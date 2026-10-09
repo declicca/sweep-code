@@ -348,7 +348,7 @@ def final_cta(lang, t, title=None, sub=None):
 <h2>{t(title)}</h2>
 <p class="lead">{t(sub)}</p>
 <div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(CREATE_FREE)}</a><a class="btn btn-line btn-lg" href="{href(lang,'how-it-works.html')}">{t(T("See how it works","Voir comment ça marche","Ver cómo funciona"))}</a></div>
-<p class="signoff">Your edge, finally in one place.</p>
+<p class="signoff">{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}</p>
 </div></section>'''
 
 def words(text, delay=0.0):

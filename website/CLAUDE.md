@@ -17,6 +17,3 @@
 
 ## Avant chaque livraison
 Lancer l'audit Playwright de toutes les pages (mobile et ordinateur) : erreurs console, ressources brisées, débordement horizontal, ID en double, ancres brisées, alt manquants, longueur des titres et descriptions.
-
-## À faire connu
-Le footer et la page d'accueil utilisent encore les anciens slogans : remplacer par « Your edge, finally in one place. »
