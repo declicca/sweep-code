@@ -1,0 +1,5 @@
+# Screenshots of the sign-in page: linked with ?v=… (bump it when an image changes), kept 30 days by the browser
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=2592000"
+</IfModule>
+Options -Indexes

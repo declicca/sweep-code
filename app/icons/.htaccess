@@ -1,0 +1,5 @@
+# App icons and favicons: names without a hash, so a short cache (7 days) lets a new icon arrive within a week
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=604800"
+</IfModule>
+Options -Indexes

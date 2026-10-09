@@ -202,13 +202,13 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Les règles des firmes sont vérifiées ailleurs** et fournies confirmées. Ne refaire la vérification web que si une valeur semble contradictoire.
 - **Rapport de livraison en 3 lignes** : ce qui change, les fichiers modifiés, les tests passés.
 
-## Passation (9 octobre — audit visuel / animations / vitesse, étapes 1 et 2 livrées)
+## Passation (9 octobre — audit visuel / animations / vitesse, étapes 1 à 3 livrées)
 
 ### Où on en est
 - **Audit avant mise en ligne** (demandé le 9 oct. : visuel, animations, vitesse ; aucune refonte, rien ne doit briser) : récapitulatif validé par Mateo. Plan en 6 étapes, **une à la fois, approuvée avant la suivante** ; à chaque étape : fichiers complets modifiés avec leur chemin, tests ordinateur + mobile, clair + foncé, nouvelles mesures de vitesse.
   1. **Bloquants visuels : livrée et en ligne** (contrastes AA, bouton principal, Comptes qui sautent, nom du bouton Progression, zoom permis, zones tactiles 44 px, montants clés jamais coupés).
-  2. **Vitesse côté navigateur : livrée** (voir « Étape 2 de l'audit » plus bas : polices en sous-ensemble, Aujourd'hui sans décalage au chargement ; trois points du plan abandonnés après mesure). Réglages serveur (compression NGINX, HTTP/2, OPcache) : **mis de côté par Mateo le 9 oct.** ; le support HostArmada a répondu que la compression était active, mais la mesure en ligne montre le contraire (HTML, CSS et JS servis sans `Content-Encoding`). Un message prêt à leur envoyer a été donné à Mateo. Le plus gros gain de vitesse restant.
-  3. Vitesse côté serveur : migrations d'`api/data` mémorisées une fois faites ; cache de `img/` et `icons/` ; vérifications en ligne.
+  2. **Vitesse côté navigateur : livrée et en ligne** (voir « Étape 2 de l'audit » plus bas : polices en sous-ensemble, Aujourd'hui sans décalage au chargement ; trois points du plan abandonnés après mesure). Réglages serveur (compression NGINX, HTTP/2, OPcache) : **mis de côté par Mateo le 9 oct.** ; le support HostArmada a répondu que la compression était active, mais la mesure en ligne montre le contraire (HTML, CSS et JS servis sans `Content-Encoding`). Un message prêt à leur envoyer a été donné à Mateo. Le plus gros gain de vitesse restant.
+  3. **Vitesse côté serveur : livrée** (voir « Étape 3 de l'audit » : cache de `img/` et `icons/` ; migrations laissées telles quelles après mesure ; compression impossible sans root).
   4. Finitions visuelles : formats de nombres FR/ES (« 79 % », « 1,71 »), « Bonjour Mateo, · » (virgule en trop).
   5. Animations : une seule courbe iOS, 150-350 ms ; 13 animations à réécrire en transform/opacity ; 18 animations infinies à arrêter hors écran.
   6. Lot B (Stats, Deep Dive, Mon argent, filtres harmonisés).
@@ -230,6 +230,13 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - **charger la gamification et le guide après le premier affichage** : `game.js` (anneaux, routine) et `guide.js` (carte de départ) dessinent une partie d'Aujourd'hui au premier rendu ; les retarder ferait apparaître ces cartes en retard (sauts) ;
   - **purger le CSS « écrasé »** : les déclarations réellement écrasées (même sélecteur, même contexte, plus loin) ne sont que 413 sur 15 820 (−3 %). Les « ~85 % inutilisés » sont des règles que la page affichée n'utilise pas (survols, fenêtres, états rares) : les retirer par couverture divise le temps de style par deux sur Aujourd'hui (254 → 120 ms, mobile CPU ×4) mais risque de casser des états rares. À ne reprendre qu'avec une couverture de tous les états.
   - Le profil CPU attribue ~250 ms à `fitOne` (`nav.js`) : c'est le recalcul de style de la page, déclenché par sa première mesure, pas un emballement (35 mises en page avant comme après une réécriture en lecture groupée, abandonnée).
+### Étape 3 de l'audit — ce qui a été mesuré et décidé
+- **Migrations d'`api/data`** (dates de séance, types d'argent, abonnements mensuels) : **laissées telles quelles**. Avec 5 000 trades et 20 abonnements, `api/data` répond en 40-70 ms avec ou sans elles (écart dans le bruit) ; les abonnements mensuels doivent de toute façon tourner (dépense de chaque nouveau mois).
+- **Le vrai coût d'`api/data`** : la réponse elle-même (105 Ko avec les données d'exemple, **4,9 Mo pour 5 000 trades**), envoyée sans compression.
+- **Pourquoi rien n'est compressé** : NGINX (devant Apache) a `gzip` désactivé et efface l'en-tête du navigateur `Accept-Encoding` avant de passer la requête à Apache (`proxy_set_header Accept-Encoding ""` dans `/etc/nginx/conf.d/includes-optional/cpanel-proxy.conf`). Apache (`mod_deflate`, `mod_brotli` présents) et PHP (`zlib`) ne savent donc jamais si le navigateur accepte la compression : les règles de `.htaccess` ne s'appliquent pas, et compresser d'office serait faux pour les clients qui ne la demandent pas. **Seul root peut le régler** (`gzip on` dans NGINX).
+- **Cache** : `img/.htaccess` (30 jours ; les images sont appelées avec `?v=…`, à changer quand une image change) et `icons/.htaccess` (7 jours ; noms sans empreinte). `assets/` garde 1 an `immutable`.
+- ⚠️ `assets/.htaccess` met aussi 1 an `immutable` sur `assets/fonts/` et `assets/vendor/`, dont les noms n'ont pas d'empreinte : **pour changer une police, il faut changer son nom de fichier** (et le `@font-face` de `nav.css` + le `preload` d'`app.html`), sinon les visiteurs déjà venus gardent l'ancienne un an. Les polices allégées de l'étape 2 gardent leur nom : les anciens visiteurs ont encore la version complète, qui contient tous les mêmes caractères (sans conséquence).
+
 - **Le vrai coût restant au chargement** : style (~250 ms) et script (~270 ms) sur Aujourd'hui mobile CPU ×4, pour ~9 300 éléments dans la page.
 
 ### Étape 1 de l'audit — causes trouvées
@@ -251,6 +258,9 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Modifiés : `src/nav.js` (pas d'étiquette « prochaine séance » sur la routine en chargement), `src/nav.css` (en-tête d'Aujourd'hui à sa taille finale dès `html[data-home]`), `assets/fonts/Geist-Variable.woff2` et `GeistMono-Variable.woff2` (sous-ensemble), `app.html` (nouveaux noms de fichiers), `CONTEXTE-APP.md`.
 - Recompilés : `assets/bundle.7cfeabbae3.css`, `assets/nav.656d6b8284.js`, `assets/nav.a7bef0aeac.css` (remplacent `bundle.22e4b3842c.css`, `nav.6a0187b7d5.js`, `nav.d03abd2926.css`, qui peuvent rester sur le serveur).
 - Nouveau : `tools/` (environnement local, mesures, suite répartie `par.py`, originaux des polices).
+
+### Ce qui a changé à l'étape 3 de l'audit
+- Nouveaux : `img/.htaccess` et `icons/.htaccess` (durée de cache). Aucun code PHP ou JS modifié.
 
 ### État des tests
 - PHP : `presets_test.php` 41/41, `shot_trades_test.php` 32/32.
