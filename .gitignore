@@ -1,0 +1,8 @@
+app/config.php
+app/data/
+app/error_log
+app/.ftp-deploy-sync-state.json
+website/dist/
+*.zip
+.DS_Store
+.claude/settings.local.json

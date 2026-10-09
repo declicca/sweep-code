@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(php:*)",
+      "Bash(python3:*)",
+      "Bash(sqlite3:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(bash app/tests/run-all.sh:*)",
+      "Bash(bash app/tools/build.sh:*)",
+      "Bash(./deploy.sh app)",
+      "Bash(./deploy.sh website)"
+    ],
+    "ask": [
+      "Bash(./deploy.sh app --go)",
+      "Bash(./deploy.sh website --go)",
+      "Bash(git push:*)",
+      "Bash(ssh:*)"
+    ],
+    "deny": [
+      "Read(./app/config.php)",
+      "Read(./app/data/**)",
+      "Read(**/sweep-private/**)",
+      "Read(**/.env)"
+    ]
+  }
+}
