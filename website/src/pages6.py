@@ -143,7 +143,7 @@ def page_home(lang, t):
 <div class="cohort rise d5" id="cohort" hidden><div class="cbar"><i></i></div><a href="{href(lang,'100')}" class="ctext num" data-tpl="{t(T("{n}/{total} founding traders","{n}/{total} traders fondateurs","{n}/{total} traders fundadores"))}"></a></div>
 </div>
 <div class="stage has-reel">
-<div class="reel"><video class="hero-loop" muted loop playsinline preload="none" data-auto poster="/video/hero-loop-poster.webp" aria-label="{html.escape(t(T("Sweep in action: your day, a trade logged in seconds, your rules, every trade, payout ready, your progress","Sweep en action : ta journée, un trade ajouté en quelques secondes, tes règles, chaque trade, payout prêt, ta progression","Sweep en acción: tu día, una operación registrada en segundos, tus reglas, cada operación, payout listo, tu progreso")))}"><source src="/video/hero-loop-720.webm" type="video/webm" media="(max-width: 860px)"><source src="/video/hero-loop-720.mp4" type="video/mp4" media="(max-width: 860px)"><source src="/video/hero-loop.webm" type="video/webm"><source src="/video/hero-loop.mp4" type="video/mp4"></video>
+<div class="reel"><video class="hero-loop" muted loop playsinline preload="none" data-auto aria-label="{html.escape(t(T("Sweep in action: your day, a trade logged in seconds, your rules, every trade, payout ready, your progress","Sweep en action : ta journée, un trade ajouté en quelques secondes, tes règles, chaque trade, payout prêt, ta progression","Sweep en acción: tu día, una operación registrada en segundos, tus reglas, cada operación, payout listo, tu progreso")))}"><source src="/video/hero-loop-720.webm" type="video/webm" media="(max-width: 860px)"><source src="/video/hero-loop-720.mp4" type="video/mp4" media="(max-width: 860px)"><source src="/video/hero-loop.webm" type="video/webm"><source src="/video/hero-loop.mp4" type="video/mp4"></video>
 <button type="button" class="reel-play" data-tour><span class="rp-ic">{PLAY}</span><span class="rp-tx">{t(TOUR_LABEL)}</span><span class="rp-dur num">1:00</span></button></div>
 <div class="phone"><picture><source media="(prefers-color-scheme: light)" srcset="/img/captures/ecran-apercu-anneaux-clair.webp"><img src="/img/captures/ecran-apercu-anneaux.webp" width="393" height="852" alt="{html.escape(t(T("Today card with the three rings and shortcuts","Carte Aujourd’hui avec les 3 anneaux et les raccourcis","Tarjeta Hoy con los 3 anillos y los accesos")))}" fetchpriority="high"></picture></div>
 
@@ -173,7 +173,8 @@ def page_home(lang, t):
          "offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro","price":"19","priceCurrency":"USD"},{"@type":"Offer","name":"Elite","price":"39","priceCurrency":"USD"}]},
         faq_ld(t)]})
     from pages4 import plans_band
-    ld = ('<link rel="preload" as="image" href="/video/hero-loop-poster.webp" fetchpriority="high">') + ld
+    ld = ('<link rel="preload" as="image" href="/video/hero-loop-poster-960.webp" media="(max-width: 860px)" fetchpriority="high">'
+          '<link rel="preload" as="image" href="/video/hero-loop-poster.webp" media="(min-width: 861px)" fetchpriority="high">') + ld
     from pages9 import sec_why, sec_capture, sec_rules
     from pages10 import sec_eval, sec_share, sec_today, sec_signup
     from pages15 import sec_realpnl, sec_six, sec_nytime, sec_compare, sec_data, home_faq, home_faq_ld, home_final

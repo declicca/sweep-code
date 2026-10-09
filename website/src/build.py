@@ -110,7 +110,7 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set X-Frame-Options "DENY"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 Header always set Strict-Transport-Security "max-age=31536000"
-<FilesMatch "\\.(webp|png|svg|ico|woff2)$">
+<FilesMatch "\\.(webp|png|svg|ico|woff2|mp4|webm)$">
 Header set Cache-Control "public, max-age=2592000, immutable"
 </FilesMatch>
 <FilesMatch "\\.[0-9a-f]{10}\\.(css|js)$">

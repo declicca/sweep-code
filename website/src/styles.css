@@ -1232,7 +1232,8 @@ details summary,.faq summary{transition:color .2s}
   .why-sec{margin-top:-120px;position:relative;z-index:2;padding-top:0}
   .why{max-width:1040px;margin:0 auto;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);background:color-mix(in srgb,var(--ink-2) 72%,transparent)}
 }
-@keyframes reelin{from{opacity:0;transform:perspective(1800px) rotateX(18deg) scale(.9) translateY(40px);filter:blur(8px)}to{opacity:1;transform:perspective(1800px) rotateX(var(--rx,10deg)) scale(var(--rs,.94));filter:none}}
+/* transform only: the reel is the LCP element, so it stays visible from the first paint */
+@keyframes reelin{from{transform:perspective(1800px) rotateX(18deg) scale(.9) translateY(40px)}to{transform:perspective(1800px) rotateX(var(--rx,10deg)) scale(var(--rs,.94))}}
 @media (prefers-reduced-motion: reduce){ .stage.has-reel .reel{animation:none!important;transform:none!important} }
 
 /* v8.2 — no hard edge under the floating menu */
