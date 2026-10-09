@@ -1,14 +1,13 @@
 {
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
+      "Bash(git:*)",
       "Bash(php:*)",
       "Bash(python3:*)",
       "Bash(sqlite3:*)",
-      "Bash(git status)",
-      "Bash(git diff:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
+      "Bash(rsync --dry-run *)",
+      "Bash(rsync -n *)",
+      "Bash(rsync * --dry-run *)",
       "Bash(bash app/tests/run-all.sh:*)",
       "Bash(bash app/tools/build.sh:*)",
       "Bash(./deploy.sh app)",
@@ -17,7 +16,6 @@
     "ask": [
       "Bash(./deploy.sh app --go)",
       "Bash(./deploy.sh website --go)",
-      "Bash(git push:*)",
       "Bash(ssh:*)"
     ],
     "deny": [
