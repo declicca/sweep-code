@@ -1,0 +1,3320 @@
+{
+"name": "US economic calendar 2026-2027",
+"generated": "2026-09-30",
+"country": "US",
+"timezone": "America/New_York",
+"notes": "official = published by BLS / Federal Reserve; official-tentative = Fed 2027 calendar; estimated = projected from the usual release pattern, check closer to the date. Actual/forecast values are not included.",
+"events": [
+{
+"date": "2026-01-02",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-01-06",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-01-07",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-01-08",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-01-09",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-01-09",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-01-09",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-01-13",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-01-13",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-01-15",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-01-22",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-01-27",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-01-28",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-01-28",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-01-29",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-02-02",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-02-04",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-02-05",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-02-09",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-02-11",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-02-11",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-02-11",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-02-12",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-02-13",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-02-13",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-02-18",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-02-19",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-02-24",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-02-26",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-03-02",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-03-04",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-03-04",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-03-05",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-03-06",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-03-06",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-03-06",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-03-11",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-03-11",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-03-12",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-03-18",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-03-18",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-03-19",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-03-26",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-03-31",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-04-01",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-04-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-04-02",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-04-03",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-04-03",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-04-03",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-04-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-04-08",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-04-09",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-04-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-04-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-04-16",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-04-23",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-04-28",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-04-29",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-04-29",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-04-30",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-05-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-05-05",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-05-06",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-05-07",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-05-08",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-05-08",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-05-08",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-05-12",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-05-12",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-05-14",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-05-20",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-05-21",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-05-26",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-05-28",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-06-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-06-03",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-06-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-06-04",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-06-05",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-06-05",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-06-05",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-06-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-06-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-06-11",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-06-17",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-06-17",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-06-18",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-06-25",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-06-30",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-06-30",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-07-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-07-02",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-07-02",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-07-02",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-07-02",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-07-06",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-07-08",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-07-09",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-07-14",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-07-14",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-07-16",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-07-23",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-07-28",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-07-29",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-07-29",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-07-30",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-08-03",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-08-05",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-08-05",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-08-06",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-08-07",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-08-07",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-08-07",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-08-12",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-08-12",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-08-13",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-08-19",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-08-20",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-08-25",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-08-27",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-09-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-09-02",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-09-03",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-09-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-09-04",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-09-04",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-09-04",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-09-10",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-09-11",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-09-11",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-09-16",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-09-16",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-09-17",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-09-24",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-09-29",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-09-29",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-09-30",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-10-01",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-10-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-10-02",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-10-02",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-02",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-05",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-10-07",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-10-08",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-10-14",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-14",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-15",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-15",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-10-15",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-10-22",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-10-27",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-10-28",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-28",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-29",
+"time": "08:30",
+"event": "GDP q/q (Advance)",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-10-29",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-10-30",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-10-30",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-02",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-11-03",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-11-04",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-04",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-11-05",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-06",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-11-06",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-11-06",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-11-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-11-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-11-12",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-13",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-11-13",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-11-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-11-18",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-11-19",
+"time": "08:30",
+"event": "GDP q/q (Second Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-19",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-24",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-25",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-11-27",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-11-27",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-12-01",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-12-02",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-03",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-12-04",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-12-04",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-04",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-09",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-09",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-10",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-15",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-15",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-12-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-12-17",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-18",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-12-18",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-24",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-29",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-30",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2026-12-31",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-31",
+"time": "08:30",
+"event": "GDP q/q (Third Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2026-12-31",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-04",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-04",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-04",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-04",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-05",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-06",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-07",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-13",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-13",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-14",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-14",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-14",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-15",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-21",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-26",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-27",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-01-27",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-01-28",
+"time": "08:30",
+"event": "GDP q/q (Advance)",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-28",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-01-29",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-01-29",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-02",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-03",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-04",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-05",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-05",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-05",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-11",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-11",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-11",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-17",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-18",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-23",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-25",
+"time": "08:30",
+"event": "GDP q/q (Second Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-25",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-02-26",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-02-26",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-02",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-03",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-04",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-05",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-05",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-05",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-11",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-11",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-11",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-17",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-03-17",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-03-18",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-25",
+"time": "08:30",
+"event": "GDP q/q (Third Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-25",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-26",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-03-26",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-30",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-03-31",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-01",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-02",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-02",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-02",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-05",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-06",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-07",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-08",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-13",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-13",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-14",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-14",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-15",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-22",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-27",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-28",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-04-28",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-04-29",
+"time": "08:30",
+"event": "GDP q/q (Advance)",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-29",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-04-30",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-04-30",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-03",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-04",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-05",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-05",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-06",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-07",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-07",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-07",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-12",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-12",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-13",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-13",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-13",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-14",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-19",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-20",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-25",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-27",
+"time": "08:30",
+"event": "GDP q/q (Second Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-27",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-05-28",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-05-28",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-01",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-02",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-03",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-04",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-04",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-04",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-09",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-06-09",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-06-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-10",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-11",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-11",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-17",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-24",
+"time": "08:30",
+"event": "GDP q/q (Third Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-24",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-25",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-06-25",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-29",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-30",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-06-30",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-01",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-02",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-02",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-02",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-06",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-06",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-08",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-13",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-13",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-14",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-14",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-15",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-22",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-27",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-28",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-07-28",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-07-29",
+"time": "08:30",
+"event": "GDP q/q (Advance)",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-29",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-07-30",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-07-30",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-02",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-03",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-04",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-04",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-05",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-06",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-06",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-06",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-11",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-11",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-12",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-12",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-12",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-18",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-19",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-26",
+"time": "08:30",
+"event": "GDP q/q (Second Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-26",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-27",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-08-27",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-08-31",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-01",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-02",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-03",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-03",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-03",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-07",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-09",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-14",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-14",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-15",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-15",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-15",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-09-15",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-09-16",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-23",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-24",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-09-24",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-28",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-29",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-30",
+"time": "08:30",
+"event": "GDP q/q (Third Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-09-30",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-01",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-01",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-01",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-05",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-05",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-06",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-07",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-13",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-13",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-14",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-14",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-14",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-15",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-21",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-26",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-27",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-10-27",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-10-28",
+"time": "08:30",
+"event": "GDP q/q (Advance)",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-28",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-10-29",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-10-29",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-02",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-03",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-04",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-05",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-05",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-05",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-10",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-12",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-12",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-17",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-18",
+"time": "08:30",
+"event": "GDP q/q (Second Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-18",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-24",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-26",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-11-26",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-11-30",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-01",
+"time": "08:15",
+"event": "ADP Non-Farm Employment Change",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-01",
+"time": "10:00",
+"event": "ISM Manufacturing PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-02",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-03",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-03",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-03",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-03",
+"time": "10:00",
+"event": "ISM Services PMI",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-07",
+"time": "10:00",
+"event": "JOLTS Job Openings",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-08",
+"time": "14:00",
+"event": "FOMC Rate Decision",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-12-08",
+"time": "14:30",
+"event": "FOMC Press Conference",
+"impact": "high",
+"status": "official-tentative"
+},
+{
+"date": "2027-12-09",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-10",
+"time": "08:30",
+"event": "CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-10",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-13",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-13",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-16",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-17",
+"time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-17",
+"time": "08:30",
+"event": "PCE Price Index m/m",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-23",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-28",
+"time": "10:00",
+"event": "CB Consumer Confidence",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-29",
+"time": "14:00",
+"event": "FOMC Meeting Minutes",
+"impact": "high",
+"status": "estimated"
+},
+{
+"date": "2027-12-30",
+"time": "08:30",
+"event": "GDP q/q (Third Estimate)",
+"impact": "medium",
+"status": "estimated"
+},
+{
+"date": "2027-12-30",
+"time": "08:30",
+"event": "Initial Jobless Claims",
+"impact": "medium",
+"status": "estimated"
+}
+]
+}

@@ -1,0 +1,39 @@
+# Sweep
+
+> Sweep is a free trading journal built for futures and prop firm traders. It tracks every evaluation, funded and live account, payouts and expenses in one place, with prop firm rules preloaded and verified every week. Available in English, French and Spanish.
+
+Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro ($19/month or $159/year), Elite ($39/month or $329/year); every new account gets 60 days of Pro. Add trades from a screenshot, in your own words, or by importing your platform's export. Automatic live sync with Rithmic and Tradovate is in development. Sweep does not offer trade replay or backtesting. Supported prop firms: Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify, Alpha Futures; when a firm changes a rule, affected traders are notified and choose whether to apply it.
+
+## Product
+- [Home](https://makeitsweep.com/): overview of Sweep
+- [Pricing](https://makeitsweep.com/pricing): Free, Pro and Elite plans
+- [Features](https://makeitsweep.com/features): logging, real P&L, rules, review, analytics, accounts, payouts
+- [How it works](https://makeitsweep.com/how-it-works): the daily loop and discipline
+- [For prop traders](https://makeitsweep.com/prop-traders): prop firm rules, payouts and expenses
+- [Sweep AI](https://makeitsweep.com/ai)
+- [Economic calendar](https://makeitsweep.com/economic-calendar)
+
+## Prop firms
+- [Topstep](https://makeitsweep.com/topstep-trading-journal)
+- [Apex Trader Funding](https://makeitsweep.com/apex-trader-funding-journal)
+- [Take Profit Trader](https://makeitsweep.com/take-profit-trader-journal)
+- [Lucid Trading](https://makeitsweep.com/lucid-trading-journal)
+- [MyFundedFutures](https://makeitsweep.com/myfundedfutures-journal)
+- [Tradeify](https://makeitsweep.com/tradeify-trading-journal)
+- [Alpha Futures](https://makeitsweep.com/alpha-futures-trading-journal)
+
+## Free resources
+- [Free calculators](https://makeitsweep.com/tools): position size, trailing drawdown, consistency, payout, expectancy, prop firm ROI
+- [CME futures contract specs](https://makeitsweep.com/futures-contracts)
+- [U.S. economic release dates](https://makeitsweep.com/release-dates)
+- [Futures market hours](https://makeitsweep.com/futures-market-hours)
+- [Glossary](https://makeitsweep.com/glossary)
+- [Free trading templates](https://makeitsweep.com/trading-templates)
+- [How to choose a trading journal](https://makeitsweep.com/how-to-choose-a-trading-journal)
+
+## Company
+- [About](https://makeitsweep.com/about)
+- [Security](https://makeitsweep.com/security)
+- [What's new](https://makeitsweep.com/changelog)
+- [Press kit](https://makeitsweep.com/press-kit)
+- Contact: hello@makeitsweep.com

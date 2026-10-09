@@ -2,8 +2,12 @@
 
 ## Technique
 - Générateur de site statique en Python, 180+ pages en EN / FR / ES.
-- Sources dans `src/` : `core.py` (structure, nav, footer), `pages*.py` (contenu), `build.py` (build), `styles.css`, `site.js`. Fichiers statiques dans `static/`.
-- Build : `cd src && python3 build.py` → résultat dans `dist/`. Ne jamais modifier `dist/` à la main.
+- Sources dans `src/` : `core.py` (structure, nav, footer, réglages comme `COHORT_FLOOR`, `STATS_MIN`, `UTM_CAMPAIGN`), `pages1.py` à `pages16.py` (contenu), `legal.py` (confidentialité, conditions, risques), `build.py` (build), `styles.css`, `site.js`. `src/data/` : calendrier économique 2026-2027, `robots.txt`, `llms.txt`.
+- `static/` : fichiers copiés tels quels (img, video, fonts, icons, social, press, templates, `site.webmanifest`).
+- `legacy/` : anciens `styles.css` et `site.js` non versionnés, recopiés dans `dist/assets/` pour les pages encore en cache chez certains visiteurs.
+- Build : `cd src && python3 build.py` → résultat dans `dist/` (recréé à chaque build, `.htaccess` compris ; les images et vidéos de `static/` qu'aucune page n'utilise sont retirées de `dist/`). Ne jamais modifier `dist/` à la main.
+- Python 3.12 ou plus récent requis (f-strings avec guillemets échappés), aucune dépendance externe. `README-BUILD.txt` indique 3.10 : c'est faux.
+- Déploiement : `./deploy.sh website` depuis la racine du dépôt (racine du site sur le serveur : `/home/matnsabc/makeitsweep.com/`, pas `public_html` comme le dit `README-BUILD.txt`).
 - `sweep-count.php` lit le nombre de traders dans la base de l'app (compteur de la cohorte fondatrice).
 - Permissions : dossiers 755, fichiers 644.
 
