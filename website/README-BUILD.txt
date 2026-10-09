@@ -9,7 +9,7 @@ Contenu
             pour les pages HTML encore en cache chez certains visiteurs
 
 Générer le site
-  Python 3.10 ou plus récent, aucune dépendance externe.
+  Python 3.12 ou plus récent, aucune dépendance externe.
     cd src
     python3 build.py
   Le site est écrit dans ../dist/ (dossier recréé à chaque génération).
@@ -17,8 +17,9 @@ Générer le site
   de dist/ à la fin de la génération (static/ n'est jamais modifié).
 
 Mettre en ligne
-  Envoyer le contenu de dist/ dans public_html (fichiers cachés compris : .htaccess,
-  fr/.htaccess, es/.htaccess), puis vider le cache NGINX dans cPanel.
+  Envoyer le contenu de dist/ dans /home/matnsabc/makeitsweep.com/ (fichiers cachés
+  compris : .htaccess, fr/.htaccess, es/.htaccess), puis vider le cache NGINX.
+  Depuis la racine du dépôt, ./deploy.sh website --go fait les deux.
 
 Réglages utiles (src/core.py)
   COHORT_FLOOR   minimum affiché par le compteur de la cohorte (0 = valeur réelle seulement)

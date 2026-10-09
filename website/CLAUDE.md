@@ -6,8 +6,8 @@
 - `static/` : fichiers copiés tels quels (img, video, fonts, icons, social, press, templates, `site.webmanifest`).
 - `legacy/` : anciens `styles.css` et `site.js` non versionnés, recopiés dans `dist/assets/` pour les pages encore en cache chez certains visiteurs.
 - Build : `cd src && python3 build.py` → résultat dans `dist/` (recréé à chaque build, `.htaccess` compris ; les images et vidéos de `static/` qu'aucune page n'utilise sont retirées de `dist/`). Ne jamais modifier `dist/` à la main.
-- Python 3.12 ou plus récent requis (f-strings avec guillemets échappés), aucune dépendance externe. `README-BUILD.txt` indique 3.10 : c'est faux.
-- Déploiement : `./deploy.sh website` depuis la racine du dépôt (racine du site sur le serveur : `/home/matnsabc/makeitsweep.com/`, pas `public_html` comme le dit `README-BUILD.txt`).
+- Python 3.12 ou plus récent requis (f-strings avec guillemets échappés), aucune dépendance externe.
+- Déploiement : `./deploy.sh website` depuis la racine du dépôt (racine du site sur le serveur : `/home/matnsabc/makeitsweep.com/`). Le cache NGINX est vidé automatiquement après un déploiement réel.
 - `sweep-count.php` lit le nombre de traders dans la base de l'app (compteur de la cohorte fondatrice).
 - Permissions : dossiers 755, fichiers 644.
 

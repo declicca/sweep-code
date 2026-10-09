@@ -2,6 +2,7 @@
 # Usage : ./deploy.sh app|website        -> simulation (rien n'est envoyé)
 #         ./deploy.sh app|website --go   -> déploiement réel
 set -e
+export PATH="$HOME/.local/bin:$PATH"   # Python 3.12+ installed by uv
 HOST="sweep"   # alias défini dans ~/.ssh/config
 APP_REMOTE="/home/matnsabc/app.makeitsweep.com/"
 WEBSITE_REMOTE="/home/matnsabc/makeitsweep.com/"
@@ -20,4 +21,11 @@ case "$1" in
     rsync -avz $DRY --exclude 'sweep-count.php' website/dist/ "$HOST:$WEBSITE_REMOTE" ;;
   *) echo "Usage : ./deploy.sh app|website [--go]"; exit 1 ;;
 esac
-[ -n "$DRY" ] && echo "Simulation seulement. Ajoute --go pour déployer."
+if [ -n "$DRY" ]; then
+  echo "Simulation seulement. Ajoute --go pour déployer."
+else
+  # Clear the cPanel NGINX cache (whole account) so visitors get the new files
+  ssh "$HOST" 'uapi NginxCaching clear_cache' | grep -q '^ *status: 1$' \
+    && echo "Cache NGINX vidé." \
+    || { echo "ERREUR : le cache NGINX n'a pas pu être vidé (cPanel > NGINX Manager)."; exit 1; }
+fi
