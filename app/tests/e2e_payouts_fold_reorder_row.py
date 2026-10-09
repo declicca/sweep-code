@@ -1,0 +1,27 @@
+import asyncio
+from playwright.async_api import async_playwright
+async def main():
+  async with async_playwright() as p:
+    br=await p.chromium.launch()
+    ctx=await br.new_context(viewport={'width':1440,'height':900}, storage_state='/tmp/show_state.json', color_scheme='dark', locale='en-US'); pg=await ctx.new_page()
+    await pg.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('en'))")
+    await pg.goto('http://127.0.0.1:8095/?x=1#payouts'); await pg.wait_for_timeout(3000)
+    vis=lambda k: pg.evaluate(f"!!(document.querySelector('form[data-form={k}]')||{{}}).offsetParent")
+    print('folded: payout form visible', await vis('payout'), '| expense form visible', await vis('expense'), '| buttons:', await pg.evaluate("[...document.querySelectorAll('.nav-pz-b')].map(b=>b.textContent.trim()).join(' | ')"))
+    await pg.screenshot(path='/tmp/pz_folded.png', full_page=True)
+    await pg.locator('.nav-pz-b[data-k=payout]').click(); await pg.wait_for_timeout(600)
+    print('after « Add payout »: form visible', await vis('payout'))
+    n0=await pg.evaluate("S.payouts.length"); f=pg.locator('form[data-form=payout]'); await f.locator('[name=amount]').fill('750'); await f.locator('[type=submit]').click(); await pg.wait_for_timeout(1500)
+    print('saved:', await pg.evaluate("S.payouts.length")-n0, '| folded again:', not await vis('payout'))
+    await pg.evaluate("const p=S.payouts.slice(-1)[0]; p&&remove('payouts',p.id)")
+    await pg.evaluate("location.hash='#accounts'"); await pg.wait_for_timeout(1500)
+    await pg.evaluate("document.querySelectorAll('#main table.acct-tbl tr[data-href^=\"#account/\"]')[1].classList.add('nav-drag')"); await pg.wait_for_timeout(300)
+    b=await pg.locator('#main table.acct-tbl').bounding_box(); await pg.screenshot(path='/tmp/pz_drag.png', clip={'x':b['x'],'y':b['y'],'width':b['width'],'height':min(320,b['height'])})
+    await ctx.close()
+    ctx=await br.new_context(**p.devices['iPhone 13'], storage_state='/tmp/show_state.json', color_scheme='dark', locale='en-US'); pg=await ctx.new_page()
+    await pg.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('en'))")
+    await pg.goto('http://127.0.0.1:8095/?x=1#accounts'); await pg.wait_for_timeout(3000)
+    print('phone: Add account and Reorder on one line:', await pg.evaluate("(()=>{const a=document.querySelector('.nav-acc-top .nav-addrow'), b=document.querySelector('.nav-acc-top .nav-ord-b'); if(!a||!b) return 'missing'; const A=a.getBoundingClientRect(), B=b.getBoundingClientRect(); return 'same line: '+(Math.abs((A.top+A.height/2)-(B.top+B.height/2))<6)+' | reorder right edge '+Math.round(B.right)+' of '+innerWidth})()"))
+    b=await pg.locator('.nav-acc-top').bounding_box(); await pg.screenshot(path='/tmp/pz_phone.png', clip={'x':0,'y':b['y']-80,'width':390,'height':260})
+    await br.close()
+asyncio.run(main())

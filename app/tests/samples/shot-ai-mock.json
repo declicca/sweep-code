@@ -1,0 +1,247 @@
+{
+ "f17f49d21b98070213fef0cc86fb3ea9e27b0f7f": {
+  "source_type": "fills",
+  "platform_guess": "tradovate",
+  "timezone_shown": "ET",
+  "account_label": "APEX-224455-03",
+  "rows": [
+   {
+    "symbol": "NQZ6",
+    "side": "buy",
+    "qty": 1,
+    "price": 21012.25,
+    "datetime": "10/07/2026 10:02:11",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "NQZ6",
+    "side": "buy",
+    "qty": 1,
+    "price": 21008.0,
+    "datetime": "10/07/2026 10:03:40",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "NQZ6",
+    "side": "sell",
+    "qty": 2,
+    "price": 21026.5,
+    "datetime": "10/07/2026 10:09:05",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "MNQZ6",
+    "side": "sell",
+    "qty": 3,
+    "price": 21040.0,
+    "datetime": "10/07/2026 10:41:30",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "MNQZ6",
+    "side": "buy",
+    "qty": 3,
+    "price": 21030.25,
+    "datetime": "10/07/2026 10:44:02",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "ESZ6",
+    "side": "buy",
+    "qty": 1,
+    "price": 5812.25,
+    "datetime": "10/07/2026 11:15:10",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "ESZ6",
+    "side": "sell",
+    "qty": 1,
+    "price": 5809.0,
+    "datetime": "10/07/2026 11:22:48",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "NQZ6",
+    "side": "sell",
+    "qty": 1,
+    "price": 21050.0,
+    "datetime": "10/07/2026 13:05:00",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "NQZ6",
+    "side": "buy",
+    "qty": 1,
+    "price": 21038.75,
+    "datetime": "10/07/2026 13:12:31",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "MNQZ6",
+    "side": "buy",
+    "qty": 2,
+    "price": 21060.0,
+    "datetime": "10/07/2026 14:20:00",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "MNQZ6",
+    "side": "sell",
+    "qty": 2,
+    "price": 21071.5,
+    "datetime": "10/07/2026 14:28:45",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "MESZ6",
+    "side": "sell",
+    "qty": 2,
+    "price": 5820.0,
+    "datetime": "10/07/2026 15:02:12",
+    "confidence": 0.95
+   },
+   {
+    "symbol": "MESZ6",
+    "side": "buy",
+    "qty": 2,
+    "price": 5816.25,
+    "datetime": "10/07/2026 15:09:59",
+    "confidence": 0.95
+   }
+  ]
+ },
+ "1cea13edd5493ff1d46dc6b27e47c510c1722de9": {
+  "source_type": "closed_trades",
+  "platform_guess": "topstepx",
+  "timezone_shown": "unknown",
+  "account_label": null,
+  "rows": [
+   {
+    "symbol": "NQZ6",
+    "side": "long",
+    "qty": 1,
+    "entry_price": 21000,
+    "exit_price": 21012.5,
+    "entry_time": "10/07/2026 10:00:05",
+    "exit_time": "10/07/2026 10:12:40",
+    "pnl_shown": 250,
+    "confidence": 0.97
+   }
+  ]
+ },
+ "default": {
+  "source_type": "unknown",
+  "rows": []
+ },
+ "31c484c653f0218e05d7aa1488ffc345e92e57a4": {
+  "source_type": "closed_trades",
+  "platform_guess": "other",
+  "timezone_shown": "unknown",
+  "date_shown": null,
+  "account_label": "LucidFlex 50K",
+  "columns": [
+   "Symbol",
+   "Side",
+   "Qty",
+   "Entry Price",
+   "Exit Price",
+   "Entry Time",
+   "Exit Time",
+   "Duration",
+   "P&L",
+   "Commission"
+  ],
+  "table": [
+   [
+    "MNQZ6",
+    "Short",
+    "3",
+    "21,040.25",
+    "21,030.00",
+    "10/07/2026 10:41:30 AM",
+    "10/07/2026 10:44:02 AM",
+    "2m 32s",
+    "$61.50",
+    "$1.86"
+   ],
+   [
+    "NQZ6",
+    "Long",
+    "2",
+    "21,010.25",
+    "21,026.50",
+    "10/07/2026 10:02:11 AM",
+    "10/07/2026 10:09:05 AM",
+    "6m 54s",
+    "$650.00",
+    "$8.40"
+   ],
+   [
+    "ESZ6",
+    "Long",
+    "1",
+    "5,812.25",
+    "5,809.00",
+    "10/07/2026 9:31:10 AM",
+    "10/07/2026 9:38:48 AM",
+    "7m 38s",
+    "$162.50",
+    "$4.20"
+   ],
+   [
+    "MESZ6",
+    "Short",
+    "2",
+    "5,820.00",
+    "5,816.25",
+    "10/07/2026 3:02:12 PM",
+    "10/07/2026 3:09:59 PM",
+    "7m 47s",
+    "$37.50",
+    "$1.24"
+   ]
+  ],
+  "pnl_colors": [
+   "green",
+   "green",
+   "red",
+   "green"
+  ],
+  "rows": []
+ },
+ "8328d50724816c41ab4ce74838318f984902b643": {
+  "source_type": "closed_trades",
+  "platform_guess": "other",
+  "timezone_shown": "unknown",
+  "date_shown": "Thursday, Oct 08, 2026",
+  "symbol_shown": "Gold (GCZ6) \u00b7 5 \u00b7 COMEX",
+  "account_label": "Demo Account",
+  "columns": [
+   "Net P&L",
+   "Side",
+   "Lots",
+   "Entry",
+   "Exit",
+   "Open time",
+   "Close time",
+   "Total Charges"
+  ],
+  "table": [
+   [
+    "$204.00",
+    "Long",
+    "1",
+    "$4,149.80",
+    "$4,151.90",
+    "2:51:12 PM",
+    "3:05:05 PM",
+    "$6.00"
+   ]
+  ],
+  "pnl_colors": [
+   "green"
+  ],
+  "rows": []
+ }
+}

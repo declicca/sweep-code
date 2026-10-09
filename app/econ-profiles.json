@@ -1,0 +1,399 @@
+{
+ "version": 1,
+ "profiles": [
+  {
+   "key": "core_cpi",
+   "match": "core (cpi|inflation)",
+   "name": "Core CPI",
+   "short_description": "Consumer prices excluding food and energy.",
+   "what_it_measures": "Month-over-month change in prices paid by urban consumers for a basket of goods and services, excluding the volatile food and energy categories.",
+   "why_it_matters": "It is the market’s main read on underlying inflation momentum; a single 0.1 percentage-point miss can move rate expectations.",
+   "release_frequency": "Monthly, about two weeks after the reference month",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS)",
+   "important_components": [
+    "Shelter (owners’ equivalent rent, rent)",
+    "Core services excluding shelter (“supercore”)",
+    "Core goods (used cars, apparel)",
+    "Medical care, auto insurance"
+   ],
+   "relationship_to_inflation": "Direct measure of underlying consumer inflation.",
+   "relationship_to_growth": "Indirect: persistent inflation can squeeze real incomes and spending.",
+   "relationship_to_labor_market": "Services inflation is closely tied to wage growth.",
+   "relationship_to_fed_policy": "The Fed targets 2% PCE inflation, but CPI arrives first and shapes expectations for PCE and the rate path.",
+   "typical_market_focus": "Core m/m versus consensus (0.1 pp matters), the 3-month annualized pace, shelter, and supercore."
+  },
+  {
+   "key": "cpi",
+   "match": "^(cpi|inflation rate|consumer price index)",
+   "name": "CPI",
+   "short_description": "Headline consumer price inflation.",
+   "what_it_measures": "Month-over-month change in prices for the full consumer basket, including food and energy.",
+   "why_it_matters": "Headline inflation drives inflation expectations and real income; markets usually weigh core more heavily.",
+   "release_frequency": "Monthly, about two weeks after the reference month",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS)",
+   "important_components": [
+    "Energy (gasoline)",
+    "Food",
+    "Shelter",
+    "Core goods and services"
+   ],
+   "relationship_to_inflation": "Headline measure of consumer inflation.",
+   "relationship_to_growth": "Energy spikes can act like a tax on consumers.",
+   "relationship_to_labor_market": "Indirect, through wage-setting and inflation expectations.",
+   "relationship_to_fed_policy": "Relevant to the Fed mainly through its influence on expectations and on the PCE estimate.",
+   "typical_market_focus": "Headline versus core divergence, energy contribution, year-over-year trend."
+  },
+  {
+   "key": "core_pce",
+   "match": "core pce",
+   "name": "Core PCE Price Index",
+   "short_description": "The Federal Reserve’s preferred measure of underlying inflation.",
+   "what_it_measures": "Month-over-month change in prices of personal consumption expenditures excluding food and energy, with weights based on what consumers actually spend.",
+   "why_it_matters": "The Fed’s 2% inflation objective is defined on PCE; core PCE is its main gauge of underlying trend.",
+   "release_frequency": "Monthly, near the end of the following month",
+   "releasing_agency": "U.S. Bureau of Economic Analysis (BEA)",
+   "important_components": [
+    "Core services (health care, financial services)",
+    "Housing",
+    "Core goods"
+   ],
+   "relationship_to_inflation": "The official inflation benchmark for monetary policy.",
+   "relationship_to_growth": "Released with personal income and spending, which describe consumer demand.",
+   "relationship_to_labor_market": "Services prices reflect labor costs.",
+   "relationship_to_fed_policy": "Most directly tied to the Fed’s mandate; persistent deviations from 2% shape the rate path.",
+   "typical_market_focus": "Core m/m versus consensus; often partly anticipated from CPI and PPI, so surprises can be smaller."
+  },
+  {
+   "key": "pce",
+   "match": "pce",
+   "name": "PCE Price Index",
+   "short_description": "Headline personal consumption expenditures inflation.",
+   "what_it_measures": "Month-over-month change in prices of all personal consumption expenditures.",
+   "why_it_matters": "The Fed’s 2% target is defined on headline PCE, though policy discussion focuses on core.",
+   "release_frequency": "Monthly",
+   "releasing_agency": "U.S. Bureau of Economic Analysis (BEA)",
+   "important_components": [
+    "Energy",
+    "Food",
+    "Core services",
+    "Core goods"
+   ],
+   "relationship_to_inflation": "Headline inflation benchmark for the Fed target.",
+   "relationship_to_growth": "Released alongside personal spending data.",
+   "relationship_to_labor_market": "Indirect.",
+   "relationship_to_fed_policy": "Referenced in the Fed’s statement and projections.",
+   "typical_market_focus": "Year-over-year headline versus the 2% target; personal spending in the same release."
+  },
+  {
+   "key": "core_ppi",
+   "match": "core ppi",
+   "name": "Core PPI",
+   "short_description": "Producer prices excluding food and energy.",
+   "what_it_measures": "Month-over-month change in selling prices received by domestic producers, excluding food and energy.",
+   "why_it_matters": "A read on pipeline price pressure; some components feed directly into PCE estimates.",
+   "release_frequency": "Monthly, around CPI week",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS)",
+   "important_components": [
+    "Trade services margins",
+    "Portfolio management fees",
+    "Airfares",
+    "Medical services"
+   ],
+   "relationship_to_inflation": "Upstream inflation; can foreshadow consumer prices.",
+   "relationship_to_growth": "Margin components reflect business pricing power.",
+   "relationship_to_labor_market": "Indirect.",
+   "relationship_to_fed_policy": "Matters mainly through its implications for the core PCE estimate.",
+   "typical_market_focus": "PCE-relevant components more than the headline number."
+  },
+  {
+   "key": "ppi",
+   "match": "\\bppi\\b|producer price",
+   "name": "PPI",
+   "short_description": "Producer price inflation.",
+   "what_it_measures": "Month-over-month change in prices received by domestic producers for their output (final demand).",
+   "why_it_matters": "Signals cost pressures that may pass through to consumers.",
+   "release_frequency": "Monthly",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS)",
+   "important_components": [
+    "Final demand goods",
+    "Final demand services",
+    "Energy",
+    "Food"
+   ],
+   "relationship_to_inflation": "Pipeline inflation indicator.",
+   "relationship_to_growth": "Reflects business costs and pricing.",
+   "relationship_to_labor_market": "Indirect.",
+   "relationship_to_fed_policy": "Secondary to CPI and PCE, but used to refine PCE estimates.",
+   "typical_market_focus": "Services components, and how PCE-mapped items move."
+  },
+  {
+   "key": "nfp",
+   "match": "non.?farm payrolls|nonfarm payrolls|non farm payrolls",
+   "name": "Nonfarm Payrolls",
+   "short_description": "Monthly change in U.S. jobs.",
+   "what_it_measures": "Net change in the number of payroll jobs outside farming, from the establishment survey of employers.",
+   "why_it_matters": "The headline labor-market report; it tests both sides of the Fed’s mandate and often produces large moves.",
+   "release_frequency": "Monthly, usually the first Friday",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS) — Employment Situation",
+   "important_components": [
+    "Private payrolls",
+    "Sector breakdown",
+    "Revisions to the two prior months",
+    "Average hourly earnings",
+    "Unemployment rate (household survey)"
+   ],
+   "relationship_to_inflation": "Through wages: strong hiring can sustain services inflation.",
+   "relationship_to_growth": "Employment growth supports income and spending.",
+   "relationship_to_labor_market": "Primary measure of labor demand.",
+   "relationship_to_fed_policy": "A cooling labor market can support easier policy; strong hiring can reduce the urgency to cut.",
+   "typical_market_focus": "Headline versus consensus, revisions, unemployment rate and wages together."
+  },
+  {
+   "key": "unemployment",
+   "match": "unemployment rate",
+   "name": "Unemployment Rate",
+   "short_description": "Share of the labor force without a job.",
+   "what_it_measures": "Percentage of the labor force that is unemployed and actively looking for work, from the household survey.",
+   "why_it_matters": "Directly tied to the Fed’s maximum-employment mandate; rises can shift the policy outlook quickly.",
+   "release_frequency": "Monthly, with the Employment Situation",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS)",
+   "important_components": [
+    "Participation rate",
+    "Household employment",
+    "Broader U-6 rate"
+   ],
+   "relationship_to_inflation": "Indirect: a tighter labor market can support wage and price growth.",
+   "relationship_to_growth": "Rising unemployment can signal slowing activity.",
+   "relationship_to_labor_market": "Core labor-market slack measure.",
+   "relationship_to_fed_policy": "Compared with the Fed’s projections; unexpected rises can raise expectations of cuts.",
+   "typical_market_focus": "Change versus prior month and versus Fed projections; participation."
+  },
+  {
+   "key": "ahe",
+   "match": "average hourly earnings",
+   "name": "Average Hourly Earnings",
+   "short_description": "Wage growth.",
+   "what_it_measures": "Month-over-month change in average hourly earnings of private-sector employees.",
+   "why_it_matters": "Wage growth is a key driver of services inflation.",
+   "release_frequency": "Monthly, with the Employment Situation",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS)",
+   "important_components": [
+    "Production and nonsupervisory wages",
+    "Hours worked"
+   ],
+   "relationship_to_inflation": "Faster wage growth can sustain services inflation.",
+   "relationship_to_growth": "Supports household income.",
+   "relationship_to_labor_market": "Measures labor-cost pressure.",
+   "relationship_to_fed_policy": "Watched for consistency with 2% inflation.",
+   "typical_market_focus": "m/m versus 0.3%; year-over-year trend; composition effects."
+  },
+  {
+   "key": "claims",
+   "match": "jobless claims",
+   "name": "Initial Jobless Claims",
+   "short_description": "Weekly new unemployment insurance filings.",
+   "what_it_measures": "Number of people filing for unemployment benefits for the first time in the reporting week.",
+   "why_it_matters": "The most timely labor-market indicator; trends can signal layoffs before monthly data.",
+   "release_frequency": "Weekly, Thursday",
+   "releasing_agency": "U.S. Department of Labor",
+   "important_components": [
+    "Continuing claims",
+    "4-week moving average",
+    "Seasonal adjustment effects"
+   ],
+   "relationship_to_inflation": "Indirect.",
+   "relationship_to_growth": "Rising claims can indicate slowing activity.",
+   "relationship_to_labor_market": "Direct read on layoffs.",
+   "relationship_to_fed_policy": "A sustained rise can shift the Fed toward easier policy.",
+   "typical_market_focus": "Trend and 4-week average rather than one week; holiday and seasonal noise."
+  },
+  {
+   "key": "adp",
+   "match": "\\badp\\b",
+   "name": "ADP Employment Change",
+   "short_description": "Private payroll estimate from ADP.",
+   "what_it_measures": "Change in private-sector employment estimated from ADP payroll-processing data.",
+   "why_it_matters": "Arrives two days before the official report; watched as a partial signal, though it often diverges from payrolls.",
+   "release_frequency": "Monthly, Wednesday before the Employment Situation",
+   "releasing_agency": "ADP Research with Stanford Digital Economy Lab",
+   "important_components": [
+    "Private employment by size and sector",
+    "Pay growth for job-stayers and job-changers"
+   ],
+   "relationship_to_inflation": "Pay data gives a read on wage pressure.",
+   "relationship_to_growth": "Private hiring trend.",
+   "relationship_to_labor_market": "Private labor demand.",
+   "relationship_to_fed_policy": "Limited on its own; relevant through expectations for payrolls.",
+   "typical_market_focus": "Surprise versus consensus; historically an imperfect predictor of nonfarm payrolls."
+  },
+  {
+   "key": "jolts",
+   "match": "jolts",
+   "name": "JOLTS Job Openings",
+   "short_description": "Job openings, hires and quits.",
+   "what_it_measures": "Number of job openings on the last business day of the reference month, with hires, quits and layoffs.",
+   "why_it_matters": "A read on labor demand and churn; quits relate to wage pressure.",
+   "release_frequency": "Monthly, about five weeks after the reference month",
+   "releasing_agency": "U.S. Bureau of Labor Statistics (BLS)",
+   "important_components": [
+    "Job openings",
+    "Quits rate",
+    "Hires",
+    "Layoffs"
+   ],
+   "relationship_to_inflation": "Quits and openings relate to wage pressure.",
+   "relationship_to_growth": "Openings reflect business demand.",
+   "relationship_to_labor_market": "Labor demand and turnover.",
+   "relationship_to_fed_policy": "Used to gauge labor-market tightness.",
+   "typical_market_focus": "Openings versus consensus, quits rate trend."
+  },
+  {
+   "key": "gdp",
+   "match": "\\bgdp\\b",
+   "name": "GDP",
+   "short_description": "Quarterly economic output.",
+   "what_it_measures": "Annualized quarter-over-quarter growth in real gross domestic product.",
+   "why_it_matters": "The broadest measure of activity; advance estimates can shift growth expectations.",
+   "release_frequency": "Quarterly: advance, second and third estimates",
+   "releasing_agency": "U.S. Bureau of Economic Analysis (BEA)",
+   "important_components": [
+    "Consumer spending",
+    "Business investment",
+    "Government spending",
+    "Net exports and inventories",
+    "GDP price deflator"
+   ],
+   "relationship_to_inflation": "The deflator and core PCE for the quarter are included.",
+   "relationship_to_growth": "Primary growth measure.",
+   "relationship_to_labor_market": "Indirect.",
+   "relationship_to_fed_policy": "Influences the growth side of the outlook; weak growth can support easier policy.",
+   "typical_market_focus": "Final sales to private domestic purchasers; inventory and trade distortions."
+  },
+  {
+   "key": "retail",
+   "match": "retail sales",
+   "name": "Retail Sales",
+   "short_description": "Monthly consumer spending at retailers.",
+   "what_it_measures": "Month-over-month change in the value of sales at retail and food-service stores (not inflation-adjusted).",
+   "why_it_matters": "Consumer spending drives most of the U.S. economy.",
+   "release_frequency": "Monthly, mid-month",
+   "releasing_agency": "U.S. Census Bureau",
+   "important_components": [
+    "Control group (feeds GDP)",
+    "Ex-autos",
+    "Ex-autos and gas",
+    "Revisions"
+   ],
+   "relationship_to_inflation": "Nominal: part of the change can be price increases.",
+   "relationship_to_growth": "Key read on consumer demand.",
+   "relationship_to_labor_market": "Supported by employment and wages.",
+   "relationship_to_fed_policy": "Strong demand can reduce the urgency to ease.",
+   "typical_market_focus": "Control group versus consensus; revisions."
+  },
+  {
+   "key": "ism_mfg",
+   "match": "ism manufacturing",
+   "name": "ISM Manufacturing PMI",
+   "short_description": "Survey of manufacturing activity.",
+   "what_it_measures": "Diffusion index from purchasing managers; above 50 indicates expansion, below 50 contraction.",
+   "why_it_matters": "Timely read on the industrial cycle and price pressures.",
+   "release_frequency": "Monthly, first business day",
+   "releasing_agency": "Institute for Supply Management (ISM)",
+   "important_components": [
+    "New orders",
+    "Prices paid",
+    "Employment",
+    "Production",
+    "Inventories"
+   ],
+   "relationship_to_inflation": "Prices paid is an early signal of goods inflation.",
+   "relationship_to_growth": "Leading indicator of manufacturing activity.",
+   "relationship_to_labor_market": "Employment sub-index.",
+   "relationship_to_fed_policy": "Secondary, but prices paid can influence inflation expectations.",
+   "typical_market_focus": "Headline versus 50 and consensus; new orders; prices paid."
+  },
+  {
+   "key": "ism_srv",
+   "match": "ism (services|non.?manufacturing)",
+   "name": "ISM Services PMI",
+   "short_description": "Survey of services-sector activity.",
+   "what_it_measures": "Diffusion index from services purchasing managers; above 50 indicates expansion.",
+   "why_it_matters": "Services dominate the U.S. economy and services inflation is sticky.",
+   "release_frequency": "Monthly, third business day",
+   "releasing_agency": "Institute for Supply Management (ISM)",
+   "important_components": [
+    "Business activity",
+    "New orders",
+    "Prices paid",
+    "Employment"
+   ],
+   "relationship_to_inflation": "Prices paid relates to services inflation.",
+   "relationship_to_growth": "Broad read on services activity.",
+   "relationship_to_labor_market": "Employment sub-index.",
+   "relationship_to_fed_policy": "Watched for inflation persistence in services.",
+   "typical_market_focus": "Headline versus consensus; prices paid."
+  },
+  {
+   "key": "confidence",
+   "match": "consumer confidence",
+   "name": "CB Consumer Confidence",
+   "short_description": "Consumer sentiment survey.",
+   "what_it_measures": "Index of consumers’ assessment of current conditions and expectations from the Conference Board.",
+   "why_it_matters": "A soft read on household mood; the labor-market differential is watched.",
+   "release_frequency": "Monthly, last Tuesday",
+   "releasing_agency": "The Conference Board",
+   "important_components": [
+    "Present situation index",
+    "Expectations index",
+    "Jobs plentiful vs hard to get"
+   ],
+   "relationship_to_inflation": "Inflation expectations questions.",
+   "relationship_to_growth": "Soft indicator of spending intentions.",
+   "relationship_to_labor_market": "Labor differential tracks unemployment trends.",
+   "relationship_to_fed_policy": "Minor direct influence.",
+   "typical_market_focus": "Expectations index and labor differential rather than the headline."
+  },
+  {
+   "key": "fomc",
+   "match": "(interest rate decision|rate decision|fomc statement|federal funds|fed press conference|press conference)",
+   "name": "FOMC Rate Decision",
+   "short_description": "Federal Reserve policy decision.",
+   "what_it_measures": "The target range for the federal funds rate set by the Federal Open Market Committee, with the policy statement; quarterly meetings include economic projections and the dot plot.",
+   "why_it_matters": "Sets the price of money; the statement, projections and press conference can reprice the entire rate path.",
+   "release_frequency": "Eight scheduled meetings per year; statement at 2:00 PM ET, press conference at 2:30 PM ET",
+   "releasing_agency": "Federal Reserve",
+   "important_components": [
+    "Rate decision",
+    "Statement wording",
+    "Dot plot and projections (quarterly)",
+    "Dissents",
+    "Press conference"
+   ],
+   "relationship_to_inflation": "Reflects the Fed’s inflation assessment.",
+   "relationship_to_growth": "Reflects the growth assessment.",
+   "relationship_to_labor_market": "Reflects the employment assessment.",
+   "relationship_to_fed_policy": "This is the policy itself.",
+   "typical_market_focus": "Surprise versus market pricing, statement changes, dot plot, and the chair’s tone."
+  },
+  {
+   "key": "minutes",
+   "match": "minutes",
+   "name": "FOMC Meeting Minutes",
+   "short_description": "Record of the previous Fed meeting.",
+   "what_it_measures": "Detailed summary of the discussion at the FOMC meeting held three weeks earlier.",
+   "why_it_matters": "Adds nuance on how many participants lean toward easing or tightening.",
+   "release_frequency": "Three weeks after each meeting, 2:00 PM ET",
+   "releasing_agency": "Federal Reserve",
+   "important_components": [
+    "Balance of views",
+    "Risk assessments",
+    "Balance-sheet discussion"
+   ],
+   "relationship_to_inflation": "Shows how officials weigh inflation risks.",
+   "relationship_to_growth": "Shows the growth assessment.",
+   "relationship_to_labor_market": "Shows the labor-market assessment.",
+   "relationship_to_fed_policy": "Clarifies the reaction function behind the last decision.",
+   "typical_market_focus": "Wording on the direction and pace of policy; number of participants holding each view."
+  }
+ ]
+}

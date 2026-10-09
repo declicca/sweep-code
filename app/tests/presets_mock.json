@@ -1,0 +1,274 @@
+{
+    "apex": {
+        "programs": [
+            {
+                "id": "apex-eod",
+                "name": "EOD Trail",
+                "sizes": [
+                    {
+                        "size": 25000,
+                        "eval": {
+                            "target": 1500,
+                            "dd": 1000,
+                            "dd_type": "eod",
+                            "dll": 500,
+                            "max_minis": 4
+                        },
+                        "funded": {
+                            "dd": 1000,
+                            "dd_type": "eod",
+                            "dll": 500,
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 100,
+                                "min": 500,
+                                "ladder": [
+                                    1000,
+                                    1000,
+                                    1000,
+                                    1000,
+                                    1000,
+                                    1000
+                                ],
+                                "max": 1000,
+                                "min_bal": 26100,
+                                "max_payouts": 6
+                            }
+                        }
+                    },
+                    {
+                        "size": 50000,
+                        "eval": {
+                            "target": 3000,
+                            "dd": 2000,
+                            "dd_type": "eod",
+                            "dll": 1000,
+                            "max_minis": 6
+                        },
+                        "funded": {
+                            "dd": 2000,
+                            "dd_type": "eod",
+                            "dll": 1000,
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 200,
+                                "min": 500,
+                                "ladder": [
+                                    1500,
+                                    1500,
+                                    2000,
+                                    2500,
+                                    2500,
+                                    3000
+                                ],
+                                "max": 1500,
+                                "min_bal": 52100,
+                                "max_payouts": 6
+                            }
+                        }
+                    },
+                    {
+                        "size": 100000,
+                        "eval": {
+                            "target": 6000,
+                            "dd": 3000,
+                            "dd_type": "eod",
+                            "dll": 1500,
+                            "max_minis": 8
+                        },
+                        "funded": {
+                            "dd": 3000,
+                            "dd_type": "eod",
+                            "dll": 1500,
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 300,
+                                "min": 500,
+                                "ladder": [
+                                    2000,
+                                    2500,
+                                    2500,
+                                    3000,
+                                    4000,
+                                    4000
+                                ],
+                                "max": 2000,
+                                "min_bal": 103100,
+                                "max_payouts": 6
+                            }
+                        }
+                    },
+                    {
+                        "size": 150000,
+                        "eval": {
+                            "target": 9000,
+                            "dd": 4000,
+                            "dd_type": "eod",
+                            "dll": 2000,
+                            "max_minis": 12
+                        },
+                        "funded": {
+                            "dd": 4000,
+                            "dd_type": "eod",
+                            "dll": 2000,
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 350,
+                                "min": 500,
+                                "ladder": [
+                                    2500,
+                                    3000,
+                                    3000,
+                                    3000,
+                                    4000,
+                                    5000
+                                ],
+                                "max": 2500,
+                                "min_bal": 154100,
+                                "max_payouts": 6
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "apex-intraday",
+                "name": "Intraday Trail",
+                "sizes": [
+                    {
+                        "size": 25000,
+                        "eval": {
+                            "target": 1500,
+                            "dd": 1000,
+                            "dd_type": "trade",
+                            "max_minis": 4
+                        },
+                        "funded": {
+                            "dd": 1000,
+                            "dd_type": "trade",
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 100,
+                                "min": 500,
+                                "ladder": [
+                                    1000,
+                                    1000,
+                                    1000,
+                                    1000,
+                                    1000,
+                                    1000
+                                ],
+                                "max": 1000,
+                                "min_bal": 26100,
+                                "max_payouts": 6
+                            }
+                        }
+                    },
+                    {
+                        "size": 50000,
+                        "eval": {
+                            "target": 3000,
+                            "dd": 2000,
+                            "dd_type": "trade",
+                            "max_minis": 6
+                        },
+                        "funded": {
+                            "dd": 2000,
+                            "dd_type": "trade",
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 200,
+                                "min": 500,
+                                "ladder": [
+                                    1500,
+                                    2000,
+                                    2500,
+                                    2500,
+                                    3000,
+                                    3000
+                                ],
+                                "max": 1500,
+                                "min_bal": 52100,
+                                "max_payouts": 6
+                            }
+                        }
+                    },
+                    {
+                        "size": 100000,
+                        "eval": {
+                            "target": 6000,
+                            "dd": 3000,
+                            "dd_type": "trade",
+                            "max_minis": 8
+                        },
+                        "funded": {
+                            "dd": 3000,
+                            "dd_type": "trade",
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 250,
+                                "min": 500,
+                                "ladder": [
+                                    2000,
+                                    2500,
+                                    3000,
+                                    3000,
+                                    4000,
+                                    4000
+                                ],
+                                "max": 2000,
+                                "min_bal": 103100,
+                                "max_payouts": 6
+                            }
+                        }
+                    },
+                    {
+                        "size": 150000,
+                        "eval": {
+                            "target": 9000,
+                            "dd": 4000,
+                            "dd_type": "trade",
+                            "max_minis": 12
+                        },
+                        "funded": {
+                            "dd": 4000,
+                            "dd_type": "trade",
+                            "consistency": 50,
+                            "dd_lock": true,
+                            "payout": {
+                                "win_days": 5,
+                                "win_min": 300,
+                                "min": 500,
+                                "ladder": [
+                                    2500,
+                                    3000,
+                                    3000,
+                                    4000,
+                                    4000,
+                                    5000
+                                ],
+                                "max": 2500,
+                                "min_bal": 154100,
+                                "max_payouts": 6
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,53 @@
+/* Sweep — real candle charts (Lightweight Charts) */
+.sc-wrap{position:relative}
+.sc-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sc-bar .seg{overflow-x:auto;scrollbar-width:none;max-width:100%}
+.sc-bar .seg::-webkit-scrollbar{display:none}
+.sc-ic{width:34px;height:34px;flex-shrink:0;display:grid;place-items:center;border:0;border-radius:8px;background:var(--panel2);color:var(--text2);cursor:pointer}
+.sc-ic svg{width:17px;height:17px}
+.sc-box{position:relative;margin-top:10px}
+.sc-chart{position:relative;height:380px;border-radius:16px;overflow:hidden;touch-action:pan-y}
+@media (max-width:860px){.sc-chart{height:260px}}
+.sc-skel{position:absolute;inset:0;border-radius:16px;background:linear-gradient(100deg,var(--panel2) 30%,color-mix(in srgb,var(--panel2) 70%,var(--text) 6%) 50%,var(--panel2) 70%);background-size:300% 100%;animation:sc-sh 1.4s ease-in-out infinite}
+@keyframes sc-sh{0%{background-position:100% 0}100%{background-position:0 0}}
+.sc-card{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;border-radius:16px;background:radial-gradient(circle at 50% 30%,rgba(var(--pos-rgb),.12),transparent 65%),var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
+.sc-card svg{width:30px;height:30px;color:var(--pos);opacity:.85}
+.sc-card p{margin:0;max-width:36ch;color:var(--text2);font-size:15px;line-height:1.5;text-wrap:balance}
+.sc-card.unsupported svg{color:var(--muted)}
+.sc-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;min-height:22px;font-size:12px;color:var(--muted)}
+.sc-warn{color:var(--neg)}
+.sc-warn:empty{display:none}
+.sc-save{font-size:13px}
+.sc-wrap.sc-full{position:fixed;inset:0;z-index:420;margin:0;padding:calc(12px + env(safe-area-inset-top,0)) 14px calc(12px + env(safe-area-inset-bottom,0));background:var(--bg);display:flex;flex-direction:column;border-radius:0}
+.sc-wrap.sc-full .sc-box{flex:1;display:flex}
+.sc-wrap.sc-full .sc-chart{flex:1;height:auto}
+body.sc-lock{overflow:hidden}
+.sc-legal{margin:28px 0 8px;font-size:12px;color:var(--muted);text-align:center}
+.sc-legal a{color:inherit}
+@media (prefers-reduced-motion:reduce){.sc-skel{animation:none}}
+@media (max-width:860px){.sc-bar{flex-wrap:nowrap}.sc-bar>.muted{white-space:nowrap}.sc-bar .seg{flex:1 1 auto;min-width:0}.sc-bar>span[style]{display:none}}
+/* add-trade form */
+.sc-tk{display:flex;flex-direction:column;gap:10px}
+.sc-tk[hidden]{display:none}
+.sc-tools{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none}
+.sc-tools::-webkit-scrollbar{display:none}
+.sc-tools[hidden]{display:none}
+.sc-tool{flex-shrink:0;min-height:34px;padding:0 14px;border:0;border-radius:999px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text2);font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s,color .2s,transform .2s var(--sw-spring)}
+.sc-tool:active{transform:scale(.95)}
+.sc-tool.on{background:var(--text);color:var(--bg);box-shadow:none}
+.sc-tool.stop.on{background:var(--neg);color:#0b0b0c}
+.sc-tool.target.on,.sc-tool.exit.on{background:var(--pos);color:var(--btntext)}
+.sc-snap{display:flex;align-items:center;gap:6px;margin-left:auto;padding-left:8px;font-size:13px;color:var(--muted);white-space:nowrap;cursor:pointer}
+.sc-tkchart{height:300px}
+@media (max-width:860px){.sc-tkchart{height:260px}}
+.sc-hint{font-size:12px;color:var(--muted)}
+.sc-tools{flex-wrap:wrap;overflow:visible}.sc-snap{margin-left:auto}
+.sc-adv{margin-top:2px}
+.sc-adv summary{cursor:pointer;font-size:13px;color:var(--muted);list-style:none;display:inline-flex;align-items:center;gap:6px}
+.sc-adv summary::-webkit-details-marker{display:none}
+.sc-adv summary::before{content:"›";display:inline-block;transition:transform .2s}
+.sc-adv[open] summary::before{transform:rotate(90deg)}
+.sc-adv .tk-f{margin-top:8px}
+.sc-adv input{text-transform:uppercase;font-family:"Geist Mono",ui-monospace,monospace}
+.sc-cbad{display:block;margin-top:4px;font-size:12px;color:var(--neg)}
+.sc-chelp{display:block;margin:6px 2px 0;font-size:12px;line-height:1.45;color:var(--muted)}

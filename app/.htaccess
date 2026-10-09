@@ -1,0 +1,44 @@
+# Sweep — Apache rules (cPanel) for app.makeitsweep.com
+Options -Indexes
+AddType application/manifest+json .webmanifest
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "DENY"
+  Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
+DirectoryIndex api.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Always use HTTPS
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # Never serve these files directly
+  RewriteRule ^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|README\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|src/.*|data(/.*)?)$ - [F,L]
+
+  # Everything goes through api.php (which checks the session)
+  RewriteRule ^$ api.php?r=app [L,QSA]
+  RewriteRule ^index\.html?$ api.php?r=app [L,QSA]
+  RewriteRule ^api/(.*)$ api.php?r=api/$1 [L,QSA]
+  RewriteRule ^r/([A-Za-z0-9]{3,16})/?$ api.php?r=ref/$1 [L,QSA]
+  RewriteRule ^s/([A-Za-z0-9]{10,24}(\.png)?)$ api.php?r=s/$1 [L,QSA]
+  RewriteRule ^uploads/([A-Za-z0-9-]+)$ api.php?r=uploads/$1 [L,QSA]
+</IfModule>
+
+<FilesMatch "^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|README\.md)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>
+
+# Compression of the pages and of the API's JSON (trades, stats…): 4–8× less to download on a phone
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html application/json text/css application/javascript image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html application/json text/css application/javascript image/svg+xml application/manifest+json
+</IfModule>
