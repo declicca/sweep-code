@@ -1,7 +1,7 @@
 # CONTEXTE-APP — Sweep (app.makeitsweep.com)
 
 Référence pour démarrer une nouvelle conversation.
-Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A du document UI/UX) — point de départ de la prochaine conversation. État des tests : voir « Passation » à la fin.
+Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A UI/UX + étape 1 de l'audit) — point de départ de la prochaine conversation. État des tests : voir « Passation » à la fin.
 ⚠️ = information que je ne peux pas garantir à jour : vérifie dans le code.
 
 ---
@@ -50,6 +50,9 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A du d
   - Pour essayer du code sans perturber une suite en cours : une deuxième copie `/tmp/g2` servie sur le port 8096.
   - **Build** : toujours vérifier `node --check src/*.js` **avant** `ops/build-assets.sh` (il s'arrête à la première erreur et laisse les anciens fichiers compilés : une erreur de syntaxe passe inaperçue). Un script `/tmp/build.sh` le fait.
   - Les captures pleine page (`full_page=True`) peuvent laisser des zones vides dans les longues listes : vérifier à l'écran en faisant défiler avant de conclure à un bug.
+  - **Mesures de vitesse** : le serveur `php -S` ne compresse pas ; un petit relais gzip (`/tmp/gzproxy.py`) donne des chiffres proches de la production. La machine peut changer entre deux messages (`uptime`) : ne comparer avant / après qu'en servant l'ancien et le nouveau code côte à côte, mesurés en alternance (3 passages, médiane).
+  - `e2e_no_jumps` et `e2e_acceptance` sont câblés sur le port 8095 (ils ne lisent pas l'adresse passée en argument).
+  - Une optimisation de `app.css` (`.tbl tbody tr{content-visibility:auto;contain-intrinsic-size:auto 60px}`) fait sauter les listes dont les lignes ne font pas ~60 px : les comptes en sont exclus, les trades réservent 43 px sur ordinateur.
 
 - **Sources** : `/home/claude/src`. **Copie servie** : `/tmp/g`, copiée par `tar --exclude=./data --exclude=./config.php -cf - . | (cd /tmp/g && tar xf -)`.
 - **Serveur** :
@@ -170,12 +173,17 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A du d
 
 ## 8. Design system (« Sweep Glass »)
 
-- **Couleurs (foncé)** : encre #08080A / #0B0B0C, surfaces #151518 / #1C1C20, ligne #2A2A30, texte #F2F2F3, gris #9A9AA2. Bleu #4C8DFF (gains, action), or #D4A24C (pertes, alertes). Le thème clair a ses valeurs.
+- **Couleurs (foncé)** : encre #08080A / #0B0B0C, surfaces #151518 / #1C1C20, ligne #2A2A30, texte #F2F2F3, gris #9A9AA2, gris secondaire (`--faint`) #8A8A93. Bleu #4C8DFF (gains), or #D4A24C (pertes, alertes).
+- **Couleurs (clair)** : gains #2862D0, pertes #8A600F, gris secondaire #66666F.
+- **Fond bleu sous un texte ou une icône blanche** (boutons principaux, puces actives, pastilles) : `--pos-fill` #2F6FE4 (foncé) / #2862D0 (clair), et le dégradé du bouton principal #2F6FE4 → #2A66D6. Le bleu des chiffres reste #4C8DFF en foncé. Les éléments concernés redéfinissent leur propre `--pos` (liste dans `nav.css`, section « Audit, step 1 ») : pour un nouveau fond bleu avec texte blanc, l'ajouter à cette liste.
+- **Contraste** : tout texte à 4,5:1 minimum (WCAG AA), vérifié avec axe-core sur ordinateur, iPhone et Android, en clair et en foncé. Seule exception volontaire : les jours hors du mois du Calendrier (éléments inactifs). ⚠️ Les jetons du thème foncé existent aussi dans `app.css` (plus ancien) sous `@media (prefers-color-scheme:dark){:root:not([data-theme=light])}` : pour changer un jeton foncé, le redéfinir avec ce même sélecteur dans `nav.css`, sinon il ne s'applique pas quand le thème suit le navigateur.
+- **Zoom** : permis (pas de `maximum-scale`). Tout champ fait au moins 16 px sur téléphone (sinon l'iPhone zoome tout seul au toucher).
 - **Matière** : un seul verre ; barres et fenêtres en encre translucide floutée.
 - **Polices** : Geist et Geist Mono, servies par l'app (aucune police externe).
 - **Rayons** : 14 (champs) · 20 (tuiles) · 26 (cartes) · 32 (grands blocs, fenêtres) · capsule pour les boutons.
 - **Tailles** :
-  - champs à 42 px sur ordinateur, 44 px sur téléphone ;
+  - champs à 42 px sur ordinateur, 44 px sur téléphone ; texte des champs ≥ 16 px sur téléphone ;
+  - un petit lien ou bouton sur téléphone (« Tout voir › », plis) garde une zone tactile de 44 px par un `::after` invisible ;
   - boutons à 40 px (petits : 34 px) sur ordinateur, cibles tactiles d'au moins 44 px sur téléphone.
 - **Espacements** : 28 px entre les blocs, 12 px entre un titre et sa carte. Rien ne dépasse d'une carte (test `e2e_visual_fit`).
 - **Lignes repliables** : petite flèche, pas de triangle du navigateur.
@@ -199,14 +207,28 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A du d
 - **Les règles des firmes sont vérifiées ailleurs** et fournies confirmées. Ne refaire la vérification web que si une valeur semble contradictoire.
 - **Rapport de livraison en 3 lignes** : ce qui change, les fichiers modifiés, les tests passés.
 
-## Passation (9 octobre — étape 1 du brief + lot A du document UI/UX)
+## Passation (9 octobre — audit visuel / animations / vitesse, étape 1 livrée)
 
 ### Où on en est
-- **Brief d'évolution** (5 étapes, une à la fois) : **étape 1 livrée** (vrai net dès l'arrivée). Étape 2 (règles et journée en trois temps) : pas commencée.
-- **Document UI/UX** (« Make It Sweep — UI/UX Improvements & Bug Fixes », 25 points) découpé en 2 lots :
-  - **Lot A (corrections ciblées) : livré dans ce zip** — 1.1, 1.2, 1.3, 2, 3, 5, 9, 10, 11, 12, 13, 14, 15.1-15.3, 16.1, 16.2, 17.2, 17.3, 18.1 + Forfait Free.
-  - **Lot B (raffinements)** : pas commencé — Stats et Deep Dive (6, 7), Mon argent (8, 18.2), filtres harmonisés sur 7 pages (19 : montrer des captures à Mateo avant de l'étendre partout), boutons/cartes/détails (20-22).
-  - Ordre convenu : lot A → lot B → étape 2 du brief.
+- **Audit avant mise en ligne** (demandé le 9 oct. : visuel, animations, vitesse ; aucune refonte, rien ne doit briser) : récapitulatif validé par Mateo. Plan en 6 étapes, **une à la fois, approuvée avant la suivante** ; à chaque étape : fichiers complets modifiés avec leur chemin, tests ordinateur + mobile, clair + foncé, nouvelles mesures de vitesse.
+  1. **Bloquants visuels : livrée dans ce zip** (contrastes AA, bouton principal, Comptes qui sautent, nom du bouton Progression, zoom permis, zones tactiles 44 px, montants clés jamais coupés).
+  2. Vitesse côté navigateur : un seul observateur au lieu de 39 dans `nav.js` ; charger la gamification et le guide après le premier affichage ; purger le CSS écrasé (431 Ko, ~85 % inutilisé) ; équilibrer les colonnes d'Aujourd'hui avant l'affichage ; sous-ensemble des polices.
+  3. Vitesse côté serveur : migrations d'`api/data` mémorisées une fois faites ; cache de `img/` et `icons/` ; vérifications en ligne.
+  4. Finitions visuelles : formats de nombres FR/ES (« 79 % », « 1,71 »), « Bonjour Mateo, · » (virgule en trop).
+  5. Animations : une seule courbe iOS, 150-350 ms ; 13 animations à réécrire en transform/opacity ; 18 animations infinies à arrêter hors écran.
+  6. Lot B (Stats, Deep Dive, Mon argent, filtres harmonisés).
+- **En attente de Mateo pour l'étape 2** : rapports Lighthouse faits connecté sur app.makeitsweep.com (mobile + ordinateur) ; en-têtes de réponse de `bundle.….css` (compression, HTTP/2) ; version de PHP et OPcache (cPanel).
+- Étape 2 du brief d'évolution (règles et journée en trois temps) : après l'audit.
+
+### Mesures (local, relais gzip, Lighthouse simulé)
+- Avant l'audit : Aujourd'hui mobile perf 55, LCP 5,3 s, TBT 1 136 ms ; Stats mobile 54 / 5,5 s / 1 242 ms ; Comptes mobile CLS 0,382 ; ordinateur 85-96. Poids d'une page : 622 Ko (JS 383, CSS 77, polices 138).
+- Après l'étape 1, comparaison A/B sur la même machine (ancien et nouveau code servis côte à côte, 3 passages, médiane) : pas de régression ; Aujourd'hui mobile TBT 2 146 → 1 994 ms, Trades mobile 1 657 → 909 ms (cette machine est plus lente que celle des mesures « avant » : comparer seulement en A/B). Comptes : CLS 0,69 → 0,067.
+- Contrastes sous 4,5:1 : ~1 100 éléments → 0 (hors jours hors du mois du Calendrier, exemptés).
+
+### Étape 1 de l'audit — causes trouvées
+- Gris secondaire foncé : l'ancienne règle de `app.css` (`prefers-color-scheme:dark` + `:root:not([data-theme=light])`) avait le sélecteur le plus fort ; la valeur de `nav.css` ne s'appliquait qu'au thème foncé choisi à la main.
+- Comptes qui sautent : `content-visibility:auto` réservait 60 px par ligne, une carte de compte en fait ~140 sur téléphone.
+- Montant clé coupé un instant : l'ajustement passait à l'image suivante après chaque redessin ; les cases clés sont maintenant ajustées avant l'affichage (observateur natif limité à ces cases).
 
 ### Lot A — causes trouvées (pour ne pas les réintroduire)
 - 1.2 : l'équilibrage des colonnes déplaçait « À surveiller » ; au redessin, la carte revenait à sa place du gabarit (haut de la colonne droite). Elle n'est plus jamais déplacée.
@@ -218,15 +240,14 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A du d
 - 15.2/15.3 : l'en-tête ouvert perdait ses coins du bas, au-dessus d'une fiche séparée. 17.2/17.3 : bordure du bas de la dernière ligne qui dépassait sous la carte.
 - 1.3 : l'onglet Semaine n'avait jamais affiché les chiffres (seul l'onglet Jour). En local, les valeurs sont vides (calendrier économique manuel).
 
-### Ce qui a changé dans ce zip (depuis le zip de l'étape 1)
-- `src/nav.js`, `src/nav.css`, `src/ux.js` (sections 24, 25, 27, 29) ; `assets/` et `app.html` recompilés.
-- Tests : `e2e_lot_a.py` (nouveau, suite principale) ; `e2e_money.py` (le Calendrier suit maintenant le sélecteur) ; `e2e_realnet.py` (ressaisie « RETRY » du profil).
+### Ce qui a changé dans ce zip (depuis le zip du lot A)
+- Modifiés : `app.html` et `auth.html` (zoom permis : `maximum-scale=1` retiré), `src/nav.css` (section « Audit, step 1 » : jetons de couleur, `--pos-fill`, zones tactiles, `content-visibility` des comptes), `src/nav.js` (nom du bouton Progression, observateur natif des Comptes et des cases de chiffres clés, `fitOne`), `tests/e2e_lot_a.py` (couleur du bouton « Faire mon plan »), `CONTEXTE-APP.md`.
+- Recompilés : `assets/bundle.22e4b3842c.css`, `assets/nav.6a0187b7d5.js`, `assets/nav.d03abd2926.css` (remplacent `bundle.87ff8bfd02.css`, `nav.d6c03a7bbf.js`, `nav.2e01067e79.css`, qui peuvent rester sur le serveur).
 
 ### État des tests
 - PHP : `presets_test.php` 41/41, `shot_trades_test.php` 32/32.
-- **Série complète sur base neuve avec ce zip : 29/31.** Les 2 échecs venaient des tests, corrigés puis relancés seuls : **tous passent**.
-  - `e2e_money` vérifiait l'ancienne règle « le Calendrier montre tout » (changée au point 14).
-  - `e2e_lot_a` glissait un compte dépassé, que la règle produit garde toujours en bas.
+- **Série complète sur base neuve avec ce zip : 31/31**, sans « RETRY ».
+- Contrôles de l'audit : axe-core (contraste, noms, cibles) sur 14 pages × ordinateur / iPhone / Android × clair / foncé ; aucun débordement horizontal, aucune erreur JS, aucun CLS > 0,1.
 - `run-all.sh --all` et `ops/tests.php` : non lancés.
 
 ### Bugs connus et points à surveiller

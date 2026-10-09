@@ -1547,7 +1547,7 @@ html body a,html body button{-webkit-tap-highlight-color:transparent}
 @font-face{font-family:'Geist';src:url('fonts/Geist-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
 @font-face{font-family:'Geist Mono';src:url('fonts/GeistMono-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
 :root,:root[data-theme="dark"]{
-  --bg:#08080A;--ink2:#0E0E11;--panel:#151518;--panel2:#1C1C20;--line:#2A2A30;--line2:#34343B;--text:#F2F2F3;--text2:#C9C9CF;--muted:#9A9AA2;--faint:#7E7E87;
+  --bg:#08080A;--ink2:#0E0E11;--panel:#151518;--panel2:#1C1C20;--line:#2A2A30;--line2:#34343B;--text:#F2F2F3;--text2:#C9C9CF;--muted:#9A9AA2;--faint:#8A8A93;
   --pos:#4C8DFF;--pos-rgb:76,141,255;--posbg:rgba(76,141,255,.14);--neg:#D4A24C;--neg-rgb:212,162,76;--negbg:rgba(212,162,76,.14);--btntext:#FFFFFF;
   --r-chip:10px;--r-field:14px;--r-tile:20px;--r-card:26px;--r-block:32px;--r-pill:999px;
   --glass:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));--glass-hi:inset 0 1px 0 rgba(255,255,255,.11);--glass-edge:0 0 0 1px rgba(255,255,255,.075);
@@ -1558,16 +1558,16 @@ html body a,html body button{-webkit-tap-highlight-color:transparent}
   --ambient:radial-gradient(1100px 700px at 12% -10%,rgba(76,141,255,.14),transparent 60%),radial-gradient(900px 600px at 105% 110%,rgba(212,162,76,.08),transparent 60%);
 }
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
-  --bg:#F3F4F6;--ink2:#EEEFF2;--panel:#FFFFFF;--panel2:#F4F5F7;--line:#E1E2E7;--line2:#D6D7DD;--text:#0B0B0C;--text2:#2E2E33;--muted:#5F5F68;--faint:#6E6E77;
-  --pos:#2F6FE4;--pos-rgb:47,111,228;--posbg:rgba(47,111,228,.1);--neg:#9A6B12;--neg-rgb:154,107,18;--negbg:rgba(154,107,18,.1);--btntext:#FFFFFF;
+  --bg:#F3F4F6;--ink2:#EEEFF2;--panel:#FFFFFF;--panel2:#F4F5F7;--line:#E1E2E7;--line2:#D6D7DD;--text:#0B0B0C;--text2:#2E2E33;--muted:#5F5F68;--faint:#66666F;
+  --pos:#2862D0;--pos-rgb:40,98,208;--posbg:rgba(40,98,208,.1);--neg:#8A600F;--neg-rgb:138,96,15;--negbg:rgba(138,96,15,.1);--btntext:#FFFFFF;
   --glass:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.78));--glass-hi:inset 0 1px 0 rgba(255,255,255,.9);--glass-edge:0 0 0 1px rgba(11,11,12,.06);
   --glass-bar:rgba(247,247,248,.82);--glass-strong:rgba(255,255,255,.88);--shadow-float:0 24px 60px -30px rgba(15,20,40,.28),0 0 0 1px rgba(11,11,12,.06),inset 0 1px 0 #fff;
   --hair:rgba(11,11,12,.07);--fill:rgba(11,11,12,.045);--fill-2:rgba(11,11,12,.075);
   --ambient:radial-gradient(1100px 700px at 12% -10%,rgba(47,111,228,.10),transparent 60%),radial-gradient(900px 600px at 105% 110%,rgba(154,107,18,.06),transparent 60%);
 }}
 :root[data-theme="light"]{
-  --bg:#F3F4F6;--ink2:#EEEFF2;--panel:#FFFFFF;--panel2:#F4F5F7;--line:#E1E2E7;--line2:#D6D7DD;--text:#0B0B0C;--text2:#2E2E33;--muted:#5F5F68;--faint:#6E6E77;
-  --pos:#2F6FE4;--pos-rgb:47,111,228;--posbg:rgba(47,111,228,.1);--neg:#9A6B12;--neg-rgb:154,107,18;--negbg:rgba(154,107,18,.1);--btntext:#FFFFFF;
+  --bg:#F3F4F6;--ink2:#EEEFF2;--panel:#FFFFFF;--panel2:#F4F5F7;--line:#E1E2E7;--line2:#D6D7DD;--text:#0B0B0C;--text2:#2E2E33;--muted:#5F5F68;--faint:#66666F;
+  --pos:#2862D0;--pos-rgb:40,98,208;--posbg:rgba(40,98,208,.1);--neg:#8A600F;--neg-rgb:138,96,15;--negbg:rgba(138,96,15,.1);--btntext:#FFFFFF;
   --glass:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.78));--glass-hi:inset 0 1px 0 rgba(255,255,255,.9);--glass-edge:0 0 0 1px rgba(11,11,12,.06);
   --glass-bar:rgba(247,247,248,.82);--glass-strong:rgba(255,255,255,.88);--shadow-float:0 24px 60px -30px rgba(15,20,40,.28),0 0 0 1px rgba(11,11,12,.06),inset 0 1px 0 #fff;
   --hair:rgba(11,11,12,.07);--fill:rgba(11,11,12,.045);--fill-2:rgba(11,11,12,.075);
@@ -2332,3 +2332,85 @@ body.nav-few-trades #main .msearch{display:none!important}
   html body #main .mny-cseg button{position:relative;min-height:30px!important;height:30px!important;padding:0 12px!important;font-size:13px!important;line-height:30px!important}
   html body #main .mny-cseg button::before{content:'';position:absolute;inset:-7px 0}
 }
+
+/* ───────────── Audit, step 1 (9 Oct) · readable everywhere (WCAG AA), a page that does not jump ─────────────
+   #2  the secondary grey of the dark theme: the older rule of app.css (prefers-color-scheme) had the stronger selector
+       and kept #5E5E66 (3.1:1); the same selector, later, gives #8A8A93 (≥ 4.9:1 on every dark surface) */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--faint:#8A8A93}}
+:root[data-theme="dark"]{--faint:#8A8A93}
+/* #4  a blue fill behind white text or icons is one shade deeper (white on it ≥ 4.6:1); the gains blue of the figures is unchanged.
+       Each filled element gets its own --pos, so its rules stay as they are */
+:root{--pos-fill:#2F6FE4}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--pos-fill:#2862D0}}
+:root[data-theme="light"]{--pos-fill:#2862D0}
+.ask-fab-ic,
+.ask-msg.u>div,
+.ask-send,
+.bottomnav .plus,
+.chip.on,
+.d-ai-in button,
+.fb-st.s-shipped,
+.fbtn b,
+.g-dots button.on,
+.g-ob .chip.on,
+.g-seg3 button.on,
+.g-seg4 button.on,
+.g-sheet .chip.on,
+.g-xpf,
+.gc-step.done .gc-step-ic,
+.gd-pt-ic,
+.gd-steps li.ok .gd-ck,
+.gm-mrow.done .gm-mic,
+.gm-node.done .gm-dot,
+.lg-row b i,
+.nav-ck-b button.on[data-v=y],
+.nav-hplus,
+.nav-po-c li.ok i,
+.nav-rt-s.done .nav-rt-n,
+.nt-badge,
+.onb-steps li.on span,
+.rf-gift,
+.rnum.ok,
+.rprog-steps a.ok span,
+.sb-pcard .sb-tag,
+.sc-tool.exit.on,
+.sc-tool.target.on,
+.side .new,
+.ss-col.cur .ss-n,
+.ux-setup.on,
+html body .add-row:hover .add-ic,
+html body .chip.on,
+html body .chip[aria-pressed=true],
+html body .nav-rt .nav-rt-s .nav-rt-sa .btn.primary,
+html body .nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary,
+html body .nav-rt .nav-rt-sa .btn.primary{--pos:var(--pos-fill)}
+html body .btn.primary,html body .tk-save,html body button.tk-save{background:linear-gradient(180deg,#2F6FE4 0%,#2A66D6 100%)!important}
+.nav-fd.sel small,.nav-fd.sel .nav-fd-p{opacity:1}
+/* the « Discipline » label of its tile, at full strength (it was faded to 80 %) */
+.nav-rt-disc small{opacity:1}
+/* the days of the week strip: the other days faded to 80 % (not 46 %), their names in the second text grey */
+html body .nav-fstrip .nav-fd{opacity:.86}
+html body .nav-fstrip .nav-fd small{color:var(--text2)!important}
+/* the LIVE badge on gold: white text in the light theme (black stays in the dark one) */
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .nav-live{color:#fff}}
+:root[data-theme="light"] .nav-live{color:#fff}
+/* #1  table rows were drawn at a reserved 60 px before their real height (content-visibility): on a phone an account is a
+       ~140 px card, so each draw made the list grow and jump. Accounts are few: drawn at once. Trades keep the optimisation,
+       with the real height (60 px phone, 43 px computer) */
+html body table.acct-tbl tbody tr{content-visibility:visible;contain-intrinsic-size:none}
+@media (min-width:861px){html body .tbl tbody tr,html body .tlist .trow{contain-intrinsic-size:auto 43px}}
+/* #12 phone: the small « Tout voir › », « Journal › », « Calendrier › » links and the fold buttons get a 44 px touch area
+        (an invisible extension: nothing moves) */
+@media (max-width:860px){
+  html body #main .nav-all,html body #main .nav-fdate > a,html body #main .nav-fh a,html body #main .nav-fold-t{position:relative}
+  html body #main .nav-all::after,html body #main .nav-fdate > a::after,html body #main .nav-fh a::after,html body #main .nav-fold-t::after{content:"";position:absolute;inset:-12px -8px}
+}
+/* the last small texts under 4.5:1 found by the check: the selected journal day, « Objectives reached », the light Discipline tile,
+   and a 24 px minimum for the small « Mark as paid » / « Share » links on a computer (WCAG 2.2) */
+html body #main a.on > small{color:#fff!important;opacity:1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nav-ready{color:#5B97FF}}
+:root[data-theme="dark"] .nav-ready{color:#5B97FF}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .nav-rt-disc{color:#2459BE}}
+:root[data-theme="light"] .nav-rt-disc{color:#2459BE}
+html body #main .pz-acts2 .link,html body #main .pz-acts2 button{min-height:24px}
+html body #main a.on[href*="#journal/"]{--pos:var(--pos-fill)}

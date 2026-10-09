@@ -62,7 +62,7 @@ with sync_playwright() as p:
   if b.count():
     b.hover(); pg.wait_for_timeout(400)
     bg = pg.evaluate("getComputedStyle(document.querySelector('#main .nav-rt-s.next .btn.primary')).backgroundColor")
-    ok(bg == 'rgb(76, 141, 255)', f'3 « Faire mon plan » stays solid blue on hover ({bg})')
+    ok(bg in ('rgb(76, 141, 255)', 'rgb(47, 111, 228)'), f'3 « Faire mon plan » stays solid blue on hover ({bg})')   # the button blue (#2F6FE4 since the audit, step 1)
   wk = pg.locator('#main button').filter(has_text='Semaine')
   if wk.count():
     wk.first.click(); pg.wait_for_timeout(1500)

@@ -1131,6 +1131,8 @@ window.SweepMO = window.SweepMO || class {
   }, true);
   // the app's accessible names stay (the buttons show only their icon on phones)
   function iconLabels() {
+    // #10 the sidebar's « Progression » button shows only its icon: it carries its name for screen readers
+    document.querySelectorAll('.nav-prog').forEach((b) => { if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', t().prog || 'Progression'); });
     document.querySelectorAll('#main .tr-top .ai-btn, #main .tr-top [data-act="edit-trade"]').forEach((b) => { if (!b.getAttribute('aria-label')) { const t = b.textContent.replace('✦', '').trim(); b.setAttribute('aria-label', t); b.title = t; } });
   }
   /* toggle report: a chip that does not stay selected after a tap is reported to the admin dashboard (Errors) */
@@ -4517,6 +4519,10 @@ document.addEventListener('click', (e) => {
       if (!window.SW_MQ.matches) tr.draggable = true;
     }));
   }
+  // whatever redraws the list (a render, a quiet sync), the top row and the grips are in place before the browser paints:
+  // a native observer runs right after the change, so the list never shows a frame without them and then jumps (CLS)
+  { const m0 = document.getElementById('main');
+    if (m0) new MutationObserver(() => { if (/^#accounts$/.test(location.hash || '')) { const s0 = m0.querySelector('table.acct-tbl tbody'); const sf = s0 && s0.closest('.surface'); if (sf && (!sf.querySelector('.nav-acc-top') || sf.querySelector('tr[data-href^="#account/"]:not([data-ord])'))) { try { decorate(); } catch (e) { /* never blocks */ } } } }).observe(m0, { childList: true, subtree: true }); }
   // computer: drag and drop
   let dragRow = null;
   document.addEventListener('dragstart', (e) => { const tr = e.target.closest && e.target.closest('#main table.acct-tbl tr[data-href^="#account/"]'); if (!tr) return; dragRow = tr; tr.classList.add('nav-drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', idOf(tr)); } catch (x) { /* some browsers */ } });
@@ -4888,10 +4894,8 @@ new window.SweepMO(() => {
     if (a >= 1000) out.push(a < 99950 ? cur(num(a / 1000, 1), 'k') : a < 999500 ? cur(num(a / 1000, 0), 'k') : cur(num(a / 1e6, a < 9995000 ? 2 : 1), 'M'));   // never « 1000 k »
     return out;
   }
-  function fit() {
-    q = 0;
-    const main = document.getElementById('main'); if (!main) return;
-    main.querySelectorAll('.neg, .pos, .big, .nav-acc-bal, .v, .num, b, strong').forEach((el) => {
+  /** one figure: rounded / abbreviated (key figure tiles) then a smaller font, never cut by « … » */
+  function fitOne(el) {
       if (el.children.length || !el.getClientRects().length) return;
       const tx = (el.textContent || '').trim(); if (!tx || tx.length > 18 || !/\d/.test(tx) || !MONEY.test(tx)) return;
       if (el.dataset.fitTx !== tx) { el.style.removeProperty('font-size'); el.dataset.fitTx = tx; }
@@ -4912,8 +4916,16 @@ new window.SweepMO(() => {
       const fs = parseFloat(getComputedStyle(el).fontSize) || 16;
       el.style.setProperty('font-size', Math.max(fs * 0.55, Math.floor(fs * room / el.scrollWidth * 10) / 10) + 'px', 'important');   // « important »: the page's own sizes are !important too
       el.style.setProperty('text-overflow', 'clip'); el.style.setProperty('overflow', 'visible');
-    });
   }
+  function fit() {
+    q = 0;
+    const main = document.getElementById('main'); if (!main) return;
+    main.querySelectorAll('.neg, .pos, .big, .nav-acc-bal, .v, .num, b, strong').forEach(fitOne);
+  }
+  // the key figure tiles (a handful of elements) are fitted right after each redraw, before the browser paints:
+  // a page redrawn by a sync never shows its P&L cut for a frame (the rest of the page keeps the per-frame pass)
+  { const m0 = document.getElementById('main');
+    if (m0) new MutationObserver(() => { const k = m0.querySelectorAll('.nav-kpi-g b, .d-perf b'); if (k.length) k.forEach(fitOne); }).observe(m0, { childList: true, subtree: true }); }
   const soon = () => { if (!q) q = requestAnimationFrame(fit); };
   if (window.SweepMO) new window.SweepMO(soon).observe(document.getElementById('main') || document.body, { childList: true, subtree: true });
   else new MutationObserver(soon).observe(document.body, { childList: true, subtree: true });
