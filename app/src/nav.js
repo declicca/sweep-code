@@ -556,7 +556,7 @@ window.SweepMO = window.SweepMO || class {
     day = day.charAt(0).toUpperCase() + day.slice(1);
     // three lines: « Good afternoon, Mateo » (small) / Today (title) / the date (small)
     const title = document.querySelector('.main-wrap .top #title'), top = title && title.closest('.top');
-    if (title) { const v = hi + (name ? ' ' + name + ',' : ',') + '  ·  ' + day; if (title.dataset.hi !== v) title.dataset.hi = v; /* « Bonjour Mateo, » */ top.classList.add('nav-3l'); document.documentElement.setAttribute('data-home', ''); }
+    if (title) { const v = hi + (name ? ' ' + name : '') + ' · ' + day; if (title.dataset.hi !== v) title.dataset.hi = v; /* « Bonjour Mateo · Vendredi 9 octobre » (no comma before the dot) */ top.classList.add('nav-3l'); document.documentElement.setAttribute('data-home', ''); }
     el.setAttribute('data-noi18n', '');
     if (el.textContent !== day) el.textContent = day;
     el.classList.add('nav-date');

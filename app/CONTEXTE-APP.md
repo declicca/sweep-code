@@ -9,7 +9,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 ## 1. Architecture
 
 - **Stack** : PHP 8.1 + SQLite (`data/journal.db`), sans framework. Hébergement HostArmada (cPanel, `/home/matnsabc/app.makeitsweep.com`). Mise en ligne par `./deploy.sh app` à la racine du dépôt (rsync par SSH, simulation par défaut, `--go` pour envoyer ; il vide le cache NGINX), seulement avec l'accord de Mateo.
-- **Front** : `app.html` charge le bundle principal (`assets/app.de47127496.js`, minifié). Ce fichier est parfois patché directement par remplacement de chaînes exactes : titres, `ft()`, `mergeCopies`, partage, données d'exemple. Les modules ci-dessous l'enrichissent : ils enveloppent `render()`, `submitAccount()`, `payoutForm()`, `acctTable()`, etc., et observent le DOM.
+- **Front** : `app.html` charge le bundle principal (`assets/app.e2b985f447.js`, minifié). Ce fichier est parfois patché directement par remplacement de chaînes exactes : titres, `ft()`, `mergeCopies`, partage, données d'exemple, formats de nombres FR/ES (`trText`/`pctSp`, `decl`). **Après un patch, le renommer avec sa nouvelle empreinte** (`md5 -q` → 10 premiers caractères) et mettre à jour `app.html` : `assets/` est en cache 1 an `immutable`, l'ancien nom resterait chez les visiteurs. Les modules ci-dessous l'enrichissent : ils enveloppent `render()`, `submitAccount()`, `payoutForm()`, `acctTable()`, etc., et observent le DOM.
 
 | Élément | Rôle |
 |---|---|
@@ -45,7 +45,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - `sync.sh [dossier]` : copie `app/` vers la copie servie (`/tmp/g` par défaut) sans `data/` ni `config.php`, puis installe `router.php` et `config.local.php` (mateo, mot de passe de test local, SMTP vide) ;
   - `router.php` : routeur de `php -S` qui reproduit le `.htaccess` ;
   - `run.sh <commande>` : démarre `php -S 127.0.0.1:8095` sur la copie servie (`PORT=`, `DEST=` pour une autre), avec préréglages et Sweep AI simulés (`ai-config.local.php`, `SWEEP_AI_MOCK`), lance la commande, puis arrête le serveur ;
-  - `fresh.sh` (base vide), `prof.py` (connexion de mateo, profil, données d'exemple, session dans `/tmp/show_state.json`), `full.sh` (fresh + prof + `run-all.sh`) ;
+  - `fresh.sh` (base vide), `prof.py` (connexion de mateo, profil, données d'exemple, session dans `/tmp/show_state.json` ; il attend que l'app soit chargée, pas « réseau au repos », qu'une requête lente peut empêcher), `full.sh` (fresh + prof + `run-all.sh`) ;
   - `build.sh` : `node --check` de chaque `src/*.js` puis `ops/build-assets.sh` (le build reproduit exactement les empreintes d'App 3) ;
   - mesures : `gzproxy.py` (relais gzip devant `php -S`), `perf.py` (A/B en alternance, médiane : FCP, LCP, TBT, temps script / style / mise en page, CLS, poids), `profile.py` (profil CPU d'un chargement), `shifts.py` (décalages de mise en page élément par élément), `pixdiff.py` (captures A/B comparées au pixel) ;
   - `subset-fonts.py` : sous-ensemble des polices à partir des originaux de `tools/fonts-src/`.
@@ -117,6 +117,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Suppression** : toujours dans l'app (jamais `confirm()` du navigateur), avec un toast « Annuler » pendant 5 s (`SweepUndo.del`, `SweepUndo.toast`). Ça vaut pour un trade, toutes ses copies, une capture, une question de la checklist, les données d'exemple et un lot importé.
 - **Ajout de trade** : la capture d'abord. Une capture avec plusieurs trades ouvre « X trades trouvés » ; avec un seul trade, l'écran habituel s'affiche.
 - **Langues** : EN / FR / ES ; montants au format de la langue (FR « 1 688 $ »).
+- **Nombres en FR / ES** (étape 4 de l'audit) : espace fine insécable avant « % » (« 52 % »), virgule décimale pour les ratios, les R et les abréviations (« 1,52 », « +0,85R », « +1,6k »). Les **prix** d'entrée et de sortie gardent leur point (« 21366.00 »), comme sur les plateformes. Les pourcentages sont corrigés **après** la traduction (`trText` dans `app.js` : textes traduits et textes faits d'un seul nombre ; les notes des traders ne sont jamais touchées), parce que des phrases anglaises avec « 52% » servent de modèles de traduction. Les ratios et les R le sont à la source (`decl()`). Contrôle : `python3 tools/numfmt.py`.
 - **Chiffres clés qui ne rentrent pas** (cases KPI : Net P&L, soldes…) : d'abord arrondis au dollar, puis abrégés (« −12,3 k $ », « 1,23 M $ »), et seulement ensuite police réduite. Le montant exact reste dans le libellé (`title`, `aria-label`). Ailleurs, un chiffre trop long rétrécit au lieu d'être coupé.
 - **Export CSV de Mon argent** : il contient exactement ce que montre la page (période active, type de compte, firme, compte), via le même `moneyOf`. Nom du fichier : période + filtres. Il n'existe pas de filtre « statut » sur Mon argent.
 - **À surveiller** : les onglets Jour et Semaine montrent Réel · Prév. · Préc. sur chaque annonce (« Sans chiffre » pour les minutes et discours). La carte ne quitte jamais sa place sous la journée (l'équilibrage des colonnes ne la déplace pas).
@@ -202,14 +203,14 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Les règles des firmes sont vérifiées ailleurs** et fournies confirmées. Ne refaire la vérification web que si une valeur semble contradictoire.
 - **Rapport de livraison en 3 lignes** : ce qui change, les fichiers modifiés, les tests passés.
 
-## Passation (9 octobre — audit visuel / animations / vitesse, étapes 1 à 3 livrées)
+## Passation (9 octobre — audit visuel / animations / vitesse, étapes 1 à 4 livrées)
 
 ### Où on en est
 - **Audit avant mise en ligne** (demandé le 9 oct. : visuel, animations, vitesse ; aucune refonte, rien ne doit briser) : récapitulatif validé par Mateo. Plan en 6 étapes, **une à la fois, approuvée avant la suivante** ; à chaque étape : fichiers complets modifiés avec leur chemin, tests ordinateur + mobile, clair + foncé, nouvelles mesures de vitesse.
   1. **Bloquants visuels : livrée et en ligne** (contrastes AA, bouton principal, Comptes qui sautent, nom du bouton Progression, zoom permis, zones tactiles 44 px, montants clés jamais coupés).
   2. **Vitesse côté navigateur : livrée et en ligne** (voir « Étape 2 de l'audit » plus bas : polices en sous-ensemble, Aujourd'hui sans décalage au chargement ; trois points du plan abandonnés après mesure). Réglages serveur (compression NGINX, HTTP/2, OPcache) : **mis de côté par Mateo le 9 oct.** ; le support HostArmada a répondu que la compression était active, mais la mesure en ligne montre le contraire (HTML, CSS et JS servis sans `Content-Encoding`). Un message prêt à leur envoyer a été donné à Mateo. Le plus gros gain de vitesse restant.
-  3. **Vitesse côté serveur : livrée** (voir « Étape 3 de l'audit » : cache de `img/` et `icons/` ; migrations laissées telles quelles après mesure ; compression impossible sans root).
-  4. Finitions visuelles : formats de nombres FR/ES (« 79 % », « 1,71 »), « Bonjour Mateo, · » (virgule en trop).
+  3. **Vitesse côté serveur : livrée et en ligne** (voir « Étape 3 de l'audit » : cache de `img/` et `icons/` ; migrations laissées telles quelles après mesure ; compression impossible sans root).
+  4. **Finitions visuelles : livrée** (formats de nombres FR/ES, « Bonjour Mateo · Vendredi 9 octobre » sans virgule).
   5. Animations : une seule courbe iOS, 150-350 ms ; 13 animations à réécrire en transform/opacity ; 18 animations infinies à arrêter hors écran.
   6. Lot B (Stats, Deep Dive, Mon argent, filtres harmonisés).
 - **Serveur (mesuré le 9 oct.)** : aucune compression (NGINX a `gzip` désactivé pour tout le VPS : CSS 434 Ko et JS 339 Ko envoyés bruts), HTTP/1.1 (`http2 off` : ea-nginx ne l'active que si `/etc/nginx/conf.d/http2.conf` existe), PHP 8.1 sans OPcache (mod_lsapi). Le cache des `assets/` est bon (1 an, `immutable`). Les réglages demandent root (WHM → Terminal) ; les commandes ont été données à Mateo le 9 oct. : `/etc/nginx/conf.d/sweep-gzip.conf`, `touch /etc/nginx/conf.d/http2.conf`, `dnf install ea-php81-php-opcache`, `ea-nginx config --all`, rechargement de NGINX et d'Apache. Mon accès SSH (`matnsabc`) ne peut pas les faire.
@@ -259,12 +260,16 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Recompilés : `assets/bundle.7cfeabbae3.css`, `assets/nav.656d6b8284.js`, `assets/nav.a7bef0aeac.css` (remplacent `bundle.22e4b3842c.css`, `nav.6a0187b7d5.js`, `nav.d03abd2926.css`, qui peuvent rester sur le serveur).
 - Nouveau : `tools/` (environnement local, mesures, suite répartie `par.py`, originaux des polices).
 
+### Ce qui a changé à l'étape 4 de l'audit
+- `assets/app.de47127496.js` → `assets/app.e2b985f447.js` (patché : `trText` + `pctSp`, `decl` dans `pf`, `rfmt`, gain/perte moyen, « Plus actif », abréviations « k »), `src/nav.js` (message d'accueil), `app.html`, recompilé `assets/nav.*.js`. Nouveau : `tools/numfmt.py`.
+
 ### Ce qui a changé à l'étape 3 de l'audit
 - Nouveaux : `img/.htaccess` et `icons/.htaccess` (durée de cache). Aucun code PHP ou JS modifié.
 
 ### État des tests
 - PHP : `presets_test.php` 41/41, `shot_trades_test.php` 32/32.
 - **Série complète sur base neuve (Mac, PHP 8.5) : 31/31 avant l'étape 2 et 31/31 après** (en série puis en suite répartie), sans « RETRY ».
+- **Étape 4 : 31/31** (suite répartie, 8 min 11 s), sans « RETRY » ; `tools/numfmt.py` ne trouve plus de format anglais en FR/ES (hors prix et numéro de version) ; aucune boucle de réécriture (mutations au repos identiques en EN, FR, ES).
 - Étape 2 : captures A/B au pixel (8 pages × téléphone / ordinateur × FR foncé / ES clair) ; décalages mesurés sur 7 pages × 2 tailles ; aucune erreur JS.
 - `run-all.sh --all` et `ops/tests.php` : non lancés.
 
