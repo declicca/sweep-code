@@ -1,14 +1,14 @@
 # CONTEXTE-APP — Sweep (app.makeitsweep.com)
 
 Référence pour démarrer une nouvelle conversation.
-Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A UI/UX + étape 1 de l'audit) — point de départ de la prochaine conversation. État des tests : voir « Passation » à la fin.
+Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : étape 1 du brief + lot A UI/UX + étapes 1 et 2 de l'audit) — point de départ de la prochaine conversation. État des tests : voir « Passation » à la fin.
 ⚠️ = information que je ne peux pas garantir à jour : vérifie dans le code.
 
 ---
 
 ## 1. Architecture
 
-- **Stack** : PHP 8.1 + SQLite (`data/journal.db`), sans framework. Hébergement HostArmada (cPanel, `/home/matnsabc/app.makeitsweep.com`). Mise en ligne par zip téléversé puis « Extraire ».
+- **Stack** : PHP 8.1 + SQLite (`data/journal.db`), sans framework. Hébergement HostArmada (cPanel, `/home/matnsabc/app.makeitsweep.com`). Mise en ligne par `./deploy.sh app` à la racine du dépôt (rsync par SSH, simulation par défaut, `--go` pour envoyer ; il vide le cache NGINX), seulement avec l'accord de Mateo.
 - **Front** : `app.html` charge le bundle principal (`assets/app.de47127496.js`, minifié). Ce fichier est parfois patché directement par remplacement de chaînes exactes : titres, `ft()`, `mergeCopies`, partage, données d'exemple. Les modules ci-dessous l'enrichissent : ils enveloppent `render()`, `submitAccount()`, `payoutForm()`, `acctTable()`, etc., et observent le DOM.
 
 | Élément | Rôle |
@@ -31,44 +31,39 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A UI/U
 ## 2. Build et livraison
 
 - **Build** : `sh ops/build-assets.sh`. Il minifie les JS de `src/` en `assets/<nom>.<hash10>.js`, regroupe tous les CSS dans **un seul** `assets/bundle.<hash>.css` (ordre dans `ops/css-order.txt`, `nav.css` en dernier) et réécrit `app.html`. Le bundle principal `app.*.js` garde son nom.
-- **Avant le zip** :
+- **Avant un déploiement** :
   - `node --check` sur chaque JS de `assets/` ;
   - `php -l` sur les PHP modifiés ;
   - `tests/run-all.sh` complet ;
   - vérifier que `app.html` est identique à celui qui a été testé.
-- **Zip** : tout le dossier sauf `data/` et `config.php` (`zip -qr … . -x 'data/*' 'config.php'`). Vérifier ensuite que le zip n'en contient aucun.
+- **Déploiement** : `./deploy.sh app` n'envoie ni `config.php`, ni `data/`, ni `src/`, `tests/`, `tools/`, `CLAUDE.md`, `CONTEXTE-APP.md`. Ne jamais laisser de zip du code dans le dossier web (un `sweep-app-base.zip` y était téléchargeable publiquement ; supprimé le 9 oct.).
 
-## 3. Environnement local ⚠️ (le conteneur peut être réinitialisé)
+## 3. Environnement local (Mac de Mateo, depuis le 9 octobre)
 
-- **Après une réinitialisation (vécu le 8 octobre)** : rien n'existe, il faut tout recréer.
-  - `apt-get install -y php-cli php-sqlite3 php-curl php-mbstring` (PHP 8.3 en local, 8.1 en production) et `npm install -g terser csso-cli` (pour le build).
-  - `/tmp/g/config.php` : il reprend `config.sample.php` avec `user` = mateo, un mot de passe local, `data_dir` = `/tmp/g/data`, SMTP vide.
-  - `/tmp/router.php` : routeur de `php -S` qui reproduit le `.htaccess` (`/` → `api.php?r=app`, `/api/x` → `api.php?r=api/x`, `/r/`, `/s/`, `/uploads/`, et 403 sur `src/`, `tests/`, `config.php`…).
-  - Les scripts `run.sh` / `run_ai.sh` exportent `SWEEP_PRESETS_MOCK=/tmp/g/tests/presets_mock.json` et `SWEEP_TEST_DB=/tmp/g/data/journal.db` (+ `SWEEP_AI_CONFIG`, `SWEEP_AI_MOCK` pour `run_ai.sh`).
-  - `prof.sh` est devenu `/tmp/prof.py` : connexion de mateo, profil (`POST /api/me/profile`), puis `loadDemo()` **et un clic sur la fenêtre de confirmation** `aside.nav-ask.open [data-ask="1"]` (sinon aucune donnée d'exemple n'est ajoutée).
-  - Toutes les requêtes `POST /api/...` doivent porter l'en-tête `X-Requested-With: fetch`.
-  - Pour essayer du code sans perturber une suite en cours : une deuxième copie `/tmp/g2` servie sur le port 8096.
-  - **Build** : toujours vérifier `node --check src/*.js` **avant** `ops/build-assets.sh` (il s'arrête à la première erreur et laisse les anciens fichiers compilés : une erreur de syntaxe passe inaperçue). Un script `/tmp/build.sh` le fait.
-  - Les captures pleine page (`full_page=True`) peuvent laisser des zones vides dans les longues listes : vérifier à l'écran en faisant défiler avant de conclure à un bug.
-  - **Mesures de vitesse** : le serveur `php -S` ne compresse pas ; un petit relais gzip (`/tmp/gzproxy.py`) donne des chiffres proches de la production. La machine peut changer entre deux messages (`uptime`) : ne comparer avant / après qu'en servant l'ancien et le nouveau code côte à côte, mesurés en alternance (3 passages, médiane).
-  - `e2e_no_jumps` et `e2e_acceptance` sont câblés sur le port 8095 (ils ne lisent pas l'adresse passée en argument).
-  - Une optimisation de `app.css` (`.tbl tbody tr{content-visibility:auto;contain-intrinsic-size:auto 60px}`) fait sauter les listes dont les lignes ne font pas ~60 px : les comptes en sont exclus, les trades réservent 43 px sur ordinateur.
-
-- **Sources** : `/home/claude/src`. **Copie servie** : `/tmp/g`, copiée par `tar --exclude=./data --exclude=./config.php -cf - . | (cd /tmp/g && tar xf -)`.
-- **Serveur** :
-  - `/tmp/run.sh <commande>` démarre `php -S 127.0.0.1:8095` (préréglages simulés), lance la commande, puis arrête le serveur.
-  - `/tmp/run_ai.sh` fait la même chose avec Sweep AI activé et des réponses simulées : `SWEEP_AI_CONFIG=/tmp/ai-config.php` (n'importe quelle clé) et `SWEEP_AI_MOCK=tests/samples/shot-ai-mock.json`.
-- **Base neuve + suite complète** : `/tmp/full.sh` enchaîne `fresh.sh` (base vide), `prof.sh` (profil), `demo.py` (données d'exemple) et `run-all.sh`. Le lancer avec `(setsid nohup /tmp/run_ai.sh /tmp/full.sh > /tmp/full.log 2>&1 &)`, puis lire le log par étapes de moins de 300 s.
-- **Compte de test** : `/tmp/show_state.json` (Mateo, données d'exemple). Pour un nouveau compte dans un test : `POST /api/auth/register` puis `/api/me/profile`.
+- **Outils** (Homebrew) : `php` (8.5 en local, 8.1 en production), `coreutils` et `gnu-sed` (le build utilise `md5sum` et `sed -i` de Linux), Node avec `terser` et `csso-cli` (`npm install -g`). Python : environnement `~/.venvs/sweep` (Playwright + Chromium, fonttools, brotli, Pillow, uharfbuzz), créé avec `uv`.
+- **Scripts dans `app/tools/`** (jamais dans `/tmp`, exclus du déploiement) :
+  - `sync.sh [dossier]` : copie `app/` vers la copie servie (`/tmp/g` par défaut) sans `data/` ni `config.php`, puis installe `router.php` et `config.local.php` (mateo, mot de passe de test local, SMTP vide) ;
+  - `router.php` : routeur de `php -S` qui reproduit le `.htaccess` ;
+  - `run.sh <commande>` : démarre `php -S 127.0.0.1:8095` sur la copie servie (`PORT=`, `DEST=` pour une autre), avec préréglages et Sweep AI simulés (`ai-config.local.php`, `SWEEP_AI_MOCK`), lance la commande, puis arrête le serveur ;
+  - `fresh.sh` (base vide), `prof.py` (connexion de mateo, profil, données d'exemple, session dans `/tmp/show_state.json`), `full.sh` (fresh + prof + `run-all.sh`) ;
+  - `build.sh` : `node --check` de chaque `src/*.js` puis `ops/build-assets.sh` (le build reproduit exactement les empreintes d'App 3) ;
+  - mesures : `gzproxy.py` (relais gzip devant `php -S`), `perf.py` (A/B en alternance, médiane : FCP, LCP, TBT, temps script / style / mise en page, CLS, poids), `profile.py` (profil CPU d'un chargement), `shifts.py` (décalages de mise en page élément par élément), `pixdiff.py` (captures A/B comparées au pixel) ;
+  - `subset-fonts.py` : sous-ensemble des polices à partir des originaux de `tools/fonts-src/`.
+- **Suite complète** : `sh tools/sync.sh && sh tools/run.sh sh tools/full.sh > log 2>&1` (~35 min, en arrière-plan).
+- **Comparer l'ancien et le nouveau code** : une deuxième copie (`sh tools/sync.sh /tmp/g2` depuis l'ancien code) avec **la même base** (`cp -R /tmp/g/data /tmp/g2/`), servies sur 8095 et 8096, chacune derrière `gzproxy.py` (9095, 9096). La session de test vaut pour les deux, mais `localStorage` dépend du port : `perf.py` et `pixdiff.py` recopient celui de la session pour chaque adresse (sans ça, les deux copies n'affichent pas la même période).
+- **Compte de test** : `/tmp/show_state.json` (Mateo, données d'exemple). Pour un nouveau compte dans un test : `POST /api/auth/register` puis `/api/me/profile`. Toutes les requêtes `POST /api/...` portent l'en-tête `X-Requested-With: fetch`.
+- `e2e_no_jumps` et `e2e_acceptance` sont câblés sur le port 8095 (ils ne lisent pas l'adresse passée en argument).
+- Les captures pleine page (`full_page=True`) peuvent laisser des zones vides dans les longues listes : vérifier à l'écran en faisant défiler avant de conclure à un bug.
+- Une optimisation de `app.css` (`.tbl tbody tr{content-visibility:auto;contain-intrinsic-size:auto 60px}`) fait sauter les listes dont les lignes ne font pas ~60 px : les comptes en sont exclus, les trades réservent 43 px sur ordinateur.
 - **Pièges** :
   - **limiteur de tentatives** : `run-all.sh` vide la table `attempts` avant chaque test si `SWEEP_TEST_DB` est défini (c'est le cas dans `full.sh`) ;
-  - **ne jamais écrire `pkill -f "php -S"` dans une commande** : ça tue la commande elle-même ;
-  - **chaque appel d'outil est limité à 300 s** : la suite complète prend environ 35 min ;
+  - **ne jamais écrire `pkill -f "php -S"` dans une commande** : ça tue la commande elle-même (arrêter par port : `lsof -ti tcp:8095 -sTCP:LISTEN | xargs kill`) ;
   - **`sessionStorage sw.modal=1`** supprime les fenêtres de première visite ;
   - **`await pg.evaluate("impGo()")`** échoue parfois (passage à #trades pendant l'attente) : utiliser `void impGo()`.
 
 ## 4. Tests
 
+- **Suite répartie (à préférer)** : `python3 tools/par.py 3` lance la suite sur 3 copies en même temps (`/tmp/g`, `/tmp/g_2`, `/tmp/g_3` ; ports 8095, 8295, 8395), chacune avec sa base et sa session ; les adresses écrites en dur dans les tests sont réécrites dans la copie de chaque groupe seulement. Groupes équilibrés sur les durées du passage précédent (`tools/test-times.json`). **31/31 en 9 min 38 s** (contre ~35 min en série) ; les serveurs locaux tournent avec `PHP_CLI_SERVER_WORKERS=4` (sinon une requête lente bloque la page).
 - **Suite complète** : `tests/run-all.sh BASE STATE` → « N passed, N failed ». 31 tests au 9 octobre :
   - **PHP** : `presets_test.php` (41), `shot_trades_test.php` (32) ;
   - **Playwright** :
@@ -179,7 +174,7 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A UI/U
 - **Contraste** : tout texte à 4,5:1 minimum (WCAG AA), vérifié avec axe-core sur ordinateur, iPhone et Android, en clair et en foncé. Seule exception volontaire : les jours hors du mois du Calendrier (éléments inactifs). ⚠️ Les jetons du thème foncé existent aussi dans `app.css` (plus ancien) sous `@media (prefers-color-scheme:dark){:root:not([data-theme=light])}` : pour changer un jeton foncé, le redéfinir avec ce même sélecteur dans `nav.css`, sinon il ne s'applique pas quand le thème suit le navigateur.
 - **Zoom** : permis (pas de `maximum-scale`). Tout champ fait au moins 16 px sur téléphone (sinon l'iPhone zoome tout seul au toucher).
 - **Matière** : un seul verre ; barres et fenêtres en encre translucide floutée.
-- **Polices** : Geist et Geist Mono, servies par l'app (aucune police externe).
+- **Polices** : Geist et Geist Mono, servies par l'app (aucune police externe), **en sous-ensemble** (latin, accents FR/ES, ponctuation, symboles monétaires et tout caractère présent dans le code ; plus de cyrillique) : 141 → 79 Ko. Un nouveau caractère spécial dans un texte de l'app → relancer `python3 -I tools/subset-fonts.py` (sinon il s'affiche dans la police du système).
 - **Rayons** : 14 (champs) · 20 (tuiles) · 26 (cartes) · 32 (grands blocs, fenêtres) · capsule pour les boutons.
 - **Tailles** :
   - champs à 42 px sur ordinateur, 44 px sur téléphone ; texte des champs ≥ 16 px sur téléphone ;
@@ -207,23 +202,35 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A UI/U
 - **Les règles des firmes sont vérifiées ailleurs** et fournies confirmées. Ne refaire la vérification web que si une valeur semble contradictoire.
 - **Rapport de livraison en 3 lignes** : ce qui change, les fichiers modifiés, les tests passés.
 
-## Passation (9 octobre — audit visuel / animations / vitesse, étape 1 livrée)
+## Passation (9 octobre — audit visuel / animations / vitesse, étapes 1 et 2 livrées)
 
 ### Où on en est
 - **Audit avant mise en ligne** (demandé le 9 oct. : visuel, animations, vitesse ; aucune refonte, rien ne doit briser) : récapitulatif validé par Mateo. Plan en 6 étapes, **une à la fois, approuvée avant la suivante** ; à chaque étape : fichiers complets modifiés avec leur chemin, tests ordinateur + mobile, clair + foncé, nouvelles mesures de vitesse.
-  1. **Bloquants visuels : livrée dans ce zip** (contrastes AA, bouton principal, Comptes qui sautent, nom du bouton Progression, zoom permis, zones tactiles 44 px, montants clés jamais coupés).
-  2. Vitesse côté navigateur : un seul observateur au lieu de 39 dans `nav.js` ; charger la gamification et le guide après le premier affichage ; purger le CSS écrasé (431 Ko, ~85 % inutilisé) ; équilibrer les colonnes d'Aujourd'hui avant l'affichage ; sous-ensemble des polices.
+  1. **Bloquants visuels : livrée et en ligne** (contrastes AA, bouton principal, Comptes qui sautent, nom du bouton Progression, zoom permis, zones tactiles 44 px, montants clés jamais coupés).
+  2. **Vitesse côté navigateur : livrée** (voir « Étape 2 de l'audit » plus bas : polices en sous-ensemble, Aujourd'hui sans décalage au chargement ; trois points du plan abandonnés après mesure). Réglages serveur (compression NGINX, HTTP/2, OPcache) : **mis de côté par Mateo le 9 oct.** ; le support HostArmada a répondu que la compression était active, mais la mesure en ligne montre le contraire (HTML, CSS et JS servis sans `Content-Encoding`). Un message prêt à leur envoyer a été donné à Mateo. Le plus gros gain de vitesse restant.
   3. Vitesse côté serveur : migrations d'`api/data` mémorisées une fois faites ; cache de `img/` et `icons/` ; vérifications en ligne.
   4. Finitions visuelles : formats de nombres FR/ES (« 79 % », « 1,71 »), « Bonjour Mateo, · » (virgule en trop).
   5. Animations : une seule courbe iOS, 150-350 ms ; 13 animations à réécrire en transform/opacity ; 18 animations infinies à arrêter hors écran.
   6. Lot B (Stats, Deep Dive, Mon argent, filtres harmonisés).
-- **En attente de Mateo pour l'étape 2** : rapports Lighthouse faits connecté sur app.makeitsweep.com (mobile + ordinateur) ; en-têtes de réponse de `bundle.….css` (compression, HTTP/2) ; version de PHP et OPcache (cPanel).
+- **Serveur (mesuré le 9 oct.)** : aucune compression (NGINX a `gzip` désactivé pour tout le VPS : CSS 434 Ko et JS 339 Ko envoyés bruts), HTTP/1.1 (`http2 off` : ea-nginx ne l'active que si `/etc/nginx/conf.d/http2.conf` existe), PHP 8.1 sans OPcache (mod_lsapi). Le cache des `assets/` est bon (1 an, `immutable`). Les réglages demandent root (WHM → Terminal) ; les commandes ont été données à Mateo le 9 oct. : `/etc/nginx/conf.d/sweep-gzip.conf`, `touch /etc/nginx/conf.d/http2.conf`, `dnf install ea-php81-php-opcache`, `ea-nginx config --all`, rechargement de NGINX et d'Apache. Mon accès SSH (`matnsabc`) ne peut pas les faire.
 - Étape 2 du brief d'évolution (règles et journée en trois temps) : après l'audit.
 
 ### Mesures (local, relais gzip, Lighthouse simulé)
 - Avant l'audit : Aujourd'hui mobile perf 55, LCP 5,3 s, TBT 1 136 ms ; Stats mobile 54 / 5,5 s / 1 242 ms ; Comptes mobile CLS 0,382 ; ordinateur 85-96. Poids d'une page : 622 Ko (JS 383, CSS 77, polices 138).
 - Après l'étape 1, comparaison A/B sur la même machine (ancien et nouveau code servis côte à côte, 3 passages, médiane) : pas de régression ; Aujourd'hui mobile TBT 2 146 → 1 994 ms, Trades mobile 1 657 → 909 ms (cette machine est plus lente que celle des mesures « avant » : comparer seulement en A/B). Comptes : CLS 0,69 → 0,067.
 - Contrastes sous 4,5:1 : ~1 100 éléments → 0 (hors jours hors du mois du Calendrier, exemptés).
+- Étape 2 (Mac de Mateo, `tools/perf.py` et `tools/shifts.py`, A/B) : polices 141 → 79 Ko (poids d'une page avec compression 624 → ~561 Ko) ; Aujourd'hui ordinateur CLS 0,089-0,22 → 0,0002-0,035 ; mobile déjà à 0 partout. Temps de calcul inchangés (aucune modification du JS de rendu).
+
+### Étape 2 de l'audit — ce qui a été mesuré et décidé
+- **Polices** : sous-ensemble (`tools/subset-fonts.py`, originaux dans `tools/fonts-src/`). Largeurs et crénage vérifiés identiques (HarfBuzz, graisses 400/500/600) ; captures A/B identiques sur téléphone ; sur ordinateur (densité 1×) seul le lissage des lettres diffère, à moins de 0,4 % des pixels, sans aucun déplacement.
+- **Routine qui sautait (ordinateur)** : l'étiquette « Pour la prochaine séance » était ajoutée à la carte de chargement ; ses étapes n'ont pas de titre, donc l'étiquette tombait à côté de l'étape, comme 4ᵉ case de la grille. Elle ne s'ajoute plus aux étapes `.sk`.
+- **En-tête d'Aujourd'hui (ordinateur)** : il passait de la taille simple à celle à 3 lignes (`.nav-3l`, posée par `nav.js`) après le premier affichage. Les mêmes règles s'appliquent maintenant dès `html[data-home]`, posé dans le `<head>` d'`app.html`.
+- **Abandonnés après mesure** (ne pas les refaire sans nouvelle mesure) :
+  - **un seul observateur au lieu de 39** : tous les observateurs réunis coûtent ~15 ms sur ~650 ms de calcul au chargement d'Aujourd'hui (mobile, CPU ×4) ; le gain ne vaut pas le risque ;
+  - **charger la gamification et le guide après le premier affichage** : `game.js` (anneaux, routine) et `guide.js` (carte de départ) dessinent une partie d'Aujourd'hui au premier rendu ; les retarder ferait apparaître ces cartes en retard (sauts) ;
+  - **purger le CSS « écrasé »** : les déclarations réellement écrasées (même sélecteur, même contexte, plus loin) ne sont que 413 sur 15 820 (−3 %). Les « ~85 % inutilisés » sont des règles que la page affichée n'utilise pas (survols, fenêtres, états rares) : les retirer par couverture divise le temps de style par deux sur Aujourd'hui (254 → 120 ms, mobile CPU ×4) mais risque de casser des états rares. À ne reprendre qu'avec une couverture de tous les états.
+  - Le profil CPU attribue ~250 ms à `fitOne` (`nav.js`) : c'est le recalcul de style de la page, déclenché par sa première mesure, pas un emballement (35 mises en page avant comme après une réécriture en lecture groupée, abandonnée).
+- **Le vrai coût restant au chargement** : style (~250 ms) et script (~270 ms) sur Aujourd'hui mobile CPU ×4, pour ~9 300 éléments dans la page.
 
 ### Étape 1 de l'audit — causes trouvées
 - Gris secondaire foncé : l'ancienne règle de `app.css` (`prefers-color-scheme:dark` + `:root:not([data-theme=light])`) avait le sélecteur le plus fort ; la valeur de `nav.css` ne s'appliquait qu'au thème foncé choisi à la main.
@@ -240,14 +247,15 @@ Version : `sweep-app-base.zip` du 9 octobre 2026 (étape 1 du brief + lot A UI/U
 - 15.2/15.3 : l'en-tête ouvert perdait ses coins du bas, au-dessus d'une fiche séparée. 17.2/17.3 : bordure du bas de la dernière ligne qui dépassait sous la carte.
 - 1.3 : l'onglet Semaine n'avait jamais affiché les chiffres (seul l'onglet Jour). En local, les valeurs sont vides (calendrier économique manuel).
 
-### Ce qui a changé dans ce zip (depuis le zip du lot A)
-- Modifiés : `app.html` et `auth.html` (zoom permis : `maximum-scale=1` retiré), `src/nav.css` (section « Audit, step 1 » : jetons de couleur, `--pos-fill`, zones tactiles, `content-visibility` des comptes), `src/nav.js` (nom du bouton Progression, observateur natif des Comptes et des cases de chiffres clés, `fitOne`), `tests/e2e_lot_a.py` (couleur du bouton « Faire mon plan »), `CONTEXTE-APP.md`.
-- Recompilés : `assets/bundle.22e4b3842c.css`, `assets/nav.6a0187b7d5.js`, `assets/nav.d03abd2926.css` (remplacent `bundle.87ff8bfd02.css`, `nav.d6c03a7bbf.js`, `nav.2e01067e79.css`, qui peuvent rester sur le serveur).
+### Ce qui a changé à l'étape 2 de l'audit (depuis le commit « App 3 : version finale », en ligne)
+- Modifiés : `src/nav.js` (pas d'étiquette « prochaine séance » sur la routine en chargement), `src/nav.css` (en-tête d'Aujourd'hui à sa taille finale dès `html[data-home]`), `assets/fonts/Geist-Variable.woff2` et `GeistMono-Variable.woff2` (sous-ensemble), `app.html` (nouveaux noms de fichiers), `CONTEXTE-APP.md`.
+- Recompilés : `assets/bundle.7cfeabbae3.css`, `assets/nav.656d6b8284.js`, `assets/nav.a7bef0aeac.css` (remplacent `bundle.22e4b3842c.css`, `nav.6a0187b7d5.js`, `nav.d03abd2926.css`, qui peuvent rester sur le serveur).
+- Nouveau : `tools/` (environnement local, mesures, suite répartie `par.py`, originaux des polices).
 
 ### État des tests
 - PHP : `presets_test.php` 41/41, `shot_trades_test.php` 32/32.
-- **Série complète sur base neuve avec ce zip : 31/31**, sans « RETRY ».
-- Contrôles de l'audit : axe-core (contraste, noms, cibles) sur 14 pages × ordinateur / iPhone / Android × clair / foncé ; aucun débordement horizontal, aucune erreur JS, aucun CLS > 0,1.
+- **Série complète sur base neuve (Mac, PHP 8.5) : 31/31 avant l'étape 2 et 31/31 après** (en série puis en suite répartie), sans « RETRY ».
+- Étape 2 : captures A/B au pixel (8 pages × téléphone / ordinateur × FR foncé / ES clair) ; décalages mesurés sur 7 pages × 2 tailles ; aucune erreur JS.
 - `run-all.sh --all` et `ops/tests.php` : non lancés.
 
 ### Bugs connus et points à surveiller

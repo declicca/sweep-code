@@ -1892,11 +1892,12 @@ html body .d-pay .nav-kpi-g > div b{font:600 26px var(--font-num)!important;lett
 /* 2 · no « per your platform » under the P&L of the trade rows */
 html body #main .nav-plat-r{display:none!important}
 /* 4 · compact header: greeting · date on one line, the title under it, centred with « Add a trade » */
-html body .main-wrap > .top.nav-3l{align-items:center!important;min-height:0!important;padding-top:4px!important;padding-bottom:4px!important}
+/* audit step 2: the home header has its final size from the first paint (html[data-home] is set in app.html's <head>; .nav-3l comes later from nav.js) */
+html body .main-wrap > .top.nav-3l,html[data-home] body .main-wrap > .top{align-items:center!important;min-height:0!important;padding-top:4px!important;padding-bottom:4px!important}
 html body .main-wrap > .top.nav-3l .nav-date{display:none!important}
-html body .main-wrap > .top.nav-3l #title::before{font-size:13px!important;margin-bottom:2px!important;white-space:nowrap}
-html body .main-wrap > .top.nav-3l #title{font-size:30px!important;line-height:1.1!important}
-@media (max-width:860px){html body .main-wrap > .top.nav-3l #title{font-size:26px!important}html body .main-wrap > .top.nav-3l #title::before{font-size:12px!important}}
+html body .main-wrap > .top.nav-3l #title::before,html[data-home] body .main-wrap > .top #title::before{font-size:13px!important;margin-bottom:2px!important;white-space:nowrap}
+html body .main-wrap > .top.nav-3l #title,html[data-home] body .main-wrap > .top #title{font-size:30px!important;line-height:1.1!important}
+@media (max-width:860px){html body .main-wrap > .top.nav-3l #title,html[data-home] body .main-wrap > .top #title{font-size:26px!important}html body .main-wrap > .top.nav-3l #title::before,html[data-home] body .main-wrap > .top #title::before{font-size:12px!important}}
 /* 5 · info bubbles always on top: the hovered card rises above its neighbours */
 html body #main .surface:hover,html body #main .surface:focus-within{position:relative;z-index:30}
 html body #main [class*="tip"],html body #main [role="tooltip"]{z-index:1000!important}
@@ -1938,7 +1939,7 @@ html body #navMenu.nav-menu{background:rgba(0,0,0,.12)!important;-webkit-backdro
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) body #navMenu.nav-menu{background:rgba(255,255,255,.4)!important}}
 :root[data-theme="light"] body #navMenu.nav-menu{background:rgba(255,255,255,.4)!important}
 /* home, computer: room above « Good evening, Mateo » so the page does not stick to the top */
-@media (min-width:861px){html body .main-wrap > .top.nav-3l{padding-top:36px!important;padding-bottom:10px!important}}
+@media (min-width:861px){html body .main-wrap > .top.nav-3l,html[data-home] body .main-wrap > .top{padding-top:36px!important;padding-bottom:10px!important}}
 /* computer, news card in « Week »: every release of the week, past ones dimmed, upcoming ones bright */
 .nav-evs-w .nav-ev.nav-ev-wpast{opacity:.42}
 .nav-evs-w .nav-ev.nav-ev-wnext{opacity:1}

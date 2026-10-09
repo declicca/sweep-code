@@ -4699,7 +4699,8 @@ document.addEventListener('click', (e) => {
     return h >= 16 || target !== today || !d || !d.market ? target : null;
   };
   new window.SweepMO(() => {
-    const nx = window.SweepNextSession(); const s1 = document.querySelector('#main .nav-rt-s:first-child'); if (!s1) return;
+    // never on the loading card: its steps have no title, so the tag landed next to the step, as a 4th cell of the grid (layout shift)
+    const nx = window.SweepNextSession(); const s1 = document.querySelector('#main .nav-rt-s:first-child'); if (!s1 || s1.classList.contains('sk')) return;
     let tag = s1.querySelector('.nav-next-ses');
     if (!nx) { if (tag) tag.remove(); return; }
     const txt = ({ en: 'For the next session', fr: 'Pour la prochaine séance', es: 'Para la próxima sesión' })[L];
