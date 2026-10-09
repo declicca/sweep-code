@@ -12,6 +12,9 @@ N = int(sys.argv[1]) if len(sys.argv) > 1 else 3
 TIMES = os.path.join(TOOLS, 'test-times.json')
 ENV = dict(os.environ, PATH=':'.join([os.path.expanduser('~/.venvs/sweep/bin'), '/opt/homebrew/bin', '/opt/homebrew/opt/coreutils/libexec/gnubin',
                                       '/opt/homebrew/opt/gnu-sed/libexec/gnubin', os.environ.get('PATH', '')]))
+# market weekend: the game runs on Friday 15:00 ET (tools/game-now.py), the tests need an open session
+GAME_NOW = subprocess.run([sys.executable, '-I', os.path.join(TOOLS, 'game-now.py')], capture_output=True, text=True).stdout.strip()
+if GAME_NOW: ENV['SWEEP_GAME_NOW'] = GAME_NOW
 core = re.search(r'CORE="([^"]*)"', open(os.path.join(APP, 'tests/run-all.sh')).read()).group(1).split()
 php_tests = ['presets_test.php', 'shot_trades_test.php']
 # durations of the last run (seconds); unknown tests count as 60 s
@@ -51,8 +54,22 @@ def prepare(i):
             s2 = re.sub(r"/tmp/g(?=[/'\"])", dest, s2)
             if s2 != s: open(p, 'w', encoding='utf-8').write(s2)
 
+def free(port):
+    pids = subprocess.run(['lsof', '-ti', 'tcp:%d' % port, '-sTCP:LISTEN'], capture_output=True, text=True).stdout.split()
+    for pid in pids: subprocess.run(['kill', pid])
+    for _ in range(50):
+        if not subprocess.run(['lsof', '-ti', 'tcp:%d' % port, '-sTCP:LISTEN'], capture_output=True, text=True).stdout.strip(): return
+        time.sleep(0.1)
+    raise SystemExit('port %d still in use' % port)
+
+def stop(srv):   # php -S with workers: the whole process group (the workers are children)
+    try: os.killpg(srv.pid, 15)
+    except ProcessLookupError: pass
+    srv.wait()
+
 def main():
     t0 = time.time()
+    if GAME_NOW: print('SWEEP_GAME_NOW=%s (market weekend)' % GAME_NOW, flush=True)
     print('shards:', ' | '.join('%d: %d tests ~%d s' % (i + 1, len(s), load[i]) for i, s in enumerate(shares)), flush=True)
     for i in range(N): prepare(i)
     procs = []
@@ -62,7 +79,8 @@ def main():
                    SWEEP_AI_CONFIG=TOOLS + '/ai-config.local.php', SWEEP_AI_MOCK=dest + '/tests/samples/shot-ai-mock.json',
                    TMPDIR='/tmp/sweep-par-%d' % (i + 1), PHP_CLI_SERVER_WORKERS='4')   # php -S answers one request at a time otherwise
         os.makedirs(env['TMPDIR'], exist_ok=True); [os.remove(os.path.join(env['TMPDIR'], f)) for f in os.listdir(env['TMPDIR'])]
-        srv = subprocess.Popen(['php', '-S', '127.0.0.1:%d' % port, 'router.php'], cwd=dest, env=env, stdout=subprocess.DEVNULL, stderr=open(env['TMPDIR'] + '/php.log', 'w'))
+        free(port)   # a server left over by an earlier run would answer instead (without this run's settings)
+        srv = subprocess.Popen(['php', '-S', '127.0.0.1:%d' % port, 'router.php'], cwd=dest, env=env, stdout=subprocess.DEVNULL, stderr=open(env['TMPDIR'] + '/php.log', 'w'), start_new_session=True)
         base = 'http://127.0.0.1:%d' % port
         script = ('for i in $(seq 1 50); do curl -s -o /dev/null %s/api/auth/config && break; sleep 0.2; done; '
                   'python3 %s/prof.py %s %s && cd %s && sh tests/run-all.sh %s %s') % (base, TOOLS, base, state, dest, base, state)
@@ -71,7 +89,7 @@ def main():
         time.sleep(8)   # the shards start a few seconds apart (cold browsers, fresh databases)
     rc = 0; passed = failed = 0; failed_names = []
     for i, srv, p, log, tmp in procs:
-        p.wait(); srv.terminate(); log.close()
+        p.wait(); stop(srv); log.close()
         out = open(tmp + '/run.log').read()
         m = re.search(r'(\d+) passed, (\d+) failed', out)
         if not m: print('shard %d: no result (see %s/run.log)' % (i + 1, tmp)); rc = 1; continue

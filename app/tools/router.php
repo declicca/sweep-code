@@ -2,7 +2,7 @@
 // Sweep — router for `php -S`, mirrors app/.htaccess (local tests only).
 $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $rel = ltrim($path, '/');
-if (preg_match('#^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|README\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|src/.*|tools/.*|data(/.*)?)$#', $rel)) { http_response_code(403); exit; }
+if (preg_match('#^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|README\.md|NOTES\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|src/.*|tools/.*|data(/.*)?)$#', $rel)) { http_response_code(403); exit; }
 $route = null;
 if ($rel === '' || preg_match('#^index\.html?$#', $rel)) $route = 'app';
 elseif (preg_match('#^api/(.*)$#', $rel, $m)) $route = 'api/' . $m[1];

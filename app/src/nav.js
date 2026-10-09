@@ -693,7 +693,8 @@ window.SweepMO = window.SweepMO || class {
     const shown = accs.filter((a) => !flagged.includes(a)).slice(0, 6).concat(flagged);
     const items = shown.map((a) => {
       let st = null; try { st = typeof acctState === 'function' ? acctState(a) : null; } catch (err) { st = null; }
-      const room = st && st.dd ? Math.max(0, Math.min(1, (st.buffer || 0) / st.dd)) : null;
+      // an exceeded account: room 0 $, and its bar empty too (the text said 0 $ while the bar stayed full)
+      const room = st && st.dd ? (st.breached ? 0 : Math.max(0, Math.min(1, (st.buffer || 0) / st.dd))) : null;
       const ps = window.SweepPayout && SweepPayout.status(a);   // the firm's payout conditions when they are set
       const evalA = a.phase === 'eval' || (!a.phase && a.rules && a.rules.target_c);
       const ready = evalA ? !!(st && st.passed) : ps ? ps.ready : false;   // an evaluation is passed only when target + consistency + minimum days are all met

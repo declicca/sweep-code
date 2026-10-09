@@ -9,7 +9,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 ## 1. Architecture
 
 - **Stack** : PHP 8.1 + SQLite (`data/journal.db`), sans framework. Hébergement HostArmada (cPanel, `/home/matnsabc/app.makeitsweep.com`). Mise en ligne par `./deploy.sh app` à la racine du dépôt (rsync par SSH, simulation par défaut, `--go` pour envoyer ; il vide le cache NGINX), seulement avec l'accord de Mateo.
-- **Front** : `app.html` charge le bundle principal (`assets/app.e2b985f447.js`, minifié). Ce fichier est parfois patché directement par remplacement de chaînes exactes : titres, `ft()`, `mergeCopies`, partage, données d'exemple, formats de nombres FR/ES (`trText`/`pctSp`, `decl`). **Après un patch, le renommer avec sa nouvelle empreinte** (`md5 -q` → 10 premiers caractères) et mettre à jour `app.html` : `assets/` est en cache 1 an `immutable`, l'ancien nom resterait chez les visiteurs. Les modules ci-dessous l'enrichissent : ils enveloppent `render()`, `submitAccount()`, `payoutForm()`, `acctTable()`, etc., et observent le DOM.
+- **Front** : `app.html` charge le bundle principal (`assets/app.708d6fa5c5.js`, minifié). Ce fichier est parfois patché directement par remplacement de chaînes exactes : titres, `ft()`, `mergeCopies`, partage, données d'exemple, formats de nombres FR/ES (`trText`/`pctSp`, `decl`). **Après un patch, le renommer avec sa nouvelle empreinte** (`md5 -q` → 10 premiers caractères) et mettre à jour `app.html` : `assets/` est en cache 1 an `immutable`, l'ancien nom resterait chez les visiteurs. Les modules ci-dessous l'enrichissent : ils enveloppent `render()`, `submitAccount()`, `payoutForm()`, `acctTable()`, etc., et observent le DOM.
 
 | Élément | Rôle |
 |---|---|
@@ -49,6 +49,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - `build.sh` : `node --check` de chaque `src/*.js` puis `ops/build-assets.sh` (le build reproduit exactement les empreintes d'App 3) ;
   - mesures : `gzproxy.py` (relais gzip devant `php -S`), `perf.py` (A/B en alternance, médiane : FCP, LCP, TBT, temps script / style / mise en page, CLS, poids), `profile.py` (profil CPU d'un chargement), `shifts.py` (décalages de mise en page élément par élément), `pixdiff.py` (captures A/B comparées au pixel) ;
   - `subset-fonts.py` : sous-ensemble des polices à partir des originaux de `tools/fonts-src/`.
+  - `game-now.py` : pendant la fin de semaine du marché (vendredi 17 h → dimanche 18 h ET), `run.sh` et `par.py` fixent l'heure du jeu côté serveur au vendredi 15 h ET (`SWEEP_GAME_NOW`, déjà prévu dans `game/game.php`). Sans ça, `e2e_clarity`, `e2e_session_parity`, `e2e_plan_journal` et `e2e_lot_a` échouent le week-end (aucune séance ouverte). Les autres jours : heure réelle.
 - **Suite complète** : `sh tools/sync.sh && sh tools/run.sh sh tools/full.sh > log 2>&1` (~35 min, en arrière-plan).
 - **Comparer l'ancien et le nouveau code** : une deuxième copie (`sh tools/sync.sh /tmp/g2` depuis l'ancien code) avec **la même base** (`cp -R /tmp/g/data /tmp/g2/`), servies sur 8095 et 8096, chacune derrière `gzproxy.py` (9095, 9096). La session de test vaut pour les deux, mais `localStorage` dépend du port : `perf.py` et `pixdiff.py` recopient celui de la session pour chaque adresse (sans ça, les deux copies n'affichent pas la même période).
 - **Compte de test** : `/tmp/show_state.json` (Mateo, données d'exemple). Pour un nouveau compte dans un test : `POST /api/auth/register` puis `/api/me/profile`. Toutes les requêtes `POST /api/...` portent l'en-tête `X-Requested-With: fetch`.
@@ -113,8 +114,9 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Dépenses** : 7 catégories ; remboursement = montant négatif ; abonnement mensuel arrêté automatiquement quand le compte se termine.
 - **ROI prop** = (payouts nets − dépenses) / dépenses, sans le P&L live.
 - **Copy trading** : un groupe de copies compte une fois, avec le P&L de la copie principale (la plus ancienne). Option Stats « par contrat ».
-- **Comptes dépassés** : étiquette or partout, marge affichée à 0 $, placés en bas des listes. « Objectif atteint » seulement si objectif, consistance et jours minimum sont remplis.
+- **Comptes dépassés** : étiquette or **« Drawdown dépassé »** (ES « Drawdown superado », EN « Drawdown exceeded ») ou « Limite du jour atteinte », partout (Aujourd'hui, liste Comptes, page du compte) ; marge affichée à 0 $ **et barre vide**, même si le solde est remonté au-dessus du seuil ; placés en bas des listes. « Réussi » seulement si objectif, consistance et jours minimum sont remplis ; sinon « Objectif atteint · il manque : consistance 67 % (max 55 %) / 1 jour sur 3 » (brief 01, 1.3).
 - **Suppression** : toujours dans l'app (jamais `confirm()` du navigateur), avec un toast « Annuler » pendant 5 s (`SweepUndo.del`, `SweepUndo.toast`). Ça vaut pour un trade, toutes ses copies, une capture, une question de la checklist, les données d'exemple et un lot importé.
+- **Import sans frais** (Tradovate, Rithmic) : la commission par contrat du compte (`fee_rt_c`, aller-retour × contrats) est appliquée (`fees_auto`) ; sans commission sur le compte, l'aperçu dit « Frais non inclus dans ce rapport ».
 - **Ajout de trade** : la capture d'abord. Une capture avec plusieurs trades ouvre « X trades trouvés » ; avec un seul trade, l'écran habituel s'affiche.
 - **Langues** : EN / FR / ES ; montants au format de la langue (FR « 1 688 $ »).
 - **Nombres en FR / ES** (étape 4 de l'audit) : espace fine insécable avant « % » (« 52 % »), virgule décimale pour les ratios, les R et les abréviations (« 1,52 », « +0,85R », « +1,6k »). Les **prix** d'entrée et de sortie gardent leur point (« 21366.00 »), comme sur les plateformes. Les pourcentages sont corrigés **après** la traduction (`trText` dans `app.js` : textes traduits et textes faits d'un seul nombre ; les notes des traders ne sont jamais touchées), parce que des phrases anglaises avec « 52% » servent de modèles de traduction. Les ratios et les R le sont à la source (`decl()`). Contrôle : `python3 tools/numfmt.py`.
@@ -124,7 +126,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Comptes** : le glisser-déposer (ordinateur) et « Modifier l'ordre » (téléphone) marchent dans chaque groupe (Live, Financés, Évaluations, Perso), uniquement à l'intérieur du groupe ; l'ordre est enregistré pour tous les comptes.
 - **Forfait Free** : Mon argent n'y est pas. Le rattrapage du vrai net ne s'ouvre pas et l'invitation « Complète ton historique » ne s'affiche pas en Free (un nouveau trader est en essai Pro de 14 jours, donc il l'a).
 - **Compte live** : sans préréglage, avec le choix « live de la firme / perso (courtier) ».
-- **Essai Pro** : 14 jours (`billing/billing-core.php`).
+- **Essai Pro** : **60 jours** en ligne (`sweep-private/billing-config.php`) ; le défaut du code (`billing/billing-core.php`) dit 14 jours et ne sert que sans ce fichier.
 - **Arrivée d'un nouveau trader** (étape 1 du brief) : inscription → « Complète ton profil » → dans la même fenêtre, « Tu trades depuis combien de temps ? » (Je commence · Moins d'un an · Plus d'un an, ou Passer) → premier compte → **« Compte ajouté »** (Continuer · + Ajouter un autre compte ; jamais la fenêtre d'ajout de trade pendant ce parcours) → rattrapage → écran du vrai net → Aujourd'hui.
   - Le niveau d'expérience est gardé sur le serveur (`users.experience` : `new` / `lt1` / `gt1`, renvoyé dans `user.experience`). Il servira aux règles par défaut de l'étape 2.
   - **Rattrapage** : « Depuis quand veux-tu suivre ton argent ? » (Ce mois-ci · Depuis janvier · Une date) → achats par firme des comptes du trader (évaluations, resets, activations, compteurs +/−, prix du catalogue pré-remplis et modifiables ; Topstep : « Mois d'abonnement ») → payouts nets reçus (un seul montant) → vrai net.
@@ -260,8 +262,15 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Recompilés : `assets/bundle.7cfeabbae3.css`, `assets/nav.656d6b8284.js`, `assets/nav.a7bef0aeac.css` (remplacent `bundle.22e4b3842c.css`, `nav.6a0187b7d5.js`, `nav.d03abd2926.css`, qui peuvent rester sur le serveur).
 - Nouveau : `tools/` (environnement local, mesures, suite répartie `par.py`, originaux des polices).
 
+### Brief 01 « Fondations » (reçu le 9 oct.) — étape 1
+- Le brief décrit un état plus ancien : ses scénarios de l'étape 1 existaient déjà comme tests (`e2e_accuracy` A2-A8, `e2e_session_parity`, `e2e_import_session_day`). Ajoutés : A3 avec la formulation exacte, A5b (compte dépassé puis remonté), A6b (commission Tradovate appliquée).
+- Corrigé : étiquette « Drawdown dépassé » (avant « Dépassé »), texte de ce qui manque, marge 0 $ et barre vide sur la page du compte et sur Aujourd'hui pour un compte dépassé puis remonté (avant : marge réelle, barre pleine).
+- Prix des firmes (1.7) : passés (Mateo n'a pas les montants). Environnement de test : **local seulement** (choix de Mateo ; trade.agencedeclic.ca garde sa redirection vers l'app, c'est l'ancienne adresse du journal).
+- Points vus en passant : `NOTES.md` (non déployé).
+- Écarts du brief déjà tranchés : ne pas charger `game` / `guide` à la demande (ils dessinent Aujourd'hui, mesuré à l'étape 2 de l'audit) ; Google Fonts déjà retirées ; une seule langue chargée ; CSS déjà en un fichier.
+
 ### Ce qui a changé à l'étape 4 de l'audit
-- `assets/app.de47127496.js` → `assets/app.e2b985f447.js` (patché : `trText` + `pctSp`, `decl` dans `pf`, `rfmt`, gain/perte moyen, « Plus actif », abréviations « k »), `src/nav.js` (message d'accueil), `app.html`, recompilé `assets/nav.*.js`. Nouveau : `tools/numfmt.py`.
+- `assets/app.de47127496.js` → `assets/app.708d6fa5c5.js` (patché : `trText` + `pctSp`, `decl` dans `pf`, `rfmt`, gain/perte moyen, « Plus actif », abréviations « k »), `src/nav.js` (message d'accueil), `app.html`, recompilé `assets/nav.*.js`. Nouveau : `tools/numfmt.py`.
 
 ### Ce qui a changé à l'étape 3 de l'audit
 - Nouveaux : `img/.htaccess` et `icons/.htaccess` (durée de cache). Aucun code PHP ou JS modifié.
@@ -270,6 +279,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - PHP : `presets_test.php` 41/41, `shot_trades_test.php` 32/32.
 - **Série complète sur base neuve (Mac, PHP 8.5) : 31/31 avant l'étape 2 et 31/31 après** (en série puis en suite répartie), sans « RETRY ».
 - **Étape 4 : 31/31** (suite répartie, 8 min 11 s), sans « RETRY » ; `tools/numfmt.py` ne trouve plus de format anglais en FR/ES (hors prix et numéro de version) ; aucune boucle de réécriture (mutations au repos identiques en EN, FR, ES).
+- **Brief 01, étape 1 : 31/31** (suite répartie, 8 min 14 s, un vendredi soir avec `SWEEP_GAME_NOW` = vendredi 15 h ET), sans « RETRY ». `e2e_presets_firms` a échoué une fois sous la charge des 3 groupes (clic pendant une transition), puis passé seul 2 fois et dans la suite complète suivante : à surveiller.
 - Étape 2 : captures A/B au pixel (8 pages × téléphone / ordinateur × FR foncé / ES clair) ; décalages mesurés sur 7 pages × 2 tailles ; aucune erreur JS.
 - `run-all.sh --all` et `ops/tests.php` : non lancés.
 
@@ -287,6 +297,8 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 5. Questions de l'étape 2 (brief, section 8) : définition exacte de la journée propre, journée sans trade, valeurs des 3 règles du débutant, check-in obligatoire ou non.
 
 ### Décisions prises le 8-9 octobre
+- **Routine** : on garde le chevron pour la replier (brief 02 §5.1 « toujours dépliée » écarté par Mateo le 9 oct.).
+- **Essai Pro : 60 jours**, déjà appliqué en ligne par `sweep-private/billing-config.php` (confirmé par Mateo le 9 oct.) ; le défaut du code (`billing/billing-core.php`, 14 jours) ne sert que sans ce fichier. Reste à faire avec le brief 02 §13 : rappel au jour 50 (aujourd'hui 3 jours avant la fin, `nav.js`), texte du site « Essai Pro de 14 jours » (`website/src/pages4.py`).
 - Forfait Free : pas de Mon argent (donc ni rattrapage ni invitation en Free).
 - Les estimations du rattrapage comptent comme de l'argent réel partout, y compris dans les cartes « argent » partagées ; seul le bouton « Partager » d'un payout estimé est retiré.
 - Routine repliable, sélecteur sur le Calendrier, boutons (bleu = seul bouton principal) : voir sections 5 et 8.

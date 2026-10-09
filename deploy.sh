@@ -13,7 +13,7 @@ case "$1" in
   app)
     rsync -avz $DRY \
       --exclude 'config.php' --exclude 'data/' --exclude 'error_log' \
-      --exclude 'CLAUDE.md' --exclude 'CONTEXTE-APP.md' --exclude '.ftp-deploy-sync-state.json' \
+      --exclude 'CLAUDE.md' --exclude 'CONTEXTE-APP.md' --exclude 'NOTES.md' --exclude '.ftp-deploy-sync-state.json' \
       --exclude 'src/' --exclude 'tests/' --exclude 'tools/' \
       app/ "$HOST:$APP_REMOTE" ;;
   website)
