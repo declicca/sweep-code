@@ -193,6 +193,8 @@ FOOT = [
 # prop firms with preloaded rules: from the app's catalogue (presets.py), never retyped here
 from presets import PRESET_FIRMS
 
+CRUMBS = {}   # page → breadcrumb name, when the title is too long to be one
+
 def jsonld(obj): return f'<script type="application/ld+json">{json.dumps(obj, ensure_ascii=False)}</script>'
 
 def _trim(desc, n=158):
@@ -238,9 +240,9 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     web = {"@type":"WebSite","@id":f"https://{DOMAIN}/#website","name":"Sweep","alternateName":["Make it Sweep","makeitsweep","Sweep trading journal"],"url":f"https://{DOMAIN}/","inLanguage":["en","fr","es"],"publisher":{"@id":f"https://{DOMAIN}/#org"}}
     graph = [org, web]
     if page not in ("index.html", "404.html"):
-        crumb = re.split(r"\s[·|—]\s", title)[0].strip()
-        graph.append({"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Sweep","item":f"https://{DOMAIN}{href(lang,'index.html')}"},
-                      {"@type":"ListItem","position":2,"name":crumb,"item":f"https://{DOMAIN}{href(lang,page)}"}]})
+        crumb = CRUMBS.get(page) or re.split(r"\s[·|—]\s", title)[0].strip()
+        items = [("Sweep", href(lang, "index.html"))] + ([(t(T("Prop firms","Prop firms","Prop firms")), href(lang, "prop-firms.html"))] if page.startswith("prop-firms/") else []) + [(crumb, href(lang, page))]
+        graph.append({"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":i + 1,"name":n,"item":f"https://{DOMAIN}{u}"} for i, (n, u) in enumerate(items)]})
     extra_head += jsonld({"@context":"https://schema.org","@graph":graph})
     if page == "404.html": extra_head += '<meta name="robots" content="noindex">'
     cl = "fr" if lang == "fr" else "en"   # Spanish pages use the English captures
@@ -446,4 +448,6 @@ STATS_MIN = 250
 def shell(lang, page, title, desc, body, t, extra_head=""):
     out = _shell_raw(lang, page, title, desc, body, t, extra_head)
     medium = "home" if page == "index.html" else page.replace(".html", "").replace("/", "-")
-    return out.replace(SIGNUP, f"{SIGNUP}&amp;utm_source=site&amp;utm_medium={medium}&amp;utm_campaign={UTM_CAMPAIGN}")
+    campaign = UTM_CAMPAIGN
+    if page.startswith("prop-firms/"): medium, campaign = "prop-firm", page[len("prop-firms/"):-len(".html")]
+    return out.replace(SIGNUP, f"{SIGNUP}&amp;utm_source=site&amp;utm_medium={medium}&amp;utm_campaign={campaign}")

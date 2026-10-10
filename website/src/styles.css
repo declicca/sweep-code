@@ -1484,3 +1484,19 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
   .cmp.two tbody th,.cmp.two thead th:first-child,.cmp.glance tbody th,.cmp.glance thead th:first-child{position:static;min-width:0;box-shadow:none;width:30%}
   .cmp.two th,.cmp.two td,.cmp.glance th,.cmp.glance td{padding:12px 10px;font-size:13px;overflow-wrap:anywhere}
 }
+
+/* prop firm rule pages: one column per account size, a header row per block */
+.cmp.rules td:nth-child(3){background:none}
+.cmp.rules td{color:var(--text);white-space:nowrap}
+.cmp.rules tbody th{width:auto}
+.cmp.rules .grp th{text-align:left;color:var(--muted);font-size:12.5px;font-weight:500;letter-spacing:.02em;text-transform:uppercase;background:color-mix(in srgb,var(--text) 4%,transparent);padding-top:12px;padding-bottom:12px}
+.page-hero .verified{margin-top:14px}
+.verified a,.rules-prog .fine a{color:var(--text)}
+.rules-prog .cmp-wrap{margin:18px 0 8px}
+.rules-prog h3{margin:30px 0 8px;font-size:18px;letter-spacing:-.01em}
+@media (max-width:860px){
+  .cmp.rules.n1,.cmp.rules.n2,.cmp.rules.n3{min-width:0;table-layout:fixed}
+  .cmp.rules.n1 tbody th,.cmp.rules.n2 tbody th,.cmp.rules.n3 tbody th,.cmp.rules.n1 thead th:first-child,.cmp.rules.n2 thead th:first-child,.cmp.rules.n3 thead th:first-child{position:static;min-width:0;width:34%;box-shadow:none}
+  .cmp.rules td{white-space:normal}
+  .cmp.rules th,.cmp.rules td{padding:11px 8px;font-size:12.5px}
+}
