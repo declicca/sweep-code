@@ -2447,3 +2447,10 @@ html body #gSheet .wk-brief b{white-space:normal;overflow:visible;text-overflow:
 html body #gSheet .wk-habits li{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
 html body #gSheet .wk-habits li b{font-size:12px;font-weight:600;color:var(--muted)}
 html body #gSheet .wk-habits li span{font-size:14px;line-height:1.35}
+html body #gSheet .wk-habits li::before{display:none}   /* the lines are cards: no bullet on their border */
+/* share the week (lot 4): a gray button, the payouts only when the trader adds them */
+html body #gSheet .wk-share{display:flex;flex-direction:column;gap:10px;margin:4px 0 12px}
+html body #gSheet .wk-sh-pay{padding:10px 12px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
+html body #gSheet .wk-sh-pay b{font-size:14px}
+html body #gSheet .wk-sh{width:100%;justify-content:center;gap:8px;height:44px}html body #gSheet .wk-sh svg{width:17px;height:17px;flex:0 0 auto}
+@media (max-width:600px){html body #gSheet .wk-sh{height:48px}}
