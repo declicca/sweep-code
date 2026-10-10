@@ -7,6 +7,7 @@ Slogan : « Your edge, finally in one place. » — soutien : hello@makeitsweep.
 - `app/` → app web, en ligne sur app.makeitsweep.com (voir app/CLAUDE.md et app/CONTEXTE-APP.md, qui fait foi pour l'app)
 - `website/` → site vitrine makeitsweep.com (voir website/CLAUDE.md)
 - `deploy.sh` → déploiement SSH vers le serveur (simulation par défaut)
+- `marketing/` → textes et images pour les annuaires et lancements (non déployé)
 
 ## Serveur
 - HostArmada, VPS Web Raider (cPanel/WHM), utilisateur cPanel `matnsabc`
