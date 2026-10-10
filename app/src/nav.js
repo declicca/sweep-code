@@ -3787,13 +3787,17 @@ window.SweepMO = window.SweepMO || class {
         <button type="button" class="nav-rt-streak" data-rt="hub" title="${esc2(streak + ' ' + t(streak === 1 ? 'streak1' : 'streak'))}">${svg('fire')}<b>${streak}</b><span>${t(streak === 1 ? 'streak1' : 'streak')}</span></button>
         <button type="button" class="nav-rt-lv ${pct ? '' : 'nopct'}" data-rt="hub">${pct ? `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" stroke-dasharray="94.25" stroke-dashoffset="${94.25 * (1 - pct / 100)}"/></svg>` : ''}<span><small>${t('level')}</small><b>${esc2(lv)}</b></span></button>
         <button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div></div>`;
-    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}<p class="nav-rt-msg">${t('closed')}</p></section>`;
-    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}<p class="nav-rt-msg">${t('dayoff')}</p></section>`;
+    // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
+    const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
+    const wkt = ({ en: ['Your week is ready', 'See my week'], fr: ['Ta semaine est prête', 'Voir mon bilan'], es: ['Tu semana está lista', 'Ver mi semana'] })[L] || ['Your week is ready', 'See my week'];
+    const wkRow = wkReady ? `<div class="nav-rt-wk"><b>${wkt[0]}</b><button type="button" class="btn primary" data-rt="week">${wkt[1]}</button></div>` : '';
+    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}<p class="nav-rt-msg">${t('closed')}</p></section>`;
+    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}<p class="nav-rt-msg">${t('dayoff')}</p></section>`;
     const s1 = r.plan >= 100 ? 'done' : r.plan > 0 ? 'late' : 'todo';
     const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
     const s3 = r.review >= 100 ? 'done' : 'todo';
     const n = [s1 !== 'todo', s2 === 'done', s3 === 'done'].filter(Boolean).length;
-    const nextI = s1 === 'todo' ? 1 : !d.trades ? 2 : s3 !== 'done' ? 3 : 0;   // only the next step is highlighted
+    const nextI = wkReady ? 0 : s1 === 'todo' ? 1 : !d.trades ? 2 : s3 !== 'done' ? 3 : 0;   // only the next step is highlighted (none when the week's recap is ready)
     const pill = d.swept ? `<span class="nav-rt-pill ok">${svg('check')}${t('swept')}</span>` : `<span class="nav-rt-pill">${t('of', { n })}</span>`;
     const step = (i, key, ic, title, sub, state, stateTxt, btn, act, extra, short) => `<div class="nav-rt-s ${state}${i === nextI ? ' next' : ''}"${i === nextI ? ' aria-current="step"' : ''}>
         <div class="nav-rt-si"><span class="nav-rt-n">${state === 'done' ? svg('check') : i}</span><span class="nav-rt-ic">${svg(ic)}</span></div>
@@ -3802,7 +3806,7 @@ window.SweepMO = window.SweepMO || class {
         <i class="nav-rt-bar"><i style="width:${key}%"></i></i></div>`;
     const execPct = d.trades ? Math.round((d.compliant || 0) / d.trades * 100) : 0;
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${t('ydayB')} ›</b><span>${esc2(left(y.deadline))}</span></button>` : '';
-    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}
+    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, d.trades ? t('inPlan', { c: d.compliant || 0, n: d.trades }) : t('noTrade'), t('b2'), 'trade', '', t('b2s'))}
@@ -3829,6 +3833,7 @@ window.SweepMO = window.SweepMO || class {
     const k = b.dataset.rt, g = document.querySelector('#main .g-today');
     if (k === 'plan') { if (window.SweepGame && SweepGame.openPlan) { const nx = window.SweepNextSession && SweepNextSession(); nx ? SweepGame.openPlan(nx) : SweepGame.openPlan(); } }
     else if (k === 'review') { if (window.SweepGame && SweepGame.openReview) SweepGame.openReview(); }
+    else if (k === 'week') { if (window.SweepGame && SweepGame.open) SweepGame.open('weekly'); }
     else if (k === 'trade') { if (typeof openTicket === 'function') openTicket(); }
     else if (k === 'dayoff') { const o = g && g.querySelector('[data-g=dayoff]'); if (o) o.click(); }
     else if (k === 'yday') { const o = document.querySelector('#main [data-g=yday]'); if (o) o.click(); }

@@ -1374,6 +1374,7 @@
     WK.step = step || 0; WK.items = null;
     openSheet(`${head(wt('weekly'))}<div class="wk-body"><div class="skel" style="height:240px;border-radius:18px"></div></div>`, { cls: 'wk-sheet' });
     try { WK.data = await apiJSON('api/game/weekly'); } catch (e) { return; }
+    if (G.weekly && (G.weekly.open || WK.data.open)) G.weekly.seen = true;   // opened (the server marks it too): the routine card stops offering it
     if (WK.data.done && !WK.data.chest_opened) WK.step = Math.max(WK.step, 3);
     renderWk();
   }
@@ -1512,7 +1513,7 @@
       archive: 'Your Wrapped', card_t: '{m} swept', card_s: '{n} days swept · best streak {s}', tap: 'Tap to continue',
       pay_t: 'Ready for payout', pay_s: 'Your account meets its payout rules. Well played.',
       n: { 'g_plan.title': 'Your plan of the day is waiting.', 'g_plan.body': 'Two minutes before the open.', 'g_review.title': '60 seconds to sweep your day.', 'g_review.body': 'Journal and review while it is fresh.',
-        'g_streak.title': 'Your {n}-day streak can still be saved.', 'g_streak.body': 'A review is all it takes.', 'g_weekly.title': 'Your weekly recap and chest are ready.', 'g_weekly.body': 'Open it before Sunday night.',
+        'g_streak.title': 'Your {n}-day streak can still be saved.', 'g_streak.body': 'A review is all it takes.', 'g_weekly.title': 'Your week is ready.', 'g_weekly.body': 'Your streak, your discipline and your swept days, in one place.',
         'g_intention.title': 'New missions tomorrow.', 'g_intention.body': 'Your intention: {intention}', 'g_wrapped.title': 'Your monthly Wrapped is ready.', 'g_wrapped.body': 'A look back at your month, in one minute.' } },
     fr: { pill: 'Ton Wrapped de {m}', s1: 'Ton mois de {m}', s1b: 'journées balayées sur {n} jours de marché', s2: 'Meilleur streak du mois', s2b: 'jours de suite', s3: 'Setup signature', s3b: '{n} trades · {pct} % dans ton plan',
       s4: 'Créneau d’or', s4b: '{r}R en moyenne sur {n} trades', s5: 'Émotion dominante', s5b: '{n} trades · {r}R en moyenne', s6: 'Débloqué ce mois-ci', s6b: '{b} badges · {n} étapes du parcours',
@@ -1520,7 +1521,7 @@
       archive: 'Tes Wrapped', card_t: '{m} balayé', card_s: '{n} journées balayées · meilleur streak {s}', tap: 'Touche pour continuer',
       pay_t: 'Prêt pour le payout', pay_s: 'Ton compte respecte ses règles de payout. Bien joué.',
       n: { 'g_plan.title': 'Ton plan du jour t’attend.', 'g_plan.body': 'Deux minutes avant l’ouverture.', 'g_review.title': '60 secondes pour balayer ta journée.', 'g_review.body': 'Journalise et fais ta revue tant que c’est frais.',
-        'g_streak.title': 'Ton streak de {n} jours est encore sauvable.', 'g_streak.body': 'Une revue suffit.', 'g_weekly.title': 'Ton bilan de la semaine et ton coffre sont prêts.', 'g_weekly.body': 'Ouvre-les avant dimanche soir.',
+        'g_streak.title': 'Ton streak de {n} jours est encore sauvable.', 'g_streak.body': 'Une revue suffit.', 'g_weekly.title': 'Ta semaine est prête.', 'g_weekly.body': 'Ton streak, ta discipline et tes journées balayées, au même endroit.',
         'g_intention.title': 'Nouvelles missions demain.', 'g_intention.body': 'Ton intention : {intention}', 'g_wrapped.title': 'Ton Wrapped du mois est prêt.', 'g_wrapped.body': 'Ton mois en une minute.' } },
     es: { pill: 'Tu Wrapped de {m}', s1: 'Tu {m}', s1b: 'días barridos de {n} días de mercado', s2: 'Mejor racha del mes', s2b: 'días seguidos', s3: 'Setup insignia', s3b: '{n} trades · {pct} % dentro de tu plan',
       s4: 'Franja de oro', s4b: '{r}R de media en {n} trades', s5: 'Emoción dominante', s5b: '{n} trades · {r}R de media', s6: 'Desbloqueado este mes', s6b: '{b} insignias · {n} pasos del recorrido',
@@ -1528,7 +1529,7 @@
       archive: 'Tus Wrapped', card_t: '{m} barrido', card_s: '{n} días barridos · mejor racha {s}', tap: 'Toca para continuar',
       pay_t: 'Listo para el payout', pay_s: 'Tu cuenta cumple sus reglas de payout. Bien jugado.',
       n: { 'g_plan.title': 'Tu plan del día te espera.', 'g_plan.body': 'Dos minutos antes de la apertura.', 'g_review.title': '60 segundos para barrer tu día.', 'g_review.body': 'Registra y revisa mientras está fresco.',
-        'g_streak.title': 'Tu racha de {n} días aún se puede salvar.', 'g_streak.body': 'Basta con una revisión.', 'g_weekly.title': 'Tu resumen semanal y tu cofre están listos.', 'g_weekly.body': 'Ábrelos antes del domingo por la noche.',
+        'g_streak.title': 'Tu racha de {n} días aún se puede salvar.', 'g_streak.body': 'Basta con una revisión.', 'g_weekly.title': 'Tu semana está lista.', 'g_weekly.body': 'Tu racha, tu disciplina y tus días barridos, en un solo lugar.',
         'g_intention.title': 'Nuevas misiones mañana.', 'g_intention.body': 'Tu intención: {intention}', 'g_wrapped.title': 'Tu Wrapped del mes está listo.', 'g_wrapped.body': 'Tu mes en un minuto.' } },
   };
   Object.assign(WR_T.en, { yshare: 'Share my year', ypill: 'Your {y}', y1: 'Your {y}', y1b: 'days swept this year', y3: 'Bosses beaten', y3b: 'No boss beaten this year: next year.', y4: 'Chapters completed', y4b: 'journey chapters', y7b: 'Level {l} · {t} league', y8: 'That was {y}.', ycard: '{y} swept', ycard_s: '{n} days swept · best streak {s}',
@@ -2033,7 +2034,7 @@
   paint();
   window.SweepGame = { refresh: () => load(true), openPlan, openReview,
     // the plan first (once a day) before a new trade — used by the screenshot way of adding a trade too
-    state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null }),   // for the « Your routine » card on Today
+    state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
     planFirst: (then) => { if (!document.getElementById('gSheet') && planGateNeeded()) { openPlan(G.today.day, { then }); return true; } return false; }, openJournal: () => openJournal(), openGoal: () => openGoalQuestions(), t,
     next: () => { try { return progNext(); } catch (e) { return null; } },
     summary: () => (G.profile ? { rank: rankName(G.profile.rank), level: G.profile.level, streak: G.profile.streak.current, best: G.profile.streak.best, valid: G.profile.streak.today_valid } : null),

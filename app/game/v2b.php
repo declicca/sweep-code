@@ -41,14 +41,31 @@ final class GameV2b
 
     /* ───────────── weekly review window ───────────── */
 
-    /** the week a review is open for right now (Fri 17:00 ET → Sun 23:59 ET), or null */
-    public static function openWeek(): ?string
+    /**
+     * The week whose recap is ready right now (its Monday), or null — brief 01 step 5. The recap of a week is ready from the
+     * end of its last trading day (Friday, or Thursday when Friday is a market holiday): as soon as that day's review is
+     * done, or at its 17:00 ET close otherwise, until Sunday 23:59 ET. New York time, whatever the trader's own time zone.
+     * For a trader ($uid): only a week with at least one trade has a recap. Without $uid: the time rule only.
+     */
+    public static function openWeek(?string $uid = null): ?string
     {
         $now = (new DateTimeImmutable('@' . GameEngine::ts()))->setTimezone(new DateTimeZone('America/New_York'));
-        $dow = (int) $now->format('N'); $hm = $now->format('H:i');
-        if (($dow === 5 && $hm >= '17:00') || $dow === 6 || $dow === 7) return GameEngine::monday($now->format('Y-m-d'));
-        return null;
+        $today = $now->format('Y-m-d'); $mon = GameEngine::monday($today); $last = null;
+        for ($i = 4; $i >= 0; $i--) { $d = GameEngine::addDays($mon, $i); if (GameEngine::isMarketDay($d)) { $last = $d; break; } }
+        if ($last === null || $today < $last) return null;
+        $closed = $today > $last || $now->format('H:i') >= '17:00';
+        if ($uid === null) return $closed ? $mon : null;
+        $w = self::q('SELECT SUM(trades_count) AS n, MAX(CASE WHEN trading_day = ? THEN review_done ELSE 0 END) AS r FROM game_days WHERE user_id = ? AND trading_day >= ? AND trading_day <= ?',
+            [$last, $uid, $mon, GameEngine::addDays($mon, 4)])->fetch(PDO::FETCH_ASSOC) ?: [];
+        if ((int) ($w['n'] ?? 0) < 1) return null;   // no trade this week: no recap, no reminder
+        return ($closed || (int) ($w['r'] ?? 0) === 1) ? $mon : null;
     }
+    /** the trader opened this week's recap in the app (no reminder, no « Your week » email after that) */
+    public static function seen(string $uid, string $mon): bool
+    {
+        return (bool) self::q("SELECT 1 FROM game_analytics WHERE user_id = ? AND event = 'weekly_opened' AND meta_json = ?", [$uid, json_encode(['week' => $mon])])->fetchColumn();
+    }
+    public static function markSeen(string $uid, string $mon): void { if (!self::seen($uid, $mon)) GameEngine::track($uid, 'weekly_opened', ['week' => $mon]); }
 
     public static function weekSummary(string $uid, string $mon): array
     {
@@ -66,15 +83,15 @@ final class GameV2b
     public static function weeklyState(string $uid, bool $light = false): array
     {
         self::schema();
-        $mon = self::openWeek();
+        $mon = self::openWeek($uid);
         $last = self::q('SELECT week_start, data_json, chest_opened_at FROM weekly_reviews WHERE user_id = ? ORDER BY week_start DESC LIMIT 1', [$uid])->fetch(PDO::FETCH_ASSOC) ?: null;
         $intention = null;
         if ($last && $last['week_start'] === GameEngine::addDays(GameEngine::monday(GameEngine::today()), -7)) $intention = (json_decode((string) $last['data_json'], true) ?: [])['intention'] ?? null;
         $keys = (int) self::q("SELECT COUNT(*) FROM user_rewards WHERE user_id = ? AND reward_type = 'key' AND used_at IS NULL", [$uid])->fetchColumn();
         if (!$mon) return ['open' => false, 'intention' => $intention, 'keys' => $keys];
         $row = self::q('SELECT * FROM weekly_reviews WHERE user_id = ? AND week_start = ?', [$uid, $mon])->fetch(PDO::FETCH_ASSOC) ?: null;
-        if ($light) return ['open' => true, 'week' => $mon, 'done' => (bool) $row, 'chest_opened' => (bool) ($row['chest_opened_at'] ?? false), 'intention' => $intention, 'keys' => $keys];
-        return ['open' => true, 'week' => $mon, 'done' => (bool) $row, 'chest_opened' => $row && $row['chest_opened_at'], 'intention' => $intention, 'keys' => $keys,
+        if ($light) return ['open' => true, 'week' => $mon, 'seen' => self::seen($uid, $mon), 'done' => (bool) $row, 'chest_opened' => (bool) ($row['chest_opened_at'] ?? false), 'intention' => $intention, 'keys' => $keys];
+        return ['open' => true, 'week' => $mon, 'seen' => self::seen($uid, $mon), 'done' => (bool) $row, 'chest_opened' => $row && $row['chest_opened_at'], 'intention' => $intention, 'keys' => $keys,
                 'answers' => $row ? (json_decode((string) $row['data_json'], true) ?: (object) []) : (object) [],
                 'summary' => self::weekSummary($uid, $mon), 'reveal' => self::reveal($uid, $mon, 1), 'can_second' => GameV2::plan($uid) === 'elite', 'odds' => GAME_CHEST];
     }
@@ -82,7 +99,7 @@ final class GameV2b
     public static function saveWeekly(string $uid, array $b): array
     {
         self::schema();
-        $mon = self::openWeek();
+        $mon = self::openWeek($uid);
         if (!$mon) return ['error' => 'closed'];
         $clean = fn($k) => mb_substr_safe(trim((string) ($b[$k] ?? '')), 300);
         $g = (int) ($b['grade'] ?? 0);
@@ -111,7 +128,7 @@ final class GameV2b
     public static function openChest(string $uid): array
     {
         self::schema();
-        $mon = self::openWeek();
+        $mon = self::openWeek($uid);
         $row = $mon ? self::q('SELECT * FROM weekly_reviews WHERE user_id = ? AND week_start = ?', [$uid, $mon])->fetch(PDO::FETCH_ASSOC) : null;
         if (!$row) return ['error' => 'review_first'];
         if ($row['chest_opened_at']) return ['error' => 'opened'];

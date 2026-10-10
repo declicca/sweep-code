@@ -46,7 +46,11 @@ final class GameNotifyService
         if ($market && $hm >= '21:00' && !($g && (int) $g['is_valid_streak']) && $streak['current'] >= 3) $todo[] = ['g_streak', ['n' => $streak['current']], '#dashboard'];
         if (class_exists('GameV2b', false)) {
             $w = GameV2b::weeklyState($uid, true);
-            if ($dow === 5 && $hm >= '17:30' && $w['open'] && !$w['done'] && in_array('weekly', GameEngine::unlocks($uid), true)) $todo[] = ['g_weekly', [], '#dashboard'];
+            // the week's recap (brief 01 step 5): ONE notification when it is ready (review of the last trading day, or its close),
+            // never again that week, none once the trader has opened it; every trader with a trade this week
+            Notify::schema();   // a fresh database may not have the notifications table yet
+            if ($w['open'] && empty($w['seen']) && !GameEngine::q('SELECT 1 FROM notifications WHERE user_id = ? AND dedupe_key LIKE ?', [$uid, 'g:g_weekly:' . $w['week'] . ':%'])->fetchColumn())
+                $todo[] = ['g_weekly', [], '#dashboard', 'g:g_weekly:' . $w['week'] . ':' . $date];
             if ($dow === 7 && $hm >= '18:00') {
                 $mon = GameEngine::monday($date);
                 $row = GameEngine::q('SELECT data_json FROM weekly_reviews WHERE user_id = ? AND week_start = ?', [$uid, $mon])->fetchColumn();
@@ -71,9 +75,10 @@ final class GameNotifyService
                 }
             } catch (Throwable $e) { error_log('[Sweep notify] trial: ' . $e->getMessage()); }
         }
-        foreach ($todo as [$type, $params, $url]) {
+        foreach ($todo as $x) {
+            [$type, $params, $url] = $x;
             if ($sent >= 2) break;
-            if (self::send($uid, $type, $params, "g:$type:$date", $url)) $sent++;
+            if (self::send($uid, $type, $params, $x[3] ?? "g:$type:$date", $url)) $sent++;   // keys end with :date (2 a day at most)
         }
     }
 }
