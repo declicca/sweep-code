@@ -190,12 +190,8 @@ FOOT = [
  (T("Legal","Légal","Legal"), [("privacy.html", T("Privacy policy","Confidentialité","Privacidad")), ("terms.html", T("Terms of use","Conditions d’utilisation","Términos de uso")), ("risk.html", T("Risk disclosure","Divulgation des risques","Aviso de riesgo"))]),
 ]
 
-# prop firms with preloaded rules in the app: read from the app's catalogue, never retyped here
-APP_PRESETS = os.path.join(HERE, "..", "..", "app", "presets", "seed.json")
-def _preset_firms():
-    if not os.path.exists(APP_PRESETS): raise SystemExit(f"Missing {APP_PRESETS}: the site build reads the app's prop firm presets")
-    return {f["name"] for f in json.load(open(APP_PRESETS)).get("firms", []) if f.get("programs")}
-PRESET_FIRMS = _preset_firms()
+# prop firms with preloaded rules: from the app's catalogue (presets.py), never retyped here
+from presets import PRESET_FIRMS
 
 def jsonld(obj): return f'<script type="application/ld+json">{json.dumps(obj, ensure_ascii=False)}</script>'
 

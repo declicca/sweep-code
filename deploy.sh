@@ -28,7 +28,10 @@ case "$1" in
       app/ "$HOST:$APP_REMOTE" ;;
   website)
     (cd website/src && python3 build.py)
-    rsync -avz $DRY --exclude 'sweep-count.php' website/dist/ "$HOST:$WEBSITE_REMOTE" ;;
+    rsync -avz $DRY --exclude 'sweep-count.php' website/dist/ "$HOST:$WEBSITE_REMOTE"
+    # the build keeps a copy of the app's prop firm rules: commit it when it changed (it is the rules' history)
+    git status --porcelain website/src/data/presets.json website/src/data/presets-changes.json | grep -q . \
+      && echo "Règles des prop firms mises à jour : committer website/src/data/presets*.json." ;;
   *) echo "Usage : ./deploy.sh app|website [--go]"; exit 1 ;;
 esac
 if [ -n "$DRY" ]; then
