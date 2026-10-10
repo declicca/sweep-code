@@ -46,10 +46,11 @@ def sec_log(lang, t):
             + f'<p class="shot-note">{t(L3("Sample data · Real CME charts appear on your trades the day after the session.","Données d’exemple · Les vrais graphiques CME apparaissent sur tes trades le lendemain de la séance.","Datos de ejemplo · Los gráficos reales de CME aparecen en tus operaciones al día siguiente de la sesión."))}</p></div>'
             + f'<p class="center-note">{link(lang,t,"how-it-works.html",L3("See how logging works","Voir comment ça marche","Ver cómo funciona"))}</p></div></section>')
 
-FIRMS_TXT = "Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures"
 
 def sec_firms(lang, t):
-    pts = [T(FIRMS_TXT + ". Another firm? Enter its rules once.", FIRMS_TXT + ". Une autre firme ? Saisis ses règles une fois.", FIRMS_TXT + ". ¿Otra firma? Introduce sus reglas una vez."),
+    import pages18
+    firms = ", ".join(f'<a href="{href(lang, pages18.page_of(f))}">{f["name"]}</a>' for f in pages18.presets.FIRMS)
+    pts = [T(firms + ". Another firm? Enter its rules once.", firms + ". Une autre firme ? Saisis ses règles une fois.", firms + ". ¿Otra firma? Introduce sus reglas una vez."),
            L3("Rules checked every week against each firm’s official pages.","Règles vérifiées chaque semaine sur les pages officielles des firmes.","Reglas verificadas cada semana en las páginas oficiales de cada firma."),
            L3("A rule changes? You see what it means for your account, and you decide.","Une règle change ? Tu vois ce que ça change pour ton compte, et tu décides.","¿Cambia una regla? Ves qué significa para tu cuenta, y tú decides.")]
     return split(t, L3("Prop firms","Prop firms","Prop firms"), L3("Your firm’s rules, already loaded.","Les règles de ta firme, déjà chargées.","Las reglas de tu firma, ya cargadas."),

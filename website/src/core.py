@@ -182,7 +182,7 @@ FOOT = [
    ("pricing.html", T("Pricing","Tarifs","Precios")), ("changelog.html", T("What’s new","Nouveautés","Novedades"))]),
  (T("Help","Aide","Ayuda"), [("import.html", T("Import your trades","Importer tes trades","Importar operaciones")), ("install.html", T("Install on your phone","Installer sur ton téléphone","Instalar en tu teléfono")),
    ("faq.html", T("FAQ","FAQ","Preguntas frecuentes")), ("contact.html", T("Contact","Contact","Contacto"))]),
- (T("Resources","Ressources","Recursos"), [("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas")), ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
+ (T("Resources","Ressources","Recursos"), [("prop-firms/index.html", T("Prop firm rules","Règles des prop firms","Reglas de las prop firms")), ("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas")), ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
    ("release-dates.html", T("Release dates","Dates des annonces","Fechas de datos")), ("futures-market-hours.html", T("Market hours","Heures de marché","Horario de mercado")),
    ("glossary.html", T("Glossary","Lexique","Glosario")), ("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas")),
    ("how-to-choose-a-trading-journal.html", T("Choose a trading journal","Choisir un journal de trading","Elegir un diario de trading")), ("trading-journal-routine.html", T("A daily journal routine","Routine de journal","Rutina de diario"))]),

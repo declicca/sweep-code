@@ -14,10 +14,19 @@ EXAMPLES = {
 }
 GENERIC_PAYOUT = T("<b>Payout conditions</b> counted since your last request: winning days, cushion, minimum and maximum","<b>Conditions de payout</b> comptées depuis ta dernière demande : jours gagnants, coussin, minimum et maximum","<b>Condiciones de payout</b> contadas desde tu última solicitud: días ganadores, colchón, mínimo y máximo")
 
+def size_range(rp, lang):
+    """« 25K to 300K »: the sizes in the app's catalogue for this firm."""
+    sz = sorted({x["size"] for p in rp["programs"] for x in p["sizes"]}) if rp else []
+    k = lambda v: f"{v / 1000:g}K"
+    if not sz: return ""
+    return k(sz[0]) if len(sz) == 1 else k(sz[0]) + {"en": " to ", "fr": " à ", "es": " a "}[lang] + k(sz[-1])
+
 def make_firm_page(slug, firm):
     def page(lang, t):
         F = lambda d: t(_f(d, firm))
         has = firm in PRESET_FIRMS   # rules preloaded in the app for this firm?
+        import pages18
+        rp = next((x for x in pages18.presets.FIRMS if x["name"] == firm), None)   # its rules page, if any
         lead_manual = T("Add your {F} account as “Other firm”, enter its rules once, and Sweep checks every trade against them, so you see when you’re ready for the payout. {F}’s rules aren’t preloaded in Sweep yet.",
                         "Ajoute ton compte {F} comme « Autre firme », saisis ses règles une fois, et Sweep vérifie chaque trade contre elles : tu vois quand tu es prêt pour le payout. Les règles de {F} ne sont pas encore préremplies dans Sweep.",
                         "Añade tu cuenta de {F} como «Otra firma», introduce sus reglas una vez y Sweep comprueba cada operación con ellas: ves cuándo estás listo para el payout. Las reglas de {F} aún no están precargadas en Sweep.")
@@ -37,10 +46,11 @@ def make_firm_page(slug, firm):
             _f(T("Enter your account’s rules once: every value below is then tracked on every trade. Firms update their rules, so always check the current ones on {F}’s site.",
                  "Saisis les règles de ton compte une fois : chaque valeur ci-dessous est ensuite suivie à chaque trade. Les firmes mettent leurs règles à jour : vérifie toujours les règles actuelles sur le site de {F}.",
                  "Introduce las reglas de tu cuenta una vez: cada valor de abajo se sigue en cada operación. Las firmas actualizan sus reglas: verifica siempre las actuales en el sitio de {F}."), firm) if not has else
-            _f(T("Pick the account size (25K to 150K) and the preset fills in the rules below. Every value stays editable, because firms update their rules: always check the current ones on {F}’s site.",
-                 "Choisis la taille du compte (25K à 150K) et le préréglage remplit les règles ci-dessous. Chaque valeur reste modifiable, parce que les firmes mettent leurs règles à jour : vérifie toujours les règles actuelles sur le site de {F}.",
-                 "Elige el tamaño de la cuenta (25K a 150K) y el preajuste completa las reglas de abajo. Cada valor sigue siendo editable, porque las firmas actualizan sus reglas: verifica siempre las actuales en el sitio de {F}."), firm),
-            rules, frame("accounts", lang, F(T("{F} accounts in Sweep, sample data","Comptes {F} dans Sweep, données d’exemple","Cuentas de {F} en Sweep, datos de ejemplo")), t), id_="rules")
+            {l: v.replace("{R}", size_range(rp, l)) for l, v in _f(T("Pick the account size ({R}) and the preset fills in the rules below. Every value stays editable, because firms update their rules: always check the current ones on {F}’s site.",
+                 "Choisis la taille du compte ({R}) et le préréglage remplit les règles ci-dessous. Chaque valeur reste modifiable, parce que les firmes mettent leurs règles à jour : vérifie toujours les règles actuelles sur le site de {F}.",
+                 "Elige el tamaño de la cuenta ({R}) y el preajuste completa las reglas de abajo. Cada valor sigue siendo editable, porque las firmas actualizan sus reglas: verifica siempre las actuales en el sitio de {F}."), firm).items()},
+            rules, frame("accounts", lang, F(T("{F} accounts in Sweep, sample data","Comptes {F} dans Sweep, données d’exemple","Cuentas de {F} en Sweep, datos de ejemplo")), t), id_="rules",
+            more=(f'<p><a class="tlink" href="{href(lang, pages18.page_of(rp))}">{F(T("{F} rules, explained","Les règles de {F}, expliquées","Las reglas de {F}, explicadas"))} <span aria-hidden="true">→</span></a></p>' if rp else ""))
         b += split(t, T("Payouts and costs","Payouts et coûts","Payouts y costes"), _f(T("Know what {F} really pays you.","Sache ce que {F} te rapporte vraiment.","Conoce lo que {F} te paga realmente."), firm),
             T("Track evaluations, activations and resets next to every payout, from requested to paid. Your net result is always one line: payouts minus what you spent.",
               "Suis évaluations, activations et resets à côté de chaque payout, de la demande au paiement. Ton résultat net tient toujours en une ligne : payouts moins ce que tu as dépensé.",
@@ -79,6 +89,7 @@ def make_firm_page(slug, firm):
 def firm_row(lang, t):
     links = "".join(f'<a href="{href(lang,s)}">{n}</a>' for s,n in FIRMS)
     return (f'<section class="rule" style="padding:40px 0"><div class="wrap"><p class="firm-others"><span>{t(T("By firm","Par firme","Por firma"))}</span>{links}'
+            f'<a href="{href(lang,"prop-firms/index.html")}">{t(T("Rules by firm","Règles par firme","Reglas por firma"))} →</a>'
             f'<a href="{href(lang,"tools.html")}">{t(T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas"))} →</a></p></div></section>')
 
 def rule_change(lang, t):
