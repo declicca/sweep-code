@@ -34,6 +34,9 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 ## Compare
 - [Best trading journal for prop firm traders (2026)](https://makeitsweep.com/best-trading-journal-for-prop-firms): Sweep, TradeZella, Tradervue, TraderSync and Edgewonk compared
 - [Sweep vs TradeZella](https://makeitsweep.com/sweep-vs-tradezella): prices, free plan, trade import, prop firm rules, replay and backtesting, side by side
+- [Sweep vs Tradervue](https://makeitsweep.com/sweep-vs-tradervue): free plan, prices, broker sync, prop firm rules, reports and markets, side by side
+- [Sweep vs TraderSync](https://makeitsweep.com/sweep-vs-tradersync): prices, trial, broker sync, prop firm rules, replay, AI and mobile, side by side
+- [Sweep vs Edgewonk](https://makeitsweep.com/sweep-vs-edgewonk): yearly price, imports, prop firm accounts, psychology tools and markets, side by side
 
 ## Company
 - [About](https://makeitsweep.com/about)
