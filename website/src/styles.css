@@ -1449,7 +1449,7 @@ main .fine{max-width:70ch}
 /* ===== v15 — notes under visuals centred and quiet; premium motion details ===== */
 figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint);letter-spacing:.005em;margin:12px auto 0;max-width:70ch}
 .split figcaption{text-align:center}
-[style*="text-align:center"] p,.final p,.center-note{margin-left:auto;margin-right:auto}
+[style*="text-align:center"] p,.final p,.center-note,.spots-line{margin-left:auto;margin-right:auto}
 .ptiles2+.fine,#pricing .fine,.final .fine{text-align:center}
 
 /* page changes: the content lifts in, the old page dissolves; the header never moves */
