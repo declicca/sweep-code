@@ -92,12 +92,8 @@ RewriteCond %{HTTPS} off
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 RewriteCond %{HTTP_HOST} ^www\\.(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
-# /100 campaign page without a trailing-slash redirect (keeps UTM query strings intact)
-RewriteRule ^100$ /100/index.html [L]
-RewriteRule ^(fr|es)/100$ /$1/100/index.html [L]
-# prop firm rules hub: /prop-firms serves prop-firms/index.html (the firms' pages live in that folder)
-RewriteRule ^prop-firms$ /prop-firms/index.html [L]
-RewriteRule ^(fr|es)/prop-firms$ /$1/prop-firms/index.html [L]
+# folders (/100, /prop-firms): NGINX answers before Apache and adds the trailing slash itself (301, query string kept),
+# so these pages are linked as /100/ and /prop-firms/ everywhere (core.href)
 # clean URLs: /pricing.html -> /pricing (301), and /pricing serves pricing.html
 RewriteCond %{THE_REQUEST} \\s/+([^?\\s]+?)\\.html[\\s?] [NC]
 RewriteCond %1 !(^|/)index$

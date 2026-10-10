@@ -14,9 +14,9 @@ IMGS = set(f.rsplit("-", 1)[0] for f in os.listdir(os.path.join(STATIC, "img")))
 def T(en, fr, es): return {"en": en, "fr": fr, "es": es}
 def href(lang, page):
     base = "/" if lang == "en" else f"/{lang}/"
-    if page == "100": return base + "100"
+    if page == "100": return base + "100/"
     if page == "index.html": return base
-    if page.endswith("/index.html"): return base + page[:-len("/index.html")]
+    if page.endswith("/index.html"): return base + page[:-len("index.html")]
     return base + (page[:-5] if page.endswith(".html") else page)
 
 # W1 — first-touch UTM cookie shared with app.makeitsweep.com (runs first on every page)
