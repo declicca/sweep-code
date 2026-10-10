@@ -128,12 +128,6 @@
     }
   }
 
-  // pointer light on cards (desktop): one listener, CSS does the rest
-  if(window.matchMedia('(hover:hover) and (pointer:fine)').matches && !reduce){
-    document.addEventListener('pointermove', function(e){ var c = e.target.closest && e.target.closest('.grid>div,.grid>a,.tool-card,.plat,.ncard,.plan,.ptile2'); if(!c) return;
-      var r = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - r.left) + 'px'); c.style.setProperty('--my', (e.clientY - r.top) + 'px'); }, {passive:true});
-  }
-
   // header dropdowns (Product, Resources)
   var dds = [].slice.call(document.querySelectorAll('.navdd'));
   var closeDD = function(except){ dds.forEach(function(d){ if(d !== except){ d.classList.remove('open'); d.querySelector('.ddbtn').setAttribute('aria-expanded','false'); } }); };

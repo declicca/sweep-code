@@ -85,7 +85,7 @@ def page_release_hub(lang, t):
         nx = f'<span class="go num">{t(T("Next","Prochaine","Próxima"))} : {_date(t,nxt["date"])} · {nxt["time"]} ET</span>' if nxt else ""
         cards += f'<a class="tool-card" href="{href(lang,sl)}"><h2>{title}</h2><p>{t(what)}</p>{nx}</a>'
     b = f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
-    return (t(T("U.S. economic release dates 2026–2027: CPI, NFP, FOMC… · Sweep","Dates des annonces économiques 2026–2027 : CPI, NFP, FOMC… · Sweep","Fechas de datos económicos 2026–2027: CPI, NFP, FOMC… · Sweep")),
+    return (t(T("U.S. economic release dates 2026–2027: CPI, NFP, FOMC… · Sweep","Dates des annonces économiques 2026–2027 : CPI, NFP, FOMC · Sweep","Fechas de datos económicos 2026–2027: CPI, NFP, FOMC… · Sweep")),
             t(T("Release dates and times for CPI, NFP, FOMC, PPI, PCE, retail sales, GDP and ISM in 2026 and 2027, in New York time.","Dates et heures de CPI, NFP, FOMC, PPI, PCE, ventes au détail, PIB et ISM en 2026 et 2027, en heure de New York.","Fechas y horas de CPI, NFP, FOMC, PPI, PCE, ventas minoristas, PIB e ISM en 2026 y 2027, en hora de Nueva York.")),
             hero + b + final_cta(lang, t), "")
 

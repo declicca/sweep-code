@@ -1462,13 +1462,6 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
 }
 :target{scroll-margin-top:110px}
 
-/* cards answer the pointer with a soft light (desktop only) */
-@media (hover:hover) and (pointer:fine){
-  .grid>div,.grid>a,.tool-card,.plat,.ncard,.plan,.cards3x>div,.ptile2{position:relative;isolation:isolate}
-  .grid>div::before,.grid>a::before,.tool-card::before,.plat::before,.ncard::before,.plan::before,.ptile2::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;opacity:0;transition:opacity .4s var(--spring);
-    background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--gain) 12%,transparent),transparent 60%)}
-  .grid>div:hover::before,.grid>a:hover::before,.tool-card:hover::before,.plat:hover::before,.ncard:hover::before,.plan:hover::before,.ptile2:hover::before{opacity:1}
-}
 
 /* comparison pages (Sweep vs …): two columns, Sweep highlighted, fits a phone without sideways scroll */
 .cmp.two{min-width:0;table-layout:fixed}
