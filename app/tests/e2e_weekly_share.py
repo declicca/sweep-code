@@ -33,9 +33,18 @@ def png_size(raw): return struct.unpack('>II', raw[16:24]) if raw[:8] == b'\x89P
 sp = lambda s: re.sub(r'[  ]', ' ', s)
 # what sticks out on the right (elements clipped by a scrolling row or inside a fixed layer don't count)
 WIDE = """(()=>{ const W = document.documentElement.clientWidth, out = [];
-  const inside = (e) => { for (let x = e.parentElement; x; x = x.parentElement) { const c = getComputedStyle(x); if (c.position === 'fixed' || (c.overflowX !== 'visible' && x.getBoundingClientRect().right <= W + .5)) return true; } return false; };
-  document.querySelectorAll('body *').forEach((e) => { const r = e.getBoundingClientRect(); if (r.width && r.right > W + .5 && getComputedStyle(e).position !== 'fixed' && !inside(e)) out.push(e.tagName.toLowerCase() + '.' + String(e.className).trim().split(/\\s+/).slice(0, 2).join('.') + ' ' + Math.round(r.right) + 'px'); });
-  return { sw: document.documentElement.scrollWidth, w: innerWidth, out: out.slice(-6) }; })()"""
+  const name = (e) => e.tagName.toLowerCase() + '.' + String(e.className).trim().split(/\\s+/).slice(0, 2).join('.');
+  const inside = (e) => { for (let x = e; x; x = x.parentElement) { const c = getComputedStyle(x); if (c.position === 'fixed' || (x !== e && c.overflowX !== 'visible' && x.getBoundingClientRect().right <= W + .5)) return true; } return false; };
+  document.querySelectorAll('body *').forEach((e) => {
+    const r = e.getBoundingClientRect(); if (!r.width || inside(e)) return;
+    if (r.right > W + .5) out.push(name(e) + ' ' + Math.round(r.right) + 'px');
+    for (const ps of ['::before', '::after']) { const c = getComputedStyle(e, ps); if (c.content === 'none' || c.position !== 'absolute') continue;   // a pseudo-element: right edge from its inset
+      const rr = parseFloat(c.right); if (!isNaN(rr) && r.right - rr > W + .5) out.push(name(e) + ps + ' ' + Math.round(r.right - rr) + 'px'); }
+  });
+  const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);   // text running out of its box
+  for (let n = tw.nextNode(); n; n = tw.nextNode()) { if (!n.textContent.trim() || inside(n.parentElement)) continue; const g = document.createRange(); g.selectNodeContents(n); const r = g.getBoundingClientRect();
+    if (r.right > W + .5) out.push('text « ' + n.textContent.trim().slice(0, 30) + ' » in ' + name(n.parentElement) + ' ' + Math.round(r.right) + 'px'); }
+  return { sw: document.documentElement.scrollWidth, w: innerWidth, out: out.slice(-8) }; })()"""
 async def no_hscroll(pg, what):
     d = await pg.evaluate(WIDE)
     ok(d['sw'] <= d['w'], what + ('' if d['sw'] <= d['w'] else f" — page {d['sw']}px for {d['w']}px: {d['out']}"))
