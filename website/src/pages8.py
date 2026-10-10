@@ -17,8 +17,12 @@ GENERIC_PAYOUT = T("<b>Payout conditions</b> counted since your last request: wi
 def make_firm_page(slug, firm):
     def page(lang, t):
         F = lambda d: t(_f(d, firm))
+        has = firm in PRESET_FIRMS   # rules preloaded in the app for this firm?
+        lead_manual = T("Add your {F} account as “Other firm”, enter its rules once, and Sweep checks every trade against them, so you see when you’re ready for the payout. {F}’s rules aren’t preloaded in Sweep yet.",
+                        "Ajoute ton compte {F} comme « Autre firme », saisis ses règles une fois, et Sweep vérifie chaque trade contre elles : tu vois quand tu es prêt pour le payout. Les règles de {F} ne sont pas encore préremplies dans Sweep.",
+                        "Añade tu cuenta de {F} como «Otra firma», introduce sus reglas una vez y Sweep comprueba cada operación con ellas: ves cuándo estás listo para el payout. Las reglas de {F} aún no están precargadas en Sweep.")
         hero = page_hero(t, _f(T("A trading journal for {F} traders.","Un journal de trading pour les traders {F}.","Un diario de trading para traders de {F}."), firm),
-            _f(T("Add your {F} account in one click and Sweep prefills its rules from the {F} preset, for guidance only. Then every trade is checked against them, and you see when you’re ready for the payout.",
+            _f(lead_manual, firm) if not has else _f(T("Add your {F} account in one click and Sweep prefills its rules from the {F} preset, for guidance only. Then every trade is checked against them, and you see when you’re ready for the payout.",
                  "Ajoute ton compte {F} en un clic : Sweep préremplit ses règles à partir du préréglage {F}, à titre indicatif. Ensuite, chaque trade est vérifié contre elles, et tu vois quand tu es prêt pour le payout.",
                  "Añade tu cuenta de {F} en un clic: Sweep precarga sus reglas desde el preajuste de {F}, a título indicativo. Después, cada operación se comprueba con ellas y ves cuándo estás listo para el payout."), firm),
             T("Prop firms","Prop firms","Prop firms"), f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_firm">{t(T("Start for free","Commencer gratuitement","Empieza gratis"))}</a>')
@@ -30,6 +34,9 @@ def make_firm_page(slug, firm):
                  EXAMPLES.get(firm, GENERIC_PAYOUT),
                  T("<b>Evaluation passed → funded</b> automatically, then funded → live","<b>Évaluation réussie → financé</b> automatiquement, puis financé → live","<b>Evaluación superada → fondeada</b> automáticamente, luego fondeada → live")]
         b = split(t, T("Rules","Règles","Reglas"), _f(T("Every {F} rule, on every trade.","Chaque règle {F}, à chaque trade.","Cada regla de {F}, en cada operación."), firm),
+            _f(T("Enter your account’s rules once: every value below is then tracked on every trade. Firms update their rules, so always check the current ones on {F}’s site.",
+                 "Saisis les règles de ton compte une fois : chaque valeur ci-dessous est ensuite suivie à chaque trade. Les firmes mettent leurs règles à jour : vérifie toujours les règles actuelles sur le site de {F}.",
+                 "Introduce las reglas de tu cuenta una vez: cada valor de abajo se sigue en cada operación. Las firmas actualizan sus reglas: verifica siempre las actuales en el sitio de {F}."), firm) if not has else
             _f(T("Pick the account size (25K to 150K) and the preset fills in the rules below. Every value stays editable, because firms update their rules: always check the current ones on {F}’s site.",
                  "Choisis la taille du compte (25K à 150K) et le préréglage remplit les règles ci-dessous. Chaque valeur reste modifiable, parce que les firmes mettent leurs règles à jour : vérifie toujours les règles actuelles sur le site de {F}.",
                  "Elige el tamaño de la cuenta (25K a 150K) y el preajuste completa las reglas de abajo. Cada valor sigue siendo editable, porque las firmas actualizan sus reglas: verifica siempre las actuales en el sitio de {F}."), firm),
@@ -48,6 +55,9 @@ def make_firm_page(slug, firm):
         faqs = [(_f(T("Is Sweep affiliated with {F}?","Sweep est-il affilié à {F} ?","¿Sweep está afiliado a {F}?"),firm),
                  _f(T("No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {F}. The {F} name belongs to its owner.","Non. Sweep est indépendant et n’est ni affilié à {F}, ni approuvé par {F}. Le nom {F} appartient à son propriétaire.","No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {F}. El nombre {F} pertenece a su propietario."),firm)),
                 (_f(T("Are the {F} rules in Sweep always up to date?","Les règles {F} dans Sweep sont-elles toujours à jour ?","¿Las reglas de {F} en Sweep están siempre actualizadas?"),firm),
+                 _f(T("{F}’s rules aren’t preloaded in Sweep yet: you enter them yourself and can edit them anytime. Firms change their rules, so always check the current ones on {F}’s site.",
+                      "Les règles de {F} ne sont pas encore préremplies dans Sweep : tu les saisis toi-même et tu peux les modifier à tout moment. Les firmes changent leurs règles : vérifie toujours les règles actuelles sur le site de {F}.",
+                      "Las reglas de {F} aún no están precargadas en Sweep: las introduces tú y puedes editarlas cuando quieras. Las firmas cambian sus reglas: verifica siempre las actuales en el sitio de {F}."),firm) if not has else
                  _f(T("The preset is prefilled for guidance and every value can be edited. Firms change their rules, so always check the current rules on {F}’s site.","Le préréglage est prérempli à titre indicatif et chaque valeur est modifiable. Les firmes changent leurs règles : vérifie toujours les règles actuelles sur le site de {F}.","El preajuste está precargado a título indicativo y cada valor es editable. Las firmas cambian sus reglas: verifica siempre las reglas actuales en el sitio de {F}."),firm)),
                 (_f(T("Can I track several {F} accounts?","Puis-je suivre plusieurs comptes {F} ?","¿Puedo seguir varias cuentas de {F}?"),firm),
                  T("Yes, as many as your plan allows, each with its own rules, and you can copy one trade to several accounts at once.","Oui, autant que ton forfait le permet, chacun avec ses propres règles, et tu peux copier un trade sur plusieurs comptes en une fois.","Sí, tantas como permita tu plan, cada una con sus propias reglas, y puedes copiar una operación en varias cuentas a la vez.")),
@@ -57,6 +67,9 @@ def make_firm_page(slug, firm):
         b += f'<section class="rule"><div class="wrap"><p class="firm-others"><span>{t(T("Also for","Aussi pour","También para"))}</span>{others}<a href="{href(lang,"prop-traders.html")}">{t(T("All prop traders","Tous les traders prop","Todos los traders prop"))} →</a></p></div></section>'
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]})
         return (F(T("{F} trading journal: rules and payouts · Sweep","Journal de trading {F} : règles et payouts · Sweep","Diario de trading para {F} · Sweep")) if len(firm) < 14 else F(T("{F} trading journal · Sweep","Journal de trading {F} · Sweep","Diario de trading para {F} · Sweep")),
+                F(T("Track your {F} accounts in one place: profit target, drawdown, daily loss, consistency and payouts. Enter your rules once. Free forever.",
+                    "Suis tes comptes {F} au même endroit : objectif, drawdown, perte quotidienne, consistance et payouts. Saisis tes règles une fois. Gratuit pour toujours.",
+                    "Sigue tus cuentas de {F} en un solo lugar: objetivo, drawdown, pérdida diaria, consistencia y payouts. Introduce tus reglas una vez. Gratis para siempre.")) if not has else
                 F(T("Track your {F} accounts in one place: profit target, drawdown, daily loss, consistency and payouts. Rules prefilled for guidance. Free forever.",
                     "Suis tes comptes {F} au même endroit : objectif, drawdown, perte quotidienne, consistance et payouts. Règles préremplies à titre indicatif. Gratuit pour toujours.",
                     "Sigue tus cuentas de {F} en un solo lugar: objetivo, drawdown, pérdida diaria, consistencia y payouts. Reglas precargadas a título indicativo. Gratis para siempre.")),

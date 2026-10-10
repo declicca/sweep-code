@@ -2,7 +2,7 @@
 
 > Sweep is a free trading journal built for futures and prop firm traders. It tracks every evaluation, funded and live account, payouts and expenses in one place, with prop firm rules preloaded and verified every week. Available in English, French and Spanish.
 
-Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro ($19/month or $159/year), Elite ($39/month or $329/year); every new account gets 60 days of Pro. Add trades from a screenshot, in your own words, or by importing your platform's export. Automatic live sync with Rithmic and Tradovate is in development. Sweep does not offer trade replay or backtesting. Supported prop firms: Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify, Alpha Futures; when a firm changes a rule, affected traders are notified and choose whether to apply it.
+Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro ($19/month or $159/year), Elite ($39/month or $329/year); every new account gets 60 days of Pro. Add trades from a screenshot, in your own words, or by importing your platform's export. Automatic live sync with Rithmic and Tradovate is in development. Sweep does not offer trade replay or backtesting. Prop firms with preloaded rules: Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures; any other firm (for example Tradeify or Alpha Futures) can be added with its rules entered by hand; when a firm changes a rule, affected traders are notified and choose whether to apply it.
 
 ## Product
 - [Home](https://makeitsweep.com/): overview of Sweep
@@ -32,6 +32,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [How to choose a trading journal](https://makeitsweep.com/how-to-choose-a-trading-journal)
 
 ## Compare
+- [Best trading journal for prop firm traders (2026)](https://makeitsweep.com/best-trading-journal-for-prop-firms): Sweep, TradeZella, Tradervue, TraderSync and Edgewonk compared
 - [Sweep vs TradeZella](https://makeitsweep.com/sweep-vs-tradezella): prices, free plan, trade import, prop firm rules, replay and backtesting, side by side
 
 ## Company

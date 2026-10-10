@@ -39,9 +39,9 @@ def sec_rules(lang, t, id_="prop", flip=False, link=True):
     note = f'<p class="fine">{t(T("Rules prefilled for guidance only. Catalog checked every week. Always check your firm’s current rules.","Règles préremplies à titre indicatif. Catalogue vérifié chaque semaine. Vérifie toujours les règles actuelles de ta firme.","Reglas precargadas a título indicativo. Catálogo revisado cada semana. Verifica siempre las reglas actuales de tu firma."))}</p>'
     media = slot("ecran-payout-apex.webp","desktop",t(T("Payout conditions card for a prop account","Carte des conditions de payout d’un compte prop","Tarjeta de condiciones de payout de una cuenta prop")),t,fallback="cap:ecran-comptes-prop.webp")
     return split(t, T("Prop firms","Prop firms","Prop firms"), T("Your firm’s real rules.","Les vraies règles de ta firme.","Las reglas reales de tu firma."),
-        T("Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify, Alpha Futures: winning days, safety net, payout minimum and maximum. Sweep tells you when you can request, and how much.",
-          "Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify, Alpha Futures : jours gagnants, coussin, minimum et maximum de payout. Sweep te dit quand tu peux demander, et combien.",
-          "Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify, Alpha Futures: días ganadores, colchón, mínimo y máximo de payout. Sweep te dice cuándo puedes pedirlo y cuánto."),
+        T("Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures: winning days, safety net, payout minimum and maximum. Sweep tells you when you can request, and how much.",
+          "Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures : jours gagnants, coussin, minimum et maximum de payout. Sweep te dit quand tu peux demander, et combien.",
+          "Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures: días ganadores, colchón, mínimo y máximo de payout. Sweep te dice cuándo puedes pedirlo y cuánto."),
         pts, media, flip=flip, id_=id_, more=note + m)
 
 # ------------------------------------------------------------------ features: platform numbers (2.2 + 2.3)

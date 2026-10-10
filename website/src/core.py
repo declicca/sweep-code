@@ -185,9 +185,17 @@ FOOT = [
    ("release-dates.html", T("Release dates","Dates des annonces","Fechas de datos")), ("futures-market-hours.html", T("Market hours","Heures de marché","Horario de mercado")),
    ("glossary.html", T("Glossary","Lexique","Glosario")), ("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas")),
    ("how-to-choose-a-trading-journal.html", T("Choose a trading journal","Choisir un journal de trading","Elegir un diario de trading")), ("trading-journal-routine.html", T("A daily journal routine","Routine de journal","Rutina de diario"))]),
+ (T("Compare","Comparer","Comparar"), [("best-trading-journal-for-prop-firms.html", T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms")), ("sweep-vs-tradezella.html", T("Sweep vs TradeZella","Sweep vs TradeZella","Sweep vs TradeZella"))]),
  (T("Company","Entreprise","Empresa"), [("about.html", T("About","À propos","Acerca de")), ("press-kit.html", T("Press kit","Kit presse","Kit de prensa")), ("security.html", T("Security and privacy","Sécurité et confidentialité","Seguridad y privacidad"))]),
  (T("Legal","Légal","Legal"), [("privacy.html", T("Privacy policy","Confidentialité","Privacidad")), ("terms.html", T("Terms of use","Conditions d’utilisation","Términos de uso")), ("risk.html", T("Risk disclosure","Divulgation des risques","Aviso de riesgo"))]),
 ]
+
+# prop firms with preloaded rules in the app: read from the app's catalogue, never retyped here
+APP_PRESETS = os.path.join(HERE, "..", "..", "app", "presets", "seed.json")
+def _preset_firms():
+    if not os.path.exists(APP_PRESETS): raise SystemExit(f"Missing {APP_PRESETS}: the site build reads the app's prop firm presets")
+    return {f["name"] for f in json.load(open(APP_PRESETS)).get("firms", []) if f.get("programs")}
+PRESET_FIRMS = _preset_firms()
 
 def jsonld(obj): return f'<script type="application/ld+json">{json.dumps(obj, ensure_ascii=False)}</script>'
 

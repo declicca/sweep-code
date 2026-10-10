@@ -1472,7 +1472,15 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
 .vs-picks>div h3{margin:0}
 .vs-picks .list{margin:16px 0 0;padding:0}
 .vs-note{margin-top:16px}
+/* pillar page: one row per journal, Sweep's row highlighted */
+.cmp.glance{min-width:0;table-layout:fixed}
+.cmp.glance th,.cmp.glance td{text-align:left;vertical-align:top}
+.cmp.glance td:nth-child(3){background:none}
+.cmp.glance tbody tr:first-child>*{background:color-mix(in srgb,var(--gain) 4%,transparent);color:var(--text)}
+.cmp.glance tbody th a{color:var(--text);text-decoration:none;font-weight:500}
+.ans a{color:var(--text)}
+.article .firm-others{margin:14px 0 6px}
 @media (max-width:860px){
-  .cmp.two tbody th,.cmp.two thead th:first-child{position:static;min-width:0;box-shadow:none;width:30%}
-  .cmp.two th,.cmp.two td{padding:12px 10px;font-size:13px;overflow-wrap:anywhere}
+  .cmp.two tbody th,.cmp.two thead th:first-child,.cmp.glance tbody th,.cmp.glance thead th:first-child{position:static;min-width:0;box-shadow:none;width:30%}
+  .cmp.two th,.cmp.two td,.cmp.glance th,.cmp.glance td{padding:12px 10px;font-size:13px;overflow-wrap:anywhere}
 }

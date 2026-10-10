@@ -1,4 +1,5 @@
 from core import *
+import re
 
 L3 = lambda en, fr, es: T(en, fr, es)
 
@@ -45,10 +46,10 @@ def sec_log(lang, t):
             + f'<p class="shot-note">{t(L3("Sample data · Real CME charts appear on your trades the day after the session.","Données d’exemple · Les vrais graphiques CME apparaissent sur tes trades le lendemain de la séance.","Datos de ejemplo · Los gráficos reales de CME aparecen en tus operaciones al día siguiente de la sesión."))}</p></div>'
             + f'<p class="center-note">{link(lang,t,"how-it-works.html",L3("See how logging works","Voir comment ça marche","Ver cómo funciona"))}</p></div></section>')
 
-FIRMS_TXT = "Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify, Alpha Futures"
+FIRMS_TXT = "Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures"
 
 def sec_firms(lang, t):
-    pts = [T(FIRMS_TXT + ".", FIRMS_TXT + ".", FIRMS_TXT + "."),
+    pts = [T(FIRMS_TXT + ". Another firm? Enter its rules once.", FIRMS_TXT + ". Une autre firme ? Saisis ses règles une fois.", FIRMS_TXT + ". ¿Otra firma? Introduce sus reglas una vez."),
            L3("Rules checked every week against each firm’s official pages.","Règles vérifiées chaque semaine sur les pages officielles des firmes.","Reglas verificadas cada semana en las páginas oficiales de cada firma."),
            L3("A rule changes? You see what it means for your account, and you decide.","Une règle change ? Tu vois ce que ça change pour ton compte, et tu décides.","¿Cambia una regla? Ves qué significa para tu cuenta, y tú decides.")]
     return split(t, L3("Prop firms","Prop firms","Prop firms"), L3("Your firm’s rules, already loaded.","Les règles de ta firme, déjà chargées.","Las reglas de tu firma, ya cargadas."),
@@ -96,31 +97,31 @@ def sec_trust(lang, t):
             f'<p class="fine" style="text-align:center;margin:18px auto 0">{t(L3("Sweep doesn’t offer financial advice.","Sweep n’offre pas de conseils financiers.","Sweep no ofrece asesoría financiera."))} <a href="{href(lang,"security.html")}">{t(L3("Security and data","Sécurité et données","Seguridad y datos"))}</a></p></div></section>')
 
 def sec_pricing(lang, t):
-    tiles = [("Free", L3("$0, forever","0 $, pour toujours","$0, para siempre")), ("Pro", L3("$19/mo","19 $/mois","$19/mes")), ("Elite", L3("$39/mo","39 $/mois","$39/mes"))]
+    tiles = [("Free", L3("$0, forever","0 $, pour toujours","0 $, para siempre")), ("Pro", L3("$19/mo","19 $/mois","19 $/mes")), ("Elite", L3("$39/mo","39 $/mois","39 $/mes"))]
     tl = "".join(f'<div class="ptile2{" main" if n=="Pro" else ""}"><b>{n}</b><span class="num">{t(v)}</span></div>' for n,v in tiles)
     return (f'<section class="rule" id="pricing"><div class="wrap" style="text-align:center">'
             f'<div class="head" style="margin:0 auto"><span class="kick">{t(L3("Pricing","Tarifs","Precios"))}</span><h2>{t(L3("Start free. Stay free if you like.","Commence gratuitement. Reste gratuit si tu veux.","Empieza gratis. Quédate gratis si quieres."))}</h2>'
             f'<p class="lead" style="margin-left:auto;margin-right:auto">{t(L3("Every new trader gets 60 days of Pro to try everything. Then keep Free, or upgrade.","Chaque nouveau trader reçoit 60 jours de Pro pour tout essayer. Ensuite, garde Free ou passe à un forfait.","Cada trader nuevo recibe 60 días de Pro para probarlo todo. Después, sigue en Free o mejora tu plan."))}</p></div>'
             f'<div class="ptiles2 stagger">{tl}</div><p class="fine" style="margin-top:12px">{t(L3("Annual billing: −30%. Prices before tax.","Facturation annuelle : −30 %. Prix avant taxes.","Facturación anual: −30 %. Precios antes de impuestos."))}</p>'
-            f'<p class="center-note">{link(lang,t,"pricing.html",L3("Compare plans","Comparer les forfaits","Comparar planes"))}</p></div></section>')
+            f'<p class="center-note">{link(lang,t,"pricing.html",L3("Compare plans","Comparer les forfaits","Comparar planes"))} · {link(lang,t,"best-trading-journal-for-prop-firms.html",L3("Compare Sweep","Comparer Sweep","Comparar Sweep"))}</p></div></section>')
 
 FAQ5 = [
  (L3("Is Sweep really free?","Sweep est-il vraiment gratuit ?","¿Sweep es realmente gratis?"),
   L3("Yes. The Free plan has no time limit and needs no card. Every new account also gets 60 days of Pro, so you can try everything before deciding.","Oui. Le forfait Free n’a pas de limite de temps et ne demande aucune carte. Chaque nouveau compte reçoit aussi 60 jours de Pro pour tout essayer avant de décider.","Sí. El plan Free no tiene límite de tiempo ni pide tarjeta. Cada cuenta nueva recibe además 60 días de Pro para probarlo todo antes de decidir.")),
  (L3("Which prop firms does Sweep support?","Quelles prop firms Sweep prend-il en charge ?","¿Qué prop firms admite Sweep?"),
-  L3("Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify and Alpha Futures, with each firm’s account types preloaded. Rules are checked every week, and you’re notified when something changes for your account.","Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify et Alpha Futures, avec leurs types de comptes préchargés. Les règles sont vérifiées chaque semaine, et tu es averti quand quelque chose change pour ton compte.","Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Tradeify y Alpha Futures, con sus tipos de cuenta precargados. Las reglas se verifican cada semana y te avisamos cuando algo cambia para tu cuenta.")),
+  L3("Apex, Topstep, Lucid, Take Profit Trader and MyFundedFutures, with each firm’s account types preloaded. Any other firm, like Tradeify or Alpha Futures, can be added with its rules entered by hand. Rules are checked every week, and you’re notified when something changes for your account.","Apex, Topstep, Lucid, Take Profit Trader et MyFundedFutures, avec leurs types de comptes préchargés. Toute autre firme, comme Tradeify ou Alpha Futures, s’ajoute avec ses règles saisies à la main. Les règles sont vérifiées chaque semaine, et tu es averti quand quelque chose change pour ton compte.","Apex, Topstep, Lucid, Take Profit Trader y MyFundedFutures, con sus tipos de cuenta precargados. Cualquier otra firma, como Tradeify o Alpha Futures, se añade con sus reglas introducidas a mano. Las reglas se verifican cada semana y te avisamos cuando algo cambia para tu cuenta.")),
  (L3("How do I add my trades?","Comment j’ajoute mes trades ?","¿Cómo agrego mis operaciones?"),
   L3("Drop a screenshot (a history screenshot adds every trade on it at once), describe the trade in your own words, or import your platform’s export. Automatic live sync with Rithmic and Tradovate is in development.","Dépose une capture (une capture de l’historique ajoute tous ses trades d’un coup), décris le trade avec tes mots ou importe l’export de ta plateforme. La synchronisation automatique avec Rithmic et Tradovate est en développement.","Sube una captura (una captura del historial agrega todas sus operaciones de una vez), describe la operación con tus palabras o importa la exportación de tu plataforma. La sincronización automática con Rithmic y Tradovate está en desarrollo.")),
  (L3("What happens after the 60 days of Pro?","Que se passe-t-il après les 60 jours de Pro ?","¿Qué pasa después de los 60 días de Pro?"),
   L3("You keep everything you logged. Your account moves to Free unless you choose Pro or Elite.","Tu gardes tout ce que tu as enregistré. Ton compte passe à Free, sauf si tu choisis Pro ou Elite.","Conservas todo lo que registraste. Tu cuenta pasa a Free, salvo que elijas Pro o Elite.")),
  (L3("What is a trading journal, and why use Sweep?","C’est quoi un journal de trading, et pourquoi Sweep ?","¿Qué es un diario de trading y por qué Sweep?"),
-  L3("A trading journal records every trade, your plan and your review, so you can see what works. Sweep is a free trading journal built for futures and prop firm traders: it also tracks your firm’s rules, payouts and expenses in the same place.","Un journal de trading enregistre chaque trade, ton plan et ta revue, pour voir ce qui fonctionne. Sweep est un journal de trading gratuit conçu pour les traders de futures et de prop firms : il suit aussi les règles de ta firme, tes payouts et tes dépenses, au même endroit.","Un diario de trading registra cada operación, tu plan y tu revisión, para ver qué funciona. Sweep es un diario de trading gratis creado para traders de futuros y prop firms: además sigue las reglas de tu firma, tus payouts y tus gastos, en el mismo lugar.")),
+  L3("A trading journal records every trade, your plan and your review, so you can see what works. Sweep is a free trading journal built for futures and prop firm traders: it also tracks your firm’s rules, payouts and expenses in the same place. To compare it with other journals, read <a href=\"/best-trading-journal-for-prop-firms\">the best trading journal for prop firm traders</a> or <a href=\"/sweep-vs-tradezella\">Sweep vs TradeZella</a>.","Un journal de trading enregistre chaque trade, ton plan et ta revue, pour voir ce qui fonctionne. Sweep est un journal de trading gratuit conçu pour les traders de futures et de prop firms : il suit aussi les règles de ta firme, tes payouts et tes dépenses, au même endroit. Pour le comparer aux autres journaux, lis <a href=\"/fr/best-trading-journal-for-prop-firms\">le meilleur journal de trading pour les prop firms</a> ou <a href=\"/fr/sweep-vs-tradezella\">Sweep vs TradeZella</a>.","Un diario de trading registra cada operación, tu plan y tu revisión, para ver qué funciona. Sweep es un diario de trading gratis creado para traders de futuros y prop firms: además sigue las reglas de tu firma, tus payouts y tus gastos, en el mismo lugar. Para compararlo con otros diarios, lee <a href=\"/es/best-trading-journal-for-prop-firms\">el mejor diario de trading para prop firms</a> o <a href=\"/es/sweep-vs-tradezella\">Sweep vs TradeZella</a>.")),
 ]
 def sec_faq(lang, t):
     return (f'<section class="rule" id="faq"><div class="wrap narrow"><div class="head"><h2>{t(L3("Questions","Questions","Preguntas"))}</h2></div>'
             + "".join(faq_item(t,q,a) for q,a in FAQ5) + f'<p style="margin-top:20px">{link(lang,t,"faq.html",L3("All questions","Toutes les questions","Todas las preguntas"))}</p></div></section>')
 def faq_ld(t):
-    return {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in FAQ5]}
+    return {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":re.sub(r"<[^>]+>","",t(a))}} for q,a in FAQ5]}
 
 REASSURE = L3("Free forever · 60 days of Pro included · No card","Gratuit pour toujours · 60 jours de Pro inclus · Sans carte","Gratis para siempre · 60 días de Pro incluidos · Sin tarjeta")
 def sec_final(lang, t):
