@@ -1,8 +1,12 @@
-# Sweep — the app's full test suite on every push (brief 01, step 2). ./deploy.sh app --go refuses to deploy a commit
-# whose run did not succeed. Same tools as on the Mac: app/tools/par.py (3 copies of the app, PHP 8.1 like production).
+# Sweep — the app's full test suite on every push that changes the app (brief 01, step 2). ./deploy.sh app --go refuses
+# to deploy unless the last commit that changed app/ passed. Same tools as on the Mac: app/tools/par.py (3 copies of the app, PHP 8.1 like production).
 name: Tests
+# Only the commits that touch the app (or this file): a website commit neither runs nor cancels the app's tests.
 on:
   push:
+    paths:
+      - 'app/**'
+      - '.github/workflows/tests.yml'
   workflow_dispatch:
 concurrency:
   group: tests-${{ github.ref }}

@@ -9,13 +9,15 @@ WEBSITE_REMOTE="/home/matnsabc/makeitsweep.com/"
 
 DRY="--dry-run"; [ "$2" = "--go" ] && DRY=""
 
-# app --go: only a committed, pushed commit whose GitHub Actions « Tests » run succeeded (brief 01, step 2)
+# app --go: app/ committed and identical on GitHub, and the last commit that changed app/ passed its GitHub Actions
+# « Tests » run (brief 01, step 2). Website commits, pushed or not, never block nor count.
 if [ "$1" = "app" ] && [ -z "$DRY" ]; then
   [ -z "$(git status --porcelain -- app)" ] || { echo "REFUS : app/ a des changements non commités."; exit 1; }
   git fetch -q origin || { echo "REFUS : GitHub inaccessible (git fetch)."; exit 1; }
-  BR=$(git rev-parse --abbrev-ref HEAD)
-  [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$BR" 2>/dev/null)" ] || { echo "REFUS : ce commit n'est pas poussé sur origin/$BR."; exit 1; }
-  CI=0; python3 -I app/tools/ci-status.py "$(git rev-parse HEAD)" || CI=$?
+  git diff --quiet origin/main HEAD -- app .github/workflows/tests.yml || { echo "REFUS : app/ n'est pas identique sur GitHub (commit de l'app pas encore poussé)."; exit 1; }
+  APPSHA=$(git log -1 --format=%H origin/main -- app .github/workflows/tests.yml)
+  echo "Dernier commit de l'app : $(git log -1 --format='%h %s' "$APPSHA")"
+  CI=0; python3 -I app/tools/ci-status.py "$APPSHA" || CI=$?
   [ $CI -eq 0 ] || { [ $CI -eq 2 ] && echo "REFUS : attends la fin des tests sur GitHub." || echo "REFUS : les tests de ce commit n'ont pas réussi sur GitHub."; exit 1; }
 fi
 
