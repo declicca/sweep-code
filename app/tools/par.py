@@ -104,6 +104,16 @@ def main():
             for line in open(stamp + '.times'):
                 n, s = line.split(); times[n] = round(float(s))
     if times: json.dump(dict(known, **times), open(TIMES, 'w'), indent=1, sort_keys=True)
+    if os.environ.get('GITHUB_ACTIONS'):   # GitHub: one annotation per failed test (readable without signing in; tools/ci-status.py shows them)
+        esc = lambda v: str(v).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+        for i, srv, p, log, tmp in procs:
+            path = os.path.join(tmp, 'sweep-run-all.log')
+            txt = open(path, encoding='utf-8', errors='replace').read() if os.path.exists(path) else open(tmp + '/run.log', encoding='utf-8', errors='replace').read()
+            for name in re.findall(r'^FAIL\s+(\S+)', open(tmp + '/run.log', encoding='utf-8', errors='replace').read(), re.M):
+                m = re.search(r'^===== ' + re.escape(name) + r'.*?(?=^===== |\Z)', txt, re.M | re.S)
+                lines = [l for l in (m.group(0) if m else '').splitlines() if re.search(r'FAIL|Error|Traceback|assert|exit', l)][-6:]
+                print('::error title=%s::%s' % (esc(name), esc('\n'.join(lines) or 'see the test logs')), flush=True)
+        print('::notice title=Tests::%s' % esc('%d réussis, %d échoués' % (passed, failed)), flush=True)
     print('\n%d réussis, %d échoués%s   (%d min %02d s)' % (passed, failed, (' — échoués : ' + ' '.join(failed_names)) if failed_names else '', (time.time() - t0) // 60, (time.time() - t0) % 60))
     sys.exit(1 if failed or rc else 0)
 

@@ -23,4 +23,12 @@ r = max(rs, key=lambda r: r.get('run_number', 0))
 url = r.get('html_url', '')
 if r['status'] != 'completed': print(f'tests en cours ({r["status"]}) pour {sha[:7]} : {url}'); sys.exit(2)
 if r['conclusion'] == 'success': print(f'tests réussis pour {sha[:7]} : {url}'); sys.exit(0)
-print(f'tests {r["conclusion"]} pour {sha[:7]} : {url}'); sys.exit(1)
+print(f'tests {r["conclusion"]} pour {sha[:7]} : {url}')
+try:   # why: the annotations written by tools/par.py (one per failed test), readable without signing in
+    jobs = json.load(urllib.request.urlopen(urllib.request.Request(r['jobs_url'], headers={'User-Agent': 'sweep-deploy'}), timeout=20))['jobs']
+    for j in jobs:
+        ann = json.load(urllib.request.urlopen(urllib.request.Request(j['check_run_url'] + '/annotations', headers={'User-Agent': 'sweep-deploy'}), timeout=20))
+        for x in ann:
+            if x.get('annotation_level') == 'failure' and x.get('title'): print(f"  ✗ {x['title']} : {x.get('message', '').strip()}")
+except Exception: pass
+sys.exit(1)
