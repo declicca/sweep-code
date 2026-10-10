@@ -31,6 +31,14 @@ def ok(c, what):
     print(('ok   ' if c else 'FAIL ') + what); fails += 0 if c else 1
 def png_size(raw): return struct.unpack('>II', raw[16:24]) if raw[:8] == b'\x89PNG\r\n\x1a\n' else (0, 0)
 sp = lambda s: re.sub(r'[  ]', ' ', s)
+# what sticks out on the right (elements clipped by a scrolling row or inside a fixed layer don't count)
+WIDE = """(()=>{ const W = document.documentElement.clientWidth, out = [];
+  const inside = (e) => { for (let x = e.parentElement; x; x = x.parentElement) { const c = getComputedStyle(x); if (c.position === 'fixed' || (c.overflowX !== 'visible' && x.getBoundingClientRect().right <= W + .5)) return true; } return false; };
+  document.querySelectorAll('body *').forEach((e) => { const r = e.getBoundingClientRect(); if (r.width && r.right > W + .5 && getComputedStyle(e).position !== 'fixed' && !inside(e)) out.push(e.tagName.toLowerCase() + '.' + String(e.className).trim().split(/\\s+/).slice(0, 2).join('.') + ' ' + Math.round(r.right) + 'px'); });
+  return { sw: document.documentElement.scrollWidth, w: innerWidth, out: out.slice(-6) }; })()"""
+async def no_hscroll(pg, what):
+    d = await pg.evaluate(WIDE)
+    ok(d['sw'] <= d['w'], what + ('' if d['sw'] <= d['w'] else f" — page {d['sw']}px for {d['w']}px: {d['out']}"))
 async def main():
   async with async_playwright() as p:
     br = await p.chromium.launch()
@@ -61,6 +69,7 @@ async def main():
          f'{tag} « {btn and btn["t"]} »: a gray button, one primary button on the screen ({btn})')
       sw = await pg.evaluate("(()=>{const i=document.querySelector('#gSheet [data-wk-pay]'); return i?{on:i.checked, l:i.closest('.wk-sh-pay').innerText.replace(/\\s+/g,' ').trim()}:null})()")
       ok(sw is not None and sw['on'] is False and ('Ajouter mes payouts reçus' if lang == 'fr' else 'Add my payouts received') in sw['l'], f'{tag} « add my payouts »: shown (payouts this week), off by default ({sw})')
+      await no_hscroll(pg, f'{tag} no horizontal scroll, recap open')
       vis = await pg.evaluate("(()=>{const b=document.querySelector('#gSheet .wk-sh').getBoundingClientRect(); return b.width>0 && b.right<=innerWidth})()")
       ok(vis, f'{tag} the button fits the screen')
       async def make():
@@ -85,7 +94,7 @@ async def main():
       ok(any(PAY[lang][0] in t for t in txt2) and any(t.strip() == PAY[lang][1] for t in txt2), f'{tag} with the payouts: « {PAY[lang][0]} · {PAY[lang][1]} » on the card')
       ok(len([t for t in txt2 if '$' in t]) == 1, f'{tag} the payouts are the only amount ({[t for t in txt2 if "$" in t]})')
       ok(any('"week"' in x for x in shares), f'{tag} the share is counted (api/game/share, kind week)')
-      ok(await pg.evaluate("document.documentElement.scrollWidth <= innerWidth"), f'{tag} no horizontal scroll')
+      await no_hscroll(pg, f'{tag} no horizontal scroll, after sharing')
       ok(not errs, f'{tag} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
       await pg.screenshot(path=os.path.join(OUT, f'week-share-{lang}-{w}.png'))
       await ctx.close()
