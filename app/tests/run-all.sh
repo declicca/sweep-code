@@ -1,12 +1,12 @@
 #!/bin/sh
-# Sweep — runs the tests and prints « N passed, N failed » (dev environment: PHP, Python 3 + Playwright).
-#   sh tests/run-all.sh [base_url] [storage_state] [--all]
-# The app must be served at base_url (default http://127.0.0.1:8095) with a signed-in admin session saved in
-# storage_state (default /tmp/show_state.json). Without --all: the server tests and every end-to-end test that checks
-# its own result (exit code, or « FAIL » / « ❌ » / a traceback in its output). With --all: also the older visual and
-# exploratory scripts of tests/ (screenshots, measures), counted as failed only when they crash.
-BASE=${1:-http://127.0.0.1:8095}; STATE=${2:-/tmp/show_state.json}; ALL=0
-for a in "$@"; do [ "$a" = "--all" ] && ALL=1; done
+# Sweep — runs the tests and prints « N réussis, N échoués » (dev environment: PHP, Python 3 + Playwright).
+#   sh tests/run-all.sh [base_url] [storage_state]
+# The app must be served at base_url (default http://127.0.0.1:8095, local test config: tools/run.sh, tools/par.py).
+# First tests/setup.py signs the test trader in, fills his profile, adds the sample data once and saves the session to
+# storage_state (default /tmp/show_state.json); SWEEP_NO_SETUP=1 skips it. Then the server tests (ops/tests.php,
+# presets, screenshots) and every end-to-end test of CORE: a test fails on a non-zero exit, « FAIL », « ❌ » or a traceback.
+# The old exploratory scripts (no checks) were retired: tests/RETIRED.md.
+BASE=${1:-http://127.0.0.1:8095}; STATE=${2:-/tmp/show_state.json}
 cd "$(dirname "$0")/.."
 CORE="e2e_session_parity e2e_accuracy e2e_clarity e2e_a11y_names e2e_import_session_day e2e_delete_undo_copy_dates e2e_session_news_ui
 e2e_presets_firms e2e_prop_rules e2e_isolation e2e_eval_to_funded e2e_payout_conditions e2e_live_accounts
@@ -20,19 +20,19 @@ check() {   # name, exit code, output file
   { echo "===== $1 (exit $2)"; cat "$3"; } >> "$log"
 }
 out=$(mktemp)
+if [ -z "$SWEEP_NO_SETUP" ]; then   # the trader, profile, sample data and session the tests need
+  reset_attempts
+  if ! python3 tests/setup.py "$BASE" "$STATE" > "$out" 2>&1; then
+    { echo "===== setup.py"; cat "$out"; } >> "$log"; echo "FAIL  setup.py"; echo; echo "0 réussis, 1 échoués"; echo "échoués : setup.py"; echo "détails : $log"; rm -f "$out"; exit 1
+  fi
+fi
+php ops/tests.php > "$out" 2>&1; check ops/tests.php $? "$out"
 php tests/presets_test.php > "$out" 2>&1; check presets_test.php $? "$out"
 php tests/shot_trades_test.php > "$out" 2>&1; check shot_trades_test.php $? "$out"
 for t in $CORE; do
   [ -f "tests/$t.py" ] || continue
   reset_attempts; timeout 900 python3 "tests/$t.py" "$BASE" "$STATE" > "$out" 2>&1; check "$t" $? "$out"
 done
-if [ "$ALL" = 1 ]; then
-  for f in tests/*.py; do
-    t=$(basename "$f" .py); case " $(echo $CORE | tr '\n' ' ') " in *" $t "*) continue;; esac
-    timeout 600 python3 "$f" "$BASE" "$STATE" > "$out" 2>&1; rc=$?
-    if [ $rc -eq 0 ] || ! grep -q 'Traceback' "$out"; then rc=0; : > "$out.ok"; check "$t (script)" 0 "$out.ok"; else check "$t (script)" 1 "$out"; fi
-  done
-fi
-rm -f "$out" "$out.ok"
-echo; echo "$pass passed, $fail failed"; [ -n "$failed" ] && echo "failed:$failed" && echo "details: $log"
+rm -f "$out"
+echo; echo "$pass réussis, $fail échoués"; [ -n "$failed" ] && echo "échoués :$failed" && echo "détails : $log"
 [ "$fail" -eq 0 ]

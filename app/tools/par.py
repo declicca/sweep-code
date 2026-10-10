@@ -4,9 +4,9 @@
 Shard 1 is the usual copy (/tmp/g, port 8095, /tmp/show_state.json). Shard N is /tmp/g_N on port 8N95 with its own
 database and session (/tmp/show_state_N.json). Many tests have 127.0.0.1:8095, /tmp/show_state.json or /tmp/g/ written
 in them: these are rewritten in the shard's own copy only (the tests of the repository never change).
-Each shard: fresh database, profile + sample data (prof.py), then tests/run-all.sh on its share of the tests.
+Each shard: fresh database, then tests/run-all.sh on its share of the tests (it runs tests/setup.py first).
 Shares are balanced on the durations of the previous run (tools/test-times.json, written at the end)."""
-import json, os, re, subprocess, sys, time
+import json, os, re, shutil, subprocess, sys, time
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); TOOLS = os.path.join(APP, 'tools')
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 3
 TIMES = os.path.join(TOOLS, 'test-times.json')
@@ -40,7 +40,7 @@ def prepare(i):
     tests = os.path.join(dest, 'tests')
     run_all = open(os.path.join(tests, 'run-all.sh')).read()
     run_all = re.sub(r'CORE="[^"]*"', 'CORE="%s"' % ' '.join(shares[i]), run_all)
-    if i > 0: run_all = re.sub(r'^php tests/.*$', '', run_all, flags=re.M)   # the PHP tests run once, in shard 1
+    if i > 0: run_all = re.sub(r'^php (tests|ops)/.*$', '', run_all, flags=re.M)   # the PHP tests run once, in shard 1
     # each test timed (copy only): « name seconds » lines next to run-all's log
     a = 'reset_attempts; timeout 900 python3 "tests/$t.py" "$BASE" "$STATE" > "$out" 2>&1; check "$t" $? "$out"'
     assert a in run_all, 'run-all.sh changed: update tools/par.py'
@@ -55,6 +55,7 @@ def prepare(i):
             if s2 != s: open(p, 'w', encoding='utf-8').write(s2)
 
 def free(port):
+    if not shutil.which('lsof'): return   # GitHub Actions: fresh machine, nothing left over
     pids = subprocess.run(['lsof', '-ti', 'tcp:%d' % port, '-sTCP:LISTEN'], capture_output=True, text=True).stdout.split()
     for pid in pids: subprocess.run(['kill', pid])
     for _ in range(50):
@@ -83,7 +84,7 @@ def main():
         srv = subprocess.Popen(['php', '-S', '127.0.0.1:%d' % port, 'router.php'], cwd=dest, env=env, stdout=subprocess.DEVNULL, stderr=open(env['TMPDIR'] + '/php.log', 'w'), start_new_session=True)
         base = 'http://127.0.0.1:%d' % port
         script = ('for i in $(seq 1 50); do curl -s -o /dev/null %s/api/auth/config && break; sleep 0.2; done; '
-                  'python3 %s/prof.py %s %s && cd %s && sh tests/run-all.sh %s %s') % (base, TOOLS, base, state, dest, base, state)
+                  'cd %s && sh tests/run-all.sh %s %s') % (base, dest, base, state)
         log = open(env['TMPDIR'] + '/run.log', 'w')
         procs.append((i, srv, subprocess.Popen(['sh', '-c', script], env=env, stdout=log, stderr=subprocess.STDOUT), log, env['TMPDIR']))
         time.sleep(8)   # the shards start a few seconds apart (cold browsers, fresh databases)
@@ -91,10 +92,10 @@ def main():
     for i, srv, p, log, tmp in procs:
         p.wait(); stop(srv); log.close()
         out = open(tmp + '/run.log').read()
-        m = re.search(r'(\d+) passed, (\d+) failed', out)
-        if not m: print('shard %d: no result (see %s/run.log)' % (i + 1, tmp)); rc = 1; continue
+        m = re.search(r'(\d+) réussis, (\d+) échoués', out)
+        if not m: print('groupe %d : aucun résultat (voir %s/run.log)' % (i + 1, tmp)); rc = 1; continue
         passed += int(m.group(1)); failed += int(m.group(2)); failed_names += re.findall(r'^FAIL\s+(\S+)', out, re.M)
-        print('shard %d: %s passed, %s failed' % (i + 1, m.group(1), m.group(2)), flush=True)
+        print('groupe %d : %s réussis, %s échoués' % (i + 1, m.group(1), m.group(2)), flush=True)
     # durations, for the next balance
     times = {}
     for i, srv, p, log, tmp in procs:
@@ -103,7 +104,7 @@ def main():
             for line in open(stamp + '.times'):
                 n, s = line.split(); times[n] = round(float(s))
     if times: json.dump(dict(known, **times), open(TIMES, 'w'), indent=1, sort_keys=True)
-    print('\n%d passed, %d failed%s   (%d min %02d s)' % (passed, failed, (' — failed: ' + ' '.join(failed_names)) if failed_names else '', (time.time() - t0) // 60, (time.time() - t0) % 60))
+    print('\n%d réussis, %d échoués%s   (%d min %02d s)' % (passed, failed, (' — échoués : ' + ' '.join(failed_names)) if failed_names else '', (time.time() - t0) // 60, (time.time() - t0) % 60))
     sys.exit(1 if failed or rc else 0)
 
 main()

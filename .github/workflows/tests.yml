@@ -1,0 +1,36 @@
+# Sweep — the app's full test suite on every push (brief 01, step 2). ./deploy.sh app --go refuses to deploy a commit
+# whose run did not succeed. Same tools as on the Mac: app/tools/par.py (3 copies of the app, PHP 8.1 like production).
+name: Tests
+on:
+  push:
+  workflow_dispatch:
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: pdo_sqlite, sqlite3, curl, mbstring
+          coverage: none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Playwright and Chromium
+        run: |
+          pip install playwright==1.63.0
+          python -m playwright install --with-deps chromium
+      - name: Test suite (3 copies in parallel)
+        run: python3 app/tools/par.py 3
+      - name: Logs of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: /tmp/sweep-par-*/
+          retention-days: 7

@@ -45,7 +45,8 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - `sync.sh [dossier]` : copie `app/` vers la copie servie (`/tmp/g` par défaut) sans `data/` ni `config.php`, puis installe `router.php` et `config.local.php` (mateo, mot de passe de test local, SMTP vide) ;
   - `router.php` : routeur de `php -S` qui reproduit le `.htaccess` ;
   - `run.sh <commande>` : démarre `php -S 127.0.0.1:8095` sur la copie servie (`PORT=`, `DEST=` pour une autre), avec préréglages et Sweep AI simulés (`ai-config.local.php`, `SWEEP_AI_MOCK`), lance la commande, puis arrête le serveur ;
-  - `fresh.sh` (base vide), `prof.py` (connexion de mateo, profil, données d'exemple, session dans `/tmp/show_state.json` ; il attend que l'app soit chargée, pas « réseau au repos », qu'une requête lente peut empêcher), `full.sh` (fresh + prof + `run-all.sh`) ;
+  - `fresh.sh` (base vide), `full.sh` (fresh + `run-all.sh`) ; la préparation des tests est dans `tests/setup.py` (voir section 4) ;
+  - `ci-status.py` : résultat du passage « Tests » de GitHub Actions pour un commit (utilisé par `deploy.sh`) ;
   - `build.sh` : `node --check` de chaque `src/*.js` puis `ops/build-assets.sh` (le build reproduit exactement les empreintes d'App 3) ;
   - mesures : `gzproxy.py` (relais gzip devant `php -S`), `perf.py` (A/B en alternance, médiane : FCP, LCP, TBT, temps script / style / mise en page, CLS, poids), `profile.py` (profil CPU d'un chargement), `shifts.py` (décalages de mise en page élément par élément), `pixdiff.py` (captures A/B comparées au pixel) ;
   - `subset-fonts.py` : sous-ensemble des polices à partir des originaux de `tools/fonts-src/`.
@@ -64,8 +65,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ## 4. Tests
 
+- **Préparation** : `tests/setup.py` (lancé par `run-all.sh`, sauf `SWEEP_NO_SETUP=1`) connecte le trader de test « mateo » avec le mot de passe local de `tools/config.local.php`, remplit son profil, ajoute les données d'exemple une seule fois et enregistre la session (`/tmp/show_state.json`). Aucun test ne dépend plus d'un fichier qui pourrait manquer. Son navigateur ignore la CSP de l'app (`bypass_csp`) : les attentes de Playwright évaluent leur condition.
+- **GitHub Actions** (`.github/workflows/tests.yml`) : à chaque push, `tools/par.py 3` sur Ubuntu avec **PHP 8.1** (comme la production) ; journaux en pièce jointe si échec. **`./deploy.sh app --go` refuse** : changements non commités dans `app/`, commit non poussé, tests en cours ou en échec sur GitHub (`tools/ci-status.py`).
 - **Suite répartie (à préférer)** : `python3 tools/par.py 3` lance la suite sur 3 copies en même temps (`/tmp/g`, `/tmp/g_2`, `/tmp/g_3` ; ports 8095, 8295, 8395), chacune avec sa base et sa session ; les adresses écrites en dur dans les tests sont réécrites dans la copie de chaque groupe seulement. Groupes équilibrés sur les durées du passage précédent (`tools/test-times.json`). **31/31 en 9 min 38 s** (contre ~35 min en série) ; les serveurs locaux tournent avec `PHP_CLI_SERVER_WORKERS=4` (sinon une requête lente bloque la page).
-- **Suite complète** : `tests/run-all.sh BASE STATE` → « N passed, N failed ». 31 tests au 9 octobre :
+- **Suite complète** : `tests/run-all.sh BASE STATE` → « N réussis, N échoués ». 32 tests au 9 octobre (`ops/tests.php` + 2 tests PHP + 29 Playwright) :
+  - **serveur** : `ops/tests.php` (20 : forfaits, essai, gel des comptes après un passage à Free, garde d'écriture, parrainage, déblocage du jeu) ;
   - **PHP** : `presets_test.php` (41), `shot_trades_test.php` (32) ;
   - **Playwright** :
     - `e2e_session_parity`, `e2e_accuracy`, `e2e_clarity`, `e2e_a11y_names` ;
@@ -74,7 +78,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
     - `e2e_acceptance`, `e2e_no_english_in_fr_es`, `e2e_redraw_no_replay`, `e2e_no_jumps`, `e2e_quiet_sync`, `e2e_history_back` ;
     - `e2e_rows_open`, `e2e_plan_journal`, `e2e_import_tradingview`, `e2e_visual_fit` ;
     - `e2e_money`, `e2e_money_parity`, `e2e_shot_multi` (nécessite `run_ai.sh`), `e2e_scroll_stable`, `e2e_realnet`, `e2e_lot_a`.
-  - `run-all.sh --all` ajoute les autres scripts `e2e_*` (plus de 100, surtout des captures). ⚠️ Pas relancé récemment ; une dizaine pointent encore vers `/home/claude/media/…` (ancien conteneur).
+  - Les 111 anciens scripts d'exploration (aucune vérification) ont été **retirés** le 9 oct. : liste dans `tests/RETIRED.md`, récupérables dans git. `--all` n'existe plus.
 - **Tests par sujet** :
 
 | Sujet | Tests |
@@ -90,7 +94,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 | Arrivée, rattrapage, vrai net, « Estimé » | `e2e_realnet` (~2 min, crée ses propres traders, vide le limiteur d'inscription via `SWEEP_TEST_DB`) |
 | Lot A UI/UX (routine, news, boutons, comptes, Net P&L, recherche, espacements, Calendrier, coins, CSV) | `e2e_lot_a` (~2 min) |
 
-- `php ops/tests.php` (suite serveur historique) existe. ⚠️ Pas lancé dans cette série de changements.
+- `php ops/tests.php` fait partie de la suite depuis le 9 oct. (20/20).
 
 ## 5. Règles produit décidées
 
@@ -261,6 +265,12 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Modifiés : `src/nav.js` (pas d'étiquette « prochaine séance » sur la routine en chargement), `src/nav.css` (en-tête d'Aujourd'hui à sa taille finale dès `html[data-home]`), `assets/fonts/Geist-Variable.woff2` et `GeistMono-Variable.woff2` (sous-ensemble), `app.html` (nouveaux noms de fichiers), `CONTEXTE-APP.md`.
 - Recompilés : `assets/bundle.7cfeabbae3.css`, `assets/nav.656d6b8284.js`, `assets/nav.a7bef0aeac.css` (remplacent `bundle.22e4b3842c.css`, `nav.6a0187b7d5.js`, `nav.d03abd2926.css`, qui peuvent rester sur le serveur).
 - Nouveau : `tools/` (environnement local, mesures, suite répartie `par.py`, originaux des polices).
+
+### Brief 01 — étape 2 (suite de tests qui protège)
+- `tests/setup.py` remplace `tools/prof.py` ; `run-all.sh` le lance, puis `ops/tests.php` (nouveau dans la suite), les tests PHP et les 29 tests Playwright : **32 au total**.
+- 111 scripts d'exploration retirés (`tests/RETIRED.md`) ; les 2 mentions du README pointent vers les tests qui couvrent ces sujets.
+- GitHub Actions à chaque push (PHP 8.1) et verrou dans `deploy.sh` (voir section 4). `gh` n'est pas installé sur le Mac : le dépôt étant public, `tools/ci-status.py` lit l'API sans identification.
+- Les scénarios de l'étape 1 sont des tests permanents (`e2e_accuracy` A2-A8, A5b, A6b).
 
 ### Brief 01 « Fondations » (reçu le 9 oct.) — étape 1
 - Le brief décrit un état plus ancien : ses scénarios de l'étape 1 existaient déjà comme tests (`e2e_accuracy` A2-A8, `e2e_session_parity`, `e2e_import_session_day`). Ajoutés : A3 avec la formulation exacte, A5b (compte dépassé puis remonté), A6b (commission Tradovate appliquée).

@@ -251,7 +251,7 @@ Le dossier `data_dir` contient tout : `journal.db` et `uploads/`. Compresse-le e
 - **Migrations** : chaque module crée et complète ses tables tout seul, une seule fois (`CREATE TABLE IF NOT EXISTS`, colonnes ajoutées si absentes) ; les fichiers `game/migrations/*.sql` documentent chaque étape.
 - **Fin d'essai** : rappels in-app aux jours 50 et 58 (10 et 2 jours restants) avec ce que le trader a utilisé ; jamais pendant les heures de marché ; rien n'est supprimé au jour 61.
 - **« Ton graphique NQ est prêt »** : envoyé par le cron des graphiques, une fois par trader et par journée, quand le graphique devient disponible (après 16 h ET si c'est pendant la séance).
-- **Tests d'interface** : `tests/e2e_ui.py` (toutes les pages, 4 configurations, textes anglais oubliés en français).
+- **Tests d'interface** : `tests/e2e_no_english_in_fr_es.py` (textes anglais oubliés en français et en espagnol), `tests/e2e_acceptance.py`, `tests/e2e_visual_fit.py`. Liste complète et lancement : `tests/run-all.sh` ; scripts d'exploration retirés : `tests/RETIRED.md`.
 
 ## Imports CSV (Tradovate, Rithmic, TopstepX)
 
@@ -274,5 +274,4 @@ One scale for every stylesheet added on top of the app (reference at the top of 
 ## Stabilité visuelle (tests)
 - `tests/e2e_no_jumps.py` : touche les contrôles de chaque page (comme Safari, sans ancrage du défilement, enregistrements lents) et signale tout saut, animation rejouée ou graphique reconstruit.
 - `tests/e2e_redraw_no_replay.py` : un redessin de la même page ne rejoue aucune animation.
-- `tests/e2e_trade_nojump.py` : le Bilan du trade ne saute pas pendant les réponses.
 - Sur téléphone, la page Bilan envoie un « Trade page jump » au tableau de bord admin (Erreurs) si un élément touché bouge.
