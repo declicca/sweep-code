@@ -16,6 +16,7 @@ def href(lang, page):
     base = "/" if lang == "en" else f"/{lang}/"
     if page == "100": return base + "100"
     if page == "index.html": return base
+    if page.endswith("/index.html"): return base + page[:-len("/index.html")]
     return base + (page[:-5] if page.endswith(".html") else page)
 
 # W1 — first-touch UTM cookie shared with app.makeitsweep.com (runs first on every page)
@@ -241,7 +242,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     graph = [org, web]
     if page not in ("index.html", "404.html"):
         crumb = CRUMBS.get(page) or re.split(r"\s[·|—]\s", title)[0].strip()
-        items = [("Sweep", href(lang, "index.html"))] + ([(t(T("Prop firms","Prop firms","Prop firms")), href(lang, "prop-firms.html"))] if page.startswith("prop-firms/") else []) + [(crumb, href(lang, page))]
+        items = [("Sweep", href(lang, "index.html"))] + ([(t(T("Prop firms","Prop firms","Prop firms")), href(lang, "prop-firms/index.html"))] if page.startswith("prop-firms/") and page != "prop-firms/index.html" else []) + [(crumb, href(lang, page))]
         graph.append({"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":i + 1,"name":n,"item":f"https://{DOMAIN}{u}"} for i, (n, u) in enumerate(items)]})
     extra_head += jsonld({"@context":"https://schema.org","@graph":graph})
     if page == "404.html": extra_head += '<meta name="robots" content="noindex">'
@@ -447,7 +448,7 @@ STATS_MIN = 250
 
 def shell(lang, page, title, desc, body, t, extra_head=""):
     out = _shell_raw(lang, page, title, desc, body, t, extra_head)
-    medium = "home" if page == "index.html" else page.replace(".html", "").replace("/", "-")
+    medium = "home" if page == "index.html" else page.replace("/index.html", "").replace(".html", "").replace("/", "-")
     campaign = UTM_CAMPAIGN
-    if page.startswith("prop-firms/"): medium, campaign = "prop-firm", page[len("prop-firms/"):-len(".html")]
+    if page.startswith("prop-firms/") and page != "prop-firms/index.html": medium, campaign = "prop-firm", page[len("prop-firms/"):-len(".html")]
     return out.replace(SIGNUP, f"{SIGNUP}&amp;utm_source=site&amp;utm_medium={medium}&amp;utm_campaign={campaign}")

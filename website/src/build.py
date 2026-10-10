@@ -30,8 +30,8 @@ PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calcul
               "trading-templates.html":pages14.page_templates,"how-to-choose-a-trading-journal.html":pages14.page_choose,"trading-journal-routine.html":pages14.page_routine,
               "sweep-vs-tradezella.html":pages17.page_vs_tradezella,"best-trading-journal-for-prop-firms.html":pages17.page_best_journal})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
-for _f in pages18.presets.FIRMS:
-    if _f["id"] == "topstep": PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
+PAGES["prop-firms/index.html"] = pages18.page_hub
+for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
 PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","topstep-trading-journal.html":"0.8","apex-trader-funding-journal.html":"0.8","take-profit-trader-journal.html":"0.8","lucid-trading-journal.html":"0.8","myfundedfutures-journal.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
@@ -91,6 +91,9 @@ RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 # /100 campaign page without a trailing-slash redirect (keeps UTM query strings intact)
 RewriteRule ^100$ /100/index.html [L]
 RewriteRule ^(fr|es)/100$ /$1/100/index.html [L]
+# prop firm rules hub: /prop-firms serves prop-firms/index.html (the firms' pages live in that folder)
+RewriteRule ^prop-firms$ /prop-firms/index.html [L]
+RewriteRule ^(fr|es)/prop-firms$ /$1/prop-firms/index.html [L]
 # clean URLs: /pricing.html -> /pricing (301), and /pricing serves pricing.html
 RewriteCond %{THE_REQUEST} \\s/+([^?\\s]+?)\\.html[\\s?] [NC]
 RewriteCond %1 !(^|/)index$

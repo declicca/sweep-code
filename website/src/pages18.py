@@ -147,7 +147,8 @@ def table(lang, t, sizes, groups, only_diff_from=None):
 def practice(lang, t, f, p):
     s = rep(p); size = kk(s["size"]); U = lambda v: usd(v, lang); E, F, L = _ph(s, "eval"), _ph(s, "funded"), _ph(s, "live")
     pts = []
-    if E.get("dd") and E.get("dd_type") in DDT:
+    D = E if E.get("dd") else F
+    if D.get("dd") and D.get("dd_type") in DDT:
         pts.append({"eod": T(f"The max loss ({U(E['dd'])} on the {size}) follows your highest end-of-day balance: a peak during the day doesn’t move it.",
                              f"La perte max ({U(E['dd'])} sur le {size}) suit ton solde de fin de journée le plus haut : un sommet pendant la journée ne la déplace pas.",
                              f"La pérdida máx. ({U(E['dd'])} en la {size}) sigue tu saldo de cierre más alto: un máximo durante el día no la mueve."),
@@ -156,7 +157,14 @@ def practice(lang, t, f, p):
                                f"La pérdida máx. ({U(E['dd'])} en la {size}) sigue tu saldo más alto en tiempo real, también durante el día."),
                     "static": T(f"The max loss ({U(E['dd'])} on the {size}) is fixed: it doesn’t move up with your profit.",
                                 f"La perte max ({U(E['dd'])} sur le {size}) est fixe : elle ne monte pas avec ton profit.",
-                                f"La pérdida máx. ({U(E['dd'])} en la {size}) es fija: no sube con tu beneficio.")}[E["dd_type"]])
+                                f"La pérdida máx. ({U(E['dd'])} en la {size}) es fija: no sube con tu beneficio.")}[D["dd_type"]] if D is E else
+                   {"eod": T(f"The max loss ({U(F['dd'])} on the {size}) follows your highest end-of-day balance: a peak during the day doesn’t move it.", f"La perte max ({U(F['dd'])} sur le {size}) suit ton solde de fin de journée le plus haut : un sommet pendant la journée ne la déplace pas.", f"La pérdida máx. ({U(F['dd'])} en la {size}) sigue tu saldo de cierre más alto: un máximo durante el día no la mueve."),
+                    "trade": T(f"The max loss ({U(F['dd'])} on the {size}) follows your highest balance in real time, during the day too.", f"La perte max ({U(F['dd'])} sur le {size}) suit ton solde le plus haut en temps réel, pendant la journée aussi.", f"La pérdida máx. ({U(F['dd'])} en la {size}) sigue tu saldo más alto en tiempo real, también durante el día."),
+                    "static": T(f"The max loss ({U(F['dd'])} on the {size}) is fixed: it doesn’t move up with your profit.", f"La perte max ({U(F['dd'])} sur le {size}) est fixe : elle ne monte pas avec ton profit.", f"La pérdida máx. ({U(F['dd'])} en la {size}) es fija: no sube con tu beneficio.")}[D["dd_type"]])
+    if D is E and F.get("dd_type") in DDT and E.get("dd_type") != F.get("dd_type"):
+        pts.append({"eod": T("Once funded, it follows your end-of-day balance instead.", "Une fois financé, elle suit plutôt ton solde de fin de journée.", "Ya financiada, sigue en cambio tu saldo al cierre."),
+                    "trade": T("Once funded, it follows your balance in real time instead.", "Une fois financé, elle suit plutôt ton solde en temps réel.", "Ya financiada, sigue en cambio tu saldo en tiempo real."),
+                    "static": T("Once funded, it becomes fixed.", "Une fois financé, elle devient fixe.", "Ya financiada, pasa a ser fija.")}[F["dd_type"]])
     if F.get("dd_lock") and F.get("dd_type") != "static":
         off = F.get("dd_lock_offset") or 0
         pts.append(T("Once funded, it stops trailing when it reaches your starting balance" + (f" + {U(off)}" if off else "") + ".",
@@ -169,12 +177,16 @@ def practice(lang, t, f, p):
                 if po.get("max") and po.get("max_dll") else T("", "", ""))
         pts.append({l: v + more[l] for l, v in T("The daily loss limit is an option you choose when you buy.", "La limite de perte du jour est une option que tu choisis à l’achat.", "El límite de pérdida diaria es una opción que eliges al comprar.").items()})
     elif dll:
-        pts.append(T(f"Daily loss limit: lose {U(dll)} in a day on the {size} and you stop for the day.", f"Limite du jour : perds {U(dll)} dans une journée sur le {size} et tu t’arrêtes pour la journée.", f"Límite diario: pierde {U(dll)} en un día en la {size} y paras por ese día."))
+        pts.append(T(f"On the {size}, a day can’t lose more than {U(dll)}: that’s the daily loss limit.", f"Sur le {size}, une journée ne peut pas perdre plus de {U(dll)} : c’est la limite de perte du jour.", f"En la {size}, un día no puede perder más de {U(dll)}: es el límite de pérdida diaria."))
     if E.get("consistency") and E.get("target"):
         c = E["consistency"]; mx = E["target"] * c / 100
         pts.append(T(f"To pass, your best day can’t be more than {pc(c, lang)} of your profit: right at the {U(E['target'])} target ({size}), that’s {U(mx)} at most in one day.",
                      f"Pour réussir, ton meilleur jour ne peut pas dépasser {pc(c, lang)} de ton profit : pile à l’objectif de {U(E['target'])} ({size}), c’est {U(mx)} au plus en une journée.",
                      f"Para aprobar, tu mejor día no puede superar el {pc(c, lang)} de tu beneficio: justo en el objetivo de {U(E['target'])} ({size}), son {U(mx)} como máximo en un día."))
+    if F.get("consistency"):
+        pts.append(T(f"Once funded, consistency is checked at each payout: your best day can be at most {pc(F['consistency'], lang)} of the profit since your last payout.",
+                     f"Une fois financé, la consistance est vérifiée à chaque payout : ton meilleur jour peut représenter au plus {pc(F['consistency'], lang)} du profit depuis ton dernier payout.",
+                     f"Ya financiada, la consistencia se revisa en cada payout: tu mejor día puede ser como máximo el {pc(F['consistency'], lang)} del beneficio desde tu último payout."))
     pay = payout_sentence(f, p, s, None)
     if pay: pts.append(pay)
     if L.get("start_pct"):
@@ -197,16 +209,29 @@ def payout_sentence(f, p, s, label):
         if po.get("win_days"): bits.append({"en": f"{po['win_days']:g} winning days" + (f" of {U(po['win_min'])} or more" if po.get("win_min") else ""), "fr": f"{po['win_days']:g} jours gagnants" + (f" de {U(po['win_min'])} et +" if po.get("win_min") else ""), "es": f"{po['win_days']:g} días ganadores" + (f" de {U(po['win_min'])} o más" if po.get("win_min") else "")}[l])
         if po.get("trade_days"): bits.append({"en": f"{po['trade_days']:g} traded days", "fr": f"{po['trade_days']:g} jours tradés", "es": f"{po['trade_days']:g} días operados"}[l])
         if po.get("cycle_days"): bits.append({"en": f"{po['cycle_days']:g} days since the last payout", "fr": f"{po['cycle_days']:g} jours depuis le dernier payout", "es": f"{po['cycle_days']:g} días desde el último payout"}[l])
+        if po.get("cycle_pos") and not po.get("cycle_min"): bits.append({"en": "a profit since the last payout", "fr": "un profit depuis le dernier payout", "es": "un beneficio desde el último payout"}[l])
+        if po.get("cycle_min"): bits.append({"en": f"at least {U(po['cycle_min'])} of profit since the last payout", "fr": f"au moins {U(po['cycle_min'])} de profit depuis le dernier payout", "es": f"al menos {U(po['cycle_min'])} de beneficio desde el último payout"}[l])
         if po.get("min_bal"): bits.append({"en": f"a balance above {U(po['min_bal'])}", "fr": f"un solde au-dessus de {U(po['min_bal'])}", "es": f"un saldo por encima de {U(po['min_bal'])}"}[l])
-        rng = ({"en": f"from {U(po['min'])} to {U(po['max'])} per payout", "fr": f"de {U(po['min'])} à {U(po['max'])} par payout", "es": f"de {U(po['min'])} a {U(po['max'])} por payout"}[l] if po.get("min") and po.get("max")
+        lad = po.get("ladder")
+        caps = " / ".join(U(x) if x is not None else {"en": "no cap", "fr": "sans plafond", "es": "sin tope"}[l] for x in lad) if lad else ""
+        rng = ({"en": f"from {U(po['min'])} per payout, capped at {caps} for payouts 1 to {len(lad)}", "fr": f"à partir de {U(po['min'])} par payout, avec des plafonds de {caps} pour les payouts 1 à {len(lad)}", "es": f"desde {U(po['min'])} por payout, con topes de {caps} para los payouts 1 a {len(lad)}"}[l] if lad and po.get("min")
+               else {"en": f"from {U(po['min'])} to {U(po['max'])} per payout", "fr": f"de {U(po['min'])} à {U(po['max'])} par payout", "es": f"de {U(po['min'])} a {U(po['max'])} por payout"}[l] if po.get("min") and po.get("max")
                else {"en": f"at least {U(po['min'])} per payout", "fr": f"au moins {U(po['min'])} par payout", "es": f"al menos {U(po['min'])} por payout"}[l] if po.get("min") else "")
         if not bits and not rng: return None
         where = label[l] if label else {"en": f"the {size}", "fr": f"le {size}", "es": f"la {size}"}[l]
         if opt: where += {"en": f" ({opt[1]['label'][l]} option)", "fr": f" (option {opt[1]['label'][l]})", "es": f" (opción {opt[1]['label'][l]})"}[l]
-        txt = {"en": "To request a payout on ", "fr": "Pour demander un payout sur ", "es": "Para pedir un payout en "}[l] + where + colon(l) + {"en": " and ", "fr": " et ", "es": " y "}[l].join(bits)
+        if not bits:   # only an amount: « On the 50K, each payout is at least $500. »
+            one = ({"en": f"each payout is between {U(po['min'])} and {U(po['max'])}", "fr": f"chaque payout va de {U(po['min'])} à {U(po['max'])}", "es": f"cada payout va de {U(po['min'])} a {U(po['max'])}"}[l] if po.get("min") and po.get("max") and not lad
+                   else {"en": f"each payout is at least {U(po['min'])}", "fr": f"chaque payout est d’au moins {U(po['min'])}", "es": f"cada payout es de al menos {U(po['min'])}"}[l] if po.get("min") and not lad else rng)
+            txt = {"en": "On ", "fr": "Sur ", "es": "En "}[l] + where + ", " + one
+            if po.get("split_pct"): txt += {"en": f"; you keep {pc(po['split_pct'], l)}", "fr": f" ; tu gardes {pc(po['split_pct'], l)}", "es": f"; te quedas con el {pc(po['split_pct'], l)}"}[l]
+            if po.get("max_payouts") and not lad: txt += {"en": f", up to {po['max_payouts']:g} payouts", "fr": f", jusqu’à {po['max_payouts']:g} payouts", "es": f", hasta {po['max_payouts']:g} payouts"}[l]
+            out[l] = txt + "."; continue
+        txt = {"en": "To request a payout on ", "fr": "Pour demander un payout sur ", "es": "Para pedir un payout en "}[l] + where + colon(l) + (", ".join(bits[:-1]) + {"en": " and ", "fr": " et ", "es": " y "}[l] + bits[-1] if len(bits) > 1 else bits[0])
         if rng:
             txt += ({"en": ", then ", "fr": ", puis ", "es": ", luego "}[l] if bits else "") + ({"en": f"up to {pc(po['max_pct'], l)} of your profit, ", "fr": f"jusqu’à {pc(po['max_pct'], l)} de ton profit, ", "es": f"hasta el {pc(po['max_pct'], l)} de tu beneficio, "}[l] if po.get("max_pct") else "") + rng
         if po.get("split_pct"): txt += {"en": f"; you keep {pc(po['split_pct'], l)}", "fr": f" ; tu gardes {pc(po['split_pct'], l)}", "es": f"; te quedas con el {pc(po['split_pct'], l)}"}[l]
+        if po.get("max_payouts") and not lad: txt += {"en": f"; up to {po['max_payouts']:g} payouts", "fr": f" ; jusqu’à {po['max_payouts']:g} payouts", "es": f"; hasta {po['max_payouts']:g} payouts"}[l]
         out[l] = txt + "."
     return out
 
@@ -306,7 +331,7 @@ def faq_of(lang, t, f):
     # max loss
     parts = {l: [] for l in LANGS}
     for p in progs:
-        E = [(s["size"], _ph(s, "eval")) for s in p["sizes"] if _ph(s, "eval").get("dd")]
+        E = [(s["size"], _ph(s, "eval")) for s in p["sizes"] if _ph(s, "eval").get("dd")] or [(s["size"], _ph(s, "funded")) for s in p["sizes"] if _ph(s, "funded").get("dd")]
         if not E: continue
         typ = E[0][1].get("dd_type")
         for l in LANGS:
@@ -353,3 +378,46 @@ def faq_of(lang, t, f):
                   f"Non. Sweep est indépendant. Les règles de cette page viennent de la vérification hebdomadaire des pages officielles de {name} par Sweep ; confirme toujours sur le site de {name}.",
                   f"No. Sweep es independiente. Las reglas de esta página vienen de la revisión semanal de las páginas oficiales de {name} por Sweep; confirma siempre en el sitio de {name}.")))
     return out
+
+# ---------------------------------------------------------------- hub: /prop-firms
+CRUMBS["prop-firms/index.html"] = "Prop firms"
+
+def page_hub(lang, t):
+    firms = presets.FIRMS
+    when = max(checked_of(f) for f in firms)
+    hero = page_hero(t, T("Prop firm rules, explained.", "Les règles des prop firms, expliquées.", "Las reglas de las prop firms, explicadas."),
+        T(f"Drawdown, consistency and payout rules for {len(firms)} futures prop firms, from Sweep’s weekly check of their official pages. Last check: {day(when, 'en')}.",
+          f"Drawdown, consistance et payouts de {len(firms)} prop firms de futures, selon la vérification hebdomadaire de leurs pages officielles par Sweep. Dernière vérification : {day(when, 'fr')}.",
+          f"Drawdown, consistencia y payouts de {len(firms)} prop firms de futuros, según la revisión semanal de sus páginas oficiales por Sweep. Última verificación: {day(when, 'es')}."),
+        T("Prop firms", "Prop firms", "Prop firms"))
+    def card(f):
+        sz = sorted({s["size"] for p in f["programs"] for s in p["sizes"]})
+        types = ", ".join(p["name"] for p in f["programs"])
+        return (f'<a class="tool-card" href="{href(lang, page_of(f))}"><h2>{f["name"]}</h2><p>{types} · {kk(sz[0])}' + (f" – {kk(sz[-1])}" if len(sz) > 1 else "") + "</p>"
+                f'<p class="fine">{t(T("Verified on ", "Vérifié le ", "Verificado el "))}{day(checked_of(f), lang)}</p><span class="go">{t(T("See the rules", "Voir les règles", "Ver las reglas"))} →</span></a>')
+    from pages8 import FIRMS as JOURNALS
+    others = [(s, n) for s, n in JOURNALS if n not in presets.PRESET_FIRMS]
+    other = ""
+    if others:
+        names = {l: {"en": " or ", "fr": " ou ", "es": " o "}[l].join(n for _, n in others) for l in LANGS}
+        other = (f'<p>{t(T(f"{names["en"]}? Their rules aren’t preloaded in Sweep yet: add your account as “Other firm” and enter its rules once.", f"{names["fr"]} ? Leurs règles ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme » et saisis ses règles une fois.", f"¿{names["es"]}? Sus reglas aún no están precargadas en Sweep: añade tu cuenta como «Otra firma» e introduce sus reglas una vez."))}</p>'
+                 '<p class="firm-others">' + "".join(f'<a href="{href(lang, s)}">{n}</a>' for s, n in others) + "</p>")
+    disclaimer = T("Sweep is not affiliated with these firms. Rules can change at any time; always confirm on each firm’s official site.",
+                   "Sweep n’est affilié à aucune de ces firmes. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de chaque firme.",
+                   "Sweep no está afiliado a estas firmas. Las reglas pueden cambiar en cualquier momento; confirma siempre en el sitio oficial de cada firma.")
+    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{"".join(card(f) for f in firms)}</div>'
+         f'<p class="fine" style="margin-top:18px">{t(disclaimer)}</p></div></section>'
+         + (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Another firm?", "Une autre firme ?", "¿Otra firma?"))}</h2></div>{other}</div></section>' if other else "")
+         + f'<section class="rule"><div class="wrap narrow"><p class="firm-others"><span>{t(T("Free tools", "Outils gratuits", "Herramientas gratuitas"))}</span>'
+         + "".join(f'<a href="{href(lang, s)}">{t(n)}</a>' for s, n in [("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico")),
+                    ("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), ("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout"))])
+         + "</p></div></section>")
+    ld = jsonld({"@context": "https://schema.org", "@type": "ItemList", "name": t(T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")),
+                 "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": f["name"], "url": f"https://{DOMAIN}{href(lang, page_of(f))}"} for i, f in enumerate(firms)]})
+    title = t(T("Prop Firm Rules 2026: Drawdown & Payouts by Firm · Sweep", "Règles des prop firms 2026 : drawdown et payouts · Sweep", "Reglas de prop firms 2026: drawdown y payouts · Sweep"))
+    desc = t(T(f"Drawdown, daily loss, consistency and payout rules for {', '.join(f['name'] for f in firms)}, checked every week against each firm’s official pages.",
+               f"Drawdown, perte du jour, consistance et payouts de {', '.join(f['name'] for f in firms)}, vérifiés chaque semaine sur leurs pages officielles.",
+               f"Drawdown, pérdida diaria, consistencia y payouts de {', '.join(f['name'] for f in firms)}, revisados cada semana en sus páginas oficiales."))
+    body = hero + b + final_cta(lang, t)
+    if lang == "fr": body, title, desc = (re.sub(r" ([:;?!])(?=\s|<|$)", " \\1", x) for x in (body, title, desc))
+    return (title, desc, body, ld)
