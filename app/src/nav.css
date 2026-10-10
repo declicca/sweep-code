@@ -2441,3 +2441,9 @@ html body #main .nav-rt-wk{display:flex;align-items:center;justify-content:space
 html body #main .nav-rt-wk b{font-size:15px;font-weight:600}
 html body #main .nav-rt-wk .btn{flex:0 0 auto;justify-content:center;text-align:center}
 @media (max-width:600px){html body #main .nav-rt-wk{flex-direction:column;align-items:stretch}html body #main .nav-rt-wk .btn{height:48px}}
+
+/* The week's recap, first screen (brief 01 step 5): discipline first, words that wrap, the habits as lines */
+html body #gSheet .wk-brief b{white-space:normal;overflow:visible;text-overflow:clip;font-family:inherit;font-size:15px;line-height:1.25}
+html body #gSheet .wk-habits li{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
+html body #gSheet .wk-habits li b{font-size:12px;font-weight:600;color:var(--muted)}
+html body #gSheet .wk-habits li span{font-size:14px;line-height:1.35}

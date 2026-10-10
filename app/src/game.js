@@ -1379,10 +1379,32 @@
     renderWk();
   }
   const WQ = {
-    en: { recap_t: 'Your week', net: 'Net P&L', trades: 'Trades', wr: 'Win rate', inplan: 'In your plan', best: 'Best day', worst: 'Worst day', to_q: 'Analyse my week', q_t: 'Your week, in a few answers', h_best: 'Your best day: {d}, {v}.', q_worst: 'Worst day: {d}, {v}. What happened?', q_rule: 'A rule for next week', h_rule: 'One sentence you will follow, e.g. « Stop after 2 losses ».', q_grade: 'Rate your week (process, not P&L)', n_nostop: '{n} trade{s} without a stop.', n_off: '{n} trade{s} out of your plan.', n_emo: 'Most frequent emotion on your losing trades: {e}.', n_setup: 'Best setup: {a}. Weakest: {b}.', n_fees: 'Slippage and fees: {v}.', fix_nostop: 'Hint: {n} trade{s} without a stop this week.', fix_emo: 'Hint: « {e} » came back on your losing trades.' },
-    fr: { recap_t: 'Ta semaine', net: 'P&L net', trades: 'Trades', wr: 'Taux de réussite', inplan: 'Dans ton plan', best: 'Meilleur jour', worst: 'Pire jour', to_q: 'Analyser ma semaine', q_t: 'Ta semaine, en quelques réponses', h_best: 'Ton meilleur jour : {d}, {v}.', q_worst: 'Pire jour : {d}, {v}. Qu’est-ce qui s’est passé ?', q_rule: 'Une règle pour la semaine prochaine', h_rule: 'Une phrase que tu vas suivre, ex. « J’arrête après 2 pertes ».', q_grade: 'Note ta semaine (le processus, pas le P&L)', n_nostop: '{n} trade{s} sans stop.', n_off: '{n} trade{s} hors de ton plan.', n_emo: 'Émotion la plus fréquente sur tes pertes : {e}.', n_setup: 'Meilleur setup : {a}. Plus faible : {b}.', n_fees: 'Glissement et frais : {v}.', fix_nostop: 'Indice : {n} trade{s} sans stop cette semaine.', fix_emo: 'Indice : « {e} » est revenu sur tes pertes.' },
-    es: { recap_t: 'Tu semana', net: 'P&L neto', trades: 'Operaciones', wr: 'Tasa de acierto', inplan: 'En tu plan', best: 'Mejor día', worst: 'Peor día', to_q: 'Analizar mi semana', q_t: 'Tu semana, en pocas respuestas', h_best: 'Tu mejor día: {d}, {v}.', q_worst: 'Peor día: {d}, {v}. ¿Qué pasó?', q_rule: 'Una regla para la próxima semana', h_rule: 'Una frase que vas a seguir, ej. « Paro tras 2 pérdidas ».', q_grade: 'Valora tu semana (el proceso, no el P&L)', n_nostop: '{n} operaci{s} sin stop.', n_off: '{n} operaci{s} fuera de tu plan.', n_emo: 'Emoción más frecuente en tus pérdidas: {e}.', n_setup: 'Mejor setup: {a}. Más débil: {b}.', n_fees: 'Deslizamiento y comisiones: {v}.', fix_nostop: 'Pista: {n} operaci{s} sin stop esta semana.', fix_emo: 'Pista: « {e} » volvió en tus pérdidas.' } };
+    en: { b_streak: 'Swept-day streak', b_streak_1: '{n} day in a row', b_streak_v: '{n} days in a row', b_disc: 'Discipline this week', b_swept: 'Swept days', b_swept_v: '{a} of {b} days traded', b_habit: 'Your best habit', b_habit_v: '« {q} » — yes {y} times out of {n}', b_work: 'For next week', b_work_v: 'Aim for a « yes » to « {q} » on every trade.', b_pay: 'Payouts received this week', b_nodisc: 'Answer the checklist on your trades to get a discipline score.', recap_t: 'Your week', net: 'Net P&L', trades: 'Trades', wr: 'Win rate', inplan: 'In your plan', best: 'Best day', worst: 'Worst day', to_q: 'Analyse my week', q_t: 'Your week, in a few answers', h_best: 'Your best day: {d}, {v}.', q_worst: 'Worst day: {d}, {v}. What happened?', q_rule: 'A rule for next week', h_rule: 'One sentence you will follow, e.g. « Stop after 2 losses ».', q_grade: 'Rate your week (process, not P&L)', n_nostop: '{n} trade{s} without a stop.', n_off: '{n} trade{s} out of your plan.', n_emo: 'Most frequent emotion on your losing trades: {e}.', n_setup: 'Best setup: {a}. Weakest: {b}.', n_fees: 'Slippage and fees: {v}.', fix_nostop: 'Hint: {n} trade{s} without a stop this week.', fix_emo: 'Hint: « {e} » came back on your losing trades.' },
+    fr: { b_streak: 'Streak de journées balayées', b_streak_1: '{n} jour d’affilée', b_streak_v: '{n} jours d’affilée', b_disc: 'Discipline de la semaine', b_swept: 'Journées balayées', b_swept_v: '{a} sur {b} jours tradés', b_habit: 'Ta meilleure habitude', b_habit_v: '« {q} » — oui {y} fois sur {n}', b_work: 'Pour la semaine prochaine', b_work_v: 'Vise un « oui » à « {q} » sur chaque trade.', b_pay: 'Payouts reçus cette semaine', b_nodisc: 'Réponds à la checklist de tes trades pour avoir un score de discipline.', recap_t: 'Ta semaine', net: 'P&L net', trades: 'Trades', wr: 'Taux de réussite', inplan: 'Dans ton plan', best: 'Meilleur jour', worst: 'Pire jour', to_q: 'Analyser ma semaine', q_t: 'Ta semaine, en quelques réponses', h_best: 'Ton meilleur jour : {d}, {v}.', q_worst: 'Pire jour : {d}, {v}. Qu’est-ce qui s’est passé ?', q_rule: 'Une règle pour la semaine prochaine', h_rule: 'Une phrase que tu vas suivre, ex. « J’arrête après 2 pertes ».', q_grade: 'Note ta semaine (le processus, pas le P&L)', n_nostop: '{n} trade{s} sans stop.', n_off: '{n} trade{s} hors de ton plan.', n_emo: 'Émotion la plus fréquente sur tes pertes : {e}.', n_setup: 'Meilleur setup : {a}. Plus faible : {b}.', n_fees: 'Glissement et frais : {v}.', fix_nostop: 'Indice : {n} trade{s} sans stop cette semaine.', fix_emo: 'Indice : « {e} » est revenu sur tes pertes.' },
+    es: { b_streak: 'Racha de días barridos', b_streak_1: '{n} día seguido', b_streak_v: '{n} días seguidos', b_disc: 'Disciplina de la semana', b_swept: 'Días barridos', b_swept_v: '{a} de {b} días operados', b_habit: 'Tu mejor hábito', b_habit_v: '« {q} » — sí {y} veces de {n}', b_work: 'Para la próxima semana', b_work_v: 'Apunta a un « sí » en « {q} » en cada operación.', b_pay: 'Payouts recibidos esta semana', b_nodisc: 'Responde la checklist de tus operaciones para tener un puntaje de disciplina.', recap_t: 'Tu semana', net: 'P&L neto', trades: 'Operaciones', wr: 'Tasa de acierto', inplan: 'En tu plan', best: 'Mejor día', worst: 'Peor día', to_q: 'Analizar mi semana', q_t: 'Tu semana, en pocas respuestas', h_best: 'Tu mejor día: {d}, {v}.', q_worst: 'Peor día: {d}, {v}. ¿Qué pasó?', q_rule: 'Una regla para la próxima semana', h_rule: 'Una frase que vas a seguir, ej. « Paro tras 2 pérdidas ».', q_grade: 'Valora tu semana (el proceso, no el P&L)', n_nostop: '{n} operaci{s} sin stop.', n_off: '{n} operaci{s} fuera de tu plan.', n_emo: 'Emoción más frecuente en tus pérdidas: {e}.', n_setup: 'Mejor setup: {a}. Más débil: {b}.', n_fees: 'Deslizamiento y comisiones: {v}.', fix_nostop: 'Pista: {n} operaci{s} sin stop esta semana.', fix_emo: 'Pista: « {e} » volvió en tus pérdidas.' } };
   const wq = (k, v) => { let x = (WQ[LANG] || WQ.en)[k] || k; if (v) for (const [a, b] of Object.entries(v)) x = x.split('{' + a + '}').join(String(b)); if (v && 'n' in v) x = x.split('{s}').join(LANG === 'es' ? (+v.n > 1 ? 'ones' : 'ón') : (+v.n > 1 ? 's' : '')); return x; };
+  /** the week's recap (brief 01 step 5): discipline, swept days on traded days, best habit, one point to work on, real payouts
+   *  received. No P&L here: simulated profit is never shown as money earned. */
+  function weekBrief(mon, summary) {
+    const m = mon || (() => { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); })();
+    const add = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+    const tr = (S.trades || []).filter((x) => !x.demo && x.date >= m && x.date <= add(m, 4));
+    const traded = new Set(tr.map((x) => x.date)).size;
+    const ds = tr.map((x) => (typeof tDisc === 'function' ? tDisc(x) : null)).filter((v) => v != null);
+    const disc = ds.length ? Math.round(ds.reduce((a, v) => a + v, 0) / ds.length) : null;
+    const qs = ((S.settings && S.settings.questions) || []), qText = (id) => { const q = qs.find((x) => x.id === id); const t0 = q ? q.text : id; return typeof tr0 === 'function' ? tr0(t0) : t0; };
+    const per = {}; tr.forEach((x) => Object.entries(x.discipline || {}).forEach(([k, v]) => { if (v !== 'y' && v !== 'n') return; const o = per[k] || (per[k] = { y: 0, n: 0 }); o[v === 'y' ? 'y' : 'n']++; }));
+    const rows = Object.entries(per).map(([k, o]) => ({ k, y: o.y, n: o.y + o.n, rate: o.y / (o.y + o.n) })).filter((r) => r.n >= 2);
+    const best = rows.slice().sort((a, b) => b.rate - a.rate || b.n - a.n)[0] || null;
+    const work = rows.filter((r) => r.y < r.n).sort((a, b) => a.rate - b.rate || b.n - a.n)[0] || null;
+    const M2 = window.SweepMoney, sun = add(m, 6);
+    const pay = (S.payouts || []).filter((p) => (M2 ? M2.pState(p) === 'paid' : p.status === 'paid')).filter((p) => { const d = M2 ? M2.pPaidOn(p) : (p.payment_date || p.date); return d && d >= m && d <= sun; })
+      .reduce((a, p) => a + (M2 ? M2.pNet(p) : (p.net_c || p.amount_c || 0)), 0);
+    const sm = summary || {};
+    return { traded, swept: Math.min(sm.swept || 0, traded || sm.swept || 0), streak: sm.streak || 0, disc, best: best && { q: qText(best.k), y: best.y, n: best.n },
+      work: work && (!best || work.k !== best.k) ? { q: qText(work.k) } : null, payouts: pay };
+  }
+  const tr0 = (x) => (typeof tr === 'function' ? tr(x) : x);
   function weekRecap(mon) {
     const m = mon || (() => { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); })();
     const add = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
@@ -1418,19 +1440,19 @@
     const dots = `<div class="wk-dots">${[0, 1, 2, 3].map((i) => `<i class="${i <= WK.step ? 'on' : ''}"></i>`).join('')}</div>`;
     let h = '';
     if (WK.step === 0) {
-      const r = weekRecap(d.week);
+      const r = weekRecap(d.week), b = weekBrief(d.week, s);
       h = `<h3>${wq('recap_t')}</h3><p class="muted wk-range">${r.range}</p>
-        <div class="wk-sum">
-          <div><small>${wq('net')}</small><b class="${r.net < 0 ? 'neg' : r.net > 0 ? 'pos' : ''}">${r.n ? money(r.net) : '—'}</b></div>
-          <div><small>${wq('trades')}</small><b>${r.n}</b></div>
-          <div><small>${wq('wr')}</small><b>${r.n ? Math.round(r.wr) + ' %' : '—'}</b></div>
-          <div><small>${wq('inplan')}</small><b>${r.n ? r.inPlan + ' / ' + r.n : '—'}</b></div>
-          <div class="wk-day"><small>${wq('best')}${r.best ? ' · ' + esc(r.best.short) : ''}</small><b class="${r.best && r.best.net > 0 ? 'pos' : ''}">${r.best ? money(r.best.net) : '—'}</b></div>
-          <div class="wk-day"><small>${wq('worst')}${r.worst ? ' · ' + esc(r.worst.short) : ''}</small><b class="${r.worst && r.worst.net < 0 ? 'neg' : ''}">${r.worst ? money(r.worst.net) : '—'}</b></div>
+        <div class="wk-sum wk-brief">
+          <div><small>${wq('b_streak')}</small><b>${wq(b.streak === 1 ? 'b_streak_1' : 'b_streak_v', { k: b.streak }).split('{n}').join(b.streak)}</b></div>
+          <div><small>${wq('b_disc')}</small><b class="${b.disc != null && b.disc >= 80 ? 'pos' : ''}">${b.disc != null ? b.disc + '\u202f%' : '—'}</b></div>
+          <div><small>${wq('b_swept')}</small><b>${wq('b_swept_v', { a: b.swept, b: b.traded })}</b></div>
         </div>
-        ${r.notes.length ? `<ul class="wk-notes">${r.notes.map((x) => `<li>${x}</li>`).join('')}</ul>` : ''}
         <div class="wk-week">${s.days.map((x) => `<span class="${x.swept ? 'swept' : ''} ${x.market ? '' : 'off'}"><i>${new Date(x.day + 'T12:00:00').toLocaleDateString(loc(), { weekday: 'short' })}</i>${miniRings(x.rings || { plan: 0, execution: 0, review: 0 })}</span>`).join('')}</div>
-        <div class="wk-stats"><div><b>${s.swept}</b><small>${wt('w_swept')}</small></div><div><b>${s.streak}</b><small>${wt('w_streak')}</small></div><div><b>${s.missions.done || 0}/${s.missions.total || 0}</b><small>${wt('w_missions')}</small></div></div>
+        <ul class="wk-notes wk-habits">
+          ${b.best ? `<li><b>${wq('b_habit')}</b><span>${esc(wq('b_habit_v', { q: b.best.q, y: b.best.y, n: b.best.n }))}</span></li>` : b.disc == null ? `<li><span>${wq('b_nodisc')}</span></li>` : ''}
+          ${b.work ? `<li><b>${wq('b_work')}</b><span>${esc(wq('b_work_v', { q: b.work.q }))}</span></li>` : ''}
+          ${b.payouts > 0 ? `<li><b>${wq('b_pay')}</b><span class="pos">${money(b.payouts)}</span></li>` : ''}
+        </ul>
         <button type="button" class="btn primary g-big" data-g="wk-next">${wq('to_q')}</button>`;
     } else if (WK.step === 1) {
       const r = weekRecap(d.week), prev = d.answers || {};
