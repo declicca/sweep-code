@@ -8,7 +8,7 @@ declare(strict_types=1);
  * cPanel → Cron Jobs → every 15 minutes (reminders need it; locking/streaks only need hourly):
  *   /usr/local/bin/php /home/matnsabc/app.makeitsweep.com/game/cron.php >/dev/null 2>&1
  *
- *   php game/cron.php            lock + streaks for every player
+ *   php game/cron.php            lock + streaks for every player, reminders, the « Your week » email (Friday 17:30 ET)
  *   php game/cron.php backfill   (re)run the history backfill for every player (idempotent)
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
@@ -34,7 +34,7 @@ function billing_on(): bool {
     try { sb_config(); return $on = true; } catch (Throwable $e) { return $on = false; }
 }
 
-foreach (['/notify/notify.php', '/notify/listeners.php'] as $f) if (is_file($root . $f)) require_once $root . $f;   // reminders go through the notification center
+foreach (['/notify/notify.php', '/notify/listeners.php', '/notify/mail.php'] as $f) if (is_file($root . $f)) require_once $root . $f;   // reminders go through the notification center
 require_once __DIR__ . '/game.php';
 if (is_file($root . '/money/money.php')) require_once $root . '/money/money.php';
 GameEngine::setPdo($pdo);
@@ -48,6 +48,7 @@ $n = 0;
 foreach ($users as $uid) {
     try {
         if ($mode === 'backfill') { GameEngine::backfill((string) $uid); GameV2::backfillMap((string) $uid); } else { GameEngine::catchUp((string) $uid); GameV2::ensureMissions((string) $uid); GameWrapped::ensure((string) $uid); GameWrappedYear::ensure((string) $uid); GameWow::check((string) $uid); GameNotifyService::run((string) $uid); }
+        if ($mode !== 'backfill') { try { GameWeeklyMail::run((string) $uid); } catch (Throwable $e) { fwrite(STDERR, "[Sweep weekly email] $uid: " . $e->getMessage() . "\n"); } }   // Friday 17:30 ET: « Your week », if not opened in the app
         try { if (class_exists('SweepMoneyServer')) SweepMoneyServer::monthly($pdo, (string) $uid); } catch (Throwable $e) { fwrite(STDERR, "[Sweep money] $uid: " . $e->getMessage() . "\n"); }   // the 1st: « The reality of the month »
         GameEngine::forget((string) $uid);
         $n++;

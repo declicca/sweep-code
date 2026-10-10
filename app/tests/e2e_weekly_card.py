@@ -3,7 +3,7 @@ Sweep — the week's recap in « Your routine » (brief 01 step 5), dev environm
   python3 tests/e2e_weekly_card.py http://127.0.0.1:8095 /tmp/show_state.json
 The moment the recap is ready is tested on the server (tests/weekly_test.php); here the server's answer is set to « ready,
 not seen » so the card can be checked whatever the day:
- - « Your week is ready » with « See my week », the card's only primary button, and no step highlighted (in place of the next step);
+ - « Your week is ready » with « See my week », the routine's only primary button, and no step highlighted (in place of the next step);
  - the button opens the week's recap; once opened (seen), the card no longer offers it;
  - FR / EN words, phone and computer, no horizontal scroll, no page error.
 """
@@ -34,7 +34,8 @@ async def main():
       await pg.goto(B + '/#dashboard'); await pg.wait_for_selector('#main .nav-rt .nav-rt-wk', timeout=15000); await pg.wait_for_timeout(600)
       row = await pg.evaluate("(()=>{const r=document.querySelector('#main .nav-rt .nav-rt-wk'); return {t:r.querySelector('b').textContent, b:r.querySelector('button').textContent, prim:r.querySelector('button').classList.contains('primary')}})()")
       ok(row['t'] == W[0] and row['b'] == W[1] and row['prim'], f'{tag} « {W[0]} » + « {W[1]} » ({row})')
-      prim = await pg.evaluate("document.querySelectorAll('#main .nav-rt .btn.primary').length")
+      # the routine's own buttons (the « Getting started » card can sit inside the routine card, with its own « Do it now »)
+      prim = await pg.evaluate("[...document.querySelectorAll('#main .nav-rt .btn.primary')].filter(b=>!b.closest('.gd-start')).length")
       nxt = await pg.evaluate("(document.querySelector('#main .nav-rt .nav-rt-steps')||{dataset:{next:'0'}}).dataset.next")
       ok(prim == 1 and nxt == '0', f'{tag} in place of the next step: one primary button in the card ({prim}), no step highlighted (data-next={nxt})')
       vis = await pg.evaluate("(()=>{const b=document.querySelector('#main .nav-rt-wk button').getBoundingClientRect(); return b.width>0 && b.right<=innerWidth})()")

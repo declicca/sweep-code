@@ -20,11 +20,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 | `src/guide.js`, `src/chart.js`, `src/notify.js` | Guide, graphique TradingView (chargé à la demande), centre de notifications |
 | `assets/` | Fichiers servis : un seul CSS `bundle.<hash>.css`, JS hachés, `fonts/` (Geist local, plus de Google Fonts) |
 | `game/game.php` | Règles du jeu serveur (anneaux, « dans ton plan », journée réussie, date de séance) |
-| `game/cron.php` | Jeu (toutes les 15 min). Le 1er du mois, il envoie aussi « La réalité du mois » via `money/money.php` |
+| `game/cron.php` | Jeu (toutes les 15 min). Le 1er du mois, il envoie aussi « La réalité du mois » via `money/money.php` ; le vendredi dès 17 h 30 ET, le courriel « Ta semaine » (`game/weekly-mail.php`) |
 | `money/money.php` | Calcul serveur de l'argent réel du mois, mêmes règles que `moneyOf()` (test de parité) |
 | `presets/` | `seed.json` (catalogue), `presets-lib.php` (fusion, validation), `check.php` (vérification d'une firme), `cron.php` (vérification hebdomadaire) |
 | `ai/` | Sweep AI (Gemini) : `ai-core.php`, `ai-features.php`, `ai-routes.php`, `ai-stats.php` (table des contrats), `shot-trades.php` (construction des trades depuis une capture), `econ-ai.php` |
-| `notify/`, `chart/`, `billing/`, `growth/`, `econ.php` | Notifications, bougies (cron horaire), forfaits Free/Pro/Elite + Stripe, partage public, calendrier économique |
+| `notify/`, `chart/`, `billing/`, `growth/`, `econ.php` | Notifications et envoi des courriels (`notify/mail.php` : `sweep_mail()`, partagée par `api.php` et les tâches cron), bougies (cron horaire), forfaits Free/Pro/Elite + Stripe, partage public, calendrier économique |
 | `ops/` | `build-assets.sh`, `css-order.txt`, `tests.php`, `metrics.php`, sauvegardes |
 | `tests/` | `run-all.sh`, tests PHP (`presets_test.php`, `shot_trades_test.php`), Playwright `e2e_*.py`, `samples/` |
 
@@ -69,7 +69,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Préparation** : `tests/setup.py` (lancé par `run-all.sh`, sauf `SWEEP_NO_SETUP=1`) connecte le trader de test « mateo » avec le mot de passe local de `tools/config.local.php`, remplit son profil, ajoute les données d'exemple une seule fois et enregistre la session (`/tmp/show_state.json`). Aucun test ne dépend plus d'un fichier qui pourrait manquer. Son navigateur ignore la CSP de l'app (`bypass_csp`) : les attentes de Playwright évaluent leur condition.
 - **GitHub Actions** (`.github/workflows/tests.yml`) : à chaque push **qui touche `app/`** (ou ce fichier ; un commit du site ne lance ni n'annule rien), `tools/par.py 3` sur Ubuntu avec **PHP 8.1** (comme la production) ; une **annotation par test échoué** (lisible sans identification, affichée par `tools/ci-status.py` et donc par `deploy.sh` quand il refuse) ; journaux en pièce jointe si échec. Un push plus récent annule le passage en cours (« cancelled ») : c'est le passage du dernier commit qui compte. Un test ne doit pas dépendre des comptes laissés par les autres tests du même groupe (la carte Comptes d'Aujourd'hui en montre 6 au plus) : créer son propre trader si besoin. **`./deploy.sh app --go` refuse** : changements non commités dans `app/`, `app/` différent sur GitHub (commit de l'app pas poussé), ou tests en cours / en échec pour **le dernier commit qui a modifié `app/`** (`tools/ci-status.py`). Les commits du site, poussés ou non, ne comptent pas.
 - **Suite répartie (à préférer)** : `python3 tools/par.py 3` lance la suite sur 3 copies en même temps (`/tmp/g`, `/tmp/g_2`, `/tmp/g_3` ; ports 8095, 8295, 8395), chacune avec sa base et sa session ; les adresses écrites en dur dans les tests sont réécrites dans la copie de chaque groupe seulement. Groupes équilibrés sur les durées du passage précédent (`tools/test-times.json`). **31/31 en 9 min 38 s** (contre ~35 min en série) ; les serveurs locaux tournent avec `PHP_CLI_SERVER_WORKERS=4` (sinon une requête lente bloque la page).
-- **Suite complète** : `tests/run-all.sh BASE STATE` → « N réussis, N échoués ». 40 tests au 10 octobre (`ops/tests.php` + 4 tests PHP + 35 Playwright, dont `e2e_rule_parity`, `e2e_drawdown_kinds`, `e2e_money_views`, `e2e_admin_metrics`, `e2e_weekly_card` et `e2e_weekly_content`) :
+- **Suite complète** : `tests/run-all.sh BASE STATE` → « N réussis, N échoués ». 41 tests au 10 octobre (`ops/tests.php` + 4 tests PHP + 36 Playwright, dont `e2e_rule_parity`, `e2e_drawdown_kinds`, `e2e_money_views`, `e2e_admin_metrics`, `e2e_weekly_card`, `e2e_weekly_content` et `e2e_weekly_parity`) :
   - **serveur** : `ops/tests.php` (20 : forfaits, essai, gel des comptes après un passage à Free, garde d'écriture, parrainage, déblocage du jeu) ;
   - **PHP** : `presets_test.php` (41), `shot_trades_test.php` (32) ;
   - **Playwright** :
@@ -87,6 +87,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 | Préréglages, règles | `presets_test.php`, `e2e_presets_firms`, `e2e_prop_rules`, `e2e_eval_to_funded`, `e2e_payout_conditions` |
 | Date de séance, news | `e2e_session_parity`, `e2e_import_session_day`, `e2e_session_news_ui` |
 | Mon argent | `e2e_money`, `e2e_money_parity` |
+| Bilan de la semaine (moment, contenu, courriel) | `weekly_test.php`, `e2e_weekly_card`, `e2e_weekly_content`, `e2e_weekly_parity` |
 | Captures multi-trades | `shot_trades_test.php`, `e2e_shot_multi` |
 | Imports CSV | `e2e_accuracy`, `e2e_import_tradingview` |
 | Visuel, stabilité | `e2e_visual_fit`, `e2e_scroll_stable`, `e2e_no_jumps`, `e2e_redraw_no_replay` |
@@ -275,7 +276,12 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 ### Brief 01 — étape 5 (bilan du vendredi), en lots
 - **Lot 1 : le moment** (`GameV2b::openWeek($uid)`, `tests/weekly_test.php`, `tests/e2e_weekly_card.py`). Le bilan d'une semaine est prêt à la fin de son **dernier jour de trading** (vendredi, ou jeudi si le vendredi est férié) : **dès que la revue de ce jour est faite**, sinon à la **clôture de 17 h ET** ; il reste jusqu'au dimanche 23 h 59 ET, heure de New York quel que soit le fuseau du trader. **Seulement s'il y a au moins un trade dans la semaine.** Il prend la place de l'étape suivante dans « Ta routine du jour » (« Ta semaine est prête · Voir mon bilan », seul bouton bleu ; aussi sur la carte « marché fermé » du week-end). **Une seule notification** « Ta semaine est prête » par semaine (`g:g_weekly:<semaine>:<jour>`), aucune si le bilan a déjà été ouvert ; plus de condition de déblocage pour le bilan lui-même (le questionnaire, la découverte et le coffre gardent leur déblocage). Ouvrir le bilan (`GET api/game/weekly`) le marque vu (`game_analytics` `weekly_opened`).
 - **Lot 2 : le contenu** du premier écran (`weekBrief()` dans `game.js`, `tests/e2e_weekly_content.py`) : streak de journées balayées, **score de discipline de la semaine** (moyenne des scores de checklist des trades, `tDisc`), **journées balayées sur jours tradés**, **meilleure habitude** (question de la checklist la plus souvent « oui », 2 réponses au moins), **un point à travailler** (la moins souvent « oui », formulé « Vise un « oui » à … »), **payouts reçus** de la semaine (payés, argent réel), plus les anneaux des 5 jours. **Plus aucun P&L** sur cet écran (avant : P&L net, taux de réussite, meilleur / pire jour en dollars) : aucun montant simulé présenté comme de l'argent gagné. Le questionnaire, la découverte et le coffre suivent, inchangés.
-- Restent : lot 3 (courriel « Ta semaine » à 17 h 30 ET si pas ouvert), lot 4 (carte de partage sans dollars par défaut).
+- **Lot 3 : le courriel « Ta semaine »** (`game/weekly-mail.php`, classe `GameWeeklyMail`, appelée par `game/cron.php` toutes les 15 min ; `tests/weekly_test.php`, `tests/e2e_weekly_parity.py`).
+  - **Quand** : dès **17 h 30 ET le dernier jour de trading** de la semaine (jeudi si le vendredi est férié), ou plus tard jusqu'au dimanche 23 h 59 si le cron l'a manqué ; **seulement si le bilan est prêt (au moins un trade) et pas encore ouvert dans l'app** ; **une fois par semaine** (table `weekly_emails`, écrite avant l'envoi : jamais deux courriels, même si deux passages du cron se chevauchent ; un envoi raté est noté dans le journal d'erreurs et n'est pas relancé). Sans adresse ou compte désactivé : rien. Langue : `users.lang`.
+  - **Contenu** : les chiffres du premier écran du bilan (streak, discipline, journées balayées sur jours tradés, meilleure habitude, point à travailler, payouts reçus), calculés côté serveur par `GameWeeklyMail::brief()` avec les règles de `weekBrief()` ; `e2e_weekly_parity` compare les deux sur les mêmes trades, en FR / EN / ES. Aucun P&L. Bouton « Voir mon bilan » vers Aujourd'hui. Les questions par défaut sont traduites par la table `QS_TR` (reprise des fichiers de langue) : **à mettre à jour si une question par défaut change**. Égalité entre deux questions : départagée par l'identifiant de la question, des deux côtés (avant, par l'ordre des trades dans l'app).
+  - **Lien « Ne plus recevoir le bilan par courriel »** en bas, exigé par la LCAP (loi canadienne anti-pourriel) pour ce type de courriel, et en-tête `List-Unsubscribe` (désinscription en un clic des applications de courriel) : `api/email/weekly?t=<jeton>` (table `email_prefs`, un jeton par trader, sans connexion) affiche une page avec un seul bouton, puis « La recevoir à nouveau ». La route est placée avant le contrôle CSRF : les applications de courriel postent sans l'en-tête de l'app.
+  - `sweep_mail()` a quitté `api.php` pour `notify/mail.php` (avec un 5ᵉ paramètre pour des en-têtes en plus) ; le courriel de mot de passe ne change pas. Tables créées toutes seules : `weekly_emails`, `email_prefs`.
+- Reste : lot 4 (carte de partage sans dollars par défaut).
 
 ### Brief 01 — étape 4 (voir ce qui se passe chez les traders)
 - **Erreurs JS** : déjà envoyées par `ux.js` §15 (`api/client-error`, 5 par page au plus : message, fichier:ligne, page, navigateur, version de l'app ; jamais de contenu de trade). Nouveau : Admin › Tableau de bord les **regroupe par message sur 30 jours** (traders touchés, nombre de fois, dernière fois, pages, navigateurs résumés « Safari iOS 17 », versions).
@@ -319,6 +325,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ### État des tests
 - PHP : `presets_test.php` 41/41, `shot_trades_test.php` 32/32.
+- **Brief 01, étape 5, lots 1 à 3 : tous réussis** (suite répartie, 8 min 41 s, un samedi avec `SWEEP_GAME_NOW` = vendredi 15 h ET), sans « RETRY » ; `weekly_test.php` 44/44, `e2e_weekly_parity` identique en FR / EN / ES.
 - **Série complète sur base neuve (Mac, PHP 8.5) : 31/31 avant l'étape 2 et 31/31 après** (en série puis en suite répartie), sans « RETRY ».
 - **Étape 4 : 31/31** (suite répartie, 8 min 11 s), sans « RETRY » ; `tools/numfmt.py` ne trouve plus de format anglais en FR/ES (hors prix et numéro de version) ; aucune boucle de réécriture (mutations au repos identiques en EN, FR, ES).
 - **Brief 01, étape 1 : 31/31** (suite répartie, 8 min 14 s, un vendredi soir avec `SWEEP_GAME_NOW` = vendredi 15 h ET), sans « RETRY ». `e2e_presets_firms` a échoué une fois sous la charge des 3 groupes (clic pendant une transition), puis passé seul 2 fois et dans la suite complète suivante : à surveiller.
@@ -350,7 +357,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Captures réelles (Lucid, Tradesea) à essayer en ligne ; import « Performance » de Tradovate sans la règle de 18 h ET.
 
 ### En ligne, de ton côté
-- SMTP dans `config.php`.
+- SMTP dans `config.php` (le courriel « Ta semaine » passe aussi par lui) ; `app_url` dans `config.php` sert aux liens du courriel (sinon https://app.makeitsweep.com).
 - Tâches Cron : `game/cron.php` toutes les 15 min, `chart/cron.php` toutes les heures, `presets/cron.php` le lundi à 5 h.
 - `GAME_RELEASE_DATE` et `backup-config.php`.
 - Clé Gemini et `model_vision` dans `sweep-private/ai-config.php`.

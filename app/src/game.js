@@ -1395,8 +1395,9 @@
     const qs = ((S.settings && S.settings.questions) || []), qText = (id) => { const q = qs.find((x) => x.id === id); const t0 = q ? q.text : id; return typeof tr0 === 'function' ? tr0(t0) : t0; };
     const per = {}; tr.forEach((x) => Object.entries(x.discipline || {}).forEach(([k, v]) => { if (v !== 'y' && v !== 'n') return; const o = per[k] || (per[k] = { y: 0, n: 0 }); o[v === 'y' ? 'y' : 'n']++; }));
     const rows = Object.entries(per).map(([k, o]) => ({ k, y: o.y, n: o.y + o.n, rate: o.y / (o.y + o.n) })).filter((r) => r.n >= 2);
-    const best = rows.slice().sort((a, b) => b.rate - a.rate || b.n - a.n)[0] || null;
-    const work = rows.filter((r) => r.y < r.n).sort((a, b) => a.rate - b.rate || b.n - a.n)[0] || null;
+    const byK = (a, b) => (a.k < b.k ? -1 : a.k > b.k ? 1 : 0);   // same order as the « Your week » email (game/weekly-mail.php)
+    const best = rows.slice().sort((a, b) => b.rate - a.rate || b.n - a.n || byK(a, b))[0] || null;
+    const work = rows.filter((r) => r.y < r.n).sort((a, b) => a.rate - b.rate || b.n - a.n || byK(a, b))[0] || null;
     const M2 = window.SweepMoney, sun = add(m, 6);
     const pay = (S.payouts || []).filter((p) => (M2 ? M2.pState(p) === 'paid' : p.status === 'paid')).filter((p) => { const d = M2 ? M2.pPaidOn(p) : (p.payment_date || p.date); return d && d >= m && d <= sun; })
       .reduce((a, p) => a + (M2 ? M2.pNet(p) : (p.net_c || p.amount_c || 0)), 0);
@@ -2054,7 +2055,7 @@
     };
   }
   paint();
-  window.SweepGame = { refresh: () => load(true), openPlan, openReview,
+  window.SweepGame = { refresh: () => load(true), openPlan, openReview, weekBrief,
     // the plan first (once a day) before a new trade — used by the screenshot way of adding a trade too
     state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
     planFirst: (then) => { if (!document.getElementById('gSheet') && planGateNeeded()) { openPlan(G.today.day, { then }); return true; } return false; }, openJournal: () => openJournal(), openGoal: () => openGoalQuestions(), t,

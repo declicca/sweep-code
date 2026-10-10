@@ -10,7 +10,7 @@ BASE=${1:-http://127.0.0.1:8095}; STATE=${2:-/tmp/show_state.json}
 cd "$(dirname "$0")/.."
 CORE="e2e_session_parity e2e_accuracy e2e_clarity e2e_a11y_names e2e_import_session_day e2e_delete_undo_copy_dates e2e_session_news_ui
 e2e_presets_firms e2e_prop_rules e2e_isolation e2e_eval_to_funded e2e_payout_conditions e2e_live_accounts
-e2e_acceptance e2e_no_english_in_fr_es e2e_redraw_no_replay e2e_no_jumps e2e_quiet_sync e2e_history_back e2e_rows_open e2e_plan_journal e2e_import_tradingview e2e_visual_fit e2e_money e2e_money_parity e2e_shot_multi e2e_scroll_stable e2e_realnet e2e_lot_a e2e_rule_parity e2e_drawdown_kinds e2e_money_views e2e_admin_metrics e2e_weekly_card e2e_weekly_content"
+e2e_acceptance e2e_no_english_in_fr_es e2e_redraw_no_replay e2e_no_jumps e2e_quiet_sync e2e_history_back e2e_rows_open e2e_plan_journal e2e_import_tradingview e2e_visual_fit e2e_money e2e_money_parity e2e_shot_multi e2e_scroll_stable e2e_realnet e2e_lot_a e2e_rule_parity e2e_drawdown_kinds e2e_money_views e2e_admin_metrics e2e_weekly_card e2e_weekly_content e2e_weekly_parity"
 pass=0; fail=0; failed=""; log=${TMPDIR:-/tmp}/sweep-run-all.log; : > "$log"
 # SWEEP_TEST_DB (SQLite of the dev server): sign-up attempts are cleared before each test (the tests create many traders)
 reset_attempts() { [ -n "$SWEEP_TEST_DB" ] && php -r '$p=new PDO("sqlite:".getenv("SWEEP_TEST_DB")); try { $p->exec("DELETE FROM attempts"); } catch (Throwable $e) {}' 2>/dev/null; return 0; }
