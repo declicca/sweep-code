@@ -31,10 +31,11 @@ def ok(c, what):
     print(('ok   ' if c else 'FAIL ') + what); fails += 0 if c else 1
 def png_size(raw): return struct.unpack('>II', raw[16:24]) if raw[:8] == b'\x89PNG\r\n\x1a\n' else (0, 0)
 sp = lambda s: re.sub(r'[  ]', ' ', s)
-# what sticks out on the right (elements clipped by a scrolling row or inside a fixed layer don't count)
+# what sticks out on the right (elements clipped by a scrolling row or inside a fixed layer don't count; the app clips
+# html / body with overflow-x:clip, so the trader never gets a sideways scroll, but the content is cut)
 WIDE = """(()=>{ const W = document.documentElement.clientWidth, out = [];
   const name = (e) => e.tagName.toLowerCase() + '.' + String(e.className).trim().split(/\\s+/).slice(0, 2).join('.');
-  const inside = (e) => { for (let x = e; x; x = x.parentElement) { const c = getComputedStyle(x); if (c.position === 'fixed' || (x !== e && c.overflowX !== 'visible' && x.getBoundingClientRect().right <= W + .5)) return true; } return false; };
+  const inside = (e) => { for (let x = e; x; x = x.parentElement) { const c = getComputedStyle(x); if (x === document.body) break; if (c.position === 'fixed' || (x !== e && c.overflowX !== 'visible' && x.getBoundingClientRect().right <= W + .5)) return true; } return false; };   // body / html clip the page itself: not a scrolling row
   document.querySelectorAll('body *').forEach((e) => {
     const r = e.getBoundingClientRect(); if (!r.width || inside(e)) return;
     if (r.right > W + .5) out.push(name(e) + ' ' + Math.round(r.right) + 'px');
@@ -44,10 +45,10 @@ WIDE = """(()=>{ const W = document.documentElement.clientWidth, out = [];
   const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);   // text running out of its box
   for (let n = tw.nextNode(); n; n = tw.nextNode()) { if (!n.textContent.trim() || inside(n.parentElement)) continue; const g = document.createRange(); g.selectNodeContents(n); const r = g.getBoundingClientRect();
     if (r.right > W + .5) out.push('text « ' + n.textContent.trim().slice(0, 30) + ' » in ' + name(n.parentElement) + ' ' + Math.round(r.right) + 'px'); }
-  return { sw: document.documentElement.scrollWidth, w: innerWidth, out: out.slice(-8) }; })()"""
+  return { sw: document.documentElement.scrollWidth, w: innerWidth, cw: W, out: out.slice(-8) }; })()"""
 async def no_hscroll(pg, what):
     d = await pg.evaluate(WIDE)
-    ok(d['sw'] <= d['w'], what + ('' if d['sw'] <= d['w'] else f" — page {d['sw']}px for {d['w']}px: {d['out']}"))
+    ok(d['sw'] <= d['w'], what + ('' if d['sw'] <= d['w'] else f" — page {d['sw']}px for {d['w']}px (usable {d['cw']}px): {d['out']}"))
 async def main():
   async with async_playwright() as p:
     br = await p.chromium.launch()
