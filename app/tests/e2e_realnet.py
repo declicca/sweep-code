@@ -131,9 +131,10 @@ def case_a(p, lang, phone, per, exp):
   # My money: same period → same net, the « Estimated » tags
   if per == 'date': pg.evaluate("(f)=>{U.mper='custom'; U.mcustom={from:f,to:todayStr()}; saveU()}", d0)
   else: pg.evaluate("(p)=>{U.mper=p; saveU()}", per)
-  pg.evaluate("location.hash='#payouts'"); pg.wait_for_selector('.mny-net', timeout=8000); pg.wait_for_timeout(500)
+  pg.evaluate("U.mview='analysis'; location.hash='#payouts'"); pg.wait_for_selector('.mny-net', timeout=8000); pg.wait_for_timeout(500)   # the net is on « Analysis »
   mn = digits(pg.locator('.mny-net .tot b').inner_text())
   ok(mn.lstrip('+') == shown.lstrip('+'), f'{tag} My money shows the same real net ({mn} / {shown})')
+  tap(pg, '[data-mny-view=entries]'); pg.wait_for_selector('.mny-actions', timeout=8000); pg.wait_for_timeout(400)   # the entries are on « My entries »
   ok(pg.locator('.mny .rn-est').count() == 5, f'{tag} 5 entries tagged « Estimated » in My money ({pg.locator(".mny .rn-est").count()})')
   print(f'      {tag}: {taps} taps, {secs:.0f} s from the profile to the real net (automated)')
   ok(not errs, f'{tag} no page error ({errs[:2]})')
@@ -180,7 +181,7 @@ def case_d(p):
   tap(pg, '[data-rn=start]'); tap(pg, '[data-rn=buys]')
   pg.locator(f'[data-rn-q="{ap}|evaluation"][data-d="1"]').click(); pg.locator(f'[data-rn-q="{ap}|evaluation"][data-d="1"]').click()
   pg.fill(f'[data-rn-p="{ap}|evaluation"]', '100'); tap(pg, '[data-rn=payouts]'); tap(pg, '[data-rn=save]'); tap(pg, '[data-rn=close]')
-  pg.evaluate("U.mper='year'; saveU(); location.hash='#payouts'"); pg.wait_for_selector('.mny-net', timeout=8000); pg.wait_for_timeout(600)
+  pg.evaluate("U.mper='year'; U.mview='entries'; saveU(); location.hash='#payouts'"); pg.wait_for_selector('.mny-actions', timeout=8000); pg.wait_for_timeout(600)
   eid = f'est-{ap}-evaluation'
   tap(pg, f'.mny-row[data-id="{eid}"]'); pg.wait_for_selector('form.rn-estf', timeout=4000)
   pg.fill('form.rn-estf [name=amount]', '250'); pg.evaluate("document.querySelector('form.rn-estf').requestSubmit()"); pg.wait_for_timeout(700)

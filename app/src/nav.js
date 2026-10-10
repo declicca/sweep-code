@@ -4756,7 +4756,8 @@ document.addEventListener('click', (e) => { const q = e.target.closest && e.targ
 new window.SweepMO(() => {
   let want = false; try { want = sessionStorage.getItem('sw.openPayout') === '1'; } catch (x) { /* private */ }
   if (!want || !/^#payouts/.test(location.hash || '')) return;
-  const b = document.querySelector('#main .nav-pz-b[data-k="payout"]'); if (!b) return;
+  const b = document.querySelector('#main .nav-pz-b[data-k="payout"]');
+  if (!b) { const tab = document.querySelector('#main [data-mny-view="entries"]:not(.on)'); if (tab) tab.click(); return; }   // « My money » shown on « Analysis »: the add buttons are on « My entries »
   try { sessionStorage.removeItem('sw.openPayout'); } catch (x) { /* private */ }
   b.click(); setTimeout(() => { const f = document.querySelector('#main form[data-form="payout"]'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
 }).observe(document.body, { childList: true, subtree: true });

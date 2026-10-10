@@ -68,7 +68,8 @@ async def main():
     async def go(h, name):
       await pg.evaluate(f"location.hash='{h}'"); await pg.wait_for_timeout(1800); shots[name] = await pg.evaluate("document.getElementById('main').innerText")
     await pg.evaluate("U.mper='all'; saveU()")
-    await go('#payouts', 'money'); await go('#accounts', 'accounts'); await go('#analytics', 'stats'); await go('#dashboard', 'today')
+    await pg.evaluate("U.mview = 'analysis'")   # « My money » → Analysis: net real, ROI, indicators (« My entries » holds the lists)
+    await go('#payouts', 'money'); await pg.evaluate("U.mview = 'entries'"); await go('#accounts', 'accounts'); await go('#analytics', 'stats'); await go('#dashboard', 'today')
     ok('2\u202f617' in shots['money'] and '422 %' in shots['money'] and '50 %' in shots['money'], 'My money shows net real +2,617, ROI 422 %, passed 50 %')
     ok(all(g in shots['accounts'] for g in ['LIVE', 'FINANCÉS', 'ÉVALUATIONS']) or all(g.lower() in shots['accounts'].lower() for g in ['Live', 'Financés', 'Évaluations']), 'Accounts grouped Live / Funded / Evaluations')
     ok('Réel' in shots['today'] and 'Mon argent' in shots['today'], 'Today: « My money » card with « Real »')

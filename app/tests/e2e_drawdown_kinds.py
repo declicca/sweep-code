@@ -7,9 +7,10 @@ Sweep — drawdown by kind of account (dev environment with Playwright):
  Live accounts without firm rules: the most you can lose is the live balance itself (some lives start at $0); the room is
  the current balance, never negative. A live account with its firm's own rules (Topstep Live: a fixed floor) keeps them.
  The room is the same on Today, in the Accounts list and on the account's page.
-Part 1 injects accounts and trades in memory (nothing saved); part 2 saves two accounts in the test database, then removes them.
+Part 1 injects accounts and trades in memory (nothing saved); part 2 uses a new trader of its own (no other account:
+the Today card shows 6 accounts in good standing at most).
 """
-import asyncio, re, sys
+import asyncio, json, random, re, sys
 from playwright.async_api import async_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
@@ -59,7 +60,17 @@ async def main():
       bad = {k: (v, got.get(k)) for k, v in want.items() if got.get(k) != v}
       ok(not bad, name + (f'  {bad}' if bad else ''))
     print('— 2. the same room on every screen')
-    await pg.evaluate("""(()=>{const fid=(S.accounts[0]||{}).firm_id||'';
+    ok(not errs, 'no browser error (part 1)' + ('' if not errs else ': ' + ' | '.join(errs[:3])))
+    await ctx.close()
+    ctx = await br.new_context(base_url=B, locale='fr-CA', viewport={'width': 1300, 'height': 900})
+    await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+    H = {'X-Requested-With': 'fetch', 'Content-Type': 'application/json'}; n = 'dk%06d' % random.randint(0, 999999)
+    r = await ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': n + '@t.dev', 'consent': True, 'elapsed': 6000}), headers=H)
+    ok(r.ok, f'a new trader of its own ({r.status})')
+    await ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Dana', 'last_name': 'Test'}), headers=H)
+    pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    await pg.goto(B + '/#dashboard'); await pg.wait_for_timeout(2500)
+    await pg.evaluate("""(()=>{put('firms',{id:'f-dk',name:'Topstep'}); const fid='f-dk';
       put('accounts',{id:'dk-fun',firm_id:fid,name:'DK Funded 50K',starting_balance_c:5000000,status:'active',phase:'funded',money_type:'funded',rules:{dd_c:200000,dd_type:'eod',dd_lock:true}});
       put('accounts',{id:'dk-live',firm_id:fid,name:'DK Live',starting_balance_c:0,status:'active',phase:'live',money_type:'live',rules:{}});
       [['2026-10-01',300000],['2026-10-02',300000]].forEach(([d,c],i)=>put('trades',{id:'dk-f'+i,account_id:'dk-fun',date:d,session_date:true,entry_time:'10:00:00',exit_time:'10:10:00',instrument:'NQ',direction:'long',contracts:1,pnl_c:c,pnl_manual:true}));
@@ -76,8 +87,7 @@ async def main():
       await pg.evaluate(f"location.hash='#account/{aid}'"); await pg.wait_for_timeout(1600)
       page = await pg.evaluate("(()=>{const r=[...document.querySelectorAll('#main .rule')].find(x=>/Marge de drawdown/.test(x.textContent)); return r?r.querySelector('b').textContent:''})()")
       ok(sp(page).strip() == room, f'{aid} account page: « Marge de drawdown {sp(page).strip()} » (expects {room})')
-    await pg.evaluate("""(()=>{['dk-f0','dk-f1','dk-l0','dk-l1'].forEach(id=>remove('trades',id)); ['dk-fun','dk-live'].forEach(id=>remove('accounts',id));})()"""); await pg.wait_for_timeout(1200)
-    ok(not errs, 'no browser error' + ('' if not errs else ': ' + ' | '.join(errs[:3])))
+    ok(not errs, 'no browser error (part 2)' + ('' if not errs else ': ' + ' | '.join(errs[:3])))
     await br.close()
     print('all passed' if not fails else f'{fails} failed'); sys.exit(1 if fails else 0)
 asyncio.run(main())

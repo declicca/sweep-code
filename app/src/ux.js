@@ -1594,6 +1594,12 @@
     const per = P(), o = viewOpts(), from = o.from, to = o.to;
     const m = M.moneyOf(o);
     const r = m.real, i = m.ind;
+    // « My entries » (what you do: add, mark paid) and « Analysis » (what it means), Mateo 9 Oct: the add buttons in sight
+    const vx = ({ en: { entries: 'My entries', analysis: 'Analysis', addPay: 'Add a payout', addExp: 'Add an expense', pay: 'Payout', exp: 'Expense' },
+      fr: { entries: 'Mes entrées', analysis: 'Analyse', addPay: 'Ajouter un payout', addExp: 'Ajouter une dépense', pay: 'Payout', exp: 'Dépense' },
+      es: { entries: 'Mis entradas', analysis: 'Análisis', addPay: 'Añadir un payout', addExp: 'Añadir un gasto', pay: 'Payout', exp: 'Gasto' } })[L] || {};
+    const mv = U.mview === 'analysis' ? 'analysis' : 'entries';
+    const seg2 = `<div class="seg mny-view" role="tablist">${[['entries', vx.entries], ['analysis', vx.analysis]].map(([k, l]) => `<button type="button" role="tab" aria-selected="${mv === k}" class="${mv === k ? 'on' : ''}" data-mny-view="${k}">${l}</button>`).join('')}</div>`;
     const seg = [['month', x.month], ['quarter', x.quarter], ['year', x.year], ['all', x.all], ['custom', x.dates]].map(([k, l]) => `<button type="button" class="${per === k ? 'on' : ''}" data-mny-per="${k}">${l}</button>`).join('');
     const custom = per === 'custom' ? `<div class="mny-dates"><label class="f"><span>${x.from}</span><input type="date" data-mny-d="from" value="${esc2((U.mcustom || {}).from || '')}"></label><label class="f"><span>${x.to}</span><input type="date" data-mny-d="to" value="${esc2((U.mcustom || {}).to || '')}"></label></div>` : '';
     const payRows = m.payouts.slice().sort((a, b) => (M.pPaidOn(b) || '').localeCompare(M.pPaidOn(a) || '')).map((p) => U.editP === p.id ? `<li class="pz-edit">${payoutForm(p)}</li>` : (() => {
@@ -1610,6 +1616,15 @@
     return `<div class="mny" data-noi18n>
       ${window.SweepTypeSeg ? `<div class="mny-typerow">${SweepTypeSeg()}</div>` : ''}
       <div class="mny-top"><div class="mny-tsw"><span class="mny-tsl">${({ fr: 'Période', es: 'Período' })[L] || 'Period'}</span><div class="seg mny-per" role="group">${seg}</div></div><button type="button" class="btn" data-mny="csv">${x.export}</button></div>${custom}
+      ${seg2}
+      ${mv === 'entries' ? `<div class="mny-pane" data-mny-pane="entries">
+        <div class="mny-actions"><button type="button" class="btn primary nav-pz-b" data-k="payout" data-mny="addP" aria-expanded="${!!U.addP}" aria-label="${vx.addPay}">+ <span class="l">${vx.addPay}</span><span class="s">${vx.pay}</span></button><button type="button" class="btn" data-mny="addE" aria-expanded="${!!U.addE}" aria-label="${vx.addExp}">+ <span class="l">${vx.addExp}</span><span class="s">${vx.exp}</span></button></div>
+        ${U.addP ? `<section class="surface mny-addform"><div class="pz-add">${payoutForm()}</div></section>` : ''}${U.addE ? `<section class="surface mny-addform"><div class="pz-add">${expenseForm()}</div></section>` : ''}
+        <div class="mny-cols"><div>
+          <section class="surface"><div class="mny-h"><b>${x.payouts}</b></div>${payRows ? `<ul class="pz-list">${payRows}</ul>` : `<p class="muted">${x.noP}</p>`}</section>
+        </div><div>
+          <section class="surface"><div class="mny-h"><b>${x.expenses}</b></div>${expRows ? `<ul class="pz-list">${expRows}</ul>` : `<p class="muted">${x.noE}</p>`}</section>
+        </div></div></div>` : `<div class="mny-pane" data-mny-pane="analysis">
       <section class="surface mny-net"><div class="mny-h"><b>${x.netReal}</b>${TAG('real')}</div>
         <div class="mny-wf"><div><span>${x.payNet}</span><b class="${r.payouts ? 'pos' : ''}">${mS(r.payouts)}</b></div><div><span>${x.livePnl}</span><b class="${r.live >= 0 ? 'pos' : 'neg'}">${mS(r.live)}</b></div><div><span>${x.exp}</span><b class="neg">${mS(-r.expenses)}</b></div><div class="tot ${r.net >= 0 ? 'up' : 'down'}"><span>${x.eq}</span><b class="${r.net >= 0 ? 'pos' : 'neg'}">${mS(r.net)}</b></div></div>
         <p class="mny-note">${x.roi} : <b>${pct(m.roiProp)}</b>${r.nPending ? ' · ' + x.pend.replace('{a}', mU(r.pending)) : ''}</p></section>
@@ -1623,11 +1638,8 @@
       </div><div>
         <section class="surface"><div class="mny-h"><b>${x.byFirm}</b></div>${firmRows ? `<div class="scroll-x"><table class="tbl mny-tbl"><thead><tr><th>${x.firm}</th><th>${x.spent}</th><th>${x.recv}</th><th>${x.net}</th><th>${x.roiC}</th><th>${x.counts}</th></tr></thead><tbody>${firmRows}</tbody></table></div>` : '<p class="muted">—</p>'}
           ${r.live ? `<p class="mny-note">${x.liveNote}</p>` : ''}</section>
-        <section class="surface"><div class="mny-h"><b>${x.payouts}</b><button type="button" class="link" data-mny="addP">${x.add}</button></div>
-          ${U.addP ? `<div class="pz-add">${payoutForm()}</div>` : ''}${payRows ? `<ul class="pz-list">${payRows}</ul>` : `<p class="muted">${x.noP}</p>`}</section>
-        <section class="surface"><div class="mny-h"><b>${x.expenses}</b><button type="button" class="link" data-mny="addE">${x.add}</button></div>
-          ${U.addE ? `<div class="pz-add">${expenseForm()}</div>` : ''}${expRows ? `<ul class="pz-list">${expRows}</ul>` : `<p class="muted">${x.noE}</p>`}</section>
-      </div></div></div>`;
+      </div></div></div>`}
+    </div>`;
   }
   vPayouts = function () {
     if (!S.accounts.length) return onboarding();
@@ -1654,8 +1666,9 @@
   const csvYear = csvView;   // (older name, kept for the tests and the CSV menu)
   window.SweepMoney.csvYear = csvYear;
   document.addEventListener('click', (ev) => {
-    const b = ev.target.closest && ev.target.closest('[data-mny-per], [data-mny]'); if (!b) return;
+    const b = ev.target.closest && ev.target.closest('[data-mny-per], [data-mny-view], [data-mny]'); if (!b) return;
     if (b.dataset.mnyPer) { U.mper = b.dataset.mnyPer; if (typeof saveU === 'function') saveU(); render(); return; }
+    if (b.dataset.mnyView) { U.mview = b.dataset.mnyView; if (typeof saveU === 'function') saveU(); render(); return; }
     const k = b.dataset.mny;
     if (k === 'csv') csvView();
     else if (k === 'addP') { U.addP = !U.addP; U.editP = null; render(); }
@@ -2109,7 +2122,7 @@
     r.innerHTML = `<span>${esc2(x.remind.replace('{f}', firmName(est.firm_id) || '—'))}</span><button type="button">${x.adjust}</button>`;
     document.body.append(r);
     const end = setTimeout(() => r.remove(), 8000);
-    r.querySelector('button').addEventListener('click', () => { clearTimeout(end); r.remove(); U.editE = est.id; U.addE = false; U.mper = 'all'; location.hash = '#payouts'; render(); });
+    r.querySelector('button').addEventListener('click', () => { clearTimeout(end); r.remove(); U.editE = est.id; U.addE = false; U.mper = 'all'; U.mview = 'entries'; location.hash = '#payouts'; render(); });
   }
 
   const appRender = render;
