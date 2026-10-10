@@ -11,7 +11,7 @@ from pages7 import page_tools, page_position, page_drawdown, page_consistency
 from pages8 import FIRMS, make_firm_page
 from pages11 import page_import
 from pages7 import page_expectancy, page_roi, page_payoutcalc
-import pages12, pages13, pages14
+import pages12, pages13, pages14, pages17
 import pages9, re as _re
 from pages2 import page_changelog as _old_changelog
 def page_changelog_new(lang, t):
@@ -27,10 +27,11 @@ for _s,_n in FIRMS: PAGES[_s] = make_firm_page(_s,_n)
 PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calculator.html":page_roi,"payout-calculator.html":page_payoutcalc,
               "futures-contracts.html":pages12.page_contracts,"release-dates.html":pages13.page_release_hub,"glossary.html":pages13.page_glossary,
               "futures-market-hours.html":pages13.page_hours,"press-kit.html":pages13.page_press,
-              "trading-templates.html":pages14.page_templates,"how-to-choose-a-trading-journal.html":pages14.page_choose,"trading-journal-routine.html":pages14.page_routine})
+              "trading-templates.html":pages14.page_templates,"how-to-choose-a-trading-journal.html":pages14.page_choose,"trading-journal-routine.html":pages14.page_routine,
+              "sweep-vs-tradezella.html":pages17.page_vs_tradezella})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
-PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","topstep-trading-journal.html":"0.8","apex-trader-funding-journal.html":"0.8","take-profit-trader-journal.html":"0.8","lucid-trading-journal.html":"0.8","myfundedfutures-journal.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7"}
+PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","topstep-trading-journal.html":"0.8","apex-trader-funding-journal.html":"0.8","take-profit-trader-journal.html":"0.8","lucid-trading-journal.html":"0.8","myfundedfutures-journal.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core

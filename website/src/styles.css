@@ -1469,3 +1469,17 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
     background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--gain) 12%,transparent),transparent 60%)}
   .grid>div:hover::before,.grid>a:hover::before,.tool-card:hover::before,.plat:hover::before,.ncard:hover::before,.plan:hover::before,.ptile2:hover::before{opacity:1}
 }
+
+/* comparison pages (Sweep vs …): two columns, Sweep highlighted, fits a phone without sideways scroll */
+.cmp.two{min-width:0;table-layout:fixed}
+.cmp.two th,.cmp.two td{text-align:left;vertical-align:top}
+.cmp.two td:nth-child(3){background:none}
+.cmp.two td:nth-child(2){background:color-mix(in srgb,var(--gain) 4%,transparent);color:var(--text)}
+.cmp.two tbody th{width:32%}
+.vs-picks>div h3{margin:0}
+.vs-picks .list{margin:16px 0 0;padding:0}
+.vs-note{margin-top:16px}
+@media (max-width:860px){
+  .cmp.two tbody th,.cmp.two thead th:first-child{position:static;min-width:0;box-shadow:none;width:30%}
+  .cmp.two th,.cmp.two td{padding:12px 10px;font-size:13px;overflow-wrap:anywhere}
+}

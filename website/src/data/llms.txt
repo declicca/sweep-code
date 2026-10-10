@@ -31,6 +31,9 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Free trading templates](https://makeitsweep.com/trading-templates)
 - [How to choose a trading journal](https://makeitsweep.com/how-to-choose-a-trading-journal)
 
+## Compare
+- [Sweep vs TradeZella](https://makeitsweep.com/sweep-vs-tradezella): prices, free plan, trade import, prop firm rules, replay and backtesting, side by side
+
 ## Company
 - [About](https://makeitsweep.com/about)
 - [Security](https://makeitsweep.com/security)
