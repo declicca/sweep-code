@@ -2426,3 +2426,12 @@ html body #main .mny-addform{padding-top:18px}
 @media (max-width:860px){html body #main .mny-view{max-width:none}html body #main .mny-actions{max-width:none}html body #main .mny-actions .btn{height:48px;padding:0 10px}}
 html body #main .mny-actions .btn .s{display:none}
 @media (max-width:600px){html body #main .mny-actions .btn .l{display:none}html body #main .mny-actions .btn .s{display:inline}}
+
+/* Admin dashboard (brief 01 step 4): the week / source filters and the JS errors table */
+html body #main .ux-brief{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+html body #main .ux-bf{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+html body #main .ux-bf .f{min-width:220px;flex:0 1 280px}
+html body #main .ux-errs td{vertical-align:top;font-size:13px}
+html body #main .ux-err-m{max-width:420px;word-break:break-word}
+html body #main .ux-err-m small{display:block;color:var(--muted)}
+@media (max-width:860px){html body #main .ux-bf .f{flex:1 1 100%;min-width:0}}

@@ -1331,7 +1331,11 @@ try {
             }
             json_out(404, ['error' => 'not found']);
         }
-        if ($route === 'api/admin/metrics' && $method === 'GET') { require_once __DIR__ . '/ops/metrics.php'; json_out(200, sweep_metrics(db(), __DIR__)); }
+        if ($route === 'api/admin/metrics' && $method === 'GET') {   // ?cohort=YYYY-MM-DD (Monday of the sign-up week) &source=<found_via> (brief 01 step 4)
+            require_once __DIR__ . '/ops/metrics.php';
+            $fc = (string) ($_GET['cohort'] ?? ''); $fs = substr((string) ($_GET['source'] ?? ''), 0, 40);
+            json_out(200, sweep_metrics(db(), __DIR__, ['cohort' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $fc) ? $fc : '', 'source' => $fs]));
+        }
         if ($route === 'api/admin/feedback' && $method === 'GET') json_out(200, fb_admin_list(db(), $_GET['status'] ?? null, $_GET['type'] ?? null));
         if (preg_match('#^api/admin/feedback/(\d+)$#', $route, $fm) && $method === 'POST') {
             $b = body_json(65536);

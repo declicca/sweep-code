@@ -768,8 +768,39 @@
     es: { title: 'Panel', north: 'Traders con 3+ días barridos (7 d)', active: 'Traders activos (7 d)', sign: 'Registros', act: 'Activación: 1.ª operación en 24 h', aha: '1.er día barrido en 7 días', w2: 'Semana 2: 3+ días barridos', ai: 'Coste IA', err: 'Errores (24 h)', mrr: 'Ingreso mensual estimado', src: 'Registros por fuente (30 d)', meth: 'Cómo se registran (30 d)', of: 'de {n}', today: 'hoy', d7: '7 días', js: 'navegador', php: 'servidor', none: 'aún sin datos' },
   };
   const t = () => T[LANG] || T.en;
-  let data = null, at = 0, busy = false;
+  let data = null, at = 0, busy = false, fc = '', fs = '';   // fc / fs: sign-up week and source filters (brief 01 step 4)
   const pct = (o) => (o && o.pct != null ? `${o.pct} %` : '—');
+  const BT = { en: { week: 'Sign-up week', source: 'Source (« Where did you find Sweep? »)', all: 'All', none: 'Not given', wk: 'week of {d}', traders: 'Traders: {a} of {b}',
+      d0: 'Activation: a trade on the sign-up day', d7: 'Retention D7: a trade or a review on days 7-13', d30: 'Retention D30: a trade or a review on days 30-36', swept: 'Swept days: sessions with trades, 3 rings closed (30 d)',
+      of: 'of {n}', errs: 'JS errors on traders\' devices (30 d)', msg: 'Message', tr: 'Traders', n: 'Times', last: 'Last', pages: 'Pages', br: 'Browsers', ver: 'Version', noErr: 'No error in 30 days.',
+      src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'A friend', google: 'Google', other: 'Other' } },
+    fr: { week: 'Semaine d’inscription', source: 'Source (« Où as-tu trouvé Sweep ? »)', all: 'Toutes', none: 'Non renseignée', wk: 'sem. du {d}', traders: 'Traders : {a} sur {b}',
+      d0: 'Activation : un trade le jour de l’inscription', d7: 'Rétention J7 : un trade ou une revue les jours 7 à 13', d30: 'Rétention J30 : un trade ou une revue les jours 30 à 36', swept: 'Journées balayées : séances avec trades, 3 anneaux fermés (30 j)',
+      of: 'sur {n}', errs: 'Erreurs JS chez les traders (30 j)', msg: 'Message', tr: 'Traders', n: 'Fois', last: 'Dernière', pages: 'Pages', br: 'Navigateurs', ver: 'Version', noErr: 'Aucune erreur en 30 jours.',
+      src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un ami', google: 'Google', other: 'Autre' } },
+    es: { week: 'Semana de registro', source: 'Fuente (« ¿Dónde encontraste Sweep? »)', all: 'Todas', none: 'Sin respuesta', wk: 'sem. del {d}', traders: 'Traders: {a} de {b}',
+      d0: 'Activación: una operación el día del registro', d7: 'Retención D7: una operación o una revisión los días 7 a 13', d30: 'Retención D30: una operación o una revisión los días 30 a 36', swept: 'Días barridos: sesiones con operaciones, 3 anillos cerrados (30 d)',
+      of: 'de {n}', errs: 'Errores JS en los dispositivos de los traders (30 d)', msg: 'Mensaje', tr: 'Traders', n: 'Veces', last: 'Última', pages: 'Páginas', br: 'Navegadores', ver: 'Versión', noErr: 'Ningún error en 30 días.',
+      src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un amigo', google: 'Google', other: 'Otro' } } };
+  const bt = () => BT[LANG] || BT.en;
+  const loc = () => (LANG === 'fr' ? 'fr-CA' : LANG === 'es' ? 'es' : 'en-US');
+  function briefHtml(d) {   // brief 01 step 4: the filters, the four indicators, the JS errors grouped by message
+    const y = bt(), b = d.brief; if (!b) return '';
+    const day = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
+    const opt = (v, l, cur) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`;
+    const weeks = opt('', y.all, fc) + Object.entries(b.filters.weeks || {}).map(([w, n]) => opt(w, y.wk.replace('{d}', day(w)) + ' (' + n + ')', fc)).join('');
+    const srcs = opt('', y.all, fs) + Object.entries(b.filters.sources || {}).map(([v, n]) => opt(v, (v === 'none' ? y.none : (y.src[v] || v)) + ' (' + n + ')', fs)).join('');
+    const sub = (o) => (o && o.of != null ? y.of.replace('{n}', o.of) : '');
+    const g = (d.errors && d.errors.groups_30d) || [];
+    const when = (iso) => new Date(iso).toLocaleString(loc(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const rows = g.map((e) => `<tr><td class="ux-err-m"><b>${esc(e.msg)}</b>${e.where ? `<small>${esc(e.where)}</small>` : ''}</td><td class="num">${e.traders}</td><td class="num">${e.n}</td><td>${when(e.last)}</td><td>${esc(e.pages.join(', '))}</td><td>${esc(e.browsers.join(', '))}</td><td>${esc(e.versions.join(', '))}</td></tr>`).join('');
+    return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
+        <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
+      <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}</div>
+      <h4>${y.errs}</h4>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
+  }
+  const load = () => { busy = true; apiJSON('api/admin/metrics' + (fc || fs ? '?' + new URLSearchParams({ cohort: fc, source: fs }) : '')).then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) b.innerHTML = html(d); }).catch(() => { busy = false; at = Date.now(); }); };
+  document.addEventListener('change', (e) => { const sel = e.target.closest && e.target.closest('[data-ux-mf]'); if (!sel) return; if (sel.dataset.uxMf === 'cohort') fc = sel.value; else fs = sel.value; load(); });
   const card = (label, value, sub, big) => `<div class="ux-m ${big ? 'big' : ''}"><small>${label}</small><b>${value}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
   function html(d) {
     const x = t(), list = (o) => { const e = Object.entries(o || {}); return e.length ? e.map(([k, v]) => `<li><span>${esc(k)}</span><b>${v}</b></li>`).join('') : `<li class="muted">${x.none}</li>`; };
@@ -779,7 +810,7 @@
         ${card(x.ai, '$' + d.ai.today.toFixed(2), x.today + ' · $' + d.ai.d7.toFixed(2) + ' ' + x.d7)}${card(x.err, d.errors.js_24h + d.errors.php_24h, x.js + ' ' + d.errors.js_24h + ' · ' + x.php + ' ' + d.errors.php_24h)}
         ${card(x.mrr, d.revenue.mrr != null ? '$' + d.revenue.mrr : '—', (d.revenue.subs || []).map((s) => `${s.plan} ${s.i || ''} ×${s.n}`).join(' · '))}</div>
       <div class="ux-mlists"><div><h4>${x.src}</h4><ul>${list(d.signups.by_source_30d)}</ul></div><div><h4>${x.meth}</h4><ul>${list(d.trade_methods_30d)}</ul></div><div><h4>${{ en: 'Searches with no result (30 d)', fr: 'Recherches sans résultat (30 j)', es: 'Búsquedas sin resultado (30 d)' }[LANG] || 'Searches with no result (30 d)'}</h4><ul>${list(d.search_misses_30d)}</ul></div>
-      ${d.errors.top && d.errors.top.length ? `<div><h4>${x.err}</h4><ul>${d.errors.top.map((e) => `<li><span>${esc(e.msg)}</span><b>${e.n}</b></li>`).join('')}</ul></div>` : ''}</div>`;
+      </div>${briefHtml(d)}`;
   }
   function paint() {
     if (route().v !== 'admin') return;
@@ -787,7 +818,7 @@
     let box = main.querySelector('.ux-metrics');
     if (!box) { box = document.createElement('section'); box.className = 'sec ux-metrics'; box.setAttribute('data-noi18n', ''); const anchor = main.querySelector('.page-head, h1, .ph'); if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor.nextSibling); else main.prepend(box); }
     if (data) box.innerHTML = html(data);
-    if (!busy && Date.now() - at > 60000) { busy = true; apiJSON('api/admin/metrics').then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) b.innerHTML = html(d); }).catch(() => { busy = false; at = Date.now(); }); }
+    if (!busy && Date.now() - at > 60000) load();   // with the chosen week and source
   }
   /* ───── Admin → Presets: last check, status per firm, alert after 8 days, « Check now » ───── */
   const PT2 = {
