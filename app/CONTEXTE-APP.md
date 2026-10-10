@@ -9,7 +9,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 ## 1. Architecture
 
 - **Stack** : PHP 8.1 + SQLite (`data/journal.db`), sans framework. Hébergement HostArmada (cPanel, `/home/matnsabc/app.makeitsweep.com`). Mise en ligne par `./deploy.sh app` à la racine du dépôt (rsync par SSH, simulation par défaut, `--go` pour envoyer ; il vide le cache NGINX), seulement avec l'accord de Mateo.
-- **Front** : `app.html` charge le bundle principal (`assets/app.708d6fa5c5.js`, minifié). Ce fichier est parfois patché directement par remplacement de chaînes exactes : titres, `ft()`, `mergeCopies`, partage, données d'exemple, formats de nombres FR/ES (`trText`/`pctSp`, `decl`). **Après un patch, le renommer avec sa nouvelle empreinte** (`md5 -q` → 10 premiers caractères) et mettre à jour `app.html` : `assets/` est en cache 1 an `immutable`, l'ancien nom resterait chez les visiteurs. Les modules ci-dessous l'enrichissent : ils enveloppent `render()`, `submitAccount()`, `payoutForm()`, `acctTable()`, etc., et observent le DOM.
+- **Front** : `app.html` charge le cœur `assets/app.<hash>.js`, **compilé depuis `src/app.js`** comme les autres modules (depuis le 9 oct., brief 01 étape 3 : version lisible du cœur ; les noms de fonctions sont d'origine, les petites variables locales `e, t, a…` viennent de l'ancien minifieur). **Modifier `src/app.js`, puis `sh tools/build.sh`** ; ne plus jamais patcher `assets/app.*.js` (l'empreinte du nom change toute seule au build). Les modules ci-dessous l'enrichissent : ils enveloppent `render()`, `submitAccount()`, `payoutForm()`, `acctTable()`, etc., et observent le DOM.
 
 | Élément | Rôle |
 |---|---|
@@ -30,7 +30,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ## 2. Build et livraison
 
-- **Build** : `sh ops/build-assets.sh`. Il minifie les JS de `src/` en `assets/<nom>.<hash10>.js`, regroupe tous les CSS dans **un seul** `assets/bundle.<hash>.css` (ordre dans `ops/css-order.txt`, `nav.css` en dernier) et réécrit `app.html`. Le bundle principal `app.*.js` garde son nom.
+- **Build** : `sh ops/build-assets.sh` (ou `sh tools/build.sh`, qui vérifie d'abord la syntaxe). Il minifie les JS de `src/` (dont `app.js`, le cœur) en `assets/<nom>.<hash10>.js`, regroupe tous les CSS dans **un seul** `assets/bundle.<hash>.css` (ordre dans `ops/css-order.txt`, `nav.css` en dernier ; `app.*.css` n'a pas de source dans `src/`) et réécrit `app.html`.
 - **Avant un déploiement** :
   - `node --check` sur chaque JS de `assets/` ;
   - `php -l` sur les PHP modifiés ;
@@ -265,6 +265,10 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Modifiés : `src/nav.js` (pas d'étiquette « prochaine séance » sur la routine en chargement), `src/nav.css` (en-tête d'Aujourd'hui à sa taille finale dès `html[data-home]`), `assets/fonts/Geist-Variable.woff2` et `GeistMono-Variable.woff2` (sous-ensemble), `app.html` (nouveaux noms de fichiers), `CONTEXTE-APP.md`.
 - Recompilés : `assets/bundle.7cfeabbae3.css`, `assets/nav.656d6b8284.js`, `assets/nav.a7bef0aeac.css` (remplacent `bundle.22e4b3842c.css`, `nav.6a0187b7d5.js`, `nav.d03abd2926.css`, qui peuvent rester sur le serveur).
 - Nouveau : `tools/` (environnement local, mesures, suite répartie `par.py`, originaux des polices).
+
+### Brief 01 — étape 3 (ordre dans le code), en lots
+- **Lot 1 : `src/app.js`** (cœur lisible, 9 974 lignes) compilé par `ops/build-assets.sh`. Vérifié : 32/32, captures A/B identiques au pixel (8 pages × 2 tailles × FR foncé / ES clair), vitesse identique (−3 Ko).
+- **Inventaire** : 25 fonctions du cœur remplacées ou enveloppées à 59 endroits (`render` × 23 : chaque module y ajoute sa partie de l'écran ; `payoutForm`, `expenseForm`, `submitExpense` × 3 ; `submitPayout`, `vPayouts`, `submitAccount`, `openTicket`, `calDays` × 2 ; `acctTable`, `acctOK`, `parseTradovate`, `impGo`, `deleteAccount`…). Les formulaires de payout / dépense et `vPayouts` sont ceux de « Mon argent » (`ux.js`, chantier séparé selon le brief 02).
 
 ### Brief 01 — étape 2 (suite de tests qui protège)
 - `tests/setup.py` remplace `tools/prof.py` ; `run-all.sh` le lance, puis `ops/tests.php` (nouveau dans la suite), les tests PHP et les 29 tests Playwright : **32 au total**.

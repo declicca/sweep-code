@@ -2,11 +2,11 @@
 # Sweep — build the served files of our modules from the readable sources in src/.
 # Each module is minified (terser for JS, csso without restructuring for CSS) and named with a content hash.
 # CSS: all the style sheets are joined, in order, into ONE file (assets/bundle.<hash>.css) — one request instead of seven.
-# JS: app.html loads the modules in order; chart.js is loaded on demand (nav.js: window.SWEEP_LAZY).
+# JS: app.html loads the modules in order (app.js, the core, first); chart.js is loaded on demand (nav.js: window.SWEEP_LAZY).
 # Run from the app folder:  sh ops/build-assets.sh        Needs Node: npm install -g terser csso-cli
 set -e
 cd "$(dirname "$0")/.."
-for k in nav game ux guide notify chart; do
+for k in app nav game ux guide notify chart; do   # app: the core (src/app.js since 9 Oct 2026)
   for e in js css; do
     src="src/$k.$e"; [ -f "$src" ] || continue
     old=$(ls assets/$k.*.$e 2>/dev/null | grep -v '\.build\.' | head -1 || true)
