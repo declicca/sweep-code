@@ -68,7 +68,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Préparation** : `tests/setup.py` (lancé par `run-all.sh`, sauf `SWEEP_NO_SETUP=1`) connecte le trader de test « mateo » avec le mot de passe local de `tools/config.local.php`, remplit son profil, ajoute les données d'exemple une seule fois et enregistre la session (`/tmp/show_state.json`). Aucun test ne dépend plus d'un fichier qui pourrait manquer. Son navigateur ignore la CSP de l'app (`bypass_csp`) : les attentes de Playwright évaluent leur condition.
 - **GitHub Actions** (`.github/workflows/tests.yml`) : à chaque push, `tools/par.py 3` sur Ubuntu avec **PHP 8.1** (comme la production) ; journaux en pièce jointe si échec. **`./deploy.sh app --go` refuse** : changements non commités dans `app/`, commit non poussé, tests en cours ou en échec sur GitHub (`tools/ci-status.py`).
 - **Suite répartie (à préférer)** : `python3 tools/par.py 3` lance la suite sur 3 copies en même temps (`/tmp/g`, `/tmp/g_2`, `/tmp/g_3` ; ports 8095, 8295, 8395), chacune avec sa base et sa session ; les adresses écrites en dur dans les tests sont réécrites dans la copie de chaque groupe seulement. Groupes équilibrés sur les durées du passage précédent (`tools/test-times.json`). **31/31 en 9 min 38 s** (contre ~35 min en série) ; les serveurs locaux tournent avec `PHP_CLI_SERVER_WORKERS=4` (sinon une requête lente bloque la page).
-- **Suite complète** : `tests/run-all.sh BASE STATE` → « N réussis, N échoués ». 32 tests au 9 octobre (`ops/tests.php` + 2 tests PHP + 29 Playwright) :
+- **Suite complète** : `tests/run-all.sh BASE STATE` → « N réussis, N échoués ». 34 tests au 9 octobre (`ops/tests.php` + 2 tests PHP + 31 Playwright, dont `e2e_rule_parity` et `e2e_drawdown_kinds`) :
   - **serveur** : `ops/tests.php` (20 : forfaits, essai, gel des comptes après un passage à Free, garde d'écriture, parrainage, déblocage du jeu) ;
   - **PHP** : `presets_test.php` (41), `shot_trades_test.php` (32) ;
   - **Playwright** :
@@ -118,6 +118,10 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Dépenses** : 7 catégories ; remboursement = montant négatif ; abonnement mensuel arrêté automatiquement quand le compte se termine.
 - **ROI prop** = (payouts nets − dépenses) / dépenses, sans le P&L live.
 - **Copy trading** : un groupe de copies compte une fois, avec le P&L de la copie principale (la plus ancienne). Option Stats « par contrat ».
+- **Drawdown par type de compte** (demande de Mateo, 9 oct. ; `tests/e2e_drawdown_kinds.py`) :
+  - **challenges et funded en drawdown suiveur** (fin de journée ou temps réel) : la limite suit le meilleur solde puis **s'arrête au solde de départ** (+ décalage de la firme : Apex 100 $). Avec 2 000 $ de drawdown et +6 000 $ de profit, le pire est de revenir au départ : marge **6 000 $**. Un compte affiché à partir de 0 $ suit la même règle (limite bloquée à 0 $). Déjà juste avant le 9 oct., maintenant verrouillé par le test.
+  - **live sans règles de firme** : la limite est **0 $** et la marge = **le solde live actuel** (certains live commencent à 0 $), jamais négative ; statut « En règle » (avant : « Aucune règle », sans marge). Info-bulle : « Ton solde live : le plus que tu peux perdre sur ce compte. » Un live avec ses propres règles (Topstep Live : plancher fixe) les garde. `acctState` : `lv`, `live: true`, `dd` = solde.
+  - ⚠️ « Pire recul » désigne deux choses : la tuile du haut de la page d'un compte (plus gros recul déjà vécu) et, dans les règles, le drawdown permis (`dd_c`, ex. 2 000 $, fixe).
 - **Comptes dépassés** : étiquette or **« Drawdown dépassé »** (ES « Drawdown superado », EN « Drawdown exceeded ») ou « Limite du jour atteinte », partout (Aujourd'hui, liste Comptes, page du compte) ; marge affichée à 0 $ **et barre vide**, même si le solde est remonté au-dessus du seuil ; placés en bas des listes. « Réussi » seulement si objectif, consistance et jours minimum sont remplis ; sinon « Objectif atteint · il manque : consistance 67 % (max 55 %) / 1 jour sur 3 » (brief 01, 1.3).
 - **Suppression** : toujours dans l'app (jamais `confirm()` du navigateur), avec un toast « Annuler » pendant 5 s (`SweepUndo.del`, `SweepUndo.toast`). Ça vaut pour un trade, toutes ses copies, une capture, une question de la checklist, les données d'exemple et un lot importé.
 - **Import sans frais** (Tradovate, Rithmic) : la commission par contrat du compte (`fee_rt_c`, aller-retour × contrats) est appliquée (`fees_auto`) ; sans commission sur le compte, l'aperçu dit « Frais non inclus dans ce rapport ».
@@ -269,6 +273,18 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 ### Brief 01 — étape 3 (ordre dans le code), en lots
 - **Lot 1 : `src/app.js`** (cœur lisible, 9 974 lignes) compilé par `ops/build-assets.sh`. Vérifié : 32/32, captures A/B identiques au pixel (8 pages × 2 tailles × FR foncé / ES clair), vitesse identique (−3 Ko).
 - **Inventaire** : 25 fonctions du cœur remplacées ou enveloppées à 59 endroits (`render` × 23 : chaque module y ajoute sa partie de l'écran ; `payoutForm`, `expenseForm`, `submitExpense` × 3 ; `submitPayout`, `vPayouts`, `submitAccount`, `openTicket`, `calDays` × 2 ; `acctTable`, `acctOK`, `parseTradovate`, `impGo`, `deleteAccount`…). Les formulaires de payout / dépense et `vPayouts` sont ceux de « Mon argent » (`ux.js`, chantier séparé selon le brief 02).
+
+- **Lot 2 : règles partagées verrouillées** (le navigateur et le serveur ne partagent pas de code) : `tests/e2e_rule_parity.py` compare les deux côtés — séance du moment (90 instants : 0 h → 23 h 59, vendredi, dimanche, changements d'heure 2026), séance d'un trade selon son heure d'entrée (90 cas), `hasSessionDate` (9 trades), montants en dollars EN / FR / ES (`SweepMoneyServer::dollars()`, sorti de `monthly()` sans changer ce qu'il produit). Aucun écart trouvé ; un écart volontaire (+7 h côté serveur) fait bien échouer le test. Le statut des comptes n'est calculé que dans le navigateur (`acctState`) : l'export copie les règles et le statut enregistrés, rien à mettre en parité. Notification « La réalité du mois » : espace insécable avant « $ » en FR / ES.
+- **Point 3.2 du brief (réintégrer les corrections de `nav.js` / `ux.js` dans le cœur) : écarté avec Mateo** le 9 oct. Les 23 enveloppes de `render` sont le mécanisme normal des modules ; les fonctions remplacées en couches sont celles de « Mon argent » (brief 02 : ne pas y toucher). L'inventaire ci-dessus sert de carte.
+- **Vitesse (téléphone simulé du brief : CPU ×4, 1,6 Mbit/s, 150 ms, cache vide ; `tools/perf-net.py`)** :
+
+  | | Avant l'audit (commit `ec5a837`) | Maintenant, sans compression (comme en ligne) | Maintenant, **avec gzip** (relais local) |
+  |---|---|---|---|
+  | Premier affichage | 3,2 s | 2,9 s | **1,2 s** |
+  | Page prête | 9,7 – 10,2 s | 9,4 – 9,9 s | **3,5 – 4,0 s** |
+  | Ko transférés | 1 917 | 1 852 | **578** |
+
+  Le reste de la liste du brief était déjà fait (une seule langue chargée, graphique à la demande, plus de Google Fonts, un seul CSS) ; `game` et `guide` restent chargés au départ (ils dessinent Aujourd'hui). **La compression NGINX (HostArmada, root) est le seul gain important restant.**
 
 ### Brief 01 — étape 2 (suite de tests qui protège)
 - `tests/setup.py` remplace `tools/prof.py` ; `run-all.sh` le lance, puis `ops/tests.php` (nouveau dans la suite), les tests PHP et les 29 tests Playwright : **32 au total**.

@@ -1789,8 +1789,8 @@
 (function () {
   'use strict';
   const N = { en: { 'money_month.title': 'The reality of {month}', 'money_month.body': 'Simulated profit ${sim} · money received ${received} · expenses ${expenses} · net real money ${net}.' },
-    fr: { 'money_month.title': 'La réalité de {month}', 'money_month.body': 'Profit simulé {sim} $ · argent reçu {received} $ · dépenses {expenses} $ · net réel {net} $.' },
-    es: { 'money_month.title': 'La realidad de {month}', 'money_month.body': 'Beneficio simulado {sim} $ · dinero recibido {received} $ · gastos {expenses} $ · neto real {net} $.' } };
+    fr: { 'money_month.title': 'La réalité de {month}', 'money_month.body': 'Profit simulé {sim}\u00a0$ · argent reçu {received}\u00a0$ · dépenses {expenses}\u00a0$ · net réel {net}\u00a0$.' },
+    es: { 'money_month.title': 'La realidad de {month}', 'money_month.body': 'Beneficio simulado {sim}\u00a0$ · dinero recibido {received}\u00a0$ · gastos {expenses}\u00a0$ · neto real {net}\u00a0$.' } };
   const reg = () => { if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings(N); } catch (e) { /* older module */ } return true; } return false; };
   if (!reg()) setTimeout(reg, 1500);
 })();

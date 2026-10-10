@@ -55,6 +55,12 @@ final class SweepMoneyServer
         return ['sim' => $sim, 'received' => $recv, 'expenses' => $exp, 'live' => $live, 'net' => $recv + $live - $exp];
     }
     /** on the 1st (New York), once per trader: « The reality of last month » */
+    /** whole dollars in the language's format, the same grouping as the app (tests/e2e_rule_parity.py): en 1,688 · fr 1 688 · es 1.688 */
+    public static function dollars(int $c, string $lang): string
+    {
+        $sign = $c < 0 ? '−' : ''; $v = abs($c) / 100;
+        return $sign . ($lang === 'fr' ? number_format($v, 0, ',', "\u{202F}") : ($lang === 'es' ? number_format($v, 0, ',', '.') : number_format($v, 0, '.', ',')));
+    }
     public static function monthly(PDO $pdo, string $uid, ?DateTimeImmutable $now = null): bool
     {
         if (!class_exists('Notify')) return false;
@@ -68,8 +74,7 @@ final class SweepMoneyServer
         $names = ['en' => ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], 'fr' => ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'], 'es' => ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']];
         $p = ['month' => $names['en'][$mon], 'month_fr' => $names['fr'][$mon], 'month_es' => $names['es'][$mon], 'from' => $from, 'to' => $to];
         foreach (['sim' => $m['sim'], 'received' => $m['received'], 'expenses' => $m['expenses'], 'net' => $m['net']] as $k => $c) {   // amounts in each language's format (1,688 · 1 688 · 1.688)
-            $sign = $c < 0 ? '−' : ''; $v = abs($c);
-            $p[$k] = $sign . number_format($v / 100, 0, '.', ','); $p[$k . '_fr'] = $sign . number_format($v / 100, 0, ',', "\u{202F}"); $p[$k . '_es'] = $sign . number_format($v / 100, 0, ',', '.');
+            $p[$k] = self::dollars($c, 'en'); $p[$k . '_fr'] = self::dollars($c, 'fr'); $p[$k . '_es'] = self::dollars($c, 'es');
         }
         return (bool) Notify::send($uid, 'money_month', $p,
             ['dedupe_key' => 'money_month:' . $first->format('Y-m'), 'action_url' => '#payouts', 'category' => 'product_updates', 'priority' => 'celebration']   /* shown large once (the session's window), then in the bell */);

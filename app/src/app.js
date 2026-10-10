@@ -2488,6 +2488,9 @@ function acctState(e) {
     for (;PI < PW.length && PW[PI].d && PW[PI].d < H; ) c -= PW[PI].a, PI++;
   };
   const u = t.dd_c || 0, h = t.dd_lock !== !1, m = H => h && t.dd_type !== "static" ? Math.min(H, a + (t.dd_lock_offset_c || 0)) : H;
+  // a live account without firm rules: the most it can lose is its balance (some lives start at $0) → limit $0, room = balance
+  const lv = !u && (e.money_type || e.phase) === "live";
+  lv && (l = 0);
   if (u) if (l = a - u, t.dd_type === "static") for (const H of n) PAY(H.date), c += tNet(H), 
   c <= l && (p = !0); else if (t.dd_type === "trade") for (const H of n) PAY(H.date), 
   c += tNet(H), c <= l && (p = !0), r = Math.max(r, c), l = m(r - u); else for (const H of dayMap(n).values()) {
@@ -2502,7 +2505,8 @@ function acctState(e) {
     thr: l,
     buffer: C,
     breached: p,
-    dd: u,
+    dd: lv ? Math.max(0, o) : u,
+    live: lv,
     target: t.target_c || 0,
     dll: t.dll_c || 0,
     consPct: t.consistency_pct || 0,
@@ -2522,7 +2526,7 @@ function acctState(e) {
   g.minDays && g.days < g.minDays && g.missing.push([ "days", g.minDays - g.days, g.days, g.minDays ])), 
   g.reached = !!(g.target && L >= g.target), g.passed = g.reached && !g.missing.length && !p;
   let P = "none", O = "No rules";
-  return hasRules(e) && (P = "ok", O = "In good standing", g.target && L >= g.target && (g.missing.length ? (P = "warn", 
+  return (hasRules(e) || lv) && (P = "ok", O = "In good standing", g.target && L >= g.target && (g.missing.length ? (P = "warn", 
   O = evalMissLabel(g.missing)) : (P = "target", O = "Target reached")), (u && C <= u * .25 || g.dll && -v >= g.dll * .75) && (P = "warn", 
   O = "Close to a limit"), (p || g.dll && -v >= g.dll) && (P = "breach", O = p ? "Drawdown breached" : "Daily limit hit"), 
   g.consPct && x != null && x * 100 > g.consPct && P === "ok" && (P = "warn", O = "Consistency rule")), 
@@ -2542,7 +2546,8 @@ function accountCard(e, {full: t = !1} = {}) {
   let i = 0;
   if (a.dd) {
     const bf = a.breached ? 0 : Math.max(0, a.buffer), p = a.dd ? 1 - bf / a.dd : 0;
-    s.push(`<div class="rule"><div class="lab"><span>${tip("Drawdown room", `Distance to the ${DD_TYPES.find(u => u[0] === ((e.rules || {}).dd_type || "eod"))[1].toLowerCase()} drawdown limit, currently at ${moneyU(a.thr)}.`)}</span><b>${moneyU(bf)}</b></div>${bar(Math.min(1, bf / a.dd), p > .75 ? "neg" : "pos")}</div>`);
+    const lt = a.live ? ({ fr: "Ton solde live : le plus que tu peux perdre sur ce compte.", es: "Tu saldo live: lo máximo que puedes perder en esta cuenta." }[typeof LANG == "string" ? LANG : "en"] || "Your live balance: the most you can lose on this account.") : null;
+    s.push(`<div class="rule"><div class="lab"><span>${tip("Drawdown room", lt || `Distance to the ${DD_TYPES.find(u => u[0] === ((e.rules || {}).dd_type || "eod"))[1].toLowerCase()} drawdown limit, currently at ${moneyU(a.thr)}.`)}</span><b>${moneyU(bf)}</b></div>${bar(Math.min(1, bf / a.dd), p > .75 ? "neg" : "pos")}</div>`);
   }
   a.target && s.push(`<div class="rule"><div class="lab"><span>Profit target</span><b>${moneyU(Math.max(0, a.net))} <span class="faint">/ ${moneyU(a.target)}</span></b></div>${bar(Math.max(0, a.net) / a.target, "pos")}</div>`);
   const o = a.dll && (t || a.today < 0);
