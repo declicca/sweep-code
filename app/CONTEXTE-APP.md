@@ -63,6 +63,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - **ne jamais écrire `pkill -f "php -S"` dans une commande** : ça tue la commande elle-même (arrêter par port : `lsof -ti tcp:8095 -sTCP:LISTEN | xargs kill`) ;
   - **`sessionStorage sw.modal=1`** supprime les fenêtres de première visite ;
   - **`await pg.evaluate("impGo()")`** échoue parfois (passage à #trades pendant l'attente) : utiliser `void impGo()`.
+  - **`html, body { overflow-x: clip }`** (`app.css`) : un élément qui dépasse à droite est coupé, sans défilement. Sur le Mac, `document.documentElement.scrollWidth` ne voit pas ce dépassement ; sur Linux (GitHub), si. Pour savoir ce qui dépasse, mesurer les éléments, le texte et les pseudo-éléments (fonction `WIDE` de `tests/e2e_weekly_share.py`).
 
 ## 4. Tests
 
@@ -283,6 +284,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - `sweep_mail()` a quitté `api.php` pour `notify/mail.php` (avec un 5ᵉ paramètre pour des en-têtes en plus) ; le courriel de mot de passe ne change pas. Tables créées toutes seules : `weekly_emails`, `email_prefs`.
 - **Lot 4 : partager sa semaine** (`shareCard('week')` dans `game.js`, `tests/e2e_weekly_share.py`). Sur le premier écran du bilan, un bouton gris « Partager ma semaine » (« Analyser ma semaine » reste le seul bouton bleu) et, seulement s'il y a des payouts reçus dans la semaine, l'interrupteur « Ajouter mes payouts reçus », **désactivé par défaut**. La carte (image 1080 × 1920, même style que les autres cartes de partage) : « La semaine de <prénom> » (« Ma semaine » sans prénom), la semaine, les anneaux des 5 jours, le streak, la discipline, les journées balayées sur jours tradés ; aucun montant, sauf la ligne « Payouts reçus cette semaine » si l'interrupteur est activé. Téléphone : la feuille de partage du système ; ordinateur : l'image est téléchargée (`sweep-week.png`). Compté comme les autres cartes (`api/game/share`, `week`).
 - En passant : sur le premier écran du bilan, les puces bleues de la liste tombaient sur le bord des cases (retirées) ; en français, espaces insécables dans « » et avant « ? » (le « » » ne commence plus une ligne), comme dans le courriel.
+- **Calendrier « Ce mois-ci » d'Aujourd'hui** (trouvé par `e2e_weekly_share` sur GitHub) : ses 5 colonnes (`repeat(5,1fr)`) prenaient la largeur de leur contenu ; dans la colonne étroite d'un ordinateur à 1300 px, le nom d'une annonce (« Nonfarm Payrolls ») les rendait inégales et la grille sortait de sa carte d'environ 50 px. Colonnes égales (`minmax(0,1fr)`) et nom terminé par « … » (la ligne de l'annonce n'est plus un conteneur flex, sinon `text-overflow` ne s'applique pas).
 - **Étape 5 terminée** (lots 1 à 4).
 
 ### Brief 01 — étape 4 (voir ce qui se passe chez les traders)
@@ -327,7 +329,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ### État des tests
 - PHP : `presets_test.php` 41/41, `shot_trades_test.php` 32/32.
-- **Brief 01, étape 5, lot 4 : 42/42** (suite répartie sur une copie propre du commit, sans le travail en cours de la session synchro, 8 min 46 s, un samedi avec `SWEEP_GAME_NOW` = vendredi 15 h ET), sans « RETRY ».
+- **Brief 01, étape 5, lot 4 : 42/42** (suite répartie sur une copie propre du commit, sans le travail en cours de la session synchro, 8 min 46 s, un samedi avec `SWEEP_GAME_NOW` = vendredi 15 h ET), sans « RETRY ». Puis avec la correction du calendrier : 42/42 (8 min 46 s), sans « RETRY ».
 - **Brief 01, étape 5, lots 1 à 3 : tous réussis** (suite répartie, 8 min 41 s, un samedi avec `SWEEP_GAME_NOW` = vendredi 15 h ET), sans « RETRY » ; `weekly_test.php` 44/44, `e2e_weekly_parity` identique en FR / EN / ES.
 - **Série complète sur base neuve (Mac, PHP 8.5) : 31/31 avant l'étape 2 et 31/31 après** (en série puis en suite répartie), sans « RETRY ».
 - **Étape 4 : 31/31** (suite répartie, 8 min 11 s), sans « RETRY » ; `tools/numfmt.py` ne trouve plus de format anglais en FR/ES (hors prix et numéro de version) ; aucune boucle de réécriture (mutations au repos identiques en EN, FR, ES).
