@@ -32,12 +32,12 @@ FILLS = [   # MNQ: long 1 at 09:31 (also typed by hand), short 2 at 10:15
   {'id': 'u4', 'account': 'APEX-555-01', 'contract': 'MNQ 12-26', 'side': 'buy', 'qty': 2, 'price': 21020.5, 'ts': ms(DAY + ' 10:22:00'), 'point_value': 2},
 ]
 
-def new_trader(p, lang, phone):
+def new_trader(p, lang, phone, beta=True):
   unthrottle()
   br = p.chromium.launch()
   ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, device_scale_factor=2 if phone else 1,
                        locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
-  ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+  ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang + ("; localStorage.setItem('sw.syncBeta','1')" if beta else ''))   # beta: Connections shows to admins (or with this flag)
   n = 'sy%d' % int(time.time() * 1000)
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': n + '@t.dev', 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise RuntimeError('sign-up refused: %s %s' % (r.status, r.text()[:80]))
@@ -168,7 +168,15 @@ def case_lang(p, lang):   # the section, the sheets and the preview in English a
   ok(not errs, f'{lang}: no JS error {errs[:3]}')
   br.close()
 
+def case_hidden(p):   # beta: a trader (not an administrator) does not see Connections yet
+  br, ctx, pg, errs, bad = new_trader(p, 'fr', True, beta=False)
+  pg.goto(B + '/#settings'); pg.wait_for_selector('#main details.nav-sgd[data-i="3"]', timeout=15000)
+  pg.evaluate("document.querySelector('#main details.nav-sgd[data-i=\"3\"]').open = true"); pg.wait_for_timeout(1200)
+  ok(pg.locator('#main .sy-sec').count() == 0 and not errs, 'beta: a trader who is not an administrator does not see Connections')
+  br.close()
+
 with sync_playwright() as p:
+  case_hidden(p)
   case_fr(p, True)
   case_fr(p, False)
   case_lang(p, 'en')
