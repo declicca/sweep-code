@@ -2240,7 +2240,8 @@
       man1: '1 trade typed by hand with no match, kept as it is', manN: '{n} trades typed by hand with no match, kept as they are', open1: '1 open position, added when it closes', openN: '{n} open positions, added when they close',
       none: 'No trade yet: they arrive as you trade.', link: 'Link', newNote: 'Create the account: it is linked right after.', create: 'Create the account', ignoreGo: 'Ignore',
       linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', editT: 'Edit trade',
-      editNote: 'Prices, times, contracts and P&L come from {p} and update on their own. Notes, review, setup, tags and screenshots are edited on the trade page.', target: 'Target', save: 'Save', saved: 'Trade updated' },
+      editNote: 'Prices, times, contracts and P&L come from {p} and update on their own. Notes, review, setup, tags and screenshots are edited on the trade page.', target: 'Target', save: 'Save', saved: 'Trade updated',
+      tipImport: 'On NinjaTrader 8? Connect it once: your trades arrive on their own, no more imports.', tipAcct: 'Trading on NinjaTrader 8? Connect it: your accounts are found and your trades arrive on their own.' },
     fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis NinjaTrader 8, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
       seen: 'Add-on vu {t}', now: 'à l’instant', min: 'il y a {n} min', hr: 'il y a {n} h', day: 'il y a {n} j', found1: '1 compte trouvé', foundN: '{n} comptes trouvés', linkMine: 'Relier mes comptes',
       linkedTo: 'Relié à {a}', tr1: '1 trade', trN: '{n} trades', toLink: 'À relier', ignored: 'Ignoré', eval: 'Évaluation', funded: 'Financé', sim: 'Simulation NinjaTrader',
@@ -2254,7 +2255,8 @@
       man1: '1 trade saisi à la main sans équivalent, gardé tel quel', manN: '{n} trades saisis à la main sans équivalent, gardés tels quels', open1: '1 position ouverte, ajoutée à sa fermeture', openN: '{n} positions ouvertes, ajoutées à leur fermeture',
       none: 'Aucun trade pour l’instant : ils arrivent au fil de tes trades.', link: 'Relier', newNote: 'Crée le compte : il sera relié juste après.', create: 'Créer le compte', ignoreGo: 'Ignorer',
       linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', editT: 'Modifier le trade',
-      editNote: 'Prix, heures, contrats et P&L viennent de {p} et se mettent à jour seuls. Notes, bilan, setup, tags et captures se modifient sur la page du trade.', target: 'Cible', save: 'Enregistrer', saved: 'Trade mis à jour' },
+      editNote: 'Prix, heures, contrats et P&L viennent de {p} et se mettent à jour seuls. Notes, bilan, setup, tags et captures se modifient sur la page du trade.', target: 'Cible', save: 'Enregistrer', saved: 'Trade mis à jour',
+      tipImport: 'Sur NinjaTrader 8 ? Connecte-le une fois : tes trades arrivent seuls, plus besoin d’importer.', tipAcct: 'Tu trades sur NinjaTrader 8 ? Connecte-le : tes comptes sont trouvés et tes trades arrivent seuls.' },
     es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde NinjaTrader 8, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
       seen: 'Add-on visto {t}', now: 'justo ahora', min: 'hace {n} min', hr: 'hace {n} h', day: 'hace {n} d', found1: '1 cuenta encontrada', foundN: '{n} cuentas encontradas', linkMine: 'Vincular mis cuentas',
       linkedTo: 'Vinculada a {a}', tr1: '1 operación', trN: '{n} operaciones', toLink: 'Por vincular', ignored: 'Ignorada', eval: 'Evaluación', funded: 'Financiada', sim: 'Simulación de NinjaTrader',
@@ -2268,7 +2270,8 @@
       man1: '1 operación anotada a mano sin equivalente, se queda igual', manN: '{n} operaciones anotadas a mano sin equivalente, se quedan igual', open1: '1 posición abierta, añadida al cerrarse', openN: '{n} posiciones abiertas, añadidas al cerrarse',
       none: 'Aún no hay operaciones: llegan a medida que operas.', link: 'Vincular', newNote: 'Crea la cuenta: se vincula justo después.', create: 'Crear la cuenta', ignoreGo: 'Ignorar',
       linkedT: 'Vinculada · {n} operaciones añadidas', linked0: 'Vinculada', ignoredT: 'Cuenta ignorada', loading: 'Cargando…', syncedWith: 'Sincronizada con {p}', editT: 'Editar operación',
-      editNote: 'Precios, horas, contratos y P&L vienen de {p} y se actualizan solos. Notas, revisión, setup, etiquetas y capturas se editan en la página de la operación.', target: 'Objetivo', save: 'Guardar', saved: 'Operación actualizada' },
+      editNote: 'Precios, horas, contratos y P&L vienen de {p} y se actualizan solos. Notas, revisión, setup, etiquetas y capturas se editan en la página de la operación.', target: 'Objetivo', save: 'Guardar', saved: 'Operación actualizada',
+      tipImport: '¿En NinjaTrader 8? Conéctalo una vez: tus operaciones llegan solas, sin importar más.', tipAcct: '¿Operas en NinjaTrader 8? Conéctalo: tus cuentas se encuentran y tus operaciones llegan solas.' },
   };
   const t = (k) => { const x = (T[L] || T.en)[k]; return x == null ? T.en[k] : x; };
   const P = (n, one, many) => (n === 1 ? t(one) : t(many).replace('{n}', n));
@@ -2551,7 +2554,23 @@
     }
   }
 
-  function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); }
+  /* « On NinjaTrader 8? Connect it » on the CSV import page and under the « Add account » form of the Accounts page (never in
+     the first-account flow of a new trader); gone once NinjaTrader 8 is connected. Connect opens the connect sheet directly. */
+  function paintTips() {
+    const main = document.getElementById('main'); if (!main) return;
+    const hash = location.hash || '', on = /^#import/.test(hash) ? 'tipImport' : /^#accounts$/.test(hash) ? 'tipAcct' : null;
+    if (on) load();
+    const drop = on === 'tipImport' ? main.querySelector('#drop') : null;
+    const host = drop ? drop.closest('.surface') : on === 'tipAcct' ? main.querySelector('.acct-add form[data-form="account"]') : null;
+    const show = !!(host && SY.st && !conn() && !host.closest('.onb, .nav-dlg, .rn'));
+    let el = main.querySelector('.sy-tip');
+    if (!show) { if (el) el.remove(); return; }
+    if (el && el.dataset.sytip === on) return;
+    if (el) el.remove();
+    const html = `<div class="sy-tip" data-noi18n data-sytip="${on}"><span class="sy-ic">${IC}</span><span class="sy-txt"><span>${h(t(on))}</span></span><button type="button" class="btn sm" data-sy="connect">${t('connect')}</button></div>`;
+    host.insertAdjacentHTML(on === 'tipImport' ? 'beforebegin' : 'afterend', html);
+  }
+  function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); paintTips(); }
   const appRender = render;
   render = function () {
     try { importKeys(); } catch (e) { /* never blocks */ }

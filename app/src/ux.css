@@ -492,4 +492,9 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .sy-acct .sy-dot{margin-top:6px}
 .sy-acct .sy-err{grid-column:2}
 .th-head .lbl .sy-chip{margin-left:4px;vertical-align:1px}
+/* « On NinjaTrader 8? Connect it » (import page, under the « Add account » form) */
+.sy-tip{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:12px 14px;border-radius:20px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.acct-add .sy-tip{margin:12px 0 0}
+.sy-tip .sy-txt>span{font-size:14px;line-height:1.45;color:var(--text)}
+@media (max-width:600px){.sy-tip{flex-wrap:wrap}.sy-tip .sy-txt{flex-basis:calc(100% - 52px)}.sy-tip .btn{margin-left:52px}}
 @media (prefers-reduced-motion:reduce){.sy-acc,.sy-opt i{transition:none}}
