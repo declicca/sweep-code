@@ -2227,8 +2227,6 @@
   const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   const SY = { st: null, at: 0, busy: null, view: null, stopping: false };
   const server = () => typeof S !== 'undefined' && S.mode === 'server';
-  // beta: Connections is shown to administrators only until the add-on is tested in NinjaTrader (to open it to every trader: return true)
-  const beta = () => { if (S.me && S.me.is_admin) return true; try { return localStorage.getItem('sw.syncBeta') === '1'; } catch (e) { return false; } };
 
   function ago(sec) {
     if (!sec) return '';
@@ -2270,7 +2268,7 @@
     return `<div class="sec-h"><h2>${t('conn')}</h2></div><div class="surface pad sy-card">${head}${found}${list.length ? `<ul class="sy-list">${list.map(rowHtml).join('')}</ul>` : ''}</div>`;
   }
   function paintSettings() {
-    const main = document.getElementById('main'); if (!main || !/^#settings/.test(location.hash || '') || !beta()) return;
+    const main = document.getElementById('main'); if (!main || !/^#settings/.test(location.hash || '')) return;
     let sec = main.querySelector('.sy-sec');
     const html = sectionHtml();
     if (!sec) {
