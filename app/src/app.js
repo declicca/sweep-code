@@ -1444,7 +1444,7 @@ function metricsGrid(e) {
 
 function vDashboard() {
   if (!S.accounts.length) return onboarding();
-  const e = todayStr(), t = mergeCopies(sorted(S.trades.filter(h => h.date === e && acctOK(h)))), a = stats(t), n = ft(), s = stats(n), i = (h, m, v = "") => `<div><span>${h}</span><span class="${v}">${m}</span></div>`, o = `<section class="surface"><div class="today">\n     <div class="pair hero-pnl">${a.n ? `<button class="hero-share" data-act="share" data-k="day" data-id="${todayStr()}" aria-label="Share today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>` : ""}<span class="lbl">Today</span><span class="val ${cls(a.net)}">${a.n ? cu(a.net) : "$0"}</span>${a.n && a.net < 0 ? `<a class="down-note" href="#journal/${todayStr()}">Down day. Review it while it's fresh.</a>` : ""}</div>\n     <div class="pair hero-disc">${ring(a.disc, {
+  const e = todayStr(), t = mergeCopies(sorted(S.trades.filter(h => h.date === e && acctOK(h)))), a = stats(t), n = ft(), s = stats(n), i = (h, m, v = "") => `<div><span>${h}</span><span class="${v}">${m}</span></div>`, o = `<section class="surface"><div class="today">\n     <div class="pair hero-pnl">${a.n ? `<button class="hero-share" data-act="share" data-k="day" data-id="${todayStr()}" aria-label="Share today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>` : ""}<span class="lbl">Today</span><span class="val ${cls(a.net)}">${cu(a.n ? a.net : 0)}</span>${a.n && a.net < 0 ? `<a class="down-note" href="#journal/${todayStr()}">Down day. Review it while it's fresh.</a>` : ""}</div>\n     <div class="pair hero-disc">${ring(a.disc, {
     size: 74,
     stroke: 5
   })}<div><span class="lbl">${tip("Discipline", "Average discipline score of today’s trades")}</span><span class="val dc">${a.disc == null ? "—" : cu(a.disc, "pct")}</span></div></div>\n     <div class="minor">${i("Trades", a.n)}${i("Win rate", pct(a.wr))}${i("Best trade", a.best ? money(tNet(a.best)) : "—", a.best ? cls(tNet(a.best)) : "")}${i("Worst trade", a.worst ? money(tNet(a.worst)) : "—", a.worst ? cls(tNet(a.worst)) : "")}<div><span>Journal</span><span><a href="#journal/${e}">${S.journals.find(h => h.id === e) ? "Open" : "Start"}</a></span></div></div>\n   </div><div class="today-trades">${t.length ? tradeTable(t, {
@@ -1719,7 +1719,9 @@ function vPayouts() {
     dec: 0
   })}</div></div><div><div class="lbl">Payouts received</div><div class="val">${moneyU(r)}</div></div><div><div class="lbl">Trading expenses</div><div class="val ${l ? "neg" : ""}">${l ? money(-l, {
     dec: 0
-  }) : "$0"}</div></div><div><div class="lbl">${tip("Net realized income", "Payouts received − trading expenses. The money trading actually made you.")}</div><div class="val ${cls(r - l)}">${money(r - l, {
+  }) : money(0, {
+    dec: 0
+  })}</div></div><div><div class="lbl">${tip("Net realized income", "Payouts received − trading expenses. The money trading actually made you.")}</div><div class="val ${cls(r - l)}">${money(r - l, {
     dec: 0
   })}</div></div></div>\n  ${r || S.expenses.length ? `<div class="sh-row">${shareBtn("net", "all", "Share net after fees")}</div>` : ""}\n  <div class="metrics surface m4" style="margin-top:10px">${p("Requested", moneyU(i))}${p("Approved", moneyU(o))}${p("Pending", moneyU(c), c ? "dc" : "")}${p("Rejected", moneyU(n(t, h => h.status === "rejected")))}</div>\n  <section class="sec"><div class="sec-h"><h2>Payouts</h2></div><div class="surface">${t.length ? payoutTable(t) : '<div class="empty">No payouts yet.</div>'}</div>\n    <div class="surface pad" style="margin-top:10px">${U.editP ? "" : payoutForm()}${U.editP ? '<span class="muted">Finish editing the payout above to add a new one.</span>' : ""}</div></section>\n  <section class="sec"><div class="sec-h"><h2>Expenses</h2>${aiBtn("ai-scan", "Scan a receipt")}</div><div class="surface">${a.length ? `<div class="scroll-x"><table class="tbl exp-tbl"><thead><tr><th>Date</th><th>Prop firm</th><th>Account</th><th>Category</th><th class="num">Amount</th><th>Notes</th></tr></thead><tbody>${u}</tbody></table></div>` : '<div class="empty">No expenses yet.</div>'}</div>\n    <div class="surface pad" style="margin-top:10px">${U.editE ? '<span class="muted">Finish editing the expense above to add a new one.</span>' : expenseForm()}</div></section></div>`;
 }
@@ -2487,16 +2489,43 @@ function acctState(e) {
   const PAY = H => {
     for (;PI < PW.length && PW[PI].d && PW[PI].d < H; ) c -= PW[PI].a, PI++;
   };
+  // adjustments (an account added « already running », a recalibration) are balance changes on their date:
+  // the trailing drawdown follows them, its stop at the start included (brief 02, part 2; before, they were added afterwards:
+  // the highest balance typed ignored the stop at the start and never moved again)
+  const AW = (Array.isArray(e.adjustments) ? e.adjustments : []).map(H => ({
+    d: String(H.at || ""),
+    a: +H.amount_c || 0
+  })).filter(H => H.a).sort((H, J) => H.d < J.d ? -1 : H.d > J.d ? 1 : 0);
+  let AI = 0;
+  const ADJ = (H, f) => {   // on or before H: an adjustment comes before the trades of its own date (added « already running », then traded that day)
+    for (;AI < AW.length && (H == null || AW[AI].d <= H); ) {
+      const d = AW[AI].d;
+      for (;AI < AW.length && AW[AI].d === d; ) c += AW[AI++].a;
+      f();
+    }
+  };
   const u = t.dd_c || 0, h = t.dd_lock !== !1, m = H => h && t.dd_type !== "static" ? Math.min(H, a + (t.dd_lock_offset_c || 0)) : H;
   // a live account without firm rules: the most it can lose is its balance (some lives start at $0) → limit $0, room = balance
   const lv = !u && (e.money_type || e.phase) === "live";
   lv && (l = 0);
-  if (u) if (l = a - u, t.dd_type === "static") for (const H of n) PAY(H.date), c += tNet(H), 
-  c <= l && (p = !0); else if (t.dd_type === "trade") for (const H of n) PAY(H.date), 
-  c += tNet(H), c <= l && (p = !0), r = Math.max(r, c), l = m(r - u); else for (const H of dayMap(n).values()) {
-    H.trades[0] && PAY(H.trades[0].date);
-    for (const J of H.trades) c += tNet(J), c <= l && (p = !0);
-    r = Math.max(r, c), l = m(r - u);
+  const AS = () => {
+    c <= l && (p = !0);
+  }, AT = () => {
+    c <= l && (p = !0), r = Math.max(r, c), l = m(r - u);
+  };
+  if (u) if (l = a - u, t.dd_type === "static") {
+    for (const H of n) ADJ(H.date, AS), PAY(H.date), c += tNet(H), c <= l && (p = !0);
+    ADJ(null, AS);
+  } else if (t.dd_type === "trade") {
+    for (const H of n) ADJ(H.date, AT), PAY(H.date), c += tNet(H), c <= l && (p = !0), r = Math.max(r, c), l = m(r - u);
+    ADJ(null, AT);
+  } else {
+    for (const H of dayMap(n).values()) {
+      H.trades[0] && (ADJ(H.trades[0].date, AT), PAY(H.trades[0].date));
+      for (const J of H.trades) c += tNet(J), c <= l && (p = !0);
+      r = Math.max(r, c), l = m(r - u);
+    }
+    ADJ(null, AT);
   }
   const v = n.filter(H => H.date === todayStr()).reduce((H, J) => H + tNet(J), 0), b = dayMap(n), E = [ ...b.values() ].map(H => H.net), R = E.length ? Math.max(...E) : 0, L = i, x = L > 0 && R > 0 ? R / L : null, C = l != null ? o - l : null, g = {
     bal: o,
@@ -2539,6 +2568,21 @@ function sparkline(e) {
   return `<svg class="spark" viewBox="0 0 100 34" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${s}L100 34L0 34Z"/><path class="l" d="${s}" vector-effect="non-scaling-stroke"/></svg>`;
 }
 
+/* brief 02 part 2: the drawdown room in points of the account's most traded instrument, at its most used size
+   (« soit 42 points de NQ à 2 contrats »); nothing when the account has no trade on a known instrument */
+function roomPts(e, bf) {
+  if (!(bf > 0)) return "";
+  const tr = S.trades.filter(x => x.account_id === e.id && !instOf(x.instrument).unknown && +x.contracts > 0);
+  if (!tr.length) return "";
+  const top = (arr, k) => { const m = new Map(); for (const x of arr) m.set(k(x), (m.get(k(x)) || 0) + 1); return [ ...m ].sort((u, v) => v[1] - u[1])[0][0]; };
+  const sym = x => { const u = String(x.instrument).toUpperCase(); return INSTR[u] ? u : u.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, ""); };
+  const k = top(tr, sym), c = top(tr.filter(x => sym(x) === k), x => +x.contracts), n = Math.floor(bf / (PV(k) * c));
+  if (!(n >= 0) || !isFinite(n)) return "";
+  const N = n.toLocaleString(LOC());
+  const t = LANG === "fr" ? `soit ${N} ${plw(n, "point", "points")} de ${k} à ${c} ${plw(c, "contrat", "contrats")}` : LANG === "es" ? `o sea ${N} ${plw(n, "punto", "puntos")} de ${k} con ${c} ${plw(c, "contrato", "contratos")}` : `that is ${N} ${plw(n, "point", "points")} of ${k} at ${c} ${plw(c, "contract", "contracts")}`;
+  return `<span class="faint rule-pts" data-noi18n>${esc(t)}</span>`;
+}
+
 const bar = (e, t) => `<div class="pbar"><i class="${t}" style="width:${Math.max(0, Math.min(100, e * 100)).toFixed(1)}%"></i></div>`;
 
 function accountCard(e, {full: t = !1} = {}) {
@@ -2547,11 +2591,11 @@ function accountCard(e, {full: t = !1} = {}) {
   if (a.dd) {
     const bf = a.breached ? 0 : Math.max(0, a.buffer), p = a.dd ? 1 - bf / a.dd : 0;
     const lt = a.live ? ({ fr: "Ton solde live : le plus que tu peux perdre sur ce compte.", es: "Tu saldo live: lo máximo que puedes perder en esta cuenta." }[typeof LANG == "string" ? LANG : "en"] || "Your live balance: the most you can lose on this account.") : null;
-    s.push(`<div class="rule"><div class="lab"><span>${tip("Drawdown room", lt || `Distance to the ${DD_TYPES.find(u => u[0] === ((e.rules || {}).dd_type || "eod"))[1].toLowerCase()} drawdown limit, currently at ${moneyU(a.thr)}.`)}</span><b>${moneyU(bf)}</b></div>${bar(Math.min(1, bf / a.dd), p > .75 ? "neg" : "pos")}</div>`);
+    s.push(`<div class="rule"><div class="lab"><span>${tip("Drawdown room", lt || `Distance to the ${DD_TYPES.find(u => u[0] === ((e.rules || {}).dd_type || "eod"))[1].toLowerCase()} drawdown limit, currently at ${moneyU(a.thr)}.`)}</span><b>${moneyU(bf)}</b></div>${bar(Math.min(1, bf / a.dd), p > .75 ? "neg" : "pos")}${t ? roomPts(e, bf) : ""}</div>`);
   }
   a.target && s.push(`<div class="rule"><div class="lab"><span>Profit target</span><b>${moneyU(Math.max(0, a.net))} <span class="faint">/ ${moneyU(a.target)}</span></b></div>${bar(Math.max(0, a.net) / a.target, "pos")}</div>`);
   const o = a.dll && (t || a.today < 0);
-  a.dll && !o && i++, o && s.push(`<div class="rule"><div class="lab"><span>Daily loss limit</span><b>${a.today < 0 ? moneyU(-a.today) : "$0"} <span class="faint">/ ${moneyU(a.dll)}</span></b></div>${bar(Math.max(0, -a.today) / a.dll, -a.today >= a.dll * .75 ? "neg" : "ink")}</div>`);
+  a.dll && !o && i++, o && s.push(`<div class="rule"><div class="lab"><span>Daily loss limit</span><b>${moneyU(a.today < 0 ? -a.today : 0)} <span class="faint">/ ${moneyU(a.dll)}</span></b></div>${bar(Math.max(0, -a.today) / a.dll, -a.today >= a.dll * .75 ? "neg" : "ink")}</div>`);
   const r = a.cons != null && a.cons * 100 > a.consPct, c = a.consPct && (t || r);
   a.consPct && !c && i++, c && s.push(`<div class="rule"><div class="lab"><span>${tip("Consistency", "Best day ÷ total profit. Must stay at or under the firm limit.")}</span><b>${a.cons == null ? "—" : Math.round(a.cons * 100) + "%"} <span class="faint">max ${a.consPct}%</span></b></div>${bar(a.cons == null ? 0 : a.cons * 100 / a.consPct, a.cons != null && a.cons * 100 > a.consPct ? "neg" : "ink")}</div>`);
   const l = a.minDays && (t || a.days < a.minDays);
@@ -2564,7 +2608,7 @@ function rulesForm(e) {
     kind: "money",
     ph: "$"
   });
-  return `<div class="fgrid">\n    <label class="f"><span>Profit target</span>${n("target_c", t.target_c)}</label>\n    <label class="f"><span>Worst drawdown</span>${n("dd_c", t.dd_c)}</label>\n    <label class="f"><span>Drawdown type</span><select data-bind="accounts|${e.id}|rules.dd_type">${opts(DD_TYPES, t.dd_type || "eod")}</select></label>\n    <label class="f"><span>Daily loss limit</span>${n("dll_c", t.dll_c)}</label>\n    <label class="f"><span>Consistency max (%)</span>${bindIn("accounts", e.id, "rules.consistency_pct", t.consistency_pct ?? "", {
+  return `<div class="fgrid">\n    <label class="f"><span>Profit target</span>${n("target_c", t.target_c)}</label>\n    <label class="f"><span>Max drawdown allowed</span>${n("dd_c", t.dd_c)}</label>\n    <label class="f"><span>Drawdown type</span><select data-bind="accounts|${e.id}|rules.dd_type">${opts(DD_TYPES, t.dd_type || "eod")}</select></label>\n    <label class="f"><span>Daily loss limit</span>${n("dll_c", t.dll_c)}</label>\n    <label class="f"><span>Consistency max (%)</span>${bindIn("accounts", e.id, "rules.consistency_pct", t.consistency_pct ?? "", {
     type: "number",
     kind: "int",
     ph: "e.g. 50"
