@@ -620,6 +620,7 @@ function delete_user_everything(string $uid): void {
     if (class_exists('GameEngine', false)) { try { foreach (['user_game_profile', 'game_days', 'xp_events', 'user_badges', 'game_celebrations', 'game_analytics', 'user_map_nodes', 'user_missions', 'user_rewards', 'user_bosses', 'weekly_reviews', 'edge_reveals', 'user_cosmetics', 'user_quests', 'monthly_wrapped', 'user_season', 'social_profile', 'league_members', 'crew_reactions'] as $tb) db()->prepare("DELETE FROM $tb WHERE user_id = ?")->execute([$uid]); } catch (Throwable $e) { error_log('[Sweep game] delete: ' . $e->getMessage()); } }
     if (class_exists('Notify', false)) { try { Notify::deleteUser($uid); } catch (Throwable $e) { error_log('[Sweep notify] delete: ' . $e->getMessage()); } }
     foreach (['ai_cache', 'ai_log'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* AI tables not created yet */ } }
+    foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* sync tables not created yet */ } }   // sync/: keys, executions, accounts found
     if (billing_on()) {
         try {
             require_once __DIR__ . '/billing/billing-stripe.php';
@@ -711,6 +712,8 @@ try {
         require_once __DIR__ . '/billing/billing-routes.php';
         sweep_billing_webhook_route(db());
     }
+    // NinjaTrader 8 add-on (sync/): executions sent with the trader's personal key (X-Sweep-Key), no session, no CSRF header
+    if ($route === 'api/sync/push') { require_once __DIR__ . '/sync/sync-routes.php'; sync_push_route($method); }
     // « Your week » email: the link at its bottom stops (or starts again) the email, without signing in: the link carries the trader's own token
     // (no CSRF header: mail apps post the one-click « Unsubscribe » themselves, List-Unsubscribe-Post)
     if ($route === 'api/email/weekly' && class_exists('GameWeeklyMail')) GameWeeklyMail::page($method, (string) ($_GET['t'] ?? ''));
@@ -926,6 +929,9 @@ try {
 
     // Gamification (game/)
     if (strpos($route, 'api/game/') === 0 && function_exists('game_route')) game_route($route, $method, (string)$UID);
+
+    // Automatic sync of trades (sync/): personal key, accounts found, linking
+    if ($route === 'api/sync' || strpos($route, 'api/sync/') === 0) { require_once __DIR__ . '/sync/sync-routes.php'; sync_route($route, $method, (string)$UID); }
 
     // Notification center (notify/)
     if (strpos($route, 'api/notifications') === 0 && function_exists('nt_route')) nt_route($route, $method, (string)$UID, !empty($me['is_admin']));

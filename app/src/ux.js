@@ -2160,3 +2160,351 @@
   render = function () { const out = appRender.apply(this, arguments); try { tagRows(); } catch (x0) { /* never blocks */ } return out; };
   window.SweepRealNet = { invite, open: () => { W = null; start(); }, state: stOf, showNet };
 })();
+
+/* ───────────── 30. Automatic sync (NinjaTrader 8): Settings › Data › Connections, accounts found, synced trades ─────────────
+ * The server keeps the key, the executions and the trades (sync/); here is what the trader sees and does:
+ *  - Connections (Settings, Data group): connect (a key shown once), the add-on seen, the accounts found and their link;
+ *  - one sheet (side panel on a computer, swipe-down sheet on a phone): connect, manage, link an account with its preview
+ *    (trades to add, typed by hand to complete); a Sweep account created for a found account is linked right after (preview first);
+ *  - account page: « Synced with NinjaTrader »; trade page: a NinjaTrader chip; editing a synced trade only changes its
+ *    stop and target (prices, times, contracts and P&L come from the platform);
+ *  - CSV import: a row already synced is « Already imported » and skipped. */
+(function () {
+  'use strict';
+  if (typeof render !== 'function' || typeof apiJSON !== 'function') return;
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = {
+    en: { conn: 'Connections', pitch: 'Your trades arrive on their own from NinjaTrader 8, on every account.', connect: 'Connect', manage: 'Manage', waiting: 'Waiting for the add-on',
+      seen: 'Add-on seen {t}', now: 'just now', min: '{n} min ago', hr: '{n} h ago', day: '{n} d ago', found1: '1 account found', foundN: '{n} accounts found', linkMine: 'Link my accounts',
+      linkedTo: 'Linked to {a}', tr1: '1 trade', trN: '{n} trades', toLink: 'To link', ignored: 'Ignored', eval: 'Evaluation', funded: 'Funded', sim: 'NinjaTrader simulation',
+      err_plan: 'Frozen on the Free plan: its trades wait and arrive once it is unlocked.', err_limit: 'Record limit reached: no new trade added.', err_account_gone: 'The linked Sweep account was deleted: link it again.',
+      err_taken: 'This Sweep account is already linked to another platform account.', err: 'Not saved. Try again.', close: 'Close',
+      cTitle: 'Connect NinjaTrader 8', s1: 'Download the Sweep add-on for NinjaTrader 8.', dl: 'Download', soon: 'Available soon', s2: 'In NinjaTrader: Tools › Import › NinjaScript Add-On, then pick the file.',
+      s3: 'Paste your key in the Sweep window of NinjaTrader:', copy: 'Copy', copied: 'Key copied', once: 'This key is shown only once. It only sends your executions to Sweep: it can never place an order.', done: 'Done',
+      key: 'Key', addon: 'Add-on', lastSeen: 'Last seen', never: 'Never', newKey: 'New key', newKeyHelp: 'The current key stops working.', stop: 'Stop the sync', stopHelp: 'Trades already synced stay in your journal.', stopped: 'Sync stopped',
+      which: 'Which Sweep account is it?', newAcc: '+ New account', ignore: 'Ignore this account', current: 'Linked to {a}', unlink: 'Unlink', unlinkHelp: 'Trades already synced stay.',
+      pv: 'Linking to {a}:', add1: '1 trade to add', addN: '{n} trades to add', cmp1: '1 trade typed by hand, completed (your notes stay)', cmpN: '{n} trades typed by hand, completed (your notes stay)',
+      man1: '1 trade typed by hand with no match, kept as it is', manN: '{n} trades typed by hand with no match, kept as they are', open1: '1 open position, added when it closes', openN: '{n} open positions, added when they close',
+      none: 'No trade yet: they arrive as you trade.', link: 'Link', newNote: 'Create the account: it is linked right after.', create: 'Create the account', ignoreGo: 'Ignore',
+      linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', editT: 'Edit trade',
+      editNote: 'Prices, times, contracts and P&L come from {p} and update on their own. Notes, review, setup, tags and screenshots are edited on the trade page.', target: 'Target', save: 'Save', saved: 'Trade updated' },
+    fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis NinjaTrader 8, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
+      seen: 'Add-on vu {t}', now: 'à l’instant', min: 'il y a {n} min', hr: 'il y a {n} h', day: 'il y a {n} j', found1: '1 compte trouvé', foundN: '{n} comptes trouvés', linkMine: 'Relier mes comptes',
+      linkedTo: 'Relié à {a}', tr1: '1 trade', trN: '{n} trades', toLink: 'À relier', ignored: 'Ignoré', eval: 'Évaluation', funded: 'Financé', sim: 'Simulation NinjaTrader',
+      err_plan: 'Compte gelé avec le forfait Free : ses trades attendent et arriveront dès qu’il sera débloqué.', err_limit: 'Limite d’enregistrements atteinte : aucun nouveau trade ajouté.', err_account_gone: 'Le compte Sweep relié a été supprimé : relie-le de nouveau.',
+      err_taken: 'Ce compte Sweep est déjà relié à un autre compte de la plateforme.', err: 'Non enregistré. Réessaie.', close: 'Fermer',
+      cTitle: 'Connecter NinjaTrader 8', s1: 'Télécharge l’add-on Sweep pour NinjaTrader 8.', dl: 'Télécharger', soon: 'Bientôt disponible', s2: 'Dans NinjaTrader : Tools › Import › NinjaScript Add-On, puis choisis le fichier.',
+      s3: 'Colle ta clé dans la fenêtre Sweep de NinjaTrader :', copy: 'Copier', copied: 'Clé copiée', once: 'Cette clé n’est montrée qu’une fois. Elle sert seulement à envoyer tes exécutions à Sweep : elle ne peut jamais passer un ordre.', done: 'Terminé',
+      key: 'Clé', addon: 'Add-on', lastSeen: 'Vu pour la dernière fois', never: 'Jamais', newKey: 'Nouvelle clé', newKeyHelp: 'La clé actuelle cessera de fonctionner.', stop: 'Arrêter la synchro', stopHelp: 'Les trades déjà synchronisés restent dans ton journal.', stopped: 'Synchro arrêtée',
+      which: 'C’est quel compte Sweep ?', newAcc: '+ Nouveau compte', ignore: 'Ignorer ce compte', current: 'Relié à {a}', unlink: 'Délier', unlinkHelp: 'Les trades déjà synchronisés restent.',
+      pv: 'En le reliant à {a} :', add1: '1 trade à ajouter', addN: '{n} trades à ajouter', cmp1: '1 trade saisi à la main, complété (tes notes restent)', cmpN: '{n} trades saisis à la main, complétés (tes notes restent)',
+      man1: '1 trade saisi à la main sans équivalent, gardé tel quel', manN: '{n} trades saisis à la main sans équivalent, gardés tels quels', open1: '1 position ouverte, ajoutée à sa fermeture', openN: '{n} positions ouvertes, ajoutées à leur fermeture',
+      none: 'Aucun trade pour l’instant : ils arrivent au fil de tes trades.', link: 'Relier', newNote: 'Crée le compte : il sera relié juste après.', create: 'Créer le compte', ignoreGo: 'Ignorer',
+      linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', editT: 'Modifier le trade',
+      editNote: 'Prix, heures, contrats et P&L viennent de {p} et se mettent à jour seuls. Notes, bilan, setup, tags et captures se modifient sur la page du trade.', target: 'Cible', save: 'Enregistrer', saved: 'Trade mis à jour' },
+    es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde NinjaTrader 8, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
+      seen: 'Add-on visto {t}', now: 'justo ahora', min: 'hace {n} min', hr: 'hace {n} h', day: 'hace {n} d', found1: '1 cuenta encontrada', foundN: '{n} cuentas encontradas', linkMine: 'Vincular mis cuentas',
+      linkedTo: 'Vinculada a {a}', tr1: '1 operación', trN: '{n} operaciones', toLink: 'Por vincular', ignored: 'Ignorada', eval: 'Evaluación', funded: 'Financiada', sim: 'Simulación de NinjaTrader',
+      err_plan: 'Cuenta congelada con el plan Free: sus operaciones esperan y llegarán en cuanto se desbloquee.', err_limit: 'Límite de registros alcanzado: no se añadió ninguna operación nueva.', err_account_gone: 'La cuenta de Sweep vinculada se eliminó: vincúlala de nuevo.',
+      err_taken: 'Esta cuenta de Sweep ya está vinculada a otra cuenta de la plataforma.', err: 'No se guardó. Inténtalo de nuevo.', close: 'Cerrar',
+      cTitle: 'Conectar NinjaTrader 8', s1: 'Descarga el add-on de Sweep para NinjaTrader 8.', dl: 'Descargar', soon: 'Disponible pronto', s2: 'En NinjaTrader: Tools › Import › NinjaScript Add-On y elige el archivo.',
+      s3: 'Pega tu clave en la ventana Sweep de NinjaTrader:', copy: 'Copiar', copied: 'Clave copiada', once: 'Esta clave solo se muestra una vez. Solo envía tus ejecuciones a Sweep: nunca puede enviar una orden.', done: 'Listo',
+      key: 'Clave', addon: 'Add-on', lastSeen: 'Visto por última vez', never: 'Nunca', newKey: 'Nueva clave', newKeyHelp: 'La clave actual dejará de funcionar.', stop: 'Detener la sincronización', stopHelp: 'Las operaciones ya sincronizadas se quedan en tu diario.', stopped: 'Sincronización detenida',
+      which: '¿Qué cuenta de Sweep es?', newAcc: '+ Nueva cuenta', ignore: 'Ignorar esta cuenta', current: 'Vinculada a {a}', unlink: 'Desvincular', unlinkHelp: 'Las operaciones ya sincronizadas se quedan.',
+      pv: 'Al vincularla a {a}:', add1: '1 operación por añadir', addN: '{n} operaciones por añadir', cmp1: '1 operación anotada a mano, completada (tus notas se quedan)', cmpN: '{n} operaciones anotadas a mano, completadas (tus notas se quedan)',
+      man1: '1 operación anotada a mano sin equivalente, se queda igual', manN: '{n} operaciones anotadas a mano sin equivalente, se quedan igual', open1: '1 posición abierta, añadida al cerrarse', openN: '{n} posiciones abiertas, añadidas al cerrarse',
+      none: 'Aún no hay operaciones: llegan a medida que operas.', link: 'Vincular', newNote: 'Crea la cuenta: se vincula justo después.', create: 'Crear la cuenta', ignoreGo: 'Ignorar',
+      linkedT: 'Vinculada · {n} operaciones añadidas', linked0: 'Vinculada', ignoredT: 'Cuenta ignorada', loading: 'Cargando…', syncedWith: 'Sincronizada con {p}', editT: 'Editar operación',
+      editNote: 'Precios, horas, contratos y P&L vienen de {p} y se actualizan solos. Notas, revisión, setup, etiquetas y capturas se editan en la página de la operación.', target: 'Objetivo', save: 'Guardar', saved: 'Operación actualizada' },
+  };
+  const t = (k) => { const x = (T[L] || T.en)[k]; return x == null ? T.en[k] : x; };
+  const P = (n, one, many) => (n === 1 ? t(one) : t(many).replace('{n}', n));
+  const h = (s) => (typeof esc === 'function' ? esc(s) : String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]));
+  const PLAT = { ninjatrader: 'NinjaTrader' };   // the platforms a synced trade can come from (its « source »)
+  const FIRMS = { apex: 'Apex' };
+  const isSynced = (d) => !!(d && PLAT[d.source]);
+  const IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5"/></svg>';
+  const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  const SY = { st: null, at: 0, busy: null, view: null, stopping: false };
+  const server = () => typeof S !== 'undefined' && S.mode === 'server';
+
+  function ago(sec) {
+    if (!sec) return '';
+    const d = Math.max(0, Math.floor(Date.now() / 1000) - sec);
+    if (d < 60) return t('now');
+    if (d < 3600) return t('min').replace('{n}', Math.floor(d / 60));
+    if (d < 86400) return t('hr').replace('{n}', Math.floor(d / 3600));
+    return t('day').replace('{n}', Math.floor(d / 86400));
+  }
+  const recent = (c) => !!(c && c.last_seen_at && Date.now() / 1000 - c.last_seen_at < 900);   // the add-on says hello every 5 minutes
+  const conn = () => (SY.stopping || !SY.st ? null : (SY.st.connections || []).find((c) => c.platform === 'ninjatrader') || null);
+  const accts = () => (SY.st ? (SY.st.accounts || []).filter((a) => a.platform === 'ninjatrader') : []);
+  const nameOf = (id) => { const a = typeof acct === 'function' ? acct(id) : null; return a ? (typeof acctLabel === 'function' ? acctLabel(id) : a.name) : '—'; };
+  const guessOf = (a) => { const g = a.guess || {}; if (g.sim) return t('sim'); if (g.firm) return (FIRMS[g.firm] || g.firm) + (g.phase ? ' · ' + t(g.phase) : ''); return ''; };
+
+  /** the trader's sync, asked again at most every 20 s (and right after each action) */
+  function load(force) {
+    if (!server()) return Promise.resolve(null);
+    if (SY.busy) return SY.busy;
+    if (!force && SY.st && Date.now() - SY.at < 20000) return Promise.resolve(SY.st);
+    SY.busy = apiJSON('api/sync').then((d) => { SY.st = d; return d; }).catch(() => SY.st)
+      .finally(() => { SY.at = Date.now(); SY.busy = null; try { paint(); redraw(); } catch (e) { /* never blocks */ } });
+    return SY.busy;
+  }
+
+  /* ───── Settings › Data › Connections ───── */
+  function rowHtml(a) {
+    const g = guessOf(a);
+    const st = a.state === 'linked' ? t('linkedTo').replace('{a}', h(nameOf(a.account_id))) + ' · ' + P(a.trades, 'tr1', 'trN') : a.state === 'ignored' ? t('ignored') : t('toLink');
+    return `<li><button type="button" class="sy-acc" data-sy="acct" data-id="${h(a.id)}"><span class="sy-txt"><b>${h(a.name)}</b><span>${g ? `<em class="sy-chip">${h(g)}</em>` : ''}${st}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</span><svg class="sy-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>`;
+  }
+  function sectionHtml() {
+    if (!SY.st) return `<div class="sec-h"><h2>${t('conn')}</h2></div><div class="surface pad sy-card"><p class="muted sy-wait">${t('loading')}</p></div>`;
+    const c = conn(), list = accts(), fresh = list.filter((a) => a.state === 'new');
+    const head = c
+      ? `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>NinjaTrader 8</b><span><i class="sy-dot${recent(c) ? ' on' : ''}"></i>${c.last_seen_at ? h(t('seen').replace('{t}', ago(c.last_seen_at))) : t('waiting')}</span></span><button type="button" class="btn sm" data-sy="manage">${t('manage')}</button></div>`
+      : `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>NinjaTrader 8</b><span>${t('pitch')}</span></span><button type="button" class="btn sm" data-sy="connect">${t('connect')}</button></div>`;
+    const found = fresh.length ? `<div class="sy-found"><span>${P(fresh.length, 'found1', 'foundN')}</span><button type="button" class="btn sm" data-sy="acct" data-id="${h(fresh[0].id)}">${t('linkMine')}</button></div>` : '';
+    return `<div class="sec-h"><h2>${t('conn')}</h2></div><div class="surface pad sy-card">${head}${found}${list.length ? `<ul class="sy-list">${list.map(rowHtml).join('')}</ul>` : ''}</div>`;
+  }
+  function paintSettings() {
+    const main = document.getElementById('main'); if (!main || !/^#settings/.test(location.hash || '')) return;
+    let sec = main.querySelector('.sy-sec');
+    const html = sectionHtml();
+    if (!sec) {
+      sec = document.createElement('section'); sec.className = 'sec sy-sec'; sec.setAttribute('data-noi18n', '');
+      const grp = main.querySelector('details.nav-sgd[data-i="3"]');   // Settings in groups (nav.js): the Data group
+      if (grp) grp.append(sec); else main.append(sec);   // before grouping: nav.js puts it in the Data group by its title
+    }
+    if (sec.innerHTML !== html) sec.innerHTML = html;
+    load();
+  }
+
+  /* ───── account page and trade page ───── */
+  function paintAccount() {
+    const main = document.getElementById('main'); if (!main) return;
+    const m = /^#account\/([^/?]+)/.exec(location.hash || ''); let el = main.querySelector('.sy-acct');
+    if (!m) { if (el) el.remove(); return; }
+    load();
+    const id = decodeURIComponent(m[1]), a = accts().find((x) => x.state === 'linked' && x.account_id === id);
+    if (!a) { if (el) el.remove(); return; }
+    const c = conn();
+    const html = `<p class="sy-acct" data-noi18n><i class="sy-dot${recent(c) ? ' on' : ''}${a.error ? ' err' : ''}"></i><span>${h(t('syncedWith').replace('{p}', PLAT[a.platform]))} · ${h(a.name)}${c && c.last_seen_at ? ' · ' + h(t('seen').replace('{t}', ago(c.last_seen_at))) : ''}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</p>`;
+    if (!el) { const row = main.querySelector(':scope > .row') || main.firstElementChild; if (row) row.insertAdjacentHTML('afterend', html); }
+    else if (el.outerHTML !== html) el.outerHTML = html;
+  }
+  function paintTrade() {
+    const m = /^#trade\/([^/?]+)/.exec(location.hash || ''); if (!m || typeof getDoc !== 'function') return;
+    const d = getDoc('trades', decodeURIComponent(m[1])); if (!isSynced(d)) return;
+    const lbl = document.querySelector('#main .th-head .lbl');
+    if (lbl && !lbl.querySelector('.sy-chip')) lbl.insertAdjacentHTML('beforeend', ` <em class="sy-chip" data-noi18n>${PLAT[d.source]}</em>`);
+  }
+
+  /* ───── the sheet ───── */
+  function sheet() {
+    let el = document.getElementById('sySheet'); if (el) return el;
+    el = document.createElement('aside'); el.id = 'sySheet'; el.className = 'evp sysh';
+    el.setAttribute('data-noi18n', ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+    el.innerHTML = '<div class="evp-in sy-in"></div>'; document.body.append(el);
+    const sc = document.createElement('div'); sc.id = 'syScrim'; sc.className = 'evp-scrim'; sc.addEventListener('click', close); document.body.append(sc);
+    if (typeof swipeDismiss === 'function') swipeDismiss(el, { scroller: () => el.querySelector('.evp-in'), onClose: close, ignore: 'input, .sy-key' });
+    return el;
+  }
+  function open(view) {
+    SY.view = view; const el = sheet();
+    el.querySelector('.sy-in').innerHTML = viewHtml(); el.setAttribute('aria-label', titleOf());
+    requestAnimationFrame(() => { el.classList.add('open'); document.getElementById('syScrim').classList.add('open'); document.body.classList.add('evp-lock'); });
+  }
+  function redraw() {
+    const el = document.getElementById('sySheet'); if (!el || !el.classList.contains('open') || !SY.view) return;
+    const html = viewHtml(), box = el.querySelector('.sy-in');
+    if (box.innerHTML !== html && !box.contains(document.activeElement && document.activeElement.matches('input') ? document.activeElement : null)) box.innerHTML = html;
+  }
+  function close() {
+    SY.view = null;
+    const el = document.getElementById('sySheet'); if (!el) return;
+    el.classList.remove('open'); document.getElementById('syScrim').classList.remove('open');
+    if (!document.querySelector('.evp.open')) document.body.classList.remove('evp-lock');
+  }
+  function titleOf() {
+    const v = SY.view || {};
+    if (v.k === 'connect') return t('cTitle');
+    if (v.k === 'manage') return 'NinjaTrader 8';
+    if (v.k === 'edit') return t('editT');
+    const a = accts().find((x) => x.id === v.id); return a ? a.name : t('conn');
+  }
+  function viewHtml() {
+    const v = SY.view || {};
+    const head = `<div class="sy-head"><h2>${h(titleOf())}</h2><button type="button" class="sy-x" data-sy="close" aria-label="${t('close')}">${X}</button></div>`;
+    if (v.k === 'connect') {
+      const ad = SY.st && SY.st.addon;
+      return head + `<ol class="sy-steps"><li><span>${t('s1')}</span>${ad ? `<a class="btn sm" href="${h(ad.url)}" download>${t('dl')}</a>` : `<em class="sy-soon">${t('soon')}</em>`}</li>
+        <li><span>${t('s2')}</span></li><li><span>${t('s3')}</span><div class="sy-key"><code>${h(v.key)}</code><button type="button" class="btn sm" data-sy="copy">${t('copy')}</button></div></li></ol>
+        <p class="sy-note">${t('once')}</p><button type="button" class="btn primary sy-main" data-sy="close">${t('done')}</button>`;
+    }
+    if (v.k === 'manage') {
+      const c = conn() || {};
+      return head + `<div class="sy-kv"><span>${t('key')}</span><b>····${h(c.hint || '')}</b></div><div class="sy-kv"><span>${t('addon')}</span><b>${h(c.client || '—')}</b></div>
+        <div class="sy-kv"><span>${t('lastSeen')}</span><b>${c.last_seen_at ? h(ago(c.last_seen_at)) : t('never')}</b></div>
+        <button type="button" class="btn sy-wide" data-sy="newkey">${t('newKey')}</button><p class="sy-note">${t('newKeyHelp')}</p>
+        <button type="button" class="btn danger sy-wide" data-sy="stop">${t('stop')}</button><p class="sy-note">${t('stopHelp')}</p>`;
+    }
+    if (v.k === 'edit') {
+      const d = typeof getDoc === 'function' ? getDoc('trades', v.id) : null; if (!d) return head;
+      const num = (x) => (x == null || x === '' ? '' : h(String(x)));
+      return head + `<p class="sy-note">${h(t('editNote').replace('{p}', PLAT[d.source] || ''))}</p>
+        <div class="sy-two"><label class="f"><span>Stop</span><input inputmode="decimal" data-syf="stop" value="${num(d.stop)}"></label><label class="f"><span>${t('target')}</span><input inputmode="decimal" data-syf="target" value="${num(d.target)}"></label></div>
+        <button type="button" class="btn primary sy-main" data-sy="save-edit">${t('save')}</button>`;
+    }
+    const a = accts().find((x) => x.id === v.id); if (!a) return head;
+    const g = guessOf(a), info = a.info || {}, sub = [g, info.connection, info.provider].filter((x, i, l) => x && l.findIndex((y) => y && y.toLowerCase().includes(String(x).toLowerCase())) === i);   // « Apex » is already in « Apex · Evaluation »
+    const taken = new Set(accts().filter((x) => x.state === 'linked' && x.id !== a.id).map((x) => x.account_id));
+    const own = (S.accounts || []).filter((x) => x.status !== 'archived' && !x.demo && !taken.has(x.id));
+    const opt = (val, label, extra) => `<button type="button" class="sy-opt${v.pick === val ? ' on' : ''}${extra || ''}" role="radio" aria-checked="${v.pick === val}" data-sy="pick" data-v="${h(val)}"><i aria-hidden="true"></i><span>${label}</span></button>`;
+    let out = head + (sub.length ? `<p class="sy-sub">${sub.map((x) => `<em class="sy-chip">${h(x)}</em>`).join('')}</p>` : '');
+    if (a.error) out += `<p class="sy-err sy-errbox">${h(t('err_' + a.error))}</p>`;
+    if (a.state === 'linked') out += `<div class="sy-kv"><span>${h(t('current').replace('{a}', nameOf(a.account_id)))}</span><button type="button" class="btn sm" data-sy="unlink">${t('unlink')}</button></div><p class="sy-note">${t('unlinkHelp')}</p>`;
+    else {
+      out += `<p class="sy-q">${t('which')}</p><div class="sy-opts" role="radiogroup">${own.map((x) => opt(x.id, h(nameOf(x.id)))).join('')}${opt('new', t('newAcc'))}${opt('ignore', t('ignore'), ' sy-quiet')}</div>`;
+      if (v.pick === 'new') out += `<p class="sy-note">${t('newNote')}</p><button type="button" class="btn primary sy-main" data-sy="create">${t('create')}</button>`;
+      else if (v.pick === 'ignore') out += `<button type="button" class="btn primary sy-main" data-sy="ignore">${t('ignoreGo')}</button>`;
+      else if (v.pick) {
+        const pv = v.pv;
+        const lines = !pv ? `<li class="muted">${t('loading')}</li>` : pv.error ? '' : [pv.add ? P(pv.add, 'add1', 'addN') : '', pv.complete ? P(pv.complete, 'cmp1', 'cmpN') : '', pv.manual ? P(pv.manual, 'man1', 'manN') : '', pv.open ? P(pv.open, 'open1', 'openN') : ''].filter(Boolean).map((x) => `<li>${h(x)}</li>`).join('') || `<li>${t('none')}</li>`;
+        out += `<div class="sy-pv"><b>${h(t('pv').replace('{a}', nameOf(v.pick)))}</b><ul>${lines}</ul></div>${v.err ? `<p class="sy-err sy-errbox">${h(v.err)}</p>` : ''}<button type="button" class="btn primary sy-main" data-sy="link"${!pv || v.busy ? ' disabled' : ''}>${t('link')}</button>`;
+      }
+    }
+    return out;
+  }
+  /** the next account still to link, or nothing */
+  const nextFresh = (skip) => accts().find((x) => x.state === 'new' && x.id !== skip);
+  function after(skip) { const n = nextFresh(skip); if (n) open({ k: 'acct', id: n.id, pick: null }); else close(); }
+
+  /* ───── what the trader does ───── */
+  async function act(b) {
+    const k = b.dataset.sy, v = SY.view || {};
+    if (k === 'close') return close();
+    if (k === 'manage') return open({ k: 'manage' });
+    if (k === 'acct') return open({ k: 'acct', id: b.dataset.id, pick: null });
+    if (k === 'connect' || k === 'newkey') {
+      b.disabled = true;
+      try { const r = await apiJSON('api/sync/key', { method: 'POST', body: { platform: 'ninjatrader' } }); SY.stopping = false; open({ k: 'connect', key: r.key }); load(true); }
+      catch (e) { if (typeof toast === 'function') toast(t('err')); b.disabled = false; }
+      return;
+    }
+    if (k === 'copy') {
+      const key = v.key || ''; let ok = false;
+      try { await navigator.clipboard.writeText(key); ok = true; } catch (e) { /* older browser: select it */ }
+      if (!ok) { const c = document.querySelector('#sySheet .sy-key code'); if (c) { const r = document.createRange(); r.selectNodeContents(c); const s = getSelection(); s.removeAllRanges(); s.addRange(r); try { ok = document.execCommand('copy'); } catch (e) { /* selected for the trader */ } } }
+      if (ok && typeof toast === 'function') toast(t('copied'));
+      return;
+    }
+    if (k === 'stop') {   // like a delete: « Undo » for 5 s, the key is revoked only then
+      close(); SY.stopping = true; paint();
+      const undo = () => { SY.stopping = false; paint(); };
+      const go = () => { apiJSON('api/sync/key?platform=ninjatrader', { method: 'DELETE' }).catch(() => {}).finally(() => { SY.stopping = false; load(true); }); };
+      if (window.SweepUndo && SweepUndo.toast) SweepUndo.toast(t('stopped'), undo, go); else go();
+      return;
+    }
+    if (k === 'pick') {
+      v.pick = b.dataset.v; v.pv = null; v.err = null; redraw();
+      if (v.pick !== 'new' && v.pick !== 'ignore') {
+        const pick = v.pick;
+        try { const pv = await apiJSON(`api/sync/accounts/${encodeURIComponent(v.id)}/preview?account_id=${encodeURIComponent(pick)}`); if (SY.view === v && v.pick === pick) { v.pv = pv; redraw(); } }
+        catch (e) { if (SY.view === v) { v.pv = { error: true }; v.err = t('err'); redraw(); } }
+      }
+      return;
+    }
+    if (k === 'link') {
+      v.busy = true; v.err = null; redraw();
+      try {
+        const r = await apiJSON(`api/sync/accounts/${encodeURIComponent(v.id)}`, { method: 'POST', body: { action: 'link', account_id: v.pick } });
+        const n = (r.created || 0) + (r.merged || 0);
+        if (typeof toast === 'function') toast(r.error ? t('err_' + r.error) : n ? t('linkedT').replace('{n}', n) : t('linked0'));
+        if (typeof syncNow === 'function') syncNow({ manual: true });
+        await load(true); after(v.id);
+      } catch (e) { v.busy = false; v.err = e && e.status === 409 && e.data && e.data.error === 'taken' ? t('err_taken') : t('err'); redraw(); }
+      return;
+    }
+    if (k === 'ignore' || k === 'unlink') {
+      try { await apiJSON(`api/sync/accounts/${encodeURIComponent(v.id)}`, { method: 'POST', body: { action: k } }); if (k === 'ignore' && typeof toast === 'function') toast(t('ignoredT')); await load(true); if (k === 'ignore') after(v.id); else redraw(); }
+      catch (e) { if (typeof toast === 'function') toast(t('err')); }
+      return;
+    }
+    if (k === 'create') {   // the app's own « Add account » form, named like the platform account; linked once saved (preview first)
+      const a = accts().find((x) => x.id === v.id);
+      try { sessionStorage.setItem('sw.syPend', JSON.stringify({ sid: v.id, ids: (S.accounts || []).map((x) => x.id), at: Date.now() })); } catch (e) { /* private mode: linked by hand */ }
+      close(); location.hash = '#accounts';
+      setTimeout(() => {
+        const all = document.querySelectorAll('#main [data-act="acct-add"][data-v="1"]'), btn = all[all.length - 1];
+        if (btn && !document.querySelector('#main form[data-form="account"]')) btn.click();
+        setTimeout(() => { const i = document.querySelector('#main form[data-form="account"] input[name="name"]'); if (i && a && !i.value) { i.value = a.name; i.dispatchEvent(new Event('input', { bubbles: true })); } }, 120);
+      }, 400);
+      return;
+    }
+    if (k === 'save-edit') {
+      const d = typeof getDoc === 'function' ? getDoc('trades', v.id) : null; if (!d) return close();
+      const val = (f) => { const x = document.querySelector(`#sySheet [data-syf="${f}"]`); const s = x ? String(x.value).trim().replace(/\s/g, '').replace(',', '.') : ''; return s === '' || !isFinite(+s) ? null : +s; };
+      const stop = val('stop'), target = val('target');
+      const copies = typeof copiesOf === 'function' ? copiesOf(d) : [d];
+      copies.forEach((c) => editDoc('trades', c.id, (x) => {   // stop and target are shared by the copies, as in the trade form
+        x.stop = stop; x.target = target;
+        const r = typeof riskOf === 'function' ? riskOf({ entry: x.entry, stop: stop == null ? '' : stop, target: target == null ? '' : target, qty: x.contracts, dir: x.direction, inst: x.instrument }) : {};
+        x.risk_c = r.risk_c || null; x.planned_rr = r.rr ? r.rr.toFixed(2) : '';
+      }));
+      close(); if (typeof toast === 'function') toast(t('saved')); render();
+    }
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-sy]'); if (!b || (b.disabled)) return; e.preventDefault(); act(b); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && SY.view) close(); });
+
+  /* a synced trade opens its own small editor (stop, target): the trade form would rewrite the platform's prices and P&L */
+  if (typeof openTicket === 'function') {
+    const orig = openTicket;
+    openTicket = function (id) {
+      const d = typeof id === 'string' && typeof getDoc === 'function' ? getDoc('trades', id) : null;
+      if (isSynced(d)) { open({ k: 'edit', id }); return; }
+      return orig.apply(this, arguments);
+    };
+  }
+
+  /* a Sweep account created from « + New account »: once it exists, its link is proposed (with the preview) */
+  function pending() {
+    let p = null; try { p = JSON.parse(sessionStorage.getItem('sw.syPend') || 'null'); } catch (e) { p = null; }
+    if (!p || typeof S === 'undefined') return;
+    if (Date.now() - p.at > 30 * 60000) { try { sessionStorage.removeItem('sw.syPend'); } catch (e) { /* private mode */ } return; }
+    const nu = (S.accounts || []).find((a) => !a.demo && !p.ids.includes(a.id)); if (!nu) return;
+    if (document.querySelector('.evp.open, .nav-dlg.open, #gSheet.open, .nt-modal, #tkSlide.open')) return;   // never on top of another window: next render
+    try { sessionStorage.removeItem('sw.syPend'); } catch (e) { /* private mode */ }
+    load(true).then(() => { if (!accts().some((x) => x.id === p.sid)) return; open({ k: 'acct', id: p.sid, pick: null }); const b = document.querySelector(`#sySheet [data-sy="pick"][data-v="${CSS.escape(nu.id)}"]`); if (b) act(b); });
+  }
+
+  /* CSV import: a row that is already a synced trade (same account, instrument, side, contracts, entry within 2 min) takes
+     that trade's import key, so the import shows it « Already imported » and skips it */
+  const minOf = (s) => { const m = /^(\d{4})-?(\d{2})-?(\d{2})[ T]?(\d{2}):?(\d{2})/.exec(String(s || '')); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) / 60000 : null; };
+  function importKeys() {
+    if (!/^#import/.test(location.hash || '') || typeof IMP === 'undefined' || !IMP.rows || !IMP.rows.length || typeof S === 'undefined') return;
+    const synced = (S.trades || []).filter((x) => isSynced(x) && x.import_key && x.executions && x.executions[0]); if (!synced.length && !IMP.rows.some((r) => r._k0)) return;
+    const multi = new Set(IMP.rows.map((r) => r.acct).filter(Boolean)).size > 1;
+    const live = (S.accounts || []).filter((a) => a.status !== 'archived');
+    const def = IMP.account && live.some((a) => a.id === IMP.account) ? IMP.account : (typeof F !== 'undefined' && F.account !== 'all' ? F.account : (live[0] || {}).id);
+    for (const r of IMP.rows) {
+      if (r._k0 === undefined) r._k0 = r.key;
+      const acc = multi ? IMP.map && IMP.map[r.acct] : def, at = minOf(r.entryKey);
+      const twin = acc && at != null ? synced.find((x) => x.account_id === acc && x.instrument === r.inst && x.direction === r.dir
+        && (+x.contracts === +r.qty || x.executions.filter((e) => e.side === (r.dir === 'long' ? 'buy' : 'sell')).reduce((s, e) => s + +e.qty, 0) === +r.qty)
+        && Math.abs(minOf(x.executions[0].t) - at) <= 2) : null;
+      r.key = twin ? twin.import_key : r._k0;
+    }
+  }
+
+  function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); }
+  const appRender = render;
+  render = function () {
+    try { importKeys(); } catch (e) { /* never blocks */ }
+    const out = appRender.apply(this, arguments);
+    try { paint(); pending(); } catch (e) { /* never blocks */ }
+    return out;
+  };
+  window.SweepSync = { load: () => load(true), state: () => SY.st };
+})();

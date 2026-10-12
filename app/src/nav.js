@@ -913,7 +913,7 @@ window.SweepMO = window.SweepMO || class {
     [0, /^(your account|ton compte|tu cuenta|appearance|apparence|apariencia|keyboard shortcuts|raccourcis clavier|atajos de teclado)/i],
     [1, /^(discipline checklist|checklist de discipline|checklist de disciplina|setups|prop firms|risk rules|règles de risque|reglas de riesgo|copied trades|trades copiés|operaciones copiadas)/i],
     [2, /^(notifications|notificaciones)/i],
-    [3, /^(data|données|datos)/i],
+    [3, /^(data|données|datos|connections|connexions|conexiones)/i],
   ];
   function groupSettings() {
     if (route().v !== 'settings') return;
