@@ -111,7 +111,11 @@ def main():
             txt = open(path, encoding='utf-8', errors='replace').read() if os.path.exists(path) else open(tmp + '/run.log', encoding='utf-8', errors='replace').read()
             for name in re.findall(r'^FAIL\s+(\S+)', open(tmp + '/run.log', encoding='utf-8', errors='replace').read(), re.M):
                 m = re.search(r'^===== ' + re.escape(name) + r'.*?(?=^===== |\Z)', txt, re.M | re.S)
-                lines = [l for l in (m.group(0) if m else '').splitlines() if re.search(r'FAIL|Error|Traceback|assert|exit', l)][-6:]
+                body = (m.group(0) if m else '').splitlines()
+                # a crash: the last check that passed, where in the test it stopped (file:line) and what it was waiting for
+                last_ok = [l for l in body if l.startswith('ok ')][-1:] if any('Traceback' in l for l in body) else []
+                where = [l.strip() for l in body if re.search(r'File ".*/tests/[^"]+\.py", line \d+', l)][-2:]
+                lines = last_ok + where + [l.strip() for l in body if re.search(r'FAIL|Error|Traceback|assert|exit|waiting for', l)][-6:]
                 print('::error title=%s::%s' % (esc(name), esc('\n'.join(lines) or 'see the test logs')), flush=True)
         print('::notice title=Tests::%s' % esc('%d réussis, %d échoués' % (passed, failed)), flush=True)
     print('\n%d réussis, %d échoués%s   (%d min %02d s)' % (passed, failed, (' — échoués : ' + ' '.join(failed_names)) if failed_names else '', (time.time() - t0) // 60, (time.time() - t0) % 60))
