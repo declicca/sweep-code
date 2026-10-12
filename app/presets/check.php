@@ -147,7 +147,7 @@ function pr_carry_over(array $old, array $new): array
     $byId = []; foreach ($old['programs'] as $p) $byId[$p['id']] = $p;
     foreach ($new['programs'] as &$p) {
         $o = $byId[$p['id']] ?? null; if (!$o) continue;
-        foreach (['note', 'label', 'options', 'verified', 'payout_sources'] as $k) if (isset($o[$k])) $p[$k] = $o[$k];
+        foreach (['name', 'note', 'label', 'options', 'verified', 'payout_sources'] as $k) if (isset($o[$k])) $p[$k] = $o[$k];   // the names are ours (« Test → PRO »), the pages give the numbers
         $oSizes = []; foreach ($o['sizes'] as $s) $oSizes[$s['size']] = $s;
         foreach ($p['sizes'] as &$s) {
             $os = $oSizes[$s['size']] ?? null; if (!$os) continue;
@@ -172,6 +172,14 @@ function pr_doubtful(array $old, array $new): array
     $idx = function (array $f) { $o = []; foreach ((array) $f['programs'] as $p) foreach ((array) $p['sizes'] as $s) $o[$p['id'] . ' ' . ((int) $s['size'] / 1000) . 'K'] = $s; return $o; };
     $a = $idx($old); $b = $idx($new);
     $jump = fn($x, $y) => is_numeric($x) && is_numeric($y) && $x > 0 && abs($y - $x) / $x > 0.5;
+    // something that disappears is never applied automatically: an account no longer found (traders' accounts are linked to
+    // it), or a rule no longer read (Topstep's optional daily loss limit, 12 Oct.: the pages still offer it at checkout)
+    foreach ($a as $k => $s) if (!isset($b[$k])) $e[] = "$k no longer found on the official pages: to review";   // (no-longer-sold programs are kept by pr_carry_over)
+    foreach ($b as $k => $s) {
+        if (!isset($a[$k])) continue;
+        foreach (['eval', 'funded'] as $ph) foreach (['target', 'dd', 'dll', 'dll_optional', 'consistency', 'min_days'] as $f)
+            if (isset($a[$k][$ph][$f]) && $a[$k][$ph][$f] !== false && !isset($s[$ph][$f])) $e[] = "$k $ph $f " . var_export($a[$k][$ph][$f], true) . ' → no longer read: to review';
+    }
     foreach ($b as $k => $s) {
         if (!isset($a[$k])) continue;
         $po = (array) ($a[$k]['funded']['payout'] ?? []); $pn = (array) ($s['funded']['payout'] ?? []);

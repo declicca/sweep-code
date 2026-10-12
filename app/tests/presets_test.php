@@ -164,6 +164,19 @@ $l['seed_version'] = '2026-01-02'; file_put_contents(pr_live_path(), json_encode
 $st = pr_status(); $st['recheck_for'] = $seedV; pr_save_status($st);
 ok(!pr_recheck_due(), 'a check already tried for this seed (even a failed one) is not repeated every 15 minutes: the weekly task tries again');
 
+echo "— A check never removes on its own: an account or a rule no longer read goes to review (12 Oct.)\n";
+$firmOf = function (string $id) { foreach (pr_current()['firms'] as $f) if ($f['id'] === $id) return $f; return null; };
+$run1 = function (string $id, callable $edit) use ($pdo, $firmOf) { mock([$id => answer_of($id, $edit)]); [$st, $new] = pr_check_firm($pdo, $firmOf($id)); return pr_apply($pdo, $id, $st, $new); };
+$st = $run1('topstep', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) unset($s['funded']['dll_optional']); });
+ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'dll_optional') !== false, "Topstep's optional daily loss limit no longer read on the pages: to review, not applied (" . ($st['errors'][0] ?? '') . ')');
+ok(!empty($firmOf('topstep')['programs'][0]['sizes'][0]['funded']['dll_optional']), '… and traders are still offered the option');
+$st = $run1('mffu', function (array &$a) { array_pop($a['programs'][0]['sizes']); });
+ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'no longer found on the official pages') !== false, 'an account no longer found on the pages: to review, the account stays');
+$st = $run1('tpt', function (array &$a) { $a['programs'][0]['name'] = 'Test'; });
+ok($st['status'] === 'unchanged' && $firmOf('tpt')['programs'][0]['name'] === 'Test → PRO', 'a program read under another name keeps ours (« Test → PRO »): nothing changes (' . $st['status'] . ')');
+$st = $run1('topstep', function (array &$a) { foreach ($a['programs'][0]['sizes'] as &$s) $s['funded']['max_minis'] = ($s['funded']['max_minis'] ?? 0) + 1; });
+ok($st['status'] === 'updated' && $firmOf('topstep')['programs'][0]['sizes'][0]['funded']['max_minis'] >= 1, 'a number read on the pages (max contracts) is still applied automatically (' . $st['status'] . ')');
+
 exec('rm -rf ' . escapeshellarg($DATA));
 echo "\n" . ($n - $fails) . "/$n passed\n";
 exit($fails ? 1 : 0);
