@@ -261,12 +261,54 @@ function pr_apply(PDO $pdo, string $firmId, array $st, ?array $new, bool $dry = 
     return $st;
 }
 
-/** End of a full run (cron, or the last firm of « Check now »): the date the admin sees and the 8-day alert rely on. */
+/**
+ * End of a full run (cron, or the last firm of « Check now »): the date the admin sees and the 8-day alert rely on.
+ * A checked catalogue built on an older shipped seed (before an update) is ignored by pr_current(): this run compared every
+ * firm with the current seed, so once it has read at least one firm (« unchanged » or « updated »), the catalogue is saved
+ * again on the current seed — api/presets says « checked » with today's date, never the shipped seed in silence.
+ */
 function pr_finish_run(string $by = 'cron'): void
 {
     $status = pr_status(); $status['last_run'] = gmdate('c'); $status['last_run_by'] = $by; pr_save_status($status);
+    $seed = pr_read(pr_seed_path()); $live = pr_read(pr_live_path());
+    $read = 0; foreach ((array) ($status['firms'] ?? []) as $f) if (in_array($f['status'] ?? '', ['unchanged', 'updated'], true) && (int) strtotime((string) ($f['checked_at'] ?? '')) > time() - 6 * 3600) $read++;
+    if ($seed && $read && (!$live || ($live['seed_version'] ?? null) !== ($seed['version'] ?? null))) {
+        $cat = pr_current();   // the current seed, which this run has just compared with the official pages
+        $cat['version'] = gmdate('Y-m-d-His'); $cat['checked_at'] = gmdate('c');
+        $cat['origin'] = 'weekly check of the official pages'; $cat['seed_version'] = $seed['version'] ?? null;
+        pr_save($cat);
+        return;
+    }
     $cat = pr_current();
     if (is_file(pr_live_path()) && ($cat['origin'] ?? '') !== '' && strpos((string) $cat['origin'], 'seed') !== 0) { $cat['checked_at'] = gmdate('c'); pr_save($cat); }
+}
+
+/** Every firm checked (the weekly task, or once after an update): one line per firm. Ends the run unless dry or one firm. */
+function pr_run_all(PDO $pdo, bool $dry = false, ?string $only = null, string $by = 'cron'): array
+{
+    $report = [];
+    foreach (pr_current()['firms'] as $firm) {
+        if ($only && $firm['id'] !== $only) continue;
+        [$st, $new] = pr_check_firm($pdo, $firm);
+        $st = pr_apply($pdo, $firm['id'], $st, $new, $dry);
+        $report[] = sprintf("%-22s %-9s %s", $firm['name'], $st['status'], $st['changes'] ? implode(' | ', array_slice($st['changes'], 0, 6)) : implode(' | ', $st['errors']))
+            . (!empty($st['notified']) ? "  → {$st['notified']} trader(s) notified" : '');
+    }
+    if (!$dry && !$only) pr_finish_run($by);
+    return $report;
+}
+/** The shipped seed changed since the last check (an update): one full check, once per seed version (run by game/cron.php). */
+function pr_recheck_due(): bool
+{
+    $seed = pr_read(pr_seed_path()); $live = pr_read(pr_live_path());
+    if (!$seed || !$live || ($live['seed_version'] ?? null) === ($seed['version'] ?? null)) return false;
+    return (pr_status()['recheck_for'] ?? null) !== ($seed['version'] ?? null);
+}
+function pr_recheck_if_seed_changed(PDO $pdo): ?array
+{
+    if (!pr_recheck_due()) return null;
+    $status = pr_status(); $status['recheck_for'] = pr_read(pr_seed_path())['version'] ?? null; pr_save_status($status);   // once, even if it fails (the weekly task tries again)
+    return pr_run_all($pdo);
 }
 
 /* ───────────── admin view + 8-day alert ───────────── */

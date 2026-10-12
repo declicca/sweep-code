@@ -39,14 +39,5 @@ if (in_array('--rollback', $args, true)) {
     exit($f ? 0 : 1);
 }
 
-$cat = pr_current();
-$report = [];
-foreach ($cat['firms'] as $firm) {
-    if ($only && $firm['id'] !== $only) continue;
-    [$st, $new] = pr_check_firm($pdo, $firm);
-    $st = pr_apply($pdo, $firm['id'], $st, $new, $dry);
-    $report[] = sprintf("%-22s %-9s %s", $firm['name'], $st['status'], $st['changes'] ? implode(' | ', array_slice($st['changes'], 0, 6)) : implode(' | ', $st['errors']))
-        . (!empty($st['notified']) ? "  → {$st['notified']} trader(s) notified" : '');
-}
-if (!$dry && !$only) pr_finish_run('cron');
+$report = pr_run_all($pdo, $dry, $only, 'cron');
 echo ($dry ? "[dry run] " : '') . "Prop firm presets — " . gmdate('Y-m-d H:i') . " UTC\n" . implode("\n", $report) . "\n";

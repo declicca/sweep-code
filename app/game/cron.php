@@ -56,4 +56,9 @@ foreach ($users as $uid) {
         fwrite(STDERR, "[Sweep game] $uid: " . $e->getMessage() . "\n");
     }
 }
+// an update shipped new prop firm rules: check them once against the official pages (until then, the shipped seed is used)
+if ($mode === 'lock' && is_file($root . '/presets/check.php')) {
+    try { require_once $root . '/presets/check.php'; require_once $root . '/ai/ai-core.php'; $r = pr_recheck_if_seed_changed($pdo); if ($r !== null) echo date('c') . ' Sweep presets: new shipped rules, ' . count($r) . " firm(s) checked\n"; }
+    catch (Throwable $e) { fwrite(STDERR, '[Sweep presets recheck] ' . $e->getMessage() . "\n"); }
+}
 echo date('c') . " Sweep game $mode: $n player(s)\n";

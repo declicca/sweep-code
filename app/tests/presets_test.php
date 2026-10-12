@@ -145,6 +145,25 @@ $live = json_decode((string) file_get_contents(pr_live_path()), true);
 $live['seed_version'] = '2026-01-01'; file_put_contents(pr_live_path(), json_encode($live));
 ok(pr_current()['version'] === pr_read(pr_seed_path())['version'], 'live file built on an older seed → the shipped seed is used');
 
+echo "— After an update: the checked rules are not ignored in silence (brief app-depuis-site, step 1)\n";
+$seedV = pr_read(pr_seed_path())['version'];
+$origin = fn() => strpos((string) (pr_current()['origin'] ?? ''), 'seed') === 0 ? 'seed' : 'checked';   // what api/presets says
+ok($origin() === 'seed' && pr_recheck_due(), 'checked catalogue on an older seed: api/presets says « seed », and a check is due');
+@unlink($GLOBALS['DATA'] . '/mock.json'); putenv('SWEEP_PRESETS_MOCK=' . $GLOBALS['DATA'] . '/none.json'); file_put_contents($GLOBALS['DATA'] . '/none.json', '{}');
+pr_run_all($pdo);   // every firm fails (no answer): nothing was read
+ok($origin() === 'seed' && pr_read(pr_live_path())['seed_version'] === '2026-01-01', 'a check that could read no firm claims nothing: still « seed »');
+$answers = []; foreach (pr_current()['firms'] as $f) if ($f['programs']) $answers[$f['id']] = answer_of($f['id']);
+mock($answers);
+$r = pr_recheck_if_seed_changed($pdo);   // what game/cron.php does after an update
+$l = pr_read(pr_live_path());
+ok(is_array($r) && count($r) === count(pr_read(pr_seed_path())['firms']), 'after an update: one full check against the official pages (' . (is_array($r) ? count($r) : 0) . ' firms)');
+ok($l['seed_version'] === $seedV && $origin() === 'checked' && abs(strtotime($l['checked_at']) - time()) < 120, "nothing changed on the pages: the catalogue is saved on the current seed, api/presets says « checked » with today's date");
+ok(pr_current()['version'] === $l['version'] && count(pr_current()['firms']) === count(pr_read(pr_seed_path())['firms']), 'the rules served are the current seed, now checked (same firms)');
+ok(!pr_recheck_due() && pr_recheck_if_seed_changed($pdo) === null, 'no second check for the same seed');
+$l['seed_version'] = '2026-01-02'; file_put_contents(pr_live_path(), json_encode($l));
+$st = pr_status(); $st['recheck_for'] = $seedV; pr_save_status($st);
+ok(!pr_recheck_due(), 'a check already tried for this seed (even a failed one) is not repeated every 15 minutes: the weekly task tries again');
+
 exec('rm -rf ' . escapeshellarg($DATA));
 echo "\n" . ($n - $fails) . "/$n passed\n";
 exit($fails ? 1 : 0);

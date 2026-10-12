@@ -18,7 +18,7 @@ DirectoryIndex api.php
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
   # Never serve these files directly
-  RewriteRule ^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|README\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|sync/.*|src/.*|data(/.*)?)$ - [F,L]
+  RewriteRule ^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|[A-Za-z0-9_-]+\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|sync/.*|src/.*|data(/.*)?)$ - [F,L]
 
   # Everything goes through api.php (which checks the session)
   RewriteRule ^$ api.php?r=app [L,QSA]
@@ -29,7 +29,7 @@ DirectoryIndex api.php
   RewriteRule ^uploads/([A-Za-z0-9-]+)$ api.php?r=uploads/$1 [L,QSA]
 </IfModule>
 
-<FilesMatch "^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|README\.md)$">
+<FilesMatch "^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|[A-Za-z0-9_-]+\.md)$">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

@@ -887,6 +887,7 @@ try {
     if ($route === 'app' || $route === '' || $route === 'index.html') {
         header('Content-Type: text/html; charset=utf-8');
         header('Cache-Control: no-store');
+        header('X-Robots-Tag: noindex');   // sign-in, sign-up (/?signup=1&plan=…) and the app itself are never indexed (robots.txt must not block it: Google has to read this)
         header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src https://s.tradingview.com https://www.tradingview-widget.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
         header('X-Content-Type-Options: nosniff');
         header('Referrer-Policy: strict-origin-when-cross-origin');

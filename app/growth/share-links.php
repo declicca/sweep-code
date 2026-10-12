@@ -115,7 +115,7 @@ function sl_public(PDO $pdo, string $id, bool $png): void
     $file = sl_dir() . '/' . basename($id) . '.png';
     if (!$r || !is_file($file)) { http_response_code(404); header('Content-Type: text/html; charset=utf-8'); echo '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Sweep</title><body style="font:16px system-ui;background:#0b0b0d;color:#ddd;display:grid;place-items:center;height:100vh;margin:0"><p>This link is no longer available. <a style="color:#5b8cff" href="https://makeitsweep.com">makeitsweep.com</a></p>'; exit; }
     if ($png) {
-        header('Content-Type: ' . (substr((string) file_get_contents($file, false, null, 0, 3), 0, 3) === "\xFF\xD8\xFF" ? 'image/jpeg' : 'image/png')); header('Cache-Control: public, max-age=300'); header('X-Content-Type-Options: nosniff');
+        header('Content-Type: ' . (substr((string) file_get_contents($file, false, null, 0, 3), 0, 3) === "\xFF\xD8\xFF" ? 'image/jpeg' : 'image/png')); header('Cache-Control: public, max-age=300'); header('X-Content-Type-Options: nosniff'); header('X-Robots-Tag: noindex');   // a trader's stats: link previews yes, image search no
         readfile($file); exit;
     }
     try { $pdo->prepare('UPDATE public_shares SET views = views + 1 WHERE id = ?')->execute([$id]); } catch (Throwable $e) { /* counting never blocks */ }
