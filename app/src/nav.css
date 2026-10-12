@@ -2472,3 +2472,13 @@ html body #main .ux-hl-cfg li{display:flex;flex-direction:column;gap:2px;padding
 html body #main .ux-hl-cfg li b{font-size:14px;font-weight:600;color:var(--pos)}
 html body #main .ux-hl-cfg li.off b{color:var(--hl-bad)}
 html body #main .ux-hl-cfg li small{color:var(--muted);font-size:12px;line-height:1.35}
+
+/* « This trade looks like the one at 10:32. Add it anyway? » (brief 02, part 1): gold = an alert, right above « Save » */
+html body #tkSlide .nav-dup{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;padding:10px 12px;border-radius:14px;font-size:13.5px;line-height:1.4;
+  background:color-mix(in srgb,var(--neg) 12%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--neg) 45%,transparent)}
+html body #tkSlide .nav-dup p{margin:0;flex:1 1 220px}
+html body #tkSlide .nav-dup .btn{flex:0 0 auto}
+/* « Same as last · NQ · Buy · 2 » (brief 02, part 1): one chip under the title of the manual form */
+html body #tkSlide .nav-like{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;width:auto;max-width:100%;margin:2px 0 12px;min-height:36px;padding:0 14px;font-size:13.5px}
+html body #tkSlide .nav-like span{color:var(--muted)}
+@media (max-width:600px){html body #tkSlide .nav-like{min-height:44px}}

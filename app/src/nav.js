@@ -1268,11 +1268,13 @@ window.SweepMO = window.SweepMO || class {
   const acctOf = (id) => (typeof S !== 'undefined' && S.accounts || []).find((a) => a.id === id);
 
   /* every saved trade: fees from the account, P&L from the prices, real P&L as the truth */
+  /** contracts bought and sold: one round trip each — an add counts (2 contracts, out 1, back in 1, out 2 = 3), like the CSV import and the sync */
+  const turnsOf = (ex, n) => { ex = Array.isArray(ex) ? ex : []; if (!ex.length) return n; const side = ex[0].side, q = ex.reduce((a, x) => a + (x.side === side ? +x.qty || 0 : 0), 0); return q > 0 ? q : n; };
   function shape(d) {
     if (!d || d.demo) return d;
     const a = acctOf(d.account_id);
     const isNew = !(typeof getDoc === 'function' && getDoc('trades', d.id));   // older trades keep their fees as they are
-    if (isNew && d.fees_c == null && a && a.fee_rt_c > 0 && d.contracts > 0) { d.fees_c = Math.round(a.fee_rt_c * d.contracts); d.fees_auto = true; }
+    if (isNew && d.fees_c == null && a && a.fee_rt_c > 0 && d.contracts > 0) { d.fees_c = Math.round(a.fee_rt_c * turnsOf(d.executions, d.contracts)); d.fees_auto = true; }
     const c = calcOf(d); if (c != null) d.pnl_calc_c = c;
     if (typeof d.real_pnl_c === 'number' && isFinite(d.real_pnl_c)) { d.pnl_c = d.real_pnl_c + (d.fees_c || 0); d.pnl_manual = true; d.pnl_real = true; }
     else if (d.pnl_real) { delete d.pnl_real; d.pnl_manual = false; if (c != null) d.pnl_c = c; }
@@ -1317,7 +1319,7 @@ window.SweepMO = window.SweepMO || class {
     let calc = null; try { const s = typeof tkState === 'function' ? tkState() : null; calc = s && s.pos && typeof s.pos.realized_c === 'number' && s.pos.closed ? s.pos.realized_c : null; } catch (e) { /* form not ready */ }
     const set = (html) => { if (out.innerHTML !== html) out.innerHTML = html; };   // unchanged = untouched (no endless redraw)
     if (v == null || calc == null) { set(tx('hint')); return; }
-    const a = acctOf(TK.account), fee = a && a.fee_rt_c > 0 ? Math.round(a.fee_rt_c * (TK.qty || 1)) : 0;
+    const a = acctOf(TK.account), fee = a && a.fee_rt_c > 0 ? Math.round(a.fee_rt_c * turnsOf(typeof tkExecs === 'function' ? tkExecs() : [], TK.qty || 1)) : 0;
     const slip = v + fee - calc;
     set(`${tx('calc')} : <b>${$m(calc)}</b> · ${tx('gap')} : <b class="${slip < 0 ? 'neg' : 'pos'}">${$m(slip)}</b>${fee ? ` · ${tx('fees')} : <b>${$m(-fee)}</b>` : ''}`);
   }
@@ -2044,9 +2046,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { q: 'How do you like to log a trade?', qs: 'You can change it any time in Settings.', shot: 'With a screenshot', shotS: 'Drop the screenshot of your platform or chart. Sweep fills in the trade, you answer the discipline and psychology questions on the same screen.', man: 'By hand', manS: 'Entry, exit, stop, executions: every detail, then the review on the next page.', title: 'New trade', sub: 'from a screenshot', cancel: 'Cancel', byHand: 'Enter by hand', fromShot: 'From a screenshot', impFile: 'Import CSV', toMan: 'Enter by hand ›', toShot: 'From a screenshot ›', drop: 'Paste or drop your screenshot (Ctrl+V)', reading: 'Reading the screenshot…', read: 'Filled in from the screenshot: check and complete.', noAi: 'Fill in the key fields.', aiFail: 'Could not read it: fill in the key fields.', acc: 'Account', sym: 'Symbol', dir: 'Direction', long: 'Long', short: 'Short', date: 'Date', time: 'Entry time (ET)', qty: 'Contracts', entry: 'Entry price', exit: 'Exit price', pnl: 'Result ($)', pnlH: 'Calculated from the prices when both are there.', disc: 'Discipline', psy: 'Psychology', emo: 'How did you feel before the trade?', conf: 'Confidence', exec: 'Execution', yes: 'Yes', no: 'No', na: 'N/A', save: 'Save the trade', saved: 'Trade saved', need: 'The account and the net P&L (or the prices) are needed.', set: 'Adding a trade', setS: 'What « Add a trade » opens first.', pref: 'Saved as your default way', more: '+ More', addEmo: '+ Add yours', addEmoQ: 'Your emotion (one or two words)', moreQ: '+ {n} more questions', addQ: '+ Add a question', addQQ: 'Your question (e.g. « Did I wait for my level? »)', also: 'Also on (copy trading)', alsoS: 'Also on', net: 'Net P&L (as on your platform)', risk: 'Risk ($), optional', rHint: 'Enter the net P&L shown by your platform.', rAdd: 'Add the risk to see the R.', verify: 'Check the trade details ›', alsoH: 'Same trade saved on each account you pick.' },
-    fr: { q: 'Comment préfères-tu ajouter un trade ?', qs: 'Tu pourras changer ça en tout temps dans Réglages.', shot: 'Avec une capture d’écran', shotS: 'Dépose la capture de ta plateforme ou de ton graphique. Sweep remplit le trade, et tu réponds à la discipline et à la psychologie sur le même écran.', man: 'Manuellement', manS: 'Entrée, sortie, stop, exécutions : chaque détail, puis le bilan sur la page suivante.', title: 'Nouveau trade', sub: 'par capture d’écran', cancel: 'Annuler', byHand: 'Saisir à la main', fromShot: 'Par capture d’écran', impFile: 'Importer un CSV', toMan: 'Saisir manuellement ›', toShot: 'Par capture d’écran ›', drop: 'Colle ou dépose ta capture (Ctrl+V)', reading: 'Lecture de la capture…', read: 'Rempli à partir de la capture : vérifie et complète.', noAi: 'Remplis les infos principales.', aiFail: 'Lecture impossible : remplis les infos principales.', acc: 'Compte', sym: 'Symbole', dir: 'Sens', long: 'Long', short: 'Short', date: 'Date', time: 'Heure d’entrée (ET)', qty: 'Contrats', entry: 'Prix d’entrée', exit: 'Prix de sortie', pnl: 'Résultat ($)', pnlH: 'Calculé à partir des prix quand les deux sont là.', disc: 'Discipline', psy: 'Psychologie', emo: 'Comment te sentais-tu avant le trade ?', conf: 'Confiance', exec: 'Exécution', yes: 'Oui', no: 'Non', na: 'N/A', save: 'Enregistrer le trade', saved: 'Trade enregistré', need: 'Il faut le compte et le P&L net (ou les prix).', set: 'Ajout d’un trade', setS: 'Ce que « Ajouter un trade » ouvre en premier.', pref: 'Enregistré comme ta façon par défaut', more: '+ Voir plus', addEmo: '+ Ajouter la tienne', addEmoQ: 'Ton émotion (un ou deux mots)', moreQ: '+ {n} autres questions', addQ: '+ Ajouter une question', addQQ: 'Ta question (ex. « Ai-je attendu mon niveau ? »)', also: 'Aussi sur (copy trading)', alsoS: 'Aussi sur', net: 'P&L net (comme sur ta plateforme)', risk: 'Risque ($), facultatif', rHint: 'Entre le P&L net affiché par ta plateforme.', rAdd: 'Ajoute le risque pour voir le R.', verify: 'Vérifier le trade ›', alsoH: 'Le même trade est enregistré sur chaque compte choisi.' },
-    es: { q: '¿Cómo prefieres añadir una operación?', qs: 'Puedes cambiarlo cuando quieras en Ajustes.', shot: 'Con una captura', shotS: 'Sube la captura de tu plataforma o gráfico. Sweep rellena la operación y respondes disciplina y psicología en la misma pantalla.', man: 'Manualmente', manS: 'Entrada, salida, stop, ejecuciones: cada detalle, y la revisión en la página siguiente.', title: 'Nueva operación', sub: 'por captura', cancel: 'Cancelar', byHand: 'Introducir a mano', fromShot: 'Desde una captura', impFile: 'Importar CSV', toMan: 'Introducir manualmente ›', toShot: 'Con una captura ›', drop: 'Pega o suelta tu captura (Ctrl+V)', reading: 'Leyendo la captura…', read: 'Rellenado desde la captura: revisa y completa.', noAi: 'Rellena los datos principales.', aiFail: 'No se pudo leer: rellena los datos principales.', acc: 'Cuenta', sym: 'Símbolo', dir: 'Sentido', long: 'Long', short: 'Short', date: 'Fecha', time: 'Hora de entrada (ET)', qty: 'Contratos', entry: 'Precio de entrada', exit: 'Precio de salida', pnl: 'Resultado ($)', pnlH: 'Calculado con los precios cuando están los dos.', disc: 'Disciplina', psy: 'Psicología', emo: '¿Cómo te sentías antes de la operación?', conf: 'Confianza', exec: 'Ejecución', yes: 'Sí', no: 'No', na: 'N/A', save: 'Guardar la operación', saved: 'Operación guardada', need: 'Hacen falta la cuenta y el P&L neto (o los precios).', set: 'Añadir una operación', setS: 'Lo que « Añadir una operación » abre primero.', pref: 'Guardado como tu forma por defecto', more: '+ Ver más', addEmo: '+ Añadir la tuya', addEmoQ: 'Tu emoción (una o dos palabras)', moreQ: '+ {n} preguntas más', addQ: '+ Añadir una pregunta', addQQ: 'Tu pregunta (ej. « ¿Esperé mi nivel? »)', also: 'También en (copy trading)', alsoS: 'También en', net: 'P&L neto (como en tu plataforma)', risk: 'Riesgo ($), opcional', rHint: 'Introduce el P&L neto de tu plataforma.', rAdd: 'Añade el riesgo para ver la R.', verify: 'Revisar la operación ›', alsoH: 'La misma operación se guarda en cada cuenta elegida.' } };
+    en: { dup: 'This trade looks like the one at {t}. Add it anyway?', dupOk: 'Add anyway', q: 'How do you like to log a trade?', qs: 'You can change it any time in Settings.', shot: 'With a screenshot', shotS: 'Drop the screenshot of your platform or chart. Sweep fills in the trade, you answer the discipline and psychology questions on the same screen.', man: 'By hand', manS: 'Entry, exit, stop, executions: every detail, then the review on the next page.', title: 'New trade', sub: 'from a screenshot', cancel: 'Cancel', byHand: 'Enter by hand', fromShot: 'From a screenshot', impFile: 'Import CSV', toMan: 'Enter by hand ›', toShot: 'From a screenshot ›', drop: 'Paste or drop your screenshot (Ctrl+V)', reading: 'Reading the screenshot…', read: 'Filled in from the screenshot: check and complete.', noAi: 'Fill in the key fields.', aiFail: 'Could not read it: fill in the key fields.', acc: 'Account', sym: 'Symbol', dir: 'Direction', long: 'Long', short: 'Short', date: 'Date', time: 'Entry time (ET)', qty: 'Contracts', entry: 'Entry price', exit: 'Exit price', pnl: 'Result ($)', pnlH: 'Calculated from the prices when both are there.', disc: 'Discipline', psy: 'Psychology', emo: 'How did you feel before the trade?', conf: 'Confidence', exec: 'Execution', yes: 'Yes', no: 'No', na: 'N/A', save: 'Save the trade', saved: 'Trade saved', need: 'The account and the net P&L (or the prices) are needed.', set: 'Adding a trade', setS: 'What « Add a trade » opens first.', pref: 'Saved as your default way', more: '+ More', addEmo: '+ Add yours', addEmoQ: 'Your emotion (one or two words)', moreQ: '+ {n} more questions', addQ: '+ Add a question', addQQ: 'Your question (e.g. « Did I wait for my level? »)', also: 'Also on (copy trading)', alsoS: 'Also on', net: 'Net P&L (as on your platform)', risk: 'Risk ($), optional', rHint: 'Enter the net P&L shown by your platform.', rAdd: 'Add the risk to see the R.', verify: 'Check the trade details ›', alsoH: 'Same trade saved on each account you pick.' },
+    fr: { dup: 'Ce trade ressemble à celui de {t}. L’ajouter quand même ?', dupOk: 'Ajouter quand même', q: 'Comment préfères-tu ajouter un trade ?', qs: 'Tu pourras changer ça en tout temps dans Réglages.', shot: 'Avec une capture d’écran', shotS: 'Dépose la capture de ta plateforme ou de ton graphique. Sweep remplit le trade, et tu réponds à la discipline et à la psychologie sur le même écran.', man: 'Manuellement', manS: 'Entrée, sortie, stop, exécutions : chaque détail, puis le bilan sur la page suivante.', title: 'Nouveau trade', sub: 'par capture d’écran', cancel: 'Annuler', byHand: 'Saisir à la main', fromShot: 'Par capture d’écran', impFile: 'Importer un CSV', toMan: 'Saisir manuellement ›', toShot: 'Par capture d’écran ›', drop: 'Colle ou dépose ta capture (Ctrl+V)', reading: 'Lecture de la capture…', read: 'Rempli à partir de la capture : vérifie et complète.', noAi: 'Remplis les infos principales.', aiFail: 'Lecture impossible : remplis les infos principales.', acc: 'Compte', sym: 'Symbole', dir: 'Sens', long: 'Long', short: 'Short', date: 'Date', time: 'Heure d’entrée (ET)', qty: 'Contrats', entry: 'Prix d’entrée', exit: 'Prix de sortie', pnl: 'Résultat ($)', pnlH: 'Calculé à partir des prix quand les deux sont là.', disc: 'Discipline', psy: 'Psychologie', emo: 'Comment te sentais-tu avant le trade ?', conf: 'Confiance', exec: 'Exécution', yes: 'Oui', no: 'Non', na: 'N/A', save: 'Enregistrer le trade', saved: 'Trade enregistré', need: 'Il faut le compte et le P&L net (ou les prix).', set: 'Ajout d’un trade', setS: 'Ce que « Ajouter un trade » ouvre en premier.', pref: 'Enregistré comme ta façon par défaut', more: '+ Voir plus', addEmo: '+ Ajouter la tienne', addEmoQ: 'Ton émotion (un ou deux mots)', moreQ: '+ {n} autres questions', addQ: '+ Ajouter une question', addQQ: 'Ta question (ex. « Ai-je attendu mon niveau ? »)', also: 'Aussi sur (copy trading)', alsoS: 'Aussi sur', net: 'P&L net (comme sur ta plateforme)', risk: 'Risque ($), facultatif', rHint: 'Entre le P&L net affiché par ta plateforme.', rAdd: 'Ajoute le risque pour voir le R.', verify: 'Vérifier le trade ›', alsoH: 'Le même trade est enregistré sur chaque compte choisi.' },
+    es: { dup: 'Esta operación se parece a la de las {t}. ¿Añadirla de todos modos?', dupOk: 'Añadir de todos modos', q: '¿Cómo prefieres añadir una operación?', qs: 'Puedes cambiarlo cuando quieras en Ajustes.', shot: 'Con una captura', shotS: 'Sube la captura de tu plataforma o gráfico. Sweep rellena la operación y respondes disciplina y psicología en la misma pantalla.', man: 'Manualmente', manS: 'Entrada, salida, stop, ejecuciones: cada detalle, y la revisión en la página siguiente.', title: 'Nueva operación', sub: 'por captura', cancel: 'Cancelar', byHand: 'Introducir a mano', fromShot: 'Desde una captura', impFile: 'Importar CSV', toMan: 'Introducir manualmente ›', toShot: 'Con una captura ›', drop: 'Pega o suelta tu captura (Ctrl+V)', reading: 'Leyendo la captura…', read: 'Rellenado desde la captura: revisa y completa.', noAi: 'Rellena los datos principales.', aiFail: 'No se pudo leer: rellena los datos principales.', acc: 'Cuenta', sym: 'Símbolo', dir: 'Sentido', long: 'Long', short: 'Short', date: 'Fecha', time: 'Hora de entrada (ET)', qty: 'Contratos', entry: 'Precio de entrada', exit: 'Precio de salida', pnl: 'Resultado ($)', pnlH: 'Calculado con los precios cuando están los dos.', disc: 'Disciplina', psy: 'Psicología', emo: '¿Cómo te sentías antes de la operación?', conf: 'Confianza', exec: 'Ejecución', yes: 'Sí', no: 'No', na: 'N/A', save: 'Guardar la operación', saved: 'Operación guardada', need: 'Hacen falta la cuenta y el P&L neto (o los precios).', set: 'Añadir una operación', setS: 'Lo que « Añadir una operación » abre primero.', pref: 'Guardado como tu forma por defecto', more: '+ Ver más', addEmo: '+ Añadir la tuya', addEmoQ: 'Tu emoción (una o dos palabras)', moreQ: '+ {n} preguntas más', addQ: '+ Añadir una pregunta', addQQ: 'Tu pregunta (ej. « ¿Esperé mi nivel? »)', also: 'También en (copy trading)', alsoS: 'También en', net: 'P&L neto (como en tu plataforma)', risk: 'Riesgo ($), opcional', rHint: 'Introduce el P&L neto de tu plataforma.', rAdd: 'Añade el riesgo para ver la R.', verify: 'Revisar la operación ›', alsoH: 'La misma operación se guarda en cada cuenta elegida.' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
@@ -2091,7 +2093,7 @@ window.SweepMO = window.SweepMO || class {
   /* 2. the screenshot form */
   const SH = { file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: {} };
   function shotForm(opts) {
-    Object.assign(SH, { batch: [], open: false, copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || today(), qty: '1' } });
+    Object.assign(SH, { dupOk: false, batch: [], open: false, copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || today(), qty: '1' } });
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
     SH.f.account = (accs[0] || {}).id || '';
     { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').forEach((x) => SH.copy.add(x.id)); }
@@ -2203,11 +2205,15 @@ window.SweepMO = window.SweepMO || class {
     if (tr._pnlTyped) return;
     if (tr.entry != null && tr.exit != null && tr.contracts) tr.pnl_c = Math.round((tr.exit - tr.entry) * (tr.direction === 'long' ? 1 : -1) * tr.contracts * pvOf(tr.instrument));
   }
-  function dupOf(tr) {
+  /** the trade already in Sweep that looks the same: same account, instrument, side, contracts, session, entry within a minute,
+   *  same prices when known. « Already in Sweep » here; « looks like the one at 10:32 » on the form and the single screenshot */
+  function dupTrade(tr, acc) {
     const m = (x) => +String(x || '').slice(0, 2) * 60 + +String(x || '').slice(3, 5);
-    return (S.trades || []).some((x) => x.account_id === SHM.acc && x.instrument === tr.instrument && x.direction === tr.direction && +x.contracts === +tr.contracts && x.date === tr.date
-      && Math.abs(m(x.entry_time) - m(tr.entry_time)) <= 1 && (tr.entry == null || +x.entry === +tr.entry) && (tr.exit == null || +x.exit === +tr.exit));
+    return (S.trades || []).find((x) => x.account_id === acc && x.instrument === tr.instrument && x.direction === tr.direction && +x.contracts === +tr.contracts && x.date === tr.date
+      && Math.abs(m(x.entry_time) - m(tr.entry_time)) <= 1 && (tr.entry == null || +x.entry === +tr.entry) && (tr.exit == null || +x.exit === +tr.exit)) || null;
   }
+  function dupOf(tr) { return !!dupTrade(tr, SHM.acc); }
+  window.SweepDupOf = dupTrade;
   function flag() { SHM.trades.forEach((tr) => { const d = dupOf(tr); if (d && !tr._dupSeen) { tr.sel = false; tr._dupSeen = true; } tr.dup = d; }); }
   function multiHtml() {
     const sel = SHM.trades.filter((x) => x.sel), net = sel.reduce((a, x) => a + (x.pnl_c || 0) - (x.fees_c || 0), 0);
@@ -2420,6 +2426,12 @@ window.SweepMO = window.SweepMO || class {
     const doc = { id: typeof uid === 'function' ? uid() : 't' + Date.now(), account_id: SH.f.account, instrument: SH.f.inst, date: SH.f.date || today(), session_date: true, entry_time: tm, exit_time: SH.f.exitTime ? String(SH.f.exitTime).slice(0, 8) : '', direction: SH.dir, contracts: q,
       entry: e, exit: x, pnl_c: pnl, pnl_manual: true, real_pnl_c: net, risk_c: num(SH.f.risk) ? Math.round(Math.abs(num(SH.f.risk)) * 100) : null, stop: null, target: null, fees_c: SH.f.fees || null,
       discipline: Object.assign({}, SH.disc), emo, review: {}, shots: SH.shot ? [SH.shot] : [], tags: [], setup: '', notes: '', source: 'screenshot' };
+    const same = !quiet && !SH.dupOk && dupTrade(doc, doc.account_id);   // the same trade saved twice: asked once
+    if (same) {
+      const hm = String(same.entry_time || '').slice(0, 5), at = LANG === 'fr' ? `${+hm.slice(0, 2)} h ${hm.slice(3, 5)}` : hm;
+      if (err) err.innerHTML = `${esc2(t('dup').replace('{t}', at))} <button type="button" class="btn sm" data-am="dupok">${esc2(t('dupOk'))}</button>`;
+      return;
+    }
     const copies = [...SH.copy].filter((id) => id !== doc.account_id && typeof acct === 'function' && acct(id));
     if (copies.length) doc.copy_group = typeof uid === 'function' ? uid() : 'g' + Date.now();
     if (typeof put === 'function') {
@@ -2460,6 +2472,7 @@ window.SweepMO = window.SweepMO || class {
     }
     if (act === 'close') close();
     if (act === 'save') save();
+    if (act === 'dupok') { SH.dupOk = true; save(); }
     if (act === 'to-manual') { const d = SH.f.date; close(); setTimeout(() => origTicket && origTicket(null, { date: d }), 280); }
   });
   document.addEventListener('toggle', (e) => { if (e.target.classList && e.target.classList.contains('nav-am-more-d')) SH.open = e.target.open; }, true);
@@ -4719,26 +4732,102 @@ document.addEventListener('click', (e) => {
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const W = ({ en: ['Yes', 'No', 'N/A', 'See more', 'Checklist'], fr: ['Oui', 'Non', 'N/A', 'Voir plus', 'Checklist'], es: ['Sí', 'No', 'N/A', 'Ver más', 'Checklist'] })[L];
-  let ans = {}, before = null;
+  const W = ({ en: ['Yes', 'No', 'N/A', 'See more', 'Checklist', 'Setup, fees and review are on the next page.'], fr: ['Oui', 'Non', 'N/A', 'Voir plus', 'Checklist', 'Le setup, les frais et le bilan sont sur la page suivante.'],
+    es: ['Sí', 'No', 'N/A', 'Ver más', 'Checklist', 'El setup, las comisiones y la revisión están en la página siguiente.'] })[L];
+  let ans = {}, pending = null;   // pending: the answers of the trade being saved (and its copies)
   function qs() { return ((typeof S !== 'undefined' && S.settings && S.settings.questions) || []).filter((q) => q.active !== false); }
   new window.SweepMO(() => {
-    const tk = document.querySelector('#tkSlide.open'); if (!tk || (typeof TK !== 'undefined' && TK && TK.id)) { if (!tk) ans = {}; return; }
+    const tk = document.querySelector('#tkSlide.open'); if (!tk || (typeof TK !== 'undefined' && TK && TK.id)) { if (!tk) { ans = {}; pending = null; } return; }
     if (tk.querySelector('.nav-ck')) return;
     const save = tk.querySelector('[data-act="tk-save"]'); const list = qs(); if (!save || !list.length) return;
     const box = document.createElement('div'); box.className = 'nav-ck';
     box.innerHTML = `<b class="nav-ck-t" data-noi18n>${W[4]}</b>` + list.map((q, i) => `<div class="nav-ck-q ${i > 2 ? 'more' : ''}" data-q="${q.id}"><span>${(q.text || q.q || q.label || q.id).replace(/[<>&]/g, '')}</span><div class="nav-ck-b" data-noi18n>${['y', 'n', 'na'].map((v, k) => `<button type="button" data-v="${v}">${W[k]}</button>`).join('')}</div></div>`).join('') + (list.length > 3 ? `<button type="button" class="link nav-ck-more" data-noi18n>${W[3]} ›</button>` : '');
     (save.closest('.tk-foot, .tk-actions') || save).before(box);
+    const hint = tk.querySelector('#tkErr') && tk.querySelector('#tkErr').previousElementSibling;   // « …checklist… on the next page »: it is here now
+    if (hint && hint.classList.contains('help')) { hint.textContent = W[5]; hint.setAttribute('data-noi18n', ''); }
   }).observe(document.body, { childList: true, subtree: true });
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('.nav-ck-b button');
     if (b) { const q = b.closest('.nav-ck-q'); q.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); ans[q.dataset.q] = b.dataset.v; return; }
     const m = e.target.closest && e.target.closest('.nav-ck-more'); if (m) { m.closest('.nav-ck').classList.add('all'); m.remove(); return; }
-    if (e.target.closest && e.target.closest('#tkSlide [data-act="tk-save"]') && !(typeof TK !== 'undefined' && TK && TK.id)) {
-      before = new Set((S.trades || []).map((t) => t.id)); const a = Object.assign({}, ans);
-      setTimeout(() => { if (!Object.keys(a).length) return; (S.trades || []).filter((t) => !before.has(t.id)).forEach((t) => editDoc('trades', t.id, (d) => { d.discipline = Object.assign({}, d.discipline || {}, a); })); ans = {}; }, 900);
-    }
+    if (e.target.closest && e.target.closest('#tkSlide [data-act="tk-save"]') && !(typeof TK !== 'undefined' && TK && TK.id)) pending = Object.keys(ans).length ? Object.assign({}, ans) : null;
   }, true);
+  document.addEventListener('keydown', (e) => {   // ⌘/Ctrl + Enter saves too
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && document.querySelector('#tkSlide.open') && !(typeof TK !== 'undefined' && TK && TK.id)) pending = Object.keys(ans).length ? Object.assign({}, ans) : null;
+  }, true);
+  // the answers go into the trade as it is saved, copies included (before: applied 900 ms later, and lost after a refused save,
+  // e.g. « Add the entry price »: the score stayed empty); « Step 2 » shows them at once. Kept until the form closes.
+  (function wrap(n) {
+    if (typeof window.put !== 'function') { if (n < 60) setTimeout(() => wrap(n + 1), 100); return; }
+    const orig = window.put;
+    const w = function (col, doc) {
+      if (col === 'trades' && pending && doc && typeof doc === 'object' && !doc.demo && document.querySelector('#tkSlide.open') && !(typeof getDoc === 'function' && getDoc('trades', doc.id)))
+        doc.discipline = Object.assign({}, doc.discipline || {}, pending);
+      return orig.apply(this, arguments);
+    };
+    Object.keys(orig).forEach((k) => { w[k] = orig[k]; });
+    window.put = w;
+  })(0);
+})();
+
+/* D16 · « This trade looks like the one at 10:32. Add it anyway? » on the manual form (brief 02, part 1): the same rule as the
+   screenshots (window.SweepDupOf), asked once, before « Save » or ⌘/Ctrl + Enter */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const W = ({ en: ['This trade looks like the one at {t}.', 'Add it anyway?', 'Add anyway'], fr: ['Ce trade ressemble à celui de {t}.', 'L’ajouter quand même ?', 'Ajouter quand même'],
+    es: ['Esta operación se parece a la de las {t}.', '¿Añadirla de todos modos?', 'Añadir de todos modos'] })[L];
+  let okFor = null;   // the values the trader confirmed
+  const at = (x) => { const v = String(x || '').slice(0, 5); return L === 'fr' ? `${+v.slice(0, 2)} h ${v.slice(3, 5)}` : v; };
+  function cand() {
+    if (typeof TK === 'undefined' || !TK || TK.id || !TK.account || typeof tkState !== 'function') return null;
+    const s = tkState(), ex = s.ex || []; if (!ex.length) return null;
+    const p = s.pos || {}, r2 = (v) => (v == null ? null : Math.round(v * 100) / 100), t0 = String(ex[0].t || '');
+    return { instrument: TK.inst, direction: s.dir, contracts: p.maxQty, date: typeof sessionOfTs === 'function' ? sessionOfTs(t0) : t0.slice(0, 10), entry_time: t0.slice(11, 16), entry: r2(p.avgEntry), exit: p.closed ? r2(p.avgExit) : null };
+  }
+  function check(e) {
+    const c = cand(); if (!c || typeof window.SweepDupOf !== 'function') return;
+    const key = JSON.stringify([TK.account, c]); if (okFor === key) return;
+    const d = window.SweepDupOf(c, TK.account); if (!d) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    const tk = document.querySelector('#tkSlide.open'), save = tk && tk.querySelector('[data-act="tk-save"]'); if (!save) return;
+    let box = tk.querySelector('.nav-dup');
+    if (!box) { box = document.createElement('div'); box.className = 'nav-dup'; box.setAttribute('role', 'alert'); (save.closest('.tk-foot, .tk-actions') || save).before(box); }
+    box.dataset.key = key;
+    box.innerHTML = `<p><b>${W[0].replace('{t}', at(d.entry_time))}</b> ${W[1]}</p><button type="button" class="btn sm" data-dup-ok>${W[2]}</button>`;
+  }
+  document.addEventListener('click', (e) => {
+    const ok = e.target.closest && e.target.closest('#tkSlide [data-dup-ok]');
+    if (ok) { const box = ok.closest('.nav-dup'); okFor = box.dataset.key; box.remove(); const s = document.querySelector('#tkSlide.open [data-act="tk-save"]'); if (s) s.click(); return; }
+    if (e.target.closest && e.target.closest('#tkSlide [data-act="tk-save"]')) check(e);
+  }, true);
+  document.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && document.querySelector('#tkSlide.open')) check(e); }, true);
+  document.addEventListener('input', (e) => { const b = e.target.closest && e.target.closest('#tkSlide') && document.querySelector('#tkSlide .nav-dup'); if (b) b.remove(); }, true);   // other values: asked again
+})();
+
+/* D17 · « Same as last » on the manual form (brief 02, part 1): the account, instrument, side and contracts of the previous trade
+   in one tap (the account and the instrument are pre-selected already; the side never was) */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const W = ({ en: ['Same as last', 'Buy', 'Sell'], fr: ['Comme le dernier', 'Achat', 'Vente'], es: ['Como la última', 'Compra', 'Venta'] })[L];
+  const last = () => (S.trades || []).filter((x) => !x.demo && x.account_id && x.instrument && x.direction)
+    .sort((a, b) => ((b.date || '') + (b.entry_time || '')).localeCompare((a.date || '') + (a.entry_time || '')))[0] || null;
+  const usable = (t) => t && typeof acct === 'function' && acct(t.account_id) && acct(t.account_id).status !== 'archived';
+  new window.SweepMO(() => {
+    const tk = document.querySelector('#tkSlide.open'); if (!tk || typeof TK === 'undefined' || !TK || TK.id || TK.multi || TK.likeDone) return;
+    if (tk.querySelector('.nav-like')) return;
+    const head = tk.querySelector('#tkPanel .tk-head'), t = last(); if (!head || !usable(t)) return;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip nav-like'; b.setAttribute('data-like', ''); b.setAttribute('data-noi18n', '');
+    b.innerHTML = `<span>${W[0]}</span><b>${String(t.instrument).replace(/[<>&]/g, '')} · ${t.direction === 'short' ? W[2] : W[1]} · ${Math.max(1, +t.contracts || 1)}</b>`;
+    head.after(b);
+  }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('#tkSlide [data-like]'); if (!b) return;
+    const t = last(); if (!usable(t) || typeof TK === 'undefined' || !TK) return;
+    Object.assign(TK, { account: t.account_id, inst: t.instrument, dir: t.direction === 'short' ? 'short' : 'long', qty: Math.max(1, +t.contracts || 1), likeDone: true });
+    if (typeof tkRefresh === 'function') tkRefresh({ panel: true });
+  });
 })();
 
 /* a trade copied on several accounts shows « 2 × 5 » contracts (per account × accounts), never the sum */
