@@ -26,8 +26,8 @@ L = {"free": T("Free plan","Forfait gratuit","Plan gratis"), "trial": T("Trial o
 SW = {"free": T("Yes, no time limit, no card","Oui, sans limite de temps, sans carte","Sí, sin límite de tiempo, sin tarjeta"), "trial": T("60 days of Pro","60 jours de Pro","60 días de Pro"),
       "month": T("Pro $19 · Elite $39","Pro 19 $ · Elite 39 $","Pro 19 $ · Elite 39 $"),
       "year": T("Pro $159 · Elite $329","Pro 159 $ · Elite 329 $","Pro 159 $ · Elite 329 $"),
-      "add": T("File import, screenshot read by AI, or by hand","Import de fichier, capture lue par l’IA, ou à la main","Importación de archivo, captura leída por la IA o a mano"),
-      "sync": T("In development","En développement","En desarrollo"),
+      "add": T("NinjaTrader 8 sync, file import, screenshot read by AI, or by hand","Synchro NinjaTrader 8, import de fichier, capture lue par l’IA, ou à la main","Sincronización con NinjaTrader 8, importación de archivo, captura leída por la IA o a mano"),
+      "sync": T("From NinjaTrader 8 (free add-on), every plan","Depuis NinjaTrader 8 (add-on gratuit), tous les forfaits","Desde NinjaTrader 8 (add-on gratis), todos los planes"),
       "rules": T("Preloaded for 5 futures firms, per account type, checked every week","Préremplies pour 5 firmes de futures, par type de compte, vérifiées chaque semaine","Precargadas para 5 firmas de futuros, por tipo de cuenta, revisadas cada semana"),
       "money": T("Pro and Elite","Pro et Elite","Pro y Elite"), "no": T("No","Non","No"),
       "charts": T("Real CME charts, the day after the session","Vrais graphiques CME, le lendemain de la séance","Gráficos reales de CME, al día siguiente de la sesión"),
@@ -53,13 +53,13 @@ SWEEP_DIFF = [
  T("Each session has a routine: a plan before the open, your rules during it, and a short review after the close. Sweep measures those habits, so a red day where you followed your plan still counts.",
    "Chaque séance a sa routine : un plan avant l’ouverture, tes règles pendant, et une courte revue après la clôture. Sweep mesure ces habitudes : une journée dans le rouge où tu as suivi ton plan compte quand même.",
    "Cada sesión tiene su rutina: un plan antes de la apertura, tus reglas durante y una breve revisión tras el cierre. Sweep mide esos hábitos, así que un día en rojo en el que seguiste tu plan también cuenta.")]
-SYNC_NOTE = T("At Sweep, automatic sync with Rithmic and Tradovate is in development; we’ll announce it on our changelog as soon as it’s live.",
-              "Chez Sweep, la synchronisation automatique avec Rithmic et Tradovate est en développement ; on l’annoncera dans les nouveautés dès qu’elle sera disponible.",
-              "En Sweep, la sincronización automática con Rithmic y Tradovate está en desarrollo; la anunciaremos en las novedades en cuanto esté disponible.")
+SYNC_NOTE = T("Sweep syncs automatically from NinjaTrader 8 only; from other platforms, you import a file or a screenshot.",
+              "Sweep se synchronise automatiquement depuis NinjaTrader 8 seulement ; depuis les autres plateformes, tu importes un fichier ou une capture.",
+              "Sweep se sincroniza automáticamente solo desde NinjaTrader 8; desde otras plataformas importas un archivo o una captura.")
 FAQ_ADD = (T("How do I add trades to Sweep?","Comment ajouter des trades dans Sweep ?","¿Cómo añado operaciones en Sweep?"),
-  T("Import your platform’s export (Tradovate, Rithmic, ProjectX or TradingView), paste a screenshot that Sweep AI reads, or type the trade by hand. Automatic sync with Rithmic and Tradovate is in development.",
-    "Importe l’export de ta plateforme (Tradovate, Rithmic, ProjectX ou TradingView), colle une capture que Sweep AI lit, ou saisis le trade à la main. La synchronisation automatique avec Rithmic et Tradovate est en développement.",
-    "Importa la exportación de tu plataforma (Tradovate, Rithmic, ProjectX o TradingView), pega una captura que Sweep AI lee o escribe la operación a mano. La sincronización automática con Rithmic y Tradovate está en desarrollo."))
+  T("From NinjaTrader 8, trades sync automatically with Sweep’s free add-on. From another platform, import its export (Tradovate, Rithmic, ProjectX or TradingView), paste a screenshot that Sweep AI reads, or type the trade by hand.",
+    "Depuis NinjaTrader 8, les trades se synchronisent automatiquement avec l’add-on gratuit de Sweep. Depuis une autre plateforme, importe son export (Tradovate, Rithmic, ProjectX ou TradingView), colle une capture que Sweep AI lit, ou saisis le trade à la main.",
+    "Desde NinjaTrader 8, las operaciones se sincronizan automáticamente con el add-on gratis de Sweep. Desde otra plataforma, importa su exportación (Tradovate, Rithmic, ProjectX o TradingView), pega una captura que Sweep AI lee o escribe la operación a mano."))
 def _free_alt(name, them_en, them_fr, them_es):
     return (T(f"Is there a free alternative to {name}?", f"Existe-t-il une alternative gratuite à {name} ?", f"¿Hay una alternativa gratis a {name}?"),
             T("Yes. Sweep has a Free plan with no time limit and no credit card, and every new account gets 60 days of Pro. " + them_en,
@@ -75,7 +75,7 @@ def _cheaper(them_en, them_fr, them_es, first=T("Sweep. ","Sweep. ","Sweep. ")):
 VS = [
  {"slug": "sweep-vs-tradezella.html", "name": "TradeZella",
   "sources": T("its public pricing and Prop Firm Sync pages", "ses pages publiques de tarifs et de Prop Firm Sync", "sus páginas públicas de precios y de Prop Firm Sync"),
-  "them_if": [T("You want trades to sync from your broker automatically, today.","Tu veux que tes trades arrivent automatiquement de ton courtier, dès aujourd’hui.","Quieres que tus operaciones lleguen solas desde tu bróker, ya hoy."),
+  "them_if": [T("You want trades to sync automatically from a platform other than NinjaTrader 8.","Tu veux que tes trades arrivent automatiquement d’une autre plateforme que NinjaTrader 8.","Quieres que tus operaciones lleguen solas desde una plataforma que no sea NinjaTrader 8."),
               T("You use trade replay or backtesting.","Tu utilises le replay de trades ou le backtesting.","Usas el replay de operaciones o el backtesting."),
               T("You also trade stocks, forex or crypto.","Tu trades aussi des actions, du forex ou des cryptos.","También operas acciones, forex o cripto."),
               T("You work with a mentor who reviews your journal.","Tu travailles avec un mentor qui consulte ton journal.","Trabajas con un mentor que revisa tu diario.")],
@@ -149,7 +149,7 @@ VS = [
 
  {"slug": "sweep-vs-tradersync.html", "name": "TraderSync",
   "sources": T("its public pricing page", "sa page publique de tarifs", "su página pública de precios"),
-  "them_if": [T("You want automatic broker sync and a native mobile app today.","Tu veux une synchro automatique avec ton courtier et une app mobile native dès aujourd’hui.","Quieres sincronización automática con tu bróker y una app móvil nativa ya hoy."),
+  "them_if": [T("You want automatic sync beyond NinjaTrader 8 and a native mobile app today.","Tu veux une synchro automatique au-delà de NinjaTrader 8 et une app mobile native dès aujourd’hui.","Quieres sincronización automática más allá de NinjaTrader 8 y una app móvil nativa ya hoy."),
               T("You use trade replay, market replay or backtesting.","Tu utilises le replay de trades, le replay de marché ou le backtesting.","Usas el replay de operaciones, el replay de mercado o el backtesting."),
               T("You want an AI coach on your trades.","Tu veux un coach IA sur tes trades.","Quieres un coach de IA sobre tus operaciones."),
               T("You also trade stocks, forex, crypto or options.","Tu trades aussi des actions, du forex, des cryptos ou des options.","También operas acciones, forex, cripto u opciones.")],
@@ -189,7 +189,7 @@ VS = [
   "them_if": [T("You want one yearly price with every feature included.","Tu veux un seul prix annuel avec toutes les fonctions incluses.","Quieres un solo precio anual con todas las funciones incluidas."),
               T("You focus on psychology: tilt, mistakes and missed trades.","Tu mises sur la psychologie : tilt, erreurs et trades manqués.","Te centras en la psicología: tilt, errores y operaciones perdidas."),
               T("You also trade forex, stocks or crypto.","Tu trades aussi du forex, des actions ou des cryptos.","También operas forex, acciones o cripto."),
-              T("You want automatic imports from your platform today.","Tu veux des imports automatiques depuis ta plateforme dès aujourd’hui.","Quieres importaciones automáticas desde tu plataforma ya hoy.")],
+              T("You want automatic imports from a platform other than NinjaTrader 8.","Tu veux des imports automatiques depuis une autre plateforme que NinjaTrader 8.","Quieres importaciones automáticas desde una plataforma que no sea NinjaTrader 8.")],
   "rows": [row("free", T("None on its pricing page","Aucun sur sa page de tarifs","Ninguno en su página de precios")),
            row("trial", T("No; 14-day money-back guarantee","Non ; satisfait ou remboursé 14 jours","No; garantía de reembolso de 14 días")),
            row("month", T("No monthly plan","Pas de forfait mensuel","Sin plan mensual")),
@@ -269,9 +269,9 @@ def _journal(t, n, name, best, text, price, watch, extra=""):
 
 PILLAR_FAQ = [
  (T("What is the best trading journal for prop firm traders?","Quel est le meilleur journal de trading pour les traders de prop firms ?","¿Cuál es el mejor diario de trading para traders de prop firms?"),
-  T("It depends on how you trade. For futures evaluations and funded accounts with each firm’s rules on every account, Sweep is built for that and free to start. If you need automatic broker sync, trade replay or backtesting today, TradeZella is the stronger all-round pick.",
-    "Ça dépend de ta façon de trader. Pour des évaluations et des comptes financés en futures, avec les règles de chaque firme sur chaque compte, Sweep est conçu pour ça et gratuit pour commencer. Si tu as besoin aujourd’hui d’une synchro automatique avec ton courtier, du replay de trades ou du backtesting, TradeZella est le choix le plus complet.",
-    "Depende de cómo operes. Para evaluaciones y cuentas fondeadas de futuros, con las reglas de cada firma en cada cuenta, Sweep está hecho para eso y es gratis para empezar. Si hoy necesitas sincronización automática con tu bróker, replay de operaciones o backtesting, TradeZella es la opción más completa.")),
+  T("It depends on how you trade. For futures evaluations and funded accounts with each firm’s rules on every account, Sweep is built for that and free to start. If you need automatic sync from a platform other than NinjaTrader 8, trade replay or backtesting, TradeZella is the stronger all-round pick.",
+    "Ça dépend de ta façon de trader. Pour des évaluations et des comptes financés en futures, avec les règles de chaque firme sur chaque compte, Sweep est conçu pour ça et gratuit pour commencer. Si tu as besoin d’une synchro automatique depuis une autre plateforme que NinjaTrader 8, du replay de trades ou du backtesting, TradeZella est le choix le plus complet.",
+    "Depende de cómo operes. Para evaluaciones y cuentas fondeadas de futuros, con las reglas de cada firma en cada cuenta, Sweep está hecho para eso y es gratis para empezar. Si necesitas sincronización automática desde una plataforma que no sea NinjaTrader 8, replay de operaciones o backtesting, TradeZella es la opción más completa.")),
  (T("Is there a free trading journal for prop firms?","Existe-t-il un journal de trading gratuit pour les prop firms ?","¿Hay un diario de trading gratis para prop firms?"),
   T("Yes. Sweep has a Free plan with no time limit and no credit card, with prop firm rules included. Tradervue also has a free plan, limited to 30 trades a month.",
     "Oui. Sweep a un forfait Free sans limite de temps et sans carte de crédit, avec les règles des prop firms incluses. Tradervue a aussi un forfait gratuit, limité à 30 trades par mois.",
@@ -281,9 +281,9 @@ PILLAR_FAQ = [
     "Sweep préremplit les règles de 5 prop firms de futures (Apex, Topstep, Lucid, Take Profit Trader et MyFundedFutures) pour chaque type de compte et les vérifie chaque semaine sur les pages officielles des firmes. Le tableau de bord Prop Firm Sync de TradeZella suit le drawdown, la perte quotidienne, les cibles de profit, les jours de trading et la consistance. Edgewonk permet de suivre plusieurs comptes de prop firms.",
     "Sweep precarga las reglas de 5 prop firms de futuros (Apex, Topstep, Lucid, Take Profit Trader y MyFundedFutures) para cada tipo de cuenta y las revisa cada semana en las páginas oficiales de las firmas. El panel Prop Firm Sync de TradeZella sigue el drawdown, la pérdida diaria, los objetivos de ganancia, los días de trading y la consistencia. Edgewonk permite seguir varias cuentas de prop firms.")),
  (T("Do I need automatic broker sync?","Ai-je besoin d’une synchro automatique avec mon courtier ?","¿Necesito sincronización automática con el bróker?"),
-  T("It saves a few minutes a day, but it isn’t required. In Sweep you import your platform’s export, paste a screenshot that Sweep AI reads, or type a trade by hand; automatic sync with Rithmic and Tradovate is in development. If you trade many accounts and don’t want any manual step, pick a journal with sync today.",
-    "Elle fait gagner quelques minutes par jour, mais elle n’est pas obligatoire. Dans Sweep, tu importes l’export de ta plateforme, tu colles une capture que Sweep AI lit, ou tu saisis un trade à la main ; la synchro automatique avec Rithmic et Tradovate est en développement. Si tu trades beaucoup de comptes et ne veux aucune étape manuelle, choisis un journal qui synchronise dès aujourd’hui.",
-    "Ahorra unos minutos al día, pero no es imprescindible. En Sweep importas la exportación de tu plataforma, pegas una captura que Sweep AI lee o escribes una operación a mano; la sincronización automática con Rithmic y Tradovate está en desarrollo. Si operas muchas cuentas y no quieres ningún paso manual, elige hoy un diario con sincronización.")),
+  T("It saves a few minutes a day, but it isn’t required. Sweep syncs automatically from NinjaTrader 8, on every account whatever its connection; from another platform you import its export, paste a screenshot that Sweep AI reads, or type a trade by hand. If you trade many accounts on another platform and don’t want any manual step, pick a journal that syncs with it.",
+    "Elle fait gagner quelques minutes par jour, mais elle n’est pas obligatoire. Sweep se synchronise automatiquement depuis NinjaTrader 8, sur tous tes comptes quelle que soit leur connexion ; depuis une autre plateforme, tu importes son export, tu colles une capture que Sweep AI lit, ou tu saisis un trade à la main. Si tu trades beaucoup de comptes sur une autre plateforme et ne veux aucune étape manuelle, choisis un journal qui se synchronise avec elle.",
+    "Ahorra unos minutos al día, pero no es imprescindible. Sweep se sincroniza automáticamente desde NinjaTrader 8, en todas tus cuentas sea cual sea su conexión; desde otra plataforma importas su exportación, pegas una captura que Sweep AI lee o escribes una operación a mano. Si operas muchas cuentas en otra plataforma y no quieres ningún paso manual, elige un diario que se sincronice con ella.")),
 ]
 
 def vs_link(t, lang, slug, name):
@@ -315,7 +315,7 @@ def page_best_journal(lang, t):
         "Sweep est construit autour des comptes prop. Choisis ta firme et ton type de compte, et les règles sont déjà là : drawdown, consistance et conditions de payout, vérifiées chaque semaine sur les pages officielles de chaque firme. Évaluations, comptes financés et live restent séparés dans ton P&L, et une routine quotidienne (plan, règles, revue) garde l’accent sur le processus.",
         "Sweep está construido alrededor de las cuentas prop. Elige tu firma y tu tipo de cuenta y las reglas ya están ahí: drawdown, consistencia y condiciones de payout, revisadas cada semana en las páginas oficiales de cada firma. Evaluaciones, cuentas fondeadas y live se mantienen separadas en tu P&L, y una rutina diaria (plan, reglas, revisión) mantiene el foco en el proceso."),
       T("Free forever; Pro $19/mo or $159/yr; Elite $39/mo or $329/yr; 60 days of Pro for every new account.","Gratuit pour toujours ; Pro 19 $/mois ou 159 $/an ; Elite 39 $/mois ou 329 $/an ; 60 jours de Pro pour chaque nouveau compte.","Gratis para siempre; Pro 19 $/mes o 159 $/año; Elite 39 $/mes o 329 $/año; 60 días de Pro para cada cuenta nueva."),
-      T("No automatic broker sync yet (in development), no trade replay or backtesting, futures only. Expense and payout tracking is on Pro and Elite.","Pas encore de synchro automatique avec le courtier (en développement), pas de replay ni de backtesting, futures seulement. Le suivi des dépenses et des payouts est sur Pro et Elite.","Todavía sin sincronización automática con el bróker (en desarrollo), sin replay ni backtesting, solo futuros. El seguimiento de gastos y payouts está en Pro y Elite."),
+      T("Automatic sync from NinjaTrader 8 only, no trade replay or backtesting, futures only. Expense and payout tracking is on Pro and Elite.","Synchro automatique depuis NinjaTrader 8 seulement, pas de replay ni de backtesting, futures seulement. Le suivi des dépenses et des payouts est sur Pro et Elite.","Sincronización automática solo desde NinjaTrader 8, sin replay ni backtesting, solo futuros. El seguimiento de gastos y payouts está en Pro y Elite."),
       firms)
      + _journal(t, 2, "TradeZella", T("best all-round journal with sync, replay and backtesting","le plus complet, avec synchro, replay et backtesting","el más completo, con sincronización, replay y backtesting"),
       T("TradeZella is a large all-round journal. It syncs trades from hundreds of brokers and prop firms, replays trades second by second and includes backtesting. Its free Prop Firm Sync dashboard tracks drawdown, daily loss, profit targets, trading days and consistency, along with expenses and payouts.",
@@ -343,7 +343,7 @@ def page_best_journal(lang, t):
       T("Automatic import lists NinjaTrader and Tradovate among its platforms: check yours before you buy.","L’import automatique cite NinjaTrader et Tradovate parmi ses plateformes : vérifie la tienne avant d’acheter.","La importación automática incluye NinjaTrader y Tradovate entre sus plataformas: comprueba la tuya antes de comprar."), vs_link(t, lang, "sweep-vs-edgewonk.html", "Edgewonk")))
     pick = [
      T("<b>Futures evaluations and funded accounts, with firm rules on every account:</b> Sweep.","<b>Évaluations et comptes financés en futures, avec les règles de la firme sur chaque compte :</b> Sweep.","<b>Evaluaciones y cuentas fondeadas de futuros, con las reglas de la firma en cada cuenta:</b> Sweep."),
-     T("<b>Automatic broker sync, replay and backtesting today:</b> TradeZella.","<b>Synchro automatique, replay et backtesting dès aujourd’hui :</b> TradeZella.","<b>Sincronización automática, replay y backtesting ya hoy:</b> TradeZella."),
+     T("<b>Automatic sync from many brokers, replay and backtesting:</b> TradeZella.","<b>Synchro automatique avec beaucoup de courtiers, replay et backtesting :</b> TradeZella.","<b>Sincronización automática con muchos brókers, replay y backtesting:</b> TradeZella."),
      T("<b>Mostly stocks, with deep reports:</b> Tradervue.","<b>Surtout des actions, avec des rapports poussés :</b> Tradervue.","<b>Sobre todo acciones, con informes a fondo:</b> Tradervue."),
      T("<b>Broker sync, a mobile app, replay and AI across many markets:</b> TraderSync.","<b>Synchro courtier, app mobile, replay et IA sur plusieurs marchés :</b> TraderSync.","<b>Sincronización, app móvil, replay e IA en muchos mercados:</b> TraderSync."),
      T("<b>Psychology and strategy statistics, one yearly price:</b> Edgewonk.","<b>Psychologie et statistiques de stratégie, un seul prix annuel :</b> Edgewonk.","<b>Psicología y estadísticas de estrategia, un solo precio anual:</b> Edgewonk."),
