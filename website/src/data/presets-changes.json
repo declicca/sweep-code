@@ -1,0 +1,2477 @@
+[
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 3500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 10
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 3
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 8000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 3500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 10
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 15000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 349
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 5250
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 15
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 3
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 12000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 5250
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 15
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 15000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 489
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 1750
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 3
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 4000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 1750
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 15000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 209
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 20
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 2500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 689
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 20
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 4500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 10
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 859
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 20
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 2
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 349
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 20
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 519
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 50
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 10
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 2
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 6000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 10
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 4000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 239
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 50
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 4500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 15
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 2
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 9000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 4500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 15
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 5000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 349
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 50
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 2
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 129
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "eval.dll",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 6
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 1
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 6000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 6
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 2500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 279
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "eval.dll",
+  "old": null,
+  "new": 500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 1
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 1
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 1500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 1
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 89
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "eval.dll",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "eval.max_minis",
+  "old": null,
+  "new": 3
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 1
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 3000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 2000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.dll",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 3
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.payout.max",
+  "old": null,
+  "new": 1500
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.payout.max_payouts",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.payout.win_days",
+  "old": null,
+  "new": 5
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.payout.win_min",
+  "old": null,
+  "new": 200
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 139
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 100000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 100000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 100000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 12
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 150000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 150000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 150000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 150000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 25000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 25000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 25000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 25000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 6
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 50000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-eod",
+  "size": 50000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 100000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 100000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 100000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 12
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 150000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 150000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 150000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 150000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 25000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 25000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 25000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 25000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 6
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 50000,
+  "rule": "funded.payout.max_pct",
+  "old": null,
+  "new": 30
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "apex",
+  "program": "apex-intraday",
+  "size": 50000,
+  "rule": "funded.payout.trade_days",
+  "old": null,
+  "new": 8
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 12
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 15
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 3
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 6
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 9
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-12"
+ },
+ {
+  "date": "2026-10-12",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ }
+]
