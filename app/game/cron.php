@@ -41,6 +41,8 @@ GameEngine::setPdo($pdo);
 GameEngine::schema();
 
 $mode = $argv[1] ?? 'lock';
+require_once $root . '/ops/cron-lib.php';   // Admin › Health: last run, duration, success or error (brief 02 step 0)
+if ($mode === 'lock') sweep_cron_start($pdo, 'game');
 try { GameDiscord::cron(); } catch (Throwable $e) { fwrite(STDERR, '[Sweep discord] ' . $e->getMessage() . "\n"); }
 try { GameSocial::ensureWeek(); } catch (Throwable $e) { fwrite(STDERR, '[Sweep league] ' . $e->getMessage() . "\n"); }   // Monday: close last week, form this week
 $users = $pdo->query('SELECT user_id FROM user_game_profile')->fetchAll(PDO::FETCH_COLUMN);
@@ -61,4 +63,7 @@ if ($mode === 'lock' && is_file($root . '/presets/check.php')) {
     try { require_once $root . '/presets/check.php'; require_once $root . '/ai/ai-core.php'; $r = pr_recheck_if_seed_changed($pdo); if ($r !== null) echo date('c') . ' Sweep presets: new shipped rules, ' . count($r) . " firm(s) checked\n"; }
     catch (Throwable $e) { fwrite(STDERR, '[Sweep presets recheck] ' . $e->getMessage() . "\n"); }
 }
+sweep_cron_note("$n player(s)");
+// a task red for more than one cycle → one email to the support address (this one included, by the app itself if it stops)
+if ($mode === 'lock') { try { sweep_cron_watch($pdo, fn(string $s, string $t) => function_exists('sweep_mail') && sweep_mail(trim((string) ($cfg['support_email'] ?? '')) ?: 'hello@makeitsweep.com', $s, $t)); } catch (Throwable $e) { fwrite(STDERR, '[Sweep cron watch] ' . $e->getMessage() . "\n"); } }
 echo date('c') . " Sweep game $mode: $n player(s)\n";

@@ -146,7 +146,7 @@ L'app recharge les données quand elle revient au premier plan, puis toutes les 
 - **Plan et revue** : enregistrés dans la page de journal du jour (`pre` et `post`), donc visibles aussi dans l'onglet Journal. La journalisation d'un trade (setup, émotion, règles suivies) est enregistrée dans le trade.
 - **Journée de trading** : un trade pris à 18 h ET ou plus tard compte pour le lendemain. Week-ends et fériés (table `market_holidays`) sont neutres.
 - **Verrouillage** : chaque journée reste modifiable jusqu'au lendemain 23 h 59 ET. Le verrouillage et le streak sont calculés à l'ouverture de l'app et par la tâche cron (même résultat).
-- **Cron (recommandé)** : cPanel → Cron Jobs → une fois par heure : `/usr/local/bin/php /home/matnsabc/app.makeitsweep.com/game/cron.php >/dev/null 2>&1`
+- **Cron (recommandé)** : cPanel → Cron Jobs → toutes les 15 minutes (rappels, courriel « Ta semaine ») : `/usr/local/bin/php /home/matnsabc/app.makeitsweep.com/game/cron.php >/dev/null 2>&1`. Toutes les tâches et leur état : `ops/CRON.md` et Admin › Santé.
 - **Jours fériés** : 12 mois déjà inclus. Pour l'année suivante, ajoute les dates dans la table `market_holidays` (voir `game/migrations/001_game.sql`).
 - **Forfaits** : tout est gratuit. Seul le nombre de gels par semaine dépend du forfait (Gratuit 1, Pro 2, Elite 3 ; Pro pendant l'accès anticipé).
 
@@ -228,7 +228,7 @@ Le dossier `data_dir` contient tout : `journal.db` et `uploads/`. Compresse-le e
 ## Sauvegardes (ops/)
 
 - `ops/backup.php` (cron **chaque jour**, ex. 3 h 30) : copie à chaud de SQLite (`VACUUM INTO`), vérification d'intégrité, compression, chiffrement AES-256-GCM, rotation 7 jours / 4 semaines / 12 mois dans `/home/<user>/sweep-backups`, archive hebdomadaire des captures et de la config privée, copie hors serveur S3 compatible (facultative).
-- `ops/restore-test.php` (cron **chaque semaine**) : déchiffre la dernière sauvegarde, vérifie qu'elle s'ouvre et contient les mêmes utilisateurs, et contrôle l'intégrité de la base en production. Le rapport envoyé par courriel par cPanel sert de preuve.
+- `ops/restore-test.php` (cron **chaque semaine**, le lundi à 6 h) : déchiffre la dernière sauvegarde, vérifie qu'elle s'ouvre et contient les mêmes utilisateurs, et contrôle l'intégrité de la base en production. Le rapport envoyé par courriel par cPanel sert de preuve.
 - `ops/restore.php <fichier.enc> <sortie>` : restauration manuelle.
 - Config : `sweep-private/backup-config.php` (modèle `ops/backup-config.sample.php`). **Garde la phrase de passe hors du serveur** : sans elle, aucune sauvegarde n'est lisible.
 

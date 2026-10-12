@@ -31,7 +31,7 @@ Version complète de l'app au 3 octobre 2026. Ce zip **ne contient jamais** `con
 
 ## 3. Tâches planifiées (cPanel → Cron Jobs)
 
-Mettre ton courriel dans « Cron Email » pour recevoir les rapports et les alertes.
+Mettre ton courriel dans « Cron Email » pour recevoir les rapports et les alertes. La liste complète, prête à copier, et ce que chaque tâche écrit : `ops/CRON.md`. Leur état en direct (dernière exécution, durée, erreur) : Admin › Santé ; une tâche en rouge depuis plus d'un cycle envoie un courriel à l'adresse de support.
 
 | Fréquence | Commande | Rôle |
 |---|---|---|

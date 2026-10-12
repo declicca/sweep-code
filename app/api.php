@@ -666,6 +666,20 @@ try {
             pr_watchdog(fn(string $subj, string $text) => sweep_mail($SUPPORT ?: 'hello@makeitsweep.com', $subj, $text));
         } catch (Throwable $e) { error_log('Sweep presets watchdog: ' . $e->getMessage()); }
     });
+    // scheduled tasks: one red for more than one cycle → one email to the support address. Also checked here, at most once an
+    // hour, in case the 15-minute task (which checks the others) is the one that stopped. A dev copy never emails.
+    register_shutdown_function(function () {
+        global $SUPPORT;
+        try {
+            if (getenv('SWEEP_TEST_DB')) return;
+            $w = rtrim((string)($GLOBALS['DATA'] ?? ''), '/') . '/cron-watch.txt';
+            if (is_file($w) && filemtime($w) > time() - 3600) return;   // cheap: one file stat per request
+            @touch($w);
+            if (function_exists('fastcgi_finish_request')) @fastcgi_finish_request();
+            require_once __DIR__ . '/ops/cron-lib.php';
+            sweep_cron_watch(db(), fn(string $subj, string $text) => sweep_mail($SUPPORT ?: 'hello@makeitsweep.com', $subj, $text));
+        } catch (Throwable $e) { error_log('Sweep cron watch: ' . $e->getMessage()); }
+    });
     require_once __DIR__ . '/growth/referral.php';
     require_once __DIR__ . '/growth/feedback.php';
     if (is_file(__DIR__ . '/notify/notify.php')) require_once __DIR__ . '/notify/notify.php';   // notification center + events (Feature 0)
@@ -1288,6 +1302,8 @@ try {
             @unlink($DATA . '/cohort-count.json');
             json_out(200, ['ok' => true]);
         }
+        // Admin › Health (brief 02 step 0): the scheduled tasks and whether each outside service is set up (yes / no, never a value)
+        if ($route === 'api/admin/health' && $method === 'GET') { require_once __DIR__ . '/ops/health.php'; json_out(200, sweep_health(db(), $cfg, __DIR__)); }
         // prop firm presets: last check, status per firm, « Check now » (one firm per request, then « finish »)
         if (strpos($route, 'api/admin/presets') === 0) {
             require_once __DIR__ . '/presets/check.php';

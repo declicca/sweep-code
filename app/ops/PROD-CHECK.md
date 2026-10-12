@@ -1,0 +1,35 @@
+# Liste de vérification production (brief 02, étape 0)
+
+À refaire après un changement de serveur, de DNS ou de configuration. État au **12 octobre 2026**. Vérifications en ligne : au plus 2 requêtes à la fois, une pause entre elles (le pare-feu du serveur bloque l'IP sinon).
+
+## 0. Tâches planifiées
+
+- **Constaté le 12 oct.** : aucune tâche de Sweep n'était installée (la crontab du compte ne contenait qu'une ligne WordPress de lacstmajo.ca). Pas de sauvegarde, pas de rappels, pas de courriel « Ta semaine », pas de vérification hebdomadaire des firmes.
+- **Fait le 12 oct.** : les 5 lignes de `ops/CRON.md` ajoutées (copie de l'ancienne crontab : `~/crontab-backup-2026-10-12.txt`).
+- `MAILTO=""` : cPanel n'envoie pas la sortie des tâches. Les échecs se voient dans **Admin › Santé**, et une tâche rouge depuis plus d'un cycle envoie un courriel à l'adresse de support.
+- **À vérifier** : Admin › Santé, les 5 lignes en bleu après leur premier passage (le jeu dans le quart d'heure, la sauvegarde après 3 h 30, les firmes et le test de restauration le lundi).
+
+## 1. Courriel « mot de passe oublié » (3 langues, pas en indésirables)
+
+- **Constaté le 12 oct.** (DNS publics, 1.1.1.1 et 8.8.8.8) : DNS chez Cloudflare, **aucun MX, aucun SPF, aucune DKIM**, pas de `mail.makeitsweep.com`, avec pourtant un DMARC `p=quarantine`. La boîte hello@makeitsweep.com (sur le serveur cPanel) ne pouvait rien recevoir, et les courriels de l'app partaient sans authentification.
+- **Fait le 12 oct.** (Cloudflare, en « DNS only ») : `A mail → 178.93.238.40`, `MX @ → mail.makeitsweep.com (10)`, `TXT @ → v=spf1 +a +mx ip4:178.93.238.40 ~all`, `TXT default._domainkey →` la clé DKIM de cPanel. cPanel → Email Deliverability : SPF et DKIM « Valid » ; vérifié depuis l'extérieur (clé DKIM identique caractère pour caractère).
+- **À faire** : « Mot de passe oublié » vers une adresse Gmail, l'app en FR, puis EN, puis ES ; dans Gmail, ⋮ → Afficher l'original : `SPF: PASS`, `DKIM: PASS`, `DMARC: PASS`, et le courriel dans la boîte de réception. Un courriel envoyé à hello@makeitsweep.com arrive dans le webmail. Le lendemain : certificat de `mail.makeitsweep.com` dans cPanel → SSL/TLS Status (AutoSSL).
+- Facultatif : le DMARC envoie ses rapports à `dmarc_rua@onsecureserver.net` (GoDaddy, sans doute un reste de l'achat du domaine) ; `rua=mailto:hello@makeitsweep.com` pour les recevoir.
+- Admin › Santé dit si l'envoi passe par la boîte (SMTP) ou par `mail()` de PHP.
+
+## 2. Webhooks Stripe
+
+- Adresse : `https://app.makeitsweep.com/api/billing/webhook` (signature vérifiée ; sans signature : refusée).
+- Admin › Santé : Stripe et « Secret du webhook Stripe » réglés ou manquants, mode réel ou test.
+- **À faire** (Stripe → Développeurs → Webhooks, en mode test) : envoyer les événements d'abonnement créé, renouvelé (facture payée), annulé et paiement échoué ; chaque envoi doit répondre `200`, et l'abonnement du compte de test changer dans Admin › Traders.
+
+## 3. Restauration d'une sauvegarde
+
+- `sweep-private/backup-config.php` n'existait pas : aucune sauvegarde n'avait jamais été faite. **Créé le 12 oct.** (phrase secrète gardée hors du serveur) ; sauvegarde lancée à la main : OK.
+- Le test de restauration (`ops/restore-test.php`, le lundi à 6 h) déchiffre la dernière sauvegarde dans un fichier temporaire, vérifie son intégrité et qu'elle contient les mêmes traders que la base en production, sans jamais toucher à la base en production. Il n'y a pas d'environnement de test en ligne (choix du 9 oct. : local seulement).
+- **À faire** : Admin › Santé, ligne « Test de restauration » en bleu après le premier lundi ; prévoir une copie hors du serveur (ligne `s3` de `backup-config.php`, Backblaze B2 ou Cloudflare R2).
+
+## 4. Sweep AI
+
+- `sweep-private/ai-config.php` présent. Admin › Santé : clé réglée ou manquante, budget quotidien global, limite par trader et par jour, dépensé aujourd'hui (jamais la clé elle-même).
+- Budget atteint : l'IA répond « budget » (503) ; ce que voit le trader est vérifié avec la partie 9 du brief 02.

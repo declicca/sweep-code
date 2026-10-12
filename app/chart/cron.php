@@ -19,9 +19,10 @@ $pdo = ($c['driver'] ?? 'sqlite') === 'mysql'
     : new PDO('sqlite:' . $DATA . '/journal.db', null, null, $opts);
 function db(): PDO { global $pdo; return $pdo; }
 require_once __DIR__ . '/chart.php';
+require_once $root . '/ops/cron-lib.php'; sweep_cron_start($pdo, 'chart');   // Admin › Health (brief 02 step 0)
 foreach (['/notify/notify.php', '/notify/listeners.php'] as $f) if (is_file($root . $f)) require_once $root . $f;   // « your chart is ready »
 
-if (!ChartData::enabled()) { echo "Sweep chart: disabled or no Databento key\n"; exit; }
+if (!ChartData::enabled()) { sweep_cron_note('disabled or no Databento key'); echo "Sweep chart: disabled or no Databento key\n"; exit; }
 $perRun = 40;
 $recent = gmdate('Y-m-d', time() - 30 * 86400);
 $jobs = [];   // root|day|contract => [recent?, …]
@@ -46,6 +47,7 @@ foreach ($jobs as $key => $isRecent) {
     if ($r['status'] === 'soon') { echo "Sweep chart: daily budget reached, stopping\n"; break; }
     if ($r['status'] === 'ok') $done++;
 }
+sweep_cron_note("$done day(s) downloaded, $skipped cached");
 echo date('c') . " Sweep chart: $done day(s) downloaded, $skipped already cached, " . count($jobs) . " total\n";
 
 // « Your NQ chart is ready »: once per trader and session day, when the day's chart becomes available

@@ -857,8 +857,59 @@
     try { pr = await post({ finish: true }); } catch (x) { /* the list above already shows each firm */ }
     prRun = null; prAt = Date.now(); prPaint(); if (typeof toast === 'function') toast(p2().done);
   });
+  /* ───── Admin → Health (brief 02 step 0): the scheduled tasks (last run, duration, error) and the outside services ───── */
+  const HT = {
+    en: { h: 'Health', sub: 'Scheduled tasks (cPanel → Cron Jobs) and outside services. A task red for more than one cycle sends one email to the support address.',
+      names: { game: 'Game, reminders, « Your week » email', chart: 'Trade charts', presets: 'Prop firm rules check', backup: 'Backup', restore_test: 'Restore test' },
+      every: { game: 'every 15 min', chart: 'every hour', presets: 'Mondays at 5:00', backup: 'every day at 3:30', restore_test: 'Mondays at 6:00' },
+      st: { ok: 'OK', running: 'Running', late: 'Late', failed: 'Failed', stuck: 'Stuck', never: 'Never ran' }, last: 'last run {t}', ago: '{t} ago', now: 'just now', took: '{s} s', cmd: 'cPanel line',
+      svc: 'Services', yes: 'Set', no: 'Missing', live: 'live', test: 'test mode', aiUse: 'today {a} of {b} · {n} per trader per day',
+      c: { smtp: ['Email through the mailbox (SMTP)', 'PHP mail() instead: more often in spam'], ai: ['Sweep AI key', 'Sweep AI is off'], billing: ['Stripe', 'Billing is off'],
+        webhook: ['Stripe webhook secret', 'Payments are not confirmed'], chart: ['Databento (trade charts)', 'No trade charts'], backup: ['Backup passphrase', 'No backup is written'],
+        offsite: ['Off-site backup copy', 'Backups only on the server'], app_url: ['App address (app_url)', 'Email links use app.makeitsweep.com'] } },
+    fr: { h: 'Santé', sub: 'Tâches planifiées (cPanel → Cron Jobs) et services externes. Une tâche rouge depuis plus d’un cycle envoie un courriel à l’adresse de support.',
+      names: { game: 'Jeu, rappels, courriel « Ta semaine »', chart: 'Graphiques des trades', presets: 'Vérification des règles des firmes', backup: 'Sauvegarde', restore_test: 'Test de restauration' },
+      every: { game: 'toutes les 15 min', chart: 'toutes les heures', presets: 'le lundi à 5 h', backup: 'chaque jour à 3 h 30', restore_test: 'le lundi à 6 h' },
+      st: { ok: 'OK', running: 'En cours', late: 'En retard', failed: 'Échec', stuck: 'Bloquée', never: 'Jamais exécutée' }, last: 'dernière exécution {t}', ago: 'il y a {t}', now: 'à l’instant', took: '{s} s', cmd: 'Ligne cPanel',
+      svc: 'Services', yes: 'Réglé', no: 'Manquant', live: 'réel', test: 'mode test', aiUse: 'aujourd’hui {a} sur {b} · {n} par trader et par jour',
+      c: { smtp: ['Courriels par la boîte (SMTP)', 'mail() de PHP à la place : plus souvent en indésirables'], ai: ['Clé de Sweep AI', 'Sweep AI est désactivé'], billing: ['Stripe', 'Facturation désactivée'],
+        webhook: ['Secret du webhook Stripe', 'Les paiements ne sont pas confirmés'], chart: ['Databento (graphiques des trades)', 'Pas de graphiques'], backup: ['Phrase secrète des sauvegardes', 'Aucune sauvegarde n’est écrite'],
+        offsite: ['Copie des sauvegardes hors du serveur', 'Sauvegardes seulement sur le serveur'], app_url: ['Adresse de l’app (app_url)', 'Les liens des courriels utilisent app.makeitsweep.com'] } },
+    es: { h: 'Salud', sub: 'Tareas programadas (cPanel → Cron Jobs) y servicios externos. Una tarea en rojo durante más de un ciclo envía un correo a la dirección de soporte.',
+      names: { game: 'Juego, recordatorios, correo « Tu semana »', chart: 'Gráficos de las operaciones', presets: 'Verificación de las reglas de las firmas', backup: 'Copia de seguridad', restore_test: 'Prueba de restauración' },
+      every: { game: 'cada 15 min', chart: 'cada hora', presets: 'los lunes a las 5:00', backup: 'cada día a las 3:30', restore_test: 'los lunes a las 6:00' },
+      st: { ok: 'OK', running: 'En curso', late: 'Con retraso', failed: 'Error', stuck: 'Bloqueada', never: 'Nunca ejecutada' }, last: 'última ejecución {t}', ago: 'hace {t}', now: 'ahora mismo', took: '{s} s', cmd: 'Línea de cPanel',
+      svc: 'Servicios', yes: 'Configurado', no: 'Falta', live: 'real', test: 'modo de prueba', aiUse: 'hoy {a} de {b} · {n} por trader y por día',
+      c: { smtp: ['Correos por el buzón (SMTP)', 'mail() de PHP en su lugar: más a menudo en spam'], ai: ['Clave de Sweep AI', 'Sweep AI está desactivado'], billing: ['Stripe', 'Facturación desactivada'],
+        webhook: ['Secreto del webhook de Stripe', 'Los pagos no se confirman'], chart: ['Databento (gráficos de las operaciones)', 'Sin gráficos'], backup: ['Frase secreta de las copias', 'No se escribe ninguna copia'],
+        offsite: ['Copia fuera del servidor', 'Copias solo en el servidor'], app_url: ['Dirección de la app (app_url)', 'Los enlaces de los correos usan app.makeitsweep.com'] } },
+  };
+  const ht = () => HT[LANG] || HT.en;
+  let hl = null, hlAt = 0, hlBusy = false;
+  const ago = (ts, now) => { const x = ht(), s = Math.max(0, now - ts); if (s < 60) return x.now; const v = s < 3600 ? Math.round(s / 60) + ' min' : s < 86400 ? Math.round(s / 3600) + ' h' : Math.round(s / 86400) + (LANG === 'en' ? ' d' : LANG === 'es' ? ' d' : ' j'); return x.ago.replace('{t}', v); };
+  function hlHtml(d) {
+    const x = ht(), cls = { green: 'ok', orange: 'late', red: 'bad' }, dec = (v) => (LANG === 'en' ? v : v.replace('.', ','));
+    const rows = d.tasks.map((k) => { const at = k.finished_at && k.finished_at >= (k.started_at || 0) ? k.finished_at : k.started_at;
+      return `<li class="ux-hl-${cls[k.color] || 'bad'}"><div><b>${esc(x.names[k.task] || k.task)}</b><span class="ux-pr-chip">${esc(x.st[k.state] || k.state)}</span>
+        <small>${esc(x.every[k.task] || k.schedule)}${at ? ' · ' + x.last.replace('{t}', ago(at, d.now)) : ''}${k.duration_ms != null && k.state !== 'running' ? ' · ' + x.took.replace('{s}', dec((k.duration_ms / 1000).toFixed(1))) : ''}</small></div>
+        ${k.error ? `<small class="neg">${esc(k.error)}</small>` : k.note ? `<small>${esc(k.note)}</small>` : ''}
+        <details><summary>${x.cmd}</summary><code>${esc(k.schedule + '  ' + k.command)}</code></details></li>`; }).join('');
+    const C = d.config || {}, money2 = (v) => (typeof money === 'function' ? money(Math.round(Number(v || 0) * 100), { sign: false, dec: 2 }) : '$' + Number(v || 0).toFixed(2));   // the language's format
+    const svc = [['smtp', C.smtp], ['ai', C.ai, C.ai ? x.aiUse.replace('{a}', money2(C.ai_spent_usd)).replace('{b}', money2(C.ai_budget_usd)).replace('{n}', C.ai_user_limit) : ''],
+      ['billing', C.billing, C.billing ? (C.billing_live ? x.live : x.test) : ''], ['webhook', C.webhook], ['chart', C.chart], ['backup', C.backup], ['offsite', C.offsite], ['app_url', C.app_url]];
+    return `<div class="sec-h"><h2>${x.h}</h2></div><p class="muted ux-hl-sub">${x.sub}</p><ul class="ux-pr-list ux-hl-list">${rows}</ul>
+      <h4>${x.svc}</h4><ul class="ux-hl-cfg">${svc.map(([k, on, extra]) => `<li class="${on ? 'on' : 'off'}" data-hl="${k}"><span>${esc(x.c[k][0])}</span><b>${on ? x.yes : x.no}</b><small>${esc(on ? (extra || '') : x.c[k][1])}</small></li>`).join('')}</ul>`;
+  }
+  function hlPaint() {
+    if (route().v !== 'admin') return;
+    const main = document.getElementById('main'); if (!main) return;
+    let box = main.querySelector('.ux-health-admin');
+    if (!box) { box = document.createElement('section'); box.className = 'sec ux-health-admin'; box.setAttribute('data-noi18n', ''); const m = main.querySelector('.ux-metrics'); if (m) m.before(box); else main.prepend(box); }   // first: problems before numbers
+    if (hl) { const h = hlHtml(hl); if (box._h !== h) { box.innerHTML = h; box._h = h; } }
+    if (!hlBusy && Date.now() - hlAt > 60000) { hlBusy = true; apiJSON('api/admin/health').then((d) => { hl = d; hlAt = Date.now(); hlBusy = false; hlPaint(); }).catch(() => { hlBusy = false; hlAt = Date.now(); }); }
+  }
   const appRender = render;
-  render = function () { const out = appRender.apply(this, arguments); try { paint(); prPaint(); } catch (e) { /* never blocks */ } return out; };
+  render = function () { const out = appRender.apply(this, arguments); try { paint(); prPaint(); hlPaint(); } catch (e) { /* never blocks */ } return out; };
 })();
 
 /* ───────────── 16. Text for « chart ready » and end-of-trial notifications ───────────── */

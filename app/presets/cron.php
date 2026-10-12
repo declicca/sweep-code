@@ -33,6 +33,7 @@ $args = array_slice($argv, 1);
 $dry = in_array('--dry-run', $args, true);
 $only = null; foreach ($args as $a) if (strpos($a, '--firm=') === 0) $only = substr($a, 7);
 
+if (!$dry && !$only && !in_array('--rollback', $args, true)) { require_once $root . '/ops/cron-lib.php'; sweep_cron_start($pdo, 'presets'); }   // Admin › Health (brief 02 step 0)
 if (in_array('--rollback', $args, true)) {
     $f = pr_rollback();
     echo $f ? "Restored the version saved as $f\n" : "No previous version to restore\n";
@@ -40,4 +41,5 @@ if (in_array('--rollback', $args, true)) {
 }
 
 $report = pr_run_all($pdo, $dry, $only, 'cron');
+if (!$dry && !$only && function_exists('sweep_cron_note')) sweep_cron_note(count($report) . ' firm(s) checked');   // Admin › Health
 echo ($dry ? "[dry run] " : '') . "Prop firm presets — " . gmdate('Y-m-d H:i') . " UTC\n" . implode("\n", $report) . "\n";

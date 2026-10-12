@@ -21,7 +21,8 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/ops-lib.php';
 
 $cfg = ops_cfg();
-$fail = function (string $m) { fwrite(STDERR, '[Sweep backup] ' . $m . "\n"); error_log('[Sweep backup] ' . $m); exit(1); };
+$fail = function (string $m) { fwrite(STDERR, '[Sweep backup] ' . $m . "\n"); error_log('[Sweep backup] ' . $m); if (function_exists('sweep_cron_fail')) sweep_cron_fail($m); exit(1); };
+if (is_file($cfg['db'])) { try { require_once __DIR__ . '/cron-lib.php'; sweep_cron_start(new PDO('sqlite:' . $cfg['db'], null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]), 'backup'); } catch (Throwable $e) { error_log('[Sweep backup] health: ' . $e->getMessage()); } }   // Admin › Health (brief 02 step 0)
 if ($cfg['passphrase'] === '') $fail('no passphrase in backup-config.php: refusing to write unencrypted backups');
 if (!is_file($cfg['db'])) $fail('database not found: ' . $cfg['db']);
 foreach (['daily', 'weekly', 'monthly'] as $d) if (!is_dir($cfg['dir'] . "/$d") && !@mkdir($cfg['dir'] . "/$d", 0700, true)) $fail('cannot create ' . $cfg['dir'] . "/$d");
@@ -88,4 +89,5 @@ if (!empty($cfg['s3']['bucket'])) {
     }
 }
 file_put_contents($cfg['dir'] . '/last-success.txt', gmdate('c') . " $name\n");
+if (function_exists('sweep_cron_note')) sweep_cron_note($name . (!empty($cfg['s3']['bucket']) ? ' + off-site copy' : ' (no off-site copy)'));
 exit(0);

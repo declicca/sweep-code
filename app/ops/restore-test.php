@@ -10,9 +10,10 @@ declare(strict_types=1);
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/ops-lib.php';
 $cfg = ops_cfg(); $bad = false; $out = [];
+if (is_file($cfg['db'])) { try { require_once __DIR__ . '/cron-lib.php'; sweep_cron_start(new PDO('sqlite:' . $cfg['db'], null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]), 'restore_test'); } catch (Throwable $e) { error_log('[Sweep restore test] health: ' . $e->getMessage()); } }   // Admin › Health (brief 02 step 0)
 $all = glob($cfg['dir'] . '/daily/sweep-db-*.enc') ?: []; sort($all);
 $last = end($all);
-if (!$last) { echo "[Sweep restore test] FAILED: no backup found in {$cfg['dir']}/daily\n"; exit(1); }
+if (!$last) { echo "[Sweep restore test] FAILED: no backup found in {$cfg['dir']}/daily\n"; if (function_exists('sweep_cron_fail')) sweep_cron_fail('no backup found in the daily folder'); exit(1); }
 $tmp = sys_get_temp_dir() . '/sweep-restore-' . bin2hex(random_bytes(4)) . '.sqlite';
 try {
     file_put_contents($tmp, gzdecode(ops_decrypt((string) file_get_contents($last), $cfg['passphrase'])));
@@ -34,4 +35,5 @@ try {
 } catch (Throwable $e) { $bad = true; $out[] = 'error: ' . $e->getMessage(); }
 @unlink($tmp);
 echo '[Sweep restore test] ' . ($bad ? 'FAILED' : 'OK') . ' · ' . gmdate('Y-m-d H:i') . " UTC\n  " . implode("\n  ", $out) . "\n";
+if (function_exists('sweep_cron_fail')) { if ($bad) sweep_cron_fail(implode(' · ', $out)); else sweep_cron_note(implode(' · ', array_slice($out, 1))); }   // counts only, no data
 exit($bad ? 1 : 0);
