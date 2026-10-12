@@ -980,7 +980,9 @@
     return out;
   }
 
-  /** fills (one account / contract at a time, FIFO) → round trips. prefix makes the import key (no duplicates on a re-import) */
+  /** fills (one account / contract at a time, FIFO) → round trips. prefix makes the import key (no duplicates on a re-import).
+   *  qty = the largest position held, as the trade form and the sync count contracts; turns = contracts bought and sold
+   *  (the account's round-trip commission is charged on each of them) */
   function pairFills(fills, prefix) {
     fills.sort((a, b) => a.t.key.localeCompare(b.t.key));
     const pos = new Map(), out = [];
@@ -989,14 +991,14 @@
       const k = f.acct + '|' + f.sym; let st = pos.get(k);
       let left = f.q;
       while (left > 0) {
-        if (!st || st.net === 0) { st = { net: 0, dir: f.side, open: f.t, ew: 0, eq: 0, xw: 0, xq: 0, fee: 0, id: f.id }; pos.set(k, st); }
-        if (f.side === st.dir) { st.net += left; st.ew += f.px * left; st.eq += left; st.fee += f.fee * (left / f.q); left = 0; break; }
+        if (!st || st.net === 0) { st = { net: 0, max: 0, dir: f.side, open: f.t, ew: 0, eq: 0, xw: 0, xq: 0, fee: 0, id: f.id }; pos.set(k, st); }
+        if (f.side === st.dir) { st.net += left; st.max = Math.max(st.max, st.net); st.ew += f.px * left; st.eq += left; st.fee += f.fee * (left / f.q); left = 0; break; }
         const close = Math.min(left, st.net);
         st.net -= close; st.xw += f.px * close; st.xq += close; st.fee += f.fee * (close / f.q); left -= close;
         if (st.net === 0) {
           const e = st.ew / st.eq, x = st.xw / st.xq, pv = PV[f.root] || 0;
           out.push({ key: `${prefix}:${f.acct}:${f.sym}:${st.open.key}:${st.id}`, acct: f.acct || '', inst: f.root, sym: f.sym, dir: st.dir > 0 ? 'long' : 'short', date: st.open.date, entry_time: st.open.time, exit_time: f.t.time,
-            entryKey: st.open.key, exitKey: f.t.key, qty: st.eq, entry: px(e), exit: px(x),
+            entryKey: st.open.key, exitKey: f.t.key, qty: st.max, turns: st.eq, entry: px(e), exit: px(x),
             unknown: f.unknown, pnl_c: Math.round((x - e) * (st.dir > 0 ? 1 : -1) * st.xq * pv * 100), fees_c: Math.round(st.fee * 100), duration_s: Math.max(0, Math.round((keyMs(f.t.key) - keyMs(st.open.key)) / 1000)) });
         }
       }
@@ -1303,7 +1305,7 @@
       if (have.get(acc) && have.get(acc).has(r.key)) continue;
       const a = typeof acct === 'function' ? acct(acc) : null;
       let fees = r.fees_c || 0, auto = false;
-      if (!fees && a && a.fee_rt_c > 0 && r.qty > 0) { fees = Math.round(a.fee_rt_c * r.qty); auto = true; }
+      if (!fees && a && a.fee_rt_c > 0 && r.qty > 0) { fees = Math.round(a.fee_rt_c * (r.turns || r.qty)); auto = true; }   // a round trip per contract bought and sold
       const doc = { id: uid(), account_id: acc, instrument: r.inst, date: r.date, session_date: true, entry_time: r.entry_time, exit_time: r.exit_time,
         session: typeof sessionFor === 'function' ? sessionFor(r.entry_time) : '', direction: r.dir, contracts: r.qty, entry: r.entry, exit: r.exit, pnl_c: r.pnl_c, pnl_manual: true,
         import_key: r.key, duration_s: r.duration_s, discipline: {}, emo: {}, review: {}, tags: [], shots: [] };

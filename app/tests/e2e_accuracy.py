@@ -106,6 +106,13 @@ async def main():
     await pg.evaluate("void impGo()"); await pg.wait_for_timeout(3000)
     fee = await pg.evaluate("S.trades.filter(t=>t.account_id==='t-r3').map(t=>[t.contracts,t.fees_c,!!t.fees_auto])")
     ok(not warn and fee == [[2, 500, True]], f'A6b commission of the account ($2.50 × 2 contracts) applied, no « fees not included » (warning: {warn}, trades: {fee})')
+    # A6c: out and back in before flat (buy 2, sell 1, buy 1, sell 2) → one trade of 2 contracts (the largest position, as the
+    # trade form and the sync count), fees on the 3 contracts bought and sold, P&L of every exit
+    ADD = 'Completed Orders\\nAccount,Status,Remarks,Buy/Sell,Qty To Fill,Symbol,Qty Filled,Avg Fill Price,Limit Price,Order Number,Create Time,Update Time,Commission\\nAPEX-333,Filled,,B,0,NQZ6,2,21000,21000,41,2026-10-03 10:00:00,2026-10-03 10:00:00,0\\nAPEX-333,Filled,,S,0,NQZ6,1,21020,21020,42,2026-10-03 10:02:00,2026-10-03 10:02:00,0\\nAPEX-333,Filled,,B,0,NQZ6,1,21010,21010,43,2026-10-03 10:04:00,2026-10-03 10:04:00,0\\nAPEX-333,Filled,,S,0,NQZ6,2,21030,21030,44,2026-10-03 10:06:00,2026-10-03 10:06:00,0\\n'
+    await pg.evaluate(f"(()=>{{IMP.rows=parseTradovate('{ADD}'); IMP.file='a.csv'; IMP.account='t-r3'; render();}})()"); await pg.wait_for_timeout(800)
+    await pg.evaluate("void impGo()"); await pg.wait_for_timeout(3000)
+    add = await pg.evaluate("S.trades.filter(t=>t.account_id==='t-r3' && t.date==='2026-10-03').map(t=>[t.contracts,t.fees_c,t.pnl_c])")
+    ok(add == [[2, 750, (20 + 30 * 2 - 10) * 20 * 100]], f'A6c buy 2, sell 1, buy 1, sell 2 → one trade of 2 contracts, fees $2.50 × 3, P&L +$1,400 ({add})')
     # A7 instruments
     r7 = await pg.evaluate("[PV('6E')*0.001, PV('ZN')*0.5, PV('MBT')*100, instOf('XYZ').tickC, !!instOf('XYZ').unknown, PV('SIL')*0.1, PV('NG')*0.01, PV('HG')*0.01, PV('M6E')*0.001, PV('MET')*10, PV('ZB')*1, PV('SI')*0.1]")
     ok(r7[:3] == [12500, 50000, 1000] and r7[3] == 0 and r7[4], f'A7 6E 1.0800→1.0810 = $125, ZN ½ pt = $500, MBT 100 pts = $10; unknown symbol: no point value ({r7[:5]})')
