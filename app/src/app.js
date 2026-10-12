@@ -4916,7 +4916,8 @@ const SYNC = {
 };
 
 async function syncNow({manual: e = !1} = {}) {
-  if (S.mode !== "server" || SYNC.busy || savingN > 0 || document.activeElement && document.activeElement.matches("input,textarea,select") && !e || TK || document.querySelector(".drawer.open")) return !1;
+  // not under the trader's hands: a field being typed in, a side sheet, the add-account form (a redraw would send it back to its first step)
+  if (S.mode !== "server" || SYNC.busy || savingN > 0 || document.activeElement && document.activeElement.matches("input,textarea,select") && !e || TK || document.querySelector(".drawer.open") || document.querySelector("#main .acct-add") && !e) return !1;
   SYNC.busy = !0;
   try {
     const t = await fetch("api/data", {

@@ -67,7 +67,8 @@ async def run(p, name, kw):
       con = sqlite3.connect(DB); c = {'cel': [r[0] for r in con.execute('SELECT type FROM game_celebrations WHERE user_id = ? ORDER BY id', (uid,))], 'nt': [r[0] for r in con.execute('SELECT type FROM notifications WHERE user_id = ? ORDER BY id', (uid,))]}; con.close(); return c
     except Exception: return {'cel': [], 'nt': []}
   before = rows()
-  await pg.locator('[data-shm-save]').click(); await pg.wait_for_timeout(2500)
+  await pg.locator('[data-shm-save]').click()
+  await pg.wait_for_selector('.nav-undo', timeout=15000); await pg.wait_for_timeout(300)   # « Undo » lives 5 s: the checks below start from the toast, not from a fixed wait
   saved = await pg.evaluate("(()=>{const x=S.trades.filter(t=>t.import_batch_id); const b=[...new Set(x.map(t=>t.import_batch_id))]; const last=b[b.length-1]; const lot=x.filter(t=>t.import_batch_id===last); return {n:lot.length, ids:lot.map(t=>t.id), shots:[...new Set(lot.flatMap(t=>(t.shots||[]).map(s=>s.id)))].length, acc:[...new Set(lot.map(t=>t.account_id))]}})()")
   await pg.wait_for_timeout(1500); after = rows()
   newc, newn = after['cel'][len(before['cel']):], after['nt'][len(before['nt']):]

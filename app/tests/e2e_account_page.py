@@ -7,6 +7,7 @@ Sweep — the account page (brief 02, part 2), dev environment with Playwright:
    MNQ at 5 → peak $50,400, limit $48,400, room $1,920 = 48 points of NQ at 2 contracts ($20 a point a contract); only on
    the account's page, not on the list; nothing without a trade;
  - the daily loss limit with nothing lost today reads « 0 $ / 1 000 $ » in French (not « $0 »);
+ - a background sync waits while the add-account form is open (a redraw sent it back to its first step); once closed, it redraws;
  - « Marquer comme échoué »: no browser window, marked at once, « Annuler » puts the account back as it was; without
    « Annuler » it stays failed;
  - the funded account is named after its firm: « Topstep XFA 50K #2 », « Apex Trader Funding PA 50K », « Take Profit
@@ -60,6 +61,19 @@ async def main():
     await pg.evaluate("put('accounts', Object.assign({}, %s, {id:'ap-none', name:'Sans trade'}))" % json.dumps(ACC)); await pg.wait_for_timeout(600)
     await pg.evaluate("location.hash='#account/ap-none'"); await pg.wait_for_timeout(1500)
     ok(await pg.locator('#main .rule').count() > 0 and await pg.locator('#main .rule-pts').count() == 0, 'no trade: no points')
+    # a background sync while the add-account form is half filled: it waits, the form keeps its steps (brief 02 part 2: a sync
+    # that brought a change redrew the page and sent the form back to its first step)
+    step = "(()=>{const w=document.querySelector('form[data-form=account] .ux-st'); return w?!!w.querySelector('[data-st-type]'):null})()"
+    await pg.evaluate("location.hash='#accounts'"); await pg.wait_for_timeout(1200)
+    await pg.locator('#main [data-act=acct-add]').last.click(); await pg.wait_for_timeout(500)
+    await pg.locator('[data-st-ph0=funded]').first.click(); await pg.wait_for_timeout(200)
+    await pg.locator('[data-st-firm=apex]').first.click(); await pg.wait_for_timeout(200)
+    ok(await pg.evaluate(step), 'add-account form: Financé › Apex, the account types are shown')
+    r = await pg.evaluate("(async()=>{ document.activeElement && document.activeElement.blur(); S.accounts = S.accounts.filter(a => a.id !== 'ap-none'); return await syncNow(); })()"); await pg.wait_for_timeout(500)
+    ok(r is False and await pg.evaluate(step), 'form open: the background sync waits, the form keeps its steps')
+    await pg.evaluate("U.addAcct = false; render()"); await pg.wait_for_timeout(500)
+    r = await pg.evaluate("syncNow()"); await pg.wait_for_timeout(500)
+    ok(r is True and await pg.evaluate("S.accounts.some(a => a.id === 'ap-none')") and await pg.locator('#main [data-href="#account/ap-none"]').count() > 0, 'form closed: the next background sync brings the change and redraws the page')
     # « Marquer comme échoué »: at once, « Annuler » puts it back
     await pg.evaluate("location.hash='#account/ap-acc'"); await pg.wait_for_timeout(1500)
     await pg.locator('#main .acc-menu summary').click(); await pg.wait_for_timeout(300)
