@@ -67,10 +67,10 @@ def in_screen(pg):   # the open sheet is inside the window and nothing in it sti
     for(const b of e.querySelectorAll('button,a,input,code')){ if(!b.offsetParent) continue; const q=b.getBoundingClientRect(); if(q.right>r.right+1||q.left<r.left-1) return 'sticks out: '+(b.textContent||'').slice(0,30); }
     return ''}""")
 
-def settings(pg):
+def settings(pg):   # (waits of 20 s: the GitHub runner with 3 groups at once can take more than 10 s, 12 Oct.)
   pg.goto(B + '/#settings'); pg.wait_for_selector('#main details.nav-sgd[data-i="3"]', timeout=15000)
   pg.evaluate("document.querySelector('#main details.nav-sgd[data-i=\"3\"]').open = true")
-  pg.wait_for_selector('#main .sy-sec .sy-row', timeout=10000); pg.wait_for_timeout(300)
+  pg.wait_for_selector('#main .sy-sec .sy-row', timeout=20000); pg.wait_for_timeout(300)
 
 def case_fr(p, phone):
   tag = '390' if phone else '1300'
@@ -111,7 +111,7 @@ def case_fr(p, phone):
   man = pg.evaluate("S.trades.find(t => t.id === 'man-sy')")
   ok(man and man.get('notes') == 'Patient entry' and man.get('source') == 'ninjatrader' and man.get('entry') == 21000.25 and len(S_trades(pg)) == 2, f'{tag}: the hand-typed trade completed (notes kept, exact entry 21,000.25), no double')
   sid = pg.evaluate("S.trades.find(t => t.source === 'ninjatrader' && t.id !== 'man-sy').id")
-  pg.goto(B + '/#trade/' + sid); pg.wait_for_selector('#main .th-head .lbl .sy-chip', timeout=10000)
+  pg.goto(B + '/#trade/' + sid); pg.wait_for_selector('#main .th-head .lbl .sy-chip', timeout=20000)
   ok(pg.inner_text('#main .th-head .lbl .sy-chip') == 'NinjaTrader', f'{tag}: trade page: the NinjaTrader chip')
   tap(pg, '#main [data-act="edit-trade"]'); pg.wait_for_selector('#sySheet.open [data-syf="stop"]', timeout=8000)
   ok(not pg.locator('#tkSlide.open').count() and 'viennent de NinjaTrader' in pg.inner_text('#sySheet'), f'{tag}: « Modifier » opens the stop / target editor, not the trade form')
@@ -119,7 +119,7 @@ def case_fr(p, phone):
   pg.fill('#sySheet [data-syf="stop"]', '21035,5'); pg.fill('#sySheet [data-syf="target"]', '21010'); tap(pg, '#sySheet [data-sy="save-edit"]'); pg.wait_for_timeout(800)
   t = pg.evaluate("S.trades.find(t => t.id === '%s')" % sid)
   ok(t['stop'] == 21035.5 and t['target'] == 21010 and t['entry'] == 21030.5 and t['exit'] == 21020.5 and t['pnl_c'] == 4000 and t.get('risk_c') == 2000, f'{tag}: stop 21,035.5 and target saved (risk $20), prices and P&L unchanged')
-  pg.goto(B + '/#account/acc-sy'); pg.wait_for_selector('#main .sy-acct', timeout=10000)
+  pg.goto(B + '/#account/acc-sy'); pg.wait_for_selector('#main .sy-acct', timeout=20000)
   ok('Synchronisé avec NinjaTrader · APEX-555-01' in pg.inner_text('#main .sy-acct'), f'{tag}: account page: « Synchronisé avec NinjaTrader · APEX-555-01 »')
   pg.wait_for_timeout(700); pg.screenshot(path=f'{SHOTS}/sync-account-{tag}.png')
   # CSV import of the same trade (Tradovate Performance): already imported
