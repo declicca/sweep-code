@@ -740,13 +740,6 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 @media (min-width:861px){.nav-am{left:50%!important;right:auto!important;top:50%!important;bottom:auto!important;width:min(560px,calc(100vw - 48px))!important;max-height:min(88vh,900px);height:auto!important;translate:-50% -50%;border-radius:24px!important;overflow:auto;box-shadow:0 30px 90px rgba(0,0,0,.45),inset 0 0 0 1px var(--line)}.nav-am:not(.open){opacity:0;transform:scale(.97)!important;transition:opacity .18s ease,transform .22s var(--sw-ease)!important}.nav-am.open{opacity:1;transform:none!important;transition:opacity .22s ease,transform .32s var(--sw-ease)!important}}
 .nav-am h2{margin:0;font-size:20px;letter-spacing:-.02em}
 .nav-am-x{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:0;background:var(--panel2);color:var(--text);font-size:20px;cursor:pointer}
-.nav-am-ask .nav-am-in{padding-top:28px}
-.nav-am-choices{display:grid;gap:10px;margin-top:4px}
-.nav-am-c{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:14px;row-gap:3px;align-items:center;text-align:left;padding:16px;border-radius:16px;border:0;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text);font:inherit;cursor:pointer;transition:box-shadow .15s}
-.nav-am-c:hover,.nav-am-c:focus-visible{box-shadow:inset 0 0 0 2px var(--pos)}
-.nav-am-c .nav-am-ic{grid-row:1/3}
-.nav-am-c b{font-size:15.5px}
-.nav-am-c small{font-size:13px;color:var(--muted);line-height:1.45}
 .nav-am-ic{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--posbg);color:var(--pos)}
 .nav-am-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav-am-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -970,17 +963,14 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 .nav-stl-acts{display:flex;justify-content:space-between;align-items:center;gap:12px}
 
 /* profile: completion window and Settings */
-.nav-prof-in{text-align:left!important;gap:12px!important}
-.nav-prof-in h2{margin:0;font-size:21px}
-.nav-prof-in > p.muted{margin:-4px 0 4px;font-size:14px}
 .nav-prof-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .nav-prof-w{grid-column:1/-1}
 .nav-prof-g.wide{grid-template-columns:1fr 1fr 1fr}.nav-prof-g.wide .nav-prof-w{grid-column:auto}
 @media (max-width:700px){.nav-prof-g.wide{grid-template-columns:1fr 1fr}.nav-prof-g.wide .nav-prof-w{grid-column:1/-1}}
-.nav-prof-in .f,.nav-set-prof .f{display:flex;flex-direction:column;gap:5px}
-.nav-prof-in .f > span,.nav-set-prof .f > span{font-size:12.5px;color:var(--muted)}
-.nav-prof-in input,.nav-prof-in select,.nav-set-prof input{min-height:42px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font:inherit;font-size:15px}
-.nav-prof-in small,.nav-set-prof small{font-size:12px}
+.nav-set-prof .f{display:flex;flex-direction:column;gap:5px}
+.nav-set-prof .f > span{font-size:12.5px;color:var(--muted)}
+.nav-set-prof input{min-height:42px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font:inherit;font-size:15px}
+.nav-set-prof small{font-size:12px}
 .nav-prof-err:empty{display:none}
 .nav-set-prof,.nav-set-help{padding:18px 20px;margin-bottom:14px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .nav-set-prof > .nav-prof-g{width:100%}
@@ -1351,13 +1341,6 @@ html body .evp,html body .nav-am,html body .nav-dlg,html body #gSheet{transition
 html body a,html body button{-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){html body *{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 /* ── Delivery 1 ── */
-.nav-onb-hidden{display:none!important}
-.nav-hello{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;max-width:520px;margin:6vh auto 0;padding:36px 28px;border-radius:var(--r-card,22px);background:var(--panel);box-shadow:inset 0 0 0 .5px var(--hair)}
-.nav-hello-ic{display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:var(--posbg);color:var(--pos)}
-.nav-hello-ic svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.nav-hello h1{margin:4px 0 0;font-size:30px;letter-spacing:-.03em}
-.nav-hello p{margin:0;font-size:16px;line-height:1.5;color:var(--text2);max-width:380px}
-.nav-hello-go{margin-top:8px;min-height:52px!important;padding:0 32px!important;font-size:16px!important}
 .nav-firm-ini{display:grid;place-items:center;width:40px;height:40px;margin-bottom:8px;border-radius:12px;background:hsl(var(--h) 55% 50% / .16);color:hsl(var(--h) 70% 68%);font-weight:700;font-size:14px;letter-spacing:.02em}
 .ux-st-tile[data-st-firm]{display:flex!important;flex-direction:column;align-items:flex-start}
 .nav-acst{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;margin:4px 0}
@@ -1582,8 +1565,7 @@ html body h2{font-weight:600;letter-spacing:-.03em}
 html body h3{font-weight:560;letter-spacing:-.015em}
 html body .mono,html body .num,html body [class*="pnl"],html body .kpis b,html body .nav-kpi-b,html body td.num,html body .big{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;font-weight:500}
 /* glass cards: one material, a light edge, no heavy border */
-html body .surface,html body .nav-card,html body .nav-rt,html body .nav-po,html body .nav-wk-k > div,html body .nav-wk-d,html body .nav-hello,html body .nav-trial,html body .nav-arch{background:var(--glass),var(--panel)!important;background-blend-mode:normal;border:0!important;border-radius:var(--r-card)!important;box-shadow:var(--glass-edge),var(--glass-hi)!important}
-html body .nav-hello{border-radius:var(--r-block)!important}
+html body .surface,html body .nav-card,html body .nav-rt,html body .nav-po,html body .nav-wk-k > div,html body .nav-wk-d,html body .nav-trial,html body .nav-arch{background:var(--glass),var(--panel)!important;background-blend-mode:normal;border:0!important;border-radius:var(--r-card)!important;box-shadow:var(--glass-edge),var(--glass-hi)!important}
 /* tiles inside cards */
 html body .nav-rt-s,html body .nav-am-more-d,html body .nav-am-bi,html body .nav-copy,html body .nav-stl,html body .nav-wk-t,html body .nav-acc,html body .nav-inst-l li,html body .nav-fee,html body .nav-ring-tip{border-radius:var(--r-tile)!important;background:var(--fill)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;border:0!important}
 /* the one active card of the screen: the next step of the routine */
@@ -1619,7 +1601,7 @@ html body .evp,html body #gSheet,html body .nav-dlg,html body .nav-am,html body 
 @media (min-width:861px){html body aside.side{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01)),var(--ink2)!important;box-shadow:1px 0 0 var(--hair)!important;border:0!important}
   html body aside.side a.on,html body aside.side .on{background:var(--fill)!important;box-shadow:var(--glass-edge),var(--glass-hi)!important;border-radius:14px!important}}
 /* icons in a bluish glass tile (feature tiles) */
-html body .nav-hello-ic,html body .nav-inst-ic{background:linear-gradient(180deg,rgba(var(--pos-rgb),.22),rgba(var(--pos-rgb),.08))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(var(--pos-rgb),.28)!important}
+html body .nav-inst-ic{background:linear-gradient(180deg,rgba(var(--pos-rgb),.22),rgba(var(--pos-rgb),.08))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(var(--pos-rgb),.28)!important}
 /* motion: on each page, blocks rise 20 px from a light blur, one after the other */
 @keyframes sw-rise{from{opacity:0;transform:translateY(20px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 #main.sw-enter > *,#main.sw-enter .nav-dash > * > *,#main.sw-enter .nav-dash > .d-today{animation:sw-rise var(--t-slow) var(--ease-ios) both}
@@ -2242,19 +2224,10 @@ html body #main .acc-type .seg{width:100%}
 html body #main .acc-type small{font-size:12px}
 
 /* ───────────── onboarding: experience question + real net from the start (ux.js section 29) ───────────── */
-.nav-exp{display:flex;flex-direction:column;gap:10px;margin-top:4px}
-.nav-exp-o{min-height:52px;border-radius:var(--r-tile,20px);background:var(--fill);box-shadow:inset 0 0 0 1px var(--hair);color:var(--text);font:600 16px/1.2 var(--font-ui);border:0;cursor:pointer;transition:background var(--t-fast) var(--ease-ios)}
-.nav-exp-o:hover,.nav-exp-o:focus-visible{background:var(--fill-2)}
-.nav-exp-skip{align-self:center;min-height:44px;color:var(--muted)}
 .rn.nav-dlg{width:min(480px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overscroll-behavior:contain}
 .rn-in{gap:14px;text-align:left}
 .rn-in h2{margin:0;font-size:22px;line-height:1.2;letter-spacing:-.01em;outline:none}
 .rn-in > .muted{margin:-6px 0 2px;font-size:14px;line-height:1.45}
-.rn-ok{align-self:flex-start;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--posbg);color:var(--pos)}
-.rn-ok svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.rn-accs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:180px;overflow:auto}
-.rn-accs li{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:var(--r-field,14px);background:var(--fill)}
-.rn-accs small{color:var(--muted)}
 .rn-opts{display:flex;flex-direction:column;gap:8px}
 .rn-opt{min-height:50px;padding:0 16px;text-align:left;border:0;border-radius:var(--r-tile,20px);background:var(--fill);box-shadow:inset 0 0 0 1px var(--hair);color:var(--text);font:600 15px/1.2 var(--font-ui);cursor:pointer;transition:background var(--t-fast) var(--ease-ios),box-shadow var(--t-fast) var(--ease-ios)}
 .rn-opt.on{background:var(--posbg);box-shadow:inset 0 0 0 1.5px var(--pos)}
@@ -2296,7 +2269,7 @@ html body #main .acc-type small{font-size:12px}
 .rn-remind button{white-space:nowrap}
 .rn-date input,.rn-pay input{min-height:44px}
 @media (min-width:861px){.rn-date input,.rn-pay input{min-height:42px}.rn-row{min-height:46px}.rn-step button{width:34px;height:34px}.rn-price input{height:34px}}
-@media (prefers-reduced-motion:reduce){.rn-opt,.nav-exp-o{transition:none}}
+@media (prefers-reduced-motion:reduce){.rn-opt{transition:none}}
 
 /* ── 1.1 the routine folds again: a chevron next to its title, folded until the session ends ── */
 html body .nav-rt-tg{cursor:default}
@@ -2484,3 +2457,24 @@ html body #tkSlide .nav-dup .btn{flex:0 0 auto}
 html body #tkSlide .nav-like{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;width:auto;max-width:100%;margin:2px 0 12px;min-height:36px;padding:0 14px;font-size:13.5px}
 html body #tkSlide .nav-like span{color:var(--muted)}
 @media (max-width:600px){html body #tkSlide .nav-like{min-height:44px}}
+/* brief 03 step 1: the first name and the experience on the first-account page; the sources (under « More options ») on one sliding row */
+.nav-onb-me{grid-column:1/-1;min-width:0;display:grid;gap:12px;margin:0 0 18px}
+.nav-onb-me .f,.nav-onb-me .nav-prof-src{min-width:0}.nav-onb-me input{width:100%;box-sizing:border-box}
+.nav-onb-me .nav-prof-src,.nav-onb-src{margin:0;min-width:0}
+.nav-onb-me .nav-prof-chips,.nav-onb-src .nav-prof-chips{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.nav-onb-me .nav-prof-chips::-webkit-scrollbar,.nav-onb-src .nav-prof-chips::-webkit-scrollbar{display:none}
+.nav-onb-me .nav-prof-chips .chip,.nav-onb-src .nav-prof-chips .chip{flex:0 0 auto}
+/* the experience: 3 answers, always whole (3 equal columns), 44 px targets */
+.nav-onb-me .nav-onb-exp .nav-prof-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible}
+.nav-onb-me .nav-onb-exp .chip{min-width:0;min-height:44px;padding:6px 8px;white-space:normal;text-align:center;line-height:1.2}
+/* « More options » of the add-account form: folded, and hidden while the guided picker asks its questions */
+.nav-acc-opt{grid-column:1/-1;min-width:0;margin:2px 0 4px}
+.nav-acc-opt > summary{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;list-style:none;cursor:pointer;padding:10px 0;font-size:14px;font-weight:600;color:var(--pos)}
+.nav-acc-opt > summary::-webkit-details-marker{display:none}
+.nav-acc-opt > summary small{font-weight:400;font-size:12.5px}
+.nav-acc-opt[open]{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.nav-acc-opt > *{min-width:0}
+form.ux-st-on:not(.ux-st-final) .nav-acc-opt{display:none}
+.nav-acc-opt[open] > summary small{display:none}
+/* the first-account page proposes one action: no « Ask Sweep » nor « Add a trade » beside it (a trade needs an account) */
+body:has(#main .onb) #askFab,body:has(#main .onb) .nav-addtop{display:none!important}

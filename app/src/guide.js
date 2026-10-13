@@ -1,9 +1,8 @@
 /*
  * Sweep — first-run guidance and help.
- *  1. Welcome tour (coach marks on the real interface), once, after the first account exists; replayable in Settings.
- *  2. A tip the first time each page is opened (one card, dismissible, links to the full guide).
- *  3. « Get started » checklist on Today: 2 steps detected automatically from the trader's data, inside the routine card.
- *  4. Help center: searchable articles for every feature, with « do it now » buttons. Opens from the « ? » in the header.
+ *  1. « Get started » checklist on Today: 2 steps detected automatically from the trader's data, inside the routine card.
+ *  2. Help center: searchable articles for every feature, with « do it now » buttons. Opens from the « ? » in the header.
+ * (The guided tour and the page tips were never built: their strings and styles are gone, brief 03 step 1.)
  * State is kept on the device (localStorage); nothing here can block the app.
  */
 (function () {
@@ -11,14 +10,13 @@
   if (typeof render !== 'function') return;
   const KEY = 'sw.guide';
   const st = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })();
-  st.tips = st.tips || {}; st.visited = st.visited || {};
+  st.visited = st.visited || {};
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* private mode */ } };
   const L = () => (['fr', 'es'].includes(LANG) ? LANG : 'en');
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const shown = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden'; };
   // selectors are tried in the order given (first one that is visible wins), not in document order
   const vis = (sel) => { for (const one of sel.split(',')) { const e = [...document.querySelectorAll(one.trim())].find(shown); if (e) return e; } return null; };
-  const busy = () => !!document.querySelector('.evp.open, #tkSlide.open, .nt-modal, .g-sweep, .wr, .gd-tour, #gOnb, .g-onb');
   const ic = (p) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
   const I = {
     help: ic('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6M12 17h.01"/>'),
@@ -29,19 +27,16 @@
 
   /* ───────────── strings ───────────── */
   const T = {
-    fr: { help: 'Guide et aide', search: 'Rechercher dans le guide…', none: 'Aucun article ne correspond.', back: 'Guide', doit: 'Le faire maintenant', next: 'Suivant', prev: 'Retour', skip: 'Passer', done: 'C’est parti',
-      tip: 'Astuce', readmore: 'Lire le guide', gotit: 'Compris', start_t: 'Bien démarrer', start_s: '{d} sur {n} étapes', start_done: 'Tu maîtrises les bases. Bravo !', hide: 'Masquer', how: 'Comment ?',
-      replay: 'Revoir la visite guidée', retips: 'Réafficher les astuces des pages', open: 'Ouvrir le guide', tips_back: 'Les astuces réapparaîtront sur chaque page.', guide_sec: 'Guide et aide',
+    fr: { help: 'Guide et aide', search: 'Rechercher dans le guide…', none: 'Aucun article ne correspond.', back: 'Guide', doit: 'Le faire maintenant',
+      start_t: 'Bien démarrer', start_s: '{d} sur {n} étapes', start_done: 'Tu maîtrises les bases. Bravo !', hide: 'Masquer', how: 'Comment ?',
       guide_d: 'Tout ce qu’il faut savoir pour tirer le maximum de Sweep.', contact: 'Une question sans réponse ? Écris-nous à hello@makeitsweep.com ou via la page Feedback.',
       cats: { start: 'Pour commencer', daily: 'Ta routine quotidienne', progress: 'Progression et jeu', social: 'Social', prop: 'Comptes prop et payouts', tools: 'Outils', data: 'Données et réglages' } },
-    en: { help: 'Guide & help', search: 'Search the guide…', none: 'No article matches.', back: 'Guide', doit: 'Do it now', next: 'Next', prev: 'Back', skip: 'Skip', done: 'Let’s go',
-      tip: 'Tip', readmore: 'Read the guide', gotit: 'Got it', start_t: 'Get started', start_s: '{d} of {n} steps', start_done: 'You know the basics. Well done!', hide: 'Hide', how: 'How?',
-      replay: 'Replay the guided tour', retips: 'Show page tips again', open: 'Open the guide', tips_back: 'Tips will show again on each page.', guide_sec: 'Guide & help',
+    en: { help: 'Guide & help', search: 'Search the guide…', none: 'No article matches.', back: 'Guide', doit: 'Do it now',
+      start_t: 'Get started', start_s: '{d} of {n} steps', start_done: 'You know the basics. Well done!', hide: 'Hide', how: 'How?',
       guide_d: 'Everything you need to get the most out of Sweep.', contact: 'Question not answered? Write to hello@makeitsweep.com or use the Feedback page.',
       cats: { start: 'Getting started', daily: 'Your daily routine', progress: 'Progress and game', social: 'Social', prop: 'Prop accounts and payouts', tools: 'Tools', data: 'Data and settings' } },
-    es: { help: 'Guía y ayuda', search: 'Buscar en la guía…', none: 'Ningún artículo coincide.', back: 'Guía', doit: 'Hacerlo ahora', next: 'Siguiente', prev: 'Atrás', skip: 'Saltar', done: 'Vamos',
-      tip: 'Consejo', readmore: 'Leer la guía', gotit: 'Entendido', start_t: 'Primeros pasos', start_s: '{d} de {n} pasos', start_done: 'Ya dominas lo básico. ¡Bravo!', hide: 'Ocultar', how: '¿Cómo?',
-      replay: 'Ver de nuevo la visita guiada', retips: 'Mostrar de nuevo los consejos', open: 'Abrir la guía', tips_back: 'Los consejos volverán a aparecer en cada página.', guide_sec: 'Guía y ayuda',
+    es: { help: 'Guía y ayuda', search: 'Buscar en la guía…', none: 'Ningún artículo coincide.', back: 'Guía', doit: 'Hacerlo ahora',
+      start_t: 'Primeros pasos', start_s: '{d} de {n} pasos', start_done: 'Ya dominas lo básico. ¡Bravo!', hide: 'Ocultar', how: '¿Cómo?',
       guide_d: 'Todo lo que necesitas para sacar el máximo de Sweep.', contact: '¿Pregunta sin respuesta? Escríbenos a hello@makeitsweep.com o usa la página Feedback.',
       cats: { start: 'Para empezar', daily: 'Tu rutina diaria', progress: 'Progreso y juego', social: 'Social', prop: 'Cuentas prop y payouts', tools: 'Herramientas', data: 'Datos y ajustes' } },
   };

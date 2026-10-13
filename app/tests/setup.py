@@ -1,7 +1,7 @@
 """Sweep — test setup: everything the tests need, created on the test server (never a real one).
    python3 tests/setup.py [base_url] [state_file]          (run by tests/run-all.sh before the tests)
  - the test trader « mateo » (admin, created by the server from the local config at the first request) signs in;
- - his profile is filled (otherwise the « Complete your profile » window covers every page);
+ - his profile is filled (first name, last name, experience: otherwise the first-account page asks the first name);
  - the sample data are added once (accounts, trades, payouts, journals), through the app's own « Add sample data »;
  - the signed-in session is saved to state_file (default /tmp/show_state.json), used by the tests.
 The password is the local test one (tools/config.local.php, or SWEEP_TEST_PASSWORD). Tests that need other traders

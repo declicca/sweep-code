@@ -102,6 +102,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 | Visuel, stabilité | `e2e_visual_fit`, `e2e_scroll_stable`, `e2e_no_jumps`, `e2e_redraw_no_replay` |
 | Langues, accessibilité | `e2e_no_english_in_fr_es`, `e2e_a11y_names` |
 | Parcours clés (6 × 3 langues × 2 tailles) | `e2e_acceptance` (~5 min) |
+| Démarrage en 3 étapes (prénom, compte, plan, premier trade ; Aujourd'hui progressif) | `e2e_first_run` (~1 min, crée ses propres traders : 390 FR et ES, 1300 EN, au plus 8 touchers) |
 | Arrivée, rattrapage, vrai net, « Estimé » | `e2e_realnet` (~2 min, crée ses propres traders, vide le limiteur d'inscription via `SWEEP_TEST_DB`) |
 | Lot A UI/UX (routine, news, boutons, comptes, Net P&L, recherche, espacements, Calendrier, coins, CSV) | `e2e_lot_a` (~2 min) |
 
@@ -156,18 +157,24 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Export CSV de Mon argent** : il contient exactement ce que montre la page (période active, type de compte, firme, compte), via le même `moneyOf`. Nom du fichier : période + filtres. Il n'existe pas de filtre « statut » sur Mon argent.
 - **À surveiller** : les onglets Jour et Semaine montrent Réel · Prév. · Préc. sur chaque annonce (« Sans chiffre » pour les minutes et discours). La carte ne quitte jamais sa place sous la journée (l'équilibrage des colonnes ne la déplace pas).
 - **Comptes** : le glisser-déposer (ordinateur) et « Modifier l'ordre » (téléphone) marchent dans chaque groupe (Live, Financés, Évaluations, Perso), uniquement à l'intérieur du groupe ; l'ordre est enregistré pour tous les comptes.
-- **Forfait Free** : Mon argent n'y est pas. Le rattrapage du vrai net ne s'ouvre pas et l'invitation « Complète ton historique » ne s'affiche pas en Free (un nouveau trader est en essai Pro de 14 jours, donc il l'a).
+- **Forfait Free** : Mon argent n'y est pas. Le rattrapage du vrai net ne s'ouvre pas et l'invitation « Complète ton historique » ne s'affiche pas en Free (un nouveau trader est en essai Pro, donc il l'a).
 - **Compte live** : sans préréglage, avec le choix « live de la firme / perso (courtier) ».
 - **Essai Pro** : **60 jours** en ligne (`sweep-private/billing-config.php`) ; le défaut du code (`billing/billing-core.php`) dit 14 jours et ne sert que sans ce fichier.
-- **Arrivée d'un nouveau trader** (étape 1 du brief) : inscription → « Complète ton profil » → dans la même fenêtre, « Tu trades depuis combien de temps ? » (Je commence · Moins d'un an · Plus d'un an, ou Passer) → premier compte → **« Compte ajouté »** (Continuer · + Ajouter un autre compte ; jamais la fenêtre d'ajout de trade pendant ce parcours) → rattrapage → écran du vrai net → Aujourd'hui.
-  - Le niveau d'expérience est gardé sur le serveur (`users.experience` : `new` / `lt1` / `gt1`, renvoyé dans `user.experience`). Il servira aux règles par défaut de l'étape 2.
+- **Arrivée d'un nouveau trader : le démarrage en 3 étapes** (brief 03, étape 1, 13 oct. ; `tests/e2e_first_run.py`) : inscription → page **« Bienvenue · Trois étapes et tu trades. »** (Ton compte · Ton plan · Ton premier trade) → **plan du jour pré-rempli** → **formulaire du premier trade**. 8 touchers et 3 écrans jusqu'au formulaire (avant : 12 touchers, 7 écrans, sans plan).
+  - **Page du premier compte** : en haut, « Ton prénom » (obligatoire : « Créer le compte » sans prénom le redemande, rien n'est créé) et « Tu trades depuis combien de temps ? » (facultatif, 3 réponses, un toucher, retouché = annulé), puis le choix guidé. Plus de fenêtre « Complète ton profil » ; le nom de famille est facultatif (`api/me/profile`), modifiable dans Réglages › Profil.
+  - **« Plus d'options »** (replié, et caché tant que le choix guidé pose ses questions) : « Où as-tu trouvé Sweep ? », « Neuf ou déjà en cours ? », les frais de la firme (cochés par défaut) ou le coût, le nombre de comptes. Quand les frais seront ajoutés, la ligne repliée le dit (« 49 $ de frais ajoutés à tes dépenses ») : rien n'est ajouté sans que le trader le voie. Vaut pour tous les formulaires d'ajout de compte.
+  - Sur cette page : ni « Ask Sweep » ni « Ajouter un trade » (une seule action). Un rafraîchissement de la page (l'app dessine depuis son cache, puis quand le serveur répond) ne redessine pas un formulaire déjà touché tant qu'il n'y a pas de compte, et un changement de taille d'écran ne redessine pas pendant un ajout de compte : le choix guidé ne revient plus à sa première question.
+  - **Après « Créer le compte »** : le plan du jour (« Avant ton premier trade : 30 secondes pour ton plan »), perte max reprise de la limite du jour du compte, « Enregistrer et ajouter mon trade » (ou « Passer, ajouter mon trade ») → le formulaire de trade.
+  - Le niveau d'expérience est gardé sur le serveur (`users.experience` : `new` / `lt1` / `gt1`, renvoyé dans `user.experience`). Il réglera le ton et les réglages de départ du coach (étape 2 du brief 03).
+  - **Aujourd'hui grandit avec le trader** (`stage()`, `nav.js`) : sans trade, la routine et « Bien démarrer » seulement ; dès le 1er trade, performance, comptes, calendrier, news ; dès le 5e trade (ou un premier payout), Mon argent, le rang et l'accès rapide. Les tendances restaient déjà cachées sans données.
+- **« Ton vrai net » (rattrapage)** : plus au premier jour. Pour un nouveau trader (premier compte créé sur la page de démarrage : `S.settings.realnet.due`), il s'ouvre tout seul **la première fois qu'il ouvre Mon argent** (où il entre ses payouts), une fois (`auto`), jamais par-dessus une autre fenêtre, pas en Free. Un trader existant garde son invitation d'un jour sur Aujourd'hui, et rien ne s'ouvre seul.
   - **Rattrapage** : « Depuis quand veux-tu suivre ton argent ? » (Ce mois-ci · Depuis janvier · Une date) → achats par firme des comptes du trader (évaluations, resets, activations, compteurs +/−, prix du catalogue pré-remplis et modifiables ; Topstep : « Mois d'abonnement ») → payouts nets reçus (un seul montant) → vrai net.
   - Pour chaque firme, « Déjà dans Mon argent : X $ » affiche les dépenses déjà saisies dans la période (frais ajoutés avec le compte), et les compteurs servent à ajouter des achats en plus : jamais de double comptage.
   - **Écran du vrai net** : dépensé, reçu, vrai net, calculés par `moneyOf` sur la même période (donc le même chiffre que Mon argent). Net positif : « Tu es rentable de X $ depuis … » ; sinon : « C'est ton point de départ… ». Jamais de reproche.
   - « Je le ferai plus tard » sur chaque écran. Ensuite, la carte Mon argent d'Aujourd'hui propose « Ton vrai net en 1 minute » jusqu'à ce que ce soit fait ou masqué (✕).
   - **Trader existant** : la carte propose « Complète ton historique en 1 minute » un seul jour (le premier où il la voit).
-  - État dans les réglages synchronisés : `S.settings.realnet = { state: 'done' | 'later' | 'hidden', shown_on, at }`.
-  - Pendant le parcours, les fenêtres automatiques (célébrations, installation) attendent (`sw.modal`).
+  - État dans les réglages synchronisés : `S.settings.realnet = { state: 'done' | 'later' | 'hidden', shown_on, due, auto, at }`.
+  - Pendant le rattrapage, les fenêtres automatiques (célébrations, installation) attendent (`sw.modal`).
 - **Entrées estimées** : dépenses et payout du rattrapage sont des entrées normales de Mon argent avec `estimated: true`, une par firme et par catégorie (ids `est-<firme>-<catégorie>`, un nouveau rattrapage les remplace), datées au début de la période ; le payout estimé (`est-payouts`) n'a ni firme ni compte.
   - Elles comptent comme de l'argent réel (net réel, ROI, par firme, « La réalité du mois »).
   - Étiquette « Estimé » dans Mon argent, « estimé » dans l'export CSV. Elles se modifient dans un petit formulaire (montant, date) ou se suppriment comme les autres.
@@ -377,6 +384,13 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - Test : `e2e_sync_ui` attendait 5,8 s fixes la révocation de la clé après « Annuler » (échec vu une fois sur téléphone, machine chargée) : il attend maintenant que `api/sync` n'ait plus de connexion (20 s au plus).
 - **Contrats d'un trade = la plus grosse position** (12 oct.) : formulaire de trade (`positionOf`), synchro, et maintenant imports CSV Rithmic et TradingView (`pairFills`, `ux.js` : `qty` = plus grosse position, `turns` = contrats achetés et vendus, sur lesquels la commission du compte est comptée ; test `e2e_accuracy` A6c). Tradovate Performance et TopstepX l'étaient déjà (une ligne par entrée ou par aller-retour). **Captures aussi** (12 oct., `shot-trades.php`) : `contracts` = plus grosse position, `turns` = contrats achetés et vendus ; P&L calculé, tolérance et frais par défaut sur `turns`. L'écran « X trades trouvés » (`recompute`, `nav.js`) et l'écran d'une seule capture (`autoPnl`) recalculent le P&L avec prix moyens × `turns` ; si le trader tape le nombre de contrats, `turns` disparaît (trade simple de cette taille). Test : `shot_trades_test.php` (achat 2, vente 1, achat 1, vente 2 → 2 contrats, +1 000 $, frais × 3).
 
+### Brief 03 — étape 1 (le démarrage en 3 étapes), 13 oct.
+- Brief : `~/Downloads/brief-03-coach-et-demarrage-2026-10-13.md` (5 étapes ; la partie 13 du brief 02, facturation, est en pause, ses notes sont prêtes).
+- **Mesuré** (parcours le plus court, de la première page après l'inscription au formulaire de trade, 390 et 1300) : **avant 12 touchers, 7 écrans** (profil → expérience → premier compte → « Compte ajouté » → vrai net → Aujourd'hui → « + »), sans plan ; **après 8 touchers, 3 écrans** (premier compte → plan → trade), plan compris. Temps réel d'un humain : à lire dans Admin › Métriques, « Le démarrage ».
+- **Admin › Métriques, « Le démarrage »** (mêmes filtres semaine / source) : inscrits → prénom → premier compte → premier plan → premier trade, nombre, part des inscrits et temps médian depuis l'inscription. Premier plan = l'heure d'enregistrement du plan dans le journal (`pre.saved_at`), donc aussi un plan fait le soir pour la séance suivante (l'événement `plan_saved` attend ce jour-là ; il sert seulement si SQLite ne lit pas le JSON). Les comptes et plans des données d'exemple ne comptent pas.
+- **Bug trouvé et corrigé** : le choix guidé du premier compte revenait à sa première question quand l'app se redessinait (deuxième dessin quand le serveur répond, ~0,8 s après l'ouverture, plus sur un téléphone lent ; ou passage de la largeur 860 px). C'est sans doute la cause de la « saisie du profil perdue » vue 2 fois dans `e2e_realnet`.
+- **Retiré** : la fenêtre « Complète ton profil » (remplacée par le haut de la page du premier compte), « Compte ajouté » et « + Ajouter un autre compte » ; et, jamais utilisés : l'accueil « Bonjour {prénom} » désactivé, la question « capture ou à la main » jamais posée, les textes et styles de la visite guidée et des astuces de page (jamais codées).
+
 ### Erreurs d'Admin du 13 oct. (corrigées)
 - **« Cannot read properties of null (reading 'hidden') »** (12 fois, 12 oct., `#dashboard`) : le « ? » de la routine sur une carte « Marchés fermés » ou « Journée off », qui n'avaient pas de texte d'aide. Elles l'ont maintenant ; le clic ne plante plus.
 - **« Trade page jump … surface -12px »** (téléphones, `#trade`) : toucher une puce redessine la page ; le bloc Discipline recevait sa classe une image trop tard (observateur `SweepMO` sur `requestAnimationFrame`), 12 px plus court le temps d'une image. Il a maintenant sa classe dans la page (`app.js`) ; `tradeDisc` (nav.js) est retiré. À retenir : tout ce qu'un observateur ajoute après un redessin apparaît une image plus tard.
@@ -466,6 +480,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Nouveaux : `img/.htaccess` et `icons/.htaccess` (durée de cache). Aucun code PHP ou JS modifié.
 
 ### État des tests
+- **Brief 03, étape 1 (13 oct.) : 63/63** (suite répartie, 11 min 09 s, `caffeinate -dimsu`), sans « RETRY » ; `e2e_first_run` (nouveau : 390 FR et ES, 1300 EN, 8 touchers), `e2e_realnet` réécrit pour le nouveau parcours, `metrics_test.php` 19/19. Un premier passage avait échoué sur `e2e_lot_a` (le rattrapage s'ouvrait aussi chez un trader existant) : corrigé, il est réservé aux nouveaux traders.
 - **Contrats dans Admin › Synchro (13 oct.) : 62/62** (suite répartie, 11 min 20 s, `caffeinate -dimsu`), sans « RETRY » ; `sync_store_test.php` 49/49, `e2e_admin_sync` (contrat ProjectX non reconnu en rouge et dans l'alerte, 390 × 844 et 1300 × 850).
 - **Relier ses comptes après la clé (13 oct.) : 62/62** (suite répartie, 11 min 20 s, `caffeinate -dimsu`), sans « RETRY » ; `sync_store_test.php` 47/47, `e2e_sync_ui` 130/130 (dont `case_multi` à 390 × 844 et 1300 × 850).
 - **Admin › Synchro (13 oct.), fusionné avec « erreurs d'Admin corrigées » : 62/62** (suite répartie, 11 min 10 s, `caffeinate -dimsu`), sans « RETRY » ; `sync_store_test.php` 46/46, `e2e_admin_sync` (390 × 844 et 1300 × 850). Premier passage : `e2e_admin_health` échouait (la liste de Synchro portait la classe `ux-hl-list` de Santé, que ce test compte) ; classe propre `ux-sy-list`.
@@ -492,7 +507,6 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 ### Bugs connus et points à surveiller
 - `e2e_sync_ui` a échoué 2 fois sur la machine GitHub (attente dépassée, 10 s puis 20 s), jamais en local : relancer avant de chercher une cause ; l'annotation dit maintenant où il attendait.
 - Données d'exemple : tous les comptes d'exemple affichent « Drawdown dépassé » (à revoir avec la partie 14 du brief 02).
-- Saisie du profil perdue (2 fois sur ~25 passages de `e2e_realnet`, jamais reproduit à la main ; le test ressaisit une fois et l'écrit « RETRY »). Aucun « RETRY » dans la dernière série complète.
 - Un compte dépassé glissé en tête retombe en bas (règle « comptes dépassés en bas ») : voulu, mais peut surprendre.
 - La fenêtre d'ajout de trade s'ouvre avec un léger délai après le toucher ; la célébration unique d'un lot importé n'a été vérifiée qu'un jour sans célébration.
 - Une dizaine de scripts `tests/e2e_*` hors suite principale pointent encore vers `/home/claude/media/…`.
@@ -513,6 +527,8 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ### Demandes non terminées ou mises en pause
 - Aucune modification à moitié faite dans le code.
+- Brief 03, étapes 2 à 5 (le coach après chaque action, pendant la séance, ce qui fonctionne pour toi, moins d'options visibles).
+- Brief 02, partie 13 (facturation) : en pause pour le brief 03.
 - Captures réelles (Lucid, Tradesea) à essayer en ligne ; import « Performance » de Tradovate sans la règle de 18 h ET.
 
 ### En ligne, de ton côté

@@ -1,0 +1,139 @@
+"""
+Sweep — the first run in 3 steps (brief 03 step 1), dev environment with Playwright:
+  python3 tests/e2e_first_run.py http://127.0.0.1:8095 [storage_state, unused: every case signs up its own trader]
+A brand-new trader, phone (fr, es) and computer (en), from the first screen after sign-up to the trade form:
+  1. « Three steps and you're trading »: first name on top (asked again if empty, nothing created), « How long have you
+     been trading? » optional, the guided picker (Apex › EOD › 50K), the account options folded under « More options »;
+  2. « Create account » → the plan of the day, its max loss taken from the account's daily limit ($1,000), « Save and add
+     my trade » → 3. the trade form. At most 8 taps, the first name (and the experience when tapped) kept on the server.
+Then Today grows with the trader: with 0 trades only the routine; the 1st trade brings performance, accounts, calendar and
+news; My money, the rank and Quick access wait for the 5th trade (or a payout). « Your real net » is not on the first day:
+it opens the first time My money is opened. Checks: no page error, nothing wider than the window, no English in fr/es.
+"""
+import json, os, sqlite3, sys, time
+from playwright.sync_api import sync_playwright
+B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
+H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
+DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
+MAX_TAPS = 8
+fails = 0
+def ok(c, what):
+  global fails
+  fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
+def unthrottle():   # every case signs up a trader: the sign-up limiter is cleared on the dev database
+  try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
+  except Exception: pass
+TXT = {
+  'fr': {'title': 'Trois étapes et tu trades.', 'need': 'Entre ton prénom.', 'gate': 'Avant ton premier trade', 'more': 'Plus d’options', 'wel': 'Bienvenue'},
+  'en': {'title': 'Three steps and you’re trading.', 'need': 'Enter your first name.', 'gate': 'Before your first trade', 'more': 'More options', 'wel': 'Welcome'},
+  'es': {'title': 'Tres pasos y operas.', 'need': 'Escribe tu nombre.', 'gate': 'Antes de tu primera operación', 'more': 'Más opciones', 'wel': 'Bienvenido'},
+}
+EN_ONLY = ['Three steps', 'Your first name', 'How long have you been trading', 'More options', 'Your account', 'Your plan', 'Your first trade', 'Welcome', 'optional']
+CARDS = "(() => { const d = document.querySelector('#main .nav-dash'); return d ? ['.d-today', '.d-perf', '.d-acc', '.d-cal', '.d-news', '.d-pay', '.d-rank', '.d-quick'].filter((q) => d.querySelector(q)).map((q) => q.slice(3)) : null })()"
+WIDE = "document.documentElement.scrollWidth - innerWidth"
+
+def run(p, lang, phone, exp):
+  tag = f"{'390' if phone else '1300'}-{lang}"
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone,
+                       locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang], color_scheme='dark' if phone else 'light')
+  ctx.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+  n = 'fr%d' % int(time.time() * 1000)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': n + '@t.dev', 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s %s' % (r.status, r.text()[:80]))
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  taps = [0]
+  def tap(sel, count=True):
+    last = None
+    for _ in range(6):
+      try:
+        pg.locator(sel).first.click(timeout=3000); pg.wait_for_timeout(250)
+        if count: taps[0] += 1
+        return
+      except Exception as e: last = e; pg.wait_for_timeout(300)
+    raise last
+  # 1. the first screen
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account][data-onb] [data-st-ph0=eval]', timeout=20000); pg.wait_for_timeout(700)
+  t0 = time.time()
+  main = pg.locator('#main .onb').inner_text()
+  ok(TXT[lang]['title'] in main and pg.locator('#title').inner_text().strip() == TXT[lang]['wel'], f'{tag} « {TXT[lang]["title"]} », page « {TXT[lang]["wel"]} »')
+  ok(pg.locator('#main .onb-steps li').count() == 3, f'{tag} 3 steps: account, plan, first trade')
+  first = pg.evaluate("(() => { const f = document.querySelector('form[data-form=account][data-onb]'); return f.firstElementChild && f.firstElementChild.className })()")
+  ok(first == 'nav-onb-me', f'{tag} the first name is on top of the form ({first})')
+  ok(pg.locator('.nav-dlg.open, .nav-prof.open, aside.nav-prof').count() == 0, f'{tag} no « Complete your profile » window')
+  ok(pg.evaluate("!document.querySelector('#askFab') || getComputedStyle(document.querySelector('#askFab')).display === 'none'"), f'{tag} one action: no « Ask Sweep » button on this page')
+  ok(pg.locator('.nav-acc-opt').count() == 1 and not pg.locator('.nav-acc-opt').is_visible(), f'{tag} « More options » hidden while the picker asks')
+  # the guided picker; « Create account » without a first name: asked, nothing created
+  tap('form[data-form=account] [data-st-ph0=eval]'); tap('[data-st-firm=apex]')
+  if pg.locator('[data-st-type=apex-eod]').count(): tap('[data-st-type=apex-eod]')
+  tap('[data-st-size="50000"]')
+  more = pg.locator('.nav-acc-opt summary')
+  ok(more.is_visible() and TXT[lang]['more'] in more.inner_text(), f'{tag} last step: « {TXT[lang]["more"]} » folded')
+  ok(not pg.locator('.nav-acc-opt [name=nav_qty]').is_visible() and not pg.locator('.nav-acc-opt [data-src]').first.is_visible(), f'{tag} count, cost and source under it, not shown')
+  if phone: pg.screenshot(path=f'/tmp/fr_{tag}_1_account.png', full_page=False)
+  pg.evaluate("document.querySelector('form[data-form=account][data-onb]').requestSubmit()"); pg.wait_for_timeout(600)
+  err = pg.locator('.nav-onb-me .nav-prof-err').inner_text()
+  ok(err == TXT[lang]['need'] and pg.evaluate("S.accounts.length") == 0, f'{tag} no first name: « {err} », no account created')
+  # the first name (1 tap + typing), the experience when he answers it
+  pg.locator('[data-onb-fn]').click(); taps[0] += 1; pg.keyboard.type('Léa')
+  if exp: tap(f'.nav-onb-me [data-exp="{exp}"]')
+  texts = [pg.locator('#main .onb').inner_text()]
+  ok(pg.evaluate(WIDE) <= 0, f'{tag} nothing wider than the window ({pg.evaluate(WIDE)})')
+  # 2. « Create account » → the plan of the day
+  tap('form[data-form=account][data-onb] [type=submit]')
+  pg.wait_for_selector('#gSheet.g-plan, #gSheet .g-gate', timeout=8000); pg.wait_for_timeout(500)
+  sh = pg.locator('#gSheet').inner_text(); texts.append(sh)
+  ml = pg.evaluate("(document.querySelector('#gSheet [data-gp=max_loss]') || {}).value")
+  ok(TXT[lang]['gate'] in sh and ml == '1000', f'{tag} the plan opens, its max loss from the account daily limit ({ml})')
+  ok(pg.locator('.rn.open').count() == 0 and pg.locator('#tkSlide.open, .nav-am.open, .nav-am-shot.open').count() == 0, f'{tag} no « Your real net », no trade form before the plan')
+  if phone: pg.screenshot(path=f'/tmp/fr_{tag}_2_plan.png')
+  tap('#gSheet [data-g=bias][data-v=bullish]'); tap('#gSheet [data-g=save-plan]')
+  # 3. the trade form
+  pg.wait_for_selector('#tkSlide.open, .nav-am.open, .nav-am-shot.open', timeout=8000); secs = time.time() - t0
+  ok(taps[0] <= MAX_TAPS + (1 if exp else 0), f'{tag} {taps[0]} taps to the trade form (at most {MAX_TAPS}{" + the optional answer" if exp else ""}), {secs:.0f} s automated')
+  if phone: pg.screenshot(path=f'/tmp/fr_{tag}_3_trade.png')
+  pg.wait_for_timeout(900)
+  j = pg.evaluate("(() => { const d = (window.SweepNextSession && SweepNextSession()) || todayStr(); const j = getDoc('journals', d); return j && j.pre ? [j.pre.bias, j.pre.max_loss] : null })()")
+  ok(j == ['bullish', '1000'], f'{tag} the plan is saved ({j})')
+  me = pg.evaluate("fetch('api/data',{headers:{'X-Requested-With':'fetch'},credentials:'same-origin'}).then(r=>r.json()).then(j=>j.user&&[j.user.first_name,j.user.experience||null])")
+  ok(me == ['Léa', exp or None], f'{tag} first name (and experience) kept on the server ({me})')
+  acc = pg.evaluate("S.accounts.map(a=>[a.preset||'', a.rules && a.rules.dll_c])")
+  ok(len(acc) == 1 and acc[0][0].startswith('apex') and acc[0][1] == 100000, f'{tag} one Apex EOD 50K account, daily limit $1,000 ({acc})')
+  # Today with 0 trades: the routine only
+  pg.keyboard.press('Escape'); pg.wait_for_timeout(500)
+  if pg.locator('#tkSlide.open').count(): pg.evaluate("closeTicket()"); pg.wait_for_timeout(400)
+  ok(pg.locator('.nav-am.open, #tkSlide.open').count() == 0, f'{tag} the trade form closes')
+  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-dash .d-today', timeout=8000); pg.wait_for_timeout(900)
+  c0 = pg.evaluate(CARDS)
+  ok(c0 == ['today'], f'{tag} Today with no trade: the routine only ({c0})')
+  ok(pg.locator('.rn.open').count() == 0, f'{tag} « Your real net » not on the first day')
+  if phone: pg.screenshot(path=f'/tmp/fr_{tag}_4_today0.png', full_page=True)
+  # the first trade → performance, accounts, calendar, news
+  pg.evaluate("put('trades', { id: 'fr-t1', account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 12000, pnl_manual: true, date: todayStr(), entry_time: '10:00', exit_time: '10:05' }); render()")
+  pg.wait_for_timeout(1200); c1 = pg.evaluate(CARDS)
+  ok(c1 is not None and all(k in c1 for k in ('today', 'perf', 'acc', 'cal', 'news')) and not any(k in c1 for k in ('pay', 'rank', 'quick')), f'{tag} after the 1st trade: performance, accounts, calendar, news ({c1})')
+  pg.evaluate("for (let i = 2; i <= 5; i++) put('trades', { id: 'fr-t' + i, account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: todayStr(), entry_time: '1' + i + ':00', exit_time: '1' + i + ':05' }); render()")
+  pg.wait_for_timeout(1500); c5 = pg.evaluate(CARDS)
+  ok(c5 is not None and all(k in c5 for k in ('pay', 'quick')), f'{tag} from the 5th trade: My money and Quick access too ({c5})')
+  ok(pg.evaluate(WIDE) <= 0, f'{tag} Today: nothing wider than the window')
+  # My money opened for the first time → « Your real net »
+  if pg.locator('.nav-inst.open [data-inst-ok]').count(): pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(400)   # « Add Sweep to your home screen », after the 1st trade
+  pg.evaluate("location.hash = '#payouts'"); pg.wait_for_selector('.rn.open [data-rn-per]', timeout=6000)
+  ok(pg.evaluate("(S.settings.realnet || {}).auto") == pg.evaluate("todayStr()"), f'{tag} My money opened: « Your real net » offered, once')
+  pg.locator('.rn.open [data-rn=later]').click(); pg.wait_for_timeout(700)
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(600); pg.evaluate("location.hash = '#payouts'"); pg.wait_for_timeout(1200)
+  ok(pg.locator('.rn.open').count() == 0, f'{tag} not offered again on the next visit')
+  if lang != 'en':
+    import re
+    bad = [w for w in EN_ONLY if any(re.search(r'(?<![\w’])' + re.escape(w) + r'(?![\w’])', t) for t in texts)]
+    ok(not bad, f'{tag} no English on the first screens ({bad})')
+  ok(not errs, f'{tag} no page error ({errs[:2]})')
+  br.close()
+
+with sync_playwright() as p:
+  for lang, phone, exp in (('fr', True, ''), ('en', False, ''), ('es', True, 'lt1')):
+    print(f"— {'phone' if phone else 'computer'} {lang}")
+    run(p, lang, phone, exp)
+print(f'{fails} failed' if fails else 'all passed')
+sys.exit(1 if fails else 0)

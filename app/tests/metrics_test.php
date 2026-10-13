@@ -4,7 +4,8 @@ declare(strict_types=1);
  * Sweep — admin indicators (brief 01 step 4), on a throwaway SQLite database (never the live one):
  *   php tests/metrics_test.php
  * Known traders, hand-computed numbers: activation on the sign-up day, retention D7 / D30 (a trade or a review), swept
- * sessions, median sign-up → first trade, the cohort and source filters, JS errors grouped with the traders affected.
+ * sessions, median sign-up → first trade, the cohort and source filters, JS errors grouped with the traders affected,
+ * the start step by step (brief 03 step 1).
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -64,6 +65,28 @@ $ok(($g[0]['msg'] ?? '') === 'A is undefined' && $g[0]['traders'] === 2 && $g[0]
 $ok(in_array('Safari iOS 17', $g[0]['browsers'] ?? [], true) && in_array('Chrome Windows', $g[0]['browsers'] ?? [], true) && ($g[0]['pages'] ?? []) === ['#dashboard'] && ($g[0]['versions'] ?? []) === ['app.abc'],
     'browsers, page and version of the first: ' . json_encode([$g[0]['browsers'] ?? [], $g[0]['pages'] ?? [], $g[0]['versions'] ?? []]));
 $ok(!array_filter($g, fn($x) => $x['msg'] === 'old error'), 'an error older than 30 days is not listed');
+
+// brief 03 step 1: the start, step by step (signed up → first name → first account → first plan → first trade)
+$s0 = sweep_metrics($pdo, $app)['brief']['start'];
+$ok($s0['first_name']['n'] === 0 && $s0['account']['n'] === 0 && $s0['trade']['n'] === 2, 'start: no first_name column nor documents table yet → 0, no error; trades 2: ' . json_encode($s0));
+$pdo->exec('ALTER TABLE users ADD COLUMN first_name TEXT');
+$pdo->exec('CREATE TABLE documents (user_id TEXT, collection TEXT, id TEXT, data TEXT, created_at TEXT, updated_at TEXT)');
+$pdo->exec("UPDATE users SET first_name = 'Léa' WHERE id IN ('u1', 'u2', 'u4', 'staff')");
+$doc = fn(string $u, string $coll, string $id, string $data, int $ts) => $pdo->prepare('INSERT INTO documents VALUES (?, ?, ?, ?, ?, ?)')->execute([$u, $coll, $id, $data, gmdate('Y-m-d H:i:s', $ts), gmdate('Y-m-d H:i:s', $ts)]);
+$doc('u1', 'accounts', 'a1', '{"name":"Apex"}', $t1 + 120);                // 2 min after signing up
+$doc('u1', 'accounts', 'a2', '{"name":"Topstep"}', $t1 + 9000);            // a later account: the first one counts
+$doc('u2', 'accounts', 'a3', '{"name":"Lucid"}', $t2 + 600);               // 10 min
+$doc('u3', 'accounts', 'd1', '{"name":"Sample","demo":true}', $t3 + 60);   // sample data: not an account
+$doc('u1', 'journals', 'j1', '{"pre":{"bias":"bullish","max_loss":"1000","saved_at":' . ($t1 + 300) . '}}', $t1 + 300);   // the first plan 5 min after signing up (even for the next session)
+$doc('u1', 'journals', 'j2', '{"pre":{"bias":"neutral","saved_at":' . ($t1 + 2 * $D) . '}}', $t1 + 2 * $D);
+$doc('u2', 'journals', 'j3', '{"post":{"lesson":"x"}}', $t2 + 60);                        // a review, no plan: not a plan
+$doc('u3', 'journals', 'j4', '{"pre":{"bias":"bearish"},"demo":true}', $t3 + 60);        // sample data: not a plan
+$s = sweep_metrics($pdo, $app)['brief']['start'];
+$ok($s['signed_up'] === 4 && $s['first_name']['n'] === 3, 'start: 4 signed up, 3 with a first name (the internal trader left out): ' . json_encode([$s['signed_up'], $s['first_name']]));
+$ok($s['account'] === ['n' => 2, 'median_min' => 10], 'first account: u1 (2 min) and u2 (10 min), the sample-data account left out: ' . json_encode($s['account']));
+$ok($s['plan'] === ['n' => 1, 'median_min' => 5] && $s['trade'] === ['n' => 2, 'median_min' => 2880], 'first plan: u1 at 5 min (a review is not a plan); first trade: 2, median 2 days: ' . json_encode([$s['plan'], $s['trade']]));
+$st = sweep_metrics($pdo, $app, ['source' => 'tiktok'])['brief']['start'];
+$ok($st['signed_up'] === 3 && $st['first_name']['n'] === 2 && $st['account'] === ['n' => 1, 'median_min' => 2], 'source « tiktok »: 3 signed up, 2 first names, 1 account at 2 min: ' . json_encode($st));
 
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";

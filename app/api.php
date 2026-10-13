@@ -991,7 +991,7 @@ try {
         $b = body_json(4096);
         $clean = fn($v, $n) => mb_substr(trim(preg_replace('/\s+/u', ' ', strip_tags((string)$v)) ?? ''), 0, $n);
         $fn = $clean($b['first_name'] ?? '', 40); $ln = $clean($b['last_name'] ?? '', 40);
-        if ($fn === '' || $ln === '') json_out(400, ['error' => 'Enter your first and last name.']);
+        if ($fn === '') json_out(400, ['error' => 'Enter your first name.']);   // the last name is optional (brief 03 step 1: the first screen asks the first name only)
         $set = ['first_name = ?' => $fn, 'last_name = ?' => $ln, 'full_name = ?' => trim($fn . ' ' . $ln)];
         if (isset($b['username']) && trim((string)$b['username']) !== '' && strcasecmp(trim((string)$b['username']), (string)$me['username']) !== 0) {
             $un = trim((string)$b['username']);

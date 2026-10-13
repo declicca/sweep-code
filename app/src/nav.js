@@ -532,7 +532,10 @@ window.SweepMO = window.SweepMO || class {
     parts.forEach((el, i) => { if (el.parentElement !== box || box.children[i] !== el) box.insertBefore(el, box.children[i] || null); });
   }
   new window.SweepMO(() => { try { newsUnderDay(document.querySelector('#main .nav-dash')); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+  /* Today grows with the trader (brief 03 step 1): first the routine; the cards come when they have something to show */
+  const stage = () => { const n = (S.trades || []).length; return { n, perf: n >= 1, more: n >= 5, money: n >= 5 || (S.payouts || []).length > 0 }; };
   function deskToday(dash) {
+    if (dash && !stage().more) return;   // Quick access and the rank: from the 5th trade
     if (dash && window.SW_MQ.matches && !dash.querySelector('.d-quick')) { const acc = dash.querySelector('.d-acc'); (acc ? acc.parentElement : dash).insertAdjacentHTML('beforeend', quickCard()); }   // phone: Quick access at the end too
     if (!dash || window.SW_MQ.matches) return;
     const rank = dash.querySelector('.d-col-b > .d-rank'), today = dash.querySelector('.d-today');
@@ -877,8 +880,9 @@ window.SweepMO = window.SweepMO || class {
     const dash = document.createElement('div'); dash.className = 'nav-dash';
     if (dashEnteredAt !== location.hash + '|' + navCount) { dashEnteredAt = location.hash + '|' + navCount; dash.classList.add('nav-dash-in'); }
     // two columns on a computer, each card at its natural height (no stretched empty cards); one list on a phone (CSS order)
-    const rk = rankCard() ? `<div class="d-rank">${rankCard()}</div>` : '<div class="d-rank"><div class="surface nav-rank ph" aria-hidden="true"><span class="skel" style="display:block;height:38px;width:100%;border-radius:12px"></span></div></div>';
-    dash.innerHTML = `<div class="d-col d-col-a"><div class="d-today"></div>${kpiCard()}${calCard()}</div><div class="d-col d-col-b">${newsCard()}${accountsCard()}${payoutsCard()}${rk}</div>`;
+    const sg = stage();
+    const rk = !sg.more ? '' : rankCard() ? `<div class="d-rank">${rankCard()}</div>` : '<div class="d-rank"><div class="surface nav-rank ph" aria-hidden="true"><span class="skel" style="display:block;height:38px;width:100%;border-radius:12px"></span></div></div>';
+    dash.innerHTML = `<div class="d-col d-col-a"><div class="d-today"></div>${sg.perf ? kpiCard() + calCard() : ''}</div><div class="d-col d-col-b">${sg.perf ? newsCard() + accountsCard() : ''}${sg.money ? payoutsCard() : ''}${rk}</div>`;
     const greetEl = main.querySelector(':scope > .greet');
     // computer: the news, calendar and payouts go under the day card before the first paint (no card jumping a frame later)
     try { if (typeof newsUnderDay === 'function') newsUnderDay(dash); if (typeof deskToday === 'function') deskToday(dash); } catch (e) { /* the observers do it */ }
@@ -2046,9 +2050,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { dup: 'This trade looks like the one at {t}. Add it anyway?', dupOk: 'Add anyway', q: 'How do you like to log a trade?', qs: 'You can change it any time in Settings.', shot: 'With a screenshot', shotS: 'Drop the screenshot of your platform or chart. Sweep fills in the trade, you answer the discipline and psychology questions on the same screen.', man: 'By hand', manS: 'Entry, exit, stop, executions: every detail, then the review on the next page.', title: 'New trade', sub: 'from a screenshot', cancel: 'Cancel', byHand: 'Enter by hand', fromShot: 'From a screenshot', impFile: 'Import CSV', toMan: 'Enter by hand ›', toShot: 'From a screenshot ›', drop: 'Paste or drop your screenshot (Ctrl+V)', reading: 'Reading the screenshot…', read: 'Filled in from the screenshot: check and complete.', noAi: 'Fill in the key fields.', aiFail: 'Could not read it: fill in the key fields.', acc: 'Account', sym: 'Symbol', dir: 'Direction', long: 'Long', short: 'Short', date: 'Date', time: 'Entry time (ET)', qty: 'Contracts', entry: 'Entry price', exit: 'Exit price', pnl: 'Result ($)', pnlH: 'Calculated from the prices when both are there.', disc: 'Discipline', psy: 'Psychology', emo: 'How did you feel before the trade?', conf: 'Confidence', exec: 'Execution', yes: 'Yes', no: 'No', na: 'N/A', save: 'Save the trade', saved: 'Trade saved', need: 'The account and the net P&L (or the prices) are needed.', set: 'Adding a trade', setS: 'What « Add a trade » opens first.', pref: 'Saved as your default way', more: '+ More', addEmo: '+ Add yours', addEmoQ: 'Your emotion (one or two words)', moreQ: '+ {n} more questions', addQ: '+ Add a question', addQQ: 'Your question (e.g. « Did I wait for my level? »)', also: 'Also on (copy trading)', alsoS: 'Also on', net: 'Net P&L (as on your platform)', risk: 'Risk ($), optional', rHint: 'Enter the net P&L shown by your platform.', rAdd: 'Add the risk to see the R.', verify: 'Check the trade details ›', alsoH: 'Same trade saved on each account you pick.' },
-    fr: { dup: 'Ce trade ressemble à celui de {t}. L’ajouter quand même ?', dupOk: 'Ajouter quand même', q: 'Comment préfères-tu ajouter un trade ?', qs: 'Tu pourras changer ça en tout temps dans Réglages.', shot: 'Avec une capture d’écran', shotS: 'Dépose la capture de ta plateforme ou de ton graphique. Sweep remplit le trade, et tu réponds à la discipline et à la psychologie sur le même écran.', man: 'Manuellement', manS: 'Entrée, sortie, stop, exécutions : chaque détail, puis le bilan sur la page suivante.', title: 'Nouveau trade', sub: 'par capture d’écran', cancel: 'Annuler', byHand: 'Saisir à la main', fromShot: 'Par capture d’écran', impFile: 'Importer un CSV', toMan: 'Saisir manuellement ›', toShot: 'Par capture d’écran ›', drop: 'Colle ou dépose ta capture (Ctrl+V)', reading: 'Lecture de la capture…', read: 'Rempli à partir de la capture : vérifie et complète.', noAi: 'Remplis les infos principales.', aiFail: 'Lecture impossible : remplis les infos principales.', acc: 'Compte', sym: 'Symbole', dir: 'Sens', long: 'Long', short: 'Short', date: 'Date', time: 'Heure d’entrée (ET)', qty: 'Contrats', entry: 'Prix d’entrée', exit: 'Prix de sortie', pnl: 'Résultat ($)', pnlH: 'Calculé à partir des prix quand les deux sont là.', disc: 'Discipline', psy: 'Psychologie', emo: 'Comment te sentais-tu avant le trade ?', conf: 'Confiance', exec: 'Exécution', yes: 'Oui', no: 'Non', na: 'N/A', save: 'Enregistrer le trade', saved: 'Trade enregistré', need: 'Il faut le compte et le P&L net (ou les prix).', set: 'Ajout d’un trade', setS: 'Ce que « Ajouter un trade » ouvre en premier.', pref: 'Enregistré comme ta façon par défaut', more: '+ Voir plus', addEmo: '+ Ajouter la tienne', addEmoQ: 'Ton émotion (un ou deux mots)', moreQ: '+ {n} autres questions', addQ: '+ Ajouter une question', addQQ: 'Ta question (ex. « Ai-je attendu mon niveau ? »)', also: 'Aussi sur (copy trading)', alsoS: 'Aussi sur', net: 'P&L net (comme sur ta plateforme)', risk: 'Risque ($), facultatif', rHint: 'Entre le P&L net affiché par ta plateforme.', rAdd: 'Ajoute le risque pour voir le R.', verify: 'Vérifier le trade ›', alsoH: 'Le même trade est enregistré sur chaque compte choisi.' },
-    es: { dup: 'Esta operación se parece a la de las {t}. ¿Añadirla de todos modos?', dupOk: 'Añadir de todos modos', q: '¿Cómo prefieres añadir una operación?', qs: 'Puedes cambiarlo cuando quieras en Ajustes.', shot: 'Con una captura', shotS: 'Sube la captura de tu plataforma o gráfico. Sweep rellena la operación y respondes disciplina y psicología en la misma pantalla.', man: 'Manualmente', manS: 'Entrada, salida, stop, ejecuciones: cada detalle, y la revisión en la página siguiente.', title: 'Nueva operación', sub: 'por captura', cancel: 'Cancelar', byHand: 'Introducir a mano', fromShot: 'Desde una captura', impFile: 'Importar CSV', toMan: 'Introducir manualmente ›', toShot: 'Con una captura ›', drop: 'Pega o suelta tu captura (Ctrl+V)', reading: 'Leyendo la captura…', read: 'Rellenado desde la captura: revisa y completa.', noAi: 'Rellena los datos principales.', aiFail: 'No se pudo leer: rellena los datos principales.', acc: 'Cuenta', sym: 'Símbolo', dir: 'Sentido', long: 'Long', short: 'Short', date: 'Fecha', time: 'Hora de entrada (ET)', qty: 'Contratos', entry: 'Precio de entrada', exit: 'Precio de salida', pnl: 'Resultado ($)', pnlH: 'Calculado con los precios cuando están los dos.', disc: 'Disciplina', psy: 'Psicología', emo: '¿Cómo te sentías antes de la operación?', conf: 'Confianza', exec: 'Ejecución', yes: 'Sí', no: 'No', na: 'N/A', save: 'Guardar la operación', saved: 'Operación guardada', need: 'Hacen falta la cuenta y el P&L neto (o los precios).', set: 'Añadir una operación', setS: 'Lo que « Añadir una operación » abre primero.', pref: 'Guardado como tu forma por defecto', more: '+ Ver más', addEmo: '+ Añadir la tuya', addEmoQ: 'Tu emoción (una o dos palabras)', moreQ: '+ {n} preguntas más', addQ: '+ Añadir una pregunta', addQQ: 'Tu pregunta (ej. « ¿Esperé mi nivel? »)', also: 'También en (copy trading)', alsoS: 'También en', net: 'P&L neto (como en tu plataforma)', risk: 'Riesgo ($), opcional', rHint: 'Introduce el P&L neto de tu plataforma.', rAdd: 'Añade el riesgo para ver la R.', verify: 'Revisar la operación ›', alsoH: 'La misma operación se guarda en cada cuenta elegida.' } };
+    en: { dup: 'This trade looks like the one at {t}. Add it anyway?', dupOk: 'Add anyway', shot: 'With a screenshot', man: 'By hand', title: 'New trade', sub: 'from a screenshot', cancel: 'Cancel', byHand: 'Enter by hand', fromShot: 'From a screenshot', impFile: 'Import CSV', toMan: 'Enter by hand ›', toShot: 'From a screenshot ›', drop: 'Paste or drop your screenshot (Ctrl+V)', reading: 'Reading the screenshot…', read: 'Filled in from the screenshot: check and complete.', noAi: 'Fill in the key fields.', aiFail: 'Could not read it: fill in the key fields.', acc: 'Account', sym: 'Symbol', dir: 'Direction', long: 'Long', short: 'Short', date: 'Date', time: 'Entry time (ET)', qty: 'Contracts', entry: 'Entry price', exit: 'Exit price', pnl: 'Result ($)', pnlH: 'Calculated from the prices when both are there.', disc: 'Discipline', psy: 'Psychology', emo: 'How did you feel before the trade?', conf: 'Confidence', exec: 'Execution', yes: 'Yes', no: 'No', na: 'N/A', save: 'Save the trade', saved: 'Trade saved', need: 'The account and the net P&L (or the prices) are needed.', set: 'Adding a trade', setS: 'What « Add a trade » opens first.', more: '+ More', addEmo: '+ Add yours', addEmoQ: 'Your emotion (one or two words)', moreQ: '+ {n} more questions', addQ: '+ Add a question', addQQ: 'Your question (e.g. « Did I wait for my level? »)', also: 'Also on (copy trading)', alsoS: 'Also on', net: 'Net P&L (as on your platform)', risk: 'Risk ($), optional', rHint: 'Enter the net P&L shown by your platform.', rAdd: 'Add the risk to see the R.', verify: 'Check the trade details ›', alsoH: 'Same trade saved on each account you pick.' },
+    fr: { dup: 'Ce trade ressemble à celui de {t}. L’ajouter quand même ?', dupOk: 'Ajouter quand même', shot: 'Avec une capture d’écran', man: 'Manuellement', title: 'Nouveau trade', sub: 'par capture d’écran', cancel: 'Annuler', byHand: 'Saisir à la main', fromShot: 'Par capture d’écran', impFile: 'Importer un CSV', toMan: 'Saisir manuellement ›', toShot: 'Par capture d’écran ›', drop: 'Colle ou dépose ta capture (Ctrl+V)', reading: 'Lecture de la capture…', read: 'Rempli à partir de la capture : vérifie et complète.', noAi: 'Remplis les infos principales.', aiFail: 'Lecture impossible : remplis les infos principales.', acc: 'Compte', sym: 'Symbole', dir: 'Sens', long: 'Long', short: 'Short', date: 'Date', time: 'Heure d’entrée (ET)', qty: 'Contrats', entry: 'Prix d’entrée', exit: 'Prix de sortie', pnl: 'Résultat ($)', pnlH: 'Calculé à partir des prix quand les deux sont là.', disc: 'Discipline', psy: 'Psychologie', emo: 'Comment te sentais-tu avant le trade ?', conf: 'Confiance', exec: 'Exécution', yes: 'Oui', no: 'Non', na: 'N/A', save: 'Enregistrer le trade', saved: 'Trade enregistré', need: 'Il faut le compte et le P&L net (ou les prix).', set: 'Ajout d’un trade', setS: 'Ce que « Ajouter un trade » ouvre en premier.', more: '+ Voir plus', addEmo: '+ Ajouter la tienne', addEmoQ: 'Ton émotion (un ou deux mots)', moreQ: '+ {n} autres questions', addQ: '+ Ajouter une question', addQQ: 'Ta question (ex. « Ai-je attendu mon niveau ? »)', also: 'Aussi sur (copy trading)', alsoS: 'Aussi sur', net: 'P&L net (comme sur ta plateforme)', risk: 'Risque ($), facultatif', rHint: 'Entre le P&L net affiché par ta plateforme.', rAdd: 'Ajoute le risque pour voir le R.', verify: 'Vérifier le trade ›', alsoH: 'Le même trade est enregistré sur chaque compte choisi.' },
+    es: { dup: 'Esta operación se parece a la de las {t}. ¿Añadirla de todos modos?', dupOk: 'Añadir de todos modos', shot: 'Con una captura', man: 'Manualmente', title: 'Nueva operación', sub: 'por captura', cancel: 'Cancelar', byHand: 'Introducir a mano', fromShot: 'Desde una captura', impFile: 'Importar CSV', toMan: 'Introducir manualmente ›', toShot: 'Con una captura ›', drop: 'Pega o suelta tu captura (Ctrl+V)', reading: 'Leyendo la captura…', read: 'Rellenado desde la captura: revisa y completa.', noAi: 'Rellena los datos principales.', aiFail: 'No se pudo leer: rellena los datos principales.', acc: 'Cuenta', sym: 'Símbolo', dir: 'Sentido', long: 'Long', short: 'Short', date: 'Fecha', time: 'Hora de entrada (ET)', qty: 'Contratos', entry: 'Precio de entrada', exit: 'Precio de salida', pnl: 'Resultado ($)', pnlH: 'Calculado con los precios cuando están los dos.', disc: 'Disciplina', psy: 'Psicología', emo: '¿Cómo te sentías antes de la operación?', conf: 'Confianza', exec: 'Ejecución', yes: 'Sí', no: 'No', na: 'N/A', save: 'Guardar la operación', saved: 'Operación guardada', need: 'Hacen falta la cuenta y el P&L neto (o los precios).', set: 'Añadir una operación', setS: 'Lo que « Añadir una operación » abre primero.', more: '+ Ver más', addEmo: '+ Añadir la tuya', addEmoQ: 'Tu emoción (una o dos palabras)', moreQ: '+ {n} preguntas más', addQ: '+ Añadir una pregunta', addQQ: 'Tu pregunta (ej. « ¿Esperé mi nivel? »)', also: 'También en (copy trading)', alsoS: 'También en', net: 'P&L neto (como en tu plataforma)', risk: 'Riesgo ($), opcional', rHint: 'Introduce el P&L neto de tu plataforma.', rAdd: 'Añade el riesgo para ver la R.', verify: 'Revisar la operación ›', alsoH: 'La misma operación se guarda en cada cuenta elegida.' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
@@ -2077,18 +2081,7 @@ window.SweepMO = window.SweepMO || class {
   }
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.querySelector('.nav-am.open')) { e.stopPropagation(); close(); } }, true);
 
-  /* 1. the question, asked once */
-  function chooser(opts) {
-    const el = layer('nav-am-ask', `<button type="button" class="nav-am-x" data-am="close" aria-label="×">×</button>
-      <h2>${t('q')}</h2><p class="muted">${t('qs')}</p>
-      <div class="nav-am-choices">
-        <button type="button" class="nav-am-c" data-am-pick="shot"><span class="nav-am-ic">${ICS}</span><b>${t('shot')}</b><small>${t('shotS')}</small></button>
-        <button type="button" class="nav-am-c" data-am-pick="manual"><span class="nav-am-ic">${ICM}</span><b>${t('man')}</b><small>${t('manS')}</small></button>
-      </div>`);
-    el._opts = opts || {};
-  }
   const ICS = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="12" cy="12" r="3.2"/><path d="M8 5l1.5-2h5L16 5"/></svg>';
-  const ICM = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z M14 6l4 4"/></svg>';
 
   /* 2. the screenshot form */
   const SH = { file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: {} };
@@ -2449,9 +2442,8 @@ window.SweepMO = window.SweepMO || class {
 
   /* events */
   document.addEventListener('click', (e) => {
-    const a = e.target.closest && e.target.closest('[data-am],[data-am-pick],[data-am-pickf],[data-am-sel],[data-am-copy],[data-am-seg],[data-am-emo],[data-am-rm]'); if (!a) return;
+    const a = e.target.closest && e.target.closest('[data-am],[data-am-pickf],[data-am-sel],[data-am-copy],[data-am-seg],[data-am-emo],[data-am-rm]'); if (!a) return;
     const box = a.closest('.nav-am'); if (!box) return;
-    if (a.dataset.amPick) { const v = a.dataset.amPick, opts = box._opts || {}; setMode(v); close(); if (typeof toast === 'function') toast(t('pref')); setTimeout(() => go(v, opts), 280); return; }
     if (a.dataset.amRm) { SH.batch = SH.batch.filter((b) => b.id !== a.dataset.amRm); if (SH.batch.length === 1) { const b = SH.batch[0]; SH.batch = []; Object.assign(SH, { file: b.file, src: b.src, shot: b.shot, dir: b.f.dir || SH.dir }); Object.assign(SH.f, b.f); } paint(); return; }
     if (a.dataset.amSel) { SH.openPick = SH.openPick === a.dataset.amSel ? null : a.dataset.amSel; paint(); return; }
     if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; if (a.dataset.amPickf === 'account') SH.f.accountPicked = true; SH.openPick = null; if (a.dataset.amPickf === 'account') SH.copy.delete(a.dataset.v); paint(); return; }
@@ -2552,7 +2544,7 @@ window.SweepMO = window.SweepMO || class {
     const w = function () { const out = appRender.apply(this, arguments); try { settingsRow(); } catch (e) { /* never blocks */ } return out; };
     w.__am = true; window.render = w;
   }
-  window.SweepAddMode = { open: (opts) => shotForm(opts), ask: (opts) => chooser(opts) };
+  window.SweepAddMode = { open: (opts) => shotForm(opts) };
 })();
 
 /* ───────────── trade page: copy trading in plain sight ─────────────
@@ -3311,16 +3303,17 @@ window.SweepMO = window.SweepMO || class {
 
 
 /* ───────────── the profile: completed in the app before the first account, and in Settings ─────────────
- * Sign-up asks only the email and the password; the trader is in right away. Before he adds his first account,
- * « Complete your profile » asks first name, last name, username, where he found Sweep and his accounts.
- * Settings gets a « Profile » section (first name and last name as two fields) and the support address. */
+ * Sign-up asks only the email and the password; the trader is in right away. The first-account page asks his first name
+ * and, optional, how long he has been trading (where he found Sweep: under « More options »), saved with the account:
+ * one screen (brief 03 step 1; before, a « Complete your profile » window, then the experience question on its own).
+ * Settings gets a « Profile » section (first name, last name — optional — and username) and the support address. */
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { t: 'Complete your profile', s: 'Two more details and your journal is ready.', fn: 'First name', ln: 'Last name', un: 'Username', unH: 'Your public name in leagues and shared links.', fv: 'Where did you find Sweep?', choose: 'Choose…', vid: 'Which video?', acc: 'How many accounts do you trade, and with which firm(s)?', accPh: 'e.g. 3 × Apex 50K, 1 Topstep 150K', go: 'Continue', need: 'Enter your first and last name.', prof: 'Profile', save: 'Save', saved: 'Profile saved', help: 'Help & support', helpS: 'A question, an idea, a bug? Write to us, we answer every message.', friend: 'A friend', google: 'Google', other: 'Other', email: 'Email' },
-    fr: { t: 'Complète ton profil', s: 'Deux petites infos et ton journal est prêt.', fn: 'Prénom', ln: 'Nom', un: 'Nom d’utilisateur', unH: 'Ton nom public dans les ligues et les liens partagés.', fv: 'Où as-tu trouvé Sweep ?', choose: 'Choisir…', vid: 'Quelle vidéo ?', acc: 'Combien de comptes trades-tu, et avec quelle(s) firme(s) ?', accPh: 'ex. 3 × Apex 50K, 1 Topstep 150K', go: 'Continuer', need: 'Entre ton prénom et ton nom.', prof: 'Profil', save: 'Enregistrer', saved: 'Profil enregistré', help: 'Aide et support', helpS: 'Une question, une idée, un bug ? Écris-nous, on répond à chaque message.', friend: 'Un ami', google: 'Google', other: 'Autre', email: 'Email' },
-    es: { t: 'Completa tu perfil', s: 'Dos datos más y tu diario está listo.', fn: 'Nombre', ln: 'Apellido', un: 'Nombre de usuario', unH: 'Tu nombre público en ligas y enlaces compartidos.', fv: '¿Dónde encontraste Sweep?', choose: 'Elegir…', vid: '¿Qué video?', acc: '¿Cuántas cuentas operas y con qué firma(s)?', accPh: 'ej. 3 × Apex 50K, 1 Topstep 150K', go: 'Continuar', need: 'Escribe tu nombre y apellido.', prof: 'Perfil', save: 'Guardar', saved: 'Perfil guardado', help: 'Ayuda y soporte', helpS: '¿Una pregunta, una idea, un error? Escríbenos, respondemos cada mensaje.', friend: 'Un amigo', google: 'Google', other: 'Otro', email: 'Email' } };
+    en: { fn: 'First name', ln: 'Last name', un: 'Username', unH: 'Your public name in leagues and shared links.', fv: 'Where did you find Sweep?', need: 'Enter your first name.', me: 'Your first name', prof: 'Profile', save: 'Save', saved: 'Profile saved', help: 'Help & support', helpS: 'A question, an idea, a bug? Write to us, we answer every message.', friend: 'A friend', google: 'Google', other: 'Other' },
+    fr: { fn: 'Prénom', ln: 'Nom', un: 'Nom d’utilisateur', unH: 'Ton nom public dans les ligues et les liens partagés.', fv: 'Où as-tu trouvé Sweep ?', need: 'Entre ton prénom.', me: 'Ton prénom', prof: 'Profil', save: 'Enregistrer', saved: 'Profil enregistré', help: 'Aide et support', helpS: 'Une question, une idée, un bug ? Écris-nous, on répond à chaque message.', friend: 'Un ami', google: 'Google', other: 'Autre' },
+    es: { fn: 'Nombre', ln: 'Apellido', un: 'Nombre de usuario', unH: 'Tu nombre público en ligas y enlaces compartidos.', fv: '¿Dónde encontraste Sweep?', need: 'Escribe tu nombre.', me: 'Tu nombre', prof: 'Perfil', save: 'Guardar', saved: 'Perfil guardado', help: 'Ayuda y soporte', helpS: '¿Una pregunta, una idea, un error? Escríbenos, respondemos cada mensaje.', friend: 'Un amigo', google: 'Google', other: 'Otro' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const SUPPORT = 'hello@makeitsweep.com';
@@ -3332,53 +3325,52 @@ window.SweepMO = window.SweepMO || class {
   async function save(root) {
     const b = {}; root.querySelectorAll('[data-pf]').forEach((i) => { b[i.dataset.pf] = i.value.trim(); });
     const err = root.querySelector('.nav-prof-err');
-    if (!b.first_name || !b.last_name) { if (err) err.textContent = t('need'); return false; }
+    if (!b.first_name) { if (err) err.textContent = t('need'); return false; }
     const r = await fetch('api/me/profile', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(b) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) { if (err) err.textContent = j.error || '—'; return false; }
     S.me = Object.assign({}, S.me || {}, { first_name: j.first_name, last_name: j.last_name, full_name: j.full_name, username: j.username });
     return true;
   }
-  /* 1. before the first account */
-  function ask() {
-    if (!S.me || S.me.first_name || document.querySelector('.nav-prof')) return;
-    if ((S.accounts || []).some((a) => !a.demo)) return;   // traders who already have accounts set it in Settings (or when sharing)
-    if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, '')) && !/^#dashboard/.test(location.hash)) return;
-    const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-prof open';
-    const el = document.createElement('aside'); el.className = 'nav-dlg nav-prof open'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
-    el.innerHTML = `<div class="nav-dlg-in nav-prof-in"><h2>${t('t')}</h2><p class="muted">${t('s')}</p>
-      <div class="nav-prof-g"><label class="f"><span>${t('fn')}</span><input data-pf="first_name" autocomplete="given-name" maxlength="40"></label><label class="f"><span>${t('ln')}</span><input data-pf="last_name" autocomplete="family-name" maxlength="40"></label></div>
-      <div class="nav-prof-src"><span>${t('fv')} <em>${({ en: 'optional', fr: 'facultatif', es: 'opcional' })[L] || ''}</em></span><div class="nav-prof-chips">${SRC.map(([v, l]) => `<button type="button" class="chip" data-src="${v}">${T[L] && T[L][l] ? T[L][l] : l}</button>`).join('')}</div><input type="hidden" data-pf="found_via" value=""></div>
-      <p class="err nav-prof-err"></p><button type="button" class="btn primary nav-am-save" data-prof-go>${t('go')}</button></div>`;
-    document.body.append(scrim, el);
-    setTimeout(() => { const i = el.querySelector('[data-pf=first_name]'); if (i) i.focus(); }, 80);
+  /* 1. the first-account page: the first name and the experience on top, saved with the account */
+  function onbName() {
+    if (!S.me || S.me.first_name) return;
+    const f = document.querySelector('#main form[data-form="account"][data-onb]'); if (!f) return;
+    const had = f.querySelector('.nav-onb-me'); if (had) { if (f.firstElementChild !== had) f.prepend(had); srcInOptions(f, `<em>${({ en: 'optional', fr: 'facultatif', es: 'opcional' })[L] || ''}</em>`); return; }   // above the guided picker, which is put on top of the form too
+    const box = document.createElement('div'); box.className = 'nav-onb-me'; box.setAttribute('data-noi18n', '');
+    const X = EXP[L] || EXP.en, opt = `<em>${({ en: 'optional', fr: 'facultatif', es: 'opcional' })[L] || ''}</em>`;
+    box.innerHTML = `<label class="f"><span>${t('me')}</span><input data-onb-fn autocomplete="given-name" maxlength="40" enterkeyhint="next"></label>
+      <div class="nav-prof-src nav-onb-exp"><span>${X.q} ${opt}</span><div class="nav-prof-chips">${[['new', X.a], ['lt1', X.b], ['gt1', X.c]].map(([v, l]) => `<button type="button" class="chip" data-exp="${v}">${l}</button>`).join('')}</div></div>
+      <p class="err nav-prof-err"></p>`;
+    f.prepend(box);
+    srcInOptions(f, opt);
   }
-  document.addEventListener('click', (e) => { const c = e.target.closest && e.target.closest('.nav-prof [data-src]'); if (!c) return; const box = c.closest('.nav-prof-in'); const was = c.classList.contains('on'); box.querySelectorAll('[data-src]').forEach((x) => x.classList.remove('on')); if (!was) c.classList.add('on'); box.querySelector('[data-pf=found_via]').value = was ? '' : c.dataset.src; });
-  document.addEventListener('click', async (e) => {
-    const g = e.target.closest && e.target.closest('[data-prof-go]'); if (!g) return;
-    g.disabled = true; const ok = await save(g.closest('.nav-prof-in')); g.disabled = false;
-    if (!ok) return;
-    // then one question, one tap: how long he has been trading (kept for the default rules later on)
-    const box = g.closest('.nav-prof-in'), X = EXP[L] || EXP.en;
-    box.innerHTML = `<h2>${X.q}</h2><p class="muted">${X.s}</p><div class="nav-exp">${[['new', X.a], ['lt1', X.b], ['gt1', X.c]].map(([v, l]) => `<button type="button" class="nav-exp-o" data-exp="${v}">${l}</button>`).join('')}</div>
-      <button type="button" class="link nav-exp-skip" data-exp="">${X.skip}</button>`;
-    const f = box.querySelector('[data-exp]'); if (f) f.focus();
+  // where he found Sweep: under the form's « More options » (brief 03 step 1), once that line exists
+  function srcInOptions(f, opt) {
+    const more = f.querySelector('.nav-acc-opt'); if (!more || more.querySelector('[data-src]')) return;
+    more.querySelector('summary').insertAdjacentHTML('afterend', `<div class="nav-prof-src nav-onb-src" data-noi18n><span>${t('fv')} ${opt}</span><div class="nav-prof-chips">${SRC.map(([v, l]) => `<button type="button" class="chip" data-src="${v}">${T[L] && T[L][l] ? T[L][l] : l}</button>`).join('')}</div></div>`);
+  }
+  // the experience sets the coach's starting tone (brief 03); the source is for Sweep: both optional, one tap, tapped again = undone
+  const EXP = { en: { q: 'How long have you been trading?', a: 'I’m starting out', b: 'Less than a year', c: 'More than a year' },
+    fr: { q: 'Tu trades depuis combien de temps ?', a: 'Je commence', b: 'Moins d’un an', c: 'Plus d’un an' },
+    es: { q: '¿Desde cuándo operas?', a: 'Estoy empezando', b: 'Menos de un año', c: 'Más de un año' } };
+  document.addEventListener('click', (e) => {
+    const c = e.target.closest && e.target.closest('form[data-onb] [data-src], form[data-onb] [data-exp]'); if (!c) return;
+    const k = c.dataset.src != null ? 'data-src' : 'data-exp', was = c.classList.contains('on');
+    c.closest('.nav-prof-chips').querySelectorAll(`[${k}]`).forEach((x) => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
+    if (!was) { c.classList.add('on'); c.setAttribute('aria-pressed', 'true'); }
   });
-  const EXP = { en: { q: 'How long have you been trading?', s: 'Sweep adapts its first settings to you.', a: 'I’m starting out', b: 'Less than a year', c: 'More than a year', skip: 'Skip' },
-    fr: { q: 'Tu trades depuis combien de temps ?', s: 'Sweep adapte ses premiers réglages à toi.', a: 'Je commence', b: 'Moins d’un an', c: 'Plus d’un an', skip: 'Passer' },
-    es: { q: '¿Desde cuándo operas?', s: 'Sweep adapta sus primeros ajustes a ti.', a: 'Estoy empezando', b: 'Menos de un año', c: 'Más de un año', skip: 'Omitir' } };
-  document.addEventListener('click', async (e) => {
-    const b = e.target.closest && e.target.closest('.nav-prof [data-exp]'); if (!b) return;
-    const v = b.dataset.exp;
-    b.closest('.nav-prof-in').querySelectorAll('[data-exp]').forEach((x) => { x.disabled = true; });
-    if (v) {
-      try {
-        const r = await fetch('api/me/profile', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ first_name: S.me.first_name, last_name: S.me.last_name, experience: v }) });
-        if (r.ok) S.me = Object.assign({}, S.me, { experience: v });
-      } catch (x) { /* the answer is optional: never blocks the start */ }
-    }
-    document.querySelectorAll('.nav-prof').forEach((x) => x.remove()); if (typeof render === 'function') render();
-  });
+  // « Create account » without a first name: asked there, nothing else runs; with one: saved, then the app creates the account
+  document.addEventListener('submit', (e) => {
+    const f = e.target; const box = f && f.matches && f.matches('form[data-form="account"]') && f.querySelector('.nav-onb-me'); if (!box) return;
+    const fn = (box.querySelector('[data-onb-fn]').value || '').trim(), err = box.querySelector('.nav-prof-err');
+    if (!fn) { e.preventDefault(); e.stopImmediatePropagation(); if (err) err.textContent = t('need'); const i = box.querySelector('[data-onb-fn]'); i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+    const src = (f.querySelector('[data-src].on') || {}).dataset, xp = (f.querySelector('[data-exp].on') || {}).dataset;
+    const b = { first_name: fn }; if (src && src.src) b.found_via = src.src; if (xp && xp.exp) b.experience = xp.exp;
+    S.me = Object.assign({}, S.me || {}, { first_name: fn });
+    fetch('api/me/profile', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(b) })
+      .then((r) => r.json()).then((j) => { if (j && j.first_name) S.me = Object.assign({}, S.me, { first_name: j.first_name, last_name: j.last_name, full_name: j.full_name }); }).catch(() => { /* kept in this view; Settings can set it again */ });
+  }, true);
   /* 2. Settings: Profile first, and help & support */
   function settings() {
     if (!/^#settings/.test(location.hash || '')) return;
@@ -3392,11 +3384,18 @@ window.SweepMO = window.SweepMO || class {
     main.append(help);
   }
   document.addEventListener('click', async (e) => { const b = e.target.closest && e.target.closest('[data-prof-save]'); if (!b) return; b.disabled = true; const ok = await save(b.closest('.nav-set-prof')); b.disabled = false; if (ok && typeof toast === 'function') toast(t('saved')); });
+  // the trader has started filling in the first account: a refresh that would draw the same page (still no account, same
+  // address) is skipped, otherwise it sends the guided picker back to its first question and empties the first name
+  // (the app draws from its cache, then again when the server answers, which can be seconds later on a phone)
+  const onbBusy = () => { const f = document.querySelector('#main form[data-form="account"][data-onb][data-touched]'); return !!f && f.dataset.touched === location.hash && !(S.accounts || []).length; };
+  const touch = (e) => { const f = e.target.closest && e.target.closest('#main form[data-form="account"][data-onb]'); if (f && !f.dataset.touched) f.dataset.touched = location.hash; };
+  document.addEventListener('click', touch, true); document.addEventListener('input', touch, true);
   const appRender = window.render;
   if (typeof appRender === 'function' && !appRender.__prof) {
-    const w = function () { const out = appRender.apply(this, arguments); try { settings(); setTimeout(ask, 400); } catch (e) { /* never blocks */ } return out; };
+    const w = function () { if (onbBusy()) return undefined; const out = appRender.apply(this, arguments); try { settings(); onbName(); } catch (e) { /* never blocks */ } return out; };
     w.__prof = true; window.render = w;
   }
+  new window.SweepMO(() => { try { onbName(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 })();
 
 
@@ -3483,9 +3482,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { setups: '+ My setups (optional)', imp: 'Import CSV', impH: 'How to export your trades from your platform', congrats: 'Congrats', show: 'Boxes', disc: 'Discipline', dol: 'Dollars', wr: 'Win rate', rr: 'Avg R:R', dsc: 'Discipline', qty: 'How many accounts', qtyH: 'Same firm, size and rules. Named #1, #2…', cost: 'Account cost ($)', costH: 'Optional: added to your expenses.', also: 'Also for', alsoH: 'Same entry for each account you pick.', added: (n) => `${n} added` },
-    fr: { setups: '+ Mes setups (facultatif)', imp: 'Importer un CSV', impH: 'Comment exporter tes trades de ta plateforme', congrats: 'Congrats', show: 'Cases', disc: 'Discipline', dol: 'Dollars', wr: 'Taux de réussite', rr: 'R:R moyen', dsc: 'Discipline', qty: 'Nombre de comptes', qtyH: 'Même firme, taille et règles. Nommés #1, #2…', cost: 'Coût du compte ($)', costH: 'Facultatif : ajouté à tes dépenses.', also: 'Aussi pour', alsoH: 'La même entrée pour chaque compte choisi.', added: (n) => `${n} ajoutés` },
-    es: { setups: '+ Mis setups (opcional)', imp: 'Importar CSV', impH: 'Cómo exportar tus operaciones de tu plataforma', congrats: 'Congrats', show: 'Casillas', disc: 'Disciplina', dol: 'Dólares', wr: 'Tasa de acierto', rr: 'R:R medio', dsc: 'Disciplina', qty: 'Número de cuentas', qtyH: 'Misma firma, tamaño y reglas. Nombradas #1, #2…', cost: 'Coste de la cuenta ($)', costH: 'Opcional: se añade a tus gastos.', also: 'También para', alsoH: 'La misma entrada para cada cuenta elegida.', added: (n) => `${n} añadidos` } };
+    en: { opts: 'More options', setups: '+ My setups (optional)', imp: 'Import CSV', impH: 'How to export your trades from your platform', congrats: 'Congrats', show: 'Boxes', disc: 'Discipline', dol: 'Dollars', wr: 'Win rate', rr: 'Avg R:R', dsc: 'Discipline', qty: 'How many accounts', qtyH: 'Same firm, size and rules. Named #1, #2…', cost: 'Account cost ($)', costH: 'Optional: added to your expenses.', also: 'Also for', alsoH: 'Same entry for each account you pick.', added: (n) => `${n} added` },
+    fr: { opts: 'Plus d’options', setups: '+ Mes setups (facultatif)', imp: 'Importer un CSV', impH: 'Comment exporter tes trades de ta plateforme', congrats: 'Congrats', show: 'Cases', disc: 'Discipline', dol: 'Dollars', wr: 'Taux de réussite', rr: 'R:R moyen', dsc: 'Discipline', qty: 'Nombre de comptes', qtyH: 'Même firme, taille et règles. Nommés #1, #2…', cost: 'Coût du compte ($)', costH: 'Facultatif : ajouté à tes dépenses.', also: 'Aussi pour', alsoH: 'La même entrée pour chaque compte choisi.', added: (n) => `${n} ajoutés` },
+    es: { opts: 'Más opciones', setups: '+ Mis setups (opcional)', imp: 'Importar CSV', impH: 'Cómo exportar tus operaciones de tu plataforma', congrats: 'Congrats', show: 'Casillas', disc: 'Disciplina', dol: 'Dólares', wr: 'Tasa de acierto', rr: 'R:R medio', dsc: 'Disciplina', qty: 'Número de cuentas', qtyH: 'Misma firma, tamaño y reglas. Nombradas #1, #2…', cost: 'Coste de la cuenta ($)', costH: 'Opcional: se añade a tus gastos.', also: 'También para', alsoH: 'La misma entrada para cada cuenta elegida.', added: (n) => `${n} añadidos` } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
@@ -3529,7 +3528,8 @@ window.SweepMO = window.SweepMO || class {
     const af = document.querySelector('form[data-form="account"]');
     if (af && !af.querySelector('.nav-acc-x')) {
       const sub = af.querySelector('[type="submit"]'); const host = sub && (sub.closest('.row, .acts, div') || sub);   // next to the button: visible with or without a preset
-      if (host) host.insertAdjacentHTML('beforebegin', `<div class="nav-acc-xs"><label class="f nav-acc-x" data-noi18n><span>${t('cost')}</span><input name="nav_cost" inputmode="decimal" placeholder="$"><small class="muted">${t('costH')}</small></label><label class="f nav-acc-x" data-noi18n><span>${t('qty')}</span><input name="nav_qty" type="number" min="1" max="20" value="1" inputmode="numeric"><small class="muted">${t('qtyH')}</small></label></div>`);
+      // under « More options » (brief 03 step 1): the cost, the count and « new or already running » are inserted in it
+      if (host) host.insertAdjacentHTML('beforebegin', `<details class="nav-acc-opt" data-noi18n><summary><span>${t('opts')}</span><small class="muted nav-acc-opt-s"></small></summary><div class="nav-acc-xs"><label class="f nav-acc-x" data-noi18n><span>${t('cost')}</span><input name="nav_cost" inputmode="decimal" placeholder="$"><small class="muted">${t('costH')}</small></label><label class="f nav-acc-x" data-noi18n><span>${t('qty')}</span><input name="nav_qty" type="number" min="1" max="20" value="1" inputmode="numeric"><small class="muted">${t('qtyH')}</small></label></div></details>`);
     }
     // 6. payout and expense forms: also for other accounts
     document.querySelectorAll('form[data-form="payout"], form[data-form="expense"]').forEach((f) => {
@@ -3950,7 +3950,7 @@ window.SweepMO = window.SweepMO || class {
 })();
 
 /* ───────────── Delivery 1 · the first two minutes ─────────────
- * 2. Before the first account: « Hi {first name} », one sentence, one big button. The app's own setup form opens on tap.
+ * 2. The first-account page: « Three steps and you're trading » (account, plan, first trade), brief 03 step 1.
  * 3a. Firms as a grid of initials badges · 3b. « New or already running? » (current balance, highest balance).
  * 5. Manual form at first glance: account, symbol, direction, contracts, entry/exit or net P&L; the rest under « More details ».
  * 6. First ring filled: one sentence, once. · 7. After the first trade, once: « Add Sweep to your home screen ». */
@@ -3958,9 +3958,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { hi: 'Hi {n}', one: 'Add your prop firm account: Sweep tracks its rules for you.', add: 'Add my account', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', ring: 'Close the 3 rings = day swept. That’s your discipline.', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
-    fr: { hi: 'Bonjour {n}', one: 'Ajoute ton compte de prop firm : Sweep suit ses règles pour toi.', add: 'Ajouter mon compte', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', ring: 'Ferme les 3 anneaux = journée balayée. C’est ta discipline.', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
-    es: { hi: 'Hola {n}', one: 'Añade tu cuenta de prop firm: Sweep sigue sus reglas por ti.', add: 'Añadir mi cuenta', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', ring: 'Cierra los 3 anillos = día completado. Esa es tu disciplina.', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
+    en: { onbT: 'Three steps and you’re trading.', onbS: 'Your account, your plan for the day, your first trade: about two minutes.', st1: 'Your account', st2: 'Your plan', st3: 'Your first trade', wel: 'Welcome', feeN: '${a} of fees added to your expenses', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', ring: 'Close the 3 rings = day swept. That’s your discipline.', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
+    fr: { onbT: 'Trois étapes et tu trades.', onbS: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.', st1: 'Ton compte', st2: 'Ton plan', st3: 'Ton premier trade', wel: 'Bienvenue', feeN: '{a} $ de frais ajoutés à tes dépenses', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', ring: 'Ferme les 3 anneaux = journée balayée. C’est ta discipline.', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
+    es: { onbT: 'Tres pasos y operas.', onbS: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.', st1: 'Tu cuenta', st2: 'Tu plan', st3: 'Tu primera operación', wel: 'Bienvenido', feeN: '{a} $ de comisiones añadidas a tus gastos', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', ring: 'Cierra los 3 anillos = día completado. Esa es tu disciplina.', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return null; };
@@ -3970,12 +3970,11 @@ window.SweepMO = window.SweepMO || class {
     const onb = document.querySelector('#main .onb');
     if (onb && !onb.dataset.simple) {
       onb.dataset.simple = '1'; onb.classList.add('nav-onb-direct');
-      const ttl = onb.querySelector('h1, h2'); if (ttl) { ttl.textContent = ({ en: 'Your first account', fr: 'Ton premier compte', es: 'Tu primera cuenta' })[L] || 'Your first account'; ttl.setAttribute('data-noi18n', ''); }
+      const ttl = onb.querySelector('h1, h2'); if (ttl) { ttl.textContent = t('onbT'); ttl.setAttribute('data-noi18n', ''); }
+      const sub = onb.querySelector('.onb-sub'); if (sub) { sub.textContent = t('onbS'); sub.setAttribute('data-noi18n', ''); }
+      const ol = onb.querySelector('.onb-steps'); if (ol) { ol.setAttribute('data-noi18n', ''); ol.innerHTML = ['st1', 'st2', 'st3'].map((k, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${t(k)}</li>`).join(''); }
     }
-    if (false) {
-      const fn = (S.me && (S.me.first_name || '')) || '';
-      onb.insertAdjacentHTML('beforebegin', `<section class="nav-hello" data-noi18n><div class="nav-hello-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M8 15h4"/></svg></div><h1>${esc2(t('hi', { n: fn }).trim())}</h1><p>${t('one')}</p><button type="button" class="btn primary nav-hello-go" data-hello-go>${t('add')}</button></section>`);
-    }
+    if (onb) ['title', 'mtitle'].forEach((id) => { const el = document.getElementById(id); if (el && el.textContent !== t('wel')) el.textContent = t('wel'); });   // the page title and its collapsed copy on a phone
     // 3a. firms: initials badges
     document.querySelectorAll('.ux-st-tile[data-st-firm]:not([data-ini])').forEach((b) => {
       b.dataset.ini = '1'; const nm = (b.querySelector('b') || b).textContent.trim();
@@ -4002,6 +4001,7 @@ window.SweepMO = window.SweepMO || class {
           const c = af2.querySelector('.nav-acc-x [name=nav_cost]'); if (c) c.closest('.nav-acc-x').hidden = true;   // one cost field, not two
         }
       }
+      optNote(af2);
     }
     // 3b. new or already running (in the add-account form, next to the cost and count)
     const xs = document.querySelector('form[data-form="account"] .nav-acc-xs');
@@ -4037,9 +4037,17 @@ window.SweepMO = window.SweepMO || class {
       const mb = tk.querySelector('.nav-more-b'); if (mb) { mb.textContent = (tk.classList.contains('nav-tk-min') ? t('more') + ' ▾' : t('less') + ' ▴'); }
     }
   }
+  // the folded « More options » line says when the firm's fees go to the expenses (nothing added without the trader seeing it)
+  function optNote(f) {
+    const s = f.querySelector('.nav-acc-opt-s'); if (!s) return;
+    const on = f.querySelector('[name=nav_fee_on]'), amt = f.querySelector('[name=nav_fee]');
+    const v = on && on.checked && amt ? Number(String(amt.value).replace(/[^0-9.]/g, '')) : 0;
+    const txt = v > 0 ? t('feeN', { a: v.toLocaleString(L === 'en' ? 'en-US' : L + '-CA') }) : '';
+    if (s.textContent !== txt) s.textContent = txt;
+  }
+  document.addEventListener('input', (e) => { const f = e.target.closest && e.target.closest('form[data-form="account"]'); if (f && /^nav_fee/.test(e.target.name || '')) optNote(f); });
+  document.addEventListener('change', (e) => { const f = e.target.closest && e.target.closest('form[data-form="account"]'); if (f && /^nav_fee/.test(e.target.name || '')) optNote(f); });
   document.addEventListener('click', (e) => {
-    const g = e.target.closest && e.target.closest('[data-hello-go]');
-    if (g) { const onb = document.querySelector('#main .onb'); const hello = g.closest('.nav-hello'); if (onb) { onb.classList.remove('nav-onb-hidden'); onb.classList.add('nav-onb-open'); } if (hello) hello.remove(); const f = onb && onb.querySelector('form[data-form="account"]'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     const s = e.target.closest && e.target.closest('[data-acst]');
     if (s) { const box = s.closest('.nav-acst'); box.querySelectorAll('[data-acst]').forEach((x) => x.classList.toggle('on', x === s)); box.querySelector('.nav-acst-run').hidden = s.dataset.acst !== 'run'; return; }
     const m = e.target.closest && e.target.closest('.nav-more-b');
@@ -5256,7 +5264,8 @@ new window.SweepMO(() => {
     cols[0].replaceWith(wrap); cols.slice(1).forEach((c) => c.remove());
   }
   if (typeof render === 'function') { const r0 = render; render = function () { const o = r0.apply(this, arguments); try { lay(); } catch (e) { /* stays a grid */ } return o; }; }
-  if (window.SW_MQ && window.SW_MQ.addEventListener) window.SW_MQ.addEventListener('change', () => { if (typeof render === 'function') render(); });
+  // (not while an account is being added: the redraw would send the guided picker back to its first question; CSS adapts the page meanwhile)
+  if (window.SW_MQ && window.SW_MQ.addEventListener) window.SW_MQ.addEventListener('change', () => { if (typeof render === 'function' && !document.querySelector('#main .onb, #main .acct-add')) render(); });
 })();
 
 /* A screenshot can belong to several trades (several trades read from one screenshot): its file is deleted only when no

@@ -513,3 +513,6 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 /* Admin › Errors: the heading and « Export » on one line (13 Oct.) */
 .ux-err-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}
 .ux-err-h h4{margin:0}
+/* Admin › the start (brief 03 step 1) */
+.ux-start-h{margin:18px 0 8px}
+.ux-start td:first-child{width:50%}

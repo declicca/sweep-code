@@ -771,20 +771,27 @@
   const t = () => T[LANG] || T.en;
   let data = null, at = 0, busy = false, fc = '', fs = '';   // fc / fs: sign-up week and source filters (brief 01 step 4)
   const pct = (o) => (o && o.pct != null ? `${o.pct} %` : '—');
-  const BT = { en: { week: 'Sign-up week', source: 'Source (« Where did you find Sweep? »)', all: 'All', none: 'Not given', wk: 'week of {d}', traders: 'Traders: {a} of {b}',
+  const BT = { en: { st: 'The start (brief 03): how many reach each step, median time from the sign-up', stN: ['Signed up', 'First name', 'First account', 'First plan', 'First trade'], week: 'Sign-up week', source: 'Source (« Where did you find Sweep? »)', all: 'All', none: 'Not given', wk: 'week of {d}', traders: 'Traders: {a} of {b}',
       d0: 'Activation: a trade on the sign-up day', d7: 'Retention D7: a trade or a review on days 7-13', d30: 'Retention D30: a trade or a review on days 30-36', swept: 'Swept days: sessions with trades, 3 rings closed (30 d)',
       of: 'of {n}', errs: 'JS errors on traders\' devices (30 d)', msg: 'Message', tr: 'Traders', n: 'Times', last: 'Last', pages: 'Pages', br: 'Browsers', ver: 'Version', noErr: 'No error in 30 days.', exp: 'Export', expT: 'The 30-day list as a Markdown file, to give to Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'A friend', google: 'Google', other: 'Other' } },
-    fr: { week: 'Semaine d’inscription', source: 'Source (« Où as-tu trouvé Sweep ? »)', all: 'Toutes', none: 'Non renseignée', wk: 'sem. du {d}', traders: 'Traders : {a} sur {b}',
+    fr: { st: 'Le démarrage (brief 03) : combien atteignent chaque étape, temps médian depuis l’inscription', stN: ['Inscrits', 'Prénom', 'Premier compte', 'Premier plan', 'Premier trade'], week: 'Semaine d’inscription', source: 'Source (« Où as-tu trouvé Sweep ? »)', all: 'Toutes', none: 'Non renseignée', wk: 'sem. du {d}', traders: 'Traders : {a} sur {b}',
       d0: 'Activation : un trade le jour de l’inscription', d7: 'Rétention J7 : un trade ou une revue les jours 7 à 13', d30: 'Rétention J30 : un trade ou une revue les jours 30 à 36', swept: 'Journées balayées : séances avec trades, 3 anneaux fermés (30 j)',
       of: 'sur {n}', errs: 'Erreurs JS chez les traders (30 j)', msg: 'Message', tr: 'Traders', n: 'Fois', last: 'Dernière', pages: 'Pages', br: 'Navigateurs', ver: 'Version', noErr: 'Aucune erreur en 30 jours.', exp: 'Exporter', expT: 'La liste des 30 jours en fichier Markdown, à donner à Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un ami', google: 'Google', other: 'Autre' } },
-    es: { week: 'Semana de registro', source: 'Fuente (« ¿Dónde encontraste Sweep? »)', all: 'Todas', none: 'Sin respuesta', wk: 'sem. del {d}', traders: 'Traders: {a} de {b}',
+    es: { st: 'El inicio (brief 03): cuántos llegan a cada paso, tiempo mediano desde el registro', stN: ['Registrados', 'Nombre', 'Primera cuenta', 'Primer plan', 'Primera operación'], week: 'Semana de registro', source: 'Fuente (« ¿Dónde encontraste Sweep? »)', all: 'Todas', none: 'Sin respuesta', wk: 'sem. del {d}', traders: 'Traders: {a} de {b}',
       d0: 'Activación: una operación el día del registro', d7: 'Retención D7: una operación o una revisión los días 7 a 13', d30: 'Retención D30: una operación o una revisión los días 30 a 36', swept: 'Días barridos: sesiones con operaciones, 3 anillos cerrados (30 d)',
       of: 'de {n}', errs: 'Errores JS en los dispositivos de los traders (30 d)', msg: 'Mensaje', tr: 'Traders', n: 'Veces', last: 'Última', pages: 'Páginas', br: 'Navegadores', ver: 'Versión', noErr: 'Ningún error en 30 días.', exp: 'Exportar', expT: 'La lista de 30 días en archivo Markdown, para dar a Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un amigo', google: 'Google', other: 'Otro' } } };
   const bt = () => BT[LANG] || BT.en;
   const loc = () => (LANG === 'fr' ? 'fr-CA' : LANG === 'es' ? 'es' : 'en-US');
+  // brief 03 step 1: the start, step by step (count, share of the sign-ups, median time from the sign-up)
+  function startHtml(s, y) {
+    if (!s) return '';
+    const dur = (m) => (m == null ? '—' : m < 120 ? m + ' min' : m < 2880 ? Math.round(m / 60) + ' h' : Math.round(m / 1440) + ' d');
+    const all = s.signed_up || 0, rows = [[y.stN[0], all, null], [y.stN[1], s.first_name.n, null], [y.stN[2], s.account.n, s.account.median_min], [y.stN[3], s.plan.n, s.plan.median_min], [y.stN[4], s.trade.n, s.trade.median_min]];
+    return `<h4 class="ux-start-h">${y.st}</h4><div class="scroll-x"><table class="tbl ux-start"><tbody>${rows.map(([l, n, m], i) => `<tr><td>${esc(l)}</td><td class="num"><b>${n}</b></td><td class="num">${all ? Math.round(n / all * 100) + ' %' : '—'}</td><td class="num muted">${i > 1 ? dur(m) : ''}</td></tr>`).join('')}</tbody></table></div>`;
+  }
   function briefHtml(d) {   // brief 01 step 4: the filters, the four indicators, the JS errors grouped by message
     const y = bt(), b = d.brief; if (!b) return '';
     const day = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
@@ -798,6 +805,7 @@
     return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
       <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}</div>
+      ${startHtml(b.start, y)}
       <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }
   const load = () => { busy = true; apiJSON('api/admin/metrics' + (fc || fs ? '?' + new URLSearchParams({ cohort: fc, source: fs }) : '')).then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) b.innerHTML = html(d); }).catch(() => { busy = false; at = Date.now(); }); };
@@ -1980,7 +1988,7 @@
 })();
 
 /* ───────────── 29. Real net from the start: catch-up of past purchases and payouts, then the real net ─────────────
- * New trader: profile → experience → first account → « Account added » (continue / add another) → catch-up:
+ * Offered when it matters (brief 03 step 1), not on the first day: a new trader's first visit of My money → catch-up:
  *   1. since when (this month · since January · a date)  2. purchases per firm (+/−, prices from the catalogue, editable)
  *   3. net payouts received  4. the real net (spent, received, net, one sentence), from moneyOf: the same number as My money.
  * « Later » on every screen; Today's « My money » card then offers it until done or hidden. Existing traders: offered one day.
@@ -1993,21 +2001,21 @@
   const M = window.SweepMoney;
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const X = ({
-    en: { added: 'Account added', addedS: 'Add your other accounts now, or continue.', another: '+ Add another account', cont: 'Continue', later: 'I’ll do it later',
+    en: { cont: 'Continue', later: 'I’ll do it later',
       pT: 'Since when do you want to track your money?', pS: 'Sweep works out your real net: money received minus money spent on prop firms.', month: 'This month', year: 'Since January', date: 'A date',
       bT: 'Your purchases since {d}', bS: 'Just the numbers: prices are editable.', eval: 'Evaluations', evalM: 'Months of subscription', reset: 'Resets', activation: 'Activations', price: 'Price per unit', already: 'Already in My money: {a}', each: 'each',
       rT: 'How much did you receive in payouts since {d}?', rS: 'The net amount that reached your bank. Leave empty if nothing.', rL: 'Net payouts received ($)', see: 'See my real net',
       nT: 'Your real net', spent: 'Spent', recv: 'Received', net: 'Real net', pos: 'You’re up {a} since {p}. Sweep will help you stay there.', neg: 'This is your starting point. From today, every dollar is tracked.', go: 'Let’s go',
       sMonth: 'the start of the month', sYear: 'January', est: 'Estimated', invNew: 'Your real net in 1 minute', invOld: 'Complete your history in 1 minute', invS: 'Your past purchases and payouts, without entering them one by one.', hide: 'Hide',
       remind: 'You have an estimate for {f} over this period: adjust it if needed.', adjust: 'Adjust', estF: 'Estimate · {c}', amount: 'Amount ($)', save: 'Save', del: 'Delete', cancel: 'Cancel', back: '‹ Back', saveErr: 'Not saved: check your connection, then try again.' },
-    fr: { added: 'Compte ajouté', addedS: 'Ajoute tes autres comptes maintenant, ou continue.', another: '+ Ajouter un autre compte', cont: 'Continuer', later: 'Je le ferai plus tard',
+    fr: { cont: 'Continuer', later: 'Je le ferai plus tard',
       pT: 'Depuis quand veux-tu suivre ton argent ?', pS: 'Sweep calcule ton vrai net : l’argent reçu moins l’argent dépensé en prop firms.', month: 'Ce mois-ci', year: 'Depuis janvier', date: 'Une date',
       bT: 'Tes achats depuis le {d}', bS: 'Le nombre suffit : les prix sont modifiables.', eval: 'Évaluations', evalM: 'Mois d’abonnement', reset: 'Resets', activation: 'Activations', price: 'Prix à l’unité', already: 'Déjà dans Mon argent : {a}', each: 'l’unité',
       rT: 'Combien as-tu reçu en payouts depuis le {d} ?', rS: 'Le montant net, arrivé sur ton compte. Laisse vide si rien.', rL: 'Payouts nets reçus ($)', see: 'Voir mon vrai net',
       nT: 'Ton vrai net', spent: 'Dépensé', recv: 'Reçu', net: 'Vrai net', pos: 'Tu es rentable de {a} depuis {p}. Sweep va t’aider à le rester.', neg: 'C’est ton point de départ. À partir d’aujourd’hui, chaque dollar est suivi.', go: 'C’est parti',
       sMonth: 'le début du mois', sYear: 'janvier', est: 'Estimé', invNew: 'Ton vrai net en 1 minute', invOld: 'Complète ton historique en 1 minute', invS: 'Tes achats et payouts passés, sans tout entrer un par un.', hide: 'Masquer',
       remind: 'Tu as une estimation pour {f} sur cette période : ajuste-la si besoin.', adjust: 'Ajuster', estF: 'Estimation · {c}', amount: 'Montant ($)', save: 'Enregistrer', del: 'Supprimer', cancel: 'Annuler', back: '‹ Retour', saveErr: 'Non enregistré : vérifie ta connexion, puis réessaie.' },
-    es: { added: 'Cuenta añadida', addedS: 'Añade tus otras cuentas ahora, o continúa.', another: '+ Añadir otra cuenta', cont: 'Continuar', later: 'Lo haré más tarde',
+    es: { cont: 'Continuar', later: 'Lo haré más tarde',
       pT: '¿Desde cuándo quieres seguir tu dinero?', pS: 'Sweep calcula tu neto real: el dinero recibido menos el dinero gastado en prop firms.', month: 'Este mes', year: 'Desde enero', date: 'Una fecha',
       bT: 'Tus compras desde el {d}', bS: 'Basta con el número: los precios se pueden cambiar.', eval: 'Evaluaciones', evalM: 'Meses de suscripción', reset: 'Resets', activation: 'Activaciones', price: 'Precio por unidad', already: 'Ya en Mi dinero: {a}', each: 'c/u',
       rT: '¿Cuánto recibiste en payouts desde el {d}?', rS: 'El importe neto que llegó a tu cuenta. Déjalo vacío si nada.', rL: 'Payouts netos recibidos ($)', see: 'Ver mi neto real',
@@ -2051,20 +2059,9 @@
   }
   const laterBtn = () => `<button type="button" class="link rn-later" data-rn="later">${x.later}</button>`;
 
-  /* « Account added »: during the first visit, after each account */
-  let flow = false;
-  function added() {
-    holdModals();
-    if (!stOf().state) setSt({ state: 'later' });   // a new trader: if he leaves now, Today offers « Your real net in 1 minute »
-    const list = realAccts().slice(-12).map((a) => `<li><b>${esc2(a.name || '')}</b><small>${esc2(firmName(a.firm_id))}</small></li>`).join('');
-    shell(`<span class="rn-ok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span><h2>${x.added}</h2><p class="muted">${x.addedS}</p>
-      <ul class="rn-accs">${list}</ul>
-      <button type="button" class="btn primary nav-am-save" data-rn="start">${x.cont}</button>
-      <button type="button" class="btn nav-pass-later" data-rn="another">${x.another}</button>`);
-  }
   /* 1. the period */
   function start() {
-    holdModals(); flow = false;
+    holdModals();
     W = W || { per: 'year', from: '', q: {}, p: {}, payout: '' };
     shell(`<h2>${x.pT}</h2><p class="muted">${x.pS}</p>
       <div class="rn-opts">${[['month', x.month], ['year', x.year], ['date', x.date]].map(([k, l]) => `<button type="button" class="rn-opt ${W.per === k ? 'on' : ''}" data-rn-per="${k}" aria-pressed="${W.per === k}">${l}</button>`).join('')}</div>
@@ -2148,10 +2145,6 @@
     if (b.dataset.rnQ) { const k = b.dataset.rnQ, v = Math.max(0, Math.min(99, (W.q[k] || 0) + (+b.dataset.d || 0))); W.q[k] = v; const o = b.parentNode.querySelector('output'); if (o) o.textContent = v; const m = b.parentNode.querySelector('[data-d="-1"]'); if (m) m.disabled = !v; return; }
     const a = b.dataset.rn;
     if (a === 'start') start();
-    else if (a === 'another') {   // the Accounts page with its add form open, as its own « + » does
-      close(); flow = true; location.hash = '#accounts';
-      setTimeout(() => { const all = document.querySelectorAll('#main [data-act="acct-add"]'), btn = all[all.length - 1]; if (btn && !document.querySelector('#main form[data-form="account"]')) btn.click(); }, 400);
-    }
     else if (a === 'buys') buys();
     else if (a === 'payouts') payouts();
     else if (a === 'save') { try { save(); } catch (x0) { if (typeof toast === 'function') toast(x.saveErr); } }
@@ -2169,31 +2162,30 @@
   document.addEventListener('input', onField); document.addEventListener('change', onField);   // Safari: a date field may only send « change »
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && el) { if (stOf().state !== 'done') setSt({ state: 'later' }); close(); } });
 
-  /* after an account is saved during the first visit: « Account added » instead of the trade window */
-  // the app opens the trade window right after an account is saved: during this flow, that one call is skipped.
-  // window.openTicket is wrapped at that moment (other modules wrap it later, the outermost one must be held)
-  function holdTicket() {
-    const cur = window.openTicket; if (typeof cur !== 'function' || cur.__rnHold) return;
-    const until = Date.now() + 3000;
-    const w = function () { if (Date.now() < until) return undefined; return cur.apply(this, arguments); }; w.__rnHold = true;
-    window.openTicket = w; setTimeout(() => { if (window.openTicket === w) window.openTicket = cur; }, 3100);
-  }
+  /* a new trader (first account added on the first-account page): the catch-up is due, and opens by itself the first time
+   * he opens My money (a payout is entered there), once. Existing traders keep their one-day invitation on Today. */
   if (typeof submitAccount === 'function') {
     const orig = submitAccount;
     submitAccount = function (form) {
-      const first = !!(form && form.dataset && form.dataset.onb) && !realAccts().length && !stOf().state && !(typeof billCan === 'function' && !billCan('payouts'));   // (a new trader is on the Pro trial)
-      if (first) flow = true;
-      if (flow) holdTicket();
+      const first = !!(form && form.dataset && form.dataset.onb) && !realAccts().length && !stOf().state;
       const before = realAccts().length, out = orig.apply(this, arguments);
-      if (flow && realAccts().length > before) setTimeout(() => { if (!/^#(dashboard)?$/.test(location.hash || '')) location.hash = '#dashboard'; added(); }, 350);
+      if (first && realAccts().length > before) setSt({ due: today() });
       return out;
     };
   }
+  function offer() {
+    const s = stOf(); if (el || !s.due || s.state || s.auto || !realAccts().length || S.mode !== 'server' || !/^#payouts/.test(location.hash || '')) return;
+    if (typeof billCan === 'function' && !billCan('payouts')) return;   // Free: My money is not in the plan
+    if (document.querySelector('.nav-dlg.open, #gSheet, #tkSlide.open')) return;   // never over another window
+    setSt({ auto: today() }); start();
+  }
+  addEventListener('hashchange', () => setTimeout(offer, 450));
+  setTimeout(offer, 1500);   // the app opened directly on My money
 
   /* Today's « My money » card: the invitation (new trader who chose « later », or an existing trader, one day) */
   function invite() {
-    const s = stOf(); if (flow || el || s.state === 'done' || s.state === 'hidden' || !realAccts().length || S.mode !== 'server') return '';
-    if (typeof billCan === 'function' && !billCan('payouts')) return '';   // Free: My money is not in the plan, the server would refuse the entries   // never during the first visit's own flow
+    const s = stOf(); if (el || s.state === 'done' || s.state === 'hidden' || !realAccts().length || S.mode !== 'server') return '';
+    if (typeof billCan === 'function' && !billCan('payouts')) return '';   // Free: My money is not in the plan, the server would refuse the entries
     if (!s.state) {   // an existing trader: offered on one day only
       if (s.shown_on && s.shown_on !== today()) return '';
       if (!s.shown_on) setTimeout(() => { if (!stOf().shown_on) setSt({ shown_on: today() }); }, 0);

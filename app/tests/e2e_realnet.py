@@ -1,13 +1,14 @@
 """
 Sweep — the real net from the start (step 1 of the evolution brief), dev environment with Playwright:
   python3 tests/e2e_realnet.py http://127.0.0.1:8095 [storage_state, unused: every case signs up its own trader]
-A. New trader, 3 languages × phone and computer: profile → « How long have you been trading? » (kept on the server) →
-   Topstep 50K → « Account added » (never the trade window) → « + Add another account » → Apex 50K → catch-up:
+A. New trader, 3 languages × phone and computer: first name and « How long have you been trading? » on the first-account
+   page (kept on the server) → Topstep 50K → the plan of the day, not « Your real net » (brief 03 step 1: not on the first
+   day) → a 2nd account (Apex 50K) from Accounts → My money opened for the first time → the catch-up opens by itself:
    period, purchases per firm (Topstep: months of subscription at $49, activation $149, « already in My money »;
    Apex: no catalogue price, typed), net payouts → the real net screen. Checks: the real net = moneyOf = My money for the
    same period, the estimated entries carry « Estimated », no English in FR/ES, nothing wider than the window, taps ≥ 44 px.
-B. « I'll do it later » → Today's My money card offers « Your real net in 1 minute » → hidden with ✕ (stays hidden).
-C. An existing trader: « Complete your history in 1 minute » on one day only.
+B. « I'll do it later » → Today's My money card (from the 5th trade) offers « Your real net in 1 minute » → hidden with ✕.
+C. An existing trader: « Complete your history in 1 minute » on one day only; My money opens nothing by itself.
 D. My money: an estimate is edited in its small form; an exact purchase in the period shows the reminder; the CSV says « estimé ».
 """
 import json, os, sqlite3, sys, time, re
@@ -23,11 +24,10 @@ def unthrottle():   # every case signs up a trader: the sign-up limiter (5 per h
   try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
   except Exception: pass
 EXP = {'fr': 'Tu trades depuis combien de temps ?', 'en': 'How long have you been trading?', 'es': '¿Desde cuándo operas?'}
-ADDED = {'fr': 'Compte ajouté', 'en': 'Account added', 'es': 'Cuenta añadida'}
 MONTHS = {'fr': 'Mois d’abonnement', 'en': 'Months of subscription', 'es': 'Meses de suscripción'}
 POS = {'fr': 'Tu es rentable de', 'en': 'You’re up', 'es': 'Eres rentable en'}
 NEG = {'fr': 'C’est ton point de départ', 'en': 'This is your starting point', 'es': 'Este es tu punto de partida'}
-EN_ONLY = ['Account added', 'Continue', 'Add another account', 'Since when', 'Your purchases', 'Months of subscription', 'Evaluations', 'I’ll do it later', 'See my real net', 'Your real net', 'Spent', 'Received', 'Let’s go', 'Already in My money']
+EN_ONLY = ['Continue', 'Since when', 'Your purchases', 'Months of subscription', 'Evaluations', 'I’ll do it later', 'See my real net', 'Your real net', 'Spent', 'Received', 'Let’s go', 'Already in My money']
 digits = lambda s: re.sub(r'[^0-9−-]', '', s or '').replace('−', '-')
 
 def new_trader(p, lang, phone, profile=False):
@@ -47,14 +47,36 @@ def tap(pg, sel):
   for _ in range(6):
     try: pg.locator(sel).first.click(timeout=3000); pg.wait_for_timeout(220); return
     except Exception as e: last = e; pg.wait_for_timeout(300)
+  pg.screenshot(path='/tmp/rn_fail.png'); print('      tap failed on', sel, pg.evaluate("[...document.querySelectorAll('.open, [role=dialog]')].map(e=>e.className).join(' | ')"))
   raise last
 
-def add_account(pg, firm, typ, size='50000'):
-  tap(pg, 'form[data-form=account] [data-st-ph0=eval]'); tap(pg, f'[data-st-firm={firm}]')
-  if typ and pg.locator(f'[data-st-type={typ}]').count(): tap(pg, f'[data-st-type={typ}]')
-  tap(pg, f'[data-st-size="{size}"]')
-  pg.evaluate("document.querySelector('form[data-form=account]').requestSubmit()")
-  pg.wait_for_selector('.rn.open h2', timeout=6000); pg.wait_for_timeout(450)
+def add_account(pg, firm, typ, size='50000', at='#main'):
+  f = at + ' form[data-form=account]'
+  tap(pg, f + ' [data-st-ph0=eval]'); tap(pg, f'{f} [data-st-firm={firm}]')
+  if typ and pg.locator(f'{f} [data-st-type={typ}]').count(): tap(pg, f'{f} [data-st-type={typ}]')
+  tap(pg, f'{f} [data-st-size="{size}"]')
+  n = pg.evaluate("S.accounts.length")
+  pg.evaluate("(f) => document.querySelector(f).requestSubmit()", f)
+  pg.wait_for_function("(n) => S.accounts.length > n", arg=n, timeout=6000); pg.wait_for_timeout(450)
+
+def first_account(pg, firm, typ):   # the first-account page → the plan of the day (skipped) → the trade form (closed)
+  add_account(pg, firm, typ)
+  pg.wait_for_selector('#gSheet [data-g=plan-skip]', timeout=8000)
+  ok(pg.locator('.rn.open').count() == 0, 'the first account opens the plan, not « Your real net »')
+  tap(pg, '#gSheet [data-g=plan-skip]'); pg.wait_for_timeout(700)
+  pg.wait_for_selector('#tkSlide.open, .nav-am.open', timeout=6000)   # the trade form, closed as a trader would
+  pg.keyboard.press('Escape'); pg.wait_for_timeout(500)
+  if pg.locator('#tkSlide.open').count(): pg.evaluate("closeTicket()"); pg.wait_for_timeout(400)
+
+def my_money(pg):   # My money opened for the first time: the catch-up opens by itself
+  for b in ('.nav-inst.open [data-inst-ok]',):
+    if pg.locator(b).count(): pg.locator(b).click(); pg.wait_for_timeout(300)
+  pg.evaluate("location.hash = '#payouts'"); pg.wait_for_selector('.rn.open [data-rn-per]', timeout=8000); pg.wait_for_timeout(400)
+
+def trades(pg, n):   # n trades on the first account (Today's My money card comes from the 5th)
+  pg.evaluate("(n) => { for (let i = 1; i <= n; i++) put('trades', { id: 'rn-t' + i, account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: todayStr(), entry_time: '1' + i + ':00', exit_time: '1' + i + ':05' }); render() }", n)
+  pg.wait_for_timeout(900)
+  if pg.locator('.nav-inst.open [data-inst-ok]').count(): pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(300)
 
 def fits(pg):   # nothing wider than the window; on a phone, every control of the window is a 44 px target
   return pg.evaluate("""(phone)=>{const e=document.querySelector('.rn'); if(!e) return 'no window';
@@ -68,28 +90,18 @@ def case_a(p, lang, phone, per, exp):
   tag = f"{'390' if phone else '1440'}-{lang}"
   br, pg, errs = new_trader(p, lang, phone)
   t0 = time.time(); taps = 0
-  pg.goto(B + '/'); pg.wait_for_selector('.nav-prof [data-pf=first_name]', timeout=15000)
-  pg.fill('.nav-prof [data-pf=first_name]', 'Léa'); pg.fill('.nav-prof [data-pf=last_name]', 'Test'); tap(pg, '[data-prof-go]'); taps += 1
-  try: pg.wait_for_selector('.nav-prof [data-exp]', timeout=6000)
-  except Exception:   # seen 2 times in ~25 runs, never by hand: the names typed in the first milliseconds were gone → typed again once, and said
-    print('      RETRY profile: the names were empty at « Continue » (%r)' % pg.evaluate("(document.querySelector('.nav-prof-err')||{}).textContent||''"))
-    pg.fill('.nav-prof [data-pf=first_name]', 'Léa'); pg.fill('.nav-prof [data-pf=last_name]', 'Test'); tap(pg, '[data-prof-go]')
-    pg.wait_for_selector('.nav-prof [data-exp]', timeout=8000)
-  ok(EXP[lang] in pg.locator('aside.nav-prof').inner_text(), f'{tag} the question « {EXP[lang]} »')
-  tap(pg, f'.nav-prof [data-exp="{exp}"]'); taps += 1; pg.wait_for_timeout(900)
-  srv = pg.evaluate("fetch('api/data',{headers:{'X-Requested-With':'fetch'},credentials:'same-origin'}).then(r=>r.json()).then(j=>j.user&&j.user.experience)")
-  ok(srv == (exp or None), f'{tag} experience kept on the server ({srv!r})')
-  pg.wait_for_selector('form[data-form=account][data-onb] [data-st-ph0=eval]', timeout=15000); pg.wait_for_timeout(800)
-  add_account(pg, 'topstep', None); taps += 4
-  ok(pg.evaluate("!document.querySelector('#tkSlide.open, .nav-am.open, .nav-am-shot.open')"), f'{tag} « {ADDED[lang]} », not the trade window')
-  ok(ADDED[lang] in pg.locator('.rn').inner_text(), f'{tag} the window says « {ADDED[lang]} »')
-  if phone: pg.screenshot(path=f'/tmp/rn_{tag}_1_added.png')
-  tap(pg, '[data-rn=another]'); taps += 1; pg.wait_for_timeout(900)
-  pg.wait_for_selector('form[data-form=account] [data-st-ph0=eval]', timeout=8000)
-  add_account(pg, 'apex', 'apex-eod'); taps += 4
-  ok(pg.locator('.rn-accs li').count() == 2 and pg.evaluate("!document.querySelector('#tkSlide.open, .nav-am.open, .nav-am-shot.open')"), f'{tag} second account added from the window, the list shows 2')
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account][data-onb] [data-onb-fn]', timeout=15000); pg.wait_for_timeout(500)
+  ok(EXP[lang] in pg.locator('.nav-onb-me').inner_text(), f'{tag} the question « {EXP[lang]} » on the first-account page')
+  pg.fill('[data-onb-fn]', 'Léa'); taps += 1
+  if exp: tap(pg, f'.nav-onb-me [data-exp="{exp}"]'); taps += 1
+  first_account(pg, 'topstep', None); taps += 5
+  srv = pg.evaluate("fetch('api/data',{headers:{'X-Requested-With':'fetch'},credentials:'same-origin'}).then(r=>r.json()).then(j=>j.user&&[j.user.first_name,j.user.experience])")
+  ok(srv == ['Léa', exp or None], f'{tag} first name and experience kept on the server ({srv!r})')
+  pg.evaluate("U.addAcct = true; location.hash = '#accounts'; render()"); pg.wait_for_selector('.acct-add form[data-form=account] [data-st-ph0=eval]', timeout=8000); pg.wait_for_timeout(500)
+  add_account(pg, 'apex', 'apex-eod', at='.acct-add'); taps += 5
+  ok(pg.evaluate("S.accounts.filter(a=>!a.demo).length") == 2 and pg.locator('.rn.open').count() == 0, f'{tag} second account added from Accounts, no window')
   texts = []
-  tap(pg, '[data-rn=start]'); taps += 1; texts.append(pg.locator('.rn').inner_text())
+  my_money(pg); taps += 1; texts.append(pg.locator('.rn').inner_text())
   if per != 'year': tap(pg, f'[data-rn-per={per}]'); taps += 1
   if per == 'date':
     d0 = pg.evaluate("(()=>{const d=new Date(todayStr()+'T12:00:00'); d.setMonth(d.getMonth()-3); d.setDate(1); return d.toISOString().slice(0,10)})()")
@@ -131,7 +143,7 @@ def case_a(p, lang, phone, per, exp):
   # My money: same period → same net, the « Estimated » tags
   if per == 'date': pg.evaluate("(f)=>{U.mper='custom'; U.mcustom={from:f,to:todayStr()}; saveU()}", d0)
   else: pg.evaluate("(p)=>{U.mper=p; saveU()}", per)
-  pg.evaluate("U.mview='analysis'; location.hash='#payouts'"); pg.wait_for_selector('.mny-net', timeout=8000); pg.wait_for_timeout(500)   # the net is on « Analysis »
+  pg.evaluate("U.mview='analysis'; location.hash === '#payouts' ? render() : (location.hash='#payouts')");   # (already on My money since the catch-up) pg.wait_for_selector('.mny-net', timeout=8000); pg.wait_for_timeout(500)   # the net is on « Analysis »
   mn = digits(pg.locator('.mny-net .tot b').inner_text())
   ok(mn.lstrip('+') == shown.lstrip('+'), f'{tag} My money shows the same real net ({mn} / {shown})')
   tap(pg, '[data-mny-view=entries]'); pg.wait_for_selector('.mny-actions', timeout=8000); pg.wait_for_timeout(400)   # the entries are on « My entries »
@@ -143,9 +155,12 @@ def case_a(p, lang, phone, per, exp):
 def case_b(p):
   br, pg, errs = new_trader(p, 'fr', True, profile=True)
   pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account][data-onb] [data-st-ph0=eval]', timeout=15000); pg.wait_for_timeout(800)
-  add_account(pg, 'topstep', None)
-  tap(pg, '[data-rn=start]'); tap(pg, '[data-rn=later]'); pg.wait_for_timeout(900)
+  first_account(pg, 'topstep', None)
+  my_money(pg); tap(pg, '[data-rn=later]'); pg.wait_for_timeout(900)
   ok(pg.evaluate("(S.settings.realnet||{}).state") == 'later' and pg.locator('.rn.open').count() == 0, 'B « Je le ferai plus tard » closes the window')
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(700)
+  ok(pg.locator('.d-money').count() == 0, 'B Today with no trade: no My money card yet')
+  trades(pg, 5)
   inv = pg.locator('.d-money .rn-inv')
   ok(inv.count() == 1 and 'Ton vrai net en 1 minute' in inv.inner_text(), 'B Today: « Ton vrai net en 1 minute » in My money')
   pg.screenshot(path='/tmp/rn_B_invite.png', full_page=True)
@@ -161,7 +176,7 @@ def case_c(p):
   br, pg, errs = new_trader(p, 'en', False, profile=True)
   pg.goto(B + '/'); pg.wait_for_timeout(3000)
   pg.evaluate("put('firms',{id:'f-old',name:'Lucid'}); put('accounts',{id:'a-old',firm_id:'f-old',name:'Lucid 50K',starting_balance_c:5000000,status:'active',created_on:'2026-01-05',money_type:'eval',phase:'eval'}); render()")
-  pg.wait_for_timeout(1500)
+  pg.wait_for_timeout(1500); trades(pg, 5)
   ok(pg.locator('.rn.open').count() == 0, 'C an account added outside the first visit opens no window')
   inv = pg.locator('.d-money .rn-inv')
   ok(inv.count() == 1 and 'Complete your history in 1 minute' in inv.inner_text(), 'C existing trader: « Complete your history in 1 minute »')
@@ -170,18 +185,20 @@ def case_c(p):
   pg.evaluate("(()=>{const s=JSON.parse(JSON.stringify(S.settings)); s.realnet={shown_on:'2020-01-01'}; put('settings',s)})()"); pg.wait_for_timeout(1200)
   pg.reload(); pg.wait_for_timeout(3500)
   ok(pg.locator('.rn-inv').count() == 0, 'C the next day: no invitation (offered once)')
+  pg.evaluate("location.hash = '#payouts'"); pg.wait_for_timeout(2500)
+  ok(pg.locator('.rn.open').count() == 0, 'C an existing trader opening My money: nothing opens by itself')
   ok(not errs, f'C no page error ({errs[:2]})')
   br.close()
 
 def case_d(p):
   br, pg, errs = new_trader(p, 'fr', False, profile=True)
   pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account][data-onb] [data-st-ph0=eval]', timeout=15000); pg.wait_for_timeout(800)
-  add_account(pg, 'apex', 'apex-eod')
+  first_account(pg, 'apex', 'apex-eod')
   ap = pg.evaluate("S.accounts[0].firm_id")
-  tap(pg, '[data-rn=start]'); tap(pg, '[data-rn=buys]')
+  my_money(pg); tap(pg, '[data-rn=buys]')
   pg.locator(f'[data-rn-q="{ap}|evaluation"][data-d="1"]').click(); pg.locator(f'[data-rn-q="{ap}|evaluation"][data-d="1"]').click()
   pg.fill(f'[data-rn-p="{ap}|evaluation"]', '100'); tap(pg, '[data-rn=payouts]'); tap(pg, '[data-rn=save]'); tap(pg, '[data-rn=close]')
-  pg.evaluate("U.mper='year'; U.mview='entries'; saveU(); location.hash='#payouts'"); pg.wait_for_selector('.mny-actions', timeout=8000); pg.wait_for_timeout(600)
+  pg.evaluate("U.mper='year'; U.mview='entries'; saveU(); location.hash === '#payouts' ? render() : (location.hash='#payouts')"); pg.wait_for_selector('.mny-actions', timeout=8000); pg.wait_for_timeout(600)
   eid = f'est-{ap}-evaluation'
   tap(pg, f'.mny-row[data-id="{eid}"]'); pg.wait_for_selector('form.rn-estf', timeout=4000)
   pg.fill('form.rn-estf [name=amount]', '250'); pg.evaluate("document.querySelector('form.rn-estf').requestSubmit()"); pg.wait_for_timeout(700)

@@ -10,6 +10,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * New York), retention D7 / D30 (a trade or a review during days 7-13 / 30-36, only traders whose window is over),
  * swept days (sessions with trades where the 3 rings are closed, last 30 days). JS errors grouped by message (30 days):
  * occurrences, traders affected, last seen, pages, browsers, versions — never any trade content.
+ * Brief 03 step 1 (block « start »), same traders: signed up → first name → first account → first plan → first trade,
+ * how many reached each step and the median time from the sign-up (sample-data accounts are not counted).
  */
 function sweep_metrics(PDO $pdo, string $app, array $f = []): array
 {
@@ -106,7 +108,25 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         $d0n++; if (isset($first[$u['id']]) && $nyDay($first[$u['id']]) === $u['d0']) $d0k++;
     }
     sort($ft);
+    // brief 03 step 1: where the new traders stop on the way to their first trade
+    $cols = array_column($q('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+    $named = []; if (in_array('first_name', $cols, true)) foreach ($q("SELECT id FROM users WHERE COALESCE(first_name, '') <> ''") as $r) $named[$r['id']] = true;
+    $acc1 = []; if ($has('documents')) foreach ($q("SELECT user_id, MIN(created_at) t FROM documents WHERE collection = 'accounts' AND data NOT LIKE '%\"demo\":true%' GROUP BY user_id") as $r) $acc1[$r['user_id']] = strtotime((string) $r['t']) ?: 0;
+    // the first plan: when the journal's plan was saved (a plan made in the evening for the next session counts at once;
+    // the « plan_saved » event waits for that day) — the event when this SQLite cannot read JSON
+    $plan1 = [];
+    try {
+        if ($has('documents')) foreach ($q("SELECT user_id, MIN(COALESCE(CAST(json_extract(data, '$.pre.saved_at') AS INTEGER), CAST(strftime('%s', created_at) AS INTEGER))) t FROM documents WHERE collection = 'journals' AND json_extract(data, '$.pre.bias') IS NOT NULL AND COALESCE(json_extract(data, '$.demo'), 0) = 0 GROUP BY user_id") as $r) $plan1[$r['user_id']] = (int) $r['t'];
+    } catch (Throwable $e) { $plan1 = []; }
+    if (!$plan1 && $has('game_analytics')) foreach ($q("SELECT user_id, MIN(created_at) t FROM game_analytics WHERE event = 'plan_saved' GROUP BY user_id") as $r) $plan1[$r['user_id']] = (int) $r['t'];
+    $step = function (array $at, bool $timed = true) use ($users) {
+        $n = 0; $d = [];
+        foreach ($users as $u) { if (!isset($at[$u['id']])) continue; $n++; if ($timed) $d[] = max(0, $at[$u['id']] - $u['ts']); }
+        sort($d); return ['n' => $n, 'median_min' => $d ? (int) round($d[intdiv(count($d), 2)] / 60) : null];
+    };
+    $start = ['signed_up' => count($users), 'first_name' => $step($named, false), 'account' => $step($acc1), 'plan' => $step($plan1), 'trade' => $step($first)];
     $brief = [
+        'start' => $start,
         'filters' => ['cohort' => $fc, 'source' => $fs, 'weeks' => array_slice($weeks, 0, 16, true), 'sources' => $sources, 'traders' => count($users), 'of' => count($all)],
         'first_trade_median_min' => $ft ? (int) round($ft[intdiv(count($ft), 2)] / 60) : null, 'first_trade_of' => count($ft),
         'activation_day0' => ['pct' => $rate($d0k, $d0n), 'of' => $d0n],

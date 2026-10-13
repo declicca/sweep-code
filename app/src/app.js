@@ -8891,7 +8891,11 @@ function submitAccount(e) {
     status: "active",
     created_on: t.get("created") || todayStr()
   }), toast("Account added"), U.addAcct = !1, e.dataset.onb) {
-    render(), setTimeout(() => openTicket(null), 300);
+    // the first account → the plan of the day, pre-filled (bias, max loss from the account's daily limit), then the first trade
+    render(), setTimeout(() => {
+      const G = window.SweepGame, d = (window.SweepNextSession && SweepNextSession()) || (G && G.state && G.state() && G.state().today && G.state().today.day);
+      G && G.openPlan && d ? G.openPlan(d, { then: () => openTicket(null) }) : openTicket(null);
+    }, 300);
     return;
   }
   D.open && D.mode === "account" && (closeDrawer(), setTimeout(() => openTicket(null), 250)), 
@@ -10007,7 +10011,8 @@ addEventListener("hashchange", () => {
 var _lastMob = null;
 
 addEventListener("resize", () => {
-  (_lastPhone !== null && isPhone() !== _lastPhone || _lastMob !== null && isMobileUI() !== _lastMob) && scheduleRender();
+  // not while an account is being added: the redraw would reset the guided picker
+  (_lastPhone !== null && isPhone() !== _lastPhone || _lastMob !== null && isMobileUI() !== _lastMob) && !document.querySelector("#main .onb, #main .acct-add") && scheduleRender();
 }), document.addEventListener("click", e => {
   document.querySelectorAll("details.menu[open]").forEach(t => {
     t.contains(e.target) || t.removeAttribute("open");
