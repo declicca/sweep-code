@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-08c",
+ "version": "2026-10-13a",
  "checked_at": "2026-10-07T00:00:00Z",
  "origin": "seed (checked 2026-10-07 on the pages listed in each program's \"verified\"; the weekly check keeps it up to date)",
  "firms": [
@@ -785,7 +785,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 100,
+         "trade_days": 8,
          "min": 500,
+         "max": 1000,
+         "max_pct": 30,
+         "min_bal": 26100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           1000,
           1000,
@@ -794,11 +800,10 @@
           1000,
           1000
          ],
-         "max": 1000,
-         "min_bal": 26100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 4
        }
       },
       {
@@ -819,7 +824,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 250,
+         "trade_days": 8,
          "min": 500,
+         "max": 1500,
+         "max_pct": 30,
+         "min_bal": 52100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           1500,
           1500,
@@ -828,11 +839,10 @@
           2500,
           3000
          ],
-         "max": 1500,
-         "min_bal": 52100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 6
        }
       },
       {
@@ -853,7 +863,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 300,
+         "trade_days": 8,
          "min": 500,
+         "max": 2000,
+         "max_pct": 30,
+         "min_bal": 103100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           2000,
           2500,
@@ -862,11 +878,10 @@
           4000,
           4000
          ],
-         "max": 2000,
-         "min_bal": 103100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 8
        }
       },
       {
@@ -887,7 +902,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 350,
+         "trade_days": 8,
          "min": 500,
+         "max": 2500,
+         "max_pct": 30,
+         "min_bal": 154100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           2500,
           3000,
@@ -896,11 +917,10 @@
           4000,
           5000
          ],
-         "max": 2500,
-         "min_bal": 154100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 12
        }
       }
      ],
@@ -933,7 +953,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 100,
+         "trade_days": 8,
          "min": 500,
+         "max": 1000,
+         "max_pct": 30,
+         "min_bal": 26100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           1000,
           1000,
@@ -942,11 +968,10 @@
           1000,
           1000
          ],
-         "max": 1000,
-         "min_bal": 26100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 4
        }
       },
       {
@@ -965,7 +990,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 200,
+         "trade_days": 8,
          "min": 500,
+         "max": 1500,
+         "max_pct": 30,
+         "min_bal": 52100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           1500,
           2000,
@@ -974,11 +1005,10 @@
           3000,
           3000
          ],
-         "max": 1500,
-         "min_bal": 52100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 6
        }
       },
       {
@@ -997,7 +1027,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 250,
+         "trade_days": 8,
          "min": 500,
+         "max": 2000,
+         "max_pct": 30,
+         "min_bal": 103100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           2000,
           2500,
@@ -1006,11 +1042,10 @@
           4000,
           4000
          ],
-         "max": 2000,
-         "min_bal": 103100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 8
        }
       },
       {
@@ -1029,7 +1064,13 @@
         "payout": {
          "win_days": 5,
          "win_min": 300,
+         "trade_days": 8,
          "min": 500,
+         "max": 2500,
+         "max_pct": 30,
+         "min_bal": 154100,
+         "max_payouts": 6,
+         "split_pct": 90,
          "ladder": [
           2500,
           3000,
@@ -1038,11 +1079,10 @@
           4000,
           5000
          ],
-         "max": 2500,
-         "min_bal": 154100,
-         "max_payouts": 6
+         "cycle_pos": true
         },
-        "dd_lock_offset": 100
+        "dd_lock_offset": 100,
+        "max_minis": 12
        }
       }
      ],
@@ -1295,8 +1335,10 @@
         "dd_lock": true,
         "payout": {
          "min": 250,
-         "min_bal": 26500
-        }
+         "min_bal": 26500,
+         "split_pct": 80
+        },
+        "max_minis": 3
        }
       },
       {
@@ -1315,8 +1357,10 @@
         "dd_lock": true,
         "payout": {
          "min": 250,
-         "min_bal": 52000
-        }
+         "min_bal": 52000,
+         "split_pct": 80
+        },
+        "max_minis": 6
        }
       },
       {
@@ -1335,8 +1379,10 @@
         "dd_lock": true,
         "payout": {
          "min": 250,
-         "min_bal": 77500
-        }
+         "min_bal": 77500,
+         "split_pct": 80
+        },
+        "max_minis": 9
        }
       },
       {
@@ -1355,8 +1401,10 @@
         "dd_lock": true,
         "payout": {
          "min": 250,
-         "min_bal": 103000
-        }
+         "min_bal": 103000,
+         "split_pct": 80
+        },
+        "max_minis": 12
        }
       },
       {
@@ -1375,8 +1423,10 @@
         "dd_lock": true,
         "payout": {
          "min": 250,
-         "min_bal": 154500
-        }
+         "min_bal": 154500,
+         "split_pct": 80
+        },
+        "max_minis": 15
        }
       }
      ],
@@ -1694,9 +1744,454 @@
     "AlphaFutures"
    ],
    "sources": [
-    "https://alpha-futures.com"
+    "https://alpha-futures.com",
+    "https://help.alpha-futures.com/en/articles/9492051-payout-policy"
    ],
-   "programs": []
+   "programs": [
+    {
+     "id": "zero",
+     "name": "Zero",
+     "verified": [
+      {
+       "url": "https://alpha-futures.com",
+       "date": "2026-10-13",
+       "what": "Zero: prices, targets, $500–2,000 daily loss guard, 1 day minimum, max contracts; funded 40 % consistency, 5 winning days of $200, min payout $200, caps $1,000 / $1,500 / $2,500, up to 50 % of the profit, 90 %"
+      },
+      {
+       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
+       "date": "2026-10-13",
+       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
+      }
+     ],
+     "sizes": [
+      {
+       "size": 25000,
+       "eval": {
+        "dd": 1000,
+        "dd_type": "eod",
+        "target": 1500,
+        "dll": 500,
+        "max_minis": 1,
+        "min_days": 1
+       },
+       "funded": {
+        "dd": 1000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 500,
+        "consistency": 40,
+        "max_minis": 1,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 200,
+         "max": 1000,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 89,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      },
+      {
+       "size": 50000,
+       "eval": {
+        "dd": 2000,
+        "dd_type": "eod",
+        "target": 3000,
+        "dll": 1000,
+        "max_minis": 3,
+        "min_days": 1
+       },
+       "funded": {
+        "dd": 2000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 1000,
+        "consistency": 40,
+        "max_minis": 3,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 200,
+         "max": 1500,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 139,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      },
+      {
+       "size": 100000,
+       "eval": {
+        "dd": 3000,
+        "dd_type": "eod",
+        "target": 6000,
+        "dll": 2000,
+        "max_minis": 6,
+        "min_days": 1
+       },
+       "funded": {
+        "dd": 3000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 2000,
+        "consistency": 40,
+        "max_minis": 6,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 200,
+         "max": 2500,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 279,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      }
+     ]
+    },
+    {
+     "id": "standard",
+     "name": "Standard",
+     "verified": [
+      {
+       "url": "https://alpha-futures.com",
+       "date": "2026-10-13",
+       "what": "Standard: prices, targets, 50 % consistency and 2 days to pass, no daily limit in evaluation; funded $1,000–3,000 daily limit, 40 %, 5 winning days of $200, min payout $500, caps $3,000 / $4,000 / $5,000, up to 50 % of the profit, 90 %"
+      },
+      {
+       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
+       "date": "2026-10-13",
+       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
+      }
+     ],
+     "sizes": [
+      {
+       "size": 50000,
+       "eval": {
+        "dd": 2000,
+        "dd_type": "eod",
+        "target": 3000,
+        "consistency": 50,
+        "max_minis": 5,
+        "min_days": 2
+       },
+       "funded": {
+        "dd": 2000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 1000,
+        "consistency": 40,
+        "max_minis": 5,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 500,
+         "max": 3000,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 129,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      },
+      {
+       "size": 100000,
+       "eval": {
+        "dd": 3000,
+        "dd_type": "eod",
+        "target": 6000,
+        "consistency": 50,
+        "max_minis": 10,
+        "min_days": 2
+       },
+       "funded": {
+        "dd": 3000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 2000,
+        "consistency": 40,
+        "max_minis": 10,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 500,
+         "max": 4000,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 239,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      },
+      {
+       "size": 150000,
+       "eval": {
+        "dd": 4500,
+        "dd_type": "eod",
+        "target": 9000,
+        "consistency": 50,
+        "max_minis": 15,
+        "min_days": 2
+       },
+       "funded": {
+        "dd": 4500,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 3000,
+        "consistency": 40,
+        "max_minis": 15,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 500,
+         "max": 5000,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 349,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      }
+     ]
+    },
+    {
+     "id": "direct",
+     "name": "Direct",
+     "direct": true,
+     "verified": [
+      {
+       "url": "https://alpha-futures.com",
+       "date": "2026-10-13",
+       "what": "Direct: price, no evaluation, daily limit, 20 % consistency; withdrawal targets $1,500 / $3,000 / $6,000 / $9,000 then $1,000 / $2,000 / $4,000 / $6,000 (reset after each withdrawal), min payout $500, caps $1,000 / $2,000 / $2,500 / $3,000, up to 50 % of the profit, 90 %"
+      },
+      {
+       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
+       "date": "2026-10-13",
+       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type, Direct withdrawal targets"
+      }
+     ],
+     "sizes": [
+      {
+       "size": 25000,
+       "funded": {
+        "dd": 1000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 500,
+        "consistency": 20,
+        "max_minis": 2,
+        "payout": {
+         "min": 500,
+         "max": 1000,
+         "max_pct": 50,
+         "first_min": 1500,
+         "cycle_min": 1000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 349
+       }
+      },
+      {
+       "size": 50000,
+       "funded": {
+        "dd": 2000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 1000,
+        "consistency": 20,
+        "max_minis": 4,
+        "payout": {
+         "min": 500,
+         "max": 2000,
+         "max_pct": 50,
+         "first_min": 3000,
+         "cycle_min": 2000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 519
+       }
+      },
+      {
+       "size": 100000,
+       "funded": {
+        "dd": 3000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 2000,
+        "consistency": 20,
+        "max_minis": 8,
+        "payout": {
+         "min": 500,
+         "max": 2500,
+         "max_pct": 50,
+         "first_min": 6000,
+         "cycle_min": 4000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 689
+       }
+      },
+      {
+       "size": 150000,
+       "funded": {
+        "dd": 4500,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 3000,
+        "consistency": 20,
+        "max_minis": 10,
+        "payout": {
+         "min": 500,
+         "max": 3000,
+         "max_pct": 50,
+         "first_min": 9000,
+         "cycle_min": 6000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 859
+       }
+      }
+     ]
+    },
+    {
+     "id": "advanced",
+     "name": "Advanced",
+     "verified": [
+      {
+       "url": "https://alpha-futures.com",
+       "date": "2026-10-13",
+       "what": "Advanced: prices, targets, 40 % consistency and 3 days to pass, no daily limit; funded no consistency, 5 winning days of $200, min payout $1,000, cap $15,000, up to 50 % of the profit, 90 %"
+      },
+      {
+       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
+       "date": "2026-10-13",
+       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
+      }
+     ],
+     "sizes": [
+      {
+       "size": 50000,
+       "eval": {
+        "dd": 1750,
+        "dd_type": "eod",
+        "target": 4000,
+        "consistency": 40,
+        "max_minis": 5,
+        "min_days": 3
+       },
+       "funded": {
+        "dd": 1750,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "max_minis": 5,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 1000,
+         "max": 15000,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 209,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      },
+      {
+       "size": 100000,
+       "eval": {
+        "dd": 3500,
+        "dd_type": "eod",
+        "target": 8000,
+        "consistency": 40,
+        "max_minis": 10,
+        "min_days": 3
+       },
+       "funded": {
+        "dd": 3500,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "max_minis": 10,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 1000,
+         "max": 15000,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 349,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      },
+      {
+       "size": 150000,
+       "eval": {
+        "dd": 5250,
+        "dd_type": "eod",
+        "target": 12000,
+        "consistency": 40,
+        "max_minis": 15,
+        "min_days": 3
+       },
+       "funded": {
+        "dd": 5250,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "max_minis": 15,
+        "payout": {
+         "win_days": 5,
+         "win_min": 200,
+         "min": 1000,
+         "max": 15000,
+         "max_pct": 50,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 489,
+        "activation": 0,
+        "eval_period": "month"
+       }
+      }
+     ]
+    }
+   ]
   }
  ]
 }

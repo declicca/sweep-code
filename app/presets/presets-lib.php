@@ -93,7 +93,7 @@ function pr_check_phase(array $p, int $size, string $phase): array
         if (isset($po['win_days']) && (!is_numeric($po['win_days']) || $po['win_days'] < 0 || $po['win_days'] > 30)) $e[] = "$phase: payout winning days must be 0–30";
         if (isset($po['win_min']) && (!is_numeric($po['win_min']) || $po['win_min'] < 0 || $po['win_min'] > $size * 0.05)) $e[] = "$phase: payout minimum day profit looks wrong";
         if (isset($po['min_bal']) && (!is_numeric($po['min_bal']) || $po['min_bal'] < $size || $po['min_bal'] > $size * 1.2)) $e[] = "$phase: payout minimum balance must be between the size and +20%";
-        foreach (['min', 'max', 'max_dll', 'cycle_min'] as $k) if (isset($po[$k]) && (!is_numeric($po[$k]) || $po[$k] < 0 || $po[$k] > $size)) $e[] = "$phase: payout $k looks wrong";
+        foreach (['min', 'max', 'max_dll', 'cycle_min', 'first_min'] as $k) if (isset($po[$k]) && (!is_numeric($po[$k]) || $po[$k] < 0 || $po[$k] > $size)) $e[] = "$phase: payout $k looks wrong";
         if (isset($po['max_pct']) && (!is_numeric($po['max_pct']) || $po['max_pct'] <= 0 || $po['max_pct'] > 100)) $e[] = "$phase: payout max % must be 1–100";
         if (isset($p['dd_lock_offset']) && (!is_numeric($p['dd_lock_offset']) || $p['dd_lock_offset'] < 0 || $p['dd_lock_offset'] > 1000)) $e[] = "$phase: drawdown lock offset looks wrong";
         if (isset($po['split_pct']) && (!is_numeric($po['split_pct']) || $po['split_pct'] <= 0 || $po['split_pct'] > 100)) $e[] = "$phase: payout split must be 1–100 %";
@@ -198,7 +198,7 @@ function pr_rules_of(array $cat, string $value): ?array
         'payout_trade_days' => $po['trade_days'] ?? null, 'payout_min_c' => $c($po['min'] ?? null),
         'payout_max_c' => $c($dll && !empty($po['max_dll']) ? $po['max_dll'] : ($po['max'] ?? null)), 'payout_max_pct' => $po['max_pct'] ?? null,
         'payout_min_bal_c' => $c($po['min_bal'] ?? null), 'payout_cycle_pos' => !empty($po['cycle_pos']) ? true : null,
-        'payout_cycle_min_c' => $c($po['cycle_min'] ?? null), 'payout_ladder_c' => isset($po['ladder']) && is_array($po['ladder']) ? array_map($c, $po['ladder']) : null,
+        'payout_cycle_min_c' => $c($po['cycle_min'] ?? null), 'payout_first_min_c' => $c($po['first_min'] ?? null), 'payout_ladder_c' => isset($po['ladder']) && is_array($po['ladder']) ? array_map($c, $po['ladder']) : null,
         'payout_max_n' => $po['max_payouts'] ?? null, 'payout_split_pct' => $po['split_pct'] ?? null,
     ];
     return ['rules' => $out, 'name' => $p['name'] . ' ' . ($s['size'] / 1000) . 'K', 'firm' => $f['name'], 'price' => $s['price'] ?? null];
@@ -222,17 +222,17 @@ function pr_describe(array $diff, string $lang): string
     $L = [
         'en' => ['target_c' => 'Profit target', 'dd_c' => 'Max loss', 'dd_type' => 'Drawdown type', 'dll_c' => 'Daily loss limit', 'consistency_pct' => 'Consistency', 'min_days' => 'Minimum days',
             'payout_win_days' => 'Winning days for a payout', 'payout_win_min_c' => 'Minimum per winning day', 'payout_trade_days' => 'Trading days for a payout', 'payout_min_c' => 'Minimum payout',
-            'payout_max_c' => 'Maximum per payout', 'payout_max_pct' => 'Max % of the profit', 'payout_min_bal_c' => 'Balance to keep', 'payout_cycle_min_c' => 'Profit since the last payout',
+            'payout_max_c' => 'Maximum per payout', 'payout_max_pct' => 'Max % of the profit', 'payout_min_bal_c' => 'Balance to keep', 'payout_cycle_min_c' => 'Profit since the last payout', 'payout_first_min_c' => 'Profit before the first payout',
             'payout_ladder_c' => 'Payout caps', 'payout_max_n' => 'Max number of payouts', 'payout_cycle_pos' => 'Profitable since the last payout', 'dd_floor_c' => 'Balance to stay above',
             '_none' => 'none', '_yes' => 'yes', '_more' => '+{n} more', 'eod' => 'end of day', 'trade' => 'real time', 'static' => 'static'],
         'fr' => ['target_c' => 'Objectif de profit', 'dd_c' => 'Perte max', 'dd_type' => 'Type de drawdown', 'dll_c' => 'Limite de perte du jour', 'consistency_pct' => 'Consistance', 'min_days' => 'Jours minimum',
             'payout_win_days' => 'Jours gagnants pour un payout', 'payout_win_min_c' => 'Minimum par jour gagnant', 'payout_trade_days' => 'Jours tradés pour un payout', 'payout_min_c' => 'Payout minimum',
-            'payout_max_c' => 'Maximum par payout', 'payout_max_pct' => 'Max % du profit', 'payout_min_bal_c' => 'Solde à garder', 'payout_cycle_min_c' => 'Profit depuis le dernier payout',
+            'payout_max_c' => 'Maximum par payout', 'payout_max_pct' => 'Max % du profit', 'payout_min_bal_c' => 'Solde à garder', 'payout_cycle_min_c' => 'Profit depuis le dernier payout', 'payout_first_min_c' => 'Profit avant le premier payout',
             'payout_ladder_c' => 'Plafonds de payout', 'payout_max_n' => 'Nombre max de payouts', 'payout_cycle_pos' => 'Profitable depuis le dernier payout', 'dd_floor_c' => 'Solde à garder au-dessus de',
             '_none' => 'aucune', '_yes' => 'oui', '_more' => '+{n} autres', 'eod' => 'fin de journée', 'trade' => 'temps réel', 'static' => 'fixe'],
         'es' => ['target_c' => 'Objetivo de beneficio', 'dd_c' => 'Pérdida máx.', 'dd_type' => 'Tipo de drawdown', 'dll_c' => 'Límite de pérdida diaria', 'consistency_pct' => 'Consistencia', 'min_days' => 'Días mínimos',
             'payout_win_days' => 'Días ganadores para un payout', 'payout_win_min_c' => 'Mínimo por día ganador', 'payout_trade_days' => 'Días operados para un payout', 'payout_min_c' => 'Payout mínimo',
-            'payout_max_c' => 'Máximo por payout', 'payout_max_pct' => 'Máx. % del beneficio', 'payout_min_bal_c' => 'Saldo a mantener', 'payout_cycle_min_c' => 'Beneficio desde el último payout',
+            'payout_max_c' => 'Máximo por payout', 'payout_max_pct' => 'Máx. % del beneficio', 'payout_min_bal_c' => 'Saldo a mantener', 'payout_cycle_min_c' => 'Beneficio desde el último payout', 'payout_first_min_c' => 'Beneficio antes del primer payout',
             'payout_ladder_c' => 'Topes de payout', 'payout_max_n' => 'Número máx. de payouts', 'payout_cycle_pos' => 'Rentable desde el último payout', 'dd_floor_c' => 'Saldo mínimo',
             '_none' => 'ninguno', '_yes' => 'sí', '_more' => '+{n} más', 'eod' => 'al cierre', 'trade' => 'tiempo real', 'static' => 'fijo'],
     ][$lang] ?? null;

@@ -57,7 +57,7 @@ async def main():
     ok(not bad, f'{made} accounts created (every firm, type and size), each with its rules, phase and catalogue version' + ('' if not bad else ': ' + '; '.join(bad[:3])))
     names = await pg.evaluate("[...new Set(S.accounts.map(a=>(firm(a.firm_id)||{}).name))].join(', ')")
     ok(all(n.split()[0] in names for n in [f['name'] for f in cat['firms']]), 'firms in the journal: ' + names)   # a firm already in the journal under a short name (« Lucid ») is reused
-    ok('Tradeify' not in [f['name'] for f in cat['firms']] and 'Alpha Futures' not in [f['name'] for f in cat['firms']], 'Tradeify and Alpha Futures (empty) are not offered')
+    ok('Tradeify' not in [f['name'] for f in cat['firms']] and 'Alpha Futures' in [f['name'] for f in cat['firms']], 'Tradeify (empty) is not offered; Alpha Futures is (13 Oct.)')
 
     print('— 2. Topstep: Standard / Consistency')
     await open_form(); await tap('[data-st-ph0=funded]'); await tap('[data-st-firm=topstep]'); await tap('[data-st-size="100000"]')

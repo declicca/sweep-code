@@ -64,7 +64,14 @@ ok($leg['dd_c'] === 250000 && $leg['dd_type'] === 'trade' && $leg['consistency_p
 ok(pr_rules_of($cat, 'apex|apex-legacy|50000|eval|')['rules']['min_days'] === 7, 'Apex Legacy evaluation: 7 minimum days');
 ok((bool) pr_rules_of($cat, 'mffu|mffu-builder|25000|eval|') && pr_rules_of($cat, 'mffu|mffu-builder|25000|eval|')['rules']['dll_c'] === null, 'MyFundedFutures Builder 25K exists, without a daily limit');
 ok(pr_rules_of($cat, 'lucid|luciddirect|150000|funded|')['rules']['dll_c'] === 300000 && pr_rules_of($cat, 'lucid|luciddirect|25000|funded|')['rules']['dll_c'] === null, 'LucidDirect: 150K daily limit $3,000, 25K none');
-ok(empty($fs['tradeify']['programs']) && empty($fs['alpha']['programs']), 'Tradeify and Alpha Futures are still empty (the app hides firms without accounts)');
+ok(empty($fs['tradeify']['programs']), 'Tradeify is still empty (the app hides firms without accounts)');
+// Alpha Futures (13 Oct.): checked by hand on alpha-futures.com and its Payout Policy — the weekly check of 12 Oct. had read « up to 4 times a month » as 4 payouts in all
+$az = pr_rules_of($cat, 'alpha|zero|50000|funded|')['rules']; $ad = pr_rules_of($cat, 'alpha|direct|25000|funded|')['rules']; $aa = pr_rules_of($cat, 'alpha|advanced|50000|funded|')['rules'];
+ok(count($fs['alpha']['programs']) === 4 && $az['payout_max_n'] === null && $ad['payout_max_n'] === null && $aa['payout_max_n'] === null, 'Alpha Futures: 4 account types, no limit on the number of payouts');
+ok($az['payout_min_c'] === 20000 && $az['payout_max_c'] === 150000 && $az['payout_max_pct'] === 50 && $az['payout_win_days'] === 5 && $az['payout_win_min_c'] === 20000 && $az['consistency_pct'] === 40, 'Alpha Zero 50K funded: 5 winning days of $200, $200 to $1,500, 50 % of the profit, 40 %');
+ok($ad['payout_first_min_c'] === 150000 && $ad['payout_cycle_min_c'] === 100000 && $ad['payout_min_c'] === 50000 && $ad['payout_max_c'] === 100000 && $ad['consistency_pct'] === 20 && !$ad['payout_win_days'], 'Alpha Direct 25K: $1,500 before the first payout, then $1,000 since the last one, $500 to $1,000, 20 %');
+ok($aa['payout_min_c'] === 100000 && $aa['payout_max_c'] === 1500000 && $aa['consistency_pct'] === null && $aa['dll_c'] === null, 'Alpha Advanced 50K funded: $1,000 to $15,000, no consistency, no daily limit');
+ok(strpos(pr_describe(['payout_first_min_c' => [null, 150000]], 'fr'), 'Profit avant le premier payout') !== false, 'the new rule has its words in the notifications');
 
 echo "— Simulated weekly check with a payout change\n";
 put_acc('u1', 'a1', ['name' => 'EOD 50K', 'status' => 'active', 'phase' => 'funded', 'preset' => 'apex|apex-eod|50000|funded|', 'rules' => pr_rules_of($cat, 'apex|apex-eod|50000|funded|')['rules']]);
@@ -176,6 +183,12 @@ $st = $run1('tpt', function (array &$a) { $a['programs'][0]['name'] = 'Test'; })
 ok($st['status'] === 'unchanged' && $firmOf('tpt')['programs'][0]['name'] === 'Test → PRO', 'a program read under another name keeps ours (« Test → PRO »): nothing changes (' . $st['status'] . ')');
 $st = $run1('topstep', function (array &$a) { foreach ($a['programs'][0]['sizes'] as &$s) $s['funded']['max_minis'] = ($s['funded']['max_minis'] ?? 0) + 1; });
 ok($st['status'] === 'updated' && $firmOf('topstep')['programs'][0]['sizes'][0]['funded']['max_minis'] >= 1, 'a number read on the pages (max contracts) is still applied automatically (' . $st['status'] . ')');
+
+// Alpha, 12 Oct.: « up to 4 times a month » read as « 4 payouts in all » — a limit on the number of payouts that appears is not applied on its own
+$st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) if (isset($s['funded']['payout'])) $s['funded']['payout']['max_payouts'] = 4; });
+ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'max_payouts none → 4') !== false && pr_rules_of(pr_current(), 'alpha|zero|50000|funded|')['rules']['payout_max_n'] === null, 'a payout count limit read where there was none: to review, not applied (' . ($st['errors'][0] ?? $st['status']) . ')');
+$st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) if (isset($s['funded']['payout'])) unset($s['funded']['payout']['first_min'], $s['funded']['payout']['min'], $s['funded']['payout']['max_pct']); });
+ok(in_array($st['status'], ['unchanged', 'updated'], true) && pr_rules_of(pr_current(), 'alpha|direct|25000|funded|')['rules']['payout_first_min_c'] === 150000 && pr_rules_of(pr_current(), 'alpha|zero|25000|funded|')['rules']['payout_min_c'] === 20000, 'payout rules the pages do not repeat (first target, minimum, 50 %) keep their value (' . $st['status'] . ')');
 
 exec('rm -rf ' . escapeshellarg($DATA));
 echo "\n" . ($n - $fails) . "/$n passed\n";

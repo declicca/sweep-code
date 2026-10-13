@@ -52,7 +52,7 @@ function pr_ask(PDO $pdo, array $firm, string $pages): array
         . '{"programs":[{"id":"short-slug","name":"Account type name as the firm writes it","direct":false,"sizes":[{"size":50000,'
         . '"eval":{"target":3000,"dd":2000,"dd_type":"eod","dll":1000,"dll_optional":true,"consistency":50,"min_days":2,"max_minis":5},'
         . '"funded":{"dd":2000,"dd_type":"eod","dll":null,"consistency":null,"max_minis":5,'
-        . '"payout":{"win_days":5,"win_min":150,"trade_days":null,"split_pct":90,"min":500,"max":2000,"max_dll":null,"max_pct":50,"ladder":null,"min_bal":52100,"max_payouts":null,"cycle_pos":true}},'
+        . '"payout":{"win_days":5,"win_min":150,"trade_days":null,"split_pct":90,"min":500,"max":2000,"max_dll":null,"max_pct":50,"ladder":null,"min_bal":52100,"first_min":null,"cycle_min":null,"max_payouts":null,"cycle_pos":true}},'
         . '"price":{"eval":49,"eval_period":"month","activation":149}}],'
         . '"evidence":[{"url":"https://…official page…","quote":"short sentence from that page"}]}]}' . "\n"
         . "Rules of the fields: dd = maximum loss / drawdown amount; dd_type = \"eod\" (trails the end-of-day balance), \"trade\" (trails in real time / intraday) or \"static\"; "
@@ -61,7 +61,8 @@ function pr_ask(PDO $pdo, array $firm, string $pages): array
         . "Payout fields: win_days = number of winning days required per payout and win_min = the minimum profit for a day to count; trade_days = number of traded days required (any result) when the firm counts days that way; "
         . "min = minimum payout; max = maximum per request; max_dll = maximum per request when the daily loss limit option was taken (null if the same); max_pct = maximum % of the profit or balance per request; "
         . "ladder = list of caps for the 1st, 2nd, 3rd… payout when the cap changes from one payout to the next (null otherwise; null inside the list = no cap); min_bal = the balance that must stay in the account (safety net, buffer zone) minus the minimum payout; "
-        . "max_payouts = maximum number of payouts before the account closes or changes; split_pct = the trader's share of a payout in % (e.g. 90); cycle_pos = true when the account must be profitable since the last payout.\n"
+        . "first_min = profit the account must make since its start before the first payout (a withdrawal profit target), cycle_min = profit it must make since the last payout before the next one; "
+        . "max_payouts = maximum number of payouts in total before the account closes or changes (a limit per period, e.g. « up to 4 times a month », is not max_payouts: null); split_pct = the trader's share of a payout in % (e.g. 90); cycle_pos = true when the account must be profitable since the last payout.\n"
         . "Price fields: eval = evaluation price; eval_period = \"month\" (subscription) or \"once\"; activation = fee to activate the funded account (0 when none).\n"
         . "Keep the same \"id\" as today's catalogue when it is the same account type.\n\n"
         . "Today's catalogue in Sweep (to compare, not to copy):\n$current\n\n"
@@ -97,7 +98,7 @@ function pr_clean_programs(array $programs): array
     $payout = function ($po) use ($num) {
         if (!is_array($po)) return null;
         $o = [];
-        foreach (['win_days', 'win_min', 'trade_days', 'min', 'max', 'max_dll', 'max_pct', 'min_bal', 'max_payouts', 'cycle_min', 'split_pct'] as $k) if ($num($po[$k] ?? null) !== null) $o[$k] = $num($po[$k]);
+        foreach (['win_days', 'win_min', 'trade_days', 'min', 'max', 'max_dll', 'max_pct', 'min_bal', 'max_payouts', 'cycle_min', 'first_min', 'split_pct'] as $k) if ($num($po[$k] ?? null) !== null) $o[$k] = $num($po[$k]);
         if (isset($po['ladder']) && is_array($po['ladder']) && $po['ladder']) $o['ladder'] = array_map(fn($v) => $num($v), array_slice(array_values($po['ladder']), 0, 20));
         if (!empty($po['cycle_pos'])) $o['cycle_pos'] = true;
         return $o ?: null;
@@ -185,6 +186,8 @@ function pr_doubtful(array $old, array $new): array
         $po = (array) ($a[$k]['funded']['payout'] ?? []); $pn = (array) ($s['funded']['payout'] ?? []);
         foreach (['min', 'max', 'max_dll', 'min_bal', 'win_min'] as $f) if ($jump($po[$f] ?? null, $pn[$f] ?? null)) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]} (more than half): to review";
         foreach (['win_days', 'trade_days', 'max_payouts'] as $f) if (isset($po[$f], $pn[$f]) && abs($pn[$f] - $po[$f]) > 3) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]}: to review";
+        // a limit on the number of payouts that appears where there was none (Alpha, 12 Oct.: « up to 4 times a month » read as 4 payouts in all)
+        if (isset($a[$k]['funded']) && !isset($po['max_payouts']) && isset($pn['max_payouts'])) $e[] = "$k payout max_payouts none → {$pn['max_payouts']}: to review";
         if (isset($po['ladder'], $pn['ladder']) && count((array) $po['ladder']) !== count((array) $pn['ladder'])) $e[] = "$k payout ladder changes length: to review";
         foreach (['eval', 'funded'] as $ph) { $x = $a[$k][$ph]['consistency'] ?? null; $y = $s[$ph]['consistency'] ?? null; if (is_numeric($x) && is_numeric($y) && abs($y - $x) > 20) $e[] = "$k $ph consistency $x → $y: to review"; }
         foreach (['eval', 'activation'] as $f) { $x = $a[$k]['price'][$f] ?? null; $y = $s['price'][$f] ?? null; if ($jump($x, $y)) $e[] = "$k price $f $x → $y (more than half): to review"; }

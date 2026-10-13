@@ -122,7 +122,7 @@ async def main():
     # A8 presets
     cat = await pg.evaluate("fetch('api/presets').then(r=>r.json())")
     names = [f['name'] for f in cat['firms']]
-    ok('Tradeify' not in names and 'Alpha Futures' not in names, f'A8 empty firms are not offered ({names})')
+    ok('Tradeify' not in names and 'Alpha Futures' in names, f'A8 an empty firm is not offered (Tradeify), Alpha Futures is since 13 Oct. ({names})')
     rap = await pg.evaluate("SweepPresets.rulesOf('mffu|mffu-rapid-eod|50000|funded|').rules")
     ok(rap['payout_min_c'] == 50000 and rap['payout_min_bal_c'] == 5210000, 'A8 MFFU Rapid EOD 50K funded: payout rules ($500 minimum, balance to keep)')
     ok(not errs, 'no browser error' + ('' if not errs else ': ' + ' | '.join(errs[:3])))
