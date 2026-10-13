@@ -7,7 +7,9 @@ The rules of every Alpha account (SweepPresets.rulesOf) against a table copied b
  - payouts: 5 winning days of $200 (not Direct), minimum per request ($200 / $500 / $1,000 / $500), cap per size, at most
    50 % of the profit per request, 90 % split, and NO limit on the number of payouts (« up to 4 times a month » was read as
    4 payouts in all by the weekly check of 12 Oct.);
- - Direct: a withdrawal target, $1,500 before the first payout on the 25K, then $1,000 since the last one.
+ - Direct: a withdrawal target, $1,500 before the first payout on the 25K, then $1,000 since the last one;
+ - no « profitable since the last payout » (between two requests: 5 new winning days, or the Direct target; added by the
+   check of 13 Oct. after the update, removed the same day).
 Then an Alpha Direct 25K account: $1,200 of profit → not ready (« Profit before the first payout » 1 200 $ / 1 500 $);
 $1,600 → ready, up to $800 (50 %); after a payout, the next target is $1,000 since that payout. The firm picker's summary
 says the targets, and no Alpha account says « up to N payouts ».
@@ -50,7 +52,7 @@ async def main():
           else:
             f1, nx = TARGETS[size] if pid == 'direct' else (None, None)
             want.update({'payout_min_c': c(prog['min']), 'payout_max_c': c(mx), 'payout_max_pct': 50, 'payout_split_pct': 90, 'payout_max_n': None,
-                         'payout_win_days': 5 if prog['win'] else None, 'payout_win_min_c': c(200) if prog['win'] else None, 'payout_first_min_c': c(f1), 'payout_cycle_min_c': c(nx)})
+                         'payout_win_days': 5 if prog['win'] else None, 'payout_win_min_c': c(200) if prog['win'] else None, 'payout_first_min_c': c(f1), 'payout_cycle_min_c': c(nx), 'payout_cycle_pos': None})
           bad = {k: (v, got.get(k)) for k, v in want.items() if got.get(k) != v}
           ok(not bad, f'{tag}: as on the official pages' + (f' — {bad}' if bad else ''))
     ok(n == 22, f'{n} Alpha accounts checked (4 types, 13 sizes, evaluation and funded)')

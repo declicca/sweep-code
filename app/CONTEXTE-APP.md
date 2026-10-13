@@ -177,7 +177,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ## 6. Préréglages des prop firms
 
-- **Catalogue** : `presets/seed.json`, version `2026-10-13a` (règles vérifiées le 7 octobre ; Alpha Futures le 13). Points notables :
+- **Catalogue** : `presets/seed.json`, version `2026-10-13b` (règles vérifiées le 7 octobre ; Alpha Futures le 13). Points notables :
   - Topstep : Combine à 55 % ; financé « Standard » ou « Consistance » ; split 90 %.
   - Apex : programme « Legacy (avant mars 2026) » ; seuil bloqué au départ + 100 $.
   - TPT : 3 jours minimum. MFFU : Builder 25K, règles de payout du Rapid EOD. Lucid : limite journalière du 150K.
@@ -192,7 +192,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
     - une vérification complète qui a lu au moins une firme (« unchanged » ou « updated ») réenregistre le catalogue sur le seed actuel (`pr_finish_run`) : `api/presets` dit `"origin": "checked"` avec la date du jour ;
     - `game/cron.php` (toutes les 15 min) lance cette vérification complète **une fois par version de seed** (`pr_recheck_if_seed_changed`, `presets-status.json` → `recheck_for`), même ratée (la tâche du lundi réessaie) ;
     - `pr_run_all()` (une ligne par firme) sert à `presets/cron.php` et à cette vérification.
-  - **Une limite du nombre de payouts qui apparaît** là où le catalogue n'en a pas → « à revoir » (13 oct., `pr_doubtful`) ; la consigne de lecture dit qu'une fréquence (« 4 fois par mois ») n'est pas `max_payouts`, et décrit `first_min` / `cycle_min`.
+  - **Une condition de payout qui apparaît** là où le catalogue n'en a pas → « à revoir », jamais appliquée seule (13 oct., `pr_doubtful`) : jours gagnants, jours tradés, solde à garder, rentable depuis le dernier payout, objectifs (`cycle_min`, `first_min`), nombre max de payouts, consistance du financé. Elle rend « Prêt pour un payout » plus dur. Une condition déjà au catalogue, lue avec une autre valeur, s'applique toujours. La consigne de lecture dit qu'une fréquence (« 4 fois par mois ») n'est pas `max_payouts`, que `cycle_pos` ne se déduit jamais, et décrit `first_min` / `cycle_min`. Cause : la vérification relancée après le seed du 13 oct. avait ajouté « rentable depuis le dernier payout » à tous les comptes Alpha (la Payout Policy demande 5 nouveaux jours gagnants, ou l'objectif du Direct) ; retiré par le seed `2026-10-13b`.
   - **Une vérification ne retire jamais rien toute seule** (12 oct.) : un compte qui n'est plus trouvé sur les pages (les comptes des traders y sont liés) ou une règle qui n'est plus lue (objectif, drawdown, limite du jour, `dll_optional`, consistance, jours minimum) → « à revoir », rien n'est appliqué ; le nom d'un programme est le nôtre (gardé quand l'id est le même). Cause : la vérification du 8 oct. (refaite le 12) avait retiré l'option de limite du jour de Topstep, que la page officielle propose toujours (« Add a Daily Loss Limit (DLL) at checkout in the Trading Combine », plafonds de payout doublés), et renommé « Test → PRO » de TPT en « Test ». En production : catalogue du 12 oct. 13 h 15 mis de côté (`data/presets-live.before-2026-10-12.json`) puis vérification complète refaite sur le seed. Les chiffres lus (ex. `max_minis`) et les firmes vides (Alpha : 4 programmes lus le 12 oct.) restent appliqués automatiquement.
   - Topstep live (`live.start_pct` 20, `live.floor` 1 000 $) : conforme à la page officielle (mise à jour le 1er juillet 2026) — 20 % du solde **des comptes Express apportés** (plafonné au maximum du live) disponible à l'activation, le reste par tranches de 25 % ; solde à garder au-dessus de 1 000 $.
 - **Tableau Admin « Préréglages »** (admin seulement, `api/admin/presets`) : date de la dernière vérification complète, état par firme, bouton « Vérifier maintenant ».
@@ -449,6 +449,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Nouveaux : `img/.htaccess` et `icons/.htaccess` (durée de cache). Aucun code PHP ou JS modifié.
 
 ### État des tests
+- **Garde-fou des conditions de payout (13 oct.) : 59/59** (suite répartie, 11 min 02 s, avec le commit 1a83762 de la session synchro), sans « RETRY » ; `presets_test.php` 63/63.
 - **Captures + Quantower (étapes 1 à 3, en bêta), fusionnés avec la partie 5 du brief 02 et Alpha Futures (13 oct.) : 59/59** (suite répartie, 11 min 07 s, `caffeinate -dimsu`), sans « RETRY ».
 - **Quantower, étape 3 (13 oct.) : 57/57** (suite répartie, 10 min 23 s, avec le vrai zip Quantower dans les copies servies), sans « RETRY » ; `sync_addon_test.php` 58/58, `e2e_sync_ui` 102/102 (Quantower en bêta : caché à un trader, montré avec `sw.syncBeta`). Reste le test sous Windows.
 - **Quantower, étape 2 (12 oct.) : 57/57** (suite répartie, 10 min 20 s), sans « RETRY » ; `sync_addon_test.php` 57/57 (dont 31 pour Quantower) ; l'add-on Quantower n'est pas encore compilé (étape 3).
