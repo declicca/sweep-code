@@ -141,6 +141,28 @@ def page_tradovate(lang, t):
         T("How to export the Tradovate Performance report as CSV and import it into the Sweep trading journal without duplicates.","Comment exporter le rapport Performance de Tradovate en CSV et l’importer dans le journal Sweep sans doublons.","Cómo exportar el informe Performance de Tradovate en CSV e importarlo en el diario Sweep sin duplicados."),
         f'<p class="meta" style="margin-top:28px">{t(T("On NinjaTrader 8? Connect it once (Settings › Data › Connections) and your trades arrive on their own, no import. Other platforms: import their export (Rithmic, ProjectX, TradingView), a screenshot, or the trade ticket.","Sur NinjaTrader 8 ? Connecte-le une fois (Réglages › Données › Connexions) et tes trades arrivent seuls, sans import. Autres plateformes : importe leur export (Rithmic, ProjectX, TradingView), une capture, ou le ticket de trade.","¿En NinjaTrader 8? Conéctalo una vez (Ajustes › Datos › Conexiones) y tus operaciones llegan solas, sin importar. Otras plataformas: importa su exportación (Rithmic, ProjectX, TradingView), una captura o el ticket de operación."))}</p>')
 
+INSTALL_HELP = T("""<h2>Why install it this way?</h2><p>Sweep is a web app. The icon on your home screen opens the same Sweep you use on a computer, with the same account and the same data. It opens full screen, without the browser bars, and updates arrive on their own: there’s nothing to download from a store. Native iOS and Android apps are on the roadmap.</p>
+<h2>If you don’t see the option</h2><ul>
+<li><b>iPhone:</b> use Safari. “Add to Home Screen” is in the Share menu (the square with an arrow); scroll down the list if you don’t see it right away.</li>
+<li><b>Android:</b> in Chrome’s ⋮ menu, the option can be called “Add to Home screen” instead of “Install app”.</li>
+<li><b>Asked to log in again?</b> On iPhone, the installed app can keep its own session, separate from Safari: log in once from the icon.</li></ul>
+<h2>Your data stays on your account</h2><p>Your trades, journal and screenshots are stored on Sweep’s server, not on the phone. Removing the icon deletes nothing, and a new phone only needs a log-in.</p>
+<h2>On a computer</h2><p>Open app.makeitsweep.com in any recent browser. In Chrome or Edge, the install icon at the right of the address bar adds Sweep to your apps, in its own window.</p>""",
+"""<h2>Pourquoi l’installer comme ça ?</h2><p>Sweep est une app web. L’icône sur ton écran d’accueil ouvre le même Sweep que sur ton ordinateur, avec le même compte et les mêmes données. Il s’ouvre en plein écran, sans les barres du navigateur, et les mises à jour arrivent toutes seules : rien à télécharger dans un magasin d’apps. Des apps iOS et Android natives sont prévues.</p>
+<h2>Si tu ne vois pas l’option</h2><ul>
+<li><b>iPhone :</b> utilise Safari. « Sur l’écran d’accueil » est dans le menu Partager (le carré avec une flèche) ; fais défiler la liste si tu ne le vois pas tout de suite.</li>
+<li><b>Android :</b> dans le menu ⋮ de Chrome, l’option peut s’appeler « Ajouter à l’écran d’accueil » au lieu d’« Installer l’application ».</li>
+<li><b>On te redemande de te connecter ?</b> Sur iPhone, l’app installée peut garder sa propre session, séparée de Safari : connecte-toi une fois depuis l’icône.</li></ul>
+<h2>Tes données restent dans ton compte</h2><p>Tes trades, ton journal et tes captures sont conservés sur le serveur de Sweep, pas sur le téléphone. Retirer l’icône n’efface rien, et un nouveau téléphone n’a besoin que d’une connexion.</p>
+<h2>Sur un ordinateur</h2><p>Ouvre app.makeitsweep.com dans n’importe quel navigateur récent. Dans Chrome ou Edge, l’icône d’installation à droite de la barre d’adresse ajoute Sweep à tes applications, dans sa propre fenêtre.</p>""",
+"""<h2>¿Por qué instalarla así?</h2><p>Sweep es una app web. El icono de tu pantalla de inicio abre el mismo Sweep que usas en el ordenador, con la misma cuenta y los mismos datos. Se abre a pantalla completa, sin las barras del navegador, y las actualizaciones llegan solas: no hay nada que descargar de una tienda. Las apps nativas para iOS y Android están en la hoja de ruta.</p>
+<h2>Si no ves la opción</h2><ul>
+<li><b>iPhone:</b> usa Safari. «Añadir a pantalla de inicio» está en el menú Compartir (el cuadrado con una flecha); desplaza la lista si no la ves enseguida.</li>
+<li><b>Android:</b> en el menú ⋮ de Chrome, la opción puede llamarse «Añadir a pantalla de inicio» en lugar de «Instalar app».</li>
+<li><b>¿Te pide iniciar sesión otra vez?</b> En iPhone, la app instalada puede tener su propia sesión, separada de Safari: inicia sesión una vez desde el icono.</li></ul>
+<h2>Tus datos siguen en tu cuenta</h2><p>Tus operaciones, tu diario y tus capturas se guardan en el servidor de Sweep, no en el teléfono. Quitar el icono no borra nada, y un teléfono nuevo solo necesita iniciar sesión.</p>
+<h2>En un ordenador</h2><p>Abre app.makeitsweep.com en cualquier navegador reciente. En Chrome o Edge, el icono de instalación a la derecha de la barra de direcciones añade Sweep a tus aplicaciones, en su propia ventana.</p>""")
+
 def page_install(lang, t):
     ios = [T("Open <b>app.makeitsweep.com</b> in <b>Safari</b> and log in.","Ouvre <b>app.makeitsweep.com</b> dans <b>Safari</b> et connecte-toi.","Abre <b>app.makeitsweep.com</b> en <b>Safari</b> e inicia sesión."),
            T("Tap <b>Share</b>, then <b>Add to Home Screen</b>.","Touche <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.","Toca <b>Compartir</b> y luego <b>Añadir a pantalla de inicio</b>."),
@@ -153,7 +175,8 @@ def page_install(lang, t):
         T("No App Store needed. Install Sweep from your browser in three taps and open it like any other app.","Pas besoin de l’App Store. Installe Sweep depuis ton navigateur en trois touchers et ouvre-le comme n’importe quelle app.","Sin App Store. Instala Sweep desde el navegador en tres toques y ábrelo como cualquier app."), T("Help","Aide","Ayuda"))
     b = f'''<section style="padding-top:16px"><div class="wrap split"><div class="copy">
 <h2 style="font-size:22px">iPhone</h2>{ol(ios)}<h2 style="font-size:22px;margin-top:44px">Android</h2>{ol(andr)}</div>
-<div class="phones reveal" style="grid-template-columns:repeat(2,minmax(0,1fr));max-width:520px">{phone("login",lang,t(T("Sweep log-in screen on a phone","Écran de connexion Sweep sur téléphone","Pantalla de inicio de Sweep en el teléfono")))}{phone("overview",lang,t(T("Sweep overview on a phone","Aperçu Sweep sur téléphone","Resumen de Sweep en el teléfono")))}</div></div></section>'''
+<div class="phones reveal" style="grid-template-columns:repeat(2,minmax(0,1fr));max-width:520px">{phone("login",lang,t(T("Sweep log-in screen on a phone","Écran de connexion Sweep sur téléphone","Pantalla de inicio de Sweep en el teléfono")))}{phone("overview",lang,t(T("Sweep overview on a phone","Aperçu Sweep sur téléphone","Resumen de Sweep en el teléfono")))}</div></div></section>
+<section class="rule"><div class="wrap narrow"><article class="article">{t(INSTALL_HELP)}</article></div></section>'''
     ld = jsonld({"@context":"https://schema.org","@type":"HowTo","name":t(T("Install Sweep on iPhone","Installer Sweep sur iPhone","Instalar Sweep en iPhone")),"step":[{"@type":"HowToStep","position":i+1,"text":re.sub("<[^>]+>","",t(s))} for i,s in enumerate(ios)]})
     return (t(T("Install the Sweep app on iPhone and Android","Installer l’app Sweep sur iPhone et Android","Instalar la app Sweep en iPhone y Android")),
             t(T("Add Sweep to your iPhone or Android home screen from Safari or Chrome. Full screen, fast, no App Store needed, in three taps.","Ajoute Sweep à l’écran d’accueil de ton iPhone ou Android depuis Safari ou Chrome. Plein écran, rapide, sans App Store, en trois touchers.","Añade Sweep a la pantalla de inicio de tu iPhone o Android desde Safari o Chrome. Pantalla completa, rápido, sin App Store.")),
@@ -234,6 +257,34 @@ def page_about(lang, t):
         ("bolt",T("No signals, no hype","Ni signaux ni hype","Sin señales ni exageraciones"),T("Sweep shows your data. The decisions stay yours.","Sweep montre tes données. Les décisions restent les tiennes.","Sweep muestra tus datos. Las decisiones son tuyas."))]) + '</div></section>'
     return (t(T("About Sweep","À propos de Sweep","Acerca de Sweep")), t(T("Sweep is a trading journal built in Quebec by a futures trader, for futures and prop traders.","Sweep est un journal de trading conçu au Québec par un trader de futures, pour les traders de futures et prop.","Sweep es un diario de trading creado en Quebec por un trader de futuros, para traders de futuros y prop.")), hero + b + final_cta(lang, t), "")
 
+CONTACT_HELP = T("""<h2>Get a faster answer</h2><ul>
+<li><b>Say which account.</b> Your Sweep username or the email you signed up with. Never send your password: we don’t need it to help you.</li>
+<li><b>Describe what you see.</b> The screen, what you expected, what happened instead, and a screenshot if you can.</li>
+<li><b>Add your device.</b> Phone or computer, and the browser (Safari, Chrome, Edge…).</li>
+<li><b>For an import or a sync,</b> name the platform (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) and the firm.</li></ul>
+<h2>Answers you may find right away</h2><p>Importing trades: <a href="@import.html">how to import your trades</a>. Sweep on your phone: <a href="@install.html">install it in three taps</a>. Your data, export and deletion: <a href="@security.html">security and data</a>. Everything else: the <a href="@faq.html">FAQ</a>.</p>
+<h2>Ideas and bugs, from the app</h2><p>You can also send an idea or a bug report from inside Sweep. We keep each one with its status, so we can follow up and tell you when it ships.</p>
+<h2>A firm’s rule looks wrong?</h2><p>Tell us the firm, the account type and the page where you read the rule. We check it against the firm’s official pages and fix the preset for every trader.</p>
+<h2>Privacy requests</h2><p>To access, correct or delete your personal information, write to us from the email on your account, so we know it’s you. You can also export everything or delete your account yourself, in Settings. We answer privacy requests within 30 days.</p>""",
+"""<h2>Pour une réponse plus rapide</h2><ul>
+<li><b>Dis-nous quel compte.</b> Ton nom d’utilisateur Sweep ou le courriel de ton inscription. N’envoie jamais ton mot de passe : on n’en a pas besoin pour t’aider.</li>
+<li><b>Décris ce que tu vois.</b> L’écran, ce que tu attendais, ce qui s’est passé à la place, et une capture si tu peux.</li>
+<li><b>Précise ton appareil.</b> Téléphone ou ordinateur, et le navigateur (Safari, Chrome, Edge…).</li>
+<li><b>Pour un import ou une synchro,</b> nomme la plateforme (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) et la firme.</li></ul>
+<h2>Des réponses tout de suite</h2><p>Importer tes trades : <a href="@import.html">comment importer tes trades</a>. Sweep sur ton téléphone : <a href="@install.html">l’installer en trois touchers</a>. Tes données, l’export et la suppression : <a href="@security.html">sécurité et données</a>. Tout le reste : la <a href="@faq.html">FAQ</a>.</p>
+<h2>Idées et bugs, depuis l’app</h2><p>Tu peux aussi envoyer une idée ou signaler un bug directement dans Sweep. On garde chacun avec son statut, pour y donner suite et te dire quand c’est livré.</p>
+<h2>Une règle de firme te semble fausse ?</h2><p>Dis-nous la firme, le type de compte et la page où tu as lu la règle. On la vérifie sur les pages officielles de la firme et on corrige le préréglage pour tous les traders.</p>
+<h2>Demandes de confidentialité</h2><p>Pour consulter, corriger ou supprimer tes renseignements personnels, écris-nous depuis le courriel de ton compte, pour qu’on sache que c’est toi. Tu peux aussi tout exporter ou supprimer ton compte toi-même, dans les Réglages. On répond aux demandes de confidentialité dans un délai de 30 jours.</p>""",
+"""<h2>Para una respuesta más rápida</h2><ul>
+<li><b>Dinos qué cuenta.</b> Tu usuario de Sweep o el correo con el que te registraste. No envíes nunca tu contraseña: no la necesitamos para ayudarte.</li>
+<li><b>Describe lo que ves.</b> La pantalla, lo que esperabas, lo que pasó en su lugar y una captura si puedes.</li>
+<li><b>Indica tu dispositivo.</b> Teléfono u ordenador, y el navegador (Safari, Chrome, Edge…).</li>
+<li><b>Para una importación o una sincronización,</b> indica la plataforma (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) y la firma.</li></ul>
+<h2>Respuestas al momento</h2><p>Importar operaciones: <a href="@import.html">cómo importar tus operaciones</a>. Sweep en tu teléfono: <a href="@install.html">instálalo en tres toques</a>. Tus datos, la exportación y el borrado: <a href="@security.html">seguridad y datos</a>. Todo lo demás: las <a href="@faq.html">preguntas frecuentes</a>.</p>
+<h2>Ideas y errores, desde la app</h2><p>También puedes enviar una idea o avisar de un error desde dentro de Sweep. Guardamos cada uno con su estado para darle seguimiento y avisarte cuando esté listo.</p>
+<h2>¿Una regla de una firma parece incorrecta?</h2><p>Dinos la firma, el tipo de cuenta y la página donde leíste la regla. La revisamos en las páginas oficiales de la firma y corregimos el preajuste para todos los traders.</p>
+<h2>Solicitudes de privacidad</h2><p>Para consultar, corregir o eliminar tu información personal, escríbenos desde el correo de tu cuenta, para saber que eres tú. También puedes exportarlo todo o eliminar tu cuenta tú mismo, en Ajustes. Respondemos a las solicitudes de privacidad en un plazo de 30 días.</p>""")
+
 def page_contact(lang, t):
     hero = page_hero(t, T("Talk to us.","Écris-nous.","Escríbenos."), T("Questions, feedback, a bug or a feature you need. A real person reads every message.","Questions, commentaires, un bug ou une fonctionnalité qui te manque. Une vraie personne lit chaque message.","Preguntas, comentarios, un error o una función que necesitas. Una persona real lee cada mensaje."), T("Contact","Contact","Contacto"))
     b = f'''<section style="padding-top:16px"><div class="wrap"><div class="grid g2">
@@ -241,7 +292,8 @@ def page_contact(lang, t):
 <div>{ico(I["key"])}<h3>{t(T("Account help","Aide pour ton compte","Ayuda con tu cuenta"))}</h3><p>{t(T("Forgot your password? Use “Forgot password?” on the log-in screen to get a reset link by email.","Mot de passe oublié? Utilise « Mot de passe oublié? » sur l’écran de connexion pour recevoir un lien par courriel.","¿Olvidaste tu contraseña? Usa «¿Olvidaste tu contraseña?» en la pantalla de inicio para recibir un enlace por correo."))}</p><div class="cta-row"><a class="btn btn-line" href="{APP}">{t(LOGIN)}</a></div></div>
 </div>
 <div class="follow"><div><h3>{t(T("Follow Sweep","Suis Sweep","Sigue a Sweep"))}</h3><p class="muted">{t(T(f"Tips, product updates and <a href=\"{href(lang, '100')}\">the first 100</a>, on Instagram, TikTok and Facebook.",f"Conseils, nouveautés et <a href=\"{href(lang, '100')}\">les 100 premiers</a>, sur Instagram, TikTok et Facebook.",f"Consejos, novedades y <a href=\"{href(lang, '100')}\">los primeros 100</a>, en Instagram, TikTok y Facebook."))}</p></div>{social_links("social big")}</div>
-<p class="meta" style="margin-top:28px"><a href="{href(lang, "about.html")}">Sweep Inc.</a> · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2, Canada</p></div></section>'''
+<p class="meta" style="margin-top:28px"><a href="{href(lang, "about.html")}">Sweep Inc.</a> · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2, Canada</p></div></section>
+<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(CONTACT_HELP))}</article></div></section>'''
     return (t(T("Contact Sweep","Contacter Sweep","Contactar con Sweep")), t(T(f"Contact the Sweep team at {EMAIL} for support, privacy requests, press and feedback. Write to us in English, French or Spanish.",f"Joins l’équipe Sweep à {EMAIL} pour du soutien, une demande de confidentialité, la presse ou tes commentaires, en français, en anglais ou en espagnol.",f"Contacta al equipo de Sweep en {EMAIL} para soporte, privacidad, prensa y comentarios. Escríbenos en español, inglés o francés.")), hero + b, "")
 
 def page_changelog(lang, t):

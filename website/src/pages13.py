@@ -131,6 +131,28 @@ def page_glossary(lang, t):
             hero + b + final_cta(lang, t), ld)
 
 # ------------------------------------------------------------------ market hours
+HOURS_HELP = T("""<h2>What each session means for a futures trader</h2><ul>
+<li><b>Asia, 6:00 p.m. to 3:00 a.m. New York time.</b> The week opens on Sunday at 6:00 p.m. These are usually the quietest hours on index futures, though prices still move on news from Asia.</li>
+<li><b>London, 3:00 to 8:00 a.m.</b> Volume picks up, especially on gold, crude oil and the euro (6E).</li>
+<li><b>New York, 9:30 a.m. to 4:00 p.m.</b> The U.S. stock market is open: the most volume on index futures, above all in the first hour. Many U.S. <a href="@release-dates.html">economic releases</a> come out at 8:30 a.m., just before.</li>
+<li><b>Daily break, 5:00 to 6:00 p.m.</b> Globex closes for an hour every weekday, and the week ends on Friday at 5:00 p.m. Many prop firms also require you to be flat before a set time in the afternoon: check your firm’s rule.</li></ul>
+<h2>Daylight saving time</h2><p>CME hours are set in U.S. time, so the New York times above don’t change during the year. The U.S. changes its clocks in mid-March and early November, Europe in late March and late October: for a few weeks, the gap with New York shifts by an hour. This page converts with your device’s time zone, so the “Your time” column stays right.</p>
+<h2>Holidays</h2><p>On U.S. holidays such as Thanksgiving, Christmas or Independence Day, CME closes early or stays closed, and the hours differ by product. Check the CME Group holiday calendar before you plan the session.</p>""",
+"""<h2>Ce que chaque session veut dire pour un trader de futures</h2><ul>
+<li><b>Asie, de 18 h à 3 h, heure de New York.</b> La semaine ouvre le dimanche à 18 h. Ce sont en général les heures les plus calmes sur les indices, même si les prix bougent quand même sur les nouvelles d’Asie.</li>
+<li><b>Londres, de 3 h à 8 h.</b> Le volume monte, surtout sur l’or, le pétrole brut et l’euro (6E).</li>
+<li><b>New York, de 9 h 30 à 16 h.</b> La bourse américaine est ouverte : c’est le plus gros volume sur les indices, surtout la première heure. Beaucoup d’<a href="@release-dates.html">annonces économiques</a> américaines sortent à 8 h 30, juste avant.</li>
+<li><b>Pause quotidienne, de 17 h à 18 h.</b> Globex ferme une heure chaque jour de semaine, et la semaine se termine le vendredi à 17 h. Beaucoup de prop firms exigent aussi d’être sans position avant une certaine heure l’après-midi : vérifie la règle de ta firme.</li></ul>
+<h2>Heure avancée</h2><p>Les heures du CME sont fixées à l’heure américaine : les heures de New York ci-dessus ne changent pas pendant l’année. Les États-Unis changent d’heure à la mi-mars et au début de novembre, l’Europe à la fin mars et à la fin octobre : pendant quelques semaines, l’écart avec New York bouge d’une heure. Cette page convertit avec le fuseau de ton appareil, donc la colonne « Ton heure » reste juste.</p>
+<h2>Jours fériés</h2><p>Les jours fériés américains, comme l’Action de grâce, Noël ou le 4 juillet, le CME ferme plus tôt ou reste fermé, et les heures varient selon le produit. Vérifie le calendrier des jours fériés du CME Group avant de planifier ta séance.</p>""",
+"""<h2>Qué significa cada sesión para un trader de futuros</h2><ul>
+<li><b>Asia, de 18:00 a 3:00 hora de Nueva York.</b> La semana abre el domingo a las 18:00. Suelen ser las horas más tranquilas en los índices, aunque los precios se mueven igual con las noticias de Asia.</li>
+<li><b>Londres, de 3:00 a 8:00.</b> El volumen sube, sobre todo en el oro, el crudo y el euro (6E).</li>
+<li><b>Nueva York, de 9:30 a 16:00.</b> La bolsa de EE. UU. está abierta: es el mayor volumen en los índices, sobre todo la primera hora. Muchos <a href="@release-dates.html">datos económicos</a> de EE. UU. salen a las 8:30, justo antes.</li>
+<li><b>Pausa diaria, de 17:00 a 18:00.</b> Globex cierra una hora cada día laborable, y la semana termina el viernes a las 17:00. Muchas prop firms también exigen estar sin posición antes de cierta hora por la tarde: revisa la regla de tu firma.</li></ul>
+<h2>Horario de verano</h2><p>El horario de CME se fija en hora de EE. UU., así que las horas de Nueva York de arriba no cambian en todo el año. EE. UU. cambia la hora a mediados de marzo y a principios de noviembre, Europa a finales de marzo y a finales de octubre: durante unas semanas, la diferencia con Nueva York se mueve una hora. Esta página convierte con la zona horaria de tu dispositivo, así que la columna «Tu hora» sigue siendo correcta.</p>
+<h2>Festivos</h2><p>En los festivos de EE. UU., como Acción de Gracias, Navidad o el 4 de julio, CME cierra antes o no abre, y el horario cambia según el producto. Consulta el calendario de festivos de CME Group antes de planificar la sesión.</p>""")
+
 def page_hours(lang, t):
     hero = page_hero(t, T("Futures market hours, in your time zone.","Heures des marchés futures, dans ton fuseau horaire.","Horario de los mercados de futuros, en tu zona horaria."),
         T("CME Globex sessions converted to your local time, with what’s open right now.","Les sessions CME Globex converties à ton heure locale, avec ce qui est ouvert en ce moment.","Las sesiones de CME Globex convertidas a tu hora local, con lo que está abierto ahora."), T("Market hours","Heures de marché","Horario"))
@@ -153,12 +175,41 @@ tick();setInterval(tick,30000);}})();</script>'''
     note = T("Hours for CME Globex equity index, energy, metals and FX futures. Holiday hours differ: check the CME Group holiday calendar. Session names are conventions.",
              "Heures CME Globex pour les futures sur indices, énergie, métaux et devises. Les jours fériés ont des heures différentes : vérifie le calendrier des jours fériés du CME Group. Les noms des sessions sont des conventions.",
              "Horario de CME Globex para futuros de índices, energía, metales y divisas. Los festivos tienen otro horario: consulta el calendario de festivos de CME Group. Los nombres de las sesiones son convenciones.")
-    b = f'<section style="padding-top:8px"><div class="wrap narrow">{clock}{tbl}<p class="fine">{t(note)}</p></div></section>' + js
+    b = (f'<section style="padding-top:8px"><div class="wrap narrow">{clock}{tbl}<p class="fine">{t(note)}</p></div></section>'
+         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(HOURS_HELP))}</article></div></section>' + js)
     return (t(T("Futures market hours in your time zone (CME Globex) · Sweep","Heures des futures (CME Globex) dans ton fuseau · Sweep","Horario de futuros en tu zona horaria (CME Globex) · Sweep")),
             t(T("CME Globex futures hours converted to your local time: Asia, London and New York sessions, daily break, and whether the market is open now.","Les heures CME Globex converties à ton heure locale : sessions Asie, Londres et New York, pause quotidienne, et si le marché est ouvert maintenant.","El horario de CME Globex en tu hora local: sesiones de Asia, Londres y Nueva York, pausa diaria y si el mercado está abierto ahora.")),
             hero + b + final_cta(lang, t), "")
 
 # ------------------------------------------------------------------ press kit
+PRESS_FACTS = T("""<h2>Sweep at a glance</h2><ul>
+<li><b>Company:</b> Sweep Inc., Laval, Quebec, Canada.</li>
+<li><b>Launched:</b> October 1, 2026, after months of testing by futures traders in the Discord community where it was born.</li>
+<li><b>Product:</b> a trading journal for futures and prop firm traders, as a web app on phone and computer, in English, French and Spanish.</li>
+<li><b>Devices:</b> any recent browser on a computer, and an app on the iPhone or Android home screen (<a href="@install.html">how to install it</a>).</li>
+<li><b>Prop firms:</b> rules preloaded for {FIRMS_N} futures prop firms and checked every week against their official pages.</li>
+<li><b>Trades:</b> imports from Tradovate, TopstepX, Rithmic, NinjaTrader 8 and Quantower, automatic sync from NinjaTrader 8, or a trade logged from a screenshot.</li>
+<li><b>Price:</b> a free plan, forever; Pro at $19 a month or $159 a year and Elite at $39 a month or $329 a year, with 60 days of Pro for every new account. See <a href="@pricing.html">pricing</a>.</li></ul>
+<h2>Writing about Sweep</h2><p>The description at the top of this page can be quoted as is. In text, write “Sweep” with a capital S; the lowercase “sweep” is only for the wordmark. The screenshots use demo data: please don’t present them as real trading results. Sweep isn’t affiliated with any prop firm, broker or exchange. For an interview, figures or a product demo, write to us.</p>""",
+"""<h2>Sweep en bref</h2><ul>
+<li><b>Entreprise :</b> Sweep Inc., Laval, Québec, Canada.</li>
+<li><b>Lancement :</b> 1er octobre 2026, après des mois de tests par des traders de futures de la communauté Discord où il est né.</li>
+<li><b>Produit :</b> un journal de trading pour les traders de futures et de prop firms, en app web sur téléphone et ordinateur, en français, en anglais et en espagnol.</li>
+<li><b>Appareils :</b> tout navigateur récent sur ordinateur, et une app sur l’écran d’accueil de l’iPhone ou d’Android (<a href="@install.html">comment l’installer</a>).</li>
+<li><b>Prop firms :</b> règles préremplies pour {FIRMS_N} prop firms de futures et vérifiées chaque semaine sur leurs pages officielles.</li>
+<li><b>Trades :</b> imports depuis Tradovate, TopstepX, Rithmic, NinjaTrader 8 et Quantower, synchro automatique depuis NinjaTrader 8, ou un trade ajouté à partir d’une capture.</li>
+<li><b>Prix :</b> un forfait gratuit, pour toujours ; Pro à 19 $ par mois ou 159 $ par an et Elite à 39 $ par mois ou 329 $ par an, avec 60 jours de Pro pour chaque nouveau compte. Voir les <a href="@pricing.html">tarifs</a>.</li></ul>
+<h2>Écrire sur Sweep</h2><p>La description en haut de cette page peut être citée telle quelle. Dans un texte, écris « Sweep » avec une majuscule ; le « sweep » en minuscules est réservé au logo. Les captures utilisent des données de démonstration : merci de ne pas les présenter comme de vrais résultats de trading. Sweep n’est affilié à aucune prop firm, aucun courtier ni aucune bourse. Pour une entrevue, des chiffres ou une démo du produit, écris-nous.</p>""",
+"""<h2>Sweep en breve</h2><ul>
+<li><b>Empresa:</b> Sweep Inc., Laval, Quebec, Canadá.</li>
+<li><b>Lanzamiento:</b> 1 de octubre de 2026, tras meses de pruebas con traders de futuros de la comunidad de Discord donde nació.</li>
+<li><b>Producto:</b> un diario de trading para traders de futuros y de prop firms, como app web en el teléfono y el ordenador, en español, inglés y francés.</li>
+<li><b>Dispositivos:</b> cualquier navegador reciente en el ordenador, y una app en la pantalla de inicio del iPhone o Android (<a href="@install.html">cómo instalarla</a>).</li>
+<li><b>Prop firms:</b> reglas precargadas para {FIRMS_N} prop firms de futuros y revisadas cada semana en sus páginas oficiales.</li>
+<li><b>Operaciones:</b> importación desde Tradovate, TopstepX, Rithmic, NinjaTrader 8 y Quantower, sincronización automática desde NinjaTrader 8, o una operación registrada desde una captura.</li>
+<li><b>Precio:</b> un plan gratuito, para siempre; Pro a 19 $ al mes o 159 $ al año y Elite a 39 $ al mes o 329 $ al año, con 60 días de Pro para cada cuenta nueva. Mira los <a href="@pricing.html">precios</a>.</li></ul>
+<h2>Escribir sobre Sweep</h2><p>La descripción al principio de esta página se puede citar tal cual. En un texto, escribe «Sweep» con mayúscula; «sweep» en minúsculas es solo para el logotipo. Las capturas usan datos de demostración: no las presentes como resultados reales de trading. Sweep no está afiliado a ninguna prop firm, bróker ni bolsa. Para una entrevista, cifras o una demo del producto, escríbenos.</p>""")
+
 def page_press(lang, t):
     hero = page_hero(t, T("Press kit.","Kit presse.","Kit de prensa."), T("Everything you need to write about Sweep or feature it in a video.","Tout ce qu’il faut pour parler de Sweep ou le montrer en vidéo.","Todo lo necesario para hablar de Sweep o mostrarlo en un vídeo."), T("Press","Presse","Prensa"))
     boiler = T("Sweep is a trading journal for futures prop firm traders. It keeps your platform’s real numbers, follows your firm’s real rules from evaluation to funded to live, logs a trade from a screenshot in seconds, and builds a daily routine that rewards discipline, never profit. Sweep is made by Sweep Inc. in Laval, Quebec, and is available in English, French and Spanish at makeitsweep.com.",
@@ -173,6 +224,7 @@ def page_press(lang, t):
     shots = "".join(slot(n,"desktop",t(T("Sweep screen, demo data","Écran de Sweep, données de démonstration","Pantalla de Sweep, datos de demostración")),t,cap=False) for n in ("v6-01-today-d.webp","v6-08-payout-conditions-d.webp","v6-07-stats-d.webp"))
     b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("About Sweep","À propos de Sweep","Sobre Sweep"))}</h2></div><p class="lead">{t(boiler).replace("makeitsweep.com", f'<a href="{href(lang, "index.html")}">makeitsweep.com</a>')}</p>'
          f'<p class="meta"><a href="{href(lang, "contact.html")}">{t(T("Contact","Contact","Contacto"))}</a> : <a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{href(lang, "about.html")}">{t(T("Our story","Notre histoire","Nuestra historia"))}</a> · <a href="{href(lang, "changelog.html")}">{t(T("What’s new","Nouveautés","Novedades"))}</a></p></div></section>'
+         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(PRESS_FACTS).replace("{FIRMS_N}", str(FIRMS_N)))}</article></div></section>'
          f'<section class="rule"><div class="wrap"><div class="head"><h2>{t(T("Logo and files","Logo et fichiers","Logo y archivos"))}</h2><p class="lead">{t(T("Always lowercase “sweep” in the wordmark. Don’t stretch, recolor or add effects to the logo; the blue wick stays blue.","Le mot-symbole s’écrit toujours en minuscules : « sweep ». N’étire pas le logo, ne change pas ses couleurs et n’y ajoute pas d’effet ; la mèche bleue reste bleue.","El logotipo siempre en minúsculas: «sweep». No estires el logo, no cambies sus colores ni añadas efectos; la mecha azul sigue siendo azul."))}</p></div>'
          f'<div class="tool-row">{fl}</div><div class="swatches">{cl}</div></div></section>'
          f'<section class="rule"><div class="wrap"><div class="head"><h2>{t(T("Screenshots","Captures","Capturas"))}</h2><p class="lead">{t(T("Real app screens with demo data. Free to use when writing about Sweep.","De vrais écrans de l’app avec des données de démonstration. Libres d’utilisation pour parler de Sweep.","Pantallas reales de la app con datos de demostración. De uso libre para hablar de Sweep."))}</p></div><div class="press-shots">{shots}</div></div></section>')

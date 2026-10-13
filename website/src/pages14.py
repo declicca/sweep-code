@@ -7,12 +7,35 @@ ITEMS = [
  ("check", T("Discipline checklist","Checklist de discipline","Checklist de disciplina"), T("Eight yes-or-no questions before every trade, and a weekly review on the same page.","Huit questions oui ou non avant chaque trade, et une revue de la semaine sur la même page.","Ocho preguntas de sí o no antes de cada operación y una revisión semanal en la misma página.")),
 ]
 
+TPL_HELP = T("""<h2>How to use them</h2><ul>
+<li><b>Trading plan: once, then every month.</b> Fill it in before your next session and keep it next to your screen. Review it once a month, or when your account changes: a new evaluation, a funded account, a new firm.</li>
+<li><b>Daily journal: every session.</b> Five minutes before the open for your bias, levels and scenarios, one line per trade during the session, and four questions after the close.</li>
+<li><b>Discipline checklist: before every trade.</b> Eight yes-or-no questions; a “no” means no trade. Once a week, count your “no” answers on the same page: they show which rule slips first.</li></ul>
+<h2>On a prop account</h2><p>Write your firm’s numbers in the plan: max loss, daily loss limit, consistency rule and payout conditions, then your own limits, set below the firm’s. Each firm’s current rules are on our <a href="@prop-firms/index.html">prop firm rules pages</a>.</p>
+<h2>Printing</h2><p>Each template is a one-page PDF in U.S. Letter size, in English, French and Spanish. It prints fine on A4: choose “Fit to page” in the print window. Print a stack of daily journals and checklists, and a single trading plan.</p>
+<h2>Going further</h2><p>The <a href="@trading-journal-routine.html">daily journal routine</a> shows how to fill the journal in a few minutes a day, and the <a href="@glossary.html">glossary</a> explains the prop firm terms you’ll write in your plan: max loss, consistency, payout.</p>""",
+"""<h2>Comment les utiliser</h2><ul>
+<li><b>Plan de trading : une fois, puis chaque mois.</b> Remplis-le avant ta prochaine séance et garde-le à côté de ton écran. Revois-le une fois par mois, ou quand ton compte change : nouvelle évaluation, compte financé, nouvelle firme.</li>
+<li><b>Journal quotidien : à chaque séance.</b> Cinq minutes avant l’ouverture pour ton biais, tes niveaux et tes scénarios, une ligne par trade pendant la séance, et quatre questions après la clôture.</li>
+<li><b>Checklist de discipline : avant chaque trade.</b> Huit questions oui ou non ; un « non » veut dire pas de trade. Une fois par semaine, compte tes « non » sur la même page : ils montrent quelle règle lâche en premier.</li></ul>
+<h2>Sur un compte prop</h2><p>Écris les chiffres de ta firme dans le plan : perte max, limite de perte quotidienne, règle de consistance et conditions de payout, puis tes propres limites, plus basses que celles de la firme. Les règles actuelles de chaque firme sont sur nos <a href="@prop-firms/index.html">pages de règles des prop firms</a>.</p>
+<h2>Impression</h2><p>Chaque modèle est un PDF d’une page au format Lettre, en français, en anglais et en espagnol. Il s’imprime aussi en A4 : choisis « Ajuster à la page » dans la fenêtre d’impression. Imprime une pile de journaux et de checklists, et un seul plan de trading.</p>
+<h2>Pour aller plus loin</h2><p>La <a href="@trading-journal-routine.html">routine de journal</a> montre comment remplir le journal en quelques minutes par jour, et le <a href="@glossary.html">lexique</a> explique les termes des prop firms que tu écriras dans ton plan : perte max, consistance, payout.</p>""",
+"""<h2>Cómo usarlas</h2><ul>
+<li><b>Plan de trading: una vez y luego cada mes.</b> Rellénalo antes de tu próxima sesión y tenlo junto a tu pantalla. Revísalo una vez al mes o cuando cambie tu cuenta: una nueva evaluación, una cuenta fondeada, una nueva firma.</li>
+<li><b>Diario: en cada sesión.</b> Cinco minutos antes de la apertura para tu sesgo, tus niveles y tus escenarios, una línea por operación durante la sesión y cuatro preguntas al cierre.</li>
+<li><b>Checklist de disciplina: antes de cada operación.</b> Ocho preguntas de sí o no; un «no» significa que no hay operación. Una vez por semana, cuenta tus «no» en la misma página: muestran qué regla falla primero.</li></ul>
+<h2>En una cuenta prop</h2><p>Escribe las cifras de tu firma en el plan: pérdida máx., límite de pérdida diaria, regla de consistencia y condiciones de payout, y luego tus propios límites, por debajo de los de la firma. Las reglas actuales de cada firma están en nuestras <a href="@prop-firms/index.html">páginas de reglas de las prop firms</a>.</p>
+<h2>Impresión</h2><p>Cada plantilla es un PDF de una página en tamaño Carta, en español, inglés y francés. También se imprime en A4: elige «Ajustar a la página» en la ventana de impresión. Imprime un montón de diarios y checklists, y un solo plan de trading.</p>
+<h2>Para ir más lejos</h2><p>La <a href="@trading-journal-routine.html">rutina de diario</a> muestra cómo rellenar el diario en pocos minutos al día, y el <a href="@glossary.html">glosario</a> explica los términos de las prop firms que escribirás en tu plan: pérdida máx., consistencia, payout.</p>""")
+
 def page_templates(lang, t):
     hero = page_hero(t, T("Free trading templates.","Modèles de trading gratuits.","Plantillas de trading gratuitas."),
         T("Print them, fill them in, keep them next to your screen. No email needed.","Imprime-les, remplis-les, garde-les à côté de ton écran. Sans courriel.","Imprímelas, rellénalas y tenlas junto a tu pantalla. Sin email."), T("Templates","Modèles","Plantillas"))
     fl = TPL[lang]
     cards = "".join(f'<a class="tool-card" href="/templates/{lang}/{fl[i]}.pdf" download data-track="template_{TPL["en"][i]}">{ico(I[ic])}<h2>{t(n)}</h2><p>{t(d)}</p><span class="go">{t(T("Download the PDF","Télécharger le PDF","Descargar el PDF"))} ↓</span></a>' for i,(ic,n,d) in enumerate(ITEMS))
     b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
+         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(TPL_HELP))}</article></div></section>'
          f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Paper is a start. Sweep does the rest.","Le papier, c’est un début. Sweep fait le reste.","El papel es un comienzo. Sweep hace el resto."))}</h2>'
          f'<p class="lead">{t(T("Your checklist is on the same screen as every trade, your plan feeds the Plan ring, and your weekly review starts from your real numbers.","Ta checklist est sur le même écran que chaque trade, ton plan nourrit l’anneau Plan, et ta revue de la semaine part de tes vrais chiffres.","Tu checklist está en la misma pantalla que cada operación, tu plan alimenta el anillo Plan y tu revisión semanal parte de tus números reales."))}</p></div>'
          f'</div></section>')

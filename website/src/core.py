@@ -535,6 +535,10 @@ def add_links(lang, page, body):
         out.append("".join(p for p, _ in pieces))
     return "".join(out)
 
+def localize(lang, x):
+    """Links written href="@page.html" in shared texts point to that page in the reader's language."""
+    return re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', x)
+
 def nbsp(lang, body):
     """French and Spanish typography in visible text: a number never splits from its thousands or its unit,
     and in French « : ; ? ! » never start a line. Scripts, styles and tag attributes are left alone."""
