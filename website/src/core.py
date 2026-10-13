@@ -289,6 +289,7 @@ def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
     if page.endswith(("-release-dates.html", "-meeting-dates.html")): return "release-dates.html"
+    if page == "prop-firm-rule-changes.html": return "prop-firms/index.html"
     if page in CALC_PAGES: return "tools.html"
     if page in GUIDE_PAGES: return "guides.html"
     return None
@@ -486,6 +487,7 @@ REL_INFO = {
  "prop-firm-tracker.html": (T("Prop firm tracker","Suivi des comptes prop","Seguimiento de cuentas prop"), T("Every account, where it stands.","Chaque compte, là où il en est.","Cada cuenta, cómo va.")),
  "payout-tracker.html": (T("Payout tracker","Suivi des payouts","Seguimiento de payouts"), T("From request to paid, and your real net.","De la demande au paiement, et ton vrai net.","De la solicitud al pago, y tu neto real.")),
  "free-trading-journal.html": (T("Free trading journal","Journal de trading gratuit","Diario de trading gratis"), T("What stays free, forever.","Ce qui reste gratuit, pour toujours.","Lo que sigue siendo gratis, para siempre.")),
+ "prop-firm-rule-changes.html": (T("Prop firm rule changes","Changements de règles","Cambios de reglas"), T("Every change, dated, with its source.","Chaque changement, daté, avec sa source.","Cada cambio, fechado, con su fuente.")),
  "prop-traders.html": (T("For prop traders","Pour traders prop","Para traders prop"), T("Every account, payout and rule.","Chaque compte, payout et règle.","Cada cuenta, payout y regla.")),
 }
 RELATED = {
@@ -512,6 +514,7 @@ RELATED = {
  "prop-firm-drawdown-rules.html": ["trailing-drawdown-calculator.html", "prop-firm-profit-targets.html", "prop-firms/index.html"],
  "prop-firm-payout-rules.html": ["payout-calculator.html", "prop-firm-consistency-rules.html", "payout-tracker.html"],
  "prop-firm-profit-targets.html": ["position-size-calculator.html", "prop-firm-drawdown-rules.html", "prop-firms/index.html"],
+ "prop-firm-rule-changes.html": ["prop-firms/index.html", "prop-firm-payout-rules.html", "prop-firm-tracker.html"],
 }
 RELATED_CONTRACT = ["position-size-calculator.html", "futures-market-hours.html", "release-dates.html"]
 RELATED_RELEASE = ["economic-calendar.html", "futures-market-hours.html", "futures-contracts.html"]

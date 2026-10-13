@@ -277,11 +277,31 @@ def change_value(path, v, lang, t):
     if field == "dd_type" and v in DDT: return t(DDT[v])
     return str(v)
 
+RULE_CHANGES = "prop-firm-rule-changes.html"
+CRUMBS[RULE_CHANGES] = T("Rule changes", "Changements de règles", "Cambios de reglas")
+RSS = "/prop-firm-rule-changes.xml"
+RSS_LINK = '<link rel="alternate" type="application/rss+xml" title="Sweep · prop firm rule changes" href="' + RSS + '">'
+
+def real_changes(f=None):
+    """Rule changes of a firm (or all), newest first: only a value that changed. A value that appears or disappears
+    is the catalogue being completed or corrected, not a rule change."""
+    en = lambda d: d["en"]
+    return [c for c in presets.CHANGES if (f is None or c.get("firm") == f["id"]) and c.get("old") is not None and c.get("new") is not None
+            and change_label(c.get("rule", ""), "en", en)]
+
+def since_of(f):
+    """First check of a firm: the start of the log, or the day its rules entered the catalogue (Alpha Futures: October 12)."""
+    added = [c["date"] for c in presets.CHANGES if c.get("firm") == f["id"] and c.get("rule") == "eval.target" and c.get("old") is None]
+    return min(added) if added else TRACK_SINCE
+
+def no_change(lang, t, f):
+    d = day(since_of(f), lang)
+    return t(T(f"No rule change recorded since our first check on {d}.", f"Aucun changement de règle enregistré depuis notre première vérification, le {d}.", f"Ningún cambio de regla registrado desde nuestra primera revisión, el {d}."))
+
 def history(lang, t, f):
-    # only a value that changed: a value that appears or disappears is the catalogue being completed or corrected, not a rule change
-    rows = [c for c in presets.CHANGES if c.get("firm") == f["id"] and c.get("old") is not None and c.get("new") is not None and change_label(c.get("rule", ""), lang, t)][:8]
+    rows = real_changes(f)[:8]
     if not rows:
-        return f'<p>{t(T(f"No rule change recorded since our first check on {day(TRACK_SINCE, lang)}.", f"Aucun changement de règle enregistré depuis notre première vérification, le {day(TRACK_SINCE, lang)}.", f"Ningún cambio de regla registrado desde nuestra primera revisión, el {day(TRACK_SINCE, lang)}."))}</p>'
+        return f'<p>{no_change(lang, t, f)}</p>'
     prog = {p.get("id", p["name"]): p["name"] for p in f["programs"]}
     items = "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)}</li>' for c in rows)
     return f'<ul class="list">{items}</ul>'
@@ -335,7 +355,8 @@ def make_rules_page(f):
                 f'<a class="btn btn-primary" href="{SIGNUP}" data-track="signup_rules_card">{t(CREATE_FREE)}</a></div></div></section>')
         b = (f'<section style="padding-top:8px"><div class="wrap narrow">{jump}</div></section>' if jump else "") + secs + card
         b += f'<section style="padding-top:0"><div class="wrap narrow"><p class="fine">{t(disclaimer)}</p></div></section>'
-        b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Rule changes","Changements de règles","Cambios de reglas"))}</h2></div>{history(lang, t, f)}</div></section>')
+        b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Rule changes","Changements de règles","Cambios de reglas"))}</h2></div>{history(lang, t, f)}'
+              f'<p><a class="tlink" href="{href(lang, RULE_CHANGES)}#{slug(f)}">{t(T("Every firm’s rule changes","Les changements de règles de toutes les firmes","Los cambios de reglas de todas las firmas"))} <span aria-hidden="true">→</span></a></p></div></section>')
         b += split(t, T("Track it","Suis-le","Síguelo"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
                    T(f"Pick {name} and your account type: these rules fill in, and Sweep counts your payout conditions on every trade. Free forever, no card.",
                      f"Choisis {name} et ton type de compte : ces règles se remplissent, et Sweep compte tes conditions de payout à chaque trade. Gratuit pour toujours, sans carte.",
@@ -371,7 +392,7 @@ def make_rules_page(f):
         body = hero + b + final_cta(lang, t)
         if lang == "fr":   # French: no « : », « ; » or « ? » alone at the start of a line
             body, title, desc = (re.sub(r" ([:;?!])(?=\s|<|$)", "\u00a0\\1", x) for x in (body, title, desc))
-        return (title, desc, body, ld)
+        return (title, desc, body, ld + RSS_LINK)
     return page
 
 def faq_of(lang, t, f):
@@ -432,15 +453,15 @@ def faq_of(lang, t, f):
 CRUMBS["prop-firms/index.html"] = "Prop firms"
 
 HUB_HELP = T("""<h2>What each rules page covers</h2><p>For every account type and size: the evaluation’s profit target, the max loss and how it trails, the daily loss limit, consistency and minimum days, then the funded account’s rules and payout conditions. Each page also gives practical points, the rule changes we’ve recorded and answers to common questions.</p>
-<h2>How the rules are checked</h2><p>Sweep checks each firm’s official pages every week and keeps the values it uses to prefill prop accounts in the app. The date of the last check is on each page, and when a rule changes, the page lists it with the old and the new value.</p>
+<h2>How the rules are checked</h2><p>Sweep checks each firm’s official pages every week and keeps the values it uses to prefill prop accounts in the app. The date of the last check is on each page, and when a rule changes, the page lists it with the old and the new value. The <a href="@prop-firm-rule-changes.html">rule changes page</a> gathers every firm’s, with an RSS feed.</p>
 <h2>Compare the firms</h2><p>To compare one rule across every firm, use the guides: <a href="@prop-firm-drawdown-rules.html">drawdown</a>, <a href="@prop-firm-consistency-rules.html">consistency</a>, <a href="@prop-firm-payout-rules.html">payouts</a> and <a href="@prop-firm-profit-targets.html">account sizes and targets</a>.</p>
 <h2>In Sweep</h2><p>Pick the firm and the account type: the rules fill in, every value stays editable, and Sweep checks each trade against them, so you see how close you are to the target, to the max loss and to your next payout.</p>""",
 """<h2>Ce que couvre chaque page de règles</h2><p>Pour chaque type et chaque taille de compte : l’objectif de profit de l’évaluation, la perte max et la façon dont elle suit, la limite de perte quotidienne, la consistance et les jours minimum, puis les règles du compte financé et les conditions de payout. Chaque page donne aussi des points pratiques, les changements de règles enregistrés et des réponses aux questions fréquentes.</p>
-<h2>Comment les règles sont vérifiées</h2><p>Sweep vérifie chaque semaine les pages officielles de chaque firme et garde les valeurs qui servent à préremplir les comptes prop dans l’app. La date de la dernière vérification est sur chaque page, et quand une règle change, la page l’indique avec l’ancienne et la nouvelle valeur.</p>
+<h2>Comment les règles sont vérifiées</h2><p>Sweep vérifie chaque semaine les pages officielles de chaque firme et garde les valeurs qui servent à préremplir les comptes prop dans l’app. La date de la dernière vérification est sur chaque page, et quand une règle change, la page l’indique avec l’ancienne et la nouvelle valeur. La page des <a href="@prop-firm-rule-changes.html">changements de règles</a> réunit ceux de toutes les firmes, avec un flux RSS.</p>
 <h2>Comparer les firmes</h2><p>Pour comparer une règle d’une firme à l’autre, utilise les guides : <a href="@prop-firm-drawdown-rules.html">drawdown</a>, <a href="@prop-firm-consistency-rules.html">consistance</a>, <a href="@prop-firm-payout-rules.html">payouts</a> et <a href="@prop-firm-profit-targets.html">tailles de compte et objectifs</a>.</p>
 <h2>Dans Sweep</h2><p>Choisis la firme et le type de compte : les règles se remplissent, chaque valeur reste modifiable, et Sweep vérifie chaque trade contre elles. Tu vois à quelle distance tu es de l’objectif, de la perte max et de ton prochain payout.</p>""",
 """<h2>Qué cubre cada página de reglas</h2><p>Para cada tipo y tamaño de cuenta: el objetivo de beneficio de la evaluación, la pérdida máx. y cómo sigue al saldo, el límite de pérdida diaria, la consistencia y los días mínimos, y luego las reglas de la cuenta fondeada y las condiciones de payout. Cada página incluye también puntos prácticos, los cambios de reglas registrados y respuestas a las preguntas frecuentes.</p>
-<h2>Cómo se revisan las reglas</h2><p>Sweep revisa cada semana las páginas oficiales de cada firma y guarda los valores que usa para precargar las cuentas prop en la app. La fecha de la última revisión está en cada página y, cuando una regla cambia, la página lo indica con el valor anterior y el nuevo.</p>
+<h2>Cómo se revisan las reglas</h2><p>Sweep revisa cada semana las páginas oficiales de cada firma y guarda los valores que usa para precargar las cuentas prop en la app. La fecha de la última revisión está en cada página y, cuando una regla cambia, la página lo indica con el valor anterior y el nuevo. La página de <a href="@prop-firm-rule-changes.html">cambios de reglas</a> reúne los de todas las firmas, con un feed RSS.</p>
 <h2>Comparar las firmas</h2><p>Para comparar una regla entre todas las firmas, usa las guías: <a href="@prop-firm-drawdown-rules.html">drawdown</a>, <a href="@prop-firm-consistency-rules.html">consistencia</a>, <a href="@prop-firm-payout-rules.html">payouts</a> y <a href="@prop-firm-profit-targets.html">tamaños de cuenta y objetivos</a>.</p>
 <h2>En Sweep</h2><p>Elige la firma y el tipo de cuenta: las reglas se rellenan, cada valor sigue siendo editable y Sweep comprueba cada operación con ellas, así ves lo cerca que estás del objetivo, de la pérdida máx. y de tu próximo payout.</p>""")
 
@@ -548,3 +569,69 @@ def make_manual_page(slug, name):
                     f"Sigue tus cuentas de {name} en Sweep: introduce las reglas una vez (objetivo, pérdida máx., límite diario, consistencia, payouts) y se revisa cada operación.")),
                 hero + b + final_cta(lang, t), ld)
     return page
+
+
+# ---------------------------------------------------------------- every rule change, all firms (and its RSS feed, written by build.py)
+CHANGES_HELP = T("""<h2>How changes are detected</h2><p>Every week, Sweep checks each firm’s official pages and compares every rule with the previous check: profit targets, max loss, daily limits, consistency, minimum days, payout conditions and prices.</p>
+<h2>What counts as a change</h2><p>Only a value the firm changed. When Sweep adds a rule it didn’t track yet, or corrects a value it had read wrong, that’s a correction of Sweep’s data, not a change by the firm, and it isn’t listed here.</p>
+<h2>In Sweep</h2><p>Traders whose account is affected are notified, see what the change means for their account, and choose to apply it or keep their own rules.</p>
+<h2>Follow the changes</h2><p>Add the <a href="/prop-firm-rule-changes.xml">RSS feed</a> to your reader to see each change as soon as it’s recorded.</p>""",
+"""<h2>Comment les changements sont détectés</h2><p>Chaque semaine, Sweep vérifie les pages officielles de chaque firme et compare chaque règle avec la vérification précédente : objectifs de profit, perte max, limites du jour, consistance, jours minimum, conditions de payout et prix.</p>
+<h2>Ce qui compte comme un changement</h2><p>Seulement une valeur que la firme a changée. Quand Sweep ajoute une règle qu’il ne suivait pas encore, ou corrige une valeur mal lue, c’est une correction des données de Sweep, pas un changement de la firme, et elle n’apparaît pas ici.</p>
+<h2>Dans Sweep</h2><p>Les traders dont le compte est touché sont avertis, voient ce que le changement veut dire pour leur compte, et choisissent de l’appliquer ou de garder leurs propres règles.</p>
+<h2>Suivre les changements</h2><p>Ajoute le <a href="/prop-firm-rule-changes.xml">flux RSS</a> à ton lecteur pour voir chaque changement dès qu’il est enregistré.</p>""",
+"""<h2>Cómo se detectan los cambios</h2><p>Cada semana, Sweep revisa las páginas oficiales de cada firma y compara cada regla con la revisión anterior: objetivos de beneficio, pérdida máx., límites diarios, consistencia, días mínimos, condiciones de payout y precios.</p>
+<h2>Qué cuenta como un cambio</h2><p>Solo un valor que la firma cambió. Cuando Sweep añade una regla que aún no seguía, o corrige un valor mal leído, es una corrección de los datos de Sweep, no un cambio de la firma, y no aparece aquí.</p>
+<h2>En Sweep</h2><p>Los traders cuya cuenta se ve afectada reciben un aviso, ven lo que significa el cambio para su cuenta y eligen aplicarlo o mantener sus propias reglas.</p>
+<h2>Seguir los cambios</h2><p>Añade el <a href="/prop-firm-rule-changes.xml">feed RSS</a> a tu lector para ver cada cambio en cuanto se registra.</p>""")
+
+def page_rule_changes(lang, t):
+    hero = page_hero(t, T("Prop firm rule changes.", "Changements de règles des prop firms.", "Cambios de reglas de las prop firms."),
+        T(f"Every rule change Sweep has detected on the official pages of {FIRMS_N} futures prop firms, newest first.",
+          f"Chaque changement de règle détecté par Sweep sur les pages officielles de {FIRMS_N} prop firms de futures, du plus récent au plus ancien.",
+          f"Cada cambio de regla detectado por Sweep en las páginas oficiales de {FIRMS_N} prop firms de futuros, del más reciente al más antiguo."),
+        T("Prop firms", "Prop firms", "Prop firms"))
+    secs = ""
+    latest = lambda f: (real_changes(f)[:1] or [{"date": ""}])[0]["date"]
+    for f in sorted(presets.FIRMS, key=latest, reverse=True):   # the firm with the newest change first
+        src = source_of(f)
+        rows = real_changes(f)
+        prog = {p.get("id", p["name"]): p["name"] for p in f["programs"]}
+        body = ('<ul class="list">' + "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)} · <a href="{src}" rel="nofollow noopener" target="_blank">{t(T("source","source","fuente"))}</a></li>' for c in rows)
+                + '</ul>' if rows else f'<p>{no_change(lang, t, f)}</p>')
+        name = f["name"]
+        secs += f'<h2 id="{slug(f)}">{name}</h2>{body}<p><a class="tlink" href="{href(lang, page_of(f))}">{t(T(f"{poss(name)} rules", f"Les règles de {name}", f"Las reglas de {name}"))} <span aria-hidden="true">→</span></a></p>'
+    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{secs}</article></div></section>'
+         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(CHANGES_HELP))}</article></div></section>')
+    return (t(T("Prop Firm Rule Changes: Every Change, Dated · Sweep", "Changements de règles des prop firms, datés · Sweep", "Cambios de reglas de las prop firms, fechados · Sweep")),
+            t(T(f"Every rule change detected on the official pages of {FIRMS_N} futures prop firms, newest first: the rule, before and after, the date and the source.",
+                f"Chaque changement de règle détecté sur les pages officielles de {FIRMS_N} prop firms de futures : la règle, avant et après, la date et la source.",
+                f"Cada cambio de regla detectado en las páginas oficiales de {FIRMS_N} prop firms de futuros: la regla, antes y después, la fecha y la fuente.")),
+            hero + b + final_cta(lang, t), RSS_LINK)
+
+
+def rss(domain):
+    """The rule changes as an RSS 2.0 feed, newest first (the 50 latest)."""
+    from email.utils import format_datetime
+    import datetime
+    esc = lambda x: str(x).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    en = lambda d: d["en"]
+    page = f"https://{domain}{href('en', RULE_CHANGES)}"
+    when = lambda iso: format_datetime(datetime.datetime.fromisoformat(iso[:10]).replace(hour=12, tzinfo=datetime.timezone.utc))
+    firms = {f["id"]: f for f in presets.FIRMS}
+    items = ""
+    for c in real_changes()[:50]:
+        f = firms.get(c["firm"])
+        if not f: continue
+        prog = {p.get("id", p["name"]): p["name"] for p in f["programs"]}.get(c["program"], c["program"])
+        rule = change_label(c["rule"], "en", en)
+        title = f'{f["name"]} · {prog} {kk(c["size"])} · {rule}: {change_value(c["rule"], c["old"], "en", en)} → {change_value(c["rule"], c["new"], "en", en)}'
+        guid = f'{c["firm"]}/{c["program"]}/{c["size"]}/{c["rule"]}/{c["date"]}'
+        items += (f'<item><title>{esc(title)}</title><link>{page}#{slug(f)}</link><guid isPermaLink="false">{esc(guid)}</guid>'
+                  f'<pubDate>{when(c["date"])}</pubDate><description>{esc(f"{title}. Source: {source_of(f)}")}</description></item>')
+    last = (real_changes()[:1] or [{"date": presets.CHECKED or TRACK_SINCE}])[0]["date"]
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>'
+            f'<title>Sweep · Prop firm rule changes</title><link>{page}</link>'
+            f'<atom:link href="https://{domain}{RSS}" rel="self" type="application/rss+xml"/>'
+            '<description>Every rule change detected on the official pages of futures prop firms, dated, from Sweep’s weekly check.</description>'
+            f'<language>en</language><lastBuildDate>{when(last)}</lastBuildDate>{items}</channel></rss>\n')

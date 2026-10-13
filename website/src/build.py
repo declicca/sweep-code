@@ -36,6 +36,7 @@ import pages20
 PAGES["free-trading-journal.html"] = pages20.page_free
 PAGES["prop-firm-tracker.html"] = pages20.page_tracker
 PAGES["payout-tracker.html"] = pages20.page_payout_tracker
+PAGES[pages18.RULE_CHANGES] = pages18.page_rule_changes
 import pages19
 PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide, pages19.GUIDE_PAYOUT: pages19.page_payout_guide, pages19.GUIDE_SIZES: pages19.page_sizes_guide})
 for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
@@ -74,7 +75,7 @@ import datetime
 BUILD_DATE = datetime.date.today().isoformat()
 # prop firm rule pages: lastmod = the date their rules were last verified
 LASTMOD = {pages18.page_of(f): pages18.checked_of(f) for f in pages18.presets.FIRMS}
-LASTMOD["prop-firms/index.html"] = max(LASTMOD.values())
+LASTMOD["prop-firms/index.html"] = LASTMOD[pages18.RULE_CHANGES] = max(LASTMOD.values())
 for _p in LASTMOD: PRIO.setdefault(_p, "0.8")
 for _c in pages17.VS: PRIO.setdefault(_c["slug"], "0.8")
 for _g in (pages19.GUIDE_CONS, pages19.GUIDE_DD, pages19.GUIDE_PAYOUT, pages19.GUIDE_SIZES): LASTMOD[_g] = pages18.presets.CHECKED; PRIO.setdefault(_g, "0.8")
@@ -87,6 +88,7 @@ for p in PAGES:
         urls.append(f'<url><loc>https://{DOMAIN}{href(l,p)}</loc><lastmod>{LASTMOD.get(p, BUILD_DATE)}</lastmod><priority>{PRIO.get(p,"0.5")}</priority>{alts}</url>')
 open(os.path.join(DIST,"sitemap.xml"),"w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(urls) + "</urlset>")
 shutil.copy(os.path.join(HERE,"data","robots.txt"), os.path.join(DIST,"robots.txt"))
+open(os.path.join(DIST, pages18.RSS.lstrip("/")), "w", encoding="utf-8").write(pages18.rss(DOMAIN))   # rule changes feed
 _llms = open(os.path.join(HERE,"data","llms.txt"), encoding="utf-8").read()
 _oth = core.other_firms()
 open(os.path.join(DIST,"llms.txt"), "w", encoding="utf-8").write(_llms.replace("{PRESET_FIRMS}", core.FIRMS_TXT["en"]).replace("{OTHER_FIRMS}", f" (for example {core.and_list(_oth, 'en').replace(' and ', ' or ')})" if _oth else ""))
@@ -126,8 +128,8 @@ RedirectMatch 301 ^/(fr/|es/)?press/?$ /$1press-kit
 # old import page moved
 RedirectMatch 301 ^/(fr/|es/)?tradovate-import(\\.html)?$ /$1import
 # index.html is never a second URL for the same page (avoids duplicate content)
-RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
-RewriteRule ^(.*/)?index\.html$ /$1 [R=301,L]
+RewriteCond %{THE_REQUEST} \\s/+(.*/)?index\\.html[\\s?] [NC]
+RewriteRule ^(.*/)?index\\.html$ /$1 [R=301,L]
 </IfModule>
 <IfModule mod_headers.c>
 Header always set X-Content-Type-Options "nosniff"
