@@ -187,9 +187,10 @@ function pr_doubtful(array $old, array $new): array
         foreach (['min', 'max', 'max_dll', 'min_bal', 'win_min'] as $f) if ($jump($po[$f] ?? null, $pn[$f] ?? null)) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]} (more than half): to review";
         foreach (['win_days', 'trade_days', 'max_payouts'] as $f) if (isset($po[$f], $pn[$f]) && abs($pn[$f] - $po[$f]) > 3) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]}: to review";
         // a payout condition that appears where there was none makes « Ready for a payout » harder: never applied on its own
-        // (Alpha, 12–13 Oct.: « up to 4 times a month » read as 4 payouts in all, then « profitable since the last payout » added)
+        // (Alpha, 12–13 Oct.: « up to 4 times a month » read as 4 payouts in all, then « profitable since the last payout » added;
+        // Apex, 12 Oct.: the Legacy rules — 8 traded days, 30 % per request — put on the EOD and Intraday accounts)
         if (isset($a[$k]['funded'])) {
-            foreach (['win_days', 'trade_days', 'min_bal', 'cycle_pos', 'cycle_min', 'first_min', 'max_payouts'] as $f)
+            foreach (['win_days', 'trade_days', 'min_bal', 'cycle_pos', 'cycle_min', 'first_min', 'max_payouts', 'max_pct'] as $f)
                 if (empty($po[$f]) && !empty($pn[$f])) $e[] = "$k payout $f none → " . var_export($pn[$f], true) . ': to review';
             if (empty($a[$k]['funded']['consistency']) && !empty($s['funded']['consistency'])) $e[] = "$k funded consistency none → {$s['funded']['consistency']}: to review";
         }

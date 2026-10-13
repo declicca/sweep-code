@@ -72,6 +72,17 @@ ok($az['payout_min_c'] === 20000 && $az['payout_max_c'] === 150000 && $az['payou
 ok($ad['payout_first_min_c'] === 150000 && $ad['payout_cycle_min_c'] === 100000 && $ad['payout_min_c'] === 50000 && $ad['payout_max_c'] === 100000 && $ad['consistency_pct'] === 20 && !$ad['payout_win_days'], 'Alpha Direct 25K: $1,500 before the first payout, then $1,000 since the last one, $500 to $1,000, 20 %');
 ok($aa['payout_min_c'] === 100000 && $aa['payout_max_c'] === 1500000 && $aa['consistency_pct'] === null && $aa['dll_c'] === null, 'Alpha Advanced 50K funded: $1,000 to $15,000, no consistency, no daily limit');
 ok(strpos(pr_describe(['payout_first_min_c' => [null, 150000]], 'fr'), 'Profit avant le premier payout') !== false, 'the new rule has its words in the notifications');
+// Apex EOD / Intraday PA and TPT PRO (13 Oct.), against the official help centers — the check of 12 Oct. had put Apex Legacy's rules on them
+foreach (['apex-eod', 'apex-intraday'] as $pid) foreach ([[25000, 2, 50000, 100000], [50000, 4, 100000, 150000], [100000, 6, 175000, 200000], [150000, 10, 250000, 250000]] as [$sz, $mn, $dll, $cap]) {
+    $hit = pr_find($cat, "apex|$pid|$sz|funded|"); $r = pr_rules_of($cat, "apex|$pid|$sz|funded|")['rules'];
+    $ok = $r['payout_split_pct'] === 100 && $r['payout_trade_days'] === null && $r['payout_max_pct'] === null && $r['payout_cycle_pos'] === null && $r['payout_win_days'] === 5 && $r['payout_min_c'] === 50000
+        && $r['payout_max_n'] === 6 && $r['payout_ladder_c'][0] === $cap && $r['consistency_pct'] === 50 && $r['dll_c'] === $dll && $hit[0]['funded']['max_minis'] === $mn;
+    ok($ok, "Apex $pid " . ($sz / 1000) . "K funded: 100 % split, 5 days, no 8 traded days / 30 % / « profitable since », 6 payouts, cap \$" . ($cap / 100) . ", daily limit \$" . ($dll / 100) . " (level 1), $mn contracts");
+}
+foreach ([[25000, 3, 2650000], [50000, 6, 5200000], [75000, 9, 7750000], [100000, 12, 10300000], [150000, 15, 15450000]] as [$sz, $mn, $bal]) {
+    $hit = pr_find($cat, "tpt|tpt-test|$sz|funded|"); $r = pr_rules_of($cat, "tpt|tpt-test|$sz|funded|")['rules'];
+    ok($r['payout_split_pct'] === 80 && $r['payout_min_bal_c'] === $bal && $r['dd_type'] === 'trade' && $hit[0]['funded']['max_minis'] === $mn, "TPT PRO " . ($sz / 1000) . "K: 80 % split, buffer zone \$" . number_format($bal / 100) . ", real-time drawdown, $mn contracts");
+}
 
 echo "— Simulated weekly check with a payout change\n";
 put_acc('u1', 'a1', ['name' => 'EOD 50K', 'status' => 'active', 'phase' => 'funded', 'preset' => 'apex|apex-eod|50000|funded|', 'rules' => pr_rules_of($cat, 'apex|apex-eod|50000|funded|')['rules']]);

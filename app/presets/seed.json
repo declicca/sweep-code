@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-13b",
+ "version": "2026-10-13c",
  "checked_at": "2026-10-07T00:00:00Z",
  "origin": "seed (checked 2026-10-07 on the pages listed in each program's \"verified\"; the weekly check keeps it up to date)",
  "firms": [
@@ -762,9 +762,9 @@
      "id": "apex-eod",
      "name": "EOD Trail",
      "note": {
-      "fr": "Drawdown fin de journée + limite de perte journalière.",
-      "en": "End-of-day drawdown + daily loss limit.",
-      "es": "Drawdown al cierre + límite diario."
+      "fr": "Drawdown fin de journée + limite de perte journalière. Financé : limite du jour et contrats par paliers selon le profit (palier 1 indiqué).",
+      "en": "End-of-day drawdown + daily loss limit. Funded: daily limit and contracts grow in levels with profit (level 1 shown).",
+      "es": "Drawdown al cierre + límite diario. Financiada: límite diario y contratos por niveles según el beneficio (nivel 1 indicado)."
      },
      "sizes": [
       {
@@ -785,13 +785,11 @@
         "payout": {
          "win_days": 5,
          "win_min": 100,
-         "trade_days": 8,
          "min": 500,
          "max": 1000,
-         "max_pct": 30,
          "min_bal": 26100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           1000,
           1000,
@@ -799,11 +797,10 @@
           1000,
           1000,
           1000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 4
+        "max_minis": 2
        }
       },
       {
@@ -824,13 +821,11 @@
         "payout": {
          "win_days": 5,
          "win_min": 250,
-         "trade_days": 8,
          "min": 500,
          "max": 1500,
-         "max_pct": 30,
          "min_bal": 52100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           1500,
           1500,
@@ -838,11 +833,10 @@
           2500,
           2500,
           3000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 6
+        "max_minis": 4
        }
       },
       {
@@ -857,19 +851,17 @@
        "funded": {
         "dd": 3000,
         "dd_type": "eod",
-        "dll": 1500,
+        "dll": 1750,
         "consistency": 50,
         "dd_lock": true,
         "payout": {
          "win_days": 5,
          "win_min": 300,
-         "trade_days": 8,
          "min": 500,
          "max": 2000,
-         "max_pct": 30,
          "min_bal": 103100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           2000,
           2500,
@@ -877,11 +869,10 @@
           3000,
           4000,
           4000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 8
+        "max_minis": 6
        }
       },
       {
@@ -896,19 +887,17 @@
        "funded": {
         "dd": 4000,
         "dd_type": "eod",
-        "dll": 2000,
+        "dll": 2500,
         "consistency": 50,
         "dd_lock": true,
         "payout": {
          "win_days": 5,
          "win_min": 350,
-         "trade_days": 8,
          "min": 500,
          "max": 2500,
-         "max_pct": 30,
          "min_bal": 154100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           2500,
           3000,
@@ -916,25 +905,36 @@
           3000,
           4000,
           5000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 12
+        "max_minis": 10
        }
       }
      ],
      "payout_sources": [
       "https://apextraderfunding.com/help-center/eod-trailing-drawdown-accounts/eod-payouts/"
+     ],
+     "verified": [
+      {
+       "url": "https://apextraderfunding.com/help-center/eod-trailing-drawdown-accounts/eod-payouts/",
+       "date": "2026-10-13",
+       "what": "PA payouts: 5 days of $100–350, min $500, safety net, caps per payout, 6 payouts, 50 % consistency since the last payout, 100 % split (no 8 traded days, no 30 %: Legacy rules)"
+      },
+      {
+       "url": "https://apextraderfunding.com/help-center/additional-helpful-items/scaling-levels-pa-explained/",
+       "date": "2026-10-13",
+       "what": "PA scaling: max contracts 2 / 4 / 6 / 10, daily limit by level (level 1: $500 / $1,000 / $1,750 / $2,500)"
+      }
      ]
     },
     {
      "id": "apex-intraday",
      "name": "Intraday Trail",
      "note": {
-      "fr": "Drawdown en temps réel, sans limite journalière en évaluation.",
-      "en": "Real-time drawdown, no daily limit in the evaluation.",
-      "es": "Drawdown en tiempo real, sin límite diario en la evaluación."
+      "fr": "Drawdown en temps réel, sans limite journalière en évaluation. Financé : limite du jour et contrats par paliers selon le profit (palier 1 indiqué).",
+      "en": "Real-time drawdown, no daily limit in the evaluation. Funded: daily limit and contracts grow in levels with profit (level 1 shown).",
+      "es": "Drawdown en tiempo real, sin límite diario en la evaluación. Financiada: límite diario y contratos por niveles según el beneficio (nivel 1 indicado)."
      },
      "sizes": [
       {
@@ -948,18 +948,17 @@
        "funded": {
         "dd": 1000,
         "dd_type": "trade",
+        "dll": 500,
         "consistency": 50,
         "dd_lock": true,
         "payout": {
          "win_days": 5,
          "win_min": 100,
-         "trade_days": 8,
          "min": 500,
          "max": 1000,
-         "max_pct": 30,
          "min_bal": 26100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           1000,
           1000,
@@ -967,11 +966,10 @@
           1000,
           1000,
           1000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 4
+        "max_minis": 2
        }
       },
       {
@@ -985,18 +983,17 @@
        "funded": {
         "dd": 2000,
         "dd_type": "trade",
+        "dll": 1000,
         "consistency": 50,
         "dd_lock": true,
         "payout": {
          "win_days": 5,
          "win_min": 200,
-         "trade_days": 8,
          "min": 500,
          "max": 1500,
-         "max_pct": 30,
          "min_bal": 52100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           1500,
           2000,
@@ -1004,11 +1001,10 @@
           2500,
           3000,
           3000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 6
+        "max_minis": 4
        }
       },
       {
@@ -1022,18 +1018,17 @@
        "funded": {
         "dd": 3000,
         "dd_type": "trade",
+        "dll": 1750,
         "consistency": 50,
         "dd_lock": true,
         "payout": {
          "win_days": 5,
          "win_min": 250,
-         "trade_days": 8,
          "min": 500,
          "max": 2000,
-         "max_pct": 30,
          "min_bal": 103100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           2000,
           2500,
@@ -1041,11 +1036,10 @@
           3000,
           4000,
           4000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 8
+        "max_minis": 6
        }
       },
       {
@@ -1059,18 +1053,17 @@
        "funded": {
         "dd": 4000,
         "dd_type": "trade",
+        "dll": 2500,
         "consistency": 50,
         "dd_lock": true,
         "payout": {
          "win_days": 5,
          "win_min": 300,
-         "trade_days": 8,
          "min": 500,
          "max": 2500,
-         "max_pct": 30,
          "min_bal": 154100,
          "max_payouts": 6,
-         "split_pct": 90,
+         "split_pct": 100,
          "ladder": [
           2500,
           3000,
@@ -1078,16 +1071,27 @@
           4000,
           4000,
           5000
-         ],
-         "cycle_pos": true
+         ]
         },
         "dd_lock_offset": 100,
-        "max_minis": 12
+        "max_minis": 10
        }
       }
      ],
      "payout_sources": [
       "https://apextraderfunding.com/help-center/intraday-trailing-drawdown-accounts/intraday-trailing-drawdown-payouts/"
+     ],
+     "verified": [
+      {
+       "url": "https://apextraderfunding.com/help-center/intraday-trailing-drawdown-accounts/intraday-trailing-drawdown-payouts/",
+       "date": "2026-10-13",
+       "what": "PA payouts: 5 days of $100–350, min $500, safety net, caps per payout, 6 payouts, 50 % consistency since the last payout, 100 % split (no 8 traded days, no 30 %: Legacy rules)"
+      },
+      {
+       "url": "https://apextraderfunding.com/help-center/additional-helpful-items/scaling-levels-pa-explained/",
+       "date": "2026-10-13",
+       "what": "PA scaling: max contracts 2 / 4 / 6 / 10, daily limit by level (level 1: $500 / $1,000 / $1,750 / $2,500)"
+      }
      ]
     },
     {
