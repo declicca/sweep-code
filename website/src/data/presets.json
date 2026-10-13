@@ -1,7 +1,7 @@
 {
- "version": "2026-10-13b",
- "checked_at": "2026-10-07T00:00:00Z",
- "origin": "seed",
+ "version": "2026-10-13-161740",
+ "checked_at": "2026-10-13T16:17:40+00:00",
+ "origin": "checked",
  "firms": [
   {
    "id": "lucid",
@@ -1312,132 +1312,167 @@
     {
      "id": "tpt-test",
      "name": "Test → PRO",
-     "note": {
-      "fr": "Test : fin de journée, 3 jours min., consistance 50 %. PRO : drawdown intraday.",
-      "en": "Test: end of day, 3 days min., 50% consistency. PRO: intraday drawdown.",
-      "es": "Test: al cierre, 3 días mín., consistencia 50 %. PRO: drawdown intradía."
-     },
      "sizes": [
       {
        "size": 25000,
        "eval": {
-        "target": 1500,
         "dd": 1500,
         "dd_type": "eod",
+        "target": 1500,
         "consistency": 50,
-        "min_days": 3,
-        "max_minis": 3
+        "max_minis": 3,
+        "min_days": 3
        },
        "funded": {
         "dd": 1500,
         "dd_type": "trade",
-        "dd_lock": true,
+        "max_minis": 3,
         "payout": {
          "min": 250,
          "min_bal": 26500,
          "split_pct": 80
         },
-        "max_minis": 3
+        "dd_lock": true
+       },
+       "price": {
+        "activation": 130,
+        "eval_period": "month",
+        "checked": "2026-10-13"
        }
       },
       {
        "size": 50000,
        "eval": {
-        "target": 3000,
         "dd": 2000,
         "dd_type": "eod",
+        "target": 3000,
         "consistency": 50,
-        "min_days": 3,
-        "max_minis": 6
+        "max_minis": 6,
+        "min_days": 3
        },
        "funded": {
         "dd": 2000,
         "dd_type": "trade",
-        "dd_lock": true,
+        "max_minis": 6,
         "payout": {
          "min": 250,
          "min_bal": 52000,
          "split_pct": 80
         },
-        "max_minis": 6
+        "dd_lock": true
+       },
+       "price": {
+        "activation": 130,
+        "eval_period": "month",
+        "checked": "2026-10-13"
        }
       },
       {
        "size": 75000,
        "eval": {
-        "target": 4500,
         "dd": 2500,
         "dd_type": "eod",
+        "target": 4500,
         "consistency": 50,
-        "min_days": 3,
-        "max_minis": 9
+        "max_minis": 9,
+        "min_days": 3
        },
        "funded": {
         "dd": 2500,
         "dd_type": "trade",
-        "dd_lock": true,
+        "max_minis": 9,
         "payout": {
          "min": 250,
          "min_bal": 77500,
          "split_pct": 80
         },
-        "max_minis": 9
+        "dd_lock": true
+       },
+       "price": {
+        "activation": 130,
+        "eval_period": "month",
+        "checked": "2026-10-13"
        }
       },
       {
        "size": 100000,
        "eval": {
-        "target": 6000,
         "dd": 3000,
         "dd_type": "eod",
+        "target": 6000,
         "consistency": 50,
-        "min_days": 3,
-        "max_minis": 12
+        "max_minis": 12,
+        "min_days": 3
        },
        "funded": {
         "dd": 3000,
         "dd_type": "trade",
-        "dd_lock": true,
+        "max_minis": 12,
         "payout": {
          "min": 250,
          "min_bal": 103000,
          "split_pct": 80
         },
-        "max_minis": 12
+        "dd_lock": true
+       },
+       "price": {
+        "activation": 130,
+        "eval_period": "month",
+        "checked": "2026-10-13"
        }
       },
       {
        "size": 150000,
        "eval": {
-        "target": 9000,
         "dd": 4500,
         "dd_type": "eod",
+        "target": 9000,
         "consistency": 50,
-        "min_days": 3,
-        "max_minis": 15
+        "max_minis": 15,
+        "min_days": 3
        },
        "funded": {
         "dd": 4500,
         "dd_type": "trade",
-        "dd_lock": true,
+        "max_minis": 15,
         "payout": {
          "min": 250,
          "min_bal": 154500,
          "split_pct": 80
         },
-        "max_minis": 15
+        "dd_lock": true
+       },
+       "price": {
+        "activation": 130,
+        "eval_period": "month",
+        "checked": "2026-10-13"
        }
       }
      ],
-     "payout_sources": [
-      "https://takeprofittrader.com"
+     "evidence": [
+      {
+       "url": "https://takeprofittrader.com",
+       "quote": "Number of Trading Days to \"PRO Account\" 3 Days"
+      },
+      {
+       "url": "https://takeprofittrader.com",
+       "quote": "Fees for PRO Account One Time $130 Fee"
+      }
      ],
+     "note": {
+      "fr": "Test : fin de journée, 3 jours min., consistance 50 %. PRO : drawdown intraday.",
+      "en": "Test: end of day, 3 days min., 50% consistency. PRO: intraday drawdown.",
+      "es": "Test: al cierre, 3 días mín., consistencia 50 %. PRO: drawdown intradía."
+     },
      "verified": [
       {
        "url": "https://investinglive.com/education/take-profit-trader-cuts-evaluation-timeline-to-three-days-what-that-means-and-how-prop-firm-evals-work/",
        "date": "2026-10-07",
        "what": "Test minimum cut from 5 to 3 days on 2026-08-17 (announcement by Take Profit Trader): 3 kept"
       }
+     ],
+     "payout_sources": [
+      "https://takeprofittrader.com"
      ]
     }
    ]

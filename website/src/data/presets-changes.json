@@ -1,5 +1,140 @@
 [
  {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-13"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-13"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-13"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-13"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 130
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-10-13"
+ },
+ {
+  "date": "2026-10-13",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "month"
+ },
+ {
   "date": "2026-10-07",
   "firm": "alpha",
   "program": "advanced",
