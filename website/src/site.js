@@ -132,6 +132,16 @@
   var unfold = function(){ var id = decodeURIComponent(location.hash.slice(1)), el = id && document.getElementById(id), d = el && el.closest('details'); if(d && !d.open){ d.open = true; el.scrollIntoView(); } };
   window.addEventListener('hashchange', unfold); unfold();
 
+  // firm rule tables on phones: one account size at a time, the same one in every table, remembered
+  var rts = [].slice.call(document.querySelectorAll('.rules-tbl')), want = null;
+  try{ want = localStorage.getItem('sw-size'); }catch(e){}
+  var pick = function(box){ var bs = [].slice.call(box.querySelectorAll('.sizes button')), k = 0;
+    bs.forEach(function(b, i){ if(b.getAttribute('data-size') === want) k = i; });
+    bs.forEach(function(b, i){ b.setAttribute('aria-pressed', i === k ? 'true' : 'false'); }); box.setAttribute('data-col', k); };
+  rts.forEach(function(box){ var seg = box.querySelector('.sizes'); if(!seg) return; seg.hidden = false; pick(box);
+    seg.addEventListener('click', function(e){ var b = e.target.closest('button'); if(!b) return; want = b.getAttribute('data-size');
+      try{ localStorage.setItem('sw-size', want); }catch(e){} rts.forEach(function(x){ if(x.querySelector('.sizes')) pick(x); }); }); });
+
   // header dropdowns (Product, Resources)
   var dds = [].slice.call(document.querySelectorAll('.navdd'));
   var closeDD = function(except){ dds.forEach(function(d){ if(d !== except){ d.classList.remove('open'); d.querySelector('.ddbtn').setAttribute('aria-expanded','false'); } }); };

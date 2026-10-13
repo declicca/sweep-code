@@ -130,7 +130,7 @@ def groups_of(lang, t, sizes, variant=None):
 def table(lang, t, sizes, groups, only_diff_from=None):
     cols = len(sizes)
     head = (f'<thead><tr><th scope="col">{t(T("Account size","Taille du compte","Tamaño de la cuenta"))}</th>'
-            + "".join(f'<th scope="col">{kk(s["size"])}</th>' for s in sizes) + "</tr></thead>")
+            + "".join(f'<th scope="col" class="cc c{i}">{kk(s["size"])}</th>' for i, s in enumerate(sizes)) + "</tr></thead>")
     body = ""
     for gi, (gt, rows, get) in enumerate(groups):
         out = []
@@ -140,9 +140,12 @@ def table(lang, t, sizes, groups, only_diff_from=None):
             if only_diff_from is not None:
                 base = [val(only_diff_from[gi][2](s), s) for s in sizes]
                 if vals == base: continue
-            out.append(f'<tr><th scope="row">{t(label)}</th>' + "".join(f'<td>{fmt(v) if v is not None else "—"}</td>' for v in vals) + "</tr>")
+            out.append(f'<tr><th scope="row">{t(label)}</th>' + "".join(f'<td class="cc c{i}">{fmt(v) if v is not None else "—"}</td>' for i, v in enumerate(vals)) + "</tr>")
         if out: body += f'<tr class="grp"><th colspan="{cols + 1}" scope="colgroup">{t(gt)}</th></tr>' + "".join(out)
-    return f'<div class="cmp-wrap"><table class="cmp rules n{cols}">{head}<tbody>{body}</tbody></table></div>' if body else ""
+    # on phones, one account size at a time (site.js shows the switch; without JavaScript, the whole table)
+    seg = ("" if cols < 2 else f'<div class="seg sizes" role="group" aria-label="{t(T("Account size","Taille du compte","Tamaño de la cuenta"))}" hidden>'
+           + "".join(f'<button type="button" data-size="{s["size"]}" aria-pressed="{"true" if i == 0 else "false"}">{kk(s["size"])}</button>' for i, s in enumerate(sizes)) + "</div>")
+    return f'<div class="rules-tbl">{seg}<div class="cmp-wrap"><table class="cmp rules n{cols}">{head}<tbody>{body}</tbody></table></div></div>' if body else ""
 
 # ---------------------------------------------------------------- what it means in practice (generated from the rules, reviewed before publishing)
 def practice(lang, t, f, p):

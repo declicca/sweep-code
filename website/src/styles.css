@@ -1378,3 +1378,20 @@ figcaption, .cap, .shot-note{text-align:center;font-size:12.5px;color:var(--fain
 .fk{font-size:13px;font-weight:400;color:var(--muted)}
 .fmore>section{padding:8px 0 28px}
 .fmore>section>.wrap{padding-left:0;padding-right:0}
+/* ---------- firm rule tables on phones: one account size at a time ---------- */
+.seg.sizes{margin:14px 0 2px}.seg.sizes[hidden]{display:none}
+@media (max-width:860px){
+  .rules-tbl[data-col] .cmp.rules .cc{display:none}
+  .rules-tbl[data-col="0"] .cmp.rules .c0{display:table-cell}
+  .rules-tbl[data-col="1"] .cmp.rules .c1{display:table-cell}
+  .rules-tbl[data-col="2"] .cmp.rules .c2{display:table-cell}
+  .rules-tbl[data-col="3"] .cmp.rules .c3{display:table-cell}
+  .rules-tbl[data-col="4"] .cmp.rules .c4{display:table-cell}
+  .rules-tbl[data-col="5"] .cmp.rules .c5{display:table-cell}
+  .rules-tbl[data-col="6"] .cmp.rules .c6{display:table-cell}
+  .rules-tbl[data-col="7"] .cmp.rules .c7{display:table-cell}
+  .rules-tbl[data-col] .cmp.rules{min-width:0;width:100%;table-layout:auto}
+  .rules-tbl[data-col] .cmp.rules tbody th, .rules-tbl[data-col] .cmp.rules thead th:first-child{position:static;width:55%;white-space:normal}
+  .rules-tbl[data-col] .cmp.rules td{white-space:normal}
+}
+@media (min-width:861px){ .seg.sizes{display:none} }
