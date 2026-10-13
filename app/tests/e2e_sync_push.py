@@ -75,6 +75,24 @@ s, r = call(bare, 'POST', 'api/sync/push', push, AK)
 s2, data2 = call(web, 'GET', 'api/data', None, H)
 ok(s == 200 and r.get('new') == 0 and len([x for x in data2.get('trades', []) if x.get('source') == 'ninjatrader']) == 1, 'the same push again: nothing new, still 1 trade')
 
+# a second platform: Quantower has its own key; a key pasted in the other platform's add-on is refused (« platform »)
+s, kq = call(web, 'POST', 'api/sync/key', {'platform': 'quantower'}, H)
+QK = {'Content-Type': 'application/json', 'X-Sweep-Key': kq.get('key', '')}
+ok(s == 200 and kq.get('key', '').startswith('swk_') and kq.get('key') != key, 'a personal key for Quantower, separate from the NinjaTrader 8 one')
+s1, r1 = call(bare, 'POST', 'api/sync/push', dict(push, client='Sweep Quantower test'), AK)
+s2, r2 = call(bare, 'POST', 'api/sync/push', push, QK)
+ok(s1 == 401 and r1.get('code') == 'platform' and 'NinjaTrader 8' in r1.get('error', '') and s2 == 401 and r2.get('code') == 'platform', 'a key used by the other platform\'s add-on → 401 « This key is for NinjaTrader 8 »')
+s, r = call(bare, 'POST', 'api/sync/push', dict(push, client='Sweep Quantower test'), QK)
+s, st = call(web, 'GET', 'api/sync', None, H)
+pl = sorted((a.get('platform'), a.get('name'), a.get('state')) for a in st.get('accounts', []))
+ok(r.get('new') == 3 and pl == [('ninjatrader', 'APEX-777-01', 'linked'), ('quantower', 'APEX-777-01', 'new')] and sorted(c['platform'] for c in st['connections']) == ['ninjatrader', 'quantower'], 'the Quantower push: its account listed under Quantower, the NinjaTrader 8 one unchanged')
+def raw(path):
+    try:
+        with web.open(urllib.request.Request(B + '/' + path, headers=H), timeout=30) as r: return r.status, r.headers.get('Content-Type'), r.read()[:2]
+    except urllib.error.HTTPError as e: return e.code, None, b''
+d1, dq, dx = raw('api/sync/addon'), raw('api/sync/addon?platform=quantower'), raw('api/sync/addon?platform=tradovate')
+ok(d1[0] == 200 and d1[1] == 'application/zip' and d1[2] == b'PK' and st['addons']['ninjatrader'] and dq[0] == (200 if st['addons']['quantower'] else 404) and dx[0] == 400, 'add-ons: NinjaTrader 8 by default (zip), Quantower once it exists, unknown platform → 400')
+
 # heartbeat (no executions) and a revoked key
 ok(call(bare, 'POST', 'api/sync/push', {'client': 'Sweep NT8 test', 'fills': []}, AK)[0] == 200, 'heartbeat without executions → 200')
 ok(call(web, 'DELETE', 'api/sync/key?platform=ninjatrader', None, H)[1].get('revoked') == 1, 'stop the sync (key revoked)')

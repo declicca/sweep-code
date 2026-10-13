@@ -726,7 +726,7 @@ try {
         require_once __DIR__ . '/billing/billing-routes.php';
         sweep_billing_webhook_route(db());
     }
-    // NinjaTrader 8 add-on (sync/): executions sent with the trader's personal key (X-Sweep-Key), no session, no CSRF header
+    // sync add-ons (sync/: NinjaTrader 8, Quantower): executions sent with the trader's personal key (X-Sweep-Key), no session, no CSRF header
     if ($route === 'api/sync/push') { require_once __DIR__ . '/sync/sync-routes.php'; sync_push_route($method); }
     // « Your week » email: the link at its bottom stops (or starts again) the email, without signing in: the link carries the trader's own token
     // (no CSRF header: mail apps post the one-click « Unsubscribe » themselves, List-Unsubscribe-Post)

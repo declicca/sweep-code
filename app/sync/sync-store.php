@@ -16,11 +16,13 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  */
 require_once __DIR__ . '/sync-engine.php';
 
-const SYNC_PLATFORMS = ['ninjatrader'];
+const SYNC_PLATFORMS = ['ninjatrader', 'quantower'];
 const SYNC_MAX_FILLS = 500;      // executions per push
 const SYNC_MAX_ACCOUNTS = 50;    // accounts described per push
 const SYNC_MATCH_MIN = 2;        // minutes between a synced entry and a trade typed by hand
-const SYNC_ADDON = __DIR__ . '/addon/SweepSync.zip';   // the NinjaTrader 8 add-on (step 4), downloaded through api/sync/addon
+// each platform's add-on, downloaded through api/sync/addon?platform=…; a platform shows in Connections once its add-on is here
+const SYNC_ADDONS = ['ninjatrader' => __DIR__ . '/addon/SweepSync.zip', 'quantower' => __DIR__ . '/addon/SweepSync-Quantower.zip'];
+const SYNC_CLIENTS = ['Sweep NT8' => 'ninjatrader', 'Sweep Quantower' => 'quantower'];   // how each add-on names itself (« client »)
 
 function sync_q(PDO $pdo, string $sql, array $args = []): PDOStatement { $st = $pdo->prepare($sql); $st->execute($args); return $st; }
 function sync_iso(): string { return gmdate('Y-m-d\TH:i:s\Z'); }   // the documents' date format (now() in api.php)
@@ -121,13 +123,19 @@ function sync_guard(PDO $pdo, string $uid, string $accountId): ?array
 
 function sync_name($v): string { return mb_substr(trim(preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $v)), 0, 120); }
 /** what the account's name says, when a firm documents it (Apex: « APEX-… » evaluation, « PA-APEX… » funded); NinjaTrader's own simulation accounts */
-function sync_guess(string $name): array
+function sync_guess(string $name, string $platform = 'ninjatrader'): array
 {
     $u = strtoupper($name);
     if (str_starts_with($u, 'PA-APEX')) return ['firm' => 'apex', 'phase' => 'funded'];
     if (str_starts_with($u, 'APEX-')) return ['firm' => 'apex', 'phase' => 'eval'];
-    if (preg_match('/^(SIM\d*|PLAYBACK\d*|BACKTEST)$/', $u)) return ['sim' => true];
+    if ($platform === 'ninjatrader' && preg_match('/^(SIM\d*|PLAYBACK\d*|BACKTEST)$/', $u)) return ['sim' => true];
     return [];
+}
+/** the platform an add-on says it is (its « client »), or null when it does not say */
+function sync_client_platform(string $client): ?string
+{
+    foreach (SYNC_CLIENTS as $prefix => $platform) if (str_starts_with($client, $prefix)) return $platform;
+    return null;
 }
 function sync_account_row(PDO $pdo, string $uid, string $platform, string $name, ?array $info, int $now): array
 {
@@ -137,7 +145,7 @@ function sync_account_row(PDO $pdo, string $uid, string $platform, string $name,
         $id = 'sa_' . bin2hex(random_bytes(8));
         try {
             // NinjaTrader's own simulation accounts (Sim101, Playback101) start « ignored »: one tap in the list links them
-            sync_q($pdo, 'INSERT INTO sync_accounts (id, user_id, platform, ext_id, info, state, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [$id, $uid, $platform, $name, $js, empty(sync_guess($name)['sim']) ? 'new' : 'ignored', $now, $now]);
+            sync_q($pdo, 'INSERT INTO sync_accounts (id, user_id, platform, ext_id, info, state, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [$id, $uid, $platform, $name, $js, empty(sync_guess($name, $platform)['sim']) ? 'new' : 'ignored', $now, $now]);
         } catch (Throwable $e) { /* added by a push running at the same time */ }
         return sync_q($pdo, 'SELECT * FROM sync_accounts WHERE user_id = ? AND platform = ? AND ext_id = ?', [$uid, $platform, $name])->fetch();
     }
@@ -459,9 +467,10 @@ function sync_status(PDO $pdo, string $uid): array
     $n = []; foreach (sync_q($pdo, 'SELECT sync_account_id, COUNT(*) n FROM sync_trades WHERE user_id = ? GROUP BY sync_account_id', [$uid]) as $r) $n[$r['sync_account_id']] = (int) $r['n'];
     $accts = [];
     foreach (sync_q($pdo, 'SELECT * FROM sync_accounts WHERE user_id = ? ORDER BY created_at, ext_id', [$uid]) as $a)
-        $accts[] = ['id' => $a['id'], 'platform' => $a['platform'], 'name' => $a['ext_id'], 'info' => json_decode((string) $a['info'], true) ?: null, 'guess' => sync_guess((string) $a['ext_id']) ?: null,
+        $accts[] = ['id' => $a['id'], 'platform' => $a['platform'], 'name' => $a['ext_id'], 'info' => json_decode((string) $a['info'], true) ?: null, 'guess' => sync_guess((string) $a['ext_id'], (string) $a['platform']) ?: null,
             'state' => $a['state'], 'account_id' => $a['account_id'], 'trades' => $n[$a['id']] ?? 0, 'last_fill_at' => $a['last_fill_at'] === null ? null : (int) $a['last_fill_at'], 'error' => $a['last_error']];
-    return ['connections' => $conns, 'accounts' => $accts, 'addon' => is_file(SYNC_ADDON) ? ['url' => 'api/sync/addon', 'size' => filesize(SYNC_ADDON)] : null];
+    $addons = []; foreach (SYNC_ADDONS as $pl => $f) $addons[$pl] = is_file($f) ? ['url' => 'api/sync/addon?platform=' . $pl, 'size' => filesize($f)] : null;
+    return ['connections' => $conns, 'accounts' => $accts, 'addons' => $addons];
 }
 /** a trader deletes their Sweep account: everything of the sync goes too */
 function sync_delete_user(PDO $pdo, string $uid): void

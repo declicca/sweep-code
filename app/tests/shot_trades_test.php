@@ -23,6 +23,17 @@ $r = $B([
 $t = $r['trades'][0] ?? [];
 ok(count($r['trades']) === 1 && $t['direction'] === 'long' && $t['contracts'] === 2 && $t['entry'] == 20995 && $t['exit'] == 21015 && count($t['executions']) === 4, 'scale-in + partial exits → ONE trade, 4 executions, average entry 20,995 / exit 21,015');
 ok($t['pnl_c'] === 80000 && $t['entry_time'] === '10:00' && $t['exit_time'] === '10:09', 'P&L (21,015 − 20,995) × 2 × $20 = +$800');
+// 1b. add back after a partial exit: contracts = the largest position (as the trade form, CSV imports and sync count them);
+//     P&L and default fees on the contracts bought and sold (3 round turns)
+$r = $B([
+  ['symbol' => 'NQZ6', 'side' => 'buy', 'qty' => 2, 'price' => 21000, 'datetime' => '2026-10-07 10:00:00'],
+  ['symbol' => 'NQZ6', 'side' => 'sell', 'qty' => 1, 'price' => 21010, 'datetime' => '2026-10-07 10:02:00'],
+  ['symbol' => 'NQZ6', 'side' => 'buy', 'qty' => 1, 'price' => 21000, 'datetime' => '2026-10-07 10:04:00'],
+  ['symbol' => 'NQZ6', 'side' => 'sell', 'qty' => 2, 'price' => 21020, 'datetime' => '2026-10-07 10:08:00'],
+], 'fills', ['fee_rt_c' => 400]);
+$t = $r['trades'][0] ?? [];
+ok(count($r['trades']) === 1 && $t['contracts'] === 2 && $t['turns'] === 3, 'buy 2, sell 1, buy 1, sell 2 → contracts 2 (largest position), 3 bought and sold');
+ok($t['pnl_c'] === 100000 && $t['fees_c'] === 1200 && !empty($t['fees_auto']), 'P&L = sales − purchases = 50 pts × $20 = +$1,000; default fees $4 × 3 = $12');
 // 2. reversal long 2 → short 1 in one fill
 $r = $B([
   ['symbol' => 'MNQ', 'side' => 'buy', 'qty' => 2, 'price' => 21000, 'datetime' => '2026-10-07 11:00:00'],

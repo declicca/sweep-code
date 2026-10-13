@@ -7,8 +7,11 @@ Settings › Data › Connections → Connect (a key shown once, the 3 steps) �
 stop and target (the platform's prices stay exact), the account page says « Synced with NinjaTrader », a CSV row already synced
 is « already imported », « Stop the sync » with Undo then for good. Each size: no JS error, no broken file, nothing wider than
 the window, the sheet inside the screen, screenshots.
+Quantower (2nd platform): in beta, shown to administrators only (the tests set sw.syncBeta); hidden while its add-on does
+not exist; with one (the real zip, or a stand-in in the served copy for the test),
+its own block, connect sheet and key, its account found under it, linked, the Quantower chip and « Synced with Quantower ».
 """
-import json, os, sqlite3, sys, time
+import json, os, sqlite3, sys, time, zipfile
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from playwright.sync_api import sync_playwright
@@ -16,6 +19,8 @@ B = (sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095').rstrip('/')
 H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
 DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
 SHOTS = os.environ.get('TMPDIR', '/tmp').rstrip('/')
+QZIP = os.path.join(os.path.dirname(os.path.dirname(DB)), 'sync', 'addon', 'SweepSync-Quantower.zip')   # in the served copy
+QREAL = os.path.exists(QZIP)   # the real Quantower add-on is there: no stand-in
 fails = 0
 def ok(c, what):
   global fails
@@ -143,20 +148,64 @@ def case_fr(p, phone):
   ok(in_screen(pg) == '', f'{tag}: manage sheet inside the screen ({in_screen(pg)})')
   pg.screenshot(path=f'{SHOTS}/sync-manage-{tag}.png')
   tap(pg, '#sySheet [data-sy="stop"]'); pg.wait_for_selector('.nav-undo.on button', timeout=5000)
-  ok('Synchro arrêtée' in pg.inner_text('.nav-undo') and pg.locator('#main .sy-sec [data-sy="connect"]').count() == 1, f'{tag}: « Synchro arrêtée · Annuler »')
+  ok('Synchro arrêtée' in pg.inner_text('.nav-undo') and pg.locator('#main .sy-sec [data-sy="connect"][data-p="ninjatrader"]').count() == 1, f'{tag}: « Synchro arrêtée · Annuler »')
   tap(pg, '.nav-undo button'); pg.wait_for_timeout(5600)
   st = pg.evaluate("fetch('api/sync',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json())")
   ok(len(st['connections']) == 1, f'{tag}: Undo → the key still works')
-  settings(pg); tap(pg, '#main .sy-sec [data-sy="manage"]'); tap(pg, '#sySheet [data-sy="stop"]'); pg.wait_for_timeout(5800)
+  settings(pg); tap(pg, '#main .sy-sec [data-sy="manage"]'); tap(pg, '#sySheet [data-sy="stop"]'); pg.wait_for_timeout(5000)
+  # the key is revoked when « Undo » is over (5 s), then the request: waited for, not a fixed delay (a busy machine is slower)
+  pg.wait_for_function("fetch('api/sync',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json()).then(d=>!d.connections.length)", timeout=20000, polling=500)
   st = pg.evaluate("fetch('api/sync',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json())")
   r = ctx.request.post(B + '/api/sync/push', data=json.dumps({'fills': []}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
-  ok(len(st['connections']) == 0 and r.status == 401 and pg.evaluate("S.trades.filter(t => t.source === 'ninjatrader').length") == 2, f'{tag}: stopped for good: key revoked (401), the synced trades stay')
+  ok(len(st['connections']) == 0 and r.status == 401 and pg.evaluate("S.trades.filter(t => t.source === 'ninjatrader').length") == 2, f'{tag}: stopped for good: key revoked (401), the synced trades stay ({[c["platform"] for c in st["connections"]]}, {r.status})')
   ok(wide(pg) <= 0, f'{tag}: nothing wider than the window ({wide(pg)} px)')
   ok(not errs, f'{tag}: no JS error {errs[:3]}')
   ok(not bad, f'{tag}: no broken file {bad[:3]}')
   br.close()
 
 def S_trades(pg): return pg.evaluate("S.trades.filter(t => !t.demo)")
+
+def case_quantower(p, phone):   # the 2nd platform: its block, connect sheet, account found, link, chip (beta: shown as to an administrator)
+  tag = 'Q' + ('390' if phone else '1300')
+  br, ctx, pg, errs, bad = new_trader(p, 'fr', phone)
+  ctx.add_init_script("localStorage.setItem('sw.syncBeta','1')")
+  settings(pg)
+  blocks = pg.eval_on_selector_all('#main .sy-sec .sy-plat', 'l => l.map(x => x.dataset.p)')
+  ok(blocks == ['ninjatrader', 'quantower'] and 'Tes trades arrivent seuls depuis Quantower' in pg.inner_text('#main .sy-plat[data-p="quantower"]'), f'{tag}: Connections: NinjaTrader 8 then Quantower, each with « Connecter » ({blocks})')
+  tap(pg, '#main .sy-sec [data-sy="connect"][data-p="quantower"]'); pg.wait_for_selector('#sySheet.open .sy-key code', timeout=8000); pg.wait_for_timeout(500)
+  key = pg.inner_text('#sySheet .sy-key code').strip(); txt = pg.inner_text('#sySheet')
+  ok(key.startswith('swk_') and 'Connecter Quantower' in txt and 'Télécharge l’add-on Sweep pour Quantower' in txt and 'Settings › Scripts › plug-ins' in txt and 'ouvre le panneau Sweep Sync' in txt and 'NinjaScript' not in txt, f'{tag}: Quantower connect sheet: its key and its own 3 steps')
+  dl = pg.evaluate("(async()=>{const a=document.querySelector('#sySheet a[download]'); if(!a) return null; const r=await fetch(a.href,{headers:{'X-Requested-With':'fetch'}}); const b=new Uint8Array(await r.arrayBuffer()); return [a.getAttribute('href'), r.status, String.fromCharCode(b[0],b[1])]})()")
+  ok(dl and dl[0] == 'api/sync/addon?platform=quantower' and dl[1] == 200 and dl[2] == 'PK', f'{tag}: « Télécharger » gives the Quantower add-on ({dl})')
+  ok(in_screen(pg) == '', f'{tag}: connect sheet inside the screen ({in_screen(pg)})')
+  pg.screenshot(path=f'{SHOTS}/sync-q-connect-{tag}.png')
+  tap(pg, '#sySheet [data-sy="close"].sy-main'); pg.wait_for_timeout(500)
+  r = ctx.request.post(B + '/api/sync/push', data=json.dumps({'client': 'Sweep Quantower test', 'accounts': [{'name': 'APEX-555-01', 'connection': 'Rithmic'}], 'fills': FILLS}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
+  ok(r.status == 200, f'{tag}: executions received with the Quantower key')
+  pg.evaluate("SweepSync.load()"); pg.wait_for_timeout(600)
+  qb, nb = pg.inner_text('#main .sy-plat[data-p="quantower"]'), pg.inner_text('#main .sy-plat[data-p="ninjatrader"]')
+  ok('1 compte trouvé' in qb and 'APEX-555-01' in qb and 'Add-on vu' in qb and 'APEX-555-01' not in nb and 'Connecter' in nb, f'{tag}: the account found under Quantower only')
+  ok(wide(pg) <= 0, f'{tag}: two platforms, nothing wider than the window ({wide(pg)} px)')
+  pg.screenshot(path=f'{SHOTS}/sync-q-settings-{tag}.png')
+  tap(pg, '#main .sy-plat[data-p="quantower"] .sy-found [data-sy="acct"]'); tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000)
+  tap(pg, '#sySheet [data-sy="link"]'); pg.wait_for_timeout(1500)
+  ok('Relié à Apex 1 · 2 trades' in pg.inner_text('#main .sy-plat[data-p="quantower"]'), f'{tag}: linked under Quantower')
+  pg.wait_for_function("S.trades.filter(t => t.source === 'quantower').length === 2", timeout=15000)
+  sid = pg.evaluate("S.trades.find(t => t.source === 'quantower' && t.id !== 'man-sy').id")
+  pg.goto(B + '/#trade/' + sid); pg.wait_for_selector('#main .th-head .lbl .sy-chip', timeout=20000)
+  ok(pg.inner_text('#main .th-head .lbl .sy-chip') == 'Quantower', f'{tag}: trade page: the Quantower chip')
+  tap(pg, '#main [data-act="edit-trade"]'); pg.wait_for_selector('#sySheet.open [data-syf="stop"]', timeout=8000)
+  ok('viennent de Quantower' in pg.inner_text('#sySheet') and not pg.locator('#tkSlide.open').count(), f'{tag}: « Modifier »: stop / target only, « viennent de Quantower »')
+  tap(pg, '#sySheet [data-sy="close"]'); pg.wait_for_timeout(400)
+  pg.goto(B + '/#account/acc-sy'); pg.wait_for_selector('#main .sy-acct', timeout=20000)
+  ok('Synchronisé avec Quantower · APEX-555-01' in pg.inner_text('#main .sy-acct'), f'{tag}: account page: « Synchronisé avec Quantower · APEX-555-01 »')
+  settings(pg); tap(pg, '#main .sy-plat[data-p="quantower"] [data-sy="manage"]'); pg.wait_for_selector('#sySheet.open [data-sy="stop"]', timeout=8000); pg.wait_for_timeout(600)
+  ok(pg.inner_text('#sySheet .sy-head h2') == 'Quantower' and 'Sweep Quantower test' in pg.inner_text('#sySheet'), f'{tag}: manage sheet: Quantower, its add-on version')
+  ok(in_screen(pg) == '', f'{tag}: manage sheet inside the screen ({in_screen(pg)})')
+  pg.screenshot(path=f'{SHOTS}/sync-q-manage-{tag}.png')
+  ok(not errs, f'{tag}: no JS error {errs[:3]}')
+  ok(not bad, f'{tag}: no broken file {bad[:3]}')
+  br.close()
 
 def case_lang(p, lang):   # the section, the sheets and the preview in English and Spanish (never a French or English word left)
   br, ctx, pg, errs, bad = new_trader(p, lang, True)
@@ -176,6 +225,12 @@ def case_lang(p, lang):   # the section, the sheets and the preview in English a
   tap(pg, '#main .sy-sec .sy-found [data-sy="acct"]'); tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000)
   pv = pg.inner_text('#sySheet')
   ok(({'en': '1 trade to add', 'es': '1 operación por añadir'}[lang]) in pv and 'trade à ajouter' not in pv, f'{lang}: preview translated')
+  tap(pg, '#sySheet [data-sy="close"]'); pg.wait_for_timeout(400)
+  pg.evaluate("localStorage.setItem('sw.syncBeta','1'); SweepSync.load()")   # Quantower in beta: shown as to an administrator (the section is painted again)
+  pg.wait_for_selector('#main .sy-sec [data-sy="connect"][data-p="quantower"]', timeout=20000)
+  tap(pg, '#main .sy-sec [data-sy="connect"][data-p="quantower"]'); pg.wait_for_selector('#sySheet.open .sy-key code', timeout=8000)
+  q = pg.inner_text('#sySheet')
+  ok(({'en': 'In Quantower, open the Sweep Sync panel', 'es': 'En Quantower, abre el panel Sweep Sync'}[lang]) in q and ({'en': 'Connect Quantower', 'es': 'Conectar Quantower'}[lang]) in q and 'Dans Quantower' not in q, f'{lang}: Quantower connect sheet translated')
   ok(not errs, f'{lang}: no JS error {errs[:3]}')
   br.close()
 
@@ -184,6 +239,7 @@ def case_trader(p):   # every trader sees Connections (the beta for administrato
   pg.goto(B + '/#settings'); pg.wait_for_selector('#main details.nav-sgd[data-i="3"]', timeout=15000)
   pg.evaluate("document.querySelector('#main details.nav-sgd[data-i=\"3\"]').open = true"); pg.wait_for_timeout(1200)
   ok(pg.evaluate("S.me && !S.me.is_admin") and pg.locator('#main .sy-sec').count() == 1 and not errs, 'a trader who is not an administrator sees Connections')
+  ok(pg.locator('#main .sy-sec .sy-plat').count() == 1 and 'Quantower' not in pg.inner_text('#main .sy-sec'), 'Quantower in beta (administrators only): a trader sees only NinjaTrader 8 in Connections')
   pg.goto(B + '/#import'); pg.wait_for_selector('#main .sy-tip [data-sy="connect"]', timeout=20000)
   tap(pg, '#main .sy-tip [data-sy="connect"]'); pg.wait_for_selector('#sySheet.open .sy-key code', timeout=8000)
   ok(pg.inner_text('#sySheet .sy-key code').startswith('swk_'), 'the invitation\'s « Connecter » opens the connect sheet with the key')
@@ -193,9 +249,16 @@ def case_trader(p):   # every trader sees Connections (the beta for administrato
 
 with sync_playwright() as p:
   case_trader(p)
-  case_fr(p, True)
-  case_fr(p, False)
-  case_lang(p, 'en')
-  case_lang(p, 'es')
+  if not QREAL:   # a stand-in Quantower add-on, removed at the end
+    with zipfile.ZipFile(QZIP, 'w') as z: z.writestr('SweepSync/readme.txt', 'test stand-in')
+  try:
+    case_fr(p, True)
+    case_fr(p, False)
+    case_lang(p, 'en')
+    case_lang(p, 'es')
+    case_quantower(p, True)
+    case_quantower(p, False)
+  finally:
+    if not QREAL and os.path.exists(QZIP): os.remove(QZIP)
 print('\n%s' % ('%d failed' % fails if fails else 'all passed'))
 sys.exit(1 if fails else 0)

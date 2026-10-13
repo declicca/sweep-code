@@ -3,13 +3,13 @@ declare(strict_types=1);
 if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === realpath(__FILE__)) { http_response_code(404); exit; }
 /**
  * Sweep — automatic sync, HTTP routes (loaded by api.php only for api/sync…).
- *   POST   api/sync/push                    the NinjaTrader 8 add-on: accounts and executions, key in the X-Sweep-Key header (no session)
+ *   POST   api/sync/push                    an add-on (NinjaTrader 8, Quantower): accounts and executions, key in the X-Sweep-Key header (no session)
  *   GET    api/sync                         connections and accounts found (the Connections screen)
  *   POST   api/sync/key {platform}          a new personal key, shown once (the previous one stops working)
  *   DELETE api/sync/key?platform=…          stop the sync (the trades already written stay)
  *   GET    api/sync/accounts/ID/preview?account_id=…   what linking would do: trades to add, typed by hand to complete
  *   POST   api/sync/accounts/ID {action: link, account_id} | {action: ignore} | {action: unlink}
- *   GET    api/sync/addon                   the NinjaTrader 8 add-on (zip), for a signed-in trader
+ *   GET    api/sync/addon?platform=…        a platform's add-on (zip; NinjaTrader 8 by default), for a signed-in trader
  */
 require_once __DIR__ . '/sync-store.php';
 
@@ -21,6 +21,12 @@ function sync_push_route(string $method): void
     $conn = sync_auth(db(), trim((string) ($_SERVER['HTTP_X_SWEEP_KEY'] ?? '')));
     if (!$conn) { record_attempt([$ip]); json_out(401, ['error' => 'Unknown or revoked key. Create a new one in Sweep: Settings, Connections.', 'code' => 'key']); }
     $p = body_json(2 * 1048576);
+    // a key pasted in the other platform's add-on: refused, else its accounts and trades would show under the wrong platform
+    $cp = sync_client_platform((string) ($p['client'] ?? ''));
+    if ($cp !== null && $cp !== $conn['platform']) {
+        $nm = ['ninjatrader' => 'NinjaTrader 8', 'quantower' => 'Quantower'];
+        json_out(401, ['error' => 'This key is for ' . $nm[$conn['platform']] . '. Create a ' . $nm[$cp] . ' key in Sweep: Settings, Connections.', 'code' => 'platform']);
+    }
     if (count((array) ($p['fills'] ?? [])) > SYNC_MAX_FILLS) json_out(413, ['error' => 'Too many executions in one request.', 'max' => SYNC_MAX_FILLS]);
     try { $r = sync_receive(db(), $conn, $p); }
     catch (Throwable $e) { error_log('[Sweep sync] push: ' . $e->getMessage()); json_out(503, ['error' => 'Not saved. Send again.', 'code' => 'retry']); }
@@ -32,9 +38,11 @@ function sync_route(string $route, string $method, string $uid): void
     $pdo = db(); sync_schema($pdo);
     if ($route === 'api/sync' && $method === 'GET') json_out(200, sync_status($pdo, $uid));
     if ($route === 'api/sync/addon' && $method === 'GET') {
-        if (!is_file(SYNC_ADDON)) json_out(404, ['error' => 'Not available yet.']);
-        header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="SweepSync.zip"'); header('Content-Length: ' . filesize(SYNC_ADDON)); header('Cache-Control: no-store');
-        readfile(SYNC_ADDON); exit;
+        $f = SYNC_ADDONS[(string) ($_GET['platform'] ?? 'ninjatrader')] ?? null;
+        if ($f === null) json_out(400, ['error' => 'Unknown platform.']);
+        if (!is_file($f)) json_out(404, ['error' => 'Not available yet.']);
+        header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="' . basename($f) . '"'); header('Content-Length: ' . filesize($f)); header('Cache-Control: no-store');
+        readfile($f); exit;
     }
     if ($route === 'api/sync/key' && in_array($method, ['POST', 'DELETE'], true)) {
         $platform = $method === 'POST' ? (string) (body_json(4096)['platform'] ?? '') : (string) ($_GET['platform'] ?? '');

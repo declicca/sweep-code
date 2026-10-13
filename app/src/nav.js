@@ -2181,7 +2181,7 @@ window.SweepMO = window.SweepMO || class {
       const res = await fetch('api/ai/import', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ image: b64, mime: (b64.match(/^data:([^;]+)/) || [])[1] || b.file.type, mode: 'shot', local_tz: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (x) { return ''; } })() }) });
       const j = await res.json().catch(() => ({})); const trs = res.ok && Array.isArray(j.trades) ? j.trades : [];
       b.res = res.ok ? j : null; const d = trs[0];
-      if (d) Object.assign(b.f, { inst: d.instrument || b.f.inst, dir: d.direction || '', qty: d.contracts ? String(d.contracts) : '1', date: d.date || b.f.date, time: String(d.entry_time || '').slice(0, 5), entry: d.entry != null ? String(d.entry) : '', exit: d.exit != null ? String(d.exit) : '', net: d.pnl_c != null ? ((d.pnl_c - (d.fees_c || 0)) / 100).toFixed(2) : '', fees: d.fees_c || 0, exitTime: d.exit_time || '' });
+      if (d) Object.assign(b.f, { inst: d.instrument || b.f.inst, dir: d.direction || '', qty: d.contracts ? String(d.contracts) : '1', turns: d.turns || null, date: d.date || b.f.date, time: String(d.entry_time || '').slice(0, 5), entry: d.entry != null ? String(d.entry) : '', exit: d.exit != null ? String(d.exit) : '', net: d.pnl_c != null ? ((d.pnl_c - (d.fees_c || 0)) / 100).toFixed(2) : '', fees: d.fees_c || 0, exitTime: d.exit_time || '' });
       if (j.account_suggest && !SH.f.accountPicked) SH.f.account = j.account_suggest;
       b.st = d ? 'ok' : 'fail';
     } catch (e) { b.st = 'fail'; }
@@ -2203,7 +2203,9 @@ window.SweepMO = window.SweepMO || class {
   const pvOf = (inst) => (typeof PV === 'function' ? PV(inst) : 2000);   // cents per point
   function recompute(tr) {   // the P&L follows every change, unless the trader typed it
     if (tr._pnlTyped) return;
-    if (tr.entry != null && tr.exit != null && tr.contracts) tr.pnl_c = Math.round((tr.exit - tr.entry) * (tr.direction === 'long' ? 1 : -1) * tr.contracts * pvOf(tr.instrument));
+    // average prices × contracts bought and sold (turns, from the fills); contracts shown = the largest position
+    const q = tr.turns || tr.contracts;
+    if (tr.entry != null && tr.exit != null && q) tr.pnl_c = Math.round((tr.exit - tr.entry) * (tr.direction === 'long' ? 1 : -1) * q * pvOf(tr.instrument));
   }
   /** the trade already in Sweep that looks the same: same account, instrument, side, contracts, session, entry within a minute,
    *  same prices when known. « Already in Sweep » here; « looks like the one at 10:32 » on the form and the single screenshot */
@@ -2325,7 +2327,7 @@ window.SweepMO = window.SweepMO || class {
       if (f === 'instrument') tr.instrument = v.toUpperCase();
       else if (f === 'entry_time' || f === 'exit_time') { tr[f] = /^\d{1,2}:\d{2}$/.test(v) ? v.padStart(5, '0') : tr[f]; if (f === 'entry_time') tr.date = sessOf(tr.executions && tr.executions[0] ? tr.executions[0].t.slice(0, 10) : tr.date, tr.entry_time); }
       else if (f === 'pnl') { const n2 = num(v); if (n2 != null) { tr.pnl_c = Math.round(n2 * 100); tr._pnlTyped = true; } }
-      else { const n2 = num(v); tr[f] = f === 'contracts' ? Math.max(1, Math.round(n2 || 1)) : n2; }
+      else { const n2 = num(v); tr[f] = f === 'contracts' ? Math.max(1, Math.round(n2 || 1)) : n2; if (f === 'contracts') delete tr.turns; }   // contracts typed by the trader: a simple trade of that size
       if (f !== 'pnl') recompute(tr);
       flag(); paintMulti();
     }
@@ -2334,7 +2336,7 @@ window.SweepMO = window.SweepMO || class {
   async function takeFiles(files) {
     files = files.filter((f) => f && /^image\//.test(f.type)); if (!files.length) return;
     if (files.length === 1 && !SH.batch.length && !SH.file) return takeFile(files[0]);
-    if (SH.file && !SH.batch.length) SH.batch.push({ id: 'b0', file: SH.file, src: SH.src, shot: SH.shot, st: 'ok', f: { inst: SH.f.inst, dir: SH.dir, qty: SH.f.qty, date: SH.f.date, time: SH.f.time, exitTime: SH.f.exitTime, entry: SH.f.entry, exit: SH.f.exit, fees: SH.f.fees, net: SH.f.net } });
+    if (SH.file && !SH.batch.length) SH.batch.push({ id: 'b0', file: SH.file, src: SH.src, shot: SH.shot, st: 'ok', f: { inst: SH.f.inst, dir: SH.dir, qty: SH.f.qty, turns: SH.f.turns, date: SH.f.date, time: SH.f.time, exitTime: SH.f.exitTime, entry: SH.f.entry, exit: SH.f.exit, fees: SH.f.fees, net: SH.f.net } });
     const added = files.map((file, i) => ({ id: 'b' + Date.now().toString(36) + i, file, src: URL.createObjectURL(file), st: 'reading', f: { inst: SH.f.inst, qty: '1', date: SH.f.date } }));
     SH.batch.push(...added); paint();
     for (const b of added) { await readOne(b); paint(); }
@@ -2356,7 +2358,7 @@ window.SweepMO = window.SweepMO || class {
     return esc2(bits.join(' · '));
   }
   function autoPnl() {
-    const e = num(SH.f.entry), x = num(SH.f.exit), q = num(SH.f.qty) || 1;
+    const e = num(SH.f.entry), x = num(SH.f.exit), q = SH.f.turns || num(SH.f.qty) || 1;   // average prices × contracts bought and sold
     if (e == null || x == null || !SH.dir || typeof calcPnl !== 'function') return null;
     return calcPnl(SH.dir, e, x, q, SH.f.inst);
   }
@@ -2380,6 +2382,7 @@ window.SweepMO = window.SweepMO || class {
         if (d.instrument) SH.f.inst = d.instrument;
         if (d.direction) SH.dir = d.direction;
         if (d.contracts) SH.f.qty = String(d.contracts);
+        SH.f.turns = d.turns || null;   // contracts bought and sold (scale-ins): the P&L of the prices uses them
         if (d.date) SH.f.date = d.date;   // already the session (the server applies the 18:00 rule)
         if (d.entry_time) SH.f.time = String(d.entry_time).slice(0, 5);
         if (d.entry != null) SH.f.entry = String(d.entry);
@@ -2479,7 +2482,7 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('input', (e) => {
     const bn = e.target.closest && e.target.closest('.nav-am [data-am-bnet]'); if (bn) { const b = SH.batch.find((x) => x.id === bn.dataset.amBnet); if (b) b.f.net = bn.value; return; }
     const f = e.target.closest && e.target.closest('.nav-am [data-am-f]'); if (!f) return;
-    SH.f[f.dataset.amF] = f.value;
+    SH.f[f.dataset.amF] = f.value; if (f.dataset.amF === 'qty') delete SH.f.turns;   // contracts typed by the trader: a simple trade of that size
     const v = autoPnl(), p = document.querySelector('.nav-am-net input'); if (p) p.placeholder = v != null ? ((v - (SH.f.fees || 0)) / 100).toFixed(2) : '+250';
     const r = document.querySelector('.nav-am-r'); if (r) r.innerHTML = rLine();
     const sm = document.querySelector('.nav-am-more-d summary small'); if (sm) sm.innerHTML = verifyLine();

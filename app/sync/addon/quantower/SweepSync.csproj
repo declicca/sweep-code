@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Sweep Sync for Quantower (a panel). Built by tools/addon-quantower.py with the two Quantower libraries of an installed
+       Quantower (QuantowerBin = <Quantower>\TradingPlatform\v1.x\bin); they are referenced only, never shipped in the zip. -->
+  <PropertyGroup>
+    <!-- Quantower 1.147 runs on .NET 10 (its libraries need System.Runtime 10.0); its older examples on GitHub say net8 -->
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>SweepSync</AssemblyName>
+    <RootNamespace>SweepSync</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>true</Deterministic>
+    <!-- the same source gives the same file: no debug data, no build folder written into the add-on -->
+    <DebugType>none</DebugType>
+    <PathMap>$(MSBuildProjectDirectory)=/SweepSync</PathMap>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="HTML\layout.html" />
+    <!-- the name a Windows build gives it (as in Quantower's example); a Mac build would drop « HTML. » -->
+    <EmbeddedResource Include="HTML\layout.html" LogicalName="SweepSync.HTML.layout.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="TradingPlatform.BusinessLayer">
+      <HintPath>$(QuantowerBin)\TradingPlatform.BusinessLayer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TradingPlatform.PresentationLayer.Plugins">
+      <HintPath>$(QuantowerBin)\TradingPlatform.PresentationLayer.Plugins.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

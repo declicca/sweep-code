@@ -157,6 +157,18 @@ ok((sync_receive($pdo, $conn, ['fills' => $big])['error'] ?? '') === 'too_many',
 $r = sync_receive($pdo, $conn, ['fills' => [$fill('v1', 'APEX-123-01', 'buy', 1, 1, '2019-12-31 10:00:00'), $fill('v2', 'APEX-123-01', 'buy', 1, 1, '2099-01-01 10:00:00'), ['id' => 'v3', 'contract' => 'NQ 12-26'], 'x', $fill('v4', '', 'buy', 1, 1, '2026-10-09 10:00:00')]]);
 ok($r['skipped'] === 5 && $r['new'] === 0, 'executions before 2020, in the future, without account or fields → skipped (5)');
 
+// 14b. a second platform (Quantower): its own key and accounts, its trades say « quantower »
+ok(sync_client_platform('Sweep NT8 1.0.0') === 'ninjatrader' && sync_client_platform('Sweep Quantower 1.0.0') === 'quantower' && sync_client_platform('') === null && sync_client_platform('Other 1.0') === null, 'each add-on names its platform (« Sweep NT8 … », « Sweep Quantower … »)');
+$kq = sync_new_key($pdo, 'u1', 'quantower'); $cq = sync_auth($pdo, $kq['key']);
+ok($cq['platform'] === 'quantower' && sync_auth($pdo, $k2['key'])['platform'] === 'ninjatrader', 'one key per platform: a Quantower key leaves the NinjaTrader 8 key working');
+$r = sync_receive($pdo, $cq, ['client' => 'Sweep Quantower test', 'accounts' => [['name' => 'Sim202', 'connection' => 'Simulator'], ['name' => 'PA-APEX-9-01', 'connection' => 'Rithmic']], 'fills' => [$fill('q1', 'PA-APEX-9-01', 'buy', 1, 21000, '2026-10-09 10:00:00'), $fill('q2', 'PA-APEX-9-01', 'sell', 1, 21004, '2026-10-09 10:03:00')]]);
+$st = sync_status($pdo, 'u1'); $q = []; foreach ($st['accounts'] as $x) if ($x['platform'] === 'quantower') $q[$x['name']] = $x;
+ok(count($q) === 2 && $q['Sim202']['state'] === 'new' && $q['Sim202']['guess'] === null && $q['PA-APEX-9-01']['guess'] === ['firm' => 'apex', 'phase' => 'funded'], 'Quantower accounts listed under Quantower: « Sim202 » is not taken for a NinjaTrader simulation there, Apex still guessed');
+ok(array_keys($st['addons']) === ['ninjatrader', 'quantower'] && ($st['addons']['ninjatrader']['url'] ?? '') === 'api/sync/addon?platform=ninjatrader', 'status: each platform\'s add-on (download address, or null while it does not exist)');
+$put('u1', 'accounts', ['id' => 'accq', 'name' => 'Apex PA 9']);
+$r = sync_link($pdo, 'u1', $q['PA-APEX-9-01']['id'], 'accq'); $tq = array_values(array_filter($trades('u1'), fn($x) => ($x['account_id'] ?? '') === 'accq'));
+ok(($r['created'] ?? 0) === 1 && count($tq) === 1 && $tq[0]['source'] === 'quantower' && $tq[0]['pnl_c'] === 8000 && str_starts_with($tq[0]['import_key'], 'sync:quantower:'), 'linked: the Quantower trade (+$80) says source « quantower », import key sync:quantower:…');
+
 // 15. a trader deletes their Sweep account: everything of the sync goes
 sync_delete_user($pdo, 'u1');
 $left = 0; foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $tb) $left += (int) $pdo->query("SELECT COUNT(*) FROM $tb WHERE user_id = 'u1'")->fetchColumn();

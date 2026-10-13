@@ -2215,12 +2215,13 @@
   window.SweepRealNet = { invite, open: () => { W = null; start(); }, state: stOf, showNet };
 })();
 
-/* ───────────── 30. Automatic sync (NinjaTrader 8): Settings › Data › Connections, accounts found, synced trades ─────────────
+/* ───────────── 30. Automatic sync (NinjaTrader 8, Quantower): Settings › Data › Connections, accounts found, synced trades ─────────────
  * The server keeps the key, the executions and the trades (sync/); here is what the trader sees and does:
- *  - Connections (Settings, Data group): connect (a key shown once), the add-on seen, the accounts found and their link;
+ *  - Connections (Settings, Data group): one block per platform whose add-on is available (or already connected): connect
+ *    (a key shown once, one key per platform), the add-on seen, the accounts found and their link;
  *  - one sheet (side panel on a computer, swipe-down sheet on a phone): connect, manage, link an account with its preview
  *    (trades to add, typed by hand to complete); a Sweep account created for a found account is linked right after (preview first);
- *  - account page: « Synced with NinjaTrader »; trade page: a NinjaTrader chip; editing a synced trade only changes its
+ *  - account page: « Synced with NinjaTrader »; trade page: the platform's chip; editing a synced trade only changes its
  *    stop and target (prices, times, contracts and P&L come from the platform);
  *  - CSV import: a row already synced is « Already imported » and skipped. */
 (function () {
@@ -2228,12 +2229,13 @@
   if (typeof render !== 'function' || typeof apiJSON !== 'function') return;
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { conn: 'Connections', pitch: 'Your trades arrive on their own from NinjaTrader 8, on every account.', connect: 'Connect', manage: 'Manage', waiting: 'Waiting for the add-on',
+    en: { conn: 'Connections', pitch: 'Your trades arrive on their own from {p}, on every account.', connect: 'Connect', manage: 'Manage', waiting: 'Waiting for the add-on',
       seen: 'Add-on seen {t}', now: 'just now', min: '{n} min ago', hr: '{n} h ago', day: '{n} d ago', found1: '1 account found', foundN: '{n} accounts found', linkMine: 'Link my accounts',
       linkedTo: 'Linked to {a}', tr1: '1 trade', trN: '{n} trades', toLink: 'To link', ignored: 'Ignored', eval: 'Evaluation', funded: 'Funded', sim: 'NinjaTrader simulation',
       err_plan: 'Frozen on the Free plan: its trades wait and arrive once it is unlocked.', err_limit: 'Record limit reached: no new trade added.', err_account_gone: 'The linked Sweep account was deleted: link it again.',
       err_taken: 'This Sweep account is already linked to another platform account.', err: 'Not saved. Try again.', close: 'Close',
-      cTitle: 'Connect NinjaTrader 8', s1: 'Download the Sweep add-on for NinjaTrader 8.', dl: 'Download', soon: 'Available soon', s2: 'In NinjaTrader: Tools › Import › NinjaScript Add-On, then pick the file.',
+      cTitle: 'Connect {p}', s1: 'Download the Sweep add-on for {p}.', dl: 'Download', soon: 'Available soon', s2: 'In NinjaTrader: Tools › Import › NinjaScript Add-On, then pick the file.',
+      s2q: 'Unzip it into the Quantower folder: Settings › Scripts › plug-ins, then restart Quantower.', s3q: 'In Quantower, open the Sweep Sync panel and paste your key:',
       s3: 'Paste your key in the Sweep window of NinjaTrader:', copy: 'Copy', copied: 'Key copied', once: 'This key is shown only once. It only sends your executions to Sweep: it can never place an order.', done: 'Done',
       key: 'Key', addon: 'Add-on', lastSeen: 'Last seen', never: 'Never', newKey: 'New key', newKeyHelp: 'The current key stops working.', stop: 'Stop the sync', stopHelp: 'Trades already synced stay in your journal.', stopped: 'Sync stopped',
       which: 'Which Sweep account is it?', newAcc: '+ New account', ignore: 'Ignore this account', current: 'Linked to {a}', unlink: 'Unlink', unlinkHelp: 'Trades already synced stay.',
@@ -2243,12 +2245,13 @@
       linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', editT: 'Edit trade',
       editNote: 'Prices, times, contracts and P&L come from {p} and update on their own. Notes, review, setup, tags and screenshots are edited on the trade page.', target: 'Target', save: 'Save', saved: 'Trade updated',
       tipImport: 'On NinjaTrader 8? Connect it once: your trades arrive on their own, no more imports.', tipAcct: 'Trading on NinjaTrader 8? Connect it: your accounts are found and your trades arrive on their own.' },
-    fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis NinjaTrader 8, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
+    fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis {p}, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
       seen: 'Add-on vu {t}', now: 'à l’instant', min: 'il y a {n} min', hr: 'il y a {n} h', day: 'il y a {n} j', found1: '1 compte trouvé', foundN: '{n} comptes trouvés', linkMine: 'Relier mes comptes',
       linkedTo: 'Relié à {a}', tr1: '1 trade', trN: '{n} trades', toLink: 'À relier', ignored: 'Ignoré', eval: 'Évaluation', funded: 'Financé', sim: 'Simulation NinjaTrader',
       err_plan: 'Compte gelé avec le forfait Free : ses trades attendent et arriveront dès qu’il sera débloqué.', err_limit: 'Limite d’enregistrements atteinte : aucun nouveau trade ajouté.', err_account_gone: 'Le compte Sweep relié a été supprimé : relie-le de nouveau.',
       err_taken: 'Ce compte Sweep est déjà relié à un autre compte de la plateforme.', err: 'Non enregistré. Réessaie.', close: 'Fermer',
-      cTitle: 'Connecter NinjaTrader 8', s1: 'Télécharge l’add-on Sweep pour NinjaTrader 8.', dl: 'Télécharger', soon: 'Bientôt disponible', s2: 'Dans NinjaTrader : Tools › Import › NinjaScript Add-On, puis choisis le fichier.',
+      cTitle: 'Connecter {p}', s1: 'Télécharge l’add-on Sweep pour {p}.', dl: 'Télécharger', soon: 'Bientôt disponible', s2: 'Dans NinjaTrader : Tools › Import › NinjaScript Add-On, puis choisis le fichier.',
+      s2q: 'Décompresse-le dans le dossier de Quantower : Settings › Scripts › plug-ins, puis redémarre Quantower.', s3q: 'Dans Quantower, ouvre le panneau Sweep Sync et colle ta clé :',
       s3: 'Colle ta clé dans la fenêtre Sweep de NinjaTrader :', copy: 'Copier', copied: 'Clé copiée', once: 'Cette clé n’est montrée qu’une fois. Elle sert seulement à envoyer tes exécutions à Sweep : elle ne peut jamais passer un ordre.', done: 'Terminé',
       key: 'Clé', addon: 'Add-on', lastSeen: 'Vu pour la dernière fois', never: 'Jamais', newKey: 'Nouvelle clé', newKeyHelp: 'La clé actuelle cessera de fonctionner.', stop: 'Arrêter la synchro', stopHelp: 'Les trades déjà synchronisés restent dans ton journal.', stopped: 'Synchro arrêtée',
       which: 'C’est quel compte Sweep ?', newAcc: '+ Nouveau compte', ignore: 'Ignorer ce compte', current: 'Relié à {a}', unlink: 'Délier', unlinkHelp: 'Les trades déjà synchronisés restent.',
@@ -2258,12 +2261,13 @@
       linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', editT: 'Modifier le trade',
       editNote: 'Prix, heures, contrats et P&L viennent de {p} et se mettent à jour seuls. Notes, bilan, setup, tags et captures se modifient sur la page du trade.', target: 'Cible', save: 'Enregistrer', saved: 'Trade mis à jour',
       tipImport: 'Sur NinjaTrader 8 ? Connecte-le une fois : tes trades arrivent seuls, plus besoin d’importer.', tipAcct: 'Tu trades sur NinjaTrader 8 ? Connecte-le : tes comptes sont trouvés et tes trades arrivent seuls.' },
-    es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde NinjaTrader 8, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
+    es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde {p}, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
       seen: 'Add-on visto {t}', now: 'justo ahora', min: 'hace {n} min', hr: 'hace {n} h', day: 'hace {n} d', found1: '1 cuenta encontrada', foundN: '{n} cuentas encontradas', linkMine: 'Vincular mis cuentas',
       linkedTo: 'Vinculada a {a}', tr1: '1 operación', trN: '{n} operaciones', toLink: 'Por vincular', ignored: 'Ignorada', eval: 'Evaluación', funded: 'Financiada', sim: 'Simulación de NinjaTrader',
       err_plan: 'Cuenta congelada con el plan Free: sus operaciones esperan y llegarán en cuanto se desbloquee.', err_limit: 'Límite de registros alcanzado: no se añadió ninguna operación nueva.', err_account_gone: 'La cuenta de Sweep vinculada se eliminó: vincúlala de nuevo.',
       err_taken: 'Esta cuenta de Sweep ya está vinculada a otra cuenta de la plataforma.', err: 'No se guardó. Inténtalo de nuevo.', close: 'Cerrar',
-      cTitle: 'Conectar NinjaTrader 8', s1: 'Descarga el add-on de Sweep para NinjaTrader 8.', dl: 'Descargar', soon: 'Disponible pronto', s2: 'En NinjaTrader: Tools › Import › NinjaScript Add-On y elige el archivo.',
+      cTitle: 'Conectar {p}', s1: 'Descarga el add-on de Sweep para {p}.', dl: 'Descargar', soon: 'Disponible pronto', s2: 'En NinjaTrader: Tools › Import › NinjaScript Add-On y elige el archivo.',
+      s2q: 'Descomprímelo en la carpeta de Quantower: Settings › Scripts › plug-ins y reinicia Quantower.', s3q: 'En Quantower, abre el panel Sweep Sync y pega tu clave:',
       s3: 'Pega tu clave en la ventana Sweep de NinjaTrader:', copy: 'Copiar', copied: 'Clave copiada', once: 'Esta clave solo se muestra una vez. Solo envía tus ejecuciones a Sweep: nunca puede enviar una orden.', done: 'Listo',
       key: 'Clave', addon: 'Add-on', lastSeen: 'Visto por última vez', never: 'Nunca', newKey: 'Nueva clave', newKeyHelp: 'La clave actual dejará de funcionar.', stop: 'Detener la sincronización', stopHelp: 'Las operaciones ya sincronizadas se quedan en tu diario.', stopped: 'Sincronización detenida',
       which: '¿Qué cuenta de Sweep es?', newAcc: '+ Nueva cuenta', ignore: 'Ignorar esta cuenta', current: 'Vinculada a {a}', unlink: 'Desvincular', unlinkHelp: 'Las operaciones ya sincronizadas se quedan.',
@@ -2277,7 +2281,9 @@
   const t = (k) => { const x = (T[L] || T.en)[k]; return x == null ? T.en[k] : x; };
   const P = (n, one, many) => (n === 1 ? t(one) : t(many).replace('{n}', n));
   const h = (s) => (typeof esc === 'function' ? esc(s) : String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]));
-  const PLAT = { ninjatrader: 'NinjaTrader' };   // the platforms a synced trade can come from (its « source »)
+  const PLAT = { ninjatrader: 'NinjaTrader', quantower: 'Quantower' };   // the platforms a synced trade can come from (its « source »)
+  const NAME = { ninjatrader: 'NinjaTrader 8', quantower: 'Quantower' };   // in Connections, in this order
+  const STEPS = { ninjatrader: ['s2', 's3'], quantower: ['s2q', 's3q'] };   // how its add-on is installed, then where the key goes
   const FIRMS = { apex: 'Apex' };
   const isSynced = (d) => !!(d && PLAT[d.source]);
   const IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5"/></svg>';
@@ -2294,8 +2300,13 @@
     return t('day').replace('{n}', Math.floor(d / 86400));
   }
   const recent = (c) => !!(c && c.last_seen_at && Date.now() / 1000 - c.last_seen_at < 900);   // the add-on says hello every 5 minutes
-  const conn = () => (SY.stopping || !SY.st ? null : (SY.st.connections || []).find((c) => c.platform === 'ninjatrader') || null);
-  const accts = () => (SY.st ? (SY.st.accounts || []).filter((a) => a.platform === 'ninjatrader') : []);
+  // a platform's connection (any platform when none is given) and its accounts found (all of them when none is given)
+  const conn = (p) => (!SY.st ? null : (SY.st.connections || []).find((c) => (!p || c.platform === p) && SY.stopping !== c.platform) || null);
+  const accts = (p) => (SY.st ? (SY.st.accounts || []).filter((a) => !p || a.platform === p) : []);
+  // beta: a platform still being tested in its own software shows to administrators only (to open it to every trader: remove it here)
+  const BETA = ['quantower'];
+  const beta = () => { if (S.me && S.me.is_admin) return true; try { return localStorage.getItem('sw.syncBeta') === '1'; } catch (e) { return false; } };
+  const shown = () => Object.keys(NAME).filter((p) => ((SY.st.addons || {})[p] && (!BETA.includes(p) || beta())) || conn(p) || accts(p).length);   // an add-on to download, or already in use
   const nameOf = (id) => { const a = typeof acct === 'function' ? acct(id) : null; return a ? (typeof acctLabel === 'function' ? acctLabel(id) : a.name) : '—'; };
   const guessOf = (a) => { const g = a.guess || {}; if (g.sim) return t('sim'); if (g.firm) return (FIRMS[g.firm] || g.firm) + (g.phase ? ' · ' + t(g.phase) : ''); return ''; };
 
@@ -2315,14 +2326,17 @@
     const st = a.state === 'linked' ? t('linkedTo').replace('{a}', h(nameOf(a.account_id))) + ' · ' + P(a.trades, 'tr1', 'trN') : a.state === 'ignored' ? t('ignored') : t('toLink');
     return `<li><button type="button" class="sy-acc" data-sy="acct" data-id="${h(a.id)}"><span class="sy-txt"><b>${h(a.name)}</b><span>${g ? `<em class="sy-chip">${h(g)}</em>` : ''}${st}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</span><svg class="sy-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>`;
   }
+  function platHtml(p) {
+    const c = conn(p), list = accts(p), fresh = list.filter((a) => a.state === 'new');
+    const head = c
+      ? `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>${NAME[p]}</b><span><i class="sy-dot${recent(c) ? ' on' : ''}"></i>${c.last_seen_at ? h(t('seen').replace('{t}', ago(c.last_seen_at))) : t('waiting')}</span></span><button type="button" class="btn sm" data-sy="manage" data-p="${p}">${t('manage')}</button></div>`
+      : `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>${NAME[p]}</b><span>${h(t('pitch').replace('{p}', NAME[p]))}</span></span><button type="button" class="btn sm" data-sy="connect" data-p="${p}">${t('connect')}</button></div>`;
+    const found = fresh.length ? `<div class="sy-found"><span>${P(fresh.length, 'found1', 'foundN')}</span><button type="button" class="btn sm" data-sy="acct" data-id="${h(fresh[0].id)}">${t('linkMine')}</button></div>` : '';
+    return `<div class="sy-plat" data-p="${p}">${head}${found}${list.length ? `<ul class="sy-list">${list.map(rowHtml).join('')}</ul>` : ''}</div>`;
+  }
   function sectionHtml() {
     if (!SY.st) return `<div class="sec-h"><h2>${t('conn')}</h2></div><div class="surface pad sy-card"><p class="muted sy-wait">${t('loading')}</p></div>`;
-    const c = conn(), list = accts(), fresh = list.filter((a) => a.state === 'new');
-    const head = c
-      ? `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>NinjaTrader 8</b><span><i class="sy-dot${recent(c) ? ' on' : ''}"></i>${c.last_seen_at ? h(t('seen').replace('{t}', ago(c.last_seen_at))) : t('waiting')}</span></span><button type="button" class="btn sm" data-sy="manage">${t('manage')}</button></div>`
-      : `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>NinjaTrader 8</b><span>${t('pitch')}</span></span><button type="button" class="btn sm" data-sy="connect">${t('connect')}</button></div>`;
-    const found = fresh.length ? `<div class="sy-found"><span>${P(fresh.length, 'found1', 'foundN')}</span><button type="button" class="btn sm" data-sy="acct" data-id="${h(fresh[0].id)}">${t('linkMine')}</button></div>` : '';
-    return `<div class="sec-h"><h2>${t('conn')}</h2></div><div class="surface pad sy-card">${head}${found}${list.length ? `<ul class="sy-list">${list.map(rowHtml).join('')}</ul>` : ''}</div>`;
+    return `<div class="sec-h"><h2>${t('conn')}</h2></div><div class="surface pad sy-card">${shown().map(platHtml).join('')}</div>`;
   }
   function paintSettings() {
     const main = document.getElementById('main'); if (!main || !/^#settings/.test(location.hash || '')) return;
@@ -2345,7 +2359,7 @@
     load();
     const id = decodeURIComponent(m[1]), a = accts().find((x) => x.state === 'linked' && x.account_id === id);
     if (!a) { if (el) el.remove(); return; }
-    const c = conn();
+    const c = conn(a.platform);
     const html = `<p class="sy-acct" data-noi18n><i class="sy-dot${recent(c) ? ' on' : ''}${a.error ? ' err' : ''}"></i><span>${h(t('syncedWith').replace('{p}', PLAT[a.platform]))} · ${h(a.name)}${c && c.last_seen_at ? ' · ' + h(t('seen').replace('{t}', ago(c.last_seen_at))) : ''}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</p>`;
     if (!el) { const row = main.querySelector(':scope > .row') || main.firstElementChild; if (row) row.insertAdjacentHTML('afterend', html); }
     else if (el.outerHTML !== html) el.outerHTML = html;
@@ -2385,8 +2399,8 @@
   }
   function titleOf() {
     const v = SY.view || {};
-    if (v.k === 'connect') return t('cTitle');
-    if (v.k === 'manage') return 'NinjaTrader 8';
+    if (v.k === 'connect') return t('cTitle').replace('{p}', NAME[v.p]);
+    if (v.k === 'manage') return NAME[v.p];
     if (v.k === 'edit') return t('editT');
     const a = accts().find((x) => x.id === v.id); return a ? a.name : t('conn');
   }
@@ -2394,13 +2408,13 @@
     const v = SY.view || {};
     const head = `<div class="sy-head"><h2>${h(titleOf())}</h2><button type="button" class="sy-x" data-sy="close" aria-label="${t('close')}">${X}</button></div>`;
     if (v.k === 'connect') {
-      const ad = SY.st && SY.st.addon;
-      return head + `<ol class="sy-steps"><li><span>${t('s1')}</span>${ad ? `<a class="btn sm" href="${h(ad.url)}" download>${t('dl')}</a>` : `<em class="sy-soon">${t('soon')}</em>`}</li>
-        <li><span>${t('s2')}</span></li><li><span>${t('s3')}</span><div class="sy-key"><code>${h(v.key)}</code><button type="button" class="btn sm" data-sy="copy">${t('copy')}</button></div></li></ol>
+      const ad = SY.st && (SY.st.addons || {})[v.p], [s2, s3] = STEPS[v.p];
+      return head + `<ol class="sy-steps"><li><span>${h(t('s1').replace('{p}', NAME[v.p]))}</span>${ad ? `<a class="btn sm" href="${h(ad.url)}" download>${t('dl')}</a>` : `<em class="sy-soon">${t('soon')}</em>`}</li>
+        <li><span>${t(s2)}</span></li><li><span>${t(s3)}</span><div class="sy-key"><code>${h(v.key)}</code><button type="button" class="btn sm" data-sy="copy">${t('copy')}</button></div></li></ol>
         <p class="sy-note">${t('once')}</p><button type="button" class="btn primary sy-main" data-sy="close">${t('done')}</button>`;
     }
     if (v.k === 'manage') {
-      const c = conn() || {};
+      const c = conn(v.p) || {};
       return head + `<div class="sy-kv"><span>${t('key')}</span><b>····${h(c.hint || '')}</b></div><div class="sy-kv"><span>${t('addon')}</span><b>${h(c.client || '—')}</b></div>
         <div class="sy-kv"><span>${t('lastSeen')}</span><b>${c.last_seen_at ? h(ago(c.last_seen_at)) : t('never')}</b></div>
         <button type="button" class="btn sy-wide" data-sy="newkey">${t('newKey')}</button><p class="sy-note">${t('newKeyHelp')}</p>
@@ -2441,11 +2455,12 @@
   async function act(b) {
     const k = b.dataset.sy, v = SY.view || {};
     if (k === 'close') return close();
-    if (k === 'manage') return open({ k: 'manage' });
+    if (k === 'manage') return open({ k: 'manage', p: b.dataset.p });
     if (k === 'acct') return open({ k: 'acct', id: b.dataset.id, pick: null });
     if (k === 'connect' || k === 'newkey') {
       b.disabled = true;
-      try { const r = await apiJSON('api/sync/key', { method: 'POST', body: { platform: 'ninjatrader' } }); SY.stopping = false; open({ k: 'connect', key: r.key }); load(true); }
+      const p = b.dataset.p || v.p || 'ninjatrader';   // the invitations connect NinjaTrader 8
+      try { const r = await apiJSON('api/sync/key', { method: 'POST', body: { platform: p } }); SY.stopping = false; open({ k: 'connect', p, key: r.key }); load(true); }
       catch (e) { if (typeof toast === 'function') toast(t('err')); b.disabled = false; }
       return;
     }
@@ -2457,9 +2472,9 @@
       return;
     }
     if (k === 'stop') {   // like a delete: « Undo » for 5 s, the key is revoked only then
-      close(); SY.stopping = true; paint();
+      close(); SY.stopping = v.p; paint();
       const undo = () => { SY.stopping = false; paint(); };
-      const go = () => { apiJSON('api/sync/key?platform=ninjatrader', { method: 'DELETE' }).catch(() => {}).finally(() => { SY.stopping = false; load(true); }); };
+      const go = () => { apiJSON('api/sync/key?platform=' + encodeURIComponent(v.p), { method: 'DELETE' }).catch(() => {}).finally(() => { SY.stopping = false; load(true); }); };
       if (window.SweepUndo && SweepUndo.toast) SweepUndo.toast(t('stopped'), undo, go); else go();
       return;
     }
@@ -2556,7 +2571,7 @@
   }
 
   /* « On NinjaTrader 8? Connect it » on the CSV import page and under the « Add account » form of the Accounts page (never in
-     the first-account flow of a new trader); gone once NinjaTrader 8 is connected. Connect opens the connect sheet directly. */
+     the first-account flow of a new trader); gone once a platform is connected. Connect opens the NinjaTrader 8 connect sheet. */
   function paintTips() {
     const main = document.getElementById('main'); if (!main) return;
     const hash = location.hash || '', on = /^#import/.test(hash) ? 'tipImport' : /^#accounts$/.test(hash) ? 'tipAcct' : null;

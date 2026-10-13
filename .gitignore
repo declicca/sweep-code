@@ -8,3 +8,4 @@ website/dist/
 .claude/settings.local.json
 !website/static/press/*.zip
 !app/sync/addon/SweepSync.zip
+!app/sync/addon/SweepSync-Quantower.zip

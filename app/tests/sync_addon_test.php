@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 /**
- * Sweep — the NinjaTrader 8 add-on and the server speak the same language (no C# compiler here: NinjaTrader compiles it):
+ * Sweep — the add-ons (NinjaTrader 8, Quantower) and the server speak the same language (no C# compiler here):
  *   php tests/sync_addon_test.php
- * The import zip is up to date with sync/addon/SweepSync.cs, the add-on sends the fields, header and key the server reads,
- * it never calls an order function, and it sends to app.makeitsweep.com.
+ * NinjaTrader 8: the import zip is up to date with sync/addon/SweepSync.cs. Both: the add-on sends the fields, header, key
+ * and name (« client ») the server reads, it never calls an order function, and it sends to app.makeitsweep.com.
+ * Quantower: a panel (Plugin) whose page (HTML/layout.html) is built in; its zip holds the compiled add-on only, once built.
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -38,5 +39,30 @@ ok(str_contains($cs, '"https://app.makeitsweep.com/api/sync/push"'), 'it sends t
 // read-only: no order function of NinjaTrader is ever called
 ok(preg_match('/\.(Submit|CreateOrder|Cancel|CancelAllOrders|Change|Flatten)\s*\(/', $cs) === 0, 'read-only: no Submit, CreateOrder, Cancel, Change or Flatten');
 ok(preg_match('/\bPassword\b|AccountItem\./', $cs) === 0, 'it never reads a password or an account balance');
+ok(str_contains($cs, 'J("Sweep NT8 " + Version)') && str_contains($store, "'Sweep NT8' => 'ninjatrader'"), 'it names itself « Sweep NT8 … », the name the server ties to NinjaTrader 8');
+
+// Quantower: the same language, from a panel
+$q = (string) file_get_contents($app . '/sync/addon/quantower/SweepSync.cs');
+$qp = (string) file_get_contents($app . '/sync/addon/quantower/SweepSync.csproj');
+$qh = (string) file_get_contents($app . '/sync/addon/quantower/HTML/layout.html');
+ok(str_contains($q, 'class SweepSyncPanel : Plugin') && str_contains($q, 'TemplateName = "layout.html"') && str_contains($qp, '<EmbeddedResource Include="HTML\layout.html" LogicalName="SweepSync.HTML.layout.html" />'), 'Quantower: a panel (Plugin, not a Strategy) whose page is built into the add-on');
+ok(substr_count($qp, '<Private>false</Private>') === 2 && str_contains($qp, '$(QuantowerBin)\TradingPlatform.BusinessLayer.dll') && str_contains($qp, '$(QuantowerBin)\TradingPlatform.PresentationLayer.Plugins.dll'), 'Quantower: its two libraries are referenced, never shipped with the add-on');
+foreach (['id', 'account', 'contract', 'side', 'qty', 'price', 'ts', 'fee', 'point_value'] as $k) ok(str_contains($q, '\"' . $k . '\":'), "Quantower: execution field « $k » sent");
+foreach (['name', 'connection', 'provider', 'currency'] as $k) ok(str_contains($q, '\"' . $k . '\":'), "Quantower: account field « $k » sent");
+foreach (['client', 'accounts', 'fills'] as $k) ok(str_contains($q, '\"' . $k . '\":'), "Quantower: request part « $k » sent");
+ok(str_contains($q, '? "buy" : "sell"') && str_contains($q, 'TryAddWithoutValidation("X-Sweep-Key", Key)') && str_contains($q, '^swk_[0-9a-f]{40}$'), 'Quantower: sides buy / sell, the key in X-Sweep-Key, the same key format');
+ok(str_contains($q, 'J("Sweep Quantower " + Version)') && str_contains($store, "'Sweep Quantower' => 'quantower'"), 'Quantower: it names itself « Sweep Quantower … », the name the server ties to Quantower (a NinjaTrader key is refused)');
+ok(preg_match('/MaxPerPush = (\d+)/', $q, $m) === 1 && (int) $m[1] <= (int) $m2[1] && str_contains($q, '"https://app.makeitsweep.com/api/sync/push"'), 'Quantower: never more executions per request than the server takes, sent to app.makeitsweep.com');
+ok(preg_match('/\b(PlaceOrder|CancelOrder|ModifyOrder|ClosePosition|SendCustomRequest)\b|\.(Close|Cancel)\s*\(/', $q) === 0, 'Quantower: read-only, no PlaceOrder, CancelOrder, ModifyOrder or Close');
+ok(preg_match('/\bPassword\b|\.Balance\b/', $q) === 0, 'Quantower: it never reads a password or an account balance');
+ok(preg_match_all('/public static readonly string\[\] (En|Fr|Es) = \{(.*)\};/', $q, $tx) === 3 && count(array_unique(array_map(fn($x) => preg_match_all('/"(?:[^"\\\\]|\\\\.)*"/', $x), $tx[2]))) === 1, 'Quantower: the panel\'s texts in English, French and Spanish, as many in each');
+foreach (['intro', 'label', 'key', 'save', 'status'] as $id) ok(str_contains($qh, 'id="' . $id . '"') && (in_array($id, ['key', 'save'], true) ? str_contains($q, '"' . $id . '"') : true), "Quantower: the panel's page has « $id »");
+ok(str_contains($qh, 'paint: function (intro, label, save, status)') && str_contains($q, '"sweep.paint("'), 'Quantower: the add-on writes the page through sweep.paint');
+$qz = $app . '/sync/addon/SweepSync-Quantower.zip';
+if (is_file($qz)) {
+    $names = []; if (class_exists('ZipArchive')) { $z = new ZipArchive(); if ($z->open($qz) === true) { for ($i = 0; $i < $z->numFiles; $i++) $names[] = $z->getNameIndex($i); $z->close(); } }
+    else $names = array_filter(array_map('trim', explode("\n", (string) shell_exec('unzip -Z1 ' . escapeshellarg($qz) . ' 2>/dev/null'))));
+    ok(array_values($names) === ['SweepSync/SweepSync.dll'], 'Quantower: the zip holds the compiled add-on only (SweepSync/SweepSync.dll)');
+} else echo "--   Quantower: no zip yet (built at step 3 with tools/addon-quantower.py)\n";
 
 echo "\n" . ($f ? "$f failed" : "$n/$n passed") . "\n"; exit($f ? 1 : 0);

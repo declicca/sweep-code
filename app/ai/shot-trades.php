@@ -6,7 +6,8 @@ declare(strict_types=1);
  *  - closed_trades: one row = one trade;
  *  - fills: per symbol, in time order, FIFO; a trade runs from flat back to flat (scale-ins and partial exits are the
  *    executions of ONE trade, weighted average prices); a reversal closes the trade and opens the next one; a position
- *    still open at the end is « Open — to complete » (unchecked);
+ *    still open at the end is « Open — to complete » (unchecked); contracts = the largest position held (as the trade
+ *    form, the CSV imports and the sync count them), turns = contracts bought and sold (P&L and default fees use them);
  *  - P&L = (exit − entry) × qty × $ per point (sign by direction); the P&L shown on screen wins when it differs by more
  *    than one tick × qty (the trade is then « To check »);
  *  - fees: the commissions shown, else the account's commission per contract;
@@ -229,15 +230,17 @@ function shot_build(array $data, array $o): array
     $out = []; $unknown = [];
     $finish = function (array $t) use (&$out, $feeRt) {
         $t['contracts'] = max(1, (int) round($t['contracts']));
-        $calc = ($t['entry'] !== null && $t['exit'] !== null) ? shot_pnl_c($t['instrument'], $t['direction'], $t['entry'], $t['exit'], $t['contracts']) : null;
+        $q = isset($t['turns']) ? max(1, (int) round($t['turns'])) : $t['contracts'];   // contracts bought and sold (fills); a closed-trade row: its quantity
+        if (isset($t['turns'])) $t['turns'] = $q;
+        $calc = ($t['entry'] !== null && $t['exit'] !== null) ? shot_pnl_c($t['instrument'], $t['direction'], $t['entry'], $t['exit'], $q) : null;
         $shown = $t['_shown']; $feesShown = $t['_fees'] !== null ? (int) round(abs($t['_fees']) * 100) : null;
-        $sp = shot_spec($t['instrument']); $tol = $sp ? max(1, (int) round($sp[0] * $sp[1] * $t['contracts'] * 100)) : 0;
+        $sp = shot_spec($t['instrument']); $tol = $sp ? max(1, (int) round($sp[0] * $sp[1] * $q * 100)) : 0;
         $t['pnl_calc_c'] = $calc; $t['pnl_shown_c'] = $shown;
-        $fees = $feesShown ?? ($feeRt > 0 ? $feeRt * $t['contracts'] : 0);
+        $fees = $feesShown ?? ($feeRt > 0 ? $feeRt * $q : 0);
         if ($calc !== null && $shown !== null && empty($t['_gross'])) {
             if (abs($shown - $calc) <= $tol) { $t['pnl_c'] = $calc; }                                    // the platform shows the gross P&L
             elseif ($feesShown !== null && abs($shown - ($calc - $feesShown)) <= $tol) { $t['pnl_c'] = $calc; }   // it shows the net P&L
-            elseif ($feesShown === null && $calc - $shown > 0 && $calc - $shown <= 1500 * $t['contracts']) { $t['pnl_c'] = $calc; $fees = $calc - $shown; $t['fees_from_pnl'] = true; }   // net P&L: the difference is the fees
+            elseif ($feesShown === null && $calc - $shown > 0 && $calc - $shown <= 1500 * $q) { $t['pnl_c'] = $calc; $fees = $calc - $shown; $t['fees_from_pnl'] = true; }   // net P&L: the difference is the fees
             else { $t['pnl_c'] = $shown; $t['pnl_manual'] = true; $t['check'] = true; $t['why'][] = 'pnl'; }
         } elseif ($calc !== null) { $t['pnl_c'] = $calc; }
         elseif ($shown !== null) { $t['pnl_c'] = $shown; $t['pnl_manual'] = true; }
@@ -302,9 +305,9 @@ function shot_build(array $data, array $o): array
             $left = $f['qty'];
             while ($left > 1e-9) {
                 $st = $pos[$f['root']] ?? null;
-                if (!$st) $st = ['t' => $base($f['root'], $f['side'] > 0 ? 'long' : 'short', $f['tm'], $day), 'dir' => $f['side'], 'net' => 0.0, 'ew' => 0.0, 'eq' => 0.0, 'xw' => 0.0, 'xq' => 0.0, 'fee' => null, 'last' => $f['tm']];
+                if (!$st) $st = ['t' => $base($f['root'], $f['side'] > 0 ? 'long' : 'short', $f['tm'], $day), 'dir' => $f['side'], 'net' => 0.0, 'max' => 0.0, 'ew' => 0.0, 'eq' => 0.0, 'xw' => 0.0, 'xq' => 0.0, 'fee' => null, 'last' => $f['tm']];
                 if ($f['side'] === $st['dir']) {
-                    $st['net'] += $left; $st['ew'] += $f['price'] * $left; $st['eq'] += $left;
+                    $st['net'] += $left; $st['max'] = max($st['max'], $st['net']); $st['ew'] += $f['price'] * $left; $st['eq'] += $left;
                     $st['t']['executions'][] = ['id' => $nid('x'), 'side' => $f['side'] > 0 ? 'buy' : 'sell', 'qty' => $left, 'price' => $f['price'], 't' => $f['tm'][0] . ' ' . $f['tm'][1]];
                     if ($f['fee'] !== null) $st['fee'] = ($st['fee'] ?? 0) + abs($f['fee']) * ($left / $f['qty']);
                     if ($f['conf'] < 0.6) { $st['t']['check'] = true; $st['t']['why'][] = 'read'; }
@@ -316,14 +319,14 @@ function shot_build(array $data, array $o): array
                 if ($f['fee'] !== null) $st['fee'] = ($st['fee'] ?? 0) + abs($f['fee']) * ($close / $f['qty']);
                 if ($f['conf'] < 0.6) { $st['t']['check'] = true; $st['t']['why'][] = 'read'; }
                 if ($st['net'] <= 1e-9) {
-                    $t = $st['t']; $t['contracts'] = $st['eq']; $t['entry'] = round($st['ew'] / $st['eq'], 6); $t['exit'] = round($st['xw'] / $st['xq'], 6);
+                    $t = $st['t']; $t['contracts'] = $st['max']; $t['turns'] = $st['eq']; $t['entry'] = round($st['ew'] / $st['eq'], 6); $t['exit'] = round($st['xw'] / $st['xq'], 6);
                     $t['exit_time'] = substr($st['last'][1], 0, 5); $t['_fees'] = $st['fee'];
                     $finish($t); unset($pos[$f['root']]);
                 } else $pos[$f['root']] = $st;
             }
         }
         foreach ($pos as $st) {
-            $t = $st['t']; $t['contracts'] = $st['eq']; $t['entry'] = round($st['ew'] / $st['eq'], 6);
+            $t = $st['t']; $t['contracts'] = $st['max']; $t['turns'] = $st['eq']; $t['entry'] = round($st['ew'] / $st['eq'], 6);
             $t['open'] = true; $t['check'] = true; $t['why'][] = 'open'; $t['_fees'] = $st['fee']; $t['exit'] = null; $finish($t);
         }
         if ($skipped) $o['skipped'] = $skipped;

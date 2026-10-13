@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sweep Sync</title>
+  <!-- Quantower's own theme (same links as Quantower's plugin example): the panel follows its dark or light theme -->
+  <link rel="stylesheet" href="../../../themes/default/css/colors.css"/>
+  <link rel="stylesheet" href="../../../themes/default/css/core.css"/>
+  <style>
+    :where(body) { font-family: "Segoe UI", system-ui, sans-serif; }   /* fallback only: Quantower's theme wins */
+    body { margin: 0; padding: 14px 16px; font-size: 13px; line-height: 1.5; }
+    p { margin: 0 0 12px; }
+    label { display: block; margin-bottom: 4px; }
+    #key { display: block; width: 100%; box-sizing: border-box; margin-bottom: 10px; font-family: Consolas, monospace; }
+    #status { margin-top: 14px; white-space: pre-line; }
+  </style>
+  <script>
+    (async function () { try { await CefSharp.BindObjectAsync("bound"); } catch (e) { /* not needed to show the panel */ } })();
+    // the panel's texts and state, written by the add-on every 2 seconds (texts set only when they change)
+    var sweep = {
+      paint: function (intro, label, save, status) {
+        var set = function (id, t) { var e = document.getElementById(id); if (e && e.textContent !== t) e.textContent = t; };
+        set('intro', intro); set('label', label); set('save', save); set('status', status);
+      }
+    };
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'key') document.getElementById('save').click();
+    });
+  </script>
+</head>
+<body>
+  <p id="intro"></p>
+  <label id="label" for="key"></label>
+  <input id="key" type="text" spellcheck="false" autocomplete="off" placeholder="swk_…">
+  <button id="save" type="button">Save</button>
+  <div id="status"></div>
+</body>
+</html>
