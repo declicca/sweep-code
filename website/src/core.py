@@ -193,6 +193,21 @@ FOOT = [
    ("contact.html", T("Contact","Contact","Contacto")), ("privacy.html", T("Privacy policy","Confidentialité","Privacidad")), ("terms.html", T("Terms of use","Conditions d’utilisation","Términos de uso")), ("risk.html", T("Risk disclosure","Divulgation des risques","Aviso de riesgo"))]),
 ]
 
+def _firm_menu():
+    """Header « Prop firms » menu: the 7 firms (their rules page, or their journal page), then the pages for prop traders."""
+    from pages8 import FIRMS as JOURNALS
+    from pages18 import page_of
+    rules = {f["name"]: f for f in _PRESET_LIST}
+    def desc(f):
+        sz = sorted({s["size"] for p in f["programs"] for s in p["sizes"]}); n = len(f["programs"])
+        r = f"{sz[0] // 1000}K" + (f" – {sz[-1] // 1000}K" if len(sz) > 1 else "")
+        return T(f"{n} account type{'s' if n > 1 else ''} · {r}", f"{n} type{'s' if n > 1 else ''} de compte · {r}", f"{n} tipo{'s' if n > 1 else ''} de cuenta · {r}")
+    firms = [(page_of(rules[n]), T(n, n, n), desc(rules[n])) if n in rules else (jp, T(n, n, n), T("Journal, your own rules", "Journal, tes propres règles", "Diario, tus propias reglas")) for jp, n in JOURNALS]
+    more = [("prop-traders.html", T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"), T("Accounts, rules and payouts in one place","Comptes, règles et payouts au même endroit","Cuentas, reglas y payouts en un solo lugar")),
+            ("prop-firms/index.html", T("Every firm’s rules","Les règles de chaque firme","Las reglas de cada firma"), T("Checked every week","Vérifiées chaque semaine","Revisadas cada semana")),
+            ("prop-firm-payout-rules.html", T("Payout rules compared","Règles de payout comparées","Reglas de payout comparadas"), T("Winning days, caps and split","Jours gagnants, plafonds et partage","Días ganadores, límites y reparto"))]
+    return firms + more, [(T("Firms","Firmes","Firmas"), firms), (T("For prop traders","Pour les traders prop","Para traders prop"), more)]
+
 def _foot_firms():
     """Footer « Prop firms » column: each firm's rules page when the app has its rules, else its journal page."""
     from pages8 import FIRMS as JOURNALS
@@ -315,8 +330,10 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
         menu = ('<div class="ddcols">' + "".join(f'<div class="ddgrp" role="group" aria-label="{t(g)}"><span class="ddh" aria-hidden="true">{t(g)}</span>{links(its)}</div>' for g, its in groups) + '</div>') if groups else links(items)
         return (f'<div class="navdd" data-dd="{key}"><button type="button" class="ddbtn{" cur" if cur else ""}" aria-haspopup="true" aria-expanded="false">{t(label)}{CHEV}</button>'
                 f'<div class="ddmenu{" two" if groups else ""}" role="menu">{menu}</div></div>')
+    fm, fg = _firm_menu()
     nav = (dd(T("Product","Produit","Producto"), PRODUCT, "product")
-           + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l in NAV[2:])
+           + dd(T("Prop firms","Prop firms","Prop firms"), fm, "firms", fg)
+           + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l in NAV[3:])
            + dd(T("Resources","Ressources","Recursos"), RESOURCES, "res", RES_GROUPS))
     ARROW = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>'
     sheet = "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}><span>{t(l)}</span>{ARROW}</a>' for p, l in NAV)
@@ -444,6 +461,7 @@ REL_INFO = {
  "install.html": (T("Install on your phone","Installer sur ton téléphone","Instalar en tu teléfono"), T("Add Sweep to your home screen.","Ajoute Sweep à ton écran d’accueil.","Añade Sweep a tu pantalla de inicio.")),
  "features.html": (T("Features","Fonctionnalités","Funciones"), T("Everything Sweep does.","Tout ce que fait Sweep.","Todo lo que hace Sweep.")),
  "faq.html": (T("FAQ","FAQ","Preguntas frecuentes"), T("Quick answers about Sweep.","Réponses rapides sur Sweep.","Respuestas rápidas sobre Sweep.")),
+ "free-trading-journal.html": (T("Free trading journal","Journal de trading gratuit","Diario de trading gratis"), T("What stays free, forever.","Ce qui reste gratuit, pour toujours.","Lo que sigue siendo gratis, para siempre.")),
  "prop-traders.html": (T("For prop traders","Pour traders prop","Para traders prop"), T("Every account, payout and rule.","Chaque compte, payout et règle.","Cada cuenta, payout y regla.")),
 }
 RELATED = {
@@ -462,6 +480,7 @@ RELATED = {
  "import.html": ["install.html", "features.html", "faq.html"],
  "how-to-choose-a-trading-journal.html": ["best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "guides.html"],
  "trading-journal-routine.html": ["trading-templates.html", "how-to-choose-a-trading-journal.html", "guides.html"],
+ "free-trading-journal.html": ["prop-traders.html", "how-to-choose-a-trading-journal.html", "trading-templates.html"],
  "guides.html": ["prop-firms/index.html", "tools.html", "glossary.html"],
  "prop-firm-consistency-rules.html": ["consistency-rule-calculator.html", "prop-firm-payout-rules.html", "prop-firms/index.html"],
  "prop-firm-drawdown-rules.html": ["trailing-drawdown-calculator.html", "prop-firm-profit-targets.html", "prop-firms/index.html"],

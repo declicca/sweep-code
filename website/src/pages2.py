@@ -7,9 +7,9 @@ from pages3 import AI_FAQ
 FAQ = [
  (T("Free and plans","Gratuit et forfaits","Gratis y planes"), [
   (T("Is Sweep really free?","Sweep est-il vraiment gratuit ?","¿Sweep es realmente gratis?"),
-   T("Yes. The Free plan is free forever. You also get Pro for your first 60 days to try everything, no credit card needed.",
-     "Oui. Le forfait Free est gratuit pour toujours. Tu as aussi accès à Pro pendant tes 60 premiers jours pour tout essayer, sans carte de crédit.",
-     "Sí. El plan Free es gratis para siempre. También tienes Pro durante tus primeros 60 días para probarlo todo, sin tarjeta.")),
+   T("Yes. The <a href=\"/free-trading-journal\">Free plan</a> is free forever. You also get Pro for your first 60 days to try everything, no credit card needed.",
+     "Oui. Le <a href=\"/fr/free-trading-journal\">forfait Free</a> est gratuit pour toujours. Tu as aussi accès à Pro pendant tes 60 premiers jours pour tout essayer, sans carte de crédit.",
+     "Sí. El <a href=\"/es/free-trading-journal\">plan Free</a> es gratis para siempre. También tienes Pro durante tus primeros 60 días para probarlo todo, sin tarjeta.")),
   (T("What happens after the 60 days of Pro?","Que se passe-t-il après les 60 jours de Pro ?","¿Qué pasa después de los 60 días de Pro?"),
    T("You move to the Free plan automatically. Nothing is charged and nothing is lost. Upgrade only if you want to.",
      "Tu passes automatiquement au forfait Free. Rien n’est facturé et rien n’est perdu. Tu passes à un forfait payant seulement si tu le veux.",
