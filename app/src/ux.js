@@ -911,8 +911,49 @@
     if (hl) { const h = hlHtml(hl); if (box._h !== h) { box.innerHTML = h; box._h = h; } }
     if (!hlBusy && Date.now() - hlAt > 60000) { hlBusy = true; apiJSON('api/admin/health').then((d) => { hl = d; hlAt = Date.now(); hlBusy = false; hlPaint(); }).catch(() => { hlBusy = false; hlAt = Date.now(); }); }
   }
+  /* ───── Admin → Sync: who connected NinjaTrader 8 or Quantower and where each one is (read-only, api/admin/sync) ───── */
+  const ST = {
+    en: { h: 'Sync', sub: 'Traders who created a key, most recently seen first. Read-only.', card: 'Traders on {p}', cardSub: '{a} seen in 24 h · {b} accounts linked · {c} trades in 7 d',
+      st: { ok: 'Syncing', to_link: 'Accounts to link', no_accounts: 'No account found', never: 'Add-on never seen', error: 'Error' },
+      why: { never: 'Key created, the add-on never sent anything: installed? key pasted?', no_accounts: 'The add-on runs but sees no account: is the platform connected to the broker?', to_link: 'Accounts found, none linked yet: the trader has to link them (Settings › Connections).' },
+      err: { plan: 'frozen on the Free plan', limit: 'record limit reached', account_gone: 'linked Sweep account deleted' },
+      seen: 'seen {t}', acc: '{l} linked · {n} to link · {i} ignored', tr: '{n} trades ({w} in 7 d)', team: 'team', none: 'No trader has created a key yet.' },
+    fr: { h: 'Synchro', sub: 'Les traders qui ont créé une clé, les plus récemment vus en premier. Lecture seule.', card: 'Traders sur {p}', cardSub: '{a} vu(s) en 24 h · {b} compte(s) relié(s) · {c} trade(s) en 7 j',
+      st: { ok: 'Synchronise', to_link: 'Comptes à relier', no_accounts: 'Aucun compte trouvé', never: 'Add-on jamais vu', error: 'Erreur' },
+      why: { never: 'Clé créée, l’add-on n’a jamais rien envoyé : installé ? clé collée ?', no_accounts: 'L’add-on tourne mais ne voit aucun compte : la plateforme est-elle connectée au courtier ?', to_link: 'Comptes trouvés, aucun relié : le trader doit les relier (Réglages › Connexions).' },
+      err: { plan: 'compte gelé (forfait Free)', limit: 'limite d’enregistrements atteinte', account_gone: 'compte Sweep relié supprimé' },
+      seen: 'vu {t}', acc: '{l} relié(s) · {n} à relier · {i} ignoré(s)', tr: '{n} trade(s) ({w} en 7 j)', team: 'équipe', none: 'Aucun trader n’a encore créé de clé.' },
+    es: { h: 'Sincronización', sub: 'Los traders que crearon una clave, los vistos más recientemente primero. Solo lectura.', card: 'Traders en {p}', cardSub: '{a} vistos en 24 h · {b} cuentas vinculadas · {c} operaciones en 7 d',
+      st: { ok: 'Sincroniza', to_link: 'Cuentas por vincular', no_accounts: 'Ninguna cuenta encontrada', never: 'Add-on nunca visto', error: 'Error' },
+      why: { never: 'Clave creada, el add-on nunca envió nada: ¿instalado? ¿clave pegada?', no_accounts: 'El add-on funciona pero no ve ninguna cuenta: ¿la plataforma está conectada al bróker?', to_link: 'Cuentas encontradas, ninguna vinculada: el trader debe vincularlas (Ajustes › Conexiones).' },
+      err: { plan: 'cuenta congelada (plan Free)', limit: 'límite de registros alcanzado', account_gone: 'cuenta de Sweep vinculada eliminada' },
+      seen: 'visto {t}', acc: '{l} vinculada(s) · {n} por vincular · {i} ignorada(s)', tr: '{n} operación(es) ({w} en 7 d)', team: 'equipo', none: 'Ningún trader ha creado una clave todavía.' },
+  };
+  const PLATS = { ninjatrader: 'NinjaTrader 8', quantower: 'Quantower' };
+  let sy = null, syAt = 0, syBusy = false;
+  function syHtml(d) {
+    const x = ST[LANG] || ST.en, cls = { ok: 'ok', error: 'bad' };
+    const cards = Object.entries(d.platforms || {}).map(([p, v]) => card(x.card.replace('{p}', PLATS[p] || p), v.traders, x.cardSub.replace('{a}', v.seen_24h).replace('{b}', v.linked).replace('{c}', v.trades_7d))).join('');
+    const rows = (d.rows || []).map((r) => {
+      const info = [r.email !== r.name ? r.email : '', r.client || '', r.last_seen_at ? x.seen.replace('{t}', ago(r.last_seen_at, d.now)) : '', r.team ? x.team : ''].filter(Boolean).map(esc).join(' · ');
+      const acc = x.acc.replace('{l}', r.accounts.linked).replace('{n}', r.accounts.new).replace('{i}', r.accounts.ignored) + ' · ' + x.tr.replace('{n}', r.trades).replace('{w}', r.trades_7d);
+      const why = r.state === 'error' ? `<small class="neg">${esc(r.errors.map((e) => x.err[e] || e).join(' · '))}</small>` : x.why[r.state] ? `<small>${esc(x.why[r.state])}</small>` : '';
+      return `<li class="ux-hl-${cls[r.state] || 'late'}" data-sy-row="${esc(r.platform)}"><div><b>${esc(r.name)}</b><small>${esc(PLATS[r.platform] || r.platform)}</small><span class="ux-pr-chip">${esc(x.st[r.state] || r.state)}</span></div>
+        ${info ? `<small>${info}</small>` : ''}<small>${esc(acc)}</small>${why}</li>`;
+    }).join('');
+    return `<div class="sec-h"><h2>${x.h}</h2></div><p class="muted ux-hl-sub">${x.sub}</p><div class="ux-mgrid">${cards}</div>
+      ${rows ? `<ul class="ux-pr-list ux-sy-list">${rows}</ul>` : `<p class="muted">${x.none}</p>`}`;
+  }
+  function syPaint() {
+    if (route().v !== 'admin') return;
+    const main = document.getElementById('main'); if (!main) return;
+    let box = main.querySelector('.ux-sync-admin');
+    if (!box) { box = document.createElement('section'); box.className = 'sec ux-sync-admin'; box.setAttribute('data-noi18n', ''); const m = main.querySelector('.ux-presets-admin') || main.querySelector('.ux-metrics'); if (m) m.after(box); else main.prepend(box); }
+    if (sy) { const h = syHtml(sy); if (box._h !== h) { box.innerHTML = h; box._h = h; } }
+    if (!syBusy && Date.now() - syAt > 60000) { syBusy = true; apiJSON('api/admin/sync').then((d) => { sy = d; syAt = Date.now(); syBusy = false; syPaint(); }).catch(() => { syBusy = false; syAt = Date.now(); }); }
+  }
   const appRender = render;
-  render = function () { const out = appRender.apply(this, arguments); try { paint(); prPaint(); hlPaint(); } catch (e) { /* never blocks */ } return out; };
+  render = function () { const out = appRender.apply(this, arguments); try { paint(); prPaint(); hlPaint(); syPaint(); } catch (e) { /* never blocks */ } return out; };
 })();
 
 /* ───────────── 16. Text for « chart ready » and end-of-trial notifications ───────────── */

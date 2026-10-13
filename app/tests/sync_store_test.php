@@ -169,6 +169,25 @@ $put('u1', 'accounts', ['id' => 'accq', 'name' => 'Apex PA 9']);
 $r = sync_link($pdo, 'u1', $q['PA-APEX-9-01']['id'], 'accq'); $tq = array_values(array_filter($trades('u1'), fn($x) => ($x['account_id'] ?? '') === 'accq'));
 ok(($r['created'] ?? 0) === 1 && count($tq) === 1 && $tq[0]['source'] === 'quantower' && $tq[0]['pnl_c'] === 8000 && str_starts_with($tq[0]['import_key'], 'sync:quantower:'), 'linked: the Quantower trade (+$80) says source « quantower », import key sync:quantower:…');
 
+// 14c. Admin › Sync: per platform, then one row per key with where the trader is (never a key or an execution)
+foreach (['username', 'email', 'first_name', 'last_name'] as $col) $pdo->exec("ALTER TABLE users ADD COLUMN $col TEXT");
+$pdo->exec("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0"); $pdo->exec("ALTER TABLE users ADD COLUMN is_internal INTEGER NOT NULL DEFAULT 0");
+$pdo->exec("UPDATE users SET username = 'lea@t.dev', email = 'lea@t.dev', first_name = 'Lea', last_name = 'Test' WHERE id = 'u1'");
+$pdo->exec("UPDATE users SET username = 'max@t.dev', email = 'max@t.dev', is_internal = 1 WHERE id = 'u2'");
+$k3 = sync_new_key($pdo, 'u2', 'quantower');
+$ad = sync_admin($pdo); $row = function (string $uid, string $pl) use ($ad) { foreach ($ad['rows'] as $r) if ($r['user_id'] === $uid && $r['platform'] === $pl) return $r; return null; };
+$q1 = $row('u1', 'quantower'); $n1 = $row('u1', 'ninjatrader'); $q2 = $row('u2', 'quantower');
+ok($q1 && $q1['state'] === 'ok' && $q1['name'] === 'Lea Test' && $q1['email'] === 'lea@t.dev' && $q1['client'] === 'Sweep Quantower test' && $q1['accounts'] === ['new' => 1, 'linked' => 1, 'ignored' => 0] && $q1['trades'] === 1 && $q1['trades_7d'] === 1 && $q1['last_seen_at'] > 0, 'Admin › Sync: Quantower, linked and writing trades → « ok » (1 linked, 1 to link, 1 trade)');
+ok($n1 && $n1['state'] === 'error' && in_array('limit', $n1['errors'], true), 'Admin › Sync: NinjaTrader 8 with an account over the record limit → « error » (limit)');
+ok($q2 && $q2['state'] === 'never' && $q2['last_seen_at'] === null && $q2['team'] === true && $q2['name'] === 'max@t.dev', 'Admin › Sync: a key never used by the add-on → « never »; an internal trader is marked team');
+ok(array_search($q2, $ad['rows'], true) > array_search($q1, $ad['rows'], true) && $ad['platforms']['quantower'] === ['traders' => 2, 'seen_24h' => 1, 'linked' => 1, 'trades_7d' => 1] && $ad['platforms']['ninjatrader']['traders'] === 1, 'Admin › Sync: most recently seen first; per platform: traders, seen within 24 h, accounts linked, trades in 7 days');
+$js = json_encode($ad);
+ok(!str_contains($js, 'swk_') && !str_contains($js, $k3['hint']) && !str_contains($js, 'key_hash') && !str_contains($js, '21004'), 'Admin › Sync: never a key, a key hint or an execution');
+$pdo->exec("UPDATE sync_connections SET last_seen_at = 1 WHERE user_id = 'u2'"); $pdo->exec("INSERT INTO sync_accounts (id, user_id, platform, ext_id, state, created_at, updated_at) VALUES ('sa_x', 'u2', 'quantower', 'X-1', 'new', 1, 1)");
+ok(($row2 = (function () use ($pdo) { foreach (sync_admin($pdo)['rows'] as $r) if ($r['user_id'] === 'u2') return $r; })()) && $row2['state'] === 'to_link', 'Admin › Sync: accounts found, none linked → « to_link »');
+$pdo->exec("DELETE FROM sync_accounts WHERE id = 'sa_x'");
+ok((function () use ($pdo) { foreach (sync_admin($pdo)['rows'] as $r) if ($r['user_id'] === 'u2') return $r['state']; })() === 'no_accounts', 'Admin › Sync: add-on seen, no account found → « no_accounts »');
+
 // 15. a trader deletes their Sweep account: everything of the sync goes
 sync_delete_user($pdo, 'u1');
 $left = 0; foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $tb) $left += (int) $pdo->query("SELECT COUNT(*) FROM $tb WHERE user_id = 'u1'")->fetchColumn();

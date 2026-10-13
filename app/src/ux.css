@@ -424,6 +424,8 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .ux-pr-updated .ux-pr-chip{color:var(--pos);box-shadow:inset 0 0 0 1px var(--pos)}
 .ux-pr-review .ux-pr-chip,.ux-pr-error .ux-pr-chip{color:#dc2626;box-shadow:inset 0 0 0 1px #dc2626}
 .ux-pr-list details{margin-top:4px;font-size:12px}
+.ux-sy-list{margin-top:12px}   /* Admin › Sync: the list under the platform cards (its own class: tests read Health's .ux-hl-list) */
+.ux-sy-list small.neg{color:var(--hl-bad)}
 /* import: accounts of the file → Sweep accounts; fees not included */
 .ux-imap{margin-top:12px;padding:14px 16px;display:grid;gap:10px}
 .ux-imap p{margin:0;font-size:13px}

@@ -1311,6 +1311,8 @@ try {
             @unlink($DATA . '/cohort-count.json');
             json_out(200, ['ok' => true]);
         }
+        // Admin › Sync: who connected a platform, the add-on seen, accounts linked, trades written, where each trader is (read-only)
+        if ($route === 'api/admin/sync' && $method === 'GET') { require_once __DIR__ . '/sync/sync-store.php'; json_out(200, sync_admin(db())); }
         // Admin › Health (brief 02 step 0): the scheduled tasks and whether each outside service is set up (yes / no, never a value)
         if ($route === 'api/admin/errors-export' && $method === 'GET') {   // Admin › Errors › Export: the 30-day list as Markdown, for Claude
             require_once __DIR__ . '/ops/client-errors.php';

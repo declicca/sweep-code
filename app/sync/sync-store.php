@@ -472,6 +472,54 @@ function sync_status(PDO $pdo, string $uid): array
     $addons = []; foreach (SYNC_ADDONS as $pl => $f) $addons[$pl] = is_file($f) ? ['url' => 'api/sync/addon?platform=' . $pl, 'size' => filesize($f)] : null;
     return ['connections' => $conns, 'accounts' => $accts, 'addons' => $addons];
 }
+/**
+ * Admin › Sync: per platform (traders with a key, add-on seen within 24 h, accounts linked, trades written in 7 days), then one
+ * row per active key, most recently seen first, with where the trader is: never (key made, add-on never seen), no_accounts
+ * (add-on seen, no account found), to_link (accounts found, none linked), error (an account in error: plan, limit,
+ * account_gone), ok (linked). Read-only; names and emails as in Admin › Users, never a key or an execution.
+ */
+function sync_admin(PDO $pdo, int $now = 0): array
+{
+    sync_schema($pdo); $now = $now ?: time();
+    $acc = [];
+    foreach (sync_q($pdo, 'SELECT user_id, platform, state, last_error FROM sync_accounts') as $r) {
+        $a = &$acc[$r['user_id'] . '|' . $r['platform']]; $a ??= ['new' => 0, 'linked' => 0, 'ignored' => 0, 'errors' => []];
+        if (isset($a[$r['state']])) $a[$r['state']]++;
+        if ($r['last_error'] !== null && $r['last_error'] !== '' && !in_array($r['last_error'], $a['errors'], true)) $a['errors'][] = (string) $r['last_error'];
+        unset($a);
+    }
+    $tr = [];
+    foreach (sync_q($pdo, 'SELECT a.user_id, a.platform, COUNT(*) n, SUM(CASE WHEN t.created_at >= ? THEN 1 ELSE 0 END) n7 FROM sync_trades t JOIN sync_accounts a ON a.id = t.sync_account_id GROUP BY a.user_id, a.platform', [$now - 7 * 86400]) as $r)
+        $tr[$r['user_id'] . '|' . $r['platform']] = ['n' => (int) $r['n'], 'n7' => (int) $r['n7']];
+    $conns = sync_q($pdo, "SELECT user_id, platform, client, last_seen_at, last_push_at, created_at FROM sync_connections WHERE status = 'active'")->fetchAll();
+    $users = [];
+    if ($conns) {
+        $ids = array_values(array_unique(array_column($conns, 'user_id')));
+        try {
+            foreach (sync_q($pdo, 'SELECT * FROM users WHERE id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')', $ids) as $u) $users[$u['id']] = $u;
+        } catch (Throwable $e) { /* no users table (tests) */ }
+    }
+    $plat = []; foreach (SYNC_PLATFORMS as $p) $plat[$p] = ['traders' => 0, 'seen_24h' => 0, 'linked' => 0, 'trades_7d' => 0];
+    $rows = [];
+    foreach ($conns as $c) {
+        $k = $c['user_id'] . '|' . $c['platform'];
+        $a = $acc[$k] ?? ['new' => 0, 'linked' => 0, 'ignored' => 0, 'errors' => []]; $t = $tr[$k] ?? ['n' => 0, 'n7' => 0];
+        $seen = $c['last_seen_at'] === null ? null : (int) $c['last_seen_at'];
+        $state = $seen === null ? 'never' : ($a['errors'] ? 'error' : (!($a['new'] + $a['linked'] + $a['ignored']) ? 'no_accounts' : (!$a['linked'] ? 'to_link' : 'ok')));
+        $u = $users[$c['user_id']] ?? [];
+        $name = trim(((string) ($u['first_name'] ?? '')) . ' ' . ((string) ($u['last_name'] ?? '')));
+        $rows[] = ['user_id' => (string) $c['user_id'], 'name' => $name !== '' ? $name : (string) ($u['username'] ?? $c['user_id']), 'email' => (string) ($u['email'] ?? ''),
+            'team' => !empty($u['is_admin']) || !empty($u['is_internal']), 'platform' => (string) $c['platform'], 'client' => $c['client'],
+            'created_at' => (int) $c['created_at'], 'last_seen_at' => $seen, 'last_push_at' => $c['last_push_at'] === null ? null : (int) $c['last_push_at'],
+            'accounts' => ['new' => $a['new'], 'linked' => $a['linked'], 'ignored' => $a['ignored']], 'errors' => $a['errors'],
+            'trades' => $t['n'], 'trades_7d' => $t['n7'], 'state' => $state];
+        if (isset($plat[$c['platform']])) {
+            $x = &$plat[$c['platform']]; $x['traders']++; if ($seen !== null && $now - $seen < 86400) $x['seen_24h']++; $x['linked'] += $a['linked']; $x['trades_7d'] += $t['n7']; unset($x);
+        }
+    }
+    usort($rows, fn($x, $y) => [$y['last_seen_at'] ?? 0, $y['created_at']] <=> [$x['last_seen_at'] ?? 0, $x['created_at']]);
+    return ['now' => $now, 'platforms' => $plat, 'rows' => array_slice($rows, 0, 300)];
+}
 /** a trader deletes their Sweep account: everything of the sync goes too */
 function sync_delete_user(PDO $pdo, string $uid): void
 {
