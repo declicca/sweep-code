@@ -192,7 +192,26 @@ FOOT = [
 ]
 
 # prop firms with preloaded rules: from the app's catalogue (presets.py), never retyped here
-from presets import PRESET_FIRMS
+from presets import PRESET_FIRMS, FIRMS as _PRESET_LIST
+def poss(name):
+    """English possessive: « Topstep’s », « Alpha Futures’ »."""
+    return name + ("’" if name.endswith("s") else "’s")
+
+def and_list(names, lang):
+    """« A, B and C » in the page's language."""
+    if len(names) < 2: return "".join(names)
+    return ", ".join(names[:-1]) + {"en": " and ", "fr": " et ", "es": " y "}[lang] + names[-1]
+def or_list(names, lang):
+    """« A, B or C » in the page's language."""
+    if len(names) < 2: return "".join(names)
+    return ", ".join(names[:-1]) + {"en": " or ", "fr": " ou ", "es": " o "}[lang] + names[-1]
+FIRMS_N = len(_PRESET_LIST)
+FIRMS_OR = {l: or_list([f["name"] for f in _PRESET_LIST], l) for l in ("en", "fr", "es")}
+FIRMS_TXT = {l: and_list([f["name"] for f in _PRESET_LIST], l) for l in ("en", "fr", "es")}
+def other_firms():
+    """Firms with a journal page on the site but no preloaded rules in the app (added as « Other firm »)."""
+    from pages8 import FIRMS
+    return [n for _, n in FIRMS if n not in PRESET_FIRMS]
 
 CRUMBS = {}   # page → breadcrumb name, when the title is too long to be one
 

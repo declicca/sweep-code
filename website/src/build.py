@@ -75,7 +75,9 @@ for p in PAGES:
         urls.append(f'<url><loc>https://{DOMAIN}{href(l,p)}</loc><lastmod>{LASTMOD.get(p, BUILD_DATE)}</lastmod><priority>{PRIO.get(p,"0.5")}</priority>{alts}</url>')
 open(os.path.join(DIST,"sitemap.xml"),"w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(urls) + "</urlset>")
 shutil.copy(os.path.join(HERE,"data","robots.txt"), os.path.join(DIST,"robots.txt"))
-shutil.copy(os.path.join(HERE,"data","llms.txt"), os.path.join(DIST,"llms.txt"))
+_llms = open(os.path.join(HERE,"data","llms.txt"), encoding="utf-8").read()
+_oth = core.other_firms()
+open(os.path.join(DIST,"llms.txt"), "w", encoding="utf-8").write(_llms.replace("{PRESET_FIRMS}", core.FIRMS_TXT["en"]).replace("{OTHER_FIRMS}", f" (for example {core.and_list(_oth, 'en').replace(' and ', ' or ')})" if _oth else ""))
 open(os.path.join(DIST,".htaccess"),"w").write("""# makeitsweep.com (Apache / cPanel)
 Options -Indexes
 # Never serve this site from LiteSpeed's server-side page cache (stale pages break the design)
@@ -96,6 +98,8 @@ RewriteCond %{HTTP_HOST} ^www\\.(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 # folders (/100, /prop-firms): NGINX answers before Apache and adds the trailing slash itself (301, query string kept),
 # so these pages are linked as /100/ and /prop-firms/ everywhere (core.href)
+# Alpha Futures' rules page was first published at /prop-firms/alpha (the old file stays on the server: deploy.sh never deletes)
+RewriteRule ^(fr/|es/)?prop-firms/alpha/?$ /$1prop-firms/alpha-futures [R=301,L]
 # clean URLs: /pricing.html -> /pricing (301), and /pricing serves pricing.html
 RewriteCond %{THE_REQUEST} \\s/+([^?\\s]+?)\\.html[\\s?] [NC]
 RewriteCond %1 !(^|/)index$
