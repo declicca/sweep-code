@@ -338,6 +338,7 @@ def make_rules_page(f):
         rel = ([("trailing-drawdown-calculator.html", T("Trailing drawdown calculator","Calculateur de drawdown suiveur","Calculadora de drawdown dinámico")),
                 ("payout-calculator.html", T("Payout calculator","Calculateur de payout","Calculadora de payout")),
                 ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
+                ("prop-firm-payout-rules.html", T("Payout rules compared","Règles de payout comparées","Reglas de payout comparadas")),
                 ("prop-firm-drawdown-rules.html", T("Drawdown rules compared","Règles de drawdown comparées","Reglas de drawdown comparadas")),
                 ("prop-firm-consistency-rules.html", T("Consistency rules compared","Règles de consistance comparées","Reglas de consistencia comparadas")),
                 ("best-trading-journal-for-prop-firms.html", T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms"))]
