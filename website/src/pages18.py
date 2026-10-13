@@ -446,7 +446,8 @@ def page_hub(lang, t):
          + (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Another firm?", "Une autre firme ?", "¿Otra firma?"))}</h2></div>{other}</div></section>' if other else "")
          + f'<section class="rule"><div class="wrap narrow"><p class="firm-others"><span>{t(T("Free tools", "Outils gratuits", "Herramientas gratuitas"))}</span>'
          + "".join(f'<a href="{href(lang, s)}">{t(n)}</a>' for s, n in [("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico")),
-                    ("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), ("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout"))])
+                    ("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), ("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout")),
+                    ("prop-firm-profit-targets.html", T("Profit targets and max loss compared", "Objectifs et perte max comparés", "Objetivos y pérdida máx. comparados"))])
          + "</p></div></section>")
     ld = jsonld({"@context": "https://schema.org", "@type": "ItemList", "name": t(T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")),
                  "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": f["name"], "url": f"https://{DOMAIN}{href(lang, page_of(f))}"} for i, f in enumerate(firms)]})
