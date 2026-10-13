@@ -327,26 +327,38 @@ def make_rules_page(f):
         disclaimer = T(f"Sweep is not affiliated with {name}. Rules can change at any time; always confirm on {poss(name)} official site. Values are shown for information, from Sweep’s weekly check of {poss(name)} pages.",
                        f"Sweep n’est pas affilié à {name}. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de {name}. Valeurs présentées à titre indicatif, tirées de la vérification hebdomadaire des pages de {name} par Sweep.",
                        f"Sweep no está afiliado a {name}. Las reglas pueden cambiar en cualquier momento; confirma siempre en el sitio oficial de {name}. Valores a título informativo, tomados de la revisión semanal de las páginas de {name} por Sweep.")
-        b = (f'<section style="padding-top:8px"><div class="wrap narrow">{jump}</div></section>' if jump else "") + secs
+        card = (f'<section style="padding-top:0"><div class="wrap narrow"><div class="calc-act"><div><b>{t(T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."))}</b>'
+                f'<p data-nolinks>{t(T("These rules fill in automatically.", "Ces règles se remplissent toutes seules.", "Estas reglas se rellenan solas."))}</p></div>'
+                f'<a class="btn btn-primary" href="{SIGNUP}" data-track="signup_rules_card">{t(CREATE_FREE)}</a></div></div></section>')
+        b = (f'<section style="padding-top:8px"><div class="wrap narrow">{jump}</div></section>' if jump else "") + secs + card
         b += f'<section style="padding-top:0"><div class="wrap narrow"><p class="fine">{t(disclaimer)}</p></div></section>'
         b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Rule changes","Changements de règles","Cambios de reglas"))}</h2></div>{history(lang, t, f)}</div></section>')
         b += split(t, T("Track it","Suis-le","Síguelo"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
                    T(f"Pick {name} and your account type: these rules fill in, and Sweep counts your payout conditions on every trade. Free forever, no card.",
                      f"Choisis {name} et ton type de compte : ces règles se remplissent, et Sweep compte tes conditions de payout à chaque trade. Gratuit pour toujours, sans carte.",
                      f"Elige {name} y tu tipo de cuenta: estas reglas se completan y Sweep cuenta tus condiciones de payout en cada operación. Gratis para siempre, sin tarjeta."),
-                   [], slot("v6-08-payout-conditions-d.webp", "desktop", t(T("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")), t),
-                   more=f'<div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div>')
-        faqs = faq_of(lang, t, f)
-        from pages8 import FIRMS as JOURNALS
-        jp = next((s for s, n in JOURNALS if n == name), None)
-        rel = ([(jp, T(f"{name} trading journal", f"Journal de trading {name}", f"Diario de trading para {name}"), T(f"Track your {name} accounts in Sweep.", f"Suis tes comptes {name} dans Sweep.", f"Sigue tus cuentas de {name} en Sweep."))] if jp else []) \
-              + ["prop-firm-payout-rules.html", "prop-firm-drawdown-rules.html", "prop-firm-consistency-rules.html"]
+                   [T(f"<b>Rules prefilled</b> for every {name} account type and size, each value editable", f"<b>Règles préremplies</b> pour chaque type et taille de compte {name}, chaque valeur modifiable", f"<b>Reglas precargadas</b> para cada tipo y tamaño de cuenta de {name}, cada valor editable"),
+                    T("<b>Every trade checked:</b> target, room above the max loss, today’s limit, consistency and payout readiness in %", "<b>Chaque trade vérifié :</b> objectif, marge au-dessus de la perte max, limite du jour, consistance et prêt pour le payout en %", "<b>Cada operación comprobada:</b> objetivo, margen sobre la pérdida máx., límite del día, consistencia y listo para el payout en %"),
+                    T("<b>One trade on several accounts</b> with the copier; a failed account keeps its history", "<b>Un trade sur plusieurs comptes</b> avec le copieur ; un compte échoué garde son historique", "<b>Una operación en varias cuentas</b> con el copiador; una cuenta fallida conserva su historial")],
+                   slot("v6-08-payout-conditions-d.webp", "desktop", t(T("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")), t),
+                   more=f'<div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div><p class="fine" style="margin-top:16px">{t(MONEY_PLAN)}</p>', id_="track")
+        faqs = faq_of(lang, t, f) + [
+            (T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
+             T(f"No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {name}. The {name} name belongs to its owner.", f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Le nom {name} appartient à son propriétaire.", f"No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {name}. El nombre {name} pertenece a su propietario.")),
+            (T(f"Can I track several {name} accounts?", f"Puis-je suivre plusieurs comptes {name} ?", f"¿Puedo seguir varias cuentas de {name}?"),
+             T("Yes, as many as your plan allows, each with its own rules, and you can copy one trade to several accounts at once.", "Oui, autant que ton forfait le permet, chacun avec ses propres règles, et tu peux copier un trade sur plusieurs comptes en une fois.", "Sí, tantas como permita tu plan, cada una con sus propias reglas, y puedes copiar una operación en varias cuentas a la vez.")),
+            (T("Is it free?", "C’est gratuit ?", "¿Es gratis?"),
+             T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.", "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
+        rel = ["prop-firm-payout-rules.html", "prop-firm-drawdown-rules.html", "prop-firm-consistency-rules.html"]
         b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>'
               + "".join(faq_item(t, q, a) for q, a in faqs)
               + "</div></section>" + related(lang, t, rel[:3]))
-        title = t(T(f"{name} Rules 2026: Drawdown, Consistency & Payout Rules · Sweep", f"Règles {name} 2026 : drawdown, consistance et payouts · Sweep", f"Reglas de {name} 2026: drawdown, consistencia y payouts · Sweep"))
-        if len(title) > 60: title = t(T(f"{name} Rules 2026: Drawdown & Payouts · Sweep", f"Règles {name} 2026 : drawdown et payouts · Sweep", f"Reglas de {name} 2026: drawdown y payouts · Sweep"))
-        if len(title) > 60: title = t(T(f"{name} Rules 2026 · Sweep", f"Règles {name} 2026 · Sweep", f"Reglas de {name} 2026 · Sweep"))
+        for cand in (T(f"{name} Rules 2026: Drawdown, Payouts & Journal · Sweep", f"Règles {name} 2026 : drawdown, payouts et journal · Sweep", f"Reglas de {name} 2026: drawdown, payouts y diario · Sweep"),
+                     T(f"{name} Rules 2026: Payouts & Journal · Sweep", f"Règles {name} 2026 : payouts et journal · Sweep", f"Reglas de {name} 2026: payouts y diario · Sweep"),
+                     T(f"{name} Rules & Journal 2026 · Sweep", f"Règles et journal {name} 2026 · Sweep", f"Reglas y diario de {name} 2026 · Sweep"),
+                     T(f"{name} Rules 2026 · Sweep", f"Règles {name} 2026 · Sweep", f"Reglas de {name} 2026 · Sweep")):
+            title = t(cand)
+            if len(title) <= 60: break
         desc = t(T(f"{name} rules from Sweep’s weekly check ({day(when, 'en')}): max loss, daily loss limit, consistency, minimum days and payout conditions, {kk(sizes_all[0])} to {kk(sizes_all[-1])}.",
                    f"Les règles de {name} selon la vérification hebdomadaire de Sweep ({day(when, 'fr')}) : perte max, limite du jour, consistance, jours minimum et payouts.",
                    f"Las reglas de {name} según la revisión semanal de Sweep ({day(when, 'es')}): pérdida máx., límite diario, consistencia, días mínimos y payouts."))

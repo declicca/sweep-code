@@ -18,13 +18,13 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 
 ## Prop firms
 - [Prop firm rules](https://makeitsweep.com/prop-firms/): drawdown, consistency and payout rules by firm and account type, from Sweep's weekly check
-- [Topstep](https://makeitsweep.com/topstep-trading-journal)
-- [Apex Trader Funding](https://makeitsweep.com/apex-trader-funding-journal)
-- [Take Profit Trader](https://makeitsweep.com/take-profit-trader-journal)
-- [Lucid Trading](https://makeitsweep.com/lucid-trading-journal)
-- [MyFundedFutures](https://makeitsweep.com/myfundedfutures-journal)
+- [Topstep](https://makeitsweep.com/prop-firms/topstep)
+- [Apex Trader Funding](https://makeitsweep.com/prop-firms/apex)
+- [Take Profit Trader](https://makeitsweep.com/prop-firms/take-profit-trader)
+- [Lucid Trading](https://makeitsweep.com/prop-firms/lucid)
+- [MyFundedFutures](https://makeitsweep.com/prop-firms/myfundedfutures)
 - [Tradeify](https://makeitsweep.com/prop-firms/tradeify)
-- [Alpha Futures](https://makeitsweep.com/alpha-futures-trading-journal)
+- [Alpha Futures](https://makeitsweep.com/prop-firms/alpha-futures)
 
 ## Guides
 - [Guides](https://makeitsweep.com/guides): all guides for futures prop firm traders
