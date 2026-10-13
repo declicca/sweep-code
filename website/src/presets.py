@@ -7,7 +7,7 @@ At each build:
 Without network and without a copy, the app's shipped catalogue (app/presets/seed.json) is used.
 SWEEP_PRESETS_OFFLINE=1 skips the network (tests, offline builds).
 """
-import datetime, json, os, urllib.request
+import json, os, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 API = "https://app.makeitsweep.com/api/presets"
@@ -69,12 +69,15 @@ def _load():
         cat, src = live, "app"
         if snap != live:
             if _valid(snap):
-                # the date of the check that produced the new rules; today when the catalogue changed without a new check
-                new_check = (live.get("checked_at") or "")[:10]
-                date = new_check if new_check and new_check != (snap.get("checked_at") or "")[:10] else datetime.date.today().isoformat()
-                rows = _changes(snap, live, date)
-                if rows: _write(LOG, rows + (_read(LOG) or []))
-                print(f"presets: {len(rows)} rule change(s) logged")
+                # only a newer weekly check can change a firm's rules; the same check re-served, a hand-checked seed
+                # or an older one is the app correcting its catalogue: the copy follows it, the change log doesn't
+                new_check, old_check = (live.get("checked_at") or "")[:19], (snap.get("checked_at") or "")[:19]
+                if new_check > old_check:
+                    rows = _changes(snap, live, new_check[:10])
+                    if rows: _write(LOG, rows + (_read(LOG) or []))
+                    print(f"presets: {len(rows)} rule change(s) logged")
+                else:
+                    print(f"presets: catalogue corrected by the app ({live.get('origin')}, checked {new_check[:10]}), not logged as rule changes")
             _write(SNAP, live)
     if not _valid(cat): raise SystemExit("presets: no prop firm catalogue (app API, data/presets.json and app/presets/seed.json all unusable)")
     print(f"presets: {src}, version {cat.get('version')}, checked {(cat.get('checked_at') or '')[:10]}, origin {cat.get('origin')}")

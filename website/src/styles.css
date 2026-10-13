@@ -1535,13 +1535,8 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
 /* ---------- lists in articles (calculators, guides) ---------- */
 .article ol,.article ul{color:var(--muted);font-size:16.5px;line-height:1.7;margin:0 0 14px;padding-left:22px;max-width:72ch}
 .article li{margin-bottom:8px}.article li b{color:var(--text);font-weight:500}
-/* ---------- features page: 6 chapter tiles, folded sections ---------- */
-.ftiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.ftile{display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-radius:var(--r-lg);background:var(--glass);box-shadow:var(--lift);text-decoration:none;color:var(--text);transition:transform .35s var(--spring)}
-.ftile:hover{transform:translateY(-2px)}
-.ftile .ico{margin-bottom:6px}.ftile b{font-weight:600;font-size:16px}.ftile span{color:var(--muted);font-size:14px;line-height:1.45}
+/* ---------- features page: folded sections ---------- */
 .fmores{padding:8px 0 40px}
 .fmore summary{font-size:17px}.fmore summary>span:first-child{display:flex;flex-direction:column;gap:2px}
 .fk{font-size:13px;font-weight:400;color:var(--muted)}
 .fmore>section{padding:8px 0 28px}.fmore>section>.wrap{padding-left:0;padding-right:0}
-@media (max-width:860px){ .ftiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px} .ftile{padding:14px 16px} .ftile span{font-size:13px} }
