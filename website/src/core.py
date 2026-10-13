@@ -315,7 +315,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
         par = _parent(page)
         items = [(t(T("Home","Accueil","Inicio")), href(lang, "index.html"))] + ([(_crumb(lang, t, par), href(lang, par))] if par else []) + [(_crumb(lang, t, page, title), href(lang, page))]
         graph.append({"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":i + 1,"name":n,"item":f"https://{DOMAIN}{u}"} for i, (n, u) in enumerate(items)]})
-        if page not in ("privacy.html", "terms.html", "risk.html"):   # the visible line: every inner page but the legal ones
+        if True:   # the visible line: every inner page (audit of Oct 13)
             crumbs = (f'<nav class="crumbs" aria-label="{t(T("Breadcrumb","Fil d’Ariane","Ruta de navegación"))}"><div class="wrap"><ol>'
                       + "".join(f'<li><a href="{u}">{html.escape(n)}</a></li>' for n, u in items[:-1])
                       + f'<li aria-current="page">{html.escape(items[-1][0])}</li></ol></div></nav>')

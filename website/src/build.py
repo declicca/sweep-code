@@ -8,7 +8,7 @@ from pages3 import page_ai, page_econ
 from pages4 import page_pricing
 from pages5 import page_100
 from pages7 import page_tools, page_position, page_drawdown, page_consistency
-from pages8 import FIRMS, make_firm_page
+from pages8 import FIRMS, JOURNAL_MOVED
 from pages11 import page_import
 from pages7 import page_expectancy, page_roi, page_payoutcalc
 import pages12, pages13, pages14, pages17, pages18
@@ -23,8 +23,6 @@ DIST = os.path.join(HERE, "..", "dist")
 PAGES = {"index.html":page_home,"features.html":page_features,"ai.html":page_ai,"how-it-works.html":page_how,"prop-traders.html":page_prop,"economic-calendar.html":page_econ,
  "import.html":page_import,"install.html":page_install,"security.html":page_security,"pricing.html":page_pricing6,"faq.html":page_faq,
  "about.html":page_about,"contact.html":page_contact,"changelog.html":page_changelog_new,"privacy.html":page_privacy,"terms.html":page_terms,"risk.html":page_risk,"404.html":page_404,"100":page_100,"tools.html":page_tools,"position-size-calculator.html":page_position,"trailing-drawdown-calculator.html":page_drawdown,"consistency-rule-calculator.html":page_consistency}
-for _s,_n in FIRMS:
-    if not _s.startswith("prop-firms/"): PAGES[_s] = make_firm_page(_s,_n)   # a firm without preloaded rules gets a rules page (pages18.make_manual_page)
 PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calculator.html":page_roi,"payout-calculator.html":page_payoutcalc,
               "futures-contracts.html":pages12.page_contracts,"release-dates.html":pages13.page_release_hub,"glossary.html":pages13.page_glossary,
               "futures-market-hours.html":pages13.page_hours,"press-kit.html":pages13.page_press,
@@ -32,8 +30,8 @@ PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calcul
               "best-trading-journal-for-prop-firms.html":pages17.page_best_journal})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
 PAGES["prop-firms/index.html"] = pages18.page_hub
-for _s,_n in FIRMS:
-    if _s.startswith("prop-firms/"): PAGES[_s] = pages18.make_manual_page(_s, _n)
+for _s,_n in FIRMS:   # a firm without preloaded rules: its page says which rules to enter
+    if _n not in pages18.presets.PRESET_FIRMS: PAGES[_s] = pages18.make_manual_page(_s, _n)
 import pages20
 PAGES["free-trading-journal.html"] = pages20.page_free
 PAGES["prop-firm-tracker.html"] = pages20.page_tracker
@@ -43,7 +41,7 @@ PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_co
 for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
-PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","topstep-trading-journal.html":"0.8","apex-trader-funding-journal.html":"0.8","take-profit-trader-journal.html":"0.8","lucid-trading-journal.html":"0.8","myfundedfutures-journal.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9"}
+PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core
@@ -114,7 +112,7 @@ RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 # so these pages are linked as /100/ and /prop-firms/ everywhere (core.href)
 # Alpha Futures' rules page was first published at /prop-firms/alpha (the old file stays on the server: deploy.sh never deletes)
 RewriteRule ^(fr/|es/)?prop-firms/alpha/?$ /$1prop-firms/alpha-futures [R=301,L]
-RewriteRule ^(fr/|es/)?tradeify-trading-journal(\\.html)?/?$ /$1prop-firms/tradeify [R=301,L]
+{JOURNAL_REDIRECTS}
 # clean URLs: /pricing.html -> /pricing (301), and /pricing serves pricing.html
 RewriteCond %{THE_REQUEST} \\s/+([^?\\s]+?)\\.html[\\s?] [NC]
 RewriteCond %1 !(^|/)index$
@@ -153,7 +151,7 @@ Header set Cache-Control "no-cache, must-revalidate"
 <IfModule mod_deflate.c>
 AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/xml text/plain application/manifest+json
 </IfModule>
-""")
+""".replace("{JOURNAL_REDIRECTS}", "\n".join(f"RewriteRule ^(fr/|es/)?{old}(\\.html)?/?$ /$1{new} [R=301,L]" for old, new in JOURNAL_MOVED.items())))   # old journal pages → one page per firm
 n = sum(len(f) for _,_,f in os.walk(DIST)); print("built", n, "files")
 
 # per-language 404 pages, served with a real 404 status
