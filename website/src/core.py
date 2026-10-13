@@ -461,6 +461,8 @@ REL_INFO = {
  "install.html": (T("Install on your phone","Installer sur ton téléphone","Instalar en tu teléfono"), T("Add Sweep to your home screen.","Ajoute Sweep à ton écran d’accueil.","Añade Sweep a tu pantalla de inicio.")),
  "features.html": (T("Features","Fonctionnalités","Funciones"), T("Everything Sweep does.","Tout ce que fait Sweep.","Todo lo que hace Sweep.")),
  "faq.html": (T("FAQ","FAQ","Preguntas frecuentes"), T("Quick answers about Sweep.","Réponses rapides sur Sweep.","Respuestas rápidas sobre Sweep.")),
+ "prop-firm-tracker.html": (T("Prop firm tracker","Suivi des comptes prop","Seguimiento de cuentas prop"), T("Every account, where it stands.","Chaque compte, là où il en est.","Cada cuenta, cómo va.")),
+ "payout-tracker.html": (T("Payout tracker","Suivi des payouts","Seguimiento de payouts"), T("From request to paid, and your real net.","De la demande au paiement, et ton vrai net.","De la solicitud al pago, y tu neto real.")),
  "free-trading-journal.html": (T("Free trading journal","Journal de trading gratuit","Diario de trading gratis"), T("What stays free, forever.","Ce qui reste gratuit, pour toujours.","Lo que sigue siendo gratis, para siempre.")),
  "prop-traders.html": (T("For prop traders","Pour traders prop","Para traders prop"), T("Every account, payout and rule.","Chaque compte, payout et règle.","Cada cuenta, payout y regla.")),
 }
@@ -470,7 +472,7 @@ RELATED = {
  "consistency-rule-calculator.html": ["prop-firm-consistency-rules.html", "payout-calculator.html", "glossary.html"],
  "payout-calculator.html": ["prop-firm-payout-rules.html", "prop-firm-roi-calculator.html", "prop-firms/index.html"],
  "expectancy-calculator.html": ["trading-journal-routine.html", "position-size-calculator.html", "glossary.html"],
- "prop-firm-roi-calculator.html": ["payout-calculator.html", "prop-firm-payout-rules.html", "prop-traders.html"],
+ "prop-firm-roi-calculator.html": ["payout-calculator.html", "prop-firm-payout-rules.html", "payout-tracker.html"],
  "tools.html": ["guides.html", "prop-firms/index.html", "glossary.html"],
  "futures-contracts.html": ["position-size-calculator.html", "futures-market-hours.html", "glossary.html"],
  "release-dates.html": ["economic-calendar.html", "futures-market-hours.html", "futures-contracts.html"],
@@ -480,11 +482,13 @@ RELATED = {
  "import.html": ["install.html", "features.html", "faq.html"],
  "how-to-choose-a-trading-journal.html": ["best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "guides.html"],
  "trading-journal-routine.html": ["trading-templates.html", "how-to-choose-a-trading-journal.html", "guides.html"],
- "free-trading-journal.html": ["prop-traders.html", "how-to-choose-a-trading-journal.html", "trading-templates.html"],
+ "free-trading-journal.html": ["prop-firm-tracker.html", "how-to-choose-a-trading-journal.html", "trading-templates.html"],
+ "prop-firm-tracker.html": ["payout-tracker.html", "prop-firms/index.html", "prop-firm-drawdown-rules.html"],
+ "payout-tracker.html": ["prop-firm-tracker.html", "payout-calculator.html", "prop-firm-payout-rules.html"],
  "guides.html": ["prop-firms/index.html", "tools.html", "glossary.html"],
  "prop-firm-consistency-rules.html": ["consistency-rule-calculator.html", "prop-firm-payout-rules.html", "prop-firms/index.html"],
  "prop-firm-drawdown-rules.html": ["trailing-drawdown-calculator.html", "prop-firm-profit-targets.html", "prop-firms/index.html"],
- "prop-firm-payout-rules.html": ["payout-calculator.html", "prop-firm-consistency-rules.html", "prop-firms/index.html"],
+ "prop-firm-payout-rules.html": ["payout-calculator.html", "prop-firm-consistency-rules.html", "payout-tracker.html"],
  "prop-firm-profit-targets.html": ["position-size-calculator.html", "prop-firm-drawdown-rules.html", "prop-firms/index.html"],
 }
 RELATED_CONTRACT = ["position-size-calculator.html", "futures-market-hours.html", "release-dates.html"]

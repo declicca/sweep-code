@@ -8,6 +8,8 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Home](https://makeitsweep.com/): overview of Sweep
 - [Pricing](https://makeitsweep.com/pricing): Free, Pro and Elite plans
 - [Free trading journal](https://makeitsweep.com/free-trading-journal): what the Free plan includes, forever, and what Pro adds
+- [Prop firm tracker](https://makeitsweep.com/prop-firm-tracker): every evaluation, funded and live account with its firm's rules
+- [Payout tracker](https://makeitsweep.com/payout-tracker): payouts from request to paid, expenses and real net (Pro and Elite)
 - [Features](https://makeitsweep.com/features): logging, real P&L, rules, review, analytics, accounts, payouts
 - [How it works](https://makeitsweep.com/how-it-works): the daily loop and discipline
 - [For prop traders](https://makeitsweep.com/prop-traders): prop firm rules, payouts and expenses
