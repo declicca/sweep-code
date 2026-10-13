@@ -580,9 +580,6 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 }
 
 /* « Get started » is its own card under the day (phone: right after the P&L card) */
-.nav-dash .gd-start{margin:0!important}
-.nav-dash .gd-start{order:1}
-@media (max-width:860px){.nav-dash .gd-start{order:2}}   /* phone: after the P&L card, before what to watch */
 /* « Add a trade » in the title row of Trades / Calendar / Journal */
 .nav-addtop{display:inline-flex;align-items:center;gap:8px;margin-left:auto;height:40px;padding:0 16px 0 12px;border:0;border-radius:13px;background:linear-gradient(160deg,color-mix(in srgb,var(--pos) 82%,#fff 18%),var(--pos));color:var(--btntext);font:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 10px 22px -12px rgba(var(--pos-rgb),.9);white-space:nowrap}
 .nav-addtop[hidden]{display:none}
@@ -1158,7 +1155,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 /* phone: the routine card shows at the top of Today (the old block stays hidden) */
 @media (max-width:860px){
   body.nav-rt-on .nav-dash .d-today{display:block!important;order:0!important;margin-bottom:12px}
-  body.nav-rt-on .nav-dash .d-today > :not(.nav-rt){display:none!important}
+  body.nav-rt-on .nav-dash .d-today > :not(.nav-rt):not(.co-today){display:none!important}   /* (« Your coach » stays under it) */
 }
 .nav-rt-sa .btn .s{display:none}
 .nav-rt-lv.nopct{padding:0 12px}
@@ -1176,7 +1173,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 @media (prefers-reduced-motion:reduce){.nav-rt-s.sk{animation:none}}
 @media (max-width:860px){.nav-rt-s{min-height:150px}.nav-rt-sk{height:36px;width:52px}.nav-rt-sk.w{width:60px}
   .nav-dash .d-today{display:block!important;order:0!important;margin-bottom:12px}
-  .nav-dash .d-today > :not(.nav-rt){display:none!important}}
+  .nav-dash .d-today > :not(.nav-rt):not(.co-today){display:none!important}}
 @media (min-width:861px){.nav-dash .d-today > .g-today,.nav-dash .d-today > div:not(.nav-rt):not(.d-rank){display:none!important}}
 
 /* title row: Import + ⓘ glued to the left of « Add a trade » */
@@ -1353,7 +1350,6 @@ html body a,html body button{-webkit-tap-highlight-color:transparent}
 .nav-more-b{align-self:flex-start;margin:4px 0;padding:6px 0;font-size:14px;font-weight:500;color:var(--pos);background:none;border:0;cursor:pointer}
 .nav-netH{font-style:normal;color:var(--muted);font-size:12px}
 /* the first ring */
-.nav-ring-tip{display:block;width:100%;margin-top:2px;padding:10px 14px;border:0;border-radius:var(--r-tile,16px);background:var(--posbg);color:var(--text);font:inherit;font-size:13.5px;text-align:left;cursor:pointer}
 /* add to home screen */
 .nav-inst-in{text-align:center;align-items:stretch}
 .nav-inst-app{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 4px;border-radius:16px;background:var(--fill)}
@@ -1567,7 +1563,7 @@ html body .mono,html body .num,html body [class*="pnl"],html body .kpis b,html b
 /* glass cards: one material, a light edge, no heavy border */
 html body .surface,html body .nav-card,html body .nav-rt,html body .nav-po,html body .nav-wk-k > div,html body .nav-wk-d,html body .nav-trial,html body .nav-arch{background:var(--glass),var(--panel)!important;background-blend-mode:normal;border:0!important;border-radius:var(--r-card)!important;box-shadow:var(--glass-edge),var(--glass-hi)!important}
 /* tiles inside cards */
-html body .nav-rt-s,html body .nav-am-more-d,html body .nav-am-bi,html body .nav-copy,html body .nav-stl,html body .nav-wk-t,html body .nav-acc,html body .nav-inst-l li,html body .nav-fee,html body .nav-ring-tip{border-radius:var(--r-tile)!important;background:var(--fill)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;border:0!important}
+html body .nav-rt-s,html body .nav-am-more-d,html body .nav-am-bi,html body .nav-copy,html body .nav-stl,html body .nav-wk-t,html body .nav-acc,html body .nav-inst-l li,html body .nav-fee{border-radius:var(--r-tile)!important;background:var(--fill)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;border:0!important}
 /* the one active card of the screen: the next step of the routine */
 html body .nav-rt-steps[data-next="1"] > .nav-rt-s:nth-child(1),html body .nav-rt-steps[data-next="2"] > .nav-rt-s:nth-child(2),html body .nav-rt-steps[data-next="3"] > .nav-rt-s:nth-child(3){background:linear-gradient(180deg,rgba(var(--pos-rgb),.16),rgba(var(--pos-rgb),.06))!important;box-shadow:0 0 0 1px rgba(var(--pos-rgb),.42),0 18px 50px -24px rgba(var(--pos-rgb),.55),inset 0 1px 0 rgba(255,255,255,.12)!important}
 html body .nav-rt-s.done{background:linear-gradient(180deg,rgba(var(--pos-rgb),.09),rgba(var(--pos-rgb),.03))!important;box-shadow:0 0 0 1px rgba(var(--pos-rgb),.22)!important}
@@ -1720,8 +1716,8 @@ html body .nav-am-alt .btn{min-height:42px!important;font-size:13.5px!important;
   html body .nav-rt-chev{width:18px;height:18px;flex-shrink:0;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s var(--ease-ios)}
   html body .nav-rt.closed-rt .nav-rt-chev{transform:rotate(-90deg)}
   html body .nav-rt-tg:hover .nav-rt-chev{stroke:var(--text)}
-  html body .nav-rt .nav-rt-steps,html body .nav-rt .nav-ring-tip,html body .nav-rt .nav-rt-help-t{transition:opacity .3s var(--ease-ios)}
-  html body .nav-rt.closed-rt .nav-rt-steps,html body .nav-rt.closed-rt .nav-ring-tip{display:none!important}
+  html body .nav-rt .nav-rt-steps,html body .nav-rt .nav-rt-help-t{transition:opacity .3s var(--ease-ios)}
+  html body .nav-rt.closed-rt .nav-rt-steps{display:none!important}
   html body .nav-rt.closed-rt{gap:14px!important;padding-bottom:20px!important}
 }
 
@@ -1746,7 +1742,7 @@ html body .nav-am-alt .btn{min-height:42px!important;font-size:13.5px!important;
 html body .nav-rt-tg{cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
 html body .nav-rt-chev{width:18px;height:18px;flex-shrink:0;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s var(--ease-ios)}
 html body .nav-rt.closed-rt .nav-rt-chev{transform:rotate(-90deg)}
-html body .nav-rt.closed-rt .nav-rt-steps,html body .nav-rt.closed-rt .nav-ring-tip{display:none!important}
+html body .nav-rt.closed-rt .nav-rt-steps{display:none!important}
 @media (max-width:860px){html body .nav-rt.closed-rt{gap:12px!important;padding-bottom:16px!important}}
 /* computer: the routine sits on the page itself (no card): no frame, no fill, aligned with the sections below */
 @media (min-width:861px){
@@ -1830,8 +1826,6 @@ body.nav-few-trades #main .tsearch,body.nav-few-trades #main input[type="search"
 .ux-sum-more summary::-webkit-details-marker{display:none}
 .ux-sum-more[open] summary{margin-bottom:6px}
 /* A4 */
-html body .nav-rt .gd-start.nav-start-in{margin:0!important;background:var(--fill)!important;box-shadow:none!important;border-radius:var(--r-tile,20px)!important;padding:14px 16px!important}
-html body .nav-rt .gd-start.nav-start-in h2{font-size:15px!important}
 /* B9 */
 .nav-next-ses{display:block;margin-top:2px;font-size:11.5px;color:var(--pos);font-weight:500}
 /* D15 · checklist above Save */
@@ -1844,8 +1838,8 @@ html body .nav-rt .gd-start.nav-start-in h2{font-size:15px!important}
 .nav-ck-b button.on[data-v="y"]{background:var(--pos);color:#fff}.nav-ck-b button.on[data-v="n"]{background:var(--neg);color:#111}.nav-ck-b button.on[data-v="na"]{background:var(--text2);color:var(--bg)}
 .nav-ck-more{align-self:flex-start;font-size:13px;color:var(--pos);background:none;border:0;cursor:pointer;padding:2px 0}
 /* 1 · routine toggle back, with a smooth fold */
-html body .nav-rt .nav-rt-steps,html body .nav-rt .nav-ring-tip,html body .nav-rt .gd-start{transition:opacity .35s var(--ease-ios),max-height .5s var(--ease-ios),margin .5s var(--ease-ios);max-height:900px;overflow:hidden}
-html body .nav-rt.closed-rt .nav-rt-steps,html body .nav-rt.closed-rt .nav-ring-tip,html body .nav-rt.closed-rt .gd-start{display:block!important;max-height:0!important;opacity:0!important;margin:0!important;pointer-events:none}
+html body .nav-rt .nav-rt-steps{transition:opacity .35s var(--ease-ios),max-height .5s var(--ease-ios),margin .5s var(--ease-ios);max-height:900px;overflow:hidden}
+html body .nav-rt.closed-rt .nav-rt-steps{display:block!important;max-height:0!important;opacity:0!important;margin:0!important;pointer-events:none}
 html body .nav-rt.closed-rt .nav-rt-steps{display:grid!important}
 /* 2 · Cancel on add forms */
 .nav-cancel{float:right;margin:0 0 6px 12px;padding:6px 12px;border:0;border-radius:999px;background:var(--fill);color:var(--text2);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
@@ -1911,7 +1905,7 @@ form.nav-live > .nav-cancel{grid-column:1/-1;justify-self:end;order:-2;margin:0!
 form.nav-live > .nav-live-h{order:-1}
 /* routine folded: the hidden steps no longer leave an empty band (no gap rows for folded parts) */
 html body .nav-rt.closed-rt{row-gap:0!important;gap:0!important}
-html body .nav-rt.closed-rt > .nav-rt-steps,html body .nav-rt.closed-rt > .nav-ring-tip,html body .nav-rt.closed-rt > .gd-start{margin:0!important;padding-top:0!important;padding-bottom:0!important;border:0!important}
+html body .nav-rt.closed-rt > .nav-rt-steps{margin:0!important;padding-top:0!important;padding-bottom:0!important;border:0!important}
 .nav-nonum{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--fill-2);color:var(--muted);font:500 11px var(--font-ui);vertical-align:middle;white-space:nowrap}
 .nav-nonum-note{margin:8px 0 10px;padding:10px 12px;border-radius:var(--r-tile,16px);background:var(--fill);color:var(--text2);font-size:13px;line-height:1.5}
 /* routine « ? »: the explanation sits a little away from the chips */
@@ -1952,8 +1946,9 @@ html body .nav-tr-copy{display:inline-grid!important;place-items:center;min-widt
 .sc-off{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:220px;color:var(--muted);font-size:14px}
 /* trade page (phone): the Chart / Details / Review / Setup tabs no longer sit over the P&L header */
 
-/* trade page: the sticky Chart / Details / Review / Setup bar is solid and sits under the app header (nothing shows through it) */
-@media (max-width:860px){html body #main .nav-tnav{top:calc(var(--nav-hdr,56px) + 6px)!important;background:rgba(14,14,17,.94)!important;-webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;box-shadow:0 0 0 1px var(--hair),0 10px 24px -14px rgba(0,0,0,.8)!important}}
+/* trade page: the sticky Chart / Details / Review / Setup bar is solid and sits under the app header (nothing shows through it);
+   its background follows the theme (a fixed dark one made the tabs unreadable in light mode, seen 13 Oct.) */
+@media (max-width:860px){html body #main .nav-tnav{top:calc(var(--nav-hdr,56px) + 6px)!important;background:color-mix(in srgb,var(--bg) 94%,transparent)!important;-webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;box-shadow:0 0 0 1px var(--hair),0 10px 24px -14px rgba(0,0,0,.8)!important}}
 /* news rows: Actual · Forecast · Previous side by side, compact */
 .nav-ev-v3{display:inline-grid!important;grid-auto-flow:column;gap:12px;align-items:end;margin-left:auto;flex-shrink:0}
 .nav-ev-v3 > span{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:38px}
@@ -2014,7 +2009,7 @@ html body #main .nav-rt-s.next .btn.primary{min-height:44px}
 /* B17: « Avg win / loss » never cut */
 html body #main .ik .lbl{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
 /* B18: touch targets of at least 44 px on a phone */
-@media (max-width:860px){html body #main .btn,html body #main .nav-rt .btn,html body #main .nav-rt-sa .btn,html body .bottomnav a,html body .bottomnav button,html body #main .gd-start .btn{min-height:44px!important}}
+@media (max-width:860px){html body #main .btn,html body #main .nav-rt .btn,html body #main .nav-rt-sa .btn,html body .bottomnav a,html body .bottomnav button{min-height:44px!important}}
 
 /* routine: nothing clips the highlighted step any more — its rounded corners, its border and its glow are whole
    (the day card and the steps used to hide what went past their edges: a cut left border and a square shadow) */
@@ -2280,7 +2275,7 @@ html body .nav-rt-fold:hover .nav-rt-chev,html body .nav-rt-fold:focus-visible .
 @media (min-width:861px){html body .nav-rt-fold{width:34px;height:34px;margin:-6px auto -6px -4px}}
 @media (prefers-reduced-motion:reduce){html body .nav-rt-chev,html body .nav-rt-fold{transition:none}}
 html body .nav-rt-fold .nav-rt-chev{display:block!important}
-html body #main .nav-rt.closed-rt .nav-rt-steps,html body #main .nav-rt.closed-rt .nav-ring-tip,html body #main .nav-rt.closed-rt .gd-start{max-height:0!important;overflow:hidden!important}
+html body #main .nav-rt.closed-rt .nav-rt-steps{max-height:0!important;overflow:hidden!important}
 
 /* ── 2 · the full-width button of a sheet (« Save the trade », Continue…) has the global primary look: same height,
    type and hover as the other buttons (44 px on a computer, 48 px on a phone, 15 px semibold) ── */
@@ -2333,8 +2328,6 @@ body.nav-few-trades #main .msearch{display:none!important}
 .g-sheet .chip.on,
 .g-xpf,
 .gc-step.done .gc-step-ic,
-.gd-pt-ic,
-.gd-steps li.ok .gd-ck,
 .gm-mrow.done .gm-mic,
 .gm-node.done .gm-dot,
 .lg-row b i,

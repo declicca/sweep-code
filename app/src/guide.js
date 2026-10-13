@@ -1,8 +1,8 @@
 /*
  * Sweep — first-run guidance and help.
- *  1. « Get started » checklist on Today: 2 steps detected automatically from the trader's data, inside the routine card.
- *  2. Help center: searchable articles for every feature, with « do it now » buttons. Opens from the « ? » in the header.
- * (The guided tour and the page tips were never built: their strings and styles are gone, brief 03 step 1.)
+ *  Help center: searchable articles for every feature, with « do it now » buttons. Opens from the « ? » in the header.
+ * (The guided tour and the page tips were never built: their strings and styles are gone, brief 03 step 1. « Get started »
+ * on Today is replaced by « Your coach », src/coach.js, brief 03 step 2.)
  * State is kept on the device (localStorage); nothing here can block the app.
  */
 (function () {
@@ -28,15 +28,12 @@
   /* ───────────── strings ───────────── */
   const T = {
     fr: { help: 'Guide et aide', search: 'Rechercher dans le guide…', none: 'Aucun article ne correspond.', back: 'Guide', doit: 'Le faire maintenant',
-      start_t: 'Bien démarrer', start_s: '{d} sur {n} étapes', start_done: 'Tu maîtrises les bases. Bravo !', hide: 'Masquer', how: 'Comment ?',
       guide_d: 'Tout ce qu’il faut savoir pour tirer le maximum de Sweep.', contact: 'Une question sans réponse ? Écris-nous à hello@makeitsweep.com ou via la page Feedback.',
       cats: { start: 'Pour commencer', daily: 'Ta routine quotidienne', progress: 'Progression et jeu', social: 'Social', prop: 'Comptes prop et payouts', tools: 'Outils', data: 'Données et réglages' } },
     en: { help: 'Guide & help', search: 'Search the guide…', none: 'No article matches.', back: 'Guide', doit: 'Do it now',
-      start_t: 'Get started', start_s: '{d} of {n} steps', start_done: 'You know the basics. Well done!', hide: 'Hide', how: 'How?',
       guide_d: 'Everything you need to get the most out of Sweep.', contact: 'Question not answered? Write to hello@makeitsweep.com or use the Feedback page.',
       cats: { start: 'Getting started', daily: 'Your daily routine', progress: 'Progress and game', social: 'Social', prop: 'Prop accounts and payouts', tools: 'Tools', data: 'Data and settings' } },
     es: { help: 'Guía y ayuda', search: 'Buscar en la guía…', none: 'Ningún artículo coincide.', back: 'Guía', doit: 'Hacerlo ahora',
-      start_t: 'Primeros pasos', start_s: '{d} de {n} pasos', start_done: 'Ya dominas lo básico. ¡Bravo!', hide: 'Ocultar', how: '¿Cómo?',
       guide_d: 'Todo lo que necesitas para sacar el máximo de Sweep.', contact: '¿Pregunta sin respuesta? Escríbenos a hello@makeitsweep.com o usa la página Feedback.',
       cats: { start: 'Para empezar', daily: 'Tu rutina diaria', progress: 'Progreso y juego', social: 'Social', prop: 'Cuentas prop y payouts', tools: 'Herramientas', data: 'Datos y ajustes' } },
   };
@@ -177,53 +174,6 @@
     b.scrollTop = 0;
   }
 
-  const seenAnim = new Set();   // what already played its entrance during this visit
-
-  /* ───────────── « Get started » checklist on Today ───────────── */
-  let prof = null, profAt = 0, profP = null;
-  async function counters() {
-    if (prof && Date.now() - profAt < 60000) return prof;
-    if (profP) return profP;   // already asked: two paints at the same moment share one request
-    profP = (async () => {
-      try { const r = await apiJSON('api/game/profile'); prof = (r && (r.counters || (r.profile && r.profile.counters))) || {}; profAt = Date.now(); } catch (e) { prof = prof || {}; }
-      profP = null; return prof;
-    })();
-    return profP;
-  }
-  const real = (a) => (a || []).filter((x) => !x.demo);
-  async function steps() {
-    const c = await counters();
-    const tr = real(S.trades), jr = real(S.journals);
-    const filled = (o) => o && Object.values(o).some((v) => v != null && String(v).trim() !== '' && v !== false);
-    // inside the routine card: the routine's next step keeps the only primary button (brief 02 part 5), these rows are quiet
-    return [   // three steps, the core loop: a trade, a review, a swept day (the account exists already)
-      { id: 'trade', ok: tr.length > 0, t: { fr: 'Ajouter ton premier trade (graphique ou en mots)', en: 'Log your first trade (chart or words)', es: 'Registrar tu primera operación (gráfico o palabras)' }, act: 'add', a: 'add' },
-      /* (« Do your daily review » merged into « Complete your first day »: the review is what closes the day) */
-      { id: 'swept', ok: (c.swept || 0) > 0, t: { fr: 'Réussir ta première journée : Plan, Exécution, Revue', en: 'Complete your first day: Plan, Execution, Review', es: 'Completar tu primer día: Plan, Ejecución, Revisión' }, act: 'plan', a: 'rings' },
-    ];
-  }
-  async function paintStart() {
-    if (route().v !== 'dashboard' || st.hideStart || !real(S.accounts).length) return;   // before the first account, the app's own setup card leads
-    const main = document.getElementById('main'); if (!main) return;
-    const s = await steps(), done = s.filter((x) => x.ok).length;
-    if (done === s.length) { if (!st.startCelebrated) { st.startCelebrated = true; st.hideStart = true; save(); if (typeof toast === 'function') toast(t('start_done')); } const old = main.querySelector('.gd-start'); if (old) old.remove(); return; }
-    let el = main.querySelector('.gd-start');
-    const html = `<div class="gd-st-h"><div><b>${t('start_t')}</b><small>${t('start_s', { d: done, n: s.length })}</small></div><button type="button" class="gd-x sm" data-gd="st-hide" aria-label="${t('hide')}">${I.x}</button></div>
-      <span class="gd-bar"><i style="width:${(done / s.length) * 100}%"></i></span>
-      <ol class="gd-steps">${s.map((x) => `<li class="${x.ok ? 'ok' : ''}"><span class="gd-ck">${x.ok ? I.check : ''}</span><span class="gd-st-t">${esc(pick(x.t))}</span>
-        ${x.ok ? '' : `<span class="gd-st-a">${x.act ? `<button type="button" class="btn sm" data-gd="act" data-v="${x.act}">${t('doit')}</button>` : ''}<button type="button" class="link" data-gd="art" data-v="${x.a}">${t('how')}</button></span>`}</li>`).join('')}</ol>`;
-    if (!el) {
-      el = document.createElement('section'); el.className = 'surface gd-start' + (seenAnim.has('start') ? ' gd-still' : ''); el.setAttribute('data-noi18n', '');
-      seenAnim.add('start');
-      // at the top of the routine card when there is one (same place as nav.js A4, so the card is placed once and never jumps)
-      const rt = main.querySelector('.nav-rt:not(.ph)'), rh = rt && rt.querySelector('.nav-rt-h');
-      const dayCard = main.querySelector('.nav-dash .d-today'), today = main.querySelector('.g-today');
-      if (rh) { rh.after(el); el.classList.add('nav-start-in'); } else if (dayCard) dayCard.after(el); else if (today) today.after(el); else main.prepend(el);
-    }
-    else if (!el.closest('.nav-rt')) { const dayCard = main.querySelector('.nav-dash .d-today'); if (dayCard && el.previousElementSibling !== dayCard) dayCard.after(el); }   // inside the routine card it stays where it is (no back-and-forth)
-    if (el._h !== html) { el.innerHTML = html; el._h = html; }
-  }
-
   /* ───────────── header « ? » and Settings section ───────────── */
   function paintChrome() {
     // help lives in the avatar menu and in search (no extra header button)
@@ -241,7 +191,6 @@
     else if (a === 'index') showIndex('');
     else if (a === 'art') { if (!helpEl) openHelp(v); else showArticle(v); }
     else if (a === 'act' && ACT[v]) ACT[v]();
-    else if (a === 'st-hide') { st.hideStart = true; save(); const el = b.closest('.gd-start'); if (el) el.remove(); }
   });
   document.addEventListener('input', (e) => { if (e.target.matches && e.target.matches('[data-gd-q]')) showIndex(e.target.value); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && helpEl) closeHelp(); });
@@ -253,12 +202,12 @@
     try {
       const v = route().v;
       if (v === 'analytics' && !st.visited.analytics) { st.visited.analytics = true; save(); }
-      paintChrome(); paintStart();
+      paintChrome();
     } catch (e) { /* guidance never blocks the app */ }
     return out;
   };
   // after the first load, Overview shortcuts no longer replay their entrance on each re-render
   setTimeout(() => document.body.classList.add('gc-settled'), 1800);
   window.SweepGuide = { open: openHelp, article: openHelp };
-  setTimeout(() => { try { paintChrome(); paintStart(); } catch (e) { /* first paint */ } }, 1200);
+  setTimeout(() => { try { paintChrome(); } catch (e) { /* first paint */ } }, 1200);
 })();

@@ -3953,14 +3953,14 @@ window.SweepMO = window.SweepMO || class {
  * 2. The first-account page: « Three steps and you're trading » (account, plan, first trade), brief 03 step 1.
  * 3a. Firms as a grid of initials badges · 3b. « New or already running? » (current balance, highest balance).
  * 5. Manual form at first glance: account, symbol, direction, contracts, entry/exit or net P&L; the rest under « More details ».
- * 6. First ring filled: one sentence, once. · 7. After the first trade, once: « Add Sweep to your home screen ». */
+ * 7. After the first trade, once: « Add Sweep to your home screen ». (6, the rings tip: replaced by « Your coach », brief 03 step 2.) */
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { onbT: 'Three steps and you’re trading.', onbS: 'Your account, your plan for the day, your first trade: about two minutes.', st1: 'Your account', st2: 'Your plan', st3: 'Your first trade', wel: 'Welcome', feeN: '${a} of fees added to your expenses', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', ring: 'Close the 3 rings = day swept. That’s your discipline.', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
-    fr: { onbT: 'Trois étapes et tu trades.', onbS: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.', st1: 'Ton compte', st2: 'Ton plan', st3: 'Ton premier trade', wel: 'Bienvenue', feeN: '{a} $ de frais ajoutés à tes dépenses', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', ring: 'Ferme les 3 anneaux = journée balayée. C’est ta discipline.', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
-    es: { onbT: 'Tres pasos y operas.', onbS: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.', st1: 'Tu cuenta', st2: 'Tu plan', st3: 'Tu primera operación', wel: 'Bienvenido', feeN: '{a} $ de comisiones añadidas a tus gastos', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', ring: 'Cierra los 3 anillos = día completado. Esa es tu disciplina.', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
+    en: { onbT: 'Three steps and you’re trading.', onbS: 'Your account, your plan for the day, your first trade: about two minutes.', st1: 'Your account', st2: 'Your plan', st3: 'Your first trade', wel: 'Welcome', feeN: '${a} of fees added to your expenses', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
+    fr: { onbT: 'Trois étapes et tu trades.', onbS: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.', st1: 'Ton compte', st2: 'Ton plan', st3: 'Ton premier trade', wel: 'Bienvenue', feeN: '{a} $ de frais ajoutés à tes dépenses', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
+    es: { onbT: 'Tres pasos y operas.', onbS: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.', st1: 'Tu cuenta', st2: 'Tu plan', st3: 'Tu primera operación', wel: 'Bienvenido', feeN: '{a} $ de comisiones añadidas a tus gastos', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return null; };
@@ -4053,17 +4053,8 @@ window.SweepMO = window.SweepMO || class {
     const m = e.target.closest && e.target.closest('.nav-more-b');
     if (m) { const tk = m.closest('#tkSlide'); const on = tk.classList.toggle('nav-tk-min'); LS('sw.tkMore', on ? '0' : '1'); m.textContent = on ? t('more') + ' ▾' : t('less') + ' ▴'; }
   });
-  new window.SweepMO(() => { try { pass(); ring(); install(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+  new window.SweepMO(() => { try { pass(); install(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 
-  // 6. the first ring: one sentence under the routine, once, gone on tap
-  function ring() {
-    const card = document.querySelector('#main .nav-rt:not(.ph)'); if (!card || LS('sw.ringTip') === '1' || card.querySelector('.nav-ring-tip')) return;
-    const st = window.SweepGame && SweepGame.state && SweepGame.state(); const r = st && st.today && st.today.rings; if (!r) return;
-    if (!(r.plan > 0 || r.execution > 0 || r.review > 0)) return;
-    const steps = card.querySelector('.nav-rt-steps'); if (!steps) return;
-    steps.insertAdjacentHTML('afterend', `<button type="button" class="nav-ring-tip" data-noi18n>${t('ring')}</button>`);
-  }
-  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('.nav-ring-tip'); if (b) { LS('sw.ringTip', '1'); b.remove(); } });
 
   // 7. after the first trade, once (and only if not installed): add to home screen — the session's one window
   const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
@@ -4709,16 +4700,6 @@ document.addEventListener('click', (e) => { if (e.target.closest && e.target.clo
   new window.SweepMO(() => {
     const few = /^#(trades|journal|calendar)/.test(location.hash || '#') && typeof S !== 'undefined' && (S.trades || []).filter((t) => !t.demo).length < 10;
     document.body.classList.toggle('nav-few-trades', !!few);
-  }).observe(document.body, { childList: true, subtree: true });
-})();
-
-/* A4 · « Get started » lives at the top of the routine card while unfinished (no separate checklist at the bottom) */
-(function () {
-  'use strict';
-  new window.SweepMO(() => {
-    const st = document.querySelector('#main .gd-start'), rt = document.querySelector('#main .nav-rt:not(.ph)'); if (!st || !rt) return;
-    const head = rt.querySelector('.nav-rt-h'); if (!head) return;
-    if (st.parentElement !== rt) { head.after(st); st.classList.add('nav-start-in'); }
   }).observe(document.body, { childList: true, subtree: true });
 })();
 

@@ -1,0 +1,35 @@
+/* Sweep — « Your coach » (brief 03 step 2): Today, the trade's page, the plan sheet. Blue = what was right, gold = what to improve. */
+.co{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
+.co-h{display:flex;align-items:center;gap:10px;min-width:0}
+.co-h b{font-size:15px;font-weight:600}
+.co-h small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.co-ic{display:grid;place-items:center;flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--posbg);color:var(--pos)}
+.co-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.co p{margin:0;font-size:14.5px;line-height:1.45}
+.co-ok{display:flex;gap:8px;align-items:flex-start;color:var(--text)}
+.co-ok svg{flex:0 0 auto;width:16px;height:16px;margin-top:2px;fill:none;stroke:var(--pos);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.co-fix{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:var(--r-tile,14px);background:rgba(var(--neg-rgb),.10);box-shadow:inset 3px 0 0 var(--neg)}
+.co-fix b{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--neg)}
+.co-do{font-weight:600}.co-do::before{content:'→ ';color:var(--neg)}
+.co-fix.co-none{background:var(--posbg);box-shadow:inset 3px 0 0 var(--pos)}
+.co-ses{color:var(--text2,var(--text))}
+.co-ses.co-stop{font-weight:600;color:var(--text)}
+.co-ses.muted{color:var(--muted);font-size:13.5px}
+/* Today: right under the routine card */
+.nav-dash .d-today > .co-today{margin-top:12px}
+/* the trade's page: inside the result card, under the figures */
+.co-trade{margin:14px 0 4px;padding:14px 16px;border-radius:var(--r-tile,16px);background:var(--fill)}
+/* the plan sheet: one live sentence above the button */
+.co-plan{display:flex;gap:10px;align-items:flex-start;margin:4px 0 10px;padding:10px 12px;border-radius:var(--r-tile,14px);background:var(--fill);font-size:14px;line-height:1.45}
+.co-plan .co-ic{width:24px;height:24px}.co-plan .co-ic svg{width:14px;height:14px}
+.co-plan b{font-weight:600}
+/* the rule of the day / for tomorrow */
+.co-rule{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:var(--r-tile,14px);background:var(--posbg)}
+.co-rule b{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--pos)}
+.co-rule span{font-weight:600}
+/* the habit of the week, under what the coach says */
+.co-habit{padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px!important}
+/* starting out: the why under the fix · Sweep AI, at the coach's place */
+.co-why{margin-top:4px;color:var(--muted);font-size:13px}
+.co-ai{display:flex}
+.co-ai .ai-btn{min-height:40px}
