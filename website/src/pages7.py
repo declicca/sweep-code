@@ -19,18 +19,30 @@ NOTE = T("For guidance only. Every prop firm has its own rules, and they change:
          "À titre indicatif seulement. Chaque prop firm a ses propres règles, et elles changent : vérifie toujours les règles actuelles de ta firme. Ce n’est pas un conseil financier.",
          "Solo a título indicativo. Cada prop firm tiene sus propias reglas y cambian: verifica siempre las reglas actuales de tu firma. No es asesoramiento financiero.")
 
+def note(lang, t):
+    """The guidance note, its last sentence linked to the risk disclosure."""
+    s = t(NOTE); k = s.rfind(". ") + 2
+    return s[:k] + f'<a href="{href(lang, "risk.html")}">{s[k:-1]}</a>.'
+
+ACT = {
+ "position-size-calculator.html": T("Sweep checks every trade against your daily risk budget, right in the trade ticket.", "Sweep vérifie chaque trade contre ton budget de risque du jour, directement dans le ticket.", "Sweep comprueba cada operación con tu presupuesto de riesgo del día, en el propio ticket."),
+ "trailing-drawdown-calculator.html": T("Sweep tracks the room left above your max loss on every prop account, trade by trade.", "Sweep suit la marge restante au-dessus de ta perte max sur chaque compte prop, trade après trade.", "Sweep sigue el margen que te queda sobre tu pérdida máx. en cada cuenta prop, operación a operación."),
+ "consistency-rule-calculator.html": T("Sweep checks your best day against your firm’s consistency rule after every trade.", "Sweep vérifie ton meilleur jour contre la règle de consistance de ta firme après chaque trade.", "Sweep comprueba tu mejor día con la regla de consistencia de tu firma tras cada operación."),
+ "payout-calculator.html": T("Sweep counts your payout conditions on every trade and tells you when you can request.", "Sweep compte tes conditions de payout à chaque trade et te dit quand tu peux demander.", "Sweep cuenta tus condiciones de payout en cada operación y te dice cuándo puedes pedirlo."),
+ "expectancy-calculator.html": T("Sweep computes your expectancy, win rate and profit factor from your real trades.", "Sweep calcule ton espérance, ton taux de réussite et ton profit factor à partir de tes vrais trades.", "Sweep calcula tu esperanza, tu tasa de acierto y tu profit factor con tus operaciones reales."),
+ "prop-firm-roi-calculator.html": T("Sweep keeps every evaluation, reset and payout in one place: your real net, firm by firm (Pro and Elite, included for your first 60 days).", "Sweep garde chaque évaluation, reset et payout au même endroit : ton vrai net, firme par firme (Pro et Elite, offerts tes 60 premiers jours).", "Sweep guarda cada evaluación, reinicio y payout en un solo lugar: tu neto real, firma por firma (Pro y Elite, incluidos tus primeros 60 días)."),
+}
+
 def _tool_page(lang, t, slug, h1, lead, form, results, script, howto, faqs):
     hero = page_hero(t, h1, lead, T("Free tools","Outils gratuits","Herramientas gratuitas"))
     others = "".join(f'<a class="tool-mini" href="{href(lang,s)}">{ico(I[ic])}<span>{t(n)}</span></a>' for s,ic,n,_ in TOOLS if s != slug)
     b = f'''<section style="padding-top:8px"><div class="wrap"><div class="calc" data-calc="{slug}">
 <div class="calc-form">{form}</div><div class="calc-out" aria-live="polite">{results}</div></div>
-<p class="fine" style="margin:18px auto 0;text-align:center;max-width:70ch">{t(NOTE)}</p></div></section>
+<div class="calc-act"><div><b>{t(T("Track this automatically in Sweep","Suis ça automatiquement dans Sweep","Síguelo automáticamente en Sweep"))}</b><p data-nolinks>{t(ACT[slug])}</p></div><a class="btn btn-primary" href="{SIGNUP}" data-track="signup_tool">{t(CREATE_FREE)}</a></div>
+<p class="fine" style="margin:18px auto 0;text-align:center;max-width:70ch">{note(lang, t)}</p></div></section>
 <section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("How it works","Comment ça marche","Cómo funciona"))}</h2></div><div class="prose">{t(howto)}</div>
 {"".join(faq_item(t,q,a) for q,a in faqs)}</div></section>
-<section class="rule"><div class="wrap"><div class="tool-cta"><div><h2>{t(T("Let Sweep track this for you.","Laisse Sweep suivre ça pour toi.","Deja que Sweep lo siga por ti."))}</h2>
-<p class="lead">{t(T("Sweep checks your risk on every trade, tracks your drawdown and consistency on every prop account, and tells you when you’re ready for the payout.","Sweep vérifie ton risque à chaque trade, suit ton drawdown et ta consistance sur chaque compte prop, et te dit quand tu es prêt pour le payout.","Sweep revisa tu riesgo en cada operación, sigue tu drawdown y tu consistencia en cada cuenta prop y te dice cuándo estás listo para el payout."))}</p></div>
-<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_tool">{t(T("Start for free","Commencer gratuitement","Empieza gratis"))}</a></div>
-<div class="tool-others"><span class="kick">{t(T("More free tools","Autres outils gratuits","Más herramientas gratuitas"))}</span><div>{others}</div></div></div></section>'''
+<section class="rule"><div class="wrap"><div class="tool-others"><span class="kick">{t(T("More free tools","Autres outils gratuits","Más herramientas gratuitas"))}</span><div>{others}</div></div></div></section>{final_cta(lang, t)}'''
     ld = jsonld({"@context":"https://schema.org","@graph":[
         {"@type":"WebApplication","name":t(h1),"url":f"https://{DOMAIN}{href(lang,slug)}","applicationCategory":"FinanceApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":f"https://{DOMAIN}/#org"}},
         {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]}]})
@@ -74,7 +86,7 @@ document.querySelector('[data-pct-only]').closest('.fld').hidden=true;try{{var q
              T("That’s your decision and depends on your account and its rules. Many traders define it as a fixed dollar amount or a small percentage of the balance, and keep it the same on every trade.","C’est ta décision, selon ton compte et ses règles. Beaucoup de traders la fixent en montant fixe ou en petit pourcentage du solde, et la gardent identique à chaque trade.","Es tu decisión y depende de tu cuenta y sus reglas. Muchos traders la fijan como un importe fijo o un pequeño porcentaje del saldo, y la mantienen igual en cada operación."))]
     body, ld = _tool_page(lang, t, "position-size-calculator.html", TOOLS[0][2], TOOLS[0][3], form, results, script, howto, faqs)
     return (t(T("Futures position size calculator (NQ, ES, CL, GC…) · Sweep","Calculateur de taille de position futures (NQ, ES, CL, GC…) · Sweep","Calculadora de tamaño de posición en futuros (NQ, ES, CL, GC…) · Sweep")),
-            t(T("Free calculator: how many NQ, MNQ, ES, MES, CL or GC contracts to trade for your risk and stop, with CME tick values.","Calculateur gratuit : combien de contrats NQ, MNQ, ES, MES, CL ou GC trader selon ton risque et ton stop, avec les valeurs de tick CME.","Calculadora gratuita: cuántos contratos de NQ, MNQ, ES, MES, CL o GC operar según tu riesgo y tu stop, con los valores de tick de CME.")),
+            t(T("Free calculator: how many NQ, MNQ, ES, MES, CL or GC contracts to trade for your risk and stop, with official CME tick values.","Calculateur gratuit : combien de contrats NQ, MNQ, ES, MES, CL ou GC trader selon ton risque et ton stop, avec les valeurs de tick CME.","Calculadora gratuita: cuántos contratos de NQ, MNQ, ES, MES, CL o GC operar según tu riesgo y tu stop, con los valores de tick de CME.")),
             body, ld)
 
 def guide_note(page, label):
@@ -113,8 +125,8 @@ document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventLi
             (T("Does Sweep track my drawdown automatically?","Sweep suit-il mon drawdown automatiquement ?","¿Sweep sigue mi drawdown automáticamente?"),
              T("Yes. Each prop account in Sweep has its own drawdown rule, prefilled for guidance from your firm’s preset, and its status updates with every trade.","Oui. Chaque compte prop dans Sweep a sa propre règle de drawdown, préremplie à titre indicatif à partir du préréglage de ta firme, et son statut se met à jour à chaque trade.","Sí. Cada cuenta prop en Sweep tiene su propia regla de drawdown, precargada a título indicativo desde el preajuste de tu firma, y su estado se actualiza con cada operación."))]
     body, ld = _tool_page(lang, t, "trailing-drawdown-calculator.html", TOOLS[1][2], TOOLS[1][3], form, results, script, howto, faqs)
-    return (t(T("Trailing drawdown calculator for prop firm accounts · Sweep","Calculateur de drawdown suiveur pour comptes prop · Sweep","Calculadora de drawdown dinámico para cuentas de fondeo · Sweep")),
-            t(T("Free calculator: find your liquidation level and the room left on a trailing drawdown prop firm account.","Calculateur gratuit : trouve ton seuil de liquidation et la marge restante sur un compte prop à drawdown suiveur.","Calculadora gratuita: encuentra tu nivel de liquidación y el margen restante en una cuenta de fondeo con drawdown dinámico.")),
+    return (t(T("Trailing drawdown calculator for prop firm accounts · Sweep","Calculateur de drawdown suiveur pour comptes prop · Sweep","Calculadora de drawdown dinámico para prop firms · Sweep")),
+            t(T("Free calculator: find your liquidation level and the room left on a trailing drawdown prop firm account, end of day or intraday.","Calculateur gratuit : trouve ton seuil de liquidation et la marge restante sur un compte prop à drawdown suiveur, fin de journée ou intraday.","Calculadora gratuita: tu nivel de liquidación y el margen restante en una cuenta de fondeo con drawdown dinámico, al cierre o intradía.")),
             body, ld)
 
 def page_consistency(lang, t):
@@ -142,16 +154,16 @@ document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventLi
              T("Yes. Consistency is one of the rules Sweep tracks on each prop account, with the percentage prefilled for guidance from your firm’s preset.","Oui. La consistance fait partie des règles que Sweep suit sur chaque compte prop, avec le pourcentage prérempli à titre indicatif à partir du préréglage de ta firme.","Sí. La consistencia es una de las reglas que Sweep sigue en cada cuenta prop, con el porcentaje precargado a título indicativo desde el preajuste de tu firma."))]
     body, ld = _tool_page(lang, t, "consistency-rule-calculator.html", TOOLS[2][2], TOOLS[2][3], form, results, script, howto, faqs)
     return (t(T("Consistency rule calculator for prop firm payouts · Sweep","Calculateur de règle de consistance pour prop firms · Sweep","Calculadora de regla de consistencia para prop firms · Sweep")),
-            t(T("Free calculator: check your best day against your prop firm’s consistency rule and see how much more profit you need.","Calculateur gratuit : compare ta meilleure journée à la règle de consistance de ta prop firm et vois combien de profit il te manque.","Calculadora gratuita: compara tu mejor día con la regla de consistencia de tu prop firm y mira cuánto beneficio te falta.")),
+            t(T("Free calculator: check your best day against your prop firm’s consistency rule and see how much more profit you need before a payout.","Calculateur gratuit : compare ta meilleure journée à la règle de consistance de ta prop firm et vois le profit qu’il te manque avant un payout.","Calculadora gratuita: compara tu mejor día con la regla de consistencia de tu prop firm y mira cuánto beneficio te falta antes de un payout.")),
             body, ld)
 
 def page_tools(lang, t):
     hero = page_hero(t, T("Free tools for futures and prop traders.","Outils gratuits pour traders de futures et de prop firms.","Herramientas gratuitas para traders de futuros y de fondeo."),
         T("Quick answers before you take the trade. No account needed.","Des réponses rapides avant de prendre le trade. Sans compte.","Respuestas rápidas antes de entrar en la operación. Sin cuenta."), T("Free tools","Outils gratuits","Herramientas gratuitas"))
     cards = "".join(f'<a class="tool-card reveal" href="{href(lang,s)}">{ico(I[ic])}<h2>{t(n)}</h2><p>{t(d)}</p><span class="go">{t(T("Open","Ouvrir","Abrir"))} →</span></a>' for s,ic,n,d in TOOLS)
-    b = f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div><p class="center-note"><a class="tlink" href="{href(lang,"prop-firms/index.html")}">{t(T("Each firm’s rules, explained","Les règles de chaque firme, expliquées","Las reglas de cada firma, explicadas"))} <span aria-hidden="true">→</span></a></p><p class="fine" style="text-align:center;margin:22px auto 0;max-width:70ch">{t(NOTE)}</p></div></section>'
+    b = f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div><p class="center-note"><a class="tlink" href="{href(lang,"prop-firms/index.html")}">{t(T("Each firm’s rules, explained","Les règles de chaque firme, expliquées","Las reglas de cada firma, explicadas"))} <span aria-hidden="true">→</span></a></p><p class="fine" style="text-align:center;margin:22px auto 0;max-width:70ch">{note(lang, t)}</p></div></section>'
     return (t(T("Free futures and prop firm calculators · Sweep","Calculateurs gratuits pour futures et prop firms · Sweep","Calculadoras gratuitas para futuros y prop firms · Sweep")),
-            t(T("Free position size, trailing drawdown and consistency rule calculators for futures and prop firm traders.","Calculateurs gratuits de taille de position, de drawdown suiveur et de règle de consistance pour traders de futures et de prop firms.","Calculadoras gratuitas de tamaño de posición, drawdown dinámico y regla de consistencia para traders de futuros y de fondeo.")),
+            t(T("Free position size, trailing drawdown, consistency, payout, expectancy and prop firm ROI calculators for futures and prop firm traders.","Calculateurs gratuits : taille de position, drawdown suiveur, consistance, payout, espérance et rentabilité prop, pour traders de futures.","Calculadoras gratuitas: tamaño de posición, drawdown dinámico, consistencia, payout, esperanza y rentabilidad prop, para traders de futuros.")),
             hero + b + final_cta(lang, t), "")
 
 TOOLS += [
@@ -195,8 +207,8 @@ def page_roi(lang, t):
     faqs = [(T("Does Sweep track this automatically?","Sweep calcule-t-il ça automatiquement ?","¿Sweep lo calcula automáticamente?"),
              T("Yes. Log your expenses and payouts in Sweep and your net after fees is always one line, by firm and by account.","Oui. Note tes dépenses et tes payouts dans Sweep et ton net après frais tient toujours en une ligne, par firme et par compte.","Sí. Registra tus gastos y payouts en Sweep y tu neto tras cuotas siempre cabe en una línea, por firma y por cuenta."))]
     return _simple_tool(lang, t, 4, form, res, js, howto, faqs,
-        T("Prop firm ROI calculator: net after evaluations and resets · Sweep","Calculateur de rentabilité prop : ton net après frais · Sweep","Calculadora de rentabilidad prop: neto tras cuotas · Sweep"),
-        T("Free calculator: what prop trading really pays you after evaluations, resets, activation and data fees, with your return on fees.","Calculateur gratuit : ce que le trading prop te rapporte vraiment après évaluations, resets, activation et frais de données.","Calculadora gratuita: lo que el trading prop te deja realmente tras evaluaciones, reinicios, activación y datos."))
+        T("Prop firm ROI calculator: net after evaluations and resets · Sweep","Calculateur de rentabilité prop : net après frais · Sweep","Calculadora de rentabilidad prop: neto tras cuotas · Sweep"),
+        T("Free calculator: what prop trading really pays you after evaluations, resets, activation and data fees, with your return on fees.","Calculateur gratuit : ce que le trading prop te rapporte vraiment après évaluations, resets, activation et frais de données.","Calculadora gratuita: lo que el trading prop te deja realmente tras evaluaciones, reinicios, activación y datos, con tu retorno sobre los costes."))
 
 def page_payoutcalc(lang, t):
     form = (_num("po-bal", t(T("Current balance","Solde actuel","Saldo actual")), 53800, "any", "$") + _num("po-st", t(T("Starting balance","Solde de départ","Saldo inicial")), 50000, "any", "$")
@@ -212,5 +224,5 @@ def page_payoutcalc(lang, t):
     faqs = [(T("Why can’t I withdraw my whole profit?","Pourquoi je ne peux pas retirer tout mon profit ?","¿Por qué no puedo retirar todo mi beneficio?"),
              T("Firms often require a cushion above the starting balance and cap each payout. Always check your firm’s current rules.","Les firmes exigent souvent un coussin au-dessus du solde de départ et plafonnent chaque payout. Vérifie toujours les règles actuelles de ta firme.","Las firmas suelen exigir un colchón sobre el saldo inicial y limitan cada payout. Verifica siempre las reglas actuales de tu firma."))]
     return _simple_tool(lang, t, 5, form, res, js, howto, faqs,
-        T("Prop firm payout calculator: how much can you request? · Sweep","Calculateur de payout prop : combien peux-tu demander ? · Sweep","Calculadora de payout prop: ¿cuánto puedes pedir? · Sweep"),
-        T("Free calculator: the payout you can request after your firm’s cushion, within the minimum and maximum per request.","Calculateur gratuit : le payout que tu peux demander après le coussin de ta firme, entre le minimum et le maximum.","Calculadora gratuita: el payout que puedes pedir tras el colchón de tu firma, entre el mínimo y el máximo."))
+        T("Prop firm payout calculator: what can you request? · Sweep","Calculateur de payout prop : combien retirer ? · Sweep","Calculadora de payout prop: ¿cuánto puedes pedir? · Sweep"),
+        T("Free calculator: the payout you can request after your firm’s cushion, within the minimum and maximum per request, for any prop firm.","Calculateur gratuit : le payout que tu peux demander après le coussin de ta firme, entre le minimum et le maximum, pour toute prop firm.","Calculadora gratuita: el payout que puedes pedir tras el colchón de tu firma, entre el mínimo y el máximo, para cualquier prop firm."))

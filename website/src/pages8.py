@@ -75,14 +75,16 @@ def make_firm_page(slug, firm):
         b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>{"".join(faq_item(t,q,a) for q,a in faqs)}</div></section>'
         others = "".join(f'<a href="{href(lang,s)}">{n}</a>' for s,n in FIRMS if s != slug)
         b += f'<section class="rule"><div class="wrap"><p class="firm-others"><span>{t(T("Also for","Aussi pour","También para"))}</span>{others}<a href="{href(lang,"prop-traders.html")}">{t(T("All prop traders","Tous les traders prop","Todos los traders prop"))} →</a></p></div></section>'
+        b += related(lang, t, [(pages18.page_of(rp), _f(T("{F} rules, explained","Les règles de {F}, expliquées","Las reglas de {F}, explicadas"), firm), T("Drawdown, consistency and payouts, checked every week.","Drawdown, consistance et payouts, vérifiés chaque semaine.","Drawdown, consistencia y payouts, revisados cada semana.")) if rp else "prop-firms/index.html",
+                               "prop-firm-payout-rules.html", "glossary.html"])
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]})
         return (F(T("{F} trading journal: rules and payouts · Sweep","Journal de trading {F} : règles et payouts · Sweep","Diario de trading para {F} · Sweep")) if len(firm) < 14 else F(T("{F} trading journal · Sweep","Journal de trading {F} · Sweep","Diario de trading para {F} · Sweep")),
                 F(T("Track your {F} accounts in one place: profit target, drawdown, daily loss, consistency and payouts. Enter your rules once. Free forever.",
                     "Suis tes comptes {F} au même endroit : objectif, drawdown, perte quotidienne, consistance et payouts. Saisis tes règles une fois. Gratuit pour toujours.",
-                    "Sigue tus cuentas de {F} en un solo lugar: objetivo, drawdown, pérdida diaria, consistencia y payouts. Introduce tus reglas una vez. Gratis para siempre.")) if not has else
+                    "Sigue tus cuentas de {F}: objetivo, drawdown, pérdida diaria, consistencia y payouts. Introduce tus reglas una vez. Gratis para siempre.")) if not has else
                 F(T("Track your {F} accounts in one place: profit target, drawdown, daily loss, consistency and payouts. Rules prefilled for guidance. Free forever.",
                     "Suis tes comptes {F} au même endroit : objectif, drawdown, perte quotidienne, consistance et payouts. Règles préremplies à titre indicatif. Gratuit pour toujours.",
-                    "Sigue tus cuentas de {F} en un solo lugar: objetivo, drawdown, pérdida diaria, consistencia y payouts. Reglas precargadas a título indicativo. Gratis para siempre.")),
+                    "Sigue tus cuentas de {F}: objetivo, drawdown, pérdida diaria, consistencia y payouts. Reglas precargadas a título indicativo. Gratis.")),
                 hero + b + final_cta(lang, t), ld)
     return page
 

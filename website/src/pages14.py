@@ -15,8 +15,8 @@ def page_templates(lang, t):
     b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
          f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Paper is a start. Sweep does the rest.","Le papier, c’est un début. Sweep fait le reste.","El papel es un comienzo. Sweep hace el resto."))}</h2>'
          f'<p class="lead">{t(T("Your checklist is on the same screen as every trade, your plan feeds the Plan ring, and your weekly review starts from your real numbers.","Ta checklist est sur le même écran que chaque trade, ton plan nourrit l’anneau Plan, et ta revue de la semaine part de tes vrais chiffres.","Tu checklist está en la misma pantalla que cada operación, tu plan alimenta el anillo Plan y tu revisión semanal parte de tus números reales."))}</p></div>'
-         f'<p class="firm-others"><span>{t(T("Read next","À lire","Para leer"))}</span><a href="{href(lang,"trading-journal-routine.html")}">{t(T("A daily journaling routine","Une routine de journal quotidienne","Una rutina diaria de diario"))}</a><a href="{href(lang,"how-to-choose-a-trading-journal.html")}">{t(T("How to choose a trading journal","Bien choisir son journal de trading","Cómo elegir un diario de trading"))}</a></p></div></section>')
-    return (t(T("Free trading plan, daily journal and checklist templates (PDF) · Sweep","Modèles gratuits : plan de trading, journal et checklist (PDF) · Sweep","Plantillas gratis: plan de trading, diario y checklist (PDF) · Sweep")),
+         f'</div></section>')
+    return (t(T("Free trading plan, journal and checklist templates · Sweep","Modèles gratuits : plan de trading, journal et checklist","Plantillas gratis: plan de trading, diario y checklist")),
             t(T("Download a printable trading plan, daily trading journal and discipline checklist for futures and prop firm traders. Free, no email.","Télécharge un plan de trading, un journal quotidien et une checklist de discipline à imprimer, pour traders de futures et de prop firms. Gratuit, sans courriel.","Descarga un plan de trading, un diario y un checklist de disciplina imprimibles para traders de futuros y de fondeo. Gratis, sin email.")),
             hero + b + final_cta(lang, t), "")
 
@@ -24,7 +24,7 @@ def _article(lang, t, h1, lead, kick, sections, related, title, desc):
     hero = page_hero(t, h1, lead, kick)
     body = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in sections)
     rel = "".join(f'<a href="{href(lang,s)}">{t(n)}</a>' for s,n in related)
-    b = f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{body}</article><p class="firm-others" style="margin-top:36px"><span>{t(T("Related","Voir aussi","Ver también"))}</span>{rel}</p></div></section>'
+    b = f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{body}</article></div></section>'
     ld = jsonld({"@context":"https://schema.org","@type":"Article","headline":t(h1),"description":t(desc),"inLanguage":lang,"publisher":{"@id":f"https://{DOMAIN}/#org"},"datePublished":"2026-10-06","author":{"@type":"Organization","name":"Sweep"}})
     return (t(title), t(desc), hero + b + final_cta(lang, t), ld)
 

@@ -72,9 +72,9 @@ def make_contract(sym):
         b += f'<section class="rule"><div class="wrap narrow">{"".join(faq_item(t,q,a) for q,a in faqs)}</div></section>'
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]})
         return (t(T(f"{s} futures tick value, tick size and contract specs · Sweep",f"{s} : valeur du tick, taille et spécifications · Sweep",f"{s}: valor del tick, tamaño y especificaciones · Sweep")),
-                t(T(f"{name} ({s}) futures: tick size {_tick(ts)}, tick value {_fmt(tv)}, point value {_fmt(pv)}, trading hours and what a stop costs.",
-                    f"Contrat {name} ({s}) : tick de {_tick(ts)}, valeur du tick {_fmt(tv)}, valeur du point {_fmt(pv)}, heures de marché et coût d’un stop.",
-                    f"Futuros {name} ({s}): tick de {_tick(ts)}, valor del tick {_fmt(tv)}, valor del punto {_fmt(pv)}, horario y coste de un stop.")),
+                t(T(f"{name} ({s}) futures: tick size {_tick(ts)}, tick value {_fmt(tv)}, point value {_fmt(pv)}, trading hours and what a stop costs, for prop traders.",
+                    f"Contrat {name} ({s}) : tick de {_tick(ts)}, valeur du tick {_fmt(tv)}, valeur du point {_fmt(pv)}, heures de marché et coût d’un stop, pour les traders prop.",
+                    f"Futuros {name} ({s}): tick de {_tick(ts)}, valor del tick {_fmt(tv)}, valor del punto {_fmt(pv)}, horario y coste de un stop, para traders prop.")),
                 hero + b + final_cta(lang, t), ld)
     return page
 
@@ -84,6 +84,6 @@ def page_contracts(lang, t):
     rows = "".join(f'<tr><th><a href="{href(lang,slug(s))}">{s}</a></th><td>{n}</td><td class="num">{_tick(ts)}</td><td class="num">{_fmt(tv)}</td><td class="num">{_fmt(pv)}</td></tr>' for s,n,_,ts,tv,pv,_,_,_ in C)
     tbl = (f'<div class="cmp-wrap"><table class="cmp"><thead><tr><th>{t(T("Symbol","Symbole","Símbolo"))}</th><th>{t(T("Name","Nom","Nombre"))}</th><th>{t(T("Tick","Tick","Tick"))}</th><th>{t(T("Tick value","Valeur du tick","Valor del tick"))}</th><th>{t(T("Point value","Valeur du point","Valor del punto"))}</th></tr></thead><tbody>{rows}</tbody></table></div>')
     b = f'<section style="padding-top:8px"><div class="wrap">{tbl}<p class="fine">{t(NOTE)}</p></div></section>'
-    return (t(T("CME futures tick values: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valeurs de tick CME : NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valores de tick de CME: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep")),
-            t(T("Tick size, tick value and point value for NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI and 6E futures.","Taille, valeur du tick et valeur du point pour NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI et 6E.","Tamaño, valor del tick y valor del punto para NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI y 6E.")),
+    return (t(T("Futures tick values: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valeur du tick : NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valor del tick: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep")),
+            t(T("Tick size, tick value and point value for NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI and 6E futures, with what a stop costs.","Taille, valeur du tick et valeur du point pour NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI et 6E, avec le coût d’un stop.","Tamaño, valor del tick y valor del punto para NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI y 6E, con el coste de un stop.")),
             hero + b + final_cta(lang, t), "")

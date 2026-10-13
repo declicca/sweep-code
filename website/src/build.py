@@ -61,6 +61,8 @@ for lang in LANGS:
         title, desc, body, ld = fn(lang, t)
         dest = os.path.join(out, "100", "index.html") if page == "100" else os.path.join(out, page)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
+        body = add_related(lang, t, page, body)
+        body = add_links(lang, page, body)
         open(dest, "w").write(shell(lang, page, title, desc, body, t, ld))
 import datetime
 BUILD_DATE = datetime.date.today().isoformat()

@@ -71,8 +71,8 @@ def make_release(key):
                      "itemListElement":[{"@type":"ListItem","position":i+1,"name":f'{title} {e["date"]} {e["time"]} ET'} for i,e in enumerate(evs) if e["date"] >= TODAY_ISO][:12]})
         return (t(T(f"{title} release dates 2026 and 2027 (ET) · Sweep",f"Dates {title} 2026 et 2027 (heure de New York) · Sweep",f"Fechas {title} 2026 y 2027 (hora de Nueva York) · Sweep")),
                 t(T(f"Every {title} release date and time for 2026 and 2027 in New York time, with the next release and what it means for futures traders.",
-                    f"Toutes les dates et heures de publication {title} pour 2026 et 2027, en heure de New York, avec la prochaine publication.",
-                    f"Todas las fechas y horas de publicación {title} para 2026 y 2027, en hora de Nueva York, con el próximo dato.")),
+                    f"Toutes les dates et heures de publication {title} pour 2026 et 2027, en heure de New York, avec la prochaine publication et son effet sur les futures.",
+                    f"Todas las fechas y horas de publicación {title} para 2026 y 2027, en hora de Nueva York, con el próximo dato y lo que significa para los futuros.")),
                 hero + b + final_cta(lang, t), ld)
     return page
 
@@ -85,8 +85,8 @@ def page_release_hub(lang, t):
         nx = f'<span class="go num">{t(T("Next","Prochaine","Próxima"))} : {_date(t,nxt["date"])} · {nxt["time"]} ET</span>' if nxt else ""
         cards += f'<a class="tool-card" href="{href(lang,sl)}"><h2>{title}</h2><p>{t(what)}</p>{nx}</a>'
     b = f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
-    return (t(T("U.S. economic release dates 2026–2027: CPI, NFP, FOMC… · Sweep","Dates des annonces économiques 2026–2027 : CPI, NFP, FOMC · Sweep","Fechas de datos económicos 2026–2027: CPI, NFP, FOMC… · Sweep")),
-            t(T("Release dates and times for CPI, NFP, FOMC, PPI, PCE, retail sales, GDP and ISM in 2026 and 2027, in New York time.","Dates et heures de CPI, NFP, FOMC, PPI, PCE, ventes au détail, PIB et ISM en 2026 et 2027, en heure de New York.","Fechas y horas de CPI, NFP, FOMC, PPI, PCE, ventas minoristas, PIB e ISM en 2026 y 2027, en hora de Nueva York.")),
+    return (t(T("Economic release dates 2026–2027: CPI, NFP, FOMC · Sweep","Annonces économiques 2026–2027 : CPI, NFP, FOMC · Sweep","Fechas de datos económicos 2026–2027: CPI, NFP, FOMC · Sweep")),
+            t(T("Release dates and times for CPI, NFP, FOMC, PPI, PCE, retail sales, GDP and ISM in 2026 and 2027, in New York time, with the next release.","Dates et heures de CPI, NFP, FOMC, PPI, PCE, ventes au détail, PIB et ISM en 2026 et 2027, en heure de New York, avec la prochaine.","Fechas y horas de CPI, NFP, FOMC, PPI, PCE, ventas minoristas, PIB e ISM en 2026 y 2027, en hora de Nueva York, con el próximo dato.")),
             hero + b + final_cta(lang, t), "")
 
 # ------------------------------------------------------------------ glossary
@@ -114,7 +114,7 @@ G = [
  ("globex", "Globex", T("CME’s electronic trading platform, open nearly 23 hours a day from Sunday evening to Friday.","La plateforme électronique du CME, ouverte près de 23 heures par jour du dimanche soir au vendredi.","La plataforma electrónica de CME, abierta casi 23 horas al día de domingo por la tarde a viernes.")),
  ("rollover", "Rollover", T("Moving from the expiring contract month to the next one, usually about a week before expiration for index futures.","Passer du mois de contrat qui expire au suivant, en général environ une semaine avant l’échéance pour les indices.","Pasar del mes de contrato que vence al siguiente, normalmente una semana antes del vencimiento en los índices.")),
  ("copy-trading", "Copy trading", T("Placing the same trade on several accounts at once. In Sweep, a copied trade shows once with the total.","Placer le même trade sur plusieurs comptes en même temps. Dans Sweep, un trade copié s’affiche une seule fois avec le total.","Colocar la misma operación en varias cuentas a la vez. En Sweep, una operación copiada se muestra una vez con el total.")),
- ("journal", T("Trading journal","Journal de trading","Diario de trading"), T("A record of every trade with its reason, its result and what you learned, used to find your edge and fix your mistakes.","Un registre de chaque trade avec sa raison, son résultat et ce que tu en retiens, pour trouver ton edge et corriger tes erreurs.","Un registro de cada operación con su motivo, su resultado y lo aprendido, para encontrar tu ventaja y corregir errores.")),
+ ("journal", T("Trading journal","Journal de trading","Diario de trading"), T("A record of every trade with its reason, its result and what you learned, used to find your edge and fix your mistakes. Start with a <a href=\"/trading-templates\">free template</a>.","Un registre de chaque trade avec sa raison, son résultat et ce que tu en retiens, pour trouver ton edge et corriger tes erreurs. Commence avec un <a href=\"/fr/trading-templates\">modèle gratuit</a>.","Un registro de cada operación con su motivo, su resultado y lo aprendido, para encontrar tu ventaja y corregir errores. Empieza con una <a href=\"/es/trading-templates\">plantilla gratis</a>.")),
 ]
 def page_glossary(lang, t):
     hero = page_hero(t, T("Futures and prop trading glossary.","Lexique du trading de futures et prop.","Glosario de trading de futuros y prop."),
@@ -153,7 +153,7 @@ tick();setInterval(tick,30000);}})();</script>'''
              "Heures CME Globex pour les futures sur indices, énergie, métaux et devises. Les jours fériés ont des heures différentes : vérifie le calendrier des jours fériés du CME Group. Les noms des sessions sont des conventions.",
              "Horario de CME Globex para futuros de índices, energía, metales y divisas. Los festivos tienen otro horario: consulta el calendario de festivos de CME Group. Los nombres de las sesiones son convenciones.")
     b = f'<section style="padding-top:8px"><div class="wrap narrow">{clock}{tbl}<p class="fine">{t(note)}</p></div></section>' + js
-    return (t(T("Futures market hours in your time zone (CME Globex) · Sweep","Heures des marchés futures dans ton fuseau (CME Globex) · Sweep","Horario de futuros en tu zona horaria (CME Globex) · Sweep")),
+    return (t(T("Futures market hours in your time zone (CME Globex) · Sweep","Heures des futures (CME Globex) dans ton fuseau · Sweep","Horario de futuros en tu zona horaria (CME Globex) · Sweep")),
             t(T("CME Globex futures hours converted to your local time: Asia, London and New York sessions, daily break, and whether the market is open now.","Les heures CME Globex converties à ton heure locale : sessions Asie, Londres et New York, pause quotidienne, et si le marché est ouvert maintenant.","El horario de CME Globex en tu hora local: sesiones de Asia, Londres y Nueva York, pausa diaria y si el mercado está abierto ahora.")),
             hero + b + final_cta(lang, t), "")
 
@@ -170,11 +170,11 @@ def page_press(lang, t):
     colors = [("#0B0B0C","Ink"),("#F2F2F3","Text"),("#4C8DFF","Gain · action"),("#D4A24C","Loss · alert")]
     cl = "".join(f'<div class="sw-c"><i style="background:{c}"></i><b class="num">{c}</b><span>{n}</span></div>' for c,n in colors)
     shots = "".join(slot(n,"desktop",t(T("Sweep screen, demo data","Écran de Sweep, données de démonstration","Pantalla de Sweep, datos de demostración")),t,cap=False) for n in ("v6-01-today-d.webp","v6-08-payout-conditions-d.webp","v6-07-stats-d.webp"))
-    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("About Sweep","À propos de Sweep","Sobre Sweep"))}</h2></div><p class="lead">{t(boiler)}</p>'
-         f'<p class="meta">{t(T("Contact","Contact","Contacto"))} : <a href="mailto:{EMAIL}">{EMAIL}</a></p></div></section>'
+    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("About Sweep","À propos de Sweep","Sobre Sweep"))}</h2></div><p class="lead">{t(boiler).replace("makeitsweep.com", f'<a href="{href(lang, "index.html")}">makeitsweep.com</a>')}</p>'
+         f'<p class="meta"><a href="{href(lang, "contact.html")}">{t(T("Contact","Contact","Contacto"))}</a> : <a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{href(lang, "about.html")}">{t(T("Our story","Notre histoire","Nuestra historia"))}</a> · <a href="{href(lang, "changelog.html")}">{t(T("What’s new","Nouveautés","Novedades"))}</a></p></div></section>'
          f'<section class="rule"><div class="wrap"><div class="head"><h2>{t(T("Logo and files","Logo et fichiers","Logo y archivos"))}</h2><p class="lead">{t(T("Always lowercase “sweep” in the wordmark. Don’t stretch, recolor or add effects to the logo; the blue wick stays blue.","Le mot-symbole s’écrit toujours en minuscules : « sweep ». N’étire pas le logo, ne change pas ses couleurs et n’y ajoute pas d’effet ; la mèche bleue reste bleue.","El logotipo siempre en minúsculas: «sweep». No estires el logo, no cambies sus colores ni añadas efectos; la mecha azul sigue siendo azul."))}</p></div>'
          f'<div class="tool-row">{fl}</div><div class="swatches">{cl}</div></div></section>'
          f'<section class="rule"><div class="wrap"><div class="head"><h2>{t(T("Screenshots","Captures","Capturas"))}</h2><p class="lead">{t(T("Real app screens with demo data. Free to use when writing about Sweep.","De vrais écrans de l’app avec des données de démonstration. Libres d’utilisation pour parler de Sweep.","Pantallas reales de la app con datos de demostración. De uso libre para hablar de Sweep."))}</p></div><div class="press-shots">{shots}</div></div></section>')
     return (t(T("Sweep press kit: logo, screenshots and description","Kit presse de Sweep : logo, captures et description","Kit de prensa de Sweep: logo, capturas y descripción")),
-            t(T("Download the Sweep logo, brand colors and app screenshots, and read the official description of Sweep.","Télécharge le logo de Sweep, ses couleurs et des captures de l’app, et lis la description officielle de Sweep.","Descarga el logo de Sweep, sus colores y capturas de la app, y lee la descripción oficial de Sweep.")),
+            t(T("Download the Sweep logo, brand colors and app screenshots, and read the official description of Sweep, the trading journal for prop traders.","Télécharge le logo de Sweep, ses couleurs et des captures de l’app, et lis la description officielle du journal de trading des traders prop.","Descarga el logo de Sweep, sus colores y capturas de la app, y lee la descripción oficial de Sweep, el diario de trading de los traders prop.")),
             hero + b + final_cta(lang, t), "")

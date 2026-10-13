@@ -1179,10 +1179,9 @@ details summary,.faq summary{transition:color .2s}
 }
 .tour-frame{border:0;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 60px 120px -40px rgba(0,0,0,.9);border-radius:var(--r-xl)}
 
-/* motion: everything settles on the same spring, with a soft focus pull */
+/* motion: everything settles on the same spring (fade and rise only: never filter blur, too costly on phones) */
 @media (prefers-reduced-motion: no-preference){
-  .io .reveal{filter:blur(6px);transition:opacity 1s var(--spring),transform 1.1s var(--spring),filter 1s var(--spring)}
-  .io .reveal.in{filter:none}
+  .io .reveal{transition:opacity 1s var(--spring),transform 1.1s var(--spring)}
   .io .head{transition:opacity .9s var(--spring),transform 1s var(--spring)}
   .io .stagger>*{transition:opacity .9s var(--spring),transform 1s var(--spring)}
   .grid>a,.tool-card,.pillar,.plan,.plat,.tool-mini{transition:transform .5s var(--spring),box-shadow .4s var(--spring)}
@@ -1283,7 +1282,7 @@ details summary,.faq summary{transition:color .2s}
   .js .hero .pill{animation:rise .9s var(--spring) .15s both}
   @media (max-width:860px){
     .js .stage .phone:not(.back){animation:phonein 1.1s var(--spring) .55s both, float 6s ease-in-out 1.8s infinite}
-    @keyframes phonein{from{opacity:0;transform:translateY(40px) scale(.94);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+    @keyframes phonein{from{opacity:0;transform:translateY(40px) scale(.94)}to{opacity:1;transform:none}}
   }
 }
 
@@ -1340,8 +1339,8 @@ details summary,.faq summary{transition:color .2s}
 .tour-modal[open]::backdrop{animation:bdin .4s ease both}
 .tour-modal.closing{animation:tourout .26s ease-in both}
 .tour-modal.closing::backdrop{animation:bdout .26s ease-in both}
-@keyframes tourin{from{opacity:0;transform:scale(.86) translateY(16px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
-@keyframes tourout{to{opacity:0;transform:scale(.94) translateY(8px);filter:blur(4px)}}
+@keyframes tourin{from{opacity:0;transform:scale(.86) translateY(16px)}to{opacity:1;transform:none}}
+@keyframes tourout{to{opacity:0;transform:scale(.94) translateY(8px)}}
 @keyframes bdin{from{opacity:0}}@keyframes bdout{to{opacity:0}}
 .tour-frame{aspect-ratio:16/9;background:#000;border-radius:22px}
 .tour-frame video{object-fit:contain;width:100%;height:100%}
@@ -1503,3 +1502,16 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
 .cmp.sizes td{line-height:1.45}
 .cmp.sizes td b{font-weight:600}
 .cmp.sizes th .fine{font-size:12px}
+
+/* « Read next »: three cards near the end of a page */
+.related .rgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rcard{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 44px 22px 22px;border-radius:var(--r-lg);background:var(--glass);box-shadow:var(--lift);text-decoration:none;color:var(--text)}
+.rcard b{font-weight:600;font-size:16px;letter-spacing:-.01em}
+.rcard span{color:var(--muted);font-size:14px;line-height:1.45}
+.rcard i{position:absolute;right:20px;top:22px;font-style:normal;color:var(--gain)}
+@media (hover:hover){ .rcard{transition:transform .5s var(--spring)} .rcard:hover{transform:translateY(-3px)} }
+@media (max-width:860px){ .related .rgrid{grid-template-columns:1fr} }
+/* calculators: an action card right under the result */
+.calc-act{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:16px 0 0;padding:20px 22px;border-radius:var(--r-lg);background:var(--glass);box-shadow:var(--lift)}
+.calc-act b{font-weight:600}
+.calc-act p{margin:4px 0 0;color:var(--muted);font-size:14.5px;max-width:62ch}

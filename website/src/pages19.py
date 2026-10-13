@@ -64,9 +64,7 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
          f'<p class="fine vs-note">{_checked_note(lang, t)}</p></div></section>'
          + (f'<section class="rule"><div class="wrap narrow"><article class="article">{after}</article></div></section>' if after else "")
          + f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>'
-         + "".join(faq_item(t, q, a) for q, a in faqs)
-         + f'<p class="firm-others" style="margin-top:36px"><span>{t(T("Related","Voir aussi","Ver también"))}</span>'
-         + "".join(f'<a href="{href(lang, s)}">{t(n)}</a>' for s, n in rel) + "</p></div></section>")
+         + "".join(faq_item(t, q, a) for q, a in faqs) + "</div></section>")
     ld = jsonld({"@context": "https://schema.org", "@graph": [
         {"@type": "Article", "headline": re.sub(r"\.$", "", t(h1)), "inLanguage": lang, "datePublished": "2026-10-13", "dateModified": presets.CHECKED,
          "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}},
@@ -130,7 +128,7 @@ def page_consistency(lang, t):
           f"Comment {FIRMS_N} prop firms de futures limitent ton meilleur jour, en évaluation et en compte financé, type de compte par type de compte.",
           f"Cómo {FIRMS_N} prop firms de futuros limitan tu mejor día, en evaluaciones y en cuentas financiadas, tipo de cuenta por tipo de cuenta."),
         intro, table, "", faqs, rel,
-        T("Prop Firm Consistency Rules Compared (2026) · Sweep", "Règles de consistance des prop firms comparées (2026) · Sweep", "Reglas de consistencia de prop firms (2026) · Sweep"),
+        T("Prop Firm Consistency Rules Compared (2026) · Sweep", "Règles de consistance des prop firms (2026) · Sweep", "Reglas de consistencia de prop firms (2026) · Sweep"),
         T(f"The consistency rule of {FIRMS_N} futures prop firms, side by side: best-day limits in evaluations and funded accounts, from Sweep’s weekly check.",
           f"La règle de consistance de {FIRMS_N} prop firms de futures, côte à côte : limite du meilleur jour en évaluation et en compte financé, vérifiée chaque semaine.",
           f"La regla de consistencia de {FIRMS_N} prop firms de futuros, lado a lado: límite del mejor día en evaluación y cuenta financiada, revisada cada semana."))
@@ -221,10 +219,7 @@ def page_hub(lang, t):
           "Respuestas claras a las preguntas de los traders de prop firms de futuros, con las reglas de las firmas revisadas cada semana."),
         T("Guides", "Guides", "Guías"))
     cards = "".join(f'<a class="tool-card" href="{href(lang, s)}"><h2>{t(n)}</h2><p>{t(d)}</p><span class="go">{t(T("Read", "Lire", "Leer"))} →</span></a>' for s, n, d in GUIDES)
-    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><p class="firm-others"><span>{t(T("Also", "Aussi", "También"))}</span>'
-         + "".join(f'<a href="{href(lang, s)}">{t(n)}</a>' for s, n in [("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), ("tools.html", T("Free calculators", "Calculateurs gratuits", "Calculadoras gratuitas")), ("glossary.html", T("Glossary", "Lexique", "Glosario"))])
-         + "</p></div></section>")
+    b = f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
     ld = jsonld({"@context": "https://schema.org", "@type": "ItemList", "name": t(T("Guides", "Guides", "Guías")),
                  "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": t(n), "url": f"https://{DOMAIN}{href(lang, s)}"} for i, (s, n, _) in enumerate(GUIDES)]})
     return _fr_nbsp(lang, t(T("Guides for Futures Prop Firm Traders · Sweep", "Guides pour traders de prop firms en futures · Sweep", "Guías para traders de prop firms de futuros · Sweep")),
@@ -433,7 +428,7 @@ def page_sizes_guide(lang, t):
           f"L’objectif de profit, la perte max et la limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, de 25K à la plus grande.",
           f"El objetivo de beneficio, la pérdida máx. y el límite diario de cada tamaño de cuenta en {FIRMS_N} prop firms de futuros, de 25K a la mayor."),
         intro, table, "", faqs, rel,
-        T("Prop Firm Profit Targets & Max Loss by Size (2026) · Sweep", "Objectifs et perte max des prop firms par taille (2026) · Sweep", "Objetivos y pérdida máx. de prop firms (2026) · Sweep"),
+        T("Prop Firm Profit Targets & Max Loss by Size (2026) · Sweep", "Objectifs et perte max des prop firms (2026) · Sweep", "Objetivos y pérdida máx. de prop firms (2026) · Sweep"),
         T(f"Profit target, max loss and daily loss limit for every account size at {FIRMS_N} futures prop firms, side by side, from Sweep’s weekly check of their pages.",
           f"Objectif de profit, perte max et limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, côte à côte, vérifiés chaque semaine.",
           f"Objetivo de beneficio, pérdida máx. y límite diario de cada tamaño de cuenta en {FIRMS_N} prop firms de futuros, lado a lado, revisados cada semana."))

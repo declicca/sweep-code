@@ -322,7 +322,7 @@ def page_prop(lang, t):
             t(T("Track every prop firm account with its drawdown, daily limit and target rules, copy trades across accounts, and see payouts minus evaluation fees. History kept after an account fails.",
                 "Suis chaque compte prop avec ses règles de drawdown, limite quotidienne et cible, copie tes trades sur plusieurs comptes, et vois tes payouts moins les frais d’évaluation. Historique conservé après un échec.",
                 "Sigue cada cuenta prop con sus reglas de drawdown, límite diario y objetivo, copia operaciones entre cuentas y ve tus payouts menos las cuotas de evaluación. Historial conservado tras una cuenta fallida.")),
-            hero + body + final_cta(lang, t, T("Keep every account on record.","Garde chaque compte dans ton historique.","Guarda cada cuenta en tu historial.")), "")
+            hero + body + final_cta(lang, t), "")
 
 # ============================ HOW IT WORKS ============================
 def page_how(lang, t):

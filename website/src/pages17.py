@@ -258,7 +258,7 @@ def make_vs(c):
              + chips(T("Related","Voir aussi","Ver también"), rel, ' style="margin-top:12px"') + '</div></section>')
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","inLanguage":lang,
                      "mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q, a in c["faq"]]})
-        title = t(T(f"Sweep vs {name} (2026): free {name} alternative · Sweep", f"Sweep vs {name} (2026) : alternative gratuite · Sweep", f"Sweep vs {name} (2026): alternativa gratuita · Sweep"))
+        title = t(T(f"Free {name} alternative: Sweep vs {name} (2026)", f"Sweep vs {name} (2026) : alternative gratuite · Sweep", f"Sweep vs {name} (2026): alternativa gratuita · Sweep"))
         return _fr_nbsp(lang, title, t(c["desc"]), hero + b + final_cta(lang, t), ld)
     return page
 

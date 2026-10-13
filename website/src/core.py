@@ -238,7 +238,7 @@ TITLE_TRIMS = [" (hora de Nueva York)"," (heure de New York)"," (New York time)"
                ": avant, pendant et après la séance",": antes, durante y después de la sesión"," · Track accounts, rules and payouts"," · Cuentas, reglas y payouts"," · Comptes, règles et payouts",": net after evaluations and resets"]
 def _title(tl):
     for x in TITLE_TRIMS:
-        if len(tl) <= 65: break
+        if len(tl) <= 60: break
         tl = tl.replace(x, "")
     return tl
 
@@ -248,7 +248,7 @@ META_SEO = {
  "about.html": (T("About Sweep — Trading Journal Made in Québec | Sweep","À propos — Journal de trading conçu au Québec | Sweep","Acerca de Sweep — Diario de trading hecho en Quebec | Sweep"),
                 T("Sweep Inc. builds the trading journal for futures and prop firm traders, from Laval, Québec. Our story and what we stand for.","Sweep Inc. conçoit le journal de trading des traders de futures et de prop firms, à Laval, au Québec. Notre histoire et nos valeurs.","Sweep Inc. crea el diario de trading para traders de futuros y de prop firms, desde Laval, Quebec. Nuestra historia y nuestros valores.")),
  "security.html": (T("Security & Data — Never Lose Your Trading History | Sweep","Sécurité et données — Ne perds jamais ton historique | Sweep","Seguridad y datos — Nunca pierdas tu historial | Sweep"),
-                   T("How Sweep protects your data, where it’s stored, and how to export everything in one click, even after a prop account closes.","Comment Sweep protège tes données, où elles sont stockées, et comment tout exporter en un clic, même après la fermeture d’un compte prop.","Cómo protege Sweep tus datos, dónde se guardan y cómo exportarlo todo en un clic, incluso tras cerrar una cuenta prop.")),
+                   T("How Sweep protects your data, where it’s stored, and how to export everything in one click, even after a prop account closes.","Comment Sweep protège tes données, où elles sont stockées, et comment tout exporter en un clic, même après la fermeture d’un compte prop.","Cómo protege Sweep tus datos, dónde se guardan y cómo exportarlo todo en un clic, incluso tras cerrar o perder una cuenta prop.")),
 }
 
 def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
@@ -367,7 +367,12 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 </html>
 '''
 
-def final_cta(lang, t, title=None, sub=None):
+def final_cta(lang, t, title=None, sub=None, own=False):
+    """The site's closing block (same as the home page). Only /100 keeps its own title and button (own=True)."""
+    if not own:
+        return (f'<section class="final rule"><div class="wrap" style="text-align:center"><h2>{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}</h2>'
+                f'<div class="cta-row" style="justify-content:center;margin-top:26px"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(CREATE_FREE)}</a></div>'
+                f'<p class="fine" style="margin-top:14px">{t(T("Free forever · 60 days of Pro · No card","Gratuit pour toujours · 60 jours de Pro · Sans carte","Gratis para siempre · 60 días de Pro · Sin tarjeta"))}</p></div></section>')
     title = title or T("Start your record today.","Commence ton historique aujourd’hui.","Empieza tu historial hoy.")
     sub = sub or T("Free forever. Pro included for 60 days.","Gratuit pour toujours. Pro offert pendant 60 jours.","Gratis para siempre. Pro incluido durante 60 días.")
     return f'''<section class="final rule"><div class="wrap">
@@ -375,8 +380,126 @@ def final_cta(lang, t, title=None, sub=None):
 <h2>{t(title)}</h2>
 <p class="lead">{t(sub)}</p>
 <div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(CREATE_FREE)}</a><a class="btn btn-line btn-lg" href="{href(lang,'how-it-works.html')}">{t(T("See how it works","Voir comment ça marche","Ver cómo funciona"))}</a></div>
-<p class="signoff">{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}</p>
 </div></section>'''
+
+# A3: « Read next », three cards near the end of a page
+REL_INFO = {
+ "tools.html": (T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas"), T("Position size, drawdown, payout and more.","Taille de position, drawdown, payout et plus.","Tamaño de posición, drawdown, payout y más.")),
+ "position-size-calculator.html": (T("Position size calculator","Calculateur de taille de position","Calculadora de tamaño de posición"), T("How many contracts for your risk.","Combien de contrats pour ton risque.","Cuántos contratos para tu riesgo.")),
+ "trailing-drawdown-calculator.html": (T("Trailing drawdown calculator","Calculateur de drawdown suiveur","Calculadora de drawdown dinámico"), T("Your liquidation level and the room left.","Ton seuil de liquidation et ta marge restante.","Tu nivel de liquidación y el margen restante.")),
+ "consistency-rule-calculator.html": (T("Consistency rule calculator","Calculateur de consistance","Calculadora de consistencia"), T("Is your best day within the limit?","Ton meilleur jour respecte-t-il la limite ?","¿Tu mejor día está dentro del límite?")),
+ "payout-calculator.html": (T("Payout calculator","Calculateur de payout","Calculadora de payout"), T("How much you can request now.","Combien tu peux demander maintenant.","Cuánto puedes pedir ahora.")),
+ "expectancy-calculator.html": (T("Expectancy calculator","Calculateur d’espérance","Calculadora de esperanza"), T("What one trade earns you on average.","Ce qu’un trade te rapporte en moyenne.","Lo que te deja una operación de media.")),
+ "prop-firm-roi-calculator.html": (T("Prop firm ROI calculator","Calculateur de rentabilité prop","Calculadora de rentabilidad prop"), T("Payouts minus everything you spent.","Payouts moins tout ce que tu as dépensé.","Payouts menos todo lo que gastaste.")),
+ "prop-firms/index.html": (T("Prop firm rules","Règles des prop firms","Reglas de las prop firms"), T("Drawdown, consistency and payouts, firm by firm.","Drawdown, consistance et payouts, firme par firme.","Drawdown, consistencia y payouts, firma por firma.")),
+ "prop-firm-payout-rules.html": (T("Payout rules compared","Règles de payout comparées","Reglas de payout comparadas"), T("Winning days, caps and profit split.","Jours gagnants, plafonds et partage.","Días ganadores, topes y reparto.")),
+ "prop-firm-drawdown-rules.html": (T("Drawdown rules compared","Règles de drawdown comparées","Reglas de drawdown comparadas"), T("End of day, real time or static.","Fin de journée, temps réel ou fixe.","Al cierre, en tiempo real o fijo.")),
+ "prop-firm-consistency-rules.html": (T("Consistency rules compared","Règles de consistance comparées","Reglas de consistencia comparadas"), T("Best-day limits, firm by firm.","La limite du meilleur jour, firme par firme.","El límite del mejor día, firma por firma.")),
+ "prop-firm-profit-targets.html": (T("Profit targets and max loss","Objectifs et perte max","Objetivos y pérdida máx."), T("Every account size, firm by firm.","Chaque taille de compte, firme par firme.","Cada tamaño de cuenta, firma por firma.")),
+ "guides.html": (T("All guides","Tous les guides","Todas las guías"), T("Prop firm rules compared, and journaling.","Règles des prop firms comparées, et journal.","Reglas de prop firms comparadas, y diario.")),
+ "how-to-choose-a-trading-journal.html": (T("Choose a trading journal","Choisir un journal de trading","Elegir un diario de trading"), T("Five things that matter for prop accounts.","Cinq choses qui comptent pour les comptes prop.","Cinco cosas que importan en cuentas prop.")),
+ "trading-journal-routine.html": (T("A daily journal routine","Une routine de journal","Una rutina de diario"), T("Before, during and after the session.","Avant, pendant et après la séance.","Antes, durante y después de la sesión.")),
+ "best-trading-journal-for-prop-firms.html": (T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms"), T("Five journals compared.","Cinq journaux comparés.","Cinco diarios comparados.")),
+ "futures-contracts.html": (T("Contract specs","Fiches contrats","Fichas de contratos"), T("Tick values for NQ, ES, CL, GC and more.","Valeurs de tick NQ, ES, CL, GC et plus.","Valores de tick de NQ, ES, CL, GC y más.")),
+ "futures-market-hours.html": (T("Futures market hours","Heures des marchés futures","Horario de los futuros"), T("Sessions in your time zone.","Les sessions dans ton fuseau.","Las sesiones en tu zona horaria.")),
+ "release-dates.html": (T("Economic release dates","Dates des annonces économiques","Fechas de datos económicos"), T("CPI, NFP, FOMC in 2026–2027.","CPI, NFP, FOMC en 2026–2027.","CPI, NFP, FOMC en 2026–2027.")),
+ "economic-calendar.html": (T("Economic calendar","Calendrier économique","Calendario económico"), T("This week’s releases, with the numbers.","Les annonces de la semaine, avec les chiffres.","Los datos de la semana, con las cifras.")),
+ "glossary.html": (T("Glossary","Lexique","Glosario"), T("Prop and futures terms, explained.","Les termes du prop et des futures, expliqués.","Términos de prop y futuros, explicados.")),
+ "trading-templates.html": (T("Free templates","Modèles gratuits","Plantillas gratuitas"), T("Trading plan, journal and checklist (PDF).","Plan, journal et checklist (PDF).","Plan, diario y checklist (PDF).")),
+ "import.html": (T("Import your trades","Importer tes trades","Importar operaciones"), T("Sync, file import or a screenshot.","Synchro, import de fichier ou capture.","Sincronización, archivo o captura.")),
+ "install.html": (T("Install on your phone","Installer sur ton téléphone","Instalar en tu teléfono"), T("Add Sweep to your home screen.","Ajoute Sweep à ton écran d’accueil.","Añade Sweep a tu pantalla de inicio.")),
+ "features.html": (T("Features","Fonctionnalités","Funciones"), T("Everything Sweep does.","Tout ce que fait Sweep.","Todo lo que hace Sweep.")),
+ "faq.html": (T("FAQ","FAQ","Preguntas frecuentes"), T("Quick answers about Sweep.","Réponses rapides sur Sweep.","Respuestas rápidas sobre Sweep.")),
+ "prop-traders.html": (T("For prop traders","Pour traders prop","Para traders prop"), T("Every account, payout and rule.","Chaque compte, payout et règle.","Cada cuenta, payout y regla.")),
+}
+RELATED = {
+ "position-size-calculator.html": ["futures-contracts.html", "prop-firm-profit-targets.html", "trailing-drawdown-calculator.html"],
+ "trailing-drawdown-calculator.html": ["prop-firm-drawdown-rules.html", "prop-firms/index.html", "glossary.html"],
+ "consistency-rule-calculator.html": ["prop-firm-consistency-rules.html", "payout-calculator.html", "glossary.html"],
+ "payout-calculator.html": ["prop-firm-payout-rules.html", "prop-firm-roi-calculator.html", "prop-firms/index.html"],
+ "expectancy-calculator.html": ["trading-journal-routine.html", "position-size-calculator.html", "glossary.html"],
+ "prop-firm-roi-calculator.html": ["payout-calculator.html", "prop-firm-payout-rules.html", "prop-traders.html"],
+ "tools.html": ["guides.html", "prop-firms/index.html", "glossary.html"],
+ "futures-contracts.html": ["position-size-calculator.html", "futures-market-hours.html", "glossary.html"],
+ "release-dates.html": ["economic-calendar.html", "futures-market-hours.html", "futures-contracts.html"],
+ "glossary.html": ["guides.html", "prop-firms/index.html", "tools.html"],
+ "futures-market-hours.html": ["economic-calendar.html", "release-dates.html", "futures-contracts.html"],
+ "trading-templates.html": ["trading-journal-routine.html", "how-to-choose-a-trading-journal.html", "tools.html"],
+ "import.html": ["install.html", "features.html", "faq.html"],
+ "how-to-choose-a-trading-journal.html": ["best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "guides.html"],
+ "trading-journal-routine.html": ["trading-templates.html", "how-to-choose-a-trading-journal.html", "guides.html"],
+ "guides.html": ["prop-firms/index.html", "tools.html", "glossary.html"],
+ "prop-firm-consistency-rules.html": ["consistency-rule-calculator.html", "prop-firm-payout-rules.html", "prop-firms/index.html"],
+ "prop-firm-drawdown-rules.html": ["trailing-drawdown-calculator.html", "prop-firm-profit-targets.html", "prop-firms/index.html"],
+ "prop-firm-payout-rules.html": ["payout-calculator.html", "prop-firm-consistency-rules.html", "prop-firms/index.html"],
+ "prop-firm-profit-targets.html": ["position-size-calculator.html", "prop-firm-drawdown-rules.html", "prop-firms/index.html"],
+}
+RELATED_CONTRACT = ["position-size-calculator.html", "futures-market-hours.html", "release-dates.html"]
+RELATED_RELEASE = ["economic-calendar.html", "futures-market-hours.html", "futures-contracts.html"]
+
+def related(lang, t, items):
+    """Three « Read next » cards. An item is a page (described in REL_INFO) or (page, title, description)."""
+    cards = ""
+    for it in items:
+        page, title, desc = it if isinstance(it, tuple) else (it, *REL_INFO[it])
+        cards += f'<a class="rcard" href="{href(lang, page)}"><b>{t(title)}</b><span>{t(desc)}</span><i aria-hidden="true">→</i></a>'
+    return (f'<section class="rule related"><div class="wrap"><div class="head"><h2>{t(T("Read next","À lire aussi","Para seguir leyendo"))}</h2></div>'
+            f'<div class="rgrid">{cards}</div></div></section>')
+
+def add_related(lang, t, page, body):
+    """Insert the « Read next » block of a page right before its closing block."""
+    items = RELATED.get(page) or (RELATED_CONTRACT if page.startswith("contracts/") else RELATED_RELEASE if page.endswith(("-release-dates.html", "-meeting-dates.html")) else None)
+    if not items: return body
+    block = related(lang, t, items)
+    k = body.rfind('<section class="final')
+    return body[:k] + block + body[k:] if k >= 0 else body + block
+
+# Contextual links: the first mention of each term in body text links to its glossary entry or resource page
+# (never in a lead paragraph, a heading, an existing link, a script, or a paragraph marked data-nolinks).
+LINK_TERMS = [
+ ("glossary.html#trailing-drawdown", T(r"trailing drawdowns?", r"drawdowns? suiveurs?", r"drawdowns? dinámicos?")),
+ ("glossary.html#drawdown", T(r"drawdowns?", r"drawdowns?", r"drawdowns?")),
+ ("glossary.html#consistency", T(r"consistency rules?", r"règles? de consistance", r"reglas? de consistencia")),
+ ("glossary.html#payout", T(r"payouts?", r"payouts?", r"payouts?")),
+ ("glossary.html#r-multiple", T(r"R multiples?", r"R multiples?|multiples? de R", r"múltiplos? R")),
+ ("import.html", T(r"import(?:s|ed|ing)?", r"import(?:e|er|es|ez|é|ée|ées|ation)?", r"importa(?:r|s|ción)?")),
+ ("futures-market-hours.html", T(r"market hours|trading hours", r"heures de marché|heures des marchés|heures de négociation", r"horarios? de (?:mercado|negociación)")),
+ ("release-dates.html", T(r"release dates?|economic releases?", r"dates? des annonces|annonces économiques", r"fechas de publicación|datos económicos")),
+]
+NO_LINKS = ("index.html", "404.html", "privacy.html", "terms.html", "risk.html", "100")
+_SKIP_TAGS = ("a", "h1", "h2", "h3", "h4", "h5", "h6", "button", "summary", "label", "svg", "code", "textarea", "select")
+
+def add_links(lang, page, body):
+    if page in NO_LINKS: return body
+    todo = []
+    for target, pat in LINK_TERMS:
+        url = href(lang, target.split("#")[0]) + ("#" + target.split("#")[1] if "#" in target else "")
+        if target.split("#")[0] == page or f'href="{url}"' in body: continue
+        todo.append((url, re.compile(r"(?<![\w-])(" + pat[lang] + r")(?![\w-])", re.I)))
+    done, out, para, skip = set(), [], [], 0
+    for tok in re.finditer(r"<script\b.*?</script>|<style\b.*?</style>|<(/?)([a-zA-Z0-9]+)[^>]*>|[^<]+|<", body, re.S):
+        x = tok.group(0)
+        if x.startswith(("<script", "<style")) or x == "<":
+            out.append(x); continue
+        if tok.group(2):
+            name, closing = tok.group(2).lower(), tok.group(1) == "/"
+            if name in _SKIP_TAGS: skip += -1 if closing else 1
+            elif name in ("p", "li"):
+                if closing: para and para.pop()
+                else: para.append('class="lead' not in x and "data-nolinks" not in x)
+            out.append(x); continue
+        if not (para and para[-1]) or skip > 0:
+            out.append(x); continue
+        pieces = [(x, False)]
+        for url, rx in todo:
+            if url in done: continue
+            for i, (txt, linked) in enumerate(pieces):
+                m = None if linked else rx.search(txt)
+                if m:
+                    pieces[i:i + 1] = [(txt[:m.start()], False), (f'<a href="{url}">{m.group(1)}</a>', True), (txt[m.end():], False)]
+                    done.add(url); break
+        out.append("".join(p for p, _ in pieces))
+    return "".join(out)
 
 def words(text, delay=0.0):
     """Wrap each word so headlines can rise in line by line. Plain text stays readable without CSS/JS."""

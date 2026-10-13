@@ -8,7 +8,7 @@ PRIVACY = T(f"""
 <h2>Who we are</h2><p>Sweep is operated by <strong>{CO}</strong>, {ADDR} (“Sweep”, “we”). This policy covers the website makeitsweep.com and the app at app.makeitsweep.com. It explains what personal information we collect, why, how long we keep it and the rights you have. It is written to meet Quebec’s <em>Act respecting the protection of personal information in the private sector</em> (Law 25) and Canada’s PIPEDA.</p>
 <h2>Person in charge of personal information</h2><p>The President of {CO} is responsible for the protection of personal information at Sweep. Contact: {M}.</p>
 <h2>What we collect</h2><ul>
-<li><strong>Account:</strong> your username, email address (also used for password reset), password (stored only as a secure hash, never readable), your language, and the date and time you accepted the Terms of use and this policy.</li>
+<li><strong>Account:</strong> your username, email address (also used for password reset), password (stored only as a secure hash, never readable), your language, and the date and time you accepted the <a href="terms.html">Terms of use</a> and this policy.</li>
 <li><strong>What you enter:</strong> trading accounts, trades, journals, payouts, expenses, settings, and the screenshots you upload.</li>
 <li><strong>Technical:</strong> IP addresses, kept for up to 24 hours and only to limit log-in, sign-up and password-reset attempts.</li>
 <li><strong>On your device:</strong> a session cookie (<code>tj_session</code>, lasting 30 days, HttpOnly, Secure) that keeps you signed in, and interface preferences in your browser’s local storage (theme, language, filters, last account used). The website stores your language choice.</li>
@@ -41,16 +41,16 @@ PRIVACY = T(f"""
 <h2>Your rights</h2><p>You can access, correct or delete your personal information, withdraw your consent, and receive your data in a structured, commonly used format:</p><ul>
 <li><strong>Export:</strong> one click gives you a ZIP file with a re-importable backup, CSV spreadsheets (trades, accounts, payouts, expenses, journal) and all your screenshots.</li>
 <li><strong>Delete:</strong> Settings → Delete my account (your password is required), or ask us by email.</li>
-<li><strong>Anything else:</strong> write to {M}. We answer within 30 days.</li></ul>
+<li><strong>Anything else:</strong> write to {M} or use the <a href="contact.html">contact page</a>. We answer within 30 days.</li></ul>
 <p>You can also file a complaint with the Commission d’accès à l’information du Québec.</p>
-<h2>Security</h2><p>Sweep uses HTTPS only, strict security headers, hashed passwords, one-time password-reset links valid for one hour, limits on sign-in attempts and anti-bot checks. If a confidentiality incident presents a risk of serious injury, we will notify you and the Commission d’accès à l’information as required by law.</p>
+<h2>Security</h2><p>Sweep uses HTTPS only, strict security headers, hashed passwords, one-time password-reset links valid for one hour, limits on sign-in attempts and anti-bot checks. If a confidentiality incident presents a risk of serious injury, we will notify you and the Commission d’accès à l’information as required by law. More on the <a href="security.html">Security and data</a> page.</p>
 <h2>Age</h2><p>Sweep is for people 18 and older. You must confirm you are 18 or older to create an account.</p>
 <h2>Changes</h2><p>We will post changes to this policy on this page with a new effective date, and announce significant changes in the app.</p>
 """, f"""
 <h2>Qui sommes-nous</h2><p>Sweep est exploité par <strong>{CO}</strong>, {ADDR} (« Sweep », « nous »). La présente politique couvre le site makeitsweep.com et l’application app.makeitsweep.com. Elle explique quels renseignements personnels nous recueillons, pourquoi, combien de temps nous les gardons et quels sont tes droits. Elle est rédigée pour respecter la <em>Loi sur la protection des renseignements personnels dans le secteur privé</em> du Québec (Loi 25) et la LPRPDE.</p>
 <h2>Responsable de la protection des renseignements personnels</h2><p>Le président de {CO} est responsable de la protection des renseignements personnels chez Sweep. Contact : {M}.</p>
 <h2>Ce que nous recueillons</h2><ul>
-<li><strong>Compte :</strong> ton nom d’utilisateur, ton adresse courriel (servant aussi à la réinitialisation du mot de passe), ton mot de passe (conservé uniquement sous forme de hachage sécurisé, jamais lisible), ta langue, et la date et l’heure où tu as accepté les Conditions d’utilisation et la présente politique.</li>
+<li><strong>Compte :</strong> ton nom d’utilisateur, ton adresse courriel (servant aussi à la réinitialisation du mot de passe), ton mot de passe (conservé uniquement sous forme de hachage sécurisé, jamais lisible), ta langue, et la date et l’heure où tu as accepté les <a href="terms.html">Conditions d’utilisation</a> et la présente politique.</li>
 <li><strong>Ce que tu saisis :</strong> comptes de trading, trades, journaux, payouts, dépenses, réglages et captures d’écran que tu téléverses.</li>
 <li><strong>Renseignements techniques :</strong> adresses IP, conservées jusqu’à 24 heures et uniquement pour limiter les tentatives de connexion, d’inscription et de réinitialisation.</li>
 <li><strong>Sur ton appareil :</strong> un témoin de session (<code>tj_session</code>, 30 jours, HttpOnly, Secure) qui te garde connecté, et tes préférences dans le stockage local du navigateur (thème, langue, filtres, dernier compte). Le site conserve ton choix de langue.</li>
@@ -83,16 +83,16 @@ PRIVACY = T(f"""
 <h2>Tes droits</h2><p>Tu peux accéder à tes renseignements personnels, les faire rectifier ou supprimer, retirer ton consentement et obtenir tes données dans un format technologique structuré et couramment utilisé :</p><ul>
 <li><strong>Exporter :</strong> un clic te donne un fichier ZIP avec une sauvegarde réimportable, des tableurs CSV (trades, comptes, payouts, dépenses, journal) et toutes tes captures.</li>
 <li><strong>Supprimer :</strong> Réglages → Supprimer mon compte (mot de passe requis), ou demande-le-nous par courriel.</li>
-<li><strong>Toute autre demande :</strong> écris à {M}. Nous répondons dans un délai de 30 jours.</li></ul>
+<li><strong>Toute autre demande :</strong> écris à {M} ou passe par la <a href="contact.html">page de contact</a>. Nous répondons dans un délai de 30 jours.</li></ul>
 <p>Tu peux aussi porter plainte auprès de la Commission d’accès à l’information du Québec.</p>
-<h2>Sécurité</h2><p>Sweep utilise uniquement HTTPS, des en-têtes de sécurité stricts, des mots de passe hachés, des liens de réinitialisation à usage unique valides une heure, des limites de tentatives de connexion et une protection anti-robots. Si un incident de confidentialité présente un risque de préjudice sérieux, nous t’en aviserons, ainsi que la Commission d’accès à l’information, comme l’exige la loi.</p>
+<h2>Sécurité</h2><p>Sweep utilise uniquement HTTPS, des en-têtes de sécurité stricts, des mots de passe hachés, des liens de réinitialisation à usage unique valides une heure, des limites de tentatives de connexion et une protection anti-robots. Si un incident de confidentialité présente un risque de préjudice sérieux, nous t’en aviserons, ainsi que la Commission d’accès à l’information, comme l’exige la loi. Plus de détails sur la page <a href="security.html">Sécurité et données</a>.</p>
 <h2>Âge</h2><p>Sweep s’adresse aux personnes de 18 ans et plus. Tu dois confirmer avoir 18 ans ou plus pour créer un compte.</p>
 <h2>Modifications</h2><p>Nous publierons toute modification sur cette page avec une nouvelle date d’entrée en vigueur, et annoncerons les changements importants dans l’application.</p>
 """, f"""
 <h2>Quiénes somos</h2><p>Sweep es operado por <strong>{CO}</strong>, {ADDR} («Sweep», «nosotros»). Esta política cubre el sitio makeitsweep.com y la app en app.makeitsweep.com. Explica qué información personal recopilamos, para qué, cuánto tiempo la conservamos y qué derechos tienes. Está redactada para cumplir la ley de protección de la información personal en el sector privado de Quebec (Ley 25) y la ley canadiense PIPEDA.</p>
 <h2>Responsable de la información personal</h2><p>El presidente de {CO} es responsable de la protección de la información personal en Sweep. Contacto: {M}.</p>
 <h2>Qué recopilamos</h2><ul>
-<li><strong>Cuenta:</strong> tu usuario, correo (también usado para restablecer la contraseña), contraseña (guardada solo como hash seguro, nunca legible), tu idioma, y la fecha y hora en que aceptaste los Términos de uso y esta política.</li>
+<li><strong>Cuenta:</strong> tu usuario, correo (también usado para restablecer la contraseña), contraseña (guardada solo como hash seguro, nunca legible), tu idioma, y la fecha y hora en que aceptaste los <a href="terms.html">Términos de uso</a> y esta política.</li>
 <li><strong>Lo que introduces:</strong> cuentas de trading, operaciones, diarios, payouts, gastos, ajustes y las capturas que subes.</li>
 <li><strong>Técnico:</strong> direcciones IP, guardadas hasta 24 horas y solo para limitar intentos de acceso, registro y restablecimiento.</li>
 <li><strong>En tu dispositivo:</strong> una cookie de sesión (<code>tj_session</code>, 30 días, HttpOnly, Secure) que mantiene tu sesión, y preferencias en el almacenamiento local (tema, idioma, filtros, última cuenta). El sitio guarda tu idioma.</li>
@@ -125,9 +125,9 @@ PRIVACY = T(f"""
 <h2>Tus derechos</h2><p>Puedes acceder a tu información personal, corregirla o eliminarla, retirar tu consentimiento y recibir tus datos en un formato estructurado de uso común:</p><ul>
 <li><strong>Exportar:</strong> un clic te da un archivo ZIP con una copia reimportable, hojas CSV (operaciones, cuentas, payouts, gastos, diario) y todas tus capturas.</li>
 <li><strong>Eliminar:</strong> Ajustes → Eliminar mi cuenta (se requiere tu contraseña), o pídenoslo por correo.</li>
-<li><strong>Cualquier otra solicitud:</strong> escribe a {M}. Respondemos en un plazo de 30 días.</li></ul>
+<li><strong>Cualquier otra solicitud:</strong> escribe a {M} o usa la <a href="contact.html">página de contacto</a>. Respondemos en un plazo de 30 días.</li></ul>
 <p>También puedes presentar una queja ante la Commission d’accès à l’information du Québec.</p>
-<h2>Seguridad</h2><p>Sweep usa solo HTTPS, cabeceras de seguridad estrictas, contraseñas con hash, enlaces de restablecimiento de un solo uso válidos una hora, límites de intentos de acceso y protección antibots. Si un incidente de confidencialidad presenta un riesgo de perjuicio grave, te avisaremos a ti y a la Commission d’accès à l’information, como exige la ley.</p>
+<h2>Seguridad</h2><p>Sweep usa solo HTTPS, cabeceras de seguridad estrictas, contraseñas con hash, enlaces de restablecimiento de un solo uso válidos una hora, límites de intentos de acceso y protección antibots. Si un incidente de confidencialidad presenta un riesgo de perjuicio grave, te avisaremos a ti y a la Commission d’accès à l’information, como exige la ley. Más detalles en la página <a href="security.html">Seguridad y datos</a>.</p>
 <h2>Edad</h2><p>Sweep es para mayores de 18 años. Debes confirmar que tienes 18 años o más para crear una cuenta.</p>
 <h2>Cambios</h2><p>Publicaremos los cambios en esta página con una nueva fecha de entrada en vigor y anunciaremos los cambios importantes en la app.</p>
 """)
@@ -220,7 +220,7 @@ TERMS = T(f"""
 
 RISK = T("""
 <h2>Futures trading is risky</h2><p>Trading futures and other leveraged products involves substantial risk of loss and is not suitable for every investor. You can lose more than your initial deposit. Only trade with money you can afford to lose.</p>
-<h2>No advice, no signals</h2><p>Sweep is a tracking and analytics tool. It does not provide investment, trading, tax or legal advice, and it never recommends or signals a trade. Every decision you make is your own.</p>
+<h2>No advice, no signals</h2><p>Sweep is a tracking and analytics tool. It does not provide investment, trading, tax or legal advice, and it never recommends or signals a trade. Every decision you make is your own. See also the <a href="terms.html">Terms of use</a>.</p>
 <h2>Discipline, not profit</h2><p>Sweep’s game rewards your process (planning, following your rules, reviewing), never profit. Rewards, ranks and streaks say nothing about future results.</p>
 <h2>Charts</h2><p>Charts use CME market data available 24 hours after the session. They are for reviewing past trades, not for live trading.</p>
 <h2>Share cards</h2><p>Share cards show a user’s own past results. They are not performance claims by Sweep.</p>
@@ -230,7 +230,7 @@ RISK = T("""
 <h2>Prop firms</h2><p>Sweep is not affiliated with, endorsed by or connected to any proprietary trading firm, broker or exchange. Product and company names belong to their respective owners.</p>
 ""","""
 <h2>Le trading de futures est risqué</h2><p>Le trading de contrats à terme et d’autres produits à effet de levier comporte un risque important de perte et ne convient pas à tous les investisseurs. Tu peux perdre plus que ton dépôt initial. Ne trade qu’avec de l’argent que tu peux te permettre de perdre.</p>
-<h2>Ni conseils ni signaux</h2><p>Sweep est un outil de suivi et d’analyse. Il ne fournit aucun conseil en placement, en trading, fiscal ou juridique, et ne recommande ni ne signale jamais de trade. Chaque décision t’appartient.</p>
+<h2>Ni conseils ni signaux</h2><p>Sweep est un outil de suivi et d’analyse. Il ne fournit aucun conseil en placement, en trading, fiscal ou juridique, et ne recommande ni ne signale jamais de trade. Chaque décision t’appartient. Voir aussi les <a href="terms.html">Conditions d’utilisation</a>.</p>
 <h2>La discipline, pas le profit</h2><p>Le jeu de Sweep récompense ton processus (planifier, respecter tes règles, réviser), jamais le profit. Les récompenses, rangs et streaks ne disent rien des résultats futurs.</p>
 <h2>Graphiques</h2><p>Les graphiques utilisent des données de marché du CME disponibles 24 h après la séance. Ils servent à revoir des trades passés, pas à trader en direct.</p>
 <h2>Cartes à partager</h2><p>Les cartes à partager montrent les résultats passés de l’utilisateur. Ce ne sont pas des affirmations de performance de Sweep.</p>
@@ -240,7 +240,7 @@ RISK = T("""
 <h2>Prop firms</h2><p>Sweep n’est affilié à aucune firme de trading pour compte propre, aucun courtier ni aucune bourse, et n’est approuvé par aucun d’eux. Les noms de produits et d’entreprises appartiennent à leurs propriétaires.</p>
 ""","""
 <h2>Operar futuros es arriesgado</h2><p>Operar futuros y otros productos apalancados implica un riesgo sustancial de pérdida y no es adecuado para todos los inversores. Puedes perder más que tu depósito inicial. Opera solo con dinero que puedas permitirte perder.</p>
-<h2>Sin consejos ni señales</h2><p>Sweep es una herramienta de seguimiento y análisis. No ofrece asesoramiento de inversión, trading, fiscal ni legal, y nunca recomienda ni señala una operación. Cada decisión es tuya.</p>
+<h2>Sin consejos ni señales</h2><p>Sweep es una herramienta de seguimiento y análisis. No ofrece asesoramiento de inversión, trading, fiscal ni legal, y nunca recomienda ni señala una operación. Cada decisión es tuya. Consulta también los <a href="terms.html">Términos de uso</a>.</p>
 <h2>Disciplina, no beneficio</h2><p>El juego de Sweep premia tu proceso (planificar, cumplir tus reglas, revisar), nunca el beneficio. Las recompensas, rangos y rachas no dicen nada de los resultados futuros.</p>
 <h2>Gráficos</h2><p>Los gráficos usan datos de mercado de CME disponibles 24 horas después de la sesión. Sirven para revisar operaciones pasadas, no para operar en directo.</p>
 <h2>Tarjetas para compartir</h2><p>Las tarjetas para compartir muestran resultados pasados del propio usuario. No son afirmaciones de rendimiento de Sweep.</p>
@@ -253,10 +253,11 @@ RISK = T("""
 def legal(title, desc, content):
     def f(lang, t):
         eff = t(T("Effective October 3, 2026 · Sweep Inc.","En vigueur le 3 octobre 2026 · Sweep Inc.","Vigente desde el 3 de octubre de 2026 · Sweep Inc."))
-        b = f'<div class="page-hero"><div class="wrap"><span class="kick">{t(T("Legal","Légal","Legal"))}</span><h1>{t(title)}</h1><p class="meta">{eff}</p></div></div><section style="padding-top:8px"><div class="wrap"><div class="legal">{t(content)}</div></div></section>'
+        text = re.sub(r'href="([a-z][a-z0-9-]*\.html)"', lambda m: f'href="{href(lang, m.group(1))}"', t(content))
+        b = f'<div class="page-hero"><div class="wrap"><span class="kick">{t(T("Legal","Légal","Legal"))}</span><h1>{t(title)}</h1><p class="meta">{eff}</p></div></div><section style="padding-top:8px"><div class="wrap"><div class="legal">{text}</div></div></section>'
         return (t(title) + " · Sweep", t(desc), b, "")
     return f
 
-page_privacy = legal(T("Privacy policy","Politique de confidentialité","Política de privacidad"), T("How Sweep Inc. collects, uses, stores and protects your personal information, and your rights under Quebec’s Law 25.","Comment Sweep Inc. recueille, utilise, conserve et protège tes renseignements personnels, et tes droits selon la Loi 25.","Cómo Sweep Inc. recopila, usa, guarda y protege tu información personal, y tus derechos según la Ley 25 de Quebec."), PRIVACY)
-page_terms = legal(T("Terms of use","Conditions d’utilisation","Términos de uso"), T("The terms that apply when you use Sweep, including plans, billing, cancellation, your data and limits.","Les conditions qui s’appliquent à l’utilisation de Sweep, dont les forfaits, la facturation, l’annulation, tes données et les limites.","Los términos que se aplican al usar Sweep, incluidos los planes, la facturación, la cancelación, tus datos y los límites."), TERMS)
-page_risk = legal(T("Risk disclosure","Divulgation des risques","Aviso de riesgo"), T("Important information about the risks of trading futures and the sample data shown on this site.","Renseignements importants sur les risques du trading de futures et les données d’exemple de ce site.","Información importante sobre los riesgos de operar futuros y los datos de ejemplo de este sitio."), RISK)
+page_privacy = legal(T("Privacy policy","Politique de confidentialité","Política de privacidad"), T("How Sweep Inc. collects, uses, stores and protects your personal information, and your rights under Quebec’s Law 25 and how to use them.","Comment Sweep Inc. recueille, utilise, conserve et protège tes renseignements personnels, et tes droits selon la Loi 25.","Cómo Sweep Inc. recopila, usa, guarda y protege tu información personal, y tus derechos según la Ley 25 de Quebec y cómo ejercerlos."), PRIVACY)
+page_terms = legal(T("Terms of use","Conditions d’utilisation","Términos de uso"), T("The terms that apply when you use Sweep, including plans, billing, cancellation, your data and our limitations of liability.","Les conditions qui s’appliquent à l’utilisation de Sweep, dont les forfaits, la facturation, l’annulation, tes données et les limites.","Los términos que se aplican al usar Sweep, incluidos los planes, la facturación, la cancelación, tus datos y los límites."), TERMS)
+page_risk = legal(T("Risk disclosure","Divulgation des risques","Aviso de riesgo"), T("Important information about the risks of trading futures and prop firm accounts, and about the sample data shown on this site. Read it before trading.","Renseignements importants sur les risques du trading de futures et des comptes prop, et sur les données d’exemple de ce site. À lire avant de trader.","Información importante sobre los riesgos de operar futuros y cuentas prop, y sobre los datos de ejemplo de este sitio. Léela antes de operar."), RISK)

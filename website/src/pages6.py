@@ -182,7 +182,7 @@ def page_home(lang, t):
     from pages16 import bar, sec_oneplace, sec_log, sec_firms, sec_payouts, sec_disc, sec_ai, sec_trust, sec_pricing, sec_faq, sec_final, faq_ld
     body = (hero + sec_oneplace(lang,t) + sec_log(lang,t) + sec_firms(lang,t) + sec_payouts(lang,t) + sec_disc(lang,t) + sec_ai(lang,t)
             + sec_trust(lang,t) + sec_pricing(lang,t) + sec_faq(lang,t) + sec_final(lang,t) + COHORT_JS + tour_dialog(t))
-    return (t(T("Sweep — Free Trading Journal for Futures & Prop Firm Traders","Sweep — Journal de trading gratuit pour futures et prop firms","Sweep — Diario de trading gratis para futuros y prop firms")),
+    return (t(T("Sweep — Free Trading Journal for Futures & Prop Firm Traders","Sweep — Journal de trading gratuit (futures, prop firms)","Sweep — Diario de trading gratis para futuros y prop firms")),
             t(T("Track every prop firm account, payout and expense in one place. Free forever, Pro from $19/mo. Built for Topstep, Apex, Lucid and more.","Suis chaque compte prop, payout et dépense au même endroit. Gratuit pour toujours, Pro dès 19 $/mois. Conçu pour Topstep, Apex, Lucid et plus.","Sigue cada cuenta prop, payout y gasto en un solo lugar. Gratis para siempre, Pro desde 19 $/mes. Hecho para Topstep, Apex, Lucid y más.")),
             body, ld)
 
@@ -277,7 +277,7 @@ def page_how(lang, t):
 <p class="fine">{t(T("Rewards are earned through process only. They have no cash value.","Les récompenses se gagnent uniquement par le processus. Elles n’ont aucune valeur monétaire.","Las recompensas se ganan solo con el proceso. No tienen valor monetario."))}</p></div></section>'''
     ld = jsonld({"@context":"https://schema.org","@type":"HowTo","name":t(T("How to start with Sweep","Comment commencer avec Sweep","Cómo empezar con Sweep")),
         "step":[{"@type":"HowToStep","position":i+1,"name":t(h),"text":t(p)} for i,(_,_,h,p) in enumerate(st)]})
-    return (t(T("How Sweep works · Sweep your day, discipline and social","Comment marche Sweep · Balaye ta journée, discipline et social","Cómo funciona Sweep · Barre tu día, disciplina y social")),
+    return (t(T("How Sweep works · Sweep your day, discipline and social","Comment marche Sweep · Balaye ta journée, discipline, social","Cómo funciona Sweep · Barre tu día, disciplina y social")),
             t(T("Create an account, add your prop accounts, log a trade by tapping a candle, close your three rings, and progress with ranks, missions, bosses, seasons and leagues.",
                 "Crée un compte, ajoute tes comptes prop, ajoute un trade en touchant une bougie, ferme tes trois anneaux, et progresse avec rangs, missions, boss, saisons et ligues.",
                 "Crea una cuenta, añade tus cuentas prop, registra una operación tocando una vela, cierra tus tres anillos y progresa con rangos, misiones, jefes, temporadas y ligas.")),

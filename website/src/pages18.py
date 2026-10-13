@@ -335,19 +335,14 @@ def make_rules_page(f):
         faqs = faq_of(lang, t, f)
         from pages8 import FIRMS as JOURNALS
         jp = next((s for s, n in JOURNALS if n == name), None)
-        rel = ([("trailing-drawdown-calculator.html", T("Trailing drawdown calculator","Calculateur de drawdown suiveur","Calculadora de drawdown dinámico")),
-                ("payout-calculator.html", T("Payout calculator","Calculateur de payout","Calculadora de payout")),
-                ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
-                ("prop-firm-payout-rules.html", T("Payout rules compared","Règles de payout comparées","Reglas de payout comparadas")),
-                ("prop-firm-drawdown-rules.html", T("Drawdown rules compared","Règles de drawdown comparées","Reglas de drawdown comparadas")),
-                ("prop-firm-consistency-rules.html", T("Consistency rules compared","Règles de consistance comparées","Reglas de consistencia comparadas")),
-                ("best-trading-journal-for-prop-firms.html", T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms"))]
-               + ([(jp, T(f"{name} trading journal", f"Journal de trading {name}", f"Diario de trading para {name}"))] if jp else []))
+        rel = ([(jp, T(f"{name} trading journal", f"Journal de trading {name}", f"Diario de trading para {name}"), T(f"Track your {name} accounts in Sweep.", f"Suis tes comptes {name} dans Sweep.", f"Sigue tus cuentas de {name} en Sweep."))] if jp else []) \
+              + ["prop-firm-payout-rules.html", "prop-firm-drawdown-rules.html", "prop-firm-consistency-rules.html"]
         b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>'
               + "".join(faq_item(t, q, a) for q, a in faqs)
-              + f'<p class="firm-others" style="margin-top:36px"><span>{t(T("Related","Voir aussi","Ver también"))}</span>' + "".join(f'<a href="{href(lang, s)}">{t(n)}</a>' for s, n in rel) + "</p></div></section>")
+              + "</div></section>" + related(lang, t, rel[:3]))
         title = t(T(f"{name} Rules 2026: Drawdown, Consistency & Payout Rules · Sweep", f"Règles {name} 2026 : drawdown, consistance et payouts · Sweep", f"Reglas de {name} 2026: drawdown, consistencia y payouts · Sweep"))
-        if len(title) > 65: title = t(T(f"{name} Rules 2026: Drawdown & Payouts · Sweep", f"Règles {name} 2026 : drawdown et payouts · Sweep", f"Reglas de {name} 2026: drawdown y payouts · Sweep"))
+        if len(title) > 60: title = t(T(f"{name} Rules 2026: Drawdown & Payouts · Sweep", f"Règles {name} 2026 : drawdown et payouts · Sweep", f"Reglas de {name} 2026: drawdown y payouts · Sweep"))
+        if len(title) > 60: title = t(T(f"{name} Rules 2026 · Sweep", f"Règles {name} 2026 · Sweep", f"Reglas de {name} 2026 · Sweep"))
         desc = t(T(f"{name} rules from Sweep’s weekly check ({day(when, 'en')}): max loss, daily loss limit, consistency, minimum days and payout conditions, {kk(sizes_all[0])} to {kk(sizes_all[-1])}.",
                    f"Les règles de {name} selon la vérification hebdomadaire de Sweep ({day(when, 'fr')}) : perte max, limite du jour, consistance, jours minimum et payouts.",
                    f"Las reglas de {name} según la revisión semanal de Sweep ({day(when, 'es')}): pérdida máx., límite diario, consistencia, días mínimos y payouts."))
