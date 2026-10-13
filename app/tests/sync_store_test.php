@@ -191,6 +191,10 @@ $pdo->exec("UPDATE sync_connections SET last_seen_at = 1 WHERE user_id = 'u2'");
 ok(($row2 = (function () use ($pdo) { foreach (sync_admin($pdo)['rows'] as $r) if ($r['user_id'] === 'u2') return $r; })()) && $row2['state'] === 'to_link', 'Admin › Sync: accounts found, none linked → « to_link »');
 $pdo->exec("DELETE FROM sync_accounts WHERE id = 'sa_x'");
 ok((function () use ($pdo) { foreach (sync_admin($pdo)['rows'] as $r) if ($r['user_id'] === 'u2') return $r['state']; })() === 'no_accounts', 'Admin › Sync: add-on seen, no account found → « no_accounts »');
+ok(($q1c = $row('u1', 'quantower')['contracts'] ?? null) && $q1c[0]['contract'] === 'NQ 12-26' && $q1c[0]['instrument'] === 'NQ' && $q1c[0]['known'] === true && $q1c[0]['n'] === 2 && $ad['unknown'] === [], 'Admin › Sync: the contracts received (30 days) with the instrument Sweep reads (« NQ 12-26 » → NQ, 2 executions); none unknown');
+sync_receive($pdo, sync_auth($pdo, $k3['key']), ['fills' => [$fill('w1', 'TX-1', 'buy', 1, 21000, '2026-10-09 10:00:00', ['contract' => 'CON.F.US.MNQ.Z25'])]]);
+$ad2 = sync_admin($pdo); $u2c = null; foreach ($ad2['rows'] as $r) if ($r['user_id'] === 'u2') $u2c = $r['contracts'];
+ok($u2c && $u2c[0]['contract'] === 'CON.F.US.MNQ.Z25' && $u2c[0]['known'] === false && $ad2['unknown'] === [['platform' => 'quantower', 'contract' => 'CON.F.US.MNQ.Z25', 'instrument' => 'CON.F.US.MNQ.']], 'Admin › Sync: a contract Sweep does not recognize (« CON.F.US.MNQ.Z25 ») is flagged on its row and listed apart');
 
 // 15. a trader deletes their Sweep account: everything of the sync goes
 sync_delete_user($pdo, 'u1');

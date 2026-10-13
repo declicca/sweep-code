@@ -486,7 +486,9 @@ function sync_status(PDO $pdo, string $uid): array
  * Admin › Sync: per platform (traders with a key, add-on seen within 24 h, accounts linked, trades written in 7 days), then one
  * row per active key, most recently seen first, with where the trader is: never (key made, add-on never seen), no_accounts
  * (add-on seen, no account found), to_link (accounts found, none linked), error (an account in error: plan, limit,
- * account_gone), ok (linked). Read-only; names and emails as in Admin › Users, never a key or an execution.
+ * account_gone), ok (linked); and the contracts received in 30 days with the instrument Sweep reads in each (a contract Sweep does
+ * not recognize keeps its P&L, from the platform's point value, but not its instrument: listed apart, « unknown »).
+ * Read-only; names and emails as in Admin › Users, never a key or an execution.
  */
 function sync_admin(PDO $pdo, int $now = 0): array
 {
@@ -501,6 +503,13 @@ function sync_admin(PDO $pdo, int $now = 0): array
     $tr = [];
     foreach (sync_q($pdo, 'SELECT a.user_id, a.platform, COUNT(*) n, SUM(CASE WHEN t.created_at >= ? THEN 1 ELSE 0 END) n7 FROM sync_trades t JOIN sync_accounts a ON a.id = t.sync_account_id GROUP BY a.user_id, a.platform', [$now - 7 * 86400]) as $r)
         $tr[$r['user_id'] . '|' . $r['platform']] = ['n' => (int) $r['n'], 'n7' => (int) $r['n7']];
+    $ctr = []; $unknown = [];
+    foreach (sync_q($pdo, 'SELECT a.user_id, a.platform, f.contract, COUNT(*) n, MAX(f.received_at) last FROM sync_fills f JOIN sync_accounts a ON a.id = f.sync_account_id WHERE f.received_at >= ? GROUP BY a.user_id, a.platform, f.contract ORDER BY last DESC', [$now - 30 * 86400]) as $r) {
+        [$inst, $odd] = sync_root((string) $r['contract']);
+        $k = $r['user_id'] . '|' . $r['platform'];
+        if (count($ctr[$k] ?? []) < 12) $ctr[$k][] = ['contract' => (string) $r['contract'], 'instrument' => $inst, 'known' => !$odd, 'n' => (int) $r['n']];
+        if ($odd) $unknown[$r['platform'] . '|' . $r['contract']] = ['platform' => (string) $r['platform'], 'contract' => (string) $r['contract'], 'instrument' => $inst];
+    }
     $conns = sync_q($pdo, "SELECT user_id, platform, client, last_seen_at, last_push_at, created_at FROM sync_connections WHERE status = 'active'")->fetchAll();
     $users = [];
     if ($conns) {
@@ -522,13 +531,13 @@ function sync_admin(PDO $pdo, int $now = 0): array
             'team' => !empty($u['is_admin']) || !empty($u['is_internal']), 'platform' => (string) $c['platform'], 'client' => $c['client'],
             'created_at' => (int) $c['created_at'], 'last_seen_at' => $seen, 'last_push_at' => $c['last_push_at'] === null ? null : (int) $c['last_push_at'],
             'accounts' => ['new' => $a['new'], 'linked' => $a['linked'], 'ignored' => $a['ignored']], 'errors' => $a['errors'],
-            'trades' => $t['n'], 'trades_7d' => $t['n7'], 'state' => $state];
+            'trades' => $t['n'], 'trades_7d' => $t['n7'], 'contracts' => $ctr[$k] ?? [], 'state' => $state];
         if (isset($plat[$c['platform']])) {
             $x = &$plat[$c['platform']]; $x['traders']++; if ($seen !== null && $now - $seen < 86400) $x['seen_24h']++; $x['linked'] += $a['linked']; $x['trades_7d'] += $t['n7']; unset($x);
         }
     }
     usort($rows, fn($x, $y) => [$y['last_seen_at'] ?? 0, $y['created_at']] <=> [$x['last_seen_at'] ?? 0, $x['created_at']]);
-    return ['now' => $now, 'platforms' => $plat, 'rows' => array_slice($rows, 0, 300)];
+    return ['now' => $now, 'platforms' => $plat, 'unknown' => array_values($unknown), 'rows' => array_slice($rows, 0, 300)];
 }
 /** a trader deletes their Sweep account: everything of the sync goes too */
 function sync_delete_user(PDO $pdo, string $uid): void

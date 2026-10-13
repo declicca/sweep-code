@@ -917,17 +917,20 @@
       st: { ok: 'Syncing', to_link: 'Accounts to link', no_accounts: 'No account found', never: 'Add-on never seen', error: 'Error' },
       why: { never: 'Key created, the add-on never sent anything: installed? key pasted?', no_accounts: 'The add-on runs but sees no account: is the platform connected to the broker?', to_link: 'Accounts found, none linked yet: the trader has to link them (Settings › Connections).' },
       err: { plan: 'frozen on the Free plan', limit: 'record limit reached', account_gone: 'linked Sweep account deleted' },
-      seen: 'seen {t}', acc: '{l} linked · {n} to link · {i} ignored', tr: '{n} trades ({w} in 7 d)', team: 'team', none: 'No trader has created a key yet.' },
+      seen: 'seen {t}', acc: '{l} linked · {n} to link · {i} ignored', tr: '{n} trades ({w} in 7 d)', team: 'team', none: 'No trader has created a key yet.',
+      ctr: 'Contracts (30 d): {l}', unk: 'Not recognized: {l}', alert: 'Contracts Sweep does not recognize: {l}. Their trades keep the right P&L, not the right instrument.' },
     fr: { h: 'Synchro', sub: 'Les traders qui ont créé une clé, les plus récemment vus en premier. Lecture seule.', card: 'Traders sur {p}', cardSub: '{a} vu(s) en 24 h · {b} compte(s) relié(s) · {c} trade(s) en 7 j',
       st: { ok: 'Synchronise', to_link: 'Comptes à relier', no_accounts: 'Aucun compte trouvé', never: 'Add-on jamais vu', error: 'Erreur' },
       why: { never: 'Clé créée, l’add-on n’a jamais rien envoyé : installé ? clé collée ?', no_accounts: 'L’add-on tourne mais ne voit aucun compte : la plateforme est-elle connectée au courtier ?', to_link: 'Comptes trouvés, aucun relié : le trader doit les relier (Réglages › Connexions).' },
       err: { plan: 'compte gelé (forfait Free)', limit: 'limite d’enregistrements atteinte', account_gone: 'compte Sweep relié supprimé' },
-      seen: 'vu {t}', acc: '{l} relié(s) · {n} à relier · {i} ignoré(s)', tr: '{n} trade(s) ({w} en 7 j)', team: 'équipe', none: 'Aucun trader n’a encore créé de clé.' },
+      seen: 'vu {t}', acc: '{l} relié(s) · {n} à relier · {i} ignoré(s)', tr: '{n} trade(s) ({w} en 7 j)', team: 'équipe', none: 'Aucun trader n’a encore créé de clé.',
+      ctr: 'Contrats (30 j) : {l}', unk: 'Non reconnu(s) : {l}', alert: 'Contrats que Sweep ne reconnaît pas : {l}. Leurs trades gardent le bon P&L, pas le bon instrument.' },
     es: { h: 'Sincronización', sub: 'Los traders que crearon una clave, los vistos más recientemente primero. Solo lectura.', card: 'Traders en {p}', cardSub: '{a} vistos en 24 h · {b} cuentas vinculadas · {c} operaciones en 7 d',
       st: { ok: 'Sincroniza', to_link: 'Cuentas por vincular', no_accounts: 'Ninguna cuenta encontrada', never: 'Add-on nunca visto', error: 'Error' },
       why: { never: 'Clave creada, el add-on nunca envió nada: ¿instalado? ¿clave pegada?', no_accounts: 'El add-on funciona pero no ve ninguna cuenta: ¿la plataforma está conectada al bróker?', to_link: 'Cuentas encontradas, ninguna vinculada: el trader debe vincularlas (Ajustes › Conexiones).' },
       err: { plan: 'cuenta congelada (plan Free)', limit: 'límite de registros alcanzado', account_gone: 'cuenta de Sweep vinculada eliminada' },
-      seen: 'visto {t}', acc: '{l} vinculada(s) · {n} por vincular · {i} ignorada(s)', tr: '{n} operación(es) ({w} en 7 d)', team: 'equipo', none: 'Ningún trader ha creado una clave todavía.' },
+      seen: 'visto {t}', acc: '{l} vinculada(s) · {n} por vincular · {i} ignorada(s)', tr: '{n} operación(es) ({w} en 7 d)', team: 'equipo', none: 'Ningún trader ha creado una clave todavía.',
+      ctr: 'Contratos (30 d): {l}', unk: 'No reconocido(s): {l}', alert: 'Contratos que Sweep no reconoce: {l}. Sus operaciones mantienen el P&L correcto, no el instrumento correcto.' },
   };
   const PLATS = { ninjatrader: 'NinjaTrader 8', quantower: 'Quantower' };
   let sy = null, syAt = 0, syBusy = false;
@@ -938,10 +941,15 @@
       const info = [r.email !== r.name ? r.email : '', r.client || '', r.last_seen_at ? x.seen.replace('{t}', ago(r.last_seen_at, d.now)) : '', r.team ? x.team : ''].filter(Boolean).map(esc).join(' · ');
       const acc = x.acc.replace('{l}', r.accounts.linked).replace('{n}', r.accounts.new).replace('{i}', r.accounts.ignored) + ' · ' + x.tr.replace('{n}', r.trades).replace('{w}', r.trades_7d);
       const why = r.state === 'error' ? `<small class="neg">${esc(r.errors.map((e) => x.err[e] || e).join(' · '))}</small>` : x.why[r.state] ? `<small>${esc(x.why[r.state])}</small>` : '';
+      // the contracts received and the instrument Sweep reads in each; one it does not recognize, in red
+      const cs = r.contracts || [], ok2 = cs.filter((c) => c.known), bad = cs.filter((c) => !c.known);
+      const ctr = (ok2.length ? `<small data-sy-ctr>${esc(x.ctr.replace('{l}', ok2.map((c) => c.contract + ' → ' + c.instrument).join(' · ')))}</small>` : '')
+        + (bad.length ? `<small class="neg" data-sy-unk>${esc(x.unk.replace('{l}', bad.map((c) => c.contract).join(' · ')))}</small>` : '');
       return `<li class="ux-hl-${cls[r.state] || 'late'}" data-sy-row="${esc(r.platform)}"><div><b>${esc(r.name)}</b><small>${esc(PLATS[r.platform] || r.platform)}</small><span class="ux-pr-chip">${esc(x.st[r.state] || r.state)}</span></div>
-        ${info ? `<small>${info}</small>` : ''}<small>${esc(acc)}</small>${why}</li>`;
+        ${info ? `<small>${info}</small>` : ''}<small>${esc(acc)}</small>${ctr}${why}</li>`;
     }).join('');
-    return `<div class="sec-h"><h2>${x.h}</h2></div><p class="muted ux-hl-sub">${x.sub}</p><div class="ux-mgrid">${cards}</div>
+    const unk = (d.unknown || []).map((u) => u.contract + ' (' + (PLATS[u.platform] || u.platform) + ')');
+    return `<div class="sec-h"><h2>${x.h}</h2></div><p class="muted ux-hl-sub">${x.sub}</p>${unk.length ? `<div class="ux-pr-alert" role="alert" data-sy-alert>${esc(x.alert.replace('{l}', unk.join(', ')))}</div>` : ''}<div class="ux-mgrid">${cards}</div>
       ${rows ? `<ul class="ux-pr-list ux-sy-list">${rows}</ul>` : `<p class="muted">${x.none}</p>`}`;
   }
   function syPaint() {
