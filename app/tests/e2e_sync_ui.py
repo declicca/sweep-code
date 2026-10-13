@@ -290,6 +290,9 @@ def case_trader(p):   # every trader sees Connections (the beta for administrato
   pg.goto(B + '/#settings'); pg.wait_for_selector('#main details.nav-sgd[data-i="3"]', timeout=15000)
   pg.evaluate("document.querySelector('#main details.nav-sgd[data-i=\"3\"]').open = true"); pg.wait_for_timeout(1200)
   ok(pg.evaluate("S.me && !S.me.is_admin") and pg.locator('#main .sy-sec').count() == 1 and not errs, 'a trader who is not an administrator sees Connections')
+  # the platforms come with the section's own load (api/sync): waited for, not 1.2 s (the GitHub machine was slower, 13 Oct.)
+  try: pg.wait_for_selector('#main .sy-sec .sy-plat[data-p="quantower"]', timeout=15000)
+  except Exception: pass
   blocks = pg.eval_on_selector_all('#main .sy-sec .sy-plat', 'l => l.map(x => x.dataset.p)')
   ok(blocks == ['ninjatrader', 'quantower'], f'a trader sees NinjaTrader 8 and Quantower in Connections ({blocks})')
   pg.goto(B + '/#import'); pg.wait_for_selector('#main .sy-tip [data-sy="connect"]', timeout=20000)
