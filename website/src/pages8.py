@@ -3,7 +3,7 @@ from core import *
 FIRMS = [("topstep-trading-journal.html","Topstep"),("apex-trader-funding-journal.html","Apex Trader Funding"),
          ("take-profit-trader-journal.html","Take Profit Trader"),("lucid-trading-journal.html","Lucid Trading"),
          ("myfundedfutures-journal.html","MyFundedFutures"),
-         ("tradeify-trading-journal.html","Tradeify"),("alpha-futures-trading-journal.html","Alpha Futures")]
+         ("prop-firms/tradeify.html","Tradeify"),("alpha-futures-trading-journal.html","Alpha Futures")]
 
 def _f(d, firm):
     return {k: v.replace("{F}’s", poss(firm)).replace("{F}", firm) for k, v in d.items()}

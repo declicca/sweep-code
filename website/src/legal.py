@@ -255,7 +255,7 @@ def legal(title, desc, content):
         eff = t(T("Effective October 3, 2026 · Sweep Inc.","En vigueur le 3 octobre 2026 · Sweep Inc.","Vigente desde el 3 de octubre de 2026 · Sweep Inc."))
         text = re.sub(r'href="([a-z][a-z0-9-]*\.html)"', lambda m: f'href="{href(lang, m.group(1))}"', t(content))
         b = f'<div class="page-hero"><div class="wrap"><span class="kick">{t(T("Legal","Légal","Legal"))}</span><h1>{t(title)}</h1><p class="meta">{eff}</p></div></div><section style="padding-top:8px"><div class="wrap"><div class="legal">{text}</div></div></section>'
-        return (t(title) + " · Sweep", t(desc), b, "")
+        return (t(title) + " · Sweep", t(desc), b + final_cta(lang, t), "")
     return f
 
 page_privacy = legal(T("Privacy policy","Politique de confidentialité","Política de privacidad"), T("How Sweep Inc. collects, uses, stores and protects your personal information, and your rights under Quebec’s Law 25 and how to use them.","Comment Sweep Inc. recueille, utilise, conserve et protège tes renseignements personnels, et tes droits selon la Loi 25.","Cómo Sweep Inc. recopila, usa, guarda y protege tu información personal, y tus derechos según la Ley 25 de Quebec y cómo ejercerlos."), PRIVACY)

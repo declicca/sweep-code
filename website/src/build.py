@@ -23,7 +23,8 @@ DIST = os.path.join(HERE, "..", "dist")
 PAGES = {"index.html":page_home,"features.html":page_features,"ai.html":page_ai,"how-it-works.html":page_how,"prop-traders.html":page_prop,"economic-calendar.html":page_econ,
  "import.html":page_import,"install.html":page_install,"security.html":page_security,"pricing.html":page_pricing6,"faq.html":page_faq,
  "about.html":page_about,"contact.html":page_contact,"changelog.html":page_changelog_new,"privacy.html":page_privacy,"terms.html":page_terms,"risk.html":page_risk,"404.html":page_404,"100":page_100,"tools.html":page_tools,"position-size-calculator.html":page_position,"trailing-drawdown-calculator.html":page_drawdown,"consistency-rule-calculator.html":page_consistency}
-for _s,_n in FIRMS: PAGES[_s] = make_firm_page(_s,_n)
+for _s,_n in FIRMS:
+    if not _s.startswith("prop-firms/"): PAGES[_s] = make_firm_page(_s,_n)   # a firm without preloaded rules gets a rules page (pages18.make_manual_page)
 PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calculator.html":page_roi,"payout-calculator.html":page_payoutcalc,
               "futures-contracts.html":pages12.page_contracts,"release-dates.html":pages13.page_release_hub,"glossary.html":pages13.page_glossary,
               "futures-market-hours.html":pages13.page_hours,"press-kit.html":pages13.page_press,
@@ -31,6 +32,8 @@ PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calcul
               "best-trading-journal-for-prop-firms.html":pages17.page_best_journal})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
 PAGES["prop-firms/index.html"] = pages18.page_hub
+for _s,_n in FIRMS:
+    if _s.startswith("prop-firms/"): PAGES[_s] = pages18.make_manual_page(_s, _n)
 import pages20
 PAGES["free-trading-journal.html"] = pages20.page_free
 PAGES["prop-firm-tracker.html"] = pages20.page_tracker
@@ -111,6 +114,7 @@ RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 # so these pages are linked as /100/ and /prop-firms/ everywhere (core.href)
 # Alpha Futures' rules page was first published at /prop-firms/alpha (the old file stays on the server: deploy.sh never deletes)
 RewriteRule ^(fr/|es/)?prop-firms/alpha/?$ /$1prop-firms/alpha-futures [R=301,L]
+RewriteRule ^(fr/|es/)?tradeify-trading-journal(\\.html)?/?$ /$1prop-firms/tradeify [R=301,L]
 # clean URLs: /pricing.html -> /pricing (301), and /pricing serves pricing.html
 RewriteCond %{THE_REQUEST} \\s/+([^?\\s]+?)\\.html[\\s?] [NC]
 RewriteCond %1 !(^|/)index$

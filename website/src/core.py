@@ -177,6 +177,13 @@ NAV_CTA = T("Start free","Commencer","Empieza gratis")
 DISC = T("Sweep does not offer financial advice. Trading futures involves a substantial risk of loss.",
  "Sweep n’offre pas de conseils financiers. Le trading de contrats à terme comporte un risque de perte important.",
  "Sweep no ofrece asesoramiento financiero. Operar contratos de futuros conlleva un riesgo de pérdida importante.")
+# One wording everywhere (audit of Oct 13): how trades get into Sweep, and which plans include payouts and expenses
+ADD_TRADES = T("On NinjaTrader 8, Sweep’s free add-on sends your trades on its own. Otherwise: a screenshot (a history screenshot adds all its trades), your own words, or your platform’s export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). Automatic sync for Rithmic and Tradovate is in development.",
+               "Sur NinjaTrader 8, le module gratuit de Sweep envoie tes trades tout seul. Sinon : une capture d’écran (une capture d’historique ajoute tous ses trades), tes propres mots, ou l’export de ta plateforme (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La synchro automatique Rithmic et Tradovate est en développement.",
+               "En NinjaTrader 8, el complemento gratuito de Sweep envía tus operaciones solo. Si no: una captura (una captura del historial añade todas sus operaciones), tus propias palabras o la exportación de tu plataforma (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La sincronización automática con Rithmic y Tradovate está en desarrollo.")
+MONEY_PLAN = T("Payouts and expenses are part of Pro and Elite, included for your first 60 days.",
+               "Les payouts et les dépenses font partie de Pro et d’Elite, offerts tes 60 premiers jours.",
+               "Los payouts y los gastos forman parte de Pro y Elite, incluidos tus primeros 60 días.")
 CHART_MENTION = T("CME market data. Charts powered by TradingView Lightweight Charts™.","Données de marché CME. Graphiques propulsés par TradingView Lightweight Charts™.","Datos de mercado de CME. Gráficos impulsados por TradingView Lightweight Charts™.")
 CURP = ' aria-current="page"'; CURL = ' aria-current="true"'
 
@@ -202,7 +209,7 @@ def _firm_menu():
         sz = sorted({s["size"] for p in f["programs"] for s in p["sizes"]}); n = len(f["programs"])
         r = f"{sz[0] // 1000}K" + (f" – {sz[-1] // 1000}K" if len(sz) > 1 else "")
         return T(f"{n} account type{'s' if n > 1 else ''} · {r}", f"{n} type{'s' if n > 1 else ''} de compte · {r}", f"{n} tipo{'s' if n > 1 else ''} de cuenta · {r}")
-    firms = [(page_of(rules[n]), T(n, n, n), desc(rules[n])) if n in rules else (jp, T(n, n, n), T("Journal, your own rules", "Journal, tes propres règles", "Diario, tus propias reglas")) for jp, n in JOURNALS]
+    firms = [(page_of(rules[n]), T(n, n, n), desc(rules[n])) if n in rules else (jp, T(n, n, n), T("Rules you enter yourself", "Règles saisies par toi", "Reglas que introduces tú")) for jp, n in JOURNALS]
     more = [("prop-traders.html", T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"), T("Accounts, rules and payouts in one place","Comptes, règles et payouts au même endroit","Cuentas, reglas y payouts en un solo lugar")),
             ("prop-firms/index.html", T("Every firm’s rules","Les règles de chaque firme","Las reglas de cada firma"), T("Checked every week","Vérifiées chaque semaine","Revisadas cada semana")),
             ("prop-firm-payout-rules.html", T("Payout rules compared","Règles de payout comparées","Reglas de payout comparadas"), T("Winning days, caps and split","Jours gagnants, plafonds et partage","Días ganadores, límites y reparto"))]
@@ -372,8 +379,8 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<meta name="theme-color" content="#0B0B0C" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F7F7F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#08080A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F3F4F6" media="(prefers-color-scheme: light)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sweep">
 <meta property="og:locale" content="{ogloc}">{"".join(f'<meta property="og:locale:alternate" content="{x}">' for x in ["en_US","fr_CA","es_ES"] if x!=ogloc)}
@@ -406,12 +413,11 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <footer><div class="wrap">
 <div class="foot">
 <div><a class="brand" href="{href(lang,'index.html')}" aria-label="Sweep">{MARK}<span>sweep</span></a><p style="max-width:28ch">{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}<br><span class="fine">{t(T("Sweep doesn’t offer financial advice. Trading futures involves risk.","Sweep n’offre pas de conseils financiers. Le trading de futures comporte des risques.","Sweep no ofrece asesoría financiera. Operar futuros implica riesgos."))}</span></p>
-<div class="cta-row" style="margin-top:20px"><a class="btn btn-line" href="{SIGNUP}">{t(CREATE)}</a><a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a></div></div>
+<div class="cta-row" style="margin-top:20px"><a class="btn btn-line" href="{SIGNUP}">{t(CREATE_FREE)}</a><a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a></div></div>
 {cols}
 </div>
-<div class="foot-bottom"><span>© 2026 Sweep Inc. · Laval, Québec · <a href="mailto:{EMAIL}">{EMAIL}</a></span><div class="foot-meta"><nav class="lang" aria-label="{t(T("Language","Langue","Idioma"))}">{langlinks}</nav>{social_links()}</div></div>
-<p class="disclaimer">Sweep Inc. · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2 · <a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{APP}">app.makeitsweep.com</a></p>
-<p class="disclaimer" style="margin-top:8px">{t(DISC)} {t(CHART_MENTION)}</p>
+<div class="foot-bottom"><span>© 2026 Sweep Inc. · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2 · <a href="mailto:{EMAIL}">{EMAIL}</a></span><div class="foot-meta"><nav class="lang" aria-label="{t(T("Language","Langue","Idioma"))}">{langlinks}</nav>{social_links()}</div></div>
+<p class="disclaimer">{t(DISC)} {t(CHART_MENTION)}</p>
 </div></footer>
 <script src="/assets/{ASSETS["js"]}" defer></script>
 </body>

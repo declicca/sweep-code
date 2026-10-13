@@ -2,7 +2,7 @@
 
 > Sweep is a free trading journal built for futures and prop firm traders. It tracks every evaluation, funded and live account, payouts and expenses in one place, with prop firm rules preloaded and verified every week. Available in English, French and Spanish.
 
-Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro ($19/month or $159/year), Elite ($39/month or $329/year); every new account gets 60 days of Pro. Trades sync automatically from NinjaTrader 8 with Sweep's free add-on (every account, whatever its connection: Rithmic, Tradovate and others); from other platforms, add trades from a screenshot, in your own words, or by importing the platform's export. Sweep does not offer trade replay or backtesting. Prop firms with preloaded rules: {PRESET_FIRMS}; any other firm{OTHER_FIRMS} can be added with its rules entered by hand; when a firm changes a rule, affected traders are notified and choose whether to apply it.
+Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro ($19/month or $159/year), Elite ($39/month or $329/year); every new account gets 60 days of Pro. Trades sync automatically from NinjaTrader 8 with Sweep's free add-on (every account, whatever its connection: Rithmic, Tradovate and others); from other platforms, add trades from a screenshot (a history screenshot adds all its trades), in your own words, or by importing the platform's export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). Automatic sync for Rithmic and Tradovate is in development. Sweep does not offer trade replay or backtesting. Prop firms with preloaded rules: {PRESET_FIRMS}; any other firm{OTHER_FIRMS} can be added with its rules entered by hand; when a firm changes a rule, affected traders are notified and choose whether to apply it.
 
 ## Product
 - [Home](https://makeitsweep.com/): overview of Sweep
@@ -23,7 +23,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Take Profit Trader](https://makeitsweep.com/take-profit-trader-journal)
 - [Lucid Trading](https://makeitsweep.com/lucid-trading-journal)
 - [MyFundedFutures](https://makeitsweep.com/myfundedfutures-journal)
-- [Tradeify](https://makeitsweep.com/tradeify-trading-journal)
+- [Tradeify](https://makeitsweep.com/prop-firms/tradeify)
 - [Alpha Futures](https://makeitsweep.com/alpha-futures-trading-journal)
 
 ## Guides
