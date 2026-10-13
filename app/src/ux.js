@@ -2303,8 +2303,9 @@
   // a platform's connection (any platform when none is given) and its accounts found (all of them when none is given)
   const conn = (p) => (!SY.st ? null : (SY.st.connections || []).find((c) => (!p || c.platform === p) && SY.stopping !== c.platform) || null);
   const accts = (p) => (SY.st ? (SY.st.accounts || []).filter((a) => !p || a.platform === p) : []);
-  // beta: a platform still being tested in its own software shows to administrators only (to open it to every trader: remove it here)
-  const BETA = ['quantower'];
+  // beta: a platform still being tested in its own software shows to administrators only (to open it to every trader: remove it here).
+  // Quantower: open to every trader on 13 Oct. (tested by the traders themselves)
+  const BETA = [];
   const beta = () => { if (S.me && S.me.is_admin) return true; try { return localStorage.getItem('sw.syncBeta') === '1'; } catch (e) { return false; } };
   const shown = () => Object.keys(NAME).filter((p) => ((SY.st.addons || {})[p] && (!BETA.includes(p) || beta())) || conn(p) || accts(p).length);   // an add-on to download, or already in use
   const nameOf = (id) => { const a = typeof acct === 'function' ? acct(id) : null; return a ? (typeof acctLabel === 'function' ? acctLabel(id) : a.name) : '—'; };
