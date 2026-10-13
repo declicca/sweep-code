@@ -128,6 +128,10 @@
     }
   }
 
+  // a link to a folded section (<details>) opens it
+  var unfold = function(){ var id = decodeURIComponent(location.hash.slice(1)), el = id && document.getElementById(id), d = el && el.closest('details'); if(d && !d.open){ d.open = true; el.scrollIntoView(); } };
+  window.addEventListener('hashchange', unfold); unfold();
+
   // header dropdowns (Product, Resources)
   var dds = [].slice.call(document.querySelectorAll('.navdd'));
   var closeDD = function(except){ dds.forEach(function(d){ if(d !== except){ d.classList.remove('open'); d.querySelector('.ddbtn').setAttribute('aria-expanded','false'); } }); };

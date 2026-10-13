@@ -139,10 +139,6 @@ def page_home(lang, t):
 
 # ============================ FEATURES ============================
 def page_features(lang, t):
-    anchors = [("logging",T("Logging","Saisie","Registro")),("numbers",T("Your numbers","Tes chiffres","Tus números")),("charts",T("Real charts","Graphiques","Gráficos")),("rules",T("Rules","Règles","Reglas")),("review",T("Review","Révision","Revisión")),("insights",T("Insights","Analyses","Análisis")),
-               ("journal",T("Calendar & journal","Calendrier & journal","Calendario y diario")),("economic-reports",T("News","Nouvelles","Noticias")),("ai",T("Sweep AI","Sweep AI","Sweep AI")),("ask-sweep",T("Ask Sweep","Ask Sweep","Ask Sweep")),("accounts",T("Accounts","Comptes","Cuentas")),
-               ("payouts",T("Payouts","Payouts","Payouts")),("share-cards",T("Share cards","Cartes à partager","Tarjetas")),("sync",T("Sync","Synchro","Sincronización")),("data",T("Your data","Tes données","Tus datos")),("mobile",T("Phone & desktop","Téléphone & ordi","Móvil y escritorio"))]
-    sub = '<nav class="subnav" aria-label="Features"><div class="wrap">' + "".join(f'<a href="#{a}">{t(l)}</a>' for a,l in anchors) + "</div></nav>"
     hero = page_hero(t, T("Everything you track, in one place.","Tout ce que tu suis, au même endroit.","Todo lo que sigues, en un solo lugar."),
         T("Logging, charts, prop firm rules, payouts, discipline and AI. One app, one record.","Saisie, graphiques, règles des prop firms, payouts, discipline et IA. Une app, un historique.","Registro, gráficos, reglas de prop firms, payouts, disciplina e IA. Una app, un historial."),
         T("Features","Fonctionnalités","Funciones"))
@@ -274,7 +270,38 @@ def page_features(lang, t):
             t(T("Trade ticket with live risk, automatic rule checks, guided trade review, insights and performance score, P&L calendar, economic calendar, prop accounts, payouts and expenses.",
                 "Ticket de trade avec risque en direct, vérification automatique des règles, révision guidée, analyses et score de performance, calendrier P&L, calendrier économique, comptes prop, payouts et dépenses.",
                 "Ticket con riesgo en vivo, revisión automática de reglas, revisión guiada, análisis y puntuación de rendimiento, calendario de P&L, calendario económico, cuentas prop, payouts y gastos.")),
-            hero + sub + "".join(S) + final_cta(lang, t), "")
+            hero + _chapters(lang, t, S) + final_cta(lang, t), "")
+
+# The features page in 6 chapters: a tile for each at the top; in each chapter, one main section with its screen,
+# the others folded (<details>). Every section keeps its id, and a link to a folded one opens it (site.js).
+CHAPTERS = [
+ ("logging", "calc", T("Logging","Saisie","Registro"), T("A ticket that does the math, synced on every device.","Un ticket qui fait les calculs, synchronisé sur tous tes appareils.","Un ticket que hace las cuentas, sincronizado en todos tus dispositivos."), None, ["numbers", "sync", "mobile", "data"]),
+ ("charts", "image", T("Charts","Graphiques","Gráficos"), T("Your trades on real CME candles, and your edge in numbers.","Tes trades sur de vraies bougies CME, et ton edge en chiffres.","Tus operaciones sobre velas reales de CME, y tu ventaja en cifras."), None, ["insights"]),
+ ("accounts", "shield", T("Rules","Règles","Reglas"), T("Every account with its firm’s rules, watched on every trade.","Chaque compte avec les règles de sa firme, surveillées à chaque trade.","Cada cuenta con las reglas de su firma, vigiladas en cada operación."), T("Prop firm rules","Règles des prop firms","Reglas de las prop firms"), []),
+ ("payouts", "net", T("Payouts & My money","Payouts et Mon argent","Payouts y Mi dinero"), T("From request to payment, and what you really keep.","De la demande au paiement, et ce que tu gardes vraiment.","De la solicitud al pago, y lo que de verdad te quedas."), T("Payouts & My money","Payouts et Mon argent","Payouts y Mi dinero"), ["share-cards"]),
+ ("rules", "check", T("Discipline","Discipline","Disciplina"), T("Automatic checks, a checklist, a plan and a review.","Vérifications automatiques, checklist, plan et révision.","Revisiones automáticas, checklist, plan y revisión."), T("Discipline","Discipline","Disciplina"), ["journal", "review"]),
+ ("ai", "spark", T("AI","IA","IA"), T("Sweep AI, Ask Sweep and every U.S. release recapped in a minute.","Sweep AI, Ask Sweep et chaque annonce américaine résumée en une minute.","Sweep AI, Ask Sweep y cada dato de EE. UU. resumido en un minuto."), None, ["ask-sweep", "economic-reports"]),
+]
+
+def _chapters(lang, t, sections):
+    by = {re.search(r'<section id="([^"]+)"', x).group(1): x for x in sections}
+    tiles = "".join(f'<a class="ftile" href="#{a}">{ico(I[ic])}<b>{t(n)}</b><span>{t(d)}</span></a>' for a, ic, n, d, _, _ in CHAPTERS)
+    out = f'<section style="padding-top:8px"><div class="wrap"><nav class="ftiles" aria-label="{t(T("Features","Fonctionnalités","Funciones"))}">{tiles}</nav></div></section>'
+    for a, _, _, _, kick, folded in CHAPTERS:
+        main = by.pop(a)
+        if kick: main = re.sub(r'<span class="kick">.*?</span>', f'<span class="kick">{t(kick)}</span>', main, count=1)
+        out += main
+        if folded:
+            out += '<section class="fmores"><div class="wrap">' + "".join(_fold(by.pop(f), f) for f in folded) + '</div></section>'
+    assert not by, f"features: sections without a chapter: {list(by)}"
+    return out
+
+def _fold(sec, id_):
+    """A section folded into <details>: its kick and title become the summary, the rest opens below."""
+    kick = re.search(r'<span class="kick">(.*?)</span>', sec).group(1); h = re.search(r'<h2>(.*?)</h2>', sec).group(1)
+    body = re.sub(r'<span class="kick">.*?</span>', "", sec, count=1); body = re.sub(r'<h2>.*?</h2>', "", body, count=1)
+    body = re.sub(r'^<section id="[^"]+"(?: class="rule")?>', "<section>", body)
+    return f'<details class="fmore" id="{id_}"><summary><span><span class="fk">{kick}</span>{h}</span><span class="plus" aria-hidden="true"></span></summary>{body}</details>'
 
 # ============================ PROP TRADERS ============================
 def page_prop(lang, t):
