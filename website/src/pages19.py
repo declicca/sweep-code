@@ -212,6 +212,31 @@ GUIDES = [
   T("Five minutes before the open, one line per trade, sixty seconds after the close.", "Cinq minutes avant l’ouverture, une ligne par trade, soixante secondes après la clôture.", "Cinco minutos antes de la apertura, una línea por operación, sesenta segundos tras el cierre.")),
 ]
 
+GUIDES_HELP = T("""<h2>Where to start</h2><ul>
+<li><b>New to prop firms?</b> Start with <a href="@prop-firm-profit-targets.html">account sizes, profit targets and max loss</a>, then the <a href="@prop-firm-drawdown-rules.html">drawdown rules</a>: most accounts end on the max loss, not on the target.</li>
+<li><b>Close to a payout?</b> Read the <a href="@prop-firm-consistency-rules.html">consistency rules</a> and the <a href="@prop-firm-payout-rules.html">payout rules</a>: winning days, cushion, caps and split.</li>
+<li><b>Choosing a journal?</b> <a href="@how-to-choose-a-trading-journal.html">How to choose a trading journal</a> lists what matters, and <a href="@best-trading-journal-for-prop-firms.html">the best journal for prop firm traders</a> compares five of them.</li>
+<li><b>Building the habit?</b> The <a href="@trading-journal-routine.html">daily journal routine</a> fits in a few minutes a day.</li>
+<li><b>Unsure about a term?</b> The <a href="@glossary.html">glossary</a> explains trailing drawdown, consistency, cushion, payout and the rest in a line or two.</li></ul>
+<h2>How the comparisons stay accurate</h2><p>The firm-by-firm tables come from the catalogue Sweep uses to prefill prop accounts, checked every week against each firm’s official pages. Each guide shows the date of the last check, and “—” means the rule isn’t in the rules Sweep tracks for that account. Firms change their rules: always confirm on the firm’s site before you trade. Each guide ends with the questions traders ask most about the rule.</p>
+<p>Each rules guide goes with a free calculator to check your own numbers: <a href="@trailing-drawdown-calculator.html">trailing drawdown</a>, <a href="@consistency-rule-calculator.html">consistency</a> and <a href="@payout-calculator.html">payout</a>.</p>""",
+"""<h2>Par où commencer</h2><ul>
+<li><b>Nouveau dans les prop firms ?</b> Commence par les <a href="@prop-firm-profit-targets.html">tailles de compte, objectifs et perte max</a>, puis les <a href="@prop-firm-drawdown-rules.html">règles de drawdown</a> : la plupart des comptes finissent sur la perte max, pas sur l’objectif.</li>
+<li><b>Proche d’un payout ?</b> Lis les <a href="@prop-firm-consistency-rules.html">règles de consistance</a> et les <a href="@prop-firm-payout-rules.html">règles de payout</a> : jours gagnants, coussin, plafonds et partage.</li>
+<li><b>Tu choisis un journal ?</b> <a href="@how-to-choose-a-trading-journal.html">Bien choisir son journal de trading</a> liste ce qui compte, et <a href="@best-trading-journal-for-prop-firms.html">le meilleur journal pour les traders de prop firms</a> en compare cinq.</li>
+<li><b>Tu bâtis l’habitude ?</b> La <a href="@trading-journal-routine.html">routine de journal</a> tient en quelques minutes par jour.</li>
+<li><b>Un terme t’échappe ?</b> Le <a href="@glossary.html">lexique</a> explique le drawdown suiveur, la consistance, le coussin, le payout et le reste en une ou deux lignes.</li></ul>
+<h2>Comment les comparatifs restent justes</h2><p>Les tableaux firme par firme viennent du catalogue que Sweep utilise pour préremplir les comptes prop, vérifié chaque semaine sur les pages officielles de chaque firme. Chaque guide affiche la date de la dernière vérification, et « — » veut dire que la règle ne fait pas partie de celles que Sweep suit pour ce compte. Les firmes changent leurs règles : confirme toujours sur le site de la firme avant de trader. Chaque guide se termine par les questions que les traders posent le plus sur la règle.</p>
+<p>Chaque guide de règles a son calculateur gratuit pour vérifier tes propres chiffres : <a href="@trailing-drawdown-calculator.html">drawdown suiveur</a>, <a href="@consistency-rule-calculator.html">consistance</a> et <a href="@payout-calculator.html">payout</a>.</p>""",
+"""<h2>Por dónde empezar</h2><ul>
+<li><b>¿Nuevo en las prop firms?</b> Empieza por los <a href="@prop-firm-profit-targets.html">tamaños de cuenta, objetivos y pérdida máx.</a>, y luego las <a href="@prop-firm-drawdown-rules.html">reglas de drawdown</a>: la mayoría de las cuentas terminan en la pérdida máx., no en el objetivo.</li>
+<li><b>¿Cerca de un payout?</b> Lee las <a href="@prop-firm-consistency-rules.html">reglas de consistencia</a> y las <a href="@prop-firm-payout-rules.html">reglas de payout</a>: días ganadores, colchón, límites y reparto.</li>
+<li><b>¿Eliges un diario?</b> <a href="@how-to-choose-a-trading-journal.html">Cómo elegir un diario de trading</a> enumera lo que importa, y <a href="@best-trading-journal-for-prop-firms.html">el mejor diario para traders de prop firms</a> compara cinco.</li>
+<li><b>¿Creando el hábito?</b> La <a href="@trading-journal-routine.html">rutina de diario</a> cabe en pocos minutos al día.</li>
+<li><b>¿Dudas con un término?</b> El <a href="@glossary.html">glosario</a> explica el drawdown dinámico, la consistencia, el colchón, el payout y lo demás en una o dos líneas.</li></ul>
+<h2>Cómo se mantienen exactas las comparativas</h2><p>Las tablas firma por firma salen del catálogo que Sweep usa para precargar las cuentas prop, revisado cada semana en las páginas oficiales de cada firma. Cada guía muestra la fecha de la última revisión, y «—» significa que la regla no está entre las que Sweep sigue para esa cuenta. Las firmas cambian sus reglas: confirma siempre en el sitio de la firma antes de operar. Cada guía termina con las preguntas que más hacen los traders sobre la regla.</p>
+<p>Cada guía de reglas tiene su calculadora gratuita para comprobar tus propias cifras: <a href="@trailing-drawdown-calculator.html">drawdown dinámico</a>, <a href="@consistency-rule-calculator.html">consistencia</a> y <a href="@payout-calculator.html">payout</a>.</p>""")
+
 def page_hub(lang, t):
     hero = page_hero(t, T("Guides for prop firm traders.", "Des guides pour les traders de prop firms.", "Guías para traders de prop firms."),
         T("Straight answers to the questions futures prop traders ask, with the firms’ rules checked every week.",
@@ -219,7 +244,8 @@ def page_hub(lang, t):
           "Respuestas claras a las preguntas de los traders de prop firms de futuros, con las reglas de las firmas revisadas cada semana."),
         T("Guides", "Guides", "Guías"))
     cards = "".join(f'<a class="tool-card" href="{href(lang, s)}"><h2>{t(n)}</h2><p>{t(d)}</p><span class="go">{t(T("Read", "Lire", "Leer"))} →</span></a>' for s, n, d in GUIDES)
-    b = f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
+    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
+         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(GUIDES_HELP))}</article></div></section>')
     ld = jsonld({"@context": "https://schema.org", "@type": "ItemList", "name": t(T("Guides", "Guides", "Guías")),
                  "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": t(n), "url": f"https://{DOMAIN}{href(lang, s)}"} for i, (s, n, _) in enumerate(GUIDES)]})
     return _fr_nbsp(lang, t(T("Guides for Futures Prop Firm Traders · Sweep", "Guides pour traders de prop firms en futures · Sweep", "Guías para traders de prop firms de futuros · Sweep")),

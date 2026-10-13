@@ -496,7 +496,7 @@ LINK_TERMS = [
  ("glossary.html#consistency", T(r"consistency rules?", r"règles? de consistance", r"reglas? de consistencia")),
  ("glossary.html#payout", T(r"payouts?", r"payouts?", r"payouts?")),
  ("glossary.html#r-multiple", T(r"R multiples?", r"R multiples?|multiples? de R", r"múltiplos? R")),
- ("import.html", T(r"import(?:s|ed|ing)?", r"import(?:e|er|es|ez|é|ée|ées|ation)?", r"importa(?:r|s|ción)?")),
+ ("import.html", T(r"import(?:s|ed|ing)?", r"import(?:er|ation|é|ée|ées)?|importe(?= (?:tes|ton|ta|un|une|le|les|des|ses)\b)", r"importar|importación|importaciones|importa(?= (?:tus|tu|un|una|el|los|las)\b)")),   # never « n’importe », « peu importe », « no importa »
  ("futures-market-hours.html", T(r"market hours|trading hours", r"heures de marché|heures des marchés|heures de négociation", r"horarios? de (?:mercado|negociación)")),
  ("release-dates.html", T(r"release dates?|economic releases?", r"dates? des annonces|annonces économiques", r"fechas de publicación|datos económicos")),
 ]
@@ -509,7 +509,7 @@ def add_links(lang, page, body):
     for target, pat in LINK_TERMS:
         url = href(lang, target.split("#")[0]) + ("#" + target.split("#")[1] if "#" in target else "")
         if target.split("#")[0] == page or f'href="{url}"' in body: continue
-        todo.append((url, re.compile(r"(?<![\w-])(" + pat[lang] + r")(?![\w-])", re.I)))
+        todo.append((url, re.compile(r"(?<![\w’'-])(" + pat[lang] + r")(?![\w-])", re.I)))
     done, out, para, skip = set(), [], [], 0
     for tok in re.finditer(r"<script\b.*?</script>|<style\b.*?</style>|<(/?)([a-zA-Z0-9]+)[^>]*>|[^<]+|<", body, re.S):
         x = tok.group(0)

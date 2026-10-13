@@ -145,21 +145,27 @@ INSTALL_HELP = T("""<h2>Why install it this way?</h2><p>Sweep is a web app. The 
 <h2>If you don’t see the option</h2><ul>
 <li><b>iPhone:</b> use Safari. “Add to Home Screen” is in the Share menu (the square with an arrow); scroll down the list if you don’t see it right away.</li>
 <li><b>Android:</b> in Chrome’s ⋮ menu, the option can be called “Add to Home screen” instead of “Install app”.</li>
+<li><b>On an iPad?</b> The steps are the same as on iPhone, in Safari.</li>
 <li><b>Asked to log in again?</b> On iPhone, the installed app can keep its own session, separate from Safari: log in once from the icon.</li></ul>
+<h2>Which browser?</h2><p>Sweep works in any recent browser: Safari, Chrome, Edge or Firefox. To install it, use Safari on iPhone and Chrome on Android. To get the latest version, just reopen Sweep: it updates itself, and if something looks out of date, close it and open it again. On the phone, you can also log a trade from a screenshot of your platform, right after you close it.</p>
 <h2>Your data stays on your account</h2><p>Your trades, journal and screenshots are stored on Sweep’s server, not on the phone. Removing the icon deletes nothing, and a new phone only needs a log-in.</p>
 <h2>On a computer</h2><p>Open app.makeitsweep.com in any recent browser. In Chrome or Edge, the install icon at the right of the address bar adds Sweep to your apps, in its own window.</p>""",
 """<h2>Pourquoi l’installer comme ça ?</h2><p>Sweep est une app web. L’icône sur ton écran d’accueil ouvre le même Sweep que sur ton ordinateur, avec le même compte et les mêmes données. Il s’ouvre en plein écran, sans les barres du navigateur, et les mises à jour arrivent toutes seules : rien à télécharger dans un magasin d’apps. Des apps iOS et Android natives sont prévues.</p>
 <h2>Si tu ne vois pas l’option</h2><ul>
 <li><b>iPhone :</b> utilise Safari. « Sur l’écran d’accueil » est dans le menu Partager (le carré avec une flèche) ; fais défiler la liste si tu ne le vois pas tout de suite.</li>
 <li><b>Android :</b> dans le menu ⋮ de Chrome, l’option peut s’appeler « Ajouter à l’écran d’accueil » au lieu d’« Installer l’application ».</li>
+<li><b>Sur un iPad ?</b> Les étapes sont les mêmes que sur iPhone, dans Safari.</li>
 <li><b>On te redemande de te connecter ?</b> Sur iPhone, l’app installée peut garder sa propre session, séparée de Safari : connecte-toi une fois depuis l’icône.</li></ul>
+<h2>Quel navigateur ?</h2><p>Sweep fonctionne dans tout navigateur récent : Safari, Chrome, Edge ou Firefox. Pour l’installer, utilise Safari sur iPhone et Chrome sur Android. Pour avoir la dernière version, rouvre simplement Sweep : il se met à jour tout seul, et si quelque chose semble dépassé, ferme-le et rouvre-le. Sur le téléphone, tu peux aussi ajouter un trade à partir d’une capture de ta plateforme, juste après l’avoir fermé.</p>
 <h2>Tes données restent dans ton compte</h2><p>Tes trades, ton journal et tes captures sont conservés sur le serveur de Sweep, pas sur le téléphone. Retirer l’icône n’efface rien, et un nouveau téléphone n’a besoin que d’une connexion.</p>
 <h2>Sur un ordinateur</h2><p>Ouvre app.makeitsweep.com dans n’importe quel navigateur récent. Dans Chrome ou Edge, l’icône d’installation à droite de la barre d’adresse ajoute Sweep à tes applications, dans sa propre fenêtre.</p>""",
 """<h2>¿Por qué instalarla así?</h2><p>Sweep es una app web. El icono de tu pantalla de inicio abre el mismo Sweep que usas en el ordenador, con la misma cuenta y los mismos datos. Se abre a pantalla completa, sin las barras del navegador, y las actualizaciones llegan solas: no hay nada que descargar de una tienda. Las apps nativas para iOS y Android están en la hoja de ruta.</p>
 <h2>Si no ves la opción</h2><ul>
 <li><b>iPhone:</b> usa Safari. «Añadir a pantalla de inicio» está en el menú Compartir (el cuadrado con una flecha); desplaza la lista si no la ves enseguida.</li>
 <li><b>Android:</b> en el menú ⋮ de Chrome, la opción puede llamarse «Añadir a pantalla de inicio» en lugar de «Instalar app».</li>
+<li><b>¿En un iPad?</b> Los pasos son los mismos que en iPhone, en Safari.</li>
 <li><b>¿Te pide iniciar sesión otra vez?</b> En iPhone, la app instalada puede tener su propia sesión, separada de Safari: inicia sesión una vez desde el icono.</li></ul>
+<h2>¿Qué navegador?</h2><p>Sweep funciona en cualquier navegador reciente: Safari, Chrome, Edge o Firefox. Para instalarlo, usa Safari en iPhone y Chrome en Android. Para tener la última versión, basta con volver a abrir Sweep: se actualiza solo, y si algo parece desactualizado, ciérralo y ábrelo de nuevo. En el teléfono también puedes registrar una operación desde una captura de tu plataforma, justo después de cerrarla.</p>
 <h2>Tus datos siguen en tu cuenta</h2><p>Tus operaciones, tu diario y tus capturas se guardan en el servidor de Sweep, no en el teléfono. Quitar el icono no borra nada, y un teléfono nuevo solo necesita iniciar sesión.</p>
 <h2>En un ordenador</h2><p>Abre app.makeitsweep.com en cualquier navegador reciente. En Chrome o Edge, el icono de instalación a la derecha de la barra de direcciones añade Sweep a tus aplicaciones, en su propia ventana.</p>""")
 
@@ -234,6 +240,13 @@ def page_pricing(lang, t):
             t(T("Sweep is free during early access with every feature included. Members who join now get a VIP discount when paid plans launch.","Sweep est gratuit pendant l’accès anticipé, avec toutes les fonctionnalités. Les membres inscrits maintenant auront un rabais VIP au lancement des forfaits payants.","Sweep es gratis durante el acceso anticipado, con todas las funciones. Quienes se unan ahora tendrán un descuento VIP cuando lleguen los planes de pago.")),
             hero + b + final_cta(lang, t), "")
 
+ABOUT_HELP = T("""<h2>How we build Sweep</h2><p>New versions ship regularly, and every release is listed in <a href="@changelog.html">What’s new</a>. Ideas and bug reports sent from the app are kept with their status, so the traders who asked know when it ships. Prop firm rules are checked every week against each firm’s official pages, and the whole app is in English, French and Spanish.</p>
+<h2>Who Sweep is for</h2><p>Futures traders, from the first evaluation to a live funded account: prop traders who juggle several firms and accounts, and traders on personal accounts who want honest numbers. Sweep doesn’t trade for you, doesn’t give signals and never sells your data.</p>""",
+"""<h2>Comment on construit Sweep</h2><p>De nouvelles versions sortent régulièrement, et chacune est listée dans les <a href="@changelog.html">Nouveautés</a>. Les idées et les bugs envoyés depuis l’app sont gardés avec leur statut, pour que les traders qui les ont demandés sachent quand c’est livré. Les règles des prop firms sont vérifiées chaque semaine sur les pages officielles de chaque firme, et toute l’app existe en français, en anglais et en espagnol.</p>
+<h2>Pour qui est Sweep</h2><p>Les traders de futures, de la première évaluation jusqu’au compte financé en live : les traders prop qui jonglent avec plusieurs firmes et plusieurs comptes, et les traders sur compte personnel qui veulent des chiffres honnêtes. Sweep ne trade pas à ta place, ne donne pas de signaux et ne vend jamais tes données.</p>""",
+"""<h2>Cómo construimos Sweep</h2><p>Salen versiones nuevas con frecuencia, y cada una aparece en <a href="@changelog.html">Novedades</a>. Las ideas y los errores enviados desde la app se guardan con su estado, para que los traders que los pidieron sepan cuándo están listos. Las reglas de las prop firms se revisan cada semana en las páginas oficiales de cada firma, y toda la app está en español, inglés y francés.</p>
+<h2>Para quién es Sweep</h2><p>Para traders de futuros, desde la primera evaluación hasta una cuenta fondeada en real: traders prop que gestionan varias firmas y cuentas, y traders con cuenta personal que quieren cifras honestas. Sweep no opera por ti, no da señales y nunca vende tus datos.</p>""")
+
 def page_about(lang, t):
     story = T("""<p><b>Sweep started as one trader’s journal.</b> It was built for a small community of futures traders who were tired of spreadsheets, scattered screenshots, and firm dashboards that disappeared with every prop account.</p>
 <p>The name comes from market structure. A sweep takes the liquidity below a level before price moves higher. Trading works the same way: the losing days, the broken rules and the lessons are the low that gets swept. What you do with them is the move that follows.</p>
@@ -255,34 +268,41 @@ def page_about(lang, t):
         ("archive",T("Your data stays yours","Tes données restent à toi","Tus datos son tuyos"),T("Private, exportable, deletable, never sold.","Privées, exportables, supprimables, jamais vendues.","Privados, exportables, eliminables, nunca vendidos.")),
         ("check",T("Honest numbers","Des chiffres honnêtes","Números honestos"),T("The bad days count. A warning never hides a broken rule.","Les mauvaises journées comptent. Un avertissement ne cache jamais une règle brisée.","Los días malos cuentan. Un aviso nunca oculta una regla rota.")),
         ("bolt",T("No signals, no hype","Ni signaux ni hype","Sin señales ni exageraciones"),T("Sweep shows your data. The decisions stay yours.","Sweep montre tes données. Les décisions restent les tiennes.","Sweep muestra tus datos. Las decisiones son tuyas."))]) + '</div></section>'
+    b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(ABOUT_HELP))}</article></div></section>'
     return (t(T("About Sweep","À propos de Sweep","Acerca de Sweep")), t(T("Sweep is a trading journal built in Quebec by a futures trader, for futures and prop traders.","Sweep est un journal de trading conçu au Québec par un trader de futures, pour les traders de futures et prop.","Sweep es un diario de trading creado en Quebec por un trader de futuros, para traders de futuros y prop.")), hero + b + final_cta(lang, t), "")
 
 CONTACT_HELP = T("""<h2>Get a faster answer</h2><ul>
 <li><b>Say which account.</b> Your Sweep username or the email you signed up with. Never send your password: we don’t need it to help you.</li>
 <li><b>Describe what you see.</b> The screen, what you expected, what happened instead, and a screenshot if you can.</li>
 <li><b>Add your device.</b> Phone or computer, and the browser (Safari, Chrome, Edge…).</li>
-<li><b>For an import or a sync,</b> name the platform (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) and the firm.</li></ul>
-<h2>Answers you may find right away</h2><p>Importing trades: <a href="@import.html">how to import your trades</a>. Sweep on your phone: <a href="@install.html">install it in three taps</a>. Your data, export and deletion: <a href="@security.html">security and data</a>. Everything else: the <a href="@faq.html">FAQ</a>.</p>
+<li><b>For an import or a sync,</b> name the platform (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) and the firm.</li>
+<li><b>One topic per message</b> keeps the thread easy to follow.</li></ul>
+<h2>Answers you may find right away</h2><p>Importing trades: <a href="@import.html">how to import your trades</a>. Sweep on your phone: <a href="@install.html">install it in three taps</a>. Your data, export and deletion: <a href="@security.html">security and data</a>. A firm’s current rules: the <a href="@prop-firms/index.html">prop firm rules pages</a>. Everything else: the <a href="@faq.html">FAQ</a>.</p>
 <h2>Ideas and bugs, from the app</h2><p>You can also send an idea or a bug report from inside Sweep. We keep each one with its status, so we can follow up and tell you when it ships.</p>
 <h2>A firm’s rule looks wrong?</h2><p>Tell us the firm, the account type and the page where you read the rule. We check it against the firm’s official pages and fix the preset for every trader.</p>
+<h2>A question about a charge?</h2><p>Write to us from the email on your account with the date and the amount of the charge. Never send your card number: we don’t need it.</p>
 <h2>Privacy requests</h2><p>To access, correct or delete your personal information, write to us from the email on your account, so we know it’s you. You can also export everything or delete your account yourself, in Settings. We answer privacy requests within 30 days.</p>""",
 """<h2>Pour une réponse plus rapide</h2><ul>
 <li><b>Dis-nous quel compte.</b> Ton nom d’utilisateur Sweep ou le courriel de ton inscription. N’envoie jamais ton mot de passe : on n’en a pas besoin pour t’aider.</li>
 <li><b>Décris ce que tu vois.</b> L’écran, ce que tu attendais, ce qui s’est passé à la place, et une capture si tu peux.</li>
 <li><b>Précise ton appareil.</b> Téléphone ou ordinateur, et le navigateur (Safari, Chrome, Edge…).</li>
-<li><b>Pour un import ou une synchro,</b> nomme la plateforme (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) et la firme.</li></ul>
-<h2>Des réponses tout de suite</h2><p>Importer tes trades : <a href="@import.html">comment importer tes trades</a>. Sweep sur ton téléphone : <a href="@install.html">l’installer en trois touchers</a>. Tes données, l’export et la suppression : <a href="@security.html">sécurité et données</a>. Tout le reste : la <a href="@faq.html">FAQ</a>.</p>
+<li><b>Pour un import ou une synchro,</b> nomme la plateforme (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) et la firme.</li>
+<li><b>Un sujet par message</b> garde l’échange facile à suivre.</li></ul>
+<h2>Des réponses tout de suite</h2><p>Importer tes trades : <a href="@import.html">comment importer tes trades</a>. Sweep sur ton téléphone : <a href="@install.html">l’installer en trois touchers</a>. Tes données, l’export et la suppression : <a href="@security.html">sécurité et données</a>. Les règles actuelles d’une firme : les <a href="@prop-firms/index.html">pages de règles des prop firms</a>. Tout le reste : la <a href="@faq.html">FAQ</a>.</p>
 <h2>Idées et bugs, depuis l’app</h2><p>Tu peux aussi envoyer une idée ou signaler un bug directement dans Sweep. On garde chacun avec son statut, pour y donner suite et te dire quand c’est livré.</p>
 <h2>Une règle de firme te semble fausse ?</h2><p>Dis-nous la firme, le type de compte et la page où tu as lu la règle. On la vérifie sur les pages officielles de la firme et on corrige le préréglage pour tous les traders.</p>
+<h2>Une question sur un paiement ?</h2><p>Écris-nous depuis le courriel de ton compte, avec la date et le montant du paiement. N’envoie jamais ton numéro de carte : on n’en a pas besoin.</p>
 <h2>Demandes de confidentialité</h2><p>Pour consulter, corriger ou supprimer tes renseignements personnels, écris-nous depuis le courriel de ton compte, pour qu’on sache que c’est toi. Tu peux aussi tout exporter ou supprimer ton compte toi-même, dans les Réglages. On répond aux demandes de confidentialité dans un délai de 30 jours.</p>""",
 """<h2>Para una respuesta más rápida</h2><ul>
 <li><b>Dinos qué cuenta.</b> Tu usuario de Sweep o el correo con el que te registraste. No envíes nunca tu contraseña: no la necesitamos para ayudarte.</li>
 <li><b>Describe lo que ves.</b> La pantalla, lo que esperabas, lo que pasó en su lugar y una captura si puedes.</li>
 <li><b>Indica tu dispositivo.</b> Teléfono u ordenador, y el navegador (Safari, Chrome, Edge…).</li>
-<li><b>Para una importación o una sincronización,</b> indica la plataforma (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) y la firma.</li></ul>
-<h2>Respuestas al momento</h2><p>Importar operaciones: <a href="@import.html">cómo importar tus operaciones</a>. Sweep en tu teléfono: <a href="@install.html">instálalo en tres toques</a>. Tus datos, la exportación y el borrado: <a href="@security.html">seguridad y datos</a>. Todo lo demás: las <a href="@faq.html">preguntas frecuentes</a>.</p>
+<li><b>Para una importación o una sincronización,</b> indica la plataforma (Tradovate, TopstepX, Rithmic, NinjaTrader 8…) y la firma.</li>
+<li><b>Un tema por mensaje</b> hace que la conversación sea fácil de seguir.</li></ul>
+<h2>Respuestas al momento</h2><p>Importar operaciones: <a href="@import.html">cómo importar tus operaciones</a>. Sweep en tu teléfono: <a href="@install.html">instálalo en tres toques</a>. Tus datos, la exportación y el borrado: <a href="@security.html">seguridad y datos</a>. Las reglas actuales de una firma: las <a href="@prop-firms/index.html">páginas de reglas de las prop firms</a>. Todo lo demás: las <a href="@faq.html">preguntas frecuentes</a>.</p>
 <h2>Ideas y errores, desde la app</h2><p>También puedes enviar una idea o avisar de un error desde dentro de Sweep. Guardamos cada uno con su estado para darle seguimiento y avisarte cuando esté listo.</p>
 <h2>¿Una regla de una firma parece incorrecta?</h2><p>Dinos la firma, el tipo de cuenta y la página donde leíste la regla. La revisamos en las páginas oficiales de la firma y corregimos el preajuste para todos los traders.</p>
+<h2>¿Una pregunta sobre un cobro?</h2><p>Escríbenos desde el correo de tu cuenta con la fecha y el importe del cobro. No envíes nunca el número de tu tarjeta: no lo necesitamos.</p>
 <h2>Solicitudes de privacidad</h2><p>Para consultar, corregir o eliminar tu información personal, escríbenos desde el correo de tu cuenta, para saber que eres tú. También puedes exportarlo todo o eliminar tu cuenta tú mismo, en Ajustes. Respondemos a las solicitudes de privacidad en un plazo de 30 días.</p>""")
 
 def page_contact(lang, t):

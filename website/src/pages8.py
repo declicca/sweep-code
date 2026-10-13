@@ -21,6 +21,22 @@ def size_range(rp, lang):
     if not sz: return ""
     return k(sz[0]) if len(sz) == 1 else k(sz[0]) + {"en": " to ", "fr": " à ", "es": " a "}[lang] + k(sz[-1])
 
+DAY_BY_DAY = T("""<h2>Your {F} account, day by day</h2><ul>
+<li><b>Before the session:</b> check the room left above the max loss and today’s loss limit. The <a href="@trailing-drawdown-calculator.html">trailing drawdown calculator</a> works for any account.</li>
+<li><b>After each trade:</b> Sweep updates the target, the room above the max loss and the consistency. Add the reason and a screenshot while the trade is fresh.</li>
+<li><b>Before a payout:</b> check the conditions {F} sets, such as winning days, consistency, a cushion or a cap, on {RULES}.</li>
+<li><b>Every month:</b> compare what you spent on evaluations, resets and activations with the payouts you received.</li></ul>""",
+"""<h2>Ton compte {F}, jour après jour</h2><ul>
+<li><b>Avant la séance :</b> vérifie la marge restante au-dessus de la perte max et la limite du jour. Le <a href="@trailing-drawdown-calculator.html">calculateur de drawdown suiveur</a> fonctionne pour n’importe quel compte.</li>
+<li><b>Après chaque trade :</b> Sweep met à jour l’objectif, la marge au-dessus de la perte max et la consistance. Ajoute la raison du trade et une capture pendant qu’il est frais.</li>
+<li><b>Avant un payout :</b> vérifie les conditions fixées par {F}, comme les jours gagnants, la consistance, un coussin ou un plafond, sur {RULES}.</li>
+<li><b>Chaque mois :</b> compare ce que tu as dépensé en évaluations, resets et activations avec les payouts reçus.</li></ul>""",
+"""<h2>Tu cuenta de {F}, día a día</h2><ul>
+<li><b>Antes de la sesión:</b> revisa el margen que te queda sobre la pérdida máx. y el límite del día. La <a href="@trailing-drawdown-calculator.html">calculadora de drawdown dinámico</a> sirve para cualquier cuenta.</li>
+<li><b>Tras cada operación:</b> Sweep actualiza el objetivo, el margen sobre la pérdida máx. y la consistencia. Añade el motivo y una captura mientras la operación está fresca.</li>
+<li><b>Antes de un payout:</b> revisa las condiciones que fija {F}, como días ganadores, consistencia, un colchón o un límite, en {RULES}.</li>
+<li><b>Cada mes:</b> compara lo que gastaste en evaluaciones, reinicios y activaciones con los payouts recibidos.</li></ul>""")
+
 def make_firm_page(slug, firm):
     CRUMBS[slug] = T(f"{firm} trading journal", f"Journal de trading {firm}", f"Diario de trading para {firm}")
     def page(lang, t):
@@ -60,6 +76,9 @@ def make_firm_page(slug, firm):
              T("Closed or failed accounts keep their history","Les comptes fermés ou échoués gardent leur historique","Las cuentas cerradas o fallidas conservan su historial"),
              T("Share a payout card, amounts optional","Partage une carte de payout, montants optionnels","Comparte una tarjeta de payout, importes opcionales")],
             frame("payouts", lang, F(T("Payouts and expenses for {F} accounts, sample data","Payouts et dépenses des comptes {F}, données d’exemple","Payouts y gastos de cuentas de {F}, datos de ejemplo")), t), flip=True, id_="payouts")
+        where = ({l: f'<a href="{href(l, pages18.page_of(rp))}">' + {"en": f"our {firm} rules page", "fr": f"notre page des règles de {firm}", "es": f"nuestra página de reglas de {firm}"}[l] + "</a>" for l in LANGS} if rp
+                 else {l: {"en": f"{firm}’s official site", "fr": f"le site officiel de {firm}", "es": f"el sitio oficial de {firm}"}[l] for l in LANGS})
+        b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(DAY_BY_DAY)).replace("{F}", firm).replace("{RULES}", where[lang])}</article></div></section>'
         from pages7 import TOOLS
         tools = "".join(f'<a class="tool-mini" href="{href(lang,s)}">{ico(I[ic])}<span>{t(n)}</span></a>' for s,ic,n,_ in TOOLS)
         b += f'<section class="rule"><div class="wrap"><div class="head"><span class="kick">{t(T("Free tools","Outils gratuits","Herramientas gratuitas"))}</span><h2>{t(T("Check a number before the open.","Vérifie un chiffre avant l’ouverture.","Comprueba una cifra antes de la apertura."))}</h2></div><div class="tool-row">{tools}</div></div></section>'
