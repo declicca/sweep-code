@@ -262,7 +262,9 @@ def _payout_conds(po, size, lang, t):
     if po.get("win_days"): out.append(t(T(f"{po['win_days']:g} winning days", f"{po['win_days']:g} jours gagnants", f"{po['win_days']:g} días ganadores")) + (t(T(f" of {U(po['win_min'])}+", f" de {U(po['win_min'])} et +", f" de {U(po['win_min'])} o más")) if po.get("win_min") else ""))
     if po.get("trade_days"): out.append(t(T(f"{po['trade_days']:g} traded days", f"{po['trade_days']:g} jours tradés", f"{po['trade_days']:g} días operados")))
     if po.get("cycle_days"): out.append(t(T(f"{po['cycle_days']:g} days between payouts", f"{po['cycle_days']:g} jours entre deux payouts", f"{po['cycle_days']:g} días entre payouts")))
-    if po.get("cycle_min"): out.append(t(T(f"{U(po['cycle_min'])} of profit since the last payout", f"{U(po['cycle_min'])} de profit depuis le dernier payout", f"{U(po['cycle_min'])} de beneficio desde el último payout")))
+    if po.get("first_min") and po.get("cycle_min"): out.append(t(T(f"{U(po['first_min'])} of profit before the 1st, then {U(po['cycle_min'])} before each next one", f"{U(po['first_min'])} de profit avant le 1er, puis {U(po['cycle_min'])} avant chaque suivant", f"{U(po['first_min'])} de beneficio antes del 1.º, luego {U(po['cycle_min'])} antes de cada siguiente")))
+    elif po.get("first_min"): out.append(t(T(f"{U(po['first_min'])} of profit before the 1st payout", f"{U(po['first_min'])} de profit avant le 1er payout", f"{U(po['first_min'])} de beneficio antes del 1.er payout")))
+    elif po.get("cycle_min"): out.append(t(T(f"{U(po['cycle_min'])} of profit since the last payout", f"{U(po['cycle_min'])} de profit depuis le dernier payout", f"{U(po['cycle_min'])} de beneficio desde el último payout")))
     elif po.get("cycle_pos"): out.append(t(T("a profit since the last payout", "un profit depuis le dernier payout", "beneficio desde el último payout")))
     if po.get("min_bal"): out.append(t(T(f"balance above {U(po['min_bal'])}", f"solde au-dessus de {U(po['min_bal'])}", f"saldo por encima de {U(po['min_bal'])}")))
     return out

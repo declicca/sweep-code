@@ -84,6 +84,7 @@ def payout_rows(lang, t):
      (T("Days between payouts","Jours entre deux payouts","Días entre payouts"), lambda po, s: po.get("cycle_days"), lambda v: f"{v:g}"),
      (T("Profitable since the last payout","Profitable depuis le dernier payout","Rentable desde el último payout"), lambda po, s: True if po.get("cycle_pos") else None,
       lambda v: t(T("Required","Obligatoire","Obligatorio"))),
+     (T("Profit before the 1st payout","Profit avant le 1er payout","Beneficio antes del 1.er payout"), lambda po, s: po.get("first_min"), U),
      (T("Profit since the last payout","Profit depuis le dernier payout","Beneficio desde el último payout"), lambda po, s: po.get("cycle_min"), U),
      (T("Balance to keep","Solde à garder","Saldo a mantener"), lambda po, s: po.get("min_bal"), U),
      (T("Minimum payout","Payout minimum","Payout mínimo"), lambda po, s: po.get("min"), U),
@@ -210,7 +211,10 @@ def payout_sentence(f, p, s, label):
         if po.get("trade_days"): bits.append({"en": f"{po['trade_days']:g} traded days", "fr": f"{po['trade_days']:g} jours tradés", "es": f"{po['trade_days']:g} días operados"}[l])
         if po.get("cycle_days"): bits.append({"en": f"{po['cycle_days']:g} days since the last payout", "fr": f"{po['cycle_days']:g} jours depuis le dernier payout", "es": f"{po['cycle_days']:g} días desde el último payout"}[l])
         if po.get("cycle_pos") and not po.get("cycle_min"): bits.append({"en": "a profit since the last payout", "fr": "un profit depuis le dernier payout", "es": "un beneficio desde el último payout"}[l])
-        if po.get("cycle_min"): bits.append({"en": f"at least {U(po['cycle_min'])} of profit since the last payout", "fr": f"au moins {U(po['cycle_min'])} de profit depuis le dernier payout", "es": f"al menos {U(po['cycle_min'])} de beneficio desde el último payout"}[l])
+        if po.get("first_min") and po.get("cycle_min"):   # the app's wording (Alpha Direct)
+            bits.append({"en": f"{U(po['first_min'])} of profit before the 1st, then {U(po['cycle_min'])} before each next one", "fr": f"{U(po['first_min'])} de profit avant le 1er, puis {U(po['cycle_min'])} avant chaque suivant", "es": f"{U(po['first_min'])} de beneficio antes del 1.º, luego {U(po['cycle_min'])} antes de cada siguiente"}[l])
+        elif po.get("first_min"): bits.append({"en": f"{U(po['first_min'])} of profit before the 1st payout", "fr": f"{U(po['first_min'])} de profit avant le 1er payout", "es": f"{U(po['first_min'])} de beneficio antes del 1.er payout"}[l])
+        elif po.get("cycle_min"): bits.append({"en": f"at least {U(po['cycle_min'])} of profit since the last payout", "fr": f"au moins {U(po['cycle_min'])} de profit depuis le dernier payout", "es": f"al menos {U(po['cycle_min'])} de beneficio desde el último payout"}[l])
         if po.get("min_bal"): bits.append({"en": f"a balance above {U(po['min_bal'])}", "fr": f"un solde au-dessus de {U(po['min_bal'])}", "es": f"un saldo por encima de {U(po['min_bal'])}"}[l])
         lad = po.get("ladder")
         caps = " / ".join(U(x) if x is not None else {"en": "no cap", "fr": "sans plafond", "es": "sin tope"}[l] for x in lad) if lad else ""
@@ -244,11 +248,11 @@ FIELD = {"target": T("Profit target","Objectif de profit","Objetivo de beneficio
          "dd_lock": T("Trailing stops at the start","Suivi bloqué au départ","Drawdown fijo en el inicio"), "dd_lock_offset": T("Trailing stops at start +","Suivi bloqué à départ +","Drawdown fijo en inicio +"),
          "win_days": T("Winning days","Jours gagnants","Días ganadores"), "win_min": T("Minimum per winning day","Minimum par jour gagnant","Mínimo por día ganador"), "trade_days": T("Trading days","Jours tradés","Días operados"),
          "cycle_days": T("Days between payouts","Jours entre deux payouts","Días entre payouts"), "cycle_pos": T("Profitable since the last payout","Profitable depuis le dernier payout","Rentable desde el último payout"),
-         "cycle_min": T("Profit since the last payout","Profit depuis le dernier payout","Beneficio desde el último payout"), "min_bal": T("Balance to keep","Solde à garder","Saldo a mantener"),
+         "cycle_min": T("Profit since the last payout","Profit depuis le dernier payout","Beneficio desde el último payout"), "first_min": T("Profit before the 1st payout","Profit avant le 1er payout","Beneficio antes del 1.er payout"), "min_bal": T("Balance to keep","Solde à garder","Saldo a mantener"),
          "min": T("Minimum payout","Payout minimum","Payout mínimo"), "max": T("Maximum per payout","Maximum par payout","Máximo por payout"), "max_dll": T("Maximum with the daily loss limit option","Maximum avec l’option limite du jour","Máximo con la opción de límite diario"),
          "ladder": T("Payout caps","Plafonds des payouts","Topes de los payouts"), "max_pct": T("Max % of the profit","Max % du profit","Máx. % del beneficio"), "max_payouts": T("Max number of payouts","Nombre max de payouts","Número máx. de payouts"),
          "split_pct": T("Profit split","Partage des profits","Reparto de beneficios"), "eval": T("Evaluation price","Prix de l’évaluation","Precio de la evaluación"), "activation": T("Activation fee","Frais d’activation","Tarifa de activación")}
-MONEY = {"target", "dd", "dll", "floor", "dd_lock_offset", "win_min", "cycle_min", "min_bal", "min", "max", "max_dll", "eval", "activation"}
+MONEY = {"target", "dd", "dll", "floor", "dd_lock_offset", "win_min", "cycle_min", "first_min", "min_bal", "min", "max", "max_dll", "eval", "activation"}
 PCT = {"consistency", "start_pct", "max_pct", "split_pct"}
 PHASE = {"eval": T("evaluation","évaluation","evaluación"), "funded": T("funded","financé","financiada"), "live": T("live","live","live"), "price": T("fees","frais","tarifas")}
 
