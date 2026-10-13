@@ -1395,3 +1395,12 @@ figcaption, .cap, .shot-note{text-align:center;font-size:12.5px;color:var(--fain
   .rules-tbl[data-col] .cmp.rules td{white-space:normal}
 }
 @media (min-width:861px){ .seg.sizes{display:none} }
+/* ---------- comparisons: strengths above the side-by-side table (blue), Sweep's gaps (grey) ---------- */
+.vs-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 22px}
+.vs-sum>div{padding:18px 20px;border-radius:var(--r-lg);background:var(--glass);box-shadow:var(--lift)}
+.vs-sum h3{font-size:16px;font-weight:600;margin:0 0 10px}
+.vs-sum ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.vs-sum li{position:relative;padding-left:17px;font-size:14.5px;line-height:1.45}
+.vs-sum li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--gain)}
+.vs-sum li.gap{color:var(--muted)}.vs-sum li.gap::before{background:var(--faint)}
+@media (max-width:860px){ .vs-sum{grid-template-columns:1fr} }

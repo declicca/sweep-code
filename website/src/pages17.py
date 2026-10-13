@@ -61,6 +61,34 @@ FAQ_ADD = (T("How do I add trades to Sweep?","Comment ajouter des trades dans Sw
   T("From NinjaTrader 8, trades sync automatically with Sweep’s free add-on. From another platform, import its export (Tradovate, Rithmic, ProjectX or TradingView), paste a screenshot that Sweep AI reads, or type the trade by hand.",
     "Depuis NinjaTrader 8, les trades se synchronisent automatiquement avec l’add-on gratuit de Sweep. Depuis une autre plateforme, importe son export (Tradovate, Rithmic, ProjectX ou TradingView), colle une capture que Sweep AI lit, ou saisis le trade à la main.",
     "Desde NinjaTrader 8, las operaciones se sincronizan automáticamente con el add-on gratis de Sweep. Desde otra plataforma, importa su exportación (Tradovate, Rithmic, ProjectX o TradingView), pega una captura que Sweep AI lee o escribe la operación a mano."))
+# Summary above the side-by-side table: three strengths on each side (blue), and what Sweep doesn't have (grey)
+SWEEP_STRONG = [T(f"Prop firm rules preloaded for {FIRMS_N} futures firms, checked every week", f"Règles préremplies pour {FIRMS_N} prop firms de futures, vérifiées chaque semaine", f"Reglas precargadas para {FIRMS_N} prop firms de futuros, revisadas cada semana"),
+                T("A free plan with no time limit, and Pro at $19 a month", "Un forfait gratuit sans limite de temps, et Pro à 19 $ par mois", "Un plan gratis sin límite de tiempo, y Pro a 19 $ al mes"),
+                T("A daily routine that rewards following your plan", "Une routine quotidienne qui récompense le respect de ton plan", "Una rutina diaria que premia seguir tu plan")]
+SYNC_DEV = T("Automatic sync from Rithmic and Tradovate: in development", "Synchro automatique Rithmic et Tradovate : en développement", "Sincronización automática con Rithmic y Tradovate: en desarrollo")
+NO_REPLAY = T("No trade replay or backtesting", "Pas de replay de trades ni de backtesting", "Sin replay de operaciones ni backtesting")
+FUTURES_ONLY = T("Futures only: no stocks, options or forex", "Futures seulement : pas d’actions, d’options ni de forex", "Solo futuros: sin acciones, opciones ni forex")
+SUMMARY = {
+ "TradeZella": ([T("Automatic sync from many platforms", "Synchro automatique depuis de nombreuses plateformes", "Sincronización automática desde muchas plataformas"),
+                 T("Trade replay (Pro and Ultra) and backtesting", "Replay de trades (Pro et Ultra) et backtesting", "Replay de operaciones (Pro y Ultra) y backtesting"),
+                 T("Futures, stocks, forex and crypto", "Futures, actions, forex et cryptos", "Futuros, acciones, forex y cripto")], [SYNC_DEV, NO_REPLAY]),
+ "Tradervue": ([T("A free plan of 30 trades a month", "Un forfait gratuit de 30 trades par mois", "Un plan gratis de 30 operaciones al mes"),
+                T("Broker sync and mentoring on Silver and Gold", "Synchro avec le courtier et mentorat sur Silver et Gold", "Sincronización con el bróker y mentoría en Silver y Gold"),
+                T("Stocks, options, futures and forex", "Actions, options, futures et forex", "Acciones, opciones, futuros y forex")], [SYNC_DEV, FUTURES_ONLY]),
+ "TraderSync": ([T("Auto-sync with 700+ brokers and platforms", "Synchro automatique avec 700+ courtiers et plateformes", "Sincronización automática con más de 700 brókers y plataformas"),
+                 T("A native mobile app on every plan", "Une app mobile native sur tous les forfaits", "Una app móvil nativa en todos los planes"),
+                 T("Trade and market replay; automated backtesting on Elite", "Replay de trades et de marché ; backtesting automatisé sur Elite", "Replay de operaciones y de mercado; backtesting automatizado en Elite")],
+                [T("Native mobile apps: on the roadmap (in the browser today)", "Apps mobiles natives : prévues (dans le navigateur aujourd’hui)", "Apps móviles nativas: previstas (en el navegador hoy)"), NO_REPLAY]),
+ "Edgewonk": ([T("One yearly price ($197) with every feature", "Un seul prix annuel (197 $) avec toutes les fonctions", "Un solo precio anual (197 $) con todas las funciones"),
+               T("Tiltmeter and a weekly edge finder", "Tiltmeter et un edge finder chaque semaine", "Tiltmeter y un edge finder semanal"),
+               T("Strategy testing and a performance simulator", "Test de stratégies et simulateur de performance", "Prueba de estrategias y simulador de rendimiento")],
+              [T("No strategy testing or performance simulator", "Pas de test de stratégies ni de simulateur de performance", "Sin prueba de estrategias ni simulador de rendimiento"), FUTURES_ONLY]),
+}
+def _summary(t, name):
+    strong, gaps = SUMMARY[name]
+    col = lambda h, good, bad: (f'<div><h3>{h}</h3><ul>' + "".join(f"<li>{t(x)}</li>" for x in good) + "".join(f'<li class="gap">{t(x)}</li>' for x in bad) + "</ul></div>")
+    return f'<div class="vs-sum">{col("Sweep", SWEEP_STRONG, gaps)}{col(name, strong, [])}</div>'
+
 def _free_alt(name, them_en, them_fr, them_es):
     return (T(f"Is there a free alternative to {name}?", f"Existe-t-il une alternative gratuite à {name} ?", f"¿Hay una alternativa gratis a {name}?"),
             T("Yes. Sweep has a Free plan with no time limit and no credit card, and every new account gets 60 days of Pro. " + them_en,
@@ -253,7 +281,7 @@ def make_vs(c):
         b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("The short answer.","La réponse courte.","La respuesta corta."))}</h2></div>'
              f'<div class="grid g2 vs-picks">{picks}</div></div></section>'
              f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Side by side.","Côte à côte.","Lado a lado."))}</h2></div>'
-             f'{_cmp_table(t, c["rows"], name)}<p class="fine vs-note">{t(note)}</p></div></section>'
+             f'{_summary(t, name)}{_cmp_table(t, c["rows"], name)}<p class="fine vs-note">{t(note)}</p></div></section>'
              f'<section class="rule"><div class="wrap narrow"><article class="article">{article}</article></div></section>'
              f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>{faq}'
              + chips(T("Compare too","Compare aussi","Compara también"), others, ' style="margin-top:36px"')
