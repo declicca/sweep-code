@@ -31,6 +31,8 @@ PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calcul
               "best-trading-journal-for-prop-firms.html":pages17.page_best_journal})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
 PAGES["prop-firms/index.html"] = pages18.page_hub
+import pages19
+PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide})
 for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
@@ -67,6 +69,8 @@ LASTMOD = {pages18.page_of(f): pages18.checked_of(f) for f in pages18.presets.FI
 LASTMOD["prop-firms/index.html"] = max(LASTMOD.values())
 for _p in LASTMOD: PRIO.setdefault(_p, "0.8")
 for _c in pages17.VS: PRIO.setdefault(_c["slug"], "0.8")
+for _g in (pages19.GUIDE_CONS, pages19.GUIDE_DD): LASTMOD[_g] = pages18.presets.CHECKED; PRIO.setdefault(_g, "0.8")
+PRIO.setdefault(pages19.HUB, "0.7")
 urls = []
 for p in PAGES:
     if p == "404.html": continue

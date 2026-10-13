@@ -23,6 +23,11 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Tradeify](https://makeitsweep.com/tradeify-trading-journal)
 - [Alpha Futures](https://makeitsweep.com/alpha-futures-trading-journal)
 
+## Guides
+- [Guides](https://makeitsweep.com/guides): all guides for futures prop firm traders
+- [Prop firm consistency rules, compared](https://makeitsweep.com/prop-firm-consistency-rules): best-day limits in evaluations and funded accounts, firm by firm, from Sweep's weekly check
+- [Prop firm drawdown rules, compared](https://makeitsweep.com/prop-firm-drawdown-rules): end-of-day, real-time or static drawdown and when trailing stops, firm by firm
+
 ## Free resources
 - [Free calculators](https://makeitsweep.com/tools): position size, trailing drawdown, consistency, payout, expectancy, prop firm ROI
 - [CME futures contract specs](https://makeitsweep.com/futures-contracts)
