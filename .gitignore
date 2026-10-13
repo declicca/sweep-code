@@ -9,3 +9,4 @@ website/dist/
 !website/static/press/*.zip
 !app/sync/addon/SweepSync.zip
 !app/sync/addon/SweepSync-Quantower.zip
+__pycache__/

@@ -176,3 +176,7 @@ for _sub in ("img", "video"):
             if _rel not in _refs and not _f.endswith(".txt"):
                 _bytes += os.path.getsize(_p); os.remove(_p); _removed += 1
 print(f"pruned {_removed} unused files ({_bytes//1024//1024} MB)")
+_stale = [pg for pg, d in (list((pages18.page_of(f), pages18.checked_of(f)) for f in pages18.presets.FIRMS)
+                           + [(g, pages18.presets.CHECKED) for g in (pages19.GUIDE_CONS, pages19.GUIDE_DD, pages19.GUIDE_PAYOUT, pages19.GUIDE_SIZES)])
+          if (core.OG.get(pg) or {}).get("en", {}).get("date") not in (None, d)]
+if _stale: print("share images show an older verification date, run tools/og_images.py:", ", ".join(_stale))

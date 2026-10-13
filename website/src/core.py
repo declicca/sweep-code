@@ -301,6 +301,18 @@ def _crumb(lang, t, page, title=""):
     if page in REL_INFO: return t(REL_INFO[page][0])
     return re.split(r"\s[·|—]\s", title)[0].strip()
 
+# Share images made by tools/og_images.py for some pages (firms, comparisons, compared rules, calculators); the others use the site's image
+OG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "social", "og")
+try: OG = json.load(open(os.path.join(OG_DIR, "manifest.json"), encoding="utf-8"))
+except (OSError, ValueError): OG = {}
+
+def og_of(lang, page):
+    """(image path under /social/, alt text) for a page, or None when it has no image of its own."""
+    o = (OG.get(page) or {}).get(lang)
+    name = page.replace(".html", "").replace("/", "-")
+    if o and os.path.exists(os.path.join(OG_DIR, lang, name + ".png")): return f"og/{lang}/{name}.png", o["alt"]
+    return None
+
 def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     if page in META_SEO: title, desc = t(META_SEO[page][0]), t(META_SEO[page][1])
     desc = _trim(desc); title = _title(title)
@@ -355,6 +367,9 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     langlinks = "".join(f'<a href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}>{names[l]}</a>' for l in LANGS)
     cols = "".join(f'<div><h3>{t(h)}</h3><ul>' + "".join(f'<li><a href="{href(lang,p)}">{t(l)}</a></li>' for p, l in (items or _foot_firms())) + '</ul></div>' for h, items in FOOT)
     ogloc = {"en":"en_US","fr":"fr_CA","es":"es_ES"}[lang]
+    own = og_of(lang, page)
+    og_img = f"https://{DOMAIN}/social/" + (own[0] if own else ("og-100-"+lang+".png") if page=="100" else ("og-image.png" if lang=="en" else "og-image-"+lang+".png"))
+    og_alt = own[1] if own else "Sweep — " + t(T('Your edge, finally in one place.','Ton edge, enfin au même endroit.','Tu edge, por fin en un solo lugar.'))
     noindex = '<meta name="robots" content="noindex">' if page == "404.html" else ""
     return f'''<!doctype html>
 <html lang="{lang}">
@@ -387,9 +402,10 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <meta property="og:title" content="{html.escape(title)}">
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{url}">
-<meta property="og:image" content="https://{DOMAIN}/social/{("og-100-"+lang+".png") if page=="100" else ("og-image.png" if lang=="en" else "og-image-"+lang+".png")}">
+<meta property="og:image" content="{og_img}">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Sweep — {html.escape(t(T('Your edge, finally in one place.','Ton edge, enfin au même endroit.','Tu edge, por fin en un solo lugar.')))}">
+<meta property="og:image:alt" content="{html.escape(og_alt)}">
+<meta name="twitter:image" content="{og_img}">
 <meta name="twitter:card" content="summary_large_image">
 {extra_head}
 </head>

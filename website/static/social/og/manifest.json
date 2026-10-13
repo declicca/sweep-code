@@ -1,0 +1,296 @@
+{
+ "prop-firms/lucid.html": {
+  "en": {
+   "alt": "Lucid Trading rules 2026 · Drawdown, consistency and payouts · Verified October 7, 2026",
+   "date": "2026-10-07"
+  },
+  "fr": {
+   "alt": "Règles Lucid Trading 2026 · Drawdown, consistance et payouts · Vérifiées le 7 octobre 2026",
+   "date": "2026-10-07"
+  },
+  "es": {
+   "alt": "Reglas de Lucid Trading 2026 · Drawdown, consistencia y payouts · Revisadas el 7 de octubre de 2026",
+   "date": "2026-10-07"
+  }
+ },
+ "prop-firms/topstep.html": {
+  "en": {
+   "alt": "Topstep rules 2026 · Drawdown, consistency and payouts · Verified October 7, 2026",
+   "date": "2026-10-07"
+  },
+  "fr": {
+   "alt": "Règles Topstep 2026 · Drawdown, consistance et payouts · Vérifiées le 7 octobre 2026",
+   "date": "2026-10-07"
+  },
+  "es": {
+   "alt": "Reglas de Topstep 2026 · Drawdown, consistencia y payouts · Revisadas el 7 de octubre de 2026",
+   "date": "2026-10-07"
+  }
+ },
+ "prop-firms/apex.html": {
+  "en": {
+   "alt": "Apex Trader Funding rules 2026 · Drawdown, consistency and payouts · Verified October 13, 2026",
+   "date": "2026-10-13"
+  },
+  "fr": {
+   "alt": "Règles Apex Trader Funding 2026 · Drawdown, consistance et payouts · Vérifiées le 13 octobre 2026",
+   "date": "2026-10-13"
+  },
+  "es": {
+   "alt": "Reglas de Apex Trader Funding 2026 · Drawdown, consistencia y payouts · Revisadas el 13 de octubre de 2026",
+   "date": "2026-10-13"
+  }
+ },
+ "prop-firms/take-profit-trader.html": {
+  "en": {
+   "alt": "Take Profit Trader rules 2026 · Drawdown, consistency and payouts · Verified October 7, 2026",
+   "date": "2026-10-07"
+  },
+  "fr": {
+   "alt": "Règles Take Profit Trader 2026 · Drawdown, consistance et payouts · Vérifiées le 7 octobre 2026",
+   "date": "2026-10-07"
+  },
+  "es": {
+   "alt": "Reglas de Take Profit Trader 2026 · Drawdown, consistencia y payouts · Revisadas el 7 de octubre de 2026",
+   "date": "2026-10-07"
+  }
+ },
+ "prop-firms/myfundedfutures.html": {
+  "en": {
+   "alt": "MyFundedFutures rules 2026 · Drawdown, consistency and payouts · Verified October 8, 2026",
+   "date": "2026-10-08"
+  },
+  "fr": {
+   "alt": "Règles MyFundedFutures 2026 · Drawdown, consistance et payouts · Vérifiées le 8 octobre 2026",
+   "date": "2026-10-08"
+  },
+  "es": {
+   "alt": "Reglas de MyFundedFutures 2026 · Drawdown, consistencia y payouts · Revisadas el 8 de octubre de 2026",
+   "date": "2026-10-08"
+  }
+ },
+ "prop-firms/alpha-futures.html": {
+  "en": {
+   "alt": "Alpha Futures rules 2026 · Drawdown, consistency and payouts · Verified October 13, 2026",
+   "date": "2026-10-13"
+  },
+  "fr": {
+   "alt": "Règles Alpha Futures 2026 · Drawdown, consistance et payouts · Vérifiées le 13 octobre 2026",
+   "date": "2026-10-13"
+  },
+  "es": {
+   "alt": "Reglas de Alpha Futures 2026 · Drawdown, consistencia y payouts · Revisadas el 13 de octubre de 2026",
+   "date": "2026-10-13"
+  }
+ },
+ "prop-firms/tradeify.html": {
+  "en": {
+   "alt": "Tradeify rules · Enter them once. Every trade is checked.",
+   "date": null
+  },
+  "fr": {
+   "alt": "Règles Tradeify · Saisis-les une fois. Chaque trade est vérifié.",
+   "date": null
+  },
+  "es": {
+   "alt": "Reglas de Tradeify · Introdúcelas una vez. Cada operación se revisa.",
+   "date": null
+  }
+ },
+ "sweep-vs-tradezella.html": {
+  "en": {
+   "alt": "Sweep vs TradeZella · Price, prop firm rules and features, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "Sweep vs TradeZella · Prix, règles des prop firms et fonctions, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "Sweep vs TradeZella · Precio, reglas de prop firms y funciones, lado a lado",
+   "date": null
+  }
+ },
+ "sweep-vs-tradervue.html": {
+  "en": {
+   "alt": "Sweep vs Tradervue · Price, prop firm rules and features, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "Sweep vs Tradervue · Prix, règles des prop firms et fonctions, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "Sweep vs Tradervue · Precio, reglas de prop firms y funciones, lado a lado",
+   "date": null
+  }
+ },
+ "sweep-vs-tradersync.html": {
+  "en": {
+   "alt": "Sweep vs TraderSync · Price, prop firm rules and features, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "Sweep vs TraderSync · Prix, règles des prop firms et fonctions, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "Sweep vs TraderSync · Precio, reglas de prop firms y funciones, lado a lado",
+   "date": null
+  }
+ },
+ "sweep-vs-edgewonk.html": {
+  "en": {
+   "alt": "Sweep vs Edgewonk · Price, prop firm rules and features, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "Sweep vs Edgewonk · Prix, règles des prop firms et fonctions, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "Sweep vs Edgewonk · Precio, reglas de prop firms y funciones, lado a lado",
+   "date": null
+  }
+ },
+ "prop-firm-consistency-rules.html": {
+  "en": {
+   "alt": "Consistency rules, compared · 6 prop firms · Verified October 13, 2026",
+   "date": "2026-10-13"
+  },
+  "fr": {
+   "alt": "Règles de consistance, comparées · 6 prop firms · Vérifiées le 13 octobre 2026",
+   "date": "2026-10-13"
+  },
+  "es": {
+   "alt": "Reglas de consistencia, comparadas · 6 prop firms · Revisadas el 13 de octubre de 2026",
+   "date": "2026-10-13"
+  }
+ },
+ "prop-firm-drawdown-rules.html": {
+  "en": {
+   "alt": "Drawdown rules, compared · 6 prop firms · Verified October 13, 2026",
+   "date": "2026-10-13"
+  },
+  "fr": {
+   "alt": "Règles de drawdown, comparées · 6 prop firms · Vérifiées le 13 octobre 2026",
+   "date": "2026-10-13"
+  },
+  "es": {
+   "alt": "Reglas de drawdown, comparadas · 6 prop firms · Revisadas el 13 de octubre de 2026",
+   "date": "2026-10-13"
+  }
+ },
+ "prop-firm-payout-rules.html": {
+  "en": {
+   "alt": "Payout rules, compared · 6 prop firms · Verified October 13, 2026",
+   "date": "2026-10-13"
+  },
+  "fr": {
+   "alt": "Règles de payout, comparées · 6 prop firms · Vérifiées le 13 octobre 2026",
+   "date": "2026-10-13"
+  },
+  "es": {
+   "alt": "Reglas de payout, comparadas · 6 prop firms · Revisadas el 13 de octubre de 2026",
+   "date": "2026-10-13"
+  }
+ },
+ "prop-firm-profit-targets.html": {
+  "en": {
+   "alt": "Account sizes and targets, compared · 6 prop firms · Verified October 13, 2026",
+   "date": "2026-10-13"
+  },
+  "fr": {
+   "alt": "Tailles de compte et objectifs, comparés · 6 prop firms · Vérifiées le 13 octobre 2026",
+   "date": "2026-10-13"
+  },
+  "es": {
+   "alt": "Tamaños de cuenta y objetivos, comparados · 6 prop firms · Revisadas el 13 de octubre de 2026",
+   "date": "2026-10-13"
+  }
+ },
+ "position-size-calculator.html": {
+  "en": {
+   "alt": "Position size calculator · Free calculator for futures and prop traders",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calculateur de taille de position · Calculateur gratuit pour traders de futures et de prop firms",
+   "date": null
+  },
+  "es": {
+   "alt": "Calculadora de tamaño de posición · Calculadora gratis para traders de futuros y prop firms",
+   "date": null
+  }
+ },
+ "trailing-drawdown-calculator.html": {
+  "en": {
+   "alt": "Trailing drawdown calculator · Free calculator for futures and prop traders",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calculateur de drawdown suiveur · Calculateur gratuit pour traders de futures et de prop firms",
+   "date": null
+  },
+  "es": {
+   "alt": "Calculadora de drawdown dinámico · Calculadora gratis para traders de futuros y prop firms",
+   "date": null
+  }
+ },
+ "consistency-rule-calculator.html": {
+  "en": {
+   "alt": "Consistency rule calculator · Free calculator for futures and prop traders",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calculateur de règle de consistance · Calculateur gratuit pour traders de futures et de prop firms",
+   "date": null
+  },
+  "es": {
+   "alt": "Calculadora de regla de consistencia · Calculadora gratis para traders de futuros y prop firms",
+   "date": null
+  }
+ },
+ "expectancy-calculator.html": {
+  "en": {
+   "alt": "Expectancy calculator · Free calculator for futures and prop traders",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calculateur d’espérance · Calculateur gratuit pour traders de futures et de prop firms",
+   "date": null
+  },
+  "es": {
+   "alt": "Calculadora de esperanza · Calculadora gratis para traders de futuros y prop firms",
+   "date": null
+  }
+ },
+ "prop-firm-roi-calculator.html": {
+  "en": {
+   "alt": "Prop firm ROI calculator · Free calculator for futures and prop traders",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calculateur de rentabilité prop · Calculateur gratuit pour traders de futures et de prop firms",
+   "date": null
+  },
+  "es": {
+   "alt": "Calculadora de rentabilidad prop · Calculadora gratis para traders de futuros y prop firms",
+   "date": null
+  }
+ },
+ "payout-calculator.html": {
+  "en": {
+   "alt": "Payout calculator · Free calculator for futures and prop traders",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calculateur de payout · Calculateur gratuit pour traders de futures et de prop firms",
+   "date": null
+  },
+  "es": {
+   "alt": "Calculadora de payout · Calculadora gratis para traders de futuros y prop firms",
+   "date": null
+  }
+ }
+}
