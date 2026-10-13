@@ -547,6 +547,7 @@ def nbsp(lang, body):
             if lang == "fr":
                 x = re.sub(r"(?<=\d) (?=\d{3}(?!\d))", "\u00a0", x)
                 x = re.sub(r" (?=[:;?!](?:\s|$))", "\u00a0", x)
+                x = re.sub(r"(?<=\d) (?=h\b)|(?<=\bh) (?=\d)", "\u00a0", x)   # « 18 h », « 9 h 30 »
         out.append(x)
     return "".join(out)
 
