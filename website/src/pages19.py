@@ -188,7 +188,7 @@ def page_drawdown_guide(lang, t):
                    f'Ton seuil de liquidation, c’est ton sommet moins la perte max (ou le niveau fixe une fois le suivi arrêté). Le <a href="{href("fr", "trailing-drawdown-calculator.html")}">calculateur de drawdown suiveur</a> gratuit te le montre, et Sweep le suit à chaque trade.',
                    f'Tu nivel de liquidación es tu máximo menos la pérdida máx. (o el nivel fijo una vez detenido el seguimiento). La <a href="{href("es", "trailing-drawdown-calculator.html")}">calculadora de drawdown dinámico</a> gratuita te lo muestra, y Sweep lo sigue en cada operación.')))
     rel = [("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico")), (GUIDE_CONS, T("Consistency rules compared", "Règles de consistance comparées", "Reglas de consistencia comparadas")), ("prop-firm-payout-rules.html", T("Payout rules compared", "Règles de payout comparées", "Reglas de payout comparadas")),
-           ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
+           ("prop-firm-profit-targets.html", T("Profit targets and max loss compared", "Objectifs et perte max comparés", "Objetivos y pérdida máx. comparados")), ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm drawdown rules, compared (2026).", "Les règles de drawdown des prop firms, comparées (2026).", "Las reglas de drawdown de las prop firms, comparadas (2026)."),
         T(f"End of day, real time or static: how {FIRMS_N} futures prop firms trail your max loss, and when it stops, account type by account type.",
@@ -348,3 +348,95 @@ def page_payout_guide(lang, t):
 
 GUIDES.insert(0, (GUIDE_PAYOUT, T("Prop firm payout rules, compared", "Les règles de payout des prop firms, comparées", "Las reglas de payout de las prop firms, comparadas"),
                   T("When you can request, how much, and the share you keep, firm by firm.", "Quand demander, combien, et la part que tu gardes, firme par firme.", "Cuándo pedir, cuánto y la parte que te quedas, firma por firma.")))
+
+# ---------------------------------------------------------------- account sizes, profit targets and max loss
+GUIDE_SIZES = "prop-firm-profit-targets.html"
+
+def _size_cell(s, lang, t):
+    """« $3,000 / $2,000 / $1,000 (option) »: target, max loss, daily loss limit (evaluation; funded when there's no evaluation)."""
+    U = lambda v: usd(v, lang)
+    e, f = s.get("eval") or {}, s.get("funded") or {}
+    r = e if e.get("dd") else f
+    if not r.get("dd"): return DASH
+    lines = [f"<b>{U(e['target'])}</b>" if e.get("target") else DASH, U(r["dd"])]
+    if r.get("dll"): lines.append(U(r["dll"]) + (" " + t(T("(option)", "(option)", "(opción)")) if r.get("dll_optional") else ""))
+    return "<br>".join(lines)
+
+def page_sizes_guide(lang, t):
+    secs = ""
+    for f in presets.FIRMS:
+        sizes = sorted({s["size"] for p in f["programs"] for s in p["sizes"]})
+        head = (f'<thead><tr><th scope="col">{t(T("Account type", "Type de compte", "Tipo de cuenta"))}</th>' + "".join(f'<th scope="col">{kk(z)}</th>' for z in sizes) + "</tr></thead>")
+        rows = ""
+        for p in f["programs"]:
+            by = {s["size"]: s for s in p["sizes"]}
+            direct = not any((s.get("eval") or {}).get("dd") for s in p["sizes"])
+            name = f'<a href="{href(lang, page_of(f))}#{anchor(f, p)}">{p["name"]}</a>' + (f'<br><span class="fine">{t(T("funded directly", "financé direct", "financiada directa"))}</span>' if direct else "")
+            rows += f'<tr><th scope="row">{name}</th>' + "".join(f"<td>{_size_cell(by[z], lang, t) if z in by else DASH}</td>" for z in sizes) + "</tr>"
+        secs += (f'<h3><a href="{href(lang, page_of(f))}">{f["name"]}</a></h3>'
+                 f'<div class="cmp-wrap"><table class="cmp rules sizes n{len(sizes)}">{head}<tbody>{rows}</tbody></table></div>')
+    table = (f'<p>{t(T("In each cell: the profit target (bold), the max loss, then the daily loss limit when the account has one. Evaluation values; for accounts funded directly, the funded account’s.", "Dans chaque case : l’objectif de profit (en gras), la perte max, puis la limite de perte du jour quand le compte en a une. Valeurs de l’évaluation ; pour les comptes financés directement, celles du compte financé.", "En cada casilla: el objetivo de beneficio (en negrita), la pérdida máx. y, si la cuenta lo tiene, el límite de pérdida diaria. Valores de la evaluación; en las cuentas financiadas directamente, los de la cuenta financiada."))}</p>'
+             + secs)
+    intro = [
+     (T("Reading the numbers", "Lire les chiffres", "Cómo leer las cifras"), [
+      T("The <b>profit target</b> is what you must make to pass the evaluation. The <b>max loss</b> is how far your balance can fall below its reference before the account fails; how that reference moves (end of day, real time or fixed) is in our drawdown guide. The <b>daily loss limit</b> caps what one day can lose.",
+        "L’<b>objectif de profit</b>, c’est ce que tu dois gagner pour réussir l’évaluation. La <b>perte max</b>, c’est jusqu’où ton solde peut descendre sous sa référence avant que le compte échoue ; la façon dont cette référence bouge (fin de journée, temps réel ou fixe) est dans notre guide du drawdown. La <b>limite de perte du jour</b> plafonne ce qu’une journée peut perdre.",
+        "El <b>objetivo de beneficio</b> es lo que debes ganar para aprobar la evaluación. La <b>pérdida máx.</b> es cuánto puede caer tu saldo bajo su referencia antes de que la cuenta falle; cómo se mueve esa referencia (al cierre, en tiempo real o fija) está en nuestra guía del drawdown. El <b>límite de pérdida diaria</b> limita lo que puede perder un día."),
+      T("A bigger account means a bigger target and more room, usually in proportion. Compare the target with the max loss: a $3,000 target with $2,000 of room is a different challenge from $3,000 with $2,500.",
+        "Un plus gros compte, c’est un objectif plus haut et plus de marge, en général dans les mêmes proportions. Compare l’objectif à la perte max : un objectif de 3 000 $ avec 2 000 $ de marge, ce n’est pas le même défi qu’avec 2 500 $.",
+        "Una cuenta mayor implica un objetivo más alto y más margen, en general en la misma proporción. Compara el objetivo con la pérdida máx.: un objetivo de 3.000 $ con 2.000 $ de margen no es el mismo reto que con 2.500 $.")]),
+    ]
+    def pairs50(fn):
+        out = {l: [] for l in LANGS}
+        for f in presets.FIRMS:
+            for p in f["programs"]:
+                s = next((x for x in p["sizes"] if x["size"] == 50000), None)
+                if not s: continue
+                for l in LANGS:
+                    v = fn(s, l)
+                    if v: out[l].append((f["name"], f"{p['name']} {v}"))
+        return out
+    targets = pairs50(lambda s, l: usd(s["eval"]["target"], l) if (s.get("eval") or {}).get("target") else None)
+    maxloss = pairs50(lambda s, l: usd(((s.get("eval") or {}).get("dd") or (s.get("funded") or {}).get("dd")), l) if ((s.get("eval") or {}).get("dd") or (s.get("funded") or {}).get("dd")) else None)
+    big = {l: [] for l in LANGS}
+    for f in presets.FIRMS:
+        top = max(s["size"] for p in f["programs"] for s in p["sizes"])
+        if top >= 150000:
+            for l in LANGS: big[l].append((f["name"], kk(top)))
+    dll = {l: [] for l in LANGS}
+    for f in presets.FIRMS:
+        for p in f["programs"]:
+            ds = [(s.get("eval") or {}) if (s.get("eval") or {}).get("dd") else (s.get("funded") or {}) for s in p["sizes"]]
+            if any(d.get("dll") for d in ds):
+                opt = all(d.get("dll_optional") for d in ds if d.get("dll"))
+                for l in LANGS: dll[l].append((f["name"], p["name"] + (" " + {"en": "(option)", "fr": "(option)", "es": "(opción)"}[l] if opt else "")))
+    faqs = []
+    if targets["en"]:
+        faqs.append((T("What is the profit target on a 50K prop firm account?", "Quel est l’objectif de profit d’un compte prop de 50K ?", "¿Cuál es el objetivo de beneficio de una cuenta prop de 50K?"), {l: _by_firm(targets[l], l) for l in LANGS}))
+    if maxloss["en"]:
+        faqs.append((T("What is the max loss on a 50K prop firm account?", "Quelle est la perte max d’un compte prop de 50K ?", "¿Cuál es la pérdida máx. de una cuenta prop de 50K?"), {l: _by_firm(maxloss[l], l) for l in LANGS}))
+    if big["en"]:
+        faqs.append((T("Which prop firms offer 150K accounts or bigger?", "Quelles prop firms offrent des comptes de 150K ou plus ?", "¿Qué prop firms ofrecen cuentas de 150K o más?"),
+                     {l: {"en": "Largest account size in Sweep’s catalogue: ", "fr": "Plus grande taille de compte dans le catalogue de Sweep : ", "es": "Mayor tamaño de cuenta en el catálogo de Sweep: "}[l] + _by_firm(big[l], l) for l in LANGS}))
+    if dll["en"]:
+        faqs.append((T("Which prop firm accounts have a daily loss limit?", "Quels comptes de prop firms ont une limite de perte du jour ?", "¿Qué cuentas de prop firms tienen límite de pérdida diaria?"),
+                     {l: _by_firm(dll[l], l) + {"en": " “(option)” means you choose it when you buy.", "fr": " « (option) » veut dire que tu la choisis à l’achat.", "es": " «(opción)» significa que la eliges al comprar."}[l] for l in LANGS}))
+    faqs.append((T("How many contracts can I trade on my account?", "Combien de contrats puis-je trader sur mon compte ?", "¿Cuántos contratos puedo operar en mi cuenta?"),
+                 T(f'Each firm sets a contract limit per account size (on each firm’s rules page). To size each trade so a stop never costs more than you planned, use the free <a href="{href("en", "position-size-calculator.html")}">position size calculator</a>.',
+                   f'Chaque firme fixe un nombre de contrats max par taille de compte (sur la page de règles de chaque firme). Pour dimensionner chaque trade sans qu’un stop coûte plus que prévu, utilise le <a href="{href("fr", "position-size-calculator.html")}">calculateur de taille de position</a> gratuit.',
+                   f'Cada firma fija un máximo de contratos por tamaño de cuenta (en la página de reglas de cada firma). Para dimensionar cada operación sin que un stop cueste más de lo previsto, usa la <a href="{href("es", "position-size-calculator.html")}">calculadora de tamaño de posición</a> gratuita.')))
+    rel = [("position-size-calculator.html", T("Position size calculator", "Calculateur de taille de position", "Calculadora de tamaño de posición")), (GUIDE_DD, T("Drawdown rules compared", "Règles de drawdown comparées", "Reglas de drawdown comparadas")),
+           (GUIDE_PAYOUT, T("Payout rules compared", "Règles de payout comparées", "Reglas de payout comparadas")), ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
+    return _page(lang, t, T("Guide", "Guide", "Guía"),
+        T("Prop firm account sizes, profit targets and max loss, compared (2026).", "Tailles de compte, objectifs de profit et perte max des prop firms, comparés (2026).", "Tamaños de cuenta, objetivos de beneficio y pérdida máx. de las prop firms, comparados (2026)."),
+        T(f"The profit target, max loss and daily loss limit of every account size at {FIRMS_N} futures prop firms, from 25K to the largest.",
+          f"L’objectif de profit, la perte max et la limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, de 25K à la plus grande.",
+          f"El objetivo de beneficio, la pérdida máx. y el límite diario de cada tamaño de cuenta en {FIRMS_N} prop firms de futuros, de 25K a la mayor."),
+        intro, table, "", faqs, rel,
+        T("Prop Firm Profit Targets & Max Loss by Size (2026) · Sweep", "Objectifs et perte max des prop firms par taille (2026) · Sweep", "Objetivos y pérdida máx. de prop firms (2026) · Sweep"),
+        T(f"Profit target, max loss and daily loss limit for every account size at {FIRMS_N} futures prop firms, side by side, from Sweep’s weekly check of their pages.",
+          f"Objectif de profit, perte max et limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, côte à côte, vérifiés chaque semaine.",
+          f"Objetivo de beneficio, pérdida máx. y límite diario de cada tamaño de cuenta en {FIRMS_N} prop firms de futuros, lado a lado, revisados cada semana."))
+
+GUIDES.insert(1, (GUIDE_SIZES, T("Account sizes, profit targets and max loss, compared", "Tailles de compte, objectifs et perte max, comparés", "Tamaños de cuenta, objetivos y pérdida máx., comparados"),
+                  T("Every size from 25K up, firm by firm: target, max loss, daily limit.", "Chaque taille dès 25K, firme par firme : objectif, perte max, limite du jour.", "Cada tamaño desde 25K, firma por firma: objetivo, pérdida máx., límite diario.")))

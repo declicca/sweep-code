@@ -25,6 +25,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 
 ## Guides
 - [Guides](https://makeitsweep.com/guides): all guides for futures prop firm traders
+- [Prop firm account sizes, profit targets and max loss, compared](https://makeitsweep.com/prop-firm-profit-targets): every account size, firm by firm
 - [Prop firm payout rules, compared](https://makeitsweep.com/prop-firm-payout-rules): winning days, balance to keep, caps per payout and profit split, firm by firm
 - [Prop firm consistency rules, compared](https://makeitsweep.com/prop-firm-consistency-rules): best-day limits in evaluations and funded accounts, firm by firm, from Sweep's weekly check
 - [Prop firm drawdown rules, compared](https://makeitsweep.com/prop-firm-drawdown-rules): end-of-day, real-time or static drawdown and when trailing stops, firm by firm
