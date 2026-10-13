@@ -3,7 +3,7 @@ import re
 import presets
 
 # Prop firm rule pages. Every number comes from the app's catalogue (presets.py); a value missing there is a row left out.
-SLUG = {"tpt": "take-profit-trader", "mffu": "myfundedfutures"}
+SLUG = {"tpt": "take-profit-trader", "mffu": "myfundedfutures", "alpha": "alpha-futures"}
 TRACK_SINCE = "2026-10-09"   # first copy of the app's catalogue kept by the site: changes are logged from this date
 NB, NNB = " ", " "
 
@@ -72,7 +72,7 @@ def phase_rows(lang, t, ph):
      (T("Consistency","Consistance","Consistencia"), lambda r, s: r.get("consistency"),
       lambda v: t(T("Best day ≤ ","Meilleur jour ≤ ","Mejor día ≤ ")) + pc(v, lang)),
      (T("Minimum days","Jours minimum","Días mínimos"), lambda r, s: r.get("min_days"), lambda v: f"{v:g}"),
-     (T("Max contracts","Contrats max","Contratos máx."), lambda r, s: r.get("max_minis"), lambda v: f"{v:g} minis"),
+     (T("Max contracts","Contrats max","Contratos máx."), lambda r, s: r.get("max_minis"), lambda v: f"{v:g} mini" + ("s" if v != 1 else "")),
     ]
 
 def payout_rows(lang, t):
@@ -100,7 +100,7 @@ def price_rows(lang, t):
     return [
      (T("Evaluation","Évaluation","Evaluación"), lambda pr, s: (pr.get("eval"), pr.get("eval_period")) if pr.get("eval") is not None else None,
       lambda v: usd(v[0], lang) + (t(T("/month","/mois","/mes")) if v[1] == "month" else "")),
-     (T("Activation fee","Frais d’activation","Tarifa de activación"), lambda pr, s: pr.get("activation"), lambda v: usd(v, lang)),
+     (T("Activation fee","Frais d’activation","Tarifa de activación"), lambda pr, s: pr.get("activation"), lambda v: usd(v, lang) if v else t(T("None","Aucuns","Ninguna"))),
     ]
 
 def groups_of(lang, t, sizes, variant=None):
@@ -238,13 +238,45 @@ def payout_sentence(f, p, s, label):
 # ---------------------------------------------------------------- page
 RULE_NAMES = {"eval": T("evaluation","évaluation","evaluación"), "funded": T("funded","financé","financiada"), "live": T("live","live","live")}
 
+FIELD = {"target": T("Profit target","Objectif de profit","Objetivo de beneficio"), "dd": T("Max loss","Perte max","Pérdida máx."), "dd_type": T("Drawdown type","Type de drawdown","Tipo de drawdown"),
+         "dll": T("Daily loss limit","Limite de perte du jour","Límite de pérdida diaria"), "consistency": T("Consistency","Consistance","Consistencia"), "min_days": T("Minimum days","Jours minimum","Días mínimos"),
+         "max_minis": T("Max contracts","Contrats max","Contratos máx."), "floor": T("Balance to stay above","Solde à garder au-dessus de","Saldo mínimo"), "start_pct": T("Starting balance","Solde de départ","Saldo inicial"),
+         "dd_lock": T("Trailing stops at the start","Suivi bloqué au départ","Drawdown fijo en el inicio"), "dd_lock_offset": T("Trailing stops at start +","Suivi bloqué à départ +","Drawdown fijo en inicio +"),
+         "win_days": T("Winning days","Jours gagnants","Días ganadores"), "win_min": T("Minimum per winning day","Minimum par jour gagnant","Mínimo por día ganador"), "trade_days": T("Trading days","Jours tradés","Días operados"),
+         "cycle_days": T("Days between payouts","Jours entre deux payouts","Días entre payouts"), "cycle_pos": T("Profitable since the last payout","Profitable depuis le dernier payout","Rentable desde el último payout"),
+         "cycle_min": T("Profit since the last payout","Profit depuis le dernier payout","Beneficio desde el último payout"), "min_bal": T("Balance to keep","Solde à garder","Saldo a mantener"),
+         "min": T("Minimum payout","Payout minimum","Payout mínimo"), "max": T("Maximum per payout","Maximum par payout","Máximo por payout"), "max_dll": T("Maximum with the daily loss limit option","Maximum avec l’option limite du jour","Máximo con la opción de límite diario"),
+         "ladder": T("Payout caps","Plafonds des payouts","Topes de los payouts"), "max_pct": T("Max % of the profit","Max % du profit","Máx. % del beneficio"), "max_payouts": T("Max number of payouts","Nombre max de payouts","Número máx. de payouts"),
+         "split_pct": T("Profit split","Partage des profits","Reparto de beneficios"), "eval": T("Evaluation price","Prix de l’évaluation","Precio de la evaluación"), "activation": T("Activation fee","Frais d’activation","Tarifa de activación")}
+MONEY = {"target", "dd", "dll", "floor", "dd_lock_offset", "win_min", "cycle_min", "min_bal", "min", "max", "max_dll", "eval", "activation"}
+PCT = {"consistency", "start_pct", "max_pct", "split_pct"}
+PHASE = {"eval": T("evaluation","évaluation","evaluación"), "funded": T("funded","financé","financiada"), "live": T("live","live","live"), "price": T("fees","frais","tarifas")}
+
+def change_label(path, lang, t):
+    """« funded.payout.max » → « Maximum per payout (funded) »; None for what isn't a rule (dates, notes)."""
+    parts = path.split(".")
+    if parts[0] == "variants" and len(parts) > 2: parts = parts[2:]
+    phase, field = parts[0], parts[-1]
+    if field not in FIELD or phase not in PHASE: return None
+    return f"{t(FIELD[field])} ({t(PHASE[phase])})"
+
+def change_value(path, v, lang, t):
+    field = path.split(".")[-1]
+    if v is None: return "—"
+    if isinstance(v, bool): return t(T("yes","oui","sí")) if v else t(T("no","non","no"))
+    if isinstance(v, list): return " / ".join(usd(x, lang) if x is not None else "∞" for x in v)
+    if field in MONEY and isinstance(v, (int, float)): return usd(v, lang)
+    if field in PCT and isinstance(v, (int, float)): return pc(v, lang)
+    if field == "dd_type" and v in DDT: return t(DDT[v])
+    return str(v)
+
 def history(lang, t, f):
-    rows = [c for c in presets.CHANGES if c.get("firm") == f["id"]][:8]
+    # a value that changed or disappeared; a value that only appears is the catalogue being completed, not a rule change
+    rows = [c for c in presets.CHANGES if c.get("firm") == f["id"] and c.get("old") is not None and change_label(c.get("rule", ""), lang, t)][:8]
     if not rows:
         return f'<p>{t(T(f"No rule change recorded since we started tracking on {day(TRACK_SINCE, lang)}.", f"Aucun changement de règle enregistré depuis le début du suivi, le {day(TRACK_SINCE, lang)}.", f"Ningún cambio de regla registrado desde el inicio del seguimiento, el {day(TRACK_SINCE, lang)}."))}</p>'
     prog = {p.get("id", p["name"]): p["name"] for p in f["programs"]}
-    def v(x): return "—" if x is None else (usd(x, lang) if isinstance(x, (int, float)) and not isinstance(x, bool) and abs(x) >= 100 else str(x))
-    items = "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {c["rule"]}: {v(c["old"])} → {v(c["new"])}</li>' for c in rows)
+    items = "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)}</li>' for c in rows)
     return f'<ul class="list">{items}</ul>'
 
 def make_rules_page(f):
@@ -253,7 +285,7 @@ def make_rules_page(f):
         name, progs = f["name"], f["programs"]
         when, src = checked_of(f), source_of(f)
         sizes_all = sorted({s["size"] for p in progs for s in p["sizes"]})
-        verified = T(f'Last verified: {day(when, "en")}, against <a href="{src}" rel="nofollow noopener" target="_blank">{name}’s official pages</a>.',
+        verified = T(f'Last verified: {day(when, "en")}, against <a href="{src}" rel="nofollow noopener" target="_blank">{poss(name)} official pages</a>.',
                      f'Dernière vérification : {day(when, "fr")}, sur <a href="{src}" rel="nofollow noopener" target="_blank">les pages officielles de {name}</a>.',
                      f'Última verificación: {day(when, "es")}, en <a href="{src}" rel="nofollow noopener" target="_blank">las páginas oficiales de {name}</a>.')
         names = ", ".join(p["name"] for p in progs)
@@ -288,7 +320,7 @@ def make_rules_page(f):
             if vs:
                 sec += '<p class="fine">' + t(T("Sources","Sources","Fuentes")) + " · " + " · ".join(f'<a href="{v["url"]}" rel="nofollow noopener" target="_blank">{src_name(v["url"])}</a> ({day(v.get("date") or presets.CHECKED, lang)})' for v in vs) + "</p>"
             secs += f'<section class="rule rules-prog"><div class="wrap narrow"><article class="article">{sec}</article></div></section>'
-        disclaimer = T(f"Sweep is not affiliated with {name}. Rules can change at any time; always confirm on {name}’s official site. Values are shown for information, from Sweep’s weekly check of {name}’s pages.",
+        disclaimer = T(f"Sweep is not affiliated with {name}. Rules can change at any time; always confirm on {poss(name)} official site. Values are shown for information, from Sweep’s weekly check of {poss(name)} pages.",
                        f"Sweep n’est pas affilié à {name}. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de {name}. Valeurs présentées à titre indicatif, tirées de la vérification hebdomadaire des pages de {name} par Sweep.",
                        f"Sweep no está afiliado a {name}. Las reglas pueden cambiar en cualquier momento; confirma siempre en el sitio oficial de {name}. Valores a título informativo, tomados de la revisión semanal de las páginas de {name} por Sweep.")
         b = (f'<section style="padding-top:8px"><div class="wrap narrow">{jump}</div></section>' if jump else "") + secs
@@ -374,7 +406,7 @@ def faq_of(lang, t, f):
                         + ({"en": f"; activation fee {U(act, l)}", "fr": f" ; frais d’activation de {U(act, l)}", "es": f"; tarifa de activación de {U(act, l)}"}[l] if act else "")
                         + {"en": f". Prices checked on {day(chk, l)}.", "fr": f". Prix vérifiés le {day(chk, l)}.", "es": f". Precios revisados el {day(chk, l)}."}[l] for l in LANGS}))
     out.append((T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
-                T(f"No. Sweep is independent. The rules on this page come from Sweep’s weekly check of {name}’s official pages; always confirm on {name}’s site.",
+                T(f"No. Sweep is independent. The rules on this page come from Sweep’s weekly check of {poss(name)} official pages; always confirm on {poss(name)} site.",
                   f"Non. Sweep est indépendant. Les règles de cette page viennent de la vérification hebdomadaire des pages officielles de {name} par Sweep ; confirme toujours sur le site de {name}.",
                   f"No. Sweep es independiente. Las reglas de esta página vienen de la revisión semanal de las páginas oficiales de {name} por Sweep; confirma siempre en el sitio de {name}.")))
     return out
@@ -400,7 +432,8 @@ def page_hub(lang, t):
     other = ""
     if others:
         names = {l: {"en": " or ", "fr": " ou ", "es": " o "}[l].join(n for _, n in others) for l in LANGS}
-        other = (f'<p>{t(T(f"{names["en"]}? Their rules aren’t preloaded in Sweep yet: add your account as “Other firm” and enter its rules once.", f"{names["fr"]} ? Leurs règles ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme » et saisis ses règles une fois.", f"¿{names["es"]}? Sus reglas aún no están precargadas en Sweep: añade tu cuenta como «Otra firma» e introduce sus reglas una vez."))}</p>'
+        one = len(others) == 1
+        other = (f'<p>{t(T(f"{names["en"]}? {"Its" if one else "Their"} rules aren’t preloaded in Sweep yet: add your account as “Other firm” and enter its rules once.", f"{names["fr"]} ? {"Ses" if one else "Leurs"} règles ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme » et saisis ses règles une fois.", f"¿{names["es"]}? Sus reglas aún no están precargadas en Sweep: añade tu cuenta como «Otra firma» e introduce sus reglas una vez."))}</p>'
                  '<p class="firm-others">' + "".join(f'<a href="{href(lang, s)}">{n}</a>' for s, n in others) + "</p>")
     disclaimer = T("Sweep is not affiliated with these firms. Rules can change at any time; always confirm on each firm’s official site.",
                    "Sweep n’est affilié à aucune de ces firmes. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de chaque firme.",

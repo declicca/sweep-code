@@ -6,7 +6,7 @@ FIRMS = [("topstep-trading-journal.html","Topstep"),("apex-trader-funding-journa
          ("tradeify-trading-journal.html","Tradeify"),("alpha-futures-trading-journal.html","Alpha Futures")]
 
 def _f(d, firm):
-    return {k: v.replace("{F}", firm) for k, v in d.items()}
+    return {k: v.replace("{F}’s", poss(firm)).replace("{F}", firm) for k, v in d.items()}
 
 EXAMPLES = {
  "Topstep": T("<b>Payout conditions</b> counted for you, for example 5 winning days of $150 or more (for guidance)","<b>Conditions de payout</b> comptées pour toi, par exemple 5 jours gagnants de 150 $ et plus (à titre indicatif)","<b>Condiciones de payout</b> contadas por ti, por ejemplo 5 días ganadores de 150 $ o más (a título indicativo)"),

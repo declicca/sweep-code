@@ -1,6 +1,6 @@
 # Kit d'inscription — Sweep (AlternativeTo, Product Hunt, G2, Capterra)
 
-Mis à jour le 10 octobre 2026. Les textes à copier sont en anglais (ces sites sont anglophones) et ne reprennent que des faits déjà publiés sur makeitsweep.com. Si un prix ou une fonction change, mets ce fichier à jour avant la prochaine inscription.
+Mis à jour le 13 octobre 2026 (synchro NinjaTrader 8, Alpha Futures). Les textes à copier sont en anglais (ces sites sont anglophones) et ne reprennent que des faits déjà publiés sur makeitsweep.com. Si un prix ou une fonction change, mets ce fichier à jour avant la prochaine inscription.
 
 Images prêtes à téléverser : dossier `images/` à côté de ce fichier.
 
@@ -41,19 +41,20 @@ Sweep is a free trading journal built for futures prop firm traders. Pick your f
 **Long description**
 Sweep is a free trading journal built for futures and prop firm traders.
 
-Pick your firm and account type, and the rules are already there: max loss, daily loss limit, consistency and payout conditions, preloaded for Apex Trader Funding, Topstep, Lucid Trading, Take Profit Trader and MyFundedFutures, and checked against each firm's official pages every week. When a firm changes a rule, you're notified and choose whether to apply it.
+Pick your firm and account type, and the rules are already there: max loss, daily loss limit, consistency and payout conditions, preloaded for Apex Trader Funding, Topstep, Lucid Trading, Take Profit Trader, MyFundedFutures and Alpha Futures, and checked against each firm's official pages every week. When a firm changes a rule, you're notified and choose whether to apply it.
 
-Evaluations, funded and live accounts stay apart in your P&L, and copy trading counts once, not once per account. Add a trade from a screenshot that Sweep AI reads, by importing your platform's export (Tradovate, Rithmic, ProjectX or TradingView), or by hand. Every session has a short routine: a plan before the open, your rules during it, and a review after the close.
+Evaluations, funded and live accounts stay apart in your P&L, and copy trading counts once, not once per account. Trades sync automatically from NinjaTrader 8 with a free add-on; from other platforms, import your export (Tradovate, Rithmic, ProjectX or TradingView), paste a screenshot that Sweep AI reads, or type the trade by hand. Every session has a short routine: a plan before the open, your rules during it, and a review after the close.
 
 Sweep is free forever, with Pro included for your first 60 days and no credit card. It works in English, French and Spanish, in any browser and on your phone. Your data stays yours: export everything or delete your account anytime.
 
 Made by Sweep Inc. in Laval, Quebec. Launched publicly on October 1, 2026.
 
 **Key features (une ligne par fonction)**
-- Prop firm rules preloaded for Apex, Topstep, Lucid, Take Profit Trader and MyFundedFutures, checked weekly
+- Prop firm rules preloaded for Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures and Alpha Futures, checked weekly
 - Payout conditions counted on every trade: winning days, cushion, minimum and maximum
 - Evaluations, funded and live accounts kept apart in your P&L
 - Copy trading counted once in your statistics
+- Automatic sync from NinjaTrader 8 (free add-on)
 - Log a trade from a screenshot read by Sweep AI, from your platform's export, or by hand
 - Daily routine: plan before the open, rules during the session, review after the close
 - Real CME charts on your trades, the day after the session
@@ -127,7 +128,7 @@ Le jour du lancement commence à 0 h 01, heure du Pacifique (3 h 01, heure de Mo
 >
 > What's different: pick your prop firm and account type and the rules are already there (max loss, daily loss limit, consistency, payout conditions), checked against each firm's official pages every week. Evaluations, funded and live accounts stay apart, copy trading counts once, and each session has a short routine: plan, rules, review.
 >
-> It's free forever, with Pro included for 60 days, no card. What's not there yet: automatic broker sync (in development) and trade replay.
+> It's free forever, with Pro included for 60 days, no card. Trades sync automatically from NinjaTrader 8 with a free add-on; from other platforms you import a file or a screenshot. What's not there yet: trade replay.
 >
 > I'd love your feedback, especially if you trade evaluations or funded accounts: what would make you journal every day?
 
@@ -168,9 +169,9 @@ Le jour du lancement commence à 0 h 01, heure du Pacifique (3 h 01, heure de Mo
 
 ## 6. À ne pas écrire (pour rester exact)
 
-- Pas de synchro automatique avec le courtier pour l'instant (en développement) : n'écris pas « auto-sync » ni « automatic import from your broker ».
+- La synchro automatique existe seulement depuis NinjaTrader 8 (add-on gratuit) : n'écris pas « syncs with any broker », ni « auto-sync with Tradovate / Rithmic ».
 - Pas de replay de trades, pas de backtesting.
 - Pas d'app iOS ou Android native : Sweep fonctionne dans le navigateur, y compris sur téléphone (applis natives prévues).
-- Règles préremplies pour 5 firmes seulement : Tradeify, Alpha Futures et les autres s'ajoutent avec « Other firm », règles saisies à la main.
+- Règles préremplies pour 6 firmes seulement (Apex, Topstep, Lucid, Take Profit Trader, MyFundedFutures, Alpha Futures) : Tradeify et les autres s'ajoutent avec « Other firm », règles saisies à la main.
 - Le suivi des payouts et des dépenses est sur Pro et Elite, pas sur Free.
 - Pas de « best », « #1 » ni de comparaison chiffrée sans source.
