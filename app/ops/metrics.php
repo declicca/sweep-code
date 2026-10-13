@@ -113,20 +113,10 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         'retention_d7' => $retention(7, 13), 'retention_d30' => $retention(30, 36),
         'swept_sessions_30d' => ['pct' => $rate($sweptS, $sess), 'of' => $sess],
     ];
-    if ($has('client_errors')) {   // grouped by message, last 30 days
-        $g = [];
-        foreach ($q('SELECT user_id, msg, src, line, page, ua, ver, created_at FROM client_errors WHERE created_at > ? ORDER BY created_at', [$now - 30 * $day]) as $r) {
-            $k = (string) $r['msg']; $x = $g[$k] ?? ['msg' => $k, 'n' => 0, 'users' => [], 'last' => 0, 'pages' => [], 'browsers' => [], 'versions' => [], 'where' => ''];
-            $x['n']++; $x['users'][(string) $r['user_id']] = 1; $x['last'] = max($x['last'], (int) $r['created_at']);
-            if ($r['page'] !== '') $x['pages'][$r['page']] = 1;
-            $x['browsers'][sweep_browser((string) $r['ua'])] = 1; if ($r['ver'] !== '') $x['versions'][$r['ver']] = 1;
-            if ($r['src'] !== '') $x['where'] = $r['src'] . ':' . (int) $r['line'];
-            $g[$k] = $x;
-        }
-        $g = array_map(fn($x) => ['msg' => $x['msg'], 'n' => $x['n'], 'traders' => count($x['users']), 'last' => gmdate('c', $x['last']), 'pages' => array_keys($x['pages']),
-            'browsers' => array_keys($x['browsers']), 'versions' => array_keys($x['versions']), 'where' => $x['where']], array_values($g));
-        usort($g, fn($a, $b) => [$b['traders'], $b['n']] <=> [$a['traders'], $a['n']]);
-        $errs['groups_30d'] = array_slice($g, 0, 20);
+    if ($has('client_errors')) {   // grouped by message, its numbers taken out (ops/client-errors.php), last 30 days
+        require_once __DIR__ . '/client-errors.php';
+        $errs['groups_30d'] = array_map(fn($x) => ['msg' => $x['msg'], 'n' => $x['n'], 'traders' => $x['traders'], 'first' => gmdate('c', $x['first']), 'last' => gmdate('c', $x['last']),
+            'pages' => $x['pages'], 'browsers' => $x['browsers'], 'versions' => $x['versions'], 'where' => $x['where']], array_slice(sweep_err_groups($pdo, $now), 0, 20));
     }
     return [
         'generated_at' => gmdate('c'), 'users' => count($users), 'brief' => $brief,

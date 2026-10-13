@@ -2433,7 +2433,8 @@ html body #main .ux-brief{display:flex;flex-direction:column;gap:14px;margin-top
 html body #main .ux-bf{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
 html body #main .ux-bf .f{min-width:220px;flex:0 1 280px}
 html body #main .ux-errs td{vertical-align:top;font-size:13px}
-html body #main .ux-err-m{max-width:420px;word-break:break-word}
+html body #main .ux-err-m,html body #main .ux-err-m b{max-width:420px;white-space:normal;word-break:break-word;overflow-wrap:anywhere}
+html body #main .ux-err-m{min-width:240px}   /* phone: the table scrolls sideways, the message stays readable */   /* a long message wraps in its column (it ran over Traders / Times at 1300 px) */
 html body #main .ux-err-m small{display:block;color:var(--muted)}
 @media (max-width:860px){html body #main .ux-bf .f{flex:1 1 100%;min-width:0}}
 

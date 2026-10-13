@@ -5,6 +5,7 @@ Sweep — Admin dashboard (brief 01 step 4), dev environment with Playwright:
    the page, the browser and the version;
  - the four indicators of the brief (activation on the sign-up day, retention D7 and D30, swept days);
  - the sign-up week and source filters reload the numbers (« N of M traders »);
+ - « Exporter »: the 30-day list as a Markdown file (api/admin/errors-export), with the error and where it happened;
  - FR words, phone and computer, no horizontal scroll, no page error.
 """
 import asyncio, random, sys
@@ -34,6 +35,12 @@ async def main():
       ok(all(any(c.startswith(x) for c in cards) for x in want), f'{tag} the four indicators ({cards})')
       row = await pg.evaluate(f"(()=>{{const r=[...document.querySelectorAll('#main .ux-errs tbody tr')].find(t=>t.textContent.includes('{msg}')); return r?[...r.children].map(c=>c.textContent.trim()):null}})()")
       ok(row is not None and row[1] == '1' and row[2] == '1' and row[4] == '#trades' and 'Chrome' in row[5] and row[6] == 'app.test', f'{tag} the error: 1 trader, 1 time, page, browser, version ({row})')
+      # « Exporter » (13 Oct.): the 30-day list as a Markdown file, to give to Claude
+      exp = await pg.evaluate("(() => { const a = document.querySelector('#main .ux-err-h a[download]'); return a ? [a.textContent.trim(), a.getAttribute('href')] : null; })()")
+      ok(exp == ['Exporter', 'api/admin/errors-export'], f'{tag} « Exporter » next to the errors ({exp})')
+      if not mob:
+        r = await pg.evaluate("fetch('api/admin/errors-export', { credentials: 'same-origin' }).then(async (r) => [r.status, r.headers.get('content-type'), r.headers.get('content-disposition'), await r.text()])")
+        ok(r[0] == 200 and r[1].startswith('text/markdown') and 'attachment; filename="sweep-erreurs-' in (r[2] or '') and f'## ' in r[3] and msg in r[3] and '`app.js:7`' in r[3], f'the export: a Markdown file with the error, where it happened ({r[:3]})')
       before = await pg.evaluate("document.querySelector('#main .ux-bf small').textContent")
       opts = await pg.evaluate("[...document.querySelectorAll('#main [data-ux-mf=source] option')].map(o=>o.value)")
       ok(len(opts) >= 2 and opts[0] == '', f'{tag} the source filter lists « Toutes » and the sources ({opts})')

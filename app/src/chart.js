@@ -354,9 +354,15 @@
     TKC.forId = TK.id || 'new';
     const k = tkKey();
     if (TKC.host && k && TKC.hostKey === k.key && !document.contains(TKC.host)) { anchor.after(TKC.host); return; }   // same chart: no blink, no jump
-    if (TKC.chart) { try { TKC.chart.remove(); } catch (x) { /* gone */ } TKC.chart = null; }
+    dropTk();
     anchor.insertAdjacentHTML('afterend', tkSection());
     TKC.key = ''; TKC.host = null; loadTk();
+  }
+  /** the ticket's chart goes: its series, lines and markers with it (a price typed afterwards drew on a removed chart:
+   *  « Object is disposed », Admin › Errors, 3 Oct.) */
+  function dropTk() {
+    if (TKC.chart) { try { TKC.chart.remove(); } catch (x) { /* gone */ } }
+    TKC.chart = null; TKC.series = null; TKC.markers = null; TKC.lines = {};
   }
   function tkKey() {
     const inst = TKC.contract || ($tk('inst') || {}).value || 'NQ', date = ($tk('date') || {}).value;
@@ -376,7 +382,7 @@
     let r;
     try { r = await apiJSON(`api/chart/bars?symbol=${encodeURIComponent(inst)}&from=${utc - 3 * 3600}&to=${utc + 3 * 3600}&tf=1m`); } catch (x) { r = { status: 'unavailable' }; }
     const host = document.querySelector('#tkSlide .sc-tk'); if (!host || TKC.key !== key) return;
-    if (TKC.chart) { try { TKC.chart.remove(); } catch (x) { /* gone */ } TKC.chart = null; }
+    dropTk();
     if (!r || r.status === 'unavailable' || !r.status) { host.hidden = true; TKC.host = host; TKC.hostKey = key; return; }       // no key / provider down: just the form
     host.hidden = false;
     const tools = host.querySelector('.sc-tools');

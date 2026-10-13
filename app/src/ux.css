@@ -500,3 +500,6 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .sy-tip .sy-txt>span{font-size:14px;line-height:1.45;color:var(--text)}
 @media (max-width:600px){.sy-tip{flex-wrap:wrap}.sy-tip .sy-txt{flex-basis:calc(100% - 52px)}.sy-tip .btn{margin-left:52px}}
 @media (prefers-reduced-motion:reduce){.sy-acc,.sy-opt i{transition:none}}
+/* Admin › Errors: the heading and « Export » on one line (13 Oct.) */
+.ux-err-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}
+.ux-err-h h4{margin:0}

@@ -1145,6 +1145,15 @@ try {
         db()->exec("CREATE TABLE IF NOT EXISTS client_errors (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, msg TEXT, src TEXT, line INT, page TEXT, ua TEXT, ver TEXT, created_at INT NOT NULL)");
         q('INSERT INTO client_errors (user_id, msg, src, line, page, ua, ver, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [(string)$UID, substr((string)($b['msg'] ?? ''), 0, 500), substr((string)($b['src'] ?? ''), 0, 200),
             (int)($b['line'] ?? 0), substr((string)($b['page'] ?? ''), 0, 80), substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200), substr((string)($b['ver'] ?? ''), 0, 40), time()]);
+        // an error not seen for 7 days: one email to the support address, after the answer (a dev copy never emails)
+        $emsg = substr((string)($b['msg'] ?? ''), 0, 500);
+        register_shutdown_function(function () use ($emsg) {
+            global $SUPPORT;
+            if (getenv('SWEEP_TEST_DB')) return;
+            if (function_exists('fastcgi_finish_request')) @fastcgi_finish_request();
+            try { require_once __DIR__ . '/ops/client-errors.php'; sweep_error_alert(db(), $emsg, fn(string $s, string $t) => sweep_mail($SUPPORT ?: 'hello@makeitsweep.com', $s, $t)); }
+            catch (Throwable $e) { error_log('Sweep error alert: ' . $e->getMessage()); }
+        });
         json_out(200, ['ok' => true]);
     }
 
@@ -1303,6 +1312,13 @@ try {
             json_out(200, ['ok' => true]);
         }
         // Admin › Health (brief 02 step 0): the scheduled tasks and whether each outside service is set up (yes / no, never a value)
+        if ($route === 'api/admin/errors-export' && $method === 'GET') {   // Admin › Errors › Export: the 30-day list as Markdown, for Claude
+            require_once __DIR__ . '/ops/client-errors.php';
+            header('Content-Type: text/markdown; charset=utf-8');
+            header('Content-Disposition: attachment; filename="sweep-erreurs-' . date('Y-m-d') . '.md"');
+            header('Cache-Control: no-store');
+            echo sweep_errors_report(db(), time()); exit;
+        }
         if ($route === 'api/admin/health' && $method === 'GET') { require_once __DIR__ . '/ops/health.php'; json_out(200, sweep_health(db(), $cfg, __DIR__)); }
         // prop firm presets: last check, status per firm, « Check now » (one firm per request, then « finish »)
         if (strpos($route, 'api/admin/presets') === 0) {

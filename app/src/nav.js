@@ -3826,8 +3826,10 @@ window.SweepMO = window.SweepMO || class {
     const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
     const wkt = ({ en: ['Your week is ready', 'See my week'], fr: ['Ta semaine est prête', 'Voir mon bilan'], es: ['Tu semana está lista', 'Ver mi semana'] })[L] || ['Your week is ready', 'See my week'];
     const wkRow = wkReady ? `<div class="nav-rt-wk"><b>${wkt[0]}</b><button type="button" class="btn primary" data-rt="week">${wkt[1]}</button></div>` : '';
-    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}<p class="nav-rt-msg">${t('closed')}</p></section>`;
-    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}<p class="nav-rt-msg">${t('dayoff')}</p></section>`;
+    // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
+    const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
+    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}<p class="nav-rt-msg">${t('closed')}</p>${helpT}</section>`;
+    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}<p class="nav-rt-msg">${t('dayoff')}</p>${helpT}</section>`;
     const s1 = r.plan >= 100 ? 'done' : r.plan > 0 ? 'late' : 'todo';
     const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
     const s3 = r.review >= 100 ? 'done' : 'todo';
@@ -3847,7 +3849,7 @@ window.SweepMO = window.SweepMO || class {
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, d.trades ? t('inPlan', { c: d.compliant || 0, n: d.trades }) : t('noTrade'), t('b2'), 'trade', '', t('b2s'))}
         ${step(3, r.review || 0, 'review', t('s3'), t('s3d'), s3, s3 === 'done' ? t('reviewDone') : t('reviewTodo'), s3 === 'done' ? t('b3v') : t('b3'), 'review', '', s3 === 'done' ? t('see') : t('b3s'))}
       </div>
-      <div class="nav-rt-help-t" hidden>${t('help')}</div></section>`;
+      ${helpT}</section>`;
   }
   function place() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
@@ -3879,7 +3881,7 @@ window.SweepMO = window.SweepMO || class {
       const back = () => { if (document.querySelector('#gSheet')) { setTimeout(back, 120); return; } const r = document.querySelector('#main .nav-rt ' + cls); if (r) r.focus(); };
       setTimeout(back, 300);
     }
-    else if (k === 'help') { const h = b.closest('.nav-rt').querySelector('.nav-rt-help-t'); h.hidden = !h.hidden; }
+    else if (k === 'help') { const h = b.closest('.nav-rt') && b.closest('.nav-rt').querySelector('.nav-rt-help-t'); if (h) h.hidden = !h.hidden; }
     else if (k === 'toggle') {   // folded until the session ends; the next session opens it again
       const card = b.closest('.nav-rt'), c = !card.classList.contains('closed-rt'), f = FOLD[L] || FOLD.en;
       try { if (c) localStorage.setItem('sw.rtClosedDay', rtDay()); else localStorage.removeItem('sw.rtClosedDay'); } catch (x) { /* private mode: for this view only */ }
@@ -4354,13 +4356,6 @@ window.SweepMO = window.SweepMO || class {
     const html = `<button type="button" class="nav-rt-disc" data-disc-why data-noi18n data-v="${key}"><small>${t('disc')}</small><b>${v == null ? '—' : v + '\u202f%'}</b></button>`;
     if (c) c.remove(); const ph = me.querySelector('.nav-rt-disc-ph'); if (ph) ph.remove(); me.insertAdjacentHTML('afterbegin', html);   // takes the placeholder's place: same size, nothing moves
   }
-  function tradeDisc() {
-    const m = /^#trade\/([^/]+)/.exec(location.hash || ''); if (!m) return;
-    const main = document.getElementById('main'); if (!main || main.querySelector('.nav-tdisc')) return;
-    const lab = [...main.querySelectorAll('span, small, div')].find((x) => x.children.length === 0 && /^(Discipline|Disciplina)$/i.test(x.textContent.trim()));
-    const box = lab && lab.parentElement; if (!box) return;
-    box.classList.add('nav-tdisc'); box.setAttribute('data-disc-why', 'trade'); box.setAttribute('role', 'button'); box.tabIndex = 0;
-  }
   function discWhy(kind) {
     let v = discScore();
     if (kind === 'trade') { const m = /^#trade\/([^/]+)/.exec(location.hash || ''); const tr = m && getDoc('trades', decodeURIComponent(m[1])); const d = tr && typeof tDisc === 'function' ? tDisc(tr) : null; v = d == null ? null : Math.round(d * (d <= 1 ? 100 : 1)); }
@@ -4444,7 +4439,7 @@ window.SweepMO = window.SweepMO || class {
     tk.insertAdjacentHTML('beforeend', `<small class="nav-noai" data-noi18n>${t('noAi')}</small>`);
   }
 
-  new window.SweepMO(() => { [rows, accountsExtras, filterPill, platformMark, discChip, tradeDisc, trialCard, noAiLine, copiesFromGroup].forEach((f) => { try { f(); } catch (e) { if (!f.__warned) { f.__warned = true; console.warn('Sweep:', f.name, e && e.message); } } }); /* each on its own: one failing never stops the others */ }).observe(document.body, { childList: true, subtree: true });
+  new window.SweepMO(() => { [rows, accountsExtras, filterPill, platformMark, discChip, trialCard, noAiLine, copiesFromGroup].forEach((f) => { try { f(); } catch (e) { if (!f.__warned) { f.__warned = true; console.warn('Sweep:', f.name, e && e.message); } } }); /* each on its own: one failing never stops the others */ }).observe(document.body, { childList: true, subtree: true });
 })();
 
 /* motion: blocks rise into place when a page opens — only the blocks of that first draw. A later redraw of the same

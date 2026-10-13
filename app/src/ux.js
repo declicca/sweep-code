@@ -773,15 +773,15 @@
   const pct = (o) => (o && o.pct != null ? `${o.pct} %` : '—');
   const BT = { en: { week: 'Sign-up week', source: 'Source (« Where did you find Sweep? »)', all: 'All', none: 'Not given', wk: 'week of {d}', traders: 'Traders: {a} of {b}',
       d0: 'Activation: a trade on the sign-up day', d7: 'Retention D7: a trade or a review on days 7-13', d30: 'Retention D30: a trade or a review on days 30-36', swept: 'Swept days: sessions with trades, 3 rings closed (30 d)',
-      of: 'of {n}', errs: 'JS errors on traders\' devices (30 d)', msg: 'Message', tr: 'Traders', n: 'Times', last: 'Last', pages: 'Pages', br: 'Browsers', ver: 'Version', noErr: 'No error in 30 days.',
+      of: 'of {n}', errs: 'JS errors on traders\' devices (30 d)', msg: 'Message', tr: 'Traders', n: 'Times', last: 'Last', pages: 'Pages', br: 'Browsers', ver: 'Version', noErr: 'No error in 30 days.', exp: 'Export', expT: 'The 30-day list as a Markdown file, to give to Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'A friend', google: 'Google', other: 'Other' } },
     fr: { week: 'Semaine d’inscription', source: 'Source (« Où as-tu trouvé Sweep ? »)', all: 'Toutes', none: 'Non renseignée', wk: 'sem. du {d}', traders: 'Traders : {a} sur {b}',
       d0: 'Activation : un trade le jour de l’inscription', d7: 'Rétention J7 : un trade ou une revue les jours 7 à 13', d30: 'Rétention J30 : un trade ou une revue les jours 30 à 36', swept: 'Journées balayées : séances avec trades, 3 anneaux fermés (30 j)',
-      of: 'sur {n}', errs: 'Erreurs JS chez les traders (30 j)', msg: 'Message', tr: 'Traders', n: 'Fois', last: 'Dernière', pages: 'Pages', br: 'Navigateurs', ver: 'Version', noErr: 'Aucune erreur en 30 jours.',
+      of: 'sur {n}', errs: 'Erreurs JS chez les traders (30 j)', msg: 'Message', tr: 'Traders', n: 'Fois', last: 'Dernière', pages: 'Pages', br: 'Navigateurs', ver: 'Version', noErr: 'Aucune erreur en 30 jours.', exp: 'Exporter', expT: 'La liste des 30 jours en fichier Markdown, à donner à Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un ami', google: 'Google', other: 'Autre' } },
     es: { week: 'Semana de registro', source: 'Fuente (« ¿Dónde encontraste Sweep? »)', all: 'Todas', none: 'Sin respuesta', wk: 'sem. del {d}', traders: 'Traders: {a} de {b}',
       d0: 'Activación: una operación el día del registro', d7: 'Retención D7: una operación o una revisión los días 7 a 13', d30: 'Retención D30: una operación o una revisión los días 30 a 36', swept: 'Días barridos: sesiones con operaciones, 3 anillos cerrados (30 d)',
-      of: 'de {n}', errs: 'Errores JS en los dispositivos de los traders (30 d)', msg: 'Mensaje', tr: 'Traders', n: 'Veces', last: 'Última', pages: 'Páginas', br: 'Navegadores', ver: 'Versión', noErr: 'Ningún error en 30 días.',
+      of: 'de {n}', errs: 'Errores JS en los dispositivos de los traders (30 d)', msg: 'Mensaje', tr: 'Traders', n: 'Veces', last: 'Última', pages: 'Páginas', br: 'Navegadores', ver: 'Versión', noErr: 'Ningún error en 30 días.', exp: 'Exportar', expT: 'La lista de 30 días en archivo Markdown, para dar a Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un amigo', google: 'Google', other: 'Otro' } } };
   const bt = () => BT[LANG] || BT.en;
   const loc = () => (LANG === 'fr' ? 'fr-CA' : LANG === 'es' ? 'es' : 'en-US');
@@ -798,9 +798,11 @@
     return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
       <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}</div>
-      <h4>${y.errs}</h4>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
+      <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }
   const load = () => { busy = true; apiJSON('api/admin/metrics' + (fc || fs ? '?' + new URLSearchParams({ cohort: fc, source: fs }) : '')).then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) b.innerHTML = html(d); }).catch(() => { busy = false; at = Date.now(); }); };
+  // the page stays up to date while it is open (a new error shows within a minute)
+  setInterval(() => { try { if (route().v === 'admin' && !document.hidden && !busy) load(); } catch (e) { /* next minute */ } }, 60000);
   document.addEventListener('change', (e) => { const sel = e.target.closest && e.target.closest('[data-ux-mf]'); if (!sel) return; if (sel.dataset.uxMf === 'cohort') fc = sel.value; else fs = sel.value; load(); });
   const card = (label, value, sub, big) => `<div class="ux-m ${big ? 'big' : ''}"><small>${label}</small><b>${value}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
   function html(d) {
