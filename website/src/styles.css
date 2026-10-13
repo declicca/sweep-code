@@ -1515,3 +1515,20 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
 .calc-act{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:16px 0 0;padding:20px 22px;border-radius:var(--r-lg);background:var(--glass);box-shadow:var(--lift)}
 .calc-act b{font-weight:600}
 .calc-act p{margin:4px 0 0;color:var(--muted);font-size:14.5px;max-width:62ch}
+
+/* ---------- Resources menu in two groups (Tools, Learn) ---------- */
+.ddmenu.two{min-width:0;width:min(600px,calc(100vw - 32px))}
+.ddcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+.ddh{display:block;padding:10px 12px 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+/* ---------- footer: language and social links share the bottom line ---------- */
+.foot-meta{display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px}
+.foot-meta .social{margin-top:0}
+/* ---------- breadcrumb under the menu ---------- */
+.crumbs{padding-top:16px;font-size:13px;color:var(--faint)}
+.crumbs ol{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.crumbs li{flex-shrink:0}
+.crumbs li+li::before{content:"›";margin-right:6px}
+.crumbs a{color:var(--muted);text-decoration:none;transition:color .2s}
+.crumbs a:hover{color:var(--text)}
+.crumbs li[aria-current]{flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.crumbs+.page-hero{padding-top:clamp(36px,5.5vw,80px)}

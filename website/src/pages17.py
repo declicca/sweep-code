@@ -227,6 +227,8 @@ def _fr_nbsp(lang, title, desc, body, ld):
         title, desc, body = (re.sub(r" ([:;?!])(?=\s|<|$)", "\u00a0\\1", x) for x in (title, desc, body))
     return (title, desc, body, ld)
 
+for _c in VS: CRUMBS[_c["slug"]] = f"Sweep vs {_c['name']}"
+
 def make_vs(c):
     name = c["name"]
     def page(lang, t):

@@ -2,6 +2,8 @@ from core import *
 
 COUNT_URL = "https://app.makeitsweep.com/api/cohort-count.php"
 
+CRUMBS["100"] = T("The first 100", "Les 100 premiers", "Los primeros 100")
+
 def page_100(lang, t):
     taken_tpl = t(T("{n} of {total} spots taken", "{n} places prises sur {total}", "{n} de {total} plazas ocupadas"))
     full_txt = t(T("The first 100 is full. Join the waitlist.", "Les 100 premières places sont prises. Inscris-toi sur la liste d’attente.", "Los primeros 100 están completos. Únete a la lista de espera."))

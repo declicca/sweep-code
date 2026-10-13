@@ -35,6 +35,7 @@ HOURS = T("CME Globex: Sunday to Friday, 6:00 p.m. to 5:00 p.m. New York time, w
 
 def make_contract(sym):
     s, name, exch, ts, tv, pv, months, sib, fam = next(c for c in C if c[0] == sym)
+    CRUMBS[slug(s)] = T(f"{s} futures", f"Futures {s}", f"Futuros {s}")
     def page(lang, t):
         h1 = T(f"{s} futures: tick size, tick value and specs.", f"Contrat à terme {s} : taille et valeur du tick.", f"Futuros {s}: tamaño y valor del tick.")
         lead = T(f"{name} ({s}) on {exch}: one tick is {_tick(ts)} points and is worth {_fmt(tv)} per contract; one full point is worth {_fmt(pv)}.",

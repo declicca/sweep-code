@@ -22,6 +22,7 @@ def size_range(rp, lang):
     return k(sz[0]) if len(sz) == 1 else k(sz[0]) + {"en": " to ", "fr": " à ", "es": " a "}[lang] + k(sz[-1])
 
 def make_firm_page(slug, firm):
+    CRUMBS[slug] = T(f"{firm} trading journal", f"Journal de trading {firm}", f"Diario de trading para {firm}")
     def page(lang, t):
         F = lambda d: t(_f(d, firm))
         has = firm in PRESET_FIRMS   # rules preloaded in the app for this firm?

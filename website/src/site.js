@@ -135,6 +135,7 @@
     var b = d.querySelector('.ddbtn');
     b.addEventListener('click', function(e){ e.stopPropagation(); var o = !d.classList.contains('open'); closeDD(d); d.classList.toggle('open', o); b.setAttribute('aria-expanded', o ? 'true' : 'false'); if(o){ var f = d.querySelector('.ddmenu a'); if(f && e.detail === 0) f.focus(); } });
     d.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ closeDD(); b.focus(); } });
+    d.addEventListener('focusout', function(e){ if(!d.contains(e.relatedTarget)){ d.classList.remove('open'); b.setAttribute('aria-expanded','false'); } });   // Tab out of a menu closes it
   });
   document.addEventListener('click', function(e){ if(!e.target.closest('.navdd')) closeDD(); });
   // picking a page in a dropdown: close it at once (no hover ghost while the next page loads)

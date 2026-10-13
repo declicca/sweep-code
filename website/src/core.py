@@ -157,16 +157,19 @@ NAV = [("features.html", T("Features","Fonctionnalités","Funciones")),
        ("pricing.html", T("Pricing","Tarifs","Precios"))]
 PRODUCT = [("features.html", T("Features","Fonctionnalités","Funciones"), T("Everything Sweep does","Tout ce que fait Sweep","Todo lo que hace Sweep")),
            ("how-it-works.html", T("How it works","Comment ça marche","Cómo funciona"), T("From sign-up to a swept day","De l’inscription à ta journée balayée","Del registro a tu día barrido"))]
-RESOURCES = [("tools.html", T("Free tools","Outils gratuits","Herramientas gratuitas"), T("Position size, drawdown, payout, expectancy","Taille de position, drawdown, payout, espérance","Tamaño de posición, drawdown, payout, esperanza")),
-             ("guides.html", T("Guides","Guides","Guías"), T("Prop firm rules compared, journaling","Règles des prop firms comparées, journal","Reglas de prop firms comparadas, diario")),
+# Resources menu: two groups on desktop, one simple list in the mobile menu
+RES_TOOLS = [("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas"), T("Position size, drawdown, payout, expectancy","Taille de position, drawdown, payout, espérance","Tamaño de posición, drawdown, payout, esperanza")),
              ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos"), T("Tick values for NQ, ES, CL, GC…","Valeurs de tick NQ, ES, CL, GC…","Valores de tick NQ, ES, CL, GC…")),
-             ("release-dates.html", T("Release dates","Dates des annonces","Fechas de datos"), T("CPI, NFP, FOMC in 2026–2027","CPI, NFP, FOMC en 2026–2027","CPI, NFP, FOMC en 2026–2027")),
              ("futures-market-hours.html", T("Market hours","Heures de marché","Horario de mercado"), T("Sessions in your time zone","Les sessions dans ton fuseau","Las sesiones en tu zona horaria")),
-             ("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas"), T("Trading plan, journal, checklist (PDF)","Plan, journal, checklist (PDF)","Plan, diario, checklist (PDF)")),
+             ("release-dates.html", T("Release dates","Dates des annonces","Fechas de datos"), T("CPI, NFP, FOMC in 2026–2027","CPI, NFP, FOMC en 2026–2027","CPI, NFP, FOMC en 2026–2027"))]
+RES_LEARN = [("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas"), T("Trading plan, journal, checklist (PDF)","Plan, journal, checklist (PDF)","Plan, diario, checklist (PDF)")),
              ("glossary.html", T("Glossary","Lexique","Glosario"), T("Prop and futures terms","Termes du prop et des futures","Términos de prop y futuros")),
+             ("guides.html", T("Guides","Guides","Guías"), T("Prop firm rules compared, journaling","Règles des prop firms comparées, journal","Reglas de prop firms comparadas, diario")),
              ("import.html", T("Import your trades","Importer tes trades","Importar operaciones"), T("Tradovate, TopstepX, Rithmic, NinjaTrader…","Tradovate, TopstepX, Rithmic, NinjaTrader…","Tradovate, TopstepX, Rithmic, NinjaTrader…")),
              ("faq.html", T("FAQ","FAQ","Preguntas frecuentes"), T("Quick answers","Réponses rapides","Respuestas rápidas")),
              ("changelog.html", T("What’s new","Nouveautés","Novedades"), T("Latest updates","Les dernières mises à jour","Últimas actualizaciones"))]
+RESOURCES = RES_TOOLS + RES_LEARN
+RES_GROUPS = [(T("Tools","Outils","Herramientas"), RES_TOOLS), (T("Learn","Apprendre","Aprender"), RES_LEARN)]
 LOGIN = T("Log in","Connexion","Iniciar sesión")
 CREATE = T("Start for free","Commencer gratuitement","Empieza gratis")
 CREATE_FREE = T("Start free","Commencer gratuitement","Empieza gratis")
@@ -180,17 +183,23 @@ CURP = ' aria-current="page"'; CURL = ' aria-current="true"'
 FOOT = [
  (T("Product","Produit","Producto"), [("features.html", T("Features","Fonctionnalités","Funciones")), ("ai.html", T("Sweep AI","Sweep AI","Sweep AI")), ("how-it-works.html", T("How it works","Comment ça marche","Cómo funciona")),
    ("prop-traders.html", T("For prop traders","Pour traders prop","Para traders prop")), ("economic-calendar.html", T("Economic calendar","Calendrier économique","Calendario económico")),
-   ("pricing.html", T("Pricing","Tarifs","Precios")), ("changelog.html", T("What’s new","Nouveautés","Novedades"))]),
- (T("Help","Aide","Ayuda"), [("import.html", T("Import your trades","Importer tes trades","Importar operaciones")), ("install.html", T("Install on your phone","Installer sur ton téléphone","Instalar en tu teléfono")),
-   ("faq.html", T("FAQ","FAQ","Preguntas frecuentes")), ("contact.html", T("Contact","Contact","Contacto"))]),
+   ("best-trading-journal-for-prop-firms.html", T("Compare Sweep","Comparer Sweep","Comparar Sweep")), ("pricing.html", T("Pricing","Tarifs","Precios")), ("changelog.html", T("What’s new","Nouveautés","Novedades"))]),
+ (T("Prop firms","Prop firms","Prop firms"), None),   # the firms with a journal page, filled in by _foot_firms()
  (T("Resources","Ressources","Recursos"), [("prop-firms/index.html", T("Prop firm rules","Règles des prop firms","Reglas de las prop firms")), ("guides.html", T("Guides","Guides","Guías")), ("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas")), ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
    ("release-dates.html", T("Release dates","Dates des annonces","Fechas de datos")), ("futures-market-hours.html", T("Market hours","Heures de marché","Horario de mercado")),
    ("glossary.html", T("Glossary","Lexique","Glosario")), ("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas")),
-   ("how-to-choose-a-trading-journal.html", T("Choose a trading journal","Choisir un journal de trading","Elegir un diario de trading")), ("trading-journal-routine.html", T("A daily journal routine","Routine de journal","Rutina de diario"))]),
- (T("Compare","Comparer","Comparar"), [("best-trading-journal-for-prop-firms.html", T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms")), ("sweep-vs-tradezella.html", T("Sweep vs TradeZella","Sweep vs TradeZella","Sweep vs TradeZella")), ("sweep-vs-tradervue.html", T("Sweep vs Tradervue","Sweep vs Tradervue","Sweep vs Tradervue")), ("sweep-vs-tradersync.html", T("Sweep vs TraderSync","Sweep vs TraderSync","Sweep vs TraderSync")), ("sweep-vs-edgewonk.html", T("Sweep vs Edgewonk","Sweep vs Edgewonk","Sweep vs Edgewonk"))]),
- (T("Company","Entreprise","Empresa"), [("about.html", T("About","À propos","Acerca de")), ("press-kit.html", T("Press kit","Kit presse","Kit de prensa")), ("security.html", T("Security and privacy","Sécurité et confidentialité","Seguridad y privacidad"))]),
- (T("Legal","Légal","Legal"), [("privacy.html", T("Privacy policy","Confidentialité","Privacidad")), ("terms.html", T("Terms of use","Conditions d’utilisation","Términos de uso")), ("risk.html", T("Risk disclosure","Divulgation des risques","Aviso de riesgo"))]),
+   ("import.html", T("Import your trades","Importer tes trades","Importar operaciones")), ("install.html", T("Install on your phone","Installer sur ton téléphone","Instalar en tu teléfono")), ("faq.html", T("FAQ","FAQ","Preguntas frecuentes"))]),
+ (T("Company","Entreprise","Empresa"), [("about.html", T("About","À propos","Acerca de")), ("press-kit.html", T("Press kit","Kit presse","Kit de prensa")), ("security.html", T("Security and privacy","Sécurité et confidentialité","Seguridad y privacidad")),
+   ("contact.html", T("Contact","Contact","Contacto")), ("privacy.html", T("Privacy policy","Confidentialité","Privacidad")), ("terms.html", T("Terms of use","Conditions d’utilisation","Términos de uso")), ("risk.html", T("Risk disclosure","Divulgation des risques","Aviso de riesgo"))]),
 ]
+
+def _foot_firms():
+    """Footer « Prop firms » column: each firm's rules page when the app has its rules, else its journal page."""
+    from pages8 import FIRMS as JOURNALS
+    from pages18 import page_of
+    rules = {f["name"]: page_of(f) for f in _PRESET_LIST}
+    return [(rules.get(name, jp), T(name, name, name)) for jp, name in JOURNALS]
+
 
 # prop firms with preloaded rules: from the app's catalogue (presets.py), never retyped here
 from presets import PRESET_FIRMS, FIRMS as _PRESET_LIST
@@ -251,6 +260,25 @@ META_SEO = {
                    T("How Sweep protects your data, where it’s stored, and how to export everything in one click, even after a prop account closes.","Comment Sweep protège tes données, où elles sont stockées, et comment tout exporter en un clic, même après la fermeture d’un compte prop.","Cómo protege Sweep tus datos, dónde se guardan y cómo exportarlo todo en un clic, incluso tras cerrar o perder una cuenta prop.")),
 }
 
+# breadcrumb: Home › Section › Page (the section only where a hub page lists the page)
+CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html")
+GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "how-to-choose-a-trading-journal.html", "trading-journal-routine.html")
+def _parent(page):
+    if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
+    if page.startswith("contracts/"): return "futures-contracts.html"
+    if page.endswith(("-release-dates.html", "-meeting-dates.html")): return "release-dates.html"
+    if page in CALC_PAGES: return "tools.html"
+    if page in GUIDE_PAGES: return "guides.html"
+    return None
+
+def _crumb(lang, t, page, title=""):
+    """A page's short name: set by its module, else its menu or footer label, else its « Read next » title, else its title."""
+    if page in CRUMBS: return t(CRUMBS[page]) if isinstance(CRUMBS[page], dict) else CRUMBS[page]
+    for p, l, *_ in NAV + PRODUCT + RESOURCES + [x for _, its in FOOT if its for x in its]:
+        if p == page: return t(l)
+    if page in REL_INFO: return t(REL_INFO[page][0])
+    return re.split(r"\s[·|—]\s", title)[0].strip()
+
 def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     if page in META_SEO: title, desc = t(META_SEO[page][0]), t(META_SEO[page][1])
     desc = _trim(desc); title = _title(title)
@@ -260,10 +288,15 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
            "address":{"@type":"PostalAddress","streetAddress":"3980 Blvd St-Elzear O","addressLocality":"Laval","addressRegion":"QC","postalCode":"H7P 0M2","addressCountry":"CA"}}
     web = {"@type":"WebSite","@id":f"https://{DOMAIN}/#website","name":"Sweep","alternateName":["Make it Sweep","makeitsweep","Sweep trading journal"],"url":f"https://{DOMAIN}/","inLanguage":["en","fr","es"],"publisher":{"@id":f"https://{DOMAIN}/#org"}}
     graph = [org, web]
+    crumbs = ""
     if page not in ("index.html", "404.html"):
-        crumb = CRUMBS.get(page) or re.split(r"\s[·|—]\s", title)[0].strip()
-        items = [("Sweep", href(lang, "index.html"))] + ([(t(T("Prop firms","Prop firms","Prop firms")), href(lang, "prop-firms/index.html"))] if page.startswith("prop-firms/") and page != "prop-firms/index.html" else []) + [(crumb, href(lang, page))]
+        par = _parent(page)
+        items = [(t(T("Home","Accueil","Inicio")), href(lang, "index.html"))] + ([(_crumb(lang, t, par), href(lang, par))] if par else []) + [(_crumb(lang, t, page, title), href(lang, page))]
         graph.append({"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":i + 1,"name":n,"item":f"https://{DOMAIN}{u}"} for i, (n, u) in enumerate(items)]})
+        if page not in ("privacy.html", "terms.html", "risk.html"):   # the visible line: every inner page but the legal ones
+            crumbs = (f'<nav class="crumbs" aria-label="{t(T("Breadcrumb","Fil d’Ariane","Ruta de navegación"))}"><div class="wrap"><ol>'
+                      + "".join(f'<li><a href="{u}">{html.escape(n)}</a></li>' for n, u in items[:-1])
+                      + f'<li aria-current="page">{html.escape(items[-1][0])}</li></ol></div></nav>')
     extra_head += jsonld({"@context":"https://schema.org","@graph":graph})
     if page == "404.html": extra_head += '<meta name="robots" content="noindex">'
     cl = "fr" if lang == "fr" else "en"   # Spanish pages use the English captures
@@ -276,14 +309,15 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     alts += f'<link rel="alternate" hreflang="x-default" href="https://{DOMAIN}{href("en",page)}">'
     redirect = ""   # no automatic language redirect (SEO): a suggestion banner is shown instead
     CHEV = '<svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg>'
-    def dd(label, items, key):
+    def dd(label, items, key, groups=None):
         cur = any(p == page for p, _, _ in items)
-        links = "".join(f'<a role="menuitem" href="{href(lang,p)}"{CURP if p==page else ""}><b>{t(l)}{"<span class=\"newdot\" aria-hidden=\"true\"></span>" if p=="changelog.html" else ""}</b><span>{t(d)}</span></a>' for p, l, d in items)
+        def links(its): return "".join(f'<a role="menuitem" href="{href(lang,p)}"{CURP if p==page else ""}><b>{t(l)}{"<span class=\"newdot\" aria-hidden=\"true\"></span>" if p=="changelog.html" else ""}</b><span>{t(d)}</span></a>' for p, l, d in its)
+        menu = ('<div class="ddcols">' + "".join(f'<div class="ddgrp" role="group" aria-label="{t(g)}"><span class="ddh" aria-hidden="true">{t(g)}</span>{links(its)}</div>' for g, its in groups) + '</div>') if groups else links(items)
         return (f'<div class="navdd" data-dd="{key}"><button type="button" class="ddbtn{" cur" if cur else ""}" aria-haspopup="true" aria-expanded="false">{t(label)}{CHEV}</button>'
-                f'<div class="ddmenu" role="menu">{links}</div></div>')
+                f'<div class="ddmenu{" two" if groups else ""}" role="menu">{menu}</div></div>')
     nav = (dd(T("Product","Produit","Producto"), PRODUCT, "product")
            + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l in NAV[2:])
-           + dd(T("Resources","Ressources","Recursos"), RESOURCES, "res"))
+           + dd(T("Resources","Ressources","Recursos"), RESOURCES, "res", RES_GROUPS))
     ARROW = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>'
     sheet = "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}><span>{t(l)}</span>{ARROW}</a>' for p, l in NAV)
     sheet += '<div class="sheet-res">' + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l, _ in RESOURCES) + '</div>'
@@ -295,7 +329,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     langsel = f'<div class="langsel"><button class="langbtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="{t(T("Language","Langue","Idioma"))}: {names[lang]}">{GLOBE}<span>{codes[lang]}</span><svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg></button><ul class="langmenu" role="menu">{langmenu}</ul></div>'
     seg = '<div class="langseg" role="group" aria-label="' + t(T("Language","Langue","Idioma")) + '">' + "".join(f'<a href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}>{codes[l]}</a>' for l in LANGS) + '</div>'
     langlinks = "".join(f'<a href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}>{names[l]}</a>' for l in LANGS)
-    cols = "".join(f'<div><h3>{t(h)}</h3><ul>' + "".join(f'<li><a href="{href(lang,p)}">{t(l)}</a></li>' for p, l in items) + '</ul></div>' for h, items in FOOT)
+    cols = "".join(f'<div><h3>{t(h)}</h3><ul>' + "".join(f'<li><a href="{href(lang,p)}">{t(l)}</a></li>' for p, l in (items or _foot_firms())) + '</ul></div>' for h, items in FOOT)
     ogloc = {"en":"en_US","fr":"fr_CA","es":"es_ES"}[lang]
     noindex = '<meta name="robots" content="noindex">' if page == "404.html" else ""
     return f'''<!doctype html>
@@ -347,7 +381,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <div class="sheet-foot"><a class="btn btn-primary" href="{SIGNUP}">{t(CREATE_FREE)}</a><a class="btn btn-line" href="{APP}">{t(LOGIN)}</a>
 <div class="sheet-lang"><span>{t(T("Language","Langue","Idioma"))}</span>{seg}</div>{social_links("social sheet-social")}</div></div>
 <main id="main">
-{body}
+{crumbs}{body}
 </main>
 <div class="langsug" id="langsug" hidden><span data-l="fr">Cette page existe aussi en français</span><span data-l="es">Esta página también está en español</span><span data-l="en">This page is also in English</span><a href="#" id="langsug-go"></a><button type="button" id="langsug-x" aria-label="{t(T("Close","Fermer","Cerrar"))}">✕</button></div>
 <div class="consent" id="consent" role="dialog" aria-live="polite" aria-label="{t(T("Cookies","Témoins","Cookies"))}" hidden><p>{t(T("We use one cookie to remember how you found Sweep (the link you clicked). No ads, no cross-site tracking.","On utilise un seul témoin pour savoir comment tu as trouvé Sweep (le lien sur lequel tu as cliqué). Pas de publicité, aucun suivi d’un site à l’autre.","Usamos una sola cookie para saber cómo encontraste Sweep (el enlace en el que hiciste clic). Sin anuncios ni seguimiento entre sitios."))} <a href="{href(lang,'privacy.html')}">{t(T("Privacy","Confidentialité","Privacidad"))}</a></p><div><button type="button" class="btn btn-line" data-consent="no">{t(T("Decline","Refuser","Rechazar"))}</button><button type="button" class="btn btn-primary" data-consent="yes">{t(T("Accept","Accepter","Aceptar"))}</button></div></div>
@@ -355,10 +389,10 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <footer><div class="wrap">
 <div class="foot">
 <div><a class="brand" href="{href(lang,'index.html')}" aria-label="Sweep">{MARK}<span>sweep</span></a><p style="max-width:28ch">{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}<br><span class="fine">{t(T("Sweep doesn’t offer financial advice. Trading futures involves risk.","Sweep n’offre pas de conseils financiers. Le trading de futures comporte des risques.","Sweep no ofrece asesoría financiera. Operar futuros implica riesgos."))}</span></p>
-<div class="cta-row" style="margin-top:20px"><a class="btn btn-line" href="{SIGNUP}">{t(CREATE)}</a><a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a></div>{social_links()}</div>
+<div class="cta-row" style="margin-top:20px"><a class="btn btn-line" href="{SIGNUP}">{t(CREATE)}</a><a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a></div></div>
 {cols}
 </div>
-<div class="foot-bottom"><span>© 2026 Sweep Inc. · Laval, Québec · <a href="mailto:{EMAIL}">{EMAIL}</a></span><nav class="lang" aria-label="{t(T("Language","Langue","Idioma"))}">{langlinks}</nav></div>
+<div class="foot-bottom"><span>© 2026 Sweep Inc. · Laval, Québec · <a href="mailto:{EMAIL}">{EMAIL}</a></span><div class="foot-meta"><nav class="lang" aria-label="{t(T("Language","Langue","Idioma"))}">{langlinks}</nav>{social_links()}</div></div>
 <p class="disclaimer">Sweep Inc. · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2 · <a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{APP}">app.makeitsweep.com</a></p>
 <p class="disclaimer" style="margin-top:8px">{t(DISC)} {t(CHART_MENTION)}</p>
 </div></footer>

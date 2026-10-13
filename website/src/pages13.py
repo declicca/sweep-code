@@ -42,6 +42,7 @@ def _date(t, iso):
 
 def make_release(key):
     k, sl, names, title, what, src = next(r for r in REL if r[0] == key)
+    CRUMBS[sl] = title
     evs = sorted([e for e in _EV if e["event"] in names], key=lambda e: (e["date"], e["time"]))
     def page(lang, t):
         nxt = next((e for e in evs if e["date"] >= TODAY_ISO), None)
