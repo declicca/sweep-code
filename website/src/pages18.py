@@ -278,7 +278,7 @@ def history(lang, t, f):
     # only a value that changed: a value that appears or disappears is the catalogue being completed or corrected, not a rule change
     rows = [c for c in presets.CHANGES if c.get("firm") == f["id"] and c.get("old") is not None and c.get("new") is not None and change_label(c.get("rule", ""), lang, t)][:8]
     if not rows:
-        return f'<p>{t(T(f"No rule change recorded since we started tracking on {day(TRACK_SINCE, lang)}.", f"Aucun changement de règle enregistré depuis le début du suivi, le {day(TRACK_SINCE, lang)}.", f"Ningún cambio de regla registrado desde el inicio del seguimiento, el {day(TRACK_SINCE, lang)}."))}</p>'
+        return f'<p>{t(T(f"No rule change recorded since our first check on {day(TRACK_SINCE, lang)}.", f"Aucun changement de règle enregistré depuis notre première vérification, le {day(TRACK_SINCE, lang)}.", f"Ningún cambio de regla registrado desde nuestra primera revisión, el {day(TRACK_SINCE, lang)}."))}</p>'
     prog = {p.get("id", p["name"]): p["name"] for p in f["programs"]}
     items = "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)}</li>' for c in rows)
     return f'<ul class="list">{items}</ul>'
@@ -471,3 +471,65 @@ def page_hub(lang, t):
     body = hero + b + final_cta(lang, t)
     if lang == "fr": body, title, desc = (re.sub(r" ([:;?!])(?=\s|<|$)", " \\1", x) for x in (body, title, desc))
     return (title, desc, body, ld)
+
+# ---------------------------------------------------------------- a firm whose rules aren't in the app's catalogue yet (Tradeify)
+MANUAL_RULES = T("""<h2>The rules to enter</h2><ul>
+<li><b>Profit target</b> of the evaluation, in dollars.</li>
+<li><b>Max loss</b> and how it trails: end of day, in real time or static, and whether it stops at the starting balance.</li>
+<li><b>Daily loss limit,</b> if the account has one.</li>
+<li><b>Consistency:</b> the most your best day can be, as a share of your profit.</li>
+<li><b>Minimum days</b> before passing or before a payout.</li>
+<li><b>Payout conditions:</b> winning days, a balance to keep, the minimum and maximum per payout, and your profit split.</li></ul>
+<p>Take them from {F}’s current rules for your exact account type and size: rules differ by account and change over time. The <a href="@glossary.html">glossary</a> explains each term, and the <a href="@prop-firm-drawdown-rules.html">drawdown</a> and <a href="@prop-firm-payout-rules.html">payout</a> guides show how the other firms set them.</p>""",
+"""<h2>Les règles à saisir</h2><ul>
+<li><b>Objectif de profit</b> de l’évaluation, en dollars.</li>
+<li><b>Perte max</b> et sa façon de suivre : en fin de journée, en temps réel ou fixe, et si elle s’arrête au solde de départ.</li>
+<li><b>Limite de perte du jour,</b> si le compte en a une.</li>
+<li><b>Consistance :</b> le poids maximal de ta meilleure journée dans ton profit.</li>
+<li><b>Jours minimum</b> avant de réussir ou avant un payout.</li>
+<li><b>Conditions de payout :</b> jours gagnants, solde à garder, minimum et maximum par payout, et ton partage des profits.</li></ul>
+<p>Prends-les dans les règles actuelles de {F} pour ton type et ta taille de compte exacts : les règles diffèrent selon le compte et changent avec le temps. Le <a href="@glossary.html">lexique</a> explique chaque terme, et les guides du <a href="@prop-firm-drawdown-rules.html">drawdown</a> et des <a href="@prop-firm-payout-rules.html">payouts</a> montrent comment les autres firmes les fixent.</p>""",
+"""<h2>Las reglas que debes introducir</h2><ul>
+<li><b>Objetivo de beneficio</b> de la evaluación, en dólares.</li>
+<li><b>Pérdida máx.</b> y cómo sigue al saldo: al cierre, en tiempo real o fija, y si se detiene en el saldo inicial.</li>
+<li><b>Límite de pérdida diaria,</b> si la cuenta lo tiene.</li>
+<li><b>Consistencia:</b> el peso máximo de tu mejor día en tu beneficio.</li>
+<li><b>Días mínimos</b> antes de aprobar o antes de un payout.</li>
+<li><b>Condiciones de payout:</b> días ganadores, saldo a mantener, mínimo y máximo por payout, y tu reparto de beneficios.</li></ul>
+<p>Tómalas de las reglas actuales de {F} para tu tipo y tamaño de cuenta exactos: las reglas cambian según la cuenta y con el tiempo. El <a href="@glossary.html">glosario</a> explica cada término, y las guías de <a href="@prop-firm-drawdown-rules.html">drawdown</a> y de <a href="@prop-firm-payout-rules.html">payouts</a> muestran cómo las fijan las demás firmas.</p>""")
+
+def make_manual_page(slug, name):
+    CRUMBS[slug] = name
+    def page(lang, t):
+        hero = page_hero(t, T(f"{name} rules, in Sweep.", f"Les règles de {name}, dans Sweep.", f"Las reglas de {name}, en Sweep."),
+            T(f"{poss(name)} rules aren’t preloaded in Sweep yet: add your account as “Other firm”, enter its rules once, and Sweep checks every trade against them.",
+              f"Les règles de {name} ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme », saisis ses règles une fois, et Sweep vérifie chaque trade contre elles.",
+              f"Las reglas de {name} aún no están precargadas en Sweep: añade tu cuenta como «Otra firma», introduce sus reglas una vez y Sweep comprueba cada operación con ellas."),
+            T("Prop firms", "Prop firms", "Prop firms"), f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_firm">{t(CREATE_FREE)}</a>')
+        b = f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{localize(lang, t(MANUAL_RULES)).replace("{F}", name)}</article></div></section>'
+        items = [T("<b>Every trade checked</b> against your rules: target, room above the max loss, today’s limit, consistency", "<b>Chaque trade vérifié</b> contre tes règles : objectif, marge au-dessus de la perte max, limite du jour, consistance", "<b>Cada operación comprobada</b> con tus reglas: objetivo, margen sobre la pérdida máx., límite del día, consistencia"),
+                 T("<b>Ready for payout</b> in %, once funded, from the conditions you entered", "<b>Prêt pour le payout</b> en %, une fois financé, selon les conditions saisies", "<b>Listo para el payout</b> en %, ya fondeada, según las condiciones introducidas"),
+                 T(f"<b>One trade on several {name} accounts</b> with the trade copier", f"<b>Un trade sur plusieurs comptes {name}</b> avec le copieur de trades", f"<b>Una operación en varias cuentas de {name}</b> con el copiador"),
+                 T("<b>A failed or closed account keeps its history</b>", "<b>Un compte échoué ou fermé garde son historique</b>", "<b>Una cuenta fallida o cerrada conserva su historial</b>")]
+        b += split(t, T("In Sweep", "Dans Sweep", "En Sweep"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
+                   T("Enter the rules once; then every value is tracked on every trade, next to your other firms.", "Saisis les règles une fois ; ensuite, chaque valeur est suivie à chaque trade, à côté de tes autres firmes.", "Introduce las reglas una vez; después, cada valor se sigue en cada operación, junto a tus otras firmas."),
+                   items, frame("accounts", lang, t(T(f"{name} accounts in Sweep, sample data", f"Comptes {name} dans Sweep, données d’exemple", f"Cuentas de {name} en Sweep, datos de ejemplo")), t), id_="track",
+                   more=f'<p class="fine" style="margin-top:16px">{t(MONEY_PLAN)}</p>')
+        faqs = [(T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
+                 T(f"No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {name}. The {name} name belongs to its owner.", f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Le nom {name} appartient à son propriétaire.", f"No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {name}. El nombre {name} pertenece a su propietario.")),
+                (T(f"Are {poss(name)} rules preloaded in Sweep?", f"Les règles de {name} sont-elles préremplies dans Sweep ?", f"¿Las reglas de {name} están precargadas en Sweep?"),
+                 T(f"Not yet. Add your account as “Other firm” and enter its rules once; you can edit them anytime. Sweep preloads the rules of {FIRMS_TXT['en']}.", f"Pas encore. Ajoute ton compte comme « Autre firme » et saisis ses règles une fois ; tu peux les modifier à tout moment. Sweep préremplit les règles de {FIRMS_TXT['fr']}.", f"Todavía no. Añade tu cuenta como «Otra firma» e introduce sus reglas una vez; puedes editarlas cuando quieras. Sweep precarga las reglas de {FIRMS_TXT['es']}.")),
+                (T(f"Can I track several {name} accounts?", f"Puis-je suivre plusieurs comptes {name} ?", f"¿Puedo seguir varias cuentas de {name}?"),
+                 T("Yes, as many as your plan allows, each with its own rules, and you can copy one trade to several accounts at once.", "Oui, autant que ton forfait le permet, chacun avec ses propres règles, et tu peux copier un trade sur plusieurs comptes en une fois.", "Sí, tantas como permita tu plan, cada una con sus propias reglas, y puedes copiar una operación en varias cuentas a la vez.")),
+                (T("Is it free?", "C’est gratuit ?", "¿Es gratis?"),
+                 T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.", "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
+        b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>'
+              + "".join(faq_item(t, q, a) for q, a in faqs) + "</div></section>"
+              + related(lang, t, ["prop-firms/index.html", "prop-firm-drawdown-rules.html", "prop-firm-payout-rules.html"]))
+        ld = jsonld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]})
+        return (t(T(f"{name} Rules & Trading Journal · Sweep", f"Règles {name} et journal de trading · Sweep", f"Reglas de {name} y diario de trading · Sweep")),
+                t(T(f"Track your {name} accounts in Sweep: enter the rules once (target, max loss, daily limit, consistency, payouts) and every trade is checked. Free.",
+                    f"Suis tes comptes {name} dans Sweep : saisis les règles une fois (objectif, perte max, limite du jour, consistance, payouts) et chaque trade est vérifié.",
+                    f"Sigue tus cuentas de {name} en Sweep: introduce las reglas una vez (objetivo, pérdida máx., límite diario, consistencia, payouts) y se revisa cada operación.")),
+                hero + b + final_cta(lang, t), ld)
+    return page

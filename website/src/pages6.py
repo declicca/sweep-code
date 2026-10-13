@@ -295,6 +295,7 @@ def page_pricing(lang, t):
      (T("Real CME charts","Vrais graphiques CME","Gráficos reales de CME"),Y,Y,Y),
      (T("Log with AI (words or screenshot)","Log with AI (mots ou capture)","Log with AI (palabras o captura)"),Y,Y,Y),
      (T("Prop accounts","Comptes prop","Cuentas prop"),*lim(T("Limited","Limité","Limitado"),T("More","Plus","Más"),T("The most","Le plus","El máximo"))),
+     (T("My money: payouts, expenses and real net","Mon argent : payouts, dépenses et vrai net","Mi dinero: payouts, gastos y neto real"),N,Y,Y),
      (T("Sweep AI (Ask Sweep, trade feedback)","Sweep AI (Ask Sweep, avis sur un trade)","Sweep AI (Ask Sweep, opinión sobre una operación)"),*lim(T("Base quota","Quota de base","Cuota básica"),T("Extended quota","Quota élargi","Cuota ampliada"),T("Maximum quota","Quota maximal","Cuota máxima"))),
      (T("Rings, streak, badges, ranks","Anneaux, streak, badges, rangs","Anillos, racha, insignias, rangos"),Y,Y,Y),
      (T("Streak freezes per week","Gels de streak / semaine","Congelaciones de racha / semana"),"1","2","3"),
