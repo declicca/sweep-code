@@ -1,7 +1,7 @@
 {
- "version": "2026-10-13-154550",
- "checked_at": "2026-10-13T15:45:50+00:00",
- "origin": "checked",
+ "version": "2026-10-13b",
+ "checked_at": "2026-10-07T00:00:00Z",
+ "origin": "seed",
  "firms": [
   {
    "id": "lucid",
@@ -1312,167 +1312,132 @@
     {
      "id": "tpt-test",
      "name": "Test → PRO",
-     "sizes": [
-      {
-       "size": 25000,
-       "eval": {
-        "dd": 1500,
-        "dd_type": "eod",
-        "target": 1500,
-        "consistency": 50,
-        "max_minis": 3,
-        "min_days": 3
-       },
-       "funded": {
-        "dd": 1500,
-        "dd_type": "trade",
-        "max_minis": 3,
-        "payout": {
-         "min": 250,
-         "min_bal": 26500,
-         "split_pct": 80
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 130,
-        "eval_period": "month",
-        "checked": "2026-10-13"
-       }
-      },
-      {
-       "size": 50000,
-       "eval": {
-        "dd": 2000,
-        "dd_type": "eod",
-        "target": 3000,
-        "consistency": 50,
-        "max_minis": 6,
-        "min_days": 3
-       },
-       "funded": {
-        "dd": 2000,
-        "dd_type": "trade",
-        "max_minis": 6,
-        "payout": {
-         "min": 250,
-         "min_bal": 52000,
-         "split_pct": 80
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 130,
-        "eval_period": "month",
-        "checked": "2026-10-13"
-       }
-      },
-      {
-       "size": 75000,
-       "eval": {
-        "dd": 2500,
-        "dd_type": "eod",
-        "target": 4500,
-        "consistency": 50,
-        "max_minis": 9,
-        "min_days": 3
-       },
-       "funded": {
-        "dd": 2500,
-        "dd_type": "trade",
-        "max_minis": 9,
-        "payout": {
-         "min": 250,
-         "min_bal": 77500,
-         "split_pct": 80
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 130,
-        "eval_period": "month",
-        "checked": "2026-10-13"
-       }
-      },
-      {
-       "size": 100000,
-       "eval": {
-        "dd": 3000,
-        "dd_type": "eod",
-        "target": 6000,
-        "consistency": 50,
-        "max_minis": 12,
-        "min_days": 3
-       },
-       "funded": {
-        "dd": 3000,
-        "dd_type": "trade",
-        "max_minis": 12,
-        "payout": {
-         "min": 250,
-         "min_bal": 103000,
-         "split_pct": 80
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 130,
-        "eval_period": "month",
-        "checked": "2026-10-13"
-       }
-      },
-      {
-       "size": 150000,
-       "eval": {
-        "dd": 4500,
-        "dd_type": "eod",
-        "target": 9000,
-        "consistency": 50,
-        "max_minis": 15,
-        "min_days": 3
-       },
-       "funded": {
-        "dd": 4500,
-        "dd_type": "trade",
-        "max_minis": 15,
-        "payout": {
-         "min": 250,
-         "min_bal": 154500,
-         "split_pct": 80
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 130,
-        "eval_period": "month",
-        "checked": "2026-10-13"
-       }
-      }
-     ],
-     "evidence": [
-      {
-       "url": "https://takeprofittrader.com",
-       "quote": "3 trading days, as long as you've met the profit target and all other test rules."
-      },
-      {
-       "url": "https://takeprofittrader.com",
-       "quote": "One Time $130 Fee"
-      }
-     ],
      "note": {
       "fr": "Test : fin de journée, 3 jours min., consistance 50 %. PRO : drawdown intraday.",
       "en": "Test: end of day, 3 days min., 50% consistency. PRO: intraday drawdown.",
       "es": "Test: al cierre, 3 días mín., consistencia 50 %. PRO: drawdown intradía."
      },
+     "sizes": [
+      {
+       "size": 25000,
+       "eval": {
+        "target": 1500,
+        "dd": 1500,
+        "dd_type": "eod",
+        "consistency": 50,
+        "min_days": 3,
+        "max_minis": 3
+       },
+       "funded": {
+        "dd": 1500,
+        "dd_type": "trade",
+        "dd_lock": true,
+        "payout": {
+         "min": 250,
+         "min_bal": 26500,
+         "split_pct": 80
+        },
+        "max_minis": 3
+       }
+      },
+      {
+       "size": 50000,
+       "eval": {
+        "target": 3000,
+        "dd": 2000,
+        "dd_type": "eod",
+        "consistency": 50,
+        "min_days": 3,
+        "max_minis": 6
+       },
+       "funded": {
+        "dd": 2000,
+        "dd_type": "trade",
+        "dd_lock": true,
+        "payout": {
+         "min": 250,
+         "min_bal": 52000,
+         "split_pct": 80
+        },
+        "max_minis": 6
+       }
+      },
+      {
+       "size": 75000,
+       "eval": {
+        "target": 4500,
+        "dd": 2500,
+        "dd_type": "eod",
+        "consistency": 50,
+        "min_days": 3,
+        "max_minis": 9
+       },
+       "funded": {
+        "dd": 2500,
+        "dd_type": "trade",
+        "dd_lock": true,
+        "payout": {
+         "min": 250,
+         "min_bal": 77500,
+         "split_pct": 80
+        },
+        "max_minis": 9
+       }
+      },
+      {
+       "size": 100000,
+       "eval": {
+        "target": 6000,
+        "dd": 3000,
+        "dd_type": "eod",
+        "consistency": 50,
+        "min_days": 3,
+        "max_minis": 12
+       },
+       "funded": {
+        "dd": 3000,
+        "dd_type": "trade",
+        "dd_lock": true,
+        "payout": {
+         "min": 250,
+         "min_bal": 103000,
+         "split_pct": 80
+        },
+        "max_minis": 12
+       }
+      },
+      {
+       "size": 150000,
+       "eval": {
+        "target": 9000,
+        "dd": 4500,
+        "dd_type": "eod",
+        "consistency": 50,
+        "min_days": 3,
+        "max_minis": 15
+       },
+       "funded": {
+        "dd": 4500,
+        "dd_type": "trade",
+        "dd_lock": true,
+        "payout": {
+         "min": 250,
+         "min_bal": 154500,
+         "split_pct": 80
+        },
+        "max_minis": 15
+       }
+      }
+     ],
+     "payout_sources": [
+      "https://takeprofittrader.com"
+     ],
      "verified": [
       {
        "url": "https://investinglive.com/education/take-profit-trader-cuts-evaluation-timeline-to-three-days-what-that-means-and-how-prop-firm-evals-work/",
        "date": "2026-10-07",
        "what": "Test minimum cut from 5 to 3 days on 2026-08-17 (announcement by Take Profit Trader): 3 kept"
       }
-     ],
-     "payout_sources": [
-      "https://takeprofittrader.com"
      ]
     }
    ]
@@ -1776,6 +1741,18 @@
     {
      "id": "zero",
      "name": "Zero",
+     "verified": [
+      {
+       "url": "https://alpha-futures.com",
+       "date": "2026-10-13",
+       "what": "Zero: prices, targets, $500–2,000 daily loss guard, 1 day minimum, max contracts; funded 40 % consistency, 5 winning days of $200, min payout $200, caps $1,000 / $1,500 / $2,500, up to 50 % of the profit, 90 %"
+      },
+      {
+       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
+       "date": "2026-10-13",
+       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
+      }
+     ],
      "sizes": [
       {
        "size": 25000,
@@ -1790,6 +1767,7 @@
        "funded": {
         "dd": 1000,
         "dd_type": "eod",
+        "dd_lock": true,
         "dll": 500,
         "consistency": 40,
         "max_minis": 1,
@@ -1799,16 +1777,13 @@
          "min": 200,
          "max": 1000,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 89,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
       },
       {
@@ -1824,6 +1799,7 @@
        "funded": {
         "dd": 2000,
         "dd_type": "eod",
+        "dd_lock": true,
         "dll": 1000,
         "consistency": 40,
         "max_minis": 3,
@@ -1833,16 +1809,13 @@
          "min": 200,
          "max": 1500,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 139,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
       },
       {
@@ -1858,6 +1831,7 @@
        "funded": {
         "dd": 3000,
         "dd_type": "eod",
+        "dd_lock": true,
         "dll": 2000,
         "consistency": 40,
         "max_minis": 6,
@@ -1867,41 +1841,32 @@
          "min": 200,
          "max": 2500,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 279,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
-      }
-     ],
-     "evidence": [
-      {
-       "url": "https://alpha-futures.com",
-       "quote": "Zero: prices, targets, $500–2,000 daily loss guard, 1 day minimum, max contracts; funded 40 % consistency, 5 winning days of $200, min payout $200, caps $1,000 / $1,500 / $2,500, up to 50 % of the profit, 90 %"
-      }
-     ],
-     "verified": [
-      {
-       "url": "https://alpha-futures.com",
-       "date": "2026-10-13",
-       "what": "Zero: prices, targets, $500–2,000 daily loss guard, 1 day minimum, max contracts; funded 40 % consistency, 5 winning days of $200, min payout $200, caps $1,000 / $1,500 / $2,500, up to 50 % of the profit, 90 %"
-      },
-      {
-       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
-       "date": "2026-10-13",
-       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
       }
      ]
     },
     {
      "id": "standard",
      "name": "Standard",
+     "verified": [
+      {
+       "url": "https://alpha-futures.com",
+       "date": "2026-10-13",
+       "what": "Standard: prices, targets, 50 % consistency and 2 days to pass, no daily limit in evaluation; funded $1,000–3,000 daily limit, 40 %, 5 winning days of $200, min payout $500, caps $3,000 / $4,000 / $5,000, up to 50 % of the profit, 90 %"
+      },
+      {
+       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
+       "date": "2026-10-13",
+       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
+      }
+     ],
      "sizes": [
       {
        "size": 50000,
@@ -1916,6 +1881,7 @@
        "funded": {
         "dd": 2000,
         "dd_type": "eod",
+        "dd_lock": true,
         "dll": 1000,
         "consistency": 40,
         "max_minis": 5,
@@ -1925,16 +1891,13 @@
          "min": 500,
          "max": 3000,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 129,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
       },
       {
@@ -1950,6 +1913,7 @@
        "funded": {
         "dd": 3000,
         "dd_type": "eod",
+        "dd_lock": true,
         "dll": 2000,
         "consistency": 40,
         "max_minis": 10,
@@ -1959,16 +1923,13 @@
          "min": 500,
          "max": 4000,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 239,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
       },
       {
@@ -1984,6 +1945,7 @@
        "funded": {
         "dd": 4500,
         "dd_type": "eod",
+        "dd_lock": true,
         "dll": 3000,
         "consistency": 40,
         "max_minis": 15,
@@ -1993,35 +1955,14 @@
          "min": 500,
          "max": 5000,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 349,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
-      }
-     ],
-     "evidence": [
-      {
-       "url": "https://alpha-futures.com",
-       "quote": "Standard: prices, targets, 50 % consistency and 2 days to pass, no daily limit in evaluation; funded $1,000–3,000 daily limit, 40 %, 5 winning days of $200, min payout $500, caps $3,000 / $4,000 / $5,000, up to 50 % of the profit, 90 %"
-      }
-     ],
-     "verified": [
-      {
-       "url": "https://alpha-futures.com",
-       "date": "2026-10-13",
-       "what": "Standard: prices, targets, 50 % consistency and 2 days to pass, no daily limit in evaluation; funded $1,000–3,000 daily limit, 40 %, 5 winning days of $200, min payout $500, caps $3,000 / $4,000 / $5,000, up to 50 % of the profit, 90 %"
-      },
-      {
-       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
-       "date": "2026-10-13",
-       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
       }
      ]
     },
@@ -2029,110 +1970,6 @@
      "id": "direct",
      "name": "Direct",
      "direct": true,
-     "sizes": [
-      {
-       "size": 25000,
-       "funded": {
-        "dd": 1000,
-        "dd_type": "eod",
-        "dll": 500,
-        "consistency": 20,
-        "max_minis": 2,
-        "payout": {
-         "min": 500,
-         "max": 1000,
-         "max_pct": 50,
-         "cycle_min": 1000,
-         "first_min": 1500,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 349,
-        "checked": "2026-10-13"
-       }
-      },
-      {
-       "size": 50000,
-       "funded": {
-        "dd": 2000,
-        "dd_type": "eod",
-        "dll": 1000,
-        "consistency": 20,
-        "max_minis": 4,
-        "payout": {
-         "min": 500,
-         "max": 2000,
-         "max_pct": 50,
-         "cycle_min": 2000,
-         "first_min": 3000,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 519,
-        "checked": "2026-10-13"
-       }
-      },
-      {
-       "size": 100000,
-       "funded": {
-        "dd": 3000,
-        "dd_type": "eod",
-        "dll": 2000,
-        "consistency": 20,
-        "max_minis": 8,
-        "payout": {
-         "min": 500,
-         "max": 2500,
-         "max_pct": 50,
-         "cycle_min": 4000,
-         "first_min": 6000,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 689,
-        "checked": "2026-10-13"
-       }
-      },
-      {
-       "size": 150000,
-       "funded": {
-        "dd": 4500,
-        "dd_type": "eod",
-        "dll": 3000,
-        "consistency": 20,
-        "max_minis": 10,
-        "payout": {
-         "min": 500,
-         "max": 3000,
-         "max_pct": 50,
-         "cycle_min": 6000,
-         "first_min": 9000,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
-       },
-       "price": {
-        "activation": 859,
-        "checked": "2026-10-13"
-       }
-      }
-     ],
-     "evidence": [
-      {
-       "url": "https://alpha-futures.com",
-       "quote": "Direct: price, no evaluation, daily limit, 20 % consistency; withdrawal targets $1,500 / $3,000 / $6,000 / $9,000 then $1,000 / $2,000 / $4,000 / $6,000 (reset after each withdrawal), min payout $500, caps $1,000 / $2,000 / $2,500 / $3,000, up to 50 % of the profit, 90 %"
-      }
-     ],
      "verified": [
       {
        "url": "https://alpha-futures.com",
@@ -2144,11 +1981,113 @@
        "date": "2026-10-13",
        "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type, Direct withdrawal targets"
       }
+     ],
+     "sizes": [
+      {
+       "size": 25000,
+       "funded": {
+        "dd": 1000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 500,
+        "consistency": 20,
+        "max_minis": 2,
+        "payout": {
+         "min": 500,
+         "max": 1000,
+         "max_pct": 50,
+         "first_min": 1500,
+         "cycle_min": 1000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 349
+       }
+      },
+      {
+       "size": 50000,
+       "funded": {
+        "dd": 2000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 1000,
+        "consistency": 20,
+        "max_minis": 4,
+        "payout": {
+         "min": 500,
+         "max": 2000,
+         "max_pct": 50,
+         "first_min": 3000,
+         "cycle_min": 2000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 519
+       }
+      },
+      {
+       "size": 100000,
+       "funded": {
+        "dd": 3000,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 2000,
+        "consistency": 20,
+        "max_minis": 8,
+        "payout": {
+         "min": 500,
+         "max": 2500,
+         "max_pct": 50,
+         "first_min": 6000,
+         "cycle_min": 4000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 689
+       }
+      },
+      {
+       "size": 150000,
+       "funded": {
+        "dd": 4500,
+        "dd_type": "eod",
+        "dd_lock": true,
+        "dll": 3000,
+        "consistency": 20,
+        "max_minis": 10,
+        "payout": {
+         "min": 500,
+         "max": 3000,
+         "max_pct": 50,
+         "first_min": 9000,
+         "cycle_min": 6000,
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "activation": 859
+       }
+      }
      ]
     },
     {
      "id": "advanced",
      "name": "Advanced",
+     "verified": [
+      {
+       "url": "https://alpha-futures.com",
+       "date": "2026-10-13",
+       "what": "Advanced: prices, targets, 40 % consistency and 3 days to pass, no daily limit; funded no consistency, 5 winning days of $200, min payout $1,000, cap $15,000, up to 50 % of the profit, 90 %"
+      },
+      {
+       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
+       "date": "2026-10-13",
+       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
+      }
+     ],
      "sizes": [
       {
        "size": 50000,
@@ -2163,6 +2102,7 @@
        "funded": {
         "dd": 1750,
         "dd_type": "eod",
+        "dd_lock": true,
         "max_minis": 5,
         "payout": {
          "win_days": 5,
@@ -2170,16 +2110,13 @@
          "min": 1000,
          "max": 15000,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 209,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
       },
       {
@@ -2195,6 +2132,7 @@
        "funded": {
         "dd": 3500,
         "dd_type": "eod",
+        "dd_lock": true,
         "max_minis": 10,
         "payout": {
          "win_days": 5,
@@ -2202,16 +2140,13 @@
          "min": 1000,
          "max": 15000,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 349,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
       },
       {
@@ -2227,6 +2162,7 @@
        "funded": {
         "dd": 5250,
         "dd_type": "eod",
+        "dd_lock": true,
         "max_minis": 15,
         "payout": {
          "win_days": 5,
@@ -2234,35 +2170,14 @@
          "min": 1000,
          "max": 15000,
          "max_pct": 50,
-         "split_pct": 90,
-         "cycle_pos": true
-        },
-        "dd_lock": true
+         "split_pct": 90
+        }
        },
        "price": {
         "eval": 489,
         "activation": 0,
-        "eval_period": "month",
-        "checked": "2026-10-13"
+        "eval_period": "month"
        }
-      }
-     ],
-     "evidence": [
-      {
-       "url": "https://alpha-futures.com",
-       "quote": "Advanced: prices, targets, 40 % consistency and 3 days to pass, no daily limit; funded no consistency, 5 winning days of $200, min payout $1,000, cap $15,000, up to 50 % of the profit, 90 %"
-      }
-     ],
-     "verified": [
-      {
-       "url": "https://alpha-futures.com",
-       "date": "2026-10-13",
-       "what": "Advanced: prices, targets, 40 % consistency and 3 days to pass, no daily limit; funded no consistency, 5 winning days of $200, min payout $1,000, cap $15,000, up to 50 % of the profit, 90 %"
-      },
-      {
-       "url": "https://help.alpha-futures.com/en/articles/9492051-payout-policy",
-       "date": "2026-10-13",
-       "what": "Payouts up to 4 times a month (no total limit), up to 50 % of the profit per request, minimum per account type"
       }
      ]
     }

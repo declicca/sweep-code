@@ -1,5 +1,374 @@
 [
  {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "advanced",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "standard",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": true,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": 130,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": "month",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.activation",
+  "old": 130,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 150000,
+  "rule": "price.eval_period",
+  "old": "month",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": 130,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": "month",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": 130,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": "month",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.activation",
+  "old": 130,
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.checked",
+  "old": "2026-10-13",
+  "new": null
+ },
+ {
+  "date": "2026-10-07",
+  "firm": "tpt",
+  "program": "tpt-test",
+  "size": 75000,
+  "rule": "price.eval_period",
+  "old": "month",
+  "new": null
+ },
+ {
   "date": "2026-10-13",
   "firm": "alpha",
   "program": "advanced",

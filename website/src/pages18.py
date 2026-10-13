@@ -271,8 +271,8 @@ def change_value(path, v, lang, t):
     return str(v)
 
 def history(lang, t, f):
-    # a value that changed or disappeared; a value that only appears is the catalogue being completed, not a rule change
-    rows = [c for c in presets.CHANGES if c.get("firm") == f["id"] and c.get("old") is not None and change_label(c.get("rule", ""), lang, t)][:8]
+    # only a value that changed: a value that appears or disappears is the catalogue being completed or corrected, not a rule change
+    rows = [c for c in presets.CHANGES if c.get("firm") == f["id"] and c.get("old") is not None and c.get("new") is not None and change_label(c.get("rule", ""), lang, t)][:8]
     if not rows:
         return f'<p>{t(T(f"No rule change recorded since we started tracking on {day(TRACK_SINCE, lang)}.", f"Aucun changement de règle enregistré depuis le début du suivi, le {day(TRACK_SINCE, lang)}.", f"Ningún cambio de regla registrado desde el inicio del seguimiento, el {day(TRACK_SINCE, lang)}."))}</p>'
     prog = {p.get("id", p["name"]): p["name"] for p in f["programs"]}
