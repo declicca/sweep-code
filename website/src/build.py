@@ -63,6 +63,7 @@ for lang in LANGS:
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         body = add_related(lang, t, page, body)
         body = add_links(lang, page, body)
+        body = nbsp(lang, body)
         open(dest, "w").write(shell(lang, page, title, desc, body, t, ld))
 import datetime
 BUILD_DATE = datetime.date.today().isoformat()

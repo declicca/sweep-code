@@ -489,7 +489,7 @@ def add_related(lang, t, page, body):
     return body[:k] + block + body[k:] if k >= 0 else body + block
 
 # Contextual links: the first mention of each term in body text links to its glossary entry or resource page
-# (never in a lead paragraph, a heading, an existing link, a script, or a paragraph marked data-nolinks).
+# (never in a lead paragraph, a heading, bold text, an existing link, a script, or a paragraph marked data-nolinks).
 LINK_TERMS = [
  ("glossary.html#trailing-drawdown", T(r"trailing drawdowns?", r"drawdowns? suiveurs?", r"drawdowns? dinámicos?")),
  ("glossary.html#drawdown", T(r"drawdowns?", r"drawdowns?", r"drawdowns?")),
@@ -501,7 +501,7 @@ LINK_TERMS = [
  ("release-dates.html", T(r"release dates?|economic releases?", r"dates? des annonces|annonces économiques", r"fechas de publicación|datos económicos")),
 ]
 NO_LINKS = ("index.html", "404.html", "privacy.html", "terms.html", "risk.html", "100")
-_SKIP_TAGS = ("a", "h1", "h2", "h3", "h4", "h5", "h6", "button", "summary", "label", "svg", "code", "textarea", "select")
+_SKIP_TAGS = ("a", "b", "strong", "h1", "h2", "h3", "h4", "h5", "h6", "button", "summary", "label", "svg", "code", "textarea", "select")
 
 def add_links(lang, page, body):
     if page in NO_LINKS: return body
@@ -533,6 +533,21 @@ def add_links(lang, page, body):
                     pieces[i:i + 1] = [(txt[:m.start()], False), (f'<a href="{url}">{m.group(1)}</a>', True), (txt[m.end():], False)]
                     done.add(url); break
         out.append("".join(p for p, _ in pieces))
+    return "".join(out)
+
+def nbsp(lang, body):
+    """French and Spanish typography in visible text: a number never splits from its thousands or its unit,
+    and in French « : ; ? ! » never start a line. Scripts, styles and tag attributes are left alone."""
+    if lang not in ("fr", "es"): return body
+    out = []
+    for tok in re.finditer(r"<script\b.*?</script>|<style\b.*?</style>|<[^>]*>|[^<]+|<", body, re.S):
+        x = tok.group(0)
+        if not x.startswith("<"):
+            x = re.sub(r"(?<=\d) (?=[$%])", "\u00a0", x)
+            if lang == "fr":
+                x = re.sub(r"(?<=\d) (?=\d{3}(?!\d))", "\u00a0", x)
+                x = re.sub(r" (?=[:;?!](?:\s|$))", "\u00a0", x)
+        out.append(x)
     return "".join(out)
 
 def words(text, delay=0.0):

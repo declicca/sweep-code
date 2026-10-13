@@ -1532,3 +1532,6 @@ figcaption,.cap,.shot-note{text-align:center;font-size:12.5px;color:var(--faint)
 .crumbs a:hover{color:var(--text)}
 .crumbs li[aria-current]{flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .crumbs+.page-hero{padding-top:clamp(36px,5.5vw,80px)}
+/* ---------- lists in articles (calculators, guides) ---------- */
+.article ol,.article ul{color:var(--muted);font-size:16.5px;line-height:1.7;margin:0 0 14px;padding-left:22px;max-width:72ch}
+.article li{margin-bottom:8px}.article li b{color:var(--text);font-weight:500}
