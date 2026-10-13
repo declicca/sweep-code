@@ -2,7 +2,7 @@
  * Sweep — first-run guidance and help.
  *  1. Welcome tour (coach marks on the real interface), once, after the first account exists; replayable in Settings.
  *  2. A tip the first time each page is opened (one card, dismissible, links to the full guide).
- *  3. « Get started » checklist on Today: 7 steps detected automatically from the trader's data.
+ *  3. « Get started » checklist on Today: 2 steps detected automatically from the trader's data, inside the routine card.
  *  4. Help center: searchable articles for every feature, with « do it now » buttons. Opens from the « ? » in the header.
  * State is kept on the device (localStorage); nothing here can block the app.
  */
@@ -200,6 +200,7 @@
     const c = await counters();
     const tr = real(S.trades), jr = real(S.journals);
     const filled = (o) => o && Object.values(o).some((v) => v != null && String(v).trim() !== '' && v !== false);
+    // inside the routine card: the routine's next step keeps the only primary button (brief 02 part 5), these rows are quiet
     return [   // three steps, the core loop: a trade, a review, a swept day (the account exists already)
       { id: 'trade', ok: tr.length > 0, t: { fr: 'Ajouter ton premier trade (graphique ou en mots)', en: 'Log your first trade (chart or words)', es: 'Registrar tu primera operación (gráfico o palabras)' }, act: 'add', a: 'add' },
       /* (« Do your daily review » merged into « Complete your first day »: the review is what closes the day) */
@@ -215,7 +216,7 @@
     const html = `<div class="gd-st-h"><div><b>${t('start_t')}</b><small>${t('start_s', { d: done, n: s.length })}</small></div><button type="button" class="gd-x sm" data-gd="st-hide" aria-label="${t('hide')}">${I.x}</button></div>
       <span class="gd-bar"><i style="width:${(done / s.length) * 100}%"></i></span>
       <ol class="gd-steps">${s.map((x) => `<li class="${x.ok ? 'ok' : ''}"><span class="gd-ck">${x.ok ? I.check : ''}</span><span class="gd-st-t">${esc(pick(x.t))}</span>
-        ${x.ok ? '' : `<span class="gd-st-a">${x.act ? `<button type="button" class="btn sm primary" data-gd="act" data-v="${x.act}">${t('doit')}</button>` : ''}<button type="button" class="link" data-gd="art" data-v="${x.a}">${t('how')}</button></span>`}</li>`).join('')}</ol>`;
+        ${x.ok ? '' : `<span class="gd-st-a">${x.act ? `<button type="button" class="btn sm" data-gd="act" data-v="${x.act}">${t('doit')}</button>` : ''}<button type="button" class="link" data-gd="art" data-v="${x.a}">${t('how')}</button></span>`}</li>`).join('')}</ol>`;
     if (!el) {
       el = document.createElement('section'); el.className = 'surface gd-start' + (seenAnim.has('start') ? ' gd-still' : ''); el.setAttribute('data-noi18n', '');
       seenAnim.add('start');

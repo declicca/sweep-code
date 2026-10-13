@@ -3787,13 +3787,22 @@ window.SweepMO = window.SweepMO || class {
     review: '<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',
     check: '<path d="M5 12.5l4.2 4.2L19 7"/>', fire: '<path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-2 1-3 1-3s.5 1.5 2 1.5c0-3 1-5 1-7z"/>', help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01"/>' };
   const svg = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
-  // computer: the routine opens and closes (closed by default; the numbers stay visible). Phone: always open.
   // the routine opens every session (the next step stands out); the trader can fold it, until the session ends (1.1)
   const rtDay = () => { const st = window.SweepGame && SweepGame.state && SweepGame.state(); return (st && st.today && st.today.day) || ''; };
   const rtClosed = () => { try { const d = localStorage.getItem('sw.rtClosedDay'); return !!d && d === rtDay(); } catch (x) { return false; } };
   const FOLD = { en: ['Fold the routine', 'Unfold the routine'], fr: ['Replier la routine', 'Déplier la routine'], es: ['Plegar la rutina', 'Desplegar la rutina'] };
   const foldBtn = () => { const c = rtClosed(), f = FOLD[L] || FOLD.en; return `<button type="button" class="nav-rt-fold" data-rt="toggle" aria-expanded="${!c}" aria-label="${c ? f[1] : f[0]}"><svg class="nav-rt-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>`; };
   const left = (dl) => { if (!dl) return ''; const s = Math.max(0, dl - Date.now() / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return h ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`; };
+  /** the review is offered when the session is done (brief 02 part 5): at the 16:00 ET close, or earlier once a trade is
+   *  logged and the day's last announcement is past (a logged trade is a closed one: Sweep sees no open position) */
+  function reviewTime(d) {
+    const now = Math.floor(Date.now() / 1000), et = typeof etStr === 'function' ? etStr(now) : ''; if (!et) return true;
+    const date = et.slice(0, 10), hm = et.slice(11, 16);
+    if (date > d.day || (date === d.day && hm >= '16:00')) return true;
+    if (date < d.day || !d.trades) return false;   // the evening before the session (from 18:00 ET), or nothing traded yet
+    const ev = typeof ECON !== 'undefined' && ECON.days && ECON.days[d.day];
+    return !!(ev && ev.length && now > ev[ev.length - 1].ts);
+  }
   function card() {
     const st = window.SweepGame && SweepGame.state && SweepGame.state(); const d = st && st.today;
     if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div><div class="nav-rt-steps">${'<div class="nav-rt-s sk"></div>'.repeat(3)}</div></section>`;
@@ -3818,7 +3827,7 @@ window.SweepMO = window.SweepMO || class {
     const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
     const s3 = r.review >= 100 ? 'done' : 'todo';
     const n = [s1 !== 'todo', s2 === 'done', s3 === 'done'].filter(Boolean).length;
-    const nextI = wkReady ? 0 : s1 === 'todo' ? 1 : !d.trades ? 2 : s3 !== 'done' ? 3 : 0;   // only the next step is highlighted (none when the week's recap is ready)
+    const nextI = wkReady ? 0 : s1 === 'todo' ? 1 : s3 === 'done' ? 0 : reviewTime(d) ? 3 : 2;   // only the next step is highlighted (none when the week's recap is ready)
     const pill = d.swept ? `<span class="nav-rt-pill ok">${svg('check')}${t('swept')}</span>` : `<span class="nav-rt-pill">${t('of', { n })}</span>`;
     const step = (i, key, ic, title, sub, state, stateTxt, btn, act, extra, short) => `<div class="nav-rt-s ${state}${i === nextI ? ' next' : ''}"${i === nextI ? ' aria-current="step"' : ''}>
         <div class="nav-rt-si"><span class="nav-rt-n">${state === 'done' ? svg('check') : i}</span><span class="nav-rt-ic">${svg(ic)}</span></div>
@@ -3878,6 +3887,7 @@ window.SweepMO = window.SweepMO || class {
     w.__rt = true; window.render = w;
   }
   new window.SweepMO(() => { try { place(); } catch (e) { if (!place.w) { place.w = 1; console.warn('Sweep routine: ' + (e && e.message)); } } }).observe(document.body, { childList: true, subtree: true });
+  setInterval(() => { try { place(); } catch (e) { /* next minute */ } }, 60000);   // the review's moment comes with the clock, not with a change on the page
 })();
 
 

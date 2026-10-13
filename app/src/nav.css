@@ -1900,7 +1900,8 @@ html body .main-wrap > .top.nav-3l #title,html[data-home] body .main-wrap > .top
 @media (max-width:860px){html body .main-wrap > .top.nav-3l #title,html[data-home] body .main-wrap > .top #title{font-size:26px!important}html body .main-wrap > .top.nav-3l #title::before,html[data-home] body .main-wrap > .top #title::before{font-size:12px!important}}
 /* 5 · info bubbles always on top: the hovered card rises above its neighbours */
 html body #main .surface:hover,html body #main .surface:focus-within{position:relative;z-index:30}
-html body #main [class*="tip"],html body #main [role="tooltip"]{z-index:1000!important}
+/* only the floating bubbles (chart, trade chart): « [class*=tip] » also caught cards in the page (the first-ring tip, the sync tip), which then covered the side sheets */
+html body #main .ctip,html body #main .tc-tip,html body #main [role="tooltip"]{z-index:1000!important}
 /* 8 · Cancel: a small round ✕ on a transparent dark background */
 html body .nav-cancel{float:right;width:32px;height:32px;padding:0!important;margin:0 0 6px 12px;border-radius:50%!important;background:rgba(0,0,0,.35)!important;color:var(--text2)!important;font-size:0!important;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--hair)}
 html body .nav-cancel{position:relative;overflow:hidden;line-height:0!important}

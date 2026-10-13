@@ -22,11 +22,11 @@
       start_title: 'Getting started', start_steps: { goal: 'Goal chosen', style: 'Style chosen', rules: 'Account rules', journal: 'First trade journaled', plan: 'First plan', review: 'First review' },
       plan_title: 'Plan of the day', bias: 'Bias', long: 'Long', short: 'Short', neutral: 'Neutral', no_trade: 'No trading today', setups: 'Allowed setups',
       no_setups: 'Pick the setups you allow yourself today. They are kept for your next plans and trades.', other_setup: 'Other setup', setup_ph: 'Name of your setup', add: 'Add', max_loss: 'Max loss today', max_trades: 'Max trades (optional)', levels: 'Key levels / note (optional)',
-      gate_intro: 'Before your first trade: 30 seconds for your plan.', gate_skip: 'Skip, add my trade', gate_save: 'Save and add my trade', same_plan: 'Same plan as yesterday', save_plan: 'Save my plan', plan_needs: 'Pick a bias and your max loss for the day.', plan_late: 'Your first trade is already in: this plan counts as late.',
+      gate_intro: 'Before your first trade: 30 seconds for your plan.', gate_skip: 'Skip, add my trade', gate_save: 'Save and add my trade', save_plan: 'Save my plan', confirm_plan: 'Confirm my plan', from_plan: 'From your plan of {d}: confirm or adjust.', dll_hint: 'Daily limit of {a}: {v}', plan_needs: 'Pick a bias and your max loss for the day.', plan_late: 'Your first trade is already in: this plan counts as late.',
       plan_past: 'A plan can only be made for today.',
       journal_title: 'Journal', setup: 'Setup', emotion: 'Emotion before entry', rules: 'Did you follow your rules?', yes: 'Yes', partial: 'Partly', no: 'No',
       next: 'Next', done: 'Done', skip: 'Skip', of: '{a} of {b}', all_journaled: 'Every trade is journaled.',
-      review_title: 'Daily review', went_well: 'What went well', improve: 'One thing to improve tomorrow', discipline: 'Discipline today', save_review: 'Save my review',
+      review_title: 'Daily review', improve_opt: 'One thing to improve tomorrow (optional)', discipline: 'Discipline today', save_review: 'Save my review', followed: 'Did you follow your plan?', grade: 'Your day, graded', review_needs: 'Answer the 3 questions.',
       today_title: 'Your day', step_plan: 'Plan before the first trade', step_exec: 'Trades inside your plan', step_review: 'Trades journaled and day reviewed',
       v_setup_not_in_plan: 'Setup outside your plan', v_no_stop: 'Stop not respected', v_against_bias: 'Against your bias', v_over_max_loss: 'Taken after your max loss', v_over_max_trades: 'Above your max number of trades',
       v_plan_no_trade: 'Taken on a day off', v_rules: 'Rules partly followed',
@@ -65,11 +65,11 @@
       start_title: 'Démarrage', start_steps: { goal: 'Objectif choisi', style: 'Style choisi', rules: 'Règles du compte', journal: 'Premier trade journalisé', plan: 'Premier plan', review: 'Première revue' },
       plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd'hui", setups: 'Setups autorisés',
       no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', max_trades: 'Nombre max de trades (facultatif)', levels: 'Niveaux clés / note (facultatif)',
-      gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', same_plan: "Même plan qu'hier", save_plan: 'Enregistrer mon plan', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
+      gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', save_plan: 'Enregistrer mon plan', confirm_plan: 'Confirmer mon plan', from_plan: 'Repris de ton plan du {d} : confirme ou ajuste.', dll_hint: 'Limite du jour de {a} : {v}', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
       plan_past: "Un plan ne peut être fait que pour aujourd'hui.",
       journal_title: 'Journaliser', setup: 'Setup', emotion: "Émotion avant l'entrée", rules: 'As-tu suivi tes règles ?', yes: 'Oui', partial: 'En partie', no: 'Non',
       next: 'Suivant', done: 'Terminé', skip: 'Passer', of: '{a} sur {b}', all_journaled: 'Tous les trades sont journalisés.',
-      review_title: 'Revue du jour', went_well: 'Ce qui a bien fonctionné', improve: 'Une chose à améliorer demain', discipline: "Discipline aujourd'hui", save_review: 'Enregistrer ma revue',
+      review_title: 'Revue du jour', improve_opt: 'Une chose à améliorer demain (facultatif)', discipline: "Discipline aujourd'hui", save_review: 'Enregistrer ma revue', followed: 'As-tu suivi ton plan ?', grade: 'Ta note du jour', review_needs: 'Réponds aux 3 questions.',
       today_title: 'Ta journée', step_plan: 'Plan avant le premier trade', step_exec: 'Trades dans ton plan', step_review: 'Trades journalisés et journée revue',
       v_setup_not_in_plan: 'Setup hors de ton plan', v_no_stop: 'Stop non respecté', v_against_bias: 'À l’inverse de ton biais', v_over_max_loss: 'Pris après ta perte max', v_over_max_trades: 'Au-delà de ton nombre max de trades',
       v_plan_no_trade: "Pris pendant un jour off", v_rules: 'Règles suivies en partie',
@@ -108,11 +108,11 @@
       start_title: 'Primeros pasos', start_steps: { goal: 'Objetivo elegido', style: 'Estilo elegido', rules: 'Reglas de la cuenta', journal: 'Primer trade registrado', plan: 'Primer plan', review: 'Primera revisión' },
       plan_title: 'Plan del día', bias: 'Sesgo', long: 'Largo', short: 'Corto', neutral: 'Neutral', no_trade: 'Hoy no opero', setups: 'Setups permitidos',
       no_setups: 'Elige los setups que te permites hoy. Se guardan para tus próximos planes y operaciones.', other_setup: 'Otro setup', setup_ph: 'Nombre de tu setup', add: 'Añadir', max_loss: 'Pérdida máx. del día', max_trades: 'Máx. de trades (opcional)', levels: 'Niveles clave / nota (opcional)',
-      gate_intro: 'Antes de tu primera operación: 30 segundos para tu plan.', gate_skip: 'Saltar, añadir mi operación', gate_save: 'Guardar y añadir mi operación', same_plan: 'Mismo plan que ayer', save_plan: 'Guardar mi plan', plan_needs: 'Elige un sesgo y tu pérdida máx. del día.', plan_late: 'Tu primer trade ya está hecho: este plan cuenta como tardío.',
+      gate_intro: 'Antes de tu primera operación: 30 segundos para tu plan.', gate_skip: 'Saltar, añadir mi operación', gate_save: 'Guardar y añadir mi operación', save_plan: 'Guardar mi plan', confirm_plan: 'Confirmar mi plan', from_plan: 'Retomado de tu plan del {d}: confirma o ajusta.', dll_hint: 'Límite diario de {a}: {v}', plan_needs: 'Elige un sesgo y tu pérdida máx. del día.', plan_late: 'Tu primer trade ya está hecho: este plan cuenta como tardío.',
       plan_past: 'Solo se puede hacer un plan para hoy.',
       journal_title: 'Registrar', setup: 'Setup', emotion: 'Emoción antes de entrar', rules: '¿Seguiste tus reglas?', yes: 'Sí', partial: 'En parte', no: 'No',
       next: 'Siguiente', done: 'Listo', skip: 'Saltar', of: '{a} de {b}', all_journaled: 'Todos los trades están registrados.',
-      review_title: 'Revisión del día', went_well: 'Lo que salió bien', improve: 'Una cosa a mejorar mañana', discipline: 'Disciplina hoy', save_review: 'Guardar mi revisión',
+      review_title: 'Revisión del día', improve_opt: 'Una cosa a mejorar mañana (opcional)', discipline: 'Disciplina hoy', save_review: 'Guardar mi revisión', followed: '¿Seguiste tu plan?', grade: 'Tu nota del día', review_needs: 'Responde las 3 preguntas.',
       today_title: 'Tu día', step_plan: 'Plan antes del primer trade', step_exec: 'Trades dentro de tu plan', step_review: 'Trades registrados y día revisado',
       v_setup_not_in_plan: 'Setup fuera de tu plan', v_no_stop: 'Stop no respetado', v_against_bias: 'En contra de tu sesgo', v_over_max_loss: 'Tomado después de tu pérdida máx.', v_over_max_trades: 'Por encima de tu máx. de trades',
       v_plan_no_trade: 'Tomado en un día libre', v_rules: 'Reglas seguidas en parte',
@@ -438,8 +438,13 @@
 
   /* ───────────── Plan sheet ───────────── */
   const journalOf = (day) => (typeof getDoc === 'function' ? getDoc('journals', day) : null) || { id: day };
-  function lastPlan(before) {
-    return (S.journals || []).filter((j) => j.id < before && j.pre && j.pre.bias && !j.demo).sort((a, b) => b.id.localeCompare(a.id))[0] || null;
+  function lastPlan(before, trading) {   // trading: a plan with a bias (a day off says nothing about the next session)
+    return (S.journals || []).filter((j) => j.id < before && j.pre && j.pre.bias && (!trading || j.pre.bias !== 'no_trade') && !j.demo).sort((a, b) => b.id.localeCompare(a.id))[0] || null;
+  }
+  /** the tightest daily loss limit of the trader's active accounts (brief 02 part 5: the plan's max loss never starts above it) */
+  function dailyLimit() {
+    const a = (S.accounts || []).filter((x) => !x.demo && x.status !== 'archived' && x.status !== 'closed' && x.rules && x.rules.dll_c > 0).sort((x, y) => x.rules.dll_c - y.rules.dll_c)[0];
+    return a ? { c: a.rules.dll_c, name: a.name || '' } : null;
   }
   function defaultMaxLoss() {
     const lp = lastPlan('9999');
@@ -452,10 +457,14 @@
   function openPlan(day, opts) {
     day = day || (G.today && G.today.day);
     PL.then = opts && typeof opts.then === 'function' ? opts.then : null;
-    const j = journalOf(day), pre = j.pre || {};
-    PL.day = day; PL.bias = pre.bias && pre.bias !== 'no_trade' ? pre.bias : (pre.bias || null);
-    PL.setups = new Set(pre.setups || []); PL.max_loss = pre.max_loss ? String(pre.max_loss).replace(/[^0-9.]/g, '') : defaultMaxLoss();
-    PL.max_trades = pre.max_trades || ''; PL.levels = pre.levels || ''; PL.extra = [];
+    const j = journalOf(day), pre = j.pre || {}, num = (v) => String(v || '').replace(/[^0-9.]/g, '');
+    // nothing planned for this day yet: the previous plan comes back (bias, setups, max loss, max trades) — the trader
+    // confirms or adjusts; nothing is saved before « Confirm » (brief 02 part 5)
+    const lp = pre.bias ? null : lastPlan(day, true), src = lp ? lp.pre : pre;
+    PL.day = day; PL.from = lp ? lp.id : null; PL.bias = src.bias || null;
+    PL.setups = new Set(src.setups || []); PL.max_trades = src.max_trades || ''; PL.levels = pre.levels || ''; PL.extra = [];
+    PL.max_loss = pre.max_loss ? num(pre.max_loss) : (lp && num(lp.pre.max_loss)) || defaultMaxLoss();
+    const lim = dailyLimit(); if (!pre.max_loss && lim && +PL.max_loss > lim.c / 100) PL.max_loss = String(lim.c / 100);   // never above the account's own limit
     openSheet(planHtml(), { cls: 'g-plan' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;   // the pre-market chart and screenshots attach to this day
   }
@@ -470,19 +479,19 @@
   function planHtml() {
     const setups = [...new Set([...(S.settings && S.settings.setups || []), ...PL.setups, ...(PL.extra || [])])];
     const d = G.today || {};
-    const lp = lastPlan(PL.day);
+    const lim = dailyLimit();
     const bias = [['bullish', 'long'], ['bearish', 'short'], ['neutral', 'neutral'], ['no_trade', 'no_trade']];
     return `${head(t('plan_title'), fdate(PL.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
       ${PL.then ? `<p class="g-hint g-gate">${t('gate_intro')}</p>` : ''}
       ${d.trades > 0 && !d.plan_valid && !PL.then ? `<p class="g-hint">${t('plan_late')}</p>` : ''}
-      ${lp ? `<button type="button" class="link g-same" data-g="same-plan">${t('same_plan')}</button>` : ''}
+      ${PL.from ? `<p class="g-hint g-from">${t('from_plan', { d: fdate(PL.from, { weekday: 'long', month: 'long', day: 'numeric' }) })}</p>` : ''}
       <div class="g-f"><span>${t('bias')}</span><div class="g-seg4">${bias.map(([v, k]) => `<button type="button" class="${PL.bias === v ? 'on' : ''} b-${v}" data-g="bias" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${PL.bias === 'no_trade' ? '' : `<div class="g-f g-setups"><span>${t('setups')}</span>${setupsHtml(setups)}</div>
-      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$"></label>
+      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$">${lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: typeof moneyU === 'function' ? moneyU(lim.c) : '$' + lim.c / 100 }))}</small>` : ''}</label>
       <label class="g-f"><span>${t('max_trades')}</span><input inputmode="numeric" data-gp="max_trades" value="${esc(PL.max_trades)}"></label></div>
       <label class="g-f"><span>${t('levels')}</span><textarea rows="2" data-gp="levels">${esc(PL.levels)}</textarea></label>`}
       <p class="g-err" id="gErr"></p>
-      <button type="button" class="btn primary g-big" data-g="save-plan">${PL.then ? t('gate_save') : t('save_plan')}</button>
+      <button type="button" class="btn primary g-big" data-g="save-plan">${PL.then ? t('gate_save') : PL.from ? t('confirm_plan') : t('save_plan')}</button>
       ${PL.then ? `<button type="button" class="link g-gate-skip" data-g="plan-skip">${t('gate_skip')} ›</button>` : ''}`;
   }
   function addPlanSetup(wrap) {
@@ -559,8 +568,10 @@
     } else { closeSheet(); soon(500); }
   }
 
-  /* ───────────── Review sheet ───────────── */
-  const RV = { day: null, score: null };
+  /* ───────────── Review sheet ─────────────
+   * 60 seconds (brief 02 part 5): three one-tap questions — plan followed, discipline, the day's grade (the same fields as the
+   * journal's Post-market) — and one optional sentence for tomorrow. */
+  const RV = { day: null, score: null, followed: null, grade: null, well: '' };
   function openReview(day) {
     RV.day = day || (G.today && G.today.day);
     const post = Object.assign({}, journalOf(RV.day).post || {});
@@ -575,19 +586,25 @@
       if (!(post.well || '').trim()) post.well = uniq(pick(['well'])).join('\n');
       if (!(post.tomorrow || '').trim()) post.tomorrow = uniq(pick(['lesson', 'wrong', 'differently'])).join('\n');
     }
-    RV.score = post.discipline || null;
+    RV.score = post.discipline || null; RV.followed = post.followed || null; RV.grade = post.grade || null; RV.well = post.well || '';
+    const grades = typeof GRADES !== 'undefined' ? GRADES : ['A', 'B', 'C', 'D', 'F'];
     openSheet(`${head(t('review_title'), fdate(RV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
-      <label class="g-f"><span>${t('went_well')}</span><textarea rows="2" data-gr="well" maxlength="400">${esc(post.well || '')}</textarea></label>
-      <label class="g-f"><span>${t('improve')}</span><textarea rows="2" data-gr="tomorrow" maxlength="400">${esc(post.tomorrow || '')}</textarea></label>
+      <div class="g-f"><span>${t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       <div class="g-f"><span>${t('discipline')}</span><div class="g-dots">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="${RV.score === n ? 'on' : ''}" data-g="r-score" data-v="${n}">${n}</button>`).join('')}</div></div>
+      <div class="g-f"><span>${t('grade')}</span><div class="g-dots">${grades.map((g) => `<button type="button" class="${RV.grade === g ? 'on' : ''}" data-g="r-grade" data-v="${g}">${g}</button>`).join('')}</div></div>
+      <label class="g-f"><span>${t('improve_opt')}</span><textarea rows="2" data-gr="tomorrow" maxlength="400">${esc(post.tomorrow || '')}</textarea></label>
+      <p class="g-err" id="gErr"></p>
       <button type="button" class="btn primary g-big" data-g="save-review">${t('save_review')}</button>`, { cls: 'g-rv' });
   }
   function saveReview() {
     const el = document.getElementById('gSheet');
-    const well = el.querySelector('[data-gr=well]').value.trim(), tom = el.querySelector('[data-gr=tomorrow]').value.trim();
+    if (!RV.followed || !RV.score || !RV.grade) { const e = document.getElementById('gErr'); if (e) e.textContent = t('review_needs'); buzz(20); return; }
+    const tom = el.querySelector('[data-gr=tomorrow]').value.trim();
     const j = structuredClone(journalOf(RV.day));
     j.id = RV.day;
-    j.post = Object.assign({}, j.post || {}, { well, tomorrow: tom, discipline: RV.score, reviewed_at: new Date().toISOString() });
+    // « what went well » is no longer asked here: what the journal already holds stays
+    j.post = Object.assign({}, j.post || {}, { followed: RV.followed, discipline: RV.score, grade: RV.grade, tomorrow: tom, reviewed_at: new Date().toISOString() });
+    if (!(j.post.well || '').trim() && RV.well) j.post.well = RV.well;   // what the day's trade reviews already say went well (as before)
     put('journals', j);
     buzz(10); closeSheet(); soon(500);
   }
@@ -2027,7 +2044,6 @@
     else if (a === 'setup') { PL.setups.has(v) ? PL.setups.delete(v) : PL.setups.add(v); b.classList.toggle('on'); b.classList.remove('g-sug'); }
     else if (a === 'setup-new') { const box = b.closest('.g-setups').querySelector('.g-setup-add'); box.hidden = false; const i = box.querySelector('input'); i.focus(); }
     else if (a === 'setup-add') addPlanSetup(b.closest('.g-setups'));
-    else if (a === 'same-plan') { const lp = lastPlan(PL.day); if (lp) { PL.bias = lp.pre.bias === 'no_trade' ? null : lp.pre.bias; PL.setups = new Set(lp.pre.setups || []); PL.max_loss = String(lp.pre.max_loss || '').replace(/[^0-9.]/g, ''); PL.max_trades = lp.pre.max_trades || ''; refreshPlan(); buzz(6); } }
     else if (a === 'save-plan') savePlan();
     else if (a === 'j-setup') jEdit((d) => { d.setup = v; });
     else if (a === 'j-emo') {
@@ -2038,7 +2054,11 @@
     else if (a === 'j-rules') jEdit((d) => { d.rules_followed = v; });
     else if (a === 'j-next') jNext(false);
     else if (a === 'j-skip') jNext(true);
-    else if (a === 'r-score') { RV.score = +v; b.parentElement.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); buzz(5); }
+    else if (a === 'r-score' || a === 'r-followed' || a === 'r-grade') {
+      if (a === 'r-score') RV.score = +v; else if (a === 'r-followed') RV.followed = v; else RV.grade = v;
+      b.parentElement.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); buzz(5);
+      const e = document.getElementById('gErr'); if (e) e.textContent = '';
+    }
     else if (a === 'save-review') saveReview();
     else if (a === 'share') shareCard(b.dataset.k, b.dataset.k === 'week' ? (document.querySelector('#gSheet [data-wk-pay]:checked') ? 'pay' : '') : v);
     else if (a === 'badge') badgeInfo(v);
