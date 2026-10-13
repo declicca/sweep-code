@@ -2287,6 +2287,9 @@
       none: 'No trade yet: they arrive as you trade.', link: 'Link', newNote: 'Create the account: it is linked right after.', create: 'Create the account', ignoreGo: 'Ignore',
       linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', editT: 'Edit trade',
       editNote: 'Prices, times, contracts and P&L come from {p} and update on their own. Notes, review, setup, tags and screenshots are edited on the trade page.', target: 'Target', save: 'Save', saved: 'Trade updated',
+      s4: 'Come back here: the accounts the add-on finds show up below, ready to link.', liveOn: 'Add-on connected', liveNone: 'No account yet: connect {p} to your broker.',
+      go1: 'Link my account', goN: 'Link my {n} accounts', allNote: 'For each account found, pick its Sweep account, then link them all at once.', choose: 'Choose…',
+      do1: 'Link 1 account', doN: 'Link {n} accounts', doneN: '{n} accounts linked · {t} trades added', noFree: 'No free Sweep account: choose « + New account ».',
       tipImport: 'On NinjaTrader 8? Connect it once: your trades arrive on their own, no more imports.', tipAcct: 'Trading on NinjaTrader 8? Connect it: your accounts are found and your trades arrive on their own.' },
     fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis {p}, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
       seen: 'Add-on vu {t}', now: 'à l’instant', min: 'il y a {n} min', hr: 'il y a {n} h', day: 'il y a {n} j', found1: '1 compte trouvé', foundN: '{n} comptes trouvés', linkMine: 'Relier mes comptes',
@@ -2303,6 +2306,9 @@
       none: 'Aucun trade pour l’instant : ils arrivent au fil de tes trades.', link: 'Relier', newNote: 'Crée le compte : il sera relié juste après.', create: 'Créer le compte', ignoreGo: 'Ignorer',
       linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', editT: 'Modifier le trade',
       editNote: 'Prix, heures, contrats et P&L viennent de {p} et se mettent à jour seuls. Notes, bilan, setup, tags et captures se modifient sur la page du trade.', target: 'Cible', save: 'Enregistrer', saved: 'Trade mis à jour',
+      s4: 'Reviens ici : les comptes que l’add-on trouve s’affichent juste en dessous, prêts à relier.', liveOn: 'Add-on connecté', liveNone: 'Aucun compte pour l’instant : connecte {p} à ton courtier.',
+      go1: 'Relier mon compte', goN: 'Relier mes {n} comptes', allNote: 'Pour chaque compte trouvé, choisis son compte Sweep, puis relie-les tous d’un coup.', choose: 'Choisir…',
+      do1: 'Relier 1 compte', doN: 'Relier {n} comptes', doneN: '{n} comptes reliés · {t} trades ajoutés', noFree: 'Aucun compte Sweep libre : choisis « + Nouveau compte ».',
       tipImport: 'Sur NinjaTrader 8 ? Connecte-le une fois : tes trades arrivent seuls, plus besoin d’importer.', tipAcct: 'Tu trades sur NinjaTrader 8 ? Connecte-le : tes comptes sont trouvés et tes trades arrivent seuls.' },
     es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde {p}, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
       seen: 'Add-on visto {t}', now: 'justo ahora', min: 'hace {n} min', hr: 'hace {n} h', day: 'hace {n} d', found1: '1 cuenta encontrada', foundN: '{n} cuentas encontradas', linkMine: 'Vincular mis cuentas',
@@ -2319,10 +2325,19 @@
       none: 'Aún no hay operaciones: llegan a medida que operas.', link: 'Vincular', newNote: 'Crea la cuenta: se vincula justo después.', create: 'Crear la cuenta', ignoreGo: 'Ignorar',
       linkedT: 'Vinculada · {n} operaciones añadidas', linked0: 'Vinculada', ignoredT: 'Cuenta ignorada', loading: 'Cargando…', syncedWith: 'Sincronizada con {p}', editT: 'Editar operación',
       editNote: 'Precios, horas, contratos y P&L vienen de {p} y se actualizan solos. Notas, revisión, setup, etiquetas y capturas se editan en la página de la operación.', target: 'Objetivo', save: 'Guardar', saved: 'Operación actualizada',
+      s4: 'Vuelve aquí: las cuentas que encuentra el add-on aparecen justo debajo, listas para vincular.', liveOn: 'Add-on conectado', liveNone: 'Ninguna cuenta por ahora: conecta {p} a tu bróker.',
+      go1: 'Vincular mi cuenta', goN: 'Vincular mis {n} cuentas', allNote: 'Para cada cuenta encontrada, elige su cuenta de Sweep y vincúlalas todas de una vez.', choose: 'Elegir…',
+      do1: 'Vincular 1 cuenta', doN: 'Vincular {n} cuentas', doneN: '{n} cuentas vinculadas · {t} operaciones añadidas', noFree: 'Ninguna cuenta de Sweep libre: elige « + Nueva cuenta ».',
       tipImport: '¿En NinjaTrader 8? Conéctalo una vez: tus operaciones llegan solas, sin importar más.', tipAcct: '¿Operas en NinjaTrader 8? Conéctalo: tus cuentas se encuentran y tus operaciones llegan solas.' },
   };
   const t = (k) => { const x = (T[L] || T.en)[k]; return x == null ? T.en[k] : x; };
   const P = (n, one, many) => (n === 1 ? t(one) : t(many).replace('{n}', n));
+  // the bell (sync/sync-store.php, sync_receive): accounts found by an add-on, to link; a tap opens #settings/sync
+  const NT = { en: { 'sync_found.title': '{platform} found your accounts', 'sync_found.body': '{n} to link to your Sweep accounts so your trades arrive.' },
+    fr: { 'sync_found.title': '{platform} a trouvé tes comptes', 'sync_found.body': '{n} à relier à tes comptes Sweep pour que tes trades arrivent.' },
+    es: { 'sync_found.title': '{platform} encontró tus cuentas', 'sync_found.body': '{n} por vincular a tus cuentas de Sweep para que lleguen tus operaciones.' } };
+  const regNT = () => { if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings(NT); } catch (e) { /* older module */ } return true; } return false; };
+  if (!regNT()) setTimeout(regNT, 1500);
   const h = (s) => (typeof esc === 'function' ? esc(s) : String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]));
   const PLAT = { ninjatrader: 'NinjaTrader', quantower: 'Quantower' };   // the platforms a synced trade can come from (its « source »)
   const NAME = { ninjatrader: 'NinjaTrader 8', quantower: 'Quantower' };   // in Connections, in this order
@@ -2375,7 +2390,7 @@
     const head = c
       ? `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>${NAME[p]}</b><span><i class="sy-dot${recent(c) ? ' on' : ''}"></i>${c.last_seen_at ? h(t('seen').replace('{t}', ago(c.last_seen_at))) : t('waiting')}</span></span><button type="button" class="btn sm" data-sy="manage" data-p="${p}">${t('manage')}</button></div>`
       : `<div class="sy-row"><span class="sy-ic">${IC}</span><span class="sy-txt"><b>${NAME[p]}</b><span>${h(t('pitch').replace('{p}', NAME[p]))}</span></span><button type="button" class="btn sm" data-sy="connect" data-p="${p}">${t('connect')}</button></div>`;
-    const found = fresh.length ? `<div class="sy-found"><span>${P(fresh.length, 'found1', 'foundN')}</span><button type="button" class="btn sm" data-sy="acct" data-id="${h(fresh[0].id)}">${t('linkMine')}</button></div>` : '';
+    const found = fresh.length ? `<div class="sy-found"><span>${P(fresh.length, 'found1', 'foundN')}</span><button type="button" class="btn sm" data-sy="linkall" data-p="${p}">${t('linkMine')}</button></div>` : '';
     return `<div class="sy-plat" data-p="${p}">${head}${found}${list.length ? `<ul class="sy-list">${list.map(rowHtml).join('')}</ul>` : ''}</div>`;
   }
   function sectionHtml() {
@@ -2393,6 +2408,15 @@
     }
     if (sec.innerHTML !== html) sec.innerHTML = html;
     load();
+    if (/^#settings\/sync$/.test(location.hash || '')) {   // the bell's link: straight to the accounts to link (asked again: they may be new)
+      try { history.replaceState(null, '', '#settings'); } catch (e) { /* the sheet still opens */ }
+      load(true).then(() => {
+        const grp = main.querySelector('details.nav-sgd[data-i="3"]'); if (grp) grp.open = true;
+        const box = main.querySelector('.sy-sec'); if (box) box.scrollIntoView({ block: 'start' });
+        const p = Object.keys(NAME).find((x) => accts(x).some((a) => a.state === 'new'));
+        if (p) act({ dataset: { sy: 'linkall', p } });
+      });
+    }
   }
 
   /* ───── account page and trade page ───── */
@@ -2425,8 +2449,10 @@
     if (typeof swipeDismiss === 'function') swipeDismiss(el, { scroller: () => el.querySelector('.evp-in'), onClose: close, ignore: 'input, .sy-key' });
     return el;
   }
+  let poll = null;   // the connect sheet asks for the add-on every 4 s while it is open
+  function watch(on) { if (poll) { clearInterval(poll); poll = null; } if (on) poll = setInterval(() => { if (SY.view && SY.view.k === 'connect' && document.visibilityState !== 'hidden') load(true); }, 4000); }
   function open(view) {
-    SY.view = view; const el = sheet();
+    SY.view = view; const el = sheet(); watch(view.k === 'connect');
     el.querySelector('.sy-in').innerHTML = viewHtml(); el.setAttribute('aria-label', titleOf());
     requestAnimationFrame(() => { el.classList.add('open'); document.getElementById('syScrim').classList.add('open'); document.body.classList.add('evp-lock'); });
   }
@@ -2436,7 +2462,7 @@
     if (box.innerHTML !== html && !box.contains(document.activeElement && document.activeElement.matches('input') ? document.activeElement : null)) box.innerHTML = html;
   }
   function close() {
-    SY.view = null;
+    SY.view = null; watch(false);
     const el = document.getElementById('sySheet'); if (!el) return;
     el.classList.remove('open'); document.getElementById('syScrim').classList.remove('open');
     if (!document.querySelector('.evp.open')) document.body.classList.remove('evp-lock');
@@ -2446,6 +2472,7 @@
     if (v.k === 'connect') return t('cTitle').replace('{p}', NAME[v.p]);
     if (v.k === 'manage') return NAME[v.p];
     if (v.k === 'edit') return t('editT');
+    if (v.k === 'all') return t('linkMine');
     const a = accts().find((x) => x.id === v.id); return a ? a.name : t('conn');
   }
   function viewHtml() {
@@ -2453,9 +2480,13 @@
     const head = `<div class="sy-head"><h2>${h(titleOf())}</h2><button type="button" class="sy-x" data-sy="close" aria-label="${t('close')}">${X}</button></div>`;
     if (v.k === 'connect') {
       const ad = SY.st && (SY.st.addons || {})[v.p], [s2, s3] = STEPS[v.p];
+      // 4th step: what the add-on did since the key, live (waiting · connected · N accounts found → link them here)
+      const c = conn(v.p), fr = accts(v.p).filter((x) => x.state === 'new'), on = !!(c && c.last_seen_at);
+      const live = `<p class="sy-live"><i class="sy-dot${on ? ' on' : ''}"></i><span>${on ? t('liveOn') + (fr.length ? ' · ' + P(fr.length, 'found1', 'foundN') : '') : t('waiting') + '…'}</span></p>${on && !fr.length ? `<p class="sy-note">${h(t('liveNone').replace('{p}', NAME[v.p]))}</p>` : ''}`;
       return head + `<ol class="sy-steps"><li><span>${h(t('s1').replace('{p}', NAME[v.p]))}</span>${ad ? `<a class="btn sm" href="${h(ad.url)}" download>${t('dl')}</a>` : `<em class="sy-soon">${t('soon')}</em>`}</li>
-        <li><span>${t(s2)}</span></li><li><span>${t(s3)}</span><div class="sy-key"><code>${h(v.key)}</code><button type="button" class="btn sm" data-sy="copy">${t('copy')}</button></div></li></ol>
-        <p class="sy-note">${t('once')}</p><button type="button" class="btn primary sy-main" data-sy="close">${t('done')}</button>`;
+        <li><span>${t(s2)}</span></li><li><span>${t(s3)}</span><div class="sy-key"><code>${h(v.key)}</code><button type="button" class="btn sm" data-sy="copy">${t('copy')}</button></div></li>
+        <li><span>${t('s4')}</span>${live}</li></ol>
+        <p class="sy-note">${t('once')}</p>${fr.length ? `<button type="button" class="btn primary sy-main" data-sy="linkall" data-p="${v.p}">${P(fr.length, 'go1', 'goN')}</button>` : `<button type="button" class="btn primary sy-main" data-sy="close">${t('done')}</button>`}`;
     }
     if (v.k === 'manage') {
       const c = conn(v.p) || {};
@@ -2470,6 +2501,18 @@
       return head + `<p class="sy-note">${h(t('editNote').replace('{p}', PLAT[d.source] || ''))}</p>
         <div class="sy-two"><label class="f"><span>Stop</span><input inputmode="decimal" data-syf="stop" value="${num(d.stop)}"></label><label class="f"><span>${t('target')}</span><input inputmode="decimal" data-syf="target" value="${num(d.target)}"></label></div>
         <button type="button" class="btn primary sy-main" data-sy="save-edit">${t('save')}</button>`;
+    }
+    if (v.k === 'all') {
+      const list = accts(v.p).filter((x) => x.state === 'new'), own = freeOwn(), mine = (sid) => new Set(Object.entries(v.picks).filter(([k]) => k !== sid).map(([, x]) => x));
+      const pvText = (pv) => (!pv ? t('loading') : pv.error ? '' : [pv.add ? P(pv.add, 'add1', 'addN') : '', pv.complete ? P(pv.complete, 'cmp1', 'cmpN') : '', pv.manual ? P(pv.manual, 'man1', 'manN') : '', pv.open ? P(pv.open, 'open1', 'openN') : ''].filter(Boolean).join(' · ') || t('none'));
+      const rows = list.map((a) => {
+        const cur = v.picks[a.id] || '', other = mine(a.id), g = guessOf(a), isAcc = cur && cur !== 'ignore';
+        const opts = `<option value="">${t('choose')}</option>${own.map((x) => `<option value="${h(x.id)}"${cur === x.id ? ' selected' : ''}${other.has(x.id) ? ' disabled' : ''}>${h(nameOf(x.id))}</option>`).join('')}<option value="new">${t('newAcc')}</option><option value="ignore"${cur === 'ignore' ? ' selected' : ''}>${t('ignoreGo')}</option>`;
+        return `<li class="sy-all-row"><div class="sy-all-a"><b>${h(a.name)}</b>${g ? `<em class="sy-chip">${h(g)}</em>` : ''}</div><select data-syall="${h(a.id)}" aria-label="${h(t('which') + ' ' + a.name)}">${opts}</select>${isAcc ? `<small class="sy-all-pv">${h(pvText(v.pv[a.id]))}</small>` : ''}${v.err[a.id] ? `<small class="sy-err">${h(v.err[a.id])}</small>` : ''}</li>`;
+      }).join('');
+      const nLink = list.filter((a) => v.picks[a.id] && v.picks[a.id] !== 'ignore').length, nIgn = list.filter((a) => v.picks[a.id] === 'ignore').length;
+      return head + `<p class="sy-note">${t('allNote')}</p>${own.length ? '' : `<p class="sy-note">${t('noFree')}</p>`}<ul class="sy-all">${rows}</ul>
+        <button type="button" class="btn primary sy-main" data-sy="doall"${(!nLink && !nIgn) || v.busy ? ' disabled' : ''}>${nLink ? P(nLink, 'do1', 'doN') : t('save')}</button>`;
     }
     const a = accts().find((x) => x.id === v.id); if (!a) return head;
     const g = guessOf(a), info = a.info || {}, sub = [g, info.connection, info.provider].filter((x, i, l) => x && l.findIndex((y) => y && y.toLowerCase().includes(String(x).toLowerCase())) === i);   // « Apex » is already in « Apex · Evaluation »
@@ -2491,9 +2534,42 @@
     }
     return out;
   }
+  /** the Sweep accounts a platform account can still be linked to (not demo, not archived, not linked to another one) */
+  function freeOwn() {
+    const taken = new Set(accts().filter((x) => x.state === 'linked').map((x) => x.account_id));
+    return (S.accounts || []).filter((x) => x.status !== 'archived' && !x.demo && !taken.has(x.id));
+  }
+  /** the accounts found of a platform, all at once; a Sweep account with the same name is chosen already (preview fetched) */
+  function openAll(p) {
+    const v = { k: 'all', p, picks: {}, pv: {}, err: {}, busy: false }, own = freeOwn();
+    accts(p).filter((x) => x.state === 'new').forEach((a) => {
+      const same = own.find((x) => String(x.name || '').trim().toLowerCase() === String(a.name).trim().toLowerCase() && !Object.values(v.picks).includes(x.id));
+      if (same) v.picks[a.id] = same.id;
+    });
+    open(v); Object.keys(v.picks).forEach((sid) => preview(v, sid));
+  }
+  async function preview(v, sid) {
+    const pick = v.picks[sid]; if (!pick || pick === 'ignore') return;
+    try { const pv = await apiJSON(`api/sync/accounts/${encodeURIComponent(sid)}/preview?account_id=${encodeURIComponent(pick)}`); if (SY.view === v && v.picks[sid] === pick) { v.pv[sid] = pv; redraw(); } }
+    catch (e) { if (SY.view === v) { v.pv[sid] = { error: true }; v.err[sid] = t('err'); redraw(); } }
+  }
+  /** « + New account » for one platform account: the app's own form, named like it; linked once saved (preview first) */
+  function createFor(sid) {
+    const a = accts().find((x) => x.id === sid);
+    try { sessionStorage.setItem('sw.syPend', JSON.stringify({ sid, ids: (S.accounts || []).map((x) => x.id), at: Date.now() })); } catch (e) { /* private mode: linked by hand */ }
+    close(); location.hash = '#accounts';
+    setTimeout(() => {
+      const all = document.querySelectorAll('#main [data-act="acct-add"][data-v="1"]'), btn = all[all.length - 1];
+      if (btn && !document.querySelector('#main form[data-form="account"]')) btn.click();
+      setTimeout(() => { const i = document.querySelector('#main form[data-form="account"] input[name="name"]'); if (i && a && !i.value) { i.value = a.name; i.dispatchEvent(new Event('input', { bubbles: true })); } }, 120);
+    }, 400);
+  }
   /** the next account still to link, or nothing */
   const nextFresh = (skip) => accts().find((x) => x.state === 'new' && x.id !== skip);
-  function after(skip) { const n = nextFresh(skip); if (n) open({ k: 'acct', id: n.id, pick: null }); else close(); }
+  function after(skip) {   // what is still to link: the next account's sheet, or all of them at once when several are left
+    const n = nextFresh(skip); if (!n) return close();
+    if (accts(n.platform).filter((x) => x.state === 'new' && x.id !== skip).length > 1) openAll(n.platform); else open({ k: 'acct', id: n.id, pick: null });
+  }
 
   /* ───── what the trader does ───── */
   async function act(b) {
@@ -2501,6 +2577,30 @@
     if (k === 'close') return close();
     if (k === 'manage') return open({ k: 'manage', p: b.dataset.p });
     if (k === 'acct') return open({ k: 'acct', id: b.dataset.id, pick: null });
+    if (k === 'linkall') {   // one account found: its own sheet (as before); several: all at once
+      const p = b.dataset.p || v.p, fr = accts(p).filter((x) => x.state === 'new');
+      if (fr.length === 1) return open({ k: 'acct', id: fr[0].id, pick: null });
+      if (fr.length) openAll(p);
+      return;
+    }
+    if (k === 'doall') {
+      v.busy = true; redraw();
+      let linked = 0, added = 0;
+      for (const a of accts(v.p).filter((x) => x.state === 'new')) {
+        const pick = v.picks[a.id]; if (!pick) continue;
+        try {
+          const r = await apiJSON(`api/sync/accounts/${encodeURIComponent(a.id)}`, { method: 'POST', body: pick === 'ignore' ? { action: 'ignore' } : { action: 'link', account_id: pick } });
+          if (pick !== 'ignore') { linked++; added += (r.created || 0) + (r.merged || 0); }
+          delete v.picks[a.id]; delete v.err[a.id];
+        } catch (e) { v.err[a.id] = e && e.status === 409 && e.data && e.data.error === 'taken' ? t('err_taken') : t('err'); }
+      }
+      v.busy = false;
+      if (linked && typeof syncNow === 'function') syncNow({ manual: true });
+      if (linked && typeof toast === 'function') toast(linked === 1 ? t('linkedT').replace('{n}', added) : t('doneN').replace('{n}', linked).replace('{t}', added));
+      await load(true);
+      if (SY.view === v && !Object.keys(v.err).length && !accts(v.p).some((x) => x.state === 'new')) close(); else redraw();
+      return;
+    }
     if (k === 'connect' || k === 'newkey') {
       b.disabled = true;
       const p = b.dataset.p || v.p || 'ninjatrader';   // the invitations connect NinjaTrader 8
@@ -2547,17 +2647,7 @@
       catch (e) { if (typeof toast === 'function') toast(t('err')); }
       return;
     }
-    if (k === 'create') {   // the app's own « Add account » form, named like the platform account; linked once saved (preview first)
-      const a = accts().find((x) => x.id === v.id);
-      try { sessionStorage.setItem('sw.syPend', JSON.stringify({ sid: v.id, ids: (S.accounts || []).map((x) => x.id), at: Date.now() })); } catch (e) { /* private mode: linked by hand */ }
-      close(); location.hash = '#accounts';
-      setTimeout(() => {
-        const all = document.querySelectorAll('#main [data-act="acct-add"][data-v="1"]'), btn = all[all.length - 1];
-        if (btn && !document.querySelector('#main form[data-form="account"]')) btn.click();
-        setTimeout(() => { const i = document.querySelector('#main form[data-form="account"] input[name="name"]'); if (i && a && !i.value) { i.value = a.name; i.dispatchEvent(new Event('input', { bubbles: true })); } }, 120);
-      }, 400);
-      return;
-    }
+    if (k === 'create') return createFor(v.id);   // the app's own « Add account » form, named like the platform account; linked once saved
     if (k === 'save-edit') {
       const d = typeof getDoc === 'function' ? getDoc('trades', v.id) : null; if (!d) return close();
       const val = (f) => { const x = document.querySelector(`#sySheet [data-syf="${f}"]`); const s = x ? String(x.value).trim().replace(/\s/g, '').replace(',', '.') : ''; return s === '' || !isFinite(+s) ? null : +s; };
@@ -2573,6 +2663,13 @@
   }
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-sy]'); if (!b || (b.disabled)) return; e.preventDefault(); act(b); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && SY.view) close(); });
+  document.addEventListener('change', (e) => {
+    const sel = e.target.closest && e.target.closest('#sySheet select[data-syall]'), v = SY.view; if (!sel || !v || v.k !== 'all') return;
+    const sid = sel.dataset.syall;
+    if (sel.value === 'new') return createFor(sid);
+    if (sel.value) v.picks[sid] = sel.value; else delete v.picks[sid];
+    delete v.pv[sid]; delete v.err[sid]; redraw(); preview(v, sid);
+  });
 
   /* a synced trade opens its own small editor (stop, target): the trade form would rewrite the platform's prices and P&L */
   if (typeof openTicket === 'function') {

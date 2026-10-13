@@ -23,6 +23,7 @@ const SYNC_MATCH_MIN = 2;        // minutes between a synced entry and a trade t
 // each platform's add-on, downloaded through api/sync/addon?platform=…; a platform shows in Connections once its add-on is here
 const SYNC_ADDONS = ['ninjatrader' => __DIR__ . '/addon/SweepSync.zip', 'quantower' => __DIR__ . '/addon/SweepSync-Quantower.zip'];
 const SYNC_CLIENTS = ['Sweep NT8' => 'ninjatrader', 'Sweep Quantower' => 'quantower'];   // how each add-on names itself (« client »)
+const SYNC_NAMES = ['ninjatrader' => 'NinjaTrader 8', 'quantower' => 'Quantower'];
 
 function sync_q(PDO $pdo, string $sql, array $args = []): PDOStatement { $st = $pdo->prepare($sql); $st->execute($args); return $st; }
 function sync_iso(): string { return gmdate('Y-m-d\TH:i:s\Z'); }   // the documents' date format (now() in api.php)
@@ -146,8 +147,11 @@ function sync_account_row(PDO $pdo, string $uid, string $platform, string $name,
         try {
             // NinjaTrader's own simulation accounts (Sim101, Playback101) start « ignored »: one tap in the list links them
             sync_q($pdo, 'INSERT INTO sync_accounts (id, user_id, platform, ext_id, info, state, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [$id, $uid, $platform, $name, $js, empty(sync_guess($name, $platform)['sim']) ? 'new' : 'ignored', $now, $now]);
+            $made = true;
         } catch (Throwable $e) { /* added by a push running at the same time */ }
-        return sync_q($pdo, 'SELECT * FROM sync_accounts WHERE user_id = ? AND platform = ? AND ext_id = ?', [$uid, $platform, $name])->fetch();
+        $row = sync_q($pdo, 'SELECT * FROM sync_accounts WHERE user_id = ? AND platform = ? AND ext_id = ?', [$uid, $platform, $name])->fetch();
+        if ($row && !empty($made)) $row['_found'] = true;   // found by this push (the trader is told once, sync_receive)
+        return $row;
     }
     if ($js !== null && $js !== $row['info']) { sync_q($pdo, 'UPDATE sync_accounts SET info = ?, updated_at = ? WHERE id = ?', [$js, $now, $row['id']]); $row['info'] = $js; }
     return $row;
@@ -214,6 +218,12 @@ function sync_receive(PDO $pdo, array $conn, array $p): array
         foreach ($written as $k => $v) $written[$k] += $r[$k] ?? 0;
     }
     $states = []; foreach ($rows as $n => $r) $states[] = ['name' => $n, 'state' => $r['state']];
+    // new accounts to link: the trader hears it in the app (bell), wherever they are; one notification per platform and day at most
+    $fresh = 0; foreach ($rows as $r) if ($r['state'] === 'new' && !empty($r['_found'])) $fresh++;
+    if ($fresh && class_exists('Notify')) {
+        $n = (int) sync_q($pdo, "SELECT COUNT(*) FROM sync_accounts WHERE user_id = ? AND platform = ? AND state = 'new'", [$uid, $platform])->fetchColumn();
+        Notify::send($uid, 'sync_found', ['n' => $n, 'platform' => SYNC_NAMES[$platform] ?? $platform], ['dedupe_key' => 'sync_found:' . $platform . ':' . gmdate('Y-m-d', $now), 'action_url' => '#settings/sync']);
+    }
     return ['ok' => true, 'received' => count($fills)] + $stats + ['trades' => $written, 'accounts' => $states];
 }
 

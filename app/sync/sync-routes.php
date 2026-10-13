@@ -24,8 +24,7 @@ function sync_push_route(string $method): void
     // a key pasted in the other platform's add-on: refused, else its accounts and trades would show under the wrong platform
     $cp = sync_client_platform((string) ($p['client'] ?? ''));
     if ($cp !== null && $cp !== $conn['platform']) {
-        $nm = ['ninjatrader' => 'NinjaTrader 8', 'quantower' => 'Quantower'];
-        json_out(401, ['error' => 'This key is for ' . $nm[$conn['platform']] . '. Create a ' . $nm[$cp] . ' key in Sweep: Settings, Connections.', 'code' => 'platform']);
+        json_out(401, ['error' => 'This key is for ' . SYNC_NAMES[$conn['platform']] . '. Create a ' . SYNC_NAMES[$cp] . ' key in Sweep: Settings, Connections.', 'code' => 'platform']);
     }
     if (count((array) ($p['fills'] ?? [])) > SYNC_MAX_FILLS) json_out(413, ['error' => 'Too many executions in one request.', 'max' => SYNC_MAX_FILLS]);
     try { $r = sync_receive(db(), $conn, $p); }

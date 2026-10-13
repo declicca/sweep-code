@@ -492,6 +492,14 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .sy-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sy-two input{width:100%}
 /* account page: « Synced with NinjaTrader » */
+/* connect sheet: what the add-on did since the key (live); « Link my accounts »: every account found at once */
+.sy-live{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:14px;color:var(--text)}
+.sy-all{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.sy-all-row{display:grid;gap:8px;padding:12px 14px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);min-width:0}
+.sy-all-a{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0}
+.sy-all-a b{font-weight:500;font-size:15px;overflow-wrap:anywhere}
+#sySheet .sy-all select{box-sizing:border-box;width:100%;max-width:none;min-height:44px;font-size:16px;border-radius:14px}
+.sy-all-pv{font-size:13px;line-height:1.45;color:var(--text2)}
 .sy-acct{display:grid;grid-template-columns:8px minmax(0,1fr);gap:4px 8px;align-items:start;margin:0 0 14px;font-size:13px;line-height:1.5;color:var(--text2)}
 .sy-acct .sy-dot{margin-top:6px}
 .sy-acct .sy-err{grid-column:2}

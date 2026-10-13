@@ -57,6 +57,7 @@ foreach (['wow_journal', 'wow_plans', 'wow_reviews', 'wow_days', 'wow_clean_week
 Notify::register('chart_ready', ['category' => 'product_updates', 'icon' => 'chart']);
 // a firm changed its rules (presets/check.php): what changes for this account, « Apply the new rules » on its page
 Notify::register('rules_changed', ['category' => 'prop_alerts', 'icon' => 'info']);
+Notify::register('sync_found', ['category' => 'system', 'icon' => 'info']);   // accounts found by a sync add-on, to link (sync/sync-store.php)
 // the 1st of each month: simulated profit, money really received, expenses, net real money (money/money.php)
 Notify::register('money_month', ['category' => 'product_updates', 'icon' => 'info']);
 Notify::register('trial_ending', ['category' => 'system', 'icon' => 'star']);

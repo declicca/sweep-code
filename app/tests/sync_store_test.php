@@ -21,6 +21,7 @@ function billing_account_ids(string $uid): array { return []; }
 function sb_guard(PDO $pdo, string $uid, string $what, array $ctx): ?array { global $FROZEN; return in_array($ctx['account_id'] ?? '', $FROZEN, true) ? ['error' => 'Upgrade', 'code' => 'frozen_account'] : null; }
 function nt_doc_event(string $uid, string $col, string $id, ?array $doc, ?array $prev): void { global $EVENTS; $EVENTS[] = [$col, $id, $doc['date'] ?? null, $prev === null]; }
 function ref_check_user(PDO $pdo, string $uid): void { global $REF; $REF++; }
+final class Notify { public static array $sent = []; public static function send(string $uid, string $type, array $params = [], array $opts = []): ?int { self::$sent[] = [$uid, $type, $params, $opts]; return count(self::$sent); } }   // the bell (notify/notify.php)
 require $app . '/sync/sync-store.php';
 
 $n = 0; $f = 0;
@@ -60,6 +61,9 @@ $r = sync_receive($pdo, $conn, ['fills' => $day1]);
 ok($r['new'] === 0 && $r['changed'] === 0, 'the same executions sent again: nothing new, nothing changed');
 $r = sync_receive($pdo, $conn, ['accounts' => [['name' => 'Sim101'], ['name' => 'Playback101']], 'fills' => []]);
 ok($r['accounts'] === [['name' => 'Sim101', 'state' => 'ignored'], ['name' => 'Playback101', 'state' => 'ignored']], 'NinjaTrader\'s simulation accounts (Sim101, Playback101) start « ignored »');
+$nf = array_values(array_filter(Notify::$sent, fn($x) => $x[1] === 'sync_found'));
+ok(count($nf) === 1 && $nf[0][0] === 'u1' && $nf[0][2] === ['n' => 1, 'platform' => 'NinjaTrader 8'] && $nf[0][3]['action_url'] === '#settings/sync' && $nf[0][3]['dedupe_key'] === 'sync_found:ninjatrader:' . gmdate('Y-m-d'),
+    'a new account to link → one bell notification « NinjaTrader 8: 1 account found », opening the link sheet (none for the same executions again, none for simulation accounts)');
 
 // 3. linking: preview, then the trade typed by hand is completed (its notes and screenshot stay), the others are added
 $put('u1', 'accounts', ['id' => 'acc1', 'name' => 'Apex 1', 'fee_rt_c' => 400]);

@@ -7,6 +7,9 @@ Settings › Data › Connections → Connect (a key shown once, the 3 steps) �
 stop and target (the platform's prices stay exact), the account page says « Synced with NinjaTrader », a CSV row already synced
 is « already imported », « Stop the sync » with Undo then for good. Each size: no JS error, no broken file, nothing wider than
 the window, the sheet inside the screen, screenshots.
+After the key (trader feedback, 13 Oct.): the connect sheet follows the add-on live (waiting → connected · 3 accounts found →
+« Link my 3 accounts »), every account found is linked at once (a Sweep account with the same name chosen already, one
+picked, one ignored), and a new account found later rings the bell, whose link opens its sheet.
 Quantower (2nd platform, open to every trader since 13 Oct.): shown once its add-on exists (sync/addon/SweepSync-Quantower.zip),
 its own block, connect sheet and key, its account found under it, linked, the Quantower chip and « Synced with Quantower ».
 """
@@ -60,6 +63,13 @@ def tap(pg, sel):
     except Exception as e: last = e; pg.wait_for_timeout(300)
   raise last
 
+def until(pg, js, timeout=15):   # waits for a condition by asking the page (wait_for_function would eval: the app's CSP refuses it)
+  end = time.time() + timeout
+  while time.time() < end:
+    if pg.evaluate(js): return True
+    pg.wait_for_timeout(400)
+  raise TimeoutError('still false after %d s: %s' % (timeout, js[:120]))
+
 def wide(pg):   # nothing wider than the window
   return pg.evaluate("document.documentElement.scrollWidth - innerWidth")
 
@@ -105,7 +115,7 @@ def case_fr(p, phone):
   sec_t = pg.inner_text('#main .sy-sec')
   ok('1 compte trouvé' in sec_t and 'APEX-555-01' in sec_t and 'Apex · Évaluation' in sec_t and 'À relier' in sec_t and 'Add-on vu' in sec_t, f'{tag}: « 1 compte trouvé », the account (Apex · Évaluation, à relier), add-on seen')
   pg.screenshot(path=f'{SHOTS}/sync-settings-{tag}.png', full_page=False)
-  tap(pg, '#main .sy-sec .sy-found [data-sy="acct"]'); pg.wait_for_selector('#sySheet.open .sy-opts', timeout=8000)
+  tap(pg, '#main .sy-sec .sy-found [data-sy="linkall"]'); pg.wait_for_selector('#sySheet.open .sy-opts', timeout=8000)
   opts = pg.inner_text('#sySheet .sy-opts')
   chips = pg.eval_on_selector_all('#sySheet .sy-sub .sy-chip', 'l => l.map(x => x.textContent)')
   ok(chips == ['Apex · Évaluation', 'Rithmic'], f'{tag}: the account\'s chips, « Apex » once ({chips})')
@@ -162,6 +172,52 @@ def case_fr(p, phone):
 
 def S_trades(pg): return pg.evaluate("S.trades.filter(t => !t.demo)")
 
+def case_multi(p, phone):   # after the key: the sheet follows the add-on; several accounts linked at once; the bell
+  tag = 'M' + ('390' if phone else '1300')
+  br, ctx, pg, errs, bad = new_trader(p, 'fr', phone)
+  ctx.request.put(B + '/api/docs/accounts/acc-sy2', data=json.dumps({'name': 'APEX-777-02', 'firm_id': '', 'starting_balance_c': 5000000, 'status': 'active', 'money_type': 'eval', 'phase': 'eval', 'created_on': DAY}), headers=H)
+  settings(pg)
+  tap(pg, '#main .sy-sec [data-sy="connect"][data-p="quantower"]'); pg.wait_for_selector('#sySheet.open .sy-key code', timeout=8000); pg.wait_for_timeout(500)
+  key = pg.inner_text('#sySheet .sy-key code').strip(); txt = pg.inner_text('#sySheet')
+  ok('Reviens ici : les comptes que l’add-on trouve' in txt and 'En attente de l’add-on…' in txt and pg.inner_text('#sySheet .sy-main') == 'Terminé', f'{tag}: connect sheet: « Reviens ici », waiting for the add-on')
+  accs = [{'name': 'APEX-555-01', 'connection': 'Rithmic'}, {'name': 'APEX-777-02', 'connection': 'Rithmic'}, {'name': 'PA-APEX-3-01', 'connection': 'Rithmic'}]
+  r = ctx.request.post(B + '/api/sync/push', data=json.dumps({'client': 'Sweep Quantower test', 'accounts': accs, 'fills': FILLS}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
+  until(pg, "(document.querySelector('#sySheet .sy-main')||{}).textContent === 'Relier mes 3 comptes'")
+  ok(r.status == 200 and 'Add-on connecté · 3 comptes trouvés' in pg.inner_text('#sySheet .sy-live'), f'{tag}: the open sheet follows the add-on: « Add-on connecté · 3 comptes trouvés », « Relier mes 3 comptes »')
+  ok(in_screen(pg) == '', f'{tag}: connect sheet inside the screen ({in_screen(pg)})')
+  pg.screenshot(path=f'{SHOTS}/sync-live-{tag}.png')
+  tap(pg, '#sySheet [data-sy="linkall"]'); pg.wait_for_selector('#sySheet.open .sy-all select', timeout=8000); pg.wait_for_timeout(400)
+  rows = pg.eval_on_selector_all('#sySheet .sy-all-row', 'l => l.map(x => [x.querySelector("b").textContent, x.querySelector("select").value])')
+  ok(pg.inner_text('#sySheet .sy-head h2') == 'Relier mes comptes' and [r0 for r0, _ in rows] == ['APEX-555-01', 'APEX-777-02', 'PA-APEX-3-01'] and dict(rows)['APEX-777-02'] == 'acc-sy2' and dict(rows)['APEX-555-01'] == '', f'{tag}: all the accounts found at once; the Sweep account with the same name chosen already ({rows})')
+  sel = pg.locator('#sySheet .sy-all-row').nth(0).locator('select'); sel.select_option('acc-sy'); pg.wait_for_timeout(300)
+  pg.locator('#sySheet .sy-all-row').nth(2).locator('select').select_option('ignore'); pg.wait_for_timeout(300)
+  until(pg, "[...document.querySelectorAll('#sySheet .sy-all-pv')].length === 2 && ![...document.querySelectorAll('#sySheet .sy-all-pv')].some(x => x.textContent.includes('Chargement'))", 10)
+  pv = pg.eval_on_selector_all('#sySheet .sy-all-pv', 'l => l.map(x => x.textContent)')
+  dis = pg.evaluate("[...document.querySelectorAll('#sySheet .sy-all-row')[2].querySelectorAll('option')].filter(o => o.disabled).map(o => o.value).sort()")
+  ok('1 trade à ajouter · 1 trade saisi à la main, complété (tes notes restent)' in pv[0] and 'Aucun trade pour l’instant' in pv[1] and dis == ['acc-sy', 'acc-sy2'], f'{tag}: a preview under each chosen account; a Sweep account chosen once is not offered again ({pv}, {dis})')
+  ok(pg.inner_text('#sySheet [data-sy="doall"]') == 'Relier 2 comptes' and in_screen(pg) == '', f'{tag}: « Relier 2 comptes », inside the screen ({in_screen(pg)})')
+  pg.screenshot(path=f'{SHOTS}/sync-all-{tag}.png')
+  tap(pg, '#sySheet [data-sy="doall"]'); pg.wait_for_selector('#toast.on', timeout=10000)
+  toast = pg.inner_text('#toast'); pg.wait_for_timeout(1500)
+  qb = pg.inner_text('#main .sy-plat[data-p="quantower"]')
+  ok(toast == '2 comptes reliés · 2 trades ajoutés', f'{tag}: « 2 comptes reliés · 2 trades ajoutés » ({toast})')
+  ok(not pg.locator('#sySheet.open').count() and 'Relié à Apex 1 · 2 trades' in qb and 'Relié à APEX-777-02' in qb and 'Ignoré' in qb, f'{tag}: linked at once: sheet closed, Apex 1 (2 trades), APEX-777-02, the third ignored')
+  # a 4th account found later: the bell's notification opens its sheet
+  ctx.request.post(B + '/api/sync/push', data=json.dumps({'client': 'Sweep Quantower test', 'accounts': [{'name': 'APEX-999-09'}], 'fills': []}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
+  nt = ctx.request.get(B + '/api/notifications', headers=H).json()
+  found = [n for n in nt.get('items', []) if n.get('type') == 'sync_found']
+  ok(len(found) == 1 and found[0]['params'] == {'n': 3, 'platform': 'Quantower'} and found[0]['action_url'] == '#settings/sync', f'{tag}: one bell notification for the accounts found that day ({[(n["params"], n["action_url"]) for n in found]})')
+  pg.goto(B + '/#dashboard'); pg.wait_for_timeout(1500)
+  tap(pg, '[data-nt="bell"]:visible'); pg.wait_for_selector('.nt-item', timeout=8000); pg.wait_for_timeout(400)
+  item = pg.locator('.nt-item', has_text='Quantower a trouvé tes comptes').first
+  ok(item.count() == 1 and '3 à relier à tes comptes Sweep' in item.inner_text(), f'{tag}: the bell: « Quantower a trouvé tes comptes · 3 à relier… »')
+  item.click(); pg.wait_for_selector('#sySheet.open', timeout=20000); pg.wait_for_timeout(600)
+  ok(pg.inner_text('#sySheet .sy-head h2') == 'APEX-999-09' and pg.evaluate("location.hash") == '#settings' and pg.evaluate("document.querySelector('#main details.nav-sgd[data-i=\"3\"]').open"), f'{tag}: its link opens Settings › Data and the sheet of the account still to link ({pg.evaluate("location.hash")})')
+  ok(wide(pg) <= 0, f'{tag}: nothing wider than the window ({wide(pg)} px)')
+  ok(not errs, f'{tag}: no JS error {errs[:3]}')
+  ok(not bad, f'{tag}: no broken file {bad[:3]}')
+  br.close()
+
 def case_quantower(p, phone):   # the 2nd platform: its block, connect sheet, account found, link, chip
   tag = 'Q' + ('390' if phone else '1300')
   br, ctx, pg, errs, bad = new_trader(p, 'fr', phone)
@@ -183,7 +239,7 @@ def case_quantower(p, phone):   # the 2nd platform: its block, connect sheet, ac
   ok('1 compte trouvé' in qb and 'APEX-555-01' in qb and 'Add-on vu' in qb and 'APEX-555-01' not in nb and 'Connecter' in nb, f'{tag}: the account found under Quantower only')
   ok(wide(pg) <= 0, f'{tag}: two platforms, nothing wider than the window ({wide(pg)} px)')
   pg.screenshot(path=f'{SHOTS}/sync-q-settings-{tag}.png')
-  tap(pg, '#main .sy-plat[data-p="quantower"] .sy-found [data-sy="acct"]'); tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000)
+  tap(pg, '#main .sy-plat[data-p="quantower"] .sy-found [data-sy="linkall"]'); tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000)
   tap(pg, '#sySheet [data-sy="link"]'); pg.wait_for_timeout(1500)
   ok('Relié à Apex 1 · 2 trades' in pg.inner_text('#main .sy-plat[data-p="quantower"]'), f'{tag}: linked under Quantower')
   pg.wait_for_function("S.trades.filter(t => t.source === 'quantower').length === 2", timeout=15000)
@@ -218,7 +274,7 @@ def case_lang(p, lang):   # the section, the sheets and the preview in English a
   tap(pg, '#sySheet [data-sy="close"].sy-main')
   ctx.request.post(B + '/api/sync/push', data=json.dumps({'fills': FILLS}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
   pg.evaluate("SweepSync.load()"); pg.wait_for_timeout(600)
-  tap(pg, '#main .sy-sec .sy-found [data-sy="acct"]'); tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000)
+  tap(pg, '#main .sy-sec .sy-found [data-sy="linkall"]'); tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000)
   pv = pg.inner_text('#sySheet')
   ok(({'en': '1 trade to add', 'es': '1 operación por añadir'}[lang]) in pv and 'trade à ajouter' not in pv, f'{lang}: preview translated')
   tap(pg, '#sySheet [data-sy="close"]'); pg.wait_for_timeout(400)
@@ -251,5 +307,7 @@ with sync_playwright() as p:
   case_lang(p, 'es')
   case_quantower(p, True)
   case_quantower(p, False)
+  case_multi(p, True)
+  case_multi(p, False)
 print('\n%s' % ('%d failed' % fails if fails else 'all passed'))
 sys.exit(1 if fails else 0)
