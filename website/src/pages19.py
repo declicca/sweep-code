@@ -122,7 +122,7 @@ def page_consistency(lang, t):
                  T(f'Divide your best day by your profit (total, or since your last payout) and compare it with your firm’s percentage. The free <a href="{href("en", "consistency-rule-calculator.html")}">consistency rule calculator</a> does it for you, and Sweep checks it on every trade.',
                    f'Divise ton meilleur jour par ton profit (total, ou depuis ton dernier payout) et compare avec le pourcentage de ta firme. Le <a href="{href("fr", "consistency-rule-calculator.html")}">calculateur de consistance</a> gratuit le fait pour toi, et Sweep le vérifie à chaque trade.',
                    f'Divide tu mejor día entre tu beneficio (total, o desde tu último payout) y compáralo con el porcentaje de tu firma. La <a href="{href("es", "consistency-rule-calculator.html")}">calculadora de consistencia</a> gratuita lo hace por ti, y Sweep lo revisa en cada operación.')))
-    rel = [("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), (GUIDE_DD, T("Drawdown rules compared", "Règles de drawdown comparées", "Reglas de drawdown comparadas")),
+    rel = [("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), (GUIDE_DD, T("Drawdown rules compared", "Règles de drawdown comparées", "Reglas de drawdown comparadas")), ("prop-firm-payout-rules.html", T("Payout rules compared", "Règles de payout comparées", "Reglas de payout comparadas")),
            ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm consistency rules, compared (2026).", "Les règles de consistance des prop firms, comparées (2026).", "Las reglas de consistencia de las prop firms, comparadas (2026)."),
@@ -187,7 +187,7 @@ def page_drawdown_guide(lang, t):
                  T(f'Your liquidation level is your peak minus the max loss (or the fixed level once it stops trailing). The free <a href="{href("en", "trailing-drawdown-calculator.html")}">trailing drawdown calculator</a> shows it, and Sweep tracks it on every trade.',
                    f'Ton seuil de liquidation, c’est ton sommet moins la perte max (ou le niveau fixe une fois le suivi arrêté). Le <a href="{href("fr", "trailing-drawdown-calculator.html")}">calculateur de drawdown suiveur</a> gratuit te le montre, et Sweep le suit à chaque trade.',
                    f'Tu nivel de liquidación es tu máximo menos la pérdida máx. (o el nivel fijo una vez detenido el seguimiento). La <a href="{href("es", "trailing-drawdown-calculator.html")}">calculadora de drawdown dinámico</a> gratuita te lo muestra, y Sweep lo sigue en cada operación.')))
-    rel = [("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico")), (GUIDE_CONS, T("Consistency rules compared", "Règles de consistance comparées", "Reglas de consistencia comparadas")),
+    rel = [("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico")), (GUIDE_CONS, T("Consistency rules compared", "Règles de consistance comparées", "Reglas de consistencia comparadas")), ("prop-firm-payout-rules.html", T("Payout rules compared", "Règles de payout comparées", "Reglas de payout comparadas")),
            ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm drawdown rules, compared (2026).", "Les règles de drawdown des prop firms, comparées (2026).", "Las reglas de drawdown de las prop firms, comparadas (2026)."),
@@ -232,3 +232,119 @@ def page_hub(lang, t):
                         "Guides pour traders de prop firms en futures : règles de consistance et de drawdown comparées, choisir un journal et routine de journal.",
                         "Guías para traders de prop firms de futuros: reglas de consistencia y drawdown comparadas, elegir un diario y rutina de diario.")),
                     hero + b + final_cta(lang, t), ld)
+
+# ---------------------------------------------------------------- payout rules
+GUIDE_PAYOUT = "prop-firm-payout-rules.html"
+
+def _payout_conds(po, size, lang, t):
+    U = lambda v: usd(v, lang); out = []
+    if po.get("win_days"): out.append(t(T(f"{po['win_days']:g} winning days", f"{po['win_days']:g} jours gagnants", f"{po['win_days']:g} días ganadores")) + (t(T(f" of {U(po['win_min'])}+", f" de {U(po['win_min'])} et +", f" de {U(po['win_min'])} o más")) if po.get("win_min") else ""))
+    if po.get("trade_days"): out.append(t(T(f"{po['trade_days']:g} traded days", f"{po['trade_days']:g} jours tradés", f"{po['trade_days']:g} días operados")))
+    if po.get("cycle_days"): out.append(t(T(f"{po['cycle_days']:g} days between payouts", f"{po['cycle_days']:g} jours entre deux payouts", f"{po['cycle_days']:g} días entre payouts")))
+    if po.get("cycle_min"): out.append(t(T(f"{U(po['cycle_min'])} of profit since the last payout", f"{U(po['cycle_min'])} de profit depuis le dernier payout", f"{U(po['cycle_min'])} de beneficio desde el último payout")))
+    elif po.get("cycle_pos"): out.append(t(T("a profit since the last payout", "un profit depuis le dernier payout", "beneficio desde el último payout")))
+    if po.get("min_bal"): out.append(t(T(f"balance above {U(po['min_bal'])}", f"solde au-dessus de {U(po['min_bal'])}", f"saldo por encima de {U(po['min_bal'])}")))
+    return out
+
+def _payout_amounts(po, lang, t):
+    U = lambda v: usd(v, lang); out = []
+    lad = po.get("ladder")
+    if lad:
+        caps = " / ".join(U(x) if x is not None else "∞" for x in lad)
+        out.append((t(T(f"from {U(po['min'])}, ", f"dès {U(po['min'])}, ", f"desde {U(po['min'])}, ")) if po.get("min") else "") + t(T(f"caps by payout: {caps}", f"plafonds par payout : {caps}", f"topes por payout: {caps}")))
+    elif po.get("min") and po.get("max"): out.append(t(T(f"{U(po['min'])} to {U(po['max'])} per payout", f"{U(po['min'])} à {U(po['max'])} par payout", f"{U(po['min'])} a {U(po['max'])} por payout")))
+    elif po.get("min"): out.append(t(T(f"at least {U(po['min'])} per payout", f"au moins {U(po['min'])} par payout", f"al menos {U(po['min'])} por payout")))
+    elif po.get("max"): out.append(t(T(f"up to {U(po['max'])} per payout", f"jusqu’à {U(po['max'])} par payout", f"hasta {U(po['max'])} por payout")))
+    if po.get("max_pct"): out.append(t(T(f"up to {pc(po['max_pct'], lang)} of the profit", f"jusqu’à {pc(po['max_pct'], lang)} du profit", f"hasta el {pc(po['max_pct'], lang)} del beneficio")))
+    if po.get("max_dll"): out.append(t(T(f"up to {U(po['max_dll'])} with the daily loss limit option", f"jusqu’à {U(po['max_dll'])} avec l’option limite du jour", f"hasta {U(po['max_dll'])} con la opción de límite diario")))
+    if po.get("max_payouts"): out.append(t(T(f"{po['max_payouts']:g} payouts max", f"{po['max_payouts']:g} payouts max", f"{po['max_payouts']:g} payouts máx.")))
+    if po.get("split_pct"): out.append(t(T(f"you keep {pc(po['split_pct'], lang)}", f"tu gardes {pc(po['split_pct'], lang)}", f"te quedas con el {pc(po['split_pct'], lang)}")))
+    return out
+
+def _payout_variants(p, s):
+    """[(choice label dict, payout)] for funded options that replace the payout rules (Topstep's « Consistency »)."""
+    out = []
+    for o in p.get("options") or []:
+        for c in o.get("choices") or []:
+            v = (((s.get("variants") or {}).get(c["id"]) or {}).get(o.get("phase", "funded")) or {}).get("payout")
+            if v: out.append((c["label"], v))
+    return out
+
+def page_payout_guide(lang, t):
+    def cells(f, p):
+        s = rep(p); po = (s.get("funded") or {}).get("payout") or {}
+        if not po: return DASH, DASH
+        tag = "" if s["size"] == 50000 else f" ({kk(s['size'])})"
+        conds, amts = _payout_conds(po, s["size"], lang, t), _payout_amounts(po, lang, t)
+        for label, v in _payout_variants(p, s):
+            opt = t(T(f"{label['en']} option", f"option {label['fr']}", f"opción {label['es']}"))
+            vc, va = _payout_conds(v, s["size"], lang, t), _payout_amounts(v, lang, t)
+            if vc: conds.append(f"<i>{opt}{colon(lang)}{', '.join(vc)}</i>")
+            if va: amts.append(f"<i>{opt}{colon(lang)}{', '.join(va)}</i>")
+        return ("<br>".join(conds) or DASH) + tag, ("<br>".join(amts) or DASH)
+    table = _table(lang, t, T("Conditions to request (50K)", "Conditions pour demander (50K)", "Condiciones para pedir (50K)"), T("Amount and split (50K)", "Montant et partage (50K)", "Importe y reparto (50K)"),
+                   _firm_rows(lang, t, cells))
+    intro = [
+     (T("How prop firm payouts work", "Comment marchent les payouts des prop firms", "Cómo funcionan los payouts de las prop firms"), [
+      T("Before each payout, firms check conditions since your last request: a number of winning days (sometimes with a minimum profit per day) or traded days, sometimes a balance to keep above your starting balance, and often a consistency rule.",
+        "Avant chaque payout, les firmes vérifient des conditions depuis ta dernière demande : un nombre de jours gagnants (parfois avec un profit minimum par jour) ou de jours tradés, parfois un solde à garder au-dessus de ton solde de départ, et souvent une règle de consistance.",
+        "Antes de cada payout, las firmas revisan condiciones desde tu última solicitud: un número de días ganadores (a veces con un beneficio mínimo por día) o de días operados, a veces un saldo a mantener por encima de tu saldo inicial y, a menudo, una regla de consistencia."),
+      T("Then they limit the amount: a minimum and a maximum per payout (at some firms the maximum rises with each payout), sometimes a share of your profit, and a profit split, the share you keep.",
+        "Ensuite, elles limitent le montant : un minimum et un maximum par payout (chez certaines firmes, le maximum monte à chaque payout), parfois une part de ton profit, et un partage des profits, la part que tu gardes.",
+        "Después limitan el importe: un mínimo y un máximo por payout (en algunas firmas el máximo sube con cada payout), a veces una parte de tu beneficio, y un reparto de beneficios, la parte que te quedas."),
+      T(f"Example: on a 50K where you must keep {usd(52100, 'en')}, with a balance of {usd(53800, 'en')} you can request at most {usd(1700, 'en')}, within the firm’s minimum and maximum.",
+        f"Exemple : sur un 50K où tu dois garder {usd(52100, 'fr')}, avec un solde de {usd(53800, 'fr')}, tu peux demander au plus {usd(1700, 'fr')}, dans les limites du minimum et du maximum de la firme.",
+        f"Ejemplo: en una 50K donde debes mantener {usd(52100, 'es')}, con un saldo de {usd(53800, 'es')} puedes pedir como máximo {usd(1700, 'es')}, dentro del mínimo y el máximo de la firma.")]),
+    ]
+    def pairs(fn):
+        out = {l: [] for l in LANGS}
+        for f in presets.FIRMS:
+            for p in f["programs"]:
+                s = rep(p); po = (s.get("funded") or {}).get("payout") or {}
+                for l in LANGS:
+                    v = fn(po, s, l)
+                    if v: out[l].append((f["name"], f"{p['name']} {v}"))
+        return out
+    wins = pairs(lambda po, s, l: (f"({po['win_days']:g}" + ({"en": f" × {usd(po['win_min'], l)}+", "fr": f" × {usd(po['win_min'], l)} et +", "es": f" × {usd(po['win_min'], l)} o más"}[l] if po.get("win_min") else "") + ")") if po.get("win_days") else None)
+    def cap_text(po, l):
+        """« $1,500–$3,000 », « $2,000 » or « $2,000, then no cap » (a ladder of caps by payout)."""
+        lad = po.get("ladder")
+        if not lad: return usd(po["max"], l) if po.get("max") else None
+        vals = [x for x in lad if x is not None]
+        txt = usd(vals[0], l) if min(vals) == max(vals) else f"{usd(min(vals), l)}–{usd(max(vals), l)}"
+        return txt + ({"en": ", then no cap", "fr": ", puis sans plafond", "es": ", luego sin tope"}[l] if None in lad else "")
+    caps = pairs(lambda po, s, l: cap_text(po, l))
+    splits = pairs(lambda po, s, l: pc(po["split_pct"], l) if po.get("split_pct") else None)
+    bufs = pairs(lambda po, s, l: ({"en": f"{usd(po['min_bal'], l)} ({usd(po['min_bal'] - s['size'], l)} above the start)", "fr": f"{usd(po['min_bal'], l)} ({usd(po['min_bal'] - s['size'], l)} au-dessus du départ)", "es": f"{usd(po['min_bal'], l)} ({usd(po['min_bal'] - s['size'], l)} sobre el inicio)"}[l]) if po.get("min_bal") else None)
+    faqs = []
+    if wins["en"]:
+        faqs.append((T("Which prop firms require winning days before a payout?", "Quelles prop firms exigent des jours gagnants avant un payout ?", "¿Qué prop firms exigen días ganadores antes de un payout?"),
+                     {l: {"en": "Number of winning days (and minimum profit per day) on a 50K: ", "fr": "Nombre de jours gagnants (et profit minimum par jour) sur un 50K : ", "es": "Número de días ganadores (y beneficio mínimo por día) en una 50K: "}[l] + _by_firm(wins[l], l) for l in LANGS}))
+    if caps["en"]:
+        faqs.append((T("How much can I withdraw per payout?", "Combien puis-je retirer par payout ?", "¿Cuánto puedo retirar por payout?"),
+                     {l: {"en": "Maximum per payout on a 50K (a range when the cap rises with each payout): ", "fr": "Maximum par payout sur un 50K (une fourchette quand le plafond monte à chaque payout) : ", "es": "Máximo por payout en una 50K (un rango cuando el tope sube con cada payout): "}[l] + _by_firm(caps[l], l) for l in LANGS}))
+    if splits["en"]:
+        faqs.append((T("What profit split do prop firms pay?", "Quel partage des profits les prop firms versent-elles ?", "¿Qué reparto de beneficios pagan las prop firms?"),
+                     {l: {"en": "The share you keep, where the firm’s rules state it: ", "fr": "La part que tu gardes, quand les règles de la firme l’indiquent : ", "es": "La parte que te quedas, cuando las reglas de la firma la indican: "}[l] + _by_firm(splits[l], l) for l in LANGS}))
+    if bufs["en"]:
+        faqs.append((T("Do I need to keep a buffer above my starting balance?", "Dois-je garder un coussin au-dessus de mon solde de départ ?", "¿Debo mantener un colchón sobre mi saldo inicial?"),
+                     {l: {"en": "At these firms, yes. Balance to keep on a 50K: ", "fr": "Chez ces firmes, oui. Solde à garder sur un 50K : ", "es": "En estas firmas, sí. Saldo a mantener en una 50K: "}[l] + _by_firm(bufs[l], l) for l in LANGS}))
+    faqs.append((T("How do I know how much I can request?", "Comment savoir combien je peux demander ?", "¿Cómo sé cuánto puedo pedir?"),
+                 T(f'Take your balance, subtract the balance to keep, then stay within the firm’s minimum and maximum. The free <a href="{href("en", "payout-calculator.html")}">payout calculator</a> does it for you, and Sweep counts your payout conditions on every trade.',
+                   f'Prends ton solde, retire le solde à garder, puis reste entre le minimum et le maximum de la firme. Le <a href="{href("fr", "payout-calculator.html")}">calculateur de payout</a> gratuit le fait pour toi, et Sweep compte tes conditions de payout à chaque trade.',
+                   f'Toma tu saldo, resta el saldo a mantener y quédate entre el mínimo y el máximo de la firma. La <a href="{href("es", "payout-calculator.html")}">calculadora de payout</a> gratuita lo hace por ti, y Sweep cuenta tus condiciones de payout en cada operación.')))
+    rel = [("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout")), (GUIDE_CONS, T("Consistency rules compared", "Règles de consistance comparées", "Reglas de consistencia comparadas")),
+           (GUIDE_DD, T("Drawdown rules compared", "Règles de drawdown comparées", "Reglas de drawdown comparadas")), ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
+    return _page(lang, t, T("Guide", "Guide", "Guía"),
+        T("Prop firm payout rules, compared (2026).", "Les règles de payout des prop firms, comparées (2026).", "Las reglas de payout de las prop firms, comparadas (2026)."),
+        T(f"When {FIRMS_N} futures prop firms let you request a payout, how much, and how much you keep, account type by account type.",
+          f"Quand {FIRMS_N} prop firms de futures te laissent demander un payout, combien, et ce que tu gardes, type de compte par type de compte.",
+          f"Cuándo {FIRMS_N} prop firms de futuros te dejan pedir un payout, cuánto y cuánto te quedas, tipo de cuenta por tipo de cuenta."),
+        intro, table, "", faqs, rel,
+        T("Prop Firm Payout Rules Compared (2026) · Sweep", "Règles de payout des prop firms comparées (2026) · Sweep", "Reglas de payout de prop firms (2026) · Sweep"),
+        T(f"Payout rules of {FIRMS_N} futures prop firms, side by side: winning days, balance to keep, caps per payout and profit split, from Sweep’s weekly check.",
+          f"Les règles de payout de {FIRMS_N} prop firms de futures, côte à côte : jours gagnants, solde à garder, plafonds et partage des profits, vérifiés chaque semaine.",
+          f"Las reglas de payout de {FIRMS_N} prop firms de futuros, lado a lado: días ganadores, saldo a mantener, topes y reparto de beneficios, revisadas cada semana."))
+
+GUIDES.insert(0, (GUIDE_PAYOUT, T("Prop firm payout rules, compared", "Les règles de payout des prop firms, comparées", "Las reglas de payout de las prop firms, comparadas"),
+                  T("When you can request, how much, and the share you keep, firm by firm.", "Quand demander, combien, et la part que tu gardes, firme par firme.", "Cuándo pedir, cuánto y la parte que te quedas, firma por firma.")))
