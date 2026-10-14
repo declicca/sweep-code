@@ -24,7 +24,23 @@
       'Got it': 'Got it',
       'unread': '{n} unread',
       'now': 'Just now',
-      'prefs.help': 'Choose what Sweep tells you about. Everything stays inside the app.',
+      'prefs.help': 'Choose what Sweep tells you about.',
+      'push.h': 'On this device',
+      'push.pitch': 'Your plan before the open, your review after the close, your week on Friday.',
+      'push.on': 'Turn on notifications',
+      'push.off': 'Turn off on this device',
+      'push.plan': 'Plan reminder',
+      'push.plan.d': 'Before the open',
+      'push.review': 'Review reminder',
+      'push.review.d': 'After the close',
+      'push.weekly': 'Your week',
+      'push.weekly.d': 'Friday, after the close',
+      'push.at': 'Time',
+      'push.help': 'New York time, for the bell too. Never during the session, 2 notifications a day at most.',
+      'push.ios': 'On iPhone: add Sweep to your Home Screen (Share › Add to Home Screen), then open it from its icon to turn on notifications.',
+      'push.none': "This browser can't receive notifications. Install Sweep on your phone to get them.",
+      'push.denied': "Notifications are blocked for Sweep. Allow them in your device's settings, then come back here.",
+      'push.err': "Couldn't turn on notifications. Try again.",
       'cat.product_updates': 'Product updates',
       'cat.product_updates.d': 'New features and answers to your feedback',
       'cat.achievements': 'Achievements',
@@ -64,7 +80,23 @@
       'Got it': 'OK',
       'unread': '{n} non lues',
       'now': "À l'instant",
-      'prefs.help': "Choisis ce dont Sweep te parle. Tout reste dans l'app.",
+      'prefs.help': 'Choisis ce dont Sweep te parle.',
+      'push.h': 'Sur cet appareil',
+      'push.pitch': 'Ton plan avant l’ouverture, ta revue après la clôture, ta semaine le vendredi.',
+      'push.on': 'Activer les notifications',
+      'push.off': 'Désactiver sur cet appareil',
+      'push.plan': 'Rappel du plan',
+      'push.plan.d': 'Avant l’ouverture',
+      'push.review': 'Rappel de la revue',
+      'push.review.d': 'Après la clôture',
+      'push.weekly': 'Bilan de la semaine',
+      'push.weekly.d': 'Le vendredi, après la clôture',
+      'push.at': 'Heure',
+      'push.help': 'Heure de New York, pour la cloche aussi. Jamais pendant la séance, 2 notifications par jour au plus.',
+      'push.ios': 'Sur iPhone : ajoute Sweep à ton écran d’accueil (Partager › Sur l’écran d’accueil), puis ouvre-le depuis son icône pour activer les notifications.',
+      'push.none': 'Ce navigateur ne peut pas recevoir de notifications. Installe Sweep sur ton téléphone pour les recevoir.',
+      'push.denied': 'Les notifications sont bloquées pour Sweep. Autorise-les dans les réglages de ton appareil, puis reviens ici.',
+      'push.err': 'Impossible d’activer les notifications. Réessaie.',
       'cat.product_updates': 'Nouveautés',
       'cat.product_updates.d': 'Nouvelles fonctions et suivi de tes suggestions',
       'cat.achievements': 'Accomplissements',
@@ -104,7 +136,23 @@
       'Got it': 'Entendido',
       'unread': '{n} sin leer',
       'now': 'Ahora',
-      'prefs.help': 'Elige de qué te avisa Sweep. Todo se queda dentro de la app.',
+      'prefs.help': 'Elige de qué te avisa Sweep.',
+      'push.h': 'En este dispositivo',
+      'push.pitch': 'Tu plan antes de la apertura, tu revisión después del cierre, tu semana el viernes.',
+      'push.on': 'Activar las notificaciones',
+      'push.off': 'Desactivar en este dispositivo',
+      'push.plan': 'Recordatorio del plan',
+      'push.plan.d': 'Antes de la apertura',
+      'push.review': 'Recordatorio de la revisión',
+      'push.review.d': 'Después del cierre',
+      'push.weekly': 'Balance de la semana',
+      'push.weekly.d': 'El viernes, después del cierre',
+      'push.at': 'Hora',
+      'push.help': 'Hora de Nueva York, también para la campana. Nunca durante la sesión, 2 notificaciones al día como máximo.',
+      'push.ios': 'En iPhone: añade Sweep a tu pantalla de inicio (Compartir › Añadir a pantalla de inicio) y ábrelo desde su icono para activar las notificaciones.',
+      'push.none': 'Este navegador no puede recibir notificaciones. Instala Sweep en tu teléfono para recibirlas.',
+      'push.denied': 'Las notificaciones están bloqueadas para Sweep. Permítelas en los ajustes de tu dispositivo y vuelve aquí.',
+      'push.err': 'No se pudieron activar las notificaciones. Inténtalo de nuevo.',
       'cat.product_updates': 'Novedades',
       'cat.product_updates.d': 'Nuevas funciones y respuestas a tus sugerencias',
       'cat.achievements': 'Logros',
@@ -349,7 +397,86 @@
       <button type="button" class="btn sm" data-nt="test" data-k="normal">${esc(t('test.normal'))}</button>
       <button type="button" class="btn sm" data-nt="test" data-k="celebration">${esc(t('test.celebration'))}</button></div>` : '';
     return `<div class="sec-h"><h2>${esc(t('Notifications'))}</h2><span class="help">${esc(t('prefs.help'))}</span></div>
-      <div class="surface nt-plist">${rows}</div>${admin}`;
+      <div class="surface nt-plist">${rows}</div>${pushHtml()}${admin}`;
+  }
+
+  /* ── on this device: the plan, review and week reminders as phone notifications (web push, brief 02 part 10; push/web-push.php).
+     Shown only when the server has its keys. iPhone: only from the app added to the Home Screen (iOS 16.4+). ── */
+  const PU = { st: null, busy: false, dev: null, synced: false };   // st: server state; dev: this device's subscription (false: none)
+  const KINDS = ['plan', 'review', 'weekly'];
+  const pushCan = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  const iosBrowser = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
+  const keyBytes = (k) => Uint8Array.from(atob((k + '='.repeat((4 - k.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+  const hm = (v) => {   // 08:45 → « 8 h 45 », « 8:45 AM », « 8:45 »
+    const [H, M] = v.split(':').map(Number), mm = String(M).padStart(2, '0');
+    return lang() === 'fr' ? `${H}\u00a0h\u00a0${mm}` : lang() === 'es' ? `${H}:${mm}` : `${H % 12 || 12}:${mm}\u00a0${H < 12 ? 'AM' : 'PM'}`;
+  };
+  async function devSub() {
+    try { const r = await navigator.serviceWorker.getRegistration('/'); return (r && (await r.pushManager.getSubscription())) || false; } catch (e) { return false; }
+  }
+  async function pushLoad() {
+    if (PU.busy) return;
+    PU.busy = true;
+    try { PU.st = await apiJSON('api/push'); if (PU.st.available && pushCan()) PU.dev = await devSub(); } catch (e) { PU.st = PU.st || { available: false }; }
+    PU.busy = false;
+    const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml();
+  }
+  function pushHtml() {
+    const st = PU.st;
+    if (!st || !st.available) return '';
+    let body;
+    if (!pushCan() || iosBrowser()) body = `<p class="muted nt-push-note">${esc(t(iosBrowser() ? 'push.ios' : 'push.none'))}</p>`;
+    else if (Notification.permission === 'denied') body = `<p class="muted nt-push-note">${esc(t('push.denied'))}</p>`;
+    else if (!PU.dev) body = `<div class="nt-push-on"><p class="muted">${esc(t('push.pitch'))}</p><button type="button" class="btn primary" data-nt="push-on">${esc(t('push.on'))}</button></div>`;
+    else body = KINDS.map((k) => {
+      const p = st.prefs[k], opts = st.times[k].map((v) => `<option value="${v}"${v === p.at ? ' selected' : ''}>${esc(hm(v))}</option>`).join('');
+      return `<div class="nt-prow nt-push-row"><span><b>${esc(t('push.' + k))}</b><small>${esc(t('push.' + k + '.d'))}</small></span>
+        <span class="nt-push-ctl"><select data-nt-push-at="${k}" aria-label="${esc(t('push.' + k) + ' · ' + t('push.at'))}">${opts}</select>
+        <label class="sw"><input type="checkbox" data-nt-push="${k}" ${p.on ? 'checked' : ''} aria-label="${esc(t('push.' + k))}"><i></i></label></span></div>`;
+    }).join('') + `<div class="nt-push-foot"><button type="button" class="link" data-nt="push-off">${esc(t('push.off'))}</button></div>`;
+    return `<h3 class="nt-push-h">${esc(t('push.h'))}</h3><div class="surface nt-plist nt-push">${body}</div><p class="help nt-push-help">${esc(t('push.help'))}</p>`;
+  }
+  async function pushOn(btn) {
+    btn.disabled = true;
+    try {
+      if ((await Notification.requestPermission()) !== 'granted') return;   // asked from the tap (iPhone needs it)
+      await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      const reg = await navigator.serviceWorker.ready;
+      const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(PU.st.key) }));
+      PU.st = await post('api/push/subscribe', Object.assign(sub.toJSON(), { lang: lang() }));
+      PU.dev = sub;
+      if (typeof haptic === 'function') haptic(6);
+    } catch (e) {
+      toast(t('push.err'));
+    } finally {
+      btn.disabled = false;
+      const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml();
+    }
+  }
+  async function pushOff(btn) {
+    btn.disabled = true;
+    try {
+      const sub = PU.dev || (await devSub());
+      if (sub) { const ep = sub.endpoint; try { await sub.unsubscribe(); } catch (e) { /* already gone */ } PU.st = await post('api/push/unsubscribe', { endpoint: ep }); }
+      PU.dev = false;
+    } catch (e) {
+      toast(t('error'));
+    } finally {
+      btn.disabled = false;
+      const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml();
+    }
+  }
+  async function pushPref(el) {
+    const k = el.dataset.ntPushAt || el.dataset.ntPush, body = el.dataset.ntPushAt ? { kind: k, at: el.value } : { kind: k, on: el.checked };
+    try { PU.st = await post('api/push/prefs', body); if (typeof haptic === 'function') haptic(6); }
+    catch (e) { toast(t('error')); const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml(); }
+  }
+  /** once per visit: this device's subscription again (its language, a renewed address) */
+  async function pushSync() {
+    PU.synced = true;
+    if (!pushCan() || Notification.permission !== 'granted') return;
+    const sub = await devSub();
+    if (sub) post('api/push/subscribe', Object.assign(sub.toJSON(), { lang: lang() })).catch(() => {});
   }
   function paintPrefs() {
     if (!on() || !/^#settings/.test(location.hash)) return;
@@ -366,6 +493,7 @@
       anchor ? anchor.before(sec) : main.append(sec);
     }
     sec.innerHTML = prefsHtml();
+    if (!PU.st && !PU.busy) pushLoad();
     if (!NT.prefs) {
       apiJSON('api/notifications/prefs').then((r) => { NT.prefs = r.prefs || {}; const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml(); }).catch(() => {});
     }
@@ -406,10 +534,14 @@
     else if (a === 'mclose') closeModal(false);
     else if (a === 'mgo') closeModal(true);
     else if (a === 'test') sendTest(el.dataset.k, el);
+    else if (a === 'push-on') pushOn(el);
+    else if (a === 'push-off') pushOff(el);
   });
   document.addEventListener('change', (e) => {
     const i = e.target.closest && e.target.closest('input[data-nt-pref]');
     if (i) setPref(i);
+    const pu = e.target.closest && e.target.closest('[data-nt-push], [data-nt-push-at]');
+    if (pu) pushPref(pu);
   });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
@@ -431,6 +563,7 @@
   function afterRender() {
     paintBadge();
     if (on() && NT.items == null && !NT.busy) load(true);
+    if (on() && !PU.synced) pushSync();
     paintPrefs();
   }
   afterRender();

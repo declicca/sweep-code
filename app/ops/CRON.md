@@ -19,7 +19,7 @@ Les heures sont celles du serveur. La tâche `emails` tourne toutes les heures m
 
 | Tâche | Succès (`cron_runs.note`) | Échec (`cron_runs.error`, rouge) |
 |---|---|---|
-| `game` | « N player(s) » ; aussi : verrouillage des journées, streaks, ligues, Wrapped, rappels (2 par jour au plus), « La réalité du mois » le 1er, courriel « Ta semaine » le vendredi dès 17 h 30 ET, fin d'essai. Une erreur sur un trader est écrite dans le journal d'erreurs et la tâche continue. | une erreur fatale (message + fichier:ligne) |
+| `game` | « N player(s) » ; aussi : verrouillage des journées, streaks, ligues, Wrapped, rappels (2 notifications par jour au plus ; le plan, la revue et le bilan de la semaine aussi sur le téléphone, à l'heure du trader, si `sweep-private/push-config.php` existe : `ops/push-keys.php`), « La réalité du mois » le 1er, courriel « Ta semaine » le vendredi dès 17 h 30 ET, fin d'essai. Une erreur sur un trader est écrite dans le journal d'erreurs et la tâche continue. | une erreur fatale (message + fichier:ligne) |
 | `chart` | « N day(s) downloaded, N cached », ou « disabled or no Databento key » (sans clé, rien à faire) | une erreur fatale |
 | `presets` | « N firm(s) checked » (le détail par firme : Admin › Préréglages). Seule la vérification complète compte : `--dry-run`, `--firm=` et `--rollback` ne sont pas enregistrés. | une erreur fatale |
 | `backup` | le nom de la sauvegarde, « + off-site copy » ou « (no off-site copy) » | pas de phrase secrète, base introuvable, dossier impossible à créer, intégrité, envoi hors serveur raté… (le message exact) |
@@ -41,6 +41,6 @@ Une tâche démarrée et jamais terminée depuis plus d'une heure (ou d'un cycle
 /usr/local/bin/php /home/matnsabc/app.makeitsweep.com/ops/restore-test.php          # rapport immédiat (compte comme une exécution)
 /usr/local/bin/php /home/matnsabc/app.makeitsweep.com/loops/cron.php --dry-run      # les événements du jour qui partiraient maintenant, rien n'est envoyé
 /usr/local/bin/php /home/matnsabc/app.makeitsweep.com/loops/cron.php --now="2026-12-01 07:30" --user=u_xxx   # test : une date (heure de New York), un seul trader
-/usr/local/bin/php /home/matnsabc/app.makeitsweep.com/loops/cron.php --all-events --user=u_xxx   # les 15 événements une fois à un trader de test, pour que Loops les propose tous comme déclencheurs (rien n'est enregistré)
+/usr/local/bin/php /home/matnsabc/app.makeitsweep.com/loops/cron.php --all-events --user=u_xxx   # les 16 événements une fois à un trader de test, pour que Loops les propose tous comme déclencheurs (rien n'est enregistré)
 crontab -l                                                                          # les lignes réellement en place
 ```

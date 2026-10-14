@@ -6,24 +6,30 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *
  * Wrapped: built on the 1st for the previous month when the trader had 5+ active days. Everything is computed in PHP;
  * no P&L, no amount anywhere (R and counts only). Free sees screens 1, 2, 7 and 8; the others show as a locked preview.
- * Reminders: in-app notifications through the existing notification center (channels ready for web push / native later).
- * Never between 9:30 and 16:00 ET, never pushing to take a trade, at most 2 a day, each switchable in Settings
- * (category « streaks » for daily reminders, « achievements » for weekly review and Wrapped).
+ * Reminders: in-app notifications through the existing notification center; the plan, the review and the week's recap also
+ * reach the phone (push/web-push.php, brief 02 part 10), from the scheduled task only (never while the trader is in the app).
+ * Never between 9:30 and 16:00 ET, never pushing to take a trade, at most 2 a day (and 2 notifications a day in all,
+ * notify/notify.php), each switchable in Settings (category « streaks » for daily reminders, « achievements » for weekly
+ * review and Wrapped). The plan, review and recap come at the trader's time (Settings › Notifications, New York time).
  */
 
 final class GameNotifyService
 {
-    /** channels: in-app today; web push (VAPID) and native (APNs/FCM) plug in here later */
-    public static function send(string $uid, string $type, array $params, string $dedupe, string $url, array $opts = []): bool
+    /** the reminders that also reach the phone (push/web-push.php: kind) */
+    private const PUSH = ['g_plan' => 'plan', 'g_review' => 'review', 'g_weekly' => 'weekly'];
+
+    /** channels: the bell; and the phone ($push: the scheduled task) for the 3 reminders above. A reminder over the day's 2 waits. */
+    public static function send(string $uid, string $type, array $params, string $dedupe, string $url, array $opts = [], bool $push = false): bool
     {
         if (!class_exists('Notify', false)) return false;
-        $id = Notify::send($uid, $type, $params, ['dedupe_key' => $dedupe, 'action_url' => $url] + $opts);
+        $id = Notify::send($uid, $type, $params, ['dedupe_key' => $dedupe, 'action_url' => $url] + $opts + ['over_cap' => 'skip']);
         if ($id) GameEngine::track($uid, 'notification_sent', ['type' => $type]);
+        if ($id && $push && !Notify::$quiet && isset(self::PUSH[$type]) && function_exists('wp_notify')) wp_notify(GameEngine::pdo(), $uid, self::PUSH[$type], $url);
         return (bool) $id;
     }
 
-    /** one pass for one trader (cron every 15 min, and on app open) */
-    public static function run(string $uid): void
+    /** one pass for one trader (cron every 15 min with $push, and on app open without: the trader is already in the app) */
+    public static function run(string $uid, bool $push = false): void
     {
         if (!class_exists('Notify', false)) return;
         $now = (new DateTimeImmutable('@' . GameEngine::ts()))->setTimezone(new DateTimeZone('America/New_York'));
@@ -39,9 +45,12 @@ final class GameNotifyService
         $day = GameEngine::today();
         $g = GameEngine::q('SELECT * FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $day])->fetch(PDO::FETCH_ASSOC) ?: null;
         $market = GameEngine::isMarketDay($day);
+        // the trader's times (Settings › Notifications; 8:45, 16:30 and 17:00 New York by default), never after 9:30 / 21:00
+        $at = ['plan' => '08:45', 'review' => '16:30', 'weekly' => '17:00'];
+        if (function_exists('wp_prefs')) { try { foreach (wp_prefs(GameEngine::pdo(), $uid) as $k => $v) $at[$k] = $v['at']; } catch (Throwable $e) { error_log('[Sweep push] prefs: ' . $e->getMessage()); } }
         $todo = [];
-        if ($active && $market && $hm >= '08:45' && $hm < '09:30' && !($g && (int) $g['plan_valid'])) $todo[] = ['g_plan', [], '#dashboard'];
-        if ($active && $market && $hm >= '16:30' && $hm < '21:00' && $g && !(int) $g['review_done'] && ((int) $g['trades_count'] > 0 || (int) $g['plan_valid'])) $todo[] = ['g_review', [], '#dashboard'];
+        if ($active && $market && $hm >= $at['plan'] && $hm < '09:30' && !($g && (int) $g['plan_valid'])) $todo[] = ['g_plan', [], '#dashboard'];
+        if ($active && $market && $hm >= $at['review'] && $hm < '21:00' && $g && !(int) $g['review_done'] && ((int) $g['trades_count'] > 0 || (int) $g['plan_valid'])) $todo[] = ['g_review', [], '#dashboard'];
         $streak = GameEngine::profileState($uid)['streak'];
         if ($market && $hm >= '21:00' && !($g && (int) $g['is_valid_streak']) && $streak['current'] >= 3) $todo[] = ['g_streak', ['n' => $streak['current']], '#dashboard'];
         if (class_exists('GameV2b', false)) {
@@ -49,7 +58,7 @@ final class GameNotifyService
             // the week's recap (brief 01 step 5): ONE notification when it is ready (review of the last trading day, or its close),
             // never again that week, none once the trader has opened it; every trader with a trade this week
             Notify::schema();   // a fresh database may not have the notifications table yet
-            if ($w['open'] && empty($w['seen']) && !GameEngine::q('SELECT 1 FROM notifications WHERE user_id = ? AND dedupe_key LIKE ?', [$uid, 'g:g_weekly:' . $w['week'] . ':%'])->fetchColumn())
+            if ($w['open'] && empty($w['seen']) && $hm >= $at['weekly'] && $hm < '21:00' && !GameEngine::q('SELECT 1 FROM notifications WHERE user_id = ? AND dedupe_key LIKE ?', [$uid, 'g:g_weekly:' . $w['week'] . ':%'])->fetchColumn())
                 $todo[] = ['g_weekly', [], '#dashboard', 'g:g_weekly:' . $w['week'] . ':' . $date];
             if ($dow === 7 && $hm >= '18:00') {
                 $mon = GameEngine::monday($date);
@@ -74,14 +83,14 @@ final class GameNotifyService
                     $used = sb_pro_used(GameEngine::pdo(), $uid);
                     $p = ['days' => $left, 'plan' => ucfirst((string) $g['plan'])];
                     foreach (['en', 'fr', 'es'] as $l) $p['used_' . $l] = sb_pro_used_text($used, $l);
-                    if (self::send($uid, 'trial_ending', $p, "trial:$uid:$left", '#plan', ['body_key' => $used ? 'trial_ending.used' : 'trial_ending.none'])) $sent++;
+                    if (self::send($uid, 'trial_ending', $p, "trial:$uid:$left", '#plan', ['body_key' => $used ? 'trial_ending.used' : 'trial_ending.none', 'over_cap' => 'quiet'])) $sent++;   // over the day's 2: in the list, quiet
                 }
             } catch (Throwable $e) { error_log('[Sweep notify] trial: ' . $e->getMessage()); }
         }
         foreach ($todo as $x) {
             [$type, $params, $url] = $x;
             if ($sent >= 2) break;
-            if (self::send($uid, $type, $params, $x[3] ?? "g:$type:$date", $url)) $sent++;   // keys end with :date (2 a day at most)
+            if (self::send($uid, $type, $params, $x[3] ?? "g:$type:$date", $url, [], $push)) $sent++;   // keys end with :date (2 a day at most)
         }
     }
 }

@@ -626,6 +626,7 @@ function delete_user_everything(string $uid): void {
     if (class_exists('GameCrew', false)) { try { GameCrew::schema(); GameCrew::leave($uid); GameCrew::end($uid); if (class_exists('GameDiscord', false)) GameDiscord::unlink($uid); } catch (Throwable $e) { error_log('[Sweep crew] delete: ' . $e->getMessage()); } }
     if (class_exists('GameEngine', false)) { try { foreach (['user_game_profile', 'game_days', 'xp_events', 'user_badges', 'game_celebrations', 'game_analytics', 'user_map_nodes', 'user_missions', 'user_rewards', 'user_bosses', 'weekly_reviews', 'edge_reveals', 'user_cosmetics', 'user_quests', 'monthly_wrapped', 'user_season', 'social_profile', 'league_members', 'crew_reactions'] as $tb) db()->prepare("DELETE FROM $tb WHERE user_id = ?")->execute([$uid]); } catch (Throwable $e) { error_log('[Sweep game] delete: ' . $e->getMessage()); } }
     if (class_exists('Notify', false)) { try { Notify::deleteUser($uid); } catch (Throwable $e) { error_log('[Sweep notify] delete: ' . $e->getMessage()); } }
+    if (function_exists('wp_delete_user')) { try { wp_delete_user(db(), $uid); } catch (Throwable $e) { error_log('[Sweep push] delete: ' . $e->getMessage()); } }
     foreach (['ai_cache', 'ai_log'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* AI tables not created yet */ } }
     foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* sync tables not created yet */ } }   // sync/: keys, executions, accounts found
     if (billing_on()) {
@@ -690,6 +691,8 @@ try {
     require_once __DIR__ . '/growth/referral.php';
     require_once __DIR__ . '/growth/feedback.php';
     if (is_file(__DIR__ . '/notify/notify.php')) require_once __DIR__ . '/notify/notify.php';   // notification center + events (Feature 0)
+    if (!empty($cfg['push_config']) && !defined('SWEEP_PUSH_CONFIG')) define('SWEEP_PUSH_CONFIG', (string)$cfg['push_config']);
+    if (is_file(__DIR__ . '/push/web-push.php')) require_once __DIR__ . '/push/web-push.php';   // notifications on the phone (brief 02 part 10): off without keys
     if (is_file(__DIR__ . '/game/game.php')) require_once __DIR__ . '/game/game.php';
     if (is_file(__DIR__ . '/loops/loops.php')) require_once __DIR__ . '/loops/loops.php';   // automatic emails (Loops): contact + events, off without a key
     if (!empty($cfg['chart_config']) && !defined('SWEEP_CHART_CONFIG')) define('SWEEP_CHART_CONFIG', (string)$cfg['chart_config']);
@@ -959,6 +962,8 @@ try {
 
     // Notification center (notify/)
     if (strpos($route, 'api/notifications') === 0 && function_exists('nt_route')) nt_route($route, $method, (string)$UID, !empty($me['is_admin']));
+    // Notifications on the phone (push/): this device's subscription, each reminder on / off and its time
+    if (($route === 'api/push' || strpos($route, 'api/push/') === 0) && function_exists('wp_route')) wp_route($route, $method, (string)$UID);
 
     // Billing (plans, Stripe checkout and portal, account chooser)
     if (strpos($route, 'api/billing/') === 0) {

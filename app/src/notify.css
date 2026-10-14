@@ -68,6 +68,15 @@
 .nt-prow b{font-weight:500}
 .nt-prow small{font-size:13px;color:var(--muted)}
 .nt-test{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.nt-push-h{font-size:15px;font-weight:600;margin:20px 0 8px}
+.nt-push-on{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:16px}
+.nt-push-on p,.nt-push-note{margin:0;font-size:14px;line-height:1.45}
+.nt-push-note{padding:14px 16px}
+.nt-push-ctl{display:flex;align-items:center;gap:12px;flex:none}
+.nt-push-ctl select{width:auto;min-width:0;padding:6px 28px 6px 10px;font-size:14px}
+.nt-push-foot{border-top:1px solid var(--line);padding:10px 16px}
+.nt-push-foot .link{font-size:14px}
+.nt-push-help{display:block;margin-top:8px}
 .nt-test .muted{font-size:13px;margin-right:4px}
 
 @media (prefers-reduced-motion:reduce){

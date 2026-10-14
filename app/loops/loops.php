@@ -30,7 +30,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 const LOOPS_PROPS = ['language' => 'string', 'plan' => 'string', 'isPaying' => 'boolean', 'isDiscordCrew' => 'boolean',
                      'proTrialEndsAt' => 'date', 'lastLoginAt' => 'date'];
 const LOOPS_MILESTONES = [10, 50, 100];   // tradesMilestone
-const LOOPS_INACTIVE = [7, 14, 30];       // inactive7d, inactive14d, inactive30d: days without coming back
+const LOOPS_INACTIVE = [3, 7, 14, 30];    // inactive3d, inactive7d, inactive14d, inactive30d: days without coming back (3: brief 02 part 10, the soft come-back)
 const LOOPS_TRIAL_LEFT = [3, 10, 30];     // proTrialDaysLeft: days before the end of the Pro trial
 
 function loops_pdo(): PDO { return db(); }   // api.php, the crons and the tests each define db()

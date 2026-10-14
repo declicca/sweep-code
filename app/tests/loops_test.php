@@ -209,8 +209,8 @@ for ($d = 0; $d <= 64; $d++) {
     foreach (array_slice($events(), $n) as $x) $runs[$k][] = $x['body']['userId'] . ':' . $x['body']['eventName'] . ($x['body']['eventProperties']['daysLeft'] ?? '');
 }
 $when = function (string $what) use ($runs): array { $o = []; foreach ($runs as $k => $l) foreach ($l as $x) if ($x === $what) $o[] = $k; return $o; };
-$ok($when('u_abs:inactive7d') === ['2026-11-10', '2026-12-13'] && $when('u_abs:inactive14d') === ['2026-11-17', '2026-12-20'] && $when('u_abs:inactive30d') === ['2026-12-03', '2027-01-05'],
-    'absence: 7 days (Nov 10), 14 (Nov 17), 30 (Dec 3) after Monday 15:00; back on Dec 5, a new absence: Dec 13, Dec 20, Jan 5 (' . json_encode([$when('u_abs:inactive7d'), $when('u_abs:inactive14d'), $when('u_abs:inactive30d')]) . ')');
+$ok($when('u_abs:inactive3d') === ['2026-11-06', '2026-12-09'] && $when('u_abs:inactive7d') === ['2026-11-10', '2026-12-13'] && $when('u_abs:inactive14d') === ['2026-11-17', '2026-12-20'] && $when('u_abs:inactive30d') === ['2026-12-03', '2027-01-05'],
+    'absence: 3 days (Nov 6), 7 (Nov 10), 14 (Nov 17), 30 (Dec 3) after Monday 15:00; back on Dec 5, a new absence: Dec 9, Dec 13, Dec 20, Jan 5 (' . json_encode([$when('u_abs:inactive3d'), $when('u_abs:inactive7d'), $when('u_abs:inactive14d'), $when('u_abs:inactive30d')]) . ')');
 $ok($when('u_trial:proTrialDaysLeft30') === ['2026-12-02'] && $when('u_trial:proTrialDaysLeft10') === ['2026-12-22'] && $when('u_trial:proTrialDaysLeft3') === ['2026-12-29'] && $when('u_trial:proTrialEnded') === ['2027-01-01'],
     'Pro trial (ends Jan 1, 7:00 New York): 30 days left Dec 2, 10 Dec 22, 3 Dec 29, ended Jan 1');
 $ok($when('u_ea:proTrialEnded') === ['2027-01-01'], 'an early-access Pro (free Pro from the launch) counts as the trial');
@@ -220,7 +220,7 @@ $ok($when('u_gap:inactive7d') === ['2026-11-11'], 'server down Nov 8-10: the 7-d
 $ok($when('u_gap2:inactive7d') === [] && $when('u_gap2:inactive14d') === ['2026-11-17'], 'down Nov 9-16: 7 and 14 days came due together, only the 14-day one is sent');
 $ok($when('u_trial:inactive7d') === [], 'a trader seen recently: no absence');
 $twice = array_keys(array_filter(array_count_values(array_merge(...array_values($runs))), fn($n) => $n > 1));
-$ok($twice === ['u_abs:inactive7d', 'u_abs:inactive14d', 'u_abs:inactive30d'], 'no step sent twice, except the absences of u_abs: once per absence (' . json_encode($twice) . ')');
+$ok($twice === ['u_abs:inactive3d', 'u_abs:inactive7d', 'u_abs:inactive14d', 'u_abs:inactive30d'], 'no step sent twice, except the absences of u_abs: once per absence (' . json_encode($twice) . ')');
 $e = $events('proTrialDaysLeft', 'u_trial')[0]['body'] ?? [];
 $ok(($e['eventProperties'] ?? null) === ['daysLeft' => 30] && $e['plan'] === 'pro', 'proTrialDaysLeft carries daysLeft and the contact');
 $ok(($events('proTrialEnded', 'u_trial')[0]['body']['plan'] ?? '') === 'free', 'proTrialEnded: the contact says plan free');

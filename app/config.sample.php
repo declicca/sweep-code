@@ -38,6 +38,10 @@ return [
     // Billing (optional). sweep-private/billing-config.php next to ai-config.php is found automatically; set a full path only if it lives elsewhere.
     'billing_config' => '',
 
+    // Notifications on the phone (web push, optional). sweep-private/push-config.php, written once on the server by
+    // ops/push-keys.php, is found automatically; set a full path only if it lives elsewhere. No file = no push.
+    'push_config' => '',
+
     // Market context (optional). Leave keys empty to disable.
     // Economic calendar: 'manual' (bundled 2026–2027 schedule + admin), 'tradingeconomics', 'fmp' or 'finnhub'.
     'econ_provider'   => 'manual',
@@ -47,8 +51,9 @@ return [
     'market_api_key'  => '',
     'market_symbol'   => 'NQ.v.0',
 
-    // In-app notifications (optional). daily_limit = normal notifications per trader per 24 h; celebrations are not counted.
-    'notifications' => ['daily_limit' => 5],
+    // In-app notifications (optional). daily_limit = notifications that alert a trader per New York day, celebrations included,
+    // prop firm alerts aside: 2 at most (brief 02 part 10), this can only lower it; beyond, they land quiet in the list.
+    'notifications' => ['daily_limit' => 2],
 
     // Limits
     'max_users'            => 5000,    // maximum number of trader accounts

@@ -48,7 +48,7 @@ async def main():
       cmd = await pg.evaluate("document.querySelector('#main .ux-hl-list li code').textContent")
       ok(cmd.startswith('*/15 * * * *  /usr/local/bin/php ') and cmd.endswith('/game/cron.php >/dev/null 2>&1'), f'{tag} the cPanel line ({cmd[:60]}…)')
       svc = await pg.evaluate("[...document.querySelectorAll('#main .ux-hl-cfg li')].map(l=>[l.dataset.hl, l.querySelector('b').textContent])")
-      ok(len(svc) == 8 and all(v in ('Réglé', 'Manquant') for _, v in svc) and dict(svc).get('smtp') == 'Manquant', f'{tag} services: « Réglé » or « Manquant » only, local SMTP missing ({svc})')
+      ok(len(svc) == 9 and all(v in ('Réglé', 'Manquant') for _, v in svc) and dict(svc).get('smtp') == 'Manquant', f'{tag} services: « Réglé » or « Manquant » only, local SMTP missing ({svc})')
       ok(await pg.evaluate("document.documentElement.scrollWidth <= innerWidth"), f'{tag} no horizontal scroll')
       ok(not errs, f'{tag} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
       if not mob: await pg.screenshot(path=os.path.join(os.environ.get('TMPDIR', '/tmp'), 'admin-health-1440.png'))

@@ -34,7 +34,8 @@ function billing_on(): bool {
     try { sb_config(); return $on = true; } catch (Throwable $e) { return $on = false; }
 }
 
-foreach (['/notify/notify.php', '/notify/listeners.php', '/notify/mail.php'] as $f) if (is_file($root . $f)) require_once $root . $f;   // reminders go through the notification center
+if (!empty($cfg['push_config']) && !defined('SWEEP_PUSH_CONFIG')) define('SWEEP_PUSH_CONFIG', (string) $cfg['push_config']);
+foreach (['/notify/notify.php', '/notify/listeners.php', '/notify/mail.php', '/push/web-push.php'] as $f) if (is_file($root . $f)) require_once $root . $f;   // reminders go through the notification center (and the phone)
 require_once __DIR__ . '/game.php';
 if (is_file($root . '/money/money.php')) require_once $root . '/money/money.php';
 GameEngine::setPdo($pdo);
@@ -49,7 +50,7 @@ $users = $pdo->query('SELECT user_id FROM user_game_profile')->fetchAll(PDO::FET
 $n = 0;
 foreach ($users as $uid) {
     try {
-        if ($mode === 'backfill') { GameEngine::backfill((string) $uid); GameV2::backfillMap((string) $uid); } else { GameEngine::catchUp((string) $uid); GameV2::ensureMissions((string) $uid); GameWrapped::ensure((string) $uid); GameWrappedYear::ensure((string) $uid); GameWow::check((string) $uid); GameNotifyService::run((string) $uid); }
+        if ($mode === 'backfill') { GameEngine::backfill((string) $uid); GameV2::backfillMap((string) $uid); } else { GameEngine::catchUp((string) $uid); GameV2::ensureMissions((string) $uid); GameWrapped::ensure((string) $uid); GameWrappedYear::ensure((string) $uid); GameWow::check((string) $uid); GameNotifyService::run((string) $uid, true); }
         if ($mode !== 'backfill') { try { GameWeeklyMail::run((string) $uid); } catch (Throwable $e) { fwrite(STDERR, "[Sweep weekly email] $uid: " . $e->getMessage() . "\n"); } }   // Friday 17:30 ET: « Your week », if not opened in the app
         try { if (class_exists('SweepMoneyServer')) SweepMoneyServer::monthly($pdo, (string) $uid); } catch (Throwable $e) { fwrite(STDERR, "[Sweep money] $uid: " . $e->getMessage() . "\n"); }   // the 1st: « The reality of the month »
         GameEngine::forget((string) $uid);

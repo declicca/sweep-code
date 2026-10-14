@@ -4,7 +4,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 /**
  * Sweep — Notification center + event system (Feature 0).
  *
- * Sweep sends no product email, so this is the one channel to talk to traders inside the app.
+ * The one channel to talk to traders inside the app (emails: notify/mail.php, game/weekly-mail.php, loops/; the list of
+ * everything Sweep sends: ops/NOTIFICATIONS.md). Three reminders also reach the installed app's phone (push/web-push.php).
  *
  *   Events::on('trade.created', function (array $p) { ... });   // register a listener (notify/listeners.php)
  *   Events::fire('trade.created', ['uid' => ..., 'id' => ..., 'doc' => [...], 'prev' => null]);
@@ -13,8 +14,10 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * Rules:
  *  - A listener that throws is logged and skipped: it never breaks the trader's original action.
  *  - Notify::send never throws either; it returns the new id, or null when skipped
- *    (category turned off, duplicate dedupe_key, daily limit reached, or not allowed by the plan).
- *  - Celebrations bypass the daily limit, never the dedupe.
+ *    (category turned off, duplicate dedupe_key, or not allowed by the plan).
+ *  - At most 2 a day (New York day) that alert the trader (brief 02 part 10), celebrations included; prop firm alerts (the
+ *    trader's own trade, brief 03 step 3) are neither capped nor counted. Beyond 2, a notification lands « quiet »: in the
+ *    list, already read, no badge, no toast, no push; or is skipped when the caller asks (opts over_cap = skip: reminders).
  *  - Text is never stored: only i18n keys + params. The app translates them (EN / FR / ES).
  *  - Times are stored as UTC epoch seconds.
  */
@@ -46,6 +49,8 @@ final class Notify
 {
     public const CATEGORIES = ['product_updates', 'achievements', 'prop_alerts', 'streaks', 'system'];
     public const PRIORITIES = ['normal', 'celebration'];
+    /** notifications that alert a trader, per New York day (config.php can only lower it) */
+    public const DAILY_MAX = 2;
 
     /** @var array<string, array> type => [category, title_key, body_key, icon, priority, action_url] */
     private static array $types = [];
@@ -62,7 +67,7 @@ final class Notify
     {
         global $cfg;
         $c = is_array($cfg['notifications'] ?? null) ? $cfg['notifications'] : [];
-        return $c + ['daily_limit' => 5, 'list_limit' => 60];
+        return $c + ['daily_limit' => self::DAILY_MAX, 'list_limit' => 60];
     }
 
     public static function pdo(): PDO { return db(); }
@@ -86,19 +91,22 @@ final class Notify
                 id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, user_id VARCHAR(120) NOT NULL, type VARCHAR(48) NOT NULL, category VARCHAR(24) NOT NULL,
                 title_key VARCHAR(96) NOT NULL, body_key VARCHAR(96) NULL, params TEXT NULL, icon VARCHAR(24) NULL, action_url VARCHAR(255) NULL,
                 priority VARCHAR(12) NOT NULL DEFAULT \'normal\', dedupe_key VARCHAR(160) NULL, read_at INT NULL, shown_as_modal_at INT NULL,
-                created_at INT NOT NULL, expires_at INT NULL,
+                created_at INT NOT NULL, expires_at INT NULL, quiet TINYINT NOT NULL DEFAULT 0,
                 INDEX notif_unread (user_id, read_at, created_at), INDEX notif_list (user_id, created_at), UNIQUE KEY notif_dedupe (user_id, dedupe_key)
             ) DEFAULT CHARSET=utf8mb4');
             $pdo->exec('CREATE TABLE IF NOT EXISTS notification_prefs (
                 user_id VARCHAR(120) NOT NULL, category VARCHAR(24) NOT NULL, enabled TINYINT NOT NULL DEFAULT 1, PRIMARY KEY (user_id, category)
             ) DEFAULT CHARSET=utf8mb4');
+            if (!$pdo->query("SHOW COLUMNS FROM notifications LIKE 'quiet'")->fetch()) $pdo->exec('ALTER TABLE notifications ADD COLUMN quiet TINYINT NOT NULL DEFAULT 0');   // 14 Oct. (brief 02 part 10)
             return;
         }
         $pdo->exec('CREATE TABLE IF NOT EXISTS notifications (
             id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, type TEXT NOT NULL, category TEXT NOT NULL,
             title_key TEXT NOT NULL, body_key TEXT NULL, params TEXT NULL, icon TEXT NULL, action_url TEXT NULL,
             priority TEXT NOT NULL DEFAULT \'normal\', dedupe_key TEXT NULL, read_at INTEGER NULL, shown_as_modal_at INTEGER NULL,
-            created_at INTEGER NOT NULL, expires_at INTEGER NULL)');
+            created_at INTEGER NOT NULL, expires_at INTEGER NULL, quiet INTEGER NOT NULL DEFAULT 0)');
+        if (!in_array('quiet', array_column($pdo->query('PRAGMA table_info(notifications)')->fetchAll(PDO::FETCH_ASSOC), 'name'), true))
+            $pdo->exec('ALTER TABLE notifications ADD COLUMN quiet INTEGER NOT NULL DEFAULT 0');   // 14 Oct. (brief 02 part 10)
         $pdo->exec('CREATE INDEX IF NOT EXISTS notif_unread ON notifications (user_id, read_at, created_at)');
         $pdo->exec('CREATE INDEX IF NOT EXISTS notif_list ON notifications (user_id, created_at)');
         $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS notif_dedupe ON notifications (user_id, dedupe_key)');   // NULL keys never collide
@@ -142,11 +150,14 @@ final class Notify
     /**
      * Send one notification.
      * $opts: dedupe_key, action_url, priority (normal|celebration), icon, category, expires_at (epoch) or expires_in (seconds),
-     *        title_key, body_key (override the type's keys).
-     * Returns the new id, or null when skipped. Never throws.
+     *        title_key, body_key (override the type's keys), over_cap (quiet|skip: beyond the day's 2, see the class notes).
+     * Returns the new id, or null when skipped. Never throws. self::$quiet tells whether the last one landed quiet.
      */
+    public static bool $quiet = false;
+
     public static function send(string $uid, string $type, array $params = [], array $opts = []): ?int
     {
+        self::$quiet = false;
         try {
             self::schema();
             $def = self::$types[$type] ?? ['category' => 'system', 'priority' => 'normal', 'icon' => 'bell',
@@ -160,22 +171,25 @@ final class Notify
             if (!self::allowed($uid)) return null;
             if (!(self::prefs($uid)[$category] ?? true)) return null;
             if ($dedupe !== null && self::q('SELECT 1 FROM notifications WHERE user_id = ? AND dedupe_key = ?', [$uid, $dedupe])->fetchColumn()) return null;
-            if ($priority === 'normal' && $category !== 'prop_alerts') {   // an account's limit is never dropped by the daily cap (brief 03 step 3)
-                $limit = (int) self::cfg()['daily_limit'];
-                $sent = (int) self::q("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND priority = 'normal' AND created_at > ?", [$uid, time() - 86400])->fetchColumn();
-                if ($limit > 0 && $sent >= $limit) { error_log('[Sweep notify] daily limit reached for ' . $uid . ' (' . $type . ')'); return null; }
+            $quiet = false;
+            if ($category !== 'prop_alerts' && self::alertsToday($uid) >= self::dailyMax()) {   // an account's limit is never capped (brief 03 step 3)
+                if (($opts['over_cap'] ?? 'quiet') === 'skip') return null;
+                $quiet = true;
             }
             $json = $params ? json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
             if ($json !== null && strlen($json) > 4096) $json = null;   // params are placeholders, never documents
             $expires = isset($opts['expires_at']) ? (int) $opts['expires_at'] : (isset($opts['expires_in']) ? time() + (int) $opts['expires_in'] : null);
             $url = self::safeUrl($opts['action_url'] ?? $def['action_url']);
 
-            self::q('INSERT INTO notifications (user_id, type, category, title_key, body_key, params, icon, action_url, priority, dedupe_key, created_at, expires_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            $t = time();
+            self::q('INSERT INTO notifications (user_id, type, category, title_key, body_key, params, icon, action_url, priority, dedupe_key, created_at, expires_at, quiet, read_at, shown_as_modal_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                 $uid, substr($type, 0, 48), $category,
                 (string) ($opts['title_key'] ?? $def['title_key']), $opts['body_key'] ?? $def['body_key'],
-                $json, (string) ($opts['icon'] ?? $def['icon']), $url, $priority, $dedupe, time(), $expires,
+                $json, (string) ($opts['icon'] ?? $def['icon']), $url, $priority, $dedupe, $t, $expires,
+                $quiet ? 1 : 0, $quiet ? $t : null, $quiet ? $t : null,   // quiet: already read, never a toast
             ]);
+            self::$quiet = $quiet;
             return (int) self::pdo()->lastInsertId();
         } catch (Throwable $e) {
             // A unique-key race on dedupe_key lands here too: that is a normal skip.
@@ -184,6 +198,21 @@ final class Notify
             }
             return null;
         }
+    }
+
+    /** the day's maximum: 2, or less if config.php says so */
+    public static function dailyMax(): int
+    {
+        $c = (int) self::cfg()['daily_limit'];
+        return $c > 0 ? min($c, self::DAILY_MAX) : self::DAILY_MAX;
+    }
+
+    /** notifications that alerted the trader since midnight in New York (prop firm alerts and quiet ones aside) */
+    public static function alertsToday(string $uid): int
+    {
+        self::schema();
+        $from = (new DateTimeImmutable('today', new DateTimeZone('America/New_York')))->getTimestamp();
+        return (int) self::q("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND created_at >= ? AND quiet = 0 AND category <> 'prop_alerts'", [$uid, $from])->fetchColumn();
     }
 
     /** In-app links only: a hash route (#payouts) or a path on this site. */
@@ -332,7 +361,7 @@ function nt_route(string $route, string $method, string $uid, bool $isAdmin): vo
         if (!$isAdmin) json_out(403, ['error' => 'Administrators only.']);
         $b = body_json(1024);
         $celebration = ($b['kind'] ?? '') === 'celebration';
-        $id = Notify::send($uid, $celebration ? 'test_celebration' : 'test_normal', [], ['dedupe_key' => 'test:' . bin2hex(random_bytes(6))]);
+        $id = Notify::send($uid, $celebration ? 'test_celebration' : 'test_normal', [], ['dedupe_key' => 'test:' . bin2hex(random_bytes(6)), 'over_cap' => 'skip']);
         json_out(200, ['ok' => $id !== null, 'id' => $id]);
     }
     json_out(404, ['error' => 'not found']);

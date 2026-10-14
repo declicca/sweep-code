@@ -63,8 +63,11 @@ final class GameWow
                 $pct = fn($x) => $x[1] / $x[0];
                 $best = max(array_map($pct, array_diff_key($by, [$prevM => 1])));
                 $seen[] = "month:$prevM";
-                if ($pct($by[$prevM]) > $best && !$init) $mi = (int) substr($prevM, 5) - 1; $send[] = ['wow_best_month', ['pct' => (int) round($pct($by[$prevM]) * 100), 'month' => ['January','February','March','April','May','June','July','August','September','October','November','December'][$mi],
-                    'month_fr' => ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][$mi], 'month_es' => ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][$mi]], true];
+                if ($pct($by[$prevM]) > $best && !$init) {   // only the best month (before 14 Oct., every month with data was told « best », braces missing)
+                    $mi = (int) substr($prevM, 5) - 1;
+                    $send[] = ['wow_best_month', ['pct' => (int) round($pct($by[$prevM]) * 100), 'month' => ['January','February','March','April','May','June','July','August','September','October','November','December'][$mi],
+                        'month_fr' => ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'][$mi], 'month_es' => ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][$mi]], true];
+                }
             }
         }
         $o['wow'] = array_values(array_unique($seen)); $o['wow_init'] = true;

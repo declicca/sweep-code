@@ -6,7 +6,7 @@ declare(strict_types=1);
  * It works once a New York day, from 7:30 (America/New_York: summer time follows by itself), so the follow-ups leave before
  * the session, while the trader gets ready. The other hourly runs do nothing, except catch up a day the server missed and
  * retry what Loops refused.
- *   inactive7d, inactive14d, inactive30d   7, 14 and 30 days without coming back to the app, once per absence
+ *   inactive3d, inactive7d, inactive14d, inactive30d   3, 7, 14 and 30 days without coming back to the app, once per absence
  *   proTrialDaysLeft (daysLeft 30, 10, 3)  before the end of the 60 days of Pro, once per step
  *   proTrialEnded                          the 60 days just ended and the trader did not pay, once
  * Never for the Discord crew (Elite for life) nor a trader who pays. A step comes due at a moment (last visit + 7 days, end
@@ -18,7 +18,7 @@ declare(strict_types=1);
  *   php loops/cron.php                                             the hourly run
  *   php loops/cron.php --dry-run                                   what the daily run would send now: nothing sent or recorded
  *   php loops/cron.php --now="2026-12-01 07:30" --user=u_abc       test: a New York time, one trader (not recorded as the daily run)
- *   php loops/cron.php --all-events --user=u_abc                   each of the 15 events once to this test trader, example
+ *   php loops/cron.php --all-events --user=u_abc                   each of the 16 events once to this test trader, example
  *                                                                  properties, nothing recorded: Loops then offers them all as triggers
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
@@ -73,7 +73,7 @@ if (isset($o['all-events'])) {   // every event once to a test trader (example p
     $bad = 0;
     foreach (['signedUp' => fn(array $c) => ['language' => $c['language'], 'plan' => $c['plan']], 'profileCompleted' => [], 'firstAccountAdded' => ['propFirm' => 'Topstep'],
               'firstTradeLogged' => [], 'tradesMilestone' => ['milestone' => 10], 'firstPayoutLogged' => [], 'subscriptionStarted' => ['plan' => 'pro', 'interval' => 'month'],
-              'subscriptionCanceled' => ['plan' => 'pro'], 'paymentFailed' => ['plan' => 'pro'], 'referralRewarded' => [], 'inactive7d' => [], 'inactive14d' => [], 'inactive30d' => [],
+              'subscriptionCanceled' => ['plan' => 'pro'], 'paymentFailed' => ['plan' => 'pro'], 'referralRewarded' => [], 'inactive3d' => [], 'inactive7d' => [], 'inactive14d' => [], 'inactive30d' => [],
               'proTrialDaysLeft' => ['daysLeft' => 30], 'proTrialEnded' => []] as $name => $props) {
         $sent = loops_send($user, $name, $props); $bad += $sent ? 0 : 1;
         echo ($sent ? 'sent: ' : 'NOT sent: ') . $name . "\n"; usleep(120000);

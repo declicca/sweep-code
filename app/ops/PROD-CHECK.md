@@ -50,3 +50,9 @@
   Le script pose 20 questions types de traders (comment ajouter un payout, pourquoi mon compte est rouge, mes pires heures…), une à la fois, et affiche le temps de réponse, la réponse, l'écran proposé, les données citées et ce qu'une bonne réponse doit contenir. Noter chaque réponse 0 (fausse), 1 (en partie) ou 2 (juste) ; un chiffre inventé = 0. Le résumé final donne la médiane et le temps le plus long.
 - Le budget du jour atteint se voit dans Admin › Santé (« Clé Sweep AI » : dépensé sur le budget) ; la bulle dit alors « Sweep AI est en pause pour aujourd'hui » et propose les pages et l'aide de la question.
 
+
+## Notifications sur le téléphone (brief 02, partie 10)
+
+- **Vérifié en local** (clés de test, messages écrits dans un fichier : `SWEEP_PUSH_MOCK`) : `tests/push_test.php` (le chiffrement redonne l'exemple de la RFC 8291 octet pour octet, la signature VAPID, les seules adresses des services push, les heures, 2 notifications par jour, le message ouvert avec la clé du téléphone) et `tests/e2e_push.py` (Réglages, `/sw.js`, l'heure choisie, le message dans la langue du trader, « Désactiver », l'iPhone dans Safari).
+- **À faire sur le serveur, une fois** : `/usr/local/bin/php /home/matnsabc/app.makeitsweep.com/ops/push-keys.php` écrit `sweep-private/push-config.php` (lisible par ce seul utilisateur) et affiche seulement la clé publique. Admin › Santé : « Notifications sur le téléphone » passe à « Réglé ». Ne pas relancer avec `--force` : chaque téléphone devrait réactiver ses notifications.
+- **Puis sur un vrai téléphone** : Android (Chrome) et iPhone (iOS 16.4+, Sweep ajouté à l'écran d'accueil, ouvert depuis son icône) : Réglages › Notifications › « Activer les notifications », mettre le rappel du plan au quart d'heure qui suit, attendre le passage de la tâche `game` : la notification arrive, un toucher ouvre Aujourd'hui. La tâche `game` (toutes les 15 min) envoie les rappels : rien de plus à installer.

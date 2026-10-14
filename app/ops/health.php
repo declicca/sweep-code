@@ -32,6 +32,10 @@ function sweep_health(PDO $pdo, array $cfg, string $app): array
         }
     } catch (Throwable $e) { /* no billing config */ }
     $c['chart'] = class_exists('ChartData') && ChartData::enabled();
+    try {   // notifications on the phone (brief 02 part 10): the VAPID keys of sweep-private/push-config.php, yes / no only
+        if (!function_exists('wp_config') && is_file($app . '/push/web-push.php')) require_once $app . '/push/web-push.php';
+        $c['push'] = function_exists('wp_config') && wp_config() !== null;
+    } catch (Throwable $e) { $c['push'] = false; }
     $c['backup'] = false; $c['offsite'] = false;
     try {   // the backup settings (ops/backup.php): a passphrase, and an off-site copy if a bucket is set
         $bp = getenv('SWEEP_BACKUP_CONFIG') ?: dirname($app) . '/sweep-private/backup-config.php';

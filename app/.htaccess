@@ -18,7 +18,7 @@ DirectoryIndex api.php
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
   # Never serve these files directly
-  RewriteRule ^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|[A-Za-z0-9_-]+\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|sync/.*|loops/.*|src/.*|data(/.*)?)$ - [F,L]
+  RewriteRule ^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|[A-Za-z0-9_-]+\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|sync/.*|loops/.*|push/.*|src/.*|data(/.*)?)$ - [F,L]
 
   # Everything goes through api.php (which checks the session)
   RewriteRule ^$ api.php?r=app [L,QSA]
@@ -34,6 +34,13 @@ DirectoryIndex api.php
     Require all denied
   </IfModule>
 </FilesMatch>
+
+# The service worker (notifications on the phone, brief 02 part 10): always asked again, so a new version is picked up
+<Files "sw.js">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache"
+  </IfModule>
+</Files>
 
 # Compression of the pages and of the API's JSON (trades, stats…): 4–8× less to download on a phone
 <IfModule mod_brotli.c>
