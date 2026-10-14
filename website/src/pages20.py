@@ -67,7 +67,8 @@ def page_free(lang, t):
                 "Un diario de trading gratis para traders de futuros y prop firms: diario, calendario, análisis, gráficos de CME y reglas. Gratis para siempre, sin tarjeta.")),
             hero + b + final_cta(lang, t), _faq_ld(t, faqs))
 
-# ---------------------------------------------------------------- prop firm tracker
+# ---------------------------------------------------------------- prop firm tracker (also the page for prop traders: /prop-traders redirects here)
+CRUMBS["prop-firm-tracker.html"] = T("Prop firm tracker", "Suivi des comptes prop", "Seguimiento de cuentas prop")
 TRACKER_MORE = T("""<h2>How it works</h2><ol>
 <li><b>Add an account:</b> pick the firm, the account type and the size. For {FIRMS}, the rules fill in from Sweep’s preset, for guidance; for any other firm, you enter them once.</li>
 <li><b>Add your trades:</b> from a screenshot, by importing your platform’s export, or automatically from NinjaTrader 8. The trade copier logs one trade on several accounts at once.</li>
@@ -107,7 +108,9 @@ def page_tracker(lang, t):
                 "Chaque compte porte sa firme, son type, sa taille et ses règles : une évaluation et un compte financé peuvent vivre côte à côte.",
                 "Cada cuenta lleva su firma, su tipo, su tamaño y sus reglas, así que una evaluación y una cuenta fondeada conviven sin problema."),
               items, slot("ecran-comptes-prop.webp", "desktop", t(T("Prop accounts with the ready-for-payout meter, sample data", "Comptes prop avec le compteur prêt pour le payout, données d’exemple", "Cuentas prop con el indicador listo para el payout, datos de ejemplo")), t, fallback="accounts"), id_="accounts", rule=False)
-    b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(TRACKER_MORE)).replace("{FIRMS}", FIRMS_TXT[lang])}</article></div></section>'
+    from pages1 import prop_blocks, prop_notice
+    b += prop_blocks(lang, t)   # what /prop-traders had (merged here, audit n° 3)
+    b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(TRACKER_MORE)).replace("{FIRMS}", FIRMS_TXT[lang])}</article></div>{prop_notice(lang, t)}</section>'
     faqs = [(T("Which firms have preloaded rules?", "Quelles firmes ont des règles préremplies ?", "¿Qué firmas tienen reglas precargadas?"),
              T(f"{FIRMS_TXT['en']}. Any other firm can be added with its rules entered once.", f"{FIRMS_TXT['fr']}. Toute autre firme peut être ajoutée en saisissant ses règles une fois.", f"{FIRMS_TXT['es']}. Cualquier otra firma se puede añadir introduciendo sus reglas una vez.")),
             (T("How many accounts can I track?", "Combien de comptes puis-je suivre ?", "¿Cuántas cuentas puedo seguir?"),
@@ -117,7 +120,7 @@ def page_tracker(lang, t):
             (T("Can I keep a failed account?", "Puis-je garder un compte échoué ?", "¿Puedo conservar una cuenta fallida?"),
              T("Yes. Closed and failed accounts keep their full history and stay in your filters.", "Oui. Les comptes fermés et échoués gardent tout leur historique et restent dans tes filtres.", "Sí. Las cuentas cerradas y fallidas conservan todo su historial y siguen en tus filtros."))]
     b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>{"".join(faq_item(t, q, a) for q, a in faqs)}</div></section>'
-    return (t(T("Prop Firm Tracker: Every Account and Rule · Sweep", "Suivi des comptes prop : chaque compte et règle · Sweep", "Seguimiento de cuentas prop: cada cuenta y regla · Sweep")),
+    return (t(T("Prop Firm Tracker & Trading Journal · Sweep", "Suivi des comptes prop et journal de trading · Sweep", "Seguimiento de cuentas prop y diario de trading · Sweep")),
             t(T("Track every prop firm account in one place: evaluations, funded and live, with each firm’s rules, drawdown room, consistency and payout readiness.",
                 "Suis tous tes comptes de prop firm au même endroit : évaluations, financés et live, avec les règles, la marge de drawdown, la consistance et le payout.",
                 "Sigue todas tus cuentas de prop firm en un solo lugar: evaluaciones, fondeadas y live, con las reglas, el margen de drawdown, la consistencia y el payout.")),
