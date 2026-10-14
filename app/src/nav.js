@@ -910,12 +910,14 @@ window.SweepMO = window.SweepMO || class {
 
   /* ───────────── Settings in 4 groups: Account · Discipline · Notifications · Data ───────────── */
   const SG = {
-    en: ['Account', 'Discipline', 'Notifications', 'Data'], fr: ['Compte', 'Discipline', 'Notifications', 'Données'], es: ['Cuenta', 'Disciplina', 'Notificaciones', 'Datos'],
+    en: ['Account', 'Discipline', 'Notifications', 'Data', 'Advanced'], fr: ['Compte', 'Discipline', 'Notifications', 'Données', 'Avancé'], es: ['Cuenta', 'Disciplina', 'Notificaciones', 'Datos', 'Avanzado'],
   };
   // which section goes where (matched on the section title in any language)
   const SMAP = [
-    [0, /^(your account|ton compte|tu cuenta|appearance|apparence|apariencia|keyboard shortcuts|raccourcis clavier|atajos de teclado)/i],
-    [1, /^(discipline checklist|checklist de discipline|checklist de disciplina|setups|prop firms|risk rules|règles de risque|reglas de riesgo|copied trades|trades copiés|operaciones copiadas)/i],
+    [0, /^(your account|ton compte|tu cuenta|appearance|apparence|apariencia)/i],
+    [1, /^(discipline checklist|checklist de discipline|checklist de disciplina|setups|risk rules|règles de risque|reglas de riesgo)/i],
+    // brief 03 step 5: the advanced options together, folded (nothing removed)
+    [4, /^(keyboard shortcuts|raccourcis clavier|atajos de teclado|prop firms|copied trades|trades copiés|operaciones copiadas)/i],
     [2, /^(notifications|notificaciones)/i],
     [3, /^(data|données|datos|connections|connexions|conexiones)/i],
   ];
@@ -923,7 +925,7 @@ window.SweepMO = window.SweepMO || class {
     if (route().v !== 'settings') return;
     const main = document.getElementById('main'); if (!main || main.querySelector('.nav-sgrp')) return;
     const secs = [...main.querySelectorAll(':scope > section')];
-    const buckets = [[], [], [], []], rest = [];
+    const buckets = [[], [], [], [], []], rest = [];
     for (const sec of secs) {
       const h = ((sec.querySelector('h2, h3') || {}).textContent || '').trim();
       const m = SMAP.find(([, re]) => re.test(h));
@@ -932,7 +934,7 @@ window.SweepMO = window.SweepMO || class {
     const names = SG[LANG] || SG.en;
     const anchor = main.querySelector('.nav-back');
     let at = anchor || null;
-    // B15: four foldable groups (Account, Discipline, Notifications, Data); the open ones stay open while you navigate
+    // B15: foldable groups (Account, Discipline, Notifications, Data, Advanced); the open ones stay open while you navigate
     let openSet; try { openSet = new Set(JSON.parse(sessionStorage.getItem('sw.sgd') || '[0]')); } catch (e) { openSet = new Set([0]); }
     buckets.forEach((list, i) => {
       if (!list.length) return;
@@ -1047,7 +1049,9 @@ window.SweepMO = window.SweepMO || class {
     const blocks = () => [...main.children].map((c, i) => { const r = c.getBoundingClientRect(); return { k: (c.className || c.tagName).toString().split(' ').slice(0, 2).join('.') || ('#' + i), h: Math.round(r.height), top: Math.round(r.top) }; });
     const base = blocks(), t0 = performance.now(), seen = {}, key = (e.target.closest('[data-v],[data-act],[data-path]') || e.target);
     const y0 = key.getBoundingClientRect().top; let worst = 0, worstAt = 0;
-    const find = () => { if (document.contains(key)) return key; const k = ['data-act', 'data-path', 'data-v', 'data-id'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join(''); return k ? main.querySelector(k) : null; };
+    const find = () => { if (document.contains(key)) return key; const k = ['data-act', 'data-path', 'data-v', 'data-id'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join(''); if (!k) return null;
+      // the same control redrawn: the copy nearest to where it was (« Answer your coach » repeats some of the review's buttons)
+      return [...main.querySelectorAll(k)].sort((a, b) => Math.abs(a.getBoundingClientRect().top - y0) - Math.abs(b.getBoundingClientRect().top - y0))[0] || null; };
     const tick = () => {
       const ms = Math.round(performance.now() - t0), el = find();
       if (el) { const d = Math.round(el.getBoundingClientRect().top - y0); if (Math.abs(d) > Math.abs(worst)) { worst = d; worstAt = ms; } }
@@ -2126,8 +2130,9 @@ window.SweepMO = window.SweepMO || class {
         ${fld('entry', t('entry'), 'inputmode="decimal"')}${fld('exit', t('exit'), 'inputmode="decimal"')}
         </div></details>`}
       </div>
-      ${qs.length ? `<section class="nav-am-sec"><h3>${t('disc')}</h3>${(SH.allQ ? qs : qs.filter((q, i) => i < 5 || SH.disc[q.id])).map((q) => `<div class="nav-am-q"><span>${esc2(q.text)}</span>${seg('d:' + q.id, [['y', t('yes')], ['n', t('no')], ['na', t('na')]], SH.disc[q.id] || '')}</div>`).join('')}
-        <div class="nav-am-qmore">${!SH.allQ && qs.length > 5 ? `<button type="button" class="chip nav-am-more" data-am="q-more">${t('moreQ').replace('{n}', qs.filter((q, i) => i >= 5 && !SH.disc[q.id]).length)}</button>` : ''}<button type="button" class="chip nav-am-more" data-am="q-add">${t('addQ')}</button></div></section>` : ''}
+      ${/* brief 03 step 5: 3 questions (the trader's first three), emotions in one tap; the rest, confidence and execution under « More » */ ''}
+      ${qs.length ? `<section class="nav-am-sec"><h3>${t('disc')}</h3>${(SH.allQ ? qs : qs.filter((q, i) => i < 3 || SH.disc[q.id])).map((q) => `<div class="nav-am-q"><span>${esc2(q.text)}</span>${seg('d:' + q.id, [['y', t('yes')], ['n', t('no')], ['na', t('na')]], SH.disc[q.id] || '')}</div>`).join('')}
+        <div class="nav-am-qmore">${!SH.allQ && qs.length > 3 ? `<button type="button" class="chip nav-am-more" data-am="q-more">${t('moreQ').replace('{n}', qs.filter((q, i) => i >= 3 && !SH.disc[q.id]).length)}</button>` : ''}<button type="button" class="chip nav-am-more" data-am="q-add">${t('addQ')}</button></div></section>` : ''}
       <section class="nav-am-sec"><h3>${t('psy')}</h3><p class="muted">${t('emo')}</p>
         <div class="chips nav-am-emo">${(() => {
           const own = ((S.settings && S.settings.custom_emotions) || []).filter((k) => !emos.includes(k));
@@ -2138,7 +2143,7 @@ window.SweepMO = window.SweepMO || class {
             + (SH.allEmo ? '' : `<button type="button" class="chip nav-am-more" data-am="emo-more">${t('more')}</button>`)
             + `<button type="button" class="chip nav-am-more" data-am="emo-add">${t('addEmo')}</button>`;
         })()}</div>
-        <div class="nav-am-scores"><div><span>${t('conf')}</span>${seg('conf', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.conf || '')}</div><div><span>${t('exec')}</span>${seg('exec', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.exec || '')}</div></div></section>
+        ${SH.allEmo || SH.conf || SH.exec ? `<div class="nav-am-scores"><div><span>${t('conf')}</span>${seg('conf', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.conf || '')}</div><div><span>${t('exec')}</span>${seg('exec', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.exec || '')}</div></div>` : ''}</section>
       <p class="err nav-am-err"></p>
       <button type="button" class="btn primary nav-am-save" data-am="save" ${SH.busy ? 'disabled' : ''}>${t('save')}</button>`;
   }

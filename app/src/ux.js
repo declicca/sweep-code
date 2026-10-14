@@ -310,14 +310,14 @@
   if (typeof checklist !== 'function') return;
   const AUTO = ['addloser', 'dll', 'stop', 'size'];
   const orig = checklist;
-  checklist = function (col, trade) {
+  checklist = function (col, trade, max) {   // (max: step 2's first questions, brief 03 step 5, passed on)
     try {
       const qs = (S.settings && S.settings.questions) || [];
       const act = new Set(qs.filter((q) => q.active).map((q) => q.id));
       if (!act.size) return orig.apply(this, arguments);
       const d = trade.discipline || {}, keep = {};
       for (const k in d) if (act.has(k) || (d[k] === 'n' && AUTO.includes(k))) keep[k] = d[k];
-      return orig.call(this, col, Object.assign({}, trade, { discipline: keep }));
+      return orig.call(this, col, Object.assign({}, trade, { discipline: keep }), max);
     } catch (e) { return orig.apply(this, arguments); }
   };
 })();

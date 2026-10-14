@@ -57,7 +57,7 @@ async def main():
     await pg.evaluate("location.hash='#settings'"); await pg.wait_for_timeout(1800)
     g = await pg.evaluate("[...document.querySelectorAll('#main details.nav-sgd > summary')].map(s=>s.textContent.trim())")
     last = await pg.evaluate("(()=>{const m=document.getElementById('main'); const k=[...m.children].filter(c=>c.getClientRects().length); return k.length?k[k.length-1].className:''})()")
-    ok(len(g) == 4, f'B15 four foldable groups ({g})')
+    ok(len(g) == 5 and g[-1] in ('Avancé', 'Advanced', 'Avanzado'), f'B15 five foldable groups, the advanced options last (brief 03 step 5) ({g})')
     ok('nav-logout' in last, f'B15 « Déconnexion » at the bottom ({last})')
     # B16 sample data
     await pg.evaluate("void loadDemo()")   # not awaited: it waits for the answer in the window

@@ -19,6 +19,10 @@ Then, brief 03 step 3 (a new trader: an account with a $1,000 daily limit, 3 tra
 Then, brief 03 step 4 (5 weeks of trades, the stop broken less and less, the ORB setup always winning):
   I. the Stats page opens with « What works for you »: the strength (best setup, its sample), the leak (the stop), the rule,
      the progress of the stop week by week (going up); the Friday recap's coach block speaks in % and counts, no dollar.
+Then, brief 03 step 5 (fewer options in sight, nothing removed):
+  J. the trade's page: « Answer your coach » (the plan, what pushed him in, his lesson) in place of « Review x of 4 », the
+     answers saved in the same fields; the full review folded, still open after a tap in it; the screenshot form and the
+     manual form's step 2: 3 questions, the rest one tap away; Settings: « Advanced » last, folded.
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -242,11 +246,51 @@ def works(p, lang, phone):   # brief 03 step 4: what works for you
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} I nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 
+W5 = {'fr': ('Réponds au coach', 'Avancé'), 'en': ('Answer your coach', 'Advanced'), 'es': ('Responde a tu coach', 'Avanzado')}
+def fewer(p, lang, phone):   # brief 03 step 5
+  tag = f"{'390' if phone else '1300'}-{lang}"; w = W5[lang]
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1'); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'cf%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
+  ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'gt1'}), headers=H)
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(600)
+  day = pg.evaluate("todayStr()")
+  pg.evaluate(PLAN, [day, {'bias': 'bullish', 'max_loss': '1000', 'setups': []}])
+  pg.evaluate(TRADE, ['f1', day, '10:00', '10:05', 'long', -20000, {}]); pg.evaluate(TRADE, ['f2', day, '10:08', '10:15', 'long', -10000, {}]); pg.evaluate("render()"); pg.wait_for_timeout(600)
+  pg.evaluate("location.hash = '#trade/f2'"); pg.wait_for_selector('#main .co-ask', timeout=8000); pg.wait_for_timeout(500)
+  ask = pg.evaluate(TXT, '#main .co-ask')
+  ok(w[0] in ask and pg.evaluate("document.querySelector('#main .rprog').hidden && !document.querySelector('#main details.co-full').open") and pg.locator('#main .co-ask .co-q').count() == 3, f'{tag} J the trade page: « {w[0]} », 3 questions, the full review folded')
+  pg.locator('#main .co-ask [data-path="discipline.plan"][data-v="y"]').click(); pg.wait_for_timeout(400)
+  pg.locator('#main .co-ask [data-path="emo.before"]').first.click(); pg.wait_for_timeout(400)
+  pg.locator('#main .co-ask textarea').fill('10 min'); pg.wait_for_timeout(1200)
+  sv = pg.evaluate("(() => { const t = getDoc('trades', 'f2'); return [t.discipline && t.discipline.plan, ((t.emo || {}).before || []).length, (t.review || {}).lesson] })()")
+  ok(sv == ['y', 1, '10 min'], f'{tag} J the answers in the same fields ({sv})')
+  pg.locator('#main details.co-full > summary').click(); pg.wait_for_timeout(300); pg.locator('#main #rs-chk [data-act=set]').first.click(); pg.wait_for_timeout(600)
+  ok(pg.evaluate("document.querySelector('#main details.co-full').open"), f'{tag} J the full review stays open after a tap in it')
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(500); pg.evaluate("SweepAddMode.open()"); pg.wait_for_selector('.nav-am-shot.open', timeout=8000); pg.wait_for_timeout(400)
+  q1 = pg.evaluate("[document.querySelectorAll('.nav-am-shot .nav-am-q').length, !!document.querySelector('.nav-am-shot .nav-am-scores')]")
+  pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
+  pg.evaluate("openTicket(null, { manual: true })"); pg.wait_for_selector('#tkSlide.open', timeout=8000); pg.evaluate("showStep2('f1')"); pg.wait_for_timeout(400)
+  q2 = pg.evaluate("document.querySelectorAll('#tkPanel .qlist .q').length"); pg.locator('#tkPanel [data-act=s2-more]').first.click(); pg.wait_for_timeout(400)
+  q3 = pg.evaluate("document.querySelectorAll('#tkPanel .qlist .q').length"); pg.evaluate("closeStep2()"); pg.wait_for_timeout(400)
+  ok(q1 == [3, False] and q2 == 3 and q3 > 3, f'{tag} J the forms: 3 questions, confidence folded ({q1}); step 2: 3, then {q3} after « More »')
+  pg.evaluate("location.hash = '#settings'"); pg.wait_for_selector('#main details.nav-sgd', timeout=8000); pg.wait_for_timeout(500)
+  g = pg.evaluate("[...document.querySelectorAll('#main details.nav-sgd')].map((d) => [d.querySelector('summary').textContent.trim(), d.open])")
+  ok(g and g[-1] == [w[1], False], f'{tag} J Settings: « {w[1]} » last, folded ({g[-1] if g else None})')
+  ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} J nothing wider than the window, no page error ({errs[:2]})')
+  br.close()
+
 with sync_playwright() as p:
   for lang, phone in (('fr', True), ('en', False), ('es', True)):
     print(f"— {'phone' if phone else 'computer'} {lang}")
     run(p, lang, phone)
     live(p, lang, phone)
     works(p, lang, phone)
+    fewer(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')
 sys.exit(1 if fails else 0)

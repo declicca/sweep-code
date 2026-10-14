@@ -16,6 +16,8 @@
   const L = (typeof LANG !== 'undefined' && ['fr', 'es'].includes(LANG)) ? LANG : 'en';
   const T = {
     en: {
+      askT: 'Answer your coach', askN: '{k} of {n}', aPlan: 'Was this trade in your plan?', aStop: 'Did you respect your stop?', aSize: 'Did you respect your max size?',
+      aWhy: 'What pushed you to enter?', aEmo: 'Your emotion before entering?', aLesson: 'Your lesson, in one sentence', aLessonPh: 'What you do again, or what you change.', yes: 'Yes', no: 'No', fullT: 'Full review · {x} of 4',
       wkT: 'Your week', stT: 'What works for you', stSub: 'Your last 4 weeks · {n} trades', strong: 'Your strength', leak: 'Your leak', rule: 'Your rule', ruleW: 'Your rule for next week',
       sPlan: 'In your plan: {a} % winning trades over {n} (off plan: {b} % over {m}).', sSetup: 'Your best setup: “{s}”, {a} % winning trades over {n}.',
       sSlot: 'Your best time: {s}, {a} % winning trades over {n}.', sClean: '{k} of {n} sessions without a mistake.',
@@ -84,6 +86,8 @@
       first: 'After your first trade, I tell you what was right and the one thing to improve.',
     },
     fr: {
+      askT: 'Réponds au coach', askN: '{k} sur {n}', aPlan: 'Ce trade était-il dans ton plan ?', aStop: 'As-tu respecté ton stop ?', aSize: 'As-tu respecté ta taille max ?',
+      aWhy: 'Qu’est-ce qui t’a poussé à entrer ?', aEmo: 'Ton émotion avant d’entrer ?', aLesson: 'Ta leçon, en une phrase', aLessonPh: 'Ce que tu refais, ou ce que tu changes.', yes: 'Oui', no: 'Non', fullT: 'Revue complète · {x} sur 4',
       wkT: 'Ta semaine', stT: 'Ce qui fonctionne pour toi', stSub: 'Tes 4 dernières semaines · {n} trades', strong: 'Ta force', leak: 'Ta fuite', rule: 'Ta règle', ruleW: 'Ta règle pour la semaine prochaine',
       sPlan: 'Dans ton plan : {a} % de trades gagnants sur {n} (hors plan : {b} % sur {m}).', sSetup: 'Ton meilleur setup : « {s} », {a} % de trades gagnants sur {n}.',
       sSlot: 'Ton meilleur moment : {s}, {a} % de trades gagnants sur {n}.', sClean: '{k} séances sur {n} sans erreur.',
@@ -152,6 +156,8 @@
       first: 'Après ton premier trade, je te dis ce qui était bien et la seule chose à améliorer.',
     },
     es: {
+      askT: 'Responde a tu coach', askN: '{k} de {n}', aPlan: '¿Esta operación estaba en tu plan?', aStop: '¿Respetaste tu stop?', aSize: '¿Respetaste tu tamaño máximo?',
+      aWhy: '¿Qué te empujó a entrar?', aEmo: '¿Tu emoción antes de entrar?', aLesson: 'Tu lección, en una frase', aLessonPh: 'Lo que repites, o lo que cambias.', yes: 'Sí', no: 'No', fullT: 'Revisión completa · {x} de 4',
       wkT: 'Tu semana', stT: 'Lo que funciona para ti', stSub: 'Tus últimas 4 semanas · {n} operaciones', strong: 'Tu fortaleza', leak: 'Tu fuga', rule: 'Tu regla', ruleW: 'Tu regla para la próxima semana',
       sPlan: 'Dentro de tu plan: {a} % de operaciones ganadoras en {n} (fuera del plan: {b} % en {m}).', sSetup: 'Tu mejor setup: « {s} », {a} % de operaciones ganadoras en {n}.',
       sSlot: 'Tu mejor momento: {s}, {a} % de operaciones ganadoras en {n}.', sClean: '{k} de {n} sesiones sin error.',
@@ -606,16 +612,68 @@
     const tmp = document.createElement('div'); tmp.innerHTML = html; const fresh = tmp.firstElementChild; fresh._h = html;
     if (el) el.replaceWith(fresh); else { const rt = host.querySelector(':scope > .nav-rt'); if (rt) rt.after(fresh); else host.prepend(fresh); }
   }
-  /* the trade's page: the coach right under its result */
-  function paintTrade() {
+  /* the trade's page: the coach right under its result (sample trades: the questions only, not the coach's verdict) */
+  const tradeCard = (t) => (!t || t.demo ? '' : card(T.thisT, noteHtml(tradeNote(t)) + aiMore('ai-feedback', `data-id="${esc2(t.id)}"`), 'co-trade'));
+  function paintTrade() {   // (fallback: the page draws these blocks itself, app.js vTrade)
     const m = /^#trade\/([^/?]+)/.exec(location.hash || ''); if (!m) return;
     const t = typeof getDoc === 'function' && getDoc('trades', decodeURIComponent(m[1])); const head = document.querySelector('#main .th-head');
-    if (!t || t.demo || !head) return;
-    const html = card(T.thisT, noteHtml(tradeNote(t)) + aiMore('ai-feedback', `data-id="${esc2(t.id)}"`), 'co-trade'); let el = document.querySelector('#main .co-trade');
-    if (el && el._h === html) return;
-    const tmp = document.createElement('div'); tmp.innerHTML = html; const fresh = tmp.firstElementChild; fresh._h = html;
-    if (el) el.replaceWith(fresh); else head.after(fresh);
+    if (!t || !head) return;
+    if (!document.querySelector('#main .co-trade') && !t.demo) { const tmp = document.createElement('div'); tmp.innerHTML = tradeCard(t); if (tmp.firstElementChild) head.after(tmp.firstElementChild); }
+    if (!document.querySelector('#main .co-ask')) paintAsk(t);
   }
+  /* the trade's page (brief 03 step 5): « Answer your coach », 2 or 3 questions aimed at this trade, in place of « Review x
+   * of 4 »; the full review (checklist, emotions, notes, screenshots) stays one tap away, folded (open or not: kept per trade).
+   * The buttons are the app's own (data-act set / toggle, data-bind): the answers go to the same fields. */
+  const emoT = (k) => { const d = L !== 'en' && window['I18N_' + L.toUpperCase()]; return (d && d[k]) || k; };
+  let fullOpen; try { fullOpen = new Set(JSON.parse(sessionStorage.getItem('sw.coFull') || '[]')); } catch (e) { fullOpen = new Set(); }
+  function askHtml(t) {
+    const c = tradeNote(t), qs = ((S.settings && S.settings.questions) || []).filter((q) => q.active), has = (id) => qs.some((q) => q.id === id);
+    const d = t.discipline || {}, emo = (t.emo && t.emo.before) || [], rv = t.review || {}, id = esc2(t.id), items = [];
+    const yn = (k, label) => { items.push({ ok: !!d[k], h: `<div class="co-q"><span>${esc2(label)}</span><div class="seg yn">${[['y', T.yes], ['n', T.no]].map(([v, l]) => `<button class="${v} ${d[k] === v ? 'on' : ''}" data-act="set" data-col="trades" data-id="${id}" data-path="discipline.${k}" data-v="${v}">${l}</button>`).join('')}</div></div>` }); };
+    if (has('plan')) yn('plan', T.aPlan);
+    const code = c.fix && c.fix[2];
+    if ((code === 'no_stop' || code === 'risklimit') && has('stop')) yn('stop', T.aStop);
+    else if ((code === 'oversized' || code === 'size_up') && has('size')) yn('size', T.aSize);
+    else {
+      const set = code ? ['Frustrated', 'Trying to recover a loss', 'Impulsive', 'FOMO', 'Calm'] : ['Calm', 'Confident', 'FOMO', 'Frustrated', 'Hesitant'];
+      items.push({ ok: emo.length > 0, h: `<div class="co-q"><span>${esc2(code ? T.aWhy : T.aEmo)}</span><div class="chips">${set.map((k) => `<button class="chip ${emo.includes(k) ? 'on' : ''}" data-act="toggle" data-col="trades" data-id="${id}" data-path="emo.before" data-v="${esc2(k)}">${esc2(emoT(k))}</button>`).join('')}</div></div>` });
+    }
+    items.push({ ok: !!String(rv.lesson || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(T.aLesson)}</span><textarea rows="2" data-bind="trades|${id}|review.lesson" placeholder="${esc2(c.fix ? c.fix[1] : T.aLessonPh)}">${esc2(rv.lesson || '')}</textarea></label>` });
+    return `<section class="surface co co-ask" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.askT}</b><small>${fill(T.askN, { k: items.filter((x) => x.ok).length, n: items.length })}</small></div>${items.map((x) => x.h).join('')}</section>`;
+  }
+  const fullLabel = (x) => fill(T.fullT, { x });
+  // (the full review's open state: kept per trade while the tab lives)
+  document.addEventListener('toggle', (e) => {
+    const d = e.target; if (!d.matches || !d.matches('details.co-full') || !d.dataset.id) return;
+    d.open ? fullOpen.add(d.dataset.id) : fullOpen.delete(d.dataset.id);
+    try { sessionStorage.setItem('sw.coFull', JSON.stringify([...fullOpen].slice(-50))); } catch (x) { /* private mode */ }
+  }, true);
+  /* (fallback, a trade page drawn before this module loaded: the same blocks put in place afterwards) */
+  function paintAsk(t) {
+    const main = document.getElementById('main'), prog = main && main.querySelector('.rprog'), tm = main && main.querySelector('.tr-main'); if (!prog || !tm) return;
+    const steps = [...tm.querySelectorAll(':scope > .rstep')];
+    let full = tm.querySelector(':scope > details.co-full');
+    if (!full && steps.length) {
+      full = document.createElement('details'); full.className = 'co-full'; full.dataset.id = t.id; full.open = fullOpen.has(t.id);
+      full.innerHTML = '<summary data-noi18n></summary>'; steps[0].before(full); steps.forEach((x) => full.append(x));
+    }
+    if (full) { const s = full.querySelector(':scope > summary'), x = fill(T.fullT, { x: prog.querySelectorAll('.rprog-steps a.ok').length }); if (s.textContent !== x) s.textContent = x; }
+    prog.hidden = true;
+    const html = askHtml(t); let el = main.querySelector('.co-ask');
+    if (el && el._h === html) return;
+    if (el && el.contains(document.activeElement) && document.activeElement.tagName === 'TEXTAREA') return;   // typing his lesson: never redrawn under the fingers
+    const tmp = document.createElement('div'); tmp.innerHTML = html; const fresh = tmp.firstElementChild; fresh._h = html;
+    if (el) el.replaceWith(fresh); else prog.after(fresh);
+  }
+  // the « Review » tab of the trade's page goes to the coach's questions (the full review is folded under them)
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('.nav-tnav [data-tn="2"]'), ask = document.querySelector('#main .co-ask'); if (!b || !ask) return;
+    e.stopPropagation();
+    b.parentElement.querySelectorAll('button').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
+    const bar = b.parentElement, y = ask.getBoundingClientRect().top + scrollY - (bar.offsetHeight + (window.SW_MQ && window.SW_MQ.matches ? 70 : 20));
+    scrollTo({ top: Math.max(0, y), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }, true);
+
   /* the plan sheet: one sentence, live, above the error line and the button */
   function paintPlan() {
     const sh = document.querySelector('#gSheet.g-plan, #gSheet .g-plan') && document.getElementById('gSheet'); if (!sh || !sh.querySelector('[data-g="save-plan"]')) return;
@@ -693,5 +751,6 @@
   const appRender = window.render;
   window.render = function () { const out = appRender.apply(this, arguments); paint(); return out; };
   new window.SweepMO(paint).observe(document.body, { childList: true, subtree: true });
-  window.SweepCoach = { trade: tradeNote, session, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress };
+  window.SweepCoach = { trade: tradeNote, session, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
+    tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();
