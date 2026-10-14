@@ -73,9 +73,13 @@ X = {
          'zmoney': 'Mi dinero (2 payouts, 1 gasto): guardado, vuelve con Pro', 'choose': 'Elige las 2 cuentas que siguen activas', 'go': 'Volver a Pro', 'stay': 'Quedarme en Free'},
 }
 EN_ONLY = ['What stays', 'Paused, kept', 'Get everything back', 'Stay on Free', 'Go back to', 'has ended', 'active accounts']
-SEED = """(old) => {
+SEED = """async (old) => {
   put('firms', { id: 'bf', name: 'Topstep' });
-  [['ba1', 'Topstep 50K'], ['ba2', 'Apex 100K'], ['ba3', 'Tradeify 50K'], ['ba4', 'Lucid 25K']].forEach(([id, name], i) => put('accounts', { id, firm_id: 'bf', name, starting_balance_c: 5000000, status: 'active', created_on: '2026-09-0' + (i + 1) }));
+  // one by one, a second apart: the server orders accounts by when it saved them (« the 2 oldest stay active »)
+  for (const [i, [id, name]] of [['ba1', 'Topstep 50K'], ['ba2', 'Apex 100K'], ['ba3', 'Tradeify 50K'], ['ba4', 'Lucid 25K']].entries()) {
+    put('accounts', { id, firm_id: 'bf', name, starting_balance_c: 5000000, status: 'active', created_on: '2026-09-0' + (i + 1) });
+    await new Promise((r) => setTimeout(r, 1100));
+  }
   put('payouts', { id: 'bp1', account_id: 'ba1', firm_id: 'bf', amount_c: 150000, net_c: 150000, status: 'paid', request_date: old, payment_date: old });
   put('payouts', { id: 'bp2', account_id: 'ba2', firm_id: 'bf', amount_c: 90000, net_c: 90000, status: 'paid', request_date: old, payment_date: old });
   put('expenses', { id: 'be1', account_id: 'ba3', firm_id: 'bf', category: 'evaluation', amount_c: 15000, date: old });
