@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-13c",
+ "version": "2026-10-14a",
  "checked_at": "2026-10-07T00:00:00Z",
  "origin": "seed (checked 2026-10-07 on the pages listed in each program's \"verified\"; the weekly check keeps it up to date)",
  "firms": [
@@ -543,7 +543,8 @@
            "min": 125,
            "max_pct": 50,
            "max": 3000,
-           "max_dll": 6000
+           "max_dll": 6000,
+           "split_pct": 90
           }
          }
         }
@@ -612,7 +613,8 @@
            "min": 125,
            "max_pct": 50,
            "max": 4000,
-           "max_dll": 8000
+           "max_dll": 8000,
+           "split_pct": 90
           }
          }
         }
@@ -681,7 +683,8 @@
            "min": 125,
            "max_pct": 50,
            "max": 6000,
-           "max_dll": 12000
+           "max_dll": 12000,
+           "split_pct": 90
           }
          }
         }

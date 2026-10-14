@@ -124,8 +124,51 @@ final class GameV2
     }
 
     /**
-     * « Prêt pour le payout » : for each prop account with a target or payout minimum, the weakest of
-     * profit progress, trading days and consistency. Returned as a percentage only.
+     * One funded account's next payout, with the same rules as the app's payout counter (src/nav.js SweepPayout.status, brief 02
+     * part 3): winning and traded days since the last request, profit since the last payout, consistency, the balance to keep,
+     * the amount that can be asked for (cap, ladder step), the firm's number of payouts. The app also knows when an account is
+     * breached; here a failed or archived account is skipped. Returns [ready, 0-100 (100 only when ready)] or null without payout rules.
+     */
+    public static function payoutStatus(array $a, array $trades, array $pays): ?array
+    {
+        $r = (array) ($a['rules'] ?? []);
+        $has = false; foreach (['payout_win_days', 'payout_trade_days', 'payout_min_bal_c', 'payout_min_c', 'payout_max_c', 'payout_cycle_pos', 'payout_first_min_c'] as $k) if (!empty($r[$k])) $has = true;
+        if (!$has) return null;
+        $id = (string) ($a['id'] ?? ''); $start = (int) ($a['starting_balance_c'] ?? 0);
+        // requested, approved or paid: each one restarts the count and is one step of the ladder (a planned one is not asked yet)
+        $mine = array_values(array_filter($pays, fn($p) => ($p['account_id'] ?? '') === $id && !in_array($p['status'] ?? '', ['rejected', 'planned'], true)));
+        $last = '';
+        foreach ($mine as $p) { $d = (string) ((($p['request_date'] ?? '') ?: (($p['approval_date'] ?? '') ?: ($p['payment_date'] ?? ''))) ?: substr((string) ($p['created_at'] ?? ''), 0, 10)); if ($d > $last) $last = $d; }
+        $days = []; $net = 0;
+        foreach ($trades as $t) { if (($t['account_id'] ?? '') !== $id) continue; $n = GameEngine::net($t); $net += $n; $d = (string) ($t['date'] ?? ''); if ($last === '' || $d > $last) $days[$d] = ($days[$d] ?? 0) + $n; }
+        $paid = 0; foreach ($pays as $p) if (($p['account_id'] ?? '') === $id && ($p['status'] ?? '') === 'paid') $paid += (int) ($p['amount_c'] ?? 0);
+        $adj = 0; foreach ((array) ($a['adjustments'] ?? []) as $x) $adj += (int) ($x['amount_c'] ?? 0);
+        $bal = $start + $net - $paid + $adj; $cycle = array_sum($days);
+        $c = [];   // [ok, frac]
+        $clamp = fn($v) => max(0, min(1, $v));
+        if (!empty($r['payout_win_days'])) { $m = (int) ($r['payout_win_min_c'] ?? 0); $n = count(array_filter($days, fn($v) => $m ? $v >= $m : $v > 0)); $c[] = [$n >= (int) $r['payout_win_days'], min(1, $n / (int) $r['payout_win_days'])]; }
+        if (!empty($r['payout_trade_days'])) { $n = count($days); $c[] = [$n >= (int) $r['payout_trade_days'], min(1, $n / (int) $r['payout_trade_days'])]; }
+        if (!empty($r['payout_cycle_pos']) && $last !== '') $c[] = [$cycle > 0, $cycle > 0 ? 1 : 0];
+        if (!empty($r['payout_first_min_c']) && $last === '') $c[] = [$cycle >= (int) $r['payout_first_min_c'], $clamp($cycle / (int) $r['payout_first_min_c'])];
+        if (!empty($r['payout_cycle_min_c']) && $last !== '') $c[] = [$cycle >= (int) $r['payout_cycle_min_c'], $clamp($cycle / (int) $r['payout_cycle_min_c'])];
+        if (!empty($r['consistency_pct']) && empty($r['target_c'])) { $pos = array_filter($days, fn($v) => $v > 0); $sum = array_sum($pos); $okc = $sum > 0 && max($pos) / $sum * 100 <= (float) $r['consistency_pct']; $c[] = [$okc, $okc ? 1 : 0]; }
+        $min = (int) ($r['payout_min_c'] ?? 0); $mb = (int) ($r['payout_min_bal_c'] ?? 0);
+        if ($mb) $c[] = [$bal >= $mb + $min, $clamp(($bal - $start) / max(1, $mb + $min - $start))];
+        $avail = $mb ? $bal - $mb : $bal - $start;
+        if (!empty($r['payout_max_pct'])) $avail = min($avail, (int) floor(($bal - $start) * (float) $r['payout_max_pct'] / 100));
+        $lad = is_array($r['payout_ladder_c'] ?? null) && $r['payout_ladder_c'] ? array_values($r['payout_ladder_c']) : null;
+        $cap = $lad ? $lad[min(count($mine), count($lad) - 1)] : ($r['payout_max_c'] ?? null);
+        if ($cap) $avail = min($avail, (int) $cap);
+        $avail = max(0, $avail);
+        $c[] = [$avail >= max(1, $min), $min ? $clamp($avail / $min) : ($avail > 0 ? 1 : 0)];
+        if (!empty($r['payout_max_n'])) { $okn = count($mine) < (int) $r['payout_max_n']; $c[] = [$okn, $okn ? 1 : 0]; }
+        $ready = !in_array(false, array_column($c, 0), true);
+        return [$ready, $ready ? 100 : min(99, (int) round(min(array_column($c, 1)) * 100))];
+    }
+
+    /**
+     * « Prêt pour le payout » : funded accounts with payout rules → payoutStatus (the app's rules); evaluations with a target →
+     * the weakest of profit progress, trading days and consistency. Returned as a percentage only.
      * @return array{0: bool, 1: int} [configured, best readiness 0-100]
      */
     public static function payoutReadiness(string $uid): array
@@ -134,26 +177,11 @@ final class GameV2
         $trades = GameEngine::docs($uid, 'trades');
         $paid = GameEngine::docs($uid, 'payouts');
         foreach (GameEngine::docs($uid, 'accounts') as $a) {
-            if (($a['status'] ?? '') === 'archived') continue;
+            if (($a['status'] ?? '') === 'archived' || ($a['result'] ?? '') === 'failed' || !empty($a['demo'])) continue;   // (« Mark as failed »: result failed)
             $r = (array) ($a['rules'] ?? []);
-            // the firm's payout conditions (winning days, balance to keep, minimum request) when they are set
-            if (!empty($r['payout_win_days']) || !empty($r['payout_min_bal_c'])) {
-                $cfg = true;
-                $last = '';
-                foreach ($paid as $x) if (($x['account_id'] ?? '') === $a['id'] && ($x['status'] ?? '') !== 'rejected') { $d = (string) ($x['request_date'] ?? $x['approval_date'] ?? $x['payment_date'] ?? ''); if ($d > $last) $last = $d; }
-                $byDay = []; $all = 0;
-                foreach ($trades as $t) if (($t['account_id'] ?? '') === $a['id']) { $n = GameEngine::net($t); $all += $n; $d = (string) ($t['date'] ?? ''); if (!$last || $d > $last) $byDay[$d] = ($byDay[$d] ?? 0) + $n; }
-                foreach ($paid as $x) if (($x['account_id'] ?? '') === $a['id'] && ($x['status'] ?? '') === 'paid') $all -= (int) ($x['amount_c'] ?? 0);
-                foreach ((array) ($a['adjustments'] ?? []) as $adj) $all += (int) ($adj['amount_c'] ?? 0);
-                $bal = (int) ($a['starting_balance_c'] ?? 0) + $all;
-                $parts = [];
-                if (!empty($r['payout_win_days'])) { $m = (int) ($r['payout_win_min_c'] ?? 0); $n = count(array_filter($byDay, fn($v) => $m ? $v >= $m : $v > 0)); $parts[] = min(1, $n / (int) $r['payout_win_days']); }
-                if (!empty($r['payout_min_bal_c'])) { $need = (int) $r['payout_min_bal_c'] + (int) ($r['payout_min_c'] ?? 0) - (int) ($a['starting_balance_c'] ?? 0); $parts[] = $need > 0 ? max(0, min(1, ($bal - (int) ($a['starting_balance_c'] ?? 0)) / $need)) : 1; }
-                if (!empty($r['consistency_pct']) && empty($r['target_c'])) { $pos = array_filter($byDay, fn($v) => $v > 0); $sum = array_sum($pos); $parts[] = $sum > 0 && max($pos) / $sum * 100 <= (int) $r['consistency_pct'] ? 1 : 0; }
-                $best = max($best, (int) floor(min($parts ?: [0]) * 100));
-                continue;
-            }
-            $goal = (int) ($r['payout_min_c'] ?? 0) ?: (int) ($r['target_c'] ?? 0);
+            $s = self::payoutStatus($a, $trades, $paid);
+            if ($s !== null) { $cfg = true; $best = max($best, $s[1]); continue; }
+            $goal = (int) ($r['target_c'] ?? 0);
             if ($goal <= 0) continue;
             $cfg = true;
             $net = 0; $byDay = [];

@@ -2606,25 +2606,43 @@ window.SweepMO = window.SweepMO || class {
  * rules.payout_min_c / payout_max_c / payout_max_pct / payout_ladder_c   request size
  * rules.payout_cycle_pos / payout_cycle_min_c  profitable since the last payout
  * rules.payout_first_min_c                  profit since the start before the first payout (Alpha Direct: withdrawal target)
- * rules.consistency_pct                      best day ≤ X % of the cycle's profit */
+ * rules.consistency_pct                      best day ≤ X % of the cycle's profit
+ * rules.payout_max_n                         the firm's number of payouts on the account (Apex 6) */
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { t: 'Payout', rules: 'Payout rules', ready: 'Ready for a payout', notyet: 'Not yet', avail: 'You can request up to {v}', since: 'Counted since your last request ({d}).', first: 'Counted since the start of the account.', win: 'Winning days of {m}+', winAny: 'Profitable days', tdays: 'Traded days', cons: 'Best day ≤ {p} % of the profit', pos: 'Profitable since the last payout', cmin: 'Profit since the last payout', fmin: 'Profit before the first payout', bal: 'Balance to keep', amt: 'Amount available (min {m})', none: 'Add your firm’s payout rules to see when you can request one.', f_days: 'Winning days required', f_wmin: 'Minimum profit per day ($)', f_min: 'Minimum payout ($)', f_max: 'Maximum per payout ($)', f_pct: 'Max % of the profit', f_bal: 'Balance to keep ($)', hint: 'Filled in by the preset of your firm when there is one. Check them on your firm’s site.' },
-    fr: { t: 'Payout', rules: 'Règles de payout', ready: 'Prêt pour un payout', notyet: 'Pas encore', avail: 'Tu peux demander jusqu’à {v}', since: 'Compté depuis ta dernière demande ({d}).', first: 'Compté depuis le début du compte.', win: 'Jours gagnants de {m} et +', winAny: 'Jours profitables', tdays: 'Jours tradés', cons: 'Meilleur jour ≤ {p} % du profit', pos: 'Profitable depuis le dernier payout', cmin: 'Profit depuis le dernier payout', fmin: 'Profit avant le premier payout', bal: 'Solde à garder', amt: 'Montant disponible (min {m})', none: 'Ajoute les règles de payout de ta firme pour voir quand tu pourras en demander un.', f_days: 'Jours gagnants requis', f_wmin: 'Profit minimum par jour ($)', f_min: 'Payout minimum ($)', f_max: 'Maximum par payout ($)', f_pct: 'Max % du profit', f_bal: 'Solde à garder ($)', hint: 'Remplies par le préréglage de ta firme quand il y en a un. Vérifie-les sur le site de ta firme.' },
-    es: { t: 'Payout', rules: 'Reglas de payout', ready: 'Listo para un payout', notyet: 'Aún no', avail: 'Puedes pedir hasta {v}', since: 'Contado desde tu última solicitud ({d}).', first: 'Contado desde el inicio de la cuenta.', win: 'Días ganadores de {m} o más', winAny: 'Días rentables', tdays: 'Días operados', cons: 'Mejor día ≤ {p} % del beneficio', pos: 'Rentable desde el último payout', cmin: 'Beneficio desde el último payout', fmin: 'Beneficio antes del primer payout', bal: 'Saldo a mantener', amt: 'Importe disponible (mín. {m})', none: 'Añade las reglas de payout de tu firma para ver cuándo puedes pedir uno.', f_days: 'Días ganadores requeridos', f_wmin: 'Beneficio mínimo por día ($)', f_min: 'Payout mínimo ($)', f_max: 'Máximo por payout ($)', f_pct: 'Máx. % del beneficio', f_bal: 'Saldo a mantener ($)', hint: 'Rellenadas por el preajuste de tu firma cuando existe. Compruébalas en el sitio de tu firma.' } };
+    en: { t: 'Payout', rules: 'Payout rules', ready: 'Ready for a payout', notyet: 'Not yet', avail: 'You can request up to {v}', since: 'Counted since your last request ({d}).', first: 'Counted since the start of the account.', win: 'Winning days of {m}+', winAny: 'Profitable days', tdays: 'Traded days', cons: 'Best day ≤ {p} of the profit', pos: 'Profitable since the last payout', cmin: 'Profit since the last payout', fmin: 'Profit before the first payout', bal: 'Balance to keep', amt: 'Amount available (min {m})', maxn: 'Payouts made', req: 'Record my request',
+      n_win: ['1 more winning day of {m}+', '{k} more winning days of {m}+'], n_any: ['1 more profitable day', '{k} more profitable days'], n_td: ['1 more traded day', '{k} more traded days'],
+      n_pos: '{v} more profit to be positive since the last payout', n_fmin: '{v} more profit before the first payout', n_cmin: '{v} more profit since the last payout',
+      n_cons: ['Bring your best day under {p}: about {v} more profit, on at least 1 more day', 'Bring your best day under {p}: about {v} more profit, spread over at least {k} days'],
+      n_bal: '{v} more above the balance to keep', n_amt: '{v} more profit to request the minimum of {m}', n_maxn: 'You made the {n} payouts this account allows', n_brk: 'This account went past its max loss: no payout', none: 'Add your firm’s payout rules to see when you can request one.', f_days: 'Winning days required', f_wmin: 'Minimum profit per day ($)', f_min: 'Minimum payout ($)', f_max: 'Maximum per payout ($)', f_pct: 'Max % of the profit', f_bal: 'Balance to keep ($)', hint: 'Filled in by the preset of your firm when there is one. Check them on your firm’s site.' },
+    fr: { t: 'Payout', rules: 'Règles de payout', ready: 'Prêt pour un payout', notyet: 'Pas encore', avail: 'Tu peux demander jusqu’à {v}', since: 'Compté depuis ta dernière demande ({d}).', first: 'Compté depuis le début du compte.', win: 'Jours gagnants de {m} et +', winAny: 'Jours profitables', tdays: 'Jours tradés', cons: 'Meilleur jour ≤ {p} du profit', pos: 'Profitable depuis le dernier payout', cmin: 'Profit depuis le dernier payout', fmin: 'Profit avant le premier payout', bal: 'Solde à garder', amt: 'Montant disponible (min {m})', maxn: 'Payouts faits', req: 'Enregistrer ma demande',
+      n_win: ['Encore 1 jour gagnant de {m} et +', 'Encore {k} jours gagnants de {m} et +'], n_any: ['Encore 1 jour profitable', 'Encore {k} jours profitables'], n_td: ['Encore 1 jour tradé', 'Encore {k} jours tradés'],
+      n_pos: 'Encore {v} de profit pour repasser en positif depuis le dernier payout', n_fmin: 'Encore {v} de profit avant le premier payout', n_cmin: 'Encore {v} de profit depuis le dernier payout',
+      n_cons: ['Baisse ton meilleur jour sous {p} : environ {v} de profit en plus, sur au moins 1 jour', 'Baisse ton meilleur jour sous {p} : environ {v} de profit en plus, réparti sur au moins {k} jours'],
+      n_bal: 'Encore {v} au-dessus du solde à garder', n_amt: 'Encore {v} de profit pour demander le minimum de {m}', n_maxn: 'Tu as fait les {n} payouts que ce compte permet', n_brk: 'Ce compte a dépassé sa perte max : pas de payout', none: 'Ajoute les règles de payout de ta firme pour voir quand tu pourras en demander un.', f_days: 'Jours gagnants requis', f_wmin: 'Profit minimum par jour ($)', f_min: 'Payout minimum ($)', f_max: 'Maximum par payout ($)', f_pct: 'Max % du profit', f_bal: 'Solde à garder ($)', hint: 'Remplies par le préréglage de ta firme quand il y en a un. Vérifie-les sur le site de ta firme.' },
+    es: { t: 'Payout', rules: 'Reglas de payout', ready: 'Listo para un payout', notyet: 'Aún no', avail: 'Puedes pedir hasta {v}', since: 'Contado desde tu última solicitud ({d}).', first: 'Contado desde el inicio de la cuenta.', win: 'Días ganadores de {m} o más', winAny: 'Días rentables', tdays: 'Días operados', cons: 'Mejor día ≤ {p} del beneficio', pos: 'Rentable desde el último payout', cmin: 'Beneficio desde el último payout', fmin: 'Beneficio antes del primer payout', bal: 'Saldo a mantener', amt: 'Importe disponible (mín. {m})', maxn: 'Payouts hechos', req: 'Registrar mi solicitud',
+      n_win: ['Falta 1 día ganador de {m} o más', 'Faltan {k} días ganadores de {m} o más'], n_any: ['Falta 1 día rentable', 'Faltan {k} días rentables'], n_td: ['Falta 1 día operado', 'Faltan {k} días operados'],
+      n_pos: 'Faltan {v} de beneficio para volver a positivo desde el último payout', n_fmin: 'Faltan {v} de beneficio antes del primer payout', n_cmin: 'Faltan {v} de beneficio desde el último payout',
+      n_cons: ['Baja tu mejor día bajo el {p}: unos {v} más de beneficio, en al menos 1 día más', 'Baja tu mejor día bajo el {p}: unos {v} más de beneficio, repartidos en al menos {k} días'],
+      n_bal: 'Faltan {v} por encima del saldo a mantener', n_amt: 'Faltan {v} de beneficio para pedir el mínimo de {m}', n_maxn: 'Hiciste los {n} payouts que permite esta cuenta', n_brk: 'Esta cuenta superó su pérdida máxima: sin payout', none: 'Añade las reglas de payout de tu firma para ver cuándo puedes pedir uno.', f_days: 'Días ganadores requeridos', f_wmin: 'Beneficio mínimo por día ($)', f_min: 'Payout mínimo ($)', f_max: 'Máximo por payout ($)', f_pct: 'Máx. % del beneficio', f_bal: 'Saldo a mantener ($)', hint: 'Rellenadas por el preajuste de tu firma cuando existe. Compruébalas en el sitio de tu firma.' } };
   const t = (k) => (T[L] || T.en)[k];
   const $u = (c) => (typeof moneyU === 'function' ? moneyU(Math.round(c)) : '$' + (Math.round(c) / 100).toFixed(2));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const net1 = (x) => (typeof tNet === 'function' ? tNet(x) : (x.pnl_c || 0) - (x.fees_c || 0));
+  const pc = (n) => n + (L === 'en' ? '%' : '\u202f%');   // a percent never leaves its number (« 50% », « 50 % » with a narrow space)
+  const up = (c) => $u(Math.ceil(Math.max(0, c) / 100) * 100);   // what is missing, in whole dollars, rounded up
+  const fill = (k, n, o) => { const v = t(k), s = Array.isArray(v) ? v[(L === 'fr' ? n > 1 : n !== 1) ? 1 : 0] : v; return s.replace(/\{(\w+)\}/g, (x, y) => (o[y] != null ? o[y] : x)); };
 
   function status(acc) {
     if (!acc) return null;
     const r = acc.rules || {};
     const has = r.payout_win_days || r.payout_trade_days || r.payout_min_bal_c || r.payout_min_c || r.payout_max_c || r.payout_cycle_pos || r.payout_first_min_c;
     if (!has) return null;
-    const pays = (S.payouts || []).filter((p) => p.account_id === acc.id && p.status !== 'rejected');
+    // the payouts that count: requested, approved or paid (a planned one is not asked yet, a rejected one never happened);
+    // each one restarts the cycle and is one step of the firm's ladder (brief 02 part 3)
+    const pays = (S.payouts || []).filter((p) => p.account_id === acc.id && p.status !== 'rejected' && p.status !== 'planned');
     const dateOf = (p) => p.request_date || p.approval_date || p.payment_date || (p.created_at || '').slice(0, 10);
     const last = pays.map(dateOf).filter(Boolean).sort().pop() || null;
     const tr = (S.trades || []).filter((x) => x.account_id === acc.id && (!last || x.date > last));
@@ -2647,23 +2665,55 @@ window.SweepMO = window.SweepMO || class {
     if (r.consistency_pct && !r.target_c) {
       const pos = vals.filter((v) => v > 0), sum = pos.reduce((a, v) => a + v, 0), best = pos.length ? Math.max(...pos) : 0;
       const pct = sum > 0 ? (best / sum) * 100 : 0;
-      conds.push({ k: 'cons', label: t('cons').replace('{p}', r.consistency_pct), ok: sum > 0 && pct <= r.consistency_pct, have: sum > 0 ? Math.round(pct) + ' %' : '—', frac: sum > 0 && pct <= r.consistency_pct ? 1 : 0 });
+      conds.push({ k: 'cons', label: t('cons').replace('{p}', pc(r.consistency_pct)), ok: sum > 0 && pct <= r.consistency_pct, have: sum > 0 ? pc(Math.round(pct)) : '—', frac: sum > 0 && pct <= r.consistency_pct ? 1 : 0, best, sum });
     }
     const minReq = r.payout_min_c || 0;
     if (r.payout_min_bal_c) conds.push({ k: 'bal', label: t('bal'), ok: bal >= r.payout_min_bal_c + minReq, have: `${$u(bal)} / ${$u(r.payout_min_bal_c + minReq)}`, frac: Math.max(0, Math.min(1, (bal - start) / Math.max(1, r.payout_min_bal_c + minReq - start))) });
     // what can be asked for
     let avail = r.payout_min_bal_c ? bal - r.payout_min_bal_c : bal - start;
     if (r.payout_max_pct) avail = Math.min(avail, Math.floor((bal - start) * r.payout_max_pct / 100));
-    const nPaid = pays.filter((p) => p.status === 'paid' || p.status === 'approved').length;
-    const cap = Array.isArray(r.payout_ladder_c) && r.payout_ladder_c.length ? r.payout_ladder_c[Math.min(nPaid, r.payout_ladder_c.length - 1)] : r.payout_max_c;
+    const done = pays.length;   // the next payout is n° done + 1 of the ladder (a requested one counts: the firm caps the next request)
+    const cap = Array.isArray(r.payout_ladder_c) && r.payout_ladder_c.length ? r.payout_ladder_c[Math.min(done, r.payout_ladder_c.length - 1)] : r.payout_max_c;
     if (cap) avail = Math.min(avail, cap);
     avail = Math.max(0, avail);
     conds.push({ k: 'amt', label: t('amt').replace('{m}', $u(minReq)), ok: avail >= Math.max(1, minReq), have: $u(avail), frac: minReq ? Math.max(0, Math.min(1, avail / minReq)) : (avail > 0 ? 1 : 0) });
+    // the firm's number of payouts on this account (Apex 6, LucidFlex 5…): none left → no new request
+    if (r.payout_max_n) conds.push({ k: 'maxn', label: t('maxn'), ok: done < r.payout_max_n, have: `${Math.min(done, r.payout_max_n)} / ${r.payout_max_n}`, frac: done < r.payout_max_n ? 1 : 0 });
     const breached = st && st.breached;
     const ready = !breached && conds.every((c) => c.ok);
-    return { ready, conds, avail, last, pct: Math.round(Math.min(...conds.map((c) => c.frac)) * 100) };
+    // not ready: what is missing, exactly, one line per condition (« 2 more winning days of $250+ », « about $600 more profit… »)
+    const todo = [];
+    if (!ready) {
+      const bad = (k) => conds.find((c) => c.k === k && !c.ok), m = r.payout_win_min_c || 0;
+      if (breached) todo.push({ k: 'brk', text: t('n_brk') });
+      if (bad('win')) { const k = r.payout_win_days - vals.filter((v) => (m ? v >= m : v > 0)).length; todo.push({ k: 'win', text: fill(m ? 'n_win' : 'n_any', k, { k, m: $u(m) }) }); }
+      if (bad('tdays')) { const k = r.payout_trade_days - vals.length; todo.push({ k: 'tdays', text: fill('n_td', k, { k }) }); }
+      if (bad('pos')) todo.push({ k: 'pos', text: fill('n_pos', 0, { v: up(1 - cycle) }) });
+      if (bad('fmin')) todo.push({ k: 'fmin', text: fill('n_fmin', 0, { v: up(r.payout_first_min_c - cycle) }) });
+      if (bad('cmin')) todo.push({ k: 'cmin', text: fill('n_cmin', 0, { v: up(r.payout_cycle_min_c - cycle) }) });
+      const cb = bad('cons');
+      if (cb && cb.sum > 0) {   // the best day must weigh ≤ X %: the profit has to grow to best × 100 / X, on days each no bigger than the best one
+        const more = Math.ceil(cb.best * 100 / r.consistency_pct) - cb.sum, k = Math.max(1, Math.ceil(more / cb.best));
+        todo.push({ k: 'cons', text: fill('n_cons', k, { k, p: pc(r.consistency_pct), v: up(more) }) });
+      }
+      const bb = bad('bal'); if (bb) todo.push({ k: 'bal', text: fill('n_bal', 0, { v: up(r.payout_min_bal_c + minReq - bal) }) });
+      if (bad('amt') && minReq) {   // the request's minimum: enough above the safety net, and enough profit when only a part of it can be asked for
+        const x = Math.max(r.payout_min_bal_c ? r.payout_min_bal_c + minReq - bal : minReq - (bal - start), r.payout_max_pct ? Math.ceil(minReq * 100 / r.payout_max_pct) - (bal - start) : 0);
+        if (x > 0 && !(bb && x <= r.payout_min_bal_c + minReq - bal)) todo.push({ k: 'amt', text: fill('n_amt', 0, { v: up(x), m: $u(minReq) }) });
+      }
+      if (bad('maxn')) todo.push({ k: 'maxn', text: fill('n_maxn', 0, { n: r.payout_max_n }) });
+    }
+    return { ready, conds, avail, last, done, max_n: r.payout_max_n || null, todo, pct: ready ? 100 : Math.min(99, Math.round(Math.min(...conds.map((c) => c.frac)) * 100)) };   // (the server: GameV2::payoutStatus)
   }
-  window.SweepPayout = { status };
+  /* « Record my request »: My money's payout form, open, for this account, « requested », with the most that can be asked for
+     (brief 02 part 3; the Today « Ready for payout » pill too) */
+  function request(id) {
+    const a = typeof getDoc === 'function' && getDoc('accounts', id), s = a && status(a);
+    try { sessionStorage.setItem('sw.openPayout', JSON.stringify({ acc: id, gross_c: s && s.ready ? s.avail : 0, status: 'requested' })); } catch (x) { /* private mode */ }
+    location.hash = '#payouts';
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-po-req]'); if (b) { e.preventDefault(); request(b.dataset.poReq); } });
+  window.SweepPayout = { status, request };
 
   /* the account page: conditions one by one, and the rules to edit */
   function card() {
@@ -2673,7 +2723,7 @@ window.SweepMO = window.SweepMO || class {
     const r = a.rules || {}, s = status(a);
     const val = (k) => (r[k] == null ? '' : k.endsWith('_c') ? (r[k] / 100) : r[k]);
     const fld = (k, lab, ph) => `<label class="f"><span>${lab}</span><input inputmode="decimal" data-po="${k}" value="${esc2(val(k))}" placeholder="${ph || ''}"></label>`;
-    const head = s ? `<div class="nav-po-h ${s.ready ? 'ok' : ''}"><b>${s.ready ? '✓ ' + t('ready') : t('notyet')}</b>${s.ready ? `<span>${t('avail').replace('{v}', $u(s.avail))}</span>` : ''}</div>
+    const head = s ? `<div class="nav-po-h ${s.ready ? 'ok' : ''}"><b>${s.ready ? '✓ ' + t('ready') : t('notyet')}</b>${s.ready ? `<span>${t('avail').replace('{v}', $u(s.avail))}</span><button type="button" class="btn primary sm nav-po-req" data-po-req="${esc2(id)}">${t('req')}</button>` : ''}${!s.ready && s.todo.length ? `<ul class="nav-po-todo">${s.todo.map((x) => `<li data-k="${x.k}">${esc2(x.text)}</li>`).join('')}</ul>` : ''}</div>
       <ul class="nav-po-c">${s.conds.map((c) => `<li class="${c.ok ? 'ok' : ''}"><i>${c.ok ? '✓' : ''}</i><span>${esc2(c.label)}</span><b>${esc2(c.have)}</b><s style="--w:${Math.round(c.frac * 100)}%"></s></li>`).join('')}</ul>
       <small class="muted">${s.last ? t('since').replace('{d}', s.last) : t('first')}</small>` : `<p class="muted nav-po-none">${t('none')}</p>`;
     const html = `<h3>${t('t')}</h3>${head}
@@ -4235,14 +4285,7 @@ window.SweepMO = window.SweepMO || class {
     const a = r.closest('.nav-acc'); const id = a && decodeURIComponent((a.getAttribute('href') || '').replace('#account/', '')); if (!id) return;
     if (/Objectifs|Objectives|Objetivos/.test(r.textContent)) return;   // an evaluation: no payout
     e.preventDefault(); e.stopPropagation();
-    location.hash = '#payouts';
-    let n = 0; (function fill() {
-      const f = document.querySelector('form[data-form="payout"]');
-      if (!f) { if (n++ < 30) setTimeout(fill, 100); return; }
-      const sel = f.querySelector('[name="account"]'); if (sel) { sel.value = id; sel.dispatchEvent(new Event('change', { bubbles: true })); }
-      f.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => { const i = f.querySelector('[name="amount"]'); if (i) i.focus(); }, 350);
-      f.classList.add('nav-flash'); setTimeout(() => f.classList.remove('nav-flash'), 1400);
-    })();
+    if (window.SweepPayout && SweepPayout.request) SweepPayout.request(id);
   }, true);
 
   /* 10. trade rows: ⋯ (computer), swipe left (phone) */
@@ -4880,12 +4923,22 @@ document.addEventListener('click', (e) => {
 
 document.addEventListener('click', (e) => { const q = e.target.closest && e.target.closest('.d-quick [data-q="#payouts"]'); if (q) { try { sessionStorage.setItem('sw.openPayout', '1'); } catch (x) { /* private */ } } }, true);
 new window.SweepMO(() => {
-  let want = false; try { want = sessionStorage.getItem('sw.openPayout') === '1'; } catch (x) { /* private */ }
+  let want = null; try { want = sessionStorage.getItem('sw.openPayout'); } catch (x) { /* private */ }   // '1', or a pre-filled request (JSON)
   if (!want || !/^#payouts/.test(location.hash || '')) return;
   const b = document.querySelector('#main .nav-pz-b[data-k="payout"]');
   if (!b) { const tab = document.querySelector('#main [data-mny-view="entries"]:not(.on)'); if (tab) tab.click(); return; }   // « My money » shown on « Analysis »: the add buttons are on « My entries »
   try { sessionStorage.removeItem('sw.openPayout'); } catch (x) { /* private */ }
-  b.click(); setTimeout(() => { const f = document.querySelector('#main form[data-form="payout"]'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
+  b.click(); setTimeout(() => {
+    const f = document.querySelector('#main form[data-form="payout"]'); if (!f) return;
+    let o = null; try { o = want[0] === '{' ? JSON.parse(want) : null; } catch (x) { /* a plain « open » */ }
+    if (o) {   // « Record my request » (the account's payout counter): this account, « requested », the most that can be asked for
+      const sel = f.elements.account; if (sel && o.acc) { sel.value = o.acc; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      const rq = f.querySelector('input[name="status"][value="requested"]'); if (rq && !rq.checked) rq.click();
+      if (o.gross_c > 0) { f.elements.gross.value = String(o.gross_c / 100); f.elements.gross.dispatchEvent(new Event('input', { bubbles: true })); }
+      f.classList.add('nav-flash'); setTimeout(() => f.classList.remove('nav-flash'), 1400);
+    }
+    f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 150);
 }).observe(document.body, { childList: true, subtree: true });
 
 /* Today · « Accounts » card: drag to reorder (computer: drag; phone: press and hold, then slide). Same saved order as the Accounts page. */

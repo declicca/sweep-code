@@ -79,7 +79,7 @@ def main():
         env = dict(ENV, SWEEP_PRESETS_MOCK=dest + '/tests/presets_mock.json', SWEEP_TEST_DB=dest + '/data/journal.db',
                    SWEEP_AI_CONFIG=TOOLS + '/ai-config.local.php', SWEEP_AI_MOCK=dest + '/tests/samples/shot-ai-mock.json',
                    TMPDIR='/tmp/sweep-par-%d' % (i + 1), PHP_CLI_SERVER_WORKERS='4')   # php -S answers one request at a time otherwise
-        os.makedirs(env['TMPDIR'], exist_ok=True); [os.remove(os.path.join(env['TMPDIR'], f)) for f in os.listdir(env['TMPDIR'])]
+        os.makedirs(env['TMPDIR'], exist_ok=True); [shutil.rmtree(q) if os.path.isdir(q) and not os.path.islink(q) else os.remove(q) for q in (os.path.join(env['TMPDIR'], f) for f in os.listdir(env['TMPDIR']))]   # (a test may leave a folder there: e2e_loops)
         free(port)   # a server left over by an earlier run would answer instead (without this run's settings)
         srv = subprocess.Popen(['php', '-S', '127.0.0.1:%d' % port, 'router.php'], cwd=dest, env=env, stdout=subprocess.DEVNULL, stderr=open(env['TMPDIR'] + '/php.log', 'w'), start_new_session=True)
         base = 'http://127.0.0.1:%d' % port

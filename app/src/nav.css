@@ -848,6 +848,9 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 .nav-po-h.ok{background:var(--posbg);box-shadow:inset 0 0 0 1px rgba(var(--pos-rgb),.4)}
 .nav-po-h.ok b{color:var(--pos)}
 .nav-po-h span{font-size:13px;color:var(--text2)}
+.nav-po-h .nav-po-req{margin-left:auto}
+.nav-po-todo{flex:1 1 100%;margin:2px 0 0;padding:0 0 0 18px;font-size:13.5px;line-height:1.45;color:var(--text)}   /* not ready: what is missing (brief 02 part 3) */
+.nav-po-todo li + li{margin-top:3px}
 .nav-po-c{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .nav-po-c li{position:relative;display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:8px;padding-bottom:6px;font-size:13.5px}
 .nav-po-c li i{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line2);font-style:normal;font-size:11px;font-weight:700}

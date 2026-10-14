@@ -137,12 +137,21 @@
     if (status === 'paid' && prev.status !== 'paid') setTimeout(() => openShare('payout', id), 400);
   };
 
-  /* List (also used on each account page) */
+  /* List (also used on each account page): each payout with its place in the firm's ladder on its account (brief 02 part 3) */
+  const PN = { en: ['Payout {n} of {N}', 'Payout {n}'], fr: ['Payout {n} sur {N}', 'Payout {n}'], es: ['Payout {n} de {N}', 'Payout {n}'] };
+  const rq = (p) => String(p.request_date || p.approval_date || p.payment_date || '');   // in the order they were asked for
+  const payoutNo = (p) => {   // requested, approved and paid payouts of the account, oldest first (the same ones the payout counter counts)
+    if (p.status === 'rejected' || p.status === 'planned') return '';
+    const all = (S.payouts || []).filter((x) => x.account_id === p.account_id && x.status !== 'rejected' && x.status !== 'planned').sort((x, y) => rq(x).localeCompare(rq(y)) || String(x.id).localeCompare(String(y.id)));
+    const n = all.findIndex((x) => x.id === p.id) + 1; if (!n) return '';
+    const a = typeof getDoc === 'function' && getDoc('accounts', p.account_id), N = a && a.rules && a.rules.payout_max_n, w = PN[LANG] || PN.en;
+    return (N ? w[0] : w[1]).replace('{n}', n).replace('{N}', N);
+  };
   payoutTable = function (rows) {
     const list = rows.slice().sort((x, y) => pDate(y).localeCompare(pDate(x)));
     return `<ul class="pz-list">${list.map((p) => U.editP === p.id ? `<li class="pz-edit">${payoutForm(p)}</li>` : `
       <li class="pz-row pz-open ${isPaid(p) ? 'is-paid' : ''}" data-act="edit-payout" data-id="${p.id}" role="button" tabindex="0" aria-label="${esc(acctLabel(p.account_id) + ' · ' + moneyU(p.amount_c))}">
-        <div class="pz-main"><b>${esc(acctLabel(p.account_id))}</b><small>${fdate(pDate(p))}${p.notes ? ' · ' + esc(p.notes) : ''}</small></div>
+        <div class="pz-main"><b>${esc(acctLabel(p.account_id))}</b><small>${payoutNo(p) ? `<span class="pz-no" data-noi18n>${payoutNo(p)}</span> · ` : ''}${fdate(pDate(p))}${p.notes ? ' · ' + esc(p.notes) : ''}</small></div>
         <div class="pz-right"><span class="pz-amt-v ${isPaid(p) ? 'pos' : ''}">${moneyU(p.amount_c)}</span>${pill(p.status)}</div>
         <div class="pz-acts2">${isPaid(p) ? shareBtn('payout', p.id, 'Share', 'link sh-link') : `<button class="link pz-paid" data-pz-paid="${p.id}">Mark as paid</button>`}</div>
       </li>`).join('')}</ul>`;

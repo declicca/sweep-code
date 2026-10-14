@@ -58,6 +58,7 @@ ok($ts['rules']['consistency_pct'] === 55, 'Topstep Combine: 55 % consistency ta
 $std = pr_rules_of($cat, 'topstep|combine|50000|funded|')['rules']; $con = pr_rules_of($cat, 'topstep|combine|50000|funded|consistency')['rules'];
 ok($std['payout_win_days'] === 5 && $std['payout_max_c'] === 200000 && !$std['consistency_pct'], 'Topstep funded Standard: 5 winning days of $150, cap $2,000, no consistency');
 ok($con['payout_trade_days'] === 3 && $con['consistency_pct'] === 40 && $con['payout_max_c'] === 300000 && !$con['payout_win_days'], 'Topstep funded Consistency: 3 traded days, 40 %, cap $3,000');
+ok($std['payout_split_pct'] === 90 && $con['payout_split_pct'] === 90, 'Topstep funded: the 90 % split on both paths (the Consistency variant replaces the whole payout object)');
 ok(pr_rules_of($cat, 'topstep|combine|150000|funded|dll+consistency')['rules']['payout_max_c'] === 1200000, 'Topstep Consistency 150K with the daily-limit option: cap doubled to $12,000');
 $leg = pr_rules_of($cat, 'apex|apex-legacy|50000|funded|')['rules'];
 ok($leg['dd_c'] === 250000 && $leg['dd_type'] === 'trade' && $leg['consistency_pct'] === 30 && $leg['payout_trade_days'] === 8 && $leg['payout_win_days'] === 5 && $leg['payout_win_min_c'] === 5000 && $leg['payout_ladder_c'][5] === null, 'Apex « rules from before March 2026 » 50K: $2,500 real-time, 30 %, 8 days incl. 5 of $50, no cap from the 6th payout');
