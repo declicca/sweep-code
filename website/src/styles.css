@@ -1354,6 +1354,7 @@ figcaption, .cap, .shot-note{text-align:center;font-size:12.5px;color:var(--fain
 .calc-act p{margin:4px 0 0;color:var(--muted);font-size:14.5px;max-width:62ch}
 /* ---------- Resources menu in two groups (Tools, Learn) ---------- */
 .ddmenu.two{min-width:0;width:min(600px,calc(100vw - 32px))}
+.ddmenu.two a span{white-space:normal}   /* fixed-width columns: a long description wraps instead of running into the next column */
 .ddcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
 .ddh{display:block;padding:10px 12px 4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
 /* ---------- footer: language and social links share the bottom line ---------- */
