@@ -1334,6 +1334,7 @@ figcaption, .cap, .shot-note{text-align:center;font-size:12.5px;color:var(--fain
 .cmp.sizes td{line-height:1.45}
 .cmp.sizes td b{font-weight:600}
 .cmp.sizes th .fine{font-size:12px}
+.cmp.costs td{white-space:normal}
 /* « Read next »: three cards near the end of a page */
 .related .rgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .rcard{position:relative;display:flex;flex-direction:column;gap:6px;padding:22px 44px 22px 22px;border-radius:var(--r-lg);background:var(--glass);box-shadow:var(--lift);text-decoration:none;color:var(--text)}

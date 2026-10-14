@@ -35,7 +35,7 @@ def cards3(t, items):
 def sec_log(lang, t):
     items = [("image", L3("Screenshot","Capture","Captura"), L3("One capture, every trade on it.","Une capture, tous ses trades ajoutés.","Una captura, todas sus operaciones.")),
              ("chat", L3("Your words","Tes mots","Tus palabras"), L3("“Long 2 NQ at the open, out at target.”","« Long 2 NQ à l’ouverture, sorti à la cible. »","«Largo 2 NQ en la apertura, salida en el objetivo.»")),
-             ("download", L3("Import","Import","Importar"), L3("Bring in your platform’s export.","L’export de ta plateforme, importé.","Trae la exportación de tu plataforma."))]
+             ("download", L3("Import","Import","Importar"), L3(f'Bring in your platform’s export, or <a href="{href(lang, "ninjatrader.html")}">sync NinjaTrader 8</a>.', f'L’export de ta plateforme, importé, ou <a href="{href(lang, "ninjatrader.html")}">NinjaTrader 8 synchronisé</a>.', f'Trae la exportación de tu plataforma o <a href="{href(lang, "ninjatrader.html")}">sincroniza NinjaTrader 8</a>.'))]
     return (f'<section class="rule" id="logging"><div class="wrap">'
             + head(t, L3("Log","Saisie","Registro"), L3("Log a trade in seconds.","Un trade ajouté en quelques secondes.","Registra una operación en segundos."),
                    L3("No homework. Drop a screenshot, say it in your own words, or import your platform’s export. Sweep fills in the rest.",

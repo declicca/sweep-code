@@ -9,6 +9,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Pricing](https://makeitsweep.com/pricing): Free, Pro and Elite plans
 - [Free trading journal](https://makeitsweep.com/free-trading-journal): what the Free plan includes, forever, and what Pro adds
 - [Prop firm tracker](https://makeitsweep.com/prop-firm-tracker): every evaluation, funded and live account with its firm's rules
+- [NinjaTrader 8 sync](https://makeitsweep.com/ninjatrader): Sweep's free add-on sends every NinjaTrader 8 execution to the journal, read only, on every plan
 - [Payout tracker](https://makeitsweep.com/payout-tracker): payouts from request to paid, expenses and real net (Pro and Elite)
 - [Features](https://makeitsweep.com/features): logging, real P&L, rules, review, analytics, accounts, payouts
 - [How it works](https://makeitsweep.com/how-it-works): the daily loop and discipline
@@ -33,6 +34,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Prop firm payout rules, compared](https://makeitsweep.com/prop-firm-payout-rules): winning days, balance to keep, caps per payout and profit split, firm by firm
 - [Prop firm consistency rules, compared](https://makeitsweep.com/prop-firm-consistency-rules): best-day limits in evaluations and funded accounts, firm by firm, from Sweep's weekly check
 - [Prop firm drawdown rules, compared](https://makeitsweep.com/prop-firm-drawdown-rules): end-of-day, real-time or static drawdown and when trailing stops, firm by firm
+- [Prop firm minimum trading days, compared](https://makeitsweep.com/prop-firm-minimum-days): days to pass the evaluation and winning days before a payout, firm by firm
 
 ## Free resources
 - [Free calculators](https://makeitsweep.com/tools): position size, trailing drawdown, consistency, payout, expectancy, prop firm ROI

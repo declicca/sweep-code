@@ -163,3 +163,66 @@ def page_payout_tracker(lang, t):
                 "Suis tes payouts de prop firm de la demande au paiement, avec évaluations, resets et frais, ton vrai net et quand demander ton prochain payout.",
                 "Sigue tus payouts de prop firm de la solicitud al pago, con evaluaciones, reinicios y cuotas, tu neto real y cuándo pedir tu próximo payout.")),
             hero + b + final_cta(lang, t), _faq_ld(t, faqs))
+
+# ---------------------------------------------------------------- NinjaTrader 8 add-on (facts from app/CONTEXTE-APP.md, sync section)
+NT8_MORE = T("""<h2>Install it once</h2><ol>
+<li><b>In Sweep,</b> open Settings › Data › Connections, then NinjaTrader 8 › Connect. Download the add-on and copy your personal key: it’s shown only once.</li>
+<li><b>In NinjaTrader 8,</b> go to Tools › Import › NinjaScript Add-On and choose the file you downloaded.</li>
+<li><b>Open Control Center › New › Sweep Sync,</b> paste your key and save. The window shows that it’s connected.</li>
+<li><b>Back in Sweep,</b> the accounts the add-on found appear: link each one to a Sweep account, or create it on the spot. Your trades start arriving.</li></ol>
+<h2>What it sends, and what it never touches</h2><p>The add-on reads your executions: the account, the contract, the side, the quantity, the price, the time and the fees. It never places, changes or cancels an order, and it never sends your password or your balance. Sweep keeps only a fingerprint of your key; you can stop the sync or make a new key at any time, and the old one stops working.</p>
+<h2>When NinjaTrader is closed or offline</h2><p>Executions wait on your computer and leave as soon as the connection is back. When NinjaTrader starts, the add-on sends the session’s executions again, and Sweep never counts the same one twice.</p>
+<h2>Your trades from before</h2><p>The add-on sends what you trade from now on. For your history, export it from NinjaTrader’s Trade Performance window and <a href="@import.html#ninjatrader">import the CSV</a>: trades already synced are recognized and never imported twice.</p>""",
+"""<h2>Installe-le une fois</h2><ol>
+<li><b>Dans Sweep,</b> ouvre Réglages › Données › Connexions, puis NinjaTrader 8 › Connecter. Télécharge le module et copie ta clé personnelle : elle n’est montrée qu’une fois.</li>
+<li><b>Dans NinjaTrader 8,</b> va dans Tools › Import › NinjaScript Add-On et choisis le fichier téléchargé.</li>
+<li><b>Ouvre Control Center › New › Sweep Sync,</b> colle ta clé et enregistre. La fenêtre indique que c’est connecté.</li>
+<li><b>De retour dans Sweep,</b> les comptes trouvés par le module s’affichent : relie chacun à un compte Sweep, ou crée-le sur place. Tes trades commencent à arriver.</li></ol>
+<h2>Ce qu’il envoie, et ce qu’il ne touche jamais</h2><p>Le module lit tes exécutions : le compte, le contrat, le sens, la quantité, le prix, l’heure et les frais. Il ne passe, ne modifie et n’annule jamais d’ordre, et il n’envoie jamais ton mot de passe ni ton solde. Sweep ne garde qu’une empreinte de ta clé ; tu peux arrêter la synchro ou créer une nouvelle clé en tout temps, et l’ancienne cesse de fonctionner.</p>
+<h2>Quand NinjaTrader est fermé ou hors ligne</h2><p>Les exécutions attendent sur ton ordinateur et partent dès que la connexion revient. Au démarrage de NinjaTrader, le module renvoie les exécutions de la séance, et Sweep ne compte jamais deux fois la même.</p>
+<h2>Tes trades d’avant</h2><p>Le module envoie ce que tu trades à partir de maintenant. Pour ton historique, exporte-le depuis la fenêtre Trade Performance de NinjaTrader et <a href="@import.html#ninjatrader">importe le CSV</a> : les trades déjà synchronisés sont reconnus et jamais importés en double.</p>""",
+"""<h2>Instálalo una vez</h2><ol>
+<li><b>En Sweep,</b> abre Ajustes › Datos › Conexiones y luego NinjaTrader 8 › Conectar. Descarga el complemento y copia tu clave personal: solo se muestra una vez.</li>
+<li><b>En NinjaTrader 8,</b> ve a Tools › Import › NinjaScript Add-On y elige el archivo descargado.</li>
+<li><b>Abre Control Center › New › Sweep Sync,</b> pega tu clave y guarda. La ventana indica que está conectado.</li>
+<li><b>De vuelta en Sweep,</b> aparecen las cuentas que encontró el complemento: vincula cada una a una cuenta de Sweep o créala ahí mismo. Tus operaciones empiezan a llegar.</li></ol>
+<h2>Qué envía, y qué no toca nunca</h2><p>El complemento lee tus ejecuciones: la cuenta, el contrato, el sentido, la cantidad, el precio, la hora y las comisiones. Nunca envía, modifica ni cancela una orden, y nunca envía tu contraseña ni tu saldo. Sweep solo guarda una huella de tu clave; puedes detener la sincronización o crear una clave nueva cuando quieras, y la anterior deja de funcionar.</p>
+<h2>Cuando NinjaTrader está cerrado o sin conexión</h2><p>Las ejecuciones esperan en tu ordenador y salen en cuanto vuelve la conexión. Al iniciar NinjaTrader, el complemento vuelve a enviar las ejecuciones de la sesión, y Sweep nunca cuenta dos veces la misma.</p>
+<h2>Tus operaciones anteriores</h2><p>El complemento envía lo que operas a partir de ahora. Para tu historial, expórtalo desde la ventana Trade Performance de NinjaTrader e <a href="@import.html#ninjatrader">importa el CSV</a>: las operaciones ya sincronizadas se reconocen y nunca se importan dos veces.</p>""")
+
+def page_ninjatrader(lang, t):
+    hero = page_hero(t, T("Your NinjaTrader 8 trades, in your journal on their own.", "Tes trades NinjaTrader 8, dans ton journal tout seuls.", "Tus operaciones de NinjaTrader 8, en tu diario solas."),
+        T("Sweep’s free add-on sends every execution from NinjaTrader 8 to your journal within seconds. Read only: it never places an order.",
+          "Le module gratuit de Sweep envoie chaque exécution de NinjaTrader 8 à ton journal en quelques secondes. Lecture seule : il ne passe jamais d’ordre.",
+          "El complemento gratuito de Sweep envía cada ejecución de NinjaTrader 8 a tu diario en segundos. Solo lectura: nunca envía una orden."),
+        T("NinjaTrader 8", "NinjaTrader 8", "NinjaTrader 8"),
+        f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_ninjatrader">{t(CREATE)}</a>')
+    items = [T("<b>Every execution, grouped into trades:</b> partial entries and exits, and reversals", "<b>Chaque exécution, regroupée en trades :</b> entrées et sorties partielles, et retournements", "<b>Cada ejecución, agrupada en operaciones:</b> entradas y salidas parciales, y giros"),
+             T("<b>P&L and fees</b> from your commissions and the contract’s point value", "<b>P&L et frais</b> à partir de tes commissions et de la valeur du point du contrat", "<b>P&L y comisiones</b> a partir de tus comisiones y del valor del punto del contrato"),
+             T("<b>Every account found,</b> Apex accounts recognized; simulation accounts left aside until you link them", "<b>Chaque compte trouvé,</b> les comptes Apex reconnus ; les comptes de simulation mis de côté tant que tu ne les relies pas", "<b>Cada cuenta encontrada,</b> las cuentas Apex reconocidas; las de simulación quedan aparte hasta que las vinculas"),
+             T("<b>Copied trades</b> grouped across your accounts", "<b>Trades copiés</b> regroupés entre tes comptes", "<b>Operaciones copiadas</b> agrupadas entre tus cuentas"),
+             T("<b>Your notes, screenshots and review</b> are never overwritten, and a trade you logged by hand is completed, not doubled", "<b>Tes notes, captures et révisions</b> ne sont jamais écrasées, et un trade ajouté à la main est complété, pas doublé", "<b>Tus notas, capturas y revisiones</b> nunca se sobrescriben, y una operación registrada a mano se completa, no se duplica")]
+    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article"><h2>{t(T("What it does", "Ce qu’il fait", "Qué hace"))}</h2>{ul(t, items)}</article></div></section>'
+         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(NT8_MORE))}</article></div></section>')
+    faqs = [(T("Is the NinjaTrader 8 add-on free?", "Le module NinjaTrader 8 est-il gratuit ?", "¿El complemento de NinjaTrader 8 es gratis?"),
+             T("Yes, on every plan, Free included.", "Oui, avec tous les forfaits, Free compris.", "Sí, en todos los planes, Free incluido.")),
+            (T("Does it work with my prop firm account?", "Est-ce que ça marche avec mon compte de prop firm ?", "¿Funciona con mi cuenta de prop firm?"),
+             T("It follows every account connected in your NinjaTrader 8, prop accounts included. You link each one to its Sweep account once, and Sweep checks every trade against that account’s rules.",
+               "Il suit chaque compte connecté dans ton NinjaTrader 8, comptes prop compris. Tu relies chacun à son compte Sweep une fois, et Sweep vérifie chaque trade contre les règles de ce compte.",
+               "Sigue cada cuenta conectada en tu NinjaTrader 8, cuentas prop incluidas. Vinculas cada una a su cuenta de Sweep una vez, y Sweep revisa cada operación con las reglas de esa cuenta.")),
+            (T("Can the add-on place or change orders?", "Le module peut-il passer ou modifier des ordres ?", "¿El complemento puede enviar o modificar órdenes?"),
+             T("No. It only reads your executions and never sends your password or your balance.", "Non. Il lit seulement tes exécutions et n’envoie jamais ton mot de passe ni ton solde.", "No. Solo lee tus ejecuciones y nunca envía tu contraseña ni tu saldo.")),
+            (T("Can I edit a synced trade?", "Puis-je modifier un trade synchronisé ?", "¿Puedo editar una operación sincronizada?"),
+             T("Yes. Notes, review, setup, tags, screenshots and fees are edited as usual, and you can set the stop and the target. Prices and P&L come from NinjaTrader.",
+               "Oui. Notes, révision, setup, étiquettes, captures et frais se modifient comme d’habitude, et tu peux fixer le stop et la cible. Les prix et le P&L viennent de NinjaTrader.",
+               "Sí. Las notas, la revisión, el setup, las etiquetas, las capturas y las comisiones se editan como siempre, y puedes fijar el stop y el objetivo. Los precios y el P&L vienen de NinjaTrader.")),
+            (T("What about other platforms?", "Et les autres plateformes ?", "¿Y las demás plataformas?"),
+             T(f'Sync is for NinjaTrader 8 for now; sync for Rithmic and Tradovate is in development. From any other platform, <a href="{href("en", "import.html")}">import a file or a screenshot</a>.',
+               f'La synchro est pour NinjaTrader 8 pour l’instant ; celle de Rithmic et Tradovate est en développement. Depuis toute autre plateforme, <a href="{href("fr", "import.html")}">importe un fichier ou une capture</a>.',
+               f'La sincronización es para NinjaTrader 8 por ahora; la de Rithmic y Tradovate está en desarrollo. Desde cualquier otra plataforma, <a href="{href("es", "import.html")}">importa un archivo o una captura</a>.'))]
+    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>{"".join(faq_item(t, q, a) for q, a in faqs)}</div></section>'
+    return (t(T("NinjaTrader 8 Trading Journal: Free Auto Sync · Sweep", "Journal de trading NinjaTrader 8 : synchro gratuite · Sweep", "Diario de trading para NinjaTrader 8, gratis · Sweep")),
+            t(T("Sync your NinjaTrader 8 trades to your trading journal with Sweep’s free add-on: every execution in seconds, read only, prop accounts included.",
+                "Synchronise tes trades NinjaTrader 8 avec ton journal grâce au module gratuit de Sweep : chaque exécution en quelques secondes, en lecture seule.",
+                "Sincroniza tus operaciones de NinjaTrader 8 con tu diario gracias al complemento gratuito de Sweep: cada ejecución en segundos, solo lectura.")),
+            hero + b + final_cta(lang, t), _faq_ld(t, faqs))

@@ -140,6 +140,7 @@ def page_home(lang, t):
 <p class="lead rise d2">{t(T("Trades, prop accounts, payouts, expenses and daily habits. Everything you track in five different places, finally together.","Trades, comptes prop, payouts, dépenses et habitudes. Tout ce que tu suis à cinq endroits, enfin réuni.","Operaciones, cuentas prop, payouts, gastos y hábitos. Todo lo que hoy sigues en cinco lugares distintos, por fin junto."))}</p>
 <div class="cta-row rise d3"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(T("Start free","Commencer gratuitement","Empieza gratis"))}</a><button type="button" class="btn btn-line btn-lg" data-tour>{PLAY}{t(TOUR_LABEL)}</button></div>
 <p class="reassure rise d4">{t(T("Free forever · 60 days of Pro included · No card","Gratuit pour toujours · 60 jours de Pro inclus · Sans carte","Gratis para siempre · 60 días de Pro incluidos · Sin tarjeta"))}</p>
+<p class="reassure rise d4"><a href="{href(lang,'ninjatrader.html')}">{t(T("NinjaTrader 8? Your trades arrive on their own.","NinjaTrader 8 ? Tes trades arrivent tout seuls.","¿NinjaTrader 8? Tus operaciones llegan solas."))}</a></p>
 <div class="cohort rise d5" id="cohort" hidden><div class="cbar"><i></i></div><a href="{href(lang,'100')}" class="ctext num" data-tpl="{t(T("{n}/{total} founding traders","{n}/{total} traders fondateurs","{n}/{total} traders fundadores"))}"></a></div>
 </div>
 <div class="stage has-reel">

@@ -284,7 +284,7 @@ META_SEO = {
 
 # breadcrumb: Home › Section › Page (the section only where a hub page lists the page)
 CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html")
-GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "how-to-choose-a-trading-journal.html", "trading-journal-routine.html")
+GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "how-to-choose-a-trading-journal.html", "trading-journal-routine.html")
 def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
@@ -487,6 +487,9 @@ REL_INFO = {
  "prop-firm-tracker.html": (T("Prop firm tracker","Suivi des comptes prop","Seguimiento de cuentas prop"), T("Every account, where it stands.","Chaque compte, là où il en est.","Cada cuenta, cómo va.")),
  "payout-tracker.html": (T("Payout tracker","Suivi des payouts","Seguimiento de payouts"), T("From request to paid, and your real net.","De la demande au paiement, et ton vrai net.","De la solicitud al pago, y tu neto real.")),
  "free-trading-journal.html": (T("Free trading journal","Journal de trading gratuit","Diario de trading gratis"), T("What stays free, forever.","Ce qui reste gratuit, pour toujours.","Lo que sigue siendo gratis, para siempre.")),
+ "ninjatrader.html": (T("NinjaTrader 8 sync","Synchro NinjaTrader 8","Sincronización NinjaTrader 8"), T("Your trades arrive on their own.","Tes trades arrivent tout seuls.","Tus operaciones llegan solas.")),
+ "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
+ "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
  "prop-firm-rule-changes.html": (T("Prop firm rule changes","Changements de règles","Cambios de reglas"), T("Every change, dated, with its source.","Chaque changement, daté, avec sa source.","Cada cambio, fechado, con su fuente.")),
  "prop-traders.html": (T("For prop traders","Pour traders prop","Para traders prop"), T("Every account, payout and rule.","Chaque compte, payout et règle.","Cada cuenta, payout y regla.")),
 }
@@ -515,6 +518,9 @@ RELATED = {
  "prop-firm-payout-rules.html": ["payout-calculator.html", "prop-firm-consistency-rules.html", "payout-tracker.html"],
  "prop-firm-profit-targets.html": ["position-size-calculator.html", "prop-firm-drawdown-rules.html", "prop-firms/index.html"],
  "prop-firm-rule-changes.html": ["prop-firms/index.html", "prop-firm-payout-rules.html", "prop-firm-tracker.html"],
+ "ninjatrader.html": ["import.html", "prop-firm-tracker.html", "features.html"],
+ "prop-firm-minimum-days.html": ["prop-firm-payout-rules.html", "prop-firm-consistency-rules.html", "prop-firms/index.html"],
+ "prop-firm-costs.html": ["prop-firm-roi-calculator.html", "payout-tracker.html", "prop-firm-profit-targets.html"],
 }
 RELATED_CONTRACT = ["position-size-calculator.html", "futures-market-hours.html", "release-dates.html"]
 RELATED_RELEASE = ["economic-calendar.html", "futures-market-hours.html", "futures-contracts.html"]
@@ -539,6 +545,7 @@ def add_related(lang, t, page, body):
 # Contextual links: the first mention of each term in body text links to its glossary entry or resource page
 # (never in a lead paragraph, a heading, bold text, an existing link, a script, or a paragraph marked data-nolinks).
 LINK_TERMS = [
+ ("ninjatrader.html", T(r"NinjaTrader 8", r"NinjaTrader 8", r"NinjaTrader 8")),
  ("glossary.html#trailing-drawdown", T(r"trailing drawdowns?", r"drawdowns? suiveurs?", r"drawdowns? dinámicos?")),
  ("glossary.html#drawdown", T(r"drawdowns?", r"drawdowns?", r"drawdowns?")),
  ("glossary.html#consistency", T(r"consistency rules?", r"règles? de consistance", r"reglas? de consistencia")),

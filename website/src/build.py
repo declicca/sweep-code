@@ -37,12 +37,14 @@ PAGES["free-trading-journal.html"] = pages20.page_free
 PAGES["prop-firm-tracker.html"] = pages20.page_tracker
 PAGES["payout-tracker.html"] = pages20.page_payout_tracker
 PAGES[pages18.RULE_CHANGES] = pages18.page_rule_changes
+PAGES["ninjatrader.html"] = pages20.page_ninjatrader
 import pages19
-PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide, pages19.GUIDE_PAYOUT: pages19.page_payout_guide, pages19.GUIDE_SIZES: pages19.page_sizes_guide})
+PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide, pages19.GUIDE_PAYOUT: pages19.page_payout_guide, pages19.GUIDE_SIZES: pages19.page_sizes_guide, pages19.GUIDE_DAYS: pages19.page_days_guide})
+if pages19.COSTS_LIVE: PAGES[pages19.GUIDE_COSTS] = pages19.page_costs_guide
 for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
-PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9"}
+PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core
@@ -78,7 +80,7 @@ LASTMOD = {pages18.page_of(f): pages18.checked_of(f) for f in pages18.presets.FI
 LASTMOD["prop-firms/index.html"] = LASTMOD[pages18.RULE_CHANGES] = max(LASTMOD.values())
 for _p in LASTMOD: PRIO.setdefault(_p, "0.8")
 for _c in pages17.VS: PRIO.setdefault(_c["slug"], "0.8")
-for _g in (pages19.GUIDE_CONS, pages19.GUIDE_DD, pages19.GUIDE_PAYOUT, pages19.GUIDE_SIZES): LASTMOD[_g] = pages18.presets.CHECKED; PRIO.setdefault(_g, "0.8")
+for _g in pages19.RULE_GUIDES: LASTMOD[_g] = pages18.presets.CHECKED; PRIO.setdefault(_g, "0.8")
 PRIO.setdefault(pages19.HUB, "0.7")
 urls = []
 for p in PAGES:
@@ -179,6 +181,6 @@ for _sub in ("img", "video"):
                 _bytes += os.path.getsize(_p); os.remove(_p); _removed += 1
 print(f"pruned {_removed} unused files ({_bytes//1024//1024} MB)")
 _stale = [pg for pg, d in (list((pages18.page_of(f), pages18.checked_of(f)) for f in pages18.presets.FIRMS)
-                           + [(g, pages18.presets.CHECKED) for g in (pages19.GUIDE_CONS, pages19.GUIDE_DD, pages19.GUIDE_PAYOUT, pages19.GUIDE_SIZES)])
+                           + [(g, pages18.presets.CHECKED) for g in pages19.RULE_GUIDES])
           if (core.OG.get(pg) or {}).get("en", {}).get("date") not in (None, d)]
 if _stale: print("share images show an older verification date, run tools/og_images.py:", ", ".join(_stale))

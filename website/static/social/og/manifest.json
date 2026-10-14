@@ -209,6 +209,20 @@
    "date": "2026-10-13"
   }
  },
+ "prop-firm-minimum-days.html": {
+  "en": {
+   "alt": "Minimum trading days, compared · 6 prop firms · Verified October 13, 2026",
+   "date": "2026-10-13"
+  },
+  "fr": {
+   "alt": "Jours minimum, comparés · 6 prop firms · Vérifiées le 13 octobre 2026",
+   "date": "2026-10-13"
+  },
+  "es": {
+   "alt": "Días mínimos, comparados · 6 prop firms · Revisadas el 13 de octubre de 2026",
+   "date": "2026-10-13"
+  }
+ },
  "position-size-calculator.html": {
   "en": {
    "alt": "Position size calculator · Free calculator for futures and prop traders",

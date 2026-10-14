@@ -1,7 +1,7 @@
 from core import *
 import re
 import presets
-from pages18 import page_of, anchor, usd, pc, kk, day, rep, DDT, colon
+from pages18 import page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of
 from pages17 import _fr_nbsp
 
 # Guides built from the app's prop firm catalogue (presets.py): every number is the app's, never retyped here.
@@ -257,11 +257,16 @@ def page_hub(lang, t):
 # ---------------------------------------------------------------- payout rules
 GUIDE_PAYOUT = "prop-firm-payout-rules.html"
 
-def _payout_conds(po, size, lang, t):
+def _day_conds(po, lang, t):
+    """The payout conditions counted in days: winning days (and their minimum profit), traded days, days between payouts."""
     U = lambda v: usd(v, lang); out = []
     if po.get("win_days"): out.append(t(T(f"{po['win_days']:g} winning days", f"{po['win_days']:g} jours gagnants", f"{po['win_days']:g} días ganadores")) + (t(T(f" of {U(po['win_min'])}+", f" de {U(po['win_min'])} et +", f" de {U(po['win_min'])} o más")) if po.get("win_min") else ""))
     if po.get("trade_days"): out.append(t(T(f"{po['trade_days']:g} traded days", f"{po['trade_days']:g} jours tradés", f"{po['trade_days']:g} días operados")))
     if po.get("cycle_days"): out.append(t(T(f"{po['cycle_days']:g} days between payouts", f"{po['cycle_days']:g} jours entre deux payouts", f"{po['cycle_days']:g} días entre payouts")))
+    return out
+
+def _payout_conds(po, size, lang, t):
+    U = lambda v: usd(v, lang); out = _day_conds(po, lang, t)
     if po.get("first_min") and po.get("cycle_min"): out.append(t(T(f"{U(po['first_min'])} of profit before the 1st, then {U(po['cycle_min'])} before each next one", f"{U(po['first_min'])} de profit avant le 1er, puis {U(po['cycle_min'])} avant chaque suivant", f"{U(po['first_min'])} de beneficio antes del 1.º, luego {U(po['cycle_min'])} antes de cada siguiente")))
     elif po.get("first_min"): out.append(t(T(f"{U(po['first_min'])} of profit before the 1st payout", f"{U(po['first_min'])} de profit avant le 1er payout", f"{U(po['first_min'])} de beneficio antes del 1.er payout")))
     elif po.get("cycle_min"): out.append(t(T(f"{U(po['cycle_min'])} of profit since the last payout", f"{U(po['cycle_min'])} de profit depuis le dernier payout", f"{U(po['cycle_min'])} de beneficio desde el último payout")))
@@ -463,3 +468,154 @@ def page_sizes_guide(lang, t):
 
 GUIDES.insert(1, (GUIDE_SIZES, T("Account sizes, profit targets and max loss, compared", "Tailles de compte, objectifs et perte max, comparés", "Tamaños de cuenta, objetivos y pérdida máx., comparados"),
                   T("Every size from 25K up, firm by firm: target, max loss, daily limit.", "Chaque taille dès 25K, firme par firme : objectif, perte max, limite du jour.", "Cada tamaño desde 25K, firma por firma: objetivo, pérdida máx., límite diario.")))
+
+# ---------------------------------------------------------------- minimum days
+GUIDE_DAYS = "prop-firm-minimum-days.html"
+
+def _days(v, lang, t):
+    """[2] → « 2 days », [1, 3] → « 1–3 days »."""
+    n = f"{v[0]:g}" if len(v) == 1 else f"{v[0]:g}–{v[-1]:g}"
+    one = v == [1]
+    return t(T(f"{n} day" if one else f"{n} days", f"{n} jour" if one else f"{n} jours", f"{n} día" if one else f"{n} días"))
+
+def _direct(p):
+    """An account funded directly: no evaluation phase in any size."""
+    return not any((s.get("eval") or {}).get("dd") for s in p["sizes"])
+
+def page_days_guide(lang, t):
+    def cells(f, p):
+        v = _vals(p, "eval", "min_days")
+        ev = _days(v, lang, t) if v else t(T("No evaluation", "Pas d’évaluation", "Sin evaluación")) if _direct(p) else DASH
+        s = rep(p); po = (s.get("funded") or {}).get("payout") or {}
+        conds = _day_conds(po, lang, t)
+        for label, vp in _payout_variants(p, s):
+            vc = _day_conds(vp, lang, t)
+            if vc and vc != conds: conds.append(f"<i>{t(T(f"{label['en']} option", f"option {label['fr']}", f"opción {label['es']}"))}{colon(lang)}{', '.join(vc)}</i>")
+        tag = "" if s["size"] == 50000 else f" ({kk(s['size'])})"
+        return ev, ("<br>".join(conds) + tag if conds else DASH)
+    table = _table(lang, t, T("Evaluation: minimum days", "Évaluation : jours minimum", "Evaluación: días mínimos"), T("Funded: days before a payout (50K)", "Financé : jours avant un payout (50K)", "Fondeada: días antes de un payout (50K)"),
+                   _firm_rows(lang, t, cells))
+    intro = [
+     (T("What minimum days are", "Ce que sont les jours minimum", "Qué son los días mínimos"), [
+      T("Many evaluations set a minimum number of trading days: even if you reach the profit target sooner, you pass only once you’ve traded that many days. On funded accounts, the days that count before a payout are usually winning days, days that close with at least a set profit, counted again after each payout.",
+        "Beaucoup d’évaluations fixent un nombre minimum de jours de trading : même si tu atteins l’objectif de profit plus tôt, tu réussis seulement après avoir tradé ce nombre de jours. En compte financé, les jours qui comptent avant un payout sont en général des jours gagnants, des journées qui finissent avec au moins un certain profit, comptés de nouveau après chaque payout.",
+        "Muchas evaluaciones fijan un número mínimo de días de trading: aunque alcances el objetivo de beneficio antes, apruebas solo cuando has operado esos días. En las cuentas fondeadas, los días que cuentan antes de un payout suelen ser días ganadores, jornadas que cierran con al menos cierto beneficio, contados de nuevo después de cada payout."),
+      T("A trading day runs from one session close to the next, not from midnight to midnight, and each firm sets what makes a day count. The details are on each firm’s rules page.",
+        "Une journée de trading va d’une clôture de séance à la suivante, pas de minuit à minuit, et chaque firme fixe ce qui fait compter une journée. Les détails sont sur la page de règles de chaque firme.",
+        "Un día de trading va de un cierre de sesión al siguiente, no de medianoche a medianoche, y cada firma fija qué hace contar un día. Los detalles están en la página de reglas de cada firma.")]),
+    ]
+    ev = {l: [] for l in LANGS}; fu = {l: [] for l in LANGS}
+    for f in presets.FIRMS:
+        for p in f["programs"]:
+            v = _vals(p, "eval", "min_days")
+            s = next((x for x in p["sizes"] if x["size"] == 50000), None)
+            po = ((s or {}).get("funded") or {}).get("payout") or {}
+            for l in LANGS:
+                tl = lambda d, L=l: d[L]
+                if v: ev[l].append((f["name"], f"{p['name']} {_days(v, l, tl)}"))
+                if s and po.get("win_days"): fu[l].append((f["name"], f"{p['name']} {', '.join(_day_conds(po, l, tl))}"))
+    faqs = []
+    if ev["en"]:
+        faqs.append((T("How many days do I need to pass a prop firm evaluation?", "Combien de jours faut-il pour réussir une évaluation de prop firm ?", "¿Cuántos días necesito para aprobar una evaluación de prop firm?"),
+                     {l: {"en": "At least the firm’s minimum, and only once the profit target is reached. ", "fr": "Au moins le minimum de la firme, et seulement une fois l’objectif de profit atteint. ", "es": "Al menos el mínimo de la firma, y solo una vez alcanzado el objetivo de beneficio. "}[l] + _by_firm(ev[l], l) for l in LANGS}))
+    if fu["en"]:
+        faqs.append((T("How many winning days do I need before a payout?", "Combien de jours gagnants faut-il avant un payout ?", "¿Cuántos días ganadores necesito antes de un payout?"),
+                     {l: {"en": "On a 50K funded account: ", "fr": "Sur un compte financé de 50K : ", "es": "En una cuenta fondeada de 50K: "}[l] + _by_firm(fu[l], l) for l in LANGS}))
+    faqs.append((T("How does Sweep count my days?", "Comment Sweep compte-t-il mes jours ?", "¿Cómo cuenta Sweep mis días?"),
+                 T("For each account, Sweep counts the days you trade and your winning days against your firm’s rules, and shows when the account is ready for a payout.",
+                   "Pour chaque compte, Sweep compte les jours où tu trades et tes jours gagnants selon les règles de ta firme, et t’indique quand le compte est prêt pour un payout.",
+                   "En cada cuenta, Sweep cuenta los días que operas y tus días ganadores según las reglas de tu firma, y te muestra cuándo la cuenta está lista para un payout.")))
+    return _page(lang, t, T("Guide", "Guide", "Guía"),
+        T("Prop firm minimum trading days, compared (2026).", "Les jours minimum des prop firms, comparés (2026).", "Los días mínimos de las prop firms, comparados (2026)."),
+        T(f"How many days {FIRMS_N} futures prop firms require to pass an evaluation, and how many winning days before each payout.",
+          f"Combien de jours {FIRMS_N} prop firms de futures demandent pour réussir une évaluation, et combien de jours gagnants avant chaque payout.",
+          f"Cuántos días piden {FIRMS_N} prop firms de futuros para aprobar una evaluación, y cuántos días ganadores antes de cada payout."),
+        intro, table, "", faqs, None,
+        T("Prop Firm Minimum Trading Days Compared (2026) · Sweep", "Jours minimum des prop firms, comparés (2026) · Sweep", "Días mínimos de las prop firms, comparados (2026) · Sweep"),
+        T(f"Minimum trading days to pass the evaluation and winning days before a payout at {FIRMS_N} futures prop firms, side by side, from Sweep’s weekly check.",
+          f"Jours minimum pour réussir l’évaluation et jours gagnants avant un payout chez {FIRMS_N} prop firms de futures, côte à côte, vérifiés chaque semaine.",
+          f"Días mínimos para aprobar la evaluación y días ganadores antes de un payout en {FIRMS_N} prop firms de futuros, lado a lado, revisados cada semana."))
+
+GUIDES.insert(2, (GUIDE_DAYS, T("Prop firm minimum trading days, compared", "Les jours minimum des prop firms, comparés", "Los días mínimos de las prop firms, comparados"),
+                  T("Days to pass the evaluation, and winning days before each payout.", "Les jours pour réussir l’évaluation, et les jours gagnants avant chaque payout.", "Los días para aprobar la evaluación, y los días ganadores antes de cada payout.")))
+
+# ---------------------------------------------------------------- costs
+GUIDE_COSTS = "prop-firm-costs.html"
+
+def _price_cell(pr, lang, t):
+    """« $49/month » then the activation fee, from the app's catalogue; « — » when it has no price."""
+    lines = []
+    if pr.get("eval") is not None:
+        lines.append(f"<b>{usd(pr['eval'], lang)}{t(T('/month', '/mois', '/mes')) if pr.get('eval_period') == 'month' else ''}</b>")
+    if pr.get("activation") is not None:
+        lines.append(t(T(f"activation {usd(pr['activation'], lang)}", f"activation {usd(pr['activation'], lang)}", f"activación {usd(pr['activation'], lang)}")) if pr["activation"]
+                     else t(T("no activation fee", "sans frais d’activation", "sin tarifa de activación")))
+    return "<br>".join(lines) or DASH
+
+def page_costs_guide(lang, t):
+    secs, missing = "", []
+    for f in presets.FIRMS:
+        priced = [p for p in f["programs"] if any((s.get("price") or {}).get("eval") is not None or (s.get("price") or {}).get("activation") is not None for s in p["sizes"])]
+        if not priced:
+            missing.append(f); continue
+        sizes = sorted({s["size"] for p in priced for s in p["sizes"]})
+        head = (f'<thead><tr><th scope="col">{t(T("Account type", "Type de compte", "Tipo de cuenta"))}</th>' + "".join(f'<th scope="col">{kk(z)}</th>' for z in sizes) + "</tr></thead>")
+        rows = ""
+        for p in priced:
+            by = {s["size"]: s for s in p["sizes"]}
+            name = f'<a href="{href(lang, page_of(f))}#{anchor(f, p)}">{p["name"]}</a>' + (f'<br><span class="fine">{t(T("funded directly", "financé direct", "financiada directa"))}</span>' if _direct(p) else "")
+            rows += f'<tr><th scope="row">{name}</th>' + "".join(f"<td>{_price_cell(by[z].get('price') or {}, lang, t) if z in by else DASH}</td>" for z in sizes) + "</tr>"
+        when = max((s.get("price") or {}).get("checked") or "" for p in priced for s in p["sizes"]) or checked_of(f)
+        fine = t(T(f"Prices checked on {day(when, 'en')}", f"Prix vérifiés le {day(when, 'fr')}", f"Precios revisados el {day(when, 'es')}")) + "."
+        secs += (f'<h3><a href="{href(lang, page_of(f))}">{f["name"]}</a></h3>'
+                 f'<div class="cmp-wrap"><table class="cmp rules sizes costs n{len(sizes)}">{head}<tbody>{rows}</tbody></table></div><p class="fine">{fine}</p>')
+    if missing:
+        names = and_list([f'<a href="{href(lang, page_of(f))}">{f["name"]}</a>' for f in missing], lang)
+        secs += f'<p>{t(T(f"Prices for {names} aren’t in Sweep’s catalogue yet: see each firm’s site.", f"Les prix de {names} ne sont pas encore dans le catalogue de Sweep : vois le site de chaque firme.", f"Los precios de {names} aún no están en el catálogo de Sweep: consulta el sitio de cada firma."))}</p>'
+    table = (f'<p>{t(T("In each cell: the evaluation’s price (bold), then the activation fee paid once the evaluation is passed. For accounts funded directly, the activation fee is the account’s price.", "Dans chaque case : le prix de l’évaluation (en gras), puis les frais d’activation payés une fois l’évaluation réussie. Pour les comptes financés directement, les frais d’activation sont le prix du compte.", "En cada casilla: el precio de la evaluación (en negrita) y luego la tarifa de activación que se paga al aprobar la evaluación. En las cuentas financiadas directamente, la tarifa de activación es el precio de la cuenta."))}</p>'
+             + secs)
+    intro = [
+     (T("What a prop account costs", "Ce que coûte un compte prop", "Lo que cuesta una cuenta prop"), [
+      T("Two prices add up: the evaluation, often billed every month until you pass or stop it, and an activation fee when you get the funded account. Some firms have no activation fee; others sell an account funded directly, with no evaluation.",
+        "Deux prix s’additionnent : l’évaluation, souvent facturée chaque mois jusqu’à ce que tu réussisses ou que tu l’arrêtes, et des frais d’activation quand tu obtiens le compte financé. Certaines firmes n’ont pas de frais d’activation ; d’autres vendent un compte financé directement, sans évaluation.",
+        "Se suman dos precios: la evaluación, a menudo cobrada cada mes hasta que apruebas o la cancelas, y una tarifa de activación cuando obtienes la cuenta fondeada. Algunas firmas no cobran activación; otras venden una cuenta fondeada directamente, sin evaluación."),
+      T("Firms often run discounts, so the price you pay can be lower. What matters is the total over every attempt and reset, against what your payouts bring back.",
+        "Les firmes font souvent des rabais, donc le prix payé peut être plus bas. Ce qui compte, c’est le total de toutes les tentatives et réinitialisations, comparé à ce que tes payouts rapportent.",
+        "Las firmas hacen descuentos a menudo, así que el precio pagado puede ser menor. Lo que importa es el total de todos los intentos y reinicios, frente a lo que te devuelven tus payouts.")]),
+    ]
+    p50 = {l: [] for l in LANGS}; free_act = {l: [] for l in LANGS}
+    for f in presets.FIRMS:
+        for p in f["programs"]:
+            s = next((x for x in p["sizes"] if x["size"] == 50000), None); pr = (s or {}).get("price") or {}
+            for l in LANGS:
+                tl = lambda d, L=l: d[L]
+                if pr.get("eval") is not None: p50[l].append((f["name"], f"{p['name']} {_price_cell({'eval': pr['eval'], 'eval_period': pr.get('eval_period')}, l, tl)}".replace("<b>", "").replace("</b>", "")))
+            if any((x.get("price") or {}).get("activation") == 0 for x in p["sizes"]):
+                for l in LANGS: free_act[l].append((f["name"], p["name"]))
+    faqs = []
+    if p50["en"]:
+        faqs.append((T("How much does a 50K prop firm evaluation cost?", "Combien coûte une évaluation de prop firm de 50K ?", "¿Cuánto cuesta una evaluación de prop firm de 50K?"),
+                     {l: _by_firm(p50[l], l) + {"en": " Before discounts, from Sweep’s catalogue.", "fr": " Avant rabais, selon le catalogue de Sweep.", "es": " Antes de descuentos, según el catálogo de Sweep."}[l] for l in LANGS}))
+    if free_act["en"]:
+        faqs.append((T("Which prop firms have no activation fee?", "Quelles prop firms n’ont pas de frais d’activation ?", "¿Qué prop firms no cobran tarifa de activación?"),
+                     {l: _by_firm(free_act[l], l) for l in LANGS}))
+    faqs.append((T("How do I track what my prop accounts really cost?", "Comment suivre ce que mes comptes prop coûtent vraiment ?", "¿Cómo sigo lo que me cuestan de verdad mis cuentas prop?"),
+                 T(f'Log every evaluation, reset and activation fee as an expense, and every payout as it’s paid: Sweep’s <a href="{href("en", "payout-tracker.html")}">payout tracker</a> shows your real net, on the Pro and Elite plans. To see if an account can pay for itself, try the free <a href="{href("en", "prop-firm-roi-calculator.html")}">prop firm ROI calculator</a>.',
+                   f'Note chaque évaluation, réinitialisation et frais d’activation comme une dépense, et chaque payout quand il est payé : le <a href="{href("fr", "payout-tracker.html")}">suivi des payouts</a> de Sweep montre ton vrai net, avec les forfaits Pro et Elite. Pour voir si un compte peut se rembourser, essaie le <a href="{href("fr", "prop-firm-roi-calculator.html")}">calculateur de rentabilité</a> gratuit.',
+                   f'Anota cada evaluación, reinicio y tarifa de activación como gasto, y cada payout cuando se paga: el <a href="{href("es", "payout-tracker.html")}">seguimiento de payouts</a> de Sweep muestra tu neto real, con los planes Pro y Elite. Para ver si una cuenta puede pagarse sola, prueba la <a href="{href("es", "prop-firm-roi-calculator.html")}">calculadora de rentabilidad</a> gratuita.')))
+    return _page(lang, t, T("Guide", "Guide", "Guía"),
+        T("Prop firm costs: evaluation and activation fees, compared (2026).", "Le coût des prop firms : évaluation et frais d’activation, comparés (2026).", "El costo de las prop firms: evaluación y tarifa de activación, comparados (2026)."),
+        T("What an evaluation and a funded account cost, account size by account size, from the prices in Sweep’s catalogue.",
+          "Ce que coûtent une évaluation et un compte financé, taille de compte par taille de compte, d’après les prix du catalogue de Sweep.",
+          "Lo que cuestan una evaluación y una cuenta fondeada, tamaño por tamaño, según los precios del catálogo de Sweep."),
+        intro, table, "", faqs, None,
+        T("Prop Firm Costs: Evaluation & Activation Fees (2026) · Sweep", "Coût des prop firms : évaluation et activation · Sweep", "Costo de las prop firms: evaluación y activación · Sweep"),
+        T("Evaluation prices and activation fees of futures prop firms, account size by account size, from Sweep’s catalogue, with the date each price was checked.",
+          "Prix des évaluations et frais d’activation des prop firms de futures, taille par taille, d’après le catalogue de Sweep, avec la date de vérification.",
+          "Precios de las evaluaciones y tarifas de activación de las prop firms de futuros, tamaño por tamaño, según el catálogo de Sweep, con la fecha de revisión."))
+
+COSTS_LIVE = False   # held until the app's catalogue has every firm's prices (none for Lucid, Apex and MFFU on Oct 13: brief sent to the App session)
+if COSTS_LIVE: GUIDES.insert(3, (GUIDE_COSTS, T("Prop firm costs, compared", "Le coût des prop firms, comparé", "El costo de las prop firms, comparado"),
+                  T("Evaluation prices and activation fees, size by size.", "Prix des évaluations et frais d’activation, taille par taille.", "Precios de evaluación y tarifas de activación, tamaño por tamaño.")))
+
+RULE_GUIDES = (GUIDE_CONS, GUIDE_DD, GUIDE_PAYOUT, GUIDE_SIZES, GUIDE_DAYS) + ((GUIDE_COSTS,) if COSTS_LIVE else ())   # firm-by-firm guides built from the catalogue

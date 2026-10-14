@@ -42,7 +42,10 @@ def entries():
     for page, title in ((pages19.GUIDE_CONS, T("Consistency rules, compared", "Règles de consistance, comparées", "Reglas de consistencia, comparadas")),
                         (pages19.GUIDE_DD, T("Drawdown rules, compared", "Règles de drawdown, comparées", "Reglas de drawdown, comparadas")),
                         (pages19.GUIDE_PAYOUT, T("Payout rules, compared", "Règles de payout, comparées", "Reglas de payout, comparadas")),
-                        (pages19.GUIDE_SIZES, T("Account sizes and targets, compared", "Tailles de compte et objectifs, comparés", "Tamaños de cuenta y objetivos, comparados"))):
+                        (pages19.GUIDE_SIZES, T("Account sizes and targets, compared", "Tailles de compte et objectifs, comparés", "Tamaños de cuenta y objetivos, comparados")),
+                        (pages19.GUIDE_DAYS, T("Minimum trading days, compared", "Jours minimum, comparés", "Días mínimos, comparados")),
+                        (pages19.GUIDE_COSTS, T("Prop firm costs, compared", "Coût des prop firms, comparé", "Costo de las prop firms, comparado"))):
+        if page not in pages19.RULE_GUIDES: continue   # a guide not published yet
         out.append((page, {l: (title[l], T(f"{core.FIRMS_N} prop firms · Verified {pages18.day(when, 'en')}", f"{core.FIRMS_N} prop firms · Vérifiées le {pages18.day(when, 'fr')}",
                                            f"{core.FIRMS_N} prop firms · Revisadas el {pages18.day(when, 'es')}")[l]) for l in LANGS}, when))
     for slug, _, name, _ in pages7.TOOLS:
