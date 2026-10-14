@@ -1820,6 +1820,7 @@ html[data-home] .main-wrap > .top .nav-addtop{background:var(--fill)!important;c
 /* A3 · phone: no unlabelled chips in the header (streak, level and the « + » live in the routine card and the bottom bar) */
 @media (max-width:860px){html body .main-wrap > .top .nav-hday{display:none!important}html body .main-wrap > .top .nav-addtop{display:none!important}}
 /* E19 */
+html body .ins .ins-act{display:block;margin-top:6px;font-weight:600;color:var(--text)}   /* the trend of the week: what to do (brief 02 part 6) */
 html body .nav-five{font-size:13px!important;color:var(--muted)!important;font-family:var(--font-ui)!important;font-weight:500!important}
 /* C11 · the first account form, directly, without the marketing block or the welcome line */
 .nav-onb-direct .onb-feat,.nav-onb-direct .onb-feats,.nav-onb-direct .onb-eyebrow,.nav-onb-direct .onb-why{display:none!important}
@@ -2018,6 +2019,8 @@ html body #main .nav-rt-s.next .btn.primary{min-height:44px}
 .nav-logout .btn{min-height:44px;min-width:160px}
 /* B17: « Avg win / loss » never cut */
 html body #main .ik .lbl{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+/* brief 02 part 6: on a phone the « i » sits in the tile's corner, the label keeps the whole width (« Gain / perte moy. » on one line) */
+@media (max-width:860px){html body #main .ikpis .ik{position:relative}html body #main .ikpis .ik .lbl .info{position:absolute;top:10px;right:8px;margin:0}}
 /* B18: touch targets of at least 44 px on a phone */
 @media (max-width:860px){html body #main .btn,html body #main .nav-rt .btn,html body #main .nav-rt-sa .btn,html body .bottomnav a,html body .bottomnav button{min-height:44px!important}}
 

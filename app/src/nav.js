@@ -667,13 +667,13 @@ window.SweepMO = window.SweepMO || class {
   const DT = {
     en: { all: 'See all ›', acc: 'Accounts', pay: 'Payouts & expenses', recv: 'Received', exp: 'Expenses', net: 'Net (prop ROI)', last: 'Last payout: {a} · {d}', nopay: 'No payouts or expenses yet.', addpay: 'Log one',
       dd: 'Drawdown room', ready: 'Ready for payout', cal: 'This month', nocal: 'Your month lights up here once you log trades.', notrade: 'Nothing to show yet: log your first trade.', log: 'Log a trade',
-      curve: 'Equity curve', recent: 'Recent trades', trends: 'Trends', news: 'Economic news', tolog: 'Checklist to do', swept: 'Swept', moretr: 'Trends appear after a few more trades.' },
+      curve: 'Equity curve', recent: 'Recent trades', trends: 'Trend of the week', news: 'Economic news', tolog: 'Checklist to do', swept: 'Swept', moretr: 'Trends appear after a few more trades.' },
     fr: { all: 'Tout voir ›', acc: 'Comptes', pay: 'Payouts et dépenses', recv: 'Reçus', exp: 'Dépenses', net: 'Net (ROI prop)', last: 'Dernier payout : {a} · {d}', nopay: 'Aucun payout ni dépense pour l’instant.', addpay: 'En noter un',
       dd: 'Marge de drawdown', ready: 'Prêt pour le payout', cal: 'Ce mois-ci', nocal: 'Ton mois s’allumera ici dès tes premiers trades.', notrade: 'Rien à afficher pour l’instant : journalise ton premier trade.', log: 'Ajouter un trade',
-      curve: 'Courbe de capital', recent: 'Trades récents', trends: 'Tendances', news: 'Nouvelles économiques', tolog: 'Checklist à faire', swept: 'Balayée', moretr: 'Les tendances apparaissent après quelques trades de plus.' },
+      curve: 'Courbe de capital', recent: 'Trades récents', trends: 'La tendance de la semaine', news: 'Nouvelles économiques', tolog: 'Checklist à faire', swept: 'Balayée', moretr: 'Les tendances apparaissent après quelques trades de plus.' },
     es: { all: 'Ver todo ›', acc: 'Cuentas', pay: 'Payouts y gastos', recv: 'Recibidos', exp: 'Gastos', net: 'Neto (ROI prop)', last: 'Último payout: {a} · {d}', nopay: 'Aún no hay payouts ni gastos.', addpay: 'Registrar uno',
       dd: 'Margen de drawdown', ready: 'Listo para el payout', cal: 'Este mes', nocal: 'Tu mes se iluminará aquí con tus primeras operaciones.', notrade: 'Nada que mostrar aún: registra tu primera operación.', log: 'Añadir una operación',
-      curve: 'Curva de capital', recent: 'Operaciones recientes', trends: 'Tendencias', news: 'Noticias económicas', tolog: 'Checklist pendiente', swept: 'Barrido', moretr: 'Las tendencias aparecen tras algunas operaciones más.' },
+      curve: 'Curva de capital', recent: 'Operaciones recientes', trends: 'La tendencia de la semana', news: 'Noticias económicas', tolog: 'Checklist pendiente', swept: 'Barrido', moretr: 'Las tendencias aparecen tras algunas operaciones más.' },
   };
   const dt = () => DT[LANG] || DT.en;
   const head = (title, href, extra = '') => `<div class="nav-ch" role="link" tabindex="0" data-href="${href}"><h2>${esc(title)}${extra ? `<span class="nav-ch-sub">${extra}</span>` : ''}</h2><span class="nav-all">${dt().all}</span></div>`;
@@ -1447,7 +1447,7 @@ window.SweepMO = window.SweepMO || class {
   function statsCard() {
     if (!/^#analytics/.test(location.hash || '')) return;
     const main = document.getElementById('main'); if (!main || main.querySelector('.nav-slip')) return;
-    const tr = (S.trades || []).filter((t) => !t.demo);
+    const tr = (typeof ft === 'function' ? ft() : (S.trades || [])).filter((t) => !t.demo);   // the page's trades: its filters, a copy once (brief 02 part 6)
     const real = tr.filter((t) => typeof t.real_pnl_c === 'number' && typeof t.pnl_calc_c === 'number');
     const fees = tr.reduce((s, t) => s + (t.fees_c || 0), 0);
     const sec = document.createElement('section'); sec.className = 'surface nav-slip'; sec.setAttribute('data-noi18n', '');
@@ -3170,13 +3170,15 @@ window.SweepMO = window.SweepMO || class {
       const PL = { fr: { 'today': 'aujourd’hui', 'yesterday': 'hier', 'this week': 'cette semaine', 'last week': 'la semaine dernière', 'this month': 'ce mois-ci', 'last month': 'le mois dernier', 'this year': 'cette année', 'all time': 'depuis le début', 'last 7 days': 'les 7 derniers jours', 'last 30 days': 'les 30 derniers jours', 'last 90 days': 'les 90 derniers jours' },
         es: { 'today': 'hoy', 'yesterday': 'ayer', 'this week': 'esta semana', 'last week': 'la semana pasada', 'this month': 'este mes', 'last month': 'el mes pasado', 'this year': 'este año', 'all time': 'desde el inicio', 'last 7 days': 'los últimos 7 días', 'last 30 days': 'los últimos 30 días', 'last 90 days': 'los últimos 90 días' } };
       const raw = typeof periodLabel === 'function' ? String(periodLabel()) : '', per = ((PL[L] || {})[raw.toLowerCase()] || raw);
-      const amt = SH.amounts, wr = st.wr != null ? Math.round(st.wr * (st.wr <= 1 ? 100 : 1)) + ' %' : '—';
-      const pf = st.pf === Infinity ? '∞' : st.pf ? st.pf.toFixed(2) : '—';
+      // under 5 trades, no ratio that means nothing; no infinite profit factor (brief 02 part 6, like the Stats page)
+      const FV = { en: 'From 5 trades', fr: 'Dès 5 trades', es: 'Desde 5 operaciones' }[L] || 'From 5 trades', NL = { en: 'No loss yet', fr: 'Pas encore de perte', es: 'Aún sin pérdidas' }[L] || 'No loss yet';
+      const few = list.length < 5, amt = SH.amounts, wr = few ? FV : st.wr != null ? Math.round(st.wr * (st.wr <= 1 ? 100 : 1)) + (L === 'en' ? '%' : '\u202f%') : '—';
+      const pf = few ? FV : st.pf === Infinity ? NL : st.pf ? (L === 'en' ? st.pf.toFixed(2) : st.pf.toFixed(2).replace('.', ',')) : '—';
       let c = 0; const curve = list.slice().sort((a, b) => ((a.date || '') + (a.entry_time || '')).localeCompare((b.date || '') + (b.entry_time || ''))).map((x) => (c += (typeof tNet === 'function' ? tNet(x) : 0)));
       return {
         label: t('label'), eyebrow: [per, list.length + ' trades'].filter(Boolean).join(' · '),
         big: list.length ? (amt ? money(net) : wr) : '—', tone: net >= 0 ? 'pos' : 'neg', sub: null,
-        stats: [[t('wr'), wr], [t('pf'), pf], amt ? [t('trades'), String(list.length)] : [t('avgR'), st.avgR != null ? (st.avgR >= 0 ? '+' : '') + st.avgR.toFixed(2) + 'R' : '—']],
+        stats: [[t('wr'), wr], [t('pf'), pf], amt ? [t('trades'), String(list.length)] : [t('avgR'), !few && st.avgR != null ? (st.avgR >= 0 ? '+' : '') + st.avgR.toFixed(2) + 'R' : '—']],
         demo: list.some((x) => x.demo), chart: amt && curve.length > 1 ? curve : null, bars: null, mark: false,
         cap: t('cap')(amt ? money(net) : wr, per),
       };
@@ -4834,7 +4836,6 @@ document.addEventListener('click', (e) => { if (e.target.closest && e.target.clo
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const FIVE = { en: 'From 5 trades', fr: 'Dès 5 trades', es: 'Desde 5 operaciones' }[L];
   const TREND = { fr: 'Pas encore assez de données. Les stats apparaissent dès 5 trades dans chaque groupe comparé.', es: 'Aún no hay suficientes datos. Las estadísticas aparecen con al menos 5 operaciones en cada grupo comparado.' }[L];
   function pass() {
     const me = (typeof S !== 'undefined' && S.me) || {}; const full = [me.first_name, me.last_name].filter(Boolean).join(' ');
@@ -4845,8 +4846,6 @@ document.addEventListener('click', (e) => { if (e.target.closest && e.target.clo
     }
     if (/^#analytics/.test(location.hash || '')) {
       const ins = document.querySelector('#main #gIns'); if (ins && !ins.hidden) ins.hidden = true;
-      const n = (S.trades || []).filter((x) => !x.demo || (S.trades || []).every((y) => y.demo)).length;
-      if (n < 5) document.querySelectorAll('#main b, #main .big, #main strong').forEach((b) => { if (b.children.length === 0 && b.textContent.trim() === '∞') { b.textContent = FIVE; b.classList.add('nav-five'); } });
     }
     // only Stats shows that message
     if (TREND && /^#analytics/.test(location.hash || '')) document.querySelectorAll('#main p, #main .muted, #main div').forEach((p) => { if (p.children.length === 0 && /^Not enough data yet\./.test(p.textContent.trim())) p.textContent = TREND; });
@@ -5263,7 +5262,7 @@ new window.SweepMO(() => {
 (function () {
   'use strict';
   const add = { fr: { 'My money': 'Mon argent', 'Worst drawdown': 'Pire recul', 'Max drawdown allowed': 'Drawdown permis', 'Exceeded': 'Dépassé', 'Avg win / loss': 'Gain / perte moy.', 'See its stats': 'Voir ses stats' },
-    es: { 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida media', 'See its stats': 'Ver sus estadísticas' } };
+    es: { 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas' } };
   try { if (window.I18N_FR) Object.assign(window.I18N_FR, add.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, add.es); } catch (e) { /* the app stays in English */ }
   // « Exceeded (12/10) » → « Dépassé (12/10) »
   const L = (typeof LANG !== 'undefined' && LANG) || 'en'; if (L === 'en') return;

@@ -161,7 +161,7 @@ final class GameEngine
     public static function forget(string $uid): void { foreach (array_keys(self::$docCache) as $k) if (str_starts_with($k, $uid . '|')) unset(self::$docCache[$k]); }
 
     /** a copy group counted once, as its original: the earliest created (copies can have their own size; same rule as the app) */
-    private static function onePerCopyGroup(array $trades): array
+    public static function onePerCopyGroup(array $trades): array
     {
         $out = []; $at = [];
         foreach ($trades as $t) {

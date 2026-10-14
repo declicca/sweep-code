@@ -196,7 +196,7 @@ final class GameV2b
     public static function candidates(string $uid): array
     {
         $from = GameEngine::addDays(GameEngine::today(), -56);
-        $trades = array_values(array_filter(GameEngine::docs($uid, 'trades'), fn($t) => ($t['date'] ?? '') >= $from && empty($t['demo'])));
+        $trades = GameEngine::onePerCopyGroup(array_values(array_filter(GameEngine::docs($uid, 'trades'), fn($t) => ($t['date'] ?? '') >= $from && empty($t['demo']))));   // a copied trade once (brief 02 part 6)
         $rows = [];
         foreach ($trades as $t) { $r = self::rOf($t); if ($r !== null) $rows[] = ['t' => $t, 'r' => $r]; }
         $out = [];

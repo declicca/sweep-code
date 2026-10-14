@@ -1438,7 +1438,8 @@
   function weekBrief(mon, summary) {
     const m = mon || (() => { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); })();
     const add = (k, n) => { const d = new Date(k + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
-    const tr = (S.trades || []).filter((x) => !x.demo && x.date >= m && x.date <= add(m, 4));
+    const one = (l) => { const at = new Map(), out = []; l.forEach((x) => { if (!x.copy_group) { out.push(x); return; } const i = at.get(x.copy_group); if (i == null) { at.set(x.copy_group, out.length); out.push(x); } else if ((x.created_at || x.id) < (out[i].created_at || out[i].id)) out[i] = x; }); return out; };
+    const tr = one((S.trades || []).filter((x) => !x.demo && x.date >= m && x.date <= add(m, 4)));   // copies once, as their original (brief 02 part 6; same as the server's email)
     const traded = new Set(tr.map((x) => x.date)).size;
     const ds = tr.map((x) => (typeof tDisc === 'function' ? tDisc(x) : null)).filter((v) => v != null);
     const disc = ds.length ? Math.round(ds.reduce((a, v) => a + v, 0) / ds.length) : null;

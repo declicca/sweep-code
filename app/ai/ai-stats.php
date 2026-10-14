@@ -104,7 +104,7 @@ function sai_norm_trade(array $t): array
         'session' => (string) ($t['session'] ?? ''), 'setup' => (string) ($t['setup'] ?? ''), 'grade' => (string) ($t['grade'] ?? ''),
         'tags' => array_values(array_filter(array_map('strval', (array) ($t['tags'] ?? [])))), 'account_id' => (string) ($t['account_id'] ?? ''),
         'pnl_c' => $pnl, 'fees_c' => $fees, 'net_c' => $pnl - $fees, 'risk_c' => isset($t['risk_c']) ? (int) $t['risk_c'] : null,
-        'r_mult' => isset($t['r_mult']) && is_numeric($t['r_mult']) ? (float) $t['r_mult'] : null, 'demo' => !empty($t['demo']), 'accounts' => 1,
+        'r_mult' => isset($t['r_mult']) && is_numeric($t['r_mult']) ? (float) $t['r_mult'] : (!empty($t['risk_c']) && (int) $t['risk_c'] > 0 ? round(($pnl - $fees) / (int) $t['risk_c'], 4) : null), 'demo' => !empty($t['demo']), 'accounts' => 1,   // R: typed, else net ÷ the trade's risk (no risk → none, never a guess)
     ];
 }
 
@@ -130,12 +130,12 @@ function sai_metrics(array $trades): array
     $greenDays = count(array_filter($days, fn($x) => $x > 0));
     return [
         'trades' => $n, 'wins' => $wins, 'losses' => $losses,
-        'win_rate' => $n ? round($wins / $n, 4) : null,
+        'win_rate' => $wins + $losses ? round($wins / ($wins + $losses), 4) : null,   // breakeven trades excluded, like the app's Stats
         'net_c' => $net, 'fees_c' => $fees,
         'profit_factor' => $gl > 0 ? round($gw / $gl, 2) : ($gw > 0 ? null : 0),
         'avg_win_c' => $wins ? (int) round($gw / $wins) : null,
         'avg_loss_c' => $losses ? (int) round(-$gl / $losses) : null,
-        'expectancy_c' => $n ? (int) round($net / $n) : null,
+        'expectancy_c' => $wins + $losses ? (int) round($net / ($wins + $losses)) : null,
         'avg_r' => $rs ? round(array_sum($rs) / count($rs), 2) : null,
         'largest_win_c' => $big ?: null, 'largest_loss_c' => $worst ?: null,
         'avg_hold_win_min' => $hw ? (int) round(array_sum($hw) / count($hw)) : null,

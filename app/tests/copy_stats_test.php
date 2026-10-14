@@ -3,8 +3,9 @@ declare(strict_types=1);
 /**
  * Sweep — copies with their own size (brief 02 part 4) count once, as their original (the earliest created), on the server too:
  *   php tests/copy_stats_test.php
- * The game's day (its discipline rules, streaks) and the trades Sweep AI reads: a group of 3 copies (2, 2 and 1 contracts)
- * is one trade, the original's P&L, with its 3 accounts — like the app's Stats, Journal and My money.
+ * The game's day (its discipline rules, streaks), the trades Sweep AI reads and the « Your week » email (brief 02 part 6: its
+ * best habit and point to work on): a group of 3 copies (2, 2 and 1 contracts) is one trade, the original's P&L, with its 3
+ * accounts — like the app's Stats, Journal, My money and the weekly recap.
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -17,7 +18,7 @@ require $app . '/notify/notify.php';
 require $app . '/game/game.php';
 require_once $app . '/ai/ai-core.php';   // (sai_q; nothing read until an AI call)
 require_once $app . '/ai/ai-stats.php';
-GameEngine::setPdo($pdo); GameEngine::schema();
+GameEngine::setPdo($pdo); GameEngine::schema(); GameV2::schema(); GameV2b::schema(); if (class_exists('GameV2c')) GameV2c::schema();
 $pass = 0; $fail = 0;
 $ok = function (bool $c, string $what) use (&$pass, &$fail) { echo ($c ? 'ok   ' : 'FAIL ') . $what . "\n"; $c ? $pass++ : $fail++; };
 $put = function (string $id, array $d) use ($pdo) { $pdo->prepare('INSERT INTO documents (user_id, collection, id, data, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)')->execute(['u1', 'trades', $id, json_encode($d + ['id' => $id]), $d['created_at'], $d['created_at']]); };
@@ -36,6 +37,12 @@ $ai = sai_trades($pdo, 'u1');
 $g = array_values(array_filter($ai, fn($t) => ($t['accounts'] ?? 1) > 1))[0] ?? [];
 $ok(count($ai) === 2 && ($g['pnl_c'] ?? null) === 4000 && ($g['fees_c'] ?? null) === 1000 && ($g['contracts'] ?? null) === 2 && ($g['accounts'] ?? null) === 3,
     'Sweep AI reads the group once: the original\'s P&L, fees and size, on 3 accounts (' . json_encode(['pnl' => $g['pnl_c'] ?? null, 'fees' => $g['fees_c'] ?? null, 'n' => $g['contracts'] ?? null, 'acc' => $g['accounts'] ?? null]) . ')');
+// the week: the checklist of a copied trade counted once (here « stop »: yes on the copied trade, no on the other one → 1 of 2)
+$pdo->exec("UPDATE documents SET data = json_set(data, '$.discipline', json('{\"stop\":\"y\"}')) WHERE id IN ('o', 'c1', 'c2')");
+$pdo->exec("UPDATE documents SET data = json_set(data, '$.discipline', json('{\"stop\":\"n\"}')) WHERE id = 'solo'");
+GameEngine::forget('u1'); putenv('SWEEP_GAME_NOW=2026-10-09 18:00'); GameEngine::profile('u1');
+$wk = GameWeeklyMail::brief('u1', '2026-10-05', 'en');
+$ok(($wk['best']['y'] ?? null) === 1 && ($wk['best']['n'] ?? null) === 2, 'the « Your week » email: the copied trade\'s answer once, « stop » yes 1 time out of 2 (' . json_encode($wk['best'] ?? null) . ')');
 $pdo = null; array_map('unlink', glob($tmp . '/*') ?: []); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

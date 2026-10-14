@@ -108,7 +108,7 @@ final class GameWeeklyMail
     {
         $fri = GameEngine::addDays($mon, 4); $sun = GameEngine::addDays($mon, 6);
         $in = fn($d, string $a, string $b) => is_string($d) && $d !== '' && strcmp($d, $a) >= 0 && strcmp($d, $b) <= 0;
-        $tr = array_values(array_filter(self::docs($uid, 'trades'), fn($t) => empty($t['demo']) && $in($t['date'] ?? null, $mon, $fri)));
+        $tr = GameEngine::onePerCopyGroup(array_values(array_filter(self::docs($uid, 'trades'), fn($t) => empty($t['demo']) && $in($t['date'] ?? null, $mon, $fri))));   // copies once, as their original (as the app)
         $traded = count(array_unique(array_map(fn($t) => (string) $t['date'], $tr)));
         $ds = []; $per = [];
         foreach ($tr as $t) {
