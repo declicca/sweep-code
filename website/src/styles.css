@@ -640,6 +640,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px}
 /* discipline: Wrapped and wow moments as full-width cards */
 .gblock.wide{grid-column:1/-1;grid-template-columns:minmax(0,1fr) auto;align-items:center}
 .gblock .trio{display:grid;grid-template-columns:repeat(3,150px);gap:14px}
+.gblock.wide > .slot{width:150px}   /* a lone phone has no width of its own in the auto column */
 .gblock.wide .gtxt{max-width:46ch}
 @media (max-width:860px){
   .gblock.wide{grid-template-columns:1fr}
