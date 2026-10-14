@@ -16,6 +16,13 @@
   const L = (typeof LANG !== 'undefined' && ['fr', 'es'].includes(LANG)) ? LANG : 'en';
   const T = {
     en: {
+      wkT: 'Your week', stT: 'What works for you', stSub: 'Your last 4 weeks · {n} trades', strong: 'Your strength', leak: 'Your leak', rule: 'Your rule', ruleW: 'Your rule for next week',
+      sPlan: 'In your plan: {a} % winning trades over {n} (off plan: {b} % over {m}).', sSetup: 'Your best setup: “{s}”, {a} % winning trades over {n}.',
+      sSlot: 'Your best time: {s}, {a} % winning trades over {n}.', sClean: '{k} of {n} sessions without a mistake.',
+      sNone: 'Not enough trades yet to tell what works: 5 in the same situation are needed.',
+      lk: '{w}: {k} of {n} trades{c}.', lk1: '{w}: 1 of {n} trades{c}.', lkNone: 'No leak: not one mistake over {n} trades.',
+      prT: 'Your progress', prLine: '{w} weeks ago: {a} % · {l}: {b} %', prNow: 'this week', prLast: 'last week', prAgo: '{w} weeks ago', prHelp: '% of trades without this mistake, week by week',
+      slot: (h, m, h2, m2) => `${h}:${m}–${h2}:${m2}`,
       lim: { dll75: '{a}: {p} % of your daily limit used ({u} of {l}). Keep your size, or stop.', dll100: '{a}: daily limit reached ({l}). Your session is over on this account.',
         dd75: '{a}: {p} % of the drawdown used, {r} of room left. Trade smaller.', dd100: '{a}: drawdown limit reached. Check the account’s status with your firm.' },
       bTitle: 'Before this trade',
@@ -53,7 +60,7 @@
         oversized: ['{n} contracts, your maximum is {m}.', 'Stay at your size, even when you feel sure.'],
         size_up: ['Size raised to {n} after {w} wins in a row.', 'After wins, keep the same size: that is where overconfidence costs.'],
         against_bias: ['Against your bias ({b}).', 'If the market goes against your bias, wait or pass: no trade against your plan.'],
-        setup_not_in_plan: ['Setup « {s} » is not in your plan.', 'Take only your plan’s setups; add this one tomorrow if it earns it.'],
+        setup_not_in_plan: ['Setup “{s}” is not in your plan.', 'Take only your plan’s setups; add this one tomorrow if it earns it.'],
         open5: ['Taken in the first 5 minutes of the open.', 'Let the open pass: wait for your setup after 9:35.'],
         plan_no_trade: ['You had planned not to trade.', 'A planned day off is a rule too.'],
         no_plan: ['No plan for this session.', 'Make your plan before the next trade: 30 seconds.'],
@@ -77,6 +84,13 @@
       first: 'After your first trade, I tell you what was right and the one thing to improve.',
     },
     fr: {
+      wkT: 'Ta semaine', stT: 'Ce qui fonctionne pour toi', stSub: 'Tes 4 dernières semaines · {n} trades', strong: 'Ta force', leak: 'Ta fuite', rule: 'Ta règle', ruleW: 'Ta règle pour la semaine prochaine',
+      sPlan: 'Dans ton plan : {a} % de trades gagnants sur {n} (hors plan : {b} % sur {m}).', sSetup: 'Ton meilleur setup : « {s} », {a} % de trades gagnants sur {n}.',
+      sSlot: 'Ton meilleur moment : {s}, {a} % de trades gagnants sur {n}.', sClean: '{k} séances sur {n} sans erreur.',
+      sNone: 'Pas encore assez de trades pour dire ce qui fonctionne : il en faut 5 dans une même situation.',
+      lk: '{w} : {k} trades sur {n}{c}.', lk1: '{w} : 1 trade sur {n}{c}.', lkNone: 'Aucune fuite : pas une erreur sur {n} trades.',
+      prT: 'Ta progression', prLine: 'Il y a {w} semaines : {a} % · {l} : {b} %', prNow: 'cette semaine', prLast: 'la semaine dernière', prAgo: 'il y a {w} semaines', prHelp: '% des trades sans cette erreur, semaine par semaine',
+      slot: (h, m, h2, m2) => `${+h} h ${m}–${+h2} h ${m2}`.replace(/ h 00/g, ' h'),
       lim: { dll75: '{a} : {p} % de ta limite du jour utilisés ({u} sur {l}). Garde ta taille, ou arrête-toi.', dll100: '{a} : limite du jour atteinte ({l}). Ta séance est finie sur ce compte.',
         dd75: '{a} : {p} % du drawdown utilisés, il te reste {r} de marge. Trade plus petit.', dd100: '{a} : limite de drawdown atteinte. Vérifie le statut du compte auprès de ta firme.' },
       bTitle: 'Avant ce trade',
@@ -138,6 +152,13 @@
       first: 'Après ton premier trade, je te dis ce qui était bien et la seule chose à améliorer.',
     },
     es: {
+      wkT: 'Tu semana', stT: 'Lo que funciona para ti', stSub: 'Tus últimas 4 semanas · {n} operaciones', strong: 'Tu fortaleza', leak: 'Tu fuga', rule: 'Tu regla', ruleW: 'Tu regla para la próxima semana',
+      sPlan: 'Dentro de tu plan: {a} % de operaciones ganadoras en {n} (fuera del plan: {b} % en {m}).', sSetup: 'Tu mejor setup: « {s} », {a} % de operaciones ganadoras en {n}.',
+      sSlot: 'Tu mejor momento: {s}, {a} % de operaciones ganadoras en {n}.', sClean: '{k} de {n} sesiones sin error.',
+      sNone: 'Aún no hay suficientes operaciones para saber qué funciona: hacen falta 5 en una misma situación.',
+      lk: '{w}: {k} de {n} operaciones{c}.', lk1: '{w}: 1 de {n} operaciones{c}.', lkNone: 'Ninguna fuga: ni un error en {n} operaciones.',
+      prT: 'Tu progreso', prLine: 'Hace {w} semanas: {a} % · {l}: {b} %', prNow: 'esta semana', prLast: 'la semana pasada', prAgo: 'hace {w} semanas', prHelp: '% de operaciones sin este error, semana a semana',
+      slot: (h, m, h2, m2) => `${h}:${m}–${h2}:${m2}`,
       lim: { dll75: '{a}: {p} % de tu límite diario usado ({u} de {l}). Mantén tu tamaño, o para.', dll100: '{a}: límite diario alcanzado ({l}). Tu sesión terminó en esta cuenta.',
         dd75: '{a}: {p} % del drawdown usado, te quedan {r} de margen. Opera más pequeño.', dd100: '{a}: límite de drawdown alcanzado. Verifica el estado de la cuenta con tu firma.' },
       bTitle: 'Antes de esta operación',
@@ -199,7 +220,8 @@
       first: 'Tras tu primera operación, te digo qué estuvo bien y la única cosa a mejorar.',
     },
   }[L];
-  const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (_, k) => (v && v[k] != null ? v[k] : ''));
+  // (a percentage never leaves its number: « 89 % » with a narrow no-break space in fr / es, « 89% » in en)
+  const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (_, k) => (v && v[k] != null ? v[k] : '')).replace(/ %/g, L === 'en' ? '%' : '\u202f%');
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const usd = (c) => (typeof money === 'function' ? money(Math.abs(c), { sign: false, dec: 0 }) : '$' + Math.round(Math.abs(c) / 100));
   const cents = (v) => { const n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.]/g, '')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; };
@@ -449,6 +471,96 @@
     if (k === limKey) return; limKey = k; setTimeout(() => { try { alertLimits(); } catch (e) { /* never blocks */ } }, 800);
   }
 
+  /* ── what works for you (brief 03 step 4): over a span of days, 1 strength, 1 leak, 1 rule, with the samples ── */
+  const PLAN_CODES = ['over_max_loss', 'over_max_trades', 'against_bias', 'setup_not_in_plan', 'plan_no_trade', 'no_plan'];
+  const isoD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const addDays = (day, n) => { const d = new Date(day + 'T12:00:00'); d.setDate(d.getDate() + n); return isoD(d); };
+  const mondayOf = (day) => { const d = new Date(day + 'T12:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return isoD(d); };
+  /** the real trades of the days from..to (to excluded), each with what the coach says about it */
+  function span(from, to) {
+    const days = [...new Set((S.trades || []).filter((t) => !t.demo && t.date >= from && t.date < to).map((t) => t.date))].sort();
+    const rows = []; days.forEach((d) => dayTrades(d).forEach((t) => rows.push({ t, c: tradeNote(t), day: d })));
+    return { days, rows };
+  }
+  const rate = (rows) => (rows.length ? Math.round(rows.filter((r) => net(r.t) > 0).length / rows.length * 100) : 0);
+  function strength(sp) {
+    const R = sp.rows, all = rate(R), cands = [];
+    const inPlan = R.filter((r) => planOf(r.day).valid && !r.c.all.some((x) => PLAN_CODES.includes(x))), off = R.filter((r) => !inPlan.includes(r));
+    if (inPlan.length >= 5 && off.length >= 5) cands.push({ gap: rate(inPlan) - rate(off), n: Math.min(inPlan.length, off.length), text: fill(T.sPlan, { a: rate(inPlan), n: inPlan.length, b: rate(off), m: off.length }) });
+    const group = (key) => { const m = new Map(); R.forEach((r) => { const k = key(r.t); if (k) { if (!m.has(k)) m.set(k, []); m.get(k).push(r); } }); return [...m.entries()].filter(([, v]) => v.length >= 5); };
+    const best = (g, tpl, label) => { if (g.length < 2) return; const [k, v] = g.sort((a, b) => rate(b[1]) - rate(a[1]) || b[1].length - a[1].length)[0]; cands.push({ gap: rate(v) - all, n: v.length, text: fill(tpl, { s: label(k), a: rate(v), n: v.length }) }); };
+    best(group((t) => String(t.setup || '').trim()), T.sSetup, (k) => k);
+    best(group((t) => { const e = min(timeOf(t)); return e == null ? '' : String(Math.floor(e / 30) * 30); }), T.sSlot, (k) => { const a = +k, b = a + 30, p = (x) => String(x).padStart(2, '0'); return T.slot(p(Math.floor(a / 60)), p(a % 60), p(Math.floor(b / 60)), p(b % 60)); });
+    const top = cands.filter((x) => x.gap >= 5).sort((a, b) => b.gap * Math.sqrt(b.n) - a.gap * Math.sqrt(a.n))[0];
+    if (top) return top.text;
+    const clean = sp.days.filter((d) => R.filter((r) => r.day === d).every((r) => !r.c.fix)).length;
+    if (clean && sp.days.length >= 3) return fill(T.sClean, { k: clean, n: sp.days.length });
+    return T.sNone;
+  }
+  function leakOf(sp) {
+    const by = {}; sp.rows.forEach((r) => { if (!r.c.fix) return; const k = r.c.fix[2], x = by[k] || (by[k] = { n: 0, c: 0 }); x.n++; x.c += net(r.t); });
+    const order = Object.keys(T.f), top = Object.entries(by).sort((a, b) => b[1].n - a[1].n || a[1].c - b[1].c || order.indexOf(a[0]) - order.indexOf(b[0]))[0];
+    return top ? { code: top[0], n: top[1].n, c: top[1].c } : null;
+  }
+  const ruleFor2 = (code, sp) => fill(T.r[code] || T.r.clean, { m: code === 'over_max_trades' ? (sp.days.map((d) => planOf(d).maxTrades).filter(Boolean).pop() || '') : +(S.settings && S.settings.max_contracts) || '' });
+  /** progress per habit, week by week (the last 5 weeks): % of trades without the habit's mistake */
+  const HABITS = { no_stop: ['no_stop'], over_max_loss: ['over_max_loss'], over_max_trades: ['over_max_trades'], revenge: ['revenge'], setup_not_in_plan: ['setup_not_in_plan'], oversized: ['oversized', 'size_up'], no_plan: ['no_plan'] };
+  function progress(day) {
+    const mon = mondayOf(day || today()), weeks = [4, 3, 2, 1, 0].map((k) => addDays(mon, -7 * k));
+    const W = weeks.map((m) => ({ mon: m, rows: span(m, addDays(m, 7)).rows }));
+    const out = [];
+    Object.entries(HABITS).forEach(([key, codes]) => {
+      const pts = W.map((w) => (w.rows.length ? { mon: w.mon, n: w.rows.length, pct: Math.round(w.rows.filter((r) => !r.c.all.some((x) => codes.includes(x))).length / w.rows.length * 100) } : { mon: w.mon, n: 0, pct: null }));
+      const had = pts.filter((x) => x.pct != null), miss = W.reduce((s, w) => s + w.rows.filter((r) => r.c.all.some((x) => codes.includes(x))).length, 0);
+      if (had.length >= 2 && miss) out.push({ key, label: T.h[key], pts, first: had[0], last: had[had.length - 1], miss });
+    });
+    return out.sort((a, b) => b.miss - a.miss).slice(0, 4);
+  }
+  const prLine = (h) => { const ago = (m) => Math.round((new Date(mondayOf(today()) + 'T12:00:00') - new Date(m + 'T12:00:00')) / 6048e5);
+    const wl = ago(h.last.mon), l = wl === 0 ? T.prNow : wl === 1 ? T.prLast : fill(T.prAgo, { w: wl });
+    return fill(T.prLine, { w: ago(h.first.mon), a: h.first.pct, l, b: h.last.pct }).replace(/^./, (m) => m.toUpperCase()); };
+  const bars = (h) => `<span class="co-bars" aria-hidden="true">${h.pts.map((x) => `<i class="${x.pct == null ? 'none' : ''}" style="--h:${x.pct == null ? 6 : Math.max(8, x.pct)}%"></i>`).join('')}</span>`;
+  const row = (label, text) => `<p class="co-row"><b>${label}</b><span>${esc2(text)}</span></p>`;
+  let wCache = { k: '', v: '' };
+  const tradesKey = () => [(S.trades || []).length, (S.trades || []).reduce((m, t) => (t.updated_at > m ? t.updated_at : m), ''), (S.journals || []).reduce((m, x) => (x.updated_at > m ? x.updated_at : m), ''), today()].join('|');
+  /** the Friday recap (weekly sheet, step 0): the week, in % and counts (the sheet shows one dollar amount: the payouts) */
+  function weekHtml(mon) {
+    const k = 'w' + mon + tradesKey(); if (wCache.k === k) return wCache.v;
+    const sp = span(mon, addDays(mon, 7)); let v = '';
+    if (sp.rows.length) {
+      const lk = leakOf(sp), hp = lk && progress(addDays(mon, 4)).find((h) => (HABITS[h.key] || []).includes(lk.code));
+      v = `<div class="co-week" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.title}</b><small>${T.wkT}</small></div>
+        ${row(T.strong, strength(sp))}${row(T.leak, lk ? fill(lk.n === 1 ? T.lk1 : T.lk, { w: T.w[lk.code], k: lk.n, n: sp.rows.length, c: '' }).replace(/^./, (m) => m.toUpperCase()) : fill(T.lkNone, { n: sp.rows.length }))}
+        ${row(T.ruleW, ruleFor2(lk ? lk.code : 'clean', sp))}${hp && hp.first.mon !== hp.last.mon ? `<p class="co-own">${esc2(prLine(hp))}</p>` : ''}</div>`;
+    }
+    wCache = { k, v }; return v;
+  }
+  /** the Stats page, at the top: the last 4 weeks, then the progress per habit */
+  let sCache = { k: '', v: '' };
+  function statsHtml() {
+    const k = 's' + tradesKey(); if (sCache.k === k) return sCache.v;
+    const to = addDays(today(), 1), sp = span(addDays(to, -28), to); let v = '';
+    if (sp.rows.length) {
+      const lk = leakOf(sp), pr = progress(today());
+      v = `<section class="surface co co-stats" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.stT}</b><small>${esc2(fill(T.stSub, { n: sp.rows.length }))}</small></div>
+        ${row(T.strong, strength(sp))}${row(T.leak, lk ? fill(lk.n === 1 ? T.lk1 : T.lk, { w: T.w[lk.code], k: lk.n, n: sp.rows.length, c: lk.c < 0 ? ` (${sgn(lk.c)})` : '' }).replace(/^./, (m) => m.toUpperCase()) : fill(T.lkNone, { n: sp.rows.length }))}
+        ${row(T.rule, ruleFor2(lk ? lk.code : 'clean', sp))}
+        ${pr.length ? `<div class="co-prog"><p class="co-prog-h"><b>${T.prT}</b><small>${T.prHelp}</small></p>${pr.map((h) => `<div class="co-pr"><span class="co-pr-t"><b>${esc2(h.label.replace(/^./, (m) => m.toUpperCase()))}</b><small>${esc2(prLine(h))}</small></span>${bars(h)}</div>`).join('')}</div>` : ''}
+        ${aiMore('ai-review', '')}</section>`;
+    }
+    sCache = { k, v }; return v;
+  }
+  function paintStats() {
+    if (!/^#analytics/.test(location.hash || '')) return;
+    const first = document.querySelector('#main .ikpis'); if (!first) return;
+    const host = first.parentElement && first.parentElement.id !== 'main' ? first.parentElement : first;   // before the Pro lock: the coach is for every plan
+    const html = statsHtml(); let el = document.querySelector('#main .co-stats');
+    if (!html) { if (el) el.remove(); return; }
+    if (el && el._h === html && el.nextElementSibling === host) return;
+    const tmp = document.createElement('div'); tmp.innerHTML = html; const fresh = tmp.firstElementChild; fresh._h = html;
+    if (el) el.remove(); host.before(fresh);
+  }
+
   /* ── how it reads ── */
   const IC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>';
   const OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
@@ -560,12 +672,12 @@
     };
   }
 
-  const paint = () => { try { paintToday(); paintTrade(); paintPlan(); paintReview(); watchLimits(); } catch (e) { /* the coach never blocks the app */ } };
+  const paint = () => { try { paintToday(); paintTrade(); paintPlan(); paintReview(); paintStats(); watchLimits(); } catch (e) { /* the coach never blocks the app */ } };
   // the bell's words for these alerts (one type, four keys: daily limit or drawdown, 75 % or 100 %)
   const N = {
-    en: { 'prop_dll75.title': 'Daily limit: {pct} % used', 'prop_dll75.body': '{account}: ${used} of ${limit}. Keep your size, or stop here.',
+    en: { 'prop_dll75.title': 'Daily limit: {pct}% used', 'prop_dll75.body': '{account}: ${used} of ${limit}. Keep your size, or stop here.',
       'prop_dll100.title': 'Daily limit reached', 'prop_dll100.body': '{account}: ${limit} lost today. Your session is over on this account.',
-      'prop_dd75.title': 'Drawdown: {pct} % used', 'prop_dd75.body': '{account}: ${left} of room left before the limit. Trade smaller until it comes back.',
+      'prop_dd75.title': 'Drawdown: {pct}% used', 'prop_dd75.body': '{account}: ${left} of room left before the limit. Trade smaller until it comes back.',
       'prop_dd100.title': 'Drawdown limit reached', 'prop_dd100.body': '{account}: the account’s max loss is reached. Check its status with your firm.' },
     fr: { 'prop_dll75.title': 'Limite du jour : {pct} % utilisés', 'prop_dll75.body': '{account} : {used} $ sur {limit} $. Garde ta taille, ou arrête-toi ici.',
       'prop_dll100.title': 'Limite du jour atteinte', 'prop_dll100.body': '{account} : {limit} $ perdus aujourd’hui. Ta séance est finie sur ce compte.',
@@ -581,5 +693,5 @@
   const appRender = window.render;
   window.render = function () { const out = appRender.apply(this, arguments); paint(); return out; };
   new window.SweepMO(paint).observe(document.body, { childList: true, subtree: true });
-  window.SweepCoach = { trade: tradeNote, session, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits };
+  window.SweepCoach = { trade: tradeNote, session, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress };
 })();

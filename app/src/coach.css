@@ -42,3 +42,16 @@
 .co-before .co-sig{font-weight:600;color:var(--text)}
 .co-own{color:var(--muted);font-size:13px}
 .co-bud{color:var(--text2,var(--text))}
+/* what works for you: the Friday recap and the Stats page (strength, leak, rule; the progress per habit) */
+.co-week{display:flex;flex-direction:column;gap:8px;margin:14px 0 4px;padding:14px 16px;border-radius:var(--r-tile,16px);background:var(--fill);text-align:left}
+.co-row{display:flex;flex-direction:column;gap:2px;margin:0;font-size:14px;line-height:1.45}
+.co-row b{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--muted)}
+.co-stats{margin-bottom:16px}
+.co-prog{display:flex;flex-direction:column;gap:10px;padding-top:10px;border-top:1px solid var(--line)}
+.co-prog-h{display:flex;flex-direction:column;gap:2px;margin:0}.co-prog-h b{font-size:14px}.co-prog-h small{color:var(--muted);font-size:12.5px}
+.co-pr{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
+.co-pr-t{display:flex;flex-direction:column;gap:2px;min-width:0}.co-pr-t b{font-size:14px;font-weight:600}.co-pr-t small{color:var(--muted);font-size:12.5px}
+.co-bars{display:flex;align-items:flex-end;gap:4px;height:34px;flex:0 0 auto}
+.co-bars i{display:block;width:8px;height:var(--h);border-radius:3px;background:var(--pos)}
+.co-bars i.none{background:var(--line)}
+.co-stats .co-h{flex-wrap:wrap;row-gap:2px}.co-stats .co-h small{flex-basis:100%;padding-left:38px;white-space:normal}

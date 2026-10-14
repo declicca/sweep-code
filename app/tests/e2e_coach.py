@@ -16,6 +16,9 @@ Then, brief 03 step 3 (a new trader: an account with a $1,000 daily limit, 3 tra
      with his own number (his past re-entries after a loss), and what is left (max loss, trades);
   H. the account at 80 % then 100 % of its daily limit: the « saved » message, the coach's card and the bell (« Prop firm
      alerts »), each level once.
+Then, brief 03 step 4 (5 weeks of trades, the stop broken less and less, the ORB setup always winning):
+  I. the Stats page opens with « What works for you »: the strength (best setup, its sample), the leak (the stop), the rule,
+     the progress of the stop week by week (going up); the Friday recap's coach block speaks in % and counts, no dollar.
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -43,6 +46,23 @@ Y = {
   'en': {'wait': 'Your last loss was', 'own': 'Your trades taken less than 10 min after a loss', 'left': 'before your max loss', 'd75': 'of your daily limit used', 'd100': 'daily limit reached'},
   'es': {'wait': 'Tu última pérdida fue hace', 'own': 'Tus operaciones tomadas menos de 10 min', 'left': 'antes de tu pérdida máxima', 'd75': 'de tu límite diario usado', 'd100': 'límite diario alcanzado'},
 }
+Z = {
+  'fr': {'title': 'Ce qui fonctionne pour toi', 'strong': 'Ton meilleur setup : « ORB »', 'leak': 'Le stop non respecté', 'ago': 'Il y a 4 semaines', 'rule': 'Un stop placé avant chaque entrée'},
+  'en': {'title': 'What works for you', 'strong': 'Your best setup: “ORB”', 'leak': 'The stop not respected', 'ago': '4 weeks ago', 'rule': 'A stop set before each entry'},
+  'es': {'title': 'Lo que funciona para ti', 'strong': 'Tu mejor setup: « ORB »', 'leak': 'El stop no respetado', 'ago': 'Hace 4 semanas', 'rule': 'Un stop puesto antes de cada entrada'},
+}
+HIST = """() => { put('firms', { id: 'wf', name: 'Topstep' }); put('accounts', { id: 'wa', firm_id: 'wf', name: 'TS 50K', starting_balance_c: 5000000, status: 'active', created_on: '2026-08-01' });
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const t0 = new Date(todayStr() + 'T12:00:00'), mon = new Date(t0); mon.setDate(t0.getDate() - ((t0.getDay() + 6) % 7)); let n = 0;
+  for (let w = 4; w >= 0; w--) for (let d = 0; d < 5; d++) {
+    const day = new Date(mon); day.setDate(mon.getDate() - 7 * w + d); if (day > t0) continue; const ds = iso(day);
+    put('journals', { id: ds, pre: { bias: 'bullish', max_loss: '1000', max_trades: '3', setups: ['orb', 'vwap'], saved_at: 1 } });
+    [['09:35', 'ORB', 1], ['10:40', 'VWAP', -1], ['11:15', 'ORB', 1]].forEach(([tm, st, sg], k) => {
+      const bad = (w * 5 + d + k) % 10 < (w + 1) * 2 - 1;   // the stop broken often 4 weeks ago, rarely now
+      put('trades', { id: 'w' + (++n), account_id: 'wa', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: sg * (st === 'ORB' ? 30000 : 15000), pnl_manual: true, date: ds, entry_time: tm, exit_time: tm.slice(0, 3) + '50', setup: st, discipline: { stop: bad ? 'n' : 'y' } });
+    });
+  }
+  render(); return n; }"""
 EN_ONLY = ['Your coach', 'To improve', 'In your plan', 'stop respected', 'losses in a row', 'You have', 'Rule for tomorrow', 'This week', 'without a mistake']
 TXT = "(sel) => { const e = document.querySelector(sel); return e ? e.textContent.replace(/\\s+/g, ' ').trim() : '' }"
 SEED = """() => {
@@ -196,10 +216,37 @@ def live(p, lang, phone):   # brief 03 step 3: during the session
   ok(not errs, f'{tag} G-H no page error ({errs[:2]})')
   br.close()
 
+def works(p, lang, phone):   # brief 03 step 4: what works for you
+  tag = f"{'390' if phone else '1300'}-{lang}"; z = Z[lang]
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1'); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'cw%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
+  ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'gt1'}), headers=H)
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  n = pg.evaluate(HIST); pg.wait_for_timeout(900)
+  pg.evaluate("location.hash = '#analytics'"); pg.wait_for_selector('#main .co-stats', timeout=10000); pg.wait_for_timeout(700)
+  st = pg.evaluate(TXT, '#main .co-stats')
+  first = pg.evaluate("(() => { const c = document.querySelector('#main .co-stats'), k = document.querySelector('#main .ikpis'); return !!(c && k && (c.compareDocumentPosition(k) & Node.DOCUMENT_POSITION_FOLLOWING)) })()")
+  pr = pg.evaluate("SweepCoach.progress().map((h) => [h.key, h.first.pct, h.last.pct])")
+  ok(z['title'] in st and z['strong'] in st and z['leak'] in st and z['rule'] in st and first, f'{tag} I Stats: « {z["title"]} » first, strength, leak, rule ({n} trades)')
+  stop = next((x for x in pr if x[0] == 'no_stop'), None)
+  ok(z['ago'] in st and stop and stop[1] < stop[2], f'{tag} I the stop week by week, going up ({stop})')
+  if phone: pg.screenshot(path=f'/tmp/co_{tag}_stats.png')
+  mon = pg.evaluate("(() => { const d = new Date(todayStr() + 'T12:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })()")
+  wk = pg.evaluate("(m) => { const d = document.createElement('div'); d.innerHTML = SweepCoach.weekHtml(m); return d.textContent }", mon)
+  ok(wk and '$' not in wk and z['rule'] in wk, f'{tag} I the Friday recap: the coach in % and counts, no dollar ({wk[:80]}…)')
+  ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} I nothing wider than the window, no page error ({errs[:2]})')
+  br.close()
+
 with sync_playwright() as p:
   for lang, phone in (('fr', True), ('en', False), ('es', True)):
     print(f"— {'phone' if phone else 'computer'} {lang}")
     run(p, lang, phone)
     live(p, lang, phone)
+    works(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')
 sys.exit(1 if fails else 0)

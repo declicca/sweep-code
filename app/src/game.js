@@ -1506,6 +1506,7 @@
           ${b.work ? `<li><b>${wq('b_work')}</b><span>${esc(nbFr(wq('b_work_v', { q: b.work.q })))}</span></li>` : ''}
           ${b.payouts > 0 ? `<li><b>${wq('b_pay')}</b><span class="pos">${money(b.payouts)}</span></li>` : ''}
         </ul>
+        ${window.SweepCoach && SweepCoach.weekHtml ? SweepCoach.weekHtml(d.week) : ''}
         <div class="wk-share">${b.payouts > 0 ? `<div class="g-sound wk-sh-pay"><span><b>${wq('sh_pay')}</b></span><label class="sw"><input type="checkbox" data-wk-pay aria-label="${esc(wq('sh_pay'))}"><i></i></label></div>` : ''}
           <button type="button" class="btn wk-sh" data-g="share" data-k="week">${svg('share')}${wq('sh_btn')}</button></div>
         <button type="button" class="btn primary g-big" data-g="wk-next">${wq('to_q')}</button>`;
