@@ -629,7 +629,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - `run-all.sh --all` et `ops/tests.php` : non lancés.
 
 ### Bugs connus et points à surveiller
-- `e2e_sync_ui` a échoué 2 fois sur la machine GitHub (attente dépassée, 10 s puis 20 s), jamais en local : relancer avant de chercher une cause ; l'annotation dit maintenant où il attendait.
+- `e2e_sync_ui` a échoué 3 fois sur la machine GitHub (attente dépassée dans Réglages › Connexions, 10 s puis 20 s ; la 3e le 14 oct.), jamais en local, même tous les cœurs occupés. Depuis le 14 oct., s'il ne voit pas les lignes de Connexions en 20 s, il écrit « RETRY settings: … seen {…} » (groupe ouvert, section, lignes, temps de `api/sync`), recharge la page une fois, et n'échoue qu'à la 2e fois : chercher ce « RETRY » dans les journaux de GitHub pour trouver la cause.
 - Données d'exemple : tous les comptes d'exemple affichent « Drawdown dépassé » (à revoir avec la partie 14 du brief 02).
 - Un compte dépassé glissé en tête retombe en bas (règle « comptes dépassés en bas ») : voulu, mais peut surprendre.
 - La fenêtre d'ajout de trade s'ouvre avec un léger délai après le toucher ; la célébration unique d'un lot importé n'a été vérifiée qu'un jour sans célébration.

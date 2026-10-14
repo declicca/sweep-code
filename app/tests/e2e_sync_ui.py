@@ -79,10 +79,20 @@ def in_screen(pg):   # the open sheet is inside the window and nothing in it sti
     for(const b of e.querySelectorAll('button,a,input,code')){ if(!b.offsetParent) continue; const q=b.getBoundingClientRect(); if(q.right>r.right+1||q.left<r.left-1) return 'sticks out: '+(b.textContent||'').slice(0,30); }
     return ''}""")
 
+SEEN = """async () => { const g = document.querySelector('#main details.nav-sgd[data-i="3"]'), s = document.querySelector('#main .sy-sec'), t0 = Date.now(); let api = '';
+  try { const r = await fetch('api/sync', { headers: { 'X-Requested-With': 'fetch' } }); api = r.status + ' in ' + (Date.now() - t0) + ' ms'; } catch (e) { api = String(e); }
+  return { open: g ? g.open : null, in_group: !!(g && s && g.contains(s)), section: s ? s.textContent.trim().slice(0, 60) : null, rows: document.querySelectorAll('#main .sy-sec .sy-row').length, api }; }"""
 def settings(pg):   # (waits of 20 s: the GitHub runner with 3 groups at once can take more than 10 s, 12 Oct.)
-  pg.goto(B + '/#settings'); pg.wait_for_selector('#main details.nav-sgd[data-i="3"]', timeout=15000)
-  pg.evaluate("document.querySelector('#main details.nav-sgd[data-i=\"3\"]').open = true")
-  pg.wait_for_selector('#main .sy-sec .sy-row', timeout=20000); pg.wait_for_timeout(300)
+  # 14 Oct.: a 3rd time on GitHub only (never here, even with every core busy): it says what it saw, then reloads once
+  for k in (0, 1):
+    pg.goto(B + '/#settings'); pg.wait_for_selector('#main details.nav-sgd[data-i="3"]', timeout=15000)
+    pg.evaluate("document.querySelector('#main details.nav-sgd[data-i=\"3\"]').open = true")
+    try: pg.wait_for_selector('#main .sy-sec .sy-row', timeout=20000); break
+    except Exception:
+      if k: raise
+      print(f'RETRY settings: no Connections row after 20 s, seen {pg.evaluate(SEEN)}', flush=True)
+      pg.reload()
+  pg.wait_for_timeout(300)
 
 def case_fr(p, phone):
   tag = '390' if phone else '1300'
