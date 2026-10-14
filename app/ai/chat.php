@@ -12,14 +12,15 @@ require_once __DIR__ . '/ai-stats.php';
 require_once __DIR__ . '/ai-features.php';
 
 const ASK_GUIDE = "Sweep app guide (for how-to questions):\n"
-    . "- Add a trade: the + button opens the trade ticket (symbol, buy/sell, time, contracts, entry, stop, target, exit). Exit time fills itself. After saving, step 2 asks for the discipline checklist and emotional state.\n"
-    . "- Log with AI: in the ticket, 'Log with AI' turns plain words or a screenshot into draft trades.\n"
-    . "- Trade review: open a trade for the chart, the 4-step review (checklist, psychology, notes, screenshots), setup, fees, tags, AI feedback.\n"
-    . "- Insights: performance score, P&L by session/setup/day, patterns to watch, deep dives (discipline, behavior, recovery, news).\n"
-    . "- Calendar: P&L heat map with U.S. news; Journal: daily pre-market and post-market, weekly review.\n"
-    . "- News: U.S. economic calendar; Sweep AI fills released values and writes a market impact report (flash after 1 minute, full after 30 minutes).\n"
-    . "- Accounts: prop firm accounts and their rules (drawdown, target, daily limit); closed accounts keep their history. Payouts & expenses: net = payouts - expenses; 'Scan a receipt' files them with AI.\n"
-    . "- Import: Trades > Import CSV (Tradovate performance report). Settings: checklist, risk rules, language, theme, export JSON, delete account.";
+    . "- Today: the day's routine (Plan, Execution, Review rings), the coach, the news of the day, your accounts.\n"
+    . "- Add a trade: the + button: by hand (symbol, buy/sell, time, contracts, entry, stop, exit) or from a screenshot of your platform. Copy it to your other accounts there or later from the trade's page (« Copy to my group »).\n"
+    . "- Trade page: the coach's verdict, « Answer your coach », the full review (checklist, psychology, notes, screenshots), the chart, AI feedback.\n"
+    . "- Stats: net P&L, win rate, profit factor (from 5 trades), « What works for you », trends, deep dives (discipline, behavior, recovery, sessions, time of day, setups, news).\n"
+    . "- Calendar: P&L by day with U.S. news. Journal: the day's plan and review, the weekly review.\n"
+    . "- Accounts: prop firm accounts with their firm's rules (drawdown, target, daily limit, payout conditions); « Ready for a payout » on an account's page says what is missing, « Record my request » fills the payout.\n"
+    . "- My money (payouts and expenses): « + Add payout » / « + Add expense »; net = payouts - expenses.\n"
+    . "- Import: CSV from Tradovate, Rithmic R|Trader Pro, TopstepX or TradingView; automatic sync from NinjaTrader 8 and Quantower (Settings > Data > Connections).\n"
+    . "- Settings: profile, checklist, risk rules, notifications, plan, data (export everything as a ZIP, delete the account). Help: the avatar menu > Help.";
 
 function ask_money($c): ?string { if ($c === null) return null; $v = $c / 100; return ($v < 0 ? '-' : '') . '$' . number_format(abs($v), 2); }
 
@@ -95,14 +96,19 @@ function sweep_chat(PDO $pdo, string $uid, array $b, string $lang): array
         . "- About markets: you may describe today's U.S. economic releases and their reports above. Never predict prices, never give trade signals, entries or financial advice; say so kindly if asked.\n"
         . "- Be warm and brief (max 110 words). Numbers first. Plain text, no markdown tables.\n"
         . "- action (optional) lets the app open a screen: new_trade, ai_log, ai_review, ai_scan, insights, calendar, news, journal, accounts, payouts, settings, import.\n"
-        . "- followups: 2-3 short questions the trader might ask next.\n\n"
+        . "- followups: 2-3 short questions the trader might ask next.\n"
+        . "- data: when the reply uses the trader's own numbers without a query, the window they come from: all_time, last_30_days, last_7_days or today (else null). Say the period and the number of trades in the reply.\n\n"
         . ($hist ? "Conversation so far:\n" . implode("\n", $hist) . "\n\n" : '')
         . "Trader: " . $msg . "\n\n"
-        . 'Return JSON: {"reply":string,"query":null|{"metric":string,"group_by":string,"filters":{}},"action":null|string,"followups":[string]}';
+        . 'Return JSON: {"reply":string,"query":null|{"metric":string,"group_by":string,"filters":{}},"data":null|string,"action":null|string,"followups":[string]}';
     $r = sai_call($pdo, $uid, 'chat', $prompt, ['system' => sai_system($lang), 'max_tokens' => 700, 'cache' => false]);
     $d = $r['data'];
     $reply = sai_str($d['reply'] ?? null, 1200) ?? '';
     $q = is_array($d['query'] ?? null) ? $d['query'] : null;
+    // the trades an answer about the trader's data comes from, counted here (never by the model): « Based on your 48 trades … »
+    $span = function (array $l): ?array { if (!$l) return null; $ds = array_column($l, 'date'); sort($ds); return ['trades' => count($l), 'from' => $ds[0], 'to' => end($ds)]; };
+    $win = ['all_time' => $all, 'last_30_days' => $since(30), 'last_7_days' => $since(7), 'today' => array_values(array_filter($all, fn($t) => $t['date'] === $today))];
+    $basis = !$q && is_string($d['data'] ?? null) && isset($win[$d['data']]) ? $span($win[$d['data']]) : null;
     if ($q) {
         $metric = in_array($q['metric'] ?? '', SAI_METRICS, true) ? $q['metric'] : 'net_pnl';
         $by = in_array($q['group_by'] ?? '', SAI_GROUPS, true) ? $q['group_by'] : 'none';
@@ -115,6 +121,7 @@ function sweep_chat(PDO $pdo, string $uid, array $b, string $lang): array
         if (is_array($f['weekdays'] ?? null)) $clean['weekdays'] = array_values(array_filter(array_map('intval', $f['weekdays']), fn($x) => $x >= 1 && $x <= 7));
         $trades = sai_filter($all, $clean, $accounts);
         $m = sai_metrics($trades);
+        $basis = $span($trades);
         [$value, $kind] = sai_metric_value($metric, $m);
         $rows = $by !== 'none' ? sai_grouped($trades, $by, $metric, $accounts) : [];
         $ranked = array_values(array_filter($rows, fn($x) => $x['value'] !== null && $x['trades'] >= 1));
@@ -128,6 +135,7 @@ function sweep_chat(PDO $pdo, string $uid, array $b, string $lang): array
         'reply' => $reply,
         'action' => in_array($d['action'] ?? null, $actions, true) ? $d['action'] : null,
         'followups' => array_values(array_filter(array_map(fn($x) => sai_str($x, 90), array_slice((array) ($d['followups'] ?? []), 0, 3)))),
+        'basis' => $basis,   // {trades, from, to} when the answer speaks about the trader's data
         'cached' => $r['cached'], 'usage' => sai_usage($pdo, $uid),
     ];
 }

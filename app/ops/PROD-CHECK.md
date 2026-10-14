@@ -39,5 +39,14 @@
 
 ## 4. Sweep AI
 
-- `sweep-private/ai-config.php` présent. Admin › Santé : clé réglée ou manquante, budget quotidien global, limite par trader et par jour, dépensé aujourd'hui (jamais la clé elle-même).
-- Budget atteint : l'IA répond « budget » (503) ; ce que voit le trader est vérifié avec la partie 9 du brief 02.
+- `sweep-private/ai-config.php` présent. Admin › Santé : clé réglée ou manquante, budget quotidien global, limite par trader et par jour (avec la facturation, celle de chaque forfait : « Free 3 · Pro 50 · Elite 200 »), dépensé aujourd'hui (jamais la clé elle-même).
+- Budget atteint : l'IA répond « budget » (503) ; ce que voit le trader : « Sweep AI avec la vraie clé » ci-dessous.
+
+## Sweep AI avec la vraie clé (brief 02, partie 9)
+
+- **Vérifié en local** (sans clé, réponses simulées : `SWEEP_AI_CHAT_MOCK`) : `tests/ai_chat_test.php` (une réponse et l'écran à ouvrir ; « d'après N trades » compté par Sweep ; le quota du forfait, sa remise à minuit New York ; une panne rend la question ; le budget du jour atteint ; l'IA éteinte) et `tests/e2e_ai.py` (la recherche, la bulle, l'aide quand l'IA ne répond pas).
+- **À faire sur le serveur, avec un compte de test Pro ou Elite** (son quota d'IA est utilisé, environ 0,02 $ ; Free n'a que 3 questions par jour : le script s'arrête s'il ne reste pas 20 actions IA) :
+  `/usr/local/bin/php /home/matnsabc/app.makeitsweep.com/ops/ai-check.php <nom du compte de test> fr`
+  Le script pose 20 questions types de traders (comment ajouter un payout, pourquoi mon compte est rouge, mes pires heures…), une à la fois, et affiche le temps de réponse, la réponse, l'écran proposé, les données citées et ce qu'une bonne réponse doit contenir. Noter chaque réponse 0 (fausse), 1 (en partie) ou 2 (juste) ; un chiffre inventé = 0. Le résumé final donne la médiane et le temps le plus long.
+- Le budget du jour atteint se voit dans Admin › Santé (« Clé Sweep AI » : dépensé sur le budget) ; la bulle dit alors « Sweep AI est en pause pour aujourd'hui » et propose les pages et l'aide de la question.
+

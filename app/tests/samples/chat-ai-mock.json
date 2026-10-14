@@ -1,0 +1,54 @@
+{
+ "_": "Ask Sweep's stand-in for the tests (ai-core.php sai_chat_mock, SWEEP_AI_CHAT_MOCK): the first rule whose « match » is in the question answers.",
+ "rules": [
+  {
+   "match": "payout",
+   "out": {
+    "reply": "My money > + Add a payout.",
+    "action": "payouts",
+    "followups": [],
+    "data": null
+   }
+  },
+  {
+   "match": "mois",
+   "out": {
+    "reply": "Ce mois-ci : +$650.",
+    "data": "last_30_days",
+    "followups": []
+   }
+  },
+  {
+   "match": "month",
+   "out": {
+    "reply": "This month: +$650.",
+    "data": "last_30_days",
+    "followups": []
+   }
+  },
+  {
+   "match": "este mes",
+   "out": {
+    "reply": "Este mes: +$650.",
+    "data": "last_30_days",
+    "followups": []
+   }
+  },
+  {
+   "match": "panne",
+   "error": "provider"
+  },
+  {
+   "match": "outage",
+   "error": "provider"
+  },
+  {
+   "match": "caída",
+   "error": "provider"
+  }
+ ],
+ "default": {
+  "reply": "OK",
+  "followups": []
+ }
+}

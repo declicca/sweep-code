@@ -247,6 +247,8 @@ function sai_billing(): bool { return function_exists('billing_on') && billing_o
 
 function sai_call_run(PDO $pdo, string $uid, string $task, string $prompt, array $opts, array $cfg, string $system, $image, bool $useCache, string $key): array
 {
+    // tests only: SWEEP_AI_CHAT_MOCK (a JSON file) answers the chat without calling Google; never set on the server
+    if ($task === 'chat' && ($mf = (string) getenv('SWEEP_AI_CHAT_MOCK')) !== '' && is_file($mf)) return sai_chat_mock($pdo, $uid, $prompt, $mf);
     $parts = [['text' => $prompt]];
     if ($image) $parts[] = ['inlineData' => ['mimeType' => $image['mime'], 'data' => $image['data']]];
     $body = [
@@ -294,6 +296,21 @@ function sai_call_run(PDO $pdo, string $uid, string $task, string $prompt, array
     }
     if ($useCache) sai_cache_put($pdo, $uid, $key, $task, $data);
     return ['data' => $data, 'cached' => false];
+}
+
+/** The chat's test stand-in: the first rule whose « match » is in the trader's message answers (or fails with its « error »). */
+function sai_chat_mock(PDO $pdo, string $uid, string $prompt, string $file): array
+{
+    $m = json_decode((string) file_get_contents($file), true) ?: [];
+    $i = strrpos($prompt, "\nTrader: "); $j = strrpos($prompt, "\n\nReturn JSON");   // the latest message (the history has earlier ones)
+    $msg = $i !== false && $j !== false && $j > $i ? substr($prompt, $i + 9, $j - $i - 9) : '';
+    $rule = null;
+    foreach ((array) ($m['rules'] ?? []) as $r) if (isset($r['match']) && mb_stripos($msg, (string) $r['match']) !== false) { $rule = $r; break; }
+    $rule = $rule ?? ['out' => $m['default'] ?? ['reply' => 'OK']];
+    $codes = ['network' => 502, 'provider' => 502, 'provider_busy' => 503, 'bad_output' => 502];
+    if (!empty($rule['error'])) throw new SaiError((string) $rule['error'], $codes[$rule['error']] ?? 502);
+    sai_q($pdo, 'INSERT INTO ai_log (user_id, task, input_tokens, output_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?)', [$uid, 'chat', 0, 0, (float) ($rule['cost'] ?? 0.0001), sai_now()]);
+    return ['data' => (array) ($rule['out'] ?? []), 'cached' => false];
 }
 
 function sai_http(array $cfg, array $body): array

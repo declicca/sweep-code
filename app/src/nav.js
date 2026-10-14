@@ -219,8 +219,11 @@ window.SweepMO = window.SweepMO || class {
     { l: { en: 'Subscription', fr: 'Abonnement', es: 'Suscripción' }, k: 'subscription abonnement suscripcion forfait billing facturation facturacion pro elite upgrade', go: '#plan' },
     { l: { en: 'Export all my data (ZIP)', fr: 'Exporter toutes mes données (ZIP)', es: 'Exportar todos mis datos (ZIP)' }, k: 'export exporter exportar zip donnees data datos sauvegarde backup', go: '#settings' },
     { l: { en: 'Import trades (Tradovate, Rithmic, TopstepX)', fr: 'Importer des trades (Tradovate, Rithmic, TopstepX)', es: 'Importar operaciones (Tradovate, Rithmic, TopstepX)' }, k: 'import importer importar csv tradovate rithmic topstepx topstep', go: '#import' },
+    { l: { en: 'Add a payout', fr: 'Ajouter un payout', es: 'Añadir un payout' }, k: 'ajouter add anadir enregistrer record registrar payout payouts retrait withdrawal retiro demande request solicitud', go: () => { try { sessionStorage.setItem('sw.openPayout', '1'); } catch (e) { /* private mode */ } location.hash = '#payouts'; } },
+    { l: { en: 'Add a trade', fr: 'Ajouter un trade', es: 'Añadir una operación' }, k: 'ajouter add anadir nouveau new nuevo trade trades operacion operaciones saisir enter capture screenshot', go: () => { if (typeof openTicket === 'function') openTicket(); } },
+    { l: { en: 'My best and worst hours', fr: 'Mes meilleures et pires heures', es: 'Mis mejores y peores horas' }, k: 'heure heures hour hours hora horas moment time pire pires worst peor peores meilleure meilleures best mejor mejores', go: '#analytics/time' },
     { l: { en: 'My money', fr: 'Mon argent', es: 'Mi dinero' }, k: 'argent money dinero payout payouts depenses expenses gastos retrait withdrawal retiro frais fees', go: '#payouts' },
-    { l: { en: 'Accounts', fr: 'Comptes', es: 'Cuentas' }, k: 'accounts comptes cuentas compte account cuenta prop drawdown regles rules reglas', go: '#accounts' },
+    { l: { en: 'Accounts', fr: 'Comptes', es: 'Cuentas' }, k: 'accounts comptes cuentas compte account cuenta prop drawdown regles rules reglas rouge red rojo limite limit perte loss perdida brule breached', go: '#accounts' },
     { l: { en: 'Economic news', fr: 'Nouvelles économiques', es: 'Noticias económicas' }, k: 'news nouvelles noticias calendrier economique economic calendar calendario economico cpi nfp fomc', go: '#news' },
     { l: { en: 'Stats', fr: 'Stats', es: 'Stats' }, k: 'stats statistiques statistics estadisticas analyses analytics insights analisis', go: '#analytics' },
     { l: { en: 'Calendar', fr: 'Calendrier', es: 'Calendario' }, k: 'calendar calendrier calendario', go: '#calendar' },
@@ -244,14 +247,36 @@ window.SweepMO = window.SweepMO || class {
     missT = setTimeout(() => { missLast = v; try { fetch('api/search-miss', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ q: v, lang: LANG }) }).catch(() => {}); } catch (e) { /* offline */ } }, 1500);
   }
   const norm = (v) => String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  /* brief 02 part 9: a question in several words (« comment ajouter un payout », « pourquoi mon compte est rouge ») finds the
+     features and the help articles it is about — the search, the help's own search, and Sweep AI when it cannot answer */
+  const STOP = new Set('comment pourquoi quoi quel quelle quels quelles est sont mon mes ton tes son ses une des les dans pour avec sur par que qui plus moins faire fait voir how why what which where when does the and for with your you can are this that como por que cual cuales donde cuando mis tus una los las del con para esta este son'.split(' '));
+  const tokens = (q) => norm(q).split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !STOP.has(w));
+  const fits = (t, w) => w.length >= 3 && (w.startsWith(t) || (t.length >= 4 && t.startsWith(w)));
+  function helpFind(q, n) {
+    const ts = tokens(q), s = norm(q).trim(); if (!s) return [];
+    const out = [];
+    FIND.forEach((f, i) => {
+      const words = (norm(f.l[LANG] || f.l.en) + ' ' + norm(f.k)).split(/[^a-z0-9]+/);
+      let sc = ts.filter((t) => words.some((w) => fits(t, w))).length;
+      if (norm(f.l[LANG] || f.l.en).includes(s)) sc += 3;
+      if (sc) out.push({ sc: sc + 0.5, i, kind: 'page', t: f.l[LANG] || f.l.en, run: typeof f.go === 'string' ? () => { location.hash = f.go; } : f.go });
+    });
+    const arts = window.SweepGuide && SweepGuide.list ? SweepGuide.list() : [];
+    arts.forEach((a) => {
+      const ti = norm(a.title).split(/[^a-z0-9]+/), bo = norm(a.body).split(/[^a-z0-9]+/);
+      const sc = ts.filter((t) => ti.some((w) => fits(t, w))).length + ts.filter((t) => bo.some((w) => fits(t, w))).length * 0.2;   // (a page first, its help article right after)
+      if (sc >= 1) out.push({ sc, kind: 'help', t: a.title, run: () => SweepGuide.article(a.id) });
+    });
+    return out.sort((x, y) => y.sc - x.sc || (x.i ?? 99) - (y.i ?? 99)).slice(0, n || 6);
+  }
+  window.SweepHelp = { find: helpFind, tokens, norm };
   if (typeof cmdItems === 'function') {
     const orig = cmdItems;
     cmdItems = function (q) {
       const base = orig.apply(this, arguments), s = norm(q).trim();
       if (!s) return base;
-      const g = { en: 'Features', fr: 'Fonctions', es: 'Funciones' }[LANG] || 'Features';
-      const hits = FIND.filter((f) => norm(f.l[LANG] || f.l.en).includes(s) || norm(f.k).split(' ').some((w) => w.startsWith(s) || (s.length > 3 && w.includes(s))))
-        .map((f) => ({ g, t: f.l[LANG] || f.l.en, run: typeof f.go === 'string' ? () => { location.hash = f.go; } : f.go }));
+      const g = { en: 'Features', fr: 'Fonctions', es: 'Funciones' }[LANG] || 'Features', gh = { en: 'Help', fr: 'Aide', es: 'Ayuda' }[LANG] || 'Help';
+      const hits = helpFind(q, 8).map((h) => ({ g: h.kind === 'help' ? gh : g, t: h.t, run: h.run }));   // best first, the help articles too
       const seen = new Set(hits.map((h) => norm(h.t)));
       const all = [...hits, ...base.filter((b) => !seen.has(norm(b.t)))];
       if (!all.length) missed(q);

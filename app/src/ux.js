@@ -915,7 +915,7 @@
         ${k.error ? `<small class="neg">${esc(k.error)}</small>` : k.note ? `<small>${esc(k.note)}</small>` : ''}
         <details><summary>${x.cmd}</summary><code>${esc(k.schedule + '  ' + k.command)}</code></details></li>`; }).join('');
     const C = d.config || {}, money2 = (v) => (typeof money === 'function' ? money(Math.round(Number(v || 0) * 100), { sign: false, dec: 2 }) : '$' + Number(v || 0).toFixed(2));   // the language's format
-    const svc = [['smtp', C.smtp], ['ai', C.ai, C.ai ? x.aiUse.replace('{a}', money2(C.ai_spent_usd)).replace('{b}', money2(C.ai_budget_usd)).replace('{n}', C.ai_user_limit) : ''],
+    const svc = [['smtp', C.smtp], ['ai', C.ai, C.ai ? x.aiUse.replace('{a}', money2(C.ai_spent_usd)).replace('{b}', money2(C.ai_budget_usd)).replace('{n}', C.ai_plan_limits ? Object.entries(C.ai_plan_limits).map(([p, n]) => ({ free: 'Free', pro: 'Pro', elite: 'Elite' })[p] + ' ' + n).join(' · ') : C.ai_user_limit) : ''],
       ['billing', C.billing, C.billing ? (C.billing_live ? x.live : x.test) : ''], ['webhook', C.webhook], ['chart', C.chart], ['backup', C.backup], ['offsite', C.offsite], ['app_url', C.app_url]];
     return `<div class="sec-h"><h2>${x.h}</h2></div><p class="muted ux-hl-sub">${x.sub}</p><ul class="ux-pr-list ux-hl-list">${rows}</ul>
       <h4>${x.svc}</h4><ul class="ux-hl-cfg">${svc.map(([k, on, extra]) => `<li class="${on ? 'on' : 'off'}" data-hl="${k}"><span>${esc(x.c[k][0])}</span><b>${on ? x.yes : x.no}</b><small>${esc(on ? (extra || '') : x.c[k][1])}</small></li>`).join('')}</ul>`;

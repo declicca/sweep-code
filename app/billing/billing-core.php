@@ -306,7 +306,8 @@ function sb_founding(PDO $pdo, string $uid, array $user, array $eff): array
 
 function sb_period(string $metric): string
 {
-    return $metric === 'ai_reviews' ? gmdate('Y-m', sb_now()) : gmdate('Y-m-d', sb_now());
+    $d = (new DateTime('@' . sb_now()))->setTimezone(new DateTimeZone('America/New_York'));   // New York's day and month (« they reset at midnight, New York »)
+    return $metric === 'ai_reviews' ? $d->format('Y-m') : $d->format('Y-m-d');
 }
 
 function sb_usage(PDO $pdo, string $uid, string $metric): int
@@ -327,9 +328,9 @@ function sb_usage_inc(PDO $pdo, string $uid, string $metric, int $by = 1): void
 
 function sb_reset_at(string $metric): string
 {
-    $n = sb_now();
-    $t = $metric === 'ai_reviews' ? gmmktime(0, 0, 0, (int) gmdate('n', $n) + 1, 1, (int) gmdate('Y', $n)) : gmmktime(0, 0, 0, (int) gmdate('n', $n), (int) gmdate('j', $n) + 1, (int) gmdate('Y', $n));
-    return gmdate('c', $t);
+    $d = (new DateTime('@' . sb_now()))->setTimezone(new DateTimeZone('America/New_York'));
+    $d->modify($metric === 'ai_reviews' ? 'first day of next month midnight' : 'tomorrow midnight');   // the next New York midnight (or month)
+    return gmdate('c', $d->getTimestamp());
 }
 
 /**

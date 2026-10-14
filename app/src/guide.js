@@ -150,8 +150,8 @@
   }
   function showIndex(q) {
     const b = helpEl && helpEl.querySelector('.gd-body'); if (!b) return;
-    const ql = q.trim().toLowerCase();
-    const match = (a) => !ql || (pick(a.title) + ' ' + pick(a.body).join(' ')).toLowerCase().includes(ql);
+    const ql = q.trim().toLowerCase(), H = window.SweepHelp, nq = H ? H.norm(q).trim() : ql, ts = H ? H.tokens(q) : [];
+    const match = (a) => { if (!ql) return true; const tx = H ? H.norm(pick(a.title) + ' ' + pick(a.body).join(' ')) : (pick(a.title) + ' ' + pick(a.body).join(' ')).toLowerCase(); return tx.includes(nq) || (ts.length > 0 && ts.some((t) => tx.includes(t))); };
     const cats = Object.keys(T.en.cats);
     const list = cats.map((c) => { const items = A.filter((a) => a.cat === c && match(a)); return items.length ? `<h4>${t('cats.' + c)}</h4><div class="gd-list">${items.map((a) => `<button type="button" class="gd-item" data-gd="art" data-v="${a.id}"><span>${esc(pick(a.title))}</span>${I.arrow}</button>`).join('')}</div>` : ''; }).join('');
     b.innerHTML = `<div class="gd-head"><h2>${t('help')}</h2><button type="button" class="gd-x" data-gd="close" aria-label="Close">${I.x}</button></div>
@@ -208,6 +208,6 @@
   };
   // after the first load, Overview shortcuts no longer replay their entrance on each re-render
   setTimeout(() => document.body.classList.add('gc-settled'), 1800);
-  window.SweepGuide = { open: openHelp, article: openHelp };
+  window.SweepGuide = { open: openHelp, article: openHelp, list: () => A.map((a) => ({ id: a.id, title: pick(a.title), body: [].concat(pick(a.body) || []).join(' ') })) };   // (the search and Sweep AI's fallback: nav.js SweepHelp)
   setTimeout(() => { try { paintChrome(); } catch (e) { /* first paint */ } }, 1200);
 })();

@@ -23,6 +23,8 @@ function sweep_health(PDO $pdo, array $cfg, string $app): array
     $c['billing'] = false; $c['webhook'] = false; $c['billing_live'] = false;
     try {
         if (function_exists('billing_on') && billing_on()) {
+            // with billing, Sweep AI's per-trader limit is each plan's (sai_call → sb_ai_consume), not ai-config's
+            foreach (['free', 'pro', 'elite'] as $p) $c['ai_plan_limits'][$p] = (int) (sb_plan_limits($p)['ai_daily'] ?? 0);
             $b = sb_config();
             $c['billing'] = trim((string) ($b['stripe_secret_key'] ?? '')) !== '';
             $c['webhook'] = trim((string) ($b['stripe_webhook_secret'] ?? '')) !== '';
