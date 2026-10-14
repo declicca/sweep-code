@@ -1,6 +1,6 @@
 {
- "version": "2026-10-13-171522",
- "checked_at": "2026-10-13T17:15:48+00:00",
+ "version": "2026-10-14-133029",
+ "checked_at": "2026-10-14T13:30:56+00:00",
  "origin": "checked",
  "firms": [
   {
@@ -542,7 +542,8 @@
            "min": 125,
            "max_pct": 50,
            "max": 3000,
-           "max_dll": 6000
+           "max_dll": 6000,
+           "split_pct": 90
           }
          }
         }
@@ -611,7 +612,8 @@
            "min": 125,
            "max_pct": 50,
            "max": 4000,
-           "max_dll": 8000
+           "max_dll": 8000,
+           "split_pct": 90
           }
          }
         }
@@ -680,7 +682,8 @@
            "min": 125,
            "max_pct": 50,
            "max": 6000,
-           "max_dll": 12000
+           "max_dll": 12000,
+           "split_pct": 90
           }
          }
         }
@@ -1341,7 +1344,7 @@
        "price": {
         "activation": 130,
         "eval_period": "month",
-        "checked": "2026-10-13"
+        "checked": "2026-10-14"
        }
       },
       {
@@ -1368,7 +1371,7 @@
        "price": {
         "activation": 130,
         "eval_period": "month",
-        "checked": "2026-10-13"
+        "checked": "2026-10-14"
        }
       },
       {
@@ -1395,7 +1398,7 @@
        "price": {
         "activation": 130,
         "eval_period": "month",
-        "checked": "2026-10-13"
+        "checked": "2026-10-14"
        }
       },
       {
@@ -1422,7 +1425,7 @@
        "price": {
         "activation": 130,
         "eval_period": "month",
-        "checked": "2026-10-13"
+        "checked": "2026-10-14"
        }
       },
       {
@@ -1449,18 +1452,14 @@
        "price": {
         "activation": 130,
         "eval_period": "month",
-        "checked": "2026-10-13"
+        "checked": "2026-10-14"
        }
       }
      ],
      "evidence": [
       {
        "url": "https://takeprofittrader.com",
-       "quote": "Number of Trading Days to \"PRO Account\" 3 Days"
-      },
-      {
-       "url": "https://takeprofittrader.com",
-       "quote": "Fees for PRO Account One Time $130 Fee"
+       "quote": "The below table displays how Take Profit Trader differentiates itself from our competitors."
       }
      ],
      "note": {
