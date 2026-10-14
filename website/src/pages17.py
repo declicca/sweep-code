@@ -134,8 +134,8 @@ VS = [
              "Non. Sweep se concentre sur le journal, les règles des prop firms et ta routine quotidienne. Si le replay ou le backtesting fait partie de ta façon de travailler, TradeZella te conviendra mieux aujourd’hui.",
              "No. Sweep se centra en el diario, las reglas de las prop firms y tu rutina diaria. Si el replay o el backtesting forman parte de tu forma de trabajar, hoy TradeZella te encajará mejor."))],
   "desc": T("Sweep vs TradeZella for futures prop firm traders: free plan, prices, trade import, firm rules, replay and backtesting, compared side by side.",
-            "Sweep vs TradeZella pour les traders de prop firms en futures : forfait gratuit, prix, import, règles des firmes, replay et backtesting, côte à côte.",
-            "Sweep vs TradeZella para traders de prop firms de futuros: plan gratis, precios, importación, reglas de las firmas, replay y backtesting, lado a lado.")},
+            "Alternative gratuite à TradeZella pour les traders de prop firms : forfait gratuit, prix, import, règles des firmes, replay et backtesting, côte à côte.",
+            "Alternativa gratis a TradeZella para traders de prop firms: plan gratis, precios, importación, reglas de las firmas, replay y backtesting, lado a lado.")},
 
  {"slug": "sweep-vs-tradervue.html", "name": "Tradervue",
   "sources": T("its public pricing page and help center", "sa page publique de tarifs et son centre d’aide", "su página pública de precios y su centro de ayuda"),
@@ -173,8 +173,8 @@ VS = [
              "Souvent, oui. Tradervue couvre les actions, les options, les futures et le forex avec des rapports détaillés. Sweep est conçu pour les futures seulement, et d’abord pour les comptes de prop firms.",
              "A menudo, sí. Tradervue cubre acciones, opciones, futuros y forex con informes detallados. Sweep está hecho solo para futuros, y primero para cuentas de prop firms."))],
   "desc": T("Sweep vs Tradervue for futures prop firm traders: free plans, prices, broker sync, prop firm rules, reports and markets, compared side by side.",
-            "Sweep vs Tradervue pour les traders de prop firms en futures : forfaits gratuits, prix, synchro, règles des firmes, rapports et marchés, côte à côte.",
-            "Sweep vs Tradervue para traders de prop firms de futuros: planes gratis, precios, sincronización, reglas de las firmas, informes y mercados, lado a lado.")},
+            "Alternative gratuite à Tradervue pour les traders de prop firms : forfaits gratuits, prix, synchro, règles des firmes, rapports et marchés, côte à côte.",
+            "Alternativa gratis a Tradervue para traders de prop firms: planes gratis, precios, sincronización, reglas de las firmas, informes y mercados, lado a lado.")},
 
  {"slug": "sweep-vs-tradersync.html", "name": "TraderSync",
   "sources": T("its public pricing page", "sa page publique de tarifs", "su página pública de precios"),
@@ -210,8 +210,8 @@ VS = [
              "Oui, sur tous les forfaits. Sweep est conçu d’abord pour le mobile et fonctionne dans le navigateur de ton téléphone ; tu peux l’ajouter à ton écran d’accueil. Des apps iOS et Android natives sont prévues.",
              "Sí, en todos los planes. Sweep está pensado primero para el móvil y funciona en el navegador de tu teléfono; puedes añadirlo a tu pantalla de inicio. Las apps nativas para iOS y Android están previstas."))],
   "desc": T("Sweep vs TraderSync for futures prop firm traders: prices, free plan and trial, broker sync, prop firm rules, replay, AI and mobile, side by side.",
-            "Sweep vs TraderSync pour les traders de prop firms en futures : prix, forfait gratuit et essai, synchro, règles des firmes, replay, IA et mobile.",
-            "Sweep vs TraderSync para traders de prop firms de futuros: precios, plan gratis y prueba, sincronización, reglas de las firmas, replay, IA y móvil.")},
+            "Alternative gratuite à TraderSync pour les traders de prop firms : prix, forfait gratuit et essai, synchro, règles des firmes, replay, IA et mobile.",
+            "Alternativa gratis a TraderSync para traders de prop firms: precios, plan gratis y prueba, sincronización, reglas de las firmas, replay, IA y móvil.")},
 
  {"slug": "sweep-vs-edgewonk.html", "name": "Edgewonk",
   "sources": T("its public pricing and home pages", "ses pages publiques de tarifs et d’accueil", "sus páginas públicas de precios y de inicio"),
@@ -245,8 +245,8 @@ VS = [
              "Il va loin sur ce terrain : Tiltmeter, suivi des erreurs et edge finder chaque semaine. Sweep travaille la discipline par une routine quotidienne (plan, règles, revue) et récompense le respect de ton plan, pas seulement ton P&L.",
              "Profundiza mucho en ello: Tiltmeter, seguimiento de errores y un edge finder semanal. Sweep trabaja la disciplina con una rutina diaria (plan, reglas, revisión) y premia seguir tu plan, no solo tu P&L."))],
   "desc": T("Sweep vs Edgewonk for futures prop firm traders: free plan, yearly price, imports, prop firm rules, psychology tools and markets, side by side.",
-            "Sweep vs Edgewonk pour les traders de prop firms en futures : forfait gratuit, prix annuel, imports, règles des firmes, psychologie et marchés.",
-            "Sweep vs Edgewonk para traders de prop firms de futuros: plan gratis, precio anual, importación, reglas de las firmas, psicología y mercados.")},
+            "Alternative gratuite à Edgewonk pour les traders de prop firms : forfait gratuit, prix annuel, imports, règles des firmes, psychologie et marchés.",
+            "Alternativa gratis a Edgewonk para traders de prop firms: plan gratis, precio anual, importación, reglas de las firmas, psicología y mercados.")},
 ]
 
 def _fr_nbsp(lang, title, desc, body, ld):
@@ -288,7 +288,7 @@ def make_vs(c):
              + chips(T("Related","Voir aussi","Ver también"), rel, ' style="margin-top:12px"') + '</div></section>')
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","inLanguage":lang,
                      "mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q, a in c["faq"]]})
-        title = t(T(f"Free {name} alternative: Sweep vs {name} (2026)", f"Sweep vs {name} (2026) : alternative gratuite · Sweep", f"Sweep vs {name} (2026): alternativa gratuita · Sweep"))
+        title = t(T(f"Free {name} alternative: Sweep vs {name} (2026)", f"Alternative gratuite à {name} : Sweep vs {name}", f"Alternativa gratis a {name}: Sweep vs {name}"))   # FR / ES: how it's searched there
         return _fr_nbsp(lang, title, t(c["desc"]), hero + b + final_cta(lang, t), ld)
     return page
 

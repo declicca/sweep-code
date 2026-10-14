@@ -63,6 +63,9 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
     b = (f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{body_intro}</article></div></section>'
          f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Firm by firm.","Firme par firme.","Firma por firma."))}</h2></div>{table}'
          f'<p class="fine vs-note">{_checked_note(lang, t)}</p></div></section>'
+         + f'<section style="padding-top:0"><div class="wrap narrow"><div class="calc-act"><div><b>{t(T("Track your prop accounts in Sweep.", "Suis tes comptes prop dans Sweep.", "Sigue tus cuentas prop en Sweep."))}</b>'
+         f'<p data-nolinks>{t(T("Your firm’s rules fill in automatically.", "Les règles de ta firme se remplissent toutes seules.", "Las reglas de tu firma se rellenan solas."))}</p></div>'
+         f'<a class="btn btn-primary" href="{SIGNUP}" data-track="signup_guide_card">{t(CREATE_FREE)}</a></div></div></section>'
          + (f'<section class="rule"><div class="wrap narrow"><article class="article">{after}</article></div></section>' if after else "")
          + f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>'
          + "".join(faq_item(t, q, a) for q, a in faqs) + "</div></section>")
@@ -129,7 +132,7 @@ def page_consistency(lang, t):
           f"Comment {FIRMS_N} prop firms de futures limitent ton meilleur jour, en évaluation et en compte financé, type de compte par type de compte.",
           f"Cómo {FIRMS_N} prop firms de futuros limitan tu mejor día, en evaluaciones y en cuentas financiadas, tipo de cuenta por tipo de cuenta."),
         intro, table, "", faqs, rel,
-        T("Prop Firm Consistency Rules Compared (2026) · Sweep", "Règles de consistance des prop firms (2026) · Sweep", "Reglas de consistencia de prop firms (2026) · Sweep"),
+        T("Prop Firm Consistency Rules Compared (2026) · Sweep", "Règle de consistance des prop firms, comparée (2026) · Sweep", "Regla de consistencia de las prop firms (2026) · Sweep"),
         T(f"The consistency rule of {FIRMS_N} futures prop firms, side by side: best-day limits in evaluations and funded accounts, from Sweep’s weekly check.",
           f"La règle de consistance de {FIRMS_N} prop firms de futures, côte à côte : limite du meilleur jour en évaluation et en compte financé, vérifiée chaque semaine.",
           f"La regla de consistencia de {FIRMS_N} prop firms de futuros, lado a lado: límite del mejor día en evaluación y cuenta financiada, revisada cada semana."))
@@ -194,7 +197,7 @@ def page_drawdown_guide(lang, t):
           f"Fin de journée, temps réel ou fixe : comment {FIRMS_N} prop firms de futures font suivre ta perte max, et quand elle s’arrête, type de compte par type de compte.",
           f"Al cierre, en tiempo real o fijo: cómo {FIRMS_N} prop firms de futuros hacen seguir tu pérdida máx. y cuándo se detiene, tipo de cuenta por tipo de cuenta."),
         intro, table, "", faqs, rel,
-        T("Prop Firm Drawdown Rules Compared (2026) · Sweep", "Règles de drawdown des prop firms comparées (2026) · Sweep", "Reglas de drawdown de prop firms (2026) · Sweep"),
+        T("Prop Firm Drawdown Rules Compared (2026) · Sweep", "Drawdown des prop firms : règles comparées (2026) · Sweep", "Drawdown de las prop firms: reglas comparadas (2026) · Sweep"),
         T(f"End-of-day, intraday or static drawdown at {FIRMS_N} futures prop firms, side by side: max loss on a 50K and when trailing stops, checked every week.",
           f"Drawdown de fin de journée, intraday ou fixe chez {FIRMS_N} prop firms de futures, côte à côte : perte max sur un 50K et fin du suivi, vérifiés chaque semaine.",
           f"Drawdown al cierre, intradía o fijo en {FIRMS_N} prop firms de futuros, lado a lado: pérdida máx. en una 50K y fin del seguimiento, revisado cada semana."))
@@ -368,7 +371,7 @@ def page_payout_guide(lang, t):
           f"Quand {FIRMS_N} prop firms de futures te laissent demander un payout, combien, et ce que tu gardes, type de compte par type de compte.",
           f"Cuándo {FIRMS_N} prop firms de futuros te dejan pedir un payout, cuánto y cuánto te quedas, tipo de cuenta por tipo de cuenta."),
         intro, table, "", faqs, rel,
-        T("Prop Firm Payout Rules Compared (2026) · Sweep", "Règles de payout des prop firms comparées (2026) · Sweep", "Reglas de payout de prop firms (2026) · Sweep"),
+        T("Prop Firm Payout Rules Compared (2026) · Sweep", "Payouts des prop firms : règles comparées (2026) · Sweep", "Payouts de las prop firms: reglas comparadas (2026) · Sweep"),
         T(f"Payout rules of {FIRMS_N} futures prop firms, side by side: winning days, balance to keep, caps per payout and profit split, from Sweep’s weekly check.",
           f"Les règles de payout de {FIRMS_N} prop firms de futures, côte à côte : jours gagnants, solde à garder, plafonds et partage des profits, vérifiés chaque semaine.",
           f"Las reglas de payout de {FIRMS_N} prop firms de futuros, lado a lado: días ganadores, saldo a mantener, topes y reparto de beneficios, revisadas cada semana."))
@@ -460,7 +463,7 @@ def page_sizes_guide(lang, t):
           f"L’objectif de profit, la perte max et la limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, de 25K à la plus grande.",
           f"El objetivo de beneficio, la pérdida máx. y el límite diario de cada tamaño de cuenta en {FIRMS_N} prop firms de futuros, de 25K a la mayor."),
         intro, table, "", faqs, rel,
-        T("Prop Firm Profit Targets & Max Loss by Size (2026) · Sweep", "Objectifs et perte max des prop firms (2026) · Sweep", "Objetivos y pérdida máx. de prop firms (2026) · Sweep"),
+        T("Prop Firm Profit Targets & Max Loss by Size (2026) · Sweep", "Objectif de profit et perte max des prop firms · Sweep", "Objetivo de beneficio y pérdida máx. de prop firms · Sweep"),
         T(f"Profit target, max loss and daily loss limit for every account size at {FIRMS_N} futures prop firms, side by side, from Sweep’s weekly check of their pages.",
           f"Objectif de profit, perte max et limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, côte à côte, vérifiés chaque semaine.",
           f"Objetivo de beneficio, pérdida máx. y límite diario de cada tamaño de cuenta en {FIRMS_N} prop firms de futuros, lado a lado, revisados cada semana."))
@@ -530,7 +533,7 @@ def page_days_guide(lang, t):
           f"Combien de jours {FIRMS_N} prop firms de futures demandent pour réussir une évaluation, et combien de jours gagnants avant chaque payout.",
           f"Cuántos días piden {FIRMS_N} prop firms de futuros para aprobar una evaluación, y cuántos días ganadores antes de cada payout."),
         intro, table, "", faqs, None,
-        T("Prop Firm Minimum Trading Days Compared (2026) · Sweep", "Jours minimum des prop firms, comparés (2026) · Sweep", "Días mínimos de las prop firms, comparados (2026) · Sweep"),
+        T("Prop Firm Minimum Trading Days Compared (2026) · Sweep", "Jours de trading minimum des prop firms (2026) · Sweep", "Días mínimos de trading de las prop firms (2026) · Sweep"),
         T(f"Minimum trading days to pass the evaluation and winning days before a payout at {FIRMS_N} futures prop firms, side by side, from Sweep’s weekly check.",
           f"Jours minimum pour réussir l’évaluation et jours gagnants avant un payout chez {FIRMS_N} prop firms de futures, côte à côte, vérifiés chaque semaine.",
           f"Días mínimos para aprobar la evaluación y días ganadores antes de un payout en {FIRMS_N} prop firms de futuros, lado a lado, revisados cada semana."))

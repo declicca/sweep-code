@@ -385,15 +385,13 @@ def make_rules_page(f):
         b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>'
               + "".join(faq_item(t, q, a) for q, a in faqs)
               + "</div></section>" + related(lang, t, rel[:3]))
-        for cand in (T(f"{name} Rules 2026: Drawdown, Payouts & Journal · Sweep", f"Règles {name} 2026 : drawdown, payouts et journal · Sweep", f"Reglas de {name} 2026: drawdown, payouts y diario · Sweep"),
-                     T(f"{name} Rules 2026: Payouts & Journal · Sweep", f"Règles {name} 2026 : payouts et journal · Sweep", f"Reglas de {name} 2026: payouts y diario · Sweep"),
-                     T(f"{name} Rules & Journal 2026 · Sweep", f"Règles et journal {name} 2026 · Sweep", f"Reglas y diario de {name} 2026 · Sweep"),
-                     T(f"{name} Rules 2026 · Sweep", f"Règles {name} 2026 · Sweep", f"Reglas de {name} 2026 · Sweep")):
-            title = t(cand)
-            if len(title) <= 60: break
+        chain = {"en": [f"{name} Rules 2026: Drawdown, Payouts & Journal · Sweep", f"{name} Rules 2026: Payouts & Journal · Sweep", f"{name} Rules & Journal 2026 · Sweep", f"{name} Rules 2026 · Sweep"],
+                 "fr": [f"Règles {name} 2026 : drawdown, payouts · Sweep", f"Règles {name} 2026 : drawdown, payouts", f"Règles {name} 2026 · Sweep"],     # written for French searches,
+                 "es": [f"Reglas de {name} 2026: drawdown y payouts · Sweep", f"Reglas de {name} 2026: drawdown y payouts", f"Reglas de {name} 2026 · Sweep"]}   # not translated
+        title = next(c for c in chain[lang] if len(c) <= 60)
         desc = t(T(f"{name} rules from Sweep’s weekly check ({day(when, 'en')}): max loss, daily loss limit, consistency, minimum days and payout conditions, {kk(sizes_all[0])} to {kk(sizes_all[-1])}.",
-                   f"Les règles de {name} selon la vérification hebdomadaire de Sweep ({day(when, 'fr')}) : perte max, limite du jour, consistance, jours minimum et payouts.",
-                   f"Las reglas de {name} según la revisión semanal de Sweep ({day(when, 'es')}): pérdida máx., límite diario, consistencia, días mínimos y payouts."))
+                   f"Règles {name} 2026 : drawdown, perte journalière max, règle de consistance, jours minimum et conditions de payout, vérifiées le {day(when, 'fr')}.",
+                   f"Reglas de {name} 2026: drawdown, pérdida diaria máxima, regla de consistencia, días mínimos y condiciones de payout, revisadas el {day(when, 'es')}."))
         ld = jsonld({"@context":"https://schema.org","@graph":[
             {"@type":"WebPage","name":title,"inLanguage":lang,"dateModified":when,"url":f"https://{DOMAIN}{href(lang, page_of(f))}","about":{"@type":"Organization","name":name,"url":(f.get("sources") or [None])[0]}},
             {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]}]})

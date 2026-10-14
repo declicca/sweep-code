@@ -61,7 +61,7 @@ def page_free(lang, t):
             (T("Can I use the Free plan with a prop firm?", "Puis-je utiliser le forfait Free avec une prop firm ?", "¿Puedo usar el plan Free con una prop firm?"),
              T("Yes. Free includes prop accounts with their firm’s rules prefilled for guidance, with a limited number of accounts. Pro and Elite add more.", "Oui. Free comprend des comptes prop avec les règles de leur firme préremplies à titre indicatif, en nombre limité. Pro et Elite en ajoutent.", "Sí. Free incluye cuentas prop con las reglas de su firma precargadas a título indicativo, en número limitado. Pro y Elite añaden más."))]
     b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>{"".join(faq_item(t, q, a) for q, a in faqs)}</div></section>'
-    return (t(T("Free Trading Journal for Futures & Prop Traders · Sweep", "Journal de trading gratuit pour futures et prop · Sweep", "Diario de trading gratis para futuros y prop · Sweep")),
+    return (t(T("Free Trading Journal for Futures & Prop Traders · Sweep", "Journal de trading gratuit pour futures · Sweep", "Diario de trading gratis para futuros · Sweep")),
             t(T("A free trading journal for futures and prop firm traders: journal, calendar, analytics, real CME charts and prop firm rules. Free forever, no card.",
                 "Un journal de trading gratuit pour les traders de futures et de prop firms : journal, calendrier, analyses, graphiques CME et règles. Gratuit, sans carte.",
                 "Un diario de trading gratis para traders de futuros y prop firms: diario, calendario, análisis, gráficos de CME y reglas. Gratis para siempre, sin tarjeta.")),
