@@ -2,7 +2,7 @@ from core import *
 CAPTURES['ecran-apercu-anneaux.webp'] = ('phone', 1179, 2556, 'Today card with the three rings and shortcuts (hero)')
 from pages4 import money, PRICES
 
-START = T("Start for free","Commencer gratuitement","Empieza gratis")
+START = T("Start free","Commencer gratuitement","Empieza gratis")
 FREE_LINE = T("Free forever. Pro included for 60 days.","Gratuit pour toujours. Pro offert pendant 60 jours.","Gratis para siempre. Pro incluido durante 60 días.")
 CONFIDENCE = T("Private by default. Your P&L is never shared. Export or delete your data whenever you want.",
                "Privé par défaut. Jamais de P&L partagé. Exporte ou supprime tes données quand tu veux.",
@@ -45,7 +45,7 @@ def sec_charts(lang, t, id_="charts", flip=True):
       flip=flip, id_=id_, more=f'<div style="margin-top:26px">{chips14()}</div>{note(t,CHART_NOTE)}')
 
 def sec_prop(lang, t, id_="prop", flip=False, link=True, title=None):
-    m = f'<div class="cta-row"><a class="btn btn-line" href="{href(lang,"prop-traders.html")}">{t(T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"))}</a></div>' if link else ""
+    m = f'<div class="cta-row"><a class="btn btn-line" href="{href(lang,"prop-firm-tracker.html")}">{t(T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"))}</a></div>' if link else ""
     return split(t, T("Prop firms","Prop firms","Prop firms"), title or T("Built for prop firm traders.","Construit pour les traders de prop firms.","Hecho para traders de prop firms."),
       T(f"Pick your firm and account size: {FIRMS_OR['en']}. Target, drawdown, daily loss, consistency and minimum days fill in by themselves. Sweep watches every rule and tells you when you’re ready for the payout.",
         f"Choisis ta firme et la taille du compte : {FIRMS_OR['fr']}. Objectif, drawdown, perte quotidienne, consistance et jours minimum se remplissent seuls. Sweep surveille chaque règle et te dit quand tu es prêt pour le payout.",
@@ -183,7 +183,7 @@ def page_home(lang, t):
     from pages16 import bar, sec_oneplace, sec_log, sec_firms, sec_payouts, sec_disc, sec_ai, sec_trust, sec_pricing, sec_faq, sec_final, faq_ld
     body = (hero + sec_oneplace(lang,t) + sec_log(lang,t) + sec_firms(lang,t) + sec_payouts(lang,t) + sec_disc(lang,t) + sec_ai(lang,t)
             + sec_trust(lang,t) + sec_pricing(lang,t) + sec_faq(lang,t) + sec_final(lang,t) + COHORT_JS + tour_dialog(t))
-    return (t(T("Sweep — Free Trading Journal for Futures & Prop Firm Traders","Sweep — Journal de trading gratuit (futures, prop firms)","Sweep — Diario de trading gratis para futuros y prop firms")),
+    return (t(T("Sweep — Trading Journal for Prop Firm Traders · Free","Sweep — Journal de trading pour prop firms · Gratuit","Sweep — Diario de trading para prop firms · Gratis")),
             t(T("Track every prop firm account, payout and expense in one place. Free forever, Pro from $19/mo. Built for Topstep, Apex, Lucid and more.","Suis chaque compte prop, payout et dépense au même endroit. Gratuit pour toujours, Pro dès 19 $/mois. Conçu pour Topstep, Apex, Lucid et plus.","Sigue cada cuenta prop, payout y gasto en un solo lugar. Gratis para siempre, Pro desde 19 $/mes. Hecho para Topstep, Apex, Lucid y más.")),
             body, ld)
 

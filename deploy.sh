@@ -35,7 +35,10 @@ case "$1" in
     rsync -avz $DRY --exclude 'sweep-count.php' website/dist/ "$HOST:$WEBSITE_REMOTE"
     # the build keeps a copy of the app's prop firm rules: commit it when it changed (it is the rules' history)
     git status --porcelain website/src/data/presets.json website/src/data/presets-changes.json | grep -q . \
-      && echo "Règles des prop firms mises à jour : committer website/src/data/presets*.json." ;;
+      && echo "Règles des prop firms mises à jour : committer website/src/data/presets*.json."
+    # and the date each page last changed (sitemap): commit it too, or the next build dates the pages again
+    git status --porcelain website/src/data/lastmod.json | grep -q . \
+      && echo "Dates des pages mises à jour : committer website/src/data/lastmod.json." ;;
   *) echo "Usage : ./deploy.sh app|website [--go]"; exit 1 ;;
 esac
 if [ -n "$DRY" ]; then

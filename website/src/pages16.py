@@ -58,7 +58,7 @@ def sec_firms(lang, t):
            "Choisis ta firme et ton type de compte. Sweep suit le drawdown, la consistance et les conditions de payout de chaque compte.",
            "Elige tu firma y tu tipo de cuenta. Sweep sigue el drawdown, la consistencia y las condiciones de payout de cada cuenta."),
         pts, slot("v6-08-payout-conditions-d.webp","desktop",t(L3("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")),t),
-        id_="prop", more=link(lang,t,"prop-traders.html",L3("See prop firm tracking","Voir le suivi des prop firms","Ver el seguimiento de prop firms")))
+        id_="prop", more=link(lang,t,"prop-firm-tracker.html",L3("See prop firm tracking","Voir le suivi des prop firms","Ver el seguimiento de prop firms")))
 
 def sec_payouts(lang, t):
     return split(t, L3("Payouts","Payouts","Payouts"), L3("Every account. Every payout. One record.","Chaque compte. Chaque payout. Un seul historique.","Cada cuenta. Cada payout. Un solo historial."),

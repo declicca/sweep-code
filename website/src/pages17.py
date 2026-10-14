@@ -275,8 +275,8 @@ def make_vs(c):
         article = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in diff)
         faq = "".join(faq_item(t, q, a) for q, a in c["faq"])
         others = [(o["slug"], T(f"Sweep vs {o['name']}", f"Sweep vs {o['name']}", f"Sweep vs {o['name']}")) for o in VS if o is not c]
-        rel = [("best-trading-journal-for-prop-firms.html",T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms")),("how-to-choose-a-trading-journal.html",T("How to choose a trading journal","Bien choisir son journal de trading","Cómo elegir un diario de trading")),
-               ("prop-traders.html",T("For prop traders","Pour traders prop","Para traders prop")),("import.html",T("Import your trades","Importer tes trades","Importar operaciones")),("pricing.html",T("Sweep pricing","Tarifs de Sweep","Precios de Sweep"))]
+        rel = [("best-trading-journal-for-prop-firms.html",T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms")),("free-trading-journal.html",T("Free trading journal","Journal de trading gratuit","Diario de trading gratis")),
+               ("prop-firm-tracker.html",T("For prop traders","Pour traders prop","Para traders prop")),("import.html",T("Import your trades","Importer tes trades","Importar operaciones")),("pricing.html",T("Sweep pricing","Tarifs de Sweep","Precios de Sweep"))]
         chips = lambda label, items, top="": (f'<p class="firm-others"{top}><span>{t(label)}</span>' + "".join(f'<a href="{href(lang,s)}">{t(n)}</a>' for s, n in items) + '</p>')
         b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("The short answer.","La réponse courte.","La respuesta corta."))}</h2></div>'
              f'<div class="grid g2 vs-picks">{picks}</div></div></section>'
@@ -319,6 +319,14 @@ PILLAR_FAQ = [
 
 def vs_link(t, lang, slug, name):
     return f'<p class="firm-others"><a href="{href(lang, slug)}">{t(T(f"Sweep vs {name}, in detail", f"Sweep vs {name}, en détail", f"Sweep vs {name}, en detalle"))} →</a></p>'
+
+def choose_section(lang, t):
+    """What to look for in a trading journal (was /how-to-choose-a-trading-journal)."""
+    from pages14 import CHOOSE
+    body = "".join(f'<h3>{t(h)}</h3>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in CHOOSE)
+    return (f'<section class="rule" id="how-to-choose"><div class="wrap narrow"><div class="head"><h2>{t(T("How to choose a trading journal","Bien choisir son journal de trading","Cómo elegir un diario de trading"))}</h2>'
+            f'<p class="lead">{t(T("Five things that matter when you trade evaluations and funded futures accounts.","Cinq choses qui comptent quand tu trades des évaluations et des comptes financés.","Cinco cosas que importan cuando operas evaluaciones y cuentas fondeadas."))}</p></div>'
+            f'<article class="article">{body}</article></div></section>')
 
 def page_best_journal(lang, t):
     from pages8 import FIRMS
@@ -383,10 +391,11 @@ def page_best_journal(lang, t):
              f"On fait Sweep, donc il est en premier ; chaque section dit quand un autre journal convient mieux. Prix en USD, facturation mensuelle sauf mention contraire, avant taxes, tirés du site public et des pages d’aide de chaque journal, vérifiés le {CHECKED['fr']}. Les forfaits changent souvent : confirme sur le site du journal avant d’acheter, et écris-nous à {EMAIL} si une info n’est plus à jour. Tous les noms sont des marques de leurs propriétaires.",
              f"Hacemos Sweep, así que aparece primero; cada sección dice cuándo otro diario encaja mejor. Precios en USD, facturación mensual salvo indicación, antes de impuestos, tomados del sitio público y las páginas de ayuda de cada diario, revisados el {CHECKED['es']}. Los planes cambian a menudo: confírmalo en el sitio del diario antes de comprar y escríbenos a {EMAIL} si algo ya no está al día. Todos los nombres son marcas de sus propietarios.")
     faq = "".join(faq_item(t, q, a) for q, a in PILLAR_FAQ)
-    rel = [("sweep-vs-tradezella.html",T("Sweep vs TradeZella","Sweep vs TradeZella","Sweep vs TradeZella")),("how-to-choose-a-trading-journal.html",T("How to choose a trading journal","Bien choisir son journal de trading","Cómo elegir un diario de trading")),
-           ("prop-traders.html",T("For prop traders","Pour traders prop","Para traders prop")),("pricing.html",T("Sweep pricing","Tarifs de Sweep","Precios de Sweep"))]
+    rel = [("sweep-vs-tradezella.html",T("Sweep vs TradeZella","Sweep vs TradeZella","Sweep vs TradeZella")),("free-trading-journal.html",T("Free trading journal","Journal de trading gratuit","Diario de trading gratis")),
+           ("prop-firm-tracker.html",T("For prop traders","Pour traders prop","Para traders prop")),("pricing.html",T("Sweep pricing","Tarifs de Sweep","Precios de Sweep"))]
     b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("At a glance.","En bref.","De un vistazo."))}</h2></div>{glance}<p class="fine vs-note">{t(note)}</p></div></section>'
          f'<section class="rule"><div class="wrap narrow"><article class="article">{journals}</article></div></section>'
+         + choose_section(lang, t) +
          f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Which one should you pick?","Lequel choisir ?","¿Cuál elegir?"))}</h2></div>{ul(t, pick)}</div></section>'
          f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>{faq}'
          f'<p class="firm-others" style="margin-top:36px"><span>{t(T("Related","Voir aussi","Ver también"))}</span>'

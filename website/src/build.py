@@ -1,7 +1,7 @@
 import os, shutil, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core import *
-from pages1 import page_features, page_prop
+from pages1 import page_features
 from pages6 import page_home, page_how, page_pricing as page_pricing6
 from pages2 import page_faq, page_tradovate, page_install, page_security, page_about, page_contact, page_changelog, page_404
 from pages3 import page_ai, page_econ
@@ -9,6 +9,8 @@ from pages4 import page_pricing
 from pages5 import page_100
 from pages7 import page_tools, page_position, page_drawdown, page_consistency
 from pages8 import FIRMS, JOURNAL_MOVED
+# pages merged into another one (audit n° 3, 1.1): their address redirects there, in the 3 languages
+PAGES_MOVED = {"prop-traders": "prop-firm-tracker", "how-to-choose-a-trading-journal": "best-trading-journal-for-prop-firms"}
 from pages11 import page_import
 from pages7 import page_expectancy, page_roi, page_payoutcalc
 import pages12, pages13, pages14, pages17, pages18
@@ -20,13 +22,13 @@ def page_changelog_new(lang, t):
     return pages9.page_changelog(lang, t, older=m.group(0) if m else "")
 from legal import page_privacy, page_terms, page_risk
 DIST = os.path.join(HERE, "..", "dist")
-PAGES = {"index.html":page_home,"features.html":page_features,"ai.html":page_ai,"how-it-works.html":page_how,"prop-traders.html":page_prop,"economic-calendar.html":page_econ,
+PAGES = {"index.html":page_home,"features.html":page_features,"ai.html":page_ai,"how-it-works.html":page_how,"economic-calendar.html":page_econ,
  "import.html":page_import,"install.html":page_install,"security.html":page_security,"pricing.html":page_pricing6,"faq.html":page_faq,
  "about.html":page_about,"contact.html":page_contact,"changelog.html":page_changelog_new,"privacy.html":page_privacy,"terms.html":page_terms,"risk.html":page_risk,"404.html":page_404,"100":page_100,"tools.html":page_tools,"position-size-calculator.html":page_position,"trailing-drawdown-calculator.html":page_drawdown,"consistency-rule-calculator.html":page_consistency}
 PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calculator.html":page_roi,"payout-calculator.html":page_payoutcalc,
               "futures-contracts.html":pages12.page_contracts,"release-dates.html":pages13.page_release_hub,"glossary.html":pages13.page_glossary,
               "futures-market-hours.html":pages13.page_hours,"press-kit.html":pages13.page_press,
-              "trading-templates.html":pages14.page_templates,"how-to-choose-a-trading-journal.html":pages14.page_choose,"trading-journal-routine.html":pages14.page_routine,
+              "trading-templates.html":pages14.page_templates,"trading-journal-routine.html":pages14.page_routine,
               "best-trading-journal-for-prop-firms.html":pages17.page_best_journal})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
 PAGES["prop-firms/index.html"] = pages18.page_hub
@@ -44,7 +46,7 @@ if pages19.COSTS_LIVE: PAGES[pages19.GUIDE_COSTS] = pages19.page_costs_guide
 for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
-PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","prop-traders.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8"}
+PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core
@@ -62,6 +64,7 @@ for f in os.listdir(os.path.join(STATIC,"fonts")): shutil.copy(os.path.join(STAT
 shutil.copytree(os.path.join(STATIC,"img"), os.path.join(DIST,"img"))
 for d in ("icons","social","video","press","templates"): shutil.copytree(os.path.join(STATIC,d), os.path.join(DIST,d))
 shutil.copy(os.path.join(STATIC,"site.webmanifest"), os.path.join(DIST,"site.webmanifest"))
+MAIN = {p: hashlib.sha256() for p in PAGES}   # each page's main content, in the 3 languages: its sitemap date changes only when this does
 for lang in LANGS:
     t = lambda d, L=lang: d[L]
     out = DIST if lang == "en" else os.path.join(DIST, lang); os.makedirs(out, exist_ok=True)
@@ -70,24 +73,35 @@ for lang in LANGS:
         dest = os.path.join(out, "100", "index.html") if page == "100" else os.path.join(out, page)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         body = add_related(lang, t, page, body)
+        body = add_xlinks(lang, t, page, body)
         body = add_links(lang, page, body)
         body = nbsp(lang, body)
+        MAIN[page].update(body.encode("utf-8"))
         open(dest, "w").write(shell(lang, page, title, desc, body, t, ld))
 import datetime
 BUILD_DATE = datetime.date.today().isoformat()
-# prop firm rule pages: lastmod = the date their rules were last verified
-LASTMOD = {pages18.page_of(f): pages18.checked_of(f) for f in pages18.presets.FIRMS}
-LASTMOD["prop-firms/index.html"] = LASTMOD[pages18.RULE_CHANGES] = max(LASTMOD.values())
-for _p in LASTMOD: PRIO.setdefault(_p, "0.8")
+# sitemap dates: a page's date is the day its main content last changed (fingerprint kept in data/lastmod.json, to commit
+# when it changes); a prop firm's rules page keeps the date its rules were last verified
+LM_FILE = os.path.join(HERE, "data", "lastmod.json")
+try: _lm = json.load(open(LM_FILE, encoding="utf-8"))
+except (OSError, ValueError): _lm = {}
+LM = {}
+for _p, _h in MAIN.items():
+    _d = _h.hexdigest()[:16]
+    LM[_p] = _lm[_p] if _lm.get(_p, {}).get("hash") == _d else {"hash": _d, "date": BUILD_DATE}
+if LM != _lm: json.dump(LM, open(LM_FILE, "w", encoding="utf-8"), indent=1, sort_keys=True); open(LM_FILE, "a").write("\n")
+LASTMOD = {p: v["date"] for p, v in LM.items()}
+for f in pages18.presets.FIRMS: LASTMOD[pages18.page_of(f)] = pages18.checked_of(f); PRIO.setdefault(pages18.page_of(f), "0.8")
+PRIO.setdefault("prop-firms/index.html", "0.8"); PRIO.setdefault(pages18.RULE_CHANGES, "0.8")
 for _c in pages17.VS: PRIO.setdefault(_c["slug"], "0.8")
-for _g in pages19.RULE_GUIDES: LASTMOD[_g] = pages18.presets.CHECKED; PRIO.setdefault(_g, "0.8")
+for _g in pages19.RULE_GUIDES: PRIO.setdefault(_g, "0.8")
 PRIO.setdefault(pages19.HUB, "0.7")
 urls = []
 for p in PAGES:
     if p == "404.html": continue
     for l in LANGS:
         alts = "".join(f'<xhtml:link rel="alternate" hreflang="{a}" href="https://{DOMAIN}{href(a,p)}"/>' for a in LANGS) + f'<xhtml:link rel="alternate" hreflang="x-default" href="https://{DOMAIN}{href("en",p)}"/>'
-        urls.append(f'<url><loc>https://{DOMAIN}{href(l,p)}</loc><lastmod>{LASTMOD.get(p, BUILD_DATE)}</lastmod><priority>{PRIO.get(p,"0.5")}</priority>{alts}</url>')
+        urls.append(f'<url><loc>https://{DOMAIN}{href(l,p)}</loc><lastmod>{LASTMOD[p]}</lastmod><priority>{PRIO.get(p,"0.5")}</priority>{alts}</url>')
 open(os.path.join(DIST,"sitemap.xml"),"w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(urls) + "</urlset>")
 shutil.copy(os.path.join(HERE,"data","robots.txt"), os.path.join(DIST,"robots.txt"))
 open(os.path.join(DIST, pages18.RSS.lstrip("/")), "w", encoding="utf-8").write(pages18.rss(DOMAIN))   # rule changes feed
@@ -155,7 +169,7 @@ Header set Cache-Control "no-cache, must-revalidate"
 <IfModule mod_deflate.c>
 AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/xml text/plain application/manifest+json
 </IfModule>
-""".replace("{JOURNAL_REDIRECTS}", "\n".join(f"RewriteRule ^(fr/|es/)?{old}(\\.html)?/?$ /$1{new} [R=301,L]" for old, new in JOURNAL_MOVED.items())))   # old journal pages → one page per firm
+""".replace("{JOURNAL_REDIRECTS}", "\n".join(f"RewriteRule ^(fr/|es/)?{old}(\\.html)?/?$ /$1{new} [R=301,L]" for old, new in {**JOURNAL_MOVED, **PAGES_MOVED}.items())))   # old journal pages → one page per firm; merged pages
 n = sum(len(f) for _,_,f in os.walk(DIST)); print("built", n, "files")
 
 # per-language 404 pages, served with a real 404 status

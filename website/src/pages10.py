@@ -42,6 +42,6 @@ def sec_signup(lang, t):
     return f'''<section class="rule signup-sec"><div class="wrap split">
 <div class="copy"><span class="kick">{t(T("Sign up","Inscription","Registro"))}</span><h2>{t(T("Start in 30 seconds.","Commence en 30 secondes.","Empieza en 30 segundos."))}</h2>
 <p class="lead">{t(T("Your email, a password, and you’re in. Free forever, with Pro included for 60 days.","Ton email, un mot de passe, et tu es dedans. Gratuit pour toujours, avec Pro offert pendant 60 jours.","Tu email, una contraseña y listo. Gratis para siempre, con Pro incluido durante 60 días."))}</p>
-<div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(T("Start for free","Commencer gratuitement","Empieza gratis"))}</a></div>
+<div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(T("Start free","Commencer gratuitement","Empieza gratis"))}</a></div>
 <p class="meta">{t(T("Questions? Write to","Une question ? Écris à","¿Una pregunta? Escribe a"))} <a href="mailto:{EMAIL}">{EMAIL}</a></p></div>
 <div class="reveal">{slot("v6-20-signup-d.webp","desktop",t(T("The one-screen sign-up","L’inscription en un écran","El registro en una pantalla")),t)}</div></div></section>'''

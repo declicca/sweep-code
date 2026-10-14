@@ -8,12 +8,11 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Home](https://makeitsweep.com/): overview of Sweep
 - [Pricing](https://makeitsweep.com/pricing): Free, Pro and Elite plans
 - [Free trading journal](https://makeitsweep.com/free-trading-journal): what the Free plan includes, forever, and what Pro adds
-- [Prop firm tracker](https://makeitsweep.com/prop-firm-tracker): every evaluation, funded and live account with its firm's rules
+- [Prop firm tracker](https://makeitsweep.com/prop-firm-tracker): every evaluation, funded and live account with its firm's rules, for prop traders
 - [NinjaTrader 8 sync](https://makeitsweep.com/ninjatrader): Sweep's free add-on sends every NinjaTrader 8 execution to the journal, read only, on every plan
 - [Payout tracker](https://makeitsweep.com/payout-tracker): payouts from request to paid, expenses and real net (Pro and Elite)
 - [Features](https://makeitsweep.com/features): logging, real P&L, rules, review, analytics, accounts, payouts
 - [How it works](https://makeitsweep.com/how-it-works): the daily loop and discipline
-- [For prop traders](https://makeitsweep.com/prop-traders): prop firm rules, payouts and expenses
 - [Sweep AI](https://makeitsweep.com/ai)
 - [Economic calendar](https://makeitsweep.com/economic-calendar)
 
@@ -43,7 +42,6 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Futures market hours](https://makeitsweep.com/futures-market-hours)
 - [Glossary](https://makeitsweep.com/glossary)
 - [Free trading templates](https://makeitsweep.com/trading-templates)
-- [How to choose a trading journal](https://makeitsweep.com/how-to-choose-a-trading-journal)
 
 ## Compare
 - [Best trading journal for prop firm traders (2026)](https://makeitsweep.com/best-trading-journal-for-prop-firms): Sweep, TradeZella, Tradervue, TraderSync and Edgewonk compared

@@ -152,7 +152,7 @@ I = {
 
 NAV = [("features.html", T("Features","Fonctionnalités","Funciones")),
        ("how-it-works.html", T("How it works","Comment ça marche","Cómo funciona")),
-       ("prop-traders.html", T("Prop traders","Traders prop","Traders prop")),
+       ("prop-firm-tracker.html", T("Prop traders","Traders prop","Traders prop")),
        ("ai.html", T("Sweep AI","Sweep AI","Sweep AI")),
        ("pricing.html", T("Pricing","Tarifs","Precios"))]
 PRODUCT = [("features.html", T("Features","Fonctionnalités","Funciones"), T("Everything Sweep does","Tout ce que fait Sweep","Todo lo que hace Sweep")),
@@ -171,9 +171,9 @@ RES_LEARN = [("trading-templates.html", T("Free templates","Modèles gratuits","
 RESOURCES = RES_TOOLS + RES_LEARN
 RES_GROUPS = [(T("Tools","Outils","Herramientas"), RES_TOOLS), (T("Learn","Apprendre","Aprender"), RES_LEARN)]
 LOGIN = T("Log in","Connexion","Iniciar sesión")
-CREATE = T("Start for free","Commencer gratuitement","Empieza gratis")
+CREATE = T("Start free","Commencer gratuitement","Empieza gratis")
 CREATE_FREE = T("Start free","Commencer gratuitement","Empieza gratis")
-NAV_CTA = T("Start free","Commencer","Empieza gratis")
+NAV_CTA = CREATE_FREE   # one sign-up label everywhere (audit n° 3, 1.3)
 DISC = T("Sweep does not offer financial advice. Trading futures involves a substantial risk of loss.",
  "Sweep n’offre pas de conseils financiers. Le trading de contrats à terme comporte un risque de perte important.",
  "Sweep no ofrece asesoramiento financiero. Operar contratos de futuros conlleva un riesgo de pérdida importante.")
@@ -189,7 +189,7 @@ CURP = ' aria-current="page"'; CURL = ' aria-current="true"'
 
 FOOT = [
  (T("Product","Produit","Producto"), [("features.html", T("Features","Fonctionnalités","Funciones")), ("ai.html", T("Sweep AI","Sweep AI","Sweep AI")), ("how-it-works.html", T("How it works","Comment ça marche","Cómo funciona")),
-   ("prop-traders.html", T("For prop traders","Pour traders prop","Para traders prop")), ("economic-calendar.html", T("Economic calendar","Calendrier économique","Calendario económico")),
+   ("prop-firm-tracker.html", T("For prop traders","Pour traders prop","Para traders prop")), ("economic-calendar.html", T("Economic calendar","Calendrier économique","Calendario económico")),
    ("best-trading-journal-for-prop-firms.html", T("Compare Sweep","Comparer Sweep","Comparar Sweep")), ("pricing.html", T("Pricing","Tarifs","Precios")), ("changelog.html", T("What’s new","Nouveautés","Novedades"))]),
  (T("Prop firms","Prop firms","Prop firms"), None),   # the firms with a journal page, filled in by _foot_firms()
  (T("Resources","Ressources","Recursos"), [("prop-firms/index.html", T("Prop firm rules","Règles des prop firms","Reglas de las prop firms")), ("guides.html", T("Guides","Guides","Guías")), ("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas")), ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
@@ -210,7 +210,7 @@ def _firm_menu():
         r = f"{sz[0] // 1000}K" + (f" – {sz[-1] // 1000}K" if len(sz) > 1 else "")
         return T(f"{n} account type{'s' if n > 1 else ''} · {r}", f"{n} type{'s' if n > 1 else ''} de compte · {r}", f"{n} tipo{'s' if n > 1 else ''} de cuenta · {r}")
     firms = [(page_of(rules[n]), T(n, n, n), desc(rules[n])) if n in rules else (jp, T(n, n, n), T("Rules you enter yourself", "Règles saisies par toi", "Reglas que introduces tú")) for jp, n in JOURNALS]
-    more = [("prop-traders.html", T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"), T("Accounts, rules and payouts in one place","Comptes, règles et payouts au même endroit","Cuentas, reglas y payouts en un solo lugar")),
+    more = [("prop-firm-tracker.html", T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"), T("Accounts, rules and payouts in one place","Comptes, règles et payouts au même endroit","Cuentas, reglas y payouts en un solo lugar")),
             ("prop-firms/index.html", T("Every firm’s rules","Les règles de chaque firme","Las reglas de cada firma"), T("Checked every week","Vérifiées chaque semaine","Revisadas cada semana")),
             ("prop-firm-payout-rules.html", T("Payout rules compared","Règles de payout comparées","Reglas de payout comparadas"), T("Winning days, caps and split","Jours gagnants, plafonds et partage","Días ganadores, límites y reparto"))]
     return firms + more, [(T("Firms","Firmes","Firmas"), firms), (T("For prop traders","Pour les traders prop","Para traders prop"), more)]
@@ -284,7 +284,7 @@ META_SEO = {
 
 # breadcrumb: Home › Section › Page (the section only where a hub page lists the page)
 CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html")
-GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "how-to-choose-a-trading-journal.html", "trading-journal-routine.html")
+GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "trading-journal-routine.html")
 def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
@@ -471,7 +471,6 @@ REL_INFO = {
  "prop-firm-consistency-rules.html": (T("Consistency rules compared","Règles de consistance comparées","Reglas de consistencia comparadas"), T("Best-day limits, firm by firm.","La limite du meilleur jour, firme par firme.","El límite del mejor día, firma por firma.")),
  "prop-firm-profit-targets.html": (T("Profit targets and max loss","Objectifs et perte max","Objetivos y pérdida máx."), T("Every account size, firm by firm.","Chaque taille de compte, firme par firme.","Cada tamaño de cuenta, firma por firma.")),
  "guides.html": (T("All guides","Tous les guides","Todas las guías"), T("Prop firm rules compared, and journaling.","Règles des prop firms comparées, et journal.","Reglas de prop firms comparadas, y diario.")),
- "how-to-choose-a-trading-journal.html": (T("Choose a trading journal","Choisir un journal de trading","Elegir un diario de trading"), T("Five things that matter for prop accounts.","Cinq choses qui comptent pour les comptes prop.","Cinco cosas que importan en cuentas prop.")),
  "trading-journal-routine.html": (T("A daily journal routine","Une routine de journal","Una rutina de diario"), T("Before, during and after the session.","Avant, pendant et après la séance.","Antes, durante y después de la sesión.")),
  "best-trading-journal-for-prop-firms.html": (T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms"), T("Five journals compared.","Cinq journaux comparés.","Cinco diarios comparados.")),
  "futures-contracts.html": (T("Contract specs","Fiches contrats","Fichas de contratos"), T("Tick values for NQ, ES, CL, GC and more.","Valeurs de tick NQ, ES, CL, GC et plus.","Valores de tick de NQ, ES, CL, GC y más.")),
@@ -491,7 +490,6 @@ REL_INFO = {
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
  "prop-firm-rule-changes.html": (T("Prop firm rule changes","Changements de règles","Cambios de reglas"), T("Every change, dated, with its source.","Chaque changement, daté, avec sa source.","Cada cambio, fechado, con su fuente.")),
- "prop-traders.html": (T("For prop traders","Pour traders prop","Para traders prop"), T("Every account, payout and rule.","Chaque compte, payout et règle.","Cada cuenta, payout y regla.")),
 }
 RELATED = {
  "position-size-calculator.html": ["futures-contracts.html", "prop-firm-profit-targets.html", "trailing-drawdown-calculator.html"],
@@ -505,11 +503,10 @@ RELATED = {
  "release-dates.html": ["economic-calendar.html", "futures-market-hours.html", "futures-contracts.html"],
  "glossary.html": ["guides.html", "prop-firms/index.html", "tools.html"],
  "futures-market-hours.html": ["economic-calendar.html", "release-dates.html", "futures-contracts.html"],
- "trading-templates.html": ["trading-journal-routine.html", "how-to-choose-a-trading-journal.html", "tools.html"],
+ "trading-templates.html": ["trading-journal-routine.html", "best-trading-journal-for-prop-firms.html", "tools.html"],
  "import.html": ["install.html", "features.html", "faq.html"],
- "how-to-choose-a-trading-journal.html": ["best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "guides.html"],
- "trading-journal-routine.html": ["trading-templates.html", "how-to-choose-a-trading-journal.html", "guides.html"],
- "free-trading-journal.html": ["prop-firm-tracker.html", "how-to-choose-a-trading-journal.html", "trading-templates.html"],
+ "trading-journal-routine.html": ["trading-templates.html", "best-trading-journal-for-prop-firms.html", "guides.html"],
+ "free-trading-journal.html": ["prop-firm-tracker.html", "best-trading-journal-for-prop-firms.html", "trading-templates.html"],
  "prop-firm-tracker.html": ["payout-tracker.html", "prop-firms/index.html", "prop-firm-drawdown-rules.html"],
  "payout-tracker.html": ["prop-firm-tracker.html", "payout-calculator.html", "prop-firm-payout-rules.html"],
  "guides.html": ["prop-firms/index.html", "tools.html", "glossary.html"],
@@ -533,6 +530,26 @@ def related(lang, t, items):
         cards += f'<a class="rcard" href="{href(lang, page)}"><b>{t(title)}</b><span>{t(desc)}</span><i aria-hidden="true">→</i></a>'
     return (f'<section class="rule related"><div class="wrap"><div class="head"><h2>{t(T("Read next","À lire aussi","Para seguir leyendo"))}</h2></div>'
             f'<div class="rgrid">{cards}</div></div></section>')
+
+# one intent per page, the others one click away at the top (audit n° 3, 1.1): feature, rules compared, calculator
+XLINKS = [(T("Payouts","Payouts","Payouts"), [("payout-tracker.html", T("Payout tracker","Suivi des payouts","Seguimiento de payouts")),
+                                              ("prop-firm-payout-rules.html", T("Payout rules compared","Règles de payout comparées","Reglas de payout comparadas")),
+                                              ("payout-calculator.html", T("Payout calculator","Calculateur de payout","Calculadora de payout"))])]
+
+def add_xlinks(lang, t, page, body):
+    """At the end of the page's hero, a line of links to the pages that share its topic."""
+    for label, items in XLINKS:
+        if page not in [p for p, _ in items]: continue
+        i = body.find('<div class="page-hero">')
+        if i < 0: return body
+        depth, end = 0, None
+        for m in re.finditer(r"<div\b|</div>", body[i:]):
+            depth += 1 if m.group(0) == "<div" else -1
+            if depth == 1 and m.group(0) == "</div>": end = i + m.start(); break   # closes the hero's .wrap
+        if end is None: return body
+        line = f'<p class="firm-others xlinks" data-nolinks><span>{t(label)}</span>' + "".join(f'<a href="{href(lang, p)}">{t(n)}</a>' for p, n in items if p != page) + "</p>"
+        return body[:end] + line + body[end:]
+    return body
 
 def add_related(lang, t, page, body):
     """Insert the « Read next » block of a page right before its closing block."""
