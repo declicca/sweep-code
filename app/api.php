@@ -399,7 +399,18 @@ function econ_seed(): void {
         $key = 'econ_seed:' . basename($file) . ':' . filesize($file);
         if (setting($key, '') !== '') continue;
         $data = json_decode((string)file_get_contents($file), true);
-        if (is_array($data)) { $n = econ_import($data); save_setting($key, (string)$n); }
+        if (!is_array($data)) continue;
+        $n = econ_import($data); save_setting($key, (string)$n);
+        // a release whose date changed in the file (brief 02 part 7: dates checked against the official calendars) leaves its old
+        // row: the future ones the file no longer has, never filled, from the schedule, go
+        $tz = new DateTimeZone('America/New_York'); $keep = []; $lo = PHP_INT_MAX; $hi = 0;
+        foreach (($data['events'] ?? []) as $e) {
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($e['date'] ?? '')) || !preg_match('/^\d{1,2}:\d{2}$/', (string)($e['time'] ?? ''))) continue;
+            $ts = (new DateTime($e['date'] . ' ' . $e['time'] . ':00', $tz))->getTimestamp(); $lo = min($lo, $ts); $hi = max($hi, $ts);
+            $keep[sha1('US|' . $ts . '|' . strtolower(trim((string)($e['event'] ?? ''))))] = true;
+        }
+        if ($keep) foreach (q("SELECT id FROM econ_events WHERE source = 'schedule' AND ts > ? AND ts BETWEEN ? AND ? AND (actual IS NULL OR actual = '')", [time(), $lo - 86400, $hi + 86400])->fetchAll(PDO::FETCH_COLUMN) as $id)
+            if (!isset($keep[$id])) q('DELETE FROM econ_events WHERE id = ?', [$id]);   // (only this file's span: another file keeps its own)
     }
 }
 function econ_sync(string $from, string $to): void {

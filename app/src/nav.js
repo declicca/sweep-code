@@ -420,7 +420,7 @@ window.SweepMO = window.SweepMO || class {
     if (!list.length) return `<div class="nav-fnews">${hd}<small class="muted">${x.none}</small></div>`;
     const now = Date.now() / 1000;
     return `<div class="nav-fnews">${hd}${list.map((e) => { const hm = typeof etStr === 'function' ? etStr(e.ts).slice(11, 16) : ''; const past = e.ts <= now && e.actual != null && e.actual !== '';
-      return `<button type="button" class="nav-fev ${e.impact}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-fev-t">${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-fev-n">${esc(e.event)}</span>${(/\b(minutes|speech|speaks|testimony|press conference|beige book|statement|remarks)\b/i.test(e.event || '')) ? `<span class="nav-nonum nav-nonum-r" data-noi18n>${({ en: 'No number', fr: 'Sans chiffre', es: 'Sin cifra' })[LANG] || 'No number'}</span>` : `<span class="nav-fev-v nav-ev-v3"><span><small>${x.act || ({ fr: 'Réel', es: 'Real' })[LANG] || 'Act.'}</small><b>${e.actual != null && e.actual !== '' ? esc(String(e.actual)) : '—'}</b></span><span><small>${x.fc || ({ fr: 'Prév.', es: 'Prev.' })[LANG] || 'Fcst'}</small><b>${esc(String(e.forecast || '—'))}</b></span><span><small>${x.prev || ({ fr: 'Préc.', es: 'Ant.' })[LANG] || 'Prev.'}</small><b>${esc(String(e.previous || '—'))}</b></span></span>`}</button>`; }).join('')}</div>`;
+      return `<button type="button" class="nav-fev ${e.impact}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-fev-t">${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-fev-n">${esc(tr(e.event))}</span>${(/\b(minutes|speech|speaks|testimony|press conference|beige book|statement|remarks)\b/i.test(e.event || '')) ? `<span class="nav-nonum nav-nonum-r" data-noi18n>${({ en: 'No number', fr: 'Sans chiffre', es: 'Sin cifra' })[LANG] || 'No number'}</span>` : `<span class="nav-fev-v nav-ev-v3"><span><small>${x.act || ({ fr: 'Réel', es: 'Real' })[LANG] || 'Act.'}</small><b>${e.actual != null && e.actual !== '' ? esc(String(e.actual)) : '—'}</b></span><span><small>${x.fc || ({ fr: 'Prév.', es: 'Prev.' })[LANG] || 'Fcst'}</small><b>${esc(String(e.forecast || '—'))}</b></span><span><small>${x.prev || ({ fr: 'Préc.', es: 'Ant.' })[LANG] || 'Prev.'}</small><b>${esc(String(e.previous || '—'))}</b></span></span>`}</button>`; }).join('')}</div>`;
   }
   /** Week tab: the week's U.S. releases (Monday to Friday) — past ones dimmed, upcoming ones bright */
   function feedWeekNews() {
@@ -434,7 +434,7 @@ window.SweepMO = window.SweepMO || class {
       ev.filter((e) => e.impact === 'high' || e.impact === 'medium').forEach((e) => {
         const hm = typeof etStr === 'function' ? etStr(e.ts).slice(11, 16) : '';
         const wd = new Date(day + 'T12:00:00').toLocaleDateString(LANG === 'en' ? 'en-US' : LANG === 'es' ? 'es-ES' : 'fr-CA', { weekday: 'short' });
-        rows.push(`<button type="button" class="nav-fev ${e.impact} ${e.ts < now - 60 ? 'nav-fev-past' : ''}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-fev-t"><small class="nav-fev-d">${esc(wd)}</small> ${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-fev-n">${esc(e.event)}</span>${(/\b(minutes|speech|speaks|testimony|press conference|beige book|statement|remarks)\b/i.test(e.event || '')) ? `<span class="nav-nonum nav-nonum-r" data-noi18n>${({ en: 'No number', fr: 'Sans chiffre', es: 'Sin cifra' })[LANG] || 'No number'}</span>` : `<span class="nav-fev-v nav-ev-v3"><span><small>${({ en: 'Act.', fr: 'Réel', es: 'Real' })[LANG] || 'Act.'}</small><b>${e.actual != null && e.actual !== '' ? esc(String(e.actual)) : '—'}</b></span><span><small>${({ en: 'Fcst', fr: 'Prév.', es: 'Prev.' })[LANG] || 'Fcst'}</small><b>${esc(String(e.forecast || '—'))}</b></span><span><small>${({ en: 'Prev.', fr: 'Préc.', es: 'Ant.' })[LANG] || 'Prev.'}</small><b>${esc(String(e.previous || '—'))}</b></span></span>`}</button>`);
+        rows.push(`<button type="button" class="nav-fev ${e.impact} ${e.ts < now - 60 ? 'nav-fev-past' : ''}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-fev-t"><small class="nav-fev-d">${esc(wd)}</small> ${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-fev-n">${esc(tr(e.event))}</span>${(/\b(minutes|speech|speaks|testimony|press conference|beige book|statement|remarks)\b/i.test(e.event || '')) ? `<span class="nav-nonum nav-nonum-r" data-noi18n>${({ en: 'No number', fr: 'Sans chiffre', es: 'Sin cifra' })[LANG] || 'No number'}</span>` : `<span class="nav-fev-v nav-ev-v3"><span><small>${({ en: 'Act.', fr: 'Réel', es: 'Real' })[LANG] || 'Act.'}</small><b>${e.actual != null && e.actual !== '' ? esc(String(e.actual)) : '—'}</b></span><span><small>${({ en: 'Fcst', fr: 'Prév.', es: 'Prev.' })[LANG] || 'Fcst'}</small><b>${esc(String(e.forecast || '—'))}</b></span><span><small>${({ en: 'Prev.', fr: 'Préc.', es: 'Ant.' })[LANG] || 'Prev.'}</small><b>${esc(String(e.previous || '—'))}</b></span></span>`}</button>`);
       });
     });
     if (!rows.length) return `<div class="nav-fnews">${hd}<small class="muted">${loading ? x.loading : x.none}</small></div>`;
@@ -805,7 +805,7 @@ window.SweepMO = window.SweepMO || class {
         const hasAct = e.actual != null && e.actual !== '';
         const right = evNums(e, x, now);
         const cd = e === nextUp && e.ts > now ? `<span class="nav-ev-cd" data-ts="${e.ts}">${x.in.replace('{m}', dur(e.ts - now))}</span>` : '';
-        return `<button type="button" class="nav-ev ${e.impact} ${past ? 'past' : ''} ${e === nextUp ? 'next' : ''}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-ev-t">${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-ev-n">${esc(e.event)}${cd}</span>${right}</button>`;
+        return `<button type="button" class="nav-ev ${e.impact} ${past ? 'past' : ''} ${e === nextUp ? 'next' : ''}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-ev-t">${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-ev-n">${esc(tr(e.event))}${cd}</span>${right}</button>`;
       }).join('')}</div>`;
     }
     const MORE = { en: '+{n} more', fr: '+{n} autres', es: '+{n} más' };
@@ -824,7 +824,7 @@ window.SweepMO = window.SweepMO || class {
         const hm = typeof etStr === 'function' ? etStr(e.ts).slice(11, 16) : '';
         const wd = new Date(day + 'T12:00:00').toLocaleDateString(LANG === 'en' ? 'en-US' : LANG === 'es' ? 'es-ES' : 'fr-CA', { weekday: 'short' }).replace('.', '');
         const past = e.ts < now - 60;
-        rows.push(`<button type="button" class="nav-ev ${e.impact} ${past ? 'past nav-ev-wpast' : 'nav-ev-wnext'}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-ev-t"><small class="nav-ev-d">${esc(wd)}</small>${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-ev-n">${esc(e.event)}</span>${evNums(e, x, now)}</button>`);
+        rows.push(`<button type="button" class="nav-ev ${e.impact} ${past ? 'past nav-ev-wpast' : 'nav-ev-wnext'}" data-act="ev-open" data-id="${esc(e.id)}"><span class="nav-ev-t"><small class="nav-ev-d">${esc(wd)}</small>${hm}</span><span class="imp ${e.impact}"><i></i></span><span class="nav-ev-n">${esc(tr(e.event))}</span>${evNums(e, x, now)}</button>`);
       });
     });
     const W = { en: 'This week', fr: 'Cette semaine', es: 'Esta semana' };
@@ -856,10 +856,10 @@ window.SweepMO = window.SweepMO || class {
       const n = day ? (day.trades || []).length : 0;
       const net = day ? (day.net != null ? day.net : (day.trades || []).reduce((a, t) => a + (typeof tNet === 'function' ? tNet(t) : 0), 0)) : null;
       const evs = evDay(k);
-      const tip = [k, net != null ? `${typeof money === 'function' ? money(net) : net} · ${n} trade${n > 1 ? 's' : ''}` : '', ...evs.map((e) => `${etStr(e.ts).slice(11, 16)} ${e.event}`)].filter(Boolean).join('\n');
+      const tip = [k, net != null ? `${typeof money === 'function' ? money(net) : net} · ${n} trade${n > 1 ? 's' : ''}` : '', ...evs.map((e) => `${etStr(e.ts).slice(11, 16)} ${typeof tr === 'function' ? tr(e.event) : e.event}`)].filter(Boolean).join('\n');
       cells.push(`<a class="nav-cd ${net == null ? '' : net > 0 ? 'p' : net < 0 ? 'n' : 'z'} ${histDays[k] ? 'nav-sw' : ''} ${k === ymd(now) ? 'today' : ''} ${k < ymd(now) ? 'past' : ''}" href="#journal/${k}" data-day="${k}" title="${esc(tip)}">
         <b>${d}</b>${net != null ? `<span class="nav-cd-p">${short(net)}</span><span class="nav-cd-n">${n} trade${n > 1 ? 's' : ''}</span>` : ''}
-        ${evs.length ? `<span class="nav-cd-e"><i></i>${esc(evs[0].event.replace(/\s*\(.*?\)/g, '').split(' ').slice(0, 2).join(' '))}${evs.length > 1 ? ` +${evs.length - 1}` : ''}</span>` : ''}</a>`);
+        ${evs.length ? `<span class="nav-cd-e"><i></i>${esc(typeof shortEv === 'function' ? shortEv(evs[0].event) : evs[0].event.replace(/\s*\(.*?\)/g, '').split(' ').slice(0, 2).join(' '))}${evs.length > 1 ? ` +${evs.length - 1}` : ''}</span>` : ''}</a>`);
       strip.push(`<a class="nav-sd ${net == null ? '' : net > 0 ? 'p' : net < 0 ? 'n' : 'z'} ${histDays[k] ? 'nav-sw' : ''} ${k === ymd(now) ? 'today' : ''} ${k < ymd(now) ? 'past' : ''}" href="#journal/${k}" data-day="${k}" title="${esc(tip)}"><small>${WD[wd]}</small><b>${d}</b><span>${net != null ? short(net) : evs.length ? '<i></i>' : '·'}</span></a>`);
     }
     const wk = LANG === 'en' ? ['M', 'T', 'W', 'T', 'F'] : LANG === 'es' ? ['L', 'M', 'X', 'J', 'V'] : ['L', 'M', 'M', 'J', 'V'];
@@ -3685,8 +3685,8 @@ window.SweepMO = window.SweepMO || class {
 /* ───────────── October 7 notes ─────────────
  * 1. Stats: « Slippage and fees » hidden.
  * 2. Plan: setups optional (folded behind « + My setups (optional) »).
- * 3. Import: a visible « Import » button + a ⓘ « how to export from your platform » next to it (Trades, Calendar,
- *    Journal, both « New trade » forms).
+ * 3. Import: a visible « Import » button + a ⓘ « how to export from your platform » next to it (Trades and both
+ *    « New trade » forms; not on the Calendar nor the Journal since B17: no one imports from there).
  * 4. Payout cards: « Congrats {name} ! » where the period line was, the period line above the boxes; and the boxes
  *    can show discipline (win rate, average R:R, discipline) instead of dollars — discipline by default.
  * 5. Accounts: « How many » (several identical accounts at once) and « Account cost » (added to expenses).
@@ -5332,18 +5332,17 @@ new window.SweepMO(() => {
   window.SweepBalance = balance;
 })();
 
-/* B12 / B17: words — « Worst drawdown », « Exceeded », the regex for « Exceeded (n/m) »
-   Brief 02 part 2: the firm's rule (« Max drawdown allowed ») no longer has the same name as the account's own worst drawdown */
+/* B12 / B17: words — « Worst drawdown », « Exceeded » (« Exceeded (n/m) »: a pattern of I18N_PAT, app.js)
+   Brief 02 part 2: the firm's rule (« Max drawdown allowed ») no longer has the same name as the account's own worst drawdown
+   Brief 02 part 7: what stayed in English (the Journal's « Max trades », two rules of the default checklist, the week's view,
+   the economic releases' names: the acronyms traders use stay, CPI, PPI, PCE, NFP, FOMC, ISM) */
 (function () {
   'use strict';
-  const add = { fr: { 'My money': 'Mon argent', 'Worst drawdown': 'Pire recul', 'Max drawdown allowed': 'Drawdown permis', 'Exceeded': 'Dépassé', 'Avg win / loss': 'Gain / perte moy.', 'See its stats': 'Voir ses stats' },
-    es: { 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas' } };
+  const add = { fr: { 'My money': 'Mon argent', 'Worst drawdown': 'Pire recul', 'Max drawdown allowed': 'Drawdown permis', 'Exceeded': 'Dépassé', 'Avg win / loss': 'Gain / perte moy.', 'See its stats': 'Voir ses stats',
+      'Max trades': 'Trades max', 'Entered without confirmation': 'Entrée sans confirmation', 'Broke daily loss limit': 'Limite de perte du jour dépassée', 'None recorded': 'Aucune', 'Show all accounts': 'Voir tous les comptes', 'schedule file': 'calendrier livré avec l’app', 'manual entry': 'saisie manuelle', 'ADP Non-Farm Employment Change': 'Emploi privé ADP', 'Average Hourly Earnings m/m': 'Salaire horaire moyen m/m', 'CB Consumer Confidence': 'Confiance des consommateurs (CB)', 'Core CPI m/m': 'CPI de base m/m', 'Core PCE Price Index m/m': 'Indice PCE de base m/m', 'Core PPI m/m': 'PPI de base m/m', 'FOMC Meeting Minutes': 'Procès-verbal du FOMC', 'FOMC Press Conference': 'Conférence de presse du FOMC', 'FOMC Rate Decision': 'Décision de taux du FOMC', 'GDP q/q (Advance)': 'PIB t/t (première estimation)', 'GDP q/q (Second Estimate)': 'PIB t/t (deuxième estimation)', 'GDP q/q (Third Estimate)': 'PIB t/t (troisième estimation)', 'ISM Manufacturing PMI': 'PMI manufacturier ISM', 'ISM Services PMI': 'PMI des services ISM', 'Initial Jobless Claims': 'Inscriptions au chômage', 'JOLTS Job Openings': 'Offres d’emploi JOLTS', 'Nonfarm Payrolls': 'Emplois non agricoles (NFP)', 'PCE Price Index m/m': 'Indice PCE m/m', 'Retail Sales m/m': 'Ventes au détail m/m', 'Unemployment Rate': 'Taux de chômage' },
+    es: { 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas',
+      'Max trades': 'Operaciones máx.', 'Entered without confirmation': 'Entrada sin confirmación', 'Broke daily loss limit': 'Límite de pérdida diaria superado', 'None recorded': 'Ninguna', 'Show all accounts': 'Ver todas las cuentas', 'schedule file': 'calendario incluido en la app', 'manual entry': 'entrada manual', 'ADP Non-Farm Employment Change': 'Empleo privado ADP', 'Average Hourly Earnings m/m': 'Ingresos medios por hora m/m', 'CB Consumer Confidence': 'Confianza del consumidor (CB)', 'Core CPI m/m': 'CPI subyacente m/m', 'Core PCE Price Index m/m': 'Índice PCE subyacente m/m', 'Core PPI m/m': 'PPI subyacente m/m', 'FOMC Meeting Minutes': 'Actas del FOMC', 'FOMC Press Conference': 'Rueda de prensa del FOMC', 'FOMC Rate Decision': 'Decisión de tipos del FOMC', 'GDP q/q (Advance)': 'PIB t/t (avance)', 'GDP q/q (Second Estimate)': 'PIB t/t (segunda estimación)', 'GDP q/q (Third Estimate)': 'PIB t/t (tercera estimación)', 'ISM Manufacturing PMI': 'PMI manufacturero ISM', 'ISM Services PMI': 'PMI de servicios ISM', 'Initial Jobless Claims': 'Solicitudes de subsidio por desempleo', 'JOLTS Job Openings': 'Ofertas de empleo JOLTS', 'Nonfarm Payrolls': 'Nóminas no agrícolas (NFP)', 'PCE Price Index m/m': 'Índice PCE m/m', 'Retail Sales m/m': 'Ventas minoristas m/m', 'Unemployment Rate': 'Tasa de desempleo' } };
   try { if (window.I18N_FR) Object.assign(window.I18N_FR, add.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, add.es); } catch (e) { /* the app stays in English */ }
-  // « Exceeded (12/10) » → « Dépassé (12/10) »
-  const L = (typeof LANG !== 'undefined' && LANG) || 'en'; if (L === 'en') return;
-  const W = { fr: 'Dépassé', es: 'Superado' }[L];
-  const fix = () => document.querySelectorAll('#main span.neg').forEach((x) => { if (!x.children.length && /^Exceeded( \(.*\))?$/.test(x.textContent.trim())) x.textContent = x.textContent.replace('Exceeded', W); });
-  if (window.SweepMO) new window.SweepMO(fix).observe(document.getElementById('main') || document.body, { childList: true, subtree: true });
 })();
 
 /* B17: an unknown page address leads to Today (the address is corrected too) */

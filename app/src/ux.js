@@ -295,7 +295,7 @@
     if (!legacy) ta.style.display = 'none';
     const wrap = document.createElement('div');
     wrap.className = 'ux-news'; wrap.setAttribute('data-noi18n', '');
-    wrap.innerHTML = evs.map((e) => `<div class="ux-ev"><div class="ux-ev-h"><span class="ux-ev-t">${etStr(e.ts).slice(11, 16)}</span><span class="imp ${e.impact}"><i></i></span><b>${esc(e.event)}</b>
+    wrap.innerHTML = evs.map((e) => `<div class="ux-ev"><div class="ux-ev-h"><span class="ux-ev-t">${etStr(e.ts).slice(11, 16)}</span><span class="imp ${e.impact}"><i></i></span><b>${esc(tr(e.event))}</b>
       <small>${e.forecast ? tt('fcst') + ' ' + esc(e.forecast) : ''}${e.forecast && e.previous ? ' · ' : ''}${e.previous ? tt('prev') + ' ' + esc(e.previous) : ''}</small></div>
       <input data-ux-news="${esc(e.id)}" value="${esc(notes[e.id] || '')}" placeholder="${esc(tt('ph'))}" maxlength="240"></div>`).join('');
     box.append(wrap);
@@ -883,26 +883,26 @@
       names: { game: 'Game, reminders, « Your week » email', chart: 'Trade charts', presets: 'Prop firm rules check', backup: 'Backup', restore_test: 'Restore test', emails: 'Emails: daily events (Loops)' },
       every: { game: 'every 15 min', chart: 'every hour', presets: 'Mondays at 5:00', backup: 'every day at 3:30', restore_test: 'Mondays at 6:00', emails: 'every hour, events at 7:30 ET' },
       st: { ok: 'OK', running: 'Running', late: 'Late', failed: 'Failed', stuck: 'Stuck', never: 'Never ran' }, last: 'last run {t}', ago: '{t} ago', now: 'just now', took: '{s} s', cmd: 'cPanel line',
-      svc: 'Services', yes: 'Set', no: 'Missing', live: 'live', test: 'test mode', aiUse: 'today {a} of {b} · {n} per trader per day',
+      svc: 'Services', yes: 'Set', no: 'Missing', live: 'live', test: 'test mode', aiUse: 'today {a} of {b} · {n} per trader per day', econUse: '{n} high-impact releases in the next 14 days · next: {e}, {d} ET',
       c: { smtp: ['Email through the mailbox (SMTP)', 'PHP mail() instead: more often in spam'], ai: ['Sweep AI key', 'Sweep AI is off'], billing: ['Stripe', 'Billing is off'],
         webhook: ['Stripe webhook secret', 'Payments are not confirmed'], chart: ['Databento (trade charts)', 'No trade charts'], backup: ['Backup passphrase', 'No backup is written'],
-        offsite: ['Off-site backup copy', 'Backups only on the server'], push: ['Phone notifications (push keys)', 'Off: run ops/push-keys.php on the server'], app_url: ['App address (app_url)', 'Email links use app.makeitsweep.com'] } },
+        offsite: ['Off-site backup copy', 'Backups only on the server'], push: ['Phone notifications (push keys)', 'Off: run ops/push-keys.php on the server'], econ: ['Economic calendar', 'No high-impact release in the next 14 days: check the schedule'], app_url: ['App address (app_url)', 'Email links use app.makeitsweep.com'] } },
     fr: { h: 'Santé', sub: 'Tâches planifiées (cPanel → Cron Jobs) et services externes. Une tâche rouge depuis plus d’un cycle envoie un courriel à l’adresse de support.',
       names: { game: 'Jeu, rappels, courriel « Ta semaine »', chart: 'Graphiques des trades', presets: 'Vérification des règles des firmes', backup: 'Sauvegarde', restore_test: 'Test de restauration', emails: 'Courriels : événements du jour (Loops)' },
       every: { game: 'toutes les 15 min', chart: 'toutes les heures', presets: 'le lundi à 5 h', backup: 'chaque jour à 3 h 30', restore_test: 'le lundi à 6 h', emails: 'toutes les heures, événements à 7 h 30 ET' },
       st: { ok: 'OK', running: 'En cours', late: 'En retard', failed: 'Échec', stuck: 'Bloquée', never: 'Jamais exécutée' }, last: 'dernière exécution {t}', ago: 'il y a {t}', now: 'à l’instant', took: '{s} s', cmd: 'Ligne cPanel',
-      svc: 'Services', yes: 'Réglé', no: 'Manquant', live: 'réel', test: 'mode test', aiUse: 'aujourd’hui {a} sur {b} · {n} par trader et par jour',
+      svc: 'Services', yes: 'Réglé', no: 'Manquant', live: 'réel', test: 'mode test', aiUse: 'aujourd’hui {a} sur {b} · {n} par trader et par jour', econUse: '{n} annonces fortes dans les 14 prochains jours · prochaine : {e}, {d} ET',
       c: { smtp: ['Courriels par la boîte (SMTP)', 'mail() de PHP à la place : plus souvent en indésirables'], ai: ['Clé de Sweep AI', 'Sweep AI est désactivé'], billing: ['Stripe', 'Facturation désactivée'],
         webhook: ['Secret du webhook Stripe', 'Les paiements ne sont pas confirmés'], chart: ['Databento (graphiques des trades)', 'Pas de graphiques'], backup: ['Phrase secrète des sauvegardes', 'Aucune sauvegarde n’est écrite'],
-        offsite: ['Copie des sauvegardes hors du serveur', 'Sauvegardes seulement sur le serveur'], push: ['Notifications sur le téléphone (clés push)', 'Coupées : lancer ops/push-keys.php sur le serveur'], app_url: ['Adresse de l’app (app_url)', 'Les liens des courriels utilisent app.makeitsweep.com'] } },
+        offsite: ['Copie des sauvegardes hors du serveur', 'Sauvegardes seulement sur le serveur'], push: ['Notifications sur le téléphone (clés push)', 'Coupées : lancer ops/push-keys.php sur le serveur'], econ: ['Calendrier économique', 'Aucune annonce forte dans les 14 prochains jours : vérifier le calendrier'], app_url: ['Adresse de l’app (app_url)', 'Les liens des courriels utilisent app.makeitsweep.com'] } },
     es: { h: 'Salud', sub: 'Tareas programadas (cPanel → Cron Jobs) y servicios externos. Una tarea en rojo durante más de un ciclo envía un correo a la dirección de soporte.',
       names: { game: 'Juego, recordatorios, correo « Tu semana »', chart: 'Gráficos de las operaciones', presets: 'Verificación de las reglas de las firmas', backup: 'Copia de seguridad', restore_test: 'Prueba de restauración', emails: 'Correos: eventos del día (Loops)' },
       every: { game: 'cada 15 min', chart: 'cada hora', presets: 'los lunes a las 5:00', backup: 'cada día a las 3:30', restore_test: 'los lunes a las 6:00', emails: 'cada hora, eventos a las 7:30 ET' },
       st: { ok: 'OK', running: 'En curso', late: 'Con retraso', failed: 'Error', stuck: 'Bloqueada', never: 'Nunca ejecutada' }, last: 'última ejecución {t}', ago: 'hace {t}', now: 'ahora mismo', took: '{s} s', cmd: 'Línea de cPanel',
-      svc: 'Servicios', yes: 'Configurado', no: 'Falta', live: 'real', test: 'modo de prueba', aiUse: 'hoy {a} de {b} · {n} por trader y por día',
+      svc: 'Servicios', yes: 'Configurado', no: 'Falta', live: 'real', test: 'modo de prueba', aiUse: 'hoy {a} de {b} · {n} por trader y por día', econUse: '{n} anuncios de alto impacto en los próximos 14 días · próximo: {e}, {d} ET',
       c: { smtp: ['Correos por el buzón (SMTP)', 'mail() de PHP en su lugar: más a menudo en spam'], ai: ['Clave de Sweep AI', 'Sweep AI está desactivado'], billing: ['Stripe', 'Facturación desactivada'],
         webhook: ['Secreto del webhook de Stripe', 'Los pagos no se confirman'], chart: ['Databento (gráficos de las operaciones)', 'Sin gráficos'], backup: ['Frase secreta de las copias', 'No se escribe ninguna copia'],
-        offsite: ['Copia fuera del servidor', 'Copias solo en el servidor'], push: ['Notificaciones en el teléfono (claves push)', 'Apagadas: ejecutar ops/push-keys.php en el servidor'], app_url: ['Dirección de la app (app_url)', 'Los enlaces de los correos usan app.makeitsweep.com'] } },
+        offsite: ['Copia fuera del servidor', 'Copias solo en el servidor'], push: ['Notificaciones en el teléfono (claves push)', 'Apagadas: ejecutar ops/push-keys.php en el servidor'], econ: ['Calendario económico', 'Ningún anuncio de alto impacto en los próximos 14 días: revisar el calendario'], app_url: ['Dirección de la app (app_url)', 'Los enlaces de los correos usan app.makeitsweep.com'] } },
   };
   const ht = () => HT[LANG] || HT.en;
   let hl = null, hlAt = 0, hlBusy = false;
@@ -916,7 +916,7 @@
         <details><summary>${x.cmd}</summary><code>${esc(k.schedule + '  ' + k.command)}</code></details></li>`; }).join('');
     const C = d.config || {}, money2 = (v) => (typeof money === 'function' ? money(Math.round(Number(v || 0) * 100), { sign: false, dec: 2 }) : '$' + Number(v || 0).toFixed(2));   // the language's format
     const svc = [['smtp', C.smtp], ['ai', C.ai, C.ai ? x.aiUse.replace('{a}', money2(C.ai_spent_usd)).replace('{b}', money2(C.ai_budget_usd)).replace('{n}', C.ai_plan_limits ? Object.entries(C.ai_plan_limits).map(([p, n]) => ({ free: 'Free', pro: 'Pro', elite: 'Elite' })[p] + ' ' + n).join(' · ') : C.ai_user_limit) : ''],
-      ['billing', C.billing, C.billing ? (C.billing_live ? x.live : x.test) : ''], ['webhook', C.webhook], ['chart', C.chart], ['backup', C.backup], ['offsite', C.offsite], ['push', C.push], ['app_url', C.app_url]];
+      ['billing', C.billing, C.billing ? (C.billing_live ? x.live : x.test) : ''], ['webhook', C.webhook], ['chart', C.chart], ['econ', C.econ, C.econ && C.econ_next ? x.econUse.replace('{n}', C.econ_n).replace('{e}', typeof tr === 'function' ? tr(C.econ_next.event) : C.econ_next.event).replace('{d}', new Date(C.econ_next.ts * 1000).toLocaleString(typeof LOC === 'function' ? LOC() : undefined, { timeZone: 'America/New_York', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) : ''], ['backup', C.backup], ['offsite', C.offsite], ['push', C.push], ['app_url', C.app_url]];
     return `<div class="sec-h"><h2>${x.h}</h2></div><p class="muted ux-hl-sub">${x.sub}</p><ul class="ux-pr-list ux-hl-list">${rows}</ul>
       <h4>${x.svc}</h4><ul class="ux-hl-cfg">${svc.map(([k, on, extra]) => `<li class="${on ? 'on' : 'off'}" data-hl="${k}"><span>${esc(x.c[k][0])}</span><b>${on ? x.yes : x.no}</b><small>${esc(on ? (extra || '') : x.c[k][1])}</small></li>`).join('')}</ul>`;
   }

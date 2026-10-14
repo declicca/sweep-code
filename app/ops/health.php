@@ -32,6 +32,13 @@ function sweep_health(PDO $pdo, array $cfg, string $app): array
         }
     } catch (Throwable $e) { /* no billing config */ }
     $c['chart'] = class_exists('ChartData') && ChartData::enabled();
+    try {   // the economic calendar (brief 02 part 7): high-impact releases in the next 14 days and the next one (the app loads it when a page needs it)
+        $t = time();
+        $c['econ_n'] = (int) $pdo->query("SELECT COUNT(*) FROM econ_events WHERE impact = 'high' AND ts BETWEEN $t AND " . ($t + 14 * 86400))->fetchColumn();
+        $nx = $pdo->query("SELECT event, ts FROM econ_events WHERE impact = 'high' AND ts >= $t ORDER BY ts LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+        $c['econ_next'] = $nx ? ['event' => (string) $nx['event'], 'ts' => (int) $nx['ts']] : null;
+        $c['econ'] = $c['econ_n'] > 0;
+    } catch (Throwable $e) { $c['econ'] = false; }   // (no release loaded yet)
     try {   // notifications on the phone (brief 02 part 10): the VAPID keys of sweep-private/push-config.php, yes / no only
         if (!function_exists('wp_config') && is_file($app . '/push/web-push.php')) require_once $app . '/push/web-push.php';
         $c['push'] = function_exists('wp_config') && wp_config() !== null;

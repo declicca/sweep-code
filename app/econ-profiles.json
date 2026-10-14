@@ -20,7 +20,47 @@
    "relationship_to_growth": "Indirect: persistent inflation can squeeze real incomes and spending.",
    "relationship_to_labor_market": "Services inflation is closely tied to wage growth.",
    "relationship_to_fed_policy": "The Fed targets 2% PCE inflation, but CPI arrives first and shapes expectations for PCE and the rate path.",
-   "typical_market_focus": "Core m/m versus consensus (0.1 pp matters), the 3-month annualized pace, shelter, and supercore."
+   "typical_market_focus": "Core m/m versus consensus (0.1 pp matters), the 3-month annualized pace, shelter, and supercore.",
+   "i18n": {
+    "fr": {
+     "name": "CPI de base",
+     "short_description": "Prix à la consommation hors alimentation et énergie.",
+     "what_it_measures": "Variation m/m des prix payés par les consommateurs urbains pour un panier de biens et services, hors alimentation et énergie, deux catégories volatiles.",
+     "why_it_matters": "C’est la principale lecture du marché sur la dynamique de l’inflation sous-jacente ; un écart d’à peine 0,1 point de pourcentage par rapport aux attentes peut faire bouger les anticipations de taux.",
+     "release_frequency": "Mensuelle, environ deux semaines après le mois de référence",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS)",
+     "important_components": [
+      "Logement (loyer équivalent des propriétaires, loyers)",
+      "Services de base hors logement (« supercore »)",
+      "Biens de base (voitures d’occasion, vêtements)",
+      "Soins médicaux, assurance auto"
+     ],
+     "relationship_to_inflation": "Mesure directe de l’inflation sous-jacente à la consommation.",
+     "relationship_to_growth": "Indirecte : une inflation persistante peut comprimer les revenus réels et les dépenses.",
+     "relationship_to_labor_market": "L’inflation des services est étroitement liée à la croissance des salaires.",
+     "relationship_to_fed_policy": "La Fed cible une inflation PCE de 2 %, mais le CPI sort en premier et façonne les attentes pour le PCE et la trajectoire des taux.",
+     "typical_market_focus": "Variation de base m/m par rapport au consensus (0,1 pt de % compte), rythme annualisé sur 3 mois, logement et « supercore »."
+    },
+    "es": {
+     "name": "CPI subyacente",
+     "short_description": "Precios al consumidor sin alimentos ni energía.",
+     "what_it_measures": "Variación m/m de los precios que pagan los consumidores urbanos por una cesta de bienes y servicios, excluidas las categorías volátiles de alimentos y energía.",
+     "why_it_matters": "Es la principal referencia del mercado sobre el impulso de la inflación subyacente; una sorpresa de apenas 0,1 punto porcentual puede mover las expectativas de tipos.",
+     "release_frequency": "Mensual, unas dos semanas después del mes de referencia",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS)",
+     "important_components": [
+      "Vivienda (alquiler equivalente del propietario, alquiler)",
+      "Servicios subyacentes sin vivienda («supercore»)",
+      "Bienes subyacentes (vehículos usados, ropa)",
+      "Atención médica, seguro de automóvil"
+     ],
+     "relationship_to_inflation": "Medida directa de la inflación subyacente al consumidor.",
+     "relationship_to_growth": "Indirecta: una inflación persistente puede erosionar los ingresos reales y el gasto.",
+     "relationship_to_labor_market": "La inflación de servicios está estrechamente ligada al crecimiento salarial.",
+     "relationship_to_fed_policy": "La Fed apunta a una inflación PCE del 2 %, pero el CPI se publica antes y moldea las expectativas sobre el PCE y la trayectoria de tipos.",
+     "typical_market_focus": "Subyacente m/m frente al consenso (0,1 pp importa), ritmo anualizado a 3 meses, vivienda y «supercore»."
+    }
+   }
   },
   {
    "key": "cpi",
@@ -41,7 +81,47 @@
    "relationship_to_growth": "Energy spikes can act like a tax on consumers.",
    "relationship_to_labor_market": "Indirect, through wage-setting and inflation expectations.",
    "relationship_to_fed_policy": "Relevant to the Fed mainly through its influence on expectations and on the PCE estimate.",
-   "typical_market_focus": "Headline versus core divergence, energy contribution, year-over-year trend."
+   "typical_market_focus": "Headline versus core divergence, energy contribution, year-over-year trend.",
+   "i18n": {
+    "fr": {
+     "name": "CPI",
+     "short_description": "Inflation globale des prix à la consommation.",
+     "what_it_measures": "Variation m/m des prix de l’ensemble du panier de consommation, alimentation et énergie comprises.",
+     "why_it_matters": "L’inflation globale influence les anticipations d’inflation et le revenu réel ; les marchés accordent généralement plus de poids à l’inflation de base.",
+     "release_frequency": "Mensuelle, environ deux semaines après le mois de référence",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS)",
+     "important_components": [
+      "Énergie (essence)",
+      "Alimentation",
+      "Logement",
+      "Biens et services de base"
+     ],
+     "relationship_to_inflation": "Mesure globale de l’inflation à la consommation.",
+     "relationship_to_growth": "Les flambées des prix de l’énergie peuvent agir comme une taxe sur les consommateurs.",
+     "relationship_to_labor_market": "Indirecte, par la fixation des salaires et les anticipations d’inflation.",
+     "relationship_to_fed_policy": "Pertinent pour la Fed surtout par son influence sur les anticipations et sur l’estimation du PCE.",
+     "typical_market_focus": "Écart entre l’indice global et l’indice de base, contribution de l’énergie, tendance a/a."
+    },
+    "es": {
+     "name": "CPI",
+     "short_description": "Inflación general de los precios al consumidor.",
+     "what_it_measures": "Variación m/m de los precios de toda la cesta de consumo, incluidos alimentos y energía.",
+     "why_it_matters": "La inflación general impulsa las expectativas de inflación y el ingreso real; los mercados suelen dar más peso a la subyacente.",
+     "release_frequency": "Mensual, unas dos semanas después del mes de referencia",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS)",
+     "important_components": [
+      "Energía (gasolina)",
+      "Alimentos",
+      "Vivienda",
+      "Bienes y servicios subyacentes"
+     ],
+     "relationship_to_inflation": "Medida general de la inflación al consumidor.",
+     "relationship_to_growth": "Los repuntes de la energía pueden actuar como un impuesto sobre los consumidores.",
+     "relationship_to_labor_market": "Indirecta, a través de la fijación de salarios y las expectativas de inflación.",
+     "relationship_to_fed_policy": "Relevante para la Fed sobre todo por su influencia en las expectativas y en la estimación del PCE.",
+     "typical_market_focus": "Divergencia entre la cifra general y la subyacente, aporte de la energía, tendencia a/a."
+    }
+   }
   },
   {
    "key": "core_pce",
@@ -61,7 +141,45 @@
    "relationship_to_growth": "Released with personal income and spending, which describe consumer demand.",
    "relationship_to_labor_market": "Services prices reflect labor costs.",
    "relationship_to_fed_policy": "Most directly tied to the Fed’s mandate; persistent deviations from 2% shape the rate path.",
-   "typical_market_focus": "Core m/m versus consensus; often partly anticipated from CPI and PPI, so surprises can be smaller."
+   "typical_market_focus": "Core m/m versus consensus; often partly anticipated from CPI and PPI, so surprises can be smaller.",
+   "i18n": {
+    "fr": {
+     "name": "Indice PCE de base",
+     "short_description": "La mesure de l’inflation sous-jacente privilégiée par la Réserve fédérale.",
+     "what_it_measures": "Variation m/m des prix des dépenses de consommation des ménages hors alimentation et énergie, pondérée selon ce que les consommateurs dépensent réellement.",
+     "why_it_matters": "L’objectif d’inflation de 2 % de la Fed est défini sur le PCE ; le PCE de base est sa principale jauge de la tendance sous-jacente.",
+     "release_frequency": "Mensuelle, vers la fin du mois suivant",
+     "releasing_agency": "Bureau d’analyse économique des États-Unis (BEA)",
+     "important_components": [
+      "Services de base (soins de santé, services financiers)",
+      "Logement",
+      "Biens de base"
+     ],
+     "relationship_to_inflation": "La référence officielle d’inflation pour la politique monétaire.",
+     "relationship_to_growth": "Publié avec les revenus et les dépenses des ménages, qui décrivent la demande des consommateurs.",
+     "relationship_to_labor_market": "Les prix des services reflètent les coûts de main-d’œuvre.",
+     "relationship_to_fed_policy": "Le plus directement lié au mandat de la Fed ; des écarts persistants par rapport à 2 % façonnent la trajectoire des taux.",
+     "typical_market_focus": "Variation de base m/m par rapport au consensus ; souvent en partie anticipée à partir du CPI et du PPI, d’où des surprises parfois plus faibles."
+    },
+    "es": {
+     "name": "Índice PCE subyacente",
+     "short_description": "La medida de inflación subyacente preferida por la Reserva Federal.",
+     "what_it_measures": "Variación m/m de los precios del gasto de consumo personal sin alimentos ni energía, con ponderaciones basadas en lo que los consumidores realmente gastan.",
+     "why_it_matters": "El objetivo de inflación del 2 % de la Fed se define sobre el PCE; el PCE subyacente es su principal indicador de la tendencia de fondo.",
+     "release_frequency": "Mensual, hacia finales del mes siguiente",
+     "releasing_agency": "Oficina de Análisis Económico de EE. UU. (BEA)",
+     "important_components": [
+      "Servicios subyacentes (salud, servicios financieros)",
+      "Vivienda",
+      "Bienes subyacentes"
+     ],
+     "relationship_to_inflation": "La referencia oficial de inflación para la política monetaria.",
+     "relationship_to_growth": "Se publica junto con el ingreso y el gasto personal, que describen la demanda de los consumidores.",
+     "relationship_to_labor_market": "Los precios de los servicios reflejan los costos laborales.",
+     "relationship_to_fed_policy": "Es el más directamente ligado al mandato de la Fed; las desviaciones persistentes respecto al 2 % determinan la trayectoria de tipos.",
+     "typical_market_focus": "Subyacente m/m frente al consenso; suele anticiparse en parte a partir del CPI y el PPI, por lo que las sorpresas pueden ser menores."
+    }
+   }
   },
   {
    "key": "pce",
@@ -82,7 +200,47 @@
    "relationship_to_growth": "Released alongside personal spending data.",
    "relationship_to_labor_market": "Indirect.",
    "relationship_to_fed_policy": "Referenced in the Fed’s statement and projections.",
-   "typical_market_focus": "Year-over-year headline versus the 2% target; personal spending in the same release."
+   "typical_market_focus": "Year-over-year headline versus the 2% target; personal spending in the same release.",
+   "i18n": {
+    "fr": {
+     "name": "Indice PCE",
+     "short_description": "Inflation globale des dépenses de consommation des ménages.",
+     "what_it_measures": "Variation m/m des prix de l’ensemble des dépenses de consommation des ménages.",
+     "why_it_matters": "La cible de 2 % de la Fed est définie sur le PCE global, même si les discussions de politique monétaire portent surtout sur l’indice de base.",
+     "release_frequency": "Mensuelle",
+     "releasing_agency": "Bureau d’analyse économique des États-Unis (BEA)",
+     "important_components": [
+      "Énergie",
+      "Alimentation",
+      "Services de base",
+      "Biens de base"
+     ],
+     "relationship_to_inflation": "Référence d’inflation globale pour la cible de la Fed.",
+     "relationship_to_growth": "Publié en même temps que les données sur les dépenses des ménages.",
+     "relationship_to_labor_market": "Indirecte.",
+     "relationship_to_fed_policy": "Cité dans le communiqué et les projections de la Fed.",
+     "typical_market_focus": "PCE global a/a par rapport à la cible de 2 % ; dépenses des ménages dans la même publication."
+    },
+    "es": {
+     "name": "Índice PCE",
+     "short_description": "Inflación general del gasto de consumo personal.",
+     "what_it_measures": "Variación m/m de los precios de todo el gasto de consumo personal.",
+     "why_it_matters": "La meta del 2 % de la Fed se define sobre el PCE general, aunque el debate de política monetaria se centra en el subyacente.",
+     "release_frequency": "Mensual",
+     "releasing_agency": "Oficina de Análisis Económico de EE. UU. (BEA)",
+     "important_components": [
+      "Energía",
+      "Alimentos",
+      "Servicios subyacentes",
+      "Bienes subyacentes"
+     ],
+     "relationship_to_inflation": "Referencia de inflación general para la meta de la Fed.",
+     "relationship_to_growth": "Se publica junto con los datos de gasto personal.",
+     "relationship_to_labor_market": "Indirecta.",
+     "relationship_to_fed_policy": "Se menciona en el comunicado y las proyecciones de la Fed.",
+     "typical_market_focus": "PCE general a/a frente a la meta del 2 %; gasto personal en el mismo informe."
+    }
+   }
   },
   {
    "key": "core_ppi",
@@ -103,7 +261,47 @@
    "relationship_to_growth": "Margin components reflect business pricing power.",
    "relationship_to_labor_market": "Indirect.",
    "relationship_to_fed_policy": "Matters mainly through its implications for the core PCE estimate.",
-   "typical_market_focus": "PCE-relevant components more than the headline number."
+   "typical_market_focus": "PCE-relevant components more than the headline number.",
+   "i18n": {
+    "fr": {
+     "name": "PPI de base",
+     "short_description": "Prix à la production hors alimentation et énergie.",
+     "what_it_measures": "Variation m/m des prix de vente obtenus par les producteurs américains, hors alimentation et énergie.",
+     "why_it_matters": "Une lecture des pressions sur les prix en amont ; certaines composantes alimentent directement les estimations du PCE.",
+     "release_frequency": "Mensuelle, autour de la semaine du CPI",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS)",
+     "important_components": [
+      "Marges des services de commerce",
+      "Frais de gestion de portefeuille",
+      "Tarifs aériens",
+      "Services médicaux"
+     ],
+     "relationship_to_inflation": "Inflation en amont ; peut annoncer les prix à la consommation.",
+     "relationship_to_growth": "Les composantes de marge reflètent le pouvoir de fixation des prix des entreprises.",
+     "relationship_to_labor_market": "Indirecte.",
+     "relationship_to_fed_policy": "Compte surtout pour ses implications sur l’estimation du PCE de base.",
+     "typical_market_focus": "Les composantes pertinentes pour le PCE plus que le chiffre global."
+    },
+    "es": {
+     "name": "PPI subyacente",
+     "short_description": "Precios al productor sin alimentos ni energía.",
+     "what_it_measures": "Variación m/m de los precios de venta que reciben los productores estadounidenses, sin alimentos ni energía.",
+     "why_it_matters": "Una lectura de las presiones de precios en la cadena de producción; algunos componentes alimentan directamente las estimaciones del PCE.",
+     "release_frequency": "Mensual, en torno a la semana del CPI",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS)",
+     "important_components": [
+      "Márgenes de servicios comerciales",
+      "Comisiones de gestión de carteras",
+      "Tarifas aéreas",
+      "Servicios médicos"
+     ],
+     "relationship_to_inflation": "Inflación en etapas previas; puede anticipar los precios al consumidor.",
+     "relationship_to_growth": "Los componentes de margen reflejan el poder de fijación de precios de las empresas.",
+     "relationship_to_labor_market": "Indirecta.",
+     "relationship_to_fed_policy": "Importa sobre todo por sus implicaciones para la estimación del PCE subyacente.",
+     "typical_market_focus": "Los componentes relevantes para el PCE más que la cifra general."
+    }
+   }
   },
   {
    "key": "ppi",
@@ -124,7 +322,47 @@
    "relationship_to_growth": "Reflects business costs and pricing.",
    "relationship_to_labor_market": "Indirect.",
    "relationship_to_fed_policy": "Secondary to CPI and PCE, but used to refine PCE estimates.",
-   "typical_market_focus": "Services components, and how PCE-mapped items move."
+   "typical_market_focus": "Services components, and how PCE-mapped items move.",
+   "i18n": {
+    "fr": {
+     "name": "PPI",
+     "short_description": "Inflation des prix à la production.",
+     "what_it_measures": "Variation m/m des prix obtenus par les producteurs américains pour leur production (demande finale).",
+     "why_it_matters": "Signale des pressions sur les coûts qui pourraient se répercuter sur les consommateurs.",
+     "release_frequency": "Mensuelle",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS)",
+     "important_components": [
+      "Biens de demande finale",
+      "Services de demande finale",
+      "Énergie",
+      "Alimentation"
+     ],
+     "relationship_to_inflation": "Indicateur de l’inflation en amont.",
+     "relationship_to_growth": "Reflète les coûts et les prix des entreprises.",
+     "relationship_to_labor_market": "Indirecte.",
+     "relationship_to_fed_policy": "Secondaire par rapport au CPI et au PCE, mais sert à affiner les estimations du PCE.",
+     "typical_market_focus": "Les composantes services, et l’évolution des postes repris dans le PCE."
+    },
+    "es": {
+     "name": "PPI",
+     "short_description": "Inflación de los precios al productor.",
+     "what_it_measures": "Variación m/m de los precios que reciben los productores estadounidenses por su producción (demanda final).",
+     "why_it_matters": "Señala presiones de costos que pueden trasladarse a los consumidores.",
+     "release_frequency": "Mensual",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS)",
+     "important_components": [
+      "Bienes de demanda final",
+      "Servicios de demanda final",
+      "Energía",
+      "Alimentos"
+     ],
+     "relationship_to_inflation": "Indicador de inflación en la cadena de producción.",
+     "relationship_to_growth": "Refleja los costos y precios de las empresas.",
+     "relationship_to_labor_market": "Indirecta.",
+     "relationship_to_fed_policy": "Secundario frente al CPI y el PCE, pero se usa para afinar las estimaciones del PCE.",
+     "typical_market_focus": "Los componentes de servicios y cómo se mueven las partidas que se trasladan al PCE."
+    }
+   }
   },
   {
    "key": "nfp",
@@ -146,7 +384,49 @@
    "relationship_to_growth": "Employment growth supports income and spending.",
    "relationship_to_labor_market": "Primary measure of labor demand.",
    "relationship_to_fed_policy": "A cooling labor market can support easier policy; strong hiring can reduce the urgency to cut.",
-   "typical_market_focus": "Headline versus consensus, revisions, unemployment rate and wages together."
+   "typical_market_focus": "Headline versus consensus, revisions, unemployment rate and wages together.",
+   "i18n": {
+    "fr": {
+     "name": "Emplois non agricoles (NFP)",
+     "short_description": "Variation mensuelle des emplois aux États-Unis.",
+     "what_it_measures": "Variation nette du nombre d’emplois salariés hors agriculture, tirée de l’enquête auprès des employeurs (établissements).",
+     "why_it_matters": "Le principal rapport sur le marché du travail ; il met à l’épreuve les deux volets du mandat de la Fed et provoque souvent de forts mouvements.",
+     "release_frequency": "Mensuelle, généralement le premier vendredi",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS) — rapport sur l’emploi (Employment Situation)",
+     "important_components": [
+      "Emplois du secteur privé",
+      "Ventilation par secteur",
+      "Révisions des deux mois précédents",
+      "Salaire horaire moyen",
+      "Taux de chômage (enquête auprès des ménages)"
+     ],
+     "relationship_to_inflation": "Par les salaires : une embauche soutenue peut entretenir l’inflation des services.",
+     "relationship_to_growth": "La croissance de l’emploi soutient les revenus et les dépenses.",
+     "relationship_to_labor_market": "Principale mesure de la demande de main-d’œuvre.",
+     "relationship_to_fed_policy": "Un marché du travail qui ralentit peut favoriser une politique plus accommodante ; une embauche vigoureuse peut réduire l’urgence de baisser les taux.",
+     "typical_market_focus": "Chiffre global par rapport au consensus, révisions, taux de chômage et salaires pris ensemble."
+    },
+    "es": {
+     "name": "Nóminas no agrícolas (NFP)",
+     "short_description": "Variación mensual del empleo en EE. UU.",
+     "what_it_measures": "Variación neta del número de empleos asalariados fuera del sector agrícola, según la encuesta a establecimientos (empleadores).",
+     "why_it_matters": "El principal informe del mercado laboral; pone a prueba ambos lados del mandato de la Fed y a menudo provoca movimientos fuertes.",
+     "release_frequency": "Mensual, normalmente el primer viernes",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS) — informe de situación del empleo (Employment Situation)",
+     "important_components": [
+      "Nóminas privadas",
+      "Desglose por sector",
+      "Revisiones de los dos meses anteriores",
+      "Ingresos medios por hora",
+      "Tasa de desempleo (encuesta de hogares)"
+     ],
+     "relationship_to_inflation": "A través de los salarios: una contratación fuerte puede sostener la inflación de servicios.",
+     "relationship_to_growth": "El crecimiento del empleo sostiene el ingreso y el gasto.",
+     "relationship_to_labor_market": "Principal medida de la demanda de mano de obra.",
+     "relationship_to_fed_policy": "Un mercado laboral que se enfría puede respaldar una política más laxa; una contratación sólida puede restar urgencia a los recortes.",
+     "typical_market_focus": "Cifra general frente al consenso, revisiones, tasa de desempleo y salarios en conjunto."
+    }
+   }
   },
   {
    "key": "unemployment",
@@ -166,7 +446,45 @@
    "relationship_to_growth": "Rising unemployment can signal slowing activity.",
    "relationship_to_labor_market": "Core labor-market slack measure.",
    "relationship_to_fed_policy": "Compared with the Fed’s projections; unexpected rises can raise expectations of cuts.",
-   "typical_market_focus": "Change versus prior month and versus Fed projections; participation."
+   "typical_market_focus": "Change versus prior month and versus Fed projections; participation.",
+   "i18n": {
+    "fr": {
+     "name": "Taux de chômage",
+     "short_description": "Part de la population active sans emploi.",
+     "what_it_measures": "Pourcentage de la population active au chômage et activement à la recherche d’un emploi, selon l’enquête auprès des ménages.",
+     "why_it_matters": "Directement lié au mandat d’emploi maximal de la Fed ; une hausse peut modifier rapidement les perspectives de politique monétaire.",
+     "release_frequency": "Mensuelle, avec le rapport sur l’emploi",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS)",
+     "important_components": [
+      "Taux d’activité",
+      "Emploi selon l’enquête auprès des ménages",
+      "Taux élargi U-6"
+     ],
+     "relationship_to_inflation": "Indirecte : un marché du travail plus tendu peut soutenir la hausse des salaires et des prix.",
+     "relationship_to_growth": "Une hausse du chômage peut signaler un ralentissement de l’activité.",
+     "relationship_to_labor_market": "Mesure clé des capacités inutilisées sur le marché du travail.",
+     "relationship_to_fed_policy": "Comparé aux projections de la Fed ; une hausse inattendue peut renforcer les attentes de baisses de taux.",
+     "typical_market_focus": "Variation par rapport au mois précédent et aux projections de la Fed ; taux d’activité."
+    },
+    "es": {
+     "name": "Tasa de desempleo",
+     "short_description": "Proporción de la población activa sin empleo.",
+     "what_it_measures": "Porcentaje de la población activa que está desempleada y busca trabajo activamente, según la encuesta de hogares.",
+     "why_it_matters": "Ligada directamente al mandato de máximo empleo de la Fed; los aumentos pueden cambiar rápidamente las perspectivas de política monetaria.",
+     "release_frequency": "Mensual, con el informe de situación del empleo",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS)",
+     "important_components": [
+      "Tasa de participación",
+      "Empleo según la encuesta de hogares",
+      "Tasa amplia U-6"
+     ],
+     "relationship_to_inflation": "Indirecta: un mercado laboral más ajustado puede sostener el alza de salarios y precios.",
+     "relationship_to_growth": "Un desempleo en aumento puede señalar una desaceleración de la actividad.",
+     "relationship_to_labor_market": "Medida central de la holgura del mercado laboral.",
+     "relationship_to_fed_policy": "Se compara con las proyecciones de la Fed; los aumentos inesperados pueden elevar las expectativas de recortes.",
+     "typical_market_focus": "Variación frente al mes anterior y frente a las proyecciones de la Fed; participación."
+    }
+   }
   },
   {
    "key": "ahe",
@@ -185,7 +503,43 @@
    "relationship_to_growth": "Supports household income.",
    "relationship_to_labor_market": "Measures labor-cost pressure.",
    "relationship_to_fed_policy": "Watched for consistency with 2% inflation.",
-   "typical_market_focus": "m/m versus 0.3%; year-over-year trend; composition effects."
+   "typical_market_focus": "m/m versus 0.3%; year-over-year trend; composition effects.",
+   "i18n": {
+    "fr": {
+     "name": "Salaire horaire moyen",
+     "short_description": "Croissance des salaires.",
+     "what_it_measures": "Variation m/m de la rémunération horaire moyenne des salariés du secteur privé.",
+     "why_it_matters": "La croissance des salaires est un moteur clé de l’inflation des services.",
+     "release_frequency": "Mensuelle, avec le rapport sur l’emploi",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS)",
+     "important_components": [
+      "Salaires des employés de production et non cadres",
+      "Heures travaillées"
+     ],
+     "relationship_to_inflation": "Une hausse plus rapide des salaires peut entretenir l’inflation des services.",
+     "relationship_to_growth": "Soutient les revenus des ménages.",
+     "relationship_to_labor_market": "Mesure la pression sur le coût de la main-d’œuvre.",
+     "relationship_to_fed_policy": "Surveillé pour vérifier sa compatibilité avec une inflation de 2 %.",
+     "typical_market_focus": "m/m par rapport à 0,3 % ; tendance a/a ; effets de composition."
+    },
+    "es": {
+     "name": "Ingresos medios por hora",
+     "short_description": "Crecimiento salarial.",
+     "what_it_measures": "Variación m/m de los ingresos medios por hora de los empleados del sector privado.",
+     "why_it_matters": "El crecimiento salarial es un motor clave de la inflación de servicios.",
+     "release_frequency": "Mensual, con el informe de situación del empleo",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS)",
+     "important_components": [
+      "Salarios de empleados de producción y no supervisores",
+      "Horas trabajadas"
+     ],
+     "relationship_to_inflation": "Un crecimiento salarial más rápido puede sostener la inflación de servicios.",
+     "relationship_to_growth": "Sostiene el ingreso de los hogares.",
+     "relationship_to_labor_market": "Mide la presión sobre los costos laborales.",
+     "relationship_to_fed_policy": "Se vigila su coherencia con una inflación del 2 %.",
+     "typical_market_focus": "m/m frente al 0,3 %; tendencia a/a; efectos de composición."
+    }
+   }
   },
   {
    "key": "claims",
@@ -205,7 +559,45 @@
    "relationship_to_growth": "Rising claims can indicate slowing activity.",
    "relationship_to_labor_market": "Direct read on layoffs.",
    "relationship_to_fed_policy": "A sustained rise can shift the Fed toward easier policy.",
-   "typical_market_focus": "Trend and 4-week average rather than one week; holiday and seasonal noise."
+   "typical_market_focus": "Trend and 4-week average rather than one week; holiday and seasonal noise.",
+   "i18n": {
+    "fr": {
+     "name": "Inscriptions au chômage",
+     "short_description": "Nouvelles demandes hebdomadaires d’assurance chômage.",
+     "what_it_measures": "Nombre de personnes qui demandent des prestations de chômage pour la première fois au cours de la semaine de référence.",
+     "why_it_matters": "L’indicateur le plus rapide du marché du travail ; sa tendance peut signaler des mises à pied avant les données mensuelles.",
+     "release_frequency": "Hebdomadaire, le jeudi",
+     "releasing_agency": "Département du Travail des États-Unis",
+     "important_components": [
+      "Inscriptions continues",
+      "Moyenne mobile sur 4 semaines",
+      "Effets de la désaisonnalisation"
+     ],
+     "relationship_to_inflation": "Indirecte.",
+     "relationship_to_growth": "Une hausse des inscriptions peut indiquer un ralentissement de l’activité.",
+     "relationship_to_labor_market": "Lecture directe des mises à pied.",
+     "relationship_to_fed_policy": "Une hausse durable peut pousser la Fed vers un assouplissement.",
+     "typical_market_focus": "La tendance et la moyenne sur 4 semaines plutôt qu’une seule semaine ; bruit lié aux jours fériés et aux saisons."
+    },
+    "es": {
+     "name": "Solicitudes de subsidio por desempleo",
+     "short_description": "Nuevas solicitudes semanales del seguro de desempleo.",
+     "what_it_measures": "Número de personas que solicitan prestaciones por desempleo por primera vez en la semana de referencia.",
+     "why_it_matters": "El indicador más oportuno del mercado laboral; su tendencia puede anticipar despidos antes que los datos mensuales.",
+     "release_frequency": "Semanal, los jueves",
+     "releasing_agency": "Departamento de Trabajo de EE. UU.",
+     "important_components": [
+      "Solicitudes continuas",
+      "Media móvil de 4 semanas",
+      "Efectos del ajuste estacional"
+     ],
+     "relationship_to_inflation": "Indirecta.",
+     "relationship_to_growth": "Un aumento de las solicitudes puede indicar una desaceleración de la actividad.",
+     "relationship_to_labor_market": "Lectura directa de los despidos.",
+     "relationship_to_fed_policy": "Un aumento sostenido puede inclinar a la Fed hacia una política más laxa.",
+     "typical_market_focus": "Tendencia y media de 4 semanas más que una sola semana; ruido por días festivos y estacionalidad."
+    }
+   }
   },
   {
    "key": "adp",
@@ -224,7 +616,43 @@
    "relationship_to_growth": "Private hiring trend.",
    "relationship_to_labor_market": "Private labor demand.",
    "relationship_to_fed_policy": "Limited on its own; relevant through expectations for payrolls.",
-   "typical_market_focus": "Surprise versus consensus; historically an imperfect predictor of nonfarm payrolls."
+   "typical_market_focus": "Surprise versus consensus; historically an imperfect predictor of nonfarm payrolls.",
+   "i18n": {
+    "fr": {
+     "name": "Emploi privé ADP",
+     "short_description": "Estimation de l’emploi privé par ADP.",
+     "what_it_measures": "Variation de l’emploi dans le secteur privé, estimée à partir des données de traitement de la paie d’ADP.",
+     "why_it_matters": "Publié deux jours avant le rapport officiel ; suivi comme un signal partiel, même s’il s’écarte souvent des NFP.",
+     "release_frequency": "Mensuelle, le mercredi précédant le rapport sur l’emploi",
+     "releasing_agency": "ADP Research, avec le Stanford Digital Economy Lab",
+     "important_components": [
+      "Emploi privé par taille d’entreprise et par secteur",
+      "Hausse de salaire des employés restés en poste et de ceux qui ont changé d’emploi"
+     ],
+     "relationship_to_inflation": "Les données salariales donnent une lecture de la pression sur les salaires.",
+     "relationship_to_growth": "Tendance de l’embauche dans le privé.",
+     "relationship_to_labor_market": "Demande de main-d’œuvre dans le privé.",
+     "relationship_to_fed_policy": "Limitée en soi ; pertinente par les attentes qu’elle crée pour les NFP.",
+     "typical_market_focus": "Surprise par rapport au consensus ; historiquement, un prédicteur imparfait des NFP."
+    },
+    "es": {
+     "name": "Empleo privado ADP",
+     "short_description": "Estimación de ADP del empleo privado.",
+     "what_it_measures": "Variación del empleo en el sector privado, estimada a partir de los datos de procesamiento de nóminas de ADP.",
+     "why_it_matters": "Se publica dos días antes del informe oficial; se sigue como una señal parcial, aunque a menudo difiere de las NFP.",
+     "release_frequency": "Mensual, el miércoles anterior al informe de situación del empleo",
+     "releasing_agency": "ADP Research, con el Stanford Digital Economy Lab",
+     "important_components": [
+      "Empleo privado por tamaño de empresa y sector",
+      "Crecimiento salarial de quienes permanecen en su empleo y de quienes cambian de trabajo"
+     ],
+     "relationship_to_inflation": "Los datos salariales permiten evaluar la presión sobre los salarios.",
+     "relationship_to_growth": "Tendencia de la contratación privada.",
+     "relationship_to_labor_market": "Demanda de mano de obra privada.",
+     "relationship_to_fed_policy": "Limitada por sí sola; relevante por las expectativas sobre las NFP.",
+     "typical_market_focus": "Sorpresa frente al consenso; históricamente, un predictor imperfecto de las NFP."
+    }
+   }
   },
   {
    "key": "jolts",
@@ -245,7 +673,47 @@
    "relationship_to_growth": "Openings reflect business demand.",
    "relationship_to_labor_market": "Labor demand and turnover.",
    "relationship_to_fed_policy": "Used to gauge labor-market tightness.",
-   "typical_market_focus": "Openings versus consensus, quits rate trend."
+   "typical_market_focus": "Openings versus consensus, quits rate trend.",
+   "i18n": {
+    "fr": {
+     "name": "Offres d’emploi JOLTS",
+     "short_description": "Offres d’emploi, embauches et départs volontaires.",
+     "what_it_measures": "Nombre d’offres d’emploi le dernier jour ouvrable du mois de référence, avec les embauches, les départs volontaires et les mises à pied.",
+     "why_it_matters": "Une lecture de la demande de main-d’œuvre et du roulement ; les départs volontaires sont liés à la pression salariale.",
+     "release_frequency": "Mensuelle, environ cinq semaines après le mois de référence",
+     "releasing_agency": "Bureau des statistiques du travail des États-Unis (BLS)",
+     "important_components": [
+      "Offres d’emploi",
+      "Taux de départs volontaires",
+      "Embauches",
+      "Mises à pied"
+     ],
+     "relationship_to_inflation": "Les départs volontaires et les offres d’emploi sont liés à la pression salariale.",
+     "relationship_to_growth": "Les offres d’emploi reflètent la demande des entreprises.",
+     "relationship_to_labor_market": "Demande de main-d’œuvre et roulement du personnel.",
+     "relationship_to_fed_policy": "Sert à évaluer la tension du marché du travail.",
+     "typical_market_focus": "Offres d’emploi par rapport au consensus, tendance du taux de départs volontaires."
+    },
+    "es": {
+     "name": "Ofertas de empleo JOLTS",
+     "short_description": "Ofertas de empleo, contrataciones y renuncias.",
+     "what_it_measures": "Número de ofertas de empleo el último día hábil del mes de referencia, junto con contrataciones, renuncias y despidos.",
+     "why_it_matters": "Una lectura de la demanda de mano de obra y la rotación; las renuncias se relacionan con la presión salarial.",
+     "release_frequency": "Mensual, unas cinco semanas después del mes de referencia",
+     "releasing_agency": "Oficina de Estadísticas Laborales de EE. UU. (BLS)",
+     "important_components": [
+      "Ofertas de empleo",
+      "Tasa de renuncias",
+      "Contrataciones",
+      "Despidos"
+     ],
+     "relationship_to_inflation": "Las renuncias y las ofertas de empleo se relacionan con la presión salarial.",
+     "relationship_to_growth": "Las ofertas de empleo reflejan la demanda de las empresas.",
+     "relationship_to_labor_market": "Demanda de mano de obra y rotación.",
+     "relationship_to_fed_policy": "Se usa para medir la tensión del mercado laboral.",
+     "typical_market_focus": "Ofertas de empleo frente al consenso, tendencia de la tasa de renuncias."
+    }
+   }
   },
   {
    "key": "gdp",
@@ -267,7 +735,49 @@
    "relationship_to_growth": "Primary growth measure.",
    "relationship_to_labor_market": "Indirect.",
    "relationship_to_fed_policy": "Influences the growth side of the outlook; weak growth can support easier policy.",
-   "typical_market_focus": "Final sales to private domestic purchasers; inventory and trade distortions."
+   "typical_market_focus": "Final sales to private domestic purchasers; inventory and trade distortions.",
+   "i18n": {
+    "fr": {
+     "name": "PIB",
+     "short_description": "Production économique trimestrielle.",
+     "what_it_measures": "Croissance annualisée t/t du produit intérieur brut réel.",
+     "why_it_matters": "La mesure la plus large de l’activité ; l’estimation préliminaire peut modifier les attentes de croissance.",
+     "release_frequency": "Trimestrielle : estimations préliminaire, deuxième et troisième",
+     "releasing_agency": "Bureau d’analyse économique des États-Unis (BEA)",
+     "important_components": [
+      "Consommation des ménages",
+      "Investissement des entreprises",
+      "Dépenses publiques",
+      "Exportations nettes et stocks",
+      "Déflateur du PIB"
+     ],
+     "relationship_to_inflation": "Le déflateur et le PCE de base du trimestre y figurent.",
+     "relationship_to_growth": "Principale mesure de la croissance.",
+     "relationship_to_labor_market": "Indirecte.",
+     "relationship_to_fed_policy": "Influence le volet croissance des perspectives ; une croissance faible peut favoriser une politique plus accommodante.",
+     "typical_market_focus": "Ventes finales aux acheteurs privés intérieurs ; distorsions liées aux stocks et au commerce extérieur."
+    },
+    "es": {
+     "name": "PIB",
+     "short_description": "Producción económica trimestral.",
+     "what_it_measures": "Crecimiento anualizado t/t del producto interno bruto real.",
+     "why_it_matters": "La medida más amplia de la actividad; las estimaciones preliminares pueden cambiar las expectativas de crecimiento.",
+     "release_frequency": "Trimestral: estimación preliminar, segunda y tercera",
+     "releasing_agency": "Oficina de Análisis Económico de EE. UU. (BEA)",
+     "important_components": [
+      "Gasto de los consumidores",
+      "Inversión empresarial",
+      "Gasto público",
+      "Exportaciones netas e inventarios",
+      "Deflactor del PIB"
+     ],
+     "relationship_to_inflation": "Incluye el deflactor y el PCE subyacente del trimestre.",
+     "relationship_to_growth": "Principal medida del crecimiento.",
+     "relationship_to_labor_market": "Indirecta.",
+     "relationship_to_fed_policy": "Influye en la parte de crecimiento de las perspectivas; un crecimiento débil puede respaldar una política más laxa.",
+     "typical_market_focus": "Ventas finales a compradores privados nacionales; distorsiones por inventarios y comercio exterior."
+    }
+   }
   },
   {
    "key": "retail",
@@ -288,7 +798,47 @@
    "relationship_to_growth": "Key read on consumer demand.",
    "relationship_to_labor_market": "Supported by employment and wages.",
    "relationship_to_fed_policy": "Strong demand can reduce the urgency to ease.",
-   "typical_market_focus": "Control group versus consensus; revisions."
+   "typical_market_focus": "Control group versus consensus; revisions.",
+   "i18n": {
+    "fr": {
+     "name": "Ventes au détail",
+     "short_description": "Dépenses mensuelles des consommateurs chez les détaillants.",
+     "what_it_measures": "Variation m/m de la valeur des ventes des commerces de détail et des services de restauration (non corrigée de l’inflation).",
+     "why_it_matters": "La consommation des ménages est le principal moteur de l’économie américaine.",
+     "release_frequency": "Mensuelle, à la mi-mois",
+     "releasing_agency": "Bureau du recensement des États-Unis (Census Bureau)",
+     "important_components": [
+      "Groupe de contrôle (entre dans le PIB)",
+      "Hors automobiles",
+      "Hors automobiles et essence",
+      "Révisions"
+     ],
+     "relationship_to_inflation": "Données nominales : une partie de la variation peut venir de hausses de prix.",
+     "relationship_to_growth": "Lecture clé de la demande des consommateurs.",
+     "relationship_to_labor_market": "Soutenues par l’emploi et les salaires.",
+     "relationship_to_fed_policy": "Une demande forte peut réduire l’urgence d’assouplir.",
+     "typical_market_focus": "Groupe de contrôle par rapport au consensus ; révisions."
+    },
+    "es": {
+     "name": "Ventas minoristas",
+     "short_description": "Gasto mensual de los consumidores en comercios minoristas.",
+     "what_it_measures": "Variación m/m del valor de las ventas en comercios minoristas y servicios de comida (sin ajustar por inflación).",
+     "why_it_matters": "El gasto de los consumidores impulsa la mayor parte de la economía de EE. UU.",
+     "release_frequency": "Mensual, a mediados de mes",
+     "releasing_agency": "Oficina del Censo de EE. UU. (Census Bureau)",
+     "important_components": [
+      "Grupo de control (alimenta el PIB)",
+      "Sin automóviles",
+      "Sin automóviles ni gasolina",
+      "Revisiones"
+     ],
+     "relationship_to_inflation": "Nominales: parte de la variación puede deberse a aumentos de precios.",
+     "relationship_to_growth": "Lectura clave de la demanda de los consumidores.",
+     "relationship_to_labor_market": "Respaldadas por el empleo y los salarios.",
+     "relationship_to_fed_policy": "Una demanda fuerte puede restar urgencia a la flexibilización.",
+     "typical_market_focus": "Grupo de control frente al consenso; revisiones."
+    }
+   }
   },
   {
    "key": "ism_mfg",
@@ -310,7 +860,49 @@
    "relationship_to_growth": "Leading indicator of manufacturing activity.",
    "relationship_to_labor_market": "Employment sub-index.",
    "relationship_to_fed_policy": "Secondary, but prices paid can influence inflation expectations.",
-   "typical_market_focus": "Headline versus 50 and consensus; new orders; prices paid."
+   "typical_market_focus": "Headline versus 50 and consensus; new orders; prices paid.",
+   "i18n": {
+    "fr": {
+     "name": "PMI manufacturier ISM",
+     "short_description": "Enquête sur l’activité manufacturière.",
+     "what_it_measures": "Indice de diffusion établi auprès des directeurs d’achats ; au-dessus de 50, il indique une expansion, sous 50, une contraction.",
+     "why_it_matters": "Lecture rapide du cycle industriel et des pressions sur les prix.",
+     "release_frequency": "Mensuelle, premier jour ouvrable",
+     "releasing_agency": "Institute for Supply Management (ISM)",
+     "important_components": [
+      "Nouvelles commandes",
+      "Prix payés",
+      "Emploi",
+      "Production",
+      "Stocks"
+     ],
+     "relationship_to_inflation": "L’indice des prix payés est un signal précoce de l’inflation des biens.",
+     "relationship_to_growth": "Indicateur avancé de l’activité manufacturière.",
+     "relationship_to_labor_market": "Sous-indice de l’emploi.",
+     "relationship_to_fed_policy": "Secondaire, mais les prix payés peuvent influencer les anticipations d’inflation.",
+     "typical_market_focus": "Indice global par rapport à 50 et au consensus ; nouvelles commandes ; prix payés."
+    },
+    "es": {
+     "name": "PMI manufacturero ISM",
+     "short_description": "Encuesta sobre la actividad manufacturera.",
+     "what_it_measures": "Índice de difusión elaborado a partir de gerentes de compras; por encima de 50 indica expansión y por debajo de 50, contracción.",
+     "why_it_matters": "Lectura oportuna del ciclo industrial y de las presiones de precios.",
+     "release_frequency": "Mensual, primer día hábil",
+     "releasing_agency": "Institute for Supply Management (ISM)",
+     "important_components": [
+      "Nuevos pedidos",
+      "Precios pagados",
+      "Empleo",
+      "Producción",
+      "Inventarios"
+     ],
+     "relationship_to_inflation": "Los precios pagados son una señal temprana de la inflación de bienes.",
+     "relationship_to_growth": "Indicador adelantado de la actividad manufacturera.",
+     "relationship_to_labor_market": "Subíndice de empleo.",
+     "relationship_to_fed_policy": "Secundario, pero los precios pagados pueden influir en las expectativas de inflación.",
+     "typical_market_focus": "Cifra general frente a 50 y al consenso; nuevos pedidos; precios pagados."
+    }
+   }
   },
   {
    "key": "ism_srv",
@@ -331,7 +923,47 @@
    "relationship_to_growth": "Broad read on services activity.",
    "relationship_to_labor_market": "Employment sub-index.",
    "relationship_to_fed_policy": "Watched for inflation persistence in services.",
-   "typical_market_focus": "Headline versus consensus; prices paid."
+   "typical_market_focus": "Headline versus consensus; prices paid.",
+   "i18n": {
+    "fr": {
+     "name": "PMI des services ISM",
+     "short_description": "Enquête sur l’activité du secteur des services.",
+     "what_it_measures": "Indice de diffusion établi auprès des directeurs d’achats du secteur des services ; au-dessus de 50, il indique une expansion.",
+     "why_it_matters": "Les services dominent l’économie américaine et l’inflation des services est tenace.",
+     "release_frequency": "Mensuelle, troisième jour ouvrable",
+     "releasing_agency": "Institute for Supply Management (ISM)",
+     "important_components": [
+      "Activité des entreprises",
+      "Nouvelles commandes",
+      "Prix payés",
+      "Emploi"
+     ],
+     "relationship_to_inflation": "Les prix payés sont liés à l’inflation des services.",
+     "relationship_to_growth": "Lecture large de l’activité dans les services.",
+     "relationship_to_labor_market": "Sous-indice de l’emploi.",
+     "relationship_to_fed_policy": "Surveillé pour la persistance de l’inflation dans les services.",
+     "typical_market_focus": "Indice global par rapport au consensus ; prix payés."
+    },
+    "es": {
+     "name": "PMI de servicios ISM",
+     "short_description": "Encuesta sobre la actividad del sector servicios.",
+     "what_it_measures": "Índice de difusión elaborado a partir de gerentes de compras del sector servicios; por encima de 50 indica expansión.",
+     "why_it_matters": "Los servicios dominan la economía de EE. UU. y la inflación de servicios es persistente.",
+     "release_frequency": "Mensual, tercer día hábil",
+     "releasing_agency": "Institute for Supply Management (ISM)",
+     "important_components": [
+      "Actividad empresarial",
+      "Nuevos pedidos",
+      "Precios pagados",
+      "Empleo"
+     ],
+     "relationship_to_inflation": "Los precios pagados se relacionan con la inflación de servicios.",
+     "relationship_to_growth": "Lectura amplia de la actividad en los servicios.",
+     "relationship_to_labor_market": "Subíndice de empleo.",
+     "relationship_to_fed_policy": "Se vigila por la persistencia de la inflación en los servicios.",
+     "typical_market_focus": "Cifra general frente al consenso; precios pagados."
+    }
+   }
   },
   {
    "key": "confidence",
@@ -351,7 +983,45 @@
    "relationship_to_growth": "Soft indicator of spending intentions.",
    "relationship_to_labor_market": "Labor differential tracks unemployment trends.",
    "relationship_to_fed_policy": "Minor direct influence.",
-   "typical_market_focus": "Expectations index and labor differential rather than the headline."
+   "typical_market_focus": "Expectations index and labor differential rather than the headline.",
+   "i18n": {
+    "fr": {
+     "name": "Confiance des consommateurs (CB)",
+     "short_description": "Enquête sur le moral des consommateurs.",
+     "what_it_measures": "Indice du Conference Board mesurant l’évaluation que font les consommateurs de la situation actuelle et leurs attentes.",
+     "why_it_matters": "Une lecture qualitative de l’humeur des ménages ; le différentiel sur l’emploi est surveillé.",
+     "release_frequency": "Mensuelle, le dernier mardi",
+     "releasing_agency": "The Conference Board",
+     "important_components": [
+      "Indice de la situation actuelle",
+      "Indice des attentes",
+      "Emplois abondants contre emplois difficiles à trouver"
+     ],
+     "relationship_to_inflation": "Questions sur les anticipations d’inflation.",
+     "relationship_to_growth": "Indicateur qualitatif des intentions de dépense.",
+     "relationship_to_labor_market": "Le différentiel sur l’emploi suit l’évolution du chômage.",
+     "relationship_to_fed_policy": "Influence directe mineure.",
+     "typical_market_focus": "L’indice des attentes et le différentiel sur l’emploi plutôt que le chiffre global."
+    },
+    "es": {
+     "name": "Confianza del consumidor (CB)",
+     "short_description": "Encuesta de sentimiento del consumidor.",
+     "what_it_measures": "Índice del Conference Board sobre la valoración que hacen los consumidores de la situación actual y sus expectativas.",
+     "why_it_matters": "Una lectura cualitativa del ánimo de los hogares; se vigila el diferencial del mercado laboral.",
+     "release_frequency": "Mensual, el último martes",
+     "releasing_agency": "The Conference Board",
+     "important_components": [
+      "Índice de situación actual",
+      "Índice de expectativas",
+      "Empleos abundantes frente a difíciles de conseguir"
+     ],
+     "relationship_to_inflation": "Preguntas sobre expectativas de inflación.",
+     "relationship_to_growth": "Indicador cualitativo de las intenciones de gasto.",
+     "relationship_to_labor_market": "El diferencial laboral sigue las tendencias del desempleo.",
+     "relationship_to_fed_policy": "Influencia directa menor.",
+     "typical_market_focus": "El índice de expectativas y el diferencial laboral más que la cifra general."
+    }
+   }
   },
   {
    "key": "fomc",
@@ -373,7 +1043,49 @@
    "relationship_to_growth": "Reflects the growth assessment.",
    "relationship_to_labor_market": "Reflects the employment assessment.",
    "relationship_to_fed_policy": "This is the policy itself.",
-   "typical_market_focus": "Surprise versus market pricing, statement changes, dot plot, and the chair’s tone."
+   "typical_market_focus": "Surprise versus market pricing, statement changes, dot plot, and the chair’s tone.",
+   "i18n": {
+    "fr": {
+     "name": "Décision de taux du FOMC",
+     "short_description": "Décision de politique monétaire de la Réserve fédérale.",
+     "what_it_measures": "La fourchette cible du taux des fonds fédéraux fixée par le Comité fédéral de l’open market (FOMC), avec le communiqué de politique monétaire ; les réunions trimestrielles comprennent les projections économiques et le « dot plot ».",
+     "why_it_matters": "Fixe le prix de l’argent ; le communiqué, les projections et la conférence de presse peuvent faire réévaluer toute la trajectoire des taux.",
+     "release_frequency": "Huit réunions prévues par année ; communiqué à 14 h (heure de l’Est), conférence de presse à 14 h 30 (heure de l’Est)",
+     "releasing_agency": "Réserve fédérale (Fed)",
+     "important_components": [
+      "Décision de taux",
+      "Formulation du communiqué",
+      "Dot plot et projections (trimestriels)",
+      "Votes dissidents",
+      "Conférence de presse"
+     ],
+     "relationship_to_inflation": "Reflète l’évaluation de l’inflation par la Fed.",
+     "relationship_to_growth": "Reflète l’évaluation de la croissance.",
+     "relationship_to_labor_market": "Reflète l’évaluation de l’emploi.",
+     "relationship_to_fed_policy": "C’est la politique monétaire elle-même.",
+     "typical_market_focus": "Surprise par rapport à ce que le marché anticipe, changements au communiqué, dot plot et ton de la présidence."
+    },
+    "es": {
+     "name": "Decisión de tipos del FOMC",
+     "short_description": "Decisión de política monetaria de la Reserva Federal.",
+     "what_it_measures": "El rango objetivo del tipo de los fondos federales fijado por el Comité Federal de Mercado Abierto (FOMC), junto con el comunicado de política monetaria; las reuniones trimestrales incluyen proyecciones económicas y el «dot plot».",
+     "why_it_matters": "Fija el precio del dinero; el comunicado, las proyecciones y la conferencia de prensa pueden hacer que el mercado reajuste toda la trayectoria de tipos.",
+     "release_frequency": "Ocho reuniones programadas al año; comunicado a las 14:00 (hora del Este), conferencia de prensa a las 14:30 (hora del Este)",
+     "releasing_agency": "Reserva Federal (Fed)",
+     "important_components": [
+      "Decisión de tipos",
+      "Redacción del comunicado",
+      "Dot plot y proyecciones (trimestrales)",
+      "Votos disidentes",
+      "Conferencia de prensa"
+     ],
+     "relationship_to_inflation": "Refleja la evaluación de la inflación por parte de la Fed.",
+     "relationship_to_growth": "Refleja la evaluación del crecimiento.",
+     "relationship_to_labor_market": "Refleja la evaluación del empleo.",
+     "relationship_to_fed_policy": "Es la política monetaria en sí.",
+     "typical_market_focus": "Sorpresa frente a lo que descuenta el mercado, cambios en el comunicado, dot plot y tono de la presidencia."
+    }
+   }
   },
   {
    "key": "minutes",
@@ -393,7 +1105,45 @@
    "relationship_to_growth": "Shows the growth assessment.",
    "relationship_to_labor_market": "Shows the labor-market assessment.",
    "relationship_to_fed_policy": "Clarifies the reaction function behind the last decision.",
-   "typical_market_focus": "Wording on the direction and pace of policy; number of participants holding each view."
+   "typical_market_focus": "Wording on the direction and pace of policy; number of participants holding each view.",
+   "i18n": {
+    "fr": {
+     "name": "Procès-verbal du FOMC",
+     "short_description": "Compte rendu de la réunion précédente de la Fed.",
+     "what_it_measures": "Résumé détaillé des discussions de la réunion du FOMC tenue trois semaines plus tôt.",
+     "why_it_matters": "Apporte des nuances sur le nombre de participants enclins à l’assouplissement ou au resserrement.",
+     "release_frequency": "Trois semaines après chaque réunion, à 14 h (heure de l’Est)",
+     "releasing_agency": "Réserve fédérale (Fed)",
+     "important_components": [
+      "Équilibre des opinions",
+      "Évaluation des risques",
+      "Discussion sur le bilan"
+     ],
+     "relationship_to_inflation": "Montre comment les responsables pèsent les risques d’inflation.",
+     "relationship_to_growth": "Montre l’évaluation de la croissance.",
+     "relationship_to_labor_market": "Montre l’évaluation du marché du travail.",
+     "relationship_to_fed_policy": "Précise la fonction de réaction derrière la dernière décision.",
+     "typical_market_focus": "Formulation sur l’orientation et le rythme de la politique monétaire ; nombre de participants partageant chaque point de vue."
+    },
+    "es": {
+     "name": "Actas del FOMC",
+     "short_description": "Registro de la reunión anterior de la Fed.",
+     "what_it_measures": "Resumen detallado de las deliberaciones de la reunión del FOMC celebrada tres semanas antes.",
+     "why_it_matters": "Aporta matices sobre cuántos participantes se inclinan por relajar o endurecer la política monetaria.",
+     "release_frequency": "Tres semanas después de cada reunión, a las 14:00 (hora del Este)",
+     "releasing_agency": "Reserva Federal (Fed)",
+     "important_components": [
+      "Equilibrio de opiniones",
+      "Evaluación de riesgos",
+      "Debate sobre el balance"
+     ],
+     "relationship_to_inflation": "Muestra cómo ponderan los funcionarios los riesgos de inflación.",
+     "relationship_to_growth": "Muestra la evaluación del crecimiento.",
+     "relationship_to_labor_market": "Muestra la evaluación del mercado laboral.",
+     "relationship_to_fed_policy": "Aclara la función de reacción detrás de la última decisión.",
+     "typical_market_focus": "Redacción sobre la dirección y el ritmo de la política monetaria; número de participantes que sostienen cada postura."
+    }
+   }
   }
  ]
 }

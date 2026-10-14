@@ -36,7 +36,7 @@ async def main():
         hdr = await pg.evaluate("((document.querySelector('.main-wrap .top #title')||{}).dataset||{}).hi||''")
         names = await pg.evaluate("[...document.querySelectorAll('#main .d-news .nav-ev-n')].map(e=>(e.firstChild&&e.firstChild.nodeType===3?e.firstChild.textContent:e.textContent).trim())")
         week = 'Cette semaine' in (await pg.evaluate("(document.querySelector('#main .d-news')||{}).innerText||''"))   # computer with no trade today: the card shows the week
-        exp = await pg.evaluate(f"(ECON.days['{want}']||[]).filter(e=>e.impact==='high'||e.impact==='medium').map(e=>e.event)")
+        exp = await pg.evaluate(f"(ECON.days['{want}']||[]).filter(e=>e.impact==='high'||e.impact==='medium').map(e=>tr(e.event))")   # (shown in the trader's language, brief 02 part 7)
         lab = await pg.evaluate("(document.querySelector('#main .d-news')||{}).innerText||''")
         tag = ('ordinateur' if desk else 'téléphone') + ' ' + now[11:16] + 'Z'
         ok(wday in hdr.lower(), f'[{tag}] header « {hdr.strip()} »')
@@ -49,7 +49,7 @@ async def main():
     await pg.goto(B + '/?x=1#dashboard'); await pg.wait_for_timeout(3000)
     await pg.locator('#main .nav-kpi [data-kt=week]').first.click(); await pg.wait_for_timeout(1500)
     rows = await pg.evaluate("[...document.querySelectorAll('#main .d-news .nav-ev')].map(b=>({n:b.querySelector('.nav-ev-n').textContent, past:b.classList.contains('nav-ev-wpast'), o:+getComputedStyle(b).opacity}))")
-    exp = await pg.evaluate("['2026-10-05','2026-10-06','2026-10-07','2026-10-08','2026-10-09'].flatMap(d=>(ECON.days[d]||[]).filter(e=>e.impact==='high'||e.impact==='medium').map(e=>e.event))")
+    exp = await pg.evaluate("['2026-10-05','2026-10-06','2026-10-07','2026-10-08','2026-10-09'].flatMap(d=>(ECON.days[d]||[]).filter(e=>e.impact==='high'||e.impact==='medium').map(e=>tr(e.event)))")
     ok([r['n'] for r in rows] == exp and len(rows) > 0, f'« Semaine »: every release of the week ({len(rows)} / {len(exp)})')
     ok(all((r['o'] < 0.6) == r['past'] for r in rows) and any(r['past'] for r in rows) and any(not r['past'] for r in rows), 'past releases dimmed, upcoming ones bright')
     await pg.evaluate("window.scrollTo(0,0)"); await pg.wait_for_timeout(200)
