@@ -1,6 +1,14 @@
 from core import *
 import json as _json
 
+# numbers in the page's language, as everywhere on the site (never the browser's): $1,700.50 · 1 700,50 $ · 1.700,50 $ ; 52% · 52 %
+NUM_JS = ("var LG=(document.documentElement.lang||'en').slice(0,2),"
+          "fx=function(v,a,b){var s=Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:a,maximumFractionDigits:b});return LG==='en'?s:s.replace(/,/g,'~').replace('.',',').replace(/~/g,LG==='fr'?'\\u202f':'.')},"
+          "sg=function(v){return v<0?'\\u2212':''},"
+          "cur=function(v,a){return sg(v)+(LG==='en'?'$'+fx(v,a,2):fx(v,a,2)+'\\u00a0$')},"
+          "pc=function(v,d){return sg(v)+fx(v,d,d)+(LG==='en'?'%':'\\u202f%')},"
+          "dec=function(v,d){return sg(v)+fx(v,d,d)};")
+
 # CME contract specs used by the calculators: (symbol, name, tick size, tick value $)
 SPECS = [("NQ","E-mini Nasdaq-100",0.25,5.0),("MNQ","Micro E-mini Nasdaq-100",0.25,0.5),("ES","E-mini S&P 500",0.25,12.5),("MES","Micro E-mini S&P 500",0.25,1.25),
          ("YM","E-mini Dow",1.0,5.0),("MYM","Micro E-mini Dow",1.0,0.5),("RTY","E-mini Russell 2000",0.1,5.0),("M2K","Micro E-mini Russell 2000",0.1,0.5),
@@ -175,10 +183,10 @@ def page_position(lang, t):
         + f'<p class="calc-msg" id="ps-msg"></p>')
     msg = {"zero":t(T("Your stop is too wide for this risk: trade a micro, tighten the stop or accept less size.","Ton stop est trop large pour ce risque : passe à un micro, resserre le stop ou réduis la taille.","Tu stop es demasiado amplio para este riesgo: usa un micro, ajusta el stop o reduce el tamaño."))}
     script = f'''<script>(function(){{var S={_json.dumps({s:[ts,tv] for s,_,ts,tv in SPECS})},M={_json.dumps(msg)},mode='usd',stop='pts',$=function(i){{return document.getElementById(i)}};
-var money=function(v){{return '$'+v.toLocaleString(undefined,{{maximumFractionDigits:2,minimumFractionDigits:v%1?2:0}})}};
+{NUM_JS}var money=function(v){{return cur(v,v%1?2:0)}};
 function run(){{var s=S[$('ps-sym').value],ts=s[0],tv=s[1],r=parseFloat($('ps-risk').value)||0,b=parseFloat($('ps-bal').value)||0,d=parseFloat($('ps-stop').value)||0;
 var risk=mode==='pct'?b*r/100:r,ticks=stop==='pts'?d/ts:d,rpc=ticks*tv,n=rpc>0?Math.floor(risk/rpc+1e-9):0;
-$('ps-out').textContent=n;$('ps-rpc').textContent=rpc>0?money(rpc):'—';$('ps-act').textContent=money(n*rpc);$('ps-tv').textContent=money(tv)+' / '+ts;
+$('ps-out').textContent=n;$('ps-rpc').textContent=rpc>0?money(rpc):'—';$('ps-act').textContent=money(n*rpc);$('ps-tv').textContent=money(tv)+' / '+fx(ts,0,6);
 $('ps-msg').textContent=(rpc>0&&n===0)?M.zero:'';}}
 document.querySelectorAll('[data-calc] input,[data-calc] select').forEach(function(e){{e.addEventListener('input',run)}});
 document.querySelectorAll('[data-mode]').forEach(function(b){{b.addEventListener('click',function(){{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(function(x){{x.setAttribute('aria-pressed',x===b)}});document.querySelector('[data-pct-only]').closest('.fld').hidden=mode!=='pct';document.querySelector('#ps-risk+em').textContent=mode==='pct'?'%':'$';run()}})}});
@@ -218,10 +226,10 @@ def page_drawdown(lang, t):
         + f'<dl><div><dt>{t(T("Room left","Marge restante","Margen restante"))}</dt><dd class="num" id="dd-room">—</dd></div><div><dt>{t(T("Room used","Marge utilisée","Margen usado"))}</dt><dd class="num" id="dd-used">—</dd></div><div><dt>{t(T("Status","Statut","Estado"))}</dt><dd id="dd-st">—</dd></div></dl>')
     st = {"ok":t(T("Safe","Correct","Correcto")),"near":t(T("Close to the limit","Proche de la limite","Cerca del límite")),"out":t(T("Limit reached","Limite atteinte","Límite alcanzado")),"locked":t(T("locked","bloqué","bloqueado"))}
     script = f'''<script>(function(){{var L={_json.dumps(st)},$=function(i){{return document.getElementById(i)}};
-var money=function(v){{return (v<0?'−$':'$')+Math.abs(v).toLocaleString(undefined,{{maximumFractionDigits:2}})}};
+{NUM_JS}var money=function(v){{return cur(v,0)}};
 function run(){{var s=parseFloat($('dd-start').value)||0,m=parseFloat($('dd-max').value)||0,p=Math.max(parseFloat($('dd-peak').value)||0,s),c=parseFloat($('dd-cur').value)||0,lock=$('dd-lock').checked;
 var thr=p-m,locked=false;if(lock&&thr>=s){{thr=s;locked=true;}}var room=c-thr,used=m>0?Math.min(100,Math.max(0,(1-room/m)*100)):0;
-$('dd-thr').textContent=money(thr);var sb=$('dd-sub');sb.textContent=sb.getAttribute('data-base')+(locked?' · '+L.locked:'');$('dd-room').textContent=money(room);$('dd-used').textContent=Math.round(used)+' %';
+$('dd-thr').textContent=money(thr);var sb=$('dd-sub');sb.textContent=sb.getAttribute('data-base')+(locked?' · '+L.locked:'');$('dd-room').textContent=money(room);$('dd-used').textContent=pc(Math.round(used),0);
 var k=room<=0?'out':(used>=75?'near':'ok');$('dd-st').textContent=L[k];$('dd-st').className='st-'+k;$('dd-bar').style.width=used+'%';$('dd-bar').className='bar-'+k;}}
 document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventListener('input',run)}});run();}})();</script>'''
     howto = T("<p>With a trailing drawdown, your liquidation level follows your highest balance: it sits at that peak minus the maximum drawdown. It never moves down. Depending on the firm, the peak is measured during the day (intraday) or at the close (end of day), and the level often stops trailing once it reaches the starting balance.</p><p>Enter your peak according to your firm’s method: the intraday high for intraday trailing, the best closing balance for end-of-day.</p>",
@@ -246,10 +254,10 @@ def page_consistency(lang, t):
         + f'<dl><div><dt>{t(T("Status","Statut","Estado"))}</dt><dd id="cr-st">—</dd></div><div><dt>{t(T("Total profit needed","Profit total nécessaire","Beneficio total necesario"))}</dt><dd class="num" id="cr-need">—</dd></div><div><dt>{t(T("Still to make","Reste à faire","Falta por hacer"))}</dt><dd class="num" id="cr-left">—</dd></div></dl>')
     st = {"ok":t(T("Within the limit","Dans la limite","Dentro del límite")),"out":t(T("Above the limit","Au-dessus de la limite","Por encima del límite"))}
     script = f'''<script>(function(){{var L={_json.dumps(st)},$=function(i){{return document.getElementById(i)}};
-var money=function(v){{return '$'+Math.max(0,v).toLocaleString(undefined,{{maximumFractionDigits:2}})}};
+{NUM_JS}var money=function(v){{return cur(Math.max(0,v),0)}};
 function run(){{var p=parseFloat($('cr-pct').value)||0,b=parseFloat($('cr-best').value)||0,tt=parseFloat($('cr-total').value)||0;
 var share=tt>0?b/tt*100:0,need=p>0?b/(p/100):0,ok=tt>0&&share<=p+1e-9;
-$('cr-share').textContent=tt>0?share.toFixed(1)+' %':'—';$('cr-st').textContent=tt>0?(ok?L.ok:L.out):'—';$('cr-st').className=ok?'st-ok':'st-out';
+$('cr-share').textContent=tt>0?pc(share,1):'—';$('cr-st').textContent=tt>0?(ok?L.ok:L.out):'—';$('cr-st').className=ok?'st-ok':'st-out';
 $('cr-need').textContent=money(need);$('cr-left').textContent=money(need-tt);$('cr-bar').style.width=Math.min(100,share)+'%';$('cr-bar').className=ok?'bar-ok':'bar-out';$('cr-lim').style.left=Math.min(100,p)+'%';}}
 document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventListener('input',run)}});run();}})();</script>'''
     howto = T("<p>A consistency rule limits how much of your total profit can come from a single day. With a 30% rule and a $1,500 best day, your total profit must reach at least $1,500 ÷ 0.30 = $5,000 before you qualify.</p><p>The fix is never a bigger day: it’s more ordinary days. Some firms apply the rule to evaluations, others to payouts, with different percentages.</p>",
@@ -307,14 +315,14 @@ TOOLS += [
 
 def _simple_tool(lang, t, idx, form, results, js, howto, faqs, title, desc):
     s, ic, n, d = TOOLS[idx]
-    body, ld = _tool_page(lang, t, s, n, d, form, results, f"<script>(function(){{var $=function(i){{return document.getElementById(i)}},money=function(v){{var a=Math.abs(v);return (v<0?'−$':'$')+a.toLocaleString(undefined,{{maximumFractionDigits:2,minimumFractionDigits:a%1?2:0}})}};{js}document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventListener('input',run)}});run();}})();</script>", howto, faqs)
+    body, ld = _tool_page(lang, t, s, n, d, form, results, f"<script>(function(){{var $=function(i){{return document.getElementById(i)}},money=function(v){{return cur(v,Math.abs(v)%1?2:0)}};{NUM_JS}{js}document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventListener('input',run)}});run();}})();</script>", howto, faqs)
     return (t(title), t(desc), body, ld)
 
 def page_expectancy(lang, t):
     form = _num("ex-wr", t(T("Win rate","Taux de réussite","Tasa de acierto")), 45, "any", "%") + _num("ex-w", t(T("Average win","Gain moyen","Ganancia media")), 400, "any", "$") + _num("ex-l", t(T("Average loss","Perte moyenne","Pérdida media")), 250, "any", "$")
     res = (f'<div class="big"><span class="num" id="ex-e">—</span><span>{t(T("per trade, on average","par trade, en moyenne","por operación, de media"))}</span></div>'
            f'<dl><div><dt>{t(T("Per 100 trades","Pour 100 trades","Por 100 operaciones"))}</dt><dd class="num" id="ex-100">—</dd></div><div><dt>{t(T("In R (risk = average loss)","En R (risque = perte moyenne)","En R (riesgo = pérdida media)"))}</dt><dd class="num" id="ex-r">—</dd></div><div><dt>{t(T("Break-even win rate","Taux de réussite d’équilibre","Tasa de acierto de equilibrio"))}</dt><dd class="num" id="ex-be">—</dd></div><div><dt>Profit factor</dt><dd class="num" id="ex-pf">—</dd></div></dl>')
-    js = "function run(){var w=(parseFloat($('ex-wr').value)||0)/100,aw=parseFloat($('ex-w').value)||0,al=parseFloat($('ex-l').value)||0;var e=w*aw-(1-w)*al;$('ex-e').textContent=money(e);$('ex-e').className='num '+(e>=0?'st-ok':'st-out');$('ex-100').textContent=money(e*100);$('ex-r').textContent=al>0?(e/al).toFixed(2)+' R':'—';$('ex-be').textContent=(aw+al)>0?(al/(aw+al)*100).toFixed(1)+' %':'—';$('ex-pf').textContent=(1-w)*al>0?(w*aw/((1-w)*al)).toFixed(2):'—';}"
+    js = "function run(){var w=(parseFloat($('ex-wr').value)||0)/100,aw=parseFloat($('ex-w').value)||0,al=parseFloat($('ex-l').value)||0;var e=w*aw-(1-w)*al;$('ex-e').textContent=money(e);$('ex-e').className='num '+(e>=0?'st-ok':'st-out');$('ex-100').textContent=money(e*100);$('ex-r').textContent=al>0?dec(e/al,2)+' R':'—';$('ex-be').textContent=(aw+al)>0?pc(al/(aw+al)*100,1):'—';$('ex-pf').textContent=(1-w)*al>0?dec(w*aw/((1-w)*al),2):'—';}"
     howto = T("<p>Expectancy = win rate × average win − loss rate × average loss. With a 45% win rate, a $400 average win and a $250 average loss: 0.45 × 400 − 0.55 × 250 = $42.50 per trade.</p><p>It describes your past results, not the future. The more trades behind the numbers, the more meaningful it is.</p>",
               "<p>Espérance = taux de réussite × gain moyen − taux de perte × perte moyenne. Avec 45 % de réussite, 400 $ de gain moyen et 250 $ de perte moyenne : 0,45 × 400 − 0,55 × 250 = 42,50 $ par trade.</p><p>Elle décrit tes résultats passés, pas l’avenir. Plus il y a de trades derrière les chiffres, plus elle a du sens.</p>",
               "<p>Esperanza = tasa de acierto × ganancia media − tasa de pérdida × pérdida media. Con un 45 % de acierto, 400 $ de ganancia media y 250 $ de pérdida media: 0,45 × 400 − 0,55 × 250 = 42,50 $ por operación.</p><p>Describe tus resultados pasados, no el futuro. Cuantas más operaciones haya detrás, más sentido tiene.</p>")
@@ -330,7 +338,7 @@ def page_roi(lang, t):
             + _num("ro-act", t(T("Activation and data fees","Frais d’activation et de données","Cuotas de activación y datos")), 150, "any", "$") + _num("ro-pay", t(T("Payouts received","Payouts reçus","Payouts recibidos")), 2000, "any", "$"))
     res = (f'<div class="big"><span class="num" id="ro-net">—</span><span>{t(T("net after fees","net après frais","neto tras cuotas"))}</span></div>'
            f'<dl><div><dt>{t(T("Total spent","Total dépensé","Total gastado"))}</dt><dd class="num" id="ro-sp">—</dd></div><div><dt>{t(T("Return on fees","Rendement sur frais","Rendimiento sobre cuotas"))}</dt><dd class="num" id="ro-x">—</dd></div><div><dt>ROI</dt><dd class="num" id="ro-roi">—</dd></div></dl>')
-    js = "function run(){var v=function(i){return parseFloat($(i).value)||0};var sp=v('ro-ev')*v('ro-evp')+v('ro-rs')*v('ro-rsp')+v('ro-act'),p=v('ro-pay'),n=p-sp;$('ro-net').textContent=money(n);$('ro-net').className='num '+(n>=0?'st-ok':'st-out');$('ro-sp').textContent=money(sp);$('ro-x').textContent=sp>0?(p/sp).toFixed(1)+'×':'—';$('ro-roi').textContent=sp>0?Math.round(n/sp*100)+' %':'—';}"
+    js = "function run(){var v=function(i){return parseFloat($(i).value)||0};var sp=v('ro-ev')*v('ro-evp')+v('ro-rs')*v('ro-rsp')+v('ro-act'),p=v('ro-pay'),n=p-sp;$('ro-net').textContent=money(n);$('ro-net').className='num '+(n>=0?'st-ok':'st-out');$('ro-sp').textContent=money(sp);$('ro-x').textContent=sp>0?dec(p/sp,1)+'×':'—';$('ro-roi').textContent=sp>0?pc(Math.round(n/sp*100),0):'—';}"
     howto = T("<p>Net = payouts received − everything you paid: evaluations, resets, activations and data fees. Return on fees = payouts ÷ total spent: 3.0× means every dollar spent came back three times.</p>",
               "<p>Net = payouts reçus − tout ce que tu as payé : évaluations, resets, activations et frais de données. Rendement sur frais = payouts ÷ total dépensé : 3,0× veut dire que chaque dollar dépensé est revenu trois fois.</p>",
               "<p>Neto = payouts recibidos − todo lo pagado: evaluaciones, reinicios, activaciones y datos. Rendimiento sobre cuotas = payouts ÷ total gastado: 3,0× significa que cada dólar gastado volvió tres veces.</p>")
