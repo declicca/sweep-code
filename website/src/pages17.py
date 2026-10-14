@@ -1,8 +1,19 @@
 from core import *
 import re
 
-# Comparison pages (Sweep vs …). Competitor facts come from their public pages; update CHECKED when you re-verify them.
-CHECKED = T("October 10, 2026","10 octobre 2026","10 de octubre de 2026")
+# Comparison pages (Sweep vs …). Competitor facts come from their public pages: data/competitors.json keeps, for each one,
+# the date they were checked, the pages read and the plans and prices (audit n° 3, 3.3). Re-check them every month (the build
+# warns after 35 days); a price change goes through Mateo. The price rows of the tables are written from that file, and the
+# build warns when a page names a price that isn't in it.
+import os as _os
+from pages18 import day as _day, usd as _usd, src_name as _src_name
+COMP = json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "competitors.json"), encoding="utf-8"))
+def checked(name): return {l: _day(COMP[name]["checked"], l) for l in LANGS}
+CHECKED = {l: _day(min(c["checked"] for c in COMP.values()), l) for l in LANGS}   # the pillar page: its oldest check
+def plan_prices(name, key):
+    """« Essential $35 · Pro $59 · Ultra $99 » in each language, from data/competitors.json."""
+    plans = COMP[name]["plans"]; assert all(p.get(key) for p in plans), (name, key)
+    return {l: " · ".join(f'{p["name"]}\u00a0{_usd(p[key], l)}' for p in plans) for l in LANGS}
 
 def _cmp_table(t, rows, other):
     head = (f'<thead><tr><th scope="col"><span class="sr">{t(T("Feature","Fonctionnalité","Función"))}</span></th>'
@@ -110,8 +121,8 @@ VS = [
               T("You work with a mentor who reviews your journal.","Tu travailles avec un mentor qui consulte ton journal.","Trabajas con un mentor que revisa tu diario.")],
   "rows": [row("free", T("None on its pricing page","Aucun sur sa page de tarifs","Ninguno en su página de precios")),
            row("trial", T("None on its pricing page","Aucun sur sa page de tarifs","Ninguno en su página de precios")),
-           row("month", T("Essential $35 · Pro $59 · Ultra $99","Essential 35 $ · Pro 59 $ · Ultra 99 $","Essential 35 $ · Pro 59 $ · Ultra 99 $")),
-           row("year", T("Essential $315 · Pro $531 · Ultra $891","Essential 315 $ · Pro 531 $ · Ultra 891 $","Essential 315 $ · Pro 531 $ · Ultra 891 $")),
+           row("month", plan_prices("TradeZella", "month")),
+           row("year", plan_prices("TradeZella", "year")),
            row("add", T("Auto-sync, file upload or by hand","Synchro automatique, import de fichier ou à la main","Sincronización automática, subida de archivo o a mano")),
            row("sync", T("Yes","Oui","Sí")),
            row("rules", T("Prop Firm Sync: drawdown, daily loss, target, trading days, consistency","Prop Firm Sync : drawdown, perte quotidienne, cible, jours de trading, consistance","Prop Firm Sync: drawdown, pérdida diaria, objetivo, días de trading, consistencia")),
@@ -145,7 +156,7 @@ VS = [
               T("You work with a mentor who reviews your trades.","Tu travailles avec un mentor qui consulte tes trades.","Trabajas con un mentor que revisa tus operaciones.")],
   "rows": [row("free", T("Yes, 30 trades a month","Oui, 30 trades par mois","Sí, 30 operaciones al mes")),
            row("trial", T("Yes, on Silver and Gold","Oui, sur Silver et Gold","Sí, en Silver y Gold")),
-           row("month", T("Silver $29.95 · Gold $49.95","Silver 29,95 $ · Gold 49,95 $","Silver 29,95 $ · Gold 49,95 $")),
+           row("month", plan_prices("Tradervue", "month")),
            row("year", T("Not listed on its pricing page","Pas indiqué sur sa page de tarifs","No figura en su página de precios")),
            row("add", T("Broker imports","Imports depuis le courtier","Importación desde el bróker")),
            row("sync", T("Silver and Gold","Silver et Gold","Silver y Gold")),
@@ -184,8 +195,8 @@ VS = [
               T("You also trade stocks, forex, crypto or options.","Tu trades aussi des actions, du forex, des cryptos ou des options.","También operas acciones, forex, cripto u opciones.")],
   "rows": [row("free", T("None on its pricing page","Aucun sur sa page de tarifs","Ninguno en su página de precios")),
            row("trial", T("7 days, every plan","7 jours, tous les forfaits","7 días, todos los planes")),
-           row("month", T("Pro $29.95 · Premium $49.95 · Elite $79.95","Pro 29,95 $ · Premium 49,95 $ · Elite 79,95 $","Pro 29,95 $ · Premium 49,95 $ · Elite 79,95 $")),
-           row("year", T("Pro $269.52 · Premium $449.52 · Elite $719.52","Pro 269,52 $ · Premium 449,52 $ · Elite 719,52 $","Pro 269,52 $ · Premium 449,52 $ · Elite 719,52 $")),
+           row("month", plan_prices("TraderSync", "month")),
+           row("year", plan_prices("TraderSync", "year")),
            row("add", T("Auto-sync or imports, 700+ brokers and platforms","Synchro automatique ou imports, 700+ courtiers et plateformes","Sincronización automática o importación, más de 700 brókers y plataformas")),
            row("sync", T("Every plan","Tous les forfaits","Todos los planes")),
            row("rules", NONE_LISTED),
@@ -267,9 +278,13 @@ def make_vs(c):
             T("Compare","Comparer","Comparar"))
         picks = _pick(t, T("Choose Sweep if","Choisis Sweep si","Elige Sweep si"), SWEEP_IF) + _pick(t, T(f"Choose {name} if", f"Choisis {name} si", f"Elige {name} si"), c["them_if"])
         S = c["sources"]
-        note = T(f"{name} details come from {S['en']}, checked on {CHECKED['en']}. Prices in USD, before tax. Something out of date? Write to {EMAIL}. {name} is a trademark of its owner; Sweep is not affiliated with {name}.",
-                 f"Les infos sur {name} viennent de {S['fr']}, vérifiées le {CHECKED['fr']}. Prix en USD, avant taxes. Une info n’est plus à jour ? Écris à {EMAIL}. {name} est une marque de son propriétaire ; Sweep n’est pas affilié à {name}.",
-                 f"La información de {name} proviene de {S['es']}, revisadas el {CHECKED['es']}. Precios en USD, antes de impuestos. ¿Algo ya no está al día? Escribe a {EMAIL}. {name} es una marca de su propietario; Sweep no está afiliado a {name}.")
+        D = checked(name)
+        note = T(f"{name} details come from {S['en']}, checked on {D['en']}. Prices in USD, before tax. Something out of date? Write to {EMAIL}. {name} is a trademark of its owner; Sweep is not affiliated with {name}.",
+                 f"Les infos sur {name} viennent de {S['fr']}, vérifiées le {D['fr']}. Prix en USD, avant taxes. Une info n’est plus à jour ? Écris à {EMAIL}. {name} est une marque de son propriétaire ; Sweep n’est pas affilié à {name}.",
+                 f"La información de {name} proviene de {S['es']}, revisadas el {D['es']}. Precios en USD, antes de impuestos. ¿Algo ya no está al día? Escribe a {EMAIL}. {name} es una marca de su propietario; Sweep no está afiliado a {name}.")
+        srcs = " · ".join(f'<a href="{u}" rel="nofollow noopener" target="_blank">{_src_name(u)}</a>' for u in COMP[name]["sources"])
+        chk = T(f"{name} details checked on {D['en']}", f"Infos sur {name} vérifiées le {D['fr']}", f"Datos de {name} revisados el {D['es']}")
+        dated = f'<p class="fine vs-checked" data-nolinks>{t(chk)} · {t(T("Sources", "Sources", "Fuentes"))} · {srcs}</p>'
         diff = [(T("Where Sweep is different","Ce qui distingue Sweep","Lo que distingue a Sweep"), SWEEP_DIFF),
                 (T(f"Where {name} is ahead", f"Là où {name} est en avance", f"Donde {name} va por delante"), [c["ahead"], SYNC_NOTE])]
         article = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in diff)
@@ -281,7 +296,7 @@ def make_vs(c):
         b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("The short answer.","La réponse courte.","La respuesta corta."))}</h2></div>'
              f'<div class="grid g2 vs-picks">{picks}</div></div></section>'
              f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Side by side.","Côte à côte.","Lado a lado."))}</h2></div>'
-             f'{_summary(t, name)}{_cmp_table(t, c["rows"], name)}<p class="fine vs-note">{t(note)}</p></div></section>'
+             f'{dated}{_summary(t, name)}{_cmp_table(t, c["rows"], name)}<p class="fine vs-note">{t(note)}</p></div></section>'
              f'<section class="rule"><div class="wrap narrow"><article class="article">{article}</article></div></section>'
              f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>{faq}'
              + chips(T("Compare too","Compare aussi","Compara también"), others, ' style="margin-top:36px"')

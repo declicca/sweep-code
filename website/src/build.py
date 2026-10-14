@@ -199,3 +199,19 @@ _stale = [pg for pg, d in (list((pages18.page_of(f), pages18.checked_of(f)) for 
                            + [(g, pages18.presets.CHECKED) for g in pages19.RULE_GUIDES])
           if (core.OG.get(pg) or {}).get("en", {}).get("date") not in (None, d)]
 if _stale: print("share images show an older verification date, run tools/og_images.py:", ", ".join(_stale))
+# competitors (audit n° 3, 3.3): details re-checked every month, and no price on a page that data/competitors.json doesn't have
+_today = datetime.date.today()
+for _n, _c in pages17.COMP.items():
+    _age = (_today - datetime.date.fromisoformat(_c["checked"])).days
+    if _age > 35: print(f"warning: {_n} details were checked {_age} days ago ({_c['checked']}): read its pages again, then update src/data/competitors.json (prices: with Mateo)")
+_SWEEP_PRICES = {0, 19, 39, 159, 329}
+_amounts = lambda c: {float(v) for p in c["plans"] for k, v in p.items() if k in ("month", "year", "year_per_month")}
+def _prices_named(page):
+    s = open(os.path.join(DIST, page), encoding="utf-8").read(); s = s[s.find("<main"):s.find("</main>")]
+    return {float(x.replace(",", "")) for x in re.findall(r"\$(\d[\d,]*(?:\.\d+)?)", re.sub(r"<[^>]+>", " ", s))}
+import re
+for _vs in pages17.VS:
+    _odd = _prices_named(_vs["slug"]) - _SWEEP_PRICES - _amounts(pages17.COMP[_vs["name"]])
+    if _odd: print(f"warning: {_vs['slug']} names prices that aren't in src/data/competitors.json: {sorted(_odd)}")
+_odd = _prices_named("best-trading-journal-for-prop-firms.html") - _SWEEP_PRICES - set().union(*(_amounts(c) for c in pages17.COMP.values()))
+if _odd: print(f"warning: best-trading-journal-for-prop-firms.html names prices that aren't in src/data/competitors.json: {sorted(_odd)}")

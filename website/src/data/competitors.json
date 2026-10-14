@@ -1,0 +1,44 @@
+{
+ "TradeZella": {
+  "checked": "2026-10-10",
+  "sources": ["https://www.tradezella.com/pricing", "https://www.tradezella.com/prop-firm-sync"],
+  "free_plan": null,
+  "trial": null,
+  "plans": [
+   {"name": "Essential", "month": 35, "year": 315, "year_per_month": 26},
+   {"name": "Pro", "month": 59, "year": 531},
+   {"name": "Ultra", "month": 99, "year": 891}
+  ]
+ },
+ "Tradervue": {
+  "checked": "2026-10-10",
+  "sources": ["https://www.tradervue.com/site/pricing/", "https://help.tradervue.com/article/3420-trade-import-quota"],
+  "free_plan": "30 trades a month",
+  "trial": "Silver and Gold",
+  "plans": [
+   {"name": "Silver", "month": 29.95},
+   {"name": "Gold", "month": 49.95}
+  ]
+ },
+ "TraderSync": {
+  "checked": "2026-10-10",
+  "sources": ["https://tradersync.com/pricing/"],
+  "free_plan": null,
+  "trial": "7 days, every plan",
+  "plans": [
+   {"name": "Pro", "month": 29.95, "year": 269.52, "year_per_month": 22.46},
+   {"name": "Premium", "month": 49.95, "year": 449.52},
+   {"name": "Elite", "month": 79.95, "year": 719.52}
+  ]
+ },
+ "Edgewonk": {
+  "checked": "2026-10-10",
+  "sources": ["https://edgewonk.com/pricing", "https://edgewonk.com/"],
+  "free_plan": null,
+  "trial": null,
+  "refund_days": 14,
+  "plans": [
+   {"name": "Edgewonk", "year": 197}
+  ]
+ }
+}
