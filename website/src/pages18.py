@@ -473,19 +473,109 @@ HUB_HELP = T("""<h2>What each rules page covers</h2><p>For every account type an
 <h2>Comparar las firmas</h2><p>Para comparar una regla entre todas las firmas, usa las guías: <a href="@prop-firm-drawdown-rules.html">drawdown</a>, <a href="@prop-firm-consistency-rules.html">consistencia</a>, <a href="@prop-firm-payout-rules.html">payouts</a>, <a href="@prop-firm-profit-targets.html">tamaños de cuenta y objetivos</a> y <a href="@prop-firm-minimum-days.html">días mínimos</a>.</p>
 <h2>En Sweep</h2><p>Elige la firma y el tipo de cuenta: las reglas se rellenan, cada valor sigue siendo editable y Sweep comprueba cada operación con ellas, así ves lo cerca que estás del objetivo, de la pérdida máx. y de tu próximo payout.</p>""")
 
+# ---------------------------------------------------------------- the firms side by side (audit n° 3, 2.3): one row per firm, values of one account size
+PF_DEFAULT = 50000
+PF_COLS = [("types", T("Drawdown", "Drawdown", "Drawdown")), ("dd", T("Max loss", "Perte max", "Pérdida máx.")),
+           ("cons", T("Consistency (evaluation)", "Consistance (évaluation)", "Consistencia (evaluación)")), ("days", T("Min. days", "Jours min.", "Días mín.")),
+           ("split", T("Profit split", "Partage", "Reparto")), ("price", T("Cheapest evaluation", "Évaluation la moins chère", "Evaluación más barata")),
+           ("date", T("Verified", "Vérifié", "Verificado"))]
+
+def _span(vals, fmt):
+    v = sorted(set(x for x in vals if x is not None))
+    return "" if not v else fmt(v[0]) if len(v) == 1 else f"{fmt(v[0])}–{fmt(v[-1])}"
+
+def pf_row(f, size, lang, t):
+    """One firm's cells for one account size, and the numbers to sort and filter on; None when it has no account of that size."""
+    S = [(p, s) for p in f["programs"] for s in p["sizes"] if s["size"] == size]
+    if not S: return None
+    rules = lambda s: s["eval"] if (s.get("eval") or {}).get("dd") else (s.get("funded") or {})   # funded directly: no evaluation
+    ev = [s for _, s in S if (s.get("eval") or {}).get("dd")]
+    types = sorted({rules(s).get("dd_type") for _, s in S} - {None}, key=["eod", "trade", "static"].index)
+    dd = [rules(s).get("dd") for _, s in S]
+    cons = [s["eval"].get("consistency") for s in ev]
+    days = [s["eval"].get("min_days") for s in ev]
+    split = [((s.get("funded") or {}).get("payout") or {}).get("split_pct") for _, s in S]
+    prices = sorted(((s.get("price") or {})["eval"], (s.get("price") or {}).get("eval_period")) for s in ev if (s.get("price") or {}).get("eval") is not None)
+    month = t(T("/mo", "/mois", "/mes"))
+    num = lambda v: f"{v:g}"
+    cells = {"types": ", ".join(t(DDT[x]) for x in types) or DASH_,
+             "dd": _span(dd, lambda v: usd(v, lang)) or DASH_,
+             "cons": _span(cons, lambda v: pc(v, lang)) or DASH_,
+             "days": _span(days, num) or (t(T("No evaluation", "Pas d’évaluation", "Sin evaluación")) if not ev else DASH_),
+             "split": _span(split, lambda v: pc(v, lang)) or DASH_,
+             "price": (usd(prices[0][0], lang) + (month if prices[0][1] == "month" else "")) if prices else DASH_,
+             "date": day(checked_of(f), lang)}
+    keys = {"name": f["name"].lower(), "types": len(types), "dd": min([x for x in dd if x is not None], default=None),
+            "cons": min([x for x in cons if x is not None], default=None), "days": min([x for x in days if x is not None], default=None),
+            "split": max([x for x in split if x is not None], default=None), "price": prices[0][0] if prices else None, "date": checked_of(f)}
+    return {"cells": cells, "keys": keys, "dd_types": types}
+DASH_ = "—"
+
+def pf_table(lang, t):
+    sizes = sorted({s["size"] for f in presets.FIRMS for p in f["programs"] for s in p["sizes"]})
+    data = {"firms": [{"id": slug(f), "rows": {str(z): r for z in sizes for r in [pf_row(f, z, lang, t)] if r}} for f in presets.FIRMS],
+            "none": DASH_}
+    sb = lambda l: f'<button type="button" class="pf-sort">{l}</button>'   # in the page from the start: the header doesn't move when the script runs
+    head = f'<th scope="col" data-k="name" aria-sort="ascending">{sb(t(T("Firm", "Firme", "Firma")))}</th>' + "".join(f'<th scope="col" data-k="{k}" aria-sort="none">{sb(t(l))}</th>' for k, l in PF_COLS)
+    rows = ""
+    for f in sorted(presets.FIRMS, key=lambda f: f["name"].lower()):   # the script's default order, so the page reads the same without it
+        r = pf_row(f, PF_DEFAULT, lang, t)
+        if not r: continue
+        rows += (f'<tr data-firm="{slug(f)}"><th scope="row"><a href="{href(lang, page_of(f))}">{f["name"]}</a></th>'
+                 + "".join(f'<td data-k="{k}" data-label="{t(l)}">{r["cells"][k]}</td>' for k, l in PF_COLS) + "</tr>")
+    opt = lambda v, l, sel=False: f'<option value="{v}"{" selected" if sel else ""}>{l}</option>'
+    sort_opts = [("name", T("Firm", "Firme", "Firma"))] + [(k, l) for k, l in PF_COLS if k != "types"]
+    filters = (f'<div class="pf-filters"><button type="button" class="pf-toggle" aria-expanded="false" aria-controls="pf-fields">{t(T("Filters", "Filtres", "Filtros"))}</button><div class="pf-fields" id="pf-fields">'
+               f'<label><span class="pf-l">{t(T("Account size", "Taille de compte", "Tamaño de cuenta"))}</span><span class="inp"><select id="pf-size">' + "".join(opt(z, kk(z), z == PF_DEFAULT) for z in sizes) + '</select></span></label>'
+               f'<label><span class="pf-l">{t(T("Drawdown", "Drawdown", "Drawdown"))}</span><span class="inp"><select id="pf-dd">' + opt("", t(T("Any type", "Tous les types", "Todos los tipos")))
+               + "".join(opt(k, t(DDT[k])) for k in ("eod", "trade", "static")) + '</select></span></label>'
+               f'<label><span class="pf-l">{t(T("Max. evaluation price", "Prix max. de l’évaluation", "Precio máx. de la evaluación"))}</span><span class="inp"><input id="pf-max" type="number" min="0" step="1" inputmode="numeric" placeholder="{t(T("Any", "Tous", "Cualquiera"))}"></span></label>'
+               f'<label class="pf-sortsel"><span class="pf-l">{t(T("Sort by", "Trier par", "Ordenar por"))}</span><span class="inp"><select id="pf-sort">' + "".join(opt(k, t(l)) for k, l in sort_opts) + '</select></span></label>'
+               f'<button type="button" class="btn btn-ghost" id="pf-reset">{t(T("Reset", "Réinitialiser", "Restablecer"))}</button></div></div>')
+    note = t(T(f"Values for the <b id=\"pf-size-l\">{kk(PF_DEFAULT)}</b> account, across each firm’s account types: evaluation rules, or the funded account’s for accounts funded directly. Evaluation prices before discounts; firms without a published price are hidden when you set a maximum price. “{DASH_}” means the value isn’t in Sweep’s catalogue.",
+               f"Valeurs du compte de <b id=\"pf-size-l\">{kk(PF_DEFAULT)}</b>, tous types de compte de chaque firme confondus : règles de l’évaluation, ou du compte financé pour les comptes financés directement. Prix des évaluations avant rabais ; les firmes sans prix publié sont masquées quand tu fixes un prix maximum. « {DASH_} » veut dire que la valeur n’est pas dans le catalogue de Sweep.",
+               f"Valores de la cuenta de <b id=\"pf-size-l\">{kk(PF_DEFAULT)}</b>, todos los tipos de cuenta de cada firma: reglas de la evaluación, o de la cuenta fondeada en las cuentas fondeadas directamente. Precios de evaluación antes de descuentos; las firmas sin precio publicado se ocultan al fijar un precio máximo. «{DASH_}» significa que el valor no está en el catálogo de Sweep."))
+    return (f'<div class="pf">{filters}<div class="cmp-wrap"><table class="cmp pf-tbl"><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div>'
+            f'<p class="pf-empty" hidden>{t(T("No firm matches these filters.", "Aucune firme ne correspond à ces filtres.", "Ninguna firma coincide con estos filtros."))}</p>'
+            f'<p class="fine pf-note">{note} <a href="{href(lang, METHOD)}">{t(T("How we verify", "Notre méthode", "Nuestro método"))}</a></p></div>'
+            f'<script type="application/json" id="pf-data">{json.dumps(data, ensure_ascii=False)}</script>' + PF_JS)
+
+# filters, sort and a shareable address (?size=100000&dd=eod&max=150&sort=price&dir=desc); the table reads fine without it
+PF_JS = """<script>(function(){var D=JSON.parse(document.getElementById('pf-data').textContent),tb=document.querySelector('.pf-tbl tbody'),root=document.querySelector('.pf');
+var $=function(i){return document.getElementById(i)},q=new URLSearchParams(location.search),def=$('pf-size').value,st={size:q.get('size')||def,dd:q.get('dd')||'',max:q.get('max')||'',sort:q.get('sort')||'name',dir:q.get('dir')==='desc'?'desc':'asc'};
+var rows={};[].forEach.call(tb.rows,function(r){rows[r.getAttribute('data-firm')]=r;});
+var heads=[].slice.call(document.querySelectorAll('.pf-tbl thead th'));
+heads.forEach(function(th){var k=th.getAttribute('data-k'),b=th.querySelector('.pf-sort');
+ b.addEventListener('click',function(){if(st.sort===k)st.dir=st.dir==='asc'?'desc':'asc';else{st.sort=k;st.dir='asc';}render();});});
+function cell(r,k,v){var c=r.querySelector('[data-k="'+k+'"]');if(c&&c.tagName==='TD')c.textContent=v;}
+function render(){var size=String(st.size),list=[];if(!$('pf-size').querySelector('option[value="'+size+'"]'))size=st.size=def;
+ D.firms.forEach(function(f){var d=f.rows[size],r=rows[f.id];if(!r)return;var show=!!d;
+  if(d){for(var k in d.cells)cell(r,k,d.cells[k]);if(st.dd&&d.dd_types.indexOf(st.dd)<0)show=false;if(st.max!==''&&(d.keys.price===null||d.keys.price>Number(st.max)))show=false;}
+  r.hidden=!show;if(show)list.push([r,d.keys[st.sort]]);});
+ list.sort(function(a,b){var x=a[1],y=b[1];if(x===null&&y===null)return 0;if(x===null)return 1;if(y===null)return -1;var c=x<y?-1:x>y?1:0;return st.dir==='asc'?c:-c;});
+ list.forEach(function(e){tb.appendChild(e[0]);});
+ heads.forEach(function(th){th.setAttribute('aria-sort',th.getAttribute('data-k')===st.sort?(st.dir==='asc'?'ascending':'descending'):'none');});
+ $('pf-size').value=size;$('pf-dd').value=st.dd;$('pf-max').value=st.max;$('pf-sort').value=st.sort;
+ $('pf-size-l').textContent=$('pf-size').options[$('pf-size').selectedIndex].text;
+ root.querySelector('.pf-empty').hidden=list.length>0;
+ var p=new URLSearchParams();if(size!==def)p.set('size',size);if(st.dd)p.set('dd',st.dd);if(st.max!=='')p.set('max',st.max);if(st.sort!=='name')p.set('sort',st.sort);if(st.dir==='desc')p.set('dir','desc');
+ var s=p.toString();history.replaceState(null,'',location.pathname+(s?'?'+s:'')+location.hash);}
+$('pf-size').addEventListener('change',function(){st.size=this.value;render();});
+$('pf-dd').addEventListener('change',function(){st.dd=this.value;render();});
+$('pf-max').addEventListener('input',function(){st.max=this.value.replace(/[^0-9.]/g,'');render();});
+$('pf-sort').addEventListener('change',function(){st.sort=this.value;st.dir='asc';render();});
+$('pf-reset').addEventListener('click',function(){st={size:def,dd:'',max:'',sort:'name',dir:'asc'};render();});
+var fl=root.querySelector('.pf-filters'),tg=fl.querySelector('.pf-toggle');function op(o){fl.classList.toggle('open',o);tg.setAttribute('aria-expanded',o?'true':'false');}tg.addEventListener('click',function(){op(!fl.classList.contains('open'));});if(location.search)op(true);
+render();})();</script>"""
+
 def page_hub(lang, t):
     firms = presets.FIRMS
     when = max(checked_of(f) for f in firms)
-    hero = page_hero(t, T("Prop firm rules, explained.", "Les règles des prop firms, expliquées.", "Las reglas de las prop firms, explicadas."),
+    hero = page_hero(t, T("Prop firm rules, compared.", "Les règles des prop firms, comparées.", "Las reglas de las prop firms, comparadas."),
         T(f"Drawdown, consistency and payout rules for {len(firms)} futures prop firms, from Sweep’s weekly check of their official pages. Last check: {day(when, 'en')}.",
           f"Drawdown, consistance et payouts de {len(firms)} prop firms de futures, selon la vérification hebdomadaire de leurs pages officielles par Sweep. Dernière vérification : {day(when, 'fr')}.",
           f"Drawdown, consistencia y payouts de {len(firms)} prop firms de futuros, según la revisión semanal de sus páginas oficiales por Sweep. Última verificación: {day(when, 'es')}."),
         T("Prop firms", "Prop firms", "Prop firms"))
-    def card(f):
-        sz = sorted({s["size"] for p in f["programs"] for s in p["sizes"]})
-        types = ", ".join(p["name"] for p in f["programs"])
-        return (f'<a class="tool-card" href="{href(lang, page_of(f))}"><h2>{f["name"]}</h2><p>{types} · {kk(sz[0])}' + (f" – {kk(sz[-1])}" if len(sz) > 1 else "") + "</p>"
-                f'<p class="fine">{t(T("Verified on ", "Vérifié le ", "Verificado el "))}{day(checked_of(f), lang)}</p><span class="go">{t(T("See the rules", "Voir les règles", "Ver las reglas"))} →</span></a>')
     from pages8 import FIRMS as JOURNALS
     others = [(s, n) for s, n in JOURNALS if n not in presets.PRESET_FIRMS]
     other = ""
@@ -497,7 +587,7 @@ def page_hub(lang, t):
     disclaimer = T("Sweep is not affiliated with these firms. Rules can change at any time; always confirm on each firm’s official site.",
                    "Sweep n’est affilié à aucune de ces firmes. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de chaque firme.",
                    "Sweep no está afiliado a estas firmas. Las reglas pueden cambiar en cualquier momento; confirma siempre en el sitio oficial de cada firma.")
-    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{"".join(card(f) for f in firms)}</div>'
+    b = (f'<section style="padding-top:8px"><div class="wrap">{pf_table(lang, t)}'
          f'<p class="fine" style="margin-top:18px">{t(disclaimer)}</p></div></section>'
          + f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(HUB_HELP))}</article></div></section>'
          + (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Another firm?", "Une autre firme ?", "¿Otra firma?"))}</h2></div>{other}</div></section>' if other else "")

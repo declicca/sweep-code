@@ -1408,3 +1408,50 @@ figcaption, .cap, .shot-note{text-align:center;font-size:12.5px;color:var(--fain
 .vs-sum li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--gain)}
 .vs-sum li.gap{color:var(--muted)}.vs-sum li.gap::before{background:var(--faint)}
 @media (max-width:860px){ .vs-sum{grid-template-columns:1fr} }
+
+/* /prop-firms/: the firms side by side (filters, sort by column, one card per firm on phones) */
+.pf-filters{display:none;margin:0 0 18px}   /* the filters need the script: shown from the first paint when it runs (no shift) */
+.js .pf-filters{display:block}
+.pf-toggle{display:none}
+.pf-fields{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 14px}
+.pf-fields label{display:flex;flex-direction:column;gap:6px;flex:1 1 160px;max-width:240px}
+.pf-l{font-size:13.5px;color:var(--muted)}
+.pf-fields .inp input, .pf-fields .inp select{height:44px}
+.pf-fields .inp input{padding-right:14px}
+.pf-fields .pf-sortsel{display:none}
+#pf-reset{height:44px}
+.pf-tbl tr[hidden]{display:none}
+.pf-tbl tbody th{text-align:left;font-weight:500;width:auto;white-space:nowrap}
+.pf-tbl thead th:first-child{text-align:left}
+.pf-tbl td, .pf-tbl td:nth-child(3){background:none}   /* not the comparison pages' Sweep column */
+.pf-tbl td[data-k="date"]{white-space:nowrap}
+@media (min-width:961px) and (max-width:1180px){.pf-tbl th, .pf-tbl td{padding:13px 9px;font-size:13.5px}.pf-tbl{min-width:0}.pf-tbl td[data-k="date"], .pf-tbl tbody th{white-space:normal}}
+.pf-tbl tbody th a{color:var(--text)}
+.pf-sort{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:6px;text-align:inherit}
+.pf-sort::after{content:"↕";opacity:.35;font-size:12px}
+th[aria-sort="ascending"] .pf-sort::after{content:"↑";opacity:.9}
+th[aria-sort="descending"] .pf-sort::after{content:"↓";opacity:.9}
+.pf-empty{margin:16px 0;color:var(--muted)}
+.pf-note{margin-top:14px}
+@media (max-width:860px){
+  .js .pf-filters{border-radius:var(--r-md);box-shadow:0 0 0 1px var(--edge) inset;padding:0 14px}
+  .pf-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;min-height:48px;border:0;background:none;color:var(--text);font:500 16px var(--font);cursor:pointer;padding:0}
+  .pf-toggle::after{content:"+";font-size:20px;color:var(--muted)}
+  .pf-filters.open .pf-toggle::after{content:"−"}
+  .pf-fields{display:none}
+  .pf-filters.open .pf-fields{display:flex;padding-bottom:14px}
+  .pf-fields label{max-width:none;flex:1 1 100%}
+  #pf-reset{flex:1 1 100%}
+}
+@media (max-width:960px){   /* one card per firm: phones and narrow tablets (the 8 columns don't fit below that) */
+  .pf-fields .pf-sortsel{display:flex}   /* no column headers to sort with */
+  .pf .cmp-wrap{background:none;box-shadow:none;overflow:visible;border-radius:0}
+  .pf-tbl{min-width:0}
+  .pf-tbl thead{display:none}
+  .pf-tbl, .pf-tbl tbody, .pf-tbl tr, .pf-tbl th, .pf-tbl td{display:block}
+  .pf-tbl tr{background:var(--glass);box-shadow:var(--lift);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:12px}
+  .pf-tbl tr[hidden]{display:none}
+  .pf-tbl tbody th{border:0;padding:0 0 8px;font-size:17px;position:static;background:none;box-shadow:none;white-space:normal}
+  .pf-tbl td{display:flex;justify-content:space-between;gap:16px;border:0;border-top:1px solid var(--line-2);padding:9px 0;text-align:right;color:var(--text)}
+  .pf-tbl td::before{content:attr(data-label);color:var(--muted);text-align:left}
+}
