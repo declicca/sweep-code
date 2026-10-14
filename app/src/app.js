@@ -3958,6 +3958,9 @@ function tkRisk(e) {
 
 function tkAlerts(e) {
   const t = [], a = e.budget;
+  // the coach, before a new trade (brief 03 step 3): the signal of the moment, his own number, what is left (src/coach.js)
+  const co = !TK.id && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: "manual", account: TK.account, date: TK.date, qty: TK.multi ? e.pos.maxQty : +TK.qty, time: String(TK.entryTime || "").slice(0, 5) }) : "";
+  co && t.push(co);
   if (a) {
     const i = a.left - (e.r.risk_c || 0);
     t.push(`<div class="tk-budget ${i < 0 ? "over" : ""}"><div><span>Daily risk left</span><b>${moneyU(a.left)}</b></div><div><span>Trade risk</span><b>${e.r.risk_c != null ? moneyU(e.r.risk_c) : "—"}</b></div><div><span>After trade</span><b class="${i < 0 ? "neg" : ""}">${e.r.risk_c != null ? money(i, {

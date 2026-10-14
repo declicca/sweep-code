@@ -2095,6 +2095,8 @@ window.SweepMO = window.SweepMO || class {
     layer('nav-am-shot', '');
     paint();
   }
+  // the coach before this trade (brief 03 step 3, src/coach.js): one trade only (not a batch of screenshots)
+  const coachBefore = () => (!SH.batch.length && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: 'shot', account: SH.f.account, date: SH.f.date, qty: +SH.f.qty || 0, time: String(SH.f.time || '').slice(0, 5) }) : '');
   function paint() {
     const el = document.querySelector('.nav-am-shot .nav-am-in'); if (!el) return;
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
@@ -2108,6 +2110,7 @@ window.SweepMO = window.SweepMO || class {
     el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${t('sub')}</span><button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button></div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
       ${SH.batch.length ? batchTop() : `<label class="nav-am-drop ${SH.src ? 'has' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t('drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
       ${SH.status ? `<p class="nav-am-st ${SH.busy ? 'busy' : ''}">${SH.status}</p>` : ''}`}
+      ${coachBefore()}
       ${SH.batch.length || SH.src ? '' : `<div class="nav-am-alt"><button type="button" class="btn" data-am="to-manual">${t('byHand')}</button><a class="btn" href="#import" data-am-imp>${t('impFile')}</a></div>`}
       <div class="nav-am-grid">
         <div class="tk-f nav-am-wide"><span>${t('acc')}</span>${pickBox('account', accs.map((a) => [a.id, typeof acctLabel === 'function' ? acctLabel(a.id) : a.name]), SH.f.account)}</div>
@@ -2478,6 +2481,7 @@ window.SweepMO = window.SweepMO || class {
     const v = autoPnl(), p = document.querySelector('.nav-am-net input'); if (p) p.placeholder = v != null ? ((v - (SH.f.fees || 0)) / 100).toFixed(2) : '+250';
     const r = document.querySelector('.nav-am-r'); if (r) r.innerHTML = rLine();
     const sm = document.querySelector('.nav-am-more-d summary small'); if (sm) sm.innerHTML = verifyLine();
+    const cb = document.querySelector('.nav-am-shot .co-before'); if (cb) { const h = coachBefore(); if (h) cb.outerHTML = h; else cb.remove(); }
   });
   document.addEventListener('change', (e) => {
     const f = e.target.closest && e.target.closest('.nav-am [data-am-file]'); if (f && f.files.length) { takeFiles([...f.files]); return; }

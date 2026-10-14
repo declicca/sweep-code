@@ -11,6 +11,11 @@ A new trader with one account (daily limit $1,000), phone (fr, es) and computer 
      the next plan starts with that rule and saves it;
   E. the habit of the week (the rule broken most often the week before), with yesterday's or today's score;
   F. a trader starting out: the why under the fix, 2 trades max to start.
+Then, brief 03 step 3 (a new trader: an account with a $1,000 daily limit, 3 trades today, the last loss 4 min ago):
+  G. both add forms (manual and screenshot) say it before the trade: « your last loss was 4 min ago: wait 6 more min »,
+     with his own number (his past re-entries after a loss), and what is left (max loss, trades);
+  H. the account at 80 % then 100 % of its daily limit: the « saved » message, the coach's card and the bell (« Prop firm
+     alerts »), each level once.
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -32,6 +37,11 @@ X = {
          'loss2': '2 losses in a row', 'done': '3 of 3 planned trades', 'maxloss': 'Taken after your max loss', 'lesson': 'without a mistake', 'rule': 'After a loss: a 10-minute break', 'habit': 'This week: a stop on every trade', 'why': 'Why:', 'new2': 'To start, 2 trades max'},
   'es': {'need': 'Elige tu sesgo y tu pérdida máx.', 'above': 'por encima del límite diario', 'nosetup': 'Ningún setup elegido', 'ok': 'Dentro de tu plan, stop respetado', 'left': 'Te quedan', 'fix': 'Tomada 4 min después de una pérdida',
          'loss2': '2 pérdidas seguidas', 'done': '3 de 3 operaciones previstas', 'maxloss': 'Tomada después de tu pérdida máxima', 'lesson': 'sin error', 'rule': 'Tras una pérdida: 10 minutos de pausa', 'habit': 'Esta semana: un stop en cada operación', 'why': 'Por qué:', 'new2': 'Para empezar, 2 operaciones máx.'},
+}
+Y = {
+  'fr': {'wait': 'Ta dernière perte date de', 'own': 'Tes trades pris moins de 10 min après une perte', 'left': 'avant ta perte max', 'd75': 'de ta limite du jour utilisés', 'd100': 'limite du jour atteinte'},
+  'en': {'wait': 'Your last loss was', 'own': 'Your trades taken less than 10 min after a loss', 'left': 'before your max loss', 'd75': 'of your daily limit used', 'd100': 'daily limit reached'},
+  'es': {'wait': 'Tu última pérdida fue hace', 'own': 'Tus operaciones tomadas menos de 10 min', 'left': 'antes de tu pérdida máxima', 'd75': 'de tu límite diario usado', 'd100': 'límite diario alcanzado'},
 }
 EN_ONLY = ['Your coach', 'To improve', 'In your plan', 'stop respected', 'losses in a row', 'You have', 'Rule for tomorrow', 'This week', 'without a mistake']
 TXT = "(sel) => { const e = document.querySelector(sel); return e ? e.textContent.replace(/\\s+/g, ' ').trim() : '' }"
@@ -139,9 +149,57 @@ def run(p, lang, phone):
   ok(not errs, f'{tag} no page error ({errs[:2]})')
   br.close()
 
+def live(p, lang, phone):   # brief 03 step 3: during the session
+  tag = f"{'390' if phone else '1300'}-{lang}"; y = Y[lang]
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1'); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'cl%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
+  ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'gt1'}), headers=H)
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(700)
+  early = pg.evaluate("(() => { const [h, m] = nowET().slice(11, 16).split(':').map(Number); return h * 60 + m < 70 })()")
+  if early: print(f'      {tag}: just after midnight New York, the « minutes since the last loss » part is left out')
+  # his history: 5 past days with a re-entry 3 min after a loss (losing), the rest winning
+  pg.evaluate("""() => { const d0 = new Date(todayStr() + 'T12:00:00'); for (let k = 20; k < 25; k++) { const d = new Date(d0); d.setDate(d0.getDate() - k);
+      const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      [['h' + k + 'a', '10:00', '10:05', -3000], ['h' + k + 'b', '10:08', '10:15', -5000], ['h' + k + 'c', '11:00', '11:10', 8000]].forEach(([id, a, b, pnl]) => put('trades', { id, account_id: 'ca', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: pnl, pnl_manual: true, date: day, entry_time: a, exit_time: b })); } }""")
+  # today: a plan, a win, then 2 losses, the last one 4 min ago
+  pg.evaluate("""() => { const day = todayStr(), now = nowET().slice(11, 16), m = (d) => { let [h, mi] = now.split(':').map(Number); const x = Math.max(0, h * 60 + mi + d); return String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); };
+      put('journals', { id: day, pre: { bias: 'bullish', max_loss: '2000', max_trades: '5', setups: [], saved_at: 1 } });
+      [['t1', m(-60), m(-50), 20000], ['t2', m(-30), m(-20), -15000], ['t3', m(-12), m(-4), -10000]].forEach(([id, a, b, pnl]) => put('trades', { id, account_id: 'ca', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: pnl, pnl_manual: true, date: day, entry_time: a, exit_time: b })); render(); }""")
+  pg.wait_for_timeout(900)
+  # G. the two forms
+  pg.evaluate("openTicket(null, { manual: true })"); pg.wait_for_selector('#tkSlide.open #tkAlerts', timeout=8000); pg.wait_for_timeout(600)
+  man = pg.evaluate(TXT, '#tkSlide .co-before')
+  pg.evaluate("closeTicket()"); pg.wait_for_timeout(500)
+  pg.evaluate("SweepAddMode.open()"); pg.wait_for_selector('.nav-am-shot.open', timeout=8000); pg.wait_for_timeout(600)
+  sh = pg.evaluate(TXT, '.nav-am-shot .co-before')
+  if phone: pg.screenshot(path=f'/tmp/co_{tag}_shot_before.png')
+  pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
+  for name, txt in (('manual', man), ('screenshot', sh)):
+    ok(bool(txt) and y['left'] in txt and (early or (y['wait'] in txt and y['own'] in txt)), f'{tag} G the {name} form: « {txt[:110]}… »')
+  # H. 80 % then 100 % of the daily limit (the account: $1,000)
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(500)
+  pg.evaluate(TRADE, ['t4', pg.evaluate("todayStr()"), '23:58', '23:59', 'long', -70000, {}]); pg.evaluate("toast('Trade saved')"); pg.wait_for_timeout(150)
+  toast = pg.evaluate("document.getElementById('toast').textContent"); pg.evaluate("render()"); pg.wait_for_timeout(2600)
+  card = pg.evaluate(TXT, '#main .co-lim')
+  bell = [i.get('title_key') for i in ctx.request.get(B + '/api/notifications', headers=H).json().get('items', [])]
+  ok(y['d75'] in toast and y['d75'] in card and bell.count('prop_dll75.title') == 1, f'{tag} H 80 %: the message, the card and the bell ({card[:60]}… {bell})')
+  pg.evaluate(TRADE, ['t5', pg.evaluate("todayStr()"), '23:59', '23:59', 'long', -30000, {}]); pg.evaluate("render()"); pg.wait_for_timeout(2600)   # the day: −1,050 $
+  card = pg.evaluate(TXT, '#main .co-lim'); pg.evaluate("render()"); pg.wait_for_timeout(1500)
+  bell = [i.get('title_key') for i in ctx.request.get(B + '/api/notifications', headers=H).json().get('items', [])]
+  ok(y['d100'] in card.lower() and bell.count('prop_dll100.title') == 1 and bell.count('prop_dll75.title') == 1, f'{tag} H 100 %: the card, the bell, each level once ({card[:70]}… {bell})')
+  ok(not errs, f'{tag} G-H no page error ({errs[:2]})')
+  br.close()
+
 with sync_playwright() as p:
   for lang, phone in (('fr', True), ('en', False), ('es', True)):
     print(f"— {'phone' if phone else 'computer'} {lang}")
     run(p, lang, phone)
+    live(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')
 sys.exit(1 if fails else 0)

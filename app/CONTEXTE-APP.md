@@ -104,7 +104,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 | Langues, accessibilité | `e2e_no_english_in_fr_es`, `e2e_a11y_names` |
 | Parcours clés (6 × 3 langues × 2 tailles) | `e2e_acceptance` (~5 min) |
 | Démarrage en 3 étapes (prénom, compte, plan, premier trade ; Aujourd'hui progressif) | `e2e_first_run` (~1 min, crée ses propres traders : 390 FR et ES, 1300 EN, au plus 8 touchers) |
-| Le coach (plan, trade, séance, revue, règle du jour, habitude, ton, parité avec le serveur) | `e2e_coach` (~1 min, crée ses propres traders : 390 FR et ES, 1300 EN) |
+| Le coach (plan, trade, séance, revue, règle du jour, habitude, ton, parité avec le serveur ; pendant la séance : les deux formulaires, ses chiffres, la limite du jour à 75 % et 100 % jusqu'à la cloche) | `e2e_coach` (~2 min, crée ses propres traders : 390 FR et ES, 1300 EN) |
 | Arrivée, rattrapage, vrai net, « Estimé » | `e2e_realnet` (~2 min, crée ses propres traders, vide le limiteur d'inscription via `SWEEP_TEST_DB`) |
 | Lot A UI/UX (routine, news, boutons, comptes, Net P&L, recherche, espacements, Calendrier, coins, CSV) | `e2e_lot_a` (~2 min) |
 
@@ -179,6 +179,9 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - **Le ton suit l'expérience** (`users.experience`) : « Je commence » ajoute le pourquoi sous la correction, et des objectifs simples au plan (perte max et 2 trades max, pas de setup réclamé).
   - **Sweep AI** : « Aller plus loin avec Sweep AI » est dans le coach, sur la page du trade (avis sur le trade, à la place du bouton de l'en-tête) et sur la journée revue (débrief). Même bouton de l'app : caché sans Sweep AI, limites et paywall inchangés.
   - Le jour du coach sur Aujourd'hui est celui de la routine (le jour du jeu), pour que les deux cartes parlent de la même séance.
+  - **Pendant la séance** (brief 03, étape 3) : « Ton coach · Avant ce trade » en haut des **deux formulaires d'ajout** (manuel : dans `tkAlerts`, à chaque saisie ; capture : dans `paint()` et à la frappe, pas pour un lot de captures). Le signal du moment, dans l'ordre : perte max atteinte, trades prévus faits, dernière perte il y a moins de 10 min (« attends encore 6 min », d'après l'heure d'entrée ou l'heure de New York), pertes de suite, taille au-dessus du maximum (capture seulement : le formulaire manuel le dit déjà), taille montée après des gains, 5 premières minutes de l'ouverture, pas de plan ; puis ce qui reste (avant la perte max, ou la limite du jour du compte en capture ; trade n sur m). Rien n'est bloqué.
+  - **Tes propres chiffres** (`own()`, tous les trades réels, copies une fois) : reprise moins de 10 min après une perte (5 trades au moins), après 2 pertes de suite (« ta perte moyenne double : 120 $ → 260 $ » à partir de ×1,8, « passe de … à … » à partir de ×1,15), taille montée après des gains (3 au moins), 5 premières minutes (5 au moins). Montrés seulement quand l'échantillon dit que ça lui coûte. Les 5 premières minutes deviennent une chose à améliorer d'un trade seulement dans ce cas.
+  - **Limite du jour et drawdown à 75 % puis 100 %** (`limits()`, d'après `acctState`, les chiffres de la page du compte) : la ligne en tête de la carte du coach, dans le message « Trade enregistré », et une notification « Alertes prop firm » (`POST api/notifications/prop-alert`, type `prop_limit`, clés `prop_dll75` / `prop_dll100` / `prop_dd75` / `prop_dd100`, icône rouge `tone: caution`) : une fois par compte, type, niveau et jour, le compte devant être celui du trader. Le drawdown n'alerte que s'il est franchi par les trades du jour (un compte resté à 80 % n'alerte pas chaque jour). Ces alertes ne comptent pas dans le plafond de 5 notifications par jour (`notify.php`).
 - **« Ton vrai net » (rattrapage)** : plus au premier jour. Pour un nouveau trader (premier compte créé sur la page de démarrage : `S.settings.realnet.due`), il s'ouvre tout seul **la première fois qu'il ouvre Mon argent** (où il entre ses payouts), une fois (`auto`), jamais par-dessus une autre fenêtre, pas en Free. Un trader existant garde son invitation d'un jour sur Aujourd'hui, et rien ne s'ouvre seul.
   - **Rattrapage** : « Depuis quand veux-tu suivre ton argent ? » (Ce mois-ci · Depuis janvier · Une date) → achats par firme des comptes du trader (évaluations, resets, activations, compteurs +/−, prix du catalogue pré-remplis et modifiables ; Topstep : « Mois d'abonnement ») → payouts nets reçus (un seul montant) → vrai net.
   - Pour chaque firme, « Déjà dans Mon argent : X $ » affiche les dépenses déjà saisies dans la période (frais ajoutés avec le compte), et les compteurs servent à ajouter des achats en plus : jamais de double comptage.
@@ -396,6 +399,10 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - Test : `e2e_sync_ui` attendait 5,8 s fixes la révocation de la clé après « Annuler » (échec vu une fois sur téléphone, machine chargée) : il attend maintenant que `api/sync` n'ait plus de connexion (20 s au plus).
 - **Contrats d'un trade = la plus grosse position** (12 oct.) : formulaire de trade (`positionOf`), synchro, et maintenant imports CSV Rithmic et TradingView (`pairFills`, `ux.js` : `qty` = plus grosse position, `turns` = contrats achetés et vendus, sur lesquels la commission du compte est comptée ; test `e2e_accuracy` A6c). Tradovate Performance et TopstepX l'étaient déjà (une ligne par entrée ou par aller-retour). **Captures aussi** (12 oct., `shot-trades.php`) : `contracts` = plus grosse position, `turns` = contrats achetés et vendus ; P&L calculé, tolérance et frais par défaut sur `turns`. L'écran « X trades trouvés » (`recompute`, `nav.js`) et l'écran d'une seule capture (`autoPnl`) recalculent le P&L avec prix moyens × `turns` ; si le trader tape le nombre de contrats, `turns` disparaît (trade simple de cette taille). Test : `shot_trades_test.php` (achat 2, vente 1, achat 1, vente 2 → 2 contrats, +1 000 $, frais × 3).
 
+### Brief 03 — étape 3 (le coach prévient pendant la séance), 13 oct.
+- Lots : 1. « Avant ce trade » dans les deux formulaires ; 2. ses propres chiffres (et les 5 premières minutes) ; 3. limite du jour et drawdown à 75 % / 100 % (coach et cloche) ; 4. tests, docs.
+- **Piège** : dans la carte, la ligne d'un compte est insérée par une fonction (`replace(…, () => …)`) : avec une chaîne, « $1,000 » se lisait « $1 » (le premier groupe) et devenait « ,000 » en anglais.
+
 ### Brief 03 — étape 2 (le coach après chaque action), 13 oct.
 - Lots : 1. moteur et carte du coach (plan, trade, message enregistré, Aujourd'hui) ; 2. leçon de la revue et règle du jour ; 3. habitude de la semaine ; 4. ton selon l'expérience et Sweep AI à la place du coach ; 5. tests, captures, docs.
 - **Retiré** : « Bien démarrer » (`guide.js`, et son épinglage dans la routine, `nav.js`) et l'astuce des anneaux : le coach dit la même chose à la même place. Le bouton « Avis IA » de l'en-tête d'un trade passe dans le coach.
@@ -499,6 +506,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Nouveaux : `img/.htaccess` et `icons/.htaccess` (durée de cache). Aucun code PHP ou JS modifié.
 
 ### État des tests
+- **Brief 03, étape 3 (13 oct.) : 64/64** (suite répartie, 12 min 29 s, `caffeinate -dimsu`), sans « RETRY » ; `e2e_coach` étendu (G : les deux formulaires et ses chiffres ; H : limite du jour à 75 % puis 100 %, carte, message et cloche, chaque niveau une fois).
 - **Brief 03, étape 2 (13 oct.) : 64/64** (suite répartie, 11 min 22 s, `caffeinate -dimsu`), sans « RETRY » ; `e2e_coach` (nouveau : 390 FR et ES, 1300 EN, parité des codes avec le serveur). Un passage avant avait 2 échecs causés par le lot : la règle des 44 px sur téléphone cassée en retirant « Bien démarrer » de nav.css (`e2e_a11y_names`), la phrase du coach ajoutée au message « Copié sur 2 comptes » (`e2e_delete_undo_copy_dates`) : corrigés.
 - **Brief 03, étape 1 (13 oct.) : 63/63** (suite répartie, 11 min 09 s, `caffeinate -dimsu`), sans « RETRY » ; `e2e_first_run` (nouveau : 390 FR et ES, 1300 EN, 8 touchers), `e2e_realnet` réécrit pour le nouveau parcours, `metrics_test.php` 19/19. Un premier passage avait échoué sur `e2e_lot_a` (le rattrapage s'ouvrait aussi chez un trader existant) : corrigé, il est réservé aux nouveaux traders.
 - **Contrats dans Admin › Synchro (13 oct.) : 62/62** (suite répartie, 11 min 20 s, `caffeinate -dimsu`), sans « RETRY » ; `sync_store_test.php` 49/49, `e2e_admin_sync` (contrat ProjectX non reconnu en rouge et dans l'alerte, 390 × 844 et 1300 × 850).
@@ -547,7 +555,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ### Demandes non terminées ou mises en pause
 - Aucune modification à moitié faite dans le code.
-- Brief 03, étapes 3 à 5 (le coach pendant la séance, ce qui fonctionne pour toi, moins d'options visibles).
+- Brief 03, étapes 4 et 5 (ce qui fonctionne pour toi, moins d'options visibles).
 - Brief 02, partie 13 (facturation) : en pause pour le brief 03.
 - Captures réelles (Lucid, Tradesea) à essayer en ligne ; import « Performance » de Tradovate sans la règle de 18 h ET.
 

@@ -16,15 +16,30 @@
   const L = (typeof LANG !== 'undefined' && ['fr', 'es'].includes(LANG)) ? LANG : 'en';
   const T = {
     en: {
-      why: { over_max_loss: 'Why: the worst days come from the trades taken to win back a loss.', over_max_trades: 'Why: past your number, you trade fatigue, not setups.', revenge: 'Why: right after a loss, emotion picks the trade, not your plan.', addloser: 'Why: adding to a loser turns a small loss into the one that ends the account.', no_stop: 'Why: without a stop, one trade can take the whole account.', risklimit: 'Why: an account is lost a little too much risk at a time.', oversized: 'Why: a bigger size makes every tick heavier, and decisions worse.', size_up: 'Why: after wins you feel sure; the market has not changed.', against_bias: 'Why: your bias was decided calm, before the open: trust it.', setup_not_in_plan: 'Why: only a setup you repeat can be measured and improved.', plan_no_trade: 'Why: you decided calm not to trade; the urge came later.', no_plan: 'Why: the plan is your decision made calm, before the market pushes you.', rules_no: 'Why: the checklist is your filter against impulsive entries.', rules_partial: 'Why: the checklist is your filter against impulsive entries.' },
+      lim: { dll75: '{a}: {p} % of your daily limit used ({u} of {l}). Keep your size, or stop.', dll100: '{a}: daily limit reached ({l}). Your session is over on this account.',
+        dd75: '{a}: {p} % of the drawdown used, {r} of room left. Trade smaller.', dd100: '{a}: drawdown limit reached. Check the account’s status with your firm.' },
+      bTitle: 'Before this trade',
+      bMax: 'Max loss reached ({m}): your session is over. This trade will be out of your plan.',
+      bDone: 'Your {m} planned trades are done: this one will be out of your plan.',
+      bWait: 'Your last loss was {n} min ago: wait {r} more min before entering.',
+      bLoss2: '{n} losses in a row: take a 15-minute break before this trade.',
+      bSize: '{n} contracts: your maximum is {m}.',
+      bUp: 'After {w} wins in a row, keep your size ({c}).',
+      bOpen: 'The first 5 minutes of the open: wait for your setup.',
+      bNoPlan: 'No plan for this session: take 30 seconds before this trade.',
+      bLeft: 'you have {m} left before your max loss', bLeftAcc: 'you have {m} left before the daily limit of {a}', bCount: 'trade {n} of {m}',
+      o: { revenge: 'Your trades taken less than 10 min after a loss: {a} on average over {n} (the others: {b}).',
+        loss2d: 'After 2 losses in a row, your average loss doubles: {b} → {a}.', loss2m: 'After 2 losses in a row, your average loss goes from {b} to {a}.',
+        size_up: 'When you raise the size after wins: {a} on average over {n} trades.', open5: 'Your trades in the first 5 minutes: {a} on average over {n}.' },
+      why: { over_max_loss: 'Why: the worst days come from the trades taken to win back a loss.', over_max_trades: 'Why: past your number, you trade fatigue, not setups.', revenge: 'Why: right after a loss, emotion picks the trade, not your plan.', addloser: 'Why: adding to a loser turns a small loss into the one that ends the account.', no_stop: 'Why: without a stop, one trade can take the whole account.', risklimit: 'Why: an account is lost a little too much risk at a time.', oversized: 'Why: a bigger size makes every tick heavier, and decisions worse.', size_up: 'Why: after wins you feel sure; the market has not changed.', against_bias: 'Why: your bias was decided calm, before the open: trust it.', setup_not_in_plan: 'Why: only a setup you repeat can be measured and improved.', open5: 'Why: the first minutes are the wildest, and your entries there are your worst.', plan_no_trade: 'Why: you decided calm not to trade; the urge came later.', no_plan: 'Why: the plan is your decision made calm, before the market pushes you.', rules_no: 'Why: the checklist is your filter against impulsive entries.', rules_partial: 'Why: the checklist is your filter against impulsive entries.' },
       pNoMaxNew: 'To start, 2 trades max: fewer trades, more discipline.', ai: 'Go further with Sweep AI',
       habit: 'This week: {h}, {k} of {n} {w}.', habit0: 'This week: {h}.', today: 'today', yday: 'yesterday', on: 'on {d}',
-      h: { over_max_loss: 'stop at your max loss', over_max_trades: 'no more trades than planned', revenge: 'a 10-minute break after a loss', addloser: 'never add to a loser', no_stop: 'a stop on every trade', risklimit: 'the risk within your limit', oversized: 'stay at your size', size_up: 'the same size after wins', against_bias: 'trade with your bias', setup_not_in_plan: 'only your plan’s setups', plan_no_trade: 'a planned day off stays one', no_plan: 'your plan before your first trade', rules_no: 'your checklist before each entry', rules_partial: 'your checklist before each entry' },
+      h: { over_max_loss: 'stop at your max loss', over_max_trades: 'no more trades than planned', revenge: 'a 10-minute break after a loss', addloser: 'never add to a loser', no_stop: 'a stop on every trade', risklimit: 'the risk within your limit', oversized: 'stay at your size', size_up: 'the same size after wins', against_bias: 'trade with your bias', setup_not_in_plan: 'only your plan’s setups', open5: 'no trade before 9:35', plan_no_trade: 'a planned day off stays one', no_plan: 'your plan before your first trade', rules_no: 'your checklist before each entry', rules_partial: 'your checklist before each entry' },
       dayT: 'Your day', ruleT: 'Rule for tomorrow', ruleD: 'Rule of the day', rulePh: 'Suggested: {r}',
       lClean1: 'Your trade was in your plan. That is exactly the discipline.', lClean: '{n} trades, all in your plan. That is exactly the discipline.',
       lMix: '{k} of {n} trades without a mistake. What cost you the most: {w}{c}.', lOff: 'No trade today: your plan held.',
-      w: { revenge: 'going back in less than 10 minutes after a loss', over_max_loss: 'trading after your max loss', over_max_trades: 'going past your number of trades', addloser: 'adding to a loser', no_stop: 'the stop not respected', risklimit: 'a risk above your limit', oversized: 'a size above your maximum', size_up: 'raising the size after wins', against_bias: 'trading against your bias', setup_not_in_plan: 'a setup outside your plan', plan_no_trade: 'trading on a planned day off', no_plan: 'trading without a plan', rules_no: 'your checklist', rules_partial: 'your checklist' },
-      r: { over_max_loss: 'Max loss reached: I close the platform.', over_max_trades: '{m} trades max, not one more.', revenge: 'After a loss: a 10-minute break before the next trade.', addloser: 'Never add to a losing trade.', no_stop: 'A stop set before each entry, never moved.', risklimit: 'Each trade’s risk fits my limit.', oversized: 'Never more than {m} contracts.', size_up: 'The same size after wins.', against_bias: 'Only in the direction of my bias.', setup_not_in_plan: 'Only the setups of my plan.', plan_no_trade: 'A planned day off stays a day off.', no_plan: 'My plan before my first trade.', rules_no: 'Every point of my checklist before I enter.', rules_partial: 'Every point of my checklist before I enter.', clean: 'Same plan, same discipline.' },
+      w: { revenge: 'going back in less than 10 minutes after a loss', over_max_loss: 'trading after your max loss', over_max_trades: 'going past your number of trades', addloser: 'adding to a loser', no_stop: 'the stop not respected', risklimit: 'a risk above your limit', oversized: 'a size above your maximum', size_up: 'raising the size after wins', against_bias: 'trading against your bias', setup_not_in_plan: 'a setup outside your plan', open5: 'entering in the first 5 minutes', plan_no_trade: 'trading on a planned day off', no_plan: 'trading without a plan', rules_no: 'your checklist', rules_partial: 'your checklist' },
+      r: { over_max_loss: 'Max loss reached: I close the platform.', over_max_trades: '{m} trades max, not one more.', revenge: 'After a loss: a 10-minute break before the next trade.', addloser: 'Never add to a losing trade.', no_stop: 'A stop set before each entry, never moved.', risklimit: 'Each trade’s risk fits my limit.', oversized: 'Never more than {m} contracts.', size_up: 'The same size after wins.', against_bias: 'Only in the direction of my bias.', setup_not_in_plan: 'Only the setups of my plan.', open5: 'No trade before 9:35.', plan_no_trade: 'A planned day off stays a day off.', no_plan: 'My plan before my first trade.', rules_no: 'Every point of my checklist before I enter.', rules_partial: 'Every point of my checklist before I enter.', clean: 'Same plan, same discipline.' },
       title: 'Your coach', last: 'Last trade · {t}', thisT: 'This trade', fix: 'To improve',
       inPlan: 'In your plan', stopOk: 'stop respected', sizeOk: 'size within your max', chkOk: 'checklist followed',
       none: 'Nothing to fix on this trade. Do exactly the same again.',
@@ -39,6 +54,7 @@
         size_up: ['Size raised to {n} after {w} wins in a row.', 'After wins, keep the same size: that is where overconfidence costs.'],
         against_bias: ['Against your bias ({b}).', 'If the market goes against your bias, wait or pass: no trade against your plan.'],
         setup_not_in_plan: ['Setup « {s} » is not in your plan.', 'Take only your plan’s setups; add this one tomorrow if it earns it.'],
+        open5: ['Taken in the first 5 minutes of the open.', 'Let the open pass: wait for your setup after 9:35.'],
         plan_no_trade: ['You had planned not to trade.', 'A planned day off is a rule too.'],
         no_plan: ['No plan for this session.', 'Make your plan before the next trade: 30 seconds.'],
         rules_no: ['Your checklist was not followed.', 'Reread your checklist before each entry.'],
@@ -61,15 +77,30 @@
       first: 'After your first trade, I tell you what was right and the one thing to improve.',
     },
     fr: {
-      why: { over_max_loss: 'Pourquoi : les pires journées viennent des trades pris pour se refaire.', over_max_trades: 'Pourquoi : au-delà de ton nombre, tu trades la fatigue, pas des setups.', revenge: 'Pourquoi : juste après une perte, c’est l’émotion qui choisit le trade, pas ton plan.', addloser: 'Pourquoi : ajouter à un perdant transforme une petite perte en celle qui ferme le compte.', no_stop: 'Pourquoi : sans stop, un seul trade peut emporter tout le compte.', risklimit: 'Pourquoi : un compte se perd un peu trop de risque à la fois.', oversized: 'Pourquoi : une taille plus grosse rend chaque tick plus lourd, et tes décisions moins bonnes.', size_up: 'Pourquoi : après des gains, tu te sens sûr de toi ; le marché, lui, n’a pas changé.', against_bias: 'Pourquoi : ton biais a été décidé à froid, avant l’ouverture : fais-lui confiance.', setup_not_in_plan: 'Pourquoi : seul un setup que tu répètes peut être mesuré et amélioré.', plan_no_trade: 'Pourquoi : tu as décidé à froid de ne pas trader ; l’envie est venue après.', no_plan: 'Pourquoi : le plan, c’est ta décision prise à froid, avant que le marché te pousse.', rules_no: 'Pourquoi : la checklist est ton filtre contre les entrées impulsives.', rules_partial: 'Pourquoi : la checklist est ton filtre contre les entrées impulsives.' },
+      lim: { dll75: '{a} : {p} % de ta limite du jour utilisés ({u} sur {l}). Garde ta taille, ou arrête-toi.', dll100: '{a} : limite du jour atteinte ({l}). Ta séance est finie sur ce compte.',
+        dd75: '{a} : {p} % du drawdown utilisés, il te reste {r} de marge. Trade plus petit.', dd100: '{a} : limite de drawdown atteinte. Vérifie le statut du compte auprès de ta firme.' },
+      bTitle: 'Avant ce trade',
+      bMax: 'Perte max atteinte ({m}) : ta séance est finie. Ce trade sera hors plan.',
+      bDone: 'Tes {m} trades prévus sont faits : celui-ci sera hors plan.',
+      bWait: 'Ta dernière perte date de {n} min : attends encore {r} min avant d’entrer.',
+      bLoss2: '{n} pertes de suite : fais une pause de 15 minutes avant ce trade.',
+      bSize: '{n} contrats : ton maximum est {m}.',
+      bUp: 'Après {w} gains de suite, garde ta taille ({c}).',
+      bOpen: 'Les 5 premières minutes de l’ouverture : attends ton setup.',
+      bNoPlan: 'Pas de plan pour cette séance : prends 30 secondes avant ce trade.',
+      bLeft: 'il te reste {m} avant ta perte max', bLeftAcc: 'il te reste {m} avant la limite du jour de {a}', bCount: 'trade {n} sur {m}',
+      o: { revenge: 'Tes trades pris moins de 10 min après une perte : {a} en moyenne sur {n} (les autres : {b}).',
+        loss2d: 'Après 2 pertes de suite, ta perte moyenne double : {b} → {a}.', loss2m: 'Après 2 pertes de suite, ta perte moyenne passe de {b} à {a}.',
+        size_up: 'Quand tu montes la taille après des gains : {a} en moyenne sur {n} trades.', open5: 'Tes trades des 5 premières minutes : {a} en moyenne sur {n}.' },
+      why: { over_max_loss: 'Pourquoi : les pires journées viennent des trades pris pour se refaire.', over_max_trades: 'Pourquoi : au-delà de ton nombre, tu trades la fatigue, pas des setups.', revenge: 'Pourquoi : juste après une perte, c’est l’émotion qui choisit le trade, pas ton plan.', addloser: 'Pourquoi : ajouter à un perdant transforme une petite perte en celle qui ferme le compte.', no_stop: 'Pourquoi : sans stop, un seul trade peut emporter tout le compte.', risklimit: 'Pourquoi : un compte se perd un peu trop de risque à la fois.', oversized: 'Pourquoi : une taille plus grosse rend chaque tick plus lourd, et tes décisions moins bonnes.', size_up: 'Pourquoi : après des gains, tu te sens sûr de toi ; le marché, lui, n’a pas changé.', against_bias: 'Pourquoi : ton biais a été décidé à froid, avant l’ouverture : fais-lui confiance.', setup_not_in_plan: 'Pourquoi : seul un setup que tu répètes peut être mesuré et amélioré.', open5: 'Pourquoi : les premières minutes sont les plus agitées, et tes entrées y sont les moins bonnes.', plan_no_trade: 'Pourquoi : tu as décidé à froid de ne pas trader ; l’envie est venue après.', no_plan: 'Pourquoi : le plan, c’est ta décision prise à froid, avant que le marché te pousse.', rules_no: 'Pourquoi : la checklist est ton filtre contre les entrées impulsives.', rules_partial: 'Pourquoi : la checklist est ton filtre contre les entrées impulsives.' },
       pNoMaxNew: 'Pour commencer, 2 trades max : moins de trades, plus de discipline.', ai: 'Aller plus loin avec Sweep AI',
       habit: 'Cette semaine : {h}, {k} sur {n} {w}.', habit0: 'Cette semaine : {h}.', today: 'aujourd’hui', yday: 'hier', on: '{d}',
-      h: { over_max_loss: 't’arrêter à ta perte max', over_max_trades: 'pas plus de trades que prévu', revenge: '10 minutes de pause après une perte', addloser: 'jamais d’ajout à un perdant', no_stop: 'un stop sur chaque trade', risklimit: 'le risque dans ta limite', oversized: 'rester à ta taille', size_up: 'la même taille après des gains', against_bias: 'trader dans le sens de ton biais', setup_not_in_plan: 'seulement les setups de ton plan', plan_no_trade: 'respecter un jour sans trading', no_plan: 'ton plan avant ton premier trade', rules_no: 'ta checklist avant chaque entrée', rules_partial: 'ta checklist avant chaque entrée' },
+      h: { over_max_loss: 't’arrêter à ta perte max', over_max_trades: 'pas plus de trades que prévu', revenge: '10 minutes de pause après une perte', addloser: 'jamais d’ajout à un perdant', no_stop: 'un stop sur chaque trade', risklimit: 'le risque dans ta limite', oversized: 'rester à ta taille', size_up: 'la même taille après des gains', against_bias: 'trader dans le sens de ton biais', setup_not_in_plan: 'seulement les setups de ton plan', open5: 'pas de trade avant 9 h 35', plan_no_trade: 'respecter un jour sans trading', no_plan: 'ton plan avant ton premier trade', rules_no: 'ta checklist avant chaque entrée', rules_partial: 'ta checklist avant chaque entrée' },
       dayT: 'Ta journée', ruleT: 'Règle de demain', ruleD: 'Règle du jour', rulePh: 'Proposée : {r}',
       lClean1: 'Ton trade était dans ton plan. C’est exactement ça, la discipline.', lClean: '{n} trades, tous dans ton plan. C’est exactement ça, la discipline.',
       lMix: '{k} trades sur {n} sans erreur. Ce qui t’a coûté le plus : {w}{c}.', lOff: 'Pas de trade aujourd’hui : ton plan a tenu.',
-      w: { revenge: 'revenir moins de 10 minutes après une perte', over_max_loss: 'trader après ta perte max', over_max_trades: 'dépasser ton nombre de trades', addloser: 'ajouter à un perdant', no_stop: 'le stop non respecté', risklimit: 'un risque au-dessus de ta limite', oversized: 'une taille au-dessus de ton maximum', size_up: 'monter la taille après des gains', against_bias: 'trader contre ton biais', setup_not_in_plan: 'un setup hors de ton plan', plan_no_trade: 'trader un jour prévu sans trading', no_plan: 'trader sans plan', rules_no: 'ta checklist', rules_partial: 'ta checklist' },
-      r: { over_max_loss: 'Perte max atteinte : je ferme la plateforme.', over_max_trades: '{m} trades max, pas un de plus.', revenge: 'Après une perte : 10 minutes de pause avant le trade suivant.', addloser: 'Jamais d’ajout à un trade perdant.', no_stop: 'Un stop placé avant chaque entrée, jamais déplacé.', risklimit: 'Le risque de chaque trade tient dans ma limite.', oversized: 'Jamais plus de {m} contrats.', size_up: 'La même taille après des gains.', against_bias: 'Seulement dans le sens de mon biais.', setup_not_in_plan: 'Seulement les setups de mon plan.', plan_no_trade: 'Un jour prévu sans trading reste sans trading.', no_plan: 'Mon plan avant mon premier trade.', rules_no: 'Chaque point de ma checklist avant d’entrer.', rules_partial: 'Chaque point de ma checklist avant d’entrer.', clean: 'Même plan, même discipline.' },
+      w: { revenge: 'revenir moins de 10 minutes après une perte', over_max_loss: 'trader après ta perte max', over_max_trades: 'dépasser ton nombre de trades', addloser: 'ajouter à un perdant', no_stop: 'le stop non respecté', risklimit: 'un risque au-dessus de ta limite', oversized: 'une taille au-dessus de ton maximum', size_up: 'monter la taille après des gains', against_bias: 'trader contre ton biais', setup_not_in_plan: 'un setup hors de ton plan', open5: 'entrer dans les 5 premières minutes', plan_no_trade: 'trader un jour prévu sans trading', no_plan: 'trader sans plan', rules_no: 'ta checklist', rules_partial: 'ta checklist' },
+      r: { over_max_loss: 'Perte max atteinte : je ferme la plateforme.', over_max_trades: '{m} trades max, pas un de plus.', revenge: 'Après une perte : 10 minutes de pause avant le trade suivant.', addloser: 'Jamais d’ajout à un trade perdant.', no_stop: 'Un stop placé avant chaque entrée, jamais déplacé.', risklimit: 'Le risque de chaque trade tient dans ma limite.', oversized: 'Jamais plus de {m} contrats.', size_up: 'La même taille après des gains.', against_bias: 'Seulement dans le sens de mon biais.', setup_not_in_plan: 'Seulement les setups de mon plan.', open5: 'Pas de trade avant 9 h 35.', plan_no_trade: 'Un jour prévu sans trading reste sans trading.', no_plan: 'Mon plan avant mon premier trade.', rules_no: 'Chaque point de ma checklist avant d’entrer.', rules_partial: 'Chaque point de ma checklist avant d’entrer.', clean: 'Même plan, même discipline.' },
       title: 'Ton coach', last: 'Dernier trade · {t}', thisT: 'Ce trade', fix: 'À améliorer',
       inPlan: 'Dans ton plan', stopOk: 'stop respecté', sizeOk: 'taille respectée', chkOk: 'checklist suivie',
       none: 'Rien à corriger sur ce trade. Refais exactement pareil.',
@@ -84,6 +115,7 @@
         size_up: ['Taille montée à {n} après {w} gains de suite.', 'Après des gains, garde la même taille : c’est là que l’excès de confiance coûte.'],
         against_bias: ['À l’inverse de ton biais ({b}).', 'Si le marché contredit ton biais, tu attends ou tu passes : pas de trade contre ton plan.'],
         setup_not_in_plan: ['Setup « {s} » hors de ton plan.', 'Ne prends que les setups de ton plan ; ajoute celui-ci demain s’il le mérite.'],
+        open5: ['Pris dans les 5 premières minutes de l’ouverture.', 'Laisse passer l’ouverture : attends ton setup après 9 h 35.'],
         plan_no_trade: ['Tu avais prévu de ne pas trader.', 'Un jour sans trading prévu se respecte comme une règle.'],
         no_plan: ['Pas de plan pour cette séance.', 'Fais ton plan avant le prochain trade : 30 secondes.'],
         rules_no: ['Ta checklist n’est pas respectée.', 'Relis ta checklist avant chaque entrée.'],
@@ -106,15 +138,30 @@
       first: 'Après ton premier trade, je te dis ce qui était bien et la seule chose à améliorer.',
     },
     es: {
-      why: { over_max_loss: 'Por qué: los peores días vienen de las operaciones para recuperar una pérdida.', over_max_trades: 'Por qué: pasado tu número, operas el cansancio, no setups.', revenge: 'Por qué: justo después de una pérdida, la emoción elige la operación, no tu plan.', addloser: 'Por qué: añadir a una perdedora convierte una pérdida pequeña en la que cierra la cuenta.', no_stop: 'Por qué: sin stop, una sola operación puede llevarse toda la cuenta.', risklimit: 'Por qué: una cuenta se pierde con un poco de riesgo de más cada vez.', oversized: 'Por qué: un tamaño mayor hace cada tick más pesado, y tus decisiones peores.', size_up: 'Por qué: tras ganancias te sientes seguro; el mercado no ha cambiado.', against_bias: 'Por qué: tu sesgo se decidió en frío, antes de la apertura: confía en él.', setup_not_in_plan: 'Por qué: solo un setup que repites puede medirse y mejorarse.', plan_no_trade: 'Por qué: decidiste en frío no operar; las ganas vinieron después.', no_plan: 'Por qué: el plan es tu decisión en frío, antes de que el mercado te empuje.', rules_no: 'Por qué: la checklist es tu filtro contra las entradas impulsivas.', rules_partial: 'Por qué: la checklist es tu filtro contra las entradas impulsivas.' },
+      lim: { dll75: '{a}: {p} % de tu límite diario usado ({u} de {l}). Mantén tu tamaño, o para.', dll100: '{a}: límite diario alcanzado ({l}). Tu sesión terminó en esta cuenta.',
+        dd75: '{a}: {p} % del drawdown usado, te quedan {r} de margen. Opera más pequeño.', dd100: '{a}: límite de drawdown alcanzado. Verifica el estado de la cuenta con tu firma.' },
+      bTitle: 'Antes de esta operación',
+      bMax: 'Pérdida máxima alcanzada ({m}): tu sesión terminó. Esta operación quedará fuera de tu plan.',
+      bDone: 'Tus {m} operaciones previstas están hechas: esta quedará fuera de tu plan.',
+      bWait: 'Tu última pérdida fue hace {n} min: espera {r} min más antes de entrar.',
+      bLoss2: '{n} pérdidas seguidas: haz una pausa de 15 minutos antes de esta operación.',
+      bSize: '{n} contratos: tu máximo es {m}.',
+      bUp: 'Tras {w} ganancias seguidas, mantén tu tamaño ({c}).',
+      bOpen: 'Los 5 primeros minutos de la apertura: espera tu setup.',
+      bNoPlan: 'Sin plan para esta sesión: tómate 30 segundos antes de esta operación.',
+      bLeft: 'te quedan {m} antes de tu pérdida máxima', bLeftAcc: 'te quedan {m} antes del límite diario de {a}', bCount: 'operación {n} de {m}',
+      o: { revenge: 'Tus operaciones tomadas menos de 10 min después de una pérdida: {a} de media en {n} (las demás: {b}).',
+        loss2d: 'Tras 2 pérdidas seguidas, tu pérdida media se duplica: {b} → {a}.', loss2m: 'Tras 2 pérdidas seguidas, tu pérdida media pasa de {b} a {a}.',
+        size_up: 'Cuando subes el tamaño tras ganancias: {a} de media en {n} operaciones.', open5: 'Tus operaciones de los 5 primeros minutos: {a} de media en {n}.' },
+      why: { over_max_loss: 'Por qué: los peores días vienen de las operaciones para recuperar una pérdida.', over_max_trades: 'Por qué: pasado tu número, operas el cansancio, no setups.', revenge: 'Por qué: justo después de una pérdida, la emoción elige la operación, no tu plan.', addloser: 'Por qué: añadir a una perdedora convierte una pérdida pequeña en la que cierra la cuenta.', no_stop: 'Por qué: sin stop, una sola operación puede llevarse toda la cuenta.', risklimit: 'Por qué: una cuenta se pierde con un poco de riesgo de más cada vez.', oversized: 'Por qué: un tamaño mayor hace cada tick más pesado, y tus decisiones peores.', size_up: 'Por qué: tras ganancias te sientes seguro; el mercado no ha cambiado.', against_bias: 'Por qué: tu sesgo se decidió en frío, antes de la apertura: confía en él.', setup_not_in_plan: 'Por qué: solo un setup que repites puede medirse y mejorarse.', open5: 'Por qué: los primeros minutos son los más agitados, y tus entradas ahí son las peores.', plan_no_trade: 'Por qué: decidiste en frío no operar; las ganas vinieron después.', no_plan: 'Por qué: el plan es tu decisión en frío, antes de que el mercado te empuje.', rules_no: 'Por qué: la checklist es tu filtro contra las entradas impulsivas.', rules_partial: 'Por qué: la checklist es tu filtro contra las entradas impulsivas.' },
       pNoMaxNew: 'Para empezar, 2 operaciones máx.: menos operaciones, más disciplina.', ai: 'Ir más lejos con Sweep AI',
       habit: 'Esta semana: {h}, {k} de {n} {w}.', habit0: 'Esta semana: {h}.', today: 'hoy', yday: 'ayer', on: 'el {d}',
-      h: { over_max_loss: 'parar en tu pérdida máxima', over_max_trades: 'no más operaciones de las previstas', revenge: '10 minutos de pausa tras una pérdida', addloser: 'nunca añadir a una perdedora', no_stop: 'un stop en cada operación', risklimit: 'el riesgo dentro de tu límite', oversized: 'mantener tu tamaño', size_up: 'el mismo tamaño tras ganancias', against_bias: 'operar en el sentido de tu sesgo', setup_not_in_plan: 'solo los setups de tu plan', plan_no_trade: 'respetar un día sin operar', no_plan: 'tu plan antes de tu primera operación', rules_no: 'tu checklist antes de cada entrada', rules_partial: 'tu checklist antes de cada entrada' },
+      h: { over_max_loss: 'parar en tu pérdida máxima', over_max_trades: 'no más operaciones de las previstas', revenge: '10 minutos de pausa tras una pérdida', addloser: 'nunca añadir a una perdedora', no_stop: 'un stop en cada operación', risklimit: 'el riesgo dentro de tu límite', oversized: 'mantener tu tamaño', size_up: 'el mismo tamaño tras ganancias', against_bias: 'operar en el sentido de tu sesgo', setup_not_in_plan: 'solo los setups de tu plan', open5: 'ninguna operación antes de las 9:35', plan_no_trade: 'respetar un día sin operar', no_plan: 'tu plan antes de tu primera operación', rules_no: 'tu checklist antes de cada entrada', rules_partial: 'tu checklist antes de cada entrada' },
       dayT: 'Tu día', ruleT: 'Regla para mañana', ruleD: 'Regla del día', rulePh: 'Propuesta: {r}',
       lClean1: 'Tu operación estaba dentro de tu plan. Eso es exactamente la disciplina.', lClean: '{n} operaciones, todas dentro de tu plan. Eso es exactamente la disciplina.',
       lMix: '{k} de {n} operaciones sin error. Lo que más te costó: {w}{c}.', lOff: 'Sin operaciones hoy: tu plan se mantuvo.',
-      w: { revenge: 'volver menos de 10 minutos después de una pérdida', over_max_loss: 'operar después de tu pérdida máxima', over_max_trades: 'pasar tu número de operaciones', addloser: 'añadir a una perdedora', no_stop: 'el stop no respetado', risklimit: 'un riesgo por encima de tu límite', oversized: 'un tamaño por encima de tu máximo', size_up: 'subir el tamaño tras ganancias', against_bias: 'operar contra tu sesgo', setup_not_in_plan: 'un setup fuera de tu plan', plan_no_trade: 'operar un día previsto sin operar', no_plan: 'operar sin plan', rules_no: 'tu checklist', rules_partial: 'tu checklist' },
-      r: { over_max_loss: 'Pérdida máxima alcanzada: cierro la plataforma.', over_max_trades: '{m} operaciones máx., ni una más.', revenge: 'Tras una pérdida: 10 minutos de pausa antes de la siguiente operación.', addloser: 'Nunca añadir a una operación perdedora.', no_stop: 'Un stop puesto antes de cada entrada, nunca movido.', risklimit: 'El riesgo de cada operación cabe en mi límite.', oversized: 'Nunca más de {m} contratos.', size_up: 'El mismo tamaño tras ganancias.', against_bias: 'Solo en el sentido de mi sesgo.', setup_not_in_plan: 'Solo los setups de mi plan.', plan_no_trade: 'Un día previsto sin operar sigue sin operar.', no_plan: 'Mi plan antes de mi primera operación.', rules_no: 'Cada punto de mi checklist antes de entrar.', rules_partial: 'Cada punto de mi checklist antes de entrar.', clean: 'Mismo plan, misma disciplina.' },
+      w: { revenge: 'volver menos de 10 minutos después de una pérdida', over_max_loss: 'operar después de tu pérdida máxima', over_max_trades: 'pasar tu número de operaciones', addloser: 'añadir a una perdedora', no_stop: 'el stop no respetado', risklimit: 'un riesgo por encima de tu límite', oversized: 'un tamaño por encima de tu máximo', size_up: 'subir el tamaño tras ganancias', against_bias: 'operar contra tu sesgo', setup_not_in_plan: 'un setup fuera de tu plan', open5: 'entrar en los 5 primeros minutos', plan_no_trade: 'operar un día previsto sin operar', no_plan: 'operar sin plan', rules_no: 'tu checklist', rules_partial: 'tu checklist' },
+      r: { over_max_loss: 'Pérdida máxima alcanzada: cierro la plataforma.', over_max_trades: '{m} operaciones máx., ni una más.', revenge: 'Tras una pérdida: 10 minutos de pausa antes de la siguiente operación.', addloser: 'Nunca añadir a una operación perdedora.', no_stop: 'Un stop puesto antes de cada entrada, nunca movido.', risklimit: 'El riesgo de cada operación cabe en mi límite.', oversized: 'Nunca más de {m} contratos.', size_up: 'El mismo tamaño tras ganancias.', against_bias: 'Solo en el sentido de mi sesgo.', setup_not_in_plan: 'Solo los setups de mi plan.', open5: 'Ninguna operación antes de las 9:35.', plan_no_trade: 'Un día previsto sin operar sigue sin operar.', no_plan: 'Mi plan antes de mi primera operación.', rules_no: 'Cada punto de mi checklist antes de entrar.', rules_partial: 'Cada punto de mi checklist antes de entrar.', clean: 'Mismo plan, misma disciplina.' },
       title: 'Tu coach', last: 'Última operación · {t}', thisT: 'Esta operación', fix: 'A mejorar',
       inPlan: 'Dentro de tu plan', stopOk: 'stop respetado', sizeOk: 'tamaño respetado', chkOk: 'checklist cumplida',
       none: 'Nada que corregir en esta operación. Repite exactamente lo mismo.',
@@ -129,6 +176,7 @@
         size_up: ['Tamaño subido a {n} tras {w} ganancias seguidas.', 'Tras ganancias, mantén el mismo tamaño: ahí es donde cuesta el exceso de confianza.'],
         against_bias: ['Contra tu sesgo ({b}).', 'Si el mercado contradice tu sesgo, espera o pasa: nada contra tu plan.'],
         setup_not_in_plan: ['Setup « {s} » fuera de tu plan.', 'Toma solo los setups de tu plan; añade este mañana si lo merece.'],
+        open5: ['Tomada en los 5 primeros minutos de la apertura.', 'Deja pasar la apertura: espera tu setup después de las 9:35.'],
         plan_no_trade: ['Habías previsto no operar.', 'Un día sin operar previsto es también una regla.'],
         no_plan: ['Sin plan para esta sesión.', 'Haz tu plan antes de la próxima operación: 30 segundos.'],
         rules_no: ['Tu checklist no se cumplió.', 'Relee tu checklist antes de cada entrada.'],
@@ -187,6 +235,45 @@
     const n = v.filter((x) => x === 'n').length; return n === 0 ? 'yes' : n * 2 < v.length ? 'partial' : 'no';
   }
 
+  /** the trader's own numbers, from all his real trades (cached): how each situation goes for him */
+  let oCache = { k: '', v: null };
+  const avg = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0);
+  function own() {
+    const k = (S.trades || []).length + '|' + (S.trades || []).reduce((m, t) => (t.updated_at > m ? t.updated_at : m), '');
+    if (oCache.k === k) return oCache.v;
+    const b = { all: [], revenge: [], loss2: [], up: [], open5: [] };
+    [...new Set((S.trades || []).filter((t) => !t.demo).map((t) => t.date))].forEach((d) => {
+      const list = dayTrades(d);
+      list.forEach((t, i) => {
+        const n = net(t), p = list[i - 1], q = list[i - 2]; b.all.push(n);
+        if (p && net(p) < 0) { const a = min(p.exit_time || timeOf(p)), e = min(timeOf(t)); if (a != null && e != null && e >= a && e - a < 10) b.revenge.push(n); }
+        if (p && q && net(p) < 0 && net(q) < 0) b.loss2.push(n);
+        if (p && q && net(p) > 0 && net(q) > 0 && +t.contracts > +p.contracts) b.up.push(n);
+        const e = min(timeOf(t)); if (e != null && e >= 570 && e < 575) b.open5.push(n);
+      });
+    });
+    oCache = { k, v: b }; return b;
+  }
+  const sgn = (c) => (typeof money === 'function' ? money(Math.round(c), { dec: 0 }) : usd(c));
+  /** one sentence with his own number for a situation, only when his sample says it costs him (else '') */
+  function ownLine(kind) {
+    const o = own(), all = o.all;
+    if (kind === 'revenge' || kind === 'size_up' || kind === 'open5') {
+      const s = o[kind === 'size_up' ? 'up' : kind], rest = all.length - s.length;
+      if (s.length < (kind === 'size_up' ? 3 : 5) || !rest) return '';
+      const a = avg(s), others = (all.reduce((x, y) => x + y, 0) - s.reduce((x, y) => x + y, 0)) / rest;
+      if (a >= others) return '';
+      return fill(T.o[kind], { a: sgn(a), n: s.length, b: sgn(others) });
+    }
+    if (kind === 'loss2') {
+      const l2 = o.loss2.filter((x) => x < 0), la = all.filter((x) => x < 0);
+      if (l2.length < 3 || la.length < 5) return '';
+      const a = Math.abs(avg(l2)), b = Math.abs(avg(la)); if (!b || a / b < 1.15) return '';
+      return fill(a / b >= 1.8 ? T.o.loss2d : T.o.loss2m, { a: usd(a), b: usd(b) });
+    }
+    return '';
+  }
+
   /** what the coach says about one trade: { good: [labels], fix: [problem, advice, code, values] | null, all: [codes], ses: session(), n, time } */
   function tradeNote(t) {
     if (!t) return null;
@@ -207,6 +294,7 @@
     if (prev && i >= 2 && net(prev) > 0 && net(list[i - 2]) > 0 && +t.contracts > +prev.contracts) { let w = 0; for (let k = i - 1; k >= 0 && net(list[k]) > 0; k--) w++; add('size_up', { n: t.contracts, w }); }
     if (p.valid && ((p.bias === 'bullish' && t.direction === 'short') || (p.bias === 'bearish' && t.direction === 'long'))) add('against_bias', { b: T.bias[p.bias] });
     if (p.valid && p.setups.length && t.setup && !p.setups.includes(String(t.setup).trim().toLowerCase())) add('setup_not_in_plan', { s: t.setup });
+    { const e = min(timeOf(t)); if (e != null && e >= 570 && e < 575 && ownLine('open5')) add('open5'); }
     if (p.valid && p.bias === 'no_trade') add('plan_no_trade');
     if (!p.valid) add('no_plan');
     const r = rulesOf(t); if (r === 'no') add('rules_no'); else if (r === 'partial') add('rules_partial');
@@ -225,11 +313,11 @@
   function session(day, i, list, p) {
     list = list || dayTrades(day); p = p || planOf(day); if (i == null) i = list.length - 1; if (i < 0) return { t: '', stop: false };
     let after = 0; for (let k = 0; k <= i; k++) after += net(list[k]);
-    const say = (t, stop) => ({ t, stop: !!stop });
+    const say = (t, stop, code) => ({ t, stop: !!stop, code: code || '' });
     if (p.valid && p.maxLoss && after <= -p.maxLoss) return say(fill(T.maxHit, { m: usd(p.maxLoss) }), true);
     if (p.valid && p.maxTrades && i + 1 >= p.maxTrades) return say(fill(T.done, { n: i + 1, m: p.maxTrades }), true);   // done: no « next trade » to pause before
     let losses = 0; for (let k = i; k >= 0 && net(list[k]) < 0; k--) losses++;
-    if (losses >= 2) return say(fill(T.loss2, { n: losses }), true);
+    if (losses >= 2) return say(fill(T.loss2, { n: losses }), true, 'loss2');
     if (p.valid && p.maxLoss) return say(fill(T.left, { m: usd(p.maxLoss + after) }));
     const lim = accountLimit(); if (lim && lim.c + after > 0) return say(fill(T.leftAcc, { m: usd(lim.c + after), a: lim.name }));
     if (p.valid && p.maxTrades) return say(fill(T.count, { n: i + 1, m: p.maxTrades }));
@@ -298,14 +386,79 @@
   // the tone follows the experience given at the start (brief 03): a trader starting out gets the why, and simple goals
   const starting = () => !!(S.me && S.me.experience === 'new');
 
+  /** before a trade, in the two add forms (live): the signal of the moment with his own number, then what is left.
+   *  x: { form: 'manual' | 'shot', account, date, qty, time ('HH:MM', empty = now) } → html ('' when there is nothing to say) */
+  function beforeHtml(x) {
+    if (!x || !(S.accounts || []).some((a) => !a.demo)) return '';
+    const day = x.date || today(), list = dayTrades(day), p = planOf(day);
+    let sum = 0; list.forEach((t) => { sum += net(t); });
+    const nowHm = typeof nowET === 'function' && day === (typeof todayStr === 'function' ? todayStr() : day) ? nowET().slice(11, 16) : '';
+    const at = min(x.time || nowHm), last = list[list.length - 1], qty = +x.qty || 0, maxC = +(S.settings && S.settings.max_contracts) || 0;
+    let sig = '', mine = '', stop = false;
+    let losses = 0; for (let k = list.length - 1; k >= 0 && net(list[k]) < 0; k--) losses++;
+    let wins = 0; for (let k = list.length - 1; k >= 0 && net(list[k]) > 0; k--) wins++;
+    const gap = last && net(last) < 0 && at != null ? at - (min(last.exit_time || timeOf(last)) ?? at + 1) : null;
+    if (p.valid && p.maxLoss && sum <= -p.maxLoss) { sig = fill(T.bMax, { m: usd(p.maxLoss) }); stop = true; }
+    else if (p.valid && p.maxTrades && list.length >= p.maxTrades) { sig = fill(T.bDone, { m: p.maxTrades }); stop = true; }
+    else if (gap != null && gap >= 0 && gap < 10) { sig = fill(T.bWait, { n: gap, r: 10 - gap }); mine = ownLine('revenge'); stop = true; }
+    else if (losses >= 2) { sig = fill(T.bLoss2, { n: losses }); mine = ownLine('loss2'); stop = true; }
+    else if (x.form === 'shot' && maxC && qty > maxC) sig = fill(T.bSize, { n: qty, m: maxC });   // (the manual form says it already)
+    else if (wins >= 2 && last && qty > +last.contracts) { sig = fill(T.bUp, { w: wins, c: last.contracts }); mine = ownLine('size_up'); }
+    else if (at != null && at >= 570 && at < 575) { sig = T.bOpen; mine = ownLine('open5'); }
+    else if (!p.valid) sig = T.bNoPlan;
+    const bud = [];
+    if (p.valid && p.maxLoss && sum > -p.maxLoss) bud.push(fill(T.bLeft, { m: usd(p.maxLoss + sum) }));
+    else if (!p.valid && x.form === 'shot' && typeof riskBudget === 'function') { const r = riskBudget(x.account, day); const a = r && (S.accounts || []).find((y) => y.id === x.account); if (r) bud.push(fill(T.bLeftAcc, { m: usd(r.left), a: (a && a.name) || '' })); }
+    if (p.valid && p.maxTrades && list.length < p.maxTrades) bud.push(fill(T.bCount, { n: list.length + 1, m: p.maxTrades }));
+    if (!sig && !bud.length) return '';
+    const b = bud.join(' · ').replace(/^./, (m) => m.toUpperCase());
+    return `<div class="co-before ${stop ? 'co-stop' : ''}" data-noi18n aria-live="polite"><span class="co-ic">${IC}</span><div><b>${T.title}</b> · <span>${T.bTitle}</span>${sig ? `<p class="co-sig">${esc2(sig)}</p>` : ''}${mine ? `<p class="co-own">${esc2(mine)}</p>` : ''}${b ? `<p class="co-bud">${esc2(b)}</p>` : ''}</div></div>`;
+  }
+
+  /** the accounts at 75 % or more of their daily loss limit or of their drawdown, as their own page shows them (acctState):
+   *  [{ a, kind: 'dll' | 'dd', level: 75 | 100, pct, used, limit, left, fresh (crossed by today's trades) }], the worst first */
+  function limits() {
+    const out = []; if (typeof acctState !== 'function') return out;
+    (S.accounts || []).filter((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && a.rules).forEach((a) => {
+      let st = null; try { st = acctState(a); } catch (e) { return; }
+      if (!st) return;
+      const dll = +a.rules.dll_c || 0, td = +st.today || 0;
+      if (dll > 0 && td < 0) { const used = -td, pct = used / dll; if (pct >= 0.75) out.push({ a, kind: 'dll', level: pct >= 1 ? 100 : 75, pct: Math.round(Math.min(pct, 1) * 100), used, limit: dll, left: Math.max(0, dll - used), fresh: true }); }
+      const dd = +a.rules.dd_c || 0;
+      if (dd > 0 && st.buffer != null) {
+        const left = Math.max(0, st.buffer), pct = st.breached ? 1 : 1 - left / dd, before = 1 - Math.max(0, st.buffer - Math.min(0, td)) / dd;   // before today's losses
+        if (pct >= 0.75) out.push({ a, kind: 'dd', level: pct >= 1 ? 100 : 75, pct: Math.round(Math.min(pct, 1) * 100), used: dd - left, limit: dd, left, fresh: td < 0 && before < (pct >= 1 ? 1 : 0.75) });
+      }
+    });
+    return out.sort((x, y) => y.level - x.level || (x.kind === 'dll' ? -1 : 1));
+  }
+  const limitLine = (x) => fill(T.lim[x.kind + x.level], { a: x.a.name || '', p: x.pct, u: usd(x.used), l: usd(x.limit), r: usd(x.left) });
+  /* the bell, once per account, kind, level and day (the server keeps it once too): only a level crossed by today's trades */
+  const sentKey = (x) => `sw.propAlert.${x.a.id}.${x.kind}.${x.level}.${today()}`;
+  function alertLimits() {
+    if (S.mode !== 'server' || typeof apiJSON !== 'function') return;
+    limits().filter((x) => x.fresh).forEach((x) => {
+      try { if (sessionStorage.getItem(sentKey(x))) return; sessionStorage.setItem(sentKey(x), '1'); } catch (e) { /* private mode: the server dedupes */ }
+      apiJSON('api/notifications/prop-alert', { method: 'POST', body: { account: x.a.id, kind: x.kind, level: x.level, pct: x.pct, used_c: Math.round(x.used), limit_c: Math.round(x.limit), left_c: Math.round(x.left) } })
+        .then(() => { if (window.SweepNotify && SweepNotify.refresh) setTimeout(() => SweepNotify.refresh(), 300); }).catch(() => { /* the coach card says it anyway */ });
+    });
+  }
+  let limKey = '';
+  function watchLimits() {   // after the trades or the accounts change (a save, a sync, the first load)
+    const k = [(S.trades || []).length, (S.trades || []).reduce((m, t) => (t.updated_at > m ? t.updated_at : m), ''), (S.accounts || []).reduce((m, a) => (a.updated_at > m ? a.updated_at : m), ''), today()].join('|');
+    if (k === limKey) return; limKey = k; setTimeout(() => { try { alertLimits(); } catch (e) { /* never blocks */ } }, 800);
+  }
+
   /* ── how it reads ── */
   const IC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>';
   const OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
   function noteHtml(c) {
     const good = c.good.length ? `<p class="co-ok">${OK}<span>${esc2(c.good.join(', ').replace(/^./, (m) => m.toUpperCase()))}.</span></p>` : '';
     const why = c.fix && starting() && T.why[c.fix[2]] ? `<span class="co-why">${esc2(T.why[c.fix[2]])}</span>` : '';
-    const fix = c.fix ? `<p class="co-fix"><b>${T.fix}</b><span>${esc2(c.fix[0])}</span><span class="co-do">${esc2(c.fix[1])}</span>${why}</p>` : `<p class="co-fix co-none"><span>${esc2(T.none)}</span></p>`;
-    return good + fix + (c.ses.t ? `<p class="co-ses ${c.ses.stop ? 'co-stop' : ''}">${esc2(c.ses.t)}</p>` : '');
+    const mine = c.fix && ['revenge', 'size_up', 'open5'].includes(c.fix[2]) ? ownLine(c.fix[2]) : '';
+    const fix = c.fix ? `<p class="co-fix"><b>${T.fix}</b><span>${esc2(c.fix[0])}</span><span class="co-do">${esc2(c.fix[1])}</span>${mine ? `<span class="co-own">${esc2(mine)}</span>` : ''}${why}</p>` : `<p class="co-fix co-none"><span>${esc2(T.none)}</span></p>`;
+    const l2 = c.ses.code === 'loss2' ? ownLine('loss2') : '';
+    return good + fix + (c.ses.t ? `<p class="co-ses ${c.ses.stop ? 'co-stop' : ''}">${esc2(c.ses.t)}</p>` : '') + (l2 ? `<p class="co-own">${esc2(l2)}</p>` : '');
   }
   // Today: a card of its own; the trade's page: a block inside the result card (not a card in a card)
   const card = (sub, body, cls) => `<section class="${cls === 'co-trade' ? '' : 'surface '}co ${cls || ''}" data-noi18n aria-live="polite"><div class="co-h"><span class="co-ic">${IC}</span><b>${T.title}</b>${sub ? `<small>${esc2(sub)}</small>` : ''}</div>${body}</section>`;
@@ -331,8 +484,10 @@
   function paintToday() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
     const host = document.querySelector('#main .nav-dash .d-today'); if (!host) return;
-    let html = todayHtml(); const hb = html && habit(today());
-    if (hb) html = html.replace(/<\/section>$/, `<p class="co-habit">${esc2(hb.text)}</p></section>`);
+    let html = todayHtml(); const hb = html && habit(today()), lim = html ? limits() : [];
+    // (replaced by a function: an amount like « $1,000 » must not read as « $1 », the first group)
+    if (lim.length) html = html.replace(/<\/div>/, (m) => `${m}<p class="co-ses co-stop co-lim">${esc2(limitLine(lim[0]))}</p>`);   // right under the coach's title
+    if (hb) html = html.replace(/<\/section>$/, () => `<p class="co-habit">${esc2(hb.text)}</p></section>`);
     let el = host.querySelector(':scope > .co-today');
     if (!html) { if (el) el.remove(); return; }
     if (el && el._h === html) { const rt = host.querySelector(':scope > .nav-rt'); if (rt && el.previousElementSibling !== rt) rt.after(el); return; }
@@ -396,7 +551,8 @@
         if (fresh && Date.now() - fresh.at < 2500 && typeof msg === 'string') {
           const t = getDoc('trades', fresh.id); fresh = null;
           const c = t && tradeNote(t);
-          const line = c && (c.ses.stop ? c.ses.t : c.fix ? c.fix[0] : c.ses.t);   // stop or pause first, then the one thing to improve
+          const lim = t && limits().find((x) => x.a.id === t.account_id && x.fresh);
+          const line = lim ? limitLine(lim) : c && (c.ses.stop ? c.ses.t : c.fix ? c.fix[0] : c.ses.t);   // an account at its limit, then stop or pause, then the one thing to improve
           if (line) return t0.call(this, msg + ' · ' + line, Object.assign({}, opts, { ms: 5000 }));
         }
       } catch (e) { /* the message stays as it was */ }
@@ -404,9 +560,26 @@
     };
   }
 
-  const paint = () => { try { paintToday(); paintTrade(); paintPlan(); paintReview(); } catch (e) { /* the coach never blocks the app */ } };
+  const paint = () => { try { paintToday(); paintTrade(); paintPlan(); paintReview(); watchLimits(); } catch (e) { /* the coach never blocks the app */ } };
+  // the bell's words for these alerts (one type, four keys: daily limit or drawdown, 75 % or 100 %)
+  const N = {
+    en: { 'prop_dll75.title': 'Daily limit: {pct} % used', 'prop_dll75.body': '{account}: ${used} of ${limit}. Keep your size, or stop here.',
+      'prop_dll100.title': 'Daily limit reached', 'prop_dll100.body': '{account}: ${limit} lost today. Your session is over on this account.',
+      'prop_dd75.title': 'Drawdown: {pct} % used', 'prop_dd75.body': '{account}: ${left} of room left before the limit. Trade smaller until it comes back.',
+      'prop_dd100.title': 'Drawdown limit reached', 'prop_dd100.body': '{account}: the account’s max loss is reached. Check its status with your firm.' },
+    fr: { 'prop_dll75.title': 'Limite du jour : {pct} % utilisés', 'prop_dll75.body': '{account} : {used} $ sur {limit} $. Garde ta taille, ou arrête-toi ici.',
+      'prop_dll100.title': 'Limite du jour atteinte', 'prop_dll100.body': '{account} : {limit} $ perdus aujourd’hui. Ta séance est finie sur ce compte.',
+      'prop_dd75.title': 'Drawdown : {pct} % utilisés', 'prop_dd75.body': '{account} : il reste {left} $ de marge avant la limite. Trade plus petit jusqu’à ce qu’elle remonte.',
+      'prop_dd100.title': 'Limite de drawdown atteinte', 'prop_dd100.body': '{account} : la perte max du compte est atteinte. Vérifie son statut auprès de ta firme.' },
+    es: { 'prop_dll75.title': 'Límite diario: {pct} % usado', 'prop_dll75.body': '{account}: {used} $ de {limit} $. Mantén tu tamaño, o para aquí.',
+      'prop_dll100.title': 'Límite diario alcanzado', 'prop_dll100.body': '{account}: {limit} $ perdidos hoy. Tu sesión terminó en esta cuenta.',
+      'prop_dd75.title': 'Drawdown: {pct} % usado', 'prop_dd75.body': '{account}: quedan {left} $ de margen antes del límite. Opera más pequeño hasta que se recupere.',
+      'prop_dd100.title': 'Límite de drawdown alcanzado', 'prop_dd100.body': '{account}: se alcanzó la pérdida máxima de la cuenta. Verifica su estado con tu firma.' },
+  };
+  const reg = () => { if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings(N); } catch (e) { /* older module */ } return true; } return false; };
+  if (!reg()) setTimeout(reg, 1500);
   const appRender = window.render;
   window.render = function () { const out = appRender.apply(this, arguments); paint(); return out; };
   new window.SweepMO(paint).observe(document.body, { childList: true, subtree: true });
-  window.SweepCoach = { trade: tradeNote, session, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit };
+  window.SweepCoach = { trade: tradeNote, session, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits };
 })();

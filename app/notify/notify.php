@@ -160,7 +160,7 @@ final class Notify
             if (!self::allowed($uid)) return null;
             if (!(self::prefs($uid)[$category] ?? true)) return null;
             if ($dedupe !== null && self::q('SELECT 1 FROM notifications WHERE user_id = ? AND dedupe_key = ?', [$uid, $dedupe])->fetchColumn()) return null;
-            if ($priority === 'normal') {
+            if ($priority === 'normal' && $category !== 'prop_alerts') {   // an account's limit is never dropped by the daily cap (brief 03 step 3)
                 $limit = (int) self::cfg()['daily_limit'];
                 $sent = (int) self::q("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND priority = 'normal' AND created_at > ?", [$uid, time() - 86400])->fetchColumn();
                 if ($limit > 0 && $sent >= $limit) { error_log('[Sweep notify] daily limit reached for ' . $uid . ' (' . $type . ')'); return null; }
@@ -309,6 +309,23 @@ function nt_route(string $route, string $method, string $uid, bool $isAdmin): vo
         $b = body_json(2048);
         if (!Notify::setPref($uid, (string) ($b['category'] ?? ''), !empty($b['enabled']))) json_out(400, ['error' => 'Unknown category.']);
         json_out(200, ['prefs' => Notify::prefs($uid)]);
+    }
+    // brief 03 step 3: an account at 75 % or 100 % of its daily loss limit or of its drawdown, as the app computes it
+    // (acctState, the numbers its accounts show): one alert per account, kind, level and day, the account being the trader's
+    if ($route === 'api/notifications/prop-alert' && $method === 'POST') {
+        $b = body_json(2048);
+        $acc = substr((string) ($b['account'] ?? ''), 0, 120); $kind = (string) ($b['kind'] ?? ''); $level = (int) ($b['level'] ?? 0);
+        if ($acc === '' || !in_array($kind, ['dll', 'dd'], true) || !in_array($level, [75, 100], true)) json_out(400, ['error' => 'Unknown alert.']);
+        $data = q("SELECT data FROM documents WHERE user_id = ? AND collection = 'accounts' AND id = ?", [$uid, $acc])->fetchColumn();
+        if ($data === false) json_out(404, ['error' => 'Unknown account.']);
+        $a = json_decode((string) $data, true) ?: [];
+        $day = (new DateTimeImmutable('now', new DateTimeZone('America/New_York')))->modify('+6 hours')->format('Y-m-d');   // the session day (todayStr)
+        require_once dirname(__DIR__) . '/money/money.php';
+        $p = ['account' => mb_substr((string) ($a['name'] ?? ''), 0, 80), 'pct' => max(0, min(100, (int) ($b['pct'] ?? $level))), 'tone' => 'caution'];
+        foreach (['used', 'limit', 'left'] as $k) foreach (['en' => '', 'fr' => '_fr', 'es' => '_es'] as $l => $sfx) $p[$k . $sfx] = SweepMoneyServer::dollars(max(0, (int) ($b[$k . '_c'] ?? 0)), $l);
+        $id = Notify::send($uid, 'prop_limit', $p, ['dedupe_key' => "prop:$acc:$kind:$level:$day", 'action_url' => '#account/' . rawurlencode($acc),
+            'title_key' => "prop_$kind$level.title", 'body_key' => "prop_$kind$level.body"]);
+        json_out(200, ['ok' => true, 'id' => $id]);
     }
     // Administrator only: send yourself a test, to check the bell, the sheet and the celebration modal.
     if ($route === 'api/notifications/test' && $method === 'POST') {

@@ -33,3 +33,12 @@
 .co-why{margin-top:4px;color:var(--muted);font-size:13px}
 .co-ai{display:flex}
 .co-ai .ai-btn{min-height:40px}
+/* before a trade, in the two add forms: the signal of the moment, his own number, what is left */
+.co-before{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;padding:10px 12px;border-radius:var(--r-tile,14px);background:var(--fill);font-size:13.5px;line-height:1.45}
+.co-before .co-ic{width:24px;height:24px}.co-before .co-ic svg{width:14px;height:14px}
+.co-before b{font-weight:600}.co-before > div > span{color:var(--muted)}
+.co-before p{margin:4px 0 0}
+.co-before.co-stop{background:rgba(var(--neg-rgb),.10);box-shadow:inset 3px 0 0 var(--neg)}
+.co-before .co-sig{font-weight:600;color:var(--text)}
+.co-own{color:var(--muted);font-size:13px}
+.co-bud{color:var(--text2,var(--text))}

@@ -57,6 +57,8 @@ foreach (['wow_journal', 'wow_plans', 'wow_reviews', 'wow_days', 'wow_clean_week
 Notify::register('chart_ready', ['category' => 'product_updates', 'icon' => 'chart']);
 // a firm changed its rules (presets/check.php): what changes for this account, « Apply the new rules » on its page
 Notify::register('rules_changed', ['category' => 'prop_alerts', 'icon' => 'info']);
+// brief 03 step 3: an account at 75 % then 100 % of its daily loss limit or of its drawdown (the keys say which, see nt_route)
+Notify::register('prop_limit', ['category' => 'prop_alerts', 'icon' => 'shield']);
 Notify::register('sync_found', ['category' => 'system', 'icon' => 'info']);   // accounts found by a sync add-on, to link (sync/sync-store.php)
 // the 1st of each month: simulated profit, money really received, expenses, net real money (money/money.php)
 Notify::register('money_month', ['category' => 'product_updates', 'icon' => 'info']);
