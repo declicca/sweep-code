@@ -799,9 +799,24 @@ function syncTrade(e, t, {delay: a = 0} = {}) {
 
 const mergeOn = () => S.settings && S.settings.mergeCopies !== !1 && F.account === "all";
 
+/* a copy group counts once, as its original (the earliest created: copies can have their own size, brief 02 part 4;
+   My money's perfTrades, the coach and the server count it the same way) */
 function mergeCopies(e) {
   if (!mergeOn()) return e;
   const t = [], a = new Map;
+  const one = (n, list) => {
+    const o = {
+      ...n,
+      _copies: list,
+      risk_c: tRisk(n) || null
+    };
+    if (typeof U != "undefined" && U.copyMode === "contract" && (n.contracts || 1) > 1) {
+      const c = n.contracts || 1;
+      o.pnl_c = Math.round((n.pnl_c || 0) / c), o.fees_c = Math.round((n.fees_c || 0) / c), 
+      o.risk_c = o.risk_c != null ? Math.round(o.risk_c / c) : null, o.contracts = 1;
+    }
+    return o;
+  };
   for (const n of e) {
     if (!n.copy_group) {
       t.push(n);
@@ -809,20 +824,15 @@ function mergeCopies(e) {
     }
     const s = a.get(n.copy_group);
     if (!s) {
-      const o = {
-        ...n,
-        _copies: [ n ],
-        risk_c: tRisk(n) || null
-      };
-      if (typeof U != "undefined" && U.copyMode === "contract" && (n.contracts || 1) > 1) {
-        const c = n.contracts || 1;
-        o.pnl_c = Math.round((n.pnl_c || 0) / c), o.fees_c = Math.round((n.fees_c || 0) / c), 
-        o.risk_c = o.risk_c != null ? Math.round(o.risk_c / c) : null, o.contracts = 1;
-      }
+      const o = one(n, [ n ]);
       a.set(n.copy_group, o), t.push(o);
       continue;
     }
     s._copies.push(n);
+    if ((n.created_at || n.id) < (s.created_at || s.id)) {
+      const o = one(n, s._copies);
+      t[t.indexOf(s)] = o, a.set(n.copy_group, o);
+    }
   }
   return t;
 }
@@ -1535,10 +1545,38 @@ const CP = {
   sel: new Set
 };
 
+/* copy trading (brief 02 part 4): the accounts that can take a copy of trade t (active, not paused by the plan, real ones for a
+   real trade), and the reusable groups of accounts traded together (accounts' group_id, named after their firm) */
+const copyUsable = (a, t) => a.status !== "archived" && a.status !== "closed" && (!a.demo || t && t.demo) && !(typeof billFrozen == "function" && billFrozen(a.id));
+
+function copyGroups(t) {
+  const m = new Map;
+  for (const a of S.accounts) a.group_id && copyUsable(a, t) && (m.get(a.group_id) || m.set(a.group_id, []).get(a.group_id)).push(a);
+  for (const [g, l] of m) l.length < 2 && m.delete(g);
+  return m;
+}
+
+function groupName(l) {
+  const f = new Set(l.map(a => (firm(a.firm_id) || {}).name || ""));
+  return f.size === 1 && [ ...f ][0] ? [ ...f ][0] : "";
+}
+
+const CPX = {
+  en: { grp: "{g} group · {n}", grp0: "Group · {n}", save: "Save these {n} accounts as a group", saved: "Group saved", ct: "{n} ct", help: "Same prices and times; each account at its own size (“Size of copies” on its page). Review, checklist and screenshots stay in sync." },
+  fr: { grp: "Groupe {g} · {n}", grp0: "Groupe · {n}", save: "Enregistrer ces {n} comptes comme groupe", saved: "Groupe enregistré", ct: "{n} ct", help: "Mêmes prix et mêmes heures ; chaque compte à sa taille (« Taille des copies » sur sa page). Le bilan, la checklist et les captures restent synchronisés." },
+  es: { grp: "Grupo {g} · {n}", grp0: "Grupo · {n}", save: "Guardar estas {n} cuentas como grupo", saved: "Grupo guardado", ct: "{n} ct", help: "Mismos precios y horas; cada cuenta con su tamaño (« Tamaño de las copias » en su página). El balance, la checklist y las capturas siguen sincronizados." }
+};
+
+const cpx = (k, o) => String((CPX[LANG] || CPX.en)[k]).replace(/\{(\w+)\}/g, (x, y) => o && o[y] != null ? o[y] : x);
+
 function copyPanel(e, t) {
   if (CP.id !== e.id) return "";
-  const a = new Set(t.map(s => s.account_id)), n = S.accounts.filter(s => s.status !== "archived" && !a.has(s.id));
-  return `<div class="surface pad" style="margin-bottom:14px;border-color:var(--disc)"><h3 style="margin-bottom:8px">Copy this trade to other accounts</h3>\n   ${n.length ? `<div class="chips">${n.map(s => `<button type="button" class="chip ${CP.sel.has(s.id) ? "on" : ""}" data-act="copy-pick" data-v="${s.id}">${esc(acctLabel(s.id))}</button>`).join("")}</div>\n   <p class="help" style="margin:8px 0 0">Same prices, times and ${e.contracts} contract${e.contracts > 1 ? "s" : ""} on each account; adjust a copy afterwards if its size differed. Review, checklist and screenshots stay in sync.</p>\n   <div class="row" style="margin-top:12px"><button class="btn primary sm" data-act="copy-do" data-id="${e.id}" ${CP.sel.size ? "" : "disabled"}>Copy to ${CP.sel.size || ""} account${CP.sel.size === 1 ? "" : "s"}</button><button class="link" data-act="copy-close">Cancel</button></div>` : '<p class="muted" style="margin:0">This trade is already on every active account. <button class="link" data-act="copy-close">Close</button></p>'}</div>`;
+  const a = new Set(t.map(s => s.account_id)), n = S.accounts.filter(s => copyUsable(s, e) && !a.has(s.id));
+  // the groups that still have accounts without this trade: one tap selects them all; each copy shows its size when it differs
+  const G = [ ...copyGroups(e) ].map(([g, l]) => [ g, l, l.filter(s => !a.has(s.id)) ]).filter(([, , f]) => f.length);
+  const sz = s => window.SweepCopy ? SweepCopy.sizeFor(s.id, e.contracts) : e.contracts, mine = new Set([ e.account_id, ...CP.sel ]);
+  const same = [ ...copyGroups(e).values() ].some(l => l.length === mine.size && l.every(s => mine.has(s.id)));
+  return `<div class="surface pad" style="margin-bottom:14px;border-color:var(--disc)"><h3 style="margin-bottom:8px">Copy this trade to other accounts</h3>\n   ${n.length ? `${G.length ? `<div class="chips cp-grps" data-noi18n>${G.map(([g, l, f]) => `<button type="button" class="chip ${f.every(s => CP.sel.has(s.id)) ? "on" : ""}" data-act="copy-grp" data-v="${esc(g)}">${esc(groupName(l) ? cpx("grp", { g: groupName(l), n: f.length }) : cpx("grp0", { n: f.length }))}</button>`).join("")}</div>` : ""}<div class="chips">${n.map(s => `<button type="button" class="chip ${CP.sel.has(s.id) ? "on" : ""}" data-act="copy-pick" data-v="${s.id}">${esc(acctLabel(s.id))}${sz(s) !== e.contracts ? `<small class="cp-ct" data-noi18n> · ${cpx("ct", { n: sz(s) })}</small>` : ""}</button>`).join("")}</div>\n   ${CP.sel.size && !same ? `<p style="margin:8px 0 0" data-noi18n><button type="button" class="link" data-act="copy-save-grp" data-id="${e.id}">${esc(cpx("save", { n: CP.sel.size + 1 }))}</button></p>` : ""}<p class="help" style="margin:8px 0 0" data-noi18n>${esc(cpx("help"))}</p>\n   <div class="row" style="margin-top:12px"><button class="btn primary sm" data-act="copy-do" data-id="${e.id}" ${CP.sel.size ? "" : "disabled"}>Copy to ${CP.sel.size || ""} account${CP.sel.size === 1 ? "" : "s"}</button><button class="link" data-act="copy-close">Cancel</button></div>` : '<p class="muted" style="margin:0">This trade is already on every active account. <button class="link" data-act="copy-close">Close</button></p>'}</div>`;
 }
 
 function vJournal(e) {
@@ -1892,7 +1930,11 @@ function vSettings() {
   })}</label>\n    <label class="f"><span>Maximum risk per trade</span>${bindIn("settings", "settings", "max_trade_risk_c", e.max_trade_risk_c != null ? (e.max_trade_risk_c / 100).toFixed(0) : "", {
     kind: "money",
     ph: "$"
-  })}</label>\n    <div class="f"><span>&nbsp;</span><span class="help">The daily limit comes from each account's firm rules.</span></div></div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Appearance</h2></div><div class="surface pad row"><span class="muted">Theme</span><div class="seg">${[ [ "auto", "Match my device" ], [ "light", "Light" ], [ "dark", "Dark" ] ].map(([a, n]) => `<button data-act="theme" data-v="${a}" class="${lsGet("tj.theme", "auto") === a ? "on" : ""}">${n}</button>`).join("")}</div>\n    <span class="muted" style="margin-left:18px">Language</span><div class="seg" data-noi18n>${[ [ "auto", LANG === "fr" ? "Automatique" : LANG === "es" ? "Automático" : "Automatic" ], [ "en", "English" ], [ "fr", "Français" ], [ "es", "Español" ] ].map(([a, n]) => `<button data-act="lang" data-v="${a}" class="${langPref() === a ? "on" : ""}">${n}</button>`).join("")}</div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Copied trades</h2></div><div class="surface pad">\n    <label class="row" style="cursor:pointer"><input type="checkbox" data-act-change="merge-copies" ${e.mergeCopies !== !1 ? "checked" : ""}> Count a trade copied on several accounts as one trade when all accounts are shown</label>\n    <p class="help" style="margin:6px 0 0;max-width:75ch">Its P&amp;L is added up across accounts, so win rate, discipline and behavior statistics reflect your decisions rather than how many accounts you copy to. Per-account views always show each copy.</p></div></section>\n  <section class="sec"><div class="sec-h"><h2>Data</h2></div><div class="surface pad">\n    <p class="muted" style="margin:0 0 10px">${S.mode === "server" ? "Your journal is stored on the server and is private to your account: other traders cannot see it." : S.mode === "cloud" ? "Your journal is stored privately in this artifact — only you can read it, even if you share the page." : "Browser-only mode: data is stored in this browser. Run the included server to keep it in a database and sync across devices."} Times are entered in New York time; sessions are suggested from the entry time.</p>\n    <div class="row"><button class="btn" data-act="export">Export all data (JSON)</button><label class="btn">Import data (JSON)<input type="file" accept="application/json,.json" data-import hidden></label>\n    ${t ? '<button class="btn danger" data-act="demo-del">Remove sample data</button>' : '<button class="btn" data-act="demo">Load sample data</button>'}<span class="help">Sample data is tagged and can be removed in one click without touching your own records.</span></div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Keyboard shortcuts</h2></div><div class="surface pad muted">N — add trade · 1–7 — switch section · / — search trades · J / K — next / previous trade · Esc — close panel · ⌘/Ctrl + Enter — save trade</div></section>\n  ${planSettings()}${aiSettings()}${aboutSweep()}`;
+  })}</label>\n    <div class="f"><span>&nbsp;</span><span class="help">The daily limit comes from each account's firm rules.</span></div></div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Appearance</h2></div><div class="surface pad row"><span class="muted">Theme</span><div class="seg">${[ [ "auto", "Match my device" ], [ "light", "Light" ], [ "dark", "Dark" ] ].map(([a, n]) => `<button data-act="theme" data-v="${a}" class="${lsGet("tj.theme", "auto") === a ? "on" : ""}">${n}</button>`).join("")}</div>\n    <span class="muted" style="margin-left:18px">Language</span><div class="seg" data-noi18n>${[ [ "auto", LANG === "fr" ? "Automatique" : LANG === "es" ? "Automático" : "Automatic" ], [ "en", "English" ], [ "fr", "Français" ], [ "es", "Español" ] ].map(([a, n]) => `<button data-act="lang" data-v="${a}" class="${langPref() === a ? "on" : ""}">${n}</button>`).join("")}</div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Copied trades</h2></div><div class="surface pad">\n    <label class="row" style="cursor:pointer"><input type="checkbox" data-act-change="merge-copies" ${e.mergeCopies !== !1 ? "checked" : ""}> Count a trade copied on several accounts as one trade when all accounts are shown</label>\n    <p class="help" style="margin:6px 0 0;max-width:75ch" data-noi18n>${{
+    en: "It counts as its original (the account you logged it on first), so win rate, discipline and behavior statistics reflect your decisions rather than how many accounts you copy to. Per-account views always show each copy.",
+    fr: "Il compte comme son original (le compte où tu l’as noté en premier) : le taux de réussite, la discipline et les statistiques de comportement reflètent tes décisions, pas le nombre de comptes où tu copies. Les vues par compte montrent toujours chaque copie.",
+    es: "Cuenta como su original (la cuenta donde la registraste primero): la tasa de acierto, la disciplina y las estadísticas de comportamiento reflejan tus decisiones, no cuántas cuentas copias. Las vistas por cuenta siempre muestran cada copia."
+  }[LANG] || "It counts as its original (the account you logged it on first), so win rate, discipline and behavior statistics reflect your decisions rather than how many accounts you copy to. Per-account views always show each copy."}</p></div></section>\n  <section class="sec"><div class="sec-h"><h2>Data</h2></div><div class="surface pad">\n    <p class="muted" style="margin:0 0 10px">${S.mode === "server" ? "Your journal is stored on the server and is private to your account: other traders cannot see it." : S.mode === "cloud" ? "Your journal is stored privately in this artifact — only you can read it, even if you share the page." : "Browser-only mode: data is stored in this browser. Run the included server to keep it in a database and sync across devices."} Times are entered in New York time; sessions are suggested from the entry time.</p>\n    <div class="row"><button class="btn" data-act="export">Export all data (JSON)</button><label class="btn">Import data (JSON)<input type="file" accept="application/json,.json" data-import hidden></label>\n    ${t ? '<button class="btn danger" data-act="demo-del">Remove sample data</button>' : '<button class="btn" data-act="demo">Load sample data</button>'}<span class="help">Sample data is tagged and can be removed in one click without touching your own records.</span></div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Keyboard shortcuts</h2></div><div class="surface pad muted">N — add trade · 1–7 — switch section · / — search trades · J / K — next / previous trade · Esc — close panel · ⌘/Ctrl + Enter — save trade</div></section>\n  ${planSettings()}${aiSettings()}${aboutSweep()}`;
 }
 
 const REC = {
@@ -4079,21 +4121,25 @@ async function tkSave() {
     contracts: a.firstQty || a.maxQty,
     copyTo: [ ...TK.copyTo ]
   });
-  for (const v of u) put("trades", {
+  u.forEach((v, k) => put("trades", window.SweepCopy ? SweepCopy.make(c, v, c.copy_group, k) : {
     ...structuredClone(c),
     id: uid(),
     account_id: v,
     created_at: void 0
-  });
+  }));
+  // its copies follow an edit: same prices and times, each at its own size (the P&L for that size and instrument, its fees)
   if (r && r.copy_group) for (const v of siblings(c.id)) editDoc("trades", v.id, b => {
-    [ ...SHARED_FIELDS, "executions", "duration_s", "news", "news_min", "news_near", "auto_flags", "exit_time", "entry_time" ].forEach(R => {
+    [ ...SHARED_FIELDS, "duration_s", "news", "news_min", "news_near", "auto_flags", "exit_time", "entry_time" ].forEach(R => {
       b[R] = JSON.parse(JSON.stringify(c[R] ?? null));
     });
-    const E = positionOf((b.executions || []).map(R => ({
-      ...R,
-      qty: R.qty * (b.contracts / (c.contracts || 1))
-    })));
-    E.closed && (b.pnl_c = E.realized_c);
+    if (window.SweepCopy) SweepCopy.follow(b, c); else {
+      b.executions = JSON.parse(JSON.stringify(c.executions ?? null));
+      const E = positionOf((b.executions || []).map(R => ({
+        ...R,
+        qty: R.qty * (b.contracts / (c.contracts || 1))
+      })), c.instrument || "NQ");
+      E.closed && (b.pnl_c = E.realized_c);
+    }
   });
   toast(TK.id ? "Trade updated" : u.length ? `Trade saved on ${u.length + 1} accounts` : "Trade saved");
   const h = c.id, m = !TK.id;
@@ -9489,6 +9535,25 @@ document.addEventListener("click", e => {
     CP.sel.has(s.v) ? CP.sel.delete(s.v) : CP.sel.add(s.v), render();
     break;
 
+   case "copy-grp":
+    {   // a whole group in one tap (the accounts of the group that do not have this trade yet)
+      const i = getDoc("trades", CP.id), l = (copyGroups(i).get(s.v) || []).filter(c => !copiesOf(i).some(o => o.account_id === c.id));
+      l.every(c => CP.sel.has(c.id)) ? l.forEach(c => CP.sel.delete(c.id)) : l.forEach(c => CP.sel.add(c.id)), render();
+      break;
+    }
+
+   case "copy-save-grp":
+    {   // this trade's account and the chosen ones become one group, reused next time (« Copy to my group »)
+      const i = getDoc("trades", s.id);
+      if (!i || !CP.sel.size) break;
+      const g = "grp-" + uid();
+      for (const c of [ i.account_id, ...CP.sel ]) editDoc("accounts", c, o => {
+        o.group_id = g;
+      });
+      toast(cpx("saved")), render();
+      break;
+    }
+
    case "copy-do":
     {
       const i = getDoc("trades", s.id);
@@ -9498,7 +9563,8 @@ document.addEventListener("click", e => {
         c.copy_group = o;
       });
       const r = structuredClone(getDoc("trades", i.id));
-      for (const c of CP.sel) put("trades", {
+      let k = 0;   // each copy at its account's size (window.SweepCopy, nav.js: brief 02 part 4)
+      for (const c of CP.sel) put("trades", window.SweepCopy ? SweepCopy.make(r, c, o, k++) : {
         ...r,
         id: uid(),
         account_id: c,

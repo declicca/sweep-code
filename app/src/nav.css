@@ -1350,6 +1350,7 @@ html body a,html body button{-webkit-tap-highlight-color:transparent}
 .nav-acst-run .f{display:flex;flex-direction:column;gap:5px}.nav-acst-run .f > span{font-size:12.5px;color:var(--muted)}.nav-acst-run small{font-size:11.5px}
 /* manual form: the essentials first */
 #tkSlide.nav-tk-min .nav-more-x{display:none!important}
+#tkSlide.nav-tk-min .tk-copies.nav-more-x:has(.chip.on){display:flex!important}   /* copies already chosen (its group, the last trade's choice) stay in sight: never a copy made without seeing it (brief 02 part 4) */
 .nav-more-b{align-self:flex-start;margin:4px 0;padding:6px 0;font-size:14px;font-weight:500;color:var(--pos);background:none;border:0;cursor:pointer}
 .nav-netH{font-style:normal;color:var(--muted);font-size:12px}
 /* the first ring */

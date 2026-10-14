@@ -160,28 +160,29 @@ final class GameEngine
     }
     public static function forget(string $uid): void { foreach (array_keys(self::$docCache) as $k) if (str_starts_with($k, $uid . '|')) unset(self::$docCache[$k]); }
 
+    /** a copy group counted once, as its original: the earliest created (copies can have their own size; same rule as the app) */
+    private static function onePerCopyGroup(array $trades): array
+    {
+        $out = []; $at = [];
+        foreach ($trades as $t) {
+            $g = (string) ($t['copy_group'] ?? '');
+            if ($g === '') { $out[] = $t; continue; }
+            $k = (string) (($t['created_at'] ?? '') ?: ($t['id'] ?? ''));
+            if (!isset($at[$g])) { $at[$g] = [count($out), $k]; $out[] = $t; }
+            elseif (strcmp($k, $at[$g][1]) < 0) { $out[$at[$g][0]] = $t; $at[$g][1] = $k; }
+        }
+        return $out;
+    }
     /** trades of a trading day, copies counted once, in entry order */
     private static function dayTrades(string $uid, string $day): array
     {
-        $seen = []; $out = [];
-        foreach (self::docs($uid, 'trades') as $t) {
-            if (self::tradeDay($t) !== $day) continue;
-            $g = (string) ($t['copy_group'] ?? '');
-            if ($g !== '') { if (isset($seen[$g])) continue; $seen[$g] = true; }
-            $out[] = $t;
-        }
+        $out = self::onePerCopyGroup(array_values(array_filter(self::docs($uid, 'trades'), fn($t) => self::tradeDay($t) === $day)));
         usort($out, fn($a, $b) => (self::tradeEpoch($a) ?? 0) <=> (self::tradeEpoch($b) ?? 0) ?: strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? '')));
         return $out;
     }
     private static function allTradesChrono(string $uid): array
     {
-        $seen = []; $out = [];
-        foreach (self::docs($uid, 'trades') as $t) {
-            $g = (string) ($t['copy_group'] ?? '');
-            if ($g !== '') { if (isset($seen[$g])) continue; $seen[$g] = true; }
-            if (self::tradeDay($t) === null) continue;
-            $out[] = $t;
-        }
+        $out = array_values(array_filter(self::onePerCopyGroup(self::docs($uid, 'trades')), fn($t) => self::tradeDay($t) !== null));
         usort($out, fn($a, $b) => (self::tradeEpoch($a) ?? 0) <=> (self::tradeEpoch($b) ?? 0));
         return $out;
     }

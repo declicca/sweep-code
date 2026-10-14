@@ -1266,9 +1266,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const TXT = {
-    en: { real: 'Real P&L (platform)', realPh: 'As shown by your platform', calc: 'From your prices', gap: 'Slippage', fees: 'Fees', feeAcc: 'Commission per contract (round trip)', feeHelp: 'Deducted from every new trade on this account.', st: 'Slippage and fees', stSub: 'On {n} trade{s} with the real P&L entered', tot: 'Slippage', avg: 'Average per trade', avgR: 'Average in R', worst: 'Worst', feesT: 'Fees (all trades)', none: 'Enter the platform\'s P&L on a trade (form or trade review) to measure your slippage.', hint: 'Fees included, as in your account.' },
-    fr: { real: 'P&L réel (plateforme)', realPh: 'Comme affiché par ta plateforme', calc: 'Selon tes prix', gap: 'Glissement', fees: 'Frais', feeAcc: 'Commission par contrat (aller-retour)', feeHelp: 'Déduite de chaque nouveau trade sur ce compte.', st: 'Glissement et frais', stSub: 'Sur {n} trade{s} avec le P&L réel entré', tot: 'Glissement', avg: 'Moyenne par trade', avgR: 'Moyenne en R', worst: 'Pire', feesT: 'Frais (tous les trades)', none: 'Entre le P&L de ta plateforme sur un trade (formulaire ou bilan) pour mesurer ton glissement.', hint: 'Frais inclus, comme dans ton compte.' },
-    es: { real: 'P&L real (plataforma)', realPh: 'Como lo muestra tu plataforma', calc: 'Según tus precios', gap: 'Deslizamiento', fees: 'Comisiones', feeAcc: 'Comisión por contrato (ida y vuelta)', feeHelp: 'Se descuenta de cada nueva operación en esta cuenta.', st: 'Deslizamiento y comisiones', stSub: 'En {n} operaci{s} con el P&L real', tot: 'Deslizamiento', avg: 'Promedio por operación', avgR: 'Promedio en R', worst: 'Peor', feesT: 'Comisiones (todas)', none: 'Introduce el P&L de tu plataforma en una operación (formulario o revisión) para medir tu deslizamiento.', hint: 'Comisiones incluidas, como en tu cuenta.' } };
+    en: { real: 'Real P&L (platform)', realPh: 'As shown by your platform', calc: 'From your prices', gap: 'Slippage', fees: 'Fees', feeAcc: 'Commission per contract (round trip)', feeHelp: 'Deducted from every new trade on this account.', cpct: 'Size of copies on this account (%)', cpctHelp: '50%: 1 contract here for 2 on the original account. 100% by default.', grpLine: 'Copy group: {x}', grpLeave: 'Leave the group', acc1: '1 account', accN: '{k} accounts', st: 'Slippage and fees', stSub: 'On {n} trade{s} with the real P&L entered', tot: 'Slippage', avg: 'Average per trade', avgR: 'Average in R', worst: 'Worst', feesT: 'Fees (all trades)', none: 'Enter the platform\'s P&L on a trade (form or trade review) to measure your slippage.', hint: 'Fees included, as in your account.' },
+    fr: { real: 'P&L réel (plateforme)', realPh: 'Comme affiché par ta plateforme', calc: 'Selon tes prix', gap: 'Glissement', fees: 'Frais', feeAcc: 'Commission par contrat (aller-retour)', feeHelp: 'Déduite de chaque nouveau trade sur ce compte.', cpct: 'Taille des copies sur ce compte (%)', cpctHelp: '50 % : 1 contrat ici pour 2 sur le compte d’origine. 100 % par défaut.', grpLine: 'Groupe de copie : {x}', grpLeave: 'Retirer du groupe', acc1: '1 compte', accN: '{k} comptes', st: 'Glissement et frais', stSub: 'Sur {n} trade{s} avec le P&L réel entré', tot: 'Glissement', avg: 'Moyenne par trade', avgR: 'Moyenne en R', worst: 'Pire', feesT: 'Frais (tous les trades)', none: 'Entre le P&L de ta plateforme sur un trade (formulaire ou bilan) pour mesurer ton glissement.', hint: 'Frais inclus, comme dans ton compte.' },
+    es: { real: 'P&L real (plataforma)', realPh: 'Como lo muestra tu plataforma', calc: 'Según tus precios', gap: 'Deslizamiento', fees: 'Comisiones', feeAcc: 'Comisión por contrato (ida y vuelta)', feeHelp: 'Se descuenta de cada nueva operación en esta cuenta.', cpct: 'Tamaño de las copias en esta cuenta (%)', cpctHelp: '50 %: 1 contrato aquí por 2 en la cuenta de origen. 100 % por defecto.', grpLine: 'Grupo de copia: {x}', grpLeave: 'Quitar del grupo', acc1: '1 cuenta', accN: '{k} cuentas', st: 'Deslizamiento y comisiones', stSub: 'En {n} operaci{s} con el P&L real', tot: 'Deslizamiento', avg: 'Promedio por operación', avgR: 'Promedio en R', worst: 'Peor', feesT: 'Comisiones (todas)', none: 'Introduce el P&L de tu plataforma en una operación (formulario o revisión) para medir tu deslizamiento.', hint: 'Comisiones incluidas, como en tu cuenta.' } };
   const tx = (k) => (TXT[L] || TXT.en)[k];
   const $m = (c) => (typeof money === 'function' ? money(c) : (c / 100).toFixed(2));
   const toC = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); if (s === '' || s === '-' || !isFinite(+s)) return null; return Math.round(+s * 100); };
@@ -1288,6 +1288,56 @@ window.SweepMO = window.SweepMO || class {
     else if (d.pnl_real) { delete d.pnl_real; d.pnl_manual = false; if (c != null) d.pnl_c = c; }
     return d;
   }
+  /* copy trading (brief 02 part 4): a copy on another account takes that account's size (copy_pct, % of the original's
+     contracts, 100 by default, at least 1 contract), its P&L for that size and that account's commission; the source's
+     platform numbers (real P&L, import key, synced source) never travel with it. Every way of copying goes through here:
+     the trade page's « Copy to accounts », the add form, the screenshot forms. */
+  const sizeFor = (accId, n0) => { const a = acctOf(accId), p = a && +a.copy_pct > 0 ? +a.copy_pct : 100; return Math.max(1, Math.round((+n0 || 1) * p / 100)); };
+  function scaleExecs(ex, f, n) {
+    if (!Array.isArray(ex) || !ex.length || f === 1) return ex;
+    const s = ex.map((x) => Object.assign({}, x, { qty: (+x.qty || 0) * f }));
+    if (s.every((x) => Math.abs(x.qty - Math.round(x.qty)) < 1e-9)) return s.map((x) => Object.assign(x, { qty: Math.round(x.qty) }));
+    // a size that does not divide the fills: one entry and one exit at their average prices (same P&L, whole contracts)
+    const side = ex[0].side, ins = ex.filter((x) => x.side === side), outs = ex.filter((x) => x.side !== side), q = (l) => l.reduce((a, x) => a + (+x.qty || 0), 0);
+    if (!ins.length || !outs.length || Math.abs(q(ins) - q(outs)) > 1e-9) return s.map((x) => Object.assign(x, { qty: Math.max(1, Math.round(x.qty)) }));
+    const avg = (l) => l.reduce((a, x) => a + (+x.price) * (+x.qty || 0), 0) / q(l);
+    return [Object.assign({}, ins[0], { qty: n, price: avg(ins) }), Object.assign({}, outs[outs.length - 1], { qty: n, price: avg(outs) })];
+  }
+  const known = (d) => !d.pnl_manual && typeof instOf === 'function' && !instOf(d.instrument || 'NQ').unknown;
+  function feesFor(d, n, srcFees, f) {
+    const a = acctOf(d.account_id);
+    if (a && a.fee_rt_c > 0) { d.fees_c = Math.round(a.fee_rt_c * turnsOf(d.executions, n)); d.fees_auto = true; }
+    else if (srcFees != null) { d.fees_c = Math.round(srcFees * f); }
+  }
+  function makeCopy(src, accId, group, k) {
+    const d = JSON.parse(JSON.stringify(src));
+    ['real_pnl_c', 'pnl_real', 'import_key'].forEach((x) => delete d[x]);
+    if (d.source && d.source !== 'screenshot') delete d.source;   // a copy made in Sweep is not the platform's trade
+    d.id = typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2); d.account_id = accId; d.copy_group = group;
+    // the original stays the earliest created: a group is counted as its original (Stats, Journal, My money, the coach, the server)
+    d.created_at = new Date(Math.max(Date.now(), Date.parse(src.created_at || '') || 0) + 1 + (k || 0)).toISOString();
+    const n0 = +src.contracts || 1, n = sizeFor(accId, n0), f = n / n0;
+    d.contracts = n;
+    if (f !== 1) {
+      d.executions = scaleExecs(src.executions, f, n);
+      d.pnl_c = Math.round((+src.pnl_c || 0) * f);
+      if (src.risk_c != null) d.risk_c = Math.round(src.risk_c * f);
+    }
+    feesFor(d, n, src.fees_c, f);
+    return d;
+  }
+  /** a copy after its original was edited in the add form: same prices and times, its own size, its P&L for that size */
+  function follow(b, c) {
+    const n = +b.contracts || 1, f = n / (+c.contracts || 1);
+    b.instrument = c.instrument;
+    b.executions = scaleExecs(JSON.parse(JSON.stringify(c.executions || [])), f, n);
+    const pos = known(c) && Array.isArray(b.executions) && b.executions.length && typeof positionOf === 'function' ? positionOf(b.executions, c.instrument || 'NQ') : null;
+    if (pos && pos.closed) b.pnl_c = pos.realized_c; else if (c.pnl_c != null) b.pnl_c = Math.round(c.pnl_c * f);
+    if (b.fees_auto) feesFor(b, n, null, 1);
+    return b;
+  }
+  window.SweepCopy = { make: makeCopy, follow, sizeFor };
+
   (function wrapPut(n) {
     if (typeof window.put !== 'function') { if (n < 60) setTimeout(() => wrapPut(n + 1), 100); return; }
     if (window.put.__real) return;
@@ -1371,7 +1421,27 @@ window.SweepMO = window.SweepMO || class {
     box.innerHTML = `<span>${tx('feeAcc')}</span><input inputmode="decimal" placeholder="$" value="${a.fee_rt_c > 0 ? (a.fee_rt_c / 100).toFixed(2) : ''}"><small class="help">${tx('feeHelp')}</small>`;
     grid.append(box);
     box.querySelector('input').addEventListener('change', (e) => { const v = toC(e.target.value); editDoc('accounts', id, (d) => { if (v == null || v <= 0) delete d.fee_rt_c; else d.fee_rt_c = Math.abs(v); }); });
+    // copy trading (brief 02 part 4): the size a copy of a trade takes on this account
+    const cp = document.createElement('label'); cp.className = 'f nav-cpct'; cp.setAttribute('data-noi18n', '');
+    cp.innerHTML = `<span>${tx('cpct')}</span><input inputmode="numeric" placeholder="100" value="${a.copy_pct > 0 && a.copy_pct !== 100 ? a.copy_pct : ''}"><small class="help">${tx('cpctHelp')}</small>`;
+    grid.append(cp);
+    cp.querySelector('input').addEventListener('change', (e) => { const v = Math.round(parseFloat(String(e.target.value).replace(',', '.').replace('%', ''))); editDoc('accounts', id, (d) => { if (!(v > 0) || v === 100) delete d.copy_pct; else d.copy_pct = Math.min(1000, v); }); });
+    const all = a.group_id && typeof copyGroups === 'function' ? copyGroups().get(a.group_id) : null;
+    if (all) {   // the accounts it is traded with (« Copy to my group » on a trade's page)
+      const gb = document.createElement('div'); gb.className = 'f full nav-grp'; gb.setAttribute('data-noi18n', '');
+      const nm = typeof groupName === 'function' ? groupName(all) : '', n = all.length === 1 ? tx('acc1') : tx('accN').replace('{k}', all.length);
+      gb.innerHTML = `<span>${esc(tx('grpLine').replace('{x}', nm ? `${nm} (${n})` : n))}</span><small class="help">${all.map((x) => esc(typeof acctLabel === 'function' ? acctLabel(x.id) : x.name)).join(' · ')}</small><button type="button" class="link" data-grp-leave="${esc(id)}">${tx('grpLeave')}</button>`;
+      grid.append(gb);
+    }
   }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-grp-leave]'); if (!b) return;
+    const a = acctOf(b.dataset.grpLeave), g = a && a.group_id; if (!g) return;
+    editDoc('accounts', a.id, (d) => { delete d.group_id; });
+    const rest = (S.accounts || []).filter((x) => x.group_id === g);
+    if (rest.length === 1) editDoc('accounts', rest[0].id, (d) => { delete d.group_id; });   // a group of one is no group
+    if (typeof render === 'function') render();
+  });
 
   /* Stats: slippage and fees */
   function statsCard() {
@@ -2284,7 +2354,7 @@ window.SweepMO = window.SweepMO || class {
       if (x.check) d.pnl_check = true;
       if (x.fees_auto) d.fees_auto = true;
       docs.push(d);
-      if (SHM.copy.size) { d.copy_group = 'g' + d.id; SHM.copy.forEach((aid) => docs.push(Object.assign(JSON.parse(JSON.stringify(d)), { id: (typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2)), account_id: aid }))); }
+      if (SHM.copy.size) { d.copy_group = 'g' + d.id; let k = 0; SHM.copy.forEach((aid) => docs.push(window.SweepCopy ? SweepCopy.make(d, aid, d.copy_group, k++) : Object.assign(JSON.parse(JSON.stringify(d)), { id: (typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2)), account_id: aid }))); }
     });
     const btn = document.querySelector('[data-shm-save]'); if (btn) btn.disabled = true;
     try {
@@ -2440,7 +2510,7 @@ window.SweepMO = window.SweepMO || class {
     if (copies.length) doc.copy_group = typeof uid === 'function' ? uid() : 'g' + Date.now();
     if (typeof put === 'function') {
       put('trades', doc);
-      copies.forEach((id) => put('trades', Object.assign(JSON.parse(JSON.stringify(doc)), { id: typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2), account_id: id })));
+      copies.forEach((id, k) => put('trades', window.SweepCopy ? SweepCopy.make(doc, id, doc.copy_group, k) : Object.assign(JSON.parse(JSON.stringify(doc)), { id: typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2), account_id: id })));
     }
     if (quiet) return;
     close();
@@ -2562,28 +2632,52 @@ window.SweepMO = window.SweepMO || class {
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const T = { en: { only: 'Only on {a}.', also: 'Also on {l}.', ask: 'Did you take it on other accounts too?', btn: 'Copy to other accounts' },
-    fr: { only: 'Seulement sur {a}.', also: 'Aussi sur {l}.', ask: 'Tu l’as pris sur d’autres comptes aussi ?', btn: 'Copier sur d’autres comptes' },
-    es: { only: 'Solo en {a}.', also: 'También en {l}.', ask: '¿La tomaste también en otras cuentas?', btn: 'Copiar a otras cuentas' } }[L] || null;
-  const tx = T || { only: 'Only on {a}.', also: 'Also on {l}.', ask: 'Did you take it on other accounts too?', btn: 'Copy to other accounts' };
+  const T = { en: { only: 'Only on {a}.', also: 'Also on {l}.', ask: 'Did you take it on other accounts too?', btn: 'Copy to other accounts', grp: 'Copy to my {g} group ({n})', grp0: 'Copy to my group ({n})', done: 'Copied to {n}', acc: ['1 account', '{k} accounts'] },
+    fr: { only: 'Seulement sur {a}.', also: 'Aussi sur {l}.', ask: 'Tu l’as pris sur d’autres comptes aussi ?', btn: 'Copier sur d’autres comptes', grp: 'Copier sur mon groupe {g} ({n})', grp0: 'Copier sur mon groupe ({n})', done: 'Copié sur {n}', acc: ['1 compte', '{k} comptes'] },
+    es: { only: 'Solo en {a}.', also: 'También en {l}.', ask: '¿La tomaste también en otras cuentas?', btn: 'Copiar a otras cuentas', grp: 'Copiar a mi grupo {g} ({n})', grp0: 'Copiar a mi grupo ({n})', done: 'Copiado en {n}', acc: ['1 cuenta', '{k} cuentas'] } }[L] || null;
+  const tx = T || { only: 'Only on {a}.', also: 'Also on {l}.', ask: 'Did you take it on other accounts too?', btn: 'Copy to other accounts', grp: 'Copy to my {g} group ({n})', grp0: 'Copy to my group ({n})', done: 'Copied to {n}', acc: ['1 account', '{k} accounts'] };
+  const accN = (k) => tx.acc[k === 1 ? 0 : 1].replace('{k}', k);
+  /** the trader's group of this trade's account: the accounts that do not have this trade yet */
+  function groupOf(t, on) {
+    const a = typeof getDoc === 'function' && getDoc('accounts', t.account_id), all = a && a.group_id && typeof copyGroups === 'function' ? copyGroups(t).get(a.group_id) : null;
+    return all ? { g: a.group_id, name: typeof groupName === 'function' ? groupName(all) : '', left: all.filter((x) => x.id !== t.account_id && !on.has(x.id)) } : null;
+  }
+  /* « Copy to my Apex group (4 accounts) »: one tap, each copy at its account's size (SweepCopy), « Undo » for 5 s */
+  function copyToGroup(id, gid) {
+    const t = getDoc('trades', id); if (!t || !window.SweepCopy) return;
+    const on = new Set((typeof copiesOf === 'function' ? copiesOf(t) : [t]).map((x) => x.account_id)), G = groupOf(t, on);
+    if (!G || G.g !== gid || !G.left.length) return;
+    const had = t.copy_group, g = had || (typeof uid === 'function' ? uid() : 'g' + Date.now());
+    if (!had) editDoc('trades', t.id, (d) => { d.copy_group = g; });
+    const src = JSON.parse(JSON.stringify(getDoc('trades', t.id))), made = G.left.map((a, k) => { const d = SweepCopy.make(src, a.id, g, k); put('trades', d); return d.id; });
+    if (typeof render === 'function') render();
+    const label = tx.done.replace('{n}', accN(made.length));
+    if (window.SweepUndo) SweepUndo.toast(label, () => { made.forEach((x) => remove('trades', x)); if (!had) editDoc('trades', t.id, (d) => { delete d.copy_group; }); });
+    else if (typeof toast === 'function') toast(label);
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-copy-grp]'); if (!b) return; e.preventDefault(); copyToGroup(b.dataset.id, b.dataset.copyGrp); });
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
   function line() {
     const m = /^#trade\/([^/]+)/.exec(location.hash); if (!m) return;
-    const id = decodeURIComponent(m[1]), t = typeof getDoc === 'function' && getDoc('trades', id); if (!t || t.demo && !(S.accounts || []).some((a) => !a.demo)) { /* sample data: still show it */ }
+    const id = decodeURIComponent(m[1]), t = typeof getDoc === 'function' && getDoc('trades', id);
     if (!t) return;
     const main = document.getElementById('main'); if (!main) return;
     const group = typeof copiesOf === 'function' ? copiesOf(t) : [t];
     const on = new Set(group.map((x) => x.account_id));
-    const free0 = (S.accounts || []).filter((a) => a.status !== 'archived' && !on.has(a.id));
-    // B14: ask only when another active account traded in the same session (likely copy trading); otherwise the
-    // « Copy to accounts » action stays in the « ⋯ » menu, without a banner
-    const free = free0.filter((a) => (S.trades || []).some((x) => x.account_id === a.id && x.date === t.date));
+    // an account that can take a copy: active, not paused by the plan, real (sample accounts only for a sample trade)
+    const usable = (a) => a.status !== 'archived' && a.status !== 'closed' && (!a.demo || t.demo) && !(typeof billFrozen === 'function' && billFrozen(a.id));
+    const free0 = (S.accounts || []).filter((a) => usable(a) && !on.has(a.id));
+    // B14 / brief 02 part 4: ask only when another active account has a trade in the same session (likely copy trading; the
+    // sample data's trades never count for a real one); otherwise « Copy to accounts » stays in the « ⋯ » menu, without a banner
+    const free = free0.filter((a) => (S.trades || []).some((x) => x.account_id === a.id && x.date === t.date && (!x.demo || t.demo)));
     const name = (aid) => (typeof acctLabel === 'function' ? acctLabel(aid) : aid);
     const others = group.filter((x) => x.id !== t.id).map((x) => name(x.account_id));
     const panelOpen = typeof CP !== 'undefined' && CP && CP.id === t.id;
+    const G = groupOf(t, on);
     let html = '';
-    if (free.length && !panelOpen) html = `<div class="nav-copy" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${others.length ? tx.also.replace('{l}', esc2(others.join(', '))) : tx.only.replace('{a}', esc2(name(t.account_id)))} <b>${tx.ask}</b></span><button type="button" class="btn sm primary" data-act="copy-open" data-id="${esc2(t.id)}">${tx.btn}</button></div>`;
+    if (G && G.left.length && !panelOpen) html = `<div class="nav-copy" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${others.length ? tx.also.replace('{l}', esc2(others.join(', '))) : tx.only.replace('{a}', esc2(name(t.account_id)))}</span><button type="button" class="btn sm primary" data-copy-grp="${esc2(G.g)}" data-id="${esc2(t.id)}">${esc2((G.name ? tx.grp.replace('{g}', G.name) : tx.grp0).replace('{n}', accN(G.left.length)))}</button></div>`;
+    else if (free.length && !panelOpen) html = `<div class="nav-copy" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${others.length ? tx.also.replace('{l}', esc2(others.join(', '))) : tx.only.replace('{a}', esc2(name(t.account_id)))} <b>${tx.ask}</b></span><button type="button" class="btn sm primary" data-act="copy-open" data-id="${esc2(t.id)}">${tx.btn}</button></div>`;
     else if (others.length && !panelOpen) html = `<div class="nav-copy done" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${tx.also.replace('{l}', esc2(others.join(', ')))}</span></div>`;
     let el = main.querySelector('.nav-copy');
     if (!html) { if (el) el.remove(); return; }

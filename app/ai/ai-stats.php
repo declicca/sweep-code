@@ -69,17 +69,19 @@ function sai_firms(PDO $pdo, string $uid): array
 
 /**
  * Normalized trades, sorted oldest → newest.
- * Trades copied across accounts (same copy_group) count once, with P&L/fees/contracts added up — same rule as the app.
+ * Trades copied across accounts (same copy_group) count once, as their original (the earliest created), with the number of
+ * accounts — the app's rule (Stats, Journal, My money; copies can have their own size since brief 02 part 4).
  */
 function sai_trades(PDO $pdo, string $uid): array
 {
-    $groups = [];
+    $groups = []; $first = [];
     foreach (sai_docs($pdo, $uid, 'trades') as $t) {
         $k = !empty($t['copy_group']) ? 'g:' . $t['copy_group'] : 'i:' . $t['id'];
-        $n = sai_norm_trade($t);
-        if (!isset($groups[$k])) { $groups[$k] = $n; continue; }
-        foreach (['pnl_c', 'fees_c', 'net_c', 'contracts', 'risk_c'] as $f) $groups[$k][$f] = ($groups[$k][$f] ?? 0) + ($n[$f] ?? 0);
-        $groups[$k]['accounts']++;
+        $n = sai_norm_trade($t); $at = (string) (($t['created_at'] ?? '') ?: ($t['id'] ?? ''));
+        if (!isset($groups[$k])) { $groups[$k] = $n; $first[$k] = $at; continue; }
+        $count = $groups[$k]['accounts'] + 1;
+        if (strcmp($at, $first[$k]) < 0) { $groups[$k] = $n; $first[$k] = $at; }
+        $groups[$k]['accounts'] = $count;
     }
     $list = array_values($groups);
     usort($list, fn($a, $b) => [$a['date'], $a['entry_time'] ?? ''] <=> [$b['date'], $b['entry_time'] ?? '']);

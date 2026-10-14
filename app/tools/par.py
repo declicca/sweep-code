@@ -80,7 +80,7 @@ def main():
                    SWEEP_AI_CONFIG=TOOLS + '/ai-config.local.php', SWEEP_AI_MOCK=dest + '/tests/samples/shot-ai-mock.json',
                    TMPDIR='/tmp/sweep-par-%d' % (i + 1), PHP_CLI_SERVER_WORKERS='4')   # php -S answers one request at a time otherwise
         os.makedirs(env['TMPDIR'], exist_ok=True); [shutil.rmtree(q) if os.path.isdir(q) and not os.path.islink(q) else os.remove(q) for q in (os.path.join(env['TMPDIR'], f) for f in os.listdir(env['TMPDIR']))]   # (a test may leave a folder there: e2e_loops)
-        free(port)   # a server left over by an earlier run would answer instead (without this run's settings)
+        for q in range(port, port + 4): free(q)   # a server left over by an earlier run would answer instead (without this run's settings): the shard's port and the 3 next ones, which tests start their own copies on (e2e_routine_parity, e2e_billing +1, e2e_loops +2 and +3)
         srv = subprocess.Popen(['php', '-S', '127.0.0.1:%d' % port, 'router.php'], cwd=dest, env=env, stdout=subprocess.DEVNULL, stderr=open(env['TMPDIR'] + '/php.log', 'w'), start_new_session=True)
         base = 'http://127.0.0.1:%d' % port
         script = ('for i in $(seq 1 50); do curl -s -o /dev/null %s/api/auth/config && break; sleep 0.2; done; '
