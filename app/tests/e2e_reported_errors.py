@@ -40,8 +40,10 @@ async def main():
     await pg.wait_for_timeout(1200); await pg.evaluate(f"location.hash='#trade/{tid}'"); await pg.wait_for_timeout(2500)
     ok(await pg.locator('#main .nav-tdisc[data-disc-why=trade]').count() == 1, '2. the discipline box is in the page from the first frame')
     hs = set()
+    # (the full review is folded under « Answer your coach » since brief 03 step 5: opened, its emotions tapped)
+    await pg.evaluate("(() => { const d = document.querySelector('#main details.co-full'); if (d) d.open = true; })()"); await pg.wait_for_timeout(400)
     for v in ('Calm', 'Patient'):
-      loc = pg.locator(f'[data-act=toggle][data-path="emo.before"][data-v="{v}"]').first
+      loc = pg.locator(f'#rs-psy [data-act=toggle][data-path="emo.before"][data-v="{v}"]').first
       await loc.scroll_into_view_if_needed(); await pg.wait_for_timeout(1000)
       await pg.evaluate("""() => { window.__h = []; const t0 = performance.now(); const f = () => { const b = document.querySelector('#main .nav-tdisc'); window.__h.push(b ? Math.round(b.getBoundingClientRect().height) : 0); if (performance.now() - t0 < 700) requestAnimationFrame(f); };
         addEventListener('pointerdown', () => requestAnimationFrame(f), { once: true, capture: true }); }""")

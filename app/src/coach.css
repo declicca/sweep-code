@@ -55,3 +55,15 @@
 .co-bars i{display:block;width:8px;height:var(--h);border-radius:3px;background:var(--pos)}
 .co-bars i.none{background:var(--line)}
 .co-stats .co-h{flex-wrap:wrap;row-gap:2px}.co-stats .co-h small{flex-basis:100%;padding-left:38px;white-space:normal}
+/* the trade's page: « Answer your coach », then the full review folded */
+.co-ask{margin:0 0 14px}
+.co-q{display:flex;flex-direction:column;gap:8px;margin:0;font-size:14px}
+.co-q > span{font-weight:600}
+.co-q .seg{align-self:flex-start}
+.co-q .chips{display:flex;flex-wrap:wrap;gap:6px}
+.co-q-l textarea{width:100%;box-sizing:border-box;min-height:64px;padding:10px 12px;border-radius:var(--r-field,14px);border:1px solid var(--line2,var(--line));background:var(--panel2,var(--fill));color:var(--text);font:inherit;font-size:15px;resize:vertical}
+.co-full{margin:0 0 14px}
+.co-full > summary{list-style:none;cursor:pointer;padding:12px 2px;font-size:14px;font-weight:600;color:var(--pos)}
+.co-full > summary::-webkit-details-marker{display:none}
+.co-full > summary::after{content:' ▾'}.co-full[open] > summary::after{content:' ▴'}
+.s2-more{margin-top:10px}

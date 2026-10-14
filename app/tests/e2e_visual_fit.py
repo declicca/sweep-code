@@ -9,7 +9,8 @@ B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
 PAGES = ['#dashboard', '#trades', '#analytics', '#accounts', '#payouts', '#calendar', '#journal', '#news', '#settings', '#import', 'ACCOUNT', 'TRADE']
 CHECK = """(()=>{
-  const vis=e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden';
+  // (inside a closed <details>, Chromium still gives boxes: a folded block is not visible)
+  const vis=e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!(e.closest('details:not([open])')&&!e.closest('summary'));
   const over=[];
   document.querySelectorAll('#main .surface').forEach(c=>{ if(!vis(c)) return; const cr=c.getBoundingClientRect();
     c.querySelectorAll('input,select,textarea,.btn,.seg').forEach(e=>{ if(!vis(e)||e.closest('.scroll-x')) return; const p=e.parentElement; if(p&&getComputedStyle(p).overflowX==='auto') return;
