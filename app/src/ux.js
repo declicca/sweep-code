@@ -972,15 +972,21 @@
   render = function () { const out = appRender.apply(this, arguments); try { paint(); prPaint(); hlPaint(); syPaint(); } catch (e) { /* never blocks */ } return out; };
 })();
 
-/* ───────────── 16. Text for « chart ready » and end-of-trial notifications ───────────── */
+/* ───────────── 16. Text for « chart ready » and end-of-trial notifications (« trial_ending.body »: those sent before brief 02 part 13) ───────────── */
 (function () {
   const N = {
     en: { 'chart_ready.title': 'Your {inst} chart is ready.', 'chart_ready.body': 'Replay your trade on the real candles while it is still fresh.',
-      'trial_ending.title': '{days} days of {plan} left', 'trial_ending.body': 'So far: {accounts} accounts, {swept} days swept, {ai} AI analyses. Keep it all with {plan}, or stay on Free: nothing is ever deleted.' },
+      'trial_ending.title': '{days} days of {plan} left', 'trial_ending.body': 'So far: {accounts} accounts, {swept} days swept, {ai} AI analyses. Keep it all with {plan}, or stay on Free: nothing is ever deleted.',
+      'trial_ending.used': 'You use {used}. Keep it with {plan}, or stay on Free: nothing is ever deleted.',
+      'trial_ending.none': 'Free keeps your journal, your trades and your coach. Nothing is ever deleted.' },
     fr: { 'chart_ready.title': 'Ton graphique {inst} est prêt.', 'chart_ready.body': 'Revois ton trade sur les vraies bougies pendant que c’est frais.',
-      'trial_ending.title': 'Il te reste {days} jours de {plan}', 'trial_ending.body': 'Jusqu’ici : {accounts} comptes, {swept} journées balayées, {ai} analyses IA. Garde tout avec {plan}, ou reste sur Free : rien n’est jamais supprimé.' },
+      'trial_ending.title': 'Il te reste {days} jours de {plan}', 'trial_ending.body': 'Jusqu’ici : {accounts} comptes, {swept} journées balayées, {ai} analyses IA. Garde tout avec {plan}, ou reste sur Free : rien n’est jamais supprimé.',
+      'trial_ending.used': 'Tu utilises {used}. Garde-les avec {plan}, ou reste sur Free : rien n’est jamais supprimé.',
+      'trial_ending.none': 'Free garde ton journal, tes trades et ton coach. Rien n’est jamais supprimé.' },
     es: { 'chart_ready.title': 'Tu gráfico de {inst} está listo.', 'chart_ready.body': 'Revisa tu operación en las velas reales mientras está fresca.',
-      'trial_ending.title': 'Te quedan {days} días de {plan}', 'trial_ending.body': 'Hasta ahora: {accounts} cuentas, {swept} días barridos, {ai} análisis IA. Consérvalo con {plan}, o quédate en Free: nunca se borra nada.' },
+      'trial_ending.title': 'Te quedan {days} días de {plan}', 'trial_ending.body': 'Hasta ahora: {accounts} cuentas, {swept} días barridos, {ai} análisis IA. Consérvalo con {plan}, o quédate en Free: nunca se borra nada.',
+      'trial_ending.used': 'Usas {used}. Consérvalo con {plan}, o quédate en Free: nunca se borra nada.',
+      'trial_ending.none': 'Free conserva tu diario, tus operaciones y tu coach. Nunca se borra nada.' },
   };
   const reg = () => { if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings(N); } catch (e) { /* older module */ } return true; } return false; };
   if (!reg()) setTimeout(reg, 1500);
@@ -1862,7 +1868,7 @@
       const rows = sorted.filter((acc) => (M.moneyTypeOf(acc) || 'none') === g); if (!rows.length) return '';
       return `<div class="mny-grp"><h3>${x[g]}${k ? ` <span class="mny-tag ${k}">${k === 'real' ? x.real : x.sim}</span>` : ''}</h3><div class="scroll-x"><table class="tbl acct-tbl mny-acc-tbl"><thead><tr><th>${x.acc}</th><th>${x.firm}</th><th class="num">${x.bal}</th><th>${x.prog}</th></tr></thead><tbody>${rows.map((acc) => {
         const f = typeof firm === 'function' ? firm(acc.firm_id) : null; let bal = 0; try { bal = typeof acctBalance === 'function' ? acctBalance(acc) : 0; } catch (e) { bal = 0; }
-        return `<tr data-href="#account/${esc2(acc.id)}" tabindex="0"><td>${esc2(acc.name)}${typeof billBadge === 'function' ? billBadge(acc.id) : ''}${typeof acctLine === 'function' ? acctLine(acc) : ''}</td><td class="muted">${esc2(f ? f.name : '—')}</td><td class="num">${fu(bal)}</td><td>${cell(acc)}</td></tr>`;
+        return `<tr data-href="#account/${esc2(acc.id)}" tabindex="0"${typeof billFrozen === 'function' && billFrozen(acc.id) ? ' data-frozen class="is-frozen"' : ''}><td>${esc2(acc.name)}${typeof billBadge === 'function' ? billBadge(acc.id) : ''}${typeof acctLine === 'function' ? acctLine(acc) : ''}</td><td class="muted">${esc2(f ? f.name : '—')}</td><td class="num">${fu(bal)}</td><td>${cell(acc)}</td></tr>`;
       }).join('')}</tbody></table></div></div>`;
     }).join('')}</div>`;
   };

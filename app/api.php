@@ -1357,18 +1357,19 @@ try {
         if (preg_match('#^api/admin/feedback/(\d+)$#', $route, $fm) && $method === 'POST') {
             $b = body_json(65536);
             $before = q('SELECT user_id, status FROM feedback WHERE id = ?', [(int)$fm[1]])->fetch();
+            if (!$before) json_out(404, ['error' => 'not found']);
             $okFb = fb_update(db(), (int)$fm[1], (string)($b['status'] ?? ''), isset($b['reply']) ? (string)$b['reply'] : null);
             if ($okFb && $before && $before['status'] !== (string)($b['status'] ?? '') && function_exists('nt_fire')) {
                 nt_fire('feedback.status_changed', ['uid' => (string)$before['user_id'], 'item_id' => (int)$fm[1], 'from' => (string)$before['status'], 'to' => (string)$b['status'], 'reply' => isset($b['reply']) ? (string)$b['reply'] : null, 'admin_id' => (string)$UID]);
             }
-            json_out($okFb ? 200 : 400, ['ok' => true]);
+            json_out($okFb ? 200 : 400, $okFb ? ['ok' => true] : ['error' => 'Unknown status.']);
         }
         if ($route === 'api/admin/referrals' && $method === 'GET') json_out(200, ['items' => ref_admin_list(db())]);
         if (preg_match('#^api/admin/referrals/(\d+)$#', $route, $fm) && $method === 'POST') {
             $b = body_json(1024); $act = (string)($b['action'] ?? '');
             $r = q('SELECT * FROM referrals WHERE id = ?', [(int)$fm[1]])->fetch();
             if (!$r) json_out(404, ['error' => 'not found']);
-            if ($act === 'approve' && $r['status'] === 'review') { q("UPDATE referrals SET status = 'pending' WHERE id = ?", [$r['id']]); ref_give_days(db(), (string)$r['referee_id'], REF_REFEREE_DAYS); ref_check_user(db(), (string)$r['referee_id']); }
+            if ($act === 'approve' && $r['status'] === 'review') { q("UPDATE referrals SET status = 'pending' WHERE id = ?", [$r['id']]); ref_give_days(db(), (string)$r['referee_id'], REF_REFEREE_DAYS, REF_REFEREE_PLAN); ref_check_user(db(), (string)$r['referee_id']); }
             elseif ($act === 'reject' && in_array($r['status'], ['review', 'pending'], true)) q("UPDATE referrals SET status = 'rejected' WHERE id = ?", [$r['id']]);
             else json_out(400, ['error' => 'Nothing to do.']);
             json_out(200, ['ok' => true]);

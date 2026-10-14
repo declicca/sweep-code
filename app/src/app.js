@@ -7156,7 +7156,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       redirecting: "Opening secure checkout…",
       error: "Checkout didn’t open. Check your connection and try again.",
       h_add_account: "Track every prop account in one place",
-      s_add_account: "Free covers 1 account. Pro has no limit.",
+      s_add_account: "Free covers {a}. Pro has no limit.",
       h_frozen_account: "This account is paused",
       s_frozen_account: "Its trades are safe and visible. Upgrade to log on all your accounts again.",
       h_payouts: "Know what your trading really pays",
@@ -7240,10 +7240,39 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       welcome_cta: "Let’s go",
       pending_title: "Payment received",
       pending_text: "Your plan will update in a moment. Refresh if it doesn’t.",
-      choose_title: "Choose your active account",
-      choose_text: "Free includes 1 active account. The others stay saved and visible, and unlock again with Pro.",
-      choose_cta: "Keep this one active",
-      choose_upsell: "Keep all accounts active with Pro",
+      bn_free_back: "Your {plan} access ended. Your data is safe.",
+      fw_t_trial: "Your {plan} trial has ended",
+      fw_t_subscription: "Your {plan} subscription has ended",
+      fw_t_grant: "Your {plan} access has ended",
+      fw_t_free: "You’re on Free",
+      fw_sub: "You’re on Free now. Nothing was deleted.",
+      fw_stays: "What stays",
+      fw_s_journal: "Your journal, all your trades and your coach",
+      fw_s_acc1: "1 active account",
+      fw_s_accn: "{n} active accounts",
+      fw_s_accall: "All your accounts",
+      fw_s_hist: "Your stats for the last {d} days",
+      fw_s_ai: "Sweep AI: {n} messages a day",
+      fw_frozen: "Paused, kept for you",
+      fw_z_acc: "{names}: paused, their trades stay visible",
+      fw_z_money: "My money ({x}): kept, back with Pro",
+      fw_z_shots: "Screenshot reading: enter your trades by hand",
+      fw_z_hist: "{x} older than {d} days: kept, outside your stats",
+      fw_z_ai: "Sweep AI beyond {n} messages a day",
+      fw_choose1: "Choose the account that stays active",
+      fw_choosen: "Choose the {n} accounts that stay active",
+      fw_back: "Get everything back",
+      fw_back_t: "Go back to {plan}: everything opens again at once, as it was.",
+      fw_go: "Go back to {plan}",
+      fw_stay: "Stay on Free",
+      fw_acc1: "1 account",
+      fw_accn: "{n} accounts",
+      fw_po1: "1 payout",
+      fw_pon: "{n} payouts",
+      fw_ex1: "1 expense",
+      fw_exn: "{n} expenses",
+      fw_tr1: "1 trade",
+      fw_trn: "{n} trades",
       d1: "1 day",
       dn: "{n} days",
       h1: "1 hour",
@@ -7251,7 +7280,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       in_t: "in {t}"
     },
     fr: {
-      plan_free: "Gratuit",
+      plan_free: "Free",
       plan_pro: "Pro",
       plan_elite: "Elite",
       monthly: "Mensuel",
@@ -7273,7 +7302,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       redirecting: "Ouverture du paiement sécurisé…",
       error: "Le paiement ne s’est pas ouvert. Vérifie ta connexion et réessaie.",
       h_add_account: "Tous tes comptes prop au même endroit",
-      s_add_account: "Gratuit inclut 1 compte. Pro n’a aucune limite.",
+      s_add_account: "Free inclut {a}. Pro n’a aucune limite.",
       h_frozen_account: "Ce compte est en pause",
       s_frozen_account: "Ses trades sont conservés et visibles. Passe à Pro pour enregistrer sur tous tes comptes.",
       h_payouts: "Sache ce que ton trading rapporte vraiment",
@@ -7281,9 +7310,9 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_payouts_n: "Tu as enregistré {amount} en payouts",
       s_payouts_n: "Continue de suivre chaque dollar avec Pro.",
       h_analytics_history: "Vois tout ton historique",
-      s_analytics_history: "Gratuit montre tes {d} derniers jours. Le reste est conservé et se débloque avec Pro.",
+      s_analytics_history: "Free montre tes {d} derniers jours. Le reste est conservé et se débloque avec Pro.",
       h_ai_quota: "Tu as utilisé tes messages IA du jour",
-      s_ai_quota: "Gratuit en inclut {n} par jour. Pro t’en donne {m}.",
+      s_ai_quota: "Free en inclut {n} par jour. Pro t’en donne {m}.",
       h_ai_quota_pro: "Tu as utilisé tes messages IA du jour",
       s_ai_quota_pro: "Elite t’en donne {m} par jour.",
       h_ai_import: "Arrête de taper tes trades",
@@ -7357,10 +7386,39 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       welcome_cta: "C’est parti",
       pending_title: "Paiement reçu",
       pending_text: "Ton abonnement sera mis à jour dans un instant. Rafraîchis si ce n’est pas le cas.",
-      choose_title: "Choisis ton compte actif",
-      choose_text: "Gratuit inclut 1 compte actif. Les autres restent sauvegardés et visibles, et se débloquent avec Pro.",
-      choose_cta: "Garder ce compte actif",
-      choose_upsell: "Garder tous mes comptes actifs avec Pro",
+      bn_free_back: "Ton accès {plan} est terminé. Tes données sont en sécurité.",
+      fw_t_trial: "Ton essai {plan} est terminé",
+      fw_t_subscription: "Ton abonnement {plan} est terminé",
+      fw_t_grant: "Ton accès {plan} est terminé",
+      fw_t_free: "Tu es sur Free",
+      fw_sub: "Tu es maintenant sur Free. Rien n’a été supprimé.",
+      fw_stays: "Ce qui reste",
+      fw_s_journal: "Ton journal, tous tes trades et ton coach",
+      fw_s_acc1: "1 compte actif",
+      fw_s_accn: "{n} comptes actifs",
+      fw_s_accall: "Tous tes comptes",
+      fw_s_hist: "Tes stats des {d} derniers jours",
+      fw_s_ai: "Sweep AI : {n} messages par jour",
+      fw_frozen: "En pause, gardé pour toi",
+      fw_z_acc: "{names} : en pause, leurs trades restent visibles",
+      fw_z_money: "Mon argent ({x}) : gardé, il revient avec Pro",
+      fw_z_shots: "La lecture des captures : tu saisis tes trades à la main",
+      fw_z_hist: "{x} de plus de {d} jours : gardés, hors de tes stats",
+      fw_z_ai: "Sweep AI au-delà de {n} messages par jour",
+      fw_choose1: "Choisis le compte qui reste actif",
+      fw_choosen: "Choisis les {n} comptes qui restent actifs",
+      fw_back: "Pour tout récupérer",
+      fw_back_t: "Reviens à {plan} : tout se rouvre tout de suite, comme avant.",
+      fw_go: "Revenir à {plan}",
+      fw_stay: "Rester sur Free",
+      fw_acc1: "1 compte",
+      fw_accn: "{n} comptes",
+      fw_po1: "1 payout",
+      fw_pon: "{n} payouts",
+      fw_ex1: "1 dépense",
+      fw_exn: "{n} dépenses",
+      fw_tr1: "1 trade",
+      fw_trn: "{n} trades",
       d1: "1 jour",
       dn: "{n} jours",
       h1: "1 heure",
@@ -7368,7 +7426,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       in_t: "dans {t}"
     },
     es: {
-      plan_free: "Gratis",
+      plan_free: "Free",
       plan_pro: "Pro",
       plan_elite: "Elite",
       monthly: "Mensual",
@@ -7390,7 +7448,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       redirecting: "Abriendo el pago seguro…",
       error: "El pago no se abrió. Revisa tu conexión e inténtalo de nuevo.",
       h_add_account: "Todas tus cuentas de fondeo en un solo lugar",
-      s_add_account: "Gratis incluye 1 cuenta. Pro no tiene límite.",
+      s_add_account: "Free incluye {a}. Pro no tiene límite.",
       h_frozen_account: "Esta cuenta está en pausa",
       s_frozen_account: "Sus trades están guardados y visibles. Pasa a Pro para registrar en todas tus cuentas.",
       h_payouts: "Descubre lo que tu trading paga de verdad",
@@ -7398,9 +7456,9 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_payouts_n: "Has registrado {amount} en payouts",
       s_payouts_n: "Sigue cada dólar que entra y sale con Pro.",
       h_analytics_history: "Ve todo tu historial",
-      s_analytics_history: "Gratis muestra tus últimos {d} días. Lo anterior está guardado y se desbloquea con Pro.",
+      s_analytics_history: "Free muestra tus últimos {d} días. Lo anterior está guardado y se desbloquea con Pro.",
       h_ai_quota: "Usaste tus mensajes de IA de hoy",
-      s_ai_quota: "Gratis incluye {n} al día. Pro te da {m}.",
+      s_ai_quota: "Free incluye {n} al día. Pro te da {m}.",
       h_ai_quota_pro: "Usaste tus mensajes de IA de hoy",
       s_ai_quota_pro: "Elite te da {m} al día.",
       h_ai_import: "Deja de escribir tus trades",
@@ -7474,10 +7532,39 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       welcome_cta: "Vamos",
       pending_title: "Pago recibido",
       pending_text: "Tu plan se actualizará en un momento. Recarga si no cambia.",
-      choose_title: "Elige tu cuenta activa",
-      choose_text: "Gratis incluye 1 cuenta activa. Las demás quedan guardadas y visibles, y se desbloquean con Pro.",
-      choose_cta: "Mantener esta cuenta activa",
-      choose_upsell: "Mantener todas mis cuentas activas con Pro",
+      bn_free_back: "Tu acceso {plan} terminó. Tus datos están a salvo.",
+      fw_t_trial: "Tu prueba {plan} terminó",
+      fw_t_subscription: "Tu suscripción {plan} terminó",
+      fw_t_grant: "Tu acceso {plan} terminó",
+      fw_t_free: "Estás en Free",
+      fw_sub: "Ahora estás en Free. No se borró nada.",
+      fw_stays: "Lo que se queda",
+      fw_s_journal: "Tu diario, todas tus operaciones y tu coach",
+      fw_s_acc1: "1 cuenta activa",
+      fw_s_accn: "{n} cuentas activas",
+      fw_s_accall: "Todas tus cuentas",
+      fw_s_hist: "Tus stats de los últimos {d} días",
+      fw_s_ai: "Sweep AI: {n} mensajes al día",
+      fw_frozen: "En pausa, guardado para ti",
+      fw_z_acc: "{names}: en pausa, sus operaciones siguen visibles",
+      fw_z_money: "Mi dinero ({x}): guardado, vuelve con Pro",
+      fw_z_shots: "La lectura de capturas: introduces tus operaciones a mano",
+      fw_z_hist: "{x} de más de {d} días: guardadas, fuera de tus stats",
+      fw_z_ai: "Sweep AI más allá de {n} mensajes al día",
+      fw_choose1: "Elige la cuenta que sigue activa",
+      fw_choosen: "Elige las {n} cuentas que siguen activas",
+      fw_back: "Para recuperarlo todo",
+      fw_back_t: "Vuelve a {plan}: todo se abre de nuevo al instante, como antes.",
+      fw_go: "Volver a {plan}",
+      fw_stay: "Quedarme en Free",
+      fw_acc1: "1 cuenta",
+      fw_accn: "{n} cuentas",
+      fw_po1: "1 payout",
+      fw_pon: "{n} payouts",
+      fw_ex1: "1 gasto",
+      fw_exn: "{n} gastos",
+      fw_tr1: "1 operación",
+      fw_trn: "{n} operaciones",
       d1: "1 día",
       dn: "{n} días",
       h1: "1 hora",
@@ -7641,6 +7728,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
   }
   const R = k => k <= 1 ? l("d1") : l("dn", {
     n: k
+  }), pn = (k, A) => l(k === 1 || c() === "fr" && k === 0 ? A + "1" : A + "n", {
+    n: k
   });
   async function L(k, A) {
     if (s.request) return s.request(k, A ? {
@@ -7781,6 +7870,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       n: N.ai_daily,
       m: B.ai_daily,
       d: N.analytics_days,
+      a: N.accounts == null ? "" : pn(N.accounts, "fw_acc"),
       p: i ? i.founding.percent : 50
     }) ];
   }
@@ -7919,11 +8009,11 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       d: R(i.trial.days_left)
     }), j = l("bn_see_plans"), N = () => oe("trial_ending")) : i.founding.eligible ? (A = l("bn_founding", {
       t: E(i.founding.deadline)
-    }), j = l("bn_claim"), N = () => oe("founding")) : i.trial_ended && Date.now() - new Date(i.trial_ended.ended_at).getTime() < 14 * 864e5 ? (A = l("bn_trial_ended", {
-      plan: p(i.trial_ended.plan)
+    }), j = l("bn_claim"), N = () => oe("founding")) : i.free_window ? (A = l(i.free_window.kind === "trial" ? "bn_trial_ended" : "bn_free_back", {
+      plan: p(i.free_window.plan)
     }), j = l("bn_get_back", {
-      plan: p(i.trial_ended.plan)
-    }), N = () => oe("trial_ended")) : G && G.cancel_at_period_end && G.period_end && (A = l("bn_cancel", {
+      plan: p(i.free_window.plan)
+    }), N = () => M(!0)) : G && G.cancel_at_period_end && G.period_end && (A = l("bn_cancel", {
       plan: p(G.plan),
       date: b(G.period_end)
     }), j = l("bn_keep", {
@@ -8055,37 +8145,76 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       }
     };
   }
+  /* back on Free (brief 02 part 13): ONE window — what stays, what is paused and kept, how to get it all back — with the
+     choice of the accounts that stay active when there are more than Free keeps. It opens by itself once (the server
+     remembers it: free_window.seen), or while accounts wait for that choice; the banner opens it again for 14 days. */
   async function M(k) {
-    if (!i || !i.live || !i.accounts || !i.accounts.frozen.length || !k && (!i.accounts.needs_choice || h.get("sb_choose"))) return;
-    h.set("sb_choose", "1");
-    const A = s.accounts ? await s.accounts() : [ ...i.accounts.active, ...i.accounts.frozen ].map(Z => ({
+    if (!i || !i.live || i.plan !== "free") return;
+    const W = i.free_window, acc = i.accounts, frz = !!(acc && acc.frozen.length);
+    if (!W && !frz) return;
+    if (!k && (h.get("sb_fw") || !(W && !W.seen) && !(acc && acc.needs_choice))) return;
+    h.set("sb_fw", "1");
+    const F = (i.plans || {}).free || {}, lim = acc && acc.limit != null ? acc.limit : null, used = W && W.pro_used || [];
+    const all = frz ? s.accounts ? await s.accounts() : [ ...acc.active, ...acc.frozen ].map(Z => ({
       id: Z,
       name: Z
-    }));
-    let j = i.accounts.active[0];
-    const N = document.createElement("div");
-    N.className = "sb-pw";
+    })) : [];
+    let pick = frz ? acc.active.map(String) : [];
+    const plan = p(W ? W.plan : "pro"), title = W ? l("fw_t_" + W.kind, {
+      plan: plan
+    }) : l("fw_t_free"), N = document.createElement("div");
+    N.className = "sb-pw sb-fw";
     function B() {
-      N.innerHTML = '<h2 class="sb-h">' + u(l("choose_title")) + '</h2><p class="sb-p">' + u(l("choose_text")) + '</p><div class="sb-opts" role="radiogroup">' + A.map(Z => '<button type="button" class="sb-opt' + (String(Z.id) === String(j) ? " sb-sel" : "") + '" role="radio" aria-checked="' + (String(Z.id) === String(j)) + '" data-acc="' + u(Z.id) + '"><span class="sb-opt-l"><span class="sb-radio"></span><span class="sb-opt-name">' + u(Z.name || Z.id) + "</span></span></button>").join("") + '</div><button type="button" class="sb-cta">' + u(l("choose_cta")) + '</button><div class="sb-foot"><button type="button" class="sb-link sb-up">' + u(l("choose_upsell")) + "</button></div>";
+      const stays = [ l("fw_s_journal"), lim == null ? l("fw_s_accall") : pn(lim, "fw_s_acc"), typeof F.analytics_days == "number" ? l("fw_s_hist", {
+        d: F.analytics_days
+      }) : "", F.ai_daily > 0 ? l("fw_s_ai", {
+        n: F.ai_daily
+      }) : "" ].filter(Boolean), z = [], off = all.filter(Z => !pick.includes(String(Z.id))).map(Z => Z.name || Z.id);
+      off.length && z.push(l("fw_z_acc", {
+        names: off.slice(0, 3).join(", ") + (off.length > 3 ? " +" + (off.length - 3) : "")
+      }));
+      for (const Z of used) Z.k === "money" ? z.push(l("fw_z_money", {
+        x: [ Z.payouts ? pn(Z.payouts, "fw_po") : "", Z.expenses ? pn(Z.expenses, "fw_ex") : "" ].filter(Boolean).join(", ")
+      })) : Z.k === "shots" ? z.push(l("fw_z_shots")) : Z.k === "history" ? z.push(l("fw_z_hist", {
+        x: pn(Z.n, "fw_tr"),
+        d: Z.days
+      })) : Z.k === "ai" && z.push(l("fw_z_ai", {
+        n: F.ai_daily || 0
+      }));
+      const one = lim === 1;
+      N.innerHTML = '<h2 class="sb-h">' + u(title) + '</h2><p class="sb-p">' + u(l("fw_sub")) + '</p><h3 class="sb-fw-h">' + u(l("fw_stays")) + '</h3><ul class="sb-bens">' + stays.map(Z => "<li>" + u(Z) + "</li>").join("") + "</ul>" + (z.length ? '<h3 class="sb-fw-h">' + u(l("fw_frozen")) + '</h3><ul class="sb-fw-z">' + z.map(Z => "<li>" + u(Z) + "</li>").join("") + "</ul>" : "") + (frz ? '<h3 class="sb-fw-h">' + u(one ? l("fw_choose1") : l("fw_choosen", {
+        n: lim
+      })) + '</h3><div class="sb-opts" role="' + (one ? "radiogroup" : "group") + '">' + all.map(Z => {
+        const on = pick.includes(String(Z.id));
+        return '<button type="button" class="sb-opt' + (on ? " sb-sel" : "") + '" role="' + (one ? "radio" : "checkbox") + '" aria-checked="' + on + '" data-acc="' + u(Z.id) + '"><span class="sb-opt-l"><span class="sb-radio' + (one ? "" : " sb-chk") + '"></span><span class="sb-opt-name">' + u(Z.name || Z.id) + "</span></span></button>";
+      }).join("") + "</div>" : "") + '<h3 class="sb-fw-h">' + u(l("fw_back")) + '</h3><p class="sb-p">' + u(l("fw_back_t", {
+        plan: plan
+      })) + '</p><button type="button" class="sb-cta sb-fw-go">' + u(l("fw_go", {
+        plan: plan
+      })) + '</button><div class="sb-foot"><button type="button" class="sb-link sb-fw-stay">' + u(l("fw_stay")) + "</button></div>";
     }
     B();
     const G = Y(N, {
-      label: l("choose_title")
+      label: title
     });
+    x("free_window", "shown", !1), W && (W.seen = !0);
     N.addEventListener("click", async Z => {
       const ge = Z.target.closest("[data-acc]");
       if (ge) {
-        j = ge.dataset.acc, B();
+        const id = ge.dataset.acc;
+        pick.includes(id) ? lim !== 1 && (pick = pick.filter(Te => Te !== id)) : (pick.push(id), lim != null && pick.length > lim && pick.shift()), B();
         return;
       }
-      if (Z.target.closest(".sb-up")) {
-        G.close(), oe("frozen_account");
+      if (Z.target.closest(".sb-fw-go")) {
+        G.close(), oe(W && W.kind === "trial" ? "trial_ended" : "generic", {
+          recommend: W ? W.plan : "pro"
+        });
         return;
       }
-      if (Z.target.closest(".sb-cta")) {
-        try {
+      if (Z.target.closest(".sb-fw-stay")) {
+        if (frz) try {
           i.accounts = await L("api/billing/active-accounts", {
-            ids: [ j ]
+            ids: pick
           });
         } catch {}
         G.close(), s.onChange && s.onChange(i);

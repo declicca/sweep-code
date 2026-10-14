@@ -22,6 +22,14 @@
 - Adresse : `https://app.makeitsweep.com/api/billing/webhook` (signature vérifiée ; sans signature : refusée).
 - Admin › Santé : Stripe et « Secret du webhook Stripe » réglés ou manquants, mode réel ou test.
 - **À faire** (Stripe → Développeurs → Webhooks, en mode test) : envoyer les événements d'abonnement créé, renouvelé (facture payée), annulé et paiement échoué ; chaque envoi doit répondre `200`, et l'abonnement du compte de test changer dans Admin › Traders.
+- **Vérifié en local** (brief 02, partie 13, 13 oct.) : `tests/billing_test.php` (le parcours complet, Stripe remplacé par un enregistreur, webhooks signés avec un secret de test) et `tests/e2e_billing.py` (la vraie route publique du webhook : signature refusée, rejouée, abonnement créé puis supprimé ; la carte du jour 50 et la fenêtre du retour à Free dans le navigateur).
+- **Parcours en mode test de Stripe, sur le serveur** (clés `sk_test_…` et `whsec_…` du mode test dans `sweep-private/billing-config.php`, ton compte de test dans `test_users` : la facturation ne s'allume que pour lui) :
+  1. Page Forfaits (`#plan`, connecté en administrateur) › « Vérification de Stripe » : tout en vert (clé, secret du webhook, prix, coupon).
+  2. Avec le compte de test : « Voir les forfaits » → Pro → carte `4242 4242 4242 4242` → retour dans l'app : « Tu es sur Pro » ; Stripe → Webhooks : `checkout.session.completed` et `invoice.paid` à `200`.
+  3. « Gérer la facturation » (portail Stripe) → annuler → l'app dit « Pro se termine le … » ; puis, dans Stripe, annuler tout de suite → l'app repasse à Free et la fenêtre « Ton abonnement Pro est terminé » s'ouvre une fois.
+  4. Paiement échoué : s'abonner avec la carte `4000 0000 0000 0341`, puis déclencher la facture → bannière « Ton dernier paiement n’a pas passé » ; le forfait reste 7 jours.
+  5. Parrainage : le lien d'invitation du compte de test, une inscription depuis un autre appareil (pas la même connexion) → le filleul est en Elite 14 jours ; même connexion → « à vérifier » dans Admin, approuvé → Elite 14 jours.
+  6. Feedback : un message depuis la page Feedback → il arrive dans Admin › Feedback et dans la boîte de soutien.
 
 ## 3. Restauration d'une sauvegarde
 

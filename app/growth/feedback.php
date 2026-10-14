@@ -5,7 +5,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * Sweep — Feedback (ported from the feedback module to Sweep's database, sessions and data folder).
  * Types: experience (rating 1-5), idea, bug. 2000 characters max. Optional screenshot (PNG/JPG/WebP, 5 MB),
  * stored in the data folder with a random name. Statuses: new, planned, in_progress, shipped, declined.
- * 10 sends per trader per day. Email to the support address on each send.
+ * 10 sends per trader per day. Email to the support address on each send (sweep_mail: the SMTP mailbox, like every other email).
  */
 const FB_TYPES = ['bug', 'idea', 'experience'], FB_STATUSES = ['new', 'planned', 'in_progress', 'shipped', 'declined'];
 const FB_MAX_CHARS = 2000, FB_MAX_SHOT = 5 * 1048576, FB_MAX_PER_DAY = 10;
@@ -57,14 +57,13 @@ function fb_store_shot(string $dataUrl)
 }
 function fb_notify(PDO $pdo, int $id, string $type, ?int $rating, string $msg, string $uid): void
 {
-    global $SUPPORT, $MAIL_FROM, $APP_URL;
-    $to = $SUPPORT !== '' ? $SUPPORT : ''; if ($to === '' || !function_exists('mail')) return;
+    global $SUPPORT, $APP_URL;
+    $to = (string) ($SUPPORT ?? ''); if ($to === '' || !function_exists('sweep_mail')) return;
     $u = fb_q($pdo, 'SELECT username, email FROM users WHERE id = ?', [$uid])->fetch(PDO::FETCH_ASSOC) ?: [];
     $who = ($u['username'] ?? $uid) . (!empty($u['email']) ? ' <' . $u['email'] . '>' : '');
     $subj = '[Sweep] Feedback ' . $type . ($rating ? ' ' . $rating . '/5' : '') . ' #' . $id;
-    $from = $MAIL_FROM !== '' ? $MAIL_FROM : $to;
     $body = "From: $who\n\n$msg\n\n" . rtrim((string) $APP_URL, '/') . "/#admin";
-    @mail($to, '=?UTF-8?B?' . base64_encode($subj) . '?=', $body, "From: Sweep <$from>\r\n" . (!empty($u['email']) ? "Reply-To: {$u['email']}\r\n" : '') . "Content-Type: text/plain; charset=UTF-8");
+    try { sweep_mail($to, $subj, $body); } catch (Throwable $e) { error_log('[Sweep feedback] email #' . $id . ': ' . $e->getMessage()); }   // the feedback is saved either way
 }
 function fb_out(array $r, bool $admin = false): array
 {

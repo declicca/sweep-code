@@ -125,7 +125,7 @@ L'app recharge les données quand elle revient au premier plan, puis toutes les 
 - **Fichiers** : le module serveur est dans `growth/` (son `.htaccess` bloque l'accès direct). Les tables se créent seules : `ref_users`, `referrals`, `referral_clicks`, `feedback`.
 - **Lien d'invitation** : `https://app.makeitsweep.com/r/CODE`. Il pose un témoin de 60 jours, valable aussi sur makeitsweep.com, puis ouvre l'inscription avec « Invité par … ».
 - **Règles** :
-  - l'ami reçoit 30 jours de Pro à l'inscription ;
+  - l'ami reçoit 14 jours d'Elite à l'inscription, en plus de l'essai Pro (si le lien vient de la même connexion que le parrain : seulement après approbation dans Admin) ;
   - le parrain gagne un mois quand l'ami ajoute 10 trades sur 3 jours dans ses 30 premiers jours, ou paie une première facture ;
   - un parrain payant reçoit un crédit Stripe d'un mois sur sa prochaine facture, un parrain gratuit reçoit 30 jours de Pro ;
   - maximum 12 mois par année ;

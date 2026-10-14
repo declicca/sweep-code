@@ -465,6 +465,97 @@ function sb_funnel(PDO $pdo, int $days = 30): array
     return $out;
 }
 
+/* ───────────────────────────── what the trader really uses of Pro ───────────────────────────── */
+
+/**
+ * The paid features this trader really uses that Free does not include, counted from their own data (sample data
+ * excluded): the day-50 card, the end-of-trial reminders and the return to Free (brief 02 part 13).
+ *   ['k' => 'accounts', 'n' => 4, 'free' => 2]         more accounts than Free keeps active
+ *   ['k' => 'money', 'payouts' => 3, 'expenses' => 5]   payouts and expenses (« My money »), when Free has no payouts
+ *   ['k' => 'shots', 'n' => 12]                         trades read from a screenshot, when Free has no AI import
+ *   ['k' => 'history', 'n' => 38, 'days' => 30]         trades older than the history Free shows
+ *   ['k' => 'ai', 'free' => 3]                          more Sweep AI than Free allows, at least once (a day or a month)
+ */
+function sb_pro_used(PDO $pdo, string $uid): array
+{
+    $F = sb_plan_limits('free');
+    $days = is_int($F['analytics_days'] ?? null) ? (int) $F['analytics_days'] : null;
+    $cut = $days !== null ? gmdate('Y-m-d', sb_now() - $days * SB_DAY) : null;
+    $n = ['accounts' => 0, 'payouts' => 0, 'expenses' => 0, 'shots' => 0, 'old' => 0];
+    foreach (sb_q($pdo, "SELECT collection, data FROM documents WHERE user_id = ? AND collection IN ('accounts', 'payouts', 'expenses', 'trades')", [$uid]) as $r) {
+        $d = json_decode((string) $r['data'], true) ?: [];
+        if (!empty($d['demo'])) continue;
+        if ($r['collection'] !== 'trades') { $n[$r['collection']]++; continue; }
+        if (($d['source'] ?? '') === 'screenshot') $n['shots']++;
+        if ($cut !== null && (string) ($d['date'] ?? '') !== '' && (string) $d['date'] < $cut) $n['old']++;
+    }
+    $out = [];
+    if (is_int($F['accounts'] ?? null) && $n['accounts'] > $F['accounts']) $out[] = ['k' => 'accounts', 'n' => $n['accounts'], 'free' => (int) $F['accounts']];
+    if (empty($F['payouts']) && $n['payouts'] + $n['expenses'] > 0) $out[] = ['k' => 'money', 'payouts' => $n['payouts'], 'expenses' => $n['expenses']];
+    if (empty($F['ai_import']) && $n['shots'] > 0) $out[] = ['k' => 'shots', 'n' => $n['shots']];
+    if ($n['old'] > 0) $out[] = ['k' => 'history', 'n' => $n['old'], 'days' => $days];
+    foreach (['ai_daily', 'ai_reviews'] as $m) {
+        if (!is_int($F[$m] ?? null)) continue;
+        if (sb_q($pdo, 'SELECT 1 FROM billing_usage WHERE uid = ? AND metric = ? AND count > ? LIMIT 1', [$uid, $m, (int) $F[$m]])->fetchColumn()) { $out[] = ['k' => 'ai', 'free' => (int) ($F['ai_daily'] ?? 0)]; break; }
+    }
+    return $out;
+}
+
+/** The same list as one short line per language (the end-of-trial reminders: notification parameters used_en / used_fr / used_es). */
+function sb_pro_used_text(array $items, string $lang): string
+{
+    $W = [   // [singular, plural]; French: 0 and 1 take the singular
+        'en' => ['acc' => ['account', 'accounts'], 'act' => ['active', 'active'], 'po' => ['payout', 'payouts'], 'ex' => ['expense', 'expenses'], 'tr' => ['trade', 'trades'],
+                 'accounts' => '{n} (Free keeps {f})', 'money' => 'My money ({x})', 'shots' => 'screenshot reading ({n})', 'history' => 'your full history ({n} older than {d} days)',
+                 'ai' => 'Sweep AI beyond the Free limit', 'and' => ' and '],
+        'fr' => ['acc' => ['compte', 'comptes'], 'act' => ['actif', 'actifs'], 'po' => ['payout', 'payouts'], 'ex' => ['dépense', 'dépenses'], 'tr' => ['trade', 'trades'],
+                 'accounts' => '{n} (Free en garde {f})', 'money' => 'Mon argent ({x})', 'shots' => 'la lecture des captures ({n})', 'history' => 'ton historique complet ({n} de plus de {d} jours)',
+                 'ai' => 'Sweep AI au-delà de la limite de Free', 'and' => ' et '],
+        'es' => ['acc' => ['cuenta', 'cuentas'], 'act' => ['activa', 'activas'], 'po' => ['payout', 'payouts'], 'ex' => ['gasto', 'gastos'], 'tr' => ['operación', 'operaciones'],
+                 'accounts' => '{n} (Free mantiene {f})', 'money' => 'Mi dinero ({x})', 'shots' => 'la lectura de capturas ({n})', 'history' => 'tu historial completo ({n} de más de {d} días)',
+                 'ai' => 'Sweep AI más allá del límite de Free', 'and' => ' y '],
+    ];
+    $T = $W[$lang] ?? $W['en'];
+    $pl = fn(int $n, string $w) => $n . ' ' . $T[$w][($lang === 'fr' ? $n > 1 : $n !== 1) ? 1 : 0];
+    $parts = [];
+    foreach ($items as $i) {
+        switch ($i['k']) {
+            case 'accounts': $parts[] = strtr($T['accounts'], ['{n}' => $pl((int) $i['n'], 'acc'), '{f}' => $pl((int) $i['free'], 'act')]); break;
+            case 'money': $parts[] = strtr($T['money'], ['{x}' => implode(', ', array_merge($i['payouts'] ? [$pl((int) $i['payouts'], 'po')] : [], $i['expenses'] ? [$pl((int) $i['expenses'], 'ex')] : []))]); break;
+            case 'shots': $parts[] = strtr($T['shots'], ['{n}' => $pl((int) $i['n'], 'tr')]); break;
+            case 'history': $parts[] = strtr($T['history'], ['{n}' => $pl((int) $i['n'], 'tr'), '{d}' => (string) $i['days']]); break;
+            case 'ai': $parts[] = $T['ai']; break;
+        }
+    }
+    if (count($parts) < 2) return implode('', $parts);
+    return implode(', ', array_slice($parts, 0, -1)) . $T['and'] . end($parts);
+}
+
+/**
+ * Back on Free: the latest end of a paid access (the trial, a subscription, any other grant) within the last 14 days, or null.
+ * ['since' => ISO date, 'kind' => trial|subscription|grant, 'plan' => the plan it ended, 'seen' => the window was shown since,
+ *  'pro_used' => what is now frozen or locked (sb_pro_used)]. Only asked when the effective plan is Free.
+ */
+function sb_back_to_free(PDO $pdo, string $uid): ?array
+{
+    if (!sb_live($uid)) return null;
+    $now = sb_now(); $grace = (int) sb_cfg()['past_due_grace_days'] * SB_DAY;
+    $best = null;   // [end, kind, plan]
+    foreach (sb_q($pdo, 'SELECT plan, ends_at, reason FROM billing_grants WHERE uid = ? AND ends_at <= ? AND ends_at > ?', [$uid, $now, $now - 14 * SB_DAY])->fetchAll(PDO::FETCH_ASSOC) as $g) {
+        if (($g['plan'] ?? '') === 'free' || !isset(SB_RANK[$g['plan']])) continue;
+        if (!$best || (int) $g['ends_at'] > $best[0]) $best = [(int) $g['ends_at'], in_array($g['reason'], ['trial', 'early_access'], true) ? 'trial' : 'grant', (string) $g['plan']];
+    }
+    foreach (sb_q($pdo, 'SELECT plan, status, past_due_since, updated_at FROM billing_subs WHERE uid = ?', [$uid])->fetchAll(PDO::FETCH_ASSOC) as $s) {
+        if (!in_array($s['status'], ['canceled', 'unpaid', 'paused', 'past_due'], true)) continue;   // running, or never paid (incomplete)
+        $end = $s['status'] === 'past_due' ? (int) $s['past_due_since'] + $grace : (int) $s['updated_at'];   // ended: when Stripe said so
+        if ($end > $now || $end <= $now - 14 * SB_DAY) continue;
+        if (!$best || $end >= $best[0]) $best = [$end, 'subscription', (string) $s['plan']];
+    }
+    if (!$best) return null;
+    $seen = (bool) sb_q($pdo, "SELECT 1 FROM billing_upsell WHERE uid = ? AND trig = 'free_window' AND action = 'shown' AND at >= ? LIMIT 1", [$uid, $best[0]])->fetchColumn();
+    return ['since' => gmdate('c', $best[0]), 'kind' => $best[1], 'plan' => $best[2], 'seen' => $seen, 'pro_used' => sb_pro_used($pdo, $uid)];
+}
+
 /* ───────────────────────────── full state for the UI ───────────────────────────── */
 
 function sb_state(PDO $pdo, string $uid, array $user = []): array
@@ -490,6 +581,7 @@ function sb_state(PDO $pdo, string $uid, array $user = []): array
     }
     // last trial that already ended, for the "your trial ended" moment
     $ended = sb_q($pdo, "SELECT plan, ends_at, reason FROM billing_grants WHERE uid = ? AND reason IN ('trial','early_access') AND ends_at <= ? ORDER BY ends_at DESC LIMIT 1", [$uid, $now])->fetch(PDO::FETCH_ASSOC);
+    $back = $plan === 'free' ? sb_back_to_free($pdo, $uid) : null;
 
     $founding = sb_founding($pdo, $uid, $u, $eff);
     $prices = [];
@@ -513,8 +605,10 @@ function sb_state(PDO $pdo, string $uid, array $user = []): array
             'ai_reviews' => ['used' => sb_usage($pdo, $uid, 'ai_reviews'), 'limit' => $reviewLimit, 'reset_at' => sb_reset_at('ai_reviews')],
         ],
         'trial'        => $trial,
+        'pro_used'     => $trial && $trial['days_left'] <= 10 && !$sub ? sb_pro_used($pdo, $uid) : null,   // the day-50 card (brief 02 part 13)
         'trial_ended'  => (!$trial && !$sub && $ended && $plan === 'free') ? ['plan' => $ended['plan'], 'ended_at' => gmdate('c', (int) $ended['ends_at']), 'kind' => $ended['reason']] : null,
         'subscription' => $sub,
+        'free_window'  => $back,   // back on Free for less than 14 days: the one window (what stays, what is frozen, how to get it back)
         'founding'     => $founding,
         'early_access' => sb_is_early_access((int) $u['created_at']),
         'launch_at'    => gmdate('c', (int) sb_ts($cfg['launch_at'])),

@@ -7,4 +7,6 @@ return array_replace($c, [
     'app_url'  => 'http://127.0.0.1:8095/',
     'smtp'     => ['host' => '', 'port' => 465, 'user' => '', 'pass' => ''],
     'data_dir' => __DIR__ . '/data',
+    // billing: off, except on the copy tests/e2e_billing.py starts with SWEEP_BILLING_CONFIG (tools/billing-config.local.php)
+    'billing_config' => (string) getenv('SWEEP_BILLING_CONFIG'),
 ]);

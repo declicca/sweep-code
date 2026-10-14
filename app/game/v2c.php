@@ -14,10 +14,10 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 final class GameNotifyService
 {
     /** channels: in-app today; web push (VAPID) and native (APNs/FCM) plug in here later */
-    public static function send(string $uid, string $type, array $params, string $dedupe, string $url): bool
+    public static function send(string $uid, string $type, array $params, string $dedupe, string $url, array $opts = []): bool
     {
         if (!class_exists('Notify', false)) return false;
-        $id = Notify::send($uid, $type, $params, ['dedupe_key' => $dedupe, 'action_url' => $url]);
+        $id = Notify::send($uid, $type, $params, ['dedupe_key' => $dedupe, 'action_url' => $url] + $opts);
         if ($id) GameEngine::track($uid, 'notification_sent', ['type' => $type]);
         return (bool) $id;
     }
@@ -62,16 +62,19 @@ final class GameNotifyService
             $m = (new DateTimeImmutable($date))->modify('first day of last month')->format('Y-m');
             if (GameEngine::q('SELECT 1 FROM monthly_wrapped WHERE user_id = ? AND month = ?', [$uid, $m])->fetchColumn()) $todo[] = ['g_wrapped', ['month' => $m], '#dashboard'];
         }
-        // end of the free trial: day 50 (10 days left) and day 58 (2 days left), with what the trader actually used
+        // end of the free trial: day 50 (10 days left) and day 58 (2 days left), with the paid features the trader really uses
+        // (billing-core.php sb_pro_used: the same list as the day-50 card on the dashboard; none → what Free keeps)
         if (function_exists('billing_on')) billing_on();
         if (function_exists('sb_live') && sb_live($uid) && function_exists('sb_active_sub') && !sb_active_sub(GameEngine::pdo(), $uid)) {
             try {
-                $g = GameEngine::q("SELECT plan, ends_at FROM billing_grants WHERE uid = ? AND reason IN ('trial','early_access') AND starts_at <= ? AND ends_at > ? ORDER BY ends_at DESC LIMIT 1", [$uid, time(), time()])->fetch(PDO::FETCH_ASSOC);
-                $left = $g ? (int) ceil(((int) $g['ends_at'] - time()) / 86400) : 0;
+                $t = sb_now();
+                $g = GameEngine::q("SELECT plan, ends_at FROM billing_grants WHERE uid = ? AND reason IN ('trial','early_access') AND starts_at <= ? AND ends_at > ? ORDER BY ends_at DESC LIMIT 1", [$uid, $t, $t])->fetch(PDO::FETCH_ASSOC);
+                $left = $g ? (int) ceil(((int) $g['ends_at'] - $t) / 86400) : 0;
                 if ($g && in_array($left, [10, 2], true)) {
-                    $accounts = count(array_filter(GameEngine::docs($uid, 'accounts'), fn($a) => empty($a['demo'])));
-                    $ai = 0; try { $ai = (int) GameEngine::q('SELECT COUNT(*) FROM ai_log WHERE user_id = ?', [$uid])->fetchColumn(); } catch (Throwable $e) { /* no AI log */ }
-                    if (self::send($uid, 'trial_ending', ['days' => $left, 'plan' => ucfirst((string) $g['plan']), 'accounts' => $accounts, 'ai' => $ai, 'swept' => (int) GameEngine::counters($uid)['swept']], "trial:$uid:$left", '#plan')) $sent++;
+                    $used = sb_pro_used(GameEngine::pdo(), $uid);
+                    $p = ['days' => $left, 'plan' => ucfirst((string) $g['plan'])];
+                    foreach (['en', 'fr', 'es'] as $l) $p['used_' . $l] = sb_pro_used_text($used, $l);
+                    if (self::send($uid, 'trial_ending', $p, "trial:$uid:$left", '#plan', ['body_key' => $used ? 'trial_ending.used' : 'trial_ending.none'])) $sent++;
                 }
             } catch (Throwable $e) { error_log('[Sweep notify] trial: ' . $e->getMessage()); }
         }
