@@ -179,6 +179,7 @@ function ref_reward(PDO $pdo, array $r, string $reason): bool
     } catch (Throwable $e) { error_log('[Sweep referral] Stripe credit failed #' . $r['id'] . ': ' . $e->getMessage()); }
     if ($type === 'bonus_days') ref_give_days($pdo, (string) $r['referrer_id'], REF_REWARD_DAYS);
     ref_q($pdo, "UPDATE referrals SET status = 'rewarded', reward_type = ?, reward_value = ?, rewarded_at = ? WHERE id = ?", [$type, $value, $now, $r['id']]);
+    if (function_exists('loops_event')) loops_event((string) $r['referrer_id'], 'referralRewarded');   // automatic emails (loops/loops.php): the free month
     return true;
 }
 /** Catch-up and expiry. Runs at most once a day, triggered by app traffic (no cron needed). */
