@@ -139,6 +139,10 @@
   "date": "2026-10-13",
   "hash": "9413e4bef94c8979"
  },
+ "how-we-verify-prop-firm-rules.html": {
+  "date": "2026-10-13",
+  "hash": "5d6c3bed4f886dc0"
+ },
  "import.html": {
   "date": "2026-10-13",
   "hash": "b109c596f7a827dd"
@@ -197,23 +201,23 @@
  },
  "prop-firm-consistency-rules.html": {
   "date": "2026-10-13",
-  "hash": "c19cf49146d6fa8d"
+  "hash": "fdabc4527d924f0a"
  },
  "prop-firm-drawdown-rules.html": {
   "date": "2026-10-13",
-  "hash": "adaccc2e5bf7cfe1"
+  "hash": "4e38c291c1c75619"
  },
  "prop-firm-minimum-days.html": {
   "date": "2026-10-13",
-  "hash": "549aa924a3f009ae"
+  "hash": "a5e83cb605e5e62e"
  },
  "prop-firm-payout-rules.html": {
   "date": "2026-10-13",
-  "hash": "52c63dfce15afc98"
+  "hash": "eb68abd7d9cbe0c4"
  },
  "prop-firm-profit-targets.html": {
   "date": "2026-10-13",
-  "hash": "d966c8341118ae9b"
+  "hash": "d5b9ad4181b5b68d"
  },
  "prop-firm-roi-calculator.html": {
   "date": "2026-10-13",
@@ -221,7 +225,7 @@
  },
  "prop-firm-rule-changes.html": {
   "date": "2026-10-13",
-  "hash": "9071325d90ae9084"
+  "hash": "dcfd6bf4722c0cb8"
  },
  "prop-firm-tracker.html": {
   "date": "2026-10-13",
@@ -229,31 +233,31 @@
  },
  "prop-firms/alpha-futures.html": {
   "date": "2026-10-13",
-  "hash": "4ea580d636595dbb"
+  "hash": "430e1d8fa5782a53"
  },
  "prop-firms/apex.html": {
   "date": "2026-10-13",
-  "hash": "0eff95fd19dcd834"
+  "hash": "bc77de6ea8ac3666"
  },
  "prop-firms/index.html": {
   "date": "2026-10-13",
-  "hash": "4451b77f48ed727c"
+  "hash": "91153f9bd4aec1a0"
  },
  "prop-firms/lucid.html": {
   "date": "2026-10-13",
-  "hash": "0cdd6220bd893e21"
+  "hash": "46865e8abc2abe30"
  },
  "prop-firms/myfundedfutures.html": {
   "date": "2026-10-13",
-  "hash": "32522969bf2862e8"
+  "hash": "1e75627085c41758"
  },
  "prop-firms/take-profit-trader.html": {
   "date": "2026-10-13",
-  "hash": "b2856e28c5946bc0"
+  "hash": "2898bdda21f72bba"
  },
  "prop-firms/topstep.html": {
   "date": "2026-10-13",
-  "hash": "365e3848001136f0"
+  "hash": "c0c4207da72abdba"
  },
  "prop-firms/tradeify.html": {
   "date": "2026-10-13",

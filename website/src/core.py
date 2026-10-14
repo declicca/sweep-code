@@ -291,7 +291,7 @@ def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
     if page.endswith(("-release-dates.html", "-meeting-dates.html")): return "release-dates.html"
-    if page == "prop-firm-rule-changes.html": return "prop-firms/index.html"
+    if page in ("prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html"): return "prop-firms/index.html"
     if page in CALC_PAGES: return "tools.html"
     if page in GUIDE_PAGES: return "guides.html"
     return None
@@ -491,6 +491,7 @@ REL_INFO = {
  "ninjatrader.html": (T("NinjaTrader 8 sync","Synchro NinjaTrader 8","Sincronización NinjaTrader 8"), T("Your trades arrive on their own.","Tes trades arrivent tout seuls.","Tus operaciones llegan solas.")),
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
+ "how-we-verify-prop-firm-rules.html": (T("How we verify the rules","Notre méthode de vérification","Cómo verificamos las reglas"), T("Sources, frequency and limits.","Sources, fréquence et limites.","Fuentes, frecuencia y límites.")),
  "prop-firm-rule-changes.html": (T("Prop firm rule changes","Changements de règles","Cambios de reglas"), T("Every change, dated, with its source.","Chaque changement, daté, avec sa source.","Cada cambio, fechado, con su fuente.")),
 }
 RELATED = {
@@ -516,7 +517,8 @@ RELATED = {
  "prop-firm-drawdown-rules.html": ["trailing-drawdown-calculator.html", "prop-firm-profit-targets.html", "prop-firms/index.html"],
  "prop-firm-payout-rules.html": ["payout-calculator.html", "prop-firm-consistency-rules.html", "payout-tracker.html"],
  "prop-firm-profit-targets.html": ["position-size-calculator.html", "prop-firm-drawdown-rules.html", "prop-firms/index.html"],
- "prop-firm-rule-changes.html": ["prop-firms/index.html", "prop-firm-payout-rules.html", "prop-firm-tracker.html"],
+ "prop-firm-rule-changes.html": ["prop-firms/index.html", "how-we-verify-prop-firm-rules.html", "prop-firm-tracker.html"],
+ "how-we-verify-prop-firm-rules.html": ["prop-firm-rule-changes.html", "prop-firms/index.html", "prop-firm-payout-rules.html"],
  "ninjatrader.html": ["import.html", "prop-firm-tracker.html", "features.html"],
  "prop-firm-minimum-days.html": ["prop-firm-payout-rules.html", "prop-firm-consistency-rules.html", "prop-firms/index.html"],
  "prop-firm-costs.html": ["prop-firm-roi-calculator.html", "payout-tracker.html", "prop-firm-profit-targets.html"],

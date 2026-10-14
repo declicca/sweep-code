@@ -18,6 +18,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 
 ## Prop firms
 - [Prop firm rules](https://makeitsweep.com/prop-firms/): drawdown, consistency and payout rules by firm and account type, from Sweep's weekly check
+- [How we verify prop firm rules](https://makeitsweep.com/how-we-verify-prop-firm-rules): sources (the firms' official pages), weekly checks, what counts as a rule change, limits
 - [Prop firm rule changes](https://makeitsweep.com/prop-firm-rule-changes): every rule change detected on the firms' official pages, dated, with its source ([RSS](https://makeitsweep.com/prop-firm-rule-changes.xml))
 - [Topstep](https://makeitsweep.com/prop-firms/topstep)
 - [Apex Trader Funding](https://makeitsweep.com/prop-firms/apex)

@@ -39,6 +39,7 @@ PAGES["free-trading-journal.html"] = pages20.page_free
 PAGES["prop-firm-tracker.html"] = pages20.page_tracker
 PAGES["payout-tracker.html"] = pages20.page_payout_tracker
 PAGES[pages18.RULE_CHANGES] = pages18.page_rule_changes
+PAGES[pages18.METHOD] = pages18.page_method
 PAGES["ninjatrader.html"] = pages20.page_ninjatrader
 import pages19
 PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide, pages19.GUIDE_PAYOUT: pages19.page_payout_guide, pages19.GUIDE_SIZES: pages19.page_sizes_guide, pages19.GUIDE_DAYS: pages19.page_days_guide})

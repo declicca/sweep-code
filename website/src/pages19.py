@@ -1,7 +1,7 @@
 from core import *
 import re
 import presets
-from pages18 import page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of
+from pages18 import page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of, METHOD
 from pages17 import _fr_nbsp
 
 # Guides built from the app's prop firm catalogue (presets.py): every number is the app's, never retyped here.
@@ -41,9 +41,10 @@ def _table(lang, t, h1, h2, body):
 
 def _checked_note(lang, t):
     d = presets.CHECKED
+    how = f' <a href="{href(lang, METHOD)}">{t(T("How we verify", "Notre méthode", "Nuestro método"))}</a>'
     return t(T(f"From Sweep’s weekly check of each firm’s official pages, last run on {day(d, 'en')}. “{DASH}” means the rule isn’t in the rules Sweep tracks for that account. Rules change: always confirm on the firm’s site. Sweep is not affiliated with these firms.",
                f"Tiré de la vérification hebdomadaire des pages officielles de chaque firme par Sweep, faite le {day(d, 'fr')}. « {DASH} » veut dire que la règle n’est pas dans les règles suivies par Sweep pour ce compte. Les règles changent : confirme toujours sur le site de la firme. Sweep n’est affilié à aucune de ces firmes.",
-               f"Tomado de la revisión semanal de las páginas oficiales de cada firma por Sweep, hecha el {day(d, 'es')}. «{DASH}» significa que la regla no está en las reglas que Sweep sigue para esa cuenta. Las reglas cambian: confirma siempre en el sitio de la firma. Sweep no está afiliado a estas firmas."))
+               f"Tomado de la revisión semanal de las páginas oficiales de cada firma por Sweep, hecha el {day(d, 'es')}. «{DASH}» significa que la regla no está en las reglas que Sweep sigue para esa cuenta. Las reglas cambian: confirma siempre en el sitio de la firma. Sweep no está afiliado a estas firmas.")) + how
 
 def _and(items, lang): return and_list(items, lang)
 
