@@ -223,6 +223,62 @@
    "date": "2026-10-13"
   }
  },
+ "free-trading-journal.html": {
+  "en": {
+   "alt": "Free trading journal · For futures and prop firm traders · Free forever",
+   "date": null
+  },
+  "fr": {
+   "alt": "Journal de trading gratuit · Pour les traders de futures et de prop firms · Gratuit",
+   "date": null
+  },
+  "es": {
+   "alt": "Diario de trading gratis · Para traders de futuros y prop firms · Gratis",
+   "date": null
+  }
+ },
+ "prop-firm-tracker.html": {
+  "en": {
+   "alt": "Prop firm tracker · Every account, its rules and where it stands",
+   "date": null
+  },
+  "fr": {
+   "alt": "Suivi des comptes prop · Chaque compte, ses règles et où il en est",
+   "date": null
+  },
+  "es": {
+   "alt": "Seguimiento de cuentas prop · Cada cuenta, sus reglas y cómo va",
+   "date": null
+  }
+ },
+ "payout-tracker.html": {
+  "en": {
+   "alt": "Payout tracker · From request to paid, and your real net",
+   "date": null
+  },
+  "fr": {
+   "alt": "Suivi des payouts · De la demande au paiement, et ton vrai net",
+   "date": null
+  },
+  "es": {
+   "alt": "Seguimiento de payouts · De la solicitud al pago, y tu neto real",
+   "date": null
+  }
+ },
+ "ninjatrader.html": {
+  "en": {
+   "alt": "NinjaTrader 8 → Sweep · Free add-on: your trades arrive on their own",
+   "date": null
+  },
+  "fr": {
+   "alt": "NinjaTrader 8 → Sweep · Module gratuit : tes trades arrivent tout seuls",
+   "date": null
+  },
+  "es": {
+   "alt": "NinjaTrader 8 → Sweep · Complemento gratis: tus operaciones llegan solas",
+   "date": null
+  }
+ },
  "position-size-calculator.html": {
   "en": {
    "alt": "Position size calculator · Free calculator for futures and prop traders",

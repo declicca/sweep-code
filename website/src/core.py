@@ -169,7 +169,9 @@ RES_LEARN = [("trading-templates.html", T("Free templates","Modèles gratuits","
              ("faq.html", T("FAQ","FAQ","Preguntas frecuentes"), T("Quick answers","Réponses rapides","Respuestas rápidas")),
              ("changelog.html", T("What’s new","Nouveautés","Novedades"), T("Latest updates","Les dernières mises à jour","Últimas actualizaciones"))]
 RESOURCES = RES_TOOLS + RES_LEARN
-RES_GROUPS = [(T("Tools","Outils","Herramientas"), RES_TOOLS), (T("Learn","Apprendre","Aprender"), RES_LEARN)]
+# the desktop menu keeps 8 entries (audit n° 3, 2.6): Import and FAQ stay in the footer and the phone menu
+RES_MENU = [x for x in RES_LEARN if x[0] not in ("import.html", "faq.html")]
+RES_GROUPS = [(T("Tools","Outils","Herramientas"), RES_TOOLS), (T("Learn","Apprendre","Aprender"), RES_MENU)]
 LOGIN = T("Log in","Connexion","Iniciar sesión")
 CREATE = T("Start free","Commencer gratuitement","Empieza gratis")
 CREATE_FREE = T("Start free","Commencer gratuitement","Empieza gratis")
@@ -354,7 +356,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     nav = (dd(T("Product","Produit","Producto"), PRODUCT, "product")
            + dd(T("Prop firms","Prop firms","Prop firms"), fm, "firms", fg)
            + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l in NAV[3:])
-           + dd(T("Resources","Ressources","Recursos"), RESOURCES, "res", RES_GROUPS))
+           + dd(T("Resources","Ressources","Recursos"), RES_TOOLS + RES_MENU, "res", RES_GROUPS))
     ARROW = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>'
     sheet = "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}><span>{t(l)}</span>{ARROW}</a>' for p, l in NAV)
     sheet += '<div class="sheet-res">' + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l, _ in RESOURCES) + '</div>'

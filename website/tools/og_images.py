@@ -48,6 +48,16 @@ def entries():
         if page not in pages19.RULE_GUIDES: continue   # a guide not published yet
         out.append((page, {l: (title[l], T(f"{core.FIRMS_N} prop firms · Verified {pages18.day(when, 'en')}", f"{core.FIRMS_N} prop firms · Vérifiées le {pages18.day(when, 'fr')}",
                                            f"{core.FIRMS_N} prop firms · Revisadas el {pages18.day(when, 'es')}")[l]) for l in LANGS}, when))
+    for page, title, sub in (   # the landing pages (audit n° 3, 2.1)
+        ("free-trading-journal.html", T("Free trading journal", "Journal de trading gratuit", "Diario de trading gratis"),
+         T("For futures and prop firm traders · Free forever", "Pour les traders de futures et de prop firms · Gratuit", "Para traders de futuros y prop firms · Gratis")),
+        ("prop-firm-tracker.html", T("Prop firm tracker", "Suivi des comptes prop", "Seguimiento de cuentas prop"),
+         T("Every account, its rules and where it stands", "Chaque compte, ses règles et où il en est", "Cada cuenta, sus reglas y cómo va")),
+        ("payout-tracker.html", T("Payout tracker", "Suivi des payouts", "Seguimiento de payouts"),
+         T("From request to paid, and your real net", "De la demande au paiement, et ton vrai net", "De la solicitud al pago, y tu neto real")),
+        ("ninjatrader.html", T("NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep"),
+         T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas"))):
+        out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
     for slug, _, name, _ in pages7.TOOLS:
         out.append((slug, {l: (name[l], T("Free calculator for futures and prop traders", "Calculateur gratuit pour traders de futures et de prop firms", "Calculadora gratis para traders de futuros y prop firms")[l]) for l in LANGS}, None))
     return out

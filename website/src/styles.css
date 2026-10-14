@@ -1213,6 +1213,7 @@ details summary{transition:color .2s}
 .lead{font-size:clamp(17px,1.35vw,18.5px);line-height:1.6}
 .kick{text-transform:uppercase;font-size:12px;letter-spacing:.08em}
 .tlink{color:var(--gain);text-decoration:none;font-weight:500;font-size:15.5px}
+.tlinks{display:flex;flex-wrap:wrap;gap:10px 24px;margin:22px 0 0}
 .tlink span{display:inline-block;transition:transform .35s var(--spring)}
 .tlink:hover span{transform:translateX(3px)}
 .center-note{text-align:center;margin-top:18px}

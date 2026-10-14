@@ -140,7 +140,7 @@ def page_home(lang, t):
 <p class="lead rise d2">{t(T("Trades, prop accounts, payouts, expenses and daily habits. Everything you track in five different places, finally together.","Trades, comptes prop, payouts, dépenses et habitudes. Tout ce que tu suis à cinq endroits, enfin réuni.","Operaciones, cuentas prop, payouts, gastos y hábitos. Todo lo que hoy sigues en cinco lugares distintos, por fin junto."))}</p>
 <div class="cta-row rise d3"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(T("Start free","Commencer gratuitement","Empieza gratis"))}</a><button type="button" class="btn btn-line btn-lg" data-tour>{PLAY}{t(TOUR_LABEL)}</button></div>
 <p class="reassure rise d4">{t(T("Free forever · 60 days of Pro included · No card","Gratuit pour toujours · 60 jours de Pro inclus · Sans carte","Gratis para siempre · 60 días de Pro incluidos · Sin tarjeta"))}</p>
-<p class="reassure rise d4"><a href="{href(lang,'ninjatrader.html')}">{t(T("NinjaTrader 8? Your trades arrive on their own.","NinjaTrader 8 ? Tes trades arrivent tout seuls.","¿NinjaTrader 8? Tus operaciones llegan solas."))}</a></p>
+<p class="reassure rise d4"><a href="{href(lang,'ninjatrader.html')}">{t(T("NinjaTrader 8? Your trades arrive on their own","NinjaTrader 8 ? Tes trades arrivent tout seuls","¿NinjaTrader 8? Tus operaciones llegan solas"))} <span aria-hidden="true">→</span></a></p>
 <div class="cohort rise d5" id="cohort" hidden><div class="cbar"><i></i></div><a href="{href(lang,'100')}" class="ctext num" data-tpl="{t(T("{n}/{total} founding traders","{n}/{total} traders fondateurs","{n}/{total} traders fundadores"))}"></a></div>
 </div>
 <div class="stage has-reel">
@@ -172,7 +172,7 @@ def page_home(lang, t):
         {"@type":"SoftwareApplication","@id":f"https://{DOMAIN}/#app","name":"Sweep","alternateName":"Sweep trading journal","publisher":{"@id":f"https://{DOMAIN}/#org"},"applicationCategory":"FinanceApplication","operatingSystem":"Web","url":APP,
          "description":t(IDENTITY),"inLanguage":["en","fr","es"],
          "offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro","price":"19","priceCurrency":"USD"},{"@type":"Offer","name":"Elite","price":"39","priceCurrency":"USD"}]},
-        faq_ld(t)]})
+        faq_ld(t), tour_ld(t)]})
     from pages4 import plans_band
     ld = ('<link rel="preload" as="image" href="/video/hero-loop-poster-960.webp" media="(max-width: 860px)" fetchpriority="high">'
           '<link rel="preload" as="image" href="/video/hero-loop-poster.webp" media="(min-width: 861px)" fetchpriority="high">') + ld
@@ -190,6 +190,15 @@ def page_home(lang, t):
 
 # ----------------------------------------------------------------- product tour video (lightbox)
 TOUR_LABEL = T("Watch the 1-min tour","Voir la visite en 1 min","Ver el tour de 1 min")
+
+def tour_ld(t):
+    """The one-minute product tour, for search engines (VideoObject)."""
+    return {"@type": "VideoObject", "name": t(T("Sweep in one minute", "Sweep en une minute", "Sweep en un minuto")),
+            "description": t(T("A one-minute tour of Sweep: your day, a trade logged in seconds, your rules on every trade, your next payout and your progress.",
+                               "La visite de Sweep en une minute : ta journée, un trade ajouté en quelques secondes, tes règles sur chaque trade, ton prochain payout et ta progression.",
+                               "Sweep en un minuto: tu día, una operación registrada en segundos, tus reglas en cada operación, tu próximo payout y tu progreso.")),
+            "thumbnailUrl": f"https://{DOMAIN}/video/tour-poster.webp", "uploadDate": "2026-10-08", "duration": "PT1M",
+            "contentUrl": f"https://{DOMAIN}/video/tour.mp4"}
 PLAY = '<svg class="play" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.6.6 0 0 0 .9.5l8.2-5.2a.6.6 0 0 0 0-1L5.4 2.3a.6.6 0 0 0-.9.5z" fill="currentColor"/></svg>'
 def tour_dialog(t):
     return f'''<dialog class="tour-modal" id="tour" aria-label="{t(T("Sweep product tour","Visite de Sweep","Recorrido de Sweep"))}">
@@ -276,12 +285,12 @@ def page_how(lang, t):
     disc = f'''<section id="discipline" class="rule game-band"><div class="wrap"><div class="head"><span class="kick">{t(T("Gamification","Gamification","Gamificación"))}</span><h2>{t(GAME_TITLE)}</h2><p class="lead">{t(GAME_INTRO)}</p></div>
 <div class="gblocks">{blocks}</div>{wrapped_more}
 <p class="fine">{t(T("Rewards are earned through process only. They have no cash value.","Les récompenses se gagnent uniquement par le processus. Elles n’ont aucune valeur monétaire.","Las recompensas se ganan solo con el proceso. No tienen valor monetario."))}</p></div></section>'''
-    ld = jsonld({"@context":"https://schema.org","@type":"HowTo","name":t(T("How to start with Sweep","Comment commencer avec Sweep","Cómo empezar con Sweep")),
-        "step":[{"@type":"HowToStep","position":i+1,"name":t(h),"text":t(p)} for i,(_,_,h,p) in enumerate(st)]})
+    ld = jsonld({"@context":"https://schema.org","@graph":[{"@type":"HowTo","name":t(T("How to start with Sweep","Comment commencer avec Sweep","Cómo empezar con Sweep")),
+        "step":[{"@type":"HowToStep","position":i+1,"name":t(h),"text":t(p)} for i,(_,_,h,p) in enumerate(st)]}, tour_ld(t)]})
     return (t(T("How Sweep works · Sweep your day, discipline and social","Comment marche Sweep · Balaye ta journée, discipline, social","Cómo funciona Sweep · Barre tu día, disciplina y social")),
-            t(T("Create an account, add your prop accounts, log a trade by tapping a candle, close your three rings, and progress with ranks, missions, bosses, seasons and leagues.",
-                "Crée un compte, ajoute tes comptes prop, ajoute un trade en touchant une bougie, ferme tes trois anneaux, et progresse avec rangs, missions, boss, saisons et ligues.",
-                "Crea una cuenta, añade tus cuentas prop, registra una operación tocando una vela, cierra tus tres anillos y progresa con rangos, misiones, jefes, temporadas y ligas.")),
+            t(T("Create an account, add your prop accounts, log a trade from a screenshot, close your three rings, then progress with ranks, missions, bosses and leagues.",
+                "Crée un compte, ajoute tes comptes prop, ajoute un trade depuis une capture, ferme tes trois anneaux, puis progresse avec rangs, missions, boss et ligues.",
+                "Crea una cuenta, añade tus cuentas prop, registra una operación desde una captura, cierra tus tres anillos y progresa con rangos, misiones, jefes y ligas.")),
             hero + sub + steps + tour_card(lang,t) + sec_sweep_day(lang,t) + disc + sec_social(lang,t) + final_cta(lang, t) + tour_dialog(t), ld)
 
 # ----------------------------------------------------------------- PRICING
