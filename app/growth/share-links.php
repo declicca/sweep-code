@@ -11,6 +11,8 @@
  *   GET  /api/share/list                                                                                     → {links:[…]}
  *   GET  /s/{id}       public page (preview image + numbers + link to Sweep), noindex, social preview tags
  *   GET  /s/{id}.png   the card image
+ *   GET  /s/{id}-og.png  the link's preview (the same card, wide 1200 × 675, brief 02 part 12): what Discord, X and iMessage show
+ * A deleted account takes its links with it (sl_delete_user).
  */
 
 function sl_dir(): string
@@ -45,7 +47,7 @@ function sl_clean(string $s, int $max): string
 function sl_create(PDO $pdo, array $me, array $b): array
 {
     sl_table($pdo);
-    $kind = in_array($b['kind'] ?? '', ['stats', 'stats_page', 'payouts', 'net', 'week', 'day', 'payout', 'trade'], true) ? $b['kind'] : 'stats';
+    $kind = in_array($b['kind'] ?? '', ['discipline', 'swept', 'stats', 'stats_page', 'payouts', 'net', 'week', 'day', 'payout', 'trade'], true) ? $b['kind'] : 'stats';
     $c = (array) ($b['card'] ?? []);
     $stats = [];
     foreach (array_slice((array) ($c['stats'] ?? []), 0, 6) as $p) if (is_array($p) && count($p) >= 2) $stats[] = [sl_clean((string) $p[0], 40), sl_clean((string) $p[1], 40)];
@@ -58,6 +60,9 @@ function sl_create(PDO $pdo, array $me, array $b): array
     $raw = base64_decode($img, true);
     $isPng = $raw !== false && substr($raw, 0, 8) === "\x89PNG\r\n\x1a\n"; $isJpg = $raw !== false && substr($raw, 0, 3) === "\xFF\xD8\xFF";
     if ($raw === false || strlen($raw) < 100 || strlen($raw) > 3 * 1048576 || (!$isPng && !$isJpg)) return ['error' => 'image'];
+    // the link's preview (optional): the same card drawn wide, for Discord, X and iMessage
+    $pv = base64_decode(preg_replace('#^data:image/(png|jpeg);base64,#', '', (string) ($b['preview'] ?? '')) ?? '', true);
+    if ($pv === false || strlen($pv) < 100 || strlen($pv) > 1536 * 1024 || (substr($pv, 0, 8) !== "\x89PNG\r\n\x1a\n" && substr($pv, 0, 3) !== "\xFF\xD8\xFF")) $pv = null;
     $page = null;
     if ($kind === 'stats_page') {
         $html = (string) ($b['html'] ?? '');
@@ -69,6 +74,7 @@ function sl_create(PDO $pdo, array $me, array $b): array
     if ($recent >= 6) return ['error' => 'slow_down'];
     $id = sl_id();
     file_put_contents(sl_dir() . '/' . $id . '.png', $raw);
+    if ($pv !== null) file_put_contents(sl_dir() . '/' . $id . '-og.png', $pv);
     if ($page !== null) file_put_contents(sl_dir() . '/' . $id . '.html', $page);
     $st = $pdo->prepare('INSERT INTO public_shares (id, user_id, kind, payload, created_at) VALUES (?, ?, ?, ?, ?)');
     $st->execute([$id, $me['id'], $kind, json_encode($card, JSON_UNESCAPED_UNICODE), time()]);
@@ -101,18 +107,46 @@ function sl_delete(PDO $pdo, array $me, string $id): bool
     sl_table($pdo);
     $st = $pdo->prepare('UPDATE public_shares SET revoked = 1 WHERE id = ? AND user_id = ?');
     $st->execute([$id, $me['id']]);
-    if ($st->rowCount()) { @unlink(sl_dir() . '/' . basename($id) . '.png'); @unlink(sl_dir() . '/' . basename($id) . '.html'); return true; }
+    if ($st->rowCount()) { foreach (['.png', '-og.png', '.html'] as $x) @unlink(sl_dir() . '/' . basename($id) . $x); return true; }
     return false;
 }
 
-/** GET /s/{id} and /s/{id}.png */
-function sl_public(PDO $pdo, string $id, bool $png): void
+/** the account is deleted: every link of the trader, its images and pages, gone (before 14 Oct., they stayed online) */
+function sl_delete_user(PDO $pdo, string $uid): void
+{
+    sl_table($pdo);
+    $st = $pdo->prepare('SELECT id FROM public_shares WHERE user_id = ?'); $st->execute([$uid]);
+    foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $id) foreach (['.png', '-og.png', '.html'] as $x) @unlink(sl_dir() . '/' . basename((string) $id) . $x);
+    $pdo->prepare('DELETE FROM public_shares WHERE user_id = ?')->execute([$uid]);
+}
+
+/** the preview tags (Open Graph, X): the wide preview when the link has one, its real size; never indexed */
+function sl_meta(string $host, string $id, string $title, string $desc, string $lang): string
+{
+    $h = fn($s) => htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
+    $og = is_file(sl_dir() . '/' . basename($id) . '-og.png');
+    $file = sl_dir() . '/' . basename($id) . ($og ? '-og.png' : '.png');
+    $sz = @getimagesize($file) ?: [0, 0, 0, 'mime' => 'image/png'];
+    $img = $host . '/s/' . $id . ($og ? '-og' : '') . '.png';
+    return '<meta property="og:type" content="website"><meta property="og:site_name" content="Sweep"><meta property="og:url" content="' . $h($host . '/s/' . $id) . '">'
+        . '<meta property="og:locale" content="' . $h(['fr' => 'fr_CA', 'es' => 'es_ES'][$lang] ?? 'en_US') . '">'
+        . '<meta property="og:title" content="' . $h($title) . '"><meta property="og:description" content="' . $h($desc) . '">'
+        . '<meta property="og:image" content="' . $h($img) . '"><meta property="og:image:type" content="' . $h($sz['mime'] ?? 'image/png') . '">'
+        . ($sz[0] ? '<meta property="og:image:width" content="' . (int) $sz[0] . '"><meta property="og:image:height" content="' . (int) $sz[1] . '">' : '')
+        . '<meta property="og:image:alt" content="' . $h($title) . '">'
+        . '<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="' . $h($title) . '"><meta name="twitter:description" content="' . $h($desc) . '">'
+        . '<meta name="twitter:image" content="' . $h($img) . '"><meta name="theme-color" content="#08080A">';
+}
+
+/** GET /s/{id}, /s/{id}.png and /s/{id}-og.png */
+function sl_public(PDO $pdo, string $id, bool $png, bool $og = false): void
 {
     sl_table($pdo);
     $st = $pdo->prepare('SELECT * FROM public_shares WHERE id = ? AND revoked = 0');
     $st->execute([$id]);
     $r = $st->fetch();
     $file = sl_dir() . '/' . basename($id) . '.png';
+    if ($og && is_file(sl_dir() . '/' . basename($id) . '-og.png')) $file = sl_dir() . '/' . basename($id) . '-og.png';
     if (!$r || !is_file($file)) { http_response_code(404); header('Content-Type: text/html; charset=utf-8'); echo '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>Sweep</title><body style="font:16px system-ui;background:#0b0b0d;color:#ddd;display:grid;place-items:center;height:100vh;margin:0"><p>This link is no longer available. <a style="color:#5b8cff" href="https://makeitsweep.com">makeitsweep.com</a></p>'; exit; }
     if ($png) {
         header('Content-Type: ' . (substr((string) file_get_contents($file, false, null, 0, 3), 0, 3) === "\xFF\xD8\xFF" ? 'image/jpeg' : 'image/png')); header('Cache-Control: public, max-age=300'); header('X-Content-Type-Options: nosniff'); header('X-Robots-Tag: noindex');   // a trader's stats: link previews yes, image search no
@@ -143,8 +177,7 @@ function sl_public(PDO $pdo, string $id, bool $png): void
         header("Content-Security-Policy: default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
         echo '<!doctype html><html lang="' . $h($lang) . '" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">'
             . '<title>' . $h($ttl) . '</title><meta name="description" content="' . $h($desc) . '">'
-            . '<meta property="og:type" content="website"><meta property="og:site_name" content="Sweep"><meta property="og:title" content="' . $h($ttl) . '"><meta property="og:description" content="' . $h($desc) . '">'
-            . '<meta property="og:image" content="' . $h($host . '/s/' . $id . '.png') . '"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="' . $h($host . '/s/' . $id . '.png') . '">' . $css
+            . sl_meta($host, $id, $ttl, $desc, $lang) . $css
             . '<style>body{margin:0}.pub-h{max-width:1240px;margin:0 auto;padding:28px 24px 8px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}.pub-h h1{margin:0;font-size:30px;letter-spacing:-.02em}.pub-h p{margin:4px 0 0;color:var(--muted)}.pub-logo{font-weight:600;font-size:15px;color:var(--text);text-decoration:none;opacity:.9}.pub-main{max-width:1240px;margin:0 auto;padding:8px 24px 40px}.pub-main button,.pub-main .seg{pointer-events:none}.pub-cta{max-width:1240px;margin:0 auto 48px;padding:0 24px}.pub-cta div{padding:22px;border-radius:18px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.pub-cta h2{margin:0 0 4px;font-size:18px}.pub-cta p{margin:0;color:var(--muted)}.pub-cta a{padding:12px 22px;border-radius:999px;background:var(--pos);color:#0b0b0d;font-weight:600;text-decoration:none}</style></head>'
             . '<body><header class="pub-h"><div><h1>' . $h($who) . '</h1><p>' . $h($Tp['t']) . ($p['period'] ? ' · ' . $h($p['period']) : '') . ' · ' . $h(gmdate('Y-m-d', (int) $r['created_at'])) . '</p></div><a class="pub-logo" href="' . $h($site) . '">sweep</a></header>'
             . '<main class="pub-main" id="main">' . file_get_contents($pageFile) . '</main>'
@@ -155,8 +188,7 @@ function sl_public(PDO $pdo, string $id, bool $png): void
     header("Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
     echo '<!doctype html><html lang="' . $h($lang) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">'
         . '<title>' . $h($title) . '</title><meta name="description" content="' . $h($desc) . '">'
-        . '<meta property="og:type" content="website"><meta property="og:site_name" content="Sweep"><meta property="og:title" content="' . $h($title) . '"><meta property="og:description" content="' . $h($desc) . '">'
-        . '<meta property="og:image" content="' . $h($host . '/s/' . $id . '.png') . '"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="' . $h($host . '/s/' . $id . '.png') . '">'
+        . sl_meta($host, $id, $title, $desc, $lang)
         . '<style>body{margin:0;background:#0b0b0d;color:#e9e9ee;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;display:flex;justify-content:center;padding:28px 16px}main{width:min(680px,100%)}img{display:block;width:100%;height:auto;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.5)}.sts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:18px 0}.st{padding:12px 14px;border-radius:12px;background:#16161a;border:1px solid #26262c}.st span{display:block;font-size:12px;color:#9a9aa5}.st b{font-size:17px}.by{color:#9a9aa5;font-size:13px;margin:14px 0 0}.cta{margin-top:22px;padding:20px;border-radius:16px;background:#121a2e;border:1px solid #2a3b66}.cta h2{margin:0 0 4px;font-size:18px}.cta p{margin:0 0 14px;color:#b5b9c6}.cta a{display:inline-block;padding:11px 20px;border-radius:999px;background:#5b8cff;color:#0b0b0d;font-weight:600;text-decoration:none}</style></head><body><main>'
         . '<img src="/s/' . $h($id) . '.png" alt="' . $h($title) . '">'
         . ($rows ? '<div class="sts">' . $rows . '</div>' : '')

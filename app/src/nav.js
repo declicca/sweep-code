@@ -3156,6 +3156,13 @@ window.SweepMO = window.SweepMO || class {
       c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
       return c.toDataURL('image/jpeg', 0.86);
     },
+    // the link's preview on Discord, X and iMessage (brief 02 part 12): the same card, wide (1200 × 675), whatever format is shared
+    async preview() {
+      if (SH.fmt === 'wide' || typeof shDraw !== 'function') return '';   // the card is already wide
+      const keep = SH.fmt; SH.fmt = 'wide';
+      try { const cv = await shDraw(shData(SH.kind, SH.id)); const b = await new Promise((r) => cv.toBlob(r, 'image/png')); return await this.image(b); }
+      catch (e) { return ''; } finally { SH.fmt = keep; }
+    },
     async gz(text) {
       if (typeof CompressionStream === 'undefined') return null;
       const st = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
@@ -3233,9 +3240,9 @@ window.SweepMO = window.SweepMO || class {
     if (!SH.blob) return;
     btn.disabled = true; btn.textContent = t('linking');
     try {
-      const img = await SweepLinkPayload.image(SH.blob);
+      const img = await SweepLinkPayload.image(SH.blob), preview = await SweepLinkPayload.preview();
       const card = shData(SH.kind, SH.id) || {};
-      const res = await fetch('api/share/create', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ kind: SH.kind === 'payouts' ? 'payouts' : SH.kind, lang: L, image: img, card: { label: card.label, eyebrow: card.eyebrow, big: String(card.big || '').replace(/<[^>]*>/g, ''), stats: card.stats, cap: card.cap } }) });
+      const res = await fetch('api/share/create', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ kind: SH.kind === 'payouts' ? 'payouts' : SH.kind, lang: L, image: img, preview, card: { label: card.label, eyebrow: card.eyebrow, big: String(card.big || '').replace(/<[^>]*>/g, ''), stats: card.stats, cap: card.cap } }) });
       const j = await res.json().catch(() => ({}));
       if (!res.ok || !j.url) throw new Error('fail');
       lastLink = { id: j.id, url: j.url, kind: SH.kind + '|' + SH.id };
@@ -3295,6 +3302,7 @@ window.SweepMO = window.SweepMO || class {
   const t = (k) => (T || { name: 'Full name' })[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const fullName = () => (S.me && S.me.full_name) || '';
+  const firstName = () => (S.me && S.me.first_name) || fullName().split(' ')[0] || '';   // the discipline cards: the first name only
   let showName = true;
   try { showName = localStorage.getItem('sw.shName') !== '0'; } catch (e) { /* private mode */ }
   async function saveName(v) {
@@ -3302,7 +3310,7 @@ window.SweepMO = window.SweepMO || class {
     if (r.ok) { S.me = Object.assign({}, S.me || {}, { full_name: v.trim() }); if (typeof toast === 'function') toast(t('saved')); return true; }
     return false;
   }
-  window.SweepName = { get: fullName, save: saveName };
+  window.SweepName = { get: fullName, first: firstName, shown: () => showName, save: saveName };
 
   // an equity line, up and down, that finishes up big
   function upLine(trades, seed) {
@@ -3346,7 +3354,7 @@ window.SweepMO = window.SweepMO || class {
       const out = await orig.apply(this, arguments);
       try {
         const tg = document.querySelector('#shPanel .sh-tg'); if (!tg || tg.querySelector('[data-shname]')) return out;
-        tg.insertAdjacentHTML('afterbegin', fullName()
+        tg.insertAdjacentHTML('afterbegin', (['discipline', 'swept'].includes(SH.kind) ? firstName() : fullName())
           ? `<label data-noi18n><span>${t('show')}</span><span class="sw"><input type="checkbox" data-shname ${showName ? 'checked' : ''}><i></i></span></label>`
           : `<div class="nav-shname" data-noi18n data-shname><span>${t('add')}</span><div><input type="text" maxlength="80" placeholder="${t('ph')}" autocomplete="name"><button type="button" class="btn sm primary" data-shname-save>${t('save')}</button></div></div>`);
       } catch (e) { /* never blocks */ }
@@ -3491,9 +3499,12 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { fn: 'First name', ln: 'Last name', un: 'Username', unH: 'Your public name in leagues and shared links.', fv: 'Where did you find Sweep?', need: 'Enter your first name.', me: 'Your first name', prof: 'Profile', save: 'Save', saved: 'Profile saved', help: 'Help & support', helpS: 'A question, an idea, a bug? Write to us, we answer every message.', friend: 'A friend', google: 'Google', other: 'Other' },
-    fr: { fn: 'Prénom', ln: 'Nom', un: 'Nom d’utilisateur', unH: 'Ton nom public dans les ligues et les liens partagés.', fv: 'Où as-tu trouvé Sweep ?', need: 'Entre ton prénom.', me: 'Ton prénom', prof: 'Profil', save: 'Enregistrer', saved: 'Profil enregistré', help: 'Aide et support', helpS: 'Une question, une idée, un bug ? Écris-nous, on répond à chaque message.', friend: 'Un ami', google: 'Google', other: 'Autre' },
-    es: { fn: 'Nombre', ln: 'Apellido', un: 'Nombre de usuario', unH: 'Tu nombre público en ligas y enlaces compartidos.', fv: '¿Dónde encontraste Sweep?', need: 'Escribe tu nombre.', me: 'Tu nombre', prof: 'Perfil', save: 'Guardar', saved: 'Perfil guardado', help: 'Ayuda y soporte', helpS: '¿Una pregunta, una idea, un error? Escríbenos, respondemos cada mensaje.', friend: 'Un amigo', google: 'Google', other: 'Otro' } };
+    en: { pub: 'Public discipline profile', pubS: 'A personal link with your last 4 weeks: discipline, days swept, streak. Never an amount. Off by default.', pubCopy: 'Copy', pubSee: 'See my profile', pubCopied: 'Link copied', pubErr: 'Could not save. Try again.', pubVer: '« Verified » shows when every trade comes from a platform sync.',
+      fn: 'First name', ln: 'Last name', un: 'Username', unH: 'Your public name in leagues and shared links.', fv: 'Where did you find Sweep?', need: 'Enter your first name.', me: 'Your first name', prof: 'Profile', save: 'Save', saved: 'Profile saved', help: 'Help & support', helpS: 'A question, an idea, a bug? Write to us, we answer every message.', friend: 'A friend', google: 'Google', other: 'Other' },
+    fr: { pub: 'Profil public de discipline', pubS: 'Un lien personnel avec tes 4 dernières semaines : discipline, journées balayées, série. Jamais de montant. Désactivé par défaut.', pubCopy: 'Copier', pubSee: 'Voir mon profil', pubCopied: 'Lien copié', pubErr: 'Impossible d’enregistrer. Réessaie.', pubVer: '« Vérifié » s’affiche quand chaque trade vient d’une synchro de plateforme.',
+      fn: 'Prénom', ln: 'Nom', un: 'Nom d’utilisateur', unH: 'Ton nom public dans les ligues et les liens partagés.', fv: 'Où as-tu trouvé Sweep ?', need: 'Entre ton prénom.', me: 'Ton prénom', prof: 'Profil', save: 'Enregistrer', saved: 'Profil enregistré', help: 'Aide et support', helpS: 'Une question, une idée, un bug ? Écris-nous, on répond à chaque message.', friend: 'Un ami', google: 'Google', other: 'Autre' },
+    es: { pub: 'Perfil público de disciplina', pubS: 'Un enlace personal con tus últimas 4 semanas: disciplina, días barridos, racha. Nunca un monto. Desactivado por defecto.', pubCopy: 'Copiar', pubSee: 'Ver mi perfil', pubCopied: 'Enlace copiado', pubErr: 'No se pudo guardar. Inténtalo de nuevo.', pubVer: '«Verificado» aparece cuando cada operación viene de una sincronización de plataforma.',
+      fn: 'Nombre', ln: 'Apellido', un: 'Nombre de usuario', unH: 'Tu nombre público en ligas y enlaces compartidos.', fv: '¿Dónde encontraste Sweep?', need: 'Escribe tu nombre.', me: 'Tu nombre', prof: 'Perfil', save: 'Guardar', saved: 'Perfil guardado', help: 'Ayuda y soporte', helpS: '¿Una pregunta, una idea, un error? Escríbenos, respondemos cada mensaje.', friend: 'Un amigo', google: 'Google', other: 'Otro' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const SUPPORT = 'hello@makeitsweep.com';
@@ -3557,12 +3568,34 @@ window.SweepMO = window.SweepMO || class {
     const main = document.getElementById('main'); if (!main || main.querySelector('.nav-set-prof')) return;
     const first = main.querySelector('.surface'); if (!first) return;
     const sec = document.createElement('section'); sec.className = 'surface nav-set-prof'; sec.setAttribute('data-noi18n', '');
-    sec.innerHTML = `<h2>${t('prof')}</h2>${fields(S.me || {}, true)}<p class="err nav-prof-err"></p><button type="button" class="btn primary" data-prof-save>${t('save')}</button>`;
+    sec.innerHTML = `<h2>${t('prof')}</h2>${fields(S.me || {}, true)}<p class="err nav-prof-err"></p><button type="button" class="btn primary" data-prof-save>${t('save')}</button><div class="nav-pub" data-pub-box>${pubHtml()}</div>`;
     first.before(sec);
+    if (!PUB) pubLoad();
     const help = document.createElement('section'); help.className = 'surface nav-set-help'; help.setAttribute('data-noi18n', '');
     help.innerHTML = `<h2>${t('help')}</h2><p class="muted">${t('helpS')}</p><a class="btn" href="mailto:${SUPPORT}">${SUPPORT}</a>`;
     main.append(help);
   }
+  // brief 02 part 12: the public discipline profile, off by default (growth/public-profile.php)
+  let PUB = null;
+  function pubHtml() {
+    return `<label class="nav-pub-row"><span><b>${t('pub')}</b><small>${t('pubS')}</small></span><span class="sw"><input type="checkbox" data-pub ${PUB && PUB.on ? 'checked' : ''} ${PUB ? '' : 'disabled'} aria-label="${t('pub')}"><i></i></span></label>`
+      + (PUB && PUB.on ? `<div class="nav-shl-row nav-pub-link"><input readonly value="${esc2(location.origin + PUB.url)}" aria-label="${t('pub')}"><button type="button" class="btn sm primary" data-pub-copy>${t('pubCopy')}</button></div>
+        <p class="muted nav-pub-h"><a href="${esc2(PUB.url)}" target="_blank" rel="noopener">${t('pubSee')} ↗</a> · ${t('pubVer')}</p>` : '');
+  }
+  const pubPaint = () => { const b = document.querySelector('#main [data-pub-box]'); if (b) b.innerHTML = pubHtml(); };
+  async function pubLoad() { try { PUB = await apiJSON('api/profile/public'); } catch (e) { PUB = null; } pubPaint(); }
+  document.addEventListener('change', async (e) => {
+    const c = e.target.closest && e.target.closest('input[data-pub]'); if (!c) return;
+    c.disabled = true;
+    try { PUB = await apiJSON('api/profile/public', { method: 'POST', body: { on: c.checked } }); if (typeof haptic === 'function') haptic(6); }
+    catch (x) { if (typeof toast === 'function') toast(t('pubErr')); }
+    pubPaint();
+  });
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-pub-copy]'); if (!b || !PUB || !PUB.url) return;
+    const u = location.origin + PUB.url;
+    try { await navigator.clipboard.writeText(u); if (typeof toast === 'function') toast(t('pubCopied')); } catch (x) { const i = b.parentElement.querySelector('input'); if (i) i.select(); }
+  });
   document.addEventListener('click', async (e) => { const b = e.target.closest && e.target.closest('[data-prof-save]'); if (!b) return; b.disabled = true; const ok = await save(b.closest('.nav-set-prof')); b.disabled = false; if (ok && typeof toast === 'function') toast(t('saved')); });
   // the trader has started filling in the first account: a refresh that would draw the same page (still no account, same
   // address) is skipped, otherwise it sends the guided picker back to its first question and empties the first name
@@ -3804,11 +3837,11 @@ window.SweepMO = window.SweepMO || class {
         const st = typeof stats === 'function' ? stats(tr) : {};
         const n1 = (x) => (typeof tNet === 'function' ? tNet(x) : x.pnl_c || 0);
         const W = tr.filter((x) => n1(x) > 0), Lo = tr.filter((x) => n1(x) < 0);
-        const wr = W.length + Lo.length ? Math.round(W.length / (W.length + Lo.length) * 100) + ' %' : '—';
+        const wr = W.length + Lo.length ? Math.round(W.length / (W.length + Lo.length) * 100) + (L === 'en' ? '%' : '\u202f%') : '—';
         const aw = W.length ? W.reduce((a, x) => a + n1(x), 0) / W.length : 0, al = Lo.length ? Math.abs(Lo.reduce((a, x) => a + n1(x), 0) / Lo.length) : 0;
         const rr = aw && al ? '1 : ' + (aw / al).toFixed(1) : '—';
         const ds = typeof tDisc === 'function' ? tr.map(tDisc).filter((x) => x != null) : [];
-        const disc = ds.length ? Math.round(ds.reduce((a, x) => a + x, 0) / ds.length * (ds[0] <= 1 ? 100 : 1)) + ' %' : (st.disc != null ? Math.round(st.disc) + ' %' : '—');
+        const disc = ds.length ? Math.round(ds.reduce((a, x) => a + x, 0) / ds.length * (ds[0] <= 1 ? 100 : 1)) + (L === 'en' ? '%' : '\u202f%') : (st.disc != null ? Math.round(st.disc) + (L === 'en' ? '%' : '\u202f%') : '—');
         d.stats = [[t('wr'), wr], [t('rr'), rr], [t('dsc'), disc]];
       }
       return d;
@@ -3882,11 +3915,11 @@ window.SweepMO = window.SweepMO || class {
     const tr = typeof mergeCopies === 'function' ? mergeCopies(typeof sorted === 'function' ? sorted(all) : all) : all;
     const net = tr.reduce((a, x) => a + n1(x), 0);
     const W = tr.filter((x) => n1(x) > 0), Lo = tr.filter((x) => n1(x) < 0);
-    const wr = W.length + Lo.length ? Math.round(W.length / (W.length + Lo.length) * 100) + ' %' : '—';
+    const wr = W.length + Lo.length ? Math.round(W.length / (W.length + Lo.length) * 100) + (L === 'en' ? '%' : '\u202f%') : '—';
     const aw = W.length ? W.reduce((a, x) => a + n1(x), 0) / W.length : 0, al = Lo.length ? Math.abs(Lo.reduce((a, x) => a + n1(x), 0) / Lo.length) : 0;
     const rr = aw && al ? '1 : ' + (aw / al).toFixed(1) : W.length ? '∞' : '—';
     const ds = typeof tDisc === 'function' ? tr.map(tDisc).filter((x) => x != null) : [];
-    const disc = ds.length ? Math.round(ds.reduce((a, x) => a + x, 0) / ds.length * (ds[0] <= 1 ? 100 : 1)) + ' %' : '—';
+    const disc = ds.length ? Math.round(ds.reduce((a, x) => a + x, 0) / ds.length * (ds[0] <= 1 ? 100 : 1)) + (L === 'en' ? '%' : '\u202f%') : '—';
     const J = (d) => (typeof getDoc === 'function' && getDoc('journals', d)) || {};
     const days = [0, 1, 2, 3, 4].map((i) => addDays(ws, i));
     const planDays = days.filter((d) => J(d).pre && (J(d).pre.bias || J(d).pre.max_loss)).length;
@@ -4278,11 +4311,11 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { delAll: 'Deleted on {n} accounts', shotDel: 'Screenshot removed', qDel: 'Question removed', demoDel: 'Sample data removed', accDelT: 'Delete your Sweep account?', accDelS: 'Your account and all your data (trades, journals, accounts, payouts, expenses, screenshots) are deleted for good. This cannot be undone.', accDelGo: 'Delete for good', cancel: 'Cancel', edit: 'Edit', del: 'Delete', deleted: 'Deleted', undo: 'Undo', refresh: 'Release to refresh', refreshing: 'Refreshing…', failed: 'Mark as failed', failedT: 'Account marked as failed', failedL: 'Failed', passedL: 'Passed', liveL: 'Went live', archived: 'Archived', allAcc: 'All accounts', platform: 'per your platform', disc: 'Discipline', discT: 'Your discipline score', discH: 'For each trade, the share of your checklist answered « yes » (stop respected, size, max loss, setup in your plan…). Your score is the average of your trades over the last 30 days.', discI: 'To raise it: answer your checklist on every trade, define your stop before entering, stay under your max loss and your number of trades, and trade the setups of your plan.', discLast: 'last 30 days', ok: 'Got it', dCard: 'My discipline', streak: 'Streak', swept: 'Days swept', score: 'Discipline', capD: (s, n) => `${s}-day streak, ${n} % discipline. The process, every day. Tracked with Sweep`, kDisc: 'Discipline', kStats: 'Stats', trialH: 'Your Pro trial ends in {n} days', trialH1: 'Your Pro trial ends tomorrow', trialU: 'What you use of Pro:', trialK: 'On Free, everything stays saved: nothing is deleted.', trialB: 'See the plans', noAi: 'Screenshot reading is part of Pro: enter your trade by hand.',
+    en: { delAll: 'Deleted on {n} accounts', shotDel: 'Screenshot removed', qDel: 'Question removed', demoDel: 'Sample data removed', accDelT: 'Delete your Sweep account?', accDelS: 'Your account and all your data (trades, journals, accounts, payouts, expenses, screenshots) are deleted for good. This cannot be undone.', accDelGo: 'Delete for good', cancel: 'Cancel', edit: 'Edit', del: 'Delete', deleted: 'Deleted', undo: 'Undo', refresh: 'Release to refresh', refreshing: 'Refreshing…', failed: 'Mark as failed', failedT: 'Account marked as failed', failedL: 'Failed', passedL: 'Passed', liveL: 'Went live', archived: 'Archived', allAcc: 'All accounts', platform: 'per your platform', disc: 'Discipline', discT: 'Your discipline score', discH: 'For each trade, the share of your checklist answered « yes » (stop respected, size, max loss, setup in your plan…). Your score is the average of your trades over the last 30 days.', discI: 'To raise it: answer your checklist on every trade, define your stop before entering, stay under your max loss and your number of trades, and trade the setups of your plan.', discLast: 'last 30 days', ok: 'Got it', dCard: 'My discipline', streak: 'Streak', swept: 'Days swept', score: 'Discipline', capD: (s, n) => `${s}-day streak, ${n} % discipline. The process, every day. Tracked with Sweep`, kDisc: 'Discipline', kStats: 'Stats', kAlt: { stats: 'Stats', payout: 'Payout', payouts: 'Payouts', net: 'My money', week: 'Week', day: 'Day', trade: 'Trade' }, trialH: 'Your Pro trial ends in {n} days', trialH1: 'Your Pro trial ends tomorrow', trialU: 'What you use of Pro:', trialK: 'On Free, everything stays saved: nothing is deleted.', trialB: 'See the plans', noAi: 'Screenshot reading is part of Pro: enter your trade by hand.',
       u: { acc: ['account', 'accounts'], act: ['active', 'active'], po: ['payout', 'payouts'], ex: ['expense', 'expenses'], tr: ['trade', 'trades'], accounts: '{n} (Free keeps {f})', money: 'My money ({x})', shots: 'Screenshot reading ({n})', history: 'Your full history ({n} older than {d} days)', ai: 'Sweep AI beyond the Free limit' } },
-    fr: { delAll: 'Supprimé sur {n} comptes', shotDel: 'Capture retirée', qDel: 'Question retirée', demoDel: 'Données d’exemple retirées', accDelT: 'Supprimer ton compte Sweep ?', accDelS: 'Ton compte et toutes tes données (trades, journaux, comptes, payouts, dépenses, captures) sont supprimés pour de bon. C’est irréversible.', accDelGo: 'Supprimer pour de bon', cancel: 'Annuler', edit: 'Modifier', del: 'Supprimer', deleted: 'Supprimé', undo: 'Annuler', refresh: 'Relâche pour actualiser', refreshing: 'Actualisation…', failed: 'Marquer comme échoué', failedT: 'Compte marqué comme échoué', failedL: 'Échoué', passedL: 'Réussi', liveL: 'Passé en live', archived: 'Archivés', allAcc: 'Tous les comptes', platform: 'selon ta plateforme', disc: 'Discipline', discT: 'Ton score de discipline', discH: 'Pour chaque trade, la part de ta checklist répondue « oui » (stop respecté, taille, perte max, setup dans ton plan…). Ton score est la moyenne de tes trades des 30 derniers jours.', discI: 'Pour le monter : réponds à ta checklist sur chaque trade, définis ton stop avant d’entrer, reste sous ta perte max et ton nombre de trades, et trade les setups de ton plan.', discLast: '30 derniers jours', ok: 'Compris', dCard: 'Ma discipline', streak: 'Série', swept: 'Jours réussis', score: 'Discipline', capD: (s, n) => `${s} jours de suite, ${n} % de discipline. Le processus, chaque jour. Suivi avec Sweep`, kDisc: 'Discipline', kStats: 'Stats', trialH: 'Ton essai Pro se termine dans {n} jours', trialH1: 'Ton essai Pro se termine demain', trialU: 'Ce que tu utilises de Pro :', trialK: 'Sur Free, tout reste enregistré : rien n’est supprimé.', trialB: 'Voir les forfaits', noAi: 'La lecture des captures fait partie de Pro : saisis ton trade à la main.',
+    fr: { delAll: 'Supprimé sur {n} comptes', shotDel: 'Capture retirée', qDel: 'Question retirée', demoDel: 'Données d’exemple retirées', accDelT: 'Supprimer ton compte Sweep ?', accDelS: 'Ton compte et toutes tes données (trades, journaux, comptes, payouts, dépenses, captures) sont supprimés pour de bon. C’est irréversible.', accDelGo: 'Supprimer pour de bon', cancel: 'Annuler', edit: 'Modifier', del: 'Supprimer', deleted: 'Supprimé', undo: 'Annuler', refresh: 'Relâche pour actualiser', refreshing: 'Actualisation…', failed: 'Marquer comme échoué', failedT: 'Compte marqué comme échoué', failedL: 'Échoué', passedL: 'Réussi', liveL: 'Passé en live', archived: 'Archivés', allAcc: 'Tous les comptes', platform: 'selon ta plateforme', disc: 'Discipline', discT: 'Ton score de discipline', discH: 'Pour chaque trade, la part de ta checklist répondue « oui » (stop respecté, taille, perte max, setup dans ton plan…). Ton score est la moyenne de tes trades des 30 derniers jours.', discI: 'Pour le monter : réponds à ta checklist sur chaque trade, définis ton stop avant d’entrer, reste sous ta perte max et ton nombre de trades, et trade les setups de ton plan.', discLast: '30 derniers jours', ok: 'Compris', dCard: 'Ma discipline', streak: 'Série', swept: 'Journées balayées', score: 'Discipline', capD: (s, n) => `${s} jours de suite, ${n} % de discipline. Le processus, chaque jour. Suivi avec Sweep`, kDisc: 'Discipline', kStats: 'Stats', kAlt: { stats: 'Stats', payout: 'Payout', payouts: 'Payouts', net: 'Mon argent', week: 'Semaine', day: 'Journée', trade: 'Trade' }, trialH: 'Ton essai Pro se termine dans {n} jours', trialH1: 'Ton essai Pro se termine demain', trialU: 'Ce que tu utilises de Pro :', trialK: 'Sur Free, tout reste enregistré : rien n’est supprimé.', trialB: 'Voir les forfaits', noAi: 'La lecture des captures fait partie de Pro : saisis ton trade à la main.',
       u: { acc: ['compte', 'comptes'], act: ['actif', 'actifs'], po: ['payout', 'payouts'], ex: ['dépense', 'dépenses'], tr: ['trade', 'trades'], accounts: '{n} (Free en garde {f})', money: 'Mon argent ({x})', shots: 'La lecture des captures ({n})', history: 'Ton historique complet ({n} de plus de {d} jours)', ai: 'Sweep AI au-delà de la limite de Free' } },
-    es: { delAll: 'Eliminado en {n} cuentas', shotDel: 'Captura quitada', qDel: 'Pregunta quitada', demoDel: 'Datos de ejemplo quitados', accDelT: '¿Eliminar tu cuenta de Sweep?', accDelS: 'Tu cuenta y todos tus datos (operaciones, diarios, cuentas, payouts, gastos, capturas) se eliminan para siempre. No se puede deshacer.', accDelGo: 'Eliminar para siempre', cancel: 'Cancelar', edit: 'Editar', del: 'Eliminar', deleted: 'Eliminado', undo: 'Deshacer', refresh: 'Suelta para actualizar', refreshing: 'Actualizando…', failed: 'Marcar como fallida', failedT: 'Cuenta marcada como fallida', failedL: 'Fallida', passedL: 'Aprobada', liveL: 'Pasó a live', archived: 'Archivadas', allAcc: 'Todas las cuentas', platform: 'según tu plataforma', disc: 'Disciplina', discT: 'Tu puntuación de disciplina', discH: 'Para cada operación, la parte de tu checklist respondida « sí » (stop respetado, tamaño, pérdida máx., setup de tu plan…). Tu puntuación es la media de tus operaciones de los últimos 30 días.', discI: 'Para subirla: responde tu checklist en cada operación, define tu stop antes de entrar, quédate bajo tu pérdida máx. y tu número de operaciones, y opera los setups de tu plan.', discLast: 'últimos 30 días', ok: 'Entendido', dCard: 'Mi disciplina', streak: 'Racha', swept: 'Días completados', score: 'Disciplina', capD: (s, n) => `${s} días seguidos, ${n} % de disciplina. El proceso, cada día. Registrado con Sweep`, kDisc: 'Disciplina', kStats: 'Stats', trialH: 'Tu prueba Pro termina en {n} días', trialH1: 'Tu prueba Pro termina mañana', trialU: 'Lo que usas de Pro:', trialK: 'En Free, todo queda guardado: no se borra nada.', trialB: 'Ver los planes', noAi: 'La lectura de capturas es parte de Pro: introduce tu operación a mano.',
+    es: { delAll: 'Eliminado en {n} cuentas', shotDel: 'Captura quitada', qDel: 'Pregunta quitada', demoDel: 'Datos de ejemplo quitados', accDelT: '¿Eliminar tu cuenta de Sweep?', accDelS: 'Tu cuenta y todos tus datos (operaciones, diarios, cuentas, payouts, gastos, capturas) se eliminan para siempre. No se puede deshacer.', accDelGo: 'Eliminar para siempre', cancel: 'Cancelar', edit: 'Editar', del: 'Eliminar', deleted: 'Eliminado', undo: 'Deshacer', refresh: 'Suelta para actualizar', refreshing: 'Actualizando…', failed: 'Marcar como fallida', failedT: 'Cuenta marcada como fallida', failedL: 'Fallida', passedL: 'Aprobada', liveL: 'Pasó a live', archived: 'Archivadas', allAcc: 'Todas las cuentas', platform: 'según tu plataforma', disc: 'Disciplina', discT: 'Tu puntuación de disciplina', discH: 'Para cada operación, la parte de tu checklist respondida « sí » (stop respetado, tamaño, pérdida máx., setup de tu plan…). Tu puntuación es la media de tus operaciones de los últimos 30 días.', discI: 'Para subirla: responde tu checklist en cada operación, define tu stop antes de entrar, quédate bajo tu pérdida máx. y tu número de operaciones, y opera los setups de tu plan.', discLast: 'últimos 30 días', ok: 'Entendido', dCard: 'Mi disciplina', streak: 'Racha', swept: 'Días barridos', score: 'Disciplina', capD: (s, n) => `${s} días seguidos, ${n} % de disciplina. El proceso, cada día. Registrado con Sweep`, kDisc: 'Disciplina', kStats: 'Stats', kAlt: { stats: 'Stats', payout: 'Payout', payouts: 'Payouts', net: 'Mi dinero', week: 'Semana', day: 'Día', trade: 'Operación' }, trialH: 'Tu prueba Pro termina en {n} días', trialH1: 'Tu prueba Pro termina mañana', trialU: 'Lo que usas de Pro:', trialK: 'En Free, todo queda guardado: no se borra nada.', trialB: 'Ver los planes', noAi: 'La lectura de capturas es parte de Pro: introduce tu operación a mano.',
       u: { acc: ['cuenta', 'cuentas'], act: ['activa', 'activas'], po: ['payout', 'payouts'], ex: ['gasto', 'gastos'], tr: ['operación', 'operaciones'], accounts: '{n} (Free mantiene {f})', money: 'Mi dinero ({x})', shots: 'La lectura de capturas ({n})', history: 'Tu historial completo ({n} de más de {d} días)', ai: 'Sweep AI más allá del límite de Free' } } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -4528,7 +4561,7 @@ window.SweepMO = window.SweepMO || class {
     const me = document.querySelector('#main .nav-rt .nav-rt-me'); if (!me) return;
     const v = discScore(), key = String(v); let c = me.querySelector('.nav-rt-disc:not(.nav-rt-disc-ph)');
     if (c && c.dataset.v === key) return;   // unchanged: touch nothing (a DOM change here would wake every watcher again)
-    const html = `<button type="button" class="nav-rt-disc" data-disc-why data-noi18n data-v="${key}"><small>${t('disc')}</small><b>${v == null ? '—' : v + '\u202f%'}</b></button>`;
+    const html = `<button type="button" class="nav-rt-disc" data-disc-why data-noi18n data-v="${key}"><small>${t('disc')}</small><b>${v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%')}</b></button>`;
     if (c) c.remove(); const ph = me.querySelector('.nav-rt-disc-ph'); if (ph) ph.remove(); me.insertAdjacentHTML('afterbegin', html);   // takes the placeholder's place: same size, nothing moves
   }
   function discWhy(kind) {
@@ -4536,7 +4569,7 @@ window.SweepMO = window.SweepMO || class {
     if (kind === 'trade') { const m = /^#trade\/([^/]+)/.exec(location.hash || ''); const tr = m && getDoc('trades', decodeURIComponent(m[1])); const d = tr && typeof tDisc === 'function' ? tDisc(tr) : null; v = d == null ? null : Math.round(d * (d <= 1 ? 100 : 1)); }
     const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-dwhy open';
     const el = document.createElement('aside'); el.className = 'nav-dlg nav-dwhy open'; el.setAttribute('role', 'dialog'); el.setAttribute('data-noi18n', '');
-    el.innerHTML = `<div class="nav-dlg-in nav-dwhy-in"><div class="nav-dwhy-v"><b>${v == null ? '—' : v + ' %'}</b><small>${kind === 'trade' ? ({ en: 'this trade', fr: 'ce trade', es: 'esta operación' })[L] : t('discLast')}</small></div><h2>${t('discT')}</h2><p>${t('discH')}</p><p class="muted">${t('discI')}</p><button type="button" class="btn primary nav-am-save" data-dwhy-ok>${t('ok')}</button></div>`;
+    el.innerHTML = `<div class="nav-dlg-in nav-dwhy-in"><div class="nav-dwhy-v"><b>${v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%')}</b><small>${kind === 'trade' ? ({ en: 'this trade', fr: 'ce trade', es: 'esta operación' })[L] : t('discLast')}</small></div><h2>${t('discT')}</h2><p>${t('discH')}</p><p class="muted">${t('discI')}</p><button type="button" class="btn primary nav-am-save" data-dwhy-ok>${t('ok')}</button></div>`;
     document.body.append(scrim, el);
     const done = () => document.querySelectorAll('.nav-dwhy').forEach((x) => x.remove());
     scrim.addEventListener('click', done); el.querySelector('[data-dwhy-ok]').addEventListener('click', done);
@@ -4555,9 +4588,9 @@ window.SweepMO = window.SweepMO || class {
     const w = function (kind) {
       if (kind !== 'discipline') return orig.apply(this, arguments);
       const st = window.SweepGame && SweepGame.state && SweepGame.state(); const p = (st && st.profile) || {};
-      const s = (p.streak && p.streak.current) || 0, v = discScore(), nm = window.SweepName && SweepName.get();
-      return { label: t('dCard'), eyebrow: new Date().toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { month: 'long', year: 'numeric' }), big: v == null ? '—' : v + ' %', tone: 'pos', sub: null,
-        stats: [[t('streak'), String(s)], [t('score'), v == null ? '—' : v + ' %'], [t('swept'), swept == null ? '—' : String(swept)]], demo: false, chart: null, bars: null, mark: true, who: nm || null, whoAt: 'eyebrow', cap: t('capD')(s, v == null ? 0 : v) };
+      const s = (p.streak && p.streak.current) || 0, v = discScore(), nm = window.SweepName && SweepName.shown() && SweepName.first();
+      return { label: t('dCard'), eyebrow: new Date().toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { month: 'long', year: 'numeric' }), big: v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%'), tone: 'pos', sub: null,
+        stats: [[t('streak'), String(s)], [t('score'), v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%')], [t('swept'), swept == null ? '—' : String(swept)]], demo: false, chart: null, bars: null, mark: true, who: nm || null, whoAt: 'eyebrow', cap: t('capD')(s, v == null ? 0 : v) };
     };
     w.__disc = true; w.__congrats = true; w.__name = true; w.__stats = true; w.__po = true; window.shData = w;
   })(0);
@@ -4568,15 +4601,32 @@ window.SweepMO = window.SweepMO || class {
     const w = async function () {
       const out = await orig.apply(this, arguments);
       try {
-        if (SH.kind !== 'discipline' && SH.kind !== 'stats') return out;
+        if (SH.kind === 'discipline' || SH.kind === 'swept') document.querySelectorAll('#shPanel .sh-tg [data-sh]').forEach((i) => { const l = i.closest('label'); if (l) l.remove(); });   // no amount, no firm on these cards: no switch for them
+        const alt = SH.alt ? SH.alt[0] : 'stats';   // the card asked for (or Stats, from the Stats page)
+        if (!SH.alt && SH.kind !== 'discipline' && SH.kind !== 'stats') return out;
         const head = document.querySelector('#shPanel .sh-head'); if (!head || document.querySelector('#shPanel .nav-dk')) return out;
-        head.insertAdjacentHTML('afterend', `<div class="seg nav-dk" data-noi18n><button type="button" class="${SH.kind === 'discipline' ? 'on' : ''}" data-dk="discipline">${t('kDisc')}</button><button type="button" class="${SH.kind === 'stats' ? 'on' : ''}" data-dk="stats">${t('kStats')}</button></div>`);
+        head.insertAdjacentHTML('afterend', `<div class="seg nav-dk" data-noi18n><button type="button" class="${SH.kind === 'discipline' ? 'on' : ''}" data-dk="discipline">${t('kDisc')}</button><button type="button" class="${SH.kind !== 'discipline' ? 'on' : ''}" data-dk="${alt}">${esc(t('kAlt')[alt] || t('kStats'))}</button></div>`);
       } catch (e) { /* never blocks */ }
       return out;
     };
     w.__disc = true; w.__focus = true; w.__stl = true; w.__name = true; w.__link = true; w.__po = true; window.shRender = w;
   })(0);
-  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-dk]'); if (!b) return; SH.kind = b.dataset.dk; SH.id = 'view'; SH.blob = null; shRender(); });
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-dk]'); if (!b) return; const k = b.dataset.dk; SH.kind = k; SH.id = k !== 'discipline' && SH.alt ? SH.alt[1] : 'view'; SH.blob = null; shRender(); });
+  // brief 02 part 12: the Discipline card first, everywhere (payout, payouts, week, day, trade…): the card asked for is one tap away
+  (function wrapO(n) {
+    if (typeof window.openShare !== 'function') { if (n < 150) setTimeout(() => wrapO(n + 1), 150); return; }
+    if (window.openShare.__disc) return;
+    const orig = window.openShare;
+    const w = async function (kind, id) {
+      if (kind === 'discipline' || kind === 'swept') { SH.alt = null; return orig.apply(this, arguments); }
+      SH.alt = [kind, id];
+      await loadSwept();
+      const out = await orig.call(this, 'discipline', 'view');
+      if (kind === 'payout' && typeof confetti === 'function') confetti();   // the payout moment keeps its confetti
+      return out;
+    };
+    w.__disc = true; window.openShare = w;
+  })(0);
   document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('.nav-shstats')) { e.stopImmediatePropagation(); loadSwept().then(() => openShare('discipline', 'view')); } }, true);   // discipline first
 
   /* 19. end of the Pro trial: from day 50 (10 days left) until dismissed, the paid features the trader really uses
@@ -4779,8 +4829,8 @@ document.addEventListener('click', (e) => {
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
     en: { label: 'Day swept', eb: 'I completed my discipline today', sub: 'Have you completed yours?', streak: 'Streak', disc: 'Discipline', swept: 'Days swept', cap: (s) => `I completed my discipline today: plan, execution, review ✅${s ? ` ${s}-day streak.` : ''} Have you completed yours? makeitsweep.com` },
-    fr: { label: 'Journée réussie', eb: 'J’ai complété ma discipline aujourd’hui', sub: 'Et toi, as-tu complété la tienne ?', streak: 'Série', disc: 'Discipline', swept: 'Jours réussis', cap: (s) => `J’ai complété ma discipline aujourd’hui : plan, exécution, revue ✅${s ? ` ${s} jours de suite.` : ''} Et toi, as-tu complété la tienne ? makeitsweep.com` },
-    es: { label: 'Día completado', eb: 'Hoy completé mi disciplina', sub: '¿Y tú, completaste la tuya?', streak: 'Racha', disc: 'Disciplina', swept: 'Días completados', cap: (s) => `Hoy completé mi disciplina: plan, ejecución, revisión ✅${s ? ` ${s} días seguidos.` : ''} ¿Y tú, completaste la tuya? makeitsweep.com` } };
+    fr: { label: 'Journée réussie', eb: 'J’ai complété ma discipline aujourd’hui', sub: 'Et toi, as-tu complété la tienne ?', streak: 'Série', disc: 'Discipline', swept: 'Journées balayées', cap: (s) => `J’ai complété ma discipline aujourd’hui : plan, exécution, revue ✅${s ? ` ${s} jours de suite.` : ''} Et toi, as-tu complété la tienne ? makeitsweep.com` },
+    es: { label: 'Día completado', eb: 'Hoy completé mi disciplina', sub: '¿Y tú, completaste la tuya?', streak: 'Racha', disc: 'Disciplina', swept: 'Días barridos', cap: (s) => `Hoy completé mi disciplina: plan, ejecución, revisión ✅${s ? ` ${s} días seguidos.` : ''} ¿Y tú, completaste la tuya? makeitsweep.com` } };
   const t = (k) => (T[L] || T.en)[k];
   let swept = null, disc = null;
   async function load() {
@@ -4799,7 +4849,7 @@ document.addEventListener('click', (e) => {
     const w = function (kind) {
       if (kind !== 'swept') return orig.apply(this, arguments);
       const st = window.SweepGame && SweepGame.state && SweepGame.state(); const p = (st && st.profile) || {};
-      const s = (p.streak && p.streak.current) || 0, nm = window.SweepName && SweepName.get();
+      const s = (p.streak && p.streak.current) || 0, nm = window.SweepName && SweepName.shown() && SweepName.first();
       return { label: t('label'), eyebrow: t('eb'), big: '3/3 ✓', tone: 'pos', sub: t('sub'),
         stats: [[t('streak'), String(s)], [t('disc'), disc || '—'], [t('swept'), swept == null ? '—' : String(swept)]],
         demo: false, chart: null, bars: null, mark: true, who: nm || null, whoAt: 'eyebrow', cap: t('cap')(s) };

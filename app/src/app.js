@@ -6735,7 +6735,7 @@ const SH = {
   kind: null,
   id: null,
   fmt: "post",
-  amounts: !0,
+  amounts: !1,   // dollars hidden until the trader turns them on (brief 02 part 12: discipline first)
   firm: !0,
   blob: null,
   url: null,

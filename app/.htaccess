@@ -25,7 +25,8 @@ DirectoryIndex api.php
   RewriteRule ^index\.html?$ api.php?r=app [L,QSA]
   RewriteRule ^api/(.*)$ api.php?r=api/$1 [L,QSA]
   RewriteRule ^r/([A-Za-z0-9]{3,16})/?$ api.php?r=ref/$1 [L,QSA]
-  RewriteRule ^s/([A-Za-z0-9]{10,24}(\.png)?)$ api.php?r=s/$1 [L,QSA]
+  RewriteRule ^s/([A-Za-z0-9]{10,24}(-og)?(\.png)?)$ api.php?r=s/$1 [L,QSA]
+  RewriteRule ^p/([A-Za-z0-9]{10,24})$ api.php?r=p/$1 [L,QSA]
   RewriteRule ^uploads/([A-Za-z0-9-]+)$ api.php?r=uploads/$1 [L,QSA]
 </IfModule>
 

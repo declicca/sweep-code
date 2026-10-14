@@ -7,7 +7,8 @@ $route = null;
 if ($rel === '' || preg_match('#^index\.html?$#', $rel)) $route = 'app';
 elseif (preg_match('#^api/(.*)$#', $rel, $m)) $route = 'api/' . $m[1];
 elseif (preg_match('#^r/([A-Za-z0-9]{3,16})/?$#', $rel, $m)) $route = 'ref/' . $m[1];
-elseif (preg_match('#^s/([A-Za-z0-9]{10,24}(\.png)?)$#', $rel, $m)) $route = 's/' . $m[1];
+elseif (preg_match('#^s/([A-Za-z0-9]{10,24}(-og)?(\.png)?)$#', $rel, $m)) $route = 's/' . $m[1];
+elseif (preg_match('#^p/([A-Za-z0-9]{10,24})$#', $rel, $m)) $route = 'p/' . $m[1];
 elseif (preg_match('#^uploads/([A-Za-z0-9-]+)$#', $rel, $m)) $route = 'uploads/' . $m[1];
 if ($route === null) {
     if (is_file(__DIR__ . '/' . $rel) || $rel === 'api.php') return false;   // static file served by php -S
