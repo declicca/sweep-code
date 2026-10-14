@@ -39,9 +39,10 @@ async def main():
       ok(first and await pg.evaluate("document.querySelector('#main .ux-health-admin h2').textContent") == 'Santé', f'{tag} « Santé » comes first on the Admin page')
       rows = await pg.evaluate("[...document.querySelectorAll('#main .ux-hl-list li')].map(l=>({c:l.className, b:l.querySelector('b').textContent, chip:l.querySelector('.ux-pr-chip').textContent, t:l.innerText.replace(/\\s+/g,' ')}))")
       want = [('ux-hl-ok', 'Jeu, rappels, courriel « Ta semaine »', 'OK'), ('ux-hl-bad', 'Graphiques des trades', 'Échec'), ('ux-hl-bad', 'Vérification des règles des firmes', 'Jamais exécutée'),
-              ('ux-hl-late', 'Sauvegarde', 'En retard'), ('ux-hl-ok', 'Test de restauration', 'En cours')]
+              ('ux-hl-late', 'Sauvegarde', 'En retard'), ('ux-hl-ok', 'Test de restauration', 'En cours'),
+              ('ux-hl-bad', 'Courriels : événements du jour (Loops)', 'Jamais exécutée')]
       got = [(r['c'], r['b'], r['chip']) for r in rows]
-      ok(got == want, f'{tag} one line per task: OK, Échec, Jamais exécutée, En retard, En cours ({got})')
+      ok(got == want, f'{tag} one line per task: OK, Échec, Jamais exécutée, En retard, En cours, Jamais exécutée ({got})')
       ok('Databento: 401 Unauthorized' in rows[1]['t'] and 'toutes les heures' in rows[1]['t'], f'{tag} the failed task shows its error and its schedule')
       ok('12 player(s)' in rows[0]['t'] and re.search(r'il y a \d+ min|à l’instant', rows[0]['t']) and '2,3 s' in rows[0]['t'], f'{tag} last run, how long ago, duration ({rows[0]["t"][:110]})')
       cmd = await pg.evaluate("document.querySelector('#main .ux-hl-list li code').textContent")

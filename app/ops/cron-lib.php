@@ -16,6 +16,7 @@ const SWEEP_CRON_TASKS = [
     'presets'      => ['presets/cron.php', '0 5 * * 1', 604800, false],
     'backup'       => ['ops/backup.php', '30 3 * * *', 86400, true],         // prints only when something goes wrong
     'restore_test' => ['ops/restore-test.php', '0 6 * * 1', 604800, true],   // its report is the weekly proof that backups restore
+    'emails'       => ['loops/cron.php', '30 * * * *', 3600, false],      // Loops: the daily events from 7:30 New York time (the other runs catch up)
 ];
 
 function sweep_cron_schema(PDO $pdo): void

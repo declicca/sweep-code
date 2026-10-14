@@ -174,7 +174,7 @@ function sb_handle_event(PDO $pdo, array $event): string
     if ($id === '') return 'ignored: no id';
     if (sb_q($pdo, 'SELECT 1 FROM billing_webhooks WHERE event_id = ?', [$id])->fetchColumn()) return 'duplicate';
 
-    $result = 'ignored';
+    $result = 'ignored'; $uid = null;
     switch ($type) {
         case 'checkout.session.completed':
             if (($obj['mode'] ?? '') === 'subscription' && !empty($obj['subscription'])) {
@@ -206,6 +206,10 @@ function sb_handle_event(PDO $pdo, array $event): string
                 }
             }
             break;
+    }
+    // automatic emails (loops/loops.php): subscriptionStarted, subscriptionCanceled, paymentFailed, or the contact's new plan
+    if ($uid && function_exists('loops_stripe')) {
+        try { loops_stripe($pdo, $type, $obj, (array) ($event['data']['previous_attributes'] ?? []), (string) $uid); } catch (Throwable $e) { error_log('[Sweep loops] stripe ' . $type . ': ' . $e->getMessage()); }
     }
     sb_q($pdo, 'INSERT INTO billing_webhooks (event_id, type, at) VALUES (?, ?, ?)', [$id, $type, sb_now()]);
     return $result;
