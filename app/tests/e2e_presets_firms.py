@@ -96,11 +96,15 @@ async def main():
     ban = pg.locator('.ux-newrules')
     ok(await ban.count() == 1 and 'Minimum par jour gagnant' in await ban.inner_text(), 'the account shows « Apex Trader Funding a changé ses règles » with what changes')
     await ban.screenshot(path='/tmp/pr_banner.png')
-    await pg.locator('[data-nr-apply]').click(); await pg.wait_for_timeout(900)
+    await pg.locator('[data-nr-apply]').click()
+    try: await pg.wait_for_function("!document.querySelector('.ux-newrules')", timeout=5000)
+    except Exception: pass
     r = await pg.evaluate(f"getDoc('accounts','{acc}').rules.payout_win_min_c")
     ok(r == want and await pg.locator('.ux-newrules').count() == 0, f'« Appliquer les nouvelles règles »: the catalogue minimum per winning day ({r} = {want}), banner gone')
     await pg.evaluate(f"editDoc('accounts','{acc}',d=>{{d.rules.payout_win_min_c={want + 5000}; d.preset_ver='old'}})"); await pg.evaluate("render()"); await pg.wait_for_timeout(700)
-    await pg.locator('[data-nr-keep]').click(); await pg.wait_for_timeout(700)
+    await pg.locator('[data-nr-keep]').click()
+    try: await pg.wait_for_function("!document.querySelector('.ux-newrules')", timeout=5000)   # the page draws again after the save (slower on CI)
+    except Exception: pass
     ok(await pg.evaluate(f"getDoc('accounts','{acc}').rules.payout_win_min_c") == want + 5000 and await pg.locator('.ux-newrules').count() == 0, '« Garder mes règles »: rules kept, banner gone')
 
     print('— 5. Admin → Presets')
