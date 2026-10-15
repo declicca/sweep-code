@@ -138,8 +138,39 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         $errs['groups_30d'] = array_map(fn($x) => ['msg' => $x['msg'], 'n' => $x['n'], 'traders' => $x['traders'], 'first' => gmdate('c', $x['first']), 'last' => gmdate('c', $x['last']),
             'pages' => $x['pages'], 'browsers' => $x['browsers'], 'versions' => $x['versions'], 'where' => $x['where']], array_slice(sweep_err_groups($pdo, $now), 0, 20));
     }
+    // the game's use over 30 days (brief 02 part 11): among the active traders (a trade, a plan or a review on a session of
+    // the last 30 days; Mateo's and test accounts aside), those who used each feature (an action of theirs) or reached it
+    // (given by journaling: missions, badges, levels…). After 30 days of data, the ones under 10 % go to NOTES.md.
+    $game = null;
+    if ($has('game_days') && $has('game_analytics')) {
+        $real = array_fill_keys(array_column($all, 'id'), true);
+        $act30 = [];
+        foreach ($q('SELECT DISTINCT user_id FROM game_days WHERE activity = 1 AND trading_day >= ?', [$nyDay($now - 30 * $day)])->fetchAll(PDO::FETCH_COLUMN) as $u) if (isset($real[$u])) $act30[$u] = true;
+        $ev = [];
+        foreach ($q('SELECT DISTINCT user_id, event FROM game_analytics WHERE created_at > ?', [$now - 30 * $day]) as $r) if (isset($act30[$r['user_id']])) $ev[$r['event']][$r['user_id']] = true;
+        $rows = function (string $sql) use ($q, $has, $act30): array { try { $o = []; foreach ($q($sql)->fetchAll(PDO::FETCH_COLUMN) as $u) if (isset($act30[$u])) $o[$u] = true; return $o; } catch (Throwable $e) { return []; } };
+        $any = function (array $events, array ...$more) use ($ev): array { $o = []; foreach ($events as $e) $o += $ev[$e] ?? []; foreach ($more as $m) $o += $m; return $o; };
+        $used = [
+            'share' => $any(['share_card_created', 'share_card_shared']),
+            'weekly_recap' => $any(['weekly_opened']), 'weekly_review' => $any(['weekly_review_done']), 'chest' => $any(['chest_opened']), 'edge_reveal' => $any(['edge_reveal_viewed']),
+            'wrapped' => $any(['wrapped_viewed']), 'season' => $any(['season_tier_claimed']),
+            'league' => $any(['league_joined'], $has('social_profile') ? $rows('SELECT user_id FROM social_profile WHERE league_opt_in = 1') : []),
+            'crew' => $any(['crew_created', 'crew_joined'], $has('crew_members') ? $rows('SELECT user_id FROM crew_members') : []),
+            'buddy' => $any(['buddy_linked', 'buddy_encourage']),
+            'discord' => $any(['discord_linked'], $has('social_profile') ? $rows("SELECT user_id FROM social_profile WHERE discord_user_id IS NOT NULL AND discord_user_id <> ''") : []),
+            'theme' => $any(['cosmetic_equipped'], $has('user_cosmetics') ? $rows('SELECT user_id FROM user_cosmetics WHERE equipped = 1') : []),
+            'mission_reroll' => $any(['mission_rerolled']), 'locked_tap' => $any(['locked_feature_tapped']),
+        ];
+        $reached = [
+            'mission' => $any(['mission_completed']), 'badge' => $any(['badge_unlocked']), 'level' => $any(['level_up']), 'swept' => $any(['day_swept']),
+            'streak3' => $has('user_game_profile') ? $rows('SELECT user_id FROM user_game_profile WHERE streak_current >= 3') : [], 'freeze' => $any(['freeze_used']),
+            'map' => $any(['map_node_completed']), 'boss' => $any(['boss_defeated']), 'comeback' => $any(['comeback_started']), 'wow' => $any(['wow_moment']),
+        ];
+        $n = count($act30); $pc = fn(array $x) => ['n' => count($x), 'pct' => $n ? (int) round(count($x) / $n * 100) : 0];
+        $game = ['active_30d' => $n, 'used' => array_map($pc, $used), 'reached' => array_map($pc, $reached)];
+    }
     return [
-        'generated_at' => gmdate('c'), 'users' => count($users), 'brief' => $brief,
+        'generated_at' => gmdate('c'), 'users' => count($users), 'brief' => $brief, 'game' => $game,
         'signups' => ['d7' => count(array_filter($users, fn($u) => $now - $u['ts'] <= 7 * $day)), 'd30' => count(array_filter($users, fn($u) => $now - $u['ts'] <= 30 * $day)), 'by_source_30d' => array_slice($src, 0, 8, true)],
         'north_star' => $north, 'active_7d' => $active7,
         'first_trade' => (function () use ($users, $first) {   // time from sign-up to the first trade (median), and how many log it on day 1

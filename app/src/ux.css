@@ -516,3 +516,6 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 /* Admin › the start (brief 03 step 1) */
 .ux-start-h{margin:18px 0 8px}
 .ux-start td:first-child{width:50%}
+
+/* Admin › Metrics: the game's use over 30 days (brief 02 part 11) */
+.ux-gm{margin-top:22px}.ux-gm h3{margin:0 0 4px;font-size:16px}.ux-gm>p{margin:0 0 10px;font-size:13px}.ux-gm-low b{color:var(--neg,#D4A24C)}

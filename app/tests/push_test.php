@@ -143,6 +143,9 @@ $at('2026-10-19 16:15'); GameNotifyService::run('p6', true); $early = $bell('p6'
 $at('2026-10-19 16:30'); GameNotifyService::run('p6', true); $s = $sent();
 $ok($early === [] && $bell('p6') === ['g_review'] && count($s) === 2 && ($open($s[0], $kfr)['title'] ?? $open($s[1], $kfr)['title'] ?? '') === '60 secondes pour balayer ta journée.' && wp_devices($pdo, 'p6') === 1,
     'review at 16:30 (not 16:15), in French; the device the push service says gone (410) is forgotten');
+$trader('p6b', [['2026-10-16', 0, 0], ['2026-10-19', 2, 0]]); $sub('p6b', 'https://fcm.googleapis.com/fcm/send/p6b', $kfr, 'fr'); wp_set_pref($pdo, 'p6b', 'review', ['at' => '18:30']);
+$at('2026-10-19 18:30'); GameNotifyService::run('p6b', true); $s = $sent();
+$ok($bell('p6b') === ['g_review'] && count($s) === 1, 'review at 18:30 (after the next session began at 18:00): the day that closed, reminded (before 14 Oct.: nothing)');
 $trader('p7', [['2026-10-16', 0, 0], ['2026-10-19', 2, 0]]); $sub('p7', 'https://fcm.googleapis.com/fcm/send/p7', $kfr, 'fr');
 Notify::send('p7', 'fb_planned', [], ['dedupe_key' => 'x7a']); Notify::send('p7', 'chart_ready', [], ['dedupe_key' => 'x7b']);
 $at('2026-10-19 16:30'); GameNotifyService::run('p7', true);

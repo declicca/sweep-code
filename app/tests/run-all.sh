@@ -42,6 +42,7 @@ php tests/copy_stats_test.php > "$out" 2>&1; check copy_stats_test.php $? "$out"
 php tests/ai_chat_test.php > "$out" 2>&1; check ai_chat_test.php $? "$out"
 php tests/push_test.php > "$out" 2>&1; check push_test.php $? "$out"
 php tests/profile_test.php > "$out" 2>&1; check profile_test.php $? "$out"
+php tests/game_session_test.php > "$out" 2>&1; check game_session_test.php $? "$out"
 for t in $CORE; do
   [ -f "tests/$t.py" ] || continue
   reset_attempts; timeout 900 python3 "tests/$t.py" "$BASE" "$STATE" > "$out" 2>&1; check "$t" $? "$out"

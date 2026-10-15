@@ -174,6 +174,7 @@ final class GameV2b
         if ($id !== 'ring_default' && !self::q('SELECT 1 FROM user_cosmetics WHERE user_id = ? AND cosmetic_id = ?', [$uid, $id])->fetchColumn()) return false;
         self::q('UPDATE user_cosmetics SET equipped = 0 WHERE user_id = ?', [$uid]);
         if ($id !== 'ring_default') self::q('UPDATE user_cosmetics SET equipped = 1 WHERE user_id = ? AND cosmetic_id = ?', [$uid, $id]);
+        GameEngine::track($uid, 'cosmetic_equipped', ['id' => $id]);   // Admin › Metrics: the game's use (brief 02 part 11)
         return true;
     }
 

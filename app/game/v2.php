@@ -405,6 +405,7 @@ final class GameV2
         if (!$id) return false;
         self::q('UPDATE user_missions SET mission_id = ?, target = ?, progress = 0, rerolled = 1 WHERE id = ?', [$id, GAME_MISSIONS[$id][1], $r['id']]);
         self::updateMissions($uid, $mon);
+        GameEngine::track($uid, 'mission_rerolled', ['mission' => $id]);   // Admin › Metrics: the game's use (brief 02 part 11)
         return true;
     }
 

@@ -810,7 +810,7 @@ function game_route(string $route, string $method, string $uid): void
     if ($route === 'api/game/season' && $method === 'GET') json_out(200, GameSeason::state($uid));
     if ($route === 'api/game/season/claim' && $method === 'POST') { $b = body_json(256); $r = GameSeason::claim($uid, (int) ($b['tier'] ?? 0), (string) ($b['track'] ?? '')); json_out(isset($r['error']) ? 400 : 200, $r + ['season' => GameSeason::state($uid)]); }
     if ($route === 'api/game/wrapped' && $method === 'GET') json_out(200, GameWrapped::state($uid));
-    if ($route === 'api/game/wrapped/viewed' && $method === 'POST') { $b = body_json(256); if (preg_match('/^\d{4}-\d{2}$/', (string) ($b['month'] ?? ''))) GameWrapped::viewed($uid, $b['month']); json_out(200, ['ok' => true]); }
+    if ($route === 'api/game/wrapped/viewed' && $method === 'POST') { $b = body_json(256); if (preg_match('/^\d{4}-(\d{2}|AN)$/', (string) ($b['month'] ?? ''))) GameWrapped::viewed($uid, $b['month']); json_out(200, ['ok' => true]); }   // (« YYYY-AN »: the year's Wrapped, never recorded before 14 Oct.)
     if ($route === 'api/game/weekly' && $method === 'GET') { $w = GameV2b::weeklyState($uid); if (!empty($w['open'])) GameV2b::markSeen($uid, (string) $w['week']); json_out(200, $w); }   // opening the recap = seen (no reminder, no email after)
     if ($route === 'api/game/weekly' && $method === 'POST') { $r = GameV2b::saveWeekly($uid, body_json(4096)); json_out(isset($r['error']) ? 400 : 200, $r + ['celebrations' => GameEngine::pendingCelebrations($uid)]); }
     if ($route === 'api/game/chest' && $method === 'POST') { $r = GameV2b::openChest($uid); json_out(isset($r['error']) ? 400 : 200, $r + ['cosmetics' => GameV2b::cosmetics($uid)]); }

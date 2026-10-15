@@ -42,7 +42,10 @@ final class GameNotifyService
         $p = GameEngine::profile($uid, false); if (!$p) return;
         // only traders who used Sweep in the last 14 days
         $active = (bool) GameEngine::q('SELECT 1 FROM game_days WHERE user_id = ? AND activity = 1 AND trading_day >= ?', [$uid, GameEngine::addDays($date, -14)])->fetchColumn();
-        $day = GameEngine::today();
+        // the session the reminders speak of: today's in New York (the plan before the open, the review and the streak after
+        // the close). From 18:00 GameEngine::today() is already the next session: before 14 Oct. (brief 02 part 11), the evening
+        // reminders looked at that next day (no review reminder after 18:00, the streak checked on the wrong day)
+        $day = $date;
         $g = GameEngine::q('SELECT * FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $day])->fetch(PDO::FETCH_ASSOC) ?: null;
         $market = GameEngine::isMarketDay($day);
         // the trader's times (Settings › Notifications; 8:45, 16:30 and 17:00 New York by default), never after 9:30 / 21:00

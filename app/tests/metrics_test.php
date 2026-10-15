@@ -88,6 +88,18 @@ $ok($s['plan'] === ['n' => 1, 'median_min' => 5] && $s['trade'] === ['n' => 2, '
 $st = sweep_metrics($pdo, $app, ['source' => 'tiktok'])['brief']['start'];
 $ok($st['signed_up'] === 3 && $st['first_name']['n'] === 2 && $st['account'] === ['n' => 1, 'median_min' => 2], 'source « tiktok »: 3 signed up, 2 first names, 1 account at 2 min: ' . json_encode($st));
 
+// the game's use over 30 days (brief 02 part 11): active traders = a trade, a plan or a review on a session of the last 30 days
+$user('ga', $at(50), 'x'); $user('gb', $at(50), 'x'); $user('gc', $at(50), 'x'); $user('gold', $at(90), 'x'); $user('gstaff', $at(50), 'x', 1);
+foreach (['ga', 'gb', 'gc', 'gstaff'] as $u) $gd($u, $day($at(3)), 1, 1, 0);
+$gd('gold', $day($at(60)), 1, 1, 0);   // not active for 30 days
+$ev = fn(string $u, string $e, int $ts) => $pdo->prepare('INSERT INTO game_analytics VALUES (?, ?, ?, ?)')->execute([$u, $e, $ts, '{}']);
+$ev('ga', 'share_card_shared', $at(2)); $ev('ga', 'share_card_created', $at(2)); $ev('gstaff', 'share_card_shared', $at(2)); $ev('gold', 'share_card_shared', $at(2));
+$ev('gb', 'chest_opened', $at(40)); $ev('gc', 'mission_completed', $at(5)); $ev('ga', 'mission_completed', $at(6));
+$g = sweep_metrics($pdo, $app)['game'];
+$n = $g['active_30d'];
+$ok($n >= 3 && $g['used']['share']['n'] === 1 && $g['used']['share']['pct'] === (int) round(100 / $n) && $g['used']['chest']['n'] === 0 && $g['reached']['mission']['n'] === 2,
+    "the game's use: of the $n active traders, 1 shared a card (Mateo's account and an inactive trader aside, twice counted once), no chest within 30 days, 2 missions: " . json_encode([$g['used']['share'], $g['used']['chest'], $g['reached']['mission']]));
+
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

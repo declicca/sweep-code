@@ -830,7 +830,26 @@
         ${card(x.ai, '$' + d.ai.today.toFixed(2), x.today + ' · $' + d.ai.d7.toFixed(2) + ' ' + x.d7)}${card(x.err, d.errors.js_24h + d.errors.php_24h, x.js + ' ' + d.errors.js_24h + ' · ' + x.php + ' ' + d.errors.php_24h)}
         ${card(x.mrr, d.revenue.mrr != null ? '$' + d.revenue.mrr : '—', (d.revenue.subs || []).map((s) => `${s.plan} ${s.i || ''} ×${s.n}`).join(' · '))}</div>
       <div class="ux-mlists"><div><h4>${x.src}</h4><ul>${list(d.signups.by_source_30d)}</ul></div><div><h4>${x.meth}</h4><ul>${list(d.trade_methods_30d)}</ul></div><div><h4>${{ en: 'Searches with no result (30 d)', fr: 'Recherches sans résultat (30 j)', es: 'Búsquedas sin resultado (30 d)' }[LANG] || 'Searches with no result (30 d)'}</h4><ul>${list(d.search_misses_30d)}</ul></div>
-      </div>${briefHtml(d)}`;
+      </div>${briefHtml(d)}${gameHtml(d)}`;
+  }
+  // brief 02 part 11: each game feature, the share of the active traders (30 d) who used it or reached it; under 10 % in gold
+  const GL = {
+    en: { h: 'Game · use over 30 days', sub: 'Of the {n} active traders (a trade, a plan or a review in 30 days). Under 10 %: in gold (to list in NOTES.md after 30 days of data).', used: 'Used (their action)', reached: 'Reached (by journaling)',
+      f: { share: 'Shared a card', weekly_recap: 'Opened the week’s recap', weekly_review: 'Weekly review', chest: 'Opened a chest', edge_reveal: 'Edge Reveal', wrapped: 'Wrapped', season: 'Season reward claimed', league: 'League', crew: 'Crew', buddy: 'Buddy', discord: 'Discord', theme: 'Ring theme', mission_reroll: 'Mission rerolled', locked_tap: 'Tapped a locked feature',
+        mission: 'Mission completed', badge: 'Badge', level: 'Level up', swept: 'Day swept', streak3: 'Streak of 3+ (now)', freeze: 'Freeze used', map: 'Journey step', boss: 'Special mission beaten', comeback: 'Comeback quest', wow: 'Milestone' } },
+    fr: { h: 'Jeu · utilisation sur 30 jours', sub: 'Sur les {n} traders actifs (un trade, un plan ou une revue en 30 jours). Sous 10 % : en or (à noter dans NOTES.md après 30 jours de données).', used: 'Utilisé (une action du trader)', reached: 'Atteint (en journalisant)',
+      f: { share: 'Carte partagée', weekly_recap: 'Bilan de la semaine ouvert', weekly_review: 'Revue de la semaine', chest: 'Coffre ouvert', edge_reveal: 'Edge Reveal', wrapped: 'Wrapped', season: 'Récompense de saison', league: 'Ligue', crew: 'Crew', buddy: 'Buddy', discord: 'Discord', theme: 'Thème des anneaux', mission_reroll: 'Mission changée', locked_tap: 'Fonction verrouillée touchée',
+        mission: 'Mission réussie', badge: 'Badge', level: 'Niveau gagné', swept: 'Journée balayée', streak3: 'Streak de 3 et plus (maintenant)', freeze: 'Gel utilisé', map: 'Étape du parcours', boss: 'Mission spéciale battue', comeback: 'Quête de retour', wow: 'Étape importante' } },
+    es: { h: 'Juego · uso en 30 días', sub: 'De los {n} traders activos (una operación, un plan o una revisión en 30 días). Menos del 10 %: en oro (anotar en NOTES.md tras 30 días de datos).', used: 'Usado (acción del trader)', reached: 'Alcanzado (al registrar)',
+      f: { share: 'Tarjeta compartida', weekly_recap: 'Balance de la semana abierto', weekly_review: 'Revisión semanal', chest: 'Cofre abierto', edge_reveal: 'Edge Reveal', wrapped: 'Wrapped', season: 'Recompensa de temporada', league: 'Liga', crew: 'Crew', buddy: 'Buddy', discord: 'Discord', theme: 'Tema de los anillos', mission_reroll: 'Misión cambiada', locked_tap: 'Función bloqueada tocada',
+        mission: 'Misión completada', badge: 'Insignia', level: 'Nivel ganado', swept: 'Día barrido', streak3: 'Racha de 3 o más (ahora)', freeze: 'Congelación usada', map: 'Paso del recorrido', boss: 'Misión especial vencida', comeback: 'Misión de regreso', wow: 'Hito' } },
+  };
+  function gameHtml(d) {
+    const g = d.game; if (!g) return '';
+    const x = GL[LANG] || GL.en, pc = (v) => v + (LANG === 'en' ? '%' : '\u202f%');
+    const ul = (o) => Object.entries(o).sort((a, b) => b[1].pct - a[1].pct).map(([k, v]) => `<li class="${v.pct < 10 ? 'ux-gm-low' : ''}" data-gm="${k}"><span>${esc(x.f[k] || k)}</span><b>${pc(v.pct)} <small class="muted">${v.n}</small></b></li>`).join('');
+    return `<section class="ux-gm" data-noi18n><h3>${x.h}</h3><p class="muted">${esc(x.sub.replace('{n}', g.active_30d))}</p>
+      <div class="ux-mlists"><div><h4>${x.used}</h4><ul>${ul(g.used)}</ul></div><div><h4>${x.reached}</h4><ul>${ul(g.reached)}</ul></div></div></section>`;
   }
   function paint() {
     if (route().v !== 'admin') return;
