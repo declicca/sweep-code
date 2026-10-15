@@ -101,7 +101,7 @@ with sync_playwright() as p:
   pg.evaluate("location.hash='#payouts'"); pg.wait_for_timeout(2000)
   for per, mt in [('month', 'all'), ('year', 'funded'), ('all', 'live')]:
     pg.evaluate(f"(()=>{{U.mper='{per}'; U.mtype='{mt}'; F.firm='all'; F.account='all'; saveU(); render()}})()"); pg.wait_for_timeout(900)
-    with pg.expect_download() as d: pg.locator('#main [data-mny=csv]').first.click()
+    with pg.expect_download() as d: pg.locator('.top [data-mny=csv]').first.click()
     rows = list(csv.reader(io.StringIO(open(d.value.path(), encoding='utf-8-sig').read())))[1:]
     exp = pg.evaluate("""(()=>{const [from,to]=SweepMoney.periodOf(U.mper,U.mcustom); const m=SweepMoney.moneyOf({from,to,mtype:U.mtype}); const inP=d=>!!d&&(!from||d>=from)&&(!to||d<=to);
       return [m.payouts.filter(p=>SweepMoney.pState(p)==='paid'&&inP(SweepMoney.pPaidOn(p))).length + m.expenses.length + m.trades.filter(t=>['live','personal'].includes(moneyTypeOf(S.accounts.find(a=>a.id===t.account_id)))).length, from, to]})()""")

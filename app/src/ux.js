@@ -1768,7 +1768,7 @@
   const pct = (v) => (v == null ? '—' : Math.round(v * 100) + ' %');
   /** what the page shows: period, account type, firm, account — the CSV uses exactly the same (9, 18.1) */
   const viewOpts = () => { const [from, to] = M.periodOf(P(), U.mcustom); return { from, to, firm: F.firm !== 'all' ? F.firm : '', account: F.account !== 'all' ? F.account : '', mtype: (typeof U !== 'undefined' && U.mtype) || 'all' }; };
-  function view() {
+  function view(typeMoved) {
     const per = P(), o = viewOpts(), from = o.from, to = o.to;
     const m = M.moneyOf(o);
     const r = m.real, i = m.ind;
@@ -1792,8 +1792,7 @@
         <div class="pz-right"><span class="pz-amt-v ${(e.amount_c || 0) < 0 ? 'pos' : 'neg'}">${mS(-(e.amount_c || 0))}</span></div></li>`).join('');
     const firmRows = m.byFirm.map((f) => `<tr><td>${esc2(firmName(f.firm_id))}</td><td>${mU(f.spent)}</td><td class="${f.received ? 'pos' : ''}">${mU(f.received)}</td><td class="${f.net >= 0 ? 'pos' : 'neg'}">${mS(f.net)}</td><td>${pct(f.roi)}</td><td>${f.bought} · ${f.passed} · ${f.failed} · ${f.paid}</td></tr>`).join('');
     return `<div class="mny" data-noi18n>
-      ${window.SweepTypeSeg ? `<div class="mny-typerow">${SweepTypeSeg()}</div>` : ''}
-      <div class="mny-top"><div class="mny-tsw"><span class="mny-tsl">${({ fr: 'Période', es: 'Período' })[L] || 'Period'}</span><div class="seg mny-per" role="group">${seg}</div></div><button type="button" class="btn" data-mny="csv">${x.export}</button></div>${custom}
+      <div class="mny-top">${window.SweepTypeSeg && !typeMoved ? SweepTypeSeg() : ''}<div class="mny-tsw"><span class="mny-tsl">${({ fr: 'Période', es: 'Período' })[L] || 'Period'}</span><div class="seg mny-per" role="group">${seg}</div></div></div>${custom}
       ${seg2}
       ${mv === 'entries' ? `<div class="mny-pane" data-mny-pane="entries">
         <div class="mny-actions"><button type="button" class="btn primary nav-pz-b" data-k="payout" data-mny="addP" aria-expanded="${!!U.addP}" aria-label="${vx.addPay}">+ <span class="l">${vx.addPay}</span><span class="s">${vx.pay}</span></button><button type="button" class="btn" data-mny="addE" aria-expanded="${!!U.addE}" aria-label="${vx.addExp}">+ <span class="l">${vx.addExp}</span><span class="s">${vx.exp}</span></button></div>
@@ -1821,8 +1820,30 @@
   }
   vPayouts = function () {
     if (!S.accounts.length) return onboarding();
-    return (typeof filterBar === 'function' ? filterBar({ period: false, session: false, dir: false }) : '') + `<div data-lock="payouts" data-feature="payouts" class="bill-lock">${view()}</div>`;
+    let fb = typeof filterBar === 'function' ? filterBar({ period: false, session: false, dir: false }) : '';
+    // phone: the account type sits on the line of « Filters », one line that scrolls, as on Trades, Calendar and Stats
+    const r = fb.indexOf('<div class="mfb-row">'), e = r < 0 ? -1 : fb.indexOf('</button></div>', r);
+    const moved = e > 0 && !!window.SweepTypeSeg;
+    if (moved) fb = fb.slice(0, e + 9) + SweepTypeSeg() + fb.slice(e + 9);
+    return fb + `<div data-lock="payouts" data-feature="payouts" class="bill-lock">${view(moved)}</div>`;
   };
+  // « Export (CSV) » is the page's action, in its title row like « Share my stats » on Stats: one row less above the entries
+  function exportButton() {
+    const top = document.querySelector('.main-wrap .top'); if (!top) return;
+    let b = top.querySelector('.mny-exp');
+    const on = /^#payouts/.test(location.hash || '') && !!document.querySelector('#main .mny');
+    if (!on) { if (b) b.remove(); return; }
+    if (b) return;
+    b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm mny-exp'; b.dataset.mny = 'csv'; b.setAttribute('data-noi18n', '');
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/></svg><span class="l">' + x.export + '</span><span class="s">' + x.export.replace(/\s*\(CSV\)$/, '') + '</span>';   // phone: « Export »
+    (top.querySelector('.nav-titleacts') || top).append(b);
+  }
+  const appRender0 = window.render;
+  if (typeof appRender0 === 'function' && !appRender0.__mnyexp) {
+    const w = function () { const out = appRender0.apply(this, arguments); try { exportButton(); } catch (e) { /* never blocks */ } return out; };
+    w.__mnyexp = true; window.render = w;
+  }
+  window.addEventListener('hashchange', () => setTimeout(() => { try { exportButton(); } catch (e) { /* never blocks */ } }, 50));
   const EST = () => ({ en: 'estimated', fr: 'estimé', es: 'estimado' })[L] || 'estimated';   // catch-up entries (section 29)
   /** the CSV of what is on screen: the active period and every active filter (account type, firm, account) */
   function csvView() {

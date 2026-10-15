@@ -151,7 +151,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 .pz-main b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pz-main small{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pz-right{display:flex;align-items:center;gap:10px}
-.pz-amt-v{font-family:var(--mono,ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:500}
+.pz-amt-v{font-family:var(--font-num,'Geist Mono',ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:600;font-size:14.5px;letter-spacing:-.02em}   /* (var(--mono) did not exist: the system's monospace) */
 .pz-pill{font-size:12px;padding:3px 8px;border-radius:999px;background:var(--panel2);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
 .pz-pill.paid{background:var(--posbg);color:var(--pos);box-shadow:none}
 .pz-pill.requested,.pz-pill.approved,.pz-pill.planned{background:var(--negbg);color:var(--neg);box-shadow:none}
