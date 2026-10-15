@@ -47,9 +47,13 @@ async def run(br,w,h,mob,lang):
   await pg.wait_for_timeout(1200)
   import re as _re
   WK={'en':r'^(Week|This week)$','fr':r'^(Semaine|Cette semaine)$','es':r'^(Semana|Esta semana)$'}[lang]
-  wk=pg.locator('#main button, #main a').filter(has_text=_re.compile(WK)).first
+  # (16 Oct.: the period is a pill of the one line of filters; « This week » is one of its choices)
   ok2=False
-  if await wk.count(): await wk.click(); await pg.wait_for_timeout(800); ok2=await wk.evaluate("e=>e.classList.contains('on')||e.getAttribute('aria-pressed')==='true'||e.getAttribute('aria-selected')==='true'")
+  per=pg.locator('#main [data-fx="per"]').first
+  if await per.count():
+    await per.click(); await pg.wait_for_timeout(400)
+    wk=pg.locator('#fxMenu .fxm-o').filter(has_text=_re.compile(WK)).first
+    if await wk.count(): await wk.click(); await pg.wait_for_timeout(800); ok2=await pg.evaluate("F.period==='week' && !document.getElementById('fxMenu')") and bool(_re.search(WK.strip('^$'), (await per.text_content() or '').strip()))
   res['week stats']=('2 (or 0: « This week » card on Today)', ok2)
   # 3 prop account + drawdown distance
   await home(); await pg.locator(tab('accounts')).first.click(); await pg.wait_for_timeout(1200)
