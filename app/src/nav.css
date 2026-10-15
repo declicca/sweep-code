@@ -2026,7 +2026,7 @@ html body #main .nav-rt-s.next .btn.primary{min-height:44px}
 .nav-sgd[open]>summary::after{transform:rotate(-135deg)}
 .nav-sgd>section{margin:0 10px 12px}
 .nav-logout{display:flex;justify-content:center;margin:24px 0 8px}
-.nav-logout .btn{min-height:44px;min-width:160px}
+.nav-logout .btn{min-height:44px;min-width:160px;justify-content:center;text-align:center}
 /* B17: « Avg win / loss » never cut */
 html body #main .ik .lbl{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
 /* brief 02 part 6: on a phone the « i » sits in the tile's corner, the label keeps the whole width (« Gain / perte moy. » on one line) */

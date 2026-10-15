@@ -526,7 +526,10 @@
   }
 
   function dayOff() {
-    if (!G.today || !confirm(t('dayoff_confirm'))) return;
+    if (!G.today) return;
+    window.SweepUndo && SweepUndo.ask ? SweepUndo.ask(t('dayoff_confirm'), '', t('cta_dayoff'), false).then((ok) => ok && dayOffGo()) : null;   // the app's window, never confirm() (brief 02 part 14)
+  }
+  function dayOffGo() {
     const day = G.today.day, j = structuredClone(journalOf(day));
     j.id = day;
     j.pre = Object.assign({}, j.pre || {}, { bias: 'no_trade', day_off: true });
@@ -2025,14 +2028,14 @@
     else if (a === 'cr-create') { const i = document.querySelector('[data-cr-name]'); scPost('api/game/crew/create', { name: i ? i.value : '' }); }
     else if (a === 'cr-goal') scPost('api/game/crew/goal', { factor: +v });
     else if (a === 'cr-react') scPost('api/game/crew/react', { id: +v, emoji: b.dataset.k });
-    else if (a === 'cr-leave') { if (confirm(crt('leave') + ' ?')) scPost('api/game/crew/leave'); }
+    else if (a === 'cr-leave') { SweepUndo.ask(crt('leave') + ' ?', '', crt('leave')).then((ok) => ok && scPost('api/game/crew/leave')); }
     else if (a === 'cr-invite') { const url = location.origin + location.pathname + '#crew/' + v; if (navigator.share) navigator.share({ title: 'Sweep', text: SC.d && SC.d.crew ? SC.d.crew.name : 'Sweep', url }).catch(() => {}); else { navigator.clipboard && navigator.clipboard.writeText(url); toast(crt('copied')); } }
     else if (a === 'bd-invite') { const i = document.querySelector('[data-bd-handle]'); scPost('api/game/buddy/invite', { handle: i ? i.value : '' }); }
     else if (a === 'bd-respond') scPost('api/game/buddy/respond', { accept: v === '1' });
-    else if (a === 'bd-end') { if (confirm(crt('b_end') + ' ?')) scPost('api/game/buddy/end'); }
+    else if (a === 'bd-end') { SweepUndo.ask(crt('b_end') + ' ?', '', crt('b_end')).then((ok) => ok && scPost('api/game/buddy/end')); }
     else if (a === 'bd-cheer') scPost('api/game/buddy/cheer');
     else if (a === 'lg-save') { const i = document.querySelector('[data-lg-handle]'); saveSocial({ handle: i ? i.value.trim() : '' }); }
-    else if (a === 'lg-report') { if (confirm(lgt('report') + ' ?')) apiJSON('api/game/report', { method: 'POST', body: { type: 'handle', id: v } }).then(() => toast(lgt('reported'))).catch(() => {}); }
+    else if (a === 'lg-report') { SweepUndo.ask(lgt('report') + ' ?', '', lgt('report')).then((ok) => ok && apiJSON('api/game/report', { method: 'POST', body: { type: 'handle', id: v } }).then(() => toast(lgt('reported'))).catch(() => {})); }
     else if (a === 'ss-claim') ssClaim(v, b.dataset.k);
     else if (a === 'wrapped') { closeSheet(true); openWrapped(v); }
     else if (a === 'quest') questSheet();

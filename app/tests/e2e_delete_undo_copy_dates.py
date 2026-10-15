@@ -111,6 +111,13 @@ async def main():
         ok(await pg.locator('aside.nav-ask.open').count() == 1 and not dialogs, 'deleting the Sweep account asks in the app’s own window (no browser window)')
         await pg.locator('.nav-ask [data-ask="0"]').click(); await pg.wait_for_timeout(400)
         ok(await pg.evaluate("!!S.me"), '« Annuler » keeps the account')
+      # brief 02 part 14: the other questions too (here: a new recovery code) open the app's window, in French; « Annuler » sends nothing
+      calls = []; pg.on('request', lambda r: calls.append(r.url) if 'account/recovery' in r.url else None)
+      await pg.evaluate("(()=>{S.me.has_recovery=true; const f=document.createElement('form'); f.innerHTML='<input name=password value=x>'; newRecovery(f)})()"); await pg.wait_for_timeout(500)
+      ask = await pg.evaluate("(document.querySelector('aside.nav-ask.open')||{}).textContent||''")
+      ok('Remplacer' in ask and 'code de récupération' in ask and not dialogs, f'a new recovery code asks in the app’s own window, in French ({ask[:90]!r})')
+      await pg.locator('.nav-ask [data-ask="0"]').click(); await pg.wait_for_timeout(500)
+      ok(not calls and await pg.locator('aside.nav-ask.open').count() == 0, '« Annuler »: nothing is sent, the window closes')
       ok(not errs, 'no browser error' + ('' if not errs else ': ' + ' | '.join(errs[:3])))
       await ctx.close()
 

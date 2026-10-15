@@ -568,9 +568,9 @@
   if (typeof loadDemo === 'function') {
     const origDemo = loadDemo;
     const DT = {
-      en: { confirm: 'Add a short preview (about 25 trades on real NQ candles, 5 sample accounts)? You can remove it later from Settings.', adding: 'Adding sample data…', added: 'Added {n} sample trades' },
-      fr: { confirm: 'Ajouter un aperçu (environ 25 trades sur de vraies bougies NQ, 5 comptes d’exemple) ? Tu pourras le retirer dans les Réglages.', adding: 'Ajout des données d’exemple…', added: '{n} trades d’exemple ajoutés' },
-      es: { confirm: '¿Añadir una vista previa (unos 25 trades sobre velas reales de NQ, 5 cuentas de ejemplo)? Podrás quitarla en Ajustes.', adding: 'Añadiendo datos de ejemplo…', added: '{n} trades de ejemplo añadidos' },
+      en: { adding: 'Adding sample data…', added: 'Added {n} sample trades' },
+      fr: { adding: 'Ajout des données d’exemple…', added: '{n} trades d’exemple ajoutés' },
+      es: { adding: 'Añadiendo datos de ejemplo…', added: '{n} trades de ejemplo añadidos' },
     };
     const dt = (k, p) => { let s = (DT[LANG] || DT.en)[k]; if (p) s = s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)); return s; };
     loadDemo = async function () {
@@ -623,8 +623,7 @@
           post: { grade: dayNet > 0 ? pick(['A', 'B']) : pick(['B', 'C', 'D']), followed: dayNet > 0 ? 'yes' : pick(['partly', 'no']) } });
       }
       if (!trades.length) {      // no market data on this install: the previous generator (weekdays only)
-        const c = window.confirm; window.confirm = () => true;
-        try { await origDemo(); } finally { window.confirm = c; }
+        await origDemo();   // (it asks in the app's own window, with its real number of trades)
         return;
       }
       const payouts = [

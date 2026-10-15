@@ -992,8 +992,8 @@ if (LANG !== "en") {
     characterData: !0
   }), document.addEventListener("DOMContentLoaded", () => translateTree(document.body)), 
   document.body && translateTree(document.body);
-  const n = window.confirm.bind(window), s = window.alert.bind(window), i = window.prompt.bind(window);
-  window.confirm = o => n(tr(String(o))), window.alert = o => s(tr(String(o))), window.prompt = (o, r) => i(tr(String(o)), r);
+  const i = window.prompt.bind(window);
+  window.prompt = (o, r) => i(tr(String(o)), r);
 }
 
 function setLang(e) {
@@ -2045,10 +2045,13 @@ function vAdmin() {
   }[(ADM.prov || {}).econ] || "manual entry")}</b></span><span class="faint">·</span><span>Market data: <b>${(ADM.prov || {}).market === "databento" ? "Databento" : "not configured"}</b></span><span class="help">Set in config.php</span></div>\n  <p class="help" style="margin-top:10px;max-width:75ch">Traders' journals are private: this page shows account information and usage only, never their trades or notes.</p>\n  ${aiUsageSection()}${attributionSection()}${growthAdmin()}`;
 }
 
+// brief 02 part 14: never the browser's confirm() / alert(): the app's own window (nav.js SweepUndo.ask), in the trader's language
+const askIn = (q, go = "OK", d = !0) => window.SweepUndo && SweepUndo.ask ? SweepUndo.ask(tr(q), "", tr(go), d) : Promise.resolve(!1);
+
 async function admAction(e, t, a) {
   try {
     if (e === "reset") {
-      if (!confirm(`Reset the password of ${a}? They will be signed out and need the new temporary password.`)) return;
+      if (!await askIn(`Reset the password of ${a}? They will be signed out and need the new temporary password.`, "Reset")) return;
       const n = await apiJSON("api/admin/users/" + encodeURIComponent(t) + "/reset", {
         method: "POST"
       });
@@ -2057,7 +2060,7 @@ async function admAction(e, t, a) {
         pw: n.password
       };
     } else if (e === "disable") {
-      if (!confirm(`Disable ${a}? They are signed out and cannot sign in. Their data is kept.`)) return;
+      if (!await askIn(`Disable ${a}? They are signed out and cannot sign in. Their data is kept.`, "Disable")) return;
       await apiJSON("api/admin/users/" + encodeURIComponent(t) + "/disable", {
         method: "POST"
       }), toast(a + " disabled");
@@ -2132,7 +2135,7 @@ async function newRecovery(e) {
     toast("Enter your current password.");
     return;
   }
-  if (!(S.me.has_recovery && !confirm("Replace your current recovery code? The old one stops working."))) try {
+  if (!(S.me.has_recovery && !await askIn("Replace your current recovery code? The old one stops working.", "Replace", !1))) try {
     const a = await apiJSON("api/account/recovery", {
       method: "POST",
       body: {
@@ -2155,7 +2158,7 @@ async function deleteAccount(e) {
     toast("Enter your password to confirm.");
     return;
   }
-  if (confirm("Delete your account and all of your data permanently?")) try {
+  if (await askIn("Delete your account and all of your data permanently?", "Delete")) try {
     await apiJSON("api/account?_method=DELETE", {
       method: "POST",
       body: {
@@ -8222,7 +8225,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       const k = await L("api/billing/portal", {});
       k.url && (window.location.href = k.url);
     } catch {
-      alert(l("error"));
+      toast(l("error"));
     }
   }
   function ue(k) {
@@ -8315,7 +8318,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
         } catch (ee) {
           se.disabled = !1, se.textContent = l("upgrade_to", {
             plan: p(se.dataset.buy)
-          }), alert(l("error") + (ee && ee.data && ee.data.detail ? `\n\n` + ee.data.detail : ""));
+          }), toast(l("error") + (ee && ee.data && ee.data.detail ? " · " + ee.data.detail : ""));
         }
       }
     };
@@ -9327,7 +9330,7 @@ async function importData(e) {
     return;
   }
   const n = i => (Array.isArray(i) ? i : []).filter(o => o && typeof o == "object" && typeof o.id == "string" && /^[A-Za-z0-9_.:@+~-]{1,120}$/.test(o.id)), s = COLS.reduce((i, o) => i + n(a[o]).length, 0);
-  if (confirm(`Import ${s} records? Records with the same id are replaced; nothing is deleted. Screenshots are not part of exports and are not imported.`)) {
+  if (await askIn(`Import ${s} records? Records with the same id are replaced; nothing is deleted. Screenshots are not part of exports and are not imported.`, "Import", !1)) {
     toast("Importing…", {
       ms: 12e4
     });
@@ -9514,7 +9517,7 @@ async function loadDemo() {
 }
 
 async function removeDemo() {
-  if (confirm("Remove all sample data? Your own trades and accounts are not affected.")) {
+  if (await askIn("Remove all sample data? Your own trades and accounts are not affected.", "Remove")) {
     toast("Removing sample data…", {
       ms: 6e4
     });
@@ -9639,18 +9642,20 @@ document.addEventListener("click", e => {
    case "del-trade":
     {
       const i = getDoc("trades", s.id), o = siblings(s.id);
-      if (!confirm(o.length ? `Delete this copy (${acctLabel(i.account_id)})? The other ${o.length} cop${o.length > 1 ? "ies stay" : "y stays"}.` : "Delete this trade? This cannot be undone.")) break;
-      o.length || (i.shots || []).forEach(r => ASSETS && ASSETS.delete(r.id).catch(() => {})), 
-      remove("trades", s.id), toast("Trade deleted"), location.hash = o.length ? "#trade/" + o[0].id : "#trades";
+      askIn(o.length ? `Delete this copy (${acctLabel(i.account_id)})? The other ${o.length} cop${o.length > 1 ? "ies stay" : "y stays"}.` : "Delete this trade? This cannot be undone.", "Delete").then(ok => {
+        if (!ok) return;
+        o.length || (i.shots || []).forEach(r => ASSETS && ASSETS.delete(r.id).catch(() => {})), remove("trades", s.id), toast("Trade deleted"), location.hash = o.length ? "#trade/" + o[0].id : "#trades";
+      });
       break;
     }
 
    case "del-trade-all":
     {
       const i = getDoc("trades", s.id), o = copiesOf(i);
-      if (!confirm(`Delete this trade on all ${o.length} accounts? This cannot be undone.`)) break;
-      (i.shots || []).forEach(r => ASSETS && ASSETS.delete(r.id).catch(() => {})), o.forEach(r => remove("trades", r.id)), 
-      toast(`Deleted on ${o.length} accounts`), location.hash = "#trades";
+      askIn(`Delete this trade on all ${o.length} accounts? This cannot be undone.`, "Delete").then(ok => {
+        if (!ok) return;
+        (i.shots || []).forEach(r => ASSETS && ASSETS.delete(r.id).catch(() => {})), o.forEach(r => remove("trades", r.id)), toast(`Deleted on ${o.length} accounts`), location.hash = "#trades";
+      });
       break;
     }
 
@@ -9708,10 +9713,10 @@ document.addEventListener("click", e => {
     }
 
    case "del-shot":
-    confirm("Remove this screenshot?") && (ASSETS && ASSETS.delete(s.v).catch(() => {}), 
+    askIn("Remove this screenshot?", "Remove").then(ok => ok && (ASSETS && ASSETS.delete(s.v).catch(() => {}), 
     editDoc("trades", s.id, i => {
       i.shots = (i.shots || []).filter(o => o.id !== s.v);
-    }), syncTrade(s.id, [ "shots" ]), refresh());
+    }), syncTrade(s.id, [ "shots" ]), refresh()));
     break;
 
    case "zoom":
@@ -9735,16 +9740,15 @@ document.addEventListener("click", e => {
     break;
 
    case "del-payout":
-    confirm("Delete this payout?") && (remove("payouts", s.id), U.editP = null, render());
+    askIn("Delete this payout?", "Delete").then(ok => ok && (remove("payouts", s.id), U.editP = null, render()));
     break;
 
    case "del-expense":
-    confirm("Delete this expense?") && (remove("expenses", s.id), U.editE = null, render());
+    askIn("Delete this expense?", "Delete").then(ok => ok && (remove("expenses", s.id), U.editE = null, render()));
     break;
 
    case "del-account":
-    confirm("Delete this account? It has no trades.") && (remove("accounts", s.id), 
-    location.hash = "#accounts");
+    askIn("Delete this account? It has no trades.", "Delete").then(ok => ok && (remove("accounts", s.id), location.hash = "#accounts"));
     break;
 
    case "filter-account":
@@ -9771,9 +9775,9 @@ document.addEventListener("click", e => {
     }
 
    case "q-del":
-    confirm("Remove this question?") && (editDoc("settings", "settings", i => {
+    askIn("Remove this question?", "Remove").then(ok => ok && (editDoc("settings", "settings", i => {
       i.questions.splice(Number(s.i), 1);
-    }), render());
+    }), render()));
     break;
 
    case "setup-add":
