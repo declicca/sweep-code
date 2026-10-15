@@ -2810,7 +2810,7 @@ html body #main .tstats b{font:600 19px "Geist Mono",ui-monospace,monospace;lett
   html body .fx-c{height:40px;padding:0 15px;font-size:15px}
   html body .fx-c::after{content:"";position:absolute;inset:-2px 0}
   html body #main .fx-search{width:auto;height:44px;margin:10px 0 0;font-size:16px}
-  html body #main .fx-search input{font-size:16px}
+  html body #main .fx-search input{font-size:16px;height:100%!important}   /* (the whole 44 px is the field) */
   html body #main .nav-kpi-h{flex-wrap:wrap;row-gap:10px}
 }
 /* the choices of a pill: a small menu under it (computer), a sheet from the bottom (phone) */

@@ -2691,7 +2691,7 @@ function accountCard(e, {full: t = !1} = {}) {
   if (a.dd) {
     const bf = a.breached ? 0 : Math.max(0, a.buffer), p = a.dd ? 1 - bf / a.dd : 0;
     const lt = a.live ? ({ fr: "Ton solde live : le plus que tu peux perdre sur ce compte.", es: "Tu saldo live: lo máximo que puedes perder en esta cuenta." }[typeof LANG == "string" ? LANG : "en"] || "Your live balance: the most you can lose on this account.") : null;
-    s.push(`<div class="rule"><div class="lab"><span>${tip("Drawdown room", lt || `Distance to the ${DD_TYPES.find(u => u[0] === ((e.rules || {}).dd_type || "eod"))[1].toLowerCase()} drawdown limit, currently at ${moneyU(a.thr)}.`)}</span><b>${moneyU(bf)}</b></div>${bar(Math.min(1, bf / a.dd), p > .75 ? "neg" : "pos")}${t ? roomPts(e, bf) : ""}</div>`);
+    s.push(`<div class="rule"><div class="lab"><span>${tip("Drawdown room", lt || `Distance to the ${tr(DD_TYPES.find(u => u[0] === ((e.rules || {}).dd_type || "eod"))[1]).toLowerCase()} drawdown limit, currently at ${moneyU(a.thr)}.`)}</span><b>${moneyU(bf)}</b></div>${bar(Math.min(1, bf / a.dd), p > .75 ? "neg" : "pos")}${t ? roomPts(e, bf) : ""}</div>`);
   }
   a.target && s.push(`<div class="rule"><div class="lab"><span>Profit target</span><b>${moneyU(Math.max(0, a.net))} <span class="faint">/ ${moneyU(a.target)}</span></b></div>${bar(Math.max(0, a.net) / a.target, "pos")}</div>`);
   const o = a.dll && (t || a.today < 0);
