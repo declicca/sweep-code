@@ -351,10 +351,10 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     CHEV = '<svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg>'
     def dd(label, items, key, groups=None):
         cur = any(p == page for p, _, _ in items)
-        def links(its): return "".join(f'<a role="menuitem" href="{href(lang,p)}"{CURP if p==page else ""}><b>{t(l)}{"<span class=\"newdot\" aria-hidden=\"true\"></span>" if p=="changelog.html" else ""}</b><span>{t(d)}</span></a>' for p, l, d in its)
+        def links(its): return "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}><b>{t(l)}{"<span class=\"newdot\" aria-hidden=\"true\"></span>" if p=="changelog.html" else ""}</b><span>{t(d)}</span></a>' for p, l, d in its)
         menu = ('<div class="ddcols">' + "".join(f'<div class="ddgrp" role="group" aria-label="{t(g)}"><span class="ddh" aria-hidden="true">{t(g)}</span>{links(its)}</div>' for g, its in groups) + '</div>') if groups else links(items)
-        return (f'<div class="navdd" data-dd="{key}"><button type="button" class="ddbtn{" cur" if cur else ""}" aria-haspopup="true" aria-expanded="false">{t(label)}{CHEV}</button>'
-                f'<div class="ddmenu{" two" if groups else ""}" role="menu">{menu}</div></div>')
+        return (f'<div class="navdd" data-dd="{key}"><button type="button" class="ddbtn{" cur" if cur else ""}" aria-expanded="false">{t(label)}{CHEV}</button>'
+                f'<div class="ddmenu{" two" if groups else ""}">{menu}</div></div>')   # a disclosure of links (site navigation), not an ARIA menu
     fm, fg = _firm_menu()
     nav = (dd(T("Product","Produit","Producto"), PRODUCT, "product")
            + dd(T("Prop firms","Prop firms","Prop firms"), fm, "firms", fg)

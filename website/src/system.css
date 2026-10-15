@@ -850,7 +850,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .tour-close{position:absolute;right:-6px;top:-50px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--glass-menu);box-shadow:var(--shadow-3)}
 .tour-note{margin-top:12px;text-align:center;font-size:13px;color:var(--faint);max-width:none}
 .tour-modal[open]{animation:tourin var(--t-slow) var(--spring)}
-.tour-modal.closing{animation:tourout .26s ease-in forwards}
+.tour-modal.closing{animation:tourout .26s var(--spring) forwards}
 @keyframes tourin{from{opacity:0;transform:scale(.94)}}
 @keyframes tourout{to{opacity:0;transform:scale(.96)}}
 .modal-open{overflow:hidden}
@@ -956,7 +956,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
   @view-transition{navigation:auto}
   .nav{view-transition-name:sweep-nav}
   ::view-transition-group(sweep-nav),::view-transition-old(sweep-nav),::view-transition-new(sweep-nav){animation:none}
-  ::view-transition-old(root){animation:vt-out .2s ease-in both}
+  ::view-transition-old(root){animation:vt-out .2s var(--spring) both}
   ::view-transition-new(root){animation:vt-in .55s var(--spring) both}
   @keyframes vt-out{to{opacity:0}}
   @keyframes vt-in{from{opacity:0;transform:translateY(14px)}}
@@ -989,7 +989,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
   .final .mark:not(.in){opacity:0;transform:translateY(8px)}
   .final .mark{transition:opacity var(--t-slow),transform var(--t-slow) var(--spring)}
   .final .mark .k-candle{transform:translateY(12px);transition:transform var(--t-slow) var(--spring) .3s}
-  .final .mark .k-swept{stroke-dasharray:22;stroke-dashoffset:22;transition:stroke-dashoffset .6s ease-out .1s}
+  .final .mark .k-swept{stroke-dasharray:22;stroke-dashoffset:22;transition:stroke-dashoffset .6s var(--spring) .1s}
   .final .mark.in .k-candle{transform:none}
   .final .mark.in .k-swept{stroke-dashoffset:0}
 }

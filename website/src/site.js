@@ -24,8 +24,9 @@
 
   // mobile menu
   var btn = document.querySelector('.menu-btn'), sheet = document.getElementById('sheet');
-  function setMenu(open){ menuOpen = open; root.classList.toggle('menu-open', open); nav.classList.remove('hide'); root.classList.remove('nav-hidden'); sheet.setAttribute('data-open', open?'true':'false'); btn.setAttribute('aria-expanded', open?'true':'false'); document.body.style.overflow = open?'hidden':''; if(open) nav.classList.add('scrolled'); else onScroll(); }
+  function setMenu(open){ menuOpen = open; sheet.inert = !open; root.classList.toggle('menu-open', open); nav.classList.remove('hide'); root.classList.remove('nav-hidden'); sheet.setAttribute('data-open', open?'true':'false'); btn.setAttribute('aria-expanded', open?'true':'false'); document.body.style.overflow = open?'hidden':''; if(open) nav.classList.add('scrolled'); else onScroll(); }
   if(btn && sheet){
+    sheet.inert = true;   // closed: out of the tab order at once, not only after its fade
     btn.addEventListener('click', function(){ setMenu(sheet.getAttribute('data-open') !== 'true'); });
     // keep the menu in place while the next page loads: the page transition takes over (no flicker)
     sheet.addEventListener('click', function(e){ var a = e.target.closest('a'); if(a && a.getAttribute('href').charAt(0) === '#') setMenu(false); });
