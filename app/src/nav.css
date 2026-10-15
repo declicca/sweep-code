@@ -2395,7 +2395,7 @@ html body table.acct-tbl tbody tr{content-visibility:visible;contain-intrinsic-s
         (an invisible extension: nothing moves) */
 @media (max-width:860px){
   html body #main .nav-all,html body #main .nav-fdate > a,html body #main .nav-fh a,html body #main .nav-fold-t{position:relative}
-  html body #main .nav-all::after,html body #main .nav-fdate > a::after,html body #main .nav-fh a::after,html body #main .nav-fold-t::after{content:"";position:absolute;inset:-12px -8px}
+  html body #main .nav-all::after,html body #main .nav-fdate > a::after,html body #main .nav-fh a::after,html body #main .nav-fold-t::after{content:"";position:absolute;inset:-12px min(-8px,calc((44px - 100%) / -2))}
 }
 /* the last small texts under 4.5:1 found by the check: the selected journal day, « Objectives reached », the light Discipline tile,
    and a 24 px minimum for the small « Mark as paid » / « Share » links on a computer (WCAG 2.2) */
@@ -2576,7 +2576,7 @@ html body #main .acc-menu > summary.btn,html body #main a.btn.sm[href^="#calenda
 }
 @media (max-width:860px){
   /* the short choices are at least 44 px wide too (the note A–F, the trade arrows ‹ ›, the chart’s time frames, Yes / No) */
-  html body #main .tr-nav>a,html body #main .seg:has(> button.A)>button,html body #main .sc-tfs>button,html body #main .seg.yn>button{min-width:44px}
+  html body #main .tr-nav>a,html body #main .seg:has(> button.A)>button,html body #main .sc-tfs>button,html body #main .seg.yn>button,html body #main .mny-tseg>button,html body #main .mny-per>button,html body #main .ic-h .seg>button{min-width:44px}
   /* the trade's header: its round buttons are 44 px; the chart's full-screen button, the setups and the folds get a 44 px zone */
   html body #main .tr-top > .btn.sm,html body #main .tr-top details.menu > summary{width:44px;min-width:44px;height:44px;min-height:44px}
   html body #main .sc-ic,html body #main .ux-setup{position:relative}
