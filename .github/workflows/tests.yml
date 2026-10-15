@@ -13,7 +13,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   app:
-    runs-on: ubuntu-latest
+    # a fixed version: « ubuntu-latest » moves to a new Ubuntu on its own (19 Oct. 2026), which can break PHP 8.1 or Playwright's
+    # system packages, and deploy.sh refuses to deploy without a passed run. Move it on purpose, after a green run on the new one.
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
