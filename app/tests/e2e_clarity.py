@@ -42,7 +42,7 @@ async def main():
     row = await pg.evaluate("(()=>{const r=document.querySelector('#main > .row'); return r?[...r.querySelectorAll('button, summary')].filter(b=>b.getClientRects().length&&!b.closest('.menu-pop')&&!b.matches('.nav-accname')).map(b=>b.textContent.trim()):[]})()")
     ok(len([x for x in row if x != '⋯']) == 1 and '⋯' in row, f'B12 one button + the « ⋯ » menu ({row})')
     items = await pg.evaluate("[...document.querySelectorAll('#main .acc-menu .menu-pop button')].map(b=>b.textContent.trim())")
-    ok(any('Fermer' in x for x in items) and any('chou' in x for x in items) and any('Supprimer' in x for x in items), f'B12 the menu: close, mark as failed, delete ({items})')
+    ok(any('Retirer le compte' in x for x in items) and not any('Fermer' in x for x in items) and any('chou' in x for x in items) and any('Supprimer' in x for x in items), f'B12 the menu: remove (with a result, 15 Oct.), mark as failed, delete ({items})')
     backs = await pg.evaluate("[...document.querySelectorAll('#main a[href=\"#accounts\"]')].filter(a=>a.getClientRects().length).length")
     ok(backs == 1, f'B12 one way back ({backs})')
     ok('Ouvrir le tableau de bord' not in await pg.evaluate("document.getElementById('main').innerText"), 'B12 no « Ouvrir le tableau de bord »')
