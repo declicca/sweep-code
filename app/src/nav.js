@@ -5238,7 +5238,7 @@ new window.SweepMO(() => {
   function shorter(c, tx) {
     const sign = /^[−\-]/.test(tx.trim()) ? '−' : /^\+/.test(tx.trim()) ? '+' : '', a = Math.abs(c) / 100;
     const loc = LG === 'en' ? 'en-US' : LG === 'es' ? 'es-ES' : 'fr-CA';
-    const num = (v, d) => v.toLocaleString(loc, { maximumFractionDigits: d, minimumFractionDigits: 0, useGrouping: v >= 10000 });
+    const num = (v, d) => v.toLocaleString(loc, { maximumFractionDigits: d, minimumFractionDigits: 0, useGrouping: 'auto' });   // grouped as everywhere else (« −1 769 $ », not « −1769 $ »; Spanish keeps « 1769 »)
     const cur = (body, unit) => (LG === 'en' ? `${sign}$${body}${unit}` : `${sign}${body}${unit ? '\u202f' + unit : ''}\u00a0$`);
     const out = [cur(num(Math.round(a), 0), '')];
     if (a >= 1000) out.push(a < 99950 ? cur(num(a / 1000, 1), 'k') : a < 999500 ? cur(num(a / 1000, 0), 'k') : cur(num(a / 1e6, a < 9995000 ? 2 : 1), 'M'));   // never « 1000 k »

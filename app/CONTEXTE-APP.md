@@ -346,6 +346,10 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Deep Dive** : « Comportement » met ses tableaux d'émotions et d'auto-évaluations l'un sous l'autre, entiers (côte à côte, la moitié de leurs colonnes était cachée derrière un défilement) ; « Long vs short » prend toute la largeur comme les autres tableaux.
 - **Mon argent** : sur ordinateur, type de compte et période sur une seule rangée ; sur téléphone, le type sur la ligne de « Filtres » et la période ensuite (libellé gardé pour la lecture d'écran). « Exporter (CSV) » est l'action de la page, dans la ligne du titre (« Exporter » sur téléphone), comme « Partager mes stats ». Les montants des payouts et dépenses sont en Geist Mono semi-gras (`var(--mono)` n'existait pas : police du système).
 - **Aujourd'hui · Mon argent** : les trois montants (Retirable, Dépenses, Payouts en attente) sur une même ligne, quel que soit leur libellé.
+- **Réglages** : un groupe est son en-tête (ligne arrondie, ouverte ou fermée) puis ses cartes posées sur la page ; plus de cadre autour des cartes (boîte dans la boîte).
+- **Comptes (ordinateur)** : la poignée de réordonnancement (au survol) est dans la marge de la cellule ; le nom du compte s'aligne sur sa colonne et sur sa 2ᵉ ligne.
+- **Montants raccourcis** (cases clés) : groupés comme partout (« −1 769 $ », plus « −1769 $ »).
+- **Page de connexion** : bouton principal blanc sur le bleu profond (44 px ordinateur, 48 px téléphone), comme dans l'app. Les aperçus (`img/app-overview-*.webp`, `img/app-phone-*.webp`, `?v=20261015`) montrent l'app actuelle (Aujourd'hui, foncé, données d'exemple, noms de comptes dans la langue) ; à refaire quand Aujourd'hui change beaucoup (`?v=` à changer).
 - **Sélecteur collant** (Comptes / Mon argent, Liste / Calendrier / Journal, onglets d'un trade) : opaque une fois collé, avec sa bande de fond (une règle générale plus forte l'avait rendu transparent : on voyait passer les contours dessous).
 
 ## 9. Préférences de travail de Mateo

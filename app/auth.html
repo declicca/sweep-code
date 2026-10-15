@@ -114,6 +114,10 @@ select:focus{outline:2px solid var(--gain);outline-offset:3px;border-color:trans
 .card{box-shadow:0 30px 70px -40px rgba(0,0,0,.35),inset 0 1px 0 color-mix(in srgb,var(--text) 4%,transparent)}
 input{transition:border-color .2s,box-shadow .2s,background-color .2s}
 .primary{background:linear-gradient(170deg,color-mix(in srgb,var(--gain) 84%,#fff 16%),var(--gain));box-shadow:0 14px 30px -16px color-mix(in srgb,var(--gain) 90%,transparent)}
+/* the main button as in the app: white on the deeper blue in both themes (dark text on the light blue before), 44 px on a computer, 48 px on a phone */
+.primary{background:linear-gradient(180deg,#2F6FE4 0%,#2A66D6 100%);color:#fff;min-height:44px;box-shadow:0 14px 30px -16px rgba(47,111,228,.9)}
+@media (max-width:860px){.primary{min-height:48px}}
+.primary.busy::after{border-color:#fff;border-right-color:transparent}
 @supports selector(:has(a)){
   .tabs{position:relative;isolation:isolate}
   .tabs::before{content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;background:var(--surface);
@@ -273,11 +277,11 @@ if(!matchMedia('(min-width:1080px)').matches){
   $('pillarsM').innerHTML=$('pillars').innerHTML;$('pillarsM').hidden=false;
   $('peekCap').textContent=X.sample[I];$('peek').hidden=false;
   const reveal=el=>el.classList.add('in');
-  const io='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){if(en.target.id==='peek'&&!$('peekImg').src)$('peekImg').src='/img/app-phone-'+L+'.webp?v=20261003';reveal(en.target);io.unobserve(en.target)}}),{rootMargin:'0px 0px -12% 0px'}):null;
-  if(io){io.observe($('peek'));io.observe($('pillarsM'))}else{$('peekImg').src='/img/app-phone-'+L+'.webp?v=20261003';reveal($('peek'));reveal($('pillarsM'))}
+  const io='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){if(en.target.id==='peek'&&!$('peekImg').src)$('peekImg').src='/img/app-phone-'+L+'.webp?v=20261015';reveal(en.target);io.unobserve(en.target)}}),{rootMargin:'0px 0px -12% 0px'}):null;
+  if(io){io.observe($('peek'));io.observe($('pillarsM'))}else{$('peekImg').src='/img/app-phone-'+L+'.webp?v=20261015';reveal($('peek'));reveal($('pillarsM'))}
 }
 $('sample').textContent=X.sample[I];
-if(matchMedia('(min-width:1080px)').matches){$('shotD').src='/img/app-overview-'+L+'.webp?v=20261003';$('shotP').src='/img/app-phone-'+L+'.webp?v=20261003'}
+if(matchMedia('(min-width:1080px)').matches){$('shotD').src='/img/app-overview-'+L+'.webp?v=20261015';$('shotP').src='/img/app-phone-'+L+'.webp?v=20261015'}
 $('eye').addEventListener('click',()=>{const p=$('password'),c=$('confirm'),show=p.type==='password';p.type=c.type=show?'text':'password';$('eye').classList.toggle('on',show);$('eye').setAttribute('aria-label',show?'Hide password':'Show password')});
 const okU=v=>/^[A-Za-z0-9_.\-]{3,32}$/.test(v),okE=v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
 ['username','email','password','confirm'].forEach(id=>$(id).addEventListener('input',()=>{const v=$(id).value;let ok=false;

@@ -9,6 +9,9 @@ Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phon
  5  Today · My money: the three amounts on one line, whatever their label
  6  a payout's amount is in Geist Mono, semibold
  7  the selector that stays at the top while scrolling is opaque (nothing shows through it)
+ 8  Settings: a group is a rounded header then its cards, no frame around the cards (no box in a box)
+ 9  Accounts (computer): the account's name starts at its column, in line with its second line (the grip in the margin)
+ 10 sign-in page: the main button is white on the deeper blue (44 px computer, 48 px phone); the previews are the current app
 """
 import sys
 from playwright.sync_api import sync_playwright
@@ -59,6 +62,22 @@ with sync_playwright() as p:
     go(pg, 'dashboard', 2400); scroll_all(pg)
     mt = pg.evaluate("(()=>{const b=[...document.querySelectorAll('#main .nav-mny-g > div > b')]; return b.map(e=>Math.round(e.getBoundingClientRect().bottom))})()")
     ok(mt and len(mt) == 3 and max(mt) - min(mt) <= 3, f'5 computer {scheme}: Today · the three money amounts end on one line ({mt})')
+    go(pg, 'settings')
+    sg = pg.evaluate("[...document.querySelectorAll('#main details.nav-sgd')].map(d=>[getComputedStyle(d).boxShadow, getComputedStyle(d.querySelector('summary')).borderTopLeftRadius])")
+    ok(sg and all(x[0] == 'none' and x[1] == '20px' for x in sg), f'8 computer {scheme}: {len(sg)} Settings groups, rounded headers, no frame ({sg[:1]})')
+    go(pg, 'accounts')
+    al = pg.evaluate("(()=>{const td=document.querySelector('#main table.acct-tbl tbody tr td'); if(!td) return null; const tn=[...td.childNodes].find(n=>n.nodeType===3&&n.textContent.trim()); const r=document.createRange(); r.selectNodeContents(tn); const th=document.querySelector('#main table.acct-tbl thead th'); const ln=td.querySelector('.acc-line'); return [Math.round(r.getBoundingClientRect().left), ln?Math.round(ln.getBoundingClientRect().left):null, Math.round(th.getBoundingClientRect().left+parseFloat(getComputedStyle(th).paddingLeft))]})()")
+    ok(al and al[0] == al[2] and (al[1] is None or al[1] == al[0]), f'9 computer {scheme}: the account name lines up with its column ({al})')
+    allerr += errs; c.close()
+  for w, phone in [(1300, False), (390, True)]:
+    c = br.new_context(locale='fr-CA', viewport={'width': w, 'height': 850}, is_mobile=phone, has_touch=phone, color_scheme='dark')
+    pg = c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    pg.goto(B + '/'); pg.wait_for_timeout(1800)
+    b = pg.evaluate("(()=>{const b=document.querySelector('#go'); if(!b) return null; const s=getComputedStyle(b); return [s.color, s.backgroundImage.includes('47, 111, 228'), Math.round(b.getBoundingClientRect().height)]})()")
+    ok(b and b[0] == 'rgb(255, 255, 255)' and b[1] and b[2] == (48 if phone else 44), f'10 sign-in {w}: white on the deeper blue, {48 if phone else 44} px ({b})')
+    if not phone:
+      im = pg.evaluate("[...document.querySelectorAll('#shotD, #shotP')].map(i=>[i.getAttribute('src'), i.naturalWidth])")
+      ok(im and all('v=20261015' in (x[0] or '') and x[1] > 0 for x in im), f'10 sign-in: the previews are the 15 Oct. ones ({im})')
     allerr += errs; c.close()
   for w, scheme, lang in [(390, 'dark', 'fr'), (390, 'light', 'en'), (320, 'light', 'es')]:
     c, pg, errs = page(br, w, True, scheme, lang)

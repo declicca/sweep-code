@@ -2648,3 +2648,16 @@ html body #main .nav-seg.is-stuck,html body #main .nav-tnav.is-stuck{background:
   html body #main .mfb-row > .mny-tsw .mny-tag{padding:0 7px}
   html body #main .nav-mny-g .mny-tag{padding:0 7px;max-width:100%}
 }
+/* Settings: a group is its header — a rounded row, open or closed — then its cards on the page; no frame drawn around the
+   cards any more (« Profile » sat in a box inside the « Account » box), the header's rounded corners stay when it opens
+   (the same rule as Pre-market / Post-market) */
+html body #main .nav-sgd{box-shadow:none;border-radius:0;padding:0}
+html body #main .nav-sgd>summary{border-radius:var(--r-tile,20px);box-shadow:inset 0 0 0 1px var(--line);background:var(--panel)}
+html body #main .nav-sgd>section{margin:14px 0 0!important}
+html body #main .nav-sgd[open]{margin-bottom:28px}
+/* Accounts (computer): the reorder grip, shown on hover, sits in the cell's left margin — the account's name no longer starts
+   18 px to the right of its column title and of its own second line (« Drawdown exceeded · DD margin ») */
+@media (min-width:861px){
+  html body #main table.acct-tbl td:first-child{position:relative}
+  html body #main table.acct-tbl td:first-child > .nav-grip{position:absolute;left:0;top:50%;width:14px;margin:-11px 0 0}
+}
