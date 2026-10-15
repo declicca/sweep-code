@@ -62,3 +62,9 @@
 - **Vérifié en local** : `tests/e2e_share.py` (carte Discipline d'abord, prénom, sans dollar, l'image et ses tailles, la feuille de partage avec le fichier ; la page d'un lien et ses balises ; le profil public) et `tests/profile_test.php`.
 - **À faire en ligne, sur un vrai téléphone** : iPhone (Safari et Sweep ajouté à l'écran d'accueil) et Android (Chrome) : Stats › « Partager mes stats » › « Partager » : la feuille de partage s'ouvre avec l'image (sinon, l'image est téléchargée).
 - **Les aperçus** : « Créer un lien » sur une carte, puis coller le lien dans un salon Discord, un message X (brouillon) et iMessage : le titre (« Ma discipline · octobre 2026 »), la phrase et l'image large doivent paraître. Puis Réglages › Profil › « Profil public de discipline » : le lien collé montre « Prénom · Discipline sur Sweep » et la phrase des 4 semaines.
+
+## Graphiques de trade : coût et couverture (brief 02, partie 8)
+
+- **Sur le serveur** (lecture seule, aucune clé affichée) : `/usr/local/bin/php /home/matnsabc/app.makeitsweep.com/ops/chart-check.php`. Il donne le coût par mois (le prix que Databento annonce avant chaque téléchargement, `chart_fetch_log`), les téléchargements arrêtés par le budget du jour, les trades réels des 30 derniers jours qui ont leur graphique (ou trop récents, pas encore téléchargés, instrument sans graphique), le coût par trader actif et la place prise sur le serveur.
+- **À comparer** avec la facture du tableau de bord Databento (crédits, forfait) : le journal compte le prix annoncé, pas ce qui est facturé.
+- Puis noter le résultat dans `NOTES.md` (« Coût Databento »).

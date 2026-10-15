@@ -27,4 +27,5 @@ Règle du brief 01 : ce qui n'est pas dans le brief est noté ici au lieu d'êtr
   - les ventes au détail 2027 (Census) et le PIB / PCE 2027 (BEA) ne sont pas encore publiés : dates estimées, à revérifier en décembre 2026 ;
   - le fichier s'arrête au 30 décembre 2027 : à prolonger avant ;
   - aucune tâche planifiée : les chiffres publiés et les rapports sont remplis par Sweep AI quand un trader ouvre l'app ; Admin › Santé montre maintenant les annonces fortes des 14 prochains jours.
+- **Coût Databento** (brief 02, partie 8) : à remplir avec `ops/chart-check.php` sur le serveur et la facture Databento : coût par mois, coût par trader actif, part des trades couverts. Ce qui est connu : un téléchargement par jour de séance et par instrument, une fois pour tous les traders (pas par trader) ; budget du jour 2 $ par défaut (`chart_daily_budget_usd`) ; 40 jours au plus par passage de la tâche horaire. Le coût grandit avec le nombre de journées et d'instruments tradés, pas avec le nombre de traders.
 
