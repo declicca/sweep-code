@@ -6,6 +6,7 @@ declare(strict_types=1);
  *  - a task records its last run: success (duration, summary), failure (its message) and a fatal error (what stopped it),
  *    each in a real separate PHP process, like cron;
  *  - one line per task: OK, running, late after two cycles, failed, stuck, never ran;
+ *  - late alerts by email at once (16 Oct.), red after one cycle; one email per incident;
  *  - ONE email to the support address when a task stays red for more than one cycle, none again until it is back to normal;
  *  - the exact cPanel line of each task.
  */
@@ -59,8 +60,8 @@ $ok($s['game']['command'] === '/usr/local/bin/php ' . $app . '/game/cron.php >/d
     && $s['presets']['schedule'] === '0 5 * * 1', 'the cPanel line of each task (the backup keeps its output for « Cron Email »)');
 
 // alerts: one email per incident, after one cycle in red
-$mails = []; $mail = function (string $subj, string $text) use (&$mails) { $mails[] = [$subj, $text]; return true; };
-$n = function () use (&$mails) { return count($mails); };
+$mails = []; $lates = []; $mail = function (string $subj, string $text) use (&$mails, &$lates) { if (strpos($subj, 'en retard') !== false) $lates[] = [$subj, $text]; else $mails[] = [$subj, $text]; return true; };
+$n = function () use (&$mails) { return count($mails); };   // the failures (red); the « late » emails are counted apart, below
 $T = $t0 + 60;
 sweep_cron_watch($pdo, $mail, $T);
 $ok($n() === 0, 'red just noticed: no email yet');
@@ -80,6 +81,16 @@ $ok($n() === 3 && strpos($mails[2][1], 'Databento 401') !== false, 'a new incide
 $ok(count(array_filter($mails, fn($m) => strpos($m[0], 'restore_test') !== false)) === 0 && $n() === 3, 'never ran for less than one cycle (1 week): no email yet');
 sweep_cron_watch($pdo, $mail, $T + 7 * 86400 + 60);
 $ok(count(array_filter($mails, fn($m) => strpos($m[0], 'restore_test') !== false)) === 1, 'never ran for a whole week: one email');
+// (16 Oct.) late: a task that stopped running is told at once, once per incident, and again only after it came back
+$lateOf = fn(string $t) => count(array_filter($lates, fn($m) => strpos($m[0], "« $t »") !== false));
+$ok($lateOf('game') >= 1 && strpos($lates[0][1] ?? '', 'ne tourne plus') !== false, 'game late (no success for two cycles): a « late » email at once (before: none, only red alerted)');
+$k0 = count($lates); sweep_cron_watch($pdo, $mail, $T + 2 * 86400); $k1 = count($lates); sweep_cron_watch($pdo, $mail, $T + 2 * 86400 + 900);
+$ok(count($lates) === $k1, "still late at the next check: no second email for the same incident ($k0 → $k1 → " . count($lates) . ')');
+$run('game', "sweep_cron_note('ok again');"); $gb = (int) $row('game')['finished_at'];
+sweep_cron_watch($pdo, $mail, $gb + 60);
+$ok($row('game')['alerted_at'] === null, 'game back on time: the incident is closed');
+sweep_cron_watch($pdo, $mail, $gb + 3 * 900 + 700);
+$ok($lateOf('game') === 2, 'late again later: a new email');
 $nope = fn() => false; $before = $n();
 $pdo->exec("UPDATE cron_runs SET alerted_at = NULL WHERE task = 'backup'");
 sweep_cron_watch($pdo, $nope, $T + 8 * 86400);

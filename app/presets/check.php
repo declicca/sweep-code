@@ -300,6 +300,15 @@ function pr_finish_run(string $by = 'cron'): void
     if (is_file(pr_live_path()) && ($cat['origin'] ?? '') !== '' && strpos((string) $cat['origin'], 'seed') !== 0) { $cat['checked_at'] = gmdate('c'); pr_save($cat); }
 }
 
+/** Admin › Health: the weekly run is a failure (red, then an email) when it could read no firm at all on its official pages —
+ *  before 16 Oct. a run where every firm failed still showed blue. Returns the reason, or null when at least one firm was read. */
+function pr_run_problem(int $tried): ?string
+{
+    if ($tried <= 0) return null;
+    $read = 0; foreach ((array) (pr_status()['firms'] ?? []) as $f) if (in_array($f['status'] ?? '', ['unchanged', 'updated'], true) && (int) strtotime((string) ($f['checked_at'] ?? '')) > time() - 6 * 3600) $read++;
+    return $read ? null : "no firm could be read on its official pages ($tried tried): the catalogue was not checked";
+}
+
 /** Every firm checked (the weekly task, or once after an update): one line per firm. Ends the run unless dry or one firm. */
 function pr_run_all(PDO $pdo, bool $dry = false, ?string $only = null, string $by = 'cron'): array
 {

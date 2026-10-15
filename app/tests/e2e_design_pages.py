@@ -12,7 +12,8 @@ Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phon
  7  the selector that stays at the top while scrolling is opaque (nothing shows through it)
  8  Settings: a group is a rounded header then its cards, no frame around the cards (no box in a box)
  9  Accounts (computer): the account's name starts at its column, in line with its second line (the grip in the margin)
- 10 sign-in page: the main button is white on the deeper blue (44 px computer, 48 px phone); the previews are the current app
+ 10 sign-in page: the main button is white on the deeper blue (44 px computer, 48 px phone); the previews are the current app;
+    its fonts come from the app (no Google Fonts, 16 Oct.)
 """
 import sys
 from playwright.sync_api import sync_playwright
@@ -70,8 +71,12 @@ with sync_playwright() as p:
     allerr += errs; c.close()
   for w, phone in [(1300, False), (390, True)]:
     c = br.new_context(locale='fr-CA', viewport={'width': w, 'height': 850}, is_mobile=phone, has_touch=phone, color_scheme='dark')
-    pg = c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    pg = c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160])); ext = []
+    pg.on('request', lambda r: ext.append(r.url) if 'google' in r.url else None); csp = []
+    pg.on('console', lambda m: csp.append(m.text[:120]) if 'Content Security Policy' in m.text or 'Content-Security-Policy' in m.text else None)
     pg.goto(B + '/'); pg.wait_for_timeout(1800)
+    fo = pg.evaluate("document.fonts.check('16px Geist') && [...document.fonts].some(f=>f.family.replace(/[\"']/g,'')==='Geist' && f.status==='loaded')")
+    ok(fo and not ext and not csp, f'10 sign-in {w}: Geist from the app, no request to Google, no CSP error (brief 00, 1.1) ({fo}, {ext[:1]}, {csp[:1]})')
     b = pg.evaluate("(()=>{const b=document.querySelector('#go'); if(!b) return null; const s=getComputedStyle(b); return [s.color, s.backgroundImage.includes('47, 111, 228'), Math.round(b.getBoundingClientRect().height)]})()")
     ok(b and b[0] == 'rgb(255, 255, 255)' and b[1] and b[2] == (48 if phone else 44), f'10 sign-in {w}: white on the deeper blue, {48 if phone else 44} px ({b})')
     if not phone:

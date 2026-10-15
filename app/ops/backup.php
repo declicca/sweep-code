@@ -8,9 +8,11 @@ declare(strict_types=1);
  *
  * 1. Hot copy of the SQLite database with `VACUUM INTO` (never a raw file copy while it is in use),
  *    then `PRAGMA integrity_check` on the copy.
- * 2. Compressed (gzip) and encrypted (AES-256-GCM, key derived from the passphrase in the private config).
+ * 2. Compressed (gzip) and encrypted (AES-256-GCM, key derived from the passphrase in the private config), streamed by
+ *    chunks of 1 MB since 16 Oct. (format SWB2, ops-lib.php): the database is never held in memory.
  * 3. Kept locally outside the web root: 7 daily, 4 weekly (Sunday), 12 monthly (1st of the month).
- * 4. Uploaded screenshots + private config: a weekly encrypted archive (same rotation folders).
+ * 4. Uploaded screenshots + private config + feedback screenshots + prop firm catalogue: a weekly encrypted archive (same
+ *    rotation folders).
  * 5. Optional off-site copy to any S3-compatible storage (Backblaze B2, Cloudflare R2, AWS S3, Wasabi):
  *    set the retention there with a bucket lifecycle rule.
  * Prints nothing when everything is fine (cron mails only on problems); exit code 1 on failure.
@@ -45,10 +47,10 @@ try {
 
 // 2. compress + encrypt
 $name = "sweep-db-$stamp-u$users.sqlite.gz.enc";
-$blob = ops_encrypt((string) gzencode((string) file_get_contents($tmp), 6), $cfg['passphrase']);
-@unlink($tmp);
 $daily = $cfg['dir'] . "/daily/$name";
-if (file_put_contents($daily, $blob) === false) $fail('cannot write ' . $daily);
+try { ops_encrypt_file($tmp, $daily, $cfg['passphrase']); }   // streamed: never the whole database in memory (16 Oct.)
+catch (Throwable $e) { @unlink($tmp); @unlink($daily); $fail('cannot write ' . $daily . ': ' . $e->getMessage()); }
+@unlink($tmp);
 @chmod($daily, 0600);
 $files = [$daily];
 
@@ -64,8 +66,12 @@ if ($dow === 7 || !glob($cfg['dir'] . '/weekly/sweep-files-*')) {
         $phar = new PharData($tar);
         if (is_dir($cfg['uploads'])) $phar->buildFromDirectory($cfg['uploads']);
         foreach (glob($cfg['private'] . '/*.php') ?: [] as $f) $phar->addFile($f, 'sweep-private/' . basename($f));
+        // and since 16 Oct.: the feedback screenshots and the prop firm catalogue (the checked rules, their status, their history)
+        $data = dirname($cfg['db']);
+        foreach (glob($data . '/feedback/*') ?: [] as $f) if (is_file($f)) $phar->addFile($f, 'feedback/' . basename($f));
+        foreach (array_merge([$data . '/presets-live.json', $data . '/presets-status.json'], glob($data . '/presets-history/*') ?: []) as $f) if (is_file($f)) $phar->addFile($f, 'presets/' . (strpos($f, '/presets-history/') !== false ? 'presets-history/' : '') . basename($f));
         $fname = "sweep-files-$stamp.tar.gz.enc";
-        file_put_contents($cfg['dir'] . "/weekly/$fname", ops_encrypt((string) gzencode((string) file_get_contents($tar), 6), $cfg['passphrase']));
+        ops_encrypt_file($tar, $cfg['dir'] . "/weekly/$fname", $cfg['passphrase']);
         @chmod($cfg['dir'] . "/weekly/$fname", 0600);
         @unlink($tar);
         $files[] = $cfg['dir'] . "/weekly/$fname";
@@ -84,7 +90,7 @@ foreach (['daily' => 7, 'weekly' => 4, 'monthly' => 12] as $d => $keep) {
 if (!empty($cfg['s3']['bucket'])) {
     foreach ($files as $f) {
         $key = trim((string) ($cfg['s3']['prefix'] ?? 'sweep'), '/') . '/' . basename(dirname($f)) . '/' . basename($f);
-        $r = ops_s3_put($cfg['s3'], $key, (string) file_get_contents($f));
+        $r = ops_s3_put_file($cfg['s3'], $key, $f);   // read from the file, not copied in memory
         if ($r !== true) $fail('off-site upload failed for ' . basename($f) . ': ' . $r);
     }
 }

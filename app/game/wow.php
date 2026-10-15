@@ -70,8 +70,10 @@ final class GameWow
                 }
             }
         }
+        $before = json_encode($o);
         $o['wow'] = array_values(array_unique($seen)); $o['wow_init'] = true;
-        GameEngine::q('UPDATE user_game_profile SET onboarding_json = ? WHERE user_id = ?', [json_encode($o), $uid]);
+        // written only when something changed (it was rewritten for every trader every 15 min)
+        if (json_encode($o) !== $before) GameEngine::q('UPDATE user_game_profile SET onboarding_json = ? WHERE user_id = ?', [json_encode($o), $uid]);
         foreach ($send as [$type, $params, $big]) {
             Notify::send($uid, $type, $params, ['dedupe_key' => $type . ':' . json_encode($params), 'action_url' => '#analytics', 'priority' => $big ? 'celebration' : 'normal']);
             GameEngine::track($uid, 'wow_moment', ['type' => $type]);

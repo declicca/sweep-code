@@ -96,27 +96,30 @@ function sweep_cron_status(PDO $pdo, ?int $now = null): array
 
 /**
  * Run every 15 minutes (end of game/cron.php) and at most once an hour by the app itself (in case the 15-minute task is the
- * one that stopped). A task red for more than one cycle → one email to the support address; none again until it is
- * back to normal. $mail(subject, text) returns true when sent. Returns the number of emails sent.
+ * one that stopped). A task red for more than one cycle, or late (orange) at once → one email to the support address; none
+ * again until it is back to normal (green). $mail(subject, text) returns true when sent. Returns the number of emails sent.
  */
 function sweep_cron_watch(PDO $pdo, callable $mail, ?int $now = null): int
 {
     $now = $now ?? time(); $sent = 0;
     foreach (sweep_cron_status($pdo, $now) as $s) {
         $task = $s['task']; sweep_cron_row($pdo, $task);
-        if ($s['color'] !== 'red') {
+        if ($s['color'] === 'green') {
             if ($s['red_since'] !== null) $pdo->prepare('UPDATE cron_runs SET red_since = NULL, alerted_at = NULL WHERE task = ?')->execute([$task]);
             continue;
         }
-        if ($s['red_since'] === null) { $pdo->prepare('UPDATE cron_runs SET red_since = ? WHERE task = ?')->execute([$now, $task]); continue; }
-        if ($s['alerted_at'] !== null || $now - $s['red_since'] < $s['every']) continue;
-        $what = ['never' => "n'a jamais tourné", 'failed' => 'a échoué', 'stuck' => "a démarré sans jamais finir"][$s['state']] ?? $s['state'];
+        // late (orange: no successful run for two cycles) alerts too, at once: a task that silently stopped running is the
+        // incident that matters most (before 16 Oct. only red alerted; a stopped backup could wait ~13 days)
+        $late = $s['state'] === 'late';
+        if ($s['red_since'] === null) { $pdo->prepare('UPDATE cron_runs SET red_since = ? WHERE task = ?')->execute([$now, $task]); if (!$late) continue; $s['red_since'] = $now; }
+        if ($s['alerted_at'] !== null || (!$late && $now - $s['red_since'] < $s['every'])) continue;
+        $what = ['never' => "n'a jamais tourné", 'failed' => 'a échoué', 'stuck' => "a démarré sans jamais finir", 'late' => "ne tourne plus (aucun passage réussi depuis deux cycles)"][$s['state']] ?? $s['state'];
         $when = fn(?int $t) => $t ? gmdate('Y-m-d H:i', $t) . ' UTC' : '—';
         $text = "La tâche planifiée « $task » ($s[script]) $what.\n\n"
             . 'Dernier démarrage : ' . $when($s['started_at']) . "\nDernière fin : " . $when($s['finished_at']) . "\nDernier succès : " . $when($s['last_ok_at']) . "\n"
             . ($s['error'] ? "Erreur : $s[error]\n" : '')
             . "\nDans cPanel → Cron Jobs, la ligne attendue :\n$s[schedule]  $s[command]\n\nDétail : Admin › Santé de l'app. Aucun autre courriel tant qu'elle n'est pas revenue à la normale.";
-        try { $ok = (bool) $mail("Sweep : tâche planifiée « $task » en échec", $text); } catch (Throwable $e) { $ok = false; error_log('[Sweep cron] alert: ' . $e->getMessage()); }
+        try { $ok = (bool) $mail("Sweep : tâche planifiée « $task » " . ($late ? 'en retard' : 'en échec'), $text); } catch (Throwable $e) { $ok = false; error_log('[Sweep cron] alert: ' . $e->getMessage()); }
         if ($ok) { $pdo->prepare('UPDATE cron_runs SET alerted_at = ? WHERE task = ?')->execute([$now, $task]); $sent++; }
     }
     return $sent;

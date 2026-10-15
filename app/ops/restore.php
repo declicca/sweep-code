@@ -12,7 +12,5 @@ require __DIR__ . '/ops-lib.php';
 [$_, $in, $out] = $argv + [null, null, null];
 if (!$in || !$out) { echo "usage: php ops/restore.php <backup.enc> <output file>\n"; exit(1); }
 $cfg = ops_cfg();
-$plain = ops_decrypt((string) file_get_contents($in), $cfg['passphrase']);
-if (substr($in, -14) === '.sqlite.gz.enc') $plain = (string) gzdecode($plain);
-file_put_contents($out, $plain);
-echo "restored to $out (" . round(strlen($plain) / 1048576, 2) . " MB)\n";
+ops_decrypt_file($in, $out, $cfg['passphrase'], substr($in, -14) === '.sqlite.gz.enc');   // a database comes out as .sqlite, the files archive as .tar.gz
+echo "restored to $out (" . round(filesize($out) / 1048576, 2) . " MB)\n";

@@ -169,11 +169,13 @@ $seedV = pr_read(pr_seed_path())['version'];
 $origin = fn() => strpos((string) (pr_current()['origin'] ?? ''), 'seed') === 0 ? 'seed' : 'checked';   // what api/presets says
 ok($origin() === 'seed' && pr_recheck_due(), 'checked catalogue on an older seed: api/presets says « seed », and a check is due');
 @unlink($GLOBALS['DATA'] . '/mock.json'); putenv('SWEEP_PRESETS_MOCK=' . $GLOBALS['DATA'] . '/none.json'); file_put_contents($GLOBALS['DATA'] . '/none.json', '{}');
-pr_run_all($pdo);   // every firm fails (no answer): nothing was read
+$rep = pr_run_all($pdo);   // every firm fails (no answer): nothing was read
 ok($origin() === 'seed' && pr_read(pr_live_path())['seed_version'] === '2026-01-01', 'a check that could read no firm claims nothing: still « seed »');
+ok(($why = pr_run_problem(count($rep))) !== null && strpos($why, 'no firm could be read') === 0, 'Admin › Health: a run that read no firm is a failure (red), not blue (16 Oct.) (' . $why . ')');
 $answers = []; foreach (pr_current()['firms'] as $f) if ($f['programs']) $answers[$f['id']] = answer_of($f['id']);
 mock($answers);
 $r = pr_recheck_if_seed_changed($pdo);   // what game/cron.php does after an update
+ok(pr_run_problem(is_array($r) ? count($r) : 0) === null, 'a run that read the firms: no problem');
 $l = pr_read(pr_live_path());
 ok(is_array($r) && count($r) === count(pr_read(pr_seed_path())['firms']), 'after an update: one full check against the official pages (' . (is_array($r) ? count($r) : 0) . ' firms)');
 ok($l['seed_version'] === $seedV && $origin() === 'checked' && abs(strtotime($l['checked_at']) - time()) < 120, "nothing changed on the pages: the catalogue is saved on the current seed, api/presets says « checked » with today's date");

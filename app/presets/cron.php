@@ -42,4 +42,5 @@ if (in_array('--rollback', $args, true)) {
 
 $report = pr_run_all($pdo, $dry, $only, 'cron');
 if (!$dry && !$only && function_exists('sweep_cron_note')) sweep_cron_note(count($report) . ' firm(s) checked');   // Admin › Health
+if (!$dry && !$only && function_exists('sweep_cron_fail') && ($why = pr_run_problem(count($report)))) sweep_cron_fail($why);   // every firm failed: red, not blue
 echo ($dry ? "[dry run] " : '') . "Prop firm presets — " . gmdate('Y-m-d H:i') . " UTC\n" . implode("\n", $report) . "\n";

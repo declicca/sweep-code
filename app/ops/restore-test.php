@@ -16,7 +16,7 @@ $last = end($all);
 if (!$last) { echo "[Sweep restore test] FAILED: no backup found in {$cfg['dir']}/daily\n"; if (function_exists('sweep_cron_fail')) sweep_cron_fail('no backup found in the daily folder'); exit(1); }
 $tmp = sys_get_temp_dir() . '/sweep-restore-' . bin2hex(random_bytes(4)) . '.sqlite';
 try {
-    file_put_contents($tmp, gzdecode(ops_decrypt((string) file_get_contents($last), $cfg['passphrase'])));
+    ops_decrypt_file($last, $tmp, $cfg['passphrase']);   // streamed (SWB2), or an older one-piece backup (SWB1)
     $b = new PDO('sqlite:' . $tmp, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     $ok = $b->query('PRAGMA integrity_check')->fetchColumn();
     $bu = (int) $b->query('SELECT COUNT(*) FROM users')->fetchColumn();

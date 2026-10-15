@@ -651,6 +651,11 @@ function delete_user_everything(string $uid): void {
             foreach (['billing_usage', 'billing_upsell', 'billing_grants', 'billing_subs', 'billing_users'] as $t) { try { q("DELETE FROM $t WHERE uid = ?", [$uid]); } catch (Throwable $e) {} }
         } catch (Throwable $e) { error_log('[Sweep billing] delete: ' . $e->getMessage()); }
     }
+    // what was still kept before 16 Oct. (brief 00, phase 1.1): the reset links, the sign-up lead with the email, the browser
+    // errors, the weekly email's log and preferences, the crew events (tests/e2e_delete_everything.py checks every table)
+    $em = strtolower(trim((string) q('SELECT email FROM users WHERE id = ?', [$uid])->fetchColumn()));
+    foreach (['reset_tokens', 'client_errors', 'weekly_emails', 'email_prefs', 'crew_events', 'signup_leads'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* table not created yet */ } }
+    if ($em !== '') { try { q('DELETE FROM signup_leads WHERE email_lc = ?', [$em]); } catch (Throwable $e) { /* table not created yet */ } }
     q('DELETE FROM sessions WHERE user_id = ?', [$uid]);
     q('DELETE FROM users WHERE id = ?', [$uid]);
 }
@@ -940,7 +945,7 @@ try {
         header('Content-Type: text/html; charset=utf-8');
         header('Cache-Control: no-store');
         header('X-Robots-Tag: noindex');   // sign-in, sign-up (/?signup=1&plan=…) and the app itself are never indexed (robots.txt must not block it: Google has to read this)
-        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src https://s.tradingview.com https://www.tradingview-widget.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; frame-src https://s.tradingview.com https://www.tradingview-widget.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
         header('X-Content-Type-Options: nosniff');
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
