@@ -74,7 +74,9 @@ def page_css(css):
         elif body: out += [h, body]
         for l in _r.findall(r"@layer (\w+)\{", h + body): layer = l
     return "".join(out), {pg: css_min("".join(f"@layer {l}{{{''.join(b)}}}" for l, b in ls.items())) for pg, ls in per.items()}
-for key, src, ext in (("css","styles.css","css"),("js","site.js","js"),("system","system.css","css")):
+missing = [p for p in PAGES if p not in SYSTEM_PAGES]   # every page is built with ui.py and loads system.css (styles.css is gone, October 2026)
+if missing: raise SystemExit(f"not on the design system: {missing}")
+for key, src, ext in (("js","site.js","js"),("system","system.css","css")):
     data = open(os.path.join(HERE,src),"rb").read()
     if key == "system":
         s_, core.PAGE_CSS = page_css(data.decode("utf-8")); data = s_.encode("utf-8")

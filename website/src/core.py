@@ -7,8 +7,8 @@ APP = "https://app.makeitsweep.com/"
 SIGNUP = "https://app.makeitsweep.com/?signup=1"
 EMAIL = "hello@makeitsweep.com"
 LANGS = ["en", "fr", "es"]
-ASSETS = {"css": "styles.css", "js": "site.js", "system": "system.css"}
-SYSTEM_PAGES = set()   # pages built with ui.py: they load system.css (the design system) instead of styles.css
+ASSETS = {"js": "site.js", "system": "system.css"}
+SYSTEM_PAGES = set()   # pages built with ui.py (all of them: build.py stops if one is missing)
 PAGE_CSS = {}   # the sections of system.css marked « [pages: …] », inline in those pages only (filled by build.py)
 NO_DOCK = set()   # pages without the phone signup bar (calculators: their result bar takes its place)
 TODAY = "2026-10-01"
@@ -395,7 +395,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 {alts}
 <link rel="preload" href="/assets/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.classList.add("js")</script>
-<link rel="stylesheet" href="/assets/{ASSETS["system"] if page in SYSTEM_PAGES else ASSETS["css"]}">
+<link rel="stylesheet" href="/assets/{ASSETS["system"]}">
 {f"<style>{PAGE_CSS[page]}</style>" if page in SYSTEM_PAGES and page in PAGE_CSS else ""}
 <link rel="icon" href="/icons/favicon.ico" sizes="any">
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
@@ -531,6 +531,9 @@ RELATED = {
  "prop-firm-costs.html": ["prop-firm-roi-calculator.html", "payout-tracker.html", "prop-firm-profit-targets.html"],
  "prop-firms/index.html": ["prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html", "prop-firm-tracker.html"],
  "best-trading-journal-for-prop-firms.html": ["free-trading-journal.html", "prop-firm-tracker.html", "pricing.html"],
+ "economic-calendar.html": ["release-dates.html", "futures-market-hours.html", "ai.html"],
+ "faq.html": ["features.html", "pricing.html", "import.html"],
+ "about.html": ["features.html", "how-it-works.html", "pricing.html"],
  **{f"sweep-vs-{n}.html": ["best-trading-journal-for-prop-firms.html", "free-trading-journal.html", "prop-firm-tracker.html"] for n in ("tradezella", "tradervue", "tradersync", "edgewonk")},
 }
 RELATED_CONTRACT = ["position-size-calculator.html", "futures-market-hours.html", "release-dates.html"]

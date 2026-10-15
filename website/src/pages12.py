@@ -1,4 +1,5 @@
 from core import *
+import ui
 
 # symbol, name, exchange, tick size, tick value, point value, months, sibling, family
 C = [
@@ -78,6 +79,7 @@ RISK = 500   # risk per trade used in the worked example
 def make_contract(sym):
     s, name, exch, ts, tv, pv, months, sib, fam = next(c for c in C if c[0] == sym)
     CRUMBS[slug(s)] = T(f"{s} futures", f"Futures {s}", f"Futuros {s}")
+    SYSTEM_PAGES.add(slug(s))
     def page(lang, t):
         F = lambda v: _fmt(v, lang); K = lambda v: _tick(v, lang)
         loc = lambda x: re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', x)
@@ -85,19 +87,18 @@ def make_contract(sym):
         lead = T(f"{name} ({s}) on {exch}: one tick is {K(ts)} points and is worth {F(tv)} per contract; one full point is worth {F(pv)}.",
                  f"{name} ({s}) sur {exch} : un tick vaut {K(ts)} point et rapporte {F(tv)} par contrat ; un point complet vaut {F(pv)}.",
                  f"{name} ({s}) en {exch}: un tick son {K(ts)} puntos y vale {F(tv)} por contrato; un punto completo vale {F(pv)}.")
-        hero = page_hero(t, h1, lead, T("Contract specs","Fiche contrat","Ficha del contrato"))
+        hero = ui.hero(t, T("Contract specs","Fiche contrat","Ficha del contrato"), h1, lead)
+        key = ui.stats([(t(T("Tick size","Taille du tick","Tamaño del tick")), K(ts), ""), (t(T("Tick value","Valeur du tick","Valor del tick")), F(tv), ""), (t(T("Point value","Valeur du point","Valor del punto")), F(pv), "")])   # the three numbers first; the rest of the sheet under them
         rows = [(T("Symbol","Symbole","Símbolo"), s), (T("Name","Nom","Nombre"), name), (T("Exchange","Bourse","Mercado"), exch),
-                (T("Tick size","Taille du tick","Tamaño del tick"), K(ts)), (T("Tick value","Valeur du tick","Valor del tick"), F(tv)),
-                (T("Point value","Valeur du point","Valor del punto"), F(pv)), (T("Contract months","Mois de contrat","Meses de contrato"), months),
-                (T("Trading hours","Heures de marché","Horario"), t(HOURS))]
-        tbl = '<table class="tbl specs"><tbody>' + "".join(f"<tr><th>{t(a)}</th><td{' class=\"num\"' if i in (3,4,5,6) else ''}>{b}</td></tr>" for i,(a,b) in enumerate(rows)) + "</tbody></table>"
+                (T("Contract months","Mois de contrat","Meses de contrato"), f'<span class="num">{months}</span>'), (T("Trading hours","Heures de marché","Horario"), t(HOURS))]
+        tbl = '<table class="tbl specs"><tbody>' + "".join(f"<tr><th>{t(a)}</th><td>{b}</td></tr>" for a, b in rows) + "</tbody></table>"
         stops = [5, 10, 20, 40] if fam == "idx" and pv >= 5 else ([10, 20, 40, 80] if fam=="idx" else None)
         if fam == "energy": stops_t = [10, 20, 30, 50]
         elif fam == "metal": stops_t = [20, 50, 100, 200]
         elif fam == "fx": stops_t = [10, 20, 40, 80]
         else: stops_t = [int(x/ts) for x in stops]
-        risk = "".join(f"<tr><td class=\"num\">{n} ticks ({K(round(n*ts, 6))} pts)</td><td class=\"num\">{F(n*tv)}</td><td class=\"num\">{F(n*tv*5)}</td></tr>" for n in stops_t)
-        rtbl = (f'<table class="tbl risk"><thead><tr><th>{t(T("Stop","Stop","Stop"))}</th><th>{t(T("1 contract","1 contrat","1 contrato"))}</th><th>{t(T("5 contracts","5 contrats","5 contratos"))}</th></tr></thead><tbody>{risk}</tbody></table>')
+        risk = "".join(f"<tr><th scope=\"row\">{n} ticks <small>({K(round(n*ts, 6))} pts)</small></th><td>{F(n*tv)}</td><td>{F(n*tv*5)}</td></tr>" for n in stops_t)
+        rtbl = (f'<div class="cmp-wrap"><table class="cmp risk"><thead><tr><th>{t(T("Stop","Stop","Stop"))}</th><th>{t(T("1 contract","1 contrat","1 contrato"))}</th><th>{t(T("5 contracts","5 contrats","5 contratos"))}</th></tr></thead><tbody>{risk}</tbody></table></div>')
         calc = f'<div class="cta-row"><a class="btn btn-line" href="{href(lang,"position-size-calculator.html")}?sym={s}">{t(T(f"Position size calculator for {s}",f"Calculateur de taille de position pour {s}",f"Calculadora de tamaño de posición para {s}"))}</a></div>'
         # trading it: when it moves, mini or micro, what moves it, a worked stop
         big, mic = (s, sib) if sib and len(sib) > len(s) else (sib, s)
@@ -126,30 +127,33 @@ def make_contract(sym):
                f'<h2>{t(T(f"What moves {s}", f"Ce qui fait bouger {s}", f"Qué mueve {s}"))}</h2><p>{loc(t(MOVERS[fam]))} '
                + t(T(f'Check the <a href="{href("en", "release-dates.html")}">release dates</a> before you plan the day.', f'Vérifie les <a href="{href("fr", "release-dates.html")}">dates des annonces</a> avant de planifier ta journée.', f'Revisa las <a href="{href("es", "release-dates.html")}">fechas de publicación</a> antes de planificar el día.')) + '</p>'
                f'<h2>{t(T("Example","Exemple","Ejemplo"))}</h2><p>{t(ex)}</p>')
-        b = (f'<section style="padding-top:8px"><div class="wrap narrow">{tbl}<p class="fine">{t(NOTE)}</p></div></section>'
-             f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T(f"What a stop costs on {s}",f"Ce que coûte un stop sur {s}",f"Lo que cuesta un stop en {s}"))}</h2></div>{rtbl}{calc}</div></section>'
-             f'<section class="rule"><div class="wrap narrow"><article class="article">{art}</article></div></section>'
-             f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T(f"Journal your {s} trades.",f"Journalise tes trades {s}.",f"Registra tus operaciones de {s}."))}</h2>'
-             f'<p class="lead">{t(T(f"Sweep knows the {s} tick value: your net P&L and R are exact, and every trade shows on real CME candles.",f"Sweep connaît la valeur du tick {s} : ton P&L net et ton R sont exacts, et chaque trade s’affiche sur de vraies bougies CME.",f"Sweep conoce el valor del tick de {s}: tu P&L neto y tu R son exactos, y cada operación se ve sobre velas reales de CME."))}</p></div>'
-             f'<p class="firm-others"><span>{t(T("Other contracts","Autres contrats","Otros contratos"))}</span>' + "".join(f'<a href="{href(lang,slug(c[0]))}">{c[0]}</a>' for c in C if c[0] != s) + '</p></div></section>')
+        band = ui.band(t(T(f"Journal your {s} trades.",f"Journalise tes trades {s}.",f"Registra tus operaciones de {s}.")),
+                       t(T(f"Sweep knows the {s} tick value: your net P&L and R are exact, and every trade shows on real CME candles.",f"Sweep connaît la valeur du tick {s} : ton P&L net et ton R sont exacts, et chaque trade s’affiche sur de vraies bougies CME.",f"Sweep conoce el valor del tick de {s}: tu P&L neto y tu R son exactos, y cada operación se ve sobre velas reales de CME.")),
+                       ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_contract"'))
+        others = (f'<div class="chiprow" style="margin-top:40px"><span class="eyebrow">{t(T("Other contracts","Autres contrats","Otros contratos"))}</span>'
+                  + "".join(f'<a class="chip" href="{href(lang,slug(c[0]))}">{c[0]}</a>' for c in C if c[0] != s) + "</div>")
         faqs = [(T(f"What is the tick value of {s}?",f"Quelle est la valeur du tick de {s} ?",f"¿Cuál es el valor del tick de {s}?"),
                  T(f"One {s} tick ({_tick(ts)}) is worth {_fmt(tv)} per contract.",f"Un tick {s} ({_tick(ts, 'fr')}) vaut {_fmt(tv, 'fr')} par contrat.",f"Un tick de {s} ({_tick(ts, 'es')}) vale {_fmt(tv, 'es')} por contrato.")),
                 (T(f"How much is one point of {s} worth?",f"Combien vaut un point de {s} ?",f"¿Cuánto vale un punto de {s}?"),
                  T(f"One full point is worth {_fmt(pv)} per contract.",f"Un point complet vaut {_fmt(pv, 'fr')} par contrat.",f"Un punto completo vale {_fmt(pv, 'es')} por contrato."))]
-        b += f'<section class="rule"><div class="wrap narrow">{"".join(faq_item(t,q,a) for q,a in faqs)}</div></section>'
+        b = (ui.sec(key + tbl + f'<p class="fine" style="margin-top:16px">{t(NOTE)}</p>', "t", "specs", width="read")
+             + ui.sec(ui.head(t, None, T(f"What a stop costs on {s}",f"Ce que coûte un stop sur {s}",f"Lo que cuesta un stop en {s}")) + rtbl + calc, "n", "stops", width="read")
+             + ui.sec(f'<article class="article">{art}</article>' + ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs), "n", "trading", width="read")
+             + ui.sec(band + others, "t", "journal"))
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]})
         return (t(T(f"{s} futures tick value, tick size and contract specs · Sweep",f"{s} : valeur du tick, taille et spécifications · Sweep",f"{s}: valor del tick, tamaño y especificaciones · Sweep")),
                 t(T(f"{name} ({s}) futures: tick size {_tick(ts)}, tick value {_fmt(tv)}, point value {_fmt(pv)}, trading hours and what a stop costs, for prop traders.",
                     f"Contrat {name} ({s}) : tick de {_tick(ts, 'fr')}, valeur du tick {_fmt(tv, 'fr')}, valeur du point {_fmt(pv, 'fr')}, heures de marché et coût d’un stop, pour les traders prop.",
                     f"Futuros {name} ({s}): tick de {_tick(ts, 'es')}, valor del tick {_fmt(tv, 'es')}, valor del punto {_fmt(pv, 'es')}, horario y coste de un stop, para traders prop.")),
-                hero + b + final_cta(lang, t), ld)
+                hero + b + ui.final(lang, t), ld)
     return page
 
 def page_contracts(lang, t):
-    hero = page_hero(t, T("CME futures contract specs.","Fiches des contrats à terme CME.","Fichas de los contratos de futuros de CME."),
-        T("Tick size, tick value and point value for the 14 contracts Sweep charts.","Taille du tick, valeur du tick et valeur du point pour les 14 contrats que Sweep affiche en graphique.","Tamaño del tick, valor del tick y valor del punto para los 14 contratos que Sweep muestra en gráfico."), T("Contract specs","Fiches contrats","Fichas"))
-    rows = "".join(f'<tr><th><a href="{href(lang,slug(s))}">{s}</a></th><td>{n}</td><td class="num">{_tick(ts, lang)}</td><td class="num">{_fmt(tv, lang)}</td><td class="num">{_fmt(pv, lang)}</td></tr>' for s,n,_,ts,tv,pv,_,_,_ in C)
-    tbl = (f'<div class="cmp-wrap"><table class="cmp"><thead><tr><th>{t(T("Symbol","Symbole","Símbolo"))}</th><th>{t(T("Name","Nom","Nombre"))}</th><th>{t(T("Tick","Tick","Tick"))}</th><th>{t(T("Tick value","Valeur du tick","Valor del tick"))}</th><th>{t(T("Point value","Valeur du point","Valor del punto"))}</th></tr></thead><tbody>{rows}</tbody></table></div>')
+    hero = ui.hero(t, T("Contract specs","Fiches contrats","Fichas"), T("CME futures contract specs.","Fiches des contrats à terme CME.","Fichas de los contratos de futuros de CME."),
+        T("Tick size, tick value and point value for the 14 contracts Sweep charts.","Taille du tick, valeur du tick et valeur du point pour les 14 contrats que Sweep affiche en graphique.","Tamaño del tick, valor del tick y valor del punto para los 14 contratos que Sweep muestra en gráfico."))
+    L = [t(T("Name","Nom","Nombre")), t(T("Tick","Tick","Tick")), t(T("Tick value","Valeur du tick","Valor del tick")), t(T("Point value","Valeur du point","Valor del punto"))]
+    rows = "".join(f'<tr><th scope="row"><a href="{href(lang,slug(s))}">{s}</a></th><td data-label="{L[0]}">{n}</td><td class="num" data-label="{L[1]}">{_tick(ts, lang)}</td><td class="num" data-label="{L[2]}">{_fmt(tv, lang)}</td><td class="num" data-label="{L[3]}">{_fmt(pv, lang)}</td></tr>' for s,n,_,ts,tv,pv,_,_,_ in C)
+    tbl = (f'<div class="cmp-wrap"><table class="cmp guide specs-all"><thead><tr><th scope="col">{t(T("Symbol","Symbole","Símbolo"))}</th>' + "".join(f'<th scope="col">{x}</th>' for x in L) + f'</tr></thead><tbody>{rows}</tbody></table></div>')
     guide = T("""<h2>How to read a contract spec</h2><ul>
 <li><b>Tick size.</b> The smallest price step: 0.25 points on NQ and ES, 1 point on YM, 0.01 on crude oil.</li>
 <li><b>Tick value.</b> What one tick is worth per contract. Your P&L is ticks × tick value × contracts.</li>
@@ -174,8 +178,9 @@ def page_contracts(lang, t):
 <h2>Meses de contrato y rollover</h2><p>Cada letra es un mes de entrega: F enero, G febrero, H marzo, J abril, K mayo, M junio, N julio, Q agosto, U septiembre, V octubre, X noviembre, Z diciembre. Después va el año: NQZ6 es el contrato del Nasdaq-100 de diciembre de 2026.</p>
 <p>Los futuros sobre índices bursátiles vencen cada trimestre, el tercer viernes de marzo, junio, septiembre y diciembre. El volumen pasa al contrato siguiente más o menos una semana antes, y es cuando la mayoría de los traders hacen el rollover. El crudo tiene un contrato cada mes, y el oro se negocia sobre todo en sus meses pares.</p>
 <h2>Por qué importa en una cuenta prop</h2><p>La pérdida máx. de tu firma está en dólares, pero tu stop está en puntos. El valor del punto une las dos cosas: una pérdida máx. de 2.000 $ son 100 puntos en un NQ, 40 puntos en un ES y 1.000 puntos en un MNQ. Te dice cuántas operaciones perdedoras aguanta tu cuenta antes del límite, y la <a href="@position-size-calculator.html">calculadora de tamaño de posición</a> hace el cálculo para cualquier stop.</p>""")
-    b = (f'<section style="padding-top:8px"><div class="wrap">{tbl}<p class="fine">{t(NOTE)}</p></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', t(guide))}</article></div></section>')
+    b = (ui.sec(tbl + f'<p class="fine" style="margin-top:16px">{t(NOTE)}</p>', "t", "contracts")
+         + ui.sec(f'<article class="article">{re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', t(guide))}</article>', "n", "read", width="read"))
     return (t(T("Futures tick values: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valeur du tick : NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valor del tick: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep")),
             t(T("Tick size, tick value and point value for NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI and 6E futures, with what a stop costs.","Taille, valeur du tick et valeur du point pour NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI et 6E, avec le coût d’un stop.","Tamaño, valor del tick y valor del punto para NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI y 6E, con el coste de un stop.")),
-            hero + b + final_cta(lang, t), "")
+            hero + b + ui.final(lang, t), "")
+SYSTEM_PAGES.add("futures-contracts.html")

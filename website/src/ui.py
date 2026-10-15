@@ -1,8 +1,8 @@
-"""The design system's building blocks (styles in system.css). A page built with them is listed in
-core.SYSTEM_PAGES and loads system.css; the others keep styles.css until they are migrated.
+"""The design system's building blocks (styles in system.css). Every page is built with them and listed in
+core.SYSTEM_PAGES.
 Grid rules are checked here, at build time: a row of cards never mixes cards with and without a visual,
 and never ends on an orphan row."""
-import os, html as _html
+import os, re, unicodedata, html as _html
 import core
 from core import *
 
@@ -151,12 +151,31 @@ def hero(t, kick, h1, lead, cta="", note=None, visual="", center=False, extra=""
     c = f'<div class="cta-row rise d4">{cta}</div>' if cta else ""
     n = f'<p class="reassure rise d4">{t(note)}</p>' if note else ""
     v = f'<div class="c c-wide hero-visual">{hero_shot(visual)}</div>' if visual else ""
-    return f'<div class="page-hero{" center" if center else ""}"><div class="c">{k}<h1 class="wu">{words(t(h1))}</h1><p class="lead rise d3">{t(lead)}</p>{c}{n}{extra}</div>{v}</div>'
+    p = f'<p class="lead rise d3">{t(lead)}</p>' if lead else ""
+    return f'<div class="page-hero{" center" if center else ""}"><div class="c">{k}<h1 class="wu">{words(t(h1))}</h1>{p}{c}{n}{extra}</div>{v}</div>'
 
 def hero_shot(visual):
     """The visual of a first screen: loaded at once and first, never hidden while it loads (it is the largest paint)."""
     v = visual.replace('loading="lazy"', 'loading="eager" fetchpriority="low"', 1)
     return v.replace(" reveal zoom\"", " hero-shot\"", 1).replace(" reveal\"", " hero-shot\"", 1)
+
+def _anchor(text, used):
+    a = re.sub(r"[^a-z0-9]+", "-", unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()).strip("-")[:48].strip("-") or "s"
+    k, n = a, 2
+    while k in used: k, n = f"{a}-{n}", n + 1
+    used.add(k); return k
+
+def doc(t, html):
+    """A long text with its chapters: a sticky column beside the text on computers, the capsule under the menu on phones
+    (site.js highlights the chapter being read, as for .subnav). Each <h2> gets an id."""
+    used, toc = set(), []
+    def h2(m):
+        label = _html.unescape(re.sub(r"<[^>]+>", "", m.group(2))).strip()
+        k = _anchor(label, used); toc.append((k, label)); return f'<h2{m.group(1)} id="{k}">{m.group(2)}</h2>'
+    body = re.sub(r"<h2([^>]*)>(.*?)</h2>", h2, html, flags=re.S)
+    nav = (f'<nav class="subnav toc" aria-label="{t(T("On this page","Sur cette page","En esta página"))}"><div class="sn">'
+           + "".join(f'<a href="#{k}">{_html.escape(l, quote=False)}</a>' for k, l in toc) + "</div></nav>")
+    return f'<div class="doc">{nav}<article class="article">{body}</article></div>'
 
 def subnav(t, label, items):
     """Chapters of a long page, in a capsule that stays under the menu (site.js highlights the current one)."""

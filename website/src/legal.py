@@ -250,14 +250,16 @@ RISK = T("""
 <h2>Prop firms</h2><p>Sweep no está afiliado, respaldado ni vinculado a ninguna prop firm, bróker o bolsa. Los nombres de productos y empresas pertenecen a sus propietarios.</p>
 """)
 
-def legal(title, desc, content):
+def legal(title, desc, content, page):
+    SYSTEM_PAGES.add(page)
     def f(lang, t):
-        eff = t(T("Effective October 3, 2026 · Sweep Inc.","En vigueur le 3 octobre 2026 · Sweep Inc.","Vigente desde el 3 de octubre de 2026 · Sweep Inc."))
+        import ui
+        eff = T("Effective October 3, 2026 · Sweep Inc.","En vigueur le 3 octobre 2026 · Sweep Inc.","Vigente desde el 3 de octubre de 2026 · Sweep Inc.")
         text = re.sub(r'href="([a-z][a-z0-9-]*\.html)"', lambda m: f'href="{href(lang, m.group(1))}"', t(content))
-        b = f'<div class="page-hero"><div class="wrap"><span class="kick">{t(T("Legal","Légal","Legal"))}</span><h1>{t(title)}</h1><p class="meta">{eff}</p></div></div><section style="padding-top:8px"><div class="wrap"><div class="legal">{text}</div></div></section>'
-        return (t(title) + " · Sweep", t(desc), b + final_cta(lang, t), "")
+        b = ui.hero(t, T("Legal","Légal","Legal"), title, None, note=eff) + ui.sec(ui.doc(t, text), "t", "text")
+        return (t(title) + " · Sweep", t(desc), b + ui.final(lang, t), "")
     return f
 
-page_privacy = legal(T("Privacy policy","Politique de confidentialité","Política de privacidad"), T("How Sweep Inc. collects, uses, stores and protects your personal information, and your rights under Quebec’s Law 25 and how to use them.","Comment Sweep Inc. recueille, utilise, conserve et protège tes renseignements personnels, et tes droits selon la Loi 25.","Cómo Sweep Inc. recopila, usa, guarda y protege tu información personal, y tus derechos según la Ley 25 de Quebec y cómo ejercerlos."), PRIVACY)
-page_terms = legal(T("Terms of use","Conditions d’utilisation","Términos de uso"), T("The terms that apply when you use Sweep, including plans, billing, cancellation, your data and our limitations of liability.","Les conditions qui s’appliquent à l’utilisation de Sweep, dont les forfaits, la facturation, l’annulation, tes données et les limites.","Los términos que se aplican al usar Sweep, incluidos los planes, la facturación, la cancelación, tus datos y los límites."), TERMS)
-page_risk = legal(T("Risk disclosure","Divulgation des risques","Aviso de riesgo"), T("Important information about the risks of trading futures and prop firm accounts, and about the sample data shown on this site. Read it before trading.","Renseignements importants sur les risques du trading de futures et des comptes prop, et sur les données d’exemple de ce site. À lire avant de trader.","Información importante sobre los riesgos de operar futuros y cuentas prop, y sobre los datos de ejemplo de este sitio. Léela antes de operar."), RISK)
+page_privacy = legal(T("Privacy policy","Politique de confidentialité","Política de privacidad"), T("How Sweep Inc. collects, uses, stores and protects your personal information, and your rights under Quebec’s Law 25 and how to use them.","Comment Sweep Inc. recueille, utilise, conserve et protège tes renseignements personnels, et tes droits selon la Loi 25.","Cómo Sweep Inc. recopila, usa, guarda y protege tu información personal, y tus derechos según la Ley 25 de Quebec y cómo ejercerlos."), PRIVACY, "privacy.html")
+page_terms = legal(T("Terms of use","Conditions d’utilisation","Términos de uso"), T("The terms that apply when you use Sweep, including plans, billing, cancellation, your data and our limitations of liability.","Les conditions qui s’appliquent à l’utilisation de Sweep, dont les forfaits, la facturation, l’annulation, tes données et les limites.","Los términos que se aplican al usar Sweep, incluidos los planes, la facturación, la cancelación, tus datos y los límites."), TERMS, "terms.html")
+page_risk = legal(T("Risk disclosure","Divulgation des risques","Aviso de riesgo"), T("Important information about the risks of trading futures and prop firm accounts, and about the sample data shown on this site. Read it before trading.","Renseignements importants sur les risques du trading de futures et des comptes prop, et sur les données d’exemple de ce site. À lire avant de trader.","Información importante sobre los riesgos de operar futuros y cuentas prop, y sobre los datos de ejemplo de este sitio. Léela antes de operar."), RISK, "risk.html")

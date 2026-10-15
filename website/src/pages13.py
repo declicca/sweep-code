@@ -1,5 +1,6 @@
 from core import *
-import json, os, datetime
+import json, os, datetime, html as _html
+import ui
 
 _EV = json.load(open(os.path.join(os.path.dirname(__file__), "data", "econ-us-2026-2027.json"), encoding="utf-8"))["events"]
 TODAY_ISO = datetime.date.today().isoformat()
@@ -123,18 +124,24 @@ def make_release(key):
     k, sl, names, title, what, src = next(r for r in REL if r[0] == key)
     CRUMBS[sl] = title
     evs = sorted([e for e in _EV if e["event"] in names], key=lambda e: (e["date"], e["time"]))
+    SYSTEM_PAGES.add(sl)
     def page(lang, t):
-        nxt = next((e for e in evs if e["date"] >= TODAY_ISO), None)
-        hero = page_hero(t, T(f"{title} release dates 2026–2027.", f"Dates de publication {title} 2026–2027.", f"Fechas de publicación {title} 2026–2027."), what, T("Economic calendar","Calendrier économique","Calendario económico"))
+        nxt = next((e for e in evs if e["date"] >= TODAY_ISO), None)   # at build; the page picks it again in the browser (NEXT_JS)
+        hero = ui.hero(t, T("Economic calendar","Calendrier économique","Calendario económico"), T(f"{title} release dates 2026–2027.", f"Dates de publication {title} 2026–2027.", f"Fechas de publicación {title} 2026–2027."), what)
         nx = ""
         if nxt:
-            nx = f'<div class="nextrel"><span class="kick">{t(T("Next release","Prochaine publication","Próxima publicación"))}</span><b class="num">{_date(t,nxt["date"])} · {nxt["time"]} ET</b><span class="plan-tag">{t(STATUS[nxt["status"]])}</span></div>'
-        rows = ""
+            nx = (f'<div class="nextrel reveal"><span class="eyebrow">{t(T("Next release","Prochaine publication","Próxima publicación"))}</span>'
+                  f'<b class="num" data-nx="when">{_date(t,nxt["date"])} · {nxt["time"]} ET</b><span class="st st-{nxt["status"]}" data-nx="st">{t(STATUS[nxt["status"]])}</span></div>')
+        cols = 3 + (k == "gdp")
+        rows, year = "", None
         for e in evs:
+            if e["date"][:4] != year:   # one group per year
+                year = e["date"][:4]; rows += f'<tr class="grp"><th colspan="{cols}">{year}</th></tr>'
             past = e["date"] < TODAY_ISO
             lbl = e["event"].replace("GDP q/q ","GDP ") if k == "gdp" else ""
-            rows += f'<tr class="{"past" if past else ""}"><td class="num">{_date(t,e["date"])}</td><td class="num">{e["time"]} ET</td>{f"<td>{lbl}</td>" if k=="gdp" else ""}<td><span class="st st-{e["status"]}">{t(STATUS[e["status"]])}</span></td></tr>'
-        head = f'<tr><th>{t(T("Date","Date","Fecha"))}</th><th>{t(T("Time","Heure","Hora"))}</th>{"<th>"+t(T("Estimate","Estimation","Estimación"))+"</th>" if k=="gdp" else ""}<th>{t(T("Status","Statut","Estado"))}</th></tr>'
+            rows += (f'<tr class="{"past" if past else ""}" data-d="{e["date"]}T{e["time"]}"><th scope="row" class="num">{_date(t,e["date"])}</th><td class="num">{e["time"]} ET</td>'
+                     f'{f"<td>{lbl}</td>" if k=="gdp" else ""}<td><span class="st st-{e["status"]}">{t(STATUS[e["status"]])}</span></td></tr>')
+        head = f'<tr><th scope="col">{t(T("Date","Date","Fecha"))}</th><th scope="col">{t(T("Time","Heure","Hora"))}</th>{"<th scope=col>"+t(T("Estimate","Estimation","Estimación"))+"</th>" if k=="gdp" else ""}<th scope="col">{t(T("Status","Statut","Estado"))}</th></tr>'
         tbl = f'<div class="cmp-wrap"><table class="cmp reltbl"><thead>{head}</thead><tbody>{rows}</tbody></table></div>'
         note = T(f"Times in New York time (ET). Source: {src}. “Estimated” dates are projected from the usual release pattern: check the official calendar closer to the date. Not financial advice.",
                  f"Heures de New York (ET). Source : {src}. Les dates « estimées » sont projetées selon le calendrier habituel : vérifie le calendrier officiel à l’approche. Ce n’est pas un conseil financier.",
@@ -142,24 +149,33 @@ def make_release(key):
         why = T(f"Releases like {title} can move NQ, ES, yields and the dollar within seconds. Sweep marks every high-impact release on your calendar, warns you in the trade ticket when one is close, and shows how you trade around them.",
                 f"Des publications comme {title} peuvent faire bouger NQ, ES, les taux et le dollar en quelques secondes. Sweep marque chaque annonce importante dans ton calendrier, t’avertit dans le ticket quand une approche, et montre comment tu trades autour.",
                 f"Datos como {title} pueden mover NQ, ES, los rendimientos y el dólar en segundos. Sweep marca cada dato importante en tu calendario, te avisa en el ticket cuando se acerca uno y muestra cómo operas a su alrededor.")
-        others = "".join(f'<a href="{href(lang,r[1])}">{r[3]}</a>' for r in REL if r[0] != k)
+        others = (f'<div class="chiprow" style="margin-top:40px"><span class="eyebrow">{t(T("Other releases","Autres publications","Otros datos"))}</span>'
+                  + "".join(f'<a class="chip" href="{href(lang,r[1])}">{r[3]}</a>' for r in REL if r[0] != k) + "</div>")
         when = max(set(e["time"] for e in evs), key=lambda x: sum(1 for e in evs if e["time"] == x))   # its usual time
         hm, hh, ha = _heads(k)
         art = (f'<h2>{t(hm)}</h2>{t(MEASURE[k])}<h2>{t(hh)}</h2>{t(REACT[k])}'
                f'<h2>{t(ha)}</h2>{localize(lang, t(AROUND)).replace("{time}", _hm(when, lang))}')
-        b = (f'<section style="padding-top:8px"><div class="wrap narrow">{nx}{tbl}<p class="fine">{t(note)}</p></div></section>'
-             f'<section class="rule"><div class="wrap narrow"><article class="article">{art}</article></div></section>'
-             f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Trade the news with a plan.","Trade les nouvelles avec un plan.","Opera las noticias con un plan."))}</h2><p class="lead">{t(why)}</p></div>'
-             f'<div class="cta-row"><a class="btn btn-line" href="{href(lang,"economic-calendar.html")}">{t(T("The economic calendar in Sweep","Le calendrier économique dans Sweep","El calendario económico en Sweep"))}</a></div>'
-             f'<p class="firm-others" style="margin-top:28px"><span>{t(T("Other releases","Autres publications","Otros datos"))}</span>{others}</p></div></section>')
+        band = ui.band(t(T("Trade the news with a plan.","Trade les nouvelles avec un plan.","Opera las noticias con un plan.")), t(why),
+                       ui.btn(t(T("The economic calendar in Sweep","Le calendrier économique dans Sweep","El calendario económico en Sweep")), href(lang,"economic-calendar.html"), "line"))
+        b = (ui.sec(nx + tbl + f'<p class="fine" style="margin-top:16px">{t(note)}</p>', "t", "dates", width="read")
+             + ui.sec(f'<article class="article">{art}</article>', "n", "explained", width="read")
+             + ui.sec(band + others, "t", "plan") + NEXT_JS)
         ld = jsonld({"@context":"https://schema.org","@type":"ItemList","name":t(T(f"{title} release dates",f"Dates {title}",f"Fechas {title}")),
                      "itemListElement":[{"@type":"ListItem","position":i+1,"name":f'{title} {e["date"]} {e["time"]} ET'} for i,e in enumerate(evs) if e["date"] >= TODAY_ISO][:12]})
         return (t(T(f"{title} release dates 2026 and 2027 (ET) · Sweep",f"Dates {title} 2026 et 2027 (heure de New York) · Sweep",f"Fechas {title} 2026 y 2027 (hora de Nueva York) · Sweep")),
                 t(T(f"Every {title} release date and time for 2026 and 2027 in New York time, with the next release and what it means for futures traders.",
                     f"Toutes les dates et heures de publication {title} pour 2026 et 2027, en heure de New York, avec la prochaine publication et son effet sur les futures.",
                     f"Todas las fechas y horas de publicación {title} para 2026 y 2027, en hora de Nueva York, con el próximo dato y lo que significa para los futuros.")),
-                hero + b + final_cta(lang, t), ld)
+                hero + b + ui.final(lang, t), ld)
     return page
+
+# the next release and the past dates, picked in the browser in New York time (the build's choice ages with the page)
+NEXT_JS = """<script>(function(){var p={};new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});
+var now=p.year+'-'+p.month+'-'+p.day+'T'+p.hour+':'+p.minute,nx=null;
+document.querySelectorAll('[data-d]').forEach(function(r){var past=r.getAttribute('data-d')<now;r.classList.toggle('past',past);if(!past&&!nx)nx=r;});
+var w=document.querySelector('[data-nx="when"]'),s=document.querySelector('[data-nx="st"]');
+if(nx&&w){w.textContent=nx.querySelector('th').textContent+' · '+nx.querySelector('td').textContent;var st=nx.querySelector('.st');s.textContent=st.textContent;s.className=st.className;}
+document.querySelectorAll('[data-next]').forEach(function(el){var l=JSON.parse(el.getAttribute('data-next'));for(var i=0;i<l.length;i++)if(l[i][0]>=now){el.textContent=l[i][1];return;}});})();</script>"""
 
 HUB_HELP = T("""<h2>Which releases matter most</h2><ul>
 <li><b>Inflation:</b> <a href="@cpi-release-dates.html">CPI</a>, <a href="@ppi-release-dates.html">PPI</a> and <a href="@pce-release-dates.html">PCE</a> shape what the market expects from the Fed. CPI usually moves futures the most.</li>
@@ -187,18 +203,20 @@ HUB_HELP = T("""<h2>Which releases matter most</h2><ul>
 <h2>Qué significan los estados</h2><p>Las fechas <b>oficiales</b> vienen de los calendarios que publican las agencias. Las <b>provisionales</b> están anunciadas pero aún pueden cambiar. Las <b>estimadas</b> se proyectan según el patrón habitual y se sustituyen cuando la agencia publica el suyo: vuelve a revisarlas cuando se acerque la fecha.</p>""")
 
 def page_release_hub(lang, t):
-    hero = page_hero(t, T("U.S. economic release dates.","Dates des annonces économiques américaines.","Fechas de los datos económicos de EE. UU."),
-        T("The high-impact releases futures traders plan around, with every date for 2026 and 2027.","Les annonces importantes autour desquelles les traders de futures planifient, avec toutes les dates 2026 et 2027.","Los datos importantes que los traders de futuros tienen en cuenta, con todas las fechas de 2026 y 2027."), T("Economic calendar","Calendrier économique","Calendario económico"))
-    cards = ""
+    hero = ui.hero(t, T("Economic calendar","Calendrier économique","Calendario económico"), T("U.S. economic release dates.","Dates des annonces économiques américaines.","Fechas de los datos económicos de EE. UU."),
+        T("The high-impact releases futures traders plan around, with every date for 2026 and 2027.","Les annonces importantes autour desquelles les traders de futures planifient, avec toutes les dates 2026 et 2027.","Los datos importantes que los traders de futuros tienen en cuenta, con todas las fechas de 2026 y 2027."))
+    cards = []
     for k, sl, names, title, what, src in REL:
-        nxt = next((e for e in sorted([e for e in _EV if e["event"] in names], key=lambda e: e["date"]) if e["date"] >= TODAY_ISO), None)
-        nx = f'<span class="go num">{t(T("Next","Prochaine","Próxima"))} : {_date(t,nxt["date"])} · {nxt["time"]} ET</span>' if nxt else ""
-        cards += f'<a class="tool-card" href="{href(lang,sl)}"><h2>{title}</h2><p>{t(what)}</p>{nx}</a>'
-    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(HUB_HELP))}</article></div></section>')
+        up = [e for e in sorted([e for e in _EV if e["event"] in names], key=lambda e: (e["date"], e["time"])) if e["date"] >= TODAY_ISO]
+        lab = lambda e: f'{t(T("Next","Prochaine","Próxima"))} : {_date(t,e["date"])} · {e["time"]} ET'.replace(" : ", ": " if lang != "fr" else " : ")
+        nx = (f'<div class="more"><span class="go num" data-next="{_html.escape(json.dumps([[e["date"] + "T" + e["time"], lab(e)] for e in up[:8]], ensure_ascii=False))}">{lab(up[0])}</span></div>') if up else ""
+        cards.append(ui.Card("text", f'<a class="card lift" href="{href(lang,sl)}"><h3>{title}</h3><p>{t(what)}</p>{nx}</a>'))
+    b = (ui.sec(ui.cards(cards, 4), "t", "releases")
+         + ui.sec(f'<article class="article">{localize(lang, t(HUB_HELP))}</article>', "n", "read", width="read") + NEXT_JS)
     return (t(T("Economic release dates 2026–2027: CPI, NFP, FOMC · Sweep","Annonces économiques 2026–2027 : CPI, NFP, FOMC · Sweep","Fechas de datos económicos 2026–2027: CPI, NFP, FOMC · Sweep")),
             t(T("Release dates and times for CPI, NFP, FOMC, PPI, PCE, retail sales, GDP and ISM in 2026 and 2027, in New York time, with the next release.","Dates et heures de CPI, NFP, FOMC, PPI, PCE, ventes au détail, PIB et ISM en 2026 et 2027, en heure de New York, avec la prochaine.","Fechas y horas de CPI, NFP, FOMC, PPI, PCE, ventas minoristas, PIB e ISM en 2026 y 2027, en hora de Nueva York, con el próximo dato.")),
-            hero + b + final_cta(lang, t), "")
+            hero + b + ui.final(lang, t), "")
+SYSTEM_PAGES.add("release-dates.html")
 
 # ------------------------------------------------------------------ glossary
 G = [
@@ -228,17 +246,26 @@ G = [
  ("journal", T("Trading journal","Journal de trading","Diario de trading"), T("A record of every trade with its reason, its result and what you learned, used to find your edge and fix your mistakes. Start with a <a href=\"/trading-templates\">free template</a>.","Un registre de chaque trade avec sa raison, son résultat et ce que tu en retiens, pour trouver ton edge et corriger tes erreurs. Commence avec un <a href=\"/fr/trading-templates\">modèle gratuit</a>.","Un registro de cada operación con su motivo, su resultado y lo aprendido, para encontrar tu ventaja y corregir errores. Empieza con una <a href=\"/es/trading-templates\">plantilla gratis</a>.")),
 ]
 def page_glossary(lang, t):
-    hero = page_hero(t, T("Futures and prop trading glossary.","Lexique du trading de futures et prop.","Glosario de trading de futuros y prop."),
-        T("The terms you meet every day, in one sentence each.","Les termes que tu croises chaque jour, en une phrase chacun.","Los términos que encuentras cada día, en una frase cada uno."), T("Glossary","Lexique","Glosario"))
-    idx = "".join(f'<a href="#{k}">{t(n) if isinstance(n,dict) else n}</a>' for k,n,_ in G)
-    items = "".join(f'<div class="term" id="{k}"><dt>{t(n) if isinstance(n,dict) else n}</dt><dd>{t(d)}</dd></div>' for k,n,d in G)
-    links = f'<p class="firm-others" style="margin-top:32px"><span>{t(T("Free tools","Outils gratuits","Herramientas gratuitas"))}</span><a href="{href(lang,"position-size-calculator.html")}">{t(T("Position size","Taille de position","Tamaño de posición"))}</a><a href="{href(lang,"trailing-drawdown-calculator.html")}">{t(T("Trailing drawdown","Drawdown suiveur","Drawdown dinámico"))}</a><a href="{href(lang,"consistency-rule-calculator.html")}">{t(T("Consistency","Consistance","Consistencia"))}</a><a href="{href(lang,"futures-contracts.html")}">{t(T("Contract specs","Fiches contrats","Fichas de contratos"))}</a></p>'
-    b = f'<section style="padding-top:8px"><div class="wrap narrow"><nav class="gl-idx">{idx}</nav><dl class="glossary">{items}</dl>{links}</div></section>'
+    """The terms in alphabetical order in each language, grouped by letter, with an A–Z index that stays under the menu."""
+    import unicodedata
+    hero = ui.hero(t, T("Glossary","Lexique","Glosario"), T("Futures and prop trading glossary.","Lexique du trading de futures et prop.","Glosario de trading de futuros y prop."),
+        T("The terms you meet every day, in one sentence each.","Les termes que tu croises chaque jour, en une phrase chacun.","Los términos que encuentras cada día, en una frase cada uno."))
+    name = lambda n: t(n) if isinstance(n, dict) else n
+    fold = lambda x: unicodedata.normalize("NFKD", x).encode("ascii", "ignore").decode().upper()
+    terms = sorted(G, key=lambda g: fold(name(g[1])))
+    groups = {}
+    for k, n, d in terms: groups.setdefault(fold(name(n))[0], []).append((k, n, d))
+    idx = ui.subnav(t, T("Glossary index","Index du lexique","Índice del glosario"), [(f"l-{L.lower()}", {"en": L, "fr": L, "es": L}) for L in groups])
+    items = "".join(f'<div class="gl-group" id="l-{L.lower()}"><h2>{L}</h2><dl class="glossary">'
+                    + "".join(f'<div class="term" id="{k}"><dt>{name(n)}</dt><dd>{t(d)}</dd></div>' for k, n, d in ts) + "</dl></div>" for L, ts in groups.items())
+    links = f'<div class="chiprow" style="margin-top:56px"><span class="eyebrow">{t(T("Free tools","Outils gratuits","Herramientas gratuitas"))}</span><a class="chip" href="{href(lang,"position-size-calculator.html")}">{t(T("Position size","Taille de position","Tamaño de posición"))}</a><a class="chip" href="{href(lang,"trailing-drawdown-calculator.html")}">{t(T("Trailing drawdown","Drawdown suiveur","Drawdown dinámico"))}</a><a class="chip" href="{href(lang,"consistency-rule-calculator.html")}">{t(T("Consistency","Consistance","Consistencia"))}</a><a class="chip" href="{href(lang,"futures-contracts.html")}">{t(T("Contract specs","Fiches contrats","Fichas de contratos"))}</a></div>'
+    b = idx + ui.sec(items + links, "t", "terms", width="read")
     ld = jsonld({"@context":"https://schema.org","@type":"DefinedTermSet","name":t(T("Futures and prop trading glossary","Lexique du trading de futures et prop","Glosario de trading de futuros y prop")),
                  "hasDefinedTerm":[{"@type":"DefinedTerm","name":(t(n) if isinstance(n,dict) else n),"description":t(d),"url":f"https://{DOMAIN}{href(lang,'glossary.html')}#{k}"} for k,n,d in G]})
     return (t(T("Futures and prop firm trading glossary · Sweep","Lexique du trading de futures et prop firms · Sweep","Glosario de trading de futuros y prop firms · Sweep")),
             t(T("Tick value, R multiple, trailing drawdown, consistency rule, payout, slippage, RTH and more, explained in one sentence each.","Valeur du tick, R multiple, drawdown suiveur, règle de consistance, payout, glissement, RTH et plus, expliqués en une phrase.","Valor del tick, múltiplo R, drawdown dinámico, regla de consistencia, payout, deslizamiento, RTH y más, explicados en una frase.")),
-            hero + b + final_cta(lang, t), ld)
+            hero + b + ui.final(lang, t), ld)
+SYSTEM_PAGES.add("glossary.html")
 
 # ------------------------------------------------------------------ market hours
 HOURS_HELP = T("""<h2>What each session means for a futures trader</h2><ul>
@@ -267,13 +294,16 @@ HOURS_HELP = T("""<h2>What each session means for a futures trader</h2><ul>
 <h2>Festivos</h2><p>En los festivos de EE. UU., como Acción de Gracias, Navidad o el 4 de julio, CME cierra antes o no abre, y el horario cambia según el producto. Consulta el calendario de festivos de CME Group antes de planificar la sesión.</p>""")
 
 def page_hours(lang, t):
-    hero = page_hero(t, T("Futures market hours, in your time zone.","Heures des marchés futures, dans ton fuseau horaire.","Horario de los mercados de futuros, en tu zona horaria."),
-        T("CME Globex sessions converted to your local time, with what’s open right now.","Les sessions CME Globex converties à ton heure locale, avec ce qui est ouvert en ce moment.","Las sesiones de CME Globex convertidas a tu hora local, con lo que está abierto ahora."), T("Market hours","Heures de marché","Horario"))
+    hero = ui.hero(t, T("Market hours","Heures de marché","Horario"), T("Futures market hours, in your time zone.","Heures des marchés futures, dans ton fuseau horaire.","Horario de los mercados de futuros, en tu zona horaria."),
+        T("CME Globex sessions converted to your local time, with what’s open right now.","Les sessions CME Globex converties à ton heure locale, avec ce qui est ouvert en ce moment.","Las sesiones de CME Globex convertidas a tu hora local, con lo que está abierto ahora."))
     S = [("globex",T("Globex session","Session Globex","Sesión Globex"),"18:00","17:00"),("asia",T("Asia","Asie","Asia"),"18:00","03:00"),("london",T("London","Londres","Londres"),"03:00","08:00"),
          ("ny",T("New York (RTH)","New York (RTH)","Nueva York (RTH)"),"09:30","16:00"),("break",T("Daily break","Pause quotidienne","Pausa diaria"),"17:00","18:00")]
-    rows = "".join(f'<tr data-s="{k}" data-a="{a}" data-b="{b_}"><th>{t(n)}</th><td class="num">{a} – {b_} ET</td><td class="num loc">—</td></tr>' for k,n,a,b_ in S)
-    clock = f'''<div class="clock"><div><span class="kick">{t(T("New York","New York","Nueva York"))}</span><b class="num" id="hk-ny">--:--</b></div><div><span class="kick">{t(T("Your time","Ton heure","Tu hora"))}</span><b class="num" id="hk-me">--:--</b><span id="hk-tz" class="muted"></span></div><div><span class="kick">{t(T("Right now","En ce moment","Ahora mismo"))}</span><b id="hk-st">—</b></div></div>'''
-    tbl = f'<div class="cmp-wrap"><table class="cmp"><thead><tr><th>{t(T("Session","Session","Sesión"))}</th><th>{t(T("New York time","Heure de New York","Hora de Nueva York"))}</th><th>{t(T("Your time","Ton heure","Tu hora"))}</th></tr></thead><tbody>{rows}</tbody></table></div>'
+    NYL, MEL = t(T("New York time","Heure de New York","Hora de Nueva York")), t(T("Your time","Ton heure","Tu hora"))
+    rows = "".join(f'<tr data-s="{k}" data-a="{a}" data-b="{b_}"><th scope="row">{t(n)}</th><td class="num" data-label="{NYL}">{a} – {b_} ET</td><td class="num loc" data-label="{MEL}">—</td></tr>' for k,n,a,b_ in S)
+    clock = (f'<dl class="stats clock" style="--n:3"><div class="stat"><dt>{t(T("New York","New York","Nueva York"))}</dt><dd><b id="hk-ny">--:--</b></dd></div>'
+             f'<div class="stat"><dt>{MEL}</dt><dd><b id="hk-me">--:--</b><small id="hk-tz"></small></dd></div>'
+             f'<div class="stat now"><dt>{t(T("Right now","En ce moment","Ahora mismo"))}</dt><dd><b id="hk-st">—</b></dd></div></dl>')
+    tbl = f'<div class="cmp-wrap"><table class="cmp guide"><thead><tr><th scope="col">{t(T("Session","Session","Sesión"))}</th><th scope="col">{NYL}</th><th scope="col">{MEL}</th></tr></thead><tbody>{rows}</tbody></table></div>'
     st = {"closed":t(T("Market closed (weekend)","Marché fermé (week-end)","Mercado cerrado (fin de semana)")),"break":t(T("Daily break","Pause quotidienne","Pausa diaria")),"rth":t(T("Open · New York session (RTH)","Ouvert · session de New York (RTH)","Abierto · sesión de Nueva York (RTH)")),"london":t(T("Open · London session","Ouvert · session de Londres","Abierto · sesión de Londres")),"asia":t(T("Open · Asia session","Ouvert · session asiatique","Abierto · sesión asiática")),"open":t(T("Open · Globex","Ouvert · Globex","Abierto · Globex"))}
     js = f'''<script>(function(){{var L={json.dumps(st)},$=function(i){{return document.getElementById(i)}};
 function nyParts(d){{var f=new Intl.DateTimeFormat('en-US',{{timeZone:'America/New_York',hour12:false,weekday:'short',hour:'2-digit',minute:'2-digit'}}).formatToParts(d),o={{}};f.forEach(function(p){{o[p.type]=p.value}});return o;}}
@@ -288,11 +318,12 @@ tick();setInterval(tick,30000);}})();</script>'''
     note = T("Hours for CME Globex equity index, energy, metals and FX futures. Holiday hours differ: check the CME Group holiday calendar. Session names are conventions.",
              "Heures CME Globex pour les futures sur indices, énergie, métaux et devises. Les jours fériés ont des heures différentes : vérifie le calendrier des jours fériés du CME Group. Les noms des sessions sont des conventions.",
              "Horario de CME Globex para futuros de índices, energía, metales y divisas. Los festivos tienen otro horario: consulta el calendario de festivos de CME Group. Los nombres de las sesiones son convenciones.")
-    b = (f'<section style="padding-top:8px"><div class="wrap narrow">{clock}{tbl}<p class="fine">{t(note)}</p></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(HOURS_HELP))}</article></div></section>' + js)
+    b = (ui.sec(clock + f'<div style="margin-top:24px">{tbl}</div><p class="fine" style="margin-top:16px">{t(note)}</p>', "t", "hours", width="read")
+         + ui.sec(f'<article class="article">{localize(lang, t(HOURS_HELP))}</article>', "n", "read", width="read") + js)
     return (t(T("Futures market hours in your time zone (CME Globex) · Sweep","Heures des futures (CME Globex) dans ton fuseau · Sweep","Horario de futuros en tu zona horaria (CME Globex) · Sweep")),
             t(T("CME Globex futures hours converted to your local time: Asia, London and New York sessions, daily break, and whether the market is open now.","Les heures CME Globex converties à ton heure locale : sessions Asie, Londres et New York, pause quotidienne, et si le marché est ouvert maintenant.","El horario de CME Globex en tu hora local: sesiones de Asia, Londres y Nueva York, pausa diaria y si el mercado está abierto ahora.")),
-            hero + b + final_cta(lang, t), "")
+            hero + b + ui.final(lang, t), "")
+SYSTEM_PAGES.add("futures-market-hours.html")
 
 # ------------------------------------------------------------------ press kit
 PRESS_FACTS = T("""<h2>Sweep at a glance</h2><ul>
@@ -324,23 +355,24 @@ PRESS_FACTS = T("""<h2>Sweep at a glance</h2><ul>
 <h2>Escribir sobre Sweep</h2><p>La descripción al principio de esta página se puede citar tal cual. En un texto, escribe «Sweep» con mayúscula; «sweep» en minúsculas es solo para el logotipo. Las capturas usan datos de demostración: no las presentes como resultados reales de trading. Sweep no está afiliado a ninguna prop firm, bróker ni bolsa. Para una entrevista, cifras o una demo del producto, escríbenos.</p>""")
 
 def page_press(lang, t):
-    hero = page_hero(t, T("Press kit.","Kit presse.","Kit de prensa."), T("Everything you need to write about Sweep or feature it in a video.","Tout ce qu’il faut pour parler de Sweep ou le montrer en vidéo.","Todo lo necesario para hablar de Sweep o mostrarlo en un vídeo."), T("Press","Presse","Prensa"))
+    import ui
+    hero = ui.hero(t, T("Press","Presse","Prensa"), T("Press kit.","Kit presse.","Kit de prensa."), T("Everything you need to write about Sweep or feature it in a video.","Tout ce qu’il faut pour parler de Sweep ou le montrer en vidéo.","Todo lo necesario para hablar de Sweep o mostrarlo en un vídeo."))
     boiler = T("Sweep is a trading journal for futures prop firm traders. It keeps your platform’s real numbers, follows your firm’s real rules from evaluation to funded to live, logs a trade from a screenshot in seconds, and builds a daily routine that rewards discipline, never profit. Sweep is made by Sweep Inc. in Laval, Quebec, and is available in English, French and Spanish at makeitsweep.com.",
                "Sweep est un journal de trading pour les traders de prop firms de futures. Il garde les vrais chiffres de ta plateforme, suit les vraies règles de ta firme de l’évaluation au financé puis au live, ajoute un trade à partir d’une capture en quelques secondes, et bâtit une routine quotidienne qui récompense la discipline, jamais le profit. Sweep est conçu par Sweep Inc. à Laval, au Québec, et offert en français, en anglais et en espagnol sur makeitsweep.com.",
                "Sweep es un diario de trading para traders de prop firms de futuros. Mantiene los números reales de tu plataforma, sigue las reglas reales de tu firma de la evaluación a la cuenta fondeada y live, registra una operación desde una captura en segundos y crea una rutina diaria que premia la disciplina, nunca el beneficio. Sweep lo hace Sweep Inc. en Laval, Quebec, y está disponible en inglés, francés y español en makeitsweep.com.")
     files = [("sweep-logo-horizontal-white.svg",T("Logo, white (SVG)","Logo blanc (SVG)","Logo blanco (SVG)")),("sweep-logo-horizontal-ink.svg",T("Logo, dark (SVG)","Logo foncé (SVG)","Logo oscuro (SVG)")),
              ("sweep-logo-horizontal-white@2x.png",T("Logo, white (PNG)","Logo blanc (PNG)","Logo blanco (PNG)")),("sweep-mark-white-512.png",T("Mark, white (PNG)","Symbole blanc (PNG)","Símbolo blanco (PNG)")),
              ("sweep-mark-ink-512.png",T("Mark, dark (PNG)","Symbole foncé (PNG)","Símbolo oscuro (PNG)")),("sweep-press-kit.zip",T("Everything (ZIP)","Tout le kit (ZIP)","Todo (ZIP)"))]
-    fl = "".join(f'<a class="tool-mini" href="/press/{f}" download>{ico(I["download"])}<span>{t(l)}</span></a>' for f,l in files)
+    fl = "".join(f'<a class="chip dl" href="/press/{f}" download>{ico(I["download"])}{t(l)}</a>' for f,l in files)
     colors = [("#0B0B0C","Ink"),("#F2F2F3","Text"),("#4C8DFF","Gain · action"),("#D4A24C","Loss · alert")]
     cl = "".join(f'<div class="sw-c"><i style="background:{c}"></i><b class="num">{c}</b><span>{n}</span></div>' for c,n in colors)
-    shots = "".join(slot(n,"desktop",t(T("Sweep screen, demo data","Écran de Sweep, données de démonstration","Pantalla de Sweep, datos de demostración")),t,cap=False) for n in ("v6-01-today-d.webp","v6-08-payout-conditions-d.webp","v6-07-stats-d.webp"))
-    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("About Sweep","À propos de Sweep","Sobre Sweep"))}</h2></div><p class="lead">{t(boiler).replace("makeitsweep.com", f'<a href="{href(lang, "index.html")}">makeitsweep.com</a>')}</p>'
-         f'<p class="meta"><a href="{href(lang, "contact.html")}">{t(T("Contact","Contact","Contacto"))}</a> : <a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{href(lang, "about.html")}">{t(T("Our story","Notre histoire","Nuestra historia"))}</a> · <a href="{href(lang, "changelog.html")}">{t(T("What’s new","Nouveautés","Novedades"))}</a></p></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(PRESS_FACTS).replace("{FIRMS_N}", str(FIRMS_N)))}</article></div></section>'
-         f'<section class="rule"><div class="wrap"><div class="head"><h2>{t(T("Logo and files","Logo et fichiers","Logo y archivos"))}</h2><p class="lead">{t(T("Always lowercase “sweep” in the wordmark. Don’t stretch, recolor or add effects to the logo; the blue wick stays blue.","Le mot-symbole s’écrit toujours en minuscules : « sweep ». N’étire pas le logo, ne change pas ses couleurs et n’y ajoute pas d’effet ; la mèche bleue reste bleue.","El logotipo siempre en minúsculas: «sweep». No estires el logo, no cambies sus colores ni añadas efectos; la mecha azul sigue siendo azul."))}</p></div>'
-         f'<div class="tool-row">{fl}</div><div class="swatches">{cl}</div></div></section>'
-         f'<section class="rule"><div class="wrap"><div class="head"><h2>{t(T("Screenshots","Captures","Capturas"))}</h2><p class="lead">{t(T("Real app screens with demo data. Free to use when writing about Sweep.","De vrais écrans de l’app avec des données de démonstration. Libres d’utilisation pour parler de Sweep.","Pantallas reales de la app con datos de demostración. De uso libre para hablar de Sweep."))}</p></div><div class="press-shots">{shots}</div></div></section>')
+    shots = "".join(ui.frame_d(n, t(T("Sweep screen, demo data","Écran de Sweep, données de démonstration","Pantalla de Sweep, datos de demostración")), cap=False, sizes="(max-width: 860px) 92vw, 400px") for n in ("v6-01-today-d.webp","v6-08-payout-conditions-d.webp","v6-07-stats-d.webp"))
+    b = (ui.sec(ui.head(t, None, T("About Sweep","À propos de Sweep","Sobre Sweep")) + f'<p class="lead">{t(boiler).replace("makeitsweep.com", f'<a href="{href(lang, "index.html")}">makeitsweep.com</a>')}</p>'
+                + f'<p class="fine" style="margin-top:20px"><a href="{href(lang, "contact.html")}">{t(T("Contact","Contact","Contacto"))}</a> : <a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{href(lang, "about.html")}">{t(T("Our story","Notre histoire","Nuestra historia"))}</a> · <a href="{href(lang, "changelog.html")}">{t(T("What’s new","Nouveautés","Novedades"))}</a></p>', "t", "about", width="read")
+         + ui.sec(f'<article class="article">{localize(lang, t(PRESS_FACTS).replace("{FIRMS_N}", str(FIRMS_N)))}</article>', "n", "facts", width="read")
+         + ui.sec(ui.head(t, None, T("Logo and files","Logo et fichiers","Logo y archivos"), T("Always lowercase “sweep” in the wordmark. Don’t stretch, recolor or add effects to the logo; the blue wick stays blue.","Le mot-symbole s’écrit toujours en minuscules : « sweep ». N’étire pas le logo, ne change pas ses couleurs et n’y ajoute pas d’effet ; la mèche bleue reste bleue.","El logotipo siempre en minúsculas: «sweep». No estires el logo, no cambies sus colores ni añadas efectos; la mecha azul sigue siendo azul.")) + f'<div class="dls">{fl}</div><div class="swatches">{cl}</div>', "n", "files")
+         + ui.sec(ui.head(t, None, T("Screenshots","Captures","Capturas"), T("Real app screens with demo data. Free to use when writing about Sweep.","De vrais écrans de l’app avec des données de démonstration. Libres d’utilisation pour parler de Sweep.","Pantallas reales de la app con datos de demostración. De uso libre para hablar de Sweep.")) + f'<div class="press-shots">{shots}</div>', "n", "shots"))
     return (t(T("Sweep press kit: logo, screenshots and description","Kit presse de Sweep : logo, captures et description","Kit de prensa de Sweep: logo, capturas y descripción")),
             t(T("Download the Sweep logo, brand colors and app screenshots, and read the official description of Sweep, the trading journal for prop traders.","Télécharge le logo de Sweep, ses couleurs et des captures de l’app, et lis la description officielle du journal de trading des traders prop.","Descarga el logo de Sweep, sus colores y capturas de la app, y lee la descripción oficial de Sweep, el diario de trading de los traders prop.")),
-            hero + b + final_cta(lang, t), "")
+            hero + b + ui.final(lang, t), "")
+SYSTEM_PAGES.add("press-kit.html")

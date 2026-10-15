@@ -792,7 +792,7 @@ def page_method(lang, t):
     sites = '<ul class="list">' + "".join(
         f'<li><a href="{href(lang, page_of(f))}">{f["name"]}</a>{colon(lang)}' + ", ".join(f'<a href="{u}" rel="nofollow noopener" target="_blank">{_host(u)}</a>' for u in (f.get("sources") or [])[:3])
         + f' · {t(T("last checked", "dernière vérification", "última revisión"))} {day(checked_of(f), lang)}</li>' for f in presets.FIRMS) + "</ul>"
-    b = ui.sec(steps, "t", "steps") + ui.sec(f'<article class="article">{localize(lang, t(METHOD_HELP)).replace("{SITES}", sites)}</article>', "n", "details", width="read")
+    b = ui.sec(steps, "t", "steps") + ui.sec(ui.doc(t, localize(lang, t(METHOD_HELP)).replace("{SITES}", sites)), "n", "details")
     ld = jsonld({"@context": "https://schema.org", "@type": "Article", "headline": t(T("How we verify prop firm rules", "Comment on vérifie les règles des prop firms", "Cómo verificamos las reglas de las prop firms")),
                  "inLanguage": lang, "datePublished": "2026-10-13", "dateModified": presets.CHECKED, "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}})
     return (t(T("How We Verify Prop Firm Rules · Sweep", "Comment on vérifie les règles des prop firms · Sweep", "Cómo verificamos las reglas de prop firms · Sweep")),

@@ -30,24 +30,31 @@ TPL_HELP = T("""<h2>How to use them</h2><ul>
 <h2>Para ir más lejos</h2><p>La <a href="@trading-journal-routine.html">rutina de diario</a> muestra cómo rellenar el diario en pocos minutos al día, y el <a href="@glossary.html">glosario</a> explica los términos de las prop firms que escribirás en tu plan: pérdida máx., consistencia, payout.</p>""")
 
 def page_templates(lang, t):
-    hero = page_hero(t, T("Free trading templates.","Modèles de trading gratuits.","Plantillas de trading gratuitas."),
-        T("Print them, fill them in, keep them next to your screen. No email needed.","Imprime-les, remplis-les, garde-les à côté de ton écran. Sans courriel.","Imprímelas, rellénalas y tenlas junto a tu pantalla. Sin email."), T("Templates","Modèles","Plantillas"))
+    """Each template as a card with a picture of its first page, and a real download button."""
+    import ui
+    hero = ui.hero(t, T("Templates","Modèles","Plantillas"), T("Free trading templates.","Modèles de trading gratuits.","Plantillas de trading gratuitas."),
+        T("Print them, fill them in, keep them next to your screen. No email needed.","Imprime-les, remplis-les, garde-les à côté de ton écran. Sans courriel.","Imprímelas, rellénalas y tenlas junto a tu pantalla. Sin email."))
     fl = TPL[lang]
-    cards = "".join(f'<a class="tool-card" href="/templates/{lang}/{fl[i]}.pdf" download data-track="template_{TPL["en"][i]}">{ico(I[ic])}<h2>{t(n)}</h2><p>{t(d)}</p><span class="go">{t(T("Download the PDF","Télécharger le PDF","Descargar el PDF"))} ↓</span></a>' for i,(ic,n,d) in enumerate(ITEMS))
-    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(TPL_HELP))}</article></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Paper is a start. Sweep does the rest.","Le papier, c’est un début. Sweep fait le reste.","El papel es un comienzo. Sweep hace el resto."))}</h2>'
-         f'<p class="lead">{t(T("Your checklist is on the same screen as every trade, your plan feeds the Plan ring, and your weekly review starts from your real numbers.","Ta checklist est sur le même écran que chaque trade, ton plan nourrit l’anneau Plan, et ta revue de la semaine part de tes vrais chiffres.","Tu checklist está en la misma pantalla que cada operación, tu plan alimenta el anillo Plan y tu revisión semanal parte de tus números reales."))}</p></div>'
-         f'</div></section>')
+    dl = T("Download the PDF","Télécharger le PDF","Descargar el PDF")
+    cards = ui.cards([ui.card_media(t, n, d, f'<img src="/img/templates/{lang}/{fl[i]}.webp" width="600" height="777" alt="{t(n)}, PDF" {'fetchpriority="high"' if i == 0 else 'loading="lazy"'} decoding="async">',
+                                    more=f'<a class="btn btn-line" href="/templates/{lang}/{fl[i]}.pdf" download data-track="template_{TPL["en"][i]}">{t(dl)}</a>')
+                      for i, (ic, n, d) in enumerate(ITEMS)], 3, "stagger tpl")
+    paper = ui.band(t(T("Paper is a start. Sweep does the rest.","Le papier, c’est un début. Sweep fait le reste.","El papel es un comienzo. Sweep hace el resto.")),
+                    t(T("Your checklist is on the same screen as every trade, your plan feeds the Plan ring, and your weekly review starts from your real numbers.","Ta checklist est sur le même écran que chaque trade, ton plan nourrit l’anneau Plan, et ta revue de la semaine part de tes vrais chiffres.","Tu checklist está en la misma pantalla que cada operación, tu plan alimenta el anillo Plan y tu revisión semanal parte de tus números reales.")),
+                    ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_templates"'))
+    b = (ui.sec(cards, "t", "templates")
+         + ui.sec(f'<article class="article">{localize(lang, t(TPL_HELP))}</article>', "n", "use", width="read")
+         + ui.sec(paper, "t", "sweep"))
     return (t(T("Free trading plan, journal and checklist templates · Sweep","Modèles gratuits : plan de trading, journal et checklist","Plantillas gratis: plan de trading, diario y checklist")),
             t(T("Download a printable trading plan, daily trading journal and discipline checklist for futures and prop firm traders. Free, no email.","Télécharge un plan de trading, un journal quotidien et une checklist de discipline à imprimer, pour traders de futures et de prop firms. Gratuit, sans courriel.","Descarga un plan de trading, un diario y un checklist de disciplina imprimibles para traders de futuros y de fondeo. Gratis, sin email.")),
-            hero + b + final_cta(lang, t), "")
+            hero + b + ui.final(lang, t), "")
+SYSTEM_PAGES.add("trading-templates.html")
 
 def _article(lang, t, h1, lead, kick, sections, title, desc):
     import ui
     hero = ui.hero(t, kick, h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_hero"'))
     body = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in sections)
-    b = ui.sec(f'<article class="article">{body}</article>', "t", "guide", width="read")
+    b = ui.sec(ui.doc(t, body), "t", "guide")
     ld = jsonld({"@context":"https://schema.org","@type":"Article","headline":t(h1),"description":t(desc),"inLanguage":lang,"publisher":{"@id":f"https://{DOMAIN}/#org"},"datePublished":"2026-10-06","author":{"@type":"Organization","name":"Sweep"}})
     return (t(title), t(desc), hero + b + ui.final(lang, t), ld)
 

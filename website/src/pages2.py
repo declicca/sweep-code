@@ -83,15 +83,21 @@ FAQ = [
  ]),
 ]
 
+FAQ_IDS = ("plans", "trades", "privacy")
+
 def page_faq(lang, t):
-    groups = "".join(f'<div class="faq-group"><h2>{t(c)}</h2>' + "".join(faq_item(t,q,a) for q,a in items) + "</div>" for c, items in FAQ)
+    """The questions by category, the categories in the capsule under the menu."""
+    import ui
+    groups = "".join(f'<div class="faq-group" id="{k}"><h2>{t(c)}</h2>{ui.qa(t, items)}</div>' for k, (c, items) in zip(FAQ_IDS, FAQ))
     ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for _,items in FAQ for q,a in items]})
-    body = page_hero(t, T("Questions and answers.","Questions et réponses.","Preguntas y respuestas."),
-        T(f"Everything about Sweep, your data and prop accounts. Can’t find it? Write to {EMAIL}.", f"Tout sur Sweep, tes données et tes comptes prop. Tu ne trouves pas? Écris à {EMAIL}.", f"Todo sobre Sweep, tus datos y cuentas prop. ¿No lo encuentras? Escribe a {EMAIL}."), T("FAQ","FAQ","Preguntas frecuentes"))
-    body += f'<section style="padding-top:24px"><div class="wrap narrow">{groups}</div></section>'
+    body = ui.hero(t, T("FAQ","FAQ","Preguntas frecuentes"), T("Questions and answers.","Questions et réponses.","Preguntas y respuestas."),
+        T(f"Everything about Sweep, your data and prop accounts. Can’t find it? Write to {EMAIL}.", f"Tout sur Sweep, tes données et tes comptes prop. Tu ne trouves pas? Écris à {EMAIL}.", f"Todo sobre Sweep, tus datos y cuentas prop. ¿No lo encuentras? Escribe a {EMAIL}."),
+        cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_faq_hero"'))
+    body += ui.subnav(t, T("Categories","Catégories","Categorías"), [(k, c) for k, (c, _) in zip(FAQ_IDS, FAQ)]) + ui.sec(groups, "t", "questions", width="read")
     return (t(T("FAQ · Sweep trading journal","FAQ · Journal de trading Sweep","Preguntas frecuentes · Diario de trading Sweep")),
             t(T("Answers about Sweep: free plan and 60 days of Pro, real CME charts, instruments, prop firms, privacy, refunds and your data.","Réponses sur Sweep : forfait gratuit et 60 jours de Pro, vrais graphiques CME, instruments, prop firms, confidentialité, remboursements et tes données.","Respuestas sobre Sweep: plan gratuito y 60 días de Pro, gráficos reales de CME, instrumentos, prop firms, privacidad, reembolsos y tus datos.")),
-            body + final_cta(lang, t), ld)
+            body + ui.final(lang, t), ld)
+SYSTEM_PAGES.add("faq.html")
 
 INDICATORS = ["CPI","Core CPI","PPI","PCE","Nonfarm Payrolls","Unemployment rate","Average hourly earnings","Initial jobless claims","ADP employment","JOLTS","GDP","Retail sales","ISM Manufacturing","ISM Services","Consumer confidence","FOMC decision","FOMC minutes"]
 def page_econ(lang, t):
@@ -269,19 +275,24 @@ def page_about(lang, t):
 """<p><b>Sweep empezó como el diario de un trader.</b> Se creó para una pequeña comunidad de traders de futuros, cansados de hojas de cálculo, capturas dispersas y paneles que desaparecían con cada cuenta prop.</p>
 <p>El nombre viene de la estructura de mercado. Un sweep toma la liquidez bajo un nivel antes de que el precio suba. El trading funciona igual: los días perdedores, las reglas rotas y las lecciones son el mínimo que se barre. Lo que haces con ellos es el movimiento que sigue.</p>
 <p>Sweep se crea en Quebec por Sweep Inc. Existe para facilitar ese siguiente movimiento: <a href="features.html">un solo lugar para cada operación, regla, cuenta y payout</a>, una mirada honesta a lo que funciona y un historial que conservas pase lo que pase con una cuenta.</p>""")
-    hero = page_hero(t, T("About Sweep","À propos de Sweep","Acerca de Sweep"), T("Why Sweep exists, and what it will never do.","Pourquoi Sweep existe, et ce qu’il ne fera jamais.","Por qué existe Sweep y lo que nunca hará."), T("About","À propos","Acerca de"))
+    import ui
+    hero = ui.hero(t, T("About","À propos","Acerca de"), T("About Sweep","À propos de Sweep","Acerca de Sweep"), T("Why Sweep exists, and what it will never do.","Pourquoi Sweep existe, et ce qu’il ne fera jamais.","Por qué existe Sweep y lo que nunca hará."),
+                   cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_about_hero"'))
     ident = T("<p><b>Sweep is a <a href=\"index.html\">free trading journal</a> built for futures and prop firm traders.</b> It was born in a Discord community of futures traders, tested for months by trader friends before it had a name, and <a href=\"changelog.html\">launched publicly on October 1, 2026</a>.</p><p><b>Our mission:</b> give every trader the system to become consistently profitable: build the habits, find the edge, get the payouts, track the expenses, and never lose a trading history again.</p>",
               "<p><b>Sweep est un <a href=\"index.html\">journal de trading gratuit</a> conçu pour les traders de futures et de prop firms.</b> Il est né dans une communauté Discord de traders de futures, a été testé pendant des mois par des amis traders avant même d’avoir un nom, et a été <a href=\"changelog.html\">lancé publiquement le 1er octobre 2026</a>.</p><p><b>Notre mission :</b> donner à chaque trader le système pour devenir régulièrement rentable : bâtir les habitudes, trouver son edge, obtenir ses payouts, suivre ses dépenses, et ne plus jamais perdre son historique.</p>",
               "<p><b>Sweep es un <a href=\"index.html\">diario de trading gratuito</a> creado para traders de futuros y de prop firms.</b> Nació en una comunidad de Discord de traders de futuros, lo probaron durante meses amigos traders antes de tener nombre y se <a href=\"changelog.html\">lanzó públicamente el 1 de octubre de 2026</a>.</p><p><b>Nuestra misión:</b> dar a cada trader el sistema para ser rentable de forma constante: crear los hábitos, encontrar su ventaja, cobrar sus payouts, seguir sus gastos y no volver a perder su historial.</p>")
-    about = re.sub(r'href="([a-z]+\.html)"', lambda m: f'href="{href(lang, m.group(1))}"', (t(ident)+t(story)).replace("<b>","<b style=\"color:var(--text);font-weight:500\">"))
-    b = f'<section style="padding-top:16px"><div class="wrap split"><div class="prose" style="font-size:17px;color:var(--muted)">{about}</div><div class="reveal">{slot("v6-01-today-d.webp","desktop",t(T("Sweep, the Today screen, sample data","Sweep, l’écran Aujourd’hui, données d’exemple","Sweep, la pantalla Hoy, datos de ejemplo")),t)}</div></div></section>'
-    b += f'<section class="rule"><div class="wrap narrow"><h2>{t(T("The company","L’entreprise","La empresa"))}</h2><p class="lead">Sweep Inc.<br>3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2, Canada<br><a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{href(lang, "press-kit.html")}">{t(T("Press kit","Kit presse","Kit de prensa"))}</a></p></div></section>'
-    b += '<section class="rule"><div class="wrap">' + f'<div class="head"><h2>{t(T("What we believe","Ce en quoi on croit","En qué creemos"))}</h2></div>' + grid(t,[
-        ("archive",T("Your data stays yours","Tes données restent à toi","Tus datos son tuyos"),T("Private, exportable, deletable, never sold.","Privées, exportables, supprimables, jamais vendues.","Privados, exportables, eliminables, nunca vendidos.")),
-        ("check",T("Honest numbers","Des chiffres honnêtes","Números honestos"),T("The bad days count. A warning never hides a broken rule.","Les mauvaises journées comptent. Un avertissement ne cache jamais une règle brisée.","Los días malos cuentan. Un aviso nunca oculta una regla rota.")),
-        ("bolt",T("No signals, no hype","Ni signaux ni hype","Sin señales ni exageraciones"),T("Sweep shows your data. The decisions stay yours.","Sweep montre tes données. Les décisions restent les tiennes.","Sweep muestra tus datos. Las decisiones son tuyas."))]) + '</div></section>'
-    b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(ABOUT_HELP))}</article></div></section>'
-    return (t(T("About Sweep","À propos de Sweep","Acerca de Sweep")), t(T("Sweep is a trading journal built in Quebec by a futures trader, for futures and prop traders.","Sweep est un journal de trading conçu au Québec par un trader de futures, pour les traders de futures et prop.","Sweep es un diario de trading creado en Quebec por un trader de futuros, para traders de futuros y prop.")), hero + b + final_cta(lang, t), "")
+    company = (f'<h2>{t(T("The company","L’entreprise","La empresa"))}</h2><p>Sweep Inc.<br>3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2, Canada<br>'
+               f'<a href="mailto:{EMAIL}">{EMAIL}</a> · <a href="{href(lang, "press-kit.html")}">{t(T("Press kit","Kit presse","Kit de prensa"))}</a></p>')   # a few lines: at the end of the story, not a section of its own
+    about = re.sub(r'href="([a-z]+\.html)"', lambda m: f'href="{href(lang, m.group(1))}"', t(ident) + t(story))
+    believe = [("archive",T("Your data stays yours","Tes données restent à toi","Tus datos son tuyos"),T("Private, exportable, deletable, never sold.","Privées, exportables, supprimables, jamais vendues.","Privados, exportables, eliminables, nunca vendidos.")),
+               ("check",T("Honest numbers","Des chiffres honnêtes","Números honestos"),T("The bad days count. A warning never hides a broken rule.","Les mauvaises journées comptent. Un avertissement ne cache jamais une règle brisée.","Los días malos cuentan. Un aviso nunca oculta una regla rota.")),
+               ("bolt",T("No signals, no hype","Ni signaux ni hype","Sin señales ni exageraciones"),T("Sweep shows your data. The decisions stay yours.","Sweep montre tes données. Les décisions restent les tiennes.","Sweep muestra tus datos. Las decisiones son tuyas."))]
+    b = (ui.sec(f'<article class="article">{about}{company}</article>', "t", "story", width="read")
+         + ui.sec(ui.frame_d("v6-01-today-d.webp", t(T("Sweep, the Today screen, sample data","Sweep, l’écran Aujourd’hui, données d’exemple","Sweep, la pantalla Hoy, datos de ejemplo")), m="v6-01-today-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1320px"), "n", "app", width="wide")
+         + ui.sec(ui.head(t, None, T("What we believe","Ce en quoi on croit","En qué creemos")) + ui.cards([ui.card(t, a, d, icon=k) for k, a, d in believe], 3), "n", "believe")
+         + ui.sec(f'<article class="article">{localize(lang, t(ABOUT_HELP))}</article>', "n", "how", width="read"))
+    return (t(T("About Sweep","À propos de Sweep","Acerca de Sweep")), t(T("Sweep is a trading journal built in Quebec by a futures trader, for futures and prop traders.","Sweep est un journal de trading conçu au Québec par un trader de futures, pour les traders de futures et prop.","Sweep es un diario de trading creado en Quebec por un trader de futuros, para traders de futuros y prop.")), hero + b + ui.final(lang, t), "")
+SYSTEM_PAGES.add("about.html")
 
 CONTACT_HELP = T("""<h2>Get a faster answer</h2><ul>
 <li><b>Say which account.</b> Your Sweep username or the email you signed up with. Never send your password: we don’t need it to help you.</li>
@@ -318,15 +329,18 @@ CONTACT_HELP = T("""<h2>Get a faster answer</h2><ul>
 <h2>Solicitudes de privacidad</h2><p>Para consultar, corregir o eliminar tu información personal, escríbenos desde el correo de tu cuenta, para saber que eres tú. También puedes exportarlo todo o eliminar tu cuenta tú mismo, en Ajustes. Respondemos a las solicitudes de privacidad en un plazo de 30 días.</p>""")
 
 def page_contact(lang, t):
-    hero = page_hero(t, T("Talk to us.","Écris-nous.","Escríbenos."), T("Questions, feedback, a bug or a feature you need. A real person reads every message.","Questions, commentaires, un bug ou une fonctionnalité qui te manque. Une vraie personne lit chaque message.","Preguntas, comentarios, un error o una función que necesitas. Una persona real lee cada mensaje."), T("Contact","Contact","Contacto"))
-    b = f'''<section style="padding-top:16px"><div class="wrap"><div class="grid g2">
-<div>{ico(I["globe"])}<h3>{t(T("Email","Courriel","Correo"))}</h3><p>{t(T("Support, accounts, privacy requests and feedback.","Soutien, comptes, demandes de confidentialité et commentaires.","Soporte, cuentas, solicitudes de privacidad y comentarios."))} {t(T("Journalists: see the","Journalistes : voir le","Periodistas: consulta el"))} <a href="{href(lang, "press-kit.html")}">{t(T("press kit","kit presse","kit de prensa"))}</a>.</p><div class="cta-row"><a class="btn btn-line" href="mailto:{EMAIL}">{EMAIL}</a></div></div>
-<div>{ico(I["key"])}<h3>{t(T("Account help","Aide pour ton compte","Ayuda con tu cuenta"))}</h3><p>{t(T("Forgot your password? Use “Forgot password?” on the log-in screen to get a reset link by email.","Mot de passe oublié? Utilise « Mot de passe oublié? » sur l’écran de connexion pour recevoir un lien par courriel.","¿Olvidaste tu contraseña? Usa «¿Olvidaste tu contraseña?» en la pantalla de inicio para recibir un enlace por correo."))}</p><div class="cta-row"><a class="btn btn-line" href="{APP}">{t(LOGIN)}</a></div></div>
-</div>
-<div class="follow"><div><h3>{t(T("Follow Sweep","Suis Sweep","Sigue a Sweep"))}</h3><p class="muted">{t(T(f"Tips, product updates and <a href=\"{href(lang, '100')}\">the first 100</a>, on Instagram, TikTok and Facebook.",f"Conseils, nouveautés et <a href=\"{href(lang, '100')}\">les 100 premiers</a>, sur Instagram, TikTok et Facebook.",f"Consejos, novedades y <a href=\"{href(lang, '100')}\">los primeros 100</a>, en Instagram, TikTok y Facebook."))}</p></div>{social_links("social big")}</div>
-<p class="meta" style="margin-top:28px"><a href="{href(lang, "about.html")}">Sweep Inc.</a> · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2, Canada</p></div></section>
-<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(CONTACT_HELP))}</article></div></section>'''
-    return (t(T("Contact Sweep","Contacter Sweep","Contactar con Sweep")), t(T(f"Contact the Sweep team at {EMAIL} for support, privacy requests, press and feedback. Write to us in English, French or Spanish.",f"Joins l’équipe Sweep à {EMAIL} pour du soutien, une demande de confidentialité, la presse ou tes commentaires, en français, en anglais ou en espagnol.",f"Contacta al equipo de Sweep en {EMAIL} para soporte, privacidad, prensa y comentarios. Escríbenos en español, inglés o francés.")), hero + b + final_cta(lang, t), "")
+    import ui
+    hero = ui.hero(t, T("Contact","Contact","Contacto"), T("Talk to us.","Écris-nous.","Escríbenos."), T("Questions, feedback, a bug or a feature you need. A real person reads every message.","Questions, commentaires, un bug ou une fonctionnalité qui te manque. Une vraie personne lit chaque message.","Preguntas, comentarios, un error o una función que necesitas. Una persona real lee cada mensaje."))
+    press = {l: {"en": "Journalists: see the", "fr": "Journalistes : voir le", "es": "Periodistas: consulta el"}[l] + f' <a href="{href(l, "press-kit.html")}">' + {"en": "press kit", "fr": "kit presse", "es": "kit de prensa"}[l] + "</a>." for l in LANGS}
+    mail = {l: {"en": "Support, accounts, privacy requests and feedback.", "fr": "Soutien, comptes, demandes de confidentialité et commentaires.", "es": "Soporte, cuentas, solicitudes de privacidad y comentarios."}[l] + " " + press[l] for l in LANGS}
+    cards = ui.cards([ui.card(t, T("Email","Courriel","Correo"), mail, icon="globe", more=f'<a class="btn btn-line" href="mailto:{EMAIL}">{EMAIL}</a>'),
+                      ui.card(t, T("Account help","Aide pour ton compte","Ayuda con tu cuenta"), T("Forgot your password? Use “Forgot password?” on the log-in screen to get a reset link by email.","Mot de passe oublié? Utilise « Mot de passe oublié? » sur l’écran de connexion pour recevoir un lien par courriel.","¿Olvidaste tu contraseña? Usa «¿Olvidaste tu contraseña?» en la pantalla de inicio para recibir un enlace por correo."),
+                              icon="key", more=f'<a class="btn btn-line" href="{APP}">{t(LOGIN)}</a>')], 2)
+    follow = ui.band(t(T("Follow Sweep","Suis Sweep","Sigue a Sweep")), t(T(f"Tips, product updates and <a href=\"{href(lang, '100')}\">the first 100</a>, on Instagram, TikTok and Facebook.",f"Conseils, nouveautés et <a href=\"{href(lang, '100')}\">les 100 premiers</a>, sur Instagram, TikTok et Facebook.",f"Consejos, novedades y <a href=\"{href(lang, '100')}\">los primeros 100</a>, en Instagram, TikTok y Facebook.")), social_links("social big"))
+    b = (ui.sec(cards + follow + f'<p class="fine" style="margin-top:24px"><a href="{href(lang, "about.html")}">Sweep Inc.</a> · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2, Canada</p>', "t", "contact")
+         + ui.sec(f'<article class="article">{localize(lang, t(CONTACT_HELP))}</article>', "n", "help", width="read"))
+    return (t(T("Contact Sweep","Contacter Sweep","Contactar con Sweep")), t(T(f"Contact the Sweep team at {EMAIL} for support, privacy requests, press and feedback. Write to us in English, French or Spanish.",f"Joins l’équipe Sweep à {EMAIL} pour du soutien, une demande de confidentialité, la presse ou tes commentaires, en français, en anglais ou en espagnol.",f"Contacta al equipo de Sweep en {EMAIL} para soporte, privacidad, prensa y comentarios. Escríbenos en español, inglés o francés.")), hero + b + ui.final(lang, t), "")
+SYSTEM_PAGES.add("contact.html")
 
 def page_changelog(lang, t):
     hero = page_hero(t, T("What’s new in Sweep.","Nouveautés dans Sweep.","Novedades en Sweep."), T("Every release, in plain words.","Chaque version, en mots simples.","Cada versión, en palabras simples."), T("Changelog","Journal des changements","Registro de cambios"))
@@ -363,7 +377,9 @@ def page_changelog(lang, t):
     return (t(T("What’s new · Sweep changelog","Nouveautés · Journal des changements Sweep","Novedades · Registro de cambios de Sweep")), t(T("What’s new in Sweep: real CME charts, the daily rings, gamification, social features, prop firm presets and plans.","Nouveautés de Sweep : vrais graphiques CME, anneaux du jour, gamification, fonctions sociales, préréglages de prop firms et forfaits.","Novedades de Sweep: gráficos reales de CME, anillos diarios, gamificación, funciones sociales, preajustes de prop firms y planes.")), hero + b + final_cta(lang, t), "")
 
 def page_404(lang, t):
-    b = f'''<section class="final" style="padding-top:clamp(96px,14vw,180px)"><div class="wrap"><span class="mark" aria-hidden="true">{ANIM_MARK}</span>
-<h1>{t(T("This page got swept.","Cette page s’est fait balayer.","Esta página fue barrida."))}</h1><p class="lead">{t(T("It doesn’t exist or it moved. The way back is up.","Elle n’existe pas ou a été déplacée. Le chemin du retour, c’est vers le haut.","No existe o se movió. El camino de vuelta es hacia arriba."))}</p>
-<div class="cta-row"><a class="btn btn-primary btn-lg" href="{href(lang,'index.html')}">{t(T("Back to home","Retour à l’accueil","Volver al inicio"))}</a></div></div></section>'''
+    import ui
+    b = (f'<section class="final s-a lost"><div class="c c-wide"><div class="stage"><span class="mark" aria-hidden="true">{ANIM_MARK}</span>'
+         f'<h1>{t(T("This page got swept.","Cette page s’est fait balayer.","Esta página fue barrida."))}</h1><p class="reassure">{t(T("It doesn’t exist or it moved. The way back is up.","Elle n’existe pas ou a été déplacée. Le chemin du retour, c’est vers le haut.","No existe o se movió. El camino de vuelta es hacia arriba."))}</p>'
+         f'<div class="cta-row">{ui.btn(t(T("Back to home","Retour à l’accueil","Volver al inicio")), href(lang, "index.html"), lg=True)}</div></div></div></section>')
     return ("404 · Sweep", t(T("This page doesn’t exist or it moved. Head back to the Sweep home page, or open the free calculators and prop firm rules from the menu.","Cette page n’existe pas ou a été déplacée. Retourne à l’accueil de Sweep, ou ouvre les calculateurs gratuits et les règles des prop firms.","Esta página no existe o se movió. Vuelve al inicio de Sweep, o abre las calculadoras gratis y las reglas de las prop firms desde el menú.")), b, "")
+SYSTEM_PAGES.add("404.html")
