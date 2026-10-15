@@ -6,7 +6,9 @@ never from the app's own table:
  - every instrument of the form: long, 2 contracts, +7 ticks;
  - a short with several contracts, at a loss; a trade with an add and a partial exit (one trade from flat to flat);
  - fees: the account's round-trip commission is charged once per contract bought and sold (an add counts);
- - phone and computer: the form shows the result before saving, saves it, no page error.
+ - phone and computer: the form shows the result before saving, saves it, no page error;
+ - 6E keeps its prices to the pip (before 16 Oct.: rounded to the cent, 1.0850 → 1.09); a symbol outside Sweep's list (ZC):
+   a new trade asks for its P&L, an edited one keeps the P&L the trader gave (before: recomputed at $0).
 """
 import asyncio, json, random, sys
 from playwright.async_api import async_playwright
@@ -66,6 +68,17 @@ async def main():
              {'id': 'c', 'side': 'buy', 'qty': 1, 'price': 21002, 't': d + ' 11:10:00'}, {'id': 'd', 'side': 'sell', 'qty': 2, 'price': 21006, 't': d + ' 11:15:00'}]
       t = await trade({'account': 'tf-b', 'inst': 'MNQ', 'date': d}, ex2)
       ok(t.get('qty') == 2 and t.get('fees') == 3 * 412, f'{tag} fees with an add: 3 contracts bought and sold (2, then 1 more) = 3 round trips, $12.36 — not 2 ({t.get("fees")})')
+      t6 = await trade({'account': 'tf-a', 'inst': '6E', 'dir': 'long', 'qty': 1, 'entry': 1.0855, 'exit': 1.08585})
+      p6 = await pg.evaluate("(()=>{const t=S.trades.filter(x=>x.instrument==='6E').pop(); return t?[t.entry,t.exit]:null})()")
+      ok(p6 == [1.0855, 1.08585] and t6.get('pnl') == 4375, f'{tag} 6E 1.0855 → 1.08585: prices kept to the pip, +$43.75 ({p6}, {t6.get("pnl")})')
+      tz = await trade({'account': 'tf-a', 'inst': 'ZC', 'dir': 'long', 'qty': 1, 'entry': 450.25, 'exit': 452.75})
+      zc = await pg.evaluate("(()=>{const t=S.trades.filter(x=>x.instrument==='ZC').pop(); return t?{pnl:t.pnl_c, check:!!t.pnl_check, id:t.id}:null})()")
+      ok(zc and zc['pnl'] is None and zc['check'], f'{tag} ZC (not in the list), new: no P&L made up, the trader is asked for it ({zc})')
+      await pg.evaluate("(id)=>editDoc('trades', id, d=>{d.pnl_c=12500; delete d.pnl_check})", zc['id']); await pg.wait_for_timeout(500)
+      await pg.evaluate("(id)=>openTicket(id)", zc['id']); await pg.wait_for_timeout(700)
+      await pg.evaluate("async()=>{tkSave(); await new Promise(r=>setTimeout(r,1500))}")
+      ze = await pg.evaluate("(id)=>{const t=getDoc('trades',id); return [t.instrument, t.pnl_c, !!t.pnl_check]}", zc['id'])
+      ok(ze == ['ZC', 12500, False], f'{tag} ZC edited and saved: the +$125 the trader gave is kept ({ze})')
       ok(not errs, f'{tag} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
       await ctx.close()
     await br.close()

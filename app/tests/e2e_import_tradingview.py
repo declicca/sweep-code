@@ -2,6 +2,8 @@
 Sweep — TradingView « Order History » CSV import (dev environment with Playwright):
   python3 tests/e2e_import_tradingview.py http://127.0.0.1:8095 /tmp/show_state.json
 Sample: tests/samples/tradingview-order-history-sample.csv (2 NQ, partial exits on MNQ, a cancelled order, an evening 6E trade).
+Then a Tradovate Performance file with 6E and ZC (not in Sweep's list): 6E stays 6E (before 16 Oct.: « NQ ») at its own
+prices, ZC keeps its symbol and the file's P&L, never NQ's.
 """
 import asyncio, sys, os, json
 from playwright.async_api import async_playwright
@@ -25,6 +27,11 @@ async def main():
     ok(nq and nq[0]['dir'] == 'long' and nq[0]['qty'] == 2 and nq[0]['pnl'] == 158000 and nq[0]['fees'] == 840 and nq[0]['t'] == '09:52', f'NQ long 2 @ 24,912.25 → 24,951.75 = +$1,580, fees $8.40 ({nq[:1]})')
     ok(mnq and mnq[0]['dir'] == 'short' and mnq[0]['qty'] == 3 and mnq[0]['pnl'] == round(((24960 - 24950) * 1 + (24960 - 24965.25) * 2) * 2 * 100), f'MNQ short 3, exits 1 + 2 → one trade, P&L from both exits ({mnq[:1]})')
     ok(e6 and e6[0]['date'] == '2026-09-30' and e6[0]['t'] == '19:30' and e6[0]['pnl'] == 12500, f'6E at 19:30 ET → session of the next day, +$125 ({e6[:1]})')
+    PERF = ('symbol,_priceFormat,_priceFormatType,_tickSize,buyFillId,sellFillId,qty,buyPrice,sellPrice,pnl,boughtTimestamp,soldTimestamp,duration\n'
+            '6EZ6,-5,0,0.00005,201,202,1,1.08550,1.08585,$43.75,10/07/2026 10:00:00,10/07/2026 10:20:00,20min\n'
+            'ZCZ6,-2,0,0.25,203,204,2,450.25,452.75,$250.00,10/07/2026 11:00:00,10/07/2026 11:30:00,30min\n')
+    pr = await pg.evaluate("(t)=>parseTradovate(t).map(r=>[r.inst,r.entry,r.exit,r.pnl_c])", PERF)
+    ok(pr == [['6E', 1.0855, 1.08585, 4375], ['ZC', 450.25, 452.75, 25000]], f'Tradovate 6EZ6 → 6E at its own prices, ZCZ6 → ZC with the file\'s P&L (never NQ) ({pr})')
     # the file in the page: preview, time zone, import
     await pg.evaluate("(t)=>{IMP.rows=parseTradovate(t); IMP.file='tv.csv'; IMP.err=''; IMP.account=(S.accounts.find(a=>a.status!=='archived')||{}).id; render();}", CSV); await pg.wait_for_timeout(800)
     ok(await pg.locator('#main [data-itz]').count() == 1, 'the preview asks for the time zone of the file (New York by default)')

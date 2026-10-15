@@ -76,7 +76,8 @@ function sai_trade_drafts(array $data, array $ctx, string $source): array
     foreach (array_slice((array) ($data['trades'] ?? []), 0, 50) as $x) {
         if (!is_array($x)) continue;
         $instr = strtoupper((string) ($x['instrument'] ?? ''));
-        if (!isset(SAI_INSTRUMENTS[$instr])) $instr = 'NQ';
+        $known = isset(SAI_INSTRUMENTS[$instr]);
+        if (!$known) $instr = preg_match('/^[A-Z0-9]{1,6}$/', $instr) ? $instr : '';   // an unknown symbol is kept as read (never « NQ »): the trader checks its P&L
         $dir = in_array($x['direction'] ?? null, ['long', 'short'], true) ? $x['direction'] : null;
         $date = is_string($x['date'] ?? null) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $x['date']) ? $x['date'] : sai_today_ny();
         $time = fn($v) => is_string($v) && preg_match('/^([01]?\d|2[0-3]):[0-5]\d$/', $v) ? str_pad($v, 5, '0', STR_PAD_LEFT) : '';
@@ -108,7 +109,7 @@ function sai_trade_drafts(array $data, array $ctx, string $source): array
         ];
         $pnl = sai_pnl_c($t);
         $t['pnl_c'] = $pnl;
-        $t['pnl_manual'] = !($t['entry'] !== null && $t['exit'] !== null);
+        $t['pnl_manual'] = !$known || !($t['entry'] !== null && $t['exit'] !== null);
         $t['ai_source'] = $source;
         unset($t['_result_value'], $t['_result_unit']);
         $missing = [];

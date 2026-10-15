@@ -329,14 +329,16 @@ function sai_journal_for(PDO $pdo, string $uid, string $date): ?array
 /** P&L in cents for a draft trade, from prices or from a stated result. */
 function sai_pnl_c(array $t): ?int
 {
-    $spec = SAI_INSTRUMENTS[$t['instrument']] ?? SAI_INSTRUMENTS['NQ'];
+    $spec = SAI_INSTRUMENTS[$t['instrument']] ?? null;
+    $v = $t['_result_value'] ?? null; $u = $t['_result_unit'] ?? null;
+    // a symbol Sweep does not know: only a dollar result counts (never NQ's point value); otherwise the trader gives it
+    if (!$spec) return $v !== null && $u === 'usd' ? (int) round($v * 100) : null;
     [$tick, $pv] = $spec;
     $q = max(1, (int) ($t['contracts'] ?? 1));
     if ($t['entry'] !== null && $t['exit'] !== null && in_array($t['direction'], ['long', 'short'], true)) {
         $pts = ($t['exit'] - $t['entry']) * ($t['direction'] === 'long' ? 1 : -1);
         return (int) round($pts * $pv * $q * 100);
     }
-    $v = $t['_result_value'] ?? null; $u = $t['_result_unit'] ?? null;
     if ($v === null) return null;
     return match ($u) {
         'usd' => (int) round($v * 100),

@@ -119,7 +119,10 @@ const ECON_SEED = [], ECON_PROFILES = [], INSTR = {
   tickC: 0,
   name: "Unknown symbol",
   unknown: !0
-}, instOf = e => INSTR[e] || INSTR[String(e || "").toUpperCase().replace(/[FGHJKMNQUVXZ]\d{1,2}$/, "")] || INSTR_UNKNOWN, SESS = [ [ "asia", "Asia" ], [ "london", "London" ], [ "nyam", "New York AM" ], [ "nypm", "New York PM" ], [ "other", "Other" ] ], EMO = [ "Calm", "Confident", "Patient", "Focused", "FOMO", "Fearful", "Frustrated", "Angry", "Greedy", "Overconfident", "Revenge mindset", "Need to be right", "Trying to recover a loss", "Hesitant", "Impulsive" ], GRADES = [ "A", "B", "C", "D", "F" ], PST = [ [ "planned", "Planned" ], [ "requested", "Requested" ], [ "approved", "Approved" ], [ "paid", "Paid" ], [ "rejected", "Rejected" ] ], ECAT = [ [ "evaluation", "Evaluation fee" ], [ "activation", "Activation fee" ], [ "reset", "Reset fee" ], [ "platform", "Platform fee" ], [ "data", "Data fee" ], [ "other", "Other" ] ], DEFAULT_QS = [ [ "plan", "Was this trade part of my trading plan?", "Off-plan trade" ], [ "confirm", "Did I wait for confirmation?", "Entered without confirmation" ], [ "entry", "Was my entry valid?", "Invalid entry" ], [ "size", "Did I respect my maximum position size?", "Oversized position" ], [ "risk", "Did I define my risk before entering?", "Risk not defined before entry" ], [ "stop", "Did I respect my stop?", "Stop not respected" ], [ "widen", "Did I avoid moving my stop to increase risk?", "Moved stop to increase risk" ], [ "addloser", "Did I avoid adding to a losing trade?", "Added to a losing trade" ], [ "revenge", "Did I avoid revenge trading?", "Revenge trading" ], [ "chase", "Did I avoid chasing price?", "Chased price" ], [ "dll", "Did I respect my daily loss limit?", "Broke daily loss limit" ], [ "emotion", "Was my emotional state appropriate for trading?", "Traded in a poor emotional state" ], [ "exit", "Did I follow my exit plan?", "Did not follow exit plan" ] ], MIN_N = 5, COLS = [ "firms", "accounts", "trades", "journals", "weekly", "payouts", "expenses" ], $ = (e, t = document) => t.querySelector(e), $$ = (e, t = document) => [ ...t.querySelectorAll(e) ], esc = e => String(e ?? "").replace(/[&<>"']/g, t => ({
+}, instOf = e => INSTR[e] || INSTR[String(e || "").toUpperCase().replace(/[FGHJKMNQUVXZ]\d{1,2}$/, "")] || INSTR_UNKNOWN, pxRound = (e, t) => {   // a price to the cent, or to the pip for 6E-like ticks and symbols Sweep does not know (1.0855 stayed 1.09)
+  const a = instOf(t);
+  return a.unknown || a.tick < .01 ? Math.round(e * 1e6) / 1e6 : Math.round(e * 100) / 100;
+}, SESS = [ [ "asia", "Asia" ], [ "london", "London" ], [ "nyam", "New York AM" ], [ "nypm", "New York PM" ], [ "other", "Other" ] ], EMO = [ "Calm", "Confident", "Patient", "Focused", "FOMO", "Fearful", "Frustrated", "Angry", "Greedy", "Overconfident", "Revenge mindset", "Need to be right", "Trying to recover a loss", "Hesitant", "Impulsive" ], GRADES = [ "A", "B", "C", "D", "F" ], PST = [ [ "planned", "Planned" ], [ "requested", "Requested" ], [ "approved", "Approved" ], [ "paid", "Paid" ], [ "rejected", "Rejected" ] ], ECAT = [ [ "evaluation", "Evaluation fee" ], [ "activation", "Activation fee" ], [ "reset", "Reset fee" ], [ "platform", "Platform fee" ], [ "data", "Data fee" ], [ "other", "Other" ] ], DEFAULT_QS = [ [ "plan", "Was this trade part of my trading plan?", "Off-plan trade" ], [ "confirm", "Did I wait for confirmation?", "Entered without confirmation" ], [ "entry", "Was my entry valid?", "Invalid entry" ], [ "size", "Did I respect my maximum position size?", "Oversized position" ], [ "risk", "Did I define my risk before entering?", "Risk not defined before entry" ], [ "stop", "Did I respect my stop?", "Stop not respected" ], [ "widen", "Did I avoid moving my stop to increase risk?", "Moved stop to increase risk" ], [ "addloser", "Did I avoid adding to a losing trade?", "Added to a losing trade" ], [ "revenge", "Did I avoid revenge trading?", "Revenge trading" ], [ "chase", "Did I avoid chasing price?", "Chased price" ], [ "dll", "Did I respect my daily loss limit?", "Broke daily loss limit" ], [ "emotion", "Was my emotional state appropriate for trading?", "Traded in a poor emotional state" ], [ "exit", "Did I follow my exit plan?", "Did not follow exit plan" ] ], MIN_N = 5, COLS = [ "firms", "accounts", "trades", "journals", "weekly", "payouts", "expenses" ], $ = (e, t = document) => t.querySelector(e), $$ = (e, t = document) => [ ...t.querySelectorAll(e) ], esc = e => String(e ?? "").replace(/[&<>"']/g, t => ({
   "&": "&amp;",
   "<": "&lt;",
   ">": "&gt;",
@@ -2801,7 +2804,7 @@ function parseTradovate(e) {
     if (!p || !u) continue;
     const h = p.key <= u.key, m = Math.abs(parseInt(l("qty"), 10) || 0);
     if (!m) continue;
-    const v = l("symbol").toUpperCase(), b = (v.match(/^(MNQ|NQ|MES|ES|MYM|YM|M2K|RTY|MCL|CL|MGC|GC)/) || [ , "NQ" ])[1];
+    const v = l("symbol").toUpperCase(), b = (v.match(/^(MNQ|NQ|MES|ES|MYM|YM|M2K|RTY|MCL|CL|MGC|GC)/) || [ , v.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, "") || v ])[1];   // an unknown symbol keeps its own root (6E, ZN…), never « NQ »
     let E = l("pnl").replace(/[$,\s]/g, "");
     const R = /^\(.*\)$/.test(E) || E.startsWith("-");
     E = parseFloat(E.replace(/[()\-]/g, ""));
@@ -2828,8 +2831,8 @@ function parseTradovate(e) {
   return [ ...o.values() ].map(c => ({
     ...c,
     duration_s: Math.max(0, Math.round((r(c.exitKey) - r(c.entryKey)) / 1e3)),
-    entry: Math.round(c.ew / c.qty * 4) / 4,
-    exit: Math.round(c.xw / c.qty * 100) / 100
+    entry: instOf(c.inst).unknown ? pxRound(c.ew / c.qty, c.inst) : pxRound(Math.round(c.ew / c.qty / instOf(c.inst).tick) * instOf(c.inst).tick, c.inst),   // at its own tick (CL 61.23 stayed 61.25 at NQ's 0.25)
+    exit: pxRound(c.xw / c.qty, c.inst)
   })).sort((c, l) => (c.date + c.entry_time).localeCompare(l.date + l.entry_time));
 }
 
@@ -4048,7 +4051,7 @@ function tkExecs() {
 }
 
 function tkState() {
-  const e = tkExecs(), t = positionOf(e, TK.inst), a = TK.multi ? t.dir : TK.dir, n = TK.multi ? t.avgEntry != null ? Math.round(t.avgEntry * 100) / 100 : "" : TK.entry, s = TK.multi ? t.maxQty || 0 : +TK.qty, i = riskOf({
+  const e = tkExecs(), t = positionOf(e, TK.inst), a = TK.multi ? t.dir : TK.dir, n = TK.multi ? t.avgEntry != null ? pxRound(t.avgEntry, TK.inst) : "" : TK.entry, s = TK.multi ? t.maxQty || 0 : +TK.qty, i = riskOf({
     entry: n,
     stop: TK.stop,
     target: TK.target,
@@ -4172,7 +4175,7 @@ async function tkSave() {
     qty: a.maxQty,
     dir: a.dir,
     inst: TK.inst
-  });
+  }), unk = instOf(TK.inst).unknown;   // a symbol Sweep does not know (6E, ZN…): its P&L is never computed at another contract's point value
   Object.assign(c, {
     instrument: TK.inst,
     account_id: TK.account,
@@ -4182,10 +4185,13 @@ async function tkSave() {
     exit_time: a.end.slice(11, 16),
     direction: a.dir,
     contracts: a.maxQty,
-    entry: Math.round(a.avgEntry * 100) / 100,
-    exit: Math.round(a.avgExit * 100) / 100,
-    pnl_c: a.realized_c,
-    pnl_manual: !1,
+    entry: pxRound(a.avgEntry, TK.inst),
+    exit: pxRound(a.avgExit, TK.inst),
+    pnl_c: unk ? r && r.pnl_c != null ? r.pnl_c : null : a.realized_c,
+    pnl_manual: !!unk,
+    ...unk && !(r && r.pnl_c != null) ? {
+      pnl_check: !0
+    } : {},
     stop: numOrNull(TK.stop),
     target: numOrNull(TK.target),
     risk_c: l.risk_c || null,
