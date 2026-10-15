@@ -5210,7 +5210,10 @@ document.addEventListener("visibilitychange", () => {
       regenerate: "Refresh",
       debrief_btn: "Debrief my day",
       no_trades_week: "No trades this week yet.",
-      no_data_day: "No trades or journal for this day.",
+      no_data_day: "No trades or journal for this day: write a few words about your day to debrief it.",
+      with_trades: "Include my trades of the day",
+      day_note: "Your day in a few words (optional)",
+      day_note_ph: "Your day in a few words (optional): what happened, how you felt, what you take away…",
       vs_prev: "vs last week",
       net: "Net",
       win_rate: "Win rate",
@@ -5332,7 +5335,10 @@ document.addEventListener("visibilitychange", () => {
       regenerate: "Actualiser",
       debrief_btn: "Débriefer ma journée",
       no_trades_week: "Aucun trade cette semaine pour l'instant.",
-      no_data_day: "Aucun trade ni journal pour ce jour.",
+      no_data_day: "Aucun trade ni journal pour ce jour : écris quelques mots sur ta journée pour la débriefer.",
+      with_trades: "Inclure mes trades du jour",
+      day_note: "Ta journée en quelques mots (facultatif)",
+      day_note_ph: "Ta journée en quelques mots (facultatif) : ce qui s’est passé, ce que tu as ressenti, ce que tu retiens…",
       vs_prev: "vs semaine passée",
       net: "Net",
       win_rate: "Réussite",
@@ -5454,7 +5460,10 @@ document.addEventListener("visibilitychange", () => {
       regenerate: "Actualizar",
       debrief_btn: "Analizar mi día",
       no_trades_week: "Aún no hay trades esta semana.",
-      no_data_day: "No hay trades ni diario para este día.",
+      no_data_day: "No hay trades ni diario para este día: escribe unas palabras sobre tu día para analizarlo.",
+      with_trades: "Incluir mis trades del día",
+      day_note: "Tu día en pocas palabras (opcional)",
+      day_note_ph: "Tu día en pocas palabras (opcional): qué pasó, cómo te sentiste, qué te llevas…",
       vs_prev: "vs semana pasada",
       net: "Neto",
       win_rate: "Acierto",
@@ -5566,7 +5575,9 @@ document.addEventListener("visibilitychange", () => {
       weekStart: null,
       date: null,
       week: null,
-      day: null
+      day: null,
+      withTrades: !0,
+      note: ""
     },
     trade: null
   }, i = (d, f) => {
@@ -5687,8 +5698,9 @@ document.addEventListener("visibilitychange", () => {
     weeklyReview: d => C("api/ai/weekly-review", {
       week_start: d
     }),
-    dayDebrief: d => C("api/ai/day-debrief", {
-      date: d
+    dayDebrief: (d, f = {}) => C("api/ai/day-debrief", {
+      date: d,
+      ...f
     }),
     tradeFeedback: (d, f) => C("api/ai/trade-feedback", {
       trade_id: d,
@@ -5934,7 +5946,7 @@ document.addEventListener("visibilitychange", () => {
       f += `<button class="sai-btn sai-primary sai-block" data-act="gen-week" data-primary ${s.busy ? "disabled" : ""}>${o(i(_ ? "regenerate" : "generate_review"))}</button>`, 
       s.busy && (f += we()), s.err && (f += te(s.err)), _ && !s.busy && (f += Te(_));
     } else {
-      f += `<div class="sai-nav"><input type="date" class="sai-input" data-bind="rev.date" value="${o(d.date)}" max="${o(h())}"></div>\n        <button class="sai-btn sai-primary sai-block" data-act="gen-day" data-primary ${s.busy ? "disabled" : ""}>${o(i("debrief_btn"))}</button>`, 
+      f += `<div class="sai-nav"><input type="date" class="sai-input" data-bind="rev.date" value="${o(d.date)}" max="${o(h())}"></div>\n        <label class="sai-check"><input type="checkbox" data-act="rev-trades" ${d.withTrades === !1 ? "" : "checked"}><span>${o(i("with_trades"))}</span></label>\n        <textarea class="sai-input sai-note" rows="3" maxlength="1500" data-bind="rev.note" aria-label="${o(i("day_note"))}" placeholder="${o(i("day_note_ph"))}">${o(d.note || "")}</textarea>\n        <button class="sai-btn sai-primary sai-block" data-act="gen-day" data-primary ${s.busy ? "disabled" : ""}>${o(i("debrief_btn"))}</button>`, 
       s.busy && (f += we()), s.err && (f += te(s.err));
       const y = d.day && d.day.date === d.date ? d.day : null;
       y && !s.busy && (f += ie(y));
@@ -6135,13 +6147,17 @@ document.addEventListener("visibilitychange", () => {
       s.ask.res = await g.ask(s.ask.q);
     });
     if (y === "rmode") return s.rev.mode = f.dataset.v, s.err = null, ae();
+    if (y === "rev-trades") return void (s.rev.withTrades = !!f.checked);   // (15 Oct.) the trader may debrief the day without his trades
     if (y === "wk") return s.rev.weekStart = m(s.rev.weekStart, Number(f.dataset.v)), 
     s.err = null, ae();
     if (y === "gen-week") return X(async () => {
       s.rev.week = await g.weeklyReview(s.rev.weekStart);
     });
     if (y === "gen-day") return X(async () => {
-      s.rev.day = await g.dayDebrief(s.rev.date);
+      s.rev.day = await g.dayDebrief(s.rev.date, {
+        with_trades: s.rev.withTrades !== !1,
+        note: String(s.rev.note || "").trim().slice(0, 1500)
+      });
     });
     if (y === "recap") {
       const I = ye(s.rev.week);

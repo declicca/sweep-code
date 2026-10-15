@@ -521,6 +521,12 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - Test : `e2e_sync_ui` attendait 5,8 s fixes la révocation de la clé après « Annuler » (échec vu une fois sur téléphone, machine chargée) : il attend maintenant que `api/sync` n'ait plus de connexion (20 s au plus).
 - **Contrats d'un trade = la plus grosse position** (12 oct.) : formulaire de trade (`positionOf`), synchro, et maintenant imports CSV Rithmic et TradingView (`pairFills`, `ux.js` : `qty` = plus grosse position, `turns` = contrats achetés et vendus, sur lesquels la commission du compte est comptée ; test `e2e_accuracy` A6c). Tradovate Performance et TopstepX l'étaient déjà (une ligne par entrée ou par aller-retour). **Captures aussi** (12 oct., `shot-trades.php`) : `contracts` = plus grosse position, `turns` = contrats achetés et vendus ; P&L calculé, tolérance et frais par défaut sur `turns`. L'écran « X trades trouvés » (`recompute`, `nav.js`) et l'écran d'une seule capture (`autoPnl`) recalculent le P&L avec prix moyens × `turns` ; si le trader tape le nombre de contrats, `turns` disparaît (trade simple de cette taille). Test : `shot_trades_test.php` (achat 2, vente 1, achat 1, vente 2 → 2 contrats, +1 000 $, frais × 3).
 
+### « Débriefer ma journée » sans les trades (15 oct., demande de Mateo)
+- Dans la fenêtre de Sweep AI (mode journée), sous la date : la case **« Inclure mes trades du jour »** (cochée par défaut) et le champ **« Ta journée en quelques mots (facultatif) »**.
+- Case décochée : le serveur (`sai_day_debrief`, `with_trades: false`) ne lit aucun trade. Le débrief part du plan, du journal et des mots du trader, sans parler de trades, de P&L ni de résultats ; il vérifie le plan, la patience et les émotions.
+- Les mots du trader (1 500 caractères au plus) servent aussi avec ses trades. Un jour sans trade ni journal se débriefe dès qu'il a écrit quelques mots ; sinon le message le lui propose.
+- Test : `tests/e2e_day_debrief.py` (la réponse de Sweep AI est jouée par le test ; aucun appel à Google).
+
 ### Erreurs d'Admin du 15 oct. (corrigées)
 - **`startsWith` sur une touche absente** (Réglages, Edge, 22 fois ; Chrome iOS) : le remplissage automatique d'un navigateur envoie un `keydown` sans `key` ; `nav.js` lit maintenant `String(e.key || '')`.
 - **« Trade page jump »** (57 + … rapports, iPhone) :

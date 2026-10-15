@@ -87,7 +87,7 @@ function sweep_ai_route(string $route, string $method, string $uid, PDO $pdo): v
 
             case 'api/ai/day-debrief':
                 if (!$post) break;
-                sai_out(200, $withUsage(sai_day_debrief($pdo, $uid, (string) ($b['date'] ?? sai_today_ny()), $lang)));
+                sai_out(200, $withUsage(sai_day_debrief($pdo, $uid, (string) ($b['date'] ?? sai_today_ny()), $lang, ($b['with_trades'] ?? true) !== false, (string) ($b['note'] ?? ''))));
 
             case 'api/ai/trade-feedback':
                 if (!$post) break;

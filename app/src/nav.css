@@ -2840,3 +2840,9 @@ html body #main .tstats b{font:600 19px "Geist Mono",ui-monospace,monospace;lett
 html body #main .fx-c.mny-tsw{display:inline-flex!important;flex-wrap:nowrap;max-width:none;margin:0!important;gap:7px}
 html body #main .fx-c.fbtn{min-height:0;height:36px;border-radius:var(--r-pill);margin:0}
 @media (max-width:860px){html body #main .fx-c.fbtn{height:40px}}
+
+/* Sweep AI · « Debrief my day » (15 Oct.): the trader may leave his trades out, and say the day in his own words */
+.sai .sai-check{display:flex;align-items:center;gap:10px;min-height:44px;margin:4px 0 2px;font-size:14.5px;cursor:pointer}
+.sai .sai-check input{width:20px;height:20px;margin:0;accent-color:var(--pos-fill)}
+.sai .sai-note{display:block;width:100%;box-sizing:border-box;min-height:84px;margin:6px 0 12px;resize:vertical;font:inherit;line-height:1.45}
+@media (max-width:860px){.sai .sai-note{font-size:16px}}
