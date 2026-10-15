@@ -39,6 +39,8 @@ with sync_playwright() as p:
     pg.add_style_tag(content='html,body,*{overflow-anchor:none!important}')
     moves = {s: pg.evaluate(MOVE, s) for s in ['#main .seg.yn button[data-v="y"]', '#main .seg.yn button[data-v="n"]', '#main .seg.yn button[data-v="na"]', '#main [data-act="all-yes"]']}
     ok(all(v in (0, None) for v in moves.values()) and any(v == 0 for v in moves.values()), f'2 {w}: the checklist answers move nothing ({moves})')
+    sw = pg.evaluate("(async()=>{const s=document.querySelector('#main .score.ux-score'); if(!s) return null; const b=s.querySelector('b'), keep=b.textContent, o=new Set(); for(const t of ['—','0 %','75 %','100 %']){b.textContent=t; await new Promise(r=>requestAnimationFrame(r)); o.add(Math.round(s.getBoundingClientRect().height)+'/'+Math.round(b.getBoundingClientRect().width))} b.textContent=keep; return [...o]})()")
+    ok(sw and len(sw) == 1, f'2 {w}: the score block keeps one size whatever the score (« — », 0 %, 75 %, 100 %: {sw})')
     cnt = pg.evaluate("(()=>{const s=document.querySelector('#main .score .ux-score-n'); return s?s.textContent:''})()")
     ok('sur' in cnt, f'2 {w}: the score always says how many are answered ({cnt})')
     sent.clear()

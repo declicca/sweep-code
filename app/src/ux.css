@@ -289,7 +289,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 .facts > div.ux-notes > span:last-child,.facts > div.ux-notes > span:last-child *{font-family:Geist,-apple-system,system-ui,sans-serif!important;font-size:15px;line-height:1.55;color:var(--text)!important;text-align:left!important;white-space:pre-wrap!important;word-break:normal;overflow-wrap:anywhere}
 /* discipline score: big number, label beside it on one line, action underneath */
 .score.ux-score{display:grid!important;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:6px 14px}
-.score.ux-score > b{grid-row:span 1;font-size:40px;line-height:1;letter-spacing:-.03em}
+.score.ux-score > b{grid-row:span 1;font-size:40px;line-height:1;letter-spacing:-.03em;min-width:3em;font-variant-numeric:tabular-nums}   /* (one width for « — », « 75 % » and « 100 % »: the label beside never wraps differently, the questions never move) */
 .score.ux-score > .muted{font-size:14px;line-height:1.4;text-wrap:balance}
 .score.ux-score > .muted [data-tip]{border-bottom:0;text-decoration:underline dotted;text-underline-offset:3px}
 .score.ux-score > span[style*="flex:1"]{display:none}
