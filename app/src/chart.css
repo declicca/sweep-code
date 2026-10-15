@@ -9,7 +9,7 @@
 .sc-chart{position:relative;height:380px;border-radius:16px;overflow:hidden;touch-action:pan-y}
 @media (max-width:860px){.sc-chart{height:260px}}
 .sc-skel{position:absolute;inset:0;border-radius:16px;background:linear-gradient(100deg,var(--panel2) 30%,color-mix(in srgb,var(--panel2) 70%,var(--text) 6%) 50%,var(--panel2) 70%);background-size:300% 100%;animation:sc-sh 1.4s ease-in-out infinite}
-@keyframes sc-sh{0%{background-position:100% 0}100%{background-position:0 0}}
+@keyframes sc-sh{50%{opacity:.55}}   /* opacity, not the background's position */
 .sc-card{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;border-radius:16px;background:radial-gradient(circle at 50% 30%,rgba(var(--pos-rgb),.12),transparent 65%),var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
 .sc-card svg{width:30px;height:30px;color:var(--pos);opacity:.85}
 .sc-card p{margin:0;max-width:36ch;color:var(--text2);font-size:15px;line-height:1.5;text-wrap:balance}
@@ -32,7 +32,7 @@ body.sc-lock{overflow:hidden}
 .sc-tools{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none}
 .sc-tools::-webkit-scrollbar{display:none}
 .sc-tools[hidden]{display:none}
-.sc-tool{flex-shrink:0;min-height:34px;padding:0 14px;border:0;border-radius:999px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text2);font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s,color .2s,transform .2s var(--sw-spring)}
+.sc-tool{flex-shrink:0;min-height:34px;padding:0 14px;border:0;border-radius:999px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text2);font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s var(--ease-ios),color .2s var(--ease-ios),transform .2s var(--ease-ios)}
 .sc-tool:active{transform:scale(.95)}
 .sc-tool.on{background:var(--text);color:var(--bg);box-shadow:none}
 .sc-tool.stop.on{background:var(--neg);color:#0b0b0c}
@@ -45,7 +45,7 @@ body.sc-lock{overflow:hidden}
 .sc-adv{margin-top:2px}
 .sc-adv summary{cursor:pointer;font-size:13px;color:var(--muted);list-style:none;display:inline-flex;align-items:center;gap:6px}
 .sc-adv summary::-webkit-details-marker{display:none}
-.sc-adv summary::before{content:"›";display:inline-block;transition:transform .2s}
+.sc-adv summary::before{content:"›";display:inline-block;transition:transform .2s var(--ease-ios)}
 .sc-adv[open] summary::before{transform:rotate(90deg)}
 .sc-adv .tk-f{margin-top:8px}
 .sc-adv input{text-transform:uppercase;font-family:"Geist Mono",ui-monospace,monospace}
