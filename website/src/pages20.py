@@ -34,24 +34,23 @@ FREE_MORE = T("""<h2>Who it’s for</h2><p>Sweep is built for futures traders, o
 <h2>Gratis no significa pagar con tus datos</h2><p>Sweep no tiene publicidad y tus datos nunca se venden. Tus operaciones son privadas por defecto y puedes exportarlo todo o eliminar tu cuenta tú mismo, cuando quieras. Más en <a href="@security.html">seguridad y datos</a>.</p>""")
 
 def page_free(lang, t):
+    import ui
     hero = page_hero(t, T("A free trading journal for futures traders.", "Un journal de trading gratuit pour les traders de futures.", "Un diario de trading gratis para traders de futuros."),
         T("Free forever, not a trial: journal, calendar, analytics, real CME charts and a full export. Every new account also gets 60 days of Pro. No card.",
           "Gratuit pour toujours, pas un essai : journal, calendrier, analyses, vrais graphiques CME et export complet. Chaque nouveau compte a aussi 60 jours de Pro. Sans carte.",
           "Gratis para siempre, no una prueba: diario, calendario, análisis, gráficos reales de CME y exportación completa. Cada cuenta nueva tiene además 60 días de Pro. Sin tarjeta."),
         T("Free trading journal", "Journal de trading gratuit", "Diario de trading gratis"),
-        f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_free">{t(CREATE)}</a>')
+        f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_free">{t(CREATE)}</a>', visual=ui.frame_d("v6-11-calendar-d.webp", t(T("P&L calendar and daily journal in Sweep, sample data", "Calendrier P&L et journal quotidien dans Sweep, données d’exemple", "Calendario de P&L y diario en Sweep, datos de ejemplo")), m="v6-11-calendar-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1320px", cls="reveal zoom"))
     free = [T("<b>Journal, P&L calendar and analytics,</b> with the economic calendar", "<b>Journal, calendrier P&L et analyses,</b> avec le calendrier économique", "<b>Diario, calendario de P&L y análisis,</b> con el calendario económico"),
             T("<b>Real CME charts</b> for every trade", "<b>Vrais graphiques CME</b> pour chaque trade", "<b>Gráficos reales de CME</b> para cada operación"),
             T("<b>Log with AI,</b> from your own words or a screenshot", "<b>Saisie avec l’IA,</b> en mots simples ou à partir d’une capture", "<b>Registro con IA,</b> con tus palabras o desde una captura"),
             T("<b>Prop accounts</b> with their firm’s rules prefilled for guidance", "<b>Comptes prop</b> avec les règles de leur firme préremplies à titre indicatif", "<b>Cuentas prop</b> con las reglas de su firma precargadas a título indicativo"),
             T("<b>Rings, streak, badges and ranks,</b> leagues and crews", "<b>Anneaux, série, badges et rangs,</b> ligues et équipes", "<b>Anillos, racha, insignias y rangos,</b> ligas y equipos"),
             T("<b>Full export</b> of your data, anytime", "<b>Export complet</b> de tes données, en tout temps", "<b>Exportación completa</b> de tus datos, cuando quieras")]
-    b = split(t, T("Free plan", "Forfait Free", "Plan Free"), T("What stays free, forever.", "Ce qui reste gratuit, pour toujours.", "Lo que sigue siendo gratis, para siempre."),
-              T("The whole daily loop is in the Free plan: log a trade, see it on a real chart, check your rules, review your day.",
+    b = ui.split(t, T("Free plan", "Forfait Free", "Plan Free"), T("What stays free, forever.", "Ce qui reste gratuit, pour toujours.", "Lo que sigue siendo gratis, para siempre."), T("The whole daily loop is in the Free plan: log a trade, see it on a real chart, check your rules, review your day.",
                 "Toute la boucle quotidienne est dans le forfait Free : ajoute un trade, vois-le sur un vrai graphique, vérifie tes règles, révise ta journée.",
-                "Todo el ciclo diario está en el plan Free: registra una operación, mírala en un gráfico real, revisa tus reglas y tu día."),
-              free, slot("ecran-calendrier-ordi.webp", "desktop", t(T("P&L calendar and daily journal in Sweep, sample data", "Calendrier P&L et journal quotidien dans Sweep, données d’exemple", "Calendario de P&L y diario en Sweep, datos de ejemplo")), t, fallback="journal-day"), id_="free", rule=False)
-    b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(FREE_MORE))}</article></div></section>'
+                "Todo el ciclo diario está en el plan Free: registra una operación, mírala en un gráfico real, revisa tus reglas y tu día."), free, ui.frame_d("v6-01-today-d.webp", t(T("P&L calendar and daily journal in Sweep, sample data", "Calendrier P&L et journal quotidien dans Sweep, données d’exemple", "Calendario de P&L y diario en Sweep, datos de ejemplo")), m="v6-01-today-m.webp", t=t), id_="free")
+    b += ui.sec(f'<article class="article">{localize(lang, t(FREE_MORE))}</article>', "n", width="read")
     faqs = [(T("Is Sweep really free?", "Sweep est-il vraiment gratuit ?", "¿Sweep es realmente gratis?"),
              T("Yes. The Free plan is free forever, and every new account also gets Pro for its first 60 days.", "Oui. Le forfait Free est gratuit pour toujours, et chaque nouveau compte a aussi Pro pendant ses 60 premiers jours.", "Sí. El plan Free es gratis para siempre, y cada cuenta nueva tiene además Pro durante sus primeros 60 días.")),
             (T("Do I need a credit card?", "Faut-il une carte de crédit ?", "¿Necesito una tarjeta?"),
@@ -60,12 +59,12 @@ def page_free(lang, t):
              T("You move to the Free plan automatically. Nothing is charged and nothing is lost.", "Tu passes automatiquement au forfait Free. Rien n’est facturé et rien n’est perdu.", "Pasas al plan Free automáticamente. No se cobra nada y no se pierde nada.")),
             (T("Can I use the Free plan with a prop firm?", "Puis-je utiliser le forfait Free avec une prop firm ?", "¿Puedo usar el plan Free con una prop firm?"),
              T("Yes. Free includes prop accounts with their firm’s rules prefilled for guidance, with a limited number of accounts. Pro and Elite add more.", "Oui. Free comprend des comptes prop avec les règles de leur firme préremplies à titre indicatif, en nombre limité. Pro et Elite en ajoutent.", "Sí. Free incluye cuentas prop con las reglas de su firma precargadas a título indicativo, en número limitado. Pro y Elite añaden más."))]
-    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>{"".join(faq_item(t, q, a) for q, a in faqs)}</div></section>'
+    b += ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read")
     return (t(T("Free Trading Journal for Futures & Prop Traders · Sweep", "Journal de trading gratuit pour futures · Sweep", "Diario de trading gratis para futuros · Sweep")),
             t(T("A free trading journal for futures and prop firm traders: journal, calendar, analytics, real CME charts and prop firm rules. Free forever, no card.",
                 "Un journal de trading gratuit pour les traders de futures et de prop firms : journal, calendrier, analyses, graphiques CME et règles. Gratuit, sans carte.",
                 "Un diario de trading gratis para traders de futuros y prop firms: diario, calendario, análisis, gráficos de CME y reglas. Gratis para siempre, sin tarjeta.")),
-            hero + b + final_cta(lang, t), _faq_ld(t, faqs))
+            hero + b + ui.final(lang, t), _faq_ld(t, faqs))
 
 # ---------------------------------------------------------------- prop firm tracker (also the page for prop traders: /prop-traders redirects here)
 CRUMBS["prop-firm-tracker.html"] = T("Prop firm tracker", "Suivi des comptes prop", "Seguimiento de cuentas prop")
@@ -92,25 +91,24 @@ TRACKER_MORE = T("""<h2>How it works</h2><ol>
 <h2>¿Un seguimiento o una hoja de cálculo?</h2><p>Una hoja de cálculo puede listar tus cuentas, pero no recalcula un drawdown dinámico tras cada operación, no cuenta los días ganadores desde tu último payout ni te avisa en el ticket cuando se acerca el límite del día. Sweep lo hace, para todas tus cuentas a la vez.</p>""")
 
 def page_tracker(lang, t):
+    import ui
     hero = page_hero(t, T("Track every prop firm account in one place.", "Suis tous tes comptes de prop firm au même endroit.", "Sigue todas tus cuentas de prop firm en un solo lugar."),
         T("Evaluations, funded and live accounts across every firm, each with its own rules. Sweep shows where each one stands after every trade.",
           "Évaluations, comptes financés et live de toutes tes firmes, chacun avec ses propres règles. Sweep montre où en est chacun après chaque trade.",
           "Evaluaciones, cuentas fondeadas y live de todas tus firmas, cada una con sus propias reglas. Sweep muestra cómo va cada una tras cada operación."),
         T("Prop firm tracker", "Suivi des comptes prop", "Seguimiento de cuentas prop"),
-        f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_tracker">{t(CREATE)}</a>')
+        f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_tracker">{t(CREATE)}</a>', visual=ui.frame_d("v6-13-accounts-d.webp", t(T("Prop accounts side by side, sample data", "Comptes prop côte à côte, données d’exemple", "Cuentas prop lado a lado, datos de ejemplo")), m="v6-13-accounts-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1320px", cls="reveal zoom"))
     items = [T("<b>Target progress,</b> with the amount still to make", "<b>Progression vers l’objectif,</b> avec le montant qu’il reste à faire", "<b>Progreso hacia el objetivo,</b> con lo que falta por hacer"),
              T("<b>Room above the max loss,</b> trailing or static, and today’s loss limit", "<b>Marge au-dessus de la perte max,</b> suiveuse ou fixe, et la limite du jour", "<b>Margen sobre la pérdida máx.,</b> dinámica o fija, y el límite del día"),
              T("<b>Consistency and minimum days,</b> counted for you", "<b>Consistance et jours minimum,</b> comptés pour toi", "<b>Consistencia y días mínimos,</b> contados por ti"),
              T("<b>Ready for payout</b> in %, on funded accounts", "<b>Prêt pour le payout</b> en %, sur les comptes financés", "<b>Listo para el payout</b> en %, en las cuentas fondeadas"),
              T("<b>Status:</b> good standing, target reached, close to a limit, drawdown breached, daily limit hit", "<b>Statut :</b> en règle, objectif atteint, proche d’une limite, drawdown dépassé, limite du jour atteinte", "<b>Estado:</b> en regla, objetivo alcanzado, cerca de un límite, drawdown superado, límite diario alcanzado")]
-    b = split(t, T("On one screen", "Sur un seul écran", "En una sola pantalla"), T("Every account, where it stands.", "Chaque compte, là où il en est.", "Cada cuenta, cómo va."),
-              T("Each account carries its firm, its type, its size and its rules, so an evaluation and a funded account can sit side by side.",
+    b = ui.split(t, T("On one screen", "Sur un seul écran", "En una sola pantalla"), T("Every account, where it stands.", "Chaque compte, là où il en est.", "Cada cuenta, cómo va."), T("Each account carries its firm, its type, its size and its rules, so an evaluation and a funded account can sit side by side.",
                 "Chaque compte porte sa firme, son type, sa taille et ses règles : une évaluation et un compte financé peuvent vivre côte à côte.",
-                "Cada cuenta lleva su firma, su tipo, su tamaño y sus reglas, así que una evaluación y una cuenta fondeada conviven sin problema."),
-              items, slot("ecran-comptes-prop.webp", "desktop", t(T("Prop accounts with the ready-for-payout meter, sample data", "Comptes prop avec le compteur prêt pour le payout, données d’exemple", "Cuentas prop con el indicador listo para el payout, datos de ejemplo")), t, fallback="accounts"), id_="accounts", rule=False)
+                "Cada cuenta lleva su firma, su tipo, su tamaño y sus reglas, así que una evaluación y una cuenta fondeada conviven sin problema."), items, ui.frame_d("v6-08-payout-conditions-d.webp", t(T("Prop accounts with the ready-for-payout meter, sample data", "Comptes prop avec le compteur prêt pour le payout, données d’exemple", "Cuentas prop con el indicador listo para el payout, datos de ejemplo")), m="v6-08-payout-conditions-m.webp", t=t), id_="accounts")
     from pages1 import prop_blocks, prop_notice
     b += prop_blocks(lang, t)   # what /prop-traders had (merged here, audit n° 3)
-    b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(TRACKER_MORE)).replace("{FIRMS}", FIRMS_TXT[lang])}</article></div>{prop_notice(lang, t)}</section>'
+    b += ui.sec(f'<article class="article">{localize(lang, t(TRACKER_MORE)).replace("{FIRMS}", FIRMS_TXT[lang])}</article>' + prop_notice(lang, t), "n", "how", width="read")
     faqs = [(T("Which firms have preloaded rules?", "Quelles firmes ont des règles préremplies ?", "¿Qué firmas tienen reglas precargadas?"),
              T(f"{FIRMS_TXT['en']}. Any other firm can be added with its rules entered once.", f"{FIRMS_TXT['fr']}. Toute autre firme peut être ajoutée en saisissant ses règles une fois.", f"{FIRMS_TXT['es']}. Cualquier otra firma se puede añadir introduciendo sus reglas una vez.")),
             (T("How many accounts can I track?", "Combien de comptes puis-je suivre ?", "¿Cuántas cuentas puedo seguir?"),
@@ -119,12 +117,12 @@ def page_tracker(lang, t):
              T("No. Your trades come from your platform, by import or NinjaTrader 8 sync, or from a screenshot, and Sweep applies your account’s rules to them.", "Non. Tes trades viennent de ta plateforme, par import ou synchro NinjaTrader 8, ou d’une capture, et Sweep leur applique les règles de ton compte.", "No. Tus operaciones vienen de tu plataforma, por importación o sincronización con NinjaTrader 8, o de una captura, y Sweep les aplica las reglas de tu cuenta.")),
             (T("Can I keep a failed account?", "Puis-je garder un compte échoué ?", "¿Puedo conservar una cuenta fallida?"),
              T("Yes. Closed and failed accounts keep their full history and stay in your filters.", "Oui. Les comptes fermés et échoués gardent tout leur historique et restent dans tes filtres.", "Sí. Las cuentas cerradas y fallidas conservan todo su historial y siguen en tus filtros."))]
-    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>{"".join(faq_item(t, q, a) for q, a in faqs)}</div></section>'
+    b += ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read")
     return (t(T("Prop Firm Tracker & Trading Journal · Sweep", "Suivi des comptes prop et journal de trading · Sweep", "Seguimiento de cuentas prop y diario de trading · Sweep")),
             t(T("Track every prop firm account in one place: evaluations, funded and live, with each firm’s rules, drawdown room, consistency and payout readiness.",
                 "Suis tous tes comptes de prop firm au même endroit : évaluations, financés et live, avec les règles, la marge de drawdown, la consistance et le payout.",
                 "Sigue todas tus cuentas de prop firm en un solo lugar: evaluaciones, fondeadas y live, con las reglas, el margen de drawdown, la consistencia y el payout.")),
-            hero + b + final_cta(lang, t), _faq_ld(t, faqs))
+            hero + b + ui.final(lang, t), _faq_ld(t, faqs))
 
 # ---------------------------------------------------------------- payout tracker
 PAYOUT_MORE = T("""<h2>Expenses and your real net</h2><p>Next to the payouts, Sweep keeps every cost of prop trading: evaluations, activations, resets, data and platform fees. A monthly evaluation stops counting when its account ends. Your real net is the payouts you received plus your live and personal P&L, minus your expenses; simulated profits on evaluation and funded accounts are never added in.</p>
@@ -138,20 +136,19 @@ PAYOUT_MORE = T("""<h2>Expenses and your real net</h2><p>Next to the payouts, Sw
 <h2>Incluido en Pro y Elite</h2><p>Los payouts, los gastos y tu neto real están en Mi dinero, que forma parte de Pro y Elite, y cada cuenta nueva empieza con Pro. La <a href="@payout-calculator.html">calculadora de payout</a> y la <a href="@prop-firm-roi-calculator.html">calculadora de rentabilidad prop</a> siguen siendo gratis para todos, y las condiciones de cada firma se comparan en la <a href="@prop-firm-payout-rules.html">guía de reglas de payout</a>.</p>""")
 
 def page_payout_tracker(lang, t):
+    import ui
     hero = page_hero(t, T("Track every payout, and what it really cost.", "Suis chaque payout, et ce qu’il t’a vraiment coûté.", "Sigue cada payout y lo que te costó de verdad."),
         T("From the first condition met to the money received: Sweep tracks your payouts, the fees behind them and your real net, firm by firm.",
           "De la première condition remplie à l’argent reçu : Sweep suit tes payouts, les frais derrière eux et ton vrai net, firme par firme.",
           "De la primera condición cumplida al dinero recibido: Sweep sigue tus payouts, los costes que hay detrás y tu neto real, firma por firma."),
         T("Payout tracker", "Suivi des payouts", "Seguimiento de payouts"),
-        f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_payouts">{t(CREATE)}</a>')
+        f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_payouts">{t(CREATE)}</a>', visual=ui.frame_d("v6-17b-share-one-payout-d.webp", t(T("A payout received, ready to share, sample data", "Un payout reçu, prêt à partager, données d’exemple", "Un payout recibido, listo para compartir, datos de ejemplo")), m="v6-17b-share-one-payout-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1320px", cls="reveal zoom"))
     items = [T("<b>Status:</b> planned, requested, approved, paid or rejected, with dates", "<b>Statut :</b> prévu, demandé, approuvé, payé ou refusé, avec les dates", "<b>Estado:</b> planificado, solicitado, aprobado, pagado o rechazado, con fechas"),
              T("<b>Ready for payout</b> in % on each funded account: winning days, cushion, minimum and maximum, counted since your last request", "<b>Prêt pour le payout</b> en % sur chaque compte financé : jours gagnants, coussin, minimum et maximum, comptés depuis ta dernière demande", "<b>Listo para el payout</b> en % en cada cuenta fondeada: días ganadores, colchón, mínimo y máximo, contados desde tu última solicitud"),
              T("<b>How much you can request,</b> after the cushion and within the limits", "<b>Combien tu peux demander,</b> après le coussin et dans les limites", "<b>Cuánto puedes pedir,</b> tras el colchón y dentro de los límites"),
              T("<b>A share card</b> when a payout is marked paid, amounts optional", "<b>Une carte à partager</b> quand un payout est marqué payé, montants optionnels", "<b>Una tarjeta para compartir</b> cuando un payout se marca como pagado, importes opcionales")]
-    b = split(t, T("Payouts", "Payouts", "Payouts"), T("From request to paid.", "De la demande au paiement.", "De la solicitud al pago."),
-              T("Each payout has a status and its dates, so you always know what’s on the way.", "Chaque payout a un statut et ses dates : tu sais toujours ce qui s’en vient.", "Cada payout tiene un estado y sus fechas, así siempre sabes lo que está en camino."),
-              items, frame("payouts", lang, t(T("Payouts and expenses with net realized income, sample data", "Payouts et dépenses avec le revenu net réalisé, données d’exemple", "Payouts y gastos con el ingreso neto realizado, datos de ejemplo")), t), id_="payouts", rule=False)
-    b += f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(PAYOUT_MORE))}</article></div></section>'
+    b = ui.split(t, T("Payouts", "Payouts", "Payouts"), T("From request to paid.", "De la demande au paiement.", "De la solicitud al pago."), T("Each payout has a status and its dates, so you always know what’s on the way.", "Chaque payout a un statut et ses dates : tu sais toujours ce qui s’en vient.", "Cada payout tiene un estado y sus fechas, así siempre sabes lo que está en camino."), items, ui.frame_d("v6-12-payouts-d.webp", t(T("Payouts and expenses with net realized income, sample data", "Payouts et dépenses avec le revenu net réalisé, données d’exemple", "Payouts y gastos con el ingreso neto realizado, datos de ejemplo")), m="v6-12-payouts-m.webp", t=t), id_="payouts")
+    b += ui.sec(f'<article class="article">{localize(lang, t(PAYOUT_MORE))}</article>', "n", width="read")
     faqs = [(T("Does Sweep request the payout for me?", "Sweep demande-t-il le payout pour moi ?", "¿Sweep pide el payout por mí?"),
              T("No. You request it on your firm’s site; Sweep tells you when you can and tracks it until it’s paid.", "Non. Tu le demandes sur le site de ta firme ; Sweep te dit quand tu peux et le suit jusqu’au paiement.", "No. Lo pides en el sitio de tu firma; Sweep te dice cuándo puedes y lo sigue hasta el pago.")),
             (T("Is my net simulated or real?", "Mon net est-il simulé ou réel ?", "¿Mi neto es simulado o real?"),
@@ -160,12 +157,12 @@ def page_payout_tracker(lang, t):
              T("Yes. The full export includes CSV spreadsheets of your payouts and expenses, handy for your accountant.", "Oui. L’export complet comprend des tableurs CSV de tes payouts et de tes dépenses, pratiques pour ton comptable.", "Sí. La exportación completa incluye hojas CSV de tus payouts y gastos, útiles para tu contable.")),
             (T("Can I hide the amounts when I share?", "Puis-je masquer les montants quand je partage ?", "¿Puedo ocultar los importes al compartir?"),
              T("Yes. Share cards can hide the dollars and show your win rate, R or return on fees instead.", "Oui. Les cartes à partager peuvent masquer les dollars et montrer plutôt ton taux de réussite, ton R ou ton rendement sur frais.", "Sí. Las tarjetas pueden ocultar los dólares y mostrar en su lugar tu tasa de acierto, tu R o tu rendimiento sobre cuotas."))]
-    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>{"".join(faq_item(t, q, a) for q, a in faqs)}</div></section>'
+    b += ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read")
     return (t(T("Prop Firm Payout Tracker: Payouts, Fees and Net · Sweep", "Suivi des payouts prop : payouts, frais et net · Sweep", "Seguimiento de payouts prop: payouts, gastos y neto · Sweep")),
             t(T("Track prop firm payouts from request to paid, with evaluations, resets and fees, your real net and when you can request your next payout.",
                 "Suis tes payouts de prop firm de la demande au paiement, avec évaluations, resets et frais, ton vrai net et quand demander ton prochain payout.",
                 "Sigue tus payouts de prop firm de la solicitud al pago, con evaluaciones, reinicios y cuotas, tu neto real y cuándo pedir tu próximo payout.")),
-            hero + b + final_cta(lang, t), _faq_ld(t, faqs))
+            hero + b + ui.final(lang, t), _faq_ld(t, faqs))
 
 # ---------------------------------------------------------------- NinjaTrader 8 add-on (facts from app/CONTEXTE-APP.md, sync section)
 NT8_MORE = T("""<h2>Install it once</h2><ol>
@@ -194,7 +191,8 @@ NT8_MORE = T("""<h2>Install it once</h2><ol>
 <h2>Tus operaciones anteriores</h2><p>El complemento envía lo que operas a partir de ahora. Para tu historial, expórtalo desde la ventana Trade Performance de NinjaTrader e <a href="@import.html#ninjatrader">importa el CSV</a>: las operaciones ya sincronizadas se reconocen y nunca se importan dos veces.</p>""")
 
 def page_ninjatrader(lang, t):
-    hero = page_hero(t, T("Your NinjaTrader 8 trades, in your journal on their own.", "Tes trades NinjaTrader 8, dans ton journal tout seuls.", "Tus operaciones de NinjaTrader 8, en tu diario solas."),
+    import ui
+    hero = page_hero(t, T("Your NinjaTrader\u00a08 trades, in your journal on their own.", "Tes trades NinjaTrader\u00a08, dans ton journal tout seuls.", "Tus operaciones de NinjaTrader\u00a08, en tu diario solas."),
         T("Sweep’s free add-on sends every execution from NinjaTrader 8 to your journal within seconds. Read only: it never places an order.",
           "Le module gratuit de Sweep envoie chaque exécution de NinjaTrader 8 à ton journal en quelques secondes. Lecture seule : il ne passe jamais d’ordre.",
           "El complemento gratuito de Sweep envía cada ejecución de NinjaTrader 8 a tu diario en segundos. Solo lectura: nunca envía una orden."),
@@ -205,8 +203,8 @@ def page_ninjatrader(lang, t):
              T("<b>Every account found,</b> Apex accounts recognized; simulation accounts left aside until you link them", "<b>Chaque compte trouvé,</b> les comptes Apex reconnus ; les comptes de simulation mis de côté tant que tu ne les relies pas", "<b>Cada cuenta encontrada,</b> las cuentas Apex reconocidas; las de simulación quedan aparte hasta que las vinculas"),
              T("<b>Copied trades</b> grouped across your accounts", "<b>Trades copiés</b> regroupés entre tes comptes", "<b>Operaciones copiadas</b> agrupadas entre tus cuentas"),
              T("<b>Your notes, screenshots and review</b> are never overwritten, and a trade you logged by hand is completed, not doubled", "<b>Tes notes, captures et révisions</b> ne sont jamais écrasées, et un trade ajouté à la main est complété, pas doublé", "<b>Tus notas, capturas y revisiones</b> nunca se sobrescriben, y una operación registrada a mano se completa, no se duplica")]
-    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article"><h2>{t(T("What it does", "Ce qu’il fait", "Qué hace"))}</h2>{ul(t, items)}</article></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(NT8_MORE))}</article></div></section>')
+    b = (ui.sec(f'<article class="article"><h2>{t(T("What it does", "Ce qu’il fait", "Qué hace"))}</h2>{ul(t, items)}</article>', "t", width="read")
+         + ui.sec(f'<article class="article">{localize(lang, t(NT8_MORE))}</article>', "n", width="read"))
     faqs = [(T("Is the NinjaTrader 8 add-on free?", "Le module NinjaTrader 8 est-il gratuit ?", "¿El complemento de NinjaTrader 8 es gratis?"),
              T("Yes, on every plan, Free included.", "Oui, avec tous les forfaits, Free compris.", "Sí, en todos los planes, Free incluido.")),
             (T("Does it work with my prop firm account?", "Est-ce que ça marche avec mon compte de prop firm ?", "¿Funciona con mi cuenta de prop firm?"),
@@ -223,9 +221,11 @@ def page_ninjatrader(lang, t):
              T(f'Sync is for NinjaTrader 8 for now; sync for Rithmic and Tradovate is in development. From any other platform, <a href="{href("en", "import.html")}">import a file or a screenshot</a>.',
                f'La synchro est pour NinjaTrader 8 pour l’instant ; celle de Rithmic et Tradovate est en développement. Depuis toute autre plateforme, <a href="{href("fr", "import.html")}">importe un fichier ou une capture</a>.',
                f'La sincronización es para NinjaTrader 8 por ahora; la de Rithmic y Tradovate está en desarrollo. Desde cualquier otra plataforma, <a href="{href("es", "import.html")}">importa un archivo o una captura</a>.'))]
-    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>{"".join(faq_item(t, q, a) for q, a in faqs)}</div></section>'
+    b += ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read")
     return (t(T("NinjaTrader 8 Trading Journal: Free Auto Sync · Sweep", "Journal de trading NinjaTrader 8 : synchro gratuite · Sweep", "Diario de trading para NinjaTrader 8, gratis · Sweep")),
             t(T("Sync your NinjaTrader 8 trades to your trading journal with Sweep’s free add-on: every execution in seconds, read only, prop accounts included.",
                 "Synchronise tes trades NinjaTrader 8 avec ton journal grâce au module gratuit de Sweep : chaque exécution en quelques secondes, en lecture seule.",
                 "Sincroniza tus operaciones de NinjaTrader 8 con tu diario gracias al complemento gratuito de Sweep: cada ejecución en segundos, solo lectura.")),
-            hero + b + final_cta(lang, t), _faq_ld(t, faqs))
+            hero + b + ui.final(lang, t), _faq_ld(t, faqs))
+
+SYSTEM_PAGES.update({"free-trading-journal.html", "prop-firm-tracker.html", "payout-tracker.html", "ninjatrader.html"})

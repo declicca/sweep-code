@@ -64,6 +64,7 @@
     var tv = tour.querySelector('video'), lastBtn = null;
     var load = function(){
       if(tv.dataset.loaded) return;
+      if(tv.dataset.poster) tv.poster = tv.dataset.poster;   // the poster too: a closed window downloads nothing
       var sm = window.matchMedia('(max-width: 900px)').matches || (navigator.connection && navigator.connection.saveData);
       [['webm', sm ? tv.dataset.srcWebmSm : tv.dataset.srcWebm], ['mp4', sm ? tv.dataset.srcMp4Sm : tv.dataset.srcMp4]].forEach(function(s){
         if(!s[1]) return; var e = document.createElement('source'); e.src = s[1]; e.type = 'video/' + s[0]; tv.appendChild(e); });

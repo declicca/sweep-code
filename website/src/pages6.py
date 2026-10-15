@@ -20,20 +20,22 @@ def note(t, d): return f'<p class="fine">{t(d)}</p>'
 
 # ----------------------------------------------------------------- sections reused on several pages
 def sec_sweep_day(lang, t, id_="sweep-the-day", rule=True):
-    return split(t, T("The daily loop","La boucle quotidienne","El ciclo diario"), T("Sweep your day.","Balaye ta journée.","Barre tu día."),
+    """The daily loop (How it works), on the design system: a phone video beside the text."""
+    import ui
+    return ui.split(t, T("The daily loop","La boucle quotidienne","El ciclo diario"), T("Sweep your day.","Balaye ta journée.","Barre tu día."),
       T("Three rings every market day: plan before the open, trade by your rules, review after the session. Close all three and your day is swept, and your discipline streak moves forward. Streak freezes protect your runs, and weekends never count against you.",
         "Trois anneaux chaque jour de marché : planifier avant l’ouverture, trader selon tes règles, réviser après la séance. Ferme les trois et ta journée est balayée : ton streak de discipline avance. Les gels de streak protègent tes séries, et le week-end ne compte jamais contre toi.",
         "Tres anillos cada día de mercado: planificar antes de la apertura, operar según tus reglas, revisar tras la sesión. Cierra los tres y tu día queda barrido: tu racha de disciplina avanza. Las congelaciones protegen tus series y los fines de semana nunca cuentan en tu contra."),
       [T("<b>Daily plan in 2 minutes:</b> bias, levels, scenario, max loss","<b>Plan du jour en 2 minutes :</b> biais, niveaux, scénario, perte max","<b>Plan del día en 2 minutos:</b> sesgo, niveles, escenario, pérdida máxima"),
        T("<b>Execution</b> measured by your own discipline checklist (5 questions)","<b>Exécution</b> mesurée par ta propre checklist de discipline (5 questions)","<b>Ejecución</b> medida con tu propio checklist de disciplina (5 preguntas)"),
-       T("<b>Review in 60 seconds,</b> without leaving the Overview","<b>Revue en 60 secondes,</b> sans quitter l’Aperçu","<b>Revisión en 60 segundos,</b> sin salir del Resumen"),
+       T("<b>Review in 60 seconds,</b> without leaving Today","<b>Revue en 60 secondes,</b> sans quitter Aujourd’hui","<b>Revisión en 60 segundos,</b> sin salir de Hoy"),
        T("<b>Discipline streak</b> plus freezes: 1 on Free, 2 on Pro, 3 on Elite per week","<b>Streak de discipline</b> et gels : 1 en Free, 2 en Pro, 3 en Elite par semaine","<b>Racha de disciplina</b> y congelaciones: 1 en Free, 2 en Pro, 3 en Elite por semana"),
        T("<b>Guardrail:</b> if you go past your max daily loss, Sweep tells you, without judgment","<b>Garde-fou :</b> si tu dépasses ta perte max du jour, Sweep te le dit, sans jugement","<b>Salvaguarda:</b> si superas tu pérdida máxima del día, Sweep te lo dice, sin juzgarte")],
-      slot("v6-video-today-phone.mp4","phone",t(T("Today on a phone: rings, days, releases","Aujourd’hui sur téléphone : anneaux, jours, annonces","Hoy en el teléfono: anillos, días, datos")),t,fallback="overview",video=True,poster="v6-poster-today-phone.webp"),
-      id_=id_, rule=rule)
+      ui.frame_p("v6-poster-today-phone.webp", t(T("Today on a phone: rings, days, releases","Aujourd’hui sur téléphone : anneaux, jours, annonces","Hoy en el teléfono: anillos, días, datos")), t, video="v6-video-today-phone.mp4"),
+      id_=id_, phone=True)
 
-def sec_charts(lang, t, id_="charts", flip=True):
-    return split(t, T("Real charts","Graphiques réels","Gráficos reales"), T("Your trades on real charts.","Tes trades sur de vrais graphiques.","Tus operaciones en gráficos reales."),
+def sec_charts(lang, t, id_="charts", flip=True, sp=None):
+    return (sp or split)(t, T("Real charts","Graphiques réels","Gráficos reales"), T("Your trades on real charts.","Tes trades sur de vrais graphiques.","Tus operaciones en gráficos reales."),
       T("See every trade where it happened, on real CME candles: entry, exit, stop, target and your position zone. Charts are ready the day after the session.",
         "Vois chaque trade là où il s’est passé, sur les vraies bougies du CME : entrée, sortie, stop, objectif et zone de position. Les graphiques sont prêts le lendemain de la séance.",
         "Mira cada operación donde ocurrió, sobre velas reales de CME: entrada, salida, stop, objetivo y zona de posición. Los gráficos están listos al día siguiente de la sesión."),
@@ -59,13 +61,15 @@ def sec_prop(lang, t, id_="prop", flip=False, link=True, title=None):
       flip=flip, id_=id_, more=note(t,PROP_NOTE) + m)
 
 def sec_trust(lang, t, id_="data"):
+    """Trust and data (features page), on the design system."""
+    import ui
     items = [("download", T("Full export in one click","Export complet en un clic","Exportación completa en un clic"), T("A ZIP file with a re-importable backup, CSV spreadsheets (trades, accounts, payouts, expenses, journal) and all your screenshots.","Un fichier ZIP avec sauvegarde réimportable, tableurs CSV (trades, comptes, payouts, dépenses, journal) et toutes tes captures.","Un archivo ZIP con copia reimportable, hojas CSV (operaciones, cuentas, payouts, gastos, diario) y todas tus capturas.")),
              ("trash", T("Self-serve account deletion","Suppression du compte en libre-service","Eliminación de la cuenta por tu cuenta"), T("Delete your account and all its data yourself, anytime.","Supprime toi-même ton compte et toutes ses données, en tout temps.","Elimina tú mismo tu cuenta y todos sus datos, cuando quieras.")),
              ("eye", T("Private by default","Privé par défaut","Privado por defecto"), T("No social feature is active without your consent.","Aucune fonction sociale n’est active sans ton accord.","Ninguna función social está activa sin tu consentimiento.")),
-             ("chat", T("Feedback loop","Boucle de feedback","Ciclo de feedback"), T("Suggest an idea or report a bug from the app and follow its status. When it ships: “You asked, we built it.”","Propose une idée ou signale un bug depuis l’app et suis son statut. Quand c’est livré : « Tu l’as demandé, on l’a construit. »","Propón una idea o reporta un error desde la app y sigue su estado. Cuando sale: «Lo pediste, lo construimos».")),
-             ("globe", T("English, French and Spanish","Français, anglais et espagnol","Español, inglés y francés"), T("The whole app, in your language.","Toute l’app, dans ta langue.","Toda la app, en tu idioma."))]
-    return f'''<section id="{id_}" class="rule"><div class="wrap"><div class="head"><span class="kick">{t(T("Trust and data","Confiance et données","Confianza y datos"))}</span><h2>{t(T("Your data belongs to you.","Tes données t’appartiennent.","Tus datos te pertenecen."))}</h2><p class="lead">{t(T("Private by default. Yours to export or delete, anytime.","Privées par défaut. À toi de les exporter ou de les supprimer, quand tu veux.","Privados por defecto. Tuyos para exportar o eliminar, cuando quieras."))}</p></div>
-<div class="grid stagger g3 g5">{"".join(f'<div>{ico(I[k])}<h3>{t(a)}</h3><p>{t(b)}</p></div>' for k,a,b in items)}<div class="cta-cell"><span class="cta-mark" aria-hidden="true">{MARK}</span><h3>{t(T("Try it with your own trades.","Essaie-le avec tes propres trades.","Pruébalo con tus propias operaciones."))}</h3><p>{t(FREE_LINE)}</p><a class="btn btn-primary" href="{SIGNUP}">{t(START)}</a></div></div></div></section>'''
+             ("chat", T("Feedback loop","Boucle de feedback","Ciclo de feedback"), T("Suggest an idea or report a bug from the app and follow its status. When it ships: “You asked, we built it.”","Propose une idée ou signale un bug depuis l’app et suis son statut. Quand c’est livré : « Tu l’as demandé, on l’a construit. »","Propón una idea o reporta un error desde la app y sigue su estado. Cuando sale: «Lo pediste, lo construimos»."))]
+    return ui.sec(ui.head(t, T("Trust and data","Confiance et données","Confianza y datos"), T("Your data belongs to you.","Tes données t’appartiennent.","Tus datos te pertenecen."),
+                          T("Private by default. Yours to export or delete, anytime.","Privées par défaut. À toi de les exporter ou de les supprimer, quand tu veux.","Privados por defecto. Tuyos para exportar o eliminar, cuando quieras."))
+                  + ui.tiles(t, items, cls="trust stagger"), "n", id_)
 
 GAME = [
  ("ecran-parcours.webp", "progression", T("Progression","Progression","Progresión"), T("XP, levels and 7 ranks","XP, niveaux et 7 rangs","XP, niveles y 7 rangos"),
@@ -106,28 +110,21 @@ GAME_INTRO = T("The traders who last aren’t the most gifted. They’re the mos
                "Los traders que duran no son los más talentosos. Son los más constantes. Sweep hace visible tu constancia con niveles, rangos, insignias, misiones y jefes que vencer, todo ganado con el proceso. Nunca con el beneficio.")
 GAME_TITLE = T("Discipline, video-game style.","La discipline, version jeu vidéo.","La disciplina, al estilo videojuego.")
 
-def game_teaser(lang, t):
-    picks = [g for g in GAME if g[0]][:4]
-    cards = "".join(f'<article class="gcard"><div class="gtxt"><span class="kick">{t(k)}</span><h3>{t(h)}</h3></div>{slot(img,"phone",t(h),t,cap=False)}</article>' for img,_,k,h,_p in picks)
-    return f'''<section class="rule game-band" id="discipline"><div class="wrap">
-<div class="head"><span class="kick">{t(T("Gamification","Gamification","Gamificación"))}</span><h2>{t(GAME_TITLE)}</h2><p class="lead">{t(GAME_INTRO)}</p></div>
-<div class="gcards rail stagger">{cards}</div>
-<div class="cta-row"><a class="btn btn-line" href="{href(lang,'how-it-works.html')}#discipline">{t(T("See everything you can unlock","Voir tout ce que tu peux débloquer","Ver todo lo que puedes desbloquear"))}</a></div>
-</div></section>'''
-
 SOCIAL_POINTS = [
  T("<b>Weekly leagues:</b> Bronze → Silver → Gold → Platinum → Diamond, ranked by discipline XP. Real traders only.","<b>Ligues hebdomadaires :</b> Bronze → Argent → Or → Platine → Diamant. Classement par XP de discipline. Que de vrais traders.","<b>Ligas semanales:</b> Bronce → Plata → Oro → Platino → Diamante, por XP de disciplina. Solo traders reales."),
  T("<b>Crews</b> (3 to 5 traders): a shared goal of swept days, an activity feed and reactions. Goal reached = a chest key for each member.","<b>Crews</b> (3 à 5 traders) : objectif commun de journées balayées, fil d’activité, réactions. Objectif atteint = une clé de coffre pour chacun.","<b>Crews</b> (3 a 5 traders): objetivo común de días barridos, feed de actividad y reacciones. Objetivo cumplido = una llave de cofre para cada uno."),
  T("<b>Accountability buddy:</b> a partner who sees your rings and streak, and can cheer you on once a day.","<b>Accountability buddy :</b> un partenaire qui voit tes anneaux et ton streak, et peut t’encourager une fois par jour.","<b>Accountability buddy:</b> un compañero que ve tus anillos y tu racha, y puede animarte una vez al día."),
  T("<b>Discord:</b> connect your account and your Sweep rank becomes a role on your community’s server.","<b>Discord :</b> connecte ton compte, et ton rang Sweep devient un rôle sur le serveur de ta communauté.","<b>Discord:</b> conecta tu cuenta y tu rango de Sweep se convierte en un rol en el servidor de tu comunidad.")]
 def sec_social(lang, t, id_="social", flip=True):
-    return split(t, T("Social","Social","Social"), T("Progress together. Your P&L stays yours.","Progresse en groupe. Ton P&L reste à toi.","Progresa en grupo. Tu P&L sigue siendo tuyo."),
+    """Social (How it works), on the design system: the league and the crew side by side."""
+    import ui
+    return ui.split(t, T("Social","Social","Social"), T("Progress together. Your P&L stays yours.","Progresse en groupe. Ton P&L reste à toi.","Progresa en grupo. Tu P&L sigue siendo tuyo."),
       T("Leagues, crews and a buddy keep you showing up. Everything is opt-in and private by default: others see your username, rank and consistency. Never your trades, amounts or accounts.",
         "Ligues, crews et buddy t’aident à être au rendez-vous. Tout est opt-in et privé par défaut : les autres voient ton pseudo, ton rang et ta régularité. Jamais tes trades, tes montants ou tes comptes.",
         "Ligas, crews y un buddy te ayudan a no fallar. Todo es opcional y privado por defecto: los demás ven tu usuario, tu rango y tu constancia. Nunca tus operaciones, importes ni cuentas."),
       SOCIAL_POINTS,
-      f'<div class="duo">{slot("ecran-ligue.webp","phone",t(T("Weekly league ranking with the promotion zone","Classement de ligue avec la zone de promotion","Clasificación de liga con la zona de ascenso")),t,cap=False)}{slot("ecran-crew.webp","phone",t(T("Crew weekly goal and activity feed","Objectif de la semaine et fil du crew","Objetivo semanal y feed del crew")),t,cap=False)}</div>',
-      flip=flip, id_=id_)
+      '<div class="duo-phones stagger">' + ui.frame_p("ecran-ligue.webp", t(T("Weekly league ranking with the promotion zone","Classement de ligue avec la zone de promotion","Clasificación de liga con la zona de ascenso")), cls="") + ui.frame_p("ecran-crew.webp", t(T("Crew weekly goal and activity feed","Objectif de la semaine et fil du crew","Objetivo semanal y feed del crew")), cls="") + '</div>',
+      flip=flip, id_=id_, phone=True)
 
 # ----------------------------------------------------------------- HOME
 def page_home(lang, t):
@@ -176,100 +173,60 @@ PLAY = '<svg class="play" width="14" height="14" viewBox="0 0 16 16" aria-hidden
 def tour_dialog(t):
     return f'''<dialog class="tour-modal" id="tour" aria-label="{t(T("Sweep product tour","Visite de Sweep","Recorrido de Sweep"))}">
 <button type="button" class="tour-close" data-close aria-label="{t(T("Close","Fermer","Cerrar"))}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
-<div class="tour-frame"><video controls playsinline preload="none" poster="/video/tour-poster.webp" data-src-webm="/video/tour.webm" data-src-mp4="/video/tour.mp4" data-src-webm-sm="" data-src-mp4-sm="/video/tour-720.mp4"></video></div>
+<div class="tour-frame"><video controls playsinline preload="none" data-poster="/video/tour-poster.webp" data-src-webm="/video/tour.webm" data-src-mp4="/video/tour.mp4" data-src-webm-sm="" data-src-mp4-sm="/video/tour-720.mp4"></video></div>
 <p class="tour-note">{t(T("Sound on · Demo data","Avec le son · Données de démonstration · Titres en anglais","Con sonido · Datos de demostración · Títulos en inglés"))}</p></dialog>'''
 
 def tour_card(lang, t):
-    return f'''<section class="rule" id="tour-video"><div class="wrap"><div class="head center"><span class="kick">{t(T("Product tour","Visite","Recorrido"))}</span><h2>{t(T("Sweep in one minute.","Sweep en une minute.","Sweep en un minuto."))}</h2></div>
-<button type="button" class="tour-card reveal" data-tour aria-label="{t(TOUR_LABEL)}"><img src="/video/tour-poster.webp" srcset="/video/tour-poster-960.webp 960w, /video/tour-poster.webp 1920w" sizes="(max-width: 860px) 92vw, 1120px" width="1600" height="900" alt="" loading="lazy" decoding="async"><span class="tour-btn">{PLAY}<span>{t(TOUR_LABEL)}</span></span></button></div></section>'''
-
-# ----------------------------------------------------------------- home sections (audit, Oct 2026)
-def sec_logging(lang, t):
-    rows = [
-     (T("Tap the candle","Touche la bougie","Toca la vela"), T("Tap a candle for the price and time, then drag your stop and target into place.","Touche une bougie pour le prix et l’heure, puis glisse ton stop et ton objectif en place.","Toca una vela para el precio y la hora, y arrastra tu stop y tu objetivo a su sitio."), ""),
-     (T("Say it in words","Dis-le en mots","Dilo con palabras"), T("Sweep AI fills the ticket. You confirm.","Sweep AI remplit le ticket. Tu confirmes.","Sweep AI completa el ticket. Tú confirmas."),
-      T("“Long NQ at the open, 2 contracts, stopped at 21,450”","« Long NQ à l’ouverture, 2 contrats, stoppé à 21 450 »","«Largo en NQ en la apertura, 2 contratos, stop en 21.450»")),
-     (T("Drop a screenshot or import","Dépose une capture ou importe","Suelta una captura o importa"), T("A screenshot of your platform, or your Tradovate history.","Une capture de ta plateforme, ou ton historique Tradovate.","Una captura de tu plataforma, o tu historial de Tradovate."), "")]
-    items = "".join(f'<li><span class="n num">{i+1:02d}</span><div><h3>{t(h)}</h3><p>{t(d)}</p>{f"<p class=\"say num\">{t(q)}</p>" if q else ""}</div></li>' for i,(h,d,q) in enumerate(rows))
-    media = slot("video-ajout-bougie.mp4","phone",t(T("Adding a trade by tapping a candle","Ajout d’un trade en touchant une bougie","Añadir una operación tocando una vela")),t,video=True,poster="ecran-ajout-bougie.webp")
-    return f'''<section id="logging" class="rule"><div class="wrap split">
-<div class="copy"><span class="kick">{t(T("Logging","Saisie","Registro"))}</span><h2>{t(T("Logging that doesn’t feel like homework.","Journaliser, sans que ça ressemble à des devoirs.","Registrar sin que parezca tarea."))}</h2>
-<p class="lead">{t(T("Three ways to log a trade. Use whichever is fastest in the moment.","Trois façons d’ajouter un trade. Prends la plus rapide sur le moment.","Tres formas de registrar una operación. Usa la más rápida en cada momento."))}</p>
-<ol class="ways">{items}</ol></div>
-<div class="reveal">{media}</div></div></section>'''
-
-def disc_mini(lang, t):
-    return f'''<section class="rule game-band" id="discipline"><div class="wrap split flip">
-<div class="copy"><span class="kick">{t(T("Gamification","Gamification","Gamificación"))}</span><h2>{t(GAME_TITLE)}</h2><p class="lead">{t(GAME_INTRO)}</p>
-<p class="meta">{t(T("Optional leagues and crews. Your P&L always stays private.","Ligues et crews optionnels. Ton P&L reste toujours privé.","Ligas y crews opcionales. Tu P&L siempre es privado."))}</p>
-<div class="cta-row"><a class="btn btn-line" href="{href(lang,'how-it-works.html')}#discipline">{t(T("See everything you can unlock","Voir tout ce que tu peux débloquer","Ver todo lo que puedes desbloquear"))}</a></div></div>
-<div class="reveal">{slot("ecran-boss-revenge.webp","phone",t(T("A boss built from your own habits","Un boss tiré de tes propres habitudes","Un jefe creado con tus propios hábitos")),t)}</div></div></section>'''
-
-def trust_line(lang, t):
-    items = [("download",T("Full export in one click","Export complet en un clic","Exportación completa en un clic")),("trash",T("Delete anytime","Supprime en tout temps","Elimina cuando quieras")),
-             ("eye",T("Private by default","Privé par défaut","Privado por defecto")),("globe",T("English, French, Spanish","Français, anglais, espagnol","Español, inglés, francés"))]
-    act = (f'<div class="activity" id="activity" hidden><div><span class="num" data-k="trades">0</span><span>{t(T("trades journaled","trades journalisés","operaciones registradas"))}</span></div>'
-           f'<div><span class="num" data-k="journal_days">0</span><span>{t(T("journal days","journées journalisées","días de diario"))}</span></div>'
-           f'<div><span class="num" data-k="taken">0</span><span>{t(T("traders","traders","traders"))}</span></div></div>')
-    return f'''<section class="rule trustline-sec"><div class="wrap">{act}<ul class="trustrow stagger">{"".join(f"<li>{ico(I[k])}<span>{t(l)}</span></li>" for k,l in items)}</ul>
-<p class="fine" style="text-align:center;margin:18px auto 0"><a href="{href(lang,'security.html')}">{t(T("How we handle your data","Comment on traite tes données","Cómo tratamos tus datos"))}</a></p></div></section>'''
+    """The one-minute tour as a poster that opens it; the button sits bottom-right, clear of the poster's title."""
+    return (f'<button type="button" class="tourcard reveal zoom" data-tour aria-label="{t(TOUR_LABEL)}"><img src="/video/tour-poster.webp" srcset="/video/tour-poster-960.webp 960w, /video/tour-poster.webp 1600w" '
+            f'sizes="(max-width: 1067px) 92vw, 1320px" width="1600" height="900" alt="" fetchpriority="high"><span class="reel-play"><span class="rp-ic">{PLAY}</span><span class="rp-tx">{t(TOUR_LABEL)}</span><span class="rp-dur num">1:00</span></span></button>')
 
 COHORT_JS = ("""<script>(function(){var b=document.getElementById('cohort'),A=document.getElementById('activity');if(!window.fetch)return;fetch('https://app.makeitsweep.com/sweep-count.php',{credentials:'omit'}).then(function(r){return r.ok?r.json():Promise.reject();}).catch(function(){return fetch('https://app.makeitsweep.com/api/cohort-count.php',{credentials:'omit'}).then(function(r){return r.ok?r.json():Promise.reject();});}).then(function(d){if(A&&(parseInt(d.trades,10)||0)>=__STATSMIN__){A.querySelectorAll('[data-k]').forEach(function(e){var v=parseInt(d[e.getAttribute('data-k')],10)||0;e.textContent=v.toLocaleString(document.documentElement.lang);});A.hidden=false;}if(!b)return;var n=Math.max(parseInt(d.taken,10)||0,__FLOOR__),tt=parseInt(d.total,10);if(!(tt>0)||!(n>=1)||n>=tt)return;var a=b.querySelector('.ctext');a.textContent=a.getAttribute('data-tpl').replace('{n}',n).replace('{total}',tt);document.querySelectorAll('.cp-n').forEach(function(x){x.textContent=n+'/'+tt;});b.querySelector('.cbar i').style.width=Math.max(2,Math.round(n/tt*100))+'%';b.hidden=false;}).catch(function(){});})();</script>""").replace('__FLOOR__', str(COHORT_FLOOR)).replace('__STATSMIN__', str(STATS_MIN))
 
 # ----------------------------------------------------------------- HOW IT WORKS (+ discipline & social)
 def page_how(lang, t):
-    hero = page_hero(t, T("How Sweep works","Comment Sweep fonctionne","Cómo funciona Sweep"),
-        T("Build the habits. Find the edge. Get paid.","Bâtis les habitudes. Trouve ton edge. Fais-toi payer.","Crea los hábitos. Encuentra tu edge. Cobra."),
-        T("How it works","Comment ça marche","Cómo funciona"))
+    """How it works, on the design system: the tour as the hero's visual, the five steps in one row, the game in even rows."""
+    import ui
     anchors = [("start",T("Getting started","Démarrer","Empezar")),("sweep-the-day",T("Sweep your day","Balaye ta journée","Barre tu día")),("discipline",T("Discipline","Discipline","Disciplina")),("social",T("Social","Social","Social"))]
-    sub = f'<nav class="subnav" aria-label="{t(T("How it works","Comment ça marche","Cómo funciona"))}"><div class="wrap">' + "".join(f'<a href="#{a}">{t(l)}</a>' for a,l in anchors) + "</div></nav>"
     st = [("signup-split", None, T("Create your account","Crée ton compte","Crea tu cuenta"), T("A username, an email and a password. Free forever, with Pro included for your first 60 days. No credit card.","Un nom d’utilisateur, un courriel et un mot de passe. Gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.","Un usuario, un correo y una contraseña. Gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta.")),
           ("ecran-comptes-prop.webp", "accounts", T("Add your accounts","Ajoute tes comptes","Añade tus cuentas"), T("Pick your prop firm and account size: the rules are prefilled, for guidance only. Or set up a personal account.","Choisis ta prop firm et la taille du compte : les règles sont préremplies, à titre indicatif. Ou configure un compte personnel.","Elige tu prop firm y el tamaño de la cuenta: las reglas vienen precargadas, a título indicativo. O configura una cuenta personal.")),
           ("v6-video-log-by-screenshot.mp4", "new-trade", T("Log a trade in seconds","Ajoute un trade en quelques secondes","Registra una operación en segundos"), T("Paste a screenshot of your platform and Sweep AI fills the trade, or enter it by hand. Your discipline checklist is on the same screen.","Colle une capture de ta plateforme et Sweep AI remplit le trade, ou ajoute-le à la main. Ta checklist de discipline est sur le même écran.","Pega una captura de tu plataforma y Sweep AI completa la operación, o añádela a mano. Tu checklist de disciplina está en la misma pantalla.")),
           ("ecran-graphique-trade.webp", None, T("Review it on the real chart","Revois-le sur le vrai graphique","Revísala en el gráfico real"), T("Entry, exit, stop, target and position zone on CME candles, with your result in R. Charts are available 24 hours after the session.","Entrée, sortie, stop, objectif et zone de position sur les bougies du CME, avec ton résultat en R. Les graphiques sont disponibles 24 h après la séance.","Entrada, salida, stop, objetivo y zona de posición sobre velas de CME, con tu resultado en R. Los gráficos están disponibles 24 h después de la sesión.")),
           ("ecran-apercu-anneaux.webp", "overview", T("Close your three rings","Ferme tes trois anneaux","Cierra tus tres anillos"), T("Plan, execution, review. Close all three and your day is swept.","Plan, exécution, revue. Ferme les trois et ta journée est balayée.","Plan, ejecución, revisión. Cierra los tres y tu día queda barrido."))]
-    items = ""
-    for img, fb, h, p in st:
-        if img == "signup-split":
-            media = frame("signup-split", lang, t(h), t, mobile="signup")
-        elif img.endswith(".mp4"):
-            media = slot(img, "desktop", t(h), t, fallback=fb, video=True, poster="v6-poster-log-by-screenshot.webp")   # a desktop recording (1440 × 900)
-        else:
-            kind = "desktop" if img in ("ecran-comptes-prop.webp","ecran-graphique-trade.webp") else "phone"
-            media = slot(img, kind, t(h), t, fallback=fb)
-        items += f'<li><div><span class="n"></span><h2 style="font-size:clamp(22px,2.2vw,30px)">{t(h)}</h2><p>{t(p)}</p></div><div class="reveal">{media}</div></li>'
-    steps = f'<section id="start" style="padding-top:24px"><div class="wrap"><ol class="steps">{items}</ol></div></section>'
-    # discipline deep dive
-    blocks = ""
-    order = ["progression","missions","boss","weekly","edge","seasons","wrapped","moments"]
+    shots = ["v6-20-signup-m.webp", "v6-13-accounts-m.webp", "v6-03-log-by-screenshot-m.webp", "v6-06-trade-review-m.webp", "v6-22-today-swept-m.webp"]
+    steps = ui.sec(ui.cards([ui.card_media(t, h, p, ui.phone_img(f"/img/captures/{shots[i]}", t(h)), crop=True, kick=T(f"0{i + 1}", f"0{i + 1}", f"0{i + 1}"))
+                             for i, (_, _, h, p) in enumerate(st)], 5, cls="stagger steps5"), "t", "start")
     G = {g[1]: g for g in GAME}
-    for aid in order:
+    POS = {"progression": "50% 16%", "boss": "50% 22%", "weekly": "50% 14%", "edge": "50% 74%", "seasons": "50% 16%", "moments": "50% 30%"}
+    def gcard(aid):
         img, _, k, h, p = G[aid]
-        txt = f'<div class="gtxt"><span class="kick">{t(k)}</span><h3>{t(h)}</h3><p>{t(p)}</p></div>'
-        if aid == "wrapped":
-            trio = "".join(slot(f"ecran-wrapped-{i}.webp","phone",t(T(f"Sweep Wrapped, screen {i}",f"Sweep Wrapped, écran {i}",f"Sweep Wrapped, pantalla {i}")),t,cap=False) for i in (1,2,3))
-            blocks += f'<article class="gblock wide reveal" id="{aid}">{txt}<div class="trio">{trio}</div></article>'
-        elif aid == "moments":
-            blocks += f'<article class="gblock wide reveal" id="{aid}">{txt}{slot(img,"phone",t(h),t,cap=False)}</article>'
-        else:
-            media = slot(img, "phone", t(h), t, cap=False) if img else ""
-            blocks += f'<article class="gblock reveal" id="{aid}">{txt}{media}</article>'
-    wrapped_more = ""
-    disc = f'''<section id="discipline" class="rule game-band"><div class="wrap"><div class="head"><span class="kick">{t(T("Gamification","Gamification","Gamificación"))}</span><h2>{t(GAME_TITLE)}</h2><p class="lead">{t(GAME_INTRO)}</p></div>
-<div class="gblocks">{blocks}</div>{wrapped_more}
-<p class="fine">{t(T("Rewards are earned through process only. They have no cash value.","Les récompenses se gagnent uniquement par le processus. Elles n’ont aucune valeur monétaire.","Las recompensas se ganan solo con el proceso. No tienen valor monetario."))}</p></div></section>'''
+        return ui.card_media(t, h, p, ui.phone_img(f"/img/captures/{img}", t(h), POS[aid]), crop=True, kick=k, id_=aid)
+    _, _, mk, mh, mp = G["missions"]; _, _, wk, wh, wp = G["wrapped"]
+    wrapped = (f'<div class="sub-block" id="wrapped"><div class="head center"><span class="eyebrow">{t(wk)}</span><h3>{t(wh)}</h3><p class="lead">{t(wp)}</p></div>'
+               + ui.phones(t, [(f"ecran-wrapped-{i}.webp", T(f"Sweep Wrapped, screen {i}", f"Sweep Wrapped, écran {i}", f"Sweep Wrapped, pantalla {i}")) for i in (1, 2, 3)]) + "</div>")
+    disc = ui.sec(ui.head(t, T("Gamification","Gamification","Gamificación"), GAME_TITLE, GAME_INTRO)
+                  + ui.cards([gcard(a) for a in ("progression", "boss", "weekly")], 3) + ui.cards([ui.card(t, mh, mp, kick=mk, id_="missions")], 1)
+                  + ui.cards([gcard(a) for a in ("edge", "seasons", "moments")], 3) + wrapped
+                  + f'<p class="fine" style="margin-top:40px">{t(T("Rewards are earned through process only. They have no cash value.","Les récompenses se gagnent uniquement par le processus. Elles n’ont aucune valeur monétaire.","Las recompensas se ganan solo con el proceso. No tienen valor monetario."))}</p>', "n", "discipline")
+    hero = ui.hero(t, T("How it works","Comment ça marche","Cómo funciona"), T("How Sweep works","Comment Sweep fonctionne","Cómo funciona Sweep"),
+                   T("Build the habits. Find the edge. Get paid.","Bâtis les habitudes. Trouve ton edge. Fais-toi payer.","Crea los hábitos. Encuentra tu edge. Cobra."),
+                   cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True), visual=tour_card(lang, t))
     ld = jsonld({"@context":"https://schema.org","@graph":[{"@type":"HowTo","name":t(T("How to start with Sweep","Comment commencer avec Sweep","Cómo empezar con Sweep")),
         "step":[{"@type":"HowToStep","position":i+1,"name":t(h),"text":t(p)} for i,(_,_,h,p) in enumerate(st)]}, tour_ld(t)]})
     return (t(T("How Sweep works · Sweep your day, discipline and social","Comment marche Sweep · Balaye ta journée, discipline, social","Cómo funciona Sweep · Barre tu día, disciplina y social")),
             t(T("Create an account, add your prop accounts, log a trade from a screenshot, close your three rings, then progress with ranks, missions, bosses and leagues.",
                 "Crée un compte, ajoute tes comptes prop, ajoute un trade depuis une capture, ferme tes trois anneaux, puis progresse avec rangs, missions, boss et ligues.",
                 "Crea una cuenta, añade tus cuentas prop, registra una operación desde una captura, cierra tus tres anillos y progresa con rangos, misiones, jefes y ligas.")),
-            hero + sub + steps + tour_card(lang,t) + sec_sweep_day(lang,t) + disc + sec_social(lang,t) + final_cta(lang, t) + tour_dialog(t), ld)
+            hero + ui.subnav(t, T("How it works","Comment ça marche","Cómo funciona"), anchors) + steps + sec_sweep_day(lang, t) + disc + sec_social(lang, t)
+            + ui.read_next(lang, t, ["features.html", "prop-firm-tracker.html", "pricing.html"]) + ui.final(lang, t) + tour_dialog(t), ld)
+SYSTEM_PAGES.add("how-it-works.html")
 
 # ----------------------------------------------------------------- PRICING
 PRICE_FAQ = None  # filled from FAQ in pages2
 
 def page_pricing(lang, t):
+    """Pricing, on the design system (the billing switch and the plans deck keep their site.js hooks)."""
+    import ui
     from pages2 import FAQ
     Y = '<span class="yes" aria-label="✓">✓</span>'; N = '<span class="no" aria-label="—">—</span>'
     lim = lambda a,b,c: (t(a),t(b),t(c))
@@ -307,7 +264,8 @@ def page_pricing(lang, t):
     def card(name, plan, tagline, btn, cls, badge=""):
         link = f"{SIGNUP}&plan={plan}" + ("" if plan == "free" else "&interval=year")
         return f'<div class="plan {cls} reveal">{badge}<h2>{name}</h2><p class="tagline">{t(tagline)}</p>{pblock(plan)}{ul(t,feats[plan])}<a class="btn {"btn-primary" if cls=="main" else "btn-line"} btn-lg" href="{link}" data-plan="{plan}">{t(btn)}</a></div>'
-    hero = f'<div class="page-hero" style="text-align:center"><div class="wrap"><span class="kick">{t(T("Pricing","Tarifs","Precios"))}</span><h1 class="wu" style="margin:0 auto;max-width:22ch">{words(t(T("Start free. Stay free if you like.","Commence gratuitement. Reste gratuit si tu veux.","Empieza gratis. Quédate gratis si quieres.")))}</h1><p class="lead rise d3" style="margin-left:auto;margin-right:auto">{t(T("Every new trader gets 60 days of Pro. Then keep Free, or pick the plan that fits. Pro $19/mo or $159/yr, Elite $39/mo or $329/yr, before tax.","Chaque nouveau trader reçoit 60 jours de Pro. Ensuite, garde Free ou choisis le forfait qui te convient. Pro 19 $/mois ou 159 $/an, Elite 39 $/mois ou 329 $/an, avant taxes.","Cada trader nuevo recibe 60 días de Pro. Después, sigue en Free o elige el plan que te conviene. Pro $19/mes o $159/año, Elite $39/mes o $329/año, antes de impuestos."))}</p></div></div>'
+    hero = ui.hero(t, T("Pricing","Tarifs","Precios"), T("Start free. Stay\u00a0free if you like.","Commence gratuitement. Reste\u00a0gratuit si tu veux.","Empieza gratis. Quédate\u00a0gratis si quieres."),
+                   T("Every new trader gets 60 days of Pro. Then keep Free, or pick the plan that fits. Pro $19/mo or $159/yr, Elite $39/mo or $329/yr, before tax.","Chaque nouveau trader reçoit 60 jours de Pro. Ensuite, garde Free ou choisis le forfait qui te convient. Pro 19 $/mois ou 159 $/an, Elite 39 $/mois ou 329 $/an, avant taxes.","Cada trader nuevo recibe 60 días de Pro. Después, sigue en Free o elige el plan que te conviene. Pro $19/mes o $159/año, Elite $39/mes o $329/año, antes de impuestos."), cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True))
     cards = f'''<div class="billing" data-k="y" role="group" aria-label="{t(T("Billing period","Période de facturation","Periodo de facturación"))}"><button type="button" data-bill="m" aria-pressed="false">{t(T("Monthly","Mensuel","Mensual"))}</button><button type="button" data-bill="y" aria-pressed="true">{t(T("Yearly","Annuel","Anual"))} <span class="save">{t(T("Save 30%","Économise 30 %","Ahorra 30 %"))}</span></button></div>
 <div class="plans three" id="plans">
 {card("Free","free",T("Your journal, real charts and the full daily loop.","Ton journal, les vrais graphiques et toute la boucle quotidienne.","Tu diario, los gráficos reales y todo el ciclo diario."),START,"")}
@@ -315,7 +273,7 @@ def page_pricing(lang, t):
 {card("Elite","elite",T("The most accounts and AI, 3 streak freezes a week, 2 bosses with rematch and a second Edge Reveal every week.","Le plus de comptes et d’IA, 3 gels de streak par semaine, 2 boss avec revanche et un 2e Edge Reveal chaque semaine.","El máximo de cuentas e IA, 3 congelaciones de racha por semana, 2 jefes con revancha y un 2.º Edge Reveal cada semana."),T("Choose Elite","Choisir Elite","Elegir Elite"),"")}
 </div><div class="dots plan-dots" aria-hidden="true"><i></i><i></i><i></i></div>
 <ul class="under">{"".join(f"<li>{t(x)}</li>" for x in [T("No credit card to start. Cancel anytime.","Sans carte de crédit pour commencer. Annule quand tu veux.","Sin tarjeta para empezar. Cancela cuando quieras."),T("Monthly or yearly billing (yearly saves 30%). Prices in USD, before taxes.","Facturation mensuelle ou annuelle (l’annuel coûte 30 % de moins). Prix en USD, affichés avant taxes.","Facturación mensual o anual (la anual cuesta un 30 % menos). Precios en USD, antes de impuestos."),T("Secure payment by Stripe. No refunds on periods already started.","Paiement sécurisé par Stripe. Aucun remboursement sur les périodes entamées.","Pago seguro con Stripe. Sin reembolsos en periodos ya iniciados.")])}</ul>'''
-    b = f'<section style="padding-top:8px"><div class="wrap">{cards}</div></section>'
+    b = ui.sec(cards, "t", "plans-sec")
     cmp = f'<div class="cmp-wrap"><table class="cmp"><thead><tr><th scope="col"><span class="sr">{t(T("Feature","Fonctionnalité","Función"))}</span></th><th scope="col">Free</th><th scope="col" class="hl">Pro</th><th scope="col">Elite</th></tr></thead><tbody>{body}</tbody></table></div>'
     stat = lambda big, small: f'<div><span class="num">{t(big)}</span><span>{t(small)}</span></div>'
     early = f'''<div class="early reveal"><div class="early-copy"><span class="kick">{t(T("Founding member offer","Offre Membre fondateur","Oferta Miembro fundador"))}</span>
@@ -323,12 +281,13 @@ def page_pricing(lang, t):
 <p>{t(T("Reserved for early-access sign-ups, valid until December 1, 2026.","Offre réservée aux inscrits de l’accès anticipé, valable jusqu’au 1er décembre 2026.","Reservada a quienes se registraron en el acceso anticipado, válida hasta el 1 de diciembre de 2026."))}</p></div>
 <div class="early-stats">{stat(T(f"{money(t,9.5)}/mo",f"{money(t,9.5)}/mois",f"{money(t,9.5)}/mes"),T(f"Pro for life · {money(t,79.5)} a year",f"Pro à vie · {money(t,79.5)} par an",f"Pro de por vida · {money(t,79.5)} al año"))}{stat(T(f"{money(t,19.5)}/mo",f"{money(t,19.5)}/mois",f"{money(t,19.5)}/mes"),T(f"Elite for life · {money(t,164.5)} a year",f"Elite à vie · {money(t,164.5)} par an",f"Elite de por vida · {money(t,164.5)} al año"))}{stat(T("Dec 1","1er déc.","1 dic."),T("last day, 2026","dernier jour, 2026","último día, 2026"))}</div></div>'''
     refer = f'''<div class="refer reveal">{ico(I["spark"])}<div><h3>{t(T("Invite a friend","Invite un ami","Invita a un amigo"))}</h3><p>{t(T("They get 30 days of Pro, and you get a free month as soon as they use Sweep for real (10 trades on 3 different days, or a paid plan). Up to 12 free months a year.","Il reçoit 30 jours de Pro, et toi un mois gratuit dès qu’il utilise Sweep pour vrai (10 trades sur 3 jours différents, ou un forfait payant). Jusqu’à 12 mois offerts par année.","Recibe 30 días de Pro, y tú un mes gratis en cuanto use Sweep de verdad (10 operaciones en 3 días distintos, o un plan de pago). Hasta 12 meses gratis al año."))}</p></div></div>'''
-    b += f'<section class="rule"><div class="wrap"><div class="head"><h2>{t(T("Compare plans","Compare les forfaits","Compara los planes"))}</h2></div>{cmp}{early}{refer}</div></section>'
+    b += ui.sec(ui.head(t, None, T("Compare plans","Compare les forfaits","Compara los planes")) + cmp + f'<div class="offers">{early}{refer}</div>', "n", "compare")
     pf = [FAQ[0][1][0], FAQ[0][1][1], FAQ[0][1][2], FAQ[0][1][5]]
-    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Pricing questions","Questions sur les tarifs","Preguntas sobre precios"))}</h2></div>{"".join(faq_item(t,q,a) for q,a in pf)}</div></section>'
+    b += ui.sec(ui.head(t, None, T("Pricing questions","Questions sur les tarifs","Preguntas sobre precios")) + ui.qa(t, pf), "n", "faq", width="read")
     offers = [{"@type":"Offer","name":n,"price":str(p),"priceCurrency":"USD"} for n,p in (("Free",0),("Pro monthly",19),("Pro yearly",159),("Elite monthly",39),("Elite yearly",329))]
     ld = jsonld({"@context":"https://schema.org","@graph":[{"@type":"Product","name":"Sweep","brand":{"@type":"Brand","name":"Sweep"},"offers":offers},
           {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in pf]}]})
     return (t(T("Pricing · Free forever, Pro included for 60 days · Sweep","Tarifs · Gratuit pour toujours, Pro offert 60 jours · Sweep","Precios · Gratis para siempre, Pro incluido 60 días · Sweep")),
             t(T("Free forever. Pro included for your first 60 days. Pro $19/mo or $159/yr, Elite $39/mo or $329/yr. Founding member offer and referrals.","Gratuit pour toujours. Pro offert pendant tes 60 premiers jours. Pro 19 $/mois ou 159 $/an, Elite 39 $/mois ou 329 $/an. Offre Membre fondateur et parrainage.","Gratis para siempre. Pro incluido tus primeros 60 días. Pro 19 $/mes o 159 $/año, Elite 39 $/mes o 329 $/año. Oferta de miembro fundador y referidos.")),
-            hero + b + final_cta(lang, t), ld)
+            hero + b + ui.read_next(lang, t, ["free-trading-journal.html", "features.html", "best-trading-journal-for-prop-firms.html"]) + ui.final(lang, t), ld)
+SYSTEM_PAGES.add("pricing.html")

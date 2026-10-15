@@ -461,6 +461,9 @@ def final_cta(lang, t, title=None, sub=None, own=False):
 
 # A3: « Read next », three cards near the end of a page
 REL_INFO = {
+ "how-it-works.html": (T("How it works","Comment ça marche","Cómo funciona"), T("Start, log a trade, sweep your day, progress.","Commence, ajoute un trade, balaye ta journée, progresse.","Empieza, registra una operación, barre tu día, progresa.")),
+ "ai.html": (T("Sweep AI","Sweep AI","Sweep AI"), T("Log, ask and review with AI.","Saisis, demande et révise avec l’IA.","Registra, pregunta y revisa con IA.")),
+ "pricing.html": (T("Pricing","Tarifs","Precios"), T("Free forever, Pro and Elite.","Gratuit pour toujours, Pro et Elite.","Gratis para siempre, Pro y Elite.")),
  "tools.html": (T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas"), T("Position size, drawdown, payout and more.","Taille de position, drawdown, payout et plus.","Tamaño de posición, drawdown, payout y más.")),
  "position-size-calculator.html": (T("Position size calculator","Calculateur de taille de position","Calculadora de tamaño de posición"), T("How many contracts for your risk.","Combien de contrats pour ton risque.","Cuántos contratos para tu riesgo.")),
  "trailing-drawdown-calculator.html": (T("Trailing drawdown calculator","Calculateur de drawdown suiveur","Calculadora de drawdown dinámico"), T("Your liquidation level and the room left.","Ton seuil de liquidation et ta marge restante.","Tu nivel de liquidación y el margen restante.")),
@@ -561,6 +564,7 @@ def add_related(lang, t, page, body):
     items = RELATED.get(page) or (RELATED_CONTRACT if page.startswith("contracts/") else RELATED_RELEASE if page.endswith(("-release-dates.html", "-meeting-dates.html")) else None)
     if not items: return body
     block = related(lang, t, items)
+    if page in SYSTEM_PAGES: block = block.replace('<section class="rule related"><div class="wrap">', '<section class="s-t related"><div class="c">', 1)
     k = body.rfind('<section class="final')
     return body[:k] + block + body[k:] if k >= 0 else body + block
 
@@ -639,10 +643,13 @@ def words(text, delay=0.0):
         out.append(f'<span class="w"><span style="--d:{delay + i*0.045:.3f}s">{w}</span></span>')
     return " ".join(out)
 
-def page_hero(t, h1, lead, kick=None, cta=None):
+def page_hero(t, h1, lead, kick=None, cta=None, visual=""):
     k = f'<span class="kick">{t(kick)}</span>' if kick else ""
     c = f'<div class="cta-row">{cta}</div>' if cta else ""
-    return f'<div class="page-hero"><div class="wrap">{k}<h1 class="wu">{words(t(h1))}</h1><p class="lead rise d3">{t(lead)}</p>{c}</div></div>'
+    if visual:   # design system pages only: loaded at once, never hidden while it loads (it is the largest paint)
+        visual = visual.replace('loading="lazy"', 'loading="eager" fetchpriority="low"', 1).replace(" reveal zoom\"", " hero-shot\"", 1)
+    v = f'<div class="wrap c-wide hero-visual">{visual}</div>' if visual else ""
+    return f'<div class="page-hero"><div class="wrap">{k}<h1 class="wu">{words(t(h1))}</h1><p class="lead rise d3">{t(lead)}</p>{c}</div>{v}</div>'
 
 def ul(t, items, cls="list"):
     return f'<ul class="{cls}">' + "".join(f"<li>{t(x)}</li>" for x in items) + "</ul>"

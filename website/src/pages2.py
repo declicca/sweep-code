@@ -170,29 +170,37 @@ INSTALL_HELP = T("""<h2>Why install it this way?</h2><p>Sweep is a web app. The 
 <h2>En un ordenador</h2><p>Abre app.makeitsweep.com en cualquier navegador reciente. En Chrome o Edge, el icono de instalación a la derecha de la barra de direcciones añade Sweep a tus aplicaciones, en su propia ventana.</p>""")
 
 def page_install(lang, t):
+    """Install, on the design system."""
+    import ui
     ios = [T("Open <b>app.makeitsweep.com</b> in <b>Safari</b> and log in.","Ouvre <b>app.makeitsweep.com</b> dans <b>Safari</b> et connecte-toi.","Abre <b>app.makeitsweep.com</b> en <b>Safari</b> e inicia sesión."),
            T("Tap <b>Share</b>, then <b>Add to Home Screen</b>.","Touche <b>Partager</b>, puis <b>Sur l’écran d’accueil</b>.","Toca <b>Compartir</b> y luego <b>Añadir a pantalla de inicio</b>."),
            T("Open Sweep from its icon. It runs full screen, like an app.","Ouvre Sweep depuis son icône. Il s’ouvre en plein écran, comme une app.","Abre Sweep desde su icono. Funciona a pantalla completa, como una app.")]
     andr = [T("Open <b>app.makeitsweep.com</b> in <b>Chrome</b> and log in.","Ouvre <b>app.makeitsweep.com</b> dans <b>Chrome</b> et connecte-toi.","Abre <b>app.makeitsweep.com</b> en <b>Chrome</b> e inicia sesión."),
             T("Tap <b>⋮</b>, then <b>Install app</b>.","Touche <b>⋮</b>, puis <b>Installer l’application</b>.","Toca <b>⋮</b> y luego <b>Instalar app</b>."),
             T("Sweep appears with your other apps.","Sweep apparaît avec tes autres apps.","Sweep aparece con tus otras apps.")]
-    ol = lambda xs: '<ol class="howto">' + "".join(f"<li><div>{t(s)}</div></li>" for s in xs) + "</ol>"
-    hero = page_hero(t, T("Sweep on your home screen.","Sweep sur ton écran d’accueil.","Sweep en tu pantalla de inicio."),
+    H = (T("Sweep on your home screen.","Sweep sur ton écran d’accueil.","Sweep en tu pantalla de inicio."),
         T("No App Store needed. Install Sweep from your browser in three taps and open it like any other app.","Pas besoin de l’App Store. Installe Sweep depuis ton navigateur en trois touchers et ouvre-le comme n’importe quelle app.","Sin App Store. Instala Sweep desde el navegador en tres toques y ábrelo como cualquier app."), T("Help","Aide","Ayuda"))
-    b = f'''<section style="padding-top:16px"><div class="wrap split"><div class="copy">
-<h2 style="font-size:22px">iPhone</h2>{ol(ios)}<h2 style="font-size:22px;margin-top:44px">Android</h2>{ol(andr)}</div>
-<div class="phones reveal" style="grid-template-columns:repeat(2,minmax(0,1fr));max-width:520px">{phone("login",lang,t(T("Sweep log-in screen on a phone","Écran de connexion Sweep sur téléphone","Pantalla de inicio de Sweep en el teléfono")))}{phone("overview",lang,t(T("Sweep overview on a phone","Aperçu Sweep sur téléphone","Resumen de Sweep en el teléfono")))}</div></div></section>
-<section class="rule"><div class="wrap narrow"><article class="article">{t(INSTALL_HELP)}</article></div></section>'''
+    ol = lambda xs: '<ol class="psteps">' + "".join(f"<li>{t(x)}</li>" for x in xs) + "</ol>"
+    copy = f'<div class="copy"><h2 class="h3">iPhone</h2>{ol(ios)}<h2 class="h3" style="margin-top:40px">Android</h2>{ol(andr)}</div>'
+    duo = ('<div class="duo-phones stagger">' + ui.frame_p("v6-20-signup-m.webp", t(T("Sweep log-in screen on a phone","Écran de connexion Sweep sur téléphone","Pantalla de inicio de Sweep en el teléfono")), cls="")
+           + ui.frame_p("v6-01-today-m.webp", t(T("Sweep on a phone: Today","Sweep sur téléphone : Aujourd’hui","Sweep en el teléfono: Hoy")), cls="") + "</div>")
+    hero = ui.hero(t, H[2], H[0], H[1], cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True))
+    b = (ui.sec(f'<div class="split phone-media">{copy}<div>{duo}</div></div>', "t", "steps")
+         + ui.sec(f'<article class="article">{t(INSTALL_HELP)}</article>', "n", "help", width="read") + ui.final(lang, t))
     ld = jsonld({"@context":"https://schema.org","@type":"HowTo","name":t(T("Install Sweep on iPhone","Installer Sweep sur iPhone","Instalar Sweep en iPhone")),"step":[{"@type":"HowToStep","position":i+1,"text":re.sub("<[^>]+>","",t(s))} for i,s in enumerate(ios)]})
     return (t(T("Install the Sweep app on iPhone and Android","Installer l’app Sweep sur iPhone et Android","Instalar la app Sweep en iPhone y Android")),
             t(T("Add Sweep to your iPhone or Android home screen from Safari or Chrome. Full screen, fast, no App Store needed, in three taps.","Ajoute Sweep à l’écran d’accueil de ton iPhone ou Android depuis Safari ou Chrome. Plein écran, rapide, sans App Store, en trois touchers.","Añade Sweep a la pantalla de inicio de tu iPhone o Android desde Safari o Chrome. Pantalla completa, rápido, sin App Store.")),
-            hero + b + final_cta(lang, t), ld)
+            hero + b, ld)
+
+SYSTEM_PAGES.add("install.html")
 
 def page_security(lang, t):
-    hero = page_hero(t, T("Your trading history, safe and yours.","Ton historique de trading, en sécurité et à toi.","Tu historial de trading, seguro y tuyo."),
+    """Security and privacy, on the design system."""
+    import ui
+    H = (T("Your trading history, safe and yours.","Ton historique de trading, en sécurité et à toi.","Tu historial de trading, seguro y tuyo."),
         T("What Sweep stores, how it’s protected, and how to take it with you or delete it. In plain words.","Ce que Sweep conserve, comment c’est protégé, et comment l’emporter ou le supprimer. En mots simples.","Qué guarda Sweep, cómo se protege y cómo llevártelo o eliminarlo. En palabras simples."),
         T("Security and privacy","Sécurité et confidentialité","Seguridad y privacidad"))
-    g = grid(t, [("archive",T("Lose an account, keep your history","Perds un compte, garde ton historique","Pierdes una cuenta, conservas tu historial"),T("Closing or failing a prop account never deletes your history. Export everything in one click, anytime.","Fermer ou échouer un compte prop ne supprime jamais ton historique. Exporte tout en un clic, à tout moment.","Cerrar o fallar una cuenta prop nunca borra tu historial. Exporta todo en un clic, cuando quieras.")),
+    items = [("archive",T("Lose an account, keep your history","Perds un compte, garde ton historique","Pierdes una cuenta, conservas tu historial"),T("Closing or failing a prop account never deletes your history. Export everything in one click, anytime.","Fermer ou échouer un compte prop ne supprime jamais ton historique. Exporte tout en un clic, à tout moment.","Cerrar o fallar una cuenta prop nunca borra tu historial. Exporta todo en un clic, cuando quieras.")),
         ("lock",T("Payments by Stripe","Paiements par Stripe","Pagos con Stripe"),T("Payments are processed by Stripe. Sweep never sees or stores your card number.","Les paiements sont traités par Stripe. Sweep ne voit ni ne stocke jamais ton numéro de carte.","Los pagos los procesa Stripe. Sweep nunca ve ni guarda el número de tu tarjeta.")),
         ("eye",T("Only you see your data","Toi seul vois tes données","Solo tú ves tus datos"),T("Each trader’s data is separate. The admin page shows usernames and usage, never trades or notes.","Les données de chaque trader sont séparées. La page admin montre les noms d’utilisateur et l’utilisation, jamais les trades ni les notes.","Los datos de cada trader están separados. La página de admin muestra usuarios y uso, nunca operaciones ni notas.")),
         ("key",T("Passwords are never readable","Mots de passe jamais lisibles","Contraseñas nunca legibles"),T("Stored only as a secure hash. Resets use a one-time link valid for one hour.","Conservés uniquement sous forme de hachage sécurisé. Les réinitialisations utilisent un lien unique valide une heure.","Se guardan solo como hash seguro. Los restablecimientos usan un enlace único válido una hora.")),
@@ -200,7 +208,7 @@ def page_security(lang, t):
         ("image",T("Private screenshots","Captures privées","Capturas privadas"),T("Images you attach to trades are stored privately for your account only.","Les images jointes à tes trades sont conservées en privé, pour ton compte seulement.","Las imágenes que adjuntas se guardan en privado, solo para tu cuenta.")),
         ("layers",T("Social is opt-in","Le social est opt-in","Lo social es opcional"),T("No social feature is active without your consent. Others only ever see your username, rank and consistency, never your P&L, amounts, trades or accounts.","Aucune fonction sociale n’est active sans ton accord. Les autres ne voient que ton pseudo, ton rang et ta régularité, jamais ton P&L, tes montants, tes trades ou tes comptes.","Ninguna función social está activa sin tu consentimiento. Los demás solo ven tu usuario, tu rango y tu constancia, nunca tu P&L, importes, operaciones ni cuentas.")),
         ("download",T("Export everything","Exporte tout","Exporta todo"),T("One click gives you a ZIP file: a re-importable backup, CSV spreadsheets (trades, accounts, payouts, expenses, journal) and all your screenshots.","Un clic te donne un fichier ZIP : sauvegarde réimportable, tableurs CSV (trades, comptes, payouts, dépenses, journal) et toutes tes captures.","Un clic te da un archivo ZIP: copia reimportable, hojas CSV (operaciones, cuentas, payouts, gastos, diario) y todas tus capturas.")),
-        ("trash",T("Delete instantly","Supprime instantanément","Elimina al instante"),T("Self-serve deletion in Settings removes everything, screenshots included, right away. Your password is required.","Réglages → Supprimer mon compte efface tout, captures comprises, tout de suite. Ton mot de passe est requis.","Ajustes → Eliminar mi cuenta lo borra todo, capturas incluidas, al instante. Se requiere tu contraseña."))])
+        ("trash",T("Delete instantly","Supprime instantanément","Elimina al instante"),T("Self-serve deletion in Settings removes everything, screenshots included, right away. Your password is required.","Réglages → Supprimer mon compte efface tout, captures comprises, tout de suite. Ton mot de passe est requis.","Ajustes → Eliminar mi cuenta lo borra todo, capturas incluidas, al instante. Se requiere tu contraseña."))]
     rows = [(T("Account","Compte","Cuenta"),T("Username, email, password hash, language, date you accepted the terms","Nom d’utilisateur, courriel, hachage du mot de passe, langue, date d’acceptation des conditions","Usuario, correo, hash de contraseña, idioma, fecha de aceptación de los términos")),
             (T("What you enter","Ce que tu saisis","Lo que introduces"),T("Accounts, trades, journals, payouts, expenses, settings and screenshots","Comptes, trades, journaux, payouts, dépenses, réglages et captures","Cuentas, operaciones, diarios, payouts, gastos, ajustes y capturas")),
             (T("Technical","Technique","Técnico"),T("IP addresses kept up to 24 hours, only to limit sign-in attempts","Adresses IP gardées jusqu’à 24 heures, seulement pour limiter les tentatives de connexion","Direcciones IP guardadas hasta 24 horas, solo para limitar intentos de acceso")),
@@ -210,10 +218,14 @@ def page_security(lang, t):
             (T("Visible to others","Visible par les autres","Visible para otros"),T("Only if you join leagues, crews or a buddy: your username, rank and consistency. A buddy also sees your rings and streak. Never P&L, amounts, trades or accounts","Seulement si tu rejoins une ligue, un crew ou un buddy : ton pseudo, ton rang et ta régularité. Un buddy voit aussi tes anneaux et ton streak. Jamais de P&L, de montants, de trades ni de comptes","Solo si te unes a ligas, crews o un buddy: tu usuario, tu rango y tu constancia. Un buddy también ve tus anillos y tu racha. Nunca P&L, importes, operaciones ni cuentas")),
             (T("Sweep AI","Sweep AI","Sweep AI"),T("Nothing is sent until you tap an AI action, then only what it needs. Ask Sweep conversations stay in your browser for the session. Deleting your account deletes its AI history","Rien n’est envoyé avant que tu touches une action IA, puis seulement le nécessaire. Les discussions Ask Sweep restent dans ton navigateur pour la session. Supprimer ton compte supprime son historique IA","No se envía nada hasta que tocas una acción de IA, y luego solo lo necesario. Las conversaciones de Ask Sweep quedan en tu navegador durante la sesión. Eliminar tu cuenta elimina su historial de IA"))]
     tbl = '<table class="tbl"><tbody>' + "".join(f"<tr><th>{t(a)}</th><td>{t(c)}</td></tr>" for a,c in rows) + "</tbody></table>"
-    b = f'<section style="padding-top:16px"><div class="wrap">{g}</div></section><section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("What we store","Ce que nous conservons","Qué guardamos"))}</h2></div>{tbl}<p class="meta" style="margin-top:28px"><a href="{href(lang,"privacy.html")}">{t(T("Read the full privacy policy","Lire la politique de confidentialité complète","Leer la política de privacidad completa"))}</a></p></div></section>'
+    hero = ui.hero(t, H[2], H[0], H[1], cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True))
+    b = (ui.sec(ui.cards([ui.card(t, a, c, k) for k, a, c in items], 3), "t", "protection")
+         + ui.sec(ui.head(t, None, T("What we store","Ce que nous conservons","Qué guardamos")) + tbl + f'<p class="fine" style="margin-top:28px"><a href="{href(lang,"privacy.html")}">{t(T("Read the full privacy policy","Lire la politique de confidentialité complète","Leer la política de privacidad completa"))}</a></p>', "n", "store", width="read") + ui.final(lang, t))
     return (t(T("Security and privacy · Sweep","Sécurité et confidentialité · Sweep","Seguridad y privacidad · Sweep")),
             t(T("How Sweep protects your trading data: private by default, hashed passwords, JSON export, instant account deletion, no ads or trackers.","Comment Sweep protège tes données de trading : privé par défaut, mots de passe hachés, export JSON, suppression immédiate, ni pubs ni traqueurs.","Cómo Sweep protege tus datos de trading: privado por defecto, contraseñas con hash, exportación JSON, eliminación inmediata, sin anuncios ni rastreadores.")),
-            hero + b + final_cta(lang, t), "")
+            hero + b, "")
+
+SYSTEM_PAGES.add("security.html")
 
 def page_pricing(lang, t):
     from core import ul

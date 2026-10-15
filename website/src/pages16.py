@@ -107,7 +107,7 @@ def sec_pricing(lang, t):
     tl = "".join(f'<div class="plan-mini{" main" if n == "Pro" else ""}"><b>{n}</b><span class="num">{t(p)} <small>{t(u)}</small></span></div>' for n, p, u in tiles_)
     return sec(head(t, L3("Pricing","Tarifs","Precios"), L3("Start free. Stay free if you like.","Commence gratuitement. Reste gratuit si tu veux.","Empieza gratis. Quédate gratis si quieres."),
                     L3("Every new trader gets 60 days of Pro to try everything. Then keep Free, or upgrade.","Chaque nouveau trader reçoit 60 jours de Pro pour tout essayer. Ensuite, garde Free ou passe à un forfait.","Cada trader nuevo recibe 60 días de Pro para probarlo todo. Después, sigue en Free o mejora tu plan."), center=True)
-               + f'<div class="plans stagger">{tl}</div><p class="cap">{t(L3("Annual billing: −30%. Prices before tax.","Facturation annuelle : −30 %. Prix avant taxes.","Facturación anual: −30 %. Precios antes de impuestos."))}</p>'
+               + f'<div class="plans-mini stagger">{tl}</div><p class="cap">{t(L3("Annual billing: −30%. Prices before tax.","Facturation annuelle : −30 %. Prix avant taxes.","Facturación anual: −30 %. Precios antes de impuestos."))}</p>'
                + f'<div class="links" style="justify-content:center">{link(lang, t, "pricing.html", L3("Compare plans","Comparer les forfaits","Comparar planes"))}{link(lang, t, "best-trading-journal-for-prop-firms.html", L3("Compare Sweep","Comparer Sweep","Comparar Sweep"))}</div>',
                "n", "pricing")
 

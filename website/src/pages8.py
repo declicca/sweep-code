@@ -12,9 +12,11 @@ JOURNAL_MOVED = {"topstep-trading-journal": "prop-firms/topstep", "apex-trader-f
 
 def firm_row(lang, t):
     links = "".join(f'<a href="{href(lang,s)}">{n}</a>' for s,n in FIRMS)
-    return (f'<section class="rule" style="padding:40px 0"><div class="wrap"><p class="firm-others"><span>{t(T("By firm","Par firme","Por firma"))}</span>{links}'
-            f'<a href="{href(lang,"prop-firms/index.html")}">{t(T("Rules by firm","Règles par firme","Reglas por firma"))} →</a>'
-            f'<a href="{href(lang,"tools.html")}">{t(T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas"))} →</a></p></div></section>')
+    """One line of chips (it scrolls on phones): each firm's rules, then the rules side by side and the calculators."""
+    links = "".join(f'<a class="chip" href="{href(lang,s)}">{n}</a>' for s,n in FIRMS)
+    return (f'<section class="s-t"><div class="c"><div class="chiprow"><span class="eyebrow">{t(T("By firm","Par firme","Por firma"))}</span>{links}'
+            f'<a class="go" href="{href(lang,"prop-firms/index.html")}">{t(T("Rules by firm","Règles par firme","Reglas por firma"))} <span aria-hidden="true">→</span></a>'
+            f'<a class="go" href="{href(lang,"tools.html")}">{t(T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas"))} <span aria-hidden="true">→</span></a></div></div></section>')
 
 def rule_change(lang, t):
     return (f'<section class="rule" id="rule-changes"><div class="wrap narrow" style="text-align:center"><div class="head" style="margin:0 auto"><span class="kick">{t(T("Rule changes","Changements de règles","Cambios de reglas"))}</span>'

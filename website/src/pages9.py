@@ -45,13 +45,13 @@ def sec_rules(lang, t, id_="prop", flip=False, link=True):
         pts, media, flip=flip, id_=id_, more=note + m)
 
 # ------------------------------------------------------------------ features: platform numbers (2.2 + 2.3)
-def sec_numbers(lang, t):
+def sec_numbers(lang, t, sp=None):
     pts = [T("<b>Real P&L (platform):</b> type the P&L your platform shows, it becomes the truth everywhere","<b>P&L réel (plateforme) :</b> tape le P&L affiché par ta plateforme, il devient la vérité partout","<b>P&L real (plataforma):</b> escribe el P&L de tu plataforma y se convierte en la referencia en todas partes"),
            T("<b>Commission per contract</b> on each account, deducted automatically","<b>Commission par contrat</b> sur chaque compte, déduite automatiquement","<b>Comisión por contrato</b> en cada cuenta, descontada automáticamente"),
            T("<b>Slippage and fees:</b> what slippage costs you, in $ and in R","<b>Glissement et frais :</b> ce que le glissement te coûte, en $ et en R","<b>Deslizamiento y comisiones:</b> lo que te cuesta el deslizamiento, en $ y en R"),
            T("<b>Add to a position and partial exits,</b> with the average entry price recalculated like on your platform","<b>Ajout à la position et sorties partielles,</b> avec le prix moyen recalculé comme sur ta plateforme","<b>Añadir a la posición y salidas parciales,</b> con el precio medio recalculado como en tu plataforma"),
            T("<b>Recalibrate an account</b> to your platform balance without skewing your stats","<b>Recalibrer un compte</b> sur le solde de ta plateforme, sans fausser tes statistiques","<b>Recalibrar una cuenta</b> al saldo de tu plataforma sin alterar tus estadísticas")]
-    return split(t, T("Your numbers","Tes chiffres","Tus números"), T("The same numbers as your platform.","Les mêmes chiffres que ta plateforme.","Los mismos números que tu plataforma."),
+    return (sp or split)(t, T("Your numbers","Tes chiffres","Tus números"), T("The same numbers as your platform.","Les mêmes chiffres que ta plateforme.","Los mismos números que tu plataforma."),
         T("Exact P&L on average prices, to the cent. Enter prices or dollar amounts for the exit, stop and target.","P&L exact sur les prix moyens, au cent près. Saisis des prix ou des montants en $ pour la sortie, le stop et l’objectif.","P&L exacto sobre precios medios, al céntimo. Introduce precios o importes en $ para la salida, el stop y el objetivo."),
         pts, slot("ecran-formulaire-capture.webp","phone",t(T("Trade form with net P&L and R first","Formulaire avec P&L net et R en premier","Formulario con P&L neto y R primero")),t,fallback="cap:ecran-ajout-bougie-static.webp"), flip=True, id_="numbers")
 
