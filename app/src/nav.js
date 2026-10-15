@@ -4072,9 +4072,11 @@ window.SweepMO = window.SweepMO || class {
     let el = host.querySelector('.nav-rt');
     const ht = el && el.querySelector('.nav-rt-help-t'); const open = !!(ht && !ht.hidden);   // the loading card has no help text
     if (el && el._h === html) return;
+    const co = el && el.querySelector(':scope > .co-today');   // the coach lives in the card: it moves to the new one, no flash
     if (el) el.remove();
     host.insertAdjacentHTML('afterbegin', html);
     el = host.querySelector('.nav-rt'); el._h = html; if (open && el.querySelector('.nav-rt-help-t')) el.querySelector('.nav-rt-help-t').hidden = false;
+    if (co) { const st = el.querySelector(':scope > .nav-rt-steps'), hp = el.querySelector(':scope > .nav-rt-help-t'); st ? st.before(co) : hp ? hp.before(co) : el.append(co); }
     el.classList.toggle('closed-rt', rtClosed());
     document.body.classList.add('nav-rt-on');
   }

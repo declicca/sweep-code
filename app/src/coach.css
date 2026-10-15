@@ -15,8 +15,10 @@
 .co-ses{color:var(--text2,var(--text))}
 .co-ses.co-stop{font-weight:600;color:var(--text)}
 .co-ses.muted{color:var(--muted);font-size:13.5px}
-/* Today: right under the routine card */
-.nav-dash .d-today > .co-today{margin-top:12px}
+/* Today: inside the routine card, between its figures and its 3 steps — a banner the card's full width, not a card in the card;
+   it folds with the steps (15 Oct.) */
+html body #main .nav-rt > .co-today{grid-column:1/-1;width:auto;max-width:none;margin:0;padding:14px 16px;border:0!important;border-radius:var(--r-tile,20px)!important;background:var(--fill)!important;box-shadow:none!important}
+html body #main .nav-rt.closed-rt > .co-today{display:none}
 /* the trade's page: inside the result card, under the figures */
 .co-trade{margin:14px 0 4px;padding:14px 16px;border-radius:var(--r-tile,16px);background:var(--fill)}
 /* the plan sheet: one live sentence above the button */

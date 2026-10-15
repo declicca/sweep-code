@@ -96,6 +96,13 @@ def run(p, lang, phone):
   # Today before any plan
   t0 = pg.evaluate(TXT, '#main .co-today'); texts.append(t0)
   ok(bool(t0) and pg.locator('#main .co-today').is_visible(), f'{tag} Today: the coach card is there before the plan ({t0[:60]})')
+  # (15 Oct.) inside the routine card, between its figures and its 3 steps, its full width; it folds with the steps
+  pl = pg.evaluate("(()=>{const c=document.querySelector('#main .co-today'), rt=c&&c.closest('.nav-rt'); if(!rt) return null; const n=c.nextElementSibling; return [!!n&&n.classList.contains('nav-rt-steps'), Math.abs(c.getBoundingClientRect().width-n.getBoundingClientRect().width)<=2]})()")
+  ok(pl == [True, True], f'{tag} Today: the coach is in the routine card, above the 3 steps, as wide as them ({pl})')
+  pg.locator('#main .nav-rt-fold').click(); pg.wait_for_timeout(500)
+  fd = pg.evaluate("getComputedStyle(document.querySelector('#main .co-today')).display")
+  pg.locator('#main .nav-rt-fold').click(); pg.wait_for_timeout(500)
+  ok(fd == 'none' and pg.locator('#main .co-today').is_visible(), f'{tag} Today: folding the routine hides the coach with the steps, unfolding shows it ({fd})')
   # A. the plan sheet, live
   pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=8000); pg.wait_for_timeout(400)
   note = lambda: pg.evaluate(TXT, '#gSheet .co-plan')

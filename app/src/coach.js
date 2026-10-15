@@ -606,11 +606,14 @@
     // (replaced by a function: an amount like « $1,000 » must not read as « $1 », the first group)
     if (lim.length) html = html.replace(/<\/div>/, (m) => `${m}<p class="co-ses co-stop co-lim">${esc2(limitLine(lim[0]))}</p>`);   // right under the coach's title
     if (hb) html = html.replace(/<\/section>$/, () => `<p class="co-habit">${esc2(hb.text)}</p></section>`);
-    let el = host.querySelector(':scope > .co-today');
+    // inside the routine card, between its figures and its 3 steps: it folds with them (brief of 15 Oct.)
+    const put = (x) => { const rt = host.querySelector(':scope > .nav-rt'), st = rt && rt.querySelector(':scope > .nav-rt-steps'), hp = rt && rt.querySelector(':scope > .nav-rt-help-t');
+      if (st) { if (x.nextElementSibling !== st) st.before(x); } else if (rt) { if (x.parentElement !== rt) (hp ? hp.before(x) : rt.append(x)); } else if (x.parentElement !== host) host.prepend(x); };
+    let el = host.querySelector('.co-today');
     if (!html) { if (el) el.remove(); return; }
-    if (el && el._h === html) { const rt = host.querySelector(':scope > .nav-rt'); if (rt && el.previousElementSibling !== rt) rt.after(el); return; }
+    if (el && el._h === html) { put(el); return; }
     const tmp = document.createElement('div'); tmp.innerHTML = html; const fresh = tmp.firstElementChild; fresh._h = html;
-    if (el) el.replaceWith(fresh); else { const rt = host.querySelector(':scope > .nav-rt'); if (rt) rt.after(fresh); else host.prepend(fresh); }
+    if (el) el.replaceWith(fresh); put(fresh);
   }
   /* the trade's page: the coach right under its result (sample trades: the questions only, not the coach's verdict) */
   const tradeCard = (t) => (!t || t.demo ? '' : card(T.thisT, noteHtml(tradeNote(t)) + aiMore('ai-feedback', `data-id="${esc2(t.id)}"`), 'co-trade'));
