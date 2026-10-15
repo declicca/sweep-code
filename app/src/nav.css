@@ -2708,3 +2708,72 @@ html body .skel,html body .sh-skel{animation-timing-function:ease-in-out!importa
    rule by rule (no rule on « * »: it slows the page changes) */
 .acard,.add-row,.bottomnav a,.bottomnav button,.btn,.cal a.d,.chip,.ff-row,.menu-pop button,.more-logout,.onb-feat,.rprog-steps a,.seg a,.seg button,.sheet-panel a,.side .new,.tk-dir button,.trow,.ask-fab,.bn-pill,.bottomnav svg,.cal .d,.chart .xdot,.chart .xh,.ctip,.csel,.csel svg,.drawer,.drawer:not(.on),.drop,.dt i,.evp,.evp-scrim,.evp:not(.open),.fb-faces button,.fb-faces span,.ff-row,.iso-bar,.nav a,.side .foot a[data-v],.ptr,.rf-candles svg,.sai-backdrop,.sai-btn,.sai-fab,.sai-foot,.sai-sheet,.sb-backdrop,.sb-cta,.sb-nudge,.sb-opt,.sb-seg button,.sb-sheet,.side,.side .brand span,.side .foot a span,.side .nav a span,.side .new .lbl,.side .search kbd,.side .search span,.side .store-note,.side .who .link,.side .who b,.side .handle,.social-icons a,.tbl tbody tr[data-href],.tk-dir button,.wheel,.wheel-scrim,.wheel.sheet-mode,.whi,body.tcollapsed .side .brand .wordmark,input:not([type]),input[type=date],input[type=email],input[type=number],input[type=password],input[type=text],input[type=time],select,textarea{transition-timing-function:var(--ease-ios)}
 .evp.open{transition-timing-function:var(--ease-ios)!important}
+
+/* ───── Accounts: select several, two icons per row, the bar of actions (15 Oct.) ───── */
+html body #main table.acct-tbl td:first-child{position:relative}
+html body #main .acc-ck{display:inline-grid;place-items:center;position:relative;width:20px;height:20px;margin:0 10px 0 0;vertical-align:-4px;cursor:pointer}
+html body #main .acc-ck input{position:absolute;inset:-12px;opacity:0;margin:0;cursor:pointer;width:auto;height:auto;min-height:0}
+html body #main .acc-ck i{width:18px;height:18px;border-radius:6px;box-shadow:inset 0 0 0 1.5px var(--line2);background:var(--panel);transition:background-color .15s var(--ease-ios),box-shadow .15s var(--ease-ios)}
+html body #main .acc-ck input:checked + i{background:var(--pos-fill) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.2 8.4l2.4 2.4 5-5.2' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;box-shadow:none}
+html body #main .acc-ck input:focus-visible + i{box-shadow:var(--focus)}
+html body #main table.acct-tbl tr.acc-on > td{background:color-mix(in srgb,var(--pos) 7%,transparent)}
+html body #main .acc-last{position:relative}
+html body #main .acc-acts{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;pointer-events:none;transition:opacity .15s var(--ease-ios)}
+html body #main .acc-ic{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--hair);color:var(--muted);cursor:pointer;transition:background-color .15s var(--ease-ios),color .15s var(--ease-ios)}
+html body #main .acc-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+html body #main .acc-ic:hover,html body #main .acc-ic:focus-visible{color:var(--text);background:var(--fill-2)}
+html body #main .acc-ic[data-acc-up]:hover{color:var(--pos)}
+@media (min-width:861px){
+  /* computer: the box shows on hover, or once something is selected; the icons on hover / keyboard focus */
+  html body #main .acc-ck{opacity:0;transition:opacity .15s var(--ease-ios)}
+  html body #main tr:hover .acc-ck,html body #main .acc-ck:focus-within,html body #main .acc-sel-any .acc-ck{opacity:1}
+  html body #main tr:hover .acc-acts,html body #main tr:focus-within .acc-acts{opacity:1;pointer-events:auto}
+  html body #main .acc-selb{display:none}
+}
+@media (max-width:860px){
+  /* phone: « Select » (or a long press), then a tap selects; no icons on the rows */
+  html body #main .acc-acts{display:none}
+  html body #main .acc-ck{display:none}
+  html body #main .acc-sel-on .acc-ck{display:inline-grid}
+  html body #main .acc-sel-on table.acct-tbl tr{-webkit-user-select:none;user-select:none}
+  html body #main .nav-acc-top .acc-selb{margin-left:auto}
+  html body #main .nav-acc-top .acc-selb + .nav-ord-b,html body #main .nav-acc-top .nav-ord-b + .acc-selb{margin-left:16px}
+}
+.acc-bar{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:150;transform:translateX(-50%);display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);padding:10px 12px 10px 18px;border-radius:var(--r-tile,20px);background:var(--glass-strong,var(--panel));-webkit-backdrop-filter:saturate(1.8) blur(24px);backdrop-filter:saturate(1.8) blur(24px);box-shadow:0 0 0 1px var(--hair),0 16px 40px -16px rgba(0,0,0,.6);animation:sw-rise-m .3s var(--ease-ios) both}
+.acc-bar-n{font-size:14px;font-weight:600;white-space:nowrap}
+.acc-bar-a{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.acc-bar-x{color:var(--muted)!important}
+@media (max-width:860px){
+  .acc-bar{left:12px;right:12px;transform:none;max-width:none;bottom:calc(96px + env(safe-area-inset-bottom,0px));flex-direction:column;align-items:stretch;gap:8px;padding:12px}
+  .acc-bar-a{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .acc-bar-a::-webkit-scrollbar{display:none}
+  html body .acc-bar .acc-bar-a .btn{flex:0 0 auto;min-height:44px!important;height:44px}
+  .acc-bar-x{margin-left:auto;min-height:44px;padding:0 6px}
+}
+@media (prefers-reduced-transparency:reduce){.acc-bar{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--panel)}}
+.acc-dlg .acc-dlg-b{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.acc-dlg .acc-dlg-l{margin:0 0 6px;font-size:13px}
+@media (min-width:861px){
+  /* room for them: the grip and the box in the first column's margin (the name stays in line with its title), the icons at
+     the end of the last one (they never cover an amount) */
+  html body #main table.acct-tbl.mny-acc-tbl th:first-child,html body #main table.acct-tbl.mny-acc-tbl td:first-child{padding-left:46px}
+  html body #main table.acct-tbl td:first-child > .acc-ck{position:absolute;left:18px;top:50%;margin:-10px 0 0}
+  html body #main table.acct-tbl .acc-last{padding-right:92px}
+}
+.acc-bar-h{display:flex;align-items:center;gap:14px}
+html body.acc-bar-on #askFab,html body.acc-bar-on .ask-fab{opacity:0!important;pointer-events:none!important}
+body:has(.acc-dlg.open) .acc-bar,body:has(.nav-pass.open) .acc-bar{display:none}
+@media (max-width:860px){
+  .acc-bar-h{justify-content:space-between}
+  .acc-bar-x{margin-left:0}
+  /* a selected account: the whole card is tinted, not each of its blocks */
+  html body #main table.acct-tbl tr.acc-on{background:color-mix(in srgb,var(--pos) 8%,transparent);border-radius:var(--r-tile,20px)}
+  html body #main table.acct-tbl tr.acc-on > td{background:none}
+  /* the top of the list: « Add an account » on its own line, then « Select » and « Reorder » at the right */
+  html body #main .nav-acc-top:has(.acc-selb){flex-wrap:wrap;row-gap:0}
+  html body #main .nav-acc-top:has(.acc-selb) > .nav-addrow{flex:1 0 100%}
+  html body #main .nav-acc-top:has(.acc-selb) > .acc-selb{margin-left:auto}
+  html body #main .nav-acc-top:has(.acc-selb) > .acc-selb,html body #main .nav-acc-top:has(.acc-selb) > .nav-ord-b{white-space:nowrap;padding:10px 20px 12px 0}
+  html body #main .nav-acc-top:has(.acc-selb) > .nav-ord-b{order:2}
+  html body #main .nav-acc-top:has(.acc-selb) > .acc-selb{order:1}
+}

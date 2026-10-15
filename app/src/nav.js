@@ -2907,21 +2907,23 @@ window.SweepMO = window.SweepMO || class {
     const k = Math.round((+a.starting_balance_c || 0) / 100000), n = (/\s(#\d+)$/.exec(a.name || '') || [])[1];
     return fn ? [fn, code, k ? k + 'K' : '', n || ''].filter(Boolean).join(' ') : a.name;
   }
-  function toFunded(id, choice) {
+  function toFunded(id, choice, quiet) {
     const a = getDoc('accounts', id); if (!a) return;
     const fr = fundedRules(a, choice);
     const nid = typeof uid === 'function' ? uid() : 'a' + Date.now();
-    put('accounts', { id: nid, firm_id: a.firm_id, name: fundedName(a), starting_balance_c: a.starting_balance_c, status: 'active', created_on: today(), phase: 'funded', money_type: 'funded', rules: fr.rules, preset: fr.preset, preset_ver: fr.ver || null, from_eval: a.id });
+    put('accounts', { id: nid, firm_id: a.firm_id, name: fundedName(a), starting_balance_c: a.starting_balance_c, status: 'active', created_on: today(), phase: 'funded', money_type: 'funded', rules: fr.rules, preset: fr.preset, preset_ver: fr.ver || null, from_eval: a.id, ...(a.demo ? { demo: true } : {}) });
     try {   // the activation fee of the funded account, when the catalogue has one (editable in My money)
       const pr = fr.preset && window.SweepPresets && SweepPresets.priceOf ? SweepPresets.priceOf(fr.preset) : null;
       if (pr && pr.activation > 0) {
         put('expenses', { id: 'act-' + nid, account_id: nid, firm_id: a.firm_id || '', amount_c: Math.round(pr.activation * 100), date: today(), category: 'activation', notes: '' });
-        if (typeof toast === 'function') toast(({ en: 'Activation fee added to your expenses', fr: 'Frais d’activation ajoutés à tes dépenses', es: 'Cuota de activación añadida a tus gastos' })[LANG] || 'Activation fee added to your expenses');
+        if (typeof toast === 'function' && !quiet) toast(({ en: 'Activation fee added to your expenses', fr: 'Frais d’activation ajoutés à tes dépenses', es: 'Cuota de activación añadida a tus gastos' })[LANG] || 'Activation fee added to your expenses');
       }
     } catch (x) { /* the trader can add it in My money */ }
     editDoc('accounts', id, (d) => { d.status = 'archived'; d.result = 'passed'; d.passed_on = today(); d.phase = 'eval'; d.funded_id = nid; });
+    if (quiet) return nid;   // several at once (Accounts): the list stays, one message for all
     if (typeof toast === 'function') toast(t('done'));
     setTimeout(() => { location.hash = '#account/' + nid; }, 300);
+    return nid;
   }
   /* the window */
   function ask(a) {
@@ -2987,7 +2989,7 @@ window.SweepMO = window.SweepMO || class {
     const w = function () { const out = appRender.apply(this, arguments); try { pageButton(); } catch (e) { /* never blocks */ } setTimeout(() => { try { check(); } catch (e) { /* never blocks */ } }, 50); return out; };
     w.__pass = true; window.render = w;
   }
-  window.SweepPass = { passed, toFunded, ask };
+  window.SweepPass = { passed, toFunded, ask, choicesOf: (a) => (a && a.preset && window.SweepPresets && SweepPresets.fundedChoices ? SweepPresets.fundedChoices(a.preset) : []) };
 })();
 
 /* ───────────── live accounts, put forward ─────────────
@@ -3018,7 +3020,10 @@ window.SweepMO = window.SweepMO || class {
   }
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('[data-live-go]'); if (!b) return;
-    const a = getDoc('accounts', b.dataset.liveGo); if (!a) return;
+    toLive(b.dataset.liveGo);
+  });
+  function toLive(id, quiet) {
+    const a = getDoc('accounts', id); if (!a) return;
     let rules = Object.assign({}, a.rules || {}), preset = null, start = a.starting_balance_c;
     const pv = a.preset && String(a.preset).split('|');
     if (pv && pv.length >= 4 && window.SweepPresets) { pv[3] = 'live'; const p = SweepPresets.rulesOf(pv.join('|')); if (p) { rules = p.rules; preset = pv.join('|'); if (p.start) start = Math.round(p.start * 100); } }
@@ -3026,11 +3031,14 @@ window.SweepMO = window.SweepMO || class {
     const nid = typeof uid === 'function' ? uid() : 'a' + Date.now();
     const today = typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10);
     if (rules.dd_floor_c != null) rules.dd_c = Math.max(0, start - rules.dd_floor_c);   // live: a fixed balance floor (Topstep: $1,000)
-    put('accounts', { id: nid, firm_id: a.firm_id, name: a.name, starting_balance_c: start, status: 'active', created_on: today, phase: 'live', money_type: 'live', rules, preset, from_funded: a.id });
+    put('accounts', { id: nid, firm_id: a.firm_id, name: a.name, starting_balance_c: start, status: 'active', created_on: today, phase: 'live', money_type: 'live', rules, preset, from_funded: a.id, ...(a.demo ? { demo: true } : {}) });
     editDoc('accounts', a.id, (d) => { d.status = 'archived'; d.result = 'live'; d.live_on = today; d.live_id = nid; });
+    if (quiet) return nid;
     if (typeof toast === 'function') toast(T.done);
     setTimeout(() => { location.hash = '#account/' + nid; }, 300);
-  });
+    return nid;
+  }
+  window.SweepLive = { toLive };
   const appRender = window.render;
   if (typeof appRender === 'function' && !appRender.__live) {
     const w = function () { const out = appRender.apply(this, arguments); try { badges(); } catch (e) { /* never blocks */ } return out; };
@@ -4516,8 +4524,8 @@ window.SweepMO = window.SweepMO || class {
     if (!/^#accounts$/.test(location.hash || '')) return;
     if (main.querySelector('.nav-arch')) return;
     const arch = (S.accounts || []).filter((a) => a.status === 'archived'); if (!arch.length) return;
-    const lab = (a) => a.result === 'failed' ? t('failedL') : a.result === 'passed' ? t('passedL') : a.result === 'live' ? t('liveL') : t('archived');
-    const when = (a) => a.failed_on || a.passed_on || a.live_on || '';
+    const lab = (a) => a.result === 'failed' ? t('failedL') : a.result === 'passed' ? t('passedL') : a.result === 'live' ? t('liveL') : a.result === 'won' ? (({ en: 'Closed in profit', fr: 'Fermé en gain', es: 'Cerrada con ganancia' })[LANG] || 'Closed in profit') : t('archived');
+    const when = (a) => a.failed_on || a.passed_on || a.live_on || a.won_on || '';
     const html = `<details class="surface nav-arch" data-noi18n><summary>${t('archived')} · ${arch.length}</summary><div>${arch.map((a) => `<a class="nav-arch-r" href="#account/${esc2(a.id)}"><b>${esc2(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</b><span class="nav-arch-t ${a.result || ''}">${lab(a)}</span><small class="muted">${esc2(when(a))}</small></a>`).join('')}</div></details>`;
     const add = main.querySelector('[data-act="acct-add"]'); const host = (add && add.closest('.surface')) || main.lastElementChild; if (host) host.insertAdjacentHTML('afterend', html);
   }
@@ -5511,3 +5519,172 @@ new window.SweepMO(() => {
   } catch (e) { /* the app deletes as before */ }
   if (n < 60) setTimeout(() => guardShots(n + 1), 500);
 })(0);
+
+/* ───────────── Accounts: act on one account or on several (15 Oct.) ─────────────
+ * Computer: two small icons at the right of each active row (« Move up »: evaluation → funded, funded → live; « Remove »:
+ * failed or passed, never removed without a result) and a box to select several rows. Phone: « Select » (or a long press),
+ * then a tap selects. Selected accounts get one bar of actions: Mark as failed (one Undo for all), Move to funded, Move to
+ * live, Closed in profit (live / personal). An account only leaves the list with its result; a true delete stays on the page
+ * of an account without trades. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = {
+    en: { sel: 'Select', done: 'Done', n1: '1 account selected', n: '{n} accounts selected', clear: 'Clear', fail: 'Mark as failed', funded: 'Move to funded', live: 'Move to live', won: 'Closed in profit',
+      up: 'Move up', upF: 'Move to funded', upL: 'Move to live', out: 'Remove', ck: 'Select {a}',
+      outT: 'Remove {a}?', outTn: 'Remove {n} accounts?', outS: 'An account leaves your list with its result: it stays in your history and your stats.', okF: 'Passed → funded', okL: 'Passed → live', cancel: 'Cancel',
+      failedT: '{n} accounts marked as failed', failed1: 'Account marked as failed', wonT: '{n} accounts closed in profit', won1: 'Account closed in profit',
+      upT: 'Move {n} evaluations to funded?', upT1: 'Move {a} to funded?', upTL1: 'Move {a} to live?', upS: 'A funded account is created for each, with the same firm and size; each evaluation stays in your history, marked passed.', upTL: 'Move {n} funded accounts to live?', upSL: 'A live account is created for each, with the firm’s live rules; each funded account stays in your history.',
+      choice: '{f}: {c} (the firm’s usual choice)', go: 'Confirm', doneF: '{n} funded accounts created', doneL: '{n} live accounts created', doneF1: 'Funded account created', doneL1: 'Live account created', skip: ' · {n} skipped (not eligible)', skip1: ' · 1 skipped (not eligible)' },
+    fr: { sel: 'Sélectionner', done: 'Terminé', n1: '1 compte sélectionné', n: '{n} comptes sélectionnés', clear: 'Effacer', fail: 'Marquer échoué', funded: 'Passer financé', live: 'Passer live', won: 'Fermé en gain',
+      up: 'Monter', upF: 'Passer en financé', upL: 'Passer en live', out: 'Retirer', ck: 'Sélectionner {a}',
+      outT: 'Retirer {a} ?', outTn: 'Retirer {n} comptes ?', outS: 'Un compte quitte ta liste avec son résultat : il reste dans ton historique et tes stats.', okF: 'Réussi → financé', okL: 'Réussi → live', cancel: 'Annuler',
+      failedT: '{n} comptes marqués échoués', failed1: 'Compte marqué échoué', wonT: '{n} comptes fermés en gain', won1: 'Compte fermé en gain',
+      upT: 'Passer {n} évaluations en financé ?', upT1: 'Passer {a} en financé ?', upTL1: 'Passer {a} en live ?', upS: 'Un compte financé est créé pour chacune, avec la même firme et la même taille ; chaque évaluation reste dans ton historique, marquée réussie.', upTL: 'Passer {n} comptes financés en live ?', upSL: 'Un compte live est créé pour chacun, avec les règles live de la firme ; chaque compte financé reste dans ton historique.',
+      choice: '{f} : {c} (le choix habituel de la firme)', go: 'Confirmer', doneF: '{n} comptes financés créés', doneL: '{n} comptes live créés', doneF1: 'Compte financé créé', doneL1: 'Compte live créé', skip: ' · {n} ignorés (pas concernés)', skip1: ' · 1 ignoré (pas concerné)' },
+    es: { sel: 'Seleccionar', done: 'Listo', n1: '1 cuenta seleccionada', n: '{n} cuentas seleccionadas', clear: 'Borrar', fail: 'Marcar fallida', funded: 'Pasar a financiada', live: 'Pasar a live', won: 'Cerrada con ganancia',
+      up: 'Subir', upF: 'Pasar a financiada', upL: 'Pasar a live', out: 'Retirar', ck: 'Seleccionar {a}',
+      outT: '¿Retirar {a}?', outTn: '¿Retirar {n} cuentas?', outS: 'Una cuenta sale de tu lista con su resultado: queda en tu historial y en tus stats.', okF: 'Aprobada → financiada', okL: 'Aprobada → live', cancel: 'Cancelar',
+      failedT: '{n} cuentas marcadas fallidas', failed1: 'Cuenta marcada fallida', wonT: '{n} cuentas cerradas con ganancia', won1: 'Cuenta cerrada con ganancia',
+      upT: '¿Pasar {n} evaluaciones a financiada?', upT1: '¿Pasar {a} a financiada?', upTL1: '¿Pasar {a} a live?', upS: 'Se crea una cuenta financiada para cada una, con la misma firma y tamaño; cada evaluación queda en tu historial, marcada aprobada.', upTL: '¿Pasar {n} cuentas financiadas a live?', upSL: 'Se crea una cuenta live para cada una, con las reglas live de la firma; cada cuenta financiada queda en tu historial.',
+      choice: '{f}: {c} (la opción habitual de la firma)', go: 'Confirmar', doneF: '{n} cuentas financiadas creadas', doneL: '{n} cuentas live creadas', doneF1: 'Cuenta financiada creada', doneL1: 'Cuenta live creada', skip: ' · {n} omitidas (no aplican)', skip1: ' · 1 omitida (no aplica)' }
+  };
+  const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (m, x) => (v && v[x] != null ? v[x] : m));
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
+  const name = (a) => (typeof acctLabel === 'function' ? acctLabel(a.id) : a.name) || a.name || '';
+  const kind = (a) => { const m = window.SweepMoney && SweepMoney.moneyTypeOf ? SweepMoney.moneyTypeOf(a) : ''; return a.phase === 'eval' || m === 'eval' ? 'eval' : a.phase === 'funded' || m === 'funded' ? 'funded' : m === 'live' || a.phase === 'live' ? 'live' : m === 'personal' ? 'personal' : 'none'; };
+  const active = (a) => a && a.status !== 'archived' && a.status !== 'closed';
+  const next = (a) => (kind(a) === 'eval' ? 'funded' : kind(a) === 'funded' ? 'live' : '');
+  const SEL = new Set(); let mode = false;   // phone: select mode
+  const onPage = () => /^#accounts$/.test(location.hash || '');
+  const idOf = (tr) => decodeURIComponent((tr.dataset.href || '').replace('#account/', ''));
+  const IC_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
+  const IC_OUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
+
+  /* the rows: a box, and the two icons (active accounts only) */
+  function decorate() {
+    if (!onPage()) { if (SEL.size || mode) { SEL.clear(); mode = false; } bar(); return; }
+    const main = document.getElementById('main'); if (!main) return;
+    const tb = main.querySelector('table.acct-tbl tbody'); const surf = tb && tb.closest('.surface'); if (!surf) return;
+    const top = surf.querySelector(':scope > .nav-acc-top');
+    if (top && !top.querySelector('.acc-selb')) { const b = document.createElement('button'); b.type = 'button'; b.className = 'link acc-selb'; b.setAttribute('data-noi18n', ''); b.textContent = mode ? t('done') : t('sel'); top.append(b); }
+    surf.classList.toggle('acc-sel-on', mode); surf.classList.toggle('acc-sel-any', SEL.size > 0);
+    surf.querySelectorAll('table.acct-tbl tbody tr[data-href^="#account/"]').forEach((tr) => {
+      const id = idOf(tr), a = getDoc('accounts', id); if (!active(a)) return;
+      const td = tr.firstElementChild, last = tr.lastElementChild; if (!td || !last) return;
+      if (!td.querySelector('.acc-ck')) td.insertAdjacentHTML('afterbegin', `<label class="acc-ck" data-noi18n><input type="checkbox" data-acc-ck="${esc2(id)}" aria-label="${esc2(t('ck', { a: name(a) }))}"><i aria-hidden="true"></i></label>`);
+      const ck = td.querySelector('[data-acc-ck]'); if (ck.checked !== SEL.has(id)) ck.checked = SEL.has(id);
+      tr.classList.toggle('acc-on', SEL.has(id));
+      if (!last.querySelector('.acc-acts')) {
+        last.classList.add('acc-last');
+        const n = next(a);
+        last.insertAdjacentHTML('beforeend', `<span class="acc-acts" data-noi18n>${n ? `<button type="button" class="acc-ic" data-acc-up="${esc2(id)}" title="${esc2(n === 'funded' ? t('upF') : t('upL'))}" aria-label="${esc2((n === 'funded' ? t('upF') : t('upL')) + ' · ' + name(a))}">${IC_UP}</button>` : ''}<button type="button" class="acc-ic" data-acc-out="${esc2(id)}" title="${esc2(t('out'))}" aria-label="${esc2(t('out') + ' · ' + name(a))}">${IC_OUT}</button></span>`);
+      }
+    });
+    bar();
+  }
+  /* the bar of actions, under the list (above the bottom bar on a phone) */
+  function bar() {
+    let el = document.getElementById('accBar');
+    const ids = [...SEL].filter((id) => active(getDoc('accounts', id)));
+    document.body.classList.toggle('acc-bar-on', onPage() && ids.length > 0);   // (Sweep AI's button steps aside while the bar is there)
+    if (!onPage() || !ids.length) { if (el) el.remove(); return; }
+    const ks = ids.map((id) => kind(getDoc('accounts', id)));
+    const html = `<div class="acc-bar-h"><span class="acc-bar-n">${ids.length === 1 ? t('n1') : t('n', { n: ids.length })}</span><button type="button" class="link acc-bar-x" data-accb="clear">${t('clear')}</button></div><div class="acc-bar-a"><button type="button" class="btn sm" data-accb="fail">${t('fail')}</button>${ks.includes('eval') ? `<button type="button" class="btn sm" data-accb="funded">${t('funded')}</button>` : ''}${ks.includes('funded') ? `<button type="button" class="btn sm" data-accb="live">${t('live')}</button>` : ''}${ks.some((k) => k === 'live' || k === 'personal') ? `<button type="button" class="btn sm" data-accb="won">${t('won')}</button>` : ''}</div>`;
+    if (!el) { el = document.createElement('div'); el.id = 'accBar'; el.className = 'acc-bar'; el.setAttribute('role', 'toolbar'); el.setAttribute('data-noi18n', ''); document.body.append(el); }
+    if (el._h !== html) { el.innerHTML = html; el._h = html; }
+  }
+  const refresh = () => { if (typeof render === 'function') render(); else decorate(); };
+  /* the actions */
+  function fail(ids) {
+    const keep = ids.map((id) => { const a = getDoc('accounts', id); return [id, { status: a.status, result: a.result, failed_on: a.failed_on }]; });
+    ids.forEach((id) => editDoc('accounts', id, (d) => { d.status = 'archived'; d.result = 'failed'; d.failed_on = today(); }));
+    SEL.clear(); refresh();
+    window.SweepUndo.toast(ids.length === 1 ? t('failed1') : t('failedT', { n: ids.length }), () => keep.forEach(([id, k]) => editDoc('accounts', id, (d) => { for (const x in k) { if (k[x] === undefined) delete d[x]; else d[x] = k[x]; } })));
+  }
+  function won(ids) {
+    const keep = ids.map((id) => { const a = getDoc('accounts', id); return [id, { status: a.status, result: a.result, won_on: a.won_on }]; });
+    ids.forEach((id) => editDoc('accounts', id, (d) => { d.status = 'archived'; d.result = 'won'; d.won_on = today(); }));
+    SEL.clear(); refresh();
+    window.SweepUndo.toast(ids.length === 1 ? t('won1') : t('wonT', { n: ids.length }), () => keep.forEach(([id, k]) => editDoc('accounts', id, (d) => { for (const x in k) { if (k[x] === undefined) delete d[x]; else d[x] = k[x]; } })));
+  }
+  /* a small window of the app (never the browser's): its buttons resolve the promise with their value, or null */
+  function dlg(title, text, buttons, extra) {
+    return new Promise((done) => {
+      document.querySelectorAll('.acc-dlg').forEach((x) => x.remove());
+      const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim acc-dlg';
+      const el = document.createElement('aside'); el.className = 'nav-dlg acc-dlg'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
+      el.innerHTML = `<div class="nav-dlg-in"><h2>${esc2(title)}</h2><p class="nav-pass-s">${esc2(text)}</p>${extra || ''}<div class="acc-dlg-b">${buttons.map((b) => `<button type="button" class="btn ${b.primary ? 'primary ' : ''}nav-am-save" data-v="${esc2(b.v)}">${esc2(b.label)}</button>`).join('')}<button type="button" class="btn nav-pass-later" data-v="">${t('cancel')}</button></div></div>`;
+      document.body.append(scrim, el);
+      requestAnimationFrame(() => { el.classList.add('open'); scrim.classList.add('open'); const f = el.querySelector('[data-v]'); if (f) f.focus(); });
+      const close = (v) => { document.removeEventListener('keydown', key, true); [el, scrim].forEach((x) => { x.classList.remove('open'); setTimeout(() => x.remove(), 250); }); done(v || null); };
+      const key = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(null); } };
+      document.addEventListener('keydown', key, true);
+      scrim.addEventListener('click', () => close(null));
+      el.addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) close(b.dataset.v); });
+    });
+  }
+  async function upgrade(ids, to) {
+    const list = ids.map((id) => getDoc('accounts', id)).filter((a) => active(a) && next(a) === to), skip = ids.length - list.length;
+    if (!list.length) return;
+    if (to === 'funded' && list.length === 1 && window.SweepPass && SweepPass.passed(list[0])) { SEL.clear(); window.SweepPass.ask(list[0]); bar(); return; }   // one evaluation Sweep sees passed: its own window (and the firm's choice)
+    const ch = to === 'funded' ? list.map((a) => { const g = window.SweepPass && SweepPass.choicesOf ? SweepPass.choicesOf(a) : []; const o = g[0]; const c = o && (o.choices.find((x) => x.def) || o.choices[0]); return c ? { a, choice: o.id + ':' + c.id, line: t('choice', { f: name(a), c: c.label }) } : { a, choice: null }; }) : list.map((a) => ({ a, choice: null }));
+    const lines = ch.filter((x) => x.line).map((x) => `<p class="muted acc-dlg-l">${esc2(x.line)}</p>`).join('');
+    const one = list.length === 1 ? name(list[0]) : null;
+    const v = await dlg(to === 'funded' ? (one ? t('upT1', { a: one }) : t('upT', { n: list.length })) : (one ? t('upTL1', { a: one }) : t('upTL', { n: list.length })), to === 'funded' ? t('upS') : t('upSL'), [{ v: 'go', label: t('go'), primary: true }], lines);
+    if (v !== 'go') return;
+    ch.forEach((x) => { if (to === 'funded') window.SweepPass.toFunded(x.a.id, x.choice, true); else window.SweepLive.toLive(x.a.id, true); });
+    SEL.clear(); refresh();
+    if (typeof toast === 'function') toast((to === 'funded' ? (one ? t('doneF1') : t('doneF', { n: list.length })) : (one ? t('doneL1') : t('doneL', { n: list.length }))) + (skip ? (skip === 1 ? t('skip1') : t('skip', { n: skip })) : ''));
+  }
+  async function out(ids) {
+    const list = ids.map((id) => getDoc('accounts', id)).filter(active); if (!list.length) return;
+    const ks = new Set(list.map(kind));
+    const btn = [{ v: 'fail', label: t('fail') }];
+    if (ks.size === 1 && ks.has('eval')) btn.push({ v: 'funded', label: t('okF') });
+    if (ks.size === 1 && ks.has('funded')) btn.push({ v: 'live', label: t('okL') });
+    if ([...ks].every((k) => k === 'live' || k === 'personal' || k === 'none')) btn.push({ v: 'won', label: t('won') });
+    const v = await dlg(list.length === 1 ? t('outT', { a: name(list[0]) }) : t('outTn', { n: list.length }), t('outS'), btn);
+    const x = list.map((a) => a.id);
+    if (v === 'fail') { fail(x); if (/^#account\//.test(location.hash)) location.hash = '#accounts'; }
+    else if (v === 'won') { won(x); if (/^#account\//.test(location.hash)) location.hash = '#accounts'; }
+    else if (v === 'funded' || v === 'live') upgrade(x, v);
+  }
+  /* clicks: before the row's own link */
+  document.addEventListener('click', (e) => {
+    const tg = e.target; if (!tg.closest) return;
+    const o = tg.closest('[data-acc-out]'), u = tg.closest('[data-acc-up]'), c = tg.closest('.acc-ck'), b = tg.closest('[data-accb]'), sb = tg.closest('.acc-selb');
+    if (o) { e.preventDefault(); e.stopPropagation(); const dm = o.closest('details.menu'); if (dm) dm.open = false; out([o.dataset.accOut]); return; }
+    if (u) { e.preventDefault(); e.stopPropagation(); const a = getDoc('accounts', u.dataset.accUp); if (a) upgrade([a.id], next(a)); return; }
+    if (c) { e.stopPropagation(); if (tg.matches('input')) { const id = tg.dataset.accCk; tg.checked ? SEL.add(id) : SEL.delete(id); decorate(); } return; }
+    if (b) { const k = b.dataset.accb, ids = [...SEL]; if (k === 'clear') { SEL.clear(); mode = false; decorate(); return; } if (k === 'fail') fail(ids); else if (k === 'won') won(ids); else upgrade(ids, k); return; }
+    if (sb) { mode = !mode; if (!mode) SEL.clear(); sb.textContent = mode ? t('done') : t('sel'); decorate(); return; }
+    if (mode && onPage()) {   // phone, select mode: a tap selects the row instead of opening it
+      const tr = tg.closest('#main table.acct-tbl tbody tr[data-href^="#account/"]'); if (!tr) return;
+      const id = idOf(tr); if (!active(getDoc('accounts', id))) return;
+      e.preventDefault(); e.stopPropagation(); SEL.has(id) ? SEL.delete(id) : SEL.add(id); decorate();
+    }
+  }, true);
+  // phone: a long press on a row starts the selection with it
+  let lp = null, lpXY = null;
+  document.addEventListener('touchstart', (e) => {
+    if (!onPage() || e.touches.length !== 1) return; const tr = e.target.closest && e.target.closest('#main table.acct-tbl tbody tr[data-href^="#account/"]'); if (!tr || e.target.closest('.nav-grip, .nav-ord-on')) return;
+    lpXY = [e.touches[0].clientX, e.touches[0].clientY];
+    lp = setTimeout(() => { lp = null; const id = idOf(tr); if (!active(getDoc('accounts', id))) return; mode = true; SEL.add(id); const sb = document.querySelector('#main .acc-selb'); if (sb) sb.textContent = t('done'); decorate(); try { navigator.vibrate && navigator.vibrate(10); } catch (x) { /* no vibration */ }
+      const stop = (ev) => { ev.preventDefault(); ev.stopPropagation(); document.removeEventListener('click', stop, true); }; document.addEventListener('click', stop, true); setTimeout(() => document.removeEventListener('click', stop, true), 600); }, 450);
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => { if (lp && lpXY && Math.hypot(e.touches[0].clientX - lpXY[0], e.touches[0].clientY - lpXY[1]) > 8) { clearTimeout(lp); lp = null; } }, { passive: true });
+  document.addEventListener('touchend', () => { if (lp) { clearTimeout(lp); lp = null; } }, { passive: true });
+  const appRender = window.render;
+  if (typeof appRender === 'function' && !appRender.__accsel) {
+    const w = function () { const out = appRender.apply(this, arguments); try { decorate(); } catch (e) { /* never blocks */ } return out; };
+    Object.keys(appRender).forEach((k) => { w[k] = appRender[k]; });
+    w.__accsel = true; window.render = w;
+  }
+  window.addEventListener('hashchange', () => setTimeout(() => { try { decorate(); } catch (e) { /* never blocks */ } }, 30));
+  // a quiet sync redraws the list without render(): the boxes and icons are back before the browser paints (no jump)
+  { const m0 = document.getElementById('main');
+    if (m0) new MutationObserver(() => { if (!onPage()) return; const tr = [...m0.querySelectorAll('table.acct-tbl tbody tr[data-href^="#account/"]')].find((x) => !x.querySelector('.acc-ck') && active(getDoc('accounts', idOf(x)))); if (tr) { try { decorate(); } catch (e) { /* never blocks */ } } }).observe(m0, { childList: true, subtree: true }); }
+  window.SweepAccSel = { out, upgrade, fail, won, selected: () => [...SEL] };
+})();

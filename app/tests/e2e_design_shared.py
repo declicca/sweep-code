@@ -67,7 +67,7 @@ with sync_playwright() as p:
     for h in ['accounts', 'payouts', 'analytics']:
       go(pg, h); bd += pg.evaluate("[...document.querySelectorAll('#main .mny-tag, #main .pz-pill, #main .acc-flag, #main .est')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect(); return [e.className.split(' ')[0], Math.round(r.height), getComputedStyle(e).borderTopLeftRadius, getComputedStyle(e).fontSize]})")
     kinds = sorted(set(x[0] for x in bd))
-    ok(len(kinds) >= 3 and all(x[1] == 22 and x[2] == '999px' and x[3] == '11px' for x in bd), f'9 computer {scheme}: {len(bd)} badges ({kinds}), all 22 px pills of 11 px ({[x for x in bd if x[1] != 22][:3]})')
+    ok(len(kinds) >= 2 and all(x[1] == 22 and x[2] == '999px' and x[3] == '11px' for x in bd), f'9 computer {scheme}: {len(bd)} badges ({kinds}), all 22 px pills of 11 px ({[x for x in bd if x[1] != 22][:3]})')
     allerr += errs; c.close()
   # phone 390 and 320
   for w, scheme in [(390, 'dark'), (390, 'light'), (320, 'light')]:

@@ -1747,13 +1747,13 @@ function vAccount(e) {
   }[LANG] || "See its stats"}</button>\n    <details class="menu acc-menu"><summary class="btn sm" aria-label="${{
     fr: "Plus d’actions",
     es: "Más acciones"
-  }[LANG] || "More actions"}">⋯</summary><div class="menu-pop" data-noi18n>\n      <button data-act="set" data-col="accounts" data-id="${e}" data-path="status" data-v="${t.status === "archived" ? "active" : "archived"}">${t.status === "archived" ? {
+  }[LANG] || "More actions"}">⋯</summary><div class="menu-pop" data-noi18n>\n      ${t.status === "archived" ? `<button data-act="set" data-col="accounts" data-id="${e}" data-path="status" data-v="active">${{
     fr: "Rouvrir le compte",
     es: "Reabrir la cuenta"
-  }[LANG] || "Reopen" : {
-    fr: "Fermer le compte",
-    es: "Cerrar la cuenta"
-  }[LANG] || "Close account"}</button>\n      ${t.status === "archived" ? "" : `<button data-fail="${e}" class="nav-fail-m">${{
+  }[LANG] || "Reopen"}</button>` : `<button data-acc-out="${e}">${{
+    fr: "Retirer le compte…",
+    es: "Retirar la cuenta…"
+  }[LANG] || "Remove account…"}</button>`}\n      ${t.status === "archived" ? "" : `<button data-fail="${e}" class="nav-fail-m">${{
     fr: "Marquer comme échoué",
     es: "Marcar como fallida"
   }[LANG] || "Mark as failed"}</button>`}\n      ${a.length ? `<button disabled title="${{
