@@ -1,4 +1,5 @@
 from core import *
+import ui
 import re
 import presets
 
@@ -315,6 +316,7 @@ def history(lang, t, f):
 
 def make_rules_page(f):
     CRUMBS[page_of(f)] = f["name"]
+    SYSTEM_PAGES.add(page_of(f))
     def page(lang, t):
         name, progs = f["name"], f["programs"]
         when, src = checked_of(f), source_of(f)
@@ -332,8 +334,10 @@ def make_rules_page(f):
             lead = {l: lead[l] + " " + " ".join((p.get("note") or {}).get(l, "") for p in progs).strip() for l in LANGS}
         hero = (f'<div class="page-hero"><div class="wrap"><span class="kick">{t(T("Prop firms","Prop firms","Prop firms"))}</span>'
                 f'<h1 class="wu">{words(t(T(f"{name} rules, explained.", f"Les règles de {name}, expliquées.", f"Las reglas de {name}, explicadas.")))}</h1>'
-                f'<p class="lead rise d3">{t(lead)}</p><p class="fine rise d4 verified">{t(verified)}</p></div></div>')
-        jump = ("" if len(progs) < 2 else '<p class="firm-others">' + "".join(f'<a href="#{anchor(f, p)}">{p["name"]}</a>' for p in progs) + "</p>")
+                f'<p class="lead rise d3">{t(lead)}</p><p class="fine rise d4 verified">{t(verified)}</p>'
+                f'<div class="cta-row rise d4"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules_hero">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div>'
+                + ("" if len(progs) < 2 else '<div class="jump rise d5">' + "".join(f'<a class="chip" href="#{anchor(f, p)}">{p["name"]}</a>' for p in progs) + "</div>")
+                + '</div></div>')
         secs = ""
         for p in progs:
             sizes = p["sizes"]; G = groups_of(lang, t, sizes)
@@ -353,38 +357,44 @@ def make_rules_page(f):
             vs = [v for v in p.get("verified", []) if v.get("url")] or [{"url": u, "date": presets.CHECKED} for u in (f.get("sources") or [])[:1]]
             if vs:
                 other = t(T("third-party source", "source tierce", "fuente externa"))   # said as such: only the firm's own pages are « official »
-                sec += '<p class="fine">' + t(T("Sources","Sources","Fuentes")) + " · " + " · ".join(f'<a href="{v["url"]}" rel="nofollow noopener" target="_blank">{src_name(v["url"])}</a> ({day(v.get("date") or presets.CHECKED, lang)}' + ("" if official(f, v["url"]) else f", {other}") + ")" for v in vs) + "</p>"
-            secs += f'<section class="rule rules-prog"><div class="wrap narrow"><article class="article">{sec}</article></div></section>'
+                sec += '<p class="fine sources">' + t(T("Sources","Sources","Fuentes")) + " · " + " · ".join(f'<a href="{v["url"]}" rel="nofollow noopener" target="_blank">{src_name(v["url"])}</a> ({day(v.get("date") or presets.CHECKED, lang)}' + ("" if official(f, v["url"]) else f", {other}") + ")" for v in vs) + "</p>"
+            secs += f'<div class="prog-block">{sec}</div>'
         disclaimer = T(f"Sweep is not affiliated with {name}. Rules can change at any time; always confirm on {poss(name)} official site. Values are shown for information, from Sweep’s weekly check of {poss(name)} pages.",
                        f"Sweep n’est pas affilié à {name}. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de {name}. Valeurs présentées à titre indicatif, tirées de la vérification hebdomadaire des pages de {name} par Sweep.",
                        f"Sweep no está afiliado a {name}. Las reglas pueden cambiar en cualquier momento; confirma siempre en el sitio oficial de {name}. Valores a título informativo, tomados de la revisión semanal de las páginas de {name} por Sweep.")
-        card = (f'<section style="padding-top:0"><div class="wrap narrow"><div class="calc-act"><div><b>{t(T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."))}</b>'
-                f'<p data-nolinks>{t(T("These rules fill in automatically.", "Ces règles se remplissent toutes seules.", "Estas reglas se rellenan solas."))}</p></div>'
-                f'<a class="btn btn-primary" href="{SIGNUP}" data-track="signup_rules_card">{t(CREATE_FREE)}</a></div></div></section>')
-        b = (f'<section style="padding-top:8px"><div class="wrap narrow">{jump}</div></section>' if jump else "") + secs + card
-        b += f'<section style="padding-top:0"><div class="wrap narrow"><p class="fine">{t(disclaimer)}</p></div></section>'
-        b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Rule changes","Changements de règles","Cambios de reglas"))}</h2></div>{history(lang, t, f)}'
-              f'<p><a class="tlink" href="{href(lang, RULE_CHANGES)}#{slug(f)}">{t(T("Every firm’s rule changes","Les changements de règles de toutes les firmes","Los cambios de reglas de todas las firmas"))} <span aria-hidden="true">→</span></a></p></div></section>')
-        b += split(t, T("Track it","Suis-le","Síguelo"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
+        p0 = progs[0]; s0 = rep(p0); E0, F0 = _ph(s0, "eval"), _ph(s0, "funded"); P0 = _po(F0)
+        dd0 = E0.get("dd") or F0.get("dd"); typ0 = E0.get("dd_type") or F0.get("dd_type"); cons0 = E0.get("consistency") or F0.get("consistency")
+        best = T("Best day","Meilleur jour","Mejor día")
+        key = [x for x in [
+            (t(T("Profit target","Objectif de profit","Objetivo de beneficio")), usd(E0["target"], lang), "") if E0.get("target") else None,
+            (t(T("Max loss","Perte max","Pérdida máx.")), usd(dd0, lang), t(DDT[typ0]) if typ0 in DDT else "") if dd0 else None,
+            (t(T("Consistency","Consistance","Consistencia")), "≤\u00a0" + pc(cons0, lang), t(best)) if cons0 else None,
+            (t(T("Profit split","Partage des profits","Reparto de beneficios")), pc(P0["split_pct"], lang), "") if P0.get("split_pct") else None,
+            (t(T("Daily loss limit","Limite de perte du jour","Límite de pérdida diaria")), usd(E0["dll"], lang), "") if E0.get("dll") else None,
+            (t(T("Minimum days","Jours minimum","Días mínimos")), f"{E0['min_days']:g}", "") if E0.get("min_days") else None] if x][:4]
+        summary = ui.stats(key, f"{p0['name']} · {kk(s0['size'])}",
+                           t(T("Values for this account. Every size is in the tables below.", "Valeurs de ce compte. Toutes les tailles sont dans les tableaux ci-dessous.", "Valores de esta cuenta. Todos los tamaños están en las tablas de abajo."))) if len(key) >= 2 else ""
+        b = (ui.sec(summary, "t", id_="summary") if summary else "")
+        b += ui.sec(secs + f'<p class="fine" style="margin-top:40px">{t(disclaimer)}</p>', "n", "rules")
+        b += ui.split(t, T("Track it","Suis-le","Síguelo"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
                    T(f"Pick {name} and your account type: these rules fill in, and Sweep counts your payout conditions on every trade. Free forever, no card.",
                      f"Choisis {name} et ton type de compte : ces règles se remplissent, et Sweep compte tes conditions de payout à chaque trade. Gratuit pour toujours, sans carte.",
                      f"Elige {name} y tu tipo de cuenta: estas reglas se completan y Sweep cuenta tus condiciones de payout en cada operación. Gratis para siempre, sin tarjeta."),
                    [T(f"<b>Rules prefilled</b> for every {name} account type and size, each value editable", f"<b>Règles préremplies</b> pour chaque type et taille de compte {name}, chaque valeur modifiable", f"<b>Reglas precargadas</b> para cada tipo y tamaño de cuenta de {name}, cada valor editable"),
                     T("<b>Every trade checked:</b> target, room above the max loss, today’s limit, consistency and payout readiness in %", "<b>Chaque trade vérifié :</b> objectif, marge au-dessus de la perte max, limite du jour, consistance et prêt pour le payout en %", "<b>Cada operación comprobada:</b> objetivo, margen sobre la pérdida máx., límite del día, consistencia y listo para el payout en %"),
                     T("<b>One trade on several accounts</b> with the copier; a failed account keeps its history", "<b>Un trade sur plusieurs comptes</b> avec le copieur ; un compte échoué garde son historique", "<b>Una operación en varias cuentas</b> con el copiador; una cuenta fallida conserva su historial")],
-                   slot("v6-08-payout-conditions-d.webp", "desktop", t(T("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")), t),
-                   more=f'<div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div><p class="fine" style="margin-top:16px">{t(MONEY_PLAN)}</p>', id_="track")
+                   ui.frame_d("v6-08-payout-conditions-d.webp", t(T("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")), m="v6-08-payout-conditions-m.webp", t=t),
+                   id_="track", more=f'<div class="cta-row"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div><p class="fine" style="margin-top:16px">{t(MONEY_PLAN)}</p>')
+        allc = f'<a class="go" href="{href(lang, RULE_CHANGES)}#{slug(f)}">{t(T("Every firm’s rule changes","Les changements de règles de toutes les firmes","Los cambios de reglas de todas las firmas"))} <span aria-hidden="true">→</span></a>'
+        changes = ui.state(no_change(lang, t, f)) if not real_changes(f) else history(lang, t, f)
+        b += ui.sec(f'<div class="read"><div class="head"><h2>{t(T("Rule changes","Changements de règles","Cambios de reglas"))}</h2></div>{changes}<div class="links">{allc}</div></div>', "t", "changes")
         faqs = faq_of(lang, t, f) + [
-            (T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
-             T(f"No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {name}. The {name} name belongs to its owner.", f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Le nom {name} appartient à son propriétaire.", f"No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {name}. El nombre {name} pertenece a su propietario.")),
             (T(f"Can I track several {name} accounts?", f"Puis-je suivre plusieurs comptes {name} ?", f"¿Puedo seguir varias cuentas de {name}?"),
              T("Yes, as many as your plan allows, each with its own rules, and you can copy one trade to several accounts at once.", "Oui, autant que ton forfait le permet, chacun avec ses propres règles, et tu peux copier un trade sur plusieurs comptes en une fois.", "Sí, tantas como permita tu plan, cada una con sus propias reglas, y puedes copiar una operación en varias cuentas a la vez.")),
             (T("Is it free?", "C’est gratuit ?", "¿Es gratis?"),
              T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.", "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
         rel = ["prop-firm-payout-rules.html", "prop-firm-drawdown-rules.html", "prop-firm-consistency-rules.html"]
-        b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>'
-              + "".join(faq_item(t, q, a) for q, a in faqs)
-              + "</div></section>" + related(lang, t, rel[:3]))
+        b += ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs), "n", "questions", width="read") + ui.read_next(lang, t, rel[:3])
         chain = {"en": [f"{name} Rules 2026: Drawdown, Payouts & Journal · Sweep", f"{name} Rules 2026: Payouts & Journal · Sweep", f"{name} Rules & Journal 2026 · Sweep", f"{name} Rules 2026 · Sweep"],
                  "fr": [f"Règles {name} 2026 : drawdown, payouts · Sweep", f"Règles {name} 2026 : drawdown, payouts", f"Règles {name} 2026 · Sweep"],     # written for French searches,
                  "es": [f"Reglas de {name} 2026: drawdown y payouts · Sweep", f"Reglas de {name} 2026: drawdown y payouts", f"Reglas de {name} 2026 · Sweep"]}   # not translated
@@ -395,7 +405,7 @@ def make_rules_page(f):
         ld = jsonld({"@context":"https://schema.org","@graph":[
             {"@type":"WebPage","name":title,"inLanguage":lang,"dateModified":when,"url":f"https://{DOMAIN}{href(lang, page_of(f))}","about":{"@type":"Organization","name":name,"url":(f.get("sources") or [None])[0]}},
             {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]}]})
-        body = hero + b + final_cta(lang, t)
+        body = hero + b + ui.final(lang, t)
         if lang == "fr":   # French: no « : », « ; » or « ? » alone at the start of a line
             body, title, desc = (re.sub(r" ([:;?!])(?=\s|<|$)", "\u00a0\\1", x) for x in (body, title, desc))
         return (title, desc, body, ld + RSS_LINK)
@@ -450,9 +460,9 @@ def faq_of(lang, t, f):
                         + ({"en": f"; activation fee {U(act, l)}", "fr": f" ; frais d’activation de {U(act, l)}", "es": f"; tarifa de activación de {U(act, l)}"}[l] if act else "")
                         + {"en": f". Prices checked on {day(chk, l)}.", "fr": f". Prix vérifiés le {day(chk, l)}.", "es": f". Precios revisados el {day(chk, l)}."}[l] for l in LANGS}))
     out.append((T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
-                T(f"No. Sweep is independent. The rules on this page come from Sweep’s weekly check of {poss(name)} official pages; always confirm on {poss(name)} site.",
-                  f"Non. Sweep est indépendant. Les règles de cette page viennent de la vérification hebdomadaire des pages officielles de {name} par Sweep ; confirme toujours sur le site de {name}.",
-                  f"No. Sweep es independiente. Las reglas de esta página vienen de la revisión semanal de las páginas oficiales de {name} por Sweep; confirma siempre en el sitio de {name}.")))
+                T(f"No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {name}. The rules on this page come from Sweep’s weekly check of {poss(name)} official pages; always confirm on {poss(name)} site. The {name} name belongs to its owner.",
+                  f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Les règles de cette page viennent de la vérification hebdomadaire des pages officielles de {name} par Sweep ; confirme toujours sur le site de {name}. Le nom {name} appartient à son propriétaire.",
+                  f"No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {name}. Las reglas de esta página vienen de la revisión semanal de las páginas oficiales de {name} por Sweep; confirma siempre en el sitio de {name}. El nombre {name} pertenece a su propietario.")))
     return out
 
 # ---------------------------------------------------------------- hub: /prop-firms

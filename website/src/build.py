@@ -51,7 +51,7 @@ PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","tr
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core
-for key, src, ext in (("css","styles.css","css"),("js","site.js","js")):
+for key, src, ext in (("css","styles.css","css"),("js","site.js","js"),("system","system.css","css")):
     data = open(os.path.join(HERE,src),"rb").read()
     if ext == "css":   # light minification: comments, whitespace
         import re as _r

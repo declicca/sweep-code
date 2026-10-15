@@ -1,4 +1,6 @@
+"""Home page sections, built with the design system (ui.py, system.css)."""
 from core import *
+from ui import sec, head, btn, go, split, card, card_media, cards, tiles, frame_d, frame_p, phone_img, qa, final, read_next
 import re
 
 L3 = lambda en, fr, es: T(en, fr, es)
@@ -7,45 +9,37 @@ def bar(lang, t):
     return (f'<a class="pill rise cohort-pill" href="{href(lang,"100")}"><span class="tag">{t(L3("Founding cohort","Cohorte fondatrice","Cohorte fundadora"))}</span>'
             f'<b><span class="cp-n num">100</span> traders</b><span class="arr" aria-hidden="true">→</span></a>')
 
-def head(t, kick, h2, line):
-    return f'<div class="head"><span class="kick">{t(kick)}</span><h2>{t(h2)}</h2><p class="lead">{t(line)}</p></div>'
-
 def link(lang, t, page, label, anchor=""):
-    return f'<a class="tlink" href="{href(lang,page)}{anchor}">{t(label)} <span aria-hidden="true">→</span></a>'
+    return go(lang, t, page, label, anchor)
 
 def sec_oneplace(lang, t):
     tools = [("doc", L3("Spreadsheet","Tableur","Hoja de cálculo")), ("shield", L3("Firm dashboard","Dashboard de la firme","Panel de la firma")),
              ("calendar", L3("Notes","Notes","Notas")), ("image", L3("Camera roll","Pellicule","Galería")), ("receipt", L3("Bank app","App bancaire","App del banco"))]
     labels = [L3("Trades & charts","Trades et graphiques","Operaciones y gráficos"), L3("Prop firm rules","Règles des prop firms","Reglas de prop firms"),
               L3("Payouts & expenses","Payouts et dépenses","Payouts y gastos"), L3("Plan & reviews","Plan et revues","Plan y revisiones"), L3("Habits & streaks","Habitudes et streaks","Hábitos y rachas")]
-    chips = "".join(f'<li style="--i:{i}">{ico(I[k])}<span>{t(n)}</span></li>' for i,(k,n) in enumerate(tools))
-    lab = "".join(f'<li style="--i:{i}"><span class="ok-dot" aria-hidden="true"></span>{t(n)}</li>' for i,n in enumerate(labels))
-    viz = (f'<div class="oneplace reveal" aria-hidden="true"><ul class="op-from">{chips}</ul><div class="op-arrow"></div>'
+    chips = "".join(f'<li>{ico(I[k])}<span>{t(n)}</span></li>' for k, n in tools)
+    lab = "".join(f'<li><span class="ok-dot" aria-hidden="true"></span>{t(n)}</li>' for n in labels)
+    viz = (f'<div class="oneplace reveal" aria-hidden="true"><ul class="op-from stagger">{chips}</ul><div class="op-arrow"></div>'
            f'<div class="op-card"><div class="op-brand"><span class="op-mark">{MARK}</span>sweep</div><ul>{lab}</ul></div></div>')
-    return (f'<section class="rule" id="one-place"><div class="wrap">'
-            + head(t, L3("Why Sweep","Pourquoi Sweep","Por qué Sweep"), L3("Stop piecing your trading together.","Arrête de recoller les morceaux.","Deja de armar tu trading a pedazos."),
-                   L3("A spreadsheet for trades. Your firm’s dashboard for drawdown. Notes for your plan. Screenshots in your camera roll. Sweep puts it all in one calm place.",
-                      "Un tableur pour tes trades. Le dashboard de ta firme pour le drawdown. Des notes pour ton plan. Des captures dans ta pellicule. Sweep réunit tout au même endroit, au calme.",
-                      "Una hoja de cálculo para tus operaciones. El panel de tu firma para el drawdown. Notas para tu plan. Capturas en tu galería. Sweep lo reúne todo en un solo lugar, con calma."))
-            + viz + '</div></section>')
-
-def cards3(t, items):
-    return '<div class="grid g3 stagger cards3x">' + "".join(f'<div>{ico(I[k])}<h3>{t(h)}</h3><p>{t(p)}</p></div>' for k,h,p in items) + '</div>'
+    return split(t, L3("Why Sweep","Pourquoi Sweep","Por qué Sweep"), L3("Stop piecing your trading together.","Arrête de recoller les morceaux.","Deja de armar tu trading a pedazos."),
+                 L3("A spreadsheet for trades. Your firm’s dashboard for drawdown. Notes for your plan. Screenshots in your camera roll. Sweep puts it all in one calm place.",
+                    "Un tableur pour tes trades. Le dashboard de ta firme pour le drawdown. Des notes pour ton plan. Des captures dans ta pellicule. Sweep réunit tout au même endroit, au calme.",
+                    "Una hoja de cálculo para tus operaciones. El panel de tu firma para el drawdown. Notas para tu plan. Capturas en tu galería. Sweep lo reúne todo en un solo lugar, con calma."),
+                 None, viz, id_="one-place")
 
 def sec_log(lang, t):
-    items = [("image", L3("Screenshot","Capture","Captura"), L3("One capture, every trade on it.","Une capture, tous ses trades ajoutés.","Una captura, todas sus operaciones.")),
-             ("chat", L3("Your words","Tes mots","Tus palabras"), L3("“Long 2 NQ at the open, out at target.”","« Long 2 NQ à l’ouverture, sorti à la cible. »","«Largo 2 NQ en la apertura, salida en el objetivo.»")),
-             ("download", L3("Import","Import","Importar"), L3(f'Bring in your platform’s export, or <a href="{href(lang, "ninjatrader.html")}">sync NinjaTrader 8</a>.', f'L’export de ta plateforme, importé, ou <a href="{href(lang, "ninjatrader.html")}">NinjaTrader 8 synchronisé</a>.', f'Trae la exportación de tu plataforma o <a href="{href(lang, "ninjatrader.html")}">sincroniza NinjaTrader 8</a>.'))]
-    return (f'<section class="rule" id="logging"><div class="wrap">'
-            + head(t, L3("Log","Saisie","Registro"), L3("Log a trade in seconds.","Un trade ajouté en quelques secondes.","Registra una operación en segundos."),
-                   L3("No homework. Drop a screenshot, say it in your own words, or import your platform’s export. Sweep fills in the rest.",
-                      "Pas de devoirs. Dépose une capture, raconte-le avec tes mots ou importe l’export de ta plateforme. Sweep fait le reste.",
-                      "Sin tareas. Sube una captura, cuéntala con tus palabras o importa la exportación de tu plataforma. Sweep completa el resto."))
-            + cards3(t, items)
-            + f'<div class="log-shot reveal">{slot("v6-03-log-by-screenshot-d.webp","desktop",t(L3("A trade filled in from a screenshot, sample data","Un trade rempli à partir d’une capture, données d’exemple","Una operación completada desde una captura, datos de ejemplo")),t,cap=False)}'
-            + f'<p class="shot-note">{t(L3("Sample data · Real CME charts appear on your trades the day after the session.","Données d’exemple · Les vrais graphiques CME apparaissent sur tes trades le lendemain de la séance.","Datos de ejemplo · Los gráficos reales de CME aparecen en tus operaciones al día siguiente de la sesión."))}</p></div>'
-            + f'<p class="center-note">{link(lang,t,"how-it-works.html",L3("See how logging works","Voir comment ça marche","Ver cómo funciona"))}</p></div></section>')
-
+    items = [card(t, L3("Screenshot","Capture","Captura"), L3("One capture, every trade on it.","Une capture, tous ses trades ajoutés.","Una captura, todas sus operaciones."), "image"),
+             card(t, L3("Your words","Tes mots","Tus palabras"), L3("“Long 2 NQ at the open, out at target.”","« Long 2 NQ à l’ouverture, sorti à la cible. »","«Largo 2 NQ en la apertura, salida en el objetivo.»"), "chat"),
+             card(t, L3("Import","Import","Importar"), L3(f'Bring in your platform’s export, or <a href="{href(lang, "ninjatrader.html")}">sync NinjaTrader 8</a>.', f'L’export de ta plateforme, importé, ou <a href="{href(lang, "ninjatrader.html")}">NinjaTrader 8 synchronisé</a>.', f'Trae la exportación de tu plataforma o <a href="{href(lang, "ninjatrader.html")}">sincroniza NinjaTrader 8</a>.'), "download")]
+    shot = frame_d("v6-03-log-by-screenshot-d.webp", t(L3("A trade filled in from a screenshot, sample data","Un trade rempli à partir d’une capture, données d’exemple","Una operación completada desde una captura, datos de ejemplo")),
+                   m="v6-03-log-by-screenshot-m.webp", sizes="(max-width: 1067px) 92vw, 1200px", cls="reveal zoom")
+    note = f'<p class="cap">{t(L3("Sample data · Real CME charts appear on your trades the day after the session.","Données d’exemple · Les vrais graphiques CME apparaissent sur tes trades le lendemain de la séance.","Datos de ejemplo · Los gráficos reales de CME aparecen en tus operaciones al día siguiente de la sesión."))}</p>'
+    return sec(head(t, L3("Log","Saisie","Registro"), L3("Log a trade in seconds.","Un trade ajouté en quelques secondes.","Registra una operación en segundos."),
+                    L3("No homework. Drop a screenshot, say it in your own words, or import your platform’s export. Sweep fills in the rest.",
+                       "Pas de devoirs. Dépose une capture, raconte-le avec tes mots ou importe l’export de ta plateforme. Sweep fait le reste.",
+                       "Sin tareas. Sube una captura, cuéntala con tus palabras o importa la exportación de tu plataforma. Sweep completa el resto."),
+                    links=link(lang, t, "how-it-works.html", L3("See how logging works","Voir comment ça marche","Ver cómo funciona")), center=True)
+               + cards(items, 3) + f'<div style="margin-top:64px">{shot}{note}</div>', "n", "logging")
 
 def sec_firms(lang, t):
     import pages18
@@ -53,13 +47,14 @@ def sec_firms(lang, t):
     pts = [T(firms + ". Another firm? Enter its rules once.", firms + ". Une autre firme ? Saisis ses règles une fois.", firms + ". ¿Otra firma? Introduce sus reglas una vez."),
            L3("Rules checked every week against each firm’s official pages.","Règles vérifiées chaque semaine sur les pages officielles des firmes.","Reglas verificadas cada semana en las páginas oficiales de cada firma."),
            L3("A rule changes? You see what it means for your account, and you decide.","Une règle change ? Tu vois ce que ça change pour ton compte, et tu décides.","¿Cambia una regla? Ves qué significa para tu cuenta, y tú decides.")]
+    more = ('<div class="links">' + link(lang, t, "prop-firm-tracker.html", L3("See prop firm tracking","Voir le suivi des prop firms","Ver el seguimiento de prop firms"))
+            + link(lang, t, "prop-firms/index.html", L3("Compare every firm’s rules","Compare les règles de chaque firme","Compara las reglas de cada firma")) + '</div>')
     return split(t, L3("Prop firms","Prop firms","Prop firms"), L3("Your firm’s rules, already loaded.","Les règles de ta firme, déjà chargées.","Las reglas de tu firma, ya cargadas."),
         L3("Pick your firm and account type. Sweep tracks drawdown, consistency and payout conditions for every account you run.",
            "Choisis ta firme et ton type de compte. Sweep suit le drawdown, la consistance et les conditions de payout de chaque compte.",
            "Elige tu firma y tu tipo de cuenta. Sweep sigue el drawdown, la consistencia y las condiciones de payout de cada cuenta."),
-        pts, slot("v6-08-payout-conditions-d.webp","desktop",t(L3("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")),t),
-        id_="prop", more='<p class="tlinks">' + link(lang,t,"prop-firm-tracker.html",L3("See prop firm tracking","Voir le suivi des prop firms","Ver el seguimiento de prop firms"))
-                         + link(lang,t,"prop-firms/index.html",L3("Compare every firm’s rules","Compare les règles de chaque firme","Compara las reglas de cada firma")) + '</p>')
+        pts, frame_d("v6-08-payout-conditions-d.webp", t(L3("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")),
+                     m="v6-08-payout-conditions-m.webp", t=t), id_="prop", more=more)
 
 def sec_payouts(lang, t):
     return split(t, L3("Payouts","Payouts","Payouts"), L3("Every account. Every payout. One record.","Chaque compte. Chaque payout. Un seul historique.","Cada cuenta. Cada payout. Un solo historial."),
@@ -69,43 +64,52 @@ def sec_payouts(lang, t):
         [L3("Evaluations, funded and live accounts stay separate, so the P&L you see is the real one.","Évaluations, comptes financés et live restent séparés : le P&L que tu vois est le vrai.","Evaluaciones, cuentas fondeadas y live siempre separadas: el P&L que ves es el real."),
          L3("Simulated and real money are never added together.","Le simulé et l’argent réel ne sont jamais additionnés.","Lo simulado y el dinero real nunca se suman."),
          L3("<b>Lose an account, keep your history.</b>","<b>Tu perds un compte, tu gardes ton historique.</b>","<b>Pierdes una cuenta, conservas tu historial.</b>")],
-        slot("v6-12-payouts-d.webp","desktop",t(L3("Payouts and expenses, sample data","Payouts et dépenses, données d’exemple","Payouts y gastos, datos de ejemplo")),t), flip=True, id_="payouts", more=f'<p class="fine" style="margin-top:16px">{t(MONEY_PLAN)}</p>')
+        frame_d("v6-12-payouts-d.webp", t(L3("Payouts and expenses, sample data","Payouts et dépenses, données d’exemple","Payouts y gastos, datos de ejemplo")), m="v6-12-payouts-m.webp", t=t),
+        flip=True, id_="payouts", more=f'<p class="fine" style="margin-top:24px">{t(MONEY_PLAN)}</p>')
 
 def sec_disc(lang, t):
+    """A showcase across the page: the day, swept."""
     pts = [L3("Streaks, missions and a weekly boss turn good habits into progress.","Streaks, missions et un boss chaque semaine : tes bonnes habitudes deviennent du progrès.","Rachas, misiones y un jefe semanal convierten los buenos hábitos en progreso."),
            L3("A rough session never blocks your day. It shows up in your discipline score, not as a penalty.","Une séance difficile ne bloque jamais ta journée. Elle compte dans ton score de discipline, pas comme une punition.","Una mala sesión nunca bloquea tu día. Cuenta en tu puntuación de disciplina, no como castigo."),
            L3("Leagues and crews are optional. Your P&L always stays private.","Ligues et crews optionnels. Ton P&L reste toujours privé.","Ligas y crews opcionales. Tu P&L siempre es privado.")]
-    return split(t, L3("Discipline","Discipline","Disciplina"), L3("Sweep your day.","Balaye ta journée.","Barre tu día."),
-        L3("Three steps every trading day: Plan before the open, Execution during the session, Review after the close. Complete all three and your day is swept.",
-           "Trois étapes chaque jour de trading : le Plan avant l’ouverture, l’Exécution pendant la séance, la Revue après la clôture. Les trois faites, ta journée est balayée.",
-           "Tres pasos cada día de trading: el Plan antes de la apertura, la Ejecución durante la sesión y la Revisión después del cierre. Completa los tres y tu día queda barrido."),
-        pts, slot("v6-video-today-phone.mp4","phone",t(L3("Today on a phone: rings, days, releases","Aujourd’hui sur téléphone : anneaux, jours, annonces","Hoy en el teléfono: anillos, días, datos")),t,video=True,poster="v6-poster-today-phone.webp"),
-        id_="discipline", more=link(lang,t,"how-it-works.html",L3("See how discipline works","Voir comment fonctionne la discipline","Ver cómo funciona la disciplina"),"#discipline"))
+    points = '<ul class="points stagger">' + "".join(f"<li>{t(x)}</li>" for x in pts) + "</ul>"
+    shot = frame_d("v6-22-today-swept-d.webp", t(L3("Today: plan, execution and review done, the day swept, sample data","Aujourd’hui : plan, exécution et revue faits, journée balayée, données d’exemple","Hoy: plan, ejecución y revisión hechos, día barrido, datos de ejemplo")),
+                   m="v6-22-today-swept-m.webp", sizes="(max-width: 1067px) 92vw, 1320px", t=t, cls="reveal zoom")
+    return sec(head(t, L3("Discipline","Discipline","Disciplina"), L3("Sweep your day.","Balaye ta journée.","Barre tu día."),
+                    L3("Three steps every trading day: Plan before the open, Execution during the session, Review after the close. Complete all three and your day is swept.",
+                       "Trois étapes chaque jour de trading : le Plan avant l’ouverture, l’Exécution pendant la séance, la Revue après la clôture. Les trois faites, ta journée est balayée.",
+                       "Tres pasos cada día de trading: el Plan antes de la apertura, la Ejecución durante la sesión y la Revisión después del cierre. Completa los tres y tu día queda barrido."),
+                    links=link(lang, t, "how-it-works.html", L3("See how discipline works","Voir comment fonctionne la discipline","Ver cómo funciona la disciplina"), "#discipline"), center=True)
+               + points + shot, "a", "discipline", cls="show", width="wide")
 
 def sec_ai(lang, t):
-    items = [("spark", T("Edge Reveal","Edge Reveal","Edge Reveal"), L3("The setups and hours that pay you most.","Les setups et les heures qui te rapportent le plus.","Los setups y horarios que más te pagan.")),
-             ("chat", L3("Ask your journal","Demande à ton journal","Pregúntale a tu diario"), L3("“What’s my best time of day on NQ?”","« Quelle est ma meilleure heure sur NQ ? »","«¿Cuál es mi mejor hora en NQ?»")),
-             ("calendar", L3("Economic calendar","Calendrier économique","Calendario económico"), L3("AI notes before every major release.","Des notes IA avant chaque annonce majeure.","Notas de IA antes de cada dato importante."))]
-    return (f'<section class="rule ai-sec" id="sweep-ai"><div class="wrap">'
-            + head(t, T("Sweep AI","Sweep AI","Sweep AI"), L3("Ask your journal anything.","Pose n’importe quelle question à ton journal.","Pregúntale lo que quieras a tu diario."),
-                   L3("Sweep AI reads your trades, plans and reviews, then answers in plain words.","Sweep AI lit tes trades, tes plans et tes revues, puis répond simplement.","Sweep AI lee tus operaciones, planes y revisiones, y responde con palabras simples."))
-            + cards3(t, items) + f'<p class="center-note">{link(lang,t,"ai.html",L3("Meet Sweep AI","Découvrir Sweep AI","Conoce Sweep AI"))}</p></div></section>')
+    L = "fr" if lang == "fr" else ("es" if lang == "es" else "en")
+    items = [card_media(t, T("Edge Reveal","Edge Reveal","Edge Reveal"), L3("The setups and hours that pay you most.","Les setups et les heures qui te rapportent le plus.","Los setups y horarios que más te pagan."),
+                        phone_img("/img/captures/ecran-edge-reveal.webp", t(L3("Edge Reveal: one truth from your trades","Edge Reveal : une vérité tirée de tes trades","Edge Reveal: una verdad de tus operaciones")), "50% 74%"), crop=True),
+             card_media(t, L3("Ask your journal","Demande à ton journal","Pregúntale a tu diario"), L3("“What’s my best time of day on NQ?”","« Quelle est ma meilleure heure sur NQ ? »","«¿Cuál es mi mejor hora en NQ?»"),
+                        phone_img(f"/img/mobile-{L}-dark-ask-sweep-786.webp", t(L3("Ask Sweep answers from your trades","Ask Sweep répond à partir de tes trades","Ask Sweep responde con tus operaciones")), "50% 4%"), crop=True),
+             card_media(t, L3("Economic calendar","Calendrier économique","Calendario económico"), L3("AI notes before every major release.","Des notes IA avant chaque annonce majeure.","Notas de IA antes de cada dato importante."),
+                        phone_img("/img/mobile-en-dark-economic-calendar-786.webp", t(L3("The week’s economic releases","Les annonces économiques de la semaine","Los datos económicos de la semana")), "50% 6%"), crop=True)]
+    return sec(head(t, T("Sweep AI","Sweep AI","Sweep AI"), L3("Ask your journal anything.","Pose n’importe quelle question à ton journal.","Pregúntale lo que quieras a tu diario."),
+                    L3("Sweep AI reads your trades, plans and reviews, then answers in plain words.","Sweep AI lit tes trades, tes plans et tes revues, puis répond simplement.","Sweep AI lee tus operaciones, planes y revisiones, y responde con palabras simples."),
+                    links=link(lang, t, "ai.html", L3("Meet Sweep AI","Découvrir Sweep AI","Conoce Sweep AI")))
+               + cards(items, 3), "n", "sweep-ai")
 
 def sec_trust(lang, t):
-    items = [("download", L3("Export everything in one click","Export complet en un clic","Exporta todo en un clic")), ("archive", L3("Nothing lost when an account closes","Rien de perdu quand un compte ferme","Nada se pierde al cerrar una cuenta")),
-             ("lock", L3("Secure payments by Stripe","Paiements sécurisés par Stripe","Pagos seguros con Stripe")), ("globe", L3("Built in Québec","Conçu au Québec","Hecho en Quebec"))]
-    return (f'<section class="rule trustline-sec"><div class="wrap"><h2 class="trust-h">{t(L3("Your data stays yours.","Tes données t’appartiennent.","Tus datos son tuyos."))}</h2>'
-            f'<ul class="trustrow stagger">{"".join(f"<li>{ico(I[k])}<span>{t(l)}</span></li>" for k,l in items)}</ul>'
-            f'<p class="fine" style="text-align:center;margin:18px auto 0">{t(L3("Sweep doesn’t offer financial advice.","Sweep n’offre pas de conseils financiers.","Sweep no ofrece asesoría financiera."))} <a href="{href(lang,"security.html")}">{t(L3("Security and data","Sécurité et données","Seguridad y datos"))}</a></p></div></section>')
+    items = [("download", L3("Export everything in one click","Export complet en un clic","Exporta todo en un clic"), None), ("archive", L3("Nothing lost when an account closes","Rien de perdu quand un compte ferme","Nada se pierde al cerrar una cuenta"), None),
+             ("lock", L3("Secure payments by Stripe","Paiements sécurisés par Stripe","Pagos seguros con Stripe"), None), ("globe", L3("Built in Québec","Conçu au Québec","Hecho en Quebec"), None)]
+    return sec(head(t, None, L3("Your data stays yours.","Tes données t’appartiennent.","Tus datos son tuyos."),
+                    links=link(lang, t, "security.html", L3("Security and data","Sécurité et données","Seguridad y datos")))
+               + tiles(t, items) + f'<p class="fine" style="margin-top:20px">{t(L3("Sweep doesn’t offer financial advice.","Sweep n’offre pas de conseils financiers.","Sweep no ofrece asesoría financiera."))}</p>', "t", "trust")
 
 def sec_pricing(lang, t):
-    tiles = [("Free", L3("$0, forever","0 $, pour toujours","0 $, para siempre")), ("Pro", L3("$19/mo","19 $/mois","19 $/mes")), ("Elite", L3("$39/mo","39 $/mois","39 $/mes"))]
-    tl = "".join(f'<div class="ptile2{" main" if n=="Pro" else ""}"><b>{n}</b><span class="num">{t(v)}</span></div>' for n,v in tiles)
-    return (f'<section class="rule" id="pricing"><div class="wrap" style="text-align:center">'
-            f'<div class="head" style="margin:0 auto"><span class="kick">{t(L3("Pricing","Tarifs","Precios"))}</span><h2>{t(L3("Start free. Stay free if you like.","Commence gratuitement. Reste gratuit si tu veux.","Empieza gratis. Quédate gratis si quieres."))}</h2>'
-            f'<p class="lead" style="margin-left:auto;margin-right:auto">{t(L3("Every new trader gets 60 days of Pro to try everything. Then keep Free, or upgrade.","Chaque nouveau trader reçoit 60 jours de Pro pour tout essayer. Ensuite, garde Free ou passe à un forfait.","Cada trader nuevo recibe 60 días de Pro para probarlo todo. Después, sigue en Free o mejora tu plan."))}</p></div>'
-            f'<div class="ptiles2 stagger">{tl}</div><p class="fine" style="margin-top:12px">{t(L3("Annual billing: −30%. Prices before tax.","Facturation annuelle : −30 %. Prix avant taxes.","Facturación anual: −30 %. Precios antes de impuestos."))}</p>'
-            f'<p class="center-note">{link(lang,t,"pricing.html",L3("Compare plans","Comparer les forfaits","Comparar planes"))} · {link(lang,t,"best-trading-journal-for-prop-firms.html",L3("Compare Sweep","Comparer Sweep","Comparar Sweep"))}</p></div></section>')
+    tiles_ = [("Free", L3("$0","0 $","0 $"), L3("forever","pour toujours","para siempre")), ("Pro", L3("$19","19 $","19 $"), L3("/mo","/mois","/mes")), ("Elite", L3("$39","39 $","39 $"), L3("/mo","/mois","/mes"))]
+    tl = "".join(f'<div class="plan-mini{" main" if n == "Pro" else ""}"><b>{n}</b><span class="num">{t(p)} <small>{t(u)}</small></span></div>' for n, p, u in tiles_)
+    return sec(head(t, L3("Pricing","Tarifs","Precios"), L3("Start free. Stay free if you like.","Commence gratuitement. Reste gratuit si tu veux.","Empieza gratis. Quédate gratis si quieres."),
+                    L3("Every new trader gets 60 days of Pro to try everything. Then keep Free, or upgrade.","Chaque nouveau trader reçoit 60 jours de Pro pour tout essayer. Ensuite, garde Free ou passe à un forfait.","Cada trader nuevo recibe 60 días de Pro para probarlo todo. Después, sigue en Free o mejora tu plan."), center=True)
+               + f'<div class="plans stagger">{tl}</div><p class="cap">{t(L3("Annual billing: −30%. Prices before tax.","Facturation annuelle : −30 %. Prix avant taxes.","Facturación anual: −30 %. Precios antes de impuestos."))}</p>'
+               + f'<div class="links" style="justify-content:center">{link(lang, t, "pricing.html", L3("Compare plans","Comparer les forfaits","Comparar planes"))}{link(lang, t, "best-trading-journal-for-prop-firms.html", L3("Compare Sweep","Comparer Sweep","Comparar Sweep"))}</div>',
+               "n", "pricing")
 
 FAQ5 = [
  (L3("Is Sweep really free?","Sweep est-il vraiment gratuit ?","¿Sweep es realmente gratis?"),
@@ -123,13 +127,12 @@ FAQ5 = [
   L3("A trading journal records every trade, your plan and your review, so you can see what works. Sweep is a free trading journal built for futures and prop firm traders: it also tracks your firm’s rules and, on Pro and Elite, your payouts and expenses in the same place. To compare it with other journals, read <a href=\"/best-trading-journal-for-prop-firms\">the best trading journal for prop firm traders</a> or <a href=\"/sweep-vs-tradezella\">Sweep vs TradeZella</a>.","Un journal de trading enregistre chaque trade, ton plan et ta revue, pour voir ce qui fonctionne. Sweep est un journal de trading gratuit conçu pour les traders de futures et de prop firms : il suit aussi les règles de ta firme et, avec Pro et Elite, tes payouts et tes dépenses, au même endroit. Pour le comparer aux autres journaux, lis <a href=\"/fr/best-trading-journal-for-prop-firms\">le meilleur journal de trading pour les prop firms</a> ou <a href=\"/fr/sweep-vs-tradezella\">Sweep vs TradeZella</a>.","Un diario de trading registra cada operación, tu plan y tu revisión, para ver qué funciona. Sweep es un diario de trading gratis creado para traders de futuros y prop firms: además sigue las reglas de tu firma y, con Pro y Elite, tus payouts y tus gastos, en el mismo lugar. Para compararlo con otros diarios, lee <a href=\"/es/best-trading-journal-for-prop-firms\">el mejor diario de trading para prop firms</a> o <a href=\"/es/sweep-vs-tradezella\">Sweep vs TradeZella</a>.")),
 ]
 def sec_faq(lang, t):
-    return (f'<section class="rule" id="faq"><div class="wrap narrow"><div class="head"><h2>{t(L3("Questions","Questions","Preguntas"))}</h2></div>'
-            + "".join(faq_item(t,q,a) for q,a in FAQ5) + f'<p style="margin-top:20px">{link(lang,t,"faq.html",L3("All questions","Toutes les questions","Todas las preguntas"))}</p></div></section>')
+    return sec(head(t, None, L3("Questions","Questions","Preguntas")) + qa(t, FAQ5, link(lang, t, "faq.html", L3("All questions","Toutes les questions","Todas las preguntas"))), "n", "faq", width="read")
 def faq_ld(t):
     return {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":re.sub(r"<[^>]+>","",t(a))}} for q,a in FAQ5]}
 
 REASSURE = L3("Free forever · 60 days of Pro included · No card","Gratuit pour toujours · 60 jours de Pro inclus · Sans carte","Gratis para siempre · 60 días de Pro incluidos · Sin tarjeta")
+def sec_next(lang, t):
+    return read_next(lang, t, ["features.html", "prop-firm-tracker.html", "tools.html"])
 def sec_final(lang, t):
-    return (f'<section class="final rule"><div class="wrap" style="text-align:center"><h2>{t(L3("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}</h2>'
-            f'<div class="cta-row" style="justify-content:center;margin-top:26px"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(L3("Start free","Commencer gratuitement","Empieza gratis"))}</a></div>'
-            f'<p class="fine" style="margin-top:14px">{t(L3("Free forever · 60 days of Pro · No card","Gratuit pour toujours · 60 jours de Pro · Sans carte","Gratis para siempre · 60 días de Pro · Sin tarjeta"))}</p></div></section>')
+    return final(lang, t)

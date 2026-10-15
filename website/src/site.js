@@ -96,7 +96,7 @@
     var rt = false;
     var settle = function(){ var r = reel.getBoundingClientRect(), vh = window.innerHeight;
       var p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.85) - 0.35));
-      var mx = window.innerWidth < 861 ? 6 : 10; reel.style.setProperty('--rx', (mx * (1 - p)).toFixed(2) + 'deg'); reel.style.setProperty('--rs', (0.94 + 0.06 * p).toFixed(4));
+      var mx = window.innerWidth < 861 ? 3 : 5; reel.style.setProperty('--rx', (mx * (1 - p)).toFixed(2) + 'deg'); reel.style.setProperty('--rs', (0.94 + 0.06 * p).toFixed(4));
       if(reel.dataset.ready) reel.style.transform = 'perspective(1800px) rotateX(' + (mx * (1 - p)).toFixed(2) + 'deg) scale(' + (0.94 + 0.06 * p).toFixed(4) + ')';
       rt = false; };
     reel.addEventListener('animationend', function(){ reel.dataset.ready = '1'; reel.style.animation = 'none'; settle(); }, {once:true});
@@ -199,7 +199,7 @@
   if(!('IntersectionObserver' in window)){ document.querySelectorAll('.reveal,.final .mark').forEach(function(el){ el.classList.add('in'); }); return; }
 
   // screenshots fade in when loaded
-  document.querySelectorAll('.frame img, .phone img, .pillar .shot img').forEach(function(img){
+  document.querySelectorAll('.frame img, .phone img, .pillar .shot img, .fr img').forEach(function(img){
     if(img.complete && img.naturalWidth) img.classList.add('ld');
     else { img.addEventListener('load', function(){ img.classList.add('ld'); }, {once:true}); img.addEventListener('error', function(){ img.classList.add('ld'); }, {once:true}); }
   });

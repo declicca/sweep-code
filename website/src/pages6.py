@@ -131,61 +131,34 @@ def sec_social(lang, t, id_="social", flip=True):
 
 # ----------------------------------------------------------------- HOME
 def page_home(lang, t):
-    from pages16 import bar, faq_ld
-    from pages3 import ai_band
-    hero = f'''<div class="hero"><div class="wrap">
-<div class="hero-copy">
+    """Home, on the design system (ui.py, system.css)."""
+    from pages16 import bar, sec_oneplace, sec_log, sec_firms, sec_payouts, sec_disc, sec_ai, sec_trust, sec_pricing, sec_faq, sec_next, sec_final, faq_ld
+    from pages15 import IDENTITY
+    reel = (f'<video class="hero-loop" muted loop playsinline preload="none" data-auto aria-label="{html.escape(t(T("Sweep in action: your day, a trade logged in seconds, your rules, every trade, payout ready, your progress","Sweep en action : ta journée, un trade ajouté en quelques secondes, tes règles, chaque trade, payout prêt, ta progression","Sweep en acción: tu día, una operación registrada en segundos, tus reglas, cada operación, payout listo, tu progreso")))}">'
+            '<source src="/video/hero-loop-720.webm" type="video/webm" media="(max-width: 860px)"><source src="/video/hero-loop-720.mp4" type="video/mp4" media="(max-width: 860px)">'
+            '<source src="/video/hero-loop.webm" type="video/webm"><source src="/video/hero-loop.mp4" type="video/mp4"></video>')
+    hero = f'''<div class="hero"><div class="c">
 {bar(lang,t)}
 <h1><span class="h1-eyebrow rise">{t(T("Free trading journal for futures & prop firm traders","Journal de trading gratuit pour traders de futures et de prop firms","Diario de trading gratis para traders de futuros y prop firms"))}</span><span class="wu h1-promise">{words(t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar.")),0.15)}</span></h1>
 <p class="lead rise d2">{t(T("Trades, prop accounts, payouts, expenses and daily habits. Everything you track in five different places, finally together.","Trades, comptes prop, payouts, dépenses et habitudes. Tout ce que tu suis à cinq endroits, enfin réuni.","Operaciones, cuentas prop, payouts, gastos y hábitos. Todo lo que hoy sigues en cinco lugares distintos, por fin junto."))}</p>
-<div class="cta-row rise d3"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(T("Start free","Commencer gratuitement","Empieza gratis"))}</a><button type="button" class="btn btn-line btn-lg" data-tour>{PLAY}{t(TOUR_LABEL)}</button></div>
+<div class="cta-row rise d3"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(CREATE_FREE)}</a><button type="button" class="btn btn-line btn-lg" data-tour>{PLAY}{t(TOUR_LABEL)}</button></div>
 <p class="reassure rise d4">{t(T("Free forever · 60 days of Pro included · No card","Gratuit pour toujours · 60 jours de Pro inclus · Sans carte","Gratis para siempre · 60 días de Pro incluidos · Sin tarjeta"))}</p>
-<p class="reassure rise d4"><a href="{href(lang,'ninjatrader.html')}">{t(T("NinjaTrader 8? Your trades arrive on their own","NinjaTrader 8 ? Tes trades arrivent tout seuls","¿NinjaTrader 8? Tus operaciones llegan solas"))} <span aria-hidden="true">→</span></a></p>
 <div class="cohort rise d5" id="cohort" hidden><div class="cbar"><i></i></div><a href="{href(lang,'100')}" class="ctext num" data-tpl="{t(T("{n}/{total} founding traders","{n}/{total} traders fondateurs","{n}/{total} traders fundadores"))}"></a></div>
 </div>
-<div class="stage has-reel">
-<div class="reel"><video class="hero-loop" muted loop playsinline preload="none" data-auto aria-label="{html.escape(t(T("Sweep in action: your day, a trade logged in seconds, your rules, every trade, payout ready, your progress","Sweep en action : ta journée, un trade ajouté en quelques secondes, tes règles, chaque trade, payout prêt, ta progression","Sweep en acción: tu día, una operación registrada en segundos, tus reglas, cada operación, payout listo, tu progreso")))}"><source src="/video/hero-loop-720.webm" type="video/webm" media="(max-width: 860px)"><source src="/video/hero-loop-720.mp4" type="video/mp4" media="(max-width: 860px)"><source src="/video/hero-loop.webm" type="video/webm"><source src="/video/hero-loop.mp4" type="video/mp4"></video>
+<div class="stage has-reel c c-wide"><div class="reel"><img class="vfb" src="/video/hero-loop-poster.webp" srcset="/video/hero-loop-poster-960.webp 960w, /video/hero-loop-poster.webp 1600w" sizes="(max-width: 1067px) 92vw, 1320px" width="1600" height="900" alt="" fetchpriority="high">{reel}
 <button type="button" class="reel-play" data-tour><span class="rp-ic">{PLAY}</span><span class="rp-tx">{t(TOUR_LABEL)}</span><span class="rp-dur num">1:00</span></button></div>
-<div class="phone"><picture><source media="(prefers-color-scheme: light)" srcset="/img/captures/ecran-apercu-anneaux-clair.webp"><img src="/img/captures/ecran-apercu-anneaux.webp" width="393" height="852" alt="{html.escape(t(T("Today card with the three rings and shortcuts","Carte Aujourd’hui avec les 3 anneaux et les raccourcis","Tarjeta Hoy con los 3 anillos y los accesos")))}" fetchpriority="high"></picture></div>
-
-<div class="phone back" aria-hidden="true"><img src="/img/captures/ecran-ajout-bougie-static.webp" width="393" height="852" alt="" loading="lazy"></div>
-<div class="stage-fade"></div>
-</div></div></div>'''
-    facts = [(14, T("CME futures contracts on real charts","contrats à terme CME sur vrais graphiques","contratos de futuros de CME en gráficos reales")),
-             (3, T("rings a day: plan, execution, review","anneaux par jour : plan, exécution, revue","anillos al día: plan, ejecución, revisión")),
-             (7, T("ranks, from Recruit to Sweeper","rangs, de Recrue à Sweeper","rangos, de Recluta a Sweeper")),
-             (35, T("badges and more, some of them secret","badges et plus, dont des secrets","insignias y más, algunas secretas"))]
-    RINGS = '<svg class="rings" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" pathLength="100"/><circle cx="22" cy="22" r="13" pathLength="100"/><circle cx="22" cy="22" r="7" pathLength="100"/></svg>'
-    fx = "".join(f'<div><span class="num" data-count="{n}">{n}</span>{"<span class=\"plus\">+</span>" if n==35 else ""}{RINGS if n==3 else ""}<span>{t(l)}</span></div>' for n,l in facts)
-    facts_html = f'<section style="padding:64px 0 0"><div class="wrap"><div class="facts stagger">{fx}</div></div></section>'
-    pillars = [("bolt", T("Lightning-fast journal","Journal ultra rapide","Diario ultrarrápido"), T("A trade in 10 seconds, on real charts.","Un trade en 10 secondes, sur de vrais graphiques.","Una operación en 10 segundos, en gráficos reales.")),
-               ("target2", T("Gamified discipline","Discipline gamifiée","Disciplina gamificada"), T("Rings, streaks, missions, bosses. We reward the process, never the P&L.","Anneaux, streaks, missions, boss. On récompense le processus, jamais le P&L.","Anillos, rachas, misiones, jefes. Premiamos el proceso, nunca el P&L.")),
-               ("shield", T("Made for prop firms","Fait pour les prop firms","Hecho para prop firms"), T("Preset rules, drawdown, consistency, a “ready for payout” meter.","Règles préconfigurées, drawdown, consistance, compteur « prêt pour le payout ».","Reglas predefinidas, drawdown, consistencia, indicador «listo para el payout»."))]
-    pil = f'<section class="rule"><div class="wrap">{grid(t, pillars)}</div></section>'
-    from pages2 import FAQ
-    picks = [FAQ[1][1][0], FAQ[0][1][0], FAQ[0][1][1], FAQ[1][1][1], FAQ[2][1][0]]
-    faq = f'''<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>{"".join(faq_item(t,q,a) for q,a in picks)}
-<div class="cta-row"><a class="btn btn-line" href="{href(lang,'faq.html')}">{t(T("All questions","Toutes les questions","Todas las preguntas"))}</a></div></div></section>'''
-    from pages15 import home_faq_ld, IDENTITY
-    from pages16 import bar, faq_ld
+<p class="hero-more"><a href="{href(lang,'ninjatrader.html')}">{t(T("NinjaTrader 8? Your trades arrive on their own","NinjaTrader 8 ? Tes trades arrivent tout seuls","¿NinjaTrader 8? Tus operaciones llegan solas"))} <span aria-hidden="true">→</span></a></p></div></div>'''
     ld = jsonld({"@context":"https://schema.org","@graph":[
         {"@type":"SoftwareApplication","@id":f"https://{DOMAIN}/#app","name":"Sweep","alternateName":"Sweep trading journal","publisher":{"@id":f"https://{DOMAIN}/#org"},"applicationCategory":"FinanceApplication","operatingSystem":"Web","url":APP,
          "description":t(IDENTITY),"inLanguage":["en","fr","es"],
          "offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro","price":"19","priceCurrency":"USD"},{"@type":"Offer","name":"Elite","price":"39","priceCurrency":"USD"}]},
         faq_ld(t), tour_ld(t)]})
-    from pages4 import plans_band
-    ld = ('<link rel="preload" as="image" href="/video/hero-loop-poster-960.webp" media="(max-width: 860px)" fetchpriority="high">'
-          '<link rel="preload" as="image" href="/video/hero-loop-poster.webp" media="(min-width: 861px)" fetchpriority="high">') + ld
-    from pages9 import sec_why, sec_capture, sec_rules
-    from pages10 import sec_eval, sec_share, sec_today, sec_signup
-    from pages15 import sec_realpnl, sec_six, sec_nytime, sec_compare, sec_data, home_faq, home_faq_ld, home_final
-    from pages9 import sec_why, sec_capture, sec_rules
-    from pages16 import bar, sec_oneplace, sec_log, sec_firms, sec_payouts, sec_disc, sec_ai, sec_trust, sec_pricing, sec_faq, sec_final, faq_ld
     body = (hero + sec_oneplace(lang,t) + sec_log(lang,t) + sec_firms(lang,t) + sec_payouts(lang,t) + sec_disc(lang,t) + sec_ai(lang,t)
-            + sec_trust(lang,t) + sec_pricing(lang,t) + sec_faq(lang,t) + sec_final(lang,t) + COHORT_JS + tour_dialog(t))
+            + sec_trust(lang,t) + sec_pricing(lang,t) + sec_faq(lang,t) + sec_next(lang,t) + sec_final(lang,t) + COHORT_JS + tour_dialog(t))
     return (t(T("Sweep — Trading Journal for Prop Firm Traders · Free","Sweep — Journal de trading pour prop firms · Gratuit","Sweep — Diario de trading para prop firms · Gratis")),
             t(T("Track every prop firm account, payout and expense in one place. Free forever, Pro from $19/mo. Built for Topstep, Apex, Lucid and more.","Suis chaque compte prop, payout et dépense au même endroit. Gratuit pour toujours, Pro dès 19 $/mois. Conçu pour Topstep, Apex, Lucid et plus.","Sigue cada cuenta prop, payout y gasto en un solo lugar. Gratis para siempre, Pro desde 19 $/mes. Hecho para Topstep, Apex, Lucid y más.")),
             body, ld)
+SYSTEM_PAGES.add("index.html")
 
 
 # ----------------------------------------------------------------- product tour video (lightbox)
@@ -324,7 +297,7 @@ def page_pricing(lang, t):
             return f'<div class="price"><span class="num">{money(t,0)}</span></div><p class="per muted">{t(T("forever","pour toujours","para siempre"))}</p>'
         m, y = PRICES[plan]["m"], PRICES[plan]["y"]
         ym = money(t, round(y/12, 2)); mm = money(t, m); yy = money(t, y)
-        by = t(T(f"billed {yy} a year · 2 months free",f"facturé {yy} par année · 2 mois offerts",f"facturado {yy} al año · 2 meses gratis"))
+        by = t(T(f"billed {yy} a year · save 30%",f"facturé {yy} par année · 30 % de moins",f"facturado {yy} al año · ahorra un 30 %"))
         bm = t(T("billed monthly","facturé chaque mois","facturado mensualmente"))
         return f'<div class="price"><span class="num" data-m="{mm}" data-y="{ym}">{ym}</span><span class="muted">/{t(T("mo","mois","mes"))}</span></div><p class="per muted" data-m="{bm}" data-y="{by}">{by}</p>'
     feats = {
@@ -341,7 +314,7 @@ def page_pricing(lang, t):
 {card("Pro","pro",T("More accounts, more AI and the whole game. Included for your first 60 days.","Plus de comptes, plus d’IA et tout le jeu. Offert pendant tes 60 premiers jours.","Más cuentas, más IA y todo el juego. Incluido tus primeros 60 días."),START,"main",f'<span class="badge">{t(T("60 days included","60 jours offerts","60 días incluidos"))}</span>')}
 {card("Elite","elite",T("The most accounts and AI, 3 streak freezes a week, 2 bosses with rematch and a second Edge Reveal every week.","Le plus de comptes et d’IA, 3 gels de streak par semaine, 2 boss avec revanche et un 2e Edge Reveal chaque semaine.","El máximo de cuentas e IA, 3 congelaciones de racha por semana, 2 jefes con revancha y un 2.º Edge Reveal cada semana."),T("Choose Elite","Choisir Elite","Elegir Elite"),"")}
 </div><div class="dots plan-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-<ul class="under">{"".join(f"<li>{t(x)}</li>" for x in [T("No credit card to start. Cancel anytime.","Sans carte de crédit pour commencer. Annule quand tu veux.","Sin tarjeta para empezar. Cancela cuando quieras."),T("Monthly or yearly billing (yearly is about 2 months free). Prices in USD, before taxes.","Facturation mensuelle ou annuelle (l’annuel revient à environ 2 mois offerts). Prix en USD, affichés avant taxes.","Facturación mensual o anual (la anual equivale a unos 2 meses gratis). Precios en USD, antes de impuestos."),T("Secure payment by Stripe. No refunds on periods already started.","Paiement sécurisé par Stripe. Aucun remboursement sur les périodes entamées.","Pago seguro con Stripe. Sin reembolsos en periodos ya iniciados.")])}</ul>'''
+<ul class="under">{"".join(f"<li>{t(x)}</li>" for x in [T("No credit card to start. Cancel anytime.","Sans carte de crédit pour commencer. Annule quand tu veux.","Sin tarjeta para empezar. Cancela cuando quieras."),T("Monthly or yearly billing (yearly saves 30%). Prices in USD, before taxes.","Facturation mensuelle ou annuelle (l’annuel coûte 30 % de moins). Prix en USD, affichés avant taxes.","Facturación mensual o anual (la anual cuesta un 30 % menos). Precios en USD, antes de impuestos."),T("Secure payment by Stripe. No refunds on periods already started.","Paiement sécurisé par Stripe. Aucun remboursement sur les périodes entamées.","Pago seguro con Stripe. Sin reembolsos en periodos ya iniciados.")])}</ul>'''
     b = f'<section style="padding-top:8px"><div class="wrap">{cards}</div></section>'
     cmp = f'<div class="cmp-wrap"><table class="cmp"><thead><tr><th scope="col"><span class="sr">{t(T("Feature","Fonctionnalité","Función"))}</span></th><th scope="col">Free</th><th scope="col" class="hl">Pro</th><th scope="col">Elite</th></tr></thead><tbody>{body}</tbody></table></div>'
     stat = lambda big, small: f'<div><span class="num">{t(big)}</span><span>{t(small)}</span></div>'

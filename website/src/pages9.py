@@ -122,23 +122,40 @@ DAYS = [
    T("First real candlestick charts","Premiers graphiques en bougies réelles","Primeros gráficos de velas reales")]),
 ]
 
+# changelog visuals on the design system: (computer capture, phone capture) for each card that has one
+CL_SHOTS = {"v6-12-payouts-d.webp": ("v6-12-payouts-d.webp", "v6-12-payouts-m.webp"), "ecran-payout-apex.webp": ("v6-08-payout-conditions-d.webp", "v6-08-payout-conditions-m.webp"),
+            "ecran-trade-copie.webp": ("v6-01-today-d.webp", "v6-01-today-m.webp"), "ecran-formulaire-capture.webp": (None, "v6-03-log-by-screenshot-m.webp"),
+            "ecran-aujourdhui-tel.webp": (None, "v6-01-today-m.webp")}
+
 def page_changelog(lang, t, older=""):
+    """What's new, on the design system: cards grouped by kind (rows with visuals, rows without), then a timeline."""
+    from ui import sec, card, card_media, card_side, cards, phone_img, read_next, final
+    import html as _h
     hero = page_hero(t, T("What’s new in Sweep.","Ce qui est nouveau dans Sweep.","Lo nuevo en Sweep."),
         T("A trading journal built for futures prop traders: your account’s real numbers, your firm’s real rules, a trade logged in seconds and a daily routine that rewards discipline, not profit.",
           "Un journal de trading pensé pour les traders de prop firms de futures : les vrais chiffres de ton compte, les vraies règles de ta firme, un trade ajouté en quelques secondes et une routine quotidienne qui récompense la discipline, pas le profit.",
           "Un diario de trading pensado para traders de prop firms de futuros: los números reales de tu cuenta, las reglas reales de tu firma, una operación registrada en segundos y una rutina diaria que premia la disciplina, no el beneficio."),
         T("What’s new","Nouveautés","Novedades"))
-    cards = ""
+    shots, phones, texts = [], [], []
     for img, kind, h, p in CARDS:
-        media = slot(img, "phone" if kind == "phone" else "desktop", t(h), t, cap=False) if img else ""
-        cards += f'<article class="ncard reveal{" has-media" if img else ""}"><div class="ntxt"><h2>{t(h)}</h2><p>{t(p)}</p></div>{media}</article>'
-    days = ""
-    for i, (iso, label, items) in enumerate(DAYS):
-        days += f'<details class="day"{" open" if i == 0 else ""}><summary><time datetime="{iso}">{t(label)}</time><span class="cnt num">{len(items)}</span></summary>{ul(t, items)}</details>'
-    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="ncards">{cards}</div></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Day by day","Jour par jour","Día a día"))}</h2></div><div class="days">{days}</div>'
-         + (f'<details class="day older"><summary><span>{t(T("Earlier releases","Versions précédentes","Versiones anteriores"))}</span></summary><div class="older-body">{older}</div></details>' if older else "")
-         + '</div></section>')
+        if not img: texts.append(card(t, h, p)); continue
+        d, m = CL_SHOTS[img]
+        if d:
+            pic = (f'<picture><source media="(max-width: 743px)" srcset="/img/captures/{m}"><img src="/img/captures/{d}" srcset="/img/captures/{d[:-5]}-1200.webp 1200w, /img/captures/{d} 2400w" '
+                   f'sizes="(max-width: 743px) 92vw, (max-width: 1067px) 30vw, 380px" width="2880" height="1800" alt="{_h.escape(t(h))}" loading="lazy" decoding="async"></picture>')
+            shots.append(card_media(t, h, p, pic))
+        else:
+            phones.append(card_side(t, h, p, phone_img(f"/img/captures/{m}", t(h))))
+    # rows alternate: without visuals, with, without, with (text first: the first screen paints at once)
+    grid = (cards(texts[:3], 3) + cards(shots, 3) + cards(texts[3:], 3) + cards(phones, 2)).replace('class="cards ', 'class="cards cl-row ')
+    days = "".join(f'<details{" open" if i < 2 else ""}><summary><time datetime="{iso}">{t(label)}</time><span class="cnt num">{len(items)}</span></summary>'
+                   + '<ul class="list">' + "".join(f"<li>{t(x)}</li>" for x in items) + "</ul></details>" for i, (iso, label, items) in enumerate(DAYS))
+    if older:
+        days += f'<details class="older"><summary><span>{t(T("Earlier releases","Versions précédentes","Versiones anteriores"))}</span></summary><div class="older-body">{older}</div></details>'
+    b = (sec(grid, "t") + sec(f'<div class="read"><div class="head"><h2>{t(T("Day by day","Jour par jour","Día a día"))}</h2></div><div class="tl">{days}</div></div>', "n", "days")
+         + read_next(lang, t, ["features.html", "import.html", "ninjatrader.html"]) + final(lang, t))
     return (t(T("What’s new in Sweep · Changelog","Nouveautés de Sweep · Changelog","Novedades de Sweep · Changelog")),
             t(T("Log a trade from a screenshot, your platform’s real numbers, real prop firm payout rules, copy trading and a new Today page.","Ajout de trade par capture, les vrais chiffres de ta plateforme, les vraies règles de payout des prop firms, copy trading et nouvelle page Aujourd’hui.","Registro por captura, los números reales de tu plataforma, reglas de payout reales de las prop firms, copy trading y nueva página Hoy.")),
-            hero + b + final_cta(lang, t), "")
+            hero + b, "")
+
+SYSTEM_PAGES.add("changelog.html")

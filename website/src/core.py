@@ -7,7 +7,8 @@ APP = "https://app.makeitsweep.com/"
 SIGNUP = "https://app.makeitsweep.com/?signup=1"
 EMAIL = "hello@makeitsweep.com"
 LANGS = ["en", "fr", "es"]
-ASSETS = {"css": "styles.css", "js": "site.js"}
+ASSETS = {"css": "styles.css", "js": "site.js", "system": "system.css"}
+SYSTEM_PAGES = set()   # pages built with ui.py: they load system.css (the design system) instead of styles.css
 TODAY = "2026-10-01"
 IMGS = set(f.rsplit("-", 1)[0] for f in os.listdir(os.path.join(STATIC, "img")))
 
@@ -392,7 +393,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 {alts}
 <link rel="preload" href="/assets/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.classList.add("js")</script>
-<link rel="stylesheet" href="/assets/{ASSETS["css"]}">
+<link rel="stylesheet" href="/assets/{ASSETS["system"] if page in SYSTEM_PAGES else ASSETS["css"]}">
 <link rel="icon" href="/icons/favicon.ico" sizes="any">
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
