@@ -1155,15 +1155,28 @@ function opts(e, t) {
   return e.map(([a, n]) => `<option value="${esc(a)}" ${String(a) === String(t) ? "selected" : ""}>${esc(n)}</option>`).join("");
 }
 
-function filterBar({period: e = !0, session: t = !0, dir: a = !0, trades: n = !1} = {}) {
-  if (isMobileUI()) return mFilterBar({
+function filterBar({period: e = !0, session: t = !0, dir: a = !0, trades: n = !1, lead: l = "", type: y = !0} = {}) {
+  // one line of filters on every page, computer and phone (16 Oct.): the period ▾, the account type ▾, « Filters » (every other
+  // filter, in one sheet) and the active ones as small removable pills; Trades adds its search
+  Object.assign(FSPEC, {
     period: e,
     session: t,
     dir: a,
     trades: n
   });
-  const s = S.firms.slice().sort((c, l) => c.name.localeCompare(l.name)), i = S.accounts.filter(c => F.firm === "all" || c.firm_id === F.firm), o = [ ...new Set(S.trades.map(c => c.instrument || "NQ")) ].sort(), r = F.account !== "all" || F.firm !== "all" || F.session !== "all" || F.dir !== "all" || F.inst && F.inst !== "all";
-  return `<div class="fbars">${e ? '<div class="fbar fb-period">' : ""}\n   ${e ? `<div class="seg" role="group" aria-label="Period">${[ [ "today", "Today" ], [ "week", "This week" ], [ "month", "This month" ], [ "all", "All time" ], [ "custom", "Custom" ] ].map(([c, l]) => `<button data-act="period" data-v="${c}" class="${F.period === c ? "on" : ""}">${l}</button>`).join("")}</div>\n   ${F.period === "custom" ? `<input type="date" data-filter="from" value="${F.from}" aria-label="From"><span class="muted">to</span><input type="date" data-filter="to" value="${F.to}" aria-label="To">` : ""}` : ""}\n   ${e ? "</div>" : ""}<div class="fbar fb-sel">\n   <select data-filter="firm" aria-label="Prop firm">${opts([ [ "all", "All prop firms" ], ...s.map(c => [ c.id, c.name ]) ], F.firm)}</select>\n   <select data-filter="account" aria-label="Account">${opts([ [ "all", "All accounts" ], ...i.map(c => [ c.id, acctLabel(c.id) ]) ], F.account)}</select>\n   ${o.length > 1 || F.inst && F.inst !== "all" ? `<select data-filter="inst" aria-label="Instrument">${opts([ [ "all", "All instruments" ], ...o.map(c => [ c, c ]) ], F.inst || "all")}</select>` : ""}\n   ${t ? `<select data-filter="session" aria-label="Session">${opts([ [ "all", "All sessions" ], ...SESS ], F.session)}</select>` : ""}\n   ${a ? `<select data-filter="dir" aria-label="Direction">${opts([ [ "all", "Long & short" ], [ "long", "Long" ], [ "short", "Short" ] ], F.dir)}</select>` : ""}\n   ${r ? '<button class="link" data-act="clear-filters">Clear filters</button>' : ""}\n  </div></div>`;
+  const i = filterDefs(FSPEC).filter(c => String(c.val) !== String(c.all)), o = c => c.opts.find(d => String(d[0]) === String(c.val)) || [ "", c.val ];
+  const fi = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>';
+  return `<div class="fx" data-noi18n><div class="fx-row" role="toolbar" aria-label="Filters">${l}${e ? `<button type="button" class="fx-c fx-per" data-fx="per" aria-haspopup="true">${esc(fxPerLabel())}<i aria-hidden="true"></i></button>` : ""}${y && window.SweepTypeSeg ? SweepTypeSeg() : ""}<button type="button" class="fx-c fx-more fbtn ${i.length ? "has" : ""}" data-act="fsheet" aria-haspopup="true">${fi}<span>${esc(tr("Filters"))}</span>${i.length ? `<b>${i.length}</b>` : ""}</button>${i.map(c => `<button type="button" class="fx-c fx-on mchip" data-act="fclear" data-k="${c.src}:${c.k}" aria-label="${esc(tr("Remove filter"))} · ${esc(tr(o(c)[1]))}"><span>${esc(tr(o(c)[1]))}</span><i aria-hidden="true">×</i></button>`).join("")}</div>${n ? `<label class="fx-search msearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input type="search" id="search" data-ui="q" value="${esc(U.q)}" placeholder="${esc(tr("Search trades"))}" enterkeyhint="search" aria-label="${esc(tr("Search trades"))}"></label>` : ""}</div>`;
+}
+
+/** the period pill: what is shown (« This month », « Oct 1 – 15 ») */
+function fxPerLabel() {
+  if (F.period === "custom") {
+    const d = x => x && x.length === 10 ? new Date(x + "T12:00:00").toLocaleDateString(LOC(), { day: "numeric", month: "short" }) : "…";
+    return `${d(F.from)} – ${d(F.to)}`;
+  }
+  if (!F.period || F.period === "all") return ({ fr: "Toute la période", es: "Todo el período" })[LANG] || "All time";   // (« Tout » alone said nothing)
+  return tr({ today: "Today", week: "This week", month: "This month" }[F.period]);
 }
 
 function checklist(e, t, max) {
@@ -1418,20 +1431,17 @@ function filterDefs({session: e, dir: t, trades: a}) {
       opts: [ [ "", "All tags" ], ...l.map(p => [ p, p ]) ]
     });
   }
+  /^#(analytics|progress)/.test(location.hash || "") && S.trades.some(c => c.copy_group) && r.push({
+    k: "copyMode",
+    src: "U",
+    label: "Copies",
+    all: "once",
+    opts: [ [ "once", "Counted once" ], [ "contract", "Per contract" ] ]
+  });
   return r.map(c => ({
     ...c,
     val: (c.src === "F" ? F[c.k] : U[c.k]) ?? c.all
   }));
-}
-
-function mFilterBar(e) {
-  Object.assign(FSPEC, e);
-  const a = filterDefs(e).filter(i => String(i.val) !== String(i.all)), n = {
-    en: [ [ "today", "Today" ], [ "week", "Week" ], [ "month", "Month" ], [ "all", "All" ], [ "custom", "Custom" ] ],
-    fr: [ [ "today", "Jour" ], [ "week", "Semaine" ], [ "month", "Mois" ], [ "all", "Tout" ], [ "custom", "Dates" ] ],
-    es: [ [ "today", "Hoy" ], [ "week", "Semana" ], [ "month", "Mes" ], [ "all", "Todo" ], [ "custom", "Fechas" ] ]
-  }[LANG];
-  return `<div class="mfb">\n    ${e.period ? `<div class="mseg" role="tablist" aria-label="Period" data-noi18n><span class="mseg-thumb" style="--i:${Math.max(0, n.findIndex(i => i[0] === F.period))}"></span>${n.map(([i, o]) => `<button role="tab" data-act="period" data-v="${i}" class="${F.period === i ? "on" : ""}" aria-selected="${F.period === i}">${o}</button>`).join("")}</div>\n      ${F.period === "custom" ? `<div class="mdates"><input type="date" data-filter="from" value="${F.from}" aria-label="From"><span class="muted">→</span><input type="date" data-filter="to" value="${F.to}" aria-label="To"></div>` : ""}` : ""}\n    <div class="mfb-row">${e.trades ? `<label class="msearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input type="search" id="search" data-ui="q" value="${esc(U.q)}" placeholder="Search trades" enterkeyhint="search"></label>` : ""}\n      <button class="fbtn ${a.length ? "has" : ""}" data-act="fsheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Filters</span>${a.length ? `<b>${a.length}</b>` : ""}</button></div>\n    ${a.length ? `<div class="mchips">${a.map(i => `<button class="mchip" data-act="fclear" data-k="${i.src}:${i.k}" aria-label="Remove filter"><span>${esc((i.opts.find(o => String(o[0]) === String(i.val)) || [ "", i.val ])[1])}</span><i aria-hidden="true">×</i></button>`).join("")}</div>` : ""}\n  </div>`;
 }
 
 function fsheetHtml() {
@@ -1545,14 +1555,10 @@ function vTrades() {
     return (l < p ? -1 : l > p ? 1 : 0) * (U.sort.d === "asc" ? 1 : -1);
   });
   const o = stats(t);
-  return isMobileUI() ? `${filterBar({
+  // the same page on a computer and a phone (16 Oct.): one line of filters, the 3 figures, the list
+  return `${filterBar({
     trades: !0
   })}\n  <div class="tstats"><div><span>Net P&amp;L</span><b class="${cls(o.net)}">${money(o.net, {
-    dec: 0
-  })}</b></div><div><span>Win rate</span><b>${pct(o.wr)}</b></div><div><span>Trades</span><b>${o.n}</b></div></div>\n  <div class="surface">${S.trades.length ? tradeTable(t, {
-    sortable: !0,
-    page: U.tlimit || 100
-  }) : '<div class="empty">No trades yet. Log your first session to start tracking. <button class="link" data-act="add-trade">Add a trade</button></div>'}</div>` : `${filterBar()}\n  <div class="fbar">\n    <input type="text" id="search" data-ui="q" value="${esc(U.q)}" placeholder="Search notes, setups, tags…  ( / )" style="width:260px">\n    <select data-ui="result" aria-label="Result">${opts([ [ "all", "Wins & losses" ], [ "win", "Winning" ], [ "loss", "Losing" ], [ "be", "Breakeven" ] ], U.result)}</select>\n    <select data-ui="setup" aria-label="Setup">${opts([ [ "all", "All setups" ], ...a.map(r => [ r, r ]) ], U.setup)}</select>\n    <select data-ui="disc" aria-label="Discipline">${opts([ [ "all", "Any discipline" ], [ "hi", `Discipline ≥ ${e}%` ], [ "lo", `Discipline < ${e}%` ], [ "none", "Checklist not done" ] ], U.disc)}</select>\n    ${n.length ? `<select data-ui="tag" aria-label="Tag">${opts([ [ "", "All tags" ], ...n.map(r => [ r, r ]) ], U.tag)}</select>` : ""}\n    <a class="btn sm" href="#import">Import CSV</a>\n    <span class="muted tsum" style="margin-left:auto">${o.n} trades · <span class="${cls(o.net)}">${money(o.net)}</span> · ${pct(o.wr)} win rate</span>\n  </div>\n  <div class="tstats"><div><span>Net P&amp;L</span><b class="${cls(o.net)}">${money(o.net, {
     dec: 0
   })}</b></div><div><span>Win rate</span><b>${pct(o.wr)}</b></div><div><span>Trades</span><b>${o.n}</b></div></div>\n  <div class="surface">${S.trades.length ? tradeTable(t, {
     sortable: !0,

@@ -115,7 +115,7 @@
 /* Today: replaced sections never painted (day numbers → Day · Week card, accounts → accounts card, period → curve header) */
 #main:has(> .greet) > section.surface:has(.today),
 #main:has(> .greet) > section.sec:has(.acards),
-#main:has(> .greet) > section.sec:has(.fbars, [data-act="period"]),
+#main:has(> .greet) > section.sec:has(.fbars, .fx, [data-act="period"]),
 #main > section.nav-old{display:none!important}
 /* the sections that become cards wait for their place in the grid (no jump); without the script they show after 4 s */
 html.nav-js #main:has(> .greet) > section.sec:has([data-act="eq"], .chartbox),
@@ -2777,3 +2777,66 @@ body:has(.acc-dlg.open) .acc-bar,body:has(.nav-pass.open) .acc-bar{display:none}
   html body #main .nav-acc-top:has(.acc-selb) > .nav-ord-b{order:2}
   html body #main .nav-acc-top:has(.acc-selb) > .acc-selb{order:1}
 }
+
+/* ───── One line of filters (16 Oct.): Period ▾ · Account type ▾ · Filters · the active ones; Trades: its search ───── */
+html body #main .fx{display:flex;align-items:center;gap:10px;margin:0 0 18px;min-width:0}
+html body #main .fx-row{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+html body .fx-c{position:relative;display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;box-sizing:border-box;height:36px;padding:0 14px;border:0;border-radius:var(--r-pill);background:var(--fill);box-shadow:inset 0 0 0 1px var(--hair);color:var(--text);font:500 14px/1 var(--font-ui,Geist,system-ui,sans-serif);white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .15s var(--ease-ios),transform .14s var(--ease-ios)}
+html body .fx-c:hover{background:var(--fill-2)}
+html body .fx-c:active{transform:scale(.97)}
+html body .fx-c:focus-visible{outline:0;box-shadow:var(--focus)}
+html body .fx-c > i{width:6px;height:6px;margin:-3px 0 0 1px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);opacity:.6}
+html body .fx-c svg{width:16px;height:16px;flex-shrink:0;color:var(--muted)}
+html body .fx-c.fx-set,html body .fx-c.fx-more.has{background:var(--posbg);box-shadow:inset 0 0 0 1px rgba(var(--pos-rgb),.35);color:var(--pos)}
+html body .fx-c.fx-more.has svg{color:var(--pos)}
+html body .fx-c.fx-more b{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--pos-fill);color:#fff;font-size:11px;font-weight:700;box-sizing:border-box}
+html body .fx-c.fx-on{background:var(--posbg);box-shadow:none;color:var(--text);padding:0 10px 0 12px;font-weight:450}
+html body .fx-c.fx-on > i{width:auto;height:auto;margin:0;border:0;transform:none;opacity:.7;font-style:normal;font-size:16px}
+html body #main .fx-search{display:flex;align-items:center;gap:8px;margin-left:auto;width:260px;height:36px;padding:0 12px;box-sizing:border-box;border-radius:var(--r-pill);background:var(--fill);box-shadow:inset 0 0 0 1px var(--hair)}
+html body #main .fx-search svg{width:16px;height:16px;flex-shrink:0;color:var(--muted)}
+html body #main .fx-search input{flex:1;min-width:0;height:100%;border:0!important;background:none!important;box-shadow:none!important;padding:0!important;font-size:14px;color:var(--text);outline:0;min-height:0!important}
+html body #main .fx-search:focus-within{box-shadow:var(--focus)}
+html body #main .nav-kpi-h > .fx-c{margin-left:4px}
+html body #main .tstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 14px}
+html body #main .tstats > div{display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-radius:var(--r-tile,20px);background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+html body #main .tstats span{font-size:12.5px;color:var(--muted)}
+html body #main .tstats b{font:600 19px "Geist Mono",ui-monospace,monospace;letter-spacing:-.02em}
+@media (max-width:860px){html body #main .tstats{gap:8px}html body #main .tstats > div{padding:10px 12px}html body #main .tstats b{font-size:17px}}
+@media (max-width:860px){
+  /* phone: one line that scrolls (Period, Type, Filters, the active ones), the search under it on Trades */
+  html body #main .fx{display:block;margin:0 0 16px}
+  html body #main .fx-row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:3px 20px;scroll-padding:0 20px}
+  html body #main .fx-row::-webkit-scrollbar{display:none}
+  html body .fx-c{height:40px;padding:0 15px;font-size:15px}
+  html body .fx-c::after{content:"";position:absolute;inset:-2px 0}
+  html body #main .fx-search{width:auto;height:44px;margin:10px 0 0;font-size:16px}
+  html body #main .fx-search input{font-size:16px}
+  html body #main .nav-kpi-h{flex-wrap:wrap;row-gap:10px}
+}
+/* the choices of a pill: a small menu under it (computer), a sheet from the bottom (phone) */
+.fxm{position:fixed;z-index:180;min-width:220px;max-width:calc(100vw - 24px);padding:6px;box-sizing:border-box;border-radius:var(--r-tile,20px);background:var(--glass-strong,var(--panel));-webkit-backdrop-filter:saturate(1.8) blur(24px);backdrop-filter:saturate(1.8) blur(24px);box-shadow:0 0 0 1px var(--hair),0 18px 44px -18px rgba(0,0,0,.6);opacity:0;transform:translateY(-4px) scale(.98);transform-origin:top left;transition:opacity .18s var(--ease-ios),transform .22s var(--ease-ios)}
+.fxm.open{opacity:1;transform:none}
+.fxm-t{margin:6px 10px 4px;font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--muted)}
+.fxm-l{display:flex;flex-direction:column}
+.fxm-o{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:38px;padding:0 10px;border:0;border-radius:12px;background:none;color:var(--text);font:450 14.5px var(--font-ui,Geist,system-ui,sans-serif);text-align:left;cursor:pointer}
+.fxm-o:hover,.fxm-o:focus-visible{background:var(--fill);outline:0}
+.fxm-o svg{width:16px;height:16px;fill:none;stroke:var(--pos);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.fxm-o.on{font-weight:600}.fxm-o.on svg{opacity:1}
+.fxm-d{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 6px 4px}
+.fxm-d .f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.fxm-d input{min-height:38px;font-size:14px}
+.fxm-sheet{left:0!important;right:0;top:auto!important;bottom:0;max-width:none;min-width:0!important;padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));border-radius:var(--r-block,32px) var(--r-block,32px) 0 0;transform:translateY(100%);transition:transform .34s var(--ease-ios)}
+.fxm-sheet.open{transform:none}
+.fxm-grab{display:block;width:38px;height:5px;margin:4px auto 6px;border-radius:3px;background:var(--line2)}
+.fxm-sheet .fxm-t{margin:6px 6px 8px;font-size:17px;font-weight:600;color:var(--text);letter-spacing:0}
+.fxm-sheet .fxm-l{border-radius:var(--r-tile,20px);background:var(--fill);overflow:hidden}
+.fxm-sheet .fxm-o{min-height:50px;padding:0 16px;border-radius:0;font-size:16px;background-image:linear-gradient(var(--line),var(--line));background-repeat:no-repeat;background-size:calc(100% - 16px) 1px;background-position:16px 0}
+.fxm-sheet .fxm-o:first-child{background-image:none}
+.fxm-sheet .fxm-d input{min-height:44px;font-size:16px}
+.fxm-scrim{position:fixed;inset:0;z-index:179;background:rgba(0,0,0,.35);opacity:0;transition:opacity .25s var(--ease-ios)}
+.fxm-scrim.open{opacity:1}
+@media (prefers-reduced-transparency:reduce){.fxm{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--panel)}}
+/* the type pill keeps the old selector's class (« mny-tsw ») only to be found: none of its old margins and layout */
+html body #main .fx-c.mny-tsw{display:inline-flex!important;flex-wrap:nowrap;max-width:none;margin:0!important;gap:7px}
+html body #main .fx-c.fbtn{min-height:0;height:36px;border-radius:var(--r-pill);margin:0}
+@media (max-width:860px){html body #main .fx-c.fbtn{height:40px}}

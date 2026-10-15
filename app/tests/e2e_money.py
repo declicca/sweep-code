@@ -106,11 +106,11 @@ async def main():
     await pg.evaluate("U.mtype='live'; saveU(); F.period='all'; saveF(); location.hash='#trades'"); await pg.wait_for_timeout(1800)
     rows = await pg.evaluate("document.querySelectorAll('#main tr[data-href^=\"#trade/\"], #main .trow, #main [data-href^=\"#trade/\"]').length")
     empty = await pg.evaluate("/No trades match|Aucun trade ne correspond|Ningún trade coincide/.test(document.getElementById('main').innerText)")
-    active = await pg.evaluate("!!document.querySelector('#main .mny-tseg [data-mtype=live].on')")
+    active = await pg.evaluate("U.mtype==='live' && !!document.querySelector('#main [data-fx=type].fx-set')")   # (16 Oct.: the type is a pill of the one line of filters)
     ok(rows >= 1 and not empty and active, f'with « Live » chosen, Trades shows the live trades and says so (selector on « Live », {rows} rows)')
     await pg.evaluate("location.hash='#calendar'"); await pg.wait_for_timeout(1200)
     # 14 (lot A, 9 Oct): the Calendar shows the same selector and follows it — never a hidden filter
-    sel = await pg.evaluate("!!document.querySelector('#main .mny-tseg [data-mtype=live].on')")
+    sel = await pg.evaluate("U.mtype==='live' && !!document.querySelector('#main [data-fx=type].fx-set')")
     shown = await pg.evaluate("(()=>{const mo=todayStr().slice(0,7); return S.trades.filter(t=>t.date&&t.date.startsWith(mo)&&acctOK(t)).length})()")
     live = await pg.evaluate("(()=>{const mo=todayStr().slice(0,7); return S.trades.filter(t=>t.date&&t.date.startsWith(mo)&&moneyTypeOf(S.accounts.find(a=>a.id===t.account_id))==='live').length})()")
     ok(sel and shown == live, f'Calendar shows the « Live » selector and only the live trades of the month ({shown} = {live})')
@@ -126,10 +126,10 @@ async def main():
     shown = {}
     for h in ['#dashboard', '#trades', '#analytics', '#payouts']:
       await pg.evaluate(f"location.hash='{h}'"); await pg.wait_for_timeout(1500)
-      shown[h] = await pg.evaluate("document.querySelectorAll('#main .mny-tseg [data-mtype]').length")
-    ok(all(v == 5 for v in shown.values()), f'the account-type selector is on Today, Trades, Stats and My money ({shown})')
+      shown[h] = await pg.evaluate("[...document.querySelectorAll('#main [data-fx=type]')].filter(e=>e.getClientRects().length).length")
+    ok(all(v == 1 for v in shown.values()), f'the account-type selector is on Today, Trades, Stats and My money ({shown})')
     await pg.evaluate("location.hash='#payouts'"); await pg.wait_for_timeout(1200)
-    await pg.locator('#main .mny-tseg [data-mtype=live]').first.click(); await pg.wait_for_timeout(1200)
+    await pg.locator('#main [data-fx=type]').first.click(); await pg.wait_for_timeout(400); await pg.locator('#fxMenu [data-mtype=live]').click(); await pg.wait_for_timeout(1200)
     live = await pg.evaluate("[U.mtype, SweepMoney.moneyOf({mtype:'live'}).real]")
     ok(live[0] == 'live' and live[1]['payouts'] == 0 and live[1]['live'] == 100000 and live[1]['expenses'] == 0, f'My money, « Live » only: the live account’s real P&L, no evaluation payouts or expenses ({live})')
     await pg.evaluate("U.mtype='all'; saveU()")

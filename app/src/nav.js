@@ -391,7 +391,7 @@ window.SweepMO = window.SweepMO || class {
     if (tab === 'day' && kpis('day').n === 0 && !window.SW_MQ.matches) tab = 'week';   // computer: nothing today → the week (the phone shows the day with its news)
     if (window.SW_MQ.matches) return feedCard(tab);
     DESK_TAB = tab;
-    return `<section class="surface nav-kpi nav-card d-perf" data-noi18n>${window.SweepTypeSeg ? `<div class="nav-ktype">${SweepTypeSeg()}</div>` : ''}<div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div><a class="nav-all" href="#trades">${(TL[LANG] || TL.en).all}</a></div><div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;
+    return `<section class="surface nav-kpi nav-card d-perf" data-noi18n><div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div>${window.SweepTypeSeg ? SweepTypeSeg() : ''}<a class="nav-all" href="#trades">${(TL[LANG] || TL.en).all}</a></div><div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;
   }
   /* ───── phone: one card for the day — scroll the days (P&L, news dot), see the day's numbers, releases and trades ───── */
   const FD = { en: { news: 'Releases', none: 'No important US release.', loading: 'Loading the releases…', fc: 'Fcst', act: 'Act', cal: 'Calendar ›', jr: 'Journal ›', all: 'All ›' }, fr: { news: 'Annonces', none: 'Aucune annonce américaine importante.', loading: 'Chargement des annonces…', fc: 'Prév.', act: 'Réel', cal: 'Calendrier ›', jr: 'Journal ›', all: 'Tout voir ›' }, es: { news: 'Publicaciones', none: 'Sin publicaciones importantes de EE. UU.', loading: 'Cargando publicaciones…', fc: 'Prev.', act: 'Real', cal: 'Calendario ›', jr: 'Diario ›', all: 'Ver todo ›' } };
@@ -447,7 +447,7 @@ window.SweepMO = window.SweepMO || class {
   }
   function feedCard(tab) {
     const x = KT[LANG] || KT.en;
-    return `<section class="surface nav-kpi nav-card d-perf nav-feed" data-noi18n>${window.SweepTypeSeg ? `<div class="nav-ktype">${SweepTypeSeg()}</div>` : ''}<div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div><a class="nav-all" href="#calendar">${(FD[LANG] || FD.en).cal}</a></div>
+    return `<section class="surface nav-kpi nav-card d-perf nav-feed" data-noi18n><div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div>${window.SweepTypeSeg ? SweepTypeSeg() : ''}<a class="nav-all" href="#calendar">${(FD[LANG] || FD.en).cal}</a></div>
       <div class="nav-fstrip" role="list">${feedStrip()}</div>
       <div class="nav-fdate">${feedDate()}</div>
       <div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-fn">${tab === 'day' ? feedNews() : feedWeekNews()}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;
@@ -5346,12 +5346,13 @@ new window.SweepMO(() => {
    Brief 02 part 2: the firm's rule (« Max drawdown allowed ») no longer has the same name as the account's own worst drawdown
    Brief 02 part 7: what stayed in English (the Journal's « Max trades », two rules of the default checklist, the week's view,
    the economic releases' names: the acronyms traders use stay, CPI, PPI, PCE, NFP, FOMC, ISM)
-   Brief 02 part 14: the buttons of the app's own window that replaced the browser's confirm() */
+   Brief 02 part 14: the buttons of the app's own window that replaced the browser's confirm()
+   16 Oct.: the one line of filters (the dates of « Custom », « Copies » in the Filters sheet) */
 (function () {
   'use strict';
-  const add = { fr: { 'Disable': 'Désactiver', 'Replace': 'Remplacer', 'Delete this trade? This cannot be undone.': 'Supprimer ce trade ? C’est définitif.', 'My money': 'Mon argent', 'Worst drawdown': 'Pire recul', 'Max drawdown allowed': 'Drawdown permis', 'Exceeded': 'Dépassé', 'Avg win / loss': 'Gain / perte moy.', 'See its stats': 'Voir ses stats',
+  const add = { fr: { 'From': 'Du', 'To': 'Au', 'Copies': 'Copies', 'Counted once': 'Comptées une fois', 'Per contract': 'Par contrat', 'Disable': 'Désactiver', 'Replace': 'Remplacer', 'Delete this trade? This cannot be undone.': 'Supprimer ce trade ? C’est définitif.', 'My money': 'Mon argent', 'Worst drawdown': 'Pire recul', 'Max drawdown allowed': 'Drawdown permis', 'Exceeded': 'Dépassé', 'Avg win / loss': 'Gain / perte moy.', 'See its stats': 'Voir ses stats',
       'Max trades': 'Trades max', 'Entered without confirmation': 'Entrée sans confirmation', 'Broke daily loss limit': 'Limite de perte du jour dépassée', 'None recorded': 'Aucune', 'Show all accounts': 'Voir tous les comptes', 'schedule file': 'calendrier livré avec l’app', 'manual entry': 'saisie manuelle', 'ADP Non-Farm Employment Change': 'Emploi privé ADP', 'Average Hourly Earnings m/m': 'Salaire horaire moyen m/m', 'CB Consumer Confidence': 'Confiance des consommateurs (CB)', 'Core CPI m/m': 'CPI de base m/m', 'Core PCE Price Index m/m': 'Indice PCE de base m/m', 'Core PPI m/m': 'PPI de base m/m', 'FOMC Meeting Minutes': 'Procès-verbal du FOMC', 'FOMC Press Conference': 'Conférence de presse du FOMC', 'FOMC Rate Decision': 'Décision de taux du FOMC', 'GDP q/q (Advance)': 'PIB t/t (première estimation)', 'GDP q/q (Second Estimate)': 'PIB t/t (deuxième estimation)', 'GDP q/q (Third Estimate)': 'PIB t/t (troisième estimation)', 'ISM Manufacturing PMI': 'PMI manufacturier ISM', 'ISM Services PMI': 'PMI des services ISM', 'Initial Jobless Claims': 'Inscriptions au chômage', 'JOLTS Job Openings': 'Offres d’emploi JOLTS', 'Nonfarm Payrolls': 'Emplois non agricoles (NFP)', 'PCE Price Index m/m': 'Indice PCE m/m', 'Retail Sales m/m': 'Ventes au détail m/m', 'Unemployment Rate': 'Taux de chômage' },
-    es: { 'Disable': 'Desactivar', 'Replace': 'Reemplazar', 'OK': 'OK', 'Delete this trade? This cannot be undone.': '¿Eliminar esta operación? No se puede deshacer.', 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas',
+    es: { 'From': 'Desde', 'To': 'Hasta', 'Copies': 'Copias', 'Counted once': 'Contadas una vez', 'Per contract': 'Por contrato', 'Disable': 'Desactivar', 'Replace': 'Reemplazar', 'OK': 'OK', 'Delete this trade? This cannot be undone.': '¿Eliminar esta operación? No se puede deshacer.', 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas',
       'Max trades': 'Operaciones máx.', 'Entered without confirmation': 'Entrada sin confirmación', 'Broke daily loss limit': 'Límite de pérdida diaria superado', 'None recorded': 'Ninguna', 'Show all accounts': 'Ver todas las cuentas', 'schedule file': 'calendario incluido en la app', 'manual entry': 'entrada manual', 'ADP Non-Farm Employment Change': 'Empleo privado ADP', 'Average Hourly Earnings m/m': 'Ingresos medios por hora m/m', 'CB Consumer Confidence': 'Confianza del consumidor (CB)', 'Core CPI m/m': 'CPI subyacente m/m', 'Core PCE Price Index m/m': 'Índice PCE subyacente m/m', 'Core PPI m/m': 'PPI subyacente m/m', 'FOMC Meeting Minutes': 'Actas del FOMC', 'FOMC Press Conference': 'Rueda de prensa del FOMC', 'FOMC Rate Decision': 'Decisión de tipos del FOMC', 'GDP q/q (Advance)': 'PIB t/t (avance)', 'GDP q/q (Second Estimate)': 'PIB t/t (segunda estimación)', 'GDP q/q (Third Estimate)': 'PIB t/t (tercera estimación)', 'ISM Manufacturing PMI': 'PMI manufacturero ISM', 'ISM Services PMI': 'PMI de servicios ISM', 'Initial Jobless Claims': 'Solicitudes de subsidio por desempleo', 'JOLTS Job Openings': 'Ofertas de empleo JOLTS', 'Nonfarm Payrolls': 'Nóminas no agrícolas (NFP)', 'PCE Price Index m/m': 'Índice PCE m/m', 'Retail Sales m/m': 'Ventas minoristas m/m', 'Unemployment Rate': 'Tasa de desempleo' } };
   try { if (window.I18N_FR) Object.assign(window.I18N_FR, add.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, add.es); } catch (e) { /* the app stays in English */ }
 })();
@@ -5687,4 +5688,81 @@ new window.SweepMO(() => {
   { const m0 = document.getElementById('main');
     if (m0) new MutationObserver(() => { if (!onPage()) return; const tr = [...m0.querySelectorAll('table.acct-tbl tbody tr[data-href^="#account/"]')].find((x) => !x.querySelector('.acc-ck') && active(getDoc('accounts', idOf(x)))); if (tr) { try { decorate(); } catch (e) { /* never blocks */ } } }).observe(m0, { childList: true, subtree: true }); }
   window.SweepAccSel = { out, upgrade, fail, won, selected: () => [...SEL] };
+})();
+
+/* ───────────── One line of filters (16 Oct.): the pills' choices ─────────────
+ * A pill (Period ▾, Account type ▾, My money's period ▾) opens its choices: a small menu under it on a computer, a sheet
+ * from the bottom on a phone. A choice applies at once and closes it; « Dates » keeps it open with its two dates.
+ * The choices come from window.SweepFxOpts[kind]() = { title, cur, opts: [[value, label]], attr, pick(v), keep(v), dates }. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const tr2 = (s) => (typeof tr === 'function' ? tr(s) : s);
+  window.SweepFxOpts = Object.assign(window.SweepFxOpts || {}, {
+    per: () => ({ title: ({ fr: 'Période', es: 'Período' })[L] || 'Period', cur: F.period || 'all',
+      opts: [['today', tr2('Today')], ['week', tr2('This week')], ['month', tr2('This month')], ['all', tr2('All time')], ['custom', tr2('Custom')]], attr: 'data-per',
+      dates: F.period === 'custom' ? `<label class="f"><span>${esc2(tr2('From'))}</span><input type="date" data-filter="from" value="${esc2(F.from || '')}"></label><label class="f"><span>${esc2(tr2('To'))}</span><input type="date" data-filter="to" value="${esc2(F.to || '')}"></label>` : '',
+      pick: (v) => { F.period = v; if (v === 'custom' && !F.from) { F.from = monthStart(todayStr()); F.to = todayStr(); } saveF(); render(); }, keep: (v) => v === 'custom' })
+  });
+  const phone = () => (window.SW_MQ ? window.SW_MQ.matches : matchMedia('(max-width:860px)').matches);
+  let open = null;   // { kind, chip }
+  function close(back) {
+    const m = document.getElementById('fxMenu'), sc = document.getElementById('fxScrim');
+    if (m) { m.classList.remove('open'); setTimeout(() => m.remove(), 220); }
+    if (sc) { sc.classList.remove('open'); setTimeout(() => sc.remove(), 220); }
+    const c = open && open.chip; open = null;
+    if (back && c && document.contains(c)) c.focus();
+  }
+  function paint(kind) {
+    const fn = window.SweepFxOpts[kind]; if (!fn) return;
+    const o = fn();
+    let m = document.getElementById('fxMenu');
+    if (!m) {
+      m = document.createElement('div'); m.id = 'fxMenu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', phone() ? 'true' : 'false'); m.setAttribute('data-noi18n', '');
+      document.body.append(m);
+      if (phone()) { const sc = document.createElement('div'); sc.id = 'fxScrim'; sc.className = 'fxm-scrim'; sc.addEventListener('click', () => close(true)); document.body.append(sc); requestAnimationFrame(() => sc.classList.add('open')); }
+    }
+    m.className = 'fxm' + (phone() ? ' fxm-sheet' : '') + (m.classList.contains('open') ? ' open' : '');
+    m.setAttribute('aria-label', o.title);
+    m.innerHTML = `${phone() ? '<i class="fxm-grab" aria-hidden="true"></i>' : ''}<p class="fxm-t">${esc2(o.title)}</p><div class="fxm-l" role="menu">${o.opts.map(([v, l]) => `<button type="button" role="menuitemradio" aria-checked="${String(v) === String(o.cur)}" class="fxm-o ${String(v) === String(o.cur) ? 'on' : ''}" data-fxv="${esc2(v)}" ${o.attr ? `${o.attr}="${esc2(v)}"` : ''}><span>${esc2(l)}</span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.4l2.8 2.8 6.2-6.4"/></svg></button>`).join('')}</div>${o.dates ? `<div class="fxm-d">${o.dates}</div>` : ''}`;
+    if (!phone() && open && open.chip) {   // under its pill, kept on screen
+      const r = open.chip.getBoundingClientRect(), w = Math.max(220, r.width);
+      m.style.left = Math.max(12, Math.min(r.left, innerWidth - w - 12)) + 'px'; m.style.top = (r.bottom + 6) + 'px'; m.style.minWidth = w + 'px';
+    }
+    requestAnimationFrame(() => m.classList.add('open'));
+  }
+  function show(kind, chip) {
+    if (open && open.kind === kind) { close(true); return; }
+    close(false); open = { kind, chip };
+    paint(kind);
+    requestAnimationFrame(() => { const f = document.querySelector('#fxMenu .fxm-o.on') || document.querySelector('#fxMenu .fxm-o'); if (f) f.focus(); });
+  }
+  document.addEventListener('click', (e) => {
+    const t = e.target; if (!t.closest) return;
+    const chip = t.closest('[data-fx]');
+    if (chip) { e.preventDefault(); show(chip.dataset.fx, chip); return; }
+    const o = t.closest('#fxMenu .fxm-o');
+    if (o && open) {
+      const kind = open.kind, fn = window.SweepFxOpts[kind], v = o.dataset.fxv, d = fn && fn();
+      if (!d) return;
+      d.pick(v);
+      if (d.keep && d.keep(v)) { const c = document.querySelector(`#main [data-fx="${kind}"]`); if (c) open.chip = c; paint(kind); const i = document.querySelector('#fxMenu .fxm-d input'); if (i) i.focus(); }
+      else close(true);
+      return;
+    }
+    if (open && !t.closest('#fxMenu')) close(false);
+  });
+  // a date typed in the window: the pill follows (the app redraws the page; the window stays)
+  document.addEventListener('change', (e) => { if (!open || !e.target.closest || !e.target.closest('#fxMenu')) return; setTimeout(() => { if (!open) return; const c = document.querySelector(`#main [data-fx="${open.kind}"]`); if (c) open.chip = c; paint(open.kind); }, 80); });
+  document.addEventListener('keydown', (e) => {
+    if (!open) return;
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { const l = [...document.querySelectorAll('#fxMenu .fxm-o')], i = l.indexOf(document.activeElement); if (!l.length) return; e.preventDefault(); l[(i + (e.key === 'ArrowDown' ? 1 : l.length - 1)) % l.length].focus(); }
+  }, true);
+  window.addEventListener('hashchange', () => close(false));
+  window.addEventListener('resize', () => { if (open && !phone()) close(false); });
+  if (typeof swipeDismiss === 'function') {   // phone: the sheet closes by sliding it down, like the others
+    new MutationObserver(() => { const m = document.getElementById('fxMenu'); if (m && m.classList.contains('fxm-sheet') && !m._sw) { m._sw = true; try { swipeDismiss(m, { scroller: () => m, onClose: () => close(true), ignore: 'input' }); } catch (x) { /* a tap closes it anyway */ } } }).observe(document.body, { childList: true });
+  }
 })();

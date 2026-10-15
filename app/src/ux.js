@@ -1768,7 +1768,7 @@
   const pct = (v) => (v == null ? '—' : Math.round(v * 100) + ' %');
   /** what the page shows: period, account type, firm, account — the CSV uses exactly the same (9, 18.1) */
   const viewOpts = () => { const [from, to] = M.periodOf(P(), U.mcustom); return { from, to, firm: F.firm !== 'all' ? F.firm : '', account: F.account !== 'all' ? F.account : '', mtype: (typeof U !== 'undefined' && U.mtype) || 'all' }; };
-  function view(typeMoved) {
+  function view() {
     const per = P(), o = viewOpts(), from = o.from, to = o.to;
     const m = M.moneyOf(o);
     const r = m.real, i = m.ind;
@@ -1792,7 +1792,7 @@
         <div class="pz-right"><span class="pz-amt-v ${(e.amount_c || 0) < 0 ? 'pos' : 'neg'}">${mS(-(e.amount_c || 0))}</span></div></li>`).join('');
     const firmRows = m.byFirm.map((f) => `<tr><td>${esc2(firmName(f.firm_id))}</td><td>${mU(f.spent)}</td><td class="${f.received ? 'pos' : ''}">${mU(f.received)}</td><td class="${f.net >= 0 ? 'pos' : 'neg'}">${mS(f.net)}</td><td>${pct(f.roi)}</td><td>${f.bought} · ${f.passed} · ${f.failed} · ${f.paid}</td></tr>`).join('');
     return `<div class="mny" data-noi18n>
-      <div class="mny-top">${window.SweepTypeSeg && !typeMoved ? SweepTypeSeg() : ''}<div class="mny-tsw"><span class="mny-tsl">${({ fr: 'Période', es: 'Período' })[L] || 'Period'}</span><div class="seg mny-per" role="group">${seg}</div></div></div>${custom}
+
       ${seg2}
       ${mv === 'entries' ? `<div class="mny-pane" data-mny-pane="entries">
         <div class="mny-actions"><button type="button" class="btn primary nav-pz-b" data-k="payout" data-mny="addP" aria-expanded="${!!U.addP}" aria-label="${vx.addPay}">+ <span class="l">${vx.addPay}</span><span class="s">${vx.pay}</span></button><button type="button" class="btn" data-mny="addE" aria-expanded="${!!U.addE}" aria-label="${vx.addExp}">+ <span class="l">${vx.addExp}</span><span class="s">${vx.exp}</span></button></div>
@@ -1820,13 +1820,17 @@
   }
   vPayouts = function () {
     if (!S.accounts.length) return onboarding();
-    let fb = typeof filterBar === 'function' ? filterBar({ period: false, session: false, dir: false }) : '';
-    // phone: the account type sits on the line of « Filters », one line that scrolls, as on Trades, Calendar and Stats
-    const r = fb.indexOf('<div class="mfb-row">'), e = r < 0 ? -1 : fb.indexOf('</button></div>', r);
-    const moved = e > 0 && !!window.SweepTypeSeg;
-    if (moved) fb = fb.slice(0, e + 9) + SweepTypeSeg() + fb.slice(e + 9);
-    return fb + `<div data-lock="payouts" data-feature="payouts" class="bill-lock">${view(moved)}</div>`;
+    // one line of filters (16 Oct.): the period of My money (month, quarter, year…) ▾, the account type ▾, « Filters »
+    const per = P(), mc = U.mcustom || {};
+    const dd = (v) => (v && v.length === 10 ? new Date(v + 'T12:00:00').toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { day: 'numeric', month: 'short' }) : '…');
+    const lab = per === 'custom' ? `${dd(mc.from)} – ${dd(mc.to)}` : ({ month: x.month, quarter: x.quarter, year: x.year, all: x.all })[per] || x.month;
+    const lead = `<button type="button" class="fx-c fx-per" data-fx="mper" aria-haspopup="true">${esc2(lab)}<i aria-hidden="true"></i></button>`;
+    const fb = typeof filterBar === 'function' ? filterBar({ period: false, session: false, dir: false, lead }) : '';
+    return fb + `<div data-lock="payouts" data-feature="payouts" class="bill-lock">${view()}</div>`;
   };
+  window.SweepFxOpts = Object.assign(window.SweepFxOpts || {}, { mper: () => { const c = U.mcustom || {}; return { title: ({ fr: 'Période', es: 'Período' })[L] || 'Period', cur: P(), opts: [['month', x.month], ['quarter', x.quarter], ['year', x.year], ['all', x.all], ['custom', x.dates]], attr: 'data-mny-per',
+    dates: P() === 'custom' ? `<label class="f"><span>${x.from}</span><input type="date" data-mny-d="from" value="${esc2(c.from || '')}"></label><label class="f"><span>${x.to}</span><input type="date" data-mny-d="to" value="${esc2(c.to || '')}"></label>` : '',
+    pick: (v) => { U.mper = v; if (typeof saveU === 'function') saveU(); render(); }, keep: (v) => v === 'custom' }; } });
   // « Export (CSV) » is the page's action, in its title row like « Share my stats » on Stats: one row less above the entries
   function exportButton() {
     const top = document.querySelector('.main-wrap .top'); if (!top) return;
@@ -1940,7 +1944,9 @@
   // 14 · the Calendar shows the same selector, and follows it (the Journal still shows every trade)
   if (typeof acctOK === 'function') { const ok0 = acctOK; acctOK = function (t) { if (!ok0.apply(this, arguments)) return false; return !/^#calendar/.test(location.hash || '') || !t || !t.account_id || window.mtypeKeep(t); }; }
   window.mtypeKeep = (t) => { const k = typeof U !== 'undefined' && U.mtype; if (!k || k === 'all') return true; return M.moneyTypeOf((S.accounts || []).find((y) => y.id === t.account_id)) === k; };
-  window.SweepTypeSeg = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return `<div class="mny-tsw" data-noi18n><span class="mny-tsl">${x.label}</span><div class="seg mny-tseg" role="group" aria-label="${x.label}">${['all', 'eval', 'funded', 'live', 'personal'].map((v) => `<button type="button" class="${k === v ? 'on' : ''}" data-mtype="${v}" aria-pressed="${k === v}">${x[v]}</button>`).join('')}</div></div>`; };
+  // one pill that opens its choices (16 Oct.: one line of filters); « mny-tsw » kept so nothing adds it twice
+  window.SweepTypeSeg = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return `<button type="button" class="fx-c fx-type mny-tsw ${k !== 'all' ? 'fx-set' : ''}" data-fx="type" aria-haspopup="true" aria-label="${x.label} · ${x[k]}" data-noi18n>${k === 'all' ? x.label : x[k]}<i aria-hidden="true"></i></button>`; };
+  window.SweepFxOpts = Object.assign(window.SweepFxOpts || {}, { type: () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return { title: x.label, cur: k, opts: ['all', 'eval', 'funded', 'live', 'personal'].map((v) => [v, x[v]]), attr: 'data-mtype', pick: (v) => { U.mtype = v; if (typeof saveU === 'function') saveU(); render(); } }; } });
   window.SweepTypeTag = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return k === 'all' ? `<span class="mny-tag perf">${x.perf}</span>` : `<span class="mny-tag ${k === 'live' || k === 'personal' ? 'real' : 'sim'}">${k === 'live' || k === 'personal' ? x.real : x.sim}</span>`; };
   // Trades and Stats lists follow it (they show the selector); Calendar and Journal always show every trade
   window.mtypeOK = (t) => { if (!/^#(analytics|progress|trades|calendar)/.test(location.hash || '')) return true; const k = typeof U !== 'undefined' && U.mtype; if (!k || k === 'all') return true; const a = (S.accounts || []).find((y) => y.id === t.account_id); return M.moneyTypeOf(a) === k; };
@@ -1950,16 +1956,7 @@
     const k = (typeof U !== 'undefined' && U.mtype) || 'all';
     let seg = main.querySelector('.mny-tsw');
     const html = window.SweepTypeSeg();
-    // copy trading: a group of copies counts once — its first copy, or per contract when the sizes differ between accounts
-    const cm = (typeof U !== 'undefined' && U.copyMode) || 'once';
-    const CM = { en: ['Copies: once', 'per contract'], fr: ['Copies : une fois', 'par contrat'], es: ['Copias: una vez', 'por contrato'] }[L] || ['Copies: once', 'per contract'];
-    const html2 = /^#(trades|calendar)/.test(location.hash || '') ? '' : (S.trades || []).some((t) => t.copy_group) ? `<div class="seg mny-cseg" role="group" data-noi18n><button type="button" class="${cm !== 'contract' ? 'on' : ''}" data-cmode="once">${CM[0]}</button><button type="button" class="${cm === 'contract' ? 'on' : ''}" data-cmode="contract">${CM[1]}</button></div>` : '';
-    if (!seg) {
-      const fb = main.querySelector('.fbars, .mfb'), row = fb && fb.querySelector(':scope > .mfb-row');
-      // phone: on the line of « Filters », one line that scrolls (it was two more rows, its label and itself)
-      if (row) { row.insertAdjacentHTML('beforeend', html); if (html2) fb.insertAdjacentHTML('afterend', html2); }
-      else if (fb) fb.insertAdjacentHTML('afterend', html + html2); else main.insertAdjacentHTML('afterbegin', html + html2);
-    }
+    if (!seg) { const fx = main.querySelector('.fx'); if (fx) { const per = fx.querySelector('.fx-per'); per ? per.insertAdjacentHTML('afterend', html) : fx.insertAdjacentHTML('afterbegin', html); } }   // (filterBar already has it)
     // the P&L card says what it is: performance, simulated or real
     const kp = [...main.querySelectorAll('.kpis > div, .ik')].find((d) => /P&L/.test((d.querySelector('.lbl') || {}).textContent || ''));
     if (kp && !kp.querySelector('.mny-ptag')) {

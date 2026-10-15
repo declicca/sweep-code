@@ -4,8 +4,8 @@ Sweep — design « iOS 27 », lot 1: the shared components look and behave the 
 Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phone 390 / 320, light and dark.
  1  one chooser: the selectors, the phone period bar and the view tabs (Journal, Deep Dive) are pill tracks of the same
     height (40 px on a computer, 44 px on a phone), the choice a raised pill (never the inverted black / white tab)
- 2  phone filters (Trades, Calendar, Stats): « Filters » and the account type on one line, under the period; the type's
-    label is kept for screen readers
+ 2  phone filters (Trades, Calendar, Stats): « Filters » and the account type on one line (16 Oct.: one line of filters,
+    tests/e2e_filters_line.py)
  3  a row of 4 figures or more (Journal day, Calendar month, Account) lines up in columns
  4  list separators start at the text (inset), not at the card's edge
  5  round icon buttons: the account « ⋯ » and the Calendar's month arrows are as wide as high
@@ -79,10 +79,8 @@ with sync_playwright() as p:
     ok(tr and not bad, f'1 phone {w} {scheme}: {len(tr)} choosers, pill tracks 44 px, no inverted tab ({bad[:3]})')
     for h in ['trades', 'calendar', 'analytics']:
       go(pg, h)
-      r = pg.evaluate("""(()=>{const row=document.querySelector('#main .mfb > .mfb-row'), f=row&&row.querySelector('.fbtn'), t=row&&row.querySelector('.mny-tsw .seg'), l=row&&row.querySelector('.mny-tsl');
-        if(!f||!t) return null; const a=f.getBoundingClientRect(), b=t.getBoundingClientRect();
-        return {line:Math.abs((a.top+a.bottom)/2-(b.top+b.bottom)/2)<2, after:b.left>a.right, label:!!l&&l.textContent.trim().length>0&&l.getBoundingClientRect().width<=1, named:!!t.getAttribute('aria-label'), rows:document.querySelectorAll('#main .mny-tsw').length}})()""")
-      ok(r and r['line'] and r['after'] and r['label'] and r['named'] and r['rows'] == 1, f'2 phone {w} {scheme} {h}: « Filters » and the account type on one line ({r})')
+      r = pg.evaluate("(()=>{const row=document.querySelector('#main .fx .fx-row'), f=row&&row.querySelector('[data-act=fsheet]'), t=row&&row.querySelector('[data-fx=type]'); if(!f||!t) return null; const a=f.getBoundingClientRect(), b=t.getBoundingClientRect(); return {line:Math.abs(a.top-b.top)<2, named:!!t.getAttribute('aria-label'), rows:document.querySelectorAll('#main [data-fx=type]').length}})()")
+      ok(r and r['line'] and r['named'] and r['rows'] == 1, f'2 phone {w} {scheme} {h}: « Filters » and the account type on one line (16 Oct.: the one line of filters) ({r})')
     for h in ['calendar', 'account/{A}', 'journal']:
       if '{A}' in h: h = h.replace('{A}', pg.evaluate("S.accounts.find(a=>a.status!=='archived').id"))
       go(pg, h)

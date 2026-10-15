@@ -4,8 +4,9 @@ Sweep — design « iOS 27 », lot 2: the pages (Stats, Deep Dive, My money, Tod
 Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phone 390 / 320, light and dark.
  1  Stats: « P&L breakdown » and « Patterns to watch » end at the same height; the figure tiles centre their content
  2  Deep Dive · Behavior: every table is whole in its card (none cut behind a scroll); Long vs short uses the full width
- 3  My money (computer): account type and period on one row; « Export (CSV) » in the title row; 4 rows of controls
- 4  My money (phone): the type on the line of « Filters »; « Export » in the title row; the period's label kept for readers
+ 3  My money (computer): its period and the account type in the one line of filters (16 Oct.); « Export (CSV) » in the title
+    row; 3 rows of controls
+ 4  My money (phone): the same line; « Export » in the title row
  5  Today · My money: the three amounts on one line, whatever their label
  6  a payout's amount is in Geist Mono, semibold
  7  the selector that stays at the top while scrolling is opaque (nothing shows through it)
@@ -53,10 +54,8 @@ with sync_playwright() as p:
     ok(lw and abs(lw[0] - lw[1]) <= 2, f'2 computer {scheme}: Long vs short uses the full width ({lw})')
     pg.evaluate("U.deep='discipline'; saveU()")
     go(pg, 'payouts')
-    m = pg.evaluate("""(()=>{const t=document.querySelector('#main .mny-top .mny-tseg'), p=document.querySelector('#main .mny-top .mny-per'), pane=document.querySelector('#main .mny-pane');
-      if(!t||!p||!pane) return null; const tops=new Set([...document.querySelectorAll('#main > .nav-seg, #main > .fbars, #main .mny-top, #main .mny-view')].filter(e=>e.getClientRects().length).map(e=>Math.round(e.getBoundingClientRect().top)));
-      return {row:Math.abs(t.getBoundingClientRect().top-p.getBoundingClientRect().top)<6, rows:tops.size, top:!!document.querySelector('.top .mny-exp[data-mny=csv]'), inMain:document.querySelectorAll('#main [data-mny=csv]').length}})()""")
-    ok(m and m['row'] and m['rows'] == 4 and m['top'] and m['inMain'] == 0, f'3 computer {scheme}: My money — type and period on one row, 4 rows of controls, « Export (CSV) » in the title row ({m})')
+    m = pg.evaluate("(()=>{const t=document.querySelector('#main .fx [data-fx=type]'), p=document.querySelector('#main .fx [data-fx=mper]'), pane=document.querySelector('#main .mny-pane'); if(!t||!p||!pane) return null; const tops=new Set([...document.querySelectorAll('#main > .nav-seg, #main > .fx, #main .mny-view')].filter(e=>e.getClientRects().length).map(e=>Math.round(e.getBoundingClientRect().top))); return {row:Math.abs(t.getBoundingClientRect().top-p.getBoundingClientRect().top)<2, rows:tops.size, top:!!document.querySelector('.top .mny-exp[data-mny=csv]'), inMain:document.querySelectorAll('#main [data-mny=csv]').length}})()")
+    ok(m and m['row'] and m['rows'] == 3 and m['top'] and m['inMain'] == 0, f'3 computer {scheme}: My money — period and type in the one line of filters, 3 rows of controls, « Export (CSV) » in the title row ({m})')
     fam = pg.evaluate("(()=>{const a=document.querySelector('#main .pz-amt-v'); if(!a) return null; const s=getComputedStyle(a); return [s.fontFamily, s.fontWeight]})()")
     ok(fam and 'Geist Mono' in fam[0] and fam[1] == '600', f'6 computer {scheme}: a payout amount is Geist Mono semibold ({fam})')
     go(pg, 'dashboard', 2400); scroll_all(pg)
@@ -85,10 +84,8 @@ with sync_playwright() as p:
     jc = pg.evaluate("[...document.querySelectorAll('#main .ikpis > .ik')].map(e=>getComputedStyle(e).justifyContent)")
     ok(jc and all(j == 'center' for j in jc), f'1 phone {w} {scheme}: the KPI tiles centre their content ({len(jc)})')
     go(pg, 'payouts')
-    m = pg.evaluate("""(()=>{const row=document.querySelector('#main .mfb > .mfb-row'), t=row&&row.querySelector('.mny-tseg'), l=document.querySelector('#main .mny-top .mny-tsl'), e=document.querySelector('.top .mny-exp');
-      const vis=x=>x&&x.getClientRects().length&&getComputedStyle(x).display!=='none';
-      return {typeInRow:!!t, label:!!l&&l.textContent.trim().length>0&&l.getBoundingClientRect().width<=1, exp:!!e&&vis(e.querySelector('.s'))&&!vis(e.querySelector('.l')), h:e?Math.round(e.getBoundingClientRect().height):0, ov:document.documentElement.scrollWidth-innerWidth}})()""")
-    ok(m['typeInRow'] and m['label'] and m['exp'] and m['h'] == 44 and m['ov'] <= 0, f'4 phone {w} {scheme} {lang}: My money — type beside « Filters », short « Export » in the title row ({m})')
+    m = pg.evaluate("(()=>{const row=document.querySelector('#main .fx .fx-row'), e=document.querySelector('.top .mny-exp'); const vis=x=>x&&x.getClientRects().length&&getComputedStyle(x).display!=='none'; return {typeInRow:!!(row&&row.querySelector('[data-fx=type]')&&row.querySelector('[data-fx=mper]')), exp:!!e&&vis(e.querySelector('.s'))&&!vis(e.querySelector('.l')), h:e?Math.round(e.getBoundingClientRect().height):0, ov:document.documentElement.scrollWidth-innerWidth}})()")
+    ok(m['typeInRow'] and m['exp'] and m['h'] == 44 and m['ov'] <= 0, f'4 phone {w} {scheme} {lang}: My money — period and type in the one line, short « Export » in the title row ({m})')
     go(pg, 'dashboard', 2400); scroll_all(pg)
     mt = pg.evaluate("[...document.querySelectorAll('#main .nav-mny-g > div > b')].map(e=>Math.round(e.getBoundingClientRect().bottom))")
     ok(mt and len(mt) == 3 and max(mt) - min(mt) <= 4, f'5 phone {w} {scheme}: Today · the three money amounts end on one line ({mt})')

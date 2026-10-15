@@ -48,7 +48,7 @@ with sync_playwright() as p:
   print('— 1.2 / 1.1 / 1.3 / 3 (Today, 1680 px)')
   pos = []
   for k in ['all', 'personal', 'live', 'all']:
-    pg.locator(f'#main .mny-tseg [data-mtype={k}]').first.click(); pg.wait_for_timeout(1300)
+    pg.locator('#main [data-fx=type]').first.click(); pg.wait_for_timeout(400); pg.locator(f'#fxMenu [data-mtype={k}]').click(); pg.wait_for_timeout(1300)   # (16 Oct.: a pill and its choices)
     pos.append(pg.evaluate("(()=>{const w=document.querySelector('#main section.d-news'); return w ? [w.parentElement.className.includes('nav-merge'), Math.round(w.getBoundingClientRect().left)] : null})()"))
   ok(all(x and x[0] and x[1] < 700 for x in pos), f'1.2 « À surveiller » stays under the day (left column) for Tout / Perso / Live ({pos})')
   fold = pg.locator('#main .nav-rt-fold')
@@ -89,9 +89,9 @@ with sync_playwright() as p:
   pg.reload(); pg.wait_for_timeout(2500)
   ok(grp('Évaluations') == after, '10 the new order is kept after a reload')
   pg.evaluate("location.hash='#calendar'"); pg.wait_for_timeout(2000)
-  ok(pg.locator('#main .mny-tseg').count() == 1, '14 the Calendar shows the account-type selector')
+  ok(pg.locator('#main [data-fx=type]').count() == 1, '14 the Calendar shows the account-type selector')
   for k in ['eval', 'live', 'all']:
-    pg.locator(f'#main .mny-tseg [data-mtype={k}]').first.click(); pg.wait_for_timeout(1100)
+    pg.locator('#main [data-fx=type]').first.click(); pg.wait_for_timeout(400); pg.locator(f'#fxMenu [data-mtype={k}]').click(); pg.wait_for_timeout(1100)
     got = pg.evaluate("(()=>{const m=document.getElementById('main').innerText.match(/P&L du mois\\s*\\n\\s*([^\\n]+)/); return m?m[1].trim():null})()")
     exp = pg.evaluate(f"(()=>{{const mo=todayStr().slice(0,7); const c=mergeCopies(S.trades.filter(t=>t.date.startsWith(mo)&&('{k}'==='all'||moneyTypeOf(S.accounts.find(a=>a.id===t.account_id))==='{k}'))).reduce((s,t)=>s+tNet(t),0); return money(c,{{dec:Math.abs(c)%100?2:0}})}})()")
     ok(got is not None and got.replace('+', '') == exp.replace('+', ''), f'14 Calendar « {k} »: month total {got} = {exp}')
@@ -130,8 +130,8 @@ with sync_playwright() as p:
   ok(lines and all(l == '0px' for l in lines), f'17.2 / 17.3 no line under the last account, active and closed ({lines})')
   for h in ['trades', 'analytics']:
     pg.evaluate(f"location.hash='#{h}'"); pg.wait_for_timeout(1800)
-    # (phone: the selector sits on the line of « Filters », the gap is under that bar)
-    gap = pg.evaluate("(()=>{let t=document.querySelector('#main .mny-cseg')||document.querySelector('#main .mny-tsw'); if(t&&t.closest('.mfb')) t=t.closest('.mfb'); let n=t&&t.nextElementSibling; while(n&&!n.getClientRects().length) n=n.nextElementSibling; return t&&n?Math.round(n.getBoundingClientRect().top-t.getBoundingClientRect().bottom):null})()")
+    # (16 Oct.: one line of filters, the gap is under it)
+    gap = pg.evaluate("(()=>{let t=document.querySelector('#main .fx'); let n=t&&t.nextElementSibling; while(n&&!n.getClientRects().length) n=n.nextElementSibling; return t&&n?Math.round(n.getBoundingClientRect().top-t.getBoundingClientRect().bottom):null})()")
     ok(gap is not None and gap >= 12, f'13 / 16.1 {h}: {gap} px between the selector and what follows')
   pg.evaluate("location.hash='#trades'"); pg.wait_for_timeout(1500)
   sr = pg.evaluate("(()=>{const f=document.querySelector('#main .msearch'), few=document.body.classList.contains('nav-few-trades'); if(!f) return 'none'; if(few) return f.getClientRects().length?'empty frame shown':'hidden'; const i=f.querySelector('input'); return getComputedStyle(i).backgroundColor==='rgba(0, 0, 0, 0)'&&getComputedStyle(i).boxShadow==='none'?'one box':'two boxes'})()")
