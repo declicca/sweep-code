@@ -135,7 +135,7 @@ window.SweepMO = window.SweepMO || class {
     if (e.target.closest && e.target.closest('#navMenu [data-act="logout"]')) closeMenu(true);
   });
   let lastTrigger = null, trapped = null, kbdUser = false, dotPulsed = false;
-  addEventListener('keydown', (e) => { if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ' || e.key.startsWith('Arrow')) kbdUser = true; }, true);
+  addEventListener('keydown', (e) => { if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ' || String(e.key || '').startsWith('Arrow')) kbdUser = true; }, true);   // (a browser's autofill sends keydown without a key: Admin › Errors, 13 and 8 Oct.)
   addEventListener('pointerdown', () => { kbdUser = false; }, true);
   document.addEventListener('focusin', (e) => { const top = [...document.querySelectorAll(OVERLAYS)].pop(); if (!top) lastTrigger = e.target; });
   document.addEventListener('keydown', (e) => {
@@ -1066,20 +1066,25 @@ window.SweepMO = window.SweepMO || class {
   /* ───────────── jump report (trade review page, phones) ─────────────
    * After a tap, any block ABOVE what you are looking at that changes height for a moment makes the page jump on iOS
    * (Safari has no scroll anchoring). This samples the blocks for 0.7 s after each tap and, if one changes, sends a short
-   * report to the admin dashboard (Errors): which block, how many pixels, for how long. At most 5 reports per visit. */
+   * report to the admin dashboard (Errors): which block, how many pixels, for how long. At most 5 reports per visit.
+   * (15 Oct.) A tap only — a click, not the touch that starts a scroll — and the place in the PAGE, not on the screen: the
+   * reports of 4-14 Oct. were mostly the trader's own scrolling (« none changed height », up to 2,000 px), or a tap that
+   * opened another page. */
   let jumpReports = 0;
-  addEventListener('pointerdown', (e) => {
+  addEventListener('click', (e) => {
     if (jumpReports >= 5 || route().v !== 'trade' || !window.SW_MQ.matches) return;
     const main = document.getElementById('main'); if (!main || !main.contains(e.target)) return;
     const blocks = () => [...main.children].map((c, i) => { const r = c.getBoundingClientRect(); return { k: (c.className || c.tagName).toString().split(' ').slice(0, 2).join('.') || ('#' + i), h: Math.round(r.height), top: Math.round(r.top) }; });
     const base = blocks(), t0 = performance.now(), seen = {}, key = (e.target.closest('[data-v],[data-act],[data-path]') || e.target);
-    const y0 = key.getBoundingClientRect().top; let worst = 0, worstAt = 0;
+    const at = (x) => x.getBoundingClientRect().top + scrollY, h0 = location.hash;
+    const y0 = at(key); let worst = 0, worstAt = 0;
     const find = () => { if (document.contains(key)) return key; const k = ['data-act', 'data-path', 'data-v', 'data-id'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join(''); if (!k) return null;
       // the same control redrawn: the copy nearest to where it was (« Answer your coach » repeats some of the review's buttons)
-      return [...main.querySelectorAll(k)].sort((a, b) => Math.abs(a.getBoundingClientRect().top - y0) - Math.abs(b.getBoundingClientRect().top - y0))[0] || null; };
+      return [...main.querySelectorAll(k)].sort((a, b) => Math.abs(at(a) - y0) - Math.abs(at(b) - y0))[0] || null; };
     const tick = () => {
+      if (location.hash !== h0) return;   // the tap opened another page: not a jump
       const ms = Math.round(performance.now() - t0), el = find();
-      if (el) { const d = Math.round(el.getBoundingClientRect().top - y0); if (Math.abs(d) > Math.abs(worst)) { worst = d; worstAt = ms; } }
+      if (el) { const d = Math.round(at(el) - y0); if (Math.abs(d) > Math.abs(worst)) { worst = d; worstAt = ms; } }
       blocks().forEach((b) => {
         const o = base.find((x) => x.k === b.k);
         if (!o) { if (!seen['+' + b.k]) seen['+' + b.k] = { d: b.h, ms }; return; }

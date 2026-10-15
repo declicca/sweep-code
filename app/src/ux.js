@@ -782,15 +782,15 @@
   const pct = (o) => (o && o.pct != null ? `${o.pct} %` : '—');
   const BT = { en: { st: 'The start (brief 03): how many reach each step, median time from the sign-up', stN: ['Signed up', 'First name', 'First account', 'First plan', 'First trade'], week: 'Sign-up week', source: 'Source (« Where did you find Sweep? »)', all: 'All', none: 'Not given', wk: 'week of {d}', traders: 'Traders: {a} of {b}',
       d0: 'Activation: a trade on the sign-up day', d7: 'Retention D7: a trade or a review on days 7-13', d30: 'Retention D30: a trade or a review on days 30-36', swept: 'Swept days: sessions with trades, 3 rings closed (30 d)',
-      of: 'of {n}', errs: 'JS errors on traders\' devices (30 d)', msg: 'Message', tr: 'Traders', n: 'Times', last: 'Last', pages: 'Pages', br: 'Browsers', ver: 'Version', noErr: 'No error in 30 days.', exp: 'Export', expT: 'The 30-day list as a Markdown file, to give to Claude',
+      of: 'of {n}', errs: 'JS errors on traders\' devices (30 d)', msg: 'Message', tr: 'Traders', n: 'Times', last: 'Last', pages: 'Pages', br: 'Browsers', ver: 'Version', noErr: 'No error in 30 days.', clr: 'Clear', clrQ: 'Clear the error list?', clrS: 'Once the errors are fixed: the list starts again from zero. It cannot be undone.', clrD: 'Error list cleared', exp: 'Export', expT: 'The 30-day list as a Markdown file, to give to Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'A friend', google: 'Google', other: 'Other' } },
     fr: { st: 'Le démarrage (brief 03) : combien atteignent chaque étape, temps médian depuis l’inscription', stN: ['Inscrits', 'Prénom', 'Premier compte', 'Premier plan', 'Premier trade'], week: 'Semaine d’inscription', source: 'Source (« Où as-tu trouvé Sweep ? »)', all: 'Toutes', none: 'Non renseignée', wk: 'sem. du {d}', traders: 'Traders : {a} sur {b}',
       d0: 'Activation : un trade le jour de l’inscription', d7: 'Rétention J7 : un trade ou une revue les jours 7 à 13', d30: 'Rétention J30 : un trade ou une revue les jours 30 à 36', swept: 'Journées balayées : séances avec trades, 3 anneaux fermés (30 j)',
-      of: 'sur {n}', errs: 'Erreurs JS chez les traders (30 j)', msg: 'Message', tr: 'Traders', n: 'Fois', last: 'Dernière', pages: 'Pages', br: 'Navigateurs', ver: 'Version', noErr: 'Aucune erreur en 30 jours.', exp: 'Exporter', expT: 'La liste des 30 jours en fichier Markdown, à donner à Claude',
+      of: 'sur {n}', errs: 'Erreurs JS chez les traders (30 j)', msg: 'Message', tr: 'Traders', n: 'Fois', last: 'Dernière', pages: 'Pages', br: 'Navigateurs', ver: 'Version', noErr: 'Aucune erreur en 30 jours.', clr: 'Effacer', clrQ: 'Effacer la liste des erreurs ?', clrS: 'Une fois les erreurs corrigées : la liste repart de zéro. C’est définitif.', clrD: 'Liste des erreurs effacée', exp: 'Exporter', expT: 'La liste des 30 jours en fichier Markdown, à donner à Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un ami', google: 'Google', other: 'Autre' } },
     es: { st: 'El inicio (brief 03): cuántos llegan a cada paso, tiempo mediano desde el registro', stN: ['Registrados', 'Nombre', 'Primera cuenta', 'Primer plan', 'Primera operación'], week: 'Semana de registro', source: 'Fuente (« ¿Dónde encontraste Sweep? »)', all: 'Todas', none: 'Sin respuesta', wk: 'sem. del {d}', traders: 'Traders: {a} de {b}',
       d0: 'Activación: una operación el día del registro', d7: 'Retención D7: una operación o una revisión los días 7 a 13', d30: 'Retención D30: una operación o una revisión los días 30 a 36', swept: 'Días barridos: sesiones con operaciones, 3 anillos cerrados (30 d)',
-      of: 'de {n}', errs: 'Errores JS en los dispositivos de los traders (30 d)', msg: 'Mensaje', tr: 'Traders', n: 'Veces', last: 'Última', pages: 'Páginas', br: 'Navegadores', ver: 'Versión', noErr: 'Ningún error en 30 días.', exp: 'Exportar', expT: 'La lista de 30 días en archivo Markdown, para dar a Claude',
+      of: 'de {n}', errs: 'Errores JS en los dispositivos de los traders (30 d)', msg: 'Mensaje', tr: 'Traders', n: 'Veces', last: 'Última', pages: 'Páginas', br: 'Navegadores', ver: 'Versión', noErr: 'Ningún error en 30 días.', clr: 'Borrar', clrQ: '¿Borrar la lista de errores?', clrS: 'Una vez corregidos los errores: la lista vuelve a empezar de cero. Es definitivo.', clrD: 'Lista de errores borrada', exp: 'Exportar', expT: 'La lista de 30 días en archivo Markdown, para dar a Claude',
       src: { tiktok: 'TikTok', instagram: 'Instagram', youtube: 'YouTube', discord: 'Discord', x: 'X', friend: 'Un amigo', google: 'Google', other: 'Otro' } } };
   const bt = () => BT[LANG] || BT.en;
   const loc = () => (LANG === 'fr' ? 'fr-CA' : LANG === 'es' ? 'es' : 'en-US');
@@ -815,9 +815,17 @@
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
       <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}</div>
       ${startHtml(b.start, y)}
-      <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
+      <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<span class="ux-err-a"><button type="button" class="btn sm" data-ux-errclr>${y.clr}</button><a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a></span>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }
   const load = () => { busy = true; apiJSON('api/admin/metrics' + (fc || fs ? '?' + new URLSearchParams({ cohort: fc, source: fs }) : '')).then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) b.innerHTML = html(d); }).catch(() => { busy = false; at = Date.now(); }); };
+  // « Clear »: once the errors are fixed, the list starts again from zero (the app's own window, never the browser's)
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-ux-errclr]'); if (!b) return;
+    const y = bt();
+    const go = window.SweepUndo && SweepUndo.ask ? await SweepUndo.ask(y.clrQ, y.clrS, y.clr, true) : false; if (!go) return;
+    b.disabled = true;
+    try { await apiJSON('api/admin/errors-clear', { method: 'POST', body: {} }); if (typeof toast === 'function') toast(y.clrD); load(); } catch (x) { b.disabled = false; if (typeof toast === 'function') toast(x.message || 'Error'); }
+  });
   // the page stays up to date while it is open (a new error shows within a minute)
   setInterval(() => { try { if (route().v === 'admin' && !document.hidden && !busy) load(); } catch (e) { /* next minute */ } }, 60000);
   document.addEventListener('change', (e) => { const sel = e.target.closest && e.target.closest('[data-ux-mf]'); if (!sel) return; if (sel.dataset.uxMf === 'cohort') fc = sel.value; else fs = sel.value; load(); });
@@ -1271,7 +1279,7 @@
         if (mm && LANG === 'fr') txt = `${mm[1]} sur ${mm[2]} répondues`; else if (mm && LANG === 'es') txt = `${mm[1]} de ${mm[2]} respondidas`;
         sm.textContent = txt; n.replaceWith(sm);
       }
-      if (b) b.hidden = !!(m && m[1] === m[2]);
+      if (b) { const done = !!(m && m[1] === m[2]); b.hidden = false; b.classList.toggle('ux-done', done); b.tabIndex = done ? -1 : 0; b.setAttribute('aria-hidden', String(done)); }   // (its place stays: no jump)
     });
   }
   if (typeof render !== 'function') return;

@@ -294,7 +294,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 .score.ux-score > .muted [data-tip]{border-bottom:0;text-decoration:underline dotted;text-underline-offset:3px}
 .score.ux-score > span[style*="flex:1"]{display:none}
 .score.ux-score > [data-act="all-yes"]{grid-column:1/-1;justify-self:start;margin-top:6px}
-.score.ux-score > [data-act="all-yes"][hidden]{display:none}
+.score.ux-score > [data-act="all-yes"].ux-done{visibility:hidden;pointer-events:none}   /* its place stays: answering the last question no longer moves the questions (a jump on iOS, Admin › Errors, 15 Oct.); « 0 of 5 answered » is shown from the start for the same reason */
 @media (max-width:860px){.score.ux-score > [data-act="all-yes"]{justify-self:stretch;width:100%}}
 /* compact phone header: title after the logo, help and plan chip step aside */
 @media (max-width:860px){
@@ -519,3 +519,4 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 
 /* Admin › Metrics: the game's use over 30 days (brief 02 part 11) */
 .ux-gm{margin-top:22px}.ux-gm h3{margin:0 0 4px;font-size:16px}.ux-gm>p{margin:0 0 10px;font-size:13px}.ux-gm-low b{color:var(--neg,#D4A24C)}
+.ux-err-a{display:flex;gap:8px;flex-wrap:wrap}
