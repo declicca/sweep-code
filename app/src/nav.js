@@ -1063,26 +1063,47 @@ window.SweepMO = window.SweepMO || class {
   }
 
 
+  /* ───────────── the tapped control stays under the finger (trade review page, phones), 15 Oct. ─────────────
+   * Safari has no scroll anchoring: when a tap changes the height of something above it (the coach's verdict after a Yes / No,
+   * a block that opens), the page jumped under the finger. For 0.7 s after a tap, if the control moved on the screen, the
+   * page scrolls by as much — unless the trader scrolls himself. */
+  let userMoved = 0;
+  ['touchmove', 'wheel', 'keydown'].forEach((k) => addEventListener(k, () => { userMoved = performance.now(); }, { passive: true, capture: true }));
+  addEventListener('click', (e) => {
+    if (route().v !== 'trade' || !window.SW_MQ.matches) return;
+    const main = document.getElementById('main'); if (!main || !main.contains(e.target)) return;
+    const key = e.target.closest('[data-v],[data-act],[data-path]') || e.target, h0 = location.hash, t0 = performance.now();
+    const sel = ['data-act', 'data-path', 'data-v', 'data-id', 'data-col'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join('');
+    const y0 = key.getBoundingClientRect().top;
+    const find = () => (document.contains(key) ? key : sel ? [...main.querySelectorAll(sel)].sort((a, b) => Math.abs(a.getBoundingClientRect().top - y0) - Math.abs(b.getBoundingClientRect().top - y0))[0] : null);
+    const tick = () => {
+      if (location.hash !== h0 || userMoved > t0) return;
+      const el = find();
+      if (el) { const d = el.getBoundingClientRect().top - y0; if (Math.abs(d) >= 2) window.scrollBy(0, d); }
+      if (performance.now() - t0 < 700) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, true);
+
   /* ───────────── jump report (trade review page, phones) ─────────────
    * After a tap, any block ABOVE what you are looking at that changes height for a moment makes the page jump on iOS
    * (Safari has no scroll anchoring). This samples the blocks for 0.7 s after each tap and, if one changes, sends a short
    * report to the admin dashboard (Errors): which block, how many pixels, for how long. At most 5 reports per visit.
-   * (15 Oct.) A tap only — a click, not the touch that starts a scroll — and the place in the PAGE, not on the screen: the
-   * reports of 4-14 Oct. were mostly the trader's own scrolling (« none changed height », up to 2,000 px), or a tap that
-   * opened another page. */
+   * (15 Oct.) A tap only — a click, not the touch that starts a scroll —, and never when the trader scrolls himself or the
+   * tap opens another page: the reports of 4-14 Oct. were mostly that (« none changed height », up to 2,000 px). */
   let jumpReports = 0;
   addEventListener('click', (e) => {
     if (jumpReports >= 5 || route().v !== 'trade' || !window.SW_MQ.matches) return;
     const main = document.getElementById('main'); if (!main || !main.contains(e.target)) return;
     const blocks = () => [...main.children].map((c, i) => { const r = c.getBoundingClientRect(); return { k: (c.className || c.tagName).toString().split(' ').slice(0, 2).join('.') || ('#' + i), h: Math.round(r.height), top: Math.round(r.top) }; });
     const base = blocks(), t0 = performance.now(), seen = {}, key = (e.target.closest('[data-v],[data-act],[data-path]') || e.target);
-    const at = (x) => x.getBoundingClientRect().top + scrollY, h0 = location.hash;
+    const at = (x) => x.getBoundingClientRect().top, h0 = location.hash;   // (on the screen: what the trader sees, after the anchoring above)
     const y0 = at(key); let worst = 0, worstAt = 0;
     const find = () => { if (document.contains(key)) return key; const k = ['data-act', 'data-path', 'data-v', 'data-id'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join(''); if (!k) return null;
       // the same control redrawn: the copy nearest to where it was (« Answer your coach » repeats some of the review's buttons)
       return [...main.querySelectorAll(k)].sort((a, b) => Math.abs(at(a) - y0) - Math.abs(at(b) - y0))[0] || null; };
     const tick = () => {
-      if (location.hash !== h0) return;   // the tap opened another page: not a jump
+      if (location.hash !== h0 || userMoved > t0) return;   // the tap opened another page, or the trader scrolled: not a jump
       const ms = Math.round(performance.now() - t0), el = find();
       if (el) { const d = Math.round(at(el) - y0); if (Math.abs(d) > Math.abs(worst)) { worst = d; worstAt = ms; } }
       blocks().forEach((b) => {

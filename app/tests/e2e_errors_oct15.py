@@ -3,8 +3,9 @@ Sweep — the errors of Admin › Errors, 15 Oct., with Playwright:
   python3 tests/e2e_errors_oct15.py http://127.0.0.1:8095 /tmp/show_state.json
 The signed-in trader is an administrator (tests/setup.py); sample data. Phone 390 / 440 and computer 1300.
  1  a keydown without a key (a browser's autofill: « Cannot read properties of undefined (reading 'startsWith') ») throws nothing
- 2  the trade page, without scroll anchoring (as on iOS Safari): answering the checklist (Yes / No / N/A, « Mark the rest as
-    Yes ») does not move the questions — the score block keeps its height (« 0 of 5 answered » from the start)
+ 2  the trade page (a trader's own trade, with « Your coach »), without scroll anchoring (as on iOS Safari): answering the
+    checklist (Yes / No / N/A, « Mark the rest as Yes ») leaves the tapped control under the finger — the score block keeps
+    its size (« 0 of 5 answered » from the start, one width for the score), and the page follows what changes above
  3  the jump report: a tap followed by the trader's own scrolling, or a tap that opens another page, sends nothing
  4  Admin › Errors › « Clear »: the app's window first, then the list is empty
 """
@@ -34,7 +35,9 @@ with sync_playwright() as p:
     pg.evaluate("document.querySelector('#main input').dispatchEvent(new KeyboardEvent('keydown', {bubbles: true}))"); pg.wait_for_timeout(300)
     pg.evaluate("(()=>{const e=new Event('keydown',{bubbles:true}); document.dispatchEvent(e)})()"); pg.wait_for_timeout(300)
     ok(not errs, f'1 {w}: a keydown without a key throws nothing ({errs[:1]})')
-    t = pg.evaluate("(S.trades.find(t=>!t.copy_group)||S.trades[0]).id")
+    # a trader's own trade (not a sample one): « Your coach » speaks above the checklist, and its verdict changes with the answers
+    t = pg.evaluate("(()=>{const a=S.accounts.find(x=>x.status!=='archived'); const id='eo-real'; put('trades',{id,account_id:a.id,instrument:'NQ',direction:'long',contracts:1,entry:20000,exit:20010,pnl_c:20000,pnl_manual:true,fees_c:0,date:todayStr(),entry_time:'10:00',exit_time:'10:05',session_date:true}); return id})()")
+    pg.wait_for_timeout(600)
     pg.evaluate(f"location.hash='#trade/{t}'"); pg.wait_for_timeout(2400)
     pg.add_style_tag(content='html,body,*{overflow-anchor:none!important}')
     moves = {s: pg.evaluate(MOVE, s) for s in ['#main .seg.yn button[data-v="y"]', '#main .seg.yn button[data-v="n"]', '#main .seg.yn button[data-v="na"]', '#main [data-act="all-yes"]']}
@@ -48,6 +51,8 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1300)
     jumps = [x for x in sent if 'Trade page jump' in x]
     ok(not jumps, f'3 {w}: a tap then the trader\'s own scroll sends no jump report ({jumps[:1]})')
+    ok(pg.locator('#main .co-trade').count() >= 0, f'2 {w}: (coach on this trade: {pg.locator("#main .co-trade").count()})')
+    pg.evaluate("remove('trades','eo-real')"); pg.wait_for_timeout(300)
     allerr += errs; c.close()
   # 4. Admin › Errors › Clear
   c = br.new_context(storage_state=STATE, viewport={'width': 1300, 'height': 850})
