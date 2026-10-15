@@ -1,5 +1,6 @@
 from core import *
 import json as _json
+import ui
 
 # numbers in the page's language, as everywhere on the site (never the browser's): $1,700.50 · 1 700,50 $ · 1.700,50 $ ; 52% · 52 %
 NUM_JS = ("var LG=(document.documentElement.lang||'en').slice(0,2),"
@@ -142,27 +143,39 @@ HELP = {
            T("The same one for costs and payouts: a month, a quarter or a year. Mixing periods makes the return look better or worse than it is.", "La même pour les frais et les payouts : un mois, un trimestre ou un an. Mélanger les périodes rend le rendement meilleur ou pire qu’il ne l’est.", "El mismo para costes y payouts: un mes, un trimestre o un año. Mezclar periodos hace que el rendimiento parezca mejor o peor de lo que es."))]},
 }
 
+# phones: while you type, the result stays in a bar at the bottom of the screen (in place of the signup bar)
+BAR_JS = """<script>(function(){var c=document.querySelector('[data-calc]'),bar=document.querySelector('.calc-bar');if(!c||!bar||!('IntersectionObserver' in window))return;
+var big=c.querySelector('.big'),x=big.querySelector('.num'),y=x.nextElementSibling,n=bar.querySelector('.num'),l=bar.querySelector('.lbl'),inForm=false,seen=false,used=false;
+function sync(){n.textContent=x.textContent;n.className=x.className;l.textContent=y?y.textContent:'';}
+function show(){var on=used&&inForm&&!seen;bar.classList.toggle('on',on);}
+c.addEventListener('focusin',function(){used=true;show();});
+new MutationObserver(sync).observe(big,{subtree:true,childList:true,characterData:true,attributes:true});sync();
+new IntersectionObserver(function(es){es.forEach(function(e){inForm=e.isIntersecting;show();});}).observe(c.querySelector('.calc-form'));
+new IntersectionObserver(function(es){es.forEach(function(e){seen=e.isIntersecting;show();});},{threshold:.6}).observe(big);})();</script>"""
+
 def _tool_page(lang, t, slug, h1, lead, form, results, script, howto, faqs):
-    hero = page_hero(t, h1, lead, T("Free tools","Outils gratuits","Herramientas gratuitas"))
+    """A calculator: the form and the result side by side in one card, the action under the result, then how it works."""
+    NO_DOCK.add(slug)
+    hero = ui.hero(t, T("Free tools","Outils gratuits","Herramientas gratuitas"), h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_tool_hero"'))
     h = HELP[slug]; faqs = faqs + h["faq"]
     loc = lambda x: re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', x)
-    others = "".join(f'<a class="tool-mini" href="{href(lang,s)}">{ico(I[ic])}<span>{t(n)}</span></a>' for s,ic,n,_ in TOOLS if s != slug)
-    b = f'''<section style="padding-top:8px"><div class="wrap"><div class="calc" data-calc="{slug}">
-<div class="calc-form">{form}</div><div class="calc-out" aria-live="polite">{results}</div></div>
-<div class="calc-act"><div><b>{t(T("Track this automatically in Sweep","Suis ça automatiquement dans Sweep","Síguelo automáticamente en Sweep"))}</b><p data-nolinks>{t(ACT[slug])}</p></div><a class="btn btn-primary" href="{SIGNUP}" data-track="signup_tool">{t(CREATE_FREE)}</a></div>
-<p class="fine" style="margin:18px auto 0;text-align:center;max-width:70ch">{note(lang, t)}</p></div></section>
-<section class="rule"><div class="wrap narrow"><article class="article">
-<h2>{t(T("How to use it","Comment l’utiliser","Cómo usarla"))}</h2><ol>{"".join(f"<li>{t(x)}</li>" for x in h["steps"])}</ol>
-<h2>{t(T("How it works","Comment ça marche","Cómo funciona"))}</h2>{t(howto)}
-<h2>{t(T("Example","Exemple","Ejemplo"))}</h2>{t(h["example"])}
-<h2>{t(T("Common mistakes","Erreurs fréquentes","Errores frecuentes"))}</h2><ul>{"".join(f"<li><b>{t(a)}</b> {loc(t(b))}</li>" for a, b in h["mistakes"])}</ul></article></div></section>
-<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>
-{"".join(faq_item(t,q,a) for q,a in faqs)}</div></section>
-<section class="rule"><div class="wrap"><div class="tool-others"><span class="kick">{t(T("More free tools","Autres outils gratuits","Más herramientas gratuitas"))}</span><div>{others}</div></div></div></section>{final_cta(lang, t)}'''
+    act = (f'<div class="calc-act"><b>{t(T("Track this automatically in Sweep","Suis ça automatiquement dans Sweep","Síguelo automáticamente en Sweep"))}</b>'
+           f'<p data-nolinks>{t(ACT[slug])}</p>{ui.btn(t(CREATE_FREE), SIGNUP, attrs='data-track="signup_tool"')}</div>')
+    calc = (f'<div class="calc" data-calc="{slug}"><div class="calc-form">{form}</div><div class="calc-out" aria-live="polite">{results}{act}</div></div>'
+            f'<p class="fine calc-note">{note(lang, t)}</p><div class="calc-bar" aria-hidden="true"><span class="num"></span><span class="lbl"></span></div>')
+    article = (f'<h2>{t(T("How to use it","Comment l’utiliser","Cómo usarla"))}</h2><ol>{"".join(f"<li>{t(x)}</li>" for x in h["steps"])}</ol>'
+               f'<h2>{t(T("How it works","Comment ça marche","Cómo funciona"))}</h2>{t(howto)}'
+               f'<h2>{t(T("Example","Exemple","Ejemplo"))}</h2>{t(h["example"])}'
+               f'<h2>{t(T("Common mistakes","Erreurs fréquentes","Errores frecuentes"))}</h2><ul>{"".join(f"<li><b>{t(a)}</b> {loc(t(b))}</li>" for a, b in h["mistakes"])}</ul>')
+    others = ('<div class="chiprow" style="margin-top:40px"><span class="eyebrow">' + t(T("More free tools","Autres outils gratuits","Más herramientas gratuitas")) + "</span>"
+              + "".join(f'<a class="chip" href="{href(lang,s)}">{t(n)}</a>' for s,_,n,_ in TOOLS if s != slug) + "</div>")
+    b = (ui.sec(calc, "t", "calculator")
+         + ui.sec(f'<article class="article">{article}</article>', "n", "how", width="read")
+         + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs) + others, "n", "faq", width="read"))
     ld = jsonld({"@context":"https://schema.org","@graph":[
         {"@type":"WebApplication","name":t(h1),"url":f"https://{DOMAIN}{href(lang,slug)}","applicationCategory":"FinanceApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":f"https://{DOMAIN}/#org"}},
         {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]}]})
-    return hero + b + script, ld
+    return hero + b + ui.final(lang, t) + script + BAR_JS, ld
 
 def _num(id_, label, val, step="any", suffix="", attrs=""):
     return f'<label class="fld"><span>{label}</span><span class="inp"><input id="{id_}" type="number" inputmode="decimal" step="{step}" value="{val}" {attrs}>{f"<em>{suffix}</em>" if suffix else ""}</span></label>'
@@ -230,7 +243,7 @@ def page_drawdown(lang, t):
 function run(){{var s=parseFloat($('dd-start').value)||0,m=parseFloat($('dd-max').value)||0,p=Math.max(parseFloat($('dd-peak').value)||0,s),c=parseFloat($('dd-cur').value)||0,lock=$('dd-lock').checked;
 var thr=p-m,locked=false;if(lock&&thr>=s){{thr=s;locked=true;}}var room=c-thr,used=m>0?Math.min(100,Math.max(0,(1-room/m)*100)):0;
 $('dd-thr').textContent=money(thr);var sb=$('dd-sub');sb.textContent=sb.getAttribute('data-base')+(locked?' · '+L.locked:'');$('dd-room').textContent=money(room);$('dd-used').textContent=pc(Math.round(used),0);
-var k=room<=0?'out':(used>=75?'near':'ok');$('dd-st').textContent=L[k];$('dd-st').className='st-'+k;$('dd-bar').style.width=used+'%';$('dd-bar').className='bar-'+k;}}
+var k=room<=0?'out':(used>=75?'near':'ok');$('dd-st').textContent=L[k];$('dd-st').className='st-'+k;$('dd-bar').style.setProperty('--p',used);$('dd-bar').className='bar-'+k;}}
 document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventListener('input',run)}});run();}})();</script>'''
     howto = T("<p>With a trailing drawdown, your liquidation level follows your highest balance: it sits at that peak minus the maximum drawdown. It never moves down. Depending on the firm, the peak is measured during the day (intraday) or at the close (end of day), and the level often stops trailing once it reaches the starting balance.</p><p>Enter your peak according to your firm’s method: the intraday high for intraday trailing, the best closing balance for end-of-day.</p>",
               "<p>Avec un drawdown suiveur, ton seuil de liquidation suit ton plus haut solde : il se situe à ce sommet moins le drawdown maximum, et il ne redescend jamais. Selon la firme, le sommet est mesuré pendant la journée (intraday) ou à la clôture (fin de journée), et le seuil arrête souvent de suivre une fois arrivé au solde de départ.</p><p>Entre ton sommet selon la méthode de ta firme : le plus haut intraday pour un suivi intraday, le meilleur solde de clôture pour un suivi en fin de journée.</p>",
@@ -258,7 +271,7 @@ def page_consistency(lang, t):
 function run(){{var p=parseFloat($('cr-pct').value)||0,b=parseFloat($('cr-best').value)||0,tt=parseFloat($('cr-total').value)||0;
 var share=tt>0?b/tt*100:0,need=p>0?b/(p/100):0,ok=tt>0&&share<=p+1e-9;
 $('cr-share').textContent=tt>0?pc(share,1):'—';$('cr-st').textContent=tt>0?(ok?L.ok:L.out):'—';$('cr-st').className=ok?'st-ok':'st-out';
-$('cr-need').textContent=money(need);$('cr-left').textContent=money(need-tt);$('cr-bar').style.width=Math.min(100,share)+'%';$('cr-bar').className=ok?'bar-ok':'bar-out';$('cr-lim').style.left=Math.min(100,p)+'%';}}
+$('cr-need').textContent=money(need);$('cr-left').textContent=money(need-tt);$('cr-bar').style.setProperty('--p',Math.min(100,share));$('cr-bar').className=ok?'bar-ok':'bar-out';$('cr-lim').style.left=Math.min(100,p)+'%';}}
 document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventListener('input',run)}});run();}})();</script>'''
     howto = T("<p>A consistency rule limits how much of your total profit can come from a single day. With a 30% rule and a $1,500 best day, your total profit must reach at least $1,500 ÷ 0.30 = $5,000 before you qualify.</p><p>The fix is never a bigger day: it’s more ordinary days. Some firms apply the rule to evaluations, others to payouts, with different percentages.</p>",
               "<p>Une règle de consistance limite la part de ton profit total qui peut venir d’une seule journée. Avec une règle de 30 % et une meilleure journée de 1 500 $, ton profit total doit atteindre au moins 1 500 $ ÷ 0,30 = 5 000 $ pour être admissible.</p><p>La solution n’est jamais une plus grosse journée : ce sont plus de journées ordinaires. Certaines firmes appliquent la règle aux évaluations, d’autres aux payouts, avec des pourcentages différents.</p>",
@@ -274,10 +287,12 @@ document.querySelectorAll('[data-calc] input').forEach(function(e){{e.addEventLi
             body, ld)
 
 def page_tools(lang, t):
-    hero = page_hero(t, T("Free tools for futures and prop traders.","Outils gratuits pour traders de futures et de prop firms.","Herramientas gratuitas para traders de futuros y de fondeo."),
-        T("Quick answers before you take the trade. No account needed.","Des réponses rapides avant de prendre le trade. Sans compte.","Respuestas rápidas antes de entrar en la operación. Sin cuenta."), T("Free tools","Outils gratuits","Herramientas gratuitas"))
-    cards = "".join(f'<a class="tool-card reveal" href="{href(lang,s)}">{ico(I[ic])}<h2>{t(n)}</h2><p>{t(d)}</p><span class="go">{t(T("Open","Ouvrir","Abrir"))} →</span></a>' for s,ic,n,d in TOOLS)
-    b = f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div><p class="center-note"><a class="tlink" href="{href(lang,"prop-firms/index.html")}">{t(T("Each firm’s rules, explained","Les règles de chaque firme, expliquées","Las reglas de cada firma, explicadas"))} <span aria-hidden="true">→</span></a></p><p class="fine" style="text-align:center;margin:22px auto 0;max-width:70ch">{note(lang, t)}</p></div></section>'
+    hero = ui.hero(t, T("Free tools","Outils gratuits","Herramientas gratuitas"), T("Free tools for futures and prop traders.","Outils gratuits pour traders de futures et de prop firms.","Herramientas gratuitas para traders de futuros y de fondeo."),
+        T("Quick answers before you take the trade. No account needed.","Des réponses rapides avant de prendre le trade. Sans compte.","Respuestas rápidas antes de entrar en la operación. Sin cuenta."),
+        cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_tools_hero"'))
+    cards = ui.cards([ui.card(t, n, d, icon=ic, more=T("Open","Ouvrir","Abrir"), url=href(lang, s)) for s, ic, n, d in TOOLS], cols=3)
+    b = ui.sec(cards + f'<div class="links">{ui.go(lang, t, "prop-firms/index.html", T("Each firm’s rules, explained","Les règles de chaque firme, expliquées","Las reglas de cada firma, explicadas"))}</div>'
+               + f'<p class="fine" style="margin-top:20px">{note(lang, t)}</p>', "t", "tools")
     when = [(T("Before the session.","Avant la séance.","Antes de la sesión."),
              T("Size each setup with the {ps}, and check the room left above your max loss with the {dd}.","Calcule la taille de chaque setup avec le {ps}, et vérifie la marge restante au-dessus de ta perte max avec le {dd}.","Calcula el tamaño de cada setup con la {ps} y revisa el margen que te queda sobre tu pérdida máx. con la {dd}.")),
             (T("During an evaluation.","Pendant une évaluation.","Durante una evaluación."),
@@ -297,12 +312,12 @@ def page_tools(lang, t):
              T("Yes, all of them, with no account and no limit.","Oui, tous, sans compte et sans limite.","Sí, todas, sin cuenta y sin límite.")),
             (T("Can Sweep do these calculations for me?","Sweep peut-il faire ces calculs pour moi ?","¿Sweep puede hacer estos cálculos por mí?"),
              T("Yes. In Sweep, your trades fill in the numbers: risk per trade, room left above the max loss, consistency and payout conditions update with every trade.","Oui. Dans Sweep, tes trades remplissent les chiffres : risque par trade, marge restante au-dessus de la perte max, consistance et conditions de payout se mettent à jour à chaque trade.","Sí. En Sweep, tus operaciones rellenan las cifras: el riesgo por operación, el margen sobre la pérdida máx., la consistencia y las condiciones de payout se actualizan con cada operación."))]
-    b += (f'<section class="rule"><div class="wrap narrow"><article class="article">{guide}</article></div></section>'
-          f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>' + "".join(faq_item(t, q, x) for q, x in faqs) + "</div></section>")
+    b += ui.sec(f'<article class="article">{guide}</article>' + ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs), "n", "when", width="read")   # two questions: under the text, not a section of their own
     ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(x)}} for q, x in faqs]})
     return (t(T("Free futures and prop firm calculators · Sweep","Calculateurs gratuits pour futures et prop firms · Sweep","Calculadoras gratuitas para futuros y prop firms · Sweep")),
             t(T("Free position size, trailing drawdown, consistency, payout, expectancy and prop firm ROI calculators for futures and prop firm traders.","Calculateurs gratuits : taille de position, drawdown suiveur, consistance, payout, espérance et rentabilité prop, pour traders de futures.","Calculadoras gratuitas: tamaño de posición, drawdown dinámico, consistencia, payout, esperanza y rentabilidad prop, para traders de futuros.")),
-            hero + b + final_cta(lang, t), ld)
+            hero + b + ui.final(lang, t), ld)
+SYSTEM_PAGES.add("tools.html")
 
 TOOLS += [
  ("expectancy-calculator.html","target2",T("Expectancy calculator","Calculateur d’espérance","Calculadora de esperanza"),
@@ -364,3 +379,5 @@ def page_payoutcalc(lang, t):
     return _simple_tool(lang, t, 5, form, res, js, howto, faqs,
         T("Prop firm payout calculator: what can you request? · Sweep","Calculateur de payout prop : combien retirer ? · Sweep","Calculadora de payout prop: ¿cuánto puedes pedir? · Sweep"),
         T("Free calculator: the payout you can request after your firm’s cushion, within the minimum and maximum per request, for any prop firm.","Calculateur gratuit : le payout que tu peux demander après le coussin de ta firme, entre le minimum et le maximum, pour toute prop firm.","Calculadora gratuita: el payout que puedes pedir tras el colchón de tu firma, entre el mínimo y el máximo, para cualquier prop firm."))
+
+SYSTEM_PAGES.update(s for s, _, _, _ in TOOLS)

@@ -43,13 +43,13 @@ def page_templates(lang, t):
             t(T("Download a printable trading plan, daily trading journal and discipline checklist for futures and prop firm traders. Free, no email.","Télécharge un plan de trading, un journal quotidien et une checklist de discipline à imprimer, pour traders de futures et de prop firms. Gratuit, sans courriel.","Descarga un plan de trading, un diario y un checklist de disciplina imprimibles para traders de futuros y de fondeo. Gratis, sin email.")),
             hero + b + final_cta(lang, t), "")
 
-def _article(lang, t, h1, lead, kick, sections, related, title, desc):
-    hero = page_hero(t, h1, lead, kick)
+def _article(lang, t, h1, lead, kick, sections, title, desc):
+    import ui
+    hero = ui.hero(t, kick, h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_hero"'))
     body = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in sections)
-    rel = "".join(f'<a href="{href(lang,s)}">{t(n)}</a>' for s,n in related)
-    b = f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{body}</article></div></section>'
+    b = ui.sec(f'<article class="article">{body}</article>', "t", "guide", width="read")
     ld = jsonld({"@context":"https://schema.org","@type":"Article","headline":t(h1),"description":t(desc),"inLanguage":lang,"publisher":{"@id":f"https://{DOMAIN}/#org"},"datePublished":"2026-10-06","author":{"@type":"Organization","name":"Sweep"}})
-    return (t(title), t(desc), hero + b + final_cta(lang, t), ld)
+    return (t(title), t(desc), hero + b + ui.final(lang, t), ld)
 
 # What to look for in a journal: a section of the best-journal guide (/how-to-choose-a-trading-journal redirects there)
 CHOOSE = [
@@ -96,6 +96,7 @@ def page_routine(lang, t):
     ]
     return _article(lang, t, T("A daily trading journal routine that sticks.","Une routine de journal de trading qui tient dans le temps.","Una rutina diaria de diario de trading que funciona."),
         T("Five minutes before the open, one line per trade, sixty seconds after the close.","Cinq minutes avant l’ouverture, une ligne par trade, soixante secondes après la clôture.","Cinco minutos antes de la apertura, una línea por operación, sesenta segundos tras el cierre."), T("Guide","Guide","Guía"), S,
-        [("trading-templates.html",T("Free templates","Modèles gratuits","Plantillas gratuitas")),("best-trading-journal-for-prop-firms.html",T("Choose a trading journal","Choisir un journal","Elegir un diario")),("guides.html",T("All guides","Tous les guides","Todas las guías")),("release-dates.html",T("Release dates","Dates des annonces","Fechas de datos"))],
         T("Daily trading journal routine: before, during and after the session · Sweep","Routine de journal de trading : avant, pendant et après la séance · Sweep","Rutina de diario de trading: antes, durante y después de la sesión · Sweep"),
         T("A simple daily routine for your trading journal: a 5-minute plan before the open, one line per trade, a 60-second review after the close and a weekly review.","Une routine simple pour ton journal : un plan de 5 minutes avant l’ouverture, une ligne par trade, une revue de 60 secondes après la clôture et une revue de la semaine.","Una rutina sencilla para tu diario: un plan de 5 minutos antes de la apertura, una línea por operación, una revisión de 60 segundos al cierre y una revisión semanal."))
+
+SYSTEM_PAGES.add("trading-journal-routine.html")

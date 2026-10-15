@@ -10,6 +10,7 @@ LANGS = ["en", "fr", "es"]
 ASSETS = {"css": "styles.css", "js": "site.js", "system": "system.css"}
 SYSTEM_PAGES = set()   # pages built with ui.py: they load system.css (the design system) instead of styles.css
 PAGE_CSS = {}   # the sections of system.css marked « [pages: …] », inline in those pages only (filled by build.py)
+NO_DOCK = set()   # pages without the phone signup bar (calculators: their result bar takes its place)
 TODAY = "2026-10-01"
 IMGS = set(f.rsplit("-", 1)[0] for f in os.listdir(os.path.join(STATIC, "img")))
 
@@ -431,7 +432,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 </main>
 <div class="langsug" id="langsug" hidden><span data-l="fr">Cette page existe aussi en français</span><span data-l="es">Esta página también está en español</span><span data-l="en">This page is also in English</span><a href="#" id="langsug-go"></a><button type="button" id="langsug-x" aria-label="{t(T("Close","Fermer","Cerrar"))}">✕</button></div>
 <div class="consent" id="consent" role="dialog" aria-live="polite" aria-label="{t(T("Cookies","Témoins","Cookies"))}" hidden><p>{t(T("We use one cookie to remember how you found Sweep (the link you clicked). No ads, no cross-site tracking.","On utilise un seul témoin pour savoir comment tu as trouvé Sweep (le lien sur lequel tu as cliqué). Pas de publicité, aucun suivi d’un site à l’autre.","Usamos una sola cookie para saber cómo encontraste Sweep (el enlace en el que hiciste clic). Sin anuncios ni seguimiento entre sitios."))} <a href="{href(lang,'privacy.html')}">{t(T("Privacy","Confidentialité","Privacidad"))}</a></p><div><button type="button" class="btn btn-line" data-consent="no">{t(T("Decline","Refuser","Rechazar"))}</button><button type="button" class="btn btn-primary" data-consent="yes">{t(T("Accept","Accepter","Aceptar"))}</button></div></div>
-<div class="dock" aria-hidden="true"><a class="btn btn-primary" href="{SIGNUP}" tabindex="-1">{t(T("Join the first 100","Rejoindre les 100 premiers","Unirme a los primeros 100")) if page=="100" else t(CREATE_FREE)}</a><a class="btn btn-ghost" href="{APP}" tabindex="-1">{t(LOGIN)}</a></div>
+{"" if page in NO_DOCK else f'''<div class="dock" aria-hidden="true"><a class="btn btn-primary" href="{SIGNUP}" tabindex="-1">{t(T("Join the first 100","Rejoindre les 100 premiers","Unirme a los primeros 100")) if page=="100" else t(CREATE_FREE)}</a><a class="btn btn-ghost" href="{APP}" tabindex="-1">{t(LOGIN)}</a></div>'''}
 <footer><div class="wrap">
 <div class="foot">
 <div><a class="brand" href="{href(lang,'index.html')}" aria-label="Sweep">{MARK}<span>sweep</span></a><p style="max-width:28ch">{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}<br><span class="fine">{t(T("Sweep doesn’t offer financial advice. Trading futures involves risk.","Sweep n’offre pas de conseils financiers. Le trading de futures comporte des risques.","Sweep no ofrece asesoría financiera. Operar futuros implica riesgos."))}</span></p>

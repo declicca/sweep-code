@@ -303,8 +303,8 @@ table.guide td{font-family:var(--font);letter-spacing:0;color:var(--muted)}
   table.guide tbody tr:not(.grp):hover>*{background:transparent}}
 
 /* ---- form fields: one height, the brand's chevron */
-.inp{display:flex}
-.inp input,.inp select{width:100%;height:44px;padding:0 14px;border:0;border-radius:var(--r1);background-color:color-mix(in srgb,var(--text) 5%,transparent);box-shadow:0 0 0 1px var(--line) inset;color:var(--text);font:500 15px/1 var(--font);-webkit-appearance:none;appearance:none;transition:box-shadow var(--t-fast)}
+.inp{position:relative;display:flex}
+.inp input,.inp select{width:100%;height:44px;padding:0 14px;border:0;border-radius:var(--r1);background-color:color-mix(in srgb,var(--text) 5%,transparent);box-shadow:0 0 0 1px var(--line) inset;color:var(--text);font:500 16px/1 var(--font);-webkit-appearance:none;appearance:none;transition:box-shadow var(--t-fast)}   /* 16 px: iPhone doesn't zoom on focus */
 .inp input{font-family:var(--mono);appearance:textfield}
 .inp input::-webkit-inner-spin-button{-webkit-appearance:none}
 .inp select{padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M2 3.5l3 3 3-3' fill='none' stroke='%239A9AA2' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
@@ -368,6 +368,52 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .picks li{color:var(--text)}
 .article .chiprow,.article .links{margin-top:16px}
 @media (max-width:743px){table.vs td:nth-child(2),table.glance tbody tr:first-child>*{background:none}table.vs td:nth-child(2)::before{color:var(--blue-text)}}
+
+/* ---- [pages: position-size-calculator.html trailing-drawdown-calculator.html consistency-rule-calculator.html payout-calculator.html expectancy-calculator.html prop-firm-roi-calculator.html] calculators: the form and the result side by side in one card; on phones the result follows you in a bar */
+.calc{display:grid;border-radius:var(--r5);background:var(--glass);box-shadow:var(--shadow-2);overflow:hidden}
+@media (min-width:861px){.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.calc-form,.calc-out{padding:clamp(24px,16px + 2vw,40px)}
+.calc-form{display:grid;gap:18px;align-content:start}
+.calc-out{display:flex;flex-direction:column;gap:24px;border-top:1px solid var(--line-2);background:linear-gradient(160deg,color-mix(in srgb,var(--blue) 12%,transparent),transparent 65%)}
+@media (min-width:861px){.calc-out{border-top:0;border-left:1px solid var(--line-2)}}
+.fld{display:grid;gap:8px}
+.fld>span:first-child{font-size:13.5px;color:var(--muted)}
+.calc .inp input,.calc .inp select{height:48px}
+.inp em{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-style:normal;font-size:14px;color:var(--faint);pointer-events:none}
+.inp:has(em) input{padding-right:40px}
+.calc-form .seg{margin:0;justify-self:start}
+.calc-form .seg button{font-family:var(--font)}
+.chk{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;color:var(--muted);cursor:pointer}
+.chk input{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--blue)}
+.big{display:grid;gap:8px}
+.big .num{font:600 clamp(44px,36px + 2vw,64px)/1 var(--font);letter-spacing:-.035em;color:var(--blue-text)}
+.big span:last-child{font-size:15px;color:var(--muted)}
+.calc-out dl{border-top:1px solid var(--line-2)}
+.calc-out dl div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-2);font-size:15px}
+.calc-out dt{color:var(--muted)}
+.calc-out dd{color:var(--text);text-align:right}
+.calc-msg{font-size:14px;color:var(--gold)}
+.calc-msg:empty{display:none}
+.st-ok,.num.st-ok{color:var(--blue-text)}
+.st-near,.st-out,.num.st-out{color:var(--gold)}
+.meter{position:relative;height:8px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--text) 10%,transparent)}
+.meter i{position:absolute;inset:0;border-radius:inherit;overflow:hidden}
+.meter i::before{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--blue);transform:translateX(calc(var(--p,0) * 1% - 100%));transition:transform var(--t-mid) var(--spring)}
+.meter i.bar-near::before,.meter i.bar-out::before{background:var(--gold)}
+.meter b{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:1px;background:var(--text)}
+.calc-act{display:grid;gap:6px;justify-items:start;margin-top:auto;padding-top:24px;border-top:1px solid var(--line-2)}
+.calc-act p{font-size:14.5px;color:var(--muted)}
+.calc-act .btn{margin-top:10px}
+.calc-note{margin-top:16px}
+.calc-bar{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:40;display:flex;align-items:baseline;gap:10px;padding:14px 20px;border-radius:var(--r-pill);background:var(--glass-bar);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow-3);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity var(--t-fast),transform var(--t-mid) var(--spring)}
+.calc-bar.on{opacity:1;transform:none}
+.calc-bar .num{flex:none;font:600 22px/1 var(--font);letter-spacing:-.02em;color:var(--blue-text)}
+.calc-bar .lbl{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13.5px;color:var(--muted)}
+.menu-open .calc-bar{opacity:0}
+@media (min-width:861px){.calc-bar{display:none}}
+
+/* ---- [pages: guides.html] the guides: a row of five on computers, a plain list below (an index, not a carousel) */
+@media (max-width:1067px){.cards.c5.index{display:grid;grid-template-columns:1fr;overflow:visible;margin-inline:0;padding:0}}
 
 /* ---- [pages: changelog.html] timeline */
 .tl{position:relative;display:grid;gap:4px}
@@ -459,6 +505,7 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .article ol li{counter-increment:a;position:relative;padding-left:34px}
 .article ol li::before{content:counter(a);position:absolute;left:0;top:2px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--blue-text);font:600 12px/1 var(--mono)}
 .article b,.article strong{color:var(--text)}
+.article+.head{margin-top:var(--sec-t)}
 .tbl{width:100%;border-collapse:collapse;font-size:15px}
 .tbl th,.tbl td{padding:16px 0;text-align:left;vertical-align:top;border-bottom:1px solid var(--line-2)}
 .tbl th{width:34%;padding-right:24px;font-weight:500;color:var(--text)}
@@ -696,9 +743,11 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .foot-meta .lang a[aria-current]{color:var(--text)}
 .disclaimer{margin-top:20px;max-width:none;font-size:12px;line-height:1.5;color:var(--faint)}
 /* floating cards: language suggestion and consent */
-.langsug,.consent{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));z-index:60;display:flex;align-items:center;gap:12px;max-width:calc(100% - 24px);padding:10px 10px 10px 18px;border-radius:var(--r-pill);background:var(--glass-menu);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow-3);font-size:14px;
+:root:has(.langsug.in) :is(.dock,.calc-bar){opacity:0;pointer-events:none}   /* one card at the bottom at a time */
+.langsug,.consent{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));z-index:60;display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:10px 10px 10px 18px;border-radius:var(--r-pill);background:var(--glass-menu);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow-3);font-size:14px;
   opacity:0;transform:translate(-50%,16px);transition:opacity var(--t-mid),transform var(--t-mid) var(--spring)}
 .langsug.in,.consent.in{opacity:1;transform:translate(-50%,0)}
+.langsug{width:max-content}   /* from left:50%, it would only get half the screen */
 .langsug a{color:var(--blue-text);font-weight:600;white-space:nowrap}
 .langsug button{width:30px;height:30px;border-radius:50%;color:var(--muted)}
 .consent{flex-wrap:wrap;border-radius:var(--r4);padding:16px 18px;width:min(560px,calc(100% - 24px))}

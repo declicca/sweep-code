@@ -24,8 +24,8 @@
   "hash": "db5a77556ec88a9c"
  },
  "consistency-rule-calculator.html": {
-  "date": "2026-10-13",
-  "hash": "c228cb2953ce0512"
+  "date": "2026-10-15",
+  "hash": "ac2dcc8f972d6a46"
  },
  "contact.html": {
   "date": "2026-10-13",
@@ -96,8 +96,8 @@
   "hash": "0a6456705312f98d"
  },
  "expectancy-calculator.html": {
-  "date": "2026-10-13",
-  "hash": "006e349a2e31ff0f"
+  "date": "2026-10-15",
+  "hash": "13b856d844fbf097"
  },
  "faq.html": {
   "date": "2026-10-13",
@@ -132,8 +132,8 @@
   "hash": "2edb1dab00a6b0d9"
  },
  "guides.html": {
-  "date": "2026-10-13",
-  "hash": "bf24e48491ab0089"
+  "date": "2026-10-15",
+  "hash": "6ad1f7f6c753c84a"
  },
  "how-it-works.html": {
   "date": "2026-10-15",
@@ -168,8 +168,8 @@
   "hash": "0ddb9151f3a2ff95"
  },
  "payout-calculator.html": {
-  "date": "2026-10-13",
-  "hash": "f395122abd405255"
+  "date": "2026-10-15",
+  "hash": "40e7fe213de42e0a"
  },
  "payout-tracker.html": {
   "date": "2026-10-15",
@@ -180,8 +180,8 @@
   "hash": "ff92eb9c5ca40ba9"
  },
  "position-size-calculator.html": {
-  "date": "2026-10-13",
-  "hash": "c64e23bc23502e7f"
+  "date": "2026-10-15",
+  "hash": "debbfec958fd134e"
  },
  "ppi-release-dates.html": {
   "date": "2026-10-13",
@@ -220,8 +220,8 @@
   "hash": "ef7c0c390009bee6"
  },
  "prop-firm-roi-calculator.html": {
-  "date": "2026-10-13",
-  "hash": "7b702b77f1c13ed8"
+  "date": "2026-10-15",
+  "hash": "09e673370fa3f4b6"
  },
  "prop-firm-rule-changes.html": {
   "date": "2026-10-15",
@@ -281,38 +281,38 @@
  },
  "sweep-vs-edgewonk.html": {
   "date": "2026-10-15",
-  "hash": "8b1cfe3e3daf5577"
+  "hash": "64fd6b8b695884d3"
  },
  "sweep-vs-tradersync.html": {
   "date": "2026-10-15",
-  "hash": "c4b82ca2d72e407f"
+  "hash": "a9c4d318c25b732d"
  },
  "sweep-vs-tradervue.html": {
   "date": "2026-10-15",
-  "hash": "0c9684c7718e2c57"
+  "hash": "7abceaf05e1f3f45"
  },
  "sweep-vs-tradezella.html": {
   "date": "2026-10-15",
-  "hash": "674a7ca8e3f59fb0"
+  "hash": "fe02b8e182c38ca9"
  },
  "terms.html": {
   "date": "2026-10-13",
   "hash": "d12ff9a7ce5de37e"
  },
  "tools.html": {
-  "date": "2026-10-13",
-  "hash": "778e33bb8551e242"
+  "date": "2026-10-15",
+  "hash": "238c0866935c79f9"
  },
  "trading-journal-routine.html": {
-  "date": "2026-10-13",
-  "hash": "d5cf1a985bc8f0b7"
+  "date": "2026-10-15",
+  "hash": "757f8dab68536eef"
  },
  "trading-templates.html": {
   "date": "2026-10-13",
   "hash": "7d1f7e165ffa63e3"
  },
  "trailing-drawdown-calculator.html": {
-  "date": "2026-10-13",
-  "hash": "89e9c7ed5611e876"
+  "date": "2026-10-15",
+  "hash": "49d4e57796d22445"
  }
 }

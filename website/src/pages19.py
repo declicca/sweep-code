@@ -243,22 +243,33 @@ GUIDES_HELP = T("""<h2>Where to start</h2><ul>
 <h2>Cómo se mantienen exactas las comparativas</h2><p>Las tablas firma por firma salen del catálogo que Sweep usa para precargar las cuentas prop, revisado cada semana en las páginas oficiales de cada firma. Cada guía muestra la fecha de la última revisión, y «—» significa que la regla no está entre las que Sweep sigue para esa cuenta. Las firmas cambian sus reglas: confirma siempre en el sitio de la firma antes de operar. Cada guía termina con las preguntas que más hacen los traders sobre la regla.</p>
 <p>Cada guía de reglas tiene su calculadora gratuita para comprobar tus propias cifras: <a href="@trailing-drawdown-calculator.html">drawdown dinámico</a>, <a href="@consistency-rule-calculator.html">consistencia</a> y <a href="@payout-calculator.html">payout</a>.</p>""")
 
+GUIDE_ICON = {"prop-firm-payout-rules.html": "receipt", "prop-firm-profit-targets.html": "target2", "prop-firm-minimum-days.html": "calendar", "prop-firm-consistency-rules.html": "layers",
+              "prop-firm-drawdown-rules.html": "shield", "prop-firm-costs.html": "tag", "best-trading-journal-for-prop-firms.html": "check", "trading-journal-routine.html": "doc"}
+JOURNAL_GUIDES = ("best-trading-journal-for-prop-firms.html", "trading-journal-routine.html")
+
 def page_hub(lang, t):
-    hero = page_hero(t, T("Guides for prop firm traders.", "Des guides pour les traders de prop firms.", "Guías para traders de prop firms."),
+    """The guides in two rows: the prop firm rules compared, then the journal."""
+    import ui
+    hero = ui.hero(t, T("Guides", "Guides", "Guías"), T("Guides for prop firm traders.", "Des guides pour les traders de prop firms.", "Guías para traders de prop firms."),
         T("Straight answers to the questions futures prop traders ask, with the firms’ rules checked every week.",
           "Des réponses claires aux questions des traders de prop firms en futures, avec les règles des firmes vérifiées chaque semaine.",
           "Respuestas claras a las preguntas de los traders de prop firms de futuros, con las reglas de las firmas revisadas cada semana."),
-        T("Guides", "Guides", "Guías"))
-    cards = "".join(f'<a class="tool-card" href="{href(lang, s)}"><h2>{t(n)}</h2><p>{t(d)}</p><span class="go">{t(T("Read", "Lire", "Leer"))} →</span></a>' for s, n, d in GUIDES)
-    b = (f'<section style="padding-top:8px"><div class="wrap"><div class="tool-grid">{cards}</div></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(GUIDES_HELP))}</article></div></section>')
+        cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guides_hero"'))
+    card = lambda s, n, d: ui.card(t, n, d, icon=GUIDE_ICON.get(s), more=T("Read", "Lire", "Leer"), url=href(lang, s))
+    rules = [card(*g) for g in GUIDES if g[0] not in JOURNAL_GUIDES]
+    journal = [card(*g) for g in GUIDES if g[0] in JOURNAL_GUIDES]
+    cols = lambda n: 5 if n == 5 else 3 if n % 3 == 0 else 2 if n % 2 == 0 else n   # one row of five, or full rows
+    b = (ui.sec(ui.head(t, None, T("Prop firm rules, compared", "Les règles des prop firms, comparées", "Las reglas de las prop firms, comparadas")) + ui.cards(rules, cols(len(rules)), "stagger index"), "t", "rules")
+         + ui.sec(ui.head(t, None, T("Your trading journal", "Ton journal de trading", "Tu diario de trading")) + ui.cards(journal, cols(len(journal))), "t", "journal")
+         + ui.sec(f'<article class="article">{localize(lang, t(GUIDES_HELP))}</article>', "n", "start", width="read"))
     ld = jsonld({"@context": "https://schema.org", "@type": "ItemList", "name": t(T("Guides", "Guides", "Guías")),
                  "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": t(n), "url": f"https://{DOMAIN}{href(lang, s)}"} for i, (s, n, _) in enumerate(GUIDES)]})
     return _fr_nbsp(lang, t(T("Guides for Futures Prop Firm Traders · Sweep", "Guides pour traders de prop firms en futures · Sweep", "Guías para traders de prop firms de futuros · Sweep")),
                     t(T("Guides for futures prop firm traders: consistency and drawdown rules compared, choosing a trading journal and a daily journaling routine.",
                         "Guides pour traders de prop firms en futures : règles de consistance et de drawdown comparées, choisir un journal et routine de journal.",
                         "Guías para traders de prop firms de futuros: reglas de consistencia y drawdown comparadas, elegir un diario y rutina de diario.")),
-                    hero + b + final_cta(lang, t), ld)
+                    hero + b + ui.final(lang, t), ld)
+SYSTEM_PAGES.add("guides.html")
 
 # ---------------------------------------------------------------- payout rules
 GUIDE_PAYOUT = "prop-firm-payout-rules.html"

@@ -78,12 +78,16 @@ def phone_img(src, alt, pos="50% 0%"):
 class Card:
     def __init__(self, kind, markup): self.kind, self.markup = kind, markup
 
-def card(t, title, text, icon=None, more="", kick=None, id_="", items=None, cls=""):
+def card(t, title, text, icon=None, more="", kick=None, id_="", items=None, cls="", url=None):
+    """A text card; with `url`, the whole card is the link (`more` is then a label, never a link)."""
     i = f'<span class="ico" aria-hidden="true">{ico(I[icon])}</span>' if icon else ""
     k = f'<span class="eyebrow">{t(kick)}</span>' if kick else ""
     d = f' id="{id_}"' if id_ else ""
     p = f"<p>{t(text)}</p>" if text else ""
-    return Card("text", f'<article class="card{" " + cls if cls else ""}"{d}>{i}{k}<h3>{t(title)}</h3>{p}{bullets(t, items) if items else ""}{f"<div class=more>{more}</div>" if more else ""}</article>')
+    tag, h = ("a", f' href="{url}"') if url else ("article", "")
+    c = " ".join(x for x in ("card", "lift" if url else "", cls) if x)
+    m = (f'<div class="more"><span class="go">{t(more)} <span aria-hidden="true">→</span></span></div>' if url else f'<div class="more">{more}</div>') if more else ""
+    return Card("text", f'<{tag} class="{c}"{d}{h}>{i}{k}<h3>{t(title)}</h3>{p}{bullets(t, items) if items else ""}{m}</{tag}>')
 
 def card_media(t, title, text, media, crop=False, more="", kick=None, items=None, id_=""):
     """A card with a visual on top; every card of the row shares the visual's ratio."""
