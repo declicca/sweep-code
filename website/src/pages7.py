@@ -149,7 +149,8 @@ var big=c.querySelector('.big'),x=big.querySelector('.num'),y=x.nextElementSibli
 function sync(){n.textContent=x.textContent;n.className=x.className;l.textContent=y?y.textContent:'';}
 function show(){var on=used&&inForm&&!seen;bar.classList.toggle('on',on);}
 c.addEventListener('focusin',function(){used=true;show();});
-new MutationObserver(sync).observe(big,{subtree:true,childList:true,characterData:true,attributes:true});sync();
+var last=x._mine=x.textContent;   // a new result rolls from the one on screen (site.js, sweepRoll); its own steps are only copied to the bar
+new MutationObserver(function(){var now=x.textContent;if(now!==x._mine&&now!==last&&window.sweepRoll){var from=x._mine;last=now;window.sweepRoll(x,now,from);}sync();}).observe(big,{subtree:true,childList:true,characterData:true,attributes:true});sync();
 new IntersectionObserver(function(es){es.forEach(function(e){inForm=e.isIntersecting;show();});}).observe(c.querySelector('.calc-form'));
 new IntersectionObserver(function(es){es.forEach(function(e){seen=e.isIntersecting;show();});},{threshold:.6}).observe(big);})();</script>"""
 

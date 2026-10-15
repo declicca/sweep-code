@@ -1,6 +1,6 @@
 """Home page sections, built with the design system (ui.py, system.css)."""
 from core import *
-from ui import sec, head, btn, go, split, card, card_media, cards, tiles, frame_d, frame_p, phone_img, qa, final, read_next
+from ui import sec, head, btn, go, split, card, card_media, cards, tiles, frame_d, frame_p, phone_img, qa, final, read_next, bullets, rings
 import re
 
 L3 = lambda en, fr, es: T(en, fr, es)
@@ -27,45 +27,53 @@ def sec_oneplace(lang, t):
                     "Una hoja de cálculo para tus operaciones. El panel de tu firma para el drawdown. Notas para tu plan. Capturas en tu galería. Sweep lo reúne todo en un solo lugar, con calma."),
                  None, viz, id_="one-place")
 
-def sec_log(lang, t):
-    items = [card(t, L3("Screenshot","Capture","Captura"), L3("One capture, every trade on it.","Une capture, tous ses trades ajoutés.","Una captura, todas sus operaciones."), "image"),
-             card(t, L3("Your words","Tes mots","Tus palabras"), L3("“Long 2 NQ at the open, out at target.”","« Long 2 NQ à l’ouverture, sorti à la cible. »","«Largo 2 NQ en la apertura, salida en el objetivo.»"), "chat"),
-             card(t, L3("Import","Import","Importar"), L3(f'Bring in your platform’s export, or <a href="{href(lang, "ninjatrader.html")}">sync NinjaTrader 8</a>.', f'L’export de ta plateforme, importé, ou <a href="{href(lang, "ninjatrader.html")}">NinjaTrader 8 synchronisé</a>.', f'Trae la exportación de tu plataforma o <a href="{href(lang, "ninjatrader.html")}">sincroniza NinjaTrader 8</a>.'), "download")]
-    shot = frame_d("v6-03-log-by-screenshot-d.webp", t(L3("A trade filled in from a screenshot, sample data","Un trade rempli à partir d’une capture, données d’exemple","Una operación completada desde una captura, datos de ejemplo")),
-                   m="v6-03-log-by-screenshot-m.webp", sizes="(max-width: 1067px) 92vw, 1200px", cls="reveal zoom")
+def sec_story(lang, t):
+    """Logging, the firm's rules, payouts: one narration. On computers the text scrolls and one app screen stays,
+    changing with it (an empty trade fills in, then the rules, then the payouts); on phones each part has its own screen."""
+    import pages18
+    from ui import _img_d
+    # logging
+    methods = [(L3("Screenshot","Capture","Captura"), L3("One capture, every trade on it.","Une capture, tous ses trades ajoutés.","Una captura, todas sus operaciones.")),
+               (L3("Your words","Tes mots","Tus palabras"), L3("“Long 2 NQ at the open, out at target.”","« Long 2 NQ à l’ouverture, sorti à la cible. »","«Largo 2 NQ en la apertura, salida en el objetivo.»")),
+               (L3("Import","Import","Importar"), L3(f'Bring in your platform’s export, or <a href="{href(lang, "ninjatrader.html")}">sync NinjaTrader 8</a>.', f'L’export de ta plateforme, importé, ou <a href="{href(lang, "ninjatrader.html")}">NinjaTrader 8 synchronisé</a>.', f'Trae la exportación de tu plataforma o <a href="{href(lang, "ninjatrader.html")}">sincroniza NinjaTrader 8</a>.'))]
     note = f'<p class="cap">{t(L3("Sample data · Real CME charts appear on your trades the day after the session.","Données d’exemple · Les vrais graphiques CME apparaissent sur tes trades le lendemain de la séance.","Datos de ejemplo · Los gráficos reales de CME aparecen en tus operaciones al día siguiente de la sesión."))}</p>'
-    return sec(head(t, L3("Log","Saisie","Registro"), L3("Log a trade in seconds.","Un trade ajouté en quelques secondes.","Registra una operación en segundos."),
+    log_head = head(t, L3("Log","Saisie","Registro"), L3("Log a trade in seconds.","Un trade ajouté en quelques secondes.","Registra una operación en segundos."),
                     L3("No homework. Drop a screenshot, say it in your own words, or import your platform’s export. Sweep fills in the rest.",
                        "Pas de devoirs. Dépose une capture, raconte-le avec tes mots ou importe l’export de ta plateforme. Sweep fait le reste.",
                        "Sin tareas. Sube una captura, cuéntala con tus palabras o importa la exportación de tu plataforma. Sweep completa el resto."),
-                    links=link(lang, t, "how-it-works.html", L3("See how logging works","Voir comment ça marche","Ver cómo funciona")), center=True)
-               + cards(items, 3) + f'<div style="margin-top:64px">{shot}{note}</div>', "n", "logging")
-
-def sec_firms(lang, t):
-    import pages18
+                    links=link(lang, t, "how-it-works.html", L3("See how logging works","Voir comment ça marche","Ver cómo funciona")))
+    log_methods = '<ul class="list ways">' + "".join(f"<li><b>{t(a)}</b> {t(b)}</li>" for a, b in methods) + "</ul>" + note
+    # the firm's rules
     firms = ", ".join(f'<a href="{href(lang, pages18.page_of(f))}">{f["name"]}</a>' for f in pages18.presets.FIRMS)
     pts = [T(firms + ". Another firm? Enter its rules once.", firms + ". Une autre firme ? Saisis ses règles une fois.", firms + ". ¿Otra firma? Introduce sus reglas una vez."),
            L3("Rules checked every week against each firm’s official pages.","Règles vérifiées chaque semaine sur les pages officielles des firmes.","Reglas verificadas cada semana en las páginas oficiales de cada firma."),
            L3("A rule changes? You see what it means for your account, and you decide.","Une règle change ? Tu vois ce que ça change pour ton compte, et tu décides.","¿Cambia una regla? Ves qué significa para tu cuenta, y tú decides.")]
-    more = ('<div class="links">' + link(lang, t, "prop-firm-tracker.html", L3("See prop firm tracking","Voir le suivi des prop firms","Ver el seguimiento de prop firms"))
-            + link(lang, t, "prop-firms/index.html", L3("Compare every firm’s rules","Compare les règles de chaque firme","Compara las reglas de cada firma")) + '</div>')
-    return split(t, L3("Prop firms","Prop firms","Prop firms"), L3("Your firm’s rules, already loaded.","Les règles de ta firme, déjà chargées.","Las reglas de tu firma, ya cargadas."),
-        L3("Pick your firm and account type. Sweep tracks drawdown, consistency and payout conditions for every account you run.",
-           "Choisis ta firme et ton type de compte. Sweep suit le drawdown, la consistance et les conditions de payout de chaque compte.",
-           "Elige tu firma y tu tipo de cuenta. Sweep sigue el drawdown, la consistencia y las condiciones de payout de cada cuenta."),
-        pts, frame_d("v6-08-payout-conditions-d.webp", t(L3("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")),
-                     m="v6-08-payout-conditions-m.webp", t=t), id_="prop", more=more)
-
-def sec_payouts(lang, t):
-    return split(t, L3("Payouts","Payouts","Payouts"), L3("Every account. Every payout. One record.","Chaque compte. Chaque payout. Un seul historique.","Cada cuenta. Cada payout. Un solo historial."),
-        L3("Eval fees, resets and activations on one side, payouts on the other. See what prop trading really pays you, and how close each funded account is to its next payout.",
-           "D’un côté les frais d’évaluation, les resets et les activations ; de l’autre les payouts. Vois ce que le prop trading te rapporte vraiment, et à quelle distance chaque compte financé est de son prochain payout.",
-           "De un lado, tarifas de evaluación, resets y activaciones; del otro, los payouts. Mira cuánto te paga realmente el trading con prop firms y qué tan cerca está cada cuenta fondeada de su próximo payout."),
-        [L3("Evaluations, funded and live accounts stay separate, so the P&L you see is the real one.","Évaluations, comptes financés et live restent séparés : le P&L que tu vois est le vrai.","Evaluaciones, cuentas fondeadas y live siempre separadas: el P&L que ves es el real."),
-         L3("Simulated and real money are never added together.","Le simulé et l’argent réel ne sont jamais additionnés.","Lo simulado y el dinero real nunca se suman."),
-         L3("<b>Lose an account, keep your history.</b>","<b>Tu perds un compte, tu gardes ton historique.</b>","<b>Pierdes una cuenta, conservas tu historial.</b>")],
-        frame_d("v6-12-payouts-d.webp", t(L3("Payouts and expenses, sample data","Payouts et dépenses, données d’exemple","Payouts y gastos, datos de ejemplo")), m="v6-12-payouts-m.webp", t=t),
-        flip=True, id_="payouts", more=f'<p class="fine" style="margin-top:24px">{t(MONEY_PLAN)}</p>')
+    prop = (head(t, L3("Prop firms","Prop firms","Prop firms"), L3("Your firm’s rules, already loaded.","Les règles de ta firme, déjà chargées.","Las reglas de tu firma, ya cargadas."),
+                 L3("Pick your firm and account type. Sweep tracks drawdown, consistency and payout conditions for every account you run.",
+                    "Choisis ta firme et ton type de compte. Sweep suit le drawdown, la consistance et les conditions de payout de chaque compte.",
+                    "Elige tu firma y tu tipo de cuenta. Sweep sigue el drawdown, la consistencia y las condiciones de payout de cada cuenta."))
+            + bullets(t, pts) + '<div class="links">' + link(lang, t, "prop-firm-tracker.html", L3("See prop firm tracking","Voir le suivi des prop firms","Ver el seguimiento de prop firms"))
+            + link(lang, t, "prop-firms/index.html", L3("Compare every firm’s rules","Compare les règles de chaque firme","Compara las reglas de cada firma")) + "</div>")
+    # payouts
+    pay = (head(t, L3("Payouts","Payouts","Payouts"), L3("Every account. Every payout. One record.","Chaque compte. Chaque payout. Un seul historique.","Cada cuenta. Cada payout. Un solo historial."),
+                L3("Eval fees, resets and activations on one side, payouts on the other. See what prop trading really pays you, and how close each funded account is to its next payout.",
+                   "D’un côté les frais d’évaluation, les resets et les activations ; de l’autre les payouts. Vois ce que le prop trading te rapporte vraiment, et à quelle distance chaque compte financé est de son prochain payout.",
+                   "De un lado, tarifas de evaluación, resets y activaciones; del otro, los payouts. Mira cuánto te paga realmente el trading con prop firms y qué tan cerca está cada cuenta fondeada de su próximo payout."))
+           + bullets(t, [L3("Evaluations, funded and live accounts stay separate, so the P&L you see is the real one.","Évaluations, comptes financés et live restent séparés : le P&L que tu vois est le vrai.","Evaluaciones, cuentas fondeadas y live siempre separadas: el P&L que ves es el real."),
+                         L3("Simulated and real money are never added together.","Le simulé et l’argent réel ne sont jamais additionnés.","Lo simulado y el dinero real nunca se suman."),
+                         L3("<b>Lose an account, keep your history.</b>","<b>Tu perds un compte, tu gardes ton historique.</b>","<b>Pierdes una cuenta, conservas tu historial.</b>")])
+           + f'<p class="fine" style="margin-top:24px">{t(MONEY_PLAN)}</p>')
+    # the screens: (desktop capture, phone capture, alt)
+    S = [("v6-25-new-trade-empty", L3("A new trade, before it’s filled in, sample data","Un nouveau trade, avant d’être rempli, données d’exemple","Una operación nueva, antes de completarla, datos de ejemplo")),
+         ("v6-24-new-trade-filled", L3("Sweep AI turning a sentence into a draft trade","Sweep AI transforme une phrase en brouillon de trade","Sweep AI convierte una frase en un borrador de operación")),
+         ("v6-08-payout-conditions", L3("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")),
+         ("v6-12-payouts", L3("Payouts and expenses, sample data","Payouts et dépenses, données d’exemple","Payouts y gastos, datos de ejemplo"))]
+    inline = lambda k: frame_d(f"{S[k][0]}-d.webp", t(S[k][1]), m=f"{S[k][0]}-m.webp", t=t, cls="reveal narr-in")   # phones and tablets
+    beats = [("logging", log_head, ""), ("", log_methods, inline(1)), ("prop", prop, inline(2)), ("payouts", pay, inline(3))]
+    steps = "".join(f'<div class="narr-beat"{' id="' + i + '"' if i else ""} data-beat="{k}">{c}{f}</div>' for k, (i, c, f) in enumerate(beats))
+    screens = "".join(_img_d(f"{n}-d.webp", t(a), "(max-width: 1067px) 92vw, 700px").replace("<img ", f'<img data-shot="{k}"{" class=on" if k == 0 else ""} ', 1) for k, (n, a) in enumerate(S))
+    media = f'<div class="narr-media"><figure class="fr fr-d"><div class="scr">{screens}</div><figcaption class="cap">{t(SAMPLE)}</figcaption></figure></div>'
+    return sec(f'<div class="narr" data-narr><div class="narr-steps">{steps}</div>{media}</div>', "n", "story")
 
 def sec_disc(lang, t):
     """A showcase across the page: the day, swept."""
@@ -80,7 +88,7 @@ def sec_disc(lang, t):
                        "Trois étapes chaque jour de trading : le Plan avant l’ouverture, l’Exécution pendant la séance, la Revue après la clôture. Les trois faites, ta journée est balayée.",
                        "Tres pasos cada día de trading: el Plan antes de la apertura, la Ejecución durante la sesión y la Revisión después del cierre. Completa los tres y tu día queda barrido."),
                     links=link(lang, t, "how-it-works.html", L3("See how discipline works","Voir comment fonctionne la discipline","Ver cómo funciona la disciplina"), "#discipline"), center=True)
-               + points + shot, "a", "discipline", cls="show", width="wide")
+               + rings(t) + points + shot, "a", "discipline", cls="show", width="wide")
 
 def sec_ai(lang, t):
     L = "fr" if lang == "fr" else ("es" if lang == "es" else "en")

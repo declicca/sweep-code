@@ -33,6 +33,23 @@
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && sheet.getAttribute('data-open') === 'true'){ setMenu(false); btn.focus(); } });
   }
 
+  // numbers that change roll to their new value (prices, calculators): the same text, only the number counts.
+  // Formats follow the page's language: 1,700.50 · 1 700,50 · 1.700,50
+  var LGR = (document.documentElement.lang || 'en').slice(0, 2), DEC = LGR === 'en' ? '.' : ',', THS = LGR === 'en' ? ',' : (LGR === 'fr' ? '\u202f' : '.');
+  var parseN = function(s){ var m = /\d(?:[\d\u202f\u00a0.,]*\d)?/.exec(s || ''); if(!m) return null;
+    var body = m[0], ip = body, fp = '', k = body.lastIndexOf(DEC);
+    if(k > -1){ ip = body.slice(0, k); fp = body.slice(k + 1); }
+    var v = parseFloat(ip.replace(/[^\d]/g, '') + (fp ? '.' + fp : ''));
+    return isNaN(v) ? null : {pre: s.slice(0, m.index), post: s.slice(m.index + body.length), v: v, d: fp.length}; };
+  var fmtN = function(v, d){ var p = v.toFixed(d).split('.'); return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, THS) + (d ? DEC + p[1] : ''); };
+  window.sweepRoll = function(el, to, from){
+    var a = parseN(from == null ? el.textContent : from), b = parseN(to), set = function(x){ el._mine = x; el.textContent = x; };
+    if(el._rf) cancelAnimationFrame(el._rf);
+    if(reduce || !a || !b || a.pre !== b.pre || a.post !== b.post || a.v === b.v){ set(to); return; }
+    var t0 = performance.now();
+    (function tick(now){ var p = Math.min(1, (now - t0) / 520), k = 1 - Math.pow(1 - p, 3);
+      if(p < 1){ set(b.pre + fmtN(a.v + (b.v - a.v) * k, b.d) + b.post); el._rf = requestAnimationFrame(tick); } else set(to); })(t0); };
+
   // pricing: monthly / yearly
   var bill = document.querySelectorAll('[data-bill]');
   if(bill.length){
@@ -41,7 +58,7 @@
     var setBill = function(k){
       bill.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.bill===k ? 'true' : 'false'); });
       place();
-      document.querySelectorAll('.plan [data-m]').forEach(function(el){ el.textContent = el.getAttribute('data-'+k); if(el.classList.contains('num') && !reduce){ el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); } });
+      document.querySelectorAll('.plan [data-m]').forEach(function(el){ var v = el.getAttribute('data-'+k); if(el.classList.contains('num')) window.sweepRoll(el, v); else el.textContent = v; });
       // send the chosen plan and billing period to the app
       document.querySelectorAll('.plan a[data-plan]').forEach(function(a){ if(a.dataset.plan === 'free') return; a.href = a.href.replace(/interval=(month|year)/, 'interval=' + (k === 'm' ? 'month' : 'year')); });
     };
@@ -97,8 +114,11 @@
     var rt = false;
     var settle = function(){ var r = reel.getBoundingClientRect(), vh = window.innerHeight;
       var p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.85) - 0.35));
-      var mx = window.innerWidth < 861 ? 3 : 5; reel.style.setProperty('--rx', (mx * (1 - p)).toFixed(2) + 'deg'); reel.style.setProperty('--rs', (0.94 + 0.06 * p).toFixed(4));
-      if(reel.dataset.ready) reel.style.transform = 'perspective(1800px) rotateX(' + (mx * (1 - p)).toFixed(2) + 'deg) scale(' + (0.94 + 0.06 * p).toFixed(4) + ')';
+      var wide = window.innerWidth >= 1068, mx = wide ? 8 : 3, s0 = wide ? 0.92 : 0.94;
+      var g = wide ? Math.min(1.08, (window.innerWidth - 16) / reel.offsetWidth) : 1;   // computers: it grows to almost the whole width, never past it
+      var sc = (s0 + (g - s0) * p).toFixed(4), rx = (mx * (1 - p)).toFixed(2) + 'deg';
+      reel.style.setProperty('--rx', rx); reel.style.setProperty('--rs', sc);
+      if(reel.dataset.ready) reel.style.transform = 'perspective(1800px) rotateX(' + rx + ') scale(' + sc + ')';
       rt = false; };
     reel.addEventListener('animationend', function(){ reel.dataset.ready = '1'; reel.style.animation = 'none'; settle(); }, {once:true});
     window.addEventListener('scroll', function(){ if(!rt){ rt = true; requestAnimationFrame(settle); } }, {passive:true}); settle();
@@ -197,6 +217,16 @@
     }
   }
 
+  // the day's three rings close one by one as they scroll through the screen, then « Day swept » (reversible)
+  document.querySelectorAll('[data-rings]').forEach(function(r){
+    if(reduce) return;
+    var rs = r.querySelectorAll('.ring'), go = false;
+    var upd = function(){ var b = r.getBoundingClientRect(), vh = window.innerHeight, p = Math.min(1, Math.max(0, (vh * 0.92 - b.top) / (vh * 0.42)));
+      rs.forEach(function(x, i){ x.classList.toggle('on', p > (i + 1) / 4); }); r.classList.toggle('done', p > 0.97); go = false; };
+    r.classList.add('live');
+    window.addEventListener('scroll', function(){ if(!go){ go = true; requestAnimationFrame(upd); } }, {passive:true}); upd();
+  });
+
   if(!('IntersectionObserver' in window)){ document.querySelectorAll('.reveal,.final .mark').forEach(function(el){ el.classList.add('in'); }); return; }
 
   // screenshots fade in when loaded
@@ -266,18 +296,13 @@
     window.addEventListener('scroll', function(){ var y = Math.min(window.scrollY, 700); hp.style.transform = 'translate3d(0,' + (-y*0.08).toFixed(1) + 'px,0)'; }, {passive:true});
   }
 
-  // sticky product tour
-  var steps = document.querySelectorAll('.tour-step'), imgs = document.querySelectorAll('.tour-media img');
-  if(steps.length && imgs.length){
-    var tio = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){
-        var i = +e.target.dataset.i;
-        steps.forEach(function(s,k){ s.classList.toggle('on', k===i); });
-        e.target.parentElement.style.setProperty('--p', ((i+1)/steps.length).toFixed(3));
-        imgs.forEach(function(m,k){ m.classList.toggle('on', k===i); });
-      }});
-    }, {rootMargin:'-45% 0px -45% 0px'});
-    steps.forEach(function(s){ tio.observe(s); });
+  // home narration: the part of the text crossing the middle of the screen picks the app screen beside it
+  var narr = document.querySelector('[data-narr]');
+  if(narr){
+    var shots = narr.querySelectorAll('[data-shot]');
+    var nio = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var k = e.target.getAttribute('data-beat');
+      shots.forEach(function(sh){ sh.classList.toggle('on', sh.getAttribute('data-shot') === k); }); } }); }, {rootMargin:'-50% 0px -50% 0px'});
+    narr.querySelectorAll('[data-beat]').forEach(function(b){ nio.observe(b); });
   }
 
   // count-up facts

@@ -406,8 +406,8 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .calc-act p{font-size:14.5px;color:var(--muted)}
 .calc-act .btn{margin-top:10px}
 .calc-note{margin-top:16px}
-.calc-bar{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:40;display:flex;align-items:baseline;gap:10px;padding:14px 20px;border-radius:var(--r-pill);background:var(--glass-bar);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow-3);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity var(--t-fast),transform var(--t-mid) var(--spring)}
-.calc-bar.on{opacity:1;transform:none}
+.calc-bar{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:40;display:flex;align-items:baseline;gap:10px;padding:14px 20px;border-radius:var(--r-pill);background:var(--glass-bar);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow-3);opacity:0;transform:translateY(16px);pointer-events:none;visibility:hidden;transition:opacity var(--t-fast),transform var(--t-mid) var(--spring),visibility 0s var(--t-mid)}
+.calc-bar.on{opacity:1;transform:none;visibility:visible;transition-delay:0s}
 .calc-bar .num{flex:none;font:600 22px/1 var(--font);letter-spacing:-.02em;color:var(--blue-text)}
 .calc-bar .lbl{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13.5px;color:var(--muted)}
 .menu-open .calc-bar{opacity:0}
@@ -478,6 +478,21 @@ table.reltbl tr.past .st{opacity:.55}
 .tpl .card.media .cm{--ratio:4/3;padding:24px 24px 0;background:radial-gradient(80% 70% at 50% 0%,color-mix(in srgb,var(--blue) 12%,transparent),transparent 70%),var(--ink-2)}
 .tpl .card.media .cm img{border-radius:var(--r1) var(--r1) 0 0;box-shadow:0 0 0 1px var(--edge),0 20px 40px -24px rgba(0,0,0,.6)}
 
+/* ---- [pages: index.html how-it-works.html] the day's three rings: they close one by one with the scroll (site.js), already closed without it */
+.rings{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:20px 28px;margin:40px auto 0}
+.split .rings{justify-content:flex-start;margin:32px 0 0}
+.ring{display:grid;justify-items:center;gap:10px}
+.ring svg{width:72px;height:72px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:6}
+.ring .tr{stroke:color-mix(in srgb,var(--text) 10%,transparent)}
+.ring .fg{stroke:var(--blue);stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:0;transition:stroke-dashoffset var(--t-slow) var(--spring)}
+.ring .ck{fill:none;stroke:var(--blue-text);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0;transform:rotate(90deg);transform-origin:32px 32px;transition:stroke-dashoffset var(--t-mid) var(--spring) .25s}
+.ring span{font-size:14px;font-weight:600}
+.rings .swept{display:inline-flex;align-items:center;min-height:34px;padding:0 16px;border-radius:var(--r-pill);background:var(--tint);color:var(--blue-ink);font-size:14px;font-weight:600;transition:opacity var(--t-mid),transform var(--t-mid) var(--spring)}
+.rings.live .ring:not(.on) .fg{stroke-dashoffset:100}
+.rings.live .ring:not(.on) .ck{stroke-dashoffset:1;transition-delay:0s}
+.rings.live:not(.done) .swept{opacity:0;transform:translateY(8px) scale(.96)}
+
 /* ---- [pages: changelog.html] timeline */
 .tl{position:relative;display:grid;gap:4px}
 .tl::before{content:"";position:absolute;left:7px;top:14px;bottom:14px;width:2px;border-radius:1px;background:linear-gradient(var(--line),var(--line) 80%,transparent)}
@@ -517,8 +532,8 @@ table.reltbl tr.past .st{opacity:.55}
 @media (max-width:743px){.ledger{padding:4px 20px}}
 
 /* ---- chapters of a long page: a capsule under the menu */
-.subnav{position:sticky;top:calc(var(--nav-h) + 6px);z-index:30;margin-top:8px;transition:top var(--t-mid) var(--spring)}
-.nav-hidden .subnav{top:12px}
+.subnav{position:sticky;top:calc(var(--nav-h) + 6px);z-index:30;margin-top:8px;transition:transform var(--t-mid) var(--spring)}
+.nav-hidden .subnav{transform:translateY(calc(18px - var(--nav-h)))}   /* up to 12px from the top, when the menu hides */
 .subnav .sn{display:flex;gap:2px;width:max-content;max-width:100%;margin-inline:auto;padding:4px;overflow-x:auto;scrollbar-width:none;border-radius:var(--r-pill);background:var(--glass-bar);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow-3)}
 .subnav .sn::-webkit-scrollbar{display:none}
 .subnav a{flex:none;padding:8px 14px;border-radius:var(--r-pill);font-size:14px;color:var(--muted);white-space:nowrap;transition:background-color var(--t-fast),color var(--t-fast)}
@@ -603,10 +618,11 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
 .notice svg{flex:none;width:20px;height:20px;color:var(--blue-text);margin-top:1px}
 
 /* ---- [pages: pricing.html] billing switch, three plans of one height, offers */
-.billing{position:relative;display:inline-flex;gap:2px;padding:4px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--text) 6%,transparent);margin-bottom:32px}
+.billing{position:relative;display:inline-grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--text) 6%,transparent);margin-bottom:32px}
 .billing button{position:relative;z-index:1;min-height:40px;padding:0 18px;border-radius:var(--r-pill);font-size:14px;font-weight:600;color:var(--muted);transition:color var(--t-fast)}
 .billing button[aria-pressed="true"]{color:var(--text)}
-.billing::before{content:"";position:absolute;top:4px;bottom:4px;left:var(--x,4px);width:var(--w,0);border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--shadow-1);transition:left var(--t-mid) var(--spring),width var(--t-mid) var(--spring)}
+.billing::before{content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 5px);border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--shadow-1);transition:transform var(--t-mid) var(--spring)}   /* two equal segments: the pill only slides */
+.billing:has([data-bill="y"][aria-pressed="true"])::before{transform:translateX(calc(100% + 2px))}
 .billing .save{margin-left:6px;padding:2px 8px;border-radius:var(--r-pill);background:var(--tint);color:var(--blue-ink);font-size:12px}
 .plans.three{display:grid;gap:0 16px;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(6,auto)}
 @media (min-width:861px){.plans.three .plan{display:grid;grid-row:span 6;grid-template-rows:subgrid;align-content:start}}   /* the same line for every price, list and button */
@@ -622,8 +638,6 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
 .plan .list{margin:24px 0 28px}
 .plan .list li{font-size:14.5px}
 .plan>.btn{margin-top:auto;width:100%}
-.plan .swap{animation:swap var(--t-mid) var(--spring)}
-@keyframes swap{from{opacity:0;transform:translateY(6px)}}
 .plan-dots{display:none}
 @media (max-width:860px){.plans.three{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:calc(-1 * var(--gutter));padding:16px var(--gutter) 8px;scrollbar-width:none}
   .plans.three::-webkit-scrollbar{display:none}.plans.three .plan{flex:0 0 min(340px,84%);scroll-snap-align:center}.plan .tagline{min-height:0}
@@ -876,8 +890,24 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .hero-more a{color:var(--blue-text);font-weight:500}
 .cohort{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px}
 .cohort .cbar{width:120px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden}
-.cohort .cbar i{display:block;height:100%;width:0;background:var(--blue);border-radius:inherit;transition:width 1.2s var(--spring)}
+.cohort .cbar i{display:block;height:100%;background:var(--blue);border-radius:inherit;transform:scaleX(var(--c,0));transform-origin:0 50%;transition:transform 1.2s var(--spring)}
 .cohort .ctext{font-size:13px;color:var(--muted)}
+/* ---- [pages: index.html] the narration: the text scrolls, one app screen stays beside it and changes with it */
+.narr-media{display:none}
+.narr-beat+.narr-beat{margin-top:var(--sec-t)}
+.narr-beat .fr{margin-top:40px}
+.narr .ways li{font-size:var(--fs-body)}
+@media (min-width:1068px){
+  .narr{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}
+  .narr-beat{min-height:72vh;display:flex;flex-direction:column;justify-content:center}
+  .narr-beat+.narr-beat{margin-top:0}
+  .narr-beat .narr-in{display:none}
+  .narr-media{display:block;position:sticky;top:calc(50vh - 200px)}
+  .narr-media .scr img{position:absolute;inset:0;transition:opacity var(--t-slow) var(--spring)}
+  .narr-media .scr img:first-child{position:relative}
+  .io .narr-media .scr img:not(.on){opacity:0}
+  .narr-media .scr img.on.ld{opacity:1}}
+
 /* ---- [pages: index.html] one place: five tools converge into one Sweep card */
 .oneplace{display:grid;grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr);align-items:center;gap:16px}
 .op-from{display:grid;gap:10px}
@@ -949,6 +979,13 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
   .io .reveal.zoom:not(.in){transform:translateY(32px) scale(.96)}
   .io .fr-p.reveal:not(.in) .scr{transform:perspective(1200px) rotateX(10deg)}
   .fr-p .scr{transition:transform 1.1s var(--spring)}
+  @supports (animation-timeline:view()){   /* captures rise and grow with the scroll itself; elsewhere, once on reveal */
+    .io .fr.reveal:not(.in){opacity:1;transform:none}
+    .fr.reveal{animation:frview linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
+    .io .fr-p.reveal:not(.in) .scr{transform:none}
+    .fr-p.reveal .scr{animation:phview linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
+    @keyframes frview{from{opacity:.4;transform:translateY(56px) scale(.94)}}
+    @keyframes phview{from{transform:perspective(1200px) rotateX(12deg) translateY(24px)}}}
   .final .mark:not(.in){opacity:0;transform:translateY(8px)}
   .final .mark{transition:opacity var(--t-slow),transform var(--t-slow) var(--spring)}
   .final .mark .k-candle{transform:translateY(12px);transition:transform var(--t-slow) var(--spring) .3s}

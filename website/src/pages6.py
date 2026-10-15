@@ -32,7 +32,7 @@ def sec_sweep_day(lang, t, id_="sweep-the-day", rule=True):
        T("<b>Discipline streak</b> plus freezes: 1 on Free, 2 on Pro, 3 on Elite per week","<b>Streak de discipline</b> et gels : 1 en Free, 2 en Pro, 3 en Elite par semaine","<b>Racha de disciplina</b> y congelaciones: 1 en Free, 2 en Pro, 3 en Elite por semana"),
        T("<b>Guardrail:</b> if you go past your max daily loss, Sweep tells you, without judgment","<b>Garde-fou :</b> si tu dépasses ta perte max du jour, Sweep te le dit, sans jugement","<b>Salvaguarda:</b> si superas tu pérdida máxima del día, Sweep te lo dice, sin juzgarte")],
       ui.frame_p("v6-poster-today-phone.webp", t(T("Today on a phone: rings, days, releases","Aujourd’hui sur téléphone : anneaux, jours, annonces","Hoy en el teléfono: anillos, días, datos")), t, video="v6-video-today-phone.mp4"),
-      id_=id_, phone=True)
+      id_=id_, phone=True, more=ui.rings(t))
 
 def sec_charts(lang, t, id_="charts", flip=True, sp=None):
     return (sp or split)(t, T("Real charts","Graphiques réels","Gráficos reales"), T("Your trades on real charts.","Tes trades sur de vrais graphiques.","Tus operaciones en gráficos reales."),
@@ -129,7 +129,7 @@ def sec_social(lang, t, id_="social", flip=True):
 # ----------------------------------------------------------------- HOME
 def page_home(lang, t):
     """Home, on the design system (ui.py, system.css)."""
-    from pages16 import bar, sec_oneplace, sec_log, sec_firms, sec_payouts, sec_disc, sec_ai, sec_trust, sec_pricing, sec_faq, sec_next, sec_final, faq_ld
+    from pages16 import bar, sec_oneplace, sec_story, sec_disc, sec_ai, sec_trust, sec_pricing, sec_faq, sec_next, sec_final, faq_ld
     from pages15 import IDENTITY
     reel = (f'<video class="hero-loop" muted loop playsinline preload="none" data-auto aria-label="{html.escape(t(T("Sweep in action: your day, a trade logged in seconds, your rules, every trade, payout ready, your progress","Sweep en action : ta journée, un trade ajouté en quelques secondes, tes règles, chaque trade, payout prêt, ta progression","Sweep en acción: tu día, una operación registrada en segundos, tus reglas, cada operación, payout listo, tu progreso")))}">'
             '<source src="/video/hero-loop-720.webm" type="video/webm" media="(max-width: 860px)"><source src="/video/hero-loop-720.mp4" type="video/mp4" media="(max-width: 860px)">'
@@ -150,7 +150,7 @@ def page_home(lang, t):
          "description":t(IDENTITY),"inLanguage":["en","fr","es"],
          "offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro","price":"19","priceCurrency":"USD"},{"@type":"Offer","name":"Elite","price":"39","priceCurrency":"USD"}]},
         faq_ld(t), tour_ld(t)]})
-    body = (hero + sec_oneplace(lang,t) + sec_log(lang,t) + sec_firms(lang,t) + sec_payouts(lang,t) + sec_disc(lang,t) + sec_ai(lang,t)
+    body = (hero + sec_oneplace(lang,t) + sec_story(lang,t) + sec_disc(lang,t) + sec_ai(lang,t)
             + sec_trust(lang,t) + sec_pricing(lang,t) + sec_faq(lang,t) + sec_next(lang,t) + sec_final(lang,t) + COHORT_JS + tour_dialog(t))
     return (t(T("Sweep — Trading Journal for Prop Firm Traders · Free","Sweep — Journal de trading pour prop firms · Gratuit","Sweep — Diario de trading para prop firms · Gratis")),
             t(T("Track every prop firm account, payout and expense in one place. Free forever, Pro from $19/mo. Built for Topstep, Apex, Lucid and more.","Suis chaque compte prop, payout et dépense au même endroit. Gratuit pour toujours, Pro dès 19 $/mois. Conçu pour Topstep, Apex, Lucid et plus.","Sigue cada cuenta prop, payout y gasto en un solo lugar. Gratis para siempre, Pro desde 19 $/mes. Hecho para Topstep, Apex, Lucid y más.")),
@@ -181,7 +181,7 @@ def tour_card(lang, t):
     return (f'<button type="button" class="tourcard reveal zoom" data-tour aria-label="{t(TOUR_LABEL)}"><img src="/video/tour-poster.webp" srcset="/video/tour-poster-960.webp 960w, /video/tour-poster.webp 1600w" '
             f'sizes="(max-width: 1067px) 92vw, 1320px" width="1600" height="900" alt="" fetchpriority="high"><span class="reel-play"><span class="rp-ic">{PLAY}</span><span class="rp-tx">{t(TOUR_LABEL)}</span><span class="rp-dur num">1:00</span></span></button>')
 
-COHORT_JS = ("""<script>(function(){var b=document.getElementById('cohort'),A=document.getElementById('activity');if(!window.fetch)return;fetch('https://app.makeitsweep.com/sweep-count.php',{credentials:'omit'}).then(function(r){return r.ok?r.json():Promise.reject();}).catch(function(){return fetch('https://app.makeitsweep.com/api/cohort-count.php',{credentials:'omit'}).then(function(r){return r.ok?r.json():Promise.reject();});}).then(function(d){if(A&&(parseInt(d.trades,10)||0)>=__STATSMIN__){A.querySelectorAll('[data-k]').forEach(function(e){var v=parseInt(d[e.getAttribute('data-k')],10)||0;e.textContent=v.toLocaleString(document.documentElement.lang);});A.hidden=false;}if(!b)return;var n=Math.max(parseInt(d.taken,10)||0,__FLOOR__),tt=parseInt(d.total,10);if(!(tt>0)||!(n>=1)||n>=tt)return;var a=b.querySelector('.ctext');a.textContent=a.getAttribute('data-tpl').replace('{n}',n).replace('{total}',tt);document.querySelectorAll('.cp-n').forEach(function(x){x.textContent=n+'/'+tt;});b.querySelector('.cbar i').style.width=Math.max(2,Math.round(n/tt*100))+'%';b.hidden=false;}).catch(function(){});})();</script>""").replace('__FLOOR__', str(COHORT_FLOOR)).replace('__STATSMIN__', str(STATS_MIN))
+COHORT_JS = ("""<script>(function(){var b=document.getElementById('cohort'),A=document.getElementById('activity');if(!window.fetch)return;fetch('https://app.makeitsweep.com/sweep-count.php',{credentials:'omit'}).then(function(r){return r.ok?r.json():Promise.reject();}).catch(function(){return fetch('https://app.makeitsweep.com/api/cohort-count.php',{credentials:'omit'}).then(function(r){return r.ok?r.json():Promise.reject();});}).then(function(d){if(A&&(parseInt(d.trades,10)||0)>=__STATSMIN__){A.querySelectorAll('[data-k]').forEach(function(e){var v=parseInt(d[e.getAttribute('data-k')],10)||0;e.textContent=v.toLocaleString(document.documentElement.lang);});A.hidden=false;}if(!b)return;var n=Math.max(parseInt(d.taken,10)||0,__FLOOR__),tt=parseInt(d.total,10);if(!(tt>0)||!(n>=1)||n>=tt)return;var a=b.querySelector('.ctext'),tp=a.getAttribute('data-tpl').replace('{total}',tt),fin=tp.replace('{n}',n);document.querySelectorAll('.cp-n').forEach(function(x){x.textContent=n+'/'+tt;});b.hidden=false;var bi=b.querySelector('.cbar i');requestAnimationFrame(function(){requestAnimationFrame(function(){bi.style.setProperty('--c',Math.max(.02,n/tt));});});if(window.sweepRoll)window.sweepRoll(a,fin,tp.replace('{n}','0'));else a.textContent=fin;}).catch(function(){});})();</script>""").replace('__FLOOR__', str(COHORT_FLOOR)).replace('__STATSMIN__', str(STATS_MIN))
 
 # ----------------------------------------------------------------- HOW IT WORKS (+ discipline & social)
 def page_how(lang, t):
@@ -256,7 +256,8 @@ def page_pricing(lang, t):
         ym = money(t, round(y/12, 2)); mm = money(t, m); yy = money(t, y)
         by = t(T(f"billed {yy} a year · save 30%",f"facturé {yy} par année · 30 % de moins",f"facturado {yy} al año · ahorra un 30 %"))
         bm = t(T("billed monthly","facturé chaque mois","facturado mensualmente"))
-        return f'<div class="price"><span class="num" data-m="{mm}" data-y="{ym}">{ym}</span><span class="muted">/{t(T("mo","mois","mes"))}</span></div><p class="per muted" data-m="{bm}" data-y="{by}">{by}</p>'
+        nb = lambda x: nbsp(lang, x)   # the values swapped in by site.js keep the page's typography (« 19 $ », « 30 % »)
+        return f'<div class="price"><span class="num" data-m="{nb(mm)}" data-y="{nb(ym)}">{ym}</span><span class="muted">/{t(T("mo","mois","mes"))}</span></div><p class="per muted" data-m="{nb(bm)}" data-y="{nb(by)}">{by}</p>'
     feats = {
      "free":[T("Journal, calendar, analytics, economic calendar","Journal, calendrier, analyses, calendrier économique","Diario, calendario, análisis, calendario económico"),T("Real CME charts and Log with AI","Vrais graphiques CME et Log with AI","Gráficos reales de CME y Log with AI"),T("Rings, streak, badges, ranks","Anneaux, streak, badges, rangs","Anillos, racha, insignias, rangos"),T("Leagues, buddy, join a crew","Ligues, buddy, rejoindre un crew","Ligas, buddy, unirse a un crew"),T("Full export","Export complet","Exportación completa")],
      "pro":[T("Everything in Free, plus:","Tout Free, plus :","Todo lo de Free, más:"),T("More prop accounts","Plus de comptes prop","Más cuentas prop"),T("Extended Sweep AI quota","Quota Sweep AI élargi","Cuota de Sweep AI ampliada"),T("2 streak freezes a week","2 gels de streak par semaine","2 congelaciones de racha por semana"),T("Complete path, 3 weekly missions","Parcours complet, 3 missions par semaine","Recorrido completo, 3 misiones semanales"),T("Edge Reveal every week, complete Wrapped","Edge Reveal chaque semaine, Wrapped complet","Edge Reveal cada semana, Wrapped completo"),T("Pro season track, create a crew","Piste de saison Pro, créer un crew","Pista de temporada Pro, crear un crew")],

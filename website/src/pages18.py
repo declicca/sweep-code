@@ -333,7 +333,7 @@ def make_rules_page(f):
         if len(progs) <= 2:
             lead = {l: lead[l] + " " + " ".join((p.get("note") or {}).get(l, "") for p in progs).strip() for l in LANGS}
         hero = (f'<div class="page-hero"><div class="wrap"><span class="kick">{t(T("Prop firms","Prop firms","Prop firms"))}</span>'
-                f'<h1 class="wu">{words(t(T(f"{name} rules, explained.", f"Les règles de {name}, expliquées.", f"Las reglas de {name}, explicadas.")))}</h1>'
+                f'<h1 class="wu" style="view-transition-name:firm-{slug(f)}">{words(t(T(f"{name} rules, explained.", f"Les règles de {name}, expliquées.", f"Las reglas de {name}, explicadas.")))}</h1>'
                 f'<p class="lead rise d3">{t(lead)}</p><p class="fine rise d4 verified">{t(verified)}</p>'
                 f'<div class="cta-row rise d4"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules_hero">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div>'
                 + ("" if len(progs) < 2 else '<div class="jump rise d5">' + "".join(f'<a class="chip" href="#{anchor(f, p)}">{p["name"]}</a>' for p in progs) + "</div>")
@@ -532,7 +532,7 @@ def pf_table(lang, t):
     for f in sorted(presets.FIRMS, key=lambda f: f["name"].lower()):   # the script's default order, so the page reads the same without it
         r = pf_row(f, PF_DEFAULT, lang, t)
         if not r: continue
-        rows += (f'<tr data-firm="{slug(f)}"><th scope="row"><a href="{href(lang, page_of(f))}">{f["name"]}</a></th>'
+        rows += (f'<tr data-firm="{slug(f)}"><th scope="row"><a href="{href(lang, page_of(f))}" style="view-transition-name:firm-{slug(f)}">{f["name"]}</a></th>'
                  + "".join(f'<td data-k="{k}" data-label="{t(l)}">{r["cells"][k]}</td>' for k, l in PF_COLS) + "</tr>")
     opt = lambda v, l, sel=False: f'<option value="{v}"{" selected" if sel else ""}>{l}</option>'
     sort_opts = [("name", T("Firm", "Firme", "Firma"))] + [(k, l) for k, l in PF_COLS if k != "types"]

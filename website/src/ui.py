@@ -115,6 +115,15 @@ def split(t, kick, title, lead, items, media, flip=False, id_="", more="", phone
     copy = (f'<div class="copy">{head(t, kick, title, lead)}' + (bullets(t, items) if items else "") + more + "</div>")
     return sec(f'<div class="split{" flip" if flip else ""}{" phone-media" if phone else ""}">{copy}<div>{media}</div></div>', rhythm, id_)
 
+def rings(t):
+    """The day's three rings (Plan, Execution, Review): site.js closes them one by one as the block scrolls through
+    the screen, then shows « Day swept ». Without the script, or with reduced motion, they are already closed."""
+    names = [T("Plan","Plan","Plan"), T("Execution","Exécution","Ejecución"), T("Review","Revue","Revisión")]
+    ring = lambda n: (f'<div class="ring"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="tr" cx="32" cy="32" r="27"/>'
+                      f'<circle class="fg" cx="32" cy="32" r="27" pathLength="100"/><path class="ck" d="M22 33l7 7 13-15" pathLength="1"/></svg><span>{t(n)}</span></div>')
+    return (f'<div class="rings" data-rings>{"".join(ring(n) for n in names)}'
+            f'<span class="swept">{t(T("Day swept","Journée balayée","Día barrido"))}</span></div>')
+
 def stats(items, caption="", note=""):
     """Key numbers: (label, value, small note)."""
     dl = "".join(f'<div class="stat"><dt>{a}</dt><dd>{b}{f"<small>{c}</small>" if c else ""}</dd></div>' for a, b, c in items)
