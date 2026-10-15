@@ -130,7 +130,8 @@ with sync_playwright() as p:
   ok(lines and all(l == '0px' for l in lines), f'17.2 / 17.3 no line under the last account, active and closed ({lines})')
   for h in ['trades', 'analytics']:
     pg.evaluate(f"location.hash='#{h}'"); pg.wait_for_timeout(1800)
-    gap = pg.evaluate("(()=>{let t=document.querySelector('#main .mny-cseg')||document.querySelector('#main .mny-tsw'); let n=t&&t.nextElementSibling; while(n&&!n.getClientRects().length) n=n.nextElementSibling; return t&&n?Math.round(n.getBoundingClientRect().top-t.getBoundingClientRect().bottom):null})()")
+    # (phone: the selector sits on the line of « Filters », the gap is under that bar)
+    gap = pg.evaluate("(()=>{let t=document.querySelector('#main .mny-cseg')||document.querySelector('#main .mny-tsw'); if(t&&t.closest('.mfb')) t=t.closest('.mfb'); let n=t&&t.nextElementSibling; while(n&&!n.getClientRects().length) n=n.nextElementSibling; return t&&n?Math.round(n.getBoundingClientRect().top-t.getBoundingClientRect().bottom):null})()")
     ok(gap is not None and gap >= 12, f'13 / 16.1 {h}: {gap} px between the selector and what follows')
   pg.evaluate("location.hash='#trades'"); pg.wait_for_timeout(1500)
   sr = pg.evaluate("(()=>{const f=document.querySelector('#main .msearch'), few=document.body.classList.contains('nav-few-trades'); if(!f) return 'none'; if(few) return f.getClientRects().length?'empty frame shown':'hidden'; const i=f.querySelector('input'); return getComputedStyle(i).backgroundColor==='rgba(0, 0, 0, 0)'&&getComputedStyle(i).boxShadow==='none'?'one box':'two boxes'})()")

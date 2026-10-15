@@ -1933,7 +1933,12 @@
     const cm = (typeof U !== 'undefined' && U.copyMode) || 'once';
     const CM = { en: ['Copies: once', 'per contract'], fr: ['Copies : une fois', 'par contrat'], es: ['Copias: una vez', 'por contrato'] }[L] || ['Copies: once', 'per contract'];
     const html2 = /^#(trades|calendar)/.test(location.hash || '') ? '' : (S.trades || []).some((t) => t.copy_group) ? `<div class="seg mny-cseg" role="group" data-noi18n><button type="button" class="${cm !== 'contract' ? 'on' : ''}" data-cmode="once">${CM[0]}</button><button type="button" class="${cm === 'contract' ? 'on' : ''}" data-cmode="contract">${CM[1]}</button></div>` : '';
-    if (!seg) { const fb = main.querySelector('.fbars, .mfb'); if (fb) fb.insertAdjacentHTML('afterend', html + html2); else main.insertAdjacentHTML('afterbegin', html + html2); }
+    if (!seg) {
+      const fb = main.querySelector('.fbars, .mfb'), row = fb && fb.querySelector(':scope > .mfb-row');
+      // phone: on the line of « Filters », one line that scrolls (it was two more rows, its label and itself)
+      if (row) { row.insertAdjacentHTML('beforeend', html); if (html2) fb.insertAdjacentHTML('afterend', html2); }
+      else if (fb) fb.insertAdjacentHTML('afterend', html + html2); else main.insertAdjacentHTML('afterbegin', html + html2);
+    }
     // the P&L card says what it is: performance, simulated or real
     const kp = [...main.querySelectorAll('.kpis > div, .ik')].find((d) => /P&L/.test((d.querySelector('.lbl') || {}).textContent || ''));
     if (kp && !kp.querySelector('.mny-ptag')) {

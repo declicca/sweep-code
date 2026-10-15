@@ -2353,6 +2353,7 @@ body.nav-few-trades #main .msearch{display:none!important}
 .gc-step.done .gc-step-ic,
 .gm-mrow.done .gm-mic,
 .gm-node.done .gm-dot,
+.jstrip a.on,
 .lg-row b i,
 .nav-ck-b button.on[data-v=y],
 .nav-hplus,
@@ -2512,3 +2513,76 @@ body:has(#main .onb) #askFab,body:has(#main .onb) .nav-addtop{display:none!impor
 .ask-msg .ask-help{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:8px}
 .ask-msg .ask-help small{font-size:12.5px;color:var(--muted)}
 .ask-msg .ask-help .ask-act{margin:0}
+
+/* ───── Design « iOS 27 », lot 1: shared components (uniformity) ───── */
+/* one chooser everywhere — the selectors (.seg), the phone period bar (.mseg) and the view tabs (.tabs: Journal, Deep Dive):
+   a pill track, the choice a raised pill; 40 px high on a computer (34 px choices), 44 px on a phone (38 px choices, the track's
+   padding added to the touch zone) */
+html body #main .seg a,html body #main .seg button,html body #main .btnlike{min-height:34px}
+html body #main .mseg,html body #main .tabs{border-radius:var(--r-pill)!important;background:var(--fill)!important;box-shadow:inset 0 0 0 1px var(--hair)!important;padding:3px!important}
+html body #main .mseg button{min-height:34px;border-radius:var(--r-pill)}
+html body #main .mseg-thumb{border-radius:var(--r-pill);background:var(--panel2);box-shadow:0 3px 10px -3px rgba(0,0,0,.45),0 0 0 1px var(--hair),inset 0 1px 0 rgba(255,255,255,.08)}
+html body #main .tabs{display:flex;width:max-content;max-width:100%;gap:2px;overflow-x:auto;scrollbar-width:none}
+html body #main .tabs::-webkit-scrollbar{display:none}
+html body #main .tabs>a,html body #main .tabs>button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:34px;padding:0 14px;border-radius:var(--r-pill);font-size:14px;font-weight:450;color:var(--muted);background:none;box-shadow:none}
+html body #main .tabs>a:hover,html body #main .tabs>button:hover{color:var(--text);background:none}
+html body #main .tabs>.on,html body #main .tabs>.on:hover{background:var(--panel2);color:var(--text);box-shadow:0 3px 10px -3px rgba(0,0,0,.45),0 0 0 1px var(--hair),inset 0 1px 0 rgba(255,255,255,.08)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) body #main .tabs>.on,:root:not([data-theme="dark"]) body #main .mseg-thumb{background:var(--panel);box-shadow:0 1px 4px -1px rgba(0,0,0,.18),0 0 0 1px var(--hair)}}
+:root[data-theme="light"] body #main .tabs>.on,:root[data-theme="light"] body #main .mseg-thumb{background:var(--panel);box-shadow:0 1px 4px -1px rgba(0,0,0,.18),0 0 0 1px var(--hair)}
+@media (max-width:860px){
+  html body #main .seg a,html body #main .seg button,html body #main .btnlike,html body #main .mseg button,html body #main .tabs>a,html body #main .tabs>button{min-height:38px}
+  html body #main .seg>a,html body #main .seg>button,html body #main .tabs>a,html body #main .tabs>button{position:relative}
+  html body #main .seg>a::after,html body #main .seg>button::after,html body #main .mseg>button::after,html body #main .tabs>a::after,html body #main .tabs>button::after{content:"";position:absolute;inset:-3px 0;pointer-events:auto}
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) body .seg button.on,:root:not([data-theme="dark"]) body .seg a.on{background:var(--panel)!important;box-shadow:0 1px 4px -1px rgba(0,0,0,.18),0 0 0 1px var(--hair)!important}}
+:root[data-theme="light"] body .seg button.on,:root[data-theme="light"] body .seg a.on{background:var(--panel)!important;box-shadow:0 1px 4px -1px rgba(0,0,0,.18),0 0 0 1px var(--hair)!important}
+/* a row of 4 figures or more (Journal day, Calendar month, Account): a grid, so the figures line up in columns instead of
+   following each other at their own width; two columns on a phone */
+html body #main .statline:has(> div:nth-child(4)){display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px 24px}
+html body #main .statline:has(> div:nth-child(4)) > div{min-width:0}
+@media (max-width:860px){html body #main .statline:has(> div:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}}
+/* lists: thin separators that start at the text and stop before the right edge (iOS grouped lists) */
+html body #main .trow{border-top:0;background-image:linear-gradient(var(--line),var(--line));background-repeat:no-repeat;background-size:calc(100% - 74px) 1px;background-position:58px 0}
+html body #main .trow:first-child{background-image:none}
+/* the Journal's chosen day: white on the deeper blue (the dark theme gave dark text on the gains blue, 4.2:1) */
+html body #main .jstrip a.on{color:#fff}
+html body #main .jstrip a.on i{background:#fff!important}
+/* the swipe « Delete » of a trade row: white on a deeper red (4.8:1, was 3.9:1) */
+@media (max-width:860px){html body #main a.trow.nav-ra-row > .nav-dots > .nav-ra button.del{background:#d4373d!important}}
+/* phone filters (Trades, Calendar, Stats): the period, then one line that scrolls — « Filters » and the account type.
+   The type's label stays for screen readers (its group is named); « Filters » takes the shape of the selectors */
+@media (max-width:860px){
+  html body #main .mfb-row:has(> .mny-tsw){flex-wrap:nowrap;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:0 20px;scroll-padding:0 20px}
+  html body #main .mfb-row:has(> .mny-tsw)::-webkit-scrollbar{display:none}
+  html body #main .mfb-row > .mny-tsw{flex:0 0 auto;flex-wrap:nowrap;margin:0!important}
+  html body #main .mfb-row > .mny-tsw > .mny-tsl{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  html body #main .mfb-row > .mny-tsw > .seg{overflow:visible;max-width:none}
+  html body #main .mfb-row:has(> .mny-tsw) > .fbtn{order:-1;margin:0!important}
+  html body #main .mfb .fbtn{min-height:44px;border-radius:var(--r-pill);background:var(--fill);box-shadow:inset 0 0 0 1px var(--hair)}
+}
+@media (max-width:860px){html body #main .mfb-row > .mny-tsw > .mny-tseg{margin:0!important}}
+/* round icon buttons: the « ⋯ » of an account and the Calendar's month arrows are circles of the button's height
+   (the « ⋯ » was taller than « See its stats » beside it, the arrows narrow pills) */
+html body #main .acc-menu > summary.btn,html body #main a.btn.sm[href^="#calendar/"]{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:40px;min-width:40px;height:40px;min-height:40px;padding:0;line-height:1}
+@media (max-width:860px){html body #main .acc-menu > summary.btn,html body #main a.btn.sm[href^="#calendar/"]{width:44px;min-width:44px;height:44px;min-height:44px}}
+/* phone: the last small targets found by the check get 44 px — the text links (« ‹ Trades », « Mark as paid », « Share »,
+   « Program terms », the legal links, the account's name) by an invisible extension, nothing moves; the folds (« Add an
+   announcement », « Delete my account ») and the pickers (.csel, a field) are 44 px high like the other fields */
+@media (max-width:860px){
+  html body #main button.link,html body #main a.link,html body #main .legal a,html body #main .nav-accname{position:relative}
+  html body #main button.link::after,html body #main a.link::after,html body #main .legal a::after,html body #main .nav-accname::after{content:"";position:absolute;inset:min(-4px,calc((44px - 100%) / -2)) -4px}
+  html body #main details.more > summary{display:flex;align-items:center;min-height:44px}
+  html body #main .csel{min-height:44px}
+}
+@media (max-width:860px){
+  /* the short choices are at least 44 px wide too (the note A–F, the trade arrows ‹ ›, the chart’s time frames, Yes / No) */
+  html body #main .tr-nav>a,html body #main .seg:has(> button.A)>button,html body #main .sc-tfs>button,html body #main .seg.yn>button{min-width:44px}
+  /* the trade's header: its round buttons are 44 px; the chart's full-screen button, the setups and the folds get a 44 px zone */
+  html body #main .tr-top > .btn.sm,html body #main .tr-top details.menu > summary{width:44px;min-width:44px;height:44px;min-height:44px}
+  html body #main .sc-ic,html body #main .ux-setup{position:relative}
+  html body #main .sc-ic::after,html body #main .ux-setup::after{content:"";position:absolute;inset:min(-4px,calc((44px - 100%) / -2)) min(0px,calc((44px - 100%) / -2))}
+  html body #main details.co-full > summary,html body #main details.nav-po-rules > summary{display:flex;align-items:center;min-height:44px}
+  html body #main .social-icons a{min-width:44px;min-height:44px}
+}
+/* a blue choice (a setup, the chosen day) has white text: the dark theme's old --btntext was dark on blue (4.2:1) */
+html body .ux-setup.on{color:#fff}
