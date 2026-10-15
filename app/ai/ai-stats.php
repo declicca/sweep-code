@@ -70,7 +70,8 @@ function sai_firms(PDO $pdo, string $uid): array
 /**
  * Normalized trades, sorted oldest → newest.
  * Trades copied across accounts (same copy_group) count once, as their original (the earliest created), with the number of
- * accounts — the app's rule (Stats, Journal, My money; copies can have their own size since brief 02 part 4).
+ * accounts — the app's rule (Stats, Journal, My money; copies can have their own size since brief 02 part 4). Each group keeps
+ * its members in _copies: a filter on one account reads that account's own trade (Stats does not merge when filtered on an account).
  */
 function sai_trades(PDO $pdo, string $uid): array
 {
@@ -79,9 +80,9 @@ function sai_trades(PDO $pdo, string $uid): array
         $k = !empty($t['copy_group']) ? 'g:' . $t['copy_group'] : 'i:' . $t['id'];
         $n = sai_norm_trade($t); $at = (string) (($t['created_at'] ?? '') ?: ($t['id'] ?? ''));
         if (!isset($groups[$k])) { $groups[$k] = $n; $first[$k] = $at; continue; }
-        $count = $groups[$k]['accounts'] + 1;
+        $count = $groups[$k]['accounts'] + 1; $members = array_merge($groups[$k]['_copies'] ?? [array_diff_key($groups[$k], ['_copies' => 1])], [$n]);
         if (strcmp($at, $first[$k]) < 0) { $groups[$k] = $n; $first[$k] = $at; }
-        $groups[$k]['accounts'] = $count;
+        $groups[$k]['accounts'] = $count; $groups[$k]['_copies'] = $members;   // every account's own trade, for a question about one account
     }
     $list = array_values($groups);
     usort($list, fn($a, $b) => [$a['date'], $a['entry_time'] ?? ''] <=> [$b['date'], $b['entry_time'] ?? '']);
@@ -161,6 +162,7 @@ function sai_filter(array $trades, array $f, array $accounts = []): array
     $wd = array_map('intval', (array) ($f['weekdays'] ?? []));
     $hf = sai_min($f['time_from'] ?? null); $ht = sai_min($f['time_to'] ?? null);
     $out = [];
+    if ($acc !== null) $trades = array_merge(...array_map(fn($t) => $t['_copies'] ?? [$t], array_values($trades)) ?: [[]]);   // one account: its own trade of each copy group, like Stats filtered on an account
     foreach ($trades as $t) {
         if (!empty($f['date_from']) && $t['date'] < $f['date_from']) continue;
         if (!empty($f['date_to']) && $t['date'] > $f['date_to']) continue;

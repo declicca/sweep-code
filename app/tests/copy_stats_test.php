@@ -5,7 +5,8 @@ declare(strict_types=1);
  *   php tests/copy_stats_test.php
  * The game's day (its discipline rules, streaks), the trades Sweep AI reads and the « Your week » email (brief 02 part 6: its
  * best habit and point to work on): a group of 3 copies (2, 2 and 1 contracts) is one trade, the original's P&L, with its 3
- * accounts — like the app's Stats, Journal, My money and the weekly recap.
+ * accounts — like the app's Stats, Journal, My money and the weekly recap. Asked about one account, Sweep AI reads that
+ * account's own trade (16 Oct.; before: nothing when the account only had the copy), like Stats filtered on an account.
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -37,6 +38,10 @@ $ai = sai_trades($pdo, 'u1');
 $g = array_values(array_filter($ai, fn($t) => ($t['accounts'] ?? 1) > 1))[0] ?? [];
 $ok(count($ai) === 2 && ($g['pnl_c'] ?? null) === 4000 && ($g['fees_c'] ?? null) === 1000 && ($g['contracts'] ?? null) === 2 && ($g['accounts'] ?? null) === 3,
     'Sweep AI reads the group once: the original\'s P&L, fees and size, on 3 accounts (' . json_encode(['pnl' => $g['pnl_c'] ?? null, 'fees' => $g['fees_c'] ?? null, 'n' => $g['contracts'] ?? null, 'acc' => $g['accounts'] ?? null]) . ')');
+$acc = [['id' => 'a1', 'name' => 'Apex 1', 'firm' => ''], ['id' => 'a2', 'name' => 'Apex 2', 'firm' => ''], ['id' => 'a3', 'name' => 'Apex 3', 'firm' => '']];
+$a2 = sai_filter($ai, ['account' => 'Apex 2'], $acc); $all3 = sai_filter($ai, [], $acc);
+$ok(count($a2) === 1 && ($a2[0]['net_c'] ?? null) === 3200 && count($all3) === 2,
+    'Sweep AI asked about one account: that account\'s own copy (+$32 net), like Stats filtered on the account; all accounts: still once (' . json_encode([count($a2), $a2[0]['net_c'] ?? null, count($all3)]) . ')');
 // the week: the checklist of a copied trade counted once (here « stop »: yes on the copied trade, no on the other one → 1 of 2)
 $pdo->exec("UPDATE documents SET data = json_set(data, '$.discipline', json('{\"stop\":\"y\"}')) WHERE id IN ('o', 'c1', 'c2')");
 $pdo->exec("UPDATE documents SET data = json_set(data, '$.discipline', json('{\"stop\":\"n\"}')) WHERE id = 'solo'");

@@ -1381,24 +1381,29 @@
   'use strict';
   if (typeof impGo !== 'function' || typeof IMP === 'undefined') return;
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const T = ({ en: { map: 'Accounts in this file', to: 'Sweep account', copy: 'The same trade on several accounts becomes one copy group.', nofee: 'Fees not included: this file has none and the account has no commission per contract (account page). P&L is gross.', ing: 'Importing {n} trades…', done: 'Imported {n} trades' },
-    fr: { map: 'Comptes dans ce fichier', to: 'Compte Sweep', copy: 'Un même trade pris sur plusieurs comptes devient un groupe de copie.', nofee: 'Frais non inclus : ce fichier n’en contient pas et le compte n’a pas de commission par contrat (page du compte). Le P&L est brut.', ing: 'Import de {n} trades…', done: '{n} trades importés' },
-    es: { map: 'Cuentas en este archivo', to: 'Cuenta de Sweep', copy: 'La misma operación en varias cuentas se vuelve un grupo de copia.', nofee: 'Comisiones no incluidas: el archivo no las trae y la cuenta no tiene comisión por contrato (página de la cuenta). El P&L es bruto.', ing: 'Importando {n} operaciones…', done: '{n} operaciones importadas' } })[L];
+  const T = ({ en: { map: 'Accounts in this file', to: 'Sweep account', copy: 'The same trade on several accounts becomes one copy group.', nofee: 'Fees not included: this file has none and the account has no commission per contract (account page). P&L is gross.', ing: 'Importing {n} trades…', done: 'Imported {n} trades', skip: 'Don’t import', miss: 'Choose a Sweep account for {a}, or “Don’t import”. Nothing is imported until then.' },
+    fr: { map: 'Comptes dans ce fichier', to: 'Compte Sweep', copy: 'Un même trade pris sur plusieurs comptes devient un groupe de copie.', nofee: 'Frais non inclus : ce fichier n’en contient pas et le compte n’a pas de commission par contrat (page du compte). Le P&L est brut.', ing: 'Import de {n} trades…', done: '{n} trades importés', skip: 'Ne pas importer', miss: 'Choisis un compte Sweep pour {a}, ou « Ne pas importer ». Rien n’est importé avant.' },
+    es: { map: 'Cuentas en este archivo', to: 'Cuenta de Sweep', copy: 'La misma operación en varias cuentas se vuelve un grupo de copia.', nofee: 'Comisiones no incluidas: el archivo no las trae y la cuenta no tiene comisión por contrato (página de la cuenta). El P&L es bruto.', ing: 'Importando {n} operaciones…', done: '{n} operaciones importadas', skip: 'No importar', miss: 'Elige una cuenta de Sweep para {a}, o « No importar ». No se importa nada antes.' } })[L];
   const fileAccts = () => [...new Set((IMP.rows || []).map((r) => r.acct).filter(Boolean))];
   const active = () => (S.accounts || []).filter((a) => a.status !== 'archived' && a.status !== 'closed');
-  function guess(fa) {
-    const low = String(fa).toLowerCase();
-    const hit = active().find((a) => (a.name || '').toLowerCase().includes(low) || (a.ext_id || '').toLowerCase() === low || low.includes((a.name || '').toLowerCase()));
-    return hit ? hit.id : null;
+  function guess(fa) {   // an exact match only: the same id, or the file's account as a whole word of the name (PA-APEX-40123-01 is not APEX-40123-01)
+    const low = String(fa).trim().toLowerCase(); if (!low) return null;
+    const ext = active().filter((a) => (a.ext_id || '').toLowerCase() === low); if (ext.length === 1) return ext[0].id;
+    const word = new RegExp('(^|[^a-z0-9_-])' + low.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9_-])');
+    const hits = active().filter((a) => word.test((a.name || '').toLowerCase()));
+    return hits.length === 1 ? hits[0].id : null;
   }
+  const chosen = (fa) => (IMP.map && IMP.map[fa]) || guess(fa) || '';
+  const missing = () => fileAccts().length > 1 ? fileAccts().filter((fa) => !chosen(fa)) : [];
   function targetOf(r) {
-    if (fileAccts().length > 1) { IMP.map = IMP.map || {}; return IMP.map[r.acct] || guess(r.acct) || null; }
+    if (fileAccts().length > 1) { IMP.map = IMP.map || {}; const v = chosen(r.acct); return v && v !== 'skip' ? v : null; }
     return IMP.account;
   }
   window.SweepImport = { targetOf, fileAccts };
   impGo = async function () {
     const rows = IMP.rows || []; if (!rows.length) return;
     const multi = fileAccts().length > 1;
+    if (missing().length) { toast(T.miss.replace('{a}', missing().join(', '))); const s0 = document.querySelector('#main [data-imap]'); const s1 = [...document.querySelectorAll('#main [data-imap]')].find((x) => !x.value) || s0; if (s1) s1.focus(); return; }   // never a file account dropped without a word
     const have = new Map();
     (S.trades || []).forEach((t) => { if (t.import_key) { if (!have.has(t.account_id)) have.set(t.account_id, new Set()); have.get(t.account_id).add(t.import_key); } });
     const out = [], bySig = new Map();
@@ -1430,8 +1435,8 @@
     let box = main.querySelector('.ux-imap');
     if (fas.length > 1) {
       IMP.map = IMP.map || {};
-      const opts = (sel) => `<option value="">—</option>` + active().map((a) => `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''}>${esc(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</option>`).join('');
-      const html = `<div class="surface ux-imap" data-noi18n><b>${T.map}</b><p class="muted">${T.copy}</p>${fas.map((fa) => { const sel = IMP.map[fa] || guess(fa) || ''; IMP.map[fa] = sel; return `<label class="f"><span>${esc(fa)} → ${T.to}</span><select data-imap="${esc(fa)}" aria-label="${esc(fa)} → ${T.to}">${opts(sel)}</select></label>`; }).join('')}</div>`;
+      const opts = (sel) => `<option value="">—</option><option value="skip" ${sel === 'skip' ? 'selected' : ''}>${T.skip}</option>` + active().map((a) => `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''}>${esc(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</option>`).join('');
+      const html = `<div class="surface ux-imap" data-noi18n><b>${T.map}</b><p class="muted">${T.copy}</p>${fas.map((fa) => { const sel = IMP.map[fa] || guess(fa) || ''; IMP.map[fa] = sel; return `<label class="f"><span>${esc(fa)} → ${T.to}</span><select data-imap="${esc(fa)}" aria-label="${esc(fa)} → ${T.to}">${opts(sel)}</select></label>`; }).join('')}${missing().length ? `<p class="ux-inofee ux-imiss">${esc(T.miss.replace('{a}', missing().join(', ')))}</p>` : ''}</div>`;
       if (!box) { const drop = main.querySelector('#drop'); const host = drop && drop.closest('.surface'); if (host) host.insertAdjacentHTML('afterend', html); }
       else if (box.outerHTML !== html && !box.contains(document.activeElement)) box.outerHTML = html;
     } else if (box) box.remove();

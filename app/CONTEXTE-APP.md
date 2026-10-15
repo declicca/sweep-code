@@ -545,6 +545,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Prix au pip** (`pxRound`, app.js) : 6E, M6E, HG et les symboles inconnus gardent 6 décimales (avant : 1,0855 devenait 1,09) ; les autres restent au cent.
 - Tests : `numbers_test.php` (nouveau), `e2e_trade_form`, `e2e_import_tradingview` ; échouaient sur l'ancien code.
 
+### Brief 00 — phase 1, lots 1.2-e et 1.2-h, 16 oct.
+- **Import Rithmic multi-comptes** (`guess`, ux.js) : correspondance exacte seulement — même identifiant externe, ou le compte du fichier comme mot entier du nom, et un seul compte qui correspond (`PA-APEX-40123-01` n'est plus rattaché à `APEX-40123-01`). Un compte du fichier sans compte Sweep est nommé sous les choix ; « Importer » n'importe rien tant qu'il n'a pas de compte ou « Ne pas importer » (avant : ses trades disparaissaient sans un mot). Test : `e2e_accuracy` A6d.
+- **Sweep AI et les copies** : le double compte était déjà corrigé le 14 oct. (brief 02, parties 4 et 6 ; l'analyse date d'avant) et le taux de réussite est déjà celui de Stats (gagnants ÷ gagnants + perdants, sur le net). Reste corrigé : une question sur un seul compte lit le trade de ce compte (`_copies` dans `sai_trades`, `sai_filter`), comme Stats filtré sur un compte ; avant, un compte qui ne portait que la copie donnait 0 trade. Test : `copy_stats_test.php`.
+- **`ops_cfg`** (ops-lib.php) : les fichiers de configuration sont lus dans leur propre portée (une variable `$c` du `config.php` de l'app écrasait la configuration des sauvegardes ; vu dans la copie de test, `backup_test`).
+
 ### Brief 02 — partie 14 (petits détails), 14 oct.
 - **Données d'exemple** : déjà fait depuis B16 (`SweepUndo.demo`, la fenêtre de l'app donne le vrai nombre de trades) ; rien de changé.
 - **Réglages** : déjà en 5 groupes repliables depuis B15 (Compte, Discipline, Notifications, Données, et « Avancé » ajouté par le brief 03), « Déconnexion » seule tout en bas (`e2e_clarity`), chaque champ nommé (`e2e_a11y_names`) ; seul changement : le mot « Déconnexion » centré dans son bouton (il était à gauche, `nav.css`).

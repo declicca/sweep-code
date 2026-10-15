@@ -8,10 +8,11 @@ function ops_cfg(): array
     $app = dirname(__DIR__);
     $home = dirname($app);
     $c = [];
+    $load = static fn(string $f) => require $f;   // its own scope: a config file's variables never overwrite these ($c in the app's config did)
     foreach ([getenv('SWEEP_BACKUP_CONFIG') ?: '', $home . '/sweep-private/backup-config.php'] as $p) {
-        if ($p && is_readable($p)) { $x = require $p; if (is_array($x)) { $c = $x; break; } }
+        if ($p && is_readable($p)) { $x = $load($p); if (is_array($x)) { $c = $x; break; } }
     }
-    $appCfg = is_readable($app . '/config.php') ? (require $app . '/config.php') : [];
+    $appCfg = is_readable($app . '/config.php') ? $load($app . '/config.php') : [];
     $data = is_array($appCfg) && !empty($appCfg['data_dir']) ? rtrim((string) $appCfg['data_dir'], '/') : $app . '/data';
     return $c + [
         'db' => $data . '/journal.db',
