@@ -11,6 +11,10 @@ Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phon
  5  round icon buttons: the account « ⋯ » and the Calendar's month arrows are as wide as high
  6  phone: the controls fixed by the lot have a 44 px touch zone (text links, folds, pickers, short choices, trade header)
  7  white on blue / red: the chosen journal day and the swipe « Delete » reach 4.5:1
+ 8  the header's actions (« Add a trade », « Import a CSV », « Share my stats ») are pills of one height (40 / 44 px)
+ 9  one badge: Real / Simulated / Performance, Requested / Paid, « Drawdown exceeded », « est. » are 22 px pills
+ 10 a button's height includes its padding (Settings on a phone: 44 px, not 56)
+ 11 the filter sheet's values are plain text (no box inside the row)
 """
 import sys
 from playwright.sync_api import sync_playwright
@@ -55,6 +59,15 @@ with sync_playwright() as p:
     ok(cols and cols[0] == 'grid', f'3 computer {scheme}: the Calendar month figures are a grid ({cols})')
     arrows = pg.evaluate("[...document.querySelectorAll('#main a.btn.sm[href^=\"#calendar/\"]')].map(a=>{const r=a.getBoundingClientRect(); return [Math.round(r.width),Math.round(r.height)]})")
     ok(arrows and all(w == h == 40 for w, h in arrows), f'5 computer {scheme}: the month arrows are 40 px circles ({arrows})')
+    hd = []
+    for h in ['dashboard', 'trades', 'analytics']:
+      go(pg, h); hd += pg.evaluate("[...document.querySelectorAll('.top .nav-addtop, .top .nav-imp-b, .top .sh-btn')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect(); return [e.className.split(' ')[0], Math.round(r.height), getComputedStyle(e).borderTopLeftRadius]})")
+    ok(len(hd) >= 3 and all(x[1] == 40 and x[2] == '999px' for x in hd), f'8 computer {scheme}: the header actions are 40 px pills ({hd})')
+    bd = []
+    for h in ['accounts', 'payouts', 'analytics']:
+      go(pg, h); bd += pg.evaluate("[...document.querySelectorAll('#main .mny-tag, #main .pz-pill, #main .acc-flag, #main .est')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect(); return [e.className.split(' ')[0], Math.round(r.height), getComputedStyle(e).borderTopLeftRadius, getComputedStyle(e).fontSize]})")
+    kinds = sorted(set(x[0] for x in bd))
+    ok(len(kinds) >= 3 and all(x[1] == 22 and x[2] == '999px' and x[3] == '11px' for x in bd), f'9 computer {scheme}: {len(bd)} badges ({kinds}), all 22 px pills of 11 px ({[x for x in bd if x[1] != 22][:3]})')
     allerr += errs; c.close()
   # phone 390 and 320
   for w, scheme in [(390, 'dark'), (390, 'light'), (320, 'light')]:
@@ -94,6 +107,17 @@ with sync_playwright() as p:
       go(pg, 'trades')
       d = pg.evaluate("(()=>{const b=document.querySelector('#main a.trow.nav-ra-row .nav-ra button.del'); return b?getComputedStyle(b).backgroundColor:null})()")
       ok(d == 'rgb(212, 55, 61)', f'7 phone {scheme}: the swipe « Delete » is white on the deeper red ({d})')
+    if w == 390:
+      go(pg, 'settings')
+      sb = pg.evaluate("[...document.querySelectorAll('#main .btn')].filter(e=>e.getClientRects().length).slice(0,4).map(e=>Math.round(e.getBoundingClientRect().height))")
+      ok(sb and all(h == 44 for h in sb), f'10 phone {scheme}: the Settings buttons are 44 px ({sb})')
+      go(pg, 'trades'); pg.locator('#main .fbtn').click(); pg.wait_for_timeout(900)
+      fv = pg.evaluate("[...document.querySelectorAll('#fSheet .fs-val select')].map(e=>{const s=getComputedStyle(e); return [s.borderTopWidth, s.backgroundColor, s.boxShadow]})")
+      ok(fv and all(x == ['0px', 'rgba(0, 0, 0, 0)', 'none'] for x in fv), f'11 phone {scheme}: the {len(fv)} filter values are plain text ({fv[:1]})')
+      pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
+      go(pg, 'analytics')
+      sh = pg.evaluate("(()=>{const e=document.querySelector('.top .sh-btn'); if(!e) return null; const r=e.getBoundingClientRect(); return [Math.round(r.height), getComputedStyle(e).borderTopLeftRadius]})()")
+      ok(sh == [44, '999px'], f'8 phone {scheme}: « Share my stats » is a 44 px pill ({sh})')
     allerr += errs; c.close()
   ok(not allerr, f'no page error ({allerr[:2]})')
   br.close()

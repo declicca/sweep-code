@@ -336,6 +336,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Listes** : séparateurs en retrait, du début du texte jusqu'à 16 px du bord droit (`.trow`).
 - **Boutons icône** (« ⋯ » d'un compte, flèches du mois) : ronds, de la hauteur des boutons (40 px ordinateur, 44 px téléphone).
 - **Blanc sur couleur** : le jour choisi du Journal et les setups choisis passent au bleu `--pos-fill` avec texte blanc ; le « Supprimer » du glissement est rouge #D4373D (4,8:1).
+- **Badges** (Réel / Simulé / Performance `.mny-tag`, Demandé / Payé `.pz-pill`, « Drawdown dépassé » `.acc-flag`, « est. » `.est`) : une seule forme, pilule de 22 px, 11 px semi-gras ; chacun garde ses couleurs.
+- **Actions de l'en-tête** (« Ajouter un trade », « Importer un CSV », « Partager mes stats ») : pilules de 40 px sur ordinateur, 44 px sur téléphone, 14 px semi-gras.
+- **Boutons** : la hauteur comprend la marge intérieure (`box-sizing:border-box` sur `#main .btn` ; les boutons des Réglages faisaient 56 px sur téléphone). Boutons principaux en semi-gras, 14 px (petits 13,5 px) ; « + Payout » / « + Dépense » gardent leurs 15 px.
+- **Feuilles** : dans la feuille des filtres, les valeurs sont du texte simple avec un chevron (pas de cadre dans la ligne). Le sous-titre « par capture d'écran » est en Geist (Geist Mono reste pour les chiffres). La ligne choisie de la recherche est marquée en bleu (l'or est pour les pertes). Flèche blanche sur le bouton d'envoi de Sweep AI.
+- **Filtres sur ordinateur** : les sélecteurs de firme / compte / session font 40 px, comme la période à côté.
 - **Tests** : `tests/e2e_design_shared.py` (ordinateur 1300, téléphone 390 et 320, clair et foncé).
 
 ## 9. Préférences de travail de Mateo

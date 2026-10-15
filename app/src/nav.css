@@ -2586,3 +2586,31 @@ html body #main .acc-menu > summary.btn,html body #main a.btn.sm[href^="#calenda
 }
 /* a blue choice (a setup, the chosen day) has white text: the dark theme's old --btntext was dark on blue (4.2:1) */
 html body .ux-setup.on{color:#fff}
+/* a button's height includes its padding (the Settings buttons measured 56 px on a phone instead of 44: content-box) */
+html body #main .btn{box-sizing:border-box}
+/* the header's actions (« Add a trade », « Import a CSV », « Share my stats »): one shape — a pill, 40 px on a computer,
+   44 px on a phone, 14 px semibold (they were a 40 px rounded square, a 40 px pill and a 34 px pill) */
+html body .top .nav-addtop,html body .top .nav-imp-b,html body .top .sh-btn{box-sizing:border-box;border-radius:var(--r-pill)!important;height:40px;min-height:40px}
+@media (min-width:861px){html body .top .nav-addtop,html body .top .nav-imp-b,html body .top .sh-btn{font-size:14px;font-weight:600}}
+@media (max-width:860px){html body .top .nav-addtop,html body .top .nav-imp-b,html body .top .sh-btn{height:44px;min-height:44px}}
+/* computer filters: the firm / account / session pickers are as high as the period selector beside them (40 px, were 35) */
+@media (min-width:861px){html body #main .fbar .csel,html body #main .fbars .csel{box-sizing:border-box;min-height:40px}}
+html body .main-wrap .top .nav-imp-b{border-radius:var(--r-pill)!important}
+@media (min-width:861px){html body .main-wrap .top .nav-imp-b{font-weight:600}}
+/* the page buttons speak with one voice: semibold, 14 px (13.5 px small) — « Send », « Share my link », « Save » and
+   « Recalibrate » were medium, two of them 15.5 px (the paired « + Payout » / « + Expense » keep their 15 px) */
+html body #main .btn.primary,html body #main .btn.primary.sm{font-weight:600}
+html body #main .btn.primary:not(.sm):not(.nav-pz-b){font-size:14px}
+/* one badge: Real / Simulated / Performance (.mny-tag), Requested / Paid (.pz-pill), « Drawdown exceeded » (.acc-flag) and
+   « est. » (.est) share their shape — a 22 px pill, 11 px semibold (they were 16 to 24 px high, 10.5 to 12 px, weights 400
+   to 700, « est. » a small square); each keeps its own colors */
+html body .mny-tag,html body .pz-pill,html body .acc-flag,html body .nav-acc-flag,html body .est{display:inline-flex;align-items:center;box-sizing:border-box;height:22px;padding:0 9px;border-radius:var(--r-pill);font-size:11px;font-weight:600;line-height:1;letter-spacing:.02em;white-space:nowrap;vertical-align:middle;top:0}
+html body .est{padding:0 7px}
+/* sheets: the filter values are plain text with a chevron, as in an iOS list (each was a bordered box inside the row) */
+html body .fsh .fs-val select{border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important;padding:12px 0!important;min-height:0!important}
+/* « by screenshot » under « New trade »: words, in the interface font (Geist Mono is for figures) */
+html body .nav-am-head > div > .muted{font-family:var(--font-ui,"Geist",system-ui,sans-serif);font-size:13px}
+/* the search's chosen line is marked in the actions blue (gold is for losses and alerts) */
+html body .cmd-it.on{box-shadow:inset 2px 0 0 var(--pos)}
+/* Sweep AI's send button: a white arrow on the blue (it was dark, like the other old --btntext cases) */
+html body .ask-send{color:#fff}
