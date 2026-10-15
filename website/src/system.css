@@ -169,6 +169,7 @@ p,li{max-width:56ch}   /* about 75 characters a line in Geist (1ch is the width 
 .card h3{font-size:clamp(18px,17.26px + .19vw,20px);line-height:1.3}
 .card p{margin-top:8px;color:var(--muted);font-size:15px;line-height:1.55}
 .card .ico{width:40px;height:40px;border-radius:var(--r2);display:grid;place-items:center;background:var(--tint);color:var(--blue-text);margin-bottom:20px}
+.ico svg{width:20px;height:20px}
 .card .ico svg{width:20px;height:20px}
 .card .more{margin-top:auto;padding-top:20px}
 .cards{display:grid;gap:16px}
@@ -235,6 +236,7 @@ p,li{max-width:56ch}   /* about 75 characters a line in Geist (1ch is the width 
 /* ---- key numbers */
 .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media (min-width:861px){.stats{grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:16px}}
+@media (max-width:860px){.stat:last-child:nth-child(odd){grid-column:1/-1}}   /* an odd count: the last one takes the whole row */
 .stat{padding:20px 22px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1)}
 .stat dt{font-size:13px;color:var(--muted);line-height:1.4}
 .stat dd{margin-top:8px;font:600 clamp(22px,19px + .8vw,30px)/1.1 var(--mono);letter-spacing:-.02em;color:var(--text)}
@@ -283,7 +285,91 @@ table.cmp tbody tr:not(.grp):hover>*{background:color-mix(in srgb,var(--text) 3%
   .rules-tbl[data-col="0"] .c0,.rules-tbl[data-col="1"] .c1,.rules-tbl[data-col="2"] .c2,.rules-tbl[data-col="3"] .c3,.rules-tbl[data-col="4"] .c4,.rules-tbl[data-col="5"] .c5,.rules-tbl[data-col="6"] .c6{display:table-cell}
   .rules-tbl[data-col] tr.grp th{display:table-cell}}
 
-/* ---- timeline */
+table.cmp .hl{color:var(--blue-text)}
+table.cmp .yes{color:var(--blue-text);font-weight:600}
+table.cmp .no{color:var(--faint)}
+
+/* ---- rules compared: firm names as real headings; on phones every row is a small card */
+table.guide tr.grp th{padding-top:32px;font-size:17px;font-weight:600;letter-spacing:-.01em;text-transform:none;color:var(--text)}
+table.guide tr.grp th a,table.guide tbody th a{color:var(--text);text-decoration:none}
+table.guide tbody th{width:28%;font-weight:500;color:var(--text)}
+table.guide td{font-family:var(--font);letter-spacing:0;color:var(--muted)}
+@media (max-width:743px){table.guide,table.guide tbody{display:block}table.guide thead{display:none}
+  table.guide tr{display:block;padding:14px 0;border-bottom:1px solid var(--line-2)}
+  table.guide th,table.guide td{display:block;width:auto!important;padding:0;border:0}
+  table.guide tr.grp{padding:28px 0 2px;border:0}table.guide tr.grp th{padding:0}
+  table.guide td{margin-top:8px;font-size:14.5px}
+  table.guide td::before{content:attr(data-label);display:block;margin-bottom:2px;font-size:12px;color:var(--faint)}
+  table.guide tbody tr:not(.grp):hover>*{background:transparent}}
+
+/* ---- form fields: one height, the brand's chevron */
+.inp{display:flex}
+.inp input,.inp select{width:100%;height:44px;padding:0 14px;border:0;border-radius:var(--r1);background-color:color-mix(in srgb,var(--text) 5%,transparent);box-shadow:0 0 0 1px var(--line) inset;color:var(--text);font:500 15px/1 var(--font);-webkit-appearance:none;appearance:none;transition:box-shadow var(--t-fast)}
+.inp input{font-family:var(--mono);appearance:textfield}
+.inp input::-webkit-inner-spin-button{-webkit-appearance:none}
+.inp select{padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M2 3.5l3 3 3-3' fill='none' stroke='%239A9AA2' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.inp input:focus,.inp select:focus{outline:0;box-shadow:0 0 0 1px var(--blue) inset,0 0 0 4px color-mix(in srgb,var(--blue) 22%,transparent)}
+
+/* ---- [pages: prop-firms/index.html] filters, sort by column; one card per firm below 961 px (8 columns don't fit) */
+.pf-filters{display:none;margin-bottom:24px}
+.js .pf-filters{display:block}
+.pf-toggle,.pf-fields .pf-sortsel{display:none}
+.pf-fields{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 14px}
+.pf-fields label{display:grid;gap:6px;flex:1 1 160px;max-width:240px}
+.pf-l{font-size:13px;color:var(--muted)}
+#pf-reset{min-height:44px}
+table.pf-tbl{table-layout:auto}
+table.pf-tbl tbody th{width:auto;font-weight:500;white-space:nowrap}
+.pf-tbl tbody th a{color:var(--text);text-decoration:none}
+.pf-tbl td[data-k="types"]{font-family:var(--font);letter-spacing:0}
+.pf-tbl td[data-k="date"],.pf-tbl td[data-k="dd"]{white-space:nowrap}
+.pf-sort{text-align:inherit}   /* the arrow follows the last word, even on two lines */
+.pf-sort::after{content:"↕";margin-left:5px;font-size:11px;opacity:.4}
+[aria-sort="ascending"] .pf-sort,[aria-sort="descending"] .pf-sort{color:var(--text)}
+[aria-sort="ascending"] .pf-sort::after{content:"↑";opacity:1}
+[aria-sort="descending"] .pf-sort::after{content:"↓";opacity:1}
+.pf-empty{margin-top:16px;color:var(--muted)}
+.pf-note{margin-top:20px}
+@media (min-width:961px) and (max-width:1180px){table.pf-tbl th,table.pf-tbl td{padding:12px 8px;font-size:13.5px}.pf-tbl tbody th,.pf-tbl td[data-k="date"],.pf-tbl td[data-k="dd"]{white-space:normal}}
+@media (max-width:960px){
+  .pf-fields .pf-sortsel{display:grid}
+  .pf-tbl,.pf-tbl tr,.pf-tbl th,.pf-tbl td{display:block}.pf-tbl thead{display:none}
+  .pf-tbl tbody{display:grid;gap:12px;max-width:var(--w-read)}
+  .pf-tbl tr{padding:18px 20px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1)}
+  table.pf-tbl tbody th{padding:0 0 10px;border:0;font-size:17px;white-space:normal}
+  table.pf-tbl td{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border:0;border-top:1px solid var(--line-2);text-align:right}
+  .pf-tbl td::before{content:attr(data-label);color:var(--muted);font-family:var(--font);text-align:left}
+  table.pf-tbl tbody tr:not(.grp):hover>*{background:none}}
+@media (max-width:743px){   /* the account size stays in view; the other filters fold */
+  .js .pf-filters{display:flex;flex-direction:column;gap:12px;padding:16px 16px 0;border-radius:var(--r2);box-shadow:0 0 0 1px var(--line) inset}
+  .pf-toggle{display:flex;min-height:44px;align-items:center;justify-content:space-between;font-weight:500;color:var(--text)}
+  .pf-toggle::after{content:"+";font-size:20px;color:var(--muted)}
+  .open .pf-toggle::after{content:"−"}
+  .pf-fields{display:contents}.pf-fields>label,.pf-fields>button,.pf-fields .pf-sortsel{display:none;flex:none;max-width:none}
+  .pf-fields>label:first-child{display:grid;order:-1}
+  .open .pf-fields>label{display:grid}.open .pf-fields>button{display:inline-flex;margin-bottom:16px}}
+
+/* ---- [pages: sweep-vs-tradezella.html sweep-vs-tradervue.html sweep-vs-tradersync.html sweep-vs-edgewonk.html best-trading-journal-for-prop-firms.html] comparisons: Sweep's card, column and row tinted; the strengths above the table */
+.card.main{background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 10%,transparent),transparent 60%),var(--glass);box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 60%,transparent) inset,var(--shadow-2)}
+.vs-checked{margin-bottom:16px}
+.vs-note{margin-top:20px}
+.vs-sum{display:grid;gap:12px;margin-bottom:24px}
+@media (min-width:744px){.vs-sum{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}}
+.vs-sum>div{padding:20px 24px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1)}
+.vs-sum h3{font-size:17px}
+.vs-sum ul{display:grid;gap:8px;margin-top:12px}
+.vs-sum li{position:relative;padding-left:18px;font-size:14.5px;line-height:1.5}
+.vs-sum li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.vs-sum li.gap{color:var(--muted)}
+.vs-sum li.gap::before{background:var(--level)}
+table.vs thead th:nth-child(2){color:var(--blue-text)}
+table.vs td:nth-child(2),table.glance tbody tr:first-child>*{background:color-mix(in srgb,var(--blue) 7%,transparent);color:var(--text)}
+table.glance tbody th a{color:var(--text);text-decoration:none}
+.picks li{color:var(--text)}
+.article .chiprow,.article .links{margin-top:16px}
+@media (max-width:743px){table.vs td:nth-child(2),table.glance tbody tr:first-child>*{background:none}table.vs td:nth-child(2)::before{color:var(--blue-text)}}
+
+/* ---- [pages: changelog.html] timeline */
 .tl{position:relative;display:grid;gap:4px}
 .tl::before{content:"";position:absolute;left:7px;top:14px;bottom:14px;width:2px;border-radius:1px;background:linear-gradient(var(--line),var(--line) 80%,transparent)}
 .tl details{position:relative;padding-left:40px}
@@ -313,6 +399,14 @@ table.cmp tbody tr:not(.grp):hover>*{background:color-mix(in srgb,var(--text) 3%
 .band p{margin-top:8px;color:var(--muted)}
 .band .cta-row{margin-top:0}
 
+/* ---- [pages: prop-firm-rule-changes.html] rule changes: one line per firm, in one card */
+.ledger{margin-top:16px;padding:4px 28px;border-radius:var(--r4);background:var(--glass);box-shadow:var(--shadow-2)}
+.ledger>div{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px;padding:20px 0;border-top:1px solid var(--line-2)}
+.ledger>div:first-child{border-top:0}
+.ledger h2{font-size:var(--fs-h3)}
+.ledger>div>p,.ledger .list{order:3;flex:1 1 100%;margin:0;font-size:15px;color:var(--muted)}
+@media (max-width:743px){.ledger{padding:4px 20px}}
+
 /* ---- chapters of a long page: a capsule under the menu */
 .subnav{position:sticky;top:calc(var(--nav-h) + 6px);z-index:30;margin-top:8px;transition:top var(--t-mid) var(--spring)}
 .nav-hidden .subnav{top:12px}
@@ -326,7 +420,7 @@ table.cmp tbody tr:not(.grp):hover>*{background:color-mix(in srgb,var(--text) 3%
 .phones-row .fr-p{--pw:280px}
 @media (max-width:743px){.phones-row{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 8px;scrollbar-width:none}
   .phones-row>*{flex:0 0 72%;scroll-snap-align:center}}
-/* ---- the tour poster that opens the video */
+/* ---- [pages: how-it-works.html] the tour poster that opens the video */
 .tourcard{position:relative;display:block;width:100%;aspect-ratio:16/9;border-radius:var(--r5);overflow:hidden;background:var(--ink-2);box-shadow:var(--frame-shadow);transition:transform var(--t-mid) var(--spring)}
 .tourcard img{width:100%;height:100%;object-fit:cover}
 .tourcard .reel-play{left:auto;right:20px}
@@ -343,7 +437,7 @@ table.cmp tbody tr:not(.grp):hover>*{background:color-mix(in srgb,var(--text) 3%
 .sub-block .head{margin-bottom:40px}
 .sub-block .head h3{font-size:clamp(26px,21px + 1.2vw,36px);line-height:1.12;letter-spacing:-.02em}
 
-/* ---- platform cards (import) */
+/* ---- [pages: import.html install.html] platform cards and numbered steps (import, install) */
 .plat-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
 .plat h4{margin-top:20px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
 .psteps{counter-reset:s;display:grid;gap:10px;margin-top:12px}
@@ -351,10 +445,7 @@ table.cmp tbody tr:not(.grp):hover>*{background:color-mix(in srgb,var(--text) 3%
 .psteps li::before{content:counter(s);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--blue-text);font:600 12px/1 var(--mono)}
 .psteps b{color:var(--text);font-weight:500}
 .chip.tint{background:var(--tint);color:var(--blue-ink)}
-.plat-any p{margin-top:8px;color:var(--muted)}
-.plat-any>div{flex:1}
 .plat-h h3,.plat-h h2{min-width:0}
-.plat-any h2{font-size:clamp(22px,19px + .8vw,28px)}
 
 /* ---- long text: articles and simple two-column tables */
 .article>*:first-child{margin-top:0}
@@ -382,15 +473,15 @@ table.cmp tbody tr:not(.grp):hover>*{background:color-mix(in srgb,var(--text) 3%
 @media (max-width:743px){.chiprow{flex-wrap:nowrap;overflow-x:auto;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 6px;scrollbar-width:none}.chiprow>*{flex:none}}
 a.chip{transition:background-color var(--t-fast),color var(--t-fast)}
 a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var(--text)}
-/* ---- share cards at one height */
+/* ---- [pages: features.html prop-firm-tracker.html] share cards at one height */
 .shares.duo{display:flex;justify-content:center;align-items:flex-end;gap:20px}
 .shares.duo img{height:min(520px,62vw);width:auto}
 @media (max-width:743px){.shares.duo{flex-direction:column;align-items:center}.shares.duo img{height:auto;width:min(100%,320px)}}
-/* ---- the independence notice */
+/* ---- [pages: prop-firm-tracker.html] the independence notice */
 .notice{display:flex;gap:14px;align-items:flex-start;margin-top:40px;padding:18px 20px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1);font-size:14px;color:var(--muted)}
 .notice svg{flex:none;width:20px;height:20px;color:var(--blue-text);margin-top:1px}
 
-/* ---- pricing: billing switch, three plans of one height, offers */
+/* ---- [pages: pricing.html] billing switch, three plans of one height, offers */
 .billing{position:relative;display:inline-flex;gap:2px;padding:4px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--text) 6%,transparent);margin-bottom:32px}
 .billing button{position:relative;z-index:1;min-height:40px;padding:0 18px;border-radius:var(--r-pill);font-size:14px;font-weight:600;color:var(--muted);transition:color var(--t-fast)}
 .billing button[aria-pressed="true"]{color:var(--text)}
@@ -418,9 +509,6 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
   .plan-dots{display:flex;justify-content:center;gap:6px;margin-top:12px}.plan-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background-color var(--t-fast)}.plan-dots i.on{background:var(--blue)}}
 .under{display:grid;gap:6px;margin-top:24px;font-size:13.5px;color:var(--faint)}
 .under li{max-width:none}
-table.cmp .hl{color:var(--blue-text)}
-table.cmp .yes{color:var(--blue-text);font-weight:600}
-table.cmp .no{color:var(--faint)}
 #compare table.cmp tbody th{width:40%}
 #compare table.cmp td{font-family:var(--font);letter-spacing:0}
 @media (max-width:743px){#compare table.cmp th,#compare table.cmp td{hyphens:auto;overflow-wrap:break-word}#compare table.cmp{font-size:13px;table-layout:fixed}#compare table.cmp th,#compare table.cmp td{padding:10px 6px}#compare table.cmp td{font-family:var(--font);font-size:12.5px}}
@@ -435,9 +523,8 @@ table.cmp .no{color:var(--faint)}
 .early-stats .num{display:block;font:600 22px/1.1 var(--font);font-variant-numeric:tabular-nums;color:var(--text)}
 .early-stats span:not(.num){display:block;margin-top:4px;font-size:13px;color:var(--faint)}
 .refer .ico,.early .ico{width:40px;height:40px;border-radius:var(--r2);display:grid;place-items:center;background:var(--tint);color:var(--blue-text)}
-.ico svg{width:20px;height:20px}
 
-/* ---- /100: the hundred spots and the statement */
+/* ---- [pages: 100] the hundred spots and the statement */
 .spots{margin:36px auto 0;max-width:360px}
 .grid100{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;max-width:300px;margin:0 auto}
 .grid100 i{aspect-ratio:1;border-radius:50%;background:color-mix(in srgb,var(--text) 14%,transparent);transition:background-color var(--t-mid),transform var(--t-mid) var(--spring)}
@@ -451,10 +538,10 @@ table.cmp .no{color:var(--faint)}
 .xlinks span{color:var(--faint);font-weight:500}
 .xlinks a{color:var(--blue-text)}
 
-/* ---- contract chips */
+/* ---- [pages: features.html] contract chips */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
 .chips span{display:inline-flex;align-items:center;min-height:30px;padding:0 11px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--text) 6%,transparent);font:500 13px/1 var(--mono);color:var(--muted)}
-/* ---- share cards gallery */
+/* ---- [pages: features.html prop-firm-tracker.html] share cards gallery */
 .shares{display:grid;gap:16px}
 .shares img{width:100%;height:auto;border-radius:var(--r3);box-shadow:var(--frame-shadow)}
 .shares.posts{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -634,7 +721,10 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 
 /* ======================================================================= pages */
 @layer pages{
-/* ---- home hero */
+/* ---- centred blocks; the closing block's stage */
+.center p,.head.center p{margin-inline:auto}
+.stage{margin-top:clamp(48px,32px + 4vw,88px);perspective:1800px}
+/* ---- [pages: index.html 100] the home and /100 heroes */
 .hero{position:relative;padding-top:clamp(40px,24px + 4vw,88px);text-align:center}
 .hero h1:has(.h1-promise){display:flex;flex-direction:column;align-items:center;gap:20px}
 .c100 h1{font-size:var(--fs-display);line-height:1.02;letter-spacing:-.035em;max-width:13ch;margin-inline:auto}
@@ -642,10 +732,10 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .h1-eyebrow{font-size:clamp(14px,13.26px + .19vw,16px);font-weight:500;letter-spacing:-.005em;color:var(--muted);line-height:1.4}
 .h1-promise{font-size:var(--fs-display);line-height:1.02;letter-spacing:-.035em;max-width:13ch}
 .hero .lead{margin:24px auto 0;max-width:46ch}
-.hero p,.center p,.head.center p{margin-inline:auto}
 .hero .cta-row{justify-content:center;margin-top:36px}
 .hero .pill{margin-bottom:28px}
-.stage{margin-top:clamp(48px,32px + 4vw,88px);perspective:1800px}
+.hero p{margin-inline:auto}
+/* ---- [pages: index.html how-it-works.html] the video reel and its play button */
 .reel{position:relative;max-width:var(--w-wide);margin:0 auto;aspect-ratio:16/9;border-radius:var(--r5);overflow:hidden;background:var(--ink-2);box-shadow:var(--frame-shadow);transform-origin:50% 0;
   transform:perspective(1800px) rotateX(var(--rx,0deg)) scale(var(--rs,1));will-change:transform}
 .reel>img,.reel>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -658,13 +748,14 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .reel-play .rp-dur{font-size:12px;color:var(--faint)}
 @media (hover:hover){.reel-play:hover{transform:scale(1.03)}}
 @media (max-width:743px){.reel{border-radius:var(--r3)}.reel-play{left:12px;bottom:12px;padding-right:12px;font-size:13px}.reel-play .rp-ic{width:30px;height:30px}}
+/* ---- [pages: index.html] the cohort line under the hero */
 .hero-more{margin-top:20px;font-size:var(--fs-small);color:var(--muted)}
 .hero-more a{color:var(--blue-text);font-weight:500}
 .cohort{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px}
 .cohort .cbar{width:120px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden}
 .cohort .cbar i{display:block;height:100%;width:0;background:var(--blue);border-radius:inherit;transition:width 1.2s var(--spring)}
 .cohort .ctext{font-size:13px;color:var(--muted)}
-/* ---- one place: five tools converge into one Sweep card */
+/* ---- [pages: index.html] one place: five tools converge into one Sweep card */
 .oneplace{display:grid;grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr);align-items:center;gap:16px}
 .op-from{display:grid;gap:10px}
 .op-from li{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--r2);background:var(--glass);box-shadow:var(--shadow-1);color:var(--muted);font-size:14.5px;max-width:none}
@@ -679,7 +770,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .ok-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px var(--tint);flex:none}
 @media (max-width:560px){.oneplace{grid-template-columns:1fr;gap:20px}.op-arrow{width:2px;height:40px;margin:0 auto;background:linear-gradient(180deg,transparent,var(--blue))}
   .op-arrow::after{right:-4px;top:auto;bottom:-1px;border:5px solid transparent;border-top-color:var(--blue);border-bottom:0}.op-from{grid-template-columns:1fr 1fr}.op-from li:last-child{grid-column:1/-1}}
-/* ---- trust row */
+/* ---- [pages: features.html index.html] trust row */
 .trust{display:grid;gap:12px}
 @media (min-width:744px){.trust{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (min-width:1068px){.trust{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -687,7 +778,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 @media (min-width:744px){.trust.five{grid-template-columns:repeat(2,minmax(0,1fr))}.trust.five>:last-child{grid-column:1/-1}}
 @media (min-width:1068px){.trust.five{grid-template-columns:repeat(5,minmax(0,1fr))}.trust.five>:last-child{grid-column:auto}}
 .trust.five .tile{flex-direction:column}
-/* ---- plans in the home band */
+/* ---- [pages: index.html] plans in the home band */
 .plans-mini{display:grid;gap:12px;max-width:880px;margin:0 auto}
 @media (min-width:744px){.plans-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
 .plan-mini{padding:24px;border-radius:var(--r4);background:var(--glass);box-shadow:var(--shadow-1);text-align:left}

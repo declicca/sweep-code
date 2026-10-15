@@ -51,12 +51,34 @@ PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","tr
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core
+import re as _r
+def css_min(s_):   # light minification: comments, whitespace
+    s_ = _r.sub(r"/\*.*?\*/", "", s_, flags=_r.S); s_ = _r.sub(r"\s+", " ", s_)
+    return _r.sub(r"\s*([{};,>])\s*", r"\1", s_).replace(";}", "}").strip()
+def page_css(css):
+    """The sections of system.css headed /* ---- [pages: a.html b.html] … */ leave the shared sheet:
+    each page listed gets them inline (core.PAGE_CSS), in the same cascade layer."""
+    parts = _r.split(r"(/\* -{4} .*?\*/|/\* =+ .*?\*/)", css, flags=_r.S)
+    out, per, layer = [parts[0]], {}, None
+    for h, body in [(parts[0], "")] + list(zip(parts[1::2], parts[2::2])):
+        m = _r.match(r"/\* -{4} \[pages: ([^\]]+)\]", h)
+        if m:
+            depth, cut = 0, len(body)
+            for i, ch in enumerate(body):   # the section ends before its layer's closing brace
+                depth += (ch == "{") - (ch == "}")
+                if depth < 0: cut = i; break
+            for pg in m.group(1).split():
+                if pg not in PAGES or pg not in SYSTEM_PAGES: raise SystemExit(f"system.css: [pages: {pg}] is not a page on the design system")
+                per.setdefault(pg, {}).setdefault(layer, []).append(body[:cut])
+            out.append(body[cut:])
+        elif body: out += [h, body]
+        for l in _r.findall(r"@layer (\w+)\{", h + body): layer = l
+    return "".join(out), {pg: css_min("".join(f"@layer {l}{{{''.join(b)}}}" for l, b in ls.items())) for pg, ls in per.items()}
 for key, src, ext in (("css","styles.css","css"),("js","site.js","js"),("system","system.css","css")):
     data = open(os.path.join(HERE,src),"rb").read()
-    if ext == "css":   # light minification: comments, whitespace
-        import re as _r
-        s_ = data.decode("utf-8"); s_ = _r.sub(r"/\*.*?\*/", "", s_, flags=_r.S); s_ = _r.sub(r"\s+", " ", s_)
-        s_ = _r.sub(r"\s*([{};,>])\s*", r"\1", s_); s_ = s_.replace(";}", "}"); data = s_.strip().encode("utf-8")
+    if key == "system":
+        s_, core.PAGE_CSS = page_css(data.decode("utf-8")); data = s_.encode("utf-8")
+    if ext == "css": data = css_min(data.decode("utf-8")).encode("utf-8")
     h = hashlib.md5(data).hexdigest()[:10]
     name = f"{src.split('.')[0]}.{h}.{ext}"; open(os.path.join(DIST,"assets",name),"wb").write(data); core.ASSETS[key] = name
 # safety net: old un-versioned files for any stale cached HTML from the first version

@@ -467,6 +467,9 @@ def faq_of(lang, t, f):
 
 # ---------------------------------------------------------------- hub: /prop-firms
 CRUMBS["prop-firms/index.html"] = "Prop firms"
+SYSTEM_PAGES.add("prop-firms/index.html")
+TRACK_PROPS = T("Track your prop accounts in Sweep.", "Suis tes comptes prop dans Sweep.", "Sigue tus cuentas prop en Sweep.")   # the band after a table of firms
+RULES_FILL = T("Your firm’s rules fill in automatically.", "Les règles de ta firme se remplissent toutes seules.", "Las reglas de tu firma se rellenan solas.")
 
 HUB_HELP = T("""<h2>What each rules page covers</h2><p>For every account type and size: the evaluation’s profit target, the max loss and how it trails, the daily loss limit, consistency and minimum days, then the funded account’s rules and payout conditions. Each page also gives practical points, the rule changes we’ve recorded and answers to common questions.</p>
 <h2>How the rules are checked</h2><p>Sweep checks each firm’s official pages every week and keeps the values it uses to prefill prop accounts in the app. The date of the last check is on each page, and when a rule changes, the page lists it with the old and the new value. The <a href="@prop-firm-rule-changes.html">rule changes page</a> gathers every firm’s, with an RSS feed. Sources, frequency and limits: <a href="@how-we-verify-prop-firm-rules.html">how we verify the rules</a>.</p>
@@ -578,39 +581,39 @@ render();})();</script>"""
 
 def page_hub(lang, t):
     firms = presets.FIRMS
-    when = max(checked_of(f) for f in firms)
-    hero = page_hero(t, T("Prop firm rules, compared.", "Les règles des prop firms, comparées.", "Las reglas de las prop firms, comparadas."),
+    when = presets.CHECKED   # the weekly check of the whole catalogue, as on the guides (each firm's own date is in the table)
+    hero = ui.hero(t, T("Prop firms", "Prop firms", "Prop firms"), T("Prop firm rules, compared.", "Les règles des prop firms, comparées.", "Las reglas de las prop firms, comparadas."),
         T(f"Drawdown, consistency and payout rules for {len(firms)} futures prop firms, from Sweep’s weekly check of their official pages. Last check: {day(when, 'en')}.",
           f"Drawdown, consistance et payouts de {len(firms)} prop firms de futures, selon la vérification hebdomadaire de leurs pages officielles par Sweep. Dernière vérification : {day(when, 'fr')}.",
           f"Drawdown, consistencia y payouts de {len(firms)} prop firms de futuros, según la revisión semanal de sus páginas oficiales por Sweep. Última verificación: {day(when, 'es')}."),
-        T("Prop firms", "Prop firms", "Prop firms"))
+        cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_hub_hero"'))
     from pages8 import FIRMS as JOURNALS
     others = [(s, n) for s, n in JOURNALS if n not in presets.PRESET_FIRMS]
     other = ""
     if others:
         names = {l: {"en": " or ", "fr": " ou ", "es": " o "}[l].join(n for _, n in others) for l in LANGS}
         one = len(others) == 1
-        other = (f'<p>{t(T(f"{names["en"]}? {"Its" if one else "Their"} rules aren’t preloaded in Sweep yet: add your account as “Other firm” and enter its rules once.", f"{names["fr"]} ? {"Ses" if one else "Leurs"} règles ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme » et saisis ses règles une fois.", f"¿{names["es"]}? Sus reglas aún no están precargadas en Sweep: añade tu cuenta como «Otra firma» e introduce sus reglas una vez."))}</p>'
-                 '<p class="firm-others">' + "".join(f'<a href="{href(lang, s)}">{n}</a>' for s, n in others) + "</p>")
+        other = f'<p>{t(T(f"{names["en"]}? {"Its" if one else "Their"} rules aren’t preloaded in Sweep yet: add your account as “Other firm” and enter its rules once.", f"{names["fr"]} ? {"Ses" if one else "Leurs"} règles ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme » et saisis ses règles une fois.", f"¿{names["es"]}? Sus reglas aún no están precargadas en Sweep: añade tu cuenta como «Otra firma» e introduce sus reglas una vez."))}</p>'
     disclaimer = T("Sweep is not affiliated with these firms. Rules can change at any time; always confirm on each firm’s official site.",
                    "Sweep n’est affilié à aucune de ces firmes. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de chaque firme.",
                    "Sweep no está afiliado a estas firmas. Las reglas pueden cambiar en cualquier momento; confirma siempre en el sitio oficial de cada firma.")
-    b = (f'<section style="padding-top:8px"><div class="wrap">{pf_table(lang, t)}'
-         f'<p class="fine" style="margin-top:18px">{t(disclaimer)}</p></div></section>'
-         + f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(HUB_HELP))}</article></div></section>'
-         + (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Another firm?", "Une autre firme ?", "¿Otra firma?"))}</h2></div>{other}</div></section>' if other else "")
-         + f'<section class="rule"><div class="wrap narrow"><p class="firm-others"><span>{t(T("Free tools", "Outils gratuits", "Herramientas gratuitas"))}</span>'
-         + "".join(f'<a href="{href(lang, s)}">{t(n)}</a>' for s, n in [("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico")),
-                    ("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), ("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout")),
-                    ("prop-firm-profit-targets.html", T("Profit targets and max loss compared", "Objectifs et perte max comparés", "Objetivos y pérdida máx. comparados"))])
-         + "</p></div></section>")
+    tools = [("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico")),
+             ("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), ("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout")),
+             ("prop-firm-profit-targets.html", T("Profit targets and max loss compared", "Objectifs et perte max comparés", "Objetivos y pérdida máx. comparados"))]
+    more = f'<h2>{t(T("Another firm?", "Une autre firme ?", "¿Otra firma?"))}</h2>{other}' if other else ""
+    rows = (('<div class="chiprow" style="margin-top:16px">' + "".join(f'<a class="chip" href="{href(lang, s)}">{n}</a>' for s, n in others) + "</div>") if other else "") \
+        + f'<div class="chiprow" style="margin-top:40px"><span class="eyebrow">{t(T("Free tools", "Outils gratuits", "Herramientas gratuitas"))}</span>' \
+        + "".join(f'<a class="chip" href="{href(lang, s)}">{t(n)}</a>' for s, n in tools) + "</div>"
+    band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_hub_card"'))
+    b = (ui.sec(pf_table(lang, t) + f'<p class="fine" style="margin-top:12px">{t(disclaimer)}</p>' + band, "t", "firms")
+         + ui.sec(f'<article class="article">{localize(lang, t(HUB_HELP))}{more}</article>' + rows, "n", "explained", width="read"))
     ld = jsonld({"@context": "https://schema.org", "@type": "ItemList", "name": t(T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")),
                  "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": f["name"], "url": f"https://{DOMAIN}{href(lang, page_of(f))}"} for i, f in enumerate(firms)]})
     title = t(T("Prop Firm Rules 2026: Drawdown & Payouts by Firm · Sweep", "Règles des prop firms 2026 : drawdown et payouts · Sweep", "Reglas de prop firms 2026: drawdown y payouts · Sweep"))
     desc = t(T(f"Drawdown, daily loss, consistency and payout rules for {', '.join(f['name'] for f in firms)}, checked every week against each firm’s official pages.",
                f"Drawdown, perte du jour, consistance et payouts de {', '.join(f['name'] for f in firms)}, vérifiés chaque semaine sur leurs pages officielles.",
                f"Drawdown, pérdida diaria, consistencia y payouts de {', '.join(f['name'] for f in firms)}, revisados cada semana en sus páginas oficiales."))
-    body = hero + b + final_cta(lang, t)
+    body = hero + b + ui.final(lang, t)
     if lang == "fr": body, title, desc = (re.sub(r" ([:;?!])(?=\s|<|$)", " \\1", x) for x in (body, title, desc))
     return (title, desc, body, ld)
 
@@ -642,20 +645,21 @@ MANUAL_RULES = T("""<h2>The rules to enter</h2><ul>
 
 def make_manual_page(slug, name):
     CRUMBS[slug] = name
+    SYSTEM_PAGES.add(slug)
     def page(lang, t):
-        hero = page_hero(t, T(f"{name} rules, in Sweep.", f"Les règles de {name}, dans Sweep.", f"Las reglas de {name}, en Sweep."),
+        hero = ui.hero(t, T("Prop firms", "Prop firms", "Prop firms"), T(f"{name} rules, in Sweep.", f"Les règles de {name}, dans Sweep.", f"Las reglas de {name}, en Sweep."),
             T(f"{poss(name)} rules aren’t preloaded in Sweep yet: add your account as “Other firm”, enter its rules once, and Sweep checks every trade against them.",
               f"Les règles de {name} ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme », saisis ses règles une fois, et Sweep vérifie chaque trade contre elles.",
               f"Las reglas de {name} aún no están precargadas en Sweep: añade tu cuenta como «Otra firma», introduce sus reglas una vez y Sweep comprueba cada operación con ellas."),
-            T("Prop firms", "Prop firms", "Prop firms"), f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_firm">{t(CREATE_FREE)}</a>')
-        b = f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{localize(lang, t(MANUAL_RULES)).replace("{F}", name)}</article></div></section>'
+            cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_firm"'))
+        b = ui.sec(f'<article class="article">{localize(lang, t(MANUAL_RULES)).replace("{F}", name)}</article>', "t", "rules", width="read")
         items = [T("<b>Every trade checked</b> against your rules: target, room above the max loss, today’s limit, consistency", "<b>Chaque trade vérifié</b> contre tes règles : objectif, marge au-dessus de la perte max, limite du jour, consistance", "<b>Cada operación comprobada</b> con tus reglas: objetivo, margen sobre la pérdida máx., límite del día, consistencia"),
                  T("<b>Ready for payout</b> in %, once funded, from the conditions you entered", "<b>Prêt pour le payout</b> en %, une fois financé, selon les conditions saisies", "<b>Listo para el payout</b> en %, ya fondeada, según las condiciones introducidas"),
                  T(f"<b>One trade on several {name} accounts</b> with the trade copier", f"<b>Un trade sur plusieurs comptes {name}</b> avec le copieur de trades", f"<b>Una operación en varias cuentas de {name}</b> con el copiador"),
                  T("<b>A failed or closed account keeps its history</b>", "<b>Un compte échoué ou fermé garde son historique</b>", "<b>Una cuenta fallida o cerrada conserva su historial</b>")]
-        b += split(t, T("In Sweep", "Dans Sweep", "En Sweep"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
+        b += ui.split(t, T("In Sweep", "Dans Sweep", "En Sweep"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
                    T("Enter the rules once; then every value is tracked on every trade, next to your other firms.", "Saisis les règles une fois ; ensuite, chaque valeur est suivie à chaque trade, à côté de tes autres firmes.", "Introduce las reglas una vez; después, cada valor se sigue en cada operación, junto a tus otras firmas."),
-                   items, frame("accounts", lang, t(T(f"{name} accounts in Sweep, sample data", f"Comptes {name} dans Sweep, données d’exemple", f"Cuentas de {name} en Sweep, datos de ejemplo")), t), id_="track",
+                   items, ui.frame_d("v6-13-accounts-d.webp", t(T("Prop accounts side by side, sample data", "Comptes prop côte à côte, données d’exemple", "Cuentas prop lado a lado, datos de ejemplo")), m="v6-13-accounts-m.webp", t=t), id_="track",
                    more=f'<p class="fine" style="margin-top:16px">{t(MONEY_PLAN)}</p>')
         faqs = [(T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
                  T(f"No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {name}. The {name} name belongs to its owner.", f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Le nom {name} appartient à son propriétaire.", f"No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {name}. El nombre {name} pertenece a su propietario.")),
@@ -665,15 +669,14 @@ def make_manual_page(slug, name):
                  T("Yes, as many as your plan allows, each with its own rules, and you can copy one trade to several accounts at once.", "Oui, autant que ton forfait le permet, chacun avec ses propres règles, et tu peux copier un trade sur plusieurs comptes en une fois.", "Sí, tantas como permita tu plan, cada una con sus propias reglas, y puedes copiar una operación en varias cuentas a la vez.")),
                 (T("Is it free?", "C’est gratuit ?", "¿Es gratis?"),
                  T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.", "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
-        b += (f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions", "Questions", "Preguntas"))}</h2></div>'
-              + "".join(faq_item(t, q, a) for q, a in faqs) + "</div></section>"
-              + related(lang, t, ["prop-firms/index.html", "prop-firm-drawdown-rules.html", "prop-firm-payout-rules.html"]))
+        b += (ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "questions", width="read")
+              + ui.read_next(lang, t, ["prop-firms/index.html", "prop-firm-drawdown-rules.html", "prop-firm-payout-rules.html"]))
         ld = jsonld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]})
         return (t(T(f"{name} Rules & Trading Journal · Sweep", f"Règles {name} et journal de trading · Sweep", f"Reglas de {name} y diario de trading · Sweep")),
                 t(T(f"Track your {name} accounts in Sweep: enter the rules once (target, max loss, daily limit, consistency, payouts) and every trade is checked. Free.",
                     f"Suis tes comptes {name} dans Sweep : saisis les règles une fois (objectif, perte max, limite du jour, consistance, payouts) et chaque trade est vérifié.",
                     f"Sigue tus cuentas de {name} en Sweep: introduce las reglas una vez (objetivo, pérdida máx., límite diario, consistencia, payouts) y se revisa cada operación.")),
-                hero + b + final_cta(lang, t), ld)
+                hero + b + ui.final(lang, t), ld)
     return page
 
 
@@ -692,28 +695,37 @@ CHANGES_HELP = T("""<h2>How changes are detected</h2><p>Every week, Sweep checks
 <h2>Seguir los cambios</h2><p>Añade el <a href="/prop-firm-rule-changes.xml">feed RSS</a> a tu lector para ver cada cambio en cuanto se registra.</p>""")
 
 def page_rule_changes(lang, t):
-    hero = page_hero(t, T("Prop firm rule changes.", "Changements de règles des prop firms.", "Cambios de reglas de las prop firms."),
+    hero = ui.hero(t, T("Prop firms", "Prop firms", "Prop firms"), T("Prop firm rule changes.", "Changements de règles des prop firms.", "Cambios de reglas de las prop firms."),
         T(f"Every rule change Sweep has detected on the official pages of {FIRMS_N} futures prop firms, newest first.",
           f"Chaque changement de règle détecté par Sweep sur les pages officielles de {FIRMS_N} prop firms de futures, du plus récent au plus ancien.",
           f"Cada cambio de regla detectado por Sweep en las páginas oficiales de {FIRMS_N} prop firms de futuros, del más reciente al más antiguo."),
-        T("Prop firms", "Prop firms", "Prop firms"))
-    secs = ""
+        cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_changes_hero"'))
+    rows = ""
     latest = lambda f: (real_changes(f)[:1] or [{"date": ""}])[0]["date"]
     for f in sorted(presets.FIRMS, key=latest, reverse=True):   # the firm with the newest change first
         src = source_of(f)
-        rows = real_changes(f)
+        cs = real_changes(f)
         prog = {p.get("id", p["name"]): p["name"] for p in f["programs"]}
-        body = ('<ul class="list">' + "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)} · <a href="{src}" rel="nofollow noopener" target="_blank">{t(T("source","source","fuente"))}</a></li>' for c in rows)
-                + '</ul>' if rows else f'<p>{no_change(lang, t, f)}</p>')
+        body = ('<ul class="list">' + "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)} · <a href="{src}" rel="nofollow noopener" target="_blank">{t(T("source","source","fuente"))}</a></li>' for c in cs)
+                + '</ul>' if cs else f'<p>{no_change(lang, t, f)}</p>')
         name = f["name"]
-        secs += f'<h2 id="{slug(f)}">{name}</h2>{body}<p><a class="tlink" href="{href(lang, page_of(f))}">{t(T(f"{poss(name)} rules", f"Les règles de {name}", f"Las reglas de {name}"))} <span aria-hidden="true">→</span></a></p>'
-    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{secs}</article></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{localize(lang, t(CHANGES_HELP))}</article></div></section>')
+        rows += f'<div id="{slug(f)}"><h2>{name}</h2>{body}<a class="go" href="{href(lang, page_of(f))}">{t(T(f"{poss(name)} rules", f"Les règles de {name}", f"Las reglas de {name}"))} <span aria-hidden="true">→</span></a></div>'
+    n, last, checked = len(real_changes()), (real_changes()[:1] or [{"date": ""}])[0]["date"], day(presets.CHECKED, lang)
+    if not n:   # no change is good news: said once, plainly
+        status = T(f"<b>No rule change recorded so far.</b> Last check: {checked}.", f"<b>Aucun changement de règle enregistré jusqu’ici.</b> Dernière vérification : {checked}.", f"<b>Ningún cambio de regla registrado hasta ahora.</b> Última verificación: {checked}.")
+    else:
+        d = day(last, lang)
+        status = T(f"<b>{n} rule change{'s' if n > 1 else ''}</b> recorded, the latest on {d}. Last check: {checked}.",
+                   f"<b>{n} changement{'s' if n > 1 else ''} de règle</b> enregistré{'s' if n > 1 else ''}, le dernier le {d}. Dernière vérification : {checked}.",
+                   f"<b>{n} cambio{'s' if n > 1 else ''} de regla</b> registrado{'s' if n > 1 else ''}, el último el {d}. Última verificación: {checked}.")
+    b = (ui.sec(ui.state(t(status)) + f'<div class="ledger reveal">{rows}</div>', "t", "changes", width="read")
+         + ui.sec(f'<article class="article">{localize(lang, t(CHANGES_HELP))}</article>', "n", "explained", width="read"))
     return (t(T("Prop Firm Rule Changes: Every Change, Dated · Sweep", "Changements de règles des prop firms, datés · Sweep", "Cambios de reglas de las prop firms, fechados · Sweep")),
             t(T(f"Every rule change detected on the official pages of {FIRMS_N} futures prop firms, newest first: the rule, before and after, the date and the source.",
                 f"Chaque changement de règle détecté sur les pages officielles de {FIRMS_N} prop firms de futures : la règle, avant et après, la date et la source.",
                 f"Cada cambio de regla detectado en las páginas oficiales de {FIRMS_N} prop firms de futuros: la regla, antes y después, la fecha y la fuente.")),
-            hero + b + final_cta(lang, t), RSS_LINK)
+            hero + b + ui.final(lang, t), RSS_LINK)
+SYSTEM_PAGES.add(RULE_CHANGES)
 
 
 def rss(domain):
@@ -768,19 +780,24 @@ METHOD_HELP = T("""<h2>Sources</h2><p>Each rule comes from the firm’s own page
 <h2>Los límites</h2><p>Las reglas se muestran a título indicativo. Una firma puede cambiar una regla en cualquier momento, incluso entre dos revisiones. Algunos valores no se publican en texto, como algunos precios de evaluación, y no aparecen hasta que se publican. Cuando una regla depende del progreso de la cuenta, como el límite diario de las cuentas fondeadas de Apex, se indica el nivel más estricto. Confirma siempre en el sitio oficial de la firma. Sweep no está afiliado a ninguna de estas firmas.</p>""")
 
 def page_method(lang, t):
-    hero = page_hero(t, T("How we verify prop firm rules.", "Comment on vérifie les règles des prop firms.", "Cómo verificamos las reglas de las prop firms."),
+    hero = ui.hero(t, T("Prop firms", "Prop firms", "Prop firms"), T("How we verify prop firm rules.", "Comment on vérifie les règles des prop firms.", "Cómo verificamos las reglas de las prop firms."),
         T("Where the rules come from, how often they’re checked, what counts as a change, and what Sweep can’t promise.",
           "D’où viennent les règles, à quelle fréquence elles sont vérifiées, ce qui compte comme un changement, et ce que Sweep ne peut pas promettre.",
           "De dónde vienen las reglas, con qué frecuencia se revisan, qué cuenta como un cambio y lo que Sweep no puede prometer."),
-        T("Prop firms", "Prop firms", "Prop firms"))
+        cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_method_hero"'))
+    steps = ui.cards([
+        ui.card(t, T("Sources", "Les sources", "Las fuentes"), T("Each rule comes from the firm’s own pages: its website, its help center and its rules and payout policies.", "Chaque règle vient des pages de la firme elle-même : son site, son centre d’aide et ses politiques de règles et de payout.", "Cada regla viene de las páginas de la propia firma: su sitio, su centro de ayuda y sus políticas de reglas y de payout."), icon="globe"),
+        ui.card(t, T("Every week", "Chaque semaine", "Cada semana"), T("Sweep reads every firm’s pages again and compares each rule with the previous check.", "Sweep relit les pages de chaque firme et compare chaque règle avec la vérification précédente.", "Sweep vuelve a leer las páginas de cada firma y compara cada regla con la revisión anterior."), icon="calendar"),
+        ui.card(t, T("Your account, your choice", "Ton compte, ton choix", "Tu cuenta, tu decisión"), T("A change is dated on the firm’s page. Your account changes only if you apply it.", "Un changement est daté sur la page de la firme. Ton compte ne change que si tu l’appliques.", "Un cambio se fecha en la página de la firma. Tu cuenta solo cambia si lo aplicas."), icon="check")], cols=3)
     sites = '<ul class="list">' + "".join(
         f'<li><a href="{href(lang, page_of(f))}">{f["name"]}</a>{colon(lang)}' + ", ".join(f'<a href="{u}" rel="nofollow noopener" target="_blank">{_host(u)}</a>' for u in (f.get("sources") or [])[:3])
         + f' · {t(T("last checked", "dernière vérification", "última revisión"))} {day(checked_of(f), lang)}</li>' for f in presets.FIRMS) + "</ul>"
-    b = f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{localize(lang, t(METHOD_HELP)).replace("{SITES}", sites)}</article></div></section>'
+    b = ui.sec(steps, "t", "steps") + ui.sec(f'<article class="article">{localize(lang, t(METHOD_HELP)).replace("{SITES}", sites)}</article>', "n", "details", width="read")
     ld = jsonld({"@context": "https://schema.org", "@type": "Article", "headline": t(T("How we verify prop firm rules", "Comment on vérifie les règles des prop firms", "Cómo verificamos las reglas de las prop firms")),
                  "inLanguage": lang, "datePublished": "2026-10-13", "dateModified": presets.CHECKED, "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}})
     return (t(T("How We Verify Prop Firm Rules · Sweep", "Comment on vérifie les règles des prop firms · Sweep", "Cómo verificamos las reglas de prop firms · Sweep")),
             t(T("Where Sweep’s prop firm rules come from: the firms’ official pages, checked every week, what counts as a rule change, and how to report an error.",
                 "D’où viennent les règles des prop firms dans Sweep : pages officielles des firmes, vérifiées chaque semaine, changements de règles et erreurs à signaler.",
                 "De dónde vienen las reglas de las prop firms en Sweep: páginas oficiales de las firmas, revisadas cada semana, cambios de reglas y cómo avisar de un error.")),
-            hero + b + final_cta(lang, t), ld)
+            hero + b + ui.final(lang, t), ld)
+SYSTEM_PAGES.add(METHOD)

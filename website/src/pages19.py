@@ -1,7 +1,7 @@
 from core import *
-import re
+import re, html
 import presets
-from pages18 import page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of, METHOD
+from pages18 import page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of, METHOD, TRACK_PROPS, RULES_FILL
 from pages17 import _fr_nbsp
 
 # Guides built from the app's prop firm catalogue (presets.py): every number is the app's, never retyped here.
@@ -37,6 +37,8 @@ def _firm_rows(lang, t, cells):
 def _table(lang, t, h1, h2, body):
     head = (f'<thead><tr><th scope="col">{t(T("Account type","Type de compte","Tipo de cuenta"))}</th>'
             f'<th scope="col">{t(h1)}</th><th scope="col">{t(h2)}</th></tr></thead>')
+    # on phones each row becomes a small card: every value carries its column's name
+    body = re.sub(r"<td>(.*?)</td><td>(.*?)</td>", lambda m: f'<td data-label="{html.escape(t(h1))}">{m.group(1)}</td><td data-label="{html.escape(t(h2))}">{m.group(2)}</td>', body)
     return f'<div class="cmp-wrap"><table class="cmp rules guide n2">{head}<tbody>{body}</tbody></table></div>'
 
 def _checked_note(lang, t):
@@ -58,22 +60,24 @@ def _by_firm(pairs, lang):
     return sep.join(firm + colon(lang) + ", ".join(groups[firm]) for firm in order) + "."
 
 def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
-    hero = page_hero(t, h1, lead, kick)
+    """A rules-compared guide, on the design system: the numbers first (summary, then the table), the explanations after."""
+    import ui
+    hero = ui.hero(t, kick, h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_hero"'))
+    n_types = sum(len(f["programs"]) for f in presets.FIRMS)
+    summary = ui.stats([(t(T("Firms","Firmes","Firmas")), str(len(presets.FIRMS)), ""), (t(T("Account types","Types de compte","Tipos de cuenta")), str(n_types), ""),
+                        (t(T("Checked","Vérifiées le","Revisadas el")), day(presets.CHECKED, lang), t(T("every week","chaque semaine","cada semana")))])
     body_intro = "".join(f"<h2>{t(h)}</h2>" + "".join(f"<p>{t(x)}</p>" for x in ps) for h, ps in intro)
-    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><article class="article">{body_intro}</article></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Firm by firm.","Firme par firme.","Firma por firma."))}</h2></div>{table}'
-         f'<p class="fine vs-note">{_checked_note(lang, t)}</p></div></section>'
-         + f'<section style="padding-top:0"><div class="wrap narrow"><div class="calc-act"><div><b>{t(T("Track your prop accounts in Sweep.", "Suis tes comptes prop dans Sweep.", "Sigue tus cuentas prop en Sweep."))}</b>'
-         f'<p data-nolinks>{t(T("Your firm’s rules fill in automatically.", "Les règles de ta firme se remplissent toutes seules.", "Las reglas de tu firma se rellenan solas."))}</p></div>'
-         f'<a class="btn btn-primary" href="{SIGNUP}" data-track="signup_guide_card">{t(CREATE_FREE)}</a></div></div></section>'
-         + (f'<section class="rule"><div class="wrap narrow"><article class="article">{after}</article></div></section>' if after else "")
-         + f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>'
-         + "".join(faq_item(t, q, a) for q, a in faqs) + "</div></section>")
+    band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_card"'))
+    b = (ui.sec(summary, "t", "summary")
+         + ui.sec(ui.head(t, None, T("Firm by firm.","Firme par firme.","Firma por firma.")) + table + f'<p class="fine vs-note" style="margin-top:20px">{_checked_note(lang, t)}</p>' + band, "t", "firms")
+         + ui.sec(f'<article class="article">{body_intro}</article>', "n", "explained", width="read")
+         + (ui.sec(f'<article class="article">{after}</article>', "n", "more", width="read") if after else "")
+         + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read"))
     ld = jsonld({"@context": "https://schema.org", "@graph": [
         {"@type": "Article", "headline": re.sub(r"\.$", "", t(h1)), "inLanguage": lang, "datePublished": "2026-10-13", "dateModified": presets.CHECKED,
          "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}},
         {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]}]})
-    return _fr_nbsp(lang, t(title), t(desc), hero + b + final_cta(lang, t), ld)
+    return _fr_nbsp(lang, t(title), t(desc), hero + b + ui.final(lang, t), ld)
 
 FIRM_PAGES = lambda: [(page_of(f), T(f["name"], f["name"], f["name"])) for f in presets.FIRMS]
 
@@ -621,3 +625,4 @@ if COSTS_LIVE: GUIDES.insert(3, (GUIDE_COSTS, T("Prop firm costs, compared", "Le
                   T("Evaluation prices and activation fees, size by size.", "Prix des évaluations et frais d’activation, taille par taille.", "Precios de evaluación y tarifas de activación, tamaño por tamaño.")))
 
 RULE_GUIDES = (GUIDE_CONS, GUIDE_DD, GUIDE_PAYOUT, GUIDE_SIZES, GUIDE_DAYS) + ((GUIDE_COSTS,) if COSTS_LIVE else ())   # firm-by-firm guides built from the catalogue
+SYSTEM_PAGES.update(RULE_GUIDES)

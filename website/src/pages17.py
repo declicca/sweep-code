@@ -6,7 +6,8 @@ import re
 # warns after 35 days); a price change goes through Mateo. The price rows of the tables are written from that file, and the
 # build warns when a page names a price that isn't in it.
 import os as _os
-from pages18 import day as _day, usd as _usd, src_name as _src_name
+from pages18 import day as _day, usd as _usd, src_name as _src_name, TRACK_PROPS, RULES_FILL
+import ui
 COMP = json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "competitors.json"), encoding="utf-8"))
 def checked(name): return {l: _day(COMP[name]["checked"], l) for l in LANGS}
 CHECKED = {l: _day(min(c["checked"] for c in COMP.values()), l) for l in LANGS}   # the pillar page: its oldest check
@@ -16,13 +17,11 @@ def plan_prices(name, key):
     return {l: " · ".join(f'{p["name"]}\u00a0{_usd(p[key], l)}' for p in plans) for l in LANGS}
 
 def _cmp_table(t, rows, other):
+    """Sweep's column tinted; on phones, one small card per row, each value under its journal's name."""
     head = (f'<thead><tr><th scope="col"><span class="sr">{t(T("Feature","Fonctionnalité","Función"))}</span></th>'
             f'<th scope="col">Sweep</th><th scope="col">{other}</th></tr></thead>')
-    body = "".join(f'<tr><th scope="row">{t(a)}</th><td>{t(b)}</td><td>{t(c)}</td></tr>' for a, b, c in rows)
-    return f'<div class="cmp-wrap"><table class="cmp two">{head}<tbody>{body}</tbody></table></div>'
-
-def _pick(t, h, items):
-    return f'<div><h3>{t(h)}</h3>{ul(t, items)}</div>'
+    body = "".join(f'<tr><th scope="row">{t(a)}</th><td data-label="Sweep">{t(b)}</td><td data-label="{other}">{t(c)}</td></tr>' for a, b, c in rows)
+    return f'<div class="cmp-wrap"><table class="cmp guide vs">{head}<tbody>{body}</tbody></table></div>'
 
 # ---------------------------------------------------------------- Sweep's side, the same on every comparison
 PF = {"en": f"{FIRMS_N} futures prop firms ({FIRMS_TXT['en']})", "fr": f"{FIRMS_N} prop firms de futures ({FIRMS_TXT['fr']})", "es": f"{FIRMS_N} prop firms de futuros ({FIRMS_TXT['es']})"}
@@ -270,13 +269,16 @@ for _c in VS: CRUMBS[_c["slug"]] = f"Sweep vs {_c['name']}"
 
 def make_vs(c):
     name = c["name"]
+    SYSTEM_PAGES.add(c["slug"])
     def page(lang, t):
-        hero = page_hero(t, T(f"Sweep vs {name}.", f"Sweep vs {name}.", f"Sweep vs {name}."),
+        hero = ui.hero(t, T("Compare","Comparer","Comparar"), T(f"Sweep vs {name}.", f"Sweep vs {name}.", f"Sweep vs {name}."),
             T(f"Two trading journals built for different traders. What each one does, what it costs, and when {name} is the better pick.",
               f"Deux journaux de trading pensés pour des traders différents. Ce que fait chacun, ce qu’il coûte, et quand {name} est le meilleur choix.",
               f"Dos diarios de trading pensados para traders distintos. Qué hace cada uno, cuánto cuesta y cuándo {name} es la mejor opción."),
-            T("Compare","Comparer","Comparar"))
-        picks = _pick(t, T("Choose Sweep if","Choisis Sweep si","Elige Sweep si"), SWEEP_IF) + _pick(t, T(f"Choose {name} if", f"Choisis {name} si", f"Elige {name} si"), c["them_if"])
+            cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_vs_hero"'))
+        picks = ui.cards([ui.card(t, T("Choose Sweep if","Choisis Sweep si","Elige Sweep si"), None, items=SWEEP_IF, cls="main",
+                                  more=ui.btn(t(CREATE_FREE), SIGNUP, attrs='data-track="signup_vs_pick"')),
+                          ui.card(t, T(f"Choose {name} if", f"Choisis {name} si", f"Elige {name} si"), None, items=c["them_if"])], cols=2)
         S = c["sources"]
         D = checked(name)
         note = T(f"{name} details come from {S['en']}, checked on {D['en']}. Prices in USD, before tax. Something out of date? Write to {EMAIL}. {name} is a trademark of its owner; Sweep is not affiliated with {name}.",
@@ -288,24 +290,23 @@ def make_vs(c):
         diff = [(T("Where Sweep is different","Ce qui distingue Sweep","Lo que distingue a Sweep"), SWEEP_DIFF),
                 (T(f"Where {name} is ahead", f"Là où {name} est en avance", f"Donde {name} va por delante"), [c["ahead"], SYNC_NOTE])]
         article = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in diff)
-        faq = "".join(faq_item(t, q, a) for q, a in c["faq"])
         others = [(o["slug"], T(f"Sweep vs {o['name']}", f"Sweep vs {o['name']}", f"Sweep vs {o['name']}")) for o in VS if o is not c]
-        rel = [("best-trading-journal-for-prop-firms.html",T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms")),("free-trading-journal.html",T("Free trading journal","Journal de trading gratuit","Diario de trading gratis")),
-               ("prop-firm-tracker.html",T("For prop traders","Pour traders prop","Para traders prop")),("import.html",T("Import your trades","Importer tes trades","Importar operaciones")),("pricing.html",T("Sweep pricing","Tarifs de Sweep","Precios de Sweep"))]
-        chips = lambda label, items, top="": (f'<p class="firm-others"{top}><span>{t(label)}</span>' + "".join(f'<a href="{href(lang,s)}">{t(n)}</a>' for s, n in items) + '</p>')
-        b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("The short answer.","La réponse courte.","La respuesta corta."))}</h2></div>'
-             f'<div class="grid g2 vs-picks">{picks}</div></div></section>'
-             f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Side by side.","Côte à côte.","Lado a lado."))}</h2></div>'
-             f'{dated}{_summary(t, name)}{_cmp_table(t, c["rows"], name)}<p class="fine vs-note">{t(note)}</p></div></section>'
-             f'<section class="rule"><div class="wrap narrow"><article class="article">{article}</article></div></section>'
-             f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>{faq}'
-             + chips(T("Compare too","Compare aussi","Compara también"), others, ' style="margin-top:36px"')
-             + chips(T("Related","Voir aussi","Ver también"), rel, ' style="margin-top:12px"') + '</div></section>')
+        band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_vs_card"'))
+        b = (ui.sec(ui.head(t, None, T("The short answer.","La réponse courte.","La respuesta corta.")) + picks, "t", "short")
+             + ui.sec(ui.head(t, None, T("Side by side.","Côte à côte.","Lado a lado.")) + dated + _summary(t, name) + _cmp_table(t, c["rows"], name)
+                      + f'<p class="fine vs-note">{t(note)}</p>' + band, "n", "compare")
+             + ui.sec(f'<article class="article">{article}</article>', "n", "different", width="read")
+             + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, c["faq"])
+                      + chiprow(lang, t, T("Compare too","Compare aussi","Compara también"), others, 40), "n", "faq", width="read"))
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","inLanguage":lang,
                      "mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q, a in c["faq"]]})
         title = t(T(f"Free {name} alternative: Sweep vs {name} (2026)", f"Alternative gratuite à {name} : Sweep vs {name}", f"Alternativa gratis a {name}: Sweep vs {name}"))   # FR / ES: how it's searched there
-        return _fr_nbsp(lang, title, t(c["desc"]), hero + b + final_cta(lang, t), ld)
+        return _fr_nbsp(lang, title, t(c["desc"]), hero + b + ui.final(lang, t), ld)
     return page
+
+def chiprow(lang, t, label, items, top=0):
+    return (f'<div class="chiprow"{f" style=margin-top:{top}px" if top else ""}><span class="eyebrow">{t(label)}</span>'
+            + "".join(f'<a class="chip" href="{href(lang, s)}">{t(n)}</a>' for s, n in items) + "</div>")
 
 # ---------------------------------------------------------------- pillar: best trading journal for prop firm traders
 # TraderSync blocks automated reads of its site: its figures are the ones consistent across independent public listings.
@@ -333,23 +334,24 @@ PILLAR_FAQ = [
 ]
 
 def vs_link(t, lang, slug, name):
-    return f'<p class="firm-others"><a href="{href(lang, slug)}">{t(T(f"Sweep vs {name}, in detail", f"Sweep vs {name}, en détail", f"Sweep vs {name}, en detalle"))} →</a></p>'
+    return f'<div class="links">{ui.go(lang, t, slug, T(f"Sweep vs {name}, in detail", f"Sweep vs {name}, en détail", f"Sweep vs {name}, en detalle"))}</div>'
 
 def choose_section(lang, t):
     """What to look for in a trading journal (was /how-to-choose-a-trading-journal)."""
     from pages14 import CHOOSE
     body = "".join(f'<h3>{t(h)}</h3>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in CHOOSE)
-    return (f'<section class="rule" id="how-to-choose"><div class="wrap narrow"><div class="head"><h2>{t(T("How to choose a trading journal","Bien choisir son journal de trading","Cómo elegir un diario de trading"))}</h2>'
-            f'<p class="lead">{t(T("Five things that matter when you trade evaluations and funded futures accounts.","Cinq choses qui comptent quand tu trades des évaluations et des comptes financés.","Cinco cosas que importan cuando operas evaluaciones y cuentas fondeadas."))}</p></div>'
-            f'<article class="article">{body}</article></div></section>')
+    return ui.sec(ui.head(t, None, T("How to choose a trading journal","Bien choisir son journal de trading","Cómo elegir un diario de trading"),
+                          T("Five things that matter when you trade evaluations and funded futures accounts.","Cinq choses qui comptent quand tu trades des évaluations et des comptes financés.","Cinco cosas que importan cuando operas evaluaciones y cuentas fondeadas."))
+                  + f'<article class="article">{body}</article>', "n", "how-to-choose", width="read")
 
+SYSTEM_PAGES.add("best-trading-journal-for-prop-firms.html")
 def page_best_journal(lang, t):
     from pages8 import FIRMS
-    hero = page_hero(t, T("The best trading journal for prop firm traders (2026).","Le meilleur journal de trading pour les traders de prop firms (2026).","El mejor diario de trading para traders de prop firms (2026)."),
+    hero = ui.hero(t, T("Guide","Guide","Guía"), T("The best trading journal for prop firm traders (2026).","Le meilleur journal de trading pour les traders de prop firms (2026).","El mejor diario de trading para traders de prop firms (2026)."),
         T("Five journals compared on what matters when you trade futures evaluations and funded accounts: price, prop firm rules, how trades get in, and what each one does best.",
           "Cinq journaux comparés sur ce qui compte quand tu trades des évaluations et des comptes financés en futures : le prix, les règles des prop firms, la façon d’ajouter tes trades, et ce que chacun fait de mieux.",
           "Cinco diarios comparados en lo que importa cuando operas evaluaciones y cuentas fondeadas de futuros: el precio, las reglas de las prop firms, cómo entran tus operaciones y lo que cada uno hace mejor."),
-        T("Guide","Guide","Guía"))
+        cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_best_hero"'))
     glance_rows = [
      ("Sweep", T("Yes, no time limit","Oui, sans limite de temps","Sí, sin límite de tiempo"), T("$19/mo","19 $/mois","19 $/mes")),
      ("TradeZella", T("No","Non","No"), T("$35/mo","35 $/mois","35 $/mes")),
@@ -357,11 +359,11 @@ def page_best_journal(lang, t):
      ("TraderSync", T("7-day trial","Essai de 7 jours","Prueba de 7 días"), T("$29.95/mo","29,95 $/mois","29,95 $/mes")),
      ("Edgewonk", T("No","Non","No"), T("$197/yr","197 $/an","197 $/año")),
     ]
-    glance = (f'<div class="cmp-wrap"><table class="cmp glance"><thead><tr><th scope="col">{t(T("Journal","Journal","Diario"))}</th>'
-              f'<th scope="col">{t(T("Free plan","Forfait gratuit","Plan gratis"))}</th><th scope="col">{t(T("Paid plans from","Forfaits payants dès","Planes de pago desde"))}</th></tr></thead><tbody>'
-              + "".join(f'<tr><th scope="row"><a href="#{n.lower()}">{n}</a></th><td>{t(a)}</td><td>{t(b)}</td></tr>' for n, a, b in glance_rows) + '</tbody></table></div>')
-    firms = (f'<p class="firm-others"><span>{t(T("Firm pages","Pages des firmes","Páginas de las firmas"))}</span>'
-             + "".join(f'<a href="{href(lang,s)}">{n}</a>' for s, n in FIRMS) + '</p>')
+    free_l, paid_l = t(T("Free plan","Forfait gratuit","Plan gratis")), t(T("Paid plans from","Forfaits payants dès","Planes de pago desde"))
+    glance = (f'<div class="cmp-wrap"><table class="cmp guide glance"><thead><tr><th scope="col">{t(T("Journal","Journal","Diario"))}</th>'
+              f'<th scope="col">{free_l}</th><th scope="col">{paid_l}</th></tr></thead><tbody>'
+              + "".join(f'<tr><th scope="row"><a href="#{n.lower()}">{n}</a></th><td data-label="{free_l}">{t(a)}</td><td data-label="{paid_l}">{t(b)}</td></tr>' for n, a, b in glance_rows) + '</tbody></table></div>')
+    firms = chiprow(lang, t, T("Firm pages","Pages des firmes","Páginas de las firmas"), [(s, T(n, n, n)) for s, n in FIRMS], 20)
     vs = vs_link(t, lang, "sweep-vs-tradezella.html", "TradeZella")
     journals = (
      _journal(t, 1, "Sweep", T("best for futures prop firm accounts","idéal pour les comptes prop en futures","ideal para cuentas prop de futuros"),
@@ -405,16 +407,12 @@ def page_best_journal(lang, t):
     note = T(f"We make Sweep, so it’s listed first; each section says where another journal is the better fit. Prices in USD, monthly billing unless noted, before tax, from each journal’s public website and help pages, checked on {CHECKED['en']}. Plans change often: confirm on the journal’s site before you buy, and tell us at {EMAIL} if something is out of date. All names are trademarks of their owners.",
              f"On fait Sweep, donc il est en premier ; chaque section dit quand un autre journal convient mieux. Prix en USD, facturation mensuelle sauf mention contraire, avant taxes, tirés du site public et des pages d’aide de chaque journal, vérifiés le {CHECKED['fr']}. Les forfaits changent souvent : confirme sur le site du journal avant d’acheter, et écris-nous à {EMAIL} si une info n’est plus à jour. Tous les noms sont des marques de leurs propriétaires.",
              f"Hacemos Sweep, así que aparece primero; cada sección dice cuándo otro diario encaja mejor. Precios en USD, facturación mensual salvo indicación, antes de impuestos, tomados del sitio público y las páginas de ayuda de cada diario, revisados el {CHECKED['es']}. Los planes cambian a menudo: confírmalo en el sitio del diario antes de comprar y escríbenos a {EMAIL} si algo ya no está al día. Todos los nombres son marcas de sus propietarios.")
-    faq = "".join(faq_item(t, q, a) for q, a in PILLAR_FAQ)
-    rel = [("sweep-vs-tradezella.html",T("Sweep vs TradeZella","Sweep vs TradeZella","Sweep vs TradeZella")),("free-trading-journal.html",T("Free trading journal","Journal de trading gratuit","Diario de trading gratis")),
-           ("prop-firm-tracker.html",T("For prop traders","Pour traders prop","Para traders prop")),("pricing.html",T("Sweep pricing","Tarifs de Sweep","Precios de Sweep"))]
-    b = (f'<section style="padding-top:8px"><div class="wrap narrow"><div class="head"><h2>{t(T("At a glance.","En bref.","De un vistazo."))}</h2></div>{glance}<p class="fine vs-note">{t(note)}</p></div></section>'
-         f'<section class="rule"><div class="wrap narrow"><article class="article">{journals}</article></div></section>'
-         + choose_section(lang, t) +
-         f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Which one should you pick?","Lequel choisir ?","¿Cuál elegir?"))}</h2></div>{ul(t, pick)}</div></section>'
-         f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Questions","Questions","Preguntas"))}</h2></div>{faq}'
-         f'<p class="firm-others" style="margin-top:36px"><span>{t(T("Related","Voir aussi","Ver también"))}</span>'
-         + "".join(f'<a href="{href(lang,s)}">{t(n)}</a>' for s, n in rel) + '</p></div></section>')
+    b = (ui.sec(ui.head(t, None, T("At a glance.","En bref.","De un vistazo.")) + glance + f'<p class="fine vs-note">{t(note)}</p>', "t", "glance")
+         + ui.sec(f'<article class="article">{journals}</article>', "n", "journals", width="read")
+         + choose_section(lang, t)
+         + ui.sec(ui.head(t, None, T("Which one should you pick?","Lequel choisir ?","¿Cuál elegir?")) + ul(t, pick, "list picks")
+                  + f'<div class="cta-row">{ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_best_pick"')}</div>', "n", "pick", width="read")
+         + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, PILLAR_FAQ), "n", "faq", width="read"))
     ld = jsonld({"@context":"https://schema.org","@graph":[
         {"@type":"Article","headline":t(T("The best trading journal for prop firm traders (2026)","Le meilleur journal de trading pour les traders de prop firms (2026)","El mejor diario de trading para traders de prop firms (2026)")),
          "inLanguage":lang,"datePublished":"2026-10-09","dateModified":"2026-10-09","publisher":{"@id":f"https://{DOMAIN}/#org"},"author":{"@type":"Organization","name":"Sweep"}},
@@ -423,4 +421,4 @@ def page_best_journal(lang, t):
             t(T("Sweep, TradeZella, Tradervue, TraderSync and Edgewonk compared for futures prop firm traders: free plans, prices, firm rules and what each does best.",
                 "Sweep, TradeZella, Tradervue, TraderSync et Edgewonk comparés pour les traders de prop firms : forfaits gratuits, prix, règles des firmes et points forts.",
                 "Sweep, TradeZella, Tradervue, TraderSync y Edgewonk comparados para traders de prop firms: planes gratis, precios, reglas de las firmas y puntos fuertes.")),
-            hero + b + final_cta(lang, t), ld)
+            hero + b + ui.final(lang, t), ld)
