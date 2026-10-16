@@ -569,6 +569,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Une alerte par groupe de copies** (question 10 ; `alertLimits`, `copyGroups` dans coach.js ; `prop-alert` dans notify.php) : les comptes copiés ensemble aujourd'hui forment un groupe ; pour un groupe, un type (limite du jour ou drawdown) et un niveau (75 % ou 100 %), une seule alerte, sur le compte qui a le moins de marge (« Apex 2 +2 »). La clé anti-doublon du serveur est celle du groupe. Avant : une alerte par compte, jusqu'à 40 par jour avec 10 comptes copiés. Un compte seul garde la même clé qu'avant.
 - Test : `tests/e2e_prop_alerts_group.py` (3 comptes copiés + 1 seul → 2 alertes ; échouait avec 4).
 
+### Brief 00 — phase 1, lot 1.2-l (nombre maximum de payouts), 16 oct.
+- **Déjà appliqué depuis le 14 oct.** (brief 02, partie 3 ; l'analyse date d'avant) : `payout_max_n` du catalogue (Apex 6, Lucid Flex 5, MFFU Builder 5) bloque « Prêt » dans l'app (`SweepPayout.status`, nav.js) et sur le serveur (`GameV2::payoutStatus`) ; testé par `e2e_payout_firms` (« every payout made ») et `payout_parity.php`.
+- **Corrigé** : une fois tous les payouts faits, le compte disait aussi « Encore 5 jours gagnants de 250 $ et + », comme si un payout restait possible. Il ne dit plus que « Tu as fait les 6 payouts que ce compte permet » (et la perte max dépassée, s'il y a lieu). Test : `e2e_payout_firms` (échouait sur 13 comptes).
+- **Reste** : le cycle de 14 jours de MFFU Pro attend la confirmation de la règle (plan, 1.2-l).
+
 ### Brief 02 — partie 14 (petits détails), 14 oct.
 - **Données d'exemple** : déjà fait depuis B16 (`SweepUndo.demo`, la fenêtre de l'app donne le vrai nombre de trades) ; rien de changé.
 - **Réglages** : déjà en 5 groupes repliables depuis B15 (Compte, Discipline, Notifications, Données, et « Avancé » ajouté par le brief 03), « Déconnexion » seule tout en bas (`e2e_clarity`), chaque champ nommé (`e2e_a11y_names`) ; seul changement : le mot « Déconnexion » centré dans son bouton (il était à gauche, `nav.css`).

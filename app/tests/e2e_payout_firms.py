@@ -6,6 +6,7 @@ limit option included, Apex's accounts bought before March 2026 (apex-legacy) in
  - the account's payout rules (SweepPresets.rulesOf) match the catalogue (winning days, traded days, minimum, cap, ladder,
    safety net, number of payouts, split);
  - 8 scenarios: everything met; one day short; one big day; after a paid payout (a new cycle, the next step of the ladder);
+   (every payout made: only « You made the N payouts this account allows » is said, 16 Oct.)
    after a request still waiting (same: the request restarts the count and takes its step); a planned payout (not asked
    yet: nothing restarts); every payout of the firm already made; a breached account.
 « Ready », the amount that can be asked for and each condition are computed here by a model of the firms' rules written
@@ -145,6 +146,11 @@ def main():
         try { const r = SweepPayout.status({ id: 'acc', starting_balance_c: start, phase: 'funded', money_type: 'funded', rules: ru }); return r && r.ready; }
         finally { [S.trades, S.payouts] = keep; } }""", [ru, start, br_tr])
       if st is not False: mis['breached'] = st
+      if mx:   # every payout made: that is the one thing said (not « 5 more winning days » for a payout that cannot come)
+        td = pg.evaluate("""([ru, start, pays]) => { const keep = [S.trades, S.payouts]; S.trades = []; S.payouts = pays;
+          try { const r = SweepPayout.status({ id: 'acc', starting_balance_c: start, phase: 'funded', money_type: 'funded', rules: ru }); return r && r.todo.map((x) => x.k); }
+          finally { [S.trades, S.payouts] = keep; } }""", [ru, start, [P(i, 'paid', 100, 'm') for i in range(mx)]])
+        if td != ['maxn']: mis['every payout made: what is said'] = td
       ok(not mis, f'{tag}: {len(cases) + 1} scenarios ({summary})' + (f' — {json.dumps(mis)}' if mis else ''))
     srv = json.loads(subprocess.run(['php', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'payout_parity.php')], input=json.dumps(parity), capture_output=True, text=True, check=True).stdout)
     off = [(c['tag'], c['app'], s2) for c, s2 in zip(parity, srv) if c['app'] != s2]

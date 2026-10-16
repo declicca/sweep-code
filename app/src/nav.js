@@ -2846,7 +2846,7 @@ window.SweepMO = window.SweepMO || class {
         const x = Math.max(r.payout_min_bal_c ? r.payout_min_bal_c + minReq - bal : minReq - (bal - start), r.payout_max_pct ? Math.ceil(minReq * 100 / r.payout_max_pct) - (bal - start) : 0);
         if (x > 0 && !(bb && x <= r.payout_min_bal_c + minReq - bal)) todo.push({ k: 'amt', text: fill('n_amt', 0, { v: up(x), m: $u(minReq) }) });
       }
-      if (bad('maxn')) todo.push({ k: 'maxn', text: fill('n_maxn', 0, { n: r.payout_max_n }) });
+      if (bad('maxn')) todo.splice(0, todo.length, ...todo.filter((x) => x.k === 'brk'), { k: 'maxn', text: fill('n_maxn', 0, { n: r.payout_max_n }) });   // no payout left: that is the one thing to say (« 5 more winning days » would promise one)
     }
     return { ready, conds, avail, last, done, max_n: r.payout_max_n || null, todo, pct: ready ? 100 : Math.min(99, Math.round(Math.min(...conds.map((c) => c.frac)) * 100)) };   // (the server: GameV2::payoutStatus)
   }

@@ -2,6 +2,7 @@
 
 Une ligne par livraison, la plus récente en haut. Le détail (règles, causes, tests) : `CONTEXTE-APP.md`. Ce fichier n'est pas servi en ligne (`.htaccess` refuse tous les `.md`).
 
+- **16 oct. 2026 — Brief 00, phase 1, lot 1.2-l.** Le nombre maximum de payouts du catalogue était déjà appliqué ; une fois tous les payouts faits, le compte ne dit plus « Encore 5 jours gagnants… », seulement « Tu as fait les 6 payouts que ce compte permet ».
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-j.** En copy trading, une seule alerte de limite par groupe de comptes copiés (sur le compte le plus fragile, « Apex 2 +2 »), au lieu d'une par compte.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-i.** Plus de « + » dans les barres sur la page de démarrage (il ouvrait une fenêtre en anglais, maintenant traduite). « Trade enregistré · … » au lieu de « Trade saved · … ». Import : « Effacer » au lieu de « Clear », prix du 6E au pip dans l'aperçu. Le « ? » de la première question et le badge « Argent réel » ne se coupent plus.
 - **15 oct. 2026 — « Débriefer ma journée » sans les trades.** Case « Inclure mes trades du jour » (cochée par défaut) et « Ta journée en quelques mots (facultatif) » : décochée, Sweep AI débriefe le plan, la patience et les émotions sans trade ni P&L ; un jour sans trade se débriefe dès quelques mots.
