@@ -77,10 +77,12 @@ def sec_story(lang, t):
 
 def sec_disc(lang, t):
     """A showcase across the page: the day, swept."""
+    heads = [L3("Progress you can see", "Des progrès qui se voient", "Progresos que se ven"), L3("Never a penalty", "Jamais de punition", "Nunca un castigo"),
+             L3("Private by default", "Privé par défaut", "Privado por defecto")]
     pts = [L3("Streaks, missions and a weekly boss turn good habits into progress.","Streaks, missions et un boss chaque semaine : tes bonnes habitudes deviennent du progrès.","Rachas, misiones y un jefe semanal convierten los buenos hábitos en progreso."),
            L3("A rough session never blocks your day. It shows up in your discipline score, not as a penalty.","Une séance difficile ne bloque jamais ta journée. Elle compte dans ton score de discipline, pas comme une punition.","Una mala sesión nunca bloquea tu día. Cuenta en tu puntuación de disciplina, no como castigo."),
            L3("Leagues and crews are optional. Your P&L always stays private.","Ligues et crews optionnels. Ton P&L reste toujours privé.","Ligas y crews opcionales. Tu P&L siempre es privado.")]
-    points = '<ul class="points stagger">' + "".join(f"<li>{t(x)}</li>" for x in pts) + "</ul>"
+    points = '<ul class="points stagger">' + "".join(f"<li><b>{t(h)}</b>{t(x)}</li>" for h, x in zip(heads, pts)) + "</ul>"
     shot = frame_d("v6-22-today-swept-d.webp", t(L3("Today: plan, execution and review done, the day swept, sample data","Aujourd’hui : plan, exécution et revue faits, journée balayée, données d’exemple","Hoy: plan, ejecución y revisión hechos, día barrido, datos de ejemplo")),
                    m="v6-22-today-swept-m.webp", sizes="(max-width: 1067px) 92vw, 1320px", t=t, cls="reveal zoom")
     return sec(head(t, L3("Discipline","Discipline","Disciplina"), L3("Sweep your day.","Balaye ta journée.","Barre tu día."),

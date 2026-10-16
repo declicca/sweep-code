@@ -131,7 +131,10 @@ def stats(items, caption="", note=""):
     return f'{cap}<dl class="stats reveal" style="--n:{len(items)}">{dl}</dl>'
 
 def qa(t, items, more=""):
-    return '<div class="qa">' + "".join(faq_item(t, q, a) for q, a in items) + (f'<p class="more-q">{more}</p>' if more else "") + "</div>"
+    """Questions: two columns on large screens (the first half, then the second: the order stays the same on phones)."""
+    h = (len(items) + 1) // 2
+    cols = "".join('<div class="qa-col">' + "".join(faq_item(t, q, a) for q, a in part) + "</div>" for part in (items[:h], items[h:]) if part)
+    return f'<div class="qa{" qa2" if len(items) > 1 else ""}">' + cols + (f'<p class="more-q">{more}</p>' if more else "") + "</div>"
 
 def band(title, text, cta):
     """A call to action after a table: one line, one button."""
@@ -144,7 +147,7 @@ def final(lang, t, title=None, note=None, label=None):
     """The site's closing block: one promise, one action. Only /100 keeps its own words (title, note, button)."""
     return (f'<section class="final s-a"><div class="c c-wide"><div class="stage reveal">'
             f'<span class="mark" aria-hidden="true">{ANIM_MARK}</span>'
-            f'<h2>{t(title or T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}</h2>'
+            f'<h2>{words(t(title or T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar.")))}</h2>'
             f'<div class="cta-row">{btn(label or t(CREATE_FREE), SIGNUP, lg=True)}</div>'
             f'<p class="reassure">{t(note or T("Free forever · 60 days of Pro · No card","Gratuit pour toujours · 60 jours de Pro · Sans carte","Gratis para siempre · 60 días de Pro · Sin tarjeta"))}</p>'
             f'</div></div></section>')

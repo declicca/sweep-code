@@ -258,6 +258,9 @@ details>summary::-webkit-details-marker{display:none}
 .qa .ans{padding:0 48px 22px 0;color:var(--muted)}
 .qa .ans p+p{margin-top:12px}
 .qa .more-q{margin-top:28px}
+.qa2{display:grid;column-gap:56px}
+.qa-col{min-width:0}
+@media (min-width:1068px){.qa2{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.qa2 .more-q{grid-column:1/-1}.read:has(.qa2){max-width:none}}
 details::details-content{block-size:0;overflow:clip;transition:block-size var(--t-mid) var(--spring),content-visibility var(--t-mid) allow-discrete}
 details[open]::details-content{block-size:auto}
 
@@ -480,8 +483,11 @@ table.reltbl tr.past .st{opacity:.55}
 .tpl .card.media .cm img{border-radius:var(--r1) var(--r1) 0 0;box-shadow:0 0 0 1px var(--edge),0 20px 40px -24px rgba(0,0,0,.6)}
 
 /* ---- [pages: index.html how-it-works.html] the day's three rings: they close one by one with the scroll (site.js), already closed without it */
-.rings{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:20px 28px;margin:40px auto 0}
-.split .rings{justify-content:flex-start;margin:32px 0 0}
+.rings{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;align-items:start;gap:24px 28px;margin:40px auto 0}
+.rings .swept{grid-column:1/-1;justify-self:center}
+.split .rings{justify-content:start;margin:32px 0 0}
+.split .rings .swept{justify-self:start}
+.show .rings+.points{margin-top:72px}
 .ring{display:grid;justify-items:center;gap:10px}
 .ring svg{width:72px;height:72px;transform:rotate(-90deg)}
 .ring circle{fill:none;stroke-width:6}
@@ -726,7 +732,7 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
 .related .head{margin-bottom:28px}
 
 /* ---- the closing block: one promise, one action */
-.final{position:relative;text-align:center;overflow:clip}
+.final{position:relative;text-align:center;overflow:clip;padding-bottom:var(--sec-t)}
 .final .stage{position:relative;padding:clamp(56px,40px + 4vw,96px) var(--gutter);border-radius:var(--r5);background:radial-gradient(70% 90% at 50% 0%,color-mix(in srgb,var(--blue) 18%,transparent),transparent 70%),var(--glass);box-shadow:var(--shadow-2)}
 .final .mark{width:46px;height:auto;margin:0 auto 28px;color:var(--text)}
 .final .mark svg{width:46px;height:auto;margin-inline:auto;overflow:visible}
@@ -958,7 +964,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 @layer motion{
 @media (prefers-reduced-motion:no-preference){
   @view-transition{navigation:auto}
-  .nav{view-transition-name:sweep-nav}
+  .nav .wrap{view-transition-name:sweep-nav}   /* on the pill itself: on .nav it would cut the pill's blur off from the page */
   ::view-transition-group(sweep-nav),::view-transition-old(sweep-nav),::view-transition-new(sweep-nav){animation:none}
   ::view-transition-old(root){animation:vt-out .2s var(--spring) both}
   ::view-transition-new(root){animation:vt-in .55s var(--spring) both}
@@ -996,6 +1002,18 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
   .final .mark .k-swept{stroke-dasharray:22;stroke-dashoffset:22;transition:stroke-dashoffset .6s var(--spring) .1s}
   .final .mark.in .k-candle{transform:none}
   .final .mark.in .k-swept{stroke-dashoffset:0}
+  /* the closing block arrives: the stage rises and grows, its glow lights up, the title word by word, then the button */
+  .final .stage{isolation:isolate}
+  .final .stage::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;background:radial-gradient(60% 80% at 50% 0%,color-mix(in srgb,var(--blue) 24%,transparent),transparent 70%);pointer-events:none;transition:opacity 1.2s var(--spring) .15s,transform 1.2s var(--spring) .15s}
+  .io .final .stage:not(.in)::before{opacity:0;transform:scale(.9)}
+  .io .final .stage.reveal:not(.in){transform:translateY(48px) scale(.96)}
+  .final h2 .w{display:inline-block;overflow:clip;overflow-clip-margin:.2em;vertical-align:top;padding-bottom:.12em;margin-bottom:-.12em}
+  .final h2 .w>span{display:inline-block;transition:transform var(--t-slow) var(--spring);transition-delay:calc(.2s + var(--d,0s))}
+  .io .final .stage:not(.in) h2 .w>span{transform:translateY(130%)}   /* far enough that no i-dot shows under the line */
+  .final .cta-row,.final .reassure{transition:opacity var(--t-slow) var(--spring),transform var(--t-slow) var(--spring)}
+  .final .cta-row{transition-delay:.5s}.final .reassure{transition-delay:.6s}
+  .io .final .stage:not(.in) .cta-row{opacity:0;transform:translateY(16px) scale(.94)}
+  .io .final .stage:not(.in) .reassure{opacity:0;transform:translateY(10px)}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;scroll-behavior:auto!important}}
 }

@@ -91,6 +91,9 @@ for f in os.listdir(os.path.join(STATIC,"fonts")): shutil.copy(os.path.join(STAT
 shutil.copytree(os.path.join(STATIC,"img"), os.path.join(DIST,"img"))
 for d in ("icons","social","video","press","templates"): shutil.copytree(os.path.join(STATIC,d), os.path.join(DIST,d))
 shutil.copy(os.path.join(STATIC,"site.webmanifest"), os.path.join(DIST,"site.webmanifest"))
+def _text(body):
+    """A page's visible text, without tags, scripts or styles: what its sitemap date follows."""
+    return _re.sub(r"\s+", " ", _re.sub(r"<[^>]+>", " ", _re.sub(r"<script\b.*?</script>|<style\b.*?</style>", " ", body, flags=_re.S))).strip()
 MAIN = {p: hashlib.sha256() for p in PAGES}   # each page's main content, in the 3 languages: its sitemap date changes only when this does
 for lang in LANGS:
     t = lambda d, L=lang: d[L]
@@ -103,7 +106,7 @@ for lang in LANGS:
         body = add_xlinks(lang, t, page, body)
         body = add_links(lang, page, body)
         body = nbsp(lang, body)
-        MAIN[page].update(body.encode("utf-8"))
+        MAIN[page].update(_text(body).encode("utf-8"))   # the visible text: a markup or style change keeps the page's date
         open(dest, "w").write(shell(lang, page, title, desc, body, t, ld))
 import datetime
 BUILD_DATE = datetime.date.today().isoformat()
