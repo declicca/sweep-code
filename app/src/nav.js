@@ -4217,9 +4217,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { onbT: 'Three steps and you’re trading.', onbS: 'Your account, your plan for the day, your first trade: about two minutes.', st1: 'Your account', st2: 'Your plan', st3: 'Your first trade', wel: 'Welcome', feeN: '${a} of fees added to your expenses', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
-    fr: { onbT: 'Trois étapes et tu trades.', onbS: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.', st1: 'Ton compte', st2: 'Ton plan', st3: 'Ton premier trade', wel: 'Bienvenue', feeN: '{a} $ de frais ajoutés à tes dépenses', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
-    es: { onbT: 'Tres pasos y operas.', onbS: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.', st1: 'Tu cuenta', st2: 'Tu plan', st3: 'Tu primera operación', wel: 'Bienvenido', feeN: '{a} $ de comisiones añadidas a tus gastos', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
+    en: { later: 'Later', instGo: 'Install', pushT: 'Turn on your reminders', pushS: 'Your plan before the open, your review after the session, your Friday recap: Sweep reminds you on this phone.', pushGo: 'Turn on', planT: 'Your plan before your next trade', planS: 'Your last 3 sessions were traded without a plan. 30 seconds before the open: your bias and your max loss.', planGo: 'Make my plan', onbT: 'Three steps and you’re trading.', onbS: 'Your account, your plan for the day, your first trade: about two minutes.', st1: 'Your account', st2: 'Your plan', st3: 'Your first trade', wel: 'Welcome', feeN: '${a} of fees added to your expenses', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
+    fr: { later: 'Plus tard', instGo: 'Installer', pushT: 'Active tes rappels', pushS: 'Ton plan avant l’ouverture, ta revue après la séance, ton bilan du vendredi : Sweep te les rappelle sur ce téléphone.', pushGo: 'Activer', planT: 'Ton plan avant ton prochain trade', planS: 'Tes 3 dernières séances se sont faites sans plan. 30 secondes avant l’ouverture : ton biais et ta perte max.', planGo: 'Faire mon plan', onbT: 'Trois étapes et tu trades.', onbS: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.', st1: 'Ton compte', st2: 'Ton plan', st3: 'Ton premier trade', wel: 'Bienvenue', feeN: '{a} $ de frais ajoutés à tes dépenses', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
+    es: { later: 'Más tarde', instGo: 'Instalar', pushT: 'Activa tus recordatorios', pushS: 'Tu plan antes de la apertura, tu revisión tras la sesión, tu resumen del viernes: Sweep te lo recuerda en este teléfono.', pushGo: 'Activar', planT: 'Tu plan antes de tu próxima operación', planS: 'Tus 3 últimas sesiones se operaron sin plan. 30 segundos antes de la apertura: tu sesgo y tu pérdida máxima.', planGo: 'Hacer mi plan', onbT: 'Tres pasos y operas.', onbS: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.', st1: 'Tu cuenta', st2: 'Tu plan', st3: 'Tu primera operación', wel: 'Bienvenido', feeN: '{a} $ de comisiones añadidas a tus gastos', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return null; };
@@ -4315,50 +4315,97 @@ window.SweepMO = window.SweepMO || class {
   new window.SweepMO(() => { try { pass(); install(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 
 
-  // 7. after a trade, once (and only if not installed): add to home screen — the session's one window. Only on a phone, and
-  // never on the day of sign-up (audit of 16 Oct.: it hid the coach's « Trade saved » after the very first trade): from the
-  // 2nd day of use, the sign-up day and this device's first day both before today
+  // 7. suggestions « do it now » (16 Oct., step 2 of the announcements): something useful not done yet, offered with the button
+  // that does it — one at a time, the session's one window, only on a phone and from the 2nd day of use (the sign-up day and
+  // this device's first day both before today; audit of 16 Oct.: never over the coach after the very first trade). In order:
+  // Sweep on the home screen (Android / Chrome: « Install » installs it; iPhone: the 3 gestures, Apple lets no page do it), the
+  // reminders on this phone, a plan before the next session after 3 sessions without one. « Later »: not before 7 days; each
+  // one 3 times at most on this device. Checked once a few seconds after the app opens, and after each new trade.
   const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   const nyDay = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const nowDay = () => (typeof todayStr === 'function' ? todayStr() : nyDay(Date.now()));
   function secondDay() {
-    const now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
+    const now = nowDay();
     let first = LS('sw.day0'); if (!first) { first = now; LS('sw.day0', now); }
     const c = S.me && S.me.created_at;
     const ms = c == null || c === '' ? NaN : /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z'));
     return first < now && (!isFinite(ms) || nyDay(ms) < now);
   }
   const phone = () => !!(window.matchMedia && matchMedia('(pointer: coarse)').matches) && innerWidth < 900;
-  let seenTrades = null, forced = false;
-  function install() {
+  let bip = null;   // Chrome's own install prompt, kept for the « Install » button
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); bip = e; });
+  addEventListener('appinstalled', () => { bip = null; LS('sw.installShown', '1'); });
+  const SG = () => { try { return JSON.parse(LS('sw.sugg') || '{}') || {}; } catch (e) { return {}; } };
+  const sgSet = (id, f) => { const all = SG(), r = all[id] || {}; f(r); all[id] = r; LS('sw.sugg', JSON.stringify(all)); };
+  const sgOk = (id) => { const r = SG()[id] || {}; return !r.done && (r.n || 0) < 3 && !(r.until && r.until > Date.now()); };
+  const planOk = (j) => !!(j && j.pre && j.pre.bias && (j.pre.bias === 'no_trade' || parseFloat(String(j.pre.max_loss || '').replace(/[^0-9.]/g, '')) > 0));
+  function noPlanRun() {   // the last 3 sessions with trades had no plan, and none yet for today
+    const now = nowDay(), days = [...new Set((S.trades || []).filter((x) => !x.demo && x.date < now).map((x) => x.date))].sort().slice(-3);
+    const jr = (d) => (typeof getDoc === 'function' ? getDoc('journals', d) : null);
+    return days.length === 3 && days.every((d) => !planOk(jr(d))) && !planOk(jr(now));
+  }
+  async function pick(force) {
+    if (force) return 'install';
+    if (sgOk('install') && LS('sw.installShown') !== '1' && !standalone()) return 'install';
+    if (sgOk('push') && window.SweepNotify && SweepNotify.push) { const p = await SweepNotify.push.state().catch(() => null); if (p && p.available && p.can && !p.on) return 'push'; }
+    if (sgOk('plan') && noPlanRun()) return 'plan';
+    return '';
+  }
+  let seenTrades = null, forced = false, loadT = 0, busy = false;
+  function install() {   // called on every change of the page: cheap unless there is something new
     if (typeof S === 'undefined' || !Array.isArray(S.trades)) return;
     const n = S.trades.filter((x) => !x.demo).length;
-    if (seenTrades === null) { seenTrades = n; if (!LS('sw.day0')) LS('sw.day0', typeof todayStr === 'function' ? todayStr() : nyDay(Date.now())); return; }
-    if (n <= seenTrades) { seenTrades = n; return; }
-    seenTrades = n;
-    if (LS('sw.installShown') === '1' || standalone() || document.querySelector('.nav-inst')) return;
-    if (!forced && (!phone() || !secondDay())) return;
-    forced = false;
-    try { if (sessionStorage.getItem('sw.modal') === '1') return; sessionStorage.setItem('sw.modal', '1'); } catch (x) { /* private mode */ }
-    LS('sw.installShown', '1');
+    if (seenTrades === null) { seenTrades = n; if (!LS('sw.day0')) LS('sw.day0', nowDay()); if (!loadT) loadT = setTimeout(() => suggest(false), 5000); return; }
+    if (n <= seenTrades && !forced) { seenTrades = n; return; }
+    seenTrades = n; suggest(forced); forced = false;
+  }
+  async function suggest(force) {
+    if (busy || document.querySelector('.nav-inst')) return;
+    if (!force && (!phone() || !secondDay() || !S.me)) return;
+    try { if (!force && sessionStorage.getItem('sw.modal') === '1') return; } catch (x) { /* private mode */ }
+    busy = true; let id = ''; try { id = await pick(force); } finally { busy = false; }
+    if (!id || document.querySelector('.nav-inst, #gSheet.open, .nav-am.open, #tkSlide.open')) return;
+    try { if (!force && sessionStorage.getItem('sw.modal') === '1') return; sessionStorage.setItem('sw.modal', '1'); } catch (x) { /* private mode */ }
+    sgSet(id, (r) => { r.n = (r.n || 0) + 1; });
+    show(id);
+  }
+  const SH_I = '<svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  const ADD_I = '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>';
+  const DOT_I = '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
+  const OK_I = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
+  const BELL_I = '<svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
+  const PLAN_I = '<svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h11l-2 4 2 4H6"/></svg>';
+  function show(id) {
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const step = (n2, ic, txt) => `<li><span class="nav-inst-n">${n2}</span><span class="nav-inst-ic">${ic}</span><span>${txt}</span></li>`;
-    const SH_I = '<svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
-    const ADD_I = '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>';
-    const DOT_I = '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
-    const OK_I = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
-    const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-inst open';
-    const el = document.createElement('aside'); el.className = 'nav-dlg nav-inst open'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
-    el.innerHTML = `<div class="nav-dlg-in nav-inst-in"><div class="nav-inst-app" aria-hidden="true"><img src="icons/icon-192.png" alt="" onerror="this.remove()"></div><h2>${t('instT')}</h2><p class="muted">${t('instS')}</p>
-      <div class="seg nav-inst-seg"><button type="button" class="${ios ? 'on' : ''}" data-inst="ios">${t('ios')}</button><button type="button" class="${ios ? '' : 'on'}" data-inst="and">${t('and')}</button></div>
+    const head = id === 'install' ? `<div class="nav-inst-app" aria-hidden="true"><img src="icons/icon-192.png?v=2" alt="" onerror="this.remove()"></div><h2>${t('instT')}</h2><p class="muted">${t('instS')}</p>`
+      : `<div class="nav-inst-app nav-inst-sg" aria-hidden="true">${id === 'push' ? BELL_I : PLAN_I}</div><h2>${t(id + 'T')}</h2><p class="muted">${t(id + 'S')}</p>`;
+    const body = id !== 'install' || bip ? '' : `<div class="seg nav-inst-seg"><button type="button" class="${ios ? 'on' : ''}" data-inst="ios">${t('ios')}</button><button type="button" class="${ios ? '' : 'on'}" data-inst="and">${t('and')}</button></div>
       <ol class="nav-inst-l" data-for="ios" ${ios ? '' : 'hidden'}>${step(1, SH_I, t('i1'))}${step(2, ADD_I, t('i2'))}${step(3, OK_I, t('i3'))}</ol>
-      <ol class="nav-inst-l" data-for="and" ${ios ? 'hidden' : ''}>${step(1, DOT_I, t('a1'))}${step(2, ADD_I, t('a2'))}${step(3, OK_I, t('a3'))}</ol>
-      <button type="button" class="btn primary nav-am-save" data-inst-ok>${t('ok')}</button></div>`;
+      <ol class="nav-inst-l" data-for="and" ${ios ? 'hidden' : ''}>${step(1, DOT_I, t('a1'))}${step(2, ADD_I, t('a2'))}${step(3, OK_I, t('a3'))}</ol>`;
+    const go = id === 'install' ? (bip ? t('instGo') : t('ok')) : t(id + 'Go');
+    const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-inst open';
+    const el = document.createElement('aside'); el.className = 'nav-dlg nav-inst open'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', ''); el.dataset.sg = id;
+    el.innerHTML = `<div class="nav-dlg-in nav-inst-in">${head}${body}<button type="button" class="btn primary nav-am-save" data-inst-ok>${go}</button><button type="button" class="link nav-inst-later" data-inst-later>${t('later')}</button></div>`;
     document.body.append(scrim, el);
-    const done = () => document.querySelectorAll('.nav-inst').forEach((x) => x.remove());
-    scrim.addEventListener('click', done); el.querySelector('[data-inst-ok]').addEventListener('click', done);
+    const close = () => document.querySelectorAll('.nav-inst').forEach((x) => x.remove());
+    const later = () => { sgSet(id, (r) => { r.until = Date.now() + 7 * 864e5; }); close(); };
+    scrim.addEventListener('click', later); el.querySelector('[data-inst-later]').addEventListener('click', later);
+    el.querySelector('[data-inst-ok]').addEventListener('click', async () => {
+      close();
+      if (id === 'install') {
+        if (!bip) { sgSet(id, (r) => { r.done = true; }); return; }   // the gestures read: not asked again on this device
+        const e = bip; bip = null;
+        try { e.prompt(); const c = await e.userChoice; if (c && c.outcome === 'accepted') { LS('sw.installShown', '1'); sgSet(id, (r) => { r.done = true; }); } else sgSet(id, (r) => { r.until = Date.now() + 7 * 864e5; }); } catch (x) { /* the browser said no */ }
+      } else if (id === 'push') {
+        const r = window.SweepNotify && SweepNotify.push ? await SweepNotify.push.on().catch(() => null) : null;
+        if (r && r.on) sgSet(id, (x) => { x.done = true; }); else location.hash = '#settings';   // refused: Settings says why
+      } else if (id === 'plan') { sgSet(id, (x) => { x.done = true; }); if (window.SweepGame && SweepGame.openPlan) SweepGame.openPlan(); }
+    });
     el.querySelectorAll('[data-inst]').forEach((b) => b.addEventListener('click', () => { el.querySelectorAll('[data-inst]').forEach((x) => x.classList.toggle('on', x === b)); el.querySelectorAll('.nav-inst-l').forEach((l) => { l.hidden = l.dataset.for !== b.dataset.inst; }); }));
   }
-  window.SweepInstall = { show: () => { seenTrades = -1; forced = true; LS('sw.installShown', '0'); try { sessionStorage.removeItem('sw.modal'); } catch (e) { /* private */ } install(); } };
+  window.SweepInstall = { show: () => { forced = true; LS('sw.installShown', '0'); try { sessionStorage.removeItem('sw.modal'); } catch (e) { /* private */ } suggest(true); },
+    suggest: () => suggest(false), state: SG };
 })();
 
 /* ───────────── Delivery 2 · expected gestures and clarity ─────────────
