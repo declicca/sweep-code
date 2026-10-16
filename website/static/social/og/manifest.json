@@ -265,6 +265,20 @@
    "date": null
   }
  },
+ "trading-journal-guide.html": {
+  "en": {
+   "alt": "How to keep a trading journal · The complete guide: what to record, the numbers, the review",
+   "date": null
+  },
+  "fr": {
+   "alt": "Tenir un journal de trading · Le guide complet : quoi noter, les chiffres, la revue",
+   "date": null
+  },
+  "es": {
+   "alt": "Cómo llevar un diario de trading · La guía completa: qué anotar, las cifras, la revisión",
+   "date": null
+  }
+ },
  "ninjatrader.html": {
   "en": {
    "alt": "NinjaTrader 8 → Sweep · Free add-on: your trades arrive on their own",

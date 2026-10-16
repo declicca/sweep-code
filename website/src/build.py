@@ -27,7 +27,7 @@ PAGES = {"index.html":page_home,"features.html":page_features,"ai.html":page_ai,
 PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calculator.html":page_roi,"payout-calculator.html":page_payoutcalc,
               "futures-contracts.html":pages12.page_contracts,"release-dates.html":pages13.page_release_hub,"glossary.html":pages13.page_glossary,
               "futures-market-hours.html":pages13.page_hours,"press-kit.html":pages13.page_press,
-              "trading-templates.html":pages14.page_templates,"trading-journal-routine.html":pages14.page_routine,
+              "trading-templates.html":pages14.page_templates,"trading-journal-routine.html":pages14.page_routine,"trading-journal-guide.html":pages14.page_journal_guide,
               "best-trading-journal-for-prop-firms.html":pages17.page_best_journal})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
 PAGES["prop-firms/index.html"] = pages18.page_hub

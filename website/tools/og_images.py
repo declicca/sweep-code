@@ -55,6 +55,8 @@ def entries():
          T("Every account, its rules and where it stands", "Chaque compte, ses règles et où il en est", "Cada cuenta, sus reglas y cómo va")),
         ("payout-tracker.html", T("Payout tracker", "Suivi des payouts", "Seguimiento de payouts"),
          T("From request to paid, and your real net", "De la demande au paiement, et ton vrai net", "De la solicitud al pago, y tu neto real")),
+        ("trading-journal-guide.html", T("How to keep a trading journal", "Tenir un journal de trading", "Cómo llevar un diario de trading"),
+         T("The complete guide: what to record, the numbers, the review", "Le guide complet : quoi noter, les chiffres, la revue", "La guía completa: qué anotar, las cifras, la revisión")),
         ("ninjatrader.html", T("NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep"),
          T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas"))):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))

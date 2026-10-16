@@ -269,7 +269,7 @@ META_SEO = {
 
 # breadcrumb: Home › Section › Page (the section only where a hub page lists the page)
 CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html")
-GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "trading-journal-routine.html")
+GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "trading-journal-guide.html")
 def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
@@ -462,6 +462,7 @@ REL_INFO = {
  "prop-firm-profit-targets.html": (T("Profit targets and max loss","Objectifs et perte max","Objetivos y pérdida máx."), T("Every account size, firm by firm.","Chaque taille de compte, firme par firme.","Cada tamaño de cuenta, firma por firma.")),
  "guides.html": (T("All guides","Tous les guides","Todas las guías"), T("Prop firm rules compared, and journaling.","Règles des prop firms comparées, et journal.","Reglas de prop firms comparadas, y diario.")),
  "trading-journal-routine.html": (T("A daily journal routine","Une routine de journal","Una rutina de diario"), T("Before, during and after the session.","Avant, pendant et après la séance.","Antes, durante y después de la sesión.")),
+ "trading-journal-guide.html": (T("The trading journal guide","Le guide du journal de trading","La guía del diario de trading"), T("What to record, the numbers, the review.","Quoi noter, les chiffres, la revue.","Qué anotar, las cifras, la revisión.")),
  "best-trading-journal-for-prop-firms.html": (T("Best trading journal for prop firms","Meilleur journal pour prop firms","Mejor diario para prop firms"), T("Five journals compared.","Cinq journaux comparés.","Cinco diarios comparados.")),
  "futures-contracts.html": (T("Contract specs","Fiches contrats","Fichas de contratos"), T("Tick values for NQ, ES, CL, GC and more.","Valeurs de tick NQ, ES, CL, GC et plus.","Valores de tick de NQ, ES, CL, GC y más.")),
  "futures-market-hours.html": (T("Futures market hours","Heures des marchés futures","Horario de los futuros"), T("Sessions in your time zone.","Les sessions dans ton fuseau.","Las sesiones en tu zona horaria.")),

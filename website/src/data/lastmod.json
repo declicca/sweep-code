@@ -128,12 +128,12 @@
   "hash": "0c98c660d5fbc2b2"
  },
  "glossary.html": {
-  "date": "2026-10-15",
-  "hash": "de0b86c27e882f9e"
+  "date": "2026-10-16",
+  "hash": "1feada3cacc48a99"
  },
  "guides.html": {
-  "date": "2026-10-15",
-  "hash": "153eb798ee166a0c"
+  "date": "2026-10-16",
+  "hash": "d16eb91c3a6143b8"
  },
  "how-it-works.html": {
   "date": "2026-10-15",
@@ -334,6 +334,10 @@
  "tools.html": {
   "date": "2026-10-15",
   "hash": "238c0866935c79f9"
+ },
+ "trading-journal-guide.html": {
+  "date": "2026-10-16",
+  "hash": "b86418f78967f740"
  },
  "trading-journal-routine.html": {
   "date": "2026-10-15",

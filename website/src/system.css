@@ -458,6 +458,7 @@ table.reltbl tr.past .st{opacity:.55}
 .term dt{font-size:var(--fs-h3);font-weight:600;line-height:1.3;letter-spacing:-.01em}
 .term dd{margin-top:6px;color:var(--muted)}
 .term:target dt{color:var(--blue-text)}
+.gl-more{color:var(--blue-text);text-decoration:none;font-weight:500;white-space:nowrap}
 
 /* ---- [pages: futures-market-hours.html] the clock: New York, your time, what's open */
 .clock dd small{display:block;margin-top:6px;font:400 13px/1.4 var(--font);color:var(--faint)}

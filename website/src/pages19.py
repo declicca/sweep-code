@@ -217,6 +217,8 @@ GUIDES = [
   T("End of day, real time or static, and when trailing stops.", "Fin de journée, temps réel ou fixe, et quand le suivi s’arrête.", "Al cierre, en tiempo real o fijo, y cuándo se detiene el seguimiento.")),
  ("best-trading-journal-for-prop-firms.html", T("The best trading journal for prop firm traders", "Le meilleur journal de trading pour les traders de prop firms", "El mejor diario de trading para traders de prop firms"),
   T("Five journals compared on price, firm rules and how trades get in.", "Cinq journaux comparés : prix, règles des firmes et ajout des trades.", "Cinco diarios comparados: precio, reglas de las firmas y cómo entran las operaciones.")),
+ ("trading-journal-guide.html", T("How to keep a trading journal", "Tenir un journal de trading", "Cómo llevar un diario de trading"),
+  T("What to record on every trade, the numbers to watch, the review and prop firm accounts.", "Quoi noter pour chaque trade, les chiffres à suivre, la revue et les comptes prop.", "Qué anotar en cada operación, las cifras a seguir, la revisión y las cuentas prop.")),
  ("trading-journal-routine.html", T("A daily trading journal routine", "Une routine de journal de trading", "Una rutina diaria de diario de trading"),
   T("Five minutes before the open, one line per trade, sixty seconds after the close.", "Cinq minutes avant l’ouverture, une ligne par trade, soixante secondes après la clôture.", "Cinco minutos antes de la apertura, una línea por operación, sesenta segundos tras el cierre.")),
 ]
@@ -247,8 +249,8 @@ GUIDES_HELP = T("""<h2>Where to start</h2><ul>
 <p>Cada guía de reglas tiene su calculadora gratuita para comprobar tus propias cifras: <a href="@trailing-drawdown-calculator.html">drawdown dinámico</a>, <a href="@consistency-rule-calculator.html">consistencia</a> y <a href="@payout-calculator.html">payout</a>.</p>""")
 
 GUIDE_ICON = {"prop-firm-payout-rules.html": "receipt", "prop-firm-profit-targets.html": "target2", "prop-firm-minimum-days.html": "calendar", "prop-firm-consistency-rules.html": "layers",
-              "prop-firm-drawdown-rules.html": "shield", "prop-firm-costs.html": "tag", "best-trading-journal-for-prop-firms.html": "check", "trading-journal-routine.html": "doc"}
-JOURNAL_GUIDES = ("best-trading-journal-for-prop-firms.html", "trading-journal-routine.html")
+              "prop-firm-drawdown-rules.html": "shield", "prop-firm-costs.html": "tag", "best-trading-journal-for-prop-firms.html": "check", "trading-journal-routine.html": "doc", "trading-journal-guide.html": "archive"}
+JOURNAL_GUIDES = ("best-trading-journal-for-prop-firms.html", "trading-journal-guide.html", "trading-journal-routine.html")
 
 def page_hub(lang, t):
     """The guides in two rows: the prop firm rules compared, then the journal."""
