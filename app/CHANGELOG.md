@@ -2,6 +2,7 @@
 
 Une ligne par livraison, la plus récente en haut. Le détail (règles, causes, tests) : `CONTEXTE-APP.md`. Ce fichier n'est pas servi en ligne (`.htaccess` refuse tous les `.md`).
 
+- **16 oct. 2026 — Brief 00, phase 1, lot 1.3 (tests).** 6 tests qui ne vérifiaient rien vérifient maintenant (et testaient le bon serveur) ; plus d'appel à Google depuis les tests ; `loops_test.php` n'oublie plus de processus.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-m.** Wrapped (du mois et de l'année) compte un trade copié une fois, comme Stats.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-l.** Le nombre maximum de payouts du catalogue était déjà appliqué ; une fois tous les payouts faits, le compte ne dit plus « Encore 5 jours gagnants… », seulement « Tu as fait les 6 payouts que ce compte permet ».
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-j.** En copy trading, une seule alerte de limite par groupe de comptes copiés (sur le compte le plus fragile, « Apex 2 +2 »), au lieu d'une par compte.

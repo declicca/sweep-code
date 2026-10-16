@@ -1,11 +1,23 @@
+"""
+Sweep — a control that acts in place never makes the page jump (Playwright, phone, 12 pages):
+  python3 tests/e2e_no_jumps.py http://127.0.0.1:8095 /tmp/show_state.json
+Up to 8 controls per page (nothing destructive, no navigation): the control stays under the finger (a move that comes back
+is a jump), no entrance animation replayed, no chart rebuilt. A toast is fine. (16 Oct.: checks, it only printed —
+and « passed » with a jump found in Settings.)
+"""
 import asyncio, json, sys
 from playwright.async_api import async_playwright
-B='http://127.0.0.1:8095'
+B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
+STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
+fails = 0
+def ok(c, what):
+  global fails
+  fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
 SKIP=r'del|remove|logout|reset|clear|archive|export|upload|demo|cmd|add-trade|ev-open|more|import|file|delete|copy|share|save-img|full|print|ask|ai-|stripe|checkout|buy|cancel|close|logout|sb-|plan-|referral|invite|crew|discord|claim|install|nt-'
 async def main():
   async with async_playwright() as p:
     br=await p.chromium.launch(); errs=[]
-    ctx=await br.new_context(viewport={'width':390,'height':844},device_scale_factor=2,is_mobile=True,has_touch=True,color_scheme='dark',locale='fr-CA',storage_state='/tmp/show_state.json')
+    ctx=await br.new_context(viewport={'width':390,'height':844},device_scale_factor=2,is_mobile=True,has_touch=True,color_scheme='dark',locale='fr-CA',storage_state=STATE)
     await ctx.add_init_script("""sessionStorage.setItem('sw.modal','1'); localStorage.setItem('sw.guide', JSON.stringify({tips:{},hideStart:true,visited:{}}));
       document.addEventListener('DOMContentLoaded',()=>{const st=document.createElement('style'); st.textContent='*{overflow-anchor:none!important}'; document.head.append(st)});
       window.__anim=[]; document.addEventListener('animationstart', e=>window.__anim.push(((e.target.className||e.target.tagName)+'').split(' ')[0]+':'+e.animationName), true);
@@ -45,9 +57,10 @@ async def main():
         if r[3]!=before_hash: await pg.evaluate(f"location.hash='{route}'"); await pg.wait_for_timeout(1200); continue   # it navigated: not an in-place control
         # a move that stays is the page legitimately changing; a move that comes back is a jump
         jump = moved and r[0] and abs(r[0][-1])<6
-        anims=[a for a in r[1] if not a.startswith('nav-dot') and 'spin' not in a and 'shimmer' not in a and 'sc-sh' not in a and 'toastIn' not in a]
+        anims=[a for a in r[1] if not a.startswith('nav-dot') and 'spin' not in a and 'shimmer' not in a and 'sc-sh' not in a and 'toastIn' not in a and 'toast' not in a]
         if jump or anims or r[2]>0: issues.append(f"{cands[i]!r}: " + ', '.join(filter(None,[f'jump {max(moved,key=abs)}px' if jump else '', f'animations {anims[:4]}' if anims else '', f'{r[2]} canvas rebuilt' if r[2] else ''])))
         await pg.evaluate("document.querySelectorAll('#gSheet [data-g=close]').forEach(b=>b.click()); typeof closeTicket==='function'&&closeTicket()"); await pg.wait_for_timeout(300)
-      print(f"{route:22} tested {len(picks):2} controls | {'OK' if not issues else ' ; '.join(issues)[:400]}")
-    print('errors', errs[:3]); await br.close()
+      ok(not issues, f"{route:22} {len(picks):2} controls, no jump" + ('' if not issues else ': ' + ' ; '.join(issues)[:400]))
+    ok(not errs, f'no page error ({errs[:3]})'); await br.close()
 asyncio.run(main())
+print(f'{fails} failed' if fails else 'all passed'); sys.exit(1 if fails else 0)

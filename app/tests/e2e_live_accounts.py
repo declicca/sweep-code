@@ -1,6 +1,18 @@
-import asyncio, datetime, random
+"""
+Sweep — live accounts and moving a funded account to live (Playwright, phone, a trader of its own):
+  python3 tests/e2e_live_accounts.py http://127.0.0.1:8095
+The form offers Evaluation, Funded and « Live account · Real money »; a live account takes a broker, a name and a balance
+(no preset); a Lucid funded account gets its catalogue rules; its page offers « Move to live », which creates the live
+account (its own rules), archives the funded one as « live », opens the new one with its LIVE badge. No page error.
+(16 Oct.: checks, it only printed.)
+"""
+import asyncio, datetime, random, sys
 from playwright.async_api import async_playwright
-B='http://127.0.0.1:8095'
+B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
+fails = 0
+def ok(c, what):
+  global fails
+  fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
 async def main():
   async with async_playwright() as p:
     br=await p.chromium.launch(); errs=[]
@@ -18,7 +30,8 @@ async def main():
       await pg.locator('#main [data-act=acct-add]:not([data-v="0"])').first.click(); await pg.wait_for_timeout(900)
       st=pg.locator('form[data-form=account] .ux-st')
       if shot:
-        print('choices:', await pg.evaluate("[...document.querySelectorAll('form[data-form=account] [data-st-ph0]')].map(b=>b.innerText.replace(/\\n/g,' — ')).join(' | ')"))
+        ch = await pg.evaluate("[...document.querySelectorAll('form[data-form=account] [data-st-ph0]')].map(b=>b.innerText.replace(/\\n/g,' — ')).join(' | ')")
+        ok(all(w in ch for w in ('Évaluation', 'Financé', 'Compte live')), f'three choices: {ch[:90]}')
         await st.screenshot(path=shot)
       await st.locator(f'[data-st-ph0={phase}]').click(); await pg.wait_for_timeout(500)
       if phase == 'live':   # since the « live account » form (no presets: live rules differ by platform): broker, name, balance
@@ -43,15 +56,17 @@ async def main():
       await pg.evaluate("closeTicket && closeTicket()"); await pg.wait_for_timeout(400)
       return summ.replace('\n',' ')+' | start field: '+start, a
     s,a=await add('live','topstep',0,'Topstep Live 50K','/tmp/live_q.png')
-    print('Topstep live:', a, '|', s[:120])
+    ok(a and a['phase'] == 'live' and a['start'] == 10000, f'a live account: broker, name, balance $10,000 ({a})')
     s,b=await add('funded','lucid',1,'LucidFlex 50K')
-    print('Lucid funded:', b)
+    ok(b and b['phase'] == 'funded' and b['dd'] and b['dd_type'], f'Lucid funded: its catalogue drawdown ({b})')
     await pg.evaluate("location.hash='#dashboard'"); await pg.wait_for_timeout(1500)
-    print('Today badges:', await pg.evaluate("[...document.querySelectorAll('.nav-acc')].map(e=>e.querySelector('.nav-acc-t b').innerText).join(' | ')"))
     await pg.evaluate(f"location.hash='#account/{b['id']}'"); await pg.wait_for_timeout(1500)
-    print('funded account page line:', await pg.evaluate("(document.querySelector('#main .nav-live-row')||{innerText:'none'}).innerText.replace(/\\n/g,' ')"))
+    row = await pg.evaluate("(document.querySelector('#main .nav-live-row')||{innerText:''}).innerText.replace(/\\n/g,' ')")
+    ok('Passer en live' in row, f'the funded account offers « Passer en live » ({row})')
     await pg.locator('#main [data-live-go]').click(); await pg.wait_for_timeout(1800)
     r=await pg.evaluate(f"(()=>{{const o=getDoc('accounts','{b['id']}'), n=S.accounts.find(x=>x.from_funded==='{b['id']}'); return {{old:[o.status,o.result], new:n?[n.phase,n.preset,n.rules.payout_max_c,n.rules.payout_max_pct,n.rules.payout_win_days]:null, page:location.hash, badge:!!document.querySelector('#main .nav-live')}}}})()")
-    print('moved to live:', r)
-    print('errors', errs[:3]); await br.close()
+    ok(r['new'] and r['new'][0] == 'live' and (r['new'][1] or '').endswith('|live|'), f'moved: the live account with its own rules ({r["new"]})')
+    ok(r['old'] == ['archived', 'live'] and r['page'].startswith('#account/') and r['badge'], f'the funded account archived as « live », the new one opened with its LIVE badge ({r["old"]}, {r["page"]}, {r["badge"]})')
+    ok(not errs, f'no page error ({errs[:3]})'); await br.close()
 asyncio.run(main())
+print(f'{fails} failed' if fails else 'all passed'); sys.exit(1 if fails else 0)

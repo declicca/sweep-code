@@ -315,6 +315,7 @@ function sai_chat_mock(PDO $pdo, string $uid, string $prompt, string $file): arr
 
 function sai_http(array $cfg, array $body): array
 {
+    if (getenv('SWEEP_AI_OFFLINE') === '1') return [0, false];   // tests only (tools/run.sh, tools/par.py): never Google; never set on the server
     $url = str_replace('{model}', rawurlencode((string) $cfg['model']), (string) $cfg['endpoint']);
     if (!function_exists('curl_init')) {
         // Fallback for hosts without the cURL extension: PHP streams

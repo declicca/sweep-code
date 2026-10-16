@@ -77,7 +77,7 @@ def main():
     for i in range(N):
         dest, port, state = shard(i)
         env = dict(ENV, SWEEP_PRESETS_MOCK=dest + '/tests/presets_mock.json', SWEEP_TEST_DB=dest + '/data/journal.db',
-                   SWEEP_AI_CONFIG=TOOLS + '/ai-config.local.php', SWEEP_AI_MOCK=dest + '/tests/samples/shot-ai-mock.json', SWEEP_AI_CHAT_MOCK=dest + '/tests/samples/chat-ai-mock.json',
+                   SWEEP_AI_CONFIG=TOOLS + '/ai-config.local.php', SWEEP_AI_MOCK=dest + '/tests/samples/shot-ai-mock.json', SWEEP_AI_CHAT_MOCK=dest + '/tests/samples/chat-ai-mock.json', SWEEP_AI_OFFLINE='1',
                    SWEEP_PUSH_CONFIG=TOOLS + '/push-config.local.php', SWEEP_PUSH_MOCK=dest + '/data/push-sent.jsonl',
                    TMPDIR='/tmp/sweep-par-%d' % (i + 1), PHP_CLI_SERVER_WORKERS='4')   # php -S answers one request at a time otherwise
         os.makedirs(env['TMPDIR'], exist_ok=True); [shutil.rmtree(q) if os.path.isdir(q) and not os.path.islink(q) else os.remove(q) for q in (os.path.join(env['TMPDIR'], f) for f in os.listdir(env['TMPDIR']))]   # (a test may leave a folder there: e2e_loops)

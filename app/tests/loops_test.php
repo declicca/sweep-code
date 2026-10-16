@@ -259,7 +259,10 @@ loops_forget('u_trial');
 $last = array_values(array_filter($calls(), fn($c) => $c['path'] === '/api/v1/contacts/delete'));
 $ok(count($last) === 1 && $last[0]['body'] === ['email' => 'u_trial@t.dev'] && $rows('u_trial') === [], 'account deleted: contact deleted in Loops, its lines of email_events_log gone');
 
+$mp = (int) (proc_get_status($mock)['pid'] ?? 0); if ($mp) exec('pkill -TERM -P ' . $mp);   // php -S with workers: its children first (proc_terminate stops only the parent)
 proc_terminate($mock); proc_close($mock);
+usleep(500000); exec('pgrep -f ' . escapeshellarg("127.0.0.1:$port"), $left);
+$ok(!$left, 'the mock Loops server is stopped, its workers too (' . count($left) . ' left; before 16 Oct.: 4 every run)');
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);
