@@ -50,8 +50,8 @@ def model(po, cons, start, days, prev, bal):
   if po.get('first_min') and not prev: out['fmin'] = cyc >= c_(po['first_min'])
   if po.get('cycle_min') and prev: out['cmin'] = cyc >= c_(po['cycle_min'])
   if cons:
-    pos = [v for v in days if v > 0]; tot = sum(pos)
-    out['cons'] = tot > 0 and max(pos) / tot * 100 <= cons
+    pos = [v for v in days if v > 0]; tot = sum(days)   # the best day ÷ the total net profit (brief 00, Q4; it was ÷ the winning days)
+    out['cons'] = bool(pos) and tot > 0 and max(pos) / tot * 100 <= cons
   mn = c_(po.get('min') or 0); mb = c_(po.get('min_bal'))
   if mb: out['bal'] = bal >= mb + mn
   avail = bal - mb if mb else bal - start

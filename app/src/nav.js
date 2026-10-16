@@ -2808,9 +2808,10 @@ window.SweepMO = window.SweepMO || class {
     if (r.payout_first_min_c && !last) conds.push({ k: 'fmin', label: t('fmin'), ok: cycle >= r.payout_first_min_c, have: `${$u(Math.max(0, cycle))} / ${$u(r.payout_first_min_c)}`, frac: Math.max(0, Math.min(1, cycle / r.payout_first_min_c)) });
     if (r.payout_cycle_min_c && last) conds.push({ k: 'cmin', label: t('cmin'), ok: cycle >= r.payout_cycle_min_c, have: `${$u(Math.max(0, cycle))} / ${$u(r.payout_cycle_min_c)}`, frac: Math.max(0, Math.min(1, cycle / r.payout_cycle_min_c)) });
     if (r.consistency_pct && !r.target_c) {
-      const pos = vals.filter((v) => v > 0), sum = pos.reduce((a, v) => a + v, 0), best = pos.length ? Math.max(...pos) : 0;
-      const pct = sum > 0 ? (best / sum) * 100 : 0;
-      conds.push({ k: 'cons', label: t('cons').replace('{p}', pc(r.consistency_pct)), ok: sum > 0 && pct <= r.consistency_pct, have: sum > 0 ? pc(Math.round(pct)) : '—', frac: sum > 0 && pct <= r.consistency_pct ? 1 : 0, best, sum });
+      // one consistency for the whole app (consPct, app.js; brief 00, Q4): ÷ the total net profit, or the winning days if the catalogue says so
+      const pos = vals.filter((v) => v > 0), best = pos.length ? Math.max(...pos) : 0, sum = (r.consistency_base === 'win' ? pos : vals).reduce((a, v) => a + v, 0);
+      const pct = typeof consPct === 'function' ? consPct(vals, r.consistency_base) : (sum > 0 ? (best / sum) * 100 : null), okc = pct != null && pct <= r.consistency_pct;
+      conds.push({ k: 'cons', label: t('cons').replace('{p}', pc(r.consistency_pct)), ok: okc, have: pct != null ? pc(Math.round(pct)) : '—', frac: okc ? 1 : 0, best, sum });
     }
     const minReq = r.payout_min_c || 0;
     if (r.payout_min_bal_c) conds.push({ k: 'bal', label: t('bal'), ok: bal >= r.payout_min_bal_c + minReq, have: `${$u(bal)} / ${$u(r.payout_min_bal_c + minReq)}`, frac: Math.max(0, Math.min(1, (bal - start) / Math.max(1, r.payout_min_bal_c + minReq - start))) });

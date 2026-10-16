@@ -129,6 +129,14 @@ final class GameV2
      * the amount that can be asked for (cap, ladder step), the firm's number of payouts. The app also knows when an account is
      * breached; here a failed or archived account is skipped. Returns [ready, 0-100 (100 only when ready)] or null without payout rules.
      */
+    /** consistency, the app's one rule (consPct, src/app.js; brief 00, Q4): the best day as a % of the total net profit, or of
+     *  the winning days when the firm's catalogue says « consistency_base: win »; null without a profit */
+    public static function consPct(array $days, ?string $base = null): ?float
+    {
+        $pos = array_filter($days, fn($v) => $v > 0); $best = $pos ? max($pos) : 0; $sum = array_sum($base === 'win' ? $pos : $days);
+        return $best > 0 && $sum > 0 ? $best / $sum * 100 : null;
+    }
+
     public static function payoutStatus(array $a, array $trades, array $pays): ?array
     {
         $r = (array) ($a['rules'] ?? []);
@@ -151,7 +159,7 @@ final class GameV2
         if (!empty($r['payout_cycle_pos']) && $last !== '') $c[] = [$cycle > 0, $cycle > 0 ? 1 : 0];
         if (!empty($r['payout_first_min_c']) && $last === '') $c[] = [$cycle >= (int) $r['payout_first_min_c'], $clamp($cycle / (int) $r['payout_first_min_c'])];
         if (!empty($r['payout_cycle_min_c']) && $last !== '') $c[] = [$cycle >= (int) $r['payout_cycle_min_c'], $clamp($cycle / (int) $r['payout_cycle_min_c'])];
-        if (!empty($r['consistency_pct']) && empty($r['target_c'])) { $pos = array_filter($days, fn($v) => $v > 0); $sum = array_sum($pos); $okc = $sum > 0 && max($pos) / $sum * 100 <= (float) $r['consistency_pct']; $c[] = [$okc, $okc ? 1 : 0]; }
+        if (!empty($r['consistency_pct']) && empty($r['target_c'])) { $cp = self::consPct(array_values($days), $r['consistency_base'] ?? null); $okc = $cp !== null && $cp <= (float) $r['consistency_pct']; $c[] = [$okc, $okc ? 1 : 0]; }
         $min = (int) ($r['payout_min_c'] ?? 0); $mb = (int) ($r['payout_min_bal_c'] ?? 0);
         if ($mb) $c[] = [$bal >= $mb + $min, $clamp(($bal - $start) / max(1, $mb + $min - $start))];
         $avail = $mb ? $bal - $mb : $bal - $start;
@@ -189,7 +197,7 @@ final class GameV2
             foreach ($paid as $x) if (($x['account_id'] ?? '') === $a['id'] && ($x['status'] ?? '') === 'paid') $net -= (int) ($x['amount_c'] ?? 0);
             $parts = [max(0, min(1, $net / $goal))];
             if (!empty($r['min_days'])) $parts[] = min(1, count($byDay) / (int) $r['min_days']);
-            if (!empty($r['consistency_pct']) && $net > 0 && $byDay) { $c = max($byDay) / max(1, array_sum(array_filter($byDay, fn($v) => $v > 0))); $parts[] = $c * 100 <= (int) $r['consistency_pct'] ? 1 : max(0, (int) $r['consistency_pct'] / ($c * 100)); }
+            if (!empty($r['consistency_pct']) && $net > 0 && $byDay && ($cp = self::consPct(array_values($byDay), $r['consistency_base'] ?? null)) !== null) { $parts[] = $cp <= (int) $r['consistency_pct'] ? 1 : max(0, (int) $r['consistency_pct'] / $cp); }
             $best = max($best, (int) floor(min($parts) * 100));
         }
         return [$cfg, $best];

@@ -604,6 +604,10 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Q3 (recommandation B) : prévenir une fois.** À l'ouverture, chaque compte est calculé à l'ancienne (`acctStateV1`, interrupteur `MARGIN_V1`) et à la nouvelle ; si la marge change d'au moins 1 $ ou si le compte devient dépassé, une fenêtre « On a corrigé le calcul de ta marge » donne une ligne par compte (« TPT 50K : marge 500 $ (et non 1 500 $) »). Une marque dans ses réglages (`settings.margin_fix`) l'empêche de revenir, sur tous ses appareils. Rien n'est changé dans ses données.
 - Test : `tests/e2e_margin_fix.py` (échouait sur l'ancien code : « 50 050 $ sous 50 100 $ » non dépassé, marge 1 500 $).
 
+### Brief 00 — phase 1, lot 1.2-f (une seule consistance), 16 oct.
+- **Une règle pour toute l'app (Q4, recommandation C)** : le meilleur jour en % du **profit net total** ; une firme dont le catalogue dit `consistency_base: "win"` divise par les jours gagnants. Une seule fonction côté app (`consPct`, app.js) lue par la page du compte (`acctState`) et « prêt pour un payout » (`SweepPayout.status`, nav.js), et sa jumelle côté serveur (`GameV2::consPct`, payout et progression). Le catalogue transmet `consistency_base` quand une firme l'a (aucune aujourd'hui : ux.js `rulesOf`, presets-lib.php).
+- Avant : +400 / +300 / +300 / −500 = 80 % sur la page du compte, 40 % pour le payout (« dans la règle » de 50 % à tort). Test : `e2e_margin_fix` (f) ; le modèle de `e2e_payout_firms` suit la même règle.
+
 ### Brief 02 — partie 14 (petits détails), 14 oct.
 - **Données d'exemple** : déjà fait depuis B16 (`SweepUndo.demo`, la fenêtre de l'app donne le vrai nombre de trades) ; rien de changé.
 - **Réglages** : déjà en 5 groupes repliables depuis B15 (Compte, Discipline, Notifications, Données, et « Avancé » ajouté par le brief 03), « Déconnexion » seule tout en bas (`e2e_clarity`), chaque champ nommé (`e2e_a11y_names`) ; seul changement : le mot « Déconnexion » centré dans son bouton (il était à gauche, `nav.css`).

@@ -190,7 +190,7 @@ function pr_rules_of(array $cat, string $value): ?array
     $liveDd = $liveStart !== null && isset($r['floor']) ? $liveStart - $r['floor'] : null;
     $out = ['target_c' => $phase === 'eval' ? $c($r['target'] ?? null) : null, 'dd_c' => $liveDd !== null ? $c($liveDd) : $c($r['dd'] ?? null),
         'dd_floor_c' => $phase === 'live' && isset($r['floor']) ? $c($r['floor']) : null, 'dd_type' => $r['dd_type'] ?? 'eod', 'dd_lock_offset_c' => isset($r['dd_lock_offset']) ? $c($r['dd_lock_offset']) : null,
-        'dll_c' => !empty($r['dll_optional']) && !$dll ? null : $c($r['dll'] ?? null), 'consistency_pct' => $r['consistency'] ?? null,
+        'dll_c' => !empty($r['dll_optional']) && !$dll ? null : $c($r['dll'] ?? null), 'consistency_pct' => $r['consistency'] ?? null,] + (!empty($r['consistency_base']) ? ['consistency_base' => (string) $r['consistency_base']] : []) + [
         'min_days' => $phase === 'eval' ? ($r['min_days'] ?? null) : null];
     $po = $phase === 'eval' ? null : ($r['payout'] ?? null);
     $out += [

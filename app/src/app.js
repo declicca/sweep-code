@@ -586,6 +586,13 @@ function tDisc(e) {
 
 // the real order: an evening trade (18:00 or later, counted on the next session) comes before that session's morning
 // (brief 00, 1.2-c: it came after, and the real-time drawdown showed $1,500 of room instead of $500)
+/* consistency, one rule for the whole app (brief 00, Q4): the best day as a % of the total net profit; a firm whose catalogue
+   says « consistency_base: win » divides by the winning days instead. null: no profit yet. (The server: GameV2::consPct.) */
+const consPct = (e, t) => {
+  const a = e.filter(s => s > 0), n = a.length ? Math.max(...a) : 0, s = (t === "win" ? a : e).reduce((i, o) => i + o, 0);
+  return n > 0 && s > 0 ? n / s * 100 : null;
+};
+
 let MARGIN_V1 = !1;   // the calculation before 16 Oct. (order, payouts), only to tell a trader what changed (acctStateV1, nav.js)
 const tkey = e => e.date + " " + (MARGIN_V1 ? "" : hasSessionDate(e) && String(e.entry_time || "") >= "18" ? "0" : "1") + (e.entry_time || "99:99") + " " + (e.created_at || ""), sorted = e => e.slice().sort((t, a) => {
   const n = tkey(t), s = tkey(a);
@@ -2651,7 +2658,7 @@ function acctState(e) {
     }
     FIN(AT);
   }
-  const v = n.filter(H => H.date === todayStr()).reduce((H, J) => H + tNet(J), 0), b = dayMap(n), E = [ ...b.values() ].map(H => H.net), R = E.length ? Math.max(...E) : 0, L = i, x = L > 0 && R > 0 ? R / L : null, C = l != null ? o - l : null, g = {
+  const v = n.filter(H => H.date === todayStr()).reduce((H, J) => H + tNet(J), 0), b = dayMap(n), E = [ ...b.values() ].map(H => H.net), R = E.length ? Math.max(...E) : 0, L = i, x = (H => H == null ? null : H / 100)(consPct(E, t.consistency_base)), C = l != null ? o - l : null, g = {
     bal: o,
     net: i,
     today: v,

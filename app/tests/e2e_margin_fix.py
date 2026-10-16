@@ -7,11 +7,14 @@ Sweep — two margins that were wrong (brief 00, phase 1.2-b and 1.2-c), Playwri
  c. the trades of a session in their real order: an evening trade (19:00, counted on the next session) comes before that
     session's morning — real-time drawdown: +$1,000 at 19:00 then −$1,500 at 10:00 → room $500, not $1,500.
 The expected numbers are worked out here by hand; the app's own state (acctState) is compared with them.
+ f. one consistency everywhere (Q4, recommendation C): best day ÷ total net profit, unless the firm's catalogue says
+    « consistency_base: win » (÷ the winning days) — +$400 / +$300 / +$300 / −$500 is 80 % on the account page, in « ready for a
+    payout » and on the server (it was 40 % in the last two);
  d. Q3 (recommendation B): a trader whose account changes is told once — « We fixed how your room is calculated », one
     line per account changed (its room now, and before; or « drawdown exceeded »); not again after a reload (a mark in his
     settings); a trader whose numbers do not change never sees it. FR, EN, ES.
 """
-import json, os, random, sqlite3, sys
+import json, os, random, sqlite3, subprocess, sys
 from playwright.sync_api import sync_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
@@ -46,6 +49,20 @@ with sync_playwright() as p:
     try { const n = SweepCoach.trade(S.trades[0]); return (n && n.all) || []; } finally { S.trades = keep; } }""")
   ok('revenge' in co, f'c the coach in the real order: a trade at 00:03, 5 minutes after a loss at 23:58 the evening before, is « right after a loss » ({co})')
   ok(not errs, f'no page error ({errs[:2]})')
+  # f. one consistency
+  days = [('2026-09-01', 40000), ('2026-09-02', 30000), ('2026-09-03', 30000), ('2026-09-04', -50000)]
+  tr = [T(i + 1, d, '10:00', v) for i, (d, v) in enumerate(days)]
+  ev = {'id': 'acc', 'name': 'E', 'starting_balance_c': 5000000, 'phase': 'eval', 'rules': {'dd_c': 200000, 'dd_type': 'eod', 'target_c': 900000, 'consistency_pct': 50}}
+  cs = pg.evaluate("""([acc, trades]) => { const keep = S.trades; S.trades = trades; try { return acctState(acc).cons } finally { S.trades = keep } }""", [ev, tr])
+  ok(cs is not None and round(cs * 100) == 80, f'f account page: 80 % ({cs})')
+  for base, want in ((None, (False, '80')), ('win', (True, '40'))):
+    ru = {'consistency_pct': 50, 'payout_min_c': 100, **({'consistency_base': base} if base else {})}   # (a payout rule: a $1 minimum)
+    st = pg.evaluate("""([ru, trades]) => { const keep = [S.trades, S.payouts]; S.trades = trades; S.payouts = [];
+      try { const r = SweepPayout.status({ id: 'acc', starting_balance_c: 5000000, phase: 'funded', money_type: 'funded', rules: ru }); const c = r.conds.find((x) => x.k === 'cons'); return [c.ok, String(c.have).replace(/[^0-9]/g, '')]; }
+      finally { [S.trades, S.payouts] = keep; } }""", [ru, tr])
+    ok(st == list(want), f'f « ready for a payout », {base or "net (default)"}: {want[1]} %, within 50 %: {want[0]} ({st})')
+    srv = json.loads(subprocess.run(['php', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'payout_parity.php')], input=json.dumps([{'start': 5000000, 'rules': ru, 'trades': tr, 'pays': []}]), capture_output=True, text=True, check=True).stdout)
+    ok(srv and srv[0][0] is want[0], f'f the server, {base or "net (default)"}: ready {want[0]} like the app ({srv})')
   # d. told once
   W = {'fr': ('On a corrigé le calcul de ta marge', 'drawdown dépassé'), 'en': ('We fixed how your room is calculated', 'drawdown exceeded'), 'es': ('Corregimos el cálculo de tu margen', 'drawdown superado')}
   H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
