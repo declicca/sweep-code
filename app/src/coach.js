@@ -726,7 +726,7 @@
           const c = t && tradeNote(t);
           const lim = t && limits().find((x) => x.a.id === t.account_id && x.fresh);
           const line = lim ? limitLine(lim) : c && (c.ses.stop ? c.ses.t : c.fix ? c.fix[0] : c.ses.t);   // an account at its limit, then stop or pause, then the one thing to improve
-          if (line) return t0.call(this, msg + ' · ' + line, Object.assign({}, opts, { ms: 5000 }));
+          if (line) return t0.call(this, (typeof tr === 'function' ? tr(msg) : msg) + ' · ' + line, Object.assign({}, opts, { ms: 5000 }));   // the message in the trader's language first: once joined, it is no longer a known phrase
         }
       } catch (e) { /* the message stays as it was */ }
       return t0.apply(this, arguments);

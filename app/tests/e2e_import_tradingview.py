@@ -3,7 +3,7 @@ Sweep — TradingView « Order History » CSV import (dev environment with Playw
   python3 tests/e2e_import_tradingview.py http://127.0.0.1:8095 /tmp/show_state.json
 Sample: tests/samples/tradingview-order-history-sample.csv (2 NQ, partial exits on MNQ, a cancelled order, an evening 6E trade).
 Then a Tradovate Performance file with 6E and ZC (not in Sweep's list): 6E stays 6E (before 16 Oct.: « NQ ») at its own
-prices, ZC keeps its symbol and the file's P&L, never NQ's.
+prices, ZC keeps its symbol and the file's P&L, never NQ's; the preview shows those prices, and « Effacer » (not « Clear »).
 """
 import asyncio, sys, os, json
 from playwright.async_api import async_playwright
@@ -32,6 +32,13 @@ async def main():
             'ZCZ6,-2,0,0.25,203,204,2,450.25,452.75,$250.00,10/07/2026 11:00:00,10/07/2026 11:30:00,30min\n')
     pr = await pg.evaluate("(t)=>parseTradovate(t).map(r=>[r.inst,r.entry,r.exit,r.pnl_c])", PERF)
     ok(pr == [['6E', 1.0855, 1.08585, 4375], ['ZC', 450.25, 452.75, 25000]], f'Tradovate 6EZ6 → 6E at its own prices, ZCZ6 → ZC with the file\'s P&L (never NQ) ({pr})')
+    await pg.evaluate("location.hash='#import'"); await pg.wait_for_timeout(900)
+    await pg.evaluate("(t)=>{IMP.rows=parseTradovate(t); IMP.file='p.csv'; IMP.err=''; IMP.account=(S.accounts.find(a=>a.status!=='archived')||{}).id; render();}", PERF); await pg.wait_for_timeout(800)
+    cells = await pg.evaluate("[...document.querySelectorAll('#main table tbody tr')].map(r=>[...r.cells].map(c=>c.textContent.trim()))")
+    reset = await pg.evaluate("(document.querySelector('#main [data-act=imp-reset]')||{}).textContent")
+    ok(cells and '1.0855' in cells[0] and '1.08585' in cells[0] and '450.25' in cells[1], f'the preview shows 6E to the pip, ZC to the cent (before 16 Oct.: 1.09) ({[c[5:7] for c in cells]})')
+    ok(reset == 'Effacer', f'« Effacer », not « Clear » ({reset!r})')
+    await pg.evaluate("IMP.rows=null; IMP.file=''; render()"); await pg.wait_for_timeout(400)
     # the file in the page: preview, time zone, import
     await pg.evaluate("(t)=>{IMP.rows=parseTradovate(t); IMP.file='tv.csv'; IMP.err=''; IMP.account=(S.accounts.find(a=>a.status!=='archived')||{}).id; render();}", CSV); await pg.wait_for_timeout(800)
     ok(await pg.locator('#main [data-itz]').count() == 1, 'the preview asks for the time zone of the file (New York by default)')

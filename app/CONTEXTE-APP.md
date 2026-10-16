@@ -556,6 +556,14 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Sweep AI et les copies** : le double compte était déjà corrigé le 14 oct. (brief 02, parties 4 et 6 ; l'analyse date d'avant) et le taux de réussite est déjà celui de Stats (gagnants ÷ gagnants + perdants, sur le net). Reste corrigé : une question sur un seul compte lit le trade de ce compte (`_copies` dans `sai_trades`, `sai_filter`), comme Stats filtré sur un compte ; avant, un compte qui ne portait que la copie donnait 0 trade. Test : `copy_stats_test.php`.
 - **`ops_cfg`** (ops-lib.php) : les fichiers de configuration sont lus dans leur propre portée (une variable `$c` du `config.php` de l'app écrasait la configuration des sauvegardes ; vu dans la copie de test, `backup_test`).
 
+### Brief 00 — phase 1, lot 1.2-i (textes du démarrage et des messages), 16 oct.
+- **Le « + » des barres** (onglets du téléphone, colonne de l'ordinateur) est caché tant que la page de démarrage est affichée (`body.sw-onb`, nav.js et nav.css ; sa place est gardée). Il ouvrait « Add an account first », en anglais ; ce texte est maintenant traduit (la touche N l'ouvre encore).
+- **« Trade saved · <coach> »** : le coach ajoutait sa phrase avant la traduction du message, qui n'était plus reconnu ; le message est traduit d'abord (`tr`, coach.js) : « Trade enregistré · … ».
+- **Import** : « Clear » devient « Effacer » / « Borrar » ; l'aperçu montre les prix du 6E au pip (`pxShow` ; il montrait 1,09).
+- Déjà justes, vérifiés : la checklist par défaut (traduite), les pluriels (« Importer 1 trade »), « None recorded ».
+- En passant : le « ? » de « …compte live ? » ne passe plus seul à la ligne ; le badge « Argent réel » ne se coupe plus en deux.
+- Tests : `e2e_first_run` (le « + », la fenêtre, le message), `e2e_import_tradingview` (aperçu, « Effacer ») ; échouaient sur l'ancien code.
+
 ### Brief 02 — partie 14 (petits détails), 14 oct.
 - **Données d'exemple** : déjà fait depuis B16 (`SweepUndo.demo`, la fenêtre de l'app donne le vrai nombre de trades) ; rien de changé.
 - **Réglages** : déjà en 5 groupes repliables depuis B15 (Compte, Discipline, Notifications, Données, et « Avancé » ajouté par le brief 03), « Déconnexion » seule tout en bas (`e2e_clarity`), chaque champ nommé (`e2e_a11y_names`) ; seul changement : le mot « Déconnexion » centré dans son bouton (il était à gauche, `nav.css`).

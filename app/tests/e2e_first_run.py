@@ -9,6 +9,8 @@ A brand-new trader, phone (fr, es) and computer (en), from the first screen afte
 Then Today grows with the trader: with 0 trades only the routine; the 1st trade brings performance, accounts, calendar and
 news; My money, the rank and Quick access wait for the 5th trade (or a payout). « Your real net » is not on the first day:
 it opens the first time My money is opened. Checks: no page error, nothing wider than the window, no English in fr/es.
+16 Oct. (brief 00, 1.2-i): no « + » outside the page while there is no account (it opened « Add an account first », in
+English); that window in the trader's language; « Trade saved · <the coach> » in the trader's language too.
 """
 import json, os, sqlite3, sys, time
 from playwright.sync_api import sync_playwright
@@ -31,6 +33,8 @@ TXT = {
 EN_ONLY = ['Three steps', 'Your first name', 'How long have you been trading', 'More options', 'Your account', 'Your plan', 'Your first trade', 'Welcome', 'optional']
 CARDS = "(() => { const d = document.querySelector('#main .nav-dash'); return d ? ['.d-today', '.d-perf', '.d-acc', '.d-cal', '.d-news', '.d-pay', '.d-rank', '.d-quick'].filter((q) => d.querySelector(q)).map((q) => q.slice(3)) : null })()"
 WIDE = "document.documentElement.scrollWidth - innerWidth"
+PLUS = "[...document.querySelectorAll('[data-act=add-trade]')].filter((e) => !e.closest('#main') && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden').length"
+SAVED = {'fr': 'Trade enregistré', 'en': 'Trade saved', 'es': 'Operación guardada'}
 
 def run(p, lang, phone, exp):
   tag = f"{'390' if phone else '1300'}-{lang}"
@@ -64,6 +68,13 @@ def run(p, lang, phone, exp):
   ok(pg.locator('.nav-dlg.open, .nav-prof.open, aside.nav-prof').count() == 0, f'{tag} no « Complete your profile » window')
   ok(pg.evaluate("!document.querySelector('#askFab') || getComputedStyle(document.querySelector('#askFab')).display === 'none'"), f'{tag} one action: no « Ask Sweep » button on this page')
   ok(pg.locator('.nav-acc-opt').count() == 1 and not pg.locator('.nav-acc-opt').is_visible(), f'{tag} « More options » hidden while the picker asks')
+  plus = pg.evaluate(PLUS)
+  ok(plus == 0, f'{tag} one action: no « + » in the bars while there is no account ({plus})')
+  pg.evaluate("openTicket(null)"); pg.wait_for_timeout(600)   # the « N » key still opens it
+  dr = pg.evaluate("(document.querySelector('#drawer.on') || {}).innerText || ''")
+  ok(dr and (lang == 'en' or ('Add an account first' not in dr and 'Trades belong' not in dr)), f'{tag} « Add an account first » in the trader\'s language ({dr[:60]!r})')
+  pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
+  if pg.locator('[data-act=close-drawer]').first.is_visible(): pg.locator('[data-act=close-drawer]').first.click(); pg.wait_for_timeout(400)
   # the guided picker; « Create account » without a first name: asked, nothing created
   tap('form[data-form=account] [data-st-ph0=eval]'); tap('[data-st-firm=apex]')
   if pg.locator('[data-st-type=apex-eod]').count(): tap('[data-st-type=apex-eod]')
@@ -124,6 +135,12 @@ def run(p, lang, phone, exp):
   pg.locator('.rn.open [data-rn=later]').click(); pg.wait_for_timeout(700)
   pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(600); pg.evaluate("location.hash = '#payouts'"); pg.wait_for_timeout(1200)
   ok(pg.locator('.rn.open').count() == 0, f'{tag} not offered again on the next visit')
+  # a trade saved with the form: the message and the coach's line in the trader's language; the « + » is back
+  ok(pg.evaluate(PLUS) >= 1, f'{tag} with an account, the « + » is back ({pg.evaluate(PLUS)})')
+  pg.evaluate("openTicket(null,{manual:true})"); pg.wait_for_timeout(800)
+  pg.evaluate("Object.assign(TK,{account:S.accounts[0].id,inst:'NQ',dir:'long',qty:1,entry:21000,exit:21010}); tkRefresh(); window.__toast=''; new MutationObserver(()=>{const t=document.getElementById('toast'); if(t&&t.textContent) window.__toast=t.textContent}).observe(document.getElementById('toast'),{childList:true,characterData:true,subtree:true}); tkSave()")
+  pg.wait_for_timeout(2500); msg = pg.evaluate("window.__toast")
+  ok(msg.startswith(SAVED[lang]) and (lang == 'en' or 'Trade saved' not in msg), f'{tag} « {SAVED[lang]} » and the coach, in one language ({msg!r})')
   if lang != 'en':
     import re
     bad = [w for w in EN_ONLY if any(re.search(r'(?<![\w’])' + re.escape(w) + r'(?![\w’])', t) for t in texts)]

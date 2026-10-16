@@ -2846,3 +2846,7 @@ html body #main .fx-c.fbtn{min-height:0;height:36px;border-radius:var(--r-pill);
 .sai .sai-check input{width:20px;height:20px;margin:0;accent-color:var(--pos-fill)}
 .sai .sai-note{display:block;width:100%;box-sizing:border-box;min-height:84px;margin:6px 0 12px;resize:vertical;font:inherit;line-height:1.45}
 @media (max-width:860px){.sai .sai-note{font-size:16px}}
+/* brief 00, 1.2-i: no « + » in the bars on the first-run page (one action); its place is kept */
+body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-events:none}
+/* a badge never splits over two lines (« Argent / réel » in the first-run account card) */
+.ux-st-live em{white-space:nowrap;display:inline-block}
