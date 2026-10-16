@@ -755,6 +755,7 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 .nav-am-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .nav-am-grid select,.nav-am-grid input{width:100%}
 .nav-am-dir .seg{width:100%}.nav-am-dir .seg button{flex:1}
+.nav-am-grid > .nav-am-dir{align-self:end}   /* next to the net P&L: on the line of its field when its label wraps (phone) */
 .nav-am-pnl{grid-column:1/-1}
 .nav-am-pnl small{display:block;margin-top:4px;font-size:12px}
 .nav-am-sec{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--line)}

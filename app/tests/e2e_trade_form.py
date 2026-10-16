@@ -8,7 +8,9 @@ never from the app's own table:
  - fees: the account's round-trip commission is charged once per contract bought and sold (an add counts);
  - phone and computer: the form shows the result before saving, saves it, no page error;
  - 6E keeps its prices to the pip (before 16 Oct.: rounded to the cent, 1.0850 → 1.09); a symbol outside Sweep's list (ZC):
-   a new trade asks for its P&L, an edited one keeps the P&L the trader gave (before: recomputed at $0).
+   a new trade asks for its P&L, an edited one keeps the P&L the trader gave (before: recomputed at $0);
+ - the quick sheet (net P&L only, audit of 16 Oct.): « Long / Short » next to the P&L, asked before saving (before: « long »
+   made up); a short with a bearish bias is not « against your bias »; the entry time is the New York time of the save.
 """
 import asyncio, json, random, sys
 from playwright.async_api import async_playwright
@@ -79,6 +81,23 @@ async def main():
       await pg.evaluate("async()=>{tkSave(); await new Promise(r=>setTimeout(r,1500))}")
       ze = await pg.evaluate("(id)=>{const t=getDoc('trades',id); return [t.instrument, t.pnl_c, !!t.pnl_check]}", zc['id'])
       ok(ze == ['ZC', 12500, False], f'{tag} ZC edited and saved: the +$125 the trader gave is kept ({ze})')
+      # the quick sheet: only the net P&L and the side
+      await pg.evaluate("() => { editDoc('settings','settings', d => { d.add_mode_pref = 'shot'; }); const D = todayStr(); put('journals', Object.assign({}, getDoc('journals', D) || {}, { id: D, pre: { bias: 'bearish', max_loss: '1000', saved_at: Math.floor(Date.now() / 1000) } })); }")
+      await pg.wait_for_timeout(600)
+      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(500)
+      side = await pg.evaluate("(()=>{const n=document.querySelector('.nav-am-net input'), d=document.querySelector('.nav-am .nav-am-dir .seg'); if(!n||!d) return null; const a=n.getBoundingClientRect(), b=d.getBoundingClientRect(); return {open: !d.closest('details') || d.closest('details').open, row: Math.abs(a.bottom-b.bottom)<8 && b.left>a.right, on: d.querySelectorAll('button.on').length}})()")
+      ok(side and side['open'] and side['row'] and side['on'] == 0, f'{tag} quick sheet: « Long / Short » next to the net P&L, none picked ({side})')
+      await pg.locator('.nav-am input[data-am-f="net"]').fill('-400'); c0 = await pg.evaluate("S.trades.length")
+      await pg.locator('.nav-am [data-am="save"]').click(); await pg.wait_for_timeout(900)
+      er = await pg.evaluate("(document.querySelector('.nav-am.open .nav-am-err')||{}).innerText||''")
+      ok(await pg.evaluate("S.trades.length") == c0 and 'Long or Short' in er, f'{tag} no side: « Save » asks for it, nothing saved ({er})')
+      await pg.locator('.nav-am [data-am-seg="dir"][data-v="short"]').click(); await pg.wait_for_timeout(300)
+      ny = await pg.evaluate("new Intl.DateTimeFormat('en-GB',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date())")
+      await pg.locator('.nav-am [data-am="save"]').click(); await pg.wait_for_timeout(1500)
+      q = await pg.evaluate("(()=>{const t=S.trades[S.trades.length-1]; const n=window.SweepCoach&&SweepCoach.trade(t); return {dir:t.direction, time:t.entry_time, date:t.date, today:todayStr(), pnl:t.real_pnl_c, coach: JSON.stringify(n||'')}})()")
+      ok(q['dir'] == 'short' and q['pnl'] == -40000, f'{tag} quick short −$400: saved « short » ({q["dir"]}, {q["pnl"]})')
+      ok(q['time'] and q['time'][:5] >= ny and q['date'] == q['today'], f'{tag} the entry time is the New York time of the save ({q["time"]}, {ny} ET, session {q["date"]})')
+      ok('against' not in q['coach'].lower() and 'bias' not in q['coach'].lower(), f'{tag} bearish bias, short trade: not « against your bias » ({q["coach"][:90]})')
       ok(not errs, f'{tag} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
       await ctx.close()
     await br.close()
