@@ -148,9 +148,34 @@ def run(p, lang, phone, exp):
   ok(not errs, f'{tag} no page error ({errs[:2]})')
   br.close()
 
+def topstep(p, lang, phone):
+  """(audit of 16 Oct.) a Topstep Combine 50K without the daily limit option ($2,000 drawdown): the first plan's max loss is
+  prefilled with half the drawdown, $1,000 (before: empty, and the plan refused)"""
+  tag = f"{'390' if phone else '1300'}-{lang} Topstep"
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'ts%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.evaluate("""() => { put('firms', { id: 'tf', name: 'Topstep' }); put('accounts', { id: 'ta', firm_id: 'tf', name: 'Trading Combine 50K', starting_balance_c: 5000000, status: 'active', phase: 'eval', created_on: todayStr(), rules: { dd_c: 200000, dd_type: 'eod', target_c: 300000 } }); }""")
+  pg.wait_for_timeout(800)
+  pg.evaluate("SweepGame.openPlan(null, { then: () => { window.__then = 1 } })"); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=8000); pg.wait_for_timeout(500)
+  ml = pg.evaluate("(document.querySelector('#gSheet [data-gp=max_loss]') || {}).value")
+  ok(ml == '1000', f'{tag} no daily limit: the max loss starts at half the drawdown, $1,000 ({ml!r})')
+  pg.locator('#gSheet [data-g=bias][data-v=bullish]').click(); pg.wait_for_timeout(200); pg.locator('#gSheet [data-g=save-plan]').click(); pg.wait_for_timeout(1200)
+  j = pg.evaluate("(() => { const d = (SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || todayStr(); const j = getDoc('journals', d); return [j && j.pre && j.pre.max_loss, !!window.__then] })()")
+  ok(j == ['1000', True], f'{tag} the plan is saved and the trade form comes next ({j})')
+  ok(not errs, f'{tag} no page error ({errs[:2]})')
+  br.close()
+
 with sync_playwright() as p:
   for lang, phone, exp in (('fr', True, ''), ('en', False, ''), ('es', True, 'lt1')):
     print(f"— {'phone' if phone else 'computer'} {lang}")
     run(p, lang, phone, exp)
+  for lang, phone in (('es', False), ('fr', True)):
+    topstep(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')
 sys.exit(1 if fails else 0)

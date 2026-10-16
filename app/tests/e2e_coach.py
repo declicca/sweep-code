@@ -23,6 +23,10 @@ Then, brief 03 step 5 (fewer options in sight, nothing removed):
   J. the trade's page: « Answer your coach » (the plan, what pushed him in, his lesson) in place of « Review x of 4 », the
      answers saved in the same fields; the full review folded, still open after a tap in it; the screenshot form and the
      manual form's step 2: 3 questions, the rest one tap away; Settings: « Advanced » last, folded.
+Then, the audit of 16 Oct. (step 2), a LucidPro 50K ($2,000 drawdown, $1,200 daily limit) with $870 of drawdown room left:
+  K. the plan's max loss starts at $870 (not $1,200), « Drawdown room of LucidPro 50K: $870 » under it; the coach before a
+     trade says $870 left (a $1,200 plan typed anyway too); after a −$780 trade ($90 left): « Room: $90. Stop for today. » (after the trade, before the next
+     one, on Today), and the rule for the next session « Max loss $90 or no trade ».
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -292,6 +296,53 @@ def fewer(p, lang, phone):   # brief 03 step 5
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} J nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 
+R = {'fr': {'hint': 'Marge de drawdown de LucidPro 50K', 'left': 'de marge de drawdown sur LucidPro 50K', 'stop': 'Arrête pour aujourd’hui', 'rule': 'Perte max 90'},
+     'en': {'hint': 'Drawdown room of LucidPro 50K', 'left': 'of drawdown room left on LucidPro 50K', 'stop': 'Stop for today', 'rule': 'Max loss $90'},
+     'es': {'hint': 'Margen de drawdown de LucidPro 50K', 'left': 'de margen de drawdown en LucidPro 50K', 'stop': 'Para por hoy', 'rule': 'Pérdida máxima 90'}}
+def room(p, lang, phone):
+  tag = f"{'390' if phone else '1300'}-{lang} room"; x = R[lang]
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1'); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'cr%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
+  ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Alex', 'experience': 'gt1'}), headers=H)
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.evaluate("""() => { put('firms', { id: 'lf', name: 'Lucid Trading' }); put('accounts', { id: 'la', firm_id: 'lf', name: 'LucidPro 50K', starting_balance_c: 5000000, status: 'active', created_on: '2026-09-01', rules: { dll_c: 120000, dd_c: 200000, dd_type: 'static' } }); render(); }""")
+  pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(900)
+  for _ in range(30):
+    day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || ''")
+    if day: break
+    pg.wait_for_timeout(300)
+  day = day or pg.evaluate("todayStr()")
+  # $1,130 lost the session before: $870 of room left
+  pg.evaluate("(d) => put('trades', { id: 'r0', account_id: 'la', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -113000, pnl_manual: true, date: ymdAdd(d, -1), entry_time: '10:00', exit_time: '10:20' })", day); pg.wait_for_timeout(800)
+  m = pg.evaluate("(d) => { const m = SweepCoach.margin(d); return m && [m.c, m.start, m.low] }", day)
+  ok(m == [87000, 87000, False], f'{tag} the room is the account page\'s: $870 ({m})')
+  pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=8000); pg.wait_for_timeout(400)
+  ml = pg.evaluate("(document.querySelector('#gSheet [data-gp=max_loss]') || {}).value"); hint = pg.evaluate(TXT, '#gSheet .g-dll')
+  ok(ml == '870' and x['hint'] in hint and '870' in hint, f'{tag} the plan\'s max loss starts at the room, not the $1,200 daily limit ({ml}, « {hint} »)')
+  # he types $1,200 anyway: the coach still counts the room
+  pg.locator('#gSheet [data-g=bias][data-v=bullish]').click(); pg.wait_for_timeout(200); pg.locator('#gSheet [data-gp=max_loss]').fill('1200'); pg.locator('#gSheet [data-g=save-plan]').click(); pg.wait_for_timeout(900)
+  b1 = pg.evaluate("(d) => { const h = SweepCoach.before({ form: 'shot', account: 'la', date: d, qty: 1 }); const e = document.createElement('div'); e.innerHTML = h; return e.textContent.replace(/\\s+/g, ' ') }", day)
+  ok('870' in b1 and x['left'] in b1, f'{tag} a $1,200 plan, before a trade: $870 of room left, not $1,200 ({b1[:120]})')
+  # −$780 today: $90 left
+  pg.evaluate("(d) => put('trades', { id: 'r1', account_id: 'la', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -78000, pnl_manual: true, date: d, entry_time: '10:00', exit_time: '10:15' })", day); pg.wait_for_timeout(900)
+  ses = pg.evaluate("() => { const c = SweepCoach.trade(getDoc('trades', 'r1')); return c && c.ses }")
+  ok(ses and ses['stop'] and x['stop'] in ses['t'] and '90' in ses['t'], f'{tag} after the trade (« saved », the trade\'s page): {ses and ses["t"]}')
+  b2 = pg.evaluate("(d) => { const h = SweepCoach.before({ form: 'shot', account: 'la', date: d, qty: 1 }); const e = document.createElement('div'); e.innerHTML = h; return e.textContent.replace(/\\s+/g, ' ') }", day)
+  ok(x['stop'] in b2 and '90' in b2 and '870' not in b2, f'{tag} before the next trade: {b2[:110]}')
+  rule = pg.evaluate("(d) => SweepCoach.lesson(d).rule", day)
+  ok(rule.startswith(x['rule']), f'{tag} the rule for the next session: « {rule} »')
+  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .co-today', timeout=8000); pg.wait_for_timeout(900)
+  td = pg.evaluate(TXT, '#main .co-today')
+  ok(x['stop'] in td, f'{tag} Today: the coach says to stop ({td[:120]})')
+  ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} nothing wider than the window')
+  ok(not errs, f'{tag} no page error ({errs[:2]})')
+  br.close()
+
 with sync_playwright() as p:
   for lang, phone in (('fr', True), ('en', False), ('es', True)):
     print(f"— {'phone' if phone else 'computer'} {lang}")
@@ -299,5 +350,6 @@ with sync_playwright() as p:
     live(p, lang, phone)
     works(p, lang, phone)
     fewer(p, lang, phone)
+    room(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')
 sys.exit(1 if fails else 0)

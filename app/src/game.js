@@ -23,7 +23,7 @@
       plan_title: 'Plan of the day', bias: 'Bias', long: 'Long', short: 'Short', neutral: 'Neutral', no_trade: 'No trading today', setups: 'Allowed setups',
       no_setups: 'Pick the setups you allow yourself today. They are kept for your next plans and trades.', other_setup: 'Other setup', setup_ph: 'Name of your setup', add: 'Add', max_loss: 'Max loss today', max_trades: 'Max trades (optional)', levels: 'Key levels / note (optional)',
       rule: 'Rule of the day', rule_ph: 'One rule to hold today (optional)',
-      gate_intro: 'Before your first trade: 30 seconds for your plan.', gate_skip: 'Skip, add my trade', gate_save: 'Save and add my trade', save_plan: 'Save my plan', confirm_plan: 'Confirm my plan', from_plan: 'From your plan of {d}: confirm or adjust.', dll_hint: 'Daily limit of {a}: {v}', plan_needs: 'Pick a bias and your max loss for the day.', plan_late: 'Your first trade is already in: this plan counts as late.',
+      gate_intro: 'Before your first trade: 30 seconds for your plan.', gate_skip: 'Skip, add my trade', gate_save: 'Save and add my trade', save_plan: 'Save my plan', confirm_plan: 'Confirm my plan', from_plan: 'From your plan of {d}: confirm or adjust.', dll_hint: 'Daily limit of {a}: {v}', dd_hint: 'Drawdown room of {a}: {v}', plan_needs: 'Pick a bias and your max loss for the day.', plan_late: 'Your first trade is already in: this plan counts as late.',
       plan_past: 'A plan can only be made for today.',
       journal_title: 'Journal', setup: 'Setup', emotion: 'Emotion before entry', rules: 'Did you follow your rules?', yes: 'Yes', partial: 'Partly', no: 'No',
       next: 'Next', done: 'Done', skip: 'Skip', of: '{a} of {b}', all_journaled: 'Every trade is journaled.',
@@ -67,7 +67,7 @@
       plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd'hui", setups: 'Setups autorisés',
       no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', max_trades: 'Nombre max de trades (facultatif)', levels: 'Niveaux clés / note (facultatif)',
       rule: 'Règle du jour', rule_ph: 'Une règle à tenir aujourd’hui (facultatif)',
-      gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', save_plan: 'Enregistrer mon plan', confirm_plan: 'Confirmer mon plan', from_plan: 'Repris de ton plan du {d} : confirme ou ajuste.', dll_hint: 'Limite du jour de {a} : {v}', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
+      gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', save_plan: 'Enregistrer mon plan', confirm_plan: 'Confirmer mon plan', from_plan: 'Repris de ton plan du {d} : confirme ou ajuste.', dll_hint: 'Limite du jour de {a} : {v}', dd_hint: 'Marge de drawdown de {a} : {v}', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
       plan_past: "Un plan ne peut être fait que pour aujourd'hui.",
       journal_title: 'Journaliser', setup: 'Setup', emotion: "Émotion avant l'entrée", rules: 'As-tu suivi tes règles ?', yes: 'Oui', partial: 'En partie', no: 'Non',
       next: 'Suivant', done: 'Terminé', skip: 'Passer', of: '{a} sur {b}', all_journaled: 'Tous les trades sont journalisés.',
@@ -111,7 +111,7 @@
       plan_title: 'Plan del día', bias: 'Sesgo', long: 'Largo', short: 'Corto', neutral: 'Neutral', no_trade: 'Hoy no opero', setups: 'Setups permitidos',
       no_setups: 'Elige los setups que te permites hoy. Se guardan para tus próximos planes y operaciones.', other_setup: 'Otro setup', setup_ph: 'Nombre de tu setup', add: 'Añadir', max_loss: 'Pérdida máx. del día', max_trades: 'Máx. de trades (opcional)', levels: 'Niveles clave / nota (opcional)',
       rule: 'Regla del día', rule_ph: 'Una regla para hoy (opcional)',
-      gate_intro: 'Antes de tu primera operación: 30 segundos para tu plan.', gate_skip: 'Saltar, añadir mi operación', gate_save: 'Guardar y añadir mi operación', save_plan: 'Guardar mi plan', confirm_plan: 'Confirmar mi plan', from_plan: 'Retomado de tu plan del {d}: confirma o ajusta.', dll_hint: 'Límite diario de {a}: {v}', plan_needs: 'Elige un sesgo y tu pérdida máx. del día.', plan_late: 'Tu primer trade ya está hecho: este plan cuenta como tardío.',
+      gate_intro: 'Antes de tu primera operación: 30 segundos para tu plan.', gate_skip: 'Saltar, añadir mi operación', gate_save: 'Guardar y añadir mi operación', save_plan: 'Guardar mi plan', confirm_plan: 'Confirmar mi plan', from_plan: 'Retomado de tu plan del {d}: confirma o ajusta.', dll_hint: 'Límite diario de {a}: {v}', dd_hint: 'Margen de drawdown de {a}: {v}', plan_needs: 'Elige un sesgo y tu pérdida máx. del día.', plan_late: 'Tu primer trade ya está hecho: este plan cuenta como tardío.',
       plan_past: 'Solo se puede hacer un plan para hoy.',
       journal_title: 'Registrar', setup: 'Setup', emotion: 'Emoción antes de entrar', rules: '¿Seguiste tus reglas?', yes: 'Sí', partial: 'En parte', no: 'No',
       next: 'Siguiente', done: 'Listo', skip: 'Saltar', of: '{a} de {b}', all_journaled: 'Todos los trades están registrados.',
@@ -471,6 +471,13 @@
     PL.ruleOn = !!PL.rule || pre.rule != null;   // shown when there is one to carry (not on a first plan: one thing at a time)
     PL.max_loss = pre.max_loss ? num(pre.max_loss) : (lp && num(lp.pre.max_loss)) || defaultMaxLoss();
     const lim = dailyLimit(); if (!pre.max_loss && lim && +PL.max_loss > lim.c / 100) PL.max_loss = String(lim.c / 100);   // never above the account's own limit
+    // nor above the drawdown room (audit of 16 Oct., src/coach.js margin()): the room before this day's trades
+    const mg = window.SweepCoach && SweepCoach.margin ? SweepCoach.margin(day) : null, room = mg ? mg.start : null;
+    PL.room = mg ? { c: room, name: mg.name } : null;
+    if (!pre.max_loss && mg) {
+      if (!(+PL.max_loss > 0)) PL.max_loss = String(Math.floor(Math.min(mg.dd / 2, room) / 100));   // no daily limit (a Topstep Combine without it): half the drawdown
+      else if (+PL.max_loss > room / 100) PL.max_loss = String(Math.floor(room / 100));
+    }
     openSheet(planHtml(), { cls: 'g-plan' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;   // the pre-market chart and screenshots attach to this day
   }
@@ -494,7 +501,7 @@
       ${PL.bias === 'no_trade' || !PL.ruleOn ? '' : `<label class="g-f g-rule"><span>${t('rule')}</span><input type="text" maxlength="160" data-gp="rule" value="${esc(PL.rule || '')}" placeholder="${esc(t('rule_ph'))}" enterkeyhint="done"></label>`}
       <div class="g-f"><span>${t('bias')}</span><div class="g-seg4">${bias.map(([v, k]) => `<button type="button" class="${PL.bias === v ? 'on' : ''} b-${v}" data-g="bias" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${PL.bias === 'no_trade' ? '' : `<div class="g-f g-setups"><span>${t('setups')}</span>${setupsHtml(setups)}</div>
-      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$">${lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: typeof moneyU === 'function' ? moneyU(lim.c) : '$' + lim.c / 100 }))}</small>` : ''}</label>
+      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$">${PL.room && (!lim || PL.room.c < lim.c) ? `<small class="g-hint-sm g-dll">${esc(t('dd_hint', { a: PL.room.name, v: typeof moneyU === 'function' ? moneyU(Math.floor(PL.room.c / 100) * 100) : '$' + Math.floor(PL.room.c / 100) }))}</small>` : lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: typeof moneyU === 'function' ? moneyU(lim.c) : '$' + lim.c / 100 }))}</small>` : ''}</label>
       <label class="g-f"><span>${t('max_trades')}</span><input inputmode="numeric" data-gp="max_trades" value="${esc(PL.max_trades)}"></label></div>
       <label class="g-f"><span>${t('levels')}</span><textarea rows="2" data-gp="levels">${esc(PL.levels)}</textarea></label>`}
       <p class="g-err" id="gErr"></p>
