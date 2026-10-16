@@ -904,13 +904,16 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .cohort .ctext{font-size:13px;color:var(--muted)}
 /* ---- [pages: index.html] the narration: the text scrolls, one app screen stays beside it and changes with it */
 .narr-media{display:none}
-.narr-beat+.narr-beat{margin-top:var(--sec-t)}
+.narr-beat+.narr-beat,.narr-pair+.narr-beat{margin-top:var(--sec-t)}
+.narr-pair .narr-beat+.narr-beat{margin-top:0}
+.narr-pair .head{margin-bottom:12px}   /* the list goes on from the title: about 36px between them */
 .narr-beat .fr{margin-top:40px}
 .narr .ways li{font-size:var(--fs-body)}
 @media (min-width:1068px){
   .narr{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}
-  .narr-beat{min-height:72vh;display:flex;flex-direction:column;justify-content:center}
-  .narr-beat+.narr-beat{margin-top:0}
+  .narr-beat,.narr-pair{min-height:72vh;display:flex;flex-direction:column;justify-content:center}
+  .narr-beat+.narr-beat,.narr-pair+.narr-beat{margin-top:0}
+  .narr-pair .narr-beat{min-height:0}
   .narr-beat .narr-in{display:none}
   .narr-media{display:block;position:sticky;top:calc(50vh - 200px)}
   .narr-media .scr img{position:absolute;inset:0;transition:opacity var(--t-slow) var(--spring)}

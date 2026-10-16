@@ -70,7 +70,8 @@ def sec_story(lang, t):
          ("v6-12-payouts", L3("Payouts and expenses, sample data","Payouts et dépenses, données d’exemple","Payouts y gastos, datos de ejemplo"))]
     inline = lambda k: frame_d(f"{S[k][0]}-d.webp", t(S[k][1]), m=f"{S[k][0]}-m.webp", t=t, cls="reveal narr-in")   # phones and tablets
     beats = [("logging", log_head, ""), ("", log_methods, inline(1)), ("prop", prop, inline(2)), ("payouts", pay, inline(3))]
-    steps = "".join(f'<div class="narr-beat"{' id="' + i + '"' if i else ""} data-beat="{k}">{c}{f}</div>' for k, (i, c, f) in enumerate(beats))
+    B = [f'<div class="narr-beat"{' id="' + i + '"' if i else ""} data-beat="{k}">{c}{f}</div>' for k, (i, c, f) in enumerate(beats)]
+    steps = f'<div class="narr-pair">{B[0]}{B[1]}</div>' + "".join(B[2:])   # the title and its ways to log read as one block; the screen still changes between them
     screens = "".join(_img_d(f"{n}-d.webp", t(a), "(max-width: 1067px) 92vw, 700px").replace("<img ", f'<img data-shot="{k}"{" class=on" if k == 0 else ""} ', 1) for k, (n, a) in enumerate(S))
     media = f'<div class="narr-media"><figure class="fr fr-d"><div class="scr">{screens}</div><figcaption class="cap">{t(SAMPLE)}</figcaption></figure></div>'
     return sec(f'<div class="narr" data-narr><div class="narr-steps">{steps}</div>{media}</div>', "n", "story")
