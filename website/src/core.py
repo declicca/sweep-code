@@ -620,6 +620,7 @@ def nbsp(lang, body):
                 x = re.sub(r"(?<=\d) (?=\d{3}(?!\d))", "\u00a0", x)
                 x = re.sub(r" (?=[:;?!](?:\s|$))", "\u00a0", x)
                 x = re.sub(r"(?<=\d) (?=h\b)|(?<=\bh) (?=\d)", "\u00a0", x)   # « 18 h », « 9 h 30 »
+                x = x.replace("« ", "«\u00a0").replace(" »", "\u00a0»")   # guillemets never split from their words
         out.append(x)
     return "".join(out)
 

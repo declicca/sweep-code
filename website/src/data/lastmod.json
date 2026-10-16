@@ -13,7 +13,7 @@
  },
  "ai.html": {
   "date": "2026-10-15",
-  "hash": "7af453835fb2f2d9"
+  "hash": "2bef0e3ffaae1d7b"
  },
  "best-trading-journal-for-prop-firms.html": {
   "date": "2026-10-15",
@@ -21,7 +21,7 @@
  },
  "changelog.html": {
   "date": "2026-10-15",
-  "hash": "db5a77556ec88a9c"
+  "hash": "a7c2eb6e288eb8d3"
  },
  "consistency-rule-calculator.html": {
   "date": "2026-10-15",
@@ -29,7 +29,7 @@
  },
  "contact.html": {
   "date": "2026-10-15",
-  "hash": "2f2276c997c82f8f"
+  "hash": "3c622112452adfee"
  },
  "contracts/6e-futures.html": {
   "date": "2026-10-15",
@@ -89,11 +89,11 @@
  },
  "cpi-release-dates.html": {
   "date": "2026-10-15",
-  "hash": "d4bb3ea06f90ce85"
+  "hash": "d55761c3e137a151"
  },
  "economic-calendar.html": {
   "date": "2026-10-15",
-  "hash": "f8fee71bf028f890"
+  "hash": "033b36710cdc3b61"
  },
  "expectancy-calculator.html": {
   "date": "2026-10-15",
@@ -101,15 +101,15 @@
  },
  "faq.html": {
   "date": "2026-10-15",
-  "hash": "3a97fa294791275e"
+  "hash": "cae6894db0a12c21"
  },
  "features.html": {
   "date": "2026-10-15",
-  "hash": "82db4b47ab615ca5"
+  "hash": "cf8ea59841beae60"
  },
  "fomc-meeting-dates.html": {
   "date": "2026-10-15",
-  "hash": "d400857e6e5168db"
+  "hash": "f82cf6076b5c4257"
  },
  "free-trading-journal.html": {
   "date": "2026-10-15",
@@ -121,11 +121,11 @@
  },
  "futures-market-hours.html": {
   "date": "2026-10-15",
-  "hash": "1393be47324ed12a"
+  "hash": "1ed4c243586e1ea2"
  },
  "gdp-release-dates.html": {
   "date": "2026-10-15",
-  "hash": "1207bc1399dddb49"
+  "hash": "0c98c660d5fbc2b2"
  },
  "glossary.html": {
   "date": "2026-10-15",
@@ -133,11 +133,11 @@
  },
  "guides.html": {
   "date": "2026-10-15",
-  "hash": "6ad1f7f6c753c84a"
+  "hash": "153eb798ee166a0c"
  },
  "how-it-works.html": {
   "date": "2026-10-15",
-  "hash": "9cfa599e2726f605"
+  "hash": "80c8ee93bf7fabe0"
  },
  "how-we-verify-prop-firm-rules.html": {
   "date": "2026-10-15",
@@ -145,23 +145,23 @@
  },
  "import.html": {
   "date": "2026-10-15",
-  "hash": "a4ba321c1f6fb382"
+  "hash": "05dc42ef46dfecb7"
  },
  "index.html": {
   "date": "2026-10-15",
-  "hash": "d895551cfe451198"
+  "hash": "3dfc18fcef5f3a6c"
  },
  "install.html": {
   "date": "2026-10-15",
-  "hash": "a98032980ad1fa8e"
+  "hash": "8de9124f9270f90f"
  },
  "ism-manufacturing-release-dates.html": {
   "date": "2026-10-15",
-  "hash": "96f2bfcc71843e25"
+  "hash": "6de78c8f5d4532d6"
  },
  "nfp-release-dates.html": {
   "date": "2026-10-15",
-  "hash": "f1806d4384e0257d"
+  "hash": "85e5e8e621cecbef"
  },
  "ninjatrader.html": {
   "date": "2026-10-15",
@@ -177,7 +177,7 @@
  },
  "pce-release-dates.html": {
   "date": "2026-10-15",
-  "hash": "389002e967b72a34"
+  "hash": "71192c0042b4cf35"
  },
  "position-size-calculator.html": {
   "date": "2026-10-15",
@@ -185,11 +185,11 @@
  },
  "ppi-release-dates.html": {
   "date": "2026-10-15",
-  "hash": "58368e30596426b6"
+  "hash": "2aaef16e4c909dc6"
  },
  "press-kit.html": {
   "date": "2026-10-15",
-  "hash": "b4a46f5932e1bd83"
+  "hash": "79542f1b5ebd8616"
  },
  "pricing.html": {
   "date": "2026-10-15",
@@ -197,27 +197,27 @@
  },
  "privacy.html": {
   "date": "2026-10-15",
-  "hash": "c6fa03de3cca0bd6"
+  "hash": "99b8044050bd1393"
  },
  "prop-firm-consistency-rules.html": {
   "date": "2026-10-15",
-  "hash": "8378950ae020245b"
+  "hash": "d9c6d877ab1b82b2"
  },
  "prop-firm-drawdown-rules.html": {
   "date": "2026-10-15",
-  "hash": "b7056b2c515dcf51"
+  "hash": "fb4ca56a3a9e1364"
  },
  "prop-firm-minimum-days.html": {
   "date": "2026-10-15",
-  "hash": "0e43f4a53eafba98"
+  "hash": "dad20b598ea7bdd8"
  },
  "prop-firm-payout-rules.html": {
   "date": "2026-10-15",
-  "hash": "37daaf7af2672b7b"
+  "hash": "bbc096c078886ce4"
  },
  "prop-firm-profit-targets.html": {
   "date": "2026-10-15",
-  "hash": "ef7c0c390009bee6"
+  "hash": "acc67d9c95baac5b"
  },
  "prop-firm-roi-calculator.html": {
   "date": "2026-10-15",
@@ -241,7 +241,7 @@
  },
  "prop-firms/index.html": {
   "date": "2026-10-15",
-  "hash": "d0ebc06aee5598a6"
+  "hash": "d93986022baf73f6"
  },
  "prop-firms/lucid.html": {
   "date": "2026-10-15",
@@ -261,7 +261,7 @@
  },
  "prop-firms/tradeify.html": {
   "date": "2026-10-15",
-  "hash": "cfba47281a6e8149"
+  "hash": "8d828c4251361b5d"
  },
  "release-dates.html": {
   "date": "2026-10-15",
@@ -269,7 +269,7 @@
  },
  "retail-sales-release-dates.html": {
   "date": "2026-10-15",
-  "hash": "4e9b3a4286ba183b"
+  "hash": "d3d76c705e4eceee"
  },
  "risk.html": {
   "date": "2026-10-15",
@@ -297,7 +297,7 @@
  },
  "terms.html": {
   "date": "2026-10-15",
-  "hash": "09af333c28e3f3e5"
+  "hash": "f9e0510d34204551"
  },
  "tools.html": {
   "date": "2026-10-15",
@@ -309,7 +309,7 @@
  },
  "trading-templates.html": {
   "date": "2026-10-15",
-  "hash": "01d609a97d276617"
+  "hash": "dae4249e76edbab2"
  },
  "trailing-drawdown-calculator.html": {
   "date": "2026-10-15",
