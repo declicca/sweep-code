@@ -4,7 +4,7 @@ Sweep — sample data once the first real trade is there (brief 00, phase 1.2-k;
 A new trader explores with the sample data, then logs a real trade: from then on the sample trades, accounts and payouts are
 hidden everywhere — Trades, Journal, Calendar, Stats, My money, Accounts — not deleted; one line says so and offers
 « Remove them » (the app's window, with Cancel). Cancel keeps them; Remove deletes them on the server. His own trade and
-account are never touched. Before 16 Oct.: only Today hid them; Trades and Stats showed two P&L for the same day.
+account are never touched; his only real trade deleted, the sample data comes back. Before 16 Oct.: only Today hid them; Trades and Stats showed two P&L for the same day.
 """
 import json, os, random, sqlite3, sys
 from playwright.sync_api import sync_playwright
@@ -52,6 +52,11 @@ with sync_playwright() as p:
     ok(L[lang][0] in line and L[lang][1] in line, f'{tag} one line: « {L[lang][0]} · {L[lang][1]} » ({line[:80]!r})')
     srv = pg.evaluate(DATA)
     ok(srv['trades'] == n0, f'{tag} hidden, not deleted: still {srv["trades"]} on the server')
+    pg.evaluate("remove('trades','dh-t1')"); pg.wait_for_timeout(1200)
+    back = pg.evaluate("[S.trades.filter(t=>t.demo).length, !!document.querySelector('#main .nav-demo-hid')]")
+    ok(back == [n0, False], f'{tag} his only real trade deleted: the sample data comes back ({back})')
+    pg.evaluate("put('trades',{id:'dh-t1',account_id:'dh-a',instrument:'NQ',direction:'long',contracts:1,entry:21000,exit:21010,pnl_c:20000,pnl_manual:true,date:todayStr(),session_date:true,entry_time:'10:00',exit_time:'10:05'}); location.hash='#dashboard'"); pg.wait_for_timeout(800)
+    pg.evaluate("location.hash='#trades'"); pg.wait_for_timeout(1700)
     # Cancel keeps them; Remove deletes them
     pg.locator('#main .nav-demo-hid [data-act="demo-remove"]').click(); pg.wait_for_timeout(700)
     pg.locator('aside.nav-ask.open [data-ask="0"]').click(); pg.wait_for_timeout(1200)

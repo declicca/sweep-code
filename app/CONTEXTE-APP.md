@@ -611,6 +611,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 ### Brief 00 — phase 1, lot 1.2-k (données d'exemple et premier vrai trade), 16 oct.
 - **Q5, recommandation A** : dès le premier vrai trade, les données d'exemple (trades, comptes, payouts, dépenses, journaux, firmes) sont **masquées partout** — Trades, Journal, Calendrier, Stats, Mon argent, Comptes —, jamais supprimées : mises de côté dans `S.__demo` à chaque rendu (nav.js ; une synchro peut les ramener). Un compte d'exemple qui porte un vrai trade reste visible, et sa firme aussi.
 - **Une ligne** sur Aujourd'hui et Trades : « Données d'exemple masquées · Les retirer » (bleu : une action) ; `removeDemo` (la fenêtre de l'app, avec Annuler) efface aussi celles mises de côté.
+- **Garde-fous** : le masquage ne part que d'un vrai trade sur un compte qui existe, ne laisse jamais la liste des comptes vide (sinon l'app retombait sur la page de démarrage), et si le seul vrai trade est supprimé, les données d'exemple reviennent tout de suite (vus par `e2e_clarity` dans la suite complète).
 - Avant : seul Aujourd'hui les cachait ; Trades et Stats montraient deux P&L pour la même journée. Test : `tests/e2e_demo_hidden.py` (échouait : 198 éléments d'exemple sur Trades après un vrai trade).
 
 ### Brief 02 — partie 14 (petits détails), 14 oct.

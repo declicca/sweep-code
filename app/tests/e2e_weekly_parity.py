@@ -46,7 +46,7 @@ async def main():
     await pg.wait_for_timeout(3500)   # saved on the server
     for lang in ('fr', 'en', 'es'):
       await pg.evaluate("l => localStorage.setItem('tj.lang', JSON.stringify(l))", lang); await pg.reload(); await pg.wait_for_timeout(2500)
-      ok(await pg.evaluate("S.trades.filter(t=>String(t.id).startsWith('wp-t')).length") == len(TRADES), f'{lang} the week\'s trades came back from the server')
+      ok(await pg.evaluate("S.trades.concat((S.__demo && S.__demo.trades) || []).filter(t=>String(t.id).startsWith('wp-t')).length") == len(TRADES), f'{lang} the week\'s trades came back from the server (the sample ones set aside, brief 00 Q5)')
       sv = server(uid, lang); s = sv['brief']; s.pop('week', None)
       c = await pg.evaluate("sm => SweepGame.weekBrief('%s', sm)" % MON, {'swept': sv['summary']['swept'], 'streak': sv['summary']['streak']})
       ok(c == s, f'{lang} app and email: the same numbers ({json.dumps(c, ensure_ascii=False)})' + ('' if c == s else f'\n      server: {json.dumps(s, ensure_ascii=False)}'))

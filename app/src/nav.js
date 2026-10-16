@@ -5395,13 +5395,18 @@ new window.SweepMO(() => {
   const COLS_D = ['trades', 'accounts', 'payouts', 'expenses', 'journals', 'firms'];
   const T = { en: ['Sample data hidden', 'Remove them'], fr: ['Données d’exemple masquées', 'Les retirer'], es: ['Datos de ejemplo ocultos', 'Quitarlos'] };
   function setAside() {
-    if (typeof S === 'undefined' || !Array.isArray(S.trades) || !S.trades.some((t) => !t.demo)) return;
-    const real = S.trades.filter((t) => !t.demo), keepAcc = new Set(real.map((t) => t.account_id));
+    if (typeof S === 'undefined' || !Array.isArray(S.trades) || !Array.isArray(S.accounts)) return;
+    const accIds = new Set(S.accounts.concat((S.__demo && S.__demo.accounts) || []).map((a) => a.id)), real = S.trades.filter((t) => !t.demo && accIds.has(t.account_id));   // a real trade on an account that exists
+    if (!real.length) {   // no real trade any more (the only one deleted): the sample data comes back
+      if (S.__demo) { COLS_D.forEach((c) => { const l = S.__demo[c]; if (l && l.length && Array.isArray(S[c])) { const have = new Set(S[c].map((d) => d.id)); S[c] = S[c].concat(l.filter((d) => !have.has(d.id))); } }); S.__demo = null; }
+      return;
+    }
+    const keepAcc = new Set(real.map((t) => t.account_id));
     const keepFirm = new Set((S.accounts || []).filter((a) => !a.demo || keepAcc.has(a.id)).map((a) => a.firm_id));
     COLS_D.forEach((c) => {
       if (!Array.isArray(S[c])) return;
       const out = S[c].filter((d) => d.demo && !(c === 'accounts' && keepAcc.has(d.id)) && !(c === 'firms' && keepFirm.has(d.id)));
-      if (!out.length) return;
+      if (!out.length || (c === 'accounts' && out.length === S[c].length)) return;   // never no account left
       S.__demo = S.__demo || {}; const ids = new Set(out.map((d) => d.id));
       S.__demo[c] = (S.__demo[c] || []).filter((d) => !ids.has(d.id)).concat(out);
       S[c] = S[c].filter((d) => !ids.has(d.id));
