@@ -99,7 +99,8 @@ with sync_playwright() as p:
     m = pg.evaluate("(()=>{const s=document.querySelector('#main .acc-menu > summary'); if(!s) return null; const r=s.getBoundingClientRect(); return [Math.round(r.width),Math.round(r.height)]})()")
     ok(m and m[0] == m[1] == 44, f'5 phone {w} {scheme}: the account « ⋯ » is a 44 px circle ({m})')
     if w == 390:
-      go(pg, 'journal')
+      wd = pg.evaluate("(() => { const d = new Date(todayStr() + 'T12:00:00'); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10) })()")
+      go(pg, 'journal/' + wd)   # a weekday: the strip shows Monday to Friday (a weekend evening's session is Saturday)
       j = pg.evaluate("(()=>{const a=document.querySelector('#main .jstrip a.on b'); return a?getComputedStyle(a).color:null})()")
       ok(j == 'rgb(255, 255, 255)', f'7 phone {scheme}: the chosen journal day is white on blue ({j})')
       go(pg, 'trades')

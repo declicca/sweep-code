@@ -506,7 +506,7 @@
   function copyGroups() {
     const up = new Map(), find = (a) => { while (up.get(a) !== a) a = up.get(a); return a; };
     const join = (a, b) => { [a, b].forEach((x) => { if (!up.has(x)) up.set(x, x); }); const ra = find(a), rb = find(b); if (ra !== rb) up.set(ra < rb ? rb : ra, ra < rb ? ra : rb); };
-    const first = new Map(), d = today();
+    const first = new Map(), d = typeof todayStr === 'function' ? todayStr() : today();   // the day of the accounts' limits (acctState), not the routine's: on a weekend evening they differ
     (S.trades || []).forEach((t) => { if (t.copy_group && t.date === d && t.account_id) { if (first.has(t.copy_group)) join(first.get(t.copy_group), t.account_id); else { first.set(t.copy_group, t.account_id); join(t.account_id, t.account_id); } } });
     const out = new Map(); up.forEach((v, k) => out.set(k, find(k))); return out;
   }

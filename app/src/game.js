@@ -709,7 +709,7 @@
   ];
   const WN = { en: ['What’s new', 'Got it'], fr: ['Quoi de neuf', 'Compris'], es: ['Novedades', 'Entendido'] };
   const nyDay = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-  const signupDay = () => { const c = S.me && S.me.created_at; if (c == null || c === '') return ''; const ms = /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z')); return isFinite(ms) ? nyDay(ms) : ''; };
+  const signupDay = () => { const c = S.me && S.me.created_at; if (c == null || c === '') return ''; const ms = /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z')); return isFinite(ms) ? nyDay(ms + 216e5) : ''; };   // the session of the sign-up (18:00 ET or later = the next day, as todayStr)
   function newsRecent() {   // the last 60 days
     const now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
     const old = new Date(now + 'T12:00:00'); old.setDate(old.getDate() - 60); const from = nyDay(old.getTime());

@@ -4331,7 +4331,7 @@ window.SweepMO = window.SweepMO || class {
     let first = LS('sw.day0'); if (!first) { first = now; LS('sw.day0', now); }
     const c = S.me && S.me.created_at;
     const ms = c == null || c === '' ? NaN : /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z'));
-    return first < now && (!isFinite(ms) || nyDay(ms) < now);
+    return first < now && (!isFinite(ms) || nyDay(ms + 216e5) < now);   // the session of the sign-up (18:00 ET or later = the next day, as todayStr)
   }
   const phone = () => !!(window.matchMedia && matchMedia('(pointer: coarse)').matches) && innerWidth < 900;
   let bip = null;   // Chrome's own install prompt, kept for the « Install » button
