@@ -3,7 +3,7 @@ Sweep — a trade typed in the evening (brief 00, phase 1.2-a; Q2, recommendatio
   python3 tests/e2e_evening_entry.py http://127.0.0.1:8095 [storage_state, unused: it signs up its own trader]
 The clock is set in the browser (New York time). From 17:00 to 9:30 ET the new trade form proposes the session that just
 ended (Saturday → Friday), its times empty; « Now » puts today's session and the time, for who trades at night. In the day
-nothing changes (today, now). The exit time never fills itself (typing the exit price used to put « now »); a time not
+nothing changes (today, now), and in the evening too once the session open has a trade (trading tonight). The exit time never fills itself (typing the exit price used to put « now »); a time not
 typed is saved empty, never invented; the direction is the Buy / Sell button's, never the order of the times.
 Before 16 Oct.: at 21:00 on Tuesday a 10:15 trade went to Wednesday's session, at « 21:00 », and an exit time before the
 made-up entry time turned a Buy into a Short.
@@ -66,6 +66,11 @@ with sync_playwright() as p:
     for at, want, what in ((utc(2026, 10, 14, 8), ['2026-10-13', '', ''], '8:00 Wed, before the open: Tue 13'), (utc(2026, 10, 17, 10), ['2026-10-16', '', ''], '10:00 Sat: Fri 16')):
       c, pg, errs = page(at); f = pg.evaluate(form)
       ok(f == want, f'{tag} {what}, times empty ({f})'); allerr += errs; c.close()
+    # trading tonight: the session open already has a trade → that session and the time, no « Now » needed
+    c, pg, errs = page(utc(2026, 10, 13, 21))
+    pg.evaluate("closeTicket(); put('trades',{id:'ee-n1',account_id:'ee-a',instrument:'NQ',direction:'long',contracts:1,entry:1,exit:2,pnl_c:1000,pnl_manual:true,date:'2026-10-14',session_date:true,entry_time:'20:40',exit_time:'20:45'})"); pg.wait_for_timeout(800)
+    pg.evaluate("openTicket(null,{manual:true})"); pg.wait_for_timeout(900); f = pg.evaluate(form)
+    ok(f[0] == '2026-10-14' and f[1].startswith('21:0'), f'{tag} 21:00 Tue, a trade already tonight (20:40): the session open (Wed 14) and the time ({f})'); allerr += errs; c.close()
     c, pg, errs = page(utc(2026, 10, 13, 11)); f = pg.evaluate(form)
     ok(f[0] == '2026-10-13' and f[1].startswith('11:0'), f'{tag} 11:00 Tue, in the day: unchanged, today and now ({f})'); allerr += errs; c.close()
   ok(not allerr, f'no page error ({allerr[:2]})')

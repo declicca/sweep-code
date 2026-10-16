@@ -584,7 +584,10 @@ function tDisc(e) {
   return n ? a / n * 100 : null;
 }
 
-const tkey = e => e.date + " " + (e.entry_time || "99:99") + " " + (e.created_at || ""), sorted = e => e.slice().sort((t, a) => {
+// the real order: an evening trade (18:00 or later, counted on the next session) comes before that session's morning
+// (brief 00, 1.2-c: it came after, and the real-time drawdown showed $1,500 of room instead of $500)
+let MARGIN_V1 = !1;   // the calculation before 16 Oct. (order, payouts), only to tell a trader what changed (acctStateV1, nav.js)
+const tkey = e => e.date + " " + (MARGIN_V1 ? "" : hasSessionDate(e) && String(e.entry_time || "") >= "18" ? "0" : "1") + (e.entry_time || "99:99") + " " + (e.created_at || ""), sorted = e => e.slice().sort((t, a) => {
   const n = tkey(t), s = tkey(a);
   return n < s ? -1 : n > s ? 1 : 0;
 });
@@ -2584,16 +2587,25 @@ function acctLine(e) {
   return s.length ? `<small class="acc-line" data-noi18n>${s.join(" · ")}</small>` : "";
 }
 
+const acctStateV1 = e => {
+  MARGIN_V1 = !0;
+  try {
+    return acctState(e);
+  } finally {
+    MARGIN_V1 = !1;
+  }
+};
+
 function acctState(e) {
   const t = e.rules || {}, a = e.starting_balance_c || 0, n = sorted(S.trades.filter(H => H.account_id === e.id)), s = S.payouts.filter(H => H.account_id === e.id && H.status === "paid").reduce((H, J) => H + (J.amount_c || 0), 0), i = n.reduce((H, J) => H + tNet(J), 0), o = a + i - s;
   let r = a, c = a, l = null, p = !1;
   const PW = S.payouts.filter(H => H.account_id === e.id && H.status === "paid").map(H => ({
     d: String(H.payment_date || H.approval_date || H.request_date || H.date || ""),
     a: H.amount_c || 0
-  })).sort((H, J) => H.d < J.d ? -1 : H.d > J.d ? 1 : 0);
+  })).sort((H, J) => MARGIN_V1 ? H.d < J.d ? -1 : H.d > J.d ? 1 : 0 : (H.d || "9999") < (J.d || "9999") ? -1 : (H.d || "9999") > (J.d || "9999") ? 1 : 0);   // a payout without a date: last, never holding back the next ones
   let PI = 0;
   const PAY = H => {
-    for (;PI < PW.length && PW[PI].d && PW[PI].d < H; ) c -= PW[PI].a, PI++;
+    for (;PI < PW.length && PW[PI].d && PW[PI].d < H; ) c -= PW[PI].a, PI++, !MARGIN_V1 && l != null && c <= l && (p = !0);   // under the limit right after the payout: a breach, even if the next trade wins
   };
   // adjustments (an account added « already running », a recalibration) are balance changes on their date:
   // the trailing drawdown follows them, its stop at the start included (brief 02, part 2; before, they were added afterwards:
@@ -2610,6 +2622,12 @@ function acctState(e) {
       f();
     }
   };
+  // after the last trade: the payouts and adjustments left, in date order — a payout that takes the balance under the limit is
+  // a breach (brief 00, 1.2-b: it was subtracted only before the next trade, so never without one)
+  const FIN = f => {
+    if (MARGIN_V1) return ADJ(null, f);
+    for (;PI < PW.length || AI < AW.length; ) AI < AW.length && (PI >= PW.length || AW[AI].d <= (PW[PI].d || "9999")) ? ADJ(AW[AI].d, f) : (c -= PW[PI++].a, c <= l && (p = !0));
+  };
   const u = t.dd_c || 0, h = t.dd_lock !== !1, m = H => h && t.dd_type !== "static" ? Math.min(H, a + (t.dd_lock_offset_c || 0)) : H;
   // a live account without firm rules: the most it can lose is its balance (some lives start at $0) → limit $0, room = balance
   const lv = !u && (e.money_type || e.phase) === "live";
@@ -2621,17 +2639,17 @@ function acctState(e) {
   };
   if (u) if (l = a - u, t.dd_type === "static") {
     for (const H of n) ADJ(H.date, AS), PAY(H.date), c += tNet(H), c <= l && (p = !0);
-    ADJ(null, AS);
+    FIN(AS);
   } else if (t.dd_type === "trade") {
     for (const H of n) ADJ(H.date, AT), PAY(H.date), c += tNet(H), c <= l && (p = !0), r = Math.max(r, c), l = m(r - u);
-    ADJ(null, AT);
+    FIN(AT);
   } else {
     for (const H of dayMap(n).values()) {
       H.trades[0] && (ADJ(H.trades[0].date, AT), PAY(H.trades[0].date));
       for (const J of H.trades) c += tNet(J), c <= l && (p = !0);
       r = Math.max(r, c), l = m(r - u);
     }
-    ADJ(null, AT);
+    FIN(AT);
   }
   const v = n.filter(H => H.date === todayStr()).reduce((H, J) => H + tNet(J), 0), b = dayMap(n), E = [ ...b.values() ].map(H => H.net), R = E.length ? Math.max(...E) : 0, L = i, x = L > 0 && R > 0 ? R / L : null, C = l != null ? o - l : null, g = {
     bal: o,
@@ -4002,7 +4020,8 @@ function ticketFrom(e, t) {
       tf: 1
     };
   }
-  const s = nowET(), off = !/^d:/.test(t || "") && offHoursET(), i = /^d:\d{4}-\d{2}-\d{2}$/.test(t || "") ? t.slice(2) : off ? lastSessionET() : todayStr();
+  // trading tonight (the session open already has a trade): that session and the time, as in the day
+  const s = nowET(), off = !/^d:/.test(t || "") && offHoursET() && !S.trades.some(o => !o.demo && o.date === todayStr()), i = /^d:\d{4}-\d{2}-\d{2}$/.test(t || "") ? t.slice(2) : off ? lastSessionET() : todayStr();
   return {
     id: null,
     inst: INSTR[a.inst] ? a.inst : "NQ",

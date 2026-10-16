@@ -2854,3 +2854,5 @@ body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-ev
 #tkSlide .tk-f .tk-date{display:flex;gap:8px;align-items:stretch}
 #tkSlide .tk-f .tk-date input{flex:1;min-width:0}
 #tkSlide .tk-f .tk-date .tk-now{flex:none;min-height:44px;height:auto;margin:0}
+/* brief 00, Q3: the margins fixed, told once */
+.nav-mfix-l{margin:4px 0 16px;padding-left:18px;display:grid;gap:6px;font-size:14.5px;line-height:1.4;text-align:left}

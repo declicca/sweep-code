@@ -240,7 +240,9 @@
   /** the session's trades, as the server counts them: real trades of the day, copies on other accounts counted once */
   function dayTrades(day) {
     const seen = new Set(), out = [];
-    (S.trades || []).filter((t) => t.date === day && !t.demo).sort((a, b) => (timeOf(a) || '99:99').localeCompare(timeOf(b) || '99:99') || String(a.created_at || '').localeCompare(String(b.created_at || ''))).forEach((t) => {
+    // the real order: an evening trade (18:00 or later, counted on the next session) before that session's morning (brief 00, 1.2-c)
+    const rk = (t) => { const x = timeOf(t) || '99:99'; return ((typeof hasSessionDate === 'function' ? hasSessionDate(t) : t.session_date) && x >= '18' ? '0' : '1') + x; };
+    (S.trades || []).filter((t) => t.date === day && !t.demo).sort((a, b) => rk(a).localeCompare(rk(b)) || String(a.created_at || '').localeCompare(String(b.created_at || ''))).forEach((t) => {
       if (t.copy_group) { if (seen.has(t.copy_group)) return; seen.add(t.copy_group); }
       out.push(t);
     });
@@ -274,7 +276,7 @@
       const list = dayTrades(d);
       list.forEach((t, i) => {
         const n = net(t), p = list[i - 1], q = list[i - 2]; b.all.push(n);
-        if (p && net(p) < 0) { const a = min(p.exit_time || timeOf(p)), e = min(timeOf(t)); if (a != null && e != null && e >= a && e - a < 10) b.revenge.push(n); }
+        if (p && net(p) < 0) { const a = min(p.exit_time || timeOf(p)), e = min(timeOf(t)); if (a != null && e != null && (e - a + 1440) % 1440 < 10) b.revenge.push(n); }   // across midnight too (23:58 → 00:03)
         if (p && q && net(p) < 0 && net(q) < 0) b.loss2.push(n);
         if (p && q && net(p) > 0 && net(q) > 0 && +t.contracts > +p.contracts) b.up.push(n);
         const e = min(timeOf(t)); if (e != null && e >= 570 && e < 575) b.open5.push(n);
@@ -313,7 +315,7 @@
     const add = (code, v) => issues.push([code, v || {}]);
     if (p.valid && p.maxLoss && before <= -p.maxLoss) add('over_max_loss', { m: usd(p.maxLoss) });
     if (p.valid && p.maxTrades && i >= p.maxTrades) add('over_max_trades', { n: i + 1, m: p.maxTrades });
-    if (prev && net(prev) < 0) { const a = min(prev.exit_time || timeOf(prev)), b = min(timeOf(t)); if (a != null && b != null && b >= a && b - a < 10) add('revenge', { n: b - a }); }
+    if (prev && net(prev) < 0) { const a = min(prev.exit_time || timeOf(prev)), b = min(timeOf(t)), g = a != null && b != null ? (b - a + 1440) % 1440 : null; if (g != null && g < 10) add('revenge', { n: g }); }   // across midnight too
     if (flags.includes('addloser')) add('addloser');
     if (stopAnswer(t) === 'n' || flags.includes('stop')) add('no_stop');
     if (flags.includes('risklimit')) add('risklimit');
@@ -425,7 +427,7 @@
     let sig = '', mine = '', stop = false;
     let losses = 0; for (let k = list.length - 1; k >= 0 && net(list[k]) < 0; k--) losses++;
     let wins = 0; for (let k = list.length - 1; k >= 0 && net(list[k]) > 0; k--) wins++;
-    const gap = last && net(last) < 0 && at != null ? at - (min(last.exit_time || timeOf(last)) ?? at + 1) : null;
+    const lx = last && net(last) < 0 && at != null ? min(last.exit_time || timeOf(last)) : null, gap = lx != null ? (at - lx + 1440) % 1440 : null;   // across midnight too (a loss at 23:58, now 00:03)
     if (p.valid && p.maxLoss && sum <= -p.maxLoss) { sig = fill(T.bMax, { m: usd(p.maxLoss) }); stop = true; }
     else if (p.valid && p.maxTrades && list.length >= p.maxTrades) { sig = fill(T.bDone, { m: p.maxTrades }); stop = true; }
     else if (gap != null && gap >= 0 && gap < 10) { sig = fill(T.bWait, { n: gap, r: 10 - gap }); mine = ownLine('revenge'); stop = true; }

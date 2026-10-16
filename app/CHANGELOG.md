@@ -2,6 +2,7 @@
 
 Une ligne par livraison, la plus récente en haut. Le détail (règles, causes, tests) : `CONTEXTE-APP.md`. Ce fichier n'est pas servi en ligne (`.htaccess` refuse tous les `.md`).
 
+- **16 oct. 2026 — Brief 00, phase 1, lots 1.2-b et 1.2-c.** Un payout qui fait passer le compte sous sa limite est un dépassement, même sans trade après lui ; les trades du soir comptent dans l'ordre réel (drawdown temps réel, coach). Chaque trader dont une marge change est prévenu une fois.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-a.** Le soir, un nouveau trade propose la séance qui vient de finir, heures vides ; « Maintenant » pour trader la nuit. L'heure de sortie ne se remplit plus seule, une heure non tapée n'est jamais inventée, et le sens vient toujours du bouton Achat / Vente.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.3 (tests).** 6 tests qui ne vérifiaient rien vérifient maintenant (et testaient le bon serveur) ; plus d'appel à Google depuis les tests ; `loops_test.php` n'oublie plus de processus.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-m.** Wrapped (du mois et de l'année) compte un trade copié une fois, comme Stats.

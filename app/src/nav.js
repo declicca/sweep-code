@@ -5384,6 +5384,46 @@ new window.SweepMO(() => {
   try { if (window.I18N_FR) Object.assign(window.I18N_FR, add.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, add.es); } catch (e) { /* the app stays in English */ }
 })();
 
+/* brief 00, 1.2-b and 1.2-c (16 Oct.), Q3 recommendation B: two margins were wrong (a payout with no trade after it; the evening
+   trades' order in the real-time drawdown). A trader whose account changes is told once, the room now and before; a mark in
+   his settings (margin_fix) keeps it from coming back, on every device. Nothing changes in his data. */
+(function () {
+  'use strict';
+  if (typeof render !== 'function' || typeof acctStateV1 !== 'function') return;
+  const T = { en: { h: 'We fixed how your room is calculated', s: 'A payout with no trade after it, or an evening trade, was counted wrong. Your accounts are right now:', room: '{a}: room {n} (not {o})', brk: '{a}: drawdown exceeded — the old calculation missed it', ok: 'Got it' },
+    fr: { h: 'On a corrigé le calcul de ta marge', s: 'Un payout sans trade après lui, ou un trade du soir, était mal compté. Tes comptes sont maintenant justes :', room: '{a} : marge {n} (et non {o})', brk: '{a} : drawdown dépassé, l’ancien calcul ne le montrait pas', ok: 'Compris' },
+    es: { h: 'Corregimos el cálculo de tu margen', s: 'Un payout sin operación después, o una operación de la noche, se contaba mal. Tus cuentas ya son correctas:', room: '{a}: margen {n} (no {o})', brk: '{a}: drawdown superado, el cálculo anterior no lo mostraba', ok: 'Entendido' } };
+  const t = () => T[(typeof LANG !== 'undefined' && LANG) || 'en'] || T.en;
+  const usd = (c) => (typeof money === 'function' ? money(Math.round(c), { sign: false, dec: 0 }) : '$' + Math.round(c / 100));
+  const esc2 = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  let done = false;
+  function check() {
+    if (done || !S || !S.settings || !Array.isArray(S.accounts)) return;
+    if (S.settings.margin_fix) { done = true; return; }
+    const accs = S.accounts.filter((a) => !a.demo && a.status !== 'archived' && a.rules && a.rules.dd_c);
+    if (!accs.length) return;   // nothing to compare yet (a new trader): asked again when he has accounts
+    done = true;
+    const lines = [];
+    accs.forEach((a) => {
+      let n = null, o = null; try { n = acctState(a); o = acctStateV1(a); } catch (e) { return; }
+      if (!n || !o) return;
+      if (n.breached && !o.breached) lines.push(t().brk.replace('{a}', a.name || ''));
+      else if (n.buffer != null && o.buffer != null && Math.abs(n.buffer - o.buffer) >= 100) lines.push(t().room.replace('{a}', a.name || '').replace('{n}', usd(Math.max(0, n.buffer))).replace('{o}', usd(Math.max(0, o.buffer))));
+    });
+    try { editDoc('settings', 'settings', (d) => { d.margin_fix = typeof todayStr === 'function' ? todayStr() : '1'; }); } catch (e) { /* asked again next time */ }
+    if (!lines.length) return;
+    const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-mfix';
+    const el = document.createElement('aside'); el.className = 'nav-dlg nav-mfix'; el.setAttribute('role', 'alertdialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
+    el.innerHTML = `<div class="nav-dlg-in"><h2>${esc2(t().h)}</h2><p class="nav-pass-s">${esc2(t().s)}</p><ul class="nav-mfix-l">${lines.map((x) => `<li>${esc2(x)}</li>`).join('')}</ul><button type="button" class="btn primary nav-am-save" data-mfix="1">${esc2(t().ok)}</button></div>`;
+    document.body.append(scrim, el); requestAnimationFrame(() => { el.classList.add('open'); scrim.classList.add('open'); });
+    const close = () => [el, scrim].forEach((x) => { x.classList.remove('open'); setTimeout(() => x.remove(), 250); });
+    el.addEventListener('click', (e) => { if (e.target.closest('[data-mfix]')) close(); }); scrim.addEventListener('click', close);
+    setTimeout(() => { const b = el.querySelector('[data-mfix]'); if (b) b.focus(); }, 50);
+  }
+  const r0 = render;
+  window.render = render = function () { const o = r0.apply(this, arguments); try { setTimeout(check, 1200); } catch (e) { /* never blocks */ } return o; };
+})();
+
 /* brief 00, 1.2-i (16 Oct.): one action on the first screen — no « + » in the bars while the first-run page is shown (it
    opened « Add an account first »); it comes back with the first account */
 (function () {
