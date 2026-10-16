@@ -254,6 +254,7 @@
   /* ───────────── icons ───────────── */
   const CANDLE = (cls = '') => `<svg class="g-candle ${cls}" viewBox="40 8 40 102" fill="none" aria-hidden="true"><line x1="60" y1="14" x2="60" y2="30" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><rect x="46" y="28" width="28" height="44" rx="6" fill="currentColor"/><line x1="60" y1="70" x2="60" y2="84" stroke="currentColor" stroke-width="7"/><line class="g-wick" x1="60" y1="84" x2="60" y2="104" stroke-width="7" stroke-linecap="round"/></svg>`;
   const IC = {
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
     flag: '<path d="M6 21V4M6 4h11l-2 4 2 4H6"/>', book: '<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>',
     sweep: '<circle cx="12" cy="12" r="8"/><path d="M8.5 12.5l2.4 2.4 4.8-5.4"/>', fire: '<path d="M12 21c3.9 0 6.5-2.6 6.5-6.2 0-3.6-2.6-5.6-3.9-8.8-.5 2.2-1.7 3.4-3 3.9.3-2.6-.6-5.2-3.2-6.9.2 3.4-2.9 5.6-2.9 10.1C5.5 18.4 8.1 21 12 21z"/>',
     cal: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>', leaf: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/>',
@@ -689,23 +690,56 @@
     return { text: x.streak.replace('{n}', p.streak.current).replace('{b}', p.streak.best), dot: false };
   }
 
-  /* ───────────── « What's new » (once per trader who started before the redesign; it is the session's modal) ───────────── */
-  const WN = {
-    en: ['What’s new', 'Your tabs are now Today, Trades, Stats and Accounts.', 'Progression, Settings and Subscription are under your avatar.', 'For everything else: « Search or ask Sweep ».', 'Got it'],
-    fr: ['Quoi de neuf', 'Les onglets sont maintenant Aujourd’hui, Trades, Stats et Comptes.', 'Progression, Réglages et Abonnement sont sous ton avatar.', 'Pour tout le reste : « Rechercher ou demander à Sweep ».', 'Compris'],
-    es: ['Novedades', 'Tus pestañas ahora son Hoy, Operaciones, Stats y Cuentas.', 'Progreso, Ajustes y Suscripción están en tu avatar.', 'Para todo lo demás: « Buscar o preguntar a Sweep ».', 'Entendido'],
-  };
-  function maybeWhatsNew() {
-    const p = G.profile;
-    if (!p || !p.onboarding || !p.onboarding.whats_new_due || G.obOpen || G.wnOpen || document.querySelector('#gSheet')) return;
-    if (!useModal()) return;
-    G.wnOpen = true;
-    const w = WN[L()] || WN.en;
-    openSheet(`<div class="g-wn"><span class="g-wn-ic">${svg('spark')}</span><h2>${w[0]}</h2><ul><li>${esc(w[1])}</li><li>${esc(w[2])}</li><li>${esc(w[3])}</li></ul>
-      <button type="button" class="btn primary g-wn-ok" data-g="wn-ok">${w[4]}</button></div>`, { cls: 'g-wnsheet' });
-    p.onboarding.whats_new_due = false;   // once: marked as seen as soon as it is shown
-    apiJSON('api/game/onboarding', { method: 'POST', body: { whats_new: 1 } }).catch(() => {});
+  /* ───────────── « What's new »: the features worth knowing (16 Oct.), each seen once per trader on every device
+     (settings.news_seen), each with the button that does it; the session's modal, never on the day of sign-up ───────────── */
+  // a new feature worth a window: add it on top (id never reused; d = the day it went live, older than 60 days: not shown)
+  const NEWS = [
+    { id: 'push-1', d: '2026-10-14', ic: 'bell', act: 'push',
+      t: { en: 'Reminders on your phone', fr: 'Des rappels sur ton téléphone', es: 'Recordatorios en tu teléfono' },
+      s: { en: 'Sweep reminds you of your plan before the open, your review after the session and your Friday recap.', fr: 'Sweep te rappelle ton plan avant l’ouverture, ta revue après la séance et ton bilan du vendredi.', es: 'Sweep te recuerda tu plan antes de la apertura, tu revisión tras la sesión y tu resumen del viernes.' },
+      b: { en: 'Turn on', fr: 'Activer', es: 'Activar' } },
+    { id: 'debrief-1', d: '2026-10-15', ic: 'book', act: '#journal',
+      t: { en: 'Debrief your day, even without trades', fr: 'Débriefe ta journée, même sans trade', es: 'Analiza tu día, incluso sin operaciones' },
+      s: { en: 'Journal › «\u00a0Debrief my day\u00a0»: untick «\u00a0Include my trades\u00a0» and say your day in a few words.', fr: 'Journal › «\u00a0Débriefer ma journée\u00a0» : décoche «\u00a0Inclure mes trades\u00a0» et raconte ta journée en quelques mots.', es: 'Diario › «\u00a0Analizar mi día\u00a0»: desmarca «\u00a0Incluir mis operaciones\u00a0» y cuenta tu día en pocas palabras.' },
+      b: { en: 'Open the Journal', fr: 'Ouvrir le Journal', es: 'Abrir el Diario' } },
+    { id: 'accsel-1', d: '2026-10-15', ic: 'target', act: '#accounts',
+      t: { en: 'Several accounts at once', fr: 'Plusieurs comptes d’un coup', es: 'Varias cuentas a la vez' },
+      s: { en: 'Accounts: select several to mark them failed or move them to funded or live.', fr: 'Comptes : sélectionnes-en plusieurs pour les marquer échoués ou les passer en financé ou en live.', es: 'Cuentas: selecciona varias para marcarlas como fallidas o pasarlas a financiada o live.' },
+      b: { en: 'See my accounts', fr: 'Voir mes comptes', es: 'Ver mis cuentas' } },
+  ];
+  const WN = { en: ['What’s new', 'Got it'], fr: ['Quoi de neuf', 'Compris'], es: ['Novedades', 'Entendido'] };
+  const nyDay = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const signupDay = () => { const c = S.me && S.me.created_at; if (c == null || c === '') return ''; const ms = /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z')); return isFinite(ms) ? nyDay(ms) : ''; };
+  async function newsDue() {
+    const seen = new Set((S.settings && S.settings.news_seen) || []), now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
+    const old = new Date(now + 'T12:00:00'); old.setDate(old.getDate() - 60); const from = nyDay(old.getTime());
+    const list = NEWS.filter((n) => !seen.has(n.id) && n.d >= from && n.d <= now);
+    const pushSt = list.some((n) => n.act === 'push') && window.SweepNotify && SweepNotify.push ? await SweepNotify.push.state().catch(() => null) : null;   // { available, can, on }
+    return list.filter((n) => n.act !== 'push' || (pushSt && pushSt.available && !pushSt.on));   // the reminders already on (or not offered): nothing to say
   }
+  async function maybeWhatsNew() {
+    if (G.obOpen || G.wnOpen || document.querySelector('#gSheet') || !S.settings || !(S.trades || []).length && !(S.accounts || []).some((a) => !a.demo)) return;
+    const sd = signupDay(), now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
+    if (!sd || sd >= now || modalUsed()) return;   // never on the day of sign-up (the first day has its own steps)
+    const list = await newsDue(); if (!list.length || G.wnOpen || document.querySelector('#gSheet') || !useModal()) return;
+    G.wnOpen = true;
+    const w = WN[L()] || WN.en, x = (o) => o[L()] || o.en;
+    openSheet(`<div class="g-wn"><span class="g-wn-ic">${svg('spark')}</span><h2>${w[0]}</h2><ul class="g-wn-l">${list.map((n) => `<li class="g-wn-it"><span class="g-wn-iic">${svg(n.ic)}</span><div><b>${esc(x(n.t))}</b><p>${esc(x(n.s))}</p><button type="button" class="btn sm g-wn-go" data-g="wn-go" data-v="${esc(n.id)}">${esc(x(n.b))}</button></div></li>`).join('')}</ul>
+      <button type="button" class="btn primary g-wn-ok" data-g="wn-ok">${w[1]}</button></div>`, { cls: 'g-wnsheet' });
+    const ids = list.map((n) => n.id);   // once: seen as soon as shown, on every device
+    if (typeof editDoc === 'function') editDoc('settings', 'settings', (r) => { r.news_seen = [...new Set([...(r.news_seen || []), ...ids])]; });
+  }
+  async function newsGo(id) {
+    const n = NEWS.find((x) => x.id === id); if (!n) return;
+    G.wnOpen = false; closeSheet();
+    if (n.act === 'push') {
+      const r = window.SweepNotify && SweepNotify.push ? await SweepNotify.push.on().catch(() => null) : null;
+      if (!r || !r.on) location.hash = '#settings';   // not possible here (iPhone outside the Home Screen, permission refused…): Settings says why
+      return;
+    }
+    location.hash = n.act;
+  }
+  window.SweepNews = { list: NEWS, due: newsDue, show: maybeWhatsNew };
 
   /* ───────────── one automatic modal per session ───────────── */
   // priority: onboarding (opens first, at load) → rank up / major badge / payout ready / boss beaten. Everything else: a 3 s toast
@@ -2028,6 +2062,7 @@
     else if (a === 'dc-unlink') apiJSON('api/game/discord/unlink', { method: 'POST', body: {} }).then((r) => { G.dc = r; const el = document.getElementById('gBdg'); if (el) { el._h = null; paintSections(); } }).catch(() => {});
     else if (a === 'hub') openHub();
     else if (a === 'wn-ok') { G.wnOpen = false; closeSheet(); }
+    else if (a === 'wn-go') newsGo(v);
     else if (a === 'league') { closeSheet(true); openLeague(); }
     else if (a === 'social') { closeSheet(true); openSocial(v || null); }
     else if (a === 'sc-tab') { SC.tab = v; renderSocial(); }

@@ -569,5 +569,10 @@
   afterRender();
 
   // Public hooks for later features (feedback loop, wow moments, streaks…)
-  window.SweepNotify = { refresh: () => load(true), open: openSheet, strings, t };
+  /* the reminders on this device, from elsewhere (« What's new », game.js): state, and turn on from a tap */
+  const push = {
+    state: async () => { if (!PU.st) await pushLoad(); const st = PU.st || {}; return { available: !!st.available, can: !!st.available && pushCan() && !iosBrowser() && Notification.permission !== 'denied', on: !!PU.dev }; },
+    on: async () => { const s0 = await push.state(); if (!s0.can) return s0; if (!s0.on) await pushOn({ disabled: false }); return push.state(); },
+  };
+  window.SweepNotify = { refresh: () => load(true), open: openSheet, strings, t, push };
 })();
