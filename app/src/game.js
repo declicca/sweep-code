@@ -710,24 +710,50 @@
   const WN = { en: ['What’s new', 'Got it'], fr: ['Quoi de neuf', 'Compris'], es: ['Novedades', 'Entendido'] };
   const nyDay = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   const signupDay = () => { const c = S.me && S.me.created_at; if (c == null || c === '') return ''; const ms = /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z')); return isFinite(ms) ? nyDay(ms) : ''; };
-  async function newsDue() {
-    const seen = new Set((S.settings && S.settings.news_seen) || []), now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
+  function newsRecent() {   // the last 60 days
+    const now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
     const old = new Date(now + 'T12:00:00'); old.setDate(old.getDate() - 60); const from = nyDay(old.getTime());
-    const list = NEWS.filter((n) => !seen.has(n.id) && n.d >= from && n.d <= now);
+    return NEWS.filter((n) => n.d >= from && n.d <= now);
+  }
+  async function newsDue(all) {   // all: the window opened by the trader (seen ones too)
+    const seen = new Set((S.settings && S.settings.news_seen) || []);
+    const list = newsRecent().filter((n) => all || !seen.has(n.id));
     const pushSt = list.some((n) => n.act === 'push') && window.SweepNotify && SweepNotify.push ? await SweepNotify.push.state().catch(() => null) : null;   // { available, can, on }
     return list.filter((n) => n.act !== 'push' || (pushSt && pushSt.available && !pushSt.on));   // the reminders already on (or not offered): nothing to say
   }
   async function maybeWhatsNew() {
     if (G.obOpen || G.wnOpen || document.querySelector('#gSheet') || !S.settings || !(S.trades || []).length && !(S.accounts || []).some((a) => !a.demo)) return;
     const sd = signupDay(), now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
-    if (!sd || sd >= now || modalUsed()) return;   // never on the day of sign-up (the first day has its own steps)
+    if (!sd || sd >= now) return;   // never on the day of sign-up (the first day has its own steps)
+    bell();
+    if (modalUsed()) return;
     const list = await newsDue(); if (!list.length || G.wnOpen || document.querySelector('#gSheet') || !useModal()) return;
+    newsSheet(list);
+  }
+  /* the bell keeps them (category « What's new »): sent once per feature and device, already read when seen (step 3) */
+  function bell() {
+    let sent = []; try { sent = JSON.parse(localStorage.getItem('sw.newsBell') || '[]'); } catch (e) { /* private mode */ }
+    const ids = newsRecent().map((n) => n.id).filter((id) => !sent.includes(id)); if (!ids.length) return;
+    const seen = (S.settings && S.settings.news_seen) || [];
+    apiJSON('api/notifications/news', { method: 'POST', body: { ids, read: ids.filter((id) => seen.includes(id)) } }).then(() => {
+      try { localStorage.setItem('sw.newsBell', JSON.stringify([...sent, ...ids])); } catch (e) { /* private mode */ }
+      if (window.SweepNotify) SweepNotify.refresh();
+    }).catch(() => {});
+  }
+  async function newsOpen(ids) {   // from the avatar menu or the bell: the last 60 days' features, or the ones asked
+    if (G.wnOpen) return;
+    const list = (await newsDue(true)).filter((n) => !ids || ids.includes(n.id));
+    if (!list.length) { if (typeof toast === 'function') toast(({ en: 'Nothing new for now.', fr: 'Rien de neuf pour l’instant.', es: 'Nada nuevo por ahora.' })[L()]); return; }
+    newsSheet(list);
+  }
+  function newsSheet(list) {
     G.wnOpen = true;
     const w = WN[L()] || WN.en, x = (o) => o[L()] || o.en;
     openSheet(`<div class="g-wn"><span class="g-wn-ic">${svg('spark')}</span><h2>${w[0]}</h2><ul class="g-wn-l">${list.map((n) => `<li class="g-wn-it"><span class="g-wn-iic">${svg(n.ic)}</span><div><b>${esc(x(n.t))}</b><p>${esc(x(n.s))}</p><button type="button" class="btn sm g-wn-go" data-g="wn-go" data-v="${esc(n.id)}">${esc(x(n.b))}</button></div></li>`).join('')}</ul>
       <button type="button" class="btn primary g-wn-ok" data-g="wn-ok">${w[1]}</button></div>`, { cls: 'g-wnsheet' });
     const ids = list.map((n) => n.id);   // once: seen as soon as shown, on every device
     if (typeof editDoc === 'function') editDoc('settings', 'settings', (r) => { r.news_seen = [...new Set([...(r.news_seen || []), ...ids])]; });
+    apiJSON('api/notifications/news', { method: 'POST', body: { ids, read: ids } }).then(() => window.SweepNotify && SweepNotify.refresh()).catch(() => {});   // in the bell, read
   }
   async function newsGo(id) {
     const n = NEWS.find((x) => x.id === id); if (!n) return;
@@ -739,7 +765,8 @@
     }
     location.hash = n.act;
   }
-  window.SweepNews = { list: NEWS, due: newsDue, show: maybeWhatsNew };
+  const newsText = (id) => { const n = NEWS.find((x) => x.id === id); return n ? { t: n.t[L()] || n.t.en, s: n.s[L()] || n.s.en } : null; };
+  window.SweepNews = { list: NEWS, due: newsDue, show: maybeWhatsNew, open: newsOpen, text: newsText };
 
   /* ───────────── one automatic modal per session ───────────── */
   // priority: onboarding (opens first, at load) → rank up / major badge / payout ready / boss beaten. Everything else: a 3 s toast

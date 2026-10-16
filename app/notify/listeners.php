@@ -62,4 +62,5 @@ Notify::register('prop_limit', ['category' => 'prop_alerts', 'icon' => 'shield']
 Notify::register('sync_found', ['category' => 'system', 'icon' => 'info']);   // accounts found by a sync add-on, to link (sync/sync-store.php)
 // the 1st of each month: simulated profit, money really received, expenses, net real money (money/money.php)
 Notify::register('money_month', ['category' => 'product_updates', 'icon' => 'info']);
+Notify::register('news', ['category' => 'product_updates', 'icon' => 'star']);   // « What's new » (src/game.js NEWS: the text is the app's)
 Notify::register('trial_ending', ['category' => 'system', 'icon' => 'star']);

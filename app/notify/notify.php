@@ -358,6 +358,17 @@ function nt_route(string $route, string $method, string $uid, bool $isAdmin): vo
             'title_key' => "prop_$kind$level.title", 'body_key' => "prop_$kind$level.body"]);
         json_out(200, ['ok' => true, 'id' => $id]);
     }
+    // « What's new » (16 Oct.): the app's own features (their text is in the app, src/game.js NEWS), once each in the bell;
+    // read: the ones the trader already saw in the window. Only ids: nothing written by the page is shown.
+    if ($route === 'api/notifications/news' && $method === 'POST') {
+        $b = body_json(4096);
+        $ok = fn($v) => is_string($v) && preg_match('/^[a-z0-9-]{1,40}$/', $v);
+        $ids = array_slice(array_values(array_unique(array_filter((array) ($b['ids'] ?? []), $ok))), 0, 10);
+        $read = array_values(array_filter((array) ($b['read'] ?? []), $ok));
+        foreach ($ids as $id) Notify::send($uid, 'news', ['id' => $id], ['dedupe_key' => 'news:' . $id, 'over_cap' => 'quiet']);
+        foreach ($read as $id) q('UPDATE notifications SET read_at = ? WHERE user_id = ? AND dedupe_key = ? AND read_at IS NULL', [time(), $uid, 'news:' . $id]);
+        json_out(200, ['ok' => true]);
+    }
     // Administrator only: send yourself a test, to check the bell, the sheet and the celebration modal.
     if ($route === 'api/notifications/test' && $method === 'POST') {
         if (!$isAdmin) json_out(403, ['error' => 'Administrators only.']);

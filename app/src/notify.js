@@ -270,6 +270,10 @@
 
   /* ───────────── sheet ───────────── */
   function itemHtml(n) {
+    if (n.type === 'news') {   // « What's new »: the feature's own text (src/game.js); an unknown one is not shown
+      const x = window.SweepNews && n.params && SweepNews.text(n.params.id); if (!x) return '';
+      return `<li><button type="button" class="nt-item${n.read ? '' : ' unread'}" data-nt="open" data-id="${n.id}"><span class="nt-ic">${icon('star')}</span><span class="nt-txt"><b>${esc(x.t)}</b><span>${esc(x.s)}</span><small>${esc(ago(n.created_at))}</small></span><i class="nt-dot" aria-hidden="true"></i></button></li>`;
+    }
     const tone = n.priority === 'celebration' ? 'cel' : (n.params && n.params.tone === 'caution' ? 'caution' : '');
     return `<li><button type="button" class="nt-item${n.read ? '' : ' unread'}" data-nt="open" data-id="${n.id}">
       <span class="nt-ic ${tone}">${icon(n.icon)}</span>
@@ -352,6 +356,7 @@
       paintBadge();
       post(`api/notifications/${id}/read`).catch(() => {});
     }
+    if (n.type === 'news' && window.SweepNews) { closeSheet(); setTimeout(() => SweepNews.open([n.params.id]), 260); return; }
     if (n.action_url) { closeSheet(); go(n.action_url); } else paintSheet();
   }
   function markAll() {

@@ -30,11 +30,11 @@ window.SweepMO = window.SweepMO || class {
   if (typeof render !== 'function' || typeof route !== 'function') return;
   const T = {
     en: { list: 'List', cal: 'Calendar', jour: 'Journal', acc: 'Accounts', pay: 'My money', today: 'Today', trades: 'Trades', stats: 'Stats',
-      prog: 'Progression', settings: 'Settings', sub: 'Subscription', ref: 'Referral', fb: 'Give feedback', help: 'Help', admin: 'Traders', out: 'Log out', back: 'Back', menu: 'Menu', search: 'Search' },
+      prog: 'Progression', news: 'What’s new', settings: 'Settings', sub: 'Subscription', ref: 'Referral', fb: 'Give feedback', help: 'Help', admin: 'Traders', out: 'Log out', back: 'Back', menu: 'Menu', search: 'Search' },
     fr: { list: 'Liste', cal: 'Calendrier', jour: 'Journal', acc: 'Comptes', pay: 'Mon argent', today: 'Aujourd’hui', trades: 'Trades', stats: 'Stats',
-      prog: 'Progression', settings: 'Réglages', sub: 'Abonnement', ref: 'Parrainage', fb: 'Donner mon avis', help: 'Aide', admin: 'Traders', out: 'Déconnexion', back: 'Retour', menu: 'Menu', search: 'Rechercher' },
+      prog: 'Progression', news: 'Quoi de neuf', settings: 'Réglages', sub: 'Abonnement', ref: 'Parrainage', fb: 'Donner mon avis', help: 'Aide', admin: 'Traders', out: 'Déconnexion', back: 'Retour', menu: 'Menu', search: 'Rechercher' },
     es: { list: 'Lista', cal: 'Calendario', jour: 'Diario', acc: 'Cuentas', pay: 'Mi dinero', today: 'Hoy', trades: 'Operaciones', stats: 'Stats',
-      prog: 'Progreso', settings: 'Ajustes', sub: 'Suscripción', ref: 'Referidos', fb: 'Dar mi opinión', help: 'Ayuda', admin: 'Traders', out: 'Cerrar sesión', back: 'Atrás', menu: 'Menú', search: 'Buscar' },
+      prog: 'Progreso', news: 'Novedades', settings: 'Ajustes', sub: 'Suscripción', ref: 'Referidos', fb: 'Dar mi opinión', help: 'Ayuda', admin: 'Traders', out: 'Cerrar sesión', back: 'Atrás', menu: 'Menú', search: 'Buscar' },
   };
   const t = () => T[LANG] || T.en;
   const SEG = {
@@ -46,6 +46,7 @@ window.SweepMO = window.SweepMO || class {
   const PARENT = { trade: ['#trades', 'trades'], import: ['#trades', 'trades'], account: ['#accounts', 'acc'], news: ['#dashboard', 'today'],
     settings: ['#dashboard', 'today'], plan: ['#dashboard', 'today'], referral: ['#dashboard', 'today'], feedback: ['#dashboard', 'today'], admin: ['#dashboard', 'today'] };
   const IC = {
+    news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
     prog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
@@ -100,7 +101,7 @@ window.SweepMO = window.SweepMO || class {
     const item = (k, ic, label, cls = '') => `<button type="button" role="menuitem" class="${cls}" data-navm="${k}">${ic}<span>${label}</span></button>`;
     el.innerHTML = `<div class="nav-menu-bg" data-navm="close"></div><div class="nav-menu-panel" role="menu">
       ${S.me ? `<button type="button" class="nav-menu-who" data-navm="plan"><span class="av">${esc(S.me.username.slice(0, 1).toUpperCase())}</span><span class="nm"><b>${esc(S.me.username)}</b>${planLine()}</span></button>` : ''}
-      <div class="nav-mg">${item('prog', IC.prog, x.prog)}</div>
+      <div class="nav-mg">${item('prog', IC.prog, x.prog)}${item('news', IC.news, x.news)}</div>
       <div class="nav-mg">${item('settings', IC.settings, x.settings)}${item('plan', IC.sub, x.sub)}</div>
       <div class="nav-mg">${item('referral', IC.ref, x.ref)}${item('feedback', IC.fb, x.fb)}${item('help', IC.help, x.help)}</div>
       ${admin ? `<div class="nav-mg">${item('admin', IC.admin, x.admin)}</div>` : ''}
@@ -129,6 +130,7 @@ window.SweepMO = window.SweepMO || class {
       const k = m.dataset.navm; closeMenu();
       if (k === 'prog') window.SweepGame && SweepGame.open('hub');
       else if (k === 'help') window.SweepGuide && SweepGuide.open();
+      else if (k === 'news') window.SweepNews && SweepNews.open();
       else if (k !== 'close') location.hash = '#' + k;
       return;
     }
