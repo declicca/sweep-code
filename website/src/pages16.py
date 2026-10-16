@@ -1,6 +1,6 @@
 """Home page sections, built with the design system (ui.py, system.css)."""
 from core import *
-from ui import sec, head, btn, go, split, card, card_media, cards, tiles, frame_d, frame_p, phone_img, qa, final, read_next, bullets, rings
+from ui import sec, head, go, split, card, card_media, cards, tiles, frame_d, phone_img, qa, final, read_next, bullets, rings
 import re
 
 L3 = lambda en, fr, es: T(en, fr, es)
@@ -139,7 +139,6 @@ def sec_faq(lang, t):
 def faq_ld(t):
     return {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":re.sub(r"<[^>]+>","",t(a))}} for q,a in FAQ5]}
 
-REASSURE = L3("Free forever · 60 days of Pro included · No card","Gratuit pour toujours · 60 jours de Pro inclus · Sans carte","Gratis para siempre · 60 días de Pro incluidos · Sin tarjeta")
 def sec_next(lang, t):
     return read_next(lang, t, ["features.html", "prop-firm-tracker.html", "tools.html"])
 def sec_final(lang, t):

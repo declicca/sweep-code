@@ -3,17 +3,10 @@ CAPTURES['ecran-apercu-anneaux.webp'] = ('phone', 1179, 2556, 'Today card with t
 from pages4 import money, PRICES
 
 START = T("Start free","Commencer gratuitement","Empieza gratis")
-FREE_LINE = T("Free forever. Pro included for 60 days.","Gratuit pour toujours. Pro offert pendant 60 jours.","Gratis para siempre. Pro incluido durante 60 días.")
-CONFIDENCE = T("Private by default. Your P&L is never shared. Export or delete your data whenever you want.",
-               "Privé par défaut. Jamais de P&L partagé. Exporte ou supprime tes données quand tu veux.",
-               "Privado por defecto. Tu P&L nunca se comparte. Exporta o elimina tus datos cuando quieras.")
 CONTRACTS14 = "NQ MNQ ES MES YM MYM RTY M2K CL MCL GC MGC SI 6E".split()
 CHART_NOTE = T("Charts available 24 hours after the session. CME market data. Charts powered by TradingView Lightweight Charts™.",
                "Graphiques disponibles 24 h après la séance. Données de marché CME. Graphiques propulsés par TradingView Lightweight Charts™.",
                "Gráficos disponibles 24 h después de la sesión. Datos de mercado de CME. Gráficos impulsados por TradingView Lightweight Charts™.")
-PROP_NOTE = T("Rules prefilled for guidance only. Always check your firm’s current rules.",
-              "Règles préremplies à titre indicatif. Vérifie toujours les règles actuelles de ta firme.",
-              "Reglas precargadas solo a título indicativo. Verifica siempre las reglas actuales de tu firma.")
 CHECK = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>'
 def chips14(): return '<div class="chips">' + "".join(f"<span>{c}</span>" for c in CONTRACTS14) + "</div>"
 def note(t, d): return f'<p class="fine">{t(d)}</p>'
@@ -34,8 +27,8 @@ def sec_sweep_day(lang, t, id_="sweep-the-day", rule=True):
       ui.frame_p("v6-poster-today-phone.webp", t(T("Today on a phone: rings, days, releases","Aujourd’hui sur téléphone : anneaux, jours, annonces","Hoy en el teléfono: anillos, días, datos")), t, video="v6-video-today-phone.mp4"),
       id_=id_, phone=True, more=ui.rings(t))
 
-def sec_charts(lang, t, id_="charts", flip=True, sp=None):
-    return (sp or split)(t, T("Real charts","Graphiques réels","Gráficos reales"), T("Your trades on real charts.","Tes trades sur de vrais graphiques.","Tus operaciones en gráficos reales."),
+def sec_charts(lang, t, sp, id_="charts", flip=True):
+    return sp(t, T("Real charts","Graphiques réels","Gráficos reales"), T("Your trades on real charts.","Tes trades sur de vrais graphiques.","Tus operaciones en gráficos reales."),
       T("See every trade where it happened, on real CME candles: entry, exit, stop, target and your position zone. Charts are ready the day after the session.",
         "Vois chaque trade là où il s’est passé, sur les vraies bougies du CME : entrée, sortie, stop, objectif et zone de position. Les graphiques sont prêts le lendemain de la séance.",
         "Mira cada operación donde ocurrió, sobre velas reales de CME: entrada, salida, stop, objetivo y zona de posición. Los gráficos están listos al día siguiente de la sesión."),
@@ -45,20 +38,6 @@ def sec_charts(lang, t, id_="charts", flip=True, sp=None):
        T("<b>Full screen,</b> pinch to zoom, light and dark mode","<b>Plein écran,</b> zoom au pincement, mode clair et foncé","<b>Pantalla completa,</b> zoom con pellizco, modo claro y oscuro")],
       slot("ecran-graphique-trade.webp","desktop",t(T("Trade recap on a real NQ chart with the position zone and the result in R","Récap d’un trade NQ sur vrai graphique avec la zone de position et le résultat en R","Resumen de una operación NQ en gráfico real con la zona de posición y el resultado en R")),t),
       flip=flip, id_=id_, more=f'<div style="margin-top:26px">{chips14()}</div>{note(t,CHART_NOTE)}')
-
-def sec_prop(lang, t, id_="prop", flip=False, link=True, title=None):
-    m = f'<div class="cta-row"><a class="btn btn-line" href="{href(lang,"prop-firm-tracker.html")}">{t(T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"))}</a></div>' if link else ""
-    return split(t, T("Prop firms","Prop firms","Prop firms"), title or T("Built for prop firm traders.","Construit pour les traders de prop firms.","Hecho para traders de prop firms."),
-      T(f"Pick your firm and account size: {FIRMS_OR['en']}. Target, drawdown, daily loss, consistency and minimum days fill in by themselves. Sweep watches every rule and tells you when you’re ready for the payout.",
-        f"Choisis ta firme et la taille du compte : {FIRMS_OR['fr']}. Objectif, drawdown, perte quotidienne, consistance et jours minimum se remplissent seuls. Sweep surveille chaque règle et te dit quand tu es prêt pour le payout.",
-        f"Elige tu firma y el tamaño de la cuenta: {FIRMS_OR['es']}. Objetivo, drawdown, pérdida diaria, consistencia y días mínimos se completan solos. Sweep vigila cada regla y te dice cuándo estás listo para el payout."),
-      [T("<b>Rule presets</b> by firm and account size (25K to 150K)","<b>Préréglages de règles</b> par firme et par taille de compte (25K à 150K)","<b>Reglas predefinidas</b> por firma y tamaño de cuenta (25K a 150K)"),
-       T("<b>Copy a trade</b> to several accounts at once","<b>Copier un trade</b> sur plusieurs comptes en même temps","<b>Copiar una operación</b> en varias cuentas a la vez"),
-       T("<b>“Ready for payout”</b> meter in %, with a golden moment at 100%","<b>Compteur « Prêt pour le payout »</b> en %, avec un moment doré à 100 %","<b>Indicador «Listo para el payout»</b> en %, con un momento dorado al 100 %"),
-       T("<b>Payouts</b> (requested → approved → paid) and <b>expenses</b> (evaluations, activations, resets)","<b>Suivi des payouts</b> (demandé → approuvé → payé) et des <b>dépenses</b> (évaluations, activations, resets)","<b>Payouts</b> (solicitado → aprobado → pagado) y <b>gastos</b> (evaluaciones, activaciones, reinicios)"),
-       T("<b>Discipline rules</b> detected automatically from your executions","<b>Règles de discipline</b> détectées automatiquement à partir des exécutions","<b>Reglas de disciplina</b> detectadas automáticamente a partir de las ejecuciones")],
-      slot("ecran-comptes-prop.webp","desktop",t(T("Prop accounts with the ready-for-payout meter","Comptes prop avec le compteur prêt pour le payout","Cuentas prop con el indicador listo para el payout")),t,fallback="accounts"),
-      flip=flip, id_=id_, more=note(t,PROP_NOTE) + m)
 
 def sec_trust(lang, t, id_="data"):
     """Trust and data (features page), on the design system."""
@@ -157,7 +136,6 @@ def page_home(lang, t):
             body, ld)
 SYSTEM_PAGES.add("index.html")
 
-
 # ----------------------------------------------------------------- product tour video (lightbox)
 TOUR_LABEL = T("Watch the 1-min tour","Voir la visite en 1 min","Ver el tour de 1 min")
 
@@ -222,7 +200,6 @@ def page_how(lang, t):
 SYSTEM_PAGES.add("how-it-works.html")
 
 # ----------------------------------------------------------------- PRICING
-PRICE_FAQ = None  # filled from FAQ in pages2
 
 def page_pricing(lang, t):
     """Pricing, on the design system (the billing switch and the plans deck keep their site.js hooks)."""

@@ -251,7 +251,6 @@ def payout_sentence(f, p, s, label):
     return out
 
 # ---------------------------------------------------------------- page
-RULE_NAMES = {"eval": T("evaluation","évaluation","evaluación"), "funded": T("funded","financé","financiada"), "live": T("live","live","live")}
 
 FIELD = {"target": T("Profit target","Objectif de profit","Objetivo de beneficio"), "dd": T("Max loss","Perte max","Pérdida máx."), "dd_type": T("Drawdown type","Type de drawdown","Tipo de drawdown"),
          "dll": T("Daily loss limit","Limite de perte du jour","Límite de pérdida diaria"), "consistency": T("Consistency","Consistance","Consistencia"), "min_days": T("Minimum days","Jours minimum","Días mínimos"),
@@ -679,7 +678,6 @@ def make_manual_page(slug, name):
                 hero + b + ui.final(lang, t), ld)
     return page
 
-
 # ---------------------------------------------------------------- every rule change, all firms (and its RSS feed, written by build.py)
 CHANGES_HELP = T("""<h2>How changes are detected</h2><p>Every week, Sweep checks each firm’s official pages and compares every rule with the previous check: profit targets, max loss, daily limits, consistency, minimum days, payout conditions and prices. More on <a href="@how-we-verify-prop-firm-rules.html">how we verify the rules</a>.</p>
 <h2>What counts as a change</h2><p>Only a value the firm changed. When Sweep adds a rule it didn’t track yet, or corrects a value it had read wrong, that’s a correction of Sweep’s data, not a change by the firm, and it isn’t listed here.</p>
@@ -726,7 +724,6 @@ def page_rule_changes(lang, t):
                 f"Cada cambio de regla detectado en las páginas oficiales de {FIRMS_N} prop firms de futuros: la regla, antes y después, la fecha y la fuente.")),
             hero + b + ui.final(lang, t), RSS_LINK)
 SYSTEM_PAGES.add(RULE_CHANGES)
-
 
 def rss(domain):
     """The rule changes as an RSS 2.0 feed, newest first (the 50 latest)."""

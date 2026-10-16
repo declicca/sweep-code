@@ -1,9 +1,6 @@
 from core import *
 import re
 
-def fm(m):
-    return lambda *a, **k: frame(*a, mobile=m, **k)
-
 AI_FEATURES = [
  ("spark", T("Log in plain words","Saisie en mots simples","Registra con tus palabras"),
   T("“2 NQ longs at the London open, first stopped at −12 ticks, second +30 at target” becomes draft trades you check and save.","« 2 longs NQ à l’ouverture de Londres, le premier stoppé à −12 ticks, le second +30 à la cible » devient des brouillons de trades à vérifier et enregistrer.","«2 largos en NQ en la apertura de Londres, el primero en stop a −12 ticks, el segundo +30 en objetivo» se convierte en borradores que revisas y guardas.")),
@@ -47,22 +44,6 @@ AI_FAQ = [
     "Rien n’est envoyé tant que tu ne touches pas une action IA. Ensuite, seul ce dont l’action a besoin (ton texte, la capture choisie ou de courts résumés de tes stats) est transmis au fournisseur d’IA. Réglages → Sweep AI l’explique en détail, et la politique de confidentialité nomme le fournisseur.",
     "No se envía nada hasta que tocas una acción de IA. Después, solo lo que esa acción necesita (tu texto, la captura elegida o breves resúmenes de tus estadísticas) va al proveedor de IA. Ajustes → Sweep AI lo explica en detalle y la Política de privacidad nombra al proveedor.")),
 ]
-
-def ai_band(lang, t, short=False):
-    SHORT = {"ai-log-trades": T("Describe the trade. Sweep fills the ticket.","Décris le trade. Sweep remplit le ticket.","Describe la operación. Sweep llena el ticket."),
-             "ask-sweep": T("Questions about your trading, answered with your own numbers.","Tes questions sur ton trading, avec tes propres chiffres.","Preguntas sobre tu trading, con tus propios números."),
-             "news-impact-report": T("A recap about a minute after every U.S. release.","Un récap environ une minute après chaque annonce américaine.","Un resumen aproximadamente un minuto después de cada dato de EE. UU.")}
-    card = lambda dscreen, mscreen, h, p, cap=None: f'''<article class="pillar"><div class="txt"><span class="spark-tag">✦ Sweep AI</span><h3>{t(h)}</h3><p>{t(SHORT[dscreen] if short else p)}</p></div><div class="shot">{picture_dm(dscreen,mscreen,lang,t(h))}</div></article>'''
-    return f'''<section class="rule ai-band"><div class="wrap">
-<div class="head"><span class="kick">{t(T("New","Nouveau","Nuevo"))}</span><h2>{t(T("Your journal, now with AI.","Ton journal, maintenant avec l’IA.","Tu diario, ahora con IA."))}</h2>
-<p class="lead">{t(T("Describe a trade in plain words, ask your journal anything, read a recap after every U.S. release. You approve every draft. Sweep does the math.","Décris un trade en mots simples, pose n’importe quelle question à ton journal, lis un récap après chaque annonce américaine. Tu approuves chaque brouillon. Sweep fait les calculs.","Describe una operación con tus palabras, pregúntale lo que quieras a tu diario, lee un resumen tras cada dato de EE. UU. Tú apruebas cada borrador. Sweep hace las cuentas."))}</p></div>
-<div class="pillars stagger">
-{card("ai-log-trades","ask-sweep",T("Log in plain words","Saisie en mots simples","Registra con tus palabras"),T("Describe your trades like you would to a friend, or drop a screenshot. Sweep fills the ticket for you to check.","Décris tes trades comme à un ami, ou dépose une capture. Sweep remplit le ticket, tu vérifies.","Describe tus operaciones como a un amigo, o suelta una captura. Sweep llena el ticket y tú lo revisas."))}
-{card("ask-sweep","ask-sweep",T("Ask your journal","Interroge ton journal","Pregunta a tu diario"),T("“Which setup makes me the most money?” Ask Sweep answers from your own trades, with numbers Sweep calculates.","« Quel setup me rapporte le plus? » Ask Sweep répond à partir de tes trades, avec des chiffres calculés par Sweep.","«¿Qué setup me da más dinero?» Ask Sweep responde con tus operaciones y cifras calculadas por Sweep."))}
-{card("news-impact-report","news-impact-report",T("A report after every release","Un rapport après chaque annonce","Un informe tras cada dato"),T("A flash recap about a minute after U.S. releases, then a full read on NQ, ES, yields and the dollar at 30 minutes.","Un récap éclair environ une minute après les annonces américaines, puis une lecture complète sur NQ, ES, les taux et le dollar à 30 minutes.","Un resumen flash aproximadamente un minuto después de los datos de EE. UU., y luego una lectura completa de NQ, ES, rendimientos y dólar a los 30 minutos."))}
-</div>
-<div class="cta-row"><a class="btn btn-line" href="{href(lang,'ai.html')}">{t(T("Discover Sweep AI","Découvrir Sweep AI","Descubrir Sweep AI"))}</a></div>
-</div></section>'''
 
 def timeline(t):
     steps = [(T("At release","À la publication","Al publicarse"), T("Numbers fill in","Les chiffres se remplissent","Las cifras se completan"), T("Actual, consensus, previous and revision, from official sources.","Réel, consensus, précédent et révision, de sources officielles.","Real, consenso, anterior y revisión, de fuentes oficiales.")),

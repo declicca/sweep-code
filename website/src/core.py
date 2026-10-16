@@ -64,15 +64,6 @@ def picture(kind, screen, lang, alt, eager=False, sizes=None, full=False):
     return (f'<picture>{light_src}<source srcset="{ss(dark)}" sizes="{sizes}">'
             f'<img src="{src}" width="{w}" height="{h}" alt="{html.escape(alt)}" {load} decoding="async"></picture>')
 
-def picture_dm(dscreen, mscreen, lang, alt, sizes="(max-width: 860px) 1px, 380px"):
-    """Desktop crop on large screens, real phone capture on phones (same <img>, art-directed)."""
-    base = picture("desktop", dscreen, lang, alt, sizes=sizes)
-    L = _pick("mobile", lang, mscreen); m = f"mobile-{L}-dark-{mscreen}"; ml = f"mobile-{L}-light-{mscreen}"
-    src = ""
-    if ml in IMGS: src += f'<source media="(max-width: 860px) and (prefers-color-scheme: light)" srcset="/img/{ml}-786.webp">'
-    src += f'<source media="(max-width: 860px)" srcset="/img/{m}-786.webp">'
-    return base.replace("<picture>", "<picture>" + src, 1)
-
 def has_mobile(screen):
     return f"mobile-en-dark-{screen}" in IMGS
 
@@ -89,8 +80,6 @@ REPL = {
  "journal-day": ("ecran-journal-ordi.webp", "ecran-journal-tel.webp"),
  "insights-discipline": (None, "ecran-revue-60s.webp"),
 }
-PHONE_REPL = {"overview": "ecran-apercu-anneaux.webp", "new-trade": "ecran-ajout-bougie-static.webp", "insights": "ecran-analyses-tel.webp",
-              "calendar": "ecran-calendrier-tel.webp", "trades": "ecran-journal-tel.webp", "accounts": "ecran-comptes-tel.webp"}
 
 def dsrc(name):
     """srcset for desktop captures (1200 and 2400 wide)."""
@@ -118,11 +107,6 @@ def frame(screen, lang, alt, t, cap=True, eager=False, cls="", sizes=None, swap=
         return (f'<figure class="sw {cls}"><div class="frame">{picture("desktop", screen, lang, alt, eager, sizes or "(max-width: 860px) 1px, 760px")}</div>'
                 f'<div class="phone m">{picture("mobile", ms, lang, alt, False, "(max-width: 860px) 72vw, 1px")}</div>{c}</figure>')
     return f'<figure class="{cls}"><div class="frame">{picture("desktop", screen, lang, alt, eager, sizes)}</div>{c}</figure>'
-
-def phone(screen, lang, alt, eager=False, sizes=None):
-    if screen in PHONE_REPL:
-        return f'<div class="phone">{capimg(PHONE_REPL[screen], alt, 900, 1948, eager)}</div>'
-    return f'<div class="phone">{picture("mobile", screen, lang, alt, eager, sizes)}</div>'
 
 def ico(path):
     return f'<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{path}</svg></div>'
@@ -227,7 +211,6 @@ def _foot_firms():
     rules = {f["name"]: page_of(f) for f in _PRESET_LIST}
     return [(rules.get(name, jp), T(name, name, name)) for jp, name in JOURNALS]
 
-
 # prop firms with preloaded rules: from the app's catalogue (presets.py), never retyped here
 from presets import PRESET_FIRMS, FIRMS as _PRESET_LIST
 def poss(name):
@@ -238,12 +221,7 @@ def and_list(names, lang):
     """« A, B and C » in the page's language."""
     if len(names) < 2: return "".join(names)
     return ", ".join(names[:-1]) + {"en": " and ", "fr": " et ", "es": " y "}[lang] + names[-1]
-def or_list(names, lang):
-    """« A, B or C » in the page's language."""
-    if len(names) < 2: return "".join(names)
-    return ", ".join(names[:-1]) + {"en": " or ", "fr": " ou ", "es": " o "}[lang] + names[-1]
 FIRMS_N = len(_PRESET_LIST)
-FIRMS_OR = {l: or_list([f["name"] for f in _PRESET_LIST], l) for l in ("en", "fr", "es")}
 FIRMS_TXT = {l: and_list([f["name"] for f in _PRESET_LIST], l) for l in ("en", "fr", "es")}
 def other_firms():
     """Firms with a journal page on the site but no preloaded rules in the app (added as « Other firm »)."""
@@ -663,15 +641,6 @@ def page_hero(t, h1, lead, kick=None, cta=None, visual=""):
 def ul(t, items, cls="list"):
     return f'<ul class="{cls}">' + "".join(f"<li>{t(x)}</li>" for x in items) + "</ul>"
 
-def split(t, kick, h, p, items, media, flip=False, id_="", rule=True, more=""):
-    k = f'<span class="kick">{t(kick)}</span>' if kick else ""
-    return f'''<section{f' id="{id_}"' if id_ else ""}{' class="rule"' if rule else ""}><div class="wrap split{" flip" if flip else ""}">
-<div class="copy">{k}<h2>{t(h)}</h2><p class="lead">{t(p)}</p>{ul(t, items) if items else ""}{more}</div>
-<div class="reveal">{media}</div></div></section>'''
-
-def grid(t, items, cols="g3"):
-    return f'<div class="grid stagger {cols}">' + "".join(f'<div>{ico(I[k])}<h3>{t(a)}</h3><p>{t(b)}</p></div>' for k, a, b in items) + '</div>'
-
 def faq_item(t, q, a):
     return f'<details><summary>{t(q)}<span class="plus" aria-hidden="true"></span></summary><div class="ans"><p>{t(a)}</p></div></details>'
 
@@ -723,18 +692,11 @@ def slot(name, kind, alt, t, fallback=None, cap=True, video=False, poster=None, 
     box = {"phone": "phone", "desktop": "frame", "card": "scard"}[kind]
     return f'<figure class="slot {cls}"><div class="{box} ph {kind}">{label}{media}</div>{c}</figure>'
 
-
-def capphone(name, alt, light=None):
-    """Phone frame with a capture from /img/captures (used in phone rows)."""
-    src = f'<source media="(prefers-color-scheme: light)" srcset="/img/captures/{light}">' if light else ""
-    return f'<div class="phone"><picture>{src}<img src="/img/captures/{name}" width="900" height="1948" alt="{html.escape(alt)}" loading="lazy" decoding="async"></picture></div>'
-
 # Founding cohort: minimum confirmed count shown while the app endpoint catches up (never inflates: the real count wins as soon as it is higher)
 COHORT_FLOOR = 0   # live count only (from the app database)
 
 # Activity numbers appear on the home page only once there are at least this many trades journaled
 STATS_MIN = 250
-
 
 def shell(lang, page, title, desc, body, t, extra_head=""):
     out = _shell_raw(lang, page, title, desc, body, t, extra_head)

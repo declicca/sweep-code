@@ -1,16 +1,10 @@
 from core import *
-from pages3 import ai_band, AI_FEATURES
-from pages4 import share_band, plans_band, plan_tag, share_img
-from pages6 import sec_charts, sec_trust, sec_prop, sec_sweep_day, PROP_NOTE
+from pages3 import AI_FEATURES
+from pages4 import share_img
+from pages6 import sec_charts, sec_trust
 
-CHECK_SVG = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>'
 def fm(m):
     return lambda *a, **k: frame(*a, mobile=m, **k)
-CONTRACTS = "NQ MNQ ES MES YM MYM RTY M2K CL MCL GC MGC SI 6E".split()
-def chips(): return '<div class="chips">' + "".join(f"<span>{c}</span>" for c in CONTRACTS) + "</div>"
-
-VIP_PILL = T("Share cards are here","Les cartes à partager sont là","Llegan las tarjetas para compartir")
-VIP_TAG = T("Share your payouts","Partage tes payouts","Comparte tus payouts")
 
 # ============================ FEATURES ============================
 def page_features(lang, t):

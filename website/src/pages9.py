@@ -1,57 +1,19 @@
 from core import *
 
-GAME_LIVE = True   # set False to label all gamification as "Coming soon" across the site
-
-def soon(t):
-    return "" if GAME_LIVE else f' <span class="plan-tag">{t(T("Coming soon","Bientôt","Pronto"))}</span>'
-
 # ------------------------------------------------------------------ home: why Sweep (section 4.2)
-def sec_why(lang, t):
-    items = [("net", T("The same numbers as your platform.","Les mêmes chiffres que ta plateforme.","Los mismos números que tu plataforma."),
-                       T("Real P&L, fees and slippage. No more gaps with your account.","P&L réel, frais et glissement. Fini les écarts avec ton compte.","P&L real, comisiones y deslizamiento. Se acabaron las diferencias con tu cuenta.")),
-             ("shield", T("Your firm’s real rules.","Les vraies règles de ta firme.","Las reglas reales de tu firma."),
-                       T("Drawdown, payout conditions, evaluation → funded → live.","Drawdown, conditions de payout, évaluation → financé → live.","Drawdown, condiciones de payout, evaluación → fondeada → live.")),
-             ("target2", T("A routine that rewards discipline.","Une routine qui récompense ta discipline.","Una rutina que premia tu disciplina."),
-                       T("Never your profit.","Jamais ton profit.","Nunca tu beneficio."))]
-    cells = "".join(f'<div>{ico(I[k])}<h3>{t(h)}</h3><p>{t(p)}</p></div>' for k,h,p in items)
-    return f'<section class="why-sec"><div class="wrap"><div class="why stagger">{cells}</div></div></section>'
 
 # ------------------------------------------------------------------ home: log by screenshot (2.1)
-def sec_capture(lang, t):
-    pts = [T("<b>Net P&L like on your platform,</b> and your R, shown first","<b>Le P&L net comme sur ta plateforme,</b> et ton R, en premier","<b>El P&L neto como en tu plataforma,</b> y tu R, primero"),
-           T("<b>Discipline and psychology</b> on the same screen","<b>Discipline et psychologie</b> sur le même écran","<b>Disciplina y psicología</b> en la misma pantalla"),
-           T("<b>Several accounts at once</b> with “Also on”","<b>Plusieurs comptes d’un coup</b> avec « Aussi sur »","<b>Varias cuentas a la vez</b> con «También en»"),
-           T("<b>Prefer typing?</b> Entry and exit side by side, quick exits at the stop or target","<b>Tu préfères à la main ?</b> Entrée et sortie côte à côte, sorties rapides au stop ou à l’objectif","<b>¿Prefieres a mano?</b> Entrada y salida lado a lado, salidas rápidas al stop o al objetivo")]
-    media = slot("v6-03-log-by-screenshot-m.webp","phone",t(T("Pasting a screenshot fills the trade","Coller une capture remplit le trade","Pegar una captura completa la operación")),t)
-    return split(t, T("New · Logging","Nouveau · Saisie","Nuevo · Registro"), T("One screenshot. Trade logged.","Une capture. Ton trade est fait.","Una captura. Operación registrada."),
-        T("Paste your platform’s screenshot: Sweep AI fills in the trade, your net P&L and your R. Answer your discipline and psychology on the same screen.",
-          "Colle la capture de ta plateforme : Sweep AI remplit le trade, ton P&L net et ton R. Tu réponds à ta discipline et ta psychologie sur le même écran.",
-          "Pega la captura de tu plataforma: Sweep AI completa la operación, tu P&L neto y tu R. Respondes tu disciplina y tu psicología en la misma pantalla."),
-        pts, media, id_="logging")
 
 # ------------------------------------------------------------------ home + features: real prop rules (2.4)
-def sec_rules(lang, t, id_="prop", flip=False, link=True):
-    pts = [T("<b>Real payout conditions,</b> counted since your last request: winning days, cushion, minimum and maximum","<b>Conditions de payout réelles,</b> comptées depuis ta dernière demande : jours gagnants, coussin, minimum et maximum","<b>Condiciones de payout reales,</b> contadas desde tu última solicitud: días ganadores, colchón, mínimo y máximo"),
-           T("<b>Evaluation passed → funded,</b> created automatically with your firm’s funded rules","<b>Évaluation réussie → financé,</b> créé automatiquement avec les règles financées de ta firme","<b>Evaluación superada → fondeada,</b> creada automáticamente con las reglas fondeadas de tu firma"),
-           T("<b>Live accounts</b> highlighted, funded → live in one tap","<b>Comptes live</b> mis en avant, financé → live en un toucher","<b>Cuentas live</b> destacadas, fondeada → live en un toque"),
-           T("<b>A rule changes?</b> You see what it means for your account, and you decide","<b>Une règle change ?</b> Tu vois ce que ça change pour ton compte, et tu décides","<b>¿Cambia una regla?</b> Ves qué significa para tu cuenta, y tú decides")]
-    m = f'<div class="cta-row"><a class="btn btn-line" href="{href(lang,"prop-firm-tracker.html")}">{t(T("Sweep for prop traders","Sweep pour les traders prop","Sweep para traders prop"))}</a></div>' if link else ""
-    note = f'<p class="fine">{t(T("Rules prefilled for guidance only. Catalog checked every week. Always check your firm’s current rules.","Règles préremplies à titre indicatif. Catalogue vérifié chaque semaine. Vérifie toujours les règles actuelles de ta firme.","Reglas precargadas a título indicativo. Catálogo revisado cada semana. Verifica siempre las reglas actuales de tu firma."))}</p>'
-    media = slot("ecran-payout-apex.webp","desktop",t(T("Payout conditions card for a prop account","Carte des conditions de payout d’un compte prop","Tarjeta de condiciones de payout de una cuenta prop")),t,fallback="cap:ecran-comptes-prop.webp")
-    return split(t, T("Prop firms","Prop firms","Prop firms"), T("Your firm’s real rules.","Les vraies règles de ta firme.","Las reglas reales de tu firma."),
-        T(f"{FIRMS_TXT['en']}: winning days, safety net, payout minimum and maximum. Sweep tells you when you can request, and how much.",
-          f"{FIRMS_TXT['fr']} : jours gagnants, coussin, minimum et maximum de payout. Sweep te dit quand tu peux demander, et combien.",
-          f"{FIRMS_TXT['es']}: días ganadores, colchón, mínimo y máximo de payout. Sweep te dice cuándo puedes pedirlo y cuánto."),
-        pts, media, flip=flip, id_=id_, more=note + m)
 
 # ------------------------------------------------------------------ features: platform numbers (2.2 + 2.3)
-def sec_numbers(lang, t, sp=None):
+def sec_numbers(lang, t, sp):
     pts = [T("<b>Real P&L (platform):</b> type the P&L your platform shows, it becomes the truth everywhere","<b>P&L réel (plateforme) :</b> tape le P&L affiché par ta plateforme, il devient la vérité partout","<b>P&L real (plataforma):</b> escribe el P&L de tu plataforma y se convierte en la referencia en todas partes"),
            T("<b>Commission per contract</b> on each account, deducted automatically","<b>Commission par contrat</b> sur chaque compte, déduite automatiquement","<b>Comisión por contrato</b> en cada cuenta, descontada automáticamente"),
            T("<b>Slippage and fees:</b> what slippage costs you, in $ and in R","<b>Glissement et frais :</b> ce que le glissement te coûte, en $ et en R","<b>Deslizamiento y comisiones:</b> lo que te cuesta el deslizamiento, en $ y en R"),
            T("<b>Add to a position and partial exits,</b> with the average entry price recalculated like on your platform","<b>Ajout à la position et sorties partielles,</b> avec le prix moyen recalculé comme sur ta plateforme","<b>Añadir a la posición y salidas parciales,</b> con el precio medio recalculado como en tu plataforma"),
            T("<b>Recalibrate an account</b> to your platform balance without skewing your stats","<b>Recalibrer un compte</b> sur le solde de ta plateforme, sans fausser tes statistiques","<b>Recalibrar una cuenta</b> al saldo de tu plataforma sin alterar tus estadísticas")]
-    return (sp or split)(t, T("Your numbers","Tes chiffres","Tus números"), T("The same numbers as your platform.","Les mêmes chiffres que ta plateforme.","Los mismos números que tu plataforma."),
+    return sp(t, T("Your numbers","Tes chiffres","Tus números"), T("The same numbers as your platform.","Les mêmes chiffres que ta plateforme.","Los mismos números que tu plataforma."),
         T("Exact P&L on average prices, to the cent. Enter prices or dollar amounts for the exit, stop and target.","P&L exact sur les prix moyens, au cent près. Saisis des prix ou des montants en $ pour la sortie, le stop et l’objectif.","P&L exacto sobre precios medios, al céntimo. Introduce precios o importes en $ para la salida, el stop y el objetivo."),
         pts, slot("ecran-formulaire-capture.webp","phone",t(T("Trade form with net P&L and R first","Formulaire avec P&L net et R en premier","Formulario con P&L neto y R primero")),t,fallback="cap:ecran-ajout-bougie-static.webp"), flip=True, id_="numbers")
 

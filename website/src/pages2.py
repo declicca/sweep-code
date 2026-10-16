@@ -1,8 +1,6 @@
 from core import *
 TODAY2 = '2026-10-03'
 import re
-from pages3 import AI_FAQ
-
 
 FAQ = [
  (T("Free and plans","Gratuit et forfaits","Gratis y planes"), [
@@ -100,52 +98,6 @@ def page_faq(lang, t):
 SYSTEM_PAGES.add("faq.html")
 
 INDICATORS = ["CPI","Core CPI","PPI","PCE","Nonfarm Payrolls","Unemployment rate","Average hourly earnings","Initial jobless claims","ADP employment","JOLTS","GDP","Retail sales","ISM Manufacturing","ISM Services","Consumer confidence","FOMC decision","FOMC minutes"]
-def page_econ(lang, t):
-    hero = page_hero(t, T("An economic calendar that knows your trades.","Un calendrier économique qui connaît tes trades.","Un calendario económico que conoce tus operaciones."),
-        T("High and medium impact U.S. releases in Eastern Time, linked to every trade you log. See how you really trade CPI, NFP and FOMC days.","Les publications américaines d’impact élevé et moyen en heure de l’Est, liées à chaque trade que tu notes. Vois comment tu trades vraiment les journées CPI, NFP et FOMC.","Publicaciones de EE. UU. de impacto alto y medio en hora del Este, vinculadas a cada operación. Mira cómo operas de verdad los días de CPI, NFP y FOMC."),
-        T("Economic calendar","Calendrier économique","Calendario económico"), f'<a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(CREATE_FREE)}</a>')
-    b = f'<section style="padding-top:16px"><div class="wrap">{frame("economic-calendar",lang,t(T("Economic calendar in Sweep","Calendrier économique dans Sweep","Calendario económico en Sweep")),t,eager=True)}</div></section>'
-    b += split(t, T("On your trades","Sur tes trades","En tus operaciones"), T("Every trade knows what was released around it.","Chaque trade sait ce qui est sorti autour.","Cada operación sabe qué se publicó a su alrededor."),
-      T("Sweep links each saved trade to the U.S. events from 30 minutes before entry to 30 minutes after exit, and shows the timing, for example “2m 00s after the release”.","Sweep lie chaque trade aux événements américains de 30 minutes avant l’entrée à 30 minutes après la sortie, et montre le délai, par exemple « 2 min 00 s après la publication ».","Sweep vincula cada operación a los eventos de EE. UU. desde 30 minutos antes de la entrada hasta 30 después de la salida, y muestra el tiempo, por ejemplo «2 min 00 s después de la publicación»."),
-      [T("A warning in the trade ticket when a release is close","Un avertissement dans le ticket quand une publication approche","Un aviso en el ticket cuando se acerca una publicación"),
-       T("News on the time axis of every trade chart","Les nouvelles sur l’axe du temps de chaque graphique","Las noticias en el eje del tiempo de cada gráfico"),
-       T("High-impact events in each day of the P&L calendar","Les événements importants dans chaque jour du calendrier P&L","Eventos de alto impacto en cada día del calendario de P&L"),
-       T("Insights on trades within 5 or 15 minutes of a release versus the rest","Analyses des trades à 5 ou 15 minutes d’une publication par rapport aux autres","Análisis de operaciones a 5 o 15 minutos de una publicación frente al resto")],
-      frame("calendar",lang,t(T("P&L calendar with daily news","Calendrier P&L avec les nouvelles du jour","Calendario de P&L con noticias del día")),t))
-    b += split(t, T("Event detail","Détail d’un événement","Detalle del evento"), T("Understand the number before it hits.","Comprends le chiffre avant qu’il tombe.","Entiende el dato antes de que salga."),
-      T("Open any event for its values, the surprise against the forecast, the revision to the previous value, a plain explainer of the indicator and its release history.","Ouvre n’importe quel événement pour ses valeurs, la surprise par rapport à la prévision, la révision de la valeur précédente, une explication claire de l’indicateur et son historique.","Abre cualquier evento para ver sus valores, la sorpresa frente al pronóstico, la revisión del dato anterior, una explicación clara del indicador y su historial."),
-      [], frame("event-detail",lang,t(T("Event detail panel","Panneau de détail d’un événement","Panel de detalle del evento")),t), flip=True,
-      more='<div class="chips" style="margin-top:26px">' + "".join(f"<span>{i}</span>" for i in INDICATORS) + "</div>")
-    rows = [(T("Scope","Portée","Alcance"),T("U.S. events, high and medium impact","Événements américains, impact élevé et moyen","Eventos de EE. UU., impacto alto y medio")),
-            (T("Time zone","Fuseau horaire","Zona horaria"),T("Eastern Time (New York)","Heure de l’Est (New York)","Hora del Este (Nueva York)")),
-            (T("Views","Vues","Vistas"),T("Today, tomorrow, this week, next week","Aujourd’hui, demain, cette semaine, la semaine prochaine","Hoy, mañana, esta semana, la próxima")),
-            (T("Source","Source","Fuente"),T("BLS and Federal Reserve calendars, 2026–2027","Calendriers du BLS et de la Réserve fédérale, 2026–2027","Calendarios del BLS y la Reserva Federal, 2026–2027")),
-            (T("“est.”","« est. »","«est.»"),T("Dates projected from the usual release pattern, until the official date is published","Dates projetées selon le rythme habituel des publications, en attendant la date officielle","Fechas proyectadas según el patrón habitual, hasta que se publique la fecha oficial")),
-            (T("Values","Valeurs","Valores"),T("Actual, forecast and previous are shown when available for an event","Réel, prévision et précédent sont affichés quand ils sont disponibles","Real, pronóstico y anterior se muestran cuando están disponibles"))]
-    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("What’s covered","Ce qui est couvert","Qué cubre"))}</h2></div><table class="tbl"><tbody>' + "".join(f"<tr><th>{t(a)}</th><td>{t(c)}</td></tr>" for a,c in rows) + "</tbody></table></div></section>"
-    return (t(T("Economic calendar for futures: CPI, NFP, FOMC · Sweep","Calendrier économique pour traders de futures · Sweep","Calendario económico para traders de futuros · Sweep")),
-            t(T("U.S. high and medium impact economic events in Eastern Time, linked to your trades. See your results around CPI, NFP, FOMC and 16 other indicators.","Événements économiques américains d’impact élevé et moyen en heure de l’Est, liés à tes trades. Vois tes résultats autour du CPI, du NFP, du FOMC et de 16 autres indicateurs.","Eventos económicos de EE. UU. de impacto alto y medio en hora del Este, vinculados a tus operaciones. Mira tus resultados alrededor de CPI, NFP, FOMC y 16 indicadores más.")),
-            hero + b + final_cta(lang, t), "")
-
-def howto_page(lang, t, title, lead, kick, steps, media, seo_t, seo_d, extra=""):
-    lis = "".join(f"<li><div>{t(s)}</div></li>" for s in steps)
-    hero = page_hero(t, title, lead, kick)
-    b = f'<section style="padding-top:16px"><div class="wrap split"><div class="copy"><ol class="howto">{lis}</ol>{extra}</div><div class="reveal">{media}</div></div></section>'
-    ld = jsonld({"@context":"https://schema.org","@type":"HowTo","name":t(title),"step":[{"@type":"HowToStep","position":i+1,"text":re.sub("<[^>]+>","",t(s))} for i,s in enumerate(steps)]})
-    return (t(seo_t), t(seo_d), hero + b + final_cta(lang, t), ld)
-
-def page_tradovate(lang, t):
-    steps = [T("In Tradovate, set your time zone to <b>New York</b> so times match Sweep.","Dans Tradovate, règle ton fuseau horaire sur <b>New York</b> pour que les heures concordent avec Sweep.","En Tradovate, pon tu zona horaria en <b>Nueva York</b> para que las horas coincidan con Sweep."),
-             T("Open the <b>Performance</b> report for the period you want and export it as <b>CSV</b>.","Ouvre le rapport <b>Performance</b> pour la période voulue et exporte-le en <b>CSV</b>.","Abre el informe <b>Performance</b> del periodo que quieras y expórtalo en <b>CSV</b>."),
-             T("In Sweep, go to <b>Trades → Import CSV</b> and choose the file.","Dans Sweep, va dans <b>Trades → Importer un CSV</b> et choisis le fichier.","En Sweep, ve a <b>Operaciones → Importar CSV</b> y elige el archivo."),
-             T("Check the <b>preview</b>, pick the account, then import. Fills of the same entry are grouped into one trade.","Vérifie l’<b>aperçu</b>, choisis le compte, puis importe. Les exécutions d’une même entrée sont regroupées en un seul trade.","Revisa la <b>vista previa</b>, elige la cuenta e importa. Las ejecuciones de una misma entrada se agrupan en una operación."),
-             T("Import again any time: trades already in Sweep are <b>skipped</b>, never duplicated.","Réimporte quand tu veux : les trades déjà dans Sweep sont <b>ignorés</b>, jamais en double.","Importa de nuevo cuando quieras: las operaciones ya en Sweep se <b>omiten</b>, nunca se duplican.")]
-    return howto_page(lang, t, T("Import your trades from Tradovate.","Importe tes trades depuis Tradovate.","Importa tus operaciones desde Tradovate."),
-        T("Bring your history into Sweep in a few minutes with the Tradovate Performance report.","Amène ton historique dans Sweep en quelques minutes avec le rapport Performance de Tradovate.","Trae tu historial a Sweep en unos minutos con el informe Performance de Tradovate."),
-        T("Help","Aide","Ayuda"), steps, frame("trades",lang,t(T("Trades list after import","Liste des trades après l’import","Lista de operaciones tras importar")),t),
-        T("Import trades from Tradovate CSV · Sweep","Importer ses trades Tradovate en CSV · Sweep","Importar operaciones de Tradovate en CSV · Sweep"),
-        T("How to export the Tradovate Performance report as CSV and import it into the Sweep trading journal without duplicates.","Comment exporter le rapport Performance de Tradovate en CSV et l’importer dans le journal Sweep sans doublons.","Cómo exportar el informe Performance de Tradovate en CSV e importarlo en el diario Sweep sin duplicados."),
-        f'<p class="meta" style="margin-top:28px">{t(T("On NinjaTrader 8? Connect it once (Settings › Data › Connections) and your trades arrive on their own, no import. Other platforms: import their export (Rithmic, ProjectX, TradingView), a screenshot, or the trade ticket.","Sur NinjaTrader 8 ? Connecte-le une fois (Réglages › Données › Connexions) et tes trades arrivent seuls, sans import. Autres plateformes : importe leur export (Rithmic, ProjectX, TradingView), une capture, ou le ticket de trade.","¿En NinjaTrader 8? Conéctalo una vez (Ajustes › Datos › Conexiones) y tus operaciones llegan solas, sin importar. Otras plataformas: importa su exportación (Rithmic, ProjectX, TradingView), una captura o el ticket de operación."))}</p>')
 
 INSTALL_HELP = T("""<h2>Why install it this way?</h2><p>Sweep is a web app. The icon on your home screen opens the same Sweep you use on a computer, with the same account and the same data. It opens full screen, without the browser bars, and updates arrive on their own: there’s nothing to download from a store. Native iOS and Android apps are on the roadmap.</p>
 <h2>If you don’t see the option</h2><ul>
@@ -232,31 +184,6 @@ def page_security(lang, t):
             hero + b, "")
 
 SYSTEM_PAGES.add("security.html")
-
-def page_pricing(lang, t):
-    from core import ul
-    hero = f'<div class="page-hero" style="text-align:center"><div class="wrap"><span class="kick">{t(T("Pricing","Tarifs","Precios"))}</span><h1 class="wu" style="margin:0 auto">{words(t(T("Free while we build it together.","Gratuit pendant qu’on le bâtit ensemble.","Gratis mientras lo construimos juntos.")))}</h1><p class="lead" style="margin-left:auto;margin-right:auto">{t(T("Every feature, free during early access. Join now and keep VIP pricing when paid plans arrive.","Toutes les fonctionnalités, gratuites pendant l’accès anticipé. Inscris-toi maintenant et garde un prix VIP quand les forfaits payants arriveront.","Todas las funciones, gratis durante el acceso anticipado. Únete ahora y conserva el precio VIP cuando lleguen los planes de pago."))}</p></div></div>'
-    feats = [T("Unlimited trades and accounts","Trades et comptes illimités","Operaciones y cuentas ilimitadas"),T("Trade ticket with live risk and daily risk budget","Ticket avec risque en direct et budget de risque","Ticket con riesgo en vivo y presupuesto de riesgo"),
-             T("Automatic rule checks and discipline checklist","Vérification automatique des règles et checklist de discipline","Revisión automática de reglas y checklist de disciplina"),T("Guided trade review and screenshots","Révision guidée et captures","Revisión guiada y capturas"),
-             T("Insights, performance score and deep dives","Analyses, score de performance et analyses poussées","Análisis, puntuación de rendimiento y análisis a fondo"),T("P&L calendar, daily journal and weekly review","Calendrier P&L, journal quotidien et révision hebdo","Calendario de P&L, diario y revisión semanal"),
-             T("Economic calendar linked to your trades","Calendrier économique lié à tes trades","Calendario económico vinculado a tus operaciones"),T("Prop firm rules, trade copier, payouts and expenses","Règles des firmes, copieur, payouts et dépenses","Reglas de firmas, copiador, payouts y gastos"),
-             T("Tradovate CSV import and JSON export","Import CSV Tradovate et export JSON","Importación CSV de Tradovate y exportación JSON"),
-             T("✦ Sweep AI and Ask Sweep, included with a daily limit","✦ Sweep AI et Ask Sweep, inclus avec une limite quotidienne","✦ Sweep AI y Ask Sweep, incluidos con un límite diario"),
-             T("AI economic recaps and market reports","Récaps économiques et rapports de marché par IA","Resúmenes económicos e informes de mercado con IA")]
-    vip = [T("A VIP discount on paid plans, for members who joined during early access","Un rabais VIP sur les forfaits payants pour les membres de l’accès anticipé","Un descuento VIP en los planes de pago para quienes se unieron en el acceso anticipado"),
-           T("Pricing announced before anything changes","Les prix annoncés avant tout changement","Precios anunciados antes de cualquier cambio"),
-           T("Nothing charged without your consent","Rien facturé sans ton accord","Nada se cobra sin tu consentimiento"),
-           T("Your data stays yours: export or delete anytime","Tes données restent à toi : exporte ou supprime en tout temps","Tus datos siguen siendo tuyos: exporta o elimina cuando quieras")]
-    b = f'''<section style="padding-top:8px"><div class="wrap"><div class="plans">
-<div class="plan main reveal"><h2 style="font-size:20px">{t(T("Early access","Accès anticipé","Acceso anticipado"))}</h2><div class="price"><span class="num">$0</span><span class="muted">{t(T("now","maintenant","ahora"))}</span></div>
-<p class="muted" style="font-size:15px">{t(T("Everything in Sweep. No credit card.","Tout Sweep. Sans carte de crédit.","Todo Sweep. Sin tarjeta."))}</p>{ul(t,feats)}<a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(CREATE_FREE)}</a></div>
-<div class="plan reveal"><h2 style="font-size:20px">{t(T("At launch","Au lancement","En el lanzamiento"))}</h2><div class="price"><span class="num">VIP</span><span class="muted">{t(T("for early members","pour les premiers membres","para los primeros miembros"))}</span></div>
-<p class="muted" style="font-size:15px">{t(T("When Sweep officially launches with paid plans.","Quand Sweep sera officiellement lancé avec des forfaits payants.","Cuando Sweep se lance oficialmente con planes de pago."))}</p>{ul(t,vip)}<a class="btn btn-line btn-lg" href="{SIGNUP}">{t(T("Claim VIP access","Obtenir l’accès VIP","Obtener acceso VIP"))}</a></div>
-</div></div></section>'''
-    b += f'<section class="rule"><div class="wrap narrow"><div class="head"><h2>{t(T("Pricing questions","Questions sur les tarifs","Preguntas sobre precios"))}</h2></div>{"".join(faq_item(t,q,a) for q,a in FAQ[3][1])}</div></section>'
-    return (t(T("Pricing · Free early access with VIP launch pricing · Sweep","Tarifs · Accès anticipé gratuit et prix VIP au lancement · Sweep","Precios · Acceso anticipado gratis y precio VIP al lanzar · Sweep")),
-            t(T("Sweep is free during early access with every feature included. Members who join now get a VIP discount when paid plans launch.","Sweep est gratuit pendant l’accès anticipé, avec toutes les fonctionnalités. Les membres inscrits maintenant auront un rabais VIP au lancement des forfaits payants.","Sweep es gratis durante el acceso anticipado, con todas las funciones. Quienes se unan ahora tendrán un descuento VIP cuando lleguen los planes de pago.")),
-            hero + b + final_cta(lang, t), "")
 
 ABOUT_HELP = T("""<h2>How we build Sweep</h2><p>New versions ship regularly, and every release is listed in <a href="@changelog.html">What’s new</a>. Ideas and bug reports sent from the app are kept with their status, so the traders who asked know when it ships. Prop firm rules are checked every week against each firm’s official pages, and the whole app is in English, French and Spanish.</p>
 <h2>Who Sweep is for</h2><p>Futures traders, from the first evaluation to a live funded account: prop traders who juggle several firms and accounts, and traders on personal accounts who want honest numbers. Sweep doesn’t trade for you, doesn’t give signals and never sells your data.</p>""",

@@ -48,8 +48,6 @@ def _checked_note(lang, t):
                f"Tiré de la vérification hebdomadaire des pages officielles de chaque firme par Sweep, faite le {day(d, 'fr')}. « {DASH} » veut dire que la règle n’est pas dans les règles suivies par Sweep pour ce compte. Les règles changent : confirme toujours sur le site de la firme. Sweep n’est affilié à aucune de ces firmes.",
                f"Tomado de la revisión semanal de las páginas oficiales de cada firma por Sweep, hecha el {day(d, 'es')}. «{DASH}» significa que la regla no está en las reglas que Sweep sigue para esa cuenta. Las reglas cambian: confirma siempre en el sitio de la firma. Sweep no está afiliado a estas firmas.")) + how
 
-def _and(items, lang): return and_list(items, lang)
-
 def _by_firm(pairs, lang):
     """[(firm name, item)] → « Firm A: x, y; Firm B: z. » in the catalogue's order."""
     order, groups = [], {}
@@ -78,8 +76,6 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
          "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}},
         {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]}]})
     return _fr_nbsp(lang, t(title), t(desc), hero + b + ui.final(lang, t), ld)
-
-FIRM_PAGES = lambda: [(page_of(f), T(f["name"], f["name"], f["name"])) for f in presets.FIRMS]
 
 # ---------------------------------------------------------------- consistency rules
 def page_consistency(lang, t):

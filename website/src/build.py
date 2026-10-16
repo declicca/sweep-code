@@ -3,9 +3,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core import *
 from pages1 import page_features
 from pages6 import page_home, page_how, page_pricing as page_pricing6
-from pages2 import page_faq, page_tradovate, page_install, page_security, page_about, page_contact, page_changelog, page_404
+from pages2 import page_faq, page_install, page_security, page_about, page_contact, page_changelog, page_404
 from pages3 import page_ai, page_econ
-from pages4 import page_pricing
 from pages5 import page_100
 from pages7 import page_tools, page_position, page_drawdown, page_consistency
 from pages8 import FIRMS, JOURNAL_MOVED
