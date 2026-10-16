@@ -37,7 +37,10 @@ with sync_playwright() as p:
     for _ in range(40):
       pg.wait_for_timeout(500)
       if pg.evaluate("S.trades.filter(t=>t.demo).length > 10"): break
-    n0 = pg.evaluate("S.trades.filter(t=>t.demo).length")
+    n0 = -1
+    for _ in range(60):   # the sample data is saved in batches: wait until the server has all of it (under load it takes a while)
+      pg.wait_for_timeout(500); mem = pg.evaluate("S.trades.filter(t=>t.demo).length")
+      if mem > 10 and pg.evaluate(DATA)['trades'] == mem: n0 = mem; break
     pg.evaluate("location.hash='#trades'"); pg.wait_for_timeout(1800)
     ok(n0 > 10 and pg.evaluate("document.querySelectorAll('#main [data-href^=\"#trade/demo\"], #main a[href^=\"#trade/demo\"]').length") > 0, f'{tag} exploring: {n0} sample trades shown')
     # the first real trade
