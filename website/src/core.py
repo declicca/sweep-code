@@ -273,6 +273,7 @@ GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "
 def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
+    if page.startswith("import-"): return "import.html"   # the export guides, one per platform
     if page.endswith(("-release-dates.html", "-meeting-dates.html")): return "release-dates.html"
     if page in ("prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html"): return "prop-firms/index.html"
     if page in CALC_PAGES: return "tools.html"

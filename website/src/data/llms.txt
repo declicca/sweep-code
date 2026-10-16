@@ -10,6 +10,9 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Free trading journal](https://makeitsweep.com/free-trading-journal): what the Free plan includes, forever, and what Pro adds
 - [Prop firm tracker](https://makeitsweep.com/prop-firm-tracker): every evaluation, funded and live account with its firm's rules, for prop traders
 - [NinjaTrader 8 sync](https://makeitsweep.com/ninjatrader): Sweep's free add-on sends every NinjaTrader 8 execution to the journal, read only, on every plan
+- [Export trades from Tradovate](https://makeitsweep.com/import-tradovate): the Performance report as a CSV, then into Sweep (time zone, fees, session day)
+- [Export trades from TopstepX](https://makeitsweep.com/import-topstepx): the Trades tab export as a CSV, UTC times converted, Topstep's trading day kept
+- [Export trades from Rithmic R | Trader Pro](https://makeitsweep.com/import-rithmic): Completed Orders as a CSV, fills paired into trades, several accounts in one file
 - [Payout tracker](https://makeitsweep.com/payout-tracker): payouts from request to paid, expenses and real net (Pro and Elite)
 - [Features](https://makeitsweep.com/features): logging, real P&L, rules, review, analytics, accounts, payouts
 - [How it works](https://makeitsweep.com/how-it-works): the daily loop and discipline

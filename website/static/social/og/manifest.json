@@ -349,6 +349,48 @@
    "date": null
   }
  },
+ "import-tradovate.html": {
+  "en": {
+   "alt": "Export trades from Tradovate · CSV export, then into your journal",
+   "date": null
+  },
+  "fr": {
+   "alt": "Exporter tes trades de Tradovate · Export CSV, puis dans ton journal",
+   "date": null
+  },
+  "es": {
+   "alt": "Exportar operaciones de Tradovate · Exportación CSV, luego a tu diario",
+   "date": null
+  }
+ },
+ "import-topstepx.html": {
+  "en": {
+   "alt": "Export trades from TopstepX · CSV export, then into your journal",
+   "date": null
+  },
+  "fr": {
+   "alt": "Exporter tes trades de TopstepX · Export CSV, puis dans ton journal",
+   "date": null
+  },
+  "es": {
+   "alt": "Exportar operaciones de TopstepX · Exportación CSV, luego a tu diario",
+   "date": null
+  }
+ },
+ "import-rithmic.html": {
+  "en": {
+   "alt": "Export trades from Rithmic · CSV export, then into your journal",
+   "date": null
+  },
+  "fr": {
+   "alt": "Exporter tes trades de Rithmic · Export CSV, puis dans ton journal",
+   "date": null
+  },
+  "es": {
+   "alt": "Exportar operaciones de Rithmic · Exportación CSV, luego a tu diario",
+   "date": null
+  }
+ },
  "position-size-calculator.html": {
   "en": {
    "alt": "Position size calculator · Free calculator for futures and prop traders",

@@ -35,6 +35,8 @@ for _s,_n in FIRMS:   # a firm without preloaded rules: its page says which rule
     if _n not in pages18.presets.PRESET_FIRMS: PAGES[_s] = pages18.make_manual_page(_s, _n)
 import pages20
 PAGES["free-trading-journal.html"] = pages20.page_free
+import pages11
+PAGES.update(pages11.EXPORT_PAGES)   # export guides: Tradovate, TopstepX, Rithmic
 PAGES["prop-firm-tracker.html"] = pages20.page_tracker
 PAGES["payout-tracker.html"] = pages20.page_payout_tracker
 PAGES[pages18.RULE_CHANGES] = pages18.page_rule_changes

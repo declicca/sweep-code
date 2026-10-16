@@ -11,7 +11,7 @@ SRC = os.path.join(HERE, "..", "src")
 OUT = os.path.join(HERE, "..", "static", "social", "og")
 os.environ.setdefault("SWEEP_PRESETS_OFFLINE", "1")   # the copy of the app's catalogue the site was built with
 sys.path.insert(0, SRC)
-import core, presets, pages4, pages7, pages8, pages17, pages18, pages19  # noqa: E402
+import core, presets, pages4, pages7, pages8, pages11, pages17, pages18, pages19  # noqa: E402
 from core import T  # noqa: E402
 
 LANGS = ("en", "fr", "es")
@@ -72,6 +72,8 @@ def entries():
         ("prop-firm-rule-changes.html", T("Prop firm rule changes", "Changements de règles des prop firms", "Cambios de reglas de las prop firms"),
          T("Every change found on the firms’ official pages, dated", "Chaque changement trouvé sur les pages officielles des firmes, daté", "Cada cambio encontrado en las páginas oficiales de las firmas, fechado"), None)):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, day))
+    for g in pages11.EXPORT_GUIDES:   # export guides (SEO brief, step 3)
+        out.append((g["slug"], {l: (g["kick"][l], T("CSV export, then into your journal", "Export CSV, puis dans ton journal", "Exportación CSV, luego a tu diario")[l]) for l in LANGS}, None))
     for slug, _, name, _ in pages7.TOOLS:
         out.append((slug, {l: (name[l], T("Free calculator for futures and prop traders", "Calculateur gratuit pour traders de futures et de prop firms", "Calculadora gratis para traders de futuros y prop firms")[l]) for l in LANGS}, None))
     return out
