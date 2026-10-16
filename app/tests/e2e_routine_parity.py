@@ -89,7 +89,8 @@ async def main():
           ok(b['s'] == want, f"{label} {when}: the card shows the server's rings {r} → {b['s']}")
           pill_ok = ('réussie' in b['pill']) if srvst['swept'] else (f'{n} sur 3' in b['pill'])
           ok(pill_ok, f"{label} {when}: « {b['pill'].strip()} » (server: {n} of 3{', swept' if srvst['swept'] else ''})")
-          if srvst['trades']: ok(f"{srvst['compliant']} sur {srvst['trades']}" in b['exec'], f"{label} {when}: « {b['exec']} » (server: {srvst['compliant']} of {srvst['trades']})")
+          if srvst['trades'] and srvst['plan_valid']: ok(f"{srvst['compliant']} sur {srvst['trades']}" in b['exec'], f"{label} {when}: « {b['exec']} » (server: {srvst['compliant']} of {srvst['trades']})")
+          elif srvst['trades']: ok(srvst['compliant'] == 0 and 'pas de plan' in b['exec'], f"{label} {when}: no plan: « {b['exec']} » (server: {srvst['compliant']} in the plan, audit of 16 Oct.)")
           if nxt is not None:
             ok(b['next'] == str(nxt), f"{label} {when}: next step {b['next']} (expects {nxt})")
             ok(b['prim'] == (1 if nxt else 0), f"{label} {when}: {b['prim']} primary button in the card (expects {1 if nxt else 0})")

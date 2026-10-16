@@ -457,7 +457,7 @@ final class GameEngine
         }
         $execScore = $n ? (int) round(100 * $ok / $n) : null;   // trades in the plan: for the discipline score
         $ringExec = $n ? 100 : ($planValid ? 100 : 0);   // trading (or keeping to « no trade ») closes the ring
-        $ok = (int) floor($ok);
+        $ok = (int) floor($ok);   // (stored as compliant_count only with a valid plan: without one, no trade is « in your plan », audit of 16 Oct.)
 
         // review
         // the day's review is done once it is written somewhere: the « Daily review » sheet, the Journal page's
@@ -473,7 +473,7 @@ final class GameEngine
         $guard = $planValid && $maxLoss && $guardIdx !== null && $guardIdx === $n - 1 && $n > 0;
         $activity = $n > 0 || $pre || $post;
         $row = [
-            'ring_plan' => $ringPlan, 'ring_execution' => $ringExec, 'ring_review' => $ringReview, 'trades_count' => $n, 'compliant_count' => $ok, 'journaled_count' => $jn,
+            'ring_plan' => $ringPlan, 'ring_execution' => $ringExec, 'ring_review' => $ringReview, 'trades_count' => $n, 'compliant_count' => $planValid ? $ok : 0, 'journaled_count' => $jn,
             'is_swept' => $swept ? 1 : 0, 'is_valid_streak' => ($ringReview === 100 || $dayOff) ? 1 : 0, 'review_done' => $reviewDone ? 1 : 0, 'day_off' => $dayOff ? 1 : 0,
             'plan_valid' => $planValid ? 1 : 0, 'plan_at' => $planAt, 'plan_bias' => $bias, 'guardrail' => $guard ? 1 : 0, 'activity' => $activity ? 1 : 0, 'net_c' => $cum,
             'detail_json' => json_encode(['trades' => $det, 'perfect_docs' => $perfect && $n > 0, 'plan_past' => $planPast, 'plan_late' => $planLate ?? false, 'exec_score' => $execScore ?? null]), 'updated_at' => self::ts(),

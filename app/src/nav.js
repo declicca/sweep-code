@@ -4026,17 +4026,17 @@ window.SweepMO = window.SweepMO || class {
   const T = {
     en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day swept', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
       s1: 'Plan', s1d: 'Make your plan', s2: 'Execution', s2d: 'Trade your plan', s3: 'Review', s3d: 'Do your review',
-      todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
+      todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', noPlanN: '{n} trades · no plan', noPlan1: '1 trade · no plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
       b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', b1s: 'Plan it', b2s: '+ Trade', b3s: 'Review', see: 'See',
       help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day swept »: your streak goes on and you earn XP. Profit never counts, only the process.' },
     fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée réussie', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
       s1: 'Plan', s1d: 'Fais ton plan', s2: 'Exécution', s2d: 'Respecte ton plan', s3: 'Revue', s3d: 'Fais ta revue',
-      todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
+      todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', noPlanN: '{n} trades · pas de plan', noPlan1: '1 trade · pas de plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
       b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', b1s: 'Planifier', b2s: '+ Trade', b3s: 'Réviser', see: 'Voir',
       help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée réussie » : ta série continue et tu gagnes de l’XP. Le profit ne compte jamais, seulement le processus.' },
     es: { title: 'Tu rutina de hoy', how: 'Cómo funciona', of: '{n} de 3 hechas', swept: 'Día completado', closed: 'Los mercados están cerrados hoy. El descanso es parte del proceso.', dayoffT: 'Día libre', dayoff: 'Sin operar hoy: tu racha está protegida.',
       s1: 'Plan', s1d: 'Haz tu plan', s2: 'Ejecución', s2d: 'Respeta tu plan', s3: 'Revisión', s3d: 'Haz tu revisión',
-      todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
+      todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', noPlanN: '{n} operaciones · sin plan', noPlan1: '1 operación · sin plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
       b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', b1s: 'Planificar', b2s: '+ Operación', b3s: 'Revisar', see: 'Ver',
       help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue y ganas XP. El beneficio nunca cuenta, solo el proceso.' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
@@ -4096,12 +4096,14 @@ window.SweepMO = window.SweepMO || class {
         <div class="nav-rt-sb"><b>${title}</b><small>${sub}</small><span class="nav-rt-st">${stateTxt}</span></div>
         <div class="nav-rt-sa"><button type="button" class="btn sm ${i === nextI ? 'primary' : ''}" data-rt="${act}"><span class="l">${btn}</span><span class="s">${short}</span></button>${extra || ''}</div>
         <i class="nav-rt-bar"><i style="width:${key}%"></i></i></div>`;
-    const execPct = d.trades ? Math.round((d.compliant || 0) / d.trades * 100) : 0;
+    const execPct = d.trades && d.plan_valid ? Math.round((d.compliant || 0) / d.trades * 100) : 0;
+    // without a valid plan no trade is « in your plan » (audit of 16 Oct.; the server counts 0 too: game.php compliant_count)
+    const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t('inPlan', { c: d.compliant || 0, n: d.trades });
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${t('ydayB')} ›</b><span>${esc2(left(y.deadline))}</span></button>` : '';
     return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
-        ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, d.trades ? t('inPlan', { c: d.compliant || 0, n: d.trades }) : t('noTrade'), t('b2'), 'trade', '', t('b2s'))}
+        ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
         ${step(3, r.review || 0, 'review', t('s3'), t('s3d'), s3, s3 === 'done' ? t('reviewDone') : t('reviewTodo'), s3 === 'done' ? t('b3v') : t('b3'), 'review', '', s3 === 'done' ? t('see') : t('b3s'))}
       </div>
       ${helpT}</section>`;

@@ -51,7 +51,7 @@
       r: { over_max_loss: 'Max loss reached: I close the platform.', over_max_trades: '{m} trades max, not one more.', revenge: 'After a loss: a 10-minute break before the next trade.', addloser: 'Never add to a losing trade.', no_stop: 'A stop set before each entry, never moved.', risklimit: 'Each trade’s risk fits my limit.', oversized: 'Never more than {m} contracts.', size_up: 'The same size after wins.', against_bias: 'Only in the direction of my bias.', setup_not_in_plan: 'Only the setups of my plan.', open5: 'No trade before 9:35.', plan_no_trade: 'A planned day off stays a day off.', no_plan: 'My plan before my first trade.', rules_no: 'Every point of my checklist before I enter.', rules_partial: 'Every point of my checklist before I enter.', clean: 'Same plan, same discipline.', margin: 'Max loss {m} or no trade.' },
       title: 'Your coach', last: 'Last trade · {t}', thisT: 'This trade', fix: 'To improve',
       inPlan: 'In your plan', stopOk: 'stop respected', sizeOk: 'size within your max', chkOk: 'checklist followed',
-      none: 'Nothing to fix on this trade. Do exactly the same again.',
+      none: 'Nothing to fix on this trade. Do exactly the same again.', noneDay: 'Nothing to fix on this trade. Earlier today: {w}.',
       f: {
         over_max_loss: ['Taken after your max loss of the day ({m}).', 'Once the max loss is hit, you close the platform.'],
         over_max_trades: ['Trade {n} for {m} planned.', 'Once your max is reached, the session is over.'],
@@ -122,7 +122,7 @@
       r: { over_max_loss: 'Perte max atteinte : je ferme la plateforme.', over_max_trades: '{m} trades max, pas un de plus.', revenge: 'Après une perte : 10 minutes de pause avant le trade suivant.', addloser: 'Jamais d’ajout à un trade perdant.', no_stop: 'Un stop placé avant chaque entrée, jamais déplacé.', risklimit: 'Le risque de chaque trade tient dans ma limite.', oversized: 'Jamais plus de {m} contrats.', size_up: 'La même taille après des gains.', against_bias: 'Seulement dans le sens de mon biais.', setup_not_in_plan: 'Seulement les setups de mon plan.', open5: 'Pas de trade avant 9 h 35.', plan_no_trade: 'Un jour prévu sans trading reste sans trading.', no_plan: 'Mon plan avant mon premier trade.', rules_no: 'Chaque point de ma checklist avant d’entrer.', rules_partial: 'Chaque point de ma checklist avant d’entrer.', clean: 'Même plan, même discipline.', margin: 'Perte max {m} ou pas de trade.' },
       title: 'Ton coach', last: 'Dernier trade · {t}', thisT: 'Ce trade', fix: 'À améliorer',
       inPlan: 'Dans ton plan', stopOk: 'stop respecté', sizeOk: 'taille respectée', chkOk: 'checklist suivie',
-      none: 'Rien à corriger sur ce trade. Refais exactement pareil.',
+      none: 'Rien à corriger sur ce trade. Refais exactement pareil.', noneDay: 'Rien à corriger sur ce trade. Plus tôt aujourd’hui : {w}.',
       f: {
         over_max_loss: ['Pris après ta perte max du jour ({m}).', 'Ta perte max atteinte, tu fermes la plateforme.'],
         over_max_trades: ['{n}ᵉ trade pour {m} prévus.', 'Ton nombre max atteint, la séance est finie.'],
@@ -193,7 +193,7 @@
       r: { over_max_loss: 'Pérdida máxima alcanzada: cierro la plataforma.', over_max_trades: '{m} operaciones máx., ni una más.', revenge: 'Tras una pérdida: 10 minutos de pausa antes de la siguiente operación.', addloser: 'Nunca añadir a una operación perdedora.', no_stop: 'Un stop puesto antes de cada entrada, nunca movido.', risklimit: 'El riesgo de cada operación cabe en mi límite.', oversized: 'Nunca más de {m} contratos.', size_up: 'El mismo tamaño tras ganancias.', against_bias: 'Solo en el sentido de mi sesgo.', setup_not_in_plan: 'Solo los setups de mi plan.', open5: 'Ninguna operación antes de las 9:35.', plan_no_trade: 'Un día previsto sin operar sigue sin operar.', no_plan: 'Mi plan antes de mi primera operación.', rules_no: 'Cada punto de mi checklist antes de entrar.', rules_partial: 'Cada punto de mi checklist antes de entrar.', clean: 'Mismo plan, misma disciplina.', margin: 'Pérdida máxima {m} o ninguna operación.' },
       title: 'Tu coach', last: 'Última operación · {t}', thisT: 'Esta operación', fix: 'A mejorar',
       inPlan: 'Dentro de tu plan', stopOk: 'stop respetado', sizeOk: 'tamaño respetado', chkOk: 'checklist cumplida',
-      none: 'Nada que corregir en esta operación. Repite exactamente lo mismo.',
+      none: 'Nada que corregir en esta operación. Repite exactamente lo mismo.', noneDay: 'Nada que corregir en esta operación. Antes, hoy: {w}.',
       f: {
         over_max_loss: ['Tomada después de tu pérdida máxima del día ({m}).', 'Alcanzada la pérdida máxima, cierras la plataforma.'],
         over_max_trades: ['Operación {n} para {m} previstas.', 'Alcanzado tu máximo, la sesión termina.'],
@@ -250,6 +250,11 @@
       out.push(t);
     });
     return out;
+  }
+  const savedHm = (t) => { const ms = Date.parse(t.created_at || ''); return isFinite(ms) ? new Date(ms).toLocaleTimeString('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : ''; };
+  function latest(list) {
+    const key = (t) => { const x = timeOf(t) || savedHm(t); return ((typeof hasSessionDate === 'function' ? hasSessionDate(t) : t.session_date) && x >= '18' ? '0' : '1') + x + '|' + String(t.created_at || ''); };
+    return list.reduce((a, t) => (key(t) > key(a) ? t : a), list[0]);
   }
   function planOf(day) {
     const j = typeof getDoc === 'function' ? getDoc('journals', day) : null, pre = (j && j.pre) || {};
@@ -618,11 +623,11 @@
   /* ── how it reads ── */
   const IC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>';
   const OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
-  function noteHtml(c) {
+  function noteHtml(c, earlier) {   // earlier: the code of a mistake of another trade of the day (never « nothing to fix » then)
     const good = c.good.length ? `<p class="co-ok">${OK}<span>${esc2(c.good.join(', ').replace(/^./, (m) => m.toUpperCase()))}.</span></p>` : '';
     const why = c.fix && starting() && T.why[c.fix[2]] ? `<span class="co-why">${esc2(T.why[c.fix[2]])}</span>` : '';
     const mine = c.fix && ['revenge', 'size_up', 'open5'].includes(c.fix[2]) ? ownLine(c.fix[2]) : '';
-    const fix = c.fix ? `<p class="co-fix"><b>${T.fix}</b><span>${esc2(c.fix[0])}</span><span class="co-do">${esc2(c.fix[1])}</span>${mine ? `<span class="co-own">${esc2(mine)}</span>` : ''}${why}</p>` : `<p class="co-fix co-none"><span>${esc2(T.none)}</span></p>`;
+    const fix = c.fix ? `<p class="co-fix"><b>${T.fix}</b><span>${esc2(c.fix[0])}</span><span class="co-do">${esc2(c.fix[1])}</span>${mine ? `<span class="co-own">${esc2(mine)}</span>` : ''}${why}</p>` : `<p class="co-fix co-none"><span>${esc2(earlier ? fill(T.noneDay, { w: T.w[earlier] || '' }) : T.none)}</span></p>`;
     const l2 = c.ses.code === 'loss2' ? ownLine('loss2') : '';
     return good + fix + (c.ses.t ? `<p class="co-ses ${c.ses.stop ? 'co-stop' : ''}">${esc2(c.ses.t)}</p>` : '') + (l2 ? `<p class="co-own">${esc2(l2)}</p>` : '');
   }
@@ -641,7 +646,13 @@
       const l = dayLesson(day), own = String(jt.post.tomorrow || '').split('\n').map((x) => x.trim()).find(Boolean);
       return card(T.dayT, `<p class="co-ses">${esc2(l.text)}</p>${(own || l.rule) ? ruleLine(T.ruleT, own || l.rule) : ''}${list.length ? aiMore('ai-day', `data-v="${esc2(day)}"`) : ''}`, 'co-today');
     }
-    if (list.length) { const c = tradeNote(list[list.length - 1]); return card(fill(T.last, { t: c.time || '' }), noteHtml(c), 'co-today'); }
+    if (list.length) {
+      // the most recent trade: by entry time, else by the New York time it was saved (audit of 16 Oct.: a trade without a time
+      // sorted last and was taken for « the last trade »); never « nothing to fix » while another trade of the day has a mistake
+      const t = latest(list), c = Object.assign(tradeNote(t), { ses: session(day, list.length - 1, list) }), hm = c.time || savedHm(t);   // where the whole session stands
+      const other = c.fix ? null : list.filter((x) => x !== t).map(tradeNote).filter((x) => x.fix).pop();
+      return card(hm ? fill(T.last, { t: hm }) : T.last.replace(/\s*·\s*\{t\}/, ''), noteHtml(c, other && other.fix[2]), 'co-today');
+    }
     const nx = (window.SweepNextSession && SweepNextSession()) || day, p = planOf(nx), j = typeof getDoc === 'function' && getDoc('journals', nx);
     const first = !(S.trades || []).some((t) => !t.demo);
     if (p.valid) { const pre = (j && j.pre) || {}; return card(T.planT, `${pre.rule ? ruleLine(T.ruleD, pre.rule) : ''}<p class="co-ses">${esc2(planNote({ bias: p.bias, maxLoss: p.maxLoss, maxTrades: p.maxTrades, setups: (pre.setups || []).length }))}</p>${first ? `<p class="co-ses muted">${esc2(T.first)}</p>` : ''}`, 'co-today'); }

@@ -27,6 +27,11 @@ Then, the audit of 16 Oct. (step 2), a LucidPro 50K ($2,000 drawdown, $1,200 dai
   K. the plan's max loss starts at $870 (not $1,200), « Drawdown room of LucidPro 50K: $870 » under it; the coach before a
      trade says $870 left (a $1,200 plan typed anyway too); after a −$780 trade ($90 left): « Room: $90. Stop for today. » (after the trade, before the next
      one, on Today), and the rule for the next session « Max loss $90 or no trade ».
+Then, the audit of 16 Oct. (step 5), a day with a trade against the bias and a trade saved without a time:
+  L. the coach's card speaks of the most recent trade (by entry time, else by when it was saved), not of the one without a
+     time; the last trade clean while an earlier one is against the bias: « Nothing to fix on this trade. Earlier today:
+     trading against your bias. », never « Do exactly the same again »; no plan for the day: the routine says « 1 trade · no
+     plan », not « 1 of 1 trades in your plan » (the server counts 0 in the plan too); what is left counts the whole session.
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -343,6 +348,52 @@ def room(p, lang, phone):
   ok(not errs, f'{tag} no page error ({errs[:2]})')
   br.close()
 
+LT = {'fr': {'fix': 'À l’inverse de ton biais', 'earlier': 'Plus tôt aujourd’hui : trader contre ton biais', 'same': 'Refais exactement pareil', 'last': 'Dernier trade · ', 'noplan': '1 trade · pas de plan'},
+      'en': {'fix': 'Against your bias', 'earlier': 'Earlier today: trading against your bias', 'same': 'Do exactly the same again', 'last': 'Last trade · ', 'noplan': '1 trade · no plan'},
+      'es': {'fix': 'Contra tu sesgo', 'earlier': 'Antes, hoy:', 'same': 'Repite exactamente lo mismo', 'last': 'Última operación · ', 'noplan': '1 operación · sin plan'}}
+def latest_case(p, lang, phone):
+  from datetime import datetime
+  from zoneinfo import ZoneInfo
+  tag = f"{'390' if phone else '1300'}-{lang} latest"; x = LT[lang]
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1'); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'cl%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
+  ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Alex', 'experience': 'gt1'}), headers=H)
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(900)
+  for _ in range(30):
+    day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || ''")
+    if day: break
+    pg.wait_for_timeout(300)
+  day = day or pg.evaluate("todayStr()")
+  at = lambda hm: datetime.strptime(f'{day} {hm}', '%Y-%m-%d %H:%M').replace(tzinfo=ZoneInfo('America/New_York')).astimezone(ZoneInfo('UTC')).strftime('%Y-%m-%dT%H:%M:%S.000Z')
+  card = lambda: pg.evaluate(TXT, '#main .co-today')
+  # no plan: one clean trade → the routine says « 1 trade · no plan »
+  pg.evaluate(TRADE, ['l1', day, '10:00', '10:10', 'long', 12000, {'created_at': at('10:11')}]); pg.wait_for_timeout(2500)
+  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-rt', timeout=8000); pg.wait_for_timeout(1500)
+  rt = pg.evaluate(TXT, '#main .nav-rt')
+  ok(x['noplan'] in rt, f'{tag} no plan: the routine says « {x["noplan"]} » ({rt[:140]})')
+  # a bullish plan; a short (against the bias) at 10:30, then a trade saved at 10:45 without a time
+  pg.evaluate(PLAN, [day, {'bias': 'bullish', 'max_loss': '1000'}])
+  pg.evaluate(TRADE, ['l2', day, '10:30', '10:40', 'short', -30000, {'created_at': at('10:41')}])
+  pg.evaluate(TRADE, ['l3', day, '', '', 'long', -10000, {'created_at': at('09:45'), 'entry': None, 'exit': None}]); pg.wait_for_timeout(1500)
+  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .co-today', timeout=8000); pg.wait_for_timeout(1200)
+  c1 = card()
+  ok((x['last'] + '10:30') in c1 and x['fix'] in c1 and x['same'] not in c1, f'{tag} the last trade is the 10:30 short, not the one without a time: {c1[:140]}')
+  # the trade without a time saved at 11:15: now the most recent, clean; the 10:30 short is still a mistake of the day
+  pg.evaluate("(at) => editDoc('trades', 'l3', (d) => { d.created_at = at; d.direction = 'long'; })", at('11:15')); pg.wait_for_timeout(1200)
+  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_timeout(1200)
+  c2 = card()
+  ok((x['last'] + '11:15') in c2 and x['earlier'] in c2 and x['same'] not in c2, f'{tag} the last trade clean, the short earlier: never « nothing to fix, do the same »: {c2[:160]}')
+  left = pg.evaluate("money(72000, { sign: false, dec: 0 })").replace('\u00a0', ' ').replace('\u202f', ' ')
+  ok(left in c2.replace('\u00a0', ' ').replace('\u202f', ' '), f'{tag} what is left counts the whole session: {left} ($1,000 − $280)')
+  ok(not errs, f'{tag} no page error ({errs[:2]})')
+  br.close()
+
 with sync_playwright() as p:
   for lang, phone in (('fr', True), ('en', False), ('es', True)):
     print(f"— {'phone' if phone else 'computer'} {lang}")
@@ -351,5 +402,6 @@ with sync_playwright() as p:
     works(p, lang, phone)
     fewer(p, lang, phone)
     room(p, lang, phone)
+    latest_case(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')
 sys.exit(1 if fails else 0)
