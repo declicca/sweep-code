@@ -2856,3 +2856,6 @@ body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-ev
 #tkSlide .tk-f .tk-date .tk-now{flex:none;min-height:44px;height:auto;margin:0}
 /* brief 00, Q3: the margins fixed, told once */
 .nav-mfix-l{margin:4px 0 16px;padding-left:18px;display:grid;gap:6px;font-size:14.5px;line-height:1.4;text-align:left}
+/* brief 00, Q5: the sample data hidden, one line */
+#main .nav-demo-hid{margin:0 0 12px;font-size:13.5px;color:var(--muted)}
+#main .nav-demo-hid .link{min-height:44px;padding:0 4px;margin:0;color:var(--pos);font-weight:600}   /* blue: an action */

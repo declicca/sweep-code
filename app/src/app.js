@@ -9579,7 +9579,8 @@ async function removeDemo() {
       ms: 6e4
     });
     try {
-      for (const e of COLS) await bulkDel(e, S[e].filter(t => t.demo).map(t => t.id));
+      for (const e of COLS) await bulkDel(e, [ ...S[e], ...(S.__demo && S.__demo[e] || []) ].filter(t => t.demo).map(t => t.id));   // the hidden ones too (brief 00, Q5)
+      S.__demo = null;
       (F.account.startsWith("demo") || F.firm.startsWith("demo")) && (F.account = "all", 
       F.firm = "all", saveF()), toast("Sample data removed");
     } catch (e) {

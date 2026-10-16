@@ -5385,6 +5385,45 @@ new window.SweepMO(() => {
   try { if (window.I18N_FR) Object.assign(window.I18N_FR, add.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, add.es); } catch (e) { /* the app stays in English */ }
 })();
 
+/* brief 00, 1.2-k (16 Oct.), Q5 recommendation A: once the first real trade is there, the sample data is hidden everywhere
+   (Trades, Journal, Calendar, Stats, My money, Accounts…), never deleted: it is set aside in S.__demo at each render (a sync
+   may bring it back), a sample account holding a real trade stays; one line on Today and Trades offers « Remove them »
+   (removeDemo: the app's window, with Cancel). Before: only Today hid it, and Trades showed two P&L for the same day. */
+(function () {
+  'use strict';
+  if (typeof render !== 'function') return;
+  const COLS_D = ['trades', 'accounts', 'payouts', 'expenses', 'journals', 'firms'];
+  const T = { en: ['Sample data hidden', 'Remove them'], fr: ['Données d’exemple masquées', 'Les retirer'], es: ['Datos de ejemplo ocultos', 'Quitarlos'] };
+  function setAside() {
+    if (typeof S === 'undefined' || !Array.isArray(S.trades) || !S.trades.some((t) => !t.demo)) return;
+    const real = S.trades.filter((t) => !t.demo), keepAcc = new Set(real.map((t) => t.account_id));
+    const keepFirm = new Set((S.accounts || []).filter((a) => !a.demo || keepAcc.has(a.id)).map((a) => a.firm_id));
+    COLS_D.forEach((c) => {
+      if (!Array.isArray(S[c])) return;
+      const out = S[c].filter((d) => d.demo && !(c === 'accounts' && keepAcc.has(d.id)) && !(c === 'firms' && keepFirm.has(d.id)));
+      if (!out.length) return;
+      S.__demo = S.__demo || {}; const ids = new Set(out.map((d) => d.id));
+      S.__demo[c] = (S.__demo[c] || []).filter((d) => !ids.has(d.id)).concat(out);
+      S[c] = S[c].filter((d) => !ids.has(d.id));
+    });
+    if (typeof F !== 'undefined' && ((F.account || '').startsWith('demo') || (F.firm || '').startsWith('demo'))) { F.account = 'all'; F.firm = 'all'; if (typeof saveF === 'function') saveF(); }
+  }
+  function line() {
+    const main = document.getElementById('main'); if (!main) return;
+    const want = !!(S.__demo && Object.values(S.__demo).some((l) => l.length)) && /^#(dashboard|trades)?$/.test(location.hash || '');   // Today and Trades
+    let el = main.querySelector('.nav-demo-hid');
+    if (!want) { if (el) el.remove(); return; }
+    if (el) return;
+    const t = T[(typeof LANG !== 'undefined' && LANG) || 'en'] || T.en;
+    el = document.createElement('p'); el.className = 'nav-demo-hid'; el.setAttribute('data-noi18n', '');
+    el.innerHTML = `<span>${t[0]}</span> · <button type="button" class="link" data-act="demo-remove">${t[1]}</button>`;
+    main.prepend(el);
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-act="demo-remove"]') && typeof removeDemo === 'function') removeDemo(); });
+  const r0 = render;
+  window.render = render = function () { try { setAside(); } catch (e) { /* never blocks */ } const o = r0.apply(this, arguments); try { line(); } catch (e) { /* never blocks */ } return o; };
+})();
+
 /* brief 00, 1.2-b and 1.2-c (16 Oct.), Q3 recommendation B: two margins were wrong (a payout with no trade after it; the evening
    trades' order in the real-time drawdown). A trader whose account changes is told once, the room now and before; a mark in
    his settings (margin_fix) keeps it from coming back, on every device. Nothing changes in his data. */
