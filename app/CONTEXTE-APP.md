@@ -563,6 +563,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Déjà justes, vérifiés : la checklist par défaut (traduite), les pluriels (« Importer 1 trade »), « None recorded ».
 - En passant : le « ? » de « …compte live ? » ne passe plus seul à la ligne ; le badge « Argent réel » ne se coupe plus en deux.
 - Tests : `e2e_first_run` (le « + », la fenêtre, le message), `e2e_import_tradingview` (aperçu, « Effacer ») ; échouaient sur l'ancien code.
+- **`ops/build-assets.sh`** : chaque ancienne copie d'un module est remplacée dans `app.html` et effacée, même absente du dossier (avant : seule la première par ordre alphabétique ; après une fusion, `app.html` gardait un module périmé ou manquant, et le paquet CSS pouvait prendre l'ancien). Vu trois fois le 16 oct. en fusionnant avec les autres sessions.
 
 ### Brief 02 — partie 14 (petits détails), 14 oct.
 - **Données d'exemple** : déjà fait depuis B16 (`SweepUndo.demo`, la fenêtre de l'app donne le vrai nombre de trades) ; rien de changé.

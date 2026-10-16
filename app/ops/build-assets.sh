@@ -9,12 +9,15 @@ cd "$(dirname "$0")/.."
 for k in app nav game ux guide notify chart coach; do   # app: the core (src/app.js since 9 Oct 2026); coach: brief 03 step 2
   for e in js css; do
     src="src/$k.$e"; [ -f "$src" ] || continue
-    old=$(ls assets/$k.*.$e 2>/dev/null | grep -v '\.build\.' | head -1 || true)
     tmp="assets/$k.build.$e"
     if [ "$e" = js ]; then terser "$src" -c -m --ecma 2020 --comments false -o "$tmp"; else csso "$src" --no-restructure -o "$tmp"; fi
     h=$(md5sum "$tmp" | cut -c1-10); new="assets/$k.$h.$e"
     mv "$tmp" "$new"
-    if [ -n "$old" ] && [ "$old" != "$new" ]; then sed -i "s#$old#$new#g" app.html; rm -f "$old"; fi
+    # every older copy goes, and app.html points to the new one, whatever name it had (16 Oct.: after a merge, only the first
+    # copy by name was replaced — app.html kept a stale or missing module, and the CSS bundle could take a stale one)
+    for old in $(grep -o "assets/$k\.[0-9a-f]\{10\}\.$e" app.html; ls assets/$k.*.$e 2>/dev/null | grep -v -e '\.build\.' -e '^assets/bundle\.'); do
+      [ "$old" = "$new" ] && continue; sed -i "s#$old#$new#g" app.html; rm -f "$old"
+    done
     echo "$k.$e → $new"
   done
 done
@@ -26,6 +29,7 @@ for k in $(cat ops/css-order.txt); do
   cat "$f" >> "$tmp"; printf '\n' >> "$tmp"
 done
 h=$(md5sum "$tmp" | cut -c1-10); new="assets/bundle.$h.css"; mv "$tmp" "$new"
-old=$(grep -o 'assets/bundle\.[a-z0-9]*\.css' app.html | head -1 || true)
-if [ -n "$old" ] && [ "$old" != "$new" ]; then sed -i "s#$old#$new#g" app.html; rm -f "$old"; fi
+for old in $(grep -o 'assets/bundle\.[a-z0-9]*\.css' app.html; ls assets/bundle.*.css 2>/dev/null | grep -v '\.build\.'); do
+  [ "$old" = "$new" ] && continue; sed -i "s#$old#$new#g" app.html; rm -f "$old"
+done
 echo "bundle.css → $new"
