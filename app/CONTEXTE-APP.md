@@ -586,6 +586,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **`loops_test.php`** arrête aussi les 4 processus de son faux serveur Loops (`pkill -P` avant `proc_terminate`) ; il en laissait 4 à chaque passage (164 trouvés et arrêtés sur le Mac).
 - Chaque bug du lot 1.2 a son scénario (un test qui échouait sur l'ancien code), voir chaque lot ci-dessus.
 
+### Décisions de Mateo et Santé, 16 oct.
+- **Q1 : pas de copie hors du serveur.** Les sauvegardes restent sur le serveur actuel (et en local). La ligne « Copie des sauvegardes hors du serveur » est retirée d'Admin › Santé (`ux.js` ; test `e2e_admin_health`). Le code d'envoi S3 reste, inutilisé.
+- **Q2 à Q5 : les recommandations** de `docs/analyse/QUESTIONS.md` (« continue avec le reste »).
+- **Sur le serveur** (16 oct.) : clés push créées (`ops/push-keys.php` ; la clé privée dans `sweep-private/push-config.php`, jamais vue) ; test de restauration lancé à la main : OK (sauvegarde du 15 oct., intégrité ok, 15 utilisateurs, 273 documents) ; ligne cron `emails` (Loops) ajoutée, après vérification qu'aucune clé Loops n'est en place (la tâche dit « off: no Loops key » ; copie de l'ancienne crontab : `~/crontab-backup-2026-10-16.txt`). Reste à Mateo : la clé Loops, s'il veut ces courriels.
+
 ### Brief 02 — partie 14 (petits détails), 14 oct.
 - **Données d'exemple** : déjà fait depuis B16 (`SweepUndo.demo`, la fenêtre de l'app donne le vrai nombre de trades) ; rien de changé.
 - **Réglages** : déjà en 5 groupes repliables depuis B15 (Compte, Discipline, Notifications, Données, et « Avancé » ajouté par le brief 03), « Déconnexion » seule tout en bas (`e2e_clarity`), chaque champ nommé (`e2e_a11y_names`) ; seul changement : le mot « Déconnexion » centré dans son bouton (il était à gauche, `nav.css`).
