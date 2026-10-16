@@ -349,6 +349,76 @@
    "date": null
   }
  },
+ "prop-firms/topstep-vs-apex.html": {
+  "en": {
+   "alt": "Topstep vs Apex · Rules compared · Verified October 14, 2026",
+   "date": "2026-10-14"
+  },
+  "fr": {
+   "alt": "Topstep vs Apex · Règles comparées · Vérifiées le 14 octobre 2026",
+   "date": "2026-10-14"
+  },
+  "es": {
+   "alt": "Topstep vs Apex · Reglas comparadas · Revisadas el 14 de octubre de 2026",
+   "date": "2026-10-14"
+  }
+ },
+ "prop-firms/apex-vs-lucid.html": {
+  "en": {
+   "alt": "Apex vs Lucid · Rules compared · Verified October 14, 2026",
+   "date": "2026-10-14"
+  },
+  "fr": {
+   "alt": "Apex vs Lucid · Règles comparées · Vérifiées le 14 octobre 2026",
+   "date": "2026-10-14"
+  },
+  "es": {
+   "alt": "Apex vs Lucid · Reglas comparadas · Revisadas el 14 de octubre de 2026",
+   "date": "2026-10-14"
+  }
+ },
+ "prop-firms/topstep-vs-take-profit-trader.html": {
+  "en": {
+   "alt": "Topstep vs Take Profit Trader · Rules compared · Verified October 14, 2026",
+   "date": "2026-10-14"
+  },
+  "fr": {
+   "alt": "Topstep vs Take Profit Trader · Règles comparées · Vérifiées le 14 octobre 2026",
+   "date": "2026-10-14"
+  },
+  "es": {
+   "alt": "Topstep vs Take Profit Trader · Reglas comparadas · Revisadas el 14 de octubre de 2026",
+   "date": "2026-10-14"
+  }
+ },
+ "prop-firms/topstep-vs-lucid.html": {
+  "en": {
+   "alt": "Topstep vs Lucid · Rules compared · Verified October 14, 2026",
+   "date": "2026-10-14"
+  },
+  "fr": {
+   "alt": "Topstep vs Lucid · Règles comparées · Vérifiées le 14 octobre 2026",
+   "date": "2026-10-14"
+  },
+  "es": {
+   "alt": "Topstep vs Lucid · Reglas comparadas · Revisadas el 14 de octubre de 2026",
+   "date": "2026-10-14"
+  }
+ },
+ "prop-firms/apex-vs-myfundedfutures.html": {
+  "en": {
+   "alt": "Apex vs MyFundedFutures · Rules compared · Verified October 14, 2026",
+   "date": "2026-10-14"
+  },
+  "fr": {
+   "alt": "Apex vs MyFundedFutures · Règles comparées · Vérifiées le 14 octobre 2026",
+   "date": "2026-10-14"
+  },
+  "es": {
+   "alt": "Apex vs MyFundedFutures · Reglas comparadas · Revisadas el 14 de octubre de 2026",
+   "date": "2026-10-14"
+  }
+ },
  "import-tradovate.html": {
   "en": {
    "alt": "Export trades from Tradovate · CSV export, then into your journal",

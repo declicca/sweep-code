@@ -23,6 +23,11 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Prop firm rules](https://makeitsweep.com/prop-firms/): drawdown, consistency and payout rules by firm and account type, from Sweep's weekly check
 - [How we verify prop firm rules](https://makeitsweep.com/how-we-verify-prop-firm-rules): sources (the firms' official pages), weekly checks, what counts as a rule change, limits
 - [Prop firm rule changes](https://makeitsweep.com/prop-firm-rule-changes): every rule change detected on the firms' official pages, dated, with its source ([RSS](https://makeitsweep.com/prop-firm-rule-changes.xml))
+- [Topstep vs Apex](https://makeitsweep.com/prop-firms/topstep-vs-apex): account sizes, targets, drawdown, consistency, minimum days and payouts, side by side
+- [Apex vs Lucid](https://makeitsweep.com/prop-firms/apex-vs-lucid): the same comparison for Apex Trader Funding and Lucid Trading
+- [Topstep vs Take Profit Trader](https://makeitsweep.com/prop-firms/topstep-vs-take-profit-trader): the same comparison for Topstep and Take Profit Trader
+- [Topstep vs Lucid](https://makeitsweep.com/prop-firms/topstep-vs-lucid): the same comparison for Topstep and Lucid Trading
+- [Apex vs MyFundedFutures](https://makeitsweep.com/prop-firms/apex-vs-myfundedfutures): the same comparison for Apex Trader Funding and MyFundedFutures
 - [Topstep](https://makeitsweep.com/prop-firms/topstep)
 - [Apex Trader Funding](https://makeitsweep.com/prop-firms/apex)
 - [Take Profit Trader](https://makeitsweep.com/prop-firms/take-profit-trader)

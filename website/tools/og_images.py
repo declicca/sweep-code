@@ -72,6 +72,11 @@ def entries():
         ("prop-firm-rule-changes.html", T("Prop firm rule changes", "Changements de règles des prop firms", "Cambios de reglas de las prop firms"),
          T("Every change found on the firms’ official pages, dated", "Chaque changement trouvé sur les pages officielles des firmes, daté", "Cada cambio encontrado en las páginas oficiales de las firmas, fechado"), None)):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, day))
+    byid = {f["id"]: f for f in presets.FIRMS}
+    for x, y in pages19.FIRM_VS:   # firm vs firm (SEO brief, step 4)
+        a_, b_ = pages19.SHORT[x], pages19.SHORT[y]
+        out.append((pages19.vs_page_of(byid[x], byid[y]), {l: (f"{a_} vs {b_}", T(f"Rules compared · Verified {pages18.day(when, 'en')}", f"Règles comparées · Vérifiées le {pages18.day(when, 'fr')}",
+                                                                                   f"Reglas comparadas · Revisadas el {pages18.day(when, 'es')}")[l]) for l in LANGS}, when))
     for g in pages11.EXPORT_GUIDES:   # export guides (SEO brief, step 3)
         out.append((g["slug"], {l: (g["kick"][l], T("CSV export, then into your journal", "Export CSV, puis dans ton journal", "Exportación CSV, luego a tu diario")[l]) for l in LANGS}, None))
     for slug, _, name, _ in pages7.TOOLS:

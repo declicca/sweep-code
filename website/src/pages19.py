@@ -24,10 +24,10 @@ def _variant_cons(p):
 
 def _pct_range(v, lang): return pc(v[0], lang) if len(v) == 1 else f"{pc(v[0], lang)}–{pc(v[-1], lang)}"
 
-def _firm_rows(lang, t, cells):
+def _firm_rows(lang, t, cells, firms=None):
     """One block per firm (header row linking to its rules page), one row per account type."""
     body = ""
-    for f in presets.FIRMS:
+    for f in firms or presets.FIRMS:
         body += f'<tr class="grp"><th colspan="3" scope="colgroup"><a href="{href(lang, page_of(f))}">{f["name"]}</a></th></tr>'
         for p in f["programs"]:
             a, b = cells(f, p)
@@ -78,14 +78,17 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
     return _fr_nbsp(lang, t(title), t(desc), hero + b + ui.final(lang, t), ld)
 
 # ---------------------------------------------------------------- consistency rules
+def cons_cells(lang, t, f, p):
+    """Consistency: (evaluation, funded account) for an account type."""
+    e, fu, va = _vals(p, "eval", "consistency"), _vals(p, "funded", "consistency"), _variant_cons(p)
+    best = t(T("Best day ≤ ", "Meilleur jour ≤ ", "Mejor día ≤ "))
+    ec = best + _pct_range(e, lang) if e else DASH
+    parts = ([best + _pct_range(fu, lang)] if fu else []) + [best + _pct_range(v, lang) + " " + t(T(f"({label['en']} option)", f"(option {label['fr']})", f"(opción {label['es']})")) for label, v in va]
+    return ec, "<br>".join(parts) or DASH
+CONS_HEADS = (T("Evaluation", "Évaluation", "Evaluación"), T("Funded account", "Compte financé", "Cuenta financiada"))
+
 def page_consistency(lang, t):
-    def cells(f, p):
-        e, fu, va = _vals(p, "eval", "consistency"), _vals(p, "funded", "consistency"), _variant_cons(p)
-        best = t(T("Best day ≤ ", "Meilleur jour ≤ ", "Mejor día ≤ "))
-        ec = best + _pct_range(e, lang) if e else DASH
-        parts = ([best + _pct_range(fu, lang)] if fu else []) + [best + _pct_range(v, lang) + " " + t(T(f"({label['en']} option)", f"(option {label['fr']})", f"(opción {label['es']})")) for label, v in va]
-        return ec, "<br>".join(parts) or DASH
-    table = _table(lang, t, T("Evaluation", "Évaluation", "Evaluación"), T("Funded account", "Compte financé", "Cuenta financiada"), _firm_rows(lang, t, cells))
+    table = _table(lang, t, *CONS_HEADS, _firm_rows(lang, t, lambda f, p: cons_cells(lang, t, f, p)))
     intro = [
      (T("What a consistency rule is", "C’est quoi une règle de consistance", "Qué es una regla de consistencia"), [
       T("A consistency rule caps how much of your profit can come from a single day. In an evaluation, your best day is compared with your total profit; on a funded account, most firms compare it with the profit since your last payout.",
@@ -138,18 +141,22 @@ def page_consistency(lang, t):
           f"La regla de consistencia de {FIRMS_N} prop firms de futuros, lado a lado: límite del mejor día en evaluación y cuenta financiada, revisada cada semana."))
 
 # ---------------------------------------------------------------- drawdown rules
+def _dd_cell(lang, t, p, ph):
+    s = rep(p); r = s.get(ph) or {}
+    if not r.get("dd"): return DASH
+    typ = t(DDT[r["dd_type"]]) if r.get("dd_type") in DDT else ""
+    txt = f"{typ} · {usd(r['dd'], lang)}" + ("" if s["size"] == 50000 else f" ({kk(s['size'])})")
+    if ph == "funded" and r.get("dd_lock") and r.get("dd_type") != "static":
+        off = r.get("dd_lock_offset") or 0
+        txt += "<br>" + t(T("stops at the starting balance", "s’arrête au solde de départ", "se detiene en el saldo inicial")) + (f" + {usd(off, lang)}" if off else "")
+    return txt
+def dd_cells(lang, t, f, p):
+    """Drawdown at 50K (or the closest size): (evaluation, funded account)."""
+    return _dd_cell(lang, t, p, "eval"), _dd_cell(lang, t, p, "funded")
+DD_HEADS = (T("Evaluation (50K)", "Évaluation (50K)", "Evaluación (50K)"), T("Funded account (50K)", "Compte financé (50K)", "Cuenta financiada (50K)"))
+
 def page_drawdown_guide(lang, t):
-    def phase_cell(p, ph):
-        s = rep(p); r = s.get(ph) or {}
-        if not r.get("dd"): return DASH
-        typ = t(DDT[r["dd_type"]]) if r.get("dd_type") in DDT else ""
-        txt = f"{typ} · {usd(r['dd'], lang)}" + ("" if s["size"] == 50000 else f" ({kk(s['size'])})")
-        if ph == "funded" and r.get("dd_lock") and r.get("dd_type") != "static":
-            off = r.get("dd_lock_offset") or 0
-            txt += "<br>" + t(T("stops at the starting balance", "s’arrête au solde de départ", "se detiene en el saldo inicial")) + (f" + {usd(off, lang)}" if off else "")
-        return txt
-    table = _table(lang, t, T("Evaluation (50K)", "Évaluation (50K)", "Evaluación (50K)"), T("Funded account (50K)", "Compte financé (50K)", "Cuenta financiada (50K)"),
-                   _firm_rows(lang, t, lambda f, p: (phase_cell(p, "eval"), phase_cell(p, "funded"))))
+    table = _table(lang, t, *DD_HEADS, _firm_rows(lang, t, lambda f, p: dd_cells(lang, t, f, p)))
     intro = [
      (T("Three kinds of drawdown", "Trois sortes de drawdown", "Tres tipos de drawdown"), [
       T("<b>End of day</b>: the max loss follows your highest closing balance. A peak during the session doesn’t move it, so open profit you give back intraday doesn’t cost you room.",
@@ -311,20 +318,22 @@ def _payout_variants(p, s):
             if v: out.append((c["label"], v))
     return out
 
+def payout_cells(lang, t, f, p):
+    """Payouts at 50K (or the closest size): (conditions to request, amount and split)."""
+    s = rep(p); po = (s.get("funded") or {}).get("payout") or {}
+    if not po: return DASH, DASH
+    tag = "" if s["size"] == 50000 else f" ({kk(s['size'])})"
+    conds, amts = _payout_conds(po, s["size"], lang, t), _payout_amounts(po, lang, t)
+    for label, v in _payout_variants(p, s):
+        opt = t(T(f"{label['en']} option", f"option {label['fr']}", f"opción {label['es']}"))
+        vc, va = _payout_conds(v, s["size"], lang, t), _payout_amounts(v, lang, t)
+        if vc: conds.append(f"<i>{opt}{colon(lang)}{', '.join(vc)}</i>")
+        if va: amts.append(f"<i>{opt}{colon(lang)}{', '.join(va)}</i>")
+    return ("<br>".join(conds) or DASH) + tag, ("<br>".join(amts) or DASH)
+PAYOUT_HEADS = (T("Conditions to request (50K)", "Conditions pour demander (50K)", "Condiciones para pedir (50K)"), T("Amount and split (50K)", "Montant et partage (50K)", "Importe y reparto (50K)"))
+
 def page_payout_guide(lang, t):
-    def cells(f, p):
-        s = rep(p); po = (s.get("funded") or {}).get("payout") or {}
-        if not po: return DASH, DASH
-        tag = "" if s["size"] == 50000 else f" ({kk(s['size'])})"
-        conds, amts = _payout_conds(po, s["size"], lang, t), _payout_amounts(po, lang, t)
-        for label, v in _payout_variants(p, s):
-            opt = t(T(f"{label['en']} option", f"option {label['fr']}", f"opción {label['es']}"))
-            vc, va = _payout_conds(v, s["size"], lang, t), _payout_amounts(v, lang, t)
-            if vc: conds.append(f"<i>{opt}{colon(lang)}{', '.join(vc)}</i>")
-            if va: amts.append(f"<i>{opt}{colon(lang)}{', '.join(va)}</i>")
-        return ("<br>".join(conds) or DASH) + tag, ("<br>".join(amts) or DASH)
-    table = _table(lang, t, T("Conditions to request (50K)", "Conditions pour demander (50K)", "Condiciones para pedir (50K)"), T("Amount and split (50K)", "Montant et partage (50K)", "Importe y reparto (50K)"),
-                   _firm_rows(lang, t, cells))
+    table = _table(lang, t, *PAYOUT_HEADS, _firm_rows(lang, t, lambda f, p: payout_cells(lang, t, f, p)))
     intro = [
      (T("How prop firm payouts work", "Comment marchent les payouts des prop firms", "Cómo funcionan los payouts de las prop firms"), [
       T("Before each payout, firms check conditions since your last request: a number of winning days (sometimes with a minimum profit per day) or traded days, sometimes a balance to keep above your starting balance, and often a consistency rule.",
@@ -403,20 +412,22 @@ def _size_cell(s, lang, t):
     if r.get("dll"): lines.append(U(r["dll"]) + (" " + t(T("(option)", "(option)", "(opción)")) if r.get("dll_optional") else ""))
     return "<br>".join(lines)
 
+def sizes_table(lang, t, f):
+    """One firm's account types × sizes: target, max loss, daily loss limit in each cell."""
+    sizes = sorted({s["size"] for p in f["programs"] for s in p["sizes"]})
+    head = (f'<thead><tr><th scope="col">{t(T("Account type", "Type de compte", "Tipo de cuenta"))}</th>' + "".join(f'<th scope="col">{kk(z)}</th>' for z in sizes) + "</tr></thead>")
+    rows = ""
+    for p in f["programs"]:
+        by = {s["size"]: s for s in p["sizes"]}
+        direct = not any((s.get("eval") or {}).get("dd") for s in p["sizes"])
+        name = f'<a href="{href(lang, page_of(f))}#{anchor(f, p)}">{p["name"]}</a>' + (f'<br><span class="fine">{t(T("funded directly", "financé direct", "financiada directa"))}</span>' if direct else "")
+        rows += f'<tr><th scope="row">{name}</th>' + "".join(f"<td>{_size_cell(by[z], lang, t) if z in by else DASH}</td>" for z in sizes) + "</tr>"
+    return (f'<h3><a href="{href(lang, page_of(f))}">{f["name"]}</a></h3>'
+            f'<div class="cmp-wrap"><table class="cmp rules sizes n{len(sizes)}">{head}<tbody>{rows}</tbody></table></div>')
+SIZES_HOW = T("In each cell: the profit target (bold), the max loss, then the daily loss limit when the account has one. Evaluation values; for accounts funded directly, the funded account’s.", "Dans chaque case : l’objectif de profit (en gras), la perte max, puis la limite de perte du jour quand le compte en a une. Valeurs de l’évaluation ; pour les comptes financés directement, celles du compte financé.", "En cada casilla: el objetivo de beneficio (en negrita), la pérdida máx. y, si la cuenta lo tiene, el límite de pérdida diaria. Valores de la evaluación; en las cuentas financiadas directamente, los de la cuenta financiada.")
 def page_sizes_guide(lang, t):
-    secs = ""
-    for f in presets.FIRMS:
-        sizes = sorted({s["size"] for p in f["programs"] for s in p["sizes"]})
-        head = (f'<thead><tr><th scope="col">{t(T("Account type", "Type de compte", "Tipo de cuenta"))}</th>' + "".join(f'<th scope="col">{kk(z)}</th>' for z in sizes) + "</tr></thead>")
-        rows = ""
-        for p in f["programs"]:
-            by = {s["size"]: s for s in p["sizes"]}
-            direct = not any((s.get("eval") or {}).get("dd") for s in p["sizes"])
-            name = f'<a href="{href(lang, page_of(f))}#{anchor(f, p)}">{p["name"]}</a>' + (f'<br><span class="fine">{t(T("funded directly", "financé direct", "financiada directa"))}</span>' if direct else "")
-            rows += f'<tr><th scope="row">{name}</th>' + "".join(f"<td>{_size_cell(by[z], lang, t) if z in by else DASH}</td>" for z in sizes) + "</tr>"
-        secs += (f'<h3><a href="{href(lang, page_of(f))}">{f["name"]}</a></h3>'
-                 f'<div class="cmp-wrap"><table class="cmp rules sizes n{len(sizes)}">{head}<tbody>{rows}</tbody></table></div>')
-    table = (f'<p>{t(T("In each cell: the profit target (bold), the max loss, then the daily loss limit when the account has one. Evaluation values; for accounts funded directly, the funded account’s.", "Dans chaque case : l’objectif de profit (en gras), la perte max, puis la limite de perte du jour quand le compte en a une. Valeurs de l’évaluation ; pour les comptes financés directement, celles du compte financé.", "En cada casilla: el objetivo de beneficio (en negrita), la pérdida máx. y, si la cuenta lo tiene, el límite de pérdida diaria. Valores de la evaluación; en las cuentas financiadas directamente, los de la cuenta financiada."))}</p>'
+    secs = "".join(sizes_table(lang, t, f) for f in presets.FIRMS)
+    table = (f'<p>{t(SIZES_HOW)}</p>'
              + secs)
     intro = [
      (T("Reading the numbers", "Lire les chiffres", "Cómo leer las cifras"), [
@@ -495,19 +506,23 @@ def _direct(p):
     """An account funded directly: no evaluation phase in any size."""
     return not any((s.get("eval") or {}).get("dd") for s in p["sizes"])
 
+def days_cells(lang, t, f, p):
+    """Days: (evaluation minimum days, funded days before a payout at 50K)."""
+    v = _vals(p, "eval", "min_days")
+    ev = _days(v, lang, t) if v else t(T("No evaluation", "Pas d’évaluation", "Sin evaluación")) if _direct(p) else DASH
+    s = rep(p); po = (s.get("funded") or {}).get("payout") or {}
+    conds = _day_conds(po, lang, t)
+    for label, vp in _payout_variants(p, s):
+        vc = _day_conds(vp, lang, t)
+        if vc and vc != conds: conds.append(f"<i>{t(T(f"{label['en']} option", f"option {label['fr']}", f"opción {label['es']}"))}{colon(lang)}{', '.join(vc)}</i>")
+    tag = "" if s["size"] == 50000 else f" ({kk(s['size'])})"
+    return ev, ("<br>".join(conds) + tag if conds else DASH)
+
+DAYS_HEADS = (T("Evaluation: minimum days", "Évaluation : jours minimum", "Evaluación: días mínimos"), T("Funded: days before a payout (50K)", "Financé : jours avant un payout (50K)", "Fondeada: días antes de un payout (50K)"))
+
 def page_days_guide(lang, t):
-    def cells(f, p):
-        v = _vals(p, "eval", "min_days")
-        ev = _days(v, lang, t) if v else t(T("No evaluation", "Pas d’évaluation", "Sin evaluación")) if _direct(p) else DASH
-        s = rep(p); po = (s.get("funded") or {}).get("payout") or {}
-        conds = _day_conds(po, lang, t)
-        for label, vp in _payout_variants(p, s):
-            vc = _day_conds(vp, lang, t)
-            if vc and vc != conds: conds.append(f"<i>{t(T(f"{label['en']} option", f"option {label['fr']}", f"opción {label['es']}"))}{colon(lang)}{', '.join(vc)}</i>")
-        tag = "" if s["size"] == 50000 else f" ({kk(s['size'])})"
-        return ev, ("<br>".join(conds) + tag if conds else DASH)
-    table = _table(lang, t, T("Evaluation: minimum days", "Évaluation : jours minimum", "Evaluación: días mínimos"), T("Funded: days before a payout (50K)", "Financé : jours avant un payout (50K)", "Fondeada: días antes de un payout (50K)"),
-                   _firm_rows(lang, t, cells))
+    cells = lambda f, p: days_cells(lang, t, f, p)
+    table = _table(lang, t, *DAYS_HEADS, _firm_rows(lang, t, cells))
     intro = [
      (T("What minimum days are", "Ce que sont les jours minimum", "Qué son los días mínimos"), [
       T("Many evaluations set a minimum number of trading days: even if you reach the profit target sooner, you pass only once you’ve traded that many days. On funded accounts, the days that count before a payout are usually winning days, days that close with at least a set profit, counted again after each payout.",
@@ -633,3 +648,108 @@ if COSTS_LIVE: GUIDES.insert(3, (GUIDE_COSTS, T("Prop firm costs, compared", "Le
 
 RULE_GUIDES = (GUIDE_CONS, GUIDE_DD, GUIDE_PAYOUT, GUIDE_SIZES, GUIDE_DAYS) + ((GUIDE_COSTS,) if COSTS_LIVE else ())   # firm-by-firm guides built from the catalogue
 SYSTEM_PAGES.update(RULE_GUIDES)
+
+# ---------------------------------------------------------------- firm vs firm (SEO brief, Oct 15, step 4): two firms, the guides' tables side by side
+from pages18 import slug as _slug
+SHORT = {"lucid": "Lucid", "topstep": "Topstep", "apex": "Apex", "tpt": "Take Profit Trader", "mffu": "MyFundedFutures", "alpha": "Alpha Futures"}
+FIRM_VS = [("topstep", "apex"), ("apex", "lucid"), ("topstep", "tpt"), ("topstep", "lucid"), ("apex", "mffu")]
+def vs_page_of(a, b): return f"prop-firms/{_slug(a)}-vs-{_slug(b)}.html"
+NONE_TRACKED = T("none in the rules Sweep tracks", "aucune dans les règles suivies par Sweep", "ninguna en las reglas que sigue Sweep")
+
+def _lower1(x): return x[:1].lower() + x[1:]
+def _eval_or_funded(s): return (s.get("eval") or {}) if (s.get("eval") or {}).get("dd") else (s.get("funded") or {})
+
+def _dd_kinds(f, lang, t):
+    """[(firm name, « end of day (EOD Trail, Apex Legacy) »)]: the evaluation's drawdown, the funded account's when funded directly."""
+    groups = {}
+    for p in f["programs"]:
+        r = _eval_or_funded(rep(p)); typ = r.get("dd_type")
+        if typ not in DDT: continue
+        label = _lower1(t(DDT[typ])) + ("" if (rep(p).get("eval") or {}).get("dd") else ", " + t(T("funded directly", "financé direct", "financiada directa")))
+        groups.setdefault(label, []).append(p["name"])
+    return [(f["name"], f"{k} ({', '.join(v)})") for k, v in groups.items()] or [(f["name"], t(NONE_TRACKED))]
+
+def _dll_of(f, lang, t):
+    out = []
+    for p in f["programs"]:
+        rs = [r for s in p["sizes"] for r in (s.get("eval") or {}, s.get("funded") or {}) if r.get("dll")]
+        if rs: out.append(p["name"] + (" " + t(T("(option)", "(option)", "(opción)")) if all(r.get("dll_optional") for r in rs) else ""))
+    return [(f["name"], x) for x in out] or [(f["name"], t(NONE_TRACKED))]
+
+def _cons_of(f, lang, t):
+    out = []
+    for p in f["programs"]:
+        e, fu, va = _vals(p, "eval", "consistency"), _vals(p, "funded", "consistency"), _variant_cons(p)
+        funded = t(T("funded", "financé", "financiada"))
+        parts = (([t(T("evaluation", "évaluation", "evaluación")) + " ≤ " + _pct_range(e, lang)] if e else []) + ([funded + " ≤ " + _pct_range(fu, lang)] if fu else [])
+                 + [funded + " ≤ " + _pct_range(v, lang) + " " + t(T(f"with the {label['en']} option", f"avec l’option {label['fr']}", f"con la opción {label['es']}")) for label, v in va])
+        if parts: out.append(f"{p['name']} ({', '.join(parts)})")
+    return [(f["name"], x) for x in out] or [(f["name"], t(NONE_TRACKED))]
+
+def _eod_of(f, lang, t):
+    out = [p["name"] for p in f["programs"] if _eval_or_funded(rep(p)).get("dd_type") == "eod"]
+    return [(f["name"], x) for x in out] or [(f["name"], t(T("none of its account types", "aucun de ses types de compte", "ninguno de sus tipos de cuenta")))]
+
+def make_firm_vs(a_id, b_id):
+    A, B = (next(f for f in presets.FIRMS if f["id"] == i) for i in (a_id, b_id))
+    a, b = SHORT[a_id], SHORT[b_id]
+    page_slug = vs_page_of(A, B)
+    SYSTEM_PAGES.add(page_slug)
+    CRUMBS[page_slug] = {l: f"{a} vs {b}" for l in LANGS}
+    def page(lang, t):
+        import ui
+        hero = ui.hero(t, T(f"{a} vs {b}", f"{a} vs {b}", f"{a} vs {b}"), T("Prop firm rules, side by side.", "Les règles, côte à côte.", "Las reglas, lado a lado."),
+            T(f"Account sizes, profit targets, drawdown, consistency, minimum days and payouts at {A['name']} and {B['name']}, from Sweep’s weekly check of each firm’s official pages. For guidance only: confirm on each firm’s site.",
+              f"Tailles de compte, objectifs, drawdown, consistance, jours minimum et payouts chez {A['name']} et {B['name']}, tirés de la vérification hebdomadaire des pages officielles de chaque firme par Sweep. À titre indicatif : confirme sur le site de chaque firme.",
+              f"Tamaños de cuenta, objetivos, drawdown, consistencia, días mínimos y payouts en {A['name']} y {B['name']}, tomados de la revisión semanal de las páginas oficiales de cada firma por Sweep. Solo como referencia: confirma en el sitio de cada firma."),
+            kick_in_h1=True, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_firmvs_hero"'))
+        kinds = lambda f: t(T("account type", "type de compte", "tipo de cuenta") if len(f["programs"]) == 1 else T("account types", "types de compte", "tipos de cuenta"))
+        summary = ui.stats([(A["name"], str(len(A["programs"])), kinds(A)), (B["name"], str(len(B["programs"])), kinds(B)),
+                            (t(T("Checked", "Vérifiées le", "Revisadas el")), day(presets.CHECKED, lang), t(T("every week", "chaque semaine", "cada semana")))])
+        both = [A, B]
+        sizes = lambda f: ", ".join(kk(z) for z in sorted({s["size"] for p in f["programs"] for s in p["sizes"]}))
+        glance = [(T("Account sizes", "Tailles de compte", "Tamaños de cuenta"), [(f["name"], x) for f in both for x in [sizes(f)]]),
+                  (T("Drawdown in the evaluation", "Drawdown en évaluation", "Drawdown en la evaluación"), _dd_kinds(A, lang, t) + _dd_kinds(B, lang, t)),
+                  (T("Daily loss limit", "Limite de perte du jour", "Límite de pérdida diaria"), _dll_of(A, lang, t) + _dll_of(B, lang, t)),
+                  (T("Consistency rule", "Règle de consistance", "Regla de consistencia"), _cons_of(A, lang, t) + _cons_of(B, lang, t))]
+        glance_html = '<ul class="list">' + "".join(f"<li><b>{t(h)}</b>{colon(lang)}{_by_firm(pairs, lang)}</li>" for h, pairs in glance) + "</ul>"
+        every = lambda g: f'<p class="fine" style="margin-top:12px"><a href="{href(lang, g)}">{t(T("All firms, compared", "Toutes les firmes, comparées", "Todas las firmas, comparadas"))} <span aria-hidden="true">→</span></a></p>'
+        rows = lambda cells: _firm_rows(lang, t, lambda f, p: cells(lang, t, f, p), firms=both)
+        topics = [("sizes", T("Account sizes and targets", "Tailles de compte et objectifs", "Tamaños de cuenta y objetivos"), f"<p>{t(SIZES_HOW)}</p>" + sizes_table(lang, t, A) + sizes_table(lang, t, B), GUIDE_SIZES),
+                  ("drawdown", T("Drawdown", "Drawdown", "Drawdown"), _table(lang, t, *DD_HEADS, rows(dd_cells)), GUIDE_DD),
+                  ("consistency", T("Consistency", "Consistance", "Consistencia"), _table(lang, t, *CONS_HEADS, rows(cons_cells)), GUIDE_CONS),
+                  ("days", T("Minimum days", "Jours minimum", "Días mínimos"), _table(lang, t, *DAYS_HEADS, rows(days_cells)), GUIDE_DAYS),
+                  ("payouts", T("Payouts", "Payouts", "Payouts"), _table(lang, t, *PAYOUT_HEADS, rows(payout_cells)), GUIDE_PAYOUT)]
+        band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_firmvs_card"'))
+        faqs = [(T(f"Which has an end-of-day drawdown, {a} or {b}?", f"Lequel a un drawdown de fin de journée, {a} ou {b} ?", f"¿Cuál tiene drawdown al cierre, {a} o {b}?"),
+                 {l: _by_firm(_eod_of(A, l, lambda d, L=l: d[L]) + _eod_of(B, l, lambda d, L=l: d[L]), l) for l in LANGS}),
+                (T(f"Do {a} and {b} have a consistency rule?", f"{a} et {b} ont-ils une règle de consistance ?", f"¿{a} y {b} tienen una regla de consistencia?"),
+                 {l: _by_firm(_cons_of(A, l, lambda d, L=l: d[L]) + _cons_of(B, l, lambda d, L=l: d[L]), l) for l in LANGS}),
+                (T(f"Which is better, {a} or {b}?", f"Lequel est le meilleur, {a} ou {b} ?", f"¿Cuál es mejor, {a} o {b}?"),
+                 T("Sweep doesn’t recommend a firm, and nothing here is financial advice. Compare what matters for how you trade (the drawdown type, the daily loss limit, consistency and the payout conditions above), then confirm on each firm’s site.",
+                   "Sweep ne recommande pas de firme, et rien ici n’est un conseil financier. Compare ce qui compte pour ta façon de trader (le type de drawdown, la limite du jour, la consistance et les conditions de payout ci-dessus), puis confirme sur le site de chaque firme.",
+                   "Sweep no recomienda ninguna firma, y nada aquí es un consejo financiero. Compara lo que importa según tu forma de operar (el tipo de drawdown, el límite diario, la consistencia y las condiciones de payout de arriba) y confirma en el sitio de cada firma."))]
+        firms_chips = [(page_of(f), {l: f["name"] for l in LANGS}) for f in both]
+        others = [(vs_page_of(*(next(f for f in presets.FIRMS if f["id"] == i) for i in pr)), {l: f"{SHORT[pr[0]]} vs {SHORT[pr[1]]}" for l in LANGS}) for pr in FIRM_VS if pr != (a_id, b_id)]
+        from pages17 import chiprow
+        b_ = (ui.sec(summary, "t", "summary")
+              + ui.sec(ui.head(t, None, T("The differences at a glance.", "Les différences en bref.", "Las diferencias de un vistazo.")) + f'<div class="read">{glance_html}</div>', "n", "glance")
+              + "".join(ui.sec(ui.head(t, None, h) + body + every(g), "t", k) for k, h, body, g in topics)
+              + ui.sec(f'<p class="fine vs-note">{_checked_note(lang, t)}</p>' + band, "n", "note")
+              + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs)
+                       + chiprow(lang, t, T("Firm pages", "Pages des firmes", "Páginas de las firmas"), firms_chips, 32)
+                       + chiprow(lang, t, T("Compare too", "Compare aussi", "Compara también"), others, 12), "n", "faq", width="read")
+              + ui.read_next(lang, t, ["prop-firms/index.html", "prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html"]) + ui.final(lang, t))
+        ld = jsonld({"@context": "https://schema.org", "@graph": [
+            {"@type": "Article", "headline": f"{a} vs {b}", "inLanguage": lang, "datePublished": "2026-10-16", "dateModified": presets.CHECKED,
+             "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}},
+            {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(x))}} for q, x in faqs]}]})
+        title = T(f"{a} vs {b}: Rules Compared (2026) · Sweep", f"{a} vs {b} : règles comparées (2026) · Sweep", f"{a} vs {b}: reglas comparadas (2026) · Sweep")
+        desc = T(f"{a} vs {b}, side by side: account sizes, profit targets, drawdown, consistency, minimum days and payout rules, checked every week.",
+                 f"{a} vs {b}, côte à côte : tailles de compte, objectifs, drawdown, consistance, jours minimum et payouts, vérifiés chaque semaine.",
+                 f"{a} vs {b}, lado a lado: tamaños de cuenta, objetivos, drawdown, consistencia, días mínimos y payouts, revisados cada semana.")
+        tt = t(title) if len(t(title)) <= 60 else t(title).replace(" (2026)", "")   # long firm names: the year goes
+        return _fr_nbsp(lang, tt, t(desc), hero + b_, ld)
+    return page_slug, page
+
+VS_PAGES = dict(make_firm_vs(a, b) for a, b in FIRM_VS)

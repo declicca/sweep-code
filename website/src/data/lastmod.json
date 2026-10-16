@@ -247,29 +247,49 @@
   "date": "2026-10-15",
   "hash": "1cc7741229158ded"
  },
+ "prop-firms/apex-vs-lucid.html": {
+  "date": "2026-10-16",
+  "hash": "e76021e1b20887c1"
+ },
+ "prop-firms/apex-vs-myfundedfutures.html": {
+  "date": "2026-10-16",
+  "hash": "3387ef013aa699a8"
+ },
  "prop-firms/apex.html": {
-  "date": "2026-10-15",
-  "hash": "35b0dfe2171248b9"
+  "date": "2026-10-16",
+  "hash": "40557bee0c95420d"
  },
  "prop-firms/index.html": {
-  "date": "2026-10-15",
-  "hash": "d93986022baf73f6"
+  "date": "2026-10-16",
+  "hash": "0b2157a6c7e27062"
  },
  "prop-firms/lucid.html": {
-  "date": "2026-10-15",
-  "hash": "c5d0052064cced83"
+  "date": "2026-10-16",
+  "hash": "8431a51b7feb0344"
  },
  "prop-firms/myfundedfutures.html": {
-  "date": "2026-10-15",
-  "hash": "d9353976e8d0e6e5"
+  "date": "2026-10-16",
+  "hash": "0fd2c8bd57d3bcd1"
  },
  "prop-firms/take-profit-trader.html": {
-  "date": "2026-10-15",
-  "hash": "7a2177ab067e21c3"
+  "date": "2026-10-16",
+  "hash": "f1750b06e7a43658"
+ },
+ "prop-firms/topstep-vs-apex.html": {
+  "date": "2026-10-16",
+  "hash": "8543139df9fa6458"
+ },
+ "prop-firms/topstep-vs-lucid.html": {
+  "date": "2026-10-16",
+  "hash": "444fffb2d37dc314"
+ },
+ "prop-firms/topstep-vs-take-profit-trader.html": {
+  "date": "2026-10-16",
+  "hash": "4141e314797b5281"
  },
  "prop-firms/topstep.html": {
-  "date": "2026-10-15",
-  "hash": "43708dd171cce2c1"
+  "date": "2026-10-16",
+  "hash": "e764bed4aebe2120"
  },
  "prop-firms/tradeify.html": {
   "date": "2026-10-15",

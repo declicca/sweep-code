@@ -393,7 +393,12 @@ def make_rules_page(f):
             (T("Is it free?", "C’est gratuit ?", "¿Es gratis?"),
              T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.", "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
         rel = ["prop-firm-payout-rules.html", "prop-firm-drawdown-rules.html", "prop-firm-consistency-rules.html"]
-        b += ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs), "n", "questions", width="read") + ui.read_next(lang, t, rel[:3])
+        from pages19 import FIRM_VS, SHORT, vs_page_of   # the firm-vs-firm pages this firm is in
+        byid = {x["id"]: x for x in presets.FIRMS}
+        vs = [(vs_page_of(byid[x], byid[y]), f"{SHORT[x]} vs {SHORT[y]}") for x, y in FIRM_VS if f["id"] in (x, y)]
+        vsrow = (f'<div class="chiprow" style="margin-top:32px"><span class="eyebrow">{t(T("Compare", "Comparer", "Comparar"))}</span>'
+                 + "".join(f'<a class="chip" href="{href(lang, u)}">{n}</a>' for u, n in vs) + "</div>") if vs else ""
+        b += ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs) + vsrow, "n", "questions", width="read") + ui.read_next(lang, t, rel[:3])
         chain = {"en": [f"{name} Rules 2026: Drawdown, Payouts & Journal · Sweep", f"{name} Rules 2026: Payouts & Journal · Sweep", f"{name} Rules & Journal 2026 · Sweep", f"{name} Rules 2026 · Sweep"],
                  "fr": [f"Règles {name} 2026 : drawdown, payouts · Sweep", f"Règles {name} 2026 : drawdown, payouts", f"Règles {name} 2026 · Sweep"],     # written for French searches,
                  "es": [f"Reglas de {name} 2026: drawdown y payouts · Sweep", f"Reglas de {name} 2026: drawdown y payouts", f"Reglas de {name} 2026 · Sweep"]}   # not translated
@@ -600,8 +605,12 @@ def page_hub(lang, t):
              ("consistency-rule-calculator.html", T("Consistency rule calculator", "Calculateur de consistance", "Calculadora de consistencia")), ("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout")),
              ("prop-firm-profit-targets.html", T("Profit targets and max loss compared", "Objectifs et perte max comparés", "Objetivos y pérdida máx. comparados"))]
     more = f'<h2>{t(T("Another firm?", "Une autre firme ?", "¿Otra firma?"))}</h2>{other}' if other else ""
+    from pages19 import FIRM_VS, SHORT, vs_page_of   # firm vs firm
+    byid = {x["id"]: x for x in presets.FIRMS}
+    vsrow = (f'<div class="chiprow" style="margin-top:40px"><span class="eyebrow">{t(T("Compare two firms", "Comparer deux firmes", "Comparar dos firmas"))}</span>'
+             + "".join(f'<a class="chip" href="{href(lang, vs_page_of(byid[x], byid[y]))}">{SHORT[x]} vs {SHORT[y]}</a>' for x, y in FIRM_VS) + "</div>")
     rows = (('<div class="chiprow" style="margin-top:16px">' + "".join(f'<a class="chip" href="{href(lang, s)}">{n}</a>' for s, n in others) + "</div>") if other else "") \
-        + f'<div class="chiprow" style="margin-top:40px"><span class="eyebrow">{t(T("Free tools", "Outils gratuits", "Herramientas gratuitas"))}</span>' \
+        + vsrow + f'<div class="chiprow" style="margin-top:16px"><span class="eyebrow">{t(T("Free tools", "Outils gratuits", "Herramientas gratuitas"))}</span>' \
         + "".join(f'<a class="chip" href="{href(lang, s)}">{t(n)}</a>' for s, n in tools) + "</div>"
     band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_hub_card"'))
     b = (ui.sec(pf_table(lang, t) + f'<p class="fine" style="margin-top:12px">{t(disclaimer)}</p>' + band, "t", "firms")
