@@ -135,7 +135,7 @@ final class GameWrapped
         }
         // trades of the month with compliance from the scored days
         $okIds = []; foreach ($days as $d) foreach ((json_decode((string) $d['detail_json'], true)['trades'] ?? []) as $x) $okIds[$x['id']] = (bool) $x['ok'];
-        $trades = array_values(array_filter(GameEngine::docs($uid, 'trades'), fn($t) => ($t['date'] ?? '') >= $from && ($t['date'] ?? '') <= $to && empty($t['demo'])));
+        $trades = GameEngine::onePerCopyGroup(array_values(array_filter(GameEngine::docs($uid, 'trades'), fn($t) => ($t['date'] ?? '') >= $from && ($t['date'] ?? '') <= $to && empty($t['demo']))));   // a copied trade once (brief 00, 1.2-m)
         // 3. signature setup: the setup with the most trades inside the plan
         $setups = [];
         foreach ($trades as $t) { $s = trim((string) ($t['setup'] ?? '')); if ($s === '') continue; $setups[$s][0] = ($setups[$s][0] ?? 0) + 1; $setups[$s][1] = ($setups[$s][1] ?? 0) + (int) ($okIds[(string) $t['id']] ?? false); }

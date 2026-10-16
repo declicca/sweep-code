@@ -192,7 +192,7 @@ final class GameWrappedYear
         $xp = (int) GameEngine::q('SELECT COALESCE(SUM(xp), 0) FROM xp_events WHERE user_id = ? AND created_at BETWEEN ? AND ?', [$uid, $s, $e])->fetchColumn();
         // signature setup and golden slot of the year (R, counts), reusing the monthly builder's logic month by month
         $setups = []; $slots = [];
-        foreach (GameEngine::docs($uid, 'trades') as $t) {
+        foreach (GameEngine::onePerCopyGroup(GameEngine::docs($uid, 'trades')) as $t) {   // a copied trade once (brief 00, 1.2-m)
             if (($t['date'] ?? '') < $from || ($t['date'] ?? '') > $to || !empty($t['demo'])) continue;
             $st = trim((string) ($t['setup'] ?? '')); if ($st !== '') $setups[$st] = ($setups[$st] ?? 0) + 1;
             $r = GameV2b::rOf($t);

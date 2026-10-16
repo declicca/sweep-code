@@ -574,6 +574,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Corrigé** : une fois tous les payouts faits, le compte disait aussi « Encore 5 jours gagnants de 250 $ et + », comme si un payout restait possible. Il ne dit plus que « Tu as fait les 6 payouts que ce compte permet » (et la perte max dépassée, s'il y a lieu). Test : `e2e_payout_firms` (échouait sur 13 comptes).
 - **Reste** : le cycle de 14 jours de MFFU Pro attend la confirmation de la règle (plan, 1.2-l).
 
+### Brief 00 — phase 1, lot 1.2-m (copies dans Wrapped), 16 oct.
+- **Wrapped du mois** (`GameWrapped::build`, v2c.php) et **de l'année** (`GameWrappedYear::build`, v3d.php) : un trade copié compte une fois (`GameEngine::onePerCopyGroup`) pour le setup signature et le créneau en or. Avant : un trade copié sur 3 comptes comptait 3 fois.
+- **Déjà justes** (vérifié) : Edge Reveal (`GameV2b::candidates`, depuis le 14 oct.), la journée du jeu, le courriel « Ta semaine », `game.js` (habitudes).
+- Test : `copy_stats_test.php` (ORB copié sur 3 comptes contre 2 trades VWAP : la signature est VWAP ; échouait avec ORB × 3).
+
 ### Brief 02 — partie 14 (petits détails), 14 oct.
 - **Données d'exemple** : déjà fait depuis B16 (`SweepUndo.demo`, la fenêtre de l'app donne le vrai nombre de trades) ; rien de changé.
 - **Réglages** : déjà en 5 groupes repliables depuis B15 (Compte, Discipline, Notifications, Données, et « Avancé » ajouté par le brief 03), « Déconnexion » seule tout en bas (`e2e_clarity`), chaque champ nommé (`e2e_a11y_names`) ; seul changement : le mot « Déconnexion » centré dans son bouton (il était à gauche, `nav.css`).

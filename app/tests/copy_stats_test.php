@@ -7,6 +7,7 @@ declare(strict_types=1);
  * best habit and point to work on): a group of 3 copies (2, 2 and 1 contracts) is one trade, the original's P&L, with its 3
  * accounts — like the app's Stats, Journal, My money and the weekly recap. Asked about one account, Sweep AI reads that
  * account's own trade (16 Oct.; before: nothing when the account only had the copy), like Stats filtered on an account.
+ * Wrapped (the month's and the year's, 16 Oct.): a copied trade counts once in the signature setup and the golden slot.
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -48,6 +49,16 @@ $pdo->exec("UPDATE documents SET data = json_set(data, '$.discipline', json('{\"
 GameEngine::forget('u1'); putenv('SWEEP_GAME_NOW=2026-10-09 18:00'); GameEngine::profile('u1');
 $wk = GameWeeklyMail::brief('u1', '2026-10-05', 'en');
 $ok(($wk['best']['y'] ?? null) === 1 && ($wk['best']['n'] ?? null) === 2, 'the « Your week » email: the copied trade\'s answer once, « stop » yes 1 time out of 2 (' . json_encode($wk['best'] ?? null) . ')');
+// Wrapped, month and year (brief 00, 1.2-m): a trade copied on 3 accounts (« ORB ») is one trade; 2 trades alone (« VWAP ») are 2
+foreach (['w1' => ['a1', '2026-10-13T14:00:00.000Z'], 'w2' => ['a2', '2026-10-13T14:00:00.001Z'], 'w3' => ['a3', '2026-10-13T14:00:00.002Z']] as $id => [$acc, $at])
+    $put($id, ['instrument' => 'MNQ', 'direction' => 'long', 'date' => '2026-10-13', 'entry_time' => '10:00:00', 'contracts' => 1, 'pnl_c' => 1000, 'copy_group' => 'gw', 'setup' => 'ORB', 'account_id' => $acc, 'created_at' => $at]);
+$put('v1', ['instrument' => 'MNQ', 'direction' => 'long', 'date' => '2026-10-14', 'entry_time' => '10:00:00', 'contracts' => 1, 'pnl_c' => 1000, 'setup' => 'VWAP', 'account_id' => 'a1', 'created_at' => '2026-10-14T14:00:00.000Z']);
+$put('v2', ['instrument' => 'MNQ', 'direction' => 'long', 'date' => '2026-10-15', 'entry_time' => '10:00:00', 'contracts' => 1, 'pnl_c' => 1000, 'setup' => 'VWAP', 'account_id' => 'a1', 'created_at' => '2026-10-15T14:00:00.000Z']);
+for ($i = 1; $i <= 12; $i++) $pdo->prepare("INSERT OR REPLACE INTO game_days (user_id, trading_day, activity, detail_json, updated_at) VALUES ('u1', ?, 1, '{}', 0)")->execute([sprintf('2026-10-%02d', $i + 1)]);
+GameEngine::forget('u1');
+$wm = GameWrapped::build('u1', '2026-10'); $wy = GameWrappedYear::build('u1', 2026);
+$ok(($wm['signature']['setup'] ?? null) === 'VWAP' && ($wm['signature']['n'] ?? null) === 2, 'monthly Wrapped: the signature setup counts a copied trade once (VWAP 2, not ORB 3) (' . json_encode($wm['signature'] ?? null) . ')');
+$ok(($wy['signature']['setup'] ?? null) === 'VWAP' && ($wy['signature']['n'] ?? null) === 2, 'yearly Wrapped: the same (' . json_encode($wy['signature'] ?? null) . ')');
 $pdo = null; array_map('unlink', glob($tmp . '/*') ?: []); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);
