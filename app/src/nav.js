@@ -179,6 +179,7 @@ window.SweepMO = window.SweepMO || class {
     if (el.id === 'navMenu') closeMenu();
     else if (el.id === 'tkSlide' && typeof closeTicket === 'function') closeTicket();
     else if (el.id === 'cmd' && typeof closeCmd === 'function') closeCmd();
+    else if (el.id === 'shPanel' && typeof closeShare === 'function') closeShare();   // its veil too (audit of 16 Oct.: the veil stayed, the app was stuck)
     else if (el.classList.contains('gd-help-ov')) { const x = el.querySelector('.gd-x'); x && x.click(); }
     else if (el.classList.contains('wr')) { const x = el.querySelector('.wr-x'); x && x.click(); }
     else { const x = el.querySelector('[data-g="close"], [data-act="close-drawer"], .sheet-bg'); if (x) x.click(); else el.classList.remove('open'); }
@@ -305,6 +306,8 @@ window.SweepMO = window.SweepMO || class {
   const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   function byDecision(list) {   // trades copied on several accounts are one trade decision
     const n1 = (x) => (typeof tNet === 'function' ? tNet(x) : (x.pnl_c || 0) - (x.fees_c || 0));
+    // counted like everywhere else (mergeCopies, audit of 16 Oct.): the main copy's P&L, once (before: the copies added up)
+    if (typeof mergeCopies === 'function') return mergeCopies(list).map((t) => ({ t, n: (t._copies || [t]).length, net: n1(t) }));
     const out = [], seen = new Map(), merge = !(typeof S !== 'undefined' && S.settings && S.settings.mergeCopies === false);   // the app's « count a copied trade once » setting
     for (const t of list) {
       const k = (merge && t.copy_group) || t.id;
@@ -326,15 +329,13 @@ window.SweepMO = window.SweepMO || class {
   }
   function kpis(tab) {
     const all = (S.trades || []).filter((x) => (typeof F === 'undefined' || !F.account || F.account === 'all' || x.account_id === F.account) && (!window.mtypeKeep || window.mtypeKeep(x))), real = all.filter((x) => !x.demo), pool = real.length ? real : all;
-    if (SELDAY) { const [a, b] = span(tab); const tr = pool.filter((x) => x.date >= a && x.date <= b); const n1 = (x) => (typeof tNet === 'function' ? tNet(x) : (x.pnl_c || 0) - (x.fees_c || 0)); const gs = byDecision(tr), w = gs.filter((g) => g.net > 0).length, l = gs.filter((g) => g.net < 0).length; return { net: tr.reduce((a2, x) => a2 + n1(x), 0), n: gs.length, win: w + l ? Math.round(w / (w + l) * 100) : null }; }   // sample trades only when there is nothing else; active account filter respected
+    if (SELDAY) { const [a, b] = span(tab); const tr = pool.filter((x) => x.date >= a && x.date <= b); const n1 = (x) => (typeof tNet === 'function' ? tNet(x) : (x.pnl_c || 0) - (x.fees_c || 0)); const gs = byDecision(tr), w = gs.filter((g) => g.net > 0).length, l = gs.filter((g) => g.net < 0).length; return { net: gs.reduce((a2, g) => a2 + g.net, 0), n: gs.length, win: w + l ? Math.round(w / (w + l) * 100) : null }; }   // sample trades only when there is nothing else; active account filter respected
     const now = new Date(etToday() + 'T12:00:00');   // the current session
     const mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
     const from = tab === 'week' ? ymd(mon) : ymd(now);
     const tr = pool.filter((x) => x.date >= from && x.date <= ymd(now));
-    const net1 = (x) => (typeof tNet === 'function' ? tNet(x) : (x.pnl_c || 0) - (x.fees_c || 0));
-    const net = tr.reduce((a, x) => a + net1(x), 0), wins = tr.filter((x) => net1(x) > 0).length, losses = tr.filter((x) => net1(x) < 0).length;   // a $0 trade is neither
     const gs = byDecision(tr), gw = gs.filter((g) => g.net > 0).length, gl = gs.filter((g) => g.net < 0).length;
-    return { net, n: gs.length, win: gw + gl ? Math.round(gw / (gw + gl) * 100) : null };
+    return { net: gs.reduce((a, g) => a + g.net, 0), n: gs.length, win: gw + gl ? Math.round(gw / (gw + gl) * 100) : null };
   }
   /* performance of the period, by account type (« of which Eval +600 · Funded +400 · Live +100 »): a copied trade counts once */
   const MT = { en: { of: 'of which', eval: 'Eval', funded: 'Funded', live: 'Live', personal: 'Personal', perf: 'Performance', sim: 'Simulated', real: 'Real' },
@@ -403,7 +404,8 @@ window.SweepMO = window.SweepMO || class {
   function feedStrip() {
     const days = stripDays(), today = etToday(), sel = SELDAY || today;
     econFor(days[0], days[days.length - 1]);
-    const tr = pool(), byDay = typeof dayMap === 'function' ? dayMap(tr.filter((t) => t.date >= days[0])) : new Map();
+    const once = (l) => (typeof mergeCopies === 'function' ? mergeCopies(l) : l);   // a copied trade counts once (audit of 16 Oct.)
+    const tr = pool(), byDay = typeof dayMap === 'function' ? dayMap(once(tr.filter((t) => t.date >= days[0]))) : new Map();
     const short = (c) => (typeof moneyShort === 'function' ? moneyShort(c) : (c / 100).toFixed(0));
     return days.map((k) => {
       const d = new Date(k + 'T12:00:00'), day = byDay.get ? byDay.get(k) : null, net = day ? day.net : null;
@@ -842,7 +844,7 @@ window.SweepMO = window.SweepMO || class {
     const y = now.getFullYear(), m = now.getMonth(), first = new Date(y, m, 1), last = new Date(y, m + 1, 0);
     const key = ymd(first).slice(0, 7);
     const tr = pool().filter((t) => t.date && t.date.slice(0, 7) === key);
-    const byDay = typeof dayMap === 'function' ? dayMap(tr) : new Map();
+    const byDay = typeof dayMap === 'function' ? dayMap(typeof mergeCopies === 'function' ? mergeCopies(tr) : tr) : new Map();   // a copied trade counts once (audit of 16 Oct.)
     if (histMonth !== key) { histMonth = key; histDays = {}; apiJSON(`api/game/history?from=${ymd(first)}&to=${ymd(last)}`).then((r) => { (r.days || []).forEach((d) => { if (+d.is_swept) histDays[d.trading_day] = 1; }); document.querySelectorAll('.nav-cal [data-day]').forEach((c) => c.classList.toggle('nav-sw', !!histDays[c.dataset.day])); }).catch(() => {}); }
     econFor(ymd(first), ymd(last));
     const evDay = (k) => (typeof ECON !== 'undefined' && ECON.days[k] ? ECON.days[k].filter((e) => e.impact === 'high') : []);

@@ -3,7 +3,7 @@ Sweep — sheets, menus and Back never leave or reload the app (Playwright, phon
   python3 tests/e2e_history_back.py http://127.0.0.1:8095 /tmp/show_state.json
 Game sheets switched and closed fast, the menu, Escape, the trade form: still in the app, never reloaded (a mark left in
 the page survives); Back closes the open sheet and stays on the page. No page error. (16 Oct.: checks, it only printed;
-its « reloads » counted the hash changes.)
+its « reloads » counted the hash changes.) Back on the share panel closes its veil too (audit of 16 Oct.).
 """
 import asyncio, datetime, sys
 from playwright.async_api import async_playwright
@@ -35,6 +35,14 @@ async def main():
     await pg.evaluate("SweepGame.open('hub')"); await pg.wait_for_timeout(900)
     await pg.go_back(); await pg.wait_for_timeout(900)
     ok(await pg.evaluate("!document.querySelector('#gSheet.open') && window.__alive === 'x'") and pg.url.split('#')[-1] == 'trades', f"Back closes the sheet and stays on the page ({pg.url.split('#')[-1]})")
+    # (audit of 16 Oct.) Back on the share panel: the panel AND its veil go, the app answers (before: the veil stayed)
+    await pg.evaluate("document.querySelectorAll('.nav-am.open [data-am=close]').forEach((b) => b.click())"); await pg.wait_for_timeout(500)   # the add sheet of a step above
+    await pg.evaluate("openShare('week', todayStr())"); await pg.wait_for_timeout(1500)
+    op = await pg.evaluate("!!document.querySelector('#shPanel.open') && !!document.querySelector('#shScrim.open')")
+    await pg.go_back(); await pg.wait_for_timeout(900)
+    st = await pg.evaluate("[!!document.querySelector('#shPanel.open'), !!document.querySelector('#shScrim.open'), document.body.classList.contains('evp-lock'), window.__alive === 'x']")
+    hit = await pg.evaluate("(() => { const r = document.querySelector('#main').getBoundingClientRect(), e = document.elementFromPoint(innerWidth / 2, Math.min(innerHeight - 10, r.top + 120)); return !!e && (!!e.closest('#main, header, nav, .bnav') || e.tagName + '.' + e.className + '#' + e.id) })()")
+    ok(op and st == [False, False, False, True] and hit is True, f"Back on the share panel: panel and veil gone, the page answers a tap (open {op}, after {st}, tap reaches the page {hit})")
     ok(not errs, f'no page error ({errs[:3]})'); await br.close()
 asyncio.run(main())
 print(f'{fails} failed' if fails else 'all passed'); sys.exit(1 if fails else 0)
