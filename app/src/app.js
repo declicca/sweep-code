@@ -8215,6 +8215,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
   }
   function ae(k, A) {
     if (!i || !i.live || i.plan !== "free" && !i.trial || i.plan === "elite") return null;
+    if (k === "green_week" && (i.plan !== "free" || i.trial)) return null;   // « Strong week, go Pro »: Free traders only, never during a trial (audit of 16 Oct.)
     const j = (new Date).toISOString().slice(0, 10);
     if (m.get("sb_nudge") === j) return null;
     m.set("sb_nudge", j);

@@ -124,6 +124,10 @@ def run(p, lang, phone, exp):
   pg.evaluate("put('trades', { id: 'fr-t1', account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 12000, pnl_manual: true, date: todayStr(), entry_time: '10:00', exit_time: '10:05' }); render()")
   pg.wait_for_timeout(1200); c1 = pg.evaluate(CARDS)
   ok(c1 is not None and all(k in c1 for k in ('today', 'perf', 'acc', 'cal', 'news')) and not any(k in c1 for k in ('pay', 'rank', 'quick')), f'{tag} after the 1st trade: performance, accounts, calendar, news ({c1})')
+  # (audit of 16 Oct.) nothing opens over the coach after the 1st trade: no « Add Sweep to your home screen » on the day of
+  # sign-up (nor ever on a computer), no « Go Pro » banner during the trial
+  ov = pg.evaluate("[document.querySelectorAll('aside.nav-inst').length, document.querySelectorAll('.sb-nudge').length]")
+  ok(ov == [0, 0], f'{tag} after the 1st trade, the day of sign-up: no install window, no Pro banner ({ov})')
   pg.evaluate("for (let i = 2; i <= 5; i++) put('trades', { id: 'fr-t' + i, account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: todayStr(), entry_time: '1' + i + ':00', exit_time: '1' + i + ':05' }); render()")
   pg.wait_for_timeout(1500); c5 = pg.evaluate(CARDS)
   ok(c5 is not None and all(k in c5 for k in ('pay', 'quick')), f'{tag} from the 5th trade: My money and Quick access too ({c5})')
@@ -145,6 +149,13 @@ def run(p, lang, phone, exp):
     import re
     bad = [w for w in EN_ONLY if any(re.search(r'(?<![\w’])' + re.escape(w) + r'(?![\w’])', t) for t in texts)]
     ok(not bad, f'{tag} no English on the first screens ({bad})')
+  ov = pg.evaluate("[document.querySelectorAll('aside.nav-inst').length, document.querySelectorAll('.sb-nudge').length]")
+  ok(ov == [0, 0], f'{tag} « {SAVED[lang]} » with the coach, nothing over it ({ov})')
+  # the 2nd day of use: the install window comes after a trade, on a phone only
+  pg.evaluate("() => { localStorage.setItem('sw.day0', ymdAdd(todayStr(), -1)); S.me.created_at = Math.floor(Date.now() / 1000) - 2 * 86400; sessionStorage.removeItem('sw.modal'); put('trades', { id: 'fr-d2', account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 3000, pnl_manual: true, date: todayStr(), entry_time: '15:30', exit_time: '15:35' }); render() }")
+  pg.wait_for_timeout(1500); n2 = pg.locator('aside.nav-inst.open').count()
+  ok(n2 == (1 if phone else 0), f'{tag} the 2nd day of use, after a trade: the install window {"opens" if phone else "never opens on a computer"} ({n2})')
+  if n2: pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(300)
   ok(not errs, f'{tag} no page error ({errs[:2]})')
   br.close()
 

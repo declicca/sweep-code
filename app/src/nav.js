@@ -4311,16 +4311,29 @@ window.SweepMO = window.SweepMO || class {
   new window.SweepMO(() => { try { pass(); install(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 
 
-  // 7. after the first trade, once (and only if not installed): add to home screen — the session's one window
+  // 7. after a trade, once (and only if not installed): add to home screen — the session's one window. Only on a phone, and
+  // never on the day of sign-up (audit of 16 Oct.: it hid the coach's « Trade saved » after the very first trade): from the
+  // 2nd day of use, the sign-up day and this device's first day both before today
   const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-  let seenTrades = null;
+  const nyDay = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  function secondDay() {
+    const now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
+    let first = LS('sw.day0'); if (!first) { first = now; LS('sw.day0', now); }
+    const c = S.me && S.me.created_at;
+    const ms = c == null || c === '' ? NaN : /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z'));
+    return first < now && (!isFinite(ms) || nyDay(ms) < now);
+  }
+  const phone = () => !!(window.matchMedia && matchMedia('(pointer: coarse)').matches) && innerWidth < 900;
+  let seenTrades = null, forced = false;
   function install() {
     if (typeof S === 'undefined' || !Array.isArray(S.trades)) return;
     const n = S.trades.filter((x) => !x.demo).length;
-    if (seenTrades === null) { seenTrades = n; return; }
+    if (seenTrades === null) { seenTrades = n; if (!LS('sw.day0')) LS('sw.day0', typeof todayStr === 'function' ? todayStr() : nyDay(Date.now())); return; }
     if (n <= seenTrades) { seenTrades = n; return; }
     seenTrades = n;
     if (LS('sw.installShown') === '1' || standalone() || document.querySelector('.nav-inst')) return;
+    if (!forced && (!phone() || !secondDay())) return;
+    forced = false;
     try { if (sessionStorage.getItem('sw.modal') === '1') return; sessionStorage.setItem('sw.modal', '1'); } catch (x) { /* private mode */ }
     LS('sw.installShown', '1');
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -4341,7 +4354,7 @@ window.SweepMO = window.SweepMO || class {
     scrim.addEventListener('click', done); el.querySelector('[data-inst-ok]').addEventListener('click', done);
     el.querySelectorAll('[data-inst]').forEach((b) => b.addEventListener('click', () => { el.querySelectorAll('[data-inst]').forEach((x) => x.classList.toggle('on', x === b)); el.querySelectorAll('.nav-inst-l').forEach((l) => { l.hidden = l.dataset.for !== b.dataset.inst; }); }));
   }
-  window.SweepInstall = { show: () => { seenTrades = -1; LS('sw.installShown', '0'); try { sessionStorage.removeItem('sw.modal'); } catch (e) { /* private */ } install(); } };
+  window.SweepInstall = { show: () => { seenTrades = -1; forced = true; LS('sw.installShown', '0'); try { sessionStorage.removeItem('sw.modal'); } catch (e) { /* private */ } install(); } };
 })();
 
 /* ───────────── Delivery 2 · expected gestures and clarity ─────────────

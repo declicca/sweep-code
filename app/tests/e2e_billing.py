@@ -4,7 +4,8 @@ Sweep — plans and billing in the app, with billing switched on (brief 02 part 
 A second copy of the local server runs next to the first one (port + 1, same database) with billing on
 (SWEEP_BILLING_CONFIG=tools/billing-config.local.php: test values, no Stripe key, Stripe is never called). The trial's clock
 is moved in the database (the end of the trader's trial), never in the server.
- A. day 50 (FR on a phone, EN on a computer): the dashboard card lists the paid features the trader really uses — 4
+ A. day 50 (FR on a phone, EN on a computer): no « Strong week, go Pro » during the trial (audit of 16 Oct.; again on Free,
+    day 61); the dashboard card lists the paid features the trader really uses — 4
     accounts (Free keeps 2), My money, screenshot reading, the full history, Sweep AI — drawn with the dashboard; ✕ hides it;
  B. day 61, back to Free: ONE window opens by itself — what stays, what is paused and kept (the accounts not chosen, My
     money…), the 2 accounts that stay active (picked, saved), how to get it back; not again on the next visit; the banner
@@ -117,6 +118,9 @@ def day50(p, lang, phone):
   br, ctx, pg, errs, uid = trader(p, lang, phone, tag.replace('-', ''))
   me(ctx); trial_ends(uid, time.time() + 9.5 * D)
   reload(pg)
+  # (audit of 16 Oct.) « Strong week, go Pro » never to a trader in his Pro trial
+  gw = pg.evaluate("() => { localStorage.removeItem('sb_nudge'); return !!SweepBilling.nudge('green_week') || !!document.querySelector('.sb-nudge') }")
+  ok(gw is False, f'{tag} during the trial: no « Strong week, go Pro » banner ({gw})')
   card = pg.locator('#main .nav-dash .nav-trial')
   ok(card.count() == 1, f'{tag} day 50: the card is on the dashboard, drawn with it')
   ok(pg.evaluate(TXT, '#main .nav-trial .nav-trial-t > b') == [x['card']] and pg.evaluate(TXT, '#main .nav-trial .nav-trial-t > span') == [x['uses']], f"{tag} day 50: « {x['card']} »")
@@ -166,6 +170,8 @@ def back_to_free(br, ctx, pg, errs, uid, lang, phone):
     p2.keyboard.press('Escape'); p2.wait_for_timeout(400)
   else: ok(False, f'{tag} day 61: the paused accounts are marked on the Accounts page')
   ok(p2.evaluate(WIDE) <= 1, f'{tag} day 61: nothing wider than the window')
+  gw = p2.evaluate("() => { localStorage.removeItem('sb_nudge'); const n = SweepBilling.nudge('green_week'); const t = n ? n.textContent : ''; document.querySelectorAll('.sb-nudge').forEach((e) => e.remove()); return t }")
+  ok(bool(gw), f'{tag} day 61, on Free: « Strong week, go Pro » can show again ({gw[:50]!r})')
   p2.close()
   return p2
 
