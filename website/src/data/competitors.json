@@ -40,5 +40,33 @@
   "plans": [
    {"name": "Edgewonk", "year": 197}
   ]
+ },
+ "TradeBase": {
+  "page": "free-trading-journal.html",
+  "checked": "2026-10-15",
+  "sources": ["https://tradebase.tech/pricing.html", "https://tradebase.tech/brokers.html"],
+  "free_plan": "free during early access, no trade limit",
+  "trial": null,
+  "plans": []
+ },
+ "CoreTrade": {
+  "page": "free-trading-journal.html",
+  "checked": "2026-10-15",
+  "sources": ["https://www.mycoretrade.com/"],
+  "free_plan": "up to 10 trades in total",
+  "trial": null,
+  "plans": [
+   {"name": "Pro", "month": 4.99, "year": 49.99, "year_per_month": 4.17}
+  ]
+ },
+ "Stonk Journal": {
+  "page": "free-trading-journal.html",
+  "checked": "2026-10-15",
+  "sources": ["https://stonkjournal.com/", "https://stonkjournal.com/features/trade-import", "https://stonkjournal.com/markets/prop-firm-trading-journal"],
+  "free_plan": "no trade limit; file import and AI Coach on Pro",
+  "trial": null,
+  "plans": [
+   {"name": "Pro", "month": 10}
+  ]
  }
 }

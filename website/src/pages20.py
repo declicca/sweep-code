@@ -33,6 +33,56 @@ FREE_MORE = T("""<h2>Who it’s for</h2><p>Sweep is built for futures traders, o
 <h2>Comparado con otros diarios</h2><p>Mira Sweep lado a lado con <a href="@sweep-vs-tradezella.html">TradeZella</a>, <a href="@sweep-vs-tradervue.html">Tradervue</a>, <a href="@sweep-vs-tradersync.html">TraderSync</a> y <a href="@sweep-vs-edgewonk.html">Edgewonk</a>: precio, reglas de prop firms y funciones. O lee nuestra comparativa de los <a href="@best-trading-journal-for-prop-firms.html">mejores diarios de trading para prop firms</a>.</p>
 <h2>Gratis no significa pagar con tus datos</h2><p>Sweep no tiene publicidad y tus datos nunca se venden. Tus operaciones son privadas por defecto y puedes exportarlo todo o eliminar tu cuenta tú mismo, cuando quieras. Más en <a href="@security.html">seguridad y datos</a>.</p>""")
 
+# free journals compared (SEO brief, Oct 15): facts read on each journal's own pages, kept with their date and sources in data/competitors.json
+FREE_CMP = [   # (journal, free plan, getting trades in, prop firm rules, markets, paid plans from)
+ ("Sweep", T("Yes, no time limit, no card","Oui, sans limite de temps, sans carte","Sí, sin límite de tiempo, sin tarjeta"),
+  T("NinjaTrader 8 sync, CSV import, screenshot read by AI, or by hand","Synchro NinjaTrader 8, import CSV, capture lue par l’IA, ou à la main","Sincronización con NinjaTrader 8, importación CSV, captura leída por la IA, o a mano"),
+  T(f"Preloaded for {FIRMS_N} futures firms, checked every week",f"Préremplies pour {FIRMS_N} firmes de futures, vérifiées chaque semaine",f"Precargadas para {FIRMS_N} firmas de futuros, revisadas cada semana"),
+  T("Futures","Futures","Futuros"), T("$19/mo","19 $/mois","19 $/mes")),
+ ("TradeBase", T("During early access, no trade limit","Pendant l’accès anticipé, sans limite de trades","Durante el acceso anticipado, sin límite de operaciones"),
+  T("CSV import (NinjaTrader and Tradovate presets); automatic sync not live yet","Import CSV (modèles NinjaTrader et Tradovate) ; synchro automatique pas encore en ligne","Importación CSV (plantillas de NinjaTrader y Tradovate); sincronización automática aún no disponible"),
+  T("Drawdown, daily loss and phases tracked; preloaded rules not stated","Suivi du drawdown, de la perte quotidienne et des phases ; règles préremplies non indiquées","Seguimiento de drawdown, pérdida diaria y fases; reglas precargadas no indicadas"),
+  T("Futures; stocks and crypto by CSV","Futures ; actions et cryptos par CSV","Futuros; acciones y cripto por CSV"), T("Base Pro announced, no price yet","Base Pro annoncé, sans prix","Base Pro anunciado, sin precio")),
+ ("CoreTrade", T("Yes, up to 10 trades in total","Oui, jusqu’à 10 trades au total","Sí, hasta 10 operaciones en total"),
+  T("By hand only","À la main seulement","Solo a mano"),
+  T("Prop Firm Mode on Pro: daily loss, drawdown, target, minimum days","Prop Firm Mode sur Pro : perte quotidienne, drawdown, objectif, jours minimum","Prop Firm Mode en Pro: pérdida diaria, drawdown, objetivo, días mínimos"),
+  T("Forex, crypto, commodities, indices","Forex, cryptos, matières premières, indices","Forex, cripto, materias primas, índices"), T("$4.99/mo","4,99 $/mois","4,99 $/mes")),
+ ("Tradervue", T("Yes, 30 imported trades a month","Oui, 30 trades importés par mois","Sí, 30 operaciones importadas al mes"),
+  T("File import; broker sync on paid plans","Import de fichier ; synchro courtier sur les forfaits payants","Importación de archivo; sincronización con el bróker en los planes de pago"),
+  T("Not stated","Non indiqué","No indicado"),
+  T("Stocks, options, futures, forex","Actions, options, futures, forex","Acciones, opciones, futuros, forex"), T("$29.95/mo","29,95 $/mois","29,95 $/mes")),
+ ("Stonk Journal", T("Yes, no trade limit","Oui, sans limite de trades","Sí, sin límite de operaciones"),
+  T("By hand; file import on Pro (stock brokers)","À la main ; import de fichier sur Pro (courtiers d’actions)","A mano; importación de archivo en Pro (brókers de acciones)"),
+  T("Rules you write yourself; firm rules not enforced","Des règles que tu écris toi-même ; règles des firmes non appliquées","Reglas que escribes tú; no aplica las reglas de las firmas"),
+  T("Stocks, options, futures, forex, crypto","Actions, options, futures, forex, cryptos","Acciones, opciones, futuros, forex, cripto"), T("$10/mo","10 $/mois","10 $/mes")),
+]
+
+def free_compared(lang, t):
+    """The free plans side by side: Sweep's row tinted, the date and the pages each journal's facts come from."""
+    import ui
+    from pages17 import COMP
+    from pages18 import day, src_name
+    labels = [t(x) for x in (T("Free plan","Forfait gratuit","Plan gratis"), T("Getting trades in","Ajout des trades","Cómo entran las operaciones"),
+                             T("Prop firm rules","Règles des prop firms","Reglas de las prop firms"), T("Markets","Marchés","Mercados"),
+                             T("Paid plans from","Forfaits payants dès","Planes de pago desde"))]
+    rows = "".join(f'<tr><th scope="row">{n}</th>' + "".join(f'<td data-label="{l}">{t(v)}</td>' for l, v in zip(labels, vals)) + "</tr>" for n, *vals in FREE_CMP)
+    table = (f'<div class="cmp-wrap"><table class="cmp guide glance"><thead><tr><th scope="col">{t(T("Journal","Journal","Diario"))}</th>'
+             + "".join(f'<th scope="col">{l}</th>' for l in labels) + f"</tr></thead><tbody>{rows}</tbody></table></div>")
+    others = [n for n, *_ in FREE_CMP if n != "Sweep"]
+    by_day = {}
+    for n in others: by_day.setdefault(COMP[n]["checked"], []).append(n)
+    when = (" ; " if lang == "fr" else "; ").join(t(T(f"{and_list(ns, 'en')} details checked on {day(d, 'en')}", f"Infos sur {and_list(ns, 'fr')} vérifiées le {day(d, 'fr')}", f"Datos de {and_list(ns, 'es')} revisados el {day(d, 'es')}") if i == 0 else
+                         T(f"{and_list(ns, 'en')}, on {day(d, 'en')}", f"sur {and_list(ns, 'fr')}, le {day(d, 'fr')}", f"de {and_list(ns, 'es')}, el {day(d, 'es')}"))
+                     for i, (d, ns) in enumerate(sorted(by_day.items(), reverse=True)))
+    srcs = " · ".join((f"{n}\u00a0: " if lang == "fr" else f"{n}: ") + ", ".join(f'<a href="{u}" rel="nofollow noopener" target="_blank">{src_name(u)}</a>' for u in COMP[n]["sources"]) for n in others)
+    names = {l: and_list(others, l) for l in LANGS}
+    note = T(f"Prices in USD, before tax. Something out of date? Write to {EMAIL}. {names['en']} are trademarks of their owners; Sweep is not affiliated with them.",
+             f"Prix en USD, avant taxes. Une info n’est plus à jour ? Écris à {EMAIL}. {names['fr']} sont des marques de leurs propriétaires ; Sweep n’est affilié à aucun d’eux.",
+             f"Precios en USD, antes de impuestos. ¿Algo ya no está al día? Escribe a {EMAIL}. {names['es']} son marcas de sus propietarios; Sweep no está afiliado a ninguno.")
+    return ui.sec(ui.head(t, None, T("Free trading journals, compared.","Journaux de trading gratuits, comparés.","Diarios de trading gratis, comparados."),
+                          T("What each free plan includes, read on each journal’s own pages.","Ce que comprend chaque forfait gratuit, lu sur les pages de chaque journal.","Lo que incluye cada plan gratis, leído en las páginas de cada diario."))
+                  + f'<p class="fine vs-checked" data-nolinks>{when} · {t(T("Sources","Sources","Fuentes"))} · {srcs}</p>' + table + f'<p class="fine vs-note">{t(note)}</p>', "n", "compare")
+
 def page_free(lang, t):
     import ui
     hero = page_hero(t, T("A free trading journal for futures traders.", "Un journal de trading gratuit pour les traders de futures.", "Un diario de trading gratis para traders de futuros."),
@@ -51,6 +101,7 @@ def page_free(lang, t):
                 "Toute la boucle quotidienne est dans le forfait Free : ajoute un trade, vois-le sur un vrai graphique, vérifie tes règles, révise ta journée.",
                 "Todo el ciclo diario está en el plan Free: registra una operación, mírala en un gráfico real, revisa tus reglas y tu día."), free, ui.frame_d("v6-01-today-d.webp", t(T("P&L calendar and daily journal in Sweep, sample data", "Calendrier P&L et journal quotidien dans Sweep, données d’exemple", "Calendario de P&L y diario en Sweep, datos de ejemplo")), m="v6-01-today-m.webp", t=t), id_="free")
     b += ui.sec(f'<article class="article">{localize(lang, t(FREE_MORE))}</article>', "n", width="read")
+    b += free_compared(lang, t)
     faqs = [(T("Is Sweep really free?", "Sweep est-il vraiment gratuit ?", "¿Sweep es realmente gratis?"),
              T("Yes. The Free plan is free forever, and every new account also gets Pro for its first 60 days.", "Oui. Le forfait Free est gratuit pour toujours, et chaque nouveau compte a aussi Pro pendant ses 60 premiers jours.", "Sí. El plan Free es gratis para siempre, y cada cuenta nueva tiene además Pro durante sus primeros 60 días.")),
             (T("Do I need a credit card?", "Faut-il une carte de crédit ?", "¿Necesito una tarjeta?"),

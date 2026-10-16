@@ -238,3 +238,5 @@ for _vs in pages17.VS:
     if _odd: print(f"warning: {_vs['slug']} names prices that aren't in src/data/competitors.json: {sorted(_odd)}")
 _odd = _prices_named("best-trading-journal-for-prop-firms.html") - _SWEEP_PRICES - set().union(*(_amounts(c) for c in pages17.COMP.values()))
 if _odd: print(f"warning: best-trading-journal-for-prop-firms.html names prices that aren't in src/data/competitors.json: {sorted(_odd)}")
+_odd = _prices_named("free-trading-journal.html") - _SWEEP_PRICES - set().union(*(_amounts(pages17.COMP[n]) for n, *_ in pages20.FREE_CMP if n != "Sweep"))
+if _odd: print(f"warning: free-trading-journal.html names prices that aren't in src/data/competitors.json: {sorted(_odd)}")

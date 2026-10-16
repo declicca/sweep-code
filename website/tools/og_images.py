@@ -11,7 +11,7 @@ SRC = os.path.join(HERE, "..", "src")
 OUT = os.path.join(HERE, "..", "static", "social", "og")
 os.environ.setdefault("SWEEP_PRESETS_OFFLINE", "1")   # the copy of the app's catalogue the site was built with
 sys.path.insert(0, SRC)
-import core, presets, pages7, pages8, pages17, pages18, pages19  # noqa: E402
+import core, presets, pages4, pages7, pages8, pages17, pages18, pages19  # noqa: E402
 from core import T  # noqa: E402
 
 LANGS = ("en", "fr", "es")
@@ -58,6 +58,20 @@ def entries():
         ("ninjatrader.html", T("NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep"),
          T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas"))):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
+    pro = pages4.PRICES["pro"]["m"]
+    for page, title, sub, day in (   # the key pages of the SEO brief (Oct 15): comparison, pricing, features, rules hub, rule changes
+        ("best-trading-journal-for-prop-firms.html", T("Best trading journal for prop firms (2026)", "Meilleur journal de trading pour prop firms (2026)", "Mejor diario de trading para prop firms (2026)"),
+         T("Sweep, TradeZella, Tradervue, TraderSync and Edgewonk, compared", "Sweep, TradeZella, Tradervue, TraderSync et Edgewonk, comparés", "Sweep, TradeZella, Tradervue, TraderSync y Edgewonk, comparados"), None),
+        ("pricing.html", T("Pricing", "Tarifs", "Precios"),
+         T(f"Free forever · Pro from ${pro}/mo", f"Gratuit pour toujours · Pro dès {pro} $/mois", f"Gratis para siempre · Pro desde {pro} $/mes"), None),
+        ("features.html", T("Trading journal features", "Fonctionnalités du journal de trading", "Funciones del diario de trading"),
+         T("Logging, charts, prop firm rules, payouts, discipline and AI", "Saisie, graphiques, règles des prop firms, payouts, discipline et IA", "Registro, gráficos, reglas de prop firms, payouts, disciplina e IA"), None),
+        ("prop-firms/index.html", T("Prop firm rules 2026", "Règles des prop firms 2026", "Reglas de las prop firms 2026"),
+         T(f"{core.FIRMS_N} futures prop firms · Verified {pages18.day(when, 'en')}", f"{core.FIRMS_N} prop firms de futures · Vérifiées le {pages18.day(when, 'fr')}",
+           f"{core.FIRMS_N} prop firms de futuros · Revisadas el {pages18.day(when, 'es')}"), when),
+        ("prop-firm-rule-changes.html", T("Prop firm rule changes", "Changements de règles des prop firms", "Cambios de reglas de las prop firms"),
+         T("Every change found on the firms’ official pages, dated", "Chaque changement trouvé sur les pages officielles des firmes, daté", "Cada cambio encontrado en las páginas oficiales de las firmas, fechado"), None)):
+        out.append((page, {l: (title[l], sub[l]) for l in LANGS}, day))
     for slug, _, name, _ in pages7.TOOLS:
         out.append((slug, {l: (name[l], T("Free calculator for futures and prop traders", "Calculateur gratuit pour traders de futures et de prop firms", "Calculadora gratis para traders de futuros y prop firms")[l]) for l in LANGS}, None))
     return out

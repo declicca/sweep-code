@@ -10,7 +10,7 @@ from pages18 import day as _day, usd as _usd, src_name as _src_name, TRACK_PROPS
 import ui
 COMP = json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "data", "competitors.json"), encoding="utf-8"))
 def checked(name): return {l: _day(COMP[name]["checked"], l) for l in LANGS}
-CHECKED = {l: _day(min(c["checked"] for c in COMP.values()), l) for l in LANGS}   # the pillar page: its oldest check
+CHECKED = {l: _day(min(c["checked"] for c in COMP.values() if "page" not in c), l) for l in LANGS}   # the pillar page: its oldest check (journals kept for another page aside)
 def plan_prices(name, key):
     """« Essential $35 · Pro $59 · Ultra $99 » in each language, from data/competitors.json."""
     plans = COMP[name]["plans"]; assert all(p.get(key) for p in plans), (name, key)
@@ -28,7 +28,7 @@ PF = {"en": f"{FIRMS_N} futures prop firms ({FIRMS_TXT['en']})", "fr": f"{FIRMS_
 L = {"free": T("Free plan","Forfait gratuit","Plan gratis"), "trial": T("Trial of a paid plan","Essai d’un forfait payant","Prueba de un plan de pago"),
      "month": T("Monthly price","Prix mensuel","Precio mensual"), "year": T("Yearly price","Prix annuel","Precio anual"),
      "add": T("Adding trades","Ajouter des trades","Añadir operaciones"), "sync": T("Automatic broker sync","Synchro automatique avec le courtier","Sincronización automática con el bróker"),
-     "rules": T("Prop firm rules","Règles des prop firms","Reglas de las prop firms"), "money": T("Expense and payout tracking","Suivi des dépenses et des payouts","Seguimiento de gastos y payouts"),
+     "rules": T("Prop firm rules","Règles des prop firms","Reglas de las prop firms"), "changes": T("Firm rule changes","Changements de règles des firmes","Cambios de reglas de las firmas"), "money": T("Expense and payout tracking","Suivi des dépenses et des payouts","Seguimiento de gastos y payouts"),
      "replay": T("Trade replay","Replay de trades","Replay de operaciones"), "mreplay": T("Market replay","Replay de marché","Replay de mercado"),
      "backtest": T("Backtesting","Backtesting","Backtesting"), "strategy": T("Strategy testing","Test de stratégies","Prueba de estrategias"),
      "charts": T("Charts of your trades","Graphiques de tes trades","Gráficos de tus operaciones"), "mentor": T("Mentoring","Mentorat","Mentoría"),
@@ -40,6 +40,7 @@ SW = {"free": T("Yes, no time limit, no card","Oui, sans limite de temps, sans c
       "add": T("NinjaTrader 8 sync, file import, screenshot read by AI, or by hand","Synchro NinjaTrader 8, import de fichier, capture lue par l’IA, ou à la main","Sincronización con NinjaTrader 8, importación de archivo, captura leída por la IA o a mano"),
       "sync": T("From NinjaTrader 8 (free add-on), every plan","Depuis NinjaTrader 8 (add-on gratuit), tous les forfaits","Desde NinjaTrader 8 (add-on gratis), todos los planes"),
       "rules": T(f"Preloaded for {FIRMS_N} futures firms, per account type, checked every week",f"Préremplies pour {FIRMS_N} firmes de futures, par type de compte, vérifiées chaque semaine",f"Precargadas para {FIRMS_N} firmas de futuros, por tipo de cuenta, revisadas cada semana"),
+      "changes": T("Found by the weekly check; you’re notified and choose to apply them or keep your rules","Repérés par la vérification de chaque semaine ; tu es prévenu et tu choisis de les appliquer ou de garder tes règles","Detectados en la revisión semanal; te avisamos y eliges aplicarlos o mantener tus reglas"),
       "money": T("Pro and Elite","Pro et Elite","Pro y Elite"), "no": T("No","Non","No"),
       "charts": T("Real CME charts, the day after the session","Vrais graphiques CME, le lendemain de la séance","Gráficos reales de CME, al día siguiente de la sesión"),
       "ai": T("Sweep AI on every plan","Sweep AI sur tous les forfaits","Sweep AI en todos los planes"),
@@ -48,6 +49,8 @@ SW = {"free": T("Yes, no time limit, no card","Oui, sans limite de temps, sans c
       "markets": T("Futures","Futures","Futuros")}
 def row(k, them, sweep=None): return (L[k], sweep or SW.get(k, SW["no"]), them)
 NONE_LISTED = T("None listed on its pricing page","Rien sur sa page de tarifs","Nada en su página de precios")
+NOT_ON_PAGES = T("Not stated on its pages","Non indiqué sur ses pages","No indicado en sus páginas")
+NOT_STATED = T("Not stated","Non indiqué","No indicado")
 
 SWEEP_IF = [
  T("You trade futures evaluations and funded accounts, and want each firm’s rules on every account.","Tu trades des évaluations et des comptes financés en futures, et tu veux les règles de chaque firme sur chaque compte.","Operas evaluaciones y cuentas fondeadas de futuros y quieres las reglas de cada firma en cada cuenta."),
@@ -125,6 +128,7 @@ VS = [
            row("add", T("Auto-sync, file upload or by hand","Synchro automatique, import de fichier ou à la main","Sincronización automática, subida de archivo o a mano")),
            row("sync", T("Yes","Oui","Sí")),
            row("rules", T("Prop Firm Sync: drawdown, daily loss, target, trading days, consistency","Prop Firm Sync : drawdown, perte quotidienne, cible, jours de trading, consistance","Prop Firm Sync: drawdown, pérdida diaria, objetivo, días de trading, consistencia")),
+           row("changes", NOT_ON_PAGES),
            row("money", T("Every plan","Tous les forfaits","Todos los planes")),
            row("replay", T("Pro and Ultra","Pro et Ultra","Pro y Ultra")),
            row("backtest", T("Every plan (AI runs on Pro and Ultra)","Tous les forfaits (exécutions IA sur Pro et Ultra)","Todos los planes (ejecuciones con IA en Pro y Ultra)")),
@@ -160,6 +164,7 @@ VS = [
            row("add", T("Broker imports","Imports depuis le courtier","Importación desde el bróker")),
            row("sync", T("Silver and Gold","Silver et Gold","Silver y Gold")),
            row("rules", NONE_LISTED),
+           row("changes", NOT_ON_PAGES),
            row("money", NONE_LISTED),
            row("charts", T("Price charts with your entries and exits","Graphiques de prix avec tes entrées et sorties","Gráficos de precio con tus entradas y salidas")),
            row("mentor", T("Silver and Gold","Silver et Gold","Silver y Gold")),
@@ -199,6 +204,7 @@ VS = [
            row("add", T("Auto-sync or imports, 700+ brokers and platforms","Synchro automatique ou imports, 700+ courtiers et plateformes","Sincronización automática o importación, más de 700 brókers y plataformas")),
            row("sync", T("Every plan","Tous les forfaits","Todos los planes")),
            row("rules", NONE_LISTED),
+           row("changes", NOT_ON_PAGES),
            row("replay", T("Premium and Elite","Premium et Elite","Premium y Elite")),
            row("mreplay", T("Every plan","Tous les forfaits","Todos los planes")),
            row("backtest", T("Automated, on Elite","Automatisé, sur Elite","Automatizado, en Elite")),
@@ -236,6 +242,7 @@ VS = [
            row("add", T("Automated imports, 200+ brokers","Imports automatiques, 200+ courtiers","Importación automática, más de 200 brókers")),
            row("sync", T("Automated imports","Imports automatiques","Importación automática")),
            row("rules", T("Tracks unlimited prop firm accounts; no rules listed","Suit un nombre illimité de comptes prop ; aucune règle indiquée","Sigue cuentas prop ilimitadas; sin reglas indicadas")),
+           row("changes", NOT_ON_PAGES),
            row("money", NONE_LISTED),
            row("psych", T("Tiltmeter and a weekly edge finder","Tiltmeter et un edge finder chaque semaine","Tiltmeter y un edge finder semanal"), SW["psych"]),
            row("strategy", T("Strategy testing and performance simulator","Test de stratégies et simulateur de performance","Prueba de estrategias y simulador de rendimiento")),
@@ -353,16 +360,16 @@ def page_best_journal(lang, t):
           "Cinco diarios comparados en lo que importa cuando operas evaluaciones y cuentas fondeadas de futuros: el precio, las reglas de las prop firms, cómo entran tus operaciones y lo que cada uno hace mejor."),
         cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_best_hero"'))
     glance_rows = [
-     ("Sweep", T("Yes, no time limit","Oui, sans limite de temps","Sí, sin límite de tiempo"), T("$19/mo","19 $/mois","19 $/mes")),
-     ("TradeZella", T("No","Non","No"), T("$35/mo","35 $/mois","35 $/mes")),
-     ("Tradervue", T("Yes, 30 trades a month","Oui, 30 trades par mois","Sí, 30 operaciones al mes"), T("$29.95/mo","29,95 $/mois","29,95 $/mes")),
-     ("TraderSync", T("7-day trial","Essai de 7 jours","Prueba de 7 días"), T("$29.95/mo","29,95 $/mois","29,95 $/mes")),
-     ("Edgewonk", T("No","Non","No"), T("$197/yr","197 $/an","197 $/año")),
+     ("Sweep", T("Yes, no time limit","Oui, sans limite de temps","Sí, sin límite de tiempo"), T("$19/mo","19 $/mois","19 $/mes"), T("Checked every week, you’re notified","Vérifiées chaque semaine, tu es prévenu","Revisadas cada semana, te avisamos")),
+     ("TradeZella", T("No","Non","No"), T("$35/mo","35 $/mois","35 $/mes"), NOT_STATED),
+     ("Tradervue", T("Yes, 30 trades a month","Oui, 30 trades par mois","Sí, 30 operaciones al mes"), T("$29.95/mo","29,95 $/mois","29,95 $/mes"), NOT_STATED),
+     ("TraderSync", T("7-day trial","Essai de 7 jours","Prueba de 7 días"), T("$29.95/mo","29,95 $/mois","29,95 $/mes"), NOT_STATED),
+     ("Edgewonk", T("No","Non","No"), T("$197/yr","197 $/an","197 $/año"), NOT_STATED),
     ]
-    free_l, paid_l = t(T("Free plan","Forfait gratuit","Plan gratis")), t(T("Paid plans from","Forfaits payants dès","Planes de pago desde"))
+    free_l, paid_l, chg_l = t(T("Free plan","Forfait gratuit","Plan gratis")), t(T("Paid plans from","Forfaits payants dès","Planes de pago desde")), t(L["changes"])
     glance = (f'<div class="cmp-wrap"><table class="cmp guide glance"><thead><tr><th scope="col">{t(T("Journal","Journal","Diario"))}</th>'
-              f'<th scope="col">{free_l}</th><th scope="col">{paid_l}</th></tr></thead><tbody>'
-              + "".join(f'<tr><th scope="row"><a href="#{n.lower()}">{n}</a></th><td data-label="{free_l}">{t(a)}</td><td data-label="{paid_l}">{t(b)}</td></tr>' for n, a, b in glance_rows) + '</tbody></table></div>')
+              f'<th scope="col">{free_l}</th><th scope="col">{paid_l}</th><th scope="col">{chg_l}</th></tr></thead><tbody>'
+              + "".join(f'<tr><th scope="row"><a href="#{n.lower()}">{n}</a></th><td data-label="{free_l}">{t(a)}</td><td data-label="{paid_l}">{t(b)}</td><td data-label="{chg_l}">{t(c)}</td></tr>' for n, a, b, c in glance_rows) + '</tbody></table></div>')
     firms = chiprow(lang, t, T("Firm pages","Pages des firmes","Páginas de las firmas"), [(s, T(n, n, n)) for s, n in FIRMS], 20)
     vs = vs_link(t, lang, "sweep-vs-tradezella.html", "TradeZella")
     journals = (

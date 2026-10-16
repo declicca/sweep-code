@@ -279,6 +279,76 @@
    "date": null
   }
  },
+ "best-trading-journal-for-prop-firms.html": {
+  "en": {
+   "alt": "Best trading journal for prop firms (2026) · Sweep, TradeZella, Tradervue, TraderSync and Edgewonk, compared",
+   "date": null
+  },
+  "fr": {
+   "alt": "Meilleur journal de trading pour prop firms (2026) · Sweep, TradeZella, Tradervue, TraderSync et Edgewonk, comparés",
+   "date": null
+  },
+  "es": {
+   "alt": "Mejor diario de trading para prop firms (2026) · Sweep, TradeZella, Tradervue, TraderSync y Edgewonk, comparados",
+   "date": null
+  }
+ },
+ "pricing.html": {
+  "en": {
+   "alt": "Pricing · Free forever · Pro from $19/mo",
+   "date": null
+  },
+  "fr": {
+   "alt": "Tarifs · Gratuit pour toujours · Pro dès 19 $/mois",
+   "date": null
+  },
+  "es": {
+   "alt": "Precios · Gratis para siempre · Pro desde 19 $/mes",
+   "date": null
+  }
+ },
+ "features.html": {
+  "en": {
+   "alt": "Trading journal features · Logging, charts, prop firm rules, payouts, discipline and AI",
+   "date": null
+  },
+  "fr": {
+   "alt": "Fonctionnalités du journal de trading · Saisie, graphiques, règles des prop firms, payouts, discipline et IA",
+   "date": null
+  },
+  "es": {
+   "alt": "Funciones del diario de trading · Registro, gráficos, reglas de prop firms, payouts, disciplina e IA",
+   "date": null
+  }
+ },
+ "prop-firms/index.html": {
+  "en": {
+   "alt": "Prop firm rules 2026 · 6 futures prop firms · Verified October 14, 2026",
+   "date": "2026-10-14"
+  },
+  "fr": {
+   "alt": "Règles des prop firms 2026 · 6 prop firms de futures · Vérifiées le 14 octobre 2026",
+   "date": "2026-10-14"
+  },
+  "es": {
+   "alt": "Reglas de las prop firms 2026 · 6 prop firms de futuros · Revisadas el 14 de octubre de 2026",
+   "date": "2026-10-14"
+  }
+ },
+ "prop-firm-rule-changes.html": {
+  "en": {
+   "alt": "Prop firm rule changes · Every change found on the firms’ official pages, dated",
+   "date": null
+  },
+  "fr": {
+   "alt": "Changements de règles des prop firms · Chaque changement trouvé sur les pages officielles des firmes, daté",
+   "date": null
+  },
+  "es": {
+   "alt": "Cambios de reglas de las prop firms · Cada cambio encontrado en las páginas oficiales de las firmas, fechado",
+   "date": null
+  }
+ },
  "position-size-calculator.html": {
   "en": {
    "alt": "Position size calculator · Free calculator for futures and prop traders",

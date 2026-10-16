@@ -350,7 +350,7 @@ table.pf-tbl tbody th{width:auto;font-weight:500;white-space:nowrap}
   .pf-fields>label:first-child{display:grid;order:-1}
   .open .pf-fields>label{display:grid}.open .pf-fields>button{display:inline-flex;margin-bottom:16px}}
 
-/* ---- [pages: sweep-vs-tradezella.html sweep-vs-tradervue.html sweep-vs-tradersync.html sweep-vs-edgewonk.html best-trading-journal-for-prop-firms.html] comparisons: Sweep's card, column and row tinted; the strengths above the table */
+/* ---- [pages: sweep-vs-tradezella.html sweep-vs-tradervue.html sweep-vs-tradersync.html sweep-vs-edgewonk.html best-trading-journal-for-prop-firms.html free-trading-journal.html] comparisons: Sweep's card, column and row tinted; the strengths above the table */
 .card.main{background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 10%,transparent),transparent 60%),var(--glass);box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 60%,transparent) inset,var(--shadow-2)}
 .vs-checked{margin-bottom:16px}
 .vs-note{margin-top:20px}

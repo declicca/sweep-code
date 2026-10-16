@@ -38,7 +38,7 @@ def rep(p):
 def src_name(url):
     """« https://help.topstep.com/en/articles/8284233-topstep-payout-policy » → « Topstep payout policy »; a bare site → its domain."""
     path = [x for x in re.sub(r"^https?://", "", url).split("?")[0].split("/") if x]
-    last = re.sub(r"^\d+-", "", path[-1]) if len(path) > 1 else ""
+    last = re.sub(r"\.(html?|php)$", "", re.sub(r"^\d+-", "", path[-1])) if len(path) > 1 else ""   # « pricing.html » → « Pricing »
     if not last or "." in last: return re.sub(r"^www\.", "", path[0])
     words_ = last.replace("-", " ").replace("_", " ").strip()
     return words_[:1].upper() + words_[1:]
