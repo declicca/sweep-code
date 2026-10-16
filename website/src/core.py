@@ -16,6 +16,8 @@ IMGS = set(f.rsplit("-", 1)[0] for f in os.listdir(os.path.join(STATIC, "img")))
 
 def T(en, fr, es): return {"en": en, "fr": fr, "es": es}
 def href(lang, page):
+    if "#" in page:
+        page, frag = page.split("#", 1); return href(lang, page) + "#" + frag
     base = "/" if lang == "en" else f"/{lang}/"
     if page == "100": return base + "100/"
     if page == "index.html": return base

@@ -32,6 +32,8 @@ case "$1" in
       app/ "$HOST:$APP_REMOTE" ;;
   website)
     (cd website/src && python3 build.py)
+    # the live sitemap before the upload: IndexNow then gets the pages whose date changed (website/tools/indexnow.py)
+    LIVE_SITEMAP=$(mktemp); curl -s --max-time 20 -o "$LIVE_SITEMAP" "https://makeitsweep.com/sitemap.xml" || true
     rsync -avz $DRY --exclude 'sweep-count.php' website/dist/ "$HOST:$WEBSITE_REMOTE"
     # the build keeps a copy of the app's prop firm rules: commit it when it changed (it is the rules' history)
     git status --porcelain website/src/data/presets.json website/src/data/presets-changes.json | grep -q . \
@@ -42,10 +44,13 @@ case "$1" in
   *) echo "Usage : ./deploy.sh app|website [--go]"; exit 1 ;;
 esac
 if [ -n "$DRY" ]; then
+  if [ "$1" = "website" ]; then python3 -I website/tools/indexnow.py "$LIVE_SITEMAP" website/dist/sitemap.xml --dry; fi
   echo "Simulation seulement. Ajoute --go pour déployer."
 else
   # Clear the cPanel NGINX cache (whole account) so visitors get the new files
   ssh "$HOST" 'uapi NginxCaching clear_cache' | grep -q '^ *status: 1$' \
     && echo "Cache NGINX vidé." \
     || { echo "ERREUR : le cache NGINX n'a pas pu être vidé (cPanel > NGINX Manager)."; exit 1; }
+  # then tell Bing and the other IndexNow engines which pages changed (a failure is only reported)
+  if [ "$1" = "website" ]; then python3 -I website/tools/indexnow.py "$LIVE_SITEMAP" website/dist/sitemap.xml; fi
 fi

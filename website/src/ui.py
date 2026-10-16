@@ -154,14 +154,17 @@ def read_next(lang, t, items):
     return related(lang, t, items).replace('<section class="rule related"><div class="wrap">', '<section class="s-t related"><div class="c">', 1)
 
 # ---------------------------------------------------------------- page heads, chapters, older captures
-def hero(t, kick, h1, lead, cta="", note=None, visual="", center=False, extra=""):
-    """A page's first screen: eyebrow, title, lead, actions, then an optional visual. Keeps the .page-hero hook (phone dock)."""
+def hero(t, kick, h1, lead, cta="", note=None, visual="", center=False, extra="", kick_in_h1=False):
+    """A page's first screen: eyebrow, title, lead, actions, then an optional visual. Keeps the .page-hero hook (phone dock).
+    kick_in_h1: the eyebrow is part of the title (it carries the page's keyword), read as « eyebrow: title »."""
     k = f'<span class="eyebrow rise">{t(kick)}</span>' if kick else ""
     c = f'<div class="cta-row rise d4">{cta}</div>' if cta else ""
     n = f'<p class="reassure rise d4">{t(note)}</p>' if note else ""
     v = f'<div class="c c-wide hero-visual">{hero_shot(visual)}</div>' if visual else ""
     p = f'<p class="lead rise d3">{t(lead)}</p>' if lead else ""
-    return f'<div class="page-hero{" center" if center else ""}"><div class="c">{k}<h1 class="wu">{words(t(h1))}</h1>{p}{c}{n}{extra}</div>{v}</div>'
+    h = f'<h1 class="wu">{words(t(h1))}</h1>'
+    if kick_in_h1 and k: k, h = "", f'<h1 class="wu">{k}<span class="sr">{t(T(": "," : ",": "))}</span>{words(t(h1))}</h1>'
+    return f'<div class="page-hero{" center" if center else ""}"><div class="c">{k}{h}{p}{c}{n}{extra}</div>{v}</div>'
 
 def hero_shot(visual):
     """The visual of a first screen: loaded at once and first, never hidden while it loads (it is the largest paint)."""

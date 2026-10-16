@@ -292,7 +292,7 @@ def make_vs(c):
         article = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in diff)
         others = [(o["slug"], T(f"Sweep vs {o['name']}", f"Sweep vs {o['name']}", f"Sweep vs {o['name']}")) for o in VS if o is not c]
         band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_vs_card"'))
-        b = (ui.sec(ui.head(t, None, T("The short answer.","La réponse courte.","La respuesta corta.")) + picks, "t", "short")
+        b = (ui.sec(ui.head(t, None, T(f"Looking for a {name} alternative?", f"Tu cherches une alternative à {name} ?", f"¿Buscas una alternativa a {name}?")) + picks, "t", "short")
              + ui.sec(ui.head(t, None, T("Side by side.","Côte à côte.","Lado a lado.")) + dated + _summary(t, name) + _cmp_table(t, c["rows"], name)
                       + f'<p class="fine vs-note">{t(note)}</p>' + band, "n", "compare")
              + ui.sec(f'<article class="article">{article}</article>', "n", "different", width="read")

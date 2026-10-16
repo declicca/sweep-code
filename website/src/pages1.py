@@ -13,7 +13,7 @@ def page_features(lang, t):
     from pages6 import PLAY, TOUR_LABEL
     H = (T("Everything you track, in one place.","Tout ce que tu suis, au même endroit.","Todo lo que sigues, en un solo lugar."),
         T("Logging, charts, prop firm rules, payouts, discipline and AI. One app, one record.","Saisie, graphiques, règles des prop firms, payouts, discipline et IA. Une app, un historique.","Registro, gráficos, reglas de prop firms, payouts, disciplina e IA. Una app, un historial."),
-        T("Features","Fonctionnalités","Funciones"))
+        T("Trading journal features","Fonctionnalités du journal de trading","Funciones del diario de trading"))
     def _d(t_, kick, title, lead, items, media=None, flip=False, id_="", rule=True, more=""):
         return {"id": id_, "kick": kick, "title": title, "lead": lead, "items": items, "more": more}
     S = []
@@ -160,7 +160,7 @@ def page_features(lang, t):
                         ("command", T("Keyboard first","Clavier d’abord","Primero el teclado"), T("⌘K or Ctrl+K command palette. N new trade, J and K to move, / to search, ⌘ or Ctrl+Enter to save.","Palette de commandes ⌘K ou Ctrl+K. N nouveau trade, J et K pour naviguer, / pour chercher, ⌘ ou Ctrl+Entrée pour enregistrer.","Paleta de comandos ⌘K o Ctrl+K. N nueva operación, J y K para moverte, / para buscar, ⌘ o Ctrl+Enter para guardar.")),
                         ("globe", T("Your language, your theme","Ta langue, ton thème","Tu idioma, tu tema"), T("English, French or Spanish from your browser. Dark or light from your device.","Anglais, français ou espagnol selon ton navigateur. Foncé ou clair selon ton appareil.","Inglés, francés o español según tu navegador. Oscuro o claro según tu dispositivo.")))], 3)
                     + '</div>', "a", "mobile")
-    hero = ui.hero(t, H[2], H[0], H[1], cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True) + f'<button type="button" class="btn btn-line btn-lg" data-tour>{PLAY}{t(TOUR_LABEL)}</button>',
+    hero = ui.hero(t, H[2], H[0], H[1], kick_in_h1=True, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True) + f'<button type="button" class="btn btn-line btn-lg" data-tour>{PLAY}{t(TOUR_LABEL)}</button>',
                    visual=ui.frame_d("v6-01-today-d.webp", t(T("Today: your day, your accounts and your rings, sample data","Aujourd’hui : ta journée, tes comptes et tes anneaux, données d’exemple","Hoy: tu día, tus cuentas y tus anillos, datos de ejemplo")), m="v6-01-today-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1320px", cls="reveal zoom"))
     chapters = [("logging", T("Logging","Saisie","Registro")), ("charts", T("Charts","Graphiques","Gráficos")), ("accounts", T("Rules","Règles","Reglas")),
                 ("payouts", T("Payouts & My money","Payouts et Mon argent","Payouts y Mi dinero")), ("rules", T("Discipline","Discipline","Disciplina")), ("ai", T("AI","IA","IA"))]
@@ -169,10 +169,10 @@ def page_features(lang, t):
             + sp("logging") + row("numbers", "sync") + sp("charts", True) + sp("insights") + sp("accounts", True)
             + show("payouts") + share + sp("rules") + row("journal", "review") + sp("ai", True) + row("ask-sweep", "economic-reports")
             + mobile + sec_trust(lang, t, id_="data") + ui.read_next(lang, t, ["how-it-works.html", "prop-firm-tracker.html", "ai.html"]) + ui.final(lang, t) + tour_dialog(t))
-    return (t(T("Features · Sweep trading journal","Fonctionnalités · Journal de trading Sweep","Funciones · Diario de trading Sweep")),
-            t(T("Trade ticket with live risk, automatic rule checks, guided trade review, insights and performance score, P&L calendar, economic calendar, prop accounts, payouts and expenses.",
-                "Ticket de trade avec risque en direct, vérification automatique des règles, révision guidée, analyses et score de performance, calendrier P&L, calendrier économique, comptes prop, payouts et dépenses.",
-                "Ticket con riesgo en vivo, revisión automática de reglas, revisión guiada, análisis y puntuación de rendimiento, calendario de P&L, calendario económico, cuentas prop, payouts y gastos.")),
+    return (t(T("Trading Journal Features for Futures & Prop Traders · Sweep","Journal de trading : fonctionnalités pour prop firms · Sweep","Diario de trading: funciones para prop firms · Sweep")),
+            t(T("Log trades in seconds, real CME charts, prop firm rules, payouts, discipline streaks and AI. Free forever, Pro from $19/mo.",
+                "Ajoute un trade en quelques secondes, vrais graphiques CME, règles des prop firms, payouts, discipline et IA. Gratuit pour toujours, Pro dès 19 $/mois.",
+                "Registra una operación en segundos, gráficos reales de CME, reglas de prop firms, payouts, rachas de disciplina e IA. Gratis para siempre, Pro desde 19 $/mes.")),
             body, "")
 SYSTEM_PAGES.add("features.html")
 

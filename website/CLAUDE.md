@@ -16,7 +16,7 @@
 - Pages longues : `ui.doc()` donne un id à chaque `<h2>` et ajoute le sommaire (colonne collante à droite sur ordinateur, capsule sous le menu sur téléphone). Dates de publication : la prochaine date et les dates passées sont recalculées dans le navigateur, en heure de New York (`NEXT_JS`, `pages13.py`). Miniatures des modèles PDF : `static/img/templates/<langue>/`, produites avec `qlmanage -t` (macOS) puis converties en WebP ; à refaire si un PDF change.
 - Build : `cd src && python3 build.py` → résultat dans `dist/` (recréé à chaque build, `.htaccess` compris ; les images et vidéos de `static/` qu'aucune page n'utilise sont retirées de `dist/`). Ne jamais modifier `dist/` à la main.
 - Python 3.12 ou plus récent requis (f-strings avec guillemets échappés), aucune dépendance externe.
-- Déploiement : `./deploy.sh website` depuis la racine du dépôt (racine du site sur le serveur : `/home/matnsabc/makeitsweep.com/`). Le cache NGINX est vidé automatiquement après un déploiement réel.
+- Déploiement : `./deploy.sh website` depuis la racine du dépôt (racine du site sur le serveur : `/home/matnsabc/makeitsweep.com/`). Le cache NGINX est vidé automatiquement après un déploiement réel, puis les pages dont la date du sitemap a changé sont envoyées à IndexNow (Bing et autres) par `tools/indexnow.py` (le fichier de clé est écrit par `build.py`).
 - `sweep-count.php` lit le nombre de traders dans la base de l'app (compteur de la cohorte fondatrice).
 - Permissions : dossiers 755, fichiers 644.
 
