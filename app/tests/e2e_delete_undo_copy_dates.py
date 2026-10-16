@@ -6,7 +6,8 @@ Sweep — points 10, 11, 12 (dev environment with Playwright, not on the server)
      and Sweep-account deletions never open the browser's window either.
  11. the copy panel and the « ⋯ » menu of a trade have no English left in French and Spanish.
  12. at 20:30 New York time, with the device clock in UTC, Europe/Paris and Asia/Tokyo: the header date, the strip of
-     days, the trade form and the saved trade all show the same session (the next day: futures sessions start at 18:00).
+     days, the trade form after « Now » and the saved trade all show the same session (the next day: futures sessions start at
+     18:00); without « Now », the form proposes the session that just ended (brief 00, Q2, 16 Oct.).
 """
 import asyncio, sys, re
 from playwright.async_api import async_playwright
@@ -134,6 +135,9 @@ async def main():
       today = await pg.evaluate('todayStr()')
       await pg.evaluate("editDoc('settings','settings',d=>{d.add_mode='manual'})"); await pg.wait_for_timeout(300)   # the form, not the screenshot reader
       await pg.evaluate("openTicket(null,{manual:true})"); await pg.wait_for_timeout(900)
+      ended = await pg.evaluate("TK && [TK.date, TK.entryTime]")   # 20:30: the session that just ended, no time made up (brief 00, Q2)
+      ok(ended == ['2026-10-07', ''], f'[{tz}] 20:30 ET → the form proposes the session that just ended, times empty ({ended})')
+      await pg.evaluate("document.querySelector('#tkSlide [data-act=tk-now]').click()"); await pg.wait_for_timeout(300)   # a night trader: « Now »
       form = await pg.evaluate("TK && TK.date"); etime = await pg.evaluate("TK && TK.entryTime")
       # save a trade from the form (entry and exit typed): the trade's date
       saved = await pg.evaluate("""(async () => { TK.entry = 21000; TK.exit = 21004; TK.qty = 1; TK.dir = 'long'; const ids = new Set(S.trades.map(t => t.id));

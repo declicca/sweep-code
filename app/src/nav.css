@@ -2850,3 +2850,7 @@ html body #main .fx-c.fbtn{min-height:0;height:36px;border-radius:var(--r-pill);
 body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-events:none}
 /* a badge never splits over two lines (« Argent / réel » in the first-run account card) */
 .ux-st-live em{white-space:nowrap;display:inline-block}
+/* brief 00, 1.2-a: « Now » next to the trade's date (night trading) */
+#tkSlide .tk-f .tk-date{display:flex;gap:8px;align-items:stretch}
+#tkSlide .tk-f .tk-date input{flex:1;min-width:0}
+#tkSlide .tk-f .tk-date .tk-now{flex:none;min-height:44px;height:auto;margin:0}

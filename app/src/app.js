@@ -3951,13 +3951,13 @@ async function getCandles(e, t, a, {preview: n, inst: s = "NQ"} = {}) {
 
 let TK = null;
 
-function autoExitTime() {
-  const e = nowET(), t = e.slice(11, 19);
-  return TK.date === todayStr() && (!TK.entryTime || t > hms(TK.entryTime)) ? t : hms(TK.entryTime) || t;
-}
-
 const hms = e => (e = String(e || "").trim(), /^\d{1,2}:\d{2}$/.test(e) && (e += ":00"), 
 /^\d{1,2}:\d{2}:\d{2}$/.test(e) ? e.padStart(8, "0") : "");
+
+/* the evening (17:00 to 9:30 ET) and the weekend: no session open to trade in — a trade typed now is most often one of the
+   session that just ended (brief 00, Q2): the form proposes that session, its times empty; « Now » is there for night trading */
+const offHoursET = () => { const n = nowET(), hm = n.slice(11, 16), wd = new Date(n.slice(0, 10) + "T12:00:00Z").getUTCDay(); return hm >= "17:00" || hm < "09:30" || wd === 0 || wd === 6; },
+  lastSessionET = () => { const n = nowET(); let d = n.slice(11, 16) >= "17:00" ? n.slice(0, 10) : ymdAdd(n.slice(0, 10), -1); while ([ 0, 6 ].includes(new Date(d + "T12:00:00Z").getUTCDay())) d = ymdAdd(d, -1); return d; };
 
 function ticketFrom(e, t) {
   const a = lsGet("tj.last", {}), n = S.accounts.filter(o => o.status !== "archived");
@@ -4002,7 +4002,7 @@ function ticketFrom(e, t) {
       tf: 1
     };
   }
-  const s = nowET(), i = /^d:\d{4}-\d{2}-\d{2}$/.test(t || "") ? t.slice(2) : todayStr();
+  const s = nowET(), off = !/^d:/.test(t || "") && offHoursET(), i = /^d:\d{4}-\d{2}-\d{2}$/.test(t || "") ? t.slice(2) : off ? lastSessionET() : todayStr();
   return {
     id: null,
     inst: INSTR[a.inst] ? a.inst : "NQ",
@@ -4012,7 +4012,7 @@ function ticketFrom(e, t) {
     qty: a.contracts || 1,
     date: i,
     entry: "",
-    entryTime: i === todayStr() ? s.slice(11, 19) : "09:30:00",
+    entryTime: off ? "" : i === todayStr() ? s.slice(11, 19) : "09:30:00",
     stop: "",
     target: "",
     exit: "",
@@ -4049,7 +4049,7 @@ function tkExecs() {
     side: a,
     qty: +TK.qty,
     price: +TK.exit,
-    t: wallTs(TK.date, hms(TK.exitTime) || hms(TK.entryTime) || "09:30:00")
+    t: (x => x < e[0].t ? e[0].t : x)(wallTs(TK.date, hms(TK.exitTime) || hms(TK.entryTime) || "09:30:00"))   // never before the entry: a Buy stays a Buy
   }), e;
 }
 
@@ -4084,7 +4084,7 @@ function ticketPanel(e) {
     i && (TK.account = i.id);
   }
   const t = S.accounts.filter(i => i.status !== "archived" && billFrozen(i.id)).length, a = S.accounts.filter(i => (i.status !== "archived" || i.id === TK.account) && !billFrozen(i.id)), n = tkState(), s = TK.execs.map((i, o) => `<div class="tk-ex" data-i="${o}">\n      <div class="seg sm2">${[ "buy", "sell" ].map(r => `<button type="button" class="${i.side === r ? "on " + r : ""}" data-act="tk-exside" data-i="${o}" data-v="${r}">${r === "buy" ? "Buy" : "Sell"}</button>`).join("")}</div>\n      <input data-tkx="qty" data-i="${o}" value="${esc(i.qty)}" inputmode="numeric" aria-label="Quantity" class="q">\n      <input data-tkx="price" data-i="${o}" value="${esc(i.price)}" inputmode="decimal" aria-label="Price" placeholder="Price">\n      <input data-tkx="time" data-wheel="time" data-i="${o}" value="${esc(i.t.slice(11, 19))}" aria-label="Time (ET)" placeholder="hh:mm:ss" class="tm">\n      <button type="button" class="link" data-act="tk-exdel" data-i="${o}" aria-label="Remove execution">×</button></div>`).join("");
-  return `<div class="tk-head"><div><h2>${TK.multi && n.pos.dir ? "Trade details" : e}</h2><span class="muted" id="tkSummary">${tkSummary(n)}</span></div><a class="link" href="#trades" data-act="tk-cancel">Cancel</a></div>\n  ${TK.id ? "" : '<button type="button" class="ai-banner ai-only" data-act="ai-log"><span class="ai-sp" aria-hidden="true">✦</span><span><b>Log with AI</b><small>Describe your trades in plain words, or import a screenshot.</small></span><i aria-hidden="true">›</i></button>'}\n  <div class="tk-sec">\n    <label class="tk-f"><span>Account</span><select data-tk="account">${opts(a.map(i => [ i.id, acctLabel(i.id) ]), TK.account)}</select></label>\n    ${t ? `<button type="button" class="tk-frozen" data-frozen>${billBadge(S.accounts.find(i => billFrozen(i.id)).id)}<span>${t} paused account${t > 1 ? "s" : ""}</span><b>Unlock</b></button>` : ""}\n    ${!TK.id && a.length > 1 ? `<div class="tk-copies"><span class="help">Also on</span>${a.filter(i => i.id !== TK.account).map(i => `<button type="button" class="chip ${TK.copyTo.has(i.id) ? "on" : ""}" data-act="tk-copy" data-v="${i.id}">${esc(acctLabel(i.id))}</button>`).join("")}</div>` : ""}\n  </div>\n  <div id="tkAlerts">${tkAlerts(n)}</div>\n  <div class="tk-sec">\n    <label class="tk-f"><span>Symbol</span><select data-tk="inst">${opts(Object.entries(INSTR).map(([i, o]) => [ i, `${i} — ${o.name}` ]), TK.inst)}</select></label>\n    <div class="tk-dir">${[ [ "long", "Buy", "Long" ], [ "short", "Sell", "Short" ] ].map(([i, o, r]) => `<button type="button" class="${i} ${n.dir === i ? "on" : ""}" data-act="tk-dir" data-v="${i}" ${TK.multi ? "disabled" : ""}><b>${o}</b><span>${r}</span></button>`).join("")}</div>\n    <div class="tk-row2"><label class="tk-f"><span>Date</span><input type="date" data-tk="date" value="${TK.date}"></label>${TK.multi ? "" : `<label class="tk-f"><span>Entry time (ET)</span><input data-tk="entryTime" data-wheel="time" value="${esc(TK.entryTime)}" placeholder="hh:mm:ss" autocomplete="off"></label>`}</div>\n    ${TK.multi ? "" : `<div class="tk-f"><span>Contracts</span><div class="tk-qty"><button type="button" data-act="tk-qty" data-v="-1" aria-label="Fewer contracts">−</button><input data-tk="qty" value="${esc(TK.qty)}" inputmode="numeric" aria-label="Contracts"><button type="button" data-act="tk-qty" data-v="1" aria-label="More contracts">+</button></div></div>`}\n    ${TK.multi ? `<div class="tk-f"><span>Avg entry</span><div class="tk-ro" id="tkAvg">${n.entry !== "" ? (+n.entry).toFixed(2) : "—"}</div></div>` : tkNum("entry", "Entry price", {
+  return `<div class="tk-head"><div><h2>${TK.multi && n.pos.dir ? "Trade details" : e}</h2><span class="muted" id="tkSummary">${tkSummary(n)}</span></div><a class="link" href="#trades" data-act="tk-cancel">Cancel</a></div>\n  ${TK.id ? "" : '<button type="button" class="ai-banner ai-only" data-act="ai-log"><span class="ai-sp" aria-hidden="true">✦</span><span><b>Log with AI</b><small>Describe your trades in plain words, or import a screenshot.</small></span><i aria-hidden="true">›</i></button>'}\n  <div class="tk-sec">\n    <label class="tk-f"><span>Account</span><select data-tk="account">${opts(a.map(i => [ i.id, acctLabel(i.id) ]), TK.account)}</select></label>\n    ${t ? `<button type="button" class="tk-frozen" data-frozen>${billBadge(S.accounts.find(i => billFrozen(i.id)).id)}<span>${t} paused account${t > 1 ? "s" : ""}</span><b>Unlock</b></button>` : ""}\n    ${!TK.id && a.length > 1 ? `<div class="tk-copies"><span class="help">Also on</span>${a.filter(i => i.id !== TK.account).map(i => `<button type="button" class="chip ${TK.copyTo.has(i.id) ? "on" : ""}" data-act="tk-copy" data-v="${i.id}">${esc(acctLabel(i.id))}</button>`).join("")}</div>` : ""}\n  </div>\n  <div id="tkAlerts">${tkAlerts(n)}</div>\n  <div class="tk-sec">\n    <label class="tk-f"><span>Symbol</span><select data-tk="inst">${opts(Object.entries(INSTR).map(([i, o]) => [ i, `${i} — ${o.name}` ]), TK.inst)}</select></label>\n    <div class="tk-dir">${[ [ "long", "Buy", "Long" ], [ "short", "Sell", "Short" ] ].map(([i, o, r]) => `<button type="button" class="${i} ${n.dir === i ? "on" : ""}" data-act="tk-dir" data-v="${i}" ${TK.multi ? "disabled" : ""}><b>${o}</b><span>${r}</span></button>`).join("")}</div>\n    <div class="tk-row2"><label class="tk-f"><span>Date</span><div class="tk-date"><input type="date" data-tk="date" value="${TK.date}"><button type="button" class="btn sm tk-now" data-act="tk-now">Now</button></div></label>${TK.multi ? "" : `<label class="tk-f"><span>Entry time (ET)</span><input data-tk="entryTime" data-wheel="time" value="${esc(TK.entryTime)}" placeholder="hh:mm:ss" autocomplete="off"></label>`}</div>\n    ${TK.multi ? "" : `<div class="tk-f"><span>Contracts</span><div class="tk-qty"><button type="button" data-act="tk-qty" data-v="-1" aria-label="Fewer contracts">−</button><input data-tk="qty" value="${esc(TK.qty)}" inputmode="numeric" aria-label="Contracts"><button type="button" data-act="tk-qty" data-v="1" aria-label="More contracts">+</button></div></div>`}\n    ${TK.multi ? `<div class="tk-f"><span>Avg entry</span><div class="tk-ro" id="tkAvg">${n.entry !== "" ? (+n.entry).toFixed(2) : "—"}</div></div>` : tkNum("entry", "Entry price", {
     ph: "21845.25"
   })}\n    <div class="tk-row2">${tkNum("stop", "Stop")}${tkNum("target", "Target")}</div>\n  </div>\n  <div class="tk-risk" id="tkRisk">${tkRisk(n)}</div>\n  <div class="tk-sec">\n    ${TK.multi ? `<div class="tk-f"><span>Executions <span class="help">· times in ET</span></span><div class="tk-exs">${s}</div><button type="button" class="btn sm" data-act="tk-exadd">+ Add execution</button></div>` : `<div class="tk-row2">${tkNum("exit", "Exit price")}<label class="tk-f"><span>Exit time (ET)</span><input data-tk="exitTime" data-wheel="time" value="${esc(TK.exitTime)}" placeholder="hh:mm:ss" autocomplete="off"></label></div>\n      <div class="row"><button type="button" class="chip" data-act="tk-exitat" data-v="target">Exit at target</button><button type="button" class="chip" data-act="tk-exitat" data-v="stop">Exit at stop</button><span style="flex:1"></span><button type="button" class="link" data-act="tk-multi">+ Add execution</button></div>`}\n    <div class="tk-result" id="tkResult">${tkResult(n)}</div>\n  </div>\n  <label class="tk-f"><span>Notes</span><textarea data-tk="notes" rows="3" placeholder="What happened, what you saw…">${esc(TK.notes)}</textarea></label>\n  ${TK.id ? "" : '<p class="help" style="margin:-4px 0 0">Setup, fees, checklist and review are on the next page.</p>'}\n  <div class="err" id="tkErr"></div>\n  <button class="btn primary tk-save" data-act="tk-save">${TK.id ? "Save changes" : "Save trade"}</button>`;
 }
@@ -4184,9 +4184,9 @@ async function tkSave() {
     account_id: TK.account,
     date: sessionOfTs(s[0].t),
     session_date: !0,
-    entry_time: s[0].t.slice(11, 16),
-    exit_time: a.end.slice(11, 16),
-    direction: a.dir,
+    entry_time: TK.multi || hms(TK.entryTime) ? s[0].t.slice(11, 16) : "",   // not typed: no time, never one made up (brief 00, Q2)
+    exit_time: TK.multi || hms(TK.exitTime) ? a.end.slice(11, 16) : "",
+    direction: TK.multi ? a.dir : TK.dir,
     contracts: a.maxQty,
     entry: pxRound(a.avgEntry, TK.inst),
     exit: pxRound(a.avgExit, TK.inst),
@@ -4255,11 +4255,7 @@ document.addEventListener("input", e => {
   const t = e.target;
   if (t.dataset.tk) {
     const a = t.dataset.tk;
-    if (TK[a] = t.value, a === "exit" && t.value.trim() && !TK.exitTime) {
-      TK.exitTime = autoExitTime();
-      const n = $('[data-tk="exitTime"]');
-      n && (n.value = TK.exitTime);
-    }
+    TK[a] = t.value;   // the exit time never fills itself (it put « now »: brief 00, Q2)
     if (a === "account") {
       tkRefresh({
         panel: !0
@@ -4310,7 +4306,11 @@ document.addEventListener("input", e => {
   const a = t.dataset.act, n = t.dataset.v;
   if (a === "tk-dir") TK.dir = n, tkRefresh({
     panel: !0
-  }); else if (a === "tk-qty") {
+  }); else if (a === "tk-now") {   // night trading: the session open now, and the time
+    e.preventDefault(), TK.date = todayStr(), TK.entryTime = nowET().slice(11, 19);
+    const d = $('[data-tk="date"]'), m = $('[data-tk="entryTime"]');
+    d && (d.value = TK.date), m && (m.value = TK.entryTime), d && d.dispatchEvent(new Event("input", { bubbles: !0 })), tkRefresh();
+  } else if (a === "tk-qty") {
     TK.qty = Math.max(1, (+TK.qty || 1) + +n);
     const s = $('[data-tk="qty"]');
     s && (s.value = TK.qty), tkRefresh();
@@ -4319,7 +4319,7 @@ document.addEventListener("input", e => {
       toast(`Set the ${n} first`);
       return;
     }
-    TK.exit = TK[n], TK.exitTime || (TK.exitTime = autoExitTime()), tkRefresh({
+    TK.exit = TK[n], tkRefresh({
       panel: !0
     });
   } else if (a === "tk-multi") {

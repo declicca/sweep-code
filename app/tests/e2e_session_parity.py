@@ -36,6 +36,8 @@ async def main():
     acc = await pg.evaluate("(S.accounts.find(a=>a.status!=='archived')||{}).id")
     await pg.evaluate("editDoc('settings','settings',d=>{d.add_mode='manual'})")
     await pg.evaluate("openTicket(null,{manual:true})"); await pg.wait_for_timeout(800)
+    # at 23:36 the form proposes the session that just ended (brief 00, Q2); a night trader taps « Now »: the session open, the time
+    await pg.evaluate("document.querySelector('#tkSlide [data-act=tk-now]').click()"); await pg.wait_for_timeout(300)
     saved = await pg.evaluate("""(async (a) => { TK.account = a; TK.entry = 21000; TK.exit = 21004; TK.qty = 1; TK.dir = 'long'; const ids = new Set(S.trades.map(t => t.id));
       tkSave(); await new Promise(r => setTimeout(r, 1800)); const t = S.trades.find(x => !ids.has(x.id)); return t ? { id: t.id, date: t.date, time: t.entry_time, flag: t.session_date, ex: (t.executions || []).map(x => x.t) } : null; })""", acc)
     ok(bool(saved) and saved['date'] == D and saved['flag'] is True and saved['time'] == '23:36', f'browser: 23:36 ET → session {D}, session_date: true ({saved})')

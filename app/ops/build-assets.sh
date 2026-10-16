@@ -15,9 +15,10 @@ for k in app nav game ux guide notify chart coach; do   # app: the core (src/app
     mv "$tmp" "$new"
     # every older copy goes, and app.html points to the new one, whatever name it had (16 Oct.: after a merge, only the first
     # copy by name was replaced — app.html kept a stale or missing module, and the CSS bundle could take a stale one)
-    for old in $(grep -o "assets/$k\.[0-9a-f]\{10\}\.$e" app.html; ls assets/$k.*.$e 2>/dev/null | grep -v -e '\.build\.' -e '^assets/bundle\.'); do
+    for old in $(grep -o "assets/$k\.[0-9a-f]\{10\}\.$e" app.html || true; ls assets/$k.*.$e 2>/dev/null | grep -v -e '\.build\.' -e '^assets/bundle\.'); do   # (|| true: a CSS module is not in app.html, and set -e stopped the list there)
       [ "$old" = "$new" ] && continue; sed -i "s#$old#$new#g" app.html; rm -f "$old"
     done
+    [ "$(ls assets/$k.*.$e | grep -v '\.build\.' | wc -l)" -eq 1 ] || { echo "more than one assets/$k.*.$e left" >&2; exit 1; }
     echo "$k.$e → $new"
   done
 done
