@@ -350,9 +350,11 @@ function nt_route(string $route, string $method, string $uid, bool $isAdmin): vo
         $a = json_decode((string) $data, true) ?: [];
         $day = (new DateTimeImmutable('now', new DateTimeZone('America/New_York')))->modify('+6 hours')->format('Y-m-d');   // the session day (todayStr)
         require_once dirname(__DIR__) . '/money/money.php';
-        $p = ['account' => mb_substr((string) ($a['name'] ?? ''), 0, 80), 'pct' => max(0, min(100, (int) ($b['pct'] ?? $level))), 'tone' => 'caution'];
+        // copy trading (brief 00, question 10): one alert per copy group, about its most fragile account, « Apex 2 +2 »
+        $grp = preg_replace('/[^A-Za-z0-9_.:-]/', '', substr((string) ($b['group'] ?? ''), 0, 120)); $n = max(1, min(50, (int) ($b['n'] ?? 1)));
+        $p = ['account' => mb_substr((string) ($a['name'] ?? ''), 0, 80) . ($n > 1 ? ' +' . ($n - 1) : ''), 'pct' => max(0, min(100, (int) ($b['pct'] ?? $level))), 'tone' => 'caution'];
         foreach (['used', 'limit', 'left'] as $k) foreach (['en' => '', 'fr' => '_fr', 'es' => '_es'] as $l => $sfx) $p[$k . $sfx] = SweepMoneyServer::dollars(max(0, (int) ($b[$k . '_c'] ?? 0)), $l);
-        $id = Notify::send($uid, 'prop_limit', $p, ['dedupe_key' => "prop:$acc:$kind:$level:$day", 'action_url' => '#account/' . rawurlencode($acc),
+        $id = Notify::send($uid, 'prop_limit', $p, ['dedupe_key' => 'prop:' . ($grp !== '' ? $grp : $acc) . ":$kind:$level:$day", 'action_url' => '#account/' . rawurlencode($acc),
             'title_key' => "prop_$kind$level.title", 'body_key' => "prop_$kind$level.body"]);
         json_out(200, ['ok' => true, 'id' => $id]);
     }

@@ -462,12 +462,26 @@
   }
   const limitLine = (x) => fill(T.lim[x.kind + x.level], { a: x.a.name || '', p: x.pct, u: usd(x.used), l: usd(x.limit), r: usd(x.left) });
   /* the bell, once per account, kind, level and day (the server keeps it once too): only a level crossed by today's trades */
-  const sentKey = (x) => `sw.propAlert.${x.a.id}.${x.kind}.${x.level}.${today()}`;
+  const sentKey = (g, x) => `sw.propAlert.${g}.${x.kind}.${x.level}.${today()}`;
+  /** the accounts copied together today (trades sharing a copy group), each → its group's key (the smallest account id) */
+  function copyGroups() {
+    const up = new Map(), find = (a) => { while (up.get(a) !== a) a = up.get(a); return a; };
+    const join = (a, b) => { [a, b].forEach((x) => { if (!up.has(x)) up.set(x, x); }); const ra = find(a), rb = find(b); if (ra !== rb) up.set(ra < rb ? rb : ra, ra < rb ? ra : rb); };
+    const first = new Map(), d = today();
+    (S.trades || []).forEach((t) => { if (t.copy_group && t.date === d && t.account_id) { if (first.has(t.copy_group)) join(first.get(t.copy_group), t.account_id); else { first.set(t.copy_group, t.account_id); join(t.account_id, t.account_id); } } });
+    const out = new Map(); up.forEach((v, k) => out.set(k, find(k))); return out;
+  }
   function alertLimits() {
     if (S.mode !== 'server' || typeof apiJSON !== 'function') return;
+    // one alert per copy group, kind and level (brief 00, question 10): about its most fragile account (the least room left)
+    const groups = copyGroups(), one = new Map();
     limits().filter((x) => x.fresh).forEach((x) => {
-      try { if (sessionStorage.getItem(sentKey(x))) return; sessionStorage.setItem(sentKey(x), '1'); } catch (e) { /* private mode: the server dedupes */ }
-      apiJSON('api/notifications/prop-alert', { method: 'POST', body: { account: x.a.id, kind: x.kind, level: x.level, pct: x.pct, used_c: Math.round(x.used), limit_c: Math.round(x.limit), left_c: Math.round(x.left) } })
+      const g = groups.get(x.a.id) || x.a.id, k = g + '|' + x.kind + '|' + x.level, cur = one.get(k);
+      if (!cur) one.set(k, { g, x, n: 1 }); else { cur.n++; if (x.left < cur.x.left) cur.x = x; }
+    });
+    one.forEach(({ g, x, n }) => {
+      try { if (sessionStorage.getItem(sentKey(g, x))) return; sessionStorage.setItem(sentKey(g, x), '1'); } catch (e) { /* private mode: the server dedupes */ }
+      apiJSON('api/notifications/prop-alert', { method: 'POST', body: { account: x.a.id, group: g, n, kind: x.kind, level: x.level, pct: x.pct, used_c: Math.round(x.used), limit_c: Math.round(x.limit), left_c: Math.round(x.left) } })
         .then(() => { if (window.SweepNotify && SweepNotify.refresh) setTimeout(() => SweepNotify.refresh(), 300); }).catch(() => { /* the coach card says it anyway */ });
     });
   }

@@ -2,6 +2,7 @@
 
 Une ligne par livraison, la plus récente en haut. Le détail (règles, causes, tests) : `CONTEXTE-APP.md`. Ce fichier n'est pas servi en ligne (`.htaccess` refuse tous les `.md`).
 
+- **16 oct. 2026 — Brief 00, phase 1, lot 1.2-j.** En copy trading, une seule alerte de limite par groupe de comptes copiés (sur le compte le plus fragile, « Apex 2 +2 »), au lieu d'une par compte.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-i.** Plus de « + » dans les barres sur la page de démarrage (il ouvrait une fenêtre en anglais, maintenant traduite). « Trade enregistré · … » au lieu de « Trade saved · … ». Import : « Effacer » au lieu de « Clear », prix du 6E au pip dans l'aperçu. Le « ? » de la première question et le badge « Argent réel » ne se coupent plus.
 - **15 oct. 2026 — « Débriefer ma journée » sans les trades.** Case « Inclure mes trades du jour » (cochée par défaut) et « Ta journée en quelques mots (facultatif) » : décochée, Sweep AI débriefe le plan, la patience et les émotions sans trade ni P&L ; un jour sans trade se débriefe dès quelques mots.
 - **15 oct. 2026 — Erreurs d'Admin.** Plantage `startsWith` avec le remplissage automatique (Réglages) ; le détecteur de sauts ne compte plus le défilement du trader ; fiche d'un trade sur iPhone : la checklist ne fait plus sauter la page (bloc du score de taille fixe, contrôle touché gardé sous le doigt quand l'avis du coach change). Admin › Erreurs › « Effacer ».
