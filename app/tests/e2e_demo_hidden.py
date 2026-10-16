@@ -38,7 +38,7 @@ with sync_playwright() as p:
       pg.wait_for_timeout(500)
       if pg.evaluate("S.trades.filter(t=>t.demo).length > 10"): break
     n0 = -1
-    for _ in range(60):   # the sample data is saved in batches: wait until the server has all of it (under load it takes a while)
+    for _ in range(120):   # the sample data is saved in batches: wait until the server has all of it (under load it takes a while; 30 s were not always enough on GitHub)
       pg.wait_for_timeout(500); mem = pg.evaluate("S.trades.filter(t=>t.demo).length")
       if mem > 10 and pg.evaluate(DATA)['trades'] == mem: n0 = mem; break
     pg.evaluate("location.hash='#trades'"); pg.wait_for_timeout(1800)

@@ -96,7 +96,7 @@ img,svg{-webkit-user-drag:none}
 .btn.primary,.sb-cta,.fb-send,.tk-save{position:relative;overflow:hidden}
 .btn.primary::after,.tk-save::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 55%);pointer-events:none}
 .btn.primary:active,.tk-save:active{transform:scale(.97)}
-input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-shadow var(--dur-2) var(--ease-out),background-color var(--dur-2)}
+input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-shadow var(--dur-2) var(--ease-out),background-color var(--dur-2) var(--ease-out)}
 .sw i::after{transition:transform .35s var(--ease-ios)!important}
 .seg button.on,.mseg-thumb{transition:background .25s var(--ease-ios),box-shadow .25s var(--ease-ios),color .2s var(--ease-ios)}
 .toast.on{animation:ux-toast .5s var(--ux-pop) both}
