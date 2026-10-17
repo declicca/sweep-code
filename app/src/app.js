@@ -7449,6 +7449,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       renews: "Renews on {date}",
       ends_on: "Ends on {date}",
       trial_left: "{plan} trial: {d} left",
+      trial_next: "On {date}, you move to Free: {k} of your {n} accounts stay active, the others are paused and kept. Nothing is charged.",
+      trial_next1: "On {date}, you move to Free: 1 of your {n} accounts stays active, the others are paused and kept. Nothing is charged.",
+      trial_next_all: "On {date}, you move to Free: your accounts stay active. Nothing is charged.",
+      keep_plan: "Keep {plan}",
       early_left: "Early access {plan}: {d} left",
       free_desc: "Journal and core dashboard",
       f_accounts: "Trading accounts",
@@ -7595,6 +7599,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       renews: "Renouvellement le {date}",
       ends_on: "Se termine le {date}",
       trial_left: "Essai {plan} : {d} restants",
+      trial_next: "Le {date}, tu passes à Free : {k} de tes {n} comptes restent actifs, les autres sont mis en pause et gardés. Rien n’est facturé.",
+      trial_next1: "Le {date}, tu passes à Free : 1 de tes {n} comptes reste actif, les autres sont mis en pause et gardés. Rien n’est facturé.",
+      trial_next_all: "Le {date}, tu passes à Free : tes comptes restent actifs. Rien n’est facturé.",
+      keep_plan: "Garder {plan}",
       early_left: "Accès anticipé {plan} : {d} restants",
       free_desc: "Journal et tableau de bord de base",
       f_accounts: "Comptes de trading",
@@ -7741,6 +7749,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       renews: "Se renueva el {date}",
       ends_on: "Termina el {date}",
       trial_left: "Prueba {plan}: quedan {d}",
+      trial_next: "El {date} pasas a Free: {k} de tus {n} cuentas siguen activas, las demás quedan en pausa y guardadas. No se cobra nada.",
+      trial_next1: "El {date} pasas a Free: 1 de tus {n} cuentas sigue activa, las demás quedan en pausa y guardadas. No se cobra nada.",
+      trial_next_all: "El {date} pasas a Free: tus cuentas siguen activas. No se cobra nada.",
+      keep_plan: "Mantener {plan}",
       early_left: "Acceso anticipado {plan}: quedan {d}",
       free_desc: "Diario y panel básico",
       f_accounts: "Cuentas de trading",
@@ -8286,6 +8298,15 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       toast(l("error"));
     }
   }
+  /* during a trial (audit of 16 Oct., R20): what happens on the last day, said plainly — the date, the accounts that stay
+     active with Free (the server's own limit), nothing charged — and « Keep Pro » (the checkout), never a countdown */
+  function trialNext() {
+    const tr = i && i.trial;
+    if (!tr || i.subscription || !tr.ends_at) return "";
+    const lim = ((i.plans || {}).free || {}).accounts, n = (typeof S != "undefined" && S.accounts || []).filter(a => !a.demo && a.status !== "archived" && a.status !== "closed").length;
+    const txt = lim == null || n <= lim ? l("trial_next_all", { date: b(tr.ends_at) }) : lim === 1 ? l("trial_next1", { date: b(tr.ends_at), n }) : l("trial_next", { date: b(tr.ends_at), k: lim, n });
+    return '<div class="sb-next"><p>' + u(txt) + '</p><button type="button" class="sb-cta sb-sm" data-buy="' + u(tr.plan || "pro") + '">' + u(l("keep_plan", { plan: p(tr.plan || "pro") })) + "</button></div>";
+  }
   function ue(k) {
     if (!k || !i) return;
     k.setAttribute("data-noi18n", "");
@@ -8336,7 +8357,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
         })) + "</button>"), he && (be = '<span class="sb-cur">' + u(l("current")) + "</span>"), 
         '<th scope="col"' + (se === "pro" ? ' class="sb-hl"' : "") + '><span class="sb-th-name">' + u(p(se)) + '</span><span class="sb-th-price">' + (se === "free" ? u(v(0)) : (ee && ee.founding !== null && ee.founding !== void 0 ? "<s>" + u(v(A === "year" ? ee.amount / 12 : ee.amount)) + "</s> " : "") + u(v(Math.round(ke * 100) / 100))) + "<small>" + u(l("per_month")) + "</small></span>" + be + "</th>";
       }).join(""), de = G.map(([se, ee, fe]) => '<tr><th scope="row">' + u(l(se)) + "</th>" + [ "free", "pro", "elite" ].map(ke => "<td" + (ke === "pro" ? ' class="sb-hl"' : "") + ">" + (fe === "trades" ? u(l("all_trades")) : B(j[ke][ee], fe)) + "</td>").join("") + "</tr>").join("");
-      k.innerHTML = '<section class="sb-plans"><div class="sb-card"><div><span class="sb-label">' + u(l("your_plan")) + '</span><b class="sb-big">' + u(p(i.plan)) + '</b><span class="sb-status">' + Z() + "</span></div>" + (i.can_manage && i.subscription ? '<button type="button" class="sb-btn2 sb-manage">' + u(l("manage")) + "</button>" : "") + "</div>" + (N.eligible ? '<p class="sb-founding">' + u(l("founding_strip", {
+      k.innerHTML = '<section class="sb-plans"><div class="sb-card"><div><span class="sb-label">' + u(l("your_plan")) + '</span><b class="sb-big">' + u(p(i.plan)) + '</b><span class="sb-status">' + Z() + "</span></div>" + (i.can_manage && i.subscription ? '<button type="button" class="sb-btn2 sb-manage">' + u(l("manage")) + "</button>" : "") + "</div>" + trialNext() + (N.eligible ? '<p class="sb-founding">' + u(l("founding_strip", {
         p: N.percent,
         t: E(N.deadline)
       })) + "</p>" : "") + '<div class="sb-seg" role="tablist"><button type="button" role="tab" data-iv="month" aria-selected="' + (A === "month") + '">' + u(l("monthly")) + '</button><button type="button" role="tab" data-iv="year" aria-selected="' + (A === "year") + '">' + u(l("yearly")) + " <em>" + u(l("save", {

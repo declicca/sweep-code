@@ -4,7 +4,8 @@ Sweep — plans and billing in the app, with billing switched on (brief 02 part 
 A second copy of the local server runs next to the first one (port + 1, same database) with billing on
 (SWEEP_BILLING_CONFIG=tools/billing-config.local.php: test values, no Stripe key, Stripe is never called). The trial's clock
 is moved in the database (the end of the trader's trial), never in the server.
- A. day 50 (FR on a phone, EN on a computer): no « Strong week, go Pro » during the trial (audit of 16 Oct.; again on Free,
+ A. day 50 (FR on a phone, EN on a computer): the plans page says the last day plainly (Free, 2 of 4 accounts active,
+    nothing charged, « Keep Pro »; audit of 16 Oct., R20); no « Strong week, go Pro » during the trial (audit of 16 Oct.; again on Free,
     day 61); the dashboard card lists the paid features the trader really uses — 4
     accounts (Free keeps 2), My money, screenshot reading, the full history, Sweep AI — drawn with the dashboard; ✕ hides it;
  B. day 61, back to Free: ONE window opens by itself — what stays, what is paused and kept (the accounts not chosen, My
@@ -133,6 +134,14 @@ def day50(p, lang, phone):
   ok(pg.locator('#main .nav-trial').count() == 0, f'{tag} day 50: ✕ hides it')
   reload(pg)
   ok(pg.locator('#main .nav-trial').count() == 0, f'{tag} day 50: and it stays hidden')
+  # (audit of 16 Oct., R20) the plans page says what happens on the last day: Free, 2 of the 4 accounts active, nothing charged
+  pg.evaluate("location.hash = '#plan'"); pg.wait_for_selector('#main .sb-plans', timeout=10000); pg.wait_for_timeout(600)
+  nx = pg.evaluate("(document.querySelector('#main .sb-next p') || {}).textContent || ''"); kb = pg.evaluate("(document.querySelector('#main .sb-next [data-buy]') || {}).textContent || ''")
+  want = {'fr': ('2 de tes 4 comptes', 'Rien n’est facturé', 'Garder Pro'), 'en': ('2 of your 4 accounts', 'Nothing is charged', 'Keep Pro'), 'es': ('2 de tus 4 cuentas', 'No se cobra nada', 'Mantener Pro')}[lang]
+  ok(want[0] in nx and want[1] in nx and 'Free' in nx and kb == want[2], f'{tag} plans page, during the trial: « {nx[:110]} » and « {kb} »')
+  ok(pg.evaluate(WIDE) <= 1, f'{tag} plans page: nothing wider than the window')
+  shot(pg, f'b13-plans-trial-{tag}')
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(600)
   return br, ctx, pg, errs, uid
 
 def back_to_free(br, ctx, pg, errs, uid, lang, phone):
