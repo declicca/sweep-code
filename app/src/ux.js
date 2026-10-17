@@ -2201,7 +2201,7 @@
     const pay = num(W.payout);
     if (pay != null && pay > 0) { const c = Math.round(pay * 100); put('payouts', { id: 'est-payouts', firm_id: '', account_id: '', gross_c: c, split_pct: 100, fees_c: 0, net_c: c, amount_c: c, status: 'paid', paid_on: from, payment_date: from, request_date: from, approval_date: from, estimated: true }); }
     else if ((S.payouts || []).some((p) => p.id === 'est-payouts')) remove('payouts', 'est-payouts');
-    setSt({ state: 'done', at: today() });
+    setSt({ state: 'done', at: today(), from, per: W.per });   // the period, for My money on Today (R17)
     showNet(from, W.per);
   }
   /* 4. the real net: moneyOf over the same period, so it is the number My money shows */
@@ -2333,7 +2333,11 @@
 
   const appRender = render;
   render = function () { const out = appRender.apply(this, arguments); try { tagRows(); } catch (x0) { /* never blocks */ } return out; };
-  window.SweepRealNet = { invite, open: () => { W = null; start(); }, state: stOf, showNet };
+  // the start of the real net's period (once done): saved since 17 Oct., else the date of its estimated entries
+  const fromNet = () => { const s = stOf(); if (s.state !== 'done') return null; if (s.from) return s.from;
+    const d = [...(S.expenses || []).filter((e) => e.estimated && /^est-/.test(e.id)), ...(S.payouts || []).filter((p) => p.id === 'est-payouts')].map((e) => e.date || e.paid_on).filter(Boolean).sort()[0];
+    return d || null; };
+  window.SweepRealNet = { invite, open: () => { W = null; start(); }, state: stOf, showNet, from: fromNet };
 })();
 
 /* ───────────── 30. Automatic sync (NinjaTrader 8, Quantower): Settings › Data › Connections, accounts found, synced trades ─────────────

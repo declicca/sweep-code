@@ -413,10 +413,15 @@
   /** the rule a new plan starts with: what the last review (within a week) said for the next session, or the coach's */
   function ruleFor(day) {
     const wk = new Date(day + 'T12:00:00'); wk.setDate(wk.getDate() - 7); const from = wk.toISOString().slice(0, 10);
-    const j = (S.journals || []).filter((x) => x.id < day && x.id >= from && !x.demo && x.post && x.post.reviewed_at).sort((a, b) => b.id.localeCompare(a.id))[0];
-    if (!j) return '';
-    const own = String(j.post.tomorrow || '').split('\n').map((x) => x.trim()).find(Boolean);
-    return String(own || dayLesson(j.id).rule || '').slice(0, 160);
+    // the last review of the week that gave a rule: a day off (« Not trading today ») has none and is skipped (audit of 16 Oct.,
+    // R22: Tuesday's rule was lost after Wednesday's day off)
+    const js = (S.journals || []).filter((x) => x.id < day && x.id >= from && !x.demo && x.post && x.post.reviewed_at && !(x.pre && x.pre.bias === 'no_trade')).sort((a, b) => b.id.localeCompare(a.id));
+    for (const j of js) {
+      const own = String(j.post.tomorrow || '').split('\n').map((x) => x.trim()).find(Boolean);
+      const r = String(own || dayLesson(j.id).rule || '').slice(0, 160);
+      if (r) return r;
+    }
+    return '';
   }
 
   /** the habit of the week: the rule broken most often the week before (a new trader: this week's days before today),

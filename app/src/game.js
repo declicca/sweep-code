@@ -525,6 +525,9 @@
     const j = structuredClone(journalOf(PL.day));
     j.id = PL.day;
     j.pre = Object.assign({}, j.pre || {}, { saved_at: (j.pre && j.pre.saved_at) || Math.floor(Date.now() / 1000), bias: PL.bias, setups: [...PL.setups], max_loss: PL.bias === 'no_trade' ? (j.pre && j.pre.max_loss) || '' : String(ml), max_trades: PL.max_trades ? String(parseInt(PL.max_trades, 10) || '') : '', levels: PL.levels, rule: String(PL.rule || '').trim().slice(0, 160) });
+    // « Not trading today » chosen in the plan, before any trade of the day: the same day off as the routine's button (audit of
+    // 16 Oct., R21: the routine still asked for a trade and a review of 3 questions); another bias: no longer a day off
+    j.pre.day_off = PL.bias === 'no_trade' && !(S.trades || []).some((t) => !t.demo && t.date === PL.day);
     put('journals', j);
     const own = S.settings && S.settings.setups || [], add = [...PL.setups].filter((x) => !own.some((y) => y.toLowerCase() === x.toLowerCase()));
     if (add.length && typeof editDoc === 'function') editDoc('settings', 'settings', (r) => { r.setups = [...(r.setups || []), ...add]; });
