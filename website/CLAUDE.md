@@ -26,5 +26,9 @@
 - URLs propres sans `.html`, sitemap, hreflang, données structurées.
 - Cibles : « trading journal », « best trading journal », « alternative à TradeZella » et autres plateformes, y compris dans les réponses des IA.
 
-## Avant chaque livraison
-Lancer l'audit Playwright de toutes les pages (mobile et ordinateur) : erreurs console, ressources brisées, débordement horizontal, ID en double, ancres brisées, alt manquants, longueur des titres et descriptions.
+## Tests (`tools/qa/qa.py`, sur le build local)
+- Installation, une fois (depuis `website/`) : `python3.13 -m venv tools/qa/.venv && tools/qa/.venv/bin/pip install playwright` (pilote le Google Chrome installé, rien d'autre à télécharger). `.venv` et `.deployed.json` ne sont pas versionnés.
+- Petite correction : `tools/qa/.venv/bin/python tools/qa/qa.py quick`. Il fait le build, teste seulement les pages changées depuis le dernier déploiement (`deploy.sh` mémorise chaque build envoyé) à 390 et 1300 px, en clair et en sombre, puis le SEO de tout le site. Environ 25 s pour quelques pages. Si le CSS ou le JS commun change, ou plus de 60 pages : une page de chaque sorte en 3 langues (environ 4 min). Pour des pages précises : `qa.py quick /features /fr/pricing`.
+- Grosse livraison : `qa.py all` (toutes les pages à 6 largeurs en clair et en sombre, SEO, fonctionnel, clavier).
+- Aussi : `qa.py seo`, `qa.py func` (menus, tailles de compte, visite, bannières, calculateurs), `qa.py kbd` (clavier), `qa.py full` (mise en page seulement) ; `--no-build` pour tester le build déjà là.
+- Chaque problème de mise en page est revérifié seul et lentement avant d'être signalé (un bloc encore en animation n'est pas un problème) ; le code de sortie vaut 1 s'il en reste.

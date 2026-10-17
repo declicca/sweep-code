@@ -10,3 +10,5 @@ website/dist/
 !app/sync/addon/SweepSync.zip
 !app/sync/addon/SweepSync-Quantower.zip
 __pycache__/
+website/tools/qa/.venv/
+website/tools/qa/.deployed.json

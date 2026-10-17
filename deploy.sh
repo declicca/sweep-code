@@ -53,4 +53,6 @@ else
     || { echo "ERREUR : le cache NGINX n'a pas pu être vidé (cPanel > NGINX Manager)."; exit 1; }
   # then tell Bing and the other IndexNow engines which pages changed (a failure is only reported)
   if [ "$1" = "website" ]; then python3 -I website/tools/indexnow.py "$LIVE_SITEMAP" website/dist/sitemap.xml; fi
+  # and remember this build: website/tools/qa/qa.py quick tests only what changes after it
+  if [ "$1" = "website" ]; then python3 -I website/tools/qa/qa.py mark-deployed || true; fi
 fi

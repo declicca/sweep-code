@@ -10,6 +10,8 @@
       "Bash(rsync * --dry-run *)",
       "Bash(bash app/tests/run-all.sh:*)",
       "Bash(bash app/tools/build.sh:*)",
+      "Bash(website/tools/qa/.venv/bin/python website/tools/qa/qa.py:*)",
+      "Bash(tools/qa/.venv/bin/python tools/qa/qa.py:*)",
       "Bash(./deploy.sh app)",
       "Bash(./deploy.sh website)"
     ],

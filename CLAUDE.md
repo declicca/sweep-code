@@ -38,3 +38,4 @@ EN / FR / ES, choisie automatiquement selon le navigateur. Tout nouveau texte do
 ## Tests
 - Playwright (Chromium) à deux tailles : mobile 390×844 (tactile) et ordinateur 1300×850, locale fr-CA.
 - Vérifier : erreurs console, ressources brisées, débordement horizontal, rendu visuel par capture d'écran.
+- Site : `website/tools/qa/qa.py quick` pour une petite correction (pages changées seulement), `qa.py all` avant une grosse livraison (voir website/CLAUDE.md, « Tests »).
