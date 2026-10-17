@@ -18,7 +18,7 @@ TRADES = [('2026-09-28', 120000, {'plan': 'y', 'stop': 'n', 'size': 'y'}), ('202
           ('2026-09-29', -30000, {'plan': 'y', 'stop': 'y', 'size': 'n'}), ('2026-10-01', 50000, {'plan': 'y', 'stop': 'n', 'size': 'y', 'risk': 'na'})]
 SUMMARY = {'days': [{'day': d, 'market': True, 'rings': {'plan': 100, 'execution': 100 if i < 3 else 0, 'review': 100 if i < 2 else 0}, 'swept': i < 2} for i, d in enumerate(['2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01', '2026-10-02'])],
            'swept': 2, 'streak': 3, 'missions': {'done': 1, 'total': 3}}
-WANT = {'fr': ['La semaine de Wes', '3 jours d’affilée', '67 %', '2 sur 3 jours tradés'], 'en': ['Wes’s week', '3 days in a row', '67 %', '2 of 3 days traded']}
+WANT = {'fr': ['La semaine de Wes', '3 jours d’affilée', '0 %', '2 sur 3 jours tradés'], 'en': ['Wes’s week', '3 days in a row', '0 %', '2 of 3 days traded']}
 PAY = {'fr': ('Payouts reçus cette semaine', '1 200 $'), 'en': ('Payouts received this week', '$1,200')}
 HOOK = """window.__txt = []; (() => { const f = CanvasRenderingContext2D.prototype.fillText;
   CanvasRenderingContext2D.prototype.fillText = function (t, ...r) { window.__txt.push(String(t)); return f.call(this, t, ...r); }; })();"""
@@ -70,6 +70,7 @@ async def main():
       pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
       await pg.goto(B + '/#dashboard'); await pg.wait_for_timeout(2500)
       await pg.evaluate("""(T) => { put('firms',{id:'f-ws',name:'Topstep'}); put('accounts',{id:'a-ws',firm_id:'f-ws',name:'Combine 50K',starting_balance_c:5000000,status:'active',phase:'eval',money_type:'eval',rules:{dd_c:200000,dd_type:'eod',target_c:300000}});
+        ['2026-09-28','2026-09-29','2026-10-01'].forEach((d)=>put('journals',{id:d,pre:{bias:'bullish',max_loss:'1000',saved_at:1}}));   // a plan each day traded (the discipline counts like the coach, 16 Oct.)
         T.forEach(([d,c,a],i)=>put('trades',{id:'ws-t'+i,account_id:'a-ws',date:d,session_date:true,entry_time:'10:0'+i+':00',exit_time:'10:3'+i+':00',instrument:'NQ',direction:'long',contracts:1,pnl_c:c,pnl_manual:true,discipline:a}));
         put('payouts',{id:'ws-p1',account_id:'a-ws',firm_id:'f-ws',gross_c:120000,split_pct:100,fees_c:0,net_c:120000,amount_c:120000,status:'paid',payment_date:'2026-09-30',paid_on:'2026-09-30'}); }""", TRADES)
       await pg.wait_for_timeout(1500)

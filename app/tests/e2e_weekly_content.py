@@ -16,7 +16,7 @@ MON = '2026-09-28'
 TRADES = [('2026-09-28', 120000, {'plan': 'y', 'stop': 'n', 'size': 'y'}), ('2026-09-28', 80000, {'plan': 'y', 'stop': 'n', 'size': 'y'}),
           ('2026-09-29', -30000, {'plan': 'y', 'stop': 'y', 'size': 'n'}), ('2026-10-01', 50000, {'plan': 'y', 'stop': 'n', 'size': 'y', 'risk': 'na'})]
 def disc(a): y = sum(v == 'y' for v in a.values()); n = sum(v in ('y', 'n') for v in a.values()); return y / n * 100
-DISC = round(sum(disc(a) for _, _, a in TRADES) / len(TRADES))   # (66.7 + 66.7 + 66.7 + 66.7) / 4 = 67
+DISC = round(sum(all(v != 'n' for v in a.values()) for _, _, a in TRADES) / len(TRADES) * 100)   # like the coach (16 Oct.): each trade has a « no » in its checklist → 0 (the checklist average said 67)
 SUMMARY = {'days': [{'day': d, 'market': True, 'rings': {'plan': 100, 'execution': 100, 'review': 100 if i < 2 else 0}, 'swept': i < 2} for i, d in enumerate(['2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01', '2026-10-02'])],
            'swept': 2, 'streak': 3, 'missions': {'done': 1, 'total': 3}}
 fails = 0
@@ -41,6 +41,7 @@ async def main():
       pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
       await pg.goto(B + '/#dashboard'); await pg.wait_for_timeout(2500)
       await pg.evaluate("""(T) => { put('firms',{id:'f-wk',name:'Topstep'}); put('accounts',{id:'a-wk',firm_id:'f-wk',name:'Combine 50K',starting_balance_c:5000000,status:'active',phase:'eval',money_type:'eval',rules:{dd_c:200000,dd_type:'eod',target_c:300000}});
+        ['2026-09-28','2026-09-29','2026-10-01'].forEach((d)=>put('journals',{id:d,pre:{bias:'bullish',max_loss:'1000',saved_at:1}}));   // a plan each day traded (the discipline counts like the coach, 16 Oct.)
         T.forEach(([d,c,a],i)=>put('trades',{id:'wk-t'+i,account_id:'a-wk',date:d,session_date:true,entry_time:'10:0'+i+':00',exit_time:'10:3'+i+':00',instrument:'NQ',direction:'long',contracts:1,pnl_c:c,pnl_manual:true,discipline:a}));
         put('payouts',{id:'wk-p1',account_id:'a-wk',firm_id:'f-wk',gross_c:120000,split_pct:100,fees_c:0,net_c:120000,amount_c:120000,status:'paid',payment_date:'2026-09-30',paid_on:'2026-09-30'}); }""", TRADES)
       await pg.wait_for_timeout(1500)

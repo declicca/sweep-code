@@ -79,10 +79,11 @@ $user('u1', 'fr-CA', 'uma@t.dev', 'Uma'); $user('u2', 'fr', 'u2@t.dev'); $user('
 foreach ([['t1', '2026-10-06', ['plan' => 'y', 'stop' => 'n']], ['t2', '2026-10-06', ['plan' => 'y', 'stop' => 'n']], ['t3', '2026-10-07', ['plan' => 'y', 'stop' => 'y', 'size' => 'na']],
           ['t4', '2026-10-08', ['plan' => 'n', 'stop' => 'n'], true], ['t5', '2026-10-10', ['plan' => 'n']]] as $t)
     $doc('u1', 'trades', ['id' => $t[0], 'date' => $t[1], 'pnl_c' => 250000, 'discipline' => $t[2]] + (!empty($t[3]) ? ['demo' => true] : []));
+foreach (['2026-10-06', '2026-10-07'] as $d) $doc('u1', 'journals', ['id' => $d, 'pre' => ['bias' => 'bullish', 'max_loss' => '1000']]);   // a plan each day
 foreach ([['p1', 'paid', '2026-10-07', 50000, null], ['p2', 'paid', '2026-10-11', null, 20000], ['p3', 'requested', '2026-10-08', 90000, null], ['p4', 'paid', '2026-10-12', 90000, null], ['p5', 'rejected', '2026-10-07', 90000, null]] as $q)
     $doc('u1', 'payouts', array_filter(['id' => $q[0], 'status' => $q[1], 'paid_on' => $q[2], 'net_c' => $q[3], 'amount_c' => $q[4]], fn($v) => $v !== null));
 $b = GameWeeklyMail::brief('u1', $W, 'fr');
-$ok($b['traded'] === 2 && $b['disc'] === 67, "brief: 2 days traded (demo and Saturday left out), discipline (50 + 50 + 100) / 3 = 67 ({$b['traded']}, {$b['disc']})");
+$ok($b['traded'] === 2 && $b['disc'] === 33, "brief: 2 days traded (demo and Saturday left out), discipline like the coach: 1 trade without a mistake out of 3 (the stop « no » twice) = 33 ({$b['traded']}, {$b['disc']})");
 $ok(($b['best']['q'] ?? '') === 'Ce trade faisait-il partie de mon plan de trading ?' && $b['best']['y'] === 3 && $b['best']['n'] === 3, 'brief: best habit, the default question in French, yes 3 times out of 3');
 $ok(($b['work']['q'] ?? '') === 'Ai-je respecté mon stop ?', 'brief: point to work on, the question answered « yes » least often (1 of 3)');
 $ok($b['payouts'] === 70000, "brief: payouts paid Monday-Sunday only (net, else amount): 500 + 200 = 700 \$ ({$b['payouts']})");
@@ -102,7 +103,7 @@ $at('2026-10-09 17:45'); GameWeeklyMail::run('u1'); $at('2026-10-10 09:00'); Gam
 $ok($sent('uma@t.dev') === 1, 'email: once a week (not again on Friday evening, Saturday or Sunday)');
 $m = $mails[0] ?? ['subject' => '', 'text' => '', 'html' => '', 'h' => []];
 $ok($m['subject'] === 'Ta semaine du 5 au 9 octobre', "email: French subject ({$m['subject']})");
-$want = ['Salut Uma,', "Streak de journées balayées\u{00A0}: 0 jours d’affilée", "Discipline de la semaine\u{00A0}: 67\u{202F}%", "Journées balayées\u{00A0}: 0 sur 2 jours tradés",
+$want = ['Salut Uma,', "Streak de journées balayées\u{00A0}: 0 jours d’affilée", "Discipline de la semaine\u{00A0}: 33\u{202F}%", "Journées balayées\u{00A0}: 0 sur 2 jours tradés",
          'Ta meilleure habitude' . "\u{00A0}: « Ce trade faisait-il partie de mon plan de trading ? » — oui 3 fois sur 3", "Vise un « oui » à « Ai-je respecté mon stop ? » sur chaque trade.",
          "Payouts reçus cette semaine\u{00A0}: 700\u{00A0}$", 'Voir mon bilan'];
 $sp = fn(string $x) => str_replace("\u{00A0}", ' ', $x);   // French no-break spaces (« », ? :) compared as spaces

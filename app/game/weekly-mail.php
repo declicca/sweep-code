@@ -89,6 +89,76 @@ final class GameWeeklyMail
         else $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS uq_email_token ON email_prefs (token)');
     }
 
+    /**
+     * The coach's rules (src/coach.js tradeNote, the same order and the same reading of each field): the share of $tr without a
+     * mistake, in % (null without trades) — the Discipline tile of Today and the recap of the week say the same (16 Oct.).
+     * A mistake: past the max loss or the number of trades of the plan, a trade less than 10 min after a loss, adding to a
+     * loser, the stop not respected, the risk or the size over the limit, a size raised after 2 wins, against the bias, a setup
+     * outside the plan, the first 5 minutes when they cost the trader, a planned day off, no plan, the checklist « no ».
+     */
+    private static function coachDisc(string $uid, array $tr): ?int
+    {
+        if (!$tr) return null;
+        $all = array_values(array_filter(self::docs($uid, 'trades'), fn($t) => empty($t['demo'])));
+        $jr = []; foreach (self::docs($uid, 'journals') as $j) $jr[(string) ($j['id'] ?? '')] = $j;
+        $maxC = 0; foreach (self::docs($uid, 'meta') as $m) if (($m['id'] ?? '') === 'settings') $maxC = (int) ($m['max_contracts'] ?? 0);
+        $net = fn($t) => (int) ($t['pnl_c'] ?? 0) - (int) ($t['fees_c'] ?? 0);
+        $hm = fn($t) => substr((string) ($t['entry_time'] ?? ''), 0, 5);
+        $eve = fn($t) => $hm($t) >= '18:00' && GameEngine::hasSessionDate($t);
+        $timeOf = fn($t) => $eve($t) ? 'E' . $hm($t) : $hm($t);   // an evening trade: a sentence in the app, never a clock time
+        $min = function ($s) { return preg_match('/^(\d{1,2}):(\d{2})/', (string) $s, $m) ? (int) $m[1] * 60 + (int) $m[2] : null; };
+        $days = [];
+        $day = function (string $d) use (&$days, $all, $timeOf) {
+            if (isset($days[$d])) return $days[$d];
+            $l = array_values(array_filter($all, fn($t) => (string) ($t['date'] ?? '') === $d));
+            $rk = function ($t) use ($timeOf) { $x = $timeOf($t) ?: '99:99'; return (GameEngine::hasSessionDate($t) && strcmp($x, '18') >= 0 ? '0' : '1') . $x; };
+            usort($l, fn($a, $b) => strcmp($rk($a), $rk($b)) ?: strcmp((string) ($a['created_at'] ?? ''), (string) ($b['created_at'] ?? '')));
+            $seen = []; $out = [];
+            foreach ($l as $t) { $g = (string) ($t['copy_group'] ?? ''); if ($g !== '') { if (isset($seen[$g])) continue; $seen[$g] = 1; } $out[] = $t; }
+            return $days[$d] = $out;
+        };
+        // the first 5 minutes count only when the trader's own numbers say they cost him (ownLine('open5'))
+        $s5 = []; $sumAll = 0; $nAll = 0;
+        foreach (array_unique(array_map(fn($t) => (string) ($t['date'] ?? ''), $all)) as $d) foreach ($day($d) as $t) {
+            $n = $net($t); $sumAll += $n; $nAll++; $e = $min($timeOf($t)); if ($e !== null && $e >= 570 && $e < 575) $s5[] = $n;
+        }
+        $open5 = count($s5) >= 5 && $nAll - count($s5) > 0 && array_sum($s5) / count($s5) < ($sumAll - array_sum($s5)) / ($nAll - count($s5));
+        $cents = function ($v) { $n = (float) preg_replace('/[^0-9.]/', '', (string) $v); return $n > 0 ? (int) round($n * 100) : 0; };
+        $clean = 0;
+        foreach ($tr as $t) {
+            $d = (string) ($t['date'] ?? ''); $list = $day($d); $key = (string) (($t['copy_group'] ?? '') ?: ($t['id'] ?? ''));
+            $i = null; foreach ($list as $k => $x) if ((string) (($x['copy_group'] ?? '') ?: ($x['id'] ?? '')) === $key) { $i = $k; break; }
+            if ($i === null) { $list[] = $t; $i = count($list) - 1; }
+            $pre = (array) (($jr[$d]['pre'] ?? null) ?: []);
+            $bias = in_array($pre['bias'] ?? null, ['bullish', 'bearish', 'neutral', 'no_trade'], true) ? $pre['bias'] : null;
+            $ml = $cents($pre['max_loss'] ?? ''); $mt = (int) ($pre['max_trades'] ?? 0);
+            $setups = array_values(array_filter(array_map(fn($x) => strtolower(trim((string) $x)), (array) ($pre['setups'] ?? []))));
+            $valid = $bias !== null && ($bias === 'no_trade' || $ml > 0);
+            $flags = (array) ($t['auto_flags'] ?? []);
+            $before = 0; for ($k = 0; $k < $i; $k++) $before += $net($list[$k]);
+            $prev = $i > 0 ? $list[$i - 1] : null; $bad = false;
+            if ($valid && $ml && $before <= -$ml) $bad = true;
+            if ($valid && $mt && $i >= $mt) $bad = true;
+            if ($prev && $net($prev) < 0) { $a = $min(($prev['exit_time'] ?? '') ?: $timeOf($prev)); $b = $min($timeOf($t)); if ($a !== null && $b !== null && (($b - $a + 1440) % 1440) < 10) $bad = true; }
+            if (array_intersect($flags, ['addloser', 'stop', 'risklimit'])) $bad = true;
+            if (in_array('oversized', $flags, true) && $maxC) $bad = true;
+            $stop = null; foreach (['stop', 'risk', 'defined_risk', 'stop_respected'] as $k) { $v = $t['discipline'][$k] ?? null; if ($v === 'y' || $v === 'n') { $stop = $v; break; } }
+            if ($stop === 'n') $bad = true;
+            if ($prev && $i >= 2 && $net($prev) > 0 && $net($list[$i - 2]) > 0 && (float) ($t['contracts'] ?? 0) > (float) ($prev['contracts'] ?? 0)) $bad = true;
+            $dir = (string) ($t['direction'] ?? '');
+            if ($valid && (($bias === 'bullish' && $dir === 'short') || ($bias === 'bearish' && $dir === 'long'))) $bad = true;
+            if ($valid && $setups && ($t['setup'] ?? '') !== '' && !in_array(strtolower(trim((string) $t['setup'])), $setups, true)) $bad = true;
+            $e = $min($timeOf($t)); if ($e !== null && $e >= 570 && $e < 575 && $open5) $bad = true;
+            if ($valid && $bias === 'no_trade') $bad = true;
+            if (!$valid) $bad = true;
+            $rf = $t['rules_followed'] ?? null;
+            if (in_array($rf, ['yes', 'partial', 'no'], true)) { if ($rf !== 'yes') $bad = true; }
+            else { $yn = array_values(array_filter((array) ($t['discipline'] ?? []), fn($v) => $v === 'y' || $v === 'n')); $no = count(array_filter($yn, fn($v) => $v === 'n')); if ($yn && $no > 0) $bad = true; }
+            if (!$bad) $clean++;
+        }
+        return (int) floor($clean / count($tr) * 100 + 0.5);   // Math.round
+    }
+
     private static function docs(string $uid, string $col): array
     {
         $out = [];
@@ -101,7 +171,7 @@ final class GameWeeklyMail
 
     /**
      * The recap's first screen for the week of $mon, the same numbers as weekBrief() in src/game.js: trades of Monday-Friday
-     * (session date, example data left out), discipline = average of the trades' checklist scores (yes / (yes + no)), best habit
+     * (session date, example data left out), discipline = the share of trades without a mistake by the coach's rules (coachDisc), best habit
      * and point to work on among the questions answered twice or more, payouts paid Monday-Sunday (real money).
      */
     public static function brief(string $uid, string $mon, string $lang = 'en'): array
@@ -110,7 +180,7 @@ final class GameWeeklyMail
         $in = fn($d, string $a, string $b) => is_string($d) && $d !== '' && strcmp($d, $a) >= 0 && strcmp($d, $b) <= 0;
         $tr = GameEngine::onePerCopyGroup(array_values(array_filter(self::docs($uid, 'trades'), fn($t) => empty($t['demo']) && $in($t['date'] ?? null, $mon, $fri))));   // copies once, as their original (as the app)
         $traded = count(array_unique(array_map(fn($t) => (string) $t['date'], $tr)));
-        $ds = []; $per = [];
+        $per = [];
         foreach ($tr as $t) {
             $y = 0; $n = 0;
             foreach ((array) ($t['discipline'] ?? []) as $k => $v) {
@@ -118,9 +188,8 @@ final class GameWeeklyMail
                 $n++; if ($v === 'y') $y++;
                 $k = (string) $k; $per[$k] = $per[$k] ?? ['y' => 0, 'n' => 0]; $per[$k][$v]++;
             }
-            if ($n) $ds[] = $y / $n * 100;
         }
-        $disc = $ds ? (int) floor(array_sum($ds) / count($ds) + 0.5) : null;   // Math.round
+        $disc = self::coachDisc($uid, $tr);   // the share of trades without a mistake, as the coach and the Discipline tile (16 Oct.)
         $rows = [];
         foreach ($per as $k => $o) { $n = $o['y'] + $o['n']; if ($n >= 2) $rows[] = ['k' => (string) $k, 'y' => $o['y'], 'n' => $n, 'rate' => $o['y'] / $n]; }
         $best = $rows; usort($best, fn($a, $b) => ($b['rate'] <=> $a['rate']) ?: (($b['n'] <=> $a['n']) ?: strcmp($a['k'], $b['k']))); $best = $best[0] ?? null;

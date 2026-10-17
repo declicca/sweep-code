@@ -1512,8 +1512,11 @@
     const one = (l) => { const at = new Map(), out = []; l.forEach((x) => { if (!x.copy_group) { out.push(x); return; } const i = at.get(x.copy_group); if (i == null) { at.set(x.copy_group, out.length); out.push(x); } else if ((x.created_at || x.id) < (out[i].created_at || out[i].id)) out[i] = x; }); return out; };
     const tr = one((S.trades || []).filter((x) => !x.demo && x.date >= m && x.date <= add(m, 4)));   // copies once, as their original (brief 02 part 6; same as the server's email)
     const traded = new Set(tr.map((x) => x.date)).size;
-    const ds = tr.map((x) => (typeof tDisc === 'function' ? tDisc(x) : null)).filter((v) => v != null);
-    const disc = ds.length ? Math.round(ds.reduce((a, v) => a + v, 0) / ds.length) : null;
+    // discipline: the share of trades without a mistake by the coach's rules, as the Discipline tile of Today (16 Oct.; the
+    // email says the same: GameWeeklyMail::coachDisc). Before: the checklist average alone.
+    const notes = window.SweepCoach && SweepCoach.trade ? tr.map((x) => { try { return SweepCoach.trade(x); } catch (e) { return null; } }).filter(Boolean) : [];
+    const ds = notes.length ? [] : tr.map((x) => (typeof tDisc === 'function' ? tDisc(x) : null)).filter((v) => v != null);
+    const disc = notes.length ? Math.round(notes.filter((c) => !c.fix).length / notes.length * 100) : ds.length ? Math.round(ds.reduce((a, v) => a + v, 0) / ds.length) : null;
     const qs = ((S.settings && S.settings.questions) || []), qText = (id) => { const q = qs.find((x) => x.id === id); const t0 = q ? q.text : id; return typeof tr0 === 'function' ? tr0(t0) : t0; };
     const per = {}; tr.forEach((x) => Object.entries(x.discipline || {}).forEach(([k, v]) => { if (v !== 'y' && v !== 'n') return; const o = per[k] || (per[k] = { y: 0, n: 0 }); o[v === 'y' ? 'y' : 'n']++; }));
     const rows = Object.entries(per).map(([k, o]) => ({ k, y: o.y, n: o.y + o.n, rate: o.y / (o.y + o.n) })).filter((r) => r.n >= 2);

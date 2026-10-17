@@ -3,7 +3,7 @@ Sweep — the « Your week » email says the same as the app (brief 01 step 5, l
   python3 tests/e2e_weekly_parity.py http://127.0.0.1:8095        (SWEEP_TEST_DB: the dev server's SQLite file)
 A trader of its own, one known week (Monday 2026-09-28), saved through the app: trades with checklist answers (a demo
 trade, a Saturday and a Sunday trade left out), a question of the trader's own, a tie between two questions, payouts paid,
-pending, rejected and paid the next Monday. The recap's first screen computed by the app (weekBrief in src/game.js) and by
+pending, rejected and paid the next Monday; a plan on 3 days (the discipline counts like the coach and the Discipline tile, 16 Oct.). The recap's first screen computed by the app (weekBrief in src/game.js) and by
 the server for the email (GameWeeklyMail::brief, read with tests/weekly_brief.php) must be identical, in FR, EN and ES.
 Then the link at the bottom of the email (api/email/weekly): one button stops the email, one starts it again, the mail
 apps' one-click « Unsubscribe » works without the app's header, an unknown link says so; phone and computer.
@@ -41,6 +41,9 @@ async def main():
     uid = await pg.evaluate("S.me && S.me.id")
     await pg.evaluate("""([T, P]) => { put('firms',{id:'f-wp',name:'Topstep'}); put('accounts',{id:'a-wp',firm_id:'f-wp',name:'Combine 50K',starting_balance_c:5000000,status:'active',phase:'eval',money_type:'eval',rules:{dd_c:200000,dd_type:'eod',target_c:300000}});
       put('settings', Object.assign({}, S.settings, {questions: S.settings.questions.concat([{id:'aplus', text:'Only my A+ setup?', viol:'Not my A+ setup', active:true}])}));
+      ['2026-09-28', '2026-10-01', '2026-10-02'].forEach((d) => put('journals', { id: d, pre: { bias: 'bullish', max_loss: '1000', saved_at: 1 } }));   // a plan on 3 days: the discipline counts like the coach
+      [['wp-x1', '11:00:00', '11:01:00', 'long', -60000], ['wp-x2', '11:05:00', '11:20:00', 'long', -50000], ['wp-x3', '11:30:00', '11:40:00', 'short', 10000]].forEach(([id, e, x, dir, pnl]) =>   // Friday: a loss, a trade 4 min after it, a short against the bias
+        put('trades', { id, account_id: 'a-wp', date: '2026-10-02', session_date: true, entry_time: e, exit_time: x, instrument: 'NQ', direction: dir, contracts: 1, pnl_c: pnl, pnl_manual: true, discipline: {} }));
       T.forEach(([d,a,demo],i)=>put('trades',Object.assign({id:'wp-t'+i,account_id:'a-wp',date:d,session_date:true,entry_time:'10:0'+i+':00',exit_time:'10:3'+i+':00',instrument:'NQ',direction:'long',contracts:1,pnl_c:50000,pnl_manual:true,discipline:a}, demo?{demo:true}:{})));
       P.forEach(([id,st,d,net,amt])=>put('payouts',Object.assign({id,account_id:'a-wp',firm_id:'f-wp',status:st,paid_on:d,payment_date:d}, net!=null?{net_c:net,gross_c:net,split_pct:100,fees_c:0}:{}, amt!=null?{amount_c:amt}:{}))); }""", [TRADES, PAYOUTS])
     await pg.wait_for_timeout(3500)   # saved on the server
@@ -51,6 +54,7 @@ async def main():
       c = await pg.evaluate("sm => SweepGame.weekBrief('%s', sm)" % MON, {'swept': sv['summary']['swept'], 'streak': sv['summary']['streak']})
       ok(c == s, f'{lang} app and email: the same numbers ({json.dumps(c, ensure_ascii=False)})' + ('' if c == s else f'\n      server: {json.dumps(s, ensure_ascii=False)}'))
       if lang == 'fr':
+        ok(s['disc'] == 25, f"fr discipline like the coach: 2 trades without a mistake out of 8 (the stop « no » ×3, no plan on Tuesday, a trade 4 min after a loss, a short against the bias) = 25 % ({s['disc']})")
         ok(s['traded'] == 4 and s['payouts'] == 150050 and s['disc'] is not None, f"fr 4 days traded (demo, Saturday, Sunday left out), payouts 1,200 + 300.50 = 1,500.50 ({s['traded']}, {s['payouts']})")
         ok((s['best'] or {}).get('q') == 'Only my A+ setup?' and (s['work'] or {}).get('q') == 'Ai-je respecté mon stop ?', f"fr own question as written, a tie (A+ and entry, 2 of 2) broken the same way; default question in French ({s['best']}, {s['work']})")
     ok(not errs, 'no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
