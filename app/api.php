@@ -656,7 +656,7 @@ function delete_user_everything(string $uid): void {
     // what was still kept before 16 Oct. (brief 00, phase 1.1): the reset links, the sign-up lead with the email, the browser
     // errors, the weekly email's log and preferences, the crew events (tests/e2e_delete_everything.py checks every table)
     $em = strtolower(trim((string) q('SELECT email FROM users WHERE id = ?', [$uid])->fetchColumn()));
-    foreach (['reset_tokens', 'client_errors', 'weekly_emails', 'email_prefs', 'crew_events', 'signup_leads'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* table not created yet */ } }
+    foreach (['reset_tokens', 'client_errors', 'weekly_emails', 'email_prefs', 'crew_events', 'signup_leads', 'trusted_devices', 'login_codes', 'passkeys', 'passkey_challenges'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* table not created yet */ } }
     if ($em !== '') { try { q('DELETE FROM signup_leads WHERE email_lc = ?', [$em]); } catch (Throwable $e) { /* table not created yet */ } }
     q('DELETE FROM sessions WHERE user_id = ?', [$uid]);
     q('DELETE FROM users WHERE id = ?', [$uid]);
