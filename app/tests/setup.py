@@ -6,13 +6,20 @@
  - the signed-in session is saved to state_file (default /tmp/show_state.json), used by the tests.
 The password is the local test one (tools/config.local.php, or SWEEP_TEST_PASSWORD). Tests that need other traders
 create them themselves (POST /api/auth/register then /api/me/profile)."""
-import asyncio, os, re, sys
+import asyncio, json, os, re, sys
 from playwright.async_api import async_playwright
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
 LOCAL = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tools', 'config.local.php')
 PASS = os.environ.get('SWEEP_TEST_PASSWORD') or re.search(r"'password'\s*=>\s*'([^']+)'", open(LOCAL).read()).group(1)
 H = {'X-Requested-With': 'fetch', 'Content-Type': 'application/json'}
+def last_code():
+    import re
+    box = os.path.join(os.path.dirname(os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')), 'outbox.jsonl')
+    for line in reversed(open(box, encoding='utf-8').read().splitlines()):
+        m = re.search(r'\b(\d{6})\b', json.loads(line).get('subject', ''))
+        if m: return m.group(1)
+    raise AssertionError('no code in ' + box)
 async def main():
     async with async_playwright() as p:
         br = await p.chromium.launch()
@@ -23,6 +30,10 @@ async def main():
         await pg.goto(BASE + '/')   # the first request creates the admin account from the local config
         r = await ctx.request.post(BASE + '/api/auth/login', headers=H, data={'username': 'mateo', 'password': PASS})
         assert r.ok, 'login: %s %s' % (r.status, await r.text())
+        if (await r.json()).get('code'):   # a new browser: the code by email (the dev copy writes it to data/outbox.jsonl, 17 Oct.)
+            code = last_code()
+            r = await ctx.request.post(BASE + '/api/auth/code', headers=H, data={'code': code})
+            assert r.ok, 'code: %s %s' % (r.status, await r.text())
         r = await ctx.request.post(BASE + '/api/me/profile', headers=H, data={'first_name': 'Mateo', 'last_name': 'De Cristofaro', 'experience': 'gt1'})
         assert r.ok, 'profile: %s %s' % (r.status, await r.text())
         # the app is ready when loadDemo exists (not « network idle »: one slow request is enough to miss it)

@@ -480,10 +480,11 @@ function set_session_cookie(string $token, int $expires): void {
     global $HTTPS;
     setcookie(COOKIE, $token, ['expires' => $expires, 'path' => cookie_path(), 'secure' => $HTTPS, 'httponly' => true, 'samesite' => 'Lax']);
 }
-function create_session(string $userId): void {
+function create_session(string $userId, ?string $device = null): void {   // $device: the remembered browser (auth/twofa.php)
     $token = bin2hex(random_bytes(32));
     $exp = time() + SESSION_TTL;
-    q('INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)', [hash('sha256', $token), $userId, time(), $exp]);
+    tf_schema();
+    q('INSERT INTO sessions (token_hash, user_id, created_at, expires_at, device) VALUES (?, ?, ?, ?, ?)', [hash('sha256', $token), $userId, time(), $exp, $device]);
     q('UPDATE users SET last_login = ? WHERE id = ?', [now(), $userId]);
     if (function_exists('loops_sync')) loops_sync($userId);   // Loops: last visit
     set_session_cookie($token, $exp);
@@ -524,6 +525,7 @@ function end_session(): void {
 }
 function lang_code($l): string { $l = strtolower(substr((string)$l, 0, 2)); return in_array($l, ['en', 'fr', 'es'], true) ? $l : 'en'; }
 require_once __DIR__ . '/notify/mail.php';   // sweep_mail(): SMTP of the mailbox, else PHP mail()
+require_once __DIR__ . '/auth/twofa.php';    // a code by email on a new browser (17 Oct.)
 
 /** Password reset email, in the trader's language (text + a clean HTML version). */
 function send_reset_email(string $to, string $username, string $token, string $lang): bool {
@@ -788,7 +790,11 @@ try {
         if ((int)$u['disabled'] === 1) json_out(403, ['error' => 'This account is disabled. Contact Sweep support.']);
         if (password_needs_rehash($u['password_hash'], PASSWORD_DEFAULT)) q('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($pass, PASSWORD_DEFAULT), $u['id']]);
         q('DELETE FROM attempts WHERE k = ?', ['u:' . $name]);
-        create_session($u['id']);
+        // a browser Sweep does not know yet: the code by email first (auth/twofa.php); a known one: in at once
+        $em = (string) q('SELECT email FROM users WHERE id = ?', [$u['id']])->fetchColumn();
+        $dev = null;
+        if (tf_on() && $em !== '') { $dev = tf_device_ok((string) $u['id']); if (!$dev) json_out(200, tf_start((string) $u['id'], $em)); }
+        create_session($u['id'], $dev);
         if (function_exists('nt_fire')) nt_fire('user.signed_in', ['uid' => (string)$u['id']]);
         json_out(200, ['ok' => true]);
     }
@@ -829,12 +835,13 @@ try {
         try { ref_attach_on_signup(db(), $id); } catch (Throwable $e) { error_log('[Sweep referral] signup: ' . $e->getMessage()); }
         product_event($id, 'signup_completed', ['lang' => lang_code($b['lang'] ?? 'en'), 'utm_source' => substr((string)($b['utm_source'] ?? ''), 0, 60), 'utm_campaign' => substr((string)($b['utm_campaign'] ?? ''), 0, 60),
             'device' => preg_match('/iPhone|Android|Mobile/i', (string)($_SERVER['HTTP_USER_AGENT'] ?? '')) ? 'mobile' : 'desktop']);
-        create_session($id);
+        create_session($id, tf_trust($id));   // the browser that signs up is the trader's
         if (function_exists('loops_once')) loops_once($id, 'signedUp', fn(array $c) => ['language' => $c['language'], 'plan' => $c['plan']]);
         json_out(201, ['ok' => true]);
     }
 
     if ($route === 'api/auth/logout' && $method === 'POST') { end_session(); json_out(200, ['ok' => true]); }
+    if (($route === 'api/auth/code' || $route === 'api/auth/code/resend') && $method === 'POST') tf_route($route);
 
     if ($route === 'api/auth/forgot' && $method === 'POST') {
         // Always answers the same way, whether or not the email exists.
@@ -869,7 +876,7 @@ try {
         q('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($pass, PASSWORD_DEFAULT), $row['user_id']]);
         q('UPDATE reset_tokens SET used = 1 WHERE user_id = ?', [$row['user_id']]);
         q('DELETE FROM sessions WHERE user_id = ?', [$row['user_id']]);
-        create_session($row['user_id']);
+        create_session($row['user_id'], tf_trust((string) $row['user_id']));   // the email link proved it: this browser is remembered
         json_out(200, ['ok' => true]);
     }
 
@@ -901,7 +908,10 @@ try {
         q('DELETE FROM sessions WHERE user_id = ?', [$u['id']]);   // sign out everywhere
         q('DELETE FROM attempts WHERE k = ?', ['recu:' . $name]);
         $newCode = $viaInvite ? null : set_recovery_code($u['id']);   // a used recovery code is replaced
-        create_session($u['id']);
+        // a personal recovery code proves the trader: in, this browser remembered; the shared invite code does not (with the
+        // second step on, he logs in with his new password and the code by email)
+        if ($viaInvite && tf_on()) json_out(200, ['ok' => true, 'recovery_code' => null]);
+        create_session($u['id'], $viaInvite ? null : tf_trust((string) $u['id']));
         json_out(200, ['ok' => true, 'recovery_code' => $newCode]);
     }
 
@@ -1032,6 +1042,7 @@ try {
         $done = (int) q('SELECT COUNT(*) FROM signup_leads WHERE completed_at IS NOT NULL')->fetchColumn();
         json_out(200, ['unfinished' => $rows, 'finished' => $done]);
     }
+    if (strpos($route, 'api/me/devices') === 0) tf_devices_route($route, $method, (string) $UID);   // Settings › « Your devices »
     if ($route === 'api/me/profile' && $method === 'POST') {
         $b = body_json(4096);
         $clean = fn($v, $n) => mb_substr(trim(preg_replace('/\s+/u', ' ', strip_tags((string)$v)) ?? ''), 0, $n);
@@ -1294,7 +1305,9 @@ try {
         if (strlen($new) < 10 || strlen($new) > 200) json_out(400, ['error' => 'New password: at least 10 characters.']);
         q('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($new, PASSWORD_DEFAULT), $UID]);
         q('DELETE FROM sessions WHERE user_id = ?', [$UID]);   // sign out every other device
-        create_session($UID);
+        $dev = tf_device_ok((string) $UID);   // and forget them: this browser only stays remembered
+        q('DELETE FROM trusted_devices WHERE user_id = ?' . ($dev ? ' AND token_hash <> ?' : ''), $dev ? [$UID, $dev] : [$UID]);
+        create_session($UID, $dev);
         json_out(200, ['ok' => true]);
     }
     if ($route === 'api/account/recovery' && $method === 'POST') {

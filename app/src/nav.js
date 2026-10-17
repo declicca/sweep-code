@@ -6000,3 +6000,39 @@ new window.SweepMO(() => {
     new MutationObserver(() => { const m = document.getElementById('fxMenu'); if (m && m.classList.contains('fxm-sheet') && !m._sw) { m._sw = true; try { swipeDismiss(m, { scroller: () => m, onClose: () => close(true), ignore: 'input' }); } catch (x) { /* a tap closes it anyway */ } } }).observe(document.body, { childList: true });
   }
 })();
+
+/* ───────────── Settings › « Your devices » (17 Oct., the code by email on a new browser: auth/twofa.php) ─────────────
+ * Each browser remembered for 30 days, this one marked; « Sign out » ends its sessions and forgets it (the next log-in there asks
+ * for a code again). Shown only when the second step is on. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = ({ en: { h: 'Your devices', s: 'A new browser asks for a code sent to your email; this list is the browsers Sweep remembers (30 days).', me: 'This browser', seen: 'Last used {d}', out: 'Sign out', outQ: 'Sign out this device?', outS: 'Its sessions end; the next log-in there asks for a code.', none: 'No remembered browser yet.' },
+    fr: { h: 'Tes appareils', s: 'Un nouveau navigateur demande un code envoyé par courriel ; voici les navigateurs que Sweep reconnaît (30 jours).', me: 'Ce navigateur', seen: 'Utilisé le {d}', out: 'Déconnecter', outQ: 'Déconnecter cet appareil ?', outS: 'Ses sessions se terminent ; la prochaine connexion y demandera un code.', none: 'Aucun navigateur reconnu pour l’instant.' },
+    es: { h: 'Tus dispositivos', s: 'Un navegador nuevo pide un código enviado a tu correo; estos son los navegadores que Sweep recuerda (30 días).', me: 'Este navegador', seen: 'Usado el {d}', out: 'Cerrar sesión', outQ: '¿Cerrar sesión en este dispositivo?', outS: 'Sus sesiones terminan; el próximo inicio de sesión allí pedirá un código.', none: 'Ningún navegador recordado por ahora.' } })[L];
+  const esc = (x) => String(x == null ? '' : x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  let st = null, busy = false;
+  const day = (s) => new Date(s * 1000).toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { day: 'numeric', month: 'long' });
+  function html() {
+    if (!st || !st.on) return '';
+    const rows = st.devices.map((d) => `<li class="nav-dev"><span><b>${esc(d.label)}</b><small>${d.this ? T.me + ' · ' : ''}${T.seen.replace('{d}', day(d.seen))}</small></span>${d.this ? '' : `<button type="button" class="btn sm" data-dev-out="${esc(d.id)}">${T.out}</button>`}</li>`).join('');
+    return `<div class="nav-devs" data-noi18n><h3>${T.h}</h3><p class="help">${T.s}</p>${rows ? `<ul>${rows}</ul>` : `<p class="muted">${T.none}</p>`}</div>`;
+  }
+  function paint() {
+    if (!/^#settings/.test(location.hash || '')) return;
+    const form = document.querySelector('#main form[data-form="email"]'), box = form && form.closest('.surface'); if (!box) return;
+    let el = box.querySelector('.nav-devs-w');
+    if (!st) { if (!busy) { busy = true; apiJSON('api/me/devices').then((r) => { st = r; busy = false; paint(); }).catch(() => { busy = false; }); } return; }
+    const h = html(); if (el && el._h === h) return;
+    if (!el) { el = document.createElement('div'); el.className = 'nav-devs-w'; box.append(el); }
+    el._h = h; el.innerHTML = h;
+  }
+  addEventListener('hashchange', () => { if (/^#settings/.test(location.hash || '')) { st = null; paint(); } });
+  new window.SweepMO(() => { try { paint(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-dev-out]'); if (!b) return;
+    const ok = window.SweepUndo && SweepUndo.ask ? await SweepUndo.ask(T.outQ, T.outS, T.out, true) : true; if (!ok) return;
+    try { await apiJSON('api/me/devices/forget', { method: 'POST', body: { id: b.dataset.devOut } }); } catch (x) { /* shown again as it is */ }
+    st = null; paint();
+  });
+})();

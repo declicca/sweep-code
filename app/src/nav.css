@@ -2884,3 +2884,11 @@ html body .sb-plans .sb-next{display:flex;align-items:center;gap:12px;margin:0 0
 html body .sb-plans .sb-next p{margin:0;flex:1}
 html body .sb-plans .sb-next .sb-cta{width:auto;flex:none;margin:0}
 @media (max-width:640px){html body .sb-plans .sb-next{flex-direction:column;align-items:stretch}html body .sb-plans .sb-next .sb-cta{width:100%}}
+
+/* Settings › « Your devices » (17 Oct.) */
+html body .nav-devs{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+html body .nav-devs h3{margin:0 0 4px;font-size:15px}
+html body .nav-devs ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+html body .nav-dev{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:var(--r-tile,14px);background:var(--fill)}
+html body .nav-dev span{display:flex;flex-direction:column;min-width:0}
+html body .nav-dev small{color:var(--text2);font-size:12.5px}

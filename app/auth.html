@@ -11,7 +11,8 @@
 <meta property="og:title" content="Sweep"><meta property="og:description" content="Your trading edge, finally in one place."><meta property="og:image" content="https://makeitsweep.com/social/og-image.png"><meta name="twitter:card" content="summary_large_image">
 <script>try{var t=localStorage.getItem('tj.theme');t=t&&JSON.parse(t);if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="preload" href="assets/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
-<style>/* the app's own fonts (no request to Google before sign-in, brief 00 phase 1.1) */@font-face{font-family:'Geist';src:url('assets/fonts/Geist-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:'Geist Mono';src:url('assets/fonts/GeistMono-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}</style>
+<style>/* the app's own fonts (no request to Google before sign-in, brief 00 phase 1.1) */@font-face{font-family:'Geist';src:url('assets/fonts/Geist-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}@font-face{font-family:'Geist Mono';src:url('assets/fonts/GeistMono-Variable.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}#otp{font:600 22px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.32em;text-align:center}
+</style>
 <style>
 :root{--ink:#F7F7F8;--surface:#FFFFFF;--raised:#F1F1F3;--line:#E4E4E7;--text:#0B0B0C;--muted:#5F5F68;--gain:#2F6FE4;--loss:#9A6B12;--on:#FFFFFF;color-scheme:light}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ink:#0B0B0C;--surface:#141416;--raised:#1B1B1E;--line:#26262A;--text:#F2F2F3;--muted:#9A9AA2;--gain:#4C8DFF;--loss:#D4A24C;--on:#0B0B0C;color-scheme:dark}}
@@ -172,6 +173,7 @@ input{transition:border-color .2s,box-shadow .2s,background-color .2s}
       <div id="nameF" hidden><label for="fullname" data-t="fullname">Full name</label><input type="text" id="fullname" autocomplete="name" maxlength="80"><div class="help" id="fnhelp"></div></div>
       <div id="userF"><label for="username" id="ulabel"></label><input type="text" id="username" autocomplete="username" autocapitalize="none" spellcheck="false"><div class="help" id="uhelp" hidden></div></div>
       <div id="emailF" hidden><label for="email" data-t="email">Email</label><input type="email" id="email" autocomplete="email" autocapitalize="none" spellcheck="false"></div>
+      <div id="otpF" hidden><label for="otp" id="otplabel"></label><input type="text" id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" spellcheck="false"></div>
       <div id="codeF" hidden><label for="code" data-t="rcode">Recovery code</label><input type="text" id="code" autocomplete="off" autocapitalize="characters" spellcheck="false"><div class="help">XXXX-XXXX-XXXX-XXXX</div></div>
       <div id="passF"><div class="row"><label for="password" id="plabel"></label><button type="button" class="link" id="forgotBtn" data-t="forgot">Forgot password?</button></div>
         <div class="pw"><input type="password" id="password" autocomplete="current-password"><button type="button" class="eye" id="eye" aria-label="Show password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div class="help" id="phelp" hidden></div></div>
@@ -228,6 +230,8 @@ about:['A bit about you','Un peu sur toi','Un poco sobre ti'],optional:['Optiona
  haveAcct:['Already have an account?','Déjà un compte ?','¿Ya tienes cuenta?'],newTo:['New to Sweep?','Nouveau sur Sweep ?','¿Nuevo en Sweep?'],
  forgotT:['Reset your password','Réinitialise ton mot de passe','Restablece tu contraseña'],forgotS:["Enter your account email. We'll send you a link to choose a new password.","Entre le courriel de ton compte. On t'envoie un lien pour choisir un nouveau mot de passe.",'Introduce el correo de tu cuenta. Te enviaremos un enlace para elegir una nueva contraseña.'],
  send:['Send reset link','Envoyer le lien','Enviar enlace'],sent:["If an account uses this email, a reset link is on its way. Check your inbox and spam folder. The link works for one hour.","Si un compte utilise ce courriel, un lien de réinitialisation est en route. Vérifie ta boîte de réception et tes indésirables. Le lien est valide une heure.",'Si una cuenta usa este correo, el enlace va en camino. Revisa tu bandeja de entrada y spam. El enlace vale una hora.'],
+ codeT:['Check it’s you','Vérifie que c’est toi','Confirma que eres tú'],codeS:['New browser: enter the 6-digit code sent to {to}. Next time on this browser, your password is enough.','Nouveau navigateur : entre le code à 6 chiffres envoyé à {to}. La prochaine fois sur ce navigateur, ton mot de passe suffira.','Navegador nuevo: introduce el código de 6 cifras enviado a {to}. La próxima vez en este navegador, tu contraseña bastará.'],
+ otpL:['Code','Code','Código'],verifyB:['Continue','Continuer','Continuar'],resend:['Send a new code','Renvoyer le code','Enviar otro código'],resent:['A new code is on its way.','Un nouveau code est en route.','Un nuevo código está en camino.'],eOtp:['Enter the 6 digits of the code.','Entre les 6 chiffres du code.','Introduce las 6 cifras del código.'],
  useCode:['Use a recovery code instead','Utiliser plutôt un code de récupération','Usar un código de recuperación'],back:['Back to log in','Retour à la connexion','Volver a iniciar sesión'],
  recT:['Reset with a recovery code','Réinitialiser avec un code de récupération','Restablecer con un código de recuperación'],
  resetT:['Choose a new password','Choisis un nouveau mot de passe','Elige una nueva contraseña'],save:['Save new password','Enregistrer le nouveau mot de passe','Guardar nueva contraseña'],
@@ -242,6 +246,10 @@ about:['A bit about you','Un peu sur toi','Un poco sobre ti'],optional:['Optiona
 };
 /* server messages, translated */
 const SRV={'Incorrect username, email or password.':["Nom d'utilisateur, courriel ou mot de passe incorrect.",'Usuario, correo o contraseña incorrectos.'],
+ 'Wrong code. Check the last email from Sweep.':['Code incorrect. Vérifie le dernier courriel de Sweep.','Código incorrecto. Revisa el último correo de Sweep.'],
+ 'This code has expired. Log in again to get a new one.':['Ce code a expiré. Reconnecte-toi pour en recevoir un nouveau.','Este código ha caducado. Vuelve a iniciar sesión para recibir uno nuevo.'],
+ 'Wait a little before asking for another code.':['Attends un peu avant de demander un autre code.','Espera un poco antes de pedir otro código.'],
+ 'Your code could not be sent. Try again in a minute, or use a recovery code.':['Ton code n’a pas pu être envoyé. Réessaie dans une minute, ou utilise un code de récupération.','No se pudo enviar tu código. Inténtalo en un minuto, o usa un código de recuperación.'],
  'This username is taken.':["Ce nom d'utilisateur est déjà pris.",'Ese usuario ya existe.'],'An account already uses this email.':['Un compte utilise déjà ce courriel.','Ya hay una cuenta con este correo.'],
  'Enter a valid email.':['Entre un courriel valide.','Introduce un correo válido.'],'Too many attempts. Wait a few minutes and try again.':['Trop de tentatives. Attends quelques minutes et réessaie.','Demasiados intentos. Espera unos minutos y vuelve a intentarlo.'],
  'This reset link is invalid or has expired.':["Ce lien n'est plus valide ou a expiré.",'Este enlace no es válido o ha caducado.'],'Incorrect username or code.':["Nom d'utilisateur ou code incorrect.",'Usuario o código incorrecto.'],
@@ -291,27 +299,28 @@ const okU=v=>/^[A-Za-z0-9_.\-]{3,32}$/.test(v),okE=v=>/^[^@\s]+@[^@\s]+\.[^@\s]+
 
 const params=new URLSearchParams(location.search);
 const RESET_TOKEN=/^[a-f0-9]{64}$/.test(params.get('reset')||'')?params.get('reset'):null;
-let mode='login',reg='open',shownAt=Date.now(),rstep=1;
+let mode='login',reg='open',shownAt=Date.now(),rstep=1,CODE_TO='';
 function show(){
-  const login=mode==='login',r=mode==='register',fg=mode==='forgot',rc=mode==='recover',rs=mode==='reset';
+  const login=mode==='login',r=mode==='register',fg=mode==='forgot',rc=mode==='recover',rs=mode==='reset',cd=mode==='code';
   $('tabs').hidden=!(login||r)||reg==='closed';
   document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.m===mode);b.setAttribute('aria-selected',b.dataset.m===mode)});
-  const title=fg?tx('forgotT'):rc?tx('recT'):rs?tx('resetT'):'';$('h').textContent=title;$('h').hidden=!title;
-  $('sub').textContent=fg?tx('forgotS'):'';$('sub').hidden=!fg;
-  $('userF').hidden=fg||rs||(r&&rstep===1);$('nameF').hidden=!(r&&rstep===2);$('fnhelp').textContent=tx('fnHelp');$('ulabel').textContent=login?tx('userOrEmail'):tx('username');
+  const title=fg?tx('forgotT'):rc?tx('recT'):rs?tx('resetT'):cd?tx('codeT'):'';$('h').textContent=title;$('h').hidden=!title;
+  $('sub').textContent=fg?tx('forgotS'):cd?tx('codeS',{to:CODE_TO}):'';$('sub').hidden=!(fg||cd);
+  $('otpF').hidden=!cd;$('otplabel').textContent=tx('otpL');
+  $('userF').hidden=fg||rs||cd||(r&&rstep===1);$('nameF').hidden=!(r&&rstep===2);$('fnhelp').textContent=tx('fnHelp');$('ulabel').textContent=login?tx('userOrEmail'):tx('username');
   $('username').autocomplete=login?'username':'username';$('uhelp').textContent=tx('uhelp');$('uhelp').hidden=!r;
   $('emailF').hidden=!((r&&rstep===1)||fg);
   $('codeF').hidden=!rc;
-  $('passF').hidden=fg||(r&&rstep===2);$('plabel').textContent=(rc||rs)?tx('newpass'):tx('password');
+  $('passF').hidden=fg||cd||(r&&rstep===2);$('plabel').textContent=(rc||rs)?tx('newpass'):tx('password');
   $('password').autocomplete=login?'current-password':'new-password';$('phelp').textContent=tx('phelp');$('phelp').hidden=login;
   $('forgotBtn').hidden=!login;
   $('confirmF').hidden=!(rc||rs);
   $('consentF').hidden=true;$('consentNote').hidden=!r;
   $('askF').hidden=true;
   $('trialpill').hidden=!(r&&TRIAL);
-  $('go').textContent=login?tx('login'):r?tx('create'):fg?tx('send'):tx('save');$('go').disabled=false;
+  $('go').textContent=login?tx('login'):r?tx('create'):fg?tx('send'):cd?tx('verifyB'):tx('save');$('go').disabled=false;
   $('err').textContent='';$('okmsg').hidden=true;
-  $('alt').innerHTML=fg?`<button type="button" class="link" data-m="recover">${tx('useCode')}</button> · <button type="button" class="link" data-m="login">${tx('back')}</button>`
+  $('alt').innerHTML=cd?`<button type="button" class="link" id="resendBtn">${tx('resend')}</button> · <button type="button" class="link" data-m="login">${tx('back')}</button>`:fg?`<button type="button" class="link" data-m="recover">${tx('useCode')}</button> · <button type="button" class="link" data-m="login">${tx('back')}</button>`
     :rc?`<button type="button" class="link" data-m="login">${tx('back')}</button>`
     :login&&reg!=='closed'?`${tx('newTo')} <button type="button" class="link" data-m="register">${tx('create')}</button>`
     :r&&rstep===2?`<button type="button" class="link" id="backStep">${tx('editEmail')}</button>`
@@ -320,12 +329,17 @@ function show(){
 function go(m){mode=m;shownAt=Date.now();show();$('f').classList.remove('swap');void $('f').offsetWidth;$('f').classList.add('swap');document.querySelectorAll('input.valid').forEach(i=>i.classList.remove('valid'));setTimeout(()=>{const f=m==='forgot'||m==='register'&&!$('username').value?(m==='forgot'?'email':'username'):m==='reset'?'password':$('username').value?'password':'username';$(f)&&$(f).focus()},0)}
 document.addEventListener('click',e=>{if(e.target.closest('#backStep')){e.preventDefault();rstep=1;show();setTimeout(()=>$('email').focus(),50);return}const b=e.target.closest('[data-m]');if(b){e.preventDefault();rstep=1;go(b.dataset.m)}});
 $('forgotBtn').addEventListener('click',()=>go('forgot'));
+// the code: 6 digits typed (or filled from the email by the phone) → sent at once; a new code on demand
+$('otp').addEventListener('input',()=>{const c=$('otp').value.replace(/\D/g,'').slice(0,6);if($('otp').value!==c)$('otp').value=c;if(c.length===6&&mode==='code'&&!$('go').disabled)$('f').requestSubmit()});
+document.addEventListener('click',async e=>{if(!e.target.closest('#resendBtn'))return;e.preventDefault();const r=await post('api/auth/code/resend',{}).catch(()=>null);const ok=$('okmsg'),err=$('err');
+  if(r&&r.ok){err.textContent='';ok.textContent=tx('resent');ok.hidden=false}else{ok.hidden=true;err.textContent=r?(srv(r.d.error)||tx('eGen',{n:r.status})):tx('eNet')}});
 async function post(url,body){const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'fetch'},body:JSON.stringify(body)});const d=await res.json().catch(()=>({}));return {ok:res.ok,status:res.status,d}}
 const enter=()=>{location.href='/'};
 $('f').addEventListener('submit',async e=>{
   e.preventDefault();const err=$('err');err.textContent='';
   const v=id=>$(id).value.trim(),pw=$('password').value;let url,body;
   if(mode==='login'){if(!v('username')||!pw){err.textContent=tx('eLogin');return}url='api/auth/login';body={username:v('username'),password:pw}}
+  else if(mode==='code'){const c=v('otp').replace(/\D/g,'');if(c.length!==6){err.textContent=tx('eOtp');return}url='api/auth/code';body={code:c}}
   else if(mode==='register'&&rstep===1){
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('email'))){err.textContent=tx('eEmail');return}
     if(pw.length<10){err.textContent=tx('ePass');return}
@@ -352,6 +366,7 @@ $('f').addEventListener('submit',async e=>{
     if(r.ok){
       if(mode==='forgot'){$('okmsg').textContent=tx('sent');$('okmsg').hidden=false;$('go').disabled=false;$('go').classList.remove('busy');return}
       if(mode==='reset')history.replaceState(null,'',location.pathname);
+      if(mode==='login'&&r.d.code){CODE_TO=r.d.to||'';$('otp').value='';go('code');$('go').classList.remove('busy');setTimeout(()=>$('otp').focus(),60);return}   // a new browser: the code by email
       enter();return}
     err.textContent=srv(r.d.error)||tx('eGen',{n:r.status});
   }catch{err.textContent=tx('eNet')}

@@ -10,6 +10,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  */
 function sweep_mail(string $to, string $subject, string $text, string $html = '', array $headers = []): bool {
     global $cfg;
+    // the dev copy (tests/run.sh sets SWEEP_TEST_DB): never sends, writes each email to data/outbox.jsonl (the log-in code tests read it)
+    if (getenv('SWEEP_TEST_DB')) { @file_put_contents(dirname((string) getenv('SWEEP_TEST_DB')) . '/outbox.jsonl', json_encode(['to' => $to, 'subject' => $subject, 'text' => $text, 'at' => time()], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX); return true; }
     $from = trim((string)($cfg['mail_from'] ?? '')) ?: 'hello@makeitsweep.com';
     $support = trim((string)($cfg['support_email'] ?? '')) ?: 'hello@makeitsweep.com';
     $sc = (array)($cfg['smtp'] ?? []);

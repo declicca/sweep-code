@@ -18,7 +18,7 @@ DirectoryIndex api.php
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
   # Never serve these files directly
-  RewriteRule ^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|[A-Za-z0-9_-]+\.md|error_log|ai/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|sync/.*|loops/.*|push/.*|src/.*|data(/.*)?)$ - [F,L]
+  RewriteRule ^(app\.html|auth\.html|config(\.sample)?\.php|econ\.php|[A-Za-z0-9_-]+\.md|error_log|ai/.*|auth/.*|billing/.*|growth/.*|notify/.*|game/.*|chart/.*|export/.*|ops/.*|tests/.*|presets/.*|sync/.*|loops/.*|push/.*|src/.*|data(/.*)?)$ - [F,L]
 
   # Everything goes through api.php (which checks the session)
   RewriteRule ^$ api.php?r=app [L,QSA]

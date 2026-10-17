@@ -21,6 +21,8 @@ return [
     'support_email' => 'hello@makeitsweep.com',              // shown in the app (help, settings) and as « Reply-To »
     // send through the mailbox itself (best delivery). cPanel → Email Accounts → hello@ → Connect Devices shows these values.
     'smtp'          => ['host' => 'mail.makeitsweep.com', 'port' => 465, 'user' => 'hello@makeitsweep.com', 'pass' => ''],
+    // a code by email on a new browser (auth/twofa.php): on whenever 'smtp' is set; false turns it off (emergency only)
+    'twofa'         => true,
     'support_email' => 'hello@makeitsweep.com',              // replies to reset emails go here
 
     // Where the database and screenshots are stored.
