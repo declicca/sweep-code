@@ -243,7 +243,7 @@ TradeBase (« The free trading journal for prop firm & futures traders ») est s
 Les 5 captures du dossier `images/` datent du 10 octobre. Depuis, l'app a été repensée dans l'esprit iOS (Nouveautés du 15 octobre) : une seule apparence, filtres sur une ligne, coach dans « Ta routine du jour ».
 
 - **AlternativeTo, SaaSHub, G2, Capterra** : les images actuelles conviennent ; tu pourras les remplacer plus tard.
-- **Product Hunt** : la galerie est la première impression du lancement. Demande d'abord à la session App de nouvelles captures (mêmes 5 écrans, 2880 × 1800, données d'exemple, mode foncé), puis remplace les fichiers en gardant les mêmes noms.
+- **Product Hunt** : la galerie est la première impression du lancement. Les nouvelles captures sont demandées à la session App (`briefs/brief-captures-site-2026-10-16.md`). La session Site en tirera ces 5 images, même taille qu'aujourd'hui (1270 × 793) et mêmes noms.
 
 ---
 
