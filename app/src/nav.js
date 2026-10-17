@@ -6036,3 +6036,96 @@ new window.SweepMO(() => {
     st = null; paint();
   });
 })();
+
+/* ───────────── Face ID in the app added to the Home Screen (17 Oct., auth/passkey.php) ─────────────
+ * Offered once in the installed app (« Later »: not before 7 days); then, after 12 hours without the app, the server answers
+ * « locked » (423) and this screen covers the app: « Unlock with Face ID », or « Use my password » (signed out, log in again).
+ * Never in a browser tab: there the code by email (auth/twofa.php) is the second step. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const BIO = ios ? 'Face ID' : ({ en: 'your fingerprint or face', fr: 'ton empreinte ou ton visage', es: 'tu huella o tu cara' })[L];
+  const T = ({ en: { askT: 'Unlock Sweep with {b}', askS: 'After 12 hours without the app, {b} unlocks it. Your face never leaves your phone: Sweep keeps no picture of it.', on: 'Turn on {b}', later: 'Later', done: '{b} is on for Sweep', fail: 'It could not be turned on. Try again from Settings.', lockT: 'Sweep is locked', lockS: 'It has been a while: confirm it’s you.', unlock: 'Unlock with {b}', unlockG: 'Unlock', pw: 'Use my password', bad: '{b} did not unlock Sweep. Try again, or use your password.', set: '{b} on this phone', setOn: 'On', setOff: 'Turn off', setAdd: 'Turn on' },
+    fr: { askT: 'Déverrouiller Sweep avec {b}', askS: 'Après 12 heures sans ouvrir l’app, {b} la déverrouille. Ton visage ne quitte jamais ton téléphone : Sweep n’en garde aucune image.', on: 'Activer {b}', later: 'Plus tard', done: '{b} est activé pour Sweep', fail: 'L’activation n’a pas marché. Réessaie depuis les Réglages.', lockT: 'Sweep est verrouillé', lockS: 'Ça fait un moment : confirme que c’est toi.', unlock: 'Déverrouiller avec {b}', unlockG: 'Déverrouiller', pw: 'Utiliser mon mot de passe', bad: '{b} n’a pas déverrouillé Sweep. Réessaie, ou utilise ton mot de passe.', set: '{b} sur ce téléphone', setOn: 'Activé', setOff: 'Désactiver', setAdd: 'Activer' },
+    es: { askT: 'Desbloquear Sweep con {b}', askS: 'Tras 12 horas sin abrir la app, {b} la desbloquea. Tu cara nunca sale de tu teléfono: Sweep no guarda ninguna imagen.', on: 'Activar {b}', later: 'Más tarde', done: '{b} está activado para Sweep', fail: 'No se pudo activar. Inténtalo desde Ajustes.', lockT: 'Sweep está bloqueado', lockS: 'Ha pasado un rato: confirma que eres tú.', unlock: 'Desbloquear con {b}', unlockG: 'Desbloquear', pw: 'Usar mi contraseña', bad: '{b} no desbloqueó Sweep. Inténtalo de nuevo, o usa tu contraseña.', set: '{b} en este teléfono', setOn: 'Activado', setOff: 'Desactivar', setAdd: 'Activar' } })[L];
+  const t = (k) => T[k].replace('{b}', BIO);
+  const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  const can = async () => { try { return !!(window.PublicKeyCredential && (await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())); } catch (e) { return false; } };
+  const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const unb = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
+  const post = (u, b) => fetch(u, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(b || {}) }).then(async (r) => ({ ok: r.ok, status: r.status, d: await r.json().catch(() => ({})) }));
+  const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { /* private mode */ } return null; };
+  const ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3H5a2 2 0 0 0-2 2v2M17 3h2a2 2 0 0 1 2 2v2M7 21H5a2 2 0 0 1-2-2v-2M17 21h2a2 2 0 0 0 2-2v-2"/><path d="M9 9v1M15 9v1M12 9v4h-1M9 16c1.6 1.2 4.4 1.2 6 0"/></svg>';
+
+  /* turning it on (from the offer or from Settings) */
+  async function register() {
+    const o = await post('api/me/passkey/options'); if (!o.ok) throw new Error('options');
+    const c = await navigator.credentials.create({ publicKey: { challenge: unb(o.d.challenge), rp: o.d.rp, user: { id: unb(o.d.user.id), name: o.d.user.name, displayName: o.d.user.displayName },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, attestation: 'none', timeout: 60000,
+      excludeCredentials: (o.d.exclude || []).map((x) => ({ type: 'public-key', id: unb(x.id) })) } });
+    const r = await post('api/me/passkey/register', { id: c.id, clientDataJSON: b64u(c.response.clientDataJSON), attestationObject: b64u(c.response.attestationObject) });
+    if (!r.ok) throw new Error('register');
+  }
+  function dialog(html, cls) {
+    const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-fid open ' + (cls || '');
+    const el = document.createElement('aside'); el.className = 'nav-dlg nav-fid open ' + (cls || ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
+    el.innerHTML = `<div class="nav-dlg-in nav-fid-in"><div class="nav-fid-ic">${ICON}</div>${html}</div>`;
+    document.body.append(scrim, el); return el;
+  }
+  const close = () => document.querySelectorAll('.nav-fid:not(.nav-lock)').forEach((x) => x.remove());
+  async function offer() {
+    if (!standalone() || document.querySelector('.nav-fid, .nav-inst, #gSheet.open')) return;
+    const at = +(LS('sw.fidLater') || 0); if (at && at > Date.now()) return;
+    try { if (sessionStorage.getItem('sw.modal') === '1') return; } catch (e) { /* private mode */ }
+    if (!(await can())) return;
+    let st = null; try { st = await apiJSON('api/me/passkey'); } catch (e) { return; }
+    if (!st || !st.on || st.has || document.querySelector('.nav-fid')) return;
+    try { sessionStorage.setItem('sw.modal', '1'); } catch (e) { /* private mode */ }
+    const el = dialog(`<h2>${t('askT')}</h2><p class="muted">${t('askS')}</p><button type="button" class="btn primary nav-am-save" data-fid-on>${t('on')}</button><button type="button" class="link nav-inst-later" data-fid-later>${t('later')}</button>`);
+    el.querySelector('[data-fid-later]').addEventListener('click', () => { LS('sw.fidLater', String(Date.now() + 7 * 864e5)); close(); });
+    el.querySelector('[data-fid-on]').addEventListener('click', async () => {
+      try { await register(); close(); if (typeof toast === 'function') toast(t('done')); } catch (e) { close(); if (typeof toast === 'function') toast(t('fail')); }
+    });
+  }
+  /* the lock: any request answered 423 */
+  let locked = false;
+  function lock() {
+    if (locked) return; locked = true;
+    const el = dialog(`<h2>${t('lockT')}</h2><p class="muted">${t('lockS')}</p><p class="err nav-fid-err"></p><button type="button" class="btn primary nav-am-save" data-fid-unlock>${ios ? t('unlock') : T.unlockG}</button><button type="button" class="link nav-inst-later" data-fid-pw>${t('pw')}</button>`, 'nav-lock');
+    const err = el.querySelector('.nav-fid-err');
+    el.querySelector('[data-fid-pw]').addEventListener('click', async () => { await post('api/auth/logout').catch(() => {}); location.href = '/'; });
+    el.querySelector('[data-fid-unlock]').addEventListener('click', async (e) => {
+      const b = e.currentTarget; b.disabled = true; err.textContent = '';
+      try {
+        const o = await post('api/auth/unlock/options'); if (!o.ok) throw new Error('options');
+        const a = await navigator.credentials.get({ publicKey: { challenge: unb(o.d.challenge), rpId: o.d.rpId, allowCredentials: o.d.allow.map((x) => ({ type: 'public-key', id: unb(x.id) })), userVerification: 'required', timeout: 60000 } });
+        const r = await post('api/auth/unlock', { id: a.id, clientDataJSON: b64u(a.response.clientDataJSON), authenticatorData: b64u(a.response.authenticatorData), signature: b64u(a.response.signature) });
+        if (!r.ok) throw new Error('unlock');
+        location.reload();
+      } catch (x) { err.textContent = t('bad'); b.disabled = false; }
+    });
+  }
+  const orig = window.fetch.bind(window);
+  window.fetch = async function (...args) { const r = await orig(...args); if (r.status === 423) { try { const j = await r.clone().json(); if (j && j.locked) lock(); } catch (e) { /* not ours */ } } return r; };
+  // the app's first requests leave before this file is read: ask once now whether this session is locked
+  if (document.querySelector('meta[name="sweep-build"]')) orig('api/me/passkey', { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } }).then((r) => { if (r.status === 423) lock(); }).catch(() => {});
+  // offered a few seconds after the app opens (after « What's new » and the suggestions have had their turn)
+  setTimeout(() => { offer().catch(() => {}); }, 6500);
+  /* Settings › « Your devices »: Face ID on this phone (installed app only) */
+  async function settingsLine() {
+    const box = document.querySelector('#main .nav-devs'); if (!box || box.querySelector('.nav-fid-set') || !standalone() || !(await can())) return;
+    let st = null; try { st = await apiJSON('api/me/passkey'); } catch (e) { return; }
+    if (!st || !st.on || box.querySelector('.nav-fid-set')) return;
+    const row = document.createElement('div'); row.className = 'nav-dev nav-fid-set';
+    row.innerHTML = `<span><b>${t('set')}</b><small>${st.has ? T.setOn : ''}</small></span><button type="button" class="btn sm" data-fid-set="${st.has ? 'off' : 'on'}">${st.has ? T.setOff : T.setAdd}</button>`;
+    box.insertBefore(row, box.querySelector('ul, p.muted'));
+    row.querySelector('[data-fid-set]').addEventListener('click', async (e) => {
+      const off = e.currentTarget.dataset.fidSet === 'off';
+      try { if (off) await post('api/me/passkey/remove'); else await register(); if (typeof toast === 'function' && !off) toast(t('done')); } catch (x) { if (typeof toast === 'function') toast(t('fail')); }
+      row.remove(); settingsLine();
+    });
+  }
+  new window.SweepMO(() => { if (/^#settings/.test(location.hash || '')) settingsLine().catch(() => {}); }).observe(document.body, { childList: true, subtree: true });
+  window.SweepFaceID = { offer, lock, register };
+})();

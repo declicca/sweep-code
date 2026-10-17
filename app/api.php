@@ -485,6 +485,7 @@ function create_session(string $userId, ?string $device = null): void {   // $de
     $exp = time() + SESSION_TTL;
     tf_schema();
     q('INSERT INTO sessions (token_hash, user_id, created_at, expires_at, device) VALUES (?, ?, ?, ?, ?)', [hash('sha256', $token), $userId, time(), $exp, $device]);
+    pk_bind(hash('sha256', $token), $device);   // a phone with its Face ID: this session locks after 12 h too
     q('UPDATE users SET last_login = ? WHERE id = ?', [now(), $userId]);
     if (function_exists('loops_sync')) loops_sync($userId);   // Loops: last visit
     set_session_cookie($token, $exp);
@@ -526,6 +527,7 @@ function end_session(): void {
 function lang_code($l): string { $l = strtolower(substr((string)$l, 0, 2)); return in_array($l, ['en', 'fr', 'es'], true) ? $l : 'en'; }
 require_once __DIR__ . '/notify/mail.php';   // sweep_mail(): SMTP of the mailbox, else PHP mail()
 require_once __DIR__ . '/auth/twofa.php';    // a code by email on a new browser (17 Oct.)
+require_once __DIR__ . '/auth/passkey.php';  // Face ID in the app added to the Home Screen (17 Oct.)
 
 /** Password reset email, in the trader's language (text + a clean HTML version). */
 function send_reset_email(string $to, string $username, string $token, string $lang): bool {
@@ -916,6 +918,9 @@ try {
     }
 
     $me = current_user();
+    // the installed app's Face ID (auth/passkey.php): a locked session reads nothing until it is unlocked
+    if ($me && strpos($route, 'api/auth/unlock') === 0) pk_route($route, $method, $me);
+    if ($me && (strpos($route, 'api/') === 0 || strpos($route, 'uploads/') === 0) && strpos($route, 'api/auth/') !== 0 && pk_locked()) json_out(423, ['locked' => true, 'error' => 'Sweep is locked.']);
     // share links: create, list and revoke (the trader's own)
     if (strpos($route, 'api/share/') === 0) {
         if (!$me) json_out(401, ['error' => 'Sign in first.']);
@@ -1043,6 +1048,7 @@ try {
         json_out(200, ['unfinished' => $rows, 'finished' => $done]);
     }
     if (strpos($route, 'api/me/devices') === 0) tf_devices_route($route, $method, (string) $UID);   // Settings › « Your devices »
+    if (strpos($route, 'api/me/passkey') === 0) pk_route($route, $method, $me);   // Face ID on this phone
     if ($route === 'api/me/profile' && $method === 'POST') {
         $b = body_json(4096);
         $clean = fn($v, $n) => mb_substr(trim(preg_replace('/\s+/u', ' ', strip_tags((string)$v)) ?? ''), 0, $n);

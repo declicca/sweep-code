@@ -2892,3 +2892,13 @@ html body .nav-devs ul{list-style:none;margin:10px 0 0;padding:0;display:flex;fl
 html body .nav-dev{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:var(--r-tile,14px);background:var(--fill)}
 html body .nav-dev span{display:flex;flex-direction:column;min-width:0}
 html body .nav-dev small{color:var(--text2);font-size:12.5px}
+
+/* Face ID (17 Oct.): the offer and the lock screen of the installed app */
+html body .nav-fid-in{text-align:center;align-items:stretch}
+html body .nav-fid-ic{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 4px;border-radius:18px;background:var(--fill)}
+html body .nav-fid-ic svg{width:34px;height:34px;fill:none;stroke:var(--pos);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+html body .nav-fid-in h2{margin:0;font-size:20px}
+html body .nav-fid-err:empty{display:none}
+html body .nav-dlg-scrim.nav-lock{background:var(--bg);opacity:1;backdrop-filter:none;-webkit-backdrop-filter:none}   /* the lock hides the app entirely */
+html body .nav-dlg.nav-lock{z-index:100001}
+html body .nav-dlg-scrim.nav-lock{z-index:100000}

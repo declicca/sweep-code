@@ -535,6 +535,12 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - **copie de test** (`SWEEP_TEST_DB`) : `sweep_mail` n'envoie rien et écrit chaque courriel dans `data/outbox.jsonl` (lu par `tests/setup.py` et `e2e_twofa`).
   - **Migration (automatique au premier appel)** : tables `trusted_devices` et `login_codes`, colonne `sessions.device`.
   - Test : `e2e_twofa` (390 FR, 1300 EN).
+- **Étape 2 livrée en local — Face ID dans l'app ajoutée à l'écran d'accueil** (`auth/passkey.php`, module « Face ID » à la fin de `src/nav.js`) :
+  - **une fois, dans l'app installée seulement** (`display-mode: standalone`, appareil avec Face ID / empreinte) : « Déverrouiller Sweep avec Face ID » (« Plus tard » : pas avant 7 jours ; la fenêtre automatique de la séance). Une clé d'accès (WebAuthn, ES256) liée à ce téléphone (`passkeys.device` = son navigateur reconnu) ; Sweep ne garde que la clé publique. Réglages › « Tes appareils » : « Face ID sur ce téléphone · Activer / Désactiver » ;
+  - **le verrou est côté serveur** : les sessions de ce téléphone (`sessions.passkey`) se verrouillent **après 12 h sans utiliser l'app** (`sessions.active_at`, noté toutes les 5 min au plus) ; tant qu'elles le sont, toute requête de données (`api/*` sauf `api/auth/*`, et `uploads/*`) répond **423** ; l'écran « Sweep est verrouillé » couvre l'app : « Déverrouiller avec Face ID » (le serveur vérifie la signature avec OpenSSL : défi à usage unique de 5 min, origine, hachage du RP id, présence et vérification de l'utilisateur, compteur) ou « Utiliser mon mot de passe » (déconnexion, puis la connexion habituelle) ;
+  - **dans un navigateur, rien ne change** : le code par courriel de l'étape 1 ;
+  - **Migration (automatique)** : tables `passkeys` et `passkey_challenges`, colonnes `sessions.passkey` et `sessions.active_at`.
+  - Test : `e2e_faceid` (l'authentificateur virtuel de Chromium joue Face ID ; activation, verrou après 13 h, déverrouillage, réponse truquée refusée, « Utiliser mon mot de passe »).
 
 ### Audit des parcours — petites cohérences R15 à R18, R21, R22 (17 oct., accord de Mateo)
 - **R15** · formulaire manuel complet (`tkAlerts`, `src/app.js`) : plus de case « Risque du jour restant / risque du trade / après le trade » ; ce qui reste est la ligne du coach au-dessus (un seul chiffre). Un trade dont le risque dépasse la limite du jour le dit encore (« Limite de risque dépassée — ce sera noté sur le trade. »).
