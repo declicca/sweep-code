@@ -100,7 +100,7 @@ window.SweepMO = window.SweepMO || class {
     const el = document.createElement('div'); el.id = 'navMenu'; el.className = 'nav-menu'; el.setAttribute('data-noi18n', '');
     const item = (k, ic, label, cls = '') => `<button type="button" role="menuitem" class="${cls}" data-navm="${k}">${ic}<span>${label}</span></button>`;
     el.innerHTML = `<div class="nav-menu-bg" data-navm="close"></div><div class="nav-menu-panel" role="menu">
-      ${S.me ? `<button type="button" class="nav-menu-who" data-navm="plan"><span class="av">${esc(S.me.username.slice(0, 1).toUpperCase())}</span><span class="nm"><b>${esc(S.me.username)}</b>${planLine()}</span></button>` : ''}
+      ${S.me ? ((nm) => `<button type="button" class="nav-menu-who" data-navm="plan"><span class="av">${esc(nm.slice(0, 1).toUpperCase())}</span><span class="nm"><b>${esc(nm)}</b>${planLine()}</span></button>`)(String(S.me.first_name || S.me.username || '').trim() || S.me.username) : ''}
       <div class="nav-mg">${item('prog', IC.prog, x.prog)}${item('news', IC.news, x.news)}</div>
       <div class="nav-mg">${item('settings', IC.settings, x.settings)}${item('plan', IC.sub, x.sub)}</div>
       <div class="nav-mg">${item('referral', IC.ref, x.ref)}${item('feedback', IC.fb, x.fb)}${item('help', IC.help, x.help)}</div>
@@ -465,10 +465,20 @@ window.SweepMO = window.SweepMO || class {
     card.querySelector('.nav-fn').innerHTML = tab === 'day' ? feedNews() : feedWeekNews();
     card.querySelector('.nav-kpi-t').innerHTML = tradesHtml(tab);
   }
-  function centerSel(card, smooth) {
+  function centerSel(card, smooth, again) {
     const st = card && card.querySelector('.nav-fstrip'), el = st && st.querySelector('.nav-fd.sel'); if (!el) return;
     const left = el.offsetLeft - (st.clientWidth - el.offsetWidth) / 2;
     st.scrollTo({ left: Math.max(0, left), behavior: smooth ? 'smooth' : 'auto' });
+    // the first paint can happen under a window or before the fonts (audit of 16 Oct., R23: the strip showed another week):
+    // checked again a moment later, unless the trader has moved the strip himself
+    if (!again && !st.dataset.navUser) {
+      if (!st.dataset.navWatch) { st.dataset.navWatch = '1'; st.addEventListener('pointerdown', () => { st.dataset.navUser = '1'; }, { passive: true }); }
+      [700, 2500].forEach((ms) => setTimeout(() => {
+        if (st.dataset.navUser || !document.contains(st)) return;
+        const r = el.getBoundingClientRect(), b = st.getBoundingClientRect();
+        if (b.width && (r.left < b.left || r.right > b.right)) centerSel(card, false, true);
+      }, ms));
+    }
   }
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('[data-fd]'); if (!b) return;
@@ -5496,6 +5506,8 @@ new window.SweepMO(() => {
     es: { 'Clear': 'Borrar', 'Add an account first': 'Primero añade una cuenta', 'Trades belong to an account.': 'Cada operación pertenece a una cuenta.', 'From': 'Desde', 'To': 'Hasta', 'Copies': 'Copias', 'Counted once': 'Contadas una vez', 'Per contract': 'Por contrato', 'Disable': 'Desactivar', 'Replace': 'Reemplazar', 'OK': 'OK', 'Delete this trade? This cannot be undone.': '¿Eliminar esta operación? No se puede deshacer.', 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas',
       'Max trades': 'Operaciones máx.', 'Entered without confirmation': 'Entrada sin confirmación', 'Broke daily loss limit': 'Límite de pérdida diaria superado', 'None recorded': 'Ninguna', 'Show all accounts': 'Ver todas las cuentas', 'schedule file': 'calendario incluido en la app', 'manual entry': 'entrada manual', 'ADP Non-Farm Employment Change': 'Empleo privado ADP', 'Average Hourly Earnings m/m': 'Ingresos medios por hora m/m', 'CB Consumer Confidence': 'Confianza del consumidor (CB)', 'Core CPI m/m': 'CPI subyacente m/m', 'Core PCE Price Index m/m': 'Índice PCE subyacente m/m', 'Core PPI m/m': 'PPI subyacente m/m', 'FOMC Meeting Minutes': 'Actas del FOMC', 'FOMC Press Conference': 'Rueda de prensa del FOMC', 'FOMC Rate Decision': 'Decisión de tipos del FOMC', 'GDP q/q (Advance)': 'PIB t/t (avance)', 'GDP q/q (Second Estimate)': 'PIB t/t (segunda estimación)', 'GDP q/q (Third Estimate)': 'PIB t/t (tercera estimación)', 'ISM Manufacturing PMI': 'PMI manufacturero ISM', 'ISM Services PMI': 'PMI de servicios ISM', 'Initial Jobless Claims': 'Solicitudes de subsidio por desempleo', 'JOLTS Job Openings': 'Ofertas de empleo JOLTS', 'Nonfarm Payrolls': 'Nóminas no agrícolas (NFP)', 'PCE Price Index m/m': 'Índice PCE m/m', 'Retail Sales m/m': 'Ventas minoristas m/m', 'Unemployment Rate': 'Tasa de desempleo' } };
   try { if (window.I18N_FR) Object.assign(window.I18N_FR, add.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, add.es); } catch (e) { /* the app stays in English */ }
+  // French typography (audit of 16 Oct., R24): the translation file's straight apostrophes become ’ (« aujourd’hui », « l’app »)
+  try { const D = window.I18N_FR; if (D) for (const k in D) if (typeof D[k] === 'string' && D[k].indexOf("'") >= 0) D[k] = D[k].replace(/([A-Za-zÀ-ÿ])'(?=[A-Za-zÀ-ÿ])/g, '$1’'); } catch (e) { /* as it was */ }
 })();
 
 /* brief 00, 1.2-k (16 Oct.), Q5 recommendation A: once the first real trade is there, the sample data is hidden everywhere

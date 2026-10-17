@@ -23,7 +23,7 @@
       sSlot: 'Your best time: {s}, {a} % winning trades over {n}.', sClean: '{k} of {n} sessions without a mistake.',
       sNone: 'Not enough trades yet to tell what works: 5 in the same situation are needed.',
       lk: '{w}: {k} of {n} trades{c}.', lk1: '{w}: 1 of {n} trades{c}.', lkNone: 'No leak: not one mistake over {n} trades.',
-      prT: 'Your progress', prLine: '{w} weeks ago: {a} % · {l}: {b} %', prNow: 'this week', prLast: 'last week', prAgo: '{w} weeks ago', prHelp: '% of trades without this mistake, week by week',
+      prT: 'Your progress', prLine: '{w} weeks ago: {a} % · {l}: {b} %', prLine1: 'Last week: {a} % · {l}: {b} %', prNow: 'this week', prLast: 'last week', prAgo: '{w} weeks ago', prHelp: '% of trades without this mistake, week by week',
       slot: (h, m, h2, m2) => `${h}:${m}–${h2}:${m2}`,
       lim: { dll75: '{a}: {p} % of your daily limit used ({u} of {l}). Keep your size, or stop.', dll100: '{a}: daily limit reached ({l}). Your session is over on this account.',
         dd75: '{a}: {p} % of the drawdown used, {r} of room left. Stop for today.', dd100: '{a}: drawdown limit reached. Check the account’s status with your firm.' },
@@ -94,7 +94,7 @@
       sSlot: 'Ton meilleur moment : {s}, {a} % de trades gagnants sur {n}.', sClean: '{k} séances sur {n} sans erreur.',
       sNone: 'Pas encore assez de trades pour dire ce qui fonctionne : il en faut 5 dans une même situation.',
       lk: '{w} : {k} trades sur {n}{c}.', lk1: '{w} : 1 trade sur {n}{c}.', lkNone: 'Aucune fuite : pas une erreur sur {n} trades.',
-      prT: 'Ta progression', prLine: 'Il y a {w} semaines : {a} % · {l} : {b} %', prNow: 'cette semaine', prLast: 'la semaine dernière', prAgo: 'il y a {w} semaines', prHelp: '% des trades sans cette erreur, semaine par semaine',
+      prT: 'Ta progression', prLine: 'Il y a {w} semaines : {a} % · {l} : {b} %', prLine1: 'La semaine dernière : {a} % · {l} : {b} %', prNow: 'cette semaine', prLast: 'la semaine dernière', prAgo: 'il y a {w} semaines', prHelp: '% des trades sans cette erreur, semaine par semaine',
       slot: (h, m, h2, m2) => `${+h} h ${m}–${+h2} h ${m2}`.replace(/ h 00/g, ' h'),
       lim: { dll75: '{a} : {p} % de ta limite du jour utilisés ({u} sur {l}). Garde ta taille, ou arrête-toi.', dll100: '{a} : limite du jour atteinte ({l}). Ta séance est finie sur ce compte.',
         dd75: '{a} : {p} % du drawdown utilisés, il te reste {r} de marge. Arrête pour aujourd’hui.', dd100: '{a} : limite de drawdown atteinte. Vérifie le statut du compte auprès de ta firme.' },
@@ -165,7 +165,7 @@
       sSlot: 'Tu mejor momento: {s}, {a} % de operaciones ganadoras en {n}.', sClean: '{k} de {n} sesiones sin error.',
       sNone: 'Aún no hay suficientes operaciones para saber qué funciona: hacen falta 5 en una misma situación.',
       lk: '{w}: {k} de {n} operaciones{c}.', lk1: '{w}: 1 de {n} operaciones{c}.', lkNone: 'Ninguna fuga: ni un error en {n} operaciones.',
-      prT: 'Tu progreso', prLine: 'Hace {w} semanas: {a} % · {l}: {b} %', prNow: 'esta semana', prLast: 'la semana pasada', prAgo: 'hace {w} semanas', prHelp: '% de operaciones sin este error, semana a semana',
+      prT: 'Tu progreso', prLine: 'Hace {w} semanas: {a} % · {l}: {b} %', prLine1: 'La semana pasada: {a} % · {l}: {b} %', prNow: 'esta semana', prLast: 'la semana pasada', prAgo: 'hace {w} semanas', prHelp: '% de operaciones sin este error, semana a semana',
       slot: (h, m, h2, m2) => `${h}:${m}–${h2}:${m2}`,
       lim: { dll75: '{a}: {p} % de tu límite diario usado ({u} de {l}). Mantén tu tamaño, o para.', dll100: '{a}: límite diario alcanzado ({l}). Tu sesión terminó en esta cuenta.',
         dd75: '{a}: {p} % del drawdown usado, te quedan {r} de margen. Para por hoy.', dd100: '{a}: límite de drawdown alcanzado. Verifica el estado de la cuenta con tu firma.' },
@@ -582,7 +582,7 @@
   }
   const prLine = (h) => { const ago = (m) => Math.round((new Date(mondayOf(today()) + 'T12:00:00') - new Date(m + 'T12:00:00')) / 6048e5);
     const wl = ago(h.last.mon), l = wl === 0 ? T.prNow : wl === 1 ? T.prLast : fill(T.prAgo, { w: wl });
-    return fill(T.prLine, { w: ago(h.first.mon), a: h.first.pct, l, b: h.last.pct }).replace(/^./, (m) => m.toUpperCase()); };
+    return fill(ago(h.first.mon) === 1 ? T.prLine1 : T.prLine, { w: ago(h.first.mon), a: h.first.pct, l, b: h.last.pct }).replace(/^./, (m) => m.toUpperCase()); };   // never « 1 weeks ago » (R24)
   const bars = (h) => `<span class="co-bars" aria-hidden="true">${h.pts.map((x) => `<i class="${x.pct == null ? 'none' : ''}" style="--h:${x.pct == null ? 6 : Math.max(8, x.pct)}%"></i>`).join('')}</span>`;
   const row = (label, text) => `<p class="co-row"><b>${label}</b><span>${esc2(text)}</span></p>`;
   let wCache = { k: '', v: '' };

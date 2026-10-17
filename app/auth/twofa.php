@@ -90,6 +90,32 @@ function tf_send(string $uid, string $code): bool {
       . '<p style="margin:0;font-size:13px;line-height:1.55;color:#8a8a94">' . $h($L['p2']) . '</p></td></tr></table></td></tr></table></body></html>';
     return sweep_mail((string) $u['email'], $L['s'], $text, $html);
 }
+/** after the code: « New log-in to your Sweep account » — the browser, the time (New York), what to do if it was not him */
+function tf_notice(string $uid): void {
+    global $APP_URL;
+    try {
+        $u = q('SELECT email, first_name, username, lang FROM users WHERE id = ?', [$uid])->fetch(); if (!$u || !$u['email']) return;
+        $l = lang_code($u['lang'] ?? 'en'); $first = (string) ($u['first_name'] ?: $u['username']);
+        $at = new DateTimeImmutable('now', new DateTimeZone('America/New_York'));
+        $when = $l === 'fr' ? $at->format('j') . ' ' . ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][(int) $at->format('n')] . ' à ' . $at->format('G') . ' h ' . $at->format('i')
+            : ($l === 'es' ? $at->format('j') . ' de ' . ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][(int) $at->format('n')] . ' a las ' . $at->format('G:i') : $at->format('F j \a\t g:i A'));
+        $base = $APP_URL !== '/' ? rtrim((string) $APP_URL, '/') . '/' : ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/');
+        $link = $base . '#settings'; $dev = tf_label();
+        $L = ['en' => ['s' => 'New log-in to your Sweep account', 'hi' => "Hi $first,", 'p' => "Your account was just opened on a new browser: $dev, on $when (New York time).", 'p2' => 'If it was you, there is nothing to do. If not: change your password now, then sign this device out in Settings › Your devices.', 'b' => 'Open my devices'],
+              'fr' => ['s' => 'Nouvelle connexion à ton compte Sweep', 'hi' => "Salut $first,", 'p' => "Ton compte vient d’être ouvert sur un nouveau navigateur : $dev, le $when (heure de New York).", 'p2' => 'Si c’est toi, rien à faire. Sinon : change ton mot de passe tout de suite, puis déconnecte cet appareil dans Réglages › Tes appareils.', 'b' => 'Voir mes appareils'],
+              'es' => ['s' => 'Nuevo inicio de sesión en tu cuenta de Sweep', 'hi' => "Hola $first,", 'p' => "Tu cuenta se acaba de abrir en un navegador nuevo: $dev, el $when (hora de Nueva York).", 'p2' => 'Si fuiste tú, no hay nada que hacer. Si no: cambia tu contraseña ahora y cierra la sesión de este dispositivo en Ajustes › Tus dispositivos.', 'b' => 'Ver mis dispositivos']][$l];
+        $h = fn($x) => htmlspecialchars($x, ENT_QUOTES, 'UTF-8');
+        $text = $L['hi'] . "\n\n" . $L['p'] . "\n\n" . $L['p2'] . "\n\n" . $link . "\n\n— Sweep";
+        $html = '<!doctype html><html><body style="margin:0;background:#0b0b0c;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Arial,sans-serif;color:#e9e9ee">'
+          . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center"><table role="presentation" width="100%" style="max-width:520px;background:#141416;border:1px solid #26262a;border-radius:18px" cellpadding="32"><tr><td>'
+          . '<div style="font-size:18px;font-weight:700;letter-spacing:-.01em;margin-bottom:24px">sweep</div>'
+          . '<p style="margin:0 0 12px;font-size:16px">' . $h($L['hi']) . '</p><p style="margin:0 0 12px;font-size:15px;line-height:1.55;color:#b9b9c2">' . $h($L['p']) . '</p>'
+          . '<p style="margin:0 0 24px;font-size:15px;line-height:1.55;color:#b9b9c2">' . $h($L['p2']) . '</p>'
+          . '<a href="' . $h($link) . '" style="display:inline-block;background:#4c8dff;color:#0b0b0c;font-weight:600;font-size:15px;text-decoration:none;padding:13px 24px;border-radius:999px">' . $h($L['b']) . '</a>'
+          . '</td></tr></table></td></tr></table></body></html>';
+        sweep_mail((string) $u['email'], $L['s'], $text, $html);
+    } catch (Throwable $e) { error_log('[Sweep 2fa] notice: ' . $e->getMessage()); }   // never blocks the log-in
+}
 /** the right password on a new browser: a code by email; the answer the log-in page shows */
 function tf_start(string $uid, string $email): array {
     tf_schema();
@@ -135,6 +161,7 @@ function tf_route(string $route): void {
         $d = q('SELECT disabled FROM users WHERE id = ?', [$uid])->fetchColumn();
         if ((int) $d === 1) json_out(403, ['error' => 'This account is disabled. Contact Sweep support.']);
         create_session($uid, tf_trust($uid));
+        tf_notice($uid);   // step 3: « New log-in to your Sweep account », with what to do if it was not him
         if (function_exists('nt_fire')) nt_fire('user.signed_in', ['uid' => $uid]);
         json_out(200, ['ok' => true]);
     }

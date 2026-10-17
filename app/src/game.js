@@ -58,31 +58,31 @@
     fr: {
       progress: 'Progression', today: "Aujourd'hui", plan: 'Plan', execution: 'Exécution', review: 'Revue',
       swept_title: 'Journée réussie.', cta_plan: 'Faire mon plan', cta_journal: 'Checklist à faire · {n} trades', cta_journal1: 'Checklist à faire · 1 trade', cta_review: 'Revue du jour',
-      cta_swept: 'Journée balayée', cta_dayoff: "Pas de trading aujourd'hui", dayoff_msg: "Un jour off planifié, c'est aussi une victoire.", dayoff_confirm: 'Déclarer un jour off ? Un trade pris ensuite comptera comme hors plan.',
-      guardrail_msg: "Tu t'es arrêté au bon moment. C'est ça, la discipline.", streak_lost: 'Nouveau départ. Ton meilleur streak reste à {n} jours.',
+      cta_swept: 'Journée balayée', cta_dayoff: "Pas de trading aujourd’hui", dayoff_msg: "Un jour off planifié, c’est aussi une victoire.", dayoff_confirm: 'Déclarer un jour off ? Un trade pris ensuite comptera comme hors plan.',
+      guardrail_msg: "Tu t’es arrêté au bon moment. C'est ça, la discipline.", streak_lost: 'Nouveau départ. Ton meilleur streak reste à {n} jours.',
       freeze_used: 'Un gel a protégé ton streak {day}.', offplan: 'Ce trade était hors de ton plan.', next_level: '{xp} XP avant {rank}',
-      market_closed: 'Les marchés sont fermés. Le repos fait partie du processus.', yday: "Hier reste ouvert jusqu'à {t}", yday_cta: 'Terminer hier',
+      market_closed: 'Les marchés sont fermés. Le repos fait partie du processus.', yday: "Hier reste ouvert jusqu’à {t}", yday_cta: 'Terminer hier',
       streak: 'Streak', best: 'Meilleur', freezes: 'Gels', level: 'Niveau', lvl: 'Niv. {n}', days: '{n} jours', day1: '1 jour',
       start_title: 'Démarrage', start_steps: { goal: 'Objectif choisi', style: 'Style choisi', rules: 'Règles du compte', journal: 'Premier trade journalisé', plan: 'Premier plan', review: 'Première revue' },
-      plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd'hui", setups: 'Setups autorisés',
+      plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd’hui", setups: 'Setups autorisés',
       no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', max_trades: 'Nombre max de trades (facultatif)', levels: 'Niveaux clés / note (facultatif)',
       rule: 'Règle du jour', rule_ph: 'Une règle à tenir aujourd’hui (facultatif)',
       gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', save_plan: 'Enregistrer mon plan', confirm_plan: 'Confirmer mon plan', from_plan: 'Repris de ton plan du {d} : confirme ou ajuste.', dll_hint: 'Limite du jour de {a} : {v}', dd_hint: 'Marge de drawdown de {a} : {v}', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
-      plan_past: "Un plan ne peut être fait que pour aujourd'hui.",
-      journal_title: 'Journaliser', setup: 'Setup', emotion: "Émotion avant l'entrée", rules: 'As-tu suivi tes règles ?', yes: 'Oui', partial: 'En partie', no: 'Non',
+      plan_past: "Un plan ne peut être fait que pour aujourd’hui.",
+      journal_title: 'Journaliser', setup: 'Setup', emotion: "Émotion avant l’entrée", rules: 'As-tu suivi tes règles ?', yes: 'Oui', partial: 'En partie', no: 'Non',
       next: 'Suivant', done: 'Terminé', skip: 'Passer', of: '{a} sur {b}', all_journaled: 'Tous les trades sont journalisés.',
-      review_title: 'Revue du jour', improve_opt: 'Une chose à améliorer demain (facultatif)', discipline: "Discipline aujourd'hui", save_review: 'Enregistrer ma revue', followed: 'As-tu suivi ton plan ?', grade: 'Ta note du jour', review_needs: 'Réponds aux 3 questions.',
+      review_title: 'Revue du jour', improve_opt: 'Une chose à améliorer demain (facultatif)', discipline: "Discipline aujourd’hui", save_review: 'Enregistrer ma revue', followed: 'As-tu suivi ton plan ?', grade: 'Ta note du jour', review_needs: 'Réponds aux 3 questions.',
       today_title: 'Ta journée', step_plan: 'Plan avant le premier trade', step_exec: 'Trades dans ton plan', step_review: 'Trades journalisés et journée revue',
       v_setup_not_in_plan: 'Setup hors de ton plan', v_no_stop: 'Stop non respecté', v_against_bias: 'À l’inverse de ton biais', v_over_max_loss: 'Pris après ta perte max', v_over_max_trades: 'Au-delà de ton nombre max de trades',
       v_plan_no_trade: "Pris pendant un jour off", v_rules: 'Règles suivies en partie',
       xp: 'XP', plus_xp: '+{n} XP', continue: 'Continuer', share: 'Partager', new_badge: 'Nouveau badge', level_up: 'Niveau {n}', rank_up: 'Nouveau rang', streak_title: 'Streak de {n} jours',
-      backfill: "Ton historique t'a déjà rapporté {xp} XP et {n} badges.", guardrail_t: 'Garde-fou respecté',
+      backfill: "Ton historique t’a déjà rapporté {xp} XP et {n} badges.", guardrail_t: 'Garde-fou respecté',
       rank_card: 'Rang', streak_card: 'Streak de discipline', calendar: 'Calendrier', badges: 'Badges', counters: 'Compteurs', swept_days: 'Journées balayées', reviews_done: 'Revues faites',
       compliant_run: 'Trades conformes de suite', sound: 'Son Sweep', sound_d: 'Un son court et feutré quand tu balaies une journée.', locked: 'Verrouillé', secret: 'Badge secret',
       ob_goal: 'Quel est ton objectif principal ?', g_evaluation: 'Passer mon évaluation', g_payout: 'Obtenir mon premier payout', g_consistency: 'Devenir constant', g_edge: 'Trouver mon edge',
       ob_style: 'Comment trades-tu ?', scalp: 'Scalp', intraday: 'Intraday', swing: 'Swing', instruments: 'Instruments', other: 'Autre',
       ob_profile: 'Profil de trader', ob_account: 'Ta limite quotidienne', ob_rules: 'On connaît déjà tes règles.', ob_rules_sub: 'Perte max quotidienne sur {acct} : {v}. Elle remplit ton plan pour toi.',
-      ob_maxloss: 'Quelle est ta perte max par jour ?', ob_win: 'Ta première victoire', ob_mission_journal: 'Fais la checklist de ton dernier trade', ob_mission_plan: "Fais ton plan pour aujourd'hui",
+      ob_maxloss: 'Quelle est ta perte max par jour ?', ob_win: 'Ta première victoire', ob_mission_journal: 'Fais la checklist de ton dernier trade', ob_mission_plan: "Fais ton plan pour aujourd’hui",
       ob_mission_plan_t: 'Fais ton plan pour la prochaine séance', ob_reward: 'Récompense : un badge et ton premier anneau fermé.', ob_skip: 'Plus tard', ob_next: 'Continuer', ob_go: "C'est parti",
       ob_hello: 'Sweep the day.', ob_hello_sub: 'Planifie, exécute, fais ta revue. Ferme tes trois anneaux : la discipline, c’est le jeu.',
       rk: { rookie: 'Recrue', apprentice: 'Apprenti', disciplined: 'Discipliné', consistent: 'Constant', seasoned: 'Aguerri', master: 'Maître', sweeper: 'Sweeper' },
@@ -93,8 +93,8 @@
         welcome: ['Bienvenue', 'Termine le démarrage.'], first_plan: ['Premier plan', 'Fais ton premier plan valide.'], first_journal: ['Première page', 'Journalise ton premier trade.'],
         first_sweep: ['Premier Sweep', 'Balaie ta première journée.'], sweep_5: ['Sur la lancée', 'Balaie 5 journées.'], sweep_25: ['Habitude', 'Balaie 25 journées.'], sweep_100: ['Machine', 'Balaie 100 journées.'],
         streak_7: ['Une semaine', 'Streak de 7 jours.'], streak_30: ['Un mois', 'Streak de 30 jours.'], streak_100: ['Cent', 'Streak de 100 jours.'],
-        full_week: ['Semaine parfaite', "Balaie chaque jour de marché d'une semaine."], patience: ['Patience', 'Balaie un jour off planifié.'], guardrail: ['Garde-fou', "Arrête-toi pour la journée à ta perte max."],
-        early_plan: ["Prêt avant l'ouverture", '10 plans faits avant 9 h 00 ET.'], sniper: ['Sniper', '10 trades conformes de suite.'], sacred_stop: ['Le stop sacré', '50 trades de suite avec un stop.'],
+        full_week: ['Semaine parfaite', "Balaie chaque jour de marché d’une semaine."], patience: ['Patience', 'Balaie un jour off planifié.'], guardrail: ['Garde-fou', "Arrête-toi pour la journée à ta perte max."],
+        early_plan: ["Prêt avant l’ouverture", '10 plans faits avant 9 h 00 ET.'], sniper: ['Sniper', '10 trades conformes de suite.'], sacred_stop: ['Le stop sacré', '50 trades de suite avec un stop.'],
         reviewer_20: ['Introspection', '20 revues de fin de journée.'], resilience: ['Résilience', 'Balaie la journée juste après une journée rouge.'], comeback: ['Le retour', 'Balaie une journée après 7+ jours de marché calmes.'],
         perfectionist: ['Perfectionniste', '5 jours de suite où chaque trade a une capture et une note.'], zen: ['Zen', '3 jours off planifiés de suite, puis une journée balayée.'],
       },
@@ -183,15 +183,15 @@
         c1_sweep: ['Premier Sweep', 'Ferme tes trois anneaux sur une journée.'], c2_setups: ['3 setups', 'Tague tes trades avec 3 setups différents.'], c2_journal30: ['30 trades journalisés', 'Journalise 30 trades.'],
         c2_edge: ['Premier Edge Reveal', 'Découvre ce qui marche pour toi.'], c2_sweep5: ['5 journées balayées', 'Balaie 5 journées.'], c2_weekly: ['Premier bilan de la semaine', 'Termine ta semaine avec le bilan de la semaine.'],
         c2_journal50: ['50 trades complets', '50 trades avec setup et émotion : débloque ton meilleur setup.'], c3_streak10: ['Streak de 10', 'Présente-toi 10 jours de marché de suite.'],
-        c3_window: ['10 sur 15', '10 journées balayées sur 15 jours de marché.'], c3_week: ['Semaine parfaite', "Balaie chaque jour de marché d'une semaine."], c3_weekly4: ['4 revues hebdo', '4 revues hebdomadaires de suite.'],
+        c3_window: ['10 sur 15', '10 journées balayées sur 15 jours de marché.'], c3_week: ['Semaine parfaite', "Balaie chaque jour de marché d’une semaine."], c3_weekly4: ['4 revues hebdo', '4 revues hebdomadaires de suite.'],
         c3_compliant20: ['20 dans le plan', '20 trades conformes de suite.'], c4_setup: ['Règles de payout', 'Ajoute le minimum de payout ou l’objectif de ton compte.'], c4_half: ['À mi-chemin', 'Prêt pour le payout à 50 %.'],
         c4_ready: ['Prêt', 'Prêt pour le payout à 100 %.'], c4_payout: ['Premier payout', 'Enregistre ton premier payout dans Sweep.'], c4p_month1: ['Un mois solide', 'Un mois avec 70 % de jours valides.'],
         c4p_month2: ['Deux mois solides', '2 mois de suite à 70 % de jours valides.'], c4p_month3: ['Trois mois solides', '3 mois de suite à 70 % de jours valides.'],
-        c5_accounts: ['Deuxième compte', 'Suis un deuxième compte.'], c5_expenses: ['Dépenses suivies', "Enregistre tes frais d'évaluation et d'abonnement."], c5_payouts3: ['3 payouts', 'Enregistre 3 payouts.'],
+        c5_accounts: ['Deuxième compte', 'Suis un deuxième compte.'], c5_expenses: ['Dépenses suivies', "Enregistre tes frais d’évaluation et d’abonnement."], c5_payouts3: ['3 payouts', 'Enregistre 3 payouts.'],
         c5_net: ['Rentable net', 'Payouts supérieurs aux dépenses.'], c5_streak60: ['Streak de 60', '60 jours de marché de suite.'],
       },
       m: {
-        m_review_3: 'Fais ta revue 3 jours', m_plan_3: 'Plan avant ton premier trade, 3 jours', m_emotion_5: 'Note ton émotion sur 5 trades', m_plan_early: "Plan avant l'ouverture, 3 jours",
+        m_review_3: 'Fais ta revue 3 jours', m_plan_3: 'Plan avant ton premier trade, 3 jours', m_emotion_5: 'Note ton émotion sur 5 trades', m_plan_early: "Plan avant l’ouverture, 3 jours",
         m_screens: 'Ajoute une capture à 5 trades', m_sweep_2: 'Balaie 2 journées', m_no_offplan: '4 jours sans trade hors plan', m_review_all: 'Revue chaque jour de marché',
         m_sweep_3: 'Balaie 3 journées', m_emotion_all: 'Émotion notée sur chaque trade, 4 jours', m_maxloss: 'Respecte ta perte max, 3 jours planifiés',
       },
@@ -231,7 +231,7 @@
   Object.assign(D.en.b, { weekly_4: ['Steady', '4 weekly recaps in a row.'], weekly_12: ['Quarter', '12 weekly recaps in a row.'], lucky: ['Lucky', 'Found in a chest.'] });
   Object.assign(D.fr.b, { weekly_4: ['Régulier', '4 revues hebdo de suite.'], weekly_12: ['Trimestre', '12 revues hebdo de suite.'], lucky: ['Chanceux', 'Trouvé dans un coffre.'] });
   Object.assign(D.es.b, { weekly_4: ['Constante', '4 revisiones semanales seguidas.'], weekly_12: ['Trimestre', '12 revisiones semanales seguidas.'], lucky: ['Suertudo', 'Encontrado en un cofre.'] });
-  D.fr.b.boss_for_good = ['Pour de bon', "Un boss battu n'est pas revenu en 30 jours."];
+  D.fr.b.boss_for_good = ['Pour de bon', "Un boss battu n’est pas revenu en 30 jours."];
   D.es.b.boss_for_good = ['Para siempre', 'Un jefe vencido no volvió en 30 días.'];
   const L = () => (LANG === 'fr' || LANG === 'es' ? LANG : 'en');
   const get = (o, path) => path.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
@@ -786,7 +786,8 @@
   };
   const TS = { shown: 0, extra: 0, reset: 0 };
   const SUMT = { en: '{n} new · See Progression', fr: '{n} nouveautés · Voir Progression', es: '{n} novedades · Ver Progreso' };
-  function summaryToast() {
+  async function summaryToast() {
+    if (sheetOpen()) await afterSheets();
     const n = TS.extra; TS.extra = 0; if (!n) return;
     document.querySelectorAll('.gm-sumtoast').forEach((e) => e.remove());
     const el = document.createElement('button'); el.type = 'button'; el.className = 'gm-sumtoast'; el.setAttribute('data-noi18n', '');
@@ -795,7 +796,11 @@
     document.body.append(el); requestAnimationFrame(() => el.classList.add('on'));
     setTimeout(() => { el.classList.remove('on'); setTimeout(() => el.remove(), 300); }, 5000);
   }
-  function smallToast(c) {
+  // a window or a sheet is open: the progression's toasts wait for it to close (audit of 16 Oct., R23: they covered the sheets)
+  const sheetOpen = () => !!document.querySelector('#gSheet.open, .evp.open, .nav-am.open, #tkSlide.open, aside.nav-dlg.open, .sb-layer, #shPanel.open');
+  const afterSheets = () => new Promise((r) => { let n = 0; (function w() { if (!sheetOpen() || ++n > 60) r(); else setTimeout(w, 500); })(); });
+  async function smallToast(c) {
+    if (sheetOpen()) await afterSheets();
     clearTimeout(TS.reset); TS.reset = setTimeout(() => { TS.shown = 0; }, 8000);
     if (TS.shown >= 2) { TS.extra++; return Promise.resolve(); }   // the rest stays in Progression and the bell
     TS.shown++;
@@ -1335,14 +1340,14 @@
       how_t: { revenge: 'After a loss, wait 10 minutes before the next entry.', fomo_open: 'No trade from 9:30 to 9:35 ET unless it is a planned setup.', cursed_day: 'On {wd}: plan first, and every trade inside your plan.',
         oversize: 'Keep the same size all day.', moving_stop: 'Respect every stop, and follow your rules fully.', overtrader: 'Stay within your max number of trades.', offplan: 'Only take your plan’s setups.', no_plan: 'Make your plan before 9:30 ET.' } },
     fr: { title: 'Boss', appears: 'Un boss apparaît', defeated: 'Tu as battu {name}', why: 'Pourquoi ce boss', how: 'Comment le battre', hits: 'Coups', rematch: 'Revanche',
-      today_hit: "Coup porté aujourd'hui", today_relapse: "Il s'est soigné aujourd'hui", today_pending: "Pas encore de coup aujourd'hui", hp: '{hp}/{max} PV', clean: 'Chaque journée propre lui porte un coup. Une rechute le soigne seulement : aucune XP ni streak perdu.',
+      today_hit: "Coup porté aujourd’hui", today_relapse: "Il s’est soigné aujourd’hui", today_pending: "Pas encore de coup aujourd’hui", hp: '{hp}/{max} PV', clean: 'Chaque journée propre lui porte un coup. Une rechute le soigne seulement : aucune XP ni streak perdu.',
       share: "J'ai battu {name}", intro: '{name} se cache dans tes stats. Chaque journée propre lui porte un coup : {max} et il disparaît.',
       wd: ['', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'],
-      n: { revenge: 'Le Revenge', fomo_open: "Le FOMO de l'ouverture", cursed_day: 'Le Jour maudit', oversize: "L'Oversize", moving_stop: 'Le Stop fuyant', overtrader: 'Le Surchauffe', offplan: "L'Improvisateur", no_plan: 'Le Sans-plan' },
-      ev: { revenge: "{pct} % de tes pertes ont été suivies d'un nouveau trade en moins de 10 minutes.", fomo_open: "{pct} % de tes trades partent dans les 5 premières minutes de l'ouverture, à {r}R en moyenne.",
+      n: { revenge: 'Le Revenge', fomo_open: "Le FOMO de l’ouverture", cursed_day: 'Le Jour maudit', oversize: "L'Oversize", moving_stop: 'Le Stop fuyant', overtrader: 'Le Surchauffe', offplan: "L'Improvisateur", no_plan: 'Le Sans-plan' },
+      ev: { revenge: "{pct} % de tes pertes ont été suivies d’un nouveau trade en moins de 10 minutes.", fomo_open: "{pct} % de tes trades partent dans les 5 premières minutes de l’ouverture, à {r}R en moyenne.",
         cursed_day: 'Tes trades du {wd} sont à {r}R en moyenne, contre {others}R les autres jours.', oversize: 'Tu as augmenté ta taille après 2 gains de suite {times} fois.',
         moving_stop: 'Ton stop a glissé ou tes règles ont été suivies en partie sur {pct} % des trades.', overtrader: 'Tu as dépassé ton nombre max de trades {pct} % des jours planifiés.',
-        offplan: '{pct} % de tes trades étaient hors des setups de ton plan.', no_plan: "Aucun plan avant l'ouverture {pct} % des jours de marché." },
+        offplan: '{pct} % de tes trades étaient hors des setups de ton plan.', no_plan: "Aucun plan avant l’ouverture {pct} % des jours de marché." },
       how_t: { revenge: "Après une perte, attends 10 minutes avant la prochaine entrée.", fomo_open: "Aucun trade de 9 h 30 à 9 h 35 ET, sauf un setup planifié.", cursed_day: 'Le {wd} : plan d’abord, et chaque trade dans ton plan.',
         oversize: 'Garde la même taille toute la journée.', moving_stop: 'Respecte chaque stop et suis tes règles au complet.', overtrader: 'Reste sous ton nombre max de trades.', offplan: 'Ne prends que les setups de ton plan.', no_plan: 'Fais ton plan avant 9 h 30 ET.' } },
     es: { title: 'Jefe', appears: 'Aparece un jefe', defeated: 'Venciste a {name}', why: 'Por qué este jefe', how: 'Cómo vencerlo', hits: 'Golpes', rematch: 'Revancha',

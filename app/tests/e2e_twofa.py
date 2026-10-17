@@ -6,6 +6,7 @@ The dev copy writes its emails to data/outbox.jsonl (never sent). A trader signs
     the right one: in; the code email says it is valid 10 minutes;
  2  B again (logged out, logged in): the password only, no code;
  3  browser C: 5 wrong codes → the code has expired, a new log-in is needed; « Send a new code » right away: wait a little;
+ 1b (step 3) right after the code: « New log-in to your Sweep account », the browser and what to do if it was not him;
  4  Settings › « Your devices » on B: A and B listed, B marked « This browser »; « Sign out » A → A is signed out;
 Phone 390 (fr) and computer 1300 (en). No page error, nothing wider than the window.
 """
@@ -58,6 +59,8 @@ with sync_playwright() as p:
     pg.fill('#otp', good); pg.wait_for_timeout(3000)
     inside = pg.evaluate("!!document.querySelector('#main') && !document.getElementById('username')")
     ok(inside, f'{tag} 1 the right code: in the app')
+    nt = mails(email)[-1]
+    ok(nt['subject'] == {'fr': 'Nouvelle connexion à ton compte Sweep', 'en': 'New log-in to your Sweep account'}[lang] and '#settings' in nt['text'], f'{tag} 1 step 3: « {nt["subject"]} », with the link to the devices')
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} nothing wider than the window')
     allerr += errs
     # 2. B again: the password only

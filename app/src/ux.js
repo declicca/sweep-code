@@ -333,7 +333,7 @@
 
 /* ───────────── 9. Missing translations spotted in the design pass ───────────── */
 (function () {
-  const fr = { 'No trades today. ': "Aucun trade aujourd'hui. ", 'No trades today.': "Aucun trade aujourd'hui.", 'No trades on this day.': 'Aucun trade ce jour-là.' };
+  const fr = { 'No trades today. ': "Aucun trade aujourd’hui. ", 'No trades today.': "Aucun trade aujourd’hui.", 'No trades on this day.': 'Aucun trade ce jour-là.' };
   const es = { 'No trades today. ': 'Ninguna operación hoy. ', 'No trades today.': 'Ninguna operación hoy.', 'No trades on this day.': 'Ninguna operación este día.' };
   if (window.I18N_FR) for (const k in fr) window.I18N_FR[k] = window.I18N_FR[k] || fr[k];
   if (window.I18N_ES) for (const k in es) window.I18N_ES[k] = window.I18N_ES[k] || es[k];
@@ -708,11 +708,11 @@
 /* ───────────── 13. Two dynamic sentences the dictionary cannot catch ───────────── */
 (function () {
   if (typeof render !== 'function') return;
-  const P = { fr: { 'this month': 'ce mois-ci', 'this week': 'cette semaine', today: "aujourd'hui", 'this year': 'cette année', 'in this range': 'sur cette période', overall: 'au total', 'all time': 'au total' },
+  const P = { fr: { 'this month': 'ce mois-ci', 'this week': 'cette semaine', today: "aujourd’hui", 'this year': 'cette année', 'in this range': 'sur cette période', overall: 'au total', 'all time': 'au total' },
               es: { 'this month': 'este mes', 'this week': 'esta semana', today: 'hoy', 'this year': 'este año', 'in this range': 'en este periodo', overall: 'en total', 'all time': 'en total' } };
   const RULES = [
     [/^No trades (.+)\. Change the period or add trades to see your (?:insights|stats)\.$/, (m, L) => L === 'fr' ? `Aucun trade ${P.fr[m[1]] || m[1]}. Change la période ou ajoute des trades pour voir tes analyses.` : `Ninguna operación ${P.es[m[1]] || m[1]}. Cambia el periodo o añade operaciones para ver tus análisis.`],
-    [/^Not enough data yet\. Complete the discipline checklist on at least (\d+) trades \((\d+) so far\)\.$/, (m, L) => L === 'fr' ? `Pas encore assez de données. Remplis la checklist de discipline sur au moins ${m[1]} trades (${m[2]} pour l'instant).` : `Aún no hay suficientes datos. Completa la checklist de disciplina en al menos ${m[1]} operaciones (${m[2]} por ahora).`],
+    [/^Not enough data yet\. Complete the discipline checklist on at least (\d+) trades \((\d+) so far\)\.$/, (m, L) => L === 'fr' ? `Pas encore assez de données. Remplis la checklist de discipline sur au moins ${m[1]} trades (${m[2]} pour l’instant).` : `Aún no hay suficientes datos. Completa la checklist de disciplina en al menos ${m[1]} operaciones (${m[2]} por ahora).`],
   ];
   function fix() {
     const L = LANG; if (L !== 'fr' && L !== 'es') return;
@@ -919,7 +919,7 @@
       every: { game: 'every 15 min', chart: 'every hour', presets: 'Mondays at 5:00', backup: 'every day at 3:30', restore_test: 'Mondays at 6:00', emails: 'every hour, events at 7:30 ET' },
       st: { ok: 'OK', running: 'Running', late: 'Late', failed: 'Failed', stuck: 'Stuck', never: 'Never ran' }, last: 'last run {t}', ago: '{t} ago', now: 'just now', took: '{s} s', cmd: 'cPanel line',
       svc: 'Services', yes: 'Set', no: 'Missing', live: 'live', test: 'test mode', aiUse: 'today {a} of {b} · {n} per trader per day', econUse: '{n} high-impact releases in the next 14 days · next: {e}, {d} ET',
-      c: { smtp: ['Email through the mailbox (SMTP)', 'PHP mail() instead: more often in spam'], ai: ['Sweep AI key', 'Sweep AI is off'], billing: ['Stripe', 'Billing is off'],
+      c: { smtp: ['Email through the mailbox (SMTP)', 'PHP mail() instead: more often in spam'], twofa: ['Second step at log-in (code by email)', 'Off: no mailbox (SMTP), or turned off in config.php (twofa)'], ai: ['Sweep AI key', 'Sweep AI is off'], billing: ['Stripe', 'Billing is off'],
         webhook: ['Stripe webhook secret', 'Payments are not confirmed'], chart: ['Databento (trade charts)', 'No trade charts'], backup: ['Backup passphrase', 'No backup is written'],
         offsite: ['Off-site backup copy', 'Backups only on the server'], push: ['Phone notifications (push keys)', 'Off: run ops/push-keys.php on the server'], econ: ['Economic calendar', 'No high-impact release in the next 14 days: check the schedule'], app_url: ['App address (app_url)', 'Email links use app.makeitsweep.com'] } },
     fr: { h: 'Santé', sub: 'Tâches planifiées (cPanel → Cron Jobs) et services externes. Une tâche rouge depuis plus d’un cycle envoie un courriel à l’adresse de support.',
@@ -927,7 +927,7 @@
       every: { game: 'toutes les 15 min', chart: 'toutes les heures', presets: 'le lundi à 5 h', backup: 'chaque jour à 3 h 30', restore_test: 'le lundi à 6 h', emails: 'toutes les heures, événements à 7 h 30 ET' },
       st: { ok: 'OK', running: 'En cours', late: 'En retard', failed: 'Échec', stuck: 'Bloquée', never: 'Jamais exécutée' }, last: 'dernière exécution {t}', ago: 'il y a {t}', now: 'à l’instant', took: '{s} s', cmd: 'Ligne cPanel',
       svc: 'Services', yes: 'Réglé', no: 'Manquant', live: 'réel', test: 'mode test', aiUse: 'aujourd’hui {a} sur {b} · {n} par trader et par jour', econUse: '{n} annonces fortes dans les 14 prochains jours · prochaine : {e}, {d} ET',
-      c: { smtp: ['Courriels par la boîte (SMTP)', 'mail() de PHP à la place : plus souvent en indésirables'], ai: ['Clé de Sweep AI', 'Sweep AI est désactivé'], billing: ['Stripe', 'Facturation désactivée'],
+      c: { smtp: ['Courriels par la boîte (SMTP)', 'mail() de PHP à la place : plus souvent en indésirables'], twofa: ['Double authentification (code par courriel)', 'Coupée : pas de boîte SMTP, ou désactivée dans config.php (twofa)'], ai: ['Clé de Sweep AI', 'Sweep AI est désactivé'], billing: ['Stripe', 'Facturation désactivée'],
         webhook: ['Secret du webhook Stripe', 'Les paiements ne sont pas confirmés'], chart: ['Databento (graphiques des trades)', 'Pas de graphiques'], backup: ['Phrase secrète des sauvegardes', 'Aucune sauvegarde n’est écrite'],
         offsite: ['Copie des sauvegardes hors du serveur', 'Sauvegardes seulement sur le serveur'], push: ['Notifications sur le téléphone (clés push)', 'Coupées : lancer ops/push-keys.php sur le serveur'], econ: ['Calendrier économique', 'Aucune annonce forte dans les 14 prochains jours : vérifier le calendrier'], app_url: ['Adresse de l’app (app_url)', 'Les liens des courriels utilisent app.makeitsweep.com'] } },
     es: { h: 'Salud', sub: 'Tareas programadas (cPanel → Cron Jobs) y servicios externos. Una tarea en rojo durante más de un ciclo envía un correo a la dirección de soporte.',
@@ -935,7 +935,7 @@
       every: { game: 'cada 15 min', chart: 'cada hora', presets: 'los lunes a las 5:00', backup: 'cada día a las 3:30', restore_test: 'los lunes a las 6:00', emails: 'cada hora, eventos a las 7:30 ET' },
       st: { ok: 'OK', running: 'En curso', late: 'Con retraso', failed: 'Error', stuck: 'Bloqueada', never: 'Nunca ejecutada' }, last: 'última ejecución {t}', ago: 'hace {t}', now: 'ahora mismo', took: '{s} s', cmd: 'Línea de cPanel',
       svc: 'Servicios', yes: 'Configurado', no: 'Falta', live: 'real', test: 'modo de prueba', aiUse: 'hoy {a} de {b} · {n} por trader y por día', econUse: '{n} anuncios de alto impacto en los próximos 14 días · próximo: {e}, {d} ET',
-      c: { smtp: ['Correos por el buzón (SMTP)', 'mail() de PHP en su lugar: más a menudo en spam'], ai: ['Clave de Sweep AI', 'Sweep AI está desactivado'], billing: ['Stripe', 'Facturación desactivada'],
+      c: { smtp: ['Correos por el buzón (SMTP)', 'mail() de PHP en su lugar: más a menudo en spam'], twofa: ['Doble autenticación (código por correo)', 'Desactivada: sin buzón SMTP, o apagada en config.php (twofa)'], ai: ['Clave de Sweep AI', 'Sweep AI está desactivado'], billing: ['Stripe', 'Facturación desactivada'],
         webhook: ['Secreto del webhook de Stripe', 'Los pagos no se confirman'], chart: ['Databento (gráficos de las operaciones)', 'Sin gráficos'], backup: ['Frase secreta de las copias', 'No se escribe ninguna copia'],
         offsite: ['Copia fuera del servidor', 'Copias solo en el servidor'], push: ['Notificaciones en el teléfono (claves push)', 'Apagadas: ejecutar ops/push-keys.php en el servidor'], econ: ['Calendario económico', 'Ningún anuncio de alto impacto en los próximos 14 días: revisar el calendario'], app_url: ['Dirección de la app (app_url)', 'Los enlaces de los correos usan app.makeitsweep.com'] } },
   };
@@ -950,7 +950,7 @@
         ${k.error ? `<small class="neg">${esc(k.error)}</small>` : k.note ? `<small>${esc(k.note)}</small>` : ''}
         <details><summary>${x.cmd}</summary><code>${esc(k.schedule + '  ' + k.command)}</code></details></li>`; }).join('');
     const C = d.config || {}, money2 = (v) => (typeof money === 'function' ? money(Math.round(Number(v || 0) * 100), { sign: false, dec: 2 }) : '$' + Number(v || 0).toFixed(2));   // the language's format
-    const svc = [['smtp', C.smtp], ['ai', C.ai, C.ai ? x.aiUse.replace('{a}', money2(C.ai_spent_usd)).replace('{b}', money2(C.ai_budget_usd)).replace('{n}', C.ai_plan_limits ? Object.entries(C.ai_plan_limits).map(([p, n]) => ({ free: 'Free', pro: 'Pro', elite: 'Elite' })[p] + ' ' + n).join(' · ') : C.ai_user_limit) : ''],
+    const svc = [['smtp', C.smtp], ['twofa', C.twofa], ['ai', C.ai, C.ai ? x.aiUse.replace('{a}', money2(C.ai_spent_usd)).replace('{b}', money2(C.ai_budget_usd)).replace('{n}', C.ai_plan_limits ? Object.entries(C.ai_plan_limits).map(([p, n]) => ({ free: 'Free', pro: 'Pro', elite: 'Elite' })[p] + ' ' + n).join(' · ') : C.ai_user_limit) : ''],
       ['billing', C.billing, C.billing ? (C.billing_live ? x.live : x.test) : ''], ['webhook', C.webhook], ['chart', C.chart], ['econ', C.econ, C.econ && C.econ_next ? x.econUse.replace('{n}', C.econ_n).replace('{e}', typeof tr === 'function' ? tr(C.econ_next.event) : C.econ_next.event).replace('{d}', new Date(C.econ_next.ts * 1000).toLocaleString(typeof LOC === 'function' ? LOC() : undefined, { timeZone: 'America/New_York', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) : ''], ['backup', C.backup], ['push', C.push], ['app_url', C.app_url]];
     return `<div class="sec-h"><h2>${x.h}</h2></div><p class="muted ux-hl-sub">${x.sub}</p><ul class="ux-pr-list ux-hl-list">${rows}</ul>
       <h4>${x.svc}</h4><ul class="ux-hl-cfg">${svc.map(([k, on, extra]) => `<li class="${on ? 'on' : 'off'}" data-hl="${k}"><span>${esc(x.c[k][0])}</span><b>${on ? x.yes : x.no}</b><small>${esc(on ? (extra || '') : x.c[k][1])}</small></li>`).join('')}</ul>`;

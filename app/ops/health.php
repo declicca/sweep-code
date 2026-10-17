@@ -13,6 +13,7 @@ function sweep_health(PDO $pdo, array $cfg, string $app): array
     $sc = (array) ($cfg['smtp'] ?? []);
     $c['smtp'] = !empty($sc['host']) && !empty($sc['user']) && !empty($sc['pass']);   // else PHP mail(): more often in spam
     $c['app_url'] = trim((string) ($cfg['app_url'] ?? '')) !== '';
+    $c['twofa'] = $c['smtp'] && !(isset($cfg['twofa']) && $cfg['twofa'] === false);   // the code by email on a new browser (auth/twofa.php)
     try {   // Sweep AI: key, global daily budget, per-trader limit, spent today
         require_once $app . '/ai/ai-core.php';
         $a = sai_config();
