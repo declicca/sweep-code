@@ -429,6 +429,12 @@
     withChoice: (v, group, id) => { const pv = String(v || '').split('|'); while (pv.length < 5) pv.push(''); const { p } = find(pv[0], pv[1], ''); const g = p && (p.options || []).find((o) => o.id === group); if (!g) return pv.join('|'); const keep = optsOf(pv[4]).filter((o) => !g.choices.some((c) => c.id === o)); if (id && id !== g.default) keep.push(id); pv[4] = keep.join('+'); return pv.join('|'); },
     version: () => (CAT && CAT.version) || null, ready: () => !!CAT, load: () => loadCat() };   // used to move a passed evaluation to its funded rules
   /** value « firm|program|size|phase » → account fields + rules (amounts in cents, as the app stores them) */
+  // a funded account is named and shown as the firm calls it (audit of 16 Oct., R13; the same names as « Move to funded »,
+  // fundedName in src/nav.js): « Topstep XFA 50K », « Apex Trader Funding PA 50K », else « Lucid Trading Funded 50K »
+  const FUNDED_CODE = [[/topstep/i, 'XFA'], [/apex/i, 'PA'], [/take ?profit|^tpt\b/i, 'PRO']];
+  const fundCode = (f) => (FUNDED_CODE.find((x) => x[0].test(`${f.id} ${f.name}`)) || [])[1] || '';
+  const fundWord = () => ({ en: 'Funded', fr: 'Financé', es: 'Financiada' })[LANG] || 'Funded';
+  const fundedNm = (f, s) => `${f.name} ${fundCode(f) || fundWord()} ${s.size / 1000}K`;
   const rulesOf = (v) => {
     const [fid, pid, size, phase, opt] = String(v || '').split('|'); const { f, p, s } = find(fid, pid, size); if (!s) return null;
     const r = phaseRules(s, phase, opt) || s.eval || s.funded; if (!r) return null;
@@ -437,7 +443,7 @@
     const liveStart = phase === 'live' && r.start_pct ? Math.round(s.size * r.start_pct / 100) : null;
     const liveDd = liveStart != null && r.floor != null ? liveStart - r.floor : null;
     const c = (x) => (x == null ? null : Math.round(x * 100));
-    return { start: liveStart != null ? liveStart : s.size, name: phase === 'live' ? `${f.name} Live ${s.size / 1000}K` : `${p.name} ${s.size / 1000}K`, firm: f.name, aliases: [f.name, ...(f.aliases || [])], rules: { target_c: phase === 'eval' ? c(r.target) : null, dd_c: liveDd != null ? c(liveDd) : c(r.dd), dd_floor_c: phase === 'live' && r.floor != null ? c(r.floor) : null, dd_type: r.dd_type || 'eod', dd_lock: true, dd_lock_offset_c: r.dd_lock_offset ? c(r.dd_lock_offset) : null, dll_c: r.dll_optional && !hasDll ? null : c(r.dll), consistency_pct: r.consistency || null, ...(r.consistency_base ? { consistency_base: r.consistency_base } : {}), min_days: phase === 'eval' ? (r.min_days || null) : null, ...payoutRules(phase === 'eval' ? null : r.payout, opt) } };
+    return { start: liveStart != null ? liveStart : s.size, name: phase === 'live' ? `${f.name} Live ${s.size / 1000}K` : phase === 'funded' ? fundedNm(f, s) : `${p.name} ${s.size / 1000}K`, firm: f.name, aliases: [f.name, ...(f.aliases || [])], rules: { target_c: phase === 'eval' ? c(r.target) : null, dd_c: liveDd != null ? c(liveDd) : c(r.dd), dd_floor_c: phase === 'live' && r.floor != null ? c(r.floor) : null, dd_type: r.dd_type || 'eod', dd_lock: true, dd_lock_offset_c: r.dd_lock_offset ? c(r.dd_lock_offset) : null, dll_c: r.dll_optional && !hasDll ? null : c(r.dll), consistency_pct: r.consistency || null, ...(r.consistency_base ? { consistency_base: r.consistency_base } : {}), min_days: phase === 'eval' ? (r.min_days || null) : null, ...payoutRules(phase === 'eval' ? null : r.payout, opt) } };
   };
   function summary(fid, pid, size, phase, opt) {
     const { s, p } = find(fid, pid, size); const r = s && (phaseRules(s, phase, opt) || s.eval || s.funded); if (!r) return ''; const hasDll = optsOf(opt).includes('dll');
@@ -496,7 +502,7 @@
     w.classList.remove('folded');
     const f = CAT.firms.find((x) => x.id === d.firm), p = f && f.programs.find((x) => x.id === d.type), s = p && p.sizes.find((x) => String(x.size) === d.size);
     const phCrumb = mode === 'create' && d.phaseSet === '1' ? `<button type="button" data-st-go="phase">${pt(d.phase)}</button><span>›</span>` : '';
-    const crumbs = f ? `<div class="ux-st-crumbs">${phCrumb}<button type="button" data-st-go="firm">${esc(f.name)}</button>${p ? `<span>›</span><button type="button" data-st-go="type">${esc(p.name)}</button>` : ''}${s ? `<span>›</span><button type="button" data-st-go="size">${s.size / 1000}K</button>` : ''}</div>` : '';
+    const crumbs = f ? `<div class="ux-st-crumbs">${phCrumb}<button type="button" data-st-go="firm">${esc(f.name)}</button>${p ? `<span>›</span><button type="button" data-st-go="type">${esc(d.phase === 'funded' && fundCode(f) && !p.direct ? `${fundCode(f)} (${p.name})` : p.name)}</button>` : ''}${s ? `<span>›</span><button type="button" data-st-go="size">${s.size / 1000}K</button>` : ''}</div>` : '';
     let body = '';
     if (mode === 'create' && d.phaseSet !== '1') {
       body = `<p class="ux-st-q">${pt('q0')}</p><div class="ux-st-tiles ux-st-ph"><button type="button" class="ux-st-tile" data-st-ph0="eval"><b>${pt('eval')}</b><small>${pt('evalSub')}</small></button><button type="button" class="ux-st-tile" data-st-ph0="funded"><b>${pt('funded')}</b><small>${pt('fundedSub')}</small></button><button type="button" class="ux-st-tile ux-st-live" data-st-ph0="live"><b>${pt('liveT')} <em>${pt('real')}</em></b><small>${pt('liveSub')}</small></button></div>`;
@@ -504,7 +510,9 @@
       body = `<p class="ux-st-q">${pt('q1')}</p><div class="ux-st-tiles">${CAT.firms.map((x) => `<button type="button" class="ux-st-tile" data-st-firm="${esc(x.id)}"><b>${esc(x.name)}</b><small>${((n) => (n === 1 ? esc(x.programs.find((y) => !y.legacy).name) : pt('types').replace('{n}', n)))(x.programs.filter((y) => !y.legacy).length || x.programs.length)}</small></button>`).join('')}
         ${mode === 'create' ? `<button type="button" class="ux-st-tile ghost" data-st-manual><b>${pt('other')}</b><small>${pt('otherSub')}</small></button>` : ''}</div>`;
     } else if (!p) {
-      const row = (x) => `<button type="button" class="ux-st-row${x.legacy ? ' ux-st-legacy' : ''}" data-st-type="${esc(x.id)}"><b>${esc(x.legacy && x.label ? L3(x.label) : x.name)}${x.direct ? ` <em>${pt('direct')}</em>` : ''}</b><small>${esc(x.note ? (x.note[LANG] || x.note.en || '') : '')}</small><i aria-hidden="true">›</i></button>`;
+      const fd = mode === 'create' && d.phaseSet === '1' && d.phase === 'funded' && fundCode(f);   // « Topstep XFA · after the Trading Combine »
+      const AFTER = ({ en: 'after the {p}', fr: 'après le {p}', es: 'después del {p}' })[LANG] || 'after the {p}';
+      const row = (x) => `<button type="button" class="ux-st-row${x.legacy ? ' ux-st-legacy' : ''}" data-st-type="${esc(x.id)}"><b>${fd && !x.direct ? `${esc(f.name)} ${fd} <small class="ux-st-after">${esc(((n) => (LANG === 'fr' && /^[aeiouyéèh]/i.test(n) ? 'après l’{p}' : AFTER).replace('{p}', n))(x.legacy && x.label ? L3(x.label) : x.name))}</small>` : esc(x.legacy && x.label ? L3(x.label) : x.name)}${x.direct ? ` <em>${pt('direct')}</em>` : ''}</b><small>${esc(x.note ? (x.note[LANG] || x.note.en || '') : '')}</small><i aria-hidden="true">›</i></button>`;
       const cur = f.programs.filter((x) => !x.legacy), old = f.programs.filter((x) => x.legacy);
       const OLD = ({ en: 'Account bought before the firm’s last rule change', fr: 'Compte acheté avant le dernier changement de règles', es: 'Cuenta comprada antes del último cambio de reglas' })[LANG] || 'Account bought before the firm’s last rule change';
       body = `<p class="ux-st-q">${pt('q2')}</p><div class="ux-st-list">${cur.map(row).join('')}</div>${old.length ? `<p class="ux-st-sub">${OLD}</p><div class="ux-st-list">${old.map(row).join('')}</div>` : ''}`;

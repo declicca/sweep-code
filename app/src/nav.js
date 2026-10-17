@@ -4266,9 +4266,17 @@ window.SweepMO = window.SweepMO || class {
     }
     // 3b. new or already running (in the add-account form, next to the cost and count)
     const xs = document.querySelector('form[data-form="account"] .nav-acc-xs');
-    if (xs && !xs.parentElement.querySelector('.nav-acst')) {
+    if (xs && !xs.closest('form').querySelector('.nav-acst')) {
       xs.insertAdjacentHTML('beforebegin', `<div class="nav-acst" data-noi18n><span>${t('state')}</span><div class="seg"><button type="button" class="on" data-acst="new">${t('nw')}</button><button type="button" data-acst="run">${t('run')}</button></div>
         <div class="nav-acst-run" hidden><label class="f"><span>${t('cur')}</span><input name="nav_cur" inputmode="decimal" placeholder="$"></label><label class="f"><span>${t('peak')}</span><input name="nav_peak" inputmode="decimal" placeholder="$"><small class="muted">${t('peakH')}</small></label></div></div>`);
+    }
+    // a funded (or live) account chosen in the guided steps is often one already running: the question comes out of « More
+    // options », right above it (audit of 16 Oct., R14); an evaluation keeps it there
+    if (xs) {
+      const f0 = xs.closest('form'), st = f0.querySelector('.nav-acst'), w = f0.querySelector('.ux-st'), opt = f0.querySelector('details.nav-acc-opt');
+      const out = !!(st && w && opt && f0.classList.contains('ux-st-final') && /^(funded|live)$/.test(w.dataset.phase || ''));
+      if (st && out && st.nextElementSibling !== opt) opt.before(st);
+      else if (st && !out && st.parentElement !== xs.parentElement) xs.before(st);
     }
     // 5. manual form: the essentials first
     const tk = document.querySelector('#tkSlide.open');
@@ -4310,7 +4318,14 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('change', (e) => { const f = e.target.closest && e.target.closest('form[data-form="account"]'); if (f && /^nav_fee/.test(e.target.name || '')) optNote(f); });
   document.addEventListener('click', (e) => {
     const s = e.target.closest && e.target.closest('[data-acst]');
-    if (s) { const box = s.closest('.nav-acst'); box.querySelectorAll('[data-acst]').forEach((x) => x.classList.toggle('on', x === s)); box.querySelector('.nav-acst-run').hidden = s.dataset.acst !== 'run'; return; }
+    if (s) {
+      const box = s.closest('.nav-acst'); box.querySelectorAll('[data-acst]').forEach((x) => x.classList.toggle('on', x === s)); box.querySelector('.nav-acst-run').hidden = s.dataset.acst !== 'run';
+      // already running: its activation fee was paid long ago — unticked (ticked again for a new one); the trader can still tick it
+      const f = s.closest('form'), fee = f && f.querySelector('[name=nav_fee_on]');
+      if (fee) { fee.checked = s.dataset.acst !== 'run'; optNote(f); }
+      if (s.dataset.acst === 'run') { const c = box.querySelector('[name=nav_cur]'); if (c) c.focus({ preventScroll: true }); }
+      return;
+    }
     const m = e.target.closest && e.target.closest('.nav-more-b');
     if (m) { const tk = m.closest('#tkSlide'); const on = tk.classList.toggle('nav-tk-min'); LS('sw.tkMore', on ? '0' : '1'); m.textContent = on ? t('more') + ' ▾' : t('less') + ' ▴'; }
   });
