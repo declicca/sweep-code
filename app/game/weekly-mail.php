@@ -96,7 +96,7 @@ final class GameWeeklyMail
      * loser, the stop not respected, the risk or the size over the limit, a size raised after 2 wins, against the bias, a setup
      * outside the plan, the first 5 minutes when they cost the trader, a planned day off, no plan, the checklist « no ».
      */
-    private static function coachDisc(string $uid, array $tr): ?int
+    public static function coachDisc(string $uid, array $tr): ?int
     {
         if (!$tr) return null;
         $all = array_values(array_filter(self::docs($uid, 'trades'), fn($t) => empty($t['demo'])));

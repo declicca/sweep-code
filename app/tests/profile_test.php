@@ -40,6 +40,7 @@ $trade('t3', '2026-10-13', ['plan' => 'n', 'stop' => 'n'], ['copy_group' => 'g1'
 $trade('t3c', '2026-10-13', ['plan' => 'y', 'stop' => 'y'], ['copy_group' => 'g1', 'created_at' => '2026-10-13T14:05:00Z']);
 $trade('t4', '2026-10-14', ['plan' => 'y'], ['demo' => true]);
 $trade('t5', '2026-10-19', ['plan' => 'y', 'stop' => 'y'], ['source' => 'ninjatrader']); $trade('t6', '2026-10-24', ['plan' => 'n']);
+foreach (['2026-09-29', '2026-09-30', '2026-10-13', '2026-10-19'] as $jd) $pdo->prepare("INSERT OR REPLACE INTO documents (user_id, collection, id, data) VALUES ('u1', 'journals', ?, ?)")->execute([$jd, json_encode(['id' => $jd, 'pre' => ['bias' => 'bullish', 'max_loss' => '1000']])]);   // a plan each day traded
 $day('2026-09-29', 1); $day('2026-09-30', 0); $day('2026-10-13', 1); $day('2026-10-19', 1);
 
 // 1. off by default; one link, kept
@@ -55,9 +56,9 @@ $ok(pp_html($pdo, 'NoSuchLink0000', 'en')[0] === 404, 'an unknown link: 404');
 $d = pp_data($pdo, 'u1');
 $w = array_column($d['weeks'], null, 'mon');
 $ok(array_keys($w) === ['2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19'], 'the 4 weeks: this one and the 3 before (' . implode(', ', array_keys($w)) . ')');
-$ok($w['2026-09-28']['disc'] === 75 && $w['2026-10-05']['disc'] === null && $w['2026-10-12']['disc'] === 0 && $w['2026-10-19']['disc'] === 100,
-    'each week: 75 %, none, 0 % (the copy once, as its original; the example left out), 100 % (Saturday left out) (' . json_encode(array_column($d['weeks'], 'disc')) . ')');
-$ok($d['disc'] === 63 && $d['trades'] === 4, 'the 4 weeks together: every trade\'s score, (100 + 50 + 0 + 100) / 4 = 63 % (' . json_encode([$d['disc'], $d['trades']]) . ')');
+$ok($w['2026-09-28']['disc'] === 50 && $w['2026-10-05']['disc'] === null && $w['2026-10-12']['disc'] === 0 && $w['2026-10-19']['disc'] === 100,
+    'each week, like the coach: 50 % (the stop « no » on Wednesday), none, 0 % (the copy once, as its original; the example left out), 100 % (Saturday left out) (' . json_encode(array_column($d['weeks'], 'disc')) . ')');
+$ok($d['disc'] === 50 && $d['trades'] === 4, 'the 4 weeks together: 2 of 4 trades without a mistake = 50 % (' . json_encode([$d['disc'], $d['trades']]) . ')');
 $ok($d['swept'] === 3 && $d['traded'] === 4 && $w['2026-09-28']['swept'] === 1 && $w['2026-09-28']['traded'] === 2 && $w['2026-10-19']['days'][0]['swept'] === true && $w['2026-09-28']['days'][2] === ['day' => '2026-09-30', 'market' => true, 'swept' => false, 'active' => true] && $w['2026-09-28']['days'][3]['active'] === false && $w['2026-10-12']['days'][3]['active'] === false,
     'days swept 3, days traded 4; each day: swept, traded, or nothing (an example trade is not a day traded)');
 $ok($d['name'] === 'Noa' && $d['verified'] === false, 'the first name; not verified (t5 says « ninjatrader », but no trade came from a sync)');
@@ -65,18 +66,18 @@ $ok($d['name'] === 'Noa' && $d['verified'] === false, 'the first name; not verif
 // 3. the page: the visitor's language, never an amount, the full name or the username
 [$c, $fr] = pp_html($pdo, $slug, 'fr');
 $nb = "\u{202F}";
-$ok($c === 200 && strpos($fr, '<h1>Noa</h1>') !== false && strpos($fr, 'Discipline · 4 dernières semaines') !== false && strpos($fr, "63{$nb}%") !== false
+$ok($c === 200 && strpos($fr, '<h1>Noa</h1>') !== false && strpos($fr, 'Discipline · 4 dernières semaines') !== false && strpos($fr, "50{$nb}%") !== false
     && strpos($fr, 'Cette semaine') !== false && strpos($fr, 'Semaine du 28 sept.') !== false && strpos($fr, '1 balayées sur 2 jours tradés') !== false && strpos($fr, 'Journées balayées') !== false,
-    'French: the first name, « 4 dernières semaines », 63 %, this week first, « Semaine du 28 sept. », days swept of days traded');
+    'French: the first name, « 4 dernières semaines », 50 %, this week first, « Semaine du 28 sept. », days swept of days traded');
 $frx = str_replace($slug, '', $fr);   // (the random link could hold any letters)
 $ok(strpos($frx, '$') === false && strpos($frx, '1 250') === false && strpos($frx, 'Tremblay') === false && stripos($frx, 'jean') === false && strpos($frx, 'NQ') === false, 'never an amount, the last name, the username or an instrument');
-$ok(strpos($fr, '<meta name="robots" content="noindex">') !== false && strpos($fr, 'og:title" content="Noa · Discipline sur Sweep"') !== false && strpos($fr, "og:description\" content=\"4 semaines : 63{$nb}% de discipline, 3 journées balayées") !== false
+$ok(strpos($fr, '<meta name="robots" content="noindex">') !== false && strpos($fr, 'og:title" content="Noa · Discipline sur Sweep"') !== false && strpos($fr, "og:description\" content=\"4 semaines : 50{$nb}% de discipline, 3 journées balayées") !== false
     && strpos($fr, 'twitter:card" content="summary_large_image"') !== false && strpos($fr, 'og:image:width" content="1200"') !== false && strpos($fr, '✓ Vérifié') === false,
-    'noindex; the preview: « Noa · Discipline sur Sweep », « 4 semaines : 63 % de discipline, 3 journées balayées… », a 1200 × 630 image; no « Vérifié »');
+    'noindex; the preview: « Noa · Discipline sur Sweep », « 4 semaines : 50 % de discipline, 3 journées balayées… », a 1200 × 500 image; no « Vérifié »');
 $_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'es-ES,es;q=0.9,en;q=0.8'; [, $es] = pp_html($pdo, $slug);
 $_SERVER['HTTP_ACCEPT_LANGUAGE'] = ''; [, $dflt] = pp_html($pdo, $slug);
-$ok(strpos($es, 'Disciplina · últimas 4 semanas') !== false && strpos($es, 'Esta semana') !== false && strpos($dflt, 'Discipline · 4 dernières semaines') !== false && strpos(pp_html($pdo, $slug, 'en')[1], "63%") !== false,
-    'the visitor\'s language (Spanish); none given: the trader\'s (French); English writes « 63% »');
+$ok(strpos($es, 'Disciplina · últimas 4 semanas') !== false && strpos($es, 'Esta semana') !== false && strpos($dflt, 'Discipline · 4 dernières semaines') !== false && strpos(pp_html($pdo, $slug, 'en')[1], "50%") !== false,
+    'the visitor\'s language (Spanish); none given: the trader\'s (French); English writes « 50% »');
 // 4. verified: every trade written by a sync
 foreach (['t1', 't2', 't3', 't5'] as $i => $id) $pdo->prepare("INSERT INTO sync_trades (user_id, trade_id, doc_id, sync_account_id, sig, fills, entry_at, inst, dir, created_at, updated_at) VALUES ('u1', ?, ?, 'sa', 'x', '[]', '2026-10-01 09:30:00', 'NQ', 'long', 0, 0)")->execute(["tr$i", $id]);
 $d = pp_data($pdo, 'u1'); [, $vf] = pp_html($pdo, $slug, 'fr');

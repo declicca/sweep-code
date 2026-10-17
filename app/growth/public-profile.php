@@ -4,7 +4,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 /**
  * Sweep — the public discipline profile (brief 02 part 12): optional, OFF by default, on a personal link
  * (/p/<random id>, never the username, which can come from the email). It shows the last 4 weeks of discipline only:
- * the discipline score (the trader's checklist answered « yes »), days swept, days traded, the current streak, week by week.
+ * the discipline score (the share of trades without a mistake, by the coach's rules), days swept, days traded, the current streak, week by week.
  * Never an amount, an instrument, an account or a firm. « Verified » only when every trade of those weeks came from a
  * platform sync (NinjaTrader 8, Quantower), as the server knows it (table sync_trades, written by the sync only: the
  * trader cannot set it). Turned off: the link answers « not public » at once. Account deleted: the profile goes too.
@@ -50,7 +50,7 @@ function pp_delete_user(PDO $pdo, string $uid): void { pp_q($pdo, 'DELETE FROM p
 
 /**
  * The 4 weeks (this week and the 3 before, Monday-Friday, New York session days), the same numbers as the week's recap
- * (GameWeeklyMail::brief: discipline = average of the trades' checklist scores, example data left out, a copy once).
+ * (GameWeeklyMail::brief: discipline = the share of trades without a mistake by the coach's rules, example data left out, a copy once).
  */
 function pp_data(PDO $pdo, string $uid): array
 {
@@ -76,13 +76,8 @@ function pp_data(PDO $pdo, string $uid): array
             GameV2b::weekSummary($uid, $m)['days']);   // each day: swept, traded, or nothing
         $weeks[] = ['mon' => $m, 'disc' => $b['disc'], 'traded' => (int) $b['traded'], 'swept' => (int) $b['swept'], 'days' => $days];
     }
-    // the 4 weeks together: every trade's checklist score, averaged (not the average of the weeks)
-    $ds = [];
-    foreach ($tr as $t) {
-        $y = 0; $n = 0;
-        foreach ((array) ($t['discipline'] ?? []) as $v) { if ($v === 'y' || $v === 'n') { $n++; if ($v === 'y') $y++; } }
-        if ($n) $ds[] = $y / $n * 100;
-    }
+    // the 4 weeks together: the share of all their trades without a mistake, by the coach's rules (not the average of the weeks)
+    $disc = GameWeeklyMail::coachDisc($uid, $tr);
     // verified: every trade of these weeks written by a platform sync (sync_trades: the server's own record)
     $synced = [];
     try { foreach ($pdo->query('SELECT doc_id FROM sync_trades WHERE user_id = ' . $pdo->quote($uid))->fetchAll(PDO::FETCH_COLUMN) as $id) $synced[(string) $id] = true; }
@@ -95,7 +90,7 @@ function pp_data(PDO $pdo, string $uid): array
     }
     $u = GameEngine::q('SELECT first_name, lang FROM users WHERE id = ?', [$uid])->fetch(PDO::FETCH_ASSOC) ?: [];
     return ['name' => trim((string) ($u['first_name'] ?? '')), 'lang' => (string) ($u['lang'] ?? 'en'), 'weeks' => $weeks, 'trades' => count($tr),
-        'disc' => $ds ? (int) floor(array_sum($ds) / count($ds) + 0.5) : null, 'swept' => array_sum(array_column($weeks, 'swept')),
+        'disc' => $disc, 'swept' => array_sum(array_column($weeks, 'swept')),
         'traded' => array_sum(array_column($weeks, 'traded')), 'streak' => (int) (GameEngine::profileState($uid)['streak']['current'] ?? 0),
         'verified' => $verified, 'platforms' => array_keys($plat)];
 }
@@ -115,21 +110,21 @@ const PP_T = [
     'en' => ['title' => '{n} · Discipline on Sweep', 'sub' => 'Discipline · last 4 weeks', 'disc' => 'Discipline', 'streak' => 'Current streak', 'days' => 'days', 'day1' => 'day',
         'swept' => 'Days swept', 'traded' => 'Days traded', 'week' => 'Week of {d}', 'now' => 'This week', 'wk' => '{s} swept of {t} days traded', 'none' => 'No trade in these 4 weeks yet.',
         'ver' => 'Verified', 'verS' => 'Every trade of these 4 weeks comes from {p}, synced automatically.', 'plat' => 'the trading platform',
-        'foot' => 'Discipline only, never an amount. Discipline = the share of the trader\'s checklist answered « yes », trade by trade.',
+        'foot' => 'Discipline only, never an amount. Discipline = the share of the trader\'s trades without a mistake (plan, stop, checklist…), by the rules of their Sweep coach.',
         'desc' => '4 weeks: {d} discipline, {s} days swept, {k}-day streak.', 'desc0' => '4 weeks of discipline, on Sweep.', 'anon' => 'A Sweep trader',
         'cta' => 'Track your discipline with Sweep', 'ctaS' => 'The trading journal for prop firm traders. Discipline first.', 'go' => 'Try Sweep', 'gone' => 'This profile is not public.',
         'mon' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 'dow' => ['M', 'T', 'W', 'T', 'F']],
     'fr' => ['title' => '{n} · Discipline sur Sweep', 'sub' => 'Discipline · 4 dernières semaines', 'disc' => 'Discipline', 'streak' => 'Série actuelle', 'days' => 'jours', 'day1' => 'jour',
         'swept' => 'Journées balayées', 'traded' => 'Jours tradés', 'week' => 'Semaine du {d}', 'now' => 'Cette semaine', 'wk' => '{s} balayées sur {t} jours tradés', 'none' => 'Pas encore de trade sur ces 4 semaines.',
         'ver' => 'Vérifié', 'verS' => 'Chaque trade de ces 4 semaines vient de {p}, synchronisé automatiquement.', 'plat' => 'la plateforme de trading',
-        'foot' => 'Seulement la discipline, jamais de montant. Discipline = la part des réponses « oui » à la checklist du trader, trade par trade.',
+        'foot' => 'Seulement la discipline, jamais de montant. Discipline = la part des trades sans erreur du trader (plan, stop, checklist…), selon les règles de son coach Sweep.',
         'desc' => '4 semaines : {d} de discipline, {s} journées balayées, série de {k} jours.', 'desc0' => '4 semaines de discipline, sur Sweep.', 'anon' => 'Un trader Sweep',
         'cta' => 'Suis ta discipline avec Sweep', 'ctaS' => 'Le journal de trading des traders de prop firms. La discipline d’abord.', 'go' => 'Essayer Sweep', 'gone' => 'Ce profil n’est pas public.',
         'mon' => ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'], 'dow' => ['L', 'M', 'M', 'J', 'V']],
     'es' => ['title' => '{n} · Disciplina en Sweep', 'sub' => 'Disciplina · últimas 4 semanas', 'disc' => 'Disciplina', 'streak' => 'Racha actual', 'days' => 'días', 'day1' => 'día',
         'swept' => 'Días barridos', 'traded' => 'Días operados', 'week' => 'Semana del {d}', 'now' => 'Esta semana', 'wk' => '{s} barridos de {t} días operados', 'none' => 'Aún no hay operaciones en estas 4 semanas.',
         'ver' => 'Verificado', 'verS' => 'Cada operación de estas 4 semanas viene de {p}, sincronizada automáticamente.', 'plat' => 'la plataforma de trading',
-        'foot' => 'Solo la disciplina, nunca un monto. Disciplina = la proporción de respuestas «sí» a la checklist del trader, operación por operación.',
+        'foot' => 'Solo la disciplina, nunca un monto. Disciplina = la proporción de operaciones sin error del trader (plan, stop, checklist…), según las reglas de su coach de Sweep.',
         'desc' => '4 semanas: {d} de disciplina, {s} días barridos, racha de {k} días.', 'desc0' => '4 semanas de disciplina, en Sweep.', 'anon' => 'Un trader de Sweep',
         'cta' => 'Sigue tu disciplina con Sweep', 'ctaS' => 'El diario de trading para traders de prop firms. Primero la disciplina.', 'go' => 'Probar Sweep', 'gone' => 'Este perfil no es público.',
         'mon' => ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sept.', 'oct.', 'nov.', 'dic.'], 'dow' => ['L', 'M', 'X', 'J', 'V']],
