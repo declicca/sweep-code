@@ -2862,3 +2862,19 @@ body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-ev
 /* brief 00, Q5: the sample data hidden, one line */
 #main .nav-demo-hid{margin:0 0 12px;font-size:13.5px;color:var(--muted)}
 #main .nav-demo-hid .link{min-height:44px;padding:0 4px;margin:0;color:var(--pos);font-weight:600}   /* blue: an action */
+
+/* The app added to the Home Screen (16 Oct., Mateo's recording on iPhone): there the safe areas are real (in Safari they are
+   0), and two rules counted them twice. Only for the installed app: the browser stays exactly as it is.
+   - the compact title of a scrolled page (« Today »): centred on the logo's row, not 1/2 safe area lower (the header's own
+     padding already holds the safe area: its row's middle is 50 % + half of it);
+   - the bottom bar: right above the Home indicator (it was the safe area plus 10 px, plus a margin of the safe area again),
+     and what floats above it (Ask Sweep, « A new version », undo, the accounts' bar…) comes down with it. */
+@media (display-mode:standalone) and (max-width:860px){
+  html body aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2)}
+  html body .bottomnav{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px))!important;margin-bottom:0!important}
+  /* what sits above the bar comes down with it (26 px), the same gap as in the browser */
+  html body .ask-fab,html body .nav-update,html body .gm-sumtoast,html body .acc-bar{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
+  html body .nav-undo{bottom:calc(66px + env(safe-area-inset-bottom,0px))!important}
+  html body .g-xpf{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+  html body .sheet-panel{bottom:calc(60px + env(safe-area-inset-bottom,0px))!important}
+}
