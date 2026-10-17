@@ -9,6 +9,9 @@ Shares are balanced on the durations of the previous run (tools/test-times.json,
 import json, os, re, shutil, subprocess, sys, time
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); TOOLS = os.path.join(APP, 'tools')
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+# GitHub Actions runs the suite on several machines at once (SWEEP_PART=k/m, 17 Oct.): the tests are balanced over N × m shards
+# and this machine runs its N; the PHP tests run on part 1 only. Locally: 1/1, as before.
+PART, PARTS = (int(x) for x in (os.environ.get('SWEEP_PART') or '1/1').split('/'))
 TIMES = os.path.join(TOOLS, 'test-times.json')
 ENV = dict(os.environ, PATH=':'.join([os.path.expanduser('~/.venvs/sweep/bin'), '/opt/homebrew/bin', '/opt/homebrew/opt/coreutils/libexec/gnubin',
                                       '/opt/homebrew/opt/gnu-sed/libexec/gnubin', os.environ.get('PATH', '')]))
@@ -22,9 +25,10 @@ known = {'e2e_acceptance': 300, 'e2e_realnet': 120, 'e2e_lot_a': 120}
 try: known.update(json.load(open(TIMES)))
 except (OSError, ValueError): pass
 order = sorted(core, key=lambda t: -known.get(t, 60))
-shares = [[] for _ in range(N)]; load = [0] * N
+shares = [[] for _ in range(N * PARTS)]; load = [0] * (N * PARTS)
 for t in order:   # longest first, to the least loaded shard
     i = load.index(min(load)); shares[i].append(t); load[i] += known.get(t, 60)
+shares, load = shares[(PART - 1) * N:PART * N], load[(PART - 1) * N:PART * N]   # this machine's
 
 def shard(i):
     k = i + 1
@@ -40,7 +44,7 @@ def prepare(i):
     tests = os.path.join(dest, 'tests')
     run_all = open(os.path.join(tests, 'run-all.sh')).read()
     run_all = re.sub(r'CORE="[^"]*"', 'CORE="%s"' % ' '.join(shares[i]), run_all)
-    if i > 0: run_all = re.sub(r'^php (tests|ops)/.*$', '', run_all, flags=re.M)   # the PHP tests run once, in shard 1
+    if i > 0 or PART > 1: run_all = re.sub(r'^php (tests|ops)/.*$', '', run_all, flags=re.M)   # the PHP tests run once, in shard 1 of part 1
     # each test timed (copy only): « name seconds » lines next to run-all's log
     a = 'reset_attempts; timeout 900 python3 "tests/$t.py" "$BASE" "$STATE" > "$out" 2>&1; check "$t" $? "$out"'
     assert a in run_all, 'run-all.sh changed: update tools/par.py'
