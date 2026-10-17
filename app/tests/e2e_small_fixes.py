@@ -7,7 +7,8 @@ A trader of its own. Phone 390 (fr) and computer 1300 (en):
  R17  « Your real net » done since January, nothing yet this month: My money on Today shows the real net since January, not $0;
  R18  an account added « already running » (an adjustment), no trade yet: the Accounts card is on Today;
  R21  « Not trading today » chosen in the plan: a day off (the routine says so, nothing else to do);
- R22  the rule of the last review comes back in the next plan, a day off between them skipped.
+ R22  the rule of the last review comes back in the next plan, a day off between them skipped;
+ R23  « Check the trade »: the Symbol list and the date inside the card; Sweep AI steps aside reading down an account (phone).
 No page error, nothing wider than the window.
 """
 import json, random, sys
@@ -66,7 +67,18 @@ with sync_playwright() as p:
     pg.evaluate("openTicket(null)"); pg.wait_for_selector('.nav-am.open', timeout=8000); pg.wait_for_timeout(500)
     drop = pg.evaluate("(document.querySelector('.nav-am .nav-am-drop b') || {}).textContent || ''")
     ok(drop == x['drop'], f'{tag} R16 the screenshot sheet: « {drop} »')
+    # R23: « Check the trade » open, the Symbol list and the date stay inside the card
+    pg.evaluate("document.querySelectorAll('.nav-am.open details.nav-am-more-d').forEach((d) => d.open = true)"); pg.wait_for_timeout(400)
+    fit = pg.evaluate("(() => { const d = document.querySelector('.nav-am.open .nav-am-more-d').getBoundingClientRect(), b = document.querySelector('.nav-am.open .nav-am-more-d .nav-am-selb').getBoundingClientRect(), i = document.querySelector('.nav-am.open .nav-am-more-d input[type=date]').getBoundingClientRect(); return [Math.round(d.right - b.right), Math.round(d.right - i.right)] })()")
+    ok(fit[0] >= 8 and fit[1] >= 8, f'{tag} R23 « Check the trade »: the Symbol list and the date inside the card ({fit})')
     pg.evaluate("document.querySelectorAll('.nav-am.open [data-am=close]').forEach((b) => b.click())"); pg.wait_for_timeout(400)
+    # R23: Sweep AI's button steps aside while reading down an account (phone), back on the way up
+    pg.evaluate("location.hash = '#account/sf-a'"); pg.wait_for_timeout(1800)
+    pg.evaluate("scrollTo(0, 0)"); pg.wait_for_timeout(300); pg.evaluate("scrollBy(0, 400)"); pg.wait_for_timeout(700)
+    away = pg.evaluate("getComputedStyle(document.querySelector('.ask-fab')).opacity")
+    pg.evaluate("scrollBy(0, -150)"); pg.wait_for_timeout(700)
+    back = pg.evaluate("getComputedStyle(document.querySelector('.ask-fab')).opacity")
+    ok((away == '0' if phone else away == '1') and back == '1', f'{tag} R23 Sweep AI steps aside reading down an account {"(phone)" if phone else "(computer: stays)"}, back scrolling up ({away}, {back})')
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} nothing wider than the window')
     allerr += errs; ctx.close()
   ok(not allerr, f'no page error ({allerr[:2]})')

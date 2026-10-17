@@ -1361,6 +1361,19 @@
     };
   }
 
+  // Ask Sweep steps aside while the trader reads down a page (it covered values on the right, like an account's profit
+  // target) and comes back on the way up, near the top and at the bottom (R23). Phones only (the CSS).
+  let lastY = scrollY, tick = false;
+  addEventListener('scroll', () => {
+    if (tick) return; tick = true;
+    requestAnimationFrame(() => {
+      tick = false; const y = scrollY, end = y + innerHeight >= document.documentElement.scrollHeight - 8;
+      if (y < 120 || end || y < lastY - 8) document.body.classList.remove('ux-fab-away');
+      else if (y > lastY + 8) document.body.classList.add('ux-fab-away');
+      if (Math.abs(y - lastY) > 8 || y < 120) lastY = y;
+    });
+  }, { passive: true });
+  addEventListener('hashchange', () => { document.body.classList.remove('ux-fab-away'); lastY = 0; });
 })();
 
 /* ───────────── decimal fields accept a comma (French/Spanish keyboards): « 30182,75 » becomes « 30182.75 » as you type ─────────────

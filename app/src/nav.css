@@ -670,6 +670,7 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-layer) .ask-fab,body:has(#gOb) .ask-fab{opacity:0!important;pointer-events:none!important;transform:scale(.9) translateY(8px)}
 @media (min-width:861px){.ask-fab{right:24px;bottom:24px}}
 @media (max-width:860px){.ask-fab{right:16px;bottom:calc(96px + env(safe-area-inset-bottom,0))}}
+@media (max-width:860px){html body.ux-fab-away .ask-fab{opacity:0!important;pointer-events:none!important;transform:translateX(calc(100% + 24px))!important}}   /* phone: steps aside while reading down a page, back when scrolling up (R23) */
 
 /* Day / Week and Payouts read as one section (computer and phone) */
 .nav-dash .d-col > .d-perf{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
@@ -900,8 +901,10 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 .nav-am-head .nav-am-sw{color:var(--pos)!important;font-size:13px;font-weight:500}
 .nav-am-sel{position:relative;min-width:0}   /* the « Symbol » list stays inside its card (R23) */
 .nav-am-grid > *{min-width:0}
+.nav-am-grid input[type=date]{padding-right:6px;letter-spacing:-.02em}   /* the whole date fits a half-width field on a phone, « 10/19/2026 » not « 10/19/202 » (R23) */
+.nav-am-grid input[type=date]::-webkit-calendar-picker-indicator{margin-left:2px;padding:2px}
 .nav-am-opts button{white-space:normal;overflow-wrap:anywhere}
-.nav-am-selb{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--input,var(--panel2));color:var(--text);font:inherit;font-size:15px;text-align:left;cursor:pointer}
+.nav-am-selb{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;box-sizing:border-box;min-height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--input,var(--panel2));color:var(--text);font:inherit;font-size:15px;text-align:left;cursor:pointer}
 .nav-am-selb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nav-am-selb svg{width:16px;height:16px;flex-shrink:0;color:var(--muted);transition:transform .15s var(--ease-ios)}
 .nav-am-sel.open .nav-am-selb{border-color:var(--pos)}
