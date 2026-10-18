@@ -656,7 +656,8 @@
       // sorted last and was taken for « the last trade »); never « nothing to fix » while another trade of the day has a mistake
       const t = latest(list), c = Object.assign(tradeNote(t), { ses: session(day, list.length - 1, list) }), hm = c.time || savedHm(t);   // where the whole session stands
       const other = c.fix ? null : list.filter((x) => x !== t).map(tradeNote).filter((x) => x.fix).pop();
-      return card(hm ? fill(T.last, { t: hm }) : T.last.replace(/\s*·\s*\{t\}/, ''), noteHtml(c, other && other.fix[2]), 'co-today');
+      const st = edgeStreak(day);   // a winning streak explained (brief edge T5)
+      return card(hm ? fill(T.last, { t: hm }) : T.last.replace(/\s*·\s*\{t\}/, ''), noteHtml(c, other && other.fix[2]) + (st ? `<p class="co-ses co-edge in">${esc2(st)}</p>` : ''), 'co-today');
     }
     const nx = (window.SweepNextSession && SweepNextSession()) || day, p = planOf(nx), j = typeof getDoc === 'function' && getDoc('journals', nx);
     const first = !(S.trades || []).some((t) => !t.demo);
@@ -936,17 +937,20 @@
       plan: { in: 'in your plan', out: 'off plan' }, nth: { 1: '1st trade of the day', 2: '2nd trade of the day' }, after: { win: 'after a win', loss: 'after a loss' }, emo: 'feeling {e}', perC: '{v} per contract',
       sEdge: 'What works for you: {s}, {v} on average over {n} trades ({a} % winners).',
       bIn: 'In your edge: {s}, {w} winners out of {n}. Keep your usual size.', bOff: 'Off your usual edge.', bWorks: 'What works for you: {s}, {v} on average over {n} trades.',
-      keep: 'Keep doing what works: {s} ({v} on average over {n} trades).' },
+      keep: 'Keep doing what works: {s} ({v} on average over {n} trades).',
+      stTr: 'Your streak: {n} winners in a row.', stDays: 'Your streak: {n} green days in a row.', stCommon: 'In common: {s}.' },
     fr: { wd: ['', 'le lundi', 'le mardi', 'le mercredi', 'le jeudi', 'le vendredi', 'le samedi', 'le dimanche'], ses: { asia: 'séance Asie', london: 'séance de Londres', nyam: 'matin de New York', nypm: 'après-midi de New York', other: 'hors des grandes séances' },
       plan: { in: 'dans ton plan', out: 'hors plan' }, nth: { 1: '1er trade du jour', 2: '2e trade du jour' }, after: { win: 'après un gain', loss: 'après une perte' }, emo: 'quand tu te sens {e}', perC: '{v} par contrat',
       sEdge: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades ({a} % gagnants).',
       bIn: 'Dans ton edge : {s}, {w} gagnants sur {n}. Garde ta taille habituelle.', bOff: 'Hors de ton edge habituel.', bWorks: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades.',
-      keep: 'Continue ce qui marche : {s} ({v} en moyenne sur {n} trades).' },
+      keep: 'Continue ce qui marche : {s} ({v} en moyenne sur {n} trades).',
+      stTr: 'Ta série : {n} gagnants de suite.', stDays: 'Ta série : {n} jours verts de suite.', stCommon: 'Point commun : {s}.' },
     es: { wd: ['', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos'], ses: { asia: 'sesión de Asia', london: 'sesión de Londres', nyam: 'mañana de Nueva York', nypm: 'tarde de Nueva York', other: 'fuera de las sesiones principales' },
       plan: { in: 'dentro de tu plan', out: 'fuera del plan' }, nth: { 1: '1.ª operación del día', 2: '2.ª operación del día' }, after: { win: 'tras una ganancia', loss: 'tras una pérdida' }, emo: 'cuando te sientes {e}', perC: '{v} por contrato',
       sEdge: 'Lo que te funciona: {s}, {v} de media en {n} operaciones ({a} % ganadoras).',
       bIn: 'En tu edge: {s}, {w} ganadoras de {n}. Mantén tu tamaño habitual.', bOff: 'Fuera de tu edge habitual.', bWorks: 'Lo que te funciona: {s}, {v} de media en {n} operaciones.',
-      keep: 'Sigue con lo que funciona: {s} ({v} de media en {n} operaciones).' },
+      keep: 'Sigue con lo que funciona: {s} ({v} de media en {n} operaciones).',
+      stTr: 'Tu racha: {n} ganadoras seguidas.', stDays: 'Tu racha: {n} días en verde seguidos.', stCommon: 'En común: {s}.' },
   }[L] || null;
   const E2 = ET || { wd: [], ses: {}, plan: {}, nth: {}, after: {}, emo: '{e}', perC: '{v}', sEdge: '{s}' };
   const slotWords = (hm) => { const a = min(hm), b = a + 30, p = (x) => String(x).padStart(2, '0'); return T.slot(p(Math.floor(a / 60)), p(a % 60), p(Math.floor(b / 60) % 24), p(b % 60)); };
@@ -1001,7 +1005,44 @@
     const rank = (x) => { const i = win.indexOf(String(x).trim().toLowerCase()); return i < 0 ? 99 : i; };
     return list.map((x, i) => [x, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map((x) => x[0]);
   }
-  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
+  /** a winning streak explained (brief edge T5): 3 winners in a row or 3 green days in a row, ending on the day; its strongest
+   *  point in common: a setup, a 30-min slot, a session, the plan, a side or an instrument shared by every trade of the streak
+   *  and by less than 90 % of the trader's trades of the 8 weeks (so « all NQ » is never said to a trader who only trades NQ) */
+  function edgeStreak(day) {
+    if (!ET) return '';
+    const addD = (d, k) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + k); return x.toISOString().slice(0, 10); };
+    const seen = new Set(), rk = (t) => { const x = String(t.entry_time || '').slice(0, 5); return ((typeof hasSessionDate === 'function' ? hasSessionDate(t) : t.session_date) && x >= '18' ? '0' : '1') + (x || '99:99'); };
+    const all = (S.trades || []).filter((t) => !t.demo && t.date && t.date <= day && (!t.copy_group || (!seen.has(t.copy_group) && seen.add(t.copy_group))))
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : rk(a) < rk(b) ? -1 : rk(a) > rk(b) ? 1 : String(a.created_at || '') < String(b.created_at || '') ? -1 : 1));
+    if (!all.length || all[all.length - 1].date !== day) return '';
+    let k = 0; for (let i = all.length - 1; i >= 0 && net(all[i]) > 0; i--) k++;
+    const sums = new Map(); all.forEach((t) => sums.set(t.date, (sums.get(t.date) || 0) + net(t)));
+    const days = [...sums.keys()].sort().reverse(); let g = 0; while (g < days.length && sums.get(days[g]) > 0) g++;
+    let pick, text;
+    if (k >= 3) { pick = all.slice(-k); text = fill(ET.stTr, { n: k }); }
+    else if (g >= 3) { const ds = new Set(days.slice(0, g)); pick = all.filter((t) => ds.has(t.date)); text = fill(ET.stDays, { n: g }); }
+    else return '';
+    const val = (t, d) => {
+      const hm = String(t.entry_time || '').slice(0, 5), m = min(hm);
+      if (d === 'setup') return String(t.setup || '').trim().toLowerCase();
+      if (d === 'slot') return m == null ? '' : String(Math.floor(m / 30) * 30 / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(m / 30) * 30 % 60).padStart(2, '0');
+      if (d === 'session') return hm && typeof sessionFor === 'function' ? sessionFor(hm) : '';
+      if (d === 'plan') { const p = planOf(t.date); if (!p.valid) return ''; const su = String(t.setup || '').trim().toLowerCase(); return p.bias !== 'no_trade' && (p.bias === 'neutral' || ((p.bias === 'bullish') === (t.direction === 'long'))) && (!p.setups.length || p.setups.includes(su)) ? 'in' : 'out'; }
+      if (d === 'side') return t.direction || '';
+      if (d === 'inst') return String(t.instrument || '').toUpperCase();
+      return '';
+    };
+    const base = all.filter((t) => t.date >= addD(day, -55)), common = [];
+    for (const d of ['setup', 'slot', 'plan', 'session', 'side', 'inst']) {
+      if (common.length >= 2) break;
+      const v = val(pick[0], d); if (!v || (d === 'plan' && v !== 'in') || !pick.every((t) => val(t, d) === v)) continue;
+      if (base.filter((t) => val(t, d) === v).length >= 0.9 * base.length) continue;
+      if (d === 'session' && common.some((c) => c[0] === 'slot')) continue;   // the slot says it already
+      common.push([d, d === 'setup' ? String(pick[0].setup).trim() : v]);
+    }
+    return text + (common.length ? ' ' + fill(ET.stCommon, { s: edgeWords({ dims: common }) }) : '');
+  }
+  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, streak: edgeStreak, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
   window.SweepCoach = { trade: tradeNote, session, margin, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();

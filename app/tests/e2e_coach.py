@@ -38,7 +38,9 @@ Then « Your edge » before the trade (brief edge T3, 17 Oct.): 12 ORB of the mo
      first in « Before this trade »; at 14:00 without a setup: a neutral « What works for you: … » (never « in your edge »);
      on the quick sheet, tapping « Opening range breakout » turns the line blue at once;
   N. (brief edge T4) Today before the session: « Keep doing what works: Opening range breakout (… over 12 trades) »; the
-     plan sheet: « What works for you: … » under its title, « Opening range breakout » first among the trader's setups.
+     plan sheet: « What works for you: … » under its title, « Opening range breakout » first among the trader's setups;
+  O. (brief edge T5) 4 winners today between 9:30 and 10:00: « Your streak: 4 winners in a row. In common: 09:30–10:00. »
+     on Today; Stats › Trading stats shows « Longest winning streak » and « Green days in a row ».
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -269,6 +271,8 @@ def works(p, lang, phone):   # brief 03 step 4: what works for you
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} I nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 
+ES = {'fr': ('Ta série : 4 gagnants de suite.', 'Point commun : ', 'Plus longue série gagnante', 'Jours verts de suite'), 'en': ('Your streak: 4 winners in a row.', 'In common: ', 'Longest winning streak', 'Green days in a row'),
+      'es': ('Tu racha: 4 ganadoras seguidas.', 'En común: ', 'Racha ganadora más larga', 'Días en verde seguidos')}
 EK = {'fr': 'Continue ce qui marche : Opening range breakout', 'en': 'Keep doing what works: Opening range breakout', 'es': 'Sigue con lo que funciona: Opening range breakout'}
 EG = {'fr': ('Dans ton edge : Opening range breakout, 10 gagnants sur 12', 'Ce qui marche pour toi : Opening range breakout'),
       'en': ('In your edge: Opening range breakout, 10 winners out of 12', 'What works for you: Opening range breakout'),
@@ -313,6 +317,15 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   ok(e[1] in pl['line'] and pl['first'] == 'Opening range breakout', f'{tag} N the plan: « {e[1]}… », the ORB first among the setups ({pl})')
   if phone: pg.screenshot(path=f'/tmp/co_{tag}_plan.png')
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} N nothing wider than the window')
+  # O. (T5) 4 winners today, all between 9:30 and 10:00: the streak and its point in common; Stats: the longest streak
+  pg.evaluate("""(day) => ['09:35', '09:40', '09:50', '09:55'].forEach((hm, i) => put('trades', { id: 'es' + i, account_id: 'ca', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 8000, pnl_manual: true, date: day, entry_time: hm + ':00', exit_time: hm + ':30' }))""", day)
+  pg.wait_for_timeout(1500); pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .co-today', timeout=8000); pg.wait_for_timeout(1200)
+  sk = pg.evaluate("(() => [...document.querySelectorAll('#main .co-today .co-edge')].map((q) => q.textContent).join(' | '))()")
+  slot = pg.evaluate("SweepEdge.words({ dims: [['slot', '09:30']] })")
+  ok(ES[lang][0] in sk and (ES[lang][1] + slot) in sk, f'{tag} O 4 winners before 10:00: « {ES[lang][0]} … {ES[lang][1]}{slot} » ({sk[:140]})')
+  pg.evaluate("location.hash = '#analytics'"); pg.wait_for_selector('#main .g-ins .tiles', state='attached', timeout=10000); pg.wait_for_timeout(800)
+  mt = pg.evaluate("(document.querySelector('#main .g-ins .tiles') || {}).textContent || ''")
+  ok(ES[lang][2] in mt and ES[lang][3] in mt, f'{tag} O Stats › Trading stats: « {ES[lang][2]} » ({mt[mt.find(ES[lang][2][:6]):][:60] if ES[lang][2][:6] in mt else mt[:80]})')
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} M nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 

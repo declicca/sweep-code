@@ -665,6 +665,8 @@ function stats(e) {
     type: i,
     n: s
   } : null, t.maxWS = o, t.maxLS = r;
+  // green days in a row (brief edge T5): the current run of days in profit and the longest one
+  { let g = 0, gm = 0; [ ...n.values() ].sort((x, y) => x.date < y.date ? -1 : 1).forEach(x => { g = x.net > 0 ? g + 1 : 0, gm = Math.max(gm, g); }), t.greenNow = g, t.greenMax = gm; }
   let c = 0, l = 0, p = 0;
   for (const u of e) c += tNet(u), l = Math.max(l, c), p = Math.min(p, c - l);
   return t.maxDD = p, t;
@@ -3328,7 +3330,12 @@ function vAnalytics(e) {
       net: j
     });
   }
-  const E = stats(t.filter(M => M.direction === "long")), R = stats(t.filter(M => M.direction === "short")), L = E.n >= R.n ? [ "Long", E, R ] : [ "Short", R, E ], x = (M, ne, k, A, j, N = "") => `<div class="surface it"><span class="lbl">${M} <span class="info" data-tip="${esc(ne)}" tabindex="0">i</span></span><b>${k}</b>${A != null ? `<em class="${j || ""}">${A}</em>` : ""}${N ? `<small>${N}</small>` : ""}</div>`, C = `${x("Most active", "Weekday with the most trades per trading day.", WD[m.k], decl(m.avg.toFixed(1)), "", "avg trades per day")}\n    ${x("Most profitable", "Weekday with the highest net P&L.", WD[v.k], money(v.net), cls(v.net))}\n    ${x("Least profitable", "Weekday with the lowest net P&L.", WD[b.k], money(b.net), cls(b.net))}\n    ${x("Trade direction", "Direction you trade most, with its share of trades and net P&L.", L[0], Math.round(L[1].n / a.n * 100) + "%", "", `<span class="${cls(L[1].net)}">${money(L[1].net)}</span> vs <span class="${cls(L[2].net)}">${money(L[2].net)}</span>`)}`;
+  const E = stats(t.filter(M => M.direction === "long")), R = stats(t.filter(M => M.direction === "short")), L = E.n >= R.n ? [ "Long", E, R ] : [ "Short", R, E ], x = (M, ne, k, A, j, N = "") => `<div class="surface it"><span class="lbl">${M} <span class="info" data-tip="${esc(ne)}" tabindex="0">i</span></span><b>${k}</b>${A != null ? `<em class="${j || ""}">${A}</em>` : ""}${N ? `<small>${N}</small>` : ""}</div>`, C = `${x("Most active", "Weekday with the most trades per trading day.", WD[m.k], decl(m.avg.toFixed(1)), "", "avg trades per day")}\n    ${x("Most profitable", "Weekday with the highest net P&L.", WD[v.k], money(v.net), cls(v.net))}\n    ${x("Least profitable", "Weekday with the lowest net P&L.", WD[b.k], money(b.net), cls(b.net))}\n    ${x("Trade direction", "Direction you trade most, with its share of trades and net P&L.", L[0], Math.round(L[1].n / a.n * 100) + "%", "", `<span class="${cls(L[1].net)}">${money(L[1].net)}</span> vs <span class="${cls(L[2].net)}">${money(L[2].net)}</span>`)}${(() => {
+    // the longest winning streak and the green days in a row (brief edge T5), in the trader's language
+    const W = ({ fr: [ "Plus longue série gagnante", "Trades gagnants de suite, le record de la période.", "trades gagnants de suite", "Jours verts de suite", "Jours en profit de suite, jusqu’au dernier jour tradé.", "record" ], es: [ "Racha ganadora más larga", "Operaciones ganadoras seguidas, el récord del periodo.", "operaciones ganadoras seguidas", "Días en verde seguidos", "Días en beneficio seguidos, hasta el último día operado.", "récord" ] })[LANG] || [ "Longest winning streak", "Winning trades in a row, the record of the period.", "winning trades in a row", "Green days in a row", "Days in profit in a row, up to the last day traded.", "best" ];
+    const sp = v => `<span data-noi18n>${v}</span>`;
+    return x(sp(W[0]), W[1], String(a.maxWS || 0), null, "", sp(W[2])) + x(sp(W[3]), W[4], String(a.greenNow || 0), null, "", sp(`${W[5]} ${a.greenMax || 0}`));
+  })()}`;
   let g = 0, P = 0;
   const O = [ {
     label: "",
