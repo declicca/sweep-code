@@ -490,8 +490,10 @@
     return `${own.length ? '' : `<p class="g-hint g-hint-sm">${t('no_setups')}</p>`}<div class="g-chips-row wrap">${setups.map((x) => `<button type="button" class="chip ${PL.setups.has(x) ? 'on' : ''}" data-g="setup" data-v="${esc(x)}">${esc(x)}</button>`).join('')}${sug.map((x) => `<button type="button" class="chip g-sug" data-g="setup" data-v="${esc(x)}">${esc(x)}</button>`).join('')}<button type="button" class="chip g-sug g-new" data-g="setup-new">+ ${t('other_setup')}</button></div>
       <div class="g-setup-add" hidden><input type="text" maxlength="40" data-g-newsetup placeholder="${esc(t('setup_ph'))}" enterkeyhint="done"><button type="button" class="btn" data-g="setup-add">${t('add')}</button></div>`;
   }
+  const edgeFirst = (l) => (window.SweepEdge && SweepEdge.first ? SweepEdge.first(l) : l);   // the setups that work for the trader first (brief edge T4)
   function planHtml() {
-    const setups = [...new Set([...(S.settings && S.settings.setups || []), ...PL.setups, ...(PL.extra || [])])];
+    const setups = edgeFirst([...new Set([...(S.settings && S.settings.setups || []), ...PL.setups, ...(PL.extra || [])])]);
+    const works = PL.bias === 'no_trade' || !window.SweepEdge || !SweepEdge.line ? '' : SweepEdge.line('works');
     const d = G.today || {};
     const lim = dailyLimit();
     const bias = [['bullish', 'long'], ['bearish', 'short'], ['neutral', 'neutral'], ['no_trade', 'no_trade']];
@@ -499,6 +501,7 @@
       ${PL.then ? `<p class="g-hint g-gate">${t('gate_intro')}</p>` : ''}
       ${d.trades > 0 && !d.plan_valid && !PL.then ? `<p class="g-hint">${t('plan_late')}</p>` : ''}
       ${PL.from ? `<p class="g-hint g-from">${t('from_plan', { d: fdate(PL.from, { weekday: 'long', month: 'long', day: 'numeric' }) })}</p>` : ''}
+      ${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}
       ${PL.bias === 'no_trade' || !PL.ruleOn ? '' : `<label class="g-f g-rule"><span>${t('rule')}</span><input type="text" maxlength="160" data-gp="rule" value="${esc(PL.rule || '')}" placeholder="${esc(t('rule_ph'))}" enterkeyhint="done"></label>`}
       <div class="g-f"><span>${t('bias')}</span><div class="g-seg4">${bias.map(([v, k]) => `<button type="button" class="${PL.bias === v ? 'on' : ''} b-${v}" data-g="bias" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${PL.bias === 'no_trade' ? '' : `<div class="g-f g-setups"><span>${t('setups')}</span>${setupsHtml(setups)}</div>
@@ -513,7 +516,7 @@
     const i = wrap && wrap.querySelector('[data-g-newsetup]'); const v = i && i.value.trim(); if (!v) return;
     PL.extra = [...new Set([...(PL.extra || []), v])]; PL.setups.add(v);
     document.querySelectorAll('#gSheet [data-gp]').forEach((x) => { PL[x.dataset.gp] = x.value; });
-    wrap.outerHTML = `<div class="g-f g-setups"><span>${t('setups')}</span>${setupsHtml([...new Set([...(S.settings && S.settings.setups || []), ...PL.setups, ...PL.extra])])}</div>`;
+    wrap.outerHTML = `<div class="g-f g-setups"><span>${t('setups')}</span>${setupsHtml(edgeFirst([...new Set([...(S.settings && S.settings.setups || []), ...PL.setups, ...PL.extra])]))}</div>`;
     buzz(5);
   }
   document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches && e.target.matches('[data-g-newsetup]')) { e.preventDefault(); addPlanSetup(e.target.closest('.g-setups')); } });

@@ -36,7 +36,9 @@ Then « Your edge » before the trade (brief edge T3, 17 Oct.): 12 ORB of the mo
   and losing afternoon trades:
   M. an ORB at 9:45: the blue line « In your edge: Opening range breakout, 10 winners out of 12. Keep your usual size. »,
      first in « Before this trade »; at 14:00 without a setup: a neutral « What works for you: … » (never « in your edge »);
-     on the quick sheet, tapping « Opening range breakout » turns the line blue at once.
+     on the quick sheet, tapping « Opening range breakout » turns the line blue at once;
+  N. (brief edge T4) Today before the session: « Keep doing what works: Opening range breakout (… over 12 trades) »; the
+     plan sheet: « What works for you: … » under its title, « Opening range breakout » first among the trader's setups.
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -267,6 +269,7 @@ def works(p, lang, phone):   # brief 03 step 4: what works for you
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} I nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 
+EK = {'fr': 'Continue ce qui marche : Opening range breakout', 'en': 'Keep doing what works: Opening range breakout', 'es': 'Sigue con lo que funciona: Opening range breakout'}
 EG = {'fr': ('Dans ton edge : Opening range breakout, 10 gagnants sur 12', 'Ce qui marche pour toi : Opening range breakout'),
       'en': ('In your edge: Opening range breakout, 10 winners out of 12', 'What works for you: Opening range breakout'),
       'es': ('En tu edge: Opening range breakout, 10 ganadoras de 12', 'Lo que te funciona: Opening range breakout')}
@@ -299,6 +302,17 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   pg.locator('.nav-am [data-sp="Opening range breakout"]').click(); pg.wait_for_timeout(300)
   b1 = pg.evaluate("(() => { const q = document.querySelector('.nav-am .co-edge'); return q ? [q.classList.contains('in'), q.textContent] : null })()")
   ok(b1 and (b1[0] or not b0), f'{tag} M the quick sheet: the line follows the setup tapped ({b0} → {b1})')
+  # N. (T4) Today before the session, then the plan sheet
+  pg.evaluate("document.querySelector('.nav-am [data-am=close]') && document.querySelector('.nav-am [data-am=close]').click()"); pg.wait_for_timeout(500)
+  pg.evaluate("editDoc('settings', 'settings', (d) => { d.setups = ['Reversal', 'VWAP reclaim', 'Opening range breakout']; })"); pg.wait_for_timeout(500)
+  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .co-today', timeout=8000); pg.wait_for_timeout(1200)
+  kt = pg.evaluate("(() => { const q = document.querySelector('#main .co-today .co-edge'); return q ? q.textContent : '' })()")
+  ok(EK[lang] in kt and '12' in kt, f'{tag} N Today before the session: « {EK[lang]}… » ({kt[:110]})')
+  pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet .g-setups', state='attached', timeout=8000); pg.wait_for_timeout(600)
+  pl = pg.evaluate("(() => { const q = document.querySelector('#gSheet .g-edge'); return { line: q ? q.textContent : '', first: ((document.querySelector('#gSheet .g-setups [data-g=setup]') || {}).dataset || {}).v || '' } })()")
+  ok(e[1] in pl['line'] and pl['first'] == 'Opening range breakout', f'{tag} N the plan: « {e[1]}… », the ORB first among the setups ({pl})')
+  if phone: pg.screenshot(path=f'/tmp/co_{tag}_plan.png')
+  ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} N nothing wider than the window')
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} M nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 

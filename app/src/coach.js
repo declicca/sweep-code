@@ -660,8 +660,9 @@
     }
     const nx = (window.SweepNextSession && SweepNextSession()) || day, p = planOf(nx), j = typeof getDoc === 'function' && getDoc('journals', nx);
     const first = !(S.trades || []).some((t) => !t.demo);
-    if (p.valid) { const pre = (j && j.pre) || {}; return card(T.planT, `${pre.rule ? ruleLine(T.ruleD, pre.rule) : ''}<p class="co-ses">${esc2(planNote({ bias: p.bias, maxLoss: p.maxLoss, maxTrades: p.maxTrades, setups: (pre.setups || []).length }))}</p>${first ? `<p class="co-ses muted">${esc2(T.first)}</p>` : ''}`, 'co-today'); }
-    return card('', `<p class="co-ses">${esc2(T.noPlan)}</p>`, 'co-today');
+    const keep = edgeLine('keep'), kp = keep ? `<p class="co-ses co-edge in">${esc2(keep)}</p>` : '';   // « Your edge » before the session (brief edge T4)
+    if (p.valid) { const pre = (j && j.pre) || {}; return card(T.planT, `${pre.rule ? ruleLine(T.ruleD, pre.rule) : ''}${kp}<p class="co-ses">${esc2(planNote({ bias: p.bias, maxLoss: p.maxLoss, maxTrades: p.maxTrades, setups: (pre.setups || []).length }))}</p>${first ? `<p class="co-ses muted">${esc2(T.first)}</p>` : ''}`, 'co-today'); }
+    return card('', `${kp}<p class="co-ses">${esc2(T.noPlan)}</p>`, 'co-today');
   }
   function paintToday() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
@@ -934,15 +935,18 @@
     en: { wd: ['', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays'], ses: { asia: 'Asia session', london: 'London session', nyam: 'New York morning', nypm: 'New York afternoon', other: 'outside the main sessions' },
       plan: { in: 'in your plan', out: 'off plan' }, nth: { 1: '1st trade of the day', 2: '2nd trade of the day' }, after: { win: 'after a win', loss: 'after a loss' }, emo: 'feeling {e}', perC: '{v} per contract',
       sEdge: 'What works for you: {s}, {v} on average over {n} trades ({a} % winners).',
-      bIn: 'In your edge: {s}, {w} winners out of {n}. Keep your usual size.', bOff: 'Off your usual edge.', bWorks: 'What works for you: {s}, {v} on average over {n} trades.' },
+      bIn: 'In your edge: {s}, {w} winners out of {n}. Keep your usual size.', bOff: 'Off your usual edge.', bWorks: 'What works for you: {s}, {v} on average over {n} trades.',
+      keep: 'Keep doing what works: {s} ({v} on average over {n} trades).' },
     fr: { wd: ['', 'le lundi', 'le mardi', 'le mercredi', 'le jeudi', 'le vendredi', 'le samedi', 'le dimanche'], ses: { asia: 'séance Asie', london: 'séance de Londres', nyam: 'matin de New York', nypm: 'après-midi de New York', other: 'hors des grandes séances' },
       plan: { in: 'dans ton plan', out: 'hors plan' }, nth: { 1: '1er trade du jour', 2: '2e trade du jour' }, after: { win: 'après un gain', loss: 'après une perte' }, emo: 'quand tu te sens {e}', perC: '{v} par contrat',
       sEdge: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades ({a} % gagnants).',
-      bIn: 'Dans ton edge : {s}, {w} gagnants sur {n}. Garde ta taille habituelle.', bOff: 'Hors de ton edge habituel.', bWorks: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades.' },
+      bIn: 'Dans ton edge : {s}, {w} gagnants sur {n}. Garde ta taille habituelle.', bOff: 'Hors de ton edge habituel.', bWorks: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades.',
+      keep: 'Continue ce qui marche : {s} ({v} en moyenne sur {n} trades).' },
     es: { wd: ['', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos'], ses: { asia: 'sesión de Asia', london: 'sesión de Londres', nyam: 'mañana de Nueva York', nypm: 'tarde de Nueva York', other: 'fuera de las sesiones principales' },
       plan: { in: 'dentro de tu plan', out: 'fuera del plan' }, nth: { 1: '1.ª operación del día', 2: '2.ª operación del día' }, after: { win: 'tras una ganancia', loss: 'tras una pérdida' }, emo: 'cuando te sientes {e}', perC: '{v} por contrato',
       sEdge: 'Lo que te funciona: {s}, {v} de media en {n} operaciones ({a} % ganadoras).',
-      bIn: 'En tu edge: {s}, {w} ganadoras de {n}. Mantén tu tamaño habitual.', bOff: 'Fuera de tu edge habitual.', bWorks: 'Lo que te funciona: {s}, {v} de media en {n} operaciones.' },
+      bIn: 'En tu edge: {s}, {w} ganadoras de {n}. Mantén tu tamaño habitual.', bOff: 'Fuera de tu edge habitual.', bWorks: 'Lo que te funciona: {s}, {v} de media en {n} operaciones.',
+      keep: 'Sigue con lo que funciona: {s} ({v} de media en {n} operaciones).' },
   }[L] || null;
   const E2 = ET || { wd: [], ses: {}, plan: {}, nth: {}, after: {}, emo: '{e}', perC: '{v}', sEdge: '{s}' };
   const slotWords = (hm) => { const a = min(hm), b = a + 30, p = (x) => String(x).padStart(2, '0'); return T.slot(p(Math.floor(a / 60)), p(a % 60), p(Math.floor(b / 60) % 24), p(b % 60)); };
@@ -986,7 +990,18 @@
     const top = pr.wins[0], off = top.level !== 'lead' && pr.wins.every((c) => edgeMatch(c, ctx) === false);
     return { in: false, text: (off ? ET.bOff + ' ' : '') + fill(ET.bWorks, { s: edgeWords(top), v: edgeValue(top.avg, pr.unit), n: top.n }) };
   }
-  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch };
+  /** one line of the profile's first winning condition: 'works' (« What works for you: … », the plan) or 'keep' (Today before the session) */
+  function edgeLine(kind) {
+    const pr = edgeMine(), top = pr && pr.wins[0]; if (!top || !ET) return '';
+    return fill(kind === 'keep' ? ET.keep : ET.bWorks, { s: edgeWords(top), v: edgeValue(top.avg, pr.unit), n: top.n });
+  }
+  /** the trader's setups, those of a winning condition first (in the profile's order), the others as they were */
+  function edgeFirst(list) {
+    const pr = edgeMine(), win = []; (pr ? pr.wins : []).forEach((c) => c.dims.forEach(([d, v]) => { if (d === 'setup') win.push(String(v).trim().toLowerCase()); }));
+    const rank = (x) => { const i = win.indexOf(String(x).trim().toLowerCase()); return i < 0 ? 99 : i; };
+    return list.map((x, i) => [x, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map((x) => x[0]);
+  }
+  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
   window.SweepCoach = { trade: tradeNote, session, margin, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();
