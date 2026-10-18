@@ -483,9 +483,10 @@
     else if (!p.valid && x.form === 'shot' && typeof riskBudget === 'function') { const r = riskBudget(x.account, day); const a = r && (S.accounts || []).find((y) => y.id === x.account); if (r) bud.push(mg && room < r.left ? fill(T.bLeftDd, { m: usd(room), a: mg.name }) : fill(T.bLeftAcc, { m: usd(r.left), a: (a && a.name) || '' })); }
     if (p.valid && p.maxTrades && list.length < p.maxTrades) bud.push(fill(T.bCount, { n: list.length + 1, m: p.maxTrades }));
     const eg = stop ? null : edgeBefore(x, day, list, p, at);   // « Your edge » first (brief edge T3), never next to a stop signal
-    if (!sig && !bud.length && !eg) return '';
+    const ls = stop ? '' : edgeLesson(x, day, at);   // the lesson of a similar trade (brief edge T8)
+    if (!sig && !bud.length && !eg && !ls) return '';
     const b = bud.join(' · ').replace(/^./, (m) => m.toUpperCase());
-    return `<div class="co-before ${stop ? 'co-stop' : ''}" data-noi18n aria-live="polite"><span class="co-ic">${IC}</span><div><b>${T.title}</b> · <span>${T.bTitle}</span>${eg ? `<p class="co-edge ${eg.in ? 'in' : ''}">${esc2(eg.text)}</p>` : ''}${sig ? `<p class="co-sig">${esc2(sig)}</p>` : ''}${mine ? `<p class="co-own">${esc2(mine)}</p>` : ''}${b ? `<p class="co-bud">${esc2(b)}</p>` : ''}</div></div>`;
+    return `<div class="co-before ${stop ? 'co-stop' : ''}" data-noi18n aria-live="polite"><span class="co-ic">${IC}</span><div><b>${T.title}</b> · <span>${T.bTitle}</span>${eg ? `<p class="co-edge ${eg.in ? 'in' : ''}">${esc2(eg.text)}</p>` : ''}${sig ? `<p class="co-sig">${esc2(sig)}</p>` : ''}${mine ? `<p class="co-own">${esc2(mine)}</p>` : ''}${ls ? `<p class="co-own co-lesson">${esc2(ls)}</p>` : ''}${b ? `<p class="co-bud">${esc2(b)}</p>` : ''}</div></div>`;
   }
 
   /** the accounts at 75 % or more of their daily loss limit or of their drawdown, as their own page shows them (acctState):
@@ -942,6 +943,7 @@
       bIn: 'In your edge: {s}, {w} winners out of {n}. Keep your usual size.', bOff: 'Off your usual edge.', bWorks: 'What works for you: {s}, {v} on average over {n} trades.',
       keep: 'Keep doing what works: {s} ({v} on average over {n} trades).',
       stTr: 'Your streak: {n} winners in a row.', stDays: 'Your streak: {n} green days in a row.', stCommon: 'In common: {s}.',
+      lesson: 'Your lesson of {d} on {s}: {l}',
       qIn: 'What was the same as usual?', qOff: 'Why this trade off your edge?', qSt: 'What put you in this streak?',
       edgeT: 'Your edge', lv: { lead: 'Lead', trend: 'Trend', confirmed: 'Confirmed' }, item: '{n} trades · {a} % winners', newL: 'New lead: {s} ({n} trades).', fadeL: 'Fading: {s}, the last 4 weeks below half of the 4 before.' },
     fr: { wd: ['', 'le lundi', 'le mardi', 'le mercredi', 'le jeudi', 'le vendredi', 'le samedi', 'le dimanche'], ses: { asia: 'séance Asie', london: 'séance de Londres', nyam: 'matin de New York', nypm: 'après-midi de New York', other: 'hors des grandes séances' },
@@ -950,6 +952,7 @@
       bIn: 'Dans ton edge : {s}, {w} gagnants sur {n}. Garde ta taille habituelle.', bOff: 'Hors de ton edge habituel.', bWorks: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades.',
       keep: 'Continue ce qui marche : {s} ({v} en moyenne sur {n} trades).',
       stTr: 'Ta série : {n} gagnants de suite.', stDays: 'Ta série : {n} jours verts de suite.', stCommon: 'Point commun : {s}.',
+      lesson: 'Ta leçon du {d} sur {s} : {l}',
       qIn: 'Qu’est-ce qui était pareil que d’habitude ?', qOff: 'Pourquoi ce trade hors de ton edge ?', qSt: 'Qu’est-ce qui t’a mis dans cette série ?',
       edgeT: 'Ton edge', lv: { lead: 'Piste', trend: 'Tendance', confirmed: 'Confirmé' }, item: '{n} trades · {a} % gagnants', newL: 'Nouvelle piste : {s} ({n} trades).', fadeL: 'En baisse : {s}, les 4 dernières semaines sous la moitié des 4 d’avant.' },
     es: { wd: ['', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos'], ses: { asia: 'sesión de Asia', london: 'sesión de Londres', nyam: 'mañana de Nueva York', nypm: 'tarde de Nueva York', other: 'fuera de las sesiones principales' },
@@ -958,6 +961,7 @@
       bIn: 'En tu edge: {s}, {w} ganadoras de {n}. Mantén tu tamaño habitual.', bOff: 'Fuera de tu edge habitual.', bWorks: 'Lo que te funciona: {s}, {v} de media en {n} operaciones.',
       keep: 'Sigue con lo que funciona: {s} ({v} de media en {n} operaciones).',
       stTr: 'Tu racha: {n} ganadoras seguidas.', stDays: 'Tu racha: {n} días en verde seguidos.', stCommon: 'En común: {s}.',
+      lesson: 'Tu lección del {d} sobre {s}: {l}',
       qIn: '¿Qué fue igual que de costumbre?', qOff: '¿Por qué esta operación fuera de tu edge?', qSt: '¿Qué te puso en esta racha?',
       edgeT: 'Tu edge', lv: { lead: 'Pista', trend: 'Tendencia', confirmed: 'Confirmado' }, item: '{n} operaciones · {a} % ganadoras', newL: 'Nueva pista: {s} ({n} operaciones).', fadeL: 'A la baja: {s}, las últimas 4 semanas por debajo de la mitad de las 4 anteriores.' },
   }[L] || null;
@@ -996,6 +1000,19 @@
     if (hit) return { in: true, text: fill(ET.bIn, { s: edgeWords(hit), w: Math.round(hit.win * hit.n / 100), n: hit.n }) };
     const top = pr.wins[0], off = top.level !== 'lead' && pr.wins.every((c) => edgeMatch(c, ctx) === false);
     return { in: false, text: (off ? ET.bOff + ' ' : '') + fill(ET.bWorks, { s: edgeWords(top), v: edgeValue(top.avg, pr.unit), n: top.n }) };
+  }
+  /** the last lesson written on a similar trade (brief edge T8): the same setup, or the same 30-min slot without a setup, in the last 30 days */
+  function edgeLesson(x, day, at) {
+    if (!ET) return '';
+    const back = new Date(day + 'T12:00:00Z'); back.setUTCDate(back.getUTCDate() - 30); const from = back.toISOString().slice(0, 10);
+    const su = String(x.setup || '').trim().toLowerCase(), slot = (m) => (m == null ? null : Math.floor(m / 30));
+    const like = (t) => (su ? String(t.setup || '').trim().toLowerCase() === su : at != null && slot(min(timeOf(t))) === slot(at));
+    const c = (S.trades || []).filter((t) => !t.demo && t.date >= from && t.date <= day && String((t.review || {}).lesson || '').trim() && like(t))
+      .sort((a, b) => (a.date + (timeOf(a) || '') + String(a.created_at || '') < b.date + (timeOf(b) || '') + String(b.created_at || '') ? 1 : -1))[0];
+    if (!c) return '';
+    let d = c.date; try { d = new Date(c.date + 'T12:00:00Z').toLocaleDateString(L === 'fr' ? 'fr-CA' : L === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'short', timeZone: 'UTC' }); } catch (e) { /* the date as stored */ }
+    const s = su ? String(c.setup).trim() : slotWords(String(Math.floor(at / 30) * 30 / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(at / 30) * 30 % 60).padStart(2, '0'));
+    return fill(ET.lesson, { d, s, l: String(c.review.lesson).trim().replace(/\s+/g, ' ').slice(0, 160) });
   }
   /** the dimensions of a trade being entered (x: setup, dir, inst, emo) after the session's trades `list` */
   function edgeCtx(x, day, list, p, at) {
