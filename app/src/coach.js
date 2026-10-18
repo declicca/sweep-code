@@ -595,7 +595,7 @@
       const lk = leakOf(sp), hp = lk && progress(addDays(mon, 4)).find((h) => (HABITS[h.key] || []).includes(lk.code));
       v = `<div class="co-week" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.title}</b><small>${T.wkT}</small></div>
         ${row(T.strong, strength(sp))}${row(T.leak, lk ? fill(lk.n === 1 ? T.lk1 : T.lk, { w: T.w[lk.code], k: lk.n, n: sp.rows.length, c: '' }).replace(/^./, (m) => m.toUpperCase()) : fill(T.lkNone, { n: sp.rows.length }))}
-        ${row(T.ruleW, ruleFor2(lk ? lk.code : 'clean', sp))}${hp && hp.first.mon !== hp.last.mon ? `<p class="co-own">${esc2(prLine(hp))}</p>` : ''}</div>`;
+        ${row(T.ruleW, ruleFor2(lk ? lk.code : 'clean', sp))}${hp && hp.first.mon !== hp.last.mon ? `<p class="co-own">${esc2(prLine(hp))}</p>` : ''}${edgeCard(addDays(mon, 4) < today() ? addDays(mon, 4) : today())}</div>`;
     }
     wCache = { k, v }; return v;
   }
@@ -609,6 +609,7 @@
       v = `<section class="surface co co-stats" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.stT}</b><small>${esc2(fill(T.stSub, { n: sp.rows.length }))}</small></div>
         ${row(T.strong, strength(sp))}${row(T.leak, lk ? fill(lk.n === 1 ? T.lk1 : T.lk, { w: T.w[lk.code], k: lk.n, n: sp.rows.length, c: lk.c < 0 ? ` (${sgn(lk.c)})` : '' }).replace(/^./, (m) => m.toUpperCase()) : fill(T.lkNone, { n: sp.rows.length }))}
         ${row(T.rule, ruleFor2(lk ? lk.code : 'clean', sp))}
+        ${edgeCard()}
         ${pr.length ? `<div class="co-prog"><p class="co-prog-h"><b>${T.prT}</b><small>${T.prHelp}</small></p>${pr.map((h) => `<div class="co-pr"><span class="co-pr-t"><b>${esc2(h.label.replace(/^./, (m) => m.toUpperCase()))}</b><small>${esc2(prLine(h))}</small></span>${bars(h)}</div>`).join('')}</div>` : ''}
         ${aiMore('ai-review', '')}</section>`;
     }
@@ -938,19 +939,22 @@
       sEdge: 'What works for you: {s}, {v} on average over {n} trades ({a} % winners).',
       bIn: 'In your edge: {s}, {w} winners out of {n}. Keep your usual size.', bOff: 'Off your usual edge.', bWorks: 'What works for you: {s}, {v} on average over {n} trades.',
       keep: 'Keep doing what works: {s} ({v} on average over {n} trades).',
-      stTr: 'Your streak: {n} winners in a row.', stDays: 'Your streak: {n} green days in a row.', stCommon: 'In common: {s}.' },
+      stTr: 'Your streak: {n} winners in a row.', stDays: 'Your streak: {n} green days in a row.', stCommon: 'In common: {s}.',
+      edgeT: 'Your edge', lv: { lead: 'Lead', trend: 'Trend', confirmed: 'Confirmed' }, item: '{n} trades · {a} % winners', newL: 'New lead: {s} ({n} trades).', fadeL: 'Fading: {s}, the last 4 weeks below half of the 4 before.' },
     fr: { wd: ['', 'le lundi', 'le mardi', 'le mercredi', 'le jeudi', 'le vendredi', 'le samedi', 'le dimanche'], ses: { asia: 'séance Asie', london: 'séance de Londres', nyam: 'matin de New York', nypm: 'après-midi de New York', other: 'hors des grandes séances' },
       plan: { in: 'dans ton plan', out: 'hors plan' }, nth: { 1: '1er trade du jour', 2: '2e trade du jour' }, after: { win: 'après un gain', loss: 'après une perte' }, emo: 'quand tu te sens {e}', perC: '{v} par contrat',
       sEdge: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades ({a} % gagnants).',
       bIn: 'Dans ton edge : {s}, {w} gagnants sur {n}. Garde ta taille habituelle.', bOff: 'Hors de ton edge habituel.', bWorks: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades.',
       keep: 'Continue ce qui marche : {s} ({v} en moyenne sur {n} trades).',
-      stTr: 'Ta série : {n} gagnants de suite.', stDays: 'Ta série : {n} jours verts de suite.', stCommon: 'Point commun : {s}.' },
+      stTr: 'Ta série : {n} gagnants de suite.', stDays: 'Ta série : {n} jours verts de suite.', stCommon: 'Point commun : {s}.',
+      edgeT: 'Ton edge', lv: { lead: 'Piste', trend: 'Tendance', confirmed: 'Confirmé' }, item: '{n} trades · {a} % gagnants', newL: 'Nouvelle piste : {s} ({n} trades).', fadeL: 'En baisse : {s}, les 4 dernières semaines sous la moitié des 4 d’avant.' },
     es: { wd: ['', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos'], ses: { asia: 'sesión de Asia', london: 'sesión de Londres', nyam: 'mañana de Nueva York', nypm: 'tarde de Nueva York', other: 'fuera de las sesiones principales' },
       plan: { in: 'dentro de tu plan', out: 'fuera del plan' }, nth: { 1: '1.ª operación del día', 2: '2.ª operación del día' }, after: { win: 'tras una ganancia', loss: 'tras una pérdida' }, emo: 'cuando te sientes {e}', perC: '{v} por contrato',
       sEdge: 'Lo que te funciona: {s}, {v} de media en {n} operaciones ({a} % ganadoras).',
       bIn: 'En tu edge: {s}, {w} ganadoras de {n}. Mantén tu tamaño habitual.', bOff: 'Fuera de tu edge habitual.', bWorks: 'Lo que te funciona: {s}, {v} de media en {n} operaciones.',
       keep: 'Sigue con lo que funciona: {s} ({v} de media en {n} operaciones).',
-      stTr: 'Tu racha: {n} ganadoras seguidas.', stDays: 'Tu racha: {n} días en verde seguidos.', stCommon: 'En común: {s}.' },
+      stTr: 'Tu racha: {n} ganadoras seguidas.', stDays: 'Tu racha: {n} días en verde seguidos.', stCommon: 'En común: {s}.',
+      edgeT: 'Tu edge', lv: { lead: 'Pista', trend: 'Tendencia', confirmed: 'Confirmado' }, item: '{n} operaciones · {a} % ganadoras', newL: 'Nueva pista: {s} ({n} operaciones).', fadeL: 'A la baja: {s}, las últimas 4 semanas por debajo de la mitad de las 4 anteriores.' },
   }[L] || null;
   const E2 = ET || { wd: [], ses: {}, plan: {}, nth: {}, after: {}, emo: '{e}', perC: '{v}', sEdge: '{s}' };
   const slotWords = (hm) => { const a = min(hm), b = a + 30, p = (x) => String(x).padStart(2, '0'); return T.slot(p(Math.floor(a / 60)), p(a % 60), p(Math.floor(b / 60) % 24), p(b % 60)); };
@@ -1042,7 +1046,15 @@
     }
     return text + (common.length ? ' ' + fill(ET.stCommon, { s: edgeWords({ dims: common }) }) : '');
   }
-  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, streak: edgeStreak, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
+  /** the profile's card (brief edge T6): its winning conditions with their level and sample, then « new lead » / « fading »;
+   *  in counts and %, never in $ (the Friday recap has no dollar) */
+  function edgeCard(day) {
+    const pr = edgeMine(day); if (!pr || !pr.wins.length || !ET) return '';
+    const items = pr.wins.map((c) => `<li><b>${esc2(edgeWords(c))}</b> <span class="co-lv co-lv-${c.level}">${ET.lv[c.level]}</span><small>${esc2(fill(ET.item, { n: c.n, a: c.win }))}</small></li>`).join('');
+    const notes = [...pr.wins.filter((c) => c.new).map((c) => fill(ET.newL, { s: edgeWords(c), n: c.n })), ...pr.wins.filter((c) => c.fading).map((c) => fill(ET.fadeL, { s: edgeWords(c) }))];
+    return `<div class="co-edgecard"><p class="co-edgecard-h"><b>${ET.edgeT}</b></p><ul>${items}</ul>${notes.map((x) => `<p class="co-own">${esc2(x)}</p>`).join('')}</div>`;
+  }
+  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, streak: edgeStreak, card: edgeCard, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
   window.SweepCoach = { trade: tradeNote, session, margin, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();

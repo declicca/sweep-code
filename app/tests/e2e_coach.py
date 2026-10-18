@@ -40,7 +40,8 @@ Then « Your edge » before the trade (brief edge T3, 17 Oct.): 12 ORB of the mo
   N. (brief edge T4) Today before the session: « Keep doing what works: Opening range breakout (… over 12 trades) »; the
      plan sheet: « What works for you: … » under its title, « Opening range breakout » first among the trader's setups;
   O. (brief edge T5) 4 winners today between 9:30 and 10:00: « Your streak: 4 winners in a row. In common: 09:30–10:00. »
-     on Today; Stats › Trading stats shows « Longest winning streak » and « Green days in a row ».
+     on Today; Stats › Trading stats shows « Longest winning streak » and « Green days in a row »;
+  P. (brief edge T6) the top of Stats and the Friday recap: « Your edge », the ORB « Trend » over 12 trades, no dollar.
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -273,6 +274,7 @@ def works(p, lang, phone):   # brief 03 step 4: what works for you
 
 ES = {'fr': ('Ta série : 4 gagnants de suite.', 'Point commun : ', 'Plus longue série gagnante', 'Jours verts de suite'), 'en': ('Your streak: 4 winners in a row.', 'In common: ', 'Longest winning streak', 'Green days in a row'),
       'es': ('Tu racha: 4 ganadoras seguidas.', 'En común: ', 'Racha ganadora más larga', 'Días en verde seguidos')}
+EV = {'fr': ('Ton edge', 'Tendance'), 'en': ('Your edge', 'Trend'), 'es': ('Tu edge', 'Tendencia')}
 EK = {'fr': 'Continue ce qui marche : Opening range breakout', 'en': 'Keep doing what works: Opening range breakout', 'es': 'Sigue con lo que funciona: Opening range breakout'}
 EG = {'fr': ('Dans ton edge : Opening range breakout, 10 gagnants sur 12', 'Ce qui marche pour toi : Opening range breakout'),
       'en': ('In your edge: Opening range breakout, 10 winners out of 12', 'What works for you: Opening range breakout'),
@@ -326,6 +328,15 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   pg.evaluate("location.hash = '#analytics'"); pg.wait_for_selector('#main .g-ins .tiles', state='attached', timeout=10000); pg.wait_for_timeout(800)
   mt = pg.evaluate("(document.querySelector('#main .g-ins .tiles') || {}).textContent || ''")
   ok(ES[lang][2] in mt and ES[lang][3] in mt, f'{tag} O Stats › Trading stats: « {ES[lang][2]} » ({mt[mt.find(ES[lang][2][:6]):][:60] if ES[lang][2][:6] in mt else mt[:80]})')
+  # P. (T6) the profile's card: Stats (top) and the Friday recap, in counts and %
+  pg.wait_for_selector('#main .co-stats', state='attached', timeout=10000); pg.wait_for_timeout(500)
+  sc = pg.evaluate("(document.querySelector('#main .co-stats .co-edgecard') || {}).textContent || ''")
+  ok(EV[lang][0] in sc and EV[lang][1] in sc and 'Opening range breakout' in sc and '12' in sc, f'{tag} P Stats: « {EV[lang][0]} », the ORB « {EV[lang][1]} » over 12 trades ({sc[:120]})')
+  mon = pg.evaluate("(() => { const d = new Date(todayStr() + 'T12:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` })()")
+  wk = pg.evaluate("(m) => { const d = document.createElement('div'); d.innerHTML = SweepCoach.weekHtml(m); const c = d.querySelector('.co-edgecard'); return [c ? c.textContent : '', d.textContent] }", mon)
+  ok(EV[lang][0] in wk[0] and '$' not in wk[1], f'{tag} P the Friday recap: the same card, no dollar ({wk[0][:90]})')
+  ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} P nothing wider than the window')
+  if phone: pg.screenshot(path=f'/tmp/co_{tag}_edgecard.png')
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} M nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 

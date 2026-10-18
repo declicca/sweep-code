@@ -45,6 +45,16 @@ html body #main .nav-rt.closed-rt > .co-today{display:none}
 .co-own{color:var(--muted);font-size:13px}
 .co-edge{color:var(--text2,var(--text))}
 .co-edge.in{color:var(--pos);font-weight:600}   /* « In your edge » (brief edge T3): blue = what works */
+/* the profile's card (brief edge T6) */
+.co-edgecard{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.co-edgecard-h{margin:0 0 6px}
+.co-edgecard ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.co-edgecard li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;min-width:0}
+.co-edgecard li b{overflow-wrap:anywhere}
+.co-edgecard li small{flex-basis:100%;color:var(--muted)}
+.co-lv{font-size:12px;font-weight:600;padding:1px 8px;border-radius:10px;background:var(--panel2);color:var(--text2,var(--text))}
+.co-lv-confirmed{background:var(--pos-fill,var(--pos));color:#fff}
+.co-lv-trend{color:var(--pos)}
 .co-bud{color:var(--text2,var(--text))}
 /* what works for you: the Friday recap and the Stats page (strength, leak, rule; the progress per habit) */
 .co-week{display:flex;flex-direction:column;gap:8px;margin:14px 0 4px;padding:14px 16px;border-radius:var(--r-tile,16px);background:var(--fill);text-align:left}
