@@ -2757,7 +2757,8 @@ html body #main .acc-ic[data-acc-up]:hover{color:var(--pos)}
   html body #main .acc-acts{display:none}
   html body #main .acc-ck{display:none}
   html body #main .acc-sel-on .acc-ck{display:inline-grid}
-  html body #main .acc-sel-on table.acct-tbl tr{-webkit-user-select:none;user-select:none}
+  /* a long press (it starts « Select ») never selects the account's text: iOS drew its blue selection caret on the row */
+  html body #main table.acct-tbl tr{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   html body #main .nav-acc-top .acc-selb{margin-left:auto}
   html body #main .nav-acc-top .acc-selb + .nav-ord-b,html body #main .nav-acc-top .nav-ord-b + .acc-selb{margin-left:16px}
 }
@@ -2792,11 +2793,12 @@ body:has(.acc-dlg.open) .acc-bar,body:has(.nav-pass.open) .acc-bar{display:none}
   html body #main table.acct-tbl tr.acc-on{background:color-mix(in srgb,var(--pos) 8%,transparent);border-radius:var(--r-tile,20px)}
   html body #main table.acct-tbl tr.acc-on > td{background:none}
   /* the top of the list: « Add an account » on its own line, then « Select » and « Reorder » at the right */
-  html body #main .nav-acc-top:has(.acc-selb){flex-wrap:wrap;row-gap:0}
+  html body #main .nav-acc-top:has(.acc-selb){flex-wrap:wrap;row-gap:0;align-items:baseline}   /* (two sizes of text: on one line) */
   html body #main .nav-acc-top:has(.acc-selb) > .nav-addrow{flex:1 0 100%}
   html body #main .nav-acc-top:has(.acc-selb) > .acc-selb{margin-left:auto}
-  html body #main .nav-acc-top:has(.acc-selb) > .acc-selb,html body #main .nav-acc-top:has(.acc-selb) > .nav-ord-b{white-space:nowrap;padding:10px 20px 12px 0}
-  html body #main .nav-acc-top:has(.acc-selb) > .nav-ord-b{order:2}
+  html body #main .nav-acc-top:has(.acc-selb) > .acc-selb,html body #main .nav-acc-top:has(.acc-selb) > .nav-ord-b{white-space:nowrap;padding:10px 0 12px}
+  /* side by side at the right, the last one in line with the accounts' amounts (its own « auto » split the room: « Select » landed mid-row) */
+  html body #main .nav-acc-top:has(.acc-selb) > .nav-ord-b{order:2;margin:0 14px 0 20px}
   html body #main .nav-acc-top:has(.acc-selb) > .acc-selb{order:1}
 }
 
