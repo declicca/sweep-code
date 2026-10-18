@@ -911,7 +911,8 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .narr .ways li{font-size:var(--fs-body)}
 @media (min-width:1068px){
   .narr{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}
-  .narr-beat,.narr-pair{min-height:72vh;display:flex;flex-direction:column;justify-content:center}
+  .narr-beat,.narr-pair{min-height:72vh;padding-block:40px;display:flex;flex-direction:column;justify-content:center}   /* a beat taller than 72vh keeps 80px from the next */
+  .narr-pair .narr-beat{padding-block:0}
   .narr-beat+.narr-beat,.narr-pair+.narr-beat{margin-top:0}
   .narr-pair .narr-beat{min-height:0}
   .narr-beat .narr-in{display:none}
