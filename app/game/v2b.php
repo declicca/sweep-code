@@ -193,52 +193,29 @@ final class GameV2b
     }
     private static function avg(array $a): ?float { return $a ? array_sum($a) / count($a) : null; }
 
-    /** statistical candidates on the last 4-8 weeks, best first */
+    /** the candidates, best first: the conditions of « Your edge » (brief edge T2, game/edge.php — the same profile as the coach) */
     public static function candidates(string $uid): array
     {
-        $from = GameEngine::addDays(GameEngine::today(), -56);
-        $trades = GameEngine::onePerCopyGroup(array_values(array_filter(GameEngine::docs($uid, 'trades'), fn($t) => ($t['date'] ?? '') >= $from && empty($t['demo']))));   // a copied trade once (brief 02 part 6)
-        $rows = [];
-        foreach ($trades as $t) { $r = self::rOf($t); if ($r !== null) $rows[] = ['t' => $t, 'r' => $r]; }
-        $out = [];
-        if (count($rows) < 20) {
+        $p = GameEdge::forUser($uid);
+        if (!$p['wins']) {
             // beginner reveal: habits, not results
             $c = GameEngine::counters($uid);
-            return [['key' => 'beginner', 'score' => 1, 'data' => ['trades' => count($trades), 'reviews' => $c['reviews'], 'plans' => $c['plans'], 'swept' => $c['swept']]]];
+            $from = GameEngine::addDays(GameEngine::today(), -55);
+            $n = count(array_filter(GameEngine::docs($uid, 'trades'), fn($t) => empty($t['demo']) && ($t['date'] ?? '') >= $from));
+            return [['key' => 'beginner', 'score' => 1, 'data' => ['trades' => $n, 'reviews' => $c['reviews'], 'plans' => $c['plans'], 'swept' => $c['swept']]]];
         }
-        $all = self::avg(array_column($rows, 'r'));
-        $group = function (callable $key, int $min) use ($rows): array { $g = []; foreach ($rows as $x) { $k = $key($x['t']); if ($k !== null && $k !== '') $g[$k][] = $x['r']; } return array_filter($g, fn($v) => count($v) >= $min); };
-        $add = function (string $key, array $data, float $gap, int $n) use (&$out) { if ($n > 0) $out[] = ['key' => $key, 'score' => abs($gap) * sqrt($n), 'data' => $data]; };
-        // best 30-minute slot
-        $slots = $group(function ($t) { $m = preg_match('/^(\d{2}):(\d{2})/', (string) ($t['entry_time'] ?? ''), $x) ? (int) $x[1] * 60 + (int) $x[2] : null; return $m === null ? null : (string) (intdiv($m, 30) * 30); }, 5);
-        if ($slots) { uasort($slots, fn($a, $b) => self::avg($b) <=> self::avg($a)); $k = (int) array_key_first($slots); $v = $slots[$k];
-            $add('best_slot', ['start' => sprintf('%02d:%02d', intdiv($k, 60), $k % 60), 'end' => sprintf('%02d:%02d', intdiv($k + 30, 60), ($k + 30) % 60), 'r' => round(self::avg($v), 2), 'n' => count($v), 'all' => round($all, 2)], self::avg($v) - $all, count($v)); }
-        // best setup
-        $setups = $group(fn($t) => trim((string) ($t['setup'] ?? '')), 5);
-        if (count($setups) >= 2) { uasort($setups, fn($a, $b) => self::avg($b) <=> self::avg($a)); $k = array_key_first($setups); $v = $setups[$k];
-            $add('best_setup', ['setup' => $k, 'r' => round(self::avg($v), 2), 'n' => count($v), 'all' => round($all, 2)], self::avg($v) - $all, count($v)); }
-        // emotion
-        $emo = $group(fn($t) => ((array) (($t['emo'] ?? [])['before'] ?? []))[0] ?? null, 5);
-        if (count($emo) >= 2) { uasort($emo, fn($a, $b) => self::avg($a) <=> self::avg($b)); $k = array_key_first($emo); $v = $emo[$k];
-            $add('emotion', ['emotion' => $k, 'r' => round(self::avg($v), 2), 'n' => count($v), 'all' => round($all, 2)], self::avg($v) - $all, count($v)); }
-        // weekday
-        $wd = $group(fn($t) => (string) (new DateTimeImmutable((string) $t['date']))->format('N'), 5);
-        if (count($wd) >= 3) { uasort($wd, fn($a, $b) => self::avg($b) <=> self::avg($a)); $k = (int) array_key_first($wd); $v = $wd[$k];
-            $add('best_day', ['weekday' => $k, 'r' => round(self::avg($v), 2), 'n' => count($v), 'all' => round($all, 2)], self::avg($v) - $all, count($v)); }
-        // plan before the open vs not (scored days)
-        $days = self::q("SELECT trading_day, plan_at, plan_valid, detail_json FROM game_days WHERE user_id = ? AND trading_day >= ?", [$uid, $from])->fetchAll(PDO::FETCH_ASSOC);
-        $byId = []; foreach ($rows as $x) $byId[(string) $x['t']['id']] = $x['r'];
-        $withP = []; $noP = []; $ok = []; $bad = [];
-        foreach ($days as $d) {
-            $early = (int) $d['plan_valid'] && $d['plan_at'] && (int) $d['plan_at'] < GameEngine::epochEt($d['trading_day'], '09:30');
-            foreach ((json_decode((string) $d['detail_json'], true)['trades'] ?? []) as $x) {
-                if (!isset($byId[$x['id']])) continue;
-                if ($early) $withP[] = $byId[$x['id']]; else $noP[] = $byId[$x['id']];
-                if ($x['ok']) $ok[] = $byId[$x['id']]; else $bad[] = $byId[$x['id']];
-            }
+        $out = [];
+        $one = fn(array $c, string $d) => count($c['dims']) === 1 && $c['dims'][0][0] === $d ? (string) $c['dims'][0][1] : null;
+        foreach (array_merge($p['wins'], $p['leak'] ? [$p['leak']] : []) as $k => $c) {
+            $data = ['r' => $c['avg'], 'n' => $c['n'], 'all' => $p['avg'], 'unit' => $p['unit'], 'win' => $c['win'], 'level' => $c['level']];
+            $score = 10 - $k;   // the profile's order
+            if ($c['avg'] < 0) $out[] = ['key' => 'leak', 'score' => $score, 'data' => $data + ['dims' => $c['dims']]];
+            elseif (($v = $one($c, 'setup')) !== null) $out[] = ['key' => 'best_setup', 'score' => $score, 'data' => $data + ['setup' => $v]];
+            elseif (($v = $one($c, 'slot')) !== null) { $m = (int) substr($v, 0, 2) * 60 + (int) substr($v, 3, 2) + 30;
+                $out[] = ['key' => 'best_slot', 'score' => $score, 'data' => $data + ['start' => $v, 'end' => sprintf('%02d:%02d', intdiv($m, 60) % 24, $m % 60)]]; }
+            elseif (($v = $one($c, 'weekday')) !== null) $out[] = ['key' => 'best_day', 'score' => $score, 'data' => $data + ['weekday' => (int) $v]];
+            else $out[] = ['key' => 'edge', 'score' => $score, 'data' => $data + ['dims' => $c['dims']]];
         }
-        if (count($withP) >= 5 && count($noP) >= 5) $add('plan_effect', ['with' => round(self::avg($withP), 2), 'without' => round(self::avg($noP), 2), 'n' => count($withP) + count($noP)], self::avg($withP) - self::avg($noP), min(count($withP), count($noP)));
-        if (count($ok) >= 5 && count($bad) >= 5) $add('compliance', ['in_plan' => round(self::avg($ok), 2), 'off_plan' => round(self::avg($bad), 2), 'pct' => (int) round(count($ok) / (count($ok) + count($bad)) * 100)], self::avg($ok) - self::avg($bad), min(count($ok), count($bad)));
         usort($out, fn($a, $b) => $b['score'] <=> $a['score']);
         // not something revealed in the last 4 weeks
         $recent = self::q('SELECT insight_key FROM edge_reveals WHERE user_id = ? AND week_start >= ?', [$uid, GameEngine::addDays(GameEngine::monday(GameEngine::today()), -28)])->fetchAll(PDO::FETCH_COLUMN);
@@ -281,7 +258,7 @@ final class GameV2b
                     require_once $core;
                     $name = ['en' => 'English', 'fr' => 'Canadian French (tutoiement)', 'es' => 'Spanish'][$lang] ?? 'English';
                     $prompt = 'A trading-discipline app shows a trader one weekly discovery about their edge, computed from their own trades. Insight: ' . $row['insight_key']
-                        . '. Numbers (R = multiple of the risk taken): ' . $row['data_json'] . ". Write it in $name: at most 2 short sentences, positive and actionable, using R and percentages only."
+                        . '. Numbers (' . ((json_decode((string) $row['data_json'], true)['unit'] ?? 'R') === '$' ? 'r and all = average result in dollars per contract: describe them in words, never as amounts' : 'R = multiple of the risk taken') . '): ' . $row['data_json'] . ". Write it in $name: at most 2 short sentences, positive and actionable, using R and percentages only."
                         . ' No dollar amounts, no financial advice, no predictions. Return JSON {"text": "..."}.';
                     $r = sai_call(GameEngine::pdo(), $uid, 'game_edge_reveal', $prompt, ['max_tokens' => 220, 'temperature' => .5]);
                     $txt = trim((string) (($r['data'] ?? [])['text'] ?? ''));

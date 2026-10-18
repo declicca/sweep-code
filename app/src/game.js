@@ -1446,10 +1446,11 @@
       qs_review: 'Do a review', qs_plan: 'Plan before the open', qs_sweep: 'Sweep a day', quest_done_t: "You're back.", quest_done_sub: 'Your streak gets {n} days back.', quest_done_sub0: 'Welcome back in the game.',
       themes: 'Ring themes', th: { ring_default: 'Sweep', ring_aurora: 'Aurora', ring_ember: 'Ember', ring_mono: 'Mono', ring_violet: 'Violet', ring_ocean: 'Ocean' },
       wd: ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      tpl: { best_slot: 'Your trades between {start} and {end} average {r}R, your best time slot (overall: {all}R).', best_setup: '“{setup}” is your best setup: {r}R on average over {n} trades.',
-        emotion: 'When you feel “{emotion}” before entering, your trades average {r}R. Worth a pause next time.', best_day: '{wd} is your best day: {r}R on average over {n} trades.',
+      tpl: { best_slot: 'Your trades between {start} and {end} average {r}, your best time slot (overall: {all}).', best_setup: '“{setup}” is your best setup: {r} on average over {n} trades.',
+        edge: 'What works for you: {cond}, {r} per trade over {n} trades (overall: {all}).', leak: 'What costs you: {cond}, {r} per trade over {n} trades. Worth a pause next time.',
+        emotion: 'When you feel “{emotion}” before entering, your trades average {r}R. Worth a pause next time.', best_day: '{wd} is your best day: {r} on average over {n} trades.',
         plan_effect: 'With a plan before the open: {with}R per trade. Without: {without}R.', compliance: 'Trades inside your plan: {in_plan}R. Outside: {off_plan}R. You stay in plan {pct} % of the time.',
-        beginner: 'You have logged {trades} trades, {plans} plans and {reviews} reviews. At 20 trades with a stop, your first real edge appears here.' } },
+        beginner: 'You have logged {trades} trades, {plans} plans and {reviews} reviews. From 5 trades in the same situation, your first lead appears here.' } },
     fr: { weekly: 'Bilan de la semaine', open_chest: 'Ouvrir ton coffre', w_title: 'Ta semaine', w_swept: 'Journées balayées', w_streak: 'Streak', w_missions: 'Missions',
       reveal_t: 'Edge Reveal', reveal_tap: 'Touche pour révéler ta découverte de la semaine', reveal_locked: 'Un Edge Reveal par mois avec Gratuit. Chaque semaine avec Pro.', unlock: 'Débloquer avec Pro', another: 'Un autre reveal',
       q_best: 'Meilleure décision de la semaine', q_fix: 'Un pattern à corriger', q_int: 'Intention pour la semaine prochaine', save_go: 'Enregistrer et ouvrir le coffre',
@@ -1460,10 +1461,11 @@
       qs_review: 'Faire une revue', qs_plan: 'Plan avant l’ouverture', qs_sweep: 'Balayer une journée', quest_done_t: 'Tu es de retour.', quest_done_sub: 'Ton streak récupère {n} jours.', quest_done_sub0: 'Bon retour dans le jeu.',
       themes: 'Thèmes des anneaux', th: { ring_default: 'Sweep', ring_aurora: 'Aurore', ring_ember: 'Braise', ring_mono: 'Mono', ring_violet: 'Violet', ring_ocean: 'Océan' },
       wd: ['', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'],
-      tpl: { best_slot: 'Tes trades entre {start} et {end} ont un R moyen de {r}R, ton meilleur créneau (global : {all}R).', best_setup: '« {setup} » est ton meilleur setup : {r}R en moyenne sur {n} trades.',
-        emotion: 'Quand tu te sens « {emotion} » avant d’entrer, tes trades font {r}R en moyenne. Une pause vaut la peine la prochaine fois.', best_day: 'Le {wd} est ton meilleur jour : {r}R en moyenne sur {n} trades.',
+      tpl: { best_slot: 'Tes trades entre {start} et {end} font {r} en moyenne, ton meilleur créneau (global : {all}).', best_setup: '« {setup} » est ton meilleur setup : {r} en moyenne sur {n} trades.',
+        edge: 'Ce qui marche pour toi : {cond}, {r} par trade sur {n} trades (global : {all}).', leak: 'Ce qui te coûte : {cond}, {r} par trade sur {n} trades. Une pause vaut la peine la prochaine fois.',
+        emotion: 'Quand tu te sens « {emotion} » avant d’entrer, tes trades font {r}R en moyenne. Une pause vaut la peine la prochaine fois.', best_day: 'Le {wd} est ton meilleur jour : {r} en moyenne sur {n} trades.',
         plan_effect: 'Avec un plan avant l’ouverture : {with}R par trade. Sans : {without}R.', compliance: 'Trades dans ton plan : {in_plan}R. Hors plan : {off_plan}R. Tu restes dans ton plan {pct} % du temps.',
-        beginner: 'Tu as journalisé {trades} trades, {plans} plans et {reviews} revues. À 20 trades avec un stop, ton premier vrai edge apparaîtra ici.' } },
+        beginner: 'Tu as journalisé {trades} trades, {plans} plans et {reviews} revues. Dès 5 trades dans une même situation, ta première piste apparaîtra ici.' } },
     es: { weekly: 'Resumen semanal', open_chest: 'Abrir tu cofre', w_title: 'Tu semana', w_swept: 'Días barridos', w_streak: 'Racha', w_missions: 'Misiones',
       reveal_t: 'Edge Reveal', reveal_tap: 'Toca para revelar tu descubrimiento de la semana', reveal_locked: 'Un Edge Reveal al mes en Gratis. Cada semana con Pro.', unlock: 'Desbloquear con Pro', another: 'Otro reveal',
       q_best: 'Mejor decisión de la semana', q_fix: 'Un patrón a corregir', q_int: 'Intención para la próxima semana', save_go: 'Guardar y abrir el cofre',
@@ -1474,10 +1476,11 @@
       qs_review: 'Hacer una revisión', qs_plan: 'Plan antes de la apertura', qs_sweep: 'Barrer un día', quest_done_t: 'Estás de vuelta.', quest_done_sub: 'Tu racha recupera {n} días.', quest_done_sub0: 'Bienvenido de nuevo al juego.',
       themes: 'Temas de anillos', th: { ring_default: 'Sweep', ring_aurora: 'Aurora', ring_ember: 'Brasa', ring_mono: 'Mono', ring_violet: 'Violeta', ring_ocean: 'Océano' },
       wd: ['', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes'],
-      tpl: { best_slot: 'Tus trades entre {start} y {end} promedian {r}R, tu mejor franja (global: {all}R).', best_setup: '«{setup}» es tu mejor setup: {r}R de media en {n} trades.',
-        emotion: 'Cuando te sientes «{emotion}» antes de entrar, tus trades promedian {r}R. Vale la pena una pausa la próxima vez.', best_day: 'El {wd} es tu mejor día: {r}R de media en {n} trades.',
+      tpl: { best_slot: 'Tus trades entre {start} y {end} promedian {r}, tu mejor franja (global: {all}).', best_setup: '«{setup}» es tu mejor setup: {r} de media en {n} trades.',
+        edge: 'Lo que te funciona: {cond}, {r} por operación en {n} operaciones (global: {all}).', leak: 'Lo que te cuesta: {cond}, {r} por operación en {n} operaciones. Vale la pena una pausa la próxima vez.',
+        emotion: 'Cuando te sientes «{emotion}» antes de entrar, tus trades promedian {r}R. Vale la pena una pausa la próxima vez.', best_day: 'El {wd} es tu mejor día: {r} de media en {n} trades.',
         plan_effect: 'Con plan antes de la apertura: {with}R por trade. Sin plan: {without}R.', compliance: 'Trades dentro del plan: {in_plan}R. Fuera: {off_plan}R. Sigues tu plan el {pct} % del tiempo.',
-        beginner: 'Registraste {trades} trades, {plans} planes y {reviews} revisiones. Con 20 trades con stop, tu primer edge real aparecerá aquí.' } },
+        beginner: 'Registraste {trades} trades, {plans} planes y {reviews} revisiones. Desde 5 operaciones en una misma situación, tu primera pista aparecerá aquí.' } },
   };
   const wt = (k, p) => { const g = (o) => k.split('.').reduce((a, x) => (a == null ? a : a[x]), o); let s = g(W_T[L()]); if (s == null) s = g(W_T.en); if (s == null) s = k; return typeof s === 'string' && p ? s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)) : s; };
   const THEMES = { ring_aurora: ['#4C8DFF', '#4FD1C5', '#2B6CB0'], ring_ember: ['#E0A84F', '#F2C98A', '#B9822F'], ring_mono: ['#F2F2F3', '#A1A1AA', '#5F5F66'], ring_violet: ['#8B7CFF', '#B6A9FF', '#5D4ED8'], ring_ocean: ['#2F80ED', '#56CCF2', '#1B4F9C'] };
@@ -1491,7 +1494,10 @@
     if (!rv || rv.locked) return '';
     if (rv.texts && rv.texts[L()]) return rv.texts[L()];
     const d = Object.assign({}, rv.data);
-    for (const k of ['r', 'all', 'with', 'without', 'in_plan', 'off_plan']) if (d[k] != null) d[k] = fmtR(d[k]);
+    // « Your edge » (brief edge T2): R, or $ per contract when the risk is unknown; the older reveals keep their « {r}R »
+    const unitOf = ['best_slot', 'best_setup', 'best_day', 'edge', 'leak'].includes(rv.key);
+    for (const k of ['r', 'all', 'with', 'without', 'in_plan', 'off_plan']) if (d[k] != null) d[k] = !unitOf ? fmtR(d[k]) : window.SweepEdge ? SweepEdge.value(+d[k], d.unit === '$' ? '$' : 'R') : fmtR(d[k]) + 'R';
+    if (d.dims && window.SweepEdge) d.cond = SweepEdge.words({ dims: d.dims });
     if (d.weekday) d.wd = wt('wd')[d.weekday] || '';
     if (d.emotion) d.emotion = t('emo.' + d.emotion) !== 'emo.' + d.emotion ? t('emo.' + d.emotion) : d.emotion;
     return wt('tpl.' + rv.key, d);

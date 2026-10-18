@@ -547,17 +547,16 @@
     return { days, rows };
   }
   const rate = (rows) => (rows.length ? Math.round(rows.filter((r) => net(r.t) > 0).length / rows.length * 100) : 0);
+  /** the strength: the first winning condition of « Your edge » (brief edge T2: one profile everywhere; same words as before for a setup or a slot) */
   function strength(sp) {
-    const R = sp.rows, all = rate(R), cands = [];
-    const inPlan = R.filter((r) => planOf(r.day).valid && !r.c.all.some((x) => PLAN_CODES.includes(x))), off = R.filter((r) => !inPlan.includes(r));
-    if (inPlan.length >= 5 && off.length >= 5) cands.push({ gap: rate(inPlan) - rate(off), n: Math.min(inPlan.length, off.length), text: fill(T.sPlan, { a: rate(inPlan), n: inPlan.length, b: rate(off), m: off.length }) });
-    const group = (key) => { const m = new Map(); R.forEach((r) => { const k = key(r.t); if (k) { if (!m.has(k)) m.set(k, []); m.get(k).push(r); } }); return [...m.entries()].filter(([, v]) => v.length >= 5); };
-    const best = (g, tpl, label) => { if (g.length < 2) return; const [k, v] = g.sort((a, b) => rate(b[1]) - rate(a[1]) || b[1].length - a[1].length)[0]; cands.push({ gap: rate(v) - all, n: v.length, text: fill(tpl, { s: label(k), a: rate(v), n: v.length }) }); };
-    best(group((t) => String(t.setup || '').trim()), T.sSetup, (k) => k);
-    best(group((t) => { const e = min(timeOf(t)); return e == null ? '' : String(Math.floor(e / 30) * 30); }), T.sSlot, (k) => { const a = +k, b = a + 30, p = (x) => String(x).padStart(2, '0'); return T.slot(p(Math.floor(a / 60)), p(a % 60), p(Math.floor(b / 60)), p(b % 60)); });
-    const top = cands.filter((x) => x.gap >= 5).sort((a, b) => b.gap * Math.sqrt(b.n) - a.gap * Math.sqrt(a.n))[0];
-    if (top) return top.text;
-    const clean = sp.days.filter((d) => R.filter((r) => r.day === d).every((r) => !r.c.fix)).length;
+    const pr = edgeMine(), top = pr && pr.wins[0];
+    if (top) {
+      const [d, v] = top.dims[0], one = top.dims.length === 1;
+      if (one && d === 'setup') return fill(T.sSetup, { s: v, a: top.win, n: top.n });
+      if (one && d === 'slot') return fill(T.sSlot, { s: slotWords(v), a: top.win, n: top.n });
+      return fill(E2.sEdge, { s: edgeWords(top), v: edgeValue(top.avg, pr.unit), a: top.win, n: top.n });
+    }
+    const clean = sp.days.filter((d) => sp.rows.filter((r) => r.day === d).every((r) => !r.c.fix)).length;
     if (clean && sp.days.length >= 3) return fill(T.sClean, { k: clean, n: sp.days.length });
     return T.sNone;
   }
@@ -818,6 +817,149 @@
   const appRender = window.render;
   window.render = function () { const out = appRender.apply(this, arguments); paint(); return out; };
   new window.SweepMO(paint).observe(document.body, { childList: true, subtree: true });
+  /* ───────────── « Your edge » (brief edge T2, 17 Oct.): one profile, used everywhere ─────────────
+   * Twin of GameEdge::profile() in game/edge.php — same inputs, same steps, same order (tests/e2e_edge_parity.py locks them).
+   * The rules are written there. Pure: it reads only what it is given. */
+  const EDGE_DIMS = ['setup', 'slot', 'session', 'weekday', 'side', 'plan', 'emo', 'nth', 'after', 'inst'];
+  function edgeProfile(trades, journals, day) {
+    const addD = (d, k) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + k); return x.toISOString().slice(0, 10); };
+    const low = (s) => String(s == null ? '' : s).trim().toLowerCase();
+    const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+    const r2 = (x) => (x < 0 ? -1 : 1) * Math.round(Math.abs(x) * 100) / 100;
+    const nt = (t) => (Math.trunc(+t.pnl_c || 0)) - (Math.trunc(+t.fees_c || 0));
+    const from = addD(day, -55), mid = addD(day, -27), wk = addD(day, -6);
+    // a copied trade once: the first saved of its group (as GameEngine::onePerCopyGroup)
+    const list = [], at = {};
+    (trades || []).forEach((t) => {
+      if (!t || typeof t !== 'object' || t.demo || !t.date || t.date < from || t.date > day) return;
+      const g = String(t.copy_group || '');
+      if (!g) { list.push(t); return; }
+      const k = String(t.created_at || t.id || '');
+      if (!(g in at)) { at[g] = [list.length, k]; list.push(t); } else if (k < at[g][1]) { list[at[g][0]] = t; at[g][1] = k; }
+    });
+    const hsd = (t) => (typeof hasSessionDate === 'function' ? hasSessionDate(t) : !!t.session_date);
+    const rk = (t) => { const x = String(t.entry_time || '').slice(0, 5); return (hsd(t) && x !== '' && x >= '18' ? '0' : '1') + (x !== '' ? x : '99:99'); };
+    list.sort((a, b) => cmp(a.date, b.date) || cmp(rk(a), rk(b)) || cmp(String(a.created_at || ''), String(b.created_at || '')) || cmp(String(a.id || ''), String(b.id || '')));
+    const pre = {}; (journals || []).forEach((j) => { if (j && j.id != null) pre[String(j.id)] = j.pre || null; });
+    // the dimensions of each trade (in the day's real order: nth and after)
+    const dims = []; let cur = null, i = 0, prev = null;
+    list.forEach((t) => {
+      if (t.date !== cur) { cur = t.date; i = 0; prev = null; }
+      const d = {};
+      const su = String(t.setup == null ? '' : t.setup).trim(); if (su) d.setup = su;
+      const m = /^(\d{1,2}):(\d{2})/.exec(String(t.entry_time || '')); if (m) { const x = Math.floor((+m[1] * 60 + +m[2]) / 30) * 30; d.slot = String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); }
+      if (String(t.session || '') !== '') d.session = String(t.session);
+      const wd = new Date(t.date + 'T12:00:00Z').getUTCDay(); d.weekday = String(wd || 7);
+      if (t.direction === 'long' || t.direction === 'short') d.side = t.direction;
+      const p = pre[t.date];
+      if (p && typeof p === 'object') {
+        const bias = ['bullish', 'bearish', 'neutral', 'no_trade'].includes(p.bias) ? p.bias : null;
+        if (bias && (bias === 'no_trade' || cents(p.max_loss) > 0)) {
+          const ps = (Array.isArray(p.setups) ? p.setups : []).map(low).filter(Boolean);
+          const inn = bias !== 'no_trade' && (bias === 'neutral' || ((bias === 'bullish') === (t.direction === 'long'))) && (!ps.length || ps.includes(low(t.setup)));
+          d.plan = inn ? 'in' : 'out';
+        }
+      }
+      const e = ((t.emo && t.emo.before) || [])[0]; if (typeof e === 'string' && e !== '') d.emo = e;
+      if (i < 2) d.nth = String(i + 1);
+      if (prev) { const pn = nt(prev); if (pn !== 0) d.after = pn > 0 ? 'win' : 'loss'; }
+      if (String(t.instrument || '') !== '') d.inst = String(t.instrument).toUpperCase();
+      dims.push(d); prev = t; i++;
+    });
+    const withR = list.filter((t) => Math.trunc(+t.risk_c || 0) > 0).length;
+    const unit = list.length && withR >= 0.8 * list.length ? 'R' : '$';
+    const rows = [];
+    list.forEach((t, k) => {
+      const risk = Math.trunc(+t.risk_c || 0); let v;
+      if (unit === 'R') { if (risk <= 0) return; v = nt(t) / risk; } else v = nt(t) / 100 / Math.max(1, Math.round(+t.contracts || 1));
+      rows.push({ t, v, w: t.date >= mid ? 2 : 1, d: dims[k] });
+    });
+    const n = rows.length, base = { n, unit, avg: 0, enough: n >= 5, wins: [], leak: null };
+    if (!n) return base;
+    let sw = 0, s = 0, sa = 0; rows.forEach((r) => { sw += r.w; s += r.w * r.v; sa += r.w * Math.abs(r.v); });
+    const M = s / sw, A = sa / sw; base.avg = r2(M);
+    // every condition of 1 or 2 dimensions
+    const C = new Map();
+    rows.forEach((r, k) => {
+      const ds = EDGE_DIMS.filter((x) => r.d[x] != null), keys = ds.map((a) => [[a, r.d[a]]]);
+      for (let x = 0; x < ds.length; x++) for (let y = x + 1; y < ds.length; y++) keys.push([[ds[x], r.d[ds[x]]], [ds[y], r.d[ds[y]]]]);
+      keys.forEach((pairs) => {
+        const key = pairs.map((p) => p[0] + '=' + (p[0] === 'setup' ? low(p[1]) : p[1])).join('|');
+        let c = C.get(key); if (!c) C.set(key, (c = { key, dims: pairs, n: 0, w: 0, s: 0, wins: 0, no: 0, so: 0, nr: 0, sr: 0, nw: 0, last: '', ids: new Set() }));
+        c.dims = pairs;   // the setup as last written
+        c.n++; c.w += r.w; c.s += r.w * r.v;
+        if (nt(r.t) > 0) c.wins++;
+        if (r.t.date >= mid) { c.nr++; c.sr += r.v; } else { c.no++; c.so += r.v; }
+        if (r.t.date < wk) c.nw++;
+        if (r.t.date > c.last) c.last = r.t.date;
+        c.ids.add(k);
+      });
+    });
+    const win = [], loss = [];
+    C.forEach((c) => {
+      if (c.n < 5) return;
+      const m = c.s / c.w;
+      if (m > 0 && m - M >= 0.25 * A && A > 0) win.push(Object.assign(c, { m, score: (m - M) * Math.sqrt(c.n) }));
+      else if (m < 0 && M - m >= 0.25 * A && A > 0) loss.push(Object.assign(c, { m, score: (M - m) * Math.sqrt(c.n) }));
+    });
+    // the same score (often the same trades): the simplest first (1 dimension), then in the order of EDGE_DIMS (the setup first)
+    const rank = (c) => c.dims.length + ':' + c.dims.map((p) => String(EDGE_DIMS.indexOf(p[0]))).join(',');
+    const order = (a, b) => cmp(b.score, a.score) || cmp(b.n, a.n) || cmp(rank(a), rank(b)) || cmp(a.key, b.key);
+    win.sort(order); loss.sort(order);
+    const picked = [];
+    for (const c of win) {
+      if (picked.length >= 3) break;
+      if (picked.some((p) => { let both = 0; c.ids.forEach((x) => { if (p.ids.has(x)) both++; }); return both / (c.ids.size + p.ids.size - both) >= 0.8; })) continue;
+      picked.push(c);
+    }
+    const out = (c) => {
+      const mo = c.no ? c.so / c.no : null, mr = c.nr ? c.sr / c.nr : null;
+      const level = c.n >= 20 && c.no && c.nr && mo > 0 && mr > 0 ? 'confirmed' : c.n >= 10 ? 'trend' : 'lead';
+      return { key: c.key, dims: c.dims, n: c.n, win: Math.round(c.wins / c.n * 100), avg: r2(c.m), level, last: c.last, new: c.nw < 5, fading: c.nr >= 5 && c.no >= 5 && mo > 0 && mr < mo / 2 };
+    };
+    base.wins = picked.map(out);
+    base.leak = loss.length ? out(loss[0]) : null;
+    return base;
+  }
+  // the trader's own profile, kept until a trade or a plan changes
+  let edgeMemo = { k: '', v: null };
+  function edgeMine(day) {
+    const d = day || today(), k = tradesKey() + '|' + d;
+    if (edgeMemo.k !== k) edgeMemo = { k, v: edgeProfile(S.trades || [], S.journals || [], d) };
+    return edgeMemo.v;
+  }
+  /** a condition in words (« Opening range breakout · 9:30–10:00 ») and its result (« +0.8 R », « +$45 per contract ») */
+  const ET = {
+    en: { wd: ['', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays'], ses: { asia: 'Asia session', london: 'London session', nyam: 'New York morning', nypm: 'New York afternoon', other: 'outside the main sessions' },
+      plan: { in: 'in your plan', out: 'off plan' }, nth: { 1: '1st trade of the day', 2: '2nd trade of the day' }, after: { win: 'after a win', loss: 'after a loss' }, emo: 'feeling {e}', perC: '{v} per contract',
+      sEdge: 'What works for you: {s}, {v} per trade over {n} trades ({a} % winners).' },
+    fr: { wd: ['', 'le lundi', 'le mardi', 'le mercredi', 'le jeudi', 'le vendredi', 'le samedi', 'le dimanche'], ses: { asia: 'séance Asie', london: 'séance de Londres', nyam: 'matin de New York', nypm: 'après-midi de New York', other: 'hors des grandes séances' },
+      plan: { in: 'dans ton plan', out: 'hors plan' }, nth: { 1: '1er trade du jour', 2: '2e trade du jour' }, after: { win: 'après un gain', loss: 'après une perte' }, emo: 'quand tu te sens {e}', perC: '{v} par contrat',
+      sEdge: 'Ce qui marche pour toi : {s}, {v} par trade sur {n} trades ({a} % gagnants).' },
+    es: { wd: ['', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos'], ses: { asia: 'sesión de Asia', london: 'sesión de Londres', nyam: 'mañana de Nueva York', nypm: 'tarde de Nueva York', other: 'fuera de las sesiones principales' },
+      plan: { in: 'dentro de tu plan', out: 'fuera del plan' }, nth: { 1: '1.ª operación del día', 2: '2.ª operación del día' }, after: { win: 'tras una ganancia', loss: 'tras una pérdida' }, emo: 'cuando te sientes {e}', perC: '{v} por contrato',
+      sEdge: 'Lo que te funciona: {s}, {v} por operación en {n} operaciones ({a} % ganadoras).' },
+  }[L] || null;
+  const E2 = ET || { wd: [], ses: {}, plan: {}, nth: {}, after: {}, emo: '{e}', perC: '{v}', sEdge: '{s}' };
+  const slotWords = (hm) => { const a = min(hm), b = a + 30, p = (x) => String(x).padStart(2, '0'); return T.slot(p(Math.floor(a / 60)), p(a % 60), p(Math.floor(b / 60) % 24), p(b % 60)); };
+  function edgeWords(c) {
+    return (c.dims || []).map(([d, v]) => {
+      if (d === 'setup') return v;
+      if (d === 'slot') return slotWords(v);
+      if (d === 'session') return E2.ses[v] || v;
+      if (d === 'weekday') return E2.wd[+v] || v;
+      if (d === 'side') return v === 'long' ? 'Long' : 'Short';
+      if (d === 'plan' || d === 'nth' || d === 'after') return E2[d][v] || v;
+      if (d === 'emo') { let e = v; try { const x = window.SweepGame && SweepGame.t('emo.' + v); if (x && x !== 'emo.' + v) e = x; } catch (er) { /* the word as written */ } return fill(E2.emo, { e }); }
+      return v;
+    }).join(' · ');
+  }
+  function edgeValue(v, unit) {
+    const sg = v > 0 ? '+' : v < 0 ? '−' : '';
+    if (unit === 'R') return sg + Math.abs(v).toLocaleString(L === 'en' ? 'en-US' : L === 'fr' ? 'fr-CA' : 'es-ES', { maximumFractionDigits: 2 }) + (L === 'en' ? 'R' : ' R');
+    return fill(E2.perC, { v: sg + usd(Math.round(v * 100)) });
+  }
+  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, dims: EDGE_DIMS, words: edgeWords, value: edgeValue };
   window.SweepCoach = { trade: tradeNote, session, margin, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();

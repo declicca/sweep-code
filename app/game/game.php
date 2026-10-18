@@ -20,6 +20,7 @@ require_once __DIR__ . '/catalog.php';
 require_once __DIR__ . '/v2.php';
 require_once __DIR__ . '/boss.php';
 require_once __DIR__ . '/v2b.php';
+require_once __DIR__ . '/edge.php';   // « Your edge » (brief edge T2)
 require_once __DIR__ . '/v2c.php';
 require_once __DIR__ . '/weekly-mail.php';   // « Your week » email (brief 01 step 5)
 require_once __DIR__ . '/v3s.php';
