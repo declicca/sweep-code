@@ -166,7 +166,7 @@ def hero(t, kick, h1, lead, cta="", note=None, visual="", center=False, extra=""
     v = f'<div class="c c-wide hero-visual">{hero_shot(visual)}</div>' if visual else ""
     p = f'<p class="lead rise d3">{t(lead)}</p>' if lead else ""
     h = f'<h1 class="wu">{words(t(h1))}</h1>'
-    if kick_in_h1 and k: k, h = "", f'<h1 class="wu">{k}<span class="sr">{t(T(": "," : ",": "))}</span>{words(t(h1))}</h1>'
+    if kick_in_h1 and k: k, h = "", f'<h1 class="wu">{k}<span class="sr">{t(T(": ",". ",". "))}</span>{words(t(h1))}</h1>'
     return f'<div class="page-hero{" center" if center else ""}"><div class="c">{k}{h}{p}{c}{n}{extra}</div>{v}</div>'
 
 def hero_shot(visual):

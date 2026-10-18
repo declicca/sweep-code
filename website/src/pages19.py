@@ -1,7 +1,7 @@
 from core import *
 import re, html
 import presets
-from pages18 import page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of, METHOD, TRACK_PROPS, RULES_FILL
+from pages18 import fr_de, page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of, METHOD, TRACK_PROPS, RULES_FILL
 from pages17 import _fr_nbsp
 
 # Guides built from the app's prop firm catalogue (presets.py): every number is the app's, never retyped here.
@@ -520,7 +520,7 @@ def days_cells(lang, t, f, p):
     tag = "" if s["size"] == 50000 else f" ({kk(s['size'])})"
     return ev, ("<br>".join(conds) + tag if conds else DASH)
 
-DAYS_HEADS = (T("Evaluation: minimum days", "Évaluation : jours minimum", "Evaluación: días mínimos"), T("Funded: days before a payout (50K)", "Financé : jours avant un payout (50K)", "Fondeada: días antes de un payout (50K)"))
+DAYS_HEADS = (T("Evaluation: minimum days", "Évaluation : jours minimum", "Evaluación: días mínimos"), T("Funded: days before a payout (50K)", "Financé : jours avant un payout (50K)", "Financiada: días antes de un payout (50K)"))
 
 def page_days_guide(lang, t):
     cells = lambda f, p: days_cells(lang, t, f, p)
@@ -529,7 +529,7 @@ def page_days_guide(lang, t):
      (T("What minimum days are", "Ce que sont les jours minimum", "Qué son los días mínimos"), [
       T("Many evaluations set a minimum number of trading days: even if you reach the profit target sooner, you pass only once you’ve traded that many days. On funded accounts, the days that count before a payout are usually winning days, days that close with at least a set profit, counted again after each payout.",
         "Beaucoup d’évaluations fixent un nombre minimum de jours de trading : même si tu atteins l’objectif de profit plus tôt, tu réussis seulement après avoir tradé ce nombre de jours. En compte financé, les jours qui comptent avant un payout sont en général des jours gagnants, des journées qui finissent avec au moins un certain profit, comptés de nouveau après chaque payout.",
-        "Muchas evaluaciones fijan un número mínimo de días de trading: aunque alcances el objetivo de beneficio antes, apruebas solo cuando has operado esos días. En las cuentas fondeadas, los días que cuentan antes de un payout suelen ser días ganadores, jornadas que cierran con al menos cierto beneficio, contados de nuevo después de cada payout."),
+        "Muchas evaluaciones fijan un número mínimo de días de trading: aunque alcances el objetivo de beneficio antes, apruebas solo cuando has operado esos días. En las cuentas financiadas, los días que cuentan antes de un payout suelen ser días ganadores, jornadas que cierran con al menos cierto beneficio, contados de nuevo después de cada payout."),
       T("A trading day runs from one session close to the next, not from midnight to midnight, and each firm sets what makes a day count. The details are on each firm’s rules page.",
         "Une journée de trading va d’une clôture de séance à la suivante, pas de minuit à minuit, et chaque firme fixe ce qui fait compter une journée. Les détails sont sur la page de règles de chaque firme.",
         "Un día de trading va de un cierre de sesión al siguiente, no de medianoche a medianoche, y cada firma fija qué hace contar un día. Los detalles están en la página de reglas de cada firma.")]),
@@ -550,7 +550,7 @@ def page_days_guide(lang, t):
                      {l: {"en": "At least the firm’s minimum, and only once the profit target is reached. ", "fr": "Au moins le minimum de la firme, et seulement une fois l’objectif de profit atteint. ", "es": "Al menos el mínimo de la firma, y solo una vez alcanzado el objetivo de beneficio. "}[l] + _by_firm(ev[l], l) for l in LANGS}))
     if fu["en"]:
         faqs.append((T("How many winning days do I need before a payout?", "Combien de jours gagnants faut-il avant un payout ?", "¿Cuántos días ganadores necesito antes de un payout?"),
-                     {l: {"en": "On a 50K funded account: ", "fr": "Sur un compte financé de 50K : ", "es": "En una cuenta fondeada de 50K: "}[l] + _by_firm(fu[l], l) for l in LANGS}))
+                     {l: {"en": "On a 50K funded account: ", "fr": "Sur un compte financé de 50K : ", "es": "En una cuenta financiada de 50K: "}[l] + _by_firm(fu[l], l) for l in LANGS}))
     faqs.append((T("How does Sweep count my days?", "Comment Sweep compte-t-il mes jours ?", "¿Cómo cuenta Sweep mis días?"),
                  T("For each account, Sweep counts the days you trade and your winning days against your firm’s rules, and shows when the account is ready for a payout.",
                    "Pour chaque compte, Sweep compte les jours où tu trades et tes jours gagnants selon les règles de ta firme, et t’indique quand le compte est prêt pour un payout.",
@@ -601,14 +601,14 @@ def page_costs_guide(lang, t):
                  f'<div class="cmp-wrap"><table class="cmp rules sizes costs n{len(sizes)}">{head}<tbody>{rows}</tbody></table></div><p class="fine">{fine}</p>')
     if missing:
         names = and_list([f'<a href="{href(lang, page_of(f))}">{f["name"]}</a>' for f in missing], lang)
-        secs += f'<p>{t(T(f"Prices for {names} aren’t in Sweep’s catalogue yet: see each firm’s site.", f"Les prix de {names} ne sont pas encore dans le catalogue de Sweep : vois le site de chaque firme.", f"Los precios de {names} aún no están en el catálogo de Sweep: consulta el sitio de cada firma."))}</p>'
+        secs += f'<p>{t(T(f"Prices for {names} aren’t in Sweep’s catalogue yet: see each firm’s site.", f"Les prix {fr_de(names)} ne sont pas encore dans le catalogue de Sweep : vois le site de chaque firme.", f"Los precios de {names} aún no están en el catálogo de Sweep: consulta el sitio de cada firma."))}</p>'
     table = (f'<p>{t(T("In each cell: the evaluation’s price (bold), then the activation fee paid once the evaluation is passed. For accounts funded directly, the activation fee is the account’s price.", "Dans chaque case : le prix de l’évaluation (en gras), puis les frais d’activation payés une fois l’évaluation réussie. Pour les comptes financés directement, les frais d’activation sont le prix du compte.", "En cada casilla: el precio de la evaluación (en negrita) y luego la tarifa de activación que se paga al aprobar la evaluación. En las cuentas financiadas directamente, la tarifa de activación es el precio de la cuenta."))}</p>'
              + secs)
     intro = [
      (T("What a prop account costs", "Ce que coûte un compte prop", "Lo que cuesta una cuenta prop"), [
       T("Two prices add up: the evaluation, often billed every month until you pass or stop it, and an activation fee when you get the funded account. Some firms have no activation fee; others sell an account funded directly, with no evaluation.",
         "Deux prix s’additionnent : l’évaluation, souvent facturée chaque mois jusqu’à ce que tu réussisses ou que tu l’arrêtes, et des frais d’activation quand tu obtiens le compte financé. Certaines firmes n’ont pas de frais d’activation ; d’autres vendent un compte financé directement, sans évaluation.",
-        "Se suman dos precios: la evaluación, a menudo cobrada cada mes hasta que apruebas o la cancelas, y una tarifa de activación cuando obtienes la cuenta fondeada. Algunas firmas no cobran activación; otras venden una cuenta fondeada directamente, sin evaluación."),
+        "Se suman dos precios: la evaluación, a menudo cobrada cada mes hasta que apruebas o la cancelas, y una tarifa de activación cuando obtienes la cuenta financiada. Algunas firmas no cobran activación; otras venden una cuenta financiada directamente, sin evaluación."),
       T("Firms often run discounts, so the price you pay can be lower. What matters is the total over every attempt and reset, against what your payouts bring back.",
         "Les firmes font souvent des rabais, donc le prix payé peut être plus bas. Ce qui compte, c’est le total de toutes les tentatives et réinitialisations, comparé à ce que tes payouts rapportent.",
         "Las firmas hacen descuentos a menudo, así que el precio pagado puede ser menor. Lo que importa es el total de todos los intentos y reinicios, frente a lo que te devuelven tus payouts.")]),
@@ -634,10 +634,10 @@ def page_costs_guide(lang, t):
                    f'Note chaque évaluation, réinitialisation et frais d’activation comme une dépense, et chaque payout quand il est payé : le <a href="{href("fr", "payout-tracker.html")}">suivi des payouts</a> de Sweep montre ton vrai net, avec les forfaits Pro et Elite. Pour voir si un compte peut se rembourser, essaie le <a href="{href("fr", "prop-firm-roi-calculator.html")}">calculateur de rentabilité</a> gratuit.',
                    f'Anota cada evaluación, reinicio y tarifa de activación como gasto, y cada payout cuando se paga: el <a href="{href("es", "payout-tracker.html")}">seguimiento de payouts</a> de Sweep muestra tu neto real, con los planes Pro y Elite. Para ver si una cuenta puede pagarse sola, prueba la <a href="{href("es", "prop-firm-roi-calculator.html")}">calculadora de rentabilidad</a> gratuita.')))
     return _page(lang, t, T("Guide", "Guide", "Guía"),
-        T("Prop firm costs: evaluation and activation fees, compared (2026).", "Le coût des prop firms : évaluation et frais d’activation, comparés (2026).", "El costo de las prop firms: evaluación y tarifa de activación, comparados (2026)."),
+        T("Prop firm costs: evaluation and activation fees, compared (2026).", "Le coût des prop firms : évaluation et frais d’activation, comparés (2026).", "El coste de las prop firms: evaluación y tarifa de activación, comparados (2026)."),
         T("What an evaluation and a funded account cost, account size by account size, from the prices in Sweep’s catalogue.",
           "Ce que coûtent une évaluation et un compte financé, taille de compte par taille de compte, d’après les prix du catalogue de Sweep.",
-          "Lo que cuestan una evaluación y una cuenta fondeada, tamaño por tamaño, según los precios del catálogo de Sweep."),
+          "Lo que cuestan una evaluación y una cuenta financiada, tamaño por tamaño, según los precios del catálogo de Sweep."),
         intro, table, "", faqs, None,
         T("Prop Firm Costs: Evaluation & Activation Fees (2026) · Sweep", "Coût des prop firms : évaluation et activation · Sweep", "Costo de las prop firms: evaluación y activación · Sweep"),
         T("Evaluation prices and activation fees of futures prop firms, account size by account size, from Sweep’s catalogue, with the date each price was checked.",
@@ -645,7 +645,7 @@ def page_costs_guide(lang, t):
           "Precios de las evaluaciones y tarifas de activación de las prop firms de futuros, tamaño por tamaño, según el catálogo de Sweep, con la fecha de revisión."))
 
 COSTS_LIVE = False   # held until the app's catalogue has every firm's prices (none for Lucid, Apex and MFFU on Oct 13: brief sent to the App session)
-if COSTS_LIVE: GUIDES.insert(3, (GUIDE_COSTS, T("Prop firm costs, compared", "Le coût des prop firms, comparé", "El costo de las prop firms, comparado"),
+if COSTS_LIVE: GUIDES.insert(3, (GUIDE_COSTS, T("Prop firm costs, compared", "Le coût des prop firms, comparé", "El coste de las prop firms, comparado"),
                   T("Evaluation prices and activation fees, size by size.", "Prix des évaluations et frais d’activation, taille par taille.", "Precios de evaluación y tarifas de activación, tamaño por tamaño.")))
 
 RULE_GUIDES = (GUIDE_CONS, GUIDE_DD, GUIDE_PAYOUT, GUIDE_SIZES, GUIDE_DAYS) + ((GUIDE_COSTS,) if COSTS_LIVE else ())   # firm-by-firm guides built from the catalogue

@@ -13,7 +13,7 @@ def link(lang, t, page, label, anchor=""):
     return go(lang, t, page, label, anchor)
 
 def sec_oneplace(lang, t):
-    tools = [("doc", L3("Spreadsheet","Tableur","Hoja de cálculo")), ("shield", L3("Firm dashboard","Dashboard de la firme","Panel de la firma")),
+    tools = [("doc", L3("Spreadsheet","Tableur","Hoja de cálculo")), ("shield", L3("Firm dashboard","Tableau de bord de la firme","Panel de la firma")),
              ("calendar", L3("Notes","Notes","Notas")), ("image", L3("Camera roll","Pellicule","Galería")), ("receipt", L3("Bank app","App bancaire","App del banco"))]
     labels = [L3("Trades & charts","Trades et graphiques","Operaciones y gráficos"), L3("Prop firm rules","Règles des prop firms","Reglas de prop firms"),
               L3("Payouts & expenses","Payouts et dépenses","Payouts y gastos"), L3("Plan & reviews","Plan et revues","Plan y revisiones"), L3("Habits & streaks","Habitudes et streaks","Hábitos y rachas")]
@@ -23,7 +23,7 @@ def sec_oneplace(lang, t):
            f'<div class="op-card"><div class="op-brand"><span class="op-mark">{MARK}</span>sweep</div><ul>{lab}</ul></div></div>')
     return split(t, L3("Why Sweep","Pourquoi Sweep","Por qué Sweep"), L3("Stop piecing your trading together.","Arrête de recoller les morceaux.","Deja de armar tu trading a pedazos."),
                  L3("A spreadsheet for trades. Your firm’s dashboard for drawdown. Notes for your plan. Screenshots in your camera roll. Sweep puts it all in one calm place.",
-                    "Un tableur pour tes trades. Le dashboard de ta firme pour le drawdown. Des notes pour ton plan. Des captures dans ta pellicule. Sweep réunit tout au même endroit, au calme.",
+                    "Un tableur pour tes trades. Le tableau de bord de ta firme pour le drawdown. Des notes pour ton plan. Des captures dans ta pellicule. Sweep réunit tout au même endroit, au calme.",
                     "Una hoja de cálculo para tus operaciones. El panel de tu firma para el drawdown. Notas para tu plan. Capturas en tu galería. Sweep lo reúne todo en un solo lugar, con calma."),
                  None, viz, id_="one-place")
 
@@ -58,8 +58,8 @@ def sec_story(lang, t):
     pay = (head(t, L3("Payouts","Payouts","Payouts"), L3("Every account. Every payout. One record.","Chaque compte. Chaque payout. Un seul historique.","Cada cuenta. Cada payout. Un solo historial."),
                 L3("Eval fees, resets and activations on one side, payouts on the other. See what prop trading really pays you, and how close each funded account is to its next payout.",
                    "D’un côté les frais d’évaluation, les resets et les activations ; de l’autre les payouts. Vois ce que le prop trading te rapporte vraiment, et à quelle distance chaque compte financé est de son prochain payout.",
-                   "De un lado, tarifas de evaluación, resets y activaciones; del otro, los payouts. Mira cuánto te paga realmente el trading con prop firms y qué tan cerca está cada cuenta fondeada de su próximo payout."))
-           + bullets(t, [L3("Evaluations, funded and live accounts stay separate, so the P&L you see is the real one.","Évaluations, comptes financés et live restent séparés : le P&L que tu vois est le vrai.","Evaluaciones, cuentas fondeadas y live siempre separadas: el P&L que ves es el real."),
+                   "De un lado, cuotas de evaluación, reinicios y activaciones; del otro, los payouts. Mira cuánto te paga realmente el trading con prop firms y lo cerca que está cada cuenta financiada de su próximo payout."))
+           + bullets(t, [L3("Evaluations, funded and live accounts stay separate, so the P&L you see is the real one.","Évaluations, comptes financés et live restent séparés : le P&L que tu vois est le vrai.","Evaluaciones, cuentas financiadas y live siempre separadas: el P&L que ves es el real."),
                          L3("Simulated and real money are never added together.","Le simulé et l’argent réel ne sont jamais additionnés.","Lo simulado y el dinero real nunca se suman."),
                          L3("<b>Lose an account, keep your history.</b>","<b>Tu perds un compte, tu gardes ton historique.</b>","<b>Pierdes una cuenta, conservas tu historial.</b>")])
            + f'<p class="fine" style="margin-top:24px">{t(MONEY_PLAN)}</p>')
@@ -130,8 +130,8 @@ FAQ5 = [
       + ({"en": f"Any other firm, like {and_list(other_firms(), 'en').replace(' and ', ' or ')}, can be added with its rules entered by hand. ", "fr": f"Toute autre firme, comme {and_list(other_firms(), 'fr').replace(' et ', ' ou ')}, s’ajoute avec ses règles saisies à la main. ", "es": f"Cualquier otra firma, como {and_list(other_firms(), 'es').replace(' y ', ' o ')}, se añade con sus reglas introducidas a mano. "}[l] if other_firms()
          else {"en": "Any other firm can be added with its rules entered by hand. ", "fr": "Toute autre firme s’ajoute avec ses règles saisies à la main. ", "es": "Cualquier otra firma se añade con sus reglas introducidas a mano. "}[l])
       + {"en": "Rules are checked every week, and you’re notified when something changes for your account.", "fr": "Les règles sont vérifiées chaque semaine, et tu es averti quand quelque chose change pour ton compte.", "es": "Las reglas se verifican cada semana y te avisamos cuando algo cambia para tu cuenta."}[l] for l in LANGS}),
- (L3("How do I add my trades?","Comment j’ajoute mes trades ?","¿Cómo agrego mis operaciones?"),
-  L3("On NinjaTrader 8, connect it once with Sweep’s free add-on: your trades arrive on their own. Otherwise, drop a screenshot (a history screenshot adds every trade on it at once), describe the trade in your own words, or import your platform’s export.","Sur NinjaTrader 8, connecte-le une fois avec l’add-on gratuit de Sweep : tes trades arrivent seuls. Sinon, dépose une capture (une capture de l’historique ajoute tous ses trades d’un coup), décris le trade avec tes mots ou importe l’export de ta plateforme.","En NinjaTrader 8, conéctalo una vez con el add-on gratis de Sweep: tus operaciones llegan solas. Si no, sube una captura (una captura del historial agrega todas sus operaciones de una vez), describe la operación con tus palabras o importa la exportación de tu plataforma.")),
+ (L3("How do I add my trades?","Comment j’ajoute mes trades ?","¿Cómo añado mis operaciones?"),
+  L3("On NinjaTrader 8, connect it once with Sweep’s free add-on: your trades arrive on their own. Otherwise, drop a screenshot (a history screenshot adds every trade on it at once), describe the trade in your own words, or import your platform’s export.","Sur NinjaTrader 8, connecte-le une fois avec l’add-on gratuit de Sweep : tes trades arrivent seuls. Sinon, dépose une capture (une capture de l’historique ajoute tous ses trades d’un coup), décris le trade avec tes mots ou importe l’export de ta plateforme.","En NinjaTrader 8, conéctalo una vez con el add-on gratis de Sweep: tus operaciones llegan solas. Si no, sube una captura (una captura del historial añade todas sus operaciones de una vez), describe la operación con tus palabras o importa la exportación de tu plataforma.")),
  (L3("What happens after the 60 days of Pro?","Que se passe-t-il après les 60 jours de Pro ?","¿Qué pasa después de los 60 días de Pro?"),
   L3("You keep everything you logged. Your account moves to Free unless you choose Pro or Elite.","Tu gardes tout ce que tu as enregistré. Ton compte passe à Free, sauf si tu choisis Pro ou Elite.","Conservas todo lo que registraste. Tu cuenta pasa a Free, salvo que elijas Pro o Elite.")),
  (L3("What is a trading journal, and why use Sweep?","C’est quoi un journal de trading, et pourquoi Sweep ?","¿Qué es un diario de trading y por qué Sweep?"),

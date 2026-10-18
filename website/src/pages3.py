@@ -7,7 +7,7 @@ AI_FEATURES = [
  ("image", T("Import a screenshot","Importe une capture","Importa una captura"),
   T("A fills or trade-history screenshot becomes draft trades, ready to check.","Une capture d’exécutions ou d’historique devient des brouillons de trades, prêts à vérifier.","Una captura de ejecuciones o historial se convierte en borradores listos para revisar.")),
  ("chat", T("Ask your journal","Interroge ton journal","Pregunta a tu diario"),
-  T("“Win rate on NQ after 10:30?” The AI understands the question; Sweep calculates the number from your own trades.","« Mon taux de réussite sur NQ après 10 h 30? » L’IA comprend la question; Sweep calcule le chiffre à partir de tes propres trades.","«¿Mi tasa de acierto en NQ después de las 10:30?» La IA entiende la pregunta; Sweep calcula el número con tus operaciones.")),
+  T("“Win rate on NQ after 10:30?” The AI understands the question; Sweep calculates the number from your own trades.","« Mon taux de réussite sur NQ après 10 h 30 ? » L’IA comprend la question ; Sweep calcule le chiffre à partir de tes propres trades.","«¿Mi tasa de acierto en NQ después de las 10:30?» La IA entiende la pregunta; Sweep calcula el número con tus operaciones.")),
  ("calendar", T("Weekly review","Bilan de la semaine","Revisión semanal"),
   T("A process score out of 10, what went well, what to fix, one focus and one rule for next week.","Un score de processus sur 10, ce qui a bien été, ce qu’il faut corriger, un focus et une règle pour la semaine suivante.","Una puntuación de proceso sobre 10, lo que fue bien, lo que corregir, un enfoque y una regla para la próxima semana.")),
  ("check", T("Day debrief","Débrief de la journée","Resumen del día"),
@@ -21,25 +21,25 @@ AI_FEATURES = [
 ]
 
 AI_FAQ = [
- (T("What is Ask Sweep?","Qu’est-ce que Ask Sweep?","¿Qué es Ask Sweep?"),
+ (T("What is Ask Sweep?","Qu’est-ce qu’Ask Sweep ?","¿Qué es Ask Sweep?"),
   T("The chat assistant in the corner of the app. Ask about your trades, today’s U.S. news or how to use Sweep. Numbers about your trading are calculated by Sweep from your journal.",
     "L’assistant de discussion dans le coin de l’app. Pose tes questions sur tes trades, les nouvelles américaines du jour ou l’utilisation de Sweep. Les chiffres sur ton trading sont calculés par Sweep à partir de ton journal.",
     "El asistente de chat en la esquina de la app. Pregunta por tus operaciones, las noticias de EE. UU. de hoy o cómo usar Sweep. Las cifras de tu trading las calcula Sweep con tu diario.")),
- (T("How fast are economic numbers updated?","À quelle vitesse les chiffres économiques sont-ils mis à jour?","¿Qué tan rápido se actualizan las cifras económicas?"),
+ (T("How fast are economic numbers updated?","À quelle vitesse les chiffres économiques sont-ils mis à jour ?","¿Qué tan rápido se actualizan las cifras económicas?"),
   T("A flash recap about a minute after the release, a full market report after about 30 minutes, and a final update about 3 hours later. Updates run while traders use the app, so timing can occasionally be a little later.",
     "Un récap éclair environ une minute après la publication, un rapport de marché complet après environ 30 minutes, et une dernière mise à jour environ 3 heures plus tard. Les mises à jour se font pendant que les traders utilisent l’app : le délai peut parfois être un peu plus long.",
     "Un resumen flash aproximadamente un minuto después de la publicación, un informe completo tras unos 30 minutos y una última actualización unas 3 horas después. Las actualizaciones ocurren mientras los traders usan la app, así que a veces pueden tardar un poco más.")),
- (T("Where do the economic numbers come from?","D’où viennent les chiffres économiques?","¿De dónde vienen las cifras económicas?"),
+ (T("Where do the economic numbers come from?","D’où viennent les chiffres économiques ?","¿De dónde vienen las cifras económicas?"),
   T("Official releases (BLS, BEA, Federal Reserve, ISM, Conference Board…) and major financial news, found with Google Search. Every report lists its sources, and a figure stays empty until it can be confirmed.",
     "Des publications officielles (BLS, BEA, Réserve fédérale, ISM, Conference Board…) et de grands médias financiers, trouvés avec la Recherche Google. Chaque rapport liste ses sources, et un chiffre reste vide tant qu’il n’est pas confirmé.",
     "De publicaciones oficiales (BLS, BEA, Reserva Federal, ISM, Conference Board…) y grandes medios financieros, encontrados con la Búsqueda de Google. Cada informe lista sus fuentes y una cifra queda vacía hasta que se confirma.")),
- (T("Is there a limit on AI?","Y a-t-il une limite à l’IA?","¿Hay un límite de IA?"),
+ (T("Is there a limit on AI?","Y a-t-il une limite à l’IA ?","¿Hay un límite de IA?"),
   T("Yes. Sweep AI is included according to your plan: a base quota on Free, an extended quota on Pro and the maximum quota on Elite. Trade feedback and receipt scans come with Pro, the weekly review with Elite. Repeating the exact same request doesn’t count again.","Oui. Sweep AI est inclus selon le forfait : quota de base en Free, quota élargi en Pro et quota maximal en Elite. L’avis sur un trade et le scan d’un reçu viennent avec Pro, le bilan de la semaine avec Elite. Refaire exactement la même demande ne compte pas de nouveau.","Sí. Sweep AI está incluido según tu plan: cuota básica en Free, ampliada en Pro y máxima en Elite. La opinión sobre una operación y el escaneo de recibos llegan con Pro, la revisión semanal con Elite. Repetir exactamente la misma solicitud no cuenta de nuevo.")),
- (T("Can Sweep AI tell me what to trade?","Sweep AI peut-il me dire quoi trader?","¿Sweep AI puede decirme qué operar?"),
+ (T("Can Sweep AI tell me what to trade?","Sweep AI peut-il me dire quoi trader ?","¿Sweep AI puede decirme qué operar?"),
   T("No. It only looks at your own past trades and public news. No signals, no predictions, no entries or exits.",
     "Non. Il ne regarde que tes propres trades passés et les nouvelles publiques. Ni signaux, ni prédictions, ni entrées ou sorties.",
     "No. Solo mira tus operaciones pasadas y las noticias públicas. Sin señales, predicciones, entradas ni salidas.")),
- (T("What data does Sweep AI send, and when?","Quelles données Sweep AI envoie-t-il, et quand?","¿Qué datos envía Sweep AI y cuándo?"),
+ (T("What data does Sweep AI send, and when?","Quelles données Sweep AI envoie-t-il, et quand ?","¿Qué datos envía Sweep AI y cuándo?"),
   T("Nothing is sent until you tap an AI action. Then only what that action needs, for example your text, the screenshot you chose, or short summaries of your stats, goes to the AI provider. Settings → Sweep AI explains it in detail, and the Privacy policy lists the provider.",
     "Rien n’est envoyé tant que tu ne touches pas une action IA. Ensuite, seul ce dont l’action a besoin (ton texte, la capture choisie ou de courts résumés de tes stats) est transmis au fournisseur d’IA. Réglages → Sweep AI l’explique en détail, et la politique de confidentialité nomme le fournisseur.",
     "No se envía nada hasta que tocas una acción de IA. Después, solo lo que esa acción necesita (tu texto, la captura elegida o breves resúmenes de tus estadísticas) va al proveedor de IA. Ajustes → Sweep AI lo explica en detalle y la Política de privacidad nombra al proveedor.")),
@@ -66,7 +66,7 @@ def page_ai(lang, t):
         frame("ticket-log-with-ai", lang, t(T("Log with AI button in the trade ticket","Bouton Saisir avec l’IA dans le ticket","Botón Registrar con IA en el ticket")), t, swap=False))
     S += split(t, T("Ask Sweep","Ask Sweep","Ask Sweep"), T("Ask Sweep anything about your trading.","Demande tout à Sweep sur ton trading.","Pregúntale a Sweep lo que quieras sobre tu trading."),
         T("Ask Sweep, your trading assistant, lives in the corner of the app. Ask about your results, today’s U.S. news or how to use Sweep. It suggests follow-up questions and can open the right page in one tap.","Ask Sweep, ton assistant de trading, vit dans le coin de l’app. Pose tes questions sur tes résultats, les nouvelles américaines du jour ou l’utilisation de Sweep. Il propose des questions de suivi et ouvre la bonne page en un toucher.","Ask Sweep, tu asistente de trading, vive en la esquina de la app. Pregunta por tus resultados, las noticias de EE. UU. de hoy o cómo usar Sweep. Sugiere preguntas de seguimiento y abre la página correcta en un toque."),
-        [T("“How did I do this week?” “How do I do after a loss?”","« Comment s’est passée ma semaine? » « Comment je trade après une perte? »","«¿Cómo me fue esta semana?» «¿Cómo opero después de una pérdida?»"),
+        [T("“How did I do this week?” “How do I do after a loss?”","« Comment s’est passée ma semaine ? » « Comment je trade après une perte ? »","«¿Cómo me fue esta semana?» «¿Cómo opero después de una pérdida?»"),
          T("Numbers calculated by Sweep from your journal","Chiffres calculés par Sweep à partir de ton journal","Cifras calculadas por Sweep con tu diario"),
          T("No predictions, no signals, and it says so kindly","Ni prédictions ni signaux, et il le dit gentiment","Sin predicciones ni señales, y lo dice con amabilidad")],
         frame("ask-sweep", lang, t(T("Ask Sweep chat answering a question about setups","Ask Sweep répond à une question sur les setups","Ask Sweep responde una pregunta sobre setups")), t), flip=True, id_="ask-sweep")
@@ -137,7 +137,7 @@ def page_econ(lang, t):
             (T("Reports","Rapports","Informes"),T("Flash at about 1 minute, full at about 30 minutes, final at about 3 hours, in each language","Éclair vers 1 minute, complet vers 30 minutes, final vers 3 heures, dans chaque langue","Flash hacia 1 minuto, completo hacia 30 minutos, final hacia 3 horas, en cada idioma")),
             (T("Explainers","Explications","Explicaciones"),T("19 major indicators explained in plain words","19 indicateurs majeurs expliqués en mots simples","19 indicadores principales explicados en palabras simples"))]
     cov = (ui.head(t, None, T("What’s covered","Ce qui est couvert","Qué cubre")) + '<table class="tbl"><tbody>' + "".join(f"<tr><th>{t(a)}</th><td>{t(c)}</td></tr>" for a,c in rows) + "</tbody></table>"
-           + '<div class="chips" style="margin-top:28px">' + "".join(f"<span>{i}</span>" for i in INDICATORS) + "</div>"
+           + '<div class="chips" style="margin-top:28px">' + "".join(f"<span>{t(i)}</span>" for i in INDICATORS) + "</div>"
            + f'<p class="fine" style="margin-top:28px">{t(T("Reports are AI-generated from public news. They can be delayed, incomplete or wrong, and they are not financial advice. Always check the official release.","Les rapports sont générés par IA à partir de nouvelles publiques. Ils peuvent être en retard, incomplets ou erronés, et ne sont pas des conseils financiers. Vérifie toujours la publication officielle.","Los informes se generan con IA a partir de noticias públicas. Pueden llegar tarde, estar incompletos o ser erróneos, y no son asesoramiento financiero. Verifica siempre la publicación oficial."))}</p>')
     b += ui.sec(cov, "n", "covered", width="read")
     return (t(T("Economic calendar for futures: CPI, NFP, FOMC · Sweep","Calendrier économique pour traders de futures · Sweep","Calendario económico para traders de futuros · Sweep")),

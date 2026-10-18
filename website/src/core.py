@@ -251,7 +251,7 @@ CAPTURE_V6 = {"ecran-apercu-anneaux":"v6-01-today-m","ecran-apercu-anneaux-clair
 UTM_CAMPAIGN = "oct-update"
 
 TITLE_TRIMS = [" (hora de Nueva York)"," (heure de New York)"," (New York time)"," (ET)"," (NQ, ES, CL, GC…)"," (win rate, R, profit factor)"," (R, profit factor)"," (PDF)",": before, during and after the session",
-               ": avant, pendant et après la séance",": antes, durante y después de la sesión"," · Track accounts, rules and payouts"," · Cuentas, reglas y payouts"," · Comptes, règles et payouts",": net after evaluations and resets"]
+               " : avant, pendant et après la séance",": antes, durante y después de la sesión"," · Track accounts, rules and payouts"," · Cuentas, reglas y payouts"," · Comptes, règles et payouts",": net after evaluations and resets"]
 def _title(tl):
     for x in TITLE_TRIMS:
         if len(tl) <= 60: break
@@ -303,6 +303,7 @@ def og_of(lang, page):
 def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     if page in META_SEO: title, desc = t(META_SEO[page][0]), t(META_SEO[page][1])
     desc = _trim(desc); title = _title(title)
+    title, desc = typo(lang, title), typo(lang, desc)   # after the trims, which look for plain spaces
     # entity markup on every page, breadcrumbs on inner pages
     org = {"@type":"Organization","@id":f"https://{DOMAIN}/#org","name":"Sweep","legalName":"Sweep Inc.","alternateName":["Make it Sweep","makeitsweep"],"url":f"https://{DOMAIN}/",
            "logo":{"@type":"ImageObject","url":f"https://{DOMAIN}/icons/icon-512.png","width":512,"height":512},"email":EMAIL,"sameAs":[u for _,u,_ in SOCIAL],
@@ -349,7 +350,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     GLOBE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg>'
     CHECK = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg>'
     langmenu = "".join(f'<li role="none"><a role="menuitem" href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}><span class="code">{codes[l]}</span><span>{names[l]}</span>{CHECK if l==lang else ""}</a></li>' for l in LANGS)
-    langsel = f'<div class="langsel"><button class="langbtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="{t(T("Language","Langue","Idioma"))}: {names[lang]}">{GLOBE}<span>{codes[lang]}</span><svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg></button><ul class="langmenu" role="menu">{langmenu}</ul></div>'
+    langsel = f'<div class="langsel"><button class="langbtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="{t(T("Language: ","Langue : ","Idioma: "))}{names[lang]}">{GLOBE}<span>{codes[lang]}</span><svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg></button><ul class="langmenu" role="menu">{langmenu}</ul></div>'
     seg = '<div class="langseg" role="group" aria-label="' + t(T("Language","Langue","Idioma")) + '">' + "".join(f'<a href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}>{codes[l]}</a>' for l in LANGS) + '</div>'
     langlinks = "".join(f'<a href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}>{names[l]}</a>' for l in LANGS)
     cols = "".join(f'<div><h3>{t(h)}</h3><ul>' + "".join(f'<li><a href="{href(lang,p)}">{t(l)}</a></li>' for p, l in (items or _foot_firms())) + '</ul></div>' for h, items in FOOT)
@@ -403,11 +404,11 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <a class="brand" href="{href(lang,'index.html')}" aria-label="Sweep">{MARK}<span>sweep</span></a>
 <nav class="nav-main" aria-label="{t(T("Main","Principal","Principal"))}">{nav}</nav>
 <div class="nav-cta">{langsel}<a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a><a class="btn btn-primary" href="{SIGNUP}">{t(NAV_CTA)}</a>
-<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sheet" aria-label="Menu"><span class="mb" aria-hidden="true"><i></i><i></i></span></button></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sheet" aria-label="{t(T("Menu","Menu","Menú"))}"><span class="mb" aria-hidden="true"><i></i><i></i></span></button></div>
 </div></header>
-<div class="sheet" id="sheet" data-open="false"><nav class="sheet-nav" aria-label="Menu">{sheet}</nav>
+<div class="sheet" id="sheet" data-open="false"><nav class="sheet-nav" aria-label="{t(T("Menu","Menu","Menú"))}">{sheet}</nav>
 <div class="sheet-foot"><a class="btn btn-primary" href="{SIGNUP}">{t(CREATE_FREE)}</a><a class="btn btn-line" href="{APP}">{t(LOGIN)}</a>
-<div class="sheet-lang"><span>{t(T("Language","Langue","Idioma"))}</span>{seg}</div>{social_links("social sheet-social")}</div></div>
+<div class="sheet-lang"><span>{t(T("Language","Langue","Idioma"))}</span>{seg}</div>{social_links("social sheet-social", t)}</div></div>
 <main id="main">
 {crumbs}{body}
 </main>
@@ -420,7 +421,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <div class="cta-row" style="margin-top:20px"><a class="btn btn-line" href="{SIGNUP}">{t(CREATE_FREE)}</a><a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a></div></div>
 {cols}
 </div>
-<div class="foot-bottom"><span>© 2026 Sweep Inc. · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2 · <a href="mailto:{EMAIL}">{EMAIL}</a></span><div class="foot-meta"><nav class="lang" aria-label="{t(T("Language","Langue","Idioma"))}">{langlinks}</nav>{social_links()}</div></div>
+<div class="foot-bottom"><span>© 2026 Sweep Inc. · 3980 Blvd St-Elzear O, Laval (Québec) H7P 0M2 · <a href="mailto:{EMAIL}">{EMAIL}</a></span><div class="foot-meta"><nav class="lang" aria-label="{t(T("Language","Langue","Idioma"))}">{langlinks}</nav>{social_links(t=t)}</div></div>
 <p class="disclaimer">{t(DISC)} {t(CHART_MENTION)}</p>
 </div></footer>
 <script src="/assets/{ASSETS["js"]}" defer></script>
@@ -618,15 +619,22 @@ def nbsp(lang, body):
     out = []
     for tok in re.finditer(r"<script\b.*?</script>|<style\b.*?</style>|<[^>]*>|[^<]+|<", body, re.S):
         x = tok.group(0)
-        if not x.startswith("<"):
-            x = re.sub(r"(?<=\d) (?=[$%])", "\u00a0", x)
-            if lang == "fr":
-                x = re.sub(r"(?<=\d) (?=\d{3}(?!\d))", "\u00a0", x)
-                x = re.sub(r" (?=[:;?!](?:\s|$))", "\u00a0", x)
-                x = re.sub(r"(?<=\d) (?=h\b)|(?<=\bh) (?=\d)", "\u00a0", x)   # « 18 h », « 9 h 30 »
-                x = x.replace("« ", "«\u00a0").replace(" »", "\u00a0»")   # guillemets never split from their words
+        if not x.startswith("<"): x = typo(lang, x)
+        elif not x.startswith(("<script", "<style")):   # what a screen reader reads gets the same typography
+            x = re.sub(r'\b(alt|aria-label|title)="([^"]*)"', lambda m: f'{m.group(1)}="{typo(lang, m.group(2))}"', x)
         out.append(x)
     return "".join(out)
+
+def typo(lang, x):
+    """The rules of nbsp() on a plain text: a page's visible text, its title, its description and its attributes."""
+    if lang not in ("fr", "es"): return x
+    x = re.sub(r"(?<=\d) (?=[$%])", "\u00a0", x)
+    if lang == "fr":
+        x = re.sub(r"(?<=\d) (?=\d{3}(?!\d))", "\u00a0", x)
+        x = re.sub(r" (?=[:;?!](?:\s|$))", "\u00a0", x)
+        x = re.sub(r"(?<=\d) (?=h\b)|(?<=\bh) (?=\d)", "\u00a0", x)   # « 18 h », « 9 h 30 »
+        x = x.replace("« ", "«\u00a0").replace(" »", "\u00a0»")   # guillemets never split from their words
+    return x
 
 def words(text, delay=0.0):
     """Wrap each word so headlines can rise in line by line. Plain text stays readable without CSS/JS."""
@@ -654,9 +662,9 @@ SOCIAL = [
  ("TikTok", "https://www.tiktok.com/@makeitsweep", '<path d="M14 3v11.2a3.8 3.8 0 1 1-3.8-3.8"/><path d="M14 3c.6 2.7 2.4 4.3 5 4.6"/>'),
  ("Facebook", "https://www.facebook.com/share/1Q6uHzUfQf/", '<path d="M14.5 21v-7.5h2.6l.4-3.2h-3V8.4c0-.9.3-1.6 1.6-1.6h1.6V4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.4H8.9v3.2h2.6V21"/>'),
 ]
-def social_links(cls="social"):
+def social_links(cls="social", t=None):
     return f'<div class="{cls}">' + "".join(
-        f'<a href="{u}" target="_blank" rel="noopener me" aria-label="Sweep on {n}" title="{n}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ic}</svg></a>'
+        f'<a href="{u}" target="_blank" rel="noopener me" aria-label="{t(T(f"Sweep on {n}", f"Sweep sur {n}", f"Sweep en {n}")) if t else "Sweep on " + n}" title="{n}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ic}</svg></a>'
         for n, u, ic in SOCIAL) + '</div>'
 
 # ---------- screenshot slots: final captures go in /img/captures/ (one English set) ----------

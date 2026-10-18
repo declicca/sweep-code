@@ -35,13 +35,21 @@ def anchor(f, p):
 def rep(p):
     """The size used for examples: 50K when the program has it."""
     sizes = p["sizes"]; return next((s for s in sizes if s["size"] == 50000), sizes[0])
+def fr_de(name):
+    """« de Topstep », « d’Apex Trader Funding »: French elides « de » before a vowel."""
+    return ("d’" if name[:1] in "AEIOUYÉ" else "de ") + name
+
 def src_name(url):
     """« https://help.topstep.com/en/articles/8284233-topstep-payout-policy » → « Topstep payout policy »; a bare site → its domain."""
     path = [x for x in re.sub(r"^https?://", "", url).split("?")[0].split("/") if x]
     last = re.sub(r"\.(html?|php)$", "", re.sub(r"^\d+-", "", path[-1])) if len(path) > 1 else ""   # « pricing.html » → « Pricing »
     if not last or "." in last: return re.sub(r"^www\.", "", path[0])
     words_ = last.replace("-", " ").replace("_", " ").strip()
+    for p, r in SRC_CASE: words_ = re.sub(p, r, words_, flags=re.I)
     return words_[:1].upper() + words_[1:]
+SRC_CASE = [(r"\bmy funded futures\b|\bmyfundedfutures\b", "MyFundedFutures"), (r"\btake profit trader\b", "Take Profit Trader"), (r"\blucid trading\b", "Lucid Trading"),
+            (r"\btopstep\b", "Topstep"), (r"\btradezella\b", "TradeZella"), (r"\btradervue\b", "Tradervue"), (r"\bapex\b", "Apex"), (r"\bpa\b", "PA"), (r"\beod\b", "EOD"),
+            (r"\bfaq\b", "FAQ"), (r"\bbuilder\b", "Builder"), (r"\b(\d+)k\b", r"\1K"), (r"\bjuly\b", "July")]
 def checked_of(f):
     ds = [v["date"] for p in f["programs"] for v in p.get("verified", []) if v.get("date")]
     return max(ds) if ds else presets.CHECKED
@@ -322,7 +330,7 @@ def make_rules_page(f):
         sizes_all = sorted({s["size"] for p in progs for s in p["sizes"]})
         wk = presets.CHECKED if presets.CHECKED > when else ""   # the weekly check of the whole catalogue, when it is newer than this firm's check by hand
         verified = T(f'{"Verified by hand on " + day(when, "en") if wk else "Last verified: " + day(when, "en")}, against <a href="{src}" rel="nofollow noopener" target="_blank">{poss(name)} official pages</a>{", then checked every week (last check: " + day(wk, "en") + ")" if wk else ""} · <a href="{href("en", METHOD)}">How we verify</a>',
-                     f'{"Vérifiées à la main le " + day(when, "fr") if wk else "Dernière vérification : " + day(when, "fr")}, sur <a href="{src}" rel="nofollow noopener" target="_blank">les pages officielles de {name}</a>{", puis chaque semaine (dernière vérification : " + day(wk, "fr") + ")" if wk else ""} · <a href="{href("fr", METHOD)}">Notre méthode</a>',
+                     f'{"Vérifiées à la main le " + day(when, "fr") if wk else "Dernière vérification : " + day(when, "fr")}, sur <a href="{src}" rel="nofollow noopener" target="_blank">les pages officielles {fr_de(name)}</a>{", puis chaque semaine (dernière vérification : " + day(wk, "fr") + ")" if wk else ""} · <a href="{href("fr", METHOD)}">Notre méthode</a>',
                      f'{"Verificadas a mano el " + day(when, "es") if wk else "Última verificación: " + day(when, "es")}, en <a href="{src}" rel="nofollow noopener" target="_blank">las páginas oficiales de {name}</a>{", y luego cada semana (última revisión: " + day(wk, "es") + ")" if wk else ""} · <a href="{href("es", METHOD)}">Nuestro método</a>')
         names = ", ".join(p["name"] for p in progs)
         rng = f"{kk(sizes_all[0])}" + (f" – {kk(sizes_all[-1])}" if len(sizes_all) > 1 else "")
@@ -333,7 +341,7 @@ def make_rules_page(f):
         if len(progs) <= 2:
             lead = {l: lead[l] + " " + " ".join((p.get("note") or {}).get(l, "") for p in progs).strip() for l in LANGS}
         hero = (f'<div class="page-hero"><div class="wrap"><span class="kick">{t(T("Prop firms","Prop firms","Prop firms"))}</span>'
-                f'<h1 class="wu" style="view-transition-name:firm-{slug(f)}">{words(t(T(f"{name} rules, explained.", f"Les règles de {name}, expliquées.", f"Las reglas de {name}, explicadas.")))}</h1>'
+                f'<h1 class="wu" style="view-transition-name:firm-{slug(f)}">{words(t(T(f"{name} rules, explained.", f"Les règles {fr_de(name)}, expliquées.", f"Las reglas de {name}, explicadas.")))}</h1>'
                 f'<p class="lead rise d3">{t(lead)}</p><p class="fine rise d4 verified">{t(verified)}</p>'
                 f'<div class="cta-row rise d4"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules_hero">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div>'
                 + ("" if len(progs) < 2 else '<div class="jump rise d5">' + "".join(f'<a class="chip" href="#{anchor(f, p)}">{p["name"]}</a>' for p in progs) + "</div>")
@@ -360,7 +368,7 @@ def make_rules_page(f):
                 sec += '<p class="fine sources">' + t(T("Sources","Sources","Fuentes")) + " · " + " · ".join(f'<a href="{v["url"]}" rel="nofollow noopener" target="_blank">{src_name(v["url"])}</a> ({day(v.get("date") or presets.CHECKED, lang)}' + ("" if official(f, v["url"]) else f", {other}") + ")" for v in vs) + "</p>"
             secs += f'<div class="prog-block">{sec}</div>'
         disclaimer = T(f"Sweep is not affiliated with {name}. Rules can change at any time; always confirm on {poss(name)} official site. Values are shown for information, from Sweep’s weekly check of {poss(name)} pages.",
-                       f"Sweep n’est pas affilié à {name}. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel de {name}. Valeurs présentées à titre indicatif, tirées de la vérification hebdomadaire des pages de {name} par Sweep.",
+                       f"Sweep n’est pas affilié à {name}. Les règles peuvent changer à tout moment ; confirme toujours sur le site officiel {fr_de(name)}. Valeurs présentées à titre indicatif, tirées de la vérification hebdomadaire des pages {fr_de(name)} par Sweep.",
                        f"Sweep no está afiliado a {name}. Las reglas pueden cambiar en cualquier momento; confirma siempre en el sitio oficial de {name}. Valores a título informativo, tomados de la revisión semanal de las páginas de {name} por Sweep.")
         p0 = progs[0]; s0 = rep(p0); E0, F0 = _ph(s0, "eval"), _ph(s0, "funded"); P0 = _po(F0)
         dd0 = E0.get("dd") or F0.get("dd"); typ0 = E0.get("dd_type") or F0.get("dd_type"); cons0 = E0.get("consistency") or F0.get("consistency")
@@ -466,7 +474,7 @@ def faq_of(lang, t, f):
                         + {"en": f". Prices checked on {day(chk, l)}.", "fr": f". Prix vérifiés le {day(chk, l)}.", "es": f". Precios revisados el {day(chk, l)}."}[l] for l in LANGS}))
     out.append((T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
                 T(f"No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {name}. The rules on this page come from Sweep’s weekly check of {poss(name)} official pages; always confirm on {poss(name)} site. The {name} name belongs to its owner.",
-                  f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Les règles de cette page viennent de la vérification hebdomadaire des pages officielles de {name} par Sweep ; confirme toujours sur le site de {name}. Le nom {name} appartient à son propriétaire.",
+                  f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Les règles de cette page viennent de la vérification hebdomadaire des pages officielles {fr_de(name)} par Sweep ; confirme toujours sur le site {fr_de(name)}. Le nom {name} appartient à son propriétaire.",
                   f"No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {name}. Las reglas de esta página vienen de la revisión semanal de las páginas oficiales de {name} por Sweep; confirma siempre en el sitio de {name}. El nombre {name} pertenece a su propietario.")))
     return out
 
@@ -484,7 +492,7 @@ HUB_HELP = T("""<h2>What each rules page covers</h2><p>For every account type an
 <h2>Comment les règles sont vérifiées</h2><p>Sweep vérifie chaque semaine les pages officielles de chaque firme et garde les valeurs qui servent à préremplir les comptes prop dans l’app. La date de la dernière vérification est sur chaque page, et quand une règle change, la page l’indique avec l’ancienne et la nouvelle valeur. La page des <a href="@prop-firm-rule-changes.html">changements de règles</a> réunit ceux de toutes les firmes, avec un flux RSS. Sources, fréquence et limites : <a href="@how-we-verify-prop-firm-rules.html">comment on vérifie les règles</a>.</p>
 <h2>Comparer les firmes</h2><p>Pour comparer une règle d’une firme à l’autre, utilise les guides : <a href="@prop-firm-drawdown-rules.html">drawdown</a>, <a href="@prop-firm-consistency-rules.html">consistance</a>, <a href="@prop-firm-payout-rules.html">payouts</a>, <a href="@prop-firm-profit-targets.html">tailles de compte et objectifs</a> et <a href="@prop-firm-minimum-days.html">jours minimum</a>.</p>
 <h2>Dans Sweep</h2><p>Choisis la firme et le type de compte : les règles se remplissent, chaque valeur reste modifiable, et Sweep vérifie chaque trade contre elles. Tu vois à quelle distance tu es de l’objectif, de la perte max et de ton prochain payout.</p>""",
-"""<h2>Qué cubre cada página de reglas</h2><p>Para cada tipo y tamaño de cuenta: el objetivo de beneficio de la evaluación, la pérdida máx. y cómo sigue al saldo, el límite de pérdida diaria, la consistencia y los días mínimos, y luego las reglas de la cuenta fondeada y las condiciones de payout. Cada página incluye también puntos prácticos, los cambios de reglas registrados y respuestas a las preguntas frecuentes.</p>
+"""<h2>Qué cubre cada página de reglas</h2><p>Para cada tipo y tamaño de cuenta: el objetivo de beneficio de la evaluación, la pérdida máx. y cómo sigue al saldo, el límite de pérdida diaria, la consistencia y los días mínimos, y luego las reglas de la cuenta financiada y las condiciones de payout. Cada página incluye también puntos prácticos, los cambios de reglas registrados y respuestas a las preguntas frecuentes.</p>
 <h2>Cómo se revisan las reglas</h2><p>Sweep revisa cada semana las páginas oficiales de cada firma y guarda los valores que usa para precargar las cuentas prop en la app. La fecha de la última revisión está en cada página y, cuando una regla cambia, la página lo indica con el valor anterior y el nuevo. La página de <a href="@prop-firm-rule-changes.html">cambios de reglas</a> reúne los de todas las firmas, con un feed RSS. Fuentes, frecuencia y límites: <a href="@how-we-verify-prop-firm-rules.html">cómo verificamos las reglas</a>.</p>
 <h2>Comparar las firmas</h2><p>Para comparar una regla entre todas las firmas, usa las guías: <a href="@prop-firm-drawdown-rules.html">drawdown</a>, <a href="@prop-firm-consistency-rules.html">consistencia</a>, <a href="@prop-firm-payout-rules.html">payouts</a>, <a href="@prop-firm-profit-targets.html">tamaños de cuenta y objetivos</a> y <a href="@prop-firm-minimum-days.html">días mínimos</a>.</p>
 <h2>En Sweep</h2><p>Elige la firma y el tipo de cuenta: las reglas se rellenan, cada valor sigue siendo editable y Sweep comprueba cada operación con ellas, así ves lo cerca que estás del objetivo, de la pérdida máx. y de tu próximo payout.</p>""")
@@ -550,7 +558,7 @@ def pf_table(lang, t):
                f'<button type="button" class="btn btn-ghost" id="pf-reset">{t(T("Reset", "Réinitialiser", "Restablecer"))}</button></div></div>')
     note = t(T(f"Values for the <b id=\"pf-size-l\">{kk(PF_DEFAULT)}</b> account, across each firm’s account types: evaluation rules, or the funded account’s for accounts funded directly. Evaluation prices before discounts; firms without a published price are hidden when you set a maximum price. “{DASH_}” means the value isn’t in Sweep’s catalogue.",
                f"Valeurs du compte de <b id=\"pf-size-l\">{kk(PF_DEFAULT)}</b>, tous types de compte de chaque firme confondus : règles de l’évaluation, ou du compte financé pour les comptes financés directement. Prix des évaluations avant rabais ; les firmes sans prix publié sont masquées quand tu fixes un prix maximum. « {DASH_} » veut dire que la valeur n’est pas dans le catalogue de Sweep.",
-               f"Valores de la cuenta de <b id=\"pf-size-l\">{kk(PF_DEFAULT)}</b>, todos los tipos de cuenta de cada firma: reglas de la evaluación, o de la cuenta fondeada en las cuentas fondeadas directamente. Precios de evaluación antes de descuentos; las firmas sin precio publicado se ocultan al fijar un precio máximo. «{DASH_}» significa que el valor no está en el catálogo de Sweep."))
+               f"Valores de la cuenta de <b id=\"pf-size-l\">{kk(PF_DEFAULT)}</b>, todos los tipos de cuenta de cada firma: reglas de la evaluación, o de la cuenta financiada en las cuentas financiadas directamente. Precios de evaluación antes de descuentos; las firmas sin precio publicado se ocultan al fijar un precio máximo. «{DASH_}» significa que el valor no está en el catálogo de Sweep."))
     return (f'<div class="pf">{filters}<div class="cmp-wrap"><table class="cmp pf-tbl"><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table></div>'
             f'<p class="pf-empty" hidden>{t(T("No firm matches these filters.", "Aucune firme ne correspond à ces filtres.", "Ninguna firma coincide con estos filtros."))}</p>'
             f'<p class="fine pf-note">{note} <a href="{href(lang, METHOD)}">{t(T("How we verify", "Notre méthode", "Nuestro método"))}</a></p></div>'
@@ -656,14 +664,14 @@ def make_manual_page(slug, name):
     CRUMBS[slug] = name
     SYSTEM_PAGES.add(slug)
     def page(lang, t):
-        hero = ui.hero(t, T("Prop firms", "Prop firms", "Prop firms"), T(f"{name} rules, in Sweep.", f"Les règles de {name}, dans Sweep.", f"Las reglas de {name}, en Sweep."),
+        hero = ui.hero(t, T("Prop firms", "Prop firms", "Prop firms"), T(f"{name} rules, in Sweep.", f"Les règles {fr_de(name)}, dans Sweep.", f"Las reglas de {name}, en Sweep."),
             T(f"{poss(name)} rules aren’t preloaded in Sweep yet: add your account as “Other firm”, enter its rules once, and Sweep checks every trade against them.",
-              f"Les règles de {name} ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme », saisis ses règles une fois, et Sweep vérifie chaque trade contre elles.",
+              f"Les règles {fr_de(name)} ne sont pas encore préremplies dans Sweep : ajoute ton compte comme « Autre firme », saisis ses règles une fois, et Sweep vérifie chaque trade contre elles.",
               f"Las reglas de {name} aún no están precargadas en Sweep: añade tu cuenta como «Otra firma», introduce sus reglas una vez y Sweep comprueba cada operación con ellas."),
             cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_firm"'))
         b = ui.sec(f'<article class="article">{localize(lang, t(MANUAL_RULES)).replace("{F}", name)}</article>', "t", "rules", width="read")
         items = [T("<b>Every trade checked</b> against your rules: target, room above the max loss, today’s limit, consistency", "<b>Chaque trade vérifié</b> contre tes règles : objectif, marge au-dessus de la perte max, limite du jour, consistance", "<b>Cada operación comprobada</b> con tus reglas: objetivo, margen sobre la pérdida máx., límite del día, consistencia"),
-                 T("<b>Ready for payout</b> in %, once funded, from the conditions you entered", "<b>Prêt pour le payout</b> en %, une fois financé, selon les conditions saisies", "<b>Listo para el payout</b> en %, ya fondeada, según las condiciones introducidas"),
+                 T("<b>Ready for payout</b> in %, once funded, from the conditions you entered", "<b>Prêt pour le payout</b> en %, une fois financé, selon les conditions saisies", "<b>Listo para el payout</b> en %, ya financiada, según las condiciones introducidas"),
                  T(f"<b>One trade on several {name} accounts</b> with the trade copier", f"<b>Un trade sur plusieurs comptes {name}</b> avec le copieur de trades", f"<b>Una operación en varias cuentas de {name}</b> con el copiador"),
                  T("<b>A failed or closed account keeps its history</b>", "<b>Un compte échoué ou fermé garde son historique</b>", "<b>Una cuenta fallida o cerrada conserva su historial</b>")]
         b += ui.split(t, T("In Sweep", "Dans Sweep", "En Sweep"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
@@ -672,7 +680,7 @@ def make_manual_page(slug, name):
                    more=f'<p class="fine" style="margin-top:16px">{t(MONEY_PLAN)}</p>')
         faqs = [(T(f"Is Sweep affiliated with {name}?", f"Sweep est-il affilié à {name} ?", f"¿Sweep está afiliado a {name}?"),
                  T(f"No. Sweep is independent and isn’t affiliated with, endorsed by or connected to {name}. The {name} name belongs to its owner.", f"Non. Sweep est indépendant et n’est ni affilié à {name}, ni approuvé par {name}. Le nom {name} appartient à son propriétaire.", f"No. Sweep es independiente y no está afiliado, respaldado ni vinculado a {name}. El nombre {name} pertenece a su propietario.")),
-                (T(f"Are {poss(name)} rules preloaded in Sweep?", f"Les règles de {name} sont-elles préremplies dans Sweep ?", f"¿Las reglas de {name} están precargadas en Sweep?"),
+                (T(f"Are {poss(name)} rules preloaded in Sweep?", f"Les règles {fr_de(name)} sont-elles préremplies dans Sweep ?", f"¿Las reglas de {name} están precargadas en Sweep?"),
                  T(f"Not yet. Add your account as “Other firm” and enter its rules once; you can edit them anytime. Sweep preloads the rules of {FIRMS_TXT['en']}.", f"Pas encore. Ajoute ton compte comme « Autre firme » et saisis ses règles une fois ; tu peux les modifier à tout moment. Sweep préremplit les règles de {FIRMS_TXT['fr']}.", f"Todavía no. Añade tu cuenta como «Otra firma» e introduce sus reglas una vez; puedes editarlas cuando quieras. Sweep precarga las reglas de {FIRMS_TXT['es']}.")),
                 (T(f"Can I track several {name} accounts?", f"Puis-je suivre plusieurs comptes {name} ?", f"¿Puedo seguir varias cuentas de {name}?"),
                  T("Yes, as many as your plan allows, each with its own rules, and you can copy one trade to several accounts at once.", "Oui, autant que ton forfait le permet, chacun avec ses propres règles, et tu peux copier un trade sur plusieurs comptes en une fois.", "Sí, tantas como permita tu plan, cada una con sus propias reglas, y puedes copiar una operación en varias cuentas a la vez.")),
@@ -717,7 +725,7 @@ def page_rule_changes(lang, t):
         body = ('<ul class="list">' + "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)} · <a href="{src}" rel="nofollow noopener" target="_blank">{t(T("source","source","fuente"))}</a></li>' for c in cs)
                 + '</ul>' if cs else f'<p>{no_change(lang, t, f)}</p>')
         name = f["name"]
-        rows += f'<div id="{slug(f)}"><h2>{name}</h2>{body}<a class="go" href="{href(lang, page_of(f))}">{t(T(f"{poss(name)} rules", f"Les règles de {name}", f"Las reglas de {name}"))} <span aria-hidden="true">→</span></a></div>'
+        rows += f'<div id="{slug(f)}"><h2>{name}</h2>{body}<a class="go" href="{href(lang, page_of(f))}">{t(T(f"{poss(name)} rules", f"Les règles {fr_de(name)}", f"Las reglas de {name}"))} <span aria-hidden="true">→</span></a></div>'
     n, last, checked = len(real_changes()), (real_changes()[:1] or [{"date": ""}])[0]["date"], day(presets.CHECKED, lang)
     if not n:   # no change is good news: said once, plainly
         status = T(f"<b>No rule change recorded so far.</b> Last check: {checked}.", f"<b>Aucun changement de règle enregistré jusqu’ici.</b> Dernière vérification : {checked}.", f"<b>Ningún cambio de regla registrado hasta ahora.</b> Última verificación: {checked}.")
@@ -784,7 +792,7 @@ METHOD_HELP = T("""<h2>Sources</h2><p>Each rule comes from the firm’s own page
 <h2>Qué provoca un cambio de regla</h2><p>Un valor que la firma cambió en sus páginas, una vez confirmado, se convierte en una nueva versión de las reglas: se fecha en la página de la firma y en la <a href="@prop-firm-rule-changes.html">página de cambios de reglas</a>, con un feed RSS. Una revisión nunca quita una regla ni añade una condición de payout por sí sola: una regla que ya no se lee, o una condición que aparece donde no la había, se revisa primero. Cuando Sweep corrige un valor que había leído mal, es una corrección de sus propios datos, no un cambio de la firma, y no se presenta como tal.</p>
 <h2>Tu cuenta, tu decisión</h2><p>Cuando cambia una regla, los traders cuya cuenta la usa reciben un aviso. En la página de la cuenta eligen aplicar las nuevas reglas o mantener las suyas: nada cambia en una cuenta sin ellos. Cada valor de una cuenta sigue siendo editable en todo momento.</p>
 <h2>¿Ves un error?</h2><p>Escribe a <a href="mailto:hello@makeitsweep.com">hello@makeitsweep.com</a> con la firma, el tipo de cuenta y la página que muestra el valor correcto. Sweep lo comprueba en la página oficial de la firma y corrige sus reglas: las cuentas nuevas tienen el valor correcto, y los traders cuya cuenta lo usa ven el cambio y deciden.</p>
-<h2>Los límites</h2><p>Las reglas se muestran a título indicativo. Una firma puede cambiar una regla en cualquier momento, incluso entre dos revisiones. Algunos valores no se publican en texto, como algunos precios de evaluación, y no aparecen hasta que se publican. Cuando una regla depende del progreso de la cuenta, como el límite diario de las cuentas fondeadas de Apex, se indica el nivel más estricto. Confirma siempre en el sitio oficial de la firma. Sweep no está afiliado a ninguna de estas firmas.</p>""")
+<h2>Los límites</h2><p>Las reglas se muestran a título indicativo. Una firma puede cambiar una regla en cualquier momento, incluso entre dos revisiones. Algunos valores no se publican en texto, como algunos precios de evaluación, y no aparecen hasta que se publican. Cuando una regla depende del progreso de la cuenta, como el límite diario de las cuentas financiadas de Apex, se indica el nivel más estricto. Confirma siempre en el sitio oficial de la firma. Sweep no está afiliado a ninguna de estas firmas.</p>""")
 
 def page_method(lang, t):
     hero = ui.hero(t, T("Prop firms", "Prop firms", "Prop firms"), T("How we verify prop firm rules.", "Comment on vérifie les règles des prop firms.", "Cómo verificamos las reglas de las prop firms."),

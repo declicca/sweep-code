@@ -1,35 +1,35 @@
 {
  "100": {
-  "date": "2026-10-15",
-  "hash": "cb854c3abc6ded7b"
+  "date": "2026-10-18",
+  "hash": "9dea6a63091e5fbe"
  },
  "404.html": {
   "date": "2026-10-15",
   "hash": "a7fa286e711f817b"
  },
  "about.html": {
-  "date": "2026-10-15",
-  "hash": "70d5263bc11da3d7"
+  "date": "2026-10-18",
+  "hash": "4a06286012e5272b"
  },
  "ai.html": {
   "date": "2026-10-18",
-  "hash": "dbff2df79d9f1412"
+  "hash": "c5f27a732dd96782"
  },
  "best-trading-journal-for-prop-firms.html": {
-  "date": "2026-10-15",
-  "hash": "dad5670a29f00fcd"
+  "date": "2026-10-18",
+  "hash": "de2e419a2b0a9a28"
  },
  "changelog.html": {
   "date": "2026-10-18",
-  "hash": "2794712a757aa4a8"
+  "hash": "781c69f08b063805"
  },
  "consistency-rule-calculator.html": {
   "date": "2026-10-15",
   "hash": "9355a0ce62236c50"
  },
  "contact.html": {
-  "date": "2026-10-15",
-  "hash": "29e6a829bc106691"
+  "date": "2026-10-18",
+  "hash": "3f9e50ecad42e4db"
  },
  "contracts/6e-futures.html": {
   "date": "2026-10-15",
@@ -88,12 +88,12 @@
   "hash": "eb5d3709bf9d8482"
  },
  "cpi-release-dates.html": {
-  "date": "2026-10-15",
-  "hash": "a38c6d51b8f4931e"
+  "date": "2026-10-18",
+  "hash": "ecd1f6e2047a386f"
  },
  "economic-calendar.html": {
   "date": "2026-10-18",
-  "hash": "ffa11831921b0e6d"
+  "hash": "5c7d3e52e9342b5f"
  },
  "expectancy-calculator.html": {
   "date": "2026-10-15",
@@ -101,19 +101,19 @@
  },
  "faq.html": {
   "date": "2026-10-18",
-  "hash": "8ef8522ac9b447e4"
+  "hash": "e80be1bd114770a0"
  },
  "features.html": {
   "date": "2026-10-18",
-  "hash": "c58e70526c60673d"
+  "hash": "d777e8a0ebd0bf38"
  },
  "fomc-meeting-dates.html": {
-  "date": "2026-10-15",
-  "hash": "c8d8578891ef4ad3"
+  "date": "2026-10-18",
+  "hash": "d5e021ea98afd125"
  },
  "free-trading-journal.html": {
   "date": "2026-10-18",
-  "hash": "0e5cbf5cd58d787d"
+  "hash": "835341e0ac11125c"
  },
  "futures-contracts.html": {
   "date": "2026-10-15",
@@ -124,12 +124,12 @@
   "hash": "7a9a105e857f8f05"
  },
  "gdp-release-dates.html": {
-  "date": "2026-10-15",
-  "hash": "328a3ccb66f7bd3c"
+  "date": "2026-10-18",
+  "hash": "fcc9f51ba7725d11"
  },
  "glossary.html": {
   "date": "2026-10-18",
-  "hash": "d1a70c9f9d5831cd"
+  "hash": "6ba7309ab021c67d"
  },
  "guides.html": {
   "date": "2026-10-16",
@@ -137,23 +137,23 @@
  },
  "how-it-works.html": {
   "date": "2026-10-18",
-  "hash": "ec206ce8b7473f7f"
+  "hash": "186bddbf00e35872"
  },
  "how-we-verify-prop-firm-rules.html": {
-  "date": "2026-10-15",
-  "hash": "816ca0fb89d8bcc2"
+  "date": "2026-10-18",
+  "hash": "8510ebce6852caac"
  },
  "import-rithmic.html": {
-  "date": "2026-10-16",
-  "hash": "5173f4c2a4dbfd54"
+  "date": "2026-10-18",
+  "hash": "70cb5696b4eefe6c"
  },
  "import-topstepx.html": {
-  "date": "2026-10-16",
-  "hash": "c883ef5131dd13f5"
+  "date": "2026-10-18",
+  "hash": "e199125f13b3612f"
  },
  "import-tradovate.html": {
-  "date": "2026-10-16",
-  "hash": "7fb43e073439dba5"
+  "date": "2026-10-18",
+  "hash": "d78d60c033580bb0"
  },
  "import.html": {
   "date": "2026-10-18",
@@ -161,19 +161,19 @@
  },
  "index.html": {
   "date": "2026-10-18",
-  "hash": "d638fb2049c23b61"
+  "hash": "d5d34d4cc0a353a8"
  },
  "install.html": {
   "date": "2026-10-15",
   "hash": "6b364e2ba1e383ff"
  },
  "ism-manufacturing-release-dates.html": {
-  "date": "2026-10-15",
-  "hash": "a8733746f5b22a72"
+  "date": "2026-10-18",
+  "hash": "8013ac0731bea756"
  },
  "nfp-release-dates.html": {
-  "date": "2026-10-15",
-  "hash": "604bbc67953ee207"
+  "date": "2026-10-18",
+  "hash": "384f7aae62bf15ff"
  },
  "ninjatrader.html": {
   "date": "2026-10-18",
@@ -185,31 +185,31 @@
  },
  "payout-tracker.html": {
   "date": "2026-10-18",
-  "hash": "57415dedbb96623f"
+  "hash": "f22be64cc65ee492"
  },
  "pce-release-dates.html": {
-  "date": "2026-10-15",
-  "hash": "724cbec35a27aff7"
+  "date": "2026-10-18",
+  "hash": "50e0cafd34d97ea0"
  },
  "position-size-calculator.html": {
   "date": "2026-10-15",
   "hash": "f80986a39043eab5"
  },
  "ppi-release-dates.html": {
-  "date": "2026-10-16",
-  "hash": "1be81b24ca596aa3"
+  "date": "2026-10-18",
+  "hash": "89470b5acf3a86e6"
  },
  "press-kit.html": {
-  "date": "2026-10-15",
-  "hash": "c51ab531bd454a50"
+  "date": "2026-10-18",
+  "hash": "f187ef7dcb44f3a3"
  },
  "pricing.html": {
   "date": "2026-10-18",
-  "hash": "d2e894c15312e389"
+  "hash": "2c967556e1fb0d93"
  },
  "privacy.html": {
   "date": "2026-10-18",
-  "hash": "8429a296b8dd454b"
+  "hash": "7dec40059e59ec91"
  },
  "prop-firm-consistency-rules.html": {
   "date": "2026-10-15",
@@ -220,8 +220,8 @@
   "hash": "d99320984f976a70"
  },
  "prop-firm-minimum-days.html": {
-  "date": "2026-10-15",
-  "hash": "17ea2bb8aea31306"
+  "date": "2026-10-18",
+  "hash": "50b93febd251c362"
  },
  "prop-firm-payout-rules.html": {
   "date": "2026-10-15",
@@ -237,71 +237,71 @@
  },
  "prop-firm-rule-changes.html": {
   "date": "2026-10-18",
-  "hash": "900db502193c267f"
+  "hash": "598b321bb00b2228"
  },
  "prop-firm-tracker.html": {
-  "date": "2026-10-15",
-  "hash": "e0f3dd4ab7f70a12"
+  "date": "2026-10-18",
+  "hash": "5643e738a7a0df95"
  },
  "prop-firms/alpha-futures.html": {
   "date": "2026-10-18",
-  "hash": "0b4b7044a4d532e5"
+  "hash": "589ec0abb27a8ef7"
  },
  "prop-firms/apex-vs-lucid.html": {
-  "date": "2026-10-16",
-  "hash": "d1a6fa18063102fc"
+  "date": "2026-10-18",
+  "hash": "9e886684ba26881d"
  },
  "prop-firms/apex-vs-myfundedfutures.html": {
-  "date": "2026-10-16",
-  "hash": "e47fc39e7292fabd"
+  "date": "2026-10-18",
+  "hash": "172f7c7bd4104360"
  },
  "prop-firms/apex.html": {
   "date": "2026-10-18",
-  "hash": "ce157c832b04d3ce"
+  "hash": "d944585715df68fb"
  },
  "prop-firms/index.html": {
-  "date": "2026-10-16",
-  "hash": "d75c53b8827b3be2"
+  "date": "2026-10-18",
+  "hash": "83055003e15d2b7a"
  },
  "prop-firms/lucid.html": {
   "date": "2026-10-18",
-  "hash": "d01109f48696636b"
+  "hash": "7a60a1a64ba1d952"
  },
  "prop-firms/myfundedfutures.html": {
   "date": "2026-10-18",
-  "hash": "a6959c145904c8ff"
+  "hash": "7c1c78d7dcf62f92"
  },
  "prop-firms/take-profit-trader.html": {
   "date": "2026-10-18",
-  "hash": "361615d0f26810d3"
+  "hash": "6b20b6d25b4f962b"
  },
  "prop-firms/topstep-vs-apex.html": {
-  "date": "2026-10-16",
-  "hash": "30dfa5cabbe862b8"
+  "date": "2026-10-18",
+  "hash": "6837b5246af90e91"
  },
  "prop-firms/topstep-vs-lucid.html": {
-  "date": "2026-10-16",
-  "hash": "abc263bf497ede83"
+  "date": "2026-10-18",
+  "hash": "b8e3f36d028ced58"
  },
  "prop-firms/topstep-vs-take-profit-trader.html": {
-  "date": "2026-10-16",
-  "hash": "4cb5a54b25575502"
+  "date": "2026-10-18",
+  "hash": "2c250c8dcbe32601"
  },
  "prop-firms/topstep.html": {
   "date": "2026-10-18",
-  "hash": "4de49f2a4f799df0"
+  "hash": "b424dd46351bdc52"
  },
  "prop-firms/tradeify.html": {
-  "date": "2026-10-15",
-  "hash": "4880b4050dcf5824"
+  "date": "2026-10-18",
+  "hash": "f23bdc29df445a0c"
  },
  "release-dates.html": {
-  "date": "2026-10-17",
-  "hash": "8bb566266908b01b"
+  "date": "2026-10-18",
+  "hash": "fc3a91f87fccb3d9"
  },
  "retail-sales-release-dates.html": {
-  "date": "2026-10-17",
-  "hash": "99bc3959c3ee47d4"
+  "date": "2026-10-18",
+  "hash": "49bbb5bca49b16b7"
  },
  "risk.html": {
   "date": "2026-10-15",
@@ -309,43 +309,43 @@
  },
  "security.html": {
   "date": "2026-10-18",
-  "hash": "fd2b8129b26364e8"
+  "hash": "0be65a81ea76364e"
  },
  "sweep-vs-edgewonk.html": {
-  "date": "2026-10-15",
-  "hash": "dccd6ae647e6f164"
+  "date": "2026-10-18",
+  "hash": "22b2b7ced70327bc"
  },
  "sweep-vs-tradersync.html": {
   "date": "2026-10-18",
-  "hash": "b533ed25d8834358"
+  "hash": "16c736ce49d9a7b7"
  },
  "sweep-vs-tradervue.html": {
-  "date": "2026-10-15",
-  "hash": "0c655330c887b9d7"
+  "date": "2026-10-18",
+  "hash": "3242432b21477ba0"
  },
  "sweep-vs-tradezella.html": {
-  "date": "2026-10-15",
-  "hash": "36bf2a60b2378ab6"
+  "date": "2026-10-18",
+  "hash": "ae3149d1bf3e3486"
  },
  "terms.html": {
   "date": "2026-10-18",
-  "hash": "acee72e3bec4593a"
+  "hash": "e4ce67e29558f4bd"
  },
  "tools.html": {
   "date": "2026-10-15",
   "hash": "4d5ddb0941c72684"
  },
  "trading-journal-guide.html": {
-  "date": "2026-10-16",
-  "hash": "2803d659db2f6f98"
+  "date": "2026-10-18",
+  "hash": "5f9c7951c379748f"
  },
  "trading-journal-routine.html": {
   "date": "2026-10-15",
   "hash": "25d1a150bb5333a8"
  },
  "trading-templates.html": {
-  "date": "2026-10-15",
-  "hash": "0990424d0de31567"
+  "date": "2026-10-18",
+  "hash": "3edde4d74078f276"
  },
  "trailing-drawdown-calculator.html": {
   "date": "2026-10-15",
