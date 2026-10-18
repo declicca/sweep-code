@@ -80,7 +80,7 @@ def sec_disc(lang, t):
     """A showcase across the page: the day, swept."""
     heads = [L3("Progress you can see", "Des progrès qui se voient", "Progresos que se ven"), L3("Never a penalty", "Jamais de punition", "Nunca un castigo"),
              L3("Private by default", "Privé par défaut", "Privado por defecto")]
-    pts = [L3("Streaks, missions and a weekly boss turn good habits into progress.","Streaks, missions et un boss chaque semaine : tes bonnes habitudes deviennent du progrès.","Rachas, misiones y un jefe semanal convierten los buenos hábitos en progreso."),
+    pts = [L3("Streaks, weekly missions and bosses made from your own bad habits: good habits become progress.","Streaks, missions chaque semaine et boss tirés de tes mauvaises habitudes : tes bonnes habitudes deviennent du progrès.","Rachas, misiones semanales y jefes sacados de tus malos hábitos: tus buenos hábitos se convierten en progreso."),
            L3("A rough session never blocks your day. It shows up in your discipline score, not as a penalty.","Une séance difficile ne bloque jamais ta journée. Elle compte dans ton score de discipline, pas comme une punition.","Una mala sesión nunca bloquea tu día. Cuenta en tu puntuación de disciplina, no como castigo."),
            L3("Leagues and crews are optional. Your P&L always stays private.","Ligues et crews optionnels. Ton P&L reste toujours privé.","Ligas y crews opcionales. Tu P&L siempre es privado.")]
     points = '<ul class="points stagger">' + "".join(f"<li><b>{t(h)}</b>{t(x)}</li>" for h, x in zip(heads, pts)) + "</ul>"
@@ -99,7 +99,7 @@ def sec_ai(lang, t):
                         phone_img("/img/captures/ecran-edge-reveal.webp", t(L3("Edge Reveal: one truth from your trades","Edge Reveal : une vérité tirée de tes trades","Edge Reveal: una verdad de tus operaciones")), "50% 74%"), crop=True),
              card_media(t, L3("Ask your journal","Demande à ton journal","Pregúntale a tu diario"), L3("“What’s my best time of day on NQ?”","« Quelle est ma meilleure heure sur NQ ? »","«¿Cuál es mi mejor hora en NQ?»"),
                         phone_img(f"/img/mobile-{L}-dark-ask-sweep-786.webp", t(L3("Ask Sweep answers from your trades","Ask Sweep répond à partir de tes trades","Ask Sweep responde con tus operaciones")), "50% 4%"), crop=True),
-             card_media(t, L3("Economic calendar","Calendrier économique","Calendario económico"), L3("AI notes before every major release.","Des notes IA avant chaque annonce majeure.","Notas de IA antes de cada dato importante."),
+             card_media(t, L3("Economic calendar","Calendrier économique","Calendario económico"), L3("AI notes on every major release, in full with Elite.","Des notes IA sur chaque annonce majeure, complètes avec Elite.","Notas de IA en cada dato importante, completas con Elite."),
                         phone_img("/img/mobile-en-dark-economic-calendar-786.webp", t(L3("The week’s economic releases","Les annonces économiques de la semaine","Los datos económicos de la semana")), "50% 6%"), crop=True)]
     return sec(head(t, T("Sweep AI","Sweep AI","Sweep AI"), L3("Ask your journal anything.","Pose n’importe quelle question à ton journal.","Pregúntale lo que quieras a tu diario."),
                     L3("Sweep AI reads your trades, plans and reviews, then answers in plain words.","Sweep AI lit tes trades, tes plans et tes revues, puis répond simplement.","Sweep AI lee tus operaciones, planes y revisiones, y responde con palabras simples."),

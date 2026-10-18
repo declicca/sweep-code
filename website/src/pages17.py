@@ -43,7 +43,7 @@ SW = {"free": T("Yes, no time limit, no card","Oui, sans limite de temps, sans c
       "changes": T("Found by the weekly check; you’re notified and choose to apply them or keep your rules","Repérés par la vérification de chaque semaine ; tu es prévenu et tu choisis de les appliquer ou de garder tes règles","Detectados en la revisión semanal; te avisamos y eliges aplicarlos o mantener tus reglas"),
       "money": T("Pro and Elite","Pro et Elite","Pro y Elite"), "no": T("No","Non","No"),
       "charts": T("Real CME charts, the day after the session","Vrais graphiques CME, le lendemain de la séance","Gráficos reales de CME, al día siguiente de la sesión"),
-      "ai": T("Sweep AI on every plan","Sweep AI sur tous les forfaits","Sweep AI en todos los planes"),
+      "ai": T("Sweep AI on every plan, more with Pro and Elite","Sweep AI dans tous les forfaits, plus avec Pro et Elite","Sweep AI en todos los planes, más con Pro y Elite"),
       "mobile": T("In the browser, add it to your home screen","Dans le navigateur, à ajouter à ton écran d’accueil","En el navegador, añádelo a tu pantalla de inicio"),
       "psych": T("Daily routine: plan, rules, review","Routine quotidienne : plan, règles, revue","Rutina diaria: plan, reglas, revisión"),
       "markets": T("Futures","Futures","Futuros")}

@@ -303,7 +303,7 @@ def since_of(f):
 
 def no_change(lang, t, f):
     d = day(since_of(f), lang)
-    return t(T(f"No rule change recorded since our first check on {d}.", f"Aucun changement de règle enregistré depuis notre première vérification, le {d}.", f"Ningún cambio de regla registrado desde nuestra primera revisión, el {d}."))
+    return t(T(f"No rule change recorded since we started logging its changes on {d}.", f"Aucun changement de règle enregistré depuis le début du suivi de ses changements, le {d}.", f"Ningún cambio de regla registrado desde que empezamos a registrar sus cambios, el {d}."))
 
 def history(lang, t, f):
     rows = real_changes(f)[:8]
@@ -320,9 +320,10 @@ def make_rules_page(f):
         name, progs = f["name"], f["programs"]
         when, src = checked_of(f), source_of(f)
         sizes_all = sorted({s["size"] for p in progs for s in p["sizes"]})
-        verified = T(f'Last verified: {day(when, "en")}, against <a href="{src}" rel="nofollow noopener" target="_blank">{poss(name)} official pages</a> · <a href="{href("en", METHOD)}">How we verify</a>',
-                     f'Dernière vérification : {day(when, "fr")}, sur <a href="{src}" rel="nofollow noopener" target="_blank">les pages officielles de {name}</a> · <a href="{href("fr", METHOD)}">Notre méthode</a>',
-                     f'Última verificación: {day(when, "es")}, en <a href="{src}" rel="nofollow noopener" target="_blank">las páginas oficiales de {name}</a> · <a href="{href("es", METHOD)}">Nuestro método</a>')
+        wk = presets.CHECKED if presets.CHECKED > when else ""   # the weekly check of the whole catalogue, when it is newer than this firm's check by hand
+        verified = T(f'{"Verified by hand on " + day(when, "en") if wk else "Last verified: " + day(when, "en")}, against <a href="{src}" rel="nofollow noopener" target="_blank">{poss(name)} official pages</a>{", then checked every week (last check: " + day(wk, "en") + ")" if wk else ""} · <a href="{href("en", METHOD)}">How we verify</a>',
+                     f'{"Vérifiées à la main le " + day(when, "fr") if wk else "Dernière vérification : " + day(when, "fr")}, sur <a href="{src}" rel="nofollow noopener" target="_blank">les pages officielles de {name}</a>{", puis chaque semaine (dernière vérification : " + day(wk, "fr") + ")" if wk else ""} · <a href="{href("fr", METHOD)}">Notre méthode</a>',
+                     f'{"Verificadas a mano el " + day(when, "es") if wk else "Última verificación: " + day(when, "es")}, en <a href="{src}" rel="nofollow noopener" target="_blank">las páginas oficiales de {name}</a>{", y luego cada semana (última revisión: " + day(wk, "es") + ")" if wk else ""} · <a href="{href("es", METHOD)}">Nuestro método</a>')
         names = ", ".join(p["name"] for p in progs)
         rng = f"{kk(sizes_all[0])}" + (f" – {kk(sizes_all[-1])}" if len(sizes_all) > 1 else "")
         if len(progs) == 1:
