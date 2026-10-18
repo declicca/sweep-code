@@ -838,14 +838,15 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
 .menu-open .dock{opacity:0;pointer-events:none}
 footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 calc(48px + env(safe-area-inset-bottom));border-top:1px solid var(--line-2);font-size:14px}
 .foot{display:grid;gap:40px}
-@media (min-width:861px){.foot{grid-template-columns:1.4fr repeat(4,minmax(0,1fr));gap:32px}}
+@media (min-width:861px){.foot{grid-template-columns:repeat(5,minmax(0,1fr));gap:32px 24px}.foot>div:first-child{grid-column:1/-1}}   /* the brand on its own line, five groups across */
+@media (min-width:1180px){.foot{grid-template-columns:1.2fr repeat(5,minmax(0,1fr))}.foot>div:first-child{grid-column:auto}}
 .foot p{margin-top:14px;color:var(--muted);max-width:30ch}
 .foot .fine{display:block;margin-top:8px}
 .foot .cta-row{margin-top:20px}
 .foot .cta-row .btn{min-height:44px;font-size:14px}
 .foot h3{font-size:13px;font-weight:600;margin-bottom:14px;letter-spacing:0}
 .foot ul{display:grid;gap:9px}
-.foot li a{color:var(--muted);text-decoration:none;transition:color var(--t-fast)}   /* not the underline of links in text */
+.foot li a{color:var(--muted);text-decoration:none;overflow-wrap:anywhere;transition:color var(--t-fast)}   /* not the underline of links in text */
 .foot li a:hover{color:var(--text)}
 .fgrp>summary{list-style:none}
 .fgrp>summary::-webkit-details-marker{display:none}

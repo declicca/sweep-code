@@ -94,7 +94,8 @@ shutil.copy(os.path.join(STATIC,"site.webmanifest"), os.path.join(DIST,"site.web
 def _text(body):
     """A page's visible text, without tags, scripts or styles: what its sitemap date follows."""
     return _re.sub(r"\s+", " ", _re.sub(r"<[^>]+>", " ", _re.sub(r"<script\b.*?</script>|<style\b.*?</style>", " ", body, flags=_re.S))).strip()
-MAIN = {p: hashlib.sha256() for p in PAGES}   # each page's main content, in the 3 languages: its sitemap date changes only when this does
+MAIN = {p: hashlib.sha256() for p in PAGES}
+EN_META = {}   # each page's English title and description, for llms.txt   # each page's main content, in the 3 languages: its sitemap date changes only when this does
 import html as _html_b
 def heading_levels(body):
     """No jump from the h1 to an h3: cards placed before the page's first h2 get h2 titles that keep the h3 look."""
@@ -123,6 +124,7 @@ for lang in LANGS:
     out = DIST if lang == "en" else os.path.join(DIST, lang); os.makedirs(out, exist_ok=True)
     for page, fn in PAGES.items():
         title, desc, body, ld = fn(lang, t)
+        if lang == "en": EN_META[page] = (title, desc)
         dest = os.path.join(out, "100", "index.html") if page == "100" else os.path.join(out, page)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         body = add_related(lang, t, page, body)
@@ -161,7 +163,35 @@ shutil.copy(os.path.join(HERE,"data","robots.txt"), os.path.join(DIST,"robots.tx
 open(os.path.join(DIST, pages18.RSS.lstrip("/")), "w", encoding="utf-8").write(pages18.rss(DOMAIN))   # rule changes feed
 _llms = open(os.path.join(HERE,"data","llms.txt"), encoding="utf-8").read()
 _oth = core.other_firms()
-open(os.path.join(DIST,"llms.txt"), "w", encoding="utf-8").write(_llms.replace("{PRESET_FIRMS}", core.FIRMS_TXT["en"]).replace("{OTHER_FIRMS}", f" (for example {core.and_list(_oth, 'en').replace(' and ', ' or ')})" if _oth else ""))
+_llms = _llms.replace("{PRESET_FIRMS}", core.FIRMS_TXT["en"]).replace("{OTHER_FIRMS}", f" (for example {core.and_list(_oth, 'en').replace(' and ', ' or ')})" if _oth else "")
+# every English page is listed: the hand-written sections first, then the ones they don't name; dated, with the French and Spanish entry points
+_named = set(_re.findall(r"\(https://makeitsweep\.com(/[^)\s]*)\)", _llms))
+_more = [p for p in PAGES if p not in ("404.html",) and href("en", p) not in _named and p in EN_META]
+_line = lambda p: f"- [{_re.sub(r'\s*[·—|]\s*Sweep$', '', EN_META[p][0])}](https://{DOMAIN}{href('en', p)}): {EN_META[p][1]}"
+_llms = _llms.replace("\n## Company", ("\n## More pages\n" + "\n".join(_line(p) for p in sorted(_more, key=lambda p: href("en", p))) + "\n" if _more else "")
+                      + "\n## Languages\n- [Français](https://makeitsweep.com/fr/)\n- [Español](https://makeitsweep.com/es/)\n\n## Company", 1)
+_llms = _llms.replace("\n\nSweep is made by", f"\n\nLast updated: {max(LASTMOD.values())}\n\nSweep is made by", 1)
+open(os.path.join(DIST,"llms.txt"), "w", encoding="utf-8").write(_llms)
+# an Article's structured data gets the page's sitemap date, its share image and the organization as author
+for _l in LANGS:
+    for _p in PAGES:
+        _f = os.path.join(DIST if _l == "en" else os.path.join(DIST, _l), "100", "index.html") if _p == "100" else os.path.join(DIST if _l == "en" else os.path.join(DIST, _l), _p)
+        _s = open(_f, encoding="utf-8").read()
+        if '"Article"' not in _s: continue
+        _og = _re.search(r'<meta property="og:image" content="([^"]+)"', _s)
+        def _fix(m):
+            try: _d = json.loads(m.group(2).replace("<\\/", "</"))
+            except ValueError: return m.group(0)
+            _nodes = _d.get("@graph", [_d]) if isinstance(_d, dict) else []
+            _hit = False
+            for _n in _nodes:
+                if isinstance(_n, dict) and _n.get("@type") == "Article":
+                    _n["dateModified"] = LASTMOD.get(_p, _n.get("dateModified")); _n["author"] = {"@id": f"https://{DOMAIN}/#org"}
+                    if _og and "image" not in _n: _n["image"] = _og.group(1)
+                    _hit = True
+            return m.group(1) + json.dumps(_d, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + m.group(3) if _hit else m.group(0)
+        _s2 = _re.sub(r'(<script type="application/ld\+json">)(.*?)(</script>)', _fix, _s, flags=_re.S)
+        if _s2 != _s: open(_f, "w", encoding="utf-8").write(_s2)
 open(os.path.join(DIST,".htaccess"),"w").write("""# makeitsweep.com (Apache / cPanel)
 Options -Indexes
 # Never serve this site from LiteSpeed's server-side page cache (stale pages break the design)

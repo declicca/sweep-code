@@ -475,6 +475,412 @@
    "date": null
   }
  },
+ "contracts/nq-futures.html": {
+  "en": {
+   "alt": "NQ futures · Tick 0.25 · $5 a tick · $20 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures NQ · Tick 0,25 · 5 $ le tick · 20 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros NQ · Tick 0,25 · 5 $ por tick · 20 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/mnq-futures.html": {
+  "en": {
+   "alt": "MNQ futures · Tick 0.25 · $0.50 a tick · $2 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures MNQ · Tick 0,25 · 0,50 $ le tick · 2 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros MNQ · Tick 0,25 · 0,50 $ por tick · 2 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/es-futures.html": {
+  "en": {
+   "alt": "ES futures · Tick 0.25 · $12.50 a tick · $50 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures ES · Tick 0,25 · 12,50 $ le tick · 50 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros ES · Tick 0,25 · 12,50 $ por tick · 50 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/mes-futures.html": {
+  "en": {
+   "alt": "MES futures · Tick 0.25 · $1.25 a tick · $5 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures MES · Tick 0,25 · 1,25 $ le tick · 5 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros MES · Tick 0,25 · 1,25 $ por tick · 5 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/ym-futures.html": {
+  "en": {
+   "alt": "YM futures · Tick 1 · $5 a tick · $5 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures YM · Tick 1 · 5 $ le tick · 5 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros YM · Tick 1 · 5 $ por tick · 5 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/mym-futures.html": {
+  "en": {
+   "alt": "MYM futures · Tick 1 · $0.50 a tick · $0.50 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures MYM · Tick 1 · 0,50 $ le tick · 0,50 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros MYM · Tick 1 · 0,50 $ por tick · 0,50 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/rty-futures.html": {
+  "en": {
+   "alt": "RTY futures · Tick 0.1 · $5 a tick · $50 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures RTY · Tick 0,1 · 5 $ le tick · 50 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros RTY · Tick 0,1 · 5 $ por tick · 50 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/m2k-futures.html": {
+  "en": {
+   "alt": "M2K futures · Tick 0.1 · $0.50 a tick · $5 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures M2K · Tick 0,1 · 0,50 $ le tick · 5 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros M2K · Tick 0,1 · 0,50 $ por tick · 5 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/cl-futures.html": {
+  "en": {
+   "alt": "CL futures · Tick 0.01 · $10 a tick · $1,000 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures CL · Tick 0,01 · 10 $ le tick · 1 000 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros CL · Tick 0,01 · 10 $ por tick · 1.000 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/mcl-futures.html": {
+  "en": {
+   "alt": "MCL futures · Tick 0.01 · $1 a tick · $100 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures MCL · Tick 0,01 · 1 $ le tick · 100 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros MCL · Tick 0,01 · 1 $ por tick · 100 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/gc-futures.html": {
+  "en": {
+   "alt": "GC futures · Tick 0.1 · $10 a tick · $100 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures GC · Tick 0,1 · 10 $ le tick · 100 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros GC · Tick 0,1 · 10 $ por tick · 100 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/mgc-futures.html": {
+  "en": {
+   "alt": "MGC futures · Tick 0.1 · $1 a tick · $10 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures MGC · Tick 0,1 · 1 $ le tick · 10 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros MGC · Tick 0,1 · 1 $ por tick · 10 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/si-futures.html": {
+  "en": {
+   "alt": "SI futures · Tick 0.005 · $25 a tick · $5,000 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures SI · Tick 0,005 · 25 $ le tick · 5 000 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros SI · Tick 0,005 · 25 $ por tick · 5.000 $ por punto",
+   "date": null
+  }
+ },
+ "contracts/6e-futures.html": {
+  "en": {
+   "alt": "6E futures · Tick 0.00005 · $6.25 a tick · $125,000 a point",
+   "date": null
+  },
+  "fr": {
+   "alt": "Futures 6E · Tick 0,00005 · 6,25 $ le tick · 125 000 $ le point",
+   "date": null
+  },
+  "es": {
+   "alt": "Futuros 6E · Tick 0,00005 · 6,25 $ por tick · 125.000 $ por punto",
+   "date": null
+  }
+ },
+ "cpi-release-dates.html": {
+  "en": {
+   "alt": "CPI release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication CPI · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación CPI · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "nfp-release-dates.html": {
+  "en": {
+   "alt": "Nonfarm Payrolls (NFP) release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication Nonfarm Payrolls (NFP) · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación Nonfarm Payrolls (NFP) · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "fomc-meeting-dates.html": {
+  "en": {
+   "alt": "FOMC release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication FOMC · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación FOMC · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "ppi-release-dates.html": {
+  "en": {
+   "alt": "PPI release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication PPI · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación PPI · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "pce-release-dates.html": {
+  "en": {
+   "alt": "PCE release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication PCE · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación PCE · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "retail-sales-release-dates.html": {
+  "en": {
+   "alt": "Retail Sales release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication des ventes au détail · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación de las ventas minoristas · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "gdp-release-dates.html": {
+  "en": {
+   "alt": "GDP release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication du PIB · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación del PIB · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "ism-manufacturing-release-dates.html": {
+  "en": {
+   "alt": "ISM Manufacturing PMI release dates · 2026 and 2027, New York time",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates de publication ISM Manufacturing PMI · 2026 et 2027, heure de New York",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de publicación ISM Manufacturing PMI · 2026 y 2027, hora de Nueva York",
+   "date": null
+  }
+ },
+ "glossary.html": {
+  "en": {
+   "alt": "Prop trading glossary · 65 terms of futures and prop firms, explained",
+   "date": null
+  },
+  "fr": {
+   "alt": "Lexique du trading prop · 65 termes des futures et des prop firms, expliqués",
+   "date": null
+  },
+  "es": {
+   "alt": "Glosario del trading prop · 65 términos de futuros y prop firms, explicados",
+   "date": null
+  }
+ },
+ "how-it-works.html": {
+  "en": {
+   "alt": "How Sweep works · Plan, execution, review: sweep your day",
+   "date": null
+  },
+  "fr": {
+   "alt": "Comment ça marche · Plan, exécution, revue : balaye ta journée",
+   "date": null
+  },
+  "es": {
+   "alt": "Cómo funciona Sweep · Plan, ejecución, revisión: barre tu día",
+   "date": null
+  }
+ },
+ "import.html": {
+  "en": {
+   "alt": "Import your trades · NinjaTrader 8, Tradovate, Rithmic, TopstepX, TradingView",
+   "date": null
+  },
+  "fr": {
+   "alt": "Importer tes trades · NinjaTrader 8, Tradovate, Rithmic, TopstepX, TradingView",
+   "date": null
+  },
+  "es": {
+   "alt": "Importar tus operaciones · NinjaTrader 8, Tradovate, Rithmic, TopstepX, TradingView",
+   "date": null
+  }
+ },
+ "economic-calendar.html": {
+  "en": {
+   "alt": "Economic calendar · Every U.S. release, recapped in a minute",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calendrier économique · Chaque annonce américaine, résumée en une minute",
+   "date": null
+  },
+  "es": {
+   "alt": "Calendario económico · Cada dato de EE. UU., resumido en un minuto",
+   "date": null
+  }
+ },
+ "tools.html": {
+  "en": {
+   "alt": "Free calculators · Position size, drawdown, consistency, payouts",
+   "date": null
+  },
+  "fr": {
+   "alt": "Calculateurs gratuits · Taille de position, drawdown, consistance, payouts",
+   "date": null
+  },
+  "es": {
+   "alt": "Calculadoras gratis · Tamaño de posición, drawdown, consistencia, payouts",
+   "date": null
+  }
+ },
+ "release-dates.html": {
+  "en": {
+   "alt": "U.S. economic release dates · CPI, NFP, FOMC and more, 2026 and 2027",
+   "date": null
+  },
+  "fr": {
+   "alt": "Dates des annonces américaines · CPI, NFP, FOMC et plus, 2026 et 2027",
+   "date": null
+  },
+  "es": {
+   "alt": "Fechas de los datos de EE. UU. · CPI, NFP, FOMC y más, 2026 y 2027",
+   "date": null
+  }
+ },
+ "futures-contracts.html": {
+  "en": {
+   "alt": "CME futures contract specs · Tick size and tick value of 14 contracts",
+   "date": null
+  },
+  "fr": {
+   "alt": "Fiches des contrats CME · Taille et valeur du tick de 14 contrats",
+   "date": null
+  },
+  "es": {
+   "alt": "Fichas de los contratos de CME · Tamaño y valor del tick de 14 contratos",
+   "date": null
+  }
+ },
  "position-size-calculator.html": {
   "en": {
    "alt": "Position size calculator · Free calculator for futures and prop traders",

@@ -75,6 +75,7 @@ SIZE = {"SI": T("One SI contract is 5,000 troy ounces of silver: each {ts} tick 
                 "Un contrat 6E, c’est 125 000 € : chaque tick de {ts} vaut {tv}, et un mouvement d’un cent (0,0100) vaut 1 250 $ par contrat. Avec 500 $ de risque par trade, un stop ne peut pas dépasser 80 ticks (0,0040). Le CME propose aussi un contrat plus petit, l’E-micro EUR/USD (M6E, 12 500 €, un dixième de 6E).",
                 "Un contrato 6E son 125.000 €: cada tick de {ts} vale {tv}, y un movimiento de un centavo (0,0100) vale 1.250 $ por contrato. Con 500 $ de riesgo por operación, un stop no puede superar los 80 ticks (0,0040). CME también ofrece un contrato más pequeño, el E-micro EUR/USD (M6E, 12.500 €, una décima parte de 6E).")}
 RISK = 500   # risk per trade used in the worked example
+MAX_LOSS = 2000   # the max loss of a 50K evaluation, a common size, in the prop firm paragraph
 
 def make_contract(sym):
     s, name, exch, ts, tv, pv, months, sib, fam = next(c for c in C if c[0] == sym)
@@ -105,9 +106,14 @@ def make_contract(sym):
         if sib:
             cb, cm = next(c for c in C if c[0] == big), next(c for c in C if c[0] == mic)
             size_h = T(f"{big} or {mic}", f"{big} ou {mic}", f"{big} o {mic}")
-            size_p = T(f"{mic} is the micro version of {big}: one {big} equals 10 {mic}, and every tick is worth ten times less ({F(cm[4])} instead of {F(cb[4])}). The price and the chart are the same; only the size changes. When one {big} is too much risk for your stop, 2 to 9 {mic} fill the gap.",
-                       f"{mic} est la version micro de {big} : un {big} équivaut à 10 {mic}, et chaque tick vaut dix fois moins ({F(cm[4])} au lieu de {F(cb[4])}). Le prix et le graphique sont les mêmes ; seule la taille change. Quand un {big} représente trop de risque pour ton stop, 2 à 9 {mic} comblent l’écart.",
-                       f"{mic} es la versión micro de {big}: un {big} equivale a 10 {mic}, y cada tick vale diez veces menos ({F(cm[4])} en lugar de {F(cb[4])}). El precio y el gráfico son los mismos; solo cambia el tamaño. Cuando un {big} es demasiado riesgo para tu stop, de 2 a 9 {mic} cubren la diferencia.")
+            if s == mic:   # each twin tells its own side: the micro page why the micro, the mini page why the mini
+                size_p = T(f"{mic} is the micro version of {big}: one {big} equals 10 {mic}, and every tick is worth ten times less ({F(cm[4])} instead of {F(cb[4])}). The price and the chart are the same; only the size changes. When one {big} is too much risk for your stop, 2 to 9 {mic} fill the gap. Micros also let you exit in steps, one contract at a time, where a single {big} can’t be split.",
+                           f"{mic} est la version micro de {big} : un {big} équivaut à 10 {mic}, et chaque tick vaut dix fois moins ({F(cm[4])} au lieu de {F(cb[4])}). Le prix et le graphique sont les mêmes ; seule la taille change. Quand un {big} représente trop de risque pour ton stop, 2 à 9 {mic} comblent l’écart. Les micros permettent aussi de sortir par étapes, un contrat à la fois, là où un seul {big} ne se divise pas.",
+                           f"{mic} es la versión micro de {big}: un {big} equivale a 10 {mic}, y cada tick vale diez veces menos ({F(cm[4])} en lugar de {F(cb[4])}). El precio y el gráfico son los mismos; solo cambia el tamaño. Cuando un {big} es demasiado riesgo para tu stop, de 2 a 9 {mic} cubren la diferencia. Los micros también permiten salir por partes, un contrato cada vez, donde un solo {big} no se puede dividir.")
+            else:
+                size_p = T(f"{big} is the full-size contract; {mic} is its micro, one tenth of it: one {big} equals 10 {mic}, and a tick is worth {F(cb[4])} on {big} against {F(cm[4])} on {mic}. The price and the chart are the same. Once your stop fits one {big}, a single order replaces ten micros: one fill and one commission instead of ten.",
+                           f"{big} est le contrat de taille normale ; {mic} est sa version micro, dix fois plus petite : un {big} équivaut à 10 {mic}, et un tick vaut {F(cb[4])} sur {big} contre {F(cm[4])} sur {mic}. Le prix et le graphique sont les mêmes. Quand ton stop tient sur un {big}, un seul ordre remplace dix micros : une exécution et une commission au lieu de dix.",
+                           f"{big} es el contrato de tamaño normal; {mic} es su versión micro, diez veces más pequeña: un {big} equivale a 10 {mic}, y un tick vale {F(cb[4])} en {big} frente a {F(cm[4])} en {mic}. El precio y el gráfico son los mismos. Cuando tu stop cabe en un {big}, una sola orden sustituye a diez micros: una ejecución y una comisión en lugar de diez.")
             size_p = {l: size_p[l] + f' <a href="{href(l, slug(sib))}">{sib} →</a>' for l in LANGS}
         else:
             size_h = T("Contract size", "Taille du contrat", "Tamaño del contrato")
@@ -122,11 +128,21 @@ def make_contract(sym):
             ex = {l: ex[l] + " " + {"en": f"On {sib}, the same stop costs {_fmt(cost2, l)} per contract: {n2} {('contract' if n2 == 1 else 'contracts')}, {_fmt(n2 * cost2, l)} at risk.",
                                     "fr": f"Sur {sib}, le même stop coûte {_fmt(cost2, l)} par contrat : {n2} {('contrat' if n2 == 1 else 'contrats')}, soit {_fmt(n2 * cost2, l)} de risque.",
                                     "es": f"En {sib}, el mismo stop cuesta {_fmt(cost2, l)} por contrato: {n2} {('contrato' if n2 == 1 else 'contratos')}, con {_fmt(n2 * cost2, l)} en riesgo."}[l] for l in LANGS}
+        # on a 50K evaluation: how much of the max loss that stop uses, and how many contracts keep a loss under a tenth of it
+        pct = round(cost / MAX_LOSS * 100, 1); pcs = lambda l: (f"{pct:g}" if l == "en" else f"{pct:g}".replace(".", ",")); k = int(MAX_LOSS / 10 // cost + 1e-9)
+        smaller = mic if sib and s == big else ""
+        prop_p = T(f"On a 50K evaluation with a {F(MAX_LOSS)} max loss, a common size, that {K(pts)}-point stop costs {F(cost)} per contract: {pcs('en')}% of the whole allowance on one trade. "
+                   + (f"To keep each loss under a tenth of it ({F(MAX_LOSS / 10)}), trade at most {k} {'contract' if k == 1 else 'contracts'}." if k else f"Even one contract risks more than a tenth of it ({F(MAX_LOSS / 10)}): tighten the stop{' or trade ' + smaller if smaller else ''}."),
+                   f"Sur une évaluation de 50K avec une perte max de {F(MAX_LOSS)}, une taille courante, ce stop de {K(pts)} point{'s' if pts >= 2 else ''} coûte {F(cost)} par contrat : {pcs('fr')} % de toute la marge sur un seul trade. "
+                   + (f"Pour garder chaque perte sous le dixième de cette marge ({F(MAX_LOSS / 10)}), trade au plus {k} {'contrat' if k == 1 else 'contrats'}." if k else f"Même un seul contrat risque plus du dixième de cette marge ({F(MAX_LOSS / 10)}) : resserre le stop{' ou passe à ' + smaller if smaller else ''}."),
+                   f"En una evaluación de 50K con una pérdida máxima de {F(MAX_LOSS)}, un tamaño habitual, ese stop de {K(pts)} puntos cuesta {F(cost)} por contrato: el {pcs('es')} % de todo el margen en una sola operación. "
+                   + (f"Para mantener cada pérdida por debajo de la décima parte de ese margen ({F(MAX_LOSS / 10)}), opera como máximo {k} {'contrato' if k == 1 else 'contratos'}." if k else f"Incluso un solo contrato arriesga más de la décima parte de ese margen ({F(MAX_LOSS / 10)}): ajusta el stop{' o pasa a ' + smaller if smaller else ''}."))
         art = (f'<h2>{t(T(f"When {s} is most active", f"Quand {s} est le plus actif", f"Cuándo tiene {s} más actividad"))}</h2><p>{t(ACTIVE[fam]).replace("{s}", s)}</p>'
                f'<h2>{t(size_h)}</h2><p>{t(size_p)}</p>'
                f'<h2>{t(T(f"What moves {s}", f"Ce qui fait bouger {s}", f"Qué mueve {s}"))}</h2><p>{loc(t(MOVERS[fam]))} '
                + t(T(f'Check the <a href="{href("en", "release-dates.html")}">release dates</a> before you plan the day.', f'Vérifie les <a href="{href("fr", "release-dates.html")}">dates des annonces</a> avant de planifier ta journée.', f'Revisa las <a href="{href("es", "release-dates.html")}">fechas de publicación</a> antes de planificar el día.')) + '</p>'
-               f'<h2>{t(T("Example","Exemple","Ejemplo"))}</h2><p>{t(ex)}</p>')
+               f'<h2>{t(T("Example","Exemple","Ejemplo"))}</h2><p>{t(ex)}</p>'
+               f'<h2>{t(T(f"{s} on a prop firm account", f"{s} sur un compte de prop firm", f"{s} en una cuenta de prop firm"))}</h2><p>{t(prop_p)}</p>')
         band = ui.band(t(T(f"Journal your {s} trades.",f"Journalise tes trades {s}.",f"Registra tus operaciones de {s}.")),
                        t(T(f"Sweep knows the {s} tick value: your net P&L and R are exact, and every trade shows on real CME candles.",f"Sweep connaît la valeur du tick {s} : ton P&L net et ton R sont exacts, et chaque trade s’affiche sur de vraies bougies CME.",f"Sweep conoce el valor del tick de {s}: tu P&L neto y tu R son exactos, y cada operación se ve sobre velas reales de CME.")),
                        ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_contract"'))

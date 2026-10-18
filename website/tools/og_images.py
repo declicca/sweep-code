@@ -11,7 +11,7 @@ SRC = os.path.join(HERE, "..", "src")
 OUT = os.path.join(HERE, "..", "static", "social", "og")
 os.environ.setdefault("SWEEP_PRESETS_OFFLINE", "1")   # the copy of the app's catalogue the site was built with
 sys.path.insert(0, SRC)
-import core, presets, pages4, pages7, pages8, pages11, pages17, pages18, pages19  # noqa: E402
+import core, presets, pages4, pages7, pages8, pages11, pages12, pages13, pages17, pages18, pages19  # noqa: E402
 from core import T  # noqa: E402
 
 LANGS = ("en", "fr", "es")
@@ -81,6 +81,24 @@ def entries():
                                                                                    f"Reglas comparadas · Revisadas el {pages18.day(when, 'es')}")[l]) for l in LANGS}, when))
     for g in pages11.EXPORT_GUIDES:   # export guides (SEO brief, step 3)
         out.append((g["slug"], {l: (g["kick"][l], T("CSV export, then into your journal", "Export CSV, puis dans ton journal", "Exportación CSV, luego a tu diario")[l]) for l in LANGS}, None))
+    for c in pages12.C:   # contract specs (audit, Oct 18)
+        s, _, _, ts, tv, pv = c[:6]
+        out.append((pages12.slug(s), {l: (T(f"{s} futures", f"Futures {s}", f"Futuros {s}")[l],
+                    T(f"Tick {pages12._tick(ts)} · {pages12._fmt(tv)} a tick · {pages12._fmt(pv)} a point", f"Tick {pages12._tick(ts, 'fr')} · {pages12._fmt(tv, 'fr')} le tick · {pages12._fmt(pv, 'fr')} le point",
+                      f"Tick {pages12._tick(ts, 'es')} · {pages12._fmt(tv, 'es')} por tick · {pages12._fmt(pv, 'es')} por punto")[l]) for l in LANGS}, None))
+    for k, sl, _, title, _, _ in pages13.REL:   # release dates
+        nm = {l: (title[l] if isinstance(title, dict) else title) for l in LANGS}; of = {l: (pages13.OF[k][l] if k in pages13.OF else nm[l]) for l in LANGS}
+        out.append((sl, {l: (T(f"{nm['en']} release dates", f"Dates de publication {of['fr']}", f"Fechas de publicación {of['es']}")[l],
+                    T("2026 and 2027, New York time", "2026 et 2027, heure de New York", "2026 y 2027, hora de Nueva York")[l]) for l in LANGS}, None))
+    done = {e[0] for e in out}
+    for page, title, sub in (("glossary.html", T("Prop trading glossary", "Lexique du trading prop", "Glosario del trading prop"), T("65 terms of futures and prop firms, explained", "65 termes des futures et des prop firms, expliqués", "65 términos de futuros y prop firms, explicados")),
+                             ("how-it-works.html", T("How Sweep works", "Comment ça marche", "Cómo funciona Sweep"), T("Plan, execution, review: sweep your day", "Plan, exécution, revue : balaye ta journée", "Plan, ejecución, revisión: barre tu día")),
+                             ("import.html", T("Import your trades", "Importer tes trades", "Importar tus operaciones"), T("NinjaTrader 8, Tradovate, Rithmic, TopstepX, TradingView", "NinjaTrader 8, Tradovate, Rithmic, TopstepX, TradingView", "NinjaTrader 8, Tradovate, Rithmic, TopstepX, TradingView")),
+                             ("economic-calendar.html", T("Economic calendar", "Calendrier économique", "Calendario económico"), T("Every U.S. release, recapped in a minute", "Chaque annonce américaine, résumée en une minute", "Cada dato de EE. UU., resumido en un minuto")),
+                             ("tools.html", T("Free calculators", "Calculateurs gratuits", "Calculadoras gratis"), T("Position size, drawdown, consistency, payouts", "Taille de position, drawdown, consistance, payouts", "Tamaño de posición, drawdown, consistencia, payouts")),
+                             ("release-dates.html", T("U.S. economic release dates", "Dates des annonces américaines", "Fechas de los datos de EE. UU."), T("CPI, NFP, FOMC and more, 2026 and 2027", "CPI, NFP, FOMC et plus, 2026 et 2027", "CPI, NFP, FOMC y más, 2026 y 2027")),
+                             ("futures-contracts.html", T("CME futures contract specs", "Fiches des contrats CME", "Fichas de los contratos de CME"), T("Tick size and tick value of 14 contracts", "Taille et valeur du tick de 14 contrats", "Tamaño y valor del tick de 14 contratos"))):
+        if page not in done: out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
     for slug, _, name, _ in pages7.TOOLS:
         out.append((slug, {l: (name[l], T("Free calculator for futures and prop traders", "Calculateur gratuit pour traders de futures et de prop firms", "Calculadora gratis para traders de futuros y prop firms")[l]) for l in LANGS}, None))
     return out
@@ -105,19 +123,25 @@ p{{margin-top:26px;font-size:30px;color:#9A9AA2;letter-spacing:-.01em}}
 async def main():
     from playwright.async_api import async_playwright
     manifest = {}
+    try: old = json.load(open(os.path.join(OUT, "manifest.json"), encoding="utf-8"))   # an image whose text and date haven't changed is kept as is
+    except (OSError, ValueError): old = {}
+    made = 0
     async with async_playwright() as p:
         br = await p.chromium.launch(channel="chrome")
         pg = await br.new_page(viewport={"width": 1200, "height": 630}, device_scale_factor=1)
         for page, texts, when in entries():
             for l in LANGS:
                 title, sub = texts[l]
+                entry = {"alt": f"{title} · {sub}", "date": when}
+                manifest.setdefault(page, {})[l] = entry
+                png = os.path.join(OUT, l, name_of(page) + ".png")
+                if os.path.exists(png) and old.get(page, {}).get(l) == entry: continue
                 await pg.set_content(html_of(title, sub)); await pg.evaluate("document.fonts.ready")
                 os.makedirs(os.path.join(OUT, l), exist_ok=True)
-                await pg.screenshot(path=os.path.join(OUT, l, name_of(page) + ".png"))
-                manifest.setdefault(page, {})[l] = {"alt": f"{title} · {sub}", "date": when}
+                await pg.screenshot(path=png); made += 1
         await br.close()
     json.dump(manifest, open(os.path.join(OUT, "manifest.json"), "w"), ensure_ascii=False, indent=1)
-    print(f"{sum(len(v) for v in manifest.values())} share images in static/social/og/")
+    print(f"{sum(len(v) for v in manifest.values())} share images in static/social/og/, {made} made now")
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -642,7 +642,12 @@ MANUAL_RULES = T("""<h2>The rules to enter</h2><ul>
 <li><b>Consistency:</b> the most your best day can be, as a share of your profit.</li>
 <li><b>Minimum days</b> before passing or before a payout.</li>
 <li><b>Payout conditions:</b> winning days, a balance to keep, the minimum and maximum per payout, and your profit split.</li></ul>
-<p>Take them from {F}’s current rules for your exact account type and size: rules differ by account and change over time. The <a href="@glossary.html">glossary</a> explains each term, and the <a href="@prop-firm-drawdown-rules.html">drawdown</a> and <a href="@prop-firm-payout-rules.html">payout</a> guides show how the other firms set them.</p>""",
+<p>Take them from {F}’s current rules for your exact account type and size: rules differ by account and change over time. The <a href="@glossary.html">glossary</a> explains each term, and the <a href="@prop-firm-drawdown-rules.html">drawdown</a> and <a href="@prop-firm-payout-rules.html">payout</a> guides show how the other firms set them.</p>
+<h2>Add the account, step by step</h2><ol>
+<li>In Sweep, add an account and choose <b>Other firm</b>; name it after the account (for example “{F} 50K”).</li>
+<li>Pick the type, evaluation or funded, and the size. Already in progress? Say so and enter its current balance.</li>
+<li>Enter the rules above, from {F}’s current rules for that account.</li>
+<li>That’s it: every trade now shows your room above the max loss, your progress to the target and, once funded, how close you are to a payout.</li></ol>""",
 """<h2>Les règles à saisir</h2><ul>
 <li><b>Objectif de profit</b> de l’évaluation, en dollars.</li>
 <li><b>Perte max</b> et sa façon de suivre : en fin de journée, en temps réel ou fixe, et si elle s’arrête au solde de départ.</li>
@@ -650,7 +655,12 @@ MANUAL_RULES = T("""<h2>The rules to enter</h2><ul>
 <li><b>Consistance :</b> le poids maximal de ta meilleure journée dans ton profit.</li>
 <li><b>Jours minimum</b> avant de réussir ou avant un payout.</li>
 <li><b>Conditions de payout :</b> jours gagnants, solde à garder, minimum et maximum par payout, et ton partage des profits.</li></ul>
-<p>Prends-les dans les règles actuelles de {F} pour ton type et ta taille de compte exacts : les règles diffèrent selon le compte et changent avec le temps. Le <a href="@glossary.html">lexique</a> explique chaque terme, et les guides du <a href="@prop-firm-drawdown-rules.html">drawdown</a> et des <a href="@prop-firm-payout-rules.html">payouts</a> montrent comment les autres firmes les fixent.</p>""",
+<p>Prends-les dans les règles actuelles de {F} pour ton type et ta taille de compte exacts : les règles diffèrent selon le compte et changent avec le temps. Le <a href="@glossary.html">lexique</a> explique chaque terme, et les guides du <a href="@prop-firm-drawdown-rules.html">drawdown</a> et des <a href="@prop-firm-payout-rules.html">payouts</a> montrent comment les autres firmes les fixent.</p>
+<h2>Ajouter le compte, étape par étape</h2><ol>
+<li>Dans Sweep, ajoute un compte et choisis <b>Autre firme</b> ; nomme-le comme le compte (par exemple « {F} 50K »).</li>
+<li>Choisis le type, évaluation ou financé, et la taille. Déjà en cours ? Indique-le et saisis son solde actuel.</li>
+<li>Saisis les règles ci-dessus, prises dans les règles actuelles de {F} pour ce compte.</li>
+<li>C’est tout : chaque trade montre maintenant ta marge au-dessus de la perte max, ta progression vers l’objectif et, une fois financé, où tu en es avant un payout.</li></ol>""",
 """<h2>Las reglas que debes introducir</h2><ul>
 <li><b>Objetivo de beneficio</b> de la evaluación, en dólares.</li>
 <li><b>Pérdida máx.</b> y cómo sigue al saldo: al cierre, en tiempo real o fija, y si se detiene en el saldo inicial.</li>
@@ -658,7 +668,12 @@ MANUAL_RULES = T("""<h2>The rules to enter</h2><ul>
 <li><b>Consistencia:</b> el peso máximo de tu mejor día en tu beneficio.</li>
 <li><b>Días mínimos</b> antes de aprobar o antes de un payout.</li>
 <li><b>Condiciones de payout:</b> días ganadores, saldo a mantener, mínimo y máximo por payout, y tu reparto de beneficios.</li></ul>
-<p>Tómalas de las reglas actuales de {F} para tu tipo y tamaño de cuenta exactos: las reglas cambian según la cuenta y con el tiempo. El <a href="@glossary.html">glosario</a> explica cada término, y las guías de <a href="@prop-firm-drawdown-rules.html">drawdown</a> y de <a href="@prop-firm-payout-rules.html">payouts</a> muestran cómo las fijan las demás firmas.</p>""")
+<p>Tómalas de las reglas actuales de {F} para tu tipo y tamaño de cuenta exactos: las reglas cambian según la cuenta y con el tiempo. El <a href="@glossary.html">glosario</a> explica cada término, y las guías de <a href="@prop-firm-drawdown-rules.html">drawdown</a> y de <a href="@prop-firm-payout-rules.html">payouts</a> muestran cómo las fijan las demás firmas.</p>
+<h2>Añade la cuenta, paso a paso</h2><ol>
+<li>En Sweep, añade una cuenta y elige <b>Otra firma</b>; ponle el nombre de la cuenta (por ejemplo «{F} 50K»).</li>
+<li>Elige el tipo, evaluación o financiada, y el tamaño. ¿Ya está en curso? Indícalo e introduce su saldo actual.</li>
+<li>Introduce las reglas de arriba, tomadas de las reglas actuales de {F} para esa cuenta.</li>
+<li>Listo: cada operación muestra ahora tu margen sobre la pérdida máxima, tu progreso hacia el objetivo y, ya financiada, cuánto te falta para un payout.</li></ol>""")
 
 def make_manual_page(slug, name):
     CRUMBS[slug] = name
