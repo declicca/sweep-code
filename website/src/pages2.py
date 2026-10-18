@@ -147,8 +147,8 @@ def page_install(lang, t):
         T("No App Store needed. Install Sweep from your browser in three taps and open it like any other app.","Pas besoin de l’App Store. Installe Sweep depuis ton navigateur en trois touchers et ouvre-le comme n’importe quelle app.","Sin App Store. Instala Sweep desde el navegador en tres toques y ábrelo como cualquier app."), T("Help","Aide","Ayuda"))
     ol = lambda xs: '<ol class="psteps">' + "".join(f"<li>{t(x)}</li>" for x in xs) + "</ol>"
     copy = f'<div class="copy"><h2 class="h3">iPhone</h2>{ol(ios)}<h2 class="h3" style="margin-top:40px">Android</h2>{ol(andr)}</div>'
-    duo = ('<div class="duo-phones stagger">' + ui.frame_p("v6-20-signup-m.webp", t(T("Sweep log-in screen on a phone","Écran de connexion Sweep sur téléphone","Pantalla de inicio de Sweep en el teléfono")), cls="")
-           + ui.frame_p("v6-01-today-m.webp", t(T("Sweep on a phone: Today","Sweep sur téléphone : Aujourd’hui","Sweep en el teléfono: Hoy")), cls="") + "</div>")
+    duo = ('<div class="duo-phones stagger">' + ui.frame_p("v6-20-signup-m.webp", t(T("Sweep log-in screen on a phone","Écran de connexion Sweep sur téléphone","Pantalla de inicio de Sweep en el teléfono")), cls="", eager=True, sizes="(max-width: 743px) 40vw, 320px")
+           + ui.frame_p("v6-01-today-m.webp", t(T("Sweep on a phone: Today","Sweep sur téléphone : Aujourd’hui","Sweep en el teléfono: Hoy")), cls="", sizes="(max-width: 743px) 40vw, 320px") + "</div>")
     hero = ui.hero(t, H[2], H[0], H[1], cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True))
     b = (ui.sec(f'<div class="split phone-media">{copy}<div>{duo}</div></div>', "t", "steps")
          + ui.sec(f'<article class="article">{t(INSTALL_HELP)}</article>', "n", "help", width="read") + ui.final(lang, t))
@@ -223,7 +223,7 @@ def page_about(lang, t):
                ("check",T("Honest numbers","Des chiffres honnêtes","Números honestos"),T("The bad days count. A warning never hides a broken rule.","Les mauvaises journées comptent. Un avertissement ne cache jamais une règle brisée.","Los días malos cuentan. Un aviso nunca oculta una regla rota.")),
                ("bolt",T("No signals, no hype","Ni signaux ni hype","Sin señales ni exageraciones"),T("Sweep shows your data. The decisions stay yours.","Sweep montre tes données. Les décisions restent les tiennes.","Sweep muestra tus datos. Las decisiones son tuyas."))]
     b = (ui.sec(f'<article class="article">{about}{company}</article>', "t", "story", width="read")
-         + ui.sec(ui.frame_d("v6-01-today-d.webp", t(T("Sweep, the Today screen, sample data","Sweep, l’écran Aujourd’hui, données d’exemple","Sweep, la pantalla Hoy, datos de ejemplo")), m="v6-01-today-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1320px"), "n", "app", width="wide")
+         + ui.sec(ui.frame_d("v6-01-today-d.webp", t(T("Sweep, the Today screen, sample data","Sweep, l’écran Aujourd’hui, données d’exemple","Sweep, la pantalla Hoy, datos de ejemplo")), m="v6-01-today-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1200px"), "n", "app", width="wide")
          + ui.sec(ui.head(t, None, T("What we believe","Ce en quoi on croit","En qué creemos")) + ui.cards([ui.card(t, a, d, icon=k) for k, a, d in believe], 3), "n", "believe")
          + ui.sec(f'<article class="article">{localize(lang, t(ABOUT_HELP))}</article>', "n", "how", width="read"))
     return (t(T("About Sweep","À propos de Sweep","Acerca de Sweep")), t(T("Sweep is a trading journal built in Quebec by a futures trader, for futures and prop traders.","Sweep est un journal de trading conçu au Québec par un trader de futures, pour les traders de futures et prop.","Sweep es un diario de trading creado en Quebec por un trader de futuros, para traders de futuros y prop.")), hero + b + ui.final(lang, t), "")

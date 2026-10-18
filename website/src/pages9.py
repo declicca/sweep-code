@@ -166,8 +166,9 @@ def page_changelog(lang, t, older=""):
         if not img: texts.append(card(t, h, p)); continue
         d, m = CL_SHOTS[img]
         if d:
-            pic = (f'<picture><source media="(max-width: 743px)" srcset="/img/captures/{m}"><img src="/img/captures/{d}" srcset="/img/captures/{d[:-5]}-1200.webp 1200w, /img/captures/{d} 2400w" '
-                   f'sizes="(max-width: 743px) 92vw, (max-width: 1067px) 30vw, 380px" width="2880" height="1800" alt="{_h.escape(t(h))}" loading="lazy" decoding="async"></picture>')
+            load = 'fetchpriority="high"' if not shots else 'loading="lazy"'   # the first one is on the first screen of a computer
+            pic = (f'<picture><source media="(max-width: 743px)" srcset="/img/captures/{m}"><img src="/img/captures/{d}" srcset="/img/captures/{d[:-5]}-600.webp 600w, /img/captures/{d[:-5]}-1200.webp 1200w, /img/captures/{d} 2400w" '
+                   f'sizes="(max-width: 743px) 92vw, (max-width: 1067px) 30vw, 380px" width="2880" height="1800" alt="{_h.escape(t(h))}" {load} decoding="async"></picture>')
             shots.append(card_media(t, h, p, pic))
         else:
             phones.append(card_side(t, h, p, phone_img(f"/img/captures/{m}", t(h))))

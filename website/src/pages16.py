@@ -85,7 +85,7 @@ def sec_disc(lang, t):
            L3("Leagues and crews are optional. Your P&L always stays private.","Ligues et crews optionnels. Ton P&L reste toujours privé.","Ligas y crews opcionales. Tu P&L siempre es privado.")]
     points = '<ul class="points stagger">' + "".join(f"<li><b>{t(h)}</b>{t(x)}</li>" for h, x in zip(heads, pts)) + "</ul>"
     shot = frame_d("v6-22-today-swept-d.webp", t(L3("Today: plan, execution and review done, the day swept, sample data","Aujourd’hui : plan, exécution et revue faits, journée balayée, données d’exemple","Hoy: plan, ejecución y revisión hechos, día barrido, datos de ejemplo")),
-                   m="v6-22-today-swept-m.webp", sizes="(max-width: 1067px) 92vw, 1320px", t=t, cls="reveal zoom")
+                   m="v6-22-today-swept-m.webp", sizes="(max-width: 1067px) 92vw, 1200px", t=t, cls="reveal zoom")
     return sec(head(t, L3("Discipline","Discipline","Disciplina"), L3("Sweep your day.","Balaye ta journée.","Barre tu día."),
                     L3("Three steps every trading day: Plan before the open, Execution during the session, Review after the close. Complete all three and your day is swept.",
                        "Trois étapes chaque jour de trading : le Plan avant l’ouverture, l’Exécution pendant la séance, la Revue après la clôture. Les trois faites, ta journée est balayée.",

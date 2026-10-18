@@ -149,12 +149,13 @@ ErrorDocument 404 /404.html
 AddType font/woff2 .woff2
 AddType image/webp .webp
 AddType application/manifest+json .webmanifest
+AddCharset utf-8 .txt .xml .webmanifest
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteRule .* - [E=Cache-Control:no-cache]
-RewriteCond %{HTTPS} off
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-RewriteCond %{HTTP_HOST} ^www\\.(.+)$ [NC]
+# http and www go to https://makeitsweep.com in one hop
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^www\\. [NC]
+RewriteCond %{HTTP_HOST} ^(?:www\\.)?(.+)$ [NC]
 RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 # folders (/100, /prop-firms): NGINX answers before Apache and adds the trailing slash itself (301, query string kept),
 # so these pages are linked as /100/ and /prop-firms/ everywhere (core.href)
@@ -165,6 +166,12 @@ RewriteRule ^(fr/|es/)?prop-firms/alpha/?$ /$1prop-firms/alpha-futures [R=301,L]
 RewriteCond %{THE_REQUEST} \\s/+([^?\\s]+?)\\.html[\\s?] [NC]
 RewriteCond %1 !(^|/)index$
 RewriteRule ^ /%1 [R=301,L,NE]
+# a page has one address: /pricing/ -> /pricing (folders keep their slash, which NGINX adds)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+RewriteRule ^(.+?)/$ /$1 [R=301,L]
+# /404 is not a page: it falls through to the real 404
+RewriteCond $1 !(^|/)404$
 RewriteCond %{DOCUMENT_ROOT}/$1.html -f
 RewriteRule ^(.+?)/?$ /$1.html [L]
 # pages renamed with the clean URLs
@@ -183,8 +190,12 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set X-Frame-Options "DENY"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 Header always set Strict-Transport-Security "max-age=31536000"
-<FilesMatch "\\.(webp|png|svg|ico|woff2|mp4|webm)$">
+<FilesMatch "\\.woff2$">
 Header set Cache-Control "public, max-age=2592000, immutable"
+</FilesMatch>
+# images and videos keep their name when they are redone: fresh for a day, then checked again in the background
+<FilesMatch "\\.(webp|png|svg|ico|mp4|webm)$">
+Header set Cache-Control "public, max-age=86400, stale-while-revalidate=2592000"
 </FilesMatch>
 <FilesMatch "\\.[0-9a-f]{10}\\.(css|js)$">
 Header set Cache-Control "public, max-age=31536000, immutable"
@@ -197,7 +208,7 @@ Header set Cache-Control "no-cache, must-revalidate"
 </FilesMatch>
 </IfModule>
 <IfModule mod_deflate.c>
-AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/xml text/plain application/manifest+json
+AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json image/svg+xml application/xml text/xml application/rss+xml text/plain application/manifest+json
 </IfModule>
 """.replace("{JOURNAL_REDIRECTS}", "\n".join(f"RewriteRule ^(fr/|es/)?{old}(\\.html)?/?$ /$1{new} [R=301,L]" for old, new in {**JOURNAL_MOVED, **PAGES_MOVED}.items())))   # old journal pages → one page per firm; merged pages
 n = sum(len(f) for _,_,f in os.walk(DIST)); print("built", n, "files")

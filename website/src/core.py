@@ -365,7 +365,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script type="speculationrules">{{"prefetch":[{{"source":"document","where":{{"and":[{{"href_matches":"/*"}},{{"not":{{"href_matches":"/*.pdf"}}}},{{"not":{{"href_matches":"/video/*"}}}}]}},"eagerness":"moderate"}}]}}</script>
-<link rel="preconnect" href="https://app.makeitsweep.com" crossorigin><link rel="dns-prefetch" href="https://app.makeitsweep.com">
+{'<link rel="preconnect" href="https://app.makeitsweep.com" crossorigin>' if page == "index.html" else ""}<link rel="dns-prefetch" href="https://app.makeitsweep.com">
 <script>try{{if(sessionStorage.getItem("sw-seen"))document.documentElement.classList.add("ret");sessionStorage.setItem("sw-seen","1")}}catch(e){{}}</script>
 {UTM_JS}
 <script>window.sweepTrack=function(n,p){{try{{if(window.plausible)plausible(n,{{props:p||{{}}}});else if(window._paq)_paq.push(['trackEvent','site',n]);}}catch(e){{}}}};</script>
@@ -647,7 +647,7 @@ def page_hero(t, h1, lead, kick=None, cta=None, visual=""):
     k = f'<span class="kick">{t(kick)}</span>' if kick else ""
     c = f'<div class="cta-row">{cta}</div>' if cta else ""
     if visual:   # design system pages only: loaded at once, never hidden while it loads (it is the largest paint)
-        visual = visual.replace('loading="lazy"', 'loading="eager" fetchpriority="low"', 1).replace(" reveal zoom\"", " hero-shot\"", 1)
+        visual = visual.replace('loading="lazy"', 'loading="eager" fetchpriority="high"', 1).replace(" reveal zoom\"", " hero-shot\"", 1)
     v = f'<div class="wrap c-wide hero-visual">{visual}</div>' if visual else ""
     return f'<div class="page-hero"><div class="wrap">{k}<h1 class="wu">{words(t(h1))}</h1><p class="lead rise d3">{t(lead)}</p>{c}</div>{v}</div>'
 

@@ -58,7 +58,7 @@ def frame_d(name, alt, m=None, sizes="(max-width: 1067px) 92vw, 700px", cap=True
     c = f'<figcaption class="cap">{t(SAMPLE)}</figcaption>' if cap and t else ""
     return f'<figure class="fr fr-d{" has-m" if m else ""} {cls}"><div class="scr">{img}</div>{c}</figure>'
 
-def frame_p(name, alt, t=None, video=None, cap=True, width=None, cls="reveal"):
+def frame_p(name, alt, t=None, video=None, cap=True, width=None, cls="reveal", eager=False, sizes="320px"):
     """A phone. With `video`, the capture `name` is its first frame and the video fades in once it plays."""
     st = f' style="--pw:{width}px"' if width else ""
     src = name if name.startswith("/") else f"/img/captures/{name}"   # a path in /img works too (older phone captures)
@@ -66,7 +66,8 @@ def frame_p(name, alt, t=None, video=None, cap=True, width=None, cls="reveal"):
         media = (f'<img class="vfb" src="{src}"{ss600(src, "320px")} width="900" height="1948" alt="" aria-hidden="true" loading="lazy" decoding="async">'
                  f'<video muted loop playsinline preload="none" data-auto aria-label="{_html.escape(alt)}"><source src="/img/captures/{video}" type="video/mp4"></video>')
     else:
-        media = f'<img src="{src}"{ss600(src, "320px")} width="900" height="1948" alt="{_html.escape(alt)}" loading="lazy" decoding="async">'
+        load = 'fetchpriority="high"' if eager else 'loading="lazy"'
+        media = f'<img src="{src}"{ss600(src, sizes)} width="900" height="1948" alt="{_html.escape(alt)}" {load} decoding="async">'
     c = f'<figcaption class="cap">{t(SAMPLE)}</figcaption>' if cap and t else ""
     return f'<figure class="fr fr-p {cls}"{st}><div class="scr">{media}</div>{c}</figure>'
 
@@ -171,7 +172,7 @@ def hero(t, kick, h1, lead, cta="", note=None, visual="", center=False, extra=""
 
 def hero_shot(visual):
     """The visual of a first screen: loaded at once and first, never hidden while it loads (it is the largest paint)."""
-    v = visual.replace('loading="lazy"', 'loading="eager" fetchpriority="low"', 1)
+    v = visual.replace('loading="lazy"', 'loading="eager" fetchpriority="high"', 1)
     return v.replace(" reveal zoom\"", " hero-shot\"", 1).replace(" reveal\"", " hero-shot\"", 1)
 
 def _anchor(text, used):

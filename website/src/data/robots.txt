@@ -1,32 +1,15 @@
 # robots.txt — makeitsweep.com
+# Every robot below, AI and answer engines included, is welcome; campaign links are not pages
 User-agent: *
-Allow: /
-Disallow: /*?utm_
-Disallow: /search
-
-# Robots IA et moteurs de réponse (explicitement autorisés)
 User-agent: GPTBot
-Allow: /
-
 User-agent: OAI-SearchBot
-Allow: /
-
 User-agent: ChatGPT-User
-Allow: /
-
 User-agent: PerplexityBot
-Allow: /
-
 User-agent: ClaudeBot
-Allow: /
-
 User-agent: Claude-SearchBot
-Allow: /
-
 User-agent: Google-Extended
-Allow: /
-
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /*?utm_
 
 Sitemap: https://makeitsweep.com/sitemap.xml

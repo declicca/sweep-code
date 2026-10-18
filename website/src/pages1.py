@@ -146,7 +146,7 @@ def page_features(lang, t):
           "review": "/img/captures/v6-23-discipline-checklist-m.webp", "ask-sweep": ui.phone_src("ask-sweep", lang), "economic-reports": ui.phone_src("news-impact-report", lang)}
     def shot(k, wide=False):
         x = F[k]; d, m = SH[k]
-        return ui.frame_d(d, t(x["title"]), m=m, t=t, sizes="(max-width: 1067px) 92vw, 1320px" if wide else "(max-width: 1067px) 92vw, 700px", cls="reveal zoom" if wide else "reveal")
+        return ui.frame_d(d, t(x["title"]), m=m, t=t, sizes="(max-width: 1067px) 92vw, 1200px" if wide else "(max-width: 1067px) 92vw, 700px", cls="reveal zoom" if wide else "reveal")
     def sp(k, flip=False):
         x = F[k]
         media = shot(k)
@@ -174,7 +174,7 @@ def page_features(lang, t):
                         ("globe", T("Your language, your theme","Ta langue, ton thème","Tu idioma, tu tema"), T("English, French or Spanish from your browser. Dark or light from your device.","Anglais, français ou espagnol selon ton navigateur. Foncé ou clair selon ton appareil.","Inglés, francés o español según tu navegador. Oscuro o claro según tu dispositivo.")))], 3)
                     + '</div>', "a", "mobile")
     hero = ui.hero(t, H[2], H[0], H[1], kick_in_h1=True, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True) + f'<button type="button" class="btn btn-line btn-lg" data-tour>{PLAY}{t(TOUR_LABEL)}</button>',
-                   visual=ui.frame_d("v6-01-today-d.webp", t(T("Today: your day, your accounts and your rings, sample data","Aujourd’hui : ta journée, tes comptes et tes anneaux, données d’exemple","Hoy: tu día, tus cuentas y tus anillos, datos de ejemplo")), m="v6-01-today-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1320px", cls="reveal zoom"))
+                   visual=ui.frame_d("v6-01-today-d.webp", t(T("Today: your day, your accounts and your rings, sample data","Aujourd’hui : ta journée, tes comptes et tes anneaux, données d’exemple","Hoy: tu día, tus cuentas y tus anillos, datos de ejemplo")), m="v6-01-today-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1200px", cls="reveal zoom"))
     chapters = [("logging", T("Logging","Saisie","Registro")), ("charts", T("Charts","Graphiques","Gráficos")), ("accounts", T("Rules","Règles","Reglas")),
                 ("payouts", T("Payouts & My money","Payouts et Mon argent","Payouts y Mi dinero")), ("rules", T("Discipline","Discipline","Disciplina")), ("ai", T("AI","IA","IA"))]
     from pages6 import tour_dialog

@@ -250,18 +250,20 @@
 
   // videos: load just before they scroll in, play only while visible, fade in once the first frame is ready
   var vids = document.querySelectorAll('video[data-auto]');
-  if(vids.length && !reduce){
+  var save = !!(navigator.connection && navigator.connection.saveData);   // data saver: the posters stay, no video is downloaded
+  if(vids.length && !reduce && !save){
     vids.forEach(function(v){ v.addEventListener('playing', function(){ v.classList.add('is-playing'); }); });
     var startLoad = function(v){ v.preload = 'auto'; v.load(); };
     var whenIdle = function(fn){ var go = function(){ (window.requestIdleCallback || function(f){ setTimeout(f, 200); })(fn, {timeout:1500}); };
       if(document.readyState === 'complete') go(); else window.addEventListener('load', go, {once:true}); };
-    var pre = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var v = e.target; pre.unobserve(v);
-      if(v.classList.contains('hero-loop')) whenIdle(function(){ startLoad(v); }); else startLoad(v); } }); }, {rootMargin:'800px 0px'});
+    var pre = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var v = e.target; pre.unobserve(v); startLoad(v); } }); }, {rootMargin:'800px 0px'});
+    // the home's big loop (4 MB on a computer): only once a third of it is on screen, after the page is idle
+    var big = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var v = e.target; big.unobserve(v); whenIdle(function(){ startLoad(v); }); } }); }, {threshold:.35});
     var vio = new IntersectionObserver(function(es){ es.forEach(function(e){ var v = e.target;
       if(e.isIntersecting){ var go = function(){ var pr = v.play(); if(pr && pr.catch) pr.catch(function(){}); };
         if(v.readyState >= 3) go(); else v.addEventListener('canplay', go, {once:true}); }
       else { v.pause(); } }); }, {threshold:.35});
-    vids.forEach(function(v){ pre.observe(v); vio.observe(v); });
+    vids.forEach(function(v){ (v.classList.contains('hero-loop') ? big : pre).observe(v); vio.observe(v); });
   }
 
   // swipe rails: highlight the card in focus
