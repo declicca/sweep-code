@@ -45,7 +45,7 @@ SW = {"free": T("Yes, no time limit, no card","Oui, sans limite de temps, sans c
       "charts": T("Real CME charts, the day after the session","Vrais graphiques CME, le lendemain de la séance","Gráficos reales de CME, al día siguiente de la sesión"),
       "ai": T("Sweep AI on every plan, more with Pro and Elite","Sweep AI dans tous les forfaits, plus avec Pro et Elite","Sweep AI en todos los planes, más con Pro y Elite"),
       "mobile": T("In the browser, add it to your home screen","Dans le navigateur, à ajouter à ton écran d’accueil","En el navegador, añádelo a tu pantalla de inicio"),
-      "psych": T("Daily routine: plan, rules, review","Routine quotidienne : plan, règles, revue","Rutina diaria: plan, reglas, revisión"),
+      "psych": T("Daily routine (plan, rules, review), a free coach on every trade and your edge profile","Routine quotidienne (plan, règles, revue), un coach gratuit sur chaque trade et le profil de ton edge","Rutina diaria (plan, reglas, revisión), un coach gratis en cada operación y el perfil de tu edge"),
       "markets": T("Futures","Futures","Futuros")}
 def row(k, them, sweep=None): return (L[k], sweep or SW.get(k, SW["no"]), them)
 NONE_LISTED = T("None listed on its pricing page","Rien sur sa page de tarifs","Nada en su página de precios")
@@ -195,7 +195,6 @@ VS = [
   "sources": T("its public pricing page", "sa page publique de tarifs", "su página pública de precios"),
   "them_if": [T("You want automatic sync beyond NinjaTrader 8 and a native mobile app today.","Tu veux une synchro automatique au-delà de NinjaTrader 8 et une app mobile native dès aujourd’hui.","Quieres sincronización automática más allá de NinjaTrader 8 y una app móvil nativa ya hoy."),
               T("You use trade replay, market replay or backtesting.","Tu utilises le replay de trades, le replay de marché ou le backtesting.","Usas el replay de operaciones, el replay de mercado o el backtesting."),
-              T("You want an AI coach on your trades.","Tu veux un coach IA sur tes trades.","Quieres un coach de IA sobre tus operaciones."),
               T("You also trade stocks, forex, crypto or options.","Tu trades aussi des actions, du forex, des cryptos ou des options.","También operas acciones, forex, cripto u opciones.")],
   "rows": [row("free", T("None on its pricing page","Aucun sur sa page de tarifs","Ninguno en su página de precios")),
            row("trial", T("7 days, every plan","7 jours, tous les forfaits","7 días, todos los planes")),
@@ -258,9 +257,9 @@ VS = [
              "Sí: sigue cuentas de prop firms ilimitadas. Su página de precios no indica reglas de prop firms. En Sweep, las reglas vienen precargadas para " + PF["es"] + " y cada tipo de cuenta, y se revisan cada semana en las páginas oficiales de las firmas.")),
           FAQ_ADD,
           (T("Is Edgewonk better for trading psychology?","Edgewonk est-il meilleur pour la psychologie du trading ?","¿Edgewonk es mejor para la psicología del trading?"),
-           T("It goes deep on it: a Tiltmeter, mistake tracking and a weekly edge finder. Sweep works on discipline through a daily routine (plan, rules, review) and rewards following your plan, not just your P&L.",
-             "Il va loin sur ce terrain : Tiltmeter, suivi des erreurs et edge finder chaque semaine. Sweep travaille la discipline par une routine quotidienne (plan, règles, revue) et récompense le respect de ton plan, pas seulement ton P&L.",
-             "Profundiza mucho en ello: Tiltmeter, seguimiento de errores y un edge finder semanal. Sweep trabaja la disciplina con una rutina diaria (plan, reglas, revisión) y premia seguir tu plan, no solo tu P&L."))],
+           T("It goes deep on it: a Tiltmeter, mistake tracking and a weekly edge finder. Sweep works on discipline through a daily routine (plan, rules, review), a free coach on every trade and the profile of your edge, and rewards following your plan, not just your P&L.",
+             "Il va loin sur ce terrain : Tiltmeter, suivi des erreurs et edge finder chaque semaine. Sweep travaille la discipline par une routine quotidienne (plan, règles, revue), un coach gratuit sur chaque trade et le profil de ton edge, et récompense le respect de ton plan, pas seulement ton P&L.",
+             "Profundiza mucho en ello: Tiltmeter, seguimiento de errores y un edge finder semanal. Sweep trabaja la disciplina con una rutina diaria (plan, reglas, revisión), un coach gratis en cada operación y el perfil de tu edge, y premia seguir tu plan, no solo tu P&L."))],
   "desc": T("Sweep vs Edgewonk for futures prop firm traders: free plan, yearly price, imports, prop firm rules, psychology tools and markets, side by side.",
             "Alternative gratuite à Edgewonk pour les traders de prop firms : forfait gratuit, prix annuel, imports, règles des firmes, psychologie et marchés.",
             "Alternativa gratis a Edgewonk para traders de prop firms: plan gratis, precio anual, importación, reglas de las firmas, psicología y mercados.")},

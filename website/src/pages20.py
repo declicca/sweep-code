@@ -94,6 +94,7 @@ def page_free(lang, t):
     free = [T("<b>Journal, P&L calendar and analytics</b> of your recent trades, with the economic calendar", "<b>Journal, calendrier P&L et analyses</b> de tes trades récents, avec le calendrier économique", "<b>Diario, calendario de P&L y análisis</b> de tus operaciones recientes, con el calendario económico"),
             T("<b>Real CME charts</b> for every trade", "<b>Vrais graphiques CME</b> pour chaque trade", "<b>Gráficos reales de CME</b> para cada operación"),
             T("<b>Log with AI,</b> from your own words or a screenshot", "<b>Saisie avec l’IA,</b> en mots simples ou à partir d’une capture", "<b>Registro con IA,</b> con tus palabras o desde una captura"),
+            T("<b>Your coach and your edge</b> on every trade", "<b>Ton coach et ton edge</b> sur chaque trade", "<b>Tu coach y tu edge</b> en cada operación"),
             T("<b>Prop accounts</b> with their firm’s rules prefilled for guidance", "<b>Comptes prop</b> avec les règles de leur firme préremplies à titre indicatif", "<b>Cuentas prop</b> con las reglas de su firma precargadas a título indicativo"),
             T("<b>Rings, streak, badges and ranks,</b> leagues and crews", "<b>Anneaux, streak, badges et rangs,</b> ligues et crews", "<b>Anillos, racha, insignias y rangos,</b> ligas y crews"),
             T("<b>Full export</b> of your data, anytime", "<b>Export complet</b> de tes données, en tout temps", "<b>Exportación completa</b> de tus datos, cuando quieras")]

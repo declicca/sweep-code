@@ -2,7 +2,7 @@
 
 > Sweep is a free trading journal built for futures and prop firm traders. It tracks every evaluation, funded and live account, payouts and expenses in one place, with prop firm rules preloaded and verified every week. Available in English, French and Spanish.
 
-Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro ($19/month or $159/year), Elite ($39/month or $329/year); every new account gets 60 days of Pro. Trades sync automatically from NinjaTrader 8 with Sweep's free add-on (every account, whatever its connection: Rithmic, Tradovate and others); from other platforms, add trades from a screenshot (a history screenshot adds all its trades), in your own words, or by importing the platform's export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). Automatic sync for Rithmic and Tradovate is in development. Sweep does not offer trade replay or backtesting. Prop firms with preloaded rules: {PRESET_FIRMS}; any other firm{OTHER_FIRMS} can be added with its rules entered by hand; when a firm changes a rule, affected traders are notified and choose whether to apply it.
+Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro ($19/month or $159/year), Elite ($39/month or $329/year); every new account gets 60 days of Pro. Every plan includes a coach on every trade (no AI) and “Your edge”, the conditions where the trader wins, found in their own last 8 weeks. Trades sync automatically from NinjaTrader 8 with Sweep's free add-on (every account, whatever its connection: Rithmic, Tradovate and others); from other platforms, add trades from a screenshot (a history screenshot adds all its trades), in your own words, or by importing the platform's export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). Automatic sync for Rithmic and Tradovate is in development. Sweep does not offer trade replay or backtesting. Prop firms with preloaded rules: {PRESET_FIRMS}; any other firm{OTHER_FIRMS} can be added with its rules entered by hand; when a firm changes a rule, affected traders are notified and choose whether to apply it.
 
 ## Product
 - [Home](https://makeitsweep.com/): overview of Sweep
@@ -14,7 +14,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Export trades from TopstepX](https://makeitsweep.com/import-topstepx): the Trades tab export as a CSV, UTC times converted, Topstep's trading day kept
 - [Export trades from Rithmic R | Trader Pro](https://makeitsweep.com/import-rithmic): Completed Orders as a CSV, fills paired into trades, several accounts in one file
 - [Payout tracker](https://makeitsweep.com/payout-tracker): payouts from request to paid, expenses and real net (Pro and Elite)
-- [Features](https://makeitsweep.com/features): logging, real P&L, rules, review, analytics, accounts, payouts
+- [Features](https://makeitsweep.com/features): logging, real P&L, rules, the coach and your edge, review, analytics, accounts, payouts
 - [How it works](https://makeitsweep.com/how-it-works): the daily loop and discipline
 - [Sweep AI](https://makeitsweep.com/ai)
 - [Economic calendar](https://makeitsweep.com/economic-calendar)

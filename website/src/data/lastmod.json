@@ -105,7 +105,7 @@
  },
  "features.html": {
   "date": "2026-10-18",
-  "hash": "d777e8a0ebd0bf38"
+  "hash": "889051516bae30b8"
  },
  "fomc-meeting-dates.html": {
   "date": "2026-10-18",
@@ -113,7 +113,7 @@
  },
  "free-trading-journal.html": {
   "date": "2026-10-18",
-  "hash": "835341e0ac11125c"
+  "hash": "5e9169b0a46ae8e1"
  },
  "futures-contracts.html": {
   "date": "2026-10-15",
@@ -137,7 +137,7 @@
  },
  "how-it-works.html": {
   "date": "2026-10-18",
-  "hash": "186bddbf00e35872"
+  "hash": "2fed33aca521d75a"
  },
  "how-we-verify-prop-firm-rules.html": {
   "date": "2026-10-18",
@@ -161,11 +161,11 @@
  },
  "index.html": {
   "date": "2026-10-18",
-  "hash": "d5d34d4cc0a353a8"
+  "hash": "67dfca62065eeb01"
  },
  "install.html": {
-  "date": "2026-10-15",
-  "hash": "6b364e2ba1e383ff"
+  "date": "2026-10-18",
+  "hash": "6afd4c823e8daeca"
  },
  "ism-manufacturing-release-dates.html": {
   "date": "2026-10-18",
@@ -313,11 +313,11 @@
  },
  "sweep-vs-edgewonk.html": {
   "date": "2026-10-18",
-  "hash": "22b2b7ced70327bc"
+  "hash": "b755fa03466c7406"
  },
  "sweep-vs-tradersync.html": {
   "date": "2026-10-18",
-  "hash": "16c736ce49d9a7b7"
+  "hash": "076f85de03fec071"
  },
  "sweep-vs-tradervue.html": {
   "date": "2026-10-18",

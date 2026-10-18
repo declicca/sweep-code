@@ -78,9 +78,9 @@ def sec_story(lang, t):
 
 def sec_disc(lang, t):
     """A showcase across the page: the day, swept."""
-    heads = [L3("Progress you can see", "Des progrès qui se voient", "Progresos que se ven"), L3("Never a penalty", "Jamais de punition", "Nunca un castigo"),
+    heads = [L3("A coach on every trade", "Un coach sur chaque trade", "Un coach en cada operación"), L3("Never a penalty", "Jamais de punition", "Nunca un castigo"),
              L3("Private by default", "Privé par défaut", "Privado por defecto")]
-    pts = [L3("Streaks, weekly missions and bosses made from your own bad habits: good habits become progress.","Streaks, missions chaque semaine et boss tirés de tes mauvaises habitudes : tes bonnes habitudes deviennent du progrès.","Rachas, misiones semanales y jefes sacados de tus malos hábitos: tus buenos hábitos se convierten en progreso."),
+    pts = [L3("Free, without AI: what was right, the one thing to fix, and your edge, the conditions where you win.","Gratuit, sans IA : ce qui était bien, la seule chose à corriger, et ton edge, les conditions où tu gagnes.","Gratis, sin IA: lo que estuvo bien, la única cosa a corregir y tu edge, las condiciones en las que ganas."),
            L3("A rough session never blocks your day. It shows up in your discipline score, not as a penalty.","Une séance difficile ne bloque jamais ta journée. Elle compte dans ton score de discipline, pas comme une punition.","Una mala sesión nunca bloquea tu día. Cuenta en tu puntuación de disciplina, no como castigo."),
            L3("Leagues and crews are optional. Your P&L always stays private.","Ligues et crews optionnels. Ton P&L reste toujours privé.","Ligas y crews opcionales. Tu P&L siempre es privado.")]
     points = '<ul class="points stagger">' + "".join(f"<li><b>{t(h)}</b>{t(x)}</li>" for h, x in zip(heads, pts)) + "</ul>"
