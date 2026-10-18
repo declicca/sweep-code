@@ -546,7 +546,7 @@ def pf_table(lang, t):
         r = pf_row(f, PF_DEFAULT, lang, t)
         if not r: continue
         rows += (f'<tr data-firm="{slug(f)}"><th scope="row"><a href="{href(lang, page_of(f))}" style="view-transition-name:firm-{slug(f)}">{f["name"]}</a></th>'
-                 + "".join(f'<td data-k="{k}" data-label="{t(l)}">{r["cells"][k]}</td>' for k, l in PF_COLS) + "</tr>")
+                 + "".join(f'<td data-k="{k}" data-label="{t(l)}"{' class="na"' if r["cells"][k] == DASH_ else ''}>{r["cells"][k]}</td>' for k, l in PF_COLS) + "</tr>")
     opt = lambda v, l, sel=False: f'<option value="{v}"{" selected" if sel else ""}>{l}</option>'
     sort_opts = [("name", T("Firm", "Firme", "Firma"))] + [(k, l) for k, l in PF_COLS if k != "types"]
     filters = (f'<div class="pf-filters"><button type="button" class="pf-toggle" aria-expanded="false" aria-controls="pf-fields">{t(T("Filters", "Filtres", "Filtros"))}</button><div class="pf-fields" id="pf-fields">'
@@ -571,7 +571,7 @@ var rows={};[].forEach.call(tb.rows,function(r){rows[r.getAttribute('data-firm')
 var heads=[].slice.call(document.querySelectorAll('.pf-tbl thead th'));
 heads.forEach(function(th){var k=th.getAttribute('data-k'),b=th.querySelector('.pf-sort');
  b.addEventListener('click',function(){if(st.sort===k)st.dir=st.dir==='asc'?'desc':'asc';else{st.sort=k;st.dir='asc';}render();});});
-function cell(r,k,v){var c=r.querySelector('[data-k="'+k+'"]');if(c&&c.tagName==='TD')c.textContent=v;}
+function cell(r,k,v){var c=r.querySelector('[data-k="'+k+'"]');if(c&&c.tagName==='TD'){c.textContent=v;c.classList.toggle('na',v===D.none);}}
 function render(){var size=String(st.size),list=[];if(!$('pf-size').querySelector('option[value="'+size+'"]'))size=st.size=def;
  D.firms.forEach(function(f){var d=f.rows[size],r=rows[f.id];if(!r)return;var show=!!d;
   if(d){for(var k in d.cells)cell(r,k,d.cells[k]);if(st.dd&&d.dd_types.indexOf(st.dd)<0)show=false;if(st.max!==''&&(d.keys.price===null||d.keys.price>Number(st.max)))show=false;}

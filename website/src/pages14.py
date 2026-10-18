@@ -37,7 +37,7 @@ def page_templates(lang, t):
     fl = TPL[lang]
     dl = T("Download the PDF","Télécharger le PDF","Descargar el PDF")
     cards = ui.cards([ui.card_media(t, n, d, f'<img src="/img/templates/{lang}/{fl[i]}.webp" width="600" height="777" alt="{t(n)}, PDF" {'fetchpriority="high"' if i == 0 else 'loading="lazy"'} decoding="async">',
-                                    more=f'<a class="btn btn-line" href="/templates/{lang}/{fl[i]}.pdf" download data-track="template_{TPL["en"][i]}">{t(dl)}</a>')
+                                    more=f'<a class="btn btn-line" href="/templates/{lang}/{fl[i]}.pdf" download data-track="template_{TPL["en"][i]}">{t(dl)}<span class="sr">, {t(n)}</span></a>')
                       for i, (ic, n, d) in enumerate(ITEMS)], 3, "stagger tpl")
     paper = ui.band(t(T("Paper is a start. Sweep does the rest.","Le papier, c’est un début. Sweep fait le reste.","El papel es un comienzo. Sweep hace el resto.")),
                     t(T("Your checklist is on the same screen as every trade, your plan feeds the Plan ring, and your weekly review starts from your real numbers.","Ta checklist est sur le même écran que chaque trade, ton plan nourrit l’anneau Plan, et ta revue de la semaine part de tes vrais chiffres.","Tu checklist está en la misma pantalla que cada operación, tu plan alimenta el anillo Plan y tu revisión semanal parte de tus números reales.")),

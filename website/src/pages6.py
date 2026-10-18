@@ -230,7 +230,7 @@ def page_pricing(lang, t):
      (T("Leagues, buddy, join a crew","Ligues, buddy, rejoindre un crew","Ligas, buddy, unirse a un crew"),Y,Y,Y),
      (T("Create a crew","Créer un crew","Crear un crew"),N,Y,Y),
      (T("Full export","Export complet","Exportación completa"),Y,Y,Y)]
-    body = "".join(f'<tr><th scope="row">{t(a)}</th><td>{b}</td><td>{c}</td><td>{d}</td></tr>' for a,b,c,d in rows)
+    body = "".join(f'<tr role="row"><th scope="row" role="rowheader">{t(a)}</th><td role="cell">{b}</td><td role="cell">{c}</td><td role="cell">{d}</td></tr>' for a,b,c,d in rows)
     def pblock(plan):
         if plan == "free":
             return f'<div class="price"><span class="num">{money(t,0)}</span></div><p class="per muted">{t(T("forever","pour toujours","para siempre"))}</p>'
@@ -257,7 +257,7 @@ def page_pricing(lang, t):
 </div><div class="dots plan-dots" aria-hidden="true"><i></i><i></i><i></i></div>
 <ul class="under">{"".join(f"<li>{t(x)}</li>" for x in [T("No credit card to start. Cancel anytime.","Sans carte de crédit pour commencer. Annule quand tu veux.","Sin tarjeta para empezar. Cancela cuando quieras."),T("Monthly or yearly billing (yearly saves 30%). Prices in USD, before taxes.","Facturation mensuelle ou annuelle (l’annuel coûte 30 % de moins). Prix en USD, affichés avant taxes.","Facturación mensual o anual (la anual cuesta un 30 % menos). Precios en USD, antes de impuestos."),T("Secure payment by Stripe. No refunds on periods already started.","Paiement sécurisé par Stripe. Aucun remboursement sur les périodes entamées.","Pago seguro con Stripe. Sin reembolsos en periodos ya iniciados.")])}</ul>'''
     b = ui.sec(cards, "t", "plans-sec")
-    cmp = f'<div class="cmp-wrap"><table class="cmp"><thead><tr><th scope="col"><span class="sr">{t(T("Feature","Fonctionnalité","Función"))}</span></th><th scope="col">Free</th><th scope="col" class="hl">Pro</th><th scope="col">Elite</th></tr></thead><tbody>{body}</tbody></table></div>'
+    cmp = f'<div class="cmp-wrap"><table class="cmp" role="table"><thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader"><span class="sr">{t(T("Feature","Fonctionnalité","Función"))}</span></th><th scope="col" role="columnheader">Free</th><th scope="col" role="columnheader" class="hl">Pro</th><th scope="col" role="columnheader">Elite</th></tr></thead><tbody role="rowgroup">{body}</tbody></table></div>'
     stat = lambda big, small: f'<div><span class="num">{t(big)}</span><span>{t(small)}</span></div>'
     early = f'''<div class="early reveal"><div class="early-copy"><span class="kick">{t(T("Founding member offer","Offre Membre fondateur","Oferta Miembro fundador"))}</span>
 <h3>{t(T("Signed up during early access? You get 50% off for life on Pro or Elite.","Tu t’es inscrit pendant l’accès anticipé ? Tu profites de 50 % de rabais à vie sur Pro ou Elite.","¿Te registraste durante el acceso anticipado? Tienes un 50 % de descuento de por vida en Pro o Elite."))}</h3>

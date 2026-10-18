@@ -142,7 +142,7 @@
     var langAlt = document.querySelector('link[rel="alternate"][hreflang="' + langWant + '"]');
     if(!langSeen && langAlt && langWant !== langPage && ['en','fr','es'].indexOf(langWant) > -1){
       langSug.querySelectorAll('[data-l]').forEach(function(s){ s.hidden = s.getAttribute('data-l') !== langWant; });
-      var langGo = document.getElementById('langsug-go'); langGo.textContent = {fr:'Voir en français →', es:'Ver en español →', en:'View in English →'}[langWant];
+      var langGo = document.getElementById('langsug-go'); langGo.textContent = {fr:'Voir en français →', es:'Ver en español →', en:'View in English →'}[langWant]; langGo.setAttribute('lang', langWant);
       langGo.href = langAlt.getAttribute('href').replace(/^https?:\/\/[^/]+/, '');
       langGo.addEventListener('click', function(){ try{ localStorage.setItem('sweep-lang', langWant); }catch(e){} });
       document.getElementById('langsug-x').addEventListener('click', function(){ try{ localStorage.setItem('sweep-lang', langPage); }catch(e){} langSug.classList.remove('in'); setTimeout(function(){ langSug.hidden = true; }, 350); });
@@ -230,6 +230,12 @@
 
   if(!('IntersectionObserver' in window)){ document.querySelectorAll('.reveal,.final .mark').forEach(function(el){ el.classList.add('in'); }); return; }
 
+  // footer: on a phone its link groups start folded (open on a computer, and when the script doesn't run)
+  var fq = window.matchMedia('(max-width:860px)'), fg = document.querySelectorAll('details.fgrp');
+  var fset = function(){ fg.forEach(function(d){ d.open = !fq.matches; d.querySelector('summary').tabIndex = fq.matches ? 0 : -1; }); };
+  if(fg.length){ fset(); if(fq.addEventListener) fq.addEventListener('change', fset);
+    fg.forEach(function(d){ d.querySelector('summary').addEventListener('click', function(e){ if(!fq.matches) e.preventDefault(); }); }); }
+
   // screenshots fade in when loaded
   document.querySelectorAll('.frame img, .phone img, .pillar .shot img, .fr img').forEach(function(img){
     if(img.complete && img.naturalWidth) img.classList.add('ld');
@@ -237,10 +243,13 @@
   });
 
   // reveal once
+  // what is already on screen when the script runs shows at once (no blink); the rest rises in as it scrolls into view
+  var vh0 = window.innerHeight;
+  document.querySelectorAll('.reveal,.final .mark,.stagger,.head').forEach(function(el){ var r = el.getBoundingClientRect(); if(r.top < vh0 && r.bottom > 0) el.classList.add('in'); });
   document.documentElement.classList.add('io');
   var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {rootMargin:'0px 0px -12% 0px'});
   document.querySelectorAll('.stagger').forEach(function(g){ [].forEach.call(g.children, function(ch,i){ ch.style.setProperty('--i', i); }); });
-  document.querySelectorAll('.reveal,.final .mark,.stagger,.head').forEach(function(el){ io.observe(el); });
+  document.querySelectorAll('.reveal:not(.in),.final .mark:not(.in),.stagger:not(.in),.head:not(.in)').forEach(function(el){ io.observe(el); });
   // failsafe: anything already on screen at the end of the page (or skipped by a fast scroll) is revealed
   var sweepReveal = function(){ var vh = window.innerHeight, end = window.scrollY + vh >= document.documentElement.scrollHeight - 8;
     document.querySelectorAll('.reveal:not(.in),.stagger:not(.in),.head:not(.in),.final .mark:not(.in)').forEach(function(el){

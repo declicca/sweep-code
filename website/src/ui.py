@@ -144,11 +144,12 @@ def band(title, text, cta):
 def state(text):
     return f'<div class="state reveal"><span class="dot" aria-hidden="true"></span><p>{text}</p></div>'
 
+FINAL_T = T("Your edge, finally in one place.", "Ton edge, enfin au même endroit.", "Tu edge, por fin en un solo lugar.")
 def final(lang, t, title=None, note=None, label=None):
     """The site's closing block: one promise, one action. Only /100 keeps its own words (title, note, button)."""
     return (f'<section class="final s-a"><div class="c c-wide"><div class="stage reveal">'
             f'<span class="mark" aria-hidden="true">{ANIM_MARK}</span>'
-            f'<h2>{words(t(title or T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar.")))}</h2>'
+            f'<h2 aria-label="{_label(t(title or FINAL_T))}">{words(t(title or FINAL_T))}</h2>'
             f'<div class="cta-row">{btn(label or t(CREATE_FREE), SIGNUP, lg=True)}</div>'
             f'<p class="reassure">{t(note or T("Free forever · 60 days of Pro · No card","Gratuit pour toujours · 60 jours de Pro · Sans carte","Gratis para siempre · 60 días de Pro · Sin tarjeta"))}</p>'
             f'</div></div></section>')
@@ -158,6 +159,8 @@ def read_next(lang, t, items):
     return related(lang, t, items).replace('<section class="rule related"><div class="wrap">', '<section class="s-t related"><div class="c">', 1)
 
 # ---------------------------------------------------------------- page heads, chapters, older captures
+def _label(s): return _html.escape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s).replace("\u00a0", " ")).strip())
+
 def hero(t, kick, h1, lead, cta="", note=None, visual="", center=False, extra="", kick_in_h1=False):
     """A page's first screen: eyebrow, title, lead, actions, then an optional visual. Keeps the .page-hero hook (phone dock).
     kick_in_h1: the eyebrow is part of the title (it carries the page's keyword), read as « eyebrow: title »."""
@@ -166,8 +169,8 @@ def hero(t, kick, h1, lead, cta="", note=None, visual="", center=False, extra=""
     n = f'<p class="reassure rise d4">{t(note)}</p>' if note else ""
     v = f'<div class="c c-wide hero-visual">{hero_shot(visual)}</div>' if visual else ""
     p = f'<p class="lead rise d3">{t(lead)}</p>' if lead else ""
-    h = f'<h1 class="wu">{words(t(h1))}</h1>'
-    if kick_in_h1 and k: k, h = "", f'<h1 class="wu">{k}<span class="sr">{t(T(": ",". ",". "))}</span>{words(t(h1))}</h1>'
+    h = f'<h1 class="wu" aria-label="{_label(t(h1))}">{words(t(h1))}</h1>'   # read as one sentence, not word by word
+    if kick_in_h1 and k: k, h = "", f'<h1 class="wu" aria-label="{_label(t(kick) + t(T(": ",". ",". ")) + t(h1))}">{k}<span class="sr">{t(T(": ",". ",". "))}</span>{words(t(h1))}</h1>'
     return f'<div class="page-hero{" center" if center else ""}"><div class="c">{k}{h}{p}{c}{n}{extra}</div>{v}</div>'
 
 def hero_shot(visual):

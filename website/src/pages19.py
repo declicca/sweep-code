@@ -715,7 +715,7 @@ def make_firm_vs(a_id, b_id):
                   (T("Daily loss limit", "Limite de perte du jour", "Límite de pérdida diaria"), _dll_of(A, lang, t) + _dll_of(B, lang, t)),
                   (T("Consistency rule", "Règle de consistance", "Regla de consistencia"), _cons_of(A, lang, t) + _cons_of(B, lang, t))]
         glance_html = '<ul class="list">' + "".join(f"<li><b>{t(h)}</b>{colon(lang)}{_by_firm(pairs, lang)}</li>" for h, pairs in glance) + "</ul>"
-        every = lambda g: f'<p class="fine" style="margin-top:12px"><a href="{href(lang, g)}">{t(T("All firms, compared", "Toutes les firmes, comparées", "Todas las firmas, comparadas"))} <span aria-hidden="true">→</span></a></p>'
+        every = lambda g, h: f'<p class="fine" style="margin-top:12px"><a href="{href(lang, g)}">{t(T("All firms, compared", "Toutes les firmes, comparées", "Todas las firmas, comparadas"))}<span class="sr">, {t(h)}</span> <span aria-hidden="true">→</span></a></p>'
         rows = lambda cells: _firm_rows(lang, t, lambda f, p: cells(lang, t, f, p), firms=both)
         topics = [("sizes", T("Account sizes and targets", "Tailles de compte et objectifs", "Tamaños de cuenta y objetivos"), f"<p>{t(SIZES_HOW)}</p>" + sizes_table(lang, t, A) + sizes_table(lang, t, B), GUIDE_SIZES),
                   ("drawdown", T("Drawdown", "Drawdown", "Drawdown"), _table(lang, t, *DD_HEADS, rows(dd_cells)), GUIDE_DD),
@@ -736,7 +736,7 @@ def make_firm_vs(a_id, b_id):
         from pages17 import chiprow
         b_ = (ui.sec(summary, "t", "summary")
               + ui.sec(ui.head(t, None, T("The differences at a glance.", "Les différences en bref.", "Las diferencias de un vistazo.")) + f'<div class="read">{glance_html}</div>', "n", "glance")
-              + "".join(ui.sec(ui.head(t, None, h) + body + every(g), "t", k) for k, h, body, g in topics)
+              + "".join(ui.sec(ui.head(t, None, h) + body + every(g, h), "t", k) for k, h, body, g in topics)
               + ui.sec(f'<p class="fine vs-note">{_checked_note(lang, t)}</p>' + band, "n", "note")
               + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs)
                        + chiprow(lang, t, T("Firm pages", "Pages des firmes", "Páginas de las firmas"), firms_chips, 32)

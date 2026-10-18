@@ -95,6 +95,29 @@ def _text(body):
     """A page's visible text, without tags, scripts or styles: what its sitemap date follows."""
     return _re.sub(r"\s+", " ", _re.sub(r"<[^>]+>", " ", _re.sub(r"<script\b.*?</script>|<style\b.*?</style>", " ", body, flags=_re.S))).strip()
 MAIN = {p: hashlib.sha256() for p in PAGES}   # each page's main content, in the 3 languages: its sitemap date changes only when this does
+import html as _html_b
+def heading_levels(body):
+    """No jump from the h1 to an h3: cards placed before the page's first h2 get h2 titles that keep the h3 look."""
+    i = body.find("<h2")
+    head, tail = (body, "") if i < 0 else (body[:i], body[i:])
+    def h2(m):
+        a = m.group(1) or ""
+        a = a.replace('class="', 'class="h3 ', 1) if 'class="' in a else ' class="h3"' + a
+        return f"<h2{a}>{m.group(2)}</h2>"
+    return _re.sub(r"<h3(\s[^>]*)?>(.*?)</h3>", h2, head, flags=_re.S) + tail
+def table_names(body):
+    """A table is named after the heading before it, and the row headers of key/value tables say they are."""
+    out, last = [], 0
+    for m in _re.finditer(r"<table\b[^>]*>", body):
+        tag = m.group(0)
+        if "aria-label" not in tag and "<caption" not in body[m.end():m.end() + 120]:
+            hs = list(_re.finditer(r"<h([1-4])\b[^>]*>(.*?)</h\1>", body[:m.start()], _re.S))
+            name = _re.sub(r"\s+", " ", _re.sub(r"<[^>]+>", " ", hs[-1].group(2))).strip() if hs else ""
+            if name: tag = tag[:-1] + f' aria-label="{_html_b.escape(name)}">'
+        out.append(body[last:m.start()] + tag); last = m.end()
+    body = "".join(out) + body[last:]
+    return _re.sub(r"<tbody\b[^>]*>.*?</tbody>", lambda m: _re.sub(r"<tr([^>]*)><th>", r'<tr\1><th scope="row">', m.group(0)), body, flags=_re.S)
+
 for lang in LANGS:
     t = lambda d, L=lang: d[L]
     out = DIST if lang == "en" else os.path.join(DIST, lang); os.makedirs(out, exist_ok=True)
@@ -105,6 +128,7 @@ for lang in LANGS:
         body = add_related(lang, t, page, body)
         body = add_xlinks(lang, t, page, body)
         body = add_links(lang, page, body)
+        body = table_names(heading_levels(body))
         body = nbsp(lang, body)
         MAIN[page].update(_text(body).encode("utf-8"))   # the visible text: a markup or style change keeps the page's date
         open(dest, "w").write(shell(lang, page, title, desc, body, t, ld))
