@@ -4194,6 +4194,15 @@ window.SweepMO = window.SweepMO || class {
       const sp = document.createElement('span'); sp.className = 'nav-side-l'; sp.setAttribute('data-noi18n', ''); sp.textContent = txt;
       const svg = b.querySelector('svg'); if (svg) svg.after(sp); else b.append(sp);
     });
+    // Sweep AI sits here on a computer, above search (audit of 18 Oct.: floating, it covered the cards on the right)
+    const se = side.querySelector('.nav-search');
+    if (se && !side.querySelector('.nav-ask-side')) {
+      const nm = (typeof AL === 'function' && AL().name) || 'Sweep AI';
+      const b = document.createElement('button'); b.type = 'button'; b.className = se.className.replace('nav-search', 'nav-ask-side'); b.setAttribute('aria-label', nm); b.setAttribute('data-noi18n', '');
+      b.innerHTML = `${typeof ASK_MARK === 'string' ? ASK_MARK : ''}<span class="nav-side-l">${nm.replace(/[<>&]/g, '')}</span>`;
+      b.addEventListener('click', () => { if (typeof askToggle === 'function') askToggle(true); });
+      se.before(b);
+    }
   }
   new window.SweepMO(() => { try { labels(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 })();
@@ -5319,6 +5328,10 @@ document.addEventListener('click', (e) => {
     if (addOne(b.dataset.srAdd)) document.dispatchEvent(new CustomEvent('sweep:qs'));
   });
   window.SweepQs = { order, criteria, label, addOne, addLink, rulesHtml, stats, T };
+  // the checklist questions of Settings grow with their text (where field-sizing is not there yet)
+  const fit = (t) => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; };
+  document.addEventListener('input', (e) => { if (e.target.matches && e.target.matches('textarea.q-ta')) fit(e.target); });
+  new window.SweepMO(() => { document.querySelectorAll('#main textarea.q-ta:not([data-fit])').forEach((t) => { t.setAttribute('data-fit', ''); requestAnimationFrame(() => fit(t)); }); }).observe(document.body, { childList: true, subtree: true });
 })();
 
 /* D16 · « This trade looks like the one at 10:32. Add it anyway? » on the manual form (brief 02, part 1): the same rule as the

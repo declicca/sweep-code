@@ -669,8 +669,14 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 /* Ask Sweep: always at hand, out of the way of forms and sheets */
 body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-layer) .ask-fab,body:has(#gOb) .ask-fab{opacity:0!important;pointer-events:none!important;transform:scale(.9) translateY(8px)}
 @media (min-width:861px){.ask-fab{right:24px;bottom:24px}}
+/* computer: Sweep AI is in the left menu, above search; nothing floats over the cards any more (audit of 18 Oct.) */
+@media (min-width:861px){html body .ask-fab{display:none!important}}
+body:not(.ask-on) .nav-ask-side{display:none!important}
+@media (max-width:860px){.nav-ask-side{display:none!important}}
+.nav-ask-side svg{width:20px;height:20px;flex:none}
+.side .foot .nav-ask-side svg{color:var(--pos)}   /* the Sweep AI mark in blue, like the floating button */
 @media (max-width:860px){.ask-fab{right:16px;bottom:calc(96px + env(safe-area-inset-bottom,0))}}
-@media (max-width:860px){html body.ux-fab-away .ask-fab{opacity:0!important;pointer-events:none!important;transform:translateX(calc(100% + 24px))!important}}   /* phone: steps aside while reading down a page, back when scrolling up (R23) */
+@media (max-width:860px){html body.ux-fab-away .ask-fab,html body.ux-fab-cover .ask-fab{opacity:0!important;pointer-events:none!important;transform:translateX(calc(100% + 24px))!important}}   /* phone: steps aside while reading down a page, back when scrolling up (R23) */
 
 /* Day / Week and Payouts read as one section (computer and phone) */
 .nav-dash .d-col > .d-perf{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
@@ -1218,10 +1224,10 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 @media (max-width:860px){.nav-topacts{gap:6px}.nav-topacts .nav-imp-b{height:34px;padding:0 9px!important}}
 /* left menu (computer): every icon on the same axis when closed; search and notifications labelled when open */
 @media (min-width:861px){
-  .side .nav-prog,.side .foot .nav-search,.side .foot .nt-bell{display:flex;align-items:center;gap:12px;width:100%;min-height:40px;padding:8px 12px;border-radius:10px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:450;text-align:left;cursor:pointer;position:relative;transition:background .12s var(--ease-ios),color .12s var(--ease-ios)}
-  .side .nav-prog:hover,.side .foot .nav-search:hover,.side .foot .nt-bell:hover{background:var(--panel2);color:var(--text)}
-  .side .nav-prog svg,.side .foot .nav-search svg,.side .foot .nt-bell svg{width:18px;height:18px;flex-shrink:0}
-  .side:not(.open) .nav-prog,.side:not(.open) .foot .nav-search,.side:not(.open) .foot .nt-bell{justify-content:center;padding:8px 0;gap:0}
+  .side .nav-prog,.side .foot .nav-search,.side .foot .nt-bell,.side .foot .nav-ask-side{display:flex;align-items:center;gap:12px;width:100%;min-height:40px;padding:8px 12px;border-radius:10px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:450;text-align:left;cursor:pointer;position:relative;transition:background .12s var(--ease-ios),color .12s var(--ease-ios)}
+  .side .nav-prog:hover,.side .foot .nav-search:hover,.side .foot .nt-bell:hover,.side .foot .nav-ask-side:hover{background:var(--panel2);color:var(--text)}
+  .side .nav-prog svg,.side .foot .nav-search svg,.side .foot .nt-bell svg,.side .foot .nav-ask-side svg{width:18px;height:18px;flex-shrink:0}
+  .side:not(.open) .nav-prog,.side:not(.open) .foot .nav-search,.side:not(.open) .foot .nt-bell,.side:not(.open) .foot .nav-ask-side{justify-content:center;padding:8px 0;gap:0}
   .nav-side-l{white-space:nowrap;opacity:0;max-width:0;overflow:hidden;transition:opacity .15s var(--ease-ios)}
   .side.open .nav-side-l{opacity:1;max-width:200px}
   .side:not(.open) .nav-prog > span{display:none}
@@ -2021,6 +2027,22 @@ html body .nav-tr-copy{display:inline-grid!important;place-items:center;min-widt
 html body #main #gIns{display:none!important}
 /* small phones (≤ 400 px): the « process vs outcome » grid of Stats fits the screen (cells were cut off at 360 px) */
 @media (max-width:400px){html body #main .quad{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);gap:4px}html body #main .quad>div{min-width:0;padding:10px 8px}html body #main .quad .cell b{font-size:16px;overflow-wrap:anywhere}html body #main .quad .ax{font-size:11px;min-width:0;overflow-wrap:anywhere}}
+/* Settings (audit of 18 Oct.): a checklist question on as many lines as it needs (an input cut long ones); the language on 2 × 2 on phones (« Españ ») */
+html body #main textarea.q-ta{width:100%;min-height:38px;resize:none;overflow:hidden;line-height:1.4;field-sizing:content}
+@media (max-width:600px){html body #main .seg:has(> [data-act="lang"]){display:grid;grid-template-columns:1fr 1fr;border-radius:18px;flex-basis:100%;width:100%}html body #main .seg:has(> [data-act="lang"]) > button{min-width:0}html body #main span:has(+ .seg > [data-act="lang"]){flex-basis:100%;margin-left:0!important;margin-top:6px}}   /* « Language » above its choices, like « Theme » */
+/* small targets on phones (audit of 18 Oct.): a 44 px touch area, the look unchanged (the avatar's ::after is its dot) */
+@media (max-width:860px) and (pointer:coarse){
+  html body .side .who,html body #main .pz-paid,html body #main .sh-link,html body #main .rf-terms,html body #main .legal a,html body .nav-am .nav-am-dir .seg button,html body #main a.link.back{position:relative}
+  html body .side .who::before,html body #main .pz-paid::before,html body #main .sh-link::before,html body #main .rf-terms::before,html body #main .legal a::before,html body .nav-am .nav-am-dir .seg button::before,html body #main a.link.back::before{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:44px;transform:translateY(-50%)}
+}
+/* Stats › Trading stats (phone): the two columns never wider than the screen (a long « Short 50 % +16 021,40 $ vs … » pushed the right one 5 px out) */
+@media (max-width:600px){html body #main .g-ins .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}html body #main .g-ins .tiles > .it{min-width:0}html body #main .g-ins .tiles > .it small{overflow-wrap:break-word}}
+/* Stats › « Net P&L without them »: one font in the sentence (the « vs … actual » part was in Geist Mono) */
+html body #main .statline .faint{font-family:inherit}
+/* « Rules followed vs broken » on a phone (audit of 18 Oct.): the 3 columns fit (it was 416 px wide, its 2nd column cut) */
+@media (max-width:600px){html body #main table.tbl.rvb{width:100%;table-layout:fixed}html body #main table.tbl.rvb th,html body #main table.tbl.rvb td{padding-left:8px;padding-right:8px;font-size:13px;white-space:normal;overflow-wrap:normal}html body #main table.tbl.rvb th:first-child,html body #main table.tbl.rvb td:first-child{width:30%}html body #main table.tbl.rvb td.num{white-space:nowrap;letter-spacing:-.03em}}
+/* « Process vs outcome » on a phone (audit of 18 Oct.): an amount on one line (« +72 78 / 1,60 $ » before), the labels on the left wrap instead */
+@media (max-width:600px){html body #main .quad{grid-template-columns:minmax(0,72px) minmax(0,1fr) minmax(0,1fr)}html body #main .quad>div:not(.ax):not(:first-child){padding:10px 8px}html body #main .quad .cell b{font-size:15px!important;line-height:1.3;white-space:nowrap;overflow-wrap:normal;letter-spacing:-.03em}html body #main .quad .cell span{font-size:11.5px}html body #main .quad > div:nth-child(3n+1){font-size:12px;overflow-wrap:break-word;hyphens:auto}}
 /* an exceeded account / daily limit reached: a clear gold label, everywhere (Today, Accounts) */
 .nav-acc-flag,.acc-flag{display:inline-block;font-size:11px;font-weight:700;line-height:1;padding:4px 8px;border-radius:99px;color:var(--neg,#d4a017);background:rgba(var(--neg-rgb,212,160,23),.14);box-shadow:inset 0 0 0 1px rgba(var(--neg-rgb,212,160,23),.45);white-space:nowrap}
 .nav-acc .nav-acc-flag{margin-top:4px;justify-self:start}

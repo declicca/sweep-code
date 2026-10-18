@@ -1373,7 +1373,27 @@
       if (Math.abs(y - lastY) > 8 || y < 120) lastY = y;
     });
   }, { passive: true });
-  addEventListener('hashchange', () => { document.body.classList.remove('ux-fab-away'); lastY = 0; });
+  addEventListener('hashchange', () => { document.body.classList.remove('ux-fab-away'); lastY = 0; setTimeout(cover, 600); });
+  // … and at rest, when it would sit on a button, a badge or a line of text (audit of 18 Oct.: « Public profile » in Settings,
+  // « Paid » in My money): a card's background under it is fine
+  let rest = null, cvT = 0;
+  function cover() {
+    const fab = document.getElementById('askFab'), body = document.body;
+    if (!fab || !matchMedia('(max-width:860px)').matches || !body.classList.contains('ask-on')) { body.classList.remove('ux-fab-cover'); return; }
+    if (!body.classList.contains('ux-fab-away') && !body.classList.contains('ux-fab-cover')) { const r = fab.getBoundingClientRect(); if (r.width) rest = r; }
+    if (!rest) return;
+    const pts = [[rest.left + rest.width / 2, rest.top + rest.height / 2], [rest.left + 8, rest.top + rest.height / 2], [rest.left + rest.width / 2, rest.top + 6], [rest.left + rest.width / 2, rest.bottom - 6]];
+    const hit = pts.some(([x, y]) => {
+      const e = document.elementsFromPoint(x, y).find((el) => !fab.contains(el) && el !== document.documentElement && el !== document.body); if (!e || e.closest('.bottomnav')) return false;
+      if (e.closest('button, a[href], input, select, textarea, label, summary, [role=button], .badge, .chip, .pill')) return true;
+      return e.children.length === 0 && (e.textContent || '').trim() !== '';
+    });
+    body.classList.toggle('ux-fab-cover', hit);
+  }
+  addEventListener('scroll', () => { clearTimeout(cvT); cvT = setTimeout(cover, 180); }, { passive: true });
+  addEventListener('resize', () => { clearTimeout(cvT); cvT = setTimeout(cover, 180); });
+  if (typeof render === 'function') { const r0 = render; render = function () { const o = r0.apply(this, arguments); clearTimeout(cvT); cvT = setTimeout(cover, 500); return o; }; }
+  setTimeout(cover, 1500);
 })();
 
 /* ───────────── decimal fields accept a comma (French/Spanish keyboards): « 30182,75 » becomes « 30182.75 » as you type ─────────────
