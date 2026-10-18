@@ -64,7 +64,7 @@ async def main():
         for (let i = 0; i < 300; i++) { const o = 21000 + Math.sin(i / 9) * 20; bars.push([from + i * 60, o, o + 3, o - 3, o + 1]); }
         return Promise.resolve(new Response(JSON.stringify({ status: 'ok', tf: '1m', bars, tick_size: 0.25, decimals: 2, source: 'test' }), { headers: { 'Content-Type': 'application/json' } })); }
       return f(u, o); }; }""")
-    await pg.evaluate("S.settings.add_mode_pref = 'manual'; S.settings.add_mode = 'manual'; openTicket(null, { date: '2026-10-07' })"); await pg.wait_for_timeout(2000)
+    await pg.evaluate("openTicket(null, { date: '2026-10-07', manual: true })"); await pg.wait_for_timeout(2000)
     async def setv(k, v, ev='change'):
       await pg.evaluate(f"(() => {{ const i = document.querySelector('#tkSlide [data-tk=\"{k}\"]'); if (!i) return; i.value = '{v}'; i.dispatchEvent(new Event('input', {{ bubbles: true }})); i.dispatchEvent(new Event('{ev}', {{ bubbles: true }})); }})()")
     await setv('inst', 'NQ'); await setv('date', '2026-10-07'); await setv('entryTime', '10:00'); await pg.wait_for_timeout(3000)

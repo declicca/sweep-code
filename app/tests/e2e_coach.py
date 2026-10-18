@@ -54,6 +54,10 @@ B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
 DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
 fails = 0
+def shot(pg):   # « New trade » shows its fields once a screenshot is there (18 Oct.): the test one, read as no table
+    pg.route('**/api/ai/import', lambda r: r.fulfill(status=200, content_type='application/json', body='{"trades": []}'))
+    pg.locator('.nav-am.open input[data-am-file]').first.set_input_files('tests/fixture-shot.png')
+    pg.wait_for_selector('.nav-am.open .nav-am-grid', timeout=8000); pg.wait_for_timeout(300)
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
@@ -230,7 +234,7 @@ def live(p, lang, phone):   # brief 03 step 3: during the session
   pg.evaluate("openTicket(null, { manual: true })"); pg.wait_for_selector('#tkSlide.open #tkAlerts', timeout=8000); pg.wait_for_timeout(600)
   man = pg.evaluate(TXT, '#tkSlide .co-before')
   pg.evaluate("closeTicket()"); pg.wait_for_timeout(500)
-  pg.evaluate("SweepAddMode.open()"); pg.wait_for_selector('.nav-am-shot.open', timeout=8000); pg.wait_for_timeout(600)
+  pg.evaluate("SweepAddMode.open()"); pg.wait_for_selector('.nav-am-shot.open', timeout=8000); pg.wait_for_timeout(600); shot(pg)
   sh = pg.evaluate(TXT, '.nav-am-shot .co-before')
   if phone: pg.screenshot(path=f'/tmp/co_{tag}_shot_before.png')
   pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
@@ -309,7 +313,7 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   ok(e[0] in inn['edge'] and inn['blue'] and inn['first'], f'{tag} M an ORB at 9:45: « {e[0]}… », in blue, first ({inn["edge"][:110]})')
   out = pg.evaluate("([d, f]) => (new Function('return ' + f))()(SweepCoach.before({ form: 'shot', account: 'ca', date: d, qty: 1, time: '14:00', setup: '', dir: 'long', inst: 'NQ' }))", [day, txt])
   ok(e[1] in out['edge'] and not out['blue'] and e[0][:8] not in out['edge'], f'{tag} M at 14:00 without a setup: neutral « {e[1]}… » ({out["edge"][:110]})')
-  pg.evaluate("openTicket(null)"); pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); pg.wait_for_timeout(500)
+  pg.evaluate("openTicket(null)"); pg.wait_for_selector('.nav-am.open', timeout=8000); shot(pg); pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); pg.wait_for_timeout(500)
   pg.locator('.nav-am [data-am-seg="dir"][data-v="long"]').click(); pg.wait_for_timeout(300)
   b0 = pg.evaluate("!!document.querySelector('.nav-am .co-edge.in')")
   pg.locator('.nav-am [data-sp="Opening range breakout"]').click(); pg.wait_for_timeout(300)
@@ -386,7 +390,7 @@ def fewer(p, lang, phone):   # brief 03 step 5
   ok(sv == ['y', 1, '10 min'], f'{tag} J the answers in the same fields ({sv})')
   pg.locator('#main details.co-full > summary').click(); pg.wait_for_timeout(300); pg.locator('#main #rs-chk [data-act=set]').first.click(); pg.wait_for_timeout(600)
   ok(pg.evaluate("document.querySelector('#main details.co-full').open"), f'{tag} J the full review stays open after a tap in it')
-  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(500); pg.evaluate("SweepAddMode.open()"); pg.wait_for_selector('.nav-am-shot.open', timeout=8000); pg.wait_for_timeout(400)
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(500); pg.evaluate("SweepAddMode.open()"); pg.wait_for_selector('.nav-am-shot.open', timeout=8000); pg.wait_for_timeout(400); shot(pg)
   q1 = pg.evaluate("[document.querySelectorAll('.nav-am-shot .nav-am-q').length, !!document.querySelector('.nav-am-shot .nav-am-scores')]")
   pg.keyboard.press('Escape'); pg.wait_for_timeout(400)
   pg.evaluate("openTicket(null, { manual: true })"); pg.wait_for_selector('#tkSlide.open', timeout=8000); pg.evaluate("showStep2('f1')"); pg.wait_for_timeout(400)

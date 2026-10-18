@@ -18,6 +18,10 @@ B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 AC = {'fr': 'acquise', 'en': 'acquired'}
 W = {'fr': {'yes': 'Oui', 'no': 'Non', 'na': 'N/A', 'more': 'Voir plus'}, 'en': {'yes': 'Yes', 'no': 'No', 'na': 'N/A', 'more': 'See more'}}
 fails = 0
+async def shot(pg):   # « New trade » shows its fields once a screenshot is there (18 Oct.): the test one, read as no table
+    await pg.route('**/api/ai/import', lambda r: r.fulfill(status=200, content_type='application/json', body='{"trades": []}'))
+    await pg.locator('.nav-am.open input[data-am-file]').first.set_input_files('tests/fixture-shot.png')
+    await pg.wait_for_selector('.nav-am.open .nav-am-grid', timeout=8000); await pg.wait_for_timeout(300)
 def ok(c, what):
     global fails
     print(('ok   ' if c else 'FAIL ') + what); fails += 0 if c else 1
@@ -86,7 +90,7 @@ async def main():
       ok(t7 == ['Opening range breakout', 'y'], f'{tag} T7 the criterion answered goes into discipline, with the setup ({t7})')
       await pg.evaluate("document.querySelector('#tkSlide [data-act=\"s2-close\"]') && document.querySelector('#tkSlide [data-act=\"s2-close\"]').click()"); await pg.wait_for_timeout(500)
       await pg.evaluate("editDoc('settings','settings', d => { d.add_mode_pref = 'shot'; })"); await pg.wait_for_timeout(400)
-      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); await pg.wait_for_timeout(400)
+      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await shot(pg); await pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); await pg.wait_for_timeout(400)
       await pg.locator('.nav-am [data-sp="Opening range breakout"]').click(); await pg.wait_for_timeout(400)
       v4 = await pg.evaluate("[...document.querySelectorAll('.nav-am .nav-am-q > span')].map(s => s.textContent)")
       ok(v4 == ['Range break'], f'{tag} T7 the quick sheet: the same criterion in place of the questions ({v4})')

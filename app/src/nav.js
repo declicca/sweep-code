@@ -1155,7 +1155,7 @@ window.SweepMO = window.SweepMO || class {
     stuckRaf = 0;
     document.querySelectorAll('#main .nav-seg, #main .nav-tnav').forEach((b) => {
       const top = parseFloat(getComputedStyle(b).top) || 0;
-      b.classList.toggle('is-stuck', scrollY > 0 && Math.abs(b.getBoundingClientRect().top - top) < 1.5);
+      b.classList.toggle('is-stuck', scrollY > 0 && Math.abs(b.getBoundingClientRect().top - top) < 3);   // (iOS rounds the sticky position: 1.5 px missed it)
     });
   }
   addEventListener('scroll', () => { if (!stuckRaf) stuckRaf = requestAnimationFrame(markStuck); }, { passive: true });
@@ -2208,8 +2208,6 @@ window.SweepMO = window.SweepMO || class {
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
   const emoLabel = (k) => { try { const v = window.SweepGame && SweepGame.t('emo.' + k); return v && v !== 'emo.' + k ? v : k; } catch (e) { return k; } };
-  const mode = () => (typeof S !== 'undefined' && S.settings && S.settings.add_mode_pref) || 'shot';   // screenshot first, unless the trader chose « by hand » in Settings
-  const setMode = (v) => { if (typeof editDoc === 'function') editDoc('settings', 'settings', (r) => { r.add_mode = v; r.add_mode_pref = v; }); };
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
   let origTicket = null;
 
@@ -2263,15 +2261,17 @@ window.SweepMO = window.SweepMO || class {
     const QO = window.SweepQs ? SweepQs.order(SH.setup) : { list: ((S.settings && S.settings.questions) || []).filter((q) => q.active), shown: 3 };   // edge T7: the setup's criteria, the question that separates, the acquired ones
     const qs = QO.list, qn = QO.shown, qLab = (q) => (window.SweepQs ? SweepQs.label(q) : esc2(q.text));
     const emos = typeof EMO !== 'undefined' ? EMO : ['Calm', 'Confident', 'Patient', 'Focused', 'FOMO', 'Fearful', 'Frustrated', 'Greedy', 'Hesitant', 'Impulsive'];
-    const pnl = autoPnl();
+    const pnl = autoPnl(), has = !!(SH.batch.length || SH.src);   // the screenshot is there: the rest of the sheet shows
+    el.closest('.nav-am').classList.toggle('nav-am-min', !has);   // before it: a short sheet, its height its content (phone)
     const fld = (k, label, attrs = '') => `<label class="tk-f"><span>${label}</span><div class="tk-in"><input data-am-f="${k}" value="${esc2(SH.f[k] ?? '')}" ${attrs}></div></label>`;
     const seg = (key, vals, cur) => `<div class="seg yn">${vals.map(([v, l]) => `<button type="button" class="${String(cur) === String(v) ? 'on' : ''}" data-am-seg="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
     // same header as the manual form: title, subtitle, the other way, « Cancel » on the right
-    el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${t('sub')}</span><button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button></div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
+    el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${t('sub')}</span>${has ? `<button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button>` : ''}</div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
       ${SH.batch.length ? batchTop() : `<label class="nav-am-drop ${SH.src ? 'has' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t(window.matchMedia && matchMedia('(pointer: coarse)').matches ? 'dropT' : 'drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
       ${SH.status ? `<p class="nav-am-st ${SH.busy ? 'busy' : ''}">${SH.status}</p>` : ''}`}
+      ${has ? '' : `<div class="nav-am-alt"><button type="button" class="btn" data-am="to-manual">${t('byHand')}</button><a class="btn" href="#import" data-am-imp>${t('impFile')}</a></div>`}
+      ${/* nothing else until the screenshot is there (18 Oct., Mateo: a minimal first screen) */ ''}${has ? `
       <div class="nav-am-co">${coachBefore()}</div>
-      ${SH.batch.length || SH.src ? '' : `<div class="nav-am-alt"><button type="button" class="btn" data-am="to-manual">${t('byHand')}</button><a class="btn" href="#import" data-am-imp>${t('impFile')}</a></div>`}
       <div class="nav-am-grid">
         <div class="tk-f nav-am-wide"><span>${t('acc')}</span>${pickBox('account', accs.map((a) => [a.id, typeof acctLabel === 'function' ? acctLabel(a.id) : a.name]), SH.f.account)}</div>
         ${accs.length > 1 ? `<div class="tk-copies nav-am-wide nav-am-copy"><span class="help">${t('alsoS')}</span>${accs.filter((a) => a.id !== SH.f.account).map((a) => `<button type="button" class="chip ${SH.copy.has(a.id) ? 'on' : ''}" data-am-copy="${esc2(a.id)}">${esc2(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</button>`).join('')}</div>` : ''}
@@ -2302,7 +2302,7 @@ window.SweepMO = window.SweepMO || class {
         })()}</div>
         ${SH.allEmo || SH.conf || SH.exec ? `<div class="nav-am-scores"><div><span>${t('conf')}</span>${seg('conf', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.conf || '')}</div><div><span>${t('exec')}</span>${seg('exec', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.exec || '')}</div></div>` : ''}</section>
       <p class="err nav-am-err"></p>
-      <button type="button" class="btn primary nav-am-save" data-am="save" ${SH.busy ? 'disabled' : ''}>${t('save')}</button>`;
+      <button type="button" class="btn primary nav-am-save" data-am="save" ${SH.busy ? 'disabled' : ''}>${t('save')}</button>` : ''}`;
   }
   function pickBox(k, opts, cur) {
     const lab = (opts.find((o) => o[0] === cur) || opts[0] || ['', ''])[1];
@@ -2681,9 +2681,7 @@ window.SweepMO = window.SweepMO || class {
         setTimeout(() => { const f = document.querySelector('#main .onb form[data-form="account"]'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400);
         return;
       }
-      const m = mode();
-      if (!m) { go(document.body.classList.contains('ai-on') ? 'shot' : 'manual', opts); return; }   // one entry screen, no question
-      go(m, opts);
+      go('shot', opts);   // always the screenshot first, never asked (18 Oct., Mateo); « Enter by hand » and « Import CSV » are on it
     };
     w.__mode = true; window.openTicket = w;
   })(0);
@@ -2701,17 +2699,8 @@ window.SweepMO = window.SweepMO || class {
     box.querySelector('[data-tk-alt=imp]').addEventListener('click', () => { if (typeof closeTicket === 'function') closeTicket(); setTimeout(() => { location.hash = '#import'; }, 250); });
   }).observe(document.body, { childList: true, subtree: true });
 
-  /* Settings: the default way */
-  function settingsRow() {
-    if (!/^#settings/.test(location.hash || '')) return;
-    const main = document.getElementById('main'); if (!main) return;
-    const m = mode() || 'manual';
-    const html = `<div class="nav-am-set" data-noi18n><div><b>${t('set')}</b><small class="muted">${t('setS')}</small></div><div class="seg"><button type="button" class="${m === 'shot' ? 'on' : ''}" data-am-set="shot">${t('shot')}</button><button type="button" class="${m === 'manual' ? 'on' : ''}" data-am-set="manual">${t('man')}</button></div></div>`;
-    let row = main.querySelector('.nav-am-set');
-    if (!row) { const first = main.querySelector('.surface'); if (!first) return; first.insertAdjacentHTML('beforeend', html); return; }
-    if (row.outerHTML !== html.replace(/^\s+/, '')) row.outerHTML = html;
-  }
-  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-am-set]'); if (!b) return; setMode(b.dataset.amSet); setTimeout(() => { try { settingsRow(); } catch (x) { /* never blocks */ } }, 60); });
+  /* Settings: no « Adding a trade » choice any more (18 Oct., Mateo: always the screenshot first, never asked) */
+  function settingsRow() { const r = document.querySelector('#main .nav-am-set'); if (r) r.remove(); }
   const appRender = window.render;
   if (typeof appRender === 'function' && !appRender.__am) {
     const w = function () { const out = appRender.apply(this, arguments); try { settingsRow(); } catch (e) { /* never blocks */ } return out; };

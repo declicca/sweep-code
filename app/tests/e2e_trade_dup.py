@@ -17,6 +17,10 @@ D = '2026-10-08'
 W = {'fr': ('Ce trade ressemble à celui de 10 h 32. L’ajouter quand même ?', 'Ajouter quand même'), 'en': ('This trade looks like the one at 10:32. Add it anyway?', 'Add anyway')}
 DAY = {'fr': 'Ce trade ressemble à un trade déjà enregistré ce jour-là.', 'en': 'This trade looks like one already saved that day.'}
 fails = 0
+async def shot(pg):   # « New trade » shows its fields once a screenshot is there (18 Oct.): the test one, read as no table
+    await pg.route('**/api/ai/import', lambda r: r.fulfill(status=200, content_type='application/json', body='{"trades": []}'))
+    await pg.locator('.nav-am.open input[data-am-file]').first.set_input_files('tests/fixture-shot.png')
+    await pg.wait_for_selector('.nav-am.open .nav-am-grid', timeout=8000); await pg.wait_for_timeout(300)
 def ok(c, what):
     global fails
     print(('ok   ' if c else 'FAIL ') + what); fails += 0 if c else 1
@@ -67,7 +71,7 @@ async def main():
       ok(await n() == c0 + 1, f'{tag} same minute, another entry price: another trade, saved at once')
       await gone()
       # the single screenshot form, filled by hand
-      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(500)
+      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(500); await shot(pg)
       if await pg.locator('.nav-am select[data-am-f="account"]').count(): await pg.select_option('.nav-am select[data-am-f="account"]', 'td-a')   # one account: chosen already
       if await pg.locator('.nav-am select[data-am-f="inst"]').count(): await pg.select_option('.nav-am select[data-am-f="inst"]', 'NQ')
       # the fields show once a screenshot is read: set them the way typing does (an input event)
@@ -81,7 +85,7 @@ async def main():
       ok(await n() == c0 + 1, f'{tag} « {btn} » on the screenshot form: saved')
       # the quick sheet: the net P&L and the side only
       async def quick(net, side='short'):
-        await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(400)
+        await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(400); await shot(pg)
         await pg.locator('.nav-am input[data-am-f="net"]').fill(net)
         await pg.locator(f'.nav-am [data-am-seg="dir"][data-v="{side}"]').click(); await pg.wait_for_timeout(200)
         c0 = await n(); await pg.locator('.nav-am [data-am="save"]').click(); await pg.wait_for_timeout(1300)

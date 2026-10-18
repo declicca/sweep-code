@@ -16,6 +16,10 @@ from playwright.sync_api import sync_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
 fails = 0
+def shot(pg):   # « New trade » shows its fields once a screenshot is there (18 Oct.): the test one, read as no table
+    pg.route('**/api/ai/import', lambda r: r.fulfill(status=200, content_type='application/json', body='{"trades": []}'))
+    pg.locator('.nav-am.open input[data-am-file]').first.set_input_files('tests/fixture-shot.png')
+    pg.wait_for_selector('.nav-am.open .nav-am-grid', timeout=8000); pg.wait_for_timeout(300)
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
@@ -67,6 +71,7 @@ with sync_playwright() as p:
     pg.evaluate("openTicket(null)"); pg.wait_for_selector('.nav-am.open', timeout=8000); pg.wait_for_timeout(500)
     drop = pg.evaluate("(document.querySelector('.nav-am .nav-am-drop b') || {}).textContent || ''")
     ok(drop == x['drop'], f'{tag} R16 the screenshot sheet: « {drop} »')
+    shot(pg)
     # R23: « Check the trade » open, the Symbol list and the date stay inside the card
     pg.evaluate("document.querySelectorAll('.nav-am.open details.nav-am-more-d').forEach((d) => d.open = true)"); pg.wait_for_timeout(400)
     fit = pg.evaluate("(() => { const d = document.querySelector('.nav-am.open .nav-am-more-d').getBoundingClientRect(), b = document.querySelector('.nav-am.open .nav-am-more-d .nav-am-selb').getBoundingClientRect(), i = document.querySelector('.nav-am.open .nav-am-more-d input[type=date]').getBoundingClientRect(); return [Math.round(d.right - b.right), Math.round(d.right - i.right)] })()")

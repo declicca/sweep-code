@@ -24,6 +24,10 @@ SPEC = {'NQ': (.25, 5.00), 'MNQ': (.25, .50), 'ES': (.25, 12.50), 'MES': (.25, 1
 PRICE = {'NQ': 21000, 'MNQ': 21000, 'ES': 5800, 'MES': 5800, 'YM': 42000, 'MYM': 42000, 'RTY': 2200, 'M2K': 2200, 'CL': 72.5, 'MCL': 72.5, 'GC': 2650, 'MGC': 2650, '6E': 1.085, 'M6E': 1.085,
          'ZN': 110.5, 'ZB': 118, 'SI': 31.5, 'SIL': 31.5, 'NG': 2.75, 'HG': 4.3, 'MBT': 62000, 'MET': 2500}
 fails = 0
+async def shot(pg):   # « New trade » shows its fields once a screenshot is there (18 Oct.): the test one, read as no table
+    await pg.route('**/api/ai/import', lambda r: r.fulfill(status=200, content_type='application/json', body='{"trades": []}'))
+    await pg.locator('.nav-am.open input[data-am-file]').first.set_input_files('tests/fixture-shot.png')
+    await pg.wait_for_selector('.nav-am.open .nav-am-grid', timeout=8000); await pg.wait_for_timeout(300)
 def ok(c, what):
     global fails
     print(('ok   ' if c else 'FAIL ') + what); fails += 0 if c else 1
@@ -86,7 +90,7 @@ async def main():
       # the quick sheet: only the net P&L and the side
       await pg.evaluate("() => { editDoc('settings','settings', d => { d.add_mode_pref = 'shot'; }); const D = todayStr(); put('journals', Object.assign({}, getDoc('journals', D) || {}, { id: D, pre: { bias: 'bearish', max_loss: '1000', setups: ['Opening range breakout'], saved_at: Math.floor(Date.now() / 1000) } })); }")
       await pg.wait_for_timeout(600)
-      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(500)
+      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(500); await shot(pg)
       side = await pg.evaluate("(()=>{const n=document.querySelector('.nav-am-net input'), d=document.querySelector('.nav-am .nav-am-dir .seg'); if(!n||!d) return null; const a=n.getBoundingClientRect(), b=d.getBoundingClientRect(); return {open: !d.closest('details') || d.closest('details').open, row: Math.abs(a.bottom-b.bottom)<8 && b.left>a.right, on: d.querySelectorAll('button.on').length}})()")
       ok(side and side['open'] and side['row'] and side['on'] == 0, f'{tag} quick sheet: « Long / Short » next to the net P&L, none picked ({side})')
       await pg.locator('.nav-am input[data-am-f="net"]').fill('-400'); c0 = await pg.evaluate("S.trades.length")
@@ -101,7 +105,7 @@ async def main():
       ok(q['time'] and q['time'][:5] >= ny and q['date'] == q['today'], f'{tag} the entry time is the New York time of the save ({q["time"]}, {ny} ET, session {q["date"]})')
       ok('against' not in q['coach'].lower() and 'bias' not in q['coach'].lower(), f'{tag} bearish bias, short trade: not « against your bias » ({q["coach"][:90]})')
       # Edge T1: the setup in one tap on the quick sheet
-      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); await pg.wait_for_timeout(400)
+      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await shot(pg); await pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); await pg.wait_for_timeout(400)
       row = await pg.evaluate("(()=>{const c=[...document.querySelectorAll('.nav-am .nav-sp [data-sp]')].map(b=>b.dataset.sp), r=document.querySelector('.nav-am .nav-sp-row').getBoundingClientRect(), n=document.querySelector('.nav-am-net input').getBoundingClientRect(); return {c, below: r.top>n.bottom-2, over: document.documentElement.scrollWidth>innerWidth+1, inside: r.right<=innerWidth+1}})()")
       ok(row['c'][:1] == ['Opening range breakout'] and row['below'] and not row['over'] and row['inside'], f'{tag} quick sheet: setup chips under the P&L, the plan setup first, no overflow ({row})')
       await pg.locator('.nav-am [data-sp="Opening range breakout"]').click()

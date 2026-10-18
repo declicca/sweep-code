@@ -915,6 +915,8 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 .nav-am-copy.tk-copies{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:-4px}
 /* Edge T1: the setup in one tap (quick sheet and manual form), one scrolling line */
 .nav-sp > span small{font-weight:400}
+/* « New trade » before its screenshot (18 Oct.): the screenshot, « Enter by hand », « Import CSV » — a short sheet on phones */
+@media (max-width:600px){html body .evp.nav-am.nav-am-min{height:auto;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 14px)}html body .evp.nav-am.nav-am-min .nav-am-in{height:auto;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}}
 .nav-sp-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0;margin:0 -2px}
 .nav-sp-row::-webkit-scrollbar{display:none}
 .nav-sp-row .chip{flex-shrink:0;white-space:nowrap}
@@ -2666,6 +2668,9 @@ html body #main .nav-mny-g > div > b{margin-top:auto}
 /* the selector that stays at the top while scrolling (Accounts / My money, Trades / Calendar / Journal, a trade's tabs): the
    same look, opaque — the selectors and cards going under it showed through as ghost outlines */
 html body #main .nav-seg.is-stuck,html body #main .nav-tnav.is-stuck{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important;box-shadow:inset 0 0 0 1px var(--hair),0 -6px 0 14px var(--bg)!important}
+/* phone: opaque all the time, not only once « stuck » is seen (18 Oct., the installed app on iPhone: the class came late or not
+   at all and « Accounts / My money » showed the cards through it); at rest the same look, the page's background under it */
+@media (max-width:860px){html body #main .nav-seg,html body #main .nav-tnav{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important}}
 @media (max-width:860px){
   html body #main .mfb-row > .mny-tsw .mny-tag{padding:0 7px}
   html body #main .nav-mny-g .mny-tag{padding:0 7px;max-width:100%}
@@ -2891,7 +2896,10 @@ body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-ev
    - the bottom bar: right above the Home indicator (it was the safe area plus 10 px, plus a margin of the safe area again),
      and what floats above it (Ask Sweep, « A new version », undo, the accounts' bar…) comes down with it. */
 @media (display-mode:standalone) and (max-width:860px){
-  html body aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2)}
+  /* the header right under the status bar (18 Oct., Mateo: too much empty space at the top): the safe area already holds the
+     room below the clock, so 6 px less instead of 10 px more; the compact title stays on the logo's row */
+  html body aside.side{padding-top:max(6px,calc(env(safe-area-inset-top,0px) - 6px))!important}
+  html body aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 8px)}
   html body .bottomnav{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px))!important;margin-bottom:0!important}
   /* what sits above the bar comes down with it (26 px), the same gap as in the browser */
   html body .ask-fab,html body .nav-update,html body .gm-sumtoast,html body .acc-bar{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}

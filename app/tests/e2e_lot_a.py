@@ -22,6 +22,10 @@ from playwright.sync_api import sync_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
 fails = 0
+def shot(pg):   # « New trade » shows its fields once a screenshot is there (18 Oct.): the test one, read as no table
+    pg.route('**/api/ai/import', lambda r: r.fulfill(status=200, content_type='application/json', body='{"trades": []}'))
+    pg.locator('.nav-am.open input[data-am-file]').first.set_input_files('tests/fixture-shot.png')
+    pg.wait_for_selector('.nav-am.open .nav-am-grid', timeout=8000); pg.wait_for_timeout(300)
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
@@ -69,7 +73,7 @@ with sync_playwright() as p:
     n = pg.evaluate("[...document.querySelectorAll('#main .d-news .nav-ev')].map(e=>!!e.querySelector('.nav-ev-v3, .nav-nonum'))")
     ok(n and all(n), f'1.3 Week tab: every release shows Réel · Prév. · Préc. or « Sans chiffre » ({n})')
   print('— 2 / 10 / 14 / 9 (computer)')
-  pg.evaluate("openTicket(null)"); pg.wait_for_timeout(1500)
+  pg.evaluate("openTicket(null)"); pg.wait_for_timeout(1500); shot(pg)
   sv = pg.evaluate("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/Enregistrer le trade/.test(b.textContent)&&b.getClientRects().length); if(!b) return null; const s=getComputedStyle(b); return [s.height, s.fontSize, s.fontWeight]})()")
   ok(sv == ['44px', '15px', '600'], f'2 « Enregistrer le trade » on a computer: 44 px, 15 px, semibold ({sv})')
   pg.keyboard.press('Escape'); pg.wait_for_timeout(500); pg.evaluate("document.querySelectorAll('.evp.open [data-am=close], .nav-am.open [data-am=close]').forEach(b=>b.click())"); pg.wait_for_timeout(400)
@@ -112,7 +116,7 @@ with sync_playwright() as p:
   # ── phone
   print('— 2 / 5 / 11 / 12 / 13 / 15 / 16 / 17 (phone)')
   c, pg, errs3 = page(br, 390, True, h=1300)
-  pg.evaluate("openTicket(null)"); pg.wait_for_timeout(1500)
+  pg.evaluate("openTicket(null)"); pg.wait_for_timeout(1500); shot(pg)
   sv = pg.evaluate("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/Enregistrer le trade/.test(b.textContent)&&b.getClientRects().length); if(!b) return null; const s=getComputedStyle(b); return [s.height, s.fontSize]})()")
   ok(sv == ['48px', '15px'], f'2 « Enregistrer le trade » on a phone: 48 px, 15 px ({sv})')
   pg.reload(); pg.wait_for_timeout(2500)
