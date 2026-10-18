@@ -1108,7 +1108,7 @@ const fpx = e => e == null || e === "" ? "—" : Number(e).toFixed(2), isPhone =
 
 function tradeRows(e) {
   return e.map(t => {
-    const a = tNet(t), n = [ tradeWhen(t), acctLabel(t.account_id) ].filter(Boolean).map(esc).join(" · ");
+    const a = tNet(t), n = [ tradeWhen(t), location.hash === "#account/" + t.account_id ? "" : acctLabel(t.account_id) ].filter(Boolean).map(esc).join(" · ");   // (on its own account's page, not its name again: audit of 18 Oct.)
     return `<a class="trow" href="#trade/${t.id}"><span class="trow-dir ${t.direction}">${t.direction === "long" ? "L" : "S"}</span><span class="trow-main"><b>${esc(t.instrument || "NQ")} ${t.direction === "long" ? "Long" : "Short"} · ${t.contracts || 0}</b><small>${n}</small></span><span class="trow-pnl ${cls(a)}">${money(a)}</span><span class="trow-go" aria-hidden="true">›</span></a>`;
   }).join("");
 }
@@ -1123,7 +1123,8 @@ function tradeTable(e, {compact: t = !1, sortable: a = !1, page: n = 0} = {}) {
     const p = tNet(l);
     return `<tr data-href="#trade/${l.id}" tabindex="0">${t ? "" : `<td>${fdate(l.date)}</td>`}<td class="muted">${esc(tradeTimeOf(l) || "—")}</td><td>${esc(acctLabel(l.account_id))}${l._copies && l._copies.length > 1 ? ` <span class="pill" title="${esc(l._copies.map(u => acctLabel(u.account_id)).join(" · "))}">+${l._copies.length - 1}</span>` : ""}</td><td class="muted">${sessName(l.session)}</td><td>${dirTag(l.direction)}</td><td class="num">${l.contracts || "—"}</td><td class="num muted">${fpx(l.entry)}</td><td class="num muted">${fpx(l.exit)}</td><td class="num ${cls(p)}">${money(p)}</td><td class="num">${rfmt(tR(l))}</td><td class="num">${dcell(tDisc(l))}</td><td class="muted">${esc(l.setup || "")}</td></tr>`;
   }).join("");
-  return `<div class="scroll-x"><table class="tbl"><thead>${r}</thead><tbody>${c}</tbody></table></div>${i}`;
+  // (on an account's own page, a full table without its « Account » column: always that account, audit of 18 Oct.)
+  return `<div class="scroll-x"><table class="tbl${!t && /^#account\//.test(location.hash) ? " tbl-own-acc" : ""}"><thead>${r}</thead><tbody>${c}</tbody></table></div>${i}`;
 }
 
 function acctTable(e, {totals: t = !1} = {}) {

@@ -6302,3 +6302,39 @@ new window.SweepMO(() => {
   new window.SweepMO(() => { if (/^#settings/.test(location.hash || '')) settingsLine().catch(() => {}); }).observe(document.body, { childList: true, subtree: true });
   window.SweepFaceID = { offer, lock, register };
 })();
+
+/* The page of an account (audit of 18 Oct., lot 2): what the account is doing first — its status, its payout, its capital,
+ * its trades and payouts — and its settings together, folded, at the bottom: « Account settings » holds the firm's rules,
+ * « Recalibrate on your platform » and the details. Open by itself while the account has no rules yet (they come first
+ * then); kept open or closed per account while the tab lives. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = ({ en: ['Account settings', 'Firm rules · recalibrate · details'], fr: ['Réglages du compte', 'Règles de la firme · recalibrer · détails'], es: ['Ajustes de la cuenta', 'Reglas de la firma · recalibrar · detalles'] })[L] || ['Account settings', 'Firm rules · recalibrate · details'];
+  const open = new Map();   // account id → open
+  let last = null;   // the box drawn before (a redraw replaces it before its « toggle » event: its state is read from it)
+  const col = (main, re) => { const h = [...main.querySelectorAll('.sec-h h2')].find((e) => re.test(e.textContent.trim())); return h ? h.closest('.sec-h').parentElement : null; };
+  function group() {
+    const m = /^#account\/(.+)$/.exec(location.hash || ''); if (!m) return;
+    const main = document.getElementById('main'); if (!main) return;
+    const id = decodeURIComponent(m[1]), a = typeof getDoc === 'function' ? getDoc('accounts', id) : null; if (!a) return;
+    const parts = [col(main, /^(Firm rules|Règles de la firme|Reglas de la firma)$/i), main.querySelector('.nav-recal'), col(main, /^(Details|Détails|Detalles)$/i)].filter(Boolean);
+    let box = main.querySelector('.nav-accset');
+    if (!parts.length || (box && parts.every((p) => box.contains(p)))) return;
+    if (!box) {
+      const noRules = !(a.rules && Object.keys(a.rules).some((k) => +a.rules[k] > 0));
+      box = document.createElement('details'); box.className = 'nav-accset';
+      box.innerHTML = `<summary data-noi18n><span><b>${T[0]}</b><small>${T[1]}</small></span></summary><div class="nav-accset-in"></div>`;
+      if (last && last.dataset.acc === id) open.set(id, last.open);
+      box.dataset.acc = id; box.open = open.has(id) ? open.get(id) : noRules; last = box;
+      box.addEventListener('toggle', () => open.set(id, box.open));
+      main.append(box);
+    }
+    const inner = box.querySelector('.nav-accset-in');
+    parts.forEach((p) => { if (p.parentElement !== inner) inner.append(p); });
+    // computer: the right column of the page held these settings; the payout goes there, next to the status
+    const mas = main.querySelector(':scope > .acc-mas'), R = mas && mas.children[1], po = main.querySelector('.nav-po');
+    if (R && po && po.parentElement !== R && ![...R.children].some((x) => x !== po)) R.append(po);
+  }
+  new window.SweepMO(() => { try { group(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+})();

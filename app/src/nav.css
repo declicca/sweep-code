@@ -474,7 +474,6 @@ body.evp-lock{overscroll-behavior:none}
   .nav-dash.has-trends .d-col > .d-trends{margin-top:-14px!important;border-top-left-radius:0!important;border-top-right-radius:0!important;border-top:1px solid var(--line)!important;box-shadow:none}
   .d-trends .nav-ch h2{font-size:14px}
 }
-}
 
 /* the day in the title row (phones only) */
 .nav-hday{display:none}
@@ -2953,3 +2952,17 @@ html body .nav-fid-err:empty{display:none}
 html body .nav-dlg-scrim.nav-lock{background:var(--bg);opacity:1;backdrop-filter:none;-webkit-backdrop-filter:none}   /* the lock hides the app entirely */
 html body .nav-dlg.nav-lock{z-index:100001}
 html body .nav-dlg-scrim.nav-lock{z-index:100000}
+
+/* the page of an account: « Account settings », folded at the bottom (audit of 18 Oct., lot 2) */
+html body #main .nav-accset{margin-top:24px;border-radius:var(--r-card,20px);background:var(--panel);box-shadow:inset 0 0 0 1px var(--hair)}
+html body #main .nav-accset > summary{list-style:none;cursor:pointer;display:flex!important;width:100%!important;box-sizing:border-box;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:12px 18px!important;color:var(--text)!important;font-weight:400}
+html body #main .nav-accset > summary::before{display:none!important}
+html body #main .nav-accset > summary b{font-size:15px;font-weight:600}
+html body #main .nav-accset > summary::-webkit-details-marker{display:none}
+html body #main .nav-accset > summary > span{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body #main .nav-accset > summary small{color:var(--muted);font-size:13px}
+html body #main .nav-accset > summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s var(--ease-ios)}
+html body #main .nav-accset[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+html body #main .nav-accset-in{display:grid;gap:20px;padding:4px 14px 16px}
+html body #main .nav-accset-in > *{margin:0}
+html body #main table.tbl.tbl-own-acc th:nth-child(3),html body #main table.tbl.tbl-own-acc td:nth-child(3){display:none!important}   /* its own page: no « Account » column */

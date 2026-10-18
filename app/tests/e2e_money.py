@@ -118,6 +118,7 @@ async def main():
     # change an account's type in place (it was funded, not an evaluation): trades, rules and stats unchanged
     before = await pg.evaluate("[S.trades.filter(t=>t.account_id==='comb').length, JSON.stringify(getDoc('accounts','comb').rules), SweepMoney.moneyOf({}).perf.total]")
     await pg.evaluate("location.hash='#account/comb'"); await pg.wait_for_timeout(1500)
+    await pg.wait_for_selector('#main .nav-accset', state='attached', timeout=10000); await pg.evaluate("document.querySelectorAll('#main .nav-accset').forEach(d => d.open = true)"); await pg.wait_for_timeout(300)   # (« Account settings », folded since 18 Oct.)
     await pg.locator('#main [data-acc-type=funded]').click(); await pg.wait_for_timeout(1200)
     after = await pg.evaluate("[S.trades.filter(t=>t.account_id==='comb').length, JSON.stringify(getDoc('accounts','comb').rules), SweepMoney.moneyOf({}).perf.total, getDoc('accounts','comb').money_type, getDoc('accounts','comb').phase, !!document.querySelector('#main [data-acc-type=funded].on')]")
     ok(after[:3] == before and after[3] == 'funded' and after[4] == 'funded' and after[5], f'account type changed in place (Evaluation → Funded): same trades, rules and performance ({after})')
