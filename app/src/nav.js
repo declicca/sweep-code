@@ -518,31 +518,6 @@ window.SweepMO = window.SweepMO || class {
   }
   const report = (msg) => { try { fetch('api/client-error', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ msg, page: '#dashboard', src: 'nav.js' }) }).catch(() => {}); } catch (e) { /* offline */ } };
   let reported = false;
-  /* ───────────── computer: the rank sits in the day card; its old place becomes « Quick access » ───────────── */
-  const QK = {
-    en: ['Quick access', 'Ask Sweep AI', 'Plan of the day', 'Daily review', 'Import trades', 'Economic calendar', 'Add a payout', 'Share my week'],
-    fr: ['Accès rapide', 'Demander à Sweep AI', 'Plan du jour', 'Revue du jour', 'Importer des trades', 'Calendrier économique', 'Ajouter un payout', 'Partager ma semaine'],
-    es: ['Acceso rápido', 'Preguntar a Sweep AI', 'Plan del día', 'Revisión del día', 'Importar operaciones', 'Calendario económico', 'Añadir un payout', 'Compartir mi semana'] };
-  const QI = {
-    ai: '<path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
-    plan: '<path d="M5 4v16M5 5h10l-2 3 2 3H5"/>', review: '<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',
-    import: '<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>', news: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9h16M9 3v4M15 3v4"/>',
-    payout: '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>', share: '<path d="M12 15V4M7 9l5-5 5 5"/><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/>' };
-  function quickCard() {
-    const x = QK[LANG] || QK.en, ic = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${QI[k]}</svg>`;
-    const d = new Date(etToday() + 'T12:00:00'), mon = new Date(d); mon.setDate(d.getDate() - ((d.getDay() + 6) % 7));   // week of the current session
-    const wk = `${mon.getFullYear()}-${String(mon.getMonth() + 1).padStart(2, '0')}-${String(mon.getDate()).padStart(2, '0')}`;
-    const b = (k, label, extra) => `<button type="button" class="nav-q" ${extra}>${ic(k)}<span>${label}</span></button>`;
-    return `<section class="surface nav-card d-quick" data-noi18n><div class="nav-ch"><h2>${x[0]}</h2></div><div class="nav-qgrid">
-      ${b('import', x[4], 'data-q="#import"')}${b('payout', x[6], 'data-q="#payouts"')}
-      ${b('news', x[5], 'data-q="#news"')}${b('share', ({ en: 'Share', fr: 'Partager', es: 'Compartir' })[LANG] || 'Share', 'data-q-share')}</div></section>`;
-  }
-  document.addEventListener('click', (e) => {
-    const q = e.target.closest && e.target.closest('.nav-q[data-q]'); if (!q) return;
-    const v = q.dataset.q;
-    if (v === 'ai') { if (typeof askToggle === 'function') askToggle(true); return; }
-    if (v[0] === '#') location.hash = v; else if (window.SweepGame) SweepGame.open(v);
-  });
   const AIQ = {
     en: { t: 'Ask Sweep AI', s: 'Answers from your own journal.', ph: 'Ask anything about your trading…', q: ['How did I do this week?', 'Which setup makes me the most money?', 'What costs me the most?'] },
     fr: { t: 'Demande à Sweep AI', s: 'Les réponses viennent de ton propre journal.', ph: 'Pose une question sur ton trading…', q: ['Comment s’est passée ma semaine ?', 'Quel setup me rapporte le plus ?', 'Qu’est-ce qui me coûte le plus ?'] },
@@ -576,12 +551,10 @@ window.SweepMO = window.SweepMO || class {
   const running = () => (S.accounts || []).some((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && Array.isArray(a.adjustments) && a.adjustments.some((x) => +x.amount_c));
   const stage = () => { const n = (S.trades || []).length; return { n, perf: n >= 1, acc: n >= 1 || running(), more: n >= 5, money: n >= 5 || (S.payouts || []).length > 0 }; };
   function deskToday(dash) {
-    if (dash && !stage().more) return;   // Quick access and the rank: from the 5th trade
-    if (dash && window.SW_MQ.matches && !dash.querySelector('.d-quick')) { const acc = dash.querySelector('.d-acc'); (acc ? acc.parentElement : dash).insertAdjacentHTML('beforeend', quickCard()); }   // phone: Quick access at the end too
+    if (dash && !stage().more) return;   // the rank in the day card: from the 5th trade (« Quick access » removed: audit of 18 Oct.)
     if (!dash || window.SW_MQ.matches) return;
     const rank = dash.querySelector('.d-col-b > .d-rank'), today = dash.querySelector('.d-today');
     if (rank && today) { today.append(rank); dash.classList.add('rank-in'); }
-    if (!dash.querySelector('.d-quick')) dash.querySelector('.d-col-b').insertAdjacentHTML('beforeend', quickCard());
     const pay = dash.querySelector('.d-col-b > .d-pay:not([data-bal-moved])'), cal = dash.querySelector('.d-col-a > .d-cal:not([data-bal-moved])');
     const perf = dash.querySelector('.d-col-a > .d-perf');
     if (pay && perf) { perf.after(pay); dash.classList.add('pay-left'); }
@@ -5074,7 +5047,6 @@ document.addEventListener('click', (e) => {
   new window.SweepMO(() => { try { pass(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 })();
 
-document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-q-share]')) { e.preventDefault(); if (window.SweepSweptShare && false) return; if (typeof openShare === 'function') openShare('discipline', 'view'); } });
 
 /* avatar and menu header: the trader's initial and full name (not the generated username);
    Stats: no rank card on top (it lives in Progression), « From 5 trades » instead of « ∞ » under 5 trades; Trends message translated */
@@ -5410,7 +5382,6 @@ document.addEventListener('click', (e) => {
   }).observe(document.body, { childList: true, subtree: true });
 })();
 
-document.addEventListener('click', (e) => { const q = e.target.closest && e.target.closest('.d-quick [data-q="#payouts"]'); if (q) { try { sessionStorage.setItem('sw.openPayout', '1'); } catch (x) { /* private */ } } }, true);
 new window.SweepMO(() => {
   let want = null; try { want = sessionStorage.getItem('sw.openPayout'); } catch (x) { /* private */ }   // '1', or a pre-filled request (JSON)
   if (!want || !/^#payouts/.test(location.hash || '')) return;
@@ -6337,4 +6308,45 @@ new window.SweepMO(() => {
     if (R && po && po.parentElement !== R && ![...R.children].some((x) => x !== po)) R.append(po);
   }
   new window.SweepMO(() => { try { group(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+})();
+
+/* Stats on a phone (audit of 18 Oct., lot 3): « What works for you », the key numbers, the score and the curve first; the
+ * rest (the trading stats, drawdown, durations, breakdown, trends, the month, the detailed analysis) under « More stats »,
+ * folded, kept open or closed while the tab lives. The computer is unchanged. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = ({ en: ['More stats', 'Trading stats, drawdown, durations, trends, the month, the detailed analysis'], fr: ['Plus de statistiques', 'Statistiques de trading, drawdown, durées, tendances, le mois, l’analyse détaillée'],
+    es: ['Más estadísticas', 'Estadísticas de trading, drawdown, duraciones, tendencias, el mes, el análisis detallado'] })[L] || ['More stats', ''];
+  let open = false, last = null;
+  function fold() {
+    if (!/^#(analytics|progress)\b/.test(location.hash || '') || !window.SW_MQ || !window.SW_MQ.matches) return;
+    const top = document.querySelector('#main .igrid.g-top'); if (!top) return;
+    const host = top.parentElement;
+    let box = host.querySelector(':scope > .nav-stmore');
+    const rest = [...host.children].filter((e) => e !== top && e !== box && (top.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING));
+    if (!rest.length) return;
+    if (!box) {
+      if (last) open = last.open;   // (a redraw replaces it before its « toggle » event)
+      box = document.createElement('details'); box.className = 'nav-stmore'; box.open = open; last = box;
+      box.innerHTML = `<summary data-noi18n><span><b>${T[0]}</b><small>${T[1]}</small></span></summary><div class="nav-stmore-in"></div>`;
+      box.addEventListener('toggle', () => { open = box.open; });
+      top.after(box);
+    }
+    const inner = box.querySelector('.nav-stmore-in');
+    rest.forEach((e) => inner.append(e));
+  }
+  new window.SweepMO(() => { try { fold(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+})();
+
+/* My money (audit of 18 Oct., lot 3): « My entries / Analysis » first in the filters' line (one row less: the page had
+ * « Accounts / My money », the filters, then this switch, three rows of controls) */
+(function () {
+  'use strict';
+  function move() {
+    const main = document.getElementById('main'); if (!main) return;
+    const v = main.querySelector('.mny > .mny-view'), row = main.querySelector('.fx .fx-row'); if (!v || !row) return;
+    v.classList.add('mny-view-fx'); v.dataset.fx = 'view'; row.prepend(v);
+  }
+  new window.SweepMO(() => { try { move(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 })();

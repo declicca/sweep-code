@@ -38,14 +38,14 @@ def shot(pg, name):
 LINE = """(()=>{const fx=document.querySelector('#main .fx'); if(!fx) return null; const row=fx.querySelector('.fx-row');
   return {kinds:[...row.children].map(c=>c.dataset.fx||(c.dataset.act==='fsheet'?'filters':c.dataset.act==='fclear'?'on':'?')),
    others:document.querySelectorAll('#main .fbars, #main .mfb, #main .mseg, #main .mny-top, #main .mny-cseg, #main select[data-filter], #main select[data-ui]').length,
-   oneLine:new Set([...row.children].map(c=>Math.round(c.getBoundingClientRect().top))).size===1}})()"""
+   oneLine:new Set([...row.children].map(c=>{const b=c.getBoundingClientRect(); return Math.round(b.top+b.height/2)})).size===1}})()"""
 
 with sync_playwright() as p:
   br = p.chromium.launch(); allerr = []
   for w, phone, lang, scheme in [(1300, False, 'fr', 'dark'), (390, True, 'fr', 'light'), (320, True, 'es', 'dark'), (1300, False, 'en', 'light')]:
     tag = f'{w} {lang}'
     c, pg, errs = page(br, w, phone, lang, scheme)
-    want = {'trades': ['per', 'type', 'filters'], 'analytics': ['per', 'type', 'filters'], 'calendar': ['type', 'filters'], 'payouts': ['mper', 'type', 'filters']}
+    want = {'trades': ['per', 'type', 'filters'], 'analytics': ['per', 'type', 'filters'], 'calendar': ['type', 'filters'], 'payouts': ['view', 'mper', 'type', 'filters']}   # (« My entries / Analysis » first in the line since 18 Oct.)
     for h, k in want.items():
       go(pg, h); r = pg.evaluate(LINE)
       ok(r and r['kinds'] == k and r['others'] == 0 and r['oneLine'], f'1 {tag} {h}: one line {k}, nothing else ({r})')

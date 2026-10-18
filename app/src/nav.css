@@ -529,20 +529,11 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 }
 
 /* computer: one card for the day — rings, next step, and the rank on the right */
-.d-quick{display:none}
 @media (min-width:861px){
   .nav-dash.rank-in .d-today{display:flex;align-items:stretch;background:var(--glass);border:1px solid var(--line);border-radius:14px;box-shadow:inset 0 1px 0 var(--hi),var(--shadow);overflow:hidden}
   .nav-dash.rank-in .d-today > #gToday{flex:1;min-width:0;background:transparent!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none;backdrop-filter:none}
   .nav-dash.rank-in .d-today > .d-rank{display:flex!important;align-items:center;flex:0 0 auto;margin:14px 0!important;padding:0 6px;border-left:1px solid var(--line)}
   .nav-dash.rank-in .d-today .nav-rank{background:transparent!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none;backdrop-filter:none;min-width:250px;height:100%}
-  /* quick access */
-  .d-quick{display:flex}
-  .nav-qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .nav-q{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;border:0;border-radius:12px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text);font:inherit;font-size:13.5px;font-weight:500;text-align:left;cursor:pointer;transition:box-shadow var(--sw-d1,.14s) var(--ease-ios),transform var(--sw-d1,.14s) var(--ease-ios)}
-  .nav-q svg{width:18px;height:18px;color:var(--pos);flex-shrink:0}
-  .nav-q span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .nav-q:hover{box-shadow:inset 0 0 0 1.5px var(--pos)}
-  .nav-q:active{transform:scale(.97)}
   /* the side bar « + » is centred when the bar is closed */
   .side:not(.open) .new{justify-content:center;padding-left:0!important;padding-right:0!important}
   .side:not(.open) .new .lbl{display:none}
@@ -571,9 +562,8 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 .nav-slip-k b{font:600 17px var(--font-num,ui-monospace);letter-spacing:-.02em}
 .nav-slip-k a{text-decoration:none}
 
-/* computer: quick access goes last in the right column; both columns end on the same line */
+/* computer: both columns of Today end on the same line (the right one: see below) */
 @media (min-width:861px){
-  .nav-dash .d-quick{order:99}
   .nav-dash{align-items:stretch!important}
   .nav-dash .d-col > :not([hidden]):last-child{flex:1 0 auto}
 }
@@ -641,7 +631,7 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 @media (min-width:861px){.nav-dash .d-col > .d-ai{order:0}}
 .d-ai .nav-ch{display:flex!important;flex-direction:row!important;justify-content:flex-start!important;align-items:center;text-align:left!important}.d-ai .nav-ch h2{flex-direction:row!important;justify-content:flex-start;text-align:left;margin:0;font-size:16px}
 
-/* computer Today: Sweep AI under quick access; the calendar fills the left column with taller days */
+/* computer Today: Sweep AI last; the calendar fills the left column with taller days */
 @media (min-width:861px){
   .nav-dash .d-col > .d-ai{order:100!important}
   .nav-dash .d-col-a > .d-pay{order:3}
@@ -1521,16 +1511,6 @@ html body a,html body button{-webkit-tap-highlight-color:transparent}
 .nav-fee-amt{display:inline-flex;align-items:center;gap:4px;font-weight:600}
 .nav-fee-amt input{width:84px;min-height:36px;padding:0 10px;text-align:right;font:600 14px var(--font-num,ui-monospace)}
 
-/* phone: « Quick access » at the end of Today too */
-@media (max-width:860px){.nav-dash .d-quick{display:block!important;order:9!important}}
-/* phone: Quick access as a tidy 2-column grid (same tiles as the computer) */
-@media (max-width:860px){
-  .nav-dash .d-quick{padding:16px!important}
-  .nav-dash .d-quick .nav-ch h2{font-size:16px;margin:0 0 10px}
-  .nav-dash .d-quick .nav-qgrid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
-  .nav-dash .d-quick .nav-qgrid > *{display:flex!important;align-items:center!important;gap:10px!important;min-height:52px!important;padding:10px 12px!important;border-radius:var(--r-tile,16px)!important;background:var(--fill)!important;color:var(--text)!important;font-size:13.5px!important;text-decoration:none!important;border:0!important;width:auto!important;height:auto!important;text-align:left!important}
-  .nav-dash .d-quick .nav-qgrid svg{width:20px!important;height:20px!important;flex-shrink:0;stroke:var(--pos)!important}
-}
 .nav-rt-disc{width:92px;flex:0 0 92px;box-sizing:border-box}
 .nav-rt-disc-ph{display:inline-block;height:40px;border-radius:12px;background:var(--posbg);opacity:.5}
 @media (max-width:860px){.nav-rt-disc{width:74px;flex:0 0 74px}.nav-rt-disc-ph{height:36px}}
@@ -1670,9 +1650,9 @@ html body .nav-inst-ic{background:linear-gradient(180deg,rgba(var(--pos-rgb),.22
   #main.sw-enter > *:nth-child(n+4),#main.sw-enter .nav-dash > * > *:nth-child(n+4){animation-delay:120ms!important}}
 @media (prefers-reduced-motion:reduce){#main.sw-enter *{animation:none!important}}
 /* touch feedback, iOS-like: rows and cards answer the finger at once */
-html body a.trow,html body a.nav-tr,html body a.nav-acc,html body tr[data-href],html body .nav-qgrid > *,html body .nav-wk-d{transition:background-color .2s var(--ease-ios),transform .2s var(--ease-ios)!important;-webkit-tap-highlight-color:transparent}
+html body a.trow,html body a.nav-tr,html body a.nav-acc,html body tr[data-href],html body .nav-wk-d{transition:background-color .2s var(--ease-ios),transform .2s var(--ease-ios)!important;-webkit-tap-highlight-color:transparent}
 html body a.trow:active,html body a.nav-tr:active,html body tr[data-href]:active{background:var(--fill)!important}
-html body a.nav-acc:active,html body .nav-qgrid > *:active,html body .nav-wk-d:active{transform:scale(.98)!important}
+html body a.nav-acc:active,html body .nav-wk-d:active{transform:scale(.98)!important}
 @media (hover:hover){html body tr[data-href]:hover{background:rgba(255,255,255,.025)!important}}
 /* sheets and windows: one spring, open 350 ms, close 200 ms */
 html body .evp,html body #gSheet,html body .nav-am,html body .nav-dlg,html body #shPanel{transition-duration:.35s!important;transition-timing-function:var(--ease-ios)!important}
@@ -1811,8 +1791,8 @@ html body .nav-rt.closed-rt .nav-rt-steps{display:none!important}
   #main .nav-ord-on table.acct-tbl .nav-grip{display:inline-grid;opacity:1;width:28px;height:32px;margin:0 6px 0 -4px;touch-action:none;color:var(--muted)}
   #main .nav-ord-on table.acct-tbl tr[data-href]{pointer-events:auto}
 }
-/* computer: Quick access ends right under its last buttons */
-@media (min-width:861px){html body .nav-dash .d-col-b > .d-quick{flex:0 0 auto!important;height:auto!important;min-height:0!important;align-self:stretch}
+/* computer: the right column's last card ends under its content (it used to be « Quick access », removed on 18 Oct.) */
+@media (min-width:861px){html body .nav-dash .d-col-b > :not([hidden]):last-child{flex:0 0 auto!important;height:auto!important;min-height:0!important;align-self:stretch}
   html body .nav-dash .d-col-b{justify-content:flex-start!important}}
 /* payouts & expenses: folded add forms */
 .nav-pz-hidden{display:none!important}
@@ -2966,3 +2946,20 @@ html body #main .nav-accset[open] > summary::after{transform:rotate(-135deg) tra
 html body #main .nav-accset-in{display:grid;gap:20px;padding:4px 14px 16px}
 html body #main .nav-accset-in > *{margin:0}
 html body #main table.tbl.tbl-own-acc th:nth-child(3),html body #main table.tbl.tbl-own-acc td:nth-child(3){display:none!important}   /* its own page: no « Account » column */
+/* Stats on a phone: « More stats », folded (audit of 18 Oct., lot 3) — the same look as « Account settings » */
+html body #main .nav-stmore{margin-top:16px;border-radius:var(--r-card,20px);background:var(--panel);box-shadow:inset 0 0 0 1px var(--hair)}
+html body #main .nav-stmore > summary{list-style:none;cursor:pointer;display:flex!important;width:100%!important;box-sizing:border-box;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:12px 18px!important;color:var(--text)!important;font-weight:400}
+html body #main .nav-stmore > summary::-webkit-details-marker{display:none}
+html body #main .nav-stmore > summary::before{display:none!important}
+html body #main .nav-stmore > summary > span{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body #main .nav-stmore > summary b{font-size:15px;font-weight:600}
+html body #main .nav-stmore > summary small{color:var(--muted);font-size:13px}
+html body #main .nav-stmore > summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s var(--ease-ios)}
+html body #main .nav-stmore[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+html body #main .nav-stmore-in{display:grid;gap:16px;padding:4px 12px 14px}
+html body #main .nav-stmore-in > *{margin:0}
+/* My money: « My entries / Analysis » in the filters' line, the height of its chips */
+html body #main .fx-row > .mny-view.mny-view-fx{flex:0 0 auto;width:auto;max-width:none;height:40px;box-sizing:border-box;margin:0;padding:0;border:0!important;box-shadow:inset 0 0 0 1px var(--hair)}
+html body #main .fx-row > .mny-view.mny-view-fx > button{flex:0 0 auto;height:100%;min-height:0;padding:0 16px;white-space:nowrap}
+@media (max-width:860px){html body #main .fx-row > .mny-view.mny-view-fx{height:44px}}   /* a 44 px touch zone on phones, centred on the chips' line; 40 px tracks on a computer (design rule) */
+

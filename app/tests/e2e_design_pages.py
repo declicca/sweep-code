@@ -5,7 +5,7 @@ Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phon
  1  Stats: « P&L breakdown » and « Patterns to watch » end at the same height; the figure tiles centre their content
  2  Deep Dive · Behavior: every table is whole in its card (none cut behind a scroll); Long vs short uses the full width
  3  My money (computer): its period and the account type in the one line of filters (16 Oct.); « Export (CSV) » in the title
-    row; 3 rows of controls
+    row; 2 rows of controls (« My entries / Analysis » first in the filters' line, 18 Oct.)
  4  My money (phone): the same line; « Export » in the title row
  5  Today · My money: the three amounts on one line, whatever their label
  6  a payout's amount is in Geist Mono, semibold
@@ -56,7 +56,7 @@ with sync_playwright() as p:
     pg.evaluate("U.deep='discipline'; saveU()")
     go(pg, 'payouts')
     m = pg.evaluate("(()=>{const t=document.querySelector('#main .fx [data-fx=type]'), p=document.querySelector('#main .fx [data-fx=mper]'), pane=document.querySelector('#main .mny-pane'); if(!t||!p||!pane) return null; const tops=new Set([...document.querySelectorAll('#main > .nav-seg, #main > .fx, #main .mny-view')].filter(e=>e.getClientRects().length).map(e=>Math.round(e.getBoundingClientRect().top))); return {row:Math.abs(t.getBoundingClientRect().top-p.getBoundingClientRect().top)<2, rows:tops.size, top:!!document.querySelector('.top .mny-exp[data-mny=csv]'), inMain:document.querySelectorAll('#main [data-mny=csv]').length}})()")
-    ok(m and m['row'] and m['rows'] == 3 and m['top'] and m['inMain'] == 0, f'3 computer {scheme}: My money — period and type in the one line of filters, 3 rows of controls, « Export (CSV) » in the title row ({m})')
+    ok(m and m['row'] and m['rows'] == 2 and m['top'] and m['inMain'] == 0, f'3 computer {scheme}: My money — period and type in the one line of filters, 2 rows of controls (« My entries / Analysis » in it since 18 Oct.), « Export (CSV) » in the title row ({m})')
     fam = pg.evaluate("(()=>{const a=document.querySelector('#main .pz-amt-v'); if(!a) return null; const s=getComputedStyle(a); return [s.fontFamily, s.fontWeight]})()")
     ok(fam and 'Geist Mono' in fam[0] and fam[1] == '600', f'6 computer {scheme}: a payout amount is Geist Mono semibold ({fam})')
     go(pg, 'dashboard', 2400); scroll_all(pg)
