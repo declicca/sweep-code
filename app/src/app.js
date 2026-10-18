@@ -4129,7 +4129,7 @@ function tkRisk(e) {
 function tkAlerts(e) {
   const t = [], a = e.budget;
   // the coach, before a new trade (brief 03 step 3): the signal of the moment, his own number, what is left (src/coach.js)
-  const co = !TK.id && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: "manual", account: TK.account, date: TK.date, qty: TK.multi ? e.pos.maxQty : +TK.qty, time: String(TK.entryTime || "").slice(0, 5) }) : "";
+  const co = !TK.id && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: "manual", account: TK.account, date: TK.date, qty: TK.multi ? e.pos.maxQty : +TK.qty, time: String(TK.entryTime || "").slice(0, 5), setup: TK.setup, dir: TK.multi ? e.pos.dir : TK.dir, inst: TK.inst }) : "";
   co && t.push(co);
   // what is left today is the coach's line above (audit of 16 Oct., R15: one number, not two that disagree); only a trade
   // whose risk goes past the day's limit still says so here, as it is recorded on the trade

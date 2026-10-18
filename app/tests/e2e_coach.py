@@ -32,6 +32,11 @@ Then, the audit of 16 Oct. (step 5), a day with a trade against the bias and a t
      time; the last trade clean while an earlier one is against the bias: « Nothing to fix on this trade. Earlier today:
      trading against your bias. », never « Do exactly the same again »; no plan for the day: the routine says « 1 trade · no
      plan », not « 1 of 1 trades in your plan » (the server counts 0 in the plan too); what is left counts the whole session.
+Then « Your edge » before the trade (brief edge T3, 17 Oct.): 12 ORB of the morning over the last 3 weeks, mostly winning,
+  and losing afternoon trades:
+  M. an ORB at 9:45: the blue line « In your edge: Opening range breakout, 10 winners out of 12. Keep your usual size. »,
+     first in « Before this trade »; at 14:00 without a setup: a neutral « What works for you: … » (never « in your edge »);
+     on the quick sheet, tapping « Opening range breakout » turns the line blue at once.
 Checks: no page error, nothing wider than the window, the coach's texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -262,6 +267,41 @@ def works(p, lang, phone):   # brief 03 step 4: what works for you
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} I nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 
+EG = {'fr': ('Dans ton edge : Opening range breakout, 10 gagnants sur 12', 'Ce qui marche pour toi : Opening range breakout'),
+      'en': ('In your edge: Opening range breakout, 10 winners out of 12', 'What works for you: Opening range breakout'),
+      'es': ('En tu edge: Opening range breakout, 10 ganadoras de 12', 'Lo que te funciona: Opening range breakout')}
+def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the trade
+  tag = f"{'390' if phone else '1300'}-{lang} edge"; e = EG[lang]
+  unthrottle()
+  br = p.chromium.launch()
+  ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1'); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'ce%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
+  ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Eli', 'experience': 'gt1'}), headers=H)
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e2: errs.append(str(e2)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(900)
+  day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || todayStr()")
+  pg.evaluate("""(day) => { const back = (k) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - k); return d.toISOString().slice(0, 10); };
+    [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 15, 16].forEach((k, i) => {
+      put('trades', { id: 'eo' + k, account_id: 'ca', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: i % 6 === 5 ? -10000 : 25000, pnl_manual: true, date: back(k), entry_time: '09:45:00', exit_time: '09:55:00', setup: 'Opening range breakout' });
+      put('trades', { id: 'ea' + k, account_id: 'ca', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -6000, pnl_manual: true, date: back(k), entry_time: '14:05:00', exit_time: '14:20:00', setup: 'Reversal' }); }); }""", day)
+  pg.wait_for_timeout(1500)
+  txt = "(h) => { const e = document.createElement('div'); e.innerHTML = h; const q = e.querySelector('.co-edge'); return { all: e.textContent.replace(/\\s+/g, ' '), edge: q ? q.textContent : '', blue: !!(q && q.classList.contains('in')), first: !!(q && q === e.querySelector('p')) } }"
+  inn = pg.evaluate("([d, f]) => (new Function('return ' + f))()(SweepCoach.before({ form: 'shot', account: 'ca', date: d, qty: 1, time: '09:45', setup: 'Opening range breakout', dir: 'long', inst: 'NQ' }))", [day, txt])
+  ok(e[0] in inn['edge'] and inn['blue'] and inn['first'], f'{tag} M an ORB at 9:45: « {e[0]}… », in blue, first ({inn["edge"][:110]})')
+  out = pg.evaluate("([d, f]) => (new Function('return ' + f))()(SweepCoach.before({ form: 'shot', account: 'ca', date: d, qty: 1, time: '14:00', setup: '', dir: 'long', inst: 'NQ' }))", [day, txt])
+  ok(e[1] in out['edge'] and not out['blue'] and e[0][:8] not in out['edge'], f'{tag} M at 14:00 without a setup: neutral « {e[1]}… » ({out["edge"][:110]})')
+  pg.evaluate("openTicket(null)"); pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); pg.wait_for_timeout(500)
+  pg.locator('.nav-am [data-am-seg="dir"][data-v="long"]').click(); pg.wait_for_timeout(300)
+  b0 = pg.evaluate("!!document.querySelector('.nav-am .co-edge.in')")
+  pg.locator('.nav-am [data-sp="Opening range breakout"]').click(); pg.wait_for_timeout(300)
+  b1 = pg.evaluate("(() => { const q = document.querySelector('.nav-am .co-edge'); return q ? [q.classList.contains('in'), q.textContent] : null })()")
+  ok(b1 and (b1[0] or not b0), f'{tag} M the quick sheet: the line follows the setup tapped ({b0} → {b1})')
+  ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} M nothing wider than the window, no page error ({errs[:2]})')
+  br.close()
+
 W5 = {'fr': ('Réponds au coach', 'Avancé'), 'en': ('Answer your coach', 'Advanced'), 'es': ('Responde a tu coach', 'Avanzado')}
 def fewer(p, lang, phone):   # brief 03 step 5
   tag = f"{'390' if phone else '1300'}-{lang}"; w = W5[lang]
@@ -403,5 +443,6 @@ with sync_playwright() as p:
     fewer(p, lang, phone)
     room(p, lang, phone)
     latest_case(p, lang, phone)
+    edge_case(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')
 sys.exit(1 if fails else 0)

@@ -2247,7 +2247,8 @@ window.SweepMO = window.SweepMO || class {
     paint();
   }
   // the coach before this trade (brief 03 step 3, src/coach.js): one trade only (not a batch of screenshots)
-  const coachBefore = () => (!SH.batch.length && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: 'shot', account: SH.f.account, date: SH.f.date, qty: +SH.f.qty || 0, time: String(SH.f.time || '').slice(0, 5) }) : '');
+  const coachBefore = () => (!SH.batch.length && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: 'shot', account: SH.f.account, date: SH.f.date, qty: +SH.f.qty || 0, time: String(SH.f.time || '').slice(0, 5), setup: SH.setup, dir: SH.dir, inst: SH.f.inst }) : '');
+  const coachPaint = () => { const w = document.querySelector('.nav-am-shot .nav-am-co'); if (w) w.innerHTML = coachBefore(); };
   function paint() {
     const el = document.querySelector('.nav-am-shot .nav-am-in'); if (!el) return;
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
@@ -2261,7 +2262,7 @@ window.SweepMO = window.SweepMO || class {
     el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${t('sub')}</span><button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button></div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
       ${SH.batch.length ? batchTop() : `<label class="nav-am-drop ${SH.src ? 'has' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t(window.matchMedia && matchMedia('(pointer: coarse)').matches ? 'dropT' : 'drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
       ${SH.status ? `<p class="nav-am-st ${SH.busy ? 'busy' : ''}">${SH.status}</p>` : ''}`}
-      ${coachBefore()}
+      <div class="nav-am-co">${coachBefore()}</div>
       ${SH.batch.length || SH.src ? '' : `<div class="nav-am-alt"><button type="button" class="btn" data-am="to-manual">${t('byHand')}</button><a class="btn" href="#import" data-am-imp>${t('impFile')}</a></div>`}
       <div class="nav-am-grid">
         <div class="tk-f nav-am-wide"><span>${t('acc')}</span>${pickBox('account', accs.map((a) => [a.id, typeof acctLabel === 'function' ? acctLabel(a.id) : a.name]), SH.f.account)}</div>
@@ -2606,7 +2607,7 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('[data-am],[data-am-pickf],[data-am-sel],[data-am-copy],[data-am-seg],[data-am-emo],[data-am-rm],[data-sp]'); if (!a) return;
     const box = a.closest('.nav-am'); if (!box) return;
-    if (a.dataset.sp != null) { SH.setup = window.SweepSetupPick ? SweepSetupPick.tap(a, SH.setup) : ''; return; }   // in place: the row keeps its scroll
+    if (a.dataset.sp != null) { SH.setup = window.SweepSetupPick ? SweepSetupPick.tap(a, SH.setup) : ''; coachPaint(); return; }   // in place: the row keeps its scroll; the coach follows the setup (edge T3)
     if (a.dataset.amRm) { SH.batch = SH.batch.filter((b) => b.id !== a.dataset.amRm); if (SH.batch.length === 1) { const b = SH.batch[0]; SH.batch = []; Object.assign(SH, { file: b.file, src: b.src, shot: b.shot, dir: b.f.dir || SH.dir }); Object.assign(SH.f, b.f); } paint(); return; }
     if (a.dataset.amSel) { SH.openPick = SH.openPick === a.dataset.amSel ? null : a.dataset.amSel; paint(); return; }
     if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; if (a.dataset.amPickf === 'account') SH.f.accountPicked = true; SH.openPick = null; if (a.dataset.amPickf === 'account') SH.copy.delete(a.dataset.v); paint(); return; }
@@ -2641,7 +2642,7 @@ window.SweepMO = window.SweepMO || class {
     const v = autoPnl(), p = document.querySelector('.nav-am-net input'); if (p) p.placeholder = v != null ? ((v - (SH.f.fees || 0)) / 100).toFixed(2) : '+250';
     const r = document.querySelector('.nav-am-r'); if (r) r.innerHTML = rLine();
     const sm = document.querySelector('.nav-am-more-d summary small'); if (sm) sm.innerHTML = verifyLine();
-    const cb = document.querySelector('.nav-am-shot .co-before'); if (cb) { const h = coachBefore(); if (h) cb.outerHTML = h; else cb.remove(); }
+    coachPaint();
   });
   document.addEventListener('change', (e) => {
     const f = e.target.closest && e.target.closest('.nav-am [data-am-file]'); if (f && f.files.length) { takeFiles([...f.files]); return; }
@@ -5221,6 +5222,7 @@ document.addEventListener('click', (e) => {
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('#tkSlide [data-sp]'); if (!b || typeof TK === 'undefined' || !TK) return;
     TK.setup = tap(b, TK.setup);
+    const al = document.getElementById('tkAlerts'); if (al && typeof tkAlerts === 'function' && typeof tkState === 'function') al.innerHTML = tkAlerts(tkState());   // the coach follows the setup (edge T3)
   });
 })();
 

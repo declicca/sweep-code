@@ -43,6 +43,8 @@ html body #main .nav-rt.closed-rt > .co-today{display:none}
 .co-before.co-stop{background:rgba(var(--neg-rgb),.10);box-shadow:inset 3px 0 0 var(--neg)}
 .co-before .co-sig{font-weight:600;color:var(--text)}
 .co-own{color:var(--muted);font-size:13px}
+.co-edge{color:var(--text2,var(--text))}
+.co-edge.in{color:var(--pos);font-weight:600}   /* « In your edge » (brief edge T3): blue = what works */
 .co-bud{color:var(--text2,var(--text))}
 /* what works for you: the Friday recap and the Stats page (strength, leak, rule; the progress per habit) */
 .co-week{display:flex;flex-direction:column;gap:8px;margin:14px 0 4px;padding:14px 16px;border-radius:var(--r-tile,16px);background:var(--fill);text-align:left}

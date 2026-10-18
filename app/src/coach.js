@@ -482,9 +482,10 @@
     else if (p.valid && p.maxLoss && sum > -p.maxLoss) bud.push(mg && room < p.maxLoss + sum ? fill(T.bLeftDd, { m: usd(room), a: mg.name }) : fill(T.bLeft, { m: usd(p.maxLoss + sum) }));
     else if (!p.valid && x.form === 'shot' && typeof riskBudget === 'function') { const r = riskBudget(x.account, day); const a = r && (S.accounts || []).find((y) => y.id === x.account); if (r) bud.push(mg && room < r.left ? fill(T.bLeftDd, { m: usd(room), a: mg.name }) : fill(T.bLeftAcc, { m: usd(r.left), a: (a && a.name) || '' })); }
     if (p.valid && p.maxTrades && list.length < p.maxTrades) bud.push(fill(T.bCount, { n: list.length + 1, m: p.maxTrades }));
-    if (!sig && !bud.length) return '';
+    const eg = stop ? null : edgeBefore(x, day, list, p, at);   // « Your edge » first (brief edge T3), never next to a stop signal
+    if (!sig && !bud.length && !eg) return '';
     const b = bud.join(' · ').replace(/^./, (m) => m.toUpperCase());
-    return `<div class="co-before ${stop ? 'co-stop' : ''}" data-noi18n aria-live="polite"><span class="co-ic">${IC}</span><div><b>${T.title}</b> · <span>${T.bTitle}</span>${sig ? `<p class="co-sig">${esc2(sig)}</p>` : ''}${mine ? `<p class="co-own">${esc2(mine)}</p>` : ''}${b ? `<p class="co-bud">${esc2(b)}</p>` : ''}</div></div>`;
+    return `<div class="co-before ${stop ? 'co-stop' : ''}" data-noi18n aria-live="polite"><span class="co-ic">${IC}</span><div><b>${T.title}</b> · <span>${T.bTitle}</span>${eg ? `<p class="co-edge ${eg.in ? 'in' : ''}">${esc2(eg.text)}</p>` : ''}${sig ? `<p class="co-sig">${esc2(sig)}</p>` : ''}${mine ? `<p class="co-own">${esc2(mine)}</p>` : ''}${b ? `<p class="co-bud">${esc2(b)}</p>` : ''}</div></div>`;
   }
 
   /** the accounts at 75 % or more of their daily loss limit or of their drawdown, as their own page shows them (acctState):
@@ -932,13 +933,16 @@
   const ET = {
     en: { wd: ['', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays'], ses: { asia: 'Asia session', london: 'London session', nyam: 'New York morning', nypm: 'New York afternoon', other: 'outside the main sessions' },
       plan: { in: 'in your plan', out: 'off plan' }, nth: { 1: '1st trade of the day', 2: '2nd trade of the day' }, after: { win: 'after a win', loss: 'after a loss' }, emo: 'feeling {e}', perC: '{v} per contract',
-      sEdge: 'What works for you: {s}, {v} per trade over {n} trades ({a} % winners).' },
+      sEdge: 'What works for you: {s}, {v} on average over {n} trades ({a} % winners).',
+      bIn: 'In your edge: {s}, {w} winners out of {n}. Keep your usual size.', bOff: 'Off your usual edge.', bWorks: 'What works for you: {s}, {v} on average over {n} trades.' },
     fr: { wd: ['', 'le lundi', 'le mardi', 'le mercredi', 'le jeudi', 'le vendredi', 'le samedi', 'le dimanche'], ses: { asia: 'séance Asie', london: 'séance de Londres', nyam: 'matin de New York', nypm: 'après-midi de New York', other: 'hors des grandes séances' },
       plan: { in: 'dans ton plan', out: 'hors plan' }, nth: { 1: '1er trade du jour', 2: '2e trade du jour' }, after: { win: 'après un gain', loss: 'après une perte' }, emo: 'quand tu te sens {e}', perC: '{v} par contrat',
-      sEdge: 'Ce qui marche pour toi : {s}, {v} par trade sur {n} trades ({a} % gagnants).' },
+      sEdge: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades ({a} % gagnants).',
+      bIn: 'Dans ton edge : {s}, {w} gagnants sur {n}. Garde ta taille habituelle.', bOff: 'Hors de ton edge habituel.', bWorks: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades.' },
     es: { wd: ['', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos'], ses: { asia: 'sesión de Asia', london: 'sesión de Londres', nyam: 'mañana de Nueva York', nypm: 'tarde de Nueva York', other: 'fuera de las sesiones principales' },
       plan: { in: 'dentro de tu plan', out: 'fuera del plan' }, nth: { 1: '1.ª operación del día', 2: '2.ª operación del día' }, after: { win: 'tras una ganancia', loss: 'tras una pérdida' }, emo: 'cuando te sientes {e}', perC: '{v} por contrato',
-      sEdge: 'Lo que te funciona: {s}, {v} por operación en {n} operaciones ({a} % ganadoras).' },
+      sEdge: 'Lo que te funciona: {s}, {v} de media en {n} operaciones ({a} % ganadoras).',
+      bIn: 'En tu edge: {s}, {w} ganadoras de {n}. Mantén tu tamaño habitual.', bOff: 'Fuera de tu edge habitual.', bWorks: 'Lo que te funciona: {s}, {v} de media en {n} operaciones.' },
   }[L] || null;
   const E2 = ET || { wd: [], ses: {}, plan: {}, nth: {}, after: {}, emo: '{e}', perC: '{v}', sEdge: '{s}' };
   const slotWords = (hm) => { const a = min(hm), b = a + 30, p = (x) => String(x).padStart(2, '0'); return T.slot(p(Math.floor(a / 60)), p(a % 60), p(Math.floor(b / 60) % 24), p(b % 60)); };
@@ -959,7 +963,30 @@
     if (unit === 'R') return sg + Math.abs(v).toLocaleString(L === 'en' ? 'en-US' : L === 'fr' ? 'fr-CA' : 'es-ES', { maximumFractionDigits: 2 }) + (L === 'en' ? 'R' : ' R');
     return fill(E2.perC, { v: sg + usd(Math.round(v * 100)) });
   }
-  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, dims: EDGE_DIMS, words: edgeWords, value: edgeValue };
+  /** does the trade being entered fall in a condition? true / false, or null when the form does not tell yet (no setup picked…) */
+  function edgeMatch(c, ctx) {
+    for (const [d, v] of c.dims) {
+      const cv = ctx[d]; if (cv == null) return null;
+      if ((d === 'setup' ? String(cv).trim().toLowerCase() !== String(v).trim().toLowerCase() : String(cv) !== String(v))) return false;
+    }
+    return true;
+  }
+  /** the line of « Before this trade » (brief edge T3): positive first; « off your usual edge » only from the « trend » level */
+  function edgeBefore(x, day, list, p, at) {
+    const pr = edgeMine(); if (!pr || !pr.wins.length || !ET) return null;
+    const last = list[list.length - 1], hm = at != null ? String(Math.floor(at / 60)).padStart(2, '0') + ':' + String(at % 60).padStart(2, '0') : '';
+    const su = String(x.setup || '').trim(), dir = x.dir === 'long' || x.dir === 'short' ? x.dir : null;
+    let plan = '';   // no valid plan: never « in the plan »
+    if (p.valid) plan = !dir || (!su && p.setups.length) ? null : p.bias !== 'no_trade' && (p.bias === 'neutral' || ((p.bias === 'bullish') === (dir === 'long'))) && (!p.setups.length || p.setups.includes(su.toLowerCase())) ? 'in' : 'out';
+    const ctx = { setup: su || null, slot: at != null ? String(Math.floor(at / 30) * 30 / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(at / 30) * 30 % 60).padStart(2, '0') : null,
+      session: hm && typeof sessionFor === 'function' ? sessionFor(hm) : null, weekday: String(new Date(day + 'T12:00:00Z').getUTCDay() || 7), side: dir, plan, emo: null,
+      nth: list.length < 2 ? String(list.length + 1) : '', after: last ? (net(last) > 0 ? 'win' : net(last) < 0 ? 'loss' : '') : '', inst: x.inst ? String(x.inst).toUpperCase() : null };
+    const hit = pr.wins.find((c) => edgeMatch(c, ctx) === true);
+    if (hit) return { in: true, text: fill(ET.bIn, { s: edgeWords(hit), w: Math.round(hit.win * hit.n / 100), n: hit.n }) };
+    const top = pr.wins[0], off = top.level !== 'lead' && pr.wins.every((c) => edgeMatch(c, ctx) === false);
+    return { in: false, text: (off ? ET.bOff + ' ' : '') + fill(ET.bWorks, { s: edgeWords(top), v: edgeValue(top.avg, pr.unit), n: top.n }) };
+  }
+  window.SweepEdge = { profile: edgeProfile, mine: edgeMine, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch };
   window.SweepCoach = { trade: tradeNote, session, margin, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();
