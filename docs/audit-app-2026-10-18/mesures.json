@@ -1,0 +1,865 @@
+{
+ "390-dark": {
+  "#dashboard": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "a.nav-all «Calendrier ›» 69×20",
+    "a «Journal ›» 53×20",
+    "a «Tout voir ›» 60×20"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2209
+  },
+  "#trades": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2217
+  },
+  "#calendar": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2205
+  },
+  "#journal": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "button.nav-fold-t «À compléter Ouvrir» 322×20",
+    "button.nav-fold-t «À compléter Ouvrir» 322×20"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2209
+  },
+  "#journal/weekly": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [
+    "Break of structure"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2208
+  },
+  "#analytics": {
+   "over": 0,
+   "wide": [
+    "table.tbl «Discipline ≥ 90 % Moins de 90 % Trades 1» right=416",
+    "thead «Discipline ≥ 90 % Moins de 90 %» right=416",
+    "tr «Discipline ≥ 90 % Moins de 90 %» right=416",
+    "th.num «Moins de 90 %» right=416",
+    "tbody «Trades 101 12 P&L net +48 650,20 $ −9 21» right=416",
+    "tr «Trades 101 12» right=416",
+    "td.num «12» right=416",
+    "tr «P&L net +48 650,20 $ −9 212,60 $» right=416"
+   ],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2217
+  },
+  "#accounts": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#payouts": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "button.link.pz-paid «Marquer payé» 90×24",
+    "button.link.pz-paid «Marquer payé» 90×24",
+    "button.link.sh-link «Partager» 75×24"
+   ],
+   "clip": [],
+   "en": [
+    "Payout"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#news": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2208
+  },
+  "#settings": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "input «on» 18×18",
+    "a «Politique de confidentialité» 168×21",
+    "a «Conditions d'utilisation» 143×21",
+    "a «Avertissement sur les risques» 186×21",
+    "a «Contact» 51×21",
+    "a «makeitsweep.com» 115×21",
+    "a «tradingview.com» 89×16"
+   ],
+   "clip": [
+    "input «Question 4 de la checklist»",
+    "input «Question 7 de la checklist»",
+    "input «Question 12 de la checklist»"
+   ],
+   "en": [
+    "Supprime ton compte et toutes tes données : trades, journaux, comptes, payouts, "
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2217
+  },
+  "#import": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.link «Trades» 43×21"
+   ],
+   "clip": [],
+   "en": [
+    "Account Reports → Performance",
+    "Dans Completed Orders, clic droit sur les en-têtes : ajoute Account, Status, Buy"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2206
+  },
+  "#subscription": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2206
+  },
+  "#referral": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "button.link.rf-terms «Conditions du programme» 154×20"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2209
+  },
+  "#feedback": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2208
+  },
+  "#progress": {
+   "over": 0,
+   "wide": [
+    "table.tbl «Discipline ≥ 90 % Moins de 90 % Trades 1» right=416",
+    "thead «Discipline ≥ 90 % Moins de 90 %» right=416",
+    "tr «Discipline ≥ 90 % Moins de 90 %» right=416",
+    "th.num «Moins de 90 %» right=416",
+    "tbody «Trades 101 12 P&L net +48 650,20 $ −9 21» right=416",
+    "tr «Trades 101 12» right=416",
+    "td.num «12» right=416",
+    "tr «P&L net +48 650,20 $ −9 212,60 $» right=416"
+   ],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2214
+  },
+  "#admin": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "summary «Ligne cPanel» 96×30",
+    "summary «Ligne cPanel» 96×30",
+    "summary «Ligne cPanel» 96×30",
+    "summary «Ligne cPanel» 96×30",
+    "summary «Ligne cPanel» 96×30",
+    "summary «Ligne cPanel» 96×30",
+    "button.link «Actualiser» 65×21",
+    "button.link «» 35×18"
+   ],
+   "clip": [],
+   "en": [
+    "Open to anyone with the link",
+    "Take Profit Trader"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2213
+  },
+  "#trade/demo-t-mve89htg00h3ul": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.link.back «‹ Trades» 52×21",
+    "button.1 «» 28×48",
+    "button.2 «» 28×48",
+    "button.3 «» 28×48",
+    "button.4.on «» 28×48",
+    "button.5 «» 28×48",
+    "button.1 «» 28×48",
+    "button.2 «» 28×48",
+    "button.3 «» 28×48",
+    "button.4.on «» 28×48",
+    "button.5 «» 28×48",
+    "button.link.ai-only «✦ Suggérer un setup» 126×20"
+   ],
+   "clip": [],
+   "en": [
+    "Break of Structure"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2211
+  },
+  "#account/demo-a1": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "button.nav-accname «Compte 1» 102×25",
+    "input «on» 18×18",
+    "input «» 20×44",
+    "button.link.sh-link «Partager» 75×24"
+   ],
+   "clip": [],
+   "en": [
+    "Payout",
+    "Payout 1",
+    "Payout minimum ($)",
+    "Profit factor",
+    "Profit minimum par jour ($)"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2215
+  },
+  "SHEET:new": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "button.link «Annuler» 50×21"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2422
+  },
+  "SHEET:newphoto": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "button.link «Annuler» 50×21",
+    "button «Long» 80×27",
+    "button «Short» 80×27",
+    "button «Oui» 42×27",
+    "button «Non» 44×27",
+    "button «N/A» 42×27",
+    "button «Oui» 42×27",
+    "button «Non» 44×27",
+    "button «N/A» 42×27",
+    "button «Oui» 42×27",
+    "button «Non» 44×27"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 3946
+  },
+  "SHEET:manual": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "a.link «Annuler» 50×21",
+    "button.link.nav-real-l «J’ai le P&L de ma plateforme» 178×28",
+    "button «Oui» 44×30",
+    "button «Non» 44×30",
+    "button «N/A» 44×30",
+    "button «Oui» 44×30",
+    "button «Non» 44×30",
+    "button «N/A» 44×30",
+    "button «Oui» 44×30",
+    "button «Non» 44×30",
+    "button «N/A» 44×30"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2717
+  },
+  "SHEET:plan": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "button.link.nav-setups-open «+ Mes setups (facultatif)» 149×28",
+    "button.link «Afficher le graphique» 126×20"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2716
+  }
+ },
+ "1300-dark": {
+  "#dashboard": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2209
+  },
+  "#trades": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Break of structure"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2214
+  },
+  "#calendar": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#journal": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#journal/weekly": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Break of structure"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2210
+  },
+  "#analytics": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2212
+  },
+  "#accounts": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#payouts": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#news": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#settings": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Supprime ton compte et toutes tes données : trades, journaux, comptes, payouts, "
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2213
+  },
+  "#import": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Account Reports → Performance",
+    "Dans Completed Orders, clic droit sur les en-têtes : ajoute Account, Status, Buy"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2208
+  },
+  "#subscription": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2205
+  },
+  "#referral": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2206
+  },
+  "#feedback": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2206
+  },
+  "#progress": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2212
+  },
+  "#admin": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Open to anyone with the link",
+    "Take Profit Trader"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2213
+  },
+  "#trade/demo-t-mve89htg00h3ul": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Break of Structure"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2210
+  },
+  "#account/demo-a1": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [
+    "Break of structure",
+    "Payout",
+    "Payout 1",
+    "Payout minimum ($)",
+    "Profit factor",
+    "Profit minimum par jour ($)"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2216
+  },
+  "SHEET:new": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2417
+  },
+  "SHEET:newphoto": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 3937
+  },
+  "SHEET:manual": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2716
+  },
+  "SHEET:plan": {
+   "over": 0,
+   "wide": [],
+   "small": [],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2717
+  }
+ },
+ "390-light": {
+  "#dashboard": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "a.nav-all «Calendrier ›» 69×20",
+    "a «Journal ›» 53×20",
+    "a «Tout voir ›» 60×20"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2205
+  },
+  "#trades": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2215
+  },
+  "#analytics": {
+   "over": 0,
+   "wide": [
+    "table.tbl «Discipline ≥ 90 % Moins de 90 % Trades 1» right=416",
+    "thead «Discipline ≥ 90 % Moins de 90 %» right=416",
+    "tr «Discipline ≥ 90 % Moins de 90 %» right=416",
+    "th.num «Moins de 90 %» right=416",
+    "tbody «Trades 101 12 P&L net +48 650,20 $ −9 21» right=416",
+    "tr «Trades 101 12» right=416",
+    "td.num «12» right=416",
+    "tr «P&L net +48 650,20 $ −9 212,60 $» right=416"
+   ],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2212
+  },
+  "#accounts": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28"
+   ],
+   "clip": [],
+   "en": [
+    "Profit factor"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2207
+  },
+  "#settings": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "input «on» 18×18",
+    "a «Politique de confidentialité» 168×21",
+    "a «Conditions d'utilisation» 143×21",
+    "a «Avertissement sur les risques» 186×21",
+    "a «Contact» 51×21",
+    "a «makeitsweep.com» 115×21",
+    "a «tradingview.com» 89×16"
+   ],
+   "clip": [
+    "input «Question 4 de la checklist»",
+    "input «Question 7 de la checklist»",
+    "input «Question 12 de la checklist»"
+   ],
+   "en": [
+    "Supprime ton compte et toutes tes données : trades, journaux, comptes, payouts, "
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2217
+  },
+  "#trade/demo-t-mve89htg00h3ul": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.link.back «‹ Trades» 52×21",
+    "button.1 «» 28×48",
+    "button.2 «» 28×48",
+    "button.3 «» 28×48",
+    "button.4.on «» 28×48",
+    "button.5 «» 28×48",
+    "button.1 «» 28×48",
+    "button.2 «» 28×48",
+    "button.3 «» 28×48",
+    "button.4.on «» 28×48",
+    "button.5 «» 28×48",
+    "button.link.ai-only «✦ Suggérer un setup» 126×20"
+   ],
+   "clip": [],
+   "en": [
+    "Break of Structure"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2212
+  },
+  "#account/demo-a1": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "button.nav-accname «Compte 1» 102×25",
+    "input «on» 18×18",
+    "input «» 20×44",
+    "button.link.sh-link «Partager» 75×24"
+   ],
+   "clip": [],
+   "en": [
+    "Payout",
+    "Payout 1",
+    "Payout minimum ($)",
+    "Profit factor",
+    "Profit minimum par jour ($)"
+   ],
+   "errs": [],
+   "bad": [],
+   "ms": 2215
+  },
+  "SHEET:new": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "button.link «Annuler» 50×21"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2418
+  },
+  "SHEET:newphoto": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "button.link «Annuler» 50×21",
+    "button «Long» 80×27",
+    "button «Short» 80×27",
+    "button «Oui» 42×27",
+    "button «Non» 44×27",
+    "button «N/A» 42×27",
+    "button «Oui» 42×27",
+    "button «Non» 44×27",
+    "button «N/A» 42×27",
+    "button «Oui» 42×27",
+    "button «Non» 44×27"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 3941
+  },
+  "SHEET:manual": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "a.link «Annuler» 50×21",
+    "button.link.nav-real-l «J’ai le P&L de ma plateforme» 178×28",
+    "button «Oui» 44×30",
+    "button «Non» 44×30",
+    "button «N/A» 44×30",
+    "button «Oui» 44×30",
+    "button «Non» 44×30",
+    "button «N/A» 44×30",
+    "button «Oui» 44×30",
+    "button «Non» 44×30",
+    "button «N/A» 44×30"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2715
+  },
+  "SHEET:plan": {
+   "over": 0,
+   "wide": [],
+   "small": [
+    "button.who «M» 32×28",
+    "a.nav-all «Calendrier ›» 64×18",
+    "a «Journal ›» 50×18",
+    "a «Tout voir ›» 56×18",
+    "button.link.nav-setups-open «+ Mes setups (facultatif)» 149×28",
+    "button.link «Afficher le graphique» 126×20"
+   ],
+   "clip": [],
+   "en": [],
+   "errs": [],
+   "bad": [],
+   "ms": 2716
+  }
+ }
+}
