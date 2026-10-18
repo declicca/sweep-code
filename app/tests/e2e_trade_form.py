@@ -10,7 +10,9 @@ never from the app's own table:
  - 6E keeps its prices to the pip (before 16 Oct.: rounded to the cent, 1.0850 → 1.09); a symbol outside Sweep's list (ZC):
    a new trade asks for its P&L, an edited one keeps the P&L the trader gave (before: recomputed at $0);
  - the quick sheet (net P&L only, audit of 16 Oct.): « Long / Short » next to the P&L, asked before saving (before: « long »
-   made up); a short with a bearish bias is not « against your bias »; the entry time is the New York time of the save.
+   made up); a short with a bearish bias is not « against your bias »; the entry time is the New York time of the save;
+ - the setup in one tap (Edge T1): on both forms, the day's plan setups first; the one tapped is saved on the trade
+   and joins the trader's setups; the row scrolls on its own line (no page overflow).
 """
 import asyncio, json, random, sys
 from playwright.async_api import async_playwright
@@ -82,7 +84,7 @@ async def main():
       ze = await pg.evaluate("(id)=>{const t=getDoc('trades',id); return [t.instrument, t.pnl_c, !!t.pnl_check]}", zc['id'])
       ok(ze == ['ZC', 12500, False], f'{tag} ZC edited and saved: the +$125 the trader gave is kept ({ze})')
       # the quick sheet: only the net P&L and the side
-      await pg.evaluate("() => { editDoc('settings','settings', d => { d.add_mode_pref = 'shot'; }); const D = todayStr(); put('journals', Object.assign({}, getDoc('journals', D) || {}, { id: D, pre: { bias: 'bearish', max_loss: '1000', saved_at: Math.floor(Date.now() / 1000) } })); }")
+      await pg.evaluate("() => { editDoc('settings','settings', d => { d.add_mode_pref = 'shot'; }); const D = todayStr(); put('journals', Object.assign({}, getDoc('journals', D) || {}, { id: D, pre: { bias: 'bearish', max_loss: '1000', setups: ['Opening range breakout'], saved_at: Math.floor(Date.now() / 1000) } })); }")
       await pg.wait_for_timeout(600)
       await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open', timeout=8000); await pg.wait_for_timeout(500)
       side = await pg.evaluate("(()=>{const n=document.querySelector('.nav-am-net input'), d=document.querySelector('.nav-am .nav-am-dir .seg'); if(!n||!d) return null; const a=n.getBoundingClientRect(), b=d.getBoundingClientRect(); return {open: !d.closest('details') || d.closest('details').open, row: Math.abs(a.bottom-b.bottom)<8 && b.left>a.right, on: d.querySelectorAll('button.on').length}})()")
@@ -98,6 +100,23 @@ async def main():
       ok(q['dir'] == 'short' and q['pnl'] == -40000, f'{tag} quick short −$400: saved « short » ({q["dir"]}, {q["pnl"]})')
       ok(q['time'] and q['time'][:5] >= ny and q['date'] == q['today'], f'{tag} the entry time is the New York time of the save ({q["time"]}, {ny} ET, session {q["date"]})')
       ok('against' not in q['coach'].lower() and 'bias' not in q['coach'].lower(), f'{tag} bearish bias, short trade: not « against your bias » ({q["coach"][:90]})')
+      # Edge T1: the setup in one tap on the quick sheet
+      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); await pg.wait_for_timeout(400)
+      row = await pg.evaluate("(()=>{const c=[...document.querySelectorAll('.nav-am .nav-sp [data-sp]')].map(b=>b.dataset.sp), r=document.querySelector('.nav-am .nav-sp-row').getBoundingClientRect(), n=document.querySelector('.nav-am-net input').getBoundingClientRect(); return {c, below: r.top>n.bottom-2, over: document.documentElement.scrollWidth>innerWidth+1, inside: r.right<=innerWidth+1}})()")
+      ok(row['c'][:1] == ['Opening range breakout'] and row['below'] and not row['over'] and row['inside'], f'{tag} quick sheet: setup chips under the P&L, the plan setup first, no overflow ({row})')
+      await pg.locator('.nav-am [data-sp="Opening range breakout"]').click()
+      await pg.locator('.nav-am input[data-am-f="net"]').fill('250'); await pg.locator('.nav-am [data-am-seg="dir"][data-v="long"]').click(); await pg.wait_for_timeout(200)
+      await pg.locator('.nav-am [data-am="save"]').click(); await pg.wait_for_timeout(1500)
+      st = await pg.evaluate("(()=>{const t=S.trades[S.trades.length-1]; return [t.setup, t.real_pnl_c, (S.settings.setups||[]).includes('Opening range breakout')]})()")
+      ok(st == ['Opening range breakout', 25000, True], f'{tag} quick trade with a setup: saved on the trade and kept in the trader\'s setups ({st})')
+      # and on the manual form
+      await pg.evaluate("openTicket(null,{manual:true})"); await pg.wait_for_selector('#tkSlide.open .nav-sp', timeout=8000); await pg.wait_for_timeout(300)
+      await pg.locator('#tkSlide [data-sp="Opening range breakout"]').click(); await pg.locator('#tkSlide [data-sp="Opening range breakout"]').click()
+      cleared = await pg.evaluate("TK.setup")
+      await pg.locator('#tkSlide [data-sp="Opening range breakout"]').click()
+      mt = await pg.evaluate(SAVE, {'tk': {'account': 'tf-a', 'inst': 'NQ', 'dir': 'long', 'qty': 1, 'entry': 21000, 'exit': 21004}})
+      ms = await pg.evaluate("S.trades[S.trades.length-1].setup")
+      ok(cleared == '' and ms == 'Opening range breakout' and mt.get('pnl') == 8000, f'{tag} manual form: a second tap clears it, the setup tapped is saved ({cleared!r}, {ms!r}, {mt.get("pnl")})')
       ok(not errs, f'{tag} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
       await ctx.close()
     await br.close()

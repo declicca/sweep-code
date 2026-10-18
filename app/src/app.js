@@ -4231,6 +4231,7 @@ async function tkSave() {
     })),
     duration_s: o - i,
     session: sessionFor(s[0].t.slice(11, 16)),
+    setup: TK.setup || c.setup || "",   // picked in one tap on a new trade (Edge T1); an edit keeps it
     notes: TK.notes.trim(),
     adds: a.adds,
     partials: a.partials
@@ -4241,6 +4242,7 @@ async function tkSave() {
     const b = AUTO_RULES[v].q;
     c.discipline[b] !== "n" && (c.discipline[b] = "n");
   }
+  !TK.id && TK.setup && window.SweepSetupPick && SweepSetupPick.keep(TK.setup);
   const u = TK.id ? [] : [ ...TK.copyTo ].filter(v => v !== TK.account && acct(v));
   u.length && (c.copy_group = uid()), put("trades", c), lsSet("tj.last", {
     account: TK.account,

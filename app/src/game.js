@@ -2197,7 +2197,7 @@
     };
   }
   paint();
-  window.SweepGame = { refresh: () => load(true), openPlan, openReview, weekBrief,
+  window.SweepGame = { refresh: () => load(true), openPlan, openReview, weekBrief, suggestedSetups: SUGGESTED_SETUPS,
     // the plan first (once a day) before a new trade — used by the screenshot way of adding a trade too
     state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
     planFirst: (then) => { if (!document.getElementById('gSheet') && planGateNeeded()) { openPlan(G.today.day, { then }); return true; } return false; }, openJournal: () => openJournal(), openGoal: () => openGoalQuestions(), t,

@@ -913,6 +913,11 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 .nav-am-opts button{padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--text);font:inherit;font-size:14px;text-align:left;cursor:pointer}
 .nav-am-opts button.on{background:var(--posbg);color:var(--pos);font-weight:600}
 .nav-am-copy.tk-copies{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:-4px}
+/* Edge T1: the setup in one tap (quick sheet and manual form), one scrolling line */
+.nav-sp > span small{font-weight:400}
+.nav-sp-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0;margin:0 -2px}
+.nav-sp-row::-webkit-scrollbar{display:none}
+.nav-sp-row .chip{flex-shrink:0;white-space:nowrap}
 .nav-am-copy.tk-copies .help{margin-right:2px}
 .nav-am-selb{font-size:14.5px;min-height:40px;border-radius:12px}
 .nav-live{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--neg);color:#111;font-size:10px;font-weight:700;letter-spacing:.06em;vertical-align:2px;line-height:1.5}

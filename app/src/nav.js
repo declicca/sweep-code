@@ -2237,7 +2237,7 @@ window.SweepMO = window.SweepMO || class {
   /* 2. the screenshot form */
   const SH = { file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: {} };
   function shotForm(opts) {
-    Object.assign(SH, { dupOk: false, batch: [], open: false, copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || today(), qty: '1' } });
+    Object.assign(SH, { dupOk: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || today(), qty: '1' } });
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
     SH.f.account = (accs[0] || {}).id || '';
     { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').forEach((x) => SH.copy.add(x.id)); }
@@ -2268,6 +2268,7 @@ window.SweepMO = window.SweepMO || class {
         ${accs.length > 1 ? `<div class="tk-copies nav-am-wide nav-am-copy"><span class="help">${t('alsoS')}</span>${accs.filter((a) => a.id !== SH.f.account).map((a) => `<button type="button" class="chip ${SH.copy.has(a.id) ? 'on' : ''}" data-am-copy="${esc2(a.id)}">${esc2(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</button>`).join('')}</div>` : ''}
         ${SH.batch.length ? batchList() : `<label class="tk-f nav-am-net"><span>${t('net')}</span><div class="tk-in"><input data-am-f="net" inputmode="decimal" value="${esc2(SH.f.net ?? '')}" placeholder="${pnl != null ? ((pnl - (SH.f.fees || 0)) / 100).toFixed(2) : '+250'}"></div></label>
         <div class="tk-f nav-am-dir"><span>${t('dir')}</span>${seg('dir', [['long', t('long')], ['short', t('short')]], SH.dir)}</div>
+        ${window.SweepSetupPick ? `<div class="nav-am-wide">${SweepSetupPick.html(SH.f.date, SH.setup)}</div>` : ''}
         <label class="tk-f nav-am-risk"><span>${t('risk')}</span><div class="tk-in"><input data-am-f="risk" inputmode="decimal" value="${esc2(SH.f.risk ?? '')}" placeholder="$"></div></label>
         <div class="nav-am-r nav-am-wide">${rLine()}</div>
         <details class="nav-am-more-d nav-am-wide" ${SH.open ? 'open' : ''}><summary>${t('verify')}<small>${verifyLine()}</small></summary><div class="nav-am-grid">
@@ -2581,7 +2582,7 @@ window.SweepMO = window.SweepMO || class {
     const emo = { before: [...SH.emo] }; if (SH.conf) emo.confidence = SH.conf; if (SH.exec) emo.execution = SH.exec;
     const doc = { id: typeof uid === 'function' ? uid() : 't' + Date.now(), account_id: SH.f.account, instrument: SH.f.inst, date: SH.f.date || today(), session_date: true, entry_time: tm, exit_time: SH.f.exitTime ? String(SH.f.exitTime).slice(0, 8) : '', direction: SH.dir, contracts: q,
       entry: e, exit: x, pnl_c: pnl, pnl_manual: true, real_pnl_c: net, risk_c: num(SH.f.risk) ? Math.round(Math.abs(num(SH.f.risk)) * 100) : null, stop: null, target: null, fees_c: SH.f.fees || null,
-      discipline: Object.assign({}, SH.disc), emo, review: {}, shots: SH.shot ? [SH.shot] : [], tags: [], setup: '', notes: '', source: 'screenshot' };
+      discipline: Object.assign({}, SH.disc), emo, review: {}, shots: SH.shot ? [SH.shot] : [], tags: [], setup: SH.setup || '', notes: '', source: 'screenshot' };
     const same = !quiet && !SH.dupOk && dupTrade(doc, doc.account_id);   // the same trade saved twice: asked once
     if (same) {
       const hm = String(same.entry_time || '').slice(0, 5), at = LANG === 'fr' ? `${+hm.slice(0, 2)} h ${hm.slice(3, 5)}` : hm;
@@ -2594,6 +2595,7 @@ window.SweepMO = window.SweepMO || class {
       put('trades', doc);
       copies.forEach((id, k) => put('trades', window.SweepCopy ? SweepCopy.make(doc, id, doc.copy_group, k) : Object.assign(JSON.parse(JSON.stringify(doc)), { id: typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2), account_id: id })));
     }
+    if (SH.setup && window.SweepSetupPick) SweepSetupPick.keep(SH.setup);
     if (quiet) return;
     close();
     if (typeof toast === 'function') toast(t('saved'));
@@ -2602,8 +2604,9 @@ window.SweepMO = window.SweepMO || class {
 
   /* events */
   document.addEventListener('click', (e) => {
-    const a = e.target.closest && e.target.closest('[data-am],[data-am-pickf],[data-am-sel],[data-am-copy],[data-am-seg],[data-am-emo],[data-am-rm]'); if (!a) return;
+    const a = e.target.closest && e.target.closest('[data-am],[data-am-pickf],[data-am-sel],[data-am-copy],[data-am-seg],[data-am-emo],[data-am-rm],[data-sp]'); if (!a) return;
     const box = a.closest('.nav-am'); if (!box) return;
+    if (a.dataset.sp != null) { SH.setup = window.SweepSetupPick ? SweepSetupPick.tap(a, SH.setup) : ''; return; }   // in place: the row keeps its scroll
     if (a.dataset.amRm) { SH.batch = SH.batch.filter((b) => b.id !== a.dataset.amRm); if (SH.batch.length === 1) { const b = SH.batch[0]; SH.batch = []; Object.assign(SH, { file: b.file, src: b.src, shot: b.shot, dir: b.f.dir || SH.dir }); Object.assign(SH.f, b.f); } paint(); return; }
     if (a.dataset.amSel) { SH.openPick = SH.openPick === a.dataset.amSel ? null : a.dataset.amSel; paint(); return; }
     if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; if (a.dataset.amPickf === 'account') SH.f.accountPicked = true; SH.openPick = null; if (a.dataset.amPickf === 'account') SH.copy.delete(a.dataset.v); paint(); return; }
@@ -5135,8 +5138,8 @@ document.addEventListener('click', (e) => {
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const W = ({ en: ['Yes', 'No', 'N/A', 'See more', 'Checklist', 'Setup, fees and review are on the next page.'], fr: ['Oui', 'Non', 'N/A', 'Voir plus', 'Checklist', 'Le setup, les frais et le bilan sont sur la page suivante.'],
-    es: ['Sí', 'No', 'N/A', 'Ver más', 'Checklist', 'El setup, las comisiones y la revisión están en la página siguiente.'] })[L];
+  const W = ({ en: ['Yes', 'No', 'N/A', 'See more', 'Checklist', 'Fees and review are on the next page.'], fr: ['Oui', 'Non', 'N/A', 'Voir plus', 'Checklist', 'Les frais et le bilan sont sur la page suivante.'],
+    es: ['Sí', 'No', 'N/A', 'Ver más', 'Checklist', 'Las comisiones y la revisión están en la página siguiente.'] })[L];
   let ans = {}, pending = null;   // pending: the answers of the trade being saved (and its copies)
   function qs() { return ((typeof S !== 'undefined' && S.settings && S.settings.questions) || []).filter((q) => q.active !== false); }
   new window.SweepMO(() => {
@@ -5171,6 +5174,54 @@ document.addEventListener('click', (e) => {
     Object.keys(orig).forEach((k) => { w[k] = orig[k]; });
     window.put = w;
   })(0);
+})();
+
+/* Edge T1 · the setup in one tap, on the quick sheet and the manual form (optional): the day's plan setups first,
+ * then the trader's own (Settings, then the most used on their trades); common setups while they have fewer than 3 */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const W = ({ en: ['Setup', 'optional'], fr: ['Setup', 'facultatif'], es: ['Setup', 'opcional'] })[L] || ['Setup', 'optional'];
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const low = (s) => String(s || '').trim().toLowerCase();
+  function list(day) {
+    const out = [], seen = new Set();
+    const add = (s) => { const v = String(s || '').trim().slice(0, 40); if (v && !seen.has(low(v))) { seen.add(low(v)); out.push(v); } };
+    const j = typeof getDoc === 'function' ? getDoc('journals', day) : null;
+    ((j && j.pre && j.pre.setups) || []).forEach(add);
+    ((typeof S !== 'undefined' && S.settings && S.settings.setups) || []).forEach(add);
+    const n = {}; ((typeof S !== 'undefined' && S.trades) || []).filter((t) => !t.demo && t.setup).slice(-80).forEach((t) => { n[t.setup] = (n[t.setup] || 0) + 1; });
+    Object.entries(n).sort((a, b) => b[1] - a[1]).forEach((x) => add(x[0]));
+    if (out.length < 3) ((window.SweepGame && SweepGame.suggestedSetups) || []).forEach(add);
+    return out.slice(0, 12);
+  }
+  function html(day, cur) {
+    const l = list(day); if (cur && !l.some((x) => low(x) === low(cur))) l.unshift(cur);
+    return `<div class="tk-f nav-sp" data-noi18n><span>${W[0]} <small class="muted">· ${W[1]}</small></span><div class="nav-sp-row">${l.map((x) => `<button type="button" class="chip ${low(x) === low(cur) ? 'on' : ''}" data-sp="${esc2(x)}">${esc2(x)}</button>`).join('')}</div></div>`;
+  }
+  /** a tap: one setup at most, a second tap clears it; returns the new value */
+  function tap(b, cur) {
+    const v = low(b.dataset.sp) === low(cur) ? '' : b.dataset.sp;
+    b.closest('.nav-sp-row').querySelectorAll('[data-sp]').forEach((x) => x.classList.toggle('on', !!v && x === b));
+    return v;
+  }
+  /** a setup used on a trade joins the trader's list (as when it is picked in the plan) */
+  function keep(v) {
+    v = String(v || '').trim().slice(0, 40); if (!v || typeof editDoc !== 'function') return;
+    if (((S.settings && S.settings.setups) || []).some((x) => low(x) === low(v))) return;
+    editDoc('settings', 'settings', (r) => { r.setups = r.setups || []; if (!r.setups.some((x) => low(x) === low(v))) r.setups.push(v); });
+  }
+  window.SweepSetupPick = { list, html, tap, keep };
+  // the manual form (a new trade): the row above the notes
+  new window.SweepMO(() => {
+    const tk = document.querySelector('#tkSlide.open'); if (!tk || typeof TK === 'undefined' || !TK || TK.id || tk.querySelector('.nav-sp')) return;
+    const notes = tk.querySelector('[data-tk="notes"]'), at = notes && notes.closest('.tk-f'); if (!at) return;
+    at.insertAdjacentHTML('beforebegin', html(TK.date, TK.setup));
+  }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('#tkSlide [data-sp]'); if (!b || typeof TK === 'undefined' || !TK) return;
+    TK.setup = tap(b, TK.setup);
+  });
 })();
 
 /* D16 · « This trade looks like the one at 10:32. Add it anyway? » on the manual form (brief 02, part 1): the same rule as the
