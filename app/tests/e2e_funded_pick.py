@@ -29,8 +29,13 @@ with sync_playwright() as p:
     ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Sam', 'experience': 'gt1'}), headers=H)
     pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account] [data-st-ph0]', timeout=20000); pg.wait_for_timeout(600)
-    def tap(sel):
-      el = pg.locator(sel).first; el.scroll_into_view_if_needed(); el.click(); pg.wait_for_timeout(250)
+    def tap(sel):   # the first-run form can be redrawn by a late sync while it is tapped: find the button again
+      for n in range(3):
+        try: el = pg.locator(sel).first; el.scroll_into_view_if_needed(timeout=5000); el.click(timeout=5000); break
+        except Exception:
+          if n == 2: raise
+          pg.wait_for_timeout(600)
+      pg.wait_for_timeout(250)
     F = 'form[data-form=account]'
     # R13: Topstep, funded
     tap(f'{F} [data-st-ph0=funded]'); tap(f'{F} [data-st-firm=topstep]')
