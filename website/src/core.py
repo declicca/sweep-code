@@ -379,7 +379,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 {noindex}
 <link rel="canonical" href="{url}">
 {alts}
-<link rel="preload" href="/assets/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/GeistMono-Variable.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.classList.add("js")</script>
 <link rel="stylesheet" href="/assets/{ASSETS["system"]}">
 {f"<style>{PAGE_CSS[page]}</style>" if page in SYSTEM_PAGES and page in PAGE_CSS else ""}

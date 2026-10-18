@@ -244,6 +244,10 @@ Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set X-Frame-Options "DENY"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 Header always set Strict-Transport-Security "max-age=31536000"
+# pages only load from the site itself (and call the app); inline scripts and styles stay allowed (the site uses them). Not on files like the PDFs
+<FilesMatch "\\.html$">
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://app.makeitsweep.com; media-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+</FilesMatch>
 <FilesMatch "\\.woff2$">
 Header set Cache-Control "public, max-age=2592000, immutable"
 </FilesMatch>

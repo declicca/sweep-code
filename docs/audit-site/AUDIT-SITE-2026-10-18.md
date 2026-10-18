@@ -20,6 +20,14 @@ L'audit cherche donc ce que ces tests ne voient pas.
 
 **Déjà corrigé pendant l'audit** (commit local 81ec616) : sur ordinateur, à l'accueil, la partie « Payouts » collait aux liens de la partie « Prop firms » (10 px). Il y a maintenant 80 px entre deux parties hautes de la narration.
 
+## Avancement (18 oct., en ligne)
+
+- Étape 1 (faits faux, textes légaux), étape 2 (ce que le site ne disait pas), étape 3 (textes et traductions) : faites.
+- Étape 4 : 4a serveur et performance, 4b accessibilité et visuel, 4c SEO : faites ; aussi une CSP sur les pages et le préchargement de Geist Mono.
+- Reste à Mateo : les 5 décisions ci-dessous (Quantower, captures en Free, comptes Pro, synchro Rithmic/Tradovate, bleu des boutons), la compression du serveur (cPanel › Optimiser le site Web › Compresser tout le contenu), l'installation de `ffmpeg` pour réencoder la vidéo de l'accueil.
+- Reste en attente : étape 5 (captures et vidéos de la session App).
+- Laissés volontairement : copies de 300 px des vignettes de téléphone (gain seulement sur les écrans 1x), textes des paires firme contre firme (proches par construction, déjà chiffrés), HSTS `includeSubDomains` (sous-domaines cPanel non vérifiés), Geist Mono réduite aux chiffres (demande d'installer un outil de police ; préchargée en attendant).
+
 Gravité : **haute** = un fait faux ou un texte légal inexact ; **moyenne** = un manque visible ou une incohérence ; **basse** = de la finition.
 
 ---
