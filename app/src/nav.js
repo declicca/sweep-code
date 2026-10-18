@@ -2249,11 +2249,19 @@ window.SweepMO = window.SweepMO || class {
   // the coach before this trade (brief 03 step 3, src/coach.js): one trade only (not a batch of screenshots)
   const coachBefore = () => (!SH.batch.length && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: 'shot', account: SH.f.account, date: SH.f.date, qty: +SH.f.qty || 0, time: String(SH.f.time || '').slice(0, 5), setup: SH.setup, dir: SH.dir, inst: SH.f.inst }) : '');
   const coachPaint = () => { const w = document.querySelector('.nav-am-shot .nav-am-co'); if (w) w.innerHTML = coachBefore(); };
+  document.addEventListener('sweep:qs', () => { if (document.querySelector('.nav-am-shot')) setTimeout(repaintKeep, 120); });   // a criterion added on the form
+  function repaintKeep() {
+    const r = document.querySelector('.nav-am-shot .nav-sp-row'), x = r ? r.scrollLeft : 0, a = document.querySelector('.nav-am-shot'), b = a && a.querySelector('.nav-am-in'), ya = a ? a.scrollTop : 0, yb = b ? b.scrollTop : 0;
+    paint();
+    const r2 = document.querySelector('.nav-am-shot .nav-sp-row'); if (r2) r2.scrollLeft = x;
+    if (a) a.scrollTop = ya; const b2 = a && a.querySelector('.nav-am-in'); if (b2) b2.scrollTop = yb;
+  }
   function paint() {
     const el = document.querySelector('.nav-am-shot .nav-am-in'); if (!el) return;
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
     const insts = typeof INSTR !== 'undefined' ? Object.keys(INSTR) : ['NQ', 'MNQ', 'ES', 'MES', 'GC', 'MGC', 'CL'];
-    const qs = ((S.settings && S.settings.questions) || []).filter((q) => q.active);
+    const QO = window.SweepQs ? SweepQs.order(SH.setup) : { list: ((S.settings && S.settings.questions) || []).filter((q) => q.active), shown: 3 };   // edge T7: the setup's criteria, the question that separates, the acquired ones
+    const qs = QO.list, qn = QO.shown, qLab = (q) => (window.SweepQs ? SweepQs.label(q) : esc2(q.text));
     const emos = typeof EMO !== 'undefined' ? EMO : ['Calm', 'Confident', 'Patient', 'Focused', 'FOMO', 'Fearful', 'Frustrated', 'Greedy', 'Hesitant', 'Impulsive'];
     const pnl = autoPnl();
     const fld = (k, label, attrs = '') => `<label class="tk-f"><span>${label}</span><div class="tk-in"><input data-am-f="${k}" value="${esc2(SH.f[k] ?? '')}" ${attrs}></div></label>`;
@@ -2280,8 +2288,8 @@ window.SweepMO = window.SweepMO || class {
         </div></details>`}
       </div>
       ${/* brief 03 step 5: 3 questions (the trader's first three), emotions in one tap; the rest, confidence and execution under « More » */ ''}
-      ${qs.length ? `<section class="nav-am-sec"><h3>${t('disc')}</h3>${(SH.allQ ? qs : qs.filter((q, i) => i < 3 || SH.disc[q.id])).map((q) => `<div class="nav-am-q"><span>${esc2(q.text)}</span>${seg('d:' + q.id, [['y', t('yes')], ['n', t('no')], ['na', t('na')]], SH.disc[q.id] || '')}</div>`).join('')}
-        <div class="nav-am-qmore">${!SH.allQ && qs.length > 3 ? `<button type="button" class="chip nav-am-more" data-am="q-more">${t('moreQ').replace('{n}', qs.filter((q, i) => i >= 3 && !SH.disc[q.id]).length)}</button>` : ''}<button type="button" class="chip nav-am-more" data-am="q-add">${t('addQ')}</button></div></section>` : ''}
+      ${qs.length ? `<section class="nav-am-sec"><h3>${t('disc')}</h3>${(SH.allQ ? qs : qs.filter((q, i) => i < qn || SH.disc[q.id])).map((q) => `<div class="nav-am-q"><span>${qLab(q)}</span>${seg('d:' + q.id, [['y', t('yes')], ['n', t('no')], ['na', t('na')]], SH.disc[q.id] || '')}</div>`).join('')}
+        <div class="nav-am-qmore">${!SH.allQ && qs.length > qn ? `<button type="button" class="chip nav-am-more" data-am="q-more">${t('moreQ').replace('{n}', qs.filter((q, i) => i >= qn && !SH.disc[q.id]).length)}</button>` : ''}<button type="button" class="chip nav-am-more" data-am="q-add">${t('addQ')}</button>${window.SweepQs ? SweepQs.addLink(SH.setup) : ''}</div></section>` : ''}
       <section class="nav-am-sec"><h3>${t('psy')}</h3><p class="muted">${t('emo')}</p>
         <div class="chips nav-am-emo">${(() => {
           const own = ((S.settings && S.settings.custom_emotions) || []).filter((k) => !emos.includes(k));
@@ -2607,7 +2615,7 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('[data-am],[data-am-pickf],[data-am-sel],[data-am-copy],[data-am-seg],[data-am-emo],[data-am-rm],[data-sp]'); if (!a) return;
     const box = a.closest('.nav-am'); if (!box) return;
-    if (a.dataset.sp != null) { SH.setup = window.SweepSetupPick ? SweepSetupPick.tap(a, SH.setup) : ''; coachPaint(); return; }   // in place: the row keeps its scroll; the coach follows the setup (edge T3)
+    if (a.dataset.sp != null) { SH.setup = window.SweepSetupPick ? SweepSetupPick.tap(a, SH.setup) : ''; repaintKeep(); return; }   // the coach (edge T3) and the questions (edge T7) follow the setup; the row keeps its scroll
     if (a.dataset.amRm) { SH.batch = SH.batch.filter((b) => b.id !== a.dataset.amRm); if (SH.batch.length === 1) { const b = SH.batch[0]; SH.batch = []; Object.assign(SH, { file: b.file, src: b.src, shot: b.shot, dir: b.f.dir || SH.dir }); Object.assign(SH.f, b.f); } paint(); return; }
     if (a.dataset.amSel) { SH.openPick = SH.openPick === a.dataset.amSel ? null : a.dataset.amSel; paint(); return; }
     if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; if (a.dataset.amPickf === 'account') SH.f.accountPicked = true; SH.openPick = null; if (a.dataset.amPickf === 'account') SH.copy.delete(a.dataset.v); paint(); return; }
@@ -5143,12 +5151,22 @@ document.addEventListener('click', (e) => {
     es: ['Sí', 'No', 'N/A', 'Ver más', 'Checklist', 'Las comisiones y la revisión están en la página siguiente.'] })[L];
   let ans = {}, pending = null;   // pending: the answers of the trade being saved (and its copies)
   function qs() { return ((typeof S !== 'undefined' && S.settings && S.settings.questions) || []).filter((q) => q.active !== false); }
+  // edge T7: the setup's criteria first (they replace the 3 questions), the question that separates winners from losers, the acquired ones under « See more »
+  const order = () => (window.SweepQs ? SweepQs.order(typeof TK !== 'undefined' && TK ? TK.setup : '') : { list: qs(), shown: 3 });
+  function ckFill(box) {
+    const O = order(), list = O.list, setup = typeof TK !== 'undefined' && TK ? TK.setup : '';
+    box.classList.remove('all');
+    box.innerHTML = `<b class="nav-ck-t" data-noi18n>${W[4]}</b>` + list.map((q, i) => `<div class="nav-ck-q ${i >= O.shown && !ans[q.id] ? 'more' : ''}" data-q="${q.id}"><span data-noi18n>${window.SweepQs ? SweepQs.label(q) : (q.text || q.q || q.label || q.id).replace(/[<>&]/g, '')}</span><div class="nav-ck-b" data-noi18n>${['y', 'n', 'na'].map((v, k) => `<button type="button" data-v="${v}" class="${ans[q.id] === v ? 'on' : ''}">${W[k]}</button>`).join('')}</div></div>`).join('')
+      + (list.length > O.shown ? `<button type="button" class="link nav-ck-more" data-noi18n>${W[3]} ›</button>` : '') + (window.SweepQs ? `<div class="nav-ck-add" data-noi18n>${SweepQs.addLink(setup)}</div>` : '');
+  }
+  window.SweepCkFill = () => { const b = document.querySelector('#tkSlide.open .nav-ck'); if (b) ckFill(b); };
+  document.addEventListener('sweep:qs', () => setTimeout(() => window.SweepCkFill(), 120));
   new window.SweepMO(() => {
     const tk = document.querySelector('#tkSlide.open'); if (!tk || (typeof TK !== 'undefined' && TK && TK.id)) { if (!tk) { ans = {}; pending = null; } return; }
     if (tk.querySelector('.nav-ck')) return;
-    const save = tk.querySelector('[data-act="tk-save"]'); const list = qs(); if (!save || !list.length) return;
+    const save = tk.querySelector('[data-act="tk-save"]'); const list = order().list; if (!save || !list.length) return;
     const box = document.createElement('div'); box.className = 'nav-ck';
-    box.innerHTML = `<b class="nav-ck-t" data-noi18n>${W[4]}</b>` + list.map((q, i) => `<div class="nav-ck-q ${i > 2 ? 'more' : ''}" data-q="${q.id}"><span>${(q.text || q.q || q.label || q.id).replace(/[<>&]/g, '')}</span><div class="nav-ck-b" data-noi18n>${['y', 'n', 'na'].map((v, k) => `<button type="button" data-v="${v}">${W[k]}</button>`).join('')}</div></div>`).join('') + (list.length > 3 ? `<button type="button" class="link nav-ck-more" data-noi18n>${W[3]} ›</button>` : '');
+    ckFill(box);
     (save.closest('.tk-foot, .tk-actions') || save).before(box);
     const hint = tk.querySelector('#tkErr') && tk.querySelector('#tkErr').previousElementSibling;   // « …checklist… on the next page »: it is here now
     if (hint && hint.classList.contains('help')) { hint.textContent = W[5]; hint.setAttribute('data-noi18n', ''); }
@@ -5223,7 +5241,95 @@ document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('#tkSlide [data-sp]'); if (!b || typeof TK === 'undefined' || !TK) return;
     TK.setup = tap(b, TK.setup);
     const al = document.getElementById('tkAlerts'); if (al && typeof tkAlerts === 'function' && typeof tkState === 'function') al.innerHTML = tkAlerts(tkState());   // the coach follows the setup (edge T3)
+    if (window.SweepCkFill) SweepCkFill();   // and the checklist: the setup's criteria (edge T7)
   });
+})();
+
+/* Edge T7 · questions that adapt (computed, never saved: nothing changes in the trader's settings without them)
+ *  - a setup's own entry criteria (settings.setup_rules = { setup: [{ id, text }] }, 3 at most, Settings › Setups or on the form):
+ *    the setup picked on a form, its criteria replace the 3 generic questions (these stay under « See more »); answers in discipline.*;
+ *  - the question that separates winners from losers (average result of « yes » against « no », 5 trades of each at least,
+ *    8 weeks) comes first, with its mention;
+ *  - an « acquired » question (« yes » on 95 % of the trades of the last 4 weeks, 10 answers at least, no « no » in the last
+ *    7 days) goes under « See more », marked; it comes back with a « no » */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const W = ({ en: { sep: 'This question separates your winners from your losers', acq: 'acquired', crit: 'Criteria of {s}', add: '+ Add a criterion for {s}', addQ: 'An entry criterion of {s} (e.g. « Break of the 15-minute range »)', rules: 'Entry criteria', rulesH: 'Up to 3 per setup. On the trade forms, they replace the first questions of the checklist when the setup is picked.', ph: 'Criterion {n}' },
+    fr: { sep: 'Cette question sépare tes gagnants de tes perdants', acq: 'acquise', crit: 'Critères de {s}', add: '+ Ajouter un critère pour {s}', addQ: 'Un critère d’entrée de {s} (ex. « Cassure du range des 15 premières minutes »)', rules: 'Critères d’entrée', rulesH: 'Jusqu’à 3 par setup. Sur les formulaires de trade, ils remplacent les premières questions de la checklist quand le setup est choisi.', ph: 'Critère {n}' },
+    es: { sep: 'Esta pregunta separa tus ganadoras de tus perdedoras', acq: 'adquirida', crit: 'Criterios de {s}', add: '+ Añadir un criterio para {s}', addQ: 'Un criterio de entrada de {s} (ej. « Ruptura del rango de los 15 primeros minutos »)', rules: 'Criterios de entrada', rulesH: 'Hasta 3 por setup. En los formularios de operación, reemplazan las primeras preguntas de la checklist cuando eliges el setup.', ph: 'Criterio {n}' } })[L] || null;
+  const T = W || { sep: 'This question separates your winners from your losers', acq: 'acquired', crit: 'Criteria of {s}', add: '+ Add a criterion for {s}', addQ: 'An entry criterion of {s}', rules: 'Entry criteria', rulesH: '', ph: 'Criterion {n}' };
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (_, k) => (v[k] != null ? v[k] : ''));
+  const low = (s) => String(s || '').trim().toLowerCase();
+  const day0 = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
+  const addD = (d, k) => { const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + k); return x.toISOString().slice(0, 10); };
+  const net = (t) => (t.pnl_c || 0) - (t.fees_c || 0);
+  const active = () => ((typeof S !== 'undefined' && S.settings && S.settings.questions) || []).filter((q) => q.active !== false && q.active !== 0);
+  /** the setup's own criteria, as questions (id « sr_… ») */
+  function criteria(setup) {
+    const r = (typeof S !== 'undefined' && S.settings && S.settings.setup_rules) || {}, k = Object.keys(r).find((x) => low(x) === low(setup));
+    return k && setup ? (r[k] || []).filter((c) => c && String(c.text || '').trim()).slice(0, 3).map((c) => ({ id: c.id, text: c.text, crit: true })) : [];
+  }
+  let memo = { k: '', v: null };
+  function stats() {
+    const tr = (typeof S !== 'undefined' && S.trades) || [], k = tr.length + '|' + tr.reduce((m, t) => (t.updated_at > m ? t.updated_at : m), '') + '|' + day0();
+    if (memo.k === k) return memo.v;
+    const d = day0(), from = addD(d, -55), m4 = addD(d, -27), w1 = addD(d, -6), seen = new Set();
+    const list = tr.filter((t) => !t.demo && t.date >= from && t.date <= d && (!t.copy_group || (!seen.has(t.copy_group) && seen.add(t.copy_group))));
+    const out = {};
+    active().forEach((q) => {
+      const y = [], n = []; let ry = 0, rn = 0, late = false;
+      list.forEach((t) => {
+        const a = (t.discipline || {})[q.id]; if (a !== 'y' && a !== 'n') return;
+        const v = net(t) / Math.max(1, Math.round(+t.contracts || 1)); (a === 'y' ? y : n).push(v);
+        if (t.date >= m4) { a === 'y' ? ry++ : rn++; if (a === 'n' && t.date >= w1) late = true; }
+      });
+      const avg = (l) => l.reduce((s, x) => s + x, 0) / l.length;
+      out[q.id] = { gap: y.length >= 5 && n.length >= 5 ? avg(y) - avg(n) : null, acq: ry + rn >= 10 && ry / (ry + rn) >= 0.95 && !late };
+    });
+    memo = { k, v: out }; return out;
+  }
+  /** the questions of a form, in their order, and how many are shown before « See more » */
+  function order(setup) {
+    const qs = active(), st = stats(), crit = criteria(setup);
+    const sepQ = qs.filter((q) => st[q.id] && st[q.id].gap > 0).sort((a, b) => st[b.id].gap - st[a.id].gap)[0] || null;
+    const gen = qs.map((q) => Object.assign({}, q, { sep: !!sepQ && q.id === sepQ.id, acq: !!(st[q.id] && st[q.id].acq) && !(sepQ && q.id === sepQ.id) }));
+    const ord = [...gen.filter((q) => q.sep), ...gen.filter((q) => !q.sep && !q.acq), ...gen.filter((q) => q.acq)];
+    if (crit.length) return { list: [...crit, ...ord], shown: crit.length, crit: true };
+    return { list: ord, shown: Math.min(3, ord.filter((q) => !q.acq).length), crit: false };
+  }
+  /** a question's words, with its mention */
+  const label = (q) => `${esc2(q.text || q.q || q.label || q.id)}${q.sep ? `<small class="nav-q-sep">${esc2(T.sep)}</small>` : ''}${q.acq ? ` <small class="nav-q-acq">· ${esc2(T.acq)}</small>` : ''}`;
+  function saveRules(setup, texts) {
+    if (typeof editDoc !== 'function') return;
+    editDoc('settings', 'settings', (r) => {
+      const all = Object.assign({}, r.setup_rules || {}), k = Object.keys(all).find((x) => low(x) === low(setup)) || String(setup).trim(), old = all[k] || [];
+      const list = texts.map((x) => String(x || '').trim().slice(0, 120)).map((x, i) => (x ? { id: (old[i] && old[i].id) || 'sr_' + Date.now().toString(36) + i, text: x } : null)).filter(Boolean).slice(0, 3);
+      if (list.length) all[k] = list; else delete all[k];
+      r.setup_rules = all;
+    });
+  }
+  /** a criterion added on the form (the setup picked) */
+  function addOne(setup) {
+    const v = (prompt(fill(T.addQ, { s: setup })) || '').trim(); if (!v) return false;
+    saveRules(setup, [...criteria(setup).map((c) => c.text), v]); return true;
+  }
+  const addLink = (setup) => (setup && criteria(setup).length < 3 ? `<button type="button" class="chip nav-am-more nav-sr-add" data-sr-add="${esc2(setup)}">${esc2(fill(T.add, { s: setup }))}</button>` : '');
+  /** Settings › Setups: the entry criteria of each setup */
+  function rulesHtml() {
+    const l = (typeof S !== 'undefined' && S.settings && S.settings.setups) || []; if (!l.length) return '';
+    return `<div class="nav-sr" data-noi18n><b>${esc2(T.rules)}</b><p class="help">${esc2(T.rulesH)}</p>${l.map((s) => { const c = criteria(s); return `<details class="nav-sr-s"${c.length ? '' : ''}><summary>${esc2(s)} <small class="muted">${c.length}/3</small></summary><div class="nav-sr-in">${[0, 1, 2].map((i) => `<input data-sr="${esc2(s)}" data-i="${i}" maxlength="120" value="${esc2((c[i] || {}).text || '')}" placeholder="${esc2(fill(T.ph, { n: i + 1 }))}">`).join('')}</div></details>`; }).join('')}</div>`;
+  }
+  document.addEventListener('change', (e) => {
+    const i = e.target.closest && e.target.closest('input[data-sr]'); if (!i) return;
+    const box = i.closest('.nav-sr-in'); saveRules(i.dataset.sr, [...box.querySelectorAll('input[data-sr]')].map((x) => x.value));
+  });
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-sr-add]'); if (!b) return;
+    if (addOne(b.dataset.srAdd)) document.dispatchEvent(new CustomEvent('sweep:qs'));
+  });
+  window.SweepQs = { order, criteria, label, addOne, addLink, rulesHtml, stats, T };
 })();
 
 /* D16 · « This trade looks like the one at 10:32. Add it anyway? » on the manual form (brief 02, part 1): the same rule as the

@@ -918,6 +918,15 @@ body:has(#tkSlide.open) .ask-fab,body:has(#gSheet.open) .ask-fab,body:has(.sb-la
 .nav-sp-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0;margin:0 -2px}
 .nav-sp-row::-webkit-scrollbar{display:none}
 .nav-sp-row .chip{flex-shrink:0;white-space:nowrap}
+/* Edge T7: the question that separates winners from losers, the acquired ones, the setup's entry criteria */
+.nav-q-sep{display:block;margin-top:2px;color:var(--pos);font-size:12px;font-weight:600}
+.nav-q-acq{color:var(--muted);font-size:12px}
+.nav-ck-add{margin-top:8px}
+.nav-sr{margin-top:14px;display:grid;gap:8px}
+.nav-sr .help{margin:0}
+.nav-sr-s summary{cursor:pointer;padding:6px 0}
+.nav-sr-in{display:grid;gap:6px;padding:4px 0 8px}
+.nav-sr-in input{width:100%;min-width:0;box-sizing:border-box}
 .nav-am-copy.tk-copies .help{margin-right:2px}
 .nav-am-selb{font-size:14.5px;min-height:40px;border-radius:12px}
 .nav-live{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--neg);color:#111;font-size:10px;font-weight:700;letter-spacing:.06em;vertical-align:2px;line-height:1.5}

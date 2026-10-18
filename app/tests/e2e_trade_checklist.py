@@ -5,11 +5,17 @@ A trader of its own with two accounts. On the form, right above « Save »: 3 qu
 trader answers, presses « Save » before typing the entry price (refused: « Add the entry price »), waits, types it and saves:
  - the answers are in the trade from the moment it is saved (and in its copy on the other account): never lost after a
    refused save, the discipline score is never empty when the trader answered;
- - « Step 2 » shows them at once; FR phone and EN computer, no page error.
+ - « Step 2 » shows them at once; FR phone and EN computer, no page error;
+ - questions that adapt (brief edge T7, computed, never saved): the question answered « yes » on the winners and « no » on
+   the losers comes first with « This question separates your winners from your losers »; one always « yes » on the last 4
+   weeks goes under « See more », marked « acquired »; « Opening range breakout » picked: its own entry criterion replaces
+   the 3 questions (manual form and quick sheet) and its answer goes into the trade's discipline; Settings › Setups saves
+   a criterion typed (the others keep their id, so their answers stay theirs).
 """
 import asyncio, json, random, sys
 from playwright.async_api import async_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
+AC = {'fr': 'acquise', 'en': 'acquired'}
 W = {'fr': {'yes': 'Oui', 'no': 'Non', 'na': 'N/A', 'more': 'Voir plus'}, 'en': {'yes': 'Yes', 'no': 'No', 'na': 'N/A', 'more': 'See more'}}
 fails = 0
 def ok(c, what):
@@ -58,6 +64,39 @@ async def main():
       await pg.wait_for_timeout(600)
       s2 = await pg.evaluate("(()=>{const s=document.querySelector('#tkSlide .score b'); return s ? s.textContent.trim() : null})()")
       ok(s2 not in (None, '—') and s2.endswith('%'), f'{tag} « Step 2 » shows the score at once ({s2})')
+      # Edge T7: the questions adapt (computed, never saved)
+      await pg.evaluate("document.querySelector('#tkSlide [data-act=\"s2-close\"]') && document.querySelector('#tkSlide [data-act=\"s2-close\"]').click()"); await pg.wait_for_timeout(500)
+      sep, acq = allq[4], allq[2]
+      await pg.evaluate("""([sep, acq]) => { const back = (k) => { const d = new Date(todayStr() + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - k); return d.toISOString().slice(0, 10); };
+        [8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 21].forEach((k, i) => put('trades', { id: 'q' + k, account_id: 'tc-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: i % 2 ? 20000 : -15000, pnl_manual: true, date: back(k), entry_time: '10:00:00', discipline: { [sep]: i % 2 ? 'y' : 'n', [acq]: 'y' } }));
+        editDoc('settings', 'settings', (d) => { d.setups = ['Opening range breakout']; d.setup_rules = { 'Opening range breakout': [{ id: 'sr_t1', text: 'Range break' }] }; }); }""", [sep, acq])
+      await pg.wait_for_timeout(1200)
+      await pg.evaluate("openTicket(null,{manual:true})"); await pg.wait_for_selector('#tkSlide.open .nav-ck', timeout=8000); await pg.wait_for_timeout(500)
+      v2 = await pg.evaluate("[...document.querySelectorAll('#tkSlide .nav-ck-q')].filter(q => q.offsetParent).map(q => [q.dataset.q, !!q.querySelector('.nav-q-sep')])")
+      lab = await pg.evaluate("(q) => (document.querySelector(`#tkSlide .nav-ck-q[data-q=\"${q}\"] .nav-q-acq`) || {}).textContent || ''", acq)
+      ok(v2 and v2[0] == [sep, True] and acq not in [q for q, _ in v2] and AC[lang] in lab, f'{tag} T7 the question that separates winners from losers first, with its mention; the acquired one under « {x["more"]} », marked ({v2}, {lab!r})')
+      await pg.locator('#tkSlide [data-sp="Opening range breakout"]').click(); await pg.wait_for_timeout(400)
+      v3 = await pg.evaluate("[...document.querySelectorAll('#tkSlide .nav-ck-q')].filter(q => q.offsetParent).map(q => q.dataset.q)")
+      ok(v3 == ['sr_t1'], f'{tag} T7 the setup picked: its criterion replaces the 3 questions ({v3})')
+      await answer('sr_t1', x['yes'])
+      n1 = await pg.evaluate("S.trades.length")
+      await pg.evaluate("() => { TK.account = 'tc-a'; TK.inst = 'NQ'; TK.dir = 'long'; TK.qty = 1; TK.entry = 21000; TK.exit = 21004; TK.copyTo = new Set(); tkRefresh(); }")
+      await pg.locator('#tkSlide [data-act="tk-save"]').click(); await pg.wait_for_function(f"S.trades.length >= {n1} + 1", timeout=10000)
+      t7 = await pg.evaluate("(()=>{const t=S.trades[S.trades.length-1]; return [t.setup, (t.discipline||{}).sr_t1]})()")
+      ok(t7 == ['Opening range breakout', 'y'], f'{tag} T7 the criterion answered goes into discipline, with the setup ({t7})')
+      await pg.evaluate("document.querySelector('#tkSlide [data-act=\"s2-close\"]') && document.querySelector('#tkSlide [data-act=\"s2-close\"]').click()"); await pg.wait_for_timeout(500)
+      await pg.evaluate("editDoc('settings','settings', d => { d.add_mode_pref = 'shot'; })"); await pg.wait_for_timeout(400)
+      await pg.evaluate("openTicket(null)"); await pg.wait_for_selector('.nav-am.open .nav-sp', timeout=8000); await pg.wait_for_timeout(400)
+      await pg.locator('.nav-am [data-sp="Opening range breakout"]').click(); await pg.wait_for_timeout(400)
+      v4 = await pg.evaluate("[...document.querySelectorAll('.nav-am .nav-am-q > span')].map(s => s.textContent)")
+      ok(v4 == ['Range break'], f'{tag} T7 the quick sheet: the same criterion in place of the questions ({v4})')
+      ok(await pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} T7 nothing wider than the window')
+      if mob: await pg.screenshot(path='/tmp/tc_t7_quick.png')
+      await pg.evaluate("document.querySelector('.nav-am [data-am=close]').click()"); await pg.wait_for_timeout(400)
+      await pg.evaluate("location.hash = '#settings'"); await pg.wait_for_selector('#main .nav-sr', state='attached', timeout=8000); await pg.wait_for_timeout(400)
+      await pg.evaluate("(() => { const i = document.querySelector('#main input[data-sr=\"Opening range breakout\"][data-i=\"1\"]'); i.value = 'Volume above average'; i.dispatchEvent(new Event('change', { bubbles: true })); })()"); await pg.wait_for_timeout(900)
+      sr = await pg.evaluate("((S.settings.setup_rules || {})['Opening range breakout'] || []).map(c => [c.id, c.text])")
+      ok(len(sr) == 2 and sr[0] == ['sr_t1', 'Range break'] and sr[1][1] == 'Volume above average' and sr[1][0].startswith('sr_'), f'{tag} T7 Settings › Setups: a 2nd criterion typed is saved, the 1st keeps its id ({sr})')
       ok(not errs, f'{tag} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
       await ctx.close()
     await br.close()

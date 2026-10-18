@@ -708,6 +708,8 @@
       const set = code ? ['Frustrated', 'Trying to recover a loss', 'Impulsive', 'FOMO', 'Calm'] : ['Calm', 'Confident', 'FOMO', 'Frustrated', 'Hesitant'];
       items.push({ ok: emo.length > 0, h: `<div class="co-q"><span>${esc2(code ? T.aWhy : T.aEmo)}</span><div class="chips">${set.map((k) => `<button class="chip ${emo.includes(k) ? 'on' : ''}" data-act="toggle" data-col="trades" data-id="${id}" data-path="emo.before" data-v="${esc2(k)}">${esc2(emoT(k))}</button>`).join('')}</div></div>` });
     }
+    const eq = edgeReview(t);   // brief edge T7: in the edge, off it, a streak
+    if (eq) items.push({ ok: !!String(rv.edge || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(eq)}</span><textarea rows="2" data-bind="trades|${id}|review.edge">${esc2(rv.edge || '')}</textarea></label>` });
     items.push({ ok: !!String(rv.lesson || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(T.aLesson)}</span><textarea rows="2" data-bind="trades|${id}|review.lesson" placeholder="${esc2(c.fix ? c.fix[1] : T.aLessonPh)}">${esc2(rv.lesson || '')}</textarea></label>` });
     return `<section class="surface co co-ask" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.askT}</b><small>${fill(T.askN, { k: items.filter((x) => x.ok).length, n: items.length })}</small></div>${items.map((x) => x.h).join('')}</section>`;
   }
@@ -940,6 +942,7 @@
       bIn: 'In your edge: {s}, {w} winners out of {n}. Keep your usual size.', bOff: 'Off your usual edge.', bWorks: 'What works for you: {s}, {v} on average over {n} trades.',
       keep: 'Keep doing what works: {s} ({v} on average over {n} trades).',
       stTr: 'Your streak: {n} winners in a row.', stDays: 'Your streak: {n} green days in a row.', stCommon: 'In common: {s}.',
+      qIn: 'What was the same as usual?', qOff: 'Why this trade off your edge?', qSt: 'What put you in this streak?',
       edgeT: 'Your edge', lv: { lead: 'Lead', trend: 'Trend', confirmed: 'Confirmed' }, item: '{n} trades · {a} % winners', newL: 'New lead: {s} ({n} trades).', fadeL: 'Fading: {s}, the last 4 weeks below half of the 4 before.' },
     fr: { wd: ['', 'le lundi', 'le mardi', 'le mercredi', 'le jeudi', 'le vendredi', 'le samedi', 'le dimanche'], ses: { asia: 'séance Asie', london: 'séance de Londres', nyam: 'matin de New York', nypm: 'après-midi de New York', other: 'hors des grandes séances' },
       plan: { in: 'dans ton plan', out: 'hors plan' }, nth: { 1: '1er trade du jour', 2: '2e trade du jour' }, after: { win: 'après un gain', loss: 'après une perte' }, emo: 'quand tu te sens {e}', perC: '{v} par contrat',
@@ -947,6 +950,7 @@
       bIn: 'Dans ton edge : {s}, {w} gagnants sur {n}. Garde ta taille habituelle.', bOff: 'Hors de ton edge habituel.', bWorks: 'Ce qui marche pour toi : {s}, {v} en moyenne sur {n} trades.',
       keep: 'Continue ce qui marche : {s} ({v} en moyenne sur {n} trades).',
       stTr: 'Ta série : {n} gagnants de suite.', stDays: 'Ta série : {n} jours verts de suite.', stCommon: 'Point commun : {s}.',
+      qIn: 'Qu’est-ce qui était pareil que d’habitude ?', qOff: 'Pourquoi ce trade hors de ton edge ?', qSt: 'Qu’est-ce qui t’a mis dans cette série ?',
       edgeT: 'Ton edge', lv: { lead: 'Piste', trend: 'Tendance', confirmed: 'Confirmé' }, item: '{n} trades · {a} % gagnants', newL: 'Nouvelle piste : {s} ({n} trades).', fadeL: 'En baisse : {s}, les 4 dernières semaines sous la moitié des 4 d’avant.' },
     es: { wd: ['', 'los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos'], ses: { asia: 'sesión de Asia', london: 'sesión de Londres', nyam: 'mañana de Nueva York', nypm: 'tarde de Nueva York', other: 'fuera de las sesiones principales' },
       plan: { in: 'dentro de tu plan', out: 'fuera del plan' }, nth: { 1: '1.ª operación del día', 2: '2.ª operación del día' }, after: { win: 'tras una ganancia', loss: 'tras una pérdida' }, emo: 'cuando te sientes {e}', perC: '{v} por contrato',
@@ -954,6 +958,7 @@
       bIn: 'En tu edge: {s}, {w} ganadoras de {n}. Mantén tu tamaño habitual.', bOff: 'Fuera de tu edge habitual.', bWorks: 'Lo que te funciona: {s}, {v} de media en {n} operaciones.',
       keep: 'Sigue con lo que funciona: {s} ({v} de media en {n} operaciones).',
       stTr: 'Tu racha: {n} ganadoras seguidas.', stDays: 'Tu racha: {n} días en verde seguidos.', stCommon: 'En común: {s}.',
+      qIn: '¿Qué fue igual que de costumbre?', qOff: '¿Por qué esta operación fuera de tu edge?', qSt: '¿Qué te puso en esta racha?',
       edgeT: 'Tu edge', lv: { lead: 'Pista', trend: 'Tendencia', confirmed: 'Confirmado' }, item: '{n} operaciones · {a} % ganadoras', newL: 'Nueva pista: {s} ({n} operaciones).', fadeL: 'A la baja: {s}, las últimas 4 semanas por debajo de la mitad de las 4 anteriores.' },
   }[L] || null;
   const E2 = ET || { wd: [], ses: {}, plan: {}, nth: {}, after: {}, emo: '{e}', perC: '{v}', sEdge: '{s}' };
@@ -986,6 +991,14 @@
   /** the line of « Before this trade » (brief edge T3): positive first; « off your usual edge » only from the « trend » level */
   function edgeBefore(x, day, list, p, at) {
     const pr = edgeMine(); if (!pr || !pr.wins.length || !ET) return null;
+    const ctx = edgeCtx(x, day, list, p, at);
+    const hit = pr.wins.find((c) => edgeMatch(c, ctx) === true);
+    if (hit) return { in: true, text: fill(ET.bIn, { s: edgeWords(hit), w: Math.round(hit.win * hit.n / 100), n: hit.n }) };
+    const top = pr.wins[0], off = top.level !== 'lead' && pr.wins.every((c) => edgeMatch(c, ctx) === false);
+    return { in: false, text: (off ? ET.bOff + ' ' : '') + fill(ET.bWorks, { s: edgeWords(top), v: edgeValue(top.avg, pr.unit), n: top.n }) };
+  }
+  /** the dimensions of a trade being entered (x: setup, dir, inst, emo) after the session's trades `list` */
+  function edgeCtx(x, day, list, p, at) {
     const last = list[list.length - 1], hm = at != null ? String(Math.floor(at / 60)).padStart(2, '0') + ':' + String(at % 60).padStart(2, '0') : '';
     const su = String(x.setup || '').trim(), dir = x.dir === 'long' || x.dir === 'short' ? x.dir : null;
     let plan = '';   // no valid plan: never « in the plan »
@@ -993,10 +1006,20 @@
     const ctx = { setup: su || null, slot: at != null ? String(Math.floor(at / 30) * 30 / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(at / 30) * 30 % 60).padStart(2, '0') : null,
       session: hm && typeof sessionFor === 'function' ? sessionFor(hm) : null, weekday: String(new Date(day + 'T12:00:00Z').getUTCDay() || 7), side: dir, plan, emo: null,
       nth: list.length < 2 ? String(list.length + 1) : '', after: last ? (net(last) > 0 ? 'win' : net(last) < 0 ? 'loss' : '') : '', inst: x.inst ? String(x.inst).toUpperCase() : null };
-    const hit = pr.wins.find((c) => edgeMatch(c, ctx) === true);
-    if (hit) return { in: true, text: fill(ET.bIn, { s: edgeWords(hit), w: Math.round(hit.win * hit.n / 100), n: hit.n }) };
-    const top = pr.wins[0], off = top.level !== 'lead' && pr.wins.every((c) => edgeMatch(c, ctx) === false);
-    return { in: false, text: (off ? ET.bOff + ' ' : '') + fill(ET.bWorks, { s: edgeWords(top), v: edgeValue(top.avg, pr.unit), n: top.n }) };
+    if (x.emo !== undefined) ctx.emo = x.emo || '';
+    return ctx;
+  }
+  /** « Answer your coach » (brief edge T7): the review question follows the edge — a streak, in the edge, off the edge (from « trend ») */
+  function edgeReview(t) {
+    const pr = edgeMine(); if (!pr || !pr.wins.length || !ET || !t || !t.date) return null;
+    const seen = new Set(), all = (S.trades || []).filter((x) => !x.demo && (!x.copy_group || (!seen.has(x.copy_group) && seen.add(x.copy_group)))).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : String(a.entry_time || '99') < String(b.entry_time || '99') ? -1 : String(a.entry_time || '99') > String(b.entry_time || '99') ? 1 : String(a.created_at || '') < String(b.created_at || '') ? -1 : 1));
+    const key = t.copy_group || t.id, i = all.findIndex((x) => (x.copy_group || x.id) === key);
+    if (i >= 0 && net(all[i]) > 0) { let a = i, b = i; while (a > 0 && net(all[a - 1]) > 0) a--; while (b < all.length - 1 && net(all[b + 1]) > 0) b++; if (b - a + 1 >= 3) return ET.qSt; }
+    const day = dayTrades(t.date), k = day.findIndex((x) => (x.copy_group || x.id) === key), prior = k >= 0 ? day.slice(0, k) : day;
+    const ctx = edgeCtx({ setup: t.setup, dir: t.direction, inst: t.instrument, emo: ((t.emo && t.emo.before) || [])[0] }, t.date, prior, planOf(t.date), min(timeOf(t)));
+    if (pr.wins.some((c) => edgeMatch(c, ctx) === true)) return ET.qIn;
+    if (pr.wins[0].level !== 'lead' && pr.wins.every((c) => edgeMatch(c, ctx) === false)) return ET.qOff;
+    return null;
   }
   /** one line of the profile's first winning condition: 'works' (« What works for you: … », the plan) or 'keep' (Today before the session) */
   function edgeLine(kind) {
