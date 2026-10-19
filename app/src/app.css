@@ -1,7 +1,8 @@
 /* Cascade layers (design chantier, Oct. 2026), like makeitsweep.com: tokens, then components, then every older rule
    (« legacy », in its old order, so a page's own adjustment still wins), then motion. */
 @layer tokens, components, legacy, motion;
-/* ---- tokens: the site's (website/src/system.css), and the app's names for them. One place; a page's own
+/* ---- tokens: the site's (website/src/system.css), and the app's names for them. Text blue and gold are a shade deeper
+   than the site's where 4.5:1 needs it on the app's tinted tiles (gains: #5E98FF dark, #265DC6 light; losses #845C0E light). One place; a page's own
    adjustment in « legacy » still wins (high contrast, Sweep AI, the game). */
 @layer tokens{
 :root{color-scheme:dark;
@@ -21,7 +22,7 @@
   --spring:cubic-bezier(.32,.72,0,1);
   /* the app's names */
   --bg:var(--ink);--panel:var(--surface);--panel2:var(--raised);
-  --pos:var(--blue);--pos-rgb:76,141,255;--neg:var(--gold);--neg-rgb:212,162,76;--pos-fill:var(--blue-btn);
+  --pos:var(--blue-text);--pos-rgb:94,152,255;--neg:var(--gold);--neg-rgb:212,162,76;--pos-fill:var(--blue-btn);
   --hair:var(--edge);--fill:color-mix(in srgb,var(--text) 6%,transparent);--fill-2:color-mix(in srgb,var(--text) 10%,transparent);
   --glass-strong:var(--glass-menu);--glass-edge:0 0 0 1px var(--edge);--glass-hi:inset 0 1px 0 var(--edge-hi);
   --shadow-float:var(--shadow-3);
@@ -32,25 +33,25 @@
 @media (prefers-color-scheme:light){:root:not([data-theme=dark]){color-scheme:light;
   --ink:#F3F4F6;--ink-2:#EEEFF2;--surface:#FFFFFF;--raised:#F4F5F7;--line:#E1E2E7;
   --text:#0B0B0C;--muted:#55555E;--faint:#66666F;
-  --blue-text:#2A64D6;--blue-ink:#1E50B8;--gold:#8F6310;
+  --blue-text:#2A64D6;--blue-ink:#1E50B8;--gold:#845C0E;
   --glass:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.66));
   --glass-bar:rgba(255,255,255,.78);--glass-menu:rgba(255,255,255,.98);
   --edge:rgba(16,18,28,.07);--edge-hi:rgba(255,255,255,.95);
   --shadow-1:0 1px 0 var(--edge-hi) inset,0 0 0 1px var(--edge),0 10px 26px -18px rgba(20,26,48,.22);
   --shadow-2:0 1px 0 var(--edge-hi) inset,0 0 0 1px var(--edge),0 24px 50px -30px rgba(20,26,48,.28);
   --shadow-3:0 1px 0 #fff inset,0 0 0 1px rgba(16,18,28,.08),0 16px 40px -18px rgba(20,26,48,.3);
-  --pos:var(--blue-text);--pos-rgb:42,100,214;--neg-rgb:143,99,16}}
+  --pos:#265DC6;--pos-rgb:38,93,198;--neg-rgb:132,92,14}}
 :root[data-theme=light]{color-scheme:light;
   --ink:#F3F4F6;--ink-2:#EEEFF2;--surface:#FFFFFF;--raised:#F4F5F7;--line:#E1E2E7;
   --text:#0B0B0C;--muted:#55555E;--faint:#66666F;
-  --blue-text:#2A64D6;--blue-ink:#1E50B8;--gold:#8F6310;
+  --blue-text:#2A64D6;--blue-ink:#1E50B8;--gold:#845C0E;
   --glass:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.66));
   --glass-bar:rgba(255,255,255,.78);--glass-menu:rgba(255,255,255,.98);
   --edge:rgba(16,18,28,.07);--edge-hi:rgba(255,255,255,.95);
   --shadow-1:0 1px 0 var(--edge-hi) inset,0 0 0 1px var(--edge),0 10px 26px -18px rgba(20,26,48,.22);
   --shadow-2:0 1px 0 var(--edge-hi) inset,0 0 0 1px var(--edge),0 24px 50px -30px rgba(20,26,48,.28);
   --shadow-3:0 1px 0 #fff inset,0 0 0 1px rgba(16,18,28,.08),0 16px 40px -18px rgba(20,26,48,.3);
-  --pos:var(--blue-text);--pos-rgb:42,100,214;--neg-rgb:143,99,16}
+  --pos:#265DC6;--pos-rgb:38,93,198;--neg-rgb:132,92,14}
 }
 @layer legacy{
 @keyframes sai-b{
