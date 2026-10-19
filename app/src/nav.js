@@ -4690,17 +4690,25 @@ window.SweepMO = window.SweepMO || class {
     } catch (e) { /* no haptic: fine */ }
   }
   let py = null, pdist = 0, pel = null;
-  const ptrPage = () => true;   // every page (the app's first pull to refresh, now removed, worked everywhere)
+  const ptrPage = () => true;
+  /* the installed app (html.pwa, 19 Oct.): iOS's own bounce is off (what it showed above the page did not match its
+     background: a dark line), the app moves the header and the page itself, the indicator in the gap */
+  const ptrMove = (y, back) => {
+    const h = document.documentElement; if (!h.classList.contains('pwa')) return;
+    h.classList.toggle('ptr-back', !!back); h.style.setProperty('--ptr-y', y + 'px'); h.classList.add('ptr-on');
+    if (back && !y) setTimeout(() => { if (h.style.getPropertyValue('--ptr-y') === '0px') h.classList.remove('ptr-on', 'ptr-back'); }, 450);
+  };   // every page (the app's first pull to refresh, now removed, worked everywhere)
   document.addEventListener('touchstart', (e) => { if (!isPhone() || !ptrPage() || scrollY > 0 || e.target.closest('.evp, .nav-am, .nav-dlg, #gSheet, #shPanel, .nav-fstrip, .nav-ra-row')) { py = null; return; } py = e.touches[0].clientY; pdist = 0; }, { passive: true });
-  document.addEventListener('touchmove', (e) => { if (py == null) return; pdist = Math.max(0, e.touches[0].clientY - py); if (pdist < 8) return; if (!pel) { pel = document.createElement('div'); pel.className = 'nav-ptr'; pel.setAttribute('data-noi18n', ''); pel.innerHTML = '<i>' + '<b></b>'.repeat(8) + '</i><span></span>'; document.body.append(pel); pel._armed = false; } const p = Math.min(1, pdist / 90); pel.style.setProperty('--p', p); pel.querySelector('span').textContent = p >= 1 ? t('refresh') : ''; if (p >= 1 && !pel._armed) { pel._armed = true; pel.classList.add('armed'); ptrTick(); } else if (p < 1 && pel._armed) { pel._armed = false; pel.classList.remove('armed'); } }, { passive: true });
+  document.addEventListener('touchmove', (e) => { if (py == null) return; pdist = Math.max(0, e.touches[0].clientY - py); if (pdist < 8) return; if (!pel) { pel = document.createElement('div'); pel.className = 'nav-ptr'; pel.setAttribute('data-noi18n', ''); pel.innerHTML = '<i></i><span></span>'; document.body.append(pel); pel._armed = false; } const p = Math.min(1, pdist / 90); pel.style.setProperty('--p', p); ptrMove(Math.round(Math.min(140, pdist * 0.55))); pel.querySelector('span').textContent = p >= 1 ? t('refresh') : ''; if (p >= 1 && !pel._armed) { pel._armed = true; pel.classList.add('armed'); ptrTick(); } else if (p < 1 && pel._armed) { pel._armed = false; pel.classList.remove('armed'); } }, { passive: true });
   document.addEventListener('touchend', async () => {
-    if (py == null) return; py = null; if (!pel) return; const go = pdist >= 90; const el = pel; pel = null;
-    if (!go) { el.remove(); return; }
+    if (py == null) return; py = null; if (!pel) { ptrMove(0, true); return; } const go = pdist >= 90; const el = pel; pel = null;
+    if (!go) { el.remove(); ptrMove(0, true); return; }
+    ptrMove(56, true);   // the page waits a little lower while it spins
     el.classList.add('busy'); el.querySelector('span').textContent = t('refreshing'); const t0 = Date.now();
     try { if (typeof syncNow === 'function') await syncNow({ manual: true }); if (window.SweepGame && SweepGame.refresh) await SweepGame.refresh(); } catch (e) { /* keeps what is shown */ }
     await new Promise((r) => setTimeout(r, Math.max(0, 700 - (Date.now() - t0))));   // it spins long enough to be seen, like Mail
     if (typeof syncNow !== 'function') { location.reload(); return; }   // only if the app's sync is missing
-    if (typeof render === 'function') render(); setTimeout(() => el.remove(), 300);
+    if (typeof render === 'function') render(); ptrMove(0, true); setTimeout(() => el.remove(), 300);
   });
 
   /* 13. accounts: « Mark as failed » and the archived list */
@@ -6386,35 +6394,6 @@ new window.SweepMO(() => {
     if (R && po && po.parentElement !== R && ![...R.children].some((x) => x !== po)) R.append(po);
   }
   new window.SweepMO(() => { try { group(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
-})();
-
-/* Stats on a phone (audit of 18 Oct., lot 3): « What works for you », the key numbers, the score and the curve first; the
- * rest (the trading stats, drawdown, durations, breakdown, trends, the month, the detailed analysis) under « More stats »,
- * folded, kept open or closed while the tab lives. The computer is unchanged. */
-(function () {
-  'use strict';
-  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const T = ({ en: ['More stats', 'Trading stats, drawdown, durations, trends, the month, the detailed analysis'], fr: ['Plus de statistiques', 'Statistiques de trading, drawdown, durées, tendances, le mois, l’analyse détaillée'],
-    es: ['Más estadísticas', 'Estadísticas de trading, drawdown, duraciones, tendencias, el mes, el análisis detallado'] })[L] || ['More stats', ''];
-  let open = false, last = null;
-  function fold() {
-    if (!/^#(analytics|progress)\b/.test(location.hash || '') || !window.SW_MQ || !window.SW_MQ.matches) return;
-    const top = document.querySelector('#main .igrid.g-top'); if (!top) return;
-    const host = top.parentElement;
-    let box = host.querySelector(':scope > .nav-stmore');
-    const rest = [...host.children].filter((e) => e !== top && e !== box && (top.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING));
-    if (!rest.length) return;
-    if (!box) {
-      if (last) open = last.open;   // (a redraw replaces it before its « toggle » event)
-      box = document.createElement('details'); box.className = 'nav-stmore'; box.open = open; last = box;
-      box.innerHTML = `<summary data-noi18n><span><b>${T[0]}</b><small>${T[1]}</small></span></summary><div class="nav-stmore-in"></div>`;
-      box.addEventListener('toggle', () => { open = box.open; });
-      top.after(box);
-    }
-    const inner = box.querySelector('.nav-stmore-in');
-    rest.forEach((e) => inner.append(e));
-  }
-  new window.SweepMO(() => { try { fold(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 })();
 
 /* My money (audit of 18 Oct., lot 3): « My entries / Analysis » first in the filters' line (one row less: the page had

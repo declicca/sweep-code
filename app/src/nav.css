@@ -661,7 +661,7 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-ask-side svg{width:20px;height:20px;flex:none}
 .side .foot .nav-ask-side svg{color:var(--pos)}   /* the Sweep AI mark in blue, like the floating button */
 @media (max-width:860px){.ask-fab{right:16px;bottom:calc(96px + env(safe-area-inset-bottom,0))}}
-@media (max-width:860px){html body.ux-fab-away .ask-fab,html body.ux-fab-cover .ask-fab{opacity:0!important;pointer-events:none!important;transform:translateX(calc(100% + 24px))!important}}   /* phone: steps aside while reading down a page, back when scrolling up (R23) */
+@media (max-width:860px){html body.ux-fab-away .ask-fab{opacity:0!important;pointer-events:none!important;transform:translateX(calc(100% + 24px))!important}}   /* phone: steps aside while reading down a page, back when scrolling up (R23) */
 
 /* Day / Week and Payouts read as one section (computer and phone) */
 .nav-dash .d-col > .d-perf{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
@@ -1432,24 +1432,19 @@ a,button{-webkit-tap-highlight-color:transparent}
   
 }
 /* pull to refresh */
-/* pull to refresh (19 Oct., Mateo: like Mail on the iPhone): the system's activity indicator, its 8 spokes appear one by one with
-   the pull and turn with it, a small tap when it is far enough, then it spins until the data is back */
+/* pull to refresh (19 Oct., Mateo: like Mail on the iPhone): a blue ring that turns with the pull, a small tap when it is far
+   enough, then it spins until the data is back */
 .nav-ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:150;display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,calc(var(--p,0) * 26px));opacity:min(1,calc(var(--p,0) * 3));pointer-events:none}
-html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) - 4px)}
-.nav-ptr i{position:relative;width:28px;height:28px;transform:rotate(calc(var(--p,0) * 180deg))}
-.nav-ptr b{position:absolute;left:12.5px;top:1px;width:3px;height:8px;border-radius:2px;background:var(--muted);transform-origin:1.5px 13px;opacity:0}
-.nav-ptr b:nth-child(1){transform:rotate(0deg);opacity:clamp(0,calc(var(--p,0) * 8 - 0),1)}
-.nav-ptr b:nth-child(2){transform:rotate(45deg);opacity:clamp(0,calc(var(--p,0) * 8 - 1),1)}
-.nav-ptr b:nth-child(3){transform:rotate(90deg);opacity:clamp(0,calc(var(--p,0) * 8 - 2),1)}
-.nav-ptr b:nth-child(4){transform:rotate(135deg);opacity:clamp(0,calc(var(--p,0) * 8 - 3),1)}
-.nav-ptr b:nth-child(5){transform:rotate(180deg);opacity:clamp(0,calc(var(--p,0) * 8 - 4),1)}
-.nav-ptr b:nth-child(6){transform:rotate(225deg);opacity:clamp(0,calc(var(--p,0) * 8 - 5),1)}
-.nav-ptr b:nth-child(7){transform:rotate(270deg);opacity:clamp(0,calc(var(--p,0) * 8 - 6),1)}
-.nav-ptr b:nth-child(8){transform:rotate(315deg);opacity:clamp(0,calc(var(--p,0) * 8 - 7),1)}
-.nav-ptr.armed i{transform:rotate(180deg) scale(1.08);transition:transform .2s var(--spring)}
-.nav-ptr.busy i{animation:nav-ptr-spin .8s steps(8) infinite}
-.nav-ptr.busy b{opacity:calc(.25 + var(--k,0))}
-.nav-ptr.busy b:nth-child(1){--k:.75}.nav-ptr.busy b:nth-child(2){--k:.65}.nav-ptr.busy b:nth-child(3){--k:.55}.nav-ptr.busy b:nth-child(4){--k:.45}.nav-ptr.busy b:nth-child(5){--k:.35}.nav-ptr.busy b:nth-child(6){--k:.25}.nav-ptr.busy b:nth-child(7){--k:.15}.nav-ptr.busy b:nth-child(8){--k:.05}
+html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + 4px);transform:translate(-50%,calc(var(--p,0) * 8px))}
+@media (max-width:860px){
+  html.pwa,html.pwa body{overscroll-behavior-y:none}
+  html.pwa.ptr-on aside.side,html.pwa.ptr-on .main-wrap{transform:translateY(var(--ptr-y,0px))}
+  html.pwa.ptr-back aside.side,html.pwa.ptr-back .main-wrap{transition:transform .42s var(--spring)}
+}
+@media (prefers-reduced-motion:reduce){html.pwa.ptr-back aside.side,html.pwa.ptr-back .main-wrap{transition:none}}
+.nav-ptr i{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--pos);border-right-color:transparent;transform:rotate(calc(var(--p,0) * 300deg))}   /* the continuous ring that turns (19 Oct., Mateo: rather than the spokes) */
+.nav-ptr.armed i{transform:rotate(300deg) scale(1.08);transition:transform .2s var(--spring)}
+.nav-ptr.busy i{animation:nav-ptr-spin .8s linear infinite}
 @keyframes nav-ptr-spin{to{transform:rotate(360deg)}}
 #navPtrTick{position:fixed;left:-200px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 .nav-ptr span{display:none}   /* iOS: the spinner only (19 Oct., Mateo: two refresh icons and a text) */
@@ -2931,17 +2926,6 @@ html body #main .nav-accset-in{display:grid;gap:20px;padding:4px 14px 16px}
 html body #main .nav-accset-in > *{margin:0}
 #main table.tbl.tbl-own-acc th:nth-child(3),#main table.tbl.tbl-own-acc td:nth-child(3){display:none!important}   /* its own page: no « Account » column */
 /* Stats on a phone: « More stats », folded (audit of 18 Oct., lot 3) — the same look as « Account settings » */
-html body #main .nav-stmore{margin-top:16px;border-radius:var(--r-card,20px);background:var(--panel);box-shadow:inset 0 0 0 1px var(--hair)}
-html body #main .nav-stmore > summary{list-style:none;cursor:pointer;display:flex!important;width:100%!important;box-sizing:border-box;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:12px 18px!important;color:var(--text)!important;font-weight:400}
-#main .nav-stmore > summary::-webkit-details-marker{display:none}
-#main .nav-stmore > summary::before{display:none!important}
-html body #main .nav-stmore > summary > span{display:flex;flex-direction:column;gap:2px;min-width:0}
-html body #main .nav-stmore > summary b{font-size:15px;font-weight:600}
-html body #main .nav-stmore > summary small{color:var(--muted);font-size:13px}
-#main .nav-stmore > summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s var(--ease-ios)}
-#main .nav-stmore[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
-html body #main .nav-stmore-in{display:grid;gap:16px;padding:4px 12px 14px}
-html body #main .nav-stmore-in > *{margin:0}
 /* My money: « My entries / Analysis » in the filters' line, the height of its chips */
 html body #main .fx-row > .mny-view.mny-view-fx{flex:0 0 auto;width:auto;max-width:none;height:40px;box-sizing:border-box;margin:0;padding:0;border:0!important;box-shadow:inset 0 0 0 1px var(--hair)}
 html body #main .fx-row > .mny-view.mny-view-fx > button{flex:0 0 auto;height:100%;min-height:0;padding:0 16px;white-space:nowrap}
@@ -2985,4 +2969,9 @@ html body .nav-imp-sheet .nav-imps-sum b{font-size:16px}
 html body .nav-imp-sheet .nav-imps-err{color:var(--neg)}
 html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 @media (max-width:600px){html body .evp.nav-am.nav-imp-sheet{height:auto;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 14px)}.evp.nav-am.nav-imp-sheet .nav-am-in{height:auto;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}}
+/* Settings › Appearance, the language (19 Oct., Mateo: badly fitted on a phone): its 4 choices in a 2 × 2 grid, rounded as a block */
+@media (max-width:600px){
+  html body .seg:has(> [data-act=lang]){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;width:100%;box-sizing:border-box;padding:4px;border-radius:var(--r3)!important}
+  html body .seg:has(> [data-act=lang]) > button{width:auto;min-width:0;margin:0!important;box-sizing:border-box;min-height:44px;border-radius:var(--r2)!important}
+}
 }

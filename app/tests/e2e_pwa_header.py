@@ -4,8 +4,9 @@ Sweep — the app added to the Home Screen (19 Oct., Mateo's recording), phone 3
  1  the app marks itself (html.pwa) even without « display-mode: standalone », and its own rules apply: the header right
     under the status bar (here, without a safe area: 6 px), transparent at the top of a page (no band, no line)
  2  scrolled: a clean line under the header, no blurred shadow fading the text under it
- 3  pull to refresh: the activity indicator's 8 spokes appear with the pull (half way: 4), a haptic tap once far enough
-    (the switch of Safari 18, toggled once), then it spins and goes away
+ 3  pull to refresh: iOS's own bounce off (what it showed above the page made a dark line), the header and the page follow
+    the finger and come back; the blue ring turns with the pull, a haptic tap once
+    far enough (the switch of Safari 18, toggled once), then it spins and goes away
  4  in the browser (not installed): no mark, the header as it was
 """
 import sys
@@ -36,8 +37,10 @@ with sync_playwright() as p:
     ok(sc[3] == 'none' and sc[2] != 'rgba(0, 0, 0, 0)', f'2 scrolled: a line, no blurred shadow ({sc[2]}, {sc[3]})')
     pg.evaluate("scrollTo(0, 0)"); pg.wait_for_timeout(500)
     pg.evaluate(TOUCH, ['touchstart', 100]); pg.evaluate(TOUCH, ['touchmove', 145]); pg.wait_for_timeout(100)
-    half = pg.evaluate("[...document.querySelectorAll('.nav-ptr b')].map((b) => +getComputedStyle(b).opacity)")
-    ok(len(half) == 8 and sum(1 for x in half if x >= .99) == 4 and all(x == 0 for x in half[4:]), f'3 half way: 4 of the 8 spokes ({half})')
+    mv = pg.evaluate("[getComputedStyle(document.documentElement).overscrollBehaviorY, getComputedStyle(document.querySelector('.main-wrap')).transform, getComputedStyle(document.querySelector('aside.side')).transform, getComputedStyle(document.querySelector('.nav-ptr i')).borderTopColor, getComputedStyle(document.documentElement).getPropertyValue('--pos').trim()]")
+    ok(mv[0] == 'none' and mv[1] == mv[2] == 'matrix(1, 0, 0, 1, 0, 25)' and mv[3] in ('rgb(94, 152, 255)', 'rgb(76, 141, 255)'), f'3 the bounce off, header and page 25 px lower (45 px pulled), the ring blue ({mv})')
+    rot = pg.evaluate("getComputedStyle(document.querySelector('.nav-ptr i')).transform")
+    ok(rot not in ('none', 'matrix(1, 0, 0, 1, 0, 0)'), f'3 half way: the ring has turned with the pull ({rot})')
     ok(pg.locator('#navPtrTick').count() == 0, '3 no haptic yet')
     pg.evaluate(TOUCH, ['touchmove', 200]); pg.wait_for_timeout(100)
     on = pg.evaluate("[document.querySelector('.nav-ptr').classList.contains('armed'), !!document.querySelector('#navPtrTick input[switch]'), (document.querySelector('#navPtrTick input') || {}).checked]")
@@ -48,7 +51,8 @@ with sync_playwright() as p:
     busy = pg.evaluate("(() => { const e = document.querySelector('.nav-ptr'); return e ? [e.classList.contains('busy'), getComputedStyle(e.querySelector('i')).animationName] : null })()")
     ok(busy == [True, 'nav-ptr-spin'], f'3 released: it spins ({busy})')
     pg.wait_for_timeout(4000)
-    ok(pg.locator('.nav-ptr').count() == 0, '3 then it goes away')
+    back = pg.evaluate("[getComputedStyle(document.querySelector('.main-wrap')).transform, document.documentElement.classList.contains('ptr-on')]")
+    ok(pg.locator('.nav-ptr').count() == 0 and back == ['none', False], f'3 then it goes away, the page back in its place ({back})')
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
   br.close()
