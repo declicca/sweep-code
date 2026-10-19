@@ -5,7 +5,7 @@
 .nt-bell{position:relative;display:inline-grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:50%;border:0;background:var(--panel2);color:var(--text2);cursor:pointer;box-shadow:inset 0 0 0 1px var(--line);-webkit-tap-highlight-color:transparent;transition:transform var(--dur-1,.14s) var(--ease-ios),color var(--dur-2,.22s) var(--ease-ios),background var(--dur-2,.22s) var(--ease-ios)}
 .nt-bell svg{width:19px;height:19px}
 .nt-bell:hover{color:var(--text);background:var(--hover)}
-.nt-bell:active{transform:scale(.92)}
+.nt-bell:active{transform:scale(.97)}
 .nt-badge{position:absolute;top:-3px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:var(--r-pill);background:var(--pos);color:var(--btntext);font:600 11px/18px var(--font-ui,inherit);text-align:center;box-shadow:0 0 0 2px var(--bg);pointer-events:none}
 .side .nt-bell{display:none}
 @media (max-width:860px){

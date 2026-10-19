@@ -24,7 +24,7 @@
 /* segmented control: Trades (List · Calendar · Journal) and Accounts (Accounts · Payouts & expenses) */
 .nav-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;margin:0 0 16px;max-width:520px}
 .nav-seg a{display:flex;align-items:center;justify-content:center;min-height:36px;padding:0 10px;text-decoration:none;color:inherit;white-space:nowrap;font-size:14px}
-.nav-seg a.on{background:var(--panel);color:var(--text);font-weight:600;border-radius:var(--r-pill);box-shadow:0 1px 3px rgba(0,0,0,.12),inset 0 0 0 1px var(--line)}
+.nav-seg a.on{background:var(--surface);color:var(--text);font-weight:600;border-radius:var(--r-pill);box-shadow:var(--shadow-1)}
 @media (max-width:860px){.nav-seg{position:sticky;top:calc(var(--nav-hdr,0px) + 6px);z-index:20;max-width:none}}
 /* back chevron */
 .nav-back{display:inline-flex;align-items:center;gap:2px;margin:0 0 10px -6px;padding:6px 8px 6px 2px;border-radius:10px;color:var(--pos);text-decoration:none;font-weight:500;font-size:15px}
@@ -183,7 +183,7 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
 /* ───── desktop sheets: centered window, rounded, dimmed background (Esc and outside click close them) ───── */
 @media (min-width:861px){
   /* .evp.g-sheet too: a closing sheet loses its id first, it must stay centred while it fades out */
-  #gSheet.evp,.evp.g-sheet{left:50%!important;right:auto!important;top:50%!important;bottom:auto!important;width:min(560px,calc(100vw - 48px))!important;max-height:min(86vh,860px);height:auto!important;translate:-50% -50%;border-radius:26px!important;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.45),inset 0 0 0 1px var(--line)}
+  #gSheet.evp,.evp.g-sheet{left:50%!important;right:auto!important;top:50%!important;bottom:auto!important;width:min(560px,calc(100vw - 48px))!important;max-height:min(86vh,860px);height:auto!important;translate:-50% -50%;border-radius:var(--r5)!important;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.45),inset 0 0 0 1px var(--line)}
   #gSheet.evp.gc-hubsheet,.evp.g-sheet.gc-hubsheet{width:min(720px,calc(100vw - 48px))!important}
   #gSheet.evp .g-in,.evp.g-sheet .g-in{max-height:min(86vh,860px);overflow-y:auto}
   #gSheet.evp:not(.open),.evp.g-sheet:not(.open){opacity:0;transform:scale(.97)!important;transition:opacity .18s var(--ease-ios),transform .22s var(--ease-ios),visibility 0s linear .22s!important}
@@ -483,7 +483,7 @@ body.evp-lock{overscroll-behavior:none}
   .nav-hring.due::after{content:"";position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;background:var(--pos);box-shadow:0 0 0 2px var(--bg)}
   .nav-hplus{border:0;display:grid;place-items:center;background:var(--pos);cursor:pointer}
   
-  .nav-hplus:active,.nav-hring:active{transform:scale(.94)}
+  .nav-hplus:active,.nav-hring:active{transform:scale(.97)}
 }
 
 @media (max-width:860px){
@@ -569,7 +569,7 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 .nav-addtop{display:inline-flex;align-items:center;gap:8px;margin-left:auto;height:40px;padding:0 16px 0 12px;border:0;border-radius:14px;background:linear-gradient(160deg,color-mix(in srgb,var(--pos) 82%,#fff 18%),var(--pos));color:var(--btntext);font:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 10px 22px -12px rgba(var(--pos-rgb),.9);white-space:nowrap}
 .nav-addtop[hidden]{display:none}
 .nav-addtop svg,.nav-addday svg{width:17px;height:17px}
-.nav-addtop:active{transform:scale(.96)}
+.nav-addtop:active{transform:scale(.97)}
 @media (max-width:860px){.nav-addtop{position:absolute;right:20px;top:50%;transform:translateY(-50%);height:40px;width:40px;padding:0;justify-content:center}.nav-addtop span{display:none}.main-wrap .top:has(.nav-addtop:not([hidden])){position:relative}.main-wrap .top:has(.nav-addtop:not([hidden])) #title{padding-right:56px}}
 .nav-addday{display:inline-flex;align-items:center;gap:6px}
 /* form: several executions link, amounts in $ */
@@ -1315,15 +1315,15 @@ html body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 
 
 /* cards: one radius, a hairline instead of a border, no heavy shadow */
-html body .surface,html body .nav-card,html body .nav-rt,html body .nav-po,html body .nav-wk-k > div,html body .nav-wk-d,html body .nav-wk-g > .surface{border-radius:var(--r-card)!important;box-shadow:inset 0 0 0 .5px var(--hair)!important;border:0!important}
+html body .surface,html body .nav-card,html body .nav-rt,html body .nav-po,html body .nav-wk-k > div,html body .nav-wk-d,html body .nav-wk-g > .surface{border-radius:var(--r-card)!important;box-shadow:var(--shadow-2)!important;border:0!important}
 /* tiles inside cards */
 html body .nav-rt-s,html body .nav-am-more-d,html body .nav-am-bi,html body .nav-po-h,html body .nav-copy,html body .nav-pass-row,html body .nav-stl,html body .nav-wk-t,html body .nav-acc,html body .kpis > *,html body .statline > *{border-radius:var(--r-tile)!important}
 
 /* buttons: pills, filled, no outline; primary solid accent, the rest a soft fill */
-html body .btn,html body button.btn,html body a.btn{border:0!important;box-shadow:none;font-weight:600;letter-spacing:-.005em;min-height:40px}
+html body .btn,html body button.btn,html body a.btn{border:0!important;box-shadow:none;font-weight:600;letter-spacing:-.01em;min-height:40px}
 html body .btn.sm{min-height:34px;font-size:14px}
 
-.btn:not(.primary):not(.danger):hover{background:var(--fill-2)!important}
+.btn:not(.primary):not(.danger):hover{background:color-mix(in srgb,var(--text) 12%,transparent)!important}
 
 
 html body .btn.danger{background:rgba(255,90,90,.12)!important;color:#ff6b6b!important}
@@ -1339,7 +1339,7 @@ html body .nav-am-more,html body .nav-setups-open{border-style:solid!important}
 /* segmented controls: a soft track, a raised thumb */
 html body .seg{border:0!important;}
 html body .seg button,html body .seg a{border-radius:var(--r-pill)!important;border:0!important}
-html body .seg button.on,html body .seg a.on,html body .seg [aria-selected="true"]{background:var(--panel)!important;color:var(--text)!important;box-shadow:0 2px 8px -2px rgba(0,0,0,.35),0 0 0 .5px var(--hair)!important}
+html body .seg button.on,html body .seg a.on,html body .seg [aria-selected="true"]{background:var(--surface)!important;color:var(--text)!important;box-shadow:var(--shadow-1)!important}
 
 /* fields: filled, no border, rounded the same everywhere */
 html body input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html body select,html body textarea,html body .tk-in,html body .nav-am-selb{border-radius:var(--r-field)!important;border:0!important;background:var(--fill)!important;box-shadow:none;transition:box-shadow .18s var(--ease-ios),background-color .18s var(--ease-ios)}
@@ -1586,7 +1586,7 @@ h2{font-weight:600;letter-spacing:-.03em}
 h3{font-weight:560;letter-spacing:-.015em}
 html body .num,html body [class*="pnl"],html body .kpis b,html body .nav-kpi-b,html body td.num,html body .big{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums;font-weight:500}
 /* glass cards: one material, a light edge, no heavy border */
-html body .surface,html body .nav-card,html body .nav-rt,html body .nav-po,html body .nav-wk-k > div,html body .nav-wk-d,html body .nav-trial,html body .nav-arch{background:var(--glass),var(--panel)!important;background-blend-mode:normal;border:0!important;border-radius:var(--r-card)!important;box-shadow:var(--glass-edge),var(--glass-hi)!important}
+html body .surface,html body .nav-card,html body .nav-rt,html body .nav-po,html body .nav-wk-k > div,html body .nav-wk-d,html body .nav-trial,html body .nav-arch{background:var(--glass)!important;background-blend-mode:normal;border:0!important;border-radius:var(--r-card)!important;box-shadow:var(--shadow-2)!important}
 /* tiles inside cards */
 html body .nav-rt-s,html body .nav-am-more-d,html body .nav-am-bi,html body .nav-copy,html body .nav-stl,html body .nav-wk-t,html body .nav-acc,html body .nav-inst-l li,html body .nav-fee{border-radius:var(--r-tile)!important;background:var(--fill)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;border:0!important}
 /* the one active card of the screen: the next step of the routine */
@@ -1595,16 +1595,16 @@ html body .nav-rt-s.done{background:linear-gradient(180deg,rgba(var(--pos-rgb),.
 /* buttons: the primary is a blue capsule with a light gradient and a top highlight; the rest, glass capsules */
 html body .btn,html body button.btn,html body a.btn{border-radius:var(--r-pill)!important;transition:transform var(--t-fast) var(--ease-ios),background-color var(--t-fast) var(--ease-ios),box-shadow var(--t-fast) var(--ease-ios),filter var(--t-fast) var(--ease-ios)!important}
 html body .btn.primary{color:#fff!important;}
-.btn:not(.primary):not(.danger){background:var(--glass),var(--fill)!important;box-shadow:var(--glass-edge),var(--glass-hi)!important;color:var(--text)!important}
-html body .btn:active,html body .chip:active,html body .seg button:active,html body .nav-rt-s:active{transform:scale(.96)!important}
+.btn:not(.primary):not(.danger){background:color-mix(in srgb,var(--text) 8%,transparent)!important;box-shadow:none!important;color:var(--text)!important}
+html body .btn:active,html body .chip:active,html body .seg button:active,html body .nav-rt-s:active{transform:scale(.97)!important}
 /* chips: 10 px, quiet; selected = blue */
 html body .chip{border-radius:var(--r-chip)!important;min-height:32px;background:var(--fill)!important;box-shadow:none!important}
 html body .chip.on,html body .chip[aria-pressed="true"]{background:var(--pos)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25)!important}
 /* segmented control, iOS-like */
-html body .seg{border-radius:var(--r-pill)!important;background:var(--fill)!important;padding:3px!important;box-shadow:inset 0 0 0 1px var(--hair)!important}
-html body .seg button.on,html body .seg a.on{background:var(--panel2)!important;box-shadow:0 3px 10px -3px rgba(0,0,0,.45),0 0 0 1px var(--hair),inset 0 1px 0 rgba(255,255,255,.08)!important}
+html body .seg{border-radius:var(--r-pill)!important;background:var(--fill)!important;padding:3px!important;box-shadow:none!important}
+html body .seg button.on,html body .seg a.on{background:var(--surface)!important;box-shadow:var(--shadow-1)!important}
 /* fields: 14 px, raised */
-html body input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html body select,html body textarea,html body .tk-in{border-radius:var(--r-field)!important;background:var(--panel2)!important;box-shadow:inset 0 0 0 1px var(--hair)!important}
+html body input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html body select,html body textarea,html body .tk-in{border-radius:var(--r-field)!important;background:color-mix(in srgb,var(--text) 5%,transparent)!important;box-shadow:0 0 0 1px var(--line) inset!important}
 html body .tk-in input{box-shadow:none!important;background:transparent!important}
 html body input:focus-visible,html body select:focus-visible,html body textarea:focus-visible{box-shadow:inset 0 0 0 1px rgba(var(--pos-rgb),.6),0 0 0 4px rgba(var(--pos-rgb),.18)!important}
 /* sections separate by space, not lines */
@@ -1612,6 +1612,7 @@ html body .surface hr,html body .nav-am-sec{border-top-color:transparent!importa
 /* floating bars and sheets: ink 86 % + 28 px blur, 180 % saturation, the one shadow */
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
   html body .bottomnav,html body .mhdr,html body .nav-mhdr{background:var(--glass-bar)!important;-webkit-backdrop-filter:saturate(180%) blur(28px)!important;backdrop-filter:saturate(180%) blur(28px)!important;box-shadow:0 0 0 1px var(--hair)!important}
+  html body .bottomnav{box-shadow:var(--shadow-3)!important;border-color:transparent!important}   /* the site's floating bar (design chantier, step 4) */
   html body .evp,html body #gSheet,html body .nav-dlg,html body .nav-am,html body #shPanel,html body #navMenu,html body .nav-ra,html body .nav-undo{background:var(--glass-strong)!important;-webkit-backdrop-filter:saturate(180%) blur(28px)!important;backdrop-filter:saturate(180%) blur(28px)!important}
 }
 html body .evp,html body #gSheet,html body .nav-dlg,html body .nav-am,html body #shPanel{box-shadow:var(--shadow-float)!important}
@@ -1707,7 +1708,7 @@ html body .nav-fstrip .nav-fd .nav-fd-p{font:500 10.5px var(--font-num)!importan
 .nav-fstrip .nav-fd.n .nav-fd-p{color:var(--neg)!important}
 html body .nav-fstrip .nav-fd.on,html body .nav-fstrip .nav-fd[aria-pressed="true"],html body .nav-fstrip .nav-fd.sel{opacity:1;background:var(--fill-2)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px var(--hair)!important}
 html body .nav-fstrip .nav-fd.on b,html body .nav-fstrip .nav-fd.sel b{color:var(--text)!important}
-html body .nav-fstrip .nav-fd:active{transform:scale(.94)}
+html body .nav-fstrip .nav-fd:active{transform:scale(.97)}
 .nav-fstrip .nav-fd::after{display:none!important}
 /* routine steps: the action as a quiet text link with a chevron (the whole step is tappable) */
 html body .nav-rt-sa .btn,html body .nav-rt-sa .btn.primary{min-height:0!important;height:auto!important;padding:4px 0!important;background:none!important;box-shadow:none!important;border-radius:10px!important;font-size:13px!important;font-weight:600!important;color:var(--muted)!important;letter-spacing:-.005em}
@@ -1810,7 +1811,7 @@ html body .add-row .add-ic{transition:background-color .18s var(--ease-ios),colo
 html body .add-row:hover .add-ic{color:#fff!important}
 html body .add-row:hover{color:var(--text)!important}
 html body .add-row:active{opacity:.7}
-html body .add-row:active .add-ic{transform:scale(.9)}
+html body .add-row:active .add-ic{transform:scale(.97)}
 /* payouts / expenses: the row and the form at the top of their list card */
 html body .nav-pz-list > .nav-pz-b{margin:0!important;border-bottom:1px solid var(--hair)}
 html body .nav-pz-list > .pz-add{background:none!important;box-shadow:none!important;border-radius:0!important;margin:0!important;padding:14px 18px!important;border-bottom:1px solid var(--hair)}
@@ -1829,9 +1830,9 @@ html body .add-row:hover .add-ic{background:var(--pos) url("data:image/svg+xml,%
 /* A1 · the routine is always open; only its next step carries the one primary (solid blue) button of the page */
 html body .nav-rt-chev{display:none!important}
 .nav-rt-tg{cursor:default!important}
-html body .nav-rt .nav-rt-sa .btn.primary{background:var(--pos)!important;color:#fff!important;padding:0 14px!important;height:32px!important;min-height:32px!important;border-radius:var(--r-pill)!important;box-shadow:0 6px 16px -8px rgba(var(--pos-rgb),.8)!important}
+html body .nav-rt .nav-rt-sa .btn.primary{background:var(--blue-btn)!important;color:#fff!important;padding:0 14px!important;height:32px!important;min-height:32px!important;border-radius:var(--r-pill)!important;box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 1px 2px rgba(0,0,0,.16)!important}
 .nav-rt .nav-rt-sa .btn.primary::after{content:none!important}
-html[data-home] .main-wrap > .top .nav-addtop{background:var(--fill)!important;color:var(--text)!important;box-shadow:inset 0 0 0 1px var(--hair)!important}
+html[data-home] .main-wrap > .top .nav-addtop{background:color-mix(in srgb,var(--text) 8%,transparent)!important;color:var(--text)!important;box-shadow:none!important}
 /* A3 · phone: no unlabelled chips in the header (streak, level and the « + » live in the routine card and the bottom bar) */
 @media (max-width:860px){html body .main-wrap > .top .nav-hday{display:none!important}html body .main-wrap > .top .nav-addtop{display:none!important}}
 /* E19 */
@@ -1877,8 +1878,8 @@ html body .d-perf .nav-kpi,html body .d-perf .statline{display:grid!important;gr
 html body .d-perf .nav-kpi > *,html body .d-perf .statline > *{padding:14px 16px!important;border-radius:var(--r-tile,20px)!important;background:var(--fill)!important}
 html body .d-perf .nav-kpi-b,html body .d-perf .statline b,html body .d-perf .statline > * > :last-child{font-size:28px!important;letter-spacing:-.02em}
 /* 6 · « Add a trade » and « Import » look the same on every page */
-html body .main-wrap > .top .nav-addtop{background:var(--fill)!important;color:var(--text)!important;box-shadow:inset 0 0 0 1px var(--hair)!important}
-html body .main-wrap > .top .nav-addtop:hover{background:var(--fill-2)!important}
+html body .main-wrap > .top .nav-addtop{background:color-mix(in srgb,var(--text) 8%,transparent)!important;color:var(--text)!important;box-shadow:none!important}
+html body .main-wrap > .top .nav-addtop:hover{background:color-mix(in srgb,var(--text) 12%,transparent)!important}
 /* Day / Week: three tiles that fill the width, big numbers */
 html body .d-perf .nav-kpi-g{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;width:100%!important}
 html body .d-perf .nav-kpi-g > div{display:flex!important;flex-direction:column;gap:6px;padding:14px 16px!important;border-radius:var(--r-tile,20px)!important;background:var(--fill)!important;min-width:0}
@@ -1911,8 +1912,8 @@ html body .nav-cancel{position:relative;overflow:hidden;line-height:0!important}
 html body .nav-cancel::before{content:"";position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 2l8 8M10 2l-8 8' stroke='black' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") center/12px 12px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 2l8 8M10 2l-8 8' stroke='black' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") center/12px 12px no-repeat}
 html body .nav-cancel:hover{background:rgba(0,0,0,.55)!important;color:var(--text)!important}
 /* 9 · primary buttons, a touch softer everywhere (same blue, less glare) */
-html body .btn.primary,html body .tk-save,html body button.tk-save{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 16px -10px rgba(var(--pos-rgb),.6)!important;text-shadow:none!important}
-html body .btn.primary:hover,html body .tk-save:hover{filter:brightness(1.05)}
+html body .btn.primary,html body .tk-save,html body button.tk-save{box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 1px 2px rgba(0,0,0,.16)!important;text-shadow:none!important}
+html body .btn.primary:hover,html body .tk-save:hover{}
 html[data-home] .nav-date,html[data-home] .main-wrap .nav-date{display:none!important}
 #main .d-acc a.nav-acc{cursor:grab}
 #main .d-acc a.nav-acc.nav-acc-drag{opacity:1!important;background:rgba(var(--pos-rgb),.08)!important;outline:2px dashed rgba(var(--pos-rgb),.55);outline-offset:-3px}
@@ -2325,8 +2326,8 @@ html body .nav-rt-fold .nav-rt-chev{display:block!important}
 html body .btn.nav-am-save{min-height:48px!important;height:48px!important;font-size:15px!important;font-weight:600!important;letter-spacing:0;transition:filter var(--t-fast) var(--ease-ios),transform var(--t-fast) var(--ease-ios)}
 @media (min-width:861px){html body .btn.nav-am-save{min-height:44px!important;height:44px!important}}
 /* ── 3 · « Make my plan »: on hover it stays itself (solid blue, a touch brighter), never a dark background ── */
-html body .nav-rt .nav-rt-s .nav-rt-sa .btn.primary,html body .nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary{background:var(--pos)!important;color:#fff!important;transition:filter var(--t-fast) var(--ease-ios),box-shadow var(--t-fast) var(--ease-ios)}
-.nav-rt .nav-rt-s .nav-rt-sa .btn.primary:hover,.nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary:hover{filter:brightness(1.07)}
+html body .nav-rt .nav-rt-s .nav-rt-sa .btn.primary,html body .nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary{background:var(--blue-btn)!important;color:#fff!important;transition:filter var(--t-fast) var(--ease-ios),box-shadow var(--t-fast) var(--ease-ios)}
+.nav-rt .nav-rt-s .nav-rt-sa .btn.primary:hover,.nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary:hover{}
 /* ── 15.2 / 15.3 · Pre-market and Post-market: the header keeps its rounded corners when open (no straight edge above the sheet) ── */
 html body .nav-fold.open > .nav-fold-h{border-radius:14px!important;margin-bottom:0!important}
 html body .nav-fold.open > .surface{margin-top:8px!important;border-radius:var(--r-card,26px)!important}
@@ -2357,7 +2358,7 @@ body.nav-few-trades #main .msearch{display:none!important}
 @media (prefers-color-scheme:light){}
 
 .ask-fab-ic,.ask-msg.u>div,.ask-send,.bottomnav .plus,.chip.on,.d-ai-in button,.fb-st.s-shipped,.fbtn b,.g-dots button.on,.g-ob .chip.on,.g-seg3 button.on,.g-seg4 button.on,.g-sheet .chip.on,.g-xpf,.gc-step.done .gc-step-ic,.gm-mrow.done .gm-mic,.gm-node.done .gm-dot,.jstrip a.on,.lg-row b i,.nav-ck-b button.on[data-v=y],.nav-hplus,.nav-po-c li.ok i,.nav-rt-s.done .nav-rt-n,.nt-badge,.onb-steps li.on span,.rf-gift,.rnum.ok,.rprog-steps a.ok span,.sb-pcard .sb-tag,.sc-tool.exit.on,.sc-tool.target.on,.side .new,.ss-col.cur .ss-n,.ux-setup.on,.add-row:hover .add-ic,.chip.on,.chip[aria-pressed=true],.nav-rt .nav-rt-s .nav-rt-sa .btn.primary,.nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary,.nav-rt .nav-rt-sa .btn.primary{--pos:var(--pos-fill)}
-html body .btn.primary,html body .tk-save,html body button.tk-save{background:linear-gradient(180deg,#2F6FE4 0%,#2A66D6 100%)!important}
+html body .btn.primary,html body .tk-save,html body button.tk-save{background:var(--blue-btn)!important}
 .nav-fd.sel small,.nav-fd.sel .nav-fd-p{opacity:1}
 /* the « Discipline » label of its tile, at full strength (it was faded to 80 %) */
 .nav-rt-disc small{opacity:1}
@@ -2767,13 +2768,13 @@ body:has(.acc-dlg.open) .acc-bar,body:has(.nav-pass.open) .acc-bar{display:none}
 /* ───── One line of filters (16 Oct.): Period ▾ · Account type ▾ · Filters · the active ones; Trades: its search ───── */
 html body #main .fx{display:flex;align-items:center;gap:10px;margin:0 0 18px;min-width:0}
 html body #main .fx-row{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
-html body .fx-c{position:relative;display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;box-sizing:border-box;height:36px;padding:0 14px;border:0;border-radius:var(--r-pill);background:var(--fill);box-shadow:inset 0 0 0 1px var(--hair);color:var(--text);font:500 14px/1 var(--font-ui,Geist,system-ui,sans-serif);white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .15s var(--ease-ios),transform .14s var(--ease-ios)}
-html body .fx-c:hover{background:var(--fill-2)}
+html body .fx-c{position:relative;display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;box-sizing:border-box;height:36px;padding:0 14px;border:0;border-radius:var(--r-pill);background:var(--fill);box-shadow:none;color:var(--text);font:500 14px/1 var(--font-ui,Geist,system-ui,sans-serif);white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .15s var(--ease-ios),transform .14s var(--ease-ios)}
+html body .fx-c:hover{background:color-mix(in srgb,var(--text) 12%,transparent)}
 html body .fx-c:active{transform:scale(.97)}
 html body .fx-c:focus-visible{outline:0;box-shadow:var(--focus)}
 html body .fx-c > i{width:6px;height:6px;margin:-3px 0 0 1px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);opacity:.6}
 html body .fx-c svg{width:16px;height:16px;flex-shrink:0;color:var(--muted)}
-html body .fx-c.fx-set,html body .fx-c.fx-more.has{background:var(--posbg);box-shadow:inset 0 0 0 1px rgba(var(--pos-rgb),.35);color:var(--pos)}
+html body .fx-c.fx-set,html body .fx-c.fx-more.has{background:var(--posbg);box-shadow:none;color:var(--pos)}
 html body .fx-c.fx-more.has svg{color:var(--pos)}
 html body .fx-c.fx-more b{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:10px;background:var(--pos-fill);color:#fff;font-size:11px;font-weight:700;box-sizing:border-box}
 html body .fx-c.fx-on{background:var(--posbg);box-shadow:none;color:var(--text);padding:0 10px 0 12px;font-weight:450}
