@@ -433,6 +433,7 @@
   function closeSheet(instant) {
     const el = document.getElementById('gSheet'), sc = document.getElementById('gScrim');
     if (!el) return;
+    window.__gSheetClosed = Date.now();
     const cb = el._onClose; el.id = ''; if (sc) sc.id = '';
     el.classList.remove('open'); if (sc) sc.classList.remove('open');
     if (!document.querySelector('.evp.open:not(.g-sheet)')) document.body.classList.remove('evp-lock');
@@ -874,7 +875,9 @@
     if (f.answers.D1 == null) f.answers.D1 = PM.d1auto.value;
     if (f.answers.max_loss == null) f.answers.max_loss = pmMaxLoss(day);
     PM.f = f;
+    PM.opening = Date.now();   // (the express offer waits: never two pre-market sheets at once)
     try { if (typeof loadEcon === 'function') await loadEcon(day, day); } catch (e) { /* the calendar is a help, not a need */ }
+    PM.opening = 0;
     PM.news = pmCalendar(day);
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
     if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-pm g-pm-locked' }); const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day; return; }   // locked: the session view
@@ -1176,7 +1179,8 @@
   /** once a day on Today: the lock time is past and there is no sheet (for a trader who makes sheets) → the express version */
   function ficheMaybeExpress() {
     const day = ficheDayOf(), now = typeof etStr === 'function' ? etStr(Math.floor(Date.now() / 1000)) : '';
-    if (now.slice(0, 10) !== day || !G.today || !G.today.market || ficheGet(day) || document.getElementById('gSheet')) return;
+    if (now.slice(0, 10) !== day || !G.today || !G.today.market || ficheGet(day) || document.getElementById('gSheet') || document.querySelector('.evp.open')) return;
+    if ((PM.opening && Date.now() - PM.opening < 10000) || Date.now() - (window.__gSheetClosed || 0) < 3000) return;   // a sheet opening, or one just closed
     if (ficheLockAt(day) > Date.now() / 1000 || !(S.journals || []).some((j) => j.fiche && j.id < day)) return;
     const j = journalOf(day); if (j.pre && j.pre.day_off) return;
     if (lsGet('pm.later.' + day, 0) || lsGet('pm.xshown.' + day, 0)) return;

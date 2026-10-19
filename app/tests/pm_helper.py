@@ -3,6 +3,7 @@ A quiet day, the price inside the London range, the high watched (or the low: sh
 or the ones offered. sync: premarket(pg, ...); async: await apremarket(pg, ...). The sheet must already be open, or day= opens it; stop_at='limits' (or a tuple of screens) stops on that screen (call again to go on); after the lock time without a sheet, the express version is filled the same way."""
 LEVELS = [('instrument', 'MES'), ('lv.london_high', '5820'), ('lv.london_low', '5800'), ('lv.pdh', '5850'), ('lv.pdl', '5770'), ('lv.price', '5810')]
 SCREEN = "(document.querySelector('#gSheet.g-pm [data-pm-screen]') || {dataset: {}}).dataset.pmScreen || ''"
+TAP = "(s) => { const b = document.querySelector(s); if (b) b.click(); return !!b }"   # (a JS click: the sheet may still be sliding in on a slow machine)
 
 def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=True, stop_at=None):
   if day is not None:
@@ -17,24 +18,24 @@ def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=Tr
       for k, v in LEVELS:
         if pg.locator(f'#gSheet [data-pmf="{k}"]').count(): pg.fill(f'#gSheet [data-pmf="{k}"]', v)   # (the instrument is hidden once the same for 5 sheets)
     elif s == 'express':   # (the lock time is past without a sheet)
-      pg.click(f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); pg.wait_for_timeout(150)
+      pg.evaluate(TAP, f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); pg.wait_for_timeout(150)
       if pg.locator('#gSheet [data-pmf="instrument"]').count(): pg.fill('#gSheet [data-pmf="instrument"]', 'MES')
       pg.fill('#gSheet [data-pmf="X_level"]', '5800' if short else '5820'); pg.fill('#gSheet [data-pmf="C3_A"]', '5770' if short else '5850')
       if max_loss is not None: pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'pos':
-      if pg.locator('#gSheet [data-q="A2"]').count(): pg.click(f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); pg.wait_for_timeout(150)
+      if pg.locator('#gSheet [data-q="A2"]').count(): pg.evaluate(TAP, f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); pg.wait_for_timeout(150)
     elif s == 'd1':
-      if not pg.locator('#gSheet [data-q="D1"].on').count(): pg.click('#gSheet [data-q="D1"][data-v="gain"]'); pg.wait_for_timeout(150)
+      if not pg.locator('#gSheet [data-q="D1"].on').count(): pg.evaluate(TAP, '#gSheet [data-q="D1"][data-v="gain"]'); pg.wait_for_timeout(150)
     elif s == 'limits':
-      if pg.locator('#gSheet [data-q="D1_reduce"]').count(): pg.click('#gSheet [data-q="D1_reduce"][data-v="refuse"]'); pg.wait_for_timeout(150)
+      if pg.locator('#gSheet [data-q="D1_reduce"]').count(): pg.evaluate(TAP, '#gSheet [data-q="D1_reduce"][data-v="refuse"]'); pg.wait_for_timeout(150)
       if max_trades is not None: pg.fill('#gSheet [data-pmf="lim.max_trades"]', str(max_trades))
       if max_loss is not None: pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'sheet':
-      if save: pg.click('#gSheet [data-pm="save"]'); pg.wait_for_timeout(900)
+      if save: pg.evaluate(TAP, '#gSheet [data-pm="save"]'); pg.wait_for_timeout(900)
       return True
-    pg.click('#gSheet [data-pm="next"]'); pg.wait_for_timeout(250)
+    pg.evaluate(TAP, '#gSheet [data-pm="next"]'); pg.wait_for_timeout(250)
   return False
 
 async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=True, stop_at=None):
@@ -50,22 +51,22 @@ async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, 
       for k, v in LEVELS:
         if await pg.locator(f'#gSheet [data-pmf="{k}"]').count(): await pg.fill(f'#gSheet [data-pmf="{k}"]', v)
     elif s == 'express':
-      await pg.click(f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); await pg.wait_for_timeout(150)
+      await pg.evaluate(TAP, f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); await pg.wait_for_timeout(150)
       if await pg.locator('#gSheet [data-pmf="instrument"]').count(): await pg.fill('#gSheet [data-pmf="instrument"]', 'MES')
       await pg.fill('#gSheet [data-pmf="X_level"]', '5800' if short else '5820'); await pg.fill('#gSheet [data-pmf="C3_A"]', '5770' if short else '5850')
       if max_loss is not None: await pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not await pg.input_value('#gSheet [data-pmf="max_loss"]'): await pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'pos':
-      if await pg.locator('#gSheet [data-q="A2"]').count(): await pg.click(f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); await pg.wait_for_timeout(150)
+      if await pg.locator('#gSheet [data-q="A2"]').count(): await pg.evaluate(TAP, f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); await pg.wait_for_timeout(150)
     elif s == 'd1':
-      if not await pg.locator('#gSheet [data-q="D1"].on').count(): await pg.click('#gSheet [data-q="D1"][data-v="gain"]'); await pg.wait_for_timeout(150)
+      if not await pg.locator('#gSheet [data-q="D1"].on').count(): await pg.evaluate(TAP, '#gSheet [data-q="D1"][data-v="gain"]'); await pg.wait_for_timeout(150)
     elif s == 'limits':
-      if await pg.locator('#gSheet [data-q="D1_reduce"]').count(): await pg.click('#gSheet [data-q="D1_reduce"][data-v="refuse"]'); await pg.wait_for_timeout(150)
+      if await pg.locator('#gSheet [data-q="D1_reduce"]').count(): await pg.evaluate(TAP, '#gSheet [data-q="D1_reduce"][data-v="refuse"]'); await pg.wait_for_timeout(150)
       if max_trades is not None: await pg.fill('#gSheet [data-pmf="lim.max_trades"]', str(max_trades))
       if max_loss is not None: await pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not await pg.input_value('#gSheet [data-pmf="max_loss"]'): await pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'sheet':
-      if save: await pg.click('#gSheet [data-pm="save"]'); await pg.wait_for_timeout(900)
+      if save: await pg.evaluate(TAP, '#gSheet [data-pm="save"]'); await pg.wait_for_timeout(900)
       return True
-    await pg.click('#gSheet [data-pm="next"]'); await pg.wait_for_timeout(250)
+    await pg.evaluate(TAP, '#gSheet [data-pm="next"]'); await pg.wait_for_timeout(250)
   return False
