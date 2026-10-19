@@ -35,8 +35,8 @@ img,svg{-webkit-user-drag:none}
 
 /* ───────────── 3. Top bar (phone): hairline appears only once content scrolls under it ───────────── */
 @media (max-width:860px){
-  .side{border-bottom-color:transparent!important;transition:border-color var(--dur-2) var(--var(--spring)),background-color var(--dur-2) var(--var(--spring)),box-shadow var(--dur-2)}
-  body.ux-scrolled .side{border-bottom-color:var(--line)!important;box-shadow:0 8px 24px -18px rgba(0,0,0,.45)}
+  .side{border-bottom-color:transparent!important;transition:border-color var(--dur-2) var(--spring),background-color var(--dur-2) var(--spring),box-shadow var(--dur-2)}
+  body.ux-scrolled .side{border-bottom-color:var(--line)!important;box-shadow:none}   /* a clean line, no blurred shadow fading the text under it (19 Oct., Mateo) */
   body:not(.ux-scrolled) .side{background:color-mix(in srgb,var(--bg) 70%,transparent)}
 }
 
@@ -97,7 +97,7 @@ img,svg{-webkit-user-drag:none}
 .btn.primary,.sb-cta,.fb-send,.tk-save{position:relative;overflow:hidden}
 .btn.primary::after,.tk-save::after{content:"";position:absolute;inset:0;border-radius:inherit;background:none;pointer-events:none}
 .btn.primary:active,.tk-save:active{transform:scale(.97)}
-input,select,textarea{transition:border-color var(--dur-2) var(--var(--spring)),box-shadow var(--dur-2) var(--var(--spring)),background-color var(--dur-2) var(--var(--spring))}
+input,select,textarea{transition:border-color var(--dur-2) var(--spring),box-shadow var(--dur-2) var(--spring),background-color var(--dur-2) var(--spring)}
 .sw i::after{transition:transform .35s var(--ease-ios)!important}
 .seg button.on{transition:background .25s var(--ease-ios),box-shadow .25s var(--ease-ios),color .2s var(--ease-ios)}
 .toast.on{animation:ux-toast .5s var(--ux-pop) both}
@@ -113,7 +113,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--var(--spring)),
 }
 
 /* ───────────── 8. Skeleton & first paint ───────────── */
-.boot .skel{background:linear-gradient(100deg,var(--panel2) 30%,var(--hover) 50%,var(--panel2) 70%);background-size:220% 100%;animation:shimmer 1.2s var(--var(--spring),var(--spring)) infinite}
+.boot .skel{background:linear-gradient(100deg,var(--panel2) 30%,var(--hover) 50%,var(--panel2) 70%);background-size:220% 100%;animation:shimmer 1.2s var(--spring) infinite}
 
 /* ───────────── 9. Reduced motion: keep it calm ───────────── */
 @media (prefers-reduced-motion:reduce){

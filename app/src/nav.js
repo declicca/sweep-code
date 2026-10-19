@@ -1,6 +1,9 @@
 /* Viewport tests without forcing a layout: media queries are cached by the browser (reading innerWidth after a DOM change
  * recalculated the whole page each time). */
 window.SW_MQ = window.SW_MQ || matchMedia('(max-width: 860px)');
+/* the app added to the Home Screen: html.pwa (19 Oct., Mateo's recording: on his iPhone « display-mode: standalone » does not
+   match there, navigator.standalone does) — the installed app's header, bars and pull to refresh follow this mark */
+try { if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true) document.documentElement.classList.add('pwa'); } catch (e) { /* no mark */ }
 window.SW_MQ6 = window.SW_MQ6 || matchMedia('(max-width: 600px)');
 /* Performance: every DOM watcher of this file is batched to one call per frame (they used to run on every
  * single DOM change: 13 watchers × hundreds of changes when a page renders). The callback still runs before the
@@ -4676,15 +4679,26 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('click', (e) => { const r = e.target.closest && e.target.closest('.nav-ra-row.nav-sw'); if (r && !e.target.closest('[data-ra]')) { e.preventDefault(); r.classList.remove('nav-sw'); } }, true);
 
   /* 12. pull to refresh (phone: Today, Trades, Stats) */
+  /* the small tap of the Mail app when the pull reaches the refresh: navigator.vibrate where it exists; on the iPhone, which has
+     none, the switch trick of Safari 18 (toggling an <input switch> plays the system haptic) */
+  function ptrTick() {
+    try {
+      if (navigator.vibrate) { navigator.vibrate(10); return; }
+      let l = document.getElementById('navPtrTick');
+      if (!l) { l = document.createElement('label'); l.id = 'navPtrTick'; l.setAttribute('aria-hidden', 'true'); l.innerHTML = '<input type="checkbox" switch tabindex="-1">'; document.body.append(l); }
+      l.click();
+    } catch (e) { /* no haptic: fine */ }
+  }
   let py = null, pdist = 0, pel = null;
   const ptrPage = () => true;   // every page (the app's first pull to refresh, now removed, worked everywhere)
   document.addEventListener('touchstart', (e) => { if (!isPhone() || !ptrPage() || scrollY > 0 || e.target.closest('.evp, .nav-am, .nav-dlg, #gSheet, #shPanel, .nav-fstrip, .nav-ra-row')) { py = null; return; } py = e.touches[0].clientY; pdist = 0; }, { passive: true });
-  document.addEventListener('touchmove', (e) => { if (py == null) return; pdist = Math.max(0, e.touches[0].clientY - py); if (pdist < 8) return; if (!pel) { pel = document.createElement('div'); pel.className = 'nav-ptr'; pel.setAttribute('data-noi18n', ''); pel.innerHTML = '<i></i><span></span>'; document.body.append(pel); } const p = Math.min(1, pdist / 90); pel.style.setProperty('--p', p); pel.querySelector('span').textContent = p >= 1 ? t('refresh') : ''; }, { passive: true });
+  document.addEventListener('touchmove', (e) => { if (py == null) return; pdist = Math.max(0, e.touches[0].clientY - py); if (pdist < 8) return; if (!pel) { pel = document.createElement('div'); pel.className = 'nav-ptr'; pel.setAttribute('data-noi18n', ''); pel.innerHTML = '<i>' + '<b></b>'.repeat(8) + '</i><span></span>'; document.body.append(pel); pel._armed = false; } const p = Math.min(1, pdist / 90); pel.style.setProperty('--p', p); pel.querySelector('span').textContent = p >= 1 ? t('refresh') : ''; if (p >= 1 && !pel._armed) { pel._armed = true; pel.classList.add('armed'); ptrTick(); } else if (p < 1 && pel._armed) { pel._armed = false; pel.classList.remove('armed'); } }, { passive: true });
   document.addEventListener('touchend', async () => {
     if (py == null) return; py = null; if (!pel) return; const go = pdist >= 90; const el = pel; pel = null;
     if (!go) { el.remove(); return; }
-    el.classList.add('busy'); el.querySelector('span').textContent = t('refreshing');
+    el.classList.add('busy'); el.querySelector('span').textContent = t('refreshing'); const t0 = Date.now();
     try { if (typeof syncNow === 'function') await syncNow({ manual: true }); if (window.SweepGame && SweepGame.refresh) await SweepGame.refresh(); } catch (e) { /* keeps what is shown */ }
+    await new Promise((r) => setTimeout(r, Math.max(0, 700 - (Date.now() - t0))));   // it spins long enough to be seen, like Mail
     if (typeof syncNow !== 'function') { location.reload(); return; }   // only if the app's sync is missing
     if (typeof render === 'function') render(); setTimeout(() => el.remove(), 300);
   });

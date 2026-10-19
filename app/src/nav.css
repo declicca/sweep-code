@@ -290,7 +290,7 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
 @media (max-width:860px){.nav-cd{min-height:58px;padding:4px}.nav-cd-n{display:none}.nav-cd-e{font-size:0}.nav-cd-e i{width:7px;height:7px}}
 /* cards come in once, gently (opacity/transform only: no layout shift) */
 @media (prefers-reduced-motion:no-preference){
-  .nav-dash.nav-dash-in .d-col > *{animation:nav-in .45s var(--sw-var(--spring)) both}
+  .nav-dash.nav-dash-in .d-col > *{animation:nav-in .45s var(--spring) both}
   .nav-dash.nav-dash-in .d-col > :nth-child(2){animation-delay:.04s}.nav-dash.nav-dash-in .d-col > :nth-child(3){animation-delay:.08s}.nav-dash.nav-dash-in .d-col > :nth-child(4){animation-delay:.12s}
   .nav-dash.nav-dash-in .d-col > :nth-child(5){animation-delay:.16s}.nav-dash.nav-dash-in .d-col > :nth-child(6){animation-delay:.2s}.nav-dash.nav-dash-in .d-col > :nth-child(n+7){animation-delay:.24s}
 }
@@ -1432,9 +1432,26 @@ a,button{-webkit-tap-highlight-color:transparent}
   
 }
 /* pull to refresh */
-.nav-ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 64px);z-index:150;display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,calc(var(--p,0) * 24px - 24px));opacity:var(--p,0);pointer-events:none}
-.nav-ptr i{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--pos);border-right-color:transparent;transform:rotate(calc(var(--p,0) * 300deg))}
-.nav-ptr.busy i{animation:spin .8s linear infinite}
+/* pull to refresh (19 Oct., Mateo: like Mail on the iPhone): the system's activity indicator, its 8 spokes appear one by one with
+   the pull and turn with it, a small tap when it is far enough, then it spins until the data is back */
+.nav-ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:150;display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,calc(var(--p,0) * 26px));opacity:min(1,calc(var(--p,0) * 3));pointer-events:none}
+html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) - 4px)}
+.nav-ptr i{position:relative;width:28px;height:28px;transform:rotate(calc(var(--p,0) * 180deg))}
+.nav-ptr b{position:absolute;left:12.5px;top:1px;width:3px;height:8px;border-radius:2px;background:var(--muted);transform-origin:1.5px 13px;opacity:0}
+.nav-ptr b:nth-child(1){transform:rotate(0deg);opacity:clamp(0,calc(var(--p,0) * 8 - 0),1)}
+.nav-ptr b:nth-child(2){transform:rotate(45deg);opacity:clamp(0,calc(var(--p,0) * 8 - 1),1)}
+.nav-ptr b:nth-child(3){transform:rotate(90deg);opacity:clamp(0,calc(var(--p,0) * 8 - 2),1)}
+.nav-ptr b:nth-child(4){transform:rotate(135deg);opacity:clamp(0,calc(var(--p,0) * 8 - 3),1)}
+.nav-ptr b:nth-child(5){transform:rotate(180deg);opacity:clamp(0,calc(var(--p,0) * 8 - 4),1)}
+.nav-ptr b:nth-child(6){transform:rotate(225deg);opacity:clamp(0,calc(var(--p,0) * 8 - 5),1)}
+.nav-ptr b:nth-child(7){transform:rotate(270deg);opacity:clamp(0,calc(var(--p,0) * 8 - 6),1)}
+.nav-ptr b:nth-child(8){transform:rotate(315deg);opacity:clamp(0,calc(var(--p,0) * 8 - 7),1)}
+.nav-ptr.armed i{transform:rotate(180deg) scale(1.08);transition:transform .2s var(--spring)}
+.nav-ptr.busy i{animation:nav-ptr-spin .8s steps(8) infinite}
+.nav-ptr.busy b{opacity:calc(.25 + var(--k,0))}
+.nav-ptr.busy b:nth-child(1){--k:.75}.nav-ptr.busy b:nth-child(2){--k:.65}.nav-ptr.busy b:nth-child(3){--k:.55}.nav-ptr.busy b:nth-child(4){--k:.45}.nav-ptr.busy b:nth-child(5){--k:.35}.nav-ptr.busy b:nth-child(6){--k:.25}.nav-ptr.busy b:nth-child(7){--k:.15}.nav-ptr.busy b:nth-child(8){--k:.05}
+@keyframes nav-ptr-spin{to{transform:rotate(360deg)}}
+#navPtrTick{position:fixed;left:-200px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
 .nav-ptr span{display:none}   /* iOS: the spinner only (19 Oct., Mateo: two refresh icons and a text) */
 /* failed and archived accounts */
 .nav-fail{color:#ff6b6b!important}
@@ -2853,19 +2870,22 @@ body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-ev
      padding already holds the safe area: its row's middle is 50 % + half of it);
    - the bottom bar: right above the Home indicator (it was the safe area plus 10 px, plus a margin of the safe area again),
      and what floats above it (Ask Sweep, « A new version », undo, the accounts' bar…) comes down with it. */
-@media (display-mode:standalone) and (max-width:860px){
+/* (19 Oct., Mateo's recording) on his iPhone the installed app does not match « display-mode: standalone »: the app
+   marks itself (html.pwa, src/nav.js, from navigator.standalone too) and these rules follow that mark. */
+@media (max-width:860px){
   /* the header right under the status bar (18 Oct., Mateo: too much empty space at the top): the safe area already holds the
      room below the clock, so 6 px less instead of 10 px more; the compact title stays on the logo's row */
-  html body aside.side{padding-top:max(6px,min(env(safe-area-inset-top,0px),44px),calc(env(safe-area-inset-top,0px) - 10px))!important}   /* (19 Oct.: 4 px higher again; never under the clock: 44 px on the iPhones with a notch, the safe area − 10 px with the Dynamic Island) */
-  aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 10px)}
+  html.pwa body aside.side{padding-top:max(6px,min(env(safe-area-inset-top,0px),44px),calc(env(safe-area-inset-top,0px) - 10px))!important}   /* (19 Oct.: 4 px higher again; never under the clock: 44 px on the iPhones with a notch, the safe area − 10 px with the Dynamic Island) */
+  html.pwa aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 10px)}
   /* at the top of a page the header is the page itself (no band, no line when the page is pulled down: 19 Oct.) */
-  html body:not(.ux-scrolled) aside.side{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:transparent!important}
-  html body .bottomnav{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px))!important;margin-bottom:0!important}
+  html.pwa body:not(.ux-scrolled) aside.side{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:transparent!important}
+  html.pwa body .bottomnav{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px))!important;margin-bottom:0!important}
   /* what sits above the bar comes down with it (26 px), the same gap as in the browser */
-  html body .ask-fab,html body .nav-update,html body .gm-sumtoast,html body .acc-bar{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
-  html body .nav-undo{bottom:calc(66px + env(safe-area-inset-bottom,0px))!important}
-  html body .g-xpf{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
-  html body .sheet-panel{bottom:calc(60px + env(safe-area-inset-bottom,0px))!important}
+  html.pwa body .ask-fab,html.pwa body .nav-update,html.pwa body .gm-sumtoast,html.pwa body .acc-bar{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
+  html.pwa body .nav-undo{bottom:calc(66px + env(safe-area-inset-bottom,0px))!important}
+  html.pwa body .g-xpf{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+  html.pwa body .sheet-panel{bottom:calc(60px + env(safe-area-inset-bottom,0px))!important}
+
 }
 
 /* Plans page during a trial (audit of 16 Oct., R20): what happens on the last day, and « Keep Pro » */
