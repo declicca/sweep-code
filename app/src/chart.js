@@ -577,7 +577,7 @@
       const rnd = (a, b) => a + Math.random() * (b - a), pick = (a) => a[Math.floor(Math.random() * a.length)], chance = (p) => Math.random() < p, q4 = (x) => Math.round(x * 4) / 4;
       const firms = [['demo-f-topstep', 'Topstep'], ['demo-f-lucid', 'Lucid'], ['demo-f-apex', 'Apex']].map(([id, name]) => ({ id, name, demo: true }));
       const aw = ({ fr: 'Compte', es: 'Cuenta' })[typeof LANG !== 'undefined' && LANG] || 'Account';   // the names in the trader's language (brief 02 part 7)
-      const accounts = [['demo-a1', 'demo-f-topstep', aw + ' 1'], ['demo-a2', 'demo-f-topstep', aw + ' 2'], ['demo-a3', 'demo-f-lucid', aw + ' 1'], ['demo-a4', 'demo-f-lucid', aw + ' 2'], ['demo-a5', 'demo-f-apex', aw + ' 1']]
+      const accounts = [['demo-a1', 'demo-f-topstep', aw + ' 1'], ['demo-a2', 'demo-f-topstep', aw + ' 2'], ['demo-a3', 'demo-f-lucid', aw + ' 3'], ['demo-a4', 'demo-f-lucid', aw + ' 4'], ['demo-a5', 'demo-f-apex', aw + ' 5']]   // one number each (audit of 18 Oct.: two « Account 1 » and two « Account 2 » in the lists)
         .map(([id, firm_id, name]) => ({ id, firm_id, name, starting_balance_c: 5e6, status: 'active', created_on: addDays(todayStr(), -40), notes: 'Sample account — sample rule values', demo: true,
           rules: { target_c: 3e5, dd_c: 2e5, dd_type: 'eod', dd_lock: true, dll_c: 1e5, consistency_pct: 50, min_days: 5 } }))
         // sample money types: two evaluations, two funded accounts (they have the sample payouts), one live account

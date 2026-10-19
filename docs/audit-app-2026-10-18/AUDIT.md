@@ -61,3 +61,7 @@ Les mesures brutes sont dans `mesures.json`, les captures dans `captures/`.
 4. **Lot 4 : points 12 et 13.**
 
 Chaque lot : tests à 390 et 1300, puis ton accord avant le déploiement.
+
+## Suivi
+
+Les 4 lots sont faits et en ligne (18 et 19 oct.). Le détail de chaque lot est dans `app/CONTEXTE-APP.md`.
