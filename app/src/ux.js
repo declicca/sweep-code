@@ -2405,7 +2405,7 @@
       s4: 'Come back here: the accounts the add-on finds show up below, ready to link.', liveOn: 'Add-on connected', liveNone: 'No account yet: connect {p} to your broker.',
       go1: 'Link my account', goN: 'Link my {n} accounts', allNote: 'For each account found, pick its Sweep account, then link them all at once.', choose: 'Choose…',
       do1: 'Link 1 account', doN: 'Link {n} accounts', doneN: '{n} accounts linked · {t} trades added', noFree: 'No free Sweep account: choose « + New account ».',
-      tipImport: 'On NinjaTrader 8? Connect it once: your trades arrive on their own, no more imports.', tipAcct: 'Trading on NinjaTrader 8? Connect it: your accounts are found and your trades arrive on their own.' },
+      tipImport: 'On NinjaTrader 8 or Quantower? Connect it once: your trades arrive on their own, no more imports.', tipAcct: 'Trading on NinjaTrader 8 or Quantower? Connect it: your accounts are found and your trades arrive on their own.' },
     fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis {p}, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
       seen: 'Add-on vu {t}', now: 'à l’instant', min: 'il y a {n} min', hr: 'il y a {n} h', day: 'il y a {n} j', found1: '1 compte trouvé', foundN: '{n} comptes trouvés', linkMine: 'Relier mes comptes',
       linkedTo: 'Relié à {a}', tr1: '1 trade', trN: '{n} trades', toLink: 'À relier', ignored: 'Ignoré', eval: 'Évaluation', funded: 'Financé', sim: 'Simulation NinjaTrader',
@@ -2424,7 +2424,7 @@
       s4: 'Reviens ici : les comptes que l’add-on trouve s’affichent juste en dessous, prêts à relier.', liveOn: 'Add-on connecté', liveNone: 'Aucun compte pour l’instant : connecte {p} à ton courtier.',
       go1: 'Relier mon compte', goN: 'Relier mes {n} comptes', allNote: 'Pour chaque compte trouvé, choisis son compte Sweep, puis relie-les tous d’un coup.', choose: 'Choisir…',
       do1: 'Relier 1 compte', doN: 'Relier {n} comptes', doneN: '{n} comptes reliés · {t} trades ajoutés', noFree: 'Aucun compte Sweep libre : choisis « + Nouveau compte ».',
-      tipImport: 'Sur NinjaTrader 8 ? Connecte-le une fois : tes trades arrivent seuls, plus besoin d’importer.', tipAcct: 'Tu trades sur NinjaTrader 8 ? Connecte-le : tes comptes sont trouvés et tes trades arrivent seuls.' },
+      tipImport: 'Sur NinjaTrader 8 ou Quantower ? Connecte-le une fois : tes trades arrivent seuls, plus besoin d’importer.', tipAcct: 'Tu trades sur NinjaTrader 8 ou Quantower ? Connecte-le : tes comptes sont trouvés et tes trades arrivent seuls.' },
     es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde {p}, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
       seen: 'Add-on visto {t}', now: 'justo ahora', min: 'hace {n} min', hr: 'hace {n} h', day: 'hace {n} d', found1: '1 cuenta encontrada', foundN: '{n} cuentas encontradas', linkMine: 'Vincular mis cuentas',
       linkedTo: 'Vinculada a {a}', tr1: '1 operación', trN: '{n} operaciones', toLink: 'Por vincular', ignored: 'Ignorada', eval: 'Evaluación', funded: 'Financiada', sim: 'Simulación de NinjaTrader',
@@ -2443,7 +2443,7 @@
       s4: 'Vuelve aquí: las cuentas que encuentra el add-on aparecen justo debajo, listas para vincular.', liveOn: 'Add-on conectado', liveNone: 'Ninguna cuenta por ahora: conecta {p} a tu bróker.',
       go1: 'Vincular mi cuenta', goN: 'Vincular mis {n} cuentas', allNote: 'Para cada cuenta encontrada, elige su cuenta de Sweep y vincúlalas todas de una vez.', choose: 'Elegir…',
       do1: 'Vincular 1 cuenta', doN: 'Vincular {n} cuentas', doneN: '{n} cuentas vinculadas · {t} operaciones añadidas', noFree: 'Ninguna cuenta de Sweep libre: elige « + Nueva cuenta ».',
-      tipImport: '¿En NinjaTrader 8? Conéctalo una vez: tus operaciones llegan solas, sin importar más.', tipAcct: '¿Operas en NinjaTrader 8? Conéctalo: tus cuentas se encuentran y tus operaciones llegan solas.' },
+      tipImport: '¿En NinjaTrader 8 o Quantower? Conéctalo una vez: tus operaciones llegan solas, sin importar más.', tipAcct: '¿Operas en NinjaTrader 8 o Quantower? Conéctalo: tus cuentas se encuentran y tus operaciones llegan solas.' },
   };
   const t = (k) => { const x = (T[L] || T.en)[k]; return x == null ? T.en[k] : x; };
   const P = (n, one, many) => (n === 1 ? t(one) : t(many).replace('{n}', n));
@@ -2839,7 +2839,7 @@
     if (!show) { if (el) el.remove(); return; }
     if (el && el.dataset.sytip === on) return;
     if (el) el.remove();
-    const html = `<div class="sy-tip" data-noi18n data-sytip="${on}"><span class="sy-ic">${IC}</span><span class="sy-txt"><span>${h(t(on))}</span></span><button type="button" class="btn sm" data-sy="connect">${t('connect')}</button></div>`;
+    const html = `<div class="sy-tip" data-noi18n data-sytip="${on}"><span class="sy-ic">${IC}</span><span class="sy-txt"><span>${h(t(on))}</span></span><span class="sy-tip-b">${['ninjatrader', 'quantower'].map((p) => `<button type="button" class="btn sm" data-sy="connect" data-p="${p}">${NAME[p]}</button>`).join('')}</span></div>`;   // both platforms (Mateo, 18 Oct.: « Quantower partout »)
     host.insertAdjacentHTML(on === 'tipImport' ? 'beforebegin' : 'afterend', html);
   }
   function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); paintTips(); }

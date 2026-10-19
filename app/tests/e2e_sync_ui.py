@@ -98,12 +98,12 @@ def case_fr(p, phone):
   tag = '390' if phone else '1300'
   br, ctx, pg, errs, bad = new_trader(p, 'fr', phone)
   pg.goto(B + '/#import'); pg.wait_for_selector('#main .sy-tip[data-sytip="tipImport"]', timeout=20000); pg.wait_for_timeout(300)
-  ok('Sur NinjaTrader 8 ? Connecte-le une fois' in pg.inner_text('#main .sy-tip') and pg.locator('#main .sy-tip [data-sy="connect"]').count() == 1 and wide(pg) <= 0, f'{tag}: import page: « Sur NinjaTrader 8 ? Connecte-le une fois » with Connecter, nothing too wide')
+  ok('Sur NinjaTrader 8 ou Quantower ? Connecte-le une fois' in pg.inner_text('#main .sy-tip') and pg.evaluate("[...document.querySelectorAll('#main .sy-tip [data-sy=connect]')].map(b => b.dataset.p)") == ['ninjatrader', 'quantower'] and wide(pg) <= 0, f'{tag}: import page: « Sur NinjaTrader 8 ou Quantower ? Connecte-le une fois », a button for each, nothing too wide')
   pg.screenshot(path=f'{SHOTS}/sync-tip-import-{tag}.png')
   pg.goto(B + '/#accounts'); pg.wait_for_timeout(800)
   pg.evaluate("(()=>{const all=document.querySelectorAll('#main [data-act=\"acct-add\"][data-v=\"1\"]'); const b=all[all.length-1]; if(b && !document.querySelector('#main form[data-form=\"account\"]')) b.click();})()")
   pg.wait_for_selector('#main .acct-add .sy-tip[data-sytip="tipAcct"]', timeout=20000); pg.wait_for_timeout(300)
-  ok('Tu trades sur NinjaTrader 8 ? Connecte-le' in pg.inner_text('#main .acct-add .sy-tip') and wide(pg) <= 0, f'{tag}: under « Add account »: « Tu trades sur NinjaTrader 8 ? Connecte-le »')
+  ok('Tu trades sur NinjaTrader 8 ou Quantower ? Connecte-le' in pg.inner_text('#main .acct-add .sy-tip') and wide(pg) <= 0, f'{tag}: under « Add account »: « Tu trades sur NinjaTrader 8 ou Quantower ? Connecte-le »')
   pg.screenshot(path=f'{SHOTS}/sync-tip-account-{tag}.png')
   settings(pg)
   sec = pg.locator('#main .sy-sec')
@@ -273,7 +273,7 @@ def case_lang(p, lang):   # the section, the sheets and the preview in English a
   br, ctx, pg, errs, bad = new_trader(p, lang, True)
   pg.goto(B + '/#import'); pg.wait_for_selector('#main .sy-tip', timeout=20000)
   tip = pg.inner_text('#main .sy-tip')
-  ok(({'en': 'On NinjaTrader 8? Connect it once', 'es': '¿En NinjaTrader 8? Conéctalo una vez'}[lang]) in tip and (lang == 'en' or 'Connect it' not in tip), f'{lang}: import page invitation translated')
+  ok(({'en': 'On NinjaTrader 8 or Quantower? Connect it once', 'es': '¿En NinjaTrader 8 o Quantower? Conéctalo una vez'}[lang]) in tip and (lang == 'en' or 'Connect it' not in tip), f'{lang}: import page invitation translated')
   settings(pg)
   W = {'en': ['Connections', 'Your trades arrive on their own', 'Connect'], 'es': ['Conexiones', 'Tus operaciones llegan solas', 'Conectar']}[lang]
   s = pg.inner_text('#main .sy-sec')

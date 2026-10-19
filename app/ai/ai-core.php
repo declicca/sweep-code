@@ -240,7 +240,8 @@ function sai_kind(string $task): ?string
 {
     if ($task === 'health' || str_starts_with($task, 'game_')) return null;   // short game texts (boss intro…) never use the trader's AI allowance
     if ($task === 'trade_feedback') return 'review';
-    if (in_array($task, ['trade_import', 'receipt_scan'], true)) return 'import';
+    if ($task === 'trade_import') return 'shot';   // a trade screenshot: 3 a day on Free (18 Oct.), unlimited on Pro and Elite
+    if ($task === 'receipt_scan') return 'import';   // a receipt (My money): Pro and Elite
     return 'chat';
 }
 function sai_billing(): bool { return function_exists('billing_on') && billing_on(); }

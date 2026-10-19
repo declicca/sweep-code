@@ -509,7 +509,8 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .sy-tip{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:12px 14px;border-radius:20px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
 .acct-add .sy-tip{margin:12px 0 0}
 .sy-tip .sy-txt>span{font-size:14px;line-height:1.45;color:var(--text)}
-@media (max-width:600px){.sy-tip{flex-wrap:wrap}.sy-tip .sy-txt{flex-basis:calc(100% - 52px)}.sy-tip .btn{margin-left:52px}}
+.sy-tip-b{display:flex;gap:8px;flex-shrink:0}   /* NinjaTrader 8 · Quantower */
+@media (max-width:600px){.sy-tip{flex-wrap:wrap}.sy-tip .sy-txt{flex-basis:calc(100% - 52px)}.sy-tip .sy-tip-b{margin-left:52px;flex-wrap:wrap}}
 @media (prefers-reduced-motion:reduce){.sy-acc,.sy-opt i{transition:none}}
 /* Admin › Errors: the heading and « Export » on one line (13 Oct.) */
 .ux-err-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}

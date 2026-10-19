@@ -83,7 +83,15 @@ function sb_ts($v): ?int
 function sb_plan_limits(string $plan): array
 {
     $plans = sb_cfg()['plans'] ?? [];
-    return (array) ($plans[$plan] ?? $plans['free'] ?? []);
+    return sb_with_shots((array) ($plans[$plan] ?? $plans['free'] ?? []));
+}
+
+/** Screenshots read by Sweep AI (Mateo, 18 Oct.): unlimited where AI import is on (Pro, Elite), else 3 a day unless the
+ *  config says otherwise ('ai_import_daily'); the config may not have the key, so the default lives here */
+function sb_with_shots(array $L): array
+{
+    if (!array_key_exists('ai_import_daily', $L)) $L['ai_import_daily'] = empty($L['ai_import']) ? 3 : null;
+    return $L;
 }
 
 /* ───────────────────────────── schema ───────────────────────────── */
@@ -343,6 +351,18 @@ function sb_ai_consume(PDO $pdo, string $uid, string $kind = 'chat', bool $count
     sb_schema($pdo);
     $plan = sb_plan($pdo, $uid);
     $L = sb_plan_limits($plan);
+    if ($kind === 'shot' && empty($L['ai_import'])) {   // Free: its own daily count of screenshots, not the AI messages
+        $limit = $L['ai_import_daily'];
+        if ($limit === null) return ['ok' => true, 'plan' => $plan, 'feature' => 'ai_import_daily', 'used' => 0, 'limit' => null];
+        $used = sb_usage($pdo, $uid, 'ai_import_daily');
+        if ($used >= (int) $limit) {
+            return ['ok' => false, 'code' => 'upgrade_required', 'feature' => 'ai_import_daily', 'trigger' => 'shot_quota', 'plan' => $plan,
+                    'used' => $used, 'limit' => (int) $limit, 'reset_at' => sb_reset_at('ai_import_daily'), 'upgrade_to' => sb_plan_for('ai_import')];
+        }
+        if ($count) sb_usage_inc($pdo, $uid, 'ai_import_daily');
+        return ['ok' => true, 'plan' => $plan, 'feature' => 'ai_import_daily', 'used' => $used + ($count ? 1 : 0), 'limit' => (int) $limit];
+    }
+    if ($kind === 'shot') $kind = 'import';   // Pro, Elite: as before (the AI messages count)
     if ($kind === 'import' && empty($L['ai_import'])) {
         return ['ok' => false, 'code' => 'upgrade_required', 'feature' => 'ai_import', 'plan' => $plan, 'upgrade_to' => sb_plan_for('ai_import')];
     }
@@ -362,7 +382,7 @@ function sb_ai_consume(PDO $pdo, string $uid, string $kind = 'chat', bool $count
 /** Give a use back when the AI call itself failed (so users don't pay quota for errors). */
 function sb_ai_refund(PDO $pdo, string $uid, string $kind = 'chat'): void
 {
-    $metric = $kind === 'review' ? 'ai_reviews' : 'ai_daily';
+    $metric = $kind === 'review' ? 'ai_reviews' : ($kind === 'shot' && empty(sb_plan_limits(sb_plan($pdo, $uid))['ai_import']) ? 'ai_import_daily' : 'ai_daily');
     sb_q($pdo, 'UPDATE billing_usage SET count = CASE WHEN count > 0 THEN count - 1 ELSE 0 END WHERE uid = ? AND metric = ? AND period = ?', [$uid, $metric, sb_period($metric)]);
 }
 
@@ -473,7 +493,7 @@ function sb_funnel(PDO $pdo, int $days = 30): array
  * excluded): the day-50 card, the end-of-trial reminders and the return to Free (brief 02 part 13).
  *   ['k' => 'accounts', 'n' => 4, 'free' => 2]         more accounts than Free keeps active
  *   ['k' => 'money', 'payouts' => 3, 'expenses' => 5]   payouts and expenses (« My money »), when Free has no payouts
- *   ['k' => 'shots', 'n' => 12]                         trades read from a screenshot, when Free has no AI import
+ *   ['k' => 'shots', 'n' => 12, 'free' => 3]            trades read from a screenshot, when Free limits them (3 a day since 18 Oct.)
  *   ['k' => 'history', 'n' => 38, 'days' => 30]         trades older than the history Free shows
  *   ['k' => 'ai', 'free' => 3]                          more Sweep AI than Free allows, at least once (a day or a month)
  */
@@ -493,7 +513,7 @@ function sb_pro_used(PDO $pdo, string $uid): array
     $out = [];
     if (is_int($F['accounts'] ?? null) && $n['accounts'] > $F['accounts']) $out[] = ['k' => 'accounts', 'n' => $n['accounts'], 'free' => (int) $F['accounts']];
     if (empty($F['payouts']) && $n['payouts'] + $n['expenses'] > 0) $out[] = ['k' => 'money', 'payouts' => $n['payouts'], 'expenses' => $n['expenses']];
-    if (empty($F['ai_import']) && $n['shots'] > 0) $out[] = ['k' => 'shots', 'n' => $n['shots']];
+    if (empty($F['ai_import']) && $F['ai_import_daily'] !== null && $n['shots'] > 0) $out[] = ['k' => 'shots', 'n' => $n['shots'], 'free' => (int) $F['ai_import_daily']];
     if ($n['old'] > 0) $out[] = ['k' => 'history', 'n' => $n['old'], 'days' => $days];
     foreach (['ai_daily', 'ai_reviews'] as $m) {
         if (!is_int($F[$m] ?? null)) continue;
@@ -507,13 +527,13 @@ function sb_pro_used_text(array $items, string $lang): string
 {
     $W = [   // [singular, plural]; French: 0 and 1 take the singular
         'en' => ['acc' => ['account', 'accounts'], 'act' => ['active', 'active'], 'po' => ['payout', 'payouts'], 'ex' => ['expense', 'expenses'], 'tr' => ['trade', 'trades'],
-                 'accounts' => '{n} (Free keeps {f})', 'money' => 'My money ({x})', 'shots' => 'screenshot reading ({n})', 'history' => 'your full history ({n} older than {d} days)',
+                 'accounts' => '{n} (Free keeps {f})', 'money' => 'My money ({x})', 'shots' => 'unlimited screenshot reading ({n}; Free: {f} a day)', 'history' => 'your full history ({n} older than {d} days)',
                  'ai' => 'Sweep AI beyond the Free limit', 'and' => ' and '],
         'fr' => ['acc' => ['compte', 'comptes'], 'act' => ['actif', 'actifs'], 'po' => ['payout', 'payouts'], 'ex' => ['dépense', 'dépenses'], 'tr' => ['trade', 'trades'],
-                 'accounts' => '{n} (Free en garde {f})', 'money' => 'Mon argent ({x})', 'shots' => 'la lecture des captures ({n})', 'history' => 'ton historique complet ({n} de plus de {d} jours)',
+                 'accounts' => '{n} (Free en garde {f})', 'money' => 'Mon argent ({x})', 'shots' => 'la lecture des captures sans limite ({n} ; Free : {f} par jour)', 'history' => 'ton historique complet ({n} de plus de {d} jours)',
                  'ai' => 'Sweep AI au-delà de la limite de Free', 'and' => ' et '],
         'es' => ['acc' => ['cuenta', 'cuentas'], 'act' => ['activa', 'activas'], 'po' => ['payout', 'payouts'], 'ex' => ['gasto', 'gastos'], 'tr' => ['operación', 'operaciones'],
-                 'accounts' => '{n} (Free mantiene {f})', 'money' => 'Mi dinero ({x})', 'shots' => 'la lectura de capturas ({n})', 'history' => 'tu historial completo ({n} de más de {d} días)',
+                 'accounts' => '{n} (Free mantiene {f})', 'money' => 'Mi dinero ({x})', 'shots' => 'la lectura de capturas sin límite ({n}; Free: {f} al día)', 'history' => 'tu historial completo ({n} de más de {d} días)',
                  'ai' => 'Sweep AI más allá del límite de Free', 'and' => ' y '],
     ];
     $T = $W[$lang] ?? $W['en'];
@@ -523,7 +543,7 @@ function sb_pro_used_text(array $items, string $lang): string
         switch ($i['k']) {
             case 'accounts': $parts[] = strtr($T['accounts'], ['{n}' => $pl((int) $i['n'], 'acc'), '{f}' => $pl((int) $i['free'], 'act')]); break;
             case 'money': $parts[] = strtr($T['money'], ['{x}' => implode(', ', array_merge($i['payouts'] ? [$pl((int) $i['payouts'], 'po')] : [], $i['expenses'] ? [$pl((int) $i['expenses'], 'ex')] : []))]); break;
-            case 'shots': $parts[] = strtr($T['shots'], ['{n}' => $pl((int) $i['n'], 'tr')]); break;
+            case 'shots': $parts[] = strtr($T['shots'], ['{n}' => $pl((int) $i['n'], 'tr'), '{f}' => (string) ($i['free'] ?? 3)]); break;
             case 'history': $parts[] = strtr($T['history'], ['{n}' => $pl((int) $i['n'], 'tr'), '{d}' => (string) $i['days']]); break;
             case 'ai': $parts[] = $T['ai']; break;
         }
@@ -600,10 +620,11 @@ function sb_state(PDO $pdo, string $uid, array $user = []): array
         'plan'      => $plan,
         'source'    => $eff['source'],
         'limits'    => $L,
-        'plans'     => $cfg['plans'],
+        'plans'     => array_map('sb_with_shots', (array) $cfg['plans']),
         'usage'     => [
             'ai_daily'   => ['used' => sb_usage($pdo, $uid, 'ai_daily'), 'limit' => $L['ai_daily'] ?? null, 'reset_at' => sb_reset_at('ai_daily')],
             'ai_reviews' => ['used' => sb_usage($pdo, $uid, 'ai_reviews'), 'limit' => $reviewLimit, 'reset_at' => sb_reset_at('ai_reviews')],
+            'ai_import_daily' => ['used' => sb_usage($pdo, $uid, 'ai_import_daily'), 'limit' => $L['ai_import_daily'], 'reset_at' => sb_reset_at('ai_import_daily')],
         ],
         'trial'        => $trial,
         'pro_used'     => $trial && $trial['days_left'] <= 10 && !$sub ? sb_pro_used($pdo, $uid) : null,   // the day-50 card (brief 02 part 13)

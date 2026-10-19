@@ -133,7 +133,7 @@ $ok(array_column($s['pro_used'] ?? [], 'k') === ['accounts', 'money', 'shots', '
 GameNotifyService::run('ana'); GameNotifyService::run('ana'); GameNotifyService::run('ben');
 $n = $notes('ana'); $p = json_decode((string) ($n[0]['params'] ?? '{}'), true) ?: [];
 $ok(count($n) === 1 && (int) ($p['days'] ?? 0) === 10 && $n[0]['body_key'] === 'trial_ending.used' && $n[0]['action_url'] === '#plan', 'day 50: one reminder, once (' . count($n) . ')');
-$ok(($p['used_fr'] ?? '') === '4 comptes (Free en garde 2 actifs), Mon argent (2 payouts, 1 dépense), la lecture des captures (3 trades), ton historique complet (5 trades de plus de 30 jours) et Sweep AI au-delà de la limite de Free',
+$ok(($p['used_fr'] ?? '') === '4 comptes (Free en garde 2 actifs), Mon argent (2 payouts, 1 dépense), la lecture des captures sans limite (3 trades ; Free : 3 par jour), ton historique complet (5 trades de plus de 30 jours) et Sweep AI au-delà de la limite de Free',
     'day 50: the reminder names them, in French: ' . ($p['used_fr'] ?? ''));
 $ok(strpos($p['used_en'] ?? '', '4 accounts (Free keeps 2 active), My money (2 payouts, 1 expense)') === 0 && strpos($p['used_es'] ?? '', '4 cuentas (Free mantiene 2 activas), Mi dinero (2 payouts, 1 gasto)') === 0, 'day 50: and in English and Spanish');
 $nb = $notes('ben');
@@ -153,6 +153,21 @@ $ok($route('ana', 'api/billing/me')[1]['plan'] === 'free', 'day 60, 09:00: the 6
 $at('2026-12-15 20:00');
 [, $s] = $route('ana', 'api/billing/me');
 $ok($s['plan'] === 'free' && $s['trial'] === null && ($s['trial_ended']['plan'] ?? '') === 'pro', 'day 61: Free, the trial ended (' . json_encode($s['trial_ended']) . ')');
+// screenshots read by Sweep AI on Free (Mateo, 18 Oct.): 3 a day on their own count, a 4th asks for Pro; a receipt scan stays
+// Pro and Elite; a read that failed is given back; New York's midnight gives 3 more; the plans page shows « 3 a day »
+$d0 = sb_usage($pdo, 'ana', 'ai_daily');
+$r = [sb_ai_consume($pdo, 'ana', 'shot'), sb_ai_consume($pdo, 'ana', 'shot'), sb_ai_consume($pdo, 'ana', 'shot'), sb_ai_consume($pdo, 'ana', 'shot')];
+$ok($r[0]['ok'] && $r[2]['ok'] && $r[2]['used'] === 3 && !$r[3]['ok'] && $r[3]['code'] === 'upgrade_required' && $r[3]['feature'] === 'ai_import_daily' && $r[3]['trigger'] === 'shot_quota' && $r[3]['limit'] === 3 && !empty($r[3]['reset_at']) && $r[3]['upgrade_to'] === 'pro', 'Free: 3 screenshots a day, the 4th opens « Pro » (' . json_encode($r[3]) . ')');
+$ok(sb_usage($pdo, 'ana', 'ai_daily') === $d0, 'Free: the screenshots do not use the AI messages');
+sb_ai_refund($pdo, 'ana', 'shot');
+$ok(sb_ai_consume($pdo, 'ana', 'shot')['ok'] && !sb_ai_consume($pdo, 'ana', 'shot')['ok'], 'Free: a failed read is given back (one more, then the limit again)');
+$rc = sb_ai_consume($pdo, 'ana', 'import');
+$ok(!$rc['ok'] && $rc['code'] === 'upgrade_required' && $rc['feature'] === 'ai_import', 'Free: a receipt scan stays Pro and Elite (' . ($rc['feature'] ?? '') . ')');
+$me = $route('ana', 'api/billing/me')[1];
+$ok(($me['plans']['free']['ai_import_daily'] ?? null) === 3 && array_key_exists('ai_import_daily', $me['plans']['pro'] ?? []) && $me['plans']['pro']['ai_import_daily'] === null && ($me['usage']['ai_import_daily']['used'] ?? null) === 3, 'the app gets 3 a day for Free, unlimited for Pro, and what is used today');
+$keep = $GLOBALS['SB_NOW']; $GLOBALS['SB_NOW'] = (new DateTimeImmutable('@' . $keep))->setTimezone(new DateTimeZone('America/New_York'))->modify('tomorrow 00:05')->getTimestamp();
+$ok(sb_ai_consume($pdo, 'ana', 'shot')['ok'], 'Free: 3 more after midnight, New York');
+$GLOBALS['SB_NOW'] = $keep;
 $ok($s['accounts']['limit'] === 2 && $s['accounts']['active'] === ['a1', 'a2'] && $s['accounts']['frozen'] === ['a3', 'a4'] && $s['accounts']['needs_choice'] === true,
     'day 61: the 2 oldest accounts stay active, the 2 others frozen, the trader is asked to choose');
 $ok($before === ['accounts' => $count('ana', 'accounts'), 'trades' => $count('ana', 'trades'), 'payouts' => $count('ana', 'payouts'), 'expenses' => $count('ana', 'expenses')], 'day 61: nothing deleted (accounts, trades, payouts, expenses)');

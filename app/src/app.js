@@ -7409,6 +7409,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_analytics_history: "Free shows your last {d} days. Everything older is saved and unlocks with Pro.",
       h_ai_quota: "You’ve used today’s AI messages",
       s_ai_quota: "Free includes {n} a day. Pro gives you {m}.",
+      h_shot_quota: "You’ve read today’s 3 screenshots",
+      s_shot_quota: "Free reads 3 screenshots a day, again from midnight (New York). Pro reads them without limit.",
       h_ai_quota_pro: "You’ve used today’s AI messages",
       s_ai_quota_pro: "Elite gives you {m} a day.",
       h_ai_import: "Stop typing your trades",
@@ -7502,7 +7504,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       fw_frozen: "Paused, kept for you",
       fw_z_acc: "{names}: paused, their trades stay visible",
       fw_z_money: "My money ({x}): kept, back with Pro",
-      fw_z_shots: "Screenshot reading: enter your trades by hand",
+      fw_z_shots: "Screenshot reading: 3 a day",
       fw_z_hist: "{x} older than {d} days: kept, outside your stats",
       fw_z_ai: "Sweep AI beyond {n} messages a day",
       fw_choose1: "Choose the account that stays active",
@@ -7559,6 +7561,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_analytics_history: "Free montre tes {d} derniers jours. Le reste est conservé et se débloque avec Pro.",
       h_ai_quota: "Tu as utilisé tes messages IA du jour",
       s_ai_quota: "Free en inclut {n} par jour. Pro t’en donne {m}.",
+      h_shot_quota: "Tu as utilisé tes 3 captures du jour",
+      s_shot_quota: "Free lit 3 captures par jour, de nouveau dès minuit (New York). Pro les lit sans limite.",
       h_ai_quota_pro: "Tu as utilisé tes messages IA du jour",
       s_ai_quota_pro: "Elite t’en donne {m} par jour.",
       h_ai_import: "Arrête de taper tes trades",
@@ -7652,7 +7656,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       fw_frozen: "En pause, gardé pour toi",
       fw_z_acc: "{names} : en pause, leurs trades restent visibles",
       fw_z_money: "Mon argent ({x}) : gardé, il revient avec Pro",
-      fw_z_shots: "La lecture des captures : tu saisis tes trades à la main",
+      fw_z_shots: "La lecture des captures : 3 par jour",
       fw_z_hist: "{x} de plus de {d} jours : gardés, hors de tes stats",
       fw_z_ai: "Sweep AI au-delà de {n} messages par jour",
       fw_choose1: "Choisis le compte qui reste actif",
@@ -7709,6 +7713,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_analytics_history: "Free muestra tus últimos {d} días. Lo anterior está guardado y se desbloquea con Pro.",
       h_ai_quota: "Usaste tus mensajes de IA de hoy",
       s_ai_quota: "Free incluye {n} al día. Pro te da {m}.",
+      h_shot_quota: "Usaste tus 3 capturas de hoy",
+      s_shot_quota: "Free lee 3 capturas al día, de nuevo desde medianoche (Nueva York). Pro las lee sin límite.",
       h_ai_quota_pro: "Usaste tus mensajes de IA de hoy",
       s_ai_quota_pro: "Elite te da {m} al día.",
       h_ai_import: "Deja de escribir tus trades",
@@ -7802,7 +7808,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       fw_frozen: "En pausa, guardado para ti",
       fw_z_acc: "{names}: en pausa, sus operaciones siguen visibles",
       fw_z_money: "Mi dinero ({x}): guardado, vuelve con Pro",
-      fw_z_shots: "La lectura de capturas: introduces tus operaciones a mano",
+      fw_z_shots: "La lectura de capturas: 3 al día",
       fw_z_hist: "{x} de más de {d} días: guardadas, fuera de tus stats",
       fw_z_ai: "Sweep AI más allá de {n} mensajes al día",
       fw_choose1: "Elige la cuenta que sigue activa",
@@ -7850,6 +7856,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       plan: "pro",
       b: [ "b_ai_import", "b_ai_more", "b_accounts" ]
     },
+    shot_quota: {
+      plan: "pro",
+      b: [ "b_ai_import", "b_ai_more", "b_accounts" ]
+    },
     ai_review: {
       plan: "elite",
       b: [ "b_reviews_all", "b_weekly", "b_calendar" ]
@@ -7889,6 +7899,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     accounts: "add_account",
     payouts: "payouts",
     ai_import: "ai_import",
+    ai_import_daily: "shot_quota",
     ai_daily: "ai_quota",
     ai_reviews: "ai_review",
     calendar_notes: "calendar_notes",
@@ -8324,7 +8335,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       n: ie
     }) : de === "month" ? l("per_month_n", {
       n: ie
-    }) : de === "notes" ? l(ie) : String(ie)), G = [ [ "f_accounts", "accounts", "" ], [ "f_trades", null, "trades" ], [ "f_history", "analytics_days", "days" ], [ "f_payouts", "payouts", "bool" ], [ "f_ai_daily", "ai_daily", "day" ], [ "f_ai_import", "ai_import", "bool" ], [ "f_ai_reviews", "ai_reviews", "month" ], [ "f_calendar", "calendar_notes", "notes" ], [ "f_weekly", "weekly_report", "bool" ], [ "f_support", "priority_support", "bool" ] ];
+    }) : de === "notes" ? l(ie) : String(ie)), G = [ [ "f_accounts", "accounts", "" ], [ "f_trades", null, "trades" ], [ "f_history", "analytics_days", "days" ], [ "f_payouts", "payouts", "bool" ], [ "f_ai_daily", "ai_daily", "day" ], [ "f_ai_import", "ai_import_daily", "day" ], [ "f_ai_reviews", "ai_reviews", "month" ], [ "f_calendar", "calendar_notes", "notes" ], [ "f_weekly", "weekly_report", "bool" ], [ "f_support", "priority_support", "bool" ] ];
     function Z() {
       const ie = i.subscription;
       return ie ? (ie.cancel_at_period_end ? l("ends_on", {
@@ -9999,8 +10010,7 @@ document.addEventListener("click", e => {
     break;
 
    case "ai-scan":
-    if (!billGate("ai_import", "ai_import")) break;
-    aiOpen("scan");
+    aiOpen("scan");   // (Free reads 3 screenshots a day since 18 Oct.: the server counts them)
     break;
 
    case "ai-day":
