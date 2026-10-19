@@ -298,14 +298,30 @@ def make_vs(c):
         article = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in diff)
         others = [(o["slug"], T(f"Sweep vs {o['name']}", f"Sweep vs {o['name']}", f"Sweep vs {o['name']}")) for o in VS if o is not c]
         band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_vs_card"'))
+        # « {name} alternatives », plural (Oct 19): the other journals, with what each is best for and its price (the pillar's words, ALT_BEST / ALT_PRICE)
+        alts = [o for o in VS if o is not c]
+        colon_ = t(T(": ", " : ", ": "))
+        alt_list = ('<ul class="list">' + "".join(f'<li><b><a href="{href(lang, o["slug"])}">{o["name"]}</a></b>{colon_}{t(ALT_BEST[o["name"]])}. {t(ALT_PRICE[o["name"]])}</li>' for o in alts)
+                    + f'<li>{localize(lang, t(T("<b>Free journals:</b> Sweep has a Free plan with no time limit; TradeBase, CoreTrade and Stonk Journal are compared on the <a href=\"@free-trading-journal.html\">free trading journal</a> page.", "<b>Journaux gratuits :</b> Sweep a un forfait Free sans limite de temps ; TradeBase, CoreTrade et Stonk Journal sont comparés sur la page du <a href=\"@free-trading-journal.html\">journal de trading gratuit</a>.", "<b>Diarios gratis:</b> Sweep tiene un plan Free sin límite de tiempo; TradeBase, CoreTrade y Stonk Journal se comparan en la página del <a href=\"@free-trading-journal.html\">diario de trading gratis</a>.")))}</li></ul>')
+        alt_sec = ui.sec(ui.head(t, None, T(f"Other {name} alternatives", f"Les autres alternatives à {name}", f"Otras alternativas a {name}"),
+                                 T("Sweep is built for futures prop firm accounts. If you trade differently, one of these may fit better.", "Sweep est conçu pour les comptes prop en futures. Si tu trades autrement, l’un de ceux-ci peut mieux te convenir.", "Sweep está hecho para cuentas prop de futuros. Si operas de otra forma, uno de estos puede encajar mejor."),
+                                 links=ui.go(lang, t, "best-trading-journal-for-prop-firms.html", T("Five journals, compared", "Cinq journaux, comparés", "Cinco diarios, comparados")))
+                         + f'<div class="read">{alt_list}</div>', "n", "alternatives")
+        alt_q = (T(f"What are the best {name} alternatives?", f"Quelles sont les meilleures alternatives à {name} ?", f"¿Cuáles son las mejores alternativas a {name}?"),
+                 {l: {"en": "For futures prop firm accounts, Sweep: a Free plan with no time limit and each firm’s rules on every account. Also: ",
+                      "fr": "Pour les comptes prop en futures, Sweep : un forfait Free sans limite de temps et les règles de chaque firme sur chaque compte. Aussi : ",
+                      "es": "Para cuentas prop de futuros, Sweep: un plan Free sin límite de tiempo y las reglas de cada firma en cada cuenta. También: "}[l]
+                     + ("; " if l != "fr" else " ; ").join(f"{o['name']}, {ALT_BEST[o['name']][l]}" for o in alts) + "." for l in LANGS})
+        faqs = c["faq"] + [alt_q]
         b = (ui.sec(ui.head(t, None, T(f"Looking for a {name} alternative?", f"Tu cherches une alternative à {name} ?", f"¿Buscas una alternativa a {name}?")) + picks, "t", "short")
              + ui.sec(ui.head(t, None, T("Side by side.","Côte à côte.","Lado a lado.")) + dated + _summary(t, name) + _cmp_table(t, c["rows"], name)
                       + f'<p class="fine vs-note">{t(note)}</p>' + band, "n", "compare")
              + ui.sec(f'<article class="article">{article}</article>', "n", "different", width="read")
-             + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, c["faq"])
+             + alt_sec
+             + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs)
                       + chiprow(lang, t, T("Compare too","Compare aussi","Compara también"), others, 40), "n", "faq", width="read"))
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","inLanguage":lang,
-                     "mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q, a in c["faq"]]})
+                     "mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q, a in faqs]})
         title = t(T(f"Free {name} alternative: Sweep vs {name} (2026)", f"Alternative gratuite à {name} : Sweep vs {name}", f"Alternativa gratis a {name}: Sweep vs {name}"))   # FR / ES: how it's searched there
         return _fr_nbsp(lang, title, t(c["desc"]), hero + b + ui.final(lang, t), ld)
     return page
@@ -350,6 +366,20 @@ def choose_section(lang, t):
                           T("Five things that matter when you trade evaluations and funded futures accounts.","Cinq choses qui comptent quand tu trades des évaluations et des comptes financés.","Cinco cosas que importan cuando operas evaluaciones y cuentas financiadas."))
                   + f'<article class="article">{body}</article>', "n", "how-to-choose", width="read")
 
+# what each other journal is best for, and its price: the pillar's sections and the « other alternatives » of every Sweep vs page
+ALT_BEST = {
+ "Edgewonk": T("best for psychology and strategy statistics","idéal pour la psychologie et les statistiques de stratégie","ideal para psicología y estadísticas de estrategia"),
+ "TraderSync": T("best for replay and AI across many markets","idéal pour le replay et l’IA sur plusieurs marchés","ideal para replay e IA en muchos mercados"),
+ "Tradervue": T("best for detailed reports, especially in stocks","idéal pour des rapports détaillés, surtout en actions","ideal para informes detallados, sobre todo en acciones"),
+ "TradeZella": T("best all-round journal with sync, replay and backtesting","le plus complet, avec synchro, replay et backtesting","el más completo, con sincronización, replay y backtesting"),
+}
+ALT_PRICE = {
+ "Edgewonk": T("$197 a year, with a 14-day refund window; no free plan.","197 $ par année, remboursable pendant 14 jours ; pas de forfait gratuit.","197 $ al año, con reembolso durante 14 días; sin plan gratis."),
+ "TraderSync": T("Pro $29.95/mo, Premium $49.95/mo, Elite $79.95/mo, with a 7-day trial; up to 25% less billed yearly.","Pro 29,95 $/mois, Premium 49,95 $/mois, Elite 79,95 $/mois, avec un essai de 7 jours ; jusqu’à 25 % de moins en facturation annuelle.","Pro 29,95 $/mes, Premium 49,95 $/mes, Elite 79,95 $/mes, con una prueba de 7 días; hasta un 25 % menos con facturación anual."),
+ "Tradervue": T("Free plan limited to 30 trades a month; Silver $29.95/mo, Gold $49.95/mo, with a trial.","Forfait gratuit limité à 30 trades par mois ; Silver 29,95 $/mois, Gold 49,95 $/mois, avec un essai.","Plan gratis limitado a 30 operaciones al mes; Silver 29,95 $/mes, Gold 49,95 $/mes, con prueba."),
+ "TradeZella": T("Essential $35/mo, Pro $59/mo, Ultra $99/mo; about 25% less billed yearly.","Essential 35 $/mois, Pro 59 $/mois, Ultra 99 $/mois ; environ 25 % de moins en facturation annuelle.","Essential 35 $/mes, Pro 59 $/mes, Ultra 99 $/mes; un 25 % menos aprox. con facturación anual."),
+}
+
 SYSTEM_PAGES.add("best-trading-journal-for-prop-firms.html")
 def page_best_journal(lang, t):
     from pages8 import FIRMS
@@ -379,29 +409,29 @@ def page_best_journal(lang, t):
       T("Free forever; Pro $19/mo or $159/yr; Elite $39/mo or $329/yr; 60 days of Pro for every new account.","Gratuit pour toujours ; Pro 19 $/mois ou 159 $/an ; Elite 39 $/mois ou 329 $/an ; 60 jours de Pro pour chaque nouveau compte.","Gratis para siempre; Pro 19 $/mes o 159 $/año; Elite 39 $/mes o 329 $/año; 60 días de Pro para cada cuenta nueva."),
       T("Automatic sync from NinjaTrader 8 and Quantower only, no trade replay or backtesting, futures only. Expense and payout tracking is on Pro and Elite.","Synchro automatique depuis NinjaTrader 8 et Quantower seulement, pas de replay ni de backtesting, futures seulement. Le suivi des dépenses et des payouts est sur Pro et Elite.","Sincronización automática solo desde NinjaTrader 8 y Quantower, sin replay ni backtesting, solo futuros. El seguimiento de gastos y payouts está en Pro y Elite."),
       firms)
-     + _journal(t, 2, "TradeZella", T("best all-round journal with sync, replay and backtesting","le plus complet, avec synchro, replay et backtesting","el más completo, con sincronización, replay y backtesting"),
+     + _journal(t, 2, "TradeZella", ALT_BEST["TradeZella"],
       T("TradeZella is a large all-round journal. It syncs trades from hundreds of brokers and prop firms, replays trades second by second and includes backtesting. Its free Prop Firm Sync dashboard tracks drawdown, daily loss, profit targets, trading days and consistency, along with expenses and payouts.",
         "TradeZella est un journal vaste et généraliste. Il synchronise les trades de centaines de courtiers et de prop firms, rejoue les trades seconde par seconde et inclut du backtesting. Son tableau de bord gratuit Prop Firm Sync suit le drawdown, la perte quotidienne, les objectifs de profit, les jours de trading et la consistance, ainsi que les dépenses et les payouts.",
         "TradeZella es un diario amplio y generalista. Sincroniza operaciones de cientos de brókers y prop firms, reproduce las operaciones segundo a segundo e incluye backtesting. Su panel gratuito Prop Firm Sync sigue el drawdown, la pérdida diaria, los objetivos de ganancia, los días de trading y la consistencia, además de los gastos y los payouts."),
-      T("Essential $35/mo, Pro $59/mo, Ultra $99/mo; about 25% less billed yearly.","Essential 35 $/mois, Pro 59 $/mois, Ultra 99 $/mois ; environ 25 % de moins en facturation annuelle.","Essential 35 $/mes, Pro 59 $/mes, Ultra 99 $/mes; un 25 % menos aprox. con facturación anual."),
+      ALT_PRICE["TradeZella"],
       T("No free plan; trade replay starts on Pro.","Pas de forfait gratuit ; le replay commence avec Pro.","Sin plan gratis; el replay empieza en Pro."), vs)
-     + _journal(t, 3, "Tradervue", T("best for detailed reports, especially in stocks","idéal pour des rapports détaillés, surtout en actions","ideal para informes detallados, sobre todo en acciones"),
+     + _journal(t, 3, "Tradervue", ALT_BEST["Tradervue"],
       T("Tradervue focuses on reporting: MFE and MAE statistics, exit analysis, risk and liquidity reports, with mentoring and trade sharing. Futures are supported on its paid plans.",
         "Tradervue mise sur les rapports : statistiques MFE et MAE, analyse des sorties, rapports de risque et de liquidité, avec mentorat et partage de trades. Les futures sont pris en charge sur ses forfaits payants.",
         "Tradervue se centra en los informes: estadísticas MFE y MAE, análisis de salidas, informes de riesgo y liquidez, con mentoría y operaciones compartidas. Los futuros están incluidos en sus planes de pago."),
-      T("Free plan limited to 30 trades a month; Silver $29.95/mo, Gold $49.95/mo, with a trial.","Forfait gratuit limité à 30 trades par mois ; Silver 29,95 $/mois, Gold 49,95 $/mois, avec un essai.","Plan gratis limitado a 30 operaciones al mes; Silver 29,95 $/mes, Gold 49,95 $/mes, con prueba."),
+      ALT_PRICE["Tradervue"],
       T("No prop firm features listed on its pricing page.","Aucune fonction pour les prop firms sur sa page de tarifs.","Ninguna función para prop firms en su página de precios."), vs_link(t, lang, "sweep-vs-tradervue.html", "Tradervue"))
-     + _journal(t, 4, "TraderSync", T("best for replay and AI across many markets","idéal pour le replay et l’IA sur plusieurs marchés","ideal para replay e IA en muchos mercados"),
+     + _journal(t, 4, "TraderSync", ALT_BEST["TraderSync"],
       T("TraderSync covers stocks, futures, forex and crypto, with broker sync, a mobile app, market replay and an AI assistant on every plan. Trade replay starts on Premium; automated backtesting and an AI coach come with Elite.",
         "TraderSync couvre les actions, les futures, le forex et les cryptos, avec synchro courtier, app mobile, replay de marché et assistant IA sur tous les forfaits. Le replay de trades commence avec Premium ; le backtesting automatisé et un coach IA viennent avec Elite.",
         "TraderSync cubre acciones, futuros, forex y cripto, con sincronización con el bróker, app móvil, replay de mercado y asistente de IA en todos los planes. El replay de operaciones empieza en Premium; el backtesting automatizado y un coach de IA llegan con Elite."),
-      T("Pro $29.95/mo, Premium $49.95/mo, Elite $79.95/mo, with a 7-day trial; up to 25% less billed yearly.","Pro 29,95 $/mois, Premium 49,95 $/mois, Elite 79,95 $/mois, avec un essai de 7 jours ; jusqu’à 25 % de moins en facturation annuelle.","Pro 29,95 $/mes, Premium 49,95 $/mes, Elite 79,95 $/mes, con una prueba de 7 días; hasta un 25 % menos con facturación anual."),
+      ALT_PRICE["TraderSync"],
       T("Pro is limited to 5 accounts and has no trade replay.","Pro est limité à 5 comptes et n’a pas le replay de trades.","Pro está limitado a 5 cuentas y no tiene replay de operaciones."), vs_link(t, lang, "sweep-vs-tradersync.html", "TraderSync"))
-     + _journal(t, 5, "Edgewonk", T("best for psychology and strategy statistics","idéal pour la psychologie et les statistiques de stratégie","ideal para psicología y estadísticas de estrategia"),
+     + _journal(t, 5, "Edgewonk", ALT_BEST["Edgewonk"],
       T("Edgewonk focuses on finding your edge: a Tiltmeter for emotional mistakes, an Edge Finder and strategy testing tools. It covers forex, stocks, futures, crypto, indices, commodities and options, and tracks unlimited prop firm accounts.",
         "Edgewonk aide à trouver ton edge : un Tiltmeter pour les erreurs émotionnelles, un Edge Finder et des outils pour tester des stratégies. Il couvre le forex, les actions, les futures, les cryptos, les indices, les matières premières et les options, et suit un nombre illimité de comptes de prop firms.",
         "Edgewonk se centra en encontrar tu ventaja: un Tiltmeter para los errores emocionales, un Edge Finder y herramientas para probar estrategias. Cubre forex, acciones, futuros, cripto, índices, materias primas y opciones, y sigue cuentas de prop firms ilimitadas."),
-      T("$197 a year, with a 14-day refund window; no free plan.","197 $ par année, remboursable pendant 14 jours ; pas de forfait gratuit.","197 $ al año, con reembolso durante 14 días; sin plan gratis."),
+      ALT_PRICE["Edgewonk"],
       T("Automatic import lists NinjaTrader and Tradovate among its platforms: check yours before you buy.","L’import automatique cite NinjaTrader et Tradovate parmi ses plateformes : vérifie la tienne avant d’acheter.","La importación automática incluye NinjaTrader y Tradovate entre sus plataformas: comprueba la tuya antes de comprar."), vs_link(t, lang, "sweep-vs-edgewonk.html", "Edgewonk")))
     pick = [
      T("<b>Futures evaluations and funded accounts, with firm rules on every account:</b> Sweep.","<b>Évaluations et comptes financés en futures, avec les règles de la firme sur chaque compte :</b> Sweep.","<b>Evaluaciones y cuentas financiadas de futuros, con las reglas de la firma en cada cuenta:</b> Sweep."),

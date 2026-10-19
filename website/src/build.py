@@ -315,8 +315,9 @@ def _prices_named(page):
     s = open(os.path.join(DIST, page), encoding="utf-8").read(); s = s[s.find("<main"):s.find("</main>")]
     return {float(x.replace(",", "")) for x in re.findall(r"\$(\d[\d,]*(?:\.\d+)?)", re.sub(r"<[^>]+>", " ", s))}
 import re
+_VS_PRICES = set().union(*(_amounts(pages17.COMP[o["name"]]) for o in pages17.VS))   # each Sweep vs page also names the other journals' prices (« Other alternatives »)
 for _vs in pages17.VS:
-    _odd = _prices_named(_vs["slug"]) - _SWEEP_PRICES - _amounts(pages17.COMP[_vs["name"]])
+    _odd = _prices_named(_vs["slug"]) - _SWEEP_PRICES - _VS_PRICES
     if _odd: print(f"warning: {_vs['slug']} names prices that aren't in src/data/competitors.json: {sorted(_odd)}")
 _odd = _prices_named("best-trading-journal-for-prop-firms.html") - _SWEEP_PRICES - set().union(*(_amounts(c) for c in pages17.COMP.values()))
 if _odd: print(f"warning: best-trading-journal-for-prop-firms.html names prices that aren't in src/data/competitors.json: {sorted(_odd)}")
