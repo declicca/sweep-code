@@ -1,7 +1,7 @@
 {
  "100": {
   "date": "2026-10-18",
-  "hash": "9dea6a63091e5fbe"
+  "hash": "060a0aced29fd80d"
  },
  "404.html": {
   "date": "2026-10-15",
@@ -17,7 +17,7 @@
  },
  "best-trading-journal-for-prop-firms.html": {
   "date": "2026-10-18",
-  "hash": "de2e419a2b0a9a28"
+  "hash": "17b225966aa76e2b"
  },
  "changelog.html": {
   "date": "2026-10-18",
@@ -29,7 +29,7 @@
  },
  "contact.html": {
   "date": "2026-10-18",
-  "hash": "3f9e50ecad42e4db"
+  "hash": "40110c4c8c9976ec"
  },
  "contracts/6e-futures.html": {
   "date": "2026-10-18",
@@ -101,11 +101,11 @@
  },
  "faq.html": {
   "date": "2026-10-18",
-  "hash": "e80be1bd114770a0"
+  "hash": "090baf65ab89f7ac"
  },
  "features.html": {
   "date": "2026-10-18",
-  "hash": "889051516bae30b8"
+  "hash": "35f14555433166c6"
  },
  "fomc-meeting-dates.html": {
   "date": "2026-10-18",
@@ -113,7 +113,7 @@
  },
  "free-trading-journal.html": {
   "date": "2026-10-18",
-  "hash": "5e9169b0a46ae8e1"
+  "hash": "3e0102fb00e4ac67"
  },
  "futures-contracts.html": {
   "date": "2026-10-15",
@@ -157,11 +157,11 @@
  },
  "import.html": {
   "date": "2026-10-18",
-  "hash": "01be23d589549416"
+  "hash": "4d6d76d6baa4885d"
  },
  "index.html": {
   "date": "2026-10-18",
-  "hash": "67dfca62065eeb01"
+  "hash": "9f75d973b91ab1d7"
  },
  "install.html": {
   "date": "2026-10-18",
@@ -177,7 +177,7 @@
  },
  "ninjatrader.html": {
   "date": "2026-10-18",
-  "hash": "57ba9a842c0d4d14"
+  "hash": "d66283772e27430c"
  },
  "payout-calculator.html": {
   "date": "2026-10-15",
@@ -201,11 +201,11 @@
  },
  "press-kit.html": {
   "date": "2026-10-18",
-  "hash": "f187ef7dcb44f3a3"
+  "hash": "3992650ca3eecfef"
  },
  "pricing.html": {
   "date": "2026-10-18",
-  "hash": "2c967556e1fb0d93"
+  "hash": "bbf8ca74c800fa08"
  },
  "privacy.html": {
   "date": "2026-10-18",
@@ -241,7 +241,7 @@
  },
  "prop-firm-tracker.html": {
   "date": "2026-10-18",
-  "hash": "5643e738a7a0df95"
+  "hash": "eec4c287651a3560"
  },
  "prop-firms/alpha-futures.html": {
   "date": "2026-10-18",
@@ -313,19 +313,19 @@
  },
  "sweep-vs-edgewonk.html": {
   "date": "2026-10-18",
-  "hash": "b755fa03466c7406"
+  "hash": "e7337059c15fadbe"
  },
  "sweep-vs-tradersync.html": {
   "date": "2026-10-18",
-  "hash": "076f85de03fec071"
+  "hash": "edeaf1e2ed9e57d2"
  },
  "sweep-vs-tradervue.html": {
   "date": "2026-10-18",
-  "hash": "3242432b21477ba0"
+  "hash": "7430a21d3471d23e"
  },
  "sweep-vs-tradezella.html": {
   "date": "2026-10-18",
-  "hash": "ae3149d1bf3e3486"
+  "hash": "73194fbe011b4f83"
  },
  "terms.html": {
   "date": "2026-10-18",

@@ -398,7 +398,7 @@ PRESS_FACTS = T("""<h2>Sweep at a glance</h2><ul>
 <li><b>Product:</b> a trading journal for futures and prop firm traders, as a web app on phone and computer, in English, French and Spanish.</li>
 <li><b>Devices:</b> any recent browser on a computer, and an app on the iPhone or Android home screen (<a href="@install.html">how to install it</a>).</li>
 <li><b>Prop firms:</b> rules preloaded for {FIRMS_N} futures prop firms and checked every week against their official pages.</li>
-<li><b>Trades:</b> sent on their own from NinjaTrader 8 by a free add-on; otherwise a screenshot, your own words or the platform’s export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView).</li>
+<li><b>Trades:</b> sent on their own from NinjaTrader 8 and Quantower by a free add-on; otherwise a screenshot, your own words or the platform’s export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView).</li>
 <li><b>Price:</b> a free plan, forever; Pro at $19 a month or $159 a year and Elite at $39 a month or $329 a year, with 60 days of Pro for every new account. See <a href="@pricing.html">pricing</a>.</li></ul>
 <h2>Writing about Sweep</h2><p>The description at the top of this page can be quoted as is. In text, write “Sweep” with a capital S; the lowercase “sweep” is only for the wordmark. The screenshots use demo data: please don’t present them as real trading results. Sweep isn’t affiliated with any prop firm, broker or exchange. For an interview, figures or a product demo, write to us.</p>""",
 """<h2>Sweep en bref</h2><ul>
@@ -407,7 +407,7 @@ PRESS_FACTS = T("""<h2>Sweep at a glance</h2><ul>
 <li><b>Produit :</b> un journal de trading pour les traders de futures et de prop firms, en app web sur téléphone et ordinateur, en français, en anglais et en espagnol.</li>
 <li><b>Appareils :</b> tout navigateur récent sur ordinateur, et une app sur l’écran d’accueil de l’iPhone ou d’Android (<a href="@install.html">comment l’installer</a>).</li>
 <li><b>Prop firms :</b> règles préremplies pour {FIRMS_N} prop firms de futures et vérifiées chaque semaine sur leurs pages officielles.</li>
-<li><b>Trades :</b> envoyés tout seuls depuis NinjaTrader 8 par un module gratuit ; sinon une capture, tes propres mots ou l’export de la plateforme (Tradovate, Rithmic, TopstepX/ProjectX, TradingView).</li>
+<li><b>Trades :</b> envoyés tout seuls depuis NinjaTrader 8 et Quantower par un module gratuit ; sinon une capture, tes propres mots ou l’export de la plateforme (Tradovate, Rithmic, TopstepX/ProjectX, TradingView).</li>
 <li><b>Prix :</b> un forfait gratuit, pour toujours ; Pro à 19 $ par mois ou 159 $ par an et Elite à 39 $ par mois ou 329 $ par an, avec 60 jours de Pro pour chaque nouveau compte. Voir les <a href="@pricing.html">tarifs</a>.</li></ul>
 <h2>Écrire sur Sweep</h2><p>La description en haut de cette page peut être citée telle quelle. Dans un texte, écris « Sweep » avec une majuscule ; le « sweep » en minuscules est réservé au logo. Les captures utilisent des données de démonstration : merci de ne pas les présenter comme de vrais résultats de trading. Sweep n’est affilié à aucune prop firm, aucun courtier ni aucune bourse. Pour une entrevue, des chiffres ou une démo du produit, écris-nous.</p>""",
 """<h2>Sweep en breve</h2><ul>
@@ -416,7 +416,7 @@ PRESS_FACTS = T("""<h2>Sweep at a glance</h2><ul>
 <li><b>Producto:</b> un diario de trading para traders de futuros y de prop firms, como app web en el teléfono y el ordenador, en español, inglés y francés.</li>
 <li><b>Dispositivos:</b> cualquier navegador reciente en el ordenador, y una app en la pantalla de inicio del iPhone o Android (<a href="@install.html">cómo instalarla</a>).</li>
 <li><b>Prop firms:</b> reglas precargadas para {FIRMS_N} prop firms de futuros y revisadas cada semana en sus páginas oficiales.</li>
-<li><b>Operaciones:</b> llegan solas desde NinjaTrader 8 con un complemento gratuito; si no, una captura, tus propias palabras o la exportación de la plataforma (Tradovate, Rithmic, TopstepX/ProjectX, TradingView).</li>
+<li><b>Operaciones:</b> llegan solas desde NinjaTrader 8 y Quantower con un complemento gratuito; si no, una captura, tus propias palabras o la exportación de la plataforma (Tradovate, Rithmic, TopstepX/ProjectX, TradingView).</li>
 <li><b>Precio:</b> un plan gratuito, para siempre; Pro a 19 $ al mes o 159 $ al año y Elite a 39 $ al mes o 329 $ al año, con 60 días de Pro para cada cuenta nueva. Mira los <a href="@pricing.html">precios</a>.</li></ul>
 <h2>Escribir sobre Sweep</h2><p>La descripción al principio de esta página se puede citar tal cual. En un texto, escribe «Sweep» con mayúscula; «sweep» en minúsculas es solo para el logotipo. Las capturas usan datos de demostración: no las presentes como resultados reales de trading. Sweep no está afiliado a ninguna prop firm, bróker ni bolsa. Para una entrevista, cifras o una demo del producto, escríbenos.</p>""")
 

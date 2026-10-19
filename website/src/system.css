@@ -15,6 +15,7 @@
   --text:#F2F2F3;--muted:#9A9AA2;--faint:#7E7E87;--level:#4A4A52;
   /* brand: blue = actions and gains, gold = losses and alerts only */
   --blue:#4C8DFF;--blue-text:#5E98FF;--blue-ink:#7FADFF;--blue-deep:#2A64D6;--gold:#D4A24C;--on-blue:#FFFFFF;
+  --blue-btn:#2F6FE8;--blue-btn-press:#2A66DC;   /* a filled button: white text at 4.6:1 (5.0:1 pressed); #4C8DFF stays for gains, links and accents */
   --tint:color-mix(in srgb,var(--blue) 14%,transparent);
   /* the material: one glass for every card */
   --glass:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
@@ -80,7 +81,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 :focus-visible{outline:2px solid var(--blue-text);outline-offset:3px;border-radius:6px}
 ::selection{background:color-mix(in srgb,var(--blue) 35%,transparent)}
 .num,time{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.skip{position:absolute;left:12px;top:-60px;z-index:100;padding:10px 14px;border-radius:var(--r1);background:var(--blue);color:var(--on-blue);font-weight:600}
+.skip{position:absolute;left:12px;top:-60px;z-index:100;padding:10px 14px;border-radius:var(--r1);background:var(--blue-btn);color:var(--on-blue);font-weight:600}
 .skip:focus{top:12px}
 [hidden]{display:none!important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -129,16 +130,16 @@ p,li{max-width:56ch}   /* about 75 characters a line in Geist (1ch is the width 
 .head.center .links{justify-content:center}
 
 /* ---- actions */
-.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:var(--r-pill);font-size:15px;font-weight:600;line-height:1;white-space:nowrap;letter-spacing:-.005em;
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:var(--r-pill);font-size:15px;font-weight:600;line-height:1;white-space:nowrap;letter-spacing:-.01em;
   transition:transform var(--t-mid) var(--spring),background-color var(--t-fast),box-shadow var(--t-fast),color var(--t-fast)}
 .btn svg{width:14px;height:14px;flex:none}
-.btn-lg{min-height:52px;padding:0 26px;font-size:16px}
-.btn-primary{color:var(--on-blue);background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 86%,#fff),var(--blue) 58%);
-  box-shadow:0 1px 0 rgba(255,255,255,.32) inset,0 -1px 0 rgba(0,0,0,.18) inset,0 10px 26px -12px color-mix(in srgb,var(--blue) 85%,transparent)}
-.btn-line,.btn-secondary{color:var(--text);background:color-mix(in srgb,var(--text) 6%,transparent);box-shadow:0 0 0 1px var(--edge-hi) inset}
-.btn-ghost{color:var(--text);background:transparent;box-shadow:0 0 0 1px var(--edge) inset}
-@media (hover:hover){.btn:hover{transform:translateY(-1px)}.btn-line:hover,.btn-secondary:hover,.btn-ghost:hover{background:color-mix(in srgb,var(--text) 10%,transparent)}}
+.btn-lg{min-height:50px;padding:0 24px;font-size:16px}
+.btn-primary{color:var(--on-blue);background:var(--blue-btn);box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 1px 2px rgba(0,0,0,.16)}   /* a flat capsule: no gradient, no glow */
+.btn-line,.btn-secondary{color:var(--text);background:color-mix(in srgb,var(--text) 8%,transparent)}   /* tinted fill, no outline */
+.btn-ghost{color:var(--text);background:color-mix(in srgb,var(--text) 4%,transparent)}
+@media (hover:hover){.btn-primary:hover{background:var(--blue-btn-press)}.btn-line:hover,.btn-secondary:hover{background:color-mix(in srgb,var(--text) 12%,transparent)}.btn-ghost:hover{background:color-mix(in srgb,var(--text) 8%,transparent)}}
 .btn:active{transform:scale(.97);transition-duration:var(--t-fast)}
+.btn-primary:active{background:var(--blue-btn-press)}
 .cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:32px}
 .center .cta-row,.cta-row.center{justify-content:center}
 .reassure{margin-top:16px;font-size:var(--fs-small);color:var(--faint)}

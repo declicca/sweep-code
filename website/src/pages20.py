@@ -36,7 +36,7 @@ FREE_MORE = T("""<h2>Who it’s for</h2><p>Sweep is built for futures traders, o
 # free journals compared (SEO brief, Oct 15): facts read on each journal's own pages, kept with their date and sources in data/competitors.json
 FREE_CMP = [   # (journal, free plan, getting trades in, prop firm rules, markets, paid plans from)
  ("Sweep", T("Yes, no time limit, no card","Oui, sans limite de temps, sans carte","Sí, sin límite de tiempo, sin tarjeta"),
-  T("NinjaTrader 8 sync, CSV import, screenshot read by AI, or by hand","Synchro NinjaTrader 8, import CSV, capture lue par l’IA, ou à la main","Sincronización con NinjaTrader 8, importación CSV, captura leída por la IA, o a mano"),
+  T("NinjaTrader 8 and Quantower sync, CSV import, screenshot read by AI, or by hand","Synchro NinjaTrader 8 et Quantower, import CSV, capture lue par l’IA, ou à la main","Sincronización con NinjaTrader 8 y Quantower, importación CSV, captura leída por la IA, o a mano"),
   T(f"Preloaded for {FIRMS_N} futures firms, checked every week",f"Préremplies pour {FIRMS_N} firmes de futures, vérifiées chaque semaine",f"Precargadas para {FIRMS_N} firmas de futuros, revisadas cada semana"),
   T("Futures","Futures","Futuros"), T("$19/mo","19 $/mois","19 $/mes")),
  ("TradeBase", T("During early access, no trade limit","Pendant l’accès anticipé, sans limite de trades","Durante el acceso anticipado, sin límite de operaciones"),
@@ -93,7 +93,7 @@ def page_free(lang, t):
         f'<a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_free">{t(CREATE)}</a>', visual=ui.frame_d("v6-11-calendar-d.webp", t(T("P&L calendar and daily journal in Sweep, sample data", "Calendrier P&L et journal quotidien dans Sweep, données d’exemple", "Calendario de P&L y diario en Sweep, datos de ejemplo")), m="v6-11-calendar-m.webp", t=t, sizes="(max-width: 1067px) 92vw, 1200px", cls="reveal zoom"))
     free = [T("<b>Journal, P&L calendar and analytics</b> of your recent trades, with the economic calendar", "<b>Journal, calendrier P&L et analyses</b> de tes trades récents, avec le calendrier économique", "<b>Diario, calendario de P&L y análisis</b> de tus operaciones recientes, con el calendario económico"),
             T("<b>Real CME charts</b> for every trade", "<b>Vrais graphiques CME</b> pour chaque trade", "<b>Gráficos reales de CME</b> para cada operación"),
-            T("<b>Log with AI,</b> from your own words or a screenshot", "<b>Saisie avec l’IA,</b> en mots simples ou à partir d’une capture", "<b>Registro con IA,</b> con tus palabras o desde una captura"),
+            T("<b>Log with AI,</b> from your own words or a screenshot, 3 times a day", "<b>Saisie avec l’IA,</b> en mots simples ou à partir d’une capture, 3 fois par jour", "<b>Registro con IA,</b> con tus palabras o desde una captura, 3 veces al día"),
             T("<b>Your coach and your edge</b> on every trade", "<b>Ton coach et ton edge</b> sur chaque trade", "<b>Tu coach y tu edge</b> en cada operación"),
             T("<b>Prop accounts</b> with their firm’s rules prefilled for guidance", "<b>Comptes prop</b> avec les règles de leur firme préremplies à titre indicatif", "<b>Cuentas prop</b> con las reglas de su firma precargadas a título indicativo"),
             T("<b>Rings, streak, badges and ranks,</b> leagues and crews", "<b>Anneaux, streak, badges et rangs,</b> ligues et crews", "<b>Anillos, racha, insignias y rangos,</b> ligas y crews"),
@@ -122,21 +122,21 @@ def page_free(lang, t):
 CRUMBS["prop-firm-tracker.html"] = T("Prop firm tracker", "Suivi des comptes prop", "Seguimiento de cuentas prop")
 TRACKER_MORE = T("""<h2>How it works</h2><ol>
 <li><b>Add an account:</b> pick the firm, the account type and the size. For {FIRMS}, the rules fill in from Sweep’s preset, for guidance; for any other firm, you enter them once.</li>
-<li><b>Add your trades:</b> from a screenshot, by importing your platform’s export, or automatically from NinjaTrader 8. The trade copier logs one trade on several accounts at once.</li>
+<li><b>Add your trades:</b> from a screenshot, by importing your platform’s export, or automatically from NinjaTrader 8 or Quantower. The trade copier logs one trade on several accounts at once.</li>
 <li><b>Watch each account update:</b> when an evaluation is passed, its funded account is created with the firm’s funded rules, and a funded account moves to live in one tap.</li>
 <li><b>When an account ends,</b> it keeps its whole history, marked failed, passed or closed.</li></ol>
 <h2>When a firm changes a rule</h2><p>Sweep checks every firm’s official pages each week. When a rule changes, you see what it means for your account and choose to apply it or keep yours. The current rules of each firm are on our <a href="@prop-firms/index.html">prop firm rules pages</a>.</p>
 <h2>A tracker or a spreadsheet?</h2><p>A spreadsheet can list your accounts, but it won’t recompute a trailing drawdown after every trade, count winning days since your last payout, or warn you in the trade ticket when today’s limit is close. Sweep does, for every account at once.</p>""",
 """<h2>Comment ça marche</h2><ol>
 <li><b>Ajoute un compte :</b> choisis la firme, le type de compte et la taille. Pour {FIRMS}, les règles se remplissent à partir du préréglage de Sweep, à titre indicatif ; pour toute autre firme, tu les saisis une fois.</li>
-<li><b>Ajoute tes trades :</b> à partir d’une capture, en important l’export de ta plateforme, ou automatiquement depuis NinjaTrader 8. Le copieur de trades note un trade sur plusieurs comptes en une fois.</li>
+<li><b>Ajoute tes trades :</b> à partir d’une capture, en important l’export de ta plateforme, ou automatiquement depuis NinjaTrader 8 ou Quantower. Le copieur de trades note un trade sur plusieurs comptes en une fois.</li>
 <li><b>Regarde chaque compte se mettre à jour :</b> quand une évaluation est réussie, son compte financé est créé avec les règles financées de la firme, et un compte financé passe en live d’un toucher.</li>
 <li><b>Quand un compte se termine,</b> il garde tout son historique, marqué échoué, réussi ou fermé.</li></ol>
 <h2>Quand une firme change une règle</h2><p>Sweep vérifie chaque semaine les pages officielles de chaque firme. Quand une règle change, tu vois ce que ça veut dire pour ton compte et tu choisis de l’appliquer ou de garder la tienne. Les règles actuelles de chaque firme sont sur nos <a href="@prop-firms/index.html">pages de règles des prop firms</a>.</p>
 <h2>Un suivi ou un tableur ?</h2><p>Un tableur peut lister tes comptes, mais il ne recalcule pas un drawdown suiveur après chaque trade, ne compte pas les jours gagnants depuis ton dernier payout et ne t’avertit pas dans le ticket quand la limite du jour approche. Sweep le fait, pour tous tes comptes à la fois.</p>""",
 """<h2>Cómo funciona</h2><ol>
 <li><b>Añade una cuenta:</b> elige la firma, el tipo de cuenta y el tamaño. Para {FIRMS}, las reglas se rellenan desde el preajuste de Sweep, a título indicativo; para cualquier otra firma, las introduces una vez.</li>
-<li><b>Añade tus operaciones:</b> desde una captura, importando la exportación de tu plataforma o automáticamente desde NinjaTrader 8. El copiador registra una operación en varias cuentas a la vez.</li>
+<li><b>Añade tus operaciones:</b> desde una captura, importando la exportación de tu plataforma o automáticamente desde NinjaTrader 8 o Quantower. El copiador registra una operación en varias cuentas a la vez.</li>
 <li><b>Mira cómo se actualiza cada cuenta:</b> al superar una evaluación, se crea su cuenta financiada con las reglas financiadas de la firma, y una cuenta financiada pasa a live con un toque.</li>
 <li><b>Cuando una cuenta termina,</b> conserva todo su historial, marcada como fallida, superada o cerrada.</li></ol>
 <h2>Cuando una firma cambia una regla</h2><p>Sweep revisa cada semana las páginas oficiales de cada firma. Cuando una regla cambia, ves lo que significa para tu cuenta y eliges aplicarla o mantener la tuya. Las reglas actuales de cada firma están en nuestras <a href="@prop-firms/index.html">páginas de reglas de las prop firms</a>.</p>
@@ -166,7 +166,7 @@ def page_tracker(lang, t):
             (T("How many accounts can I track?", "Combien de comptes puis-je suivre ?", "¿Cuántas cuentas puedo seguir?"),
              T("It depends on your plan: Free includes a limited number of prop accounts, Pro more and Elite the most.", "Ça dépend de ton forfait : Free comprend un nombre limité de comptes prop, Pro davantage et Elite le plus.", "Depende de tu plan: Free incluye un número limitado de cuentas prop, Pro más y Elite el máximo.")),
             (T("Does Sweep connect to my firm’s dashboard?", "Sweep se connecte-t-il au tableau de bord de ma firme ?", "¿Sweep se conecta al panel de mi firma?"),
-             T("No. Your trades come from your platform, by import or NinjaTrader 8 sync, or from a screenshot, and Sweep applies your account’s rules to them.", "Non. Tes trades viennent de ta plateforme, par import ou synchro NinjaTrader 8, ou d’une capture, et Sweep leur applique les règles de ton compte.", "No. Tus operaciones vienen de tu plataforma, por importación o sincronización con NinjaTrader 8, o de una captura, y Sweep les aplica las reglas de tu cuenta.")),
+             T("No. Your trades come from your platform, by import or NinjaTrader 8 and Quantower sync, or from a screenshot, and Sweep applies your account’s rules to them.", "Non. Tes trades viennent de ta plateforme, par import ou synchro NinjaTrader 8 et Quantower, ou d’une capture, et Sweep leur applique les règles de ton compte.", "No. Tus operaciones vienen de tu plataforma, por importación o sincronización con NinjaTrader 8 y Quantower, o de una captura, y Sweep les aplica las reglas de tu cuenta.")),
             (T("Can I keep a failed account?", "Puis-je garder un compte échoué ?", "¿Puedo conservar una cuenta fallida?"),
              T("Yes. Closed and failed accounts keep their full history and stay in your filters.", "Oui. Les comptes fermés et échoués gardent tout leur historique et restent dans tes filtres.", "Sí. Las cuentas cerradas y fallidas conservan todo su historial y siguen en tus filtros."))]
     b += ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read")
@@ -270,9 +270,9 @@ def page_ninjatrader(lang, t):
                "Oui. Notes, révision, setup, étiquettes, captures et frais se modifient comme d’habitude, et tu peux fixer le stop et la cible. Les prix et le P&L viennent de NinjaTrader.",
                "Sí. Las notas, la revisión, el setup, las etiquetas, las capturas y las comisiones se editan como siempre, y puedes fijar el stop y el objetivo. Los precios y el P&L vienen de NinjaTrader.")),
             (T("What about other platforms?", "Et les autres plateformes ?", "¿Y las demás plataformas?"),
-             T(f'Sync is for NinjaTrader 8 for now; sync for Rithmic and Tradovate is in development. From any other platform, <a href="{href("en", "import.html")}">import a file or a screenshot</a>.',
-               f'La synchro est pour NinjaTrader 8 pour l’instant ; celle de Rithmic et Tradovate est en développement. Depuis toute autre plateforme, <a href="{href("fr", "import.html")}">importe un fichier ou une capture</a>.',
-               f'La sincronización es para NinjaTrader 8 por ahora; la de Rithmic y Tradovate está en desarrollo. Desde cualquier otra plataforma, <a href="{href("es", "import.html")}">importa un archivo o una captura</a>.'))]
+             T(f'Quantower syncs too, with <a href="{href("en", "import.html")}#quantower">its own Sweep add-on</a>; sync for Rithmic and Tradovate is planned for later. From any other platform, <a href="{href("en", "import.html")}">import a file or a screenshot</a>.',
+               f'Quantower se synchronise aussi, avec <a href="{href("fr", "import.html")}#quantower">son propre module Sweep</a> ; la synchro Rithmic et Tradovate est prévue plus tard. Depuis toute autre plateforme, <a href="{href("fr", "import.html")}">importe un fichier ou une capture</a>.',
+               f'Quantower también se sincroniza, con <a href="{href("es", "import.html")}#quantower">su propio complemento de Sweep</a>; la sincronización con Rithmic y Tradovate está prevista para más adelante. Desde cualquier otra plataforma, <a href="{href("es", "import.html")}">importa un archivo o una captura</a>.'))]
     b += ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read")
     return (t(T("NinjaTrader 8 Trading Journal: Free Auto Sync · Sweep", "Journal de trading NinjaTrader 8 : synchro gratuite · Sweep", "Diario de trading para NinjaTrader 8, gratis · Sweep")),
             t(T("Sync your NinjaTrader 8 trades to your trading journal with Sweep’s free add-on: every execution in seconds, read only, prop accounts included.",

@@ -154,7 +154,7 @@ RES_TOOLS = [("tools.html", T("Free calculators","Calculateurs gratuits","Calcul
 RES_LEARN = [("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas"), T("Trading plan, journal, checklist (PDF)","Plan, journal, checklist (PDF)","Plan, diario, checklist (PDF)")),
              ("glossary.html", T("Glossary","Lexique","Glosario"), T("Prop and futures terms","Termes du prop et des futures","Términos de prop y futuros")),
              ("guides.html", T("Guides","Guides","Guías"), T("Prop firm rules compared, journaling","Règles des prop firms comparées, journal","Reglas de prop firms comparadas, diario")),
-             ("import.html", T("Import your trades","Importer tes trades","Importar operaciones"), T("Tradovate, TopstepX, Rithmic, NinjaTrader…","Tradovate, TopstepX, Rithmic, NinjaTrader…","Tradovate, TopstepX, Rithmic, NinjaTrader…")),
+             ("import.html", T("Import your trades","Importer tes trades","Importar operaciones"), T("Tradovate, Rithmic, NinjaTrader, Quantower…","Tradovate, Rithmic, NinjaTrader, Quantower…","Tradovate, Rithmic, NinjaTrader, Quantower…")),
              ("faq.html", T("FAQ","FAQ","Preguntas frecuentes"), T("Quick answers","Réponses rapides","Respuestas rápidas")),
              ("changelog.html", T("What’s new","Nouveautés","Novedades"), T("Latest updates","Les dernières mises à jour","Últimas actualizaciones"))]
 RESOURCES = RES_TOOLS + RES_LEARN
@@ -169,9 +169,9 @@ DISC = T("Sweep does not offer financial advice. Trading futures involves a subs
  "Sweep n’offre pas de conseils financiers. Le trading de contrats à terme comporte un risque de perte important.",
  "Sweep no ofrece asesoramiento financiero. Operar contratos de futuros conlleva un riesgo de pérdida importante.")
 # One wording everywhere (audit of Oct 13): how trades get into Sweep, and which plans include payouts and expenses
-ADD_TRADES = T("On NinjaTrader 8, Sweep’s free add-on sends your trades on its own. Otherwise: a screenshot (a history screenshot adds all its trades), your own words, or your platform’s export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). Automatic sync for Rithmic and Tradovate is in development.",
-               "Sur NinjaTrader 8, le module gratuit de Sweep envoie tes trades tout seul. Sinon : une capture d’écran (une capture d’historique ajoute tous ses trades), tes propres mots, ou l’export de ta plateforme (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La synchro automatique Rithmic et Tradovate est en développement.",
-               "En NinjaTrader 8, el complemento gratuito de Sweep envía tus operaciones solo. Si no: una captura (una captura del historial añade todas sus operaciones), tus propias palabras o la exportación de tu plataforma (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La sincronización automática con Rithmic y Tradovate está en desarrollo.")
+ADD_TRADES = T("On NinjaTrader 8 or Quantower, Sweep’s free add-on sends your trades on its own. Otherwise: a screenshot (a history screenshot adds all its trades), your own words, or your platform’s export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). Automatic sync for Rithmic and Tradovate is planned for later.",
+               "Sur NinjaTrader 8 ou Quantower, le module gratuit de Sweep envoie tes trades tout seul. Sinon : une capture d’écran (une capture d’historique ajoute tous ses trades), tes propres mots, ou l’export de ta plateforme (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La synchro automatique Rithmic et Tradovate est prévue plus tard.",
+               "En NinjaTrader 8 o Quantower, el complemento gratuito de Sweep envía tus operaciones solo. Si no: una captura (una captura del historial añade todas sus operaciones), tus propias palabras o la exportación de tu plataforma (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La sincronización automática con Rithmic y Tradovate está prevista para más adelante.")
 MONEY_PLAN = T("Payouts and expenses are part of Pro and Elite, included for your first 60 days.",
                "Les payouts et les dépenses font partie de Pro et d’Elite, offerts tes 60 premiers jours.",
                "Los payouts y los gastos forman parte de Pro y Elite, incluidos tus primeros 60 días.")
@@ -568,6 +568,7 @@ def add_related(lang, t, page, body):
 # (never in a lead paragraph, a heading, bold text, an existing link, a script, or a paragraph marked data-nolinks).
 LINK_TERMS = [
  ("ninjatrader.html", T(r"NinjaTrader 8", r"NinjaTrader 8", r"NinjaTrader 8")),
+ ("import.html#quantower", T(r"Quantower", r"Quantower", r"Quantower")),
  ("glossary.html#trailing-drawdown", T(r"trailing drawdowns?", r"drawdowns? suiveurs?", r"drawdowns? dinámicos?")),
  ("glossary.html#drawdown", T(r"drawdowns?", r"drawdowns?", r"drawdowns?")),
  ("glossary.html#consistency", T(r"consistency rules?", r"règles? de consistance", r"reglas? de consistencia")),
