@@ -155,72 +155,72 @@
  },
  "prop-firm-consistency-rules.html": {
   "en": {
-   "alt": "Consistency rules, compared · 6 prop firms · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Consistency rules, compared · 6 prop firms · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Règles de consistance, comparées · 6 prop firms · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Règles de consistance, comparées · 6 prop firms · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Reglas de consistencia, comparadas · 6 prop firms · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Reglas de consistencia, comparadas · 6 prop firms · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firm-drawdown-rules.html": {
   "en": {
-   "alt": "Drawdown rules, compared · 6 prop firms · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Drawdown rules, compared · 6 prop firms · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Règles de drawdown, comparées · 6 prop firms · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Règles de drawdown, comparées · 6 prop firms · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Reglas de drawdown, comparadas · 6 prop firms · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Reglas de drawdown, comparadas · 6 prop firms · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firm-payout-rules.html": {
   "en": {
-   "alt": "Payout rules, compared · 6 prop firms · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Payout rules, compared · 6 prop firms · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Règles de payout, comparées · 6 prop firms · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Règles de payout, comparées · 6 prop firms · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Reglas de payout, comparadas · 6 prop firms · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Reglas de payout, comparadas · 6 prop firms · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firm-profit-targets.html": {
   "en": {
-   "alt": "Account sizes and targets, compared · 6 prop firms · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Account sizes and targets, compared · 6 prop firms · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Tailles de compte et objectifs, comparés · 6 prop firms · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Tailles de compte et objectifs, comparés · 6 prop firms · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Tamaños de cuenta y objetivos, comparados · 6 prop firms · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Tamaños de cuenta y objetivos, comparados · 6 prop firms · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firm-minimum-days.html": {
   "en": {
-   "alt": "Minimum trading days, compared · 6 prop firms · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Minimum trading days, compared · 6 prop firms · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Jours minimum, comparés · 6 prop firms · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Jours minimum, comparés · 6 prop firms · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Días mínimos, comparados · 6 prop firms · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Días mínimos, comparados · 6 prop firms · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "free-trading-journal.html": {
@@ -363,6 +363,76 @@
    "date": null
   }
  },
+ "pass-prop-firm-evaluation.html": {
+  "en": {
+   "alt": "How to pass a prop firm evaluation · A plan, not speed",
+   "date": null
+  },
+  "fr": {
+   "alt": "Réussir une évaluation prop firm · Un plan, pas de la vitesse",
+   "date": null
+  },
+  "es": {
+   "alt": "Aprobar una evaluación de prop firm · Un plan, no velocidad",
+   "date": null
+  }
+ },
+ "prop-firm-position-sizing.html": {
+  "en": {
+   "alt": "When to size up · Up slowly, down instantly",
+   "date": null
+  },
+  "fr": {
+   "alt": "Quand augmenter sa taille · Monter lentement, redescendre tout de suite",
+   "date": null
+  },
+  "es": {
+   "alt": "Cuándo subir el tamaño · Subir despacio, bajar al instante",
+   "date": null
+  }
+ },
+ "funded-account-playbook.html": {
+  "en": {
+   "alt": "Funded account playbook · Five rules after you pass",
+   "date": null
+  },
+  "fr": {
+   "alt": "Playbook du compte financé · Cinq règles après la réussite",
+   "date": null
+  },
+  "es": {
+   "alt": "Playbook de la cuenta financiada · Cinco reglas tras aprobar",
+   "date": null
+  }
+ },
+ "liquidity-sweep-setup.html": {
+  "en": {
+   "alt": "Liquidity sweep setup · PDH and PDL, swept then reclaimed",
+   "date": null
+  },
+  "fr": {
+   "alt": "Setup de liquidity sweep · PDH et PDL, balayés puis repris",
+   "date": null
+  },
+  "es": {
+   "alt": "Setup de liquidity sweep · PDH y PDL, barridos y recuperados",
+   "date": null
+  }
+ },
+ "mes-vs-mnq.html": {
+  "en": {
+   "alt": "MES or MNQ? · Which micro to start with",
+   "date": null
+  },
+  "fr": {
+   "alt": "MES ou MNQ ? · Quel micro pour débuter",
+   "date": null
+  },
+  "es": {
+   "alt": "¿MES o MNQ? · Con qué micro empezar",
+   "date": null
+  }
+ },
  "best-trading-journal-for-prop-firms.html": {
   "en": {
    "alt": "Best trading journal for prop firms (2026) · Sweep, TradeZella, Tradervue, TraderSync and Edgewonk, compared",
@@ -407,16 +477,16 @@
  },
  "prop-firms/index.html": {
   "en": {
-   "alt": "Prop firm rules 2026 · 6 futures prop firms · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Prop firm rules 2026 · 6 futures prop firms · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Règles des prop firms 2026 · 6 prop firms de futures · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Règles des prop firms 2026 · 6 prop firms de futures · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Reglas de las prop firms 2026 · 6 prop firms de futuros · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Reglas de las prop firms 2026 · 6 prop firms de futuros · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firm-rule-changes.html": {
@@ -435,72 +505,72 @@
  },
  "prop-firms/topstep-vs-apex.html": {
   "en": {
-   "alt": "Topstep vs Apex · Rules compared · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Apex · Rules compared · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Topstep vs Apex · Règles comparées · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Apex · Règles comparées · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Topstep vs Apex · Reglas comparadas · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Apex · Reglas comparadas · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firms/apex-vs-lucid.html": {
   "en": {
-   "alt": "Apex vs Lucid · Rules compared · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Apex vs Lucid · Rules compared · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Apex vs Lucid · Règles comparées · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Apex vs Lucid · Règles comparées · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Apex vs Lucid · Reglas comparadas · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Apex vs Lucid · Reglas comparadas · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firms/topstep-vs-take-profit-trader.html": {
   "en": {
-   "alt": "Topstep vs Take Profit Trader · Rules compared · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Take Profit Trader · Rules compared · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Topstep vs Take Profit Trader · Règles comparées · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Take Profit Trader · Règles comparées · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Topstep vs Take Profit Trader · Reglas comparadas · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Take Profit Trader · Reglas comparadas · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firms/topstep-vs-lucid.html": {
   "en": {
-   "alt": "Topstep vs Lucid · Rules compared · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Lucid · Rules compared · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Topstep vs Lucid · Règles comparées · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Lucid · Règles comparées · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Topstep vs Lucid · Reglas comparadas · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Topstep vs Lucid · Reglas comparadas · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "prop-firms/apex-vs-myfundedfutures.html": {
   "en": {
-   "alt": "Apex vs MyFundedFutures · Rules compared · Verified October 14, 2026",
-   "date": "2026-10-14"
+   "alt": "Apex vs MyFundedFutures · Rules compared · Verified October 19, 2026",
+   "date": "2026-10-19"
   },
   "fr": {
-   "alt": "Apex vs MyFundedFutures · Règles comparées · Vérifiées le 14 octobre 2026",
-   "date": "2026-10-14"
+   "alt": "Apex vs MyFundedFutures · Règles comparées · Vérifiées le 19 octobre 2026",
+   "date": "2026-10-19"
   },
   "es": {
-   "alt": "Apex vs MyFundedFutures · Reglas comparadas · Revisadas el 14 de octubre de 2026",
-   "date": "2026-10-14"
+   "alt": "Apex vs MyFundedFutures · Reglas comparadas · Revisadas el 19 de octubre de 2026",
+   "date": "2026-10-19"
   }
  },
  "import-tradovate.html": {

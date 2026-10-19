@@ -275,6 +275,7 @@ META_SEO = {
 # breadcrumb: Home › Section › Page (the section only where a hub page lists the page)
 CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html")
 GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "trading-journal-guide.html")
+GP_SAT_PAGES = ("pass-prop-firm-evaluation.html", "prop-firm-position-sizing.html", "funded-account-playbook.html", "liquidity-sweep-setup.html", "mes-vs-mnq.html")
 def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
@@ -283,7 +284,7 @@ def _parent(page):
     if page in ("prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html"): return "prop-firms/index.html"
     if page in CALC_PAGES: return "tools.html"
     if page in GUIDE_PAGES: return "guides.html"
-    if page.startswith("prop-firm-gameplan-month-"): return "how-to-start-prop-firm-trading.html"   # the 90-day gameplan (pages21.py)
+    if page.startswith("prop-firm-gameplan-month-") or page in GP_SAT_PAGES: return "how-to-start-prop-firm-trading.html"   # the 90-day gameplan (pages21.py)
     if page == "how-to-start-prop-firm-trading.html": return "guides.html"
     return None
 
@@ -491,6 +492,11 @@ REL_INFO = {
  "prop-firm-gameplan-month-1.html": (T("Gameplan, Month 1","Plan, mois 1","Plan, mes 1"), T("Protect first, then execute.","Protège d’abord, exécute ensuite.","Primero protege, luego ejecuta.")),
  "prop-firm-gameplan-month-2.html": (T("Gameplan, Month 2","Plan, mois 2","Plan, mes 2"), T("Same setup, now measure it.","Même setup, maintenant on mesure.","Mismo setup, ahora mídelo.")),
  "prop-firm-gameplan-month-3.html": (T("Gameplan, Month 3","Plan, mois 3","Plan, mes 3"), T("Real rules, earned size.","Vraies règles, taille méritée.","Reglas reales, tamaño ganado.")),
+ "pass-prop-firm-evaluation.html": (T("Pass an evaluation","Réussir une évaluation","Aprobar una evaluación"), T("Every firm’s evaluation, in R.","L’évaluation de chaque firme, en R.","La evaluación de cada firma, en R.")),
+ "prop-firm-position-sizing.html": (T("When to size up","Quand augmenter sa taille","Cuándo subir el tamaño"), T("Up slowly, down instantly.","Monter lentement, redescendre tout de suite.","Subir despacio, bajar al instante.")),
+ "funded-account-playbook.html": (T("Funded account playbook","Playbook du compte financé","Playbook de la cuenta financiada"), T("Five rules after you pass.","Cinq règles après la réussite.","Cinco reglas tras aprobar.")),
+ "liquidity-sweep-setup.html": (T("Liquidity sweep setup","Setup de liquidity sweep","Setup de liquidity sweep"), T("PDH and PDL, swept then reclaimed.","PDH et PDL, balayés puis repris.","PDH y PDL, barridos y recuperados.")),
+ "mes-vs-mnq.html": (T("MES or MNQ","MES ou MNQ","MES o MNQ"), T("Which micro to start with.","Quel micro pour débuter.","Con qué micro empezar.")),
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
  "how-we-verify-prop-firm-rules.html": (T("How we verify the rules","Notre méthode de vérification","Cómo verificamos las reglas"), T("Sources, frequency and limits.","Sources, fréquence et limites.","Fuentes, frecuencia y límites.")),

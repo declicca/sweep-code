@@ -986,7 +986,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .prog-block>h3{margin-top:48px;font-size:var(--fs-h3)}
 .prog-block>p{margin-top:12px;color:var(--muted)}
 .prog-block .sources{margin-top:24px}
-/* ---- [pages: how-to-start-prop-firm-trading.html prop-firm-gameplan-month-1.html prop-firm-gameplan-month-2.html prop-firm-gameplan-month-3.html] the 90-day gameplan: the three months, the missions, the gates */
+/* ---- [pages: how-to-start-prop-firm-trading.html prop-firm-gameplan-month-1.html prop-firm-gameplan-month-2.html prop-firm-gameplan-month-3.html pass-prop-firm-evaluation.html prop-firm-position-sizing.html funded-account-playbook.html liquidity-sweep-setup.html mes-vs-mnq.html] the 90-day gameplan: the three months, the missions, the gates, the diagrams */
 .gp-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .gp-nav a{display:grid;gap:4px;padding:16px 18px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1);color:var(--text);text-decoration:none;transition:background-color var(--t-fast)}
 .gp-nav a small{font:500 12px/1.3 var(--mono);color:var(--faint);letter-spacing:.02em}
@@ -1011,6 +1011,16 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .gp-note{margin-top:20px;padding:18px 20px;border-radius:var(--r3);background:var(--tint)}
 .gp-note b{display:block;font:600 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue-ink)}
 .article .gp-note p{margin-top:6px;color:var(--text)}
+.gp-fig{margin:24px 0 8px;padding:16px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1)}
+.gp-fig svg{display:block;width:100%;height:auto}
+.gp-fig .lv{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:6 6}
+.gp-fig .wk{stroke-width:1.5}.gp-fig .wk.up{stroke:var(--blue)}.gp-fig .wk.dn{stroke:var(--faint)}
+.gp-fig .bd.up{fill:var(--blue)}.gp-fig .bd.dn{fill:var(--faint)}
+.gp-fig .st{stroke:var(--gold);stroke-width:1.5;stroke-dasharray:4 4}.gp-fig .tg{stroke:var(--blue);stroke-width:1.5;stroke-dasharray:4 4}
+.gp-fig .en{fill:var(--blue);stroke:var(--surface);stroke-width:2}
+.gp-fig .lb{font:500 13px var(--font);fill:var(--muted)}.gp-fig .st-t{fill:var(--gold)}.gp-fig .tg-t,.gp-fig .en-t{fill:var(--blue-text)}.gp-fig .br-t{fill:var(--text)}
+.gp-fig .cap{margin-top:12px}
+@media (max-width:743px){.gp-fig{padding:12px}.gp-fig .lb{font-size:22px}.gp-fig .rc{display:none}}   /* phones: the drawing is half size, so its labels are drawn twice as big; the caption says the rest */
 }
 
 /* ======================================================================= motion */

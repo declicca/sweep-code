@@ -45,7 +45,18 @@ Pas d'outil de volumes de recherche dans cette session : les requêtes viennent 
   - **Un avertissement éducatif sur chaque page** (risque, outil d'apprentissage, règles officielles de la firme).
 - **Les PDF ne sont pas en téléchargement** : ils sont en anglais seulement et annoncent la vérification automatique. Voir la section 6.
 
-## 4. Phase 2 : les pages satellites proposées
+## 4. Phase 2 : les pages satellites (faites et en local le 19 oct.)
+
+Faites dans `pages21.py`, dans les 3 langues :
+- les 5 pages du tableau ci-dessous ;
+- leurs images de partage ;
+- 3 termes au lexique (PDH / PDL, liquidity sweep, échelle de taille), chacun relié à sa page ;
+- une rangée « Une question à la fois » sur le pilier ;
+- des liens depuis les mois 1 et 3.
+
+Le tableau de `/pass-prop-firm-evaluation` se calcule à partir du catalogue de l'app : objectif en R et mauvaises journées absorbables, pour chaque type de compte de 50K. Il suit donc la vérification hebdomadaire. Les schémas du sweep sont dessinés par le build en SVG, sans capture de plateforme.
+
+Aussi : un lien vers le pilier depuis le guide du journal, le journal gratuit, la page Routine et les modèles.
 
 | Page | Requête principale | Angle | Renvoie vers |
 |---|---|---|---|
@@ -55,9 +66,7 @@ Pas d'outil de volumes de recherche dans cette session : les requêtes viennent 
 | `/liquidity-sweep-setup` | liquidity sweep strategy, PDH PDL strategy | le Sweep Setup en détail, avec des schémas (SVG faits par le build, pas de captures de plateforme) et les cas à passer | mois 1 |
 | `/mes-vs-mnq` | MES vs MNQ for beginners | valeurs de tick et de point, le même stop en dollars sur chacun, pourquoi commencer avec 1 micro | mois 1, fiches contrats |
 
-Aussi :
-- des entrées au lexique : PDH/PDL, liquidity sweep, note de processus, échelle de taille. Chacune renvoie à la page du plan concernée (`GLOSS_LINKS`) ;
-- un lien vers le pilier depuis le guide du journal, le journal gratuit et la page Routine.
+
 
 ## 5. Mesure
 

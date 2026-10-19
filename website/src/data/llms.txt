@@ -14,6 +14,11 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Gameplan, Month 1](https://makeitsweep.com/prop-firm-gameplan-month-1): 8 guardrails, the Sweep Setup (previous day's high or low swept, then reclaimed), a session routine and 30 daily missions
 - [Gameplan, Month 2](https://makeitsweep.com/prop-firm-gameplan-month-2): tag every trade, find patterns with at least 10 examples, one refinement locked for two weeks, the firm's real limits tracked
 - [Gameplan, Month 3](https://makeitsweep.com/prop-firm-gameplan-month-3): an evaluation plan in R, a size ladder from 1 to 3 micros, a funded playbook and a one-page trading plan
+- [How to pass a prop firm evaluation](https://makeitsweep.com/pass-prop-firm-evaluation): target in R, daily stop, daily cap from the consistency rule, bad days the max loss absorbs, for every firm's 50K evaluation
+- [When to size up on a prop firm account](https://makeitsweep.com/prop-firm-position-sizing): a size ladder from 1 to 3 micros, the drawdown test before each step, when to size down
+- [Funded account playbook](https://makeitsweep.com/funded-account-playbook): five rules after passing, a payout rule written in advance, funded profit is not income until paid
+- [Liquidity sweep setup](https://makeitsweep.com/liquidity-sweep-setup): the previous day's high or low swept, then reclaimed by a 5-minute candle; a learning setup, not a proven edge
+- [MES or MNQ](https://makeitsweep.com/mes-vs-mnq): tick and point values, the same dollar risk in points, choosing one micro future
 - [Quantower sync](https://makeitsweep.com/quantower): Sweep's free add-on, a Sweep Sync panel, sends every Quantower execution to the journal, read only, on every plan
 - [Export trades from Tradovate](https://makeitsweep.com/import-tradovate): the Performance report as a CSV, then into Sweep (time zone, fees, session day)
 - [Export trades from TopstepX](https://makeitsweep.com/import-topstepx): the Trades tab export as a CSV, UTC times converted, Topstep's trading day kept

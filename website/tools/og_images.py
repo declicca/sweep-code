@@ -68,7 +68,17 @@ def entries():
         ("prop-firm-gameplan-month-2.html", T("Month 2 · Consistency", "Mois 2 · Constance", "Mes 2 · Constancia"),
          T("Same setup, now measure it", "Même setup, maintenant on mesure", "Mismo setup, ahora mídelo")),
         ("prop-firm-gameplan-month-3.html", T("Month 3 · Prove it", "Mois 3 · Fais tes preuves", "Mes 3 · Demuéstralo"),
-         T("Real rules, earned size", "Vraies règles, taille méritée", "Reglas reales, tamaño ganado"))):
+         T("Real rules, earned size", "Vraies règles, taille méritée", "Reglas reales, tamaño ganado")),
+        ("pass-prop-firm-evaluation.html", T("How to pass a prop firm evaluation", "Réussir une évaluation prop firm", "Aprobar una evaluación de prop firm"),
+         T("A plan, not speed", "Un plan, pas de la vitesse", "Un plan, no velocidad")),
+        ("prop-firm-position-sizing.html", T("When to size up", "Quand augmenter sa taille", "Cuándo subir el tamaño"),
+         T("Up slowly, down instantly", "Monter lentement, redescendre tout de suite", "Subir despacio, bajar al instante")),
+        ("funded-account-playbook.html", T("Funded account playbook", "Playbook du compte financé", "Playbook de la cuenta financiada"),
+         T("Five rules after you pass", "Cinq règles après la réussite", "Cinco reglas tras aprobar")),
+        ("liquidity-sweep-setup.html", T("Liquidity sweep setup", "Setup de liquidity sweep", "Setup de liquidity sweep"),
+         T("PDH and PDL, swept then reclaimed", "PDH et PDL, balayés puis repris", "PDH y PDL, barridos y recuperados")),
+        ("mes-vs-mnq.html", T("MES or MNQ?", "MES ou MNQ ?", "¿MES o MNQ?"),
+         T("Which micro to start with", "Quel micro pour débuter", "Con qué micro empezar"))):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
     pro = pages4.PRICES["pro"]["m"]
     for page, title, sub, day in (   # the key pages of the SEO brief (Oct 15): comparison, pricing, features, rules hub, rule changes
