@@ -406,6 +406,7 @@
       if (!el) { el = document.createElement('div'); el.id = 'gToday'; (main.querySelector('.d-today') || main).prepend(el); }   // straight into its place on the dashboard
       if (el._html !== html) { el.innerHTML = html; el._html = html; if (G.today) animateRings(el, G.today.market ? G.today.rings : { plan: 0, execution: 0, review: 0 }, 'today'); }
       ['gMis', 'gBoss'].forEach((id) => { const x = document.getElementById(id); if (x) x.remove(); });
+      if (window.SweepFiche && SweepFiche.maybeExpress) setTimeout(() => SweepFiche.maybeExpress(), 1200);   // the pre-market missed: the express version (once a day)
     }
     paintSections();
     paintNav();
@@ -648,6 +649,7 @@
      score keep working. */
   const PMT = {
     en: {
+      x_title: 'Express plan', x_hint: 'Your sheet\'s lock time is past. In 30 seconds: your main level, the direction, the target.', x_later: 'Later (today\'s trades will be off-plan)', x_level: 'Main level', x_dir: 'Direction', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Your note from last session', of: '{a} of {b}', next: 'Continue', back: 'Back', save: 'Save my sheet', needs: 'Fill in what is missing to continue.',
       base: 'Today\'s levels', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Current price',
       base_hint: 'Typed by hand for now. Yesterday\'s values are kept as a start.', base_needs: 'London high, London low and the current price are needed (high above low).',
@@ -671,6 +673,7 @@
       l_news: 'after the first full 15m after the news', l_retest: 'retest 5m + trigger', l_vwap: 'above VWAP', l_vwap_s: 'below VWAP', l_stop: 'stop {s}', l_target: 'target {t}', l_r: '({r}R)',
     },
     fr: {
+      x_title: 'Plan express', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton niveau principal, la direction, la cible.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Niveau principal', x_dir: 'Direction', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Ta note de la dernière séance', of: '{a} sur {b}', next: 'Continuer', back: 'Retour', save: 'Enregistrer ma fiche', needs: 'Complète ce qui manque pour continuer.',
       base: 'Les niveaux du jour', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Prix actuel',
       base_hint: 'À la main pour l’instant. Les valeurs de la veille servent de départ.', base_needs: 'Il faut le London high, le London low et le prix actuel (le high au-dessus du low).',
@@ -694,6 +697,7 @@
       l_news: 'après la première 15m complète après la news', l_retest: 'retest 5m + déclenchement', l_vwap: 'au-dessus VWAP', l_vwap_s: 'sous VWAP', l_stop: 'stop {s}', l_target: 'cible {t}', l_r: '({r}R)',
     },
     es: {
+      x_title: 'Plan exprés', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu nivel principal, la dirección, el objetivo.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Nivel principal', x_dir: 'Dirección', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Tu nota de la última sesión', of: '{a} de {b}', next: 'Continuar', back: 'Atrás', save: 'Guardar mi ficha', needs: 'Completa lo que falta para continuar.',
       base: 'Los niveles del día', instrument: 'Instrumento', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Precio actual',
       base_hint: 'A mano por ahora. Los valores de ayer sirven de punto de partida.', base_needs: 'Hacen falta el London high, el London low y el precio actual (el high por encima del low).',
@@ -814,6 +818,7 @@
 
   /** the screens that apply, in order */
   function pmScreens() {
+    if (PM.express) return ['express', 'sheet'];
     const a = PM.f.answers, s = ['base', 'pos', 'news', 'scen', 'notrade'];
     if (PM.d1auto && !PM.d1auto.reviewed) s.push('d1');
     s.push('limits', 'sheet');
@@ -841,6 +846,7 @@
     PM.news = pmCalendar(day);
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
     if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-pm g-pm-locked' }); const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day; return; }   // locked: the session view
+    PM.express = !old && ficheLockAt(day) <= Date.now() / 1000;   // the lock time is past without a sheet: the express version (brief step 6)
     if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
     openSheet(pmHtml(), { cls: 'g-plan g-pm' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;
@@ -882,6 +888,15 @@
     }
     if (name === 'notrade') return `<h3 class="pm-q">${pt('c4')}</h3><div class="g-chips-row wrap">${FICHE.NO_TRADE.map((c) => `<button type="button" class="chip ${f.no_trade_conditions.includes(c) ? 'on' : ''}" data-pm="nt" data-v="${c}">${pt(c)}</button>`).join('')}</div>
       ${f.no_trade_conditions.includes('other') ? `<label class="g-f"><span>${pt('other')}</span><input type="text" maxlength="120" data-pmf="no_trade_other" value="${esc(f.no_trade_other || '')}" placeholder="${esc(pt('other_ph'))}"></label>` : ''}`;
+    if (name === 'express') {   // brief step 6: the pre-market missed, the main level, the direction and the target (R included)
+      const sc = pmBuild(f)[0];
+      return `<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt('x_hint')}</p>
+        <label class="g-f"><span>${pt('instrument')}</span>${pmIn('instrument', f.instrument, 'MES', 'text')}</label>
+        <h3 class="pm-q">${pt('x_dir')}</h3>${pmSeg('X_dir', ['long', 'short'], a.X_dir)}
+        <div class="g-row2"><label class="g-f"><span>${pt('x_level')}</span>${pmIn('X_level', a.X_level)}</label><label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_A', a.C3_A)}</label></div>
+        <p class="pm-r ${pmViable(sc) ? 'ok' : 'bad'}" data-pm-r="A">${sc && sc.r_estimate != null ? esc(pt('r', { r: pmFmt(sc.r_estimate) })) + (pmViable(sc) ? '' : ' · ' + pt('main_not_viable')) : ''}</p>
+        <button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>`;
+    }
     if (name === 'd1') return `<h3 class="pm-q">${pt('d1')}</h3>${pmSeg('D1', ['gain', 'loss', 'max_loss', 'none'], a.D1)}`;
     if (name === 'limits') return `<h3 class="pm-q">${pt('limits')}</h3>
       ${a.D1 === 'max_loss' ? `<p class="g-hint">${pt('d1_reduce')}</p>${pmSeg('D1_reduce', ['accept', 'refuse'], a.D1_reduce)}` : ''}
@@ -904,6 +919,11 @@
   /** the scenarios as the answers make them (C1 level, C2 kept or not, C3 targets), with stop and R */
   function pmBuild(f) {
     const a = f.answers;
+    if (PM.express) {
+      const lvl = fNum(a.X_level); if (lvl == null || !a.X_dir) return [];
+      const s = { id: 'A', direction: a.X_dir, type: a.X_dir === 'long' ? 'breakout' : 'breakdown', level: lvl };
+      return [pmCompute(f, s, fNum(a.C3_A))];
+    }
     return pmScenarios(f).map((s) => {
       if (s.id === 'A' && a.C1 === 'edit' && fNum(a.C1_level) != null) s.level = fNum(a.C1_level);
       const tg = a['C3_' + s.id] != null && a['C3_' + s.id] !== '' ? fNum(a['C3_' + s.id]) : pmTarget(f, s);
@@ -913,6 +933,7 @@
   /** the sheet from the answers */
   function pmFinal() {
     const f = structuredClone(PM.f), a = f.answers;
+    if (PM.express) f.mode = 'express';
     f.scenarios = pmBuild(f).filter((s) => s.id === 'A' || a.C2 !== 'remove').map((s) => Object.assign(s, { status: 'waiting', source: 'manual', done: [], conditions: [] }));
     const nw = pmNews();
     f.news_windows = a.B1 === 'yes' && ficheHm(a.B1_time) ? [{ start: pmHmAdd(a.B1_time, -nw.before), end: pmHmAdd(a.B1_time, nw.after), event: ((PM.news.find((e) => e.hm === a.B1_time) || {}).event) || '' }] : [];
@@ -946,6 +967,7 @@
       return l.every(pmViable) ? '' : pt(l.find((s) => !pmViable(s)).id === 'A' ? 'main_not_viable' : 'not_viable');
     }
     if (name === 'd1') return a.D1 ? '' : pt('needs');
+    if (name === 'express') { const s = pmBuild(f)[0]; return !s ? pt('needs') : pmViable(s) ? '' : pt('main_not_viable'); }
     if (name === 'limits') return (a.D1 === 'max_loss' && !a.D1_reduce) || !(f.limits.max_trades >= 1) || !(parseFloat(a.max_loss) > 0) ? pt('needs') : '';
     return '';
   }
@@ -964,7 +986,7 @@
     const a = f.answers, lv = f.levels, A = f.scenarios[0], prev = lastPlan(PM.day, true);
     const lvTxt = [['LH', lv.london_high], ['LL', lv.london_low], ['PDH', lv.pdh], ['PDL', lv.pdl]].filter(([, v]) => v != null).map(([k, v]) => `${k} ${pmFmt(v)}`).join(' · ');
     j.pre = Object.assign({}, j.pre || {}, { saved_at: (j.pre && j.pre.saved_at) || Math.floor(Date.now() / 1000), bias: A.direction === 'long' ? 'bullish' : 'bearish',
-      setups: (j.pre && j.pre.setups) || (prev && prev.pre.setups) || [], max_loss: String(parseFloat(a.max_loss)), max_trades: String(f.limits.max_trades),
+      setups: (j.pre && j.pre.setups) || (prev && prev.pre.setups) || [], max_loss: parseFloat(a.max_loss) > 0 ? String(parseFloat(a.max_loss)) : (j.pre && j.pre.max_loss) || '', max_trades: String(f.limits.max_trades),
       levels: lvTxt, rule: f.reminder || PM.note || (j.pre && j.pre.rule) || '', day_off: false });
     put('journals', j);
     const then = PM.then; PM.then = null;
@@ -1002,6 +1024,7 @@
     } else if (act === 'back') { PM.err = ''; PM.i = Math.max(0, PM.i - 1); pmRender(); }
     else if (act === 'save') pmSave();
     else if (act === 'lock') pmSave(true);
+    else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); closeSheet(); }   // no sheet today: its trades will be off-plan
     else if (act === 'dayoff') {   // « Not trading today »: a day off before any trade of the day, the same as the routine's button
       const j = structuredClone(journalOf(PM.day)); j.id = PM.day;
       j.pre = Object.assign({}, j.pre || {}, { saved_at: (j.pre && j.pre.saved_at) || Math.floor(Date.now() / 1000), bias: 'no_trade', day_off: !(S.trades || []).some((x) => !x.demo && x.date === PM.day) });
@@ -1011,8 +1034,8 @@
   document.addEventListener('input', (e) => {
     const i = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked) [data-pmf]'); if (!i) return;
     pmSetField(i.dataset.pmf, i.value);
-    if (/^C[13]_/.test(i.dataset.pmf)) {   // the R follows the typing
-      const s = pmBuild(PM.f).find((x) => 'C3_' + x.id === i.dataset.pmf || (i.dataset.pmf === 'C1_level' && x.id === 'A'));
+    if (/^C[13]_|^X_level$/.test(i.dataset.pmf)) {   // the R follows the typing
+      const s = pmBuild(PM.f).find((x) => 'C3_' + x.id === i.dataset.pmf || ((i.dataset.pmf === 'C1_level' || i.dataset.pmf === 'X_level') && x.id === 'A'));
       const p = s && document.querySelector(`#gSheet [data-pm-r="${s.id}"]`);
       if (p) { p.className = 'pm-r ' + (pmViable(s) ? 'ok' : 'bad'); p.textContent = s.r_estimate == null ? '' : pt('r', { r: pmFmt(s.r_estimate) }) + (pmViable(s) ? '' : ' · ' + pt(s.id === 'A' ? 'main_not_viable' : 'not_viable')); }
     }
@@ -1096,8 +1119,19 @@
   /** a new trade on a day with a sheet: off-plan until linked to a scenario (the trade forms call it before saving) */
   function ficheMarkTrade(doc) {
     if (!doc || doc.demo || doc.plan_scenario) return doc;
-    const f = ficheGet(doc.date); if (f && f.scenarios.length) doc.off_plan = true;
+    const f = ficheGet(doc.date); if (f && f.scenarios.length) { doc.off_plan = true; return doc; }
+    // the pre-market missed (no sheet, its lock time past) by a trader who makes sheets: the day's trades are off-plan
+    if (!f && doc.date === ficheDayOf() && (S.journals || []).some((j) => j.fiche && j.id < doc.date) && ficheLockAt(doc.date) <= Date.now() / 1000) doc.off_plan = true;
     return doc;
+  }
+  /** once a day on Today: the lock time is past and there is no sheet (for a trader who makes sheets) → the express version */
+  function ficheMaybeExpress() {
+    const day = ficheDayOf(), now = typeof etStr === 'function' ? etStr(Math.floor(Date.now() / 1000)) : '';
+    if (now.slice(0, 10) !== day || !G.today || !G.today.market || ficheGet(day) || document.getElementById('gSheet')) return;
+    if (ficheLockAt(day) > Date.now() / 1000 || !(S.journals || []).some((j) => j.fiche && j.id < day)) return;
+    const j = journalOf(day); if (j.pre && j.pre.day_off) return;
+    if (lsGet('pm.later.' + day, 0) || lsGet('pm.xshown.' + day, 0)) return;
+    lsSet('pm.xshown.' + day, 1); openPremarket(day);
   }
   /** after the save: which scenario was it? (A / B still open, or « Off my sheet ») */
   function ficheOfferLink(id) {
@@ -1121,7 +1155,7 @@
     else if (b.dataset.pm === 'inval') ssInvalidate(d, b.dataset.s);
     else if (b.dataset.pm === 'link') ficheLink(b.dataset.id, b.dataset.s);
   });
-  Object.assign(window.SweepFiche, { markTrade: ficheMarkTrade, offerLink: ficheOfferLink, link: ficheLink, over: (day) => { const f = ficheGet(day); return f ? ssOver(f) : ''; } });
+  Object.assign(window.SweepFiche, { maybeExpress: ficheMaybeExpress, markTrade: ficheMarkTrade, offerLink: ficheOfferLink, link: ficheLink, over: (day) => { const f = ficheGet(day); return f ? ssOver(f) : ''; } });
   Object.assign(window.SweepFiche, { open: openPremarket, scenarios: pmScenarios, target: pmTarget, compute: pmCompute, viable: pmViable, line: pmScenarioLine, sheetHtml: pmSheetHtml });
 
   /* ───────────── Quick journal (carousel) ───────────── */
