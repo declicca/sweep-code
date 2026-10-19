@@ -750,6 +750,7 @@
   /* the plan sheet: one sentence, live, above the error line and the button */
   function paintPlan() {
     const sh = document.querySelector('#gSheet.g-plan, #gSheet .g-plan') && document.getElementById('gSheet'); if (!sh || !sh.querySelector('[data-g="save-plan"]')) return;
+    if (sh.classList.contains('g-pm')) return;   // the pre-market questionnaire: its sheet says it all (no bias / max loss form any more)
     const err = sh.querySelector('#gErr'); if (!err) return;
     const b = sh.querySelector('[data-g="bias"].on'), ml = sh.querySelector('[data-gp="max_loss"]'), mt = sh.querySelector('[data-gp="max_trades"]');
     const txt = planNote({ bias: b ? b.dataset.v : null, maxLoss: cents(ml && ml.value), maxTrades: parseInt(mt && mt.value, 10) || 0, setups: sh.querySelectorAll('.g-setups .chip.on').length });

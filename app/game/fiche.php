@@ -38,9 +38,9 @@ final class Fiche
     }
 
     /** the checklist of a scenario, in its order (a reclaim adds VWAP) */
-    public static function conditions(string $type): array
+    public static function conditions(string $type, bool $news = false): array
     {
-        return $type === 'reclaim' ? ['close_15m', 'retest_5m', 'trigger_5m', 'vwap', 'risk_checked'] : ['close_15m', 'retest_5m', 'trigger_5m', 'risk_checked'];
+        return array_merge($news ? ['news_15m'] : [],  $type === 'reclaim' ? ['close_15m', 'retest_5m', 'trigger_5m', 'vwap', 'risk_checked'] : ['close_15m', 'retest_5m', 'trigger_5m', 'risk_checked']);   // B2: the first full 15m after a news comes first
     }
 
     private static function num($v): ?float { return is_numeric($v) ? (float) $v : null; }
@@ -49,7 +49,7 @@ final class Fiche
     public static function normalize(array $f, string $day): array
     {
         $lv = is_array($f['levels'] ?? null) ? $f['levels'] : [];
-        $sc = [];
+        $sc = []; $an = is_array($f['answers'] ?? null) ? $f['answers'] : []; $news = ($an['B2'] ?? '') === 'yes' && ($an['B1'] ?? '') === 'yes';
         foreach (array_slice(is_array($f['scenarios'] ?? null) ? $f['scenarios'] : [], 0, 2) as $s) {
             if (!is_array($s)) continue;
             $type = in_array($s['type'] ?? '', self::SCENARIO_TYPES, true) ? $s['type'] : 'breakout';
@@ -59,8 +59,8 @@ final class Fiche
                 'type' => $type,
                 'level' => self::num($s['level'] ?? null), 'stop_estimate' => self::num($s['stop_estimate'] ?? null),
                 'target' => self::num($s['target'] ?? null), 'r_estimate' => self::num($s['r_estimate'] ?? null),
-                'conditions' => self::conditions($type),
-                'done' => array_values(array_intersect(self::conditions($type), is_array($s['done'] ?? null) ? $s['done'] : [])),
+                'conditions' => self::conditions($type, $news),
+                'done' => array_values(array_intersect(self::conditions($type, $news), is_array($s['done'] ?? null) ? $s['done'] : [])),
                 'status' => in_array($s['status'] ?? '', self::STATUSES, true) ? $s['status'] : 'waiting',
                 'source' => ($s['source'] ?? '') === 'auto' ? 'auto' : 'manual',
             ];

@@ -9,7 +9,8 @@ is set to the same instant:
    review); checked both ways with an announcement at 10:00 and at 15:00;
  - close, D 16:30 ET: next step: the review, made from the routine card → day swept, nothing highlighted;
  - evening, D 19:30 ET: the session of D+1 has started (18:00 ET) → plan first; a trade at 19:35 counts on D+1, D stays swept;
-   the plan of D+1 starts from the plan of D (bias; max loss $1,500 → the account's $1,000 limit), saved only on « Confirmer ».
+   the plan of D+1 (the pre-market questionnaire) starts from D's levels, max loss $1,500 → the account's $1,000 limit, saved
+   only with its sheet.
 The review: three one-tap questions (plan followed, discipline, grade) and one optional sentence, saved in the day's
 journal; not saved without the three answers.
 Each time: the day the browser computes (todayStr), the day of the card and the server's day are the same; the card shows
@@ -20,6 +21,7 @@ first-ring tip covered the review's buttons on computer: a « [class*=tip] » ru
 import asyncio, datetime as dt, os, signal, subprocess, sys, time, urllib.request
 from zoneinfo import ZoneInfo
 from playwright.async_api import async_playwright
+from pm_helper import apremarket
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 APPDIR = '/tmp/g'   # the served copy (each shard has its own)
 P1 = int(B.rsplit(':', 1)[1]) + 1; B1 = f'http://127.0.0.1:{P1}'
@@ -114,14 +116,14 @@ async def main():
       ok(not cov, f'{what}: nothing of the page covers the sheet' + (f' ({cov[:3]})' if cov else ''))
     async def make_plan(page):
       await page.locator('#main .nav-rt [data-rt=plan]').click(); await sheet_on_top(page, 'plan')
-      await page.locator('#gSheet [data-g=bias][data-v=bullish]').click(); await page.wait_for_timeout(200)
-      ml = await page.locator('#gSheet [data-gp=max_loss]').input_value()
+      first = await page.locator('#gSheet [data-pmf="lv.london_high"]').input_value()
+      await apremarket(page, stop_at='limits')
+      ml = await page.locator('#gSheet [data-pmf=max_loss]').input_value()
       ok(ml == '1000', f'plan: the max loss starts from the account\'s daily limit ({ml})')
       hint = await page.locator('#gSheet .g-dll').text_content()
       ok('Topstep 50K' in hint and '1' in hint, f'plan: « {hint} » under the max loss')
-      ok(await page.locator('#gSheet .g-from').count() == 0, 'plan: a first plan starts empty (nothing to take back)')
-      await page.locator('#gSheet [data-gp=max_loss]').fill('1500')   # the trader goes above the limit (allowed)
-      await page.locator('#gSheet [data-g=save-plan]').click(); await page.wait_for_timeout(1200)
+      ok(first == '', f'plan: a first plan starts empty (nothing to take back) ({first!r})')
+      await apremarket(page, max_loss=1500)   # the trader goes above the limit (allowed)
     async def trade(page):
       await page.evaluate("""() => put('trades', {id:'rp-t1', account_id:'rp-a', instrument:'NQ', direction:'long', contracts:1, entry:21000, exit:21010, pnl_c:20000, pnl_manual:true, fees_c:0,
         date: todayStr(), entry_time:'10:30', exit_time:'10:40', session_date:true})"""); await page.wait_for_timeout(1500)
@@ -157,14 +159,14 @@ async def main():
         date: todayStr(), entry_time:'19:35', exit_time:'19:40', session_date:true})"""); await page.wait_for_timeout(1500)
     async def next_plan(page):   # the plan of D+1 starts from the plan of D: bias, max loss (never above the account's limit)
       await page.locator('#main .nav-rt [data-rt=plan]').click(); await sheet_on_top(page, 'plan of the next session')
-      p = await page.evaluate("""() => ({ bias: (document.querySelector('#gSheet [data-g=bias].on') || {}).dataset?.v, ml: document.querySelector('#gSheet [data-gp=max_loss]').value,
-        from: (document.querySelector('#gSheet .g-from') || {}).textContent || '', btn: document.querySelector('#gSheet [data-g=save-plan]').textContent.trim() })""")
-      ok(p['bias'] == 'bullish' and 'Repris de ton plan du' in p['from'] and 'confirme ou ajuste' in p['from'], f"next plan: yesterday's plan comes back ({p['bias']}, « {p['from']} »)")
-      ok(p['ml'] == '1000', f"next plan: the max loss of yesterday ($1,500) starts at the account's limit ({p['ml']})")
-      ok(p['btn'] == 'Confirmer mon plan', f"next plan: « {p['btn']} »")
+      lh = await page.locator('#gSheet [data-pmf="lv.london_high"]').input_value()
+      ok(lh == '5820', f"next plan: yesterday's levels come back to start from ({lh})")
+      await apremarket(page, stop_at='limits')
+      ml = await page.locator('#gSheet [data-pmf=max_loss]').input_value()
+      ok(ml == '1000', f"next plan: the max loss of yesterday ($1,500) starts at the account's limit ({ml})")
       nothing = await page.evaluate("!((getDoc('journals', todayStr()) || {}).pre || {}).bias")
-      ok(nothing, 'next plan: nothing saved before « Confirmer »')
-      await page.locator('#gSheet [data-g=save-plan]').click(); await page.wait_for_timeout(1200)
+      ok(nothing, 'next plan: nothing saved before « Enregistrer ma fiche »')
+      await apremarket(page)
       pre = await page.evaluate("(getDoc('journals', todayStr()) || {}).pre || {}")
       ok(pre.get('bias') == 'bullish' and pre.get('max_loss') == '1000', f"next plan: confirmed as shown ({pre.get('bias')}, {pre.get('max_loss')})")
     async def evening(page): await evening_trade(page); await next_plan(page)

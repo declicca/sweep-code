@@ -49,8 +49,8 @@ with sync_playwright() as p:
     ok(mny and mny[0].startswith(x['since']) and mny[1] == want, f'{tag} R17 My money: « {mny} » (want « {x["since"]} », {want})')
     # R21: « Not trading today » in the plan
     day = pg.evaluate(GAMEDAY)
-    pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=8000); pg.wait_for_timeout(400)
-    pg.locator('#gSheet [data-g=bias][data-v=no_trade]').click(); pg.wait_for_timeout(200); pg.locator('#gSheet [data-g=save-plan]').click(); pg.wait_for_timeout(2500)
+    pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet [data-pm=dayoff]', timeout=8000); pg.wait_for_timeout(400)
+    pg.locator('#gSheet [data-pm=dayoff]').click(); pg.wait_for_timeout(2500)   # (the pre-market questionnaire, since 19 Oct.: its « Not trading today »)
     off = pg.evaluate("(d) => { const j = getDoc('journals', d); return !!(j && j.pre && j.pre.day_off) }", day)
     pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_timeout(2500)
     ok(off and pg.locator('#main .nav-rt.off').count() == 1, f'{tag} R21 « Not trading today » in the plan: a day off, the routine says so ({off})')

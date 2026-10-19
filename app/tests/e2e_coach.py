@@ -2,7 +2,7 @@
 Sweep — « Your coach » (brief 03 step 2), dev environment with Playwright:
   python3 tests/e2e_coach.py http://127.0.0.1:8095 [storage_state, unused: every case signs up its own trader]
 A new trader with one account (daily limit $1,000), phone (fr, es) and computer (en):
-  A. the plan sheet: one live sentence (no bias, a max loss above the account's limit, no setup);
+  A. the plan (the pre-market questionnaire since 19 Oct.) is saved as before (bias, max loss);
   B. trades of the day: after a clean trade, what was right and where the session stands; a re-entry 4 min after a loss
      against the bias: the one thing to improve with its fix, « 2 losses in a row: pause », the same on the trade's page and
      in the « saved » message; the server's own out-of-plan codes are all seen by the coach (same rules);
@@ -50,6 +50,7 @@ Checks: no page error, nothing wider than the window, the coach's texts in the t
 """
 import json, os, re, sqlite3, sys, time
 from playwright.sync_api import sync_playwright
+from pm_helper import premarket
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
 DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
@@ -130,14 +131,9 @@ def run(p, lang, phone):
   fd = pg.evaluate("getComputedStyle(document.querySelector('#main .co-today')).display")
   pg.locator('#main .nav-rt-fold').click(); pg.wait_for_timeout(500)
   ok(fd == 'none' and pg.locator('#main .co-today').is_visible(), f'{tag} Today: folding the routine hides the coach with the steps, unfolding shows it ({fd})')
-  # A. the plan sheet, live
-  pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=8000); pg.wait_for_timeout(400)
-  note = lambda: pg.evaluate(TXT, '#gSheet .co-plan')
-  n1 = note(); pg.locator('#gSheet [data-g=bias][data-v=bullish]').click(); pg.wait_for_timeout(250)
-  pg.locator('#gSheet [data-gp=max_loss]').fill('1500'); pg.wait_for_timeout(250); n2 = note()
-  pg.locator('#gSheet [data-gp=max_loss]').fill('1000'); pg.wait_for_timeout(250); n3 = note(); texts += [n1, n2, n3]   # (no max of trades yet: C sets it)
-  ok(x['need'] in n1 and x['above'] in n2 and x['nosetup'] in n3, f'{tag} A plan sheet: « {n1[-40:]} » → « {n2[-40:]} » → « {n3[-40:]} »')
-  pg.locator('#gSheet [data-g=save-plan]').click(); pg.wait_for_timeout(900)
+  # A. the plan (the pre-market questionnaire since the brief « Plan pre-market adaptatif »: its sheet speaks, no coach line)
+  premarket(pg, day=day, max_loss=1000)
+  pg.evaluate("(d) => editDoc('journals', d, (j) => { j.pre.max_trades = ''; })", day); pg.wait_for_timeout(300)   # (no max of trades yet: C sets it)
   pre = pg.evaluate("(d) => (getDoc('journals', d) || {}).pre", day)
   ok(pre and pre.get('bias') == 'bullish' and pre.get('max_loss') == '1000', f'{tag} A the plan is saved as before ({pre and [pre.get("bias"), pre.get("max_loss")]})')
   # B. trades of the day
@@ -184,11 +180,11 @@ def run(p, lang, phone):
   nx = pg.evaluate("(d) => { const n = new Date(d + 'T12:00:00'); do n.setDate(n.getDate() + 1); while (n.getDay() === 0 || n.getDay() === 6); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}` }", day)
   # the « day swept » celebration can come up after the review: closed like the trader would (« Continue »)
   pg.wait_for_timeout(600); pg.evaluate("document.querySelectorAll('.g-sweep [data-g=sw-close]').forEach((b) => b.click())"); pg.wait_for_timeout(400)
-  pg.evaluate("(d) => SweepGame.openPlan(d)", nx); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=6000); pg.wait_for_timeout(400)
-  rv2 = pg.evaluate("(document.querySelector('#gSheet [data-gp=rule]') || {}).value")
-  pg.locator('#gSheet [data-g=save-plan]').click(); pg.wait_for_timeout(700)
+  pg.evaluate("(d) => SweepGame.openPlan(d)", nx); pg.wait_for_selector('#gSheet [data-pm-screen]', timeout=6000); pg.wait_for_timeout(400)
+  rv2 = pg.evaluate(TXT, '#gSheet .pm-rem')
+  premarket(pg)
   saved = pg.evaluate("(d) => ((getDoc('journals', d) || {}).pre || {}).rule", nx)
-  ok(rv2 == rule and saved == rule, f'{tag} D the next plan starts with the rule and saves it ({rv2!r})')
+  ok(rule in rv2 and saved == rule, f'{tag} D the next plan starts with the rule and saves it ({rv2!r})')
   # E. the habit of the week: last week, the stop broken most often
   pg.evaluate("""(day) => { const t0 = new Date(day + 'T12:00:00'), mon = new Date(t0); mon.setDate(t0.getDate() - ((t0.getDay() + 6) % 7));
       const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -327,9 +323,9 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .co-today', timeout=8000); pg.wait_for_timeout(1200)
   kt = pg.evaluate("(() => { const q = document.querySelector('#main .co-today .co-edge'); return q ? q.textContent : '' })()")
   ok(EK[lang] in kt and '12' in kt, f'{tag} N Today before the session: « {EK[lang]}… » ({kt[:110]})')
-  pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet .g-setups', state='attached', timeout=8000); pg.wait_for_timeout(600)
-  pl = pg.evaluate("(() => { const q = document.querySelector('#gSheet .g-edge'); return { line: q ? q.textContent : '', first: ((document.querySelector('#gSheet .g-setups [data-g=setup]') || {}).dataset || {}).v || '' } })()")
-  ok(e[1] in pl['line'] and pl['first'] == 'Opening range breakout', f'{tag} N the plan: « {e[1]}… », the ORB first among the setups ({pl})')
+  pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet [data-pm-screen]', state='attached', timeout=8000); pg.wait_for_timeout(600)
+  pl = pg.evaluate("(() => { const q = document.querySelector('#gSheet .g-edge'); return { line: q ? q.textContent : '' } })()")
+  ok(e[1] in pl['line'], f'{tag} N the plan: « {e[1]}… » ({pl})')
   if phone: pg.screenshot(path=f'/tmp/co_{tag}_plan.png')
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} N nothing wider than the window')
   # O. (T5) 4 winners today, all between 9:30 and 10:00: the streak and its point in common; Stats: the longest streak
@@ -430,11 +426,11 @@ def room(p, lang, phone):
   pg.evaluate("(d) => put('trades', { id: 'r0', account_id: 'la', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -113000, pnl_manual: true, date: ymdAdd(d, -1), entry_time: '10:00', exit_time: '10:20' })", day); pg.wait_for_timeout(800)
   m = pg.evaluate("(d) => { const m = SweepCoach.margin(d); return m && [m.c, m.start, m.low] }", day)
   ok(m == [87000, 87000, False], f'{tag} the room is the account page\'s: $870 ({m})')
-  pg.evaluate("(d) => SweepGame.openPlan(d)", day); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=8000); pg.wait_for_timeout(400)
-  ml = pg.evaluate("(document.querySelector('#gSheet [data-gp=max_loss]') || {}).value"); hint = pg.evaluate(TXT, '#gSheet .g-dll')
+  premarket(pg, day=day, stop_at='limits')
+  ml = pg.evaluate("(document.querySelector('#gSheet [data-pmf=max_loss]') || {}).value"); hint = pg.evaluate(TXT, '#gSheet .g-dll')
   ok(ml == '870' and x['hint'] in hint and '870' in hint, f'{tag} the plan\'s max loss starts at the room, not the $1,200 daily limit ({ml}, « {hint} »)')
   # he types $1,200 anyway: the coach still counts the room
-  pg.locator('#gSheet [data-g=bias][data-v=bullish]').click(); pg.wait_for_timeout(200); pg.locator('#gSheet [data-gp=max_loss]').fill('1200'); pg.locator('#gSheet [data-g=save-plan]').click(); pg.wait_for_timeout(900)
+  premarket(pg, max_loss=1200)
   b1 = pg.evaluate("(d) => { const h = SweepCoach.before({ form: 'shot', account: 'la', date: d, qty: 1 }); const e = document.createElement('div'); e.innerHTML = h; return e.textContent.replace(/\\s+/g, ' ') }", day)
   ok('870' in b1 and x['left'] in b1, f'{tag} a $1,200 plan, before a trade: $870 of room left, not $1,200 ({b1[:120]})')
   # −$780 today: $90 left
