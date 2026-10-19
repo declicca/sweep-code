@@ -1179,7 +1179,7 @@
   /** once a day on Today: the lock time is past and there is no sheet (for a trader who makes sheets) → the express version */
   function ficheMaybeExpress() {
     const day = ficheDayOf(), now = typeof etStr === 'function' ? etStr(Math.floor(Date.now() / 1000)) : '';
-    if (now.slice(0, 10) !== day || !G.today || !G.today.market || ficheGet(day) || document.getElementById('gSheet') || document.querySelector('.evp.open')) return;
+    if (now.slice(0, 10) !== day || !G.today || !G.today.market || ficheGet(day) || document.getElementById('gSheet')) return;
     if ((PM.opening && Date.now() - PM.opening < 10000) || Date.now() - (window.__gSheetClosed || 0) < 3000) return;   // a sheet opening, or one just closed
     if (ficheLockAt(day) > Date.now() / 1000 || !(S.journals || []).some((j) => j.fiche && j.id < day)) return;
     const j = journalOf(day); if (j.pre && j.pre.day_off) return;
