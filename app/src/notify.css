@@ -1,3 +1,4 @@
+@layer legacy{
 /* Sweep — notification center (Feature 0). Uses the app's tokens: --panel, --panel2, --line, --text, --muted, --pos (gains, blue), --neg (gold). */
 
 /* Bell: in the page header on desktop, in the top bar on phones */
@@ -82,4 +83,5 @@
 @media (prefers-reduced-motion:reduce){
   .nt-mbg,.nt-mcard,.nt-bell,.nt-item{transition:none!important}
   .nt-mcard{transform:none}
+}
 }

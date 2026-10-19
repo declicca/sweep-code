@@ -1,3 +1,4 @@
+@layer legacy{
 /* Sweep — Gamification V1. Blue = accomplishment, gold = rare. Rings use three tints of the app blue. */
 :root{--g-plan:var(--pos);--g-exec:color-mix(in srgb,var(--pos) 55%,#fff 45%);--g-rev:color-mix(in srgb,var(--pos) 78%,#000 22%);--g-gold:var(--neg);--g-spring:var(--sw-spring);--g-ios:var(--sw-ease)}
 :root[data-theme=light],:root:not([data-theme=dark]){--g-exec:color-mix(in srgb,var(--pos) 60%,#fff 40%)}
@@ -158,7 +159,7 @@
 .g-stat{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 10px;border-radius:20px;text-align:center}
 .g-stat b{font-size:30px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .g-stat small{color:var(--muted);font-size:13px}
-.g-stat .g-streak .g-candle{height:22px}
+
 .g-stat .g-streak{color:var(--muted)}.g-stat .g-streak.on{color:var(--pos)}
 .g-snow{width:20px;height:20px;color:var(--pos)}
 .g-mnav{display:flex;align-items:center;gap:8px;font-size:14px;text-transform:capitalize}
@@ -245,19 +246,19 @@
 }
 
 /* Insights: compact progress block (rank, streak, this week) */
-.gm-ins{display:grid;grid-template-columns:minmax(260px,1.2fr) minmax(280px,1.3fr) auto;align-items:center;gap:24px;padding:16px 20px;margin-bottom:16px;border-radius:20px}
+.gm-ins{display:grid;grid-template-columns:minmax(260px,1.2fr) minmax(280px,1.3fr) auto;align-items:center;border-radius:20px}
 .gm-ins-rank{display:flex;align-items:center;gap:14px;min-width:0;position:relative}
-.gm-ins-rank .g-medal{width:56px;height:56px}
-.gm-ins-rank .g-medal .g-candle{height:28px}
+
+
 .gm-ins-rt{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
-.gm-ins-rt b{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.gm-ins-rt b{font-weight:600;letter-spacing:-.02em}
 .gm-ins-rt small{font-size:12px}
-.gm-ins-rt .g-bar{margin:4px 0 2px;height:6px}
+
 .gm-ins-share{width:32px;height:32px;align-self:flex-start}
 .gm-ins-share svg{width:15px;height:15px}
 .gm-ins-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .gm-ins-stats>div{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
-.gm-ins-stats b{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.gm-ins-stats b{font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
 .gm-ins-stats small{font-size:12px;color:var(--muted)}
 .gm-ins-stats .g-streak{display:none}
 .gm-ins-week{display:flex;gap:6px}
@@ -271,7 +272,7 @@
 .g-bdgsec .g-sound{margin-top:12px}
 @media (max-width:1100px){.gm-ins{grid-template-columns:1fr 1fr}.gm-ins-week{grid-column:1/-1;justify-content:space-between}}
 @media (max-width:640px){
-  .gm-ins{grid-template-columns:1fr;gap:16px;padding:16px}
+  
   .gm-ins-week{justify-content:space-between}
   .g-wd{flex:1}
 }
@@ -378,7 +379,7 @@
 .g-sw-t{text-align:center;text-wrap:balance;max-width:min(340px,86vw)}
 
 /* ───────────── compact home card: tracking stays first ───────────── */
-.g-today.gc{padding:12px 14px;margin-bottom:16px;border-radius:20px;display:block}
+.g-today.gc{margin-bottom:16px;border-radius:20px;}
 .g-today.gc::before{display:none}
 .gc-row{display:flex;align-items:center;gap:14px}
 .gc-row .g-ringbtn{flex-shrink:0}
@@ -442,7 +443,7 @@
 }
 /* override the first-version card grid */
 .g-today.gc>*{grid-column:auto;grid-row:auto}
-@media (min-width:861px){.g-today.gc{grid-template-columns:max-content max-content minmax(0,1fr);column-gap:0;padding:10px 14px}.g-today.gc>*{grid-column:auto!important;grid-row:auto!important}}
+@media (min-width:861px){.g-today.gc{column-gap:0;}.g-today.gc>*{grid-column:auto!important;grid-row:auto!important}}
 @media (min-width:861px) and (max-width:1100px){.g-today.gc{grid-template-columns:max-content minmax(0,1fr)}.g-today.gc>.gc-c2{grid-column:1/-1!important;grid-row:2!important}}
 .gc-c3 .gc-cta{order:0!important}
 .gc-c3 .gc-off{order:1}
@@ -710,7 +711,7 @@
 .dc-logo svg{width:16px;height:16px}
 .dc-link{width:100%;justify-content:center;background:#5865F2!important;color:#fff!important;border-color:transparent!important}
 .gc-settled .gc-c2 .gc-pill{animation:none}
-.gc-hubwrap h4{margin:14px 0 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
 .gc-hubwrap h4:first-child{margin-top:0}
 .gc-hub .gc-pill.locked{opacity:.55;cursor:default;box-shadow:inset 0 0 0 1px var(--line);background:transparent}
 .gc-hub .gc-pill.locked svg{color:var(--muted)}
@@ -801,3 +802,4 @@ button.gc-meta{display:flex;align-items:center;gap:6px;padding:0;border:0;backgr
 .wk-notes li::before{content:"";position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--pos)}
 .wk-hint{display:block;margin:-2px 0 4px;font-size:12px;color:var(--muted)}
 .wk-grade{margin-top:2px}
+}

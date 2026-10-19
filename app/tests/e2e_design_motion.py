@@ -48,7 +48,7 @@ with sync_playwright() as p:
     ok(sh == '340ms', f'2 {w}: sheets {sh}')
     tw = pg.evaluate("(()=>{const i=document.querySelector('.ask-fab-ic i'); return i?getComputedStyle(i).animationIterationCount:null})()")
     ok(tw == '3', f'3 {w}: the Sweep AI star twinkles {tw} rounds, then stops')
-    kf = pg.evaluate("""(()=>{const out={};for(const sh of document.styleSheets){let rs;try{rs=sh.cssRules}catch(e){continue}for(const r of rs){if(r.type===7&&['wr-fill','shimmer','nav-sk','sc-sh','sw-rise'].includes(r.name))out[r.name]=r.cssText}}return out})()""")
+    kf = pg.evaluate("""(()=>{const out={};const all=[];const walk=(l)=>{for(const r of l){all.push(r);if(r.cssRules&&r.type!==7)walk(r.cssRules)}};for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(e){}}for(const r of all){if(r.type===7&&['wr-fill','shimmer','nav-sk','sc-sh','sw-rise'].includes(r.name))out[r.name]=r.cssText}return out})()""")
     bad = {k: v for k, v in kf.items() if re.search(r'width|background-position|filter', v)}
     ok(len(kf) >= 4 and not bad, f'4 {w}: {sorted(kf)} move only transform / opacity ({list(bad)})')
     allerr += errs; c.close()
@@ -58,7 +58,7 @@ with sync_playwright() as p:
   allerr += errs; c.close()
   # (Chromium has no switch for « reduce transparency » / « more contrast »: the rules are read from the style sheets)
   c, pg, errs = page(br, 390, True)
-  mq = pg.evaluate("""(()=>{const o={t:'',c:''};for(const sh of document.styleSheets){let rs;try{rs=sh.cssRules}catch(e){continue}for(const r of rs){if(r.type===4&&/reduced-transparency/.test(r.conditionText))o.t+=r.cssText;if(r.type===4&&/prefers-contrast/.test(r.conditionText))o.c+=r.cssText}}return o})()""")
+  mq = pg.evaluate("""(()=>{const o={t:'',c:''};const all=[];const walk=(l)=>{for(const r of l){all.push(r);if(r.cssRules&&r.type!==4&&r.type!==7)walk(r.cssRules)}};for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(e){}}for(const r of all){if(r.type===4&&/reduced-transparency/.test(r.conditionText))o.t+=r.cssText;if(r.type===4&&/prefers-contrast/.test(r.conditionText))o.c+=r.cssText}return o})()""")
   ok('bottomnav' in mq['t'] and 'backdrop-filter: none' in mq['t'] and '.evp' in mq['t'], '6 reduce transparency: the bottom bar and the sheets turn opaque, without blur')
   ok('--faint: var(--muted)' in mq['c'] and '--hair: var(--line2)' in mq['c'], '7 more contrast: stronger grey and lines')
   allerr += errs; c.close()

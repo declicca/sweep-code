@@ -1,3 +1,4 @@
+@layer legacy{
 /* Sweep — « Your coach » (brief 03 step 2): Today, the trade's page, the plan sheet. Blue = what was right, gold = what to improve. */
 .co{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
 .co-h{display:flex;align-items:center;gap:10px;min-width:0}
@@ -81,3 +82,4 @@ html body #main .nav-rt.closed-rt > .co-today{display:none}
 .co-full > summary::-webkit-details-marker{display:none}
 .co-full > summary::after{content:' ▾'}.co-full[open] > summary::after{content:' ▴'}
 .s2-more{margin-top:10px}
+}

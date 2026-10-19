@@ -1,3 +1,4 @@
+@layer legacy{
 /* Sweep — first-run guidance: tour, page tips, get-started checklist, help center */
 body.gd-lock{overflow:hidden}
 .gd-hbtn{width:36px;height:36px;border:0;border-radius:50%;display:inline-grid;place-items:center;background:transparent;color:var(--text2);cursor:pointer;flex-shrink:0;transition:background .2s var(--ease-ios),transform .2s var(--ease-ios)}
@@ -48,3 +49,4 @@ body.gd-lock{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.gd-panel{transition:none}.gd-art{animation:none}}
 .gd-hbtn[hidden]{display:none}
 /* re-inserted after an app re-render: no second entrance */
+}
