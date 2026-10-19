@@ -6,7 +6,7 @@
 .nt-bell svg{width:19px;height:19px}
 .nt-bell:hover{color:var(--text);background:var(--hover)}
 .nt-bell:active{transform:scale(.92)}
-.nt-badge{position:absolute;top:-3px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--pos);color:var(--btntext);font:600 11px/18px var(--font-ui,inherit);text-align:center;box-shadow:0 0 0 2px var(--bg);pointer-events:none}
+.nt-badge{position:absolute;top:-3px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:var(--r-pill);background:var(--pos);color:var(--btntext);font:600 11px/18px var(--font-ui,inherit);text-align:center;box-shadow:0 0 0 2px var(--bg);pointer-events:none}
 .side .nt-bell{display:none}
 @media (max-width:860px){
   .top .nt-bell{display:none}
@@ -24,12 +24,12 @@
 .nt-x{width:32px;height:32px;border-radius:50%;border:0;display:grid;place-items:center;background:var(--panel2);color:var(--text);cursor:pointer}
 .nt-x svg{width:15px;height:15px}
 .nt-grp h3{margin:14px 4px 6px;font-size:13px;font-weight:500;color:var(--muted)}
-.nt-grp ul{list-style:none;margin:0;padding:0;border-radius:16px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.nt-grp ul{list-style:none;margin:0;padding:0;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
 .nt-grp li+li .nt-item{border-top:1px solid var(--line)}
 .nt-item{display:grid;grid-template-columns:36px minmax(0,1fr) 8px;gap:12px;align-items:start;width:100%;padding:12px 14px;border:0;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background var(--dur-2,.22s) var(--ease-ios)}
 .nt-item:hover{background:var(--hover)}
 .nt-item:active{background:var(--hover);transform:scale(.99)}
-.nt-ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--panel);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.nt-ic{width:36px;height:36px;border-radius:14px;display:grid;place-items:center;background:var(--panel);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
 .nt-ic svg{width:18px;height:18px}
 .nt-ic.cel{background:var(--posbg);color:var(--pos);box-shadow:none}
 .nt-ic.caution{background:var(--negbg);color:var(--neg);box-shadow:none}
@@ -50,12 +50,12 @@
 /* Celebration modal: once per app open */
 .nt-modal{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:24px}
 .nt-mbg{position:absolute;inset:0;background:rgba(3,6,12,.45);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;transition:opacity .25s var(--ease-ios)}
-.nt-mcard{position:relative;width:min(360px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 24px 20px;border-radius:24px;background:var(--panel);box-shadow:0 40px 90px -30px rgba(0,0,0,.6),inset 0 0 0 1px var(--line);opacity:0;transform:translateY(14px) scale(.96);transition:opacity .3s var(--ease-ios),transform .4s var(--ease-ios)}
+.nt-mcard{position:relative;width:min(360px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 24px 20px;border-radius:26px;background:var(--panel);box-shadow:0 40px 90px -30px rgba(0,0,0,.6),inset 0 0 0 1px var(--line);opacity:0;transform:translateY(14px) scale(.96);transition:opacity .3s var(--ease-ios),transform .4s var(--ease-ios)}
 .nt-modal.in .nt-mbg{opacity:1}
 .nt-modal.in .nt-mcard{opacity:1;transform:none}
 .nt-mic{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;margin-bottom:6px;background:radial-gradient(circle at 50% 35%,rgba(var(--pos-rgb),.28),rgba(var(--pos-rgb),.1));color:var(--pos);box-shadow:0 0 0 6px rgba(var(--pos-rgb),.06)}
 .nt-mic svg{width:28px;height:28px}
-.nt-mcard h2{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
+.nt-mcard h2{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
 .nt-mcard p{margin:0;color:var(--muted);line-height:1.5;font-size:15px;text-wrap:pretty}
 .nt-macts{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:100%;margin-top:14px}
 .nt-macts .btn{justify-content:center;min-height:46px;font-size:15px}

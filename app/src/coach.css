@@ -3,10 +3,10 @@
 .co{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
 .co-h{display:flex;align-items:center;gap:10px;min-width:0}
 .co-h b{font-size:15px;font-weight:600}
-.co-h small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.co-h small{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .co-ic{display:grid;place-items:center;flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--posbg);color:var(--pos)}
 .co-ic svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.co p{margin:0;font-size:14.5px;line-height:1.45}
+.co p{margin:0;font-size:15px;line-height:1.45}
 .co-ok{display:flex;gap:8px;align-items:flex-start;color:var(--text)}
 .co-ok svg{flex:0 0 auto;width:16px;height:16px;margin-top:2px;fill:none;stroke:var(--pos);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .co-fix{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:var(--r-tile,14px);background:rgba(var(--neg-rgb),.10);box-shadow:inset 3px 0 0 var(--neg)}
@@ -15,7 +15,7 @@
 .co-fix.co-none{background:var(--posbg);box-shadow:inset 3px 0 0 var(--pos)}
 .co-ses{color:var(--text2,var(--text))}
 .co-ses.co-stop{font-weight:600;color:var(--text)}
-.co-ses.muted{color:var(--muted);font-size:13.5px}
+.co-ses.muted{color:var(--muted);font-size:14px}
 /* Today: inside the routine card, between its figures and its 3 steps — a banner the card's full width, not a card in the card;
    it folds with the steps (15 Oct.) */
 html body #main .nav-rt > .co-today{grid-column:1/-1;width:auto;max-width:none;margin:0;padding:14px 16px;border:0!important;border-radius:var(--r-tile,20px)!important;background:var(--fill)!important;box-shadow:none!important}
@@ -31,13 +31,13 @@ html body #main .nav-rt.closed-rt > .co-today{display:none}
 .co-rule b{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--pos)}
 .co-rule span{font-weight:600}
 /* the habit of the week, under what the coach says */
-.co-habit{padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px!important}
+.co-habit{padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:14px!important}
 /* starting out: the why under the fix · Sweep AI, at the coach's place */
 .co-why{margin-top:4px;color:var(--muted);font-size:13px}
 .co-ai{display:flex}
 .co-ai .ai-btn{min-height:40px}
 /* before a trade, in the two add forms: the signal of the moment, his own number, what is left */
-.co-before{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;padding:10px 12px;border-radius:var(--r-tile,14px);background:var(--fill);font-size:13.5px;line-height:1.45}
+.co-before{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;padding:10px 12px;border-radius:var(--r-tile,14px);background:var(--fill);font-size:14px;line-height:1.45}
 .co-before .co-ic{width:24px;height:24px}.co-before .co-ic svg{width:14px;height:14px}
 .co-before b{font-weight:600}.co-before > div > span{color:var(--muted)}
 .co-before p{margin:4px 0 0}
@@ -63,11 +63,11 @@ html body #main .nav-rt.closed-rt > .co-today{display:none}
 .co-row b{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--muted)}
 .co-stats{margin-bottom:16px}
 .co-prog{display:flex;flex-direction:column;gap:10px;padding-top:10px;border-top:1px solid var(--line)}
-.co-prog-h{display:flex;flex-direction:column;gap:2px;margin:0}.co-prog-h b{font-size:14px}.co-prog-h small{color:var(--muted);font-size:12.5px}
+.co-prog-h{display:flex;flex-direction:column;gap:2px;margin:0}.co-prog-h b{font-size:14px}.co-prog-h small{color:var(--muted);font-size:13px}
 .co-pr{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0}
-.co-pr-t{display:flex;flex-direction:column;gap:2px;min-width:0}.co-pr-t b{font-size:14px;font-weight:600}.co-pr-t small{color:var(--muted);font-size:12.5px}
+.co-pr-t{display:flex;flex-direction:column;gap:2px;min-width:0}.co-pr-t b{font-size:14px;font-weight:600}.co-pr-t small{color:var(--muted);font-size:13px}
 .co-bars{display:flex;align-items:flex-end;gap:4px;height:34px;flex:0 0 auto}
-.co-bars i{display:block;width:8px;height:var(--h);border-radius:3px;background:var(--pos)}
+.co-bars i{display:block;width:8px;height:var(--h);border-radius:10px;background:var(--pos)}
 .co-bars i.none{background:var(--line)}
 .co-stats .co-h{flex-wrap:wrap;row-gap:2px}.co-stats .co-h small{flex-basis:100%;padding-left:38px;white-space:normal}
 /* the trade's page: « Answer your coach », then the full review folded */

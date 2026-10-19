@@ -2,7 +2,8 @@
 Sweep — design « iOS 27 », lot 3: motion, with Playwright:
   python3 tests/e2e_design_motion.py http://127.0.0.1:8095 /tmp/show_state.json
 Uses the signed-in trader's sample data; changes nothing. Phone 390 and computer 1300, dark.
- 1  one curve: on the main pages, at least 97 % of the transitions use cubic-bezier(.32,.72,0,1)
+ 1  one curve: on the main pages, at least 97 % of the transitions use the site's spring (--spring: linear(…), or
+    cubic-bezier(.32,.72,0,1) where the browser has no linear(); design chantier, step 5)
  2  short: no transition over 350 ms on the main pages; sheets 340 ms; the page entrance ≤ 350 ms
  3  the decorative loops stop by themselves (the Sweep AI star: 3 rounds, not forever)
  4  transform / opacity: Wrapped's story bar scales (no width), the skeletons breathe in opacity, the entrance has no blur
@@ -28,7 +29,7 @@ def page(br, w, phone, **kw):
 
 SCAN = r"""()=>{let n=0,one=0;const long=[];for(const e of document.querySelectorAll('body *')){const s=getComputedStyle(e);if(s.transitionDuration==='0s')continue;
   const du=s.transitionDuration.split(', ').map(x=>parseFloat(x)*(x.endsWith('ms')?1:1000)), tf=s.transitionTimingFunction.split(/,\s(?![^(]*\))/), pr=s.transitionProperty.split(', ');
-  du.forEach((d,i)=>{if(!d||pr[i%pr.length]==='visibility')return;n++;if((tf[i%tf.length]||'')==='cubic-bezier(0.32, 0.72, 0, 1)')one++;if(d>350)long.push([(e.className&&e.className.baseVal!==undefined?e.className.baseVal:e.className)+'',pr[i%pr.length],d])})}
+  du.forEach((d,i)=>{if(!d||pr[i%pr.length]==='visibility')return;n++;if(/^linear\(0(?: 0%)?, 0\.023(?: 2\.5%)?, 0\.08|^cubic-bezier\(0\.32, 0\.72, 0, 1\)$/.test(tf[i%tf.length]||''))one++;if(d>350)long.push([(e.className&&e.className.baseVal!==undefined?e.className.baseVal:e.className)+'',pr[i%pr.length],d])})}
   return {n,one,long:long.slice(0,6)}}"""
 
 with sync_playwright() as p:

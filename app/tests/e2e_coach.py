@@ -182,6 +182,8 @@ def run(p, lang, phone):
   rule = pg.evaluate("(d) => SweepCoach.lesson(d).rule", day)
   ok(x['lesson'] in d1 and rule and rule in d1, f'{tag} D reviewed: Today shows the lesson and the rule for tomorrow ({rule})')
   nx = pg.evaluate("(d) => { const n = new Date(d + 'T12:00:00'); do n.setDate(n.getDate() + 1); while (n.getDay() === 0 || n.getDay() === 6); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}` }", day)
+  # the « day swept » celebration can come up after the review: closed like the trader would (« Continue »)
+  pg.wait_for_timeout(600); pg.evaluate("document.querySelectorAll('.g-sweep [data-g=sw-close]').forEach((b) => b.click())"); pg.wait_for_timeout(400)
   pg.evaluate("(d) => SweepGame.openPlan(d)", nx); pg.wait_for_selector('#gSheet [data-g=save-plan]', timeout=6000); pg.wait_for_timeout(400)
   rv2 = pg.evaluate("(document.querySelector('#gSheet [data-gp=rule]') || {}).value")
   pg.locator('#gSheet [data-g=save-plan]').click(); pg.wait_for_timeout(700)

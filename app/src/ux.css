@@ -7,7 +7,7 @@
  *   motion   --sw-ease (iOS curve) · --sw-spring (small overshoot) · durations 150 / 250 / 400 ms
  */
 :root{--sw-r1:4px;--sw-r2:8px;--sw-r3:12px;--sw-r4:16px;--sw-r5:20px;--sw-r6:24px;--sw-pill:999px;
-  --sw-ease:cubic-bezier(.32,.72,0,1);--sw-d1:150ms;--sw-d2:250ms;--sw-d3:400ms}
+  --sw-d1:150ms;--sw-d2:250ms;--sw-d3:400ms}
 /*
  * Sweep — experience layer (design system polish, motion, mobile ergonomics, performance).
  * Loaded after app.css. Everything here is additive: no existing class is renamed.
@@ -54,20 +54,20 @@ img,svg{-webkit-user-drag:none}
 /* ───────────── 5. "More" menu → native-feeling bottom sheet (phone) ───────────── */
 @media (max-width:860px){
   .sheet-bg{background:rgba(3,6,12,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-  .sheet-panel{left:10px;right:10px;bottom:calc(86px + env(safe-area-inset-bottom,0));width:auto;border-radius:24px;padding:20px 10px 10px;
+  .sheet-panel{left:10px;right:10px;bottom:calc(86px + env(safe-area-inset-bottom,0));width:auto;border-radius:26px;padding:20px 10px 10px;
     display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 2px;transform-origin:50% 100%;
     background:color-mix(in srgb,var(--panel) 92%,transparent);box-shadow:0 30px 80px -20px rgba(0,0,0,.65),inset 0 1px 0 var(--hi,transparent)}
-  .sheet-panel::before{content:"";position:absolute;top:8px;left:50%;width:36px;height:5px;margin-left:-16px;border-radius:999px;background:var(--line2)}
+  .sheet-panel::before{content:"";position:absolute;top:8px;left:50%;width:36px;height:5px;margin-left:-16px;border-radius:var(--r-pill);background:var(--line2)}
   /* first group = app tiles */
-  .sheet-panel>a{flex-direction:column;justify-content:flex-start;gap:8px;padding:10px 2px 8px;border-radius:16px;font-size:12px;text-align:center;line-height:1.2;color:var(--text2)}
-  .sheet-panel>a svg{width:46px;height:46px;padding:12px;border-radius:16px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text2);transition:transform .25s var(--ease-ios),background .2s var(--ease-ios)}
+  .sheet-panel>a{flex-direction:column;justify-content:flex-start;gap:8px;padding:10px 2px 8px;border-radius:14px;font-size:12px;text-align:center;line-height:1.2;color:var(--text2)}
+  .sheet-panel>a svg{width:46px;height:46px;padding:12px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text2);transition:transform .25s var(--ease-ios),background .2s var(--ease-ios)}
   .sheet-panel>a.on{background:transparent}
   .sheet-panel>a.on svg{background:var(--posbg);color:var(--pos)!important;box-shadow:none}
   .sheet-panel>a:active{background:transparent;transform:none}
   .sheet-panel>a:active svg{transform:scale(.88)}
   /* after the divider = settings rows, full width */
   .sheet-panel hr{grid-column:1/-1;margin:6px 6px}
-  .sheet-panel hr~a,.sheet-panel hr~button{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;font-size:15px;text-align:left;border-radius:16px}
+  .sheet-panel hr~a,.sheet-panel hr~button{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;font-size:15px;text-align:left;border-radius:14px}
   .sheet-panel hr~a svg{width:20px;height:20px;padding:0;border-radius:0;background:none;box-shadow:none}
   .sheet-panel hr~a.on svg{background:none}
   .sheet-panel hr~a:active,.sheet-panel hr~button:active{background:var(--hover)}
@@ -128,7 +128,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 /* ───────────── 11. Payouts & expenses ───────────── */
 .pz-form{display:flex;flex-direction:column;gap:14px}
 .pz-st{align-self:flex-start;max-width:100%}
-.pz-st label{position:relative;display:inline-flex;align-items:center;padding:8px 16px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:450;white-space:nowrap;transition:background-color .2s var(--ease-ios),color .2s var(--ease-ios),box-shadow .2s var(--ease-ios);-webkit-tap-highlight-color:transparent}
+.pz-st label{position:relative;display:inline-flex;align-items:center;padding:8px 16px;border-radius:var(--r-pill);cursor:pointer;color:var(--muted);font-weight:450;white-space:nowrap;transition:background-color .2s var(--ease-ios),color .2s var(--ease-ios),box-shadow .2s var(--ease-ios);-webkit-tap-highlight-color:transparent}
 .pz-st label input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
 .pz-st label.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--line)}
 .pz-st label:has(input:focus-visible){outline:2px solid var(--pos);outline-offset:1px}
@@ -152,7 +152,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 .pz-main b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pz-main small{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pz-right{display:flex;align-items:center;gap:10px}
-.pz-amt-v{font-family:var(--font-num,'Geist Mono',ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:600;font-size:14.5px;letter-spacing:-.02em}   /* (var(--mono) did not exist: the system's monospace) */
+.pz-amt-v{font-family:var(--font-num,'Geist Mono',ui-monospace,monospace);font-variant-numeric:tabular-nums;font-weight:600;font-size:15px;letter-spacing:-.02em}   /* (var(--mono) did not exist: the system's monospace) */
 .pz-pill{background:var(--panel2);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
 .pz-pill.paid{background:var(--posbg);color:var(--pos);box-shadow:none}
 .pz-pill.requested,.pz-pill.approved,.pz-pill.planned{background:var(--negbg);color:var(--neg);box-shadow:none}
@@ -206,7 +206,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 
 /* ───────────── 15. Journal: news of the day ───────────── */
 .ux-news{display:flex;flex-direction:column;gap:10px}
-.ux-ev{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:16px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
+.ux-ev{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)}
 .ux-ev-h{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:8px}
 .ux-ev-h b{font-weight:500;font-size:14px;min-width:0}
 .ux-ev-h small{grid-column:1/-1;color:var(--muted);font-size:12px}
@@ -227,7 +227,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 .rf-hero h2{font-size:clamp(24px,2.4vw,36px);letter-spacing:-.03em;line-height:1.1;text-wrap:balance}
 .rf-hero p{max-width:52ch}
 .rf-steps{display:grid;gap:10px;margin:0;padding:0;list-style:none}
-.rf-steps li{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);line-height:1.45}
+.rf-steps li{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);line-height:1.45}
 .rf-steps li>span{flex-shrink:0;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--posbg);color:var(--pos);font-weight:600;font-size:13px}
 .rf-list{border-radius:20px}
 .fb-next{padding:20px 24px;border-radius:20px}
@@ -258,7 +258,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 /* ───────────── 20. empty states ───────────── */
 .ux-empty{display:flex;flex-direction:column;align-items:center;gap:12px;margin:4px 0 16px;padding:24px 20px;border-radius:20px;text-align:center;background:radial-gradient(120% 100% at 50% 0%,rgba(var(--pos-rgb),.12),transparent 70%),var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
 .ux-empty p{margin:0;max-width:42ch;font-size:15px;line-height:1.5;color:var(--text2)}
-.ux-e-ic{width:44px;height:44px;border-radius:16px;display:grid;place-items:center;background:var(--posbg);color:var(--pos)}
+.ux-e-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--posbg);color:var(--pos)}
 .ux-e-ic svg{width:22px;height:22px}
 .ux-e-acts{display:flex;flex-direction:column;align-items:center;gap:10px}
 .ux-e-acts .link{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:14px}
@@ -269,16 +269,16 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 /* ───────────── 21. admin dashboard ───────────── */
 .ux-metrics{margin-bottom:24px}
 .ux-mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.ux-m{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:16px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.ux-m{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:14px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
 .ux-m small{font-size:12px;color:var(--muted);line-height:1.35}
 .ux-m b{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .ux-m span{font-size:12px;color:var(--text2)}
 .ux-m.big{grid-column:span 2;background:radial-gradient(120% 120% at 0% 0%,rgba(var(--pos-rgb),.18),transparent 60%),var(--panel)}
-.ux-m.big b{font-size:36px;color:var(--pos)}
+.ux-m.big b{font-size:34px;color:var(--pos)}
 @media (max-width:600px){.ux-m.big{grid-column:1/-1}}
 .ux-mlists{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}
 .ux-mlists h4{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.ux-mlists ul{list-style:none;margin:0;padding:0;border-radius:16px;box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.ux-mlists ul{list-style:none;margin:0;padding:0;border-radius:14px;box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
 .ux-mlists li{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-top:1px solid var(--line);font-size:14px}
 .ux-mlists li:first-child{border-top:0}
 .ux-mlists li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -310,7 +310,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 
 /* ───────────── 24. setup chips ───────────── */
 .ux-setups{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 14px}
-.ux-setup{min-height:34px;padding:0 12px;border:0;border-radius:999px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text2);font:inherit;font-size:14px;cursor:pointer;transition:background .18s var(--ease-ios),color .18s var(--ease-ios),box-shadow .18s var(--ease-ios),transform .18s var(--ease-ios)}
+.ux-setup{min-height:34px;padding:0 12px;border:0;border-radius:var(--r-pill);background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text2);font:inherit;font-size:14px;cursor:pointer;transition:background .18s var(--ease-ios),color .18s var(--ease-ios),box-shadow .18s var(--ease-ios),transform .18s var(--ease-ios)}
 .ux-setup:active{transform:scale(.95)}
 .ux-setup.mine{color:var(--text);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pos) 35%,var(--line))}
 .ux-setup.on{background:var(--pos);box-shadow:none}
@@ -321,7 +321,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 
 .ux-empty h3{margin:2px 0 -4px;font-size:17px;font-weight:600;letter-spacing:-.01em}
 /* prop firm presets picker */
-.ux-pk{margin:0 0 14px;padding:14px;border-radius:16px;background:var(--panel2)}
+.ux-pk{margin:0 0 14px;padding:14px;border-radius:14px;background:var(--panel2)}
 .ux-pk-title{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--text2)}
 
 
@@ -330,7 +330,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 
 .ux-pk-rules{margin:12px 0 0;font-size:13px;line-height:1.7;color:var(--text2)}
 .ux-pk-rules b{color:var(--text);font-variant-numeric:tabular-nums}
-.ux-pk-note{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
+.ux-pk-note{margin:4px 0 0;font-size:13px;color:var(--muted)}
 .ux-pk-when{margin:6px 0 0;font-size:12px;color:var(--muted)}
 .ux-pk [data-pk-apply]{margin-top:12px}
 /* ───── add an account: guided steps ───── */
@@ -338,13 +338,13 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 .ux-st .ux-pk-title{margin:0 0 8px}
 .ux-st-q{margin:4px 0 12px;font-size:17px;font-weight:600;letter-spacing:-.01em}
 .ux-st-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 0 6px}
-.ux-st-crumbs button{border:0;background:var(--panel);color:var(--text);font:inherit;font-size:13px;font-weight:500;padding:6px 10px;border-radius:999px;min-height:32px;cursor:pointer}
+.ux-st-crumbs button{border:0;background:var(--panel);color:var(--text);font:inherit;font-size:13px;font-weight:500;padding:6px 10px;border-radius:var(--r-pill);min-height:32px;cursor:pointer}
 .ux-st-crumbs span{color:var(--muted);font-size:13px}
 .ux-st-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 @media (min-width:861px){.ux-st-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .ux-st-tile{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:68px;border-radius:14px;border:0;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:transform var(--sw-d1) ease,box-shadow var(--sw-d1) ease}
 .ux-st-tile b{font-weight:600}
-.ux-st-tile small{font-size:11.5px;color:var(--muted);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ux-st-tile small{font-size:12px;color:var(--muted);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .ux-st-tile.ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--line);border:1px dashed transparent}
 .ux-st-tile:active,.ux-st-row:active,.ux-st-size:active{transform:scale(.97)}
 @media (hover:hover){.ux-st-tile:hover,.ux-st-row:hover,.ux-st-size:hover{box-shadow:inset 0 0 0 1.5px var(--pos)}}
@@ -353,13 +353,13 @@ input,select,textarea{transition:border-color var(--dur-2) var(--ease-out),box-s
 .ux-st-row b{grid-column:1;font-size:15px;font-weight:600}
 .ux-st-row b em{font-style:normal;font-size:11px;font-weight:600;color:var(--pos);margin-left:4px}
 .ux-st-row b .ux-st-after{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-top:1px}   /* « after the Trading Combine », under the funded account's name */
-.ux-st-row small{grid-column:1;font-size:12.5px;color:var(--muted);line-height:1.4}
+.ux-st-row small{grid-column:1;font-size:13px;color:var(--muted);line-height:1.4}
 .ux-st-row i{grid-column:2;grid-row:1 / span 2;font-style:normal;font-size:20px;color:var(--muted)}
 .ux-st-sizes{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
 .ux-st-size{min-height:52px;border-radius:14px;border:0;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);color:var(--text);font:inherit;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer}
 .ux-st-phase{margin:6px 0 4px;width:100%}
 .ux-st-phase button{flex:1}
-.ux-st-opt{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 0;min-height:44px;padding:8px 12px;border-radius:12px;background:var(--panel);font-size:13.5px;cursor:pointer}
+.ux-st-opt{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 0;min-height:44px;padding:8px 12px;border-radius:14px;background:var(--panel);font-size:14px;cursor:pointer}
 .ux-st-sum .ux-pk-rules{margin-top:10px}
 .ux-st [data-pk-apply]{margin-top:12px;width:100%}
 .ux-st-manualback{grid-column:1/-1;justify-self:start;margin:0 0 6px}
@@ -380,7 +380,7 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .ux-st-fold{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;padding:12px 16px;border:0;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--text);font:inherit;text-align:left;cursor:pointer}
 .ux-st-fold span{display:flex;flex-direction:column;gap:2px}
 .ux-st-fold b{font-size:14px;font-weight:600}
-.ux-st-fold small{font-size:12.5px;color:var(--muted)}
+.ux-st-fold small{font-size:13px;color:var(--muted)}
 .ux-st-fold i{font-style:normal;font-size:20px;color:var(--muted)}
 @media (hover:hover){.ux-st-fold:hover{box-shadow:inset 0 0 0 1.5px var(--pos)}}
 @media (min-width:861px){
@@ -394,7 +394,7 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 /* the first question: three choices, live put forward */
 @media (max-width:860px){.ux-st-ph{grid-template-columns:1fr!important}}
 .ux-st-live{box-shadow:inset 0 0 0 1.5px rgba(var(--pos-rgb),.45)!important}
-.ux-st-live em{margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--neg);color:#111;font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.06em;vertical-align:2px;}   /* « REAL MONEY » never cut in two (R23) */
+.ux-st-live em{margin-left:6px;padding:1px 7px;border-radius:var(--r-pill);background:var(--neg);color:#111;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;vertical-align:2px;}   /* « REAL MONEY » never cut in two (R23) */
 .ux-st-ph .ux-st-tile small{display:block;-webkit-line-clamp:unset;overflow:visible;white-space:normal}
 .ux-st-live em{text-transform:uppercase}
 .ux-st-note{display:block;margin-top:6px;font-size:12px;color:var(--muted);line-height:1.45}
@@ -406,7 +406,7 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .ux-st-cl{margin:0 0 6px;font-size:13px;font-weight:600}
 .ux-st-cl small{font-weight:400;color:var(--muted)}
 .ux-st-choice .ux-st-note{display:block;margin-top:6px}
-.ux-newrules{margin:12px 0;padding:16px;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--pos)}
+.ux-newrules{margin:12px 0;padding:16px;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--pos)}
 .ux-newrules>b{font-size:15px}
 .ux-newrules p{margin:4px 0 10px;font-size:13px}
 .ux-newrules ul{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
@@ -414,15 +414,15 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .ux-newrules li s{color:var(--muted)}
 .ux-newrules-a{display:flex;gap:8px;flex-wrap:wrap}
 .ux-presets-admin .sec-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.ux-pr-alert{margin:8px 0 12px;padding:12px 14px;border-radius:12px;background:rgba(220,38,38,.12);box-shadow:inset 0 0 0 1.5px #dc2626;color:#dc2626;font-weight:600;font-size:13px}
+.ux-pr-alert{margin:8px 0 12px;padding:12px 14px;border-radius:14px;background:rgba(220,38,38,.12);box-shadow:inset 0 0 0 1.5px #dc2626;color:#dc2626;font-weight:600;font-size:13px}
 .ux-pr-last{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin:6px 0 10px}
 .ux-pr-list{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:8px}
-.ux-pr-list li{padding:10px 12px;border-radius:12px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.ux-pr-list li{padding:10px 12px;border-radius:14px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
 .ux-pr-list li>div{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .ux-pr-list small{display:block;color:var(--muted);font-size:12px}
 .ux-pr-list li>div small{display:inline}
 .ux-pr-list small.neg{color:#dc2626;margin-top:4px}
-.ux-pr-chip{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;box-shadow:inset 0 0 0 1px var(--line)}
+.ux-pr-chip{font-size:11px;font-weight:600;padding:2px 8px;border-radius:var(--r-pill);box-shadow:inset 0 0 0 1px var(--line)}
 .ux-pr-updated .ux-pr-chip{color:var(--pos);box-shadow:inset 0 0 0 1px var(--pos)}
 .ux-pr-review .ux-pr-chip,.ux-pr-error .ux-pr-chip{color:#dc2626;box-shadow:inset 0 0 0 1px #dc2626}
 .ux-pr-list details{margin-top:4px;font-size:12px}
@@ -431,7 +431,7 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 /* import: accounts of the file → Sweep accounts; fees not included */
 .ux-imap{margin-top:12px;padding:14px 16px;display:grid;gap:10px}
 .ux-imap p{margin:0;font-size:13px}
-.ux-inofee{margin:6px 0 10px;padding:10px 12px;border-radius:12px;font-size:13px;color:var(--text2,var(--muted));box-shadow:inset 0 0 0 1px var(--line)}
+.ux-inofee{margin:6px 0 10px;padding:10px 12px;border-radius:14px;font-size:13px;color:var(--text2,var(--muted));box-shadow:inset 0 0 0 1px var(--line)}
 
 /* 30. Automatic sync: Settings › Data › Connections, the sync sheet, account and trade pages */
 .sy-card{display:grid;gap:12px}
@@ -446,7 +446,7 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .sy-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--faint);flex-shrink:0}
 .sy-dot.on{background:var(--pos)}
 .sy-dot.err{background:var(--neg)}
-.sy-chip{font-style:normal;font-size:12px;line-height:1;padding:4px 8px;border-radius:999px;background:var(--panel2);color:var(--text2);box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
+.sy-chip{font-style:normal;font-size:12px;line-height:1;padding:4px 8px;border-radius:var(--r-pill);background:var(--panel2);color:var(--text2);box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
 .sy-err{color:var(--neg);font-size:13px;line-height:1.45}
 .sy-found{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;background:var(--posbg);color:var(--text)}
 .sy-found span{font-weight:500;font-size:14px}
