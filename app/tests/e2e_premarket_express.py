@@ -35,7 +35,7 @@ with sync_playwright() as p:
     pg.goto(B + '/#dashboard'); until(pg, 'window.SweepFiche && SweepFiche.maybeExpress && window.S && S.journals'); pg.wait_for_timeout(2500)
     ok(pg.locator('#gSheet [data-pm-screen=express]').count() == 0, f'1 {w}: no sheet ever made: nothing opens by itself')
     pg.evaluate(PREV, prev); pg.wait_for_timeout(800)
-    pg.reload(); until(pg, 'window.SweepFiche && window.S && S.journals'); pg.wait_for_timeout(500); pg.clock.run_for(3000); until(pg, "document.querySelector('#gSheet [data-pm-screen=express]')", 6000)
+    pg.reload(); until(pg, 'window.SweepFiche && window.S && S.journals'); pg.wait_for_timeout(500); pg.clock.run_for(3000); until(pg, "document.querySelector('#gSheet [data-pm-screen=express]')", 15000)
     ok(pg.locator('#gSheet [data-pm-screen=express]').count() == 1 and 'Plan express' in pg.locator('#gSheet').inner_text(), f'1 {w}: after the lock time, without a sheet: the express version opens by itself')
     # 2. level, direction, target
     pg.click('#gSheet [data-q="X_dir"][data-v="long"]'); pg.wait_for_timeout(150)
@@ -56,7 +56,7 @@ with sync_playwright() as p:
     # 3. « Later » the next day
     y, m, d = map(int, later.split('-'))
     pg.clock.set_fixed_time(dt.datetime(y, m, d, 10, 0, tzinfo=NY)); pg.reload(); until(pg, 'window.SweepFiche && window.S && S.journals'); pg.wait_for_timeout(2500)
-    until(pg, "document.querySelector('#gSheet [data-pm-screen=express]')", 6000)
+    until(pg, "document.querySelector('#gSheet [data-pm-screen=express]')", 15000)   # (19 Oct., GitHub: 6 s after the reload were not always enough)
     ok(pg.locator('#gSheet [data-pm-screen=express]').count() == 1, f'3 {w}: the next day, after the lock time: the express version again')
     pg.click('#gSheet [data-pm="later"]'); pg.wait_for_timeout(400)
     doc = pg.evaluate("(d) => SweepFiche.markTrade({ id: 'x', date: d, instrument: 'MES' })", later)
