@@ -24,9 +24,10 @@ L'audit cherche donc ce que ces tests ne voient pas.
 
 - Étape 1 (faits faux, textes légaux), étape 2 (ce que le site ne disait pas), étape 3 (textes et traductions) : faites.
 - Étape 4 : 4a serveur et performance, 4b accessibilité et visuel, 4c SEO : faites ; aussi une CSP sur les pages et le préchargement de Geist Mono.
-- Reste à Mateo : les 5 décisions ci-dessous (Quantower, captures en Free, comptes Pro, synchro Rithmic/Tradovate, bleu des boutons), la compression du serveur (cPanel › Optimiser le site Web › Compresser tout le contenu), l'installation de `ffmpeg` pour réencoder la vidéo de l'accueil.
+- Vidéo de l'accueil réencodée en 1080p (`ffmpeg`) : WebM 3,8 → 1,5 Mo, MP4 5,6 → 1,8 Mo, même qualité visible.
+- Reste à Mateo : les 5 décisions ci-dessous (Quantower, captures en Free, comptes Pro, synchro Rithmic/Tradovate, bleu des boutons) et la compression du serveur (cPanel › Optimiser le site Web › Compresser tout le contenu).
 - Reste en attente : étape 5 (captures et vidéos de la session App).
-- Laissés volontairement : copies de 300 px des vignettes de téléphone (gain seulement sur les écrans 1x), textes des paires firme contre firme (proches par construction, déjà chiffrés), HSTS `includeSubDomains` (sous-domaines cPanel non vérifiés), Geist Mono réduite aux chiffres (demande d'installer un outil de police ; préchargée en attendant).
+- Laissés volontairement : copies de 300 px des vignettes de téléphone (gain seulement sur les écrans 1x), textes des paires firme contre firme (proches par construction, déjà chiffrés), HSTS `includeSubDomains` (sous-domaines cPanel non vérifiés), Geist Mono réduite (elle n'a que 440 glyphes latins : 1,2 Ko de gagné seulement, et « chiffres seulement » casserait les dates en chasse fixe ; elle est préchargée).
 
 Gravité : **haute** = un fait faux ou un texte légal inexact ; **moyenne** = un manque visible ou une incohérence ; **basse** = de la finition.
 
