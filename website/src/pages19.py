@@ -421,15 +421,18 @@ def _size_cell(s, lang, t):
 def sizes_table(lang, t, f):
     """One firm's account types × sizes: target, max loss, daily loss limit in each cell."""
     sizes = sorted({s["size"] for p in f["programs"] for s in p["sizes"]})
-    head = (f'<thead><tr><th scope="col">{t(T("Account type", "Type de compte", "Tipo de cuenta"))}</th>' + "".join(f'<th scope="col">{kk(z)}</th>' for z in sizes) + "</tr></thead>")
+    head = (f'<thead><tr><th scope="col">{t(T("Account type", "Type de compte", "Tipo de cuenta"))}</th>' + "".join(f'<th scope="col" class="cc c{i}">{kk(z)}</th>' for i, z in enumerate(sizes)) + "</tr></thead>")
     rows = ""
     for p in f["programs"]:
         by = {s["size"]: s for s in p["sizes"]}
         direct = not any((s.get("eval") or {}).get("dd") for s in p["sizes"])
         name = f'<a href="{href(lang, page_of(f))}#{anchor(f, p)}">{p["name"]}</a>' + (f'<br><span class="fine">{t(T("funded directly", "financé direct", "financiada directa"))}</span>' if direct else "")
-        rows += f'<tr><th scope="row">{name}</th>' + "".join(f"<td>{_size_cell(by[z], lang, t) if z in by else DASH}</td>" for z in sizes) + "</tr>"
+        rows += f'<tr><th scope="row">{name}</th>' + "".join(f'<td class="cc c{i}">{_size_cell(by[z], lang, t) if z in by else DASH}</td>' for i, z in enumerate(sizes)) + "</tr>"
+    # on phones, one account size at a time, as on the firm pages (site.js shows the switch; without JavaScript, the whole table)
+    seg = ("" if len(sizes) < 2 else f'<div class="seg sizes" role="group" aria-label="{t(T("Account size","Taille du compte","Tamaño de la cuenta"))}" hidden>'
+           + "".join(f'<button type="button" data-size="{z}" aria-pressed="{"true" if i == 0 else "false"}">{kk(z)}</button>' for i, z in enumerate(sizes)) + "</div>")
     return (f'<h3><a href="{href(lang, page_of(f))}">{f["name"]}</a></h3>'
-            f'<div class="cmp-wrap"><table class="cmp rules sizes n{len(sizes)}">{head}<tbody>{rows}</tbody></table></div>')
+            f'<div class="rules-tbl">{seg}<div class="cmp-wrap"><table class="cmp rules sizes n{len(sizes)}">{head}<tbody>{rows}</tbody></table></div></div>')
 SIZES_HOW = T("In each cell: the profit target (bold), the max loss, then the daily loss limit when the account has one. Evaluation values; for accounts funded directly, the funded account’s.", "Dans chaque case : l’objectif de profit (en gras), la perte max, puis la limite de perte du jour quand le compte en a une. Valeurs de l’évaluation ; pour les comptes financés directement, celles du compte financé.", "En cada casilla: el objetivo de beneficio (en negrita), la pérdida máx. y, si la cuenta lo tiene, el límite de pérdida diaria. Valores de la evaluación; en las cuentas financiadas directamente, los de la cuenta financiada.")
 def page_sizes_guide(lang, t):
     secs = "".join(sizes_table(lang, t, f) for f in presets.FIRMS)
@@ -658,7 +661,11 @@ SYSTEM_PAGES.update(RULE_GUIDES)
 # ---------------------------------------------------------------- firm vs firm (SEO brief, Oct 15, step 4): two firms, the guides' tables side by side
 from pages18 import slug as _slug
 SHORT = {"lucid": "Lucid", "topstep": "Topstep", "apex": "Apex", "tpt": "Take Profit Trader", "mffu": "MyFundedFutures", "alpha": "Alpha Futures"}
-FIRM_VS = [("topstep", "apex"), ("apex", "lucid"), ("topstep", "tpt"), ("topstep", "lucid"), ("apex", "mffu")]
+FIRM_VS = [("topstep", "apex"), ("apex", "lucid"), ("topstep", "tpt"), ("topstep", "lucid"), ("apex", "mffu"),
+           # every other pair of the six firms (Oct 19): the same pages, built from the catalogue
+           ("topstep", "mffu"), ("topstep", "alpha"), ("apex", "tpt"), ("apex", "alpha"), ("lucid", "tpt"), ("lucid", "mffu"), ("lucid", "alpha"),
+           ("tpt", "mffu"), ("tpt", "alpha"), ("mffu", "alpha")]
+ABBR = {"tpt": "TPT", "mffu": "MFFU"}   # what traders type for the long names, used only when a title would be too long
 def vs_page_of(a, b): return f"prop-firms/{_slug(a)}-vs-{_slug(b)}.html"
 NONE_TRACKED = T("none in the rules Sweep tracks", "aucune dans les règles suivies par Sweep", "ninguna en las reglas que sigue Sweep")
 
@@ -754,8 +761,10 @@ def make_firm_vs(a_id, b_id):
         desc = T(f"{a} vs {b}, side by side: account sizes, profit targets, drawdown, consistency, minimum days and payout rules, checked every week.",
                  f"{a} vs {b}, côte à côte : tailles de compte, objectifs, drawdown, consistance, jours minimum et payouts, vérifiés chaque semaine.",
                  f"{a} vs {b}, lado a lado: tamaños de cuenta, objetivos, drawdown, consistencia, días mínimos y payouts, revisados cada semana.")
-        tt = t(title) if len(t(title)) <= 60 else t(title).replace(" (2026)", "")   # long firm names: the year goes
-        return _fr_nbsp(lang, tt, t(desc), hero + b_, ld)
+        short = lambda x: x.replace(a, ABBR.get(a_id, a), 1).replace(b, ABBR.get(b_id, b), 1)   # the short names traders type (TPT, MFFU)
+        tt = next((x for x in (t(title), t(title).replace(" (2026)", ""), short(t(title))) if len(x) <= 60), short(t(title)).replace(" (2026)", ""))   # long names: the year goes first, then the names shorten
+        dd = t(desc) if len(t(desc)) <= 158 else t(desc).replace(a, ABBR.get(a_id, a), 1).replace(b, ABBR.get(b_id, b), 1)
+        return _fr_nbsp(lang, tt, dd, hero + b_, ld)
     return page_slug, page
 
 VS_PAGES = dict(make_firm_vs(a, b) for a, b in FIRM_VS)

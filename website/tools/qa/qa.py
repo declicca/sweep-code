@@ -111,7 +111,8 @@ CHECK = """async (wait) => {
  const sleep = ms => new Promise(r => setTimeout(r, ms));
  for (let y = 0; y < document.documentElement.scrollHeight; y += Math.round(innerHeight * .6)) { scrollTo(0, y); await sleep(45); }
  scrollTo(0, document.documentElement.scrollHeight); await sleep(wait);
- const o = {overflow: document.documentElement.scrollWidth - innerWidth, text: [], hidden: [], broken: [], deformed: []};
+ // a phone widens its layout to fit what overflows (innerWidth grows with it): measure against the screen, not the layout
+ const o = {overflow: Math.max(document.documentElement.scrollWidth, innerWidth) - screen.width, text: [], hidden: [], broken: [], deformed: []};
  const name = e => e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\\s+/).slice(0, 2).join('.') : '') + ' «' + (e.textContent || '').trim().slice(0, 30) + '»';
  const shown = e => { if (!e.offsetParent && getComputedStyle(e).position !== 'fixed') return false; if (e.closest('[hidden],dialog:not([open]),details:not([open]) > :not(summary),.sheet:not(.open)')) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
  const R = document.createRange();
