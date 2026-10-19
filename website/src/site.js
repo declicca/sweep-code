@@ -246,6 +246,17 @@
   // what is already on screen when the script runs shows at once (no blink); the rest rises in as it scrolls into view
   var vh0 = window.innerHeight;
   document.querySelectorAll('.reveal,.final .mark,.stagger,.head').forEach(function(el){ var r = el.getBoundingClientRect(); if(r.top < vh0 && r.bottom > 0) el.classList.add('in'); });
+  if(window.CSS && CSS.supports && CSS.supports('animation-timeline', 'view()')){
+    // the scroll itself drives the reveal (system.css, motion, .sv); here only each card's column in its row, so a row arrives left to right
+    document.documentElement.classList.add('sv');
+    var cols = function(){ document.querySelectorAll('.stagger').forEach(function(g){ var top = null, c = 0;
+      [].forEach.call(g.children, function(ch){ var y = ch.offsetTop; if(top === null || Math.abs(y - top) > 4){ top = y; c = 0; } else c++; ch.style.setProperty('--c', Math.min(c, 3)); }); }); };
+    cols(); var crt = 0; window.addEventListener('resize', function(){ clearTimeout(crt); crt = setTimeout(cols, 150); });
+    // at the very end of a page that can't scroll further, whatever hasn't finished is shown whole
+    var svEnd = function(){ if(window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 8)
+      document.querySelectorAll('.reveal:not(.in),.stagger:not(.in),.head:not(.in),.final .mark:not(.in)').forEach(function(el){ el.classList.add('in'); }); };
+    var sve = 0; window.addEventListener('scroll', function(){ clearTimeout(sve); sve = setTimeout(svEnd, 120); }, {passive:true});
+  } else {
   document.documentElement.classList.add('io');
   var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {rootMargin:'0px 0px -12% 0px'});
   document.querySelectorAll('.stagger').forEach(function(g){ [].forEach.call(g.children, function(ch,i){ ch.style.setProperty('--i', i); }); });
@@ -256,6 +267,7 @@
       var r = el.getBoundingClientRect(); if(r.bottom < 0 || (r.top < vh * (end ? 1 : 0.88))){ el.classList.add('in'); io.unobserve(el); } }); };
   var srt = 0; window.addEventListener('scroll', function(){ clearTimeout(srt); srt = setTimeout(sweepReveal, 120); }, {passive:true});
   window.addEventListener('load', function(){ setTimeout(sweepReveal, 400); });
+  }
 
   // videos: load just before they scroll in, play only while visible, fade in once the first frame is ready
   var vids = document.querySelectorAll('video[data-auto]');

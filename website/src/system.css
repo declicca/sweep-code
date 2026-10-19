@@ -1046,6 +1046,30 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
   .final .cta-row{transition-delay:.5s}.final .reassure{transition-delay:.6s}
   .io .final .stage:not(.in) .cta-row{opacity:0;transform:translateY(16px) scale(.94)}
   .io .final .stage:not(.in) .reassure{opacity:0;transform:translateY(10px)}
+  /* the scroll drives the reveal, like apple.com (Oct 18): where the browser supports it, site.js adds .sv instead of .io, and titles,
+     cards, blocks and the closing block move with the scroll itself: a slow scroll reveals slowly, and each part is complete once its
+     top is a third of the screen up. Linear: the scroll itself is the curve, spread over the bottom third of the screen.
+     Only translate, scale and opacity (never transform: hover and press effects keep working).
+     What is on screen at load (.in) stays still; elsewhere (no support), the reveal plays once, above. */
+  @supports (animation-timeline:view()){
+    .sv .head:not(.in)>*,.sv .stagger:not(.in)>*,.sv .reveal:not(.fr):not(.stage):not(.in){animation:sv-in linear both;animation-timeline:view();animation-range:entry 0% entry 34vh}
+    .sv .stagger:not(.in)>*{animation-range:entry calc(var(--c,0) * 4vh) entry calc(34vh + var(--c,0) * 4vh)}   /* --c: its column in the row */
+    .sv .final .stage:not(.in){view-timeline:--fin block;animation:sv-stage linear both;animation-timeline:view();animation-range:entry 0% entry 45vh}
+    .sv .final .stage:not(.in)::before{animation:sv-glow linear both;animation-timeline:--fin;animation-range:entry 10vh entry 50vh}
+    .sv .final .stage:not(.in) .mark{transform:none;animation:sv-in linear both;animation-timeline:--fin;animation-range:entry 8vh entry 30vh}
+    .sv .final .stage:not(.in) .mark .k-candle{transform:none;animation:sv-candle linear both;animation-timeline:--fin;animation-range:entry 14vh entry 36vh}
+    .sv .final .stage:not(.in) .mark .k-swept{animation:sv-swept linear both;animation-timeline:--fin;animation-range:entry 12vh entry 32vh}
+    .sv .final .stage:not(.in) h2 .w>span{animation:sv-word linear both;animation-timeline:--fin;animation-range:entry calc(12vh + var(--k,0) * 1.2vh) entry calc(36vh + var(--k,0) * 1.2vh)}
+    .sv .final .stage:not(.in) .cta-row{animation:sv-cta linear both;animation-timeline:--fin;animation-range:entry 24vh entry 46vh}
+    .sv .final .stage:not(.in) .reassure{animation:sv-in linear both;animation-timeline:--fin;animation-range:entry 28vh entry 50vh}
+    @keyframes sv-in{from{opacity:0;translate:0 32px}to{opacity:1;translate:none}}
+    @keyframes sv-stage{from{translate:0 48px;scale:.96}to{translate:none;scale:none}}
+    @keyframes sv-glow{from{opacity:0;scale:.9}to{opacity:1;scale:none}}
+    @keyframes sv-candle{from{translate:0 12px}to{translate:none}}
+    @keyframes sv-swept{from{stroke-dashoffset:22}to{stroke-dashoffset:0}}
+    @keyframes sv-word{from{translate:0 130%}to{translate:none}}
+    @keyframes sv-cta{from{opacity:0;translate:0 16px;scale:.94}to{opacity:1;translate:none;scale:none}}
+  }
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;animation-iteration-count:1!important;transition-duration:1ms!important;scroll-behavior:auto!important}}
 }

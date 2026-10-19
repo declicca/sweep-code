@@ -645,7 +645,7 @@ def words(text, delay=0.0):
     """Wrap each word so headlines can rise in line by line. Plain text stays readable without CSS/JS."""
     out = []
     for i, w in enumerate(text.split(" ")):
-        out.append(f'<span class="w"><span style="--d:{delay + i*0.045:.3f}s">{w}</span></span>')
+        out.append(f'<span class="w"><span style="--d:{delay + i*0.045:.3f}s;--k:{i}">{w}</span></span>')
     return " ".join(out)
 
 def page_hero(t, h1, lead, kick=None, cta=None, visual=""):
