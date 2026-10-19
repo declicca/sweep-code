@@ -1851,6 +1851,12 @@
       ${mv === 'entries' ? `<div class="mny-pane" data-mny-pane="entries">
         <div class="mny-actions"><button type="button" class="btn primary nav-pz-b" data-k="payout" data-mny="addP" aria-expanded="${!!U.addP}" aria-label="${vx.addPay}">+ <span class="l">${vx.addPay}</span><span class="s">${vx.pay}</span></button><button type="button" class="btn" data-mny="addE" aria-expanded="${!!U.addE}" aria-label="${vx.addExp}">+ <span class="l">${vx.addExp}</span><span class="s">${vx.exp}</span></button></div>
         ${U.addP ? `<section class="surface mny-addform"><div class="pz-add">${payoutForm()}</div></section>` : ''}${U.addE ? `<section class="surface mny-addform"><div class="pz-add">${expenseForm()}</div></section>` : ''}
+        ${(() => {   // the period's totals at a glance, with the filters (19 Oct., Mateo: « plutôt que le faire manuellement »)
+          const W = ({ en: ['Paid out', 'Pending', 'Expenses', ['payout', 'payouts'], ['request', 'requests'], ['expense', 'expenses']], fr: ['Payouts reçus', 'En attente', 'Dépenses', ['payout', 'payouts'], ['demande', 'demandes'], ['dépense', 'dépenses']],
+            es: ['Payouts recibidos', 'Pendientes', 'Gastos', ['payout', 'payouts'], ['solicitud', 'solicitudes'], ['gasto', 'gastos']] })[L] || ['Paid out', 'Pending', 'Expenses', ['payout', 'payouts'], ['request', 'requests'], ['expense', 'expenses']];
+          const n = (k, w) => `<small>${k} ${w[k === 1 ? 0 : 1]}</small>`;
+          return `<div class="mny-sum"><div><span>${W[0]}</span><b class="${r.payouts ? 'pos' : ''}">${mU(r.payouts)}</b>${n(r.nPaid, W[3])}</div><div><span>${W[1]}</span><b>${mU(r.pending)}</b>${n(r.nPending, W[4])}</div><div><span>${W[2]}</span><b class="${r.expenses ? 'neg' : ''}">${mU(r.expenses)}</b>${n(m.expenses.length, W[5])}</div></div>`;
+        })()}
         <div class="mny-cols"><div>
           <section class="surface"><div class="mny-h"><b>${x.payouts}</b></div>${payRows ? `<ul class="pz-list">${payRows}</ul>` : `<p class="muted">${x.noP}</p>`}</section>
         </div><div>

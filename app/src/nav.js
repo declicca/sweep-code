@@ -2242,7 +2242,7 @@ window.SweepMO = window.SweepMO || class {
     el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${t('sub')}</span>${has ? `<button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button>` : ''}</div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
       ${SH.batch.length ? batchTop() : `<label class="nav-am-drop ${SH.src ? 'has' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t(window.matchMedia && matchMedia('(pointer: coarse)').matches ? 'dropT' : 'drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
       ${SH.status ? `<p class="nav-am-st ${SH.busy ? 'busy' : ''}">${SH.status}</p>` : ''}`}
-      ${has ? '' : `<div class="nav-am-alt"><button type="button" class="btn" data-am="to-manual">${t('byHand')}</button><a class="btn" href="#import" data-am-imp>${t('impFile')}</a></div>`}
+      ${has ? '' : `<div class="nav-am-alt"><button type="button" class="btn" data-am="to-manual">${t('byHand')}</button><button type="button" class="btn" data-am-imp>${t('impFile')}</button></div>`}
       ${/* nothing else until the screenshot is there (18 Oct., Mateo: a minimal first screen) */ ''}${has ? `
       <div class="nav-am-co">${coachBefore()}</div>
       <div class="nav-am-grid">
@@ -2632,7 +2632,7 @@ window.SweepMO = window.SweepMO || class {
     const s = e.target.closest && e.target.closest('.nav-am select[data-am-f]'); if (s) SH.f[s.dataset.amF] = s.value;
   });
   /* (the default is no longer switched to « by hand » after a manual trade: screenshot stays first) */
-  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('[data-am-imp]'); if (a) { e.preventDefault(); close(); setTimeout(() => { location.hash = '#import'; }, 250); } });
+  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('[data-am-imp]'); if (a) { e.preventDefault(); close(); setTimeout(impSheet, 280); } });   // the CSV in a sheet too (19 Oct.)
   document.addEventListener('paste', (e) => {
     if (!document.querySelector('.nav-am-shot.open')) return;
     const its = [...(e.clipboardData && e.clipboardData.items || [])].filter((i) => i.type.startsWith('image/'));
@@ -2661,6 +2661,66 @@ window.SweepMO = window.SweepMO || class {
     w.__mode = true; window.openTicket = w;
   })(0);
 
+  /* 3. Import a CSV in a sheet, like the screenshot and the manual form (19 Oct., Mateo: « que ça ne nous sorte pas de
+   *    l'univers »): the account, the file, what it holds (new trades, P&L, those already in Sweep), « Import ». The file is
+   *    read and saved by the import page's own code (impFile, impGo: formats, fees, duplicates); a file with several
+   *    accounts goes on to the import page, where they are matched. */
+  const IT = ({
+    en: { t: 'Import a CSV', sub: 'Tradovate, Rithmic R|Trader Pro, TopstepX, TradingView', acc: 'Account', drop: 'Tap to choose your CSV file', dropD: 'Drop your CSV file here, or click to choose it', reading: 'Reading the file…',
+      found: '{n} new trades · {p}', found1: '1 new trade · {p}', dups: '{n} already in Sweep', none: 'No new trade in this file for this account.', go: 'Import {n} trades', go1: 'Import 1 trade', multi: 'This file holds several accounts: match each one to a Sweep account on the import page.', page: 'Continue on the import page', help: 'How to export it from my platform', other: 'Another file' },
+    fr: { t: 'Importer un CSV', sub: 'Tradovate, Rithmic R|Trader Pro, TopstepX, TradingView', acc: 'Compte', drop: 'Touche pour choisir ton fichier CSV', dropD: 'Dépose ton fichier CSV ici, ou clique pour le choisir', reading: 'Lecture du fichier…',
+      found: '{n} nouveaux trades · {p}', found1: '1 nouveau trade · {p}', dups: '{n} déjà dans Sweep', none: 'Aucun nouveau trade pour ce compte dans ce fichier.', go: 'Importer {n} trades', go1: 'Importer 1 trade', multi: 'Ce fichier contient plusieurs comptes : associe chacun à un compte Sweep sur la page d’import.', page: 'Continuer sur la page d’import', help: 'Comment l’exporter de ma plateforme', other: 'Un autre fichier' },
+    es: { t: 'Importar un CSV', sub: 'Tradovate, Rithmic R|Trader Pro, TopstepX, TradingView', acc: 'Cuenta', drop: 'Toca para elegir tu archivo CSV', dropD: 'Suelta tu archivo CSV aquí, o haz clic para elegirlo', reading: 'Leyendo el archivo…',
+      found: '{n} operaciones nuevas · {p}', found1: '1 operación nueva · {p}', dups: '{n} ya en Sweep', none: 'Ninguna operación nueva para esta cuenta en este archivo.', go: 'Importar {n} operaciones', go1: 'Importar 1 operación', multi: 'Este archivo tiene varias cuentas: asocia cada una a una cuenta de Sweep en la página de importación.', page: 'Seguir en la página de importación', help: 'Cómo exportarlo de mi plataforma', other: 'Otro archivo' } })[L] || null;
+  const it = (k, v) => String(((IT || {})[k]) || k).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
+  const IS = { busy: false };
+  function impSheet() {
+    if (typeof IMP === 'undefined' || typeof impFile !== 'function') { location.hash = '#import'; return; }
+    IMP.rows = null; IMP.file = ''; IMP.err = ''; IS.busy = false;
+    layer('nav-imp-sheet', ''); paintImp();
+  }
+  function paintImp() {
+    const el = document.querySelector('.nav-imp-sheet .nav-am-in'); if (!el) return;
+    const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived' && a.status !== 'closed'));
+    if (!IMP.account || !accs.some((a) => a.id === IMP.account)) IMP.account = (accs[0] || {}).id || '';
+    const rows = IMP.rows || [], multi = !!(window.SweepImport && SweepImport.fileAccts && SweepImport.fileAccts().length > 1);
+    const have = new Set((S.trades || []).filter((x) => x.account_id === IMP.account && x.import_key).map((x) => x.import_key));
+    const fresh = rows.filter((r) => !have.has(r.key)), dups = rows.length - fresh.length, sum = fresh.reduce((a, r) => a + (r.pnl_c || 0), 0);
+    const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    let res = '';
+    if (IS.busy) res = `<p class="nav-am-st busy">${it('reading')}</p>`;
+    else if (IMP.err) res = `<p class="nav-am-st nav-imps-err">${esc2(IMP.err)}</p>`;
+    else if (rows.length && multi) res = `<p class="nav-am-st">${it('multi')}</p><button type="button" class="btn primary nav-am-save" data-imps="page">${it('page')}</button>`;
+    else if (rows.length) res = `<div class="nav-imps-sum"><b class="${sum > 0 ? 'pos' : sum < 0 ? 'neg' : ''}">${fresh.length ? esc2(it(fresh.length === 1 ? 'found1' : 'found', { n: fresh.length, p: typeof money === 'function' ? money(sum) : (sum / 100).toFixed(2) })) : it('none')}</b>${dups ? `<small class="muted">${it('dups', { n: dups })}</small>` : ''}</div>
+      ${fresh.length ? `<button type="button" class="btn primary nav-am-save" data-imps="go">${it(fresh.length === 1 ? 'go1' : 'go', { n: fresh.length })}</button>` : ''}`;
+    el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${it('t')}</h2><span class="muted">${it('sub')}</span></div><button type="button" class="link" data-imps="close">${t('cancel')}</button></div>
+      <label class="tk-f"><span>${it('acc')}</span><select data-imps="acc">${accs.map((a) => `<option value="${esc2(a.id)}" ${a.id === IMP.account ? 'selected' : ''}>${esc2(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</option>`).join('')}</select></label>
+      <label class="nav-am-drop nav-imps-drop ${IMP.file ? 'has' : ''}"><span class="nav-am-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/></svg></span><b>${IMP.file ? esc2(IMP.file) : it(coarse ? 'drop' : 'dropD')}</b>${IMP.file ? `<small class="muted">${it('other')}</small>` : ''}<input type="file" accept=".csv,text/csv,.txt,text/plain" hidden data-imps="file"></label>
+      ${res}
+      <button type="button" class="link nav-imps-help" data-imp-help>${it('help')}</button>`;
+  }
+  async function readImp(file) {
+    if (!file) return;
+    IS.busy = true; paintImp();
+    try { await impFile(file); } catch (e) { IMP.err = String(e && e.message || e); }
+    IS.busy = false; paintImp();
+  }
+  document.addEventListener('change', (e) => {
+    const x = e.target.closest && e.target.closest('.nav-imp-sheet [data-imps]'); if (!x) return;
+    if (x.dataset.imps === 'acc') { IMP.account = x.value; paintImp(); }
+    else if (x.dataset.imps === 'file' && x.files && x.files[0]) { const f = x.files[0]; x.value = ''; readImp(f); }
+  });
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('.nav-imp-sheet [data-imps]'); if (!b || b.tagName === 'SELECT' || b.tagName === 'INPUT') return;
+    const k = b.dataset.imps;
+    if (k === 'close') close();
+    else if (k === 'page') { close(); setTimeout(() => { location.hash = '#import'; }, 250); }   // (IMP keeps the file: the page shows it)
+    else if (k === 'go') { b.disabled = true; try { await impGo(); } finally { close(); } }
+  });
+  document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.nav-imps-drop')) e.preventDefault(); });
+  document.addEventListener('drop', (e) => { const d = e.target.closest && e.target.closest('.nav-imps-drop'); if (!d) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) readImp(f); });
+  window.SweepImportSheet = { open: impSheet };
+
   /* the manual form: the same two quiet buttons as the screenshot screen, right under the title —
    « From a screenshot » and « Import a file (Rithmic, TopstepX) » (no link in the header any more) */
   new window.SweepMO(() => {
@@ -2671,7 +2731,7 @@ window.SweepMO = window.SweepMO || class {
     box.innerHTML = `<button type="button" class="btn" data-tk-alt="shot">${t('fromShot')}</button><button type="button" class="btn" data-tk-alt="imp">${t('impFile')}</button>`;
     head.after(box);
     box.querySelector('[data-tk-alt=shot]').addEventListener('click', () => { const d = typeof TK !== 'undefined' && TK ? TK.date : null; if (typeof closeTicket === 'function') closeTicket(); setTimeout(() => shotForm({ date: d }), 300); });
-    box.querySelector('[data-tk-alt=imp]').addEventListener('click', () => { if (typeof closeTicket === 'function') closeTicket(); setTimeout(() => { location.hash = '#import'; }, 250); });
+    box.querySelector('[data-tk-alt=imp]').addEventListener('click', () => { if (typeof closeTicket === 'function') closeTicket(); setTimeout(impSheet, 280); });
   }).observe(document.body, { childList: true, subtree: true });
 
   /* Settings: no « Adding a trade » choice any more (18 Oct., Mateo: always the screenshot first, never asked) */
@@ -3750,7 +3810,7 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('click', (e) => {
     if (e.target.closest && e.target.closest('[data-imp-help]')) { e.preventDefault(); if (window.SweepGuide) SweepGuide.open('import'); return; }
     const a = e.target.closest && e.target.closest('.nav-imp-b');
-    if (a && (a.closest('#tkSlide') || a.closest('.nav-am'))) { e.preventDefault(); if (typeof closeTicket === 'function' && a.closest('#tkSlide')) closeTicket(); document.querySelectorAll('.nav-am [data-am=close]').forEach((b) => b.click()); setTimeout(() => { location.hash = '#import'; }, 250); }
+    if (a && (a.closest('#tkSlide') || a.closest('.nav-am'))) { e.preventDefault(); if (typeof closeTicket === 'function' && a.closest('#tkSlide')) closeTicket(); document.querySelectorAll('.nav-am [data-am=close]').forEach((b) => b.click()); setTimeout(() => { if (window.SweepImportSheet) SweepImportSheet.open(); else location.hash = '#import'; }, 280); }
   });
 
   function pass() {
@@ -4615,7 +4675,7 @@ window.SweepMO = window.SweepMO || class {
 
   /* 12. pull to refresh (phone: Today, Trades, Stats) */
   let py = null, pdist = 0, pel = null;
-  const ptrPage = () => /^#?(dashboard|trades|analytics)?$/.test((location.hash || '').replace(/^#/, '').split('/')[0]);
+  const ptrPage = () => true;   // every page (the app's first pull to refresh, now removed, worked everywhere)
   document.addEventListener('touchstart', (e) => { if (!isPhone() || !ptrPage() || scrollY > 0 || e.target.closest('.evp, .nav-am, .nav-dlg, #gSheet, #shPanel, .nav-fstrip, .nav-ra-row')) { py = null; return; } py = e.touches[0].clientY; pdist = 0; }, { passive: true });
   document.addEventListener('touchmove', (e) => { if (py == null) return; pdist = Math.max(0, e.touches[0].clientY - py); if (pdist < 8) return; if (!pel) { pel = document.createElement('div'); pel.className = 'nav-ptr'; pel.setAttribute('data-noi18n', ''); pel.innerHTML = '<i></i><span></span>'; document.body.append(pel); } const p = Math.min(1, pdist / 90); pel.style.setProperty('--p', p); pel.querySelector('span').textContent = p >= 1 ? t('refresh') : ''; }, { passive: true });
   document.addEventListener('touchend', async () => {
@@ -6351,4 +6411,55 @@ new window.SweepMO(() => {
     v.classList.add('mny-view-fx'); v.dataset.fx = 'view'; row.prepend(v);
   }
   new window.SweepMO(() => { try { move(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+})();
+
+/* Accounts on a phone (19 Oct., Mateo): one « Edit » on the line of « Add an account » in place of « Select » and
+ * « Reorder »: it turns both on (a tap selects an account, the handle on the left moves it), « Done » turns both off.
+ * The two buttons stay in the page, hidden: they keep doing the work. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = ({ en: ['Edit', 'Done'], fr: ['Modifier', 'Terminé'], es: ['Editar', 'Listo'] })[L] || ['Edit', 'Done'];
+  const on = (surf) => surf.classList.contains('acc-sel-on') || surf.classList.contains('nav-ord-on');
+  let edited = false;   // « Edit » turned both on: when the selection ends (« Clear » on the bar), the order ends with it
+  function place() {
+    if (!/^#accounts$/.test(location.hash || '') || !window.SW_MQ || !window.SW_MQ.matches) return;
+    const top = document.querySelector('#main .nav-acc-top'); if (!top) return;
+    const surf = top.closest('.surface'); if (!surf || !top.querySelector('.acc-selb') || !top.querySelector('.nav-ord-b')) return;
+    if (edited && !surf.classList.contains('acc-sel-on')) { edited = false; if (surf.classList.contains('nav-ord-on')) top.querySelector('.nav-ord-b').click(); }
+    let b = top.querySelector('.acc-editb');
+    if (!b) { b = document.createElement('button'); b.type = 'button'; b.className = 'link acc-editb'; b.setAttribute('data-noi18n', ''); top.append(b); }
+    const want = on(surf) ? T[1] : T[0]; if (b.textContent !== want) b.textContent = want;
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('#main .acc-editb'); if (!b) return;
+    const top = b.closest('.nav-acc-top'), surf = top.closest('.surface'), sel = top.querySelector('.acc-selb'), ord = top.querySelector('.nav-ord-b');
+    if (on(surf)) { edited = false; if (surf.classList.contains('acc-sel-on')) sel.click(); if (surf.classList.contains('nav-ord-on')) ord.click(); }
+    else { edited = true; sel.click(); const t2 = document.querySelector('#main .nav-acc-top .nav-ord-b'); if (t2 && !t2.closest('.surface').classList.contains('nav-ord-on')) t2.click(); }
+    setTimeout(place, 0);
+  });
+  new window.SweepMO(() => { try { place(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+})();
+
+/* Accounts: the closed ones folded, like the archived ones (19 Oct., Mateo: « visuellement fermés »): « Closed accounts · 3 »,
+ * opened with a tap, kept open or closed while the tab lives */
+(function () {
+  'use strict';
+  let open = false, last = null;
+  function fold() {
+    if (!/^#accounts$/.test(location.hash || '')) return;
+    const h = [...document.querySelectorAll('#main .sec > .sec-h > h2')].find((x) => /^(Closed accounts|Comptes fermés|Cuentas cerradas)$/.test(x.textContent.trim())); if (!h) return;
+    const sec = h.closest('.sec'); if (sec.querySelector(':scope > details.nav-closed')) return;
+    const body = sec.querySelector(':scope > .surface'); if (!body) return;
+    const n = body.querySelectorAll('tbody tr[data-href^="#account/"]').length;
+    if (last) open = last.open;   // (a redraw replaces it before its « toggle » event)
+    const d = document.createElement('details'); d.className = 'nav-closed'; d.open = open; last = d;
+    d.addEventListener('toggle', () => { open = d.open; });
+    const s = document.createElement('summary'); s.setAttribute('data-noi18n', '');
+    s.innerHTML = `<span><b></b><small></small></span>`; s.querySelector('b').textContent = h.textContent.trim() + (n ? ' · ' + n : '');
+    const help = sec.querySelector(':scope > .sec-h .help'); s.querySelector('small').textContent = help ? help.textContent.trim() : '';
+    d.append(s); body.before(d); d.append(body);
+    sec.querySelector(':scope > .sec-h').hidden = true;
+  }
+  new window.SweepMO(() => { try { fold(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 })();

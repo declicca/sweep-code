@@ -96,10 +96,10 @@ with sync_playwright() as p:
   # 7. phone
   for w in [390, 320]:
     c, pg, errs = page(br, w, True)
-    pg.locator('#main .acc-selb').click(); pg.wait_for_timeout(300)
+    pg.locator('#main .acc-editb').click(); pg.wait_for_timeout(300)   # (one « Edit » on phones since 19 Oct.: select and reorder together)
     row(pg, 'ab-e1').tap(); row(pg, 'ab-l1').tap(); pg.wait_for_timeout(400)
     r = pg.evaluate("[location.hash, document.querySelector('#accBar') ? document.querySelector('.acc-bar-n').textContent : null, [...document.querySelectorAll('#accBar .btn')].map(b=>Math.round(b.getBoundingClientRect().height)), document.documentElement.scrollWidth-innerWidth, getComputedStyle(document.querySelector('#askFab')||document.body).opacity]")
-    ok(r[0] == '#accounts' and r[1] and '2' in r[1] and all(h >= 44 for h in r[2]) and r[3] <= 0 and r[4] in ('0', '1'), f'7 phone {w}: « Select », taps select 2 (no opening), 44 px buttons, no overflow ({r})')
+    ok(r[0] == '#accounts' and r[1] and '2' in r[1] and all(h >= 44 for h in r[2]) and r[3] <= 0 and r[4] in ('0', '1'), f'7 phone {w}: « Edit », taps select 2 (no opening), 44 px buttons, no overflow ({r})')
     pg.locator('#accBar [data-accb="clear"]').click(); pg.wait_for_timeout(300)
     row(pg, 'ab-e2').scroll_into_view_if_needed(); pg.wait_for_timeout(300); box = row(pg, 'ab-e2').bounding_box()
     pg.touchscreen.tap(box['x'] + 10, box['y'] + 10)   # (a plain tap after « Clear »: opens the account)

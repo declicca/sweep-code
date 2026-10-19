@@ -1754,7 +1754,8 @@ function accountForm() {
 }
 
 function vAccounts() {
-  const e = S.accounts.filter(n => n.status !== "archived"), t = S.accounts.filter(n => n.status === "archived"), a = [ ...groupBy(e, n => n.firm_id) ];
+  // a closed account goes with the archived ones, folded under « Closed accounts » (19 Oct., Mateo: « visuellement fermés »)
+  const e = S.accounts.filter(n => n.status !== "archived" && n.status !== "closed"), t = S.accounts.filter(n => n.status === "archived" || n.status === "closed"), a = [ ...groupBy(e, n => n.firm_id) ];
   return `<section><div class="sec-h"><h2>Active accounts</h2></div><div class="surface">${acctTable(e)}\n    ${U.addAcct ? `<div class="acct-add">${accountForm()}</div>` : '<button class="add-row" data-act="acct-add" data-v="1"><span class="add-ic">+</span>Add account</button>'}</div></section>\n  ${a.length > 1 ? `<section class="sec"><div class="sec-h"><h2>By prop firm</h2></div><div class="surface">${groupTable("Prop firm", new Map(a.map(([n, s]) => [ firm(n)?.name || "—", S.trades.filter(i => s.some(o => o.id === i.account_id)) ])), {
     showR: !1
   })}</div></section>` : ""}\n  ${t.length ? `<section class="sec"><div class="sec-h"><h2>Closed accounts</h2><span class="help">Trades, payouts and expenses stay in your history and filters.</span></div><div class="surface">${acctTable(t, {
@@ -5141,38 +5142,7 @@ document.addEventListener("visibilitychange", () => {
   document.visibilityState === "visible" && Date.now() - SYNC.at > 15e3 && syncNow();
 }), setInterval(() => {
   document.visibilityState === "visible" && Date.now() - SYNC.at > 6e4 && syncNow();
-}, 15e3), function() {
-  let e = null, t = 0, a = null, n = !1;
-  const s = () => (a || (a = document.createElement("div"), a.className = "ptr", a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>', 
-  document.body.append(a)), a);
-  addEventListener("touchstart", i => {
-    S.mode !== "server" || innerWidth > 860 || scrollY > 0 || document.body.classList.contains("evp-lock") || i.touches.length > 1 || i.target.closest(".evp,.sheet,.sai,.mseg,.jstrip,.mchips,.tchart,input,textarea,select") || (e = i.touches[0].clientY, 
-    t = 0, n = !1);
-  }, {
-    passive: !0
-  }), addEventListener("touchmove", i => {
-    if (e == null) return;
-    if (t = i.touches[0].clientY - e, t <= 0 || scrollY > 0) {
-      s().style.opacity = "0";
-      return;
-    }
-    const o = Math.min(1, t / 90), r = s();
-    r.style.opacity = String(o), r.style.transform = `translate(-50%,${Math.min(70, t * .55)}px) rotate(${o * 270}deg)`, 
-    o >= 1 && !n && (n = !0, haptic(8)), r.classList.toggle("armed", n);
-  }, {
-    passive: !0
-  }), addEventListener("touchend", async () => {
-    if (e == null) return;
-    e = null;
-    const i = s();
-    n && (i.classList.add("spin"), await syncNow({
-      manual: !0
-    }), toast("Up to date")), i.classList.remove("spin", "armed"), i.style.opacity = "0", 
-    i.style.transform = "translate(-50%,0)", n = !1;
-  }, {
-    passive: !0
-  });
-}(), function() {
+}, 15e3), /* (the first « pull to refresh » is gone: one only, src/nav.js section 12, 19 Oct.) */ function() {
   let e = null, t = null, a = null;
   addEventListener("touchstart", n => {
     if (a = n.target.closest && n.target.closest(".cal-wrap"), !a) {

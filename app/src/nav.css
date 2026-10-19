@@ -1439,7 +1439,7 @@ html body a,html body button{-webkit-tap-highlight-color:transparent}
 .nav-ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 64px);z-index:150;display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,calc(var(--p,0) * 24px - 24px));opacity:var(--p,0);pointer-events:none}
 .nav-ptr i{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--pos);border-right-color:transparent;transform:rotate(calc(var(--p,0) * 300deg))}
 .nav-ptr.busy i{animation:spin .8s linear infinite}
-.nav-ptr span{font-size:12px;color:var(--muted)}
+.nav-ptr span{display:none}   /* iOS: the spinner only (19 Oct., Mateo: two refresh icons and a text) */
 /* failed and archived accounts */
 .nav-fail{color:#ff6b6b!important}
 .nav-arch{margin-top:14px;padding:14px 18px}
@@ -2671,7 +2671,7 @@ html body #main .nav-mny-g > div > b{margin-top:auto}
 html body #main .nav-seg.is-stuck,html body #main .nav-tnav.is-stuck{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important;box-shadow:inset 0 0 0 1px var(--hair),0 -6px 0 14px var(--bg)!important}
 /* phone: opaque all the time, not only once « stuck » is seen (18 Oct., the installed app on iPhone: the class came late or not
    at all and « Accounts / My money » showed the cards through it); at rest the same look, the page's background under it */
-@media (max-width:860px){html body #main .nav-seg,html body #main .nav-tnav{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important}}
+@media (max-width:860px){html body #main .nav-seg,html body #main .nav-tnav{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important;box-shadow:inset 0 0 0 1px var(--hair),0 0 0 10px var(--bg)!important}}   /* (and a 10 px band of the page's colour around it, always: on iPhone « stuck » came late, the cards showed beside and above it, 19 Oct.; at rest it falls on the page's own background) */
 @media (max-width:860px){
   html body #main .mfb-row > .mny-tsw .mny-tag{padding:0 7px}
   html body #main .nav-mny-g .mny-tag{padding:0 7px;max-width:100%}
@@ -2899,8 +2899,10 @@ body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-ev
 @media (display-mode:standalone) and (max-width:860px){
   /* the header right under the status bar (18 Oct., Mateo: too much empty space at the top): the safe area already holds the
      room below the clock, so 6 px less instead of 10 px more; the compact title stays on the logo's row */
-  html body aside.side{padding-top:max(6px,calc(env(safe-area-inset-top,0px) - 6px))!important}
-  html body aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 8px)}
+  html body aside.side{padding-top:max(6px,min(env(safe-area-inset-top,0px),44px),calc(env(safe-area-inset-top,0px) - 10px))!important}   /* (19 Oct.: 4 px higher again; never under the clock: 44 px on the iPhones with a notch, the safe area − 10 px with the Dynamic Island) */
+  html body aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 10px)}
+  /* at the top of a page the header is the page itself (no band, no line when the page is pulled down: 19 Oct.) */
+  html body:not(.ux-scrolled) aside.side{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:transparent!important}
   html body .bottomnav{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px))!important;margin-bottom:0!important}
   /* what sits above the bar comes down with it (26 px), the same gap as in the browser */
   html body .ask-fab,html body .nav-update,html body .gm-sumtoast,html body .acc-bar{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
@@ -2962,4 +2964,43 @@ html body #main .nav-stmore-in > *{margin:0}
 html body #main .fx-row > .mny-view.mny-view-fx{flex:0 0 auto;width:auto;max-width:none;height:40px;box-sizing:border-box;margin:0;padding:0;border:0!important;box-shadow:inset 0 0 0 1px var(--hair)}
 html body #main .fx-row > .mny-view.mny-view-fx > button{flex:0 0 auto;height:100%;min-height:0;padding:0 16px;white-space:nowrap}
 @media (max-width:860px){html body #main .fx-row > .mny-view.mny-view-fx{height:44px}}   /* a 44 px touch zone on phones, centred on the chips' line; 40 px tracks on a computer (design rule) */
+/* the accounts' table: no blue line on the hovered row (19 Oct., Mateo: it looked like a glitch, the row's own hover is enough) */
+html body #main table.acct-tbl tbody tr[data-href]:hover td:first-child{box-shadow:none}
+/* Accounts on a phone: one « Edit » on the line of « Add an account » (19 Oct.) */
+@media (max-width:860px){
+  html body #main .nav-acc-top:has(.acc-editb){flex-wrap:nowrap!important;align-items:center!important}
+  html body #main .nav-acc-top:has(.acc-editb){border-bottom:1px solid var(--line)}
+  html body #main .nav-acc-top:has(.acc-editb) > .nav-addrow{flex:1 1 auto!important;min-width:0;border-bottom:0!important}   /* the line under the whole row, « Edit » included */
+  html body #main .nav-acc-top:has(.acc-editb) > .acc-selb,html body #main .nav-acc-top:has(.acc-editb) > .nav-ord-b{display:none!important}
+  html body #main .nav-acc-top > .acc-editb{flex:none;min-height:44px;padding:0 18px 0 8px;font-size:15px;font-weight:600;color:var(--pos);white-space:nowrap;background:none;border:0;cursor:pointer}
+}
+/* Accounts: « Closed accounts », folded (19 Oct.) — the look of « Account settings » */
+html body #main details.nav-closed{border-radius:var(--r-card,20px);background:var(--panel);box-shadow:inset 0 0 0 1px var(--hair)}
+html body #main details.nav-closed > summary{list-style:none;cursor:pointer;display:flex!important;width:100%!important;box-sizing:border-box;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:12px 18px!important;color:var(--text)!important;font-weight:400}
+html body #main details.nav-closed > summary::-webkit-details-marker{display:none}
+html body #main details.nav-closed > summary::before{display:none!important}
+html body #main details.nav-closed > summary > span{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body #main details.nav-closed > summary b{font-size:15px;font-weight:600}
+html body #main details.nav-closed > summary small{color:var(--muted);font-size:13px}
+html body #main details.nav-closed > summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s var(--ease-ios)}
+html body #main details.nav-closed[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+html body #main details.nav-closed > .surface{margin:0 8px 8px;box-shadow:none}
+/* My money › My entries: the period's totals (19 Oct.) */
+html body #main .mny-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
+html body #main .mny-sum > div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border-radius:var(--r-tile,14px);background:var(--panel);box-shadow:inset 0 0 0 1px var(--hair)}
+html body #main .mny-sum span{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body #main .mny-sum b{font-family:var(--font-mono,inherit);font-size:17px;font-weight:600;white-space:nowrap;letter-spacing:-.02em}
+html body #main .mny-sum small{font-size:12px;color:var(--muted)}
+@media (max-width:400px){html body #main .mny-sum{gap:8px}html body #main .mny-sum > div{padding:10px}html body #main .mny-sum b{font-size:15px}}
+/* « Import a CSV » in a sheet (19 Oct.) — the same family as « New trade » */
+html body .nav-imp-sheet .nav-am-in{display:flex;flex-direction:column;gap:14px}
+html body .nav-imp-sheet .tk-f select{width:100%;min-height:48px;font-size:16px}
+html body .nav-imp-sheet .nav-imps-drop{min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+html body .nav-imp-sheet .nav-imps-drop .nav-am-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+html body .nav-imp-sheet .nav-imps-drop b{overflow-wrap:anywhere}
+html body .nav-imp-sheet .nav-imps-sum{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:var(--r-tile,14px);background:var(--panel);box-shadow:inset 0 0 0 1px var(--hair)}
+html body .nav-imp-sheet .nav-imps-sum b{font-size:16px}
+html body .nav-imp-sheet .nav-imps-err{color:var(--neg)}
+html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
+@media (max-width:600px){html body .evp.nav-am.nav-imp-sheet{height:auto;max-height:calc(100dvh - env(safe-area-inset-top,0px) - 14px)}html body .evp.nav-am.nav-imp-sheet .nav-am-in{height:auto;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}}
 
