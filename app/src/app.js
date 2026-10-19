@@ -4255,6 +4255,8 @@ async function tkSave() {
   }
   !TK.id && TK.setup && window.SweepSetupPick && SweepSetupPick.keep(TK.setup);
   const u = TK.id ? [] : [ ...TK.copyTo ].filter(v => v !== TK.account && acct(v));
+  // a new trade on a day with a pre-market sheet: off-plan until linked to one of its scenarios (offered after the save)
+  !TK.id && window.SweepFiche && SweepFiche.markTrade && (SweepFiche.markTrade(c), c.off_plan && setTimeout(() => SweepFiche.offerLink(c.id), 450));
   u.length && (c.copy_group = uid()), put("trades", c), lsSet("tj.last", {
     account: TK.account,
     inst: TK.inst,

@@ -2575,6 +2575,7 @@ window.SweepMO = window.SweepMO || class {
     }
     const copies = [...SH.copy].filter((id) => id !== doc.account_id && typeof acct === 'function' && acct(id));
     if (copies.length) doc.copy_group = typeof uid === 'function' ? uid() : 'g' + Date.now();
+    if (window.SweepFiche && SweepFiche.markTrade) SweepFiche.markTrade(doc);   // a day with a pre-market sheet: off-plan until linked
     if (typeof put === 'function') {
       put('trades', doc);
       copies.forEach((id, k) => put('trades', window.SweepCopy ? SweepCopy.make(doc, id, doc.copy_group, k) : Object.assign(JSON.parse(JSON.stringify(doc)), { id: typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2), account_id: id })));
@@ -2582,6 +2583,7 @@ window.SweepMO = window.SweepMO || class {
     if (SH.setup && window.SweepSetupPick) SweepSetupPick.keep(SH.setup);
     if (quiet) return;
     close();
+    if (doc.off_plan && window.SweepFiche && SweepFiche.offerLink) setTimeout(() => SweepFiche.offerLink(doc.id), 450);   // which scenario of the sheet?
     if (typeof toast === 'function') toast(t('saved'));
     setTimeout(() => { if (typeof render === 'function') render(); }, 80);
   }

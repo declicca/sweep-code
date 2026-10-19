@@ -840,15 +840,10 @@
     try { if (typeof loadEcon === 'function') await loadEcon(day, day); } catch (e) { /* the calendar is a help, not a need */ }
     PM.news = pmCalendar(day);
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
-    if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-plan g-pm g-pm-locked' }); return; }
+    if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-pm g-pm-locked' }); const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day; return; }   // locked: the session view
     if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
     openSheet(pmHtml(), { cls: 'g-plan g-pm' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;
-  }
-  /** the locked plan: the sheet only (the session view, brief step 5, adds its checklist) */
-  function pmLockedHtml(f) {
-    const at = f.locked_at || ficheLockAt(f.trading_day), hm = typeof etStr === 'function' ? etStr(at).slice(11, 16) : '';
-    return `${head(pt('locked_title'), `${fdate(f.trading_day, { weekday: 'long', month: 'long', day: 'numeric' })} · ${esc(pt('locked', { t: hm }))}`)}${pmSheetHtml(f)}`;
   }
   const pmSeg = (q, opts, cur) => `<div class="g-seg4 pm-seg">${opts.map((o) => `<button type="button" class="${cur === o ? 'on' : ''}" data-pm="ans" data-q="${q}" data-v="${o}">${esc(pt(o))}</button>`).join('')}</div>`;
   const pmIn = (k, v, ph, mode) => `<input type="text" inputmode="${mode || 'decimal'}" data-pmf="${k}" value="${v == null ? '' : esc(String(v))}" placeholder="${esc(ph || '')}" enterkeyhint="next">`;
@@ -986,7 +981,7 @@
     else f.answers[k] = String(raw).replace(',', '.');
   }
   document.addEventListener('click', (e) => {
-    const b = e.target.closest && e.target.closest('#gSheet.g-pm [data-pm]'); if (!b) return;
+    const b = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked):not(.g-pm-link) [data-pm]'); if (!b) return;
     const act = b.dataset.pm, scr = pmScreens(), name = scr[Math.min(PM.i, scr.length - 1)];
     if (act === 'ans') {
       const q = b.dataset.q, v = b.dataset.v, a = PM.f.answers; a[q] = v;
@@ -1014,7 +1009,7 @@
     }
   });
   document.addEventListener('input', (e) => {
-    const i = e.target.closest && e.target.closest('#gSheet.g-pm [data-pmf]'); if (!i) return;
+    const i = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked) [data-pmf]'); if (!i) return;
     pmSetField(i.dataset.pmf, i.value);
     if (/^C[13]_/.test(i.dataset.pmf)) {   // the R follows the typing
       const s = pmBuild(PM.f).find((x) => 'C3_' + x.id === i.dataset.pmf || (i.dataset.pmf === 'C1_level' && x.id === 'A'));
@@ -1023,10 +1018,110 @@
     }
   });
   document.addEventListener('change', (e) => {
-    const i = e.target.closest && e.target.closest('#gSheet.g-pm [data-pmf]'); if (!i) return;
+    const i = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked) [data-pmf]'); if (!i) return;
     pmSetField(i.dataset.pmf, i.value);
     if (i.dataset.pmf === 'B1_time') pmRender();
   });
+  /* ───────────── The session view (brief « Plan pre-market adaptatif », step 5) ─────────────
+     The locked sheet: each scenario's checklist in its order (a box only after the one before), « Invalidate », a banner
+     during a news window, the trades against the limit, « Day over according to your plan » once a no-trade condition is
+     met. A trade added on a day with a sheet is offered to link to one of its scenarios; not linked, it is off-plan. */
+  const SS = {
+    en: { session: 'Your session', news_now: 'News window: no trade until {t}.', over: 'Day over according to your plan.', trades: 'Trades: {n} of {m}',
+      invalidate: 'Invalidate', st_waiting: 'Waiting', st_confirmed: 'Confirmed', st_invalidated: 'Invalidated', st_taken: 'Taken', st_expired: 'Expired',
+      news_15m: 'First full 15m after the news', close_15m: '15m close', retest_5m: '5m retest', trigger_5m: '5m trigger candle', vwap: 'VWAP', risk_checked: 'Risk checked',
+      link_q: 'Which scenario of your sheet is this trade?', off: 'Off my sheet', link_hint: 'A trade outside your sheet counts as off-plan.' },
+    fr: { session: 'Ta séance', news_now: 'Fenêtre de news : pas de trade avant {t}.', over: 'Journée terminée selon ton plan.', trades: 'Trades : {n} sur {m}',
+      invalidate: 'Invalider', st_waiting: 'En attente', st_confirmed: 'Confirmé', st_invalidated: 'Invalidé', st_taken: 'Pris', st_expired: 'Expiré',
+      news_15m: 'Première 15m complète après la news', close_15m: 'Clôture 15m', retest_5m: 'Retest 5m', trigger_5m: 'Bougie de déclenchement 5m', vwap: 'VWAP', risk_checked: 'Risque vérifié',
+      link_q: 'Ce trade, c’est quel scénario de ta fiche ?', off: 'Hors fiche', link_hint: 'Un trade hors de ta fiche compte comme hors plan.' },
+    es: { session: 'Tu sesión', news_now: 'Ventana de noticias: ninguna operación antes de las {t}.', over: 'Día terminado según tu plan.', trades: 'Operaciones: {n} de {m}',
+      invalidate: 'Invalidar', st_waiting: 'En espera', st_confirmed: 'Confirmado', st_invalidated: 'Invalidado', st_taken: 'Tomado', st_expired: 'Expirado',
+      news_15m: 'Primera vela de 15m completa tras la noticia', close_15m: 'Cierre de 15m', retest_5m: 'Retest 5m', trigger_5m: 'Vela de disparo 5m', vwap: 'VWAP', risk_checked: 'Riesgo revisado',
+      link_q: '¿Qué escenario de tu ficha es esta operación?', off: 'Fuera de mi ficha', link_hint: 'Una operación fuera de tu ficha cuenta como fuera del plan.' },
+  };
+  const st = (k, p) => { let s = (SS[L()] || SS.en)[k]; if (s == null) s = SS.en[k] != null ? SS.en[k] : k; return p ? s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)) : s; };
+  /** the moment against the sheet's day: before (the evening before), the day itself (with its NY time), or after */
+  function ssNow(day) {
+    const now = typeof etStr === 'function' ? etStr(Math.floor(Date.now() / 1000)) : '', d = now.slice(0, 10), hm = now.slice(11, 16);
+    return { when: ficheDayOf() > day ? 'after' : d < day ? 'before' : 'day', hm };
+  }
+  /** the day's trades (copies counted once) */
+  const ssTrades = (day) => { const seen = new Set(); return (S.trades || []).filter((x) => !x.demo && x.date === day).filter((x) => { const k = x.copy_group || x.id; if (seen.has(k)) return false; seen.add(k); return true; }); };
+  /** the no-trade condition met, if any */
+  function ssOver(f) {
+    const n = ssTrades(f.trading_day).length, nw = ssNow(f.trading_day), c = f.no_trade_conditions;
+    if (nw.when === 'after') return 'after';
+    if (c.includes('two_invalidations') && f.invalidations >= 2) return 'two_invalidations';
+    if (c.includes('time_limit') && f.limits.time_limit && nw.when === 'day' && nw.hm >= f.limits.time_limit) return 'time_limit';
+    if (n >= f.limits.max_trades) return 'max_trades';
+    return '';
+  }
+  const ssStatus = (f, s) => (ssOver(f) && (s.status === 'waiting' || s.status === 'confirmed') ? 'expired' : s.status);
+  function pmLockedHtml(f) {
+    const at = f.locked_at || ficheLockAt(f.trading_day), hm = typeof etStr === 'function' ? etStr(at).slice(11, 16) : '';
+    const nw = ssNow(f.trading_day), win = nw.when === 'day' ? f.news_windows.find((w) => nw.hm >= w.start && nw.hm < w.end) : null, over = ssOver(f);
+    const trades = ssTrades(f.trading_day).length;
+    const scen = f.scenarios.map((s) => {
+      const status = ssStatus(f, s), live = status === 'waiting' || status === 'confirmed';
+      const boxes = s.conditions.map((c, i) => { const done = s.done.includes(c), can = live && (done ? s.done[s.done.length - 1] === c : i === s.done.length);
+        return `<button type="button" class="pm-chk${done ? ' on' : ''}" data-pm="chk" data-s="${s.id}" data-c="${c}" ${can ? '' : 'disabled'} aria-pressed="${done}"><i aria-hidden="true">${done ? '✓' : i + 1}</i>${esc(st(c))}</button>`; }).join('');
+      return `<div class="pm-sc pm-ss pm-${status}" data-sc="${s.id}"><div class="pm-sc-h"><b>${pt(s.id === 'A' ? 'sc_a' : 'sc_b')} — ${esc(pt('d_' + s.direction))}${s.type === 'reclaim' || s.type === 'rejection' ? ' ' + esc(pt('t_' + s.type).toLowerCase()) : ''}</b><span class="pm-st">${st('st_' + status)}</span></div>
+        <p class="pm-l">${esc(pmScenarioLine(f, s))}</p><div class="pm-chks">${boxes}</div>
+        ${live ? `<button type="button" class="btn pm-inval" data-pm="inval" data-s="${s.id}">${st('invalidate')}</button>` : ''}</div>`;
+    }).join('');
+    const nt = f.no_trade_conditions.map((c) => (c === 'time_limit' && f.limits.time_limit ? pt('after', { t: f.limits.time_limit }) : c === 'other' ? f.no_trade_other || pt('other') : pt(c)));
+    return `${head(st('session'), `${fdate(f.trading_day, { weekday: 'long', month: 'long', day: 'numeric' })} · ${esc(pt('locked', { t: hm }))}`)}
+      ${f.reminder ? `<p class="pm-rem">${esc(f.reminder)}</p>` : ''}
+      ${win ? `<p class="pm-banner pm-news" role="status">${esc(st('news_now', { t: win.end }))}</p>` : ''}
+      ${over ? `<p class="pm-banner pm-over" role="status">${st('over')}</p>` : ''}
+      <p class="pm-count" data-noi18n>${esc(st('trades', { n: trades, m: f.limits.max_trades }))}</p>
+      <div class="pm-sheet pm-sheet-s">${nt.length ? `<p class="pm-l"><b>${pt('notrade')}</b> · ${esc(nt.join(pt('or')))}</p>` : ''}<p class="pm-l"><b>${pt('lim')}</b> · ${esc([pt('risk_l', { p: pmFmt(f.limits.risk_pct) })].concat(f.news_windows.map((w) => pt('window', { a: w.start, b: w.end }))).join(' · '))}</p></div>
+      <div class="pm-body pm-ss-body">${scen}</div>`;
+  }
+  function ssRender(day) { const el = document.querySelector('#gSheet.g-pm-locked .g-in'), f = ficheGet(day); if (el && f) el.innerHTML = pmLockedHtml(f); }
+  /** a box of the checklist: the next one, or undo the last one; all checked → confirmed */
+  function ssCheck(day, sid, c) {
+    const f = ficheGet(day), s = f && f.scenarios.find((x) => x.id === sid); if (!s) return;
+    const i = s.conditions.indexOf(c);
+    if (s.done.includes(c)) { if (s.done[s.done.length - 1] !== c) return; s.done = s.done.slice(0, -1); }
+    else { if (i !== s.done.length) return; s.done = s.done.concat(c); }
+    s.status = s.done.length === s.conditions.length ? 'confirmed' : s.status === 'confirmed' ? 'waiting' : s.status;
+    ficheSave(f); buzz(5); ssRender(day);
+  }
+  function ssInvalidate(day, sid) {
+    const f = ficheGet(day), s = f && f.scenarios.find((x) => x.id === sid); if (!s || (s.status !== 'waiting' && s.status !== 'confirmed')) return;
+    s.status = 'invalidated'; f.invalidations += 1; ficheSave(f); buzz(10); ssRender(day);
+  }
+  /** a new trade on a day with a sheet: off-plan until linked to a scenario (the trade forms call it before saving) */
+  function ficheMarkTrade(doc) {
+    if (!doc || doc.demo || doc.plan_scenario) return doc;
+    const f = ficheGet(doc.date); if (f && f.scenarios.length) doc.off_plan = true;
+    return doc;
+  }
+  /** after the save: which scenario was it? (A / B still open, or « Off my sheet ») */
+  function ficheOfferLink(id) {
+    const tr = typeof getDoc === 'function' && getDoc('trades', id); if (!tr || !tr.off_plan || tr.plan_scenario) return;
+    const f = ficheGet(tr.date); if (!f) return;
+    const open = f.scenarios.filter((s) => s.status !== 'invalidated');
+    openSheet(`${head(st('link_q'))}<p class="g-hint g-hint-sm">${st('link_hint')}</p><div class="pm-links">${open.map((s) => `<button type="button" class="btn primary g-big" data-pm="link" data-id="${esc(id)}" data-s="${s.id}">${pt(s.id === 'A' ? 'sc_a' : 'sc_b')} — ${esc(pt('d_' + s.direction))} ${pmFmt(s.level)}</button>`).join('')}
+      <button type="button" class="btn g-big" data-pm="link" data-id="${esc(id)}" data-s="">${st('off')}</button></div>`, { cls: 'g-pm g-pm-link' });
+  }
+  function ficheLink(id, sid) {
+    const tr = getDoc('trades', id); if (!tr) return;
+    const ids = tr.copy_group ? (S.trades || []).filter((x) => x.copy_group === tr.copy_group).map((x) => x.id) : [id];
+    for (const x of ids) editDoc('trades', x, (d) => { if (sid) { d.plan_scenario = sid; d.off_plan = false; } else { d.plan_scenario = null; d.off_plan = true; } });
+    if (sid) { const f = ficheGet(tr.date), s = f && f.scenarios.find((x) => x.id === sid); if (s && s.status !== 'taken') { s.status = 'taken'; ficheSave(f); } }
+    buzz(10); closeSheet();
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('#gSheet.g-pm-locked [data-pm], #gSheet.g-pm-link [data-pm]'); if (!b) return;
+    const day = ficheDayOf(), sh = document.getElementById('gSheet'), d = (sh && sh.dataset.day) || day;
+    if (b.dataset.pm === 'chk') ssCheck(d, b.dataset.s, b.dataset.c);
+    else if (b.dataset.pm === 'inval') ssInvalidate(d, b.dataset.s);
+    else if (b.dataset.pm === 'link') ficheLink(b.dataset.id, b.dataset.s);
+  });
+  Object.assign(window.SweepFiche, { markTrade: ficheMarkTrade, offerLink: ficheOfferLink, link: ficheLink, over: (day) => { const f = ficheGet(day); return f ? ssOver(f) : ''; } });
   Object.assign(window.SweepFiche, { open: openPremarket, scenarios: pmScenarios, target: pmTarget, compute: pmCompute, viable: pmViable, line: pmScenarioLine, sheetHtml: pmSheetHtml });
 
   /* ───────────── Quick journal (carousel) ───────────── */
