@@ -58,7 +58,7 @@ with sync_playwright() as p:
     ok(st == 200 and srv and 'junk' not in srv and srv['limits']['risk_pct'] == 0.5 and srv['limits']['max_trades'] == 20, f'4 {w}: the server keeps the model only ({srv and srv["limits"]})')
     lk = pg.evaluate("(d) => { const f = SweepFiche.get(d); f.locked_at = Math.floor(Date.now() / 1000); const a = SweepFiche.save(f); const g = SweepFiche.get(d); g.instrument = 'NQ'; return [a, SweepFiche.save(g), SweepFiche.get(d).instrument] }", DAY)
     ok(lk == [True, False, 'MES'], f'5 {w}: locked, the sheet changes no more ({lk})')
-    pg.evaluate("async (d) => { await fetch('api/docs/journals/' + d, {method: 'DELETE', headers: {'X-Requested-With': 'fetch'}}) }", DAY)
+    pg.wait_for_timeout(1500); pg.evaluate("(d) => remove('journals', d)", DAY); pg.wait_for_timeout(1500)   # (the app's own delete: after its queued sends)
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
   br.close()

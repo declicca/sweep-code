@@ -87,7 +87,7 @@ with sync_playwright() as p:
     f = pg.evaluate("(d) => (getDoc('journals', d) || {}).fiche", nday)
     ok(f and len(f['scenarios']) == 1 and f['scenarios'][0]['conditions'][0] == 'news_15m' and f['news_windows'][0]['start'] == '08:25' and f['news_windows'][0]['end'] == '08:45',
        f"5 {w}: B removed; the news condition first, window 08:25–08:45 ({f and f['news_windows']})")
-    for d in (day, nday): pg.evaluate("async (d) => { await fetch('api/docs/journals/' + d, {method: 'DELETE', headers: {'X-Requested-With': 'fetch'}}) }", d)
+    for d in (day, nday): (pg.wait_for_timeout(1500), pg.evaluate("(d) => remove('journals', d)", d), pg.wait_for_timeout(1500))
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
   br.close()

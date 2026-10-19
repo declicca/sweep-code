@@ -240,8 +240,8 @@
     if (p && typeof s === 'string') s = s.replace(/\{(\w+)\}/g, (m, k) => (p[k] != null ? p[k] : m));
     return s;
   }
-  if (window.I18N_FR) Object.assign(window.I18N_FR, { Progress: 'Progression' });
-  if (window.I18N_ES) Object.assign(window.I18N_ES, { Progress: 'Progreso' });
+  if (window.I18N_FR) Object.assign(window.I18N_FR, { Progress: 'Progression', 'Pre-market sheet locks at (New York)': 'Verrouillage de la fiche pre-market (New York)' });
+  if (window.I18N_ES) Object.assign(window.I18N_ES, { Progress: 'Progreso', 'Pre-market sheet locks at (New York)': 'Bloqueo de la ficha pre-market (Nueva York)' });
 
   const rankName = (k) => t('rk.' + k);
   const bName = (id) => /^season_\d{6}$/.test(id) && typeof sst === 'function' ? sst('season', { n: seasonNum(id.slice(7)) }) : (/^boss_/.test(id) && id !== 'boss_for_good' && typeof bossName === 'function' ? bossName(id.slice(5)) : (D[L()].b[id] || D.en.b[id] || [id])[0]);
@@ -584,14 +584,19 @@
     return j ? j.fiche.instrument : '';
   }
   const fNum = (v) => (v === '' || v == null || !isFinite(+v) ? null : +v);
+  /** estimated R: |target − entry| / |entry − stop| (entry = the level), one decimal — the same as Fiche::r() */
+  const ficheR = (l, s, t) => (l == null || s == null || t == null || l === s ? null : Math.round(Math.abs(t - l) / Math.abs(l - s) * 10) / 10);
+  /** checked boxes: one counts only when the one before it is checked */
+  const fichePrefix = (conds, done) => { const o = []; for (const c of conds) { if (!done.includes(c)) break; o.push(c); } return o; };
+  const ficheViable = (f) => !!(f && f.scenarios.length && f.scenarios.every((s) => s.r_estimate != null && s.r_estimate >= 2));
   /** a sheet with only known fields and the right types (the same as Fiche::normalize on the server) */
   function ficheNormalize(f, day) {
     f = f || {}; const lv = f.levels || {}, lim = f.limits || {};
     const sc = (Array.isArray(f.scenarios) ? f.scenarios : []).slice(0, 2).filter((s) => s && typeof s === 'object').map((s, i) => {
       const type = FICHE.TYPES.includes(s.type) ? s.type : 'breakout', cond = ficheConditions(type, !!(f.answers && f.answers.B2 === 'yes' && f.answers.B1 === 'yes'));
       return { id: ['A', 'B'].includes(s.id) ? s.id : (i ? 'B' : 'A'), direction: s.direction === 'short' ? 'short' : 'long', type,
-        level: fNum(s.level), stop_estimate: fNum(s.stop_estimate), target: fNum(s.target), r_estimate: fNum(s.r_estimate),
-        conditions: cond, done: cond.filter((c) => (s.done || []).includes(c)), status: FICHE.STATUSES.includes(s.status) ? s.status : 'waiting',
+        level: fNum(s.level), stop_estimate: fNum(s.stop_estimate), target: fNum(s.target), r_estimate: ficheR(fNum(s.level), fNum(s.stop_estimate), fNum(s.target)),
+        conditions: cond, done: fichePrefix(cond, s.done || []), status: FICHE.STATUSES.includes(s.status) ? s.status : 'waiting',
         source: s.source === 'auto' ? 'auto' : 'manual' };
     });
     const rp = fNum(lim.risk_pct);
@@ -616,15 +621,23 @@
   const ficheGet = (day) => { const j = journalOf(day); return j.fiche ? ficheNormalize(j.fiche, day) : null; };
   /** locked: by the trader (locked_at) or by the clock (the lock time of its day is past) */
   const ficheLocked = (f, nowS) => !!(f && (f.locked_at || ((nowS == null ? Date.now() / 1000 : nowS) >= ficheLockAt(f.trading_day))));
-  /** keeps a sheet; a locked one changes no more (false) */
+  /** keeps a sheet. A locked one keeps its plan: only the scenarios' status and checked boxes and the invalidations follow
+   *  (false when anything else was asked). It locks only with every scenario viable. (The server does the same, Fiche::apply.) */
   function ficheSave(f) {
     const day = f && f.trading_day; if (!day) return false;
-    const old = ficheGet(day); if (old && ficheLocked(old)) return false;
-    const j = structuredClone(journalOf(day)); j.id = day; j.fiche = ficheNormalize(f, day);
-    put('journals', j); return true;
+    const old = ficheGet(day), n = ficheNormalize(f, day), j = structuredClone(journalOf(day)); j.id = day;
+    if (old && ficheLocked(old)) {
+      const k = structuredClone(old);
+      k.scenarios.forEach((s) => { const x = n.scenarios.find((y) => y.id === s.id); if (x) { s.status = x.status; s.done = fichePrefix(s.conditions, x.done); } });
+      k.invalidations = n.invalidations;
+      const same = JSON.stringify(Object.assign({}, n, { scenarios: n.scenarios.map((s) => Object.assign({}, s, { status: 0, done: 0 })), invalidations: 0 })) === JSON.stringify(Object.assign({}, old, { scenarios: old.scenarios.map((s) => Object.assign({}, s, { status: 0, done: 0 })), invalidations: 0 }));
+      j.fiche = k; put('journals', j); return same;
+    }
+    if (n.locked_at && !ficheViable(n)) n.locked_at = null;
+    j.fiche = n; put('journals', j); return true;
   }
   window.SweepFiche = { dayOf: ficheDayOf, lockAt: ficheLockAt, lockHm: ficheLockHm, locked: ficheLocked, conditions: ficheConditions,
-    normalize: ficheNormalize, blank: ficheBlank, get: ficheGet, save: ficheSave, lastInstrument: ficheLastInstrument, K: FICHE };
+    normalize: ficheNormalize, blank: ficheBlank, get: ficheGet, save: ficheSave, lastInstrument: ficheLastInstrument, viable: ficheViable, K: FICHE };
 
   /* ───────────── Pre-market questionnaire (brief « Plan pre-market adaptatif », steps 2 and 3) ─────────────
      One question per screen (a few fields when they belong together): base data, where the price is, news, scenarios,
@@ -650,7 +663,7 @@
       d1: 'How did your last session go?', gain: 'Win', loss: 'Loss', max_loss: 'Max loss', none: 'Did not trade',
       d1_reduce: 'Last session hit your max loss. Risk 0.25 % per trade today?', accept: 'Accept', refuse: 'Refuse',
       limits: 'Your limits today', d3: 'Max trades today', d4: 'Trading time limit', d4_ph: 'e.g. 11:30', dml: 'Max loss today', risk: 'Risk per trade',
-      sheet: 'Your plan sheet', sc_a: 'Scenario A', sc_b: 'Scenario B', notrade: 'No-trade', lim: 'Limits', after: 'after {t}', window: 'blocked window {a}–{b}',
+      lock: 'Lock my plan', locked: 'Locked at {t}', locks_at: 'It locks by itself at {t} (New York). After that, only the checklist changes.', locked_title: 'Your locked plan', sheet: 'Your plan sheet', sc_a: 'Scenario A', sc_b: 'Scenario B', notrade: 'No-trade', lim: 'Limits', after: 'after {t}', window: 'blocked window {a}–{b}',
       risk_l: 'Risk {p} %', trades_l: '{n} trades', trades_l1: '1 trade', or: ' or ',
       t_breakout: 'Breakout', t_breakdown: 'Breakdown', t_continuation: 'Continuation', t_reclaim: 'Reclaim', t_rejection: 'Rejection',
       d_long: 'Long', d_short: 'Short',
@@ -673,7 +686,7 @@
       d1: 'Résultat de ta dernière séance ?', gain: 'Gain', loss: 'Perte', max_loss: 'Perte max', none: 'Pas tradé',
       d1_reduce: 'Ta dernière séance a touché ta perte max. Risquer 0,25 % par trade aujourd’hui ?', accept: 'Accepter', refuse: 'Refuser',
       limits: 'Tes limites du jour', d3: 'Trades max aujourd’hui', d4: 'Heure limite de trading', d4_ph: 'ex. 11:30', dml: 'Perte max du jour', risk: 'Risque par trade',
-      sheet: 'Ta fiche de plan', sc_a: 'Scénario A', sc_b: 'Scénario B', notrade: 'No-trade', lim: 'Limites', after: 'après {t}', window: 'fenêtre bloquée {a}–{b}',
+      lock: 'Verrouiller mon plan', locked: 'Verrouillée à {t}', locks_at: 'Elle se verrouille toute seule à {t} (New York). Ensuite, seule la checklist change.', locked_title: 'Ton plan verrouillé', sheet: 'Ta fiche de plan', sc_a: 'Scénario A', sc_b: 'Scénario B', notrade: 'No-trade', lim: 'Limites', after: 'après {t}', window: 'fenêtre bloquée {a}–{b}',
       risk_l: 'Risque {p} %', trades_l: '{n} trades', trades_l1: '1 trade', or: ' ou ',
       t_breakout: 'Breakout', t_breakdown: 'Breakdown', t_continuation: 'Continuation', t_reclaim: 'Reclaim', t_rejection: 'Rejet',
       d_long: 'Long', d_short: 'Short',
@@ -696,7 +709,7 @@
       d1: '¿Resultado de tu última sesión?', gain: 'Ganancia', loss: 'Pérdida', max_loss: 'Pérdida máx.', none: 'No operé',
       d1_reduce: 'Tu última sesión tocó tu pérdida máxima. ¿Arriesgar 0,25 % por operación hoy?', accept: 'Aceptar', refuse: 'Rechazar',
       limits: 'Tus límites de hoy', d3: 'Operaciones máx. hoy', d4: 'Hora límite para operar', d4_ph: 'p. ej. 11:30', dml: 'Pérdida máx. del día', risk: 'Riesgo por operación',
-      sheet: 'Tu ficha de plan', sc_a: 'Escenario A', sc_b: 'Escenario B', notrade: 'No operar', lim: 'Límites', after: 'después de {t}', window: 'ventana bloqueada {a}–{b}',
+      lock: 'Bloquear mi plan', locked: 'Bloqueada a las {t}', locks_at: 'Se bloquea sola a las {t} (Nueva York). Después, solo cambia la checklist.', locked_title: 'Tu plan bloqueado', sheet: 'Tu ficha de plan', sc_a: 'Escenario A', sc_b: 'Escenario B', notrade: 'No operar', lim: 'Límites', after: 'después de {t}', window: 'ventana bloqueada {a}–{b}',
       risk_l: 'Riesgo {p} %', trades_l: '{n} operaciones', trades_l1: '1 operación', or: ' o ',
       t_breakout: 'Breakout', t_breakdown: 'Breakdown', t_continuation: 'Continuación', t_reclaim: 'Reclaim', t_rejection: 'Rechazo',
       d_long: 'Long', d_short: 'Short',
@@ -827,8 +840,15 @@
     try { if (typeof loadEcon === 'function') await loadEcon(day, day); } catch (e) { /* the calendar is a help, not a need */ }
     PM.news = pmCalendar(day);
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
+    if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-plan g-pm g-pm-locked' }); return; }
+    if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
     openSheet(pmHtml(), { cls: 'g-plan g-pm' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;
+  }
+  /** the locked plan: the sheet only (the session view, brief step 5, adds its checklist) */
+  function pmLockedHtml(f) {
+    const at = f.locked_at || ficheLockAt(f.trading_day), hm = typeof etStr === 'function' ? etStr(at).slice(11, 16) : '';
+    return `${head(pt('locked_title'), `${fdate(f.trading_day, { weekday: 'long', month: 'long', day: 'numeric' })} · ${esc(pt('locked', { t: hm }))}`)}${pmSheetHtml(f)}`;
   }
   const pmSeg = (q, opts, cur) => `<div class="g-seg4 pm-seg">${opts.map((o) => `<button type="button" class="${cur === o ? 'on' : ''}" data-pm="ans" data-q="${q}" data-v="${o}">${esc(pt(o))}</button>`).join('')}</div>`;
   const pmIn = (k, v, ph, mode) => `<input type="text" inputmode="${mode || 'decimal'}" data-pmf="${k}" value="${v == null ? '' : esc(String(v))}" placeholder="${esc(ph || '')}" enterkeyhint="next">`;
@@ -873,7 +893,7 @@
       <div class="g-row2"><label class="g-f"><span>${pt('d3')}</span>${pmIn('lim.max_trades', f.limits.max_trades, '2', 'numeric')}</label>
       <label class="g-f"><span>${pt('d4')}</span><input type="time" data-pmf="lim.time_limit" value="${esc(f.limits.time_limit || '')}"></label></div>
       <label class="g-f"><span>${pt('dml')}</span>${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</label>`;
-    if (name === 'sheet') return `<h3 class="pm-q">${pt('sheet')}</h3>${pmSheetHtml(pmFinal())}<p class="g-err" id="gErr"></p>`;
+    if (name === 'sheet') return `<h3 class="pm-q">${pt('sheet')}</h3>${pmSheetHtml(pmFinal())}<p class="g-hint g-hint-sm pm-locks">${esc(pt('locks_at', { t: ficheLockHm() }))}</p><p class="g-err" id="gErr"></p>`;
     return '';
   }
   function pmHtml() {
@@ -882,7 +902,8 @@
       <div class="pm-body" data-pm-screen="${name}">${pmScreen(name)}</div>
       ${PM.err ? `<p class="g-err pm-err">${esc(PM.err)}</p>` : ''}
       ${last ? `<div class="pm-nav"><button type="button" class="btn pm-back" data-pm="back">${pt('back')}</button></div>
-      <button type="button" class="btn primary g-big pm-save" data-g="save-plan" data-pm="save">${pt('save')}</button>` : `<div class="pm-nav">${i > 0 ? `<button type="button" class="btn pm-back" data-pm="back">${pt('back')}</button>` : ''}
+      <button type="button" class="btn primary g-big pm-save" data-g="save-plan" data-pm="save">${pt('save')}</button>
+      <button type="button" class="btn pm-lock" data-pm="lock">${pt('lock')}</button>` : `<div class="pm-nav">${i > 0 ? `<button type="button" class="btn pm-back" data-pm="back">${pt('back')}</button>` : ''}
       <button type="button" class="btn primary g-big" data-pm="next">${pt('next')}</button></div>`}`;   // (the pre-market chart and screenshots come in before « Save »)
   }
   /** the scenarios as the answers make them (C1 level, C2 kept or not, C3 targets), with stop and R */
@@ -940,8 +961,9 @@
     if (fk) { const i = el.querySelector(`[data-pmf="${fk}"]`); if (i) { i.focus(); const n = i.value.length; try { i.setSelectionRange(n, n); } catch (e) { /* time inputs */ } } }
   }
   /** writes the sheet and the day's plan together (one journal write) */
-  function pmSave() {
+  function pmSave(lock) {
     const f = pmFinal(); if (!f.scenarios.length || !f.scenarios.every(pmViable)) { PM.err = pt('needs'); pmRender(); return; }
+    if (lock) f.locked_at = Math.floor(Date.now() / 1000);   // « Lock my plan »: from now on, only the checklist
     const old = ficheGet(PM.day); if (old && ficheLocked(old)) return;
     const j = structuredClone(journalOf(PM.day)); j.id = PM.day; j.fiche = f;
     const a = f.answers, lv = f.levels, A = f.scenarios[0], prev = lastPlan(PM.day, true);
@@ -984,6 +1006,7 @@
       const box = document.querySelector('#gSheet .g-in'); if (box) box.scrollTop = 0;
     } else if (act === 'back') { PM.err = ''; PM.i = Math.max(0, PM.i - 1); pmRender(); }
     else if (act === 'save') pmSave();
+    else if (act === 'lock') pmSave(true);
     else if (act === 'dayoff') {   // « Not trading today »: a day off before any trade of the day, the same as the routine's button
       const j = structuredClone(journalOf(PM.day)); j.id = PM.day;
       j.pre = Object.assign({}, j.pre || {}, { saved_at: (j.pre && j.pre.saved_at) || Math.floor(Date.now() / 1000), bias: 'no_trade', day_off: !(S.trades || []).some((x) => !x.demo && x.date === PM.day) });

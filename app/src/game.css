@@ -821,6 +821,8 @@ button.gc-meta{display:flex;align-items:center;gap:6px;padding:0;border:0;backgr
 .g-pm .pm-seg button.on{background:var(--blue-btn);color:var(--on-blue)}
 .g-pm .pm-save{width:100%;margin-top:14px}
 .g-pm .pm-off-day{justify-self:start;margin-top:4px}
+.g-pm .pm-lock{width:100%;margin-top:10px}
+.g-pm .pm-locks{margin:4px 0 0}
 .g-pm .pm-rem{margin:0;padding:10px 12px;border-radius:var(--r2);background:var(--tint);font-size:14px;line-height:1.4}
 .pm-sheet{display:grid;gap:10px;padding:16px;border-radius:var(--r3);background:var(--fill);font-size:15px;line-height:1.45}
 .pm-sheet .pm-l{margin:0}

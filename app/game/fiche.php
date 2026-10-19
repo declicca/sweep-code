@@ -44,6 +44,31 @@ final class Fiche
     }
 
     private static function num($v): ?float { return is_numeric($v) ? (float) $v : null; }
+    /** checked boxes: a box only counts when the one before it is checked (the checklist's order) */
+    public static function prefix(array $conds, array $done): array { $o = []; foreach ($conds as $c) { if (!in_array($c, $done, true)) break; $o[] = $c; } return $o; }
+    /** estimated R: |target − entry| / |entry − stop|, the entry being the scenario's level; one decimal */
+    public static function r(?float $level, ?float $stop, ?float $target): ?float
+    {
+        if ($level === null || $stop === null || $target === null || $level == $stop) return null;
+        return round(abs($target - $level) / abs($level - $stop), 1);
+    }
+    public static function viable(array $f): bool
+    {
+        if (!$f['scenarios']) return false;
+        foreach ($f['scenarios'] as $s) if ($s['r_estimate'] === null || $s['r_estimate'] < 2) return false;
+        return true;
+    }
+    /** now (SWEEP_GAME_NOW, New York time, pins it in tests — like GameEngine::ts()) */
+    public static function now(): int
+    {
+        $e = getenv('SWEEP_GAME_NOW');
+        return $e ? (new DateTimeImmutable($e, self::tz()))->getTimestamp() + (time() - (int) ($_SERVER['REQUEST_TIME'] ?? time())) : time();
+    }
+    /** locked: by the trader (locked_at) or by the clock (the lock time of its day is past) */
+    public static function isLocked(array $f, int $now, ?string $hm = null): bool
+    {
+        return !empty($f['locked_at']) || $now >= self::lockEpoch((string) $f['trading_day'], $hm);
+    }
 
     /** a sheet as the server keeps it: known fields only, the right types; what the client sent beyond that is dropped */
     public static function normalize(array $f, string $day): array
@@ -58,9 +83,9 @@ final class Fiche
                 'direction' => ($s['direction'] ?? '') === 'short' ? 'short' : 'long',
                 'type' => $type,
                 'level' => self::num($s['level'] ?? null), 'stop_estimate' => self::num($s['stop_estimate'] ?? null),
-                'target' => self::num($s['target'] ?? null), 'r_estimate' => self::num($s['r_estimate'] ?? null),
+                'target' => self::num($s['target'] ?? null), 'r_estimate' => self::r(self::num($s['level'] ?? null), self::num($s['stop_estimate'] ?? null), self::num($s['target'] ?? null)),
                 'conditions' => self::conditions($type, $news),
-                'done' => array_values(array_intersect(self::conditions($type, $news), is_array($s['done'] ?? null) ? $s['done'] : [])),
+                'done' => self::prefix(self::conditions($type, $news), is_array($s['done'] ?? null) ? $s['done'] : []),
                 'status' => in_array($s['status'] ?? '', self::STATUSES, true) ? $s['status'] : 'waiting',
                 'source' => ($s['source'] ?? '') === 'auto' ? 'auto' : 'manual',
             ];
@@ -91,13 +116,33 @@ final class Fiche
         ];
     }
 
-    /** a journal document on its way in (PUT or batch): its sheet, if any, normalized; none on a document that is not a day */
-    public static function apply(array $doc, string $id): array
+    /**
+     * a journal document on its way in (PUT or batch), $prev the stored one: its sheet normalized; a locked sheet keeps its
+     * plan (levels, scenarios, limits…), only the scenarios' status and checked boxes and the invalidations follow; a sheet
+     * is never dropped by a document that does not carry it; it locks only with every scenario viable (2R or more).
+     */
+    public static function apply(array $doc, string $id, ?array $prev = null, ?int $now = null, ?string $hm = null): array
     {
-        if (!array_key_exists('fiche', $doc)) return $doc;
-        if ($doc['fiche'] === null) return $doc;
-        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $id) || !is_array($doc['fiche'])) { unset($doc['fiche']); return $doc; }
-        $doc['fiche'] = self::normalize($doc['fiche'], $id);
+        $isDay = (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $id);
+        $old = $isDay && is_array($prev['fiche'] ?? null) ? self::normalize($prev['fiche'], $id) : null;
+        $now ??= self::now();
+        if (!$isDay) { unset($doc['fiche']); return $doc; }
+        if (!array_key_exists('fiche', $doc)) { if ($old) $doc['fiche'] = $old; return $doc; }
+        if ($old && self::isLocked($old, $now, $hm)) {
+            $new = is_array($doc['fiche']) ? self::normalize($doc['fiche'], $id) : null;
+            if ($new) {
+                foreach ($old['scenarios'] as $i => $s) {
+                    foreach ($new['scenarios'] as $n) if ($n['id'] === $s['id']) { $old['scenarios'][$i]['status'] = $n['status']; $old['scenarios'][$i]['done'] = self::prefix($s['conditions'], $n['done']); }
+                }
+                $old['invalidations'] = $new['invalidations'];
+            }
+            $doc['fiche'] = $old;
+            return $doc;
+        }
+        if ($doc['fiche'] === null || !is_array($doc['fiche'])) { unset($doc['fiche']); return $doc; }
+        $f = self::normalize($doc['fiche'], $id);
+        if ($f['locked_at'] !== null && !self::viable($f)) $f['locked_at'] = null;   // under 2R: no lock
+        $doc['fiche'] = $f;
         return $doc;
     }
 }

@@ -42,5 +42,25 @@ $ok(!isset(Fiche::apply(['fiche' => ['instrument' => 'NQ']], 'notes')['fiche']),
 $ok(Fiche::apply(['fiche' => ['instrument' => 'NQ']], '2026-10-20')['fiche']['instrument'] === 'NQ', '4 a day\'s sheet normalized');
 $ok(Fiche::apply(['pre' => ['bias' => 'bullish']], '2026-10-20') === ['pre' => ['bias' => 'bullish']], '4 a journal without a sheet is untouched');
 
+// 5. the lock (step 4)
+$sheet = fn(array $x = []) => array_replace_recursive(['instrument' => 'MES', 'levels' => ['london_high' => 5820, 'london_low' => 5800],
+    'scenarios' => [['id' => 'A', 'direction' => 'long', 'type' => 'breakout', 'level' => 5820, 'stop_estimate' => 5814, 'target' => 5850]], 'limits' => ['max_trades' => 2]], $x);
+$day = '2026-10-20'; $before = $ny('2026-10-20 08:00'); $after = $ny('2026-10-20 09:30');
+$prev = ['fiche' => Fiche::normalize($sheet(), $day)];
+$ok(Fiche::normalize($sheet(), $day)['scenarios'][0]['r_estimate'] === 5.0, '5 R recomputed by the server: 30 / 6 = 5');
+$d = Fiche::apply(['fiche' => $sheet(['levels' => ['london_high' => 5830]])], $day, $prev, $before);
+$ok($d['fiche']['levels']['london_high'] === 5830.0, '5 before 09:25: the sheet changes');
+$d = Fiche::apply(['fiche' => $sheet(['levels' => ['london_high' => 5830], 'scenarios' => [['status' => 'confirmed', 'done' => ['close_15m', 'trigger_5m']]], 'invalidations' => 1])], $day, $prev, $after);
+$ok($d['fiche']['levels']['london_high'] === 5820.0 && $d['fiche']['scenarios'][0]['level'] === 5820.0, '5 after 09:25: levels and scenarios stay');
+$ok($d['fiche']['scenarios'][0]['status'] === 'confirmed' && $d['fiche']['scenarios'][0]['done'] === ['close_15m'] && $d['fiche']['invalidations'] === 1, '5 … the status, the boxes in order (trigger without retest: not counted), the invalidations follow');
+$ok(Fiche::apply(['fiche' => $sheet(['levels' => ['london_high' => 5830]])], $day, $prev, $after, '10:00')['fiche']['levels']['london_high'] === 5830.0, '5 the trader\'s lock time (10:00): still open at 09:30');
+$lk = ['fiche' => Fiche::normalize($sheet(['locked_at' => $before]), $day)];
+$ok(Fiche::apply(['fiche' => $sheet(['limits' => ['max_trades' => 5], 'locked_at' => null])], $day, $lk, $before)['fiche']['limits']['max_trades'] === 2, '5 locked by hand: limits stay, and it does not unlock');
+$ok(Fiche::apply(['pre' => ['bias' => 'bullish']], $day, $prev, $before)['fiche']['levels']['london_high'] === 5820.0, '5 a journal sent without its sheet keeps it');
+$ok(!isset(Fiche::apply(['fiche' => null], $day, $prev, $before)['fiche']), '5 before the lock, an explicit null removes it');
+$ok(Fiche::apply(['fiche' => null], $day, $prev, $after)['fiche']['levels']['london_high'] === 5820.0, '5 after the lock, it cannot be removed');
+$ok(Fiche::apply(['fiche' => $sheet(['scenarios' => [['target' => 5825]], 'locked_at' => $before])], $day, null, $before)['fiche']['locked_at'] === null, '5 under 2R (5 825: 0.8R), the sheet does not lock');
+$ok(Fiche::apply(['fiche' => $sheet(['locked_at' => $before])], $day, null, $before)['fiche']['locked_at'] === $before, '5 viable: it locks');
+
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);
