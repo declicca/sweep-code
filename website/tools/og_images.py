@@ -58,6 +58,8 @@ def entries():
         ("trading-journal-guide.html", T("How to keep a trading journal", "Tenir un journal de trading", "Cómo llevar un diario de trading"),
          T("The complete guide: what to record, the numbers, the review", "Le guide complet : quoi noter, les chiffres, la revue", "La guía completa: qué anotar, las cifras, la revisión")),
         ("ninjatrader.html", T("NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep"),
+         T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas")),
+        ("quantower.html", T("Quantower → Sweep", "Quantower → Sweep", "Quantower → Sweep"),
          T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas"))):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
     pro = pages4.PRICES["pro"]["m"]

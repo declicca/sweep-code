@@ -25,7 +25,9 @@ L'audit cherche donc ce que ces tests ne voient pas.
 - Étape 1 (faits faux, textes légaux), étape 2 (ce que le site ne disait pas), étape 3 (textes et traductions) : faites.
 - Étape 4 : 4a serveur et performance, 4b accessibilité et visuel, 4c SEO : faites ; aussi une CSP sur les pages et le préchargement de Geist Mono.
 - Vidéo de l'accueil réencodée en 1080p (`ffmpeg`) : WebM 3,8 → 1,5 Mo, MP4 5,6 → 1,8 Mo, même qualité visible.
-- Reste à Mateo : les 5 décisions ci-dessous (Quantower, captures en Free, comptes Pro, synchro Rithmic/Tradovate, bleu des boutons) et la compression du serveur (cPanel › Optimiser le site Web › Compresser tout le contenu).
+- Les 5 décisions, tranchées par Mateo le 18 oct. et en ligne : Quantower partout ; captures en Free, 3 par jour ; synchro Rithmic/Tradovate « prévue plus tard » ; bleu des boutons foncé (#2F6FE8) et boutons refaits. Comptes en Pro : carte blanche, « illimité » comme l'app (brief `briefs/brief-app-forfaits-2026-10-18.md`).
+- Ajoutés le 18 oct. au soir : animations pilotées par le défilement (comme apple.com) ; page `/quantower` ; page Tarifs refaite pour la conversion (limites chiffrées, une raison par forfait, « Pourquoi les traders passent à Pro », tableau groupé, offre fondateur retirée de la page publique).
+- Reste à Mateo : la compression du serveur (cPanel › Optimiser le site Web › Compresser tout le contenu) ; vérifier dans `sweep-private/billing-config.php` que Free garde 2 comptes et que Pro est illimité.
 - Reste en attente : étape 5 (captures et vidéos de la session App).
 - Laissés volontairement : copies de 300 px des vignettes de téléphone (gain seulement sur les écrans 1x), textes des paires firme contre firme (proches par construction, déjà chiffrés), HSTS `includeSubDomains` (sous-domaines cPanel non vérifiés), Geist Mono réduite (elle n'a que 440 glyphes latins : 1,2 Ko de gagné seulement, et « chiffres seulement » casserait les dates en chasse fixe ; elle est préchargée).
 

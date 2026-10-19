@@ -13,7 +13,7 @@
  },
  "ai.html": {
   "date": "2026-10-18",
-  "hash": "c5f27a732dd96782"
+  "hash": "209e8d23c5b682d1"
  },
  "best-trading-journal-for-prop-firms.html": {
   "date": "2026-10-18",
@@ -113,7 +113,7 @@
  },
  "free-trading-journal.html": {
   "date": "2026-10-18",
-  "hash": "3e0102fb00e4ac67"
+  "hash": "e2c7c698268318f5"
  },
  "futures-contracts.html": {
   "date": "2026-10-15",
@@ -145,15 +145,15 @@
  },
  "import-rithmic.html": {
   "date": "2026-10-18",
-  "hash": "70cb5696b4eefe6c"
+  "hash": "1db37576c24d780c"
  },
  "import-topstepx.html": {
   "date": "2026-10-18",
-  "hash": "e199125f13b3612f"
+  "hash": "247af55b9b600cc9"
  },
  "import-tradovate.html": {
   "date": "2026-10-18",
-  "hash": "d78d60c033580bb0"
+  "hash": "ff5c45c5f8a79db8"
  },
  "import.html": {
   "date": "2026-10-18",
@@ -161,7 +161,7 @@
  },
  "index.html": {
   "date": "2026-10-18",
-  "hash": "9f75d973b91ab1d7"
+  "hash": "e809ad4b6eff613f"
  },
  "install.html": {
   "date": "2026-10-18",
@@ -177,7 +177,7 @@
  },
  "ninjatrader.html": {
   "date": "2026-10-18",
-  "hash": "d66283772e27430c"
+  "hash": "8ff2b3452fe12c2f"
  },
  "payout-calculator.html": {
   "date": "2026-10-15",
@@ -205,7 +205,7 @@
  },
  "pricing.html": {
   "date": "2026-10-18",
-  "hash": "bbf8ca74c800fa08"
+  "hash": "7e2f5458ec54fc5f"
  },
  "privacy.html": {
   "date": "2026-10-18",
@@ -295,6 +295,10 @@
   "date": "2026-10-18",
   "hash": "616020e814bcac51"
  },
+ "quantower.html": {
+  "date": "2026-10-18",
+  "hash": "47664b8c171c66ab"
+ },
  "release-dates.html": {
   "date": "2026-10-18",
   "hash": "fc3a91f87fccb3d9"
@@ -313,19 +317,19 @@
  },
  "sweep-vs-edgewonk.html": {
   "date": "2026-10-18",
-  "hash": "e7337059c15fadbe"
+  "hash": "318db802feed05e1"
  },
  "sweep-vs-tradersync.html": {
   "date": "2026-10-18",
-  "hash": "edeaf1e2ed9e57d2"
+  "hash": "b7b0784267d53051"
  },
  "sweep-vs-tradervue.html": {
   "date": "2026-10-18",
-  "hash": "7430a21d3471d23e"
+  "hash": "3ab9622a1ab07b32"
  },
  "sweep-vs-tradezella.html": {
   "date": "2026-10-18",
-  "hash": "73194fbe011b4f83"
+  "hash": "53facd98d9e7303c"
  },
  "terms.html": {
   "date": "2026-10-18",

@@ -34,7 +34,7 @@ L = {"free": T("Free plan","Forfait gratuit","Plan gratis"), "trial": T("Trial o
      "charts": T("Charts of your trades","Graphiques de tes trades","Gráficos de tus operaciones"), "mentor": T("Mentoring","Mentorat","Mentoría"),
      "ai": T("AI assistant","Assistant IA","Asistente de IA"), "mobile": T("On your phone","Sur ton téléphone","En tu teléfono"),
      "psych": T("Psychology and discipline","Psychologie et discipline","Psicología y disciplina"), "markets": T("Markets","Marchés","Mercados")}
-SW = {"free": T("Yes, no time limit, no card","Oui, sans limite de temps, sans carte","Sí, sin límite de tiempo, sin tarjeta"), "trial": T("60 days of Pro","60 jours de Pro","60 días de Pro"),
+SW = {"free": T("Yes: 2 prop accounts, no time limit, no card","Oui : 2 comptes prop, sans limite de temps, sans carte","Sí: 2 cuentas prop, sin límite de tiempo, sin tarjeta"), "trial": T("60 days of Pro","60 jours de Pro","60 días de Pro"),
       "month": T("Pro $19 · Elite $39","Pro 19 $ · Elite 39 $","Pro 19 $ · Elite 39 $"),
       "year": T("Pro $159 · Elite $329","Pro 159 $ · Elite 329 $","Pro 159 $ · Elite 329 $"),
       "add": T("NinjaTrader 8 and Quantower sync, file import, screenshot read by AI, or by hand","Synchro NinjaTrader 8 et Quantower, import de fichier, capture lue par l’IA, ou à la main","Sincronización con NinjaTrader 8 y Quantower, importación de archivo, captura leída por la IA o a mano"),

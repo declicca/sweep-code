@@ -483,6 +483,7 @@ REL_INFO = {
  "payout-tracker.html": (T("Payout tracker","Suivi des payouts","Seguimiento de payouts"), T("From request to paid, and your real net.","De la demande au paiement, et ton vrai net.","De la solicitud al pago, y tu neto real.")),
  "free-trading-journal.html": (T("Free trading journal","Journal de trading gratuit","Diario de trading gratis"), T("What stays free, forever.","Ce qui reste gratuit, pour toujours.","Lo que sigue siendo gratis, para siempre.")),
  "ninjatrader.html": (T("NinjaTrader 8 sync","Synchro NinjaTrader 8","Sincronización NinjaTrader 8"), T("Your trades arrive on their own.","Tes trades arrivent tout seuls.","Tus operaciones llegan solas.")),
+ "quantower.html": (T("Quantower sync","Synchro Quantower","Sincronización Quantower"), T("Your trades arrive on their own.","Tes trades arrivent tout seuls.","Tus operaciones llegan solas.")),
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
  "how-we-verify-prop-firm-rules.html": (T("How we verify the rules","Notre méthode de vérification","Cómo verificamos las reglas"), T("Sources, frequency and limits.","Sources, fréquence et limites.","Fuentes, frecuencia y límites.")),
@@ -513,7 +514,8 @@ RELATED = {
  "prop-firm-profit-targets.html": ["position-size-calculator.html", "prop-firm-drawdown-rules.html", "trading-journal-guide.html"],
  "prop-firm-rule-changes.html": ["prop-firms/index.html", "how-we-verify-prop-firm-rules.html", "prop-firm-tracker.html"],
  "how-we-verify-prop-firm-rules.html": ["prop-firm-rule-changes.html", "prop-firms/index.html", "prop-firm-payout-rules.html"],
- "ninjatrader.html": ["import.html", "prop-firm-tracker.html", "features.html"],
+ "ninjatrader.html": ["import.html", "quantower.html", "prop-firm-tracker.html"],
+ "quantower.html": ["import.html", "ninjatrader.html", "prop-firm-tracker.html"],
  "prop-firm-minimum-days.html": ["prop-firm-payout-rules.html", "prop-firm-consistency-rules.html", "trading-journal-guide.html"],
  "prop-firm-costs.html": ["prop-firm-roi-calculator.html", "payout-tracker.html", "prop-firm-profit-targets.html"],
  "prop-firms/index.html": ["prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html", "prop-firm-tracker.html"],
@@ -568,7 +570,7 @@ def add_related(lang, t, page, body):
 # (never in a lead paragraph, a heading, bold text, an existing link, a script, or a paragraph marked data-nolinks).
 LINK_TERMS = [
  ("ninjatrader.html", T(r"NinjaTrader 8", r"NinjaTrader 8", r"NinjaTrader 8")),
- ("import.html#quantower", T(r"Quantower", r"Quantower", r"Quantower")),
+ ("quantower.html", T(r"Quantower", r"Quantower", r"Quantower")),
  ("glossary.html#trailing-drawdown", T(r"trailing drawdowns?", r"drawdowns? suiveurs?", r"drawdowns? dinámicos?")),
  ("glossary.html#drawdown", T(r"drawdowns?", r"drawdowns?", r"drawdowns?")),
  ("glossary.html#consistency", T(r"consistency rules?", r"règles? de consistance", r"reglas? de consistencia")),
