@@ -60,7 +60,15 @@ def entries():
         ("ninjatrader.html", T("NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep", "NinjaTrader 8 → Sweep"),
          T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas")),
         ("quantower.html", T("Quantower → Sweep", "Quantower → Sweep", "Quantower → Sweep"),
-         T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas"))):
+         T("Free add-on: your trades arrive on their own", "Module gratuit : tes trades arrivent tout seuls", "Complemento gratis: tus operaciones llegan solas")),
+        ("how-to-start-prop-firm-trading.html", T("How to start prop firm trading", "Débuter en prop firm", "Empezar en prop firms"),
+         T("The free 90-day gameplan", "Le plan gratuit de 90 jours", "El plan gratis de 90 días")),
+        ("prop-firm-gameplan-month-1.html", T("Month 1 · Foundation", "Mois 1 · Fondations", "Mes 1 · Cimientos"),
+         T("Protect first, then execute", "Protège d’abord, exécute ensuite", "Primero protege, luego ejecuta")),
+        ("prop-firm-gameplan-month-2.html", T("Month 2 · Consistency", "Mois 2 · Constance", "Mes 2 · Constancia"),
+         T("Same setup, now measure it", "Même setup, maintenant on mesure", "Mismo setup, ahora mídelo")),
+        ("prop-firm-gameplan-month-3.html", T("Month 3 · Prove it", "Mois 3 · Fais tes preuves", "Mes 3 · Demuéstralo"),
+         T("Real rules, earned size", "Vraies règles, taille méritée", "Reglas reales, tamaño ganado"))):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
     pro = pages4.PRICES["pro"]["m"]
     for page, title, sub, day in (   # the key pages of the SEO brief (Oct 15): comparison, pricing, features, rules hub, rule changes

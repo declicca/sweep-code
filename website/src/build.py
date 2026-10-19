@@ -43,6 +43,11 @@ PAGES[pages18.RULE_CHANGES] = pages18.page_rule_changes
 PAGES[pages18.METHOD] = pages18.page_method
 PAGES["ninjatrader.html"] = pages20.page_ninjatrader
 PAGES["quantower.html"] = pages20.page_quantower
+import pages21   # the 90-day gameplan: a pillar page and one page per month
+PAGES[pages21.GP_HUB] = pages21.page_gp_hub
+PAGES[pages21.GP_MONTHS[0]] = pages21.page_gp_month1
+PAGES[pages21.GP_MONTHS[1]] = pages21.page_gp_month2
+PAGES[pages21.GP_MONTHS[2]] = pages21.page_gp_month3
 import pages19
 PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide, pages19.GUIDE_PAYOUT: pages19.page_payout_guide, pages19.GUIDE_SIZES: pages19.page_sizes_guide, pages19.GUIDE_DAYS: pages19.page_days_guide})
 if pages19.COSTS_LIVE: PAGES[pages19.GUIDE_COSTS] = pages19.page_costs_guide
@@ -50,7 +55,7 @@ for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 PAGES.update(pages19.VS_PAGES)   # firm vs firm
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
-PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8","quantower.html":"0.8"}
+PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8","quantower.html":"0.8","how-to-start-prop-firm-trading.html":"0.9","prop-firm-gameplan-month-1.html":"0.8","prop-firm-gameplan-month-2.html":"0.8","prop-firm-gameplan-month-3.html":"0.8"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core

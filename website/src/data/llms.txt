@@ -10,6 +10,10 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [Free trading journal](https://makeitsweep.com/free-trading-journal): what the Free plan includes, forever, and what Pro adds
 - [Prop firm tracker](https://makeitsweep.com/prop-firm-tracker): every evaluation, funded and live account with its firm's rules, for prop traders
 - [NinjaTrader 8 sync](https://makeitsweep.com/ninjatrader): Sweep's free add-on sends every NinjaTrader 8 execution to the journal, read only, on every plan
+- [How to start prop firm trading](https://makeitsweep.com/how-to-start-prop-firm-trading): a free 90-day gameplan for new futures prop traders, in three months with a gate each: guardrails and one learning setup on MES or MNQ, then tagging and one data-backed change, then an evaluation plan, a size ladder and a written trading plan
+- [Gameplan, Month 1](https://makeitsweep.com/prop-firm-gameplan-month-1): 8 guardrails, the Sweep Setup (previous day's high or low swept, then reclaimed), a session routine and 30 daily missions
+- [Gameplan, Month 2](https://makeitsweep.com/prop-firm-gameplan-month-2): tag every trade, find patterns with at least 10 examples, one refinement locked for two weeks, the firm's real limits tracked
+- [Gameplan, Month 3](https://makeitsweep.com/prop-firm-gameplan-month-3): an evaluation plan in R, a size ladder from 1 to 3 micros, a funded playbook and a one-page trading plan
 - [Quantower sync](https://makeitsweep.com/quantower): Sweep's free add-on, a Sweep Sync panel, sends every Quantower execution to the journal, read only, on every plan
 - [Export trades from Tradovate](https://makeitsweep.com/import-tradovate): the Performance report as a CSV, then into Sweep (time zone, fees, session day)
 - [Export trades from TopstepX](https://makeitsweep.com/import-topstepx): the Trades tab export as a CSV, UTC times converted, Topstep's trading day kept

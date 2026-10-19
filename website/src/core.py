@@ -151,15 +151,16 @@ RES_TOOLS = [("tools.html", T("Free calculators","Calculateurs gratuits","Calcul
              ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos"), T("Tick values for NQ, ES, CL, GC…","Valeurs de tick NQ, ES, CL, GC…","Valores de tick NQ, ES, CL, GC…")),
              ("futures-market-hours.html", T("Market hours","Heures de marché","Horario de mercado"), T("Sessions in your time zone","Les sessions dans ton fuseau","Las sesiones en tu zona horaria")),
              ("release-dates.html", T("Release dates","Dates des annonces","Fechas de datos"), T("CPI, NFP, FOMC in 2026–2027","CPI, NFP, FOMC en 2026–2027","CPI, NFP, FOMC en 2026–2027"))]
-RES_LEARN = [("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas"), T("Trading plan, journal, checklist (PDF)","Plan, journal, checklist (PDF)","Plan, diario, checklist (PDF)")),
+RES_LEARN = [("how-to-start-prop-firm-trading.html", T("Start prop firm trading","Débuter en prop firm","Empezar en prop firms"), T("The free 90-day gameplan","Le plan gratuit de 90 jours","El plan gratis de 90 días")),
+             ("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas"), T("Trading plan, journal, checklist (PDF)","Plan, journal, checklist (PDF)","Plan, diario, checklist (PDF)")),
              ("glossary.html", T("Glossary","Lexique","Glosario"), T("Prop and futures terms","Termes du prop et des futures","Términos de prop y futuros")),
              ("guides.html", T("Guides","Guides","Guías"), T("Prop firm rules compared, journaling","Règles des prop firms comparées, journal","Reglas de prop firms comparadas, diario")),
              ("import.html", T("Import your trades","Importer tes trades","Importar operaciones"), T("Tradovate, Rithmic, NinjaTrader, Quantower…","Tradovate, Rithmic, NinjaTrader, Quantower…","Tradovate, Rithmic, NinjaTrader, Quantower…")),
              ("faq.html", T("FAQ","FAQ","Preguntas frecuentes"), T("Quick answers","Réponses rapides","Respuestas rápidas")),
              ("changelog.html", T("What’s new","Nouveautés","Novedades"), T("Latest updates","Les dernières mises à jour","Últimas actualizaciones"))]
 RESOURCES = RES_TOOLS + RES_LEARN
-# the desktop menu keeps 8 entries (audit n° 3, 2.6): Import and FAQ stay in the footer and the phone menu
-RES_MENU = [x for x in RES_LEARN if x[0] not in ("import.html", "faq.html")]
+# the desktop menu keeps 8 entries (audit n° 3, 2.6): Import, FAQ and What’s new stay in the footer and the phone menu
+RES_MENU = [x for x in RES_LEARN if x[0] not in ("import.html", "faq.html", "changelog.html")]
 RES_GROUPS = [(T("Tools","Outils","Herramientas"), RES_TOOLS), (T("Learn","Apprendre","Aprender"), RES_MENU)]
 LOGIN = T("Log in","Connexion","Iniciar sesión")
 CREATE = T("Start free","Commencer gratuitement","Empieza gratis")
@@ -187,7 +188,7 @@ FOOT = [
    ("sweep-vs-tradezella.html", T("Sweep vs TradeZella","Sweep vs TradeZella","Sweep vs TradeZella")), ("sweep-vs-tradervue.html", T("Sweep vs Tradervue","Sweep vs Tradervue","Sweep vs Tradervue")),
    ("sweep-vs-tradersync.html", T("Sweep vs TraderSync","Sweep vs TraderSync","Sweep vs TraderSync")), ("sweep-vs-edgewonk.html", T("Sweep vs Edgewonk","Sweep vs Edgewonk","Sweep vs Edgewonk")),
    ("free-trading-journal.html", T("Free trading journal","Journal de trading gratuit","Diario de trading gratis"))]),
- (T("Resources","Ressources","Recursos"), [("prop-firms/index.html", T("Prop firm rules","Règles des prop firms","Reglas de las prop firms")), ("guides.html", T("Guides","Guides","Guías")), ("trading-journal-guide.html", T("Trading journal guide","Guide du journal de trading","Guía del diario de trading")), ("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas")), ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
+ (T("Resources","Ressources","Recursos"), [("how-to-start-prop-firm-trading.html", T("Start prop firm trading","Débuter en prop firm","Empezar en prop firms")), ("prop-firms/index.html", T("Prop firm rules","Règles des prop firms","Reglas de las prop firms")), ("guides.html", T("Guides","Guides","Guías")), ("trading-journal-guide.html", T("Trading journal guide","Guide du journal de trading","Guía del diario de trading")), ("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas")), ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos")),
    ("release-dates.html", T("Release dates","Dates des annonces","Fechas de datos")), ("futures-market-hours.html", T("Market hours","Heures de marché","Horario de mercado")),
    ("glossary.html", T("Glossary","Lexique","Glosario")), ("trading-templates.html", T("Free templates","Modèles gratuits","Plantillas gratuitas")),
    ("import.html", T("Import your trades","Importer tes trades","Importar operaciones")), ("install.html", T("Install on your phone","Installer sur ton téléphone","Instalar en tu teléfono")), ("faq.html", T("FAQ","FAQ","Preguntas frecuentes"))]),
@@ -282,6 +283,8 @@ def _parent(page):
     if page in ("prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html"): return "prop-firms/index.html"
     if page in CALC_PAGES: return "tools.html"
     if page in GUIDE_PAGES: return "guides.html"
+    if page.startswith("prop-firm-gameplan-month-"): return "how-to-start-prop-firm-trading.html"   # the 90-day gameplan (pages21.py)
+    if page == "how-to-start-prop-firm-trading.html": return "guides.html"
     return None
 
 def _crumb(lang, t, page, title=""):
@@ -484,6 +487,10 @@ REL_INFO = {
  "free-trading-journal.html": (T("Free trading journal","Journal de trading gratuit","Diario de trading gratis"), T("What stays free, forever.","Ce qui reste gratuit, pour toujours.","Lo que sigue siendo gratis, para siempre.")),
  "ninjatrader.html": (T("NinjaTrader 8 sync","Synchro NinjaTrader 8","Sincronización NinjaTrader 8"), T("Your trades arrive on their own.","Tes trades arrivent tout seuls.","Tus operaciones llegan solas.")),
  "quantower.html": (T("Quantower sync","Synchro Quantower","Sincronización Quantower"), T("Your trades arrive on their own.","Tes trades arrivent tout seuls.","Tus operaciones llegan solas.")),
+ "how-to-start-prop-firm-trading.html": (T("Start prop firm trading","Débuter en prop firm","Empezar en prop firms"), T("The free 90-day gameplan.","Le plan gratuit de 90 jours.","El plan gratis de 90 días.")),
+ "prop-firm-gameplan-month-1.html": (T("Gameplan, Month 1","Plan, mois 1","Plan, mes 1"), T("Protect first, then execute.","Protège d’abord, exécute ensuite.","Primero protege, luego ejecuta.")),
+ "prop-firm-gameplan-month-2.html": (T("Gameplan, Month 2","Plan, mois 2","Plan, mes 2"), T("Same setup, now measure it.","Même setup, maintenant on mesure.","Mismo setup, ahora mídelo.")),
+ "prop-firm-gameplan-month-3.html": (T("Gameplan, Month 3","Plan, mois 3","Plan, mes 3"), T("Real rules, earned size.","Vraies règles, taille méritée.","Reglas reales, tamaño ganado.")),
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
  "how-we-verify-prop-firm-rules.html": (T("How we verify the rules","Notre méthode de vérification","Cómo verificamos las reglas"), T("Sources, frequency and limits.","Sources, fréquence et limites.","Fuentes, frecuencia y límites.")),

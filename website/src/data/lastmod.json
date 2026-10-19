@@ -132,12 +132,16 @@
   "hash": "6ba7309ab021c67d"
  },
  "guides.html": {
-  "date": "2026-10-16",
-  "hash": "9b88ca764ac2910d"
+  "date": "2026-10-19",
+  "hash": "4fd68527a04d5e69"
  },
  "how-it-works.html": {
   "date": "2026-10-18",
   "hash": "2fed33aca521d75a"
+ },
+ "how-to-start-prop-firm-trading.html": {
+  "date": "2026-10-19",
+  "hash": "a5500a28367a4ef0"
  },
  "how-we-verify-prop-firm-rules.html": {
   "date": "2026-10-18",
@@ -218,6 +222,18 @@
  "prop-firm-drawdown-rules.html": {
   "date": "2026-10-18",
   "hash": "62caa69c2330b59a"
+ },
+ "prop-firm-gameplan-month-1.html": {
+  "date": "2026-10-19",
+  "hash": "c81af93989d27fe2"
+ },
+ "prop-firm-gameplan-month-2.html": {
+  "date": "2026-10-19",
+  "hash": "4299d98dfee7ad89"
+ },
+ "prop-firm-gameplan-month-3.html": {
+  "date": "2026-10-19",
+  "hash": "59bfcc81e262eb16"
  },
  "prop-firm-minimum-days.html": {
   "date": "2026-10-18",

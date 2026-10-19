@@ -986,6 +986,31 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .prog-block>h3{margin-top:48px;font-size:var(--fs-h3)}
 .prog-block>p{margin-top:12px;color:var(--muted)}
 .prog-block .sources{margin-top:24px}
+/* ---- [pages: how-to-start-prop-firm-trading.html prop-firm-gameplan-month-1.html prop-firm-gameplan-month-2.html prop-firm-gameplan-month-3.html] the 90-day gameplan: the three months, the missions, the gates */
+.gp-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.gp-nav a{display:grid;gap:4px;padding:16px 18px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1);color:var(--text);text-decoration:none;transition:background-color var(--t-fast)}
+.gp-nav a small{font:500 12px/1.3 var(--mono);color:var(--faint);letter-spacing:.02em}
+.gp-nav a b{font-size:17px;font-weight:600}
+.gp-nav a[aria-current="page"]{box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 60%,transparent) inset,var(--shadow-1)}
+.gp-nav a[aria-current="page"] small{color:var(--blue-text)}
+@media (hover:hover){.gp-nav a:not([aria-current]):hover{background:color-mix(in srgb,var(--text) 4%,transparent)}}
+@media (max-width:743px){.gp-nav{gap:8px}.gp-nav a{padding:12px;border-radius:var(--r2)}.gp-nav a b{font-size:15px}.gp-nav a small{font-size:11px}.gp-nav .gp-span{display:none}}   /* phones: « Month 1 » only */
+.article ol.gp-missions{display:block;margin-top:20px}
+.article ol.gp-missions>li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:16px;padding:18px 0 18px;border-top:1px solid var(--line-2)}
+.article ol.gp-missions>li::before{content:none}
+.gp-d{display:grid;align-content:start;gap:4px}
+.gp-d b{font:600 22px/1 var(--mono);color:var(--text);font-variant-numeric:tabular-nums}
+.gp-d small{font:500 11px/1 var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.article .gp-missions h3{margin-top:0;font-size:17px;color:var(--text)}
+.article .gp-missions p{margin-top:6px}
+.article p.gp-meta{font:500 12px/1.4 var(--mono);color:var(--faint);letter-spacing:.02em}
+.article p.gp-done{font-size:14.5px}
+.gp-done b{margin-right:8px;font:600 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--blue-text)}
+.article ul.gp-checks li{padding-left:30px}
+.article ul.gp-checks li::before{content:"";top:3px;width:18px;height:18px;border-radius:6px;box-shadow:0 0 0 1.5px var(--line) inset}
+.gp-note{margin-top:20px;padding:18px 20px;border-radius:var(--r3);background:var(--tint)}
+.gp-note b{display:block;font:600 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--blue-ink)}
+.article .gp-note p{margin-top:6px;color:var(--text)}
 }
 
 /* ======================================================================= motion */
