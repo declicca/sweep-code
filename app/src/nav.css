@@ -145,7 +145,7 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
 .nav-econ{margin-top:0}
 /* « reward waiting » dot (avatar and rank card); it goes once Progression is opened */
 .nav-dot{position:relative}
-.nav-dot::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--pos);box-shadow:0 0 0 2px var(--bg);animation:nav-dot 1.2s ease-in-out 3}
+.nav-dot::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--pos);box-shadow:0 0 0 2px var(--bg);animation:nav-dot 1.2s var(--spring) 3}
 .side .who.nav-dot::after{top:4px;right:2px}
 @keyframes nav-dot{50%{transform:scale(.8);opacity:.75}}
 @media (prefers-reduced-motion:reduce){.nav-dot::after{animation:none}}
@@ -290,7 +290,7 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
 @media (max-width:860px){.nav-cd{min-height:58px;padding:4px}.nav-cd-n{display:none}.nav-cd-e{font-size:0}.nav-cd-e i{width:7px;height:7px}}
 /* cards come in once, gently (opacity/transform only: no layout shift) */
 @media (prefers-reduced-motion:no-preference){
-  .nav-dash.nav-dash-in .d-col > *{animation:nav-in .45s var(--sw-ease) both}
+  .nav-dash.nav-dash-in .d-col > *{animation:nav-in .45s var(--sw-var(--spring)) both}
   .nav-dash.nav-dash-in .d-col > :nth-child(2){animation-delay:.04s}.nav-dash.nav-dash-in .d-col > :nth-child(3){animation-delay:.08s}.nav-dash.nav-dash-in .d-col > :nth-child(4){animation-delay:.12s}
   .nav-dash.nav-dash-in .d-col > :nth-child(5){animation-delay:.16s}.nav-dash.nav-dash-in .d-col > :nth-child(6){animation-delay:.2s}.nav-dash.nav-dash-in .d-col > :nth-child(n+7){animation-delay:.24s}
 }
@@ -646,7 +646,7 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 .nav-unit .seg button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--line)}
 .nav-usd[hidden],.nav-hide{display:none!important}
 .nav-usd-eq{display:block;min-height:14px;margin-top:3px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.tk-ex.nav-new{animation:navNew 1.6s ease}
+.tk-ex.nav-new{animation:navNew 1.6s var(--spring)}
 @keyframes navNew{0%,40%{box-shadow:0 0 0 2px var(--pos);background:var(--posbg)}100%{box-shadow:0 0 0 0 transparent;background:transparent}}
 .tk-ex{border-radius:10px;padding:2px 4px}
 #tkSlide .tk-f:has(#tkAvg){display:none}   /* the Position block above shows the average entry */
@@ -1194,7 +1194,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 .nav-rt-s{min-height:206px}
 .nav-rt-sk{display:inline-block;width:64px;height:40px;border-radius:14px;background:var(--panel2)}
 .nav-rt-sk.w{width:132px}
-.nav-rt-s.sk{background:var(--panel2);animation:nav-rt-pulse 1.4s ease-in-out infinite}
+.nav-rt-s.sk{background:var(--panel2);animation:nav-rt-pulse 1.4s var(--spring) infinite}
 @keyframes nav-rt-pulse{50%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){.nav-rt-s.sk{animation:none}}
 @media (max-width:860px){.nav-rt-s{min-height:150px}.nav-rt-sk{height:36px;width:52px}.nav-rt-sk.w{width:60px}
@@ -2655,7 +2655,7 @@ html body #main .nav-sgd[open]{margin-bottom:28px}
 /* (these durations apply only when « Reduce motion » is off: there, everything stays instant) */
 @media (prefers-reduced-motion:no-preference){
 /* entrances, toast, sheets, guide panel, bottom bar, the selectors' sliding pill: 150–350 ms (were 380 to 600 ms) */
-html body main.anim > *,html body main.anim .acard,html body main.anim .cal > a,html body main.anim .kpis > div,html body main.anim .iso-bar{animation-duration:.32s!important;animation-timing-function:cubic-bezier(.32,.72,0,1)!important}
+html body main.anim > *,html body main.anim .acard,html body main.anim .cal > a,html body main.anim .kpis > div,html body main.anim .iso-bar{animation-duration:.32s!important;animation-timing-function:var(--spring)!important}
 #main .nav-dash.nav-dash-in .d-col > *{animation-duration:.32s!important}
 .toast.on{animation-duration:.3s!important}
 .sheet:not([hidden]) .sheet-panel,.sheet:not([hidden]) .sheet-panel > a{animation-duration:.34s!important}
@@ -2665,11 +2665,11 @@ html body .nav-thumb{transition-duration:.3s!important}
 html body .rf-candles svg{transition-duration:.3s!important}
 /* gauges that fill (rings, bars, mission progress): 350 ms — still seen filling, never slow */
 html body .g-arc,html body .g-bar i,html body .gm-pay i,html body .nav-rt-lv .fg,html body .nav-rt-bar > i,html body .dt i{transition-duration:.35s!important}
-html body main.anim .ln.draw,html body main.anim .ring-fg,html body main.anim .pbar i,html body main.anim .dt i{animation-duration:.35s!important;animation-delay:0s!important;animation-timing-function:cubic-bezier(.32,.72,0,1)!important}
-html body main.anim .chart .area,html body main.anim .endpt,html body main.anim .ln.glow,html body main.anim .radar polygon.val,html body main.anim .bt i{animation-duration:.3s!important;animation-delay:.1s!important;animation-timing-function:cubic-bezier(.32,.72,0,1)!important}
+html body main.anim .ln.draw,html body main.anim .ring-fg,html body main.anim .pbar i,html body main.anim .dt i{animation-duration:.35s!important;animation-delay:0s!important;animation-timing-function:var(--spring)!important}
+html body main.anim .chart .area,html body main.anim .endpt,html body main.anim .ln.glow,html body main.anim .radar polygon.val,html body main.anim .bt i{animation-duration:.3s!important;animation-delay:.1s!important;animation-timing-function:var(--spring)!important}
 /* the weekly chest and its cards, Wrapped's slides, the game's « pop »: short, on the one curve */
 html body .wk-card .wk-back,html body .wk-card .wk-front,html body .wk-chest .ch-lid,html body .wk-chest .ch-glow,html body .wr-s,html body .gb-hp s{transition-duration:.35s!important}
-html body .wk-items li,html body .lg-row,html body .gc-c2 .gc-pill,html body .ss-cell.flash,html body .g-profile-card,html body .sh-prev,html body .rf-gift,html body .ask-fab,html body .sb-check svg,html body .okmark svg{animation-duration:.32s!important;animation-timing-function:cubic-bezier(.32,.72,0,1)!important}
+html body .wk-items li,html body .lg-row,html body .gc-c2 .gc-pill,html body .ss-cell.flash,html body .g-profile-card,html body .sh-prev,html body .rf-gift,html body .ask-fab,html body .sb-check svg,html body .okmark svg{animation-duration:.32s!important;animation-timing-function:var(--spring)!important}
 .ask-fab{animation-delay:.2s!important}
 /* decorative loops stop by themselves after 3 rounds (the Sweep AI star, the next mission, the chest, a ready cell, the dot of
    « AI ready ») and Wrapped's moving background plays once; the functional ones stay: loading skeletons, spinners, « Sweep AI is
@@ -2679,7 +2679,7 @@ html body .wk-items li,html body .lg-row,html body .gc-c2 .gc-pill,html body .ss
 }
 /* app.css's skeletons breathe in opacity instead of moving their background (a paint every frame) */
 @keyframes shimmer{50%{opacity:.55}}
-html body .skel,html body .sh-skel{animation-timing-function:ease-in-out!important}
+html body .skel,html body .sh-skel{animation-timing-function:var(--spring)!important}
 /* reduced transparency: the glass bars and sheets become opaque */
 @media (prefers-reduced-transparency:reduce){
   html body .bottomnav,html body .side,html body .main-wrap > .top,html body .evp,html body .nav-dlg,html body #main .nav-tnav,html body .cmd-panel,html body #askFab{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--panel)!important}

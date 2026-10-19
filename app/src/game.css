@@ -347,7 +347,7 @@
 .gb-art .l{stroke:var(--neg);stroke-width:3;stroke-linecap:round;fill:none}
 .gb-art .l.d{stroke-dasharray:4 5;opacity:.7}.gb-art .l.d2{stroke-dasharray:2 6;opacity:.45}
 .gb-art .z{fill:none;stroke:var(--neg);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
-.gb-art-w .gb-art{animation:gb-float 4s ease-in-out infinite}
+.gb-art-w .gb-art{animation:gb-float 4s var(--spring) infinite}
 @keyframes gb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 .gb-mid{display:flex;flex-direction:column;gap:8px;min-width:0}
 .gb-name{display:flex;align-items:center;gap:8px}
@@ -535,7 +535,7 @@
 /* ───────────── V2 step 3: Wrapped story + payout moment ───────────── */
 .wr{position:fixed;inset:0;z-index:460;background:#07080b;color:#F2F2F3;opacity:0;transition:opacity .3s var(--ease-ios);overflow:hidden;-webkit-user-select:none;user-select:none}
 .wr.in{opacity:1}.wr.out{opacity:0}
-.wr::before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 30% 20%,rgba(76,141,255,.35),transparent 55%),radial-gradient(circle at 80% 85%,rgba(46,107,224,.28),transparent 50%);animation:wr-drift 14s ease-in-out infinite alternate}
+.wr::before{content:"";position:absolute;inset:-20%;background:radial-gradient(circle at 30% 20%,rgba(76,141,255,.35),transparent 55%),radial-gradient(circle at 80% 85%,rgba(46,107,224,.28),transparent 50%);animation:wr-drift 14s var(--spring) infinite alternate}
 @keyframes wr-drift{to{transform:translate(4%,-3%) scale(1.06)}}
 .wr-bars{position:absolute;left:14px;right:56px;top:calc(14px + env(safe-area-inset-top,0));display:flex;gap:4px;z-index:2}
 .wr-bars i{flex:1;height:3px;border-radius:var(--r-pill);background:rgba(255,255,255,.22);overflow:hidden}
@@ -597,7 +597,7 @@
 .ss-ic svg{width:22px;height:22px;color:var(--pos)}
 .ss-cell.premium .ss-ic svg{color:var(--neg)}
 .ss-cell.locked{opacity:.45}
-.ss-cell.ready{cursor:pointer;box-shadow:inset 0 0 0 2px var(--pos),0 0 0 4px rgba(var(--pos-rgb),.12);animation:ss-glow 1.8s ease-in-out infinite}
+.ss-cell.ready{cursor:pointer;box-shadow:inset 0 0 0 2px var(--pos),0 0 0 4px rgba(var(--pos-rgb),.12);animation:ss-glow 1.8s var(--spring) infinite}
 .ss-cell.premium.ready{box-shadow:inset 0 0 0 2px var(--neg),0 0 0 4px rgba(var(--neg-rgb),.14)}
 .ss-cell.ready:active{transform:scale(.97)}
 .ss-cell.claimed{background:var(--posbg);box-shadow:none}
