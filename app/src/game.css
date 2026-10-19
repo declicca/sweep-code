@@ -840,6 +840,8 @@ button.gc-meta{display:flex;align-items:center;gap:6px;padding:0;border:0;backgr
 .g-pm .pm-sheet-s{margin:0 0 12px;position:static}
 .g-pm .pm-ss-body{position:static}
 .g-pm .pm-links{display:grid;gap:10px;margin-top:12px}
+.g-pm .pm-inst{margin:0;font-size:15px}
+.g-pm .pm-never{margin:0;color:var(--neg)}
 .g-pm .pm-rem{margin:0;padding:10px 12px;border-radius:var(--r2);background:var(--tint);font-size:14px;line-height:1.4}
 .pm-sheet{display:grid;gap:10px;padding:16px;border-radius:var(--r3);background:var(--fill);font-size:15px;line-height:1.45}
 .pm-sheet .pm-l{margin:0}

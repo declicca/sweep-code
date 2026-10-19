@@ -19,8 +19,12 @@ async def main():
     pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
     await pg.goto(B + '/?x=1#dashboard'); await pg.wait_for_timeout(3000)
     await pg.locator('#main .nav-rt [data-rt=plan]').first.click(); await pg.wait_for_timeout(900)
-    day = await pg.evaluate("document.getElementById('gSheet').dataset.day")
-    before = await pg.evaluate("(d) => getDoc('journals', d) ? structuredClone(getDoc('journals', d)) : null", day)   # put back at the end (the shared trader: no sheet left for the other tests)
+    opened = await pg.evaluate("!!document.querySelector('#gSheet.g-pm')")
+    ok(opened, 'the routine card opens the pre-market (the full questionnaire, or the express version after the lock time)')
+    await pg.evaluate("document.querySelector('#gSheet [data-g=close]').click()"); await pg.wait_for_timeout(400)
+    day = '2027-06-01'   # a day ahead: the full questionnaire whatever the time of the test
+    before = None
+    await pg.evaluate(f"SweepGame.openPlan('{day}')"); await pg.wait_for_timeout(900)
     # « Not trading today » from the plan (its first screen)
     await pg.locator('#gSheet [data-pm=dayoff]').click(); await pg.wait_for_timeout(1000)
     await pg.evaluate(f"location.hash='#journal/{day}'"); await pg.wait_for_timeout(1500)

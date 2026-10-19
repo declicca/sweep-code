@@ -386,7 +386,10 @@ def fewer(p, lang, phone):   # brief 03 step 5
   pg.locator('#main .co-ask textarea').fill('10 min'); pg.wait_for_timeout(1200)
   sv = pg.evaluate("(() => { const t = getDoc('trades', 'f2'); return [t.discipline && t.discipline.plan, ((t.emo || {}).before || []).length, (t.review || {}).lesson] })()")
   ok(sv == ['y', 1, '10 min'], f'{tag} J the answers in the same fields ({sv})')
-  pg.locator('#main details.co-full > summary').click(); pg.wait_for_timeout(300); pg.locator('#main #rs-chk [data-act=set]').first.click(); pg.wait_for_timeout(600)
+  for _ in range(4):   # (the page can redraw right after the answers above: open the full review once it has settled)
+    if pg.evaluate("!!(document.querySelector('#main details.co-full') || {}).open"): break
+    pg.locator('#main details.co-full > summary').click(); pg.wait_for_timeout(500)
+  pg.wait_for_selector('#main #rs-chk [data-act=set]', state='visible', timeout=8000); pg.locator('#main #rs-chk [data-act=set]').first.click(); pg.wait_for_timeout(600)
   ok(pg.evaluate("document.querySelector('#main details.co-full').open"), f'{tag} J the full review stays open after a tap in it')
   pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(500); pg.evaluate("SweepAddMode.open()"); pg.wait_for_selector('.nav-am-shot.open', timeout=8000); pg.wait_for_timeout(400); shot(pg)
   q1 = pg.evaluate("[document.querySelectorAll('.nav-am-shot .nav-am-q').length, !!document.querySelector('.nav-am-shot .nav-am-scores')]")
@@ -426,7 +429,7 @@ def room(p, lang, phone):
   pg.evaluate("(d) => put('trades', { id: 'r0', account_id: 'la', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -113000, pnl_manual: true, date: ymdAdd(d, -1), entry_time: '10:00', exit_time: '10:20' })", day); pg.wait_for_timeout(800)
   m = pg.evaluate("(d) => { const m = SweepCoach.margin(d); return m && [m.c, m.start, m.low] }", day)
   ok(m == [87000, 87000, False], f'{tag} the room is the account page\'s: $870 ({m})')
-  premarket(pg, day=day, stop_at='limits')
+  premarket(pg, day=day, stop_at=('limits', 'express'))   # (the express version after the lock time: the max loss there too)
   ml = pg.evaluate("(document.querySelector('#gSheet [data-pmf=max_loss]') || {}).value"); hint = pg.evaluate(TXT, '#gSheet .g-dll')
   ok(ml == '870' and x['hint'] in hint and '870' in hint, f'{tag} the plan\'s max loss starts at the room, not the $1,200 daily limit ({ml}, « {hint} »)')
   # he types $1,200 anyway: the coach still counts the room

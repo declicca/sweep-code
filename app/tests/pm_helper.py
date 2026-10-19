@@ -1,6 +1,6 @@
 """Tests: fill the pre-market questionnaire (the day's plan since the brief « Plan pre-market adaptatif ») with simple values.
 A quiet day, the price inside the London range, the high watched (or the low: short=True); the max loss / max trades given
-or the ones offered. sync: premarket(pg, ...); async: await apremarket(pg, ...). The sheet must already be open, or day= opens it; stop_at='limits' stops on that screen (call again to go on)."""
+or the ones offered. sync: premarket(pg, ...); async: await apremarket(pg, ...). The sheet must already be open, or day= opens it; stop_at='limits' (or a tuple of screens) stops on that screen (call again to go on); after the lock time without a sheet, the express version is filled the same way."""
 LEVELS = [('instrument', 'MES'), ('lv.london_high', '5820'), ('lv.london_low', '5800'), ('lv.pdh', '5850'), ('lv.pdl', '5770'), ('lv.price', '5810')]
 SCREEN = "(document.querySelector('#gSheet.g-pm [data-pm-screen]') || {dataset: {}}).dataset.pmScreen || ''"
 
@@ -12,9 +12,16 @@ def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=Tr
     pg.wait_for_timeout(150)
   for _ in range(12):
     s = pg.evaluate(SCREEN)
-    if stop_at and s == stop_at: return True
+    if stop_at and s in ((stop_at,) if isinstance(stop_at, str) else stop_at): return True
     if s == 'base':
-      for k, v in LEVELS: pg.fill(f'#gSheet [data-pmf="{k}"]', v)
+      for k, v in LEVELS:
+        if pg.locator(f'#gSheet [data-pmf="{k}"]').count(): pg.fill(f'#gSheet [data-pmf="{k}"]', v)   # (the instrument is hidden once the same for 5 sheets)
+    elif s == 'express':   # (the lock time is past without a sheet)
+      pg.click(f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); pg.wait_for_timeout(150)
+      if pg.locator('#gSheet [data-pmf="instrument"]').count(): pg.fill('#gSheet [data-pmf="instrument"]', 'MES')
+      pg.fill('#gSheet [data-pmf="X_level"]', '5800' if short else '5820'); pg.fill('#gSheet [data-pmf="C3_A"]', '5770' if short else '5850')
+      if max_loss is not None: pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
+      elif not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'pos':
       if pg.locator('#gSheet [data-q="A2"]').count(): pg.click(f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); pg.wait_for_timeout(150)
     elif s == 'd1':
@@ -38,9 +45,16 @@ async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, 
     await pg.wait_for_timeout(150)
   for _ in range(12):
     s = await pg.evaluate(SCREEN)
-    if stop_at and s == stop_at: return True
+    if stop_at and s in ((stop_at,) if isinstance(stop_at, str) else stop_at): return True
     if s == 'base':
-      for k, v in LEVELS: await pg.fill(f'#gSheet [data-pmf="{k}"]', v)
+      for k, v in LEVELS:
+        if await pg.locator(f'#gSheet [data-pmf="{k}"]').count(): await pg.fill(f'#gSheet [data-pmf="{k}"]', v)
+    elif s == 'express':
+      await pg.click(f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); await pg.wait_for_timeout(150)
+      if await pg.locator('#gSheet [data-pmf="instrument"]').count(): await pg.fill('#gSheet [data-pmf="instrument"]', 'MES')
+      await pg.fill('#gSheet [data-pmf="X_level"]', '5800' if short else '5820'); await pg.fill('#gSheet [data-pmf="C3_A"]', '5770' if short else '5850')
+      if max_loss is not None: await pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
+      elif not await pg.input_value('#gSheet [data-pmf="max_loss"]'): await pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'pos':
       if await pg.locator('#gSheet [data-q="A2"]').count(): await pg.click(f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); await pg.wait_for_timeout(150)
     elif s == 'd1':

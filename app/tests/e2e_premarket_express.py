@@ -3,7 +3,7 @@ Sweep — the pre-market missed (brief « Plan pre-market adaptatif », step 6),
 after 09:25 New York:
   python3 tests/e2e_premarket_express.py http://127.0.0.1:8095 /tmp/show_state.json
  1  a trader who makes sheets opens the app after the lock time without one: the express version opens by itself, once
- 2  main level, direction, target: the R is computed (under 2R it cannot go on); saved: mode express, locked, the session view
+ 2  main level, direction, target (and the day's max loss): the R is computed (under 2R it cannot go on); saved: mode express, locked, the session view
  3  « Later »: no sheet; the day's new trades are off-plan (nothing to link)
 The test days are removed at the end.
 """
@@ -43,6 +43,7 @@ with sync_playwright() as p:
     r = pg.locator('#gSheet [data-pm-r="A"]').inner_text()
     pg.click('#gSheet [data-pm="next"]'); pg.wait_for_timeout(250)
     ok('Non viable' in r and pg.locator('#gSheet [data-pm-screen=express]').count() == 1, f'2 {w}: 5 825 → under 2R, not viable: it stays ({r!r})')
+    if not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')   # (the day's max loss, as the plan always had)
     pg.fill('#gSheet [data-pmf="C3_A"]', '5850'); pg.wait_for_timeout(150); pg.click('#gSheet [data-pm="next"]'); pg.wait_for_timeout(300)
     ok(pg.locator('#gSheet [data-pm-screen=sheet]').count() == 1 and '(5R)' in pg.locator('#gSheet .pm-sheet').inner_text(), f'2 {w}: 5 850 → 5R, the sheet')
     pg.click('#gSheet [data-pm="save"]'); pg.wait_for_timeout(900)

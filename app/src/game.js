@@ -649,6 +649,7 @@
      score keep working. */
   const PMT = {
     en: {
+      change: 'Change', never_taken: 'This scenario has not been taken in 10 sessions. Keep it?',
       followed_sheet: 'Did you follow your sheet?', rules_q: 'Which rule?', note_tomorrow: 'A note for tomorrow? (optional, at the top of your next pre-market)',
       r_no_retest: 'Entered without a 5m retest', r_off_plan: 'A trade off my sheet', r_max_trades: 'Too many trades', r_news_window: 'Traded in a news window', r_moved_stop: 'Moved my stop', r_other: 'Another rule',
       d2: 'Yesterday', d2_no_retest: 'Yesterday you entered without a 5m retest. What will help you wait today?', d2_off_plan: 'Yesterday you took a trade off your sheet. What took you out of the plan?',
@@ -678,6 +679,7 @@
       l_news: 'after the first full 15m after the news', l_retest: 'retest 5m + trigger', l_vwap: 'above VWAP', l_vwap_s: 'below VWAP', l_stop: 'stop {s}', l_target: 'target {t}', l_r: '({r}R)',
     },
     fr: {
+      change: 'Modifier', never_taken: 'Ce scénario n’a pas été pris depuis 10 séances. Le garder ?',
       followed_sheet: 'As-tu suivi ta fiche ?', rules_q: 'Quelle règle ?', note_tomorrow: 'Une note pour demain ? (facultatif, en haut de ton prochain pre-market)',
       r_no_retest: 'Entré sans retest 5m', r_off_plan: 'Un trade hors de ma fiche', r_max_trades: 'Trop de trades', r_news_window: 'Tradé pendant une fenêtre de news', r_moved_stop: 'Déplacé mon stop', r_other: 'Une autre règle',
       d2: 'Hier', d2_no_retest: 'Hier tu es entré sans retest 5m. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', d2_off_plan: 'Hier tu as pris un trade hors de ta fiche. Qu’est-ce qui t’a fait sortir du plan ?',
@@ -707,6 +709,7 @@
       l_news: 'après la première 15m complète après la news', l_retest: 'retest 5m + déclenchement', l_vwap: 'au-dessus VWAP', l_vwap_s: 'sous VWAP', l_stop: 'stop {s}', l_target: 'cible {t}', l_r: '({r}R)',
     },
     es: {
+      change: 'Cambiar', never_taken: 'Este escenario no se ha tomado en 10 sesiones. ¿Mantenerlo?',
       followed_sheet: '¿Seguiste tu ficha?', rules_q: '¿Qué regla?', note_tomorrow: '¿Una nota para mañana? (opcional, arriba de tu próximo pre-market)',
       r_no_retest: 'Entré sin retest de 5m', r_off_plan: 'Una operación fuera de mi ficha', r_max_trades: 'Demasiadas operaciones', r_news_window: 'Operé en una ventana de noticias', r_moved_stop: 'Moví mi stop', r_other: 'Otra regla',
       d2: 'Ayer', d2_no_retest: 'Ayer entraste sin retest de 5m. ¿Qué te ayudará a esperar hoy?', d2_off_plan: 'Ayer tomaste una operación fuera de tu ficha. ¿Qué te sacó del plan?',
@@ -831,6 +834,13 @@
     return l.filter((e) => e.impact === 'high').map((e) => ({ hm: typeof etStr === 'function' ? etStr(e.ts).slice(11, 16) : '', event: e.event || '' })).filter((e) => e.hm);
   }
 
+  /** the last n sheets before this day (newest first) */
+  const pmRecent = (day, n) => (S.journals || []).filter((j) => j.fiche && j.id < day && !j.demo).sort((a, b) => b.id.localeCompare(a.id)).slice(0, n).map((j) => ficheNormalize(j.fiche, j.id));
+  /** a scenario type kept on each of the last 10 sheets and never taken */
+  function pmNeverTaken(day, s) {
+    const l = pmRecent(day, 10); if (l.length < 10) return false;
+    return l.every((f) => f.scenarios.some((x) => x.id === s.id && x.type === s.type && x.direction === s.direction)) && !l.some((f) => f.scenarios.some((x) => x.type === s.type && x.direction === s.direction && x.status === 'taken'));
+  }
   /** the screens that apply, in order */
   function pmScreens() {
     if (PM.express) return ['express', 'sheet'];
@@ -853,8 +863,13 @@
       const prev = (S.journals || []).filter((j) => j.fiche && j.id < day).sort((x, y) => y.id.localeCompare(x.id))[0];
       if (prev) { f.levels = Object.assign({}, prev.fiche.levels, { price: null }); f.instrument = f.instrument || prev.fiche.instrument; }
       f.no_trade_conditions = ['two_invalidations', 'time_limit'];
-      f.limits.time_limit = '11:30';
+      // learned defaults (brief step 8): the most frequent of the last 10 sheets (2 trades and 11:30 to start)
+      const last = pmRecent(day, 10), mode = (l) => { const n = new Map(); l.forEach((v) => v != null && n.set(v, (n.get(v) || 0) + 1)); let b = null, k = 0; for (const [v, c] of n) if (c > k) { b = v; k = c; } return b; };
+      f.limits.max_trades = mode(last.map((x) => x.limits.max_trades)) || 2;
+      f.limits.time_limit = mode(last.map((x) => x.limits.time_limit)) || '11:30';
     }
+    // the instrument is no longer asked once it has not changed in 5 sheets (still there, one tap away)
+    { const l5 = pmRecent(day, 5); PM.hideInst = l5.length === 5 && l5.every((x) => x.instrument && x.instrument === l5[0].instrument) && (!f.instrument || f.instrument === l5[0].instrument); if (PM.hideInst) f.instrument = l5[0].instrument; }
     f.answers = Object.assign({}, f.answers);
     if (f.answers.D1 == null) f.answers.D1 = PM.d1auto.value;
     if (f.answers.max_loss == null) f.answers.max_loss = pmMaxLoss(day);
@@ -874,7 +889,7 @@
     const f = PM.f, a = f.answers, lv = f.levels;
     if (name === 'base') { const works = window.SweepEdge && SweepEdge.line ? SweepEdge.line('works') : '';   // what works for the trader (brief edge T4)
       return `${PM.note ? `<p class="pm-rem"><b>${pt('note')}</b> · ${esc(PM.note)}</p>` : ''}${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}<h3 class="pm-q">${pt('base')}</h3><p class="g-hint g-hint-sm">${pt('base_hint')}</p>
-      <label class="g-f"><span>${pt('instrument')}</span>${pmIn('instrument', f.instrument, 'MES', 'text')}</label>
+      ${PM.hideInst ? `<p class="pm-inst" data-noi18n><b>${esc(f.instrument)}</b> · <button type="button" class="link" data-pm="inst">${pt('change')}</button></p>` : `<label class="g-f"><span>${pt('instrument')}</span>${pmIn('instrument', f.instrument, 'MES', 'text')}</label>`}
       <div class="g-row2"><label class="g-f"><span>${pt('lh')}</span>${pmIn('lv.london_high', lv.london_high)}</label><label class="g-f"><span>${pt('ll')}</span>${pmIn('lv.london_low', lv.london_low)}</label></div>
       <div class="g-row2"><label class="g-f"><span>${pt('pdh')}</span>${pmIn('lv.pdh', lv.pdh)}</label><label class="g-f"><span>${pt('pdl')}</span>${pmIn('lv.pdl', lv.pdl)}</label></div>
       <label class="g-f"><span>${pt('price')}</span>${pmIn('lv.price', lv.price)}</label>
@@ -898,6 +913,7 @@
         const main = s.id === 'A', gone = !main && a.C2 === 'remove', editLvl = main && a.C1 === 'edit', prop = pmTarget(f, s);
         return `<div class="pm-sc${gone ? ' pm-off' : ''}"><div class="pm-sc-h"><b>${pt(main ? 'main' : 'alt')} · ${esc(pt('d_' + s.direction))} ${esc(pt('t_' + s.type).toLowerCase())}</b><span class="g-hint-sm">${pt('level')} ${pmFmt(s.level)}</span></div>
           ${main ? pmSeg('C1', ['confirm', 'edit'], a.C1 || 'confirm') : pmSeg('C2', ['keep', 'remove'], a.C2 || 'keep')}
+          ${!main && !gone && pmNeverTaken(PM.day, s) ? `<p class="g-hint g-hint-sm pm-never">${pt('never_taken')}</p>` : ''}
           ${editLvl ? `<label class="g-f"><span>${pt('level')}</span>${pmIn('C1_level', a.C1_level != null ? a.C1_level : s.level)}</label>` : ''}
           ${gone ? '' : `<label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_' + s.id, a['C3_' + s.id] != null ? a['C3_' + s.id] : prop)}<small class="g-hint-sm">${prop == null ? pt('tgt_none') : esc(pt('tgt_prop', { p: pmFmt(prop) }))}</small></label>
           <p class="pm-r ${pmViable(s) ? 'ok' : 'bad'}" data-pm-r="${s.id}">${s.r_estimate == null ? '' : esc(pt('r', { r: pmFmt(s.r_estimate) }))}${pmViable(s) || s.r_estimate == null ? '' : ' · ' + pt(main ? 'main_not_viable' : 'not_viable')}</p>`}</div>`;
@@ -906,13 +922,15 @@
     if (name === 'notrade') return `<h3 class="pm-q">${pt('c4')}</h3><div class="g-chips-row wrap">${FICHE.NO_TRADE.map((c) => `<button type="button" class="chip ${f.no_trade_conditions.includes(c) ? 'on' : ''}" data-pm="nt" data-v="${c}">${pt(c)}</button>`).join('')}</div>
       ${f.no_trade_conditions.includes('other') ? `<label class="g-f"><span>${pt('other')}</span><input type="text" maxlength="120" data-pmf="no_trade_other" value="${esc(f.no_trade_other || '')}" placeholder="${esc(pt('other_ph'))}"></label>` : ''}`;
     if (name === 'express') {   // brief step 6: the pre-market missed, the main level, the direction and the target (R included)
-      const sc = pmBuild(f)[0];
-      return `<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt('x_hint')}</p>
+      const sc = pmBuild(f)[0], works = window.SweepEdge && SweepEdge.line ? SweepEdge.line('works') : '';
+      return `${PM.note ? `<p class="pm-rem"><b>${pt('note')}</b> · ${esc(PM.note)}</p>` : ''}${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt('x_hint')}</p>
         <label class="g-f"><span>${pt('instrument')}</span>${pmIn('instrument', f.instrument, 'MES', 'text')}</label>
         <h3 class="pm-q">${pt('x_dir')}</h3>${pmSeg('X_dir', ['long', 'short'], a.X_dir)}
         <div class="g-row2"><label class="g-f"><span>${pt('x_level')}</span>${pmIn('X_level', a.X_level)}</label><label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_A', a.C3_A)}</label></div>
         <p class="pm-r ${pmViable(sc) ? 'ok' : 'bad'}" data-pm-r="A">${sc && sc.r_estimate != null ? esc(pt('r', { r: pmFmt(sc.r_estimate) })) + (pmViable(sc) ? '' : ' · ' + pt('main_not_viable')) : ''}</p>
-        <button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>`;
+        <label class="g-f"><span>${pt('dml')}</span>${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</label>
+        <button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>
+        <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;
     }
     if (name === 'd2') return `<h3 class="pm-q">${esc(pt('d2_' + PM.d2))}</h3><label class="g-f"><textarea rows="2" maxlength="200" data-pmf="D2" placeholder="${esc(pt('d2_ph'))}">${esc(a.D2 || '')}</textarea></label>`;
     if (name === 'd1') return `<h3 class="pm-q">${pt('d1')}</h3>${pmSeg('D1', ['gain', 'loss', 'max_loss', 'none'], a.D1)}`;
@@ -986,7 +1004,7 @@
       return l.every(pmViable) ? '' : pt(l.find((s) => !pmViable(s)).id === 'A' ? 'main_not_viable' : 'not_viable');
     }
     if (name === 'd1') return a.D1 ? '' : pt('needs');
-    if (name === 'express') { const s = pmBuild(f)[0]; return !s ? pt('needs') : pmViable(s) ? '' : pt('main_not_viable'); }
+    if (name === 'express') { const s = pmBuild(f)[0]; return !s || !(parseFloat(a.max_loss) > 0) ? pt('needs') : pmViable(s) ? '' : pt('main_not_viable'); }   // (the day's max loss, as the plan always had)
     if (name === 'limits') return (a.D1 === 'max_loss' && !a.D1_reduce) || !(f.limits.max_trades >= 1) || !(parseFloat(a.max_loss) > 0) ? pt('needs') : '';
     return '';
   }
@@ -1043,6 +1061,7 @@
     } else if (act === 'back') { PM.err = ''; PM.i = Math.max(0, PM.i - 1); pmRender(); }
     else if (act === 'save') pmSave();
     else if (act === 'lock') pmSave(true);
+    else if (act === 'inst') { PM.hideInst = false; pmRender(); const i = document.querySelector('#gSheet [data-pmf=instrument]'); if (i) i.focus(); }
     else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); closeSheet(); }   // no sheet today: its trades will be off-plan
     else if (act === 'dayoff') {   // « Not trading today »: a day off before any trade of the day, the same as the routine's button
       const j = structuredClone(journalOf(PM.day)); j.id = PM.day;
