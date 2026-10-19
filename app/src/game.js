@@ -649,6 +649,11 @@
      score keep working. */
   const PMT = {
     en: {
+      followed_sheet: 'Did you follow your sheet?', rules_q: 'Which rule?', note_tomorrow: 'A note for tomorrow? (optional, at the top of your next pre-market)',
+      r_no_retest: 'Entered without a 5m retest', r_off_plan: 'A trade off my sheet', r_max_trades: 'Too many trades', r_news_window: 'Traded in a news window', r_moved_stop: 'Moved my stop', r_other: 'Another rule',
+      d2: 'Yesterday', d2_no_retest: 'Yesterday you entered without a 5m retest. What will help you wait today?', d2_off_plan: 'Yesterday you took a trade off your sheet. What took you out of the plan?',
+      d2_max_trades: 'Yesterday you went over your number of trades. What will be your signal to stop today?', d2_news_window: 'Yesterday you traded during a news window. How will you stay out of it?',
+      d2_moved_stop: 'Yesterday you moved your stop. What will help you leave it in place?', d2_other: 'Yesterday you broke a rule of your sheet. What will help you hold it today?', d2_ph: 'A short sentence',
       x_title: 'Express plan', x_hint: 'Your sheet\'s lock time is past. In 30 seconds: your main level, the direction, the target.', x_later: 'Later (today\'s trades will be off-plan)', x_level: 'Main level', x_dir: 'Direction', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Your note from last session', of: '{a} of {b}', next: 'Continue', back: 'Back', save: 'Save my sheet', needs: 'Fill in what is missing to continue.',
       base: 'Today\'s levels', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Current price',
@@ -673,6 +678,11 @@
       l_news: 'after the first full 15m after the news', l_retest: 'retest 5m + trigger', l_vwap: 'above VWAP', l_vwap_s: 'below VWAP', l_stop: 'stop {s}', l_target: 'target {t}', l_r: '({r}R)',
     },
     fr: {
+      followed_sheet: 'As-tu suivi ta fiche ?', rules_q: 'Quelle règle ?', note_tomorrow: 'Une note pour demain ? (facultatif, en haut de ton prochain pre-market)',
+      r_no_retest: 'Entré sans retest 5m', r_off_plan: 'Un trade hors de ma fiche', r_max_trades: 'Trop de trades', r_news_window: 'Tradé pendant une fenêtre de news', r_moved_stop: 'Déplacé mon stop', r_other: 'Une autre règle',
+      d2: 'Hier', d2_no_retest: 'Hier tu es entré sans retest 5m. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', d2_off_plan: 'Hier tu as pris un trade hors de ta fiche. Qu’est-ce qui t’a fait sortir du plan ?',
+      d2_max_trades: 'Hier tu as dépassé ton nombre de trades. Quel sera ton signal d’arrêt aujourd’hui ?', d2_news_window: 'Hier tu as tradé pendant une fenêtre de news. Comment vas-tu t’en tenir à l’écart ?',
+      d2_moved_stop: 'Hier tu as déplacé ton stop. Qu’est-ce qui t’aidera à le laisser en place ?', d2_other: 'Hier tu as enfreint une règle de ta fiche. Qu’est-ce qui t’aidera à la tenir aujourd’hui ?', d2_ph: 'Une phrase courte',
       x_title: 'Plan express', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton niveau principal, la direction, la cible.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Niveau principal', x_dir: 'Direction', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Ta note de la dernière séance', of: '{a} sur {b}', next: 'Continuer', back: 'Retour', save: 'Enregistrer ma fiche', needs: 'Complète ce qui manque pour continuer.',
       base: 'Les niveaux du jour', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Prix actuel',
@@ -697,6 +707,11 @@
       l_news: 'après la première 15m complète après la news', l_retest: 'retest 5m + déclenchement', l_vwap: 'au-dessus VWAP', l_vwap_s: 'sous VWAP', l_stop: 'stop {s}', l_target: 'cible {t}', l_r: '({r}R)',
     },
     es: {
+      followed_sheet: '¿Seguiste tu ficha?', rules_q: '¿Qué regla?', note_tomorrow: '¿Una nota para mañana? (opcional, arriba de tu próximo pre-market)',
+      r_no_retest: 'Entré sin retest de 5m', r_off_plan: 'Una operación fuera de mi ficha', r_max_trades: 'Demasiadas operaciones', r_news_window: 'Operé en una ventana de noticias', r_moved_stop: 'Moví mi stop', r_other: 'Otra regla',
+      d2: 'Ayer', d2_no_retest: 'Ayer entraste sin retest de 5m. ¿Qué te ayudará a esperar hoy?', d2_off_plan: 'Ayer tomaste una operación fuera de tu ficha. ¿Qué te sacó del plan?',
+      d2_max_trades: 'Ayer superaste tu número de operaciones. ¿Cuál será tu señal para parar hoy?', d2_news_window: 'Ayer operaste durante una ventana de noticias. ¿Cómo te mantendrás al margen?',
+      d2_moved_stop: 'Ayer moviste tu stop. ¿Qué te ayudará a dejarlo en su sitio?', d2_other: 'Ayer rompiste una regla de tu ficha. ¿Qué te ayudará a mantenerla hoy?', d2_ph: 'Una frase corta',
       x_title: 'Plan exprés', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu nivel principal, la dirección, el objetivo.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Nivel principal', x_dir: 'Dirección', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Tu nota de la última sesión', of: '{a} de {b}', next: 'Continuar', back: 'Atrás', save: 'Guardar mi ficha', needs: 'Completa lo que falta para continuar.',
       base: 'Los niveles del día', instrument: 'Instrumento', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Precio actual',
@@ -821,6 +836,7 @@
     if (PM.express) return ['express', 'sheet'];
     const a = PM.f.answers, s = ['base', 'pos', 'news', 'scen', 'notrade'];
     if (PM.d1auto && !PM.d1auto.reviewed) s.push('d1');
+    if (PM.d2) s.push('d2');
     s.push('limits', 'sheet');
     return s;
   }
@@ -830,6 +846,7 @@
     PM.day = day; PM.i = 0; PM.err = ''; PM.then = opts && typeof opts.then === 'function' ? opts.then : null;
     PM.d1auto = pmLastResult(day);
     PM.note = (window.SweepCoach && SweepCoach.ruleFor && SweepCoach.ruleFor(day)) || '';   // the last review's note for this session
+    { const br = (journalOf(pmPrevDay(day)).post || {}).rules_broken || []; PM.d2 = FICHE.RULES.find((r) => br.includes(r)) || null; }   // a rule broken last session: D2
     // a sheet started for this day comes back as it was; otherwise yesterday's levels and the learned limits are the start
     let f = old ? structuredClone(old) : ficheBlank(day);
     if (!old) {
@@ -897,6 +914,7 @@
         <p class="pm-r ${pmViable(sc) ? 'ok' : 'bad'}" data-pm-r="A">${sc && sc.r_estimate != null ? esc(pt('r', { r: pmFmt(sc.r_estimate) })) + (pmViable(sc) ? '' : ' · ' + pt('main_not_viable')) : ''}</p>
         <button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>`;
     }
+    if (name === 'd2') return `<h3 class="pm-q">${esc(pt('d2_' + PM.d2))}</h3><label class="g-f"><textarea rows="2" maxlength="200" data-pmf="D2" placeholder="${esc(pt('d2_ph'))}">${esc(a.D2 || '')}</textarea></label>`;
     if (name === 'd1') return `<h3 class="pm-q">${pt('d1')}</h3>${pmSeg('D1', ['gain', 'loss', 'max_loss', 'none'], a.D1)}`;
     if (name === 'limits') return `<h3 class="pm-q">${pt('limits')}</h3>
       ${a.D1 === 'max_loss' ? `<p class="g-hint">${pt('d1_reduce')}</p>${pmSeg('D1_reduce', ['accept', 'refuse'], a.D1_reduce)}` : ''}
@@ -938,6 +956,7 @@
     const nw = pmNews();
     f.news_windows = a.B1 === 'yes' && ficheHm(a.B1_time) ? [{ start: pmHmAdd(a.B1_time, -nw.before), end: pmHmAdd(a.B1_time, nw.after), event: ((PM.news.find((e) => e.hm === a.B1_time) || {}).event) || '' }] : [];
     f.limits.risk_pct = a.D1 === 'max_loss' && a.D1_reduce === 'accept' ? 0.25 : 0.5;
+    f.reminder = PM.d2 && a.D2 ? String(a.D2).trim().slice(0, 200) : f.reminder || '';   // D2's answer, a reminder at the top of the sheet
     return ficheNormalize(f, PM.day);
   }
   /** one line per scenario, as the brief shows it */
@@ -1000,7 +1019,7 @@
     else if (k === 'lim.max_trades') f.limits.max_trades = parseInt(raw, 10) || 0;
     else if (k === 'lim.time_limit') f.limits.time_limit = ficheHm(raw);
     else if (k === 'no_trade_other') f.no_trade_other = String(raw).slice(0, 120);
-    else f.answers[k] = String(raw).replace(',', '.');
+    else f.answers[k] = /^(C1_level|C3_[AB]|X_level|max_loss)$/.test(k) ? String(raw).replace(',', '.') : String(raw);   // numbers: a comma is a decimal point
   }
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked):not(.g-pm-link) [data-pm]'); if (!b) return;
@@ -1124,6 +1143,17 @@
     if (!f && doc.date === ficheDayOf() && (S.journals || []).some((j) => j.fiche && j.id < doc.date) && ficheLockAt(doc.date) <= Date.now() / 1000) doc.off_plan = true;
     return doc;
   }
+  /** what the app saw broken on the sheet's day: a trade off the sheet, more trades than the limit (pre-checked in the review) */
+  function ficheAutoRules(f) {
+    const tr = ssTrades(f.trading_day), o = [];
+    if (tr.some((x) => x.off_plan)) o.push('off_plan');
+    if (tr.length > f.limits.max_trades) o.push('max_trades');
+    return o;
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('#gSheet.g-rv [data-rv-rule]'); if (!b) return;
+    const r = b.dataset.rvRule; RV.rules.has(r) ? RV.rules.delete(r) : RV.rules.add(r); b.classList.toggle('on', RV.rules.has(r)); buzz(5);
+  });
   /** once a day on Today: the lock time is past and there is no sheet (for a trader who makes sheets) → the express version */
   function ficheMaybeExpress() {
     const day = ficheDayOf(), now = typeof etStr === 'function' ? etStr(Math.floor(Date.now() / 1000)) : '';
@@ -1217,12 +1247,16 @@
       if (!(post.tomorrow || '').trim()) post.tomorrow = uniq(pick(['lesson', 'wrong', 'differently'])).join('\n');
     }
     RV.score = post.discipline || null; RV.followed = post.followed || null; RV.grade = post.grade || null; RV.well = post.well || '';
+    // a day with a pre-market sheet (brief step 7): « Did you follow your sheet? », then which rule, the ones the app saw pre-checked
+    const fi = ficheGet(RV.day); RV.fiche = !!fi;
+    RV.rules = new Set(post.rules_broken || (fi ? ficheAutoRules(fi) : []));
     const grades = typeof GRADES !== 'undefined' ? GRADES : ['A', 'B', 'C', 'D', 'F'];
     openSheet(`${head(t('review_title'), fdate(RV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
-      <div class="g-f"><span>${t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
+      <div class="g-f"><span>${RV.fiche ? pt('followed_sheet') : t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
+      ${RV.fiche ? `<div class="g-f rv-rules" ${RV.followed === 'partly' || RV.followed === 'no' ? '' : 'hidden'}><span>${pt('rules_q')}</span><div class="g-chips-row wrap">${FICHE.RULES.map((r) => `<button type="button" class="chip ${RV.rules.has(r) ? 'on' : ''}" data-rv-rule="${r}">${pt('r_' + r)}</button>`).join('')}</div></div>` : ''}
       <div class="g-f"><span>${t('discipline')}</span><div class="g-dots">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="${RV.score === n ? 'on' : ''}" data-g="r-score" data-v="${n}">${n}</button>`).join('')}</div></div>
       <div class="g-f"><span>${t('grade')}</span><div class="g-dots">${grades.map((g) => `<button type="button" class="${RV.grade === g ? 'on' : ''}" data-g="r-grade" data-v="${g}">${g}</button>`).join('')}</div></div>
-      <label class="g-f"><span>${t('improve_opt')}</span><textarea rows="2" data-gr="tomorrow" maxlength="400">${esc(post.tomorrow || '')}</textarea></label>
+      <label class="g-f"><span>${RV.fiche ? pt('note_tomorrow') : t('improve_opt')}</span><textarea rows="2" data-gr="tomorrow" maxlength="400">${esc(post.tomorrow || '')}</textarea></label>
       <p class="g-err" id="gErr"></p>
       <button type="button" class="btn primary g-big" data-g="save-review">${t('save_review')}</button>`, { cls: 'g-rv' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = RV.day;   // the day reviewed (the coach's lesson reads it)
@@ -1235,6 +1269,7 @@
     j.id = RV.day;
     // « what went well » is no longer asked here: what the journal already holds stays
     j.post = Object.assign({}, j.post || {}, { followed: RV.followed, discipline: RV.score, grade: RV.grade, tomorrow: tom, reviewed_at: new Date().toISOString() });
+    if (RV.fiche) j.post.rules_broken = RV.followed === 'yes' ? [] : FICHE.RULES.filter((r) => RV.rules.has(r));   // the next pre-market asks about the first one (D2)
     if (!(j.post.well || '').trim() && RV.well) j.post.well = RV.well;   // what the day's trade reviews already say went well (as before)
     put('journals', j);
     buzz(10); closeSheet(); soon(500);
@@ -2764,6 +2799,7 @@
     else if (a === 'j-skip') jNext(true);
     else if (a === 'r-score' || a === 'r-followed' || a === 'r-grade') {
       if (a === 'r-score') RV.score = +v; else if (a === 'r-followed') RV.followed = v; else RV.grade = v;
+      if (a === 'r-followed') { const r = document.querySelector('#gSheet .rv-rules'); if (r) r.hidden = v === 'yes'; }
       b.parentElement.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); buzz(5);
       const e = document.getElementById('gErr'); if (e) e.textContent = '';
     }
