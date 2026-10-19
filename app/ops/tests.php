@@ -21,7 +21,7 @@ sb_set_config([
     'live' => true, 'launch_at' => '2026-10-01T00:00:00Z', 'prelaunch_plan' => 'elite', 'comp_users' => [], 'test_users' => [],
     'trial' => ['plan' => 'pro', 'days' => 60], 'early_access_grant' => ['plan' => 'pro', 'days' => 60],
     'campaign_grants' => ['100traders' => ['plan' => 'elite', 'days' => 30]],
-    'plans' => ['free' => ['accounts' => 2], 'pro' => ['accounts' => 5], 'elite' => ['accounts' => null]],
+    'plans' => ['free' => ['accounts' => 2], 'pro' => ['accounts' => null], 'elite' => ['accounts' => null]],
     'past_due_grace_days' => 7,
 ]);
 $GLOBALS['SB_NOW'] = $T0;

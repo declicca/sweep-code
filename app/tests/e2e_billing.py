@@ -136,7 +136,7 @@ def day50(p, lang, phone):
   ok(pg.locator('#main .nav-trial').count() == 0, f'{tag} day 50: and it stays hidden')
   # (audit of 16 Oct., R20) the plans page says what happens on the last day: Free, 2 of the 4 accounts active, nothing charged
   pg.evaluate("location.hash = '#plan'"); pg.wait_for_selector('#main .sb-plans', timeout=10000); pg.wait_for_timeout(600)
-  nx = pg.evaluate("(document.querySelector('#main .sb-next p') || {}).textContent || ''"); kb = pg.evaluate("(document.querySelector('#main .sb-next [data-buy]') || {}).textContent || ''")
+  nx = pg.evaluate("(document.querySelector('#main .sb-next p') || {}).textContent || ''"); kb = pg.evaluate("[...document.querySelectorAll('#main .sb-plans [data-buy=pro]')].map((b) => b.textContent).join('|')")   # (brief of 18 Oct.) the button is on Pro itself
   want = {'fr': ('2 de tes 4 comptes', 'Rien n’est facturé', 'Garder Pro'), 'en': ('2 of your 4 accounts', 'Nothing is charged', 'Keep Pro'), 'es': ('2 de tus 4 cuentas', 'No se cobra nada', 'Mantener Pro')}[lang]
   ok(want[0] in nx and want[1] in nx and 'Free' in nx and kb == want[2], f'{tag} plans page, during the trial: « {nx[:110]} » and « {kb} »')
   ok(pg.evaluate(WIDE) <= 1, f'{tag} plans page: nothing wider than the window')

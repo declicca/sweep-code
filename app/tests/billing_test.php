@@ -41,7 +41,7 @@ sb_set_config([
     'past_due_grace_days' => 7, 'ai_reviews_fair_use_monthly' => 200, 'paywall_max_blocking_per_week' => 3, 'currency' => 'USD',
     'plans' => [
         'free'  => ['accounts' => 2, 'analytics_days' => 30, 'payouts' => false, 'ai_import' => false, 'ai_daily' => 3, 'ai_reviews' => 0],
-        'pro'   => ['accounts' => 5, 'analytics_days' => null, 'payouts' => true, 'ai_import' => true, 'ai_daily' => 50, 'ai_reviews' => 3],
+        'pro'   => ['accounts' => null, 'analytics_days' => null, 'payouts' => true, 'ai_import' => true, 'ai_daily' => 50, 'ai_reviews' => 3],
         'elite' => ['accounts' => null, 'analytics_days' => null, 'payouts' => true, 'ai_import' => true, 'ai_daily' => 200, 'ai_reviews' => null],
     ],
     'display_prices' => ['pro' => ['month' => 29, 'year' => 290], 'elite' => ['month' => 59, 'year' => 590]],

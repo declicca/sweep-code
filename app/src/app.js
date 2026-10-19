@@ -7433,17 +7433,28 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       trial_next_all: "On {date}, you move to Free: your accounts stay active. Nothing is charged.",
       keep_plan: "Keep {plan}",
       early_left: "Early access {plan}: {d} left",
-      free_desc: "Journal and core dashboard",
-      f_accounts: "Trading accounts",
-      f_trades: "Manual trades",
-      f_history: "Analytics history",
-      f_payouts: "Payouts and expenses",
+      free_desc: "To build the habit on your first accounts.",
+      pro_desc: "For traders running several prop accounts.",
+      elite_desc: "For an AI review on every trade and a report every week.",
+      f_accounts: "Prop accounts, with their firm’s rules",
+      f_history: "Stats history",
+      f_payouts: "My money: payouts, expenses and real net",
       f_ai_daily: "Sweep AI messages",
-      f_ai_import: "AI import",
+      f_ai_import: "Trades read from a screenshot",
       f_ai_reviews: "AI trade reviews",
       f_calendar: "Economic calendar notes",
       f_weekly: "Weekly AI report",
       f_support: "Priority support",
+      last_days: "Last {n} days",
+      full_hist: "Complete",
+      every_trade: "Every trade",
+      billed_save: "billed {y} a year · you save {s}",
+      w_acc_h: "Every account, in one place",
+      w_acc: "Free follows {k} accounts. When you scale, Pro follows all of them, each with its firm’s rules.",
+      w_net_h: "Your real net",
+      w_net: "Payouts in; evaluations, resets and fees out. My money shows what trading really pays you.",
+      w_hist_h: "Your whole track record",
+      w_hist: "Free shows your last {d} days. Every older trade stays saved, and Pro puts it back in your stats.",
       unlimited: "Unlimited",
       days: "{n} days",
       per_day: "{n} a day",
@@ -7452,7 +7463,6 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       full: "Full notes",
       included: "Included",
       not_included: "Not included",
-      all_trades: "Unlimited",
       welcome_title: "You’re on {plan}",
       welcome_text: "Everything is unlocked. Thanks for backing Sweep.",
       welcome_cta: "Let’s go",
@@ -7585,17 +7595,28 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       trial_next_all: "Le {date}, tu passes à Free : tes comptes restent actifs. Rien n’est facturé.",
       keep_plan: "Garder {plan}",
       early_left: "Accès anticipé {plan} : {d} restants",
-      free_desc: "Journal et tableau de bord de base",
-      f_accounts: "Comptes de trading",
-      f_trades: "Trades manuels",
-      f_history: "Historique des analyses",
-      f_payouts: "Payouts et dépenses",
+      free_desc: "Pour bâtir l’habitude sur tes premiers comptes.",
+      pro_desc: "Pour les traders qui gèrent plusieurs comptes prop.",
+      elite_desc: "Pour un avis de l’IA sur chaque trade et un rapport chaque semaine.",
+      f_accounts: "Comptes prop, avec les règles de leur firme",
+      f_history: "Historique des stats",
+      f_payouts: "Mon argent : payouts, dépenses et vrai net",
       f_ai_daily: "Messages Sweep AI",
-      f_ai_import: "Import IA",
-      f_ai_reviews: "Revues IA de trades",
+      f_ai_import: "Trades lus depuis une capture",
+      f_ai_reviews: "Avis IA sur un trade",
       f_calendar: "Notes du calendrier économique",
-      f_weekly: "Rapport IA hebdomadaire",
+      f_weekly: "Rapport IA de la semaine",
       f_support: "Soutien prioritaire",
+      last_days: "{n} derniers jours",
+      full_hist: "Complet",
+      every_trade: "Chaque trade",
+      billed_save: "facturé {y} par année · {s} d’économie",
+      w_acc_h: "Tous tes comptes, au même endroit",
+      w_acc: "Free suit {k} comptes. Quand tu grandis, Pro les suit tous, chacun avec les règles de sa firme.",
+      w_net_h: "Ton vrai net",
+      w_net: "Les payouts d’un côté ; les évaluations, les resets et les frais de l’autre. Mon argent montre ce que le trading te rapporte vraiment.",
+      w_hist_h: "Tout ton historique",
+      w_hist: "Free montre tes {d} derniers jours. Chaque trade plus ancien reste gardé, et Pro le remet dans tes stats.",
       unlimited: "Illimité",
       days: "{n} jours",
       per_day: "{n} par jour",
@@ -7604,7 +7625,6 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       full: "Notes complètes",
       included: "Inclus",
       not_included: "Non inclus",
-      all_trades: "Illimités",
       welcome_title: "Tu es sur {plan}",
       welcome_text: "Tout est débloqué. Merci de soutenir Sweep.",
       welcome_cta: "C’est parti",
@@ -7737,17 +7757,28 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       trial_next_all: "El {date} pasas a Free: tus cuentas siguen activas. No se cobra nada.",
       keep_plan: "Mantener {plan}",
       early_left: "Acceso anticipado {plan}: quedan {d}",
-      free_desc: "Diario y panel básico",
-      f_accounts: "Cuentas de trading",
-      f_trades: "Trades manuales",
-      f_history: "Historial de análisis",
-      f_payouts: "Payouts y gastos",
+      free_desc: "Para crear el hábito con tus primeras cuentas.",
+      pro_desc: "Para traders con varias cuentas prop.",
+      elite_desc: "Para una opinión de la IA en cada operación y un informe cada semana.",
+      f_accounts: "Cuentas prop, con las reglas de su firma",
+      f_history: "Historial de estadísticas",
+      f_payouts: "Mi dinero: payouts, gastos y neto real",
       f_ai_daily: "Mensajes de Sweep AI",
-      f_ai_import: "Importación con IA",
-      f_ai_reviews: "Revisiones de IA",
+      f_ai_import: "Operaciones leídas desde una captura",
+      f_ai_reviews: "Opiniones de IA sobre una operación",
       f_calendar: "Notas del calendario económico",
-      f_weekly: "Informe semanal con IA",
+      f_weekly: "Informe semanal de IA",
       f_support: "Soporte prioritario",
+      last_days: "Últimos {n} días",
+      full_hist: "Completo",
+      every_trade: "Cada operación",
+      billed_save: "facturado {y} al año · ahorras {s}",
+      w_acc_h: "Todas tus cuentas, en un solo lugar",
+      w_acc: "Free sigue {k} cuentas. Cuando creces, Pro las sigue todas, cada una con las reglas de su firma.",
+      w_net_h: "Tu neto real",
+      w_net: "Los payouts por un lado; evaluaciones, resets y comisiones por el otro. Mi dinero muestra lo que el trading te paga de verdad.",
+      w_hist_h: "Todo tu historial",
+      w_hist: "Free muestra tus últimos {d} días. Cada operación más antigua queda guardada, y Pro la vuelve a poner en tus estadísticas.",
       unlimited: "Ilimitado",
       days: "{n} días",
       per_day: "{n} al día",
@@ -7756,7 +7787,6 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       full: "Notas completas",
       included: "Incluido",
       not_included: "No incluido",
-      all_trades: "Ilimitados",
       welcome_title: "Ya tienes {plan}",
       welcome_text: "Todo está desbloqueado. Gracias por apoyar Sweep.",
       welcome_cta: "Vamos",
@@ -7860,7 +7890,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     },
     generic: {
       plan: "pro",
-      b: [ "b_accounts", "b_payouts", "b_analytics" ]
+      b: [ "w_acc", "w_net", "w_hist" ]
     }
   }, a = {
     pro: [ "b_accounts", "b_payouts", "b_analytics", "b_ai_import", "b_ai_more", "b_reviews_3" ],
@@ -8110,9 +8140,11 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     }) ];
   }
   function me(k, A) {
-    const j = i && i.plans && i.plans[A] || {};
+    const j = i && i.plans && i.plans[A] || {}, fr = i && i.plans && i.plans.free || {};
     return l(k, {
-      n: j.ai_daily
+      n: j.ai_daily,
+      k: fr.accounts ?? 2,
+      d: fr.analytics_days ?? 30
     });
   }
   function oe(k, A) {
@@ -8155,7 +8187,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
         t: E(ye.deadline)
       })) + "</p>" : "") + '<div class="sb-seg" role="tablist"><button type="button" role="tab" data-iv="month" aria-selected="' + (G === "month") + '">' + u(l("monthly")) + '</button><button type="button" role="tab" data-iv="year" aria-selected="' + (G === "year") + '">' + u(l("yearly")) + " <em>" + u(l("save", {
         p: se()
-      })) + '</em></button></div><div class="sb-opts" role="radiogroup">' + he + '</div><ul class="sb-bens">' + be.map($e => "<li>" + u(me($e, B)) + "</li>").join("") + '</ul><button type="button" class="sb-cta">' + u(ye.eligible ? l("claim", {
+      })) + '</em></button></div><div class="sb-opts" role="radiogroup">' + he + '</div><ul class="sb-bens">' + be.map($e => "<li>" + (/^w_/.test($e) ? "<b>" + u(l($e + "_h")) + "</b> " : "") + u(me($e, B)) + "</li>").join("") + '</ul><button type="button" class="sb-cta">' + u(ye.eligible ? l("claim", {
         plan: p(B)
       }) : l("upgrade_to", {
         plan: p(B)
@@ -8293,19 +8325,30 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     if (!tr || i.subscription || !tr.ends_at) return "";
     const lim = ((i.plans || {}).free || {}).accounts, n = (typeof S != "undefined" && S.accounts || []).filter(a => !a.demo && a.status !== "archived" && a.status !== "closed").length;
     const txt = lim == null || n <= lim ? l("trial_next_all", { date: b(tr.ends_at) }) : lim === 1 ? l("trial_next1", { date: b(tr.ends_at), n }) : l("trial_next", { date: b(tr.ends_at), k: lim, n });
-    return '<div class="sb-next"><p>' + u(txt) + '</p><button type="button" class="sb-cta sb-sm" data-buy="' + u(tr.plan || "pro") + '">' + u(l("keep_plan", { plan: p(tr.plan || "pro") })) + "</button></div>";
+    return '<div class="sb-next"><p>' + u(txt) + "</p></div>";   // the « Keep Pro » button is on the plan itself (brief of 18 Oct.)
   }
   function ue(k) {
     if (!k || !i) return;
     k.setAttribute("data-noi18n", "");
     let A = "year";
-    const j = i.plans, N = i.founding, B = (ie, de) => de === "bool" ? ie ? '<span class="sb-yes" aria-label="' + u(l("included")) + '">✓</span>' : '<span class="sb-no" aria-label="' + u(l("not_included")) + '">–</span>' : ie == null ? u(l("unlimited")) : u(de === "days" ? l("days", {
+    const j = i.plans, N = i.founding, B = (ie, de) => de === "bool" ? ie ? '<span class="sb-yes" aria-label="' + u(l("included")) + '">✓</span>' : '<span class="sb-no" aria-label="' + u(l("not_included")) + '">–</span>' : de === "hist" ? u(ie == null ? l("full_hist") : l("last_days", {
+      n: ie
+    })) : de === "rev" && ie === 0 ? '<span class="sb-no" aria-label="' + u(l("not_included")) + '">–</span>' : ie == null ? u(l(de === "rev" ? "every_trade" : "unlimited")) : u(de === "days" ? l("days", {
       n: ie
     }) : de === "day" ? l("per_day", {
       n: ie
-    }) : de === "month" ? l("per_month_n", {
+    }) : de === "month" || de === "rev" ? l("per_month_n", {
       n: ie
-    }) : de === "notes" ? l(ie) : String(ie)), G = [ [ "f_accounts", "accounts", "" ], [ "f_trades", null, "trades" ], [ "f_history", "analytics_days", "days" ], [ "f_payouts", "payouts", "bool" ], [ "f_ai_daily", "ai_daily", "day" ], [ "f_ai_import", "ai_import_daily", "day" ], [ "f_ai_reviews", "ai_reviews", "month" ], [ "f_calendar", "calendar_notes", "notes" ], [ "f_weekly", "weekly_report", "bool" ], [ "f_support", "priority_support", "bool" ] ];
+    }) : de === "notes" ? l(ie) : String(ie)), G = [ [ "f_accounts", "accounts", "" ], [ "f_history", "analytics_days", "hist" ], [ "f_payouts", "payouts", "bool" ], [ "f_ai_daily", "ai_daily", "day" ], [ "f_ai_import", "ai_import_daily", "day" ], [ "f_ai_reviews", "ai_reviews", "rev" ], [ "f_calendar", "calendar_notes", "notes" ], [ "f_weekly", "weekly_report", "bool" ], [ "f_support", "priority_support", "bool" ] ];
+    const pr = de => {
+      if (de === "free") return { s: "", b: v(0), sub: "" };
+      const m = (i.prices[de] || {}).month || {}, cur = (i.prices[de] || {})[A] || {}, now = cur.founding ?? cur.amount ?? 0, per = A === "year" ? now / 12 : now, full = m.amount || 0;
+      return {
+        s: full && Math.round(per * 100) < Math.round(full * 100) ? v(full) : "",
+        b: v(Math.round(per * 100) / 100),
+        sub: A !== "year" || !now ? "" : full * 12 > now ? l("billed_save", { y: v(now), s: v(Math.round((full * 12 - now) * 100) / 100) }) : l("billed_yearly", { a: v(now) })
+      };
+    }, keep = de => !!(i.trial && !i.subscription && i.trial.ends_at && (i.trial.plan || "pro") === de);
     function Z() {
       const ie = i.subscription;
       return ie ? (ie.cancel_at_period_end ? l("ends_on", {
@@ -8322,29 +8365,33 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       return '<div class="sb-pcards">' + (i.plan === "elite" ? [ "elite", "pro", "free" ] : i.plan === "pro" ? [ "elite", "pro", "free" ] : [ "pro", "elite", "free" ]).map(de => {
         const se = (i.prices[de] || {})[A], ee = se ? se.founding ?? se.amount : 0, fe = se ? se.amount : 0, ke = A === "year" ? ee / 12 : ee, he = i.plan === de, be = de === "pro" && i.plan === "free";
         let _e = "";
-        de !== "free" && !he && (i.plan === "free" || de === "elite") && (_e = '<button type="button" class="sb-cta" data-buy="' + de + '">' + u(N.eligible ? l("claim", {
+        const kp = keep(de), P = pr(de);
+        kp ? _e = '<button type="button" class="sb-cta" data-buy="' + de + '">' + u(l("keep_plan", {
+          plan: p(de)
+        })) + "</button>" : de !== "free" && !he && (i.plan === "free" || de === "elite") && (_e = '<button type="button" class="sb-cta" data-buy="' + de + '">' + u(N.eligible ? l("claim", {
           plan: p(de)
         }) : l("upgrade_to", {
           plan: p(de)
         })) + "</button>");
-        const $e = de === "free" ? "<b>" + u(v(0)) + "</b>" : (se && se.founding !== null && se.founding !== void 0 ? "<s>" + u(v(A === "year" ? fe / 12 : fe)) + "</s>" : "") + "<b>" + u(v(Math.round(ke * 100) / 100)) + "</b>", ve = G.map(([Se, Ae, Le]) => {
-          const Me = Le === "trades" ? null : j[de][Ae], d = Le === "bool" ? !Me : !1, f = Le === "trades" ? u(l("all_trades")) : Le === "bool" ? "" : B(Me, Le);
+        const $e = (P.s ? "<s>" + u(P.s) + "</s>" : "") + "<b>" + u(P.b) + "</b>", ve = G.map(([Se, Ae, Le]) => {
+          const Me = j[de][Ae], d = Le === "bool" ? !Me : Le === "rev" ? Me === 0 : !1, f = Le === "bool" || d ? "" : B(Me, Le);
           return '<li class="' + (d ? "sb-off" : "") + '"><i aria-hidden="true">' + (d ? "–" : "✓") + "</i><span>" + u(l(Se)) + "</span>" + (f ? "<b>" + f + "</b>" : "") + "</li>";
         }).join("");
-        return '<article class="sb-pcard' + (be ? " sb-hl" : "") + (he ? " sb-curcard" : "") + '"><header><span class="sb-pc-name">' + u(p(de)) + "</span>" + (be ? '<span class="sb-tag">' + u(l("most_popular")) + "</span>" : "") + (he ? '<span class="sb-cur">' + u(l("current")) + "</span>" : "") + '</header><div class="sb-pc-price">' + $e + "<small>" + u(l("per_month")) + "</small></div>" + (de !== "free" && A === "year" ? '<div class="sb-pc-sub">' + u(l("billed_yearly", {
-          a: v(ee)
-        })) + "</div>" : '<div class="sb-pc-sub">&nbsp;</div>') + _e + '<ul class="sb-pc-feats">' + ve + "</ul></article>";
+        return '<article class="sb-pcard' + (be ? " sb-hl" : "") + (he ? " sb-curcard" : "") + '"><header><span class="sb-pc-name">' + u(p(de)) + "</span>" + (be ? '<span class="sb-tag">' + u(l("most_popular")) + "</span>" : "") + (he && !kp ? '<span class="sb-cur">' + u(l("current")) + "</span>" : "") + '</header><p class="sb-pc-desc">' + u(l(de + "_desc")) + '</p><div class="sb-pc-price">' + $e + "<small>" + u(l("per_month")) + "</small></div>" + '<div class="sb-pc-sub">' + (P.sub ? u(P.sub) : "&nbsp;") + "</div>" + _e + '<ul class="sb-pc-feats">' + ve + "</ul></article>";
       }).join("") + "</div>";
     }
     function ye() {
       const ie = [ "free", "pro", "elite" ].map(se => {
         const ee = (i.prices[se] || {})[A], fe = ee ? ee.founding ?? ee.amount : 0, ke = A === "year" ? fe / 12 : fe, he = i.plan === se;
         let be = "";
+        const P = pr(se);
         return se !== "free" && !he && (i.plan === "free" || se === "elite") && (be = '<button type="button" class="sb-cta sb-sm" data-buy="' + se + '">' + u(l("upgrade_to", {
           plan: p(se)
-        })) + "</button>"), he && (be = '<span class="sb-cur">' + u(l("current")) + "</span>"), 
-        '<th scope="col"' + (se === "pro" ? ' class="sb-hl"' : "") + '><span class="sb-th-name">' + u(p(se)) + '</span><span class="sb-th-price">' + (se === "free" ? u(v(0)) : (ee && ee.founding !== null && ee.founding !== void 0 ? "<s>" + u(v(A === "year" ? ee.amount / 12 : ee.amount)) + "</s> " : "") + u(v(Math.round(ke * 100) / 100))) + "<small>" + u(l("per_month")) + "</small></span>" + be + "</th>";
-      }).join(""), de = G.map(([se, ee, fe]) => '<tr><th scope="row">' + u(l(se)) + "</th>" + [ "free", "pro", "elite" ].map(ke => "<td" + (ke === "pro" ? ' class="sb-hl"' : "") + ">" + (fe === "trades" ? u(l("all_trades")) : B(j[ke][ee], fe)) + "</td>").join("") + "</tr>").join("");
+        })) + "</button>"), he && (be = '<span class="sb-cur">' + u(l("current")) + "</span>"), keep(se) && (be = '<button type="button" class="sb-cta sb-sm" data-buy="' + se + '">' + u(l("keep_plan", {
+          plan: p(se)
+        })) + "</button>"), 
+        '<th scope="col"' + (se === "pro" ? ' class="sb-hl"' : "") + '><span class="sb-th-name">' + u(p(se)) + '</span><span class="sb-th-desc">' + u(l(se + "_desc")) + '</span><span class="sb-th-price">' + (P.s ? "<s>" + u(P.s) + "</s> " : "") + u(P.b) + "<small>" + u(l("per_month")) + '</small></span><span class="sb-th-sub">' + (P.sub ? u(P.sub) : "&nbsp;") + "</span>" + be + "</th>";
+      }).join(""), de = G.map(([se, ee, fe]) => '<tr><th scope="row">' + u(l(se)) + "</th>" + [ "free", "pro", "elite" ].map(ke => "<td" + (ke === "pro" ? ' class="sb-hl"' : "") + ">" + B(j[ke][ee], fe) + "</td>").join("") + "</tr>").join("");
       k.innerHTML = '<section class="sb-plans"><div class="sb-card"><div><span class="sb-label">' + u(l("your_plan")) + '</span><b class="sb-big">' + u(p(i.plan)) + '</b><span class="sb-status">' + Z() + "</span></div>" + (i.can_manage && i.subscription ? '<button type="button" class="sb-btn2 sb-manage">' + u(l("manage")) + "</button>" : "") + "</div>" + trialNext() + (N.eligible ? '<p class="sb-founding">' + u(l("founding_strip", {
         p: N.percent,
         t: E(N.deadline)
