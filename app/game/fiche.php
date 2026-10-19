@@ -1,0 +1,103 @@
+<?php
+declare(strict_types=1);
+/**
+ * Sweep — the pre-market sheet (« fiche », brief « Plan pre-market adaptatif », step 1): one per trading day and trader,
+ * kept in the day's journal document (journals/{day}.fiche). The same model as SweepFiche in src/game.js.
+ * A trading day follows New York: it starts at 18:00 the evening before (NY + 6 h, like GameEngine::today()); a Saturday or
+ * a Sunday belongs to the Monday. The sheet locks at the trader's time (09:25 NY by default).
+ */
+final class Fiche
+{
+    public const VERSION = 1;
+    public const LOCK_HM = '09:25';
+    public const SCENARIO_TYPES = ['breakdown', 'breakout', 'continuation', 'reclaim', 'rejection'];
+    public const STATUSES = ['waiting', 'confirmed', 'invalidated', 'taken', 'expired'];
+    public const NO_TRADE = ['narrow_range', 'two_invalidations', 'time_limit', 'other'];
+    public const RULES = ['no_retest', 'off_plan', 'max_trades', 'news_window', 'moved_stop', 'other'];
+
+    private static function tz(): DateTimeZone { static $z = null; return $z ??= new DateTimeZone('America/New_York'); }
+
+    /** the trading day of a moment (epoch seconds) */
+    public static function dayOf(int $ts): string
+    {
+        $d = (new DateTimeImmutable('@' . $ts))->setTimezone(self::tz())->modify('+6 hours');
+        while ((int) $d->format('N') > 5) $d = $d->modify('+1 day');
+        return $d->format('Y-m-d');
+    }
+
+    /** the moment the sheet of a trading day locks (its own date, NY wall time) */
+    public static function lockEpoch(string $day, ?string $hm = null): int
+    {
+        $hm = self::hm($hm) ?? self::LOCK_HM;
+        return (new DateTimeImmutable($day . ' ' . $hm, self::tz()))->getTimestamp();
+    }
+
+    public static function hm($v): ?string
+    {
+        return is_string($v) && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $v) ? $v : null;
+    }
+
+    /** the checklist of a scenario, in its order (a reclaim adds VWAP) */
+    public static function conditions(string $type): array
+    {
+        return $type === 'reclaim' ? ['close_15m', 'retest_5m', 'trigger_5m', 'vwap', 'risk_checked'] : ['close_15m', 'retest_5m', 'trigger_5m', 'risk_checked'];
+    }
+
+    private static function num($v): ?float { return is_numeric($v) ? (float) $v : null; }
+
+    /** a sheet as the server keeps it: known fields only, the right types; what the client sent beyond that is dropped */
+    public static function normalize(array $f, string $day): array
+    {
+        $lv = is_array($f['levels'] ?? null) ? $f['levels'] : [];
+        $sc = [];
+        foreach (array_slice(is_array($f['scenarios'] ?? null) ? $f['scenarios'] : [], 0, 2) as $s) {
+            if (!is_array($s)) continue;
+            $type = in_array($s['type'] ?? '', self::SCENARIO_TYPES, true) ? $s['type'] : 'breakout';
+            $sc[] = [
+                'id' => in_array($s['id'] ?? '', ['A', 'B'], true) ? $s['id'] : (count($sc) ? 'B' : 'A'),
+                'direction' => ($s['direction'] ?? '') === 'short' ? 'short' : 'long',
+                'type' => $type,
+                'level' => self::num($s['level'] ?? null), 'stop_estimate' => self::num($s['stop_estimate'] ?? null),
+                'target' => self::num($s['target'] ?? null), 'r_estimate' => self::num($s['r_estimate'] ?? null),
+                'conditions' => self::conditions($type),
+                'done' => array_values(array_intersect(self::conditions($type), is_array($s['done'] ?? null) ? $s['done'] : [])),
+                'status' => in_array($s['status'] ?? '', self::STATUSES, true) ? $s['status'] : 'waiting',
+                'source' => ($s['source'] ?? '') === 'auto' ? 'auto' : 'manual',
+            ];
+        }
+        $win = [];
+        foreach (is_array($f['news_windows'] ?? null) ? $f['news_windows'] : [] as $w) {
+            if (is_array($w) && self::hm($w['start'] ?? null) && self::hm($w['end'] ?? null)) $win[] = ['start' => $w['start'], 'end' => $w['end'], 'event' => mb_substr((string) ($w['event'] ?? ''), 0, 80)];
+        }
+        $lim = is_array($f['limits'] ?? null) ? $f['limits'] : [];
+        return [
+            'v' => self::VERSION,
+            'trading_day' => $day,
+            'instrument' => mb_substr(preg_replace('/[^A-Za-z0-9!._-]/', '', (string) ($f['instrument'] ?? '')), 0, 16),
+            'levels' => ['london_high' => self::num($lv['london_high'] ?? null), 'london_low' => self::num($lv['london_low'] ?? null),
+                'pdh' => self::num($lv['pdh'] ?? null), 'pdl' => self::num($lv['pdl'] ?? null), 'price' => self::num($lv['price'] ?? null),
+                'source' => ($lv['source'] ?? '') === 'auto' ? 'auto' : 'manual'],
+            'answers' => (object) (is_array($f['answers'] ?? null) ? array_slice($f['answers'], 0, 40, true) : []),
+            'scenarios' => $sc,
+            'news_windows' => array_slice($win, 0, 8),
+            'no_trade_conditions' => array_values(array_intersect(self::NO_TRADE, is_array($f['no_trade_conditions'] ?? null) ? $f['no_trade_conditions'] : [])),
+            'no_trade_other' => mb_substr((string) ($f['no_trade_other'] ?? ''), 0, 120),
+            'limits' => ['risk_pct' => in_array(self::num($lim['risk_pct'] ?? null), [0.25, 0.5], true) ? (float) $lim['risk_pct'] : 0.5,
+                'max_trades' => max(1, min(20, (int) ($lim['max_trades'] ?? 2))), 'time_limit' => self::hm($lim['time_limit'] ?? null)],
+            'reminder' => mb_substr((string) ($f['reminder'] ?? ''), 0, 200),
+            'mode' => ($f['mode'] ?? '') === 'express' ? 'express' : 'full',
+            'invalidations' => max(0, min(9, (int) ($f['invalidations'] ?? 0))),
+            'locked_at' => is_int($f['locked_at'] ?? null) ? $f['locked_at'] : null,
+        ];
+    }
+
+    /** a journal document on its way in (PUT or batch): its sheet, if any, normalized; none on a document that is not a day */
+    public static function apply(array $doc, string $id): array
+    {
+        if (!array_key_exists('fiche', $doc)) return $doc;
+        if ($doc['fiche'] === null) return $doc;
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $id) || !is_array($doc['fiche'])) { unset($doc['fiche']); return $doc; }
+        $doc['fiche'] = self::normalize($doc['fiche'], $id);
+        return $doc;
+    }
+}

@@ -552,6 +552,78 @@
     buzz(10); soon(400);
   }
 
+  /* ───────────── Pre-market sheet (« fiche », brief « Plan pre-market adaptatif », step 1) ─────────────
+     One per trading day and trader, in that day's journal (journals/{day}.fiche); the server keeps the same model
+     (game/fiche.php, Fiche::normalize). A trading day follows New York: it starts at 18:00 the evening before (NY + 6 h, like
+     todayStr()); a Saturday or a Sunday belongs to the Monday. The sheet locks at the trader's time (09:25 NY by default). */
+  const FICHE = {
+    V: 1, LOCK_HM: '09:25',
+    TYPES: ['breakdown', 'breakout', 'continuation', 'reclaim', 'rejection'],
+    STATUSES: ['waiting', 'confirmed', 'invalidated', 'taken', 'expired'],
+    NO_TRADE: ['narrow_range', 'two_invalidations', 'time_limit', 'other'],
+    RULES: ['no_retest', 'off_plan', 'max_trades', 'news_window', 'moved_stop', 'other'],
+  };
+  const _ficheNy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
+  function ficheDayOf(ms) {
+    const d = new Date(_ficheNy.format(new Date((ms == null ? Date.now() : ms) + 216e5)) + 'T12:00:00');
+    while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  const ficheHm = (v) => (typeof v === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(v) ? v : null);
+  const ficheLockHm = () => ficheHm(S.settings && S.settings.plan_lock_hm) || FICHE.LOCK_HM;
+  /** epoch seconds when the sheet of this trading day locks (its own date, NY wall time) */
+  const ficheLockAt = (day, hm) => (typeof etEpoch === 'function' ? etEpoch(`${day} ${ficheHm(hm) || ficheLockHm()}`) : null);
+  const ficheConditions = (type) => (type === 'reclaim' ? ['close_15m', 'retest_5m', 'trigger_5m', 'vwap', 'risk_checked'] : ['close_15m', 'retest_5m', 'trigger_5m', 'risk_checked']);
+  /** the instrument of the trader's last trade (else of the last sheet) */
+  function ficheLastInstrument(before) {
+    const t = (S.trades || []).filter((x) => !x.demo && x.instrument && (!before || x.date < before)).sort((a, b) => (b.date + (b.entry_time || '')).localeCompare(a.date + (a.entry_time || '')))[0];
+    if (t) return String(t.instrument);
+    const j = (S.journals || []).filter((x) => x.fiche && x.fiche.instrument && (!before || x.id < before)).sort((a, b) => b.id.localeCompare(a.id))[0];
+    return j ? j.fiche.instrument : '';
+  }
+  const fNum = (v) => (v === '' || v == null || !isFinite(+v) ? null : +v);
+  /** a sheet with only known fields and the right types (the same as Fiche::normalize on the server) */
+  function ficheNormalize(f, day) {
+    f = f || {}; const lv = f.levels || {}, lim = f.limits || {};
+    const sc = (Array.isArray(f.scenarios) ? f.scenarios : []).slice(0, 2).filter((s) => s && typeof s === 'object').map((s, i) => {
+      const type = FICHE.TYPES.includes(s.type) ? s.type : 'breakout', cond = ficheConditions(type);
+      return { id: ['A', 'B'].includes(s.id) ? s.id : (i ? 'B' : 'A'), direction: s.direction === 'short' ? 'short' : 'long', type,
+        level: fNum(s.level), stop_estimate: fNum(s.stop_estimate), target: fNum(s.target), r_estimate: fNum(s.r_estimate),
+        conditions: cond, done: cond.filter((c) => (s.done || []).includes(c)), status: FICHE.STATUSES.includes(s.status) ? s.status : 'waiting',
+        source: s.source === 'auto' ? 'auto' : 'manual' };
+    });
+    const rp = fNum(lim.risk_pct);
+    return {
+      v: FICHE.V, trading_day: day,
+      instrument: String(f.instrument || '').replace(/[^A-Za-z0-9!._-]/g, '').slice(0, 16),
+      levels: { london_high: fNum(lv.london_high), london_low: fNum(lv.london_low), pdh: fNum(lv.pdh), pdl: fNum(lv.pdl), price: fNum(lv.price), source: lv.source === 'auto' ? 'auto' : 'manual' },
+      answers: f.answers && typeof f.answers === 'object' && !Array.isArray(f.answers) ? f.answers : {},
+      scenarios: sc,
+      news_windows: (Array.isArray(f.news_windows) ? f.news_windows : []).filter((w) => w && ficheHm(w.start) && ficheHm(w.end)).slice(0, 8).map((w) => ({ start: w.start, end: w.end, event: String(w.event || '').slice(0, 80) })),
+      no_trade_conditions: FICHE.NO_TRADE.filter((c) => (f.no_trade_conditions || []).includes(c)),
+      no_trade_other: String(f.no_trade_other || '').slice(0, 120),
+      limits: { risk_pct: rp === 0.25 || rp === 0.5 ? rp : 0.5, max_trades: Math.max(1, Math.min(20, parseInt(lim.max_trades, 10) || 2)), time_limit: ficheHm(lim.time_limit) },
+      reminder: String(f.reminder || '').slice(0, 200),
+      mode: f.mode === 'express' ? 'express' : 'full',
+      invalidations: Math.max(0, Math.min(9, parseInt(f.invalidations, 10) || 0)),
+      locked_at: Number.isInteger(f.locked_at) ? f.locked_at : null,
+    };
+  }
+  /** a new sheet for a trading day: the last instrument, the default limits; nothing else is guessed here */
+  const ficheBlank = (day) => ficheNormalize({ instrument: ficheLastInstrument(day) }, day);
+  const ficheGet = (day) => { const j = journalOf(day); return j.fiche ? ficheNormalize(j.fiche, day) : null; };
+  /** locked: by the trader (locked_at) or by the clock (the lock time of its day is past) */
+  const ficheLocked = (f, nowS) => !!(f && (f.locked_at || ((nowS == null ? Date.now() / 1000 : nowS) >= ficheLockAt(f.trading_day))));
+  /** keeps a sheet; a locked one changes no more (false) */
+  function ficheSave(f) {
+    const day = f && f.trading_day; if (!day) return false;
+    const old = ficheGet(day); if (old && ficheLocked(old)) return false;
+    const j = structuredClone(journalOf(day)); j.id = day; j.fiche = ficheNormalize(f, day);
+    put('journals', j); return true;
+  }
+  window.SweepFiche = { dayOf: ficheDayOf, lockAt: ficheLockAt, lockHm: ficheLockHm, locked: ficheLocked, conditions: ficheConditions,
+    normalize: ficheNormalize, blank: ficheBlank, get: ficheGet, save: ficheSave, lastInstrument: ficheLastInstrument, K: FICHE };
+
   /* ───────────── Quick journal (carousel) ───────────── */
   const EMOS = ['Calm', 'Confident', 'Patient', 'Focused', 'FOMO', 'Fearful', 'Frustrated', 'Greedy', 'Hesitant', 'Impulsive'];
   const JN = { ids: [], i: 0 };

@@ -35,6 +35,7 @@ $MARKET_PROVIDER = strtolower((string)($cfg['market_provider'] ?? 'none'));
 $MARKET_KEY      = trim((string)(getenv('MARKET_DATA_API_KEY') ?: ($cfg['market_api_key'] ?? $cfg['MARKET_DATA_API_KEY'] ?? '')));
 $MARKET_SYMBOL   = trim((string)($cfg['market_symbol'] ?? 'NQ.v.0'));
 require_once __DIR__ . '/econ.php';
+require_once __DIR__ . '/game/fiche.php';   // the pre-market sheet of a trading day (journals/{day}.fiche)
 const COOKIE = 'tj_session';
 const SESSION_TTL = 30 * 86400;
 const COLLECTIONS = ['firms', 'accounts', 'trades', 'journals', 'weekly', 'payouts', 'expenses', 'meta'];
@@ -1130,6 +1131,7 @@ try {
         try {
             foreach ($puts as $d) {
                 $d['user_id'] = $UID; $id = (string) $d['id'];
+                if ($col === 'journals') $d = Fiche::apply($d, $id);
                 $json = json_encode($d, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 $prev = q('SELECT data FROM documents WHERE user_id = ? AND collection = ? AND id = ?', [$UID, $col, $id])->fetchColumn();
                 if ($prev !== false) q('UPDATE documents SET data = ?, updated_at = ? WHERE user_id = ? AND collection = ? AND id = ?', [$json, now(), $UID, $col, $id]);
@@ -1172,6 +1174,9 @@ try {
                 if ($deny) json_out(402, $deny);
             }
             $obj = json_decode((string) file_get_contents('php://input'));
+            if ($obj instanceof stdClass && $col === 'journals' && property_exists($obj, 'fiche')) {   // the sheet as the server keeps it
+                $doc = Fiche::apply($doc, $id); if (array_key_exists('fiche', $doc)) $obj->fiche = $doc['fiche']; else unset($obj->fiche);
+            }
             if ($obj instanceof stdClass) { $obj->id = $id; $obj->user_id = $UID; $json = json_encode($obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); }
             else $json = json_encode($doc, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $prevRaw = q('SELECT data FROM documents WHERE user_id = ? AND collection = ? AND id = ?', [$UID, $col, $id])->fetchColumn();   // for events
