@@ -38,6 +38,12 @@ img,svg{-webkit-user-drag:none}
   .side{border-bottom-color:transparent!important;transition:border-color var(--dur-2) var(--spring),background-color var(--dur-2) var(--spring),box-shadow var(--dur-2)}
   body.ux-scrolled .side{border-bottom-color:var(--line)!important;box-shadow:none}   /* a clean line, no blurred shadow fading the text under it (19 Oct., Mateo) */
   body:not(.ux-scrolled) .side{background:color-mix(in srgb,var(--bg) 70%,transparent)}
+  /* the bar's glass on a layer behind its content (19 Oct., Mateo's iPhone: Safari blurred the bar's own logo, title and icons
+     while scrolling — a sticky element with a backdrop filter); the logo and the icons stay sharp */
+  html body aside.side{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:transparent!important}
+  html body aside.side::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:color-mix(in srgb,var(--bg) 96%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}
+  html body:not(.ux-scrolled) aside.side::before{background:color-mix(in srgb,var(--bg) 70%,transparent)}
+  html.pwa body:not(.ux-scrolled) aside.side::before{opacity:0}
 }
 
 /* ───────────── 4. Tab bar (phone) ───────────── */

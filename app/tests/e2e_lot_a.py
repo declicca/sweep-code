@@ -3,7 +3,7 @@ Sweep — UI/UX lot A (targeted fixes), dev environment with Playwright:
   python3 tests/e2e_lot_a.py http://127.0.0.1:8095 /tmp/show_state.json
 Uses the signed-in trader's data (sample data is enough) and adds then removes its own few test documents.
  1.1 the routine folds (chevron), stays folded for the session (after a reload), opens again on the next session
- 1.2 « What to watch » stays under the day, whatever the account type, on a wide screen (1680 px)
+ 1.2 « What to watch » stays under the day, whatever the account type, on a wide screen (1680 px); the menu stays on screen
  1.3 the Week tab shows Actual · Forecast · Previous (or « No number ») on each release
  2   « Save the trade »: 44 px on a computer, 48 px on a phone, 15 px semibold (the global primary look)
  3   « Make my plan »: still solid blue on hover
@@ -50,11 +50,12 @@ with sync_playwright() as p:
   c, pg, errs = page(br, 1680, False)
   pg.evaluate(SETUP); pg.wait_for_timeout(1500)
   print('— 1.2 / 1.1 / 1.3 / 3 (Today, 1680 px)')
-  pos = []
+  pos = []; inside = []
   for k in ['all', 'personal', 'live', 'all']:
-    pg.locator('#main [data-fx=type]').first.click(); pg.wait_for_timeout(400); pg.locator(f'#fxMenu [data-mtype={k}]').click(); pg.wait_for_timeout(1300)   # (16 Oct.: a pill and its choices)
+    pg.locator('#main [data-fx=type]').first.click(); pg.wait_for_timeout(400); inside.append(pg.evaluate("(()=>{const r=document.querySelector('#fxMenu').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight})()")); pg.locator(f'#fxMenu [data-mtype={k}]').click(); pg.wait_for_timeout(1300)   # (16 Oct.: a pill and its choices)
     pos.append(pg.evaluate("(()=>{const w=document.querySelector('#main section.d-news'); return w ? [w.parentElement.className.includes('nav-merge'), Math.round(w.getBoundingClientRect().left)] : null})()"))
   ok(all(x and x[0] and x[1] < 700 for x in pos), f'1.2 « À surveiller » stays under the day (left column) for Tout / Perso / Live ({pos})')
+  ok(all(inside), f'1.2 the account-type menu stays on screen, above its pill when there is no room below ({inside})')
   fold = pg.locator('#main .nav-rt-fold')
   ok(fold.count() == 1 and fold.get_attribute('aria-expanded') == 'true', '1.1 the routine has its fold button, open by default')
   fold.click(); pg.wait_for_timeout(600)

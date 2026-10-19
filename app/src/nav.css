@@ -1435,10 +1435,10 @@ a,button{-webkit-tap-highlight-color:transparent}
 /* pull to refresh (19 Oct., Mateo: like Mail on the iPhone): a blue ring that turns with the pull, a small tap when it is far
    enough, then it spins until the data is back */
 .nav-ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:150;display:flex;flex-direction:column;align-items:center;gap:6px;transform:translate(-50%,calc(var(--p,0) * 26px));opacity:min(1,calc(var(--p,0) * 3));pointer-events:none}
-html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + 4px);transform:translate(-50%,calc(var(--p,0) * 8px))}
+html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + var(--ptr-y,0px) * .5);transform:translate(-50%,-50%)}   /* in the middle of the gap that opens under the clock */
 @media (max-width:860px){
   html.pwa,html.pwa body{overscroll-behavior-y:none}
-  html.pwa.ptr-on aside.side,html.pwa.ptr-on .main-wrap{transform:translateY(var(--ptr-y,0px))}
+  html.pwa.ptr-on aside.side,html.pwa.ptr-on .main-wrap{transform:translateY(var(--ptr-y,0px));will-change:transform}
   html.pwa.ptr-back aside.side,html.pwa.ptr-back .main-wrap{transition:transform .42s var(--spring)}
 }
 @media (prefers-reduced-motion:reduce){html.pwa.ptr-back aside.side,html.pwa.ptr-back .main-wrap{transition:none}}
@@ -2871,6 +2871,7 @@ body.sw-onb .bottomnav .plus,body.sw-onb .side .new{visibility:hidden;pointer-ev
   /* the header right under the status bar (18 Oct., Mateo: too much empty space at the top): the safe area already holds the
      room below the clock, so 6 px less instead of 10 px more; the compact title stays on the logo's row */
   html.pwa body aside.side{padding-top:max(6px,min(env(safe-area-inset-top,0px),44px),calc(env(safe-area-inset-top,0px) - 10px))!important}   /* (19 Oct.: 4 px higher again; never under the clock: 44 px on the iPhones with a notch, the safe area − 10 px with the Dynamic Island) */
+  html.pwa body.ux-scrolled aside.side{padding-top:calc(env(safe-area-inset-top,0px) + 4px)!important}   /* scrolled, the bar's glass is on: the whole row below the clock (19 Oct., it was tucked a little under it) */
   html.pwa aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 10px)}
   /* at the top of a page the header is the page itself (no band, no line when the page is pulled down: 19 Oct.) */
   html.pwa body:not(.ux-scrolled) aside.side{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:transparent!important}

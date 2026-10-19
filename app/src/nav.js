@@ -4699,7 +4699,7 @@ window.SweepMO = window.SweepMO || class {
     if (back && !y) setTimeout(() => { if (h.style.getPropertyValue('--ptr-y') === '0px') h.classList.remove('ptr-on', 'ptr-back'); }, 450);
   };   // every page (the app's first pull to refresh, now removed, worked everywhere)
   document.addEventListener('touchstart', (e) => { if (!isPhone() || !ptrPage() || scrollY > 0 || e.target.closest('.evp, .nav-am, .nav-dlg, #gSheet, #shPanel, .nav-fstrip, .nav-ra-row')) { py = null; return; } py = e.touches[0].clientY; pdist = 0; }, { passive: true });
-  document.addEventListener('touchmove', (e) => { if (py == null) return; pdist = Math.max(0, e.touches[0].clientY - py); if (pdist < 8) return; if (!pel) { pel = document.createElement('div'); pel.className = 'nav-ptr'; pel.setAttribute('data-noi18n', ''); pel.innerHTML = '<i></i><span></span>'; document.body.append(pel); pel._armed = false; } const p = Math.min(1, pdist / 90); pel.style.setProperty('--p', p); ptrMove(Math.round(Math.min(140, pdist * 0.55))); pel.querySelector('span').textContent = p >= 1 ? t('refresh') : ''; if (p >= 1 && !pel._armed) { pel._armed = true; pel.classList.add('armed'); ptrTick(); } else if (p < 1 && pel._armed) { pel._armed = false; pel.classList.remove('armed'); } }, { passive: true });
+  document.addEventListener('touchmove', (e) => { if (py == null) return; pdist = Math.max(0, e.touches[0].clientY - py); if (pdist < 8) return; if (!pel) { pel = document.createElement('div'); pel.className = 'nav-ptr'; pel.setAttribute('data-noi18n', ''); pel.innerHTML = '<i></i><span></span>'; document.body.append(pel); pel._armed = false; } const p = Math.min(1, pdist / 90); pel.style.setProperty('--p', p); ptrMove(Math.round(130 * (1 - Math.exp(-pdist / 190))));   /* a rubber band: follows the finger, harder the further it goes */ pel.querySelector('span').textContent = p >= 1 ? t('refresh') : ''; if (p >= 1 && !pel._armed) { pel._armed = true; pel.classList.add('armed'); ptrTick(); } else if (p < 1 && pel._armed) { pel._armed = false; pel.classList.remove('armed'); } }, { passive: true });
   document.addEventListener('touchend', async () => {
     if (py == null) return; py = null; if (!pel) { ptrMove(0, true); return; } const go = pdist >= 90; const el = pel; pel = null;
     if (!go) { el.remove(); ptrMove(0, true); return; }
@@ -6193,6 +6193,7 @@ new window.SweepMO(() => {
     if (!phone() && open && open.chip) {   // under its pill, kept on screen
       const r = open.chip.getBoundingClientRect(), w = Math.max(220, r.width);
       m.style.left = Math.max(12, Math.min(r.left, innerWidth - w - 12)) + 'px'; m.style.top = (r.bottom + 6) + 'px'; m.style.minWidth = w + 'px';
+      const h = m.offsetHeight; if (r.bottom + 6 + h > innerHeight - 12 && r.top - 6 - h >= 12) m.style.top = (r.top - 6 - h) + 'px';   // no room below: above its pill (19 Oct.: low in the window, its last choices were off screen)
     }
     requestAnimationFrame(() => m.classList.add('open'));
   }
