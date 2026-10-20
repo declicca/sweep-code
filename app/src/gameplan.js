@@ -314,7 +314,8 @@
     const main = document.getElementById('main'); if (!main) return;
     let sec = main.querySelector('.gp-set');
     if (!sec) { const after = main.querySelector('.nav-set-prof') || main.querySelector('.surface'); if (!after) return; sec = document.createElement('section'); sec.className = 'surface gp-set'; sec.setAttribute('data-noi18n', ''); after.after(sec); }
-    const h = setHtml(); if (sec._h !== h) { sec.innerHTML = h; sec._h = h; }
+    const h = setHtml(); if (sec._h !== h) { sec.innerHTML = h; sec._h = h; } sec.classList.remove('gp-set-ph');
+    try { localStorage.setItem('sw.gpSet', h); } catch (e) { /* private mode */ }   // drawn at once next time
   }
   async function settings() { if (!ST) await load(); paintSettings(); }
   document.addEventListener('click', async (e) => {

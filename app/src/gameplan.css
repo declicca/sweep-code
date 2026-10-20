@@ -81,7 +81,8 @@
 .gp-set-go{display:flex;flex-wrap:wrap;gap:8px}
 .gp-set-go .btn{min-height:44px;padding:0 18px}
 .gp-stop{align-self:flex-start;padding:0;font-size:13px;color:var(--muted)}
-@media (max-width:600px){.gp-set{padding:16px}.gp-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.gp-set-go{flex-direction:column}.gp-set-go .btn{width:100%;justify-content:center}}
+.gp-set.gp-set-ph{box-sizing:border-box!important;min-height:251px}   /* its measured size before the module fills it (no jump; then the last one drawn is kept) */
+@media (max-width:600px){.gp-set.gp-set-ph{min-height:412px}.gp-set{padding:16px}.gp-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.gp-set-go{flex-direction:column}.gp-set-go .btn{width:100%;justify-content:center}}
 /* « Learn more » */
 .gp-learn-s{display:flex;flex-direction:column;gap:14px;padding-bottom:8px}
 .gp-how-l{font-size:15px}

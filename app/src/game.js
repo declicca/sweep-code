@@ -409,7 +409,7 @@
       if (window.SweepFiche && SweepFiche.maybeExpress) setTimeout(() => SweepFiche.maybeExpress(), 1200);   // the pre-market missed: the express version (once a day)
       if (window.SweepGPCheck) window.SweepGPCheck();   // the 90-day gameplan's card (loader at the end of this file)
     }
-    if (v === 'settings' && window.SweepGPCheck) setTimeout(() => window.SweepGPCheck(), 0);   // its section in Settings
+    if (v === 'settings' && window.SweepGPCheck) window.SweepGPCheck();   // its section in Settings (in place before the first paint)
     paintSections();
     paintNav();
   }
@@ -3175,10 +3175,18 @@
     const anchor = main.querySelector('#gToday') || main.querySelector('.d-today') || main.firstElementChild;
     if (anchor && anchor.parentElement) anchor.parentElement.insertBefore(el, anchor); else main.prepend(el);
   };
+  // Settings: its section in place at once (the last one drawn, or a space of its size), filled by the module (no jump)
+  const earlySet = () => {
+    const main = document.getElementById('main'); if (!main || main.querySelector('.gp-set')) return;
+    const after = main.querySelector('.nav-set-prof') || main.querySelector('.surface'); if (!after) return;
+    let h = ''; try { h = localStorage.getItem('sw.gpSet') || ''; } catch (e) { /* private mode */ }
+    const sec = document.createElement('section'); sec.className = 'surface gp-set' + (h ? '' : ' gp-set-ph'); sec.setAttribute('data-noi18n', ''); sec.innerHTML = h; after.after(sec);
+  };
   window.SweepGPCheck = async (given) => {
     if (given && given.started) { (await window.SweepGPLoad()).mount(given); return; }   // just started (sign-up, Settings)
     if (window.SweepGP) { window.SweepGP.paint(); return; }
     if (typeof route === 'function' && route().v === 'dashboard') early();
+    if (/^#settings/.test(location.hash || '')) earlySet();
     if (/^#settings/.test(location.hash || '')) { try { (await window.SweepGPLoad()).settings(); } catch (e) { /* offline */ } return; }
     if (asked || typeof apiJSON !== 'function' || typeof S === 'undefined' || S.mode !== 'server') return;   // (S is the app's own « let », not on window)
     asked = true;

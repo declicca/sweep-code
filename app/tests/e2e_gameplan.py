@@ -66,8 +66,8 @@ def run(p, lang, phone, full):
     demo = pg.locator('[data-act="demo"]')
     ok(demo.count() == 1 and demo.is_visible(), f"{tag} 1 « explore with sample data » on the last step")
     if demo.count() and demo.is_visible():   # « Explore with sample data first »: preparing at once, then its window; « Cancel » there
-      demo.click(); pg.wait_for_timeout(120)
-      st = pg.locator('.nav-busy-l'); busy = [demo.get_attribute('aria-busy'), st.count() == 1 and T['prep'] in st.text_content() and st.get_attribute('role') == 'status', st.count() == 1 and st.evaluate("(s) => getComputedStyle(s.querySelector('i')).animationName") == 'nav-ptr-spin']
+      busy = demo.evaluate("(b) => { b.click(); const st = document.querySelector('.nav-busy-l'); return [b.getAttribute('aria-busy'), !!st && st.textContent, !!st && getComputedStyle(st.querySelector('i')).animationName] }")   # read in the same turn as the tap
+      busy = [busy[0], bool(busy[1]) and T['prep'] in busy[1], busy[2] == 'nav-ptr-spin']
       until(pg, "document.querySelector('aside.nav-ask.open')", 30000)
       ok(busy == ['true', True, True] and pg.locator('aside.nav-ask.open').count() == 1, f'{tag} 1 « explore with sample data »: preparing at once ({busy}), then its window')
       pg.locator('aside.nav-ask.open [data-ask="0"]').click(); pg.wait_for_timeout(500)
