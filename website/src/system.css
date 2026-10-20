@@ -1006,6 +1006,8 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .article p.gp-meta{font:500 12px/1.4 var(--mono);color:var(--faint);letter-spacing:.02em}
 .article p.gp-done{font-size:14.5px}
 .gp-done b{margin-right:8px;font:600 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--blue-text)}
+.gp-auto{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:var(--r-pill);background:var(--tint);color:var(--blue-ink);font:600 11px/1.5 var(--mono);letter-spacing:.02em;white-space:nowrap;vertical-align:1px}   /* the missions Sweep ticks on its own in the app */
+.gp-legend{margin-top:16px;text-align:left;margin-inline:0;max-width:72ch}.gp-legend .gp-auto{margin:0 6px 0 0}
 .article ul.gp-checks li{padding-left:30px}
 .article ul.gp-checks li::before{content:"";top:3px;width:18px;height:18px;border-radius:6px;box-shadow:0 0 0 1.5px var(--line) inset}
 .gp-note{margin-top:20px;padding:18px 20px;border-radius:var(--r3);background:var(--tint)}

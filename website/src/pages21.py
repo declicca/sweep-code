@@ -2,7 +2,8 @@ from core import *
 
 # ---------------------------------------------------------------- the 90-day gameplan for new prop traders (Mateo's three PDFs, Oct 19)
 # A pillar page (« how to start prop firm trading ») and one page per month, every mission in three languages.
-# The app has no gameplan screen yet: nothing here says Sweep checks a mission on its own (the PDFs' « Sweep · auto »).
+# Since Oct 20 the app plays the same plan (app/tools/gameplan-data.py reads this file: run it again in the app when a text here changes),
+# with Pro and Elite only. Sweep ticks 35 missions on its own, marked « Sweep · auto » here exactly as the app decides (AUTO below).
 GP_HUB = "how-to-start-prop-firm-trading.html"
 GP_MONTHS = ["prop-firm-gameplan-month-1.html", "prop-firm-gameplan-month-2.html", "prop-firm-gameplan-month-3.html"]
 GP_PAGES = [GP_HUB] + GP_MONTHS
@@ -49,7 +50,7 @@ for _i, _p in enumerate(GP_MONTHS): CRUMBS[_p] = MONTH(_i + 1)
 M1_HOW = [
  T("<b>Practice first, theory second.</b> You place your first trade on Day 2. Every concept comes right when you need it.","<b>La pratique d’abord, la théorie ensuite.</b> Tu passes ton premier trade au jour 2. Chaque notion arrive au moment où tu en as besoin.","<b>Primero la práctica, luego la teoría.</b> Haces tu primera operación el día 2. Cada concepto llega justo cuando lo necesitas."),
  T("<b>15 to 30 minutes of mission a day,</b> plus your trading session on market days. Nothing more.","<b>15 à 30 minutes de mission par jour,</b> plus ta séance les jours de marché. Rien de plus.","<b>De 15 a 30 minutos de misión al día,</b> más tu sesión los días de mercado. Nada más."),
- T("<b>Start on a Monday.</b> Fridays end with your weekly recap. Weekends are for replay and prep; Sunday is a light day, and resting doesn’t break your streak.","<b>Commence un lundi.</b> Les vendredis se terminent par ton bilan de la semaine. La fin de semaine sert au replay et à la préparation ; le dimanche est une journée légère, et te reposer ne casse pas ta streak.","<b>Empieza un lunes.</b> Los viernes terminan con tu resumen semanal. El fin de semana es para el replay y la preparación; el domingo es un día ligero, y descansar no rompe tu racha."),
+ T("<b>On paper, start on a Monday;</b> in Sweep, the plan starts the day you begin it. Fridays end with your weekly recap. Weekends are for replay and prep; Sunday is a light day, and resting doesn’t break your streak.","<b>Sur papier, commence un lundi ;</b> dans Sweep, le plan commence le jour où tu le lances. Les vendredis se terminent par ton bilan de la semaine. La fin de semaine sert au replay et à la préparation ; le dimanche est une journée légère, et te reposer ne casse pas ta streak.","<b>En papel, empieza un lunes;</b> en Sweep, el plan empieza el día en que lo inicias. Los viernes terminan con tu resumen semanal. El fin de semana es para el replay y la preparación; el domingo es un día ligero, y descansar no rompe tu racha."),
  T("<b>One market, one window, one setup.</b> MES or MNQ, the same trading window every day, and the starter setup below.","<b>Un marché, une fenêtre, un setup.</b> MES ou MNQ, la même fenêtre de trading chaque jour, et le setup de départ plus bas.","<b>Un mercado, una ventana, un setup.</b> MES o MNQ, la misma ventana de trading cada día y el setup inicial de más abajo."),
  T("<b>Every mission has a “Done when”.</b> You know exactly when it’s finished.","<b>Chaque mission a son « C’est fait quand ».</b> Tu sais exactement quand elle est terminée.","<b>Cada misión tiene su «Hecho cuando».</b> Sabes exactamente cuándo está terminada.")]
 TRACKS = [
@@ -302,13 +303,19 @@ M3_GATE = [
  T("Average process score of 4 or more.","Note de processus moyenne de 4 ou plus.","Nota de proceso media de 4 o más.")]
 
 # ---------------------------------------------------------------- rendering
+AUTO_FIXED = (1, 2, 52)   # the first account, a trade with its stop and target, the account's limits saved
+def _auto(n, done): return n in AUTO_FIXED or done is J_DONE or done is ZERO or done is RECAP_DONE   # then: a journaled session, zero slips, the weekly recap
+AUTO_LABEL = "Sweep · auto"
+AUTO_TIP = T("Sweep ticks it on its own in the app","Sweep la coche tout seul dans l’app","Sweep la marca solo en la app")
+
 def _missions(t, lang, first_day, items):
     out = []
     for i, (k, m, mins, title, desc, done) in enumerate(items):
         d = first_day + i
         out.append(f'<li><span class="gp-d" aria-hidden="true"><b>{d:02d}</b><small>{t(WD[(d - 1) % 7])}</small></span><div>'
                    f'<h3><span class="sr">{t(DAY)} {d} · </span>{t(title)}</h3><p class="gp-meta">{t(KIND[k])} · {t(MKT[m])} · {mins} min</p>'
-                   f'<p>{t(desc)}</p><p class="gp-done"><b>{t(DONE)}</b> {t(done)}</p></div></li>')
+                   f'<p>{t(desc)}</p><p class="gp-done"><b>{t(DONE)}</b> {t(done)}'
+                   + (f' <span class="gp-auto" title="{t(AUTO_TIP)}">{AUTO_LABEL}<span class="sr"> : {t(AUTO_TIP)}</span></span>' if _auto(d, done) else "") + '</p></div></li>')
     return '<ol class="gp-missions">' + "".join(out) + "</ol>"
 
 def _weeks(t, lang, first_day, weeks):
@@ -329,12 +336,24 @@ def _month_nav(lang, t, cur):
     items = "".join(f'<a href="{href(lang, GP_MONTHS[i])}"{" aria-current=\"page\"" if i == cur else ""}><small>{t(MONTH(i + 1))}<span class="gp-span"> · {t(SPANS[i])}</span></small><b>{t(NAMES[i])}</b></a>' for i in range(3))
     return f'<nav class="gp-nav" aria-label="{t(T("The 90-day gameplan","Le plan de 90 jours","El plan de 90 días"))}">{items}</nav>'
 
+APP_T = T("Do this plan in Sweep.","Fais ce plan dans Sweep.","Haz este plan en Sweep.")
+APP_TXT = T("A mission a day with the notion it needs, quizzes to test yourself, the three gates, and Sweep ticks what it sees in your journal. Included with Pro, and in your first 60 days. When you sign up, answer “Less than 6 months”: the plan starts the same day.",
+            "Une mission par jour avec la notion qu’elle demande, des quiz pour te tester, les trois portes, et Sweep coche ce qu’il voit dans ton journal. Inclus avec Pro, et pendant tes 60 premiers jours. À l’inscription, réponds « Moins de 6 mois » : le plan commence le jour même.",
+            "Una misión al día con la noción que necesita, quizzes para ponerte a prueba, las tres puertas, y Sweep marca lo que ve en tu diario. Incluido con Pro, y durante tus primeros 60 días. Al registrarte, responde «Menos de 6 meses»: el plan empieza el mismo día.")
+def _app_band(t, track):
+    import ui
+    return ui.band(t(APP_T), t(APP_TXT), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs=f'data-track="{track}"'))
+LEGEND = T(f"<span class=\"gp-auto\">{AUTO_LABEL}</span> In the app, Sweep ticks these missions on its own from your journal; you tick the others. The plan is in Sweep with Pro, your first 60 days included.",
+           f"<span class=\"gp-auto\">{AUTO_LABEL}</span> Dans l’app, Sweep coche ces missions tout seul à partir de ton journal ; tu coches les autres. Le plan est dans Sweep avec Pro, tes 60 premiers jours compris.",
+           f"<span class=\"gp-auto\">{AUTO_LABEL}</span> En la app, Sweep marca estas misiones solo a partir de tu diario; tú marcas las demás. El plan está en Sweep con Pro, tus primeros 60 días incluidos.")
+
 def _month_page(lang, t, n, kick, h1, lead, body, title, desc, cta_track):
     import ui
     hero = ui.hero(t, kick, h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs=f'data-track="{cta_track}"'))
     nxt = [GP_MONTHS[n]] if n < 3 else []
-    b = (ui.sec(_month_nav(lang, t, n - 1), "t", "months")
+    b = (ui.sec(_month_nav(lang, t, n - 1) + f'<p class="fine gp-legend">{t(LEGEND)}</p>', "t", "months")
          + ui.sec(ui.doc(t, localize(lang, body)) + f'<p class="fine" style="margin-top:40px">{t(DISCLAIM)}</p>', "n", "plan")
+         + ui.sec(_app_band(t, cta_track + "_app"), "t", "app")
          + ui.read_next(lang, t, (nxt + [GP_HUB, "trading-templates.html", "prop-firms/index.html"])[:3])
          + ui.final(lang, t))
     ld = jsonld({"@context": "https://schema.org", "@type": "Article", "headline": t(title).split(" · ")[0], "description": t(desc), "inLanguage": lang, "datePublished": "2026-10-19",
@@ -469,6 +488,10 @@ HUB_FAQ = [
   T("You repeat the last two weeks of that month, focused on your most frequent slip. It’s the right call, not a setback: you move forward when your process is ready, not when the calendar says so.",
     "Tu refais les deux dernières semaines du mois, en visant ton écart le plus fréquent. C’est la bonne décision, pas un recul : tu avances quand ton processus est prêt, pas quand le calendrier le dit.",
     "Repites las dos últimas semanas de ese mes, centrado en tu desliz más frecuente. Es la decisión correcta, no un retroceso: avanzas cuando tu proceso está listo, no cuando lo dice el calendario.")),
+ (T("Can I follow this plan in Sweep?","Puis-je suivre ce plan dans Sweep ?","¿Puedo seguir este plan en Sweep?"),
+  T("Yes, with Pro, your first 60 days included. Sweep gives you one mission a day with the notion it needs, quizzes, a map of the 90 days and the three gates, and ticks 35 missions on its own from your journal: your first account and trade, your account limits, journaled sessions, days without a slip and weekly recaps. It starts the day you begin it: answer “Less than 6 months” when you sign up, or start it in Settings › 90-day gameplan. Your track comes from your account: a Simulation account gives Track A; an evaluation, funded or live account, Track B.",
+    "Oui, avec Pro, tes 60 premiers jours compris. Sweep te donne une mission par jour avec la notion qu’elle demande, des quiz, la carte des 90 jours et les trois portes, et coche 35 missions tout seul à partir de ton journal : ton premier compte et ton premier trade, les limites de ton compte, les séances notées, les journées sans écart et les bilans de la semaine. Il commence le jour où tu le lances : réponds « Moins de 6 mois » à l’inscription, ou lance-le dans Réglages › Parcours de 90 jours. Ton parcours vient de ton compte : un compte Simulation donne le parcours A ; une évaluation, un compte financé ou un compte live, le parcours B.",
+    "Sí, con Pro, tus primeros 60 días incluidos. Sweep te da una misión al día con la noción que necesita, quizzes, el mapa de los 90 días y las tres puertas, y marca 35 misiones solo a partir de tu diario: tu primera cuenta y tu primera operación, los límites de tu cuenta, las sesiones anotadas, los días sin deslices y los resúmenes semanales. Empieza el día en que lo inicias: responde «Menos de 6 meses» al registrarte, o inícialo en Ajustes › Recorrido de 90 días. Tu recorrido sale de tu cuenta: una cuenta Simulación da el recorrido A; una evaluación, una cuenta financiada o una cuenta live, el recorrido B.")),
  (T("Do I need Sweep to follow it?","Ai-je besoin de Sweep pour le suivre ?","¿Necesito Sweep para seguirlo?"),
   T("No. The plan works with a notebook and our free printable templates. Sweep makes it faster: your firm’s rules on each account, your daily plan and limits, tags and screenshots on every trade, and a coach that speaks up before you break a rule.",
     "Non. Le plan marche avec un cahier et nos modèles gratuits à imprimer. Sweep le rend plus rapide : les règles de ta firme sur chaque compte, ton plan du jour et tes limites, les étiquettes et les captures sur chaque trade, et un coach qui parle avant que tu brises une règle.",
@@ -477,7 +500,7 @@ HUB_WHY = T("""<h2>Why start with a process</h2><p>An evaluation rewards the tra
 <h2>How it works</h2><ul>
 <li><b>Practice first, theory second.</b> You place your first trade on Day 2, and each concept comes when you need it.</li>
 <li><b>15 to 30 minutes of mission a day,</b> plus your trading session on market days.</li>
-<li><b>Start on a Monday.</b> Fridays end with your weekly recap, weekends are for replay and prep, Sunday is a light day.</li>
+<li><b>On paper, start on a Monday;</b> in Sweep, the plan starts the day you begin it. Fridays end with your weekly recap, weekends are for replay and prep, Sunday is a light day.</li>
 <li><b>One market, one window, one setup:</b> MES or MNQ, the same trading window, one starter setup.</li>
 <li><b>Every mission has a “Done when”,</b> and every month ends with a gate about process, not profit. You move forward when your process is ready, not when the calendar says so.</li></ul>
 <h2>Pick your track</h2><ul>
@@ -492,7 +515,7 @@ HUB_WHY = T("""<h2>Why start with a process</h2><p>An evaluation rewards the tra
 <h2>Comment ça marche</h2><ul>
 <li><b>La pratique d’abord, la théorie ensuite.</b> Tu passes ton premier trade au jour 2, et chaque notion arrive au moment où tu en as besoin.</li>
 <li><b>15 à 30 minutes de mission par jour,</b> plus ta séance les jours de marché.</li>
-<li><b>Commence un lundi.</b> Les vendredis se terminent par ton bilan de la semaine, la fin de semaine sert au replay et à la préparation, le dimanche est une journée légère.</li>
+<li><b>Sur papier, commence un lundi ;</b> dans Sweep, le plan commence le jour où tu le lances. Les vendredis se terminent par ton bilan de la semaine, la fin de semaine sert au replay et à la préparation, le dimanche est une journée légère.</li>
 <li><b>Un marché, une fenêtre, un setup :</b> MES ou MNQ, la même fenêtre de trading, un setup de départ.</li>
 <li><b>Chaque mission a son « C’est fait quand »,</b> et chaque mois se termine par une porte qui porte sur le processus, pas sur le profit. Tu avances quand ton processus est prêt, pas quand le calendrier le dit.</li></ul>
 <h2>Choisis ton parcours</h2><ul>
@@ -507,7 +530,7 @@ HUB_WHY = T("""<h2>Why start with a process</h2><p>An evaluation rewards the tra
 <h2>Cómo funciona</h2><ul>
 <li><b>Primero la práctica, luego la teoría.</b> Haces tu primera operación el día 2, y cada concepto llega cuando lo necesitas.</li>
 <li><b>De 15 a 30 minutos de misión al día,</b> más tu sesión los días de mercado.</li>
-<li><b>Empieza un lunes.</b> Los viernes terminan con tu resumen semanal, el fin de semana es para el replay y la preparación, el domingo es un día ligero.</li>
+<li><b>En papel, empieza un lunes;</b> en Sweep, el plan empieza el día en que lo inicias. Los viernes terminan con tu resumen semanal, el fin de semana es para el replay y la preparación, el domingo es un día ligero.</li>
 <li><b>Un mercado, una ventana, un setup:</b> MES o MNQ, la misma ventana de trading, un setup inicial.</li>
 <li><b>Cada misión tiene su «Hecho cuando»,</b> y cada mes termina con una puerta sobre el proceso, no sobre el beneficio. Avanzas cuando tu proceso está listo, no cuando lo dice el calendario.</li></ul>
 <h2>Elige tu recorrido</h2><ul>
@@ -535,11 +558,7 @@ def page_gp_hub(lang, t):
              T("An evaluation plan, a size ladder from 1 to 3 micros, a funded playbook and your own one-page trading plan.","Un plan d’évaluation, une échelle de taille de 1 à 3 micros, un playbook de compte financé et ton propre plan d’une page.","Un plan de evaluación, una escalera de tamaño de 1 a 3 micros, un playbook de cuenta financiada y tu propio plan de una página.")]
     months = [ui.card(t, NAMES[i], texts[i], kick=T(f"{MONTH(i + 1)['en']} · {SPANS[i]['en']}", f"{MONTH(i + 1)['fr']} · {SPANS[i]['fr']}", f"{MONTH(i + 1)['es']} · {SPANS[i]['es']}"),
                       more=T("Open the month","Ouvrir le mois","Abrir el mes"), url=href(lang, GP_MONTHS[i])) for i in range(3)]
-    sweep = ui.band(t(T("Follow the plan in Sweep.","Suis le plan dans Sweep.","Sigue el plan en Sweep.")),
-                    t(T("Your firm’s rules on each account, your daily plan and limits, tags and screenshots on every trade, the economic calendar for your news windows, and a coach that speaks up before you break a rule.",
-                        "Les règles de ta firme sur chaque compte, ton plan du jour et tes limites, les étiquettes et les captures sur chaque trade, le calendrier économique pour tes fenêtres de nouvelles, et un coach qui parle avant que tu brises une règle.",
-                        "Las reglas de tu firma en cada cuenta, tu plan del día y tus límites, etiquetas y capturas en cada operación, el calendario económico para tus ventanas de noticias y un coach que avisa antes de que rompas una regla.")),
-                    ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_gameplan_hub"'))
+    sweep = _app_band(t, "signup_gameplan_hub")
     b = (ui.sec(ui.head(t, None, T("Three months, one process","Trois mois, un processus","Tres meses, un proceso")) + ui.cards(months, 3), "t", "months")
          + ui.sec(f'<article class="article">{localize(lang, t(HUB_WHY))}<h2>{t(T("The three gates","Les trois portes","Las tres puertas"))}</h2>{_tbl(t, GATES)}</article>', "n", "how", width="read")
          + ui.sec(ui.head(t, None, T("One question at a time","Une question à la fois","Una pregunta a la vez")) + ui.cards([ui.card(t, REL_INFO[p][0], REL_INFO[p][1], more=T("Read","Lire","Leer"), url=href(lang, p)) for p in GP_SATS], 5), "t", "deeper")

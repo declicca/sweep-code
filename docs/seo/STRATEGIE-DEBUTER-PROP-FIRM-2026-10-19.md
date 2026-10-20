@@ -74,9 +74,14 @@ Aussi : un lien vers le pilier depuis le guide du journal, le journal gratuit, l
 - **Inscriptions** : les boutons portent `data-track` : `signup_gameplan_hub`, `signup_gameplan_m1`, `signup_gameplan_m2`, `signup_gameplan_m3`.
 - **IA** : vérifier tous les mois si les réponses de ChatGPT, Perplexity et Google citent le pilier pour « how to start prop firm trading ».
 
-## 6. Pour aller plus loin (décisions de Mateo)
+## 6. Pour aller plus loin
 
-1. **Les PDF** :
-   - les publier tels quels dès que l'app sait vérifier les missions ;
-   - ou les refaire sans « Sweep · auto », en EN, FR et ES, à partir des pages : une feuille d'impression et `page.pdf()` dans un outil de développement, comme `og_images.py`.
-2. **Le plan dans l'app** : les 90 missions avec leurs portes. Elles pourraient devenir le contenu du Parcours (chapitres 1 et 2 en Free, complet en Pro). Le « Sweep · auto » des PDF deviendrait vrai, et le plan serait un argument direct pour Pro.
+1. **Le plan dans l'app : fait le 20 oct.** (`54f4228` dans l'app, Pro et Elite).
+   - Le site marque « Sweep · auto » les 35 missions que l'app coche seule. Elles sont calculées comme dans l'app : les missions 1, 2 et 52, puis les « C'est fait quand » « séance notée », « zéro écart » et « bilan de la semaine ».
+   - Une légende explique la marque sur chaque mois.
+   - Un bandeau « Fais ce plan dans Sweep » est sur le pilier et sur les 3 mois.
+   - Une question est dans la FAQ du pilier.
+   - Le parcours est dans Pro sur la page Tarifs.
+2. **Les PDF** : leurs marques « Sweep · auto » ne correspondent pas aux 35 de l'app. Par exemple, le jour 7 est marqué automatique dans le PDF, mais pas dans l'app. Donc :
+   - soit les PDF sont refaits à partir des pages (en EN, FR et ES, avec les mêmes marques que l'app) ;
+   - soit on garde les pages comme seule version.
