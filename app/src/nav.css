@@ -2843,9 +2843,10 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 @media (min-width:861px) and (max-width:1440px){ html body #main table.tbl th,html body #main table.tbl td{padding-left:10px;padding-right:10px}
   html body #main table.tbl-day th:nth-child(3),html body #main table.tbl-day td:nth-child(3){display:none} }   /* a day's trades (Journal): no « Session », its time says it */
 /* « Explore with sample data first »: preparing (20 Oct.) */
-[data-act="demo"].is-busy{display:inline-flex;align-items:center;gap:8px;opacity:1;cursor:progress}
-.nav-busy{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:nav-ptr-spin .8s linear infinite;flex-shrink:0}
-@media (prefers-reduced-motion:reduce){.nav-busy{animation-duration:2.4s}}
+[data-act="demo"].is-busy{display:none!important}
+.nav-busy-l{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;font-size:13px;color:var(--pos)}
+.nav-busy-l i{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:nav-ptr-spin .8s linear infinite;flex-shrink:0}
+@media (prefers-reduced-motion:reduce){.nav-busy-l i{animation-duration:2.4s}}
 /* the page header has one height on every page (20 Oct., Mateo: « still page jumps »): it changed with the page's buttons
    (none, Import, Export, Share: 56 to 70 px on a phone) and with Today's greeting line (96 / 72 px on a computer), so the
    title and all the content moved at each change of page. Title and buttons sit at the bottom of a fixed band. */

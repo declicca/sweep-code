@@ -6486,9 +6486,11 @@ new window.SweepMO(() => {
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('[data-act="demo"]'); if (!b) return;
     if (b.classList.contains('is-busy')) { e.preventDefault(); e.stopImmediatePropagation(); return; }
-    const was = b.innerHTML; b.classList.add('is-busy'); b.setAttribute('aria-busy', 'true'); b.innerHTML = `<i class="nav-busy" aria-hidden="true"></i><span>${W}</span>`;
+    // a status line in its place, next to it (a redraw of the button's text cannot take it away); the button back at the end
+    b.classList.add('is-busy'); b.setAttribute('aria-busy', 'true'); b.hidden = true;
+    const st = document.createElement('span'); st.className = 'nav-busy-l'; st.setAttribute('role', 'status'); st.setAttribute('data-noi18n', ''); st.innerHTML = `<i aria-hidden="true"></i>${W}`; b.after(st);
     const t0 = Date.now();
     const done = () => document.querySelector('aside.nav-ask.open') || (typeof S !== 'undefined' && (S.trades || []).some((t) => t.demo)) || Date.now() - t0 > 45000 || !document.body.contains(b);
-    (function wait() { if (!done()) { setTimeout(wait, 150); return; } b.classList.remove('is-busy'); b.removeAttribute('aria-busy'); if (document.body.contains(b)) b.innerHTML = was; })();
+    (function wait() { if (!done()) { setTimeout(wait, 150); return; } b.classList.remove('is-busy'); b.removeAttribute('aria-busy'); b.hidden = false; st.remove(); })();
   }, true);
 })();
