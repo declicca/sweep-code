@@ -656,7 +656,7 @@
       d2: 'Yesterday', d2_no_retest: 'Yesterday you entered without a 5m retest. What will help you wait today?', d2_off_plan: 'Yesterday you took a trade off your sheet. What took you out of the plan?',
       d2_max_trades: 'Yesterday you went over your number of trades. What will be your signal to stop today?', d2_news_window: 'Yesterday you traded during a news window. How will you stay out of it?',
       d2_moved_stop: 'Yesterday you moved your stop. What will help you leave it in place?', d2_other: 'Yesterday you broke a rule of your sheet. What will help you hold it today?', d2_ph: 'A short sentence',
-      x_title: 'Express plan', x_hint: 'Your sheet\'s lock time is past. In 30 seconds: your main level, the direction, the target.', x_later: 'Later (today\'s trades will be off-plan)', x_level: 'Main level', x_dir: 'Direction', long: 'Long', short: 'Short',
+      x_title: 'Express plan', x_quick: 'Express plan (30 s)', x_guided: 'Guided plan', x_hint_quick: 'In 30 seconds: your main level, the direction, the target.', x_hint: 'Your sheet\'s lock time is past. In 30 seconds: your main level, the direction, the target.', x_later: 'Later (today\'s trades will be off-plan)', x_level: 'Main level', x_dir: 'Direction', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Your note from last session', of: '{a} of {b}', next: 'Continue', back: 'Back', save: 'Save my sheet', needs: 'Fill in what is missing to continue.',
       base: 'Today\'s levels', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Current price',
       base_hint: 'Typed by hand for now. Yesterday\'s values are kept as a start.', base_needs: 'London high, London low and the current price are needed (high above low).',
@@ -686,7 +686,7 @@
       d2: 'Hier', d2_no_retest: 'Hier tu es entré sans retest 5m. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', d2_off_plan: 'Hier tu as pris un trade hors de ta fiche. Qu’est-ce qui t’a fait sortir du plan ?',
       d2_max_trades: 'Hier tu as dépassé ton nombre de trades. Quel sera ton signal d’arrêt aujourd’hui ?', d2_news_window: 'Hier tu as tradé pendant une fenêtre de news. Comment vas-tu t’en tenir à l’écart ?',
       d2_moved_stop: 'Hier tu as déplacé ton stop. Qu’est-ce qui t’aidera à le laisser en place ?', d2_other: 'Hier tu as enfreint une règle de ta fiche. Qu’est-ce qui t’aidera à la tenir aujourd’hui ?', d2_ph: 'Une phrase courte',
-      x_title: 'Plan express', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton niveau principal, la direction, la cible.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Niveau principal', x_dir: 'Direction', long: 'Long', short: 'Short',
+      x_title: 'Plan express', x_quick: 'Plan express (30 s)', x_guided: 'Plan guidé', x_hint_quick: 'En 30 secondes : ton niveau principal, la direction, la cible.', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton niveau principal, la direction, la cible.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Niveau principal', x_dir: 'Direction', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Ta note de la dernière séance', of: '{a} sur {b}', next: 'Continuer', back: 'Retour', save: 'Enregistrer ma fiche', needs: 'Complète ce qui manque pour continuer.',
       base: 'Les niveaux du jour', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Prix actuel',
       base_hint: 'À la main pour l’instant. Les valeurs de la veille servent de départ.', base_needs: 'Il faut le London high, le London low et le prix actuel (le high au-dessus du low).',
@@ -716,7 +716,7 @@
       d2: 'Ayer', d2_no_retest: 'Ayer entraste sin retest de 5m. ¿Qué te ayudará a esperar hoy?', d2_off_plan: 'Ayer tomaste una operación fuera de tu ficha. ¿Qué te sacó del plan?',
       d2_max_trades: 'Ayer superaste tu número de operaciones. ¿Cuál será tu señal para parar hoy?', d2_news_window: 'Ayer operaste durante una ventana de noticias. ¿Cómo te mantendrás al margen?',
       d2_moved_stop: 'Ayer moviste tu stop. ¿Qué te ayudará a dejarlo en su sitio?', d2_other: 'Ayer rompiste una regla de tu ficha. ¿Qué te ayudará a mantenerla hoy?', d2_ph: 'Una frase corta',
-      x_title: 'Plan exprés', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu nivel principal, la dirección, el objetivo.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Nivel principal', x_dir: 'Dirección', long: 'Long', short: 'Short',
+      x_title: 'Plan exprés', x_quick: 'Plan exprés (30 s)', x_guided: 'Plan guiado', x_hint_quick: 'En 30 segundos: tu nivel principal, la dirección, el objetivo.', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu nivel principal, la dirección, el objetivo.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Nivel principal', x_dir: 'Dirección', long: 'Long', short: 'Short',
       title: 'Pre-market', note: 'Tu nota de la última sesión', of: '{a} de {b}', next: 'Continuar', back: 'Atrás', save: 'Guardar mi ficha', needs: 'Completa lo que falta para continuar.',
       base: 'Los niveles del día', instrument: 'Instrumento', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Precio actual',
       base_hint: 'A mano por ahora. Los valores de ayer sirven de punto de partida.', base_needs: 'Hacen falta el London high, el London low y el precio actual (el high por encima del low).',
@@ -881,7 +881,8 @@
     PM.news = pmCalendar(day);
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
     if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-pm g-pm-locked' }); const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day; return; }   // locked: the session view
-    PM.express = !old && ficheLockAt(day) <= Date.now() / 1000;   // the lock time is past without a sheet: the express version (brief step 6)
+    PM.late = !old && ficheLockAt(day) <= Date.now() / 1000;   // the lock time is past without a sheet: the express version (brief step 6)
+    PM.express = old ? old.mode === 'express' : PM.late || (S.settings && S.settings.pm_mode) === 'express';   // or the version the trader chose last time (a saved sheet keeps its own)
     if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
     openSheet(pmHtml(), { cls: 'g-plan g-pm' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;
@@ -896,6 +897,7 @@
       <div class="g-row2"><label class="g-f"><span>${pt('lh')}</span>${pmIn('lv.london_high', lv.london_high)}</label><label class="g-f"><span>${pt('ll')}</span>${pmIn('lv.london_low', lv.london_low)}</label></div>
       <div class="g-row2"><label class="g-f"><span>${pt('pdh')}</span>${pmIn('lv.pdh', lv.pdh)}</label><label class="g-f"><span>${pt('pdl')}</span>${pmIn('lv.pdl', lv.pdl)}</label></div>
       <label class="g-f"><span>${pt('price')}</span>${pmIn('lv.price', lv.price)}</label>
+      <button type="button" class="link pm-off-day" data-pm="mode" data-v="express">${pt('x_quick')}</button>
       <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`; }   // a planned day off, as the plan always allowed (audit of 16 Oct., R21)
     if (name === 'pos') {
       const nr = a.A1 && (a.A1 !== 'in' || a.A2) ? pmNearLevel(f) : null;
@@ -926,13 +928,13 @@
       ${f.no_trade_conditions.includes('other') ? `<label class="g-f"><span>${pt('other')}</span><input type="text" maxlength="120" data-pmf="no_trade_other" value="${esc(f.no_trade_other || '')}" placeholder="${esc(pt('other_ph'))}"></label>` : ''}`;
     if (name === 'express') {   // brief step 6: the pre-market missed, the main level, the direction and the target (R included)
       const sc = pmBuild(f)[0], works = window.SweepEdge && SweepEdge.line ? SweepEdge.line('works') : '';
-      return `${PM.note ? `<p class="pm-rem"><b>${pt('note')}</b> · ${esc(PM.note)}</p>` : ''}${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt('x_hint')}</p>
+      return `${PM.note ? `<p class="pm-rem"><b>${pt('note')}</b> · ${esc(PM.note)}</p>` : ''}${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt(PM.late ? 'x_hint' : 'x_hint_quick')}</p>
         <label class="g-f"><span>${pt('instrument')}</span>${pmIn('instrument', f.instrument, 'MES', 'text')}</label>
         <h3 class="pm-q">${pt('x_dir')}</h3>${pmSeg('X_dir', ['long', 'short'], a.X_dir)}
         <div class="g-row2"><label class="g-f"><span>${pt('x_level')}</span>${pmIn('X_level', a.X_level)}</label><label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_A', a.C3_A)}</label></div>
         <p class="pm-r ${pmViable(sc) ? 'ok' : 'bad'}" data-pm-r="A">${sc && sc.r_estimate != null ? esc(pt('r', { r: pmFmt(sc.r_estimate) })) + (pmViable(sc) ? '' : ' · ' + pt('main_not_viable')) : ''}</p>
         <label class="g-f"><span>${pt('dml')}</span>${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</label>
-        <button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>
+        ${PM.late ? `<button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>` : `<button type="button" class="link pm-off-day" data-pm="mode" data-v="full">${pt('x_guided')}</button>`}
         <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;
     }
     if (name === 'd2') return `<h3 class="pm-q">${esc(pt('d2_' + PM.d2))}</h3><label class="g-f"><textarea rows="2" maxlength="200" data-pmf="D2" placeholder="${esc(pt('d2_ph'))}">${esc(a.D2 || '')}</textarea></label>`;
@@ -1064,6 +1066,11 @@
     } else if (act === 'back') { PM.err = ''; PM.i = Math.max(0, PM.i - 1); pmRender(); }
     else if (act === 'save') pmSave();
     else if (act === 'lock') pmSave(true);
+    else if (act === 'mode') {   // guided ⇄ express, kept for the next pre-markets (settings.pm_mode)
+      const m = b.dataset.v === 'express' ? 'express' : 'full'; PM.express = m === 'express'; PM.i = 0; PM.err = '';
+      if (S.settings && S.settings.pm_mode !== m) put('settings', Object.assign(structuredClone(S.settings), { pm_mode: m }));
+      buzz(5); pmRender(); const box = document.querySelector('#gSheet .g-in'); if (box) box.scrollTop = 0;
+    }
     else if (act === 'inst') { PM.hideInst = false; pmRender(); const i = document.querySelector('#gSheet [data-pmf=instrument]'); if (i) i.focus(); }
     else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); closeSheet(); }   // no sheet today: its trades will be off-plan
     else if (act === 'dayoff') {   // « Not trading today »: a day off before any trade of the day, the same as the routine's button
