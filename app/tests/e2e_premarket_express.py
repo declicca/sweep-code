@@ -29,7 +29,7 @@ with sync_playwright() as p:
   for w, phone, prev, day, later in [(390, True, '2027-03-15', '2027-03-17', '2027-03-18'), (1300, False, '2027-03-22', '2027-03-24', '2027-03-25')]:
     c = br.new_context(storage_state=STATE, viewport={'width': w, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, locale='fr-CA')
     c.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
-    pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+    pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160])); con = []; pg.on('console', lambda m: con.append(m.text[:100]))
     y, m, d = map(int, day.split('-'))
     pg.clock.install(time=dt.datetime(y, m, d, 10, 0, tzinfo=NY))
     pg.goto(B + '/#dashboard'); until(pg, 'window.SweepFiche && SweepFiche.maybeExpress && window.S && S.journals'); pg.wait_for_timeout(2500)
@@ -60,7 +60,7 @@ with sync_playwright() as p:
     why = ''
     if not pg.locator('#gSheet [data-pm-screen=express]').count():   # (why, when it fails on GitHub only)
       why = str(pg.evaluate("(d) => { const g = document.getElementById('gSheet'); return { day: SweepFiche.dayOf(), now: etStr(Math.floor(Date.now() / 1000)), lock: SweepFiche.lockAt(d), sheet: g && g.className + ' ' + g.innerText.slice(0, 60), mine: !!SweepFiche.get(d), before: (S.journals || []).filter((j) => j.fiche).map((j) => j.id), later: lsGet('pm.later.' + d, 0), shown: lsGet('pm.xshown.' + d, 0), hash: location.hash } }", later))
-      pg.evaluate("SweepFiche.maybeExpress()"); pg.wait_for_timeout(800); why += f" · called again: {pg.locator('#gSheet [data-pm-screen=express]').count()}"
+      why += f" · errors {errs[-3:]} · console {con[-5:]}"
     ok(pg.locator('#gSheet [data-pm-screen=express]').count() == 1, f'3 {w}: the next day, after the lock time: the express version again {why}')
     pg.click('#gSheet [data-pm="later"]'); pg.wait_for_timeout(400)
     doc = pg.evaluate("(d) => SweepFiche.markTrade({ id: 'x', date: d, instrument: 'MES' })", later)

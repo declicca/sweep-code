@@ -876,7 +876,7 @@
     if (f.answers.max_loss == null) f.answers.max_loss = pmMaxLoss(day);
     PM.f = f;
     PM.opening = Date.now();   // (the express offer waits: never two pre-market sheets at once)
-    try { if (typeof loadEcon === 'function') await loadEcon(day, day); } catch (e) { /* the calendar is a help, not a need */ }
+    try { if (typeof loadEcon === 'function') await Promise.race([loadEcon(day, day), new Promise((r) => setTimeout(r, 2500))]); } catch (e) { /* the calendar is a help, not a need */ }   // (19 Oct.: a calendar that does not answer never holds the sheet back)
     PM.opening = 0;
     PM.news = pmCalendar(day);
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
