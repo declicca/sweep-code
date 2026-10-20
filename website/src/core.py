@@ -374,7 +374,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <html lang="{lang}">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <script type="speculationrules">{{"prefetch":[{{"source":"document","where":{{"and":[{{"href_matches":"/*"}},{{"not":{{"href_matches":"/*.pdf"}}}},{{"not":{{"href_matches":"/video/*"}}}}]}},"eagerness":"moderate"}}]}}</script>
 {'<link rel="preconnect" href="https://app.makeitsweep.com" crossorigin>' if page == "index.html" else ""}<link rel="dns-prefetch" href="https://app.makeitsweep.com">
 <script>try{{if(sessionStorage.getItem("sw-seen"))document.documentElement.classList.add("ret");sessionStorage.setItem("sw-seen","1")}}catch(e){{}}</script>

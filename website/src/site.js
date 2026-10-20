@@ -1,5 +1,12 @@
 // Sweep — makeitsweep.com
 (function(){
+  // never a zoom (20 Oct., Mateo, as in the app): touch-action and the viewport stop the double tap and the pinch; Safari
+  // ignores user-scalable=no, its pinch is stopped here; ctrl / cmd + wheel (a trackpad pinch) and ctrl / cmd + = - 0 on a computer
+  var noZoom = function(e){ e.preventDefault(); };
+  ['gesturestart','gesturechange','gestureend'].forEach(function(t){ document.addEventListener(t, noZoom, { passive: false }); });
+  window.addEventListener('wheel', function(e){ if(e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false });
+  window.addEventListener('keydown', function(e){ if((e.ctrlKey || e.metaKey) && !e.altKey && ['+','=','-','_','0'].indexOf(e.key) > -1) e.preventDefault(); });
+  document.addEventListener('touchmove', function(e){ if(e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
   // captures not uploaded yet: collapse their empty spaces
   var tidy = function(){
     document.querySelectorAll('.duo,.gwrapped,.cards3').forEach(function(g){ var sl = g.querySelectorAll('.slot'); var all = sl.length && [].every.call(sl, function(x){ return x.classList.contains('missing'); }); g.classList.toggle('empty-media', !!all); });

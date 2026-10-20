@@ -62,7 +62,7 @@
 /* ======================================================================= base */
 @layer base{
 *,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--ink);scroll-padding-top:calc(var(--nav-h) + 16px);interpolate-size:allow-keywords}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:pan-x pan-y;background:var(--ink);scroll-padding-top:calc(var(--nav-h) + 16px);interpolate-size:allow-keywords}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 body{margin:0;background:var(--ink);color:var(--text);font:400 var(--fs-body)/1.6 var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;overflow-x:clip}
 body::before{content:"";position:fixed;inset:-10vh -10vw;z-index:-1;pointer-events:none;
