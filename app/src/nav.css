@@ -63,7 +63,6 @@
 .nav-rank-ic svg{width:20px;height:20px}
 .nav-rank-t{flex:1;min-width:0}.nav-rank-t b{display:block;font-size:15px;font-weight:600}.nav-rank-t small{color:var(--muted);font-size:13px}
 .nav-rank > svg{width:18px;height:18px;color:var(--muted)}
-.nav-econ table tr:nth-child(n+4),.nav-econ li:nth-child(n+4){display:none}
 .gc-near{margin-top:8px}
 
 /* Settings groups */
@@ -81,7 +80,6 @@
 
 /* sliding selection in segmented controls */
 
-@media (max-width:860px){}
 .nav-thumb{position:absolute;left:0;top:3px;bottom:3px;border-radius:var(--r-pill);background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.14),inset 0 0 0 1px var(--line);transition:transform .38s var(--ease-ios),width .38s var(--ease-ios);z-index:0;pointer-events:none}
 .has-thumb > a,.has-thumb > button{position:relative;z-index:1}
 .has-thumb > a.on,.has-thumb > button.on{background:transparent!important;box-shadow:none!important}
@@ -93,7 +91,6 @@
   .nav-back{min-height:44px}
   #main .btn.sm,#main .btn{min-height:40px}
   #main input:not([type=checkbox]):not([type=radio]):not([type=range]),#main select{min-height:44px}
-  
   .g-x,.gd-x,.nt-x{min-width:40px;min-height:40px}
   #main a.link,#main button.link{padding-top:8px;padding-bottom:8px}
 }
@@ -101,9 +98,7 @@
 @media (max-width:860px) and (pointer:coarse){.hero-share{min-width:40px;min-height:40px}}
 /* sticky segmented controls: solid, and the gap above them is covered (no content peeking through) */
 @media (max-width:860px){
-  
   /* the background band only exists while the bar is stuck under the header (at rest it would cover the buttons above it) */
-  
   #main .nav-seg.is-stuck::before,#main .nav-tnav.is-stuck::before{content:"";position:absolute;left:-24px;right:-24px;bottom:100%;height:8px;background:var(--bg);pointer-events:none}
 }
 /* search on phones: room for the full placeholder, no zoom on focus, no keyboard hint */
@@ -123,26 +118,11 @@ html.nav-js #main:has(> .greet) > section.sec:has([data-act="eq"], .chartbox),
 html.nav-js #main:has(> .greet) > section.sec:has(> .sec-h a[href^="#analytics"]),
 html.nav-js #main:has(> .greet) > section.sec:has(> .sec-h a[href="#trades"]),
 html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
-html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){display:block!important}
-.nav-today{display:flex;flex-direction:column}
-.nav-tcol{display:flex;flex-direction:column;min-width:0}
-@media (min-width:861px) and (max-width:1099px){
-  .nav-tcol.r{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}
-  .nav-tcol.r .nav-kpi,.nav-tcol.r .nav-rank{margin:14px 0 0}
-  .nav-tcol.r .nav-econ{grid-column:1/-1;margin-top:16px}
-}
-@media (min-width:1100px){
-  .nav-today{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:20px;align-items:start}
-  .nav-tcol.r.stick{position:sticky;top:20px}
-  .nav-tcol.r .nav-kpi{margin-top:0}
-  .nav-tcol.l .nav-econ{margin-top:20px}
-}
 .nav-kpi-h{gap:10px}
 .nav-kseg{display:grid;grid-template-columns:1fr 1fr;width:180px;margin:0}
 .nav-kseg button{min-height:32px;border:0;background:transparent;color:inherit;font:inherit;font-size:14px;border-radius:var(--r-pill);cursor:pointer}
 .nav-kseg button.on{background:var(--panel);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12),inset 0 0 0 1px var(--line)}
 @media (pointer:coarse){.nav-kseg button{position:relative}.nav-kseg button::after{content:"";position:absolute;inset:-6px 0}}
-.nav-econ{margin-top:0}
 /* « reward waiting » dot (avatar and rank card); it goes once Progression is opened */
 .nav-dot{position:relative}
 .nav-dot::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--pos);box-shadow:0 0 0 2px var(--bg);animation:nav-dot 1.2s var(--spring) 3}
@@ -190,7 +170,6 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
   #gSheet.evp.open,.evp.g-sheet.open{opacity:1;transform:none!important;transition:opacity .22s var(--ease-ios),transform .32s var(--ease-ios)!important}
   .evp-scrim:not(#gScrim){transition:opacity .2s var(--ease-ios)}
   #gScrim.evp-scrim{background:rgba(0,0,0,.45)}
-  
 }
 /* ───── keyboard: one focus ring everywhere; consistent hover ───── */
 :where(button,a,[role=tab],[tabindex],input,select,textarea,summary):focus-visible{outline:2px solid var(--pos);outline-offset:2px;border-radius:10px}
@@ -206,18 +185,13 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
 /* ───── Today dashboard grid ───── */
 .nav-dash{grid-template-columns:minmax(0,1fr);margin-top:4px}
 .nav-dash > *{min-width:0;margin:0!important}
-.d-side{display:flex;flex-direction:column;gap:12px}
-.d-side .nav-kpi,.d-side .nav-rank{margin:0!important}
 .nav-card{padding:16px 16px!important;display:flex;flex-direction:column;gap:10px}
 .nav-ch{display:flex;align-items:center;gap:10px;margin:0;cursor:pointer;border-radius:14px;min-height:32px}
 .nav-ch h2{flex:1;margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
 .nav-all{font-size:13px;color:var(--muted);white-space:nowrap}
 @media (hover:hover){.nav-ch:hover .nav-all{color:var(--pos)}}
-.nav-ch .nav-period{margin:0;flex-shrink:1;min-width:0;overflow-x:auto;scrollbar-width:none}
-.nav-ch .nav-period::-webkit-scrollbar{display:none}
 .nav-card .chartbox,.nav-card .surface{box-shadow:none;background:transparent;padding:0;margin:0}
 .nav-empty{margin:4px 0 2px;font-size:14px;color:var(--muted);line-height:1.5}
-.nav-sub{margin:0;font-size:13px;color:var(--muted)}
 /* accounts: compact rows; phone = horizontal cards with snap */
 .nav-accs{display:flex;flex-direction:column;gap:8px}
 .nav-acc{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;color:var(--text);text-decoration:none}
@@ -233,8 +207,6 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
   .nav-acc{flex:0 0 72%;scroll-snap-align:start}
 }
 /* recent trades: 5 on phones, 8 on computers; trades to journal are marked */
-.d-recent tbody tr:nth-child(n+9){display:none}
-@media (max-width:860px){.d-recent tbody tr:nth-child(n+6){display:none}}
 .nav-tolog{display:inline-block;margin-left:6px;font-size:11px;font-weight:600;padding:1px 8px;border-radius:var(--r-pill);background:var(--negbg);color:var(--neg);white-space:nowrap}
 /* mini calendar */
 .nav-cal{display:flex;flex-direction:column;gap:6px}
@@ -302,7 +274,6 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
 /* desktop: 12 columns, equal heights per row */
 @media (min-width:861px){
   .d-today{grid-area:today}.d-news{grid-area:news}.d-perf{grid-area:perf}.d-acc{grid-area:acc}.d-cal{grid-area:cal}.d-pay{grid-area:pay}.d-rank{grid-area:rank}.d-trends{grid-area:trends}
-  
   .d-rank .nav-rank{margin:0!important}
 }
 @media (min-width:1100px){
@@ -311,9 +282,6 @@ html:not(.nav-js) #main > section.nav-old:is(.d-curve,.d-recent,.d-trends){displ
 }
 
 
-.d-curve .nav-ch{flex-wrap:wrap}.d-curve .nav-period{order:3;flex-basis:100%}
-@media (min-width:1100px){.d-curve .nav-period{order:0;flex-basis:auto}}
-.d-curve .chartbox{min-height:180px}
 
 .nav-ch h2{display:flex;flex-direction:column;gap:1px}.nav-ch h2 .nav-ch-sub{font-size:12px;font-weight:500;color:var(--muted)}
 .nav-cd.nav-sw::after{content:"";position:absolute;right:5px;top:5px;width:6px;height:6px;border-radius:50%;background:var(--pos)}
@@ -326,13 +294,10 @@ main.anim > .nav-dash{animation:none}
 .chip.on{border-color:transparent!important;}
 
 
-
 /* fixed heights while data loads: nothing below moves when it arrives */
 .nav-evs-sk{display:flex;flex-direction:column;}.nav-evs-sk .skel{border-radius:14px}
 .d-today .g-today.g-skel{min-height:176px}
-@media (min-width:861px){}
 .d-today:empty{min-height:176px;border-radius:20px;background:var(--panel)}
-@media (min-width:861px){}
 @media (max-width:860px){.d-today .g-today{min-height:180px}.d-today .g-today.g-skel{min-height:180px}}
 /* news rows: one line each, fixed height (3 rows = 138 px), so the card never changes size */
 .nav-ev{height:46px;min-height:46px;padding-top:0;padding-bottom:0}
@@ -408,7 +373,6 @@ body.evp-lock{overscroll-behavior:none}
   #main .q-tbl td:nth-child(2)::before{content:attr(data-l);display:block;font-size:12px;color:var(--muted);margin:2px 0 4px}
   #main .q-tbl td:nth-child(3){grid-column:1;grid-row:3}
   #main .q-tbl td:nth-child(4){grid-column:2;grid-row:3;text-align:right;font-size:12px}
-  
   #main .q-tbl td:nth-child(1) input{font-size:15px;font-weight:500;min-height:44px}
   #main .q-tbl td:nth-child(2) input{font-size:14px;min-height:40px;color:var(--text2)}
   #main .q-tbl + * , #main .q-tbl{margin:0}
@@ -420,7 +384,6 @@ body.evp-lock{overscroll-behavior:none}
 .nav-qadd{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .nav-qadd input{flex:1;min-width:0;min-height:44px;font-size:16px}
 .nav-qadd button{min-height:44px;white-space:nowrap}
-.nav-qadd-note{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
 @media (max-width:600px){
   #main .q-tbl tr{padding:14px 16px}
   #main .q-tbl td:nth-child(4) .faint,#main .q-tbl td:nth-child(4) .link{font-family:Geist,-apple-system,system-ui,sans-serif!important;font-size:13px;letter-spacing:0}
@@ -476,13 +439,11 @@ body.evp-lock{overscroll-behavior:none}
 @media (max-width:860px){
   /* laid over the title row (absolute): adding it never moves the page */
   .main-wrap .top:has(.nav-hday:not([hidden])){position:relative}
-  
   .nav-hday:not([hidden]){display:flex;align-items:center;position:absolute;top:50%;transform:translateY(-50%)}
   .nav-hring{position:relative;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer}
   .nav-hring svg{width:36px!important;height:36px!important;display:block}
   .nav-hring.due::after{content:"";position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;background:var(--pos);box-shadow:0 0 0 2px var(--bg)}
   .nav-hplus{border:0;display:grid;place-items:center;background:var(--pos);cursor:pointer}
-  
   .nav-hplus:active,.nav-hring:active{transform:scale(.97)}
 }
 
@@ -611,26 +572,8 @@ html[data-home] .main-wrap .top #title::before{content:attr(data-hi);display:blo
 .tk-ex .nav-extag.in{color:var(--pos)}
 .tk-ex .nav-extag.out{color:var(--neg)}
 
-/* Today: Sweep AI card (one tap = asked) */
-.d-ai{display:flex;flex-direction:column;gap:10px;background:radial-gradient(120% 140% at 0% 0%,rgba(var(--pos-rgb),.16),transparent 60%),var(--glass)!important}
-.d-ai .nav-ch h2{display:flex;align-items:center;gap:8px}
-.d-ai-sp{color:var(--pos);font-size:15px}
-.d-ai-sub{margin:-6px 0 0;font-size:13px;color:var(--muted)}
-.d-ai-q{display:flex;flex-wrap:wrap;gap:6px}
-.d-ai-q button{border:1px solid rgba(var(--pos-rgb),.35);background:var(--posbg);color:var(--text);border-radius:var(--r-pill);padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;text-align:left}
-.d-ai-q button:active{transform:scale(.97)}
-.d-ai-in{display:flex;gap:8px}
-.d-ai-in input{flex:1;min-width:0;min-height:42px;border-radius:20px;padding:0 14px}
-.d-ai-in button{width:42px;height:42px;border-radius:50%;border:0;background:var(--pos);color:var(--btntext);display:grid;place-items:center;cursor:pointer;flex-shrink:0}
-.d-ai-in button svg{width:18px;height:18px}
-.d-ai{order:2}
-@media (min-width:861px){}
-.d-ai .nav-ch{display:flex!important;flex-direction:row!important;justify-content:flex-start!important;align-items:center;text-align:left!important}.d-ai .nav-ch h2{flex-direction:row!important;justify-content:flex-start;text-align:left;margin:0;font-size:16px}
-
-/* computer Today: Sweep AI last; the calendar fills the left column with taller days */
+/* computer Today: the calendar fills the left column with taller days */
 @media (min-width:861px){
-  .nav-dash .d-col > .d-ai{order:100!important}
-  
   .nav-dash .d-cal{display:flex;flex-direction:column}
   .nav-dash .d-cal .nav-cal{flex:1;display:flex;flex-direction:column}
   .nav-dash .d-cal .nav-cg{flex:1;grid-auto-rows:minmax(64px,1fr)}
@@ -728,14 +671,11 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-am-in{padding:20px 20px calc(24px + env(safe-area-inset-bottom,0));display:flex;flex-direction:column;gap:14px}
 @media (min-width:861px){.nav-am{left:50%!important;right:auto!important;top:50%!important;bottom:auto!important;width:min(560px,calc(100vw - 48px))!important;max-height:min(88vh,900px);height:auto!important;translate:-50% -50%;border-radius:26px!important;overflow:auto;}.nav-am:not(.open){opacity:0;transform:scale(.97)!important;transition:opacity .18s var(--ease-ios),transform .22s var(--ease-ios)!important}.nav-am.open{opacity:1;transform:none!important;transition:opacity .22s var(--ease-ios),transform .32s var(--ease-ios)!important}}
 .nav-am h2{margin:0;font-size:20px;letter-spacing:-.02em}
-.nav-am-x{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:0;background:var(--panel2);color:var(--text);font-size:20px;cursor:pointer}
 .nav-am-ic{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:var(--posbg);color:var(--pos)}
 .nav-am-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nav-am-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .nav-am-h small{display:block;margin-top:2px}
-.nav-am-ha{display:flex;align-items:center;gap:10px}
-.nav-am-ha .nav-am-x{position:static}
-.nav-am-ha .link,.nav-am-sw{font-size:13px;color:var(--pos);font-weight:500;white-space:nowrap}
+.nav-am-sw{font-size:13px;color:var(--pos);font-weight:500;white-space:nowrap}
 .nav-am-sw{display:block;margin-top:4px;padding:0;background:none;border:0;cursor:pointer}
 .nav-am-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;padding:16px;border-radius:14px;border:1.5px dashed rgba(var(--pos-rgb),.5);background:var(--posbg);color:var(--text);text-align:center;cursor:pointer;overflow:hidden}
 .nav-am-drop b{font-size:14px;font-weight:500}
@@ -748,8 +688,6 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-am-grid select,.nav-am-grid input{width:100%}
 .nav-am-dir .seg{width:100%}.nav-am-dir .seg button{flex:1}
 .nav-am-grid > .nav-am-dir{align-self:end}   /* next to the net P&L: on the line of its field when its label wraps (phone) */
-.nav-am-pnl{grid-column:1/-1}
-.nav-am-pnl small{display:block;margin-top:4px;font-size:12px}
 .nav-am-sec{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
 .nav-am-sec h3{margin:0;font-size:15px}
 .nav-am-sec p{margin:-4px 0 0;font-size:13px}
@@ -770,9 +708,6 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 
 /* screenshot form: account and symbol as chips; buttons like the rest of the app */
 .nav-am-wide{grid-column:1/-1}
-.nav-am-pick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
-.nav-am-pick::-webkit-scrollbar{display:none}
-.nav-am-pick .chip{flex-shrink:0;white-space:nowrap}
 .nav-am-more{color:var(--pos)!important}
 .nav-am-save{display:flex!important;align-items:center;justify-content:center;width:100%;border-radius:var(--r-pill)!important;font-size:16px;font-weight:600;text-align:center}
 /* manual form: the exit shortcuts under the exit price; their « + Add execution » is already above */
@@ -884,8 +819,6 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-am-shot .nav-am-in{padding:22px 22px 40px;gap:16px}
 @media (min-width:861px){
   .nav-am.nav-am-shot{background:color-mix(in srgb,var(--panel) 96%,transparent);}
-  
-  
 }
 
 /* account and symbol: same look as the manual form's lists */
@@ -1015,9 +948,7 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 /* 3. import */
 .nav-imp{display:inline-flex;align-items:center;gap:6px}
 .nav-imp-b{display:inline-flex!important;align-items:center;gap:6px;text-decoration:none}
-.nav-imp-b svg,.nav-imp-i svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.nav-imp-i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:0;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);color:var(--muted);cursor:pointer}
-.nav-imp-i:hover{color:var(--pos)}
+.nav-imp-b svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .nav-imp.top{margin-right:10px}
 .nav-imp.form{margin-top:8px}
 /* 2. plan */
@@ -1106,7 +1037,6 @@ body.nav-wk-on #main > .surface.pad > *:last-child{grid-column:1/-1}
   .nav-imp.top{margin-right:6px;gap:4px}
   .nav-imp.top .nav-imp-b{font-size:0!important;gap:0;padding:0 9px!important;min-width:34px;height:34px;justify-content:center}
   .nav-imp.top .nav-imp-b svg{width:17px;height:17px}
-  .nav-imp.top .nav-imp-i{width:28px;height:28px}
 }
 
 /* ───── Today · « Your routine » ───── */
@@ -1174,7 +1104,6 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
   .nav-rt-sb b{font-size:14px}
   .nav-rt-sb small{display:none}
   .nav-rt-st{margin-top:2px;font-size:12px;line-height:1.35}
-  
   .nav-rt-off{display:none}
 }
 
@@ -1202,11 +1131,6 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
   .nav-dash .d-today > :not(.nav-rt):not(.co-today){display:none!important}}
 @media (min-width:861px){.nav-dash .d-today > .g-today,.nav-dash .d-today > div:not(.nav-rt):not(.d-rank){display:none!important}}
 
-/* title row: Import + ⓘ glued to the left of « Add a trade » */
-.nav-topacts{margin-left:auto}
-.nav-topacts .nav-imp.top{margin:0}
-.nav-topacts .nav-imp-b{border-radius:var(--r-pill)!important}
-@media (max-width:860px){}
 /* left menu (computer): every icon on the same axis when closed; search and notifications labelled when open */
 @media (min-width:861px){
   .side .nav-prog,.side .foot .nav-search,.side .foot .nt-bell,.side .foot .nav-ask-side{display:flex;align-items:center;gap:12px;width:100%;min-height:40px;padding:8px 12px;border-radius:10px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:450;text-align:left;cursor:pointer;position:relative;transition:background .12s var(--ease-ios),color .12s var(--ease-ios)}
@@ -1226,23 +1150,13 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 
 /* title row: Import CSV and Add a trade on the same line, same height */
 
-.nav-topacts > *{margin-top:0!important;margin-bottom:0!important;}
-.nav-topacts .nav-imp{display:inline-flex;height:40px;align-items:center}
-.nav-topacts .nav-imp-b{height:40px!important;margin:0!important;}
 /* Stats: the rank is a door to Progression */
 .nav-rank-go{border-radius:14px;transition:background .15s var(--ease-ios)}
 .nav-rank-go:hover{background:var(--panel2)}
 .nav-rank-go:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
 /* Payouts: share above the numbers, on the right */
 .nav-sh-top{display:flex!important;justify-content:flex-end;margin:0 0 10px!important}
-.main-wrap .top .nav-topacts .nav-imp,.main-wrap .top .nav-topacts .nav-imp-b,.main-wrap .top .nav-topacts .nav-addtop{margin:0!important;top:auto!important;transform:none!important;position:static!important;vertical-align:middle}
-@media (max-width:860px){
-  .main-wrap .top .nav-topacts{position:absolute;right:20px;top:50%;transform:translateY(-50%);margin:0}
-  .main-wrap .top .nav-topacts .nav-imp-b{height:40px!important;font-size:13px!important;padding:0 12px!important;gap:6px}
-}
 .nav-imp-b{white-space:nowrap}
-
-@media (max-width:860px){.main-wrap .top .nav-topacts .nav-imp-b .l{display:none}.main-wrap .top .nav-topacts .nav-imp-b .s{display:inline}}
 
 /* title row: « Import CSV » glued to the left of « Add a trade », both centred on the title line */
 .main-wrap .top > .nav-imp.top{margin:0 8px 0 auto!important;align-self:center;display:inline-flex}
@@ -1256,12 +1170,6 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 .main-wrap .top > .nav-imp.top{flex:0 0 auto!important;width:auto!important;height:40px!important;min-width:0!important;padding:0!important;align-items:center}
 @media (min-width:861px){.main-wrap .top > .nav-imp.top{margin-right:0!important}.main-wrap .top > .nav-imp.top + .nav-addtop{margin-left:8px!important}.main-wrap .top > .nav-imp.top ~ *:not(.nav-addtop){display:none}}
 
-/* title row: « Import CSV » and « Add a trade », same line, same height */
-.nav-topacts{display:inline-flex!important;align-items:center!important;gap:10px}
-.nav-topacts > *{margin:0!important;align-self:center!important}
-.nav-topacts .nav-imp-b{padding:0 16px!important;font-size:14px;font-weight:500}
-.nav-topacts .nav-addtop{height:42px}
-@media (max-width:860px){.nav-topacts .nav-imp-b,.nav-topacts .nav-addtop{height:36px}}
 /* Stats: the rank says it opens the next steps */
 .nav-rank-go{cursor:pointer}
 .nav-rank-more{display:inline-block;margin-top:6px;font-size:13px;font-weight:500;color:var(--pos)}
@@ -1298,12 +1206,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
    Motion  : one curve (iOS-like), 0.18 s for presses, 0.35 s for sheets
    ═══════════════════════════════════════════════════════════════════════════════════════════════ */
 :root{
-     
-  
-  
     --fill-press:rgba(255,255,255,.14);
-   
-  
   --focus:0 0 0 3px rgba(var(--pos-rgb),.35);
 }
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--fill-press:rgba(0,0,0,.1);}}
@@ -1311,7 +1214,6 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 
 /* type: one scale, tighter titles */
 html body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-
 
 
 /* cards: one radius, a hairline instead of a border, no heavy shadow */
@@ -1324,7 +1226,6 @@ html body .btn,html body button.btn,html body a.btn{border:0!important;box-shado
 html body .btn.sm{min-height:34px;font-size:14px}
 
 .btn:not(.primary):not(.danger):hover{background:color-mix(in srgb,var(--text) 12%,transparent)!important}
-
 
 html body .btn.danger{background:rgba(255,90,90,.12)!important;color:#ff6b6b!important}
 
@@ -1351,13 +1252,10 @@ html body hr,html body .nav-am-sec,html body .nav-wk-bar{border-color:var(--hair
 
 /* glass: the bars and everything that floats */
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  html body .bottomnav,html body .mhdr,html body .nav-mhdr,html body header.top-bar{background:var(--glass)!important;-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border-color:var(--hair)!important}
+  html body .bottomnav,html body .mhdr{background:var(--glass)!important;-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);border-color:var(--hair)!important}
   html body .evp,html body #gSheet,html body .nav-dlg,html body .nav-am,html body #shPanel,html body .gd-help-ov > *,html body .menu-pop,html body #navMenu{background:var(--glass-strong)!important;-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px)}
   html body .nav-dlg-scrim,html body .evp-scrim,html body .nav-am-scrim{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 }
-
-@media (min-width:861px){}
-@media (max-width:860px){}
 
 /* motion: one curve */
 
@@ -1394,7 +1292,6 @@ a,button{-webkit-tap-highlight-color:transparent}
 /* add-trade entry screen: the other ways under the drop zone */
 .nav-am-alt{display:grid;}
 .nav-am-alt .btn{width:100%;justify-content:center;text-decoration:none;display:inline-flex;align-items:center}
-@media (max-width:600px){}
 /* profile: optional chips */
 .nav-prof-src{display:flex;flex-direction:column;gap:8px}
 .nav-prof-src > span{font-size:13px;color:var(--muted)}.nav-prof-src em{font-style:normal;opacity:.7}
@@ -1424,12 +1321,7 @@ a,button{-webkit-tap-highlight-color:transparent}
 .nav-ra button.del{color:#ff6b6b}
 .nav-ra-td{position:relative;white-space:nowrap}
 @media (max-width:860px){
-  
-  
-  
-  
   .nav-ra-row .nav-ra button:first-child{background:#5b6475}.nav-ra-row .nav-ra button.del{background:#e5484d;}
-  
 }
 /* pull to refresh */
 /* pull to refresh (19 Oct., Mateo: like Mail on the iPhone): a blue ring that turns with the pull, a small tap when it is far
@@ -1509,9 +1401,7 @@ html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + var(--ptr-y,0px) * .5)
   #main a.trow.nav-ra-row > .nav-dots > .nav-dots-b{display:none!important}
   #main a.trow.nav-ra-row > .nav-dots > .nav-ra{display:flex!important;position:static!important;flex-direction:row!important;height:100%!important;min-width:0!important;padding:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   #main a.trow.nav-ra-row > .nav-dots > .nav-ra button{flex:1!important;border-radius:0!important;text-align:center!important;font-weight:600!important;color:#fff!important;padding:0!important;background:#5b6475!important}
-  
 }
-@media (max-width:860px){}
 
 .nav-fee{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 14px;cursor:pointer}
 .nav-fee input[type=checkbox]{width:20px;height:20px;accent-color:var(--pos)}
@@ -1566,9 +1456,6 @@ html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + var(--ptr-y,0px) * .5)
   --ink2:#0E0E11;--line2:#34343B;--text2:#C9C9CF;
   --posbg:rgba(76,141,255,.14);--negbg:rgba(212,162,76,.14);--btntext:#FFFFFF;
   --r-chip:10px;
-  
-  
-  
   --t-fast:.2s;--t-base:.35s;--t-slow:.7s;
   --font-ui:'Geist',-apple-system,'SF Pro Display',system-ui,sans-serif;--font-num:'Geist Mono',ui-monospace,'SF Mono',monospace;
   --ambient:radial-gradient(1100px 700px at 12% -10%,rgba(76,141,255,.14),transparent 60%),radial-gradient(900px 600px at 105% 110%,rgba(212,162,76,.08),transparent 60%);
@@ -1576,17 +1463,11 @@ html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + var(--ptr-y,0px) * .5)
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
   --ink2:#EEEFF2;--line2:#D6D7DD;--text2:#2E2E33;
   --posbg:rgba(40,98,208,.1);--negbg:rgba(138,96,15,.1);--btntext:#FFFFFF;
-  
-  
-  
   --ambient:radial-gradient(1100px 700px at 12% -10%,rgba(47,111,228,.10),transparent 60%),radial-gradient(900px 600px at 105% 110%,rgba(154,107,18,.06),transparent 60%);
 }}
 :root[data-theme="light"]{
   --ink2:#EEEFF2;--line2:#D6D7DD;--text2:#2E2E33;
   --posbg:rgba(40,98,208,.1);--negbg:rgba(138,96,15,.1);--btntext:#FFFFFF;
-  
-  
-  
   --ambient:radial-gradient(1100px 700px at 12% -10%,rgba(47,111,228,.10),transparent 60%),radial-gradient(900px 600px at 105% 110%,rgba(154,107,18,.06),transparent 60%);
 }
 /* page: ink + a fixed ambient light, blue and gold */
@@ -1623,7 +1504,7 @@ html body input:focus-visible,html body select:focus-visible,html body textarea:
 html body .surface hr,html body .nav-am-sec{border-top-color:transparent!important}
 /* floating bars and sheets: ink 86 % + 28 px blur, 180 % saturation, the one shadow */
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  html body .bottomnav,html body .mhdr,html body .nav-mhdr{background:var(--glass-bar)!important;-webkit-backdrop-filter:saturate(180%) blur(28px)!important;backdrop-filter:saturate(180%) blur(28px)!important;box-shadow:0 0 0 1px var(--hair)!important}
+  html body .bottomnav,html body .mhdr{background:var(--glass-bar)!important;-webkit-backdrop-filter:saturate(180%) blur(28px)!important;backdrop-filter:saturate(180%) blur(28px)!important;box-shadow:0 0 0 1px var(--hair)!important}
   html body .bottomnav{box-shadow:var(--shadow-3)!important;border-color:transparent!important}   /* the site's floating bar (design chantier, step 4) */
   html body .evp,html body #gSheet,html body .nav-dlg,html body .nav-am,html body #shPanel,html body #navMenu,html body .nav-ra,html body .nav-undo{background:var(--glass-strong)!important;-webkit-backdrop-filter:saturate(180%) blur(28px)!important;backdrop-filter:saturate(180%) blur(28px)!important}
 }
@@ -1643,7 +1524,6 @@ html body .nav-inst-ic{background:linear-gradient(180deg,rgba(var(--pos-rgb),.22
 #main.sw-enter > *:nth-child(3),#main.sw-enter .nav-dash > * > *:nth-child(3){animation-delay:100ms}
 #main.sw-enter > *:nth-child(4),#main.sw-enter .nav-dash > * > *:nth-child(4){animation-delay:150ms}
 #main.sw-enter > *:nth-child(n+5),#main.sw-enter .nav-dash > * > *:nth-child(n+5){animation-delay:200ms}
-@media (prefers-reduced-motion:reduce){}
 
 /* ── motion, tuned for speed: compositor-only properties, shorter on phone ── */
 #main.sw-enter > *,#main.sw-enter .nav-dash > * > *,#main.sw-enter .nav-dash > .d-today{will-change:transform,opacity}
@@ -1703,8 +1583,6 @@ html body .nav-rt-sa .btn,html body .nav-rt-sa .btn.primary{text-shadow:none!imp
 .nav-rt-sa .btn::after{line-height:1;}
 
 
-
-@media (max-width:860px){}
 html body .nav-rt-sa .btn{display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;white-space:nowrap}html body .nav-rt-sa .btn > span{display:inline}.nav-rt-sa .btn > span.s{display:none}@media (max-width:860px){.nav-rt-sa .btn > span.l{display:none}html body .nav-rt-sa .btn > span.s{display:inline}}
    /* the app already uses ::after on primary buttons */
 html body .nav-dash .d-today{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}   /* the routine card is the only box (the old container drew a second one on the computer) */
@@ -1751,11 +1629,8 @@ html body .nav-am-alt .btn{min-height:42px!important;font-size:14px!important;fo
 /* ── computer: the routine as a toggle ── */
 @media (min-width:861px){
   html body .nav-rt-tg{border-radius:14px}
-  
-  
   html body .nav-rt-tg:hover .nav-rt-chev{stroke:var(--text)}
   html body .nav-rt .nav-rt-steps,html body .nav-rt .nav-rt-help-t{transition:opacity .3s var(--ease-ios)}
-  
   html body .nav-rt.closed-rt{padding-bottom:20px!important}
 }
 
@@ -1856,7 +1731,7 @@ html body .nav-five{font-size:13px!important;color:var(--muted)!important;font-f
 #tkSlide:not(.nav-real-on) .nav-real{display:none!important}
 .nav-real-l{align-self:flex-start;margin:2px 0 6px;padding:4px 0;font-size:14px;font-weight:500;color:var(--pos);background:none;border:0;cursor:pointer}
 /* E21 · fewer than 10 trades: no search box and no period chips on Trades */
-body.nav-few-trades #main .tsearch,body.nav-few-trades #main input[type="search"],body.nav-few-trades #main .seg.per{display:none!important}
+body.nav-few-trades #main input[type="search"],body.nav-few-trades #main .seg.per{display:none!important}
 /* C13 · account summary: three lines, the rest folded */
 .ux-sum3{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:6px}
 .ux-sum3 li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:15px}
@@ -2023,8 +1898,6 @@ html body #main textarea.q-ta{width:100%;min-height:38px;resize:none;overflow:hi
   html body .side .who,html body #main .pz-paid,html body #main .sh-link,html body #main .rf-terms,html body #main .legal a,html body .nav-am .nav-am-dir .seg button,html body #main a.link.back{position:relative}
   html body .side .who::before,html body #main .pz-paid::before,html body #main .sh-link::before,html body #main .rf-terms::before,html body #main .legal a::before,html body .nav-am .nav-am-dir .seg button::before,html body #main a.link.back::before{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:44px;transform:translateY(-50%)}
 }
-/* Stats › Trading stats (phone): the two columns never wider than the screen (a long « Short 50 % +16 021,40 $ vs … » pushed the right one 5 px out) */
-@media (max-width:600px){#main .g-ins .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}#main .g-ins .tiles > .it{min-width:0}#main .g-ins .tiles > .it small{overflow-wrap:break-word}}
 /* Stats › « Net P&L without them »: one font in the sentence (the « vs … actual » part was in Geist Mono) */
 #main .statline .faint{font-family:inherit}
 /* « Rules followed vs broken » on a phone (audit of 18 Oct.): the 3 columns fit (it was 416 px wide, its 2nd column cut) */
@@ -2123,7 +1996,6 @@ html body #main .fgrid>label:has(>input[type=checkbox]),html body #main label.f:
 html body #main label:has(>input[type=checkbox])>input[type=checkbox]{width:18px;height:18px;min-height:0;flex:0 0 auto;margin:0}
 /* Settings groups: the cards sit inside the group with the same inner margin on both sides */
 
-
 html body #main .nav-sgd>section>.sec-h{padding:0 4px}
 #main .nav-sgd details:not(.menu)>summary:not(.btn){color:var(--muted);font-weight:500}
 /* fields of a grid line up even when one label wraps to two lines */
@@ -2137,7 +2009,6 @@ html body #main .nav-sgd>section>.sec-h{padding:0 4px}
 /* a segmented control wider than its card scrolls inside it (phone) instead of sticking out */
 #main .surface .seg{max-width:100%;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
 #main .surface .seg::-webkit-scrollbar{display:none}
-
 
 /* ═══════════ Money: performance · simulated · real ═══════════ */
 .mny-tag{font:700 11px/1 var(--font-ui,Geist);text-transform:uppercase;}
@@ -2242,7 +2113,6 @@ html body #main .surface .seg>button,html body #main .surface .seg>label{flex:1 
 /* account-type selector (Today, Trades, Stats, My money) */
 html body #main .mny-tseg{display:flex;width:max-content;max-width:100%;overflow-x:auto;scrollbar-width:none}
 html body #main .mny-tseg>button{flex:0 0 auto;min-height:34px;padding:0 14px;font-size:13px}
-html body #main .nav-ktype{margin:0 0 12px}
 
 @media (max-width:860px){html body #main .mny-tseg>button{min-height:36px;padding:0 12px}}
 /* Real / Simulated / Performance labels: readable, centred with the text they sit next to */
@@ -2309,7 +2179,6 @@ html body #main .acc-type small{font-size:12px}
 .rn-net .rn-net-t > span{color:var(--text);font-weight:600}
 .rn-net .rn-net-t b{font-size:28px;letter-spacing:-.02em}
 .rn-say{margin:0;font-size:15px;line-height:1.45;color:var(--text2)}
-.rn .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .rn-inv{display:flex;align-items:stretch;gap:4px;margin-top:12px;border-radius:var(--r-tile,20px);background:var(--posbg);box-shadow:inset 0 0 0 1px rgba(var(--pos-rgb),.3)}
 .rn-inv-go{flex:1;display:flex;flex-direction:column;gap:3px;min-height:44px;padding:12px 14px;text-align:left;border:0;background:transparent;color:var(--text);cursor:pointer}
 .rn-inv-go b{font-size:15px}.rn-inv-go small{font-size:13px;color:var(--muted);line-height:1.35}
@@ -2362,14 +2231,11 @@ body.nav-few-trades #main .msearch{display:none!important}
 /* ───────────── Audit, step 1 (9 Oct) · readable everywhere (WCAG AA), a page that does not jump ─────────────
    #2  the secondary grey of the dark theme: the older rule of app.css (prefers-color-scheme) had the stronger selector
        and kept #5E5E66 (3.1:1); the same selector, later, gives #8A8A93 (≥ 4.9:1 on every dark surface) */
-@media (prefers-color-scheme:dark){}
 
 /* #4  a blue fill behind white text or icons is one shade deeper (white on it ≥ 4.6:1); the gains blue of the figures is unchanged.
        Each filled element gets its own --pos, so its rules stay as they are */
 
-@media (prefers-color-scheme:light){}
-
-.ask-fab-ic,.ask-msg.u>div,.ask-send,.bottomnav .plus,.chip.on,.d-ai-in button,.fb-st.s-shipped,.fbtn b,.g-dots button.on,.g-ob .chip.on,.g-seg3 button.on,.g-seg4 button.on,.g-sheet .chip.on,.g-xpf,.gc-step.done .gc-step-ic,.gm-mrow.done .gm-mic,.gm-node.done .gm-dot,.jstrip a.on,.lg-row b i,.nav-ck-b button.on[data-v=y],.nav-hplus,.nav-po-c li.ok i,.nav-rt-s.done .nav-rt-n,.nt-badge,.onb-steps li.on span,.rf-gift,.rnum.ok,.rprog-steps a.ok span,.sb-pcard .sb-tag,.sc-tool.exit.on,.sc-tool.target.on,.side .new,.ss-col.cur .ss-n,.ux-setup.on,.add-row:hover .add-ic,.chip.on,.chip[aria-pressed=true],.nav-rt .nav-rt-s .nav-rt-sa .btn.primary,.nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary,.nav-rt .nav-rt-sa .btn.primary{--pos:var(--pos-fill)}
+.ask-fab-ic,.ask-msg.u>div,.ask-send,.bottomnav .plus,.chip.on,.fb-st.s-shipped,.fbtn b,.g-dots button.on,.g-ob .chip.on,.g-seg3 button.on,.g-seg4 button.on,.g-sheet .chip.on,.g-xpf,.gc-step.done .gc-step-ic,.gm-mrow.done .gm-mic,.gm-node.done .gm-dot,.jstrip a.on,.lg-row b i,.nav-ck-b button.on[data-v=y],.nav-hplus,.nav-po-c li.ok i,.nav-rt-s.done .nav-rt-n,.nt-badge,.onb-steps li.on span,.rf-gift,.rnum.ok,.rprog-steps a.ok span,.sb-pcard .sb-tag,.sc-tool.exit.on,.sc-tool.target.on,.side .new,.ss-col.cur .ss-n,.ux-setup.on,.add-row:hover .add-ic,.chip.on,.chip[aria-pressed=true],.nav-rt .nav-rt-s .nav-rt-sa .btn.primary,.nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary,.nav-rt .nav-rt-sa .btn.primary{--pos:var(--pos-fill)}
 html body .btn.primary,html body .tk-save,html body button.tk-save{background:var(--blue-btn)!important}
 .nav-fd.sel small,.nav-fd.sel .nav-fd-p{opacity:1}
 /* the « Discipline » label of its tile, at full strength (it was faded to 80 %) */
@@ -2515,7 +2381,6 @@ body:has(#main .onb) #askFab,body:has(#main .onb) .nav-addtop{display:none!impor
 html body #main .seg a,html body #main .seg button,html body #main .btnlike{min-height:34px}
 html body #main .tabs{border-radius:var(--r-pill)!important;background:var(--fill)!important;box-shadow:inset 0 0 0 1px var(--hair)!important;padding:3px!important}
 
-
 html body #main .tabs{display:flex;width:max-content;max-width:100%;gap:2px;overflow-x:auto;scrollbar-width:none}
 #main .tabs::-webkit-scrollbar{display:none}
 html body #main .tabs>a,html body #main .tabs>button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:34px;padding:0 14px;border-radius:var(--r-pill);font-size:14px;font-weight:450;color:var(--muted);background:none;box-shadow:none}
@@ -2549,7 +2414,6 @@ html body #main .jstrip a.on i{background:#fff!important}
   html body #main .mfb-row:has(> .mny-tsw){flex-wrap:nowrap;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:0 20px;scroll-padding:0 20px}
   #main .mfb-row:has(> .mny-tsw)::-webkit-scrollbar{display:none}
   html body #main .mfb-row > .mny-tsw{flex:0 0 auto;flex-wrap:nowrap;margin:0!important}
-  
   html body #main .mfb-row > .mny-tsw > .seg{overflow:visible;max-width:none}
   html body #main .mfb-row:has(> .mny-tsw) > .fbtn{order:-1;margin:0!important}
   html body #main .mfb .fbtn{min-height:44px;border-radius:var(--r-pill);background:var(--fill);box-shadow:inset 0 0 0 1px var(--hair)}
@@ -2588,7 +2452,7 @@ html body .top .nav-addtop,html body .top .nav-imp-b,html body .top .sh-btn,html
 @media (min-width:861px){html body .top .nav-addtop,html body .top .nav-imp-b,html body .top .sh-btn,html body .top .mny-exp{font-size:14px;font-weight:600}}
 @media (max-width:860px){html body .top .nav-addtop,html body .top .nav-imp-b,html body .top .sh-btn,html body .top .mny-exp{height:44px;min-height:44px}}
 /* computer filters: the firm / account / session pickers are as high as the period selector beside them (40 px, were 35) */
-@media (min-width:861px){html body #main .fbar .csel,html body #main .fbars .csel{box-sizing:border-box;min-height:40px}}
+@media (min-width:861px){html body #main .fbars .csel{box-sizing:border-box;min-height:40px}}
 html body .main-wrap .top .nav-imp-b{border-radius:var(--r-pill)!important}
 @media (min-width:861px){html body .main-wrap .top .nav-imp-b{font-weight:600}}
 /* the page buttons speak with one voice: semibold, 14 px (13.5 px small) — « Send », « Share my link », « Save » and
@@ -2622,11 +2486,6 @@ html body #main .sec.stack > div + div{margin-top:28px}
    Trades, Calendar, Stats) and the period follows, its label kept for screen readers. « Export (CSV) » is the page's action in
    the title row (« Export » on a phone). Six rows of controls before the first payout become four (computer) or three (phone) */
 
-@media (max-width:860px){
-  
-  
-  
-}
 html body .top .mny-exp{display:inline-flex;align-items:center;gap:7px;margin-left:auto}
 html body .top .mny-exp svg{width:16px;height:16px;flex-shrink:0}
 html body .top .mny-exp .s{display:none}
@@ -2655,7 +2514,6 @@ html body #main .nav-sgd[open]{margin-bottom:28px}
 /* Accounts (computer): the reorder grip, shown on hover, sits in the cell's left margin — the account's name no longer starts
    18 px to the right of its column title and of its own second line (« Drawdown exceeded · DD margin ») */
 @media (min-width:861px){
-  
   #main table.acct-tbl td:first-child > .nav-grip{position:absolute;left:0;top:50%;width:14px;margin:-11px 0 0}
 }
 
@@ -2676,7 +2534,7 @@ html body .bottomnav{transition-duration:.3s!important}
 html body .nav-thumb{transition-duration:.3s!important}
 html body .rf-candles svg{transition-duration:.3s!important}
 /* gauges that fill (rings, bars, mission progress): 350 ms — still seen filling, never slow */
-html body .g-arc,html body .g-bar i,html body .gm-pay i,html body .nav-rt-lv .fg,html body .nav-rt-bar > i,html body .dt i{transition-duration:.35s!important}
+html body .g-arc,html body .g-bar i,html body .nav-rt-lv .fg,html body .nav-rt-bar > i,html body .dt i{transition-duration:.35s!important}
 html body main.anim .ln.draw,html body main.anim .ring-fg,html body main.anim .pbar i,html body main.anim .dt i{animation-duration:.35s!important;animation-delay:0s!important;animation-timing-function:var(--spring)!important}
 html body main.anim .chart .area,html body main.anim .endpt,html body main.anim .ln.glow,html body main.anim .radar polygon.val,html body main.anim .bt i{animation-duration:.3s!important;animation-delay:.1s!important;animation-timing-function:var(--spring)!important}
 /* the weekly chest and its cards, Wrapped's slides, the game's « pop »: short, on the one curve */
@@ -2974,5 +2832,9 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 @media (max-width:600px){
   html body .seg:has(> [data-act=lang]){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;width:100%;box-sizing:border-box;padding:4px;border-radius:var(--r3)!important}
   html body .seg:has(> [data-act=lang]) > button{width:auto;min-width:0;margin:0!important;box-sizing:border-box;min-height:44px;border-radius:var(--r2)!important}
+  html body .fgrid.two:has([data-imp=account]){grid-template-columns:minmax(0,1fr)}   /* Import: the account in full, the formats under it (20 Oct.: « Topstep — Co… ») */
 }
+/* a computer up to 1440 px: the 12 columns of Trades fit without a side scroll (20 Oct.: Setup cut at 1300 px) */
+@media (min-width:861px) and (max-width:1440px){ html body #main table.tbl th,html body #main table.tbl td{padding-left:10px;padding-right:10px}
+  html body #main table.tbl-day th:nth-child(3),html body #main table.tbl-day td:nth-child(3){display:none} }   /* a day's trades (Journal): no « Session », its time says it */
 }

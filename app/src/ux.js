@@ -1557,7 +1557,6 @@
   const pGross = (p) => (p.gross_c != null ? p.gross_c : p.amount_c || 0);
   const pNet = (p) => (p.net_c != null ? p.net_c : p.amount_c || 0);
   const pPaidOn = (p) => p.paid_on || p.payment_date || p.approval_date || p.request_date || '';
-  const pAskedOn = (p) => p.request_date || p.paid_on || p.payment_date || '';
   const inP = (d, from, to) => !!d && (!from || d >= from) && (!to || d <= to);
   const net = (t) => (t.pnl_c || 0) - (t.fees_c || 0);
   const ended = (a) => a && (a.status === 'archived' || a.status === 'closed' || a.result === 'passed' || a.result === 'failed' || a.outcome === 'passed' || a.outcome === 'failed');

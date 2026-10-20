@@ -236,7 +236,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--spring),box-sha
 .rf-steps li{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);line-height:1.45}
 .rf-steps li>span{flex-shrink:0;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--posbg);color:var(--pos);font-weight:600;font-size:13px}
 .rf-list{border-radius:20px}
-.fb-next{padding:20px 24px;border-radius:20px}
+.fb-next{padding:20px 24px;border-radius:20px;margin-top:16px}   /* (20 Oct.: it touched the form above it on a phone) */
 .fb-next h3{font-size:16px;font-weight:600;margin-bottom:12px}
 .fb-next ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
 .fb-next li{display:flex;gap:12px;align-items:flex-start;color:var(--text2);line-height:1.45}
@@ -250,7 +250,7 @@ input,select,textarea{transition:border-color var(--dur-2) var(--spring),box-sha
   .fb{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,1fr);gap:20px 28px;align-items:start}
   .fb>*{grid-column:1}
   .fb>.fb-lead{grid-column:1/-1;margin-bottom:0}
-  .fb>.fb-next{grid-column:2;grid-row:2}
+  .fb>.fb-next{grid-column:2;grid-row:2;margin-top:0}
   .fb>.sec{grid-column:2;grid-row:3;margin:0}
   .fb>.fb-form{grid-row:2/span 2}
 }

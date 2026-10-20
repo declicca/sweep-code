@@ -489,7 +489,6 @@ window.SweepMO = window.SweepMO || class {
     feedRefresh(card, true); centerSel(card, true);
   });
   // the releases arrive after the card: refresh it in place (and once, put today in the middle)
-  let feedT = 0;
   new window.SweepMO(() => {
     const card = document.querySelector('#main .nav-feed'); if (!card) return;
     if (!card.dataset.centered) { card.dataset.centered = '1'; requestAnimationFrame(() => centerSel(card, false)); }
@@ -521,25 +520,8 @@ window.SweepMO = window.SweepMO || class {
   }
   const report = (msg) => { try { fetch('api/client-error', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ msg, page: '#dashboard', src: 'nav.js' }) }).catch(() => {}); } catch (e) { /* offline */ } };
   let reported = false;
-  const AIQ = {
-    en: { t: 'Ask Sweep AI', s: 'Answers from your own journal.', ph: 'Ask anything about your trading…', q: ['How did I do this week?', 'Which setup makes me the most money?', 'What costs me the most?'] },
-    fr: { t: 'Demande à Sweep AI', s: 'Les réponses viennent de ton propre journal.', ph: 'Pose une question sur ton trading…', q: ['Comment s’est passée ma semaine ?', 'Quel setup me rapporte le plus ?', 'Qu’est-ce qui me coûte le plus ?'] },
-    es: { t: 'Pregunta a Sweep AI', s: 'Las respuestas salen de tu propio diario.', ph: 'Pregunta lo que sea sobre tu trading…', q: ['¿Cómo me fue esta semana?', '¿Qué setup me da más dinero?', '¿Qué me cuesta más?'] } };
-  function aiCard(dash) {
-    const on = document.body.classList.contains('ai-on') && typeof askToggle === 'function';
-    const old = dash.querySelector('.d-ai'); if (!on) { if (old) old.remove(); return; }
-    if (old) return;
-    const x = AIQ[LANG] || AIQ.en;
-    dash.querySelector('.d-col-b').insertAdjacentHTML('afterbegin', `<section class="surface nav-card d-ai" data-noi18n>
-      <div class="nav-ch"><h2><span class="d-ai-sp" aria-hidden="true">✦</span> ${x.t}</h2></div><p class="d-ai-sub">${x.s}</p>
-      <div class="d-ai-q">${x.q.map((q) => `<button type="button" data-ai-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-      <form class="d-ai-in" data-ai-form><input type="text" maxlength="400" placeholder="${esc(x.ph)}" enterkeyhint="send" aria-label="${esc(x.t)}"><button type="submit" aria-label="${esc(x.t)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></form></section>`);
-  }
-  const askNow = (q) => { q = String(q || '').trim(); if (!q || typeof askToggle !== 'function') return; askToggle(true); setTimeout(() => { if (typeof askSend === 'function') askSend(q); }, 60); };
-  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-ai-q]'); if (b) { e.preventDefault(); askNow(b.dataset.aiQ); } });
-  document.addEventListener('submit', (e) => { const f = e.target.closest && e.target.closest('[data-ai-form]'); if (!f) return; e.preventDefault(); const i = f.querySelector('input'); askNow(i.value); i.value = ''; });
   // a suggested question is sent as soon as it is tapped (no « Ask » needed); keeping the focus avoids the keyboard closing and moving the button under the finger
-  document.addEventListener('pointerdown', (e) => { if (e.target.closest && e.target.closest('#askPanel [data-ask-q], .sai .sai-chip[data-act="ask-ex"], [data-ai-q]')) e.preventDefault(); }, true);
+  document.addEventListener('pointerdown', (e) => { if (e.target.closest && e.target.closest('#askPanel [data-ask-q], .sai .sai-chip[data-act="ask-ex"]')) e.preventDefault(); }, true);
   function newsUnderDay(dash) {
     if (!dash || window.SW_MQ.matches) return;
     const col = dash.querySelector('.d-col-a'); if (!col) return;
@@ -694,7 +676,6 @@ window.SweepMO = window.SweepMO || class {
   };
   const dt = () => DT[LANG] || DT.en;
   const head = (title, href, extra = '') => `<div class="nav-ch" role="link" tabindex="0" data-href="${href}"><h2>${esc(title)}${extra ? `<span class="nav-ch-sub">${extra}</span>` : ''}</h2><span class="nav-all">${dt().all}</span></div>`;
-  const fmtM = (c) => (typeof money === 'function' ? money(c) : (c / 100).toFixed(2));
   const fmtU = (c) => (typeof moneyU === 'function' ? moneyU(c) : (c / 100).toFixed(2));
   const pool = () => { const all = (S.trades || []).filter((x) => !window.mtypeKeep || window.mtypeKeep(x)), real = all.filter((x) => !x.demo); return real.length ? real : all; };
   const empty = (msg, href, label) => `<p class="nav-empty">${esc(msg)}${href ? ` <a class="link" href="${href}">${esc(label)}</a>` : ''}</p>`;
@@ -755,7 +736,6 @@ window.SweepMO = window.SweepMO || class {
     en: { title: 'What to watch', today: 'Today', next: 'Next session', none: 'No major U.S. release today.', nextOne: 'Next big one: {e} · {d} {t}', in: 'in {m}', now: 'now', act: 'Act.', fc: 'Fcst', prev: 'Prev.' },
     fr: { title: 'À surveiller', today: 'Aujourd’hui', next: 'Prochaine séance', none: 'Aucune annonce américaine importante aujourd’hui.', nextOne: 'Prochaine importante : {e} · {d} {t}', in: 'dans {m}', now: 'maintenant', act: 'Réel', fc: 'Prév.', prev: 'Préc.' },
     es: { title: 'Para vigilar', today: 'Hoy', next: 'Próxima sesión', none: 'No hay publicaciones importantes de EE. UU. hoy.', nextOne: 'Próxima importante: {e} · {d} {t}', in: 'en {m}', now: 'ahora', act: 'Real', fc: 'Prev.', prev: 'Ant.' } };
-  const etNowStr = () => new Date().toLocaleString('sv-SE', { timeZone: 'America/New_York' }).replace(' ', 'T');
   function sessionDay() {   // after 16:00 ET (and on weekends) the next session is what you prepare
     const n = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
     if (n.getHours() >= 16) n.setDate(n.getDate() + 1);
@@ -930,7 +910,6 @@ window.SweepMO = window.SweepMO || class {
     if (dash.querySelector('.nav-rank.ph')) setTimeout(() => fillRank(0), 400);
     headDay();
     deskToday(dash);
-    { const old = dash.querySelector('.d-ai'); if (old) old.remove(); }   // Sweep AI = the floating button, on every page
     const sp = dash.querySelector('.nav-strip'), td = sp && sp.querySelector('.today');
     if (sp && td) sp.scrollLeft = Math.max(0, td.offsetLeft - sp.clientWidth / 2 + td.offsetWidth / 2);
   }
@@ -2183,7 +2162,6 @@ window.SweepMO = window.SweepMO || class {
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
-  const emoLabel = (k) => { try { const v = window.SweepGame && SweepGame.t('emo.' + k); return v && v !== 'emo.' + k ? v : k; } catch (e) { return k; } };
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
   let origTicket = null;
 
@@ -3809,7 +3787,6 @@ window.SweepMO = window.SweepMO || class {
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
   const nid = () => (typeof uid === 'function' ? uid() : 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
-  const ICON_I = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>';
   const ICON_IMP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>';
   const impHtml = (cls) => `<span class="nav-imp ${cls || ''}" data-noi18n><a class="btn sm nav-imp-b" href="#import" title="${esc2(t('impH'))}">${ICON_IMP}<span class="l">${t('imp')}</span><span class="s">CSV</span></a></span>`;   // the import page shows the instructions
   document.addEventListener('click', (e) => {
@@ -5627,9 +5604,10 @@ new window.SweepMO(() => {
       if (el.children.length || !el.getClientRects().length) return;
       const tx = (el.textContent || '').trim(); if (!tx || tx.length > 18 || !/\d/.test(tx) || !MONEY.test(tx)) return;
       if (el.dataset.fitTx !== tx) { el.style.removeProperty('font-size'); el.dataset.fitTx = tx; }
+      else if (el.dataset.fitShrunk) el.style.removeProperty('font-size');   // measured at its own size each time (20 Oct.: shrunk from an already smaller size, while a tile was still narrow, amounts ended at 8 px and never grew back)
       const box = el.clientWidth ? el : el.parentElement; if (!box) return;
       const over = el.scrollWidth - el.clientWidth > 1 || (box !== el && el.scrollWidth - box.clientWidth > 1);
-      if (!over) return;
+      if (!over) { delete el.dataset.fitShrunk; return; }
       const room = Math.max(1, (box === el ? el.clientWidth : box.clientWidth));
       // 11 · a key figure tile (Net P&L, balances…): rounded, then abbreviated, before the font gets smaller; the exact amount stays in its label
       if (!el.dataset.fitFull && el.closest('.nav-kpi-g, .d-perf')) {
@@ -5642,7 +5620,7 @@ new window.SweepMO(() => {
         }
       }
       const fs = parseFloat(getComputedStyle(el).fontSize) || 16;
-      el.style.setProperty('font-size', Math.max(fs * 0.55, Math.floor(fs * room / el.scrollWidth * 10) / 10) + 'px', 'important');   // « important »: the page's own sizes are !important too
+      el.style.setProperty('font-size', Math.max(fs * 0.55, Math.floor(fs * room / el.scrollWidth * 10) / 10) + 'px', 'important'); el.dataset.fitShrunk = '1';   // « important »: the page's own sizes are !important too
       el.style.setProperty('text-overflow', 'clip'); el.style.setProperty('overflow', 'visible');
   }
   function fit() {

@@ -538,7 +538,6 @@
   }
 
   /* ── what works for you (brief 03 step 4): over a span of days, 1 strength, 1 leak, 1 rule, with the samples ── */
-  const PLAN_CODES = ['over_max_loss', 'over_max_trades', 'against_bias', 'setup_not_in_plan', 'plan_no_trade', 'no_plan'];
   const isoD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const addDays = (day, n) => { const d = new Date(day + 'T12:00:00'); d.setDate(d.getDate() + n); return isoD(d); };
   const mondayOf = (day) => { const d = new Date(day + 'T12:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return isoD(d); };

@@ -1184,7 +1184,7 @@
     if (ficheLockAt(day) > Date.now() / 1000 || !(S.journals || []).some((j) => j.fiche && j.id < day)) return;
     const j = journalOf(day); if (j.pre && j.pre.day_off) return;
     if (lsGet('pm.later.' + day, 0) || lsGet('pm.xshown.' + day, 0)) return;
-    lsSet('pm.xshown.' + day, 1); openPremarket(day);
+    openPremarket(day).then(() => { if (document.querySelector('#gSheet.g-pm')) lsSet('pm.xshown.' + day, 1); });   // shown once it is on screen (19 Oct.: a reload while it opened lost it for the day)
   }
   /** after the save: which scenario was it? (A / B still open, or « Off my sheet ») */
   function ficheOfferLink(id) {
@@ -1913,16 +1913,6 @@
   const nodeName = (id) => (t('v2.n.' + id) || [id])[0];
   const nodeDesc = (id) => (t('v2.n.' + id) || ['', ''])[1];
 
-  function journeyStrip() {
-    const m = G.map; if (!m || !m.current) return '';
-    const c = m.current, nx = m.next, pct = Math.round((c.done / Math.max(1, c.total)) * 100);
-    const pay = m.payout && m.payout.configured && m.payout.ready >= 70 ? `<span class="gm-pay ${m.payout.ready >= 100 ? 'full' : ''}"><i style="width:${Math.min(100, m.payout.ready)}%"></i><b>${m.payout.ready >= 100 ? t('v2.payout_full') : t('v2.payout_ready')} · ${m.payout.ready} %</b></span>` : '';
-    return `<button type="button" class="gm-journey" data-g="map">
-        <span class="gm-j-top"><b>${t('v2.chapter', { n: c.pos })} · ${esc(t('v2.ch.' + c.n))}</b><span>${c.done}/${c.total}</span></span>
-        <span class="g-bar"><i style="width:${pct}%"></i></span>
-        ${nx ? `<span class="gm-j-next">${svg(NODE_IC[nx.metric] || 'star')}<span><small>${t('v2.next')}</small>${esc(nodeName(nx.id))}${nx.target > 1 ? ` · ${nx.progress}/${nx.target}` : ''}</span>${svg('chev', 'g-chev')}</span>` : ''}
-      </button>${pay}`;
-  }
 
   function missionsHtml() {
     const ms = G.missions; if (!ms || !ms.missions || !ms.missions.length) return '';
@@ -2050,18 +2040,6 @@
     G.bossBusy = true;
     try { G.boss = await apiJSON('api/game/boss?lang=' + L()); G.bossAt = Date.now(); paint(); } catch (e) { /* the game never blocks */ }
     G.bossBusy = false;
-  }
-  function bossCard() {
-    const B = G.boss; if (!B || !B.active || !B.active.length) return '';
-    return `<div class="sec-h"><h2>${bt('title')}</h2></div>${B.active.map((b) => {
-      const pct = (b.hp / b.hp_max) * 100;
-      return `<button type="button" class="surface gb-card" data-g="boss" data-v="${b.row}">
-        <span class="gb-art-w">${bossArt(b.boss)}</span>
-        <span class="gb-mid"><span class="gb-name"><b>${esc(bossName(b.boss))}</b>${b.variant === 'rematch' ? `<i>${bt('rematch')}</i>` : ''}</span>
-          <span class="gb-hp" style="--n:${b.hp_max}">${[...Array(b.hp_max)].map((_, i) => `<s class="${i < b.hp ? 'on' : ''}"></s>`).join('')}</span>
-          <small class="gb-today ${b.today}">${bt('today_' + b.today)}</small></span>
-        <span class="gb-hpn">${b.hp}<small>/${b.hp_max}</small></span></button>`;
-    }).join('')}`;
   }
   function bossSheet(row) {
     const b = (G.boss && G.boss.active || []).find((x) => x.row === +row); if (!b) return;
@@ -2431,10 +2409,6 @@
     const w = G.wrapped; if (!w) return '';
     return `<button type="button" class="gc-pill wr-pill ${w.new ? 'new' : ''}" data-g="wrapped" data-v="${w.month}">${svg('spark')}<span><small>Wrapped</small><b>${esc(/-AN$/.test(w.month) ? wrt('ypill', { y: w.month.slice(0, 4) }) : wrt('pill', { m: monthName(w.month) }))}</b></span></button>`;
   }
-  async function wrappedArchive() {
-    try { const st = await apiJSON('api/game/wrapped'); G.wrList = st.items || []; } catch (e) { G.wrList = []; }
-    const el = document.getElementById('gBdg'); if (el) { el._h = null; paintSections(); }
-  }
   const archiveHtml = () => (G.wrList && G.wrList.length ? `<div class="sec-h" style="margin-top:18px"><h2>${wrt('archive')}</h2></div><div class="wr-arch">${G.wrList.map((x) => `<button type="button" class="wr-ai" data-g="wrapped" data-v="${x.month}"><b>${esc(/-AN$/.test(x.month) ? x.month.slice(0, 4) : monthName(x.month))}</b><small>${x.data.swept} ${svg('sweep')}</small></button>`).join('')}</div>` : '');
 
   /* payout readiness at 100 %: the gold moment */
@@ -2559,10 +2533,6 @@
         ${m.me ? '' : `<button type="button" class="lg-more" data-g="lg-report" data-v="${m.ref}" aria-label="${lgt('report')}" title="${lgt('report')}">⋯</button>`}</li>`;
       }).join('')}</ol>`;
     const me = box.querySelector('.lg-row.me'); if (me) me.scrollIntoView({ block: 'center' });
-  }
-  async function socialHtml() {
-    let p = G.social; if (!p) { try { p = G.social = await apiJSON('api/game/social'); } catch (e) { return ''; } }
-    return p;
   }
   function socialCard() {
     const p = G.social; if (!p) return '';
@@ -2836,7 +2806,6 @@
     else if (a === 'ob-skip') obClose();
     else if (a === 'ob-mission') obClose(v);
   });
-  const main_g_reset = () => { const m = document.getElementById('main'); if (m) m._g = null; };
   function refreshPlan() {
     document.querySelectorAll('#gSheet [data-gp]').forEach((i) => { PL[i.dataset.gp] = i.value; });
     const el = document.querySelector('#gSheet .g-in'); if (el) el.innerHTML = planHtml();

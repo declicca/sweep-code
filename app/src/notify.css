@@ -49,17 +49,6 @@
 
 /* Celebration modal: once per app open */
 .nt-modal{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:24px}
-.nt-mbg{position:absolute;inset:0;background:rgba(3,6,12,.45);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;transition:opacity .25s var(--ease-ios)}
-.nt-mcard{position:relative;width:min(360px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 24px 20px;border-radius:26px;background:var(--panel);box-shadow:0 40px 90px -30px rgba(0,0,0,.6),inset 0 0 0 1px var(--line);opacity:0;transform:translateY(14px) scale(.96);transition:opacity .3s var(--ease-ios),transform .4s var(--ease-ios)}
-.nt-modal.in .nt-mbg{opacity:1}
-.nt-modal.in .nt-mcard{opacity:1;transform:none}
-.nt-mic{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;margin-bottom:6px;background:radial-gradient(circle at 50% 35%,rgba(var(--pos-rgb),.28),rgba(var(--pos-rgb),.1));color:var(--pos);box-shadow:0 0 0 6px rgba(var(--pos-rgb),.06)}
-.nt-mic svg{width:28px;height:28px}
-.nt-mcard h2{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
-.nt-mcard p{margin:0;color:var(--muted);line-height:1.5;font-size:15px;text-wrap:pretty}
-.nt-macts{display:flex;flex-direction:column;align-items:stretch;gap:6px;width:100%;margin-top:14px}
-.nt-macts .btn{justify-content:center;min-height:46px;font-size:15px}
-.nt-macts .link{padding:10px;font-size:14px}
 
 /* Settings → Notifications */
 .nt-plist{overflow:hidden}
@@ -81,7 +70,6 @@
 .nt-test .muted{font-size:13px;margin-right:4px}
 
 @media (prefers-reduced-motion:reduce){
-  .nt-mbg,.nt-mcard,.nt-bell,.nt-item{transition:none!important}
-  .nt-mcard{transform:none}
+  .nt-bell,.nt-item{transition:none!important}
 }
 }
