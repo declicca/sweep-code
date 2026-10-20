@@ -115,8 +115,10 @@
     const main = document.getElementById('main'); if (!main) return;
     const old = document.getElementById('gpCard');
     const onToday = typeof route === 'function' && route().v === 'dashboard';
+    if (!ST || !ST.started || !ST.access) { try { localStorage.removeItem('sw.gpCard'); } catch (e) { /* private mode */ } }
     if (!onToday || !ST || !ST.started || !ST.access) { if (old) old.remove(); return; }
-    const html = cardHtml(); if (old && old._h === html) return;
+    const html = cardHtml(); try { localStorage.setItem('sw.gpCard', html); } catch (e) { /* private mode */ }   // drawn at once next time (no jump)
+    if (old && old._h === html) return;
     const box = document.createElement('div'); box.innerHTML = html; const el = box.firstElementChild; el._h = html;
     if (old) { old.replaceWith(el); return; }
     const anchor = main.querySelector('#gToday') || main.querySelector('.d-today') || main.firstElementChild;

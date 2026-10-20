@@ -1783,7 +1783,7 @@ html body .d-pay .nav-kpi-g > div b{font:600 26px var(--font-num)!important;lett
 html body #main .nav-plat-r{display:none!important}
 /* 4 · compact header: greeting · date on one line, the title under it, centred with « Add a trade » */
 /* audit step 2: the home header has its final size from the first paint (html[data-home] is set in app.html's <head>; .nav-3l comes later from nav.js) */
-html body .main-wrap > .top.nav-3l,html[data-home] body .main-wrap > .top{align-items:center!important;min-height:0!important;padding-top:4px!important;padding-bottom:4px!important}
+html body .main-wrap > .top.nav-3l,html[data-home] body .main-wrap > .top{align-items:flex-end!important;min-height:70px!important;padding-top:4px!important;padding-bottom:4px!important}   /* (20 Oct.: the same height as every page, no jump from Today to another page) */
 html body .main-wrap > .top.nav-3l .nav-date{display:none!important}
 html body .main-wrap > .top.nav-3l #title::before,html[data-home] body .main-wrap > .top #title::before{font-size:13px!important;margin-bottom:2px!important;white-space:nowrap}
 html body .main-wrap > .top.nav-3l #title,html[data-home] body .main-wrap > .top #title{font-size:28px!important;line-height:1.1!important}
@@ -2846,4 +2846,9 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 [data-act="demo"].is-busy{display:inline-flex;align-items:center;gap:8px;opacity:1;cursor:progress}
 .nav-busy{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:nav-ptr-spin .8s linear infinite;flex-shrink:0}
 @media (prefers-reduced-motion:reduce){.nav-busy{animation-duration:2.4s}}
+/* the page header has one height on every page (20 Oct., Mateo: « still page jumps »): it changed with the page's buttons
+   (none, Import, Export, Share: 56 to 70 px on a phone) and with Today's greeting line (96 / 72 px on a computer), so the
+   title and all the content moved at each change of page. Title and buttons sit at the bottom of a fixed band. */
+html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:flex-end!important}
+@media (min-width:861px){ html body .top:has(> #title){min-height:96px} html body .main-wrap .top:has(> #title) > :not(#title){align-self:flex-end!important} }   /* the buttons on the title's line */
 }

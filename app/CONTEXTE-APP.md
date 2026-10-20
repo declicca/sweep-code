@@ -566,6 +566,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Aucun « facultatif »** à côté d'un champ (Mateo : qu'ils remplissent le plus possible) : retiré des libellés, des indications et de l'inscription (le guide d'aide garde ses phrases).
 - **« Explorer d'abord avec des données d'exemple »** : le bouton montre tout de suite qu'il prépare (anneau, « Préparation des données d'exemple… ») jusqu'à la fenêtre de confirmation ; les bougies des journées d'exemple sont demandées 4 à la fois (`chart.js`), plus une à une.
 
+### Plus de sauts de page (20 oct., « il y a encore les sauts de pages »)
+- **Mesuré** (décalages de mise en page à chaque changement de page, 390, app installée et 1300) : l'en-tête de la page changeait de hauteur avec ses boutons (aucun, Importer, Exporter, Partager : 56 à 70 px au téléphone) et avec la ligne « Bonjour … · date » d'Aujourd'hui (96 / 72 px à l'ordinateur) : le titre et tout le contenu bougeaient de 4 à 24 px à chaque page. **Corrigé** (`nav.css`, fin de la couche) : une bande de hauteur fixe (70 px au téléphone, 96 px à l'ordinateur, Aujourd'hui compris), titre et boutons en bas ; le contenu commence au même endroit sur chaque page.
+- **La carte du parcours** arrivait après la réponse du serveur et poussait Aujourd'hui de 195 px à l'ordinateur : la dernière carte dessinée est gardée (`localStorage` `sw.gpCard`) et posée avec la page, puis redessinée à sa place.
+- Vérifié sans saut : le chargement avec un serveur lent (2 s), le défilement des longues pages. Test : `tests/e2e_page_shift.py`.
+
 ### Jamais de zoom (20 oct.)
 - Demande de Mateo : aucun zoom possible, ni dans le navigateur (ordinateur et téléphone) ni dans l'app installée (un double tap par erreur zoomait). `app.html`, `auth.html` et les deux pages de `api.php` : `maximum-scale=1, user-scalable=no` ; `html{touch-action:pan-x pan-y}` (`ux.css` §1, et `auth.html`) : ni pincement ni double tap. Safari ignore `user-scalable=no` : son pincement (`gesturestart/change/end`) et deux doigts qui bougent sont arrêtés (`nav.js`, en tête ; le même script dans `auth.html`). Ordinateur : ctrl/⌘ + molette (et le pincement du pavé tactile) et ctrl/⌘ + = − 0 arrêtés ; la molette seule défile toujours. Le zoom du menu du navigateur reste hors de portée d'une page.
 - Test : `tests/e2e_no_zoom.py`.
