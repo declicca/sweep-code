@@ -8,8 +8,8 @@
   "hash": "a7fa286e711f817b"
  },
  "about.html": {
-  "date": "2026-10-18",
-  "hash": "4a06286012e5272b"
+  "date": "2026-10-20",
+  "hash": "a2465e572fdbd3d5"
  },
  "ai.html": {
   "date": "2026-10-18",
@@ -64,16 +64,16 @@
   "hash": "a0dd4a75e16380c6"
  },
  "contracts/mnq-futures.html": {
-  "date": "2026-10-18",
-  "hash": "02e384a1d6467388"
+  "date": "2026-10-20",
+  "hash": "b2074ef07e5dc939"
  },
  "contracts/mym-futures.html": {
   "date": "2026-10-18",
   "hash": "9838ad72d872c638"
  },
  "contracts/nq-futures.html": {
-  "date": "2026-10-18",
-  "hash": "2bd13f3558bd5fab"
+  "date": "2026-10-20",
+  "hash": "ad9f1e69feb0f9f5"
  },
  "contracts/rty-futures.html": {
   "date": "2026-10-18",
@@ -116,8 +116,8 @@
   "hash": "f26fc374a91f0012"
  },
  "funded-account-playbook.html": {
-  "date": "2026-10-19",
-  "hash": "407a9e2192ae7c19"
+  "date": "2026-10-20",
+  "hash": "eebea9b1991bd08c"
  },
  "futures-contracts.html": {
   "date": "2026-10-15",
@@ -132,20 +132,20 @@
   "hash": "fcc9f51ba7725d11"
  },
  "glossary.html": {
-  "date": "2026-10-19",
-  "hash": "eca117dde233176c"
+  "date": "2026-10-20",
+  "hash": "ed27044781cf2bad"
  },
  "guides.html": {
-  "date": "2026-10-19",
-  "hash": "4fd68527a04d5e69"
+  "date": "2026-10-20",
+  "hash": "ca408ee0f6717b87"
  },
  "how-it-works.html": {
   "date": "2026-10-18",
   "hash": "2fed33aca521d75a"
  },
  "how-to-start-prop-firm-trading.html": {
-  "date": "2026-10-19",
-  "hash": "f9942951791e79e2"
+  "date": "2026-10-20",
+  "hash": "1ad4e92dd730981d"
  },
  "how-we-verify-prop-firm-rules.html": {
   "date": "2026-10-18",
@@ -168,8 +168,8 @@
   "hash": "4d6d76d6baa4885d"
  },
  "index.html": {
-  "date": "2026-10-18",
-  "hash": "e809ad4b6eff613f"
+  "date": "2026-10-20",
+  "hash": "0837bd5802cb15d0"
  },
  "install.html": {
   "date": "2026-10-18",
@@ -179,13 +179,13 @@
   "date": "2026-10-18",
   "hash": "8013ac0731bea756"
  },
- "liquidity-sweep-setup.html": {
-  "date": "2026-10-19",
-  "hash": "ff68e342c784a867"
+ "liquidity-sweep.html": {
+  "date": "2026-10-20",
+  "hash": "d34872d52871125a"
  },
  "mes-vs-mnq.html": {
-  "date": "2026-10-19",
-  "hash": "d86aa7c6a2bc85af"
+  "date": "2026-10-20",
+  "hash": "c9b820f35933b2a8"
  },
  "nfp-release-dates.html": {
   "date": "2026-10-18",
@@ -196,8 +196,8 @@
   "hash": "8ff2b3452fe12c2f"
  },
  "pass-prop-firm-evaluation.html": {
-  "date": "2026-10-19",
-  "hash": "5c4dc2c73fb2d04f"
+  "date": "2026-10-20",
+  "hash": "7f97b0fd3c0661c7"
  },
  "payout-calculator.html": {
   "date": "2026-10-15",
@@ -240,16 +240,16 @@
   "hash": "0024155d8dcee8b6"
  },
  "prop-firm-gameplan-month-1.html": {
-  "date": "2026-10-19",
-  "hash": "3a2280732dfa9fff"
+  "date": "2026-10-20",
+  "hash": "a26c9222ee42f39a"
  },
  "prop-firm-gameplan-month-2.html": {
-  "date": "2026-10-19",
-  "hash": "4299d98dfee7ad89"
+  "date": "2026-10-20",
+  "hash": "cb6199f18b173980"
  },
  "prop-firm-gameplan-month-3.html": {
-  "date": "2026-10-19",
-  "hash": "4958641a25ef5cdd"
+  "date": "2026-10-20",
+  "hash": "6ec4ab0d76c38155"
  },
  "prop-firm-minimum-days.html": {
   "date": "2026-10-19",
@@ -260,8 +260,8 @@
   "hash": "cb3a88be712102b9"
  },
  "prop-firm-position-sizing.html": {
-  "date": "2026-10-19",
-  "hash": "a3ee0c3de9918686"
+  "date": "2026-10-20",
+  "hash": "09a9179a161ea4fd"
  },
  "prop-firm-profit-targets.html": {
   "date": "2026-10-19",
@@ -420,8 +420,8 @@
   "hash": "be9ca15e8fca1fcd"
  },
  "trading-journal-routine.html": {
-  "date": "2026-10-19",
-  "hash": "138760c206c43f41"
+  "date": "2026-10-20",
+  "hash": "196bc8b0a8a6dd2f"
  },
  "trading-templates.html": {
   "date": "2026-10-19",

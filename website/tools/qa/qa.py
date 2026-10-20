@@ -192,7 +192,7 @@ def seo():
     ht = open(os.path.join(D, ".htaccess")).read()
     olds = [re.compile(m) for m in re.findall(r"RewriteRule \^\(fr/\|es/\)\?([^\s]+?)\s", ht) + re.findall(r"RedirectMatch 301 \^/\(fr/\|es/\)\?([^\s]+?)\s", ht)]
     txt = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s))).strip()
-    bad = []
+    bad = []; noidx = set()
     for rel in files:
         s = open(os.path.join(D, rel), encoding="utf-8").read(); u = url_of(rel); head = s[:s.find("</head>")]
         err = lambda m: bad.append((u, m))
@@ -206,7 +206,10 @@ def seo():
         if sorted(h for h, _ in alts) != ["en", "es", "fr", "x-default"]: err(f"hreflang {sorted(h for h, _ in alts)}")
         elif can and can[0] not in [h for _, h in alts]: err("canonique absente des hreflang")
         if len(re.findall(r'<meta property="og:locale:alternate"', head)) != 2: err("og:locale:alternate ≠ 2")
-        if can and can[0] not in sm: err(f"canonique absente du sitemap {can[0]}")
+        ni = 'name="robots" content="noindex' in head   # legal pages: out of the sitemap on purpose
+        if ni: noidx.add(DOM + u)
+        if can and can[0] not in sm and not ni: err(f"canonique absente du sitemap {can[0]}")
+        if ni and can and can[0] in sm: err("page noindex dans le sitemap")
         vis_q = [txt(q) for q in re.findall(r'<summary>(.*?)<span class="plus"', s, re.S)]
         crumbs = re.search(r'<nav class="crumbs".*?</nav>', s, re.S)
         vis_c = [txt(x) for x in re.findall(r"<li[^>]*>(.*?)</li>", crumbs.group(0), re.S)] if crumbs else []
@@ -235,7 +238,7 @@ def seo():
     for loc in sm:
         p = re.sub(r"^https://makeitsweep\.com/(fr/|es/)?", "", loc)
         if any(o.fullmatch(p) or o.fullmatch(p + "/") for o in olds): bad.append((loc, "adresse qui redirige dans le sitemap"))
-    missing = [url_of(r) for r in files if DOM + url_of(r) not in sm]
+    missing = [url_of(r) for r in files if DOM + url_of(r) not in sm and DOM + url_of(r) not in noidx]
     for m in missing: bad.append((m, "absente du sitemap"))
     print(f"== SEO : {len(files)} pages, sitemap de {len(sm)} adresses, {len(bad)} problème(s)")
     for u, m in sorted(set(bad))[:60]: print(f"   {u} : {m}")

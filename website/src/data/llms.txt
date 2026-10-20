@@ -17,7 +17,7 @@ Sweep is made by Sweep Inc. (Laval, Québec, Canada). Plans: Free (forever), Pro
 - [How to pass a prop firm evaluation](https://makeitsweep.com/pass-prop-firm-evaluation): target in R, daily stop, daily cap from the consistency rule, bad days the max loss absorbs, for every firm's 50K evaluation
 - [When to size up on a prop firm account](https://makeitsweep.com/prop-firm-position-sizing): a size ladder from 1 to 3 micros, the drawdown test before each step, when to size down
 - [Funded account playbook](https://makeitsweep.com/funded-account-playbook): five rules after passing, a payout rule written in advance, funded profit is not income until paid
-- [Liquidity sweep setup](https://makeitsweep.com/liquidity-sweep-setup): the previous day's high or low swept, then reclaimed by a 5-minute candle; a learning setup, not a proven edge
+- [What is a liquidity sweep in trading?](https://makeitsweep.com/liquidity-sweep): buy-side and sell-side sweeps, where liquidity sits, sweep vs break of structure, a simple setup to practice it (the previous day's high or low swept, then reclaimed by a 5-minute candle) and how to journal it; the origin of Sweep's name
 - [MES or MNQ](https://makeitsweep.com/mes-vs-mnq): tick and point values, the same dollar risk in points, choosing one micro future
 - [Quantower sync](https://makeitsweep.com/quantower): Sweep's free add-on, a Sweep Sync panel, sends every Quantower execution to the journal, read only, on every plan
 - [Export trades from Tradovate](https://makeitsweep.com/import-tradovate): the Performance report as a CSV, then into Sweep (time zone, fees, session day)

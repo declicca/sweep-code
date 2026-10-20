@@ -75,8 +75,8 @@ def entries():
          T("Up slowly, down instantly", "Monter lentement, redescendre tout de suite", "Subir despacio, bajar al instante")),
         ("funded-account-playbook.html", T("Funded account playbook", "Playbook du compte financé", "Playbook de la cuenta financiada"),
          T("Five rules after you pass", "Cinq règles après la réussite", "Cinco reglas tras aprobar")),
-        ("liquidity-sweep-setup.html", T("Liquidity sweep setup", "Setup de liquidity sweep", "Setup de liquidity sweep"),
-         T("PDH and PDL, swept then reclaimed", "PDH et PDL, balayés puis repris", "PDH y PDL, barridos y recuperados")),
+        ("liquidity-sweep.html", T("What is a liquidity sweep?", "Qu’est-ce qu’un liquidity sweep ?", "¿Qué es un liquidity sweep?"),
+         T("And how to journal it", "Et comment le journaliser", "Y cómo registrarlo")),
         ("mes-vs-mnq.html", T("MES or MNQ?", "MES ou MNQ ?", "¿MES o MNQ?"),
          T("Which micro to start with", "Quel micro pour débuter", "Con qué micro empezar"))):
         out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))

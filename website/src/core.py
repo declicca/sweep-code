@@ -275,7 +275,9 @@ META_SEO = {
 # breadcrumb: Home › Section › Page (the section only where a hub page lists the page)
 CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html")
 GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "trading-journal-guide.html")
-GP_SAT_PAGES = ("pass-prop-firm-evaluation.html", "prop-firm-position-sizing.html", "funded-account-playbook.html", "liquidity-sweep-setup.html", "mes-vs-mnq.html")
+GP_SAT_PAGES = ("pass-prop-firm-evaluation.html", "prop-firm-position-sizing.html", "funded-account-playbook.html", "mes-vs-mnq.html")
+BRAND_LABEL = T("Sweep — Make it Sweep, home", "Sweep — Make it Sweep, accueil", "Sweep — Make it Sweep, inicio")
+NOINDEX = ("terms.html", "privacy.html", "risk.html")   # legal pages: out of search results and of the sitemap, links kept
 def _parent(page):
     if page.startswith("prop-firms/") and page != "prop-firms/index.html": return "prop-firms/index.html"
     if page.startswith("contracts/"): return "futures-contracts.html"
@@ -285,7 +287,7 @@ def _parent(page):
     if page in CALC_PAGES: return "tools.html"
     if page in GUIDE_PAGES: return "guides.html"
     if page.startswith("prop-firm-gameplan-month-") or page in GP_SAT_PAGES: return "how-to-start-prop-firm-trading.html"   # the 90-day gameplan (pages21.py)
-    if page == "how-to-start-prop-firm-trading.html": return "guides.html"
+    if page in ("how-to-start-prop-firm-trading.html", "liquidity-sweep.html"): return "guides.html"
     return None
 
 def _crumb(lang, t, page, title=""):
@@ -317,7 +319,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
            "logo":{"@type":"ImageObject","url":f"https://{DOMAIN}/icons/icon-512.png","width":512,"height":512},"email":EMAIL,"sameAs":[u for _,u,_ in SOCIAL],
            "address":{"@type":"PostalAddress","streetAddress":"3980 Blvd St-Elzear O","addressLocality":"Laval","addressRegion":"QC","postalCode":"H7P 0M2","addressCountry":"CA"}}
     web = {"@type":"WebSite","@id":f"https://{DOMAIN}/#website","name":"Sweep","alternateName":["Make it Sweep","makeitsweep","Sweep trading journal"],"url":f"https://{DOMAIN}/","inLanguage":["en","fr","es"],"publisher":{"@id":f"https://{DOMAIN}/#org"}}
-    graph = [org, web]
+    graph = [org] + ([web] if page == "index.html" else [])   # the site name is read from the home page
     crumbs = ""
     if page not in ("index.html", "404.html"):
         par = _parent(page)
@@ -329,6 +331,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
                       + f'<li aria-current="page">{html.escape(items[-1][0])}</li></ol></div></nav>')
     extra_head += jsonld({"@context":"https://schema.org","@graph":graph})
     if page == "404.html": extra_head += '<meta name="robots" content="noindex">'
+    if page in NOINDEX: extra_head += '<meta name="robots" content="noindex, follow">'   # never a result for a brand search (brief of Oct 19)
     cl = "fr" if lang == "fr" else "en"   # Spanish pages use the English captures
     for _o, _n in CAPTURE_V6.items():
         body = body.replace(f"/img/captures/{_o}-1200.webp", f"/img/captures/{_n}-1200.webp").replace(f"/img/captures/{_o}.webp", f"/img/captures/{_n}.webp")
@@ -409,7 +412,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <body>
 <a class="skip" href="#main">{t(T("Skip to content","Aller au contenu","Saltar al contenido"))}</a>
 <header class="nav"><div class="prog" aria-hidden="true"></div><div class="wrap">
-<a class="brand" href="{href(lang,'index.html')}" aria-label="Sweep">{MARK}<span>sweep</span></a>
+<a class="brand" href="{href(lang,'index.html')}" aria-label="{t(BRAND_LABEL)}">{MARK}<span>sweep</span></a>
 <nav class="nav-main" aria-label="{t(T("Main","Principal","Principal"))}">{nav}</nav>
 <div class="nav-cta">{langsel}<a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a><a class="btn btn-primary" href="{SIGNUP}">{t(NAV_CTA)}</a>
 <button class="menu-btn" type="button" aria-expanded="false" aria-controls="sheet" aria-label="{t(T("Menu","Menu","Menú"))}"><span class="mb" aria-hidden="true"><i></i><i></i></span></button></div>
@@ -425,7 +428,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 {"" if page in NO_DOCK else f'''<div class="dock" aria-hidden="true"><a class="btn btn-primary" href="{SIGNUP}" tabindex="-1">{t(T("Join the first 100","Rejoindre les 100 premiers","Unirme a los primeros 100")) if page=="100" else t(CREATE_FREE)}</a><a class="btn btn-ghost" href="{APP}" tabindex="-1">{t(LOGIN)}</a></div>'''}
 <footer><div class="wrap">
 <div class="foot">
-<div><a class="brand" href="{href(lang,'index.html')}" aria-label="Sweep">{MARK}<span>sweep</span></a><p style="max-width:28ch">{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}<br><span class="fine">{t(T("Sweep doesn’t offer financial advice. Trading futures involves risk.","Sweep n’offre pas de conseils financiers. Le trading de futures comporte des risques.","Sweep no ofrece asesoría financiera. Operar futuros implica riesgos."))}</span></p>
+<div><a class="brand" href="{href(lang,'index.html')}" aria-label="{t(BRAND_LABEL)}">{MARK}<span>sweep</span></a><p style="max-width:28ch">{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}<br><span class="fine">{t(T("Sweep · Make it Sweep — the free trading journal for futures and prop firm traders.","Sweep · Make it Sweep — le journal de trading gratuit pour les traders de futures et de prop firms.","Sweep · Make it Sweep — el diario de trading gratis para traders de futuros y prop firms."))}</span><span class="fine">{t(T("Sweep doesn’t offer financial advice. Trading futures involves risk.","Sweep n’offre pas de conseils financiers. Le trading de futures comporte des risques.","Sweep no ofrece asesoría financiera. Operar futuros implica riesgos."))}</span></p>
 <div class="cta-row" style="margin-top:20px"><a class="btn btn-line" href="{SIGNUP}">{t(CREATE_FREE)}</a><a class="btn btn-ghost" href="{APP}">{t(LOGIN)}</a></div></div>
 {cols}
 </div>
@@ -495,7 +498,7 @@ REL_INFO = {
  "pass-prop-firm-evaluation.html": (T("Pass an evaluation","Réussir une évaluation","Aprobar una evaluación"), T("Every firm’s evaluation, in R.","L’évaluation de chaque firme, en R.","La evaluación de cada firma, en R.")),
  "prop-firm-position-sizing.html": (T("When to size up","Quand augmenter sa taille","Cuándo subir el tamaño"), T("Up slowly, down instantly.","Monter lentement, redescendre tout de suite.","Subir despacio, bajar al instante.")),
  "funded-account-playbook.html": (T("Funded account playbook","Playbook du compte financé","Playbook de la cuenta financiada"), T("Five rules after you pass.","Cinq règles après la réussite.","Cinco reglas tras aprobar.")),
- "liquidity-sweep-setup.html": (T("Liquidity sweep setup","Setup de liquidity sweep","Setup de liquidity sweep"), T("PDH and PDL, swept then reclaimed.","PDH et PDL, balayés puis repris.","PDH y PDL, barridos y recuperados.")),
+ "liquidity-sweep.html": (T("Liquidity sweep, explained","Le liquidity sweep, expliqué","El liquidity sweep, explicado"), T("What it is, and how to journal it.","Ce que c’est, et comment le journaliser.","Qué es y cómo registrarlo.")),
  "mes-vs-mnq.html": (T("MES or MNQ","MES ou MNQ","MES o MNQ"), T("Which micro to start with.","Quel micro pour débuter.","Con qué micro empezar.")),
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),

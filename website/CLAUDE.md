@@ -27,6 +27,11 @@
 
 ## SEO
 - URLs propres sans `.html`, sitemap, hreflang, données structurées.
+- Marque (brief du 19 oct.) :
+  - les pages légales (`NOINDEX` dans `core.py` : Conditions, Confidentialité, Risques) portent `noindex, follow` et sortent du sitemap ; elles restent liées et lisibles ;
+  - le bloc `WebSite` (nom du site) n'est que sur l'accueil (EN, FR, ES, `url` = la racine) ; `Organization` reste sur chaque page ;
+  - « Make it Sweep » est en texte visible dans le pied de page, la réponse de la FAQ de l'accueil et la page À propos ; le lien du logo a l'`aria-label` « Sweep — Make it Sweep, accueil » ;
+  - `/liquidity-sweep` est le guide pilier sur le sweep (ancien `/liquidity-sweep-setup`, redirigé en 301).
 - Cibles : « trading journal », « best trading journal », « alternative à TradeZella » et autres plateformes, y compris dans les réponses des IA.
 
 ## Tests (`tools/qa/qa.py`, sur le build local)

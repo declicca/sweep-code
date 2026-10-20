@@ -309,7 +309,7 @@ GLOSS_LINKS = {"tick-value": "futures-contracts.html", "point-value": "futures-c
                "settlement": "futures-market-hours.html", "flat-rule": "futures-market-hours.html", "opening-range": "futures-market-hours.html",
                "high-impact-release": "release-dates.html", "news-rule": "release-dates.html", "fomc": "fomc-meeting-dates.html", "cpi": "cpi-release-dates.html",
                "nfp": "nfp-release-dates.html", "trading-plan": "trading-templates.html", "journal": "trading-journal-guide.html",
-               "pdh-pdl": "liquidity-sweep-setup.html", "liquidity-sweep": "liquidity-sweep-setup.html", "size-ladder": "prop-firm-position-sizing.html"}
+               "pdh-pdl": "liquidity-sweep.html", "liquidity-sweep": "liquidity-sweep.html", "size-ladder": "prop-firm-position-sizing.html"}
 def page_glossary(lang, t):
     """The terms in alphabetical order in each language, grouped by letter, with an A–Z index that stays under the menu."""
     import unicodedata

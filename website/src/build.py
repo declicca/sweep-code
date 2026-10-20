@@ -56,7 +56,7 @@ for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 PAGES.update(pages19.VS_PAGES)   # firm vs firm
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
-PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8","quantower.html":"0.8","how-to-start-prop-firm-trading.html":"0.9","prop-firm-gameplan-month-1.html":"0.8","prop-firm-gameplan-month-2.html":"0.8","prop-firm-gameplan-month-3.html":"0.8","pass-prop-firm-evaluation.html":"0.8","prop-firm-position-sizing.html":"0.8","funded-account-playbook.html":"0.8","liquidity-sweep-setup.html":"0.8","mes-vs-mnq.html":"0.8"}
+PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8","quantower.html":"0.8","how-to-start-prop-firm-trading.html":"0.9","prop-firm-gameplan-month-1.html":"0.8","prop-firm-gameplan-month-2.html":"0.8","prop-firm-gameplan-month-3.html":"0.8","pass-prop-firm-evaluation.html":"0.8","prop-firm-position-sizing.html":"0.8","funded-account-playbook.html":"0.8","liquidity-sweep.html":"0.8","mes-vs-mnq.html":"0.8"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
 os.makedirs(os.path.join(DIST,"assets","fonts"))
 import hashlib, core
@@ -161,7 +161,7 @@ for _g in pages19.RULE_GUIDES: PRIO.setdefault(_g, "0.8")
 PRIO.setdefault(pages19.HUB, "0.7")
 urls = []
 for p in PAGES:
-    if p == "404.html": continue
+    if p == "404.html" or p in NOINDEX: continue   # legal pages carry noindex: not in the sitemap
     for l in LANGS:
         alts = "".join(f'<xhtml:link rel="alternate" hreflang="{a}" href="https://{DOMAIN}{href(a,p)}"/>' for a in LANGS) + f'<xhtml:link rel="alternate" hreflang="x-default" href="https://{DOMAIN}{href("en",p)}"/>'
         urls.append(f'<url><loc>https://{DOMAIN}{href(l,p)}</loc><lastmod>{LASTMOD[p]}</lastmod><priority>{PRIO.get(p,"0.5")}</priority>{alts}</url>')
@@ -241,6 +241,7 @@ RedirectMatch 301 ^/(fr/|es/)?templates/?$ /$1trading-templates
 RedirectMatch 301 ^/(fr/|es/)?press/?$ /$1press-kit
 # old import page moved
 RedirectMatch 301 ^/(fr/|es/)?tradovate-import(\\.html)?$ /$1import
+RedirectMatch 301 ^/(fr/|es/)?liquidity-sweep-setup(\\.html)?$ /$1liquidity-sweep
 # index.html is never a second URL for the same page (avoids duplicate content)
 RewriteCond %{THE_REQUEST} \\s/+(.*/)?index\\.html[\\s?] [NC]
 RewriteRule ^(.*/)?index\\.html$ /$1 [R=301,L]

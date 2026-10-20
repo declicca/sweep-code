@@ -63,7 +63,7 @@ Aussi : un lien vers le pilier depuis le guide du journal, le journal gratuit, l
 | `/pass-prop-firm-evaluation` | how to pass a prop firm evaluation | le plan d'évaluation en R : objectif en R, plafond du jour tiré de la consistance, mauvaises journées absorbables, délai après un échec ; exemples chiffrés par firme, tirés des règles vérifiées chaque semaine | mois 3, pages des firmes, calculateurs |
 | `/prop-firm-position-sizing` | when to size up prop firm account | l'échelle de taille : quand monter, quand redescendre, et pourquoi le drawdown doit contenir 2 journées de stop | mois 3, calculateur de taille |
 | `/funded-account-playbook` | what to do after passing prop firm evaluation | les 5 règles du compte financé, la règle de payout, le vrai net | mois 3, Mon argent, règles de payout |
-| `/liquidity-sweep-setup` | liquidity sweep strategy, PDH PDL strategy | le Sweep Setup en détail, avec des schémas (SVG faits par le build, pas de captures de plateforme) et les cas à passer | mois 1 |
+| `/liquidity-sweep` (le 20 oct., ancien `/liquidity-sweep-setup`, redirigé) | liquidity sweep, liquidity sweep strategy, PDH PDL strategy | le Sweep Setup en détail, avec des schémas (SVG faits par le build, pas de captures de plateforme) et les cas à passer | mois 1 |
 | `/mes-vs-mnq` | MES vs MNQ for beginners | valeurs de tick et de point, le même stop en dollars sur chacun, pourquoi commencer avec 1 micro | mois 1, fiches contrats |
 
 

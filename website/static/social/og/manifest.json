@@ -405,17 +405,17 @@
    "date": null
   }
  },
- "liquidity-sweep-setup.html": {
+ "liquidity-sweep.html": {
   "en": {
-   "alt": "Liquidity sweep setup · PDH and PDL, swept then reclaimed",
+   "alt": "What is a liquidity sweep? · And how to journal it",
    "date": null
   },
   "fr": {
-   "alt": "Setup de liquidity sweep · PDH et PDL, balayés puis repris",
+   "alt": "Qu’est-ce qu’un liquidity sweep ? · Et comment le journaliser",
    "date": null
   },
   "es": {
-   "alt": "Setup de liquidity sweep · PDH y PDL, barridos y recuperados",
+   "alt": "¿Qué es un liquidity sweep? · Y cómo registrarlo",
    "date": null
   }
  },

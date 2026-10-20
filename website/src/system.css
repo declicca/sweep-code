@@ -986,7 +986,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .prog-block>h3{margin-top:48px;font-size:var(--fs-h3)}
 .prog-block>p{margin-top:12px;color:var(--muted)}
 .prog-block .sources{margin-top:24px}
-/* ---- [pages: how-to-start-prop-firm-trading.html prop-firm-gameplan-month-1.html prop-firm-gameplan-month-2.html prop-firm-gameplan-month-3.html pass-prop-firm-evaluation.html prop-firm-position-sizing.html funded-account-playbook.html liquidity-sweep-setup.html mes-vs-mnq.html] the 90-day gameplan: the three months, the missions, the gates, the diagrams */
+/* ---- [pages: how-to-start-prop-firm-trading.html prop-firm-gameplan-month-1.html prop-firm-gameplan-month-2.html prop-firm-gameplan-month-3.html pass-prop-firm-evaluation.html prop-firm-position-sizing.html funded-account-playbook.html liquidity-sweep.html mes-vs-mnq.html] the 90-day gameplan: the three months, the missions, the gates, the diagrams */
 .gp-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .gp-nav a{display:grid;gap:4px;padding:16px 18px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1);color:var(--text);text-decoration:none;transition:background-color var(--t-fast)}
 .gp-nav a small{font:500 12px/1.3 var(--mono);color:var(--faint);letter-spacing:.02em}
