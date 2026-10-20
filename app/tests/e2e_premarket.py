@@ -56,6 +56,8 @@ with sync_playwright() as p:
     what = pg.evaluate("Array.from(document.querySelectorAll('#gSheet .pm-what')).map((x) => x.textContent)")
     ok(len(what) == 2 and 'cassure à la hausse du London high' in what[0] and 'cassure à la baisse du London low' in what[1] and 'tu vises 30 pts pour 6 pts de risque' in sc[0],
        f'3 {w}: each scenario says what it means, the R says it in points ({what})')
+    ok(pg.locator('#gSheet [data-sc=A] .pm-row3[hidden]').count() == 1 and 'Entrée 5 820 · Stop 5 814 · Cible 5 850' in txt(pg, '#gSheet [data-sc=A] .pm-sum'), f'3 {w}: the prices on one line, the fields behind « Ajuster »')
+    pg.click('#gSheet [data-pm=adj][data-s=A]'); pg.wait_for_timeout(200)
     fill(pg, 'C3_A', '5825'); pg.wait_for_timeout(150)
     r = pg.locator('#gSheet [data-pm-r="A"]').inner_text()
     nxt(pg)

@@ -823,6 +823,14 @@ html body #gSheet.g-pm .pm-insts.bad .chip,html body #gSheet.g-pm input[aria-inv
 .g-pm .pm-chart-slot:empty{display:none}
 .g-pm .pm-chart-slot .nav-pre{margin:0;padding-top:0;border-top:0}
 .g-pm .pm-chart-slot .nav-pre-tools:not(:has(.seg)){width:auto}   /* the chart closed: « Show the chart » on the same line as its title */
+/* 20 Oct. (2): the « i » of each question, as on Stats, opens its explanation under it; a scenario's prices on one line, « Ajuster » opens its fields */
+.g-pm .pm-i{position:relative;padding:0;margin-left:6px;background:none;vertical-align:2px;cursor:pointer;line-height:1}
+.g-pm .pm-i::after{content:"";position:absolute;inset:-12px}
+.g-pm .pm-i[aria-expanded="true"]{border-color:var(--pos);color:var(--pos)}
+.g-pm .pm-tip{margin:-4px 0 0;padding:10px 12px;border-radius:var(--r2);background:var(--tint);color:var(--text);font-size:13px;font-weight:400;line-height:1.45}
+.g-pm .pm-tip[hidden],.g-pm .pm-row3[hidden],.g-pm .pm-tg[hidden]{display:none}
+.g-pm .pm-sum{margin:0;font-size:14px;font-variant-numeric:tabular-nums}
+.g-pm textarea{resize:vertical;min-height:64px}
 .pm-sheet .pm-fn{margin:2px 0 0;font-size:12px;line-height:1.4;color:var(--muted)}
 @media (max-width:860px){.g-pm input,.g-pm textarea{font-size:16px}}
 }

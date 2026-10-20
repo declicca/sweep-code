@@ -21,8 +21,8 @@ def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=Tr
         if pg.locator(f'#gSheet [data-pmf="{k}"]').count(): pg.fill(f'#gSheet [data-pmf="{k}"]', v)
     elif s == 'express':   # (the lock time is past without a sheet)
       pg.evaluate(PICK, 'MES'); pg.wait_for_timeout(100)
-      pg.evaluate(TAP, f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); pg.wait_for_timeout(150)
-      pg.fill('#gSheet [data-pmf="X_level"]', '5800' if short else '5820'); pg.fill('#gSheet [data-pmf="C3_A"]', '5770' if short else '5850')
+      pg.evaluate(TAP, f'#gSheet [data-q="X_bias"][data-v="{"bearish" if short else "bullish"}"]'); pg.wait_for_timeout(150)   # (20 Oct.: bias, key levels, the two scenarios in words)
+      pg.fill('#gSheet [data-pmf="X_levels"]', 'London high 5820 · London low 5800'); pg.fill('#gSheet [data-pmf="X_plan"]', 'Cassure du London low : vente.' if short else 'Cassure du London high : achat.')
       if max_loss is not None: pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'pos':
@@ -55,8 +55,8 @@ async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, 
         if await pg.locator(f'#gSheet [data-pmf="{k}"]').count(): await pg.fill(f'#gSheet [data-pmf="{k}"]', v)
     elif s == 'express':
       await pg.evaluate(PICK, 'MES'); await pg.wait_for_timeout(100)
-      await pg.evaluate(TAP, f'#gSheet [data-q="X_dir"][data-v="{"short" if short else "long"}"]'); await pg.wait_for_timeout(150)
-      await pg.fill('#gSheet [data-pmf="X_level"]', '5800' if short else '5820'); await pg.fill('#gSheet [data-pmf="C3_A"]', '5770' if short else '5850')
+      await pg.evaluate(TAP, f'#gSheet [data-q="X_bias"][data-v="{"bearish" if short else "bullish"}"]'); await pg.wait_for_timeout(150)
+      await pg.fill('#gSheet [data-pmf="X_levels"]', 'London high 5820 · London low 5800'); await pg.fill('#gSheet [data-pmf="X_plan"]', 'Cassure du London low : vente.' if short else 'Cassure du London high : achat.')
       if max_loss is not None: await pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not await pg.input_value('#gSheet [data-pmf="max_loss"]'): await pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     elif s == 'pos':

@@ -7,7 +7,7 @@ Sweep — the pre-market, clear and light (20 Oct., test as a trader), phone 390
  4  the scenarios: entry, stop and target can all be changed, the R follows in points; a stop on the wrong side says so; « Utiliser » brings the proposed target back
  5  a sheet closed without saving comes back as it was (same screen, same values); saved, the draft is gone
  6  the chart is on the levels' screen (no second instrument picker), the screenshots at the end; the session view's boxes name the level
- 7  the express version: long / short say buy / sell, the stop is proposed and can be changed
+ 7  the express version: bias, key levels, the expected and the alternative scenario (no prices); every « i » explains with an example
  8  French and Spanish: no English sentence on any screen; English: no French
 The test days are removed at the end.
 """
@@ -55,8 +55,16 @@ with sync_playwright() as p:
     pg.evaluate(PREV, prev); pg.wait_for_timeout(600)
     # 1. the words
     open_plan(pg, day); t = text(pg)
-    ok(scr(pg) == 'base' and 'Séance de Londres · son plus haut (high) et son plus bas (low), avant l’ouverture de New York' in t and 'Hier · facultatif · le PDH et le PDL sont le plus haut et le plus bas d’hier' in t and 'Prix actuel · facultatif' in t,
-       f'1 {w}: the London levels, PDH / PDL and the optional fields say what they are')
+    ok(scr(pg) == 'base' and 'Séance de Londres · avant l’ouverture de New York' in t and 'Hier · facultatif' in t and 'Prix actuel · facultatif' in t and pg.locator('#gSheet .pm-tip:not([hidden])').count() == 0,
+       f'1 {w}: the London levels, PDH / PDL and the optional fields, short; the explanations closed')
+    tap(pg, '#gSheet [data-pm=tip][data-k=prev]')
+    tip = pg.evaluate("[...document.querySelectorAll('#gSheet .pm-tip:not([hidden])')].map((x) => x.textContent)")
+    ok(len(tip) == 1 and tip[0].startswith('PDH (previous day high) et PDL (previous day low) : le plus haut et le plus bas de la séance d’hier') and 'Ex. :' in tip[0] and pg.get_attribute('#gSheet [data-pm=tip][data-k=prev]', 'aria-expanded') == 'true',
+       f'1 {w}: the « i » of PDH / PDL opens its explanation and an example ({tip[:1]})')
+    tap(pg, '#gSheet [data-pm=tip][data-k=london]')
+    tip = pg.evaluate("[...document.querySelectorAll('#gSheet .pm-tip:not([hidden])')].map((x) => x.dataset.tipk)")
+    ok(tip == ['london'] and pg.locator('#gSheet [data-pm=tip]').count() >= 4, f'1 {w}: one explanation at a time; an « i » for the instrument, London, yesterday, the price ({tip})')
+    tap(pg, '#gSheet [data-pm=tip][data-k=london]')
     chips = pg.evaluate("[...document.querySelectorAll('#gSheet [data-pm=inst-pick]')].map((x) => x.textContent)")
     ok(all(x in chips for x in ('MNQ', 'MES', 'NQ', 'ES', 'MGC', 'MCL')) and chips[-1] == 'Autre' and pg.locator('#gSheet [data-pm=inst-pick].on').count() == 1,
        f'1 {w}: the instrument: a row of chips (the trader\'s own first, then the usual futures), one chosen, « Autre » at the end ({chips[:5]}…)')
@@ -88,7 +96,9 @@ with sync_playwright() as p:
     tap(pg, '#gSheet [data-q="A2"][data-v="high"]'); nxt(pg)
     # 4. the scenarios
     sa = pg.evaluate("[document.querySelector('#gSheet [data-pmf=C1_level]').value, document.querySelector('#gSheet [data-pmf=ST_A]').value, document.querySelector('#gSheet [data-pmf=C3_A]').value]")
-    ok(scr(pg) == 'scen' and sa == ['5820.5', '5814.5', '5850'], f'3 {w}: « 5 820,5 » read as 5820.5: entry, stop (6 points), target PDH ({sa})')
+    ok(scr(pg) == 'scen' and sa == ['5820.5', '5814.5', '5850'] and 'Entrée 5 820,5 · Stop 5 814,5 · Cible 5 850' in text(pg), f'3 {w}: « 5 820,5 » read as 5820.5: entry, stop (6 points), target PDH, on one line ({sa})')
+    tap(pg, '#gSheet [data-pm=adj][data-s=A]')
+    ok(pg.locator('#gSheet [data-sc=A] .pm-row3:not([hidden])').count() == 1 and pg.locator('#gSheet [data-sc=B] .pm-row3[hidden]').count() == 1, f'4 {w}: « Ajuster » opens the fields of that scenario only')
     pg.fill('#gSheet [data-pmf=ST_A]', '5817.5'); pg.wait_for_timeout(150)
     r = pg.locator('#gSheet [data-pm-r=A]').inner_text().replace('\xa0', ' ')
     ok(r.startswith('9,8R : tu vises 29,5 pts pour 3 pts de risque'), f'4 {w}: a closer stop: the R follows, in points ({r!r})')
@@ -132,12 +142,14 @@ with sync_playwright() as p:
        f'6 {w}: the chart opens on the sheet\'s instrument, without a second instrument picker')
     tap(pg, '#gSheet .pm-chart-slot [data-pre-chart]')
     tap(pg, '#gSheet [data-pm="mode"][data-v="express"]')
-    subs = pg.evaluate("[...document.querySelectorAll('#gSheet [data-q=X_dir] small')].map((x) => x.textContent)")
-    tap(pg, '#gSheet [data-q="X_dir"][data-v="short"]'); pg.fill('#gSheet [data-pmf=X_level]', '5800'); pg.wait_for_timeout(150)
-    st0 = pg.input_value('#gSheet [data-pmf=X_stop]')
-    pg.fill('#gSheet [data-pmf=X_stop]', '5803'); pg.fill('#gSheet [data-pmf=C3_A]', '5770'); pg.wait_for_timeout(150)
-    r = pg.locator('#gSheet [data-pm-r=A]').inner_text()
-    ok(subs == ['achat', 'vente'] and st0 == '5806' and r.startswith('10R'), f'7 {w}: long / short say buy / sell; the stop proposed (5 806) and changed (5 803 → 10R) ({subs}, {st0}, {r!r})')
+    t = text(pg); bias = pg.evaluate("[...document.querySelectorAll('#gSheet [data-q=X_bias]')].map((x) => x.textContent)")
+    ok(bias == ['Haussier', 'Baissier', 'Neutre'] and 'Niveaux clés' in t and 'Scénario attendu' in t and 'Scénario alternatif · facultatif' in t and pg.locator('#gSheet [data-pmf=X_stop], #gSheet [data-pmf=C3_A]').count() == 0,
+       f'7 {w}: the express plan: bias, key levels, expected and alternative scenario, no prices to set ({bias})')
+    tap(pg, '#gSheet [data-pm=tip][data-k=plan]')
+    tip = pg.evaluate("(document.querySelector('#gSheet .pm-tip:not([hidden])') || {}).textContent || ''")
+    ok(tip.startswith('Ce que tu feras si le marché va dans le sens de ton biais') and 'Ex. :' in tip, f'7 {w}: its « i » gives an example ({tip[:60]!r})')
+    ph = pg.get_attribute('#gSheet [data-pmf=X_plan]', 'placeholder')
+    ok(ph.startswith('ex. Cassure du London high'), f'7 {w}: an example in the field too ({ph!r})')
     tap(pg, '#gSheet [data-pm="mode"][data-v="full"]'); tap(pg, '#gSheet [data-g=close]')
     # 8. the languages
     for lang, rx, name in [('es', EN, 'Spanish: no English'), ('en', FR, 'English: no French')]:
@@ -146,15 +158,15 @@ with sync_playwright() as p:
       open_plan(pg, xday); seen = []
       for k, v in [('lv.london_high', '5820'), ('lv.london_low', '5800'), ('lv.pdh', '5826'), ('lv.pdl', '5770'), ('lv.price', '5823')]: pg.fill(f'#gSheet [data-pmf="{k}"]', v)
       for _ in range(6):
-        s = scr(pg); seen.append((s, text(pg)))
+        s = scr(pg); seen.append((s, text(pg))); seen.append((s + ' (i)', pg.evaluate("[...document.querySelectorAll('#gSheet .pm-tip')].map((x) => x.textContent).join('\\n')")))   # (the explanations too)
         if s == 'pos': tap(pg, '#gSheet [data-q="A3"][data-v="yes"]'); tap(pg, '#gSheet [data-q="A4"][data-v="obstacle"]'); tap(pg, '#gSheet [data-q="B1"][data-v="yes"]'); seen.append((s, text(pg)))
-        if s == 'scen': pg.fill('#gSheet [data-pmf=C3_A]', '5850'); pg.wait_for_timeout(150); seen.append((s, text(pg)))
+        if s == 'scen': tap(pg, '#gSheet [data-pm=adj][data-s=A]'); pg.fill('#gSheet [data-pmf=C3_A]', '5850'); pg.wait_for_timeout(150); seen.append((s, text(pg)))
         if s == 'limits' and not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
         if s == 'sheet': break
         if s == 'pos': pg.fill('#gSheet [data-pmf="B1_time"]', '08:30'); pg.dispatch_event('#gSheet [data-pmf="B1_time"]', 'change'); pg.wait_for_timeout(200); seen.append((s, text(pg)))
         nxt(pg)
       hits = sorted({f'{s}: {m.group(0)}' for s, tx in seen for m in rx.finditer(tx)})
-      ok(seen[-1][0] == 'sheet' and not hits, f'8 {w}: {name} on {len({s for s, _ in seen})} screens {hits[:6]}')
+      ok(any(x == 'sheet' for x, _ in seen) and not hits, f'8 {w}: {name} on {len({s for s, _ in seen})} screens {hits[:6]}')
       tap(pg, '#gSheet [data-g=close]')
     pg.evaluate("localStorage.setItem('tj.lang', JSON.stringify('fr')); localStorage.removeItem('pm.draft')")
     for x in (prev, day, xday): pg.evaluate("(d) => { if (S.journals.some((j) => j.id === d)) remove('journals', d) }", x)
