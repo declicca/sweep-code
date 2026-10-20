@@ -9,7 +9,7 @@ ini_set('display_errors', '0');
 
 if (!is_file(__DIR__ . '/config.php')) {   // never a blank 500: say exactly what is missing
     http_response_code(503); header('Content-Type: text/html; charset=utf-8'); header('Retry-After: 120');
-    echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sweep</title>'
+    echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Sweep</title>'
        . '<body style="font:15px/1.5 system-ui,sans-serif;max-width:560px;margin:60px auto;padding:0 20px">'
        . '<h1 style="font-size:18px">Sweep is being updated</h1><p>Back in a minute.</p>'
        . '<!-- Administrator: config.php is missing from the app folder. Put it back (it is never part of an update zip). --></body>';
@@ -73,7 +73,7 @@ function html_out(int $code, string $title, string $msg): void {
     http_response_code($code);
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
-    echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title
+    echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>' . $title
        . '</title><body style="font:15px/1.5 system-ui,sans-serif;max-width:560px;margin:60px auto;padding:0 20px;color:#222">'
        . '<h1 style="font-size:18px">' . $title . '</h1><p>' . $msg . '</p></body>';
     exit;

@@ -4,6 +4,8 @@ window.SW_MQ = window.SW_MQ || matchMedia('(max-width: 860px)');
 /* the app added to the Home Screen: html.pwa (19 Oct., Mateo's recording: on his iPhone « display-mode: standalone » does not
    match there, navigator.standalone does) — the installed app's header, bars and pull to refresh follow this mark */
 try { if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true) document.documentElement.classList.add('pwa'); } catch (e) { /* no mark */ }
+/* never a zoom (20 Oct., Mateo: a double tap by mistake zoomed): Safari ignores user-scalable=no, its pinch is stopped here; ctrl/⌘ + wheel or trackpad pinch and ctrl/⌘ + − / = / 0 on a computer */
+(() => { const no = (e) => e.preventDefault(); ['gesturestart', 'gesturechange', 'gestureend'].forEach((t) => document.addEventListener(t, no, { passive: false })); addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false }); addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && !e.altKey && ['+', '=', '-', '_', '0'].includes(e.key)) e.preventDefault(); }); document.addEventListener('touchmove', (e) => { if (e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false }); })();
 window.SW_MQ6 = window.SW_MQ6 || matchMedia('(max-width: 600px)');
 /* Performance: every DOM watcher of this file is batched to one call per frame (they used to run on every
  * single DOM change: 13 watchers × hundreds of changes when a page renders). The callback still runs before the
