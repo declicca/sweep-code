@@ -4,10 +4,11 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 /**
  * Sweep — the 90-day gameplan (brief « Parcours de 90 jours », 20 Oct.): Mateo's three « Learning Edition » PDFs as a game.
  *
- * - 90 missions over 12 weeks, from a Monday: mission N is dated start + N − 1; a late one can still be done, never a penalty.
+ * - 90 missions over 12 weeks, from the day the trader starts (20 Oct., Mateo: the day the account is created, not the next
+ *   Monday): mission N is dated start + N − 1; a late one can still be done, never a penalty.
  * - Some missions Sweep checks on its own (step 4, 'a' below); the others the trader ticks, facing its « Done when ».
  * - Each mission pays its minutes in XP once (xp_events key gp:N); a gate (days 30, 60, 90) decides: on to the next
- *   month, or Weeks 3 and 4 again (the plan moves, nothing is lost).
+ *   month, or Weeks 3 and 4 again from that day (the plan moves, nothing is lost).
  * - Pro and Elite (the trial too); Free sees it locked. Billing not live yet: everyone, like the rest of the app.
  * The texts live in the app (src/gameplan.js, built from the site's website/src/pages21.py); here only what the server needs.
  */
@@ -35,13 +36,6 @@ final class GameGameplan
             if (function_exists('sb_live') && !sb_live($uid)) return true;
             return sb_can(GameEngine::pdo(), $uid, 'gameplan');
         } catch (Throwable $e) { return true; }   // billing unavailable: never lock a trader out of his plan
-    }
-
-    /** The next Monday (today if it is one), the trading day of New York as the rest of the game. */
-    public static function nextMonday(string $today): string
-    {
-        $dow = (int) (new DateTimeImmutable($today . ' 12:00'))->format('N');
-        return $dow === 1 ? $today : GameEngine::addDays($today, 8 - $dow);
     }
 
     private static function row(string $uid): ?array
@@ -80,7 +74,7 @@ final class GameGameplan
         return false;
     }
 
-    /** Sweep ticks the open missions it can measure (and the first account, even before the Monday). */
+    /** Sweep ticks the open missions it can measure. */
     private static function autoCheck(string $uid, array $r): void
     {
         $done = json_decode((string) $r['done_json'], true) ?: []; $gates = json_decode((string) $r['gates_json'], true) ?: [];
@@ -95,7 +89,7 @@ final class GameGameplan
     {
         $today = GameEngine::today();
         if ($check && self::access($uid) && ($r0 = self::row($uid))) { try { self::autoCheck($uid, $r0); } catch (Throwable $e) { error_log('[Sweep gameplan] ' . $e->getMessage()); } }
-        $out = ['access' => self::access($uid), 'today' => $today, 'started' => false, 'next_monday' => self::nextMonday($today)];
+        $out = ['access' => self::access($uid), 'today' => $today, 'started' => false];
         $r = self::row($uid); if (!$r) return $out;
         $done = json_decode((string) $r['done_json'], true) ?: []; $gates = json_decode((string) $r['gates_json'], true) ?: [];
         $day = self::dayOf($r['start_day'], $today);
@@ -111,11 +105,22 @@ final class GameGameplan
         return $n;
     }
 
+    /** Track A (simulation) or B (on an account): B as soon as the trader has an evaluation, a funded, a live or a personal account. */
+    public static function trackOf(string $uid): string
+    {
+        foreach (GameEngine::docs($uid, 'accounts') as $a) {
+            if (in_array((string) ($a['status'] ?? 'active'), ['archived', 'closed'], true)) continue;
+            $t = function_exists('sweep_money_type_of') ? sweep_money_type_of($a) : ($a['money_type'] ?? ($a['phase'] ?? null));
+            if ($t !== null && $t !== 'simulation') return 'B';
+        }
+        return 'A';
+    }
+
     public static function start(string $uid, array $b): array
     {
         if (!self::access($uid)) return ['error' => 'locked'];
-        $track = ($b['track'] ?? 'A') === 'B' ? 'B' : 'A';
-        $start = self::nextMonday(GameEngine::today());
+        $track = in_array($b['track'] ?? '', ['A', 'B'], true) ? $b['track'] : self::trackOf($uid);   // never asked (20 Oct., Mateo): from the accounts
+        $start = GameEngine::today();   // day 1 is today (the trading day of New York, as the rest of the game)
         if (self::row($uid)) self::q('UPDATE game_gameplan SET start_day = ?, track = ?, done_json = NULL, gates_json = NULL, updated_at = ? WHERE user_id = ?', [$start, $track, time(), $uid]);
         else self::q('INSERT INTO game_gameplan (user_id, start_day, track, done_json, gates_json, created_at, updated_at) VALUES (?, ?, ?, NULL, NULL, ?, ?)', [$uid, $start, $track, time(), time()]);
         GameEngine::track($uid, 'gameplan_start', ['track' => $track]);
@@ -136,8 +141,7 @@ final class GameGameplan
         $r = self::row($uid); if (!$r) return ['error' => 'not_started'];
         if (!isset(GP_MISSIONS[$n])) return ['error' => 'bad_mission'];
         $gates = json_decode((string) $r['gates_json'], true) ?: [];
-        $early = $n === 1 && $by === 'sweep';   // the first account, often added before the Monday
-        if (!$early && $n > self::openTo(self::dayOf($r['start_day'], GameEngine::today()), $gates)) return ['error' => 'not_open'];
+        if ($n > self::openTo(self::dayOf($r['start_day'], GameEngine::today()), $gates)) return ['error' => 'not_open'];
         if (GP_MISSIONS[$n][2]) return ['error' => 'gate'];   // a gate is decided, not ticked
         $done = json_decode((string) $r['done_json'], true) ?: [];
         if (isset($done[(string) $n])) return self::state($uid, $by !== 'sweep');
@@ -148,7 +152,7 @@ final class GameGameplan
         return $by === 'sweep' ? [] : self::state($uid);
     }
 
-    /** A gate: 'pass' opens the next month; 'repeat' gives Weeks 3 and 4 of that month again, from the next Monday. */
+    /** A gate: 'pass' opens the next month; 'repeat' gives Weeks 3 and 4 of that month again, from today. */
     public static function gate(string $uid, int $m, string $choice): array
     {
         if (!self::access($uid)) return ['error' => 'locked'];
@@ -162,9 +166,9 @@ final class GameGameplan
             GameEngine::awardXp($uid, 'gp:gate' . $m, GP_GATE_XP);   // the gate sheet celebrates it
             self::q('UPDATE game_gameplan SET done_json = ?, gates_json = ?, updated_at = ? WHERE user_id = ?', [json_encode($done), json_encode($gates), time(), $uid]);
         } else {
-            // Weeks 3 and 4 of month m again: their first day (15 of the month) on the next Monday, their missions open again
+            // Weeks 3 and 4 of month m again: their first day (15 of the month) is today, their missions open again
             $first = $g - 15;   // day 15, 45 or 75
-            $start = GameEngine::addDays(self::nextMonday(GameEngine::today()), -($first - 1));
+            $start = GameEngine::addDays(GameEngine::today(), -($first - 1));
             foreach (array_keys($done) as $k) if ((int) $k >= $first) unset($done[$k]);
             unset($gates[(string) $m]);
             self::q('UPDATE game_gameplan SET start_day = ?, done_json = ?, gates_json = ?, updated_at = ? WHERE user_id = ?', [$start, json_encode($done), json_encode($gates), time(), $uid]);

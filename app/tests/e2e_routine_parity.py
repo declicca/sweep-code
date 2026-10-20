@@ -143,7 +143,7 @@ async def main():
       await review(page)
     async def review(page):   # 60 seconds: three taps and one optional sentence
       qs = await page.evaluate("[...document.querySelectorAll('#gSheet .g-f > span')].map(x => x.textContent.trim())")
-      ok(qs == ['As-tu suivi ta fiche ?', 'Quelle règle ?', 'Discipline aujourd’hui', 'Ta note du jour', 'Une note pour demain ? (facultatif, en haut de ton prochain pré-marché)'], f'review: the sheet\'s questions (a day with a pre-market sheet, brief step 7) ({qs})')
+      ok(qs == ['As-tu suivi ta fiche ?', 'Quelle règle ?', 'Discipline aujourd’hui', 'Ta note du jour', 'Une note pour demain ? Elle s’affiche en haut de ton prochain pré-marché.'], f'review: the sheet\'s questions (a day with a pre-market sheet, brief step 7) ({qs})')
       await page.locator('#gSheet [data-g=save-review]').click(); await page.wait_for_timeout(300)
       err = await page.locator('#gSheet #gErr').text_content()
       ok(err == 'Réponds aux 3 questions.' and await page.locator('#gSheet.g-rv').count() == 1, f'review: not saved without the 3 answers (« {err} »)')

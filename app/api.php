@@ -91,12 +91,12 @@ function now(): string { return gmdate('Y-m-d\TH:i:s\Z'); }
  * are moved once (same rule as GameEngine::hasSessionDate: an older trade entered at 18:00 ET or later was dated by the
  * calendar → the next day; one already moved by the app keeps its date) and marked, so nothing is ever moved twice.
  */
-/** money_type of an account (eval / funded = simulated, live / personal = real), deduced once; null = « to classify » */
+/** money_type of an account (eval / funded / simulation = simulated, live / personal = real), deduced once; null = « to classify » */
 function sweep_money_type_of(array $a): ?string
 {
-    if (in_array($a['money_type'] ?? '', ['eval', 'funded', 'live', 'personal'], true)) return $a['money_type'];
+    if (in_array($a['money_type'] ?? '', ['eval', 'funded', 'live', 'personal', 'simulation'], true)) return $a['money_type'];
     $ph = (string) ($a['phase'] ?? '');
-    if (in_array($ph, ['eval', 'funded', 'live', 'personal'], true)) return $ph;
+    if (in_array($ph, ['eval', 'funded', 'live', 'personal', 'simulation'], true)) return $ph;
     $r = (array) ($a['rules'] ?? []);
     if (!empty($r['target_c'])) return 'eval';
     foreach (['payout_win_days', 'payout_min_c', 'payout_max_c', 'payout_min_bal_c', 'payout_trade_days'] as $k) if (!empty($r[$k])) return 'funded';

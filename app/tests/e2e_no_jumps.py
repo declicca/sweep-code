@@ -36,7 +36,7 @@ async def main():
       cands=await pg.evaluate(f"""(()=>{{const skip=new RegExp({json.dumps(SKIP)}); const out=[];
         for(const b of document.querySelectorAll('#main button, #main [role=tab], #main .chip, #main .seg a')){{
           const r=b.getBoundingClientRect(); if(!r.width||!r.height) continue; const act=(b.dataset.act||b.getAttribute('data-kt')||b.getAttribute('data-tn')||b.getAttribute('data-ux-setup')||b.textContent||'').trim();
-          if(skip.test(act) || skip.test(b.className) || b.closest('form,.nav-ch')) continue; if(b.tagName==='A' && b.getAttribute('href') && !b.closest('.seg')) continue;
+          if(skip.test(act) || skip.test(b.className) || b.closest('form,.nav-ch,.gp-set')) continue;   // (.gp-set: the gameplan's start / stop change the plan, not the page) if(b.tagName==='A' && b.getAttribute('href') && !b.closest('.seg')) continue;
           b.dataset.qa=out.length; out.push(act.slice(0,24)); }} return out}})()""")
       picks=list(range(len(cands)))[:: max(1,len(cands)//8)][:8]
       issues=[]

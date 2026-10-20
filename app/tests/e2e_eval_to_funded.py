@@ -41,7 +41,7 @@ async def main():
       a=await pg.evaluate(f"(()=>{{const a=S.accounts.find(x=>x.name==='{name}'); return a?{{id:a.id,phase:a.phase,preset:a.preset,target:a.rules&&a.rules.target_c,win:a.rules&&a.rules.payout_win_days,bal:a.starting_balance_c}}:null}})()")
       return q, phases, a
     q,ph,a=await add('funded','apex',1,'Apex PA 50K')
-    ok('compte live' in q and ph == 0, f'the first question: {q!r}, nothing left to choose at the end ({ph})')
+    ok('simulation' in q.lower() and 'live' in q and ph == 0, f'the first question: {q!r}, nothing left to choose at the end ({ph})')
     ok(a and a['phase'] == 'funded' and (a['preset'] or '').startswith('apex|') and a['preset'].endswith('|funded|') and a['win'], f'Apex funded: its catalogue rules ({a})')
     await pg.evaluate("closeTicket && closeTicket()"); await pg.wait_for_timeout(400)
     q,ph,ev=await add('eval','topstep',0,'Combine 50K')

@@ -186,7 +186,7 @@
       <div class="pz-fields four">
         <label class="f pz-amt"><span>Amount</span><input name="amount" inputmode="decimal" required value="${e.amount_c != null ? e.amount_c / 100 : ''}" placeholder="$"></label>
         <label class="f"><span>Prop firm</span><select name="firm">${opts([['', '\u2014'], ...S.firms.map((f) => [f.id, f.name])], e.firm_id || '')}</select></label>
-        <label class="f"><span>Account (optional)</span><select name="account">${opts([['', '\u2014'], ...S.accounts.map((a) => [a.id, acctLabel(a.id)])], e.account_id || '')}</select></label>
+        <label class="f"><span>Account</span><select name="account">${opts([['', '\u2014'], ...S.accounts.map((a) => [a.id, acctLabel(a.id)])], e.account_id || '')}</select></label>
         <label class="f"><span>Date</span><input type="date" name="date" value="${e.date || todayStr()}" required></label>
       </div>
       <div class="row pz-acts"><button class="btn primary" type="submit">${e.id ? 'Save expense' : 'Add expense'}</button>${e.id ? `<button class="btn" type="button" data-act="cancel-edit">Cancel</button><button class="btn danger" type="button" data-act="del-expense" data-id="${e.id}">Delete</button>` : ''}</div>
@@ -379,21 +379,21 @@
   'use strict';
   if (typeof render !== 'function') return;
   const T = {
-    en: { zip: 'Export everything (ZIP)', zip_d: 'Backup, spreadsheets and screenshots in one file.', preset: 'Prop firm preset (optional)', none: 'No preset', apply: 'Apply a preset', applied: 'Rules filled from the preset',
+    en: { zip: 'Export everything (ZIP)', zip_d: 'Backup, spreadsheets and screenshots in one file.', preset: 'Prop firm preset', none: 'No preset', apply: 'Apply a preset', applied: 'Rules filled from the preset',
       warn: 'Evaluation rules prefilled as a starting point. Firms change their rules: check them on the firm’s site.' },
-    fr: { zip: 'Tout exporter (ZIP)', zip_d: 'Sauvegarde, tableurs et captures en un seul fichier.', preset: 'Préréglage de prop firm (facultatif)', none: 'Aucun préréglage', apply: 'Appliquer un préréglage', applied: 'Règles remplies depuis le préréglage',
+    fr: { zip: 'Tout exporter (ZIP)', zip_d: 'Sauvegarde, tableurs et captures en un seul fichier.', preset: 'Préréglage de prop firm', none: 'Aucun préréglage', apply: 'Appliquer un préréglage', applied: 'Règles remplies depuis le préréglage',
       warn: 'Règles d’évaluation préremplies pour démarrer. Les firmes changent leurs règles : vérifie-les sur le site de la firme.' },
-    es: { zip: 'Exportar todo (ZIP)', zip_d: 'Copia, hojas de cálculo y capturas en un solo archivo.', preset: 'Preajuste de prop firm (opcional)', none: 'Sin preajuste', apply: 'Aplicar un preajuste', applied: 'Reglas completadas desde el preajuste',
+    es: { zip: 'Exportar todo (ZIP)', zip_d: 'Copia, hojas de cálculo y capturas en un solo archivo.', preset: 'Preajuste de prop firm', none: 'Sin preajuste', apply: 'Aplicar un preajuste', applied: 'Reglas completadas desde el preajuste',
       warn: 'Reglas de evaluación precargadas como punto de partida. Las firmas cambian sus reglas: verifícalas en su sitio.' },
   };
   const t = (k) => (T[LANG] || T.en)[k];
   /* ───── prop firm presets: firm → account type → size → phase, from api/presets (checked every week) ───── */
   const PT = {
-    en: { types: '{n} account types', q0: 'Evaluation, funded or live account?', liveStart: 'Starting balance', floor: 'Balance to stay above', liveNote: 'Your live starting balance comes from your funded accounts: change it below if yours is different.', live: 'Live', liveT: 'Live account', real: 'Real money', liveSub: 'Your firm’s live account (Topstep Live, Apex, Lucid Live…) or your own brokerage account.', evalSub: 'You are trying to pass: profit target, drawdown, rules.', fundedSub: 'Already passed: payouts, safety net, payout rules.', foldSub: 'Pick the account type and size: the rules below are filled in for you{f}.', q1: 'Which prop firm?', q2: 'Which account type?', q3: 'Which size?', other: 'Other firm or personal account', otherSub: 'Enter it yourself', back: '← Choose from the list', ready: 'Your account', nameL: 'Account name', withDll: 'I took the daily loss limit option', noDll: 'none (option not taken)', firm: 'Prop firm', type: 'Account type', size: 'Size', phase: 'Phase', eval: 'Evaluation', funded: 'Funded', pick: 'Choose…', applyBtn: 'Apply these rules',
+    en: { types: '{n} account types', q0: 'Simulation, evaluation, funded or live?', simulation: 'Simulation', simulationSub: 'A practice account: no firm, no real money.', liveStart: 'Starting balance', floor: 'Balance to stay above', liveNote: 'Your live starting balance comes from your funded accounts: change it below if yours is different.', live: 'Live', liveT: 'Live account', real: 'Real money', liveSub: 'Your firm’s live account (Topstep Live, Apex, Lucid Live…) or your own brokerage account.', evalSub: 'You are trying to pass: profit target, drawdown, rules.', fundedSub: 'Already passed: payouts, safety net, payout rules.', foldSub: 'Pick the account type and size: the rules below are filled in for you{f}.', q1: 'Which prop firm?', q2: 'Which account type?', q3: 'Which size?', other: 'Other firm or personal account', otherSub: 'Enter it yourself', back: '← Choose from the list', ready: 'Your account', nameL: 'Account name', withDll: 'I took the daily loss limit option', noDll: 'none (option not taken)', firm: 'Prop firm', type: 'Account type', size: 'Size', phase: 'Phase', eval: 'Evaluation', funded: 'Funded', pick: 'Choose…', applyBtn: 'Apply these rules',
       seed: 'Starting rules of {d}, compiled from public sources. The weekly check confirms them on the firm’s own pages.', checked: 'Rules checked on {d} from the firm’s own pages.', tgt: 'Target', mll: 'Max loss', dll: 'Daily limit', cons: 'Consistency', days: 'Min. days', minis: 'Max', eod: 'end of day', trade: 'real time', static: 'static', none: 'none', direct: 'funded directly' },
-    fr: { types: '{n} types de compte', q0: 'Évaluation, financé ou compte live ?', liveStart: 'Solde de départ', floor: 'Solde à garder au-dessus de', liveNote: 'Ton solde live de départ vient de tes comptes financés : modifie-le plus bas s’il est différent.', live: 'Live', liveT: 'Compte live', real: 'Argent réel', liveSub: 'Le compte live de ta firme (Topstep Live, Apex, Lucid Live…) ou ton compte de courtage perso.', evalSub: 'Tu essaies de passer : objectif de profit, drawdown, règles.', fundedSub: 'Déjà passé : payouts, coussin, règles de payout.', foldSub: 'Choisis le type de compte et la taille : les règles ci-dessous se remplissent{f}.', q1: 'Quelle prop firm ?', q2: 'Quel type de compte ?', q3: 'Quelle taille ?', other: 'Autre firme ou compte perso', otherSub: 'Je le saisis moi-même', back: '← Choisir dans la liste', ready: 'Ton compte', nameL: 'Nom du compte', withDll: 'J’ai pris l’option de limite journalière', noDll: 'aucune (option non prise)', firm: 'Prop firm', type: 'Type de compte', size: 'Taille', phase: 'Phase', eval: 'Évaluation', funded: 'Financé', pick: 'Choisir…', applyBtn: 'Appliquer ces règles',
+    fr: { types: '{n} types de compte', q0: 'Simulation, évaluation, financé ou live ?', simulation: 'Simulation', simulationSub: 'Un compte de pratique : sans firme, sans argent réel.', liveStart: 'Solde de départ', floor: 'Solde à garder au-dessus de', liveNote: 'Ton solde live de départ vient de tes comptes financés : modifie-le plus bas s’il est différent.', live: 'Live', liveT: 'Compte live', real: 'Argent réel', liveSub: 'Le compte live de ta firme (Topstep Live, Apex, Lucid Live…) ou ton compte de courtage perso.', evalSub: 'Tu essaies de passer : objectif de profit, drawdown, règles.', fundedSub: 'Déjà passé : payouts, coussin, règles de payout.', foldSub: 'Choisis le type de compte et la taille : les règles ci-dessous se remplissent{f}.', q1: 'Quelle prop firm ?', q2: 'Quel type de compte ?', q3: 'Quelle taille ?', other: 'Autre firme ou compte perso', otherSub: 'Je le saisis moi-même', back: '← Choisir dans la liste', ready: 'Ton compte', nameL: 'Nom du compte', withDll: 'J’ai pris l’option de limite journalière', noDll: 'aucune (option non prise)', firm: 'Prop firm', type: 'Type de compte', size: 'Taille', phase: 'Phase', eval: 'Évaluation', funded: 'Financé', pick: 'Choisir…', applyBtn: 'Appliquer ces règles',
       seed: 'Règles de départ du {d}, compilées de sources publiques. La vérification hebdomadaire les confirme sur les pages de la firme.', checked: 'Règles vérifiées le {d} sur les pages de la firme.', tgt: 'Objectif', mll: 'Perte max', dll: 'Limite jour', cons: 'Consistance', days: 'Jours min.', minis: 'Max', eod: 'fin de journée', trade: 'temps réel', static: 'fixe', none: 'aucune', direct: 'financé directement' },
-    es: { types: '{n} tipos de cuenta', q0: '¿Evaluación, financiada o cuenta live?', liveStart: 'Saldo inicial', floor: 'Saldo mínimo', liveNote: 'Tu saldo live inicial viene de tus cuentas financiadas: cámbialo abajo si es diferente.', live: 'Live', liveT: 'Cuenta live', real: 'Dinero real', liveSub: 'La cuenta live de tu firma (Topstep Live, Apex, Lucid Live…) o tu cuenta de bróker propia.', evalSub: 'Intentas pasar: objetivo de beneficio, drawdown, reglas.', fundedSub: 'Ya aprobada: payouts, colchón, reglas de payout.', foldSub: 'Elige el tipo de cuenta y el tamaño: las reglas de abajo se rellenan{f}.', q1: '¿Qué prop firm?', q2: '¿Qué tipo de cuenta?', q3: '¿Qué tamaño?', other: 'Otra firma o cuenta personal', otherSub: 'La escribo yo', back: '← Elegir de la lista', ready: 'Tu cuenta', nameL: 'Nombre de la cuenta', withDll: 'Tomé la opción de límite diario', noDll: 'ninguno (opción no tomada)', firm: 'Prop firm', type: 'Tipo de cuenta', size: 'Tamaño', phase: 'Fase', eval: 'Evaluación', funded: 'Financiada', pick: 'Elegir…', applyBtn: 'Aplicar estas reglas',
+    es: { types: '{n} tipos de cuenta', q0: '¿Simulación, evaluación, financiada o live?', simulation: 'Simulación', simulationSub: 'Una cuenta de práctica: sin firma, sin dinero real.', liveStart: 'Saldo inicial', floor: 'Saldo mínimo', liveNote: 'Tu saldo live inicial viene de tus cuentas financiadas: cámbialo abajo si es diferente.', live: 'Live', liveT: 'Cuenta live', real: 'Dinero real', liveSub: 'La cuenta live de tu firma (Topstep Live, Apex, Lucid Live…) o tu cuenta de bróker propia.', evalSub: 'Intentas pasar: objetivo de beneficio, drawdown, reglas.', fundedSub: 'Ya aprobada: payouts, colchón, reglas de payout.', foldSub: 'Elige el tipo de cuenta y el tamaño: las reglas de abajo se rellenan{f}.', q1: '¿Qué prop firm?', q2: '¿Qué tipo de cuenta?', q3: '¿Qué tamaño?', other: 'Otra firma o cuenta personal', otherSub: 'La escribo yo', back: '← Elegir de la lista', ready: 'Tu cuenta', nameL: 'Nombre de la cuenta', withDll: 'Tomé la opción de límite diario', noDll: 'ninguno (opción no tomada)', firm: 'Prop firm', type: 'Tipo de cuenta', size: 'Tamaño', phase: 'Fase', eval: 'Evaluación', funded: 'Financiada', pick: 'Elegir…', applyBtn: 'Aplicar estas reglas',
       seed: 'Reglas iniciales del {d}, recopiladas de fuentes públicas. La verificación semanal las confirma en las páginas de la firma.', checked: 'Reglas verificadas el {d} en las páginas de la firma.', tgt: 'Objetivo', mll: 'Pérdida máx.', dll: 'Límite diario', cons: 'Consistencia', days: 'Días mín.', minis: 'Máx.', eod: 'al cierre', trade: 'tiempo real', static: 'fija', none: 'ninguna', direct: 'financiada directamente' } };
   const pt = (k) => (PT[LANG] || PT.en)[k];
   let CAT = null, catBusy = false;
@@ -505,7 +505,7 @@
     const crumbs = f ? `<div class="ux-st-crumbs">${phCrumb}<button type="button" data-st-go="firm">${esc(f.name)}</button>${p ? `<span>›</span><button type="button" data-st-go="type">${esc(d.phase === 'funded' && fundCode(f) && !p.direct ? `${fundCode(f)} (${p.name})` : p.name)}</button>` : ''}${s ? `<span>›</span><button type="button" data-st-go="size">${s.size / 1000}K</button>` : ''}</div>` : '';
     let body = '';
     if (mode === 'create' && d.phaseSet !== '1') {
-      body = `<p class="ux-st-q">${pt('q0')}</p><div class="ux-st-tiles ux-st-ph"><button type="button" class="ux-st-tile" data-st-ph0="eval"><b>${pt('eval')}</b><small>${pt('evalSub')}</small></button><button type="button" class="ux-st-tile" data-st-ph0="funded"><b>${pt('funded')}</b><small>${pt('fundedSub')}</small></button><button type="button" class="ux-st-tile ux-st-live" data-st-ph0="live"><b>${pt('liveT')} <em>${pt('real')}</em></b><small>${pt('liveSub')}</small></button></div>`;
+      body = `<p class="ux-st-q">${pt('q0')}</p><div class="ux-st-tiles ux-st-ph"><button type="button" class="ux-st-tile" data-st-ph0="simulation"><b>${pt('simulation')}</b><small>${pt('simulationSub')}</small></button><button type="button" class="ux-st-tile" data-st-ph0="eval"><b>${pt('eval')}</b><small>${pt('evalSub')}</small></button><button type="button" class="ux-st-tile" data-st-ph0="funded"><b>${pt('funded')}</b><small>${pt('fundedSub')}</small></button><button type="button" class="ux-st-tile ux-st-live" data-st-ph0="live"><b>${pt('liveT')} <em>${pt('real')}</em></b><small>${pt('liveSub')}</small></button></div>`;
     } else if (!f) {
       body = `<p class="ux-st-q">${pt('q1')}</p><div class="ux-st-tiles">${CAT.firms.map((x) => `<button type="button" class="ux-st-tile" data-st-firm="${esc(x.id)}"><b>${esc(x.name)}</b><small>${((n) => (n === 1 ? esc(x.programs.find((y) => !y.legacy).name) : pt('types').replace('{n}', n)))(x.programs.filter((y) => !y.legacy).length || x.programs.length)}</small></button>`).join('')}
         ${mode === 'create' ? `<button type="button" class="ux-st-tile ghost" data-st-manual><b>${pt('other')}</b><small>${pt('otherSub')}</small></button>` : ''}</div>`;
@@ -1534,18 +1534,19 @@
  *  1. Performance (skill): P&L of the trades, every phase. Not money. A copied trade counts once (its first copy).
  *  2. Progress (prop): evaluation = distance to the target; funded = simulated profit + « withdrawable now ».
  *  3. Real money: net payouts received + realized P&L of Live and Personal accounts − expenses. The only « earned ».
- * money_type: eval / funded (simulated) · live / personal (real). Payouts: gross_c, split_pct, fees_c, net_c, status. */
+ * money_type: eval / funded / simulation (simulated) · live / personal (real). Payouts: gross_c, split_pct, fees_c, net_c, status. */
 (function () {
   'use strict';
   if (typeof S === 'undefined') return;
-  const TYPES = ['eval', 'funded', 'live', 'personal'];
-  const SIMT = { eval: 1, funded: 1 };
+  const TYPES = ['eval', 'funded', 'live', 'personal', 'simulation'];   // simulation: a practice account, no firm (20 Oct., Mateo)
+  const SIMT = { eval: 1, funded: 1, simulation: 1 };
   /** the account's money type: stored, else deduced (rules / phase); null = « to classify » */
   function moneyTypeOf(a) {
     if (!a) return null;
     if (TYPES.includes(a.money_type)) return a.money_type;
     if (a.phase === 'eval' || a.phase === 'funded' || a.phase === 'live') return a.phase;
     if (a.phase === 'personal') return 'personal';
+    if (a.phase === 'simulation') return 'simulation';
     const r = a.rules || {};
     if (r.target_c) return 'eval';
     if (r.payout_win_days || r.payout_min_c || r.payout_max_c || r.payout_min_bal_c || r.payout_trade_days) return 'funded';
@@ -1589,7 +1590,7 @@
     const all0 = (S.trades || []).filter((t) => inP(t.date, from, to) && keepA(acc(t.account_id)));
     // like Today: the sample trades step aside once the trader has real ones
     const trades = o.realOnly && (S.trades || []).some((t) => !t.demo) ? all0.filter((t) => !t.demo) : all0;
-    const perf = { total: 0, byType: { eval: 0, funded: 0, live: 0, personal: 0, unknown: 0 }, n: 0 };
+    const perf = { total: 0, byType: { eval: 0, funded: 0, live: 0, personal: 0, simulation: 0, unknown: 0 }, n: 0 };
     perfTrades(trades).forEach((t) => { const v = net(t); perf.total += v; perf.n++; perf.byType[typeOfId(t.account_id) || 'unknown'] += v; });
     // per account (each copy counts on its own account)
     const perAcct = {};
@@ -1679,7 +1680,7 @@
       gross: 'gross {a}', split: 'split {a} %', fees: 'fees {a}', paid: 'Paid', requested: 'Requested', denied: 'Denied', pendingS: 'Pending', export: 'Export (CSV)', monthly: 'monthly', refund: 'refund',
       cats: { evaluation: 'Evaluation', reset: 'Reset', activation: 'Activation', subscription: 'Subscription', data: 'Data', platform: 'Platform', other: 'Other' },
       f: { status: 'Status', account: 'Account', date: 'Date', gross: 'Gross requested ($)', split: 'Split (%)', fees: 'Transfer / processing fees ($)', net: 'Net received ($)', save: 'Save', addP: 'Add payout', addE: 'Add expense', cancel: 'Cancel', del: 'Delete',
-        amount: 'Amount ($)', amountH: 'A refund: a negative amount.', firm: 'Prop firm', acc: 'Account (optional)', rec: 'Repeat every month (stops when the account is passed, failed or closed)', cat: 'Category', none: '—', needAcc: 'Choose an account.', needAmt: 'Enter an amount.' },
+        amount: 'Amount ($)', amountH: 'A refund: a negative amount.', firm: 'Prop firm', acc: 'Account', rec: 'Repeat every month (stops when the account is passed, failed or closed)', cat: 'Category', none: '—', needAcc: 'Choose an account.', needAmt: 'Enter an amount.' },
       csv: ['date', 'type', 'firm', 'account', 'category', 'gross', 'fees', 'net'], payoutT: 'payout', expenseT: 'expense', liveT: 'live P&L' },
     fr: { title: 'Mon argent', real: 'Réel', sim: 'Simulé', netReal: 'Net réel', payNet: 'Payouts nets reçus', livePnl: '+ P&L live et perso (réalisé)', exp: '− Dépenses', eq: '= Net réel',
       roi: 'ROI prop (payouts nets − dépenses) / dépenses', pend: 'En attente : {a} demandés (non comptés)', month: 'Mois', quarter: 'Trimestre', year: 'Année', all: 'Tout', dates: 'Dates', from: 'Du', to: 'Au',
@@ -1689,7 +1690,7 @@
       gross: 'brut {a}', split: 'split {a} %', fees: 'frais {a}', paid: 'Payé', requested: 'Demandé', denied: 'Refusé', pendingS: 'En attente', export: 'Exporter (CSV)', monthly: 'mensuel', refund: 'remboursement',
       cats: { evaluation: 'Évaluation', reset: 'Reset', activation: 'Activation', subscription: 'Abonnement', data: 'Données', platform: 'Plateforme', other: 'Autre' },
       f: { status: 'Statut', account: 'Compte', date: 'Date', gross: 'Brut demandé ($)', split: 'Split (%)', fees: 'Frais de virement / traitement ($)', net: 'Net reçu ($)', save: 'Enregistrer', addP: 'Ajouter le payout', addE: 'Ajouter la dépense', cancel: 'Annuler', del: 'Supprimer',
-        amount: 'Montant ($)', amountH: 'Un remboursement : un montant négatif.', firm: 'Prop firm', acc: 'Compte (facultatif)', rec: 'Chaque mois (s’arrête quand le compte est réussi, échoué ou fermé)', cat: 'Catégorie', none: '—', needAcc: 'Choisis un compte.', needAmt: 'Entre un montant.' },
+        amount: 'Montant ($)', amountH: 'Un remboursement : un montant négatif.', firm: 'Prop firm', acc: 'Compte', rec: 'Chaque mois (s’arrête quand le compte est réussi, échoué ou fermé)', cat: 'Catégorie', none: '—', needAcc: 'Choisis un compte.', needAmt: 'Entre un montant.' },
       csv: ['date', 'type', 'firme', 'compte', 'categorie', 'brut', 'frais', 'net'], payoutT: 'payout', expenseT: 'dépense', liveT: 'P&L live' },
     es: { title: 'Mi dinero', real: 'Real', sim: 'Simulado', netReal: 'Neto real', payNet: 'Payouts netos recibidos', livePnl: '+ P&L live y personal (realizado)', exp: '− Gastos', eq: '= Neto real',
       roi: 'ROI prop (payouts netos − gastos) / gastos', pend: 'Pendiente: {a} solicitados (no contados)', month: 'Mes', quarter: 'Trimestre', year: 'Año', all: 'Todo', dates: 'Fechas', from: 'Desde', to: 'Hasta',
@@ -1699,7 +1700,7 @@
       gross: 'bruto {a}', split: 'split {a} %', fees: 'comisiones {a}', paid: 'Pagado', requested: 'Solicitado', denied: 'Rechazado', pendingS: 'Pendiente', export: 'Exportar (CSV)', monthly: 'mensual', refund: 'reembolso',
       cats: { evaluation: 'Evaluación', reset: 'Reset', activation: 'Activación', subscription: 'Suscripción', data: 'Datos', platform: 'Plataforma', other: 'Otro' },
       f: { status: 'Estado', account: 'Cuenta', date: 'Fecha', gross: 'Bruto solicitado ($)', split: 'Split (%)', fees: 'Comisiones de transferencia ($)', net: 'Neto recibido ($)', save: 'Guardar', addP: 'Añadir payout', addE: 'Añadir gasto', cancel: 'Cancelar', del: 'Eliminar',
-        amount: 'Importe ($)', amountH: 'Un reembolso: un importe negativo.', firm: 'Prop firm', acc: 'Cuenta (opcional)', rec: 'Cada mes (se detiene cuando la cuenta se supera, falla o se cierra)', cat: 'Categoría', none: '—', needAcc: 'Elige una cuenta.', needAmt: 'Escribe un importe.' },
+        amount: 'Importe ($)', amountH: 'Un reembolso: un importe negativo.', firm: 'Prop firm', acc: 'Cuenta', rec: 'Cada mes (se detiene cuando la cuenta se supera, falla o se cierra)', cat: 'Categoría', none: '—', needAcc: 'Elige una cuenta.', needAmt: 'Escribe un importe.' },
       csv: ['fecha', 'tipo', 'firma', 'cuenta', 'categoria', 'bruto', 'comisiones', 'neto'], payoutT: 'payout', expenseT: 'gasto', liveT: 'P&L live' },
   })[L] || null;
   const x = X || {};
@@ -1931,9 +1932,9 @@
   'use strict';
   if (typeof acctTable !== 'function' || !window.SweepMoney) return;
   const M = window.SweepMoney, L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const X = ({ en: { live: 'Live', funded: 'Funded', eval: 'Evaluations', personal: 'Personal', none: 'To classify', real: 'Real', sim: 'Simulated', of: '{a} of {b}', profit: 'Simulated profit', wd: 'withdrawable {a}', month: 'Real P&L this month', passed: 'Passed', failed: 'Failed', acc: 'Account', firm: 'Firm', bal: 'Balance', prog: 'Progress' },
-    fr: { live: 'Live', funded: 'Financés', eval: 'Évaluations', personal: 'Perso', none: 'À classer', real: 'Réel', sim: 'Simulé', of: '{a} sur {b}', profit: 'Profit simulé', wd: 'retirable {a}', month: 'P&L réel du mois', passed: 'Réussie', failed: 'Échouée', acc: 'Compte', firm: 'Firme', bal: 'Solde', prog: 'Progression' },
-    es: { live: 'Live', funded: 'Financiadas', eval: 'Evaluaciones', personal: 'Personal', none: 'Por clasificar', real: 'Real', sim: 'Simulado', of: '{a} de {b}', profit: 'Beneficio simulado', wd: 'retirable {a}', month: 'P&L real del mes', passed: 'Superada', failed: 'Fallida', acc: 'Cuenta', firm: 'Firma', bal: 'Saldo', prog: 'Progreso' } })[L] || null;
+  const X = ({ en: { live: 'Live', funded: 'Funded', eval: 'Evaluations', personal: 'Personal', simulation: 'Simulation', none: 'To classify', real: 'Real', sim: 'Simulated', of: '{a} of {b}', profit: 'Simulated profit', wd: 'withdrawable {a}', month: 'Real P&L this month', passed: 'Passed', failed: 'Failed', acc: 'Account', firm: 'Firm', bal: 'Balance', prog: 'Progress' },
+    fr: { live: 'Live', funded: 'Financés', eval: 'Évaluations', personal: 'Perso', simulation: 'Simulation', none: 'À classer', real: 'Réel', sim: 'Simulé', of: '{a} sur {b}', profit: 'Profit simulé', wd: 'retirable {a}', month: 'P&L réel du mois', passed: 'Réussie', failed: 'Échouée', acc: 'Compte', firm: 'Firme', bal: 'Solde', prog: 'Progression' },
+    es: { live: 'Live', funded: 'Financiadas', eval: 'Evaluaciones', personal: 'Personal', simulation: 'Simulación', none: 'Por clasificar', real: 'Real', sim: 'Simulado', of: '{a} de {b}', profit: 'Beneficio simulado', wd: 'retirable {a}', month: 'P&L real del mes', passed: 'Superada', failed: 'Fallida', acc: 'Cuenta', firm: 'Firma', bal: 'Saldo', prog: 'Progreso' } })[L] || null;
   const x = X || {};
   const orig = acctTable;
   acctTable = function (list, opts) {
@@ -1943,7 +1944,7 @@
     const esc2 = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
     const fm = (c) => (typeof money === 'function' ? money(c, { dec: Math.abs(c) % 100 ? 2 : 0 }) : (c / 100).toFixed(2));
     const fu = (c) => (typeof moneyU === 'function' ? moneyU(c) : (c / 100).toFixed(2));
-    const groups = [['live', 'real'], ['funded', 'sim'], ['eval', 'sim'], ['personal', 'real'], ['none', '']];
+    const groups = [['live', 'real'], ['funded', 'sim'], ['eval', 'sim'], ['personal', 'real'], ['simulation', 'sim'], ['none', '']];
     const sorted = typeof acctSortBreachLast === 'function' ? acctSortBreachLast(list) : list;
     const cell = (acc) => {
       const r = allInfo[acc.id] || {}, ty = M.moneyTypeOf(acc);
@@ -1954,6 +1955,7 @@
         return `<div class="mny-prog"><span>${x.of.replace('{a}', fu(Math.max(0, r.net))).replace('{b}', fu(r.target))} · <b>${Math.round((r.pct || 0) * 100)} %</b></span><i><s style="width:${Math.round((r.pct || 0) * 100)}%"></s></i></div>`;
       }
       if (ty === 'funded') return `<span class="mny-dim">${fm(r.profit || 0)}</span> <span class="mny-tag sim">${x.sim}</span><small class="mny-sub">${x.wd.replace('{a}', fu(r.withdrawable || 0))}</small>`;
+      if (ty === 'simulation') return `<span class="mny-dim">${fm(r.net || 0)}</span> <span class="mny-tag sim">${x.sim}</span>`;
       if (ty === 'live' || ty === 'personal') { const p = (info[acc.id] || {}).pnl || 0; return `<span class="${p >= 0 ? 'pos' : 'neg'}">${fm(p)}</span> <span class="mny-tag real">${x.real}</span><small class="mny-sub">${x.month}</small>`; }
       return '—';
     };
@@ -1972,12 +1974,12 @@
   'use strict';
   if (typeof S === 'undefined' || !window.SweepMoney) return;
   const M = window.SweepMoney, L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const X = ({ en: { label: 'Account type', all: 'All', eval: 'Evaluations', funded: 'Funded', live: 'Live', personal: 'Personal', perf: 'Performance', sim: 'Simulated', real: 'Real', note: 'Skill, not money earned: real money is in My money.', split: 'Simulated {a} · Real {b}',
-      clsT: 'Classify your accounts', clsS: 'Sweep keeps simulated money (evaluations, funded accounts) apart from real money (live, personal). One tap per account:', clsDone: 'Done', clsLater: 'Later', t_eval: 'Evaluation', t_funded: 'Funded', t_live: 'Live', t_personal: 'Personal' },
-    fr: { label: 'Type de compte', all: 'Tout', eval: 'Évaluations', funded: 'Financés', live: 'Live', personal: 'Perso', perf: 'Performance', sim: 'Simulé', real: 'Réel', note: 'Ton habileté, pas de l’argent gagné : l’argent réel est dans Mon argent.', split: 'Simulé {a} · Réel {b}',
-      clsT: 'Classe tes comptes', clsS: 'Sweep sépare l’argent simulé (évaluations, financés) de l’argent réel (live, perso). Une touche par compte :', clsDone: 'Terminé', clsLater: 'Plus tard', t_eval: 'Évaluation', t_funded: 'Financé', t_live: 'Live', t_personal: 'Perso' },
-    es: { label: 'Tipo de cuenta', all: 'Todo', eval: 'Evaluaciones', funded: 'Financiadas', live: 'Live', personal: 'Personal', perf: 'Rendimiento', sim: 'Simulado', real: 'Real', note: 'Tu habilidad, no dinero ganado: el dinero real está en Mi dinero.', split: 'Simulado {a} · Real {b}',
-      clsT: 'Clasifica tus cuentas', clsS: 'Sweep separa el dinero simulado (evaluaciones, financiadas) del dinero real (live, personal). Un toque por cuenta:', clsDone: 'Listo', clsLater: 'Más tarde', t_eval: 'Evaluación', t_funded: 'Financiada', t_live: 'Live', t_personal: 'Personal' } })[L] || null;
+  const X = ({ en: { label: 'Account type', all: 'All', eval: 'Evaluations', funded: 'Funded', live: 'Live', personal: 'Personal', simulation: 'Simulation', perf: 'Performance', sim: 'Simulated', real: 'Real', note: 'Skill, not money earned: real money is in My money.', split: 'Simulated {a} · Real {b}',
+      clsT: 'Classify your accounts', clsS: 'Sweep keeps simulated money (evaluations, funded accounts) apart from real money (live, personal). One tap per account:', clsDone: 'Done', clsLater: 'Later', t_eval: 'Evaluation', t_funded: 'Funded', t_live: 'Live', t_personal: 'Personal', t_simulation: 'Simulation' },
+    fr: { label: 'Type de compte', all: 'Tout', eval: 'Évaluations', funded: 'Financés', live: 'Live', personal: 'Perso', simulation: 'Simulation', perf: 'Performance', sim: 'Simulé', real: 'Réel', note: 'Ton habileté, pas de l’argent gagné : l’argent réel est dans Mon argent.', split: 'Simulé {a} · Réel {b}',
+      clsT: 'Classe tes comptes', clsS: 'Sweep sépare l’argent simulé (évaluations, financés) de l’argent réel (live, perso). Une touche par compte :', clsDone: 'Terminé', clsLater: 'Plus tard', t_eval: 'Évaluation', t_funded: 'Financé', t_live: 'Live', t_personal: 'Perso', t_simulation: 'Simulation' },
+    es: { label: 'Tipo de cuenta', all: 'Todo', eval: 'Evaluaciones', funded: 'Financiadas', live: 'Live', personal: 'Personal', simulation: 'Simulación', perf: 'Rendimiento', sim: 'Simulado', real: 'Real', note: 'Tu habilidad, no dinero ganado: el dinero real está en Mi dinero.', split: 'Simulado {a} · Real {b}',
+      clsT: 'Clasifica tus cuentas', clsS: 'Sweep separa el dinero simulado (evaluaciones, financiadas) del dinero real (live, personal). Un toque por cuenta:', clsDone: 'Listo', clsLater: 'Más tarde', t_eval: 'Evaluación', t_funded: 'Financiada', t_live: 'Live', t_personal: 'Personal', t_simulation: 'Simulación' } })[L] || null;
   const x = X || {};
   // the account-type filter belongs to Stats only: Trades, Calendar and Journal always show every trade
   /* one account-type filter for the whole journey (Today, Trades, Stats, My money), always shown where it applies */
@@ -1986,7 +1988,7 @@
   window.mtypeKeep = (t) => { const k = typeof U !== 'undefined' && U.mtype; if (!k || k === 'all') return true; return M.moneyTypeOf((S.accounts || []).find((y) => y.id === t.account_id)) === k; };
   // one pill that opens its choices (16 Oct.: one line of filters); « mny-tsw » kept so nothing adds it twice
   window.SweepTypeSeg = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return `<button type="button" class="fx-c fx-type mny-tsw ${k !== 'all' ? 'fx-set' : ''}" data-fx="type" aria-haspopup="true" aria-label="${x.label} · ${x[k]}" data-noi18n>${k === 'all' ? x.label : x[k]}<i aria-hidden="true"></i></button>`; };
-  window.SweepFxOpts = Object.assign(window.SweepFxOpts || {}, { type: () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return { title: x.label, cur: k, opts: ['all', 'eval', 'funded', 'live', 'personal'].map((v) => [v, x[v]]), attr: 'data-mtype', pick: (v) => { U.mtype = v; if (typeof saveU === 'function') saveU(); render(); } }; } });
+  window.SweepFxOpts = Object.assign(window.SweepFxOpts || {}, { type: () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return { title: x.label, cur: k, opts: ['all', 'eval', 'funded', 'live', 'personal', 'simulation'].map((v) => [v, x[v]]), attr: 'data-mtype', pick: (v) => { U.mtype = v; if (typeof saveU === 'function') saveU(); render(); } }; } });
   window.SweepTypeTag = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return k === 'all' ? `<span class="mny-tag perf">${x.perf}</span>` : `<span class="mny-tag ${k === 'live' || k === 'personal' ? 'real' : 'sim'}">${k === 'live' || k === 'personal' ? x.real : x.sim}</span>`; };
   // Trades and Stats lists follow it (they show the selector); Calendar and Journal always show every trade
   window.mtypeOK = (t) => { if (!/^#(analytics|progress|trades|calendar)/.test(location.hash || '')) return true; const k = typeof U !== 'undefined' && U.mtype; if (!k || k === 'all') return true; const a = (S.accounts || []).find((y) => y.id === t.account_id); return M.moneyTypeOf(a) === k; };
@@ -2006,7 +2008,7 @@
         const [a, b] = typeof periodRange === 'function' ? periodRange() : ['', ''];
         const pf = M.moneyOf({ from: a, to: b, account: F.account !== 'all' ? F.account : '', firm: F.firm !== 'all' ? F.firm : '' }).perf.byType;
         const fm = (c) => (typeof money === 'function' ? money(c, { dec: 0 }) : (c / 100).toFixed(0));
-        kp.insertAdjacentHTML('beforeend', `<small class="mny-psplit" data-noi18n>${x.split.replace('{a}', fm(pf.eval + pf.funded)).replace('{b}', fm(pf.live + pf.personal))}</small>`);
+        kp.insertAdjacentHTML('beforeend', `<small class="mny-psplit" data-noi18n>${x.split.replace('{a}', fm(pf.eval + pf.funded + (pf.simulation || 0))).replace('{b}', fm(pf.live + pf.personal))}</small>`);
       }
     }
   }
@@ -2057,9 +2059,9 @@
   'use strict';
   if (typeof S === 'undefined' || !window.SweepMoney) return;
   const M = window.SweepMoney, L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const X = ({ en: { t: 'Account type', s: 'Change it if this account was classified wrong: its trades, rules and stats stay as they are.', eval: 'Evaluation', funded: 'Funded', live: 'Live', personal: 'Personal', done: 'Type changed: {t}. Trades and stats unchanged.', sim: 'simulated money', real: 'real money' },
-    fr: { t: 'Type de compte', s: 'Change-le si ce compte est mal classé : ses trades, ses règles et ses stats restent les mêmes.', eval: 'Évaluation', funded: 'Financé', live: 'Live', personal: 'Perso', done: 'Type changé : {t}. Trades et stats inchangés.', sim: 'argent simulé', real: 'argent réel' },
-    es: { t: 'Tipo de cuenta', s: 'Cámbialo si esta cuenta está mal clasificada: sus operaciones, reglas y estadísticas no cambian.', eval: 'Evaluación', funded: 'Financiada', live: 'Live', personal: 'Personal', done: 'Tipo cambiado: {t}. Operaciones y estadísticas sin cambios.', sim: 'dinero simulado', real: 'dinero real' } })[L] || null;
+  const X = ({ en: { t: 'Account type', s: 'Change it if this account was classified wrong: its trades, rules and stats stay as they are.', eval: 'Evaluation', funded: 'Funded', live: 'Live', personal: 'Personal', simulation: 'Simulation', done: 'Type changed: {t}. Trades and stats unchanged.', sim: 'simulated money', real: 'real money' },
+    fr: { t: 'Type de compte', s: 'Change-le si ce compte est mal classé : ses trades, ses règles et ses stats restent les mêmes.', eval: 'Évaluation', funded: 'Financé', live: 'Live', personal: 'Perso', simulation: 'Simulation', done: 'Type changé : {t}. Trades et stats inchangés.', sim: 'argent simulé', real: 'argent réel' },
+    es: { t: 'Tipo de cuenta', s: 'Cámbialo si esta cuenta está mal clasificada: sus operaciones, reglas y estadísticas no cambian.', eval: 'Evaluación', funded: 'Financiada', live: 'Live', personal: 'Personal', simulation: 'Simulación', done: 'Tipo cambiado: {t}. Operaciones y estadísticas sin cambios.', sim: 'dinero simulado', real: 'dinero real' } })[L] || null;
   const x = X || { t: 'Account type', s: '', eval: 'Evaluation', funded: 'Funded', live: 'Live', personal: 'Personal', done: 'Type changed: {t}.', sim: 'simulated money', real: 'real money' };
   const esc2 = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   function paint() {
@@ -2069,7 +2071,7 @@
     const nameIn = main.querySelector(`[data-bind="accounts|${id}|name"]`); const card = nameIn && nameIn.closest('.surface'); if (!card) return;
     const cur = M.moneyTypeOf(a) || '';
     let box = card.querySelector('.acc-type');
-    const html = `<div class="acc-type" data-noi18n><span class="lbl">${x.t}</span><div class="seg" role="radiogroup" aria-label="${x.t}">${['eval', 'funded', 'live', 'personal'].map((v) => `<button type="button" role="radio" aria-checked="${cur === v}" class="${cur === v ? 'on' : ''}" data-acc-type="${v}" data-id="${esc2(id)}">${x[v]}</button>`).join('')}</div><small class="muted">${x.s} · ${cur ? (M.isSim(cur) ? x.sim : x.real) : ''}</small></div>`;
+    const html = `<div class="acc-type" data-noi18n><span class="lbl">${x.t}</span><div class="seg" role="radiogroup" aria-label="${x.t}">${['eval', 'funded', 'live', 'personal', 'simulation'].map((v) => `<button type="button" role="radio" aria-checked="${cur === v}" class="${cur === v ? 'on' : ''}" data-acc-type="${v}" data-id="${esc2(id)}">${x[v]}</button>`).join('')}</div><small class="muted">${x.s} · ${cur ? (M.isSim(cur) ? x.sim : x.real) : ''}</small></div>`;
     if (box) { if (box.dataset.cur !== cur) { box.outerHTML = html; card.querySelector('.acc-type').dataset.cur = cur; } return; }
     card.insertAdjacentHTML('afterbegin', html); card.querySelector('.acc-type').dataset.cur = cur;
   }

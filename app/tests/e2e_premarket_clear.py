@@ -1,7 +1,7 @@
 """
 Sweep — the pre-market, clear and light (20 Oct., test as a trader), phone 390 and computer 1300, the browser's clock at 08:00 New York:
   python3 tests/e2e_premarket_clear.py http://127.0.0.1:8095 /tmp/show_state.json
- 1  every term says what it means: London high / low, PDH / PDL, the optional fields; the instrument is a row of chips with its name, « Autre » for any symbol
+ 1  every term says what it means: London high / low, PDH / PDL (no « optional » on a field: Mateo wants as much as possible filled in); the instrument is a row of chips with its name, « Autre » for any symbol
  2  what is missing is said by name and outlined (the instrument, the London levels, their order); a level far from the others (a digit missing) is asked once
  3  the last sheet's levels are a reference in grey, never kept by mistake; « 5 820,5 » is read as 5820.5; « Next » on the keyboard goes to the next field
  4  the scenarios: entry, stop and target can all be changed, the R follows in points; a stop on the wrong side says so; « Utiliser » brings the proposed target back
@@ -55,8 +55,8 @@ with sync_playwright() as p:
     pg.evaluate(PREV, prev); pg.wait_for_timeout(600)
     # 1. the words
     open_plan(pg, day); t = text(pg)
-    ok(scr(pg) == 'base' and 'Séance de Londres · avant l’ouverture de New York' in t and 'Hier · facultatif' in t and 'Prix actuel · facultatif' in t and pg.locator('#gSheet .pm-tip:not([hidden])').count() == 0,
-       f'1 {w}: the London levels, PDH / PDL and the optional fields, short; the explanations closed')
+    ok(scr(pg) == 'base' and 'Séance de Londres · avant l’ouverture de New York' in t and 'Hier' in t and 'Prix actuel' in t and 'facultatif' not in t and pg.locator('#gSheet .pm-tip:not([hidden])').count() == 0,
+       f'1 {w}: the London levels, PDH / PDL, no « optional » next to any field (20 Oct., Mateo); the explanations closed')
     tap(pg, '#gSheet [data-pm=tip][data-k=prev]')
     tip = pg.evaluate("[...document.querySelectorAll('#gSheet .pm-tip:not([hidden])')].map((x) => x.textContent)")
     ok(len(tip) == 1 and tip[0].startswith('PDH (previous day high) et PDL (previous day low) : le plus haut et le plus bas de la séance d’hier') and 'Ex. :' in tip[0] and pg.get_attribute('#gSheet [data-pm=tip][data-k=prev]', 'aria-expanded') == 'true',
@@ -143,7 +143,7 @@ with sync_playwright() as p:
     tap(pg, '#gSheet .pm-chart-slot [data-pre-chart]')
     tap(pg, '#gSheet [data-pm="mode"][data-v="express"]')
     t = text(pg); bias = pg.evaluate("[...document.querySelectorAll('#gSheet [data-q=X_bias]')].map((x) => x.textContent)")
-    ok(bias == ['Haussier', 'Baissier', 'Neutre'] and 'Niveaux clés' in t and 'Scénario attendu' in t and 'Scénario alternatif · facultatif' in t and pg.locator('#gSheet [data-pmf=X_stop], #gSheet [data-pmf=C3_A]').count() == 0,
+    ok(bias == ['Haussier', 'Baissier', 'Neutre'] and 'Niveaux clés' in t and 'Scénario attendu' in t and 'Scénario alternatif' in t and 'facultatif' not in t and pg.locator('#gSheet [data-pmf=X_stop], #gSheet [data-pmf=C3_A]').count() == 0,
        f'7 {w}: the express plan: bias, key levels, expected and alternative scenario, no prices to set ({bias})')
     tap(pg, '#gSheet [data-pm=tip][data-k=plan]')
     tip = pg.evaluate("(document.querySelector('#gSheet .pm-tip:not([hidden])') || {}).textContent || ''")

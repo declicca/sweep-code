@@ -1814,7 +1814,7 @@ function payoutForm(e = {}) {
 
 function expenseForm(e = {}) {
   const t = S.firms;
-  return `<form class="fgrid four" data-form="expense" data-id="${e.id || ""}" autocomplete="off">\n   <label class="f"><span>Date</span><input type="date" name="date" value="${e.date || todayStr()}" required></label>\n   <label class="f"><span>Prop firm</span><select name="firm">${opts([ [ "", "—" ], ...t.map(a => [ a.id, a.name ]) ], e.firm_id || "")}</select></label>\n   <label class="f"><span>Account (optional)</span><select name="account">${opts([ [ "", "—" ], ...S.accounts.map(a => [ a.id, acctLabel(a.id) ]) ], e.account_id || "")}</select></label>\n   <label class="f"><span>Category</span><select name="category">${opts(ECAT, e.category || "evaluation")}</select></label>\n   <label class="f"><span>Amount</span><input name="amount" inputmode="decimal" required value="${e.amount_c != null ? e.amount_c / 100 : ""}" placeholder="$"></label>\n   <label class="f" style="grid-column:span 3"><span>Notes</span><input name="notes" value="${esc(e.notes || "")}"></label>\n   <div class="f full"><div class="row"><button class="btn primary" type="submit">${e.id ? "Save expense" : "Add expense"}</button>${e.id ? `<button class="btn" type="button" data-act="cancel-edit">Cancel</button><button class="btn danger" type="button" data-act="del-expense" data-id="${e.id}">Delete</button>` : ""}</div></div></form>`;
+  return `<form class="fgrid four" data-form="expense" data-id="${e.id || ""}" autocomplete="off">\n   <label class="f"><span>Date</span><input type="date" name="date" value="${e.date || todayStr()}" required></label>\n   <label class="f"><span>Prop firm</span><select name="firm">${opts([ [ "", "—" ], ...t.map(a => [ a.id, a.name ]) ], e.firm_id || "")}</select></label>\n   <label class="f"><span>Account</span><select name="account">${opts([ [ "", "—" ], ...S.accounts.map(a => [ a.id, acctLabel(a.id) ]) ], e.account_id || "")}</select></label>\n   <label class="f"><span>Category</span><select name="category">${opts(ECAT, e.category || "evaluation")}</select></label>\n   <label class="f"><span>Amount</span><input name="amount" inputmode="decimal" required value="${e.amount_c != null ? e.amount_c / 100 : ""}" placeholder="$"></label>\n   <label class="f" style="grid-column:span 3"><span>Notes</span><input name="notes" value="${esc(e.notes || "")}"></label>\n   <div class="f full"><div class="row"><button class="btn primary" type="submit">${e.id ? "Save expense" : "Add expense"}</button>${e.id ? `<button class="btn" type="button" data-act="cancel-edit">Cancel</button><button class="btn danger" type="button" data-act="del-expense" data-id="${e.id}">Delete</button>` : ""}</div></div></form>`;
 }
 
 function vPayouts() {
@@ -5222,8 +5222,8 @@ document.addEventListener("visibilitychange", () => {
       no_trades_week: "No trades this week yet.",
       no_data_day: "No trades or journal for this day: write a few words about your day to debrief it.",
       with_trades: "Include my trades of the day",
-      day_note: "Your day in a few words (optional)",
-      day_note_ph: "Your day in a few words (optional): what happened, how you felt, what you take away…",
+      day_note: "Your day in a few words",
+      day_note_ph: "Your day in a few words: what happened, how you felt, what you take away…",
       vs_prev: "vs last week",
       net: "Net",
       win_rate: "Win rate",
@@ -5347,8 +5347,8 @@ document.addEventListener("visibilitychange", () => {
       no_trades_week: "Aucun trade cette semaine pour l'instant.",
       no_data_day: "Aucun trade ni journal pour ce jour : écris quelques mots sur ta journée pour la débriefer.",
       with_trades: "Inclure mes trades du jour",
-      day_note: "Ta journée en quelques mots (facultatif)",
-      day_note_ph: "Ta journée en quelques mots (facultatif) : ce qui s’est passé, ce que tu as ressenti, ce que tu retiens…",
+      day_note: "Ta journée en quelques mots",
+      day_note_ph: "Ta journée en quelques mots : ce qui s’est passé, ce que tu as ressenti, ce que tu retiens…",
       vs_prev: "vs semaine passée",
       net: "Net",
       win_rate: "Réussite",
@@ -5472,8 +5472,8 @@ document.addEventListener("visibilitychange", () => {
       no_trades_week: "Aún no hay trades esta semana.",
       no_data_day: "No hay trades ni diario para este día: escribe unas palabras sobre tu día para analizarlo.",
       with_trades: "Incluir mis trades del día",
-      day_note: "Tu día en pocas palabras (opcional)",
-      day_note_ph: "Tu día en pocas palabras (opcional): qué pasó, cómo te sentiste, qué te llevas…",
+      day_note: "Tu día en pocas palabras",
+      day_note_ph: "Tu día en pocas palabras: qué pasó, cómo te sentiste, qué te llevas…",
       vs_prev: "vs semana pasada",
       net: "Neto",
       win_rate: "Acierto",

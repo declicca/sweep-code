@@ -1,8 +1,9 @@
 """
 Sweep — the 90-day gameplan (brief « Parcours de 90 jours », 20 Oct.), phone 390 (FR, ES) and computer 1300 (EN), a new trader each time:
   python3 tests/e2e_gameplan.py http://127.0.0.1:8095 [storage_state, unused: it signs up its own traders]
- 1  sign-up: « less than 6 months » offers the gameplan right under it (track A chosen, B one tap away); « Create account »
-    starts it, and Sweep ticks mission 1 (the account) at once
+ 1  sign-up: « less than 6 months » offers the gameplan right under it, no second question: its track comes from the account
+    (an evaluation → B; a simulation account, the new account type → A); « Create account » starts it today, Sweep ticks
+    mission 1 (the account) at once; no field says « optional »; « Explore with sample data » shows it is preparing
  2  Today: the gameplan's card (before the Monday: when it starts); on day 9: today's mission, the late ones, the progress
  3  a mission: the notion of the day, « Test yourself » answered at once (right in blue, wrong in gold, why), « Done when »;
     ticked → its XP, the card moves; the map: 3 months, days done / today / late / to come, nothing wider than the screen
@@ -25,9 +26,9 @@ def until(pg, expr, ms=12000):
     if pg.evaluate(f'!!({expr})'): return True
     pg.wait_for_timeout(150)
   return False
-TXT = {'fr': {'a': 'Moins de 6 mois', 'gp': 'Ton parcours de 90 jours est inclus', 'B': 'Déjà en évaluation', 'kick': 'Ton parcours de 90 jours', 'day9': 'Jour 9 sur 90', 'late': 'à rattraper', 'quiz': 'Teste-toi', 'dw': 'C’est fait quand', 'gate': 'La porte du mois 1', 'pass': 'Passer au mois 2', 'set': 'Parcours de 90 jours', 'stop': 'Arrêter le parcours', 'go': 'Commencer le parcours'},
-       'en': {'a': 'Less than 6 months', 'gp': 'Your 90-day gameplan is included', 'B': 'Already in an evaluation', 'kick': 'Your 90-day gameplan', 'day9': 'Day 9 of 90', 'late': 'to catch up', 'quiz': 'Test yourself', 'dw': 'Done when', 'gate': 'The Month 1 gate', 'pass': 'On to Month 2', 'set': '90-day gameplan', 'stop': 'Stop the gameplan', 'go': 'Start the gameplan'},
-       'es': {'a': 'Menos de 6 meses', 'gp': 'Tu recorrido de 90 días está incluido', 'B': 'Ya en una evaluación', 'kick': 'Tu recorrido de 90 días', 'day9': 'Día 9 de 90', 'late': 'por recuperar', 'quiz': 'Ponte a prueba', 'dw': 'Hecho cuando', 'gate': 'La puerta del mes 1', 'pass': 'Pasar al mes 2', 'set': 'Recorrido de 90 días', 'stop': 'Detener el recorrido', 'go': 'Empezar el recorrido'}}
+TXT = {'fr': {'more': 'En savoir plus', 'a': 'Moins de 6 mois', 'gp': 'Ton parcours de 90 jours est inclus', 'opt': 'facultatif', 'prep': 'Préparation des données', 'kick': 'Ton parcours de 90 jours', 'day9': 'Jour 9 sur 90', 'late': 'à rattraper', 'quiz': 'Teste-toi', 'dw': 'C’est fait quand', 'gate': 'La porte du mois 1', 'pass': 'Passer au mois 2', 'set': 'Parcours de 90 jours', 'stop': 'Arrêter le parcours', 'go': 'Commencer le parcours'},
+       'en': {'more': 'Learn more', 'a': 'Less than 6 months', 'gp': 'Your 90-day gameplan is included', 'opt': 'optional', 'prep': 'Preparing the sample data', 'kick': 'Your 90-day gameplan', 'day9': 'Day 9 of 90', 'late': 'to catch up', 'quiz': 'Test yourself', 'dw': 'Done when', 'gate': 'The Month 1 gate', 'pass': 'On to Month 2', 'set': '90-day gameplan', 'stop': 'Stop the gameplan', 'go': 'Start the gameplan'},
+       'es': {'more': 'Saber más', 'a': 'Menos de 6 meses', 'gp': 'Tu recorrido de 90 días está incluido', 'opt': 'opcional', 'prep': 'Preparando los datos', 'kick': 'Tu recorrido de 90 días', 'day9': 'Día 9 de 90', 'late': 'por recuperar', 'quiz': 'Ponte a prueba', 'dw': 'Hecho cuando', 'gate': 'La puerta del mes 1', 'pass': 'Pasar al mes 2', 'set': 'Recorrido de 90 días', 'stop': 'Detener el recorrido', 'go': 'Empezar el recorrido'}}
 WIDE = "Math.max(...[...document.querySelectorAll('#gSheet, #gSheet *, #main *')].map((e) => e.getBoundingClientRect().right)) - innerWidth"
 STATE = "fetch('api/game/gameplan', {headers: {'X-Requested-With': 'fetch'}}).then((r) => r.json())"
 def today_ny():   # the game's trading day: New York + 6 h
@@ -50,24 +51,39 @@ def run(p, lang, phone, full):
   # 1. sign-up
   pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account][data-onb] [data-st-ph0=eval]', timeout=20000); pg.wait_for_timeout(700)
   ok(pg.locator('.nav-onb-me [data-exp="new"]').inner_text().strip() == T['a'] and pg.locator('.nav-onb-gp').count() == 0, f'{tag} 1 « {T["a"]} », nothing offered before it is tapped')
-  for s in ('form[data-form=account] [data-st-ph0=eval]', '[data-st-firm=apex]'): pg.locator(s).first.click(); pg.wait_for_timeout(250)
-  if pg.locator('[data-st-type=apex-eod]').count(): pg.locator('[data-st-type=apex-eod]').click(); pg.wait_for_timeout(250)
-  pg.locator('[data-st-size="50000"]').click(); pg.wait_for_timeout(250)
+  ok(T['opt'] not in pg.locator('#main').text_content().lower(), f'{tag} 1 no field says « {T["opt"]} »')
+  ok(pg.locator('[data-st-ph0]').evaluate_all("(b) => b.map((x) => x.dataset.stPh0)") == ['simulation', 'eval', 'funded', 'live'], f'{tag} 1 the account: simulation, evaluation, funded or live')
+  sim = not full   # the Spanish run: a simulation account (track A); the others an evaluation (track B)
+  if sim:
+    pg.locator('form[data-form=account] [data-st-ph0=simulation]').click(); pg.wait_for_selector('form.nav-live [name=name]', timeout=5000); pg.wait_for_timeout(300)
+    hd = pg.locator('.nav-live-h').text_content()
+    ok('simulación' in hd.lower(), f'{tag} 1 simulation: its own short form')
+    pg.fill('form.nav-live [name=firmName]', 'NinjaTrader'); pg.fill('form.nav-live [name=name]', 'Práctica'); pg.fill('form.nav-live [name=start]', '50000')
+  else:
+    for s in ('form[data-form=account] [data-st-ph0=eval]', '[data-st-firm=apex]'): pg.locator(s).first.click(); pg.wait_for_timeout(250)
+    if pg.locator('[data-st-type=apex-eod]').count(): pg.locator('[data-st-type=apex-eod]').click(); pg.wait_for_timeout(250)
+    pg.locator('[data-st-size="50000"]').click(); pg.wait_for_timeout(250)
+    demo = pg.locator('[data-act="demo"]')
+    ok(demo.count() == 1 and demo.is_visible(), f"{tag} 1 « explore with sample data » on the last step")
+    if demo.count() and demo.is_visible():   # « Explore with sample data first »: preparing at once, then its window; « Cancel » there
+      demo.click(); pg.wait_for_timeout(120)
+      busy = [demo.get_attribute('aria-busy'), T['prep'] in (demo.text_content() or '')]
+      until(pg, "document.querySelector('aside.nav-ask.open')", 30000)
+      ok(busy == ['true', True] and pg.locator('aside.nav-ask.open').count() == 1, f'{tag} 1 « explore with sample data »: preparing at once ({busy}), then its window')
+      pg.locator('aside.nav-ask.open [data-ask="0"]').click(); pg.wait_for_timeout(500)
   pg.locator('[data-onb-fn]').click(); pg.keyboard.type('Noa')
-  pg.locator('.nav-onb-me [data-exp="new"]').click(); until(pg, "document.querySelector('.nav-onb-gp [data-gp-track]')", 6000)
+  pg.locator('.nav-onb-me [data-exp="new"]').click(); until(pg, "document.querySelector('.nav-onb-gp p')", 6000)
   box = pg.locator('.nav-onb-gp').inner_text() if pg.locator('.nav-onb-gp').count() else ''
-  tracks = pg.evaluate("[...document.querySelectorAll('.nav-onb-gp [data-gp-track]')].map((b) => [b.dataset.gpTrack, b.classList.contains('on')])")
-  ok(T['gp'] in box and tracks == [['A', True], ['B', False]], f'{tag} 1 tapped: the gameplan offered right under it, track A chosen ({tracks})')
+  ok(T['gp'] in box and pg.locator('.nav-onb-gp button').count() == 0, f'{tag} 1 tapped: the gameplan offered right under it, no second question')
   if phone: ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} 1 the page no wider than the screen')
-  pg.locator('.nav-onb-gp [data-gp-track="B"]').click(); pg.wait_for_timeout(200)
   pg.locator('.nav-onb-me [data-exp="new"]').click(); pg.wait_for_timeout(300)
   ok(pg.locator('.nav-onb-gp').count() == 0, f'{tag} 1 « {T["a"]} » tapped again: the offer goes')
-  pg.locator('.nav-onb-me [data-exp="new"]').click(); until(pg, "document.querySelector('.nav-onb-gp [data-gp-track]')", 6000)
-  pg.locator('.nav-onb-gp [data-gp-track="B"]').click(); pg.wait_for_timeout(200)
+  pg.locator('.nav-onb-me [data-exp="new"]').click(); until(pg, "document.querySelector('.nav-onb-gp p')", 6000)
   pg.locator('form[data-form=account][data-onb] [type=submit]').click()
-  pg.wait_for_selector('#gSheet.g-plan, #gSheet .g-gate', timeout=10000); pg.wait_for_timeout(600)
-  st = pg.evaluate(STATE)
-  ok(st.get('started') and st.get('track') == 'B' and ((st.get('done') or {}).get('1') or {}).get('by') == 'sweep', f"{tag} 1 « Create account »: the gameplan started, track B, mission 1 ticked by Sweep ({st.get('track')}, {list((st.get('done') or {}).keys())})")
+  pg.wait_for_selector('#gSheet.g-plan, #gSheet .g-gate, #gSheet.g-pm', timeout=10000); pg.wait_for_timeout(600)
+  st = pg.evaluate(STATE); want = 'A' if sim else 'B'
+  ok(st.get('started') and st.get('track') == want and st.get('day') == 1 and ((st.get('done') or {}).get('1') or {}).get('by') == 'sweep', f"{tag} 1 « Create account »: the gameplan started today (day {st.get('day')}), track {want} from the account, mission 1 ticked by Sweep ({st.get('track')}, {list((st.get('done') or {}).keys())})")
+  if sim: ok(pg.evaluate("S.accounts.map((a) => [a.money_type, a.phase])") == [['simulation', 'simulation']], f"{tag} 1 the account is a simulation one ({pg.evaluate('S.accounts.map((a) => [a.money_type, a.phase])')})")
   me = pg.evaluate("fetch('api/data',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json()).then(j=>j.user&&j.user.experience)")
   ok(me == 'new', f'{tag} 1 the experience kept: « new » ({me})')
   uid = pg.evaluate("fetch('api/data',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json()).then(j=>j.user&&j.user.id)")
@@ -123,8 +139,10 @@ def run(p, lang, phone, full):
   ok(T['set'] in s and '31' in s and T['stop'] in s, f'{tag} 5 Settings: the gameplan, its day, « {T["stop"]} »')
   pg.locator('#main .gp-set [data-gp="stop"]').click(); until(pg, "document.querySelector('aside.nav-ask.open')", 4000)
   pg.locator('aside.nav-ask.open [data-ask="1"]').click(); until(pg, "document.querySelector('#main .gp-set [data-gp=go]')", 6000)
-  ok(not pg.evaluate(STATE)['started'] and pg.locator('#main .gp-set [data-gp=go]').count() == 2, f'{tag} 5 « Stop » asked first, then the gameplan is gone; « {T["go"]} » offered')
-  pg.locator('#main .gp-set [data-gp=go][data-t=A]').click(); until(pg, "document.querySelector('#gSheet .gp-map')", 6000)
+  ok(not pg.evaluate(STATE)['started'] and pg.locator('#main .gp-set [data-gp=go]').count() == 1 and pg.locator('#main .gp-set .gp-facts span').count() == 4, f'{tag} 5 « Stop » asked first, then the gameplan is gone; « {T["go"]} » and its 4 facts')
+  pg.locator('#main .gp-set [data-gp=learn]').click(); until(pg, "document.querySelector('#gSheet .gp-learn-s')", 6000)
+  ok(pg.locator('#gSheet .gp-lm').count() == 3 and pg.locator('#gSheet .gp-learn-go [data-gp=go]').count() == 1, f'{tag} 5 « {T["more"]} »: the 3 months and the button to start')
+  pg.locator('#gSheet .gp-learn-go [data-gp=go]').click(); until(pg, "document.querySelector('#gSheet .gp-map')", 6000)
   ok(pg.evaluate(STATE)['started'] and pg.locator('#gSheet .gp-map').count() == 1, f'{tag} 5 started again from Settings: the map opens')
   ok(not errs, f'{tag} no page error ({errs[:2]})')
   c.close(); br.close()

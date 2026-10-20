@@ -11,15 +11,15 @@
   const LWC_SRC = 'assets/vendor/lightweight-charts.5.2.1.standalone.production.js';
   const TFS = [['15s', 15], ['30s', 30], ['1m', 60], ['5m', 300], ['15m', 900], ['1h', 3600]];
   const S_ = {
-    en: { adv: 'Advanced options', contract_lbl: 'Contract month (optional)', contract_help: 'Only if you traded another month than the main contract (e.g. around a rollover). Sweep then loads that exact contract\'s chart.', contract_bad: 'Format: root + month + year, e.g. NQZ6', snap: 'Snap', hint: 'Tap a candle: {tool}', too_recent_tk: 'The chart for this date will be ready {date}. The form works as usual.', pending: "This trade's chart will be ready {date}. We'll add it to your recap automatically.", unsupported: 'Chart not available yet for this instrument.',
+    en: { adv: 'Advanced options', contract_lbl: 'Contract month', contract_help: 'Only if you traded another month than the main contract (e.g. around a rollover). Sweep then loads that exact contract\'s chart.', contract_bad: 'Format: root + month + year, e.g. NQZ6', snap: 'Snap', hint: 'Tap a candle: {tool}', too_recent_tk: 'The chart for this date will be ready {date}. The form works as usual.', pending: "This trade's chart will be ready {date}. We'll add it to your recap automatically.", unsupported: 'Chart not available yet for this instrument.',
       soon: 'Chart available soon.', far: "This trade's prices are far from the market that day: check the instrument, date or prices.", mismatch: "This price doesn't match that candle. Check the time or price.", save: 'Save image', saved: 'Chart added to your screenshots',
       source: '{contract} · CME data', full: 'Full screen', close: 'Close', entry: 'Entry', exit: 'Exit', stop: 'Stop', target: 'Target', pts: 'pts', recenter: 'Double-tap to recenter',
       legal: 'Charts by TradingView Lightweight Charts™ (Apache 2.0) · tradingview.com' },
-    fr: { adv: 'Options avancées', contract_lbl: 'Mois du contrat (facultatif)', contract_help: 'Seulement si tu as tradé un autre mois que le contrat principal (par exemple autour d’un rollover). Sweep charge alors le graphique de ce contrat précis.', contract_bad: 'Format : racine + mois + année, ex. NQZ6', snap: 'Aimanter', hint: 'Touche une bougie : {tool}', too_recent_tk: 'Le graphique de cette date sera disponible {date}. Le formulaire fonctionne normalement.', pending: "Le graphique de ce trade sera disponible {date}. On l'ajoutera automatiquement à ton récap.", unsupported: 'Graphique pas encore disponible pour cet instrument.',
+    fr: { adv: 'Options avancées', contract_lbl: 'Mois du contrat', contract_help: 'Seulement si tu as tradé un autre mois que le contrat principal (par exemple autour d’un rollover). Sweep charge alors le graphique de ce contrat précis.', contract_bad: 'Format : racine + mois + année, ex. NQZ6', snap: 'Aimanter', hint: 'Touche une bougie : {tool}', too_recent_tk: 'Le graphique de cette date sera disponible {date}. Le formulaire fonctionne normalement.', pending: "Le graphique de ce trade sera disponible {date}. On l'ajoutera automatiquement à ton récap.", unsupported: 'Graphique pas encore disponible pour cet instrument.',
       soon: 'Graphique disponible bientôt.', far: "Les prix de ce trade sont loin du marché ce jour-là : vérifie l'instrument, la date ou les prix.", mismatch: "Le prix ne correspond pas à cette bougie, vérifie l'heure ou le prix.", save: "Enregistrer l'image", saved: 'Graphique ajouté à tes captures',
       source: '{contract} · données CME', full: 'Plein écran', close: 'Fermer', entry: 'Entrée', exit: 'Sortie', stop: 'Stop', target: 'Objectif', pts: 'pts', recenter: 'Double-tap pour recentrer',
       legal: 'Graphiques : TradingView Lightweight Charts™ (Apache 2.0) · tradingview.com' },
-    es: { adv: 'Opciones avanzadas', contract_lbl: 'Mes del contrato (opcional)', contract_help: 'Solo si operaste otro mes distinto del contrato principal (por ejemplo, cerca de un rollover). Sweep carga entonces el gráfico de ese contrato exacto.', contract_bad: 'Formato: raíz + mes + año, p. ej. NQZ6', snap: 'Imantar', hint: 'Toca una vela: {tool}', too_recent_tk: 'El gráfico de esta fecha estará listo {date}. El formulario funciona normalmente.', pending: 'El gráfico de este trade estará listo {date}. Lo añadiremos automáticamente a tu resumen.', unsupported: 'Gráfico aún no disponible para este instrumento.',
+    es: { adv: 'Opciones avanzadas', contract_lbl: 'Mes del contrato', contract_help: 'Solo si operaste otro mes distinto del contrato principal (por ejemplo, cerca de un rollover). Sweep carga entonces el gráfico de ese contrato exacto.', contract_bad: 'Formato: raíz + mes + año, p. ej. NQZ6', snap: 'Imantar', hint: 'Toca una vela: {tool}', too_recent_tk: 'El gráfico de esta fecha estará listo {date}. El formulario funciona normalmente.', pending: 'El gráfico de este trade estará listo {date}. Lo añadiremos automáticamente a tu resumen.', unsupported: 'Gráfico aún no disponible para este instrumento.',
       soon: 'Gráfico disponible pronto.', far: 'Los precios de este trade están lejos del mercado ese día: revisa el instrumento, la fecha o los precios.', mismatch: 'El precio no coincide con esa vela. Revisa la hora o el precio.', save: 'Guardar imagen', saved: 'Gráfico añadido a tus capturas',
       source: '{contract} · datos CME', full: 'Pantalla completa', close: 'Cerrar', entry: 'Entrada', exit: 'Salida', stop: 'Stop', target: 'Objetivo', pts: 'pts', recenter: 'Doble toque para recentrar',
       legal: 'Gráficos: TradingView Lightweight Charts™ (Apache 2.0) · tradingview.com' },
@@ -587,10 +587,12 @@
       const days = [];
       for (let h = 2; days.length < 12 && h < 45; h++) { const d = addDays(todayStr(), -h), w = pd(d).getDay(); if (w !== 0 && w !== 6) days.unshift(d); }
       const trades = [], journals = [];
+      // the candles of every day, 4 requests at a time (20 Oct.: one after the other, « Explore with sample data » looked stuck)
+      const bars = {};
+      const fetchDay = async (d) => { const w0 = wall(`${d} 09:30`), utc = w0 - (ny(w0) - w0); try { bars[d] = await apiJSON(`api/chart/bars?symbol=NQ&from=${utc}&to=${utc + 4 * 3600}&tf=1m`); } catch (x) { bars[d] = null; } };
+      for (let i = 0; i < days.length; i += 4) await Promise.all(days.slice(i, i + 4).map(fetchDay));
       for (const d of days) {
-        const w0 = wall(`${d} 09:30`), utc = w0 - (ny(w0) - w0);
-        let r;
-        try { r = await apiJSON(`api/chart/bars?symbol=NQ&from=${utc}&to=${utc + 4 * 3600}&tf=1m`); } catch (x) { r = null; }
+        const r = bars[d];
         if (!r || r.status !== 'ok' || !r.bars || r.bars.length < 60) continue;
         const B = r.bars, n = Math.floor(rnd(1, 3.6)), acct = pick(accounts).id;
         let at = Math.floor(rnd(2, 20)), dayNet = 0, losses = 0;

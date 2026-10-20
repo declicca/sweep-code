@@ -60,7 +60,7 @@ assert n == 90, n
 blocks = {k: d[k] for k in sorted({b for v in LEARN.values() for b in v})}
 data = {'months': [{'name': d['NAMES'][i], 'span': d['SPANS'][i], 'gate': d['GATES'][i]} for i in range(3)],
         'weeks': weeks, 'missions': missions, 'blocks': blocks,
-        'words': {k: d[k] for k in ('KIND', 'MKT', 'DONE', 'DAY', 'WD', 'DISCLAIM', 'NEW')}, 'how': d['M1_HOW']}
+        'words': {k: d[k] for k in ('KIND', 'MKT', 'DONE', 'DAY', 'WD', 'DISCLAIM', 'NEW')}, 'how': [x for x in d['M1_HOW'] if not x['en'].startswith('<b>Start on a Monday')]}   # the app starts the day the account is made (20 Oct., Mateo)
 js = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
 JS = js
 php = '[' + ','.join(f"{m['n']}=>[{m['min']},'{m.get('a','')}',{m.get('gate',0)}]" for m in missions) + ']'

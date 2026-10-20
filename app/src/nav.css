@@ -1817,6 +1817,7 @@ form.nav-live::before,form.nav-live::after{display:none!important;content:none!i
 form.nav-live{background:none!important}
 form.nav-live > .nav-cancel{grid-column:1/-1;justify-self:end;order:-2;margin:0!important;float:none}
 form.nav-live > .nav-live-h{order:-1}
+form.nav-sim .onb-chips:has([data-act=onb-firm]){display:none!important}   /* a simulation account: no prop firm to pick (20 Oct.) */
 /* routine folded: the hidden steps no longer leave an empty band (no gap rows for folded parts) */
 html body .nav-rt.closed-rt{row-gap:0!important;gap:0!important}
 html body .nav-rt.closed-rt > .nav-rt-steps{margin:0!important;padding-top:0!important;padding-bottom:0!important;border:0!important}
@@ -2345,7 +2346,6 @@ html body #tkSlide .nav-like{display:inline-flex;align-items:center;gap:6px;alig
 .nav-onb-me .nav-onb-exp .nav-prof-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible}
 .nav-onb-gp{display:grid;gap:8px;margin:-4px 0 0;padding:12px 14px;border-radius:var(--r3);background:radial-gradient(120% 140% at 0% 0%,rgba(var(--pos-rgb),.14),transparent 62%),var(--panel2);animation:nav-onb-gp-in .45s var(--spring)}
 .nav-onb-gp p{margin:0;font-size:14px;line-height:1.45;color:var(--text2)}
-.nav-onb-me .nav-onb-gp .nav-prof-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}
 @keyframes nav-onb-gp-in{from{opacity:0;transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){.nav-onb-gp{animation:none}}
 .nav-onb-me .nav-onb-exp .chip{min-width:0;min-height:44px;padding:6px 8px;white-space:normal;text-align:center;line-height:1.2}
@@ -2842,4 +2842,8 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 /* a computer up to 1440 px: the 12 columns of Trades fit without a side scroll (20 Oct.: Setup cut at 1300 px) */
 @media (min-width:861px) and (max-width:1440px){ html body #main table.tbl th,html body #main table.tbl td{padding-left:10px;padding-right:10px}
   html body #main table.tbl-day th:nth-child(3),html body #main table.tbl-day td:nth-child(3){display:none} }   /* a day's trades (Journal): no « Session », its time says it */
+/* « Explore with sample data first »: preparing (20 Oct.) */
+[data-act="demo"].is-busy{display:inline-flex;align-items:center;gap:8px;opacity:1;cursor:progress}
+.nav-busy{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:nav-ptr-spin .8s linear infinite;flex-shrink:0}
+@media (prefers-reduced-motion:reduce){.nav-busy{animation-duration:2.4s}}
 }

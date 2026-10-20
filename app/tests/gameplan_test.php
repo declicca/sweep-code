@@ -32,17 +32,18 @@ $doc = function (string $col, array $d, string $u = 'g1') use ($pdo) { $pdo->pre
 
 // 1. the start
 $ok(count(GP_MISSIONS) === 90 && GP_MISSIONS[30][2] === 1 && GP_MISSIONS[60][2] === 2 && GP_MISSIONS[90][2] === 3, '1 90 missions, gates on days 30, 60, 90');
-$at('2026-10-21 10:00');   // a Wednesday
-$s = GameGameplan::state($U);
-$ok($s['access'] && !$s['started'] && $s['next_monday'] === '2026-10-26', '1 not started; it would start Monday 26 Oct. (' . $s['next_monday'] . ')');
-$s = GameGameplan::start($U, ['track' => 'B']);
-$ok($s['started'] && $s['start'] === '2026-10-26' && $s['track'] === 'B' && $s['day'] === 0 && $s['open_to'] === 0, '1 started: from the next Monday, track B, day 0, nothing open yet');
-$ok((GameGameplan::done($U, 2)['error'] ?? '') === 'not_open', '1 before the Monday: a mission is not open');
-$ok(!isset(((array) GameGameplan::state($U)['done'])['1']), '1 no account yet: mission 1 waits');
-$doc('accounts', ['id' => 'a1', 'name' => 'Topstep 50K', 'status' => 'active', 'rules' => []]);
-$s = GameGameplan::state($U);
-$ok((((array) $s['done'])['1']['by'] ?? '') === 'sweep' && ($xp($U)['gp:1'] ?? 0) === 20, '1 the first account, before the Monday: Sweep ticks mission 1, 20 XP');
-$at('2026-10-26 08:00'); $ok(GameGameplan::state($U)['day'] === 1 && GameGameplan::state($U)['open_to'] === 1, '1 Monday: day 1');
+$at('2026-10-21 10:00');   // a Wednesday: the day the account is made
+$Z = 'g0'; GameEngine::profile($Z);
+$ok(GameGameplan::state($Z)['access'] && !GameGameplan::state($Z)['started'], '1 not started');
+$s = GameGameplan::start($Z, ['track' => 'B']);
+$ok($s['started'] && $s['start'] === '2026-10-21' && $s['track'] === 'B' && $s['day'] === 1 && $s['open_to'] === 1, '1 started on a Wednesday: day 1 is that very day (20 Oct., Mateo), track B');
+$ok((GameGameplan::done($Z, 2)['error'] ?? '') === 'not_open', '1 day 2 is tomorrow: not open');
+$ok(!isset(((array) GameGameplan::state($Z)['done'])['1']), '1 no account yet: mission 1 waits');
+$doc('accounts', ['id' => 'a1', 'name' => 'Topstep 50K', 'status' => 'active', 'rules' => []], 'g0');
+$ok((((array) GameGameplan::state($Z)['done'])['1']['by'] ?? '') === 'sweep' && ($xp($Z)['gp:1'] ?? 0) === 20, '1 the first account: Sweep ticks mission 1, 20 XP');
+// the main trader, from Monday 26 Oct.
+$at('2026-10-26 08:00'); GameGameplan::start($U, []); $doc('accounts', ['id' => 'a1', 'name' => 'Topstep 50K', 'status' => 'active', 'rules' => []]);
+$ok(GameGameplan::state($U)['day'] === 1 && GameGameplan::state($U)['open_to'] === 1 && ($xp($U)['gp:1'] ?? 0) === 20, '1 Monday: day 1, mission 1 by Sweep');
 $at('2026-10-27 09:00');   // Tuesday: day 2
 // 2. one mission a day, its XP once, late ones still open
 $s = GameGameplan::done($U, 2); GameGameplan::done($U, 2);
@@ -79,9 +80,16 @@ $V = 'g2'; GameEngine::profile($V); $at('2026-10-26 09:00'); GameGameplan::start
 $at('2026-11-10 09:00'); GameGameplan::done($V, 14); GameGameplan::done($V, 15); GameGameplan::done($V, 16);
 $at('2026-11-25 09:00');   // a Wednesday, day 31
 $s = GameGameplan::gate($V, 1, 'repeat');
-$ok($s['track'] === 'A' && GameGameplan::dayOf($s['start'], '2026-11-30') === 15, '4 again: day 15 is the next Monday, 30 Nov. (start ' . $s['start'] . ')');
+$ok($s['track'] === 'A' && GameGameplan::dayOf($s['start'], '2026-11-25') === 15, '4 again: day 15 is today, 25 Nov. (start ' . $s['start'] . ')');
 $d = array_map('strval', array_keys((array) $s['done']));
-$ok(in_array('14', $d, true) && !in_array('15', $d, true) && !in_array('16', $d, true) && $s['open_to'] < 15, '4 Weeks 3 and 4 open again (14 kept, 15 and 16 to redo), nothing from day 15 before the Monday');
+$ok(in_array('14', $d, true) && !in_array('15', $d, true) && !in_array('16', $d, true) && $s['open_to'] === 15, '4 Weeks 3 and 4 open again (14 kept, 15 and 16 to redo), from day 15 today');
+// 4b. the track, never asked: from the accounts
+$T1 = 'g4'; GameEngine::profile($T1); $at('2026-10-21 10:00');
+$doc('accounts', ['id' => 's1', 'name' => 'Sim', 'status' => 'active', 'money_type' => 'simulation', 'phase' => 'simulation'], $T1);
+$ok(GameGameplan::start($T1, [])['track'] === 'A', '4b only a simulation account: track A');
+$doc('accounts', ['id' => 'e1', 'name' => 'Eval', 'status' => 'active', 'money_type' => 'eval', 'phase' => 'eval', 'firm_id' => 'f'], $T1);
+$ok(GameGameplan::start($T1, [])['track'] === 'B', '4b an evaluation too: track B');
+
 // 5. Free, stop
 $at('2026-10-21 10:00');
 $ok(!GameGameplan::state('free1')['access'] && (GameGameplan::start('free1', [])['error'] ?? '') === 'locked' && (GameGameplan::done('free1', 1)['error'] ?? '') === 'locked', '5 Free: locked');

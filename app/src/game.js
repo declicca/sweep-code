@@ -21,13 +21,13 @@
       streak: 'Streak', best: 'Best', freezes: 'Freezes', level: 'Level', lvl: 'Lv {n}', days: '{n} days', day1: '1 day',
       start_title: 'Getting started', start_steps: { goal: 'Goal chosen', style: 'Style chosen', rules: 'Account rules', journal: 'First trade journaled', plan: 'First plan', review: 'First review' },
       plan_title: 'Plan of the day', bias: 'Bias', long: 'Long', short: 'Short', neutral: 'Neutral', no_trade: 'No trading today', setups: 'Allowed setups',
-      no_setups: 'Pick the setups you allow yourself today. They are kept for your next plans and trades.', other_setup: 'Other setup', setup_ph: 'Name of your setup', add: 'Add', max_loss: 'Max loss today', max_trades: 'Max trades (optional)', levels: 'Key levels / note (optional)',
-      rule: 'Rule of the day', rule_ph: 'One rule to hold today (optional)',
+      no_setups: 'Pick the setups you allow yourself today. They are kept for your next plans and trades.', other_setup: 'Other setup', setup_ph: 'Name of your setup', add: 'Add', max_loss: 'Max loss today', max_trades: 'Max trades', levels: 'Key levels / note',
+      rule: 'Rule of the day', rule_ph: 'One rule to hold today',
       gate_intro: 'Before your first trade: 30 seconds for your plan.', gate_skip: 'Skip, add my trade', gate_save: 'Save and add my trade', save_plan: 'Save my plan', confirm_plan: 'Confirm my plan', from_plan: 'From your plan of {d}: confirm or adjust.', dll_hint: 'Daily limit of {a}: {v}', dd_hint: 'Drawdown room of {a}: {v}', plan_needs: 'Pick a bias and your max loss for the day.', plan_late: 'Your first trade is already in: this plan counts as late.',
       plan_past: 'A plan can only be made for today.',
       journal_title: 'Journal', setup: 'Setup', emotion: 'Emotion before entry', rules: 'Did you follow your rules?', yes: 'Yes', partial: 'Partly', no: 'No',
       next: 'Next', done: 'Done', skip: 'Skip', of: '{a} of {b}', all_journaled: 'Every trade is journaled.',
-      review_title: 'Daily review', improve_opt: 'One thing to improve tomorrow (optional)', discipline: 'Discipline today', save_review: 'Save my review', followed: 'Did you follow your plan?', grade: 'Your day, graded', review_needs: 'Answer the 3 questions.',
+      review_title: 'Daily review', improve_opt: 'One thing to improve tomorrow', discipline: 'Discipline today', save_review: 'Save my review', followed: 'Did you follow your plan?', grade: 'Your day, graded', review_needs: 'Answer the 3 questions.',
       today_title: 'Your day', step_plan: 'Plan before the first trade', step_exec: 'Trades inside your plan', step_review: 'Trades journaled and day reviewed',
       v_setup_not_in_plan: 'Setup outside your plan', v_no_stop: 'Stop not respected', v_against_bias: 'Against your bias', v_over_max_loss: 'Taken after your max loss', v_over_max_trades: 'Above your max number of trades',
       v_plan_no_trade: 'Taken on a day off', v_rules: 'Rules partly followed',
@@ -65,13 +65,13 @@
       streak: 'Streak', best: 'Meilleur', freezes: 'Gels', level: 'Niveau', lvl: 'Niv. {n}', days: '{n} jours', day1: '1 jour',
       start_title: 'Démarrage', start_steps: { goal: 'Objectif choisi', style: 'Style choisi', rules: 'Règles du compte', journal: 'Premier trade journalisé', plan: 'Premier plan', review: 'Première revue' },
       plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd’hui", setups: 'Setups autorisés',
-      no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', max_trades: 'Nombre max de trades (facultatif)', levels: 'Niveaux clés / note (facultatif)',
-      rule: 'Règle du jour', rule_ph: 'Une règle à tenir aujourd’hui (facultatif)',
+      no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', max_trades: 'Nombre max de trades', levels: 'Niveaux clés / note',
+      rule: 'Règle du jour', rule_ph: 'Une règle à tenir aujourd’hui',
       gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', save_plan: 'Enregistrer mon plan', confirm_plan: 'Confirmer mon plan', from_plan: 'Repris de ton plan du {d} : confirme ou ajuste.', dll_hint: 'Limite du jour de {a} : {v}', dd_hint: 'Marge de drawdown de {a} : {v}', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
       plan_past: "Un plan ne peut être fait que pour aujourd’hui.",
       journal_title: 'Journaliser', setup: 'Setup', emotion: "Émotion avant l’entrée", rules: 'As-tu suivi tes règles ?', yes: 'Oui', partial: 'En partie', no: 'Non',
       next: 'Suivant', done: 'Terminé', skip: 'Passer', of: '{a} sur {b}', all_journaled: 'Tous les trades sont journalisés.',
-      review_title: 'Revue du jour', improve_opt: 'Une chose à améliorer demain (facultatif)', discipline: "Discipline aujourd’hui", save_review: 'Enregistrer ma revue', followed: 'As-tu suivi ton plan ?', grade: 'Ta note du jour', review_needs: 'Réponds aux 3 questions.',
+      review_title: 'Revue du jour', improve_opt: 'Une chose à améliorer demain', discipline: "Discipline aujourd’hui", save_review: 'Enregistrer ma revue', followed: 'As-tu suivi ton plan ?', grade: 'Ta note du jour', review_needs: 'Réponds aux 3 questions.',
       today_title: 'Ta journée', step_plan: 'Plan avant le premier trade', step_exec: 'Trades dans ton plan', step_review: 'Trades journalisés et journée revue',
       v_setup_not_in_plan: 'Setup hors de ton plan', v_no_stop: 'Stop non respecté', v_against_bias: 'À l’inverse de ton biais', v_over_max_loss: 'Pris après ta perte max', v_over_max_trades: 'Au-delà de ton nombre max de trades',
       v_plan_no_trade: "Pris pendant un jour off", v_rules: 'Règles suivies en partie',
@@ -109,13 +109,13 @@
       streak: 'Racha', best: 'Mejor', freezes: 'Congeladores', level: 'Nivel', lvl: 'Nv. {n}', days: '{n} días', day1: '1 día',
       start_title: 'Primeros pasos', start_steps: { goal: 'Objetivo elegido', style: 'Estilo elegido', rules: 'Reglas de la cuenta', journal: 'Primer trade registrado', plan: 'Primer plan', review: 'Primera revisión' },
       plan_title: 'Plan del día', bias: 'Sesgo', long: 'Largo', short: 'Corto', neutral: 'Neutral', no_trade: 'Hoy no opero', setups: 'Setups permitidos',
-      no_setups: 'Elige los setups que te permites hoy. Se guardan para tus próximos planes y operaciones.', other_setup: 'Otro setup', setup_ph: 'Nombre de tu setup', add: 'Añadir', max_loss: 'Pérdida máx. del día', max_trades: 'Máx. de trades (opcional)', levels: 'Niveles clave / nota (opcional)',
-      rule: 'Regla del día', rule_ph: 'Una regla para hoy (opcional)',
+      no_setups: 'Elige los setups que te permites hoy. Se guardan para tus próximos planes y operaciones.', other_setup: 'Otro setup', setup_ph: 'Nombre de tu setup', add: 'Añadir', max_loss: 'Pérdida máx. del día', max_trades: 'Máx. de trades', levels: 'Niveles clave / nota',
+      rule: 'Regla del día', rule_ph: 'Una regla para hoy',
       gate_intro: 'Antes de tu primera operación: 30 segundos para tu plan.', gate_skip: 'Saltar, añadir mi operación', gate_save: 'Guardar y añadir mi operación', save_plan: 'Guardar mi plan', confirm_plan: 'Confirmar mi plan', from_plan: 'Retomado de tu plan del {d}: confirma o ajusta.', dll_hint: 'Límite diario de {a}: {v}', dd_hint: 'Margen de drawdown de {a}: {v}', plan_needs: 'Elige un sesgo y tu pérdida máx. del día.', plan_late: 'Tu primer trade ya está hecho: este plan cuenta como tardío.',
       plan_past: 'Solo se puede hacer un plan para hoy.',
       journal_title: 'Registrar', setup: 'Setup', emotion: 'Emoción antes de entrar', rules: '¿Seguiste tus reglas?', yes: 'Sí', partial: 'En parte', no: 'No',
       next: 'Siguiente', done: 'Listo', skip: 'Saltar', of: '{a} de {b}', all_journaled: 'Todos los trades están registrados.',
-      review_title: 'Revisión del día', improve_opt: 'Una cosa a mejorar mañana (opcional)', discipline: 'Disciplina hoy', save_review: 'Guardar mi revisión', followed: '¿Seguiste tu plan?', grade: 'Tu nota del día', review_needs: 'Responde las 3 preguntas.',
+      review_title: 'Revisión del día', improve_opt: 'Una cosa a mejorar mañana', discipline: 'Disciplina hoy', save_review: 'Guardar mi revisión', followed: '¿Seguiste tu plan?', grade: 'Tu nota del día', review_needs: 'Responde las 3 preguntas.',
       today_title: 'Tu día', step_plan: 'Plan antes del primer trade', step_exec: 'Trades dentro de tu plan', step_review: 'Trades registrados y día revisado',
       v_setup_not_in_plan: 'Setup fuera de tu plan', v_no_stop: 'Stop no respetado', v_against_bias: 'En contra de tu sesgo', v_over_max_loss: 'Tomado después de tu pérdida máx.', v_over_max_trades: 'Por encima de tu máx. de trades',
       v_plan_no_trade: 'Tomado en un día libre', v_rules: 'Reglas seguidas en parte',
@@ -653,7 +653,7 @@
   const PMT = {
     en: {
       change: 'Change', never_taken: 'This scenario has not been taken in 10 sessions. Keep it?',
-      followed_sheet: 'Did you follow your sheet?', rules_q: 'Which rule?', note_tomorrow: 'A note for tomorrow? (optional, at the top of your next pre-market)',
+      followed_sheet: 'Did you follow your sheet?', rules_q: 'Which rule?', note_tomorrow: 'A note for tomorrow? It shows at the top of your next pre-market.',
       r_no_retest: 'Entered without waiting for the retest (5 min)', r_off_plan: 'A trade off my sheet', r_max_trades: 'Too many trades', r_news_window: 'Traded in a news window', r_moved_stop: 'Moved my stop', r_other: 'Another rule',
       d2: 'Yesterday', d2_no_retest: 'Yesterday you entered without waiting for the 5-min retest. What will help you wait today?', d2_off_plan: 'Yesterday you took a trade off your sheet. What took you out of the plan?',
       d2_max_trades: 'Yesterday you went over your number of trades. What will be your signal to stop today?', d2_news_window: 'Yesterday you traded during a news window. How will you stay out of it?',
@@ -663,7 +663,7 @@
       more: 'More info', adj: 'Adjust', x_bias: 'Bias', bullish: 'Bullish', bearish: 'Bearish', neutral: 'Neutral', x_levels: 'Key levels', x_levels_ph: 'e.g. PDH 21,290 · London high 21,250', x_plan: 'Expected scenario', x_plan_ph: 'e.g. A break of the London high that holds on the retest: I buy toward the PDH.', x_alt: 'Alternative scenario', x_alt_ph: 'e.g. Back under the London low: I sell toward the PDL. Otherwise, no trade.', x_need: 'Pick your bias and write your expected scenario.',
       tip_inst: 'The contract you trade today. Micros (MNQ, MES…) are worth 10 times less than minis (NQ, ES…): good to start. E.g. you trade the Nasdaq in micro → MNQ.',
       tip_london: 'The London session runs from about 3:00 to 8:00, New York time. Its high (London high) and its low (London low) are levels where price often reacts at the New York open. E.g. high 21,250, low 21,180. Read them on your chart (just above).',
-      tip_prev: 'PDH (previous day high) and PDL (previous day low): the high and the low of yesterday’s session. They are often a target or an obstacle. E.g. PDH 21,290, PDL 21,120. Optional, but they help propose your targets.',
+      tip_prev: 'PDH (previous day high) and PDL (previous day low): the high and the low of yesterday’s session. They are often a target or an obstacle. E.g. PDH 21,290, PDL 21,120. They help propose your targets.',
       tip_price: 'The price when you make your plan. It only pre-selects where the price is on the next screen. You can leave it empty.',
       tip_a1: 'In between: price stayed inside the London session, you wait for it to break out. Above the high or below the low: it already broke out, you play the follow-through or the return.',
       tip_a2: 'The level you watch first makes your main scenario; the other one becomes your alternative scenario. E.g. a bullish bias → the London high.',
@@ -679,8 +679,7 @@
       tip_plan: 'What you will do if the market goes the way of your bias, in one sentence. E.g. a break of the London high that holds on the retest: I buy toward the PDH.',
       tip_alt: 'What you will do if the market goes the other way. E.g. back under the London low: I sell toward the PDL. Otherwise, no trade.',
       tip_maxloss: 'The loss at which you stop for the day. Sweep starts from your account’s limit (or your drawdown room): never go above it.',
-      title: 'Pre-market', note: 'Your note from last session', of: '{a} of {b}', next: 'Continue', back: 'Back', save: 'Save my sheet', needs: 'Fill in what is missing to continue.', opt: 'optional',
-      base: 'Today’s levels', instrument: 'Instrument', inst_other: 'Other', inst_ph: 'Symbol, e.g. MNQ', inst_need: 'Pick your instrument.',
+      title: 'Pre-market', note: 'Your note from last session', of: '{a} of {b}', next: 'Continue', back: 'Back', save: 'Save my sheet', needs: 'Fill in what is missing to continue.', base: 'Today’s levels', instrument: 'Instrument', inst_other: 'Other', inst_ph: 'Symbol, e.g. MNQ', inst_need: 'Pick your instrument.',
       grp_london: 'London session', grp_london_d: 'before New York opens', grp_prev: 'Yesterday', grp_prev_d: 'PDH and PDL are yesterday’s high and low',
       lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Current price', ph_hint: 'In grey: the levels of your last sheet, for reference.',
       missing: 'Missing: {l}.', hl_order: 'The London high must be above the London low.', pd_order: 'The PDH must be above the PDL.', far: 'Check {v}: it is far from your other levels. Tap Continue if it is right.',
@@ -715,7 +714,7 @@
     },
     fr: {
       change: 'Modifier', never_taken: 'Ce scénario n’a pas été pris depuis 10 séances. Le garder ?',
-      followed_sheet: 'As-tu suivi ta fiche ?', rules_q: 'Quelle règle ?', note_tomorrow: 'Une note pour demain ? (facultatif, en haut de ton prochain pré-marché)',
+      followed_sheet: 'As-tu suivi ta fiche ?', rules_q: 'Quelle règle ?', note_tomorrow: 'Une note pour demain ? Elle s’affiche en haut de ton prochain pré-marché.',
       r_no_retest: 'Entré sans attendre le retest (5 min)', r_off_plan: 'Un trade hors de ma fiche', r_max_trades: 'Trop de trades', r_news_window: 'Tradé pendant une fenêtre de news', r_moved_stop: 'Déplacé mon stop', r_other: 'Une autre règle',
       d2: 'Hier', d2_no_retest: 'Hier tu es entré sans attendre le retest en 5 min. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', d2_off_plan: 'Hier tu as pris un trade hors de ta fiche. Qu’est-ce qui t’a fait sortir du plan ?',
       d2_max_trades: 'Hier tu as dépassé ton nombre de trades. Quel sera ton signal d’arrêt aujourd’hui ?', d2_news_window: 'Hier tu as tradé pendant une fenêtre de news. Comment vas-tu t’en tenir à l’écart ?',
@@ -725,7 +724,7 @@
       more: 'Plus d’infos', adj: 'Ajuster', x_bias: 'Biais', bullish: 'Haussier', bearish: 'Baissier', neutral: 'Neutre', x_levels: 'Niveaux clés', x_levels_ph: 'ex. PDH 21 290 · London high 21 250', x_plan: 'Scénario attendu', x_plan_ph: 'ex. Cassure du London high qui tient au retest : j’achète vers le PDH.', x_alt: 'Scénario alternatif', x_alt_ph: 'ex. Retour sous le London low : je vends vers le PDL. Sinon, pas de trade.', x_need: 'Choisis ton biais et écris ton scénario attendu.',
       tip_inst: 'Le contrat que tu trades aujourd’hui. Les micros (MNQ, MES…) valent 10 fois moins que les minis (NQ, ES…) : bien pour débuter. Ex. : tu trades le Nasdaq en micro → MNQ.',
       tip_london: 'La séance de Londres va d’environ 3 h à 8 h, heure de New York. Son plus haut (London high) et son plus bas (London low) sont des niveaux où le prix réagit souvent à l’ouverture de New York. Ex. : high 21 250, low 21 180. Lis-les sur ton graphique (juste au-dessus).',
-      tip_prev: 'PDH (previous day high) et PDL (previous day low) : le plus haut et le plus bas de la séance d’hier. Ils servent souvent de cible ou d’obstacle. Ex. : PDH 21 290, PDL 21 120. Facultatifs, mais ils aident à proposer tes cibles.',
+      tip_prev: 'PDH (previous day high) et PDL (previous day low) : le plus haut et le plus bas de la séance d’hier. Ils servent souvent de cible ou d’obstacle. Ex. : PDH 21 290, PDL 21 120. Ils aident à proposer tes cibles.',
       tip_price: 'Le prix au moment où tu fais ton plan. Il sert seulement à pré-cocher où est le prix à l’écran suivant. Tu peux le laisser vide.',
       tip_a1: 'Entre les deux : le prix est resté dans la séance de Londres, tu attends qu’il en sorte. Au-dessus du high ou sous le low : il en est déjà sorti, tu joues la suite ou le retour.',
       tip_a2: 'Le niveau que tu surveilles en priorité donne ton scénario principal ; l’autre devient ton scénario alternatif. Ex. : biais haussier → London high.',
@@ -741,8 +740,7 @@
       tip_plan: 'Ce que tu feras si le marché va dans le sens de ton biais, en une phrase. Ex. : cassure du London high qui tient au retest : j’achète vers le PDH.',
       tip_alt: 'Ce que tu feras si le marché part dans l’autre sens. Ex. : retour sous le London low : je vends vers le PDL. Sinon, pas de trade.',
       tip_maxloss: 'La perte à partir de laquelle tu arrêtes pour la journée. Sweep part de la limite de ton compte (ou de ta marge de drawdown) : ne va jamais au-dessus.',
-      title: 'Pré-marché', note: 'Ta note de la dernière séance', of: '{a} sur {b}', next: 'Continuer', back: 'Retour', save: 'Enregistrer ma fiche', needs: 'Complète ce qui manque pour continuer.', opt: 'facultatif',
-      base: 'Les niveaux du jour', instrument: 'Instrument', inst_other: 'Autre', inst_ph: 'Symbole, ex. MNQ', inst_need: 'Choisis ton instrument.',
+      title: 'Pré-marché', note: 'Ta note de la dernière séance', of: '{a} sur {b}', next: 'Continuer', back: 'Retour', save: 'Enregistrer ma fiche', needs: 'Complète ce qui manque pour continuer.', base: 'Les niveaux du jour', instrument: 'Instrument', inst_other: 'Autre', inst_ph: 'Symbole, ex. MNQ', inst_need: 'Choisis ton instrument.',
       grp_london: 'Séance de Londres', grp_london_d: 'avant l’ouverture de New York', grp_prev: 'Hier', grp_prev_d: 'le PDH et le PDL sont le plus haut et le plus bas d’hier',
       lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Prix actuel', ph_hint: 'En gris : les niveaux de ta dernière fiche, pour repère.',
       missing: 'Il manque : {l}.', hl_order: 'Le London high doit être au-dessus du London low.', pd_order: 'Le PDH doit être au-dessus du PDL.', far: 'Vérifie {v} : c’est loin de tes autres niveaux. Touche Continuer si c’est bien ça.',
@@ -777,7 +775,7 @@
     },
     es: {
       change: 'Cambiar', never_taken: 'Este escenario no se ha tomado en 10 sesiones. ¿Mantenerlo?',
-      followed_sheet: '¿Seguiste tu ficha?', rules_q: '¿Qué regla?', note_tomorrow: '¿Una nota para mañana? (opcional, arriba de tu próximo pre-mercado)',
+      followed_sheet: '¿Seguiste tu ficha?', rules_q: '¿Qué regla?', note_tomorrow: '¿Una nota para mañana? Aparece arriba de tu próximo pre-mercado.',
       r_no_retest: 'Entré sin esperar el retest (5 min)', r_off_plan: 'Una operación fuera de mi ficha', r_max_trades: 'Demasiadas operaciones', r_news_window: 'Operé en una ventana de noticias', r_moved_stop: 'Moví mi stop', r_other: 'Otra regla',
       d2: 'Ayer', d2_no_retest: 'Ayer entraste sin esperar el retest en 5 min. ¿Qué te ayudará a esperar hoy?', d2_off_plan: 'Ayer tomaste una operación fuera de tu ficha. ¿Qué te sacó del plan?',
       d2_max_trades: 'Ayer superaste tu número de operaciones. ¿Cuál será tu señal para parar hoy?', d2_news_window: 'Ayer operaste durante una ventana de noticias. ¿Cómo te mantendrás al margen?',
@@ -787,7 +785,7 @@
       more: 'Más información', adj: 'Ajustar', x_bias: 'Sesgo', bullish: 'Alcista', bearish: 'Bajista', neutral: 'Neutral', x_levels: 'Niveles clave', x_levels_ph: 'p. ej. PDH 21.290 · London high 21.250', x_plan: 'Escenario esperado', x_plan_ph: 'p. ej. Ruptura del London high que aguanta en el retest: compro hacia el PDH.', x_alt: 'Escenario alternativo', x_alt_ph: 'p. ej. De vuelta bajo el London low: vendo hacia el PDL. Si no, no opero.', x_need: 'Elige tu sesgo y escribe tu escenario esperado.',
       tip_inst: 'El contrato que operas hoy. Los micros (MNQ, MES…) valen 10 veces menos que los minis (NQ, ES…): bien para empezar. P. ej. operas el Nasdaq en micro → MNQ.',
       tip_london: 'La sesión de Londres va de las 3:00 a las 8:00 aprox., hora de Nueva York. Su máximo (London high) y su mínimo (London low) son niveles donde el precio suele reaccionar en la apertura de Nueva York. P. ej. high 21.250, low 21.180. Léelos en tu gráfico (justo arriba).',
-      tip_prev: 'PDH (previous day high) y PDL (previous day low): el máximo y el mínimo de la sesión de ayer. Suelen servir de objetivo o de obstáculo. P. ej. PDH 21.290, PDL 21.120. Opcionales, pero ayudan a proponer tus objetivos.',
+      tip_prev: 'PDH (previous day high) y PDL (previous day low): el máximo y el mínimo de la sesión de ayer. Suelen servir de objetivo o de obstáculo. P. ej. PDH 21.290, PDL 21.120. Ayudan a proponer tus objetivos.',
       tip_price: 'El precio en el momento en que haces tu plan. Solo sirve para marcar de antemano dónde está el precio en la pantalla siguiente. Puedes dejarlo vacío.',
       tip_a1: 'Entre los dos: el precio se quedó dentro de la sesión de Londres, esperas a que salga. Por encima del high o por debajo del low: ya salió, juegas la continuación o el regreso.',
       tip_a2: 'El nivel que vigilas primero da tu escenario principal; el otro se vuelve tu escenario alternativo. P. ej. sesgo alcista → London high.',
@@ -803,8 +801,7 @@
       tip_plan: 'Lo que harás si el mercado va en el sentido de tu sesgo, en una frase. P. ej. ruptura del London high que aguanta en el retest: compro hacia el PDH.',
       tip_alt: 'Lo que harás si el mercado va en el otro sentido. P. ej. de vuelta bajo el London low: vendo hacia el PDL. Si no, no opero.',
       tip_maxloss: 'La pérdida a partir de la cual paras por el día. Sweep parte del límite de tu cuenta (o de tu margen de drawdown): nunca la superes.',
-      title: 'Pre-mercado', note: 'Tu nota de la última sesión', of: '{a} de {b}', next: 'Continuar', back: 'Atrás', save: 'Guardar mi ficha', needs: 'Completa lo que falta para continuar.', opt: 'opcional',
-      base: 'Los niveles del día', instrument: 'Instrumento', inst_other: 'Otro', inst_ph: 'Símbolo, p. ej. MNQ', inst_need: 'Elige tu instrumento.',
+      title: 'Pre-mercado', note: 'Tu nota de la última sesión', of: '{a} de {b}', next: 'Continuar', back: 'Atrás', save: 'Guardar mi ficha', needs: 'Completa lo que falta para continuar.', base: 'Los niveles del día', instrument: 'Instrumento', inst_other: 'Otro', inst_ph: 'Símbolo, p. ej. MNQ', inst_need: 'Elige tu instrumento.',
       grp_london: 'Sesión de Londres', grp_london_d: 'antes de la apertura de Nueva York', grp_prev: 'Ayer', grp_prev_d: 'el PDH y el PDL son el máximo y el mínimo de ayer',
       lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Precio actual', ph_hint: 'En gris: los niveles de tu última ficha, como referencia.',
       missing: 'Falta: {l}.', hl_order: 'El London high debe estar por encima del London low.', pd_order: 'El PDH debe estar por encima del PDL.', far: 'Revisa {v}: está lejos de tus otros niveles. Toca Continuar si es correcto.',
@@ -1108,9 +1105,9 @@
       <div class="pm-chart-slot"></div>
       <p class="pm-grp"><b>${pt('grp_london')}</b> · ${pt('grp_london_d')}${pmI('london')}</p>${pmTipP('london')}
       <div class="g-row2"><label class="g-f"><span data-noi18n>${pt('lh')}</span>${pmIn('lv.london_high', lv.london_high, P('london_high'))}</label><label class="g-f"><span data-noi18n>${pt('ll')}</span>${pmIn('lv.london_low', lv.london_low, P('london_low'))}</label></div>
-      <p class="pm-grp"><b>${pt('grp_prev')}</b> · ${pt('opt')}${pmI('prev')}</p>${pmTipP('prev')}
+      <p class="pm-grp"><b>${pt('grp_prev')}</b>${pmI('prev')}</p>${pmTipP('prev')}
       <div class="g-row2"><label class="g-f"><span data-noi18n>${pt('pdh')}</span>${pmIn('lv.pdh', lv.pdh, P('pdh'))}</label><label class="g-f"><span data-noi18n>${pt('pdl')}</span>${pmIn('lv.pdl', lv.pdl, P('pdl'))}</label></div>
-      <div class="g-f"><span>${pt('price')} · ${pt('opt')}${pmI('price')}</span>${pmTipP('price')}${pmIn('lv.price', lv.price)}</div>
+      <div class="g-f"><span>${pt('price')}${pmI('price')}</span>${pmTipP('price')}${pmIn('lv.price', lv.price)}</div>
       ${hasPh ? `<p class="g-hint-sm pm-ph">${pt('ph_hint')}</p>` : ''}
       <button type="button" class="link pm-off-day" data-pm="mode" data-v="express">${pt('x_quick')}</button>
       <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;   // a planned day off, as the plan always allowed (audit of 16 Oct., R21)
@@ -1135,7 +1132,7 @@
         <h3 class="pm-q">${pt('x_bias')}${pmI('bias')}</h3>${pmTipP('bias')}${pmSeg('X_bias', ['bullish', 'bearish', 'neutral'], a.X_bias)}
         <div class="g-f"><span>${pt('x_levels')}${pmI('levels')}</span>${pmTipP('levels')}${pmIn('X_levels', a.X_levels, pt('x_levels_ph'), 'text')}</div>
         <div class="g-f"><span>${pt('x_plan')}${pmI('plan')}</span>${pmTipP('plan')}${ta('X_plan', pt('x_plan_ph'))}</div>
-        <div class="g-f"><span>${pt('x_alt')} · ${pt('opt')}${pmI('alt')}</span>${pmTipP('alt')}${ta('X_alt', pt('x_alt_ph'))}</div>
+        <div class="g-f"><span>${pt('x_alt')}${pmI('alt')}</span>${pmTipP('alt')}${ta('X_alt', pt('x_alt_ph'))}</div>
         <div class="g-f"><span>${pt('dml')}${pmI('maxloss')}</span>${pmTipP('maxloss')}${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</div>
         ${PM.late ? `<button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>` : `<button type="button" class="link pm-off-day" data-pm="mode" data-v="full">${pt('x_guided')}</button>`}
         <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;
@@ -1666,6 +1663,10 @@
      (settings.news_seen), each with the button that does it; the session's modal, never on the day of sign-up ───────────── */
   // a new feature worth a window: add it on top (id never reused; d = the day it went live, older than 60 days: not shown)
   const NEWS = [
+    { id: 'gameplan-1', d: '2026-10-20', ic: 'flag', act: 'gameplan',   // the 90-day gameplan for traders starting out (20 Oct., Mateo)
+      t: { en: 'New: a 90-day gameplan for traders starting out', fr: 'Nouveau : un parcours de 90 jours pour débuter', es: 'Nuevo: un recorrido de 90 días para empezar' },
+      s: { en: 'One mission a day for 90 days: what to learn, what to practise, what to review, with a notion and a quick quiz when it helps. Sweep ticks what it can see.', fr: 'Une mission par jour pendant 90 jours : quoi apprendre, quoi pratiquer, quoi revoir, avec la notion du jour et un petit quiz quand ça aide. Sweep coche ce qu’il voit.', es: 'Una misión al día durante 90 días: qué aprender, qué practicar, qué revisar, con la noción del día y un pequeño quiz cuando ayuda. Sweep marca lo que ve.' },
+      b: { en: 'Discover the gameplan', fr: 'Découvrir le parcours', es: 'Descubrir el recorrido' } },
     { id: 'push-1', d: '2026-10-14', ic: 'bell', act: 'push',
       t: { en: 'Reminders on your phone', fr: 'Des rappels sur ton téléphone', es: 'Recordatorios en tu teléfono' },
       s: { en: 'Sweep reminds you of your plan before the open, your review after the session and your Friday recap.', fr: 'Sweep te rappelle ton plan avant l’ouverture, ta revue après la séance et ton bilan du vendredi.', es: 'Sweep te recuerda tu plan antes de la apertura, tu revisión tras la sesión y tu resumen del viernes.' },
@@ -1735,6 +1736,7 @@
       if (!r || !r.on) location.hash = '#settings';   // not possible here (iPhone outside the Home Screen, permission refused…): Settings says why
       return;
     }
+    if (n.act === 'gameplan') { if (window.SweepGPLoad) window.SweepGPLoad().then((m) => m.learn()).catch(() => { location.hash = '#settings'; }); return; }
     location.hash = n.act;
   }
   const newsText = (id) => { const n = NEWS.find((x) => x.id === id); return n ? { t: n.t[L()] || n.t.en, s: n.s[L()] || n.s.en } : null; };

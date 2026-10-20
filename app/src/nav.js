@@ -345,9 +345,9 @@ window.SweepMO = window.SweepMO || class {
     return { net: gs.reduce((a, g) => a + g.net, 0), n: gs.length, win: gw + gl ? Math.round(gw / (gw + gl) * 100) : null };
   }
   /* performance of the period, by account type (« of which Eval +600 · Funded +400 · Live +100 »): a copied trade counts once */
-  const MT = { en: { of: 'of which', eval: 'Eval', funded: 'Funded', live: 'Live', personal: 'Personal', perf: 'Performance', sim: 'Simulated', real: 'Real' },
-    fr: { of: 'dont', eval: 'Éval', funded: 'Financé', live: 'Live', personal: 'Perso', perf: 'Performance', sim: 'Simulé', real: 'Réel' },
-    es: { of: 'de lo cual', eval: 'Eval', funded: 'Financiada', live: 'Live', personal: 'Personal', perf: 'Rendimiento', sim: 'Simulado', real: 'Real' } };
+  const MT = { en: { of: 'of which', eval: 'Eval', funded: 'Funded', live: 'Live', personal: 'Personal', simulation: 'Sim', perf: 'Performance', sim: 'Simulated', real: 'Real' },
+    fr: { of: 'dont', eval: 'Éval', funded: 'Financé', live: 'Live', personal: 'Perso', simulation: 'Simu', perf: 'Performance', sim: 'Simulé', real: 'Réel' },
+    es: { of: 'de lo cual', eval: 'Eval', funded: 'Financiada', live: 'Live', personal: 'Personal', simulation: 'Simu', perf: 'Rendimiento', sim: 'Simulado', real: 'Real' } };
   function perfOf(tab) {
     if (!window.SweepMoney) return null;
     let a, b;
@@ -358,7 +358,7 @@ window.SweepMO = window.SweepMO || class {
   function splitHtml(pf) {
     if (!pf) return '';
     const y = MT[LANG] || MT.en, fm = (c) => (typeof money === 'function' ? money(c) : (c / 100).toFixed(0));
-    const parts = ['eval', 'funded', 'live', 'personal'].filter((k) => pf.byType[k]).map((k) => `<span class="nav-split-${k}">${y[k]} <b>${fm(pf.byType[k])}</b></span>`);
+    const parts = ['eval', 'funded', 'live', 'personal', 'simulation'].filter((k) => pf.byType[k]).map((k) => `<span class="nav-split-${k}">${y[k]} <b>${fm(pf.byType[k])}</b></span>`);
     return parts.length > 1 || (parts.length === 1 && (pf.byType.live || pf.byType.personal)) ? `<p class="nav-split" data-noi18n>${y.of} ${parts.join(' · ')}</p>` : '';
   }
   function kpiHtml(tab) {
@@ -3620,28 +3620,28 @@ window.SweepMO = window.SweepMO || class {
   function onbName() {
     if (!S.me || S.me.first_name) return;
     const f = document.querySelector('#main form[data-form="account"][data-onb]'); if (!f) return;
-    const had = f.querySelector('.nav-onb-me'); if (had) { if (f.firstElementChild !== had) f.prepend(had); srcInOptions(f, `<em>${({ en: 'optional', fr: 'facultatif', es: 'opcional' })[L] || ''}</em>`); return; }   // above the guided picker, which is put on top of the form too
+    const had = f.querySelector('.nav-onb-me'); if (had) { if (f.firstElementChild !== had) f.prepend(had); srcInOptions(f); return; }   // above the guided picker, which is put on top of the form too
     const box = document.createElement('div'); box.className = 'nav-onb-me'; box.setAttribute('data-noi18n', '');
-    const X = EXP[L] || EXP.en, opt = `<em>${({ en: 'optional', fr: 'facultatif', es: 'opcional' })[L] || ''}</em>`;
+    const X = EXP[L] || EXP.en;
     box.innerHTML = `<label class="f"><span>${t('me')}</span><input data-onb-fn autocomplete="given-name" maxlength="40" enterkeyhint="next"></label>
-      <div class="nav-prof-src nav-onb-exp"><span>${X.q} ${opt}</span><div class="nav-prof-chips">${[['new', X.a], ['lt1', X.b], ['gt1', X.c]].map(([v, l]) => `<button type="button" class="chip" data-exp="${v}">${l}</button>`).join('')}</div></div>
+      <div class="nav-prof-src nav-onb-exp"><span>${X.q}</span><div class="nav-prof-chips">${[['new', X.a], ['lt1', X.b], ['gt1', X.c]].map(([v, l]) => `<button type="button" class="chip" data-exp="${v}">${l}</button>`).join('')}</div></div>
       <p class="err nav-prof-err"></p>`;
     f.prepend(box);
-    srcInOptions(f, opt);
+    srcInOptions(f);
   }
   // where he found Sweep: under the form's « More options » (brief 03 step 1), once that line exists
-  function srcInOptions(f, opt) {
+  function srcInOptions(f) {
     const more = f.querySelector('.nav-acc-opt'); if (!more || more.querySelector('[data-src]')) return;
-    more.querySelector('summary').insertAdjacentHTML('afterend', `<div class="nav-prof-src nav-onb-src" data-noi18n><span>${t('fv')} ${opt}</span><div class="nav-prof-chips">${SRC.map(([v, l]) => `<button type="button" class="chip" data-src="${v}">${T[L] && T[L][l] ? T[L][l] : l}</button>`).join('')}</div></div>`);
+    more.querySelector('summary').insertAdjacentHTML('afterend', `<div class="nav-prof-src nav-onb-src" data-noi18n><span>${t('fv')}</span><div class="nav-prof-chips">${SRC.map(([v, l]) => `<button type="button" class="chip" data-src="${v}">${T[L] && T[L][l] ? T[L][l] : l}</button>`).join('')}</div></div>`);
   }
   // the experience sets the coach's starting tone (brief 03); the source is for Sweep: both optional, one tap, tapped again = undone
   // « less than 6 months » (value « new »): the 90-day gameplan is offered right under it, started with the account (20 Oct.)
   const EXP = { en: { q: 'How long have you been trading?', a: 'Less than 6 months', b: '6 months to a year', c: 'More than a year',
-      gp: 'Your 90-day gameplan is included: one mission a day to learn, with Sweep. It starts on Monday.', gpA: 'In simulation', gpB: 'Already in an evaluation', gpL: 'The 90-day gameplan comes with Pro: one mission a day to learn, with Sweep.' },
+      gp: 'Your 90-day gameplan is included: one mission a day to learn, with Sweep. It starts today.', gpL: 'The 90-day gameplan comes with Pro: one mission a day to learn, with Sweep.' },
     fr: { q: 'Tu trades depuis combien de temps ?', a: 'Moins de 6 mois', b: '6 mois à 1 an', c: 'Plus d’un an',
-      gp: 'Ton parcours de 90 jours est inclus : une mission par jour pour apprendre, avec Sweep. Il commence lundi.', gpA: 'En simulation', gpB: 'Déjà en évaluation', gpL: 'Le parcours de 90 jours vient avec Pro : une mission par jour pour apprendre, avec Sweep.' },
+      gp: 'Ton parcours de 90 jours est inclus : une mission par jour pour apprendre, avec Sweep. Il commence aujourd’hui.', gpL: 'Le parcours de 90 jours vient avec Pro : une mission par jour pour apprendre, avec Sweep.' },
     es: { q: '¿Desde cuándo operas?', a: 'Menos de 6 meses', b: '6 meses a 1 año', c: 'Más de un año',
-      gp: 'Tu recorrido de 90 días está incluido: una misión al día para aprender, con Sweep. Empieza el lunes.', gpA: 'En simulación', gpB: 'Ya en una evaluación', gpL: 'El recorrido de 90 días viene con Pro: una misión al día para aprender, con Sweep.' } };
+      gp: 'Tu recorrido de 90 días está incluido: una misión al día para aprender, con Sweep. Empieza hoy.', gpL: 'El recorrido de 90 días viene con Pro: una misión al día para aprender, con Sweep.' } };
   let GPA = null;   // can this trader have the gameplan (Pro, the trial, billing not live)? asked once, when « less than 6 months » is tapped
   async function gpOffer(f, on) {
     let box = f.querySelector('.nav-onb-gp');
@@ -3650,12 +3650,11 @@ window.SweepMO = window.SweepMO || class {
     if (GPA == null) { try { GPA = !!(await apiJSON('api/game/gameplan')).access; } catch (e) { GPA = false; } }
     if (!f.querySelector('[data-exp="new"].on')) return;
     if (!box) { box = document.createElement('div'); box.className = 'nav-onb-gp'; box.setAttribute('data-noi18n', ''); f.querySelector('.nav-onb-exp').after(box); }
-    box.innerHTML = GPA ? `<p>✦ ${X.gp}</p><div class="nav-prof-chips"><button type="button" class="chip on" aria-pressed="true" data-gp-track="A">${X.gpA}</button><button type="button" class="chip" aria-pressed="false" data-gp-track="B">${X.gpB}</button></div>` : `<p>${X.gpL}</p>`;
+    box.innerHTML = GPA ? `<p>✦ ${X.gp}</p>` : `<p>${X.gpL}</p>`;   // its track (sim or an evaluation) comes from the account chosen below: one question, not two
   }
   document.addEventListener('click', (e) => {
-    const c = e.target.closest && e.target.closest('form[data-onb] [data-src], form[data-onb] [data-exp], form[data-onb] [data-gp-track]'); if (!c) return;
-    const k = c.dataset.src != null ? 'data-src' : c.dataset.exp != null ? 'data-exp' : 'data-gp-track', was = c.classList.contains('on');
-    if (k === 'data-gp-track' && was) return;   // one of the two tracks stays chosen
+    const c = e.target.closest && e.target.closest('form[data-onb] [data-src], form[data-onb] [data-exp]'); if (!c) return;
+    const k = c.dataset.src != null ? 'data-src' : 'data-exp', was = c.classList.contains('on');
     c.closest('.nav-prof-chips').querySelectorAll(`[${k}]`).forEach((x) => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
     if (!was) { c.classList.add('on'); c.setAttribute('aria-pressed', 'true'); }
     if (k === 'data-exp') gpOffer(c.closest('form'), !was && c.dataset.exp === 'new');
@@ -3667,9 +3666,10 @@ window.SweepMO = window.SweepMO || class {
     if (!fn) { e.preventDefault(); e.stopImmediatePropagation(); if (err) err.textContent = t('need'); const i = box.querySelector('[data-onb-fn]'); i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
     const src = (f.querySelector('[data-src].on') || {}).dataset, xp = (f.querySelector('[data-exp].on') || {}).dataset;
     const b = { first_name: fn }; if (src && src.src) b.found_via = src.src; if (xp && xp.exp) b.experience = xp.exp;
-    // less than 6 months, with access: the 90-day gameplan starts (its first mission is this very account; Sweep ticks it)
-    const tr = xp && xp.exp === 'new' && GPA && (f.querySelector('[data-gp-track].on') || {}).dataset;
-    if (tr) apiJSON('api/game/gameplan/start', { method: 'POST', body: { track: tr.gpTrack || 'A' } }).then((st) => { if (window.SweepGPCheck) window.SweepGPCheck(st); }).catch(() => { /* Settings can start it */ });
+    // less than 6 months, with access: the 90-day gameplan starts today (its first mission is this very account; Sweep ticks it);
+    // track A for a simulation account, B for an evaluation, a funded or a live one
+    const tr = xp && xp.exp === 'new' && GPA ? { gpTrack: f.dataset.uxPhase === 'simulation' || f.dataset.acctMtype === 'simulation' ? 'A' : 'B' } : null;
+    if (tr) apiJSON('api/game/gameplan/start', { method: 'POST', body: { track: tr.gpTrack } }).then((st) => { if (window.SweepGPCheck) window.SweepGPCheck(st); }).catch(() => { /* Settings can start it */ });
     S.me = Object.assign({}, S.me || {}, { first_name: fn });
     fetch('api/me/profile', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(b) })
       .then((r) => r.json()).then((j) => { if (j && j.first_name) S.me = Object.assign({}, S.me, { first_name: j.first_name, last_name: j.last_name, full_name: j.full_name }); }).catch(() => { /* kept in this view; Settings can set it again */ });
@@ -3796,7 +3796,7 @@ window.SweepMO = window.SweepMO || class {
 
 /* ───────────── October 7 notes ─────────────
  * 1. Stats: « Slippage and fees » hidden.
- * 2. Plan: setups optional (folded behind « + My setups (optional) »).
+ * 2. Plan: setups optional (folded behind « + My setups »).
  * 3. Import: a visible « Import » button + a ⓘ « how to export from your platform » next to it (Trades and both
  *    « New trade » forms; not on the Calendar nor the Journal since B17: no one imports from there).
  * 4. Payout cards: « Congrats {name} ! » where the period line was, the period line above the boxes; and the boxes
@@ -3807,9 +3807,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { opts: 'More options', setups: '+ My setups (optional)', imp: 'Import CSV', impH: 'How to export your trades from your platform', congrats: 'Congrats', show: 'Boxes', disc: 'Discipline', dol: 'Dollars', wr: 'Win rate', rr: 'Avg R:R', dsc: 'Discipline', qty: 'How many accounts', qtyH: 'Same firm, size and rules. Named #1, #2…', cost: 'Account cost ($)', costH: 'Optional: added to your expenses.', also: 'Also for', alsoH: 'Same entry for each account you pick.', added: (n) => `${n} added` },
-    fr: { opts: 'Plus d’options', setups: '+ Mes setups (facultatif)', imp: 'Importer un CSV', impH: 'Comment exporter tes trades de ta plateforme', congrats: 'Congrats', show: 'Cases', disc: 'Discipline', dol: 'Dollars', wr: 'Taux de réussite', rr: 'R:R moyen', dsc: 'Discipline', qty: 'Nombre de comptes', qtyH: 'Même firme, taille et règles. Nommés #1, #2…', cost: 'Coût du compte ($)', costH: 'Facultatif : ajouté à tes dépenses.', also: 'Aussi pour', alsoH: 'La même entrée pour chaque compte choisi.', added: (n) => `${n} ajoutés` },
-    es: { opts: 'Más opciones', setups: '+ Mis setups (opcional)', imp: 'Importar CSV', impH: 'Cómo exportar tus operaciones de tu plataforma', congrats: 'Congrats', show: 'Casillas', disc: 'Disciplina', dol: 'Dólares', wr: 'Tasa de acierto', rr: 'R:R medio', dsc: 'Disciplina', qty: 'Número de cuentas', qtyH: 'Misma firma, tamaño y reglas. Nombradas #1, #2…', cost: 'Coste de la cuenta ($)', costH: 'Opcional: se añade a tus gastos.', also: 'También para', alsoH: 'La misma entrada para cada cuenta elegida.', added: (n) => `${n} añadidos` } };
+    en: { opts: 'More options', setups: '+ My setups', imp: 'Import CSV', impH: 'How to export your trades from your platform', congrats: 'Congrats', show: 'Boxes', disc: 'Discipline', dol: 'Dollars', wr: 'Win rate', rr: 'Avg R:R', dsc: 'Discipline', qty: 'How many accounts', qtyH: 'Same firm, size and rules. Named #1, #2…', cost: 'Account cost ($)', costH: 'Added to your expenses.', also: 'Also for', alsoH: 'Same entry for each account you pick.', added: (n) => `${n} added` },
+    fr: { opts: 'Plus d’options', setups: '+ Mes setups', imp: 'Importer un CSV', impH: 'Comment exporter tes trades de ta plateforme', congrats: 'Congrats', show: 'Cases', disc: 'Discipline', dol: 'Dollars', wr: 'Taux de réussite', rr: 'R:R moyen', dsc: 'Discipline', qty: 'Nombre de comptes', qtyH: 'Même firme, taille et règles. Nommés #1, #2…', cost: 'Coût du compte ($)', costH: 'Ajouté à tes dépenses.', also: 'Aussi pour', alsoH: 'La même entrée pour chaque compte choisi.', added: (n) => `${n} ajoutés` },
+    es: { opts: 'Más opciones', setups: '+ Mis setups', imp: 'Importar CSV', impH: 'Cómo exportar tus operaciones de tu plataforma', congrats: 'Congrats', show: 'Casillas', disc: 'Disciplina', dol: 'Dólares', wr: 'Tasa de acierto', rr: 'R:R medio', dsc: 'Disciplina', qty: 'Número de cuentas', qtyH: 'Misma firma, tamaño y reglas. Nombradas #1, #2…', cost: 'Coste de la cuenta ($)', costH: 'Se añade a tus gastos.', also: 'También para', alsoH: 'La misma entrada para cada cuenta elegida.', added: (n) => `${n} añadidos` } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
@@ -5256,12 +5256,12 @@ document.addEventListener('click', (e) => {
   })(0);
 })();
 
-/* Edge T1 · the setup in one tap, on the quick sheet and the manual form (optional): the day's plan setups first,
+/* Edge T1 · the setup in one tap, on the quick sheet and the manual form: the day's plan setups first,
  * then the trader's own (Settings, then the most used on their trades); common setups while they have fewer than 3 */
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const W = ({ en: ['Setup', 'optional'], fr: ['Setup', 'facultatif'], es: ['Setup', 'opcional'] })[L] || ['Setup', 'optional'];
+  const W = ['Setup'];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const low = (s) => String(s || '').trim().toLowerCase();
   function list(day) {
@@ -5277,7 +5277,7 @@ document.addEventListener('click', (e) => {
   }
   function html(day, cur) {
     const l = list(day); if (cur && !l.some((x) => low(x) === low(cur))) l.unshift(cur);
-    return `<div class="tk-f nav-sp" data-noi18n><span>${W[0]} <small class="muted">· ${W[1]}</small></span><div class="nav-sp-row">${l.map((x) => `<button type="button" class="chip ${low(x) === low(cur) ? 'on' : ''}" data-sp="${esc2(x)}">${esc2(x)}</button>`).join('')}</div></div>`;
+    return `<div class="tk-f nav-sp" data-noi18n><span>${W[0]}</span><div class="nav-sp-row">${l.map((x) => `<button type="button" class="chip ${low(x) === low(cur) ? 'on' : ''}" data-sp="${esc2(x)}">${esc2(x)}</button>`).join('')}</div></div>`;
   }
   /** a tap: one setup at most, a second tap clears it; returns the new value */
   function tap(b, cur) {
@@ -5516,18 +5516,29 @@ new window.SweepMO(() => {
 })();
 
 /* Live account: a simple, premium form — no presets (live rules differ too much between platforms).
-   Broker or firm, account name, starting balance, creation date. */
+   Broker or firm, account name, starting balance, creation date. A simulation account (20 Oct., Mateo) takes the same form. */
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = ({ en: ['Live account', 'Live rules differ from one platform to another: enter just the essentials. You can add your rules later on the account page.', '‹ Back', 'Broker or prop firm'], fr: ['Compte live', 'Les règles live varient d’une plateforme à l’autre : entre seulement l’essentiel. Tu pourras ajouter tes règles plus tard sur la page du compte.', '‹ Retour', 'Broker ou prop firm'], es: ['Cuenta live', 'Las reglas live cambian de una plataforma a otra: introduce solo lo esencial. Podrás añadir tus reglas más tarde en la página de la cuenta.', '‹ Volver', 'Bróker o prop firm'] })[L];
+  const TS = ({ en: ['Simulation account', 'Your practice account: its platform, its name and its starting balance. No firm rules.', '‹ Back', 'Platform (NinjaTrader, Tradovate…)', 'Platform', 'Simulation', 'e.g. Sim 50K'],
+    fr: ['Compte de simulation', 'Ton compte de pratique : sa plateforme, son nom et son solde de départ. Aucune règle de firme.', '‹ Retour', 'Plateforme (NinjaTrader, Tradovate…)', 'Plateforme', 'Simulation', 'p. ex. Simulation 50K'],
+    es: ['Cuenta de simulación', 'Tu cuenta de práctica: su plataforma, su nombre y su saldo inicial. Sin reglas de firma.', '‹ Volver', 'Plataforma (NinjaTrader, Tradovate…)', 'Plataforma', 'Simulación', 'p. ej. Simulación 50K'] })[L] || [];
   document.addEventListener('click', (e) => {
-    const b = e.target.closest && e.target.closest('form[data-form="account"] [data-st-ph0="live"]'); if (!b) return;
-    const f = b.closest('form');
+    const b = e.target.closest && e.target.closest('form[data-form="account"] [data-st-ph0="live"], form[data-form="account"] [data-st-ph0="simulation"]'); if (!b) return;
+    const f = b.closest('form'), sim = b.dataset.stPh0 === 'simulation', H = sim ? TS : T;
     setTimeout(() => {
       f.classList.remove('ux-st-on', 'ux-st-final'); f.classList.add('nav-live'); f.dataset.uxPreset = '';
       const w = f.querySelector('.ux-st, .ux-pk'); if (w) w.hidden = true;
-      if (!f.querySelector('.nav-live-h')) f.insertAdjacentHTML('afterbegin', `<div class="nav-live-h" data-noi18n><button type="button" class="link nav-live-back">${T[2]}</button><h3>${T[0]}</h3><p>${T[1]}</p></div>`);
+      if (!f.querySelector('.nav-live-h')) f.insertAdjacentHTML('afterbegin', `<div class="nav-live-h" data-noi18n><button type="button" class="link nav-live-back">${H[2]}</button><h3>${H[0]}</h3><p>${H[1]}</p></div>`);
+      if (sim) {   // a practice account: its platform (not a prop firm), no firm chips
+        f.dataset.acctMtype = 'simulation'; f.classList.add('nav-sim');
+        const fn0 = f.querySelector('[name="firmName"]'), lab = fn0 && fn0.closest('label'), sp = lab && lab.querySelector('span');
+        if (fn0) { fn0.placeholder = H[3]; if (!fn0.value) fn0.value = H[5]; }
+        if (sp) { sp.dataset.was = sp.textContent; sp.textContent = H[4]; }
+        const nm0 = f.querySelector('[name="name"]'); if (nm0) { nm0.dataset.ph = nm0.placeholder; nm0.placeholder = H[6]; setTimeout(() => nm0.focus(), 80); }
+        return;
+      }
       // real money, two kinds: the firm's live account, or a personal brokerage account (« Other firm or personal account »)
       const KD = { en: ['Firm live account', 'Personal account (broker)'], fr: ['Compte live de la firme', 'Compte perso (courtier)'], es: ['Cuenta live de la firma', 'Cuenta personal (bróker)'] }[L] || ['Firm live account', 'Personal account (broker)'];
       if (!f.querySelector('.nav-live-kind')) { f.dataset.acctMtype = f.dataset.acctMtype || 'live'; f.querySelector('.nav-live-h').insertAdjacentHTML('beforeend', `<div class="seg nav-live-kind" role="group">${[['live', KD[0]], ['personal', KD[1]]].map(([v, l]) => `<button type="button" data-lkind="${v}" class="${f.dataset.acctMtype === v ? 'on' : ''}">${l}</button>`).join('')}</div>`); }
@@ -5541,7 +5552,8 @@ new window.SweepMO(() => {
   });
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('.nav-live-back'); if (!b) return;
-    const f = b.closest('form'); delete f.dataset.acctMtype; f.classList.remove('nav-live'); f.classList.add('ux-st-on'); const w = f.querySelector('.ux-st, .ux-pk'); if (w) w.hidden = false; b.closest('.nav-live-h').remove();
+    const f = b.closest('form'); delete f.dataset.acctMtype; f.classList.remove('nav-live');
+    if (f.classList.contains('nav-sim')) { f.classList.remove('nav-sim'); const sp = f.querySelector('[name="firmName"]') && f.querySelector('[name="firmName"]').closest('label').querySelector('span'); if (sp && sp.dataset.was) sp.textContent = sp.dataset.was; const nm = f.querySelector('[name="name"]'); if (nm && nm.dataset.ph) nm.placeholder = nm.dataset.ph; const fn = f.querySelector('[name="firmName"]'); if (fn && fn.value === TS[5]) fn.value = ''; } f.classList.add('ux-st-on'); const w = f.querySelector('.ux-st, .ux-pk'); if (w) w.hidden = false; b.closest('.nav-live-h').remove();
     const back = f.querySelector('[data-st-go="phase"], [data-st-go="firm"]'); if (back) back.click();
   });
 })();
@@ -6024,7 +6036,7 @@ new window.SweepMO(() => {
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
   const name = (a) => (typeof acctLabel === 'function' ? acctLabel(a.id) : a.name) || a.name || '';
-  const kind = (a) => { const m = window.SweepMoney && SweepMoney.moneyTypeOf ? SweepMoney.moneyTypeOf(a) : ''; return a.phase === 'eval' || m === 'eval' ? 'eval' : a.phase === 'funded' || m === 'funded' ? 'funded' : m === 'live' || a.phase === 'live' ? 'live' : m === 'personal' ? 'personal' : 'none'; };
+  const kind = (a) => { const m = window.SweepMoney && SweepMoney.moneyTypeOf ? SweepMoney.moneyTypeOf(a) : ''; return a.phase === 'eval' || m === 'eval' ? 'eval' : a.phase === 'funded' || m === 'funded' ? 'funded' : m === 'live' || a.phase === 'live' ? 'live' : m === 'personal' ? 'personal' : m === 'simulation' || a.phase === 'simulation' ? 'simulation' : 'none'; };
   const active = (a) => a && a.status !== 'archived' && a.status !== 'closed';
   const next = (a) => (kind(a) === 'eval' ? 'funded' : kind(a) === 'funded' ? 'live' : '');
   const SEL = new Set(); let mode = false;   // phone: select mode
@@ -6464,4 +6476,19 @@ new window.SweepMO(() => {
     sec.querySelector(':scope > .sec-h').hidden = true;
   }
   new window.SweepMO(() => { try { fold(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+})();
+
+/* « Explore with sample data first » (20 Oct., Mateo: it looked like nothing happened): the button shows at once that it
+   is preparing (a ring, its words), until the « Add the sample data? » window opens or the data is there. */
+(function () {
+  'use strict';
+  const W = ({ en: 'Preparing the sample data…', fr: 'Préparation des données d’exemple…', es: 'Preparando los datos de ejemplo…' })[(typeof LANG !== 'undefined' && LANG) || 'en'] || 'Preparing the sample data…';
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-act="demo"]'); if (!b) return;
+    if (b.classList.contains('is-busy')) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+    const was = b.innerHTML; b.classList.add('is-busy'); b.setAttribute('aria-busy', 'true'); b.innerHTML = `<i class="nav-busy" aria-hidden="true"></i><span>${W}</span>`;
+    const t0 = Date.now();
+    const done = () => document.querySelector('aside.nav-ask.open') || (typeof S !== 'undefined' && (S.trades || []).some((t) => t.demo)) || Date.now() - t0 > 45000 || !document.body.contains(b);
+    (function wait() { if (!done()) { setTimeout(wait, 150); return; } b.classList.remove('is-busy'); b.removeAttribute('aria-busy'); if (document.body.contains(b)) b.innerHTML = was; })();
+  }, true);
 })();
