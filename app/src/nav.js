@@ -3635,14 +3635,30 @@ window.SweepMO = window.SweepMO || class {
     more.querySelector('summary').insertAdjacentHTML('afterend', `<div class="nav-prof-src nav-onb-src" data-noi18n><span>${t('fv')} ${opt}</span><div class="nav-prof-chips">${SRC.map(([v, l]) => `<button type="button" class="chip" data-src="${v}">${T[L] && T[L][l] ? T[L][l] : l}</button>`).join('')}</div></div>`);
   }
   // the experience sets the coach's starting tone (brief 03); the source is for Sweep: both optional, one tap, tapped again = undone
-  const EXP = { en: { q: 'How long have you been trading?', a: 'I’m starting out', b: 'Less than a year', c: 'More than a year' },
-    fr: { q: 'Tu trades depuis combien de temps ?', a: 'Je commence', b: 'Moins d’un an', c: 'Plus d’un an' },
-    es: { q: '¿Desde cuándo operas?', a: 'Estoy empezando', b: 'Menos de un año', c: 'Más de un año' } };
+  // « less than 6 months » (value « new »): the 90-day gameplan is offered right under it, started with the account (20 Oct.)
+  const EXP = { en: { q: 'How long have you been trading?', a: 'Less than 6 months', b: '6 months to a year', c: 'More than a year',
+      gp: 'Your 90-day gameplan is included: one mission a day to learn, with Sweep. It starts on Monday.', gpA: 'In simulation', gpB: 'Already in an evaluation', gpL: 'The 90-day gameplan comes with Pro: one mission a day to learn, with Sweep.' },
+    fr: { q: 'Tu trades depuis combien de temps ?', a: 'Moins de 6 mois', b: '6 mois à 1 an', c: 'Plus d’un an',
+      gp: 'Ton parcours de 90 jours est inclus : une mission par jour pour apprendre, avec Sweep. Il commence lundi.', gpA: 'En simulation', gpB: 'Déjà en évaluation', gpL: 'Le parcours de 90 jours vient avec Pro : une mission par jour pour apprendre, avec Sweep.' },
+    es: { q: '¿Desde cuándo operas?', a: 'Menos de 6 meses', b: '6 meses a 1 año', c: 'Más de un año',
+      gp: 'Tu recorrido de 90 días está incluido: una misión al día para aprender, con Sweep. Empieza el lunes.', gpA: 'En simulación', gpB: 'Ya en una evaluación', gpL: 'El recorrido de 90 días viene con Pro: una misión al día para aprender, con Sweep.' } };
+  let GPA = null;   // can this trader have the gameplan (Pro, the trial, billing not live)? asked once, when « less than 6 months » is tapped
+  async function gpOffer(f, on) {
+    let box = f.querySelector('.nav-onb-gp');
+    if (!on) { if (box) box.remove(); return; }
+    const X = EXP[L] || EXP.en;
+    if (GPA == null) { try { GPA = !!(await apiJSON('api/game/gameplan')).access; } catch (e) { GPA = false; } }
+    if (!f.querySelector('[data-exp="new"].on')) return;
+    if (!box) { box = document.createElement('div'); box.className = 'nav-onb-gp'; box.setAttribute('data-noi18n', ''); f.querySelector('.nav-onb-exp').after(box); }
+    box.innerHTML = GPA ? `<p>✦ ${X.gp}</p><div class="nav-prof-chips"><button type="button" class="chip on" aria-pressed="true" data-gp-track="A">${X.gpA}</button><button type="button" class="chip" aria-pressed="false" data-gp-track="B">${X.gpB}</button></div>` : `<p>${X.gpL}</p>`;
+  }
   document.addEventListener('click', (e) => {
-    const c = e.target.closest && e.target.closest('form[data-onb] [data-src], form[data-onb] [data-exp]'); if (!c) return;
-    const k = c.dataset.src != null ? 'data-src' : 'data-exp', was = c.classList.contains('on');
+    const c = e.target.closest && e.target.closest('form[data-onb] [data-src], form[data-onb] [data-exp], form[data-onb] [data-gp-track]'); if (!c) return;
+    const k = c.dataset.src != null ? 'data-src' : c.dataset.exp != null ? 'data-exp' : 'data-gp-track', was = c.classList.contains('on');
+    if (k === 'data-gp-track' && was) return;   // one of the two tracks stays chosen
     c.closest('.nav-prof-chips').querySelectorAll(`[${k}]`).forEach((x) => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
     if (!was) { c.classList.add('on'); c.setAttribute('aria-pressed', 'true'); }
+    if (k === 'data-exp') gpOffer(c.closest('form'), !was && c.dataset.exp === 'new');
   });
   // « Create account » without a first name: asked there, nothing else runs; with one: saved, then the app creates the account
   document.addEventListener('submit', (e) => {
@@ -3651,6 +3667,9 @@ window.SweepMO = window.SweepMO || class {
     if (!fn) { e.preventDefault(); e.stopImmediatePropagation(); if (err) err.textContent = t('need'); const i = box.querySelector('[data-onb-fn]'); i.focus(); i.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
     const src = (f.querySelector('[data-src].on') || {}).dataset, xp = (f.querySelector('[data-exp].on') || {}).dataset;
     const b = { first_name: fn }; if (src && src.src) b.found_via = src.src; if (xp && xp.exp) b.experience = xp.exp;
+    // less than 6 months, with access: the 90-day gameplan starts (its first mission is this very account; Sweep ticks it)
+    const tr = xp && xp.exp === 'new' && GPA && (f.querySelector('[data-gp-track].on') || {}).dataset;
+    if (tr) apiJSON('api/game/gameplan/start', { method: 'POST', body: { track: tr.gpTrack || 'A' } }).then((st) => { if (window.SweepGPCheck) window.SweepGPCheck(st); }).catch(() => { /* Settings can start it */ });
     S.me = Object.assign({}, S.me || {}, { first_name: fn });
     fetch('api/me/profile', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(b) })
       .then((r) => r.json()).then((j) => { if (j && j.first_name) S.me = Object.assign({}, S.me, { first_name: j.first_name, last_name: j.last_name, full_name: j.full_name }); }).catch(() => { /* kept in this view; Settings can set it again */ });
@@ -4576,6 +4595,7 @@ window.SweepMO = window.SweepMO || class {
       setTimeout(() => { const b = el.querySelector('[data-ask="0"]'); if (b) b.focus(); }, 50);
     });
   }
+  window.SweepAsk = askApp;   // (the 90-day gameplan's « Stop » asks with it too)
   // deleting the Sweep account itself is final (server side): no « Undo » possible, so the app's own window asks, not the browser
   if (typeof deleteAccount === 'function') {
     deleteAccount = async function (form) {

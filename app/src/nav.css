@@ -2343,6 +2343,11 @@ html body #tkSlide .nav-like{display:inline-flex;align-items:center;gap:6px;alig
 .nav-onb-me .nav-prof-chips .chip,.nav-onb-src .nav-prof-chips .chip{flex:0 0 auto}
 /* the experience: 3 answers, always whole (3 equal columns), 44 px targets */
 .nav-onb-me .nav-onb-exp .nav-prof-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible}
+.nav-onb-gp{display:grid;gap:8px;margin:-4px 0 0;padding:12px 14px;border-radius:var(--r3);background:radial-gradient(120% 140% at 0% 0%,rgba(var(--pos-rgb),.14),transparent 62%),var(--panel2);animation:nav-onb-gp-in .45s var(--spring)}
+.nav-onb-gp p{margin:0;font-size:14px;line-height:1.45;color:var(--text2)}
+.nav-onb-me .nav-onb-gp .nav-prof-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}
+@keyframes nav-onb-gp-in{from{opacity:0;transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.nav-onb-gp{animation:none}}
 .nav-onb-me .nav-onb-exp .chip{min-width:0;min-height:44px;padding:6px 8px;white-space:normal;text-align:center;line-height:1.2}
 /* « More options » of the add-account form: folded, and hidden while the guided picker asks its questions */
 .nav-acc-opt{grid-column:1/-1;min-width:0;margin:2px 0 4px}

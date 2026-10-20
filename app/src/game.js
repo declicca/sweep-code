@@ -407,7 +407,9 @@
       if (el._html !== html) { el.innerHTML = html; el._html = html; if (G.today) animateRings(el, G.today.market ? G.today.rings : { plan: 0, execution: 0, review: 0 }, 'today'); }
       ['gMis', 'gBoss'].forEach((id) => { const x = document.getElementById(id); if (x) x.remove(); });
       if (window.SweepFiche && SweepFiche.maybeExpress) setTimeout(() => SweepFiche.maybeExpress(), 1200);   // the pre-market missed: the express version (once a day)
+      if (window.SweepGPCheck) window.SweepGPCheck();   // the 90-day gameplan's card (loader at the end of this file)
     }
+    if (v === 'settings' && window.SweepGPCheck) setTimeout(() => window.SweepGPCheck(), 0);   // its section in Settings
     paintSections();
     paintNav();
   }
@@ -1747,9 +1749,9 @@
   const isMajor = (c) => (c.type === 'level' && c.data && c.data.rank_up) || (c.type === 'badge' && c.data && /epic|legend/.test(c.data.rarity || '')) || c.type === 'payout_ready' || c.type === 'boss_defeated';
   const fresh = (c) => !c.created_at || Date.now() / 1000 - c.created_at < 300;
   const TOAST = {
-    en: { badge: 'New badge unlocked', level: 'Level {n} reached', streak: '{n}-day streak', sweep: 'Day swept', unlock: 'Unlocked: {f}', crew_goal: 'Crew goal reached', league_result: 'Your league result is in', quest_done: 'Comeback quest complete', boss_spawn: 'New boss: see Progression', freeze_used: 'Streak freeze used', streak_lost: 'Streak ended. A new one starts today.', guardrail: 'Daily max loss passed', node: 'Step completed', mission: 'Mission complete', chest: 'Chest ready', def: 'Nice: see Progression' },
-    fr: { badge: 'Nouveau badge débloqué', level: 'Niveau {n} atteint', streak: 'Streak de {n} jours', sweep: 'Journée balayée', unlock: 'Débloqué : {f}', crew_goal: 'Objectif du crew atteint', league_result: 'Ton résultat de ligue est arrivé', quest_done: 'Quête de retour réussie', boss_spawn: 'Nouveau boss : vois Progression', freeze_used: 'Gel de streak utilisé', streak_lost: 'Streak terminé. Un nouveau commence aujourd’hui.', guardrail: 'Perte max du jour dépassée', node: 'Étape franchie', mission: 'Mission accomplie', chest: 'Coffre prêt', def: 'Bravo : vois Progression' },
-    es: { badge: 'Nueva insignia desbloqueada', level: 'Nivel {n} alcanzado', streak: 'Racha de {n} días', sweep: 'Día barrido', unlock: 'Desbloqueado: {f}', crew_goal: 'Objetivo del crew alcanzado', league_result: 'Tu resultado de liga llegó', quest_done: 'Misión de regreso completada', boss_spawn: 'Nuevo jefe: mira Progreso', freeze_used: 'Congelador usado', streak_lost: 'Racha terminada. Hoy empieza otra.', guardrail: 'Pérdida máxima del día superada', node: 'Etapa superada', mission: 'Misión completada', chest: 'Cofre listo', def: '¡Bien! Mira Progreso' },
+    en: { gameplan: 'Gameplan · day {n} checked by Sweep', badge: 'New badge unlocked', level: 'Level {n} reached', streak: '{n}-day streak', sweep: 'Day swept', unlock: 'Unlocked: {f}', crew_goal: 'Crew goal reached', league_result: 'Your league result is in', quest_done: 'Comeback quest complete', boss_spawn: 'New boss: see Progression', freeze_used: 'Streak freeze used', streak_lost: 'Streak ended. A new one starts today.', guardrail: 'Daily max loss passed', node: 'Step completed', mission: 'Mission complete', chest: 'Chest ready', def: 'Nice: see Progression' },
+    fr: { gameplan: 'Parcours · jour {n} coché par Sweep', badge: 'Nouveau badge débloqué', level: 'Niveau {n} atteint', streak: 'Streak de {n} jours', sweep: 'Journée balayée', unlock: 'Débloqué : {f}', crew_goal: 'Objectif du crew atteint', league_result: 'Ton résultat de ligue est arrivé', quest_done: 'Quête de retour réussie', boss_spawn: 'Nouveau boss : vois Progression', freeze_used: 'Gel de streak utilisé', streak_lost: 'Streak terminé. Un nouveau commence aujourd’hui.', guardrail: 'Perte max du jour dépassée', node: 'Étape franchie', mission: 'Mission accomplie', chest: 'Coffre prêt', def: 'Bravo : vois Progression' },
+    es: { gameplan: 'Recorrido · día {n} marcado por Sweep', badge: 'Nueva insignia desbloqueada', level: 'Nivel {n} alcanzado', streak: 'Racha de {n} días', sweep: 'Día barrido', unlock: 'Desbloqueado: {f}', crew_goal: 'Objetivo del crew alcanzado', league_result: 'Tu resultado de liga llegó', quest_done: 'Misión de regreso completada', boss_spawn: 'Nuevo jefe: mira Progreso', freeze_used: 'Congelador usado', streak_lost: 'Racha terminada. Hoy empieza otra.', guardrail: 'Pérdida máxima del día superada', node: 'Etapa superada', mission: 'Misión completada', chest: 'Cofre listo', def: '¡Bien! Mira Progreso' },
   };
   const TS = { shown: 0, extra: 0, reset: 0 };
   const SUMT = { en: '{n} new · See Progression', fr: '{n} nouveautés · Voir Progression', es: '{n} novedades · Ver Progreso' };
@@ -3146,6 +3148,29 @@
     planFirst: (then) => { if (!document.getElementById('gSheet') && planGateNeeded()) { openPlan(G.today.day, { then }); return true; } return false; }, openJournal: () => openJournal(), openGoal: () => openGoalQuestions(), t,
     next: () => { try { return progNext(); } catch (e) { return null; } },
     summary: () => (G.profile ? { rank: rankName(G.profile.rank), level: G.profile.level, streak: G.profile.streak.current, best: G.profile.streak.best, valid: G.profile.streak.today_valid } : null),
+    ui: { sheet: openSheet, close: closeSheet, head, xp: xpFloat, buzz, svg, chime },   // for the 90-day gameplan module (src/gameplan.js)
     open: (k, v) => ({ hub: openHub, map: openMap, missions: missionsSheet, season: openSeason, league: openLeague, social: () => openSocial(v), weekly: openWeekly, plan: openPlan, review: openReview, wrapped: () => openWrapped(v) })[k]?.() };
 })();
 
+/* the 90-day gameplan (brief « Parcours de 90 jours », 20 Oct.): its module (src/gameplan.js) is loaded on demand — once the
+   trader has a plan (its card on Today), or is offered one at sign-up. One small request per page load to know. */
+(function () {
+  'use strict';
+  const src = window.SWEEP_LAZY && window.SWEEP_LAZY.gameplan; if (!src) return;
+  let p = null, asked = false;
+  window.SweepGPLoad = () => p || (p = new Promise((done, fail) => {
+    if (window.SweepGP) { done(window.SweepGP); return; }
+    const e = document.createElement('script'); e.src = src; e.async = true;
+    e.onload = () => done(window.SweepGP); e.onerror = () => { p = null; fail(new Error('gameplan module')); };
+    document.head.appendChild(e);
+  }));
+  window.SweepGPCheck = async (given) => {
+    if (given && given.started) { (await window.SweepGPLoad()).mount(given); return; }   // just started (sign-up, Settings)
+    if (window.SweepGP) { window.SweepGP.paint(); return; }
+    if (/^#settings/.test(location.hash || '')) { try { (await window.SweepGPLoad()).settings(); } catch (e) { /* offline */ } return; }
+    if (asked || typeof apiJSON !== 'function' || typeof S === 'undefined' || S.mode !== 'server') return;   // (S is the app's own « let », not on window)
+    asked = true;
+    try { const st = await apiJSON('api/game/gameplan'); if (st && st.started && st.access) (await window.SweepGPLoad()).mount(st); }
+    catch (e) { asked = false; }
+  };
+})();

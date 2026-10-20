@@ -28,6 +28,7 @@ require_once __DIR__ . '/v3l.php';
 require_once __DIR__ . '/v3c.php';
 require_once __DIR__ . '/v3d.php';
 require_once __DIR__ . '/wow.php';
+require_once __DIR__ . '/gameplan.php';   // the 90-day gameplan (20 Oct.)
 
 final class GameEngine
 {
@@ -745,6 +746,7 @@ function game_route(string $route, string $method, string $uid): void
 {
     GameEngine::schema();
     $p = GameEngine::profile($uid);           // first open creates the profile + history backfill
+    if (strpos($route, 'api/game/gameplan') === 0) { gameplan_route($route, $method, $uid); json_out(404, ['error' => 'not_found']); }
 
     if ($route === 'api/game/today' && $method === 'GET') {
         GameEngine::catchUp($uid);

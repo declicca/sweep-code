@@ -1,1 +1,1 @@
-app notify ux game chart guide nav coach
+app notify ux game chart guide gameplan nav coach

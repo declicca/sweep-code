@@ -83,7 +83,10 @@ function sb_ts($v): ?int
 function sb_plan_limits(string $plan): array
 {
     $plans = sb_cfg()['plans'] ?? [];
-    return sb_with_shots((array) ($plans[$plan] ?? $plans['free'] ?? []));
+    $L = sb_with_shots((array) ($plans[$plan] ?? $plans['free'] ?? []));
+    // the 90-day gameplan (20 Oct.): the first paid plan and up, unless the config says otherwise
+    if (!array_key_exists('gameplan', $L)) $L['gameplan'] = isset($plans[$plan]) && $plan !== 'free';
+    return $L;
 }
 
 /** Screenshots read by Sweep AI (Mateo, 18 Oct.): unlimited where AI import is on (Pro, Elite), else 3 a day unless the

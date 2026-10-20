@@ -6,7 +6,7 @@
 # Run from the app folder:  sh ops/build-assets.sh        Needs Node: npm install -g terser csso-cli
 set -e
 cd "$(dirname "$0")/.."
-for k in app nav game ux guide notify chart coach; do   # app: the core (src/app.js since 9 Oct 2026); coach: brief 03 step 2
+for k in app nav game ux guide notify chart coach gameplan; do   # app: the core (src/app.js since 9 Oct 2026); coach: brief 03 step 2
   for e in js css; do
     src="src/$k.$e"; [ -f "$src" ] || continue
     tmp="assets/$k.build.$e"
