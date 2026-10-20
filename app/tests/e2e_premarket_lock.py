@@ -36,7 +36,7 @@ with sync_playwright() as p:
     # 1. « Lock my plan »
     premarket(pg, day=day, save=False)
     hint = pg.locator('#gSheet .pm-locks').inner_text()
-    ok('09:25' in hint and pg.locator('#gSheet [data-pm=lock]').count() == 1, f'1 {w}: the sheet says it locks by itself at 09:25 and offers « Verrouiller mon plan » ({hint!r})')
+    ok('09:25' in hint and pg.locator('#gSheet [data-pm=lock]').count() == 1, f'1 {w}: the sheet says it locks by itself at 09:25 and offers « Verrouiller maintenant » ({hint!r})')
     pg.click('#gSheet [data-pm=lock]'); pg.wait_for_timeout(900)
     f = pg.evaluate("(d) => SweepFiche.get(d)", day)
     ok(f and isinstance(f.get('locked_at'), int), f'1 {w}: locked now ({f and f.get("locked_at")})')
@@ -67,7 +67,7 @@ with sync_playwright() as p:
     pg.evaluate("location.hash = '#settings'"); pg.wait_for_timeout(1500); pg.evaluate("document.querySelectorAll('details').forEach((d) => d.open = true)"); pg.wait_for_timeout(300)
     inp = pg.locator('#main [data-bind="settings|settings|plan_lock_hm"]')
     lab = pg.evaluate("(() => { const i = document.querySelector('#main [data-bind=\"settings|settings|plan_lock_hm\"]'); return i ? i.closest('label').textContent.trim() : '' })()")
-    ok(inp.count() == 1 and inp.input_value() == '09:25' and 'Verrouillage de la fiche pre-market' in lab, f'5 {w}: Settings shows the lock time, 09:25 by default ({lab!r})')
+    ok(inp.count() == 1 and inp.input_value() == '09:25' and 'Verrouillage de la fiche pré-marché' in lab, f'5 {w}: Settings shows the lock time, 09:25 by default ({lab!r})')
     inp.fill('09:15'); inp.dispatch_event('change'); pg.wait_for_timeout(1200)
     v = pg.evaluate("[S.settings.plan_lock_hm, SweepFiche.lockHm()]")
     ok(v == ['09:15', '09:15'], f'5 {w}: saved and used ({v})')

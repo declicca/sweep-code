@@ -1997,7 +1997,10 @@ window.SweepMO = window.SweepMO || class {
   const SYM = { NQ: 'CME_MINI:NQ1!', MNQ: 'CME_MINI:MNQ1!', ES: 'CME_MINI:ES1!', MES: 'CME_MINI:MES1!', RTY: 'CME_MINI:RTY1!', M2K: 'CME_MINI:M2K1!', YM: 'CBOT_MINI:YM1!', MYM: 'CBOT_MINI:MYM1!', GC: 'COMEX:GC1!', MGC: 'COMEX:MGC1!', SI: 'COMEX:SI1!', CL: 'NYMEX:CL1!', MCL: 'NYMEX:MCL1!', '6E': 'CME:6E1!' };
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   let inst = null, tf = '5', chartOn = false;
+  /** in the pre-market sheet, the chart shows the sheet's instrument (picked there) */
+  const sheetInst = () => { const sh = document.querySelector('#gSheet.g-pm'), r = sh && String(sh.dataset.inst || ''); return r && SYM[r] && sh.querySelector('.pm-chart-slot') ? r : null; };
   function usual() {
+    const si = sheetInst(); if (si) return si;
     if (inst) return inst;
     const c = {}; (S.trades || []).filter((x) => !x.demo).slice(-60).forEach((x) => { c[x.instrument] = (c[x.instrument] || 0) + 1; });
     const top = Object.entries(c).sort((a, b) => b[1] - a[1])[0];
@@ -2009,20 +2012,21 @@ window.SweepMO = window.SweepMO || class {
     return `<iframe class="nav-tv" loading="lazy" title="${esc2(t('chart'))}" src="https://s.tradingview.com/widgetembed/?${q}" referrerpolicy="origin" allow="fullscreen"></iframe>`;
   }
   function shotsOf(day) { const j = typeof getDoc === 'function' && getDoc('journals', day); return (j && j.pre && Array.isArray(j.pre.shots)) ? j.pre.shots : []; }
-  function block(day) {
-    const shots = shotsOf(day), src = (id) => (typeof blobSrc === 'function' ? blobSrc(id) : 'uploads/' + encodeURIComponent(id));
-    return `<div class="nav-pre" data-noi18n data-day="${esc2(day)}">
-      <div class="nav-pre-h"><b>${t('chart')}</b>
-        <div class="nav-pre-tools">${chartOn ? `<div class="seg sm2">${Object.keys(SYM).filter((k) => ['NQ', 'ES', 'MNQ', 'MES', 'GC', 'MGC', 'CL', 'YM', 'RTY'].includes(k) || k === usual()).map((k) => `<button type="button" class="${k === usual() ? 'on' : ''}" data-pre-inst="${k}">${k}</button>`).join('')}</div><div class="seg sm2">${['1', '5', '15', '60'].map((k) => `<button type="button" class="${k === tf ? 'on' : ''}" data-pre-tf="${k}">${k === '60' ? '1h' : k + 'm'}</button>`).join('')}</div>` : ''}
+  /** parts: 'chart' (the pre-market levels, where they are read), 'shots' (the end of the pre-market), both (the Journal day) */
+  function block(day, parts) {
+    const shots = shotsOf(day), src = (id) => (typeof blobSrc === 'function' ? blobSrc(id) : 'uploads/' + encodeURIComponent(id)), c = parts !== 'shots', p = parts !== 'chart';
+    return `<div class="nav-pre${parts ? ' nav-pre-' + parts : ''}" data-noi18n data-day="${esc2(day)}">
+      ${c ? `<div class="nav-pre-h"><b>${t('chart')}</b>
+        <div class="nav-pre-tools">${chartOn ? `${parts === 'chart' ? '' : `<div class="seg sm2">${Object.keys(SYM).filter((k) => ['NQ', 'ES', 'MNQ', 'MES', 'GC', 'MGC', 'CL', 'YM', 'RTY'].includes(k) || k === usual()).map((k) => `<button type="button" class="${k === usual() ? 'on' : ''}" data-pre-inst="${k}">${k}</button>`).join('')}</div>`}<div class="seg sm2">${['1', '5', '15', '60'].map((k) => `<button type="button" class="${k === tf ? 'on' : ''}" data-pre-tf="${k}">${k === '60' ? '1h' : k + 'm'}</button>`).join('')}</div>` : ''}
         <button type="button" class="link" data-pre-chart>${chartOn ? t('hide') : t('open')}</button></div></div>
-      ${chartOn ? `<div class="nav-tv-wrap">${frame()}</div><small class="nav-pre-note">${t('note')}</small>` : ''}
-      <div class="nav-pre-h"><b>${t('shots')}</b><label class="link nav-pre-add">${t('add')}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden data-pre-up></label></div>
-      ${shots.length ? `<div class="nav-pre-shots">${shots.map((x) => `<figure><a href="${src(x.id)}" target="_blank" rel="noopener"><img src="${src(x.id)}" alt="${esc2(x.name || '')}" loading="lazy"></a><button type="button" class="nav-pre-rm" data-pre-rm="${esc2(x.id)}" aria-label="${t('rm')}">×</button></figure>`).join('')}</div>` : ''}
+      ${chartOn ? `<div class="nav-tv-wrap">${frame()}</div><small class="nav-pre-note">${t('note')}</small>` : ''}` : ''}
+      ${p ? `<div class="nav-pre-h"><b>${t('shots')}</b><label class="link nav-pre-add">${t('add')}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden data-pre-up></label></div>
+      ${shots.length ? `<div class="nav-pre-shots">${shots.map((x) => `<figure><a href="${src(x.id)}" target="_blank" rel="noopener"><img src="${src(x.id)}" alt="${esc2(x.name || '')}" loading="lazy"></a><button type="button" class="nav-pre-rm" data-pre-rm="${esc2(x.id)}" aria-label="${t('rm')}">×</button></figure>`).join('')}</div>` : ''}` : ''}
     </div>`;
   }
-  function paint(host, day) {
+  function paint(host, day, parts) {
     let b = host.querySelector(':scope > .nav-pre');
-    const html = block(day);
+    const html = block(day, parts);
     if (!b) { host.insertAdjacentHTML('beforeend', html); return; }
     if (b._h !== html) { b.outerHTML = html; host.querySelector(':scope > .nav-pre')._h = html; }
   }
@@ -2033,13 +2037,15 @@ window.SweepMO = window.SweepMO || class {
     const sec = document.querySelector('#main .cols.even > section'); const body = sec && sec.querySelector('.surface'); if (!body) return;
     paint(body, m[1]);
   }
-  // the plan sheet: before its save button
+  // the plan sheet: before its save button. The pre-market: the chart on the screen of the levels, the screenshots at the end
   function plan() {
-    const sh = document.getElementById('gSheet'); if (!sh || !sh.classList.contains('g-plan')) return;
-    const save = sh.querySelector('[data-g="save-plan"]'); if (!save || !sh.dataset.day) return;
+    const sh = document.getElementById('gSheet'); if (!sh || !sh.classList.contains('g-plan') || !sh.dataset.day) return;
+    const pm = sh.classList.contains('g-pm'), slot = pm && sh.querySelector('.pm-chart-slot');
+    if (slot) paint(slot, sh.dataset.day, 'chart');
+    const save = sh.querySelector('[data-g="save-plan"]'); if (!save) return;
     let host = sh.querySelector('.nav-pre-host');
-    if (!host) { host = document.createElement('div'); host.className = 'nav-pre-host'; save.before(host); }
-    paint(host, sh.dataset.day);
+    if (!host) { host = document.createElement('div'); host.className = 'nav-pre-host'; (save.closest('.pm-nav') || save).before(host); }
+    paint(host, sh.dataset.day, pm ? 'shots' : null);
   }
   const refresh = () => { try { journal(); plan(); } catch (e) { /* never blocks */ } };
   document.addEventListener('click', (e) => {
@@ -2074,7 +2080,7 @@ window.SweepMO = window.SweepMO || class {
   new window.SweepMO((recs) => {
     if (recs.every((r) => r.target.closest && r.target.closest('.nav-pre'))) return;
     const sh = document.getElementById('gSheet');
-    if ((sh && sh.classList.contains('g-plan') && !sh.querySelector('.nav-pre')) || (/^#journal/.test(location.hash || '') && !document.querySelector('#main .nav-pre'))) refresh();
+    if ((sh && sh.classList.contains('g-plan') && (!sh.querySelector('.nav-pre') || (sh.querySelector('.pm-chart-slot') && !sh.querySelector('.pm-chart-slot > .nav-pre')))) || (/^#journal/.test(location.hash || '') && !document.querySelector('#main .nav-pre'))) refresh();
   }).observe(document.body, { childList: true, subtree: true });
   const appRender = window.render;
   if (typeof appRender === 'function' && !appRender.__pre) {

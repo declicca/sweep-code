@@ -50,7 +50,8 @@ with sync_playwright() as p:
     ok(pg.evaluate("S.settings.pm_mode") == 'express', f'1 {w}: the choice is kept (settings.pm_mode = express)')
     # 2. saved before the lock time
     pg.evaluate(TAP, '#gSheet [data-q="X_dir"][data-v="long"]'); pg.wait_for_timeout(150)
-    pg.fill('#gSheet [data-pmf="instrument"]', 'MES'); pg.fill('#gSheet [data-pmf="X_level"]', '5820'); pg.fill('#gSheet [data-pmf="C3_A"]', '5850')
+    pg.click('#gSheet [data-pm="inst-pick"][data-v="MES"]'); pg.wait_for_timeout(150)
+    pg.fill('#gSheet [data-pmf="X_level"]', '5820'); pg.fill('#gSheet [data-pmf="C3_A"]', '5850')
     if not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
     pg.evaluate(TAP, '#gSheet [data-pm="next"]'); pg.wait_for_timeout(300)
     ok(pg.evaluate(SCREEN) == 'sheet' and '(5R)' in pg.locator('#gSheet .pm-sheet').inner_text(), f'2 {w}: 5R, the sheet')

@@ -56,7 +56,7 @@ with sync_playwright() as p:
     ok('Attendre la clôture 15m.' in note, f'3 {w}: the note for tomorrow at the top of the pre-market ({note!r})')
     premarket(pg, stop_at='d2')
     q = pg.evaluate("(document.querySelector('#gSheet [data-pm-screen=d2] .pm-q') || {}).textContent || ''")
-    ok(q == 'Hier tu es entré sans retest 5m. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', f'3 {w}: the D2 question of the first rule broken ({q!r})')
+    ok(q == 'Hier tu es entré sans attendre le retest en 5 min. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', f'3 {w}: the D2 question of the first rule broken ({q!r})')
     pg.fill('#gSheet [data-pmf=D2]', 'Je pose une alerte, je regarde, je ne clique pas avant le retest.'); premarket(pg)
     f = pg.evaluate("(d) => SweepFiche.get(d)", nx)
     ok(f and f['reminder'] == 'Je pose une alerte, je regarde, je ne clique pas avant le retest.', f"3 {w}: D2's answer is the sheet's reminder")

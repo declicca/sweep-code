@@ -111,6 +111,7 @@ async def main():
         return [...document.querySelectorAll('#gSheet button, #gSheet textarea, #gSheet input')].filter((b) => b.getClientRects().length).map((b) => {
         const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
         if (y < Math.max(0, sh.top) || y > Math.min(innerHeight, sh.bottom)) return null;   // scrolled out of the sheet: not on screen
+        const row = b.closest('.g-chips-row'), rr = row && row.getBoundingClientRect(); if (rr && (x < rr.left || x > rr.right)) return null;   // further along a row of chips that scrolls sideways (the instrument, 20 Oct.)
         const at = document.elementFromPoint(x, y);
         return at && !b.contains(at) && !at.closest('#gSheet') ? (b.dataset.v || b.dataset.g || b.tagName) + ' ← ' + String(at.className || at.tagName).slice(0, 30) : null; }).filter(Boolean); }""")
       ok(not cov, f'{what}: nothing of the page covers the sheet' + (f' ({cov[:3]})' if cov else ''))
@@ -142,7 +143,7 @@ async def main():
       await review(page)
     async def review(page):   # 60 seconds: three taps and one optional sentence
       qs = await page.evaluate("[...document.querySelectorAll('#gSheet .g-f > span')].map(x => x.textContent.trim())")
-      ok(qs == ['As-tu suivi ta fiche ?', 'Quelle règle ?', 'Discipline aujourd’hui', 'Ta note du jour', 'Une note pour demain ? (facultatif, en haut de ton prochain pre-market)'], f'review: the sheet\'s questions (a day with a pre-market sheet, brief step 7) ({qs})')
+      ok(qs == ['As-tu suivi ta fiche ?', 'Quelle règle ?', 'Discipline aujourd’hui', 'Ta note du jour', 'Une note pour demain ? (facultatif, en haut de ton prochain pré-marché)'], f'review: the sheet\'s questions (a day with a pre-market sheet, brief step 7) ({qs})')
       await page.locator('#gSheet [data-g=save-review]').click(); await page.wait_for_timeout(300)
       err = await page.locator('#gSheet #gErr').text_content()
       ok(err == 'Réponds aux 3 questions.' and await page.locator('#gSheet.g-rv').count() == 1, f'review: not saved without the 3 answers (« {err} »)')
@@ -159,8 +160,8 @@ async def main():
         date: todayStr(), entry_time:'19:35', exit_time:'19:40', session_date:true})"""); await page.wait_for_timeout(1500)
     async def next_plan(page):   # the plan of D+1 starts from the plan of D: bias, max loss (never above the account's limit)
       await page.locator('#main .nav-rt [data-rt=plan]').click(); await sheet_on_top(page, 'plan of the next session')
-      lh = await page.locator('#gSheet [data-pmf="lv.london_high"]').input_value()
-      ok(lh == '5820', f"next plan: yesterday's levels come back to start from ({lh})")
+      lh = await page.locator('#gSheet [data-pmf="lv.london_high"]').input_value(); ph = await page.locator('#gSheet [data-pmf="lv.london_high"]').get_attribute('placeholder')
+      ok(lh == '' and ph == '5820', f"next plan: yesterday's levels in grey, for reference, never kept by mistake ({lh!r}, placeholder {ph!r})")   # (20 Oct.: they change every day)
       await apremarket(page, stop_at='limits')
       ml = await page.locator('#gSheet [data-pmf=max_loss]').input_value()
       ok(ml == '1000', f"next plan: the max loss of yesterday ($1,500) starts at the account's limit ({ml})")

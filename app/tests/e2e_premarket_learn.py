@@ -37,20 +37,22 @@ with sync_playwright() as p:
     # 4. first, with 2 sheets only
     pg.evaluate(SEED, DAYS[-2:]); pg.wait_for_timeout(600)
     pg.evaluate("(d) => SweepGame.openPlan(d)", D); until(pg, "document.querySelector('#gSheet.g-pm [data-pm-screen]')"); pg.wait_for_timeout(300)
-    ok(pg.locator('#gSheet [data-pmf=instrument]').count() == 1, f'4 {w}: 2 sheets: the instrument is asked')
+    ok(pg.locator('#gSheet [data-pm=inst-pick]').count() > 1, f'4 {w}: 2 sheets: the instrument is asked (its chips)')
     premarket(pg, stop_at='scen')
     ok(pg.locator('#gSheet .pm-never').count() == 0, f'4 {w}: 2 sheets: no note under B')
     premarket(pg, stop_at='limits')
     lim = [pg.input_value('#gSheet [data-pmf="lim.max_trades"]'), pg.input_value('#gSheet [data-pmf="lim.time_limit"]')]
     ok(lim == ['3', '11:00'], f'4 {w}: 2 sheets (3 trades, 11:00): already their values ({lim})')
     pg.evaluate("document.querySelector('#gSheet [data-g=close]').click()"); pg.wait_for_timeout(300)
+    pg.evaluate("localStorage.removeItem('pm.draft')")   # (the sheet closed without saving is kept as a draft: this part starts afresh)
     # 1 to 3: 10 sheets
     pg.evaluate(SEED, DAYS); pg.wait_for_timeout(1200)
     pg.evaluate("(d) => SweepGame.openPlan(d)", D); until(pg, "document.querySelector('#gSheet.g-pm [data-pm-screen]')"); pg.wait_for_timeout(300)
     inst = pg.evaluate("(document.querySelector('#gSheet .pm-inst') || {}).textContent || ''")
-    ok(pg.locator('#gSheet [data-pmf=instrument]').count() == 0 and 'MES' in inst, f'1 {w}: the same instrument for 5 sheets: not asked ({inst.strip()!r})')
+    ok(pg.locator('#gSheet [data-pm=inst-pick]').count() == 0 and 'MES' in inst and 'Micro S&P 500' in inst, f'1 {w}: the same instrument for 5 sheets: not asked, its name with it ({inst.strip()!r})')
     pg.click('#gSheet [data-pm=inst]'); pg.wait_for_timeout(200)
-    ok(pg.locator('#gSheet [data-pmf=instrument]').count() == 1 and pg.input_value('#gSheet [data-pmf=instrument]') == 'MES', f'1 {w}: « Modifier » brings the field back, MES in it')
+    on = pg.evaluate("(document.querySelector('#gSheet [data-pm=inst-pick].on') || {}).textContent || ''")
+    ok(pg.locator('#gSheet [data-pm=inst-pick]').count() > 1 and on == 'MES', f'1 {w}: « Modifier » brings the chips back, MES chosen ({on!r})')
     premarket(pg, stop_at='scen')
     note = pg.evaluate("(document.querySelector('#gSheet .pm-never') || {}).textContent || ''")
     ok(note == 'Ce scénario n’a pas été pris depuis 10 séances. Le garder ?', f'3 {w}: under B, the note ({note!r})')
@@ -58,6 +60,7 @@ with sync_playwright() as p:
     lim = [pg.input_value('#gSheet [data-pmf="lim.max_trades"]'), pg.input_value('#gSheet [data-pmf="lim.time_limit"]')]
     ok(lim == ['3', '11:00'], f'2 {w}: the limits from the last 10 sheets ({lim})')
     pg.evaluate("document.querySelector('#gSheet [data-g=close]').click()"); pg.wait_for_timeout(300)
+    pg.evaluate("localStorage.removeItem('pm.draft')")
     for d in DAYS: pg.evaluate("(d) => remove('journals', d)", d)
     pg.wait_for_timeout(1800)
     c.close()

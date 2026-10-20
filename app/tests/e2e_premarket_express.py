@@ -39,7 +39,8 @@ with sync_playwright() as p:
     ok(pg.locator('#gSheet [data-pm-screen=express]').count() == 1 and 'Plan express' in pg.locator('#gSheet').inner_text(), f'1 {w}: after the lock time, without a sheet: the express version opens by itself')
     # 2. level, direction, target
     pg.click('#gSheet [data-q="X_dir"][data-v="long"]'); pg.wait_for_timeout(150)
-    pg.fill('#gSheet [data-pmf="instrument"]', 'MES'); pg.fill('#gSheet [data-pmf="X_level"]', '5820'); pg.fill('#gSheet [data-pmf="C3_A"]', '5825'); pg.wait_for_timeout(150)
+    pg.click('#gSheet [data-pm="inst-pick"][data-v="MES"]'); pg.wait_for_timeout(150)   # (the instrument: one chip)
+    pg.fill('#gSheet [data-pmf="X_level"]', '5820'); pg.fill('#gSheet [data-pmf="C3_A"]', '5825'); pg.wait_for_timeout(150)
     r = pg.locator('#gSheet [data-pm-r="A"]').inner_text()
     pg.click('#gSheet [data-pm="next"]'); pg.wait_for_timeout(250)
     ok('Non viable' in r and pg.locator('#gSheet [data-pm-screen=express]').count() == 1, f'2 {w}: 5 825 → under 2R, not viable: it stays ({r!r})')

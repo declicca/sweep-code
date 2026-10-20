@@ -240,8 +240,8 @@
     if (p && typeof s === 'string') s = s.replace(/\{(\w+)\}/g, (m, k) => (p[k] != null ? p[k] : m));
     return s;
   }
-  if (window.I18N_FR) Object.assign(window.I18N_FR, { Progress: 'Progression', 'Pre-market sheet locks at (New York)': 'Verrouillage de la fiche pre-market (New York)' });
-  if (window.I18N_ES) Object.assign(window.I18N_ES, { Progress: 'Progreso', 'Pre-market sheet locks at (New York)': 'Bloqueo de la ficha pre-market (Nueva York)' });
+  if (window.I18N_FR) Object.assign(window.I18N_FR, { Progress: 'Progression', 'Pre-market sheet locks at (New York)': 'Verrouillage de la fiche pré-marché (New York)' });
+  if (window.I18N_ES) Object.assign(window.I18N_ES, { Progress: 'Progreso', 'Pre-market sheet locks at (New York)': 'Bloqueo de la ficha pre-mercado (Nueva York)' });
 
   const rankName = (k) => t('rk.' + k);
   const bName = (id) => /^season_\d{6}$/.test(id) && typeof sst === 'function' ? sst('season', { n: seasonNum(id.slice(7)) }) : (/^boss_/.test(id) && id !== 'boss_for_good' && typeof bossName === 'function' ? bossName(id.slice(5)) : (D[L()].b[id] || D.en.b[id] || [id])[0]);
@@ -642,9 +642,9 @@
     normalize: ficheNormalize, blank: ficheBlank, get: ficheGet, save: ficheSave, lastInstrument: ficheLastInstrument, viable: ficheViable, K: FICHE };
 
   /* ───────────── Pre-market questionnaire (brief « Plan pre-market adaptatif », steps 2 and 3) ─────────────
-     One question per screen (a few fields when they belong together): base data, where the price is, news, scenarios,
-     what cancels the day, the trader's limits. A question shows only when its condition holds; what the app knows (the last
-     levels, the calendar, the journal) is filled in, the trader confirms or corrects. The answers make the sheet: scenarios
+     A few related questions per screen: the levels, the read of the market with the news, the scenarios, the limits with what
+     stops the day. A question shows only when its condition holds; what the app knows (the calendar, the journal, the learned
+     limits) is filled in, the trader confirms or corrects; every term says what it means (20 Oct., test as a trader). The answers make the sheet: scenarios
      with their stop, target and estimated R (viable from 2R), news windows, no-trade conditions, limits. The day's plan
      (journals/{day}.pre: bias, max loss, max trades, levels, rule) is written from it, so the routine, the coach and the
      score keep working. */
@@ -652,92 +652,131 @@
     en: {
       change: 'Change', never_taken: 'This scenario has not been taken in 10 sessions. Keep it?',
       followed_sheet: 'Did you follow your sheet?', rules_q: 'Which rule?', note_tomorrow: 'A note for tomorrow? (optional, at the top of your next pre-market)',
-      r_no_retest: 'Entered without a 5m retest', r_off_plan: 'A trade off my sheet', r_max_trades: 'Too many trades', r_news_window: 'Traded in a news window', r_moved_stop: 'Moved my stop', r_other: 'Another rule',
-      d2: 'Yesterday', d2_no_retest: 'Yesterday you entered without a 5m retest. What will help you wait today?', d2_off_plan: 'Yesterday you took a trade off your sheet. What took you out of the plan?',
+      r_no_retest: 'Entered without waiting for the retest (5 min)', r_off_plan: 'A trade off my sheet', r_max_trades: 'Too many trades', r_news_window: 'Traded in a news window', r_moved_stop: 'Moved my stop', r_other: 'Another rule',
+      d2: 'Yesterday', d2_no_retest: 'Yesterday you entered without waiting for the 5-min retest. What will help you wait today?', d2_off_plan: 'Yesterday you took a trade off your sheet. What took you out of the plan?',
       d2_max_trades: 'Yesterday you went over your number of trades. What will be your signal to stop today?', d2_news_window: 'Yesterday you traded during a news window. How will you stay out of it?',
       d2_moved_stop: 'Yesterday you moved your stop. What will help you leave it in place?', d2_other: 'Yesterday you broke a rule of your sheet. What will help you hold it today?', d2_ph: 'A short sentence',
-      x_title: 'Express plan', x_quick: 'Express plan (30 s)', x_guided: 'Guided plan', x_hint_quick: 'In 30 seconds: your main level, the direction, the target.', x_hint: 'Your sheet\'s lock time is past. In 30 seconds: your main level, the direction, the target.', x_later: 'Later (today\'s trades will be off-plan)', x_level: 'Main level', x_dir: 'Direction', long: 'Long', short: 'Short',
-      title: 'Pre-market', note: 'Your note from last session', of: '{a} of {b}', next: 'Continue', back: 'Back', save: 'Save my sheet', needs: 'Fill in what is missing to continue.',
-      base: 'Today\'s levels', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Current price',
-      base_hint: 'Typed by hand for now. Yesterday\'s values are kept as a start.', base_needs: 'London high, London low and the current price are needed (high above low).',
-      a1: 'Where is the price compared with the London range?', in: 'Inside the range', above: 'Above the high', below: 'Below the low',
+      d2_hint: 'One sentence: it stays at the top of your sheet for the whole session.',
+      x_title: 'Express plan', x_quick: 'Express plan (30 s)', x_guided: 'Guided plan', x_hint_quick: 'In 30 seconds: your direction, your entry, your target.', x_hint: 'Your sheet’s lock time is past. In 30 seconds: your direction, your entry, your target.', x_later: 'Later (today’s trades will be off-plan)', x_level: 'Entry', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'buy', short_sub: 'sell',
+      title: 'Pre-market', note: 'Your note from last session', of: '{a} of {b}', next: 'Continue', back: 'Back', save: 'Save my sheet', needs: 'Fill in what is missing to continue.', opt: 'optional',
+      base: 'Today’s levels', instrument: 'Instrument', inst_other: 'Other', inst_ph: 'Symbol, e.g. MNQ', inst_need: 'Pick your instrument.',
+      grp_london: 'London session', grp_london_d: 'its high and its low, before New York opens', grp_prev: 'Yesterday', grp_prev_d: 'PDH and PDL are yesterday’s high and low',
+      lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Current price', ph_hint: 'In grey: the levels of your last sheet, for reference.',
+      missing: 'Missing: {l}.', hl_order: 'The London high must be above the London low.', pd_order: 'The PDH must be above the PDL.', far: 'Check {v}: it is far from your other levels. Tap Continue if it is right.',
+      a1: 'Where is the price compared with the London session?', a1_ctx: 'London high {h} · London low {l}', a1_price: ' · price {p}', in: 'In between', above: 'Above the high', below: 'Below the low',
       a2: 'Which level do you watch first?', high: 'London high', low: 'London low', both: 'Both',
-      a3: 'Has a 15m candle already closed beyond the level?', yes: 'Yes', no: 'No',
-      a4: '{lvl} is {n} ticks from {main}. Is it a target or an obstacle?', target: 'Target', obstacle: 'Obstacle', ignore: 'Ignore',
-      b1: 'High-impact news today?', b1_cal: 'From the calendar: {e}', b1_time: 'Time (New York)', b2: 'Wait for the first full 15m after the news?', b2_hint: 'The news comes before the open.',
-      c: 'Your scenarios', main: 'Main scenario', alt: 'Alternative scenario', confirm: 'Confirm', edit: 'Change the level', keep: 'Keep', remove: 'Remove',
-      level: 'Level', tgt: 'Target', tgt_prop: 'Proposed: {p} (next opposite level)', tgt_none: 'No opposite level: type your target.',
-      r: '{r}R estimated', not_viable: 'Not viable (under 2R): choose another target or remove the scenario.', main_not_viable: 'Not viable (under 2R): change the level or the target.', removed: 'Removed',
-      c4: 'What cancels the day?', narrow_range: 'Range too narrow', two_invalidations: '2 invalidations', time_limit: 'Time limit passed', other: 'Other', other_ph: 'What else cancels it',
-      d1: 'How did your last session go?', gain: 'Win', loss: 'Loss', max_loss: 'Max loss', none: 'Did not trade',
-      d1_reduce: 'Last session hit your max loss. Risk 0.25 % per trade today?', accept: 'Accept', refuse: 'Refuse',
-      limits: 'Your limits today', d3: 'Max trades today', d4: 'Trading time limit', d4_ph: 'e.g. 11:30', dml: 'Max loss today', risk: 'Risk per trade',
-      lock: 'Lock my plan', locked: 'Locked at {t}', locks_at: 'It locks by itself at {t} (New York). After that, only the checklist changes.', locked_title: 'Your locked plan', sheet: 'Your plan sheet', sc_a: 'Scenario A', sc_b: 'Scenario B', notrade: 'No-trade', lim: 'Limits', after: 'after {t}', window: 'blocked window {a}–{b}',
-      risk_l: 'Risk {p} %', trades_l: '{n} trades', trades_l1: '1 trade', or: ' or ',
+      a3_above: 'Has a 15-min candle already closed above the London high?', a3_below: 'Has a 15-min candle already closed below the London low?', a3_hint: 'Yes: your main scenario follows the break. No: it plays the return into the London range.', yes: 'Yes', no: 'No',
+      a4: '{lvl} is {n} from the {main}. Target or obstacle?', a4_hint: 'Target: you aim for it. Obstacle: your target stops just before it. Ignore: it does not count.', target: 'Target', obstacle: 'Obstacle', ignore: 'Ignore',
+      pdh_full: 'The PDH (yesterday’s high)', pdl_full: 'The PDL (yesterday’s low)', n_ticks: '{n} ticks', n_ticks_pts: '{n} ticks ({p} points)',
+      b1: 'A high-impact news release today?', b1_cal: 'From the calendar: {e}', b1_ex: 'For example CPI, jobs (NFP) or the Fed (FOMC): the releases that move the market.', b1_time: 'Time (New York)', b2: 'Wait for the first full 15-min candle after the news?', b2_hint: 'The news comes before the 9:30 open: the candle after it is often wild.',
+      c: 'Your scenarios', c_hint: 'What you will do depending on what price does. Adjust the entry, the stop or the target if needed.', main: 'Main scenario', alt: 'Alternative scenario', keep: 'Keep', remove: 'Remove', remove_sc: 'Remove this scenario', restore: 'Put it back', removed: 'Removed',
+      level: 'Level', f_entry: 'Entry', f_stop: 'Stop', tgt: 'Target', use: 'Use',
+      tgt_is: 'Proposed target: {lvl}, the next level.', tgt_before: 'Proposed target: just before the {lvl} (your obstacle).', tgt_prop: 'Proposed: {p} ({lvl})', tgt_none: 'No level further out: type your target.',
+      r_pts: '{r}R: you aim for {g} pts for {k} pts of risk.', r_ticks: '{r}R: you aim for {g} ticks for {k} ticks of risk.', r: '{r}R estimated',
+      not_viable: 'Not viable (under 2R): bring your stop closer, move your target further or remove this scenario.', main_not_viable: 'Not viable (under 2R): bring your stop closer or move your target further.',
+      side_long: 'For a long: the stop below the entry, the target above.', side_short: 'For a short: the stop above the entry, the target below.',
+      ty_breakout_long: 'break above {le}', ty_breakout_short: 'break below {le}', ty_breakdown_short: 'break below {le}', ty_breakdown_long: 'break above {le}',
+      ty_continuation_long: 'price keeps going above {le}', ty_continuation_short: 'price keeps going below {le}', ty_reclaim_long: 'price gets back above {le}', ty_reclaim_short: 'price gets back below {le}',
+      ty_rejection_short: 'price is pushed back below {le}', ty_rejection_long: 'price is pushed back above {le}',
+      ref_de: { lh: 'the London high', ll: 'the London low', pdh: 'the PDH', pdl: 'the PDL', n: '{v}' }, ref_le: { lh: 'the London high', ll: 'the London low', pdh: 'the PDH', pdl: 'the PDL', n: '{v}' },
+      c4: 'Your day stops if…', narrow_range: 'The London range is too narrow', two_invalidations: '2 scenarios invalidated', time_limit: 'My time limit passes', nt_time: 'After {t}', other: 'Other', other_ph: 'What else stops it',
+      d1: 'How did your last session go?', d1_hint: 'It is not reviewed yet: your answer adjusts today’s risk.', gain: 'Win', loss: 'Loss', max_loss: 'Max loss', none: 'Did not trade',
+      d1_reduce: 'Last session hit your max loss. Risk 0.25 % of the account per trade today, instead of 0.5 %?', accept: 'Accept', refuse: 'Refuse',
+      limits: 'Your limits today', d3: 'Max trades today', d4: 'Time limit (New York)', d4_ph: 'e.g. 11:30', dml: 'Max loss today', risk: 'Risk per trade',
+      lock: 'Lock it now', locked: 'Locked at {t}', locks_at: 'At {t} (New York), your sheet locks: your plan no longer changes, only your checklist gets ticked.', locks_now: 'The lock time is past: your sheet locks as soon as you save it.',
+      locked_title: 'Your locked plan', sheet: 'Your plan sheet', sc_a: 'Scenario A', sc_b: 'Scenario B', notrade: 'Day over if', lim: 'Limits', after: 'after {t}', window: 'no trade {a}–{b} (news)',
+      risk_l: 'Risk {p} % of the account per trade', trades_l: '{n} trades max', trades_l1: '1 trade max', or: ' or ', fn_r: 'R: your target in multiples of your risk. 3R is 3 times what you risk.',
       t_breakout: 'Breakout', t_breakdown: 'Breakdown', t_continuation: 'Continuation', t_reclaim: 'Reclaim', t_rejection: 'Rejection',
       d_long: 'Long', d_short: 'Short',
-      l_close_above: 'If 15m close above {l}', l_close_below: 'If 15m close below {l}', l_back_above: 'If 15m close back above {l}', l_back_below: 'If 15m close back below {l}',
-      l_news: 'after the first full 15m after the news', l_retest: 'retest 5m + trigger', l_vwap: 'above VWAP', l_vwap_s: 'below VWAP', l_stop: 'stop {s}', l_target: 'target {t}', l_r: '({r}R)',
+      l_close_above: 'If a 15-min candle closes above {l}', l_close_below: 'If a 15-min candle closes below {l}', l_back_above: 'If a 15-min candle closes back above {l}', l_back_below: 'If a 15-min candle closes back below {l}',
+      l_news: 'after the first full 15-min candle after the news', l_retest: '5-min retest and trigger candle', l_vwap: 'above VWAP', l_vwap_s: 'below VWAP', l_stop: 'stop {s}', l_target: 'target {t}', l_r: '({r}R)',
+      inst_names: {},
     },
     fr: {
       change: 'Modifier', never_taken: 'Ce scénario n’a pas été pris depuis 10 séances. Le garder ?',
-      followed_sheet: 'As-tu suivi ta fiche ?', rules_q: 'Quelle règle ?', note_tomorrow: 'Une note pour demain ? (facultatif, en haut de ton prochain pre-market)',
-      r_no_retest: 'Entré sans retest 5m', r_off_plan: 'Un trade hors de ma fiche', r_max_trades: 'Trop de trades', r_news_window: 'Tradé pendant une fenêtre de news', r_moved_stop: 'Déplacé mon stop', r_other: 'Une autre règle',
-      d2: 'Hier', d2_no_retest: 'Hier tu es entré sans retest 5m. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', d2_off_plan: 'Hier tu as pris un trade hors de ta fiche. Qu’est-ce qui t’a fait sortir du plan ?',
+      followed_sheet: 'As-tu suivi ta fiche ?', rules_q: 'Quelle règle ?', note_tomorrow: 'Une note pour demain ? (facultatif, en haut de ton prochain pré-marché)',
+      r_no_retest: 'Entré sans attendre le retest (5 min)', r_off_plan: 'Un trade hors de ma fiche', r_max_trades: 'Trop de trades', r_news_window: 'Tradé pendant une fenêtre de news', r_moved_stop: 'Déplacé mon stop', r_other: 'Une autre règle',
+      d2: 'Hier', d2_no_retest: 'Hier tu es entré sans attendre le retest en 5 min. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', d2_off_plan: 'Hier tu as pris un trade hors de ta fiche. Qu’est-ce qui t’a fait sortir du plan ?',
       d2_max_trades: 'Hier tu as dépassé ton nombre de trades. Quel sera ton signal d’arrêt aujourd’hui ?', d2_news_window: 'Hier tu as tradé pendant une fenêtre de news. Comment vas-tu t’en tenir à l’écart ?',
       d2_moved_stop: 'Hier tu as déplacé ton stop. Qu’est-ce qui t’aidera à le laisser en place ?', d2_other: 'Hier tu as enfreint une règle de ta fiche. Qu’est-ce qui t’aidera à la tenir aujourd’hui ?', d2_ph: 'Une phrase courte',
-      x_title: 'Plan express', x_quick: 'Plan express (30 s)', x_guided: 'Plan guidé', x_hint_quick: 'En 30 secondes : ton niveau principal, la direction, la cible.', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton niveau principal, la direction, la cible.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Niveau principal', x_dir: 'Direction', long: 'Long', short: 'Short',
-      title: 'Pre-market', note: 'Ta note de la dernière séance', of: '{a} sur {b}', next: 'Continuer', back: 'Retour', save: 'Enregistrer ma fiche', needs: 'Complète ce qui manque pour continuer.',
-      base: 'Les niveaux du jour', instrument: 'Instrument', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Prix actuel',
-      base_hint: 'À la main pour l’instant. Les valeurs de la veille servent de départ.', base_needs: 'Il faut le London high, le London low et le prix actuel (le high au-dessus du low).',
-      a1: 'Où est le prix par rapport au London range ?', in: 'Dans le range', above: 'Au-dessus du high', below: 'Sous le low',
+      d2_hint: 'Une phrase : elle restera en haut de ta fiche pendant toute la séance.',
+      x_title: 'Plan express', x_quick: 'Plan express (30 s)', x_guided: 'Plan guidé', x_hint_quick: 'En 30 secondes : ta direction, ton entrée, ta cible.', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ta direction, ton entrée, ta cible.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Entrée', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'achat', short_sub: 'vente',
+      title: 'Pré-marché', note: 'Ta note de la dernière séance', of: '{a} sur {b}', next: 'Continuer', back: 'Retour', save: 'Enregistrer ma fiche', needs: 'Complète ce qui manque pour continuer.', opt: 'facultatif',
+      base: 'Les niveaux du jour', instrument: 'Instrument', inst_other: 'Autre', inst_ph: 'Symbole, ex. MNQ', inst_need: 'Choisis ton instrument.',
+      grp_london: 'Séance de Londres', grp_london_d: 'son plus haut (high) et son plus bas (low), avant l’ouverture de New York', grp_prev: 'Hier', grp_prev_d: 'le PDH et le PDL sont le plus haut et le plus bas d’hier',
+      lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Prix actuel', ph_hint: 'En gris : les niveaux de ta dernière fiche, pour repère.',
+      missing: 'Il manque : {l}.', hl_order: 'Le London high doit être au-dessus du London low.', pd_order: 'Le PDH doit être au-dessus du PDL.', far: 'Vérifie {v} : c’est loin de tes autres niveaux. Touche Continuer si c’est bien ça.',
+      a1: 'Où est le prix par rapport à la séance de Londres ?', a1_ctx: 'London high {h} · London low {l}', a1_price: ' · prix {p}', in: 'Entre les deux', above: 'Au-dessus du high', below: 'Sous le low',
       a2: 'Quel niveau surveilles-tu en priorité ?', high: 'London high', low: 'London low', both: 'Les deux',
-      a3: 'Une clôture 15m au-delà du niveau a-t-elle déjà eu lieu ?', yes: 'Oui', no: 'Non',
-      a4: '{lvl} est à {n} ticks de {main}. Cible ou obstacle ?', target: 'Cible', obstacle: 'Obstacle', ignore: 'Ignorer',
-      b1: 'News à fort impact aujourd’hui ?', b1_cal: 'D’après le calendrier : {e}', b1_time: 'Heure (New York)', b2: 'Attendre la première 15m complète après la news ?', b2_hint: 'La news tombe avant l’ouverture.',
-      c: 'Tes scénarios', main: 'Scénario principal', alt: 'Scénario alternatif', confirm: 'Confirmer', edit: 'Modifier le niveau', keep: 'Garder', remove: 'Retirer',
-      level: 'Niveau', tgt: 'Cible', tgt_prop: 'Proposée : {p} (prochain niveau opposé)', tgt_none: 'Aucun niveau opposé : entre ta cible.',
-      r: '{r}R estimé', not_viable: 'Non viable (sous 2R) : choisis une autre cible ou retire le scénario.', main_not_viable: 'Non viable (sous 2R) : change le niveau ou la cible.', removed: 'Retiré',
-      c4: 'Qu’est-ce qui annule la journée ?', narrow_range: 'Range trop étroit', two_invalidations: '2 invalidations', time_limit: 'Heure limite dépassée', other: 'Autre', other_ph: 'Ce qui l’annule aussi',
-      d1: 'Résultat de ta dernière séance ?', gain: 'Gain', loss: 'Perte', max_loss: 'Perte max', none: 'Pas tradé',
-      d1_reduce: 'Ta dernière séance a touché ta perte max. Risquer 0,25 % par trade aujourd’hui ?', accept: 'Accepter', refuse: 'Refuser',
-      limits: 'Tes limites du jour', d3: 'Trades max aujourd’hui', d4: 'Heure limite de trading', d4_ph: 'ex. 11:30', dml: 'Perte max du jour', risk: 'Risque par trade',
-      lock: 'Verrouiller mon plan', locked: 'Verrouillée à {t}', locks_at: 'Elle se verrouille toute seule à {t} (New York). Ensuite, seule la checklist change.', locked_title: 'Ton plan verrouillé', sheet: 'Ta fiche de plan', sc_a: 'Scénario A', sc_b: 'Scénario B', notrade: 'No-trade', lim: 'Limites', after: 'après {t}', window: 'fenêtre bloquée {a}–{b}',
-      risk_l: 'Risque {p} %', trades_l: '{n} trades', trades_l1: '1 trade', or: ' ou ',
+      a3_above: 'Une bougie de 15 min a-t-elle déjà clôturé au-dessus du London high ?', a3_below: 'Une bougie de 15 min a-t-elle déjà clôturé sous le London low ?', a3_hint: 'Oui : ton scénario principal suit la cassure. Non : il joue le retour dans la séance de Londres.', yes: 'Oui', no: 'Non',
+      a4: '{lvl} est à {n} du {main}. Cible ou obstacle ?', a4_hint: 'Cible : tu vises ce niveau. Obstacle : ta cible s’arrête juste avant. Ignorer : il ne compte pas.', target: 'Cible', obstacle: 'Obstacle', ignore: 'Ignorer',
+      pdh_full: 'Le PDH (plus haut d’hier)', pdl_full: 'Le PDL (plus bas d’hier)', n_ticks: '{n} ticks', n_ticks_pts: '{n} ticks ({p} points)',
+      b1: 'Une news à fort impact aujourd’hui ?', b1_cal: 'D’après le calendrier : {e}', b1_ex: 'Par exemple le CPI, l’emploi (NFP) ou la Fed (FOMC) : les annonces qui font bouger le marché.', b1_time: 'Heure (New York)', b2: 'Attendre la première bougie de 15 min complète après la news ?', b2_hint: 'La news tombe avant l’ouverture de 9 h 30 : la bougie qui suit est souvent agitée.',
+      c: 'Tes scénarios', c_hint: 'Ce que tu feras selon ce que fait le prix. Ajuste l’entrée, le stop ou la cible si besoin.', main: 'Scénario principal', alt: 'Scénario alternatif', keep: 'Garder', remove: 'Retirer', remove_sc: 'Retirer ce scénario', restore: 'Le remettre', removed: 'Retiré',
+      level: 'Niveau', f_entry: 'Entrée', f_stop: 'Stop', tgt: 'Cible', use: 'Utiliser',
+      tgt_is: 'Cible proposée : {lvl}, le prochain niveau.', tgt_before: 'Cible proposée : juste avant le {lvl} (ton obstacle).', tgt_prop: 'Proposée : {p} ({lvl})', tgt_none: 'Aucun niveau plus loin : entre ta cible.',
+      r_pts: '{r}R : tu vises {g} pts pour {k} pts de risque.', r_ticks: '{r}R : tu vises {g} ticks pour {k} ticks de risque.', r: '{r}R estimé',
+      not_viable: 'Non viable (sous 2R) : rapproche ton stop, éloigne ta cible ou retire ce scénario.', main_not_viable: 'Non viable (sous 2R) : rapproche ton stop ou éloigne ta cible.',
+      side_long: 'Pour un long : le stop sous l’entrée, la cible au-dessus.', side_short: 'Pour un short : le stop au-dessus de l’entrée, la cible en dessous.',
+      ty_breakout_long: 'cassure à la hausse {de}', ty_breakout_short: 'cassure à la baisse {de}', ty_breakdown_short: 'cassure à la baisse {de}', ty_breakdown_long: 'cassure à la hausse {de}',
+      ty_continuation_long: 'le prix continue au-dessus {de}', ty_continuation_short: 'le prix continue sous {le}', ty_reclaim_long: 'le prix repasse au-dessus {de}', ty_reclaim_short: 'le prix repasse sous {le}',
+      ty_rejection_short: 'le prix est repoussé sous {le}', ty_rejection_long: 'le prix est repoussé au-dessus {de}',
+      ref_de: { lh: 'du London high', ll: 'du London low', pdh: 'du PDH', pdl: 'du PDL', n: 'de {v}' }, ref_le: { lh: 'le London high', ll: 'le London low', pdh: 'le PDH', pdl: 'le PDL', n: '{v}' },
+      c4: 'Ta journée s’arrête si…', narrow_range: 'Le range de Londres est trop étroit', two_invalidations: '2 scénarios invalidés', time_limit: 'Mon heure limite passe', nt_time: 'Après {t}', other: 'Autre', other_ph: 'Ce qui l’arrête aussi',
+      d1: 'Résultat de ta dernière séance ?', d1_hint: 'Elle n’est pas encore revue : ta réponse ajuste ton risque du jour.', gain: 'Gain', loss: 'Perte', max_loss: 'Perte max', none: 'Pas tradé',
+      d1_reduce: 'Ta dernière séance a touché ta perte max. Risquer 0,25 % du compte par trade aujourd’hui, au lieu de 0,5 % ?', accept: 'Accepter', refuse: 'Refuser',
+      limits: 'Tes limites du jour', d3: 'Trades max aujourd’hui', d4: 'Heure limite (New York)', d4_ph: 'ex. 11:30', dml: 'Perte max du jour', risk: 'Risque par trade',
+      lock: 'Verrouiller maintenant', locked: 'Verrouillée à {t}', locks_at: 'À {t} (New York), ta fiche se verrouille : ton plan ne change plus, seule ta checklist se coche.', locks_now: 'L’heure de verrouillage est passée : ta fiche se verrouille dès que tu l’enregistres.',
+      locked_title: 'Ton plan verrouillé', sheet: 'Ta fiche de plan', sc_a: 'Scénario A', sc_b: 'Scénario B', notrade: 'Fin de journée si', lim: 'Limites', after: 'après {t}', window: 'pas de trade {a}–{b} (news)',
+      risk_l: 'Risque {p} % du compte par trade', trades_l: '{n} trades max', trades_l1: '1 trade max', or: ' ou ', fn_r: 'R : ta cible en multiples de ton risque. 3R, c’est 3 fois ce que tu risques.',
       t_breakout: 'Breakout', t_breakdown: 'Breakdown', t_continuation: 'Continuation', t_reclaim: 'Reclaim', t_rejection: 'Rejet',
       d_long: 'Long', d_short: 'Short',
-      l_close_above: 'Si clôture 15m au-dessus de {l}', l_close_below: 'Si clôture 15m sous {l}', l_back_above: 'Si clôture 15m de retour au-dessus de {l}', l_back_below: 'Si clôture 15m de retour sous {l}',
-      l_news: 'après la première 15m complète après la news', l_retest: 'retest 5m + déclenchement', l_vwap: 'au-dessus VWAP', l_vwap_s: 'sous VWAP', l_stop: 'stop {s}', l_target: 'cible {t}', l_r: '({r}R)',
+      l_close_above: 'Si une bougie 15 min clôture au-dessus de {l}', l_close_below: 'Si une bougie 15 min clôture sous {l}', l_back_above: 'Si une bougie 15 min clôture de retour au-dessus de {l}', l_back_below: 'Si une bougie 15 min clôture de retour sous {l}',
+      l_news: 'après la première bougie 15 min complète qui suit la news', l_retest: 'retest en 5 min et bougie de déclenchement', l_vwap: 'au-dessus du VWAP', l_vwap_s: 'sous le VWAP', l_stop: 'stop {s}', l_target: 'cible {t}', l_r: '({r}R)',
+      inst_names: { CL: 'Pétrole brut', MCL: 'Micro pétrole brut', GC: 'Or', MGC: 'Micro or', SI: 'Argent', SIL: 'Micro argent', NG: 'Gaz naturel', HG: 'Cuivre', ZN: 'T-Note 10 ans', ZB: 'T-Bond 30 ans' },
     },
     es: {
       change: 'Cambiar', never_taken: 'Este escenario no se ha tomado en 10 sesiones. ¿Mantenerlo?',
-      followed_sheet: '¿Seguiste tu ficha?', rules_q: '¿Qué regla?', note_tomorrow: '¿Una nota para mañana? (opcional, arriba de tu próximo pre-market)',
-      r_no_retest: 'Entré sin retest de 5m', r_off_plan: 'Una operación fuera de mi ficha', r_max_trades: 'Demasiadas operaciones', r_news_window: 'Operé en una ventana de noticias', r_moved_stop: 'Moví mi stop', r_other: 'Otra regla',
-      d2: 'Ayer', d2_no_retest: 'Ayer entraste sin retest de 5m. ¿Qué te ayudará a esperar hoy?', d2_off_plan: 'Ayer tomaste una operación fuera de tu ficha. ¿Qué te sacó del plan?',
+      followed_sheet: '¿Seguiste tu ficha?', rules_q: '¿Qué regla?', note_tomorrow: '¿Una nota para mañana? (opcional, arriba de tu próximo pre-mercado)',
+      r_no_retest: 'Entré sin esperar el retest (5 min)', r_off_plan: 'Una operación fuera de mi ficha', r_max_trades: 'Demasiadas operaciones', r_news_window: 'Operé en una ventana de noticias', r_moved_stop: 'Moví mi stop', r_other: 'Otra regla',
+      d2: 'Ayer', d2_no_retest: 'Ayer entraste sin esperar el retest en 5 min. ¿Qué te ayudará a esperar hoy?', d2_off_plan: 'Ayer tomaste una operación fuera de tu ficha. ¿Qué te sacó del plan?',
       d2_max_trades: 'Ayer superaste tu número de operaciones. ¿Cuál será tu señal para parar hoy?', d2_news_window: 'Ayer operaste durante una ventana de noticias. ¿Cómo te mantendrás al margen?',
       d2_moved_stop: 'Ayer moviste tu stop. ¿Qué te ayudará a dejarlo en su sitio?', d2_other: 'Ayer rompiste una regla de tu ficha. ¿Qué te ayudará a mantenerla hoy?', d2_ph: 'Una frase corta',
-      x_title: 'Plan exprés', x_quick: 'Plan exprés (30 s)', x_guided: 'Plan guiado', x_hint_quick: 'En 30 segundos: tu nivel principal, la dirección, el objetivo.', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu nivel principal, la dirección, el objetivo.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Nivel principal', x_dir: 'Dirección', long: 'Long', short: 'Short',
-      title: 'Pre-market', note: 'Tu nota de la última sesión', of: '{a} de {b}', next: 'Continuar', back: 'Atrás', save: 'Guardar mi ficha', needs: 'Completa lo que falta para continuar.',
-      base: 'Los niveles del día', instrument: 'Instrumento', lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Precio actual',
-      base_hint: 'A mano por ahora. Los valores de ayer sirven de punto de partida.', base_needs: 'Hacen falta el London high, el London low y el precio actual (el high por encima del low).',
-      a1: '¿Dónde está el precio respecto al London range?', in: 'Dentro del range', above: 'Por encima del high', below: 'Por debajo del low',
+      d2_hint: 'Una frase: quedará arriba de tu ficha durante toda la sesión.',
+      x_title: 'Plan exprés', x_quick: 'Plan exprés (30 s)', x_guided: 'Plan guiado', x_hint_quick: 'En 30 segundos: tu dirección, tu entrada, tu objetivo.', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu dirección, tu entrada, tu objetivo.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Entrada', x_dir: 'Dirección', long: 'Long', short: 'Short', long_sub: 'compra', short_sub: 'venta',
+      title: 'Pre-mercado', note: 'Tu nota de la última sesión', of: '{a} de {b}', next: 'Continuar', back: 'Atrás', save: 'Guardar mi ficha', needs: 'Completa lo que falta para continuar.', opt: 'opcional',
+      base: 'Los niveles del día', instrument: 'Instrumento', inst_other: 'Otro', inst_ph: 'Símbolo, p. ej. MNQ', inst_need: 'Elige tu instrumento.',
+      grp_london: 'Sesión de Londres', grp_london_d: 'su máximo (high) y su mínimo (low), antes de la apertura de Nueva York', grp_prev: 'Ayer', grp_prev_d: 'el PDH y el PDL son el máximo y el mínimo de ayer',
+      lh: 'London high', ll: 'London low', pdh: 'PDH', pdl: 'PDL', price: 'Precio actual', ph_hint: 'En gris: los niveles de tu última ficha, como referencia.',
+      missing: 'Falta: {l}.', hl_order: 'El London high debe estar por encima del London low.', pd_order: 'El PDH debe estar por encima del PDL.', far: 'Revisa {v}: está lejos de tus otros niveles. Toca Continuar si es correcto.',
+      a1: '¿Dónde está el precio respecto a la sesión de Londres?', a1_ctx: 'London high {h} · London low {l}', a1_price: ' · precio {p}', in: 'Entre los dos', above: 'Por encima del high', below: 'Por debajo del low',
       a2: '¿Qué nivel vigilas primero?', high: 'London high', low: 'London low', both: 'Los dos',
-      a3: '¿Ya hubo un cierre de 15m más allá del nivel?', yes: 'Sí', no: 'No',
-      a4: '{lvl} está a {n} ticks de {main}. ¿Objetivo u obstáculo?', target: 'Objetivo', obstacle: 'Obstáculo', ignore: 'Ignorar',
-      b1: '¿Noticias de alto impacto hoy?', b1_cal: 'Según el calendario: {e}', b1_time: 'Hora (Nueva York)', b2: '¿Esperar la primera vela de 15m completa después de la noticia?', b2_hint: 'La noticia sale antes de la apertura.',
-      c: 'Tus escenarios', main: 'Escenario principal', alt: 'Escenario alternativo', confirm: 'Confirmar', edit: 'Cambiar el nivel', keep: 'Mantener', remove: 'Quitar',
-      level: 'Nivel', tgt: 'Objetivo', tgt_prop: 'Propuesto: {p} (siguiente nivel opuesto)', tgt_none: 'Ningún nivel opuesto: escribe tu objetivo.',
-      r: '{r}R estimado', not_viable: 'No viable (menos de 2R): elige otro objetivo o quita el escenario.', main_not_viable: 'No viable (menos de 2R): cambia el nivel o el objetivo.', removed: 'Quitado',
-      c4: '¿Qué anula el día?', narrow_range: 'Range demasiado estrecho', two_invalidations: '2 invalidaciones', time_limit: 'Hora límite pasada', other: 'Otro', other_ph: 'Qué más lo anula',
-      d1: '¿Resultado de tu última sesión?', gain: 'Ganancia', loss: 'Pérdida', max_loss: 'Pérdida máx.', none: 'No operé',
-      d1_reduce: 'Tu última sesión tocó tu pérdida máxima. ¿Arriesgar 0,25 % por operación hoy?', accept: 'Aceptar', refuse: 'Rechazar',
-      limits: 'Tus límites de hoy', d3: 'Operaciones máx. hoy', d4: 'Hora límite para operar', d4_ph: 'p. ej. 11:30', dml: 'Pérdida máx. del día', risk: 'Riesgo por operación',
-      lock: 'Bloquear mi plan', locked: 'Bloqueada a las {t}', locks_at: 'Se bloquea sola a las {t} (Nueva York). Después, solo cambia la checklist.', locked_title: 'Tu plan bloqueado', sheet: 'Tu ficha de plan', sc_a: 'Escenario A', sc_b: 'Escenario B', notrade: 'No operar', lim: 'Límites', after: 'después de {t}', window: 'ventana bloqueada {a}–{b}',
-      risk_l: 'Riesgo {p} %', trades_l: '{n} operaciones', trades_l1: '1 operación', or: ' o ',
+      a3_above: '¿Ya cerró una vela de 15 min por encima del London high?', a3_below: '¿Ya cerró una vela de 15 min por debajo del London low?', a3_hint: 'Sí: tu escenario principal sigue la ruptura. No: juega el regreso al rango de Londres.', yes: 'Sí', no: 'No',
+      a4: '{lvl} está a {n} del {main}. ¿Objetivo u obstáculo?', a4_hint: 'Objetivo: apuntas a él. Obstáculo: tu objetivo se queda justo antes. Ignorar: no cuenta.', target: 'Objetivo', obstacle: 'Obstáculo', ignore: 'Ignorar',
+      pdh_full: 'El PDH (máximo de ayer)', pdl_full: 'El PDL (mínimo de ayer)', n_ticks: '{n} ticks', n_ticks_pts: '{n} ticks ({p} puntos)',
+      b1: '¿Una noticia de alto impacto hoy?', b1_cal: 'Según el calendario: {e}', b1_ex: 'Por ejemplo el CPI, el empleo (NFP) o la Fed (FOMC): los anuncios que mueven el mercado.', b1_time: 'Hora (Nueva York)', b2: '¿Esperar la primera vela de 15 min completa después de la noticia?', b2_hint: 'La noticia sale antes de la apertura de las 9:30: la vela siguiente suele ser agitada.',
+      c: 'Tus escenarios', c_hint: 'Lo que harás según lo que haga el precio. Ajusta la entrada, el stop o el objetivo si hace falta.', main: 'Escenario principal', alt: 'Escenario alternativo', keep: 'Mantener', remove: 'Quitar', remove_sc: 'Quitar este escenario', restore: 'Recuperarlo', removed: 'Quitado',
+      level: 'Nivel', f_entry: 'Entrada', f_stop: 'Stop', tgt: 'Objetivo', use: 'Usar',
+      tgt_is: 'Objetivo propuesto: {lvl}, el siguiente nivel.', tgt_before: 'Objetivo propuesto: justo antes del {lvl} (tu obstáculo).', tgt_prop: 'Propuesto: {p} ({lvl})', tgt_none: 'Ningún nivel más lejos: escribe tu objetivo.',
+      r_pts: '{r}R: apuntas a {g} pts por {k} pts de riesgo.', r_ticks: '{r}R: apuntas a {g} ticks por {k} ticks de riesgo.', r: '{r}R estimado',
+      not_viable: 'No viable (menos de 2R): acerca tu stop, aleja tu objetivo o quita este escenario.', main_not_viable: 'No viable (menos de 2R): acerca tu stop o aleja tu objetivo.',
+      side_long: 'Para un long: el stop por debajo de la entrada y el objetivo por encima.', side_short: 'Para un short: el stop por encima de la entrada y el objetivo por debajo.',
+      ty_breakout_long: 'ruptura al alza {de}', ty_breakout_short: 'ruptura a la baja {de}', ty_breakdown_short: 'ruptura a la baja {de}', ty_breakdown_long: 'ruptura al alza {de}',
+      ty_continuation_long: 'el precio sigue por encima {de}', ty_continuation_short: 'el precio sigue por debajo {de}', ty_reclaim_long: 'el precio vuelve por encima {de}', ty_reclaim_short: 'el precio vuelve por debajo {de}',
+      ty_rejection_short: 'el precio es rechazado por debajo {de}', ty_rejection_long: 'el precio es rechazado por encima {de}',
+      ref_de: { lh: 'del London high', ll: 'del London low', pdh: 'del PDH', pdl: 'del PDL', n: 'de {v}' }, ref_le: { lh: 'el London high', ll: 'el London low', pdh: 'el PDH', pdl: 'el PDL', n: '{v}' },
+      c4: 'Tu día termina si…', narrow_range: 'El rango de Londres es demasiado estrecho', two_invalidations: '2 escenarios invalidados', time_limit: 'Pasa mi hora límite', nt_time: 'Después de las {t}', other: 'Otro', other_ph: 'Qué más lo termina',
+      d1: '¿Resultado de tu última sesión?', d1_hint: 'Aún no está revisada: tu respuesta ajusta tu riesgo de hoy.', gain: 'Ganancia', loss: 'Pérdida', max_loss: 'Pérdida máx.', none: 'No operé',
+      d1_reduce: 'Tu última sesión tocó tu pérdida máxima. ¿Arriesgar 0,25 % de la cuenta por operación hoy, en lugar de 0,5 %?', accept: 'Aceptar', refuse: 'Rechazar',
+      limits: 'Tus límites de hoy', d3: 'Operaciones máx. hoy', d4: 'Hora límite (Nueva York)', d4_ph: 'p. ej. 11:30', dml: 'Pérdida máx. del día', risk: 'Riesgo por operación',
+      lock: 'Bloquearla ahora', locked: 'Bloqueada a las {t}', locks_at: 'A las {t} (Nueva York), tu ficha se bloquea: tu plan ya no cambia, solo se marca tu checklist.', locks_now: 'La hora de bloqueo ya pasó: tu ficha se bloquea en cuanto la guardes.',
+      locked_title: 'Tu plan bloqueado', sheet: 'Tu ficha de plan', sc_a: 'Escenario A', sc_b: 'Escenario B', notrade: 'Día terminado si', lim: 'Límites', after: 'después de las {t}', window: 'sin operar {a}–{b} (noticia)',
+      risk_l: 'Riesgo {p} % de la cuenta por operación', trades_l: '{n} operaciones máx.', trades_l1: '1 operación máx.', or: ' o ', fn_r: 'R: tu objetivo en múltiplos de tu riesgo. 3R son 3 veces lo que arriesgas.',
       t_breakout: 'Breakout', t_breakdown: 'Breakdown', t_continuation: 'Continuación', t_reclaim: 'Reclaim', t_rejection: 'Rechazo',
       d_long: 'Long', d_short: 'Short',
-      l_close_above: 'Si cierre de 15m por encima de {l}', l_close_below: 'Si cierre de 15m por debajo de {l}', l_back_above: 'Si cierre de 15m de vuelta por encima de {l}', l_back_below: 'Si cierre de 15m de vuelta por debajo de {l}',
-      l_news: 'tras la primera vela de 15m completa después de la noticia', l_retest: 'retest 5m + disparo', l_vwap: 'por encima del VWAP', l_vwap_s: 'por debajo del VWAP', l_stop: 'stop {s}', l_target: 'objetivo {t}', l_r: '({r}R)',
+      l_close_above: 'Si una vela de 15 min cierra por encima de {l}', l_close_below: 'Si una vela de 15 min cierra por debajo de {l}', l_back_above: 'Si una vela de 15 min cierra de vuelta por encima de {l}', l_back_below: 'Si una vela de 15 min cierra de vuelta por debajo de {l}',
+      l_news: 'tras la primera vela de 15 min completa después de la noticia', l_retest: 'retest en 5 min y vela de disparo', l_vwap: 'por encima del VWAP', l_vwap_s: 'por debajo del VWAP', l_stop: 'stop {s}', l_target: 'objetivo {t}', l_r: '({r}R)',
+      inst_names: { CL: 'Petróleo crudo', MCL: 'Micro petróleo crudo', GC: 'Oro', MGC: 'Micro oro', SI: 'Plata', SIL: 'Micro plata', NG: 'Gas natural', HG: 'Cobre', ZN: 'T-Note a 10 años', ZB: 'T-Bond a 30 años' },
     },
   };
   const pt = (k, p) => { let s = (PMT[L()] || PMT.en)[k]; if (s == null) s = PMT.en[k] != null ? PMT.en[k] : k; return p ? s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)) : s; };
@@ -752,6 +791,36 @@
   const pmRound = (v, i) => { const tk = pmTick(i); return Math.round(Math.round(v / tk) * tk * 1e6) / 1e6; };
   const pmFmt = (v) => (v == null || !isFinite(v) ? '–' : new Intl.NumberFormat(LANG === 'fr' ? 'fr-CA' : LANG === 'es' ? 'es' : 'en-US', { maximumFractionDigits: 4 }).format(v));
   const pmHmAdd = (hm, min) => { const [h, m] = hm.split(':').map(Number); const x = ((h * 60 + m + min) % 1440 + 1440) % 1440; return `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`; };
+  /** a typed price: spaces and currency signs out; a comma is the decimal point, except in English where « 21,250 » groups thousands */
+  function pmNum(raw) {
+    let s = String(raw == null ? '' : raw).replace(/[\s  $€]/g, ''); if (!s) return null;
+    if (s.includes(',') && s.includes('.')) s = s.lastIndexOf(',') < s.lastIndexOf('.') ? s.replace(/,/g, '') : s.replace(/\./g, '').replace(',', '.');
+    else if (s.includes(',')) s = LANG === 'en' && /^-?\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.');
+    return fNum(s);
+  }
+  /** the instruments offered: the trader's own (most traded first), then the usual futures; the current one is always there */
+  const PM_INST = ['MNQ', 'MES', 'NQ', 'ES', 'MYM', 'YM', 'M2K', 'RTY', 'MGC', 'GC', 'MCL', 'CL'];
+  const pmKnown = (r) => !!r && (typeof instOf !== 'function' || !instOf(r).unknown);
+  function pmInstList(cur) {
+    const n = {}; (S.trades || []).forEach((x) => { if (!x.demo && x.instrument) { const r = pmRoot(x.instrument); n[r] = (n[r] || 0) + 1; } });
+    const l = [...new Set([...Object.keys(n).filter(pmKnown).sort((a, b) => n[b] - n[a]), ...PM_INST])], r = pmRoot(cur);
+    if (pmKnown(r) && !l.includes(r)) l.unshift(r);
+    return l;
+  }
+  /** the instrument's name under its symbol (« Micro Nasdaq-100 »), in the trader's language when it is not a product name */
+  const pmInstName = (i) => { const r = pmRoot(i), o = (PMT[L()] || PMT.en).inst_names || {}; if (o[r]) return o[r]; const x = typeof instOf === 'function' ? instOf(r) : null; return x && !x.unknown ? x.name : ''; };
+  /** which of the day's levels a price is (London high, PDH…), or null */
+  function pmLevelKey(lv, v, tol) {
+    if (v == null) return null;
+    for (const [k, x] of [['lh', lv.london_high], ['ll', lv.london_low], ['pdh', lv.pdh], ['pdl', lv.pdl]]) if (x != null && Math.abs(x - v) <= (tol || 1e-6)) return k;
+    return null;
+  }
+  const pmRef = (form, k, v) => { const o = (PMT[L()] || PMT.en)['ref_' + form] || PMT.en['ref_' + form]; return (o[k] || o.n).replace('{v}', pmFmt(v)); };
+  /** what a scenario means, in words: « break above the London high » */
+  function pmTypeText(f, s) {
+    const k = pmLevelKey(f.levels, s.level, pmTick(f.instrument) / 2);
+    return pt(`ty_${s.type}_${s.direction}`, { de: pmRef('de', k, s.level), le: pmRef('le', k, s.level) });
+  }
 
   /** where the price is (A1, computed from 0.2 and 0.4) */
   function pmWhere(lv) {
@@ -797,16 +866,44 @@
     if (nr && a4 === 'obstacle' && tg === nr.v) tg = s.direction === 'long' ? tg - tk : tg + tk;   // out just before the obstacle
     return pmRound(tg, f.instrument);
   }
-  /** stop, target and estimated R of a scenario: R = |target − entry| / |entry − stop|, entry = the level, stop = level ± buffer */
-  function pmCompute(f, s, target) {
-    const tk = pmTick(f.instrument), buf = pmBuf(f.instrument) * tk;
-    const stop = s.level == null ? null : pmRound(s.direction === 'long' ? s.level - buf : s.level + buf, f.instrument);
-    const r = s.level == null || target == null || stop == null || stop === s.level ? null : Math.round(Math.abs(target - s.level) / Math.abs(s.level - stop) * 10) / 10;
+  /** stop, target and estimated R of a scenario: R = |target − entry| / |entry − stop|, entry = the level, stop = the trader's or level ± buffer.
+   *  A stop or a target on the wrong side of the entry gives no R. */
+  function pmCompute(f, s, target, stopIn) {
+    const tk = pmTick(f.instrument), buf = pmBuf(f.instrument) * tk, up = s.direction === 'long';
+    const stop = s.level == null ? null : stopIn != null ? stopIn : pmRound(up ? s.level - buf : s.level + buf, f.instrument);
+    const ok = s.level != null && target != null && stop != null && (up ? stop < s.level && target > s.level : stop > s.level && target < s.level);
+    const r = ok ? Math.round(Math.abs(target - s.level) / Math.abs(s.level - stop) * 10) / 10 : null;
     return Object.assign({}, s, { stop_estimate: stop, target, r_estimate: r });
   }
   const pmViable = (s) => s && s.r_estimate != null && s.r_estimate >= 2;
+  const pmSideBad = (s) => !!s && s.level != null && s.stop_estimate != null && s.target != null && s.r_estimate == null;
+  /** the R in words: what the target brings against the risk, in points (in ticks for instruments that move by cents or less) */
+  function pmRText(f, s, main) {
+    if (!s) return '';
+    if (s.r_estimate == null) return pmSideBad(s) ? pt('side_' + s.direction) : '';
+    if (!pmViable(s)) return `${pmFmt(s.r_estimate)}R · ${pt(main ? 'main_not_viable' : 'not_viable')}`;
+    const tk = pmTick(f.instrument), ticks = tk < 0.1, u = (x) => pmFmt(ticks ? Math.round(x / tk) : Math.round(x * 1e4) / 1e4);
+    return pt(ticks ? 'r_ticks' : 'r_pts', { r: pmFmt(s.r_estimate), g: u(Math.abs(s.target - s.level)), k: u(Math.abs(s.level - s.stop_estimate)) });
+  }
+  /** under the target: which level was proposed, and « Use » when the trader typed another one */
+  function pmTargetHint(f, s) {
+    if (PM.express) return '';
+    const prop = pmTarget(f, s), a = f.answers, typed = a['C3_' + s.id] != null && a['C3_' + s.id] !== '';
+    if (prop == null) return esc(pt('tgt_none'));
+    const tk = pmTick(f.instrument), k = pmLevelKey(f.levels, prop, tk / 2), kb = k ? null : pmLevelKey(f.levels, s.direction === 'long' ? prop + tk : prop - tk, tk / 2);
+    if (typed && Math.abs(fNum(a['C3_' + s.id]) - prop) > tk / 2) return `${esc(pt('tgt_prop', { p: pmFmt(prop), lvl: pt(k || kb || 'tgt') }))}<span aria-hidden="true"> · </span><button type="button" class="link pm-use" data-pm="use-tgt" data-s="${s.id}">${pt('use')}</button>`;
+    return esc(k ? pt('tgt_is', { lvl: pt(k) }) : kb ? pt('tgt_before', { lvl: pt(kb) }) : pt('tgt_prop', { p: pmFmt(prop), lvl: pt('tgt') }));
+  }
+  /** a level far from the others (a digit missing or added): the one furthest from their median, beyond 15 % */
+  function pmFar(lv) {
+    const l = [['lv.london_high', lv.london_high], ['lv.london_low', lv.london_low], ['lv.pdh', lv.pdh], ['lv.pdl', lv.pdl], ['lv.price', lv.price]].filter((x) => x[1] != null && x[1] > 0);
+    if (l.length < 3) return null;
+    const v = l.map((x) => x[1]).sort((x, y) => x - y), m = v[Math.floor(v.length / 2)];
+    const w = l.map((x) => [x, Math.abs(x[1] - m) / m]).sort((x, y) => y[1] - x[1])[0];
+    return w[1] > 0.15 ? w[0] : null;
+  }
 
-  const PM = { day: null, f: null, i: 0, err: '', then: null, d1auto: null, news: [] };
+  const PM = { day: null, f: null, i: 0, err: '', then: null, d1auto: null, news: [], bad: [], warned: '', ph: {}, instOther: false, old: false, done: false, dt: 0 };
   function pmPrevDay(day) { const d = new Date(day + 'T12:00:00'); do d.setDate(d.getDate() - 1); while (d.getDay() === 0 || d.getDay() === 6); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
   /** the last session's result from the journal (D1): win, loss, max loss, or not traded; null when that day is not reviewed */
   function pmLastResult(day) {
@@ -834,6 +931,8 @@
     const l = (typeof ECON !== 'undefined' && ECON.days && ECON.days[day]) || [];
     return l.filter((e) => e.impact === 'high').map((e) => ({ hm: typeof etStr === 'function' ? etStr(e.ts).slice(11, 16) : '', event: e.event || '' })).filter((e) => e.hm);
   }
+  /** a release's name in the trader's language (the app's own dictionary: « Nonfarm Payrolls » → « Emplois non agricoles (NFP) ») */
+  const pmEvent = (e) => { const d = L() === 'fr' ? window.I18N_FR : L() === 'es' ? window.I18N_ES : null; return (d && d[e]) || e; };
 
   /** the last n sheets before this day (newest first) */
   const pmRecent = (day, n) => (S.journals || []).filter((j) => j.fiche && j.id < day && !j.demo).sort((a, b) => b.id.localeCompare(a.id)).slice(0, n).map((j) => ficheNormalize(j.fiche, j.id));
@@ -842,35 +941,44 @@
     const l = pmRecent(day, 10); if (l.length < 10) return false;
     return l.every((f) => f.scenarios.some((x) => x.id === s.id && x.type === s.type && x.direction === s.direction)) && !l.some((f) => f.scenarios.some((x) => x.type === s.type && x.direction === s.direction && x.status === 'taken'));
   }
-  /** the screens that apply, in order */
+  /** the screens that apply, in order: the levels, the read of the market (with the news), the scenarios, the limits (with what
+   *  stops the day), the sheet; the last session's result and yesterday's broken rule only when they have something to ask */
   function pmScreens() {
     if (PM.express) return ['express', 'sheet'];
-    const a = PM.f.answers, s = ['base', 'pos', 'news', 'scen', 'notrade'];
+    const s = ['base', 'pos', 'scen'];
     if (PM.d1auto && !PM.d1auto.reviewed) s.push('d1');
     if (PM.d2) s.push('d2');
     s.push('limits', 'sheet');
     return s;
   }
+  /* a sheet started and closed without saving (a swipe, a call) comes back where it was, on this device, for its day */
+  const PM_DRAFT = 'pm.draft';
+  function pmDraftSave(closing) { clearTimeout(PM.dt); if (PM.f && PM.day && !PM.old && !PM.done && (closing || document.querySelector('#gSheet.g-pm:not(.g-pm-locked)'))) lsSet(PM_DRAFT, { day: PM.day, f: PM.f, i: PM.i, express: !!PM.express, other: !!PM.instOther, at: Date.now() }); }
+  function pmDraftClear() { clearTimeout(PM.dt); try { localStorage.removeItem(PM_DRAFT); } catch (e) { /* private mode */ } }
   async function openPremarket(day, opts) {
     day = day || (window.SweepFiche ? SweepFiche.dayOf() : G.today && G.today.day);
     const old = ficheGet(day);
-    PM.day = day; PM.i = 0; PM.err = ''; PM.then = opts && typeof opts.then === 'function' ? opts.then : null;
+    PM.day = day; PM.i = 0; PM.err = ''; PM.bad = []; PM.warned = ''; PM.instOther = false; PM.old = !!old; PM.done = false; PM.then = opts && typeof opts.then === 'function' ? opts.then : null;
     PM.d1auto = pmLastResult(day);
     PM.note = (window.SweepCoach && SweepCoach.ruleFor && SweepCoach.ruleFor(day)) || '';   // the last review's note for this session
     { const br = (journalOf(pmPrevDay(day)).post || {}).rules_broken || []; PM.d2 = FICHE.RULES.find((r) => br.includes(r)) || null; }   // a rule broken last session: D2
-    // a sheet started for this day comes back as it was; otherwise yesterday's levels and the learned limits are the start
-    let f = old ? structuredClone(old) : ficheBlank(day);
-    if (!old) {
-      const prev = (S.journals || []).filter((j) => j.fiche && j.id < day).sort((x, y) => y.id.localeCompare(x.id))[0];
-      if (prev) { f.levels = Object.assign({}, prev.fiche.levels, { price: null }); f.instrument = f.instrument || prev.fiche.instrument; }
+    // yesterday's levels are only a reference in grey (they change every day: typed over, never kept by mistake)
+    const prev = (S.journals || []).filter((j) => j.fiche && j.id < day).sort((x, y) => y.id.localeCompare(x.id))[0];
+    PM.ph = prev && prev.fiche.levels ? Object.assign({}, prev.fiche.levels, { price: null }) : {};
+    // a sheet saved for this day comes back as it was; then a draft of this day; otherwise the learned limits are the start
+    const dr = old ? null : lsGet(PM_DRAFT, null), draft = dr && dr.day === day && dr.f && Date.now() - (dr.at || 0) < 864e5 ? dr : null;
+    let f = old ? structuredClone(old) : draft ? Object.assign(ficheBlank(day), structuredClone(draft.f)) : ficheBlank(day);
+    if (!old && !draft) {
+      if (prev && !f.instrument) f.instrument = prev.fiche.instrument;
       f.no_trade_conditions = ['two_invalidations', 'time_limit'];
       // learned defaults (brief step 8): the most frequent of the last 10 sheets (2 trades and 11:30 to start)
       const last = pmRecent(day, 10), mode = (l) => { const n = new Map(); l.forEach((v) => v != null && n.set(v, (n.get(v) || 0) + 1)); let b = null, k = 0; for (const [v, c] of n) if (c > k) { b = v; k = c; } return b; };
       f.limits.max_trades = mode(last.map((x) => x.limits.max_trades)) || 2;
       f.limits.time_limit = mode(last.map((x) => x.limits.time_limit)) || '11:30';
     }
+    if (draft) { PM.i = Date.now() - (draft.at || 0) < 6e5 ? draft.i || 0 : 0; PM.instOther = !!draft.other; }   // (closed a moment ago: back on the same screen; later: from the first one, everything still filled)
     // the instrument is no longer asked once it has not changed in 5 sheets (still there, one tap away)
-    { const l5 = pmRecent(day, 5); PM.hideInst = l5.length === 5 && l5.every((x) => x.instrument && x.instrument === l5[0].instrument) && (!f.instrument || f.instrument === l5[0].instrument); if (PM.hideInst) f.instrument = l5[0].instrument; }
+    { const l5 = pmRecent(day, 5); PM.hideInst = !PM.instOther && l5.length === 5 && l5.every((x) => x.instrument && x.instrument === l5[0].instrument) && (!f.instrument || f.instrument === l5[0].instrument); if (PM.hideInst) f.instrument = l5[0].instrument; }
     f.answers = Object.assign({}, f.answers);
     if (f.answers.D1 == null) f.answers.D1 = PM.d1auto.value;
     if (f.answers.max_loss == null) f.answers.max_loss = pmMaxLoss(day);
@@ -882,93 +990,127 @@
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
     if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-pm g-pm-locked' }); const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day; return; }   // locked: the session view
     PM.late = !old && ficheLockAt(day) <= Date.now() / 1000;   // the lock time is past without a sheet: the express version (brief step 6)
-    PM.express = old ? old.mode === 'express' : PM.late || (S.settings && S.settings.pm_mode) === 'express';   // or the version the trader chose last time (a saved sheet keeps its own)
+    PM.express = old ? old.mode === 'express' : PM.late || (draft ? !!draft.express : (S.settings && S.settings.pm_mode) === 'express');   // or the version the trader chose last time (a saved sheet keeps its own)
     if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
-    openSheet(pmHtml(), { cls: 'g-plan g-pm' });
+    else PM.i = Math.min(PM.i, pmScreens().length - 1);
+    openSheet(pmHtml(), { cls: 'g-plan g-pm', onClose: () => pmDraftSave(true) });   // (closed by a swipe or the scrim: the draft keeps the last keystrokes)
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;
+    pmAfter(sh);
   }
-  const pmSeg = (q, opts, cur) => `<div class="g-seg4 pm-seg">${opts.map((o) => `<button type="button" class="${cur === o ? 'on' : ''}" data-pm="ans" data-q="${q}" data-v="${o}">${esc(pt(o))}</button>`).join('')}</div>`;
-  const pmIn = (k, v, ph, mode) => `<input type="text" inputmode="${mode || 'decimal'}" data-pmf="${k}" value="${v == null ? '' : esc(String(v))}" placeholder="${esc(ph || '')}" enterkeyhint="next">`;
+  const pmSeg = (q, opts, cur, subs) => `<div class="g-seg4 pm-seg">${opts.map((o) => `<button type="button" class="${cur === o ? 'on' : ''}" aria-pressed="${cur === o}" data-pm="ans" data-q="${q}" data-v="${o}">${esc(pt(o))}${subs && subs[o] ? `<small data-noi18n>${esc(subs[o])}</small>` : ''}</button>`).join('')}</div>`;
+  const pmIn = (k, v, ph, mode) => `<input type="text" inputmode="${mode || 'decimal'}" data-pmf="${k}" value="${v == null ? '' : esc(String(v))}" placeholder="${esc(ph || '')}" enterkeyhint="next" autocomplete="off" spellcheck="false"${PM.bad.includes(k) ? ' aria-invalid="true"' : ''}>`;
+  /** the last review's note and what works for the trader (brief edge T4), at the top of the first screen */
+  function pmTop() {
+    const works = window.SweepEdge && SweepEdge.line ? SweepEdge.line('works') : '';
+    return `${PM.note ? `<p class="pm-rem"><b>${pt('note')}</b> · ${esc(PM.note)}</p>` : ''}${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}`;
+  }
+  /** the instrument: one tap on a chip (the trader's own first), « Other » for a symbol not in the row; its name under it */
+  function pmInstHtml(f) {
+    const nm = pmInstName(f.instrument);
+    if (PM.hideInst) return `<p class="pm-inst"><b data-noi18n>${esc(f.instrument)}</b>${nm ? ` · <span data-noi18n>${esc(nm)}</span>` : ''} · <button type="button" class="link" data-pm="inst">${pt('change')}</button></p>`;
+    const r = pmRoot(f.instrument), list = pmInstList(f.instrument), other = PM.instOther || (!!r && !list.includes(r));
+    return `<div class="g-f pm-inst-f"><span>${pt('instrument')}</span>
+      <div class="g-chips-row pm-insts${PM.bad.includes('instrument') ? ' bad' : ''}" data-noi18n>${list.map((i) => `<button type="button" class="chip${!other && r === i ? ' on' : ''}" aria-pressed="${!other && r === i}" data-pm="inst-pick" data-v="${i}">${i}</button>`).join('')}<button type="button" class="chip${other ? ' on' : ''}" aria-pressed="${other}" data-pm="inst-pick" data-v="">${pt('inst_other')}</button></div>
+      ${other ? pmIn('instrument', f.instrument, pt('inst_ph'), 'text') : nm ? `<small class="pm-inst-n" data-noi18n>${esc(nm)}</small>` : ''}</div>`;
+  }
+  /** the news question (with the read of the market: one screen less) */
+  function pmNewsHtml(a) {
+    const early = a.B1 === 'yes' && a.B1_time && a.B1_time < '09:30';
+    return `<h3 class="pm-q">${pt('b1')}</h3><p class="g-hint-sm">${esc(PM.news.length ? pt('b1_cal', { e: PM.news.map((e) => `${e.hm} ${pmEvent(e.event)}`).join(' · ') }) : pt('b1_ex'))}</p>${pmSeg('B1', ['yes', 'no'], a.B1)}
+      ${a.B1 === 'yes' ? `<label class="g-f"><span>${pt('b1_time')}</span><input type="time" data-pmf="B1_time" value="${esc(a.B1_time || '')}"${PM.bad.includes('B1_time') ? ' aria-invalid="true"' : ''}></label>` : ''}
+      ${early ? `<h3 class="pm-q">${pt('b2')}</h3><p class="g-hint-sm">${pt('b2_hint')}</p>${pmSeg('B2', ['yes', 'no'], a.B2 || 'yes')}` : ''}`;
+  }
+  /** one scenario: what it means in words, its entry, stop and target (all three can be changed), the R in words */
+  function pmCard(f, s) {
+    const a = f.answers, main = s.id === 'A', gone = !main && a.C2 === 'remove', lk = main ? 'C1_level' : 'C1_level_B';
+    const val = (k, v) => (a[k] != null && a[k] !== '' ? a[k] : v == null ? '' : v);
+    return `<div class="pm-sc${gone ? ' pm-off' : ''}" data-sc="${s.id}"><div class="pm-sc-h"><b>${pt(main ? 'main' : 'alt')}</b>${gone ? `<span class="pm-st">${pt('removed')}</span>` : ''}</div>
+      <p class="pm-what"><b>${esc(pt('d_' + s.direction))} · ${esc(pt('t_' + s.type))}</b> — ${esc(pmTypeText(f, s))}</p>
+      ${gone ? `<button type="button" class="link pm-sc-x" data-pm="ans" data-q="C2" data-v="keep">${pt('restore')}</button>` : `<div class="pm-row3">
+        <label class="g-f"><span>${pt('f_entry')}</span>${pmIn(lk, val(lk, s.level))}</label>
+        <label class="g-f"><span>${pt('f_stop')}</span>${pmIn('ST_' + s.id, val('ST_' + s.id, s.stop_estimate))}</label>
+        <label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_' + s.id, val('C3_' + s.id, s.target))}</label></div>
+        <p class="g-hint-sm pm-tg" data-pm-tg="${s.id}">${pmTargetHint(f, s)}</p>
+        <p class="pm-r ${pmViable(s) ? 'ok' : 'bad'}" data-pm-r="${s.id}">${esc(pmRText(f, s, main))}</p>
+        ${!main && pmNeverTaken(PM.day, s) ? `<p class="g-hint g-hint-sm pm-never">${pt('never_taken')}</p>` : ''}
+        ${main ? '' : `<button type="button" class="link pm-sc-x" data-pm="ans" data-q="C2" data-v="remove">${pt('remove_sc')}</button>`}`}</div>`;
+  }
   function pmScreen(name) {
     const f = PM.f, a = f.answers, lv = f.levels;
-    if (name === 'base') { const works = window.SweepEdge && SweepEdge.line ? SweepEdge.line('works') : '';   // what works for the trader (brief edge T4)
-      return `${PM.note ? `<p class="pm-rem"><b>${pt('note')}</b> · ${esc(PM.note)}</p>` : ''}${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}<h3 class="pm-q">${pt('base')}</h3><p class="g-hint g-hint-sm">${pt('base_hint')}</p>
-      ${PM.hideInst ? `<p class="pm-inst" data-noi18n><b>${esc(f.instrument)}</b> · <button type="button" class="link" data-pm="inst">${pt('change')}</button></p>` : `<label class="g-f"><span>${pt('instrument')}</span>${pmIn('instrument', f.instrument, 'MES', 'text')}</label>`}
-      <div class="g-row2"><label class="g-f"><span>${pt('lh')}</span>${pmIn('lv.london_high', lv.london_high)}</label><label class="g-f"><span>${pt('ll')}</span>${pmIn('lv.london_low', lv.london_low)}</label></div>
-      <div class="g-row2"><label class="g-f"><span>${pt('pdh')}</span>${pmIn('lv.pdh', lv.pdh)}</label><label class="g-f"><span>${pt('pdl')}</span>${pmIn('lv.pdl', lv.pdl)}</label></div>
-      <label class="g-f"><span>${pt('price')}</span>${pmIn('lv.price', lv.price)}</label>
+    if (name === 'base') {
+      const ph = PM.ph || {}, P = (k) => (ph[k] != null ? String(ph[k]) : ''), hasPh = ['london_high', 'london_low', 'pdh', 'pdl'].some((k) => ph[k] != null);
+      return `${pmTop()}<h3 class="pm-q">${pt('base')}</h3>
+      ${pmInstHtml(f)}
+      <div class="pm-chart-slot"></div>
+      <p class="pm-grp"><b>${pt('grp_london')}</b> · ${pt('grp_london_d')}</p>
+      <div class="g-row2"><label class="g-f"><span data-noi18n>${pt('lh')}</span>${pmIn('lv.london_high', lv.london_high, P('london_high'))}</label><label class="g-f"><span data-noi18n>${pt('ll')}</span>${pmIn('lv.london_low', lv.london_low, P('london_low'))}</label></div>
+      <p class="pm-grp"><b>${pt('grp_prev')}</b> · ${pt('opt')} · ${pt('grp_prev_d')}</p>
+      <div class="g-row2"><label class="g-f"><span data-noi18n>${pt('pdh')}</span>${pmIn('lv.pdh', lv.pdh, P('pdh'))}</label><label class="g-f"><span data-noi18n>${pt('pdl')}</span>${pmIn('lv.pdl', lv.pdl, P('pdl'))}</label></div>
+      <label class="g-f"><span>${pt('price')} · ${pt('opt')}</span>${pmIn('lv.price', lv.price)}</label>
+      ${hasPh ? `<p class="g-hint-sm pm-ph">${pt('ph_hint')}</p>` : ''}
       <button type="button" class="link pm-off-day" data-pm="mode" data-v="express">${pt('x_quick')}</button>
-      <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`; }   // a planned day off, as the plan always allowed (audit of 16 Oct., R21)
+      <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;   // a planned day off, as the plan always allowed (audit of 16 Oct., R21)
+    }
     if (name === 'pos') {
       const nr = a.A1 && (a.A1 !== 'in' || a.A2) ? pmNearLevel(f) : null;
-      return `<h3 class="pm-q">${pt('a1')}</h3>${pmSeg('A1', ['in', 'above', 'below'], a.A1)}
-        ${a.A1 === 'in' ? `<h3 class="pm-q">${pt('a2')}</h3>${pmSeg('A2', ['high', 'low', 'both'], a.A2)}` : ''}
-        ${a.A1 === 'above' || a.A1 === 'below' ? `<h3 class="pm-q">${pt('a3')}</h3>${pmSeg('A3', ['yes', 'no'], a.A3)}` : ''}
-        ${nr ? `<h3 class="pm-q">${esc(pt('a4', { lvl: pt(nr.key), n: nr.ticks, main: pt(nr.main) }))}</h3>${pmSeg('A4', ['target', 'obstacle', 'ignore'], a.A4)}` : ''}`;
+      const ctx = pt('a1_ctx', { h: pmFmt(lv.london_high), l: pmFmt(lv.london_low) }) + (lv.price != null ? pt('a1_price', { p: pmFmt(lv.price) }) : '');
+      let q4 = '';
+      if (nr) { const tk = pmTick(f.instrument), p = Math.round(nr.ticks * tk * 1e4) / 1e4; q4 = pt('a4', { lvl: pt(nr.key + '_full'), n: tk >= 0.1 && tk < 1 ? pt('n_ticks_pts', { n: nr.ticks, p: pmFmt(p) }) : pt('n_ticks', { n: nr.ticks }), main: pt(nr.main) }); }
+      return `<h3 class="pm-q">${pt('a1')}</h3><p class="g-hint-sm pm-ctx" data-noi18n>${esc(ctx)}</p>${pmSeg('A1', ['in', 'above', 'below'], a.A1)}
+        ${a.A1 === 'in' ? `<h3 class="pm-q">${pt('a2')}</h3>${pmSeg('A2', ['high', 'low', 'both'], a.A2, { high: pmFmt(lv.london_high), low: pmFmt(lv.london_low) })}` : ''}
+        ${a.A1 === 'above' || a.A1 === 'below' ? `<h3 class="pm-q">${pt('a3_' + a.A1)}</h3><p class="g-hint-sm">${pt('a3_hint')}</p>${pmSeg('A3', ['yes', 'no'], a.A3)}` : ''}
+        ${nr ? `<h3 class="pm-q">${esc(q4)}</h3><p class="g-hint-sm">${pt('a4_hint')}</p>${pmSeg('A4', ['target', 'obstacle', 'ignore'], a.A4)}` : ''}
+        <div class="pm-sep" role="separator"></div>${pmNewsHtml(a)}`;
     }
-    if (name === 'news') {
-      const early = a.B1 === 'yes' && a.B1_time && a.B1_time < '09:30';
-      return `<h3 class="pm-q">${pt('b1')}</h3>${PM.news.length ? `<p class="g-hint g-hint-sm">${esc(pt('b1_cal', { e: PM.news.map((e) => `${e.hm} ${e.event}`).join(' · ') }))}</p>` : ''}${pmSeg('B1', ['yes', 'no'], a.B1)}
-        ${a.B1 === 'yes' ? `<label class="g-f"><span>${pt('b1_time')}</span><input type="time" data-pmf="B1_time" value="${esc(a.B1_time || '')}"></label>` : ''}
-        ${early ? `<h3 class="pm-q">${pt('b2')}</h3><p class="g-hint g-hint-sm">${pt('b2_hint')}</p>${pmSeg('B2', ['yes', 'no'], a.B2 || 'yes')}` : ''}`;
-    }
-    if (name === 'scen') {
-      const list = pmBuild(f);
-      return `<h3 class="pm-q">${pt('c')}</h3>${list.map((s) => {
-        const main = s.id === 'A', gone = !main && a.C2 === 'remove', editLvl = main && a.C1 === 'edit', prop = pmTarget(f, s);
-        return `<div class="pm-sc${gone ? ' pm-off' : ''}"><div class="pm-sc-h"><b>${pt(main ? 'main' : 'alt')} · ${esc(pt('d_' + s.direction))} ${esc(pt('t_' + s.type).toLowerCase())}</b><span class="g-hint-sm">${pt('level')} ${pmFmt(s.level)}</span></div>
-          ${main ? pmSeg('C1', ['confirm', 'edit'], a.C1 || 'confirm') : pmSeg('C2', ['keep', 'remove'], a.C2 || 'keep')}
-          ${!main && !gone && pmNeverTaken(PM.day, s) ? `<p class="g-hint g-hint-sm pm-never">${pt('never_taken')}</p>` : ''}
-          ${editLvl ? `<label class="g-f"><span>${pt('level')}</span>${pmIn('C1_level', a.C1_level != null ? a.C1_level : s.level)}</label>` : ''}
-          ${gone ? '' : `<label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_' + s.id, a['C3_' + s.id] != null ? a['C3_' + s.id] : prop)}<small class="g-hint-sm">${prop == null ? pt('tgt_none') : esc(pt('tgt_prop', { p: pmFmt(prop) }))}</small></label>
-          <p class="pm-r ${pmViable(s) ? 'ok' : 'bad'}" data-pm-r="${s.id}">${s.r_estimate == null ? '' : esc(pt('r', { r: pmFmt(s.r_estimate) }))}${pmViable(s) || s.r_estimate == null ? '' : ' · ' + pt(main ? 'main_not_viable' : 'not_viable')}</p>`}</div>`;
-      }).join('')}`;
-    }
-    if (name === 'notrade') return `<h3 class="pm-q">${pt('c4')}</h3><div class="g-chips-row wrap">${FICHE.NO_TRADE.map((c) => `<button type="button" class="chip ${f.no_trade_conditions.includes(c) ? 'on' : ''}" data-pm="nt" data-v="${c}">${pt(c)}</button>`).join('')}</div>
-      ${f.no_trade_conditions.includes('other') ? `<label class="g-f"><span>${pt('other')}</span><input type="text" maxlength="120" data-pmf="no_trade_other" value="${esc(f.no_trade_other || '')}" placeholder="${esc(pt('other_ph'))}"></label>` : ''}`;
-    if (name === 'express') {   // brief step 6: the pre-market missed, the main level, the direction and the target (R included)
-      const sc = pmBuild(f)[0], works = window.SweepEdge && SweepEdge.line ? SweepEdge.line('works') : '';
-      return `${PM.note ? `<p class="pm-rem"><b>${pt('note')}</b> · ${esc(PM.note)}</p>` : ''}${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt(PM.late ? 'x_hint' : 'x_hint_quick')}</p>
-        <label class="g-f"><span>${pt('instrument')}</span>${pmIn('instrument', f.instrument, 'MES', 'text')}</label>
-        <h3 class="pm-q">${pt('x_dir')}</h3>${pmSeg('X_dir', ['long', 'short'], a.X_dir)}
-        <div class="g-row2"><label class="g-f"><span>${pt('x_level')}</span>${pmIn('X_level', a.X_level)}</label><label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_A', a.C3_A)}</label></div>
-        <p class="pm-r ${pmViable(sc) ? 'ok' : 'bad'}" data-pm-r="A">${sc && sc.r_estimate != null ? esc(pt('r', { r: pmFmt(sc.r_estimate) })) + (pmViable(sc) ? '' : ' · ' + pt('main_not_viable')) : ''}</p>
+    if (name === 'scen') return `<h3 class="pm-q">${pt('c')}</h3><p class="g-hint-sm">${pt('c_hint')}</p>${pmBuild(f).map((s) => pmCard(f, s)).join('')}`;
+    if (name === 'express') {   // brief step 6: the pre-market missed (or the trader's choice), the direction, the entry, the stop and the target (R included)
+      const sc = pmBuild(f)[0], stv = a.X_stop != null && a.X_stop !== '' ? a.X_stop : sc ? sc.stop_estimate : '';
+      return `${pmTop()}<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt(PM.late ? 'x_hint' : 'x_hint_quick')}</p>
+        ${pmInstHtml(f)}
+        <div class="pm-chart-slot"></div>
+        <h3 class="pm-q">${pt('x_dir')}</h3>${pmSeg('X_dir', ['long', 'short'], a.X_dir, { long: pt('long_sub'), short: pt('short_sub') })}
+        <div class="pm-row3"><label class="g-f"><span>${pt('x_level')}</span>${pmIn('X_level', a.X_level)}</label><label class="g-f"><span>${pt('f_stop')}</span>${pmIn('X_stop', stv)}</label><label class="g-f"><span>${pt('tgt')}</span>${pmIn('C3_A', a.C3_A)}</label></div>
+        <p class="pm-r ${pmViable(sc) ? 'ok' : 'bad'}" data-pm-r="A">${esc(pmRText(f, sc, true))}</p>
         <label class="g-f"><span>${pt('dml')}</span>${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</label>
         ${PM.late ? `<button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>` : `<button type="button" class="link pm-off-day" data-pm="mode" data-v="full">${pt('x_guided')}</button>`}
         <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;
     }
-    if (name === 'd2') return `<h3 class="pm-q">${esc(pt('d2_' + PM.d2))}</h3><label class="g-f"><textarea rows="2" maxlength="200" data-pmf="D2" placeholder="${esc(pt('d2_ph'))}">${esc(a.D2 || '')}</textarea></label>`;
-    if (name === 'd1') return `<h3 class="pm-q">${pt('d1')}</h3>${pmSeg('D1', ['gain', 'loss', 'max_loss', 'none'], a.D1)}`;
-    if (name === 'limits') return `<h3 class="pm-q">${pt('limits')}</h3>
+    if (name === 'd2') return `<h3 class="pm-q">${esc(pt('d2_' + PM.d2))}</h3><p class="g-hint-sm">${pt('d2_hint')}</p><label class="g-f"><textarea rows="2" maxlength="200" data-pmf="D2" placeholder="${esc(pt('d2_ph'))}">${esc(a.D2 || '')}</textarea></label>`;
+    if (name === 'd1') return `<h3 class="pm-q">${pt('d1')}</h3><p class="g-hint-sm">${pt('d1_hint')}</p>${pmSeg('D1', ['gain', 'loss', 'max_loss', 'none'], a.D1)}`;
+    if (name === 'limits') {   // the limits, then what stops the day (one screen: the time limit is right above its chip)
+      const nt = f.no_trade_conditions;
+      return `<h3 class="pm-q">${pt('limits')}</h3>
       ${a.D1 === 'max_loss' ? `<p class="g-hint">${pt('d1_reduce')}</p>${pmSeg('D1_reduce', ['accept', 'refuse'], a.D1_reduce)}` : ''}
       <div class="g-row2"><label class="g-f"><span>${pt('d3')}</span>${pmIn('lim.max_trades', f.limits.max_trades, '2', 'numeric')}</label>
       <label class="g-f"><span>${pt('d4')}</span><input type="time" data-pmf="lim.time_limit" value="${esc(f.limits.time_limit || '')}"></label></div>
-      <label class="g-f"><span>${pt('dml')}</span>${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</label>`;
-    if (name === 'sheet') return `<h3 class="pm-q">${pt('sheet')}</h3>${pmSheetHtml(pmFinal())}<p class="g-hint g-hint-sm pm-locks">${esc(pt('locks_at', { t: ficheLockHm() }))}</p><p class="g-err" id="gErr"></p>`;
+      <label class="g-f"><span>${pt('dml')}</span>${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</label>
+      <div class="pm-sep" role="separator"></div><h3 class="pm-q">${pt('c4')}</h3><div class="g-chips-row wrap">${FICHE.NO_TRADE.map((c) => `<button type="button" class="chip ${nt.includes(c) ? 'on' : ''}" aria-pressed="${nt.includes(c)}" data-pm="nt" data-v="${c}">${esc(c === 'time_limit' && f.limits.time_limit ? pt('nt_time', { t: f.limits.time_limit }) : pt(c))}</button>`).join('')}</div>
+      ${nt.includes('other') ? `<label class="g-f"><span>${pt('other')}</span><input type="text" maxlength="120" data-pmf="no_trade_other" value="${esc(f.no_trade_other || '')}" placeholder="${esc(pt('other_ph'))}"></label>` : ''}`;
+    }
+    if (name === 'sheet') return `<h3 class="pm-q">${pt('sheet')}</h3>${pmSheetHtml(pmFinal(), true)}<p class="g-err" id="gErr"></p>`;
     return '';
   }
   function pmHtml() {
-    const scr = pmScreens(), i = Math.min(PM.i, scr.length - 1), name = scr[i], last = name === 'sheet';
+    const scr = pmScreens(), i = Math.min(PM.i, scr.length - 1), name = scr[i], last = name === 'sheet', past = ficheLockAt(PM.day) <= Date.now() / 1000;
     return `${head(pt('title'), `${fdate(PM.day, { weekday: 'long', month: 'long', day: 'numeric' })} · ${pt('of', { a: i + 1, b: scr.length })}`)}
       <div class="pm-body" data-pm-screen="${name}">${pmScreen(name)}</div>
-      ${PM.err ? `<p class="g-err pm-err">${esc(PM.err)}</p>` : ''}
-      ${last ? `<div class="pm-nav"><button type="button" class="btn pm-back" data-pm="back">${pt('back')}</button></div>
-      <button type="button" class="btn primary g-big pm-save" data-g="save-plan" data-pm="save">${pt('save')}</button>
-      <button type="button" class="btn pm-lock" data-pm="lock">${pt('lock')}</button>` : `<div class="pm-nav">${i > 0 ? `<button type="button" class="btn pm-back" data-pm="back">${pt('back')}</button>` : ''}
-      <button type="button" class="btn primary g-big" data-pm="next">${pt('next')}</button></div>`}`;   // (the pre-market chart and screenshots come in before « Save »)
+      ${PM.err ? `<p class="g-err pm-err" role="alert">${esc(PM.err)}</p>` : ''}
+      <div class="pm-nav">${i > 0 ? `<button type="button" class="btn pm-back" data-pm="back">${pt('back')}</button>` : ''}
+      ${last ? `<button type="button" class="btn primary g-big pm-save" data-g="save-plan" data-pm="save">${pt('save')}</button>` : `<button type="button" class="btn primary g-big" data-pm="next">${pt('next')}</button>`}</div>
+      ${last ? `<p class="g-hint-sm pm-locks">${past ? esc(pt('locks_now')) : `${esc(pt('locks_at', { t: ficheLockHm() }))} <button type="button" class="link pm-lockl" data-pm="lock">${pt('lock')}</button>`}</p>` : ''}`;   // (the pre-market screenshots come in above the buttons)
   }
-  /** the scenarios as the answers make them (C1 level, C2 kept or not, C3 targets), with stop and R */
+  /** the scenarios as the answers make them (entries, stops and targets typed, B kept or not), with stop and R */
   function pmBuild(f) {
-    const a = f.answers;
+    const a = f.answers, num = (k) => (a[k] != null && a[k] !== '' ? fNum(a[k]) : null);
     if (PM.express) {
       const lvl = fNum(a.X_level); if (lvl == null || !a.X_dir) return [];
       const s = { id: 'A', direction: a.X_dir, type: a.X_dir === 'long' ? 'breakout' : 'breakdown', level: lvl };
-      return [pmCompute(f, s, fNum(a.C3_A))];
+      return [pmCompute(f, s, fNum(a.C3_A), num('X_stop'))];
     }
     return pmScenarios(f).map((s) => {
-      if (s.id === 'A' && a.C1 === 'edit' && fNum(a.C1_level) != null) s.level = fNum(a.C1_level);
-      const tg = a['C3_' + s.id] != null && a['C3_' + s.id] !== '' ? fNum(a['C3_' + s.id]) : pmTarget(f, s);
-      return pmCompute(f, s, tg);
+      const lk = s.id === 'A' ? 'C1_level' : 'C1_level_B';
+      if (num(lk) != null && !(s.id === 'A' && a.C1 === 'confirm')) s.level = num(lk);   // (« confirm » / « edit »: sheets saved before 20 Oct.)
+      return pmCompute(f, s, num('C3_' + s.id) != null ? num('C3_' + s.id) : pmTarget(f, s), num('ST_' + s.id));
     });
   }
   /** the sheet from the answers */
@@ -982,7 +1124,7 @@
     f.reminder = PM.d2 && a.D2 ? String(a.D2).trim().slice(0, 200) : f.reminder || '';   // D2's answer, a reminder at the top of the sheet
     return ficheNormalize(f, PM.day);
   }
-  /** one line per scenario, as the brief shows it */
+  /** one line per scenario, as the brief shows it, in plain words */
   function pmScenarioLine(f, s) {
     const lv = pmFmt(s.level), up = s.direction === 'long';
     const first = s.type === 'reclaim' || s.type === 'rejection' ? pt(up ? 'l_back_above' : 'l_back_below', { l: lv }) : pt(up ? 'l_close_above' : 'l_close_below', { l: lv });
@@ -992,37 +1134,84 @@
     const end = [pt('l_stop', { s: pmFmt(s.stop_estimate) }), pt('l_target', { t: pmFmt(s.target) }) + (s.r_estimate != null ? ' ' + pt('l_r', { r: pmFmt(s.r_estimate) }) : '')];
     return `${parts.join(' → ')} → ${end.join(' · ')}`;
   }
-  function pmSheetHtml(f) {
+  /** the sheet; with star, an asterisk after the first R and its explanation under the sheet */
+  function pmSheetHtml(f, star) {
     const nt = f.no_trade_conditions.map((c) => (c === 'time_limit' && f.limits.time_limit ? pt('after', { t: f.limits.time_limit }) : c === 'other' ? f.no_trade_other || pt('other') : pt(c)));
     const lim = [pt('risk_l', { p: pmFmt(f.limits.risk_pct) }), f.limits.max_trades === 1 ? pt('trades_l1') : pt('trades_l', { n: f.limits.max_trades })].concat(f.news_windows.map((w) => pt('window', { a: w.start, b: w.end })));
-    return `<div class="pm-sheet" data-noi18n>${f.reminder ? `<p class="pm-rem">${esc(f.reminder)}</p>` : ''}${f.scenarios.map((s) => `<p class="pm-l${pmViable(s) ? '' : ' bad'}"><b>${pt(s.id === 'A' ? 'sc_a' : 'sc_b')} — ${esc(pt('d_' + s.direction))}${s.type === 'reclaim' || s.type === 'rejection' ? ' ' + esc(pt('t_' + s.type).toLowerCase()) : ''}</b> · ${esc(pmScenarioLine(f, s))}</p>`).join('')}
-      ${nt.length ? `<p class="pm-l"><b>${pt('notrade')}</b> · ${esc(nt.join(pt('or')))}</p>` : ''}<p class="pm-l"><b>${pt('lim')}</b> · ${esc(lim.join(' · '))}</p></div>`;
+    const fn = star && f.scenarios.some((s) => s.r_estimate != null);
+    return `<div class="pm-sheet" data-noi18n>${f.reminder ? `<p class="pm-rem">${esc(f.reminder)}</p>` : ''}${f.scenarios.map((s, i) => `<p class="pm-l${pmViable(s) ? '' : ' bad'}"><b>${pt(s.id === 'A' ? 'sc_a' : 'sc_b')} — ${esc(pt('d_' + s.direction))}${s.type === 'reclaim' || s.type === 'rejection' ? ' ' + esc(pt('t_' + s.type).toLowerCase()) : ''}</b> · ${esc(pmScenarioLine(f, s))}${fn && i === 0 && s.r_estimate != null ? '*' : ''}</p>`).join('')}
+      ${nt.length ? `<p class="pm-l"><b>${pt('notrade')}</b> · ${esc(nt.join(pt('or')))}</p>` : ''}<p class="pm-l"><b>${pt('lim')}</b> · ${esc(lim.join(' · '))}</p>${fn ? `<p class="pm-fn">* ${esc(pt('fn_r'))}</p>` : ''}</div>`;
   }
-  /** can the screen be left? (the needed fields, viable scenarios) */
+  /** can the screen be left? (the needed fields, viable scenarios); the fields at fault are kept in PM.bad (outlined in gold) */
   function pmCheck(name) {
-    const f = PM.f, a = f.answers, lv = f.levels;
-    if (name === 'base') return lv.london_high != null && lv.london_low != null && lv.price != null && lv.london_high > lv.london_low ? '' : pt('base_needs');
-    if (name === 'pos') { if (!a.A1 || (a.A1 === 'in' && !a.A2) || (a.A1 !== 'in' && !a.A3)) return pt('needs'); if (pmNearLevel(f) && !a.A4) return pt('needs'); return ''; }
-    if (name === 'news') return a.B1 === 'yes' && !ficheHm(a.B1_time) ? pt('needs') : '';
+    const f = PM.f, a = f.answers, lv = f.levels; PM.bad = [];
+    if ((name === 'base' || name === 'express') && !f.instrument) { PM.bad = ['instrument']; return pt('inst_need'); }
+    if (name === 'base') {
+      const miss = [['lv.london_high', 'lh', lv.london_high], ['lv.london_low', 'll', lv.london_low]].filter((x) => x[2] == null);
+      if (miss.length) { PM.bad = miss.map((x) => x[0]); return pt('missing', { l: miss.map((x) => pt(x[1])).join(', ') }); }
+      if (!(lv.london_high > lv.london_low)) { PM.bad = ['lv.london_high', 'lv.london_low']; return pt('hl_order'); }
+      if (lv.pdh != null && lv.pdl != null && !(lv.pdh > lv.pdl)) { PM.bad = ['lv.pdh', 'lv.pdl']; return pt('pd_order'); }
+      return '';
+    }
+    if (name === 'pos') {
+      if (!a.A1 || (a.A1 === 'in' && !a.A2) || (a.A1 !== 'in' && !a.A3) || (pmNearLevel(f) && !a.A4)) return pt('needs');
+      if (a.B1 === 'yes' && !ficheHm(a.B1_time)) { PM.bad = ['B1_time']; return pt('needs'); }
+      return '';
+    }
     if (name === 'scen') {
-      const l = pmBuild(f).filter((s) => s.id === 'A' || a.C2 !== 'remove');
-      return l.every(pmViable) ? '' : pt(l.find((s) => !pmViable(s)).id === 'A' ? 'main_not_viable' : 'not_viable');
+      const x = pmBuild(f).filter((s) => s.id === 'A' || a.C2 !== 'remove').find((s) => !pmViable(s)); if (!x) return '';
+      PM.bad = ['ST_' + x.id, 'C3_' + x.id];
+      return pmSideBad(x) ? pt('side_' + x.direction) : pt(x.id === 'A' ? 'main_not_viable' : 'not_viable');
     }
     if (name === 'd1') return a.D1 ? '' : pt('needs');
-    if (name === 'express') { const s = pmBuild(f)[0]; return !s || !(parseFloat(a.max_loss) > 0) ? pt('needs') : pmViable(s) ? '' : pt('main_not_viable'); }   // (the day's max loss, as the plan always had)
-    if (name === 'limits') return (a.D1 === 'max_loss' && !a.D1_reduce) || !(f.limits.max_trades >= 1) || !(parseFloat(a.max_loss) > 0) ? pt('needs') : '';
+    if (name === 'express') {   // (the day's max loss, as the plan always had)
+      const s = pmBuild(f)[0];
+      if (!s) { PM.bad = a.X_dir ? ['X_level'] : []; return pt('needs'); }
+      if (!pmViable(s)) { PM.bad = s.target == null ? ['C3_A'] : ['X_stop', 'C3_A']; return s.target == null ? pt('needs') : pmSideBad(s) ? pt('side_' + s.direction) : pt('main_not_viable'); }
+      if (!(parseFloat(a.max_loss) > 0)) { PM.bad = ['max_loss']; return pt('needs'); }
+      return '';
+    }
+    if (name === 'limits') {
+      if (a.D1 === 'max_loss' && !a.D1_reduce) return pt('needs');
+      if (!(f.limits.max_trades >= 1)) PM.bad.push('lim.max_trades');
+      if (!(parseFloat(a.max_loss) > 0)) PM.bad.push('max_loss');
+      return PM.bad.length ? pt('needs') : '';
+    }
     return '';
+  }
+  /** after each paint: the sheet knows its instrument (the chart follows it), the last field's key says « go », the chosen chip is in view */
+  function pmAfter(sh) {
+    if (!sh) return;
+    if (PM.f) sh.dataset.inst = pmRoot(PM.f.instrument);
+    const l = [...sh.querySelectorAll('.pm-body input[data-pmf]:not([type=time])')]; if (l.length) l[l.length - 1].setAttribute('enterkeyhint', 'go');
+    const on = sh.querySelector('.pm-insts .chip.on'); if (on) { const row = on.parentElement; row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - 24); }
   }
   function pmRender(keepFocus) {
     const el = document.querySelector('#gSheet.g-pm .g-in'); if (!el) return;
     const fk = keepFocus && document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.pmf : null;
-    el.innerHTML = pmHtml();
+    el.innerHTML = pmHtml(); pmAfter(document.getElementById('gSheet'));
     if (fk) { const i = el.querySelector(`[data-pmf="${fk}"]`); if (i) { i.focus(); const n = i.value.length; try { i.setSelectionRange(n, n); } catch (e) { /* time inputs */ } } }
+    pmDraftSave();
+  }
+  /** the first field at fault gets the focus (the keyboard opens on it) */
+  function pmFocusBad() { const k = PM.bad[0], i = k && document.querySelector(`#gSheet .pm-body [data-pmf="${k}"]`); if (i) i.focus(); }
+  /** the scenarios follow the typing: the R and the target hint, and the entry / stop / target nobody typed (they follow the levels);
+   *  force: the field just emptied or given back to the proposal, written even with the keyboard still on it */
+  function pmLive(force) {
+    const a = PM.f.answers, set = (k, v) => { const x = document.querySelector(`#gSheet [data-pmf="${k}"]`); if (x && (a[k] == null || a[k] === '') && (k === force || document.activeElement !== x)) x.value = v == null ? '' : String(v); };
+    const list = pmBuild(PM.f);
+    for (const s of list) {
+      const r = document.querySelector(`#gSheet [data-pm-r="${s.id}"]`); if (r) { r.className = 'pm-r ' + (pmViable(s) ? 'ok' : 'bad'); r.textContent = pmRText(PM.f, s, s.id === 'A'); }
+      const tg = document.querySelector(`#gSheet [data-pm-tg="${s.id}"]`); if (tg) tg.innerHTML = pmTargetHint(PM.f, s);
+      if (PM.express) set('X_stop', s.stop_estimate);
+      else { set(s.id === 'A' ? 'C1_level' : 'C1_level_B', s.level); set('ST_' + s.id, s.stop_estimate); set('C3_' + s.id, s.target); }
+    }
+    if (PM.express && !list.length) { const r = document.querySelector('#gSheet [data-pm-r="A"]'); if (r) r.textContent = ''; set('X_stop', null); }
   }
   /** writes the sheet and the day's plan together (one journal write) */
   function pmSave(lock) {
     const f = pmFinal(); if (!f.scenarios.length || !f.scenarios.every(pmViable)) { PM.err = pt('needs'); pmRender(); return; }
-    if (lock) f.locked_at = Math.floor(Date.now() / 1000);   // « Lock my plan »: from now on, only the checklist
+    if (lock) f.locked_at = Math.floor(Date.now() / 1000);   // « Lock it now »: from now on, only the checklist
     const old = ficheGet(PM.day); if (old && ficheLocked(old)) return;
     const j = structuredClone(journalOf(PM.day)); j.id = PM.day; j.fiche = f;
     const a = f.answers, lv = f.levels, A = f.scenarios[0], prev = lastPlan(PM.day, true);
@@ -1030,19 +1219,22 @@
     j.pre = Object.assign({}, j.pre || {}, { saved_at: (j.pre && j.pre.saved_at) || Math.floor(Date.now() / 1000), bias: A.direction === 'long' ? 'bullish' : 'bearish',
       setups: (j.pre && j.pre.setups) || (prev && prev.pre.setups) || [], max_loss: parseFloat(a.max_loss) > 0 ? String(parseFloat(a.max_loss)) : (j.pre && j.pre.max_loss) || '', max_trades: String(f.limits.max_trades),
       levels: lvTxt, rule: f.reminder || PM.note || (j.pre && j.pre.rule) || '', day_off: false });
-    put('journals', j);
+    PM.done = true; put('journals', j); pmDraftClear();
     const then = PM.then; PM.then = null;
     buzz(10); closeSheet(); soon(500);
     if (then) setTimeout(then, 380);
   }
+  const PM_NUMK = /^(C1_level(_B)?|C3_[AB]|ST_[AB]|X_level|X_stop|max_loss)$/;
+  const PM_SCK = ['C1', 'C1_level', 'C1_level_B', 'C2', 'C3_A', 'C3_B', 'ST_A', 'ST_B'];   // the scenario answers: rebuilt when the read of the market changes
   function pmSetField(k, raw) {
     const f = PM.f;
     if (k === 'instrument') f.instrument = String(raw).toUpperCase().replace(/[^A-Z0-9!._-]/g, '').slice(0, 16);
-    else if (k.startsWith('lv.')) f.levels[k.slice(3)] = fNum(String(raw).replace(',', '.').replace(/\s/g, ''));
+    else if (k.startsWith('lv.')) f.levels[k.slice(3)] = pmNum(raw);
     else if (k === 'lim.max_trades') f.limits.max_trades = parseInt(raw, 10) || 0;
     else if (k === 'lim.time_limit') f.limits.time_limit = ficheHm(raw);
     else if (k === 'no_trade_other') f.no_trade_other = String(raw).slice(0, 120);
-    else f.answers[k] = /^(C1_level|C3_[AB]|X_level|max_loss)$/.test(k) ? String(raw).replace(',', '.') : String(raw);   // numbers: a comma is a decimal point
+    else if (PM_NUMK.test(k)) { const n = pmNum(raw); f.answers[k] = n != null ? String(n) : String(raw).trim(); }   // numbers kept plain (« 21 250,5 » → 21250.5)
+    else f.answers[k] = String(raw);
   }
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked):not(.g-pm-link) [data-pm]'); if (!b) return;
@@ -1051,47 +1243,63 @@
       const q = b.dataset.q, v = b.dataset.v, a = PM.f.answers; a[q] = v;
       if (q === 'A1') { a.A1_set = true; delete a.A2; delete a.A3; delete a.A4; }
       if (q === 'A2' || q === 'A3') delete a.A4;
-      if (q === 'A1' || q === 'A2' || q === 'A3' || q === 'A4') { for (const k of ['C1', 'C1_level', 'C2', 'C3_A', 'C3_B']) delete a[k]; }
-      if (q === 'C1' && v === 'confirm') { delete a.C1_level; delete a.C3_A; }
-      buzz(5); PM.err = ''; pmRender();
-    } else if (act === 'nt') {
+      if (/^A[1-4]$/.test(q)) PM_SCK.forEach((k) => delete a[k]);
+      buzz(5); PM.err = ''; PM.bad = []; pmRender();
+    } else if (act === 'inst-pick') {   // a chip, or « Other » and its field
+      const fo = document.activeElement; if (fo && fo.dataset && fo.dataset.pmf === 'instrument') fo.blur();   // (the « Other » field typed in: its change first, the chip after)
+      if (b.dataset.v) { PM.f.instrument = b.dataset.v; PM.instOther = false; } else PM.instOther = true;
+      buzz(5); PM.err = ''; PM.bad = []; pmRender();
+      if (!b.dataset.v) { const i = document.querySelector('#gSheet [data-pmf=instrument]'); if (i) i.focus(); }
+    } else if (act === 'use-tgt') { delete PM.f.answers['C3_' + b.dataset.s]; buzz(5); pmLive('C3_' + b.dataset.s); pmDraftSave(); }
+    else if (act === 'nt') {
       const l = PM.f.no_trade_conditions, v = b.dataset.v; PM.f.no_trade_conditions = l.includes(v) ? l.filter((x) => x !== v) : FICHE.NO_TRADE.filter((x) => x === v || l.includes(x));
       buzz(5); pmRender();
     } else if (act === 'next') {
-      if (name === 'base' && !PM.f.answers.A1_set) { const w = pmWhere(PM.f.levels); if (w && w !== PM.f.answers.A1) { const a = PM.f.answers; a.A1 = w; for (const k of ['A2', 'A3', 'A4', 'C1', 'C1_level', 'C2', 'C3_A', 'C3_B']) delete a[k]; } }   // A1 pre-selected from 0.2 and 0.4
-      const err = pmCheck(name); if (err) { PM.err = err; buzz(20); pmRender(); return; }
-      if (name === 'news' && PM.f.answers.B1 === 'yes' && PM.f.answers.B1_time < '09:30' && !PM.f.answers.B2) PM.f.answers.B2 = 'yes';
-      PM.err = ''; PM.i = Math.min(PM.i + 1, scr.length - 1); buzz(5); pmRender();
+      if (name === 'base' && !PM.f.answers.A1_set) { const w = pmWhere(PM.f.levels); if (w && w !== PM.f.answers.A1) { const a = PM.f.answers; a.A1 = w; ['A2', 'A3', 'A4'].concat(PM_SCK).forEach((k) => delete a[k]); } }   // A1 pre-selected from the levels and the price
+      const err = pmCheck(name); if (err) { PM.err = err; buzz(20); pmRender(); if (name === 'base' || name === 'express' || name === 'limits') pmFocusBad(); return; }
+      // a level far from the others (a digit too many or missing): said once, a second « Continue » goes on
+      if (name === 'base') { const far = pmFar(PM.f.levels), sig = far ? far.join('|') : ''; if (far && PM.warned !== sig) { PM.warned = sig; PM.bad = [far[0]]; PM.err = pt('far', { v: pmFmt(far[1]) }); buzz(20); pmRender(); return; } }
+      if (name === 'pos' && PM.f.answers.B1 === 'yes' && PM.f.answers.B1_time < '09:30' && !PM.f.answers.B2) PM.f.answers.B2 = 'yes';
+      PM.err = ''; PM.bad = []; PM.i = Math.min(PM.i + 1, scr.length - 1); buzz(5); pmRender();
       const box = document.querySelector('#gSheet .g-in'); if (box) box.scrollTop = 0;
-    } else if (act === 'back') { PM.err = ''; PM.i = Math.max(0, PM.i - 1); pmRender(); }
+    } else if (act === 'back') { PM.err = ''; PM.bad = []; PM.i = Math.max(0, PM.i - 1); pmRender(); }
     else if (act === 'save') pmSave();
     else if (act === 'lock') pmSave(true);
     else if (act === 'mode') {   // guided ⇄ express, kept for the next pre-markets (settings.pm_mode)
-      const m = b.dataset.v === 'express' ? 'express' : 'full'; PM.express = m === 'express'; PM.i = 0; PM.err = '';
+      const m = b.dataset.v === 'express' ? 'express' : 'full'; PM.express = m === 'express'; PM.i = 0; PM.err = ''; PM.bad = [];
       if (S.settings && S.settings.pm_mode !== m) put('settings', Object.assign(structuredClone(S.settings), { pm_mode: m }));
       buzz(5); pmRender(); const box = document.querySelector('#gSheet .g-in'); if (box) box.scrollTop = 0;
     }
-    else if (act === 'inst') { PM.hideInst = false; pmRender(); const i = document.querySelector('#gSheet [data-pmf=instrument]'); if (i) i.focus(); }
-    else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); closeSheet(); }   // no sheet today: its trades will be off-plan
+    else if (act === 'inst') { PM.hideInst = false; pmRender(); }   // « Change »: the chips come back
+    else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); PM.done = true; pmDraftClear(); closeSheet(); }   // no sheet today: its trades will be off-plan
     else if (act === 'dayoff') {   // « Not trading today »: a day off before any trade of the day, the same as the routine's button
       const j = structuredClone(journalOf(PM.day)); j.id = PM.day;
       j.pre = Object.assign({}, j.pre || {}, { saved_at: (j.pre && j.pre.saved_at) || Math.floor(Date.now() / 1000), bias: 'no_trade', day_off: !(S.trades || []).some((x) => !x.demo && x.date === PM.day) });
-      put('journals', j); buzz(10); closeSheet(); soon(500);
+      PM.done = true; put('journals', j); pmDraftClear(); buzz(10); closeSheet(); soon(500);
     }
   });
   document.addEventListener('input', (e) => {
     const i = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked) [data-pmf]'); if (!i) return;
-    pmSetField(i.dataset.pmf, i.value);
-    if (/^C[13]_|^X_level$/.test(i.dataset.pmf)) {   // the R follows the typing
-      const s = pmBuild(PM.f).find((x) => 'C3_' + x.id === i.dataset.pmf || ((i.dataset.pmf === 'C1_level' || i.dataset.pmf === 'X_level') && x.id === 'A'));
-      const p = s && document.querySelector(`#gSheet [data-pm-r="${s.id}"]`);
-      if (p) { p.className = 'pm-r ' + (pmViable(s) ? 'ok' : 'bad'); p.textContent = s.r_estimate == null ? '' : pt('r', { r: pmFmt(s.r_estimate) }) + (pmViable(s) ? '' : ' · ' + pt(s.id === 'A' ? 'main_not_viable' : 'not_viable')); }
-    }
+    const k = i.dataset.pmf; pmSetField(k, i.value);
+    if (i.hasAttribute('aria-invalid')) { i.removeAttribute('aria-invalid'); PM.bad = PM.bad.filter((x) => x !== k); }
+    if (/^(C1_level(_B)?|C3_[AB]|ST_[AB]|X_level|X_stop)$/.test(k)) pmLive();   // the R follows the typing
+    clearTimeout(PM.dt); PM.dt = setTimeout(pmDraftSave, 400);
   });
   document.addEventListener('change', (e) => {
     const i = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked) [data-pmf]'); if (!i) return;
-    pmSetField(i.dataset.pmf, i.value);
-    if (i.dataset.pmf === 'B1_time') pmRender();
+    const k = i.dataset.pmf; pmSetField(k, i.value);
+    if (k === 'B1_time') pmRender();
+    else if (k === 'lim.time_limit') { const c = document.querySelector('#gSheet [data-pm=nt][data-v=time_limit]'); if (c) c.textContent = PM.f.limits.time_limit ? pt('nt_time', { t: PM.f.limits.time_limit }) : pt('time_limit'); }
+    else if (/^(C1_level(_B)?|C3_[AB]|ST_[AB]|X_stop)$/.test(k) && !String(i.value).trim()) { delete PM.f.answers[k]; pmLive(k); }   // a field emptied goes back to the proposal
+    pmDraftSave();
+  });
+  /* « Next » on the phone's keyboard (Enter on a computer) goes to the next field, and from the last one, on */
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    const i = e.target.closest && e.target.closest('#gSheet.g-pm:not(.g-pm-locked) .pm-body input[data-pmf]'); if (!i || i.type === 'time') return;
+    e.preventDefault();
+    const l = [...document.querySelectorAll('#gSheet.g-pm .pm-body input[data-pmf]:not([type=time])')].filter((x) => x.offsetParent), n = l[l.indexOf(i) + 1];
+    if (n) n.focus(); else { i.blur(); const b = document.querySelector('#gSheet [data-pm="next"]'); if (b) b.click(); }
   });
   /* ───────────── The session view (brief « Plan pre-market adaptatif », step 5) ─────────────
      The locked sheet: each scenario's checklist in its order (a box only after the one before), « Invalidate », a banner
@@ -1101,17 +1309,34 @@
     en: { session: 'Your session', news_now: 'News window: no trade until {t}.', over: 'Day over according to your plan.', trades: 'Trades: {n} of {m}',
       invalidate: 'Invalidate', st_waiting: 'Waiting', st_confirmed: 'Confirmed', st_invalidated: 'Invalidated', st_taken: 'Taken', st_expired: 'Expired',
       news_15m: 'First full 15m after the news', close_15m: '15m close', retest_5m: '5m retest', trigger_5m: '5m trigger candle', vwap: 'VWAP', risk_checked: 'Risk checked',
+      k_close_above: '15-min candle closed above {l}', k_close_below: '15-min candle closed below {l}', k_back_above: '15-min candle closed back above {l}', k_back_below: '15-min candle closed back below {l}',
+      k_retest: '5-min retest of {l}', k_trigger: '5-min trigger candle', k_vwap_above: 'Price above VWAP', k_vwap_below: 'Price below VWAP', k_risk: 'Risk checked: stop {s}, size OK', k_news: 'First full 15-min candle after the news',
       link_q: 'Which scenario of your sheet is this trade?', off: 'Off my sheet', link_hint: 'A trade outside your sheet counts as off-plan.' },
     fr: { session: 'Ta séance', news_now: 'Fenêtre de news : pas de trade avant {t}.', over: 'Journée terminée selon ton plan.', trades: 'Trades : {n} sur {m}',
       invalidate: 'Invalider', st_waiting: 'En attente', st_confirmed: 'Confirmé', st_invalidated: 'Invalidé', st_taken: 'Pris', st_expired: 'Expiré',
       news_15m: 'Première 15m complète après la news', close_15m: 'Clôture 15m', retest_5m: 'Retest 5m', trigger_5m: 'Bougie de déclenchement 5m', vwap: 'VWAP', risk_checked: 'Risque vérifié',
+      k_close_above: 'Bougie 15 min clôturée au-dessus de {l}', k_close_below: 'Bougie 15 min clôturée sous {l}', k_back_above: 'Bougie 15 min clôturée de retour au-dessus de {l}', k_back_below: 'Bougie 15 min clôturée de retour sous {l}',
+      k_retest: 'Retest de {l} en 5 min', k_trigger: 'Bougie de déclenchement en 5 min', k_vwap_above: 'Prix au-dessus du VWAP', k_vwap_below: 'Prix sous le VWAP', k_risk: 'Risque vérifié : stop {s}, taille OK', k_news: 'Première bougie 15 min complète après la news',
       link_q: 'Ce trade, c’est quel scénario de ta fiche ?', off: 'Hors fiche', link_hint: 'Un trade hors de ta fiche compte comme hors plan.' },
     es: { session: 'Tu sesión', news_now: 'Ventana de noticias: ninguna operación antes de las {t}.', over: 'Día terminado según tu plan.', trades: 'Operaciones: {n} de {m}',
       invalidate: 'Invalidar', st_waiting: 'En espera', st_confirmed: 'Confirmado', st_invalidated: 'Invalidado', st_taken: 'Tomado', st_expired: 'Expirado',
       news_15m: 'Primera vela de 15m completa tras la noticia', close_15m: 'Cierre de 15m', retest_5m: 'Retest 5m', trigger_5m: 'Vela de disparo 5m', vwap: 'VWAP', risk_checked: 'Riesgo revisado',
+      k_close_above: 'Vela de 15 min cerrada por encima de {l}', k_close_below: 'Vela de 15 min cerrada por debajo de {l}', k_back_above: 'Vela de 15 min cerrada de vuelta por encima de {l}', k_back_below: 'Vela de 15 min cerrada de vuelta por debajo de {l}',
+      k_retest: 'Retest de {l} en 5 min', k_trigger: 'Vela de disparo en 5 min', k_vwap_above: 'Precio por encima del VWAP', k_vwap_below: 'Precio por debajo del VWAP', k_risk: 'Riesgo revisado: stop {s}, tamaño OK', k_news: 'Primera vela de 15 min completa tras la noticia',
       link_q: '¿Qué escenario de tu ficha es esta operación?', off: 'Fuera de mi ficha', link_hint: 'Una operación fuera de tu ficha cuenta como fuera del plan.' },
   };
   const st = (k, p) => { let s = (SS[L()] || SS.en)[k]; if (s == null) s = SS.en[k] != null ? SS.en[k] : k; return p ? s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)) : s; };
+  /** a box of the checklist in words, with the scenario's level and stop (« 15-min candle closed above 21,250 ») */
+  function ssCond(s, c) {
+    const up = s.direction === 'long', l = pmFmt(s.level), back = s.type === 'reclaim' || s.type === 'rejection';
+    if (c === 'close_15m') return st(back ? (up ? 'k_back_above' : 'k_back_below') : (up ? 'k_close_above' : 'k_close_below'), { l });
+    if (c === 'retest_5m') return st('k_retest', { l });
+    if (c === 'trigger_5m') return st('k_trigger');
+    if (c === 'vwap') return st(up ? 'k_vwap_above' : 'k_vwap_below');
+    if (c === 'risk_checked') return st('k_risk', { s: pmFmt(s.stop_estimate) });
+    if (c === 'news_15m') return st('k_news');
+    return st(c);
+  }
   /** the moment against the sheet's day: before (the evening before), the day itself (with its NY time), or after */
   function ssNow(day) {
     const now = typeof etStr === 'function' ? etStr(Math.floor(Date.now() / 1000)) : '', d = now.slice(0, 10), hm = now.slice(11, 16);
@@ -1136,7 +1361,7 @@
     const scen = f.scenarios.map((s) => {
       const status = ssStatus(f, s), live = status === 'waiting' || status === 'confirmed';
       const boxes = s.conditions.map((c, i) => { const done = s.done.includes(c), can = live && (done ? s.done[s.done.length - 1] === c : i === s.done.length);
-        return `<button type="button" class="pm-chk${done ? ' on' : ''}" data-pm="chk" data-s="${s.id}" data-c="${c}" ${can ? '' : 'disabled'} aria-pressed="${done}"><i aria-hidden="true">${done ? '✓' : i + 1}</i>${esc(st(c))}</button>`; }).join('');
+        return `<button type="button" class="pm-chk${done ? ' on' : ''}" data-pm="chk" data-s="${s.id}" data-c="${c}" ${can ? '' : 'disabled'} aria-pressed="${done}"><i aria-hidden="true">${done ? '✓' : i + 1}</i>${esc(ssCond(s, c))}</button>`; }).join('');
       return `<div class="pm-sc pm-ss pm-${status}" data-sc="${s.id}"><div class="pm-sc-h"><b>${pt(s.id === 'A' ? 'sc_a' : 'sc_b')} — ${esc(pt('d_' + s.direction))}${s.type === 'reclaim' || s.type === 'rejection' ? ' ' + esc(pt('t_' + s.type).toLowerCase()) : ''}</b><span class="pm-st">${st('st_' + status)}</span></div>
         <p class="pm-l">${esc(pmScenarioLine(f, s))}</p><div class="pm-chks">${boxes}</div>
         ${live ? `<button type="button" class="btn pm-inval" data-pm="inval" data-s="${s.id}">${st('invalidate')}</button>` : ''}</div>`;

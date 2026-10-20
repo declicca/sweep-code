@@ -648,7 +648,7 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 /* pre-market chart and screenshots */
 .nav-pre{display:flex;flex-direction:column;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .nav-pre-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.nav-pre-h b{font-size:14px;font-weight:600}
+.nav-pre-h b{font-size:14px;font-weight:600;white-space:nowrap}
 .nav-pre-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .nav-pre-tools .seg button{padding:4px 9px;font-size:12px}
 .nav-pre .link{font-size:13px;color:var(--pos);font-weight:500;cursor:pointer}
