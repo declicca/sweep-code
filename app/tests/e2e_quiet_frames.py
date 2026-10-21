@@ -32,7 +32,11 @@ with sync_playwright() as p:
       ok(n <= 2 * cus + 12, f'1 {w} {r}: the page is not rebuilt at each frame of its count-ups ({n} changes, {cus} count-ups: its final value each, not one a frame)')
       bad = pg.evaluate("[...document.querySelectorAll('#main [data-cu][data-fmt=int]')].filter((e) => e.getClientRects().length && e.textContent.trim() !== String(Math.round(+e.dataset.cu))).map((e) => e.dataset.cu + '≠' + e.textContent)")
       ok(not bad, f'2 {w} {r}: the count-ups end on their value ({bad[:3]})')
-      cut = pg.evaluate("[...document.querySelectorAll('#main .nav-kpi-g b, #main .d-perf b')].filter((e) => e.getClientRects().length && e.scrollWidth - (e.clientWidth || e.parentElement.clientWidth) > 1).map((e) => e.textContent)")
+      CUT = "[...document.querySelectorAll('#main .nav-kpi-g b, #main .d-perf b')].filter((e) => e.getClientRects().length && e.scrollWidth - (e.clientWidth || e.parentElement.clientWidth) > 1).map((e) => e.textContent)"
+      for _ in range(16):   # once drawn: the count-ups and the fitting may end later on a loaded machine (the CI read them at 2 s, 21 Oct.)
+        cut = pg.evaluate(CUT)
+        if not cut: break
+        pg.wait_for_timeout(250)
       ok(not cut, f'3 {w} {r}: no key figure cut ({cut[:3]})')
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
