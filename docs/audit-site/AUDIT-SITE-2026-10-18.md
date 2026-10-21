@@ -28,7 +28,7 @@ L'audit cherche donc ce que ces tests ne voient pas.
 - Les 5 décisions, tranchées par Mateo le 18 oct. et en ligne : Quantower partout ; captures en Free, 3 par jour ; synchro Rithmic/Tradovate « prévue plus tard » ; bleu des boutons foncé (#2F6FE8) et boutons refaits. Comptes en Pro : carte blanche, « illimité » comme l'app (brief `briefs/brief-app-forfaits-2026-10-18.md`).
 - Ajoutés le 18 oct. au soir : animations pilotées par le défilement (comme apple.com) ; page `/quantower` ; page Tarifs refaite pour la conversion (limites chiffrées, une raison par forfait, « Pourquoi les traders passent à Pro », tableau groupé, offre fondateur retirée de la page publique).
 - Reste à Mateo : la compression du serveur (cPanel › Optimiser le site Web › Compresser tout le contenu) ; vérifier dans `sweep-private/billing-config.php` que Free garde 2 comptes et que Pro est illimité.
-- Reste en attente : étape 5 (captures et vidéos de la session App).
+- Étape 5 faite le 21 oct. : les captures et les vidéos de la session App (app actuelle, EN et FR, calendrier économique aussi en ES) sont en place, avec les Connexions sur /ninjatrader et /quantower. Pas encore livrés : `ecran-coach` et `ecran-edge-profil` (section « Ton coach » de Fonctionnalités).
 - Laissés volontairement : copies de 300 px des vignettes de téléphone (gain seulement sur les écrans 1x), textes des paires firme contre firme (proches par construction, déjà chiffrés), HSTS `includeSubDomains` (sous-domaines cPanel non vérifiés), Geist Mono réduite (elle n'a que 440 glyphes latins : 1,2 Ko de gagné seulement, et « chiffres seulement » casserait les dates en chasse fixe ; elle est préchargée).
 
 Gravité : **haute** = un fait faux ou un texte légal inexact ; **moyenne** = un manque visible ou une incohérence ; **basse** = de la finition.
@@ -187,7 +187,7 @@ Mesuré sur les 261 pages, à deux formats : mobile 390×844 et ordinateur 1300�
 
 ---
 
-## Étape 5 — Captures et vidéos (en attente de la session App)
+## Étape 5 — Captures et vidéos (faite le 21 oct.)
 
 Les captures et les vidéos montrent l'app d'avant la refonte iOS, avec des écrans en anglais sur les pages FR/ES : vidéo de l'accueil (« Good afternoon, Alex », « Today »), affiche de /how-it-works (« Your day, one screen. »), calendrier économique, montants au format « $34,550 ». C'est déjà prévu dans `briefs/brief-captures-site-2026-10-16.md` ; il faut attendre que la session App produise les nouvelles captures.
 

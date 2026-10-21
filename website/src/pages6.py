@@ -145,7 +145,7 @@ def tour_ld(t):
             "description": t(T("A one-minute tour of Sweep: your day, a trade logged in seconds, your rules on every trade, your next payout and your progress.",
                                "La visite de Sweep en une minute : ta journée, un trade ajouté en quelques secondes, tes règles sur chaque trade, ton prochain payout et ta progression.",
                                "Sweep en un minuto: tu día, una operación registrada en segundos, tus reglas en cada operación, tu próximo payout y tu progreso.")),
-            "thumbnailUrl": f"https://{DOMAIN}/video/tour-poster.webp", "uploadDate": "2026-10-08", "duration": "PT1M",
+            "thumbnailUrl": f"https://{DOMAIN}/video/tour-poster.webp", "uploadDate": "2026-10-21", "duration": "PT1M",
             "contentUrl": f"https://{DOMAIN}/video/tour.mp4"}
 PLAY = '<svg class="play" width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4a.6.6 0 0 0 .9.5l8.2-5.2a.6.6 0 0 0 0-1L5.4 2.3a.6.6 0 0 0-.9.5z" fill="currentColor"/></svg>'
 def tour_dialog(t):

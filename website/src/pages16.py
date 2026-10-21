@@ -65,7 +65,7 @@ def sec_story(lang, t):
            + f'<p class="fine" style="margin-top:24px">{t(MONEY_PLAN)}</p>')
     # the screens: (desktop capture, phone capture, alt)
     S = [("v6-25-new-trade-empty", L3("A new trade, before it’s filled in, sample data","Un nouveau trade, avant d’être rempli, données d’exemple","Una operación nueva, antes de completarla, datos de ejemplo")),
-         ("v6-24-new-trade-filled", L3("Sweep AI turning a sentence into a draft trade","Sweep AI transforme une phrase en brouillon de trade","Sweep AI convierte una frase en un borrador de operación")),
+         ("v6-24-new-trade-filled", L3("Sweep AI filling in a trade from a screenshot","Sweep AI remplit un trade à partir d’une capture","Sweep AI completa una operación a partir de una captura")),
          ("v6-08-payout-conditions", L3("Payout conditions for a prop account, sample data","Conditions de payout d’un compte prop, données d’exemple","Condiciones de payout de una cuenta prop, datos de ejemplo")),
          ("v6-12-payouts", L3("Payouts and expenses, sample data","Payouts et dépenses, données d’exemple","Payouts y gastos, datos de ejemplo"))]
     inline = lambda k: frame_d(f"{S[k][0]}-d.webp", t(S[k][1]), m=f"{S[k][0]}-m.webp", t=t, cls="reveal narr-in")   # phones and tablets
@@ -100,7 +100,7 @@ def sec_ai(lang, t):
              card_media(t, L3("Ask your journal","Demande à ton journal","Pregúntale a tu diario"), L3("“What’s my best time of day on NQ?”","« Quelle est ma meilleure heure sur NQ ? »","«¿Cuál es mi mejor hora en NQ?»"),
                         phone_img(f"/img/mobile-{L}-dark-ask-sweep-786.webp", t(L3("Ask Sweep answers from your trades","Ask Sweep répond à partir de tes trades","Ask Sweep responde con tus operaciones")), "50% 4%"), crop=True),
              card_media(t, L3("Economic calendar","Calendrier économique","Calendario económico"), L3("AI notes on every major release, in full with Elite.","Des notes IA sur chaque annonce majeure, complètes avec Elite.","Notas de IA en cada dato importante, completas con Elite."),
-                        phone_img("/img/mobile-en-dark-economic-calendar-786.webp", t(L3("The week’s economic releases","Les annonces économiques de la semaine","Los datos económicos de la semana")), "50% 6%"), crop=True)]
+                        phone_img(f"/img/mobile-{L}-dark-economic-calendar-786.webp", t(L3("The week’s economic releases","Les annonces économiques de la semaine","Los datos económicos de la semana")), "50% 6%"), crop=True)]
     return sec(head(t, T("Sweep AI","Sweep AI","Sweep AI"), L3("Ask your journal anything.","Pose n’importe quelle question à ton journal.","Pregúntale lo que quieras a tu diario."),
                     L3("Sweep AI reads your trades, plans and reviews, then answers in plain words.","Sweep AI lit tes trades, tes plans et tes revues, puis répond simplement.","Sweep AI lee tus operaciones, planes y revisiones, y responde con palabras simples."),
                     links=link(lang, t, "ai.html", L3("Meet Sweep AI","Découvrir Sweep AI","Conoce Sweep AI")))

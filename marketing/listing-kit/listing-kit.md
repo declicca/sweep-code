@@ -57,7 +57,7 @@ Sweep is a free trading journal built for futures and prop firm traders.
 
 Pick your firm and account type, and the rules are already there: max loss, daily loss limit, consistency and payout conditions, preloaded for Apex Trader Funding, Topstep, Lucid Trading, Take Profit Trader, MyFundedFutures and Alpha Futures, and checked against each firm's official pages every week. When a firm changes a rule, you're notified and choose whether to apply it.
 
-Evaluations, funded and live accounts stay apart in your P&L, and copy trading counts once, not once per account. Trades sync automatically from NinjaTrader 8 with a free add-on; from other platforms, import your export (Tradovate, Rithmic, TopstepX or TradingView), paste a screenshot that Sweep AI reads, or type the trade by hand.
+Evaluations, funded and live accounts stay apart in your P&L, and copy trading counts once, not once per account. Trades sync automatically from NinjaTrader 8 and Quantower with a free add-on; from other platforms, import your export (Tradovate, Rithmic, TopstepX or TradingView), paste a screenshot that Sweep AI reads, or type the trade by hand.
 
 Every session has a short routine: a plan before the open, your rules during it, and a review after the close. After each trade, a coach shows what went right and the one thing to improve. During the session, it warns you without ever blocking a trade, for example when you reach your max loss. A payout counter tells you exactly what's left before you can request one.
 
@@ -71,7 +71,7 @@ Made by Sweep Inc. in Laval, Quebec. Launched publicly on October 1, 2026.
 - Payout conditions counted on every trade, with a counter that shows what's left before your next payout
 - Evaluations, funded and live accounts kept apart in your P&L
 - Copy trading counted once in your statistics
-- Automatic sync from NinjaTrader 8 (free add-on)
+- Automatic sync from NinjaTrader 8 and Quantower (free add-ons)
 - Log a trade from a screenshot read by Sweep AI, from your platform's export (Tradovate, Rithmic, TopstepX, TradingView), or by hand
 - Daily routine: plan before the open, rules during the session, review after the close
 - A coach after every trade, and warnings during the session that never block a trade
@@ -94,7 +94,7 @@ Made by Sweep Inc. in Laval, Quebec. Launched publicly on October 1, 2026.
 **Founded / launched** : publicly launched October 1, 2026
 
 **Tags / keywords**
-trading journal, free trading journal, futures trading, prop firm, prop trading, day trading, trade journal, trading analytics, funded trader, trading discipline, payout tracker, NinjaTrader journal
+trading journal, free trading journal, futures trading, prop firm, prop trading, day trading, trade journal, trading analytics, funded trader, trading discipline, payout tracker, NinjaTrader journal, Quantower journal
 
 **Logiciels sous lesquels s'inscrire comme alternative** (avec nos pages pour justifier)
 - TradeZella — https://makeitsweep.com/sweep-vs-tradezella
@@ -120,6 +120,7 @@ Quand un champ demande des liens (documentation, FAQ, ressources), ou pour répo
 | Les règles comparées (drawdown, consistance, payouts, objectifs, jours minimum) | https://makeitsweep.com/guides |
 | Exporter ses trades | https://makeitsweep.com/import-tradovate · https://makeitsweep.com/import-topstepx · https://makeitsweep.com/import-rithmic |
 | Synchro NinjaTrader 8 | https://makeitsweep.com/ninjatrader |
+| Synchro Quantower | https://makeitsweep.com/quantower |
 | Tenir un journal de trading | https://makeitsweep.com/trading-journal-guide |
 | Calculateurs gratuits | https://makeitsweep.com/tools |
 | Kit presse (logos, captures, texte de présentation) | https://makeitsweep.com/press-kit |
@@ -162,7 +163,7 @@ Choisis un mardi ou un mercredi. Le jour du lancement commence à 0 h 01, heure 
 
 TradeBase (« The free trading journal for prop firm & futures traders ») est sur Product Hunt avec une accroche proche de la nôtre. Ce qui nous distingue, et que la galerie et le premier commentaire doivent montrer :
 - les règles vérifiées chaque semaine, avec alerte de changement ;
-- la synchro NinjaTrader 8 déjà en ligne ;
+- la synchro NinjaTrader 8 et Quantower déjà en ligne (à la recherche du 12 oct., aucun autre journal n'avait de module Quantower) ;
 - les conditions de payout comptées trade par trade.
 
 - Name : `Sweep`
@@ -187,7 +188,7 @@ TradeBase (« The free trading journal for prop firm & futures traders ») est s
 >
 > What's different: pick your prop firm and account type and the rules are already there (max loss, daily loss limit, consistency, payout conditions), checked against each firm's official pages every week. When a firm changes a rule, you're notified and decide whether to apply it. Evaluations, funded and live accounts stay apart, copy trading counts once, and each session has a short routine: plan, rules, review, with a coach that tells you after each trade what went right and the one thing to improve.
 >
-> It's free forever, with Pro included for 60 days, no card. Trades sync automatically from NinjaTrader 8 with a free add-on; from other platforms you import a file or a screenshot. What's not there yet: trade replay.
+> It's free forever, with Pro included for 60 days, no card. Trades sync automatically from NinjaTrader 8 and Quantower with a free add-on; from other platforms you import a file or a screenshot. What's not there yet: trade replay.
 >
 > I'd love your feedback, especially if you trade evaluations or funded accounts: what would make you journal every day?
 
@@ -240,16 +241,20 @@ TradeBase (« The free trading journal for prop firm & futures traders ») est s
 
 ## 9. Images
 
-Les 5 captures du dossier `images/` datent du 10 octobre. Depuis, l'app a été repensée dans l'esprit iOS (Nouveautés du 15 octobre) : une seule apparence, filtres sur une ligne, coach dans « Ta routine du jour ».
+Les 5 captures du dossier `images/` montrent l'app actuelle (refaites le 21 oct. à partir des nouvelles captures du site, en anglais, 1270 × 793) :
+- 01 : Aujourd'hui sur ordinateur, avec un trade copié sur plusieurs comptes ;
+- 02 : les conditions de payout d'un compte prop ;
+- 03 : un trade rempli à partir d'une capture d'écran ;
+- 04 : les comptes, chacun avec les règles de sa firme ;
+- 05 : les statistiques, avec « Ce qui fonctionne pour toi ».
 
-- **AlternativeTo, SaaSHub, G2, Capterra** : les images actuelles conviennent ; tu pourras les remplacer plus tard.
-- **Product Hunt** : la galerie est la première impression du lancement. Les nouvelles captures sont demandées à la session App (`briefs/brief-captures-site-2026-10-16.md`). La session Site en tirera ces 5 images, même taille qu'aujourd'hui (1270 × 793) et mêmes noms.
+Elles servent partout : AlternativeTo, SaaSHub, G2, Capterra et la galerie de Product Hunt. Si tu avais déjà téléversé les anciennes, remplace-les.
 
 ---
 
 ## 10. À ne pas écrire (pour rester exact)
 
-- **Synchro automatique** : depuis NinjaTrader 8 (add-on gratuit). Quantower a aussi été ouvert à tous le 13 octobre, mais l'app attend les retours des traders avant de l'annoncer : le site n'en parle que dans les Nouveautés. Ne le cite pas dans une fiche avant ta décision. N'écris jamais « syncs with any broker » ni « auto-sync with Tradovate / Rithmic ».
+- **Synchro automatique** : depuis NinjaTrader 8 et Quantower (add-ons gratuits, tous les forfaits ; annoncée partout sur le site depuis le 18 oct.). N'écris jamais « syncs with any broker » ni « auto-sync with Tradovate / Rithmic ».
 - **Pas de « real-time »** pour Sweep : les graphiques sont prêts le lendemain de la séance.
 - **Pas de replay de trades, pas de backtesting.**
 - **Pas d'app iOS ou Android native** : Sweep fonctionne dans le navigateur, y compris sur téléphone (applis natives prévues).
