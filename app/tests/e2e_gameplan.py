@@ -132,7 +132,10 @@ def run(p, lang, phone, full):
   ok(T['gate'] in g and pg.locator('#gSheet .gp-gl li').count() == 7 and T['pass'] in g, f'{tag} 4 the gate: its 7 criteria, « {T["pass"]} »')
   # (SWEEP.md step 1, D3) « On to Month 2 » only once every criterion is ticked; « again » open at all times
   go = '#gSheet [data-gp="gate"][data-c="pass"]'
-  ok(pg.locator(go).is_disabled() and pg.locator('#gSheet .gp-need').is_visible() and pg.locator('#gSheet [data-gp="gate"][data-c="repeat"]').is_enabled(), f'{tag} 4 no criterion ticked: « {T["pass"]} » disabled, « again » open')
+  try: pg.wait_for_selector('#gSheet .gp-need', state='visible', timeout=5000)   # (the sheet may still be sliding in on a loaded machine)
+  except Exception: pass
+  st4 = [pg.locator(go).is_disabled(), pg.locator('#gSheet .gp-need').is_visible(), pg.locator('#gSheet [data-gp="gate"][data-c="repeat"]').is_enabled()]
+  ok(st4 == [True, True, True], f'{tag} 4 no criterion ticked: « {T["pass"]} » disabled, its hint shown, « again » open ({st4})')
   boxes = pg.locator('#gSheet [data-gp-c]')
   for i in range(boxes.count() - 1): boxes.nth(i).check()
   ok(pg.locator(go).is_disabled(), f'{tag} 4 6 of 7 ticked: still disabled')
