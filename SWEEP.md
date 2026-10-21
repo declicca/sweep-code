@@ -1,6 +1,8 @@
 # SWEEP.md — la carte du parcours (référence)
 
-Rédigé le 20 octobre 2026. Version analysée : `origin/main` au commit `590bd3f` (l'app en ligne et ce qui attend d'être déployé). Aucun code modifié.
+Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajustements : mesure d'abord, nouvel ordre des étapes, comptes existants gardés, missions cochées par un comportement. Version analysée : `origin/main` au commit `590bd3f`.
+
+**Avancement** : étape 0 faite en local (commit `600f135` sur la branche `parcours-0-mesure`, pas déployée) ; étapes 1 à 6 à faire (section 7).
 
 **Statut** : c'est la référence de tous les développements à venir sur l'app. En cas de désaccord avec un brief plus ancien, ce fichier gagne sur le **parcours** (ce qui est visible, où, quand). `app/CONTEXTE-APP.md` reste la référence des **règles** : calculs, argent, prop firms, tests, design.
 
@@ -403,34 +405,183 @@ Avant de coder, chaque demande répond à ces questions, dans le brief ou le com
 
 ## 7. Mise en œuvre : étapes, une à la fois
 
-Chaque étape : tests à 390 et 1300, suite complète, puis l'accord de Mateo pour déployer. Après chaque étape, les mesures de l'étape 0 sont reprises et comparées au point de départ.
+**Règles de chaque étape**
+- Elle part d'`origin/main` à jour, dans sa propre branche, une étape à la fois, jamais deux en même temps.
+- Tests ciblés pendant le travail, puis la suite complète (`python3 tools/par.py 3`), et des captures à 390 × 844 tactile et 1300 × 850, en FR / EN / ES, clair et foncé.
+- Une suite complète à la fois sur la machine : les copies `/tmp/g*` et les ports 8095 à 8395 sont partagés entre les conversations.
+- `CONTEXTE-APP.md` est mis à jour dans le même commit (règles et Passation), et ce fichier aussi si la carte change.
+- **Aucun déploiement sans l'accord explicite de Mateo**, donné dans la conversation qui déploie.
+- Les mesures de l'étape 0 sont refaites à la fin (`tools/parcours-baseline.py`, puis Admin › Métriques une fois en ligne) et ajoutées à `docs/parcours/MESURE-<n>.md`.
+- Une étape est finie quand ses critères « Fini quand » sont vrais et que la suite complète passe.
 
-0. **Mesurer avant de toucher** (sur l'app actuelle, rien d'autre ne change) :
-   - **M1, temps et touchers** :
-     - **En local**, le même parcours fait par un robot sur l'app telle qu'elle est (`app/tools/parcours-baseline.py`), à 390 × 844 tactile FR et 1300 × 850 EN, de l'écran d'inscription jusqu'à :
-       - (a) le plan enregistré, quand le trader voit son risque permis ;
-       - (b) le premier trade enregistré, avec et sans capture.
-     - On compte les touchers, les champs tapés et les écrans, plus le temps du robot (un repère, pas un temps humain).
-     - **En ligne**, le temps réel des traders : Admin › Métriques › « Le démarrage » (médianes inscription → prénom → compte → plan → trade, déjà en place).
-   - **Part des journées fermées** : séances avec au moins un trade, sur 30 jours, dont la revue est faite (`game_days.review_done`).
-   - **Part des bilans ouverts** : semaines prêtes (au moins un trade, vendredi passé), sur les 8 dernières semaines, dont le bilan a été ouvert (`game_analytics` `weekly_opened`).
-   - Ces deux parts s'ajoutent à Admin › Métriques (lecture seule, mêmes filtres semaine d'inscription / source).
-   - Le point de départ est noté dans `docs/parcours/MESURE-0.md`, avec les chiffres en ligne relevés après le déploiement de ces deux lignes.
-1. **Les défauts qui cassent le parcours** (section 3) : D2, D3, D4, D5, D7, D8, D9, chacun vérifié à l'écran avant d'être corrigé (D1 s'est révélé faux). Le code mort de D11 dans le même lot.
-2. **La saisie sans capture et le plan express par défaut** :
-   - dans la feuille « + », sous la zone de capture, « Pas de capture ? Entre ton P&L » (2.2) ;
-   - le plan express par défaut pour un nouveau trader, jusqu'à la mission « plan guidé ».
-3. **« Maintenant »** :
-   - la routine devient la carte unique (états de 4.2, risque permis, ligne news, ligne mission) ;
-   - les cartes listées en 4.2 quittent Aujourd'hui ;
-   - le bouton de l'en-tête passe au gris.
-4. **« Fermer ma journée »** : la revue pré-remplie et le lien « J'ai fini pour aujourd'hui » (4.3).
-5. **Les missions de découverte** :
-   - le contenu (5.2) en EN / FR / ES ;
-   - la fusion des chapitres, de « Démarrage » et des suggestions ;
-   - le bouton « Faire maintenant » et les règles de visibilité ;
-   - les comptes existants marqués comme ayant tout fait (5.1) ;
-   - les boutons « Faire maintenant » sur les missions du parcours de 90 jours.
-6. **« Ma progression », Réglages rangés, bilan du vendredi** : fusion de la revue du Journal, vocabulaire unique, guide d'aide mis à jour.
+### Étape 0 — Mesurer avant de toucher · **faite (21 oct.)**, pas déployée
 
-**Le 13 novembre** : la liste des fonctions du jeu utilisées par moins de 10 % des traders actifs (Admin › Métriques › Jeu), pour la décision de Mateo.
+**Livré** (branche locale `parcours-0-mesure`, commit `600f135`, non poussé) :
+- **Admin › Métriques**, deux indicateurs : « Journées fermées » (séances avec trades des 30 derniers jours dont la revue est faite) et « Bilans de la semaine ouverts » (les 8 dernières semaines terminées avec au moins un trade, bilan ouvert).
+- `app/tools/parcours-baseline.py` : M1 en vrais touchers.
+- `docs/parcours/MESURE-0.md` : le point de départ.
+
+**Point de départ en local** (Topstep 50K, téléphone FR et ordinateur EN, mêmes chiffres) :
+
+| Jusqu'à | Touchers | Champs | Écrans | Temps estimé |
+|---|---|---|---|---|
+| Risque permis vu (plan enregistré) | 11 | 3 | 3 | ~42 s |
+| Premier trade, sans capture | 16 | 5 | 5 | ~65 s |
+| Premier trade, avec capture | 16 | 4 | 5 | ~60 s |
+
+**Reste à faire, hors de cette conversation** : pousser `600f135` et déployer avec l'accord de Mateo, puis relever dans Admin › Métriques le temps de M1 (« Le démarrage »), les journées fermées et les bilans ouverts. Les noter dans `MESURE-0.md` avec la date. Sans ce relevé, les étapes suivantes se comparent seulement aux chiffres locaux.
+
+### Étape 1 — Les défauts qui cassent le parcours
+
+**But** : rien de ce que le trader voit ou fait déjà ne doit mentir.
+
+**Le travail** : chaque défaut est d'abord reproduit à l'écran, ou par un test qui échoue sur le code actuel. Un défaut qui ne se reproduit pas est barré ici, comme D1.
+
+| # | Correction |
+|---|---|
+| D2 | « Zéro écart » : la journée revue, avec des trades, et aucun code d'erreur du coach ce jour-là (perte max, nombre max, biais, setup, stop, pause après une perte), au lieu de l'XP `guardrail:` (`game/gameplan.php:69`). Les missions déjà cochées restent cochées. |
+| D3 | Porte de fin de mois : « Passer au mois N » reste gris tant que les critères ne sont pas cochés, mesurés quand Sweep le peut ; « Refaire les semaines 3 et 4 » reste toujours possible (`gameplan.js:227`). |
+| D4 | Déblocage : la fiche d'explication s'ouvre au lieu du toast de 3 s (`game.js:1802` → branche de la ligne 1806), une fois par séance comme les autres célébrations. |
+| D5 | L'intention de la semaine : affichée en une ligne dans la carte de la routine le week-end et le lundi (son texte vient du bilan, `game.js:378`). |
+| D7 | Discipline : la formule du coach (`discScore`) partout où le mot « discipline » est affiché. Concerne la page du trade, le Journal semaine et les cartes de partage d'un payout. `tDisc` reste le compte de la checklist, sous un autre libellé. |
+| D8 | `stage()` ne compte plus les trades d'exemple (`nav.js:539`). |
+| D9 | Le « Bonjour / Bon après-midi / Bonsoir » suit l'heure de New York (`nav.js:553`). |
+| D11 | Code mort retiré : `sessionDay()`, `headDay()`, `#moreSheet`, `vPayouts` du cœur, `ux.js` §5 (sauf « Marquer payé », encore utilisé), onglet `insights`. Vérifié par la suite complète. |
+
+**Tests** : un test par défaut, qui échoue sur l'ancien code. Les tests existants touchés : `e2e_gameplan`, `e2e_disc_target`, `e2e_weekly_content`, `e2e_first_run`.
+
+**Fini quand** : les 7 défauts sont corrigés, ou barrés s'ils ne se reproduisent pas, et le parcours M1 de l'étape 0 donne les mêmes chiffres (rien n'a bougé ailleurs).
+
+### Étape 2 — La saisie sans capture et le plan express par défaut
+
+**But** : M1 sans obstacle, que le trader ait une capture ou pas.
+
+**Saisie sans capture** : dans la feuille « + » (`shotForm`, `nav.js:2199`), sous la zone de capture, une ligne « Pas de capture ? Entre ton P&L ».
+- Elle ouvre la même feuille, sans image : compte, P&L net, Long / Short, setup en un toucher, « Vérifier le trade », questions, émotions, Enregistrer.
+- Mêmes règles que la saisie rapide d'aujourd'hui : sens obligatoire, heure de New York, doublons.
+- « Saisir à la main » reste pour le formulaire complet avec les prix.
+
+**Plan express par défaut** : un trader sans fiche guidée enregistrée ouvre « Faire mon plan » sur la version express (`settings.pm_mode` absent → `express`). Le plan guidé reste à un toucher (« Plan guidé ») et devient la mission 14. Un trader qui a déjà choisi garde son choix. Le plan court du tout premier trade ne change pas.
+
+**Tests** : `e2e_trade_form`, `e2e_first_run` (nouveau cas sans capture), `e2e_premarket_mode`, `e2e_premarket_express`.
+
+**Fini quand** : avec `parcours-baseline.py` (en ajoutant le cas « sans capture » par la nouvelle ligne), le premier trade sans capture se fait en **4 écrans au plus et 14 touchers au plus** (16 au départ), sans champ de prix.
+
+### Étape 3 — « Maintenant »
+
+**But** : Aujourd'hui dit quoi faire maintenant (section 4.2).
+
+**La carte de la routine** (`card()`, `nav.js:4135`) devient « Maintenant » : mêmes 3 étapes et mêmes anneaux, avec les états de 4.2 (avant, pendant, signal d'arrêt, après, fermée, repos, vendredi, fin de semaine).
+
+**Le risque permis**
+- C'est le plus petit de trois montants : perte max du plan du jour (ou du dernier plan), limite du jour la plus stricte des comptes actifs, marge de drawdown.
+- Il est calculé par une seule fonction, réutilisée par le coach (`coach.js`, `limits()` et `beforeHtml`).
+- Il est affiché avant la séance et dans « il te reste » pendant la séance.
+
+**Les lignes de la carte**
+- Ligne news : la prochaine annonce à fort impact du jour et sa fenêtre de non-trade, avant 9 h 30.
+- Ligne mission : la mission du jour du parcours de 90 jours, si le trader l'a démarré. À l'étape 5, elle prend aussi la mission de découverte.
+- La carte du coach se réduit à une phrase dans « Maintenant ».
+- La carte du parcours (`gameplan.js`) devient la ligne mission ; « Voir les 90 jours › » reste.
+
+**Ce qui quitte Aujourd'hui** :
+- « Ce mois-ci » va dans Trades › Calendrier (rien à ajouter là-bas, la grille y est déjà) ;
+- « À surveiller » et « Annonces » de la carte Jour sont remplacés par la ligne news ;
+- « La tendance de la semaine » va dans Stats ;
+- la carte de rang et la carte du jeu cachée sont retirées.
+
+**Ce qui reste ou change**
+- La carte Comptes est visible dès le premier compte.
+- Le sélecteur de type de compte n'apparaît qu'à partir de 2 types de comptes.
+- Le bouton « Ajouter un trade » de l'en-tête (ordinateur) passe au gris : un seul bleu, celui de « Maintenant ».
+
+**Tests**
+- Nouveau : `e2e_now`. Il pose les horloges du serveur et du navigateur sur chaque état (8 h, 10 h 30, signal d'arrêt, 16 h 30, journée fermée, jour de repos, vendredi 17 h, samedi). Il vérifie la phrase, le chiffre, le seul bouton bleu (`is_visible`), à 390 et 1300, en FR / EN / ES.
+- À mettre à jour : `e2e_first_run` (les cartes par stade), `e2e_routine_parity`, `e2e_lot_a`, `e2e_page_shift`, `e2e_no_jumps`.
+
+**Fini quand**
+- Aujourd'hui a « Maintenant » et 3 cartes au plus dessous.
+- Il y a un seul bouton bleu par état, aux deux tailles.
+- Le risque permis est le même chiffre dans « Maintenant », dans « Avant ce trade » et dans le message « Trade enregistré ».
+
+### Étape 4 — « Fermer ma journée »
+
+**But** : fermer la journée en un toucher (section 4.3).
+
+**La revue** (`openReview`, `game.js:1557`) s'ouvre pré-remplie :
+- le plan suivi, d'après la conformité du jour ;
+- la discipline sur 1 à 5, d'après le score du coach du jour ;
+- la note du jour proposée ;
+- les règles enfreintes, déjà pré-cochées aujourd'hui ;
+- la règle du coach en indication.
+
+Un bouton « Fermer ma journée » enregistre les mêmes champs (`post.*`) et donne la même XP. Les trades sans réponse à la checklist sont proposés dessous, en option.
+
+**Le lien « J'ai fini pour aujourd'hui »** sous l'étape Exécution, dès un trade, rend « Fermer ma journée » bleu tout de suite (`reviewTime`, `nav.js:4127`). Le signal d'arrêt du coach fait de même.
+
+**Après** : la célébration « Journée balayée », ou « Journée fermée » si les 3 anneaux ne sont pas fermés. Puis la leçon et la règle de demain sur « Maintenant ».
+
+**Rien ne change** : la revue détaillée reste possible (toucher une réponse la modifie), ainsi que « Terminer hier » et la revue du soir jusqu'au verrouillage de la journée.
+
+**Tests** : `e2e_close_day` (nouveau : 1 toucher de la carte à la journée fermée, réponses pré-remplies justes sur 3 journées types : propre, tilt, sans plan) ; `e2e_routine_parity`, `e2e_coach`, `e2e_premarket_post`.
+
+**Fini quand** : une journée se ferme en **1 toucher** depuis « Maintenant » (la feuille ouverte compte pour 1, la confirmation pour 1 : 2 touchers en tout au plus). En ligne, la part des journées fermées se compare à celle de l'étape 0 après deux semaines.
+
+### Étape 5 — Les missions de découverte
+
+**But** : chaque mission fait découvrir une fonction en la pratiquant (section 5).
+
+**Le contenu** : les 15 missions de 5.2 et leurs 3 missions de contexte, en EN / FR / ES. Pour chacune : titre, phrase « pourquoi », bouton « Faire maintenant » (la page ou la feuille à ouvrir), comportement qui la coche.
+
+**Le moteur**
+- Les chapitres `GAME_MAP` et `GAME_START_STEPS` sont remplacés par les missions de découverte.
+- XP par `awardXp` avec une clé unique (`disc:N`).
+- Chaque mission est vérifiée par le serveur, en lecture seule, comme les missions automatiques du parcours (`game/gameplan.php`).
+- Les suggestions d'installation, de rappels et de plan deviennent les missions 2 et 10.
+
+**La visibilité** : une fonction est cachée tant que sa mission n'est pas faite.
+- Fonctions concernées : Sweep AI, Mon argent (onglet et carte), plan guidé, défis, boss, saison, ligue, crew, Wrapped.
+- Le contexte peut l'ouvrir plus tôt : 2ᵉ compte, premier payout, choix dans Réglages.
+- « Tout montrer » (Réglages › Ma routine) coche tout.
+
+**Les comptes existants**
+- Une marque serveur `users.discovery_done`, posée une fois à la mise en ligne pour tout compte créé avant, donne toutes les missions faites. Elle n'est jamais retirée.
+- **Aucun trader actuel ne perd une fonction** : c'est vérifié par un test sur une base avec des traders d'avant.
+
+**Le parcours de 90 jours** : un bouton « Faire maintenant » sur ses missions qui touchent une fonction (compte, trade, revue, bilan, limites). Les missions de découverte équivalentes se cochent en même temps.
+
+**La migration** : la colonne `users.discovery_done` (et la table de progression si le moteur du jeu n'en a pas déjà une qui convient), créées seules au premier appel comme les autres tables du jeu. Elle est à décrire dans la livraison.
+
+**Tests**
+- `discovery_test.php` (chaque comportement coche, ouvrir une page ne coche rien, comptes existants) ;
+- `e2e_discovery` (jours 1 à 5 simulés, 390 FR et 1300 EN : une mission par jour, « Faire maintenant », fonctions cachées puis montrées) ;
+- `e2e_gameplan`.
+
+**Fini quand** : un nouveau trader ne voit au jour 1 que ce qui sert M1, chaque mission se coche par son comportement, et un trader existant voit exactement ce qu'il voyait avant.
+
+### Étape 6 — « Ma progression », Réglages et bilan du vendredi
+
+**But** : finir le ménage du vocabulaire et des doublons (sections 2.1 et 4.4 à 4.6).
+
+**« Ma progression »** (l'ancienne feuille Progression, `game.js:3008`) :
+- elle contient niveau, streak, gels, badges, collection, puis les défis et le jeu avancé dès la semaine 3 ;
+- elle ne propose plus d'étape ;
+- elle sort du menu de gauche ; dans l'avatar, elle s'appelle « Ma progression » ;
+- les missions du jeu deviennent « Défis de la semaine ».
+
+**Réglages** : les groupes de 4.5. « Discipline » devient « Ma routine » et reçoit le parcours de 90 jours, le mode de plan, l'heure de verrouillage et les règles de risque. Plus de section sans groupe.
+
+**Bilan du vendredi** : l'écran 2 reprend les questions de « Ta revue de la semaine » du Journal. Le Journal semaine garde ses chiffres et un lien vers le bilan. Un seul nom partout : « Bilan de la semaine ». La règle de la semaine pré-remplit sa question.
+
+**Avatar** : l'entrée « Abonnement » en double est retirée.
+
+**Guide** : les articles périmés sont mis à jour (« Bien démarrer », « XP »), avec les mots de la section 6.
+
+**Tests** : `e2e_clarity`, `e2e_weekly_content`, `e2e_weekly_card`, `e2e_news`, `e2e_a11y_names`, `e2e_no_english_in_fr_es`.
+
+**Fini quand** : chaque idée a un seul nom dans l'app et dans le guide. Réglages n'a plus de section hors groupe. La part des bilans ouverts se compare à celle de l'étape 0 après deux vendredis.
+
+### Après le chantier
+
+- **Le 13 novembre** : la liste des fonctions du jeu utilisées par moins de 10 % des traders actifs (Admin › Métriques › Jeu), pour la décision de Mateo (garder, cacher plus longtemps, retirer).
+- **Fin du gel** : quand les étapes 0 à 6 sont en ligne et que les mesures M1, journées fermées et bilans ouverts sont relevées. Toute nouvelle fonction passe alors par la section 6.
