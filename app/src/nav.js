@@ -5672,8 +5672,12 @@ new window.SweepMO(() => {
         m.sw = el.scrollWidth;
       }
     }
-    el.style.setProperty('font-size', Math.max(m.fs * 0.55, Math.floor(m.fs * m.room / m.sw * 10) / 10) + 'px', 'important'); el.dataset.fitShrunk = '1';   // « important »: the page's own sizes are !important too
+    const min = m.fs * 0.55; let fs = Math.max(min, Math.floor(m.fs * m.room / m.sw * 10) / 10);
+    el.style.setProperty('font-size', fs + 'px', 'important'); el.dataset.fitShrunk = '1';   // « important »: the page's own sizes are !important too
     el.style.setProperty('text-overflow', 'clip'); el.style.setProperty('overflow', 'visible');
+    // a text's width does not follow its font size exactly (21 Oct., the CI's Linux fonts: « −1,6 k $ » at 17.9 px still 2 px too
+    // wide, then never measured again): checked, half a pixel smaller until it fits — a few reads, only for a figure shrunk
+    for (let i = 0; i < 8 && fs > min && el.scrollWidth > m.room + 1; i++) { fs = Math.max(min, fs - 0.5); el.style.setProperty('font-size', fs + 'px', 'important'); }
   }
   /** the figure's text, the width it has and (not shrunk) the width its text takes: when they are the same as at its last fit,
       there is nothing to do (21 Oct.: without the text's own width, a figure drawn before its font had loaded kept overflowing) */

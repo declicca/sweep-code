@@ -35,7 +35,7 @@ with sync_playwright() as p:
     pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(800)
     pg.evaluate("fetch('api/game/gameplan/start', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
     pg.reload(); pg.wait_for_timeout(3500); pg.reload(); pg.wait_for_timeout(4500)
-    ok(pg.locator('#gpCard').count() == 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan card, coming back: nothing pushed down ({pg.evaluate(CLS)})')
+    ok(pg.locator('#gpCard').count() == 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan card, coming back: nothing pushed down ({pg.evaluate(CLS)} {pg.evaluate("window.__ls.filter((x) => x.v > 0.0005)")})')   # (21 Oct.: what moved, in the failure line — the only one GitHub shows)
     pg.evaluate("fetch('api/game/gameplan/stop', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
