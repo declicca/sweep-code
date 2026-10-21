@@ -5707,8 +5707,11 @@ new window.SweepMO(() => {
   if (window.SweepMO) new window.SweepMO(soon).observe(document.getElementById('main') || document.body, { childList: true, subtree: true });
   else new MutationObserver(soon).observe(document.body, { childList: true, subtree: true });
   addEventListener('resize', soon);
-  // a font that loads after the figures were fitted makes their text wider without any change in the page (21 Oct., seen on the CI)
-  if (document.fonts) { try { document.fonts.addEventListener('loadingdone', soon); document.fonts.ready.then(soon); } catch (e) { /* old browser */ } }
+  // a font that loads after the figures were fitted makes their text wider without any change in the page (21 Oct., seen on the CI):
+  // a figure that fit sees it in its key (its text's width); a shrunk one keeps its text and its width, so its key is cleared and
+  // it is measured again at its own size — only when a font has loaded, so nothing goes back and forth
+  const fontsIn = () => { document.querySelectorAll('[data-fit-shrunk]').forEach((el) => { el.__fitKey = ''; }); soon(); };
+  if (document.fonts) { try { document.fonts.addEventListener('loadingdone', fontsIn); document.fonts.ready.then(fontsIn); } catch (e) { /* old browser */ } }
 })();
 
 /* B11: computer, Today — the two columns stay balanced (height gap ≤ 20 %): cards move from the taller column to the shorter.

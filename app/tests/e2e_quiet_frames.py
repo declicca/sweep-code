@@ -38,7 +38,11 @@ with sync_playwright() as p:
         cut = pg.evaluate(CUT)
         if not cut: break
         pg.wait_for_timeout(250)
-      ok(not cut, f'3 {w} {r}: no key figure cut ({cut[:3]})')
+      # (21 Oct., cut on the CI only: what the fitting saw, in the failure line — the only one GitHub shows)
+      why = pg.evaluate("""[...document.querySelectorAll('#main .nav-kpi-g b, #main .d-perf b')].filter((e) => e.getClientRects().length && e.scrollWidth - (e.clientWidth || e.parentElement.clientWidth) > 1).map((e) => ({ t: e.textContent, sw: e.scrollWidth, cw: e.clientWidth, pw: e.parentElement.clientWidth,
+        fs: getComputedStyle(e).fontSize, inl: e.style.fontSize, kids: e.children.length, cu: e.dataset.cu || (e.querySelector('[data-cu]') ? 'child' : ''), tx: e.dataset.fitTx || '', full: e.dataset.fitFull || '', shrunk: e.dataset.fitShrunk || '',
+        key: e.__fitKey || '', fonts: document.fonts ? document.fonts.status + ':' + [...document.fonts].filter((f) => f.status === 'loaded').length : '' }))""") if cut else []
+      ok(not cut, f'3 {w} {r}: no key figure cut ({cut[:3]} {why[:2]})')
     # 4 (21 Oct., the CI): a shortened French figure (« −4,8 k $ ») is still a figure: its tile made narrower (75 % of it: within
     # what the fitting may shrink, 55 %), it is fitted again
     pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(2500)

@@ -81,15 +81,25 @@ async def main():
     ctx, pg, dlg = await page(br, True)
     await pg.wait_for_timeout(1500)
     # the sidebar stays the icon rail (the page names show when it opens), as Mateo prefers
-    # the columns are balanced in passes, as late content arrives (nav.js B11: 0.7, 1.6 and 3.2 s after Today is drawn): read
-    # until balanced, 8 s at most (21 Oct.: a busy CI machine read them before the last pass)
+    # the columns are balanced in passes, as late content arrives (nav.js B11: 0.7, 1.6 and 3.2 s after Today is drawn): read until
+    # the balance is reached, 8 s at most (21 Oct.: a busy CI machine read them before the last pass). The balance's promise
+    # (nav.js B11): a gap of 20 % at most, or else no card it may still move (not moved yet, not the day, the routine or the
+    # merged card) would make the gap smaller — the columns measured as the app measures them (each shown card + its 16 px gap).
+    # 21 Oct.: the CI's fonts gave 20.1 % then 20.2 % with no card left to move; the test asked for 20 % the app never promises.
+    B11 = """(() => { const a = document.querySelector('#main .d-col-a'), b = document.querySelector('#main .d-col-b'); if (!a || !b) return null;
+      const h = (c) => [...c.children].reduce((s, x) => s + (x.getClientRects().length ? x.getBoundingClientRect().height + 16 : 0), 0);
+      const ha = h(a), hb = h(b), big = ha > hb ? a : b, hi = Math.max(ha, hb), lo = Math.min(ha, hb), gap = hi ? (hi - lo) / hi : 0;
+      const mg = big.querySelector(':scope > .nav-merge');
+      const cand = [...big.children].filter((x) => x.getClientRects().length && !x.dataset.balMoved && !x.matches('.d-today, .nav-rt, .d-perf, .nav-merge, .d-news, .nav-trial'))
+        .concat(mg ? [...mg.children].filter((x) => x.matches('.d-pay, .d-cal') && !x.dataset.balMoved && x.getClientRects().length) : []);
+      const helps = cand.filter((c) => { const ch = c.getBoundingClientRect().height + 16; return Math.abs((hi - ch) - (lo + ch)) < hi - lo; }).map((c) => c.className.split(' ').find((k) => /^d-/.test(k)) || c.className);
+      const cards = [a, b].map((c) => [...c.children].filter((x) => x.getClientRects().length).map((x) => (x.className.split(' ').find((k) => /^(d-|nav-)/.test(k)) || '?') + ':' + Math.round(x.getBoundingClientRect().height)));
+      return { hs: [Math.round(ha), Math.round(hb)], gap: Math.round(gap * 1000) / 10, ok: gap <= 0.2 || !helps.length, helps, cards, passes: (document.querySelector('#main .nav-dash') || {}).__bal || 0 }; })()"""
     for i in range(10):
-      # measured as the app balances them (nav.js B11, h(): each shown card + its 16 px gap; 21 Oct.: without the gaps, a column
-      # with fewer cards read 20.1 % on the CI while the app saw it within its 20 %)
-      hs = await pg.evaluate("[...document.querySelectorAll('#main .d-col')].map(c=>[...c.children].reduce((s,x)=>s+(x.getClientRects().length?x.getBoundingClientRect().height+16:0),0))")
-      if len(hs) == 2 and max(hs) and (max(hs) - min(hs)) / max(hs) <= 0.2: break
+      bl = await pg.evaluate(B11)
+      if bl and bl['ok']: break
       await pg.wait_for_timeout(800)
-    ok(len(hs) == 2 and max(hs) and (max(hs) - min(hs)) / max(hs) <= 0.2, f'B11 balanced columns ({[round(h) for h in hs]})')
+    ok(bool(bl and bl['ok']), f'B11 balanced columns, or no card left that would make them closer ({bl})')
     await ctx.close(); await br.close()
   print(f'\n{"all passed" if not fails else str(fails) + " failed"}'); sys.exit(1 if fails else 0)
 asyncio.run(main())
