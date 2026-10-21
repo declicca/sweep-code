@@ -2,7 +2,7 @@
 
 Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajustements : mesure d'abord, nouvel ordre des étapes, comptes existants gardés, missions cochées par un comportement. Version analysée : `origin/main` au commit `590bd3f`.
 
-**Avancement** : étape 0 faite (branche `parcours-0-mesure`, pas encore poussée ni déployée) ; étape 1 faite en local (branche `parcours-1-defauts`) ; étape 2 en cours ; étapes 3 à 6 à faire (section 7). **L'étape 2 ne sera pas déployée avant une semaine de mesures de l'étape 0 en ligne** (décision de Mateo, 21 oct.).
+**Avancement** : étape 0 faite (pas encore poussée ni déployée) ; étape 1 faite en local (branche `parcours-1-defauts`) ; étape 2 en cours ; étapes 3 à 6 à faire (section 7). **L'étape 2 ne sera pas déployée avant une semaine de mesures de l'étape 0 en ligne** (décision de Mateo, 21 oct.).
 
 **Statut** : c'est la référence de tous les développements à venir sur l'app. En cas de désaccord avec un brief plus ancien, ce fichier gagne sur le **parcours** (ce qui est visible, où, quand). `app/CONTEXTE-APP.md` reste la référence des **règles** : calculs, argent, prop firms, tests, design.
 
@@ -406,6 +406,7 @@ Avant de coder, chaque demande répond à ces questions, dans le brief ou le com
 ## 7. Mise en œuvre : étapes, une à la fois
 
 **Règles de chaque étape**
+- **Une seule session sur l'app pendant tout le chantier du parcours** (décision de Mateo, 21 oct.) : la conversation du parcours est la seule qui modifie `app/`. Si une autre session doit quand même lancer les tests de l'app, elle utilise `SWEEP_PAR_SLOT=b` (`tools/par.py` : ses propres copies `/tmp/gb_*` et ports 9195, 9295…), jamais `/tmp/g*` ni les ports 8095 à 8498.
 - Elle part d'`origin/main` à jour, dans sa propre branche, une étape à la fois, jamais deux en même temps.
 - Tests ciblés pendant le travail, puis la suite complète (`python3 tools/par.py 3`), et des captures à 390 × 844 tactile et 1300 × 850, en FR / EN / ES, clair et foncé.
 - Une suite complète à la fois sur la machine : les copies `/tmp/g*` et les ports 8095 à 8395 sont partagés entre les conversations.
