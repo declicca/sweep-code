@@ -754,7 +754,7 @@ def make_firm_vs(a_id, b_id):
               + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs)
                        + chiprow(lang, t, T("Firm pages", "Pages des firmes", "Páginas de las firmas"), firms_chips, 32)
                        + chiprow(lang, t, T("Compare too", "Compare aussi", "Compara también"), others, 12), "n", "faq", width="read")
-              + ui.read_next(lang, t, ["prop-firms/index.html", "prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html"]) + ui.final(lang, t))
+              + ui.read_next(lang, t, ["pass-prop-firm-evaluation.html", "funded-account-playbook.html", "prop-firm-rule-changes.html"]) + ui.final(lang, t))
         ld = jsonld({"@context": "https://schema.org", "@graph": [
             {"@type": "Article", "headline": f"{a} vs {b}", "inLanguage": lang, "datePublished": "2026-10-16", "dateModified": presets.CHECKED,
              "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}},

@@ -56,16 +56,16 @@
   "hash": "d13aad5873854d12"
  },
  "contracts/mes-futures.html": {
-  "date": "2026-10-18",
-  "hash": "3d222e524aa19476"
+  "date": "2026-10-21",
+  "hash": "577fca8f95bd0cd9"
  },
  "contracts/mgc-futures.html": {
   "date": "2026-10-18",
   "hash": "a0dd4a75e16380c6"
  },
  "contracts/mnq-futures.html": {
-  "date": "2026-10-20",
-  "hash": "b2074ef07e5dc939"
+  "date": "2026-10-21",
+  "hash": "c0ff729ce9fe41e5"
  },
  "contracts/mym-futures.html": {
   "date": "2026-10-18",
@@ -120,8 +120,8 @@
   "hash": "eebea9b1991bd08c"
  },
  "futures-contracts.html": {
-  "date": "2026-10-15",
-  "hash": "b6bcb262832ed757"
+  "date": "2026-10-21",
+  "hash": "1e9e1fd8c7373667"
  },
  "futures-market-hours.html": {
   "date": "2026-10-15",
@@ -200,20 +200,20 @@
   "hash": "7f97b0fd3c0661c7"
  },
  "payout-calculator.html": {
-  "date": "2026-10-15",
-  "hash": "6e014f3424b9e5a3"
+  "date": "2026-10-21",
+  "hash": "c2500b4485f0f160"
  },
  "payout-tracker.html": {
-  "date": "2026-10-18",
-  "hash": "f22be64cc65ee492"
+  "date": "2026-10-21",
+  "hash": "0502d14f7ed5f6c8"
  },
  "pce-release-dates.html": {
   "date": "2026-10-18",
   "hash": "50e0cafd34d97ea0"
  },
  "position-size-calculator.html": {
-  "date": "2026-10-15",
-  "hash": "f80986a39043eab5"
+  "date": "2026-10-21",
+  "hash": "ae2b80a2e94d5d3e"
  },
  "ppi-release-dates.html": {
   "date": "2026-10-18",
@@ -232,12 +232,12 @@
   "hash": "7dec40059e59ec91"
  },
  "prop-firm-consistency-rules.html": {
-  "date": "2026-10-19",
-  "hash": "693927585308d787"
+  "date": "2026-10-21",
+  "hash": "a6b8b15d55124f48"
  },
  "prop-firm-drawdown-rules.html": {
-  "date": "2026-10-19",
-  "hash": "0024155d8dcee8b6"
+  "date": "2026-10-21",
+  "hash": "c2314e76bf27b7cc"
  },
  "prop-firm-gameplan-month-1.html": {
   "date": "2026-10-20",
@@ -252,20 +252,20 @@
   "hash": "3592eac20916afb0"
  },
  "prop-firm-minimum-days.html": {
-  "date": "2026-10-19",
-  "hash": "93d73dbf08486932"
+  "date": "2026-10-21",
+  "hash": "01365fa70fa96764"
  },
  "prop-firm-payout-rules.html": {
-  "date": "2026-10-19",
-  "hash": "cb3a88be712102b9"
+  "date": "2026-10-21",
+  "hash": "6742e599942907dc"
  },
  "prop-firm-position-sizing.html": {
   "date": "2026-10-20",
   "hash": "09a9179a161ea4fd"
  },
  "prop-firm-profit-targets.html": {
-  "date": "2026-10-19",
-  "hash": "a292dd4924f2d121"
+  "date": "2026-10-21",
+  "hash": "3c1305e014131a26"
  },
  "prop-firm-roi-calculator.html": {
   "date": "2026-10-15",
@@ -280,96 +280,96 @@
   "hash": "eec4c287651a3560"
  },
  "prop-firms/alpha-futures.html": {
-  "date": "2026-10-19",
-  "hash": "574ec3d714d322f8"
+  "date": "2026-10-21",
+  "hash": "5c3db6636a22ce22"
  },
  "prop-firms/apex-vs-alpha-futures.html": {
-  "date": "2026-10-19",
-  "hash": "bf1a9778c4e0e24e"
+  "date": "2026-10-21",
+  "hash": "780868bd3de018d5"
  },
  "prop-firms/apex-vs-lucid.html": {
-  "date": "2026-10-19",
-  "hash": "ac60e668acd25f1d"
+  "date": "2026-10-21",
+  "hash": "35ec00ddfc303d73"
  },
  "prop-firms/apex-vs-myfundedfutures.html": {
-  "date": "2026-10-19",
-  "hash": "1039cb2827f9054b"
+  "date": "2026-10-21",
+  "hash": "532b26d5d542b856"
  },
  "prop-firms/apex-vs-take-profit-trader.html": {
-  "date": "2026-10-19",
-  "hash": "6a901d47de81e01c"
+  "date": "2026-10-21",
+  "hash": "ffba48e8c1ec2435"
  },
  "prop-firms/apex.html": {
-  "date": "2026-10-19",
-  "hash": "b9100df70ce5c8a9"
+  "date": "2026-10-21",
+  "hash": "6fac665d8928352e"
  },
  "prop-firms/index.html": {
   "date": "2026-10-19",
   "hash": "c972e2113f71c50a"
  },
  "prop-firms/lucid-vs-alpha-futures.html": {
-  "date": "2026-10-19",
-  "hash": "e0adeba99b22f550"
+  "date": "2026-10-21",
+  "hash": "29ca539e1c8bba4a"
  },
  "prop-firms/lucid-vs-myfundedfutures.html": {
-  "date": "2026-10-19",
-  "hash": "65679c4310eb4862"
+  "date": "2026-10-21",
+  "hash": "cc089e199ae404f3"
  },
  "prop-firms/lucid-vs-take-profit-trader.html": {
-  "date": "2026-10-19",
-  "hash": "048341a2e132ae97"
+  "date": "2026-10-21",
+  "hash": "d62eb2569c136cec"
  },
  "prop-firms/lucid.html": {
-  "date": "2026-10-19",
-  "hash": "262bc45e404ab26a"
+  "date": "2026-10-21",
+  "hash": "414ca030f449d30d"
  },
  "prop-firms/myfundedfutures-vs-alpha-futures.html": {
-  "date": "2026-10-19",
-  "hash": "31bcec6fb9b5f7f0"
+  "date": "2026-10-21",
+  "hash": "662b9bf53ee440c5"
  },
  "prop-firms/myfundedfutures.html": {
-  "date": "2026-10-19",
-  "hash": "ae4950378d2c4327"
+  "date": "2026-10-21",
+  "hash": "ef96eaa335e2ba2e"
  },
  "prop-firms/take-profit-trader-vs-alpha-futures.html": {
-  "date": "2026-10-19",
-  "hash": "f90d7d842b9477b6"
+  "date": "2026-10-21",
+  "hash": "2cffc43f2389cd00"
  },
  "prop-firms/take-profit-trader-vs-myfundedfutures.html": {
-  "date": "2026-10-19",
-  "hash": "eeb81f2df9599cc3"
+  "date": "2026-10-21",
+  "hash": "422a30a39fbf0f95"
  },
  "prop-firms/take-profit-trader.html": {
-  "date": "2026-10-19",
-  "hash": "06fcf1d50f6dc0cd"
+  "date": "2026-10-21",
+  "hash": "4ea3d65383f5dfbc"
  },
  "prop-firms/topstep-vs-alpha-futures.html": {
-  "date": "2026-10-19",
-  "hash": "f42924faf1003597"
+  "date": "2026-10-21",
+  "hash": "5e6e0454a1439a12"
  },
  "prop-firms/topstep-vs-apex.html": {
-  "date": "2026-10-19",
-  "hash": "3601a06c7ddfe758"
+  "date": "2026-10-21",
+  "hash": "e0698167338b7f71"
  },
  "prop-firms/topstep-vs-lucid.html": {
-  "date": "2026-10-19",
-  "hash": "a30be7f2e8403436"
+  "date": "2026-10-21",
+  "hash": "2025c1f7d99e7c6d"
  },
  "prop-firms/topstep-vs-myfundedfutures.html": {
-  "date": "2026-10-19",
-  "hash": "12b711b6d4ac455c"
+  "date": "2026-10-21",
+  "hash": "c231edb1479a58af"
  },
  "prop-firms/topstep-vs-take-profit-trader.html": {
-  "date": "2026-10-19",
-  "hash": "be8b92ce1988fa74"
+  "date": "2026-10-21",
+  "hash": "658ea71e1cea4555"
  },
  "prop-firms/topstep.html": {
-  "date": "2026-10-19",
-  "hash": "f2c6fd5ccd37a450"
+  "date": "2026-10-21",
+  "hash": "232453b2b81988fc"
  },
  "prop-firms/tradeify.html": {
-  "date": "2026-10-18",
-  "hash": "616020e814bcac51"
+  "date": "2026-10-21",
+  "hash": "ac5a2f12e53df86c"
  },
  "quantower.html": {
   "date": "2026-10-21",
@@ -428,7 +428,7 @@
   "hash": "5cad3ac3150fb8ba"
  },
  "trailing-drawdown-calculator.html": {
-  "date": "2026-10-15",
-  "hash": "83feee410d4d7892"
+  "date": "2026-10-21",
+  "hash": "d94f1f79c43e6292"
  }
 }

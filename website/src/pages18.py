@@ -401,7 +401,7 @@ def make_rules_page(f):
              T("Yes, as many as your plan allows, each with its own rules, and you can copy one trade to several accounts at once.", "Oui, autant que ton forfait le permet, chacun avec ses propres règles, et tu peux copier un trade sur plusieurs comptes en une fois.", "Sí, tantas como permita tu plan, cada una con sus propias reglas, y puedes copiar una operación en varias cuentas a la vez.")),
             (T("Is it free?", "C’est gratuit ?", "¿Es gratis?"),
              T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.", "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
-        rel = ["prop-firm-payout-rules.html", "prop-firm-drawdown-rules.html", "prop-firm-consistency-rules.html"]
+        rel = ["pass-prop-firm-evaluation.html", "prop-firm-drawdown-rules.html", "prop-firm-consistency-rules.html"]   # payout rules: linked above
         from pages19 import FIRM_VS, SHORT, vs_page_of   # the firm-vs-firm pages this firm is in
         byid = {x["id"]: x for x in presets.FIRMS}
         vs = [(vs_page_of(byid[x], byid[y]), f"{SHORT[x]} vs {SHORT[y]}") for x, y in FIRM_VS if f["id"] in (x, y)]
@@ -702,7 +702,7 @@ def make_manual_page(slug, name):
                 (T("Is it free?", "C’est gratuit ?", "¿Es gratis?"),
                  T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.", "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
         b += (ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "questions", width="read")
-              + ui.read_next(lang, t, ["prop-firms/index.html", "prop-firm-drawdown-rules.html", "prop-firm-payout-rules.html"]))
+              + ui.read_next(lang, t, ["prop-firms/index.html", "pass-prop-firm-evaluation.html", "prop-firm-payout-rules.html"]))
         ld = jsonld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]})
         return (t(T(f"{name} Rules & Trading Journal · Sweep", f"Règles {name} et journal de trading · Sweep", f"Reglas de {name} y diario de trading · Sweep")),
                 t(T(f"Track your {name} accounts in Sweep: enter the rules once (target, max loss, daily limit, consistency, payouts) and every trade is checked. Free.",

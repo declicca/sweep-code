@@ -211,6 +211,9 @@ AddType font/woff2 .woff2
 AddType image/webp .webp
 AddType application/manifest+json .webmanifest
 AddCharset utf-8 .txt .xml .webmanifest
+# precompressed copies (below): .gz is an encoding, the type comes from the extension before it
+RemoveType .gz
+AddEncoding gzip .gz
 <IfModule mod_rewrite.c>
 RewriteEngine On
 # http and www go to https://makeitsweep.com in one hop
@@ -245,6 +248,10 @@ RedirectMatch 301 ^/(fr/|es/)?liquidity-sweep-setup(\\.html)?$ /$1liquidity-swee
 # index.html is never a second URL for the same page (avoids duplicate content)
 RewriteCond %{THE_REQUEST} \\s/+(.*/)?index\\.html[\\s?] [NC]
 RewriteRule ^(.*/)?index\\.html$ /$1 [R=301,L]
+# the server doesn't compress (no mod_deflate here): the build writes file.gz next to each text file, served to browsers that accept gzip
+RewriteCond %{HTTP:Accept-Encoding} gzip [NC]
+RewriteCond %{REQUEST_FILENAME}.gz -f
+RewriteRule ^(.+\\.(?:html|css|js|svg|xml|txt|json|webmanifest))$ /$1.gz [L]
 </IfModule>
 <IfModule mod_headers.c>
 Header always set X-Content-Type-Options "nosniff"
@@ -253,24 +260,28 @@ Header always set X-Frame-Options "DENY"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 Header always set Strict-Transport-Security "max-age=31536000"
 # pages only load from the site itself (and call the app); inline scripts and styles stay allowed (the site uses them). Not on files like the PDFs
-<FilesMatch "\\.html$">
+<FilesMatch "\\.html(\\.gz)?$">
 Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://app.makeitsweep.com; media-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 </FilesMatch>
 <FilesMatch "\\.woff2$">
 Header set Cache-Control "public, max-age=2592000, immutable"
 </FilesMatch>
 # images and videos keep their name when they are redone: fresh for a day, then checked again in the background
-<FilesMatch "\\.(webp|png|svg|ico|mp4|webm)$">
+<FilesMatch "\\.(webp|png|svg|ico|mp4|webm)(\\.gz)?$">
 Header set Cache-Control "public, max-age=86400, stale-while-revalidate=2592000"
 </FilesMatch>
-<FilesMatch "\\.[0-9a-f]{10}\\.(css|js)$">
+<FilesMatch "\\.[0-9a-f]{10}\\.(css|js)(\\.gz)?$">
 Header set Cache-Control "public, max-age=31536000, immutable"
 </FilesMatch>
-<FilesMatch "\\.(html|xml|txt|webmanifest)$">
+<FilesMatch "\\.(html|xml|txt|webmanifest)(\\.gz)?$">
 Header set Cache-Control "no-cache, must-revalidate"
 </FilesMatch>
 <FilesMatch "^$">
 Header set Cache-Control "no-cache, must-revalidate"
+</FilesMatch>
+# compressed or not, the same address: caches keep one copy of each
+<FilesMatch "\\.(html|css|js|svg|xml|txt|json|webmanifest)(\\.gz)?$">
+Header merge Vary Accept-Encoding
 </FilesMatch>
 </IfModule>
 <IfModule mod_deflate.c>
@@ -324,3 +335,16 @@ _odd = _prices_named("best-trading-journal-for-prop-firms.html") - _SWEEP_PRICES
 if _odd: print(f"warning: best-trading-journal-for-prop-firms.html names prices that aren't in src/data/competitors.json: {sorted(_odd)}")
 _odd = _prices_named("free-trading-journal.html") - _SWEEP_PRICES - set().union(*(_amounts(pages17.COMP[n]) for n, *_ in pages20.FREE_CMP if n != "Sweep"))
 if _odd: print(f"warning: free-trading-journal.html names prices that aren't in src/data/competitors.json: {sorted(_odd)}")
+
+# ---- precompressed copies: the server doesn't compress, .htaccess serves file.gz to browsers that accept gzip (about 4 times less to download)
+import gzip as _gzip
+_GZ = (".html", ".css", ".js", ".svg", ".xml", ".txt", ".json", ".webmanifest")
+_gn = _graw = _gpacked = 0
+for _root, _d, _fs in os.walk(DIST):
+    for _f in _fs:
+        if not _f.endswith(_GZ): continue
+        _p = os.path.join(_root, _f); _b = open(_p, "rb").read()
+        if len(_b) < 1024: continue   # tiny files (the IndexNow key) gain nothing
+        _z = _gzip.compress(_b, 9, mtime=0)   # the same file gives the same bytes: rsync only sends what changed
+        open(_p + ".gz", "wb").write(_z); _gn += 1; _graw += len(_b); _gpacked += len(_z)
+print(f"gzip: {_gn} files, {_graw // 1024} KB -> {_gpacked // 1024} KB")

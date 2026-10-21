@@ -71,7 +71,7 @@ Aussi : un lien vers le pilier depuis le guide du journal, le journal gratuit, l
 ## 5. Mesure
 
 - **Search Console** : les requêtes et les clics des 4 pages, à 4 puis 8 semaines. On ajoute une page satellite quand une requête obtient des impressions sans clic.
-- **Inscriptions** : les boutons portent `data-track` : `signup_gameplan_hub`, `signup_gameplan_m1`, `signup_gameplan_m2`, `signup_gameplan_m3`.
+- **Inscriptions** : chaque bouton d'inscription porte sa page dans son adresse (`utm_source=site&utm_medium=<page>`, par exemple `prop-firm-gameplan-month-1`). L'app ne les enregistre pas encore pour un visiteur venu de Google : le correctif est demandé à la session App (`briefs/brief-app-attribution-site-2026-10-21.md`), puis le décompte par page se lira dans Admin › Attribution. Les attributs `data-track` des boutons ne sont lus par aucun outil de mesure : le site n'en charge aucun.
 - **IA** : vérifier tous les mois si les réponses de ChatGPT, Perplexity et Google citent le pilier pour « how to start prop firm trading ».
 
 ## 6. Pour aller plus loin
