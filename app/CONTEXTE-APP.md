@@ -543,6 +543,12 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 - **Plan express, une fois par jour** (19 oct., échec de la CI) : l'offre n'est marquée vue (`pm.xshown.{jour}`) qu'une fois la fiche à l'écran ; le calendrier économique est attendu 2,5 s au plus avant d'ouvrir la fiche (`openPremarket`).
 
+### Parcours, étape 0 : la mesure de départ (21 oct., `SWEEP.md` à la racine du dépôt)
+- **`SWEEP.md`** (racine du dépôt) est la carte du parcours approuvée par Mateo le 21 oct. : les 3 moments (M1 premières minutes, M2 boucle quotidienne, M3 vendredi), la carte cible (« Maintenant », « Fermer ma journée », missions de découverte, « Ma progression »), l'ordre des étapes. Gel des nouvelles fonctions pendant ce chantier. Il fait foi pour le **parcours** ; ce fichier reste la référence des règles.
+- **Admin › Métriques** (`ops/metrics.php`, bloc `brief` ; `ux.js` section 15) : deux indicateurs de plus, mêmes filtres : « Journées fermées » (`closed_sessions_30d` : séances avec trades des 30 derniers jours dont la revue est faite) et « Bilans de la semaine ouverts » (`weekly_opened_8w` : les 8 dernières semaines terminées avec au moins un trade, bilan ouvert d'après `weekly_opened` ; la semaine en cours n'est pas comptée). Tests : `metrics_test.php`, `e2e_admin_metrics`.
+- **`tools/parcours-baseline.py`** (hors déploiement) : M1 en vrais touchers, de l'inscription au plan (risque permis vu) puis au premier trade, avec et sans capture, 390 FR et 1300 EN. Point de départ : 11 touchers et 3 écrans jusqu'au plan, 16 touchers et 5 écrans jusqu'au premier trade (`docs/parcours/MESURE-0.md`).
+- Vérifié en passant : la carte du parcours de 90 jours **est visible** sur téléphone (le défaut D1 de la première version de `SWEEP.md` était faux).
+
 ### Tour visuel et ménage du code (20 oct.)
 - **Montants à 8 px** (Comptes, Calendrier, Mon argent) : `fitOne` (`nav.js`) réduisait la police depuis une taille déjà réduite, pendant qu'une tuile était encore étroite, sans jamais la rendre. Mesuré maintenant chaque fois à sa propre taille (`data-fit-shrunk`).
 - **Stats, ordinateur** : les tuiles « Plus rentable » et « Direction » débordaient sous la courbe de drawdown (colonnes `1fr` à la taille du contenu) : `.tiles` en `minmax(0,1fr)` partout (la règle téléphone de `nav.css` qui le faisait, retirée).

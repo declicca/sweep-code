@@ -5,7 +5,7 @@ declare(strict_types=1);
  *   php tests/metrics_test.php
  * Known traders, hand-computed numbers: activation on the sign-up day, retention D7 / D30 (a trade or a review), swept
  * sessions, median sign-up → first trade, the cohort and source filters, JS errors grouped with the traders affected,
- * the start step by step (brief 03 step 1).
+ * the start step by step (brief 03 step 1), closed days and Friday recaps opened (SWEEP.md, step 0).
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -49,6 +49,18 @@ $ok($b['activation_day0'] === ['pct' => 33, 'of' => 3], 'activation: 1 of 3 logs
 $ok($b['retention_d7'] === ['pct' => 33, 'of' => 3], 'retention D7: 1 of 3 active during days 7-13: ' . json_encode($b['retention_d7']));
 $ok($b['retention_d30'] === ['pct' => 50, 'of' => 2], 'retention D30: 1 of 2 (a review counts), only traders whose window is over: ' . json_encode($b['retention_d30']));
 $ok($b['swept_sessions_30d'] === ['pct' => 50, 'of' => 2], 'swept: 1 of 2 sessions with trades (a review-only day is not a session with trades): ' . json_encode($b['swept_sessions_30d']));
+// the journey's baseline (SWEEP.md, step 0): closed days and Friday recaps opened
+$ok($b['closed_sessions_30d'] === ['pct' => 50, 'of' => 2], 'closed days: 1 of 2 sessions with trades has its review done: ' . json_encode($b['closed_sessions_30d']));
+$mon = fn(string $d) => (new DateTimeImmutable($d . ' 12:00', $ny))->modify('monday this week')->format('Y-m-d');
+$w8 = $mon($day($t1 + 8 * $D)); $w10 = $mon($day($t1 + 10 * $D)); $nW = $w8 === $w10 ? 1 : 2;
+$pdo->prepare("INSERT INTO game_analytics VALUES ('u1', 'weekly_opened', ?, ?)")->execute([$now - $D, json_encode(['week' => $w8])]);
+$pdo->prepare("INSERT INTO game_analytics VALUES ('u2', 'weekly_opened', ?, ?)")->execute([$now - $D, json_encode(['week' => $w8])]);   // a week without a trade of u2: not counted
+$pdo->prepare("INSERT INTO game_analytics VALUES ('u1', 'weekly_opened', ?, ?)")->execute([$now - $D, json_encode(['week' => $w8])]);   // opened twice: once
+$wo = sweep_metrics($pdo, $app)['brief']['weekly_opened_8w'];
+$ok($wo === ['pct' => (int) round(100 / $nW), 'of' => $nW], "Friday recaps opened: 1 of the $nW weeks with a trade (the current week and a week without a trade left out): " . json_encode($wo));
+$gd('u1', $day(time()), 1, 0, 0);   // a trade this week: the week is not over, not counted
+$ok(sweep_metrics($pdo, $app)['brief']['weekly_opened_8w']['of'] === $nW, 'the current week is not counted yet');
+$pdo->exec("DELETE FROM game_days WHERE user_id = 'u1' AND trading_day = '" . $day(time()) . "'");
 $ok($b['first_trade_median_min'] === 2880 && $b['first_trade_of'] === 2, "median sign-up → first trade: 2 days ({$b['first_trade_median_min']} min)");
 $ok(($b['filters']['sources']['tiktok'] ?? 0) === 3 && ($b['filters']['sources']['friend'] ?? 0) === 1, 'sources: tiktok 3, friend 1: ' . json_encode($b['filters']['sources']));
 $wk = (new DateTimeImmutable($d1 . ' 12:00', $ny))->modify('monday this week')->format('Y-m-d');

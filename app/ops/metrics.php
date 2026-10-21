@@ -12,6 +12,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * occurrences, traders affected, last seen, pages, browsers, versions — never any trade content.
  * Brief 03 step 1 (block « start »), same traders: signed up → first name → first account → first plan → first trade,
  * how many reached each step and the median time from the sign-up (sample-data accounts are not counted).
+ * The journey's baseline (SWEEP.md, step 0), same traders: closed days (sessions with trades of the last 30 days whose
+ * review is done) and Friday recaps opened (the 8 last finished weeks with a trade, recap opened: « weekly_opened »).
  */
 function sweep_metrics(PDO $pdo, string $app, array $f = []): array
 {
@@ -82,13 +84,21 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
     arsort($miss);
     // ── brief 01 step 4 ──
     $ids = array_flip(array_column($users, 'id'));
-    $activeDays = []; $sess = 0; $sweptS = 0;
+    $activeDays = []; $sess = 0; $sweptS = 0; $closedS = 0; $tradedWeeks = [];
+    // the journey's baseline (SWEEP.md, step 0): closed days = sessions with trades whose review is done; the weeks a
+    // Friday recap was ready for (a trade that week), to compare with the ones opened
+    $wkLast = $monday($nyDay($now)); $wkFirst = (new DateTimeImmutable($wkLast . ' 12:00', $ny))->modify('-8 weeks')->format('Y-m-d');
     if ($has('game_days')) {
         foreach ($q('SELECT user_id, trading_day, trades_count, review_done, is_swept FROM game_days WHERE trades_count > 0 OR review_done = 1') as $r) {
             if (!isset($ids[$r['user_id']])) continue;
             $activeDays[$r['user_id']][] = $r['trading_day'];
-            if ((int) $r['trades_count'] > 0 && $r['trading_day'] > gmdate('Y-m-d', $now - 30 * $day)) { $sess++; if ((int) $r['is_swept'] === 1) $sweptS++; }
+            if ((int) $r['trades_count'] > 0 && $r['trading_day'] > gmdate('Y-m-d', $now - 30 * $day)) { $sess++; if ((int) $r['is_swept'] === 1) $sweptS++; if ((int) $r['review_done'] === 1) $closedS++; }
+            if ((int) $r['trades_count'] > 0) { $w = $monday($r['trading_day']); if ($w >= $wkFirst && $w < $wkLast) $tradedWeeks[$r['user_id'] . '|' . $w] = true; }   // the 8 last finished weeks
         }
+    }
+    $openedW = 0;
+    if ($tradedWeeks && $has('game_analytics')) foreach ($q("SELECT DISTINCT user_id, meta_json FROM game_analytics WHERE event = 'weekly_opened'") as $r) {
+        $w = (json_decode((string) $r['meta_json'], true) ?: [])['week'] ?? ''; if (isset($tradedWeeks[$r['user_id'] . '|' . $w])) $openedW++;
     }
     $addD = fn(string $d, int $n) => (new DateTimeImmutable($d . ' 12:00', $ny))->modify(($n >= 0 ? '+' : '') . $n . ' days')->format('Y-m-d');
     $today = $nyDay($now);
@@ -132,6 +142,8 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         'activation_day0' => ['pct' => $rate($d0k, $d0n), 'of' => $d0n],
         'retention_d7' => $retention(7, 13), 'retention_d30' => $retention(30, 36),
         'swept_sessions_30d' => ['pct' => $rate($sweptS, $sess), 'of' => $sess],
+        'closed_sessions_30d' => ['pct' => $rate($closedS, $sess), 'of' => $sess],
+        'weekly_opened_8w' => ['pct' => $rate($openedW, count($tradedWeeks)), 'of' => count($tradedWeeks)],
     ];
     if ($has('client_errors')) {   // grouped by message, its numbers taken out (ops/client-errors.php), last 30 days
         require_once __DIR__ . '/client-errors.php';

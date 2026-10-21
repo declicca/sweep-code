@@ -3,7 +3,8 @@ Sweep — Admin dashboard (brief 01 step 4), dev environment with Playwright:
   python3 tests/e2e_admin_metrics.py http://127.0.0.1:8095 /tmp/show_state.json        (the test trader is the admin)
  - a JS error sent by a trader's browser (api/client-error) is listed, grouped by message, with the traders affected,
    the page, the browser and the version;
- - the four indicators of the brief (activation on the sign-up day, retention D7 and D30, swept days);
+ - the four indicators of the brief (activation on the sign-up day, retention D7 and D30, swept days), then the journey's
+   baseline (SWEEP.md, step 0): closed days, Friday recaps opened;
  - the sign-up week and source filters reload the numbers (« N of M traders »);
  - « Exporter »: the 30-day list as a Markdown file (api/admin/errors-export), with the error and where it happened;
  - FR words, phone and computer, no horizontal scroll, no page error.
@@ -31,8 +32,8 @@ async def main():
         ok(r == 200, f'a JS error is received by the server ({r})')
       await pg.evaluate("location.hash='#admin'"); await pg.wait_for_selector('#main .ux-brief', timeout=15000); await pg.wait_for_timeout(800)
       cards = await pg.evaluate("[...document.querySelectorAll('#main .ux-brief .ux-m small')].map(s=>s.textContent)")
-      want = ['Activation : un trade le jour de l’inscription', 'Rétention J7', 'Rétention J30', 'Journées balayées']
-      ok(all(any(c.startswith(x) for c in cards) for x in want), f'{tag} the four indicators ({cards})')
+      want = ['Activation : un trade le jour de l’inscription', 'Rétention J7', 'Rétention J30', 'Journées balayées', 'Journées fermées', 'Bilans de la semaine ouverts']
+      ok(all(any(c.startswith(x) for c in cards) for x in want), f'{tag} the four indicators, closed days and Friday recaps opened (SWEEP.md, step 0) ({cards})')
       row = await pg.evaluate(f"(()=>{{const r=[...document.querySelectorAll('#main .ux-errs tbody tr')].find(t=>t.textContent.includes('{msg}')); return r?[...r.children].map(c=>c.textContent.trim()):null}})()")
       ok(row is not None and row[1] == '1' and row[2] == '1' and row[4] == '#trades' and 'Chrome' in row[5] and row[6] == 'app.test', f'{tag} the error: 1 trader, 1 time, page, browser, version ({row})')
       # « Exporter » (13 Oct.): the 30-day list as a Markdown file, to give to Claude
