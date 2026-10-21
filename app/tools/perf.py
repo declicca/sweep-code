@@ -25,7 +25,8 @@ async def one(br, base, size, page):
     if size == 'mobile': await cdp.send('Emulation.setCPUThrottlingRate', {'rate': 4})
     nbytes = [0]; pg.on('response', lambda r: None)
     await cdp.send('Network.enable'); cdp.on('Network.loadingFinished', lambda e: nbytes.__setitem__(0, nbytes[0] + e.get('encodedDataLength', 0)))
-    await pg.goto(base + '/' + page, wait_until='networkidle'); await pg.wait_for_timeout(1500)
+    await pg.goto(base + '/' + page, wait_until='load')   # (not « networkidle »: the app's background requests never leave the network idle for 500 ms)
+    await pg.wait_for_selector('#main > :not(.boot)', state='attached'); await pg.wait_for_timeout(2500)
     m = {x['name']: x['value'] for x in (await cdp.send('Performance.getMetrics'))['metrics']}
     p = await pg.evaluate("({fcp:(performance.getEntriesByName('first-contentful-paint')[0]||{}).startTime||0,...window.__p})")
     await ctx.close()

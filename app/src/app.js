@@ -2947,7 +2947,13 @@ function runCountUps(e) {
       dec: 0
     }), i = performance.now(), o = 900, r = c => {
       const l = Math.min(1, (c - i) / o), p = 1 - Math.pow(1 - l, 4);
-      t.textContent = s(a * p), l < 1 ? requestAnimationFrame(r) : t.textContent = s(a);
+      // the frames change the text node in place: the page's observers (they watch added and removed nodes) only see the
+      // final value (20 Oct.: each frame woke them all, a second of work on a phone when Stats or Today opened)
+      if (l < 1) {
+        const x = t.firstChild;
+        x && x.nodeType === 3 && !x.nextSibling ? x.data = s(a * p) : t.textContent = s(a * p);
+        requestAnimationFrame(r);
+      } else t.textContent = s(a);
     };
     requestAnimationFrame(r);
   });

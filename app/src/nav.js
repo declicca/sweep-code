@@ -5639,39 +5639,70 @@ new window.SweepMO(() => {
     if (a >= 1000) out.push(a < 99950 ? cur(num(a / 1000, 1), 'k') : a < 999500 ? cur(num(a / 1000, 0), 'k') : cur(num(a / 1e6, a < 9995000 ? 2 : 1), 'M'));   // never « 1000 k »
     return out;
   }
-  /** one figure: rounded / abbreviated (key figure tiles) then a smaller font, never cut by « … » */
-  function fitOne(el) {
-      if (el.children.length || !el.getClientRects().length) return;
-      const tx = (el.textContent || '').trim(); if (!tx || tx.length > 18 || !/\d/.test(tx) || !MONEY.test(tx)) return;
-      if (el.dataset.fitTx !== tx) { el.style.removeProperty('font-size'); el.dataset.fitTx = tx; }
-      else if (el.dataset.fitShrunk) el.style.removeProperty('font-size');   // measured at its own size each time (20 Oct.: shrunk from an already smaller size, while a tile was still narrow, amounts ended at 8 px and never grew back)
-      const box = el.clientWidth ? el : el.parentElement; if (!box) return;
-      const over = el.scrollWidth - el.clientWidth > 1 || (box !== el && el.scrollWidth - box.clientWidth > 1);
-      if (!over) { delete el.dataset.fitShrunk; return; }
-      const room = Math.max(1, (box === el ? el.clientWidth : box.clientWidth));
-      // 11 · a key figure tile (Net P&L, balances…): rounded, then abbreviated, before the font gets smaller; the exact amount stays in its label
-      if (!el.dataset.fitFull && el.closest('.nav-kpi-g, .d-perf')) {
-        const c = centsOf(tx);
-        if (c != null) {
-          el.dataset.fitFull = tx; el.title = tx; el.setAttribute('aria-label', tx);
-          for (const v of shorter(c, tx)) { el.textContent = v; if (el.scrollWidth <= room + 1) break; }
-          el.dataset.fitTx = el.textContent.trim();
-          if (el.scrollWidth <= room + 1) return;
-        }
+  /** whether a figure is one to fit (no layout read) */
+  function isFig(el) {
+    if (el.children.length) return false;
+    const tx = (el.textContent || '').trim();
+    return !!tx && tx.length <= 18 && /\d/.test(tx) && MONEY.test(tx);
+  }
+  /** writes only: a new text, or a figure shrunk before, is measured again at its own size (20 Oct.: shrunk from an already
+      smaller size, while a tile was still narrow, amounts ended at 8 px and never grew back) */
+  function reset(el) {
+    const tx = el.textContent.trim();
+    if (el.dataset.fitTx !== tx) { if (el.style.fontSize) el.style.removeProperty('font-size'); el.dataset.fitTx = tx; }
+    else if (el.dataset.fitShrunk) el.style.removeProperty('font-size');
+  }
+  /** reads only: false when the figure fits, else what is needed to shrink it */
+  function measure(el) {
+    const box = el.clientWidth ? el : el.parentElement; if (!box) return null;
+    const over = el.scrollWidth - el.clientWidth > 1 || (box !== el && el.scrollWidth - box.clientWidth > 1);
+    if (!over) return false;
+    return { room: Math.max(1, (box === el ? el.clientWidth : box.clientWidth)), sw: el.scrollWidth, fs: parseFloat(getComputedStyle(el).fontSize) || 16 };
+  }
+  /** writes: a key figure tile (Net P&L, balances…) is rounded, then abbreviated, before the font gets smaller (the exact
+      amount stays in its label; each try is measured, a handful of tiles); any other figure gets a smaller font */
+  function shrink(el, m) {
+    const tx = el.textContent.trim();
+    if (!el.dataset.fitFull && el.closest('.nav-kpi-g, .d-perf')) {
+      const c = centsOf(tx);
+      if (c != null) {
+        el.dataset.fitFull = tx; el.title = tx; el.setAttribute('aria-label', tx);
+        for (const v of shorter(c, tx)) { el.textContent = v; if (el.scrollWidth <= m.room + 1) break; }
+        el.dataset.fitTx = el.textContent.trim();
+        if (el.scrollWidth <= m.room + 1) return;
+        m.sw = el.scrollWidth;
       }
-      const fs = parseFloat(getComputedStyle(el).fontSize) || 16;
-      el.style.setProperty('font-size', Math.max(fs * 0.55, Math.floor(fs * room / el.scrollWidth * 10) / 10) + 'px', 'important'); el.dataset.fitShrunk = '1';   // « important »: the page's own sizes are !important too
-      el.style.setProperty('text-overflow', 'clip'); el.style.setProperty('overflow', 'visible');
+    }
+    el.style.setProperty('font-size', Math.max(m.fs * 0.55, Math.floor(m.fs * m.room / m.sw * 10) / 10) + 'px', 'important'); el.dataset.fitShrunk = '1';   // « important »: the page's own sizes are !important too
+    el.style.setProperty('text-overflow', 'clip'); el.style.setProperty('overflow', 'visible');
+  }
+  /** the figure's text and the width it has: when both are the same as at its last fit, there is nothing to do */
+  const keyOf = (el) => el.textContent.trim() + '|' + (el.clientWidth || (el.parentElement ? el.parentElement.clientWidth : 0));
+  /** figures, never cut by « … »: all the reads, then all the writes, then the reads, then the writes (20 Oct.: one figure at a time, a
+      write then a read, made the browser lay the page out again for every figure — 600 ms when Today opened on a phone) */
+  function fitAll(list) {
+    list = list.filter((el) => isFig(el) && el.getClientRects().length);   // a hidden figure keeps its size until it is shown
+    const keys = list.map(keyOf);
+    const todo = [], w = [];
+    list.forEach((el, i) => { if (el.__fitKey !== keys[i]) { todo.push(el); w.push(keys[i].slice(keys[i].lastIndexOf('|'))); } });   // (a count-up elsewhere in the page redrew every figure at each frame)
+    todo.forEach(reset);
+    const ms = todo.map(measure);
+    todo.forEach((el, i) => {
+      if (ms[i] === false) delete el.dataset.fitShrunk; else if (ms[i]) shrink(el, ms[i]);
+      el.__fitKey = el.textContent.trim() + w[i];   // (its width is not read again: one more layout of the page)
+    });
   }
   function fit() {
     q = 0;
     const main = document.getElementById('main'); if (!main) return;
-    main.querySelectorAll('.neg, .pos, .big, .nav-acc-bal, .v, .num, b, strong').forEach(fitOne);
+    fitAll([...main.querySelectorAll('.neg, .pos, .big, .nav-acc-bal, .v, .num, b, strong')]);
   }
   // the key figure tiles (a handful of elements) are fitted right after each redraw, before the browser paints:
-  // a page redrawn by a sync never shows its P&L cut for a frame (the rest of the page keeps the per-frame pass)
-  { const m0 = document.getElementById('main');
-    if (m0) new MutationObserver(() => { const k = m0.querySelectorAll('.nav-kpi-g b, .d-perf b'); if (k.length) k.forEach(fitOne); }).observe(m0, { childList: true, subtree: true }); }
+  // a page redrawn by a sync never shows its P&L cut for a frame (the rest of the page keeps the per-frame pass).
+  // Only when a change touches the tiles (20 Oct.: every change in the page measured them again, 70 times while Today opened)
+  { const m0 = document.getElementById('main'), K = '.nav-kpi-g, .d-perf';
+    const touches = (rs) => rs.some((r) => (r.target.closest && r.target.closest(K)) || [...r.addedNodes].some((n) => n.nodeType === 1 && (n.matches(K) || n.querySelector(K))));
+    if (m0) new MutationObserver((rs) => { if (!touches(rs)) return; const k = m0.querySelectorAll('.nav-kpi-g b, .d-perf b'); if (k.length) fitAll([...k]); }).observe(m0, { childList: true, subtree: true }); }
   const soon = () => { if (!q) q = requestAnimationFrame(fit); };
   if (window.SweepMO) new window.SweepMO(soon).observe(document.getElementById('main') || document.body, { childList: true, subtree: true });
   else new MutationObserver(soon).observe(document.body, { childList: true, subtree: true });
