@@ -5615,7 +5615,9 @@ new window.SweepMO(() => {
 /* B10: key figures (P&L, balances, KPIs) are never cut by « … »: a figure that does not fit gets a smaller font instead */
 (function () {
   'use strict';
-  const MONEY = /^[−+\-]?\$?[\d,.\s]+(\s?\$|k|%)?$|^[−+\-]?\$[\d,.]+k?$/;
+  // the shortened forms too: « −4,8 k $ », « 1,23 M $ », « $4.8k », « $1.23M » (21 Oct.: in French and Spanish a figure shortened once was no
+  // longer taken for a figure, so never fitted again — it stayed cut when its tile got narrower or its font loaded late)
+  const MONEY = /^[−+\-]?\$?[\d,.\s]+(\s?[kM])?(\s?\$|%)?$|^[−+\-]?\$[\d,.]+[kM]?$/;
   let q = 0;
   const LG = (typeof LANG !== 'undefined' && LANG) || 'en';
   /** the amount (cents) of a dollar figure as the app writes it in the trader's language; null for anything else */

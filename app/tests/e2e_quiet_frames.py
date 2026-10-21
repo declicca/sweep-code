@@ -5,6 +5,7 @@ Sweep — opening a page does not keep the page busy (20 Oct., speed): phone 390
     (each replacement woke all the page's observers: a second of work on a phone); each count-up changes once, at its end
  2  the count-ups end on their value (whole numbers: exactly the number they count to)
  3  the key figure tiles are not cut once drawn (the amounts' fitting still runs)
+ 4  a shortened French figure (« −4,8 k $ ») is still fitted when its tile gets narrower (it was not taken for a figure: cut on the CI)
 """
 import sys
 from playwright.sync_api import sync_playwright
@@ -38,6 +39,14 @@ with sync_playwright() as p:
         if not cut: break
         pg.wait_for_timeout(250)
       ok(not cut, f'3 {w} {r}: no key figure cut ({cut[:3]})')
+    # 4 (21 Oct., the CI): a shortened French figure (« −4,8 k $ ») is still a figure: its tile made narrower (75 % of it: within
+    # what the fitting may shrink, 55 %), it is fitted again
+    pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(2500)
+    fig = pg.evaluate("""() => { const b = [...document.querySelectorAll('#main .nav-kpi-g b, #main .d-perf b')].find((e) => e.getClientRects().length && !e.children.length && /\\d/.test(e.textContent)); if (!b) return null;
+      b.textContent = '\u22124,8\u202fk\u00a0$'; const px = Math.floor(b.scrollWidth * 0.75) + 'px'; b.parentElement.style.setProperty('width', px, 'important'); b.parentElement.style.setProperty('max-width', px, 'important'); dispatchEvent(new Event('resize')); return true }""")
+    pg.wait_for_timeout(1200)
+    cut4 = pg.evaluate(CUT) if fig else ['no figure']
+    ok(fig and not cut4, f'4 {w}: a shortened figure « −4,8 k $ » in a narrower tile is fitted again ({cut4[:3]})')
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
   br.close()
