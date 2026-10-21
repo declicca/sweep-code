@@ -2853,3 +2853,7 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:flex-end!important}
 @media (min-width:861px){ html body .top:has(> #title){min-height:96px} html body .main-wrap .top:has(> #title) > :not(#title){align-self:flex-end!important} }   /* the buttons on the title's line */
 }
+
+/* the week's intention in the routine card (SWEEP.md step 1, D5) */
+.nav-rt-int{margin:10px 0 0;font-size:13px;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
+.nav-rt-int b{color:var(--text);font-weight:600}

@@ -65,8 +65,13 @@ final class GameGameplan
                 foreach (GameEngine::docs($uid, 'trades') as $t) { $d = GameEngine::tradeDay($t); if ($d !== null && $d >= $date && GameEngine::hasStop($t) && ($t['target'] ?? '') !== '' && $t['target'] !== null) return true; }
                 return false;
             case 'journal': return (bool) self::q('SELECT review_done FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $date])->fetchColumn();
-            case 'zero':    // the day reviewed and kept to its rules (the game's guardrail of that day)
-                return self::met($uid, 'journal', $date) && (bool) self::q('SELECT 1 FROM xp_events WHERE user_id = ? AND event_key = ?', [$uid, 'guardrail:' . $date])->fetchColumn();
+            case 'zero':    // « zero slips »: a plan for the day (not a day off), the day reviewed, every trade in the plan (the
+                            // server's own rules, game_days.detail_json; no trade at all keeps to the plan too). Before 21 Oct.
+                            // it needed the guardrail XP, paid only when the max loss was hit: a clean day never ticked it.
+                $g = self::q('SELECT plan_valid, plan_bias, review_done, detail_json FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $date])->fetch(PDO::FETCH_ASSOC);
+                if (!$g || !(int) $g['plan_valid'] || !(int) $g['review_done'] || $g['plan_bias'] === 'no_trade') return false;
+                foreach ((array) ((json_decode((string) $g['detail_json'], true) ?: [])['trades'] ?? []) as $t) if (empty($t['ok'])) return false;
+                return true;
             case 'weekly':
                 try { return (bool) self::q('SELECT 1 FROM weekly_reviews WHERE user_id = ? AND week_start = ?', [$uid, GameEngine::monday($date)])->fetchColumn(); }
                 catch (Throwable $e) { return false; }

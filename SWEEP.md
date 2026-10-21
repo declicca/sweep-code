@@ -2,7 +2,7 @@
 
 Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajustements : mesure d'abord, nouvel ordre des étapes, comptes existants gardés, missions cochées par un comportement. Version analysée : `origin/main` au commit `590bd3f`.
 
-**Avancement** : étape 0 faite en local (commit `600f135` sur la branche `parcours-0-mesure`, pas déployée) ; étapes 1 à 6 à faire (section 7).
+**Avancement** : étape 0 faite (branche `parcours-0-mesure`, pas encore poussée ni déployée) ; étape 1 faite en local (branche `parcours-1-defauts`) ; étape 2 en cours ; étapes 3 à 6 à faire (section 7). **L'étape 2 ne sera pas déployée avant une semaine de mesures de l'étape 0 en ligne** (décision de Mateo, 21 oct.).
 
 **Statut** : c'est la référence de tous les développements à venir sur l'app. En cas de désaccord avec un brief plus ancien, ce fichier gagne sur le **parcours** (ce qui est visible, où, quand). `app/CONTEXTE-APP.md` reste la référence des **règles** : calculs, argent, prop firms, tests, design.
 
@@ -254,16 +254,16 @@ Légende de la colonne **Cible** :
 | # | Défaut | Cause (code) | Certitude |
 |---|---|---|---|
 | ~~D1~~ | ~~Carte du parcours de 90 jours cachée sur téléphone~~ — **faux, vérifié à l'écran le 21 oct.** (étape 0) : à 390 px, la carte est visible en tête d'Aujourd'hui (`nav.js` la sort de `.d-today`) | — | Retiré |
-| D2 | **Missions « Zéro écart » (23–25, 46, 74, 81, 88) jamais cochées sur une journée propre** | `game/gameplan.php:69` exige l'XP `guardrail:` du jour, donnée seulement quand la perte max est atteinte et respectée (`game.php:455`, 509) | Vérifié dans le code |
-| D3 | Les portes de fin de mois se passent sans cocher leurs critères | `gameplan.js:227` | Rapport d'inventaire |
-| D4 | Une fonction débloquée n'ouvre jamais sa fiche d'explication (toujours un toast de 3 s) | `game.js:1802` attrape `unlock` avant la branche de la ligne 1806 | Rapport d'inventaire |
-| D5 | L'intention de la semaine n'est jamais affichée | dessinée dans `.g-today`, caché (`game.js:378`, `nav.css:1043`) | Rapport d'inventaire |
+| D2 | **Corrigé (étape 1, 21 oct.)** — missions « Zéro écart » (23–25, 46, 74, 81, 88) jamais cochées sur une journée propre | `game/gameplan.php` exigeait l'XP `guardrail:` (perte max atteinte puis respectée) ; maintenant : plan valide (pas un jour de repos), revue faite, chaque trade dans le plan | Vérifié (test) |
+| D3 | **Corrigé (étape 1)** — une porte de fin de mois se passait sans cocher ses critères | « Passer au mois N » grisé tant que chaque critère n'est pas coché ; « Refaire les semaines 3 et 4 » toujours possible (`gameplan.js`) | Vérifié (test) |
+| ~~D4~~ | ~~Un déblocage n'ouvre jamais sa fiche~~ — **pas un défaut** : le toast est voulu (une seule fenêtre par séance, `isMajor`), la branche de la fiche est restée morte ; l'ouvrir ajouterait une interruption. Les déblocages deviennent des missions à l'étape 5 | — | Retiré |
+| D5 | **Corrigé (étape 1)** — l'intention de la semaine n'était jamais affichée | Une ligne « Ton intention cette semaine · … » dans la carte de la routine, toute la semaine (sauf quand le bilan est prêt) | Vérifié (test, captures) |
 | D6 | La phrase du coach dans la feuille du plan n'apparaît jamais | `coach.js:750` s'arrête si `g-pm` ; le plan est toujours le questionnaire (`game.js:466`) | Rapport d'inventaire |
-| D7 | Deux scores de « discipline » différents sous le même mot | `discScore` (nav.js:4777) contre `tDisc` | Rapport d'inventaire |
-| D8 | `stage()` compte les trades d'exemple | `nav.js:539` (`S.trades.length`) | Rapport d'inventaire |
-| D9 | « Bonjour / Bonsoir » à l'heure de l'appareil, date à l'heure de New York | `nav.js:553` | Rapport d'inventaire |
-| D10 | Badges : la branche « Réglages » de `paintSections` ne s'exécute jamais | `game.js:1991` | Rapport d'inventaire |
-| D11 | Code mort : `sessionDay()` (règle de 16 h, jamais appelée), `headDay()`, `#moreSheet`, `vPayouts` du cœur, `ux.js` §5, onglet `insights` | `nav.js:741`, `nav.js:613`, `app.js:9948`, `app.js:1820`, `app.js:1546` | Rapport d'inventaire |
+| D7 | Deux calculs sous le même mot « discipline » | **D7a corrigé (étape 1)** : sur la page d'un trade, la tuile s'appelle « Checklist » et sa fenêtre explique ce chiffre-là (avant : le texte du score sur 30 jours). **D7b → étape 6** : les autres libellés « Discipline » qui montrent la moyenne de checklist (chiffres du jour, Journal, cartes de partage jour / semaine / trade, tableaux de Stats : `stats().disc`, `dayMap`) | D7a vérifié |
+| ~~D8~~ | ~~`stage()` compte les trades d'exemple~~ — **pas un défaut** : voulu, « Explorer avec des données d'exemple » montre Aujourd'hui complet | — | Retiré |
+| ~~D9~~ | ~~« Bonjour / Bonsoir » à l'heure de l'appareil~~ — **pas un défaut** : saluer à l'heure du trader est juste (Paris à 15 h : « Bon après-midi ») ; la date suit la séance de New York, voulu | — | Retiré |
+| D10 | Badges : la branche « Réglages » de `paintSections` ne s'exécute jamais | `game.js:1991` | Laissé : « Ma progression » (étape 6) range les badges |
+| D11 | Code mort | **Retiré (étape 1)** : `sessionDay()` (règle de 16 h, jamais appelée). **Gardés** : `headDay()` (invisible, mais une règle CSS `:has(.nav-hday)` en tire la marge du titre sur téléphone), `#moreSheet` (appels déjà protégés), `vPayouts` du cœur et `ux.js` §5 (enveloppés par `ux.js`), le lien `insights` (Aujourd'hui est redessiné par `nav.js`) : risque sans gain pour le parcours | — |
 
 ---
 
@@ -431,26 +431,21 @@ Avant de coder, chaque demande répond à ces questions, dans le brief ou le com
 
 **Reste à faire, hors de cette conversation** : pousser `600f135` et déployer avec l'accord de Mateo, puis relever dans Admin › Métriques le temps de M1 (« Le démarrage »), les journées fermées et les bilans ouverts. Les noter dans `MESURE-0.md` avec la date. Sans ce relevé, les étapes suivantes se comparent seulement aux chiffres locaux.
 
-### Étape 1 — Les défauts qui cassent le parcours
+### Étape 1 — Les défauts qui cassent le parcours · **faite en local (21 oct.)**, déployable dès l'accord
 
-**But** : rien de ce que le trader voit ou fait déjà ne doit mentir.
+**Fait** (branche locale `parcours-1-defauts`, partie de l'étape 0) : D2, D3, D5, D7a et D11 en partie (`sessionDay()` retiré). Le détail est dans la section 3.
 
-**Le travail** : chaque défaut est d'abord reproduit à l'écran, ou par un test qui échoue sur le code actuel. Un défaut qui ne se reproduit pas est barré ici, comme D1.
+**Barrés après vérification** : D1, D4, D8 et D9 (pas des défauts). D7b passe à l'étape 6 et D10 à « Ma progression » (étape 6).
 
-| # | Correction |
-|---|---|
-| D2 | « Zéro écart » : la journée revue, avec des trades, et aucun code d'erreur du coach ce jour-là (perte max, nombre max, biais, setup, stop, pause après une perte), au lieu de l'XP `guardrail:` (`game/gameplan.php:69`). Les missions déjà cochées restent cochées. |
-| D3 | Porte de fin de mois : « Passer au mois N » reste gris tant que les critères ne sont pas cochés, mesurés quand Sweep le peut ; « Refaire les semaines 3 et 4 » reste toujours possible (`gameplan.js:227`). |
-| D4 | Déblocage : la fiche d'explication s'ouvre au lieu du toast de 3 s (`game.js:1802` → branche de la ligne 1806), une fois par séance comme les autres célébrations. |
-| D5 | L'intention de la semaine : affichée en une ligne dans la carte de la routine le week-end et le lundi (son texte vient du bilan, `game.js:378`). |
-| D7 | Discipline : la formule du coach (`discScore`) partout où le mot « discipline » est affiché. Concerne la page du trade, le Journal semaine et les cartes de partage d'un payout. `tDisc` reste le compte de la checklist, sous un autre libellé. |
-| D8 | `stage()` ne compte plus les trades d'exemple (`nav.js:539`). |
-| D9 | Le « Bonjour / Bon après-midi / Bonsoir » suit l'heure de New York (`nav.js:553`). |
-| D11 | Code mort retiré : `sessionDay()`, `headDay()`, `#moreSheet`, `vPayouts` du cœur, `ux.js` §5 (sauf « Marquer payé », encore utilisé), onglet `insights`. Vérifié par la suite complète. |
+**Tests** :
+- `gameplan_test.php` (2c : « Zéro écart », il échoue sur l'ancien code) ;
+- `e2e_gameplan` (la porte) ;
+- `e2e_parcours_defauts` (nouveau : D5 et D7a, à 390 FR et 1300 EN) ;
+- la suite complète.
 
-**Tests** : un test par défaut, qui échoue sur l'ancien code. Les tests existants touchés : `e2e_gameplan`, `e2e_disc_target`, `e2e_weekly_content`, `e2e_first_run`.
+**Outil** : `tools/par.py` accepte `SWEEP_PAR_SLOT=b`. La suite tourne alors sur ses propres copies et ports (`/tmp/gb_*`, ports 9195, 9295…), sans gêner celle d'une autre conversation sur le même Mac (deux collisions le 21 oct.).
 
-**Fini quand** : les 7 défauts sont corrigés, ou barrés s'ils ne se reproduisent pas, et le parcours M1 de l'étape 0 donne les mêmes chiffres (rien n'a bougé ailleurs).
+**M1 inchangé** (rien de ce lot ne touche à l'arrivée) : 11 touchers jusqu'au risque permis, 16 jusqu'au premier trade.
 
 ### Étape 2 — La saisie sans capture et le plan express par défaut
 
@@ -574,6 +569,8 @@ Un bouton « Fermer ma journée » enregistre les mêmes champs (`post.*`) et do
 **Bilan du vendredi** : l'écran 2 reprend les questions de « Ta revue de la semaine » du Journal. Le Journal semaine garde ses chiffres et un lien vers le bilan. Un seul nom partout : « Bilan de la semaine ». La règle de la semaine pré-remplit sa question.
 
 **Avatar** : l'entrée « Abonnement » en double est retirée.
+
+**Discipline (D7b)** : les libellés « Discipline » qui montrent la moyenne de checklist (chiffres du jour, Journal, cartes de partage jour / semaine / trade, tableaux de Stats) deviennent « Checklist ». Le score du coach garde seul le mot « Discipline ». Les textes sont à traduire en FR / ES, dans des dictionnaires du code : les fichiers de traduction ne se recompilent pas.
 
 **Guide** : les articles périmés sont mis à jour (« Bien démarrer », « XP »), avec les mots de la section 6.
 

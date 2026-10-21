@@ -66,6 +66,19 @@ $ok((($st['29'] ?? [])['by'] ?? '') === 'sweep', '2b the day reviewed in the jou
 $ok(!isset($st['28']) && !isset($st['26']), '2b « 3 + 3 » (28) is the trader\'s to tick; the weekly recap (26) not done yet');
 GameV2b::schema(); $pdo->prepare('INSERT INTO weekly_reviews (user_id, week_start, data_json, completed_at) VALUES (?, ?, ?, ?)')->execute([$W, '2026-11-16', '{}', time()]);
 $ok(((((array) GameGameplan::state($W)['done'])['26'] ?? [])['by'] ?? '') === 'sweep', '2b the weekly recap of that week: Sweep ticks mission 26');
+// 2c. « Zero slips » (23, 24, 25): a plan, the day reviewed, every trade in the plan; no trade keeps to it too; a day off
+// does not count (SWEEP.md step 1, D2: before, it needed the guardrail XP, paid only when the max loss was hit)
+$Y = 'g5'; GameEngine::profile($Y); $at('2026-10-26 09:00'); GameGameplan::start($Y, []);
+$gday = fn(string $d, string $bias, array $trades) => $pdo->prepare('INSERT OR REPLACE INTO game_days (user_id, trading_day, plan_valid, plan_bias, review_done, trades_count, detail_json, updated_at) VALUES (?, ?, 1, ?, 1, ?, ?, ?)')
+    ->execute([$Y, $d, $bias, count($trades), json_encode(['trades' => array_map(fn($ok) => ['id' => 'x', 'ok' => $ok, 'v' => $ok ? [] : ['against_bias']], $trades)]), time()]);
+$gday('2026-11-17', 'bullish', [true, true]);    // day 23: two trades in the plan, reviewed, the max loss never hit
+$gday('2026-11-18', 'bullish', [true, false]);   // day 24: one trade against the bias
+$gday('2026-11-19', 'no_trade', []);             // day 25: a day off
+$at('2026-11-19 15:00'); $st = (array) GameGameplan::state($Y)['done'];
+$ok((($st['23'] ?? [])['by'] ?? '') === 'sweep', '2c a clean day (2 trades in the plan, reviewed): Sweep ticks « Zero slips » (23) without the max loss being hit');
+$ok(!isset($st['24']) && !isset($st['25']), '2c a trade against the bias (24), a day off (25): not ticked');
+$gday('2026-11-18', 'neutral', []);              // day 24 again: a plan, no trade, reviewed
+$ok(((((array) GameGameplan::state($Y)['done'])['24'] ?? [])['by'] ?? '') === 'sweep', '2c a plan kept without trading, reviewed: ticked');
 
 // 3. the gate of month 1
 $at('2026-11-30 09:00');   // day 36

@@ -30,8 +30,12 @@ for t in order:   # longest first, to the least loaded shard
     i = load.index(min(load)); shares[i].append(t); load[i] += known.get(t, 60)
 shares, load = shares[(PART - 1) * N:PART * N], load[(PART - 1) * N:PART * N]   # this machine's
 
+# SWEEP_PAR_SLOT=b (21 Oct.): a second suite on the same Mac at the same time (another conversation) gets its own copies,
+# ports and sessions — /tmp/gb_1…, 9195, 9295…, /tmp/show_state_b_1.json… — every shard rewritten; without it, as before
+SLOT = re.sub(r'[^a-z0-9]', '', os.environ.get('SWEEP_PAR_SLOT', '').lower())
 def shard(i):
     k = i + 1
+    if SLOT: return '/tmp/g%s_%d' % (SLOT, k), 9000 + k * 100 + 95, '/tmp/show_state_%s_%d.json' % (SLOT, k)
     dest = '/tmp/g' if k == 1 else '/tmp/g_%d' % k
     port = 8095 if k == 1 else 8000 + k * 100 + 95
     state = '/tmp/show_state.json' if k == 1 else '/tmp/show_state_%d.json' % k
@@ -50,7 +54,7 @@ def prepare(i):
     assert a in run_all, 'run-all.sh changed: update tools/par.py'
     run_all = run_all.replace(a, 'st=$(date +%s); ' + a + '; echo "$t $(( $(date +%s) - st ))" >> "$log.times"')
     open(os.path.join(tests, 'run-all.sh'), 'w').write(run_all)
-    if i > 0:
+    if i > 0 or SLOT:
         for f in os.listdir(tests):
             if not f.endswith('.py'): continue
             p = os.path.join(tests, f); s = open(p, encoding='utf-8').read()
@@ -83,7 +87,7 @@ def main():
         env = dict(ENV, SWEEP_PRESETS_MOCK=dest + '/tests/presets_mock.json', SWEEP_TEST_DB=dest + '/data/journal.db',
                    SWEEP_AI_CONFIG=TOOLS + '/ai-config.local.php', SWEEP_AI_MOCK=dest + '/tests/samples/shot-ai-mock.json', SWEEP_AI_CHAT_MOCK=dest + '/tests/samples/chat-ai-mock.json', SWEEP_AI_OFFLINE='1',
                    SWEEP_PUSH_CONFIG=TOOLS + '/push-config.local.php', SWEEP_PUSH_MOCK=dest + '/data/push-sent.jsonl',
-                   TMPDIR='/tmp/sweep-par-%d' % (i + 1), PHP_CLI_SERVER_WORKERS='4')   # php -S answers one request at a time otherwise
+                   TMPDIR='/tmp/sweep-par-%s%d' % (SLOT + '-' if SLOT else '', i + 1), PHP_CLI_SERVER_WORKERS='4')   # php -S answers one request at a time otherwise
         os.makedirs(env['TMPDIR'], exist_ok=True); [shutil.rmtree(q) if os.path.isdir(q) and not os.path.islink(q) else os.remove(q) for q in (os.path.join(env['TMPDIR'], f) for f in os.listdir(env['TMPDIR']))]   # (a test may leave a folder there: e2e_loops)
         for q in range(port, port + 4): free(q)   # a server left over by an earlier run would answer instead (without this run's settings): the shard's port and the 3 next ones, which tests start their own copies on (e2e_routine_parity, e2e_billing +1, e2e_loops +2 and +3)
         srv = subprocess.Popen(['php', '-S', '127.0.0.1:%d' % port, 'router.php'], cwd=dest, env=env, stdout=subprocess.DEVNULL, stderr=open(env['TMPDIR'] + '/php.log', 'w'), start_new_session=True)

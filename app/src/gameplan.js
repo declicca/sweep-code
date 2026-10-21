@@ -18,7 +18,7 @@
       learn: 'To learn today', done_when: 'Done when', tick: 'Done · +{n} XP', ticked: 'Done ✓', ticked_on: 'Done on {d}', auto: 'Sweep ticks it on its own once it’s done.', auto_by: 'Ticked by Sweep',
       opens: 'Opens on {d}', after_gate: 'Opens once the Month {m} gate is passed.', min: '{n} min', xp: '+{n} XP',
       map: 'Your 90-day gameplan', map_s: 'Day {d} · {n} missions done · {x} XP', how: 'How it works', week: 'Week {n}',
-      gate: 'The Month {m} gate', gate_s: 'Check each criterion honestly. Then decide.', gate_pass: 'On to Month {n}', gate_end: 'Finish the gameplan', gate_again: 'Weeks 3 and 4 again',
+      gate: 'The Month {m} gate', gate_s: 'Check each criterion honestly. Then decide.', gate_need: 'Tick every criterion to move on, or do Weeks 3 and 4 again.', gate_pass: 'On to Month {n}', gate_end: 'Finish the gameplan', gate_again: 'Weeks 3 and 4 again',
       gate_again_s: 'They start again today. Nothing is lost.', gate_passed: 'Month {m} passed · +{x} XP', gate_done: 'Gate passed ✓', all_done: 'Gameplan complete. Keep the routine from day 91.',
       err: 'That didn’t go through. Try again.', locked_t: 'Included with Pro', locked_s: 'The full 90-day gameplan: a mission a day, the notion it needs, Sweep ticking what it can.', upgrade: 'See Pro',
       blocks: { RULES_1_8: 'Your rules', TRACKS: 'Your track', VOCAB: 'The words of your firm', M1_JOURNAL: 'What you journal', SETUP: 'The Sweep Setup', SPECS: 'Your contract', ROUTINE: 'Your session routine',
@@ -30,7 +30,7 @@
       learn: 'À apprendre aujourd’hui', done_when: 'C’est fait quand', tick: 'C’est fait · +{n} XP', ticked: 'Fait ✓', ticked_on: 'Fait le {d}', auto: 'Sweep la coche tout seul dès que c’est fait.', auto_by: 'Cochée par Sweep',
       opens: 'S’ouvre le {d}', after_gate: 'S’ouvre une fois la porte du mois {m} franchie.', min: '{n} min', xp: '+{n} XP',
       map: 'Ton parcours de 90 jours', map_s: 'Jour {d} · {n} missions faites · {x} XP', how: 'Comment ça marche', week: 'Semaine {n}',
-      gate: 'La porte du mois {m}', gate_s: 'Vérifie chaque critère honnêtement. Puis décide.', gate_pass: 'Passer au mois {n}', gate_end: 'Terminer le parcours', gate_again: 'Refaire les semaines 3 et 4',
+      gate: 'La porte du mois {m}', gate_s: 'Vérifie chaque critère honnêtement. Puis décide.', gate_need: 'Coche chaque critère pour passer, ou refais les semaines 3 et 4.', gate_pass: 'Passer au mois {n}', gate_end: 'Terminer le parcours', gate_again: 'Refaire les semaines 3 et 4',
       gate_again_s: 'Elles recommencent aujourd’hui. Rien n’est perdu.', gate_passed: 'Mois {m} réussi · +{x} XP', gate_done: 'Porte franchie ✓', all_done: 'Parcours terminé. Garde la routine à partir du jour 91.',
       err: 'Ça n’a pas passé. Réessaie.', locked_t: 'Inclus avec Pro', locked_s: 'Le parcours complet de 90 jours : une mission par jour, la notion qu’elle demande, Sweep qui coche ce qu’il peut.', upgrade: 'Voir Pro',
       blocks: { RULES_1_8: 'Tes règles', TRACKS: 'Ton parcours', VOCAB: 'Les mots de ta firme', M1_JOURNAL: 'Ce que tu notes au journal', SETUP: 'Le Sweep Setup', SPECS: 'Ton contrat', ROUTINE: 'Ta routine de séance',
@@ -42,7 +42,7 @@
       learn: 'Para aprender hoy', done_when: 'Hecho cuando', tick: 'Hecho · +{n} XP', ticked: 'Hecho ✓', ticked_on: 'Hecho el {d}', auto: 'Sweep la marca solo en cuanto está hecha.', auto_by: 'Marcada por Sweep',
       opens: 'Se abre el {d}', after_gate: 'Se abre al superar la puerta del mes {m}.', min: '{n} min', xp: '+{n} XP',
       map: 'Tu recorrido de 90 días', map_s: 'Día {d} · {n} misiones hechas · {x} XP', how: 'Cómo funciona', week: 'Semana {n}',
-      gate: 'La puerta del mes {m}', gate_s: 'Revisa cada criterio con honestidad. Luego decide.', gate_pass: 'Pasar al mes {n}', gate_end: 'Terminar el recorrido', gate_again: 'Repetir las semanas 3 y 4',
+      gate: 'La puerta del mes {m}', gate_s: 'Revisa cada criterio con honestidad. Luego decide.', gate_need: 'Marca cada criterio para avanzar, o repite las semanas 3 y 4.', gate_pass: 'Pasar al mes {n}', gate_end: 'Terminar el recorrido', gate_again: 'Repetir las semanas 3 y 4',
       gate_again_s: 'Vuelven a empezar hoy. No se pierde nada.', gate_passed: 'Mes {m} superado · +{x} XP', gate_done: 'Puerta superada ✓', all_done: 'Recorrido terminado. Mantén la rutina desde el día 91.',
       err: 'No se pudo guardar. Inténtalo de nuevo.', locked_t: 'Incluido con Pro', locked_s: 'El recorrido completo de 90 días: una misión al día, la noción que necesita, Sweep marcando lo que puede.', upgrade: 'Ver Pro',
       blocks: { RULES_1_8: 'Tus reglas', TRACKS: 'Tu recorrido', VOCAB: 'Las palabras de tu firma', M1_JOURNAL: 'Lo que anotas en el diario', SETUP: 'El Sweep Setup', SPECS: 'Tu contrato', ROUTINE: 'Tu rutina de sesión',
@@ -230,7 +230,7 @@
     const list = `<ul class="gp-gl">${crit.map((c, i) => `<li><label><input type="checkbox" data-gp-c="${i}"${passed ? ' checked disabled' : ''}><span>${tx(c)}</span></label></li>`).join('')}</ul>`;
     const acts = passed ? `<button type="button" class="btn g-big gp-act is-done" disabled>${esc(u('gate_done'))}</button>`
       : !open ? `<p class="gp-wait">${esc(u('opens', { d: fd(dateOf(g), { weekday: 'long', day: 'numeric', month: 'long' }) }))}</p>`
-      : `<button type="button" class="btn primary g-big gp-act" data-gp="gate" data-m="${mo}" data-c="pass">${esc(mo < 3 ? u('gate_pass', { n: mo + 1 }) : u('gate_end'))}</button>
+      : `<button type="button" class="btn primary g-big gp-act" data-gp="gate" data-m="${mo}" data-c="pass"${crit.length ? ' disabled' : ''}>${esc(mo < 3 ? u('gate_pass', { n: mo + 1 }) : u('gate_end'))}</button>${crit.length ? `<p class="gp-sub gp-need">${esc(u('gate_need'))}</p>` : ''}
          <button type="button" class="btn g-big gp-again" data-gp="gate" data-m="${mo}" data-c="repeat">${esc(u('gate_again'))}</button><p class="gp-sub">${esc(u('gate_again_s'))}</p>`;
     ui().sheet(`${ui().head(esc(u('gate', { m: mo })), esc(tx(GP.months[mo - 1].name)))}<div class="gp-m" data-noi18n><p class="gp-desc">${esc(u('gate_s'))}</p>${list}${acts}</div>`, { cls: 'g-gp g-gp-gate' });
   }
@@ -273,6 +273,13 @@
     const g = ui(); g.close();
     if (c === 'pass') { try { g.buzz(20); g.chime(); } catch (e) { /* quiet */ } g.xp(150, u('gate_passed', { m: mo, x: 150 })); }
   }
+  // a gate passes only with every criterion ticked (SWEEP.md step 1, D3: « On to Month N » worked with none); « again » stays open
+  document.addEventListener('change', (e) => {
+    const c = e.target.closest && e.target.closest('[data-gp-c]'); if (!c) return;
+    const m = c.closest('.gp-m'), all = m.querySelectorAll('[data-gp-c]'), on = m.querySelectorAll('[data-gp-c]:checked'), go = m.querySelector('[data-gp="gate"][data-c="pass"]'), need = m.querySelector('.gp-need');
+    if (go) go.disabled = on.length < all.length;
+    if (need) need.hidden = on.length === all.length;
+  });
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('[data-gp]'); if (!b || !ST) return;
     const a = b.dataset.gp;

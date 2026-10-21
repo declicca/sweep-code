@@ -7,7 +7,7 @@ Sweep — the 90-day gameplan (brief « Parcours de 90 jours », 20 Oct.), phone
  2  Today: the gameplan's card (before the Monday: when it starts); on day 9: today's mission, the late ones, the progress
  3  a mission: the notion of the day, « Test yourself » answered at once (right in blue, wrong in gold, why), « Done when »;
     ticked → its XP, the card moves; the map: 3 months, days done / today / late / to come, nothing wider than the screen
- 4  day 31: nothing of Month 2 before the gate; the gate's criteria, « On to Month 2 » → Month 2 open, 150 XP
+ 4  day 31: nothing of Month 2 before the gate; the gate's criteria, « On to Month 2 » only once all are ticked → Month 2 open, 150 XP
  5  Settings: the gameplan's day, « Stop » asks first, then « Start » again (the map opens)
 The plan's dates are moved in the test database (SWEEP_TEST_DB), as if days had passed.
 """
@@ -130,7 +130,15 @@ def run(p, lang, phone, full):
   g = pg.locator('#gSheet').text_content()
   if T['gate'] not in g or T['pass'] not in g: print('   gate text:', g[:300])
   ok(T['gate'] in g and pg.locator('#gSheet .gp-gl li').count() == 7 and T['pass'] in g, f'{tag} 4 the gate: its 7 criteria, « {T["pass"]} »')
-  pg.locator('#gSheet [data-gp="gate"][data-c="pass"]').click(); until(pg, "!document.getElementById('gSheet')", 6000); pg.wait_for_timeout(500)
+  # (SWEEP.md step 1, D3) « On to Month 2 » only once every criterion is ticked; « again » open at all times
+  go = '#gSheet [data-gp="gate"][data-c="pass"]'
+  ok(pg.locator(go).is_disabled() and pg.locator('#gSheet .gp-need').is_visible() and pg.locator('#gSheet [data-gp="gate"][data-c="repeat"]').is_enabled(), f'{tag} 4 no criterion ticked: « {T["pass"]} » disabled, « again » open')
+  boxes = pg.locator('#gSheet [data-gp-c]')
+  for i in range(boxes.count() - 1): boxes.nth(i).check()
+  ok(pg.locator(go).is_disabled(), f'{tag} 4 6 of 7 ticked: still disabled')
+  boxes.nth(boxes.count() - 1).check()
+  ok(pg.locator(go).is_enabled() and not pg.locator('#gSheet .gp-need').is_visible(), f'{tag} 4 all 7 ticked: « {T["pass"]} » enabled')
+  pg.locator(go).click(); until(pg, "!document.getElementById('gSheet')", 6000); pg.wait_for_timeout(500)
   st = pg.evaluate(STATE)
   ok((st.get('gates') or {}).get('1') == 'pass' and st['open_to'] == 31, f"{tag} 4 passed: Month 2 open (open to {st['open_to']})")
   # 5. Settings
