@@ -171,8 +171,11 @@ def case_fr(p, phone):
   ok(len(st['connections']) == 1, f'{tag}: Undo → the key still works')
   settings(pg); tap(pg, '#main .sy-sec [data-sy="manage"]'); tap(pg, '#sySheet [data-sy="stop"]'); pg.wait_for_timeout(5000)
   # the key is revoked when « Undo » is over (5 s), then the request: waited for, not a fixed delay (a busy machine is slower)
-  pg.wait_for_function("fetch('api/sync',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json()).then(d=>!d.connections.length)", timeout=20000, polling=500)
-  st = pg.evaluate("fetch('api/sync',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json())")
+  # (21 Oct.: wait_for_function took the fetch's promise for « true » and did not wait: the server's answer is read here)
+  for i in range(40):
+    st = pg.evaluate("fetch('api/sync',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json())")
+    if not st['connections']: break
+    pg.wait_for_timeout(500)
   r = ctx.request.post(B + '/api/sync/push', data=json.dumps({'fills': []}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
   ok(len(st['connections']) == 0 and r.status == 401 and pg.evaluate("S.trades.filter(t => t.source === 'ninjatrader').length") == 2, f'{tag}: stopped for good: key revoked (401), the synced trades stay ({[c["platform"] for c in st["connections"]]}, {r.status})')
   ok(wide(pg) <= 0, f'{tag}: nothing wider than the window ({wide(pg)} px)')
