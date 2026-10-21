@@ -5676,20 +5676,21 @@ new window.SweepMO(() => {
     el.style.setProperty('font-size', Math.max(m.fs * 0.55, Math.floor(m.fs * m.room / m.sw * 10) / 10) + 'px', 'important'); el.dataset.fitShrunk = '1';   // « important »: the page's own sizes are !important too
     el.style.setProperty('text-overflow', 'clip'); el.style.setProperty('overflow', 'visible');
   }
-  /** the figure's text and the width it has: when both are the same as at its last fit, there is nothing to do */
-  const keyOf = (el) => el.textContent.trim() + '|' + (el.clientWidth || (el.parentElement ? el.parentElement.clientWidth : 0));
+  /** the figure's text, the width it has and (not shrunk) the width its text takes: when they are the same as at its last fit,
+      there is nothing to do (21 Oct.: without the text's own width, a figure drawn before its font had loaded kept overflowing) */
+  const keyOf = (el) => el.textContent.trim() + '|' + (el.clientWidth || (el.parentElement ? el.parentElement.clientWidth : 0)) + (el.dataset.fitShrunk ? '' : '|' + el.scrollWidth);
   /** figures, never cut by « … »: all the reads, then all the writes, then the reads, then the writes (20 Oct.: one figure at a time, a
       write then a read, made the browser lay the page out again for every figure — 600 ms when Today opened on a phone) */
   function fitAll(list) {
     list = list.filter((el) => isFig(el) && el.getClientRects().length);   // a hidden figure keeps its size until it is shown
     const keys = list.map(keyOf);
     const todo = [], w = [];
-    list.forEach((el, i) => { if (el.__fitKey !== keys[i]) { todo.push(el); w.push(keys[i].slice(keys[i].lastIndexOf('|'))); } });   // (a count-up elsewhere in the page redrew every figure at each frame)
+    list.forEach((el, i) => { if (el.__fitKey !== keys[i]) { todo.push(el); w.push('|' + keys[i].split('|')[1]); } });   // (a count-up elsewhere in the page redrew every figure at each frame)
     todo.forEach(reset);
     const ms = todo.map(measure);
     todo.forEach((el, i) => {
       if (ms[i] === false) delete el.dataset.fitShrunk; else if (ms[i]) shrink(el, ms[i]);
-      el.__fitKey = el.textContent.trim() + w[i];   // (its width is not read again: one more layout of the page)
+      el.__fitKey = ms[i] === false ? keys[i] : el.textContent.trim() + w[i];   // (nothing read again: one more layout of the page; a figure that fit keeps the key read before, a shrunk one its text and width)
     });
   }
   function fit() {
