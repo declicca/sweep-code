@@ -81,7 +81,12 @@ async def main():
     ctx, pg, dlg = await page(br, True)
     await pg.wait_for_timeout(1500)
     # the sidebar stays the icon rail (the page names show when it opens), as Mateo prefers
-    hs = await pg.evaluate("[...document.querySelectorAll('#main .d-col')].map(c=>[...c.children].reduce((s,x)=>s+(x.getClientRects().length?x.getBoundingClientRect().height:0),0))")
+    # the columns are balanced in passes, as late content arrives (nav.js B11: 0.7, 1.6 and 3.2 s after Today is drawn): read
+    # until balanced, 8 s at most (21 Oct.: a busy CI machine read them before the last pass)
+    for i in range(10):
+      hs = await pg.evaluate("[...document.querySelectorAll('#main .d-col')].map(c=>[...c.children].reduce((s,x)=>s+(x.getClientRects().length?x.getBoundingClientRect().height:0),0))")
+      if len(hs) == 2 and max(hs) and (max(hs) - min(hs)) / max(hs) <= 0.2: break
+      await pg.wait_for_timeout(800)
     ok(len(hs) == 2 and max(hs) and (max(hs) - min(hs)) / max(hs) <= 0.2, f'B11 balanced columns ({[round(h) for h in hs]})')
     await ctx.close(); await br.close()
   print(f'\n{"all passed" if not fails else str(fails) + " failed"}'); sys.exit(1 if fails else 0)
