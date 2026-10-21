@@ -385,6 +385,28 @@
     if (p.valid && p.maxTrades) return say(fill(T.count, { n: i + 1, m: p.maxTrades }));
     return say('');
   }
+  /** « Now » on Today (SWEEP.md step 3): the risk allowed for the session and what is left of it, from the same numbers as the
+   *  coach's lines (the plan's max loss — today's, else the last plan's within a week —, the tightest daily limit, the drawdown
+   *  room). { allowed, k: 'plan' | 'last' | 'dll' | 'dd', a: account name, left, n: trades, m: max trades, end, pause, text } | null */
+  function riskNow(day) {
+    day = day || today();
+    const list = dayTrades(day), p = planOf(day); let sum = 0; list.forEach((t) => { sum += net(t); });
+    const c = [];
+    if (p.valid && p.bias !== 'no_trade' && p.maxLoss) c.push({ c: p.maxLoss, k: 'plan' });
+    else {
+      const wk = new Date(day + 'T12:00:00'); wk.setDate(wk.getDate() - 7); const from = wk.toISOString().slice(0, 10);
+      const j = (S.journals || []).filter((x) => x.id < day && x.id >= from && !x.demo && x.pre && x.pre.bias && x.pre.bias !== 'no_trade' && cents(x.pre.max_loss) > 0).sort((a, b) => b.id.localeCompare(a.id))[0];
+      if (j) c.push({ c: cents(j.pre.max_loss), k: 'last' });
+    }
+    const lim = accountLimit(); if (lim) c.push({ c: lim.c, k: 'dll', a: lim.name });
+    const mg = day === today() ? margin(day) : null; if (mg) c.push({ c: mg.start, k: 'dd', a: mg.name });
+    if (!c.length) return null;
+    const b = c.slice().sort((x, y) => x.c - y.c)[0], bl = c.slice().sort((x, y) => x.c - y.c)[0];   // (the same one: all move with the day's P&L)
+    const left = Math.max(0, bl.c + sum);
+    const ses = list.length ? session(day, list.length - 1, list, p) : { t: '', stop: false, code: '' };
+    const end = list.length > 0 && ((p.valid && p.maxLoss && sum <= -p.maxLoss) || ses.code === 'margin' || (p.valid && p.maxTrades && list.length >= p.maxTrades) || left <= 0);
+    return { allowed: b.c, k: b.k, a: b.a || '', left, n: list.length, m: p.valid ? p.maxTrades : 0, end, pause: !end && ses.stop, text: ses.stop ? ses.t : '' };
+  }
   /** one sentence about a plan: { bias, maxLoss (cents), maxTrades, setups (count) } */
   function planNote(x) {
     if (!x.bias) return T.pNeed;
@@ -656,6 +678,7 @@
       // the most recent trade: by entry time, else by the New York time it was saved (audit of 16 Oct.: a trade without a time
       // sorted last and was taken for « the last trade »); never « nothing to fix » while another trade of the day has a mistake
       const t = latest(list), c = Object.assign(tradeNote(t), { ses: session(day, list.length - 1, list) }), hm = c.time || savedHm(t);   // where the whole session stands
+      if (riskNow(day)) c.ses = Object.assign({}, c.ses, { t: '' });   // « Now », on top of the routine, says it (SWEEP.md step 3): never twice
       const other = c.fix ? null : list.filter((x) => x !== t).map(tradeNote).filter((x) => x.fix).pop();
       const st = edgeStreak(day);   // a winning streak explained (brief edge T5)
       return card(hm ? fill(T.last, { t: hm }) : T.last.replace(/\s*·\s*\{t\}/, ''), noteHtml(c, other && other.fix[2]) + (st ? `<p class="co-ses co-edge in">${esc2(st)}</p>` : ''), 'co-today');
@@ -1095,6 +1118,6 @@
     return `<div class="co-edgecard"><p class="co-edgecard-h"><b>${ET.edgeT}</b></p><ul>${items}</ul>${notes.map((x) => `<p class="co-own">${esc2(x)}</p>`).join('')}</div>`;
   }
   window.SweepEdge = { profile: edgeProfile, mine: edgeMine, streak: edgeStreak, card: edgeCard, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
-  window.SweepCoach = { trade: tradeNote, session, margin, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
+  window.SweepCoach = { trade: tradeNote, session, margin, riskNow, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();

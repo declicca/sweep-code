@@ -2863,3 +2863,14 @@ html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:f
 .nav-am-noshot{display:block;width:100%;margin:10px 0 2px;padding:12px 0;min-height:44px;text-align:center;font-size:15px;font-weight:500;color:var(--pos)}
 .nav-am-drop.slim{flex-direction:row;min-height:52px;padding:8px 14px;gap:10px}   /* without a screenshot: one line, still there to add one */
 .nav-am-drop.slim .nav-am-ic{transform:scale(.8)}
+
+/* « Now » on top of the routine (SWEEP.md step 3): the figure of the moment, one line, then where it comes from */
+.nav-now{margin:12px 0 4px;padding:12px 14px;border-radius:var(--r3,20px);background:rgba(var(--pos-rgb),.07)}
+.nav-now small{display:block;font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--pos)}
+.nav-now-l{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:4px 0 0}
+.nav-now-l b{font-size:16px;font-weight:600;color:var(--text)}
+.nav-now-v{font-family:'Geist Mono',ui-monospace,monospace;font-size:22px;font-weight:600;color:var(--text);white-space:nowrap}
+.nav-now-s,.nav-now-news{margin:4px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
+.nav-now-news{color:var(--neg)}
+.nav-now.is-end{background:rgba(var(--neg-rgb,212,162,76),.12)}
+.nav-now.is-end small{color:var(--neg)}

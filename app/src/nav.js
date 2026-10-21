@@ -4130,6 +4130,33 @@ window.SweepMO = window.SweepMO || class {
     const ev = typeof ECON !== 'undefined' && ECON.days && ECON.days[d.day];
     return !!(ev && ev.length && now > ev[ev.length - 1].ts);
   }
+  /* « Now » (SWEEP.md step 3): one line on top of the routine, the figure that counts at this moment of the New York day —
+     before the first trade the risk allowed today (and the next big release with its no-trade window), during the session what
+     is left, past a stop the day over; the numbers are the coach's own (SweepCoach.riskNow). Nothing once the day is reviewed. */
+  const NW3 = {
+    en: { now: 'Now', risk: 'Your risk allowed today', left: 'Left today', count: 'trade {n} of {m}', end: 'Day over by your plan', plan: 'your plan’s max loss', last: 'your last plan’s max loss', dll: 'the daily limit of {a}', dd: 'your drawdown room on {a}', news: '{t} · {e}: no trade from {a} to {b}', Lplan: 'before your max loss', Llast: 'before your last plan’s max loss', Ldll: 'before the daily limit of {a}', Ldd: 'of drawdown room on {a}' },
+    fr: { now: 'Maintenant', risk: 'Ton risque permis aujourd’hui', left: 'Il te reste', count: 'trade {n} sur {m}', end: 'Journée terminée selon ton plan', plan: 'la perte max de ton plan', last: 'la perte max de ton dernier plan', dll: 'la limite du jour de {a}', dd: 'ta marge de drawdown sur {a}', news: '{t} · {e} : pas de trade de {a} à {b}', Lplan: 'avant ta perte max', Llast: 'avant la perte max de ton dernier plan', Ldll: 'avant la limite du jour de {a}', Ldd: 'de marge de drawdown sur {a}' },
+    es: { now: 'Ahora', risk: 'Tu riesgo permitido hoy', left: 'Te quedan', count: 'operación {n} de {m}', end: 'Día terminado según tu plan', plan: 'la pérdida máx. de tu plan', last: 'la pérdida máx. de tu último plan', dll: 'el límite diario de {a}', dd: 'tu margen de drawdown en {a}', news: '{t} · {e}: sin operar de {a} a {b}', Lplan: 'antes de tu pérdida máx.', Llast: 'antes de la pérdida máx. de tu último plan', Ldll: 'antes del límite diario de {a}', Ldd: 'de margen de drawdown en {a}' },
+  };
+  const nw = (k, v) => String((NW3[L] || NW3.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
+  const usd0 = (c) => (typeof money === 'function' ? money(Math.abs(Math.round(c)), { sign: false, dec: 0 }) : '$' + Math.round(Math.abs(c) / 100));   // as the coach writes it (no sign)
+  function newsLine(day) {   // the next high-impact release of the session, while its window is still ahead
+    const ev = typeof ECON !== 'undefined' && ECON.days && ECON.days[day]; if (!ev || !ev.length) return '';
+    const s0 = S.settings || {}, bf = s0.pm_news_before != null && s0.pm_news_before !== '' ? +s0.pm_news_before : 5, af = s0.pm_news_after != null && s0.pm_news_after !== '' ? +s0.pm_news_after : 15;
+    const now = Date.now() / 1000, e = ev.filter((x) => x.impact === 'high' && x.ts + af * 60 > now).sort((x, y) => x.ts - y.ts)[0]; if (!e) return '';
+    const hm = (ts) => (typeof etStr === 'function' ? etStr(ts).slice(11, 16) : '');
+    return `<p class="nav-now-news">${esc2(nw('news', { t: hm(e.ts), e: typeof tr === 'function' ? tr(e.event) : e.event, a: hm(e.ts - bf * 60), b: hm(e.ts + af * 60) }))}</p>`;
+  }
+  function nowHtml(d, r) {
+    if (!d || !d.market || d.day_off || (r && r.review >= 100) || !window.SweepCoach || !SweepCoach.riskNow) return '';
+    let x = null; try { x = SweepCoach.riskNow(d.day); } catch (e) { return ''; }
+    if (!x) return '';
+    let big, val = '', sub = '';
+    if (!x.n) { big = nw('risk'); val = usd0(x.allowed); sub = nw(x.k, { a: x.a }); }
+    else if (x.end) { big = nw('end'); sub = x.text; }
+    else { big = nw('left'); val = usd0(x.left); sub = [nw('L' + x.k, { a: x.a }), x.m ? nw('count', { n: x.n + 1 > x.m ? x.m : x.n + 1, m: x.m }) : '', x.pause ? x.text : ''].filter(Boolean).join(' · '); }
+    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l"><b>${esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${!x.n ? newsLine(d.day) : ''}</div>`;
+  }
   function card() {
     const st = window.SweepGame && SweepGame.state && SweepGame.state(); const d = st && st.today;
     if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div><div class="nav-rt-steps">${'<div class="nav-rt-s sk"></div>'.repeat(3)}</div></section>`;
@@ -4151,6 +4178,7 @@ window.SweepMO = window.SweepMO || class {
     // the intention written in last week's recap, shown all this week (SWEEP.md step 1, D5: it lived only in the game's hidden card)
     const intT = ({ en: 'Your intention this week', fr: 'Ton intention cette semaine', es: 'Tu intención esta semana' })[L] || 'Your intention this week';
     const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : '';
+    const nowRow = nowHtml(d, r);
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
     if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${helpT}</section>`;
@@ -4170,7 +4198,7 @@ window.SweepMO = window.SweepMO || class {
     // without a valid plan no trade is « in your plan » (audit of 16 Oct.; the server counts 0 too: game.php compliant_count)
     const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t('inPlan', { c: d.compliant || 0, n: d.trades });
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${t('ydayB')} ›</b><span>${esc2(left(y.deadline))}</span></button>` : '';
-    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}${intRow}
+    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}${nowRow}${intRow}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
