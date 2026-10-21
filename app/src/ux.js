@@ -296,7 +296,7 @@
     const wrap = document.createElement('div');
     wrap.className = 'ux-news'; wrap.setAttribute('data-noi18n', '');
     wrap.innerHTML = evs.map((e) => `<div class="ux-ev"><div class="ux-ev-h"><span class="ux-ev-t">${etStr(e.ts).slice(11, 16)}</span><span class="imp ${e.impact}"><i></i></span><b>${esc(tr(e.event))}</b>
-      <small>${e.forecast ? tt('fcst') + ' ' + esc(e.forecast) : ''}${e.forecast && e.previous ? ' · ' : ''}${e.previous ? tt('prev') + ' ' + esc(e.previous) : ''}</small></div>
+      <small>${e.forecast ? tt('fcst') + ' ' + esc(econL(e.forecast)) : ''}${e.forecast && e.previous ? ' · ' : ''}${e.previous ? tt('prev') + ' ' + esc(econL(e.previous)) : ''}</small></div>
       <input data-ux-news="${esc(e.id)}" value="${esc(notes[e.id] || '')}" placeholder="${esc(tt('ph'))}" maxlength="240"></div>`).join('');
     box.append(wrap);
   }

@@ -6,11 +6,15 @@ Sweep — Calendar, Journal and the economic calendar (brief 02 part 7), Playwri
    Stats › trends says it, with what to do, sample « 6 vs 6 »; Stats › News counts them « within 15 min »;
  - the Journal: a day over its maximum of trades: « Trades max » « Dépassé (2/1) » (not « Max trades », « Exceeded »);
  - the Calendar: the releases' short names in the trader's language (« Chômage », not « Unemployment »), no CSV button;
+ - the economic figures in the trader's language (20 Oct.): a release published « 0.7% », forecast « 0.4% », previous « -0.1% »
+   reads « 0,7 % », « 0,4 % », « −0,1 % », surprise « +0,3 pp » in French and Spanish (list, event sheet, its « Result »
+   sentence), unchanged in English;
  - the bundled schedule: the next two weeks as the official calendars say (BLS, Census, BEA, Fed: retail sales Oct. 15, GDP
    and PCE Oct. 29); a re-import of the file drops a future release that moved (no duplicate).
 Checks: no page error, nothing wider than the window, the texts in the trader's language.
 """
-import json, os, re, sqlite3, sys, time
+import datetime as dt, hashlib, json, os, re, sqlite3, sys, time
+from zoneinfo import ZoneInfo
 from playwright.sync_api import sync_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
@@ -83,6 +87,22 @@ def run(p, lang, phone):
   ok(pg.evaluate("document.querySelectorAll('.main-wrap .top .nav-imp, #main [data-act=export-csv]').length") == 0, f'{tag} the Calendar: no CSV button')
   ok(pg.evaluate(WIDE) <= 1, f'{tag} nothing wider than the window')
   if SHOTS: pg.screenshot(path=os.path.join(SHOTS, f'p7-calendar-{tag}.png'))
+  # 4. the economic figures in the trader's language: a release with its figures on next Monday, 8:30 ET (a week the page
+  # has not loaded yet: it is asked for when « Next week » opens)
+  eid = hashlib.sha1(('loc-test-' + lang).encode()).hexdigest()   # (an event's id: 40 hex characters, as the calendar's own)
+  mon = pg.evaluate("newsRange('next')[0]")
+  ts = int(dt.datetime.fromisoformat(mon + 'T08:30').replace(tzinfo=ZoneInfo('America/New_York')).timestamp())
+  d = sqlite3.connect(DB); d.execute("INSERT OR REPLACE INTO econ_events (id, ts, country, event, impact, actual, forecast, previous, source, updated_at) VALUES (?, ?, 'US', 'Retail Sales m/m', 'high', '0.7%', '0.4%', '-0.1%', 'manual', 0)", (eid, ts)); d.commit(); d.close()
+  pg.evaluate("location.hash = '#news/next'"); pg.wait_for_selector(f'#main [data-act=ev-open][data-id="{eid}"]', timeout=15000); pg.wait_for_timeout(500)
+  row = pg.evaluate(TXT, f'#main [data-act=ev-open][data-id="{eid}"]')[0]
+  pg.click(f'#main [data-act=ev-open][data-id="{eid}"]'); pg.wait_for_selector('.evvals', timeout=10000); pg.wait_for_timeout(800)
+  sheet = ' '.join(pg.evaluate(TXT, '.evvals') + pg.evaluate(TXT, '.facts-box'))
+  want = ['0.7%', '0.4%', '-0.1%', '+0.3 pp'] if lang == 'en' else ['0,7 %', '0,4 %', '−0,1 %', '+0,3 pp']
+  ok(all(w in row for w in want[:2]) and (lang == 'en' or '0.7' not in row), f'{tag} the economic calendar: the figures as the trader writes them ({row})')
+  ok(all(w in sheet for w in want) and (lang == 'en' or not re.search(r'\d\.\d', sheet)), f'{tag} the release sheet and its « Result »: {want} ({sheet[:220]})')
+  raw = pg.evaluate("document.querySelector('.evvals').textContent + ' ' + document.querySelector('.facts-box').textContent")
+  ok(not re.search('[\\s\u00a0\u202f]{2,}%', raw), f'{tag} one space only before « % » ({raw[:120]!r})')
+  d = sqlite3.connect(DB); d.execute('DELETE FROM econ_events WHERE id = ?', (eid,)); d.commit(); d.close()
   ok(not errs, f'{tag} no page error ' + '; '.join(errs[:2]))
   br.close()
 

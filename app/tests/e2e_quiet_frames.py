@@ -2,7 +2,7 @@
 Sweep — opening a page does not keep the page busy (20 Oct., speed): phone 390 and computer 1300
   python3 tests/e2e_quiet_frames.py http://127.0.0.1:8095 /tmp/show_state.json
  1  Stats and Today, opened from the bar: while their figures count up, the page's nodes are not replaced at each frame
-    (each replacement woke all the page's observers: a second of work on a phone)
+    (each replacement woke all the page's observers: a second of work on a phone); each count-up changes once, at its end
  2  the count-ups end on their value (whole numbers: exactly the number they count to)
  3  the key figure tiles are not cut once drawn (the amounts' fitting still runs)
 """
@@ -29,7 +29,7 @@ with sync_playwright() as p:
       pg.evaluate("location.hash = '#calendar'"); pg.wait_for_timeout(1200)
       n = pg.evaluate(WATCH, r); pg.wait_for_timeout(600)
       cus = pg.evaluate("[...document.querySelectorAll('#main [data-cu]')].length")
-      ok(n < 40, f'1 {w} {r}: the page is not rebuilt at each frame of its count-ups ({n} changes, {cus} count-ups)')
+      ok(n <= 2 * cus + 12, f'1 {w} {r}: the page is not rebuilt at each frame of its count-ups ({n} changes, {cus} count-ups: its final value each, not one a frame)')
       bad = pg.evaluate("[...document.querySelectorAll('#main [data-cu][data-fmt=int]')].filter((e) => e.getClientRects().length && e.textContent.trim() !== String(Math.round(+e.dataset.cu))).map((e) => e.dataset.cu + '≠' + e.textContent)")
       ok(not bad, f'2 {w} {r}: the count-ups end on their value ({bad[:3]})')
       cut = pg.evaluate("[...document.querySelectorAll('#main .nav-kpi-g b, #main .d-perf b')].filter((e) => e.getClientRects().length && e.scrollWidth - (e.clientWidth || e.parentElement.clientWidth) > 1).map((e) => e.textContent)")

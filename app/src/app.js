@@ -3562,6 +3562,14 @@ function loadEcon(e, t) {
   return G.push([ a, n, N, P ]), P;
 }
 
+/** the calendar asked again from the server: its days, the loads in progress and loadEcon's own cache together (21 Oct.:
+    without the last one, the page drawn right after an event was added or imported asked a promise already resolved, its
+    days stayed empty, and it was drawn again without end) */
+function econForget() {
+  for (const k in ECON.pending) delete ECON.pending[k];
+  loadEcon._g = [], ECON.days = {};
+}
+
 async function loadEconRaw(e, t) {
   const a = e + "_" + t;
   if (ECON.pending[a] && Date.now() - (ECON.at[a] || 0) < 10 * 60 * 1e3) return ECON.pending[a];
@@ -4509,7 +4517,7 @@ const estTag = e => {   // brief 02 part 7: in the trader's language
 };
 
 function eventRow(e) {
-  const t = econState(e), a = econDiff(e.actual, e.forecast), n = e.revised && e.revised !== e.previous, s = e.actual != null && e.actual !== "" ? `<b>${esc(e.actual)}</b>${a && a.direction !== "in_line" ? `<small class="sur ${a.direction}">${a.text}</small>` : ""}` : t === "awaiting" ? '<em class="await">Awaiting</em>' : '<span class="faint">—</span>', i = !(e.actual || e.forecast || e.previous) && t !== "awaiting";
+  const t = econState(e), a = econDiff(e.actual, e.forecast), n = e.revised && e.revised !== e.previous, s = e.actual != null && e.actual !== "" ? `<b>${esc(econL(e.actual))}</b>${a && a.direction !== "in_line" ? `<small class="sur ${a.direction}">${econL(a.text)}</small>` : ""}` : t === "awaiting" ? '<em class="await">Awaiting</em>' : '<span class="faint">—</span>', i = !(e.actual || e.forecast || e.previous) && t !== "awaiting";
   return `<button class="ff-row ${e.ts < Date.now() / 1e3 ? "past" : ""} ${t === "awaiting" ? "due" : ""} ${i ? "novals" : ""}" data-act="ev-open" data-id="${esc(e.id)}">\n    <span class="ff-t">${etStr(e.ts).slice(11, 16)}</span><span class="ff-c">USD</span><span class="ff-i"><span class="imp ${e.impact}" title="${impactLabel(e.impact)} impact"><i></i></span></span>\n    <span class="ff-n">${esc(tr(e.event))}${estTag(e)}</span><span class="ff-v" data-l="${{
     en: "Actual",
     fr: "Réel",
@@ -4518,11 +4526,11 @@ function eventRow(e) {
     en: "Fcst",
     fr: "Prév.",
     es: "Prev."
-  }[LANG]}">${e.forecast != null && e.forecast !== "" ? esc(e.forecast) : '<span class="faint">—</span>'}</span>\n    <span class="ff-v" data-l="${{
+  }[LANG]}">${e.forecast != null && e.forecast !== "" ? esc(econL(e.forecast)) : '<span class="faint">—</span>'}</span>\n    <span class="ff-v" data-l="${{
     en: "Prev",
     fr: "Préc.",
     es: "Ant."
-  }[LANG]}">${e.previous != null && e.previous !== "" ? esc(e.previous) : '<span class="faint">—</span>'}${n ? `<small class="faint" title="${{ en: "Previously reported", fr: "Valeur publiée précédemment", es: "Valor publicado anteriormente" }[LANG] || "Previously reported"}">rev. ${esc(e.revised)}</small>` : ""}</span><span class="ff-go">›</span></button>`;
+  }[LANG]}">${e.previous != null && e.previous !== "" ? esc(econL(e.previous)) : '<span class="faint">—</span>'}${n ? `<small class="faint" title="${{ en: "Previously reported", fr: "Valeur publiée précédemment", es: "Valor publicado anteriormente" }[LANG] || "Previously reported"}">rev. ${esc(econL(e.revised))}</small>` : ""}</span><span class="ff-go">›</span></button>`;
 }
 
 function vNews(e) {
@@ -4568,8 +4576,7 @@ async function addEcon(e) {
         previous: t.get("previous")
       }
     });
-    for (const n in ECON.pending) delete ECON.pending[n];
-    ECON.days = {}, toast("Event added"), render();
+    econForget(), toast("Event added"), render();
   } catch (n) {
     toast(n.message);
   }
@@ -4577,7 +4584,7 @@ async function addEcon(e) {
 
 function newsWidget() {
   const e = todayStr(), t = ECON.days[e];
-  return t ? `<section class="sec"><div class="sec-h"><h2>Economic calendar</h2><a class="link" href="#news">Full calendar</a></div><div class="surface ev-mini">${t.length ? t.map(a => `<div class="evm ${a.ts < Date.now() / 1e3 ? "past" : ""}" data-act="ev-open" data-id="${esc(a.id)}" role="button" tabindex="0"><span class="ev-t">${etStr(a.ts).slice(11, 16)}</span><span class="imp ${a.impact}"><i></i>${impactLabel(a.impact)}</span><span class="ev-n">${esc(tr(a.event))}</span><span class="muted">${a.actual != null ? "Actual " + esc(a.actual) : a.forecast ? "Fcst " + esc(a.forecast) : ""}</span></div>`).join("") : '<div class="empty">No major U.S. economic events today.</div>'}</div></section>` : (loadEcon(e, e).then(() => {
+  return t ? `<section class="sec"><div class="sec-h"><h2>Economic calendar</h2><a class="link" href="#news">Full calendar</a></div><div class="surface ev-mini">${t.length ? t.map(a => `<div class="evm ${a.ts < Date.now() / 1e3 ? "past" : ""}" data-act="ev-open" data-id="${esc(a.id)}" role="button" tabindex="0"><span class="ev-t">${etStr(a.ts).slice(11, 16)}</span><span class="imp ${a.impact}"><i></i>${impactLabel(a.impact)}</span><span class="ev-n">${esc(tr(a.event))}</span><span class="muted">${a.actual != null ? "Actual " + esc(econL(a.actual)) : a.forecast ? "Fcst " + esc(econL(a.forecast)) : ""}</span></div>`).join("") : '<div class="empty">No major U.S. economic events today.</div>'}</div></section>` : (loadEcon(e, e).then(() => {
     route().v === "dashboard" && scheduleRender();
   }), "");
 }
@@ -4650,7 +4657,7 @@ function newsBlock(e) {
     o && route().v === "trade" && (o.innerHTML = newsBlock(e));
   }), t.map(o => {
     const r = findEvent(o.id) || o, c = a - o.ts;
-    return `<div class="nctx"><div class="nctx-h"><span class="imp ${o.impact}"><i></i></span><b>${esc(tr(o.event))}</b><span class="muted">${etStr(o.ts).slice(11, 16)} ET</span></div>\n      <div class="nctx-v"><span>Actual <b>${esc(r.actual ?? "—")}</b></span><span>Forecast <b>${esc(r.forecast ?? "—")}</b></span><span>Previous <b>${esc(r.previous ?? "—")}</b></span></div>\n      <div class="nctx-f"><span>Your entry ${etStr(a).slice(11, 19)} · <b>${Math.abs(c) < 1 ? "at the release" : fmtSec(c) + (c > 0 ? " after" : " before") + " the release"}</b></span><button class="link" data-act="ev-open" data-id="${esc(o.id)}">View details</button></div></div>`;
+    return `<div class="nctx"><div class="nctx-h"><span class="imp ${o.impact}"><i></i></span><b>${esc(tr(o.event))}</b><span class="muted">${etStr(o.ts).slice(11, 16)} ET</span></div>\n      <div class="nctx-v"><span>Actual <b>${esc(econL(r.actual ?? "—"))}</b></span><span>Forecast <b>${esc(econL(r.forecast ?? "—"))}</b></span><span>Previous <b>${esc(econL(r.previous ?? "—"))}</b></span></div>\n      <div class="nctx-f"><span>Your entry ${etStr(a).slice(11, 19)} · <b>${Math.abs(c) < 1 ? "at the release" : fmtSec(c) + (c > 0 ? " after" : " before") + " the release"}</b></span><button class="link" data-act="ev-open" data-id="${esc(o.id)}">View details</button></div></div>`;
   }).join("");
 }
 
@@ -4686,8 +4693,7 @@ async function importEconFile(e) {
       method: "POST",
       body: a
     });
-    for (const s in ECON.pending) delete ECON.pending[s];
-    ECON.days = {}, toast(`Imported ${n.imported} events`), render();
+    econForget(), toast(`Imported ${n.imported} events`), render();
   } catch (n) {
     toast(n.message);
   }
@@ -4712,6 +4718,13 @@ function econDiff(e, t) {
     direction: s > 0 ? "above" : s < 0 ? "below" : "in_line",
     text: s === 0 ? `In line (0${i})` : (s > 0 ? "+" : "−") + Math.abs(s).toFixed(o) + i
   };
+}
+
+/** an economic value as the trader reads it: "0.7%" → « 0,7 % » in French and Spanish (decimal comma, narrow no-break
+    space before %, true minus sign), English unchanged. Display only: the values stay as published (20 Oct.). */
+function econL(e) {
+  if (e == null || LANG !== "fr" && LANG !== "es") return e;
+  return String(e).replace(/(\d),(?=\d{3}(?!\d))/g, "$1\u202f").replace(/(\d)\.(\d)/g, "$1,$2").replace(/\s*%/g, "\u202f%").replace(/(^|[\s(])-(?=\d)/g, "$1\u2212");
 }
 
 function econProfile(e) {
@@ -4840,20 +4853,20 @@ function evpHeader(e, t) {
 }
 
 function evValues(e) {
-  const t = e.event, a = e.computed || {}, n = e.state, s = (c, l, p = "") => `<div class="evv ${p}"><span>${c}</span><b>${l}</b></div>`, i = t.actual != null && t.actual !== "" ? esc(t.actual) : n === "awaiting" ? "<em>Awaiting release</em>" : "—", o = t.forecast != null && t.forecast !== "" ? esc(t.forecast) : "<em>No consensus available</em>", r = a.vs_forecast;
-  return `<div class="evvals">${s("Actual", i, "act")}${s("Forecast", o)}${s("Previous", t.previous != null && t.previous !== "" ? esc(t.previous) : "—")}${s("Surprise", r ? `<span class="sur ${r.direction}">${r.text}</span>` : "—")}</div>\n    ${a.vs_previous || a.revision ? `<div class="evsub">${a.vs_previous ? `<span>vs previous <b>${a.vs_previous.text}</b></span>` : ""}${a.revision ? `<span>Previous revised: reported <b>${esc(a.revision.reported)}</b> → now <b>${esc(a.revision.current)}</b></span>` : ""}</div>` : ""}`;
+  const t = e.event, a = e.computed || {}, n = e.state, s = (c, l, p = "") => `<div class="evv ${p}"><span>${c}</span><b>${l}</b></div>`, i = t.actual != null && t.actual !== "" ? esc(econL(t.actual)) : n === "awaiting" ? "<em>Awaiting release</em>" : "—", o = t.forecast != null && t.forecast !== "" ? esc(econL(t.forecast)) : "<em>No consensus available</em>", r = a.vs_forecast;
+  return `<div class="evvals">${s("Actual", i, "act")}${s("Forecast", o)}${s("Previous", t.previous != null && t.previous !== "" ? esc(econL(t.previous)) : "—")}${s("Surprise", r ? `<span class="sur ${r.direction}">${econL(r.text)}</span>` : "—")}</div>\n    ${a.vs_previous || a.revision ? `<div class="evsub">${a.vs_previous ? `<span>vs previous <b>${a.vs_previous.text}</b></span>` : ""}${a.revision ? `<span>Previous revised: reported <b>${esc(econL(a.revision.reported))}</b> → now <b>${esc(econL(a.revision.current))}</b></span>` : ""}</div>` : ""}`;
 }
 
 function evFacts(e) {
   const t = e.event, a = e.computed || {};
   if (t.actual == null || t.actual === "") return "";
-  const n = (i, o, r) => LANG === "fr" ? o : LANG === "es" ? r : i, s = [ n(`Actual ${esc(t.actual)}.`, `Réel ${esc(t.actual)}.`, `Real ${esc(t.actual)}.`) ];
+  const n = (i, o, r) => LANG === "fr" ? o : LANG === "es" ? r : i, s = [ n(`Actual ${esc(econL(t.actual))}.`, `Réel ${esc(econL(t.actual))}.`, `Real ${esc(econL(t.actual))}.`) ];
   if (t.forecast) {
-    const i = a.vs_forecast, o = i ? i.direction === "in_line" ? n("in line", "conforme", "en línea") : `${i.text} ${i.direction === "above" ? n("above consensus", "au-dessus du consensus", "por encima del consenso") : n("below consensus", "sous le consensus", "por debajo del consenso")}` : "";
-    s.push(`${n("Consensus", "Consensus", "Consenso")} ${esc(t.forecast)}${o ? ` — ${o}` : ""}.`);
+    const i = a.vs_forecast, o = i ? i.direction === "in_line" ? n("in line", "conforme", "en línea") : `${econL(i.text)} ${i.direction === "above" ? n("above consensus", "au-dessus du consensus", "por encima del consenso") : n("below consensus", "sous le consensus", "por debajo del consenso")}` : "";
+    s.push(`${n("Consensus", "Consensus", "Consenso")} ${esc(econL(t.forecast))}${o ? ` — ${o}` : ""}.`);
   }
-  return t.previous && s.push(`${n("Previous", "Précédent", "Anterior")} ${esc(t.previous)}${a.vs_previous ? ` (${a.vs_previous.text} ${n("vs previous", "vs précédent", "vs anterior")})` : ""}.`), 
-  a.revision && s.push(n(`Previous was revised from ${esc(a.revision.reported)} to ${esc(a.revision.current)}.`, `Le précédent a été révisé de ${esc(a.revision.reported)} à ${esc(a.revision.current)}.`, `El anterior se revisó de ${esc(a.revision.reported)} a ${esc(a.revision.current)}.`)), 
+  return t.previous && s.push(`${n("Previous", "Précédent", "Anterior")} ${esc(econL(t.previous))}${a.vs_previous ? ` (${econL(a.vs_previous.text)} ${n("vs previous", "vs précédent", "vs anterior")})` : ""}.`), 
+  a.revision && s.push(n(`Previous was revised from ${esc(econL(a.revision.reported))} to ${esc(econL(a.revision.current))}.`, `Le précédent a été révisé de ${esc(econL(a.revision.reported))} à ${esc(econL(a.revision.current))}.`, `El anterior se revisó de ${esc(econL(a.revision.reported))} a ${esc(econL(a.revision.current))}.`)), 
   `<div class="facts-box"><span class="tagk">Result</span><p data-noi18n>${s.join(" ")}</p></div>`;
 }
 
@@ -4890,7 +4903,7 @@ function evHistory(e) {
     month: "short",
     day: "numeric",
     year: "2-digit"
-  })}</td><td class="num">${esc(a.actual ?? "—")}</td><td class="num">${esc(a.forecast ?? "—")}</td><td class="num">${a.surprise ? `<span class="sur ${a.surprise.direction}">${a.surprise.text}</span>` : "—"}</td><td>${a.reaction && a.reaction.classification ? `<span class="rxl ${a.reaction.classification.key}">${esc(a.reaction.classification.label)}</span>` : '<span class="faint">—</span>'}</td></tr>`).join("")}</tbody></table>\n    ${t.length < 12 ? '<p class="help">Small sample: patterns across a few releases are not reliable on their own.</p>' : ""}</section>` : "";
+  })}</td><td class="num">${esc(econL(a.actual ?? "—"))}</td><td class="num">${esc(econL(a.forecast ?? "—"))}</td><td class="num">${a.surprise ? `<span class="sur ${a.surprise.direction}">${econL(a.surprise.text)}</span>` : "—"}</td><td>${a.reaction && a.reaction.classification ? `<span class="rxl ${a.reaction.classification.key}">${esc(a.reaction.classification.label)}</span>` : '<span class="faint">—</span>'}</td></tr>`).join("")}</tbody></table>\n    ${t.length < 12 ? '<p class="help">Small sample: patterns across a few releases are not reliable on their own.</p>' : ""}</section>` : "";
 }
 
 function evProv(e) {
