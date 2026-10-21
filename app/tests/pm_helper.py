@@ -1,12 +1,12 @@
 """Tests: fill the pre-market questionnaire (the day's plan since the brief « Plan pre-market adaptatif ») with simple values.
 A quiet day, the price inside the London range, the high watched (or the low: short=True); the max loss / max trades given
-or the ones offered. sync: premarket(pg, ...); async: await apremarket(pg, ...). The sheet must already be open, or day= opens it; stop_at='limits' (or a tuple of screens) stops on that screen (call again to go on); after the lock time without a sheet, the express version is filled the same way."""
+or the ones offered; guided=True switches an express sheet to the guided one when the trader may (SWEEP.md step 2). sync: premarket(pg, ...); async: await apremarket(pg, ...). The sheet must already be open, or day= opens it; stop_at='limits' (or a tuple of screens) stops on that screen (call again to go on); after the lock time without a sheet, the express version is filled the same way."""
 LEVELS = [('instrument', 'MES'), ('lv.london_high', '5820'), ('lv.london_low', '5800'), ('lv.pdh', '5850'), ('lv.pdl', '5770'), ('lv.price', '5810')]
 SCREEN = "(document.querySelector('#gSheet.g-pm [data-pm-screen]') || {dataset: {}}).dataset.pmScreen || ''"
 TAP = "(s) => { const b = document.querySelector(s); if (b) b.click(); return !!b }"   # (a JS click: the sheet may still be sliding in on a slow machine)
 PICK = "(v) => { const c = document.querySelector(`#gSheet [data-pm=inst-pick][data-v=${v}]`); if (c && !c.classList.contains('on')) c.click(); return !!c }"   # the instrument's chip (20 Oct.: no more typing)
 
-def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=True, stop_at=None):
+def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=True, stop_at=None, guided=True):
   if day is not None:
     pg.evaluate("(d) => SweepGame.openPlan(d)", day)
   for _ in range(60):
@@ -19,6 +19,8 @@ def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=Tr
       pg.evaluate(PICK, 'MES'); pg.wait_for_timeout(100)   # (the instrument is hidden once the same for 5 sheets: no chip then)
       for k, v in LEVELS:
         if pg.locator(f'#gSheet [data-pmf="{k}"]').count(): pg.fill(f'#gSheet [data-pmf="{k}"]', v)
+    elif s == 'express' and guided and pg.evaluate(TAP, '#gSheet [data-pm="mode"][data-v="full"]'):   # a trader who never chose opens the express one (SWEEP.md step 2): guided=True switches, as before
+      pg.wait_for_timeout(400); continue
     elif s == 'express':   # (the lock time is past without a sheet)
       pg.evaluate(PICK, 'MES'); pg.wait_for_timeout(100)
       pg.evaluate(TAP, f'#gSheet [data-q="X_bias"][data-v="{"bearish" if short else "bullish"}"]'); pg.wait_for_timeout(150)   # (20 Oct.: bias, key levels, the two scenarios in words)
@@ -40,7 +42,7 @@ def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=Tr
     pg.evaluate(TAP, '#gSheet [data-pm="next"]'); pg.wait_for_timeout(250)
   return False
 
-async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=True, stop_at=None):
+async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=True, stop_at=None, guided=True):
   if day is not None:
     await pg.evaluate("(d) => SweepGame.openPlan(d)", day)
   for _ in range(60):
@@ -53,6 +55,8 @@ async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, 
       await pg.evaluate(PICK, 'MES'); await pg.wait_for_timeout(100)
       for k, v in LEVELS:
         if await pg.locator(f'#gSheet [data-pmf="{k}"]').count(): await pg.fill(f'#gSheet [data-pmf="{k}"]', v)
+    elif s == 'express' and guided and await pg.evaluate(TAP, '#gSheet [data-pm="mode"][data-v="full"]'):
+      await pg.wait_for_timeout(400); continue
     elif s == 'express':
       await pg.evaluate(PICK, 'MES'); await pg.wait_for_timeout(100)
       await pg.evaluate(TAP, f'#gSheet [data-q="X_bias"][data-v="{"bearish" if short else "bullish"}"]'); await pg.wait_for_timeout(150)

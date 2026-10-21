@@ -2858,3 +2858,8 @@ html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:f
 /* the week's intention in the routine card (SWEEP.md step 1, D5) */
 .nav-rt-int{margin:10px 0 0;font-size:13px;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
 .nav-rt-int b{color:var(--text);font-weight:600}
+
+/* « No screenshot? Enter your P&L » under the drop zone (SWEEP.md step 2): a quiet link, a 44 px target */
+.nav-am-noshot{display:block;width:100%;margin:10px 0 2px;padding:12px 0;min-height:44px;text-align:center;font-size:15px;font-weight:500;color:var(--pos)}
+.nav-am-drop.slim{flex-direction:row;min-height:52px;padding:8px 14px;gap:10px}   /* without a screenshot: one line, still there to add one */
+.nav-am-drop.slim .nav-am-ic{transform:scale(.8)}

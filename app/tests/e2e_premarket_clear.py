@@ -51,7 +51,7 @@ with sync_playwright() as p:
     pg.clock.install(time=dt.datetime(y, m, d, 8, 0, tzinfo=NY))
     pg.goto(B + '/#dashboard'); until(pg, 'window.SweepFiche && window.SweepGame && window.S && S.journals && S.settings'); pg.wait_for_timeout(1200)
     was = pg.evaluate("S.settings.pm_mode || null")
-    if was: pg.evaluate("(() => { const s = structuredClone(S.settings); delete s.pm_mode; put('settings', s) })()"); pg.wait_for_timeout(400)
+    if was != 'full': pg.evaluate("(() => { const s = structuredClone(S.settings); s.pm_mode = 'full'; put('settings', s) })()"); pg.wait_for_timeout(400)
     pg.evaluate(PREV, prev); pg.wait_for_timeout(600)
     # 1. the words
     open_plan(pg, day); t = text(pg)

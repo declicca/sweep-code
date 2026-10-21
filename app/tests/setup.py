@@ -44,6 +44,10 @@ async def main():
             await pg.click('aside.nav-ask.open [data-ask="1"]')
             await pg.wait_for_function("S.trades.some(t => t.demo) && S.accounts.length > 0", timeout=60000)
             await pg.wait_for_timeout(3000)   # the sample data are saved in batches
+        # the test trader has chosen the guided pre-market (the pre-market tests are written for it); a trader who never chose
+        # opens the express one (SWEEP.md step 2, tested with traders of their own)
+        if await pg.evaluate("(S.settings || {}).pm_mode") != 'full':
+            await pg.evaluate("put('settings', Object.assign(structuredClone(S.settings), { pm_mode: 'full' }))"); await pg.wait_for_timeout(1500)
         n = await pg.evaluate("[S.accounts.length, S.trades.length]")
         assert n[0] > 0 and n[1] > 0, 'sample data missing: %s' % n
         await ctx.storage_state(path=STATE); await br.close()

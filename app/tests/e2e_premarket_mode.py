@@ -40,7 +40,7 @@ with sync_playwright() as p:
     pg.clock.install(time=dt.datetime(y, m, d, 8, 0, tzinfo=NY))
     pg.goto(B + '/#dashboard'); until(pg, 'window.SweepFiche && window.SweepGame && window.S && S.journals && S.settings'); pg.wait_for_timeout(1500)
     was = pg.evaluate("S.settings.pm_mode || null")
-    if was: pg.evaluate("(() => { const s = structuredClone(S.settings); delete s.pm_mode; put('settings', s) })()"); pg.wait_for_timeout(500)
+    if was != 'full': pg.evaluate("(() => { const s = structuredClone(S.settings); s.pm_mode = 'full'; put('settings', s) })()"); pg.wait_for_timeout(500)
     # 1. guided first, then express one tap away
     ok(open_plan(pg, d1) == 'base' and pg.locator('#gSheet [data-pm="mode"][data-v="express"]').count() == 1, f'1 {w}: the guided plan opens, « Plan express (30 s) » on its first screen')
     pg.evaluate(TAP, '#gSheet [data-pm="mode"][data-v="express"]'); pg.wait_for_timeout(400)

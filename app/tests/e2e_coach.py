@@ -51,6 +51,7 @@ Checks: no page error, nothing wider than the window, the coach's texts in the t
 import json, os, re, sqlite3, sys, time
 from playwright.sync_api import sync_playwright
 from pm_helper import premarket
+GUIDED = "put('settings', Object.assign(structuredClone(S.settings || {}), { pm_mode: 'full' }))"   # these traders chose the guided pre-market (a new one opens the express one, SWEEP.md step 2)
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
 DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
@@ -114,7 +115,7 @@ def run(p, lang, phone):
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'gt1'}), headers=H)
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(900)
   for _ in range(30):   # the session the routine shows (the game's day: a weekend run plays Friday 15:00 ET)
     day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || ''")
@@ -215,7 +216,7 @@ def live(p, lang, phone):   # brief 03 step 3: during the session
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'gt1'}), headers=H)
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(700)
   early = pg.evaluate("(() => { const [h, m] = nowET().slice(11, 16).split(':').map(Number); return h * 60 + m < 70 })()")
   if early: print(f'      {tag}: just after midnight New York, the « minutes since the last loss » part is left out')
@@ -262,7 +263,7 @@ def works(p, lang, phone):   # brief 03 step 4: what works for you
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'gt1'}), headers=H)
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   n = pg.evaluate(HIST); pg.wait_for_timeout(900)
   pg.evaluate("location.hash = '#analytics'"); pg.wait_for_selector('#main .co-stats', timeout=10000); pg.wait_for_timeout(700)
   st = pg.evaluate(TXT, '#main .co-stats')
@@ -298,7 +299,7 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Eli', 'experience': 'gt1'}), headers=H)
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e2: errs.append(str(e2)[:160]))
-  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(900)
   day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || todayStr()")
   pg.evaluate("""(day) => { const back = (k) => { const d = new Date(day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - k); return d.toISOString().slice(0, 10); };
@@ -373,7 +374,7 @@ def fewer(p, lang, phone):   # brief 03 step 5
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'gt1'}), headers=H)
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(600)
   day = pg.evaluate("todayStr()")
   pg.evaluate(PLAN, [day, {'bias': 'bullish', 'max_loss': '1000', 'setups': []}])
@@ -417,7 +418,7 @@ def room(p, lang, phone):
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Alex', 'experience': 'gt1'}), headers=H)
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   pg.evaluate("""() => { put('firms', { id: 'lf', name: 'Lucid Trading' }); put('accounts', { id: 'la', firm_id: 'lf', name: 'LucidPro 50K', starting_balance_c: 5000000, status: 'active', created_on: '2026-09-01', rules: { dll_c: 120000, dd_c: 200000, dd_type: 'static' } }); render(); }""")
   pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(900)
   for _ in range(30):
@@ -466,7 +467,7 @@ def latest_case(p, lang, phone):
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Alex', 'experience': 'gt1'}), headers=H)
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600)
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(900)
   for _ in range(30):
     day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || ''")

@@ -1,0 +1,178 @@
+{
+ "base": "http://127.0.0.1:8917",
+ "at": "2026-10-21 07:25",
+ "rows": [
+  {
+   "case": "390-fr-manual",
+   "experience": "new",
+   "risk_allowed_shown": "1000",
+   "plan": {
+    "taps": 11,
+    "fields": 3,
+    "screens": 3,
+    "robot_s": 1.9,
+    "human_s": 42
+   },
+   "trade": {
+    "taps": 16,
+    "fields": 5,
+    "screens": 5,
+    "robot_s": 2.7,
+    "human_s": 65
+   },
+   "trade_saved": true,
+   "toast": "Trade enregistré · Il te reste 1 200 $ avant ta perte max.",
+   "screens": [
+    "signup",
+    "welcome",
+    "plan",
+    "trade-sheet",
+    "manual-form"
+   ],
+   "errors": []
+  },
+  {
+   "case": "390-fr-shot",
+   "experience": "new",
+   "risk_allowed_shown": "1000",
+   "plan": {
+    "taps": 11,
+    "fields": 3,
+    "screens": 3,
+    "robot_s": 1.8,
+    "human_s": 42
+   },
+   "trade": {
+    "taps": 16,
+    "fields": 4,
+    "screens": 5,
+    "robot_s": 2.3,
+    "human_s": 60
+   },
+   "trade_saved": true,
+   "toast": "Trade enregistré · Il te reste 1 250 $ avant ta perte max.",
+   "screens": [
+    "signup",
+    "welcome",
+    "plan",
+    "trade-sheet",
+    "shot-read"
+   ],
+   "errors": []
+  },
+  {
+   "case": "390-fr-noshot",
+   "experience": "new",
+   "risk_allowed_shown": "1000",
+   "plan": {
+    "taps": 11,
+    "fields": 3,
+    "screens": 3,
+    "robot_s": 1.8,
+    "human_s": 42
+   },
+   "trade": {
+    "taps": 14,
+    "fields": 4,
+    "screens": 4,
+    "robot_s": 2.2,
+    "human_s": 55
+   },
+   "trade_saved": true,
+   "toast": "Trade enregistré · Il te reste 1 250 $ avant ta perte max.",
+   "screens": [
+    "signup",
+    "welcome",
+    "plan",
+    "trade-sheet"
+   ],
+   "errors": []
+  },
+  {
+   "case": "1300-en-manual",
+   "experience": "gt1",
+   "risk_allowed_shown": "1000",
+   "plan": {
+    "taps": 11,
+    "fields": 3,
+    "screens": 3,
+    "robot_s": 1.4,
+    "human_s": 42
+   },
+   "trade": {
+    "taps": 16,
+    "fields": 5,
+    "screens": 5,
+    "robot_s": 1.9,
+    "human_s": 65
+   },
+   "trade_saved": true,
+   "toast": "Trade saved · You have $1,200 left before your max loss.",
+   "screens": [
+    "signup",
+    "welcome",
+    "plan",
+    "trade-sheet",
+    "manual-form"
+   ],
+   "errors": []
+  },
+  {
+   "case": "1300-en-shot",
+   "experience": "gt1",
+   "risk_allowed_shown": "1000",
+   "plan": {
+    "taps": 11,
+    "fields": 3,
+    "screens": 3,
+    "robot_s": 1.4,
+    "human_s": 42
+   },
+   "trade": {
+    "taps": 16,
+    "fields": 4,
+    "screens": 5,
+    "robot_s": 1.7,
+    "human_s": 60
+   },
+   "trade_saved": true,
+   "toast": "Trade saved · You have $1,250 left before your max loss.",
+   "screens": [
+    "signup",
+    "welcome",
+    "plan",
+    "trade-sheet",
+    "shot-read"
+   ],
+   "errors": []
+  },
+  {
+   "case": "1300-en-noshot",
+   "experience": "gt1",
+   "risk_allowed_shown": "1000",
+   "plan": {
+    "taps": 11,
+    "fields": 3,
+    "screens": 3,
+    "robot_s": 1.4,
+    "human_s": 42
+   },
+   "trade": {
+    "taps": 14,
+    "fields": 4,
+    "screens": 4,
+    "robot_s": 1.7,
+    "human_s": 55
+   },
+   "trade_saved": true,
+   "toast": "Trade saved · You have $1,250 left before your max loss.",
+   "screens": [
+    "signup",
+    "welcome",
+    "plan",
+    "trade-sheet"
+   ],
+   "errors": []
+  }
+ ]
+}

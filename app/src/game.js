@@ -1046,7 +1046,10 @@
     if (f.answers.B1 == null) { f.answers.B1 = PM.news.length ? 'yes' : 'no'; if (PM.news.length) f.answers.B1_time = PM.news[0].hm; }
     if (old && ficheLocked(old)) { openSheet(pmLockedHtml(old), { cls: 'g-pm g-pm-locked' }); const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day; return; }   // locked: the session view
     PM.late = !old && ficheLockAt(day) <= Date.now() / 1000;   // the lock time is past without a sheet: the express version (brief step 6)
-    PM.express = old ? old.mode === 'express' : PM.late || (draft ? !!draft.express : (S.settings && S.settings.pm_mode) === 'express');   // or the version the trader chose last time (a saved sheet keeps its own)
+    // the version the trader chose last time (a saved sheet keeps its own); never chosen: the express one, unless a guided sheet
+    // was already saved (SWEEP.md step 2: the guided plan is a mission of week 2, not the first plan of a new trader)
+    const pmMode = S.settings && S.settings.pm_mode, guidedBefore = () => (S.journals || []).some((j) => !j.demo && j.fiche && j.fiche.mode === 'full' && (j.fiche.scenarios || []).length > 0);   // a guided sheet has its scenarios in numbers
+    PM.express = old ? old.mode === 'express' : PM.late || (draft ? !!draft.express : pmMode ? pmMode === 'express' : !guidedBefore());
     if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
     else PM.i = Math.min(PM.i, pmScreens().length - 1);
     openSheet(pmHtml(), { cls: 'g-plan g-pm', onClose: () => pmDraftSave(true) });   // (closed by a swipe or the scrim: the draft keeps the last keystrokes)

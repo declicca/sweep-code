@@ -54,6 +54,7 @@ async def main():
     await ctx.request.post(B + '/api/me/profile', data={'first_name': 'Routine', 'last_name': 'Parity', 'username': u}, headers={'X-Requested-With': 'fetch'})
     pg = await ctx.new_page(); await pg.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
     await pg.goto(B + '/#dashboard'); await pg.wait_for_timeout(2500)
+    await pg.evaluate("put('settings', Object.assign(structuredClone(S.settings || {}), { pm_mode: 'full' }))")   # the guided pre-market, chosen (a new trader opens the express one, SWEEP.md step 2)
     await pg.evaluate("""()=>{ put('firms',{id:'rp-f',name:'Topstep'}); put('accounts',{id:'rp-a',firm_id:'rp-f',name:'Topstep 50K',starting_balance_c:5000000,status:'active',phase:'eval',rules:{dd_c:200000,dd_type:'eod',dd_lock:true,target_c:300000,dll_c:100000}}); }""")
     await pg.wait_for_timeout(1500); await pg.close()
     # D: a market day after today, the next day a market day too (asked to the pinned server)

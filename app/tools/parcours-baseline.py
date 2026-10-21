@@ -1,8 +1,9 @@
 """
 Sweep — the journey's baseline, moment M1 (SWEEP.md, step 0): a new trader goes through the app as it is, with real taps,
 from the sign-up screen to (a) the plan saved (the risk allowed today is on screen) and (b) the first trade saved
-(« Trade saved » with the coach), without a screenshot (« Enter manually ») and with one (the test screenshot); and the
-manual form with the entry price forgotten first (27 Oct.): the cursor lands in the field, the trade is still saved.
+(« Trade saved » with the coach), without a screenshot (« Enter manually »), with one (the test screenshot), and with
+« No screenshot? Enter your P&L » (SWEEP.md step 2; BASELINE_PATHS="manual shot" for the app before it); and the manual
+form with the entry price forgotten first (27 Oct.): the cursor lands in the field, the trade is still saved.
 Counts the taps, the fields typed and the screens, and the robot's time (its own pauses taken out). A rough human time is
 given too: 2.5 s a tap, 5 s a field (the same scale as the journey audit of 16 Oct.).
   sh tools/sync.sh /tmp/gpar && DEST=/tmp/gpar PORT=8495 sh tools/run.sh python3 tools/parcours-baseline.py http://127.0.0.1:8495 [--json out.json]
@@ -68,7 +69,13 @@ def run(p, lang, phone, exp, path):
   screen('trade-sheet', '.nav-am.open, #tkSlide.open'); wait(600)
   pg.evaluate("window.__toasts = []; new MutationObserver(() => { const t = document.getElementById('toast'); if (t && t.textContent && !window.__toasts.includes(t.textContent)) window.__toasts.push(t.textContent) }).observe(document.getElementById('toast'), { childList: true, characterData: true, subtree: true })")   # every message (a celebration can follow « Trade saved »)
   forgot = None
-  if path in ('manual', 'forgot'):
+  if path == 'noshot':   # (SWEEP.md step 2) « No screenshot? Enter your P&L »: the same sheet, the net P&L focused at once
+    tap('.nav-am.open [data-am=no-shot]'); pg.wait_for_selector('.nav-am.open [data-am-f=net]', timeout=8000)
+    focused = pg.evaluate("document.activeElement && document.activeElement.dataset && document.activeElement.dataset.amF === 'net'")
+    if not focused: tap('.nav-am.open [data-am-f=net]')
+    pg.keyboard.type('250'); c['fields'] += 1
+    tap('.nav-am.open [data-am-seg=dir][data-v=long]'); tap('.nav-am.open [data-am=save]')
+  elif path in ('manual', 'forgot'):
     tap('[data-am=to-manual]'); screen('manual-form', '#tkSlide.open [data-act=tk-save]'); wait(600)
     tap('#tkSlide [data-act=tk-dir][data-v=long]')
     if path == 'forgot':   # (27 Oct., brief A1) « Save » without the entry price: the cursor lands in the field, then the trade is saved
@@ -105,7 +112,7 @@ def run(p, lang, phone, exp, path):
 rows = []
 with sync_playwright() as p:
   for lang, phone, exp in (('fr', True, 'new'), ('en', False, 'gt1')):
-    for path in ('manual', 'shot', 'forgot'):
+    for path in ([p for p in ('manual', 'shot', 'noshot', 'forgot') if p in os.environ.get('BASELINE_PATHS', 'manual shot noshot forgot').split()]):
       r = run(p, lang, phone, exp, path); rows.append(r)
       pl, tr = r['plan'], r['trade']
       print(f"{r['case']:<18} plan: {pl['taps']} taps, {pl['fields']} fields, {pl['screens']} screens, ~{pl['human_s']} s human ({pl['robot_s']} s robot), risk {r['risk_allowed_shown'] or '—'} | "
