@@ -394,12 +394,20 @@ window.SweepMO = window.SweepMO || class {
     return `<div class="nav-trs">${rows}</div>${groups.length > max ? `<a class="nav-more" href="#trades">+${groups.length - max} · ${x.all}</a>` : ''}`;
   }
   let DESK_TAB = 'day';   // computer: the tab shown by the performance card (the news card follows it)
+  // the account-type selector on Today: once the trader has two types of accounts, or a filter set (never a hidden filter)
+  function typeSeg() {
+    if (!window.SweepTypeSeg) return '';
+    const set = typeof U !== 'undefined' && U.mtype && U.mtype !== 'all';
+    const live = (S.accounts || []).filter((a) => a.status !== 'archived'), own = live.filter((a) => !a.demo);   // (the sample accounts count while there is no real one)
+    const kinds = new Set((own.length ? own : live).map((a) => (typeof moneyTypeOf === 'function' ? moneyTypeOf(a) : a.money_type)));
+    return set || kinds.size >= 2 ? SweepTypeSeg() : '';
+  }
   function kpiCard() {
     const x = KT[LANG] || KT.en; let tab = 'day'; try { tab = localStorage.getItem('sw.kpiTab') === 'week' ? 'week' : 'day'; } catch (e) { /* private mode */ }
     if (tab === 'day' && kpis('day').n === 0 && !window.SW_MQ.matches) tab = 'week';   // computer: nothing today → the week (the phone shows the day with its news)
     if (window.SW_MQ.matches) return feedCard(tab);
     DESK_TAB = tab;
-    return `<section class="surface nav-kpi nav-card d-perf" data-noi18n><div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div>${window.SweepTypeSeg ? SweepTypeSeg() : ''}<a class="nav-all" href="#trades">${(TL[LANG] || TL.en).all}</a></div><div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;
+    return `<section class="surface nav-kpi nav-card d-perf" data-noi18n><div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div>${typeSeg()}<a class="nav-all" href="#trades">${(TL[LANG] || TL.en).all}</a></div><div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;
   }
   /* ───── phone: one card for the day — scroll the days (P&L, news dot), see the day's numbers, releases and trades ───── */
   const FD = { en: { news: 'Releases', none: 'No important US release.', loading: 'Loading the releases…', fc: 'Fcst', act: 'Act', cal: 'Calendar ›', jr: 'Journal ›', all: 'All ›' }, fr: { news: 'Annonces', none: 'Aucune annonce américaine importante.', loading: 'Chargement des annonces…', fc: 'Prév.', act: 'Réel', cal: 'Calendrier ›', jr: 'Journal ›', all: 'Tout voir ›' }, es: { news: 'Publicaciones', none: 'Sin publicaciones importantes de EE. UU.', loading: 'Cargando publicaciones…', fc: 'Prev.', act: 'Real', cal: 'Calendario ›', jr: 'Diario ›', all: 'Ver todo ›' } };
@@ -456,10 +464,10 @@ window.SweepMO = window.SweepMO || class {
   }
   function feedCard(tab) {
     const x = KT[LANG] || KT.en;
-    return `<section class="surface nav-kpi nav-card d-perf nav-feed" data-noi18n><div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div>${window.SweepTypeSeg ? SweepTypeSeg() : ''}<a class="nav-all" href="#calendar">${(FD[LANG] || FD.en).cal}</a></div>
+    return `<section class="surface nav-kpi nav-card d-perf nav-feed" data-noi18n><div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div>${typeSeg()}<a class="nav-all" href="#calendar">${(FD[LANG] || FD.en).cal}</a></div>
       <div class="nav-fstrip" role="list">${feedStrip()}</div>
       <div class="nav-fdate">${feedDate()}</div>
-      <div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-fn">${tab === 'day' ? feedNews() : feedWeekNews()}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;
+      <div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;   // (the releases: the « Now » line and News, SWEEP.md step 3)
   }
   function feedRefresh(card, keepScroll) {
     const tab = (card.querySelector('[data-kt].on') || {}).dataset?.kt || 'day';
@@ -467,7 +475,7 @@ window.SweepMO = window.SweepMO || class {
     if (st) { st.innerHTML = feedStrip(); if (keepScroll) st.scrollLeft = sl; }
     const fdt = card.querySelector('.nav-fdate'); if (fdt) fdt.innerHTML = feedDate();
     card.querySelector('.nav-kpi-b').innerHTML = kpiHtml(tab);
-    card.querySelector('.nav-fn').innerHTML = tab === 'day' ? feedNews() : feedWeekNews();
+    const fn = card.querySelector('.nav-fn'); if (fn) fn.innerHTML = tab === 'day' ? feedNews() : feedWeekNews();
     card.querySelector('.nav-kpi-t').innerHTML = tradesHtml(tab);
   }
   function centerSel(card, smooth, again) {
@@ -536,7 +544,9 @@ window.SweepMO = window.SweepMO || class {
   /* Today grows with the trader (brief 03 step 1): first the routine; the cards come when they have something to show */
   // an account added « already running » (its balance moved by an adjustment) is worth seeing from the first day (R18)
   const running = () => (S.accounts || []).some((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && Array.isArray(a.adjustments) && a.adjustments.some((x) => +x.amount_c));
-  const stage = () => { const n = (S.trades || []).length; return { n, perf: n >= 1, acc: n >= 1 || running(), more: n >= 5, money: n >= 5 || (S.payouts || []).length > 0 }; };
+  // (SWEEP.md step 3: the accounts from the first one — their room is the risk allowed; « This month », the news card, the trends
+  // and the rank left Today: Trades › Calendar, the « Now » line, Stats, the routine's level)
+  const stage = () => { const n = (S.trades || []).length; return { n, perf: n >= 1, acc: true, more: n >= 5, money: n >= 5 || (S.payouts || []).length > 0 }; };
   function deskToday(dash) {
     if (dash && !stage().more) return;   // the rank in the day card: from the 5th trade (« Quick access » removed: audit of 18 Oct.)
     if (!dash || window.SW_MQ.matches) return;
@@ -884,8 +894,7 @@ window.SweepMO = window.SweepMO || class {
     if (dashEnteredAt !== location.hash + '|' + navCount) { dashEnteredAt = location.hash + '|' + navCount; dash.classList.add('nav-dash-in'); }
     // two columns on a computer, each card at its natural height (no stretched empty cards); one list on a phone (CSS order)
     const sg = stage();
-    const rk = !sg.more ? '' : rankCard() ? `<div class="d-rank">${rankCard()}</div>` : '<div class="d-rank"><div class="surface nav-rank ph" aria-hidden="true"><span class="skel" style="display:block;height:38px;width:100%;border-radius:12px"></span></div></div>';
-    dash.innerHTML = `<div class="d-col d-col-a"><div class="d-today"></div>${typeof window.SweepTrialCard === 'function' ? window.SweepTrialCard() : ''}${sg.perf ? kpiCard() + calCard() : ''}</div><div class="d-col d-col-b">${sg.perf ? newsCard() : ''}${sg.acc ? accountsCard() : ''}${sg.money ? payoutsCard() : ''}${rk}</div>`;
+    dash.innerHTML = `<div class="d-col d-col-a"><div class="d-today"></div>${typeof window.SweepTrialCard === 'function' ? window.SweepTrialCard() : ''}${sg.perf ? kpiCard() : ''}</div><div class="d-col d-col-b">${sg.acc ? accountsCard() : ''}${sg.money ? payoutsCard() : ''}</div>`;
     const greetEl = main.querySelector(':scope > .greet');
     // computer: the news, calendar and payouts go under the day card before the first paint (no card jumping a frame later)
     try { if (typeof newsUnderDay === 'function') newsUnderDay(dash); if (typeof deskToday === 'function') deskToday(dash); } catch (e) { /* the observers do it */ }
@@ -896,10 +905,7 @@ window.SweepMO = window.SweepMO || class {
     if (bb && bb.compareDocumentPosition(greetEl) & Node.DOCUMENT_POSITION_FOLLOWING) greetEl.after(bb);
     if (card) dash.querySelector('.d-today').append(card);
     // trends: only when there is something to show (no data = no card)
-    if (trends && pool().length && !trends.querySelector('.empty')) {
-      asCard(trends, 'd-trends', x.trends, '#analytics', null);
-      dash.querySelector('.d-col-a').append(trends); dash.classList.add('has-trends');
-    } else if (trends) trends.classList.add('nav-old');
+    if (trends) trends.classList.add('nav-old');   // (the week's trend: Stats, SWEEP.md step 3)
     // the old economic section, equity curve and recent trades are replaced (news card, performance card with its trades)
     [econ, curve, recent].forEach((sec) => sec && sec.classList.add('nav-old'));
 

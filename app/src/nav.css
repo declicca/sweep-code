@@ -610,7 +610,7 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-dash .d-col > .d-perf{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
 .nav-dash .d-col > .d-pay{border-top-left-radius:0!important;border-top-right-radius:0!important;border-top:1px solid var(--line)!important;box-shadow:none}
 @media (min-width:861px){.nav-dash .d-col-a > .d-pay{margin-top:-20px!important}}
-@media (max-width:860px){.nav-dash .d-pay{order:1!important}.nav-dash .d-col > .d-pay{margin-top:-14px!important}}
+@media (max-width:860px){.nav-dash .d-acc{order:1!important}.nav-dash .d-perf{order:2!important}.nav-dash .d-pay{order:3!important}.nav-dash .d-col > .d-pay{margin-top:-14px!important}}   /* (SWEEP.md step 3: « Now » in the routine, the accounts, the day or the week with my money under it) */
 /* computer: the day card's own « Add a trade » goes (the title row has it); its other steps (plan, journal, review) stay */
 @media (min-width:861px){.d-today .gc-cta[data-g="add"]{display:none!important}.d-today .gc-c3:has(.gc-cta[data-g="add"]:only-child){display:none}}
 /* account: recalibrate on the platform */
@@ -2874,3 +2874,4 @@ html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:f
 .nav-now-news{color:var(--neg)}
 .nav-now.is-end{background:rgba(var(--neg-rgb,212,162,76),.12)}
 .nav-now.is-end small{color:var(--neg)}
+
