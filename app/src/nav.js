@@ -5724,7 +5724,7 @@ new window.SweepMO(() => {
    forth, and the page jumped). */
 (function () {
   'use strict';
-  function balance() {
+  function balance(last) {
     if (!window.SW_MQ || window.SW_MQ.matches) return;
     const dash = document.querySelector('#main .nav-dash'); if (!dash) return;
     dash.__bal = (dash.__bal || 0) + 1;   // no limit needed: a card moves at most once, so the columns cannot swap back and forth
@@ -5743,12 +5743,16 @@ new window.SweepMO(() => {
       small.append(c); c.dataset.balMoved = '1';
       const after = Math.abs(h(a) - h(b));
       if (after >= hi - lo) { (c.dataset.balFrom === 'merge' ? (big.querySelector(':scope > .nav-merge') || big) : big).append(c); continue; }   // its new size made it worse: back where it was (never tried again), try the next card
-      const key = [...c.classList].find((k) => /^d-/.test(k)); if (key) remembered.set(key, small === a ? 'a' : 'b');
+      const key = [...c.classList].find((k) => /^d-/.test(k)); if (key) { remembered.set(key, small === a ? 'a' : 'b'); keep(); }
     }
+    if (last === true && remembered.size) { const ha = h(a), hb = h(b), hi = Math.max(ha, hb); if (hi && Math.abs(ha - hb) / hi > 0.2) { remembered.clear(); keep(); } }   // (last pass) the places kept no longer fit (other cards, other sizes): found again next time
   }
   // the page is redrawn now and then (sync, edits): the cards already moved go straight to their place, before the
   // page is painted — so a redraw never shows them in the other column for a moment (that was the jump)
-  const remembered = new Map();
+  // kept on this device too (24 Oct.: coming back to Today, a card moved 53 px after the first paint on a slow computer —
+  // the places were only in memory): the next visit puts the cards in their column before the page is painted
+  const remembered = new Map((() => { try { return Object.entries(JSON.parse(localStorage.getItem('sw.bal') || '{}')); } catch (e) { return []; } })());
+  const keep = () => { try { remembered.size ? localStorage.setItem('sw.bal', JSON.stringify(Object.fromEntries(remembered))) : localStorage.removeItem('sw.bal'); } catch (e) { /* private mode */ } };
   function replay(dash) {
     if (!remembered.size || !window.SW_MQ || window.SW_MQ.matches) return;
     const cols = { a: dash.querySelector('.d-col-a'), b: dash.querySelector('.d-col-b') }; if (!cols.a || !cols.b) return;
@@ -5761,7 +5765,7 @@ new window.SweepMO(() => {
     if (!dash || dash === seen) return;   // only a newly drawn Today page
     seen = dash;
     requestAnimationFrame(() => requestAnimationFrame(balance));
-    setTimeout(balance, 700); setTimeout(balance, 1600); setTimeout(balance, 3200);   // again as the accounts, the news and the routine arrive (a card still moves only once)
+    setTimeout(balance, 700); setTimeout(balance, 1600); setTimeout(() => balance(true), 3200);   // again as the accounts, the news and the routine arrive (a card still moves only once)
   };
   if (window.SweepMO) new window.SweepMO(check).observe(document.getElementById('main') || document.body, { childList: true });
   addEventListener('resize', () => { const d = document.querySelector('#main .nav-dash'); if (d) { d.__bal = 0; balance(); } });
