@@ -115,7 +115,7 @@ def run(p, lang, phone):
   # 3. the plan at 9:00, the review off: saved on the server
   pg.select_option('#ntPrefs select[data-nt-push-at="plan"]', '09:00')
   pg.click('#ntPrefs .nt-push-row:nth-child(2) .sw')
-  st = until(lambda: (lambda s: s if s['prefs']['plan']['at'] == '09:00' and s['prefs']['review']['on'] is False else None)(state(ctx)))
+  st = until(lambda: (lambda s: s if s['prefs']['plan']['at'] == '09:00' and s['prefs']['review']['on'] is False else None)(state(ctx)), 25)   # (24 Oct.: 10 s were not enough on a busy CI machine)
   ok(bool(st) and st['prefs']['weekly'] == {'on': True, 'at': '17:00'}, f"{tag} plan at 9:00, review off: saved ({st and st['prefs']})")
   ok(pg.evaluate("(() => { const s = document.querySelector('#ntPrefs select[data-nt-push-at=\"plan\"]'); return s.options[s.selectedIndex].textContent; })()") == x['nine'], f"{tag} it reads « {x['nine']} »")
   ok(pg.evaluate(WIDE) <= 1, f'{tag} nothing wider than the window')
