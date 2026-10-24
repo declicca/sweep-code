@@ -31,8 +31,11 @@ TXT = {'fr': {'more': 'En savoir plus', 'a': 'Moins de 6 mois', 'gp': 'Ton parco
        'es': {'more': 'Saber más', 'a': 'Menos de 6 meses', 'gp': 'Tu recorrido de 90 días está incluido', 'opt': 'opcional', 'prep': 'Preparando los datos', 'kick': 'Tu recorrido de 90 días', 'day9': 'Día 9 de 90', 'late': 'por recuperar', 'quiz': 'Ponte a prueba', 'dw': 'Hecho cuando', 'gate': 'La puerta del mes 1', 'pass': 'Pasar al mes 2', 'set': 'Recorrido de 90 días', 'stop': 'Detener el recorrido', 'go': 'Empezar el recorrido'}}
 WIDE = "Math.max(...[...document.querySelectorAll('#gSheet, #gSheet *, #main *')].map((e) => e.getBoundingClientRect().right)) - innerWidth"
 STATE = "fetch('api/game/gameplan', {headers: {'X-Requested-With': 'fetch'}}).then((r) => r.json())"
-def today_ny():   # the game's trading day: New York + 6 h
-  return (dt.datetime.now(ZoneInfo('America/New_York')) + dt.timedelta(hours=6)).date()
+def today_ny():   # the game's trading day: New York + 6 h — at the server's time (pinned to Friday 15:00 during the market's
+  # weekend, tools/game-now.py: 24 Oct., a Saturday counted with the real date put every day one off)
+  pin = os.environ.get('SWEEP_GAME_NOW', '')
+  now = dt.datetime.strptime(pin, '%Y-%m-%d %H:%M').replace(tzinfo=ZoneInfo('America/New_York')) if pin else dt.datetime.now(ZoneInfo('America/New_York'))
+  return (now + dt.timedelta(hours=6)).date()
 def move(uid, day):   # the plan as if today were its day `day`
   start = (today_ny() - dt.timedelta(days=day - 1)).isoformat()
   d = sqlite3.connect(DB); d.execute('UPDATE game_gameplan SET start_day = ? WHERE user_id = ?', (start, uid)); d.commit(); d.close()
