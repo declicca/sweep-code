@@ -9761,6 +9761,9 @@ document.addEventListener("click", e => {
 
    case "toggle":
     {
+      // one choice per click burst: the 2nd click of a double-click undid the 1st (23 Oct., Admin › Errors: « FOMO » would
+      // not stay selected for a trader on Chrome Windows); a tap, a keyboard press or a new click 1 s later still flip it
+      if (e.detail > 1) break;
       const i = s.col, o = s.id, r = s.path, c = s.v;
       editDoc(i, o, l => {
         const p = (getPath(l, r) || []).slice(), u = p.indexOf(c);

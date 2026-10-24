@@ -9,6 +9,9 @@ Sweep — the errors reported in Admin › Errors (list of 13 Oct.) do not come 
     same height in every frame, no jump report.
  3. « Object is disposed » (lightweight-charts, 3 Oct.): the add-trade chart was removed (another session, no data) but its
     series was kept; a price typed afterwards drew on the removed chart. Market data are simulated in the page.
+ 4. « Toggle did not stick: emo.before=FOMO » (Chrome Windows, #trade, 22 Oct.): a double-click on an emotion chip took it
+    and then undid it (each click flipped it). Now one click burst = one choice: double-clicked, « FOMO » stays selected, no
+    report; a click a moment later still takes it off (the quick Journal sheet's chips, too).
  (« Toggle did not stick », 5 Oct.: chips stay selected since then; e2e_rows_open / the trade page tests cover it.)
 """
 import asyncio, os, sys, tempfile, time
@@ -53,6 +56,27 @@ async def main():
     ok(len(hs) == 1 and not jumps, f'2. tapping emotions: the discipline box stays {sorted(hs)} px in every frame, no jump report ({jumps[:1]})')
     await pg.evaluate(f"remove('trades', '{tid}')"); await pg.wait_for_timeout(500)
     ok(not errs, '2. no page error' + ('' if not errs else ': ' + errs[0])); await ctx.close()
+    # 4. a double-click on an emotion chip (computer): one choice, kept, no report; a later click still takes it off
+    ctx = await br.new_context(storage_state=ST, locale='fr-CA', viewport={'width': 1300, 'height': 900})
+    await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+    pg = await ctx.new_page(); errs = []; reports = []
+    pg.on('pageerror', lambda e: errs.append(str(e)[:160])); pg.on('request', lambda r: 'client-error' in r.url and reports.append(r.post_data))
+    await pg.goto(B + '/#dashboard'); await pg.wait_for_timeout(2500)
+    tid = await pg.evaluate("""(() => { const id = 're-dbl-' + Date.now(); put('trades', { id, account_id: 're-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 21000, exit: 21010, pnl_c: 20000, pnl_manual: true, fees_c: 0,
+      date: todayStr(), session_date: true, entry_time: '10:00', exit_time: '10:10', emo: { before: ['Impulsive'] }, discipline: {}, review: {} }); return id; })()""")
+    await pg.wait_for_timeout(1200); await pg.evaluate(f"location.hash='#trade/{tid}'"); await pg.wait_for_timeout(2500)
+    await pg.evaluate("(() => { const d = document.querySelector('#main details.co-full'); if (d) d.open = true; })()"); await pg.wait_for_timeout(400)
+    chip = pg.locator('#rs-psy [data-act=toggle][data-path="emo.before"][data-v="FOMO"]').first
+    emo = f"(S.trades.find((t) => t.id === '{tid}').emo || {{}}).before || []"
+    await chip.scroll_into_view_if_needed(); await chip.dblclick(); await pg.wait_for_timeout(1500)
+    after = await pg.evaluate(emo); shown = await pg.evaluate("!!document.querySelector('#rs-psy [data-act=toggle][data-path=\\'emo.before\\'][data-v=FOMO].on')")
+    stick = [r for r in reports if 'did not stick' in (r or '')]
+    ok('FOMO' in after and shown and not stick, f'4. a double-click on « FOMO »: selected, shown, no « did not stick » report ({after}, shown {shown}, {stick[:1]})')
+    await pg.wait_for_timeout(600); await chip.click(); await pg.wait_for_timeout(1500)
+    after = await pg.evaluate(emo)
+    ok('FOMO' not in after and 'Impulsive' in after, f'4. a click a moment later takes it off, the other emotion stays ({after})')
+    await pg.evaluate(f"remove('trades', '{tid}')"); await pg.wait_for_timeout(500)
+    ok(not errs, '4. no page error' + ('' if not errs else ': ' + errs[0])); await ctx.close()
     # 3. the add-trade chart removed, then a price typed by hand
     ctx = await br.new_context(storage_state=ST, locale='fr-CA', viewport={'width': 1300, 'height': 900})
     await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")

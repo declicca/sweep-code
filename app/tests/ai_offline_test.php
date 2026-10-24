@@ -15,7 +15,10 @@ $ok = function (bool $c, string $what) use (&$pass, &$fail) { echo ($c ? 'ok   '
 $tmp = sys_get_temp_dir() . '/sweep-offline-' . bin2hex(random_bytes(4)); mkdir($tmp);
 file_put_contents("$tmp/google.php", '<?php file_put_contents(__DIR__ . "/hits", "x", FILE_APPEND); header("Content-Type: application/json"); echo "{}";');
 $port = 20000 + random_int(0, 9999);
-$srv = proc_open([PHP_BINARY, '-S', "127.0.0.1:$port", "$tmp/google.php"], [['file', '/dev/null', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']], $pp);
+// one process, no workers (23 Oct.: started with the suite's PHP_CLI_SERVER_WORKERS=4, its 4 workers outlived proc_terminate
+// and stayed, 4 more php processes after every run)
+$env = getenv(); unset($env['PHP_CLI_SERVER_WORKERS']);
+$srv = proc_open([PHP_BINARY, '-S', "127.0.0.1:$port", "$tmp/google.php"], [['file', '/dev/null', 'r'], ['file', '/dev/null', 'w'], ['file', '/dev/null', 'w']], $pp, null, $env);
 for ($i = 0; $i < 50 && !@fsockopen('127.0.0.1', $port); $i++) usleep(100000);
 $cfg = ['endpoint' => "http://127.0.0.1:$port/{model}", 'model' => 'm', 'api_key' => 'test', 'timeout_seconds' => 3];
 $hits = function () use ($tmp) { clearstatcache(); return is_file("$tmp/hits") ? strlen((string) file_get_contents("$tmp/hits")) : 0; };

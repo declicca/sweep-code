@@ -1175,7 +1175,7 @@ window.SweepMO = window.SweepMO || class {
   /* toggle report: a chip that does not stay selected after a tap is reported to the admin dashboard (Errors) */
   let toggleReports = 0;
   document.addEventListener('click', (e) => {
-    const b = e.target.closest && e.target.closest('[data-act="toggle"][data-path][data-v], [data-g="j-emo"][data-v]'); if (!b || toggleReports >= 3) return;
+    const b = e.target.closest && e.target.closest('[data-act="toggle"][data-path][data-v], [data-g="j-emo"][data-v]'); if (!b || toggleReports >= 3 || e.detail > 1) return;   // (the 2nd click of a double-click changes nothing, on purpose)
     const quick = b.dataset.g === 'j-emo', car = quick && b.closest('.g-car');   // the quick « Journal » sheet
     const id = quick ? (car && car.dataset.id) : b.dataset.id, col = quick ? 'trades' : b.dataset.col, path = quick ? 'emo.before' : b.dataset.path, v = b.dataset.v;
     if (!id) return;

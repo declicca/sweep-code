@@ -3088,6 +3088,7 @@
     else if (a === 'j-setup') jEdit((d) => { d.setup = v; });
     else if (a === 'j-emo') {
       // several emotions per trade; an older trade may hold a single emotion as text: it becomes a list
+      if (e.detail > 1) return;   // one choice per click burst (a double-click undid it, 23 Oct.)
       b.classList.toggle('on');   // instant feedback, the sheet is then redrawn from the saved trade
       jEdit((d) => { d.emo = d.emo && typeof d.emo === 'object' ? d.emo : {}; const cur = d.emo.before; const s = new Set(Array.isArray(cur) ? cur : (typeof cur === 'string' && cur ? [cur] : [])); s.has(v) ? s.delete(v) : s.add(v); d.emo.before = [...s]; });
     }

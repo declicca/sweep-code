@@ -48,6 +48,11 @@ def run(p, lang, phone):
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'cal%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Lou', 'experience': 'gt1'}), headers=H)
+  # (part 4) a release with its figures next Monday, 8:30 ET — « next week » as the app counts it: New York time + 6 h, from Monday
+  eid = hashlib.sha1(('loc-test-' + lang).encode()).hexdigest()   # (an event's id: 40 hex characters, as the calendar's own)
+  day = (dt.datetime.now(ZoneInfo('America/New_York')) + dt.timedelta(hours=6)).date(); mon = (day - dt.timedelta(days=day.weekday()) + dt.timedelta(days=7)).isoformat()
+  ts = int(dt.datetime.fromisoformat(mon + 'T08:30').replace(tzinfo=ZoneInfo('America/New_York')).timestamp())
+  d = sqlite3.connect(DB); d.execute("INSERT OR REPLACE INTO econ_events (id, ts, country, event, impact, actual, forecast, previous, source, updated_at) VALUES (?, ?, 'US', 'Retail Sales m/m', 'high', '0.7%', '0.4%', '-0.1%', 'manual', 0)", (eid, ts)); d.commit(); d.close()
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
   pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(500)
   pg.evaluate("() => { put('accounts', { id: 'a', name: 'Main', status: 'active', starting_balance_c: 5000000, rules: {} }); render(); }")
@@ -87,12 +92,8 @@ def run(p, lang, phone):
   ok(pg.evaluate("document.querySelectorAll('.main-wrap .top .nav-imp, #main [data-act=export-csv]').length") == 0, f'{tag} the Calendar: no CSV button')
   ok(pg.evaluate(WIDE) <= 1, f'{tag} nothing wider than the window')
   if SHOTS: pg.screenshot(path=os.path.join(SHOTS, f'p7-calendar-{tag}.png'))
-  # 4. the economic figures in the trader's language: a release with its figures on next Monday, 8:30 ET (a week the page
-  # has not loaded yet: it is asked for when « Next week » opens)
-  eid = hashlib.sha1(('loc-test-' + lang).encode()).hexdigest()   # (an event's id: 40 hex characters, as the calendar's own)
-  mon = pg.evaluate("newsRange('next')[0]")
-  ts = int(dt.datetime.fromisoformat(mon + 'T08:30').replace(tzinfo=ZoneInfo('America/New_York')).timestamp())
-  d = sqlite3.connect(DB); d.execute("INSERT OR REPLACE INTO econ_events (id, ts, country, event, impact, actual, forecast, previous, source, updated_at) VALUES (?, ?, 'US', 'Retail Sales m/m', 'high', '0.7%', '0.4%', '-0.1%', 'manual', 0)", (eid, ts)); d.commit(); d.close()
+  # 4. the economic figures in the trader's language: the release written before the app first opened (the browser keeps
+  # the calendar's answers for a while: a release added later would only show after that)
   pg.evaluate("location.hash = '#news/next'"); pg.wait_for_selector(f'#main [data-act=ev-open][data-id="{eid}"]', timeout=15000); pg.wait_for_timeout(500)
   row = pg.evaluate(TXT, f'#main [data-act=ev-open][data-id="{eid}"]')[0]
   pg.click(f'#main [data-act=ev-open][data-id="{eid}"]'); pg.wait_for_selector('.evvals', timeout=10000); pg.wait_for_timeout(800)
