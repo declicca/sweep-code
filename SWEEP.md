@@ -2,7 +2,7 @@
 
 Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajustements : mesure d'abord, nouvel ordre des étapes, comptes existants gardés, missions cochées par un comportement. Version analysée : `origin/main` au commit `590bd3f`.
 
-**Avancement** : étape 0 faite (pas encore poussée ni déployée) ; étape 1 faite en local (branche `parcours-1-defauts`) ; étape 2 en cours ; étapes 3 à 6 à faire (section 7). **L'étape 2 ne sera pas déployée avant une semaine de mesures de l'étape 0 en ligne** (décision de Mateo, 21 oct.).
+**Avancement (27 oct.)** : étapes 0 et 1 en ligne (le commit vert `ade074b` est servi par app.makeitsweep.com ; date exacte du déploiement à confirmer par Mateo, puis à noter dans `docs/parcours/MESURE-0.md`). Étape 2 faite, en attente de la semaine de mesure. Étape 3 en cours (lots a et b faits). Étapes 4 à 6 à faire (section 7).
 
 **Statut** : c'est la référence de tous les développements à venir sur l'app. En cas de désaccord avec un brief plus ancien, ce fichier gagne sur le **parcours** (ce qui est visible, où, quand). `app/CONTEXTE-APP.md` reste la référence des **règles** : calculs, argent, prop firms, tests, design.
 
@@ -406,7 +406,10 @@ Avant de coder, chaque demande répond à ces questions, dans le brief ou le com
 ## 7. Mise en œuvre : étapes, une à la fois
 
 **Règles de chaque étape**
-- **Une seule session sur l'app pendant tout le chantier du parcours** (décision de Mateo, 21 oct.) : la conversation du parcours est la seule qui modifie `app/`. Si une autre session doit quand même lancer les tests de l'app, elle utilise `SWEEP_PAR_SLOT=b` (`tools/par.py` : ses propres copies `/tmp/gb_*` et ports 9195, 9295…), jamais `/tmp/g*` ni les ports 8095 à 8498.
+- **Deux sessions, deux rôles** (décision de Mateo, 27 oct. ; remplace la règle « une seule session sur l'app » du 21 oct.) :
+  - la **session stratégie et tests** (celle qui a écrit ce fichier) : `SWEEP.md`, les briefs de chaque étape, les mesures (`docs/parcours/`), la revue des tests et de la CI, la vérification que chaque étape tient ses critères « Fini quand ». Elle ne modifie pas le code de l'app ;
+  - la **session d'exécution** : le code de l'app (`app/`), ses tests, la suite complète, le push et la CI verte, puis le déploiement avec l'accord de Mateo.
+  - Une seule suite complète à la fois sur le Mac : la session d'exécution utilise `/tmp/g*` (ports 8095 à 8498) ; la session stratégie et tests, si elle lance la suite, `SWEEP_PAR_SLOT=b` (`/tmp/gb_*`, ports 9195, 9295…).
 - Elle part d'`origin/main` à jour, dans sa propre branche, une étape à la fois, jamais deux en même temps.
 - Tests ciblés pendant le travail, puis la suite complète (`python3 tools/par.py 3`), et des captures à 390 × 844 tactile et 1300 × 850, en FR / EN / ES, clair et foncé.
 - Une suite complète à la fois sur la machine : les copies `/tmp/g*` et les ports 8095 à 8395 sont partagés entre les conversations.
@@ -464,6 +467,28 @@ Avant de coder, chaque demande répond à ces questions, dans le brief ou le com
 **Fini quand** : avec `parcours-baseline.py` (en ajoutant le cas « sans capture » par la nouvelle ligne), le premier trade sans capture se fait en **4 écrans au plus et 14 touchers au plus** (16 au départ), sans champ de prix.
 
 ### Étape 3 — « Maintenant »
+
+**Relais vers la session d'exécution (27 oct.)**
+
+- **Ce qui existe** : la branche locale `parcours-3b`, sur `ade074b`, avec 3 commits, ni poussés ni déployés :
+  - `14176c9` : l'étape 2, rebasée ;
+  - `fcf50b8` : le lot a, le bandeau « Maintenant » en tête de la routine. Il montre le risque permis et sa source avant le premier trade, plus la prochaine annonce à fort impact avec sa fenêtre sans trade. Pendant la séance, il montre ce qu'il reste et « trade n sur m ». Au signal d'arrêt, il affiche « Journée terminée selon ton plan ». Un seul calcul, `SweepCoach.riskNow`, le même chiffre que « Avant ce trade ». La carte du coach ne répète plus la ligne de séance ;
+  - `5f55cb8` : le lot b, la page Aujourd'hui allégée. Comptes est visible dès le premier compte. « Ce mois-ci », « À surveiller », les annonces de la carte Jour, la tendance et le rang sont retirés. Le sélecteur de type n'apparaît qu'à partir de 2 types de comptes ou d'un filtre actif. Sur téléphone, l'ordre est : la routine (avec Maintenant), Comptes, Jour/Semaine, Mon argent. Test nouveau : `e2e_now`.
+- **À faire d'abord** : rebaser `parcours-3b` sur le `main` actuel. Il contient `0526a3a` (le rééquilibrage des colonnes d'Aujourd'hui) et `03e5abb`. Recompiler `app.html` et les assets à chaque commit.
+- **Un vrai défaut à corriger** (`e2e_first_run`) : sur téléphone, avec l'étape 3, la fenêtre « Ajoute Sweep à ton écran d'accueil » ne s'ouvre plus le 2ᵉ jour, après un trade. Avec l'étape 2 seule, elle s'ouvre.
+  - Ce qui est établi : dans `suggest()` (`src/nav.js`, section 7), `phone()` devient faux pendant le test, parce que `matchMedia('(pointer: coarse)')` passe de vrai à faux après le premier appel.
+  - Une sonde courte, sans les clics du test, garde `pointer: coarse` à vrai.
+  - Il reste à comparer, avec le même marquage, l'étape 2 seule et l'étape 3. Les clics souris de `e2e_first_run` (`click()` au lieu de `tap()`) sont une piste.
+  - Note : « Quoi de neuf » prend aussi la fenêtre automatique de la séance le 2ᵉ jour. Le test doit marquer les nouveautés comme vues (`settings.news_seen` = tous les ids de `SweepNews.list`) avant de tester l'installation.
+- **Tests à mettre à jour pour la nouvelle page Aujourd'hui** :
+  - `e2e_first_run` : après inscription, les cartes sont `['today', 'acc']` ; après le 1er trade, `today`, `perf`, `acc`, sans `cal` ni `news` ; à partir du 5ᵉ trade, `pay`, sans `rank`.
+  - `e2e_session_news_ui` et `e2e_lot_a` 1.2 et 1.3 : la carte « À surveiller » n'est plus sur Aujourd'hui. On vérifie maintenant la ligne d'annonce de « Maintenant » (avant le 1er trade) et la page `#news` (onglet Semaine, Réel · Prév. · Préc.).
+  - `e2e_copy_once` : la carte du mois a quitté Aujourd'hui. Les chiffres d'une copie comptée une fois se vérifient sur Trades › Calendrier.
+  - Sous la charge de la suite (machine en veille la nuit), d'autres échecs ont été des délais dépassés. Chacun repasse seul.
+- **Encore à faire dans l'étape 3** :
+  - la ligne mission dans « Maintenant », avec « Voir les 90 jours › » ; la carte du parcours devient cette ligne ;
+  - puis la suite complète à 0 échec, la CI verte, et la mise à jour de `CONTEXTE-APP.md` (règles d'Aujourd'hui) et de cette section.
+
 
 **But** : Aujourd'hui dit quoi faire maintenant (section 4.2).
 
