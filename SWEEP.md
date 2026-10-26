@@ -485,6 +485,7 @@ Avant de coder, chaque demande répond à ces questions, dans le brief ou le com
   - `e2e_session_news_ui` et `e2e_lot_a` 1.2 et 1.3 : la carte « À surveiller » n'est plus sur Aujourd'hui. On vérifie maintenant la ligne d'annonce de « Maintenant » (avant le 1er trade) et la page `#news` (onglet Semaine, Réel · Prév. · Préc.).
   - `e2e_copy_once` : la carte du mois a quitté Aujourd'hui. Les chiffres d'une copie comptée une fois se vérifient sur Trades › Calendrier.
   - Sous la charge de la suite (machine en veille la nuit), d'autres échecs ont été des délais dépassés. Chacun repasse seul.
+- **Ajouté le 27 oct.** (tour de l'app) : avant le premier trade, la routine ne montre ni « Discipline — », ni la série « 0 », ni le niveau : ces chiffres apparaissent avec le premier trade.
 - **Encore à faire dans l'étape 3** :
   - la ligne mission dans « Maintenant », avec « Voir les 90 jours › » ; la carte du parcours devient cette ligne ;
   - puis la suite complète à 0 échec, la CI verte, et la mise à jour de `CONTEXTE-APP.md` (règles d'Aujourd'hui) et de cette section.
@@ -606,5 +607,15 @@ Un bouton « Fermer ma journée » enregistre les mêmes champs (`post.*`) et do
 
 ### Après le chantier
 
-- **Le 13 novembre** : la liste des fonctions du jeu utilisées par moins de 10 % des traders actifs (Admin › Métriques › Jeu), pour la décision de Mateo (garder, cacher plus longtemps, retirer).
+- **Brief du 27 oct. pour la session d'exécution** : `briefs/brief-app-activation-2026-10-27.md`. Il contient :
+- A, les défauts du tour ;
+- B, la fin de l'étape 3 ;
+- C, les mesures des premières minutes ;
+- D, la première visite qui s'adapte au moment (séance ouverte, marché fermé, historique à ramener) ;
+- E, le rendez-vous du lendemain ;
+- F, les pages longues.
+
+C'est dans cet ordre qu'il s'enchaîne avec les étapes de cette section. D et E précisent l'étape 5 (les missions) pour les premières minutes.
+
+**Le 13 novembre** : la liste des fonctions du jeu utilisées par moins de 10 % des traders actifs (Admin › Métriques › Jeu), pour la décision de Mateo (garder, cacher plus longtemps, retirer).
 - **Fin du gel** : quand les étapes 0 à 6 sont en ligne et que les mesures M1, journées fermées et bilans ouverts sont relevées. Toute nouvelle fonction passe alors par la section 6.
