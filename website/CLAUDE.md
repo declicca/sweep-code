@@ -27,7 +27,10 @@
 - Permissions : dossiers 755, fichiers 644.
 
 ## SEO
-- URLs propres sans `.html`, sitemap, hreflang, données structurées.
+- URLs propres sans `.html` (une adresse en `.html` redirige en 301), hreflang, données structurées.
+- Sitemaps (brief SEO v2, 27 oct.) : `sitemap.xml` est un index (l'adresse que connaissent Search Console et `robots.txt`) de 6 sitemaps par sorte de page, `sitemap-pages`, `-prop-firms`, `-contracts`, `-releases`, `-tools`, `-guides` (`_kind()` dans `build.py`), pour voir l'indexation de chaque sorte dans Search Console. `qa.py seo` et `tools/indexnow.py` lisent l'index (IndexNow télécharge les sitemaps en ligne un à un, avec une pause).
+- `og:locale` : `en_US`, `fr_CA`, `es_419` (espagnol d'Amérique latine et d'Espagne), chaque page déclare les deux autres. Toutes les pages indexables ont leur image de partage (`tools/og_images.py`), sauf l'accueil, qui garde l'image de la marque.
+- Données structurées : `SoftwareApplication` (`@id` `#app`, avec les offres) sur l'accueil, Tarifs et le journal gratuit ; `WebApplication` gratuit (`isAccessibleForFree`) sur les calculateurs ; jamais `Event` pour les annonces économiques. L'app envoie `X-Robots-Tag: noindex` (`api.php`) : elle n'est jamais dans Google.
 - Marque (brief du 19 oct.) :
   - les pages légales (`NOINDEX` dans `core.py` : Conditions, Confidentialité, Risques) portent `noindex, follow` et sortent du sitemap ; elles restent liées et lisibles ;
   - le bloc `WebSite` (nom du site) n'est que sur l'accueil (EN, FR, ES, `url` = la racine) ; `Organization` reste sur chaque page ;

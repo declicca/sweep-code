@@ -330,7 +330,6 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
                       + "".join(f'<li><a href="{u}">{html.escape(n)}</a></li>' for n, u in items[:-1])
                       + f'<li aria-current="page">{html.escape(items[-1][0])}</li></ol></div></nav>')
     extra_head += jsonld({"@context":"https://schema.org","@graph":graph})
-    if page == "404.html": extra_head += '<meta name="robots" content="noindex">'
     if page in NOINDEX: extra_head += '<meta name="robots" content="noindex, follow">'   # never a result for a brand search (brief of Oct 19)
     cl = "fr" if lang == "fr" else "en"   # Spanish pages use the English captures
     for _o, _n in CAPTURE_V6.items():
@@ -365,7 +364,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     seg = '<div class="langseg" role="group" aria-label="' + t(T("Language","Langue","Idioma")) + '">' + "".join(f'<a href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}>{codes[l]}</a>' for l in LANGS) + '</div>'
     langlinks = "".join(f'<a href="{href(l,page)}" hreflang="{l}" lang="{l}" data-setlang="{l}"{CURL if l==lang else ""}>{names[l]}</a>' for l in LANGS)
     cols = "".join(f'<details class="fgrp" open><summary><h3>{t(h)}</h3></summary><ul>' + "".join(f'<li><a href="{href(lang,p)}">{t(l)}</a></li>' for p, l in (items or _foot_firms())) + '</ul></details>' for h, items in FOOT)
-    ogloc = {"en":"en_US","fr":"fr_CA","es":"es_ES"}[lang]
+    ogloc = {"en":"en_US","fr":"fr_CA","es":"es_419"}[lang]
     own = og_of(lang, page)
     og_img = f"https://{DOMAIN}/social/" + (own[0] if own else ("og-100-"+lang+".png") if page=="100" else ("og-image.png" if lang=="en" else "og-image-"+lang+".png"))
     og_alt = own[1] if own else "Sweep — " + t(T('Your edge, finally in one place.','Ton edge, enfin au même endroit.','Tu edge, por fin en un solo lugar.'))
@@ -398,7 +397,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
 <meta name="theme-color" content="#F3F4F6" media="(prefers-color-scheme: light)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Sweep">
-<meta property="og:locale" content="{ogloc}">{"".join(f'<meta property="og:locale:alternate" content="{x}">' for x in ["en_US","fr_CA","es_ES"] if x!=ogloc)}
+<meta property="og:locale" content="{ogloc}">{"".join(f'<meta property="og:locale:alternate" content="{x}">' for x in ["en_US","fr_CA","es_419"] if x!=ogloc)}
 <meta property="og:title" content="{html.escape(title)}">
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{url}">

@@ -4,7 +4,7 @@ deploy.sh saves the live sitemap before uploading, then runs:  python3 -I websit
 Pages that are new or have a new <lastmod> are sent in one request, with the key file the build writes at the site's root
 (dates are days: a page changed again on the day of an earlier deploy is not sent twice; the sitemap still has it).
 --dry prints them without sending. A failure is only reported: it never stops the deploy. Standard library only."""
-import json, os, re, sys, urllib.request
+import json, os, re, sys, time, urllib.request
 
 HOST = "makeitsweep.com"
 
@@ -12,13 +12,27 @@ def dates(xml):
     """{url: lastmod} from a sitemap."""
     return dict(re.findall(r"<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>", xml))
 
+def read(path, live):
+    """{url: lastmod} of a sitemap, or of every sitemap an index lists: read next to the index for the new build,
+    fetched one at a time, gently, for the live site (the site's server blocks bursts)."""
+    xml = open(path, encoding="utf-8").read()
+    if "<sitemapindex" not in xml: return dates(xml)
+    out = {}
+    for loc in re.findall(r"<loc>([^<]+)</loc>", xml):
+        if live:
+            time.sleep(1)
+            with urllib.request.urlopen(loc, timeout=20) as r: out.update(dates(r.read().decode("utf-8")))
+        else:
+            out.update(dates(open(os.path.join(os.path.dirname(os.path.abspath(path)), loc.rsplit("/", 1)[1]), encoding="utf-8").read()))
+    return out
+
 def main():
     args = [a for a in sys.argv[1:] if a != "--dry"]
     if len(args) != 2: sys.exit("Usage : indexnow.py <old sitemap> <new sitemap> [--dry]")
     old_path, new_path = args
-    try: old = dates(open(old_path, encoding="utf-8").read())
-    except OSError: old = {}
-    new = dates(open(new_path, encoding="utf-8").read())
+    try: old = read(old_path, live=True)
+    except Exception: old = {}
+    new = read(new_path, live=False)
     if not old:
         print("IndexNow : sitemap en ligne illisible, rien n'est envoyé."); return
     urls = [u for u, d in new.items() if old.get(u) != d]

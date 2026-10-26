@@ -159,13 +159,31 @@ PRIO.setdefault("prop-firms/index.html", "0.8"); PRIO.setdefault(pages18.RULE_CH
 for _c in pages17.VS: PRIO.setdefault(_c["slug"], "0.8")
 for _g in pages19.RULE_GUIDES: PRIO.setdefault(_g, "0.8")
 PRIO.setdefault(pages19.HUB, "0.7")
-urls = []
+# sitemaps: an index (sitemap.xml, the address Search Console and robots.txt know) and one sitemap per kind of page,
+# so Search Console shows how each kind is indexed (SEO brief v2, 1.6)
+import pages7 as _p7, pages11 as _p11, pages21 as _p21
+_GUIDES = (set(pages19.RULE_GUIDES) | set(_p21.GP_PAGES) | {g["slug"] for g in _p11.EXPORT_GUIDES}
+           | {"liquidity-sweep.html", "guides.html", "trading-journal-guide.html", "trading-journal-routine.html", "trading-templates.html", "glossary.html"})
+_TOOLS = {x[0] for x in _p7.TOOLS} | {"tools.html"}
+def _kind(p):
+    if p.startswith("prop-firms/") or p in (pages18.RULE_CHANGES, "how-we-verify-prop-firm-rules.html"): return "prop-firms"
+    if p.startswith("contracts/") or p == "futures-contracts.html": return "contracts"
+    if p in ("release-dates.html", "economic-calendar.html", "futures-market-hours.html") or p.endswith(("-release-dates.html", "-meeting-dates.html")): return "releases"
+    if p in _TOOLS: return "tools"
+    if p in _GUIDES: return "guides"
+    return "pages"
+_SM = {k: [] for k in ("pages", "prop-firms", "contracts", "releases", "tools", "guides")}
 for p in PAGES:
     if p == "404.html" or p in NOINDEX: continue   # legal pages carry noindex: not in the sitemap
     for l in LANGS:
         alts = "".join(f'<xhtml:link rel="alternate" hreflang="{a}" href="https://{DOMAIN}{href(a,p)}"/>' for a in LANGS) + f'<xhtml:link rel="alternate" hreflang="x-default" href="https://{DOMAIN}{href("en",p)}"/>'
-        urls.append(f'<url><loc>https://{DOMAIN}{href(l,p)}</loc><lastmod>{LASTMOD[p]}</lastmod><priority>{PRIO.get(p,"0.5")}</priority>{alts}</url>')
-open(os.path.join(DIST,"sitemap.xml"),"w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(urls) + "</urlset>")
+        _SM[_kind(p)].append((LASTMOD[p], f'<url><loc>https://{DOMAIN}{href(l,p)}</loc><lastmod>{LASTMOD[p]}</lastmod><priority>{PRIO.get(p,"0.5")}</priority>{alts}</url>'))
+_idx = []
+for _k, _us in _SM.items():
+    if not _us: continue
+    open(os.path.join(DIST, f"sitemap-{_k}.xml"), "w").write('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + "".join(u for _, u in _us) + "</urlset>")
+    _idx.append(f'<sitemap><loc>https://{DOMAIN}/sitemap-{_k}.xml</loc><lastmod>{max(d for d, _ in _us)}</lastmod></sitemap>')
+open(os.path.join(DIST,"sitemap.xml"),"w").write('<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(_idx) + "</sitemapindex>")
 shutil.copy(os.path.join(HERE,"data","robots.txt"), os.path.join(DIST,"robots.txt"))
 open(os.path.join(DIST, pages18.RSS.lstrip("/")), "w", encoding="utf-8").write(pages18.rss(DOMAIN))   # rule changes feed
 _llms = open(os.path.join(HERE,"data","llms.txt"), encoding="utf-8").read()

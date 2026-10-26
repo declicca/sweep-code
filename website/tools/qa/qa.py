@@ -188,11 +188,17 @@ async def layout(urls, widths):
 # ---------------------------------------------------------------- SEO, read from the files
 def seo():
     D = DIST; files = sorted(os.path.relpath(os.path.join(r, f), D) for r, _, fs in os.walk(D) for f in fs if f.endswith(".html") and f != "404.html")
-    sm = set(re.findall(r"<loc>([^<]+)</loc>", open(os.path.join(D, "sitemap.xml")).read()))
+    bad = []
+    top = open(os.path.join(D, "sitemap.xml")).read()   # an index of one sitemap per kind of page (SEO brief v2, 1.6)
+    parts = re.findall(r"<loc>https://makeitsweep\.com/([^<]+)</loc>", top) if "<sitemapindex" in top else []
+    for f in parts:
+        if not os.path.exists(os.path.join(D, f)): bad.append((f, "sitemap annoncé dans l'index mais absent"))
+    locs = sum((re.findall(r"<loc>([^<]+)</loc>", open(os.path.join(D, f)).read()) for f in parts if os.path.exists(os.path.join(D, f))), []) if parts else re.findall(r"<loc>([^<]+)</loc>", top)
+    sm = set(locs)
     ht = open(os.path.join(D, ".htaccess")).read()
     olds = [re.compile(m) for m in re.findall(r"RewriteRule \^\(fr/\|es/\)\?([^\s]+?)\s", ht) + re.findall(r"RedirectMatch 301 \^/\(fr/\|es/\)\?([^\s]+?)\s", ht)]
     txt = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s))).strip()
-    bad = []; noidx = set()
+    noidx = set()
     for rel in files:
         s = open(os.path.join(D, rel), encoding="utf-8").read(); u = url_of(rel); head = s[:s.find("</head>")]
         err = lambda m: bad.append((u, m))
@@ -239,6 +245,7 @@ def seo():
         p = re.sub(r"^https://makeitsweep\.com/(fr/|es/)?", "", loc)
         if any(o.fullmatch(p) or o.fullmatch(p + "/") for o in olds): bad.append((loc, "adresse qui redirige dans le sitemap"))
     missing = [url_of(r) for r in files if DOM + url_of(r) not in sm and DOM + url_of(r) not in noidx]
+    for u in sorted({u for u in locs if locs.count(u) > 1}): bad.append((u, "adresse en double dans les sitemaps"))
     for m in missing: bad.append((m, "absente du sitemap"))
     print(f"== SEO : {len(files)} pages, sitemap de {len(sm)} adresses, {len(bad)} problème(s)")
     for u, m in sorted(set(bad))[:60]: print(f"   {u} : {m}")

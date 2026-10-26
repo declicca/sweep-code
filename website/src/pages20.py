@@ -2,6 +2,13 @@ from core import *
 
 # Lot C landing pages: the free trading journal (more to come in C-2). Facts come from the pricing page, never invented.
 
+def _app_faq_ld(t, faqs):
+    """The free journal page: the app with its offers (the same entity as the home page's SoftwareApplication), then the page's FAQ."""
+    app = {"@type": "SoftwareApplication", "@id": f"https://{DOMAIN}/#app", "name": "Sweep", "applicationCategory": "FinanceApplication", "operatingSystem": "Web",
+           "offers": [{"@type": "Offer", "name": n, "price": v, "priceCurrency": "USD"} for n, v in (("Free", "0"), ("Pro", "19"), ("Elite", "39"))], "publisher": {"@id": f"https://{DOMAIN}/#org"}}
+    faq = {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a_))}} for q, a_ in faqs]}
+    return jsonld({"@context": "https://schema.org", "@graph": [app, faq]})
+
 def _faq_ld(t, faqs):
     return jsonld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]})
 
@@ -116,7 +123,7 @@ def page_free(lang, t):
             t(T("A free trading journal for futures and prop firm traders: journal, calendar, analytics, real CME charts and prop firm rules. Free forever, no card.",
                 "Un journal de trading gratuit pour les traders de futures et de prop firms : journal, calendrier, analyses, graphiques CME et règles. Gratuit, sans carte.",
                 "Un diario de trading gratis para traders de futuros y prop firms: diario, calendario, análisis, gráficos de CME y reglas. Gratis para siempre, sin tarjeta.")),
-            hero + b + ui.final(lang, t), _faq_ld(t, faqs))
+            hero + b + ui.final(lang, t), _app_faq_ld(t, faqs))
 
 # ---------------------------------------------------------------- prop firm tracker (also the page for prop traders: /prop-traders redirects here)
 CRUMBS["prop-firm-tracker.html"] = T("Prop firm tracker", "Suivi des comptes prop", "Seguimiento de cuentas prop")

@@ -119,6 +119,19 @@ def entries():
                              ("release-dates.html", T("U.S. economic release dates", "Dates des annonces américaines", "Fechas de los datos de EE. UU."), T("CPI, NFP, FOMC and more, 2026 and 2027", "CPI, NFP, FOMC et plus, 2026 et 2027", "CPI, NFP, FOMC y más, 2026 y 2027")),
                              ("futures-contracts.html", T("CME futures contract specs", "Fiches des contrats CME", "Fichas de los contratos de CME"), T("Tick size and tick value of 14 contracts", "Taille et valeur du tick de 14 contrats", "Tamaño y valor del tick de 14 contratos"))):
         if page not in done: out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
+    done = {e[0] for e in out}
+    for page in ("install.html", "trading-templates.html", "trading-journal-routine.html", "how-we-verify-prop-firm-rules.html", "guides.html", "ai.html", "faq.html",
+                 "futures-market-hours.html"):   # the pages left on the generic image (SEO brief v2, 1.5): their « Read next » title and line
+        if page not in done: out.append((page, {l: (core.REL_INFO[page][0][l], core.REL_INFO[page][1][l]) for l in LANGS}, None))
+    for page, title, sub in (("about.html", T("About Sweep", "À propos de Sweep", "Acerca de Sweep"),
+                              T("The free trading journal for futures and prop firm traders", "Le journal de trading gratuit des traders de futures et de prop firms",
+                                "El diario de trading gratis para traders de futuros y prop firms")),
+                             ("changelog.html", T("What’s new in Sweep", "Nouveautés de Sweep", "Novedades de Sweep"), T("Every update, dated", "Chaque mise à jour, datée", "Cada actualización, fechada")),
+                             ("contact.html", T("Contact Sweep", "Contacter Sweep", "Contactar con Sweep"), T("hello@makeitsweep.com", "hello@makeitsweep.com", "hello@makeitsweep.com")),
+                             ("press-kit.html", T("Sweep press kit", "Kit presse de Sweep", "Kit de prensa de Sweep"), T("Logos, screenshots and facts", "Logos, captures et faits", "Logos, capturas y datos")),
+                             ("security.html", T("Security and privacy", "Sécurité et confidentialité", "Seguridad y privacidad"),
+                              T("How Sweep protects your journal", "Comment Sweep protège ton journal", "Cómo Sweep protege tu diario"))):
+        if page not in done: out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
     for slug, _, name, _ in pages7.TOOLS:
         out.append((slug, {l: (name[l], T("Free calculator for futures and prop traders", "Calculateur gratuit pour traders de futures et de prop firms", "Calculadora gratis para traders de futuros y prop firms")[l]) for l in LANGS}, None))
     return out

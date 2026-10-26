@@ -174,7 +174,7 @@ def _tool_page(lang, t, slug, h1, lead, form, results, script, howto, faqs):
          + ui.sec(f'<article class="article">{article}</article>', "n", "how", width="read")
          + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs) + others, "n", "faq", width="read"))
     ld = jsonld({"@context":"https://schema.org","@graph":[
-        {"@type":"WebApplication","name":t(h1),"url":f"https://{DOMAIN}{href(lang,slug)}","applicationCategory":"FinanceApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":f"https://{DOMAIN}/#org"}},
+        {"@type":"WebApplication","name":t(h1),"url":f"https://{DOMAIN}{href(lang,slug)}","applicationCategory":"FinanceApplication","operatingSystem":"Web","isAccessibleForFree":True,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":f"https://{DOMAIN}/#org"}},
         {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]}]})
     return hero + b + ui.final(lang, t) + script + BAR_JS, ld
 
