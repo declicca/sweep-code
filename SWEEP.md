@@ -7,7 +7,8 @@ Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajuste
 **Priorité de Mateo (27 oct.)** : garder les traders actuels, avec l'utilisation la plus simple et la plus rapide. L'ordre des travaux est donc :
 1. `briefs/brief-app-activation-2026-10-27.md`, étape A (les défauts) ;
 2. `briefs/brief-app-boucle-quotidienne-2026-10-27.md` (une journée à 2 trades passe d'environ 35 touchers à 15 : plan express, plus d'interruption après un trade, « Fermer ma journée », puis « Maintenant ») ;
-3. les étapes C à F du brief d'activation.
+3. `briefs/brief-app-nouveau-trader-2026-10-27.md` (accompagner un nouveau trader : 8 petites corrections, les garde-fous de la mission deviennent les valeurs du plan, chaque terme expliqué, Stats sans tuiles vides) ;
+4. les étapes C à F du brief d'activation.
 
 **Statut** : c'est la référence de tous les développements à venir sur l'app. En cas de désaccord avec un brief plus ancien, ce fichier gagne sur le **parcours** (ce qui est visible, où, quand). `app/CONTEXTE-APP.md` reste la référence des **règles** : calculs, argent, prop firms, tests, design.
 
