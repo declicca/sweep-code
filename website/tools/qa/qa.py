@@ -49,7 +49,7 @@ def url_of(rel):
     return u[:-5] if u.endswith("/index") else u   # fr/index.html → /fr/, index.html → /
 
 def pages():
-    return sorted(url_of(os.path.relpath(os.path.join(r, f), DIST)) for r, _, fs in os.walk(DIST) for f in fs if f.endswith(".html") and f != "404.html")
+    return sorted(url_of(os.path.relpath(os.path.join(r, f), DIST)) for r, _, fs in os.walk(DIST) if "_nx" not in r for f in fs if f.endswith(".html") and f != "404.html")   # _nx: the server's copies of the release pages, never served
 
 def file_of(u):
     return os.path.join(DIST, (u.lstrip("/") + "index.html") if u.endswith("/") else u.lstrip("/") + ".html")
@@ -187,7 +187,7 @@ async def layout(urls, widths):
 
 # ---------------------------------------------------------------- SEO, read from the files
 def seo():
-    D = DIST; files = sorted(os.path.relpath(os.path.join(r, f), D) for r, _, fs in os.walk(D) for f in fs if f.endswith(".html") and f != "404.html")
+    D = DIST; files = sorted(os.path.relpath(os.path.join(r, f), D) for r, _, fs in os.walk(D) if "_nx" not in r for f in fs if f.endswith(".html") and f != "404.html")
     bad = []
     top = open(os.path.join(D, "sitemap.xml")).read()   # an index of one sitemap per kind of page (SEO brief v2, 1.6)
     parts = re.findall(r"<loc>https://makeitsweep\.com/([^<]+)</loc>", top) if "<sitemapindex" in top else []

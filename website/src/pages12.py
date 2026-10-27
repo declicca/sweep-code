@@ -19,6 +19,19 @@ C = [
  ("6E","Euro FX","CME",0.00005,6.25,125000.0,"H M U Z",None,"fx"),
 ]
 def slug(s): return f"contracts/{s.lower()}-futures.html"
+# the English title's last words, after the tick value (YM and MYM: a tick is one point)
+TITLE_TAIL = {"YM": "E-mini Dow Specs", "MYM": "Micro Dow Specs", "CL": "Crude Oil Futures Specs", "MCL": "Micro Crude Oil Specs", "GC": "Gold Futures Specs",
+              "MGC": "Micro Gold Specs", "SI": "Silver Futures Specs", "6E": "Euro FX Futures Specs"}
+def spec_title(s, tv, pv, ts, L):
+    """« NQ Tick Value: $5 per Tick, $20 per Point · Specs », « Valeur du tick NQ : 5 $ par tick, 20 $ par point », « Valor del tick NQ: 5 $ por tick, 20 $ por punto »."""
+    one = ts == 1   # YM, MYM: a tick is a point
+    if L == "en":
+        if one: c = [f"{s} Tick Value: {_fmt(tv)} per Point · {TITLE_TAIL[s]}", f"{s} Tick Value: {_fmt(tv)} per Point"]
+        elif s in TITLE_TAIL: c = [f"{s} Tick Value: {_fmt(tv)} per Tick · {TITLE_TAIL[s]}", f"{s} Tick Value: {_fmt(tv)} per Tick"]
+        else: c = [f"{s} Tick Value: {_fmt(tv)} per Tick, {_fmt(pv)} per Point · Specs", f"{s} Tick Value: {_fmt(tv)} per Tick, {_fmt(pv)} per Point"]
+    elif L == "fr": c = [f"Valeur du tick {s} : {_fmt(tv, 'fr')} par point"] if one else [f"Valeur du tick {s} : {_fmt(tv, 'fr')} par tick, {_fmt(pv, 'fr')} par point"]
+    else: c = [f"Valor del tick {s}: {_fmt(tv, 'es')} por punto"] if one else [f"Valor del tick {s}: {_fmt(tv, 'es')} por tick, {_fmt(pv, 'es')} por punto"]
+    return next((x for x in c if len(x) <= 60), c[-1])
 
 def _fmt(v, lang="en"):
     """Money as the rest of the site writes it: $12.50, 12,50 $ (FR), 12,50 $ (ES); thousands 1,000 / 1 000 / 1.000."""
@@ -85,9 +98,12 @@ def make_contract(sym):
         F = lambda v: _fmt(v, lang); K = lambda v: _tick(v, lang)
         loc = lambda x: re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', x)
         h1 = T(f"{s} futures: tick size, tick value and specs.", f"Contrat à terme {s} : taille et valeur du tick.", f"Futuros {s}: tamaño y valor del tick.")
-        lead = T(f"{name} ({s}) on {exch}: one tick is {K(ts)} points and is worth {F(tv)} per contract; one full point is worth {F(pv)}.",
-                 f"{name} ({s}) sur {exch} : un tick vaut {K(ts)} point et rapporte {F(tv)} par contrat ; un point complet vaut {F(pv)}.",
-                 f"{name} ({s}) en {exch}: un tick son {K(ts)} puntos y vale {F(tv)} por contrato; un punto completo vale {F(pv)}.")
+        if ts == 1: lead = T(f"{s} moves in 1-point ticks worth {F(tv)} each, per contract. {name} ({s}), on {exch}.",
+                             f"{s} bouge par ticks de 1 point qui valent {F(tv)} chacun, par contrat. {name} ({s}), sur {exch}.",
+                             f"{s} se mueve en ticks de 1 punto que valen {F(tv)} cada uno, por contrato. {name} ({s}), en {exch}.")
+        else: lead = T(f"One {s} point is worth {F(pv)} per contract; each {K(ts)} tick is worth {F(tv)}. {name} ({s}), on {exch}.",
+                       f"Un point {s} vaut {F(pv)} par contrat ; chaque tick de {K(ts)} vaut {F(tv)}. {name} ({s}), sur {exch}.",
+                       f"Un punto de {s} vale {F(pv)} por contrato; cada tick de {K(ts)} vale {F(tv)}. {name} ({s}), en {exch}.")
         hero = ui.hero(t, T("Contract specs","Fiche contrat","Ficha del contrato"), h1, lead)
         key = ui.stats([(t(T("Tick size","Taille du tick","Tamaño del tick")), K(ts), ""), (t(T("Tick value","Valeur du tick","Valor del tick")), F(tv), ""), (t(T("Point value","Valeur du point","Valor del punto")), F(pv), "")])   # the three numbers first; the rest of the sheet under them
         rows = [(T("Symbol","Symbole","Símbolo"), s), (T("Name","Nom","Nombre"), name), (T("Exchange","Bourse","Mercado"), exch),
@@ -153,12 +169,17 @@ def make_contract(sym):
                  T(f"One {s} tick ({_tick(ts)}) is worth {_fmt(tv)} per contract.",f"Un tick {s} ({_tick(ts, 'fr')}) vaut {_fmt(tv, 'fr')} par contrat.",f"Un tick de {s} ({_tick(ts, 'es')}) vale {_fmt(tv, 'es')} por contrato.")),
                 (T(f"How much is one point of {s} worth?",f"Combien vaut un point de {s} ?",f"¿Cuánto vale un punto de {s}?"),
                  T(f"One full point is worth {_fmt(pv)} per contract.",f"Un point complet vaut {_fmt(pv, 'fr')} par contrat.",f"Un punto completo vale {_fmt(pv, 'es')} por contrato."))]
-        b = (ui.sec(key + tbl + f'<p class="fine" style="margin-top:16px">{t(NOTE)}</p>', "t", "specs", width="read")
-             + ui.sec(ui.head(t, None, T(f"What a stop costs on {s}",f"Ce que coûte un stop sur {s}",f"Lo que cuesta un stop en {s}")) + rtbl + calc, "n", "stops", width="read")
+        if sib:
+            faqs.append((T(f"How many {mic} equal one {big}?", f"Combien de {mic} font un {big} ?", f"¿Cuántos {mic} equivalen a un {big}?"),
+                         T(f"Ten. One {big} equals 10 {mic}: same price and chart, a tenth of the size.", f"Dix. Un {big} équivaut à 10 {mic} : même prix et même graphique, dix fois moins gros.",
+                           f"Diez. Un {big} equivale a 10 {mic}: mismo precio y mismo gráfico, una décima parte del tamaño.")))
+        faqs.append((T(f"What are {s} trading hours?", f"Quelles sont les heures de marché de {s} ?", f"¿Cuál es el horario de {s}?"), HOURS))
+        b = (ui.sec(key + calc + tbl + f'<p class="fine" style="margin-top:16px">{t(NOTE)}</p>', "t", "specs", width="read")
+             + ui.sec(ui.head(t, None, T(f"What a stop costs on {s}",f"Ce que coûte un stop sur {s}",f"Lo que cuesta un stop en {s}")) + rtbl, "n", "stops", width="read")
              + ui.sec(f'<article class="article">{art}</article>' + ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs), "n", "trading", width="read")
              + ui.sec(band + others, "t", "journal"))
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]})
-        return (t(T(f"{s} futures tick value, tick size and contract specs · Sweep",f"{s} : valeur du tick, taille et spécifications · Sweep",f"{s}: valor del tick, tamaño y especificaciones · Sweep")),
+        return (spec_title(s, tv, pv, ts, lang),
                 t(T(f"{name} ({s}) futures: tick size {_tick(ts)}, tick value {_fmt(tv)}, point value {_fmt(pv)}, trading hours and what a stop costs, for prop traders.",
                     f"Contrat {name} ({s}) : tick de {_tick(ts, 'fr')}, valeur du tick {_fmt(tv, 'fr')}, valeur du point {_fmt(pv, 'fr')}, heures de marché et coût d’un stop, pour les traders prop.",
                     f"Futuros {name} ({s}): tick de {_tick(ts, 'es')}, valor del tick {_fmt(tv, 'es')}, valor del punto {_fmt(pv, 'es')}, horario y coste de un stop, para traders prop.")),

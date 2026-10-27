@@ -456,6 +456,12 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 table.reltbl tbody th{width:auto;color:var(--text)}
 table.reltbl tr.past>*{color:var(--faint)}
 table.reltbl tr.past .st{opacity:.55}
+.nx .nx-in{font-size:14px;color:var(--muted)}
+.nx-cities{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 20px;margin:6px 0 0;padding:14px 0 0;list-style:none;border-top:1px solid var(--line)}
+.nx-cities li{display:flex;align-items:baseline;gap:8px;font-size:14px}
+.nx-cities span{color:var(--muted)}
+.nextrel .nx-cities b{font:600 14px/1.3 var(--font);letter-spacing:0;font-variant-numeric:tabular-nums}
+.nx-act{flex-basis:100%;margin-top:10px}
 
 /* ---- [pages: glossary.html] the terms by letter: the term first, its sentence under it */
 .gl-group{scroll-margin-top:calc(var(--nav-h) + 76px)}

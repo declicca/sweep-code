@@ -149,12 +149,24 @@ def page_install(lang, t):
     copy = f'<div class="copy"><h2 class="h3">iPhone</h2>{ol(ios)}<h2 class="h3" style="margin-top:40px">Android</h2>{ol(andr)}</div>'
     duo = ('<div class="duo-phones stagger">' + ui.frame_p("v6-20-signup-m.webp", t(T("Sweep log-in screen on a phone","Écran de connexion Sweep sur téléphone","Pantalla de inicio de Sweep en el teléfono")), cls="", eager=True, sizes="(max-width: 743px) 40vw, 320px")
            + ui.frame_p("v6-01-today-m.webp", t(T("Sweep on a phone: Today","Sweep sur téléphone : Aujourd’hui","Sweep en el teléfono: Hoy")), cls="", sizes="(max-width: 743px) 40vw, 320px") + "</div>")
-    hero = ui.hero(t, H[2], H[0], H[1], cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True))
+    hero = ui.hero(t, T("Sweep app", "App Sweep", "App Sweep"), H[0], H[1], kick_in_h1=True, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True))   # « sweep app » (SEO brief v2, 2.3)
+    faqs = [(T("Is Sweep on the App Store?", "Sweep est-il sur l’App Store ?", "¿Está Sweep en la App Store?"),
+             T("Not yet. Sweep installs from your browser: Safari on iPhone, Chrome on Android. It opens full screen from its icon, like any other app.",
+               "Pas encore. Sweep s’installe depuis ton navigateur : Safari sur iPhone, Chrome sur Android. Il s’ouvre en plein écran depuis son icône, comme n’importe quelle app.",
+               "Todavía no. Sweep se instala desde tu navegador: Safari en iPhone, Chrome en Android. Se abre a pantalla completa desde su icono, como cualquier otra app.")),
+            (T("Does it work offline?", "Fonctionne-t-il hors ligne ?", "¿Funciona sin conexión?"),
+             T("No. Sweep needs a connection to open and to save your trades, so your journal is the same on your phone and your computer.",
+               "Non. Sweep a besoin d’une connexion pour s’ouvrir et enregistrer tes trades : ton journal est donc le même sur ton téléphone et ton ordinateur.",
+               "No. Sweep necesita conexión para abrirse y guardar tus operaciones, así tu diario es el mismo en tu teléfono y tu ordenador.")),
+            (T("Is the app free?", "L’app est-elle gratuite ?", "¿La app es gratis?"),
+             T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.",
+               "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
     b = (ui.sec(f'<div class="split phone-media">{copy}<div>{duo}</div></div>', "t", "steps")
-         + ui.sec(f'<article class="article">{t(INSTALL_HELP)}</article>', "n", "help", width="read") + ui.final(lang, t))
-    ld = jsonld({"@context":"https://schema.org","@type":"HowTo","name":t(T("Install Sweep on iPhone","Installer Sweep sur iPhone","Instalar Sweep en iPhone")),"step":[{"@type":"HowToStep","position":i+1,"text":re.sub("<[^>]+>","",t(s))} for i,s in enumerate(ios)]})
-    return (t(T("Install the Sweep app on iPhone and Android","Installer l’app Sweep sur iPhone et Android","Instalar la app Sweep en iPhone y Android")),
-            t(T("Add Sweep to your iPhone or Android home screen from Safari or Chrome. Full screen, fast, no App Store needed, in three taps.","Ajoute Sweep à l’écran d’accueil de ton iPhone ou Android depuis Safari ou Chrome. Plein écran, rapide, sans App Store, en trois touchers.","Añade Sweep a la pantalla de inicio de tu iPhone o Android desde Safari o Chrome. Pantalla completa, rápido, sin App Store.")),
+         + ui.sec(f'<article class="article">{t(INSTALL_HELP)}</article>', "n", "help", width="read")
+         + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read") + ui.final(lang, t))
+    ld = jsonld({"@context":"https://schema.org","@graph":[{"@type":"HowTo","name":t(T("Install Sweep on iPhone","Installer Sweep sur iPhone","Instalar Sweep en iPhone")),"step":[{"@type":"HowToStep","position":i+1,"text":re.sub("<[^>]+>","",t(s))} for i,s in enumerate(ios)]}, {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q,a in faqs]}]})
+    return (t(T("Sweep App — Install the Trading Journal on iPhone & Android","App Sweep — installe le journal de trading (iPhone, Android)","App Sweep — Instala el diario de trading (iPhone, Android)")),
+            t(T("Add the Sweep app to your home screen in 30 seconds. Free trading journal for futures and prop firm traders. No app store needed.","Ajoute l’app Sweep à ton écran d’accueil en 30 secondes. Journal de trading gratuit pour futures et prop firms. Sans App Store.","Añade la app Sweep a tu pantalla de inicio en 30 segundos. Diario de trading gratis para futuros y prop firms. Sin tienda de apps.")),
             hero + b, ld)
 
 SYSTEM_PAGES.add("install.html")

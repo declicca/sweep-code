@@ -411,7 +411,13 @@ def make_rules_page(f):
         chain = {"en": [f"{name} Rules 2026: Drawdown, Payouts & Journal · Sweep", f"{name} Rules 2026: Payouts & Journal · Sweep", f"{name} Rules & Journal 2026 · Sweep", f"{name} Rules 2026 · Sweep"],
                  "fr": [f"Règles {name} 2026 : drawdown, payouts · Sweep", f"Règles {name} 2026 : drawdown, payouts", f"Règles {name} 2026 · Sweep"],     # written for French searches,
                  "es": [f"Reglas de {name} 2026: drawdown y payouts · Sweep", f"Reglas de {name} 2026: drawdown y payouts", f"Reglas de {name} 2026 · Sweep"]}   # not translated
-        title = next(c for c in chain[lang] if len(c) <= 60)
+        # the three firms searched most, worded like the searches (SEO brief v2, 2.6)
+        OVR = {"lucid": {"en": ["Lucid Trading Rules 2026: Drawdown & Payouts · Sweep"], "fr": ["Règles Lucid Trading 2026 : drawdown et payouts · Sweep"]},
+               "topstep": {"en": ["Topstep Rules 2026: Max Loss, Consistency & Payouts · Sweep"], "fr": ["Règles Topstep 2026 : perte max, consistance et payouts"],
+                           "es": ["Reglas de Topstep 2026: pérdida máxima y payouts · Sweep"]},
+               "apex": {"en": ["Apex Trader Funding Rules 2026: Drawdown & Payouts · Sweep"], "fr": ["Règles Apex Trader Funding 2026 : drawdown et payouts · Sweep",
+                                                                                                  "Règles Apex Trader Funding 2026 : drawdown et payouts"]}}
+        title = next(c for c in OVR.get(f["id"], {}).get(lang, []) + chain[lang] if len(c) <= 60)
         desc = t(T(f"{name} rules from Sweep’s weekly check ({day(when, 'en')}): max loss, daily loss limit, consistency, minimum days and payout conditions, {kk(sizes_all[0])} to {kk(sizes_all[-1])}.",
                    f"Règles {name} 2026 : drawdown, perte journalière max, règle de consistance, jours minimum et conditions de payout, vérifiées le {day(when, 'fr')}.",
                    f"Reglas de {name} 2026: drawdown, pérdida diaria máxima, regla de consistencia, días mínimos y condiciones de payout, revisadas el {day(when, 'es')}."))
@@ -704,7 +710,8 @@ def make_manual_page(slug, name):
         b += (ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "questions", width="read")
               + ui.read_next(lang, t, ["prop-firms/index.html", "pass-prop-firm-evaluation.html", "prop-firm-payout-rules.html"]))
         ld = jsonld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]})
-        return (t(T(f"{name} Rules & Trading Journal · Sweep", f"Règles {name} et journal de trading · Sweep", f"Reglas de {name} y diario de trading · Sweep")),
+        return (t(T("Tradeify Trading Journal: Track Your Accounts · Sweep", "Journal de trading Tradeify : suis tes comptes · Sweep", "Diario de trading Tradeify: sigue tus cuentas · Sweep")
+                  if name == "Tradeify" else T(f"{name} Rules & Trading Journal · Sweep", f"Règles {name} et journal de trading · Sweep", f"Reglas de {name} y diario de trading · Sweep")),   # « tradeify trading journal » (SEO brief v2, 2.6)
                 t(T(f"Track your {name} accounts in Sweep: enter the rules once (target, max loss, daily limit, consistency, payouts) and every trade is checked. Free.",
                     f"Suis tes comptes {name} dans Sweep : saisis les règles une fois (objectif, perte max, limite du jour, consistance, payouts) et chaque trade est vérifié.",
                     f"Sigue tus cuentas de {name} en Sweep: introduce las reglas una vez (objetivo, pérdida máx., límite diario, consistencia, payouts) y se revisa cada operación.")),

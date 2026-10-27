@@ -98,6 +98,7 @@ for f in os.listdir(os.path.join(STATIC,"fonts")): shutil.copy(os.path.join(STAT
 shutil.copytree(os.path.join(STATIC,"img"), os.path.join(DIST,"img"))
 for d in ("icons","social","video","press","templates"): shutil.copytree(os.path.join(STATIC,d), os.path.join(DIST,d))
 shutil.copy(os.path.join(STATIC,"site.webmanifest"), os.path.join(DIST,"site.webmanifest"))
+shutil.copy(os.path.join(STATIC,"release.php"), os.path.join(DIST,"release.php"))   # the release dates pages, with the next release (pages13.NX)
 def _text(body):
     """A page's visible text, without tags, scripts or styles: what its sitemap date follows."""
     return _re.sub(r"\s+", " ", _re.sub(r"<[^>]+>", " ", _re.sub(r"<script\b.*?</script>|<style\b.*?</style>", " ", body, flags=_re.S))).strip()
@@ -217,6 +218,24 @@ for _l in LANGS:
             return m.group(1) + json.dumps(_d, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + m.group(3) if _hit else m.group(0)
         _s2 = _re.sub(r'(<script type="application/ld\+json">)(.*?)(</script>)', _fix, _s, flags=_re.S)
         if _s2 != _s: open(_f, "w", encoding="utf-8").write(_s2)
+# release dates (SEO brief v2, 2.1): the page with its placeholders and the texts of every upcoming release go to _nx/ (never served:
+# release.php reads them and fills the page with the next release when it is asked for); the page as built shows the next one now
+import html as _html
+os.makedirs(os.path.join(DIST, "_nx"), exist_ok=True)
+open(os.path.join(DIST, "_nx", ".htaccess"), "w").write("Require all denied\n")
+_llms = open(os.path.join(DIST, "llms.txt"), encoding="utf-8").read()
+for (_l, _p), _vs in pages13.NX.items():
+    _f = os.path.join(DIST if _l == "en" else os.path.join(DIST, _l), _p)
+    _s = open(_f, encoding="utf-8").read(); _n = f"{_l}-{_p[:-len('.html')]}"
+    open(os.path.join(DIST, "_nx", _n + ".html"), "w", encoding="utf-8").write(_s)
+    json.dump(_vs, open(os.path.join(DIST, "_nx", _n + ".json"), "w", encoding="utf-8"), ensure_ascii=False)
+    for _k, _v in _vs[0].items():
+        if _k == "at": continue
+        _s = _s.replace(_k, _v); _llms = _llms.replace(_k, _html.unescape(_v))
+    if _re.search(r"NX[a-z]+(?:en|fr|es)[A-Z0-9]+QQ", _s): raise SystemExit(f"build: a placeholder is left in {_l}/{_p}")
+    open(_f, "w", encoding="utf-8").write(_s)
+open(os.path.join(DIST, "llms.txt"), "w", encoding="utf-8").write(_llms)
+pages13.write_ics(DIST)
 open(os.path.join(DIST,".htaccess"),"w").write("""# makeitsweep.com (Apache / cPanel)
 Options -Indexes
 # Never serve this site from LiteSpeed's server-side page cache (stale pages break the design)
@@ -228,7 +247,8 @@ ErrorDocument 404 /404.html
 AddType font/woff2 .woff2
 AddType image/webp .webp
 AddType application/manifest+json .webmanifest
-AddCharset utf-8 .txt .xml .webmanifest
+AddType text/calendar .ics
+AddCharset utf-8 .txt .xml .webmanifest .ics
 <IfModule mod_rewrite.c>
 RewriteEngine On
 # http and www go to https://makeitsweep.com in one hop
@@ -249,6 +269,8 @@ RewriteRule ^ /%1 [R=301,L,NE]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}/$1.html -f
 RewriteRule ^(.+?)/$ /$1 [R=301,L]
+# release dates: release.php fills the page with the next release when it is asked for (texts written by the build in _nx/)
+RewriteRule ^((?:fr/|es/)?(?:(?:cpi|ppi|nfp|pce|gdp|retail-sales|ism-manufacturing)-release-dates|fomc-meeting-dates))/?$ /release.php?p=$1 [L,QSA]
 # /404 is not a page: it falls through to the real 404
 RewriteCond $1 !(^|/)404$
 RewriteCond %{DOCUMENT_ROOT}/$1.html -f
@@ -271,7 +293,7 @@ Header always set X-Frame-Options "DENY"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 Header always set Strict-Transport-Security "max-age=31536000"
 # pages only load from the site itself (and call the app); inline scripts and styles stay allowed (the site uses them). Not on files like the PDFs
-<FilesMatch "\\.html$">
+<FilesMatch "(\\.html|^release\\.php)$">
 Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://app.makeitsweep.com; media-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 </FilesMatch>
 <FilesMatch "\\.woff2$">
@@ -284,7 +306,7 @@ Header set Cache-Control "public, max-age=86400, stale-while-revalidate=2592000"
 <FilesMatch "\\.[0-9a-f]{10}\\.(css|js)$">
 Header set Cache-Control "public, max-age=31536000, immutable"
 </FilesMatch>
-<FilesMatch "\\.(html|xml|txt|webmanifest)$">
+<FilesMatch "(\\.(html|xml|txt|webmanifest|ics)|^release\\.php)$">
 Header set Cache-Control "no-cache, must-revalidate"
 </FilesMatch>
 <FilesMatch "^$">

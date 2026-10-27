@@ -3,7 +3,7 @@
 "generated": "2026-09-30",
 "country": "US",
 "timezone": "America/New_York",
-"notes": "official = published by BLS / Federal Reserve; official-tentative = Fed 2027 calendar; estimated = projected from the usual release pattern, check closer to the date. Actual/forecast values are not included.",
+"notes": "official = published by BLS / Federal Reserve; official-tentative = Fed 2027 calendar; estimated = projected from the usual release pattern, check closer to the date. Actual/forecast values are not included. · 14 Oct. 2026: checked against the official calendars (BLS CPI, PPI and Employment Situation to Dec. 2027, Census retail sales 2026, BEA GDP and Personal Income to Dec. 2026, Federal Reserve FOMC): those dates are « official ».",
 "events": [
 {
 "date": "2026-01-02",
@@ -253,6 +253,13 @@
 {
 "date": "2026-03-06",
 "time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-03-06",
+"time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
 "status": "official"
@@ -319,6 +326,13 @@
 "event": "ADP Non-Farm Employment Change",
 "impact": "medium",
 "status": "estimated"
+},
+{
+"date": "2026-04-01",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2026-04-01",
@@ -396,6 +410,13 @@
 "event": "Initial Jobless Claims",
 "impact": "medium",
 "status": "estimated"
+},
+{
+"date": "2026-04-21",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2026-04-23",
@@ -503,6 +524,13 @@
 "status": "estimated"
 },
 {
+"date": "2026-05-14",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "official"
+},
+{
 "date": "2026-05-20",
 "time": "14:00",
 "event": "FOMC Meeting Minutes",
@@ -599,6 +627,13 @@
 "event": "Initial Jobless Claims",
 "impact": "medium",
 "status": "estimated"
+},
+{
+"date": "2026-06-17",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2026-06-17",
@@ -720,6 +755,13 @@
 "status": "estimated"
 },
 {
+"date": "2026-07-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "official"
+},
+{
 "date": "2026-07-23",
 "time": "08:30",
 "event": "Initial Jobless Claims",
@@ -825,6 +867,13 @@
 "status": "estimated"
 },
 {
+"date": "2026-08-14",
+"time": "08:30",
+"event": "Retail Sales m/m",
+"impact": "high",
+"status": "official"
+},
+{
 "date": "2026-08-19",
 "time": "14:00",
 "event": "FOMC Meeting Minutes",
@@ -919,6 +968,13 @@
 "date": "2026-09-11",
 "time": "08:30",
 "event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-09-16",
+"time": "08:30",
+"event": "Retail Sales m/m",
 "impact": "high",
 "status": "official"
 },
@@ -1063,11 +1119,11 @@
 "status": "official"
 },
 {
-"date": "2026-10-16",
+"date": "2026-10-15",
 "time": "08:30",
 "event": "Retail Sales m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2026-10-22",
@@ -1100,9 +1156,16 @@
 {
 "date": "2026-10-29",
 "time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-10-29",
+"time": "08:30",
 "event": "GDP q/q (Advance)",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2026-10-29",
@@ -1112,18 +1175,11 @@
 "status": "estimated"
 },
 {
-"date": "2026-10-30",
-"time": "08:30",
-"event": "Core PCE Price Index m/m",
-"impact": "high",
-"status": "estimated"
-},
-{
-"date": "2026-10-30",
+"date": "2026-10-29",
 "time": "08:30",
 "event": "PCE Price Index m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2026-11-02",
@@ -1217,24 +1273,17 @@
 "status": "official"
 },
 {
-"date": "2026-11-16",
+"date": "2026-11-17",
 "time": "08:30",
 "event": "Retail Sales m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2026-11-18",
 "time": "14:00",
 "event": "FOMC Meeting Minutes",
 "impact": "high",
-"status": "estimated"
-},
-{
-"date": "2026-11-19",
-"time": "08:30",
-"event": "GDP q/q (Second Estimate)",
-"impact": "medium",
 "status": "estimated"
 },
 {
@@ -1254,23 +1303,30 @@
 {
 "date": "2026-11-25",
 "time": "08:30",
+"event": "Core PCE Price Index m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2026-11-25",
+"time": "08:30",
+"event": "GDP q/q (Second Estimate)",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-11-25",
+"time": "08:30",
 "event": "Initial Jobless Claims",
 "impact": "medium",
 "status": "estimated"
 },
 {
-"date": "2026-11-27",
-"time": "08:30",
-"event": "Core PCE Price Index m/m",
-"impact": "high",
-"status": "estimated"
-},
-{
-"date": "2026-11-27",
+"date": "2026-11-25",
 "time": "08:30",
 "event": "PCE Price Index m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2026-12-01",
@@ -1382,7 +1438,7 @@
 "time": "08:30",
 "event": "Retail Sales m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2026-12-17",
@@ -1392,18 +1448,25 @@
 "status": "estimated"
 },
 {
-"date": "2026-12-18",
+"date": "2026-12-23",
 "time": "08:30",
 "event": "Core PCE Price Index m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
-"date": "2026-12-18",
+"date": "2026-12-23",
+"time": "08:30",
+"event": "GDP q/q (Third Estimate)",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2026-12-23",
 "time": "08:30",
 "event": "PCE Price Index m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2026-12-24",
@@ -1436,36 +1499,8 @@
 {
 "date": "2026-12-31",
 "time": "08:30",
-"event": "GDP q/q (Third Estimate)",
-"impact": "medium",
-"status": "estimated"
-},
-{
-"date": "2026-12-31",
-"time": "08:30",
 "event": "Initial Jobless Claims",
 "impact": "medium",
-"status": "estimated"
-},
-{
-"date": "2027-01-04",
-"time": "08:30",
-"event": "Average Hourly Earnings m/m",
-"impact": "medium",
-"status": "estimated"
-},
-{
-"date": "2027-01-04",
-"time": "08:30",
-"event": "Nonfarm Payrolls",
-"impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-01-04",
-"time": "08:30",
-"event": "Unemployment Rate",
-"impact": "high",
 "status": "estimated"
 },
 {
@@ -1497,25 +1532,46 @@
 "status": "estimated"
 },
 {
+"date": "2027-01-08",
+"time": "08:30",
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
+},
+{
+"date": "2027-01-08",
+"time": "08:30",
+"event": "Nonfarm Payrolls",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2027-01-08",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
+},
+{
 "date": "2027-01-13",
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-01-13",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-01-14",
 "time": "08:30",
 "event": "Core PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-01-14",
@@ -1529,7 +1585,7 @@
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-01-15",
@@ -1634,42 +1690,35 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-02-05",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-02-05",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-02-10",
-"time": "08:30",
-"event": "CPI m/m",
-"impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-02-10",
-"time": "08:30",
-"event": "Core CPI m/m",
-"impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-02-11",
 "time": "08:30",
-"event": "Core PPI m/m",
+"event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
+},
+{
+"date": "2027-02-11",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2027-02-11",
@@ -1679,11 +1728,18 @@
 "status": "estimated"
 },
 {
-"date": "2027-02-11",
+"date": "2027-02-12",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2027-02-12",
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-02-16",
@@ -1781,42 +1837,35 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-03-05",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-03-05",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-03-10",
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-03-10",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-03-11",
-"time": "08:30",
-"event": "Core PPI m/m",
-"impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-03-11",
@@ -1826,11 +1875,18 @@
 "status": "estimated"
 },
 {
-"date": "2027-03-11",
+"date": "2027-03-12",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2027-03-12",
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-03-16",
@@ -1921,21 +1977,21 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-04-02",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-04-02",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-04-05",
@@ -1970,28 +2026,28 @@
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-04-13",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-04-14",
 "time": "08:30",
 "event": "Core PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-04-14",
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-04-15",
@@ -2103,42 +2159,42 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-05-07",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-05-07",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-05-12",
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-05-12",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-05-13",
 "time": "08:30",
 "event": "Core PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-05-13",
@@ -2152,7 +2208,7 @@
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-05-14",
@@ -2250,21 +2306,21 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-06-04",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-06-04",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-06-09",
@@ -2285,14 +2341,14 @@
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-06-10",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-06-10",
@@ -2306,14 +2362,14 @@
 "time": "08:30",
 "event": "Core PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-06-11",
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-06-16",
@@ -2397,21 +2453,21 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-07-02",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-07-02",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-07-06",
@@ -2435,32 +2491,25 @@
 "status": "estimated"
 },
 {
-"date": "2027-07-13",
+"date": "2027-07-14",
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
-"date": "2027-07-13",
+"date": "2027-07-14",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
-"date": "2027-07-14",
+"date": "2027-07-15",
 "time": "08:30",
 "event": "Core PPI m/m",
 "impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-07-14",
-"time": "08:30",
-"event": "PPI m/m",
-"impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-07-15",
@@ -2468,6 +2517,13 @@
 "event": "Initial Jobless Claims",
 "impact": "medium",
 "status": "estimated"
+},
+{
+"date": "2027-07-15",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2027-07-16",
@@ -2572,55 +2628,55 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-08-06",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-08-06",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
+},
+{
+"date": "2027-08-10",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2027-08-10",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2027-08-11",
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-08-11",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-08-12",
-"time": "08:30",
-"event": "Core PPI m/m",
-"impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-08-12",
 "time": "08:30",
 "event": "Initial Jobless Claims",
 "impact": "medium",
-"status": "estimated"
-},
-{
-"date": "2027-08-12",
-"time": "08:30",
-"event": "PPI m/m",
-"impact": "high",
 "status": "estimated"
 },
 {
@@ -2705,21 +2761,21 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-09-03",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-09-03",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-09-03",
@@ -2743,32 +2799,32 @@
 "status": "estimated"
 },
 {
+"date": "2027-09-10",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2027-09-10",
+"time": "08:30",
+"event": "PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
 "date": "2027-09-14",
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-09-14",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-09-15",
-"time": "08:30",
-"event": "Core PPI m/m",
-"impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-09-15",
-"time": "08:30",
-"event": "PPI m/m",
-"impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-09-15",
@@ -2849,27 +2905,6 @@
 },
 {
 "date": "2027-10-01",
-"time": "08:30",
-"event": "Average Hourly Earnings m/m",
-"impact": "medium",
-"status": "estimated"
-},
-{
-"date": "2027-10-01",
-"time": "08:30",
-"event": "Nonfarm Payrolls",
-"impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-10-01",
-"time": "08:30",
-"event": "Unemployment Rate",
-"impact": "high",
-"status": "estimated"
-},
-{
-"date": "2027-10-01",
 "time": "10:00",
 "event": "ISM Manufacturing PMI",
 "impact": "high",
@@ -2904,25 +2939,39 @@
 "status": "estimated"
 },
 {
-"date": "2027-10-13",
+"date": "2027-10-08",
 "time": "08:30",
-"event": "CPI m/m",
-"impact": "high",
-"status": "estimated"
+"event": "Average Hourly Earnings m/m",
+"impact": "medium",
+"status": "official"
 },
 {
-"date": "2027-10-13",
+"date": "2027-10-08",
 "time": "08:30",
-"event": "Core CPI m/m",
+"event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
+},
+{
+"date": "2027-10-08",
+"time": "08:30",
+"event": "Unemployment Rate",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2027-10-14",
 "time": "08:30",
-"event": "Core PPI m/m",
+"event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
+},
+{
+"date": "2027-10-14",
+"time": "08:30",
+"event": "Core CPI m/m",
+"impact": "high",
+"status": "official"
 },
 {
 "date": "2027-10-14",
@@ -2932,11 +2981,18 @@
 "status": "estimated"
 },
 {
-"date": "2027-10-14",
+"date": "2027-10-15",
+"time": "08:30",
+"event": "Core PPI m/m",
+"impact": "high",
+"status": "official"
+},
+{
+"date": "2027-10-15",
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-10-15",
@@ -3041,35 +3097,35 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-11-05",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-11-05",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-11-10",
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-11-10",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-11-10",
@@ -3083,14 +3139,14 @@
 "time": "08:30",
 "event": "Core PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-11-12",
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-11-16",
@@ -3174,21 +3230,21 @@
 "time": "08:30",
 "event": "Average Hourly Earnings m/m",
 "impact": "medium",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-12-03",
 "time": "08:30",
 "event": "Nonfarm Payrolls",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-12-03",
 "time": "08:30",
 "event": "Unemployment Rate",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-12-03",
@@ -3230,28 +3286,28 @@
 "time": "08:30",
 "event": "CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-12-10",
 "time": "08:30",
 "event": "Core CPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
-"date": "2027-12-13",
+"date": "2027-12-15",
 "time": "08:30",
 "event": "Core PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
-"date": "2027-12-13",
+"date": "2027-12-15",
 "time": "08:30",
 "event": "PPI m/m",
 "impact": "high",
-"status": "estimated"
+"status": "official"
 },
 {
 "date": "2027-12-16",

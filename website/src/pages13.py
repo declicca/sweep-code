@@ -125,6 +125,145 @@ GDP_EST = {"GDP q/q (Advance)": T("GDP (Advance)", "PIB (première estimation)",
            "GDP q/q (Third Estimate)": T("GDP (Third Estimate)", "PIB (troisième estimation)", "PIB (tercera estimación)")}
 def _name(t, x): return t(x) if isinstance(x, dict) else x
 
+# ---------------------------------------------------------------- the next release, in the page's title (SEO brief v2, 2.1)
+# A release page is written with placeholders (NX<key><lang>…QQ) in its title, description, « next release » box, the two
+# answers that name the next date and its list of dates; NX keeps, for every upcoming release, the texts that fill them.
+# build.py writes the page filled with the next release at build time (dist/<page>.html) and, for the server, the page with
+# its placeholders and the texts (dist/_nx/, not public). release.php serves the page with the first release that hasn't
+# happened yet in New York time: the title shows the next date right after each release, without a daily build.
+from zoneinfo import ZoneInfo
+NYZ = ZoneInfo("America/New_York")
+NOW_NY = datetime.datetime.now(NYZ).strftime("%Y-%m-%dT%H:%M")
+NX = {}   # (lang, page) → [{"at": "2026-11-13T08:30", placeholder: text, …}, …]
+CITIES = {"en": [("New York", "America/New_York"), ("Chicago", "America/Chicago"), ("London", "Europe/London")],
+          "fr": [("New York", "America/New_York"), ("Montréal", "America/Toronto"), ("Paris", "Europe/Paris"), ("Abidjan / Dakar", "Africa/Abidjan"), ("Casablanca", "Africa/Casablanca")],
+          "es": [("Nueva York", "America/New_York"), ("Madrid", "Europe/Madrid"), ("Ciudad de México", "America/Mexico_City"), ("Bogotá", "America/Bogota"),
+                 ("Buenos Aires", "America/Argentina/Buenos_Aires"), ("Santiago", "America/Santiago")]}
+MONTHS = {"en": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+          "fr": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+          "es": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]}
+MON = {"en": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+       "fr": ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."],
+       "es": ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sept.", "oct.", "nov.", "dic."]}
+WDAY = {"en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], "fr": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+        "es": ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]}
+# each release's name: in a title (en, fr, es), after « de » (fr: de, es: del), as a sentence's subject (s…), as « next … » (n…), plural or not
+NXN = {
+ "cpi": dict(en="CPI", fr="CPI", es="CPI", de="du CPI", dl="del CPI", sen="CPI", sfr="le CPI", ses="el CPI", nen="Next CPI", nfr="Prochain CPI", nes="Próximo CPI"),
+ "ppi": dict(en="PPI", fr="PPI", es="PPI", de="du PPI", dl="del PPI", sen="PPI", sfr="le PPI", ses="el PPI", nen="Next PPI", nfr="Prochain PPI", nes="Próximo PPI"),
+ "pce": dict(en="PCE", fr="PCE", es="PCE", de="du PCE", dl="del PCE", sen="PCE", sfr="le PCE", ses="el PCE", nen="Next PCE", nfr="Prochain PCE", nes="Próximo PCE"),
+ "nfp": dict(en="NFP", fr="NFP", es="NFP", de="du NFP", dl="del NFP", sen="the jobs report (NFP)", sfr="le rapport sur l’emploi (NFP)", ses="el informe de empleo (NFP)",
+             nen="Next jobs report (NFP)", nfr="Prochain rapport sur l’emploi (NFP)", nes="Próximo informe de empleo (NFP)"),
+ "gdp": dict(en="GDP", fr="PIB", es="PIB", de="du PIB", dl="del PIB", sen="GDP", sfr="le PIB", ses="el PIB", nen="Next GDP", nfr="Prochain PIB", nes="Próximo PIB"),
+ "ism": dict(en="ISM Manufacturing", fr="ISM manufacturier", es="ISM manufacturero", short="ISM PMI", de="de l’ISM manufacturier", dl="del ISM manufacturero",
+             sen="the ISM Manufacturing PMI", sfr="l’ISM manufacturier", ses="el ISM manufacturero", nen="Next ISM Manufacturing PMI", nfr="Prochain ISM manufacturier", nes="Próximo ISM manufacturero"),
+ "retail": dict(en="Retail Sales", fr="Ventes au détail", es="Ventas minoristas", de="des ventes au détail", dl="de las ventas minoristas", sen="retail sales",
+                sfr="les ventes au détail", ses="las ventas minoristas", nen="Next retail sales report", nfr="Prochaines ventes au détail", nes="Próximas ventas minoristas", pl=True),
+ "fomc": dict(en="FOMC", fr="FOMC", es="FOMC", de="du FOMC", dl="del FOMC", sen="the FOMC decision", sfr="la décision du FOMC", ses="la decisión del FOMC",
+              nen="Next FOMC decision", nfr="Prochaine décision du FOMC", nes="Próxima decisión del FOMC"),
+}
+# the official schedule each release follows, and the day its dates were last checked against it
+SRC = {"BLS": (T("the U.S. Bureau of Labor Statistics", "le Bureau of Labor Statistics américain", "la Bureau of Labor Statistics de EE. UU."), "2026-10-27"),
+       "BEA": (T("the U.S. Bureau of Economic Analysis", "le Bureau of Economic Analysis américain", "la Bureau of Economic Analysis de EE. UU."), "2026-10-27"),
+       "Federal Reserve": (T("the Federal Reserve", "la Réserve fédérale", "la Reserva Federal"), "2026-10-27"),
+       "Census Bureau": (T("the U.S. Census Bureau", "le Census Bureau américain", "la Oficina del Censo de EE. UU."), "2026-10-14"),
+       "ISM": (T("the Institute for Supply Management (ISM)", "l’Institute for Supply Management (ISM)", "el Institute for Supply Management (ISM)"), "2026-10-27")}
+SRC_URL = {"cpi": "https://www.bls.gov/schedule/news_release/cpi.htm", "ppi": "https://www.bls.gov/schedule/news_release/ppi.htm", "nfp": "https://www.bls.gov/schedule/news_release/empsit.htm",
+           "pce": "https://www.bea.gov/news/schedule", "gdp": "https://www.bea.gov/news/schedule", "fomc": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+           "retail": "https://www.census.gov/economic-indicators/", "ism": "https://www.ismworld.org/supply-management-news-and-reports/reports/rob-report-calendar/"}
+NEAR = {"cpi": ["ppi", "pce"], "ppi": ["cpi", "pce"], "pce": ["cpi", "ppi"], "nfp": ["ism", "cpi"], "ism": ["nfp", "retail"], "fomc": ["cpi", "nfp"], "retail": ["gdp", "cpi"], "gdp": ["pce", "retail"]}
+
+def _at(e): return datetime.datetime.fromisoformat(f'{e["date"]}T{e["time"]}').replace(tzinfo=NYZ)
+def _long(d, L):
+    if L == "en": return f"{WDAY['en'][d.weekday()]}, {MONTHS['en'][d.month - 1]} {d.day}, {d.year}"
+    if L == "fr": return f"{WDAY['fr'][d.weekday()]} {d.day} {MONTHS['fr'][d.month - 1]} {d.year}"
+    return f"{WDAY['es'][d.weekday()]} {d.day} de {MONTHS['es'][d.month - 1]} de {d.year}"
+def _short(d, L): return f"{MON['en'][d.month - 1]} {d.day}" if L == "en" else f"{d.day} {MON[L][d.month - 1]}"
+def _in(at, tz, L):
+    x = at.astimezone(ZoneInfo(tz))
+    return _hm(x.strftime("%H:%M"), L) + (" (+1)" if x.date() > at.date() else " (−1)" if x.date() < at.date() else "")
+def _fit(cands, lo, hi):
+    """The first text that fits [lo, hi] characters, else the first under hi."""
+    return next((c for c in cands if lo <= len(c) <= hi), next((c for c in cands if len(c) <= hi), cands[-1]))
+def _de_fr(x): return "du " + x[3:] if x.startswith("le ") else "de " + x   # « du Bureau… », « de la Réserve… », « de l’Institute… »
+def _de_es(x): return "del " + x[3:] if x.startswith("el ") else "de " + x   # « del Institute… », « de la Reserva… »
+def _first_sentence(h):
+    s = re.sub(r"<[^>]+>", "", h).strip().replace("EE. UU.", "EE§UU§").replace("U.S.", "U§S§")
+    m = re.search(r"\. (?=[A-ZÀ-Ý¿¡«])", s)
+    return (s[:m.start() + 1] if m else s).replace("EE§UU§", "EE. UU.").replace("U§S§", "U.S.")
+
+def _nx_title(k, at, L):
+    n = NXN[k]; sd = _short(at.date(), L); y = str(at.year)
+    if k == "fomc":
+        return {"en": f"FOMC Meeting Dates {'2026–2027' if at.year == 2026 else y} · Next Decision: {sd}", "fr": f"Dates du FOMC {y} · Prochaine décision : {sd}",
+                "es": f"Fechas del FOMC {y} · Próxima decisión: {sd}"}[L]
+    tm = _hm(at.strftime("%H:%M"), "fr") if L == "fr" else f"{at.hour}:{at.minute:02d}"
+    if L == "en":
+        return _fit([f"{n['en']} Release Dates {'2026–2027' if at.year == 2026 else y} · Next: {sd}, {tm} ET", f"{n['en']} Release Dates {y} · Next: {sd}, {tm} ET",
+                     f"{n.get('short', n['en'])} Release Dates {y} · Next: {sd}, {tm} ET"], 0, 60)
+    nx_ = {"fr": "Prochaines" if n.get("pl") else "Prochain", "es": "Próximas" if n.get("pl") else "Próximo"}[L]
+    if L == "fr": return _fit([f"Dates {n['de']} {y} · {nx_} : {sd}, {tm} ET", f"{n['fr']} {y} · {nx_} : {sd}, {tm} ET"], 0, 60)
+    return _fit([f"Fechas {n['dl']} {y} · {nx_}: {sd}, {tm} ET", f"{n['es']} {y} · {nx_}: {sd}, {tm} ET"], 0, 60)
+
+def _nx_desc(k, e, at, L):
+    n = NXN[k]; lg = _long(at.date(), L); h = _hm(e["time"], L); est = e["status"] == "estimated"
+    if L == "en":
+        x = " (estimated date)" if est else ""
+        what = "meeting date" if k == "fomc" else "release date and time"
+        return _fit([f"{n['nen']}: {lg} at {h} ET{x}. Every 2026 and 2027 {what}, and what it means for NQ and ES traders.",
+                     f"{n['nen']}: {lg} at {h} ET{x}. Every 2026–2027 date and time, and its effect on NQ and ES."], 120, 155)
+    if L == "fr":
+        x = ", date estimée" if est else ""
+        return _fit([f"{n['nfr']} : {lg} à {h}, heure de New York ({_in(at, 'Europe/Paris', 'fr')} à Paris){x}. Toutes les dates 2026–2027 et leur effet sur NQ et ES.",
+                     f"{n['nfr']} : {lg} à {h}, heure de New York{x}. Toutes les dates 2026–2027 et leur effet sur NQ et ES."], 120, 155)
+    x = ", fecha estimada" if est else ""
+    return _fit([f"{n['nes']}: {lg} a las {h} ET ({_in(at, 'Europe/Madrid', 'es')} en Madrid, {_in(at, 'America/Mexico_City', 'es')} en Ciudad de México){x}. Todas las fechas 2026–2027.",
+                 f"{n['nes']}: {lg} a las {h} ET ({_in(at, 'Europe/Madrid', 'es')} en Madrid){x}. Todas las fechas 2026–2027 y su efecto en NQ y ES.",
+                 f"{n['nes']}: {lg} a las {h} ET ({_in(at, 'Europe/Madrid', 'es')} en Madrid){x}. Todas las fechas 2026–2027."], 120, 155)
+
+def _nx_box(k, e, at, lang, t, signup):
+    n = NXN[k]; L = lang
+    eb = {"en": "Next FOMC decision" if k == "fomc" else f"Next {n['en']} release", "fr": "Prochaine décision du FOMC" if k == "fomc" else f"Prochaine publication {n['de']}",
+          "es": "Próxima decisión del FOMC" if k == "fomc" else f"Próxima publicación {n['dl']}"}[L]
+    lbl = f' · {t(GDP_EST[e["event"]])}' if k == "gdp" and e["event"] in GDP_EST else ""
+    cities = "".join(f'<li><span>{c}</span><b class="num">{_in(at, tz, L)}</b></li>' for c, tz in CITIES[L])
+    return (f'<div class="nextrel nx reveal" data-at="{e["date"]}T{e["time"]}"><span class="eyebrow">{eb}</span>'
+            f'<b class="num nx-when">{_long(at.date(), L)} · {_hm(e["time"], L)} ET{lbl}</b><span class="st st-{e["status"]}">{t(STATUS[e["status"]])}</span>'
+            f'<span class="nx-in" data-nx="in"></span><ul class="nx-cities">{cities}</ul>'
+            f'<div class="cta-row nx-act"><a class="btn btn-line" href="/calendar/{k}-{L}.ics" download>{t(T("Add to calendar (.ics)", "Ajouter au calendrier (.ics)", "Añadir al calendario (.ics)"))}</a>'
+            f'<a class="btn btn-primary" href="{signup}" data-track="signup_release">{t(T("Get AI notes in Sweep", "Les notes IA dans Sweep", "Notas de IA en Sweep"))} <span aria-hidden="true">→</span></a></div></div>')
+
+def _nx_answers(k, e, at, L):
+    """The two answers that name the next release: when it is, and what time in other cities."""
+    n = NXN[k]; lg = _long(at.date(), L); h = _hm(e["time"], L); c = lambda tz: _in(at, tz, L)
+    est = {"en": " This date is estimated: check the official calendar closer to the day.", "fr": " Cette date est estimée : vérifie le calendrier officiel à l’approche.",
+           "es": " Esta fecha es estimada: verifica el calendario oficial cuando se acerque."}[L] if e["status"] == "estimated" else ""
+    if L == "en":
+        a1 = (f"The next FOMC decision is on {lg} at {h} ET, with the press conference at 2:30 p.m." if k == "fomc" else f"The next {'retail sales' if k == 'retail' else n['en']} release is on {lg} at {h} ET.") + est
+        a2 = f"{'The FOMC decision comes out' if k == 'fomc' else n['sen'][0].upper() + n['sen'][1:] + (' come out' if n.get('pl') else ' comes out')} at {h} New York time: {c('America/Chicago')} in Chicago and {c('Europe/London')} in London for the next one, on {_short(at.date(), 'en')}."
+    elif L == "fr":
+        a1 = (f"La prochaine décision du FOMC est le {lg} à {h}, heure de New York, avec la conférence de presse à 14 h 30." if k == "fomc"
+              else f"La prochaine publication {n['de']} est le {lg} à {h}, heure de New York.") + est
+        a2 = f"{n['sfr'][0].upper() + n['sfr'][1:]} {'sortent' if n.get('pl') else 'sort'} à {h}, heure de New York : {c('Europe/Paris')} à Paris et {c('America/Toronto')} à Montréal pour la prochaine, le {at.day} {MONTHS['fr'][at.month - 1]}."
+    else:
+        a1 = (f"La próxima decisión del FOMC es el {lg} a las {h} hora de Nueva York, con la rueda de prensa a las 14:30." if k == "fomc"
+              else f"La próxima publicación {n['dl']} es el {lg} a las {h} hora de Nueva York.") + est
+        a2 = f"{n['ses'][0].upper() + n['ses'][1:]} {'salen' if n.get('pl') else 'sale'} a las {h} hora de Nueva York: {c('America/Mexico_City')} en Ciudad de México y {c('Europe/Madrid')} en Madrid la próxima vez, el {at.day} de {MONTHS['es'][at.month - 1]}."
+    return a1, a2
+
+def _nx_questions(k, t):
+    n = NXN[k]; pl = n.get("pl")
+    q1 = T("When is the next FOMC decision?" if k == "fomc" else f"When is the next {n['en'] if k != 'retail' else 'retail sales'} release?",
+           "Quand est la prochaine décision du FOMC ?" if k == "fomc" else f"Quand est la prochaine publication {n['de']} ?",
+           "¿Cuándo es la próxima decisión del FOMC?" if k == "fomc" else f"¿Cuándo es la próxima publicación {n['dl']}?")
+    q2 = T("What time is the FOMC decision?" if k == "fomc" else f"What time {'do' if pl else 'does'} {n['sen']} come out?",
+           f"À quelle heure {'sortent' if pl else 'sort'} {n['sfr']} (heure de Paris et de Montréal) ?",
+           f"¿A qué hora {'salen' if pl else 'sale'} {n['ses']} (hora de México y de España)?")
+    q3 = T(f"How {'do' if pl else 'does'} {n['sen']} affect NQ and ES futures?", f"Quel effet {'ont' if pl else 'a'} {n['sfr']} sur le NQ et l’ES ?",
+           f"¿Cómo {'afectan' if pl else 'afecta'} {n['ses']} al NQ y al ES?")
+    q4 = T(f"Where is the official {n['en'] if k != 'retail' else 'retail sales'} schedule?", f"Où trouver le calendrier officiel {n['de']} ?", f"¿Dónde está el calendario oficial {n['dl']}?")
+    return q1, q2, q3, q4
+
 def make_release(key):
     k, sl, names, title, what, src = next(r for r in REL if r[0] == key)
     CRUMBS[sl] = title
@@ -132,12 +271,21 @@ def make_release(key):
     SYSTEM_PAGES.add(sl)
     def page(lang, t):
         ti = _name(t, title); of = t(OF[k]) if k in OF else ti
-        nxt = next((e for e in evs if e["date"] >= TODAY_ISO), None)   # at build; the page picks it again in the browser (NEXT_JS)
+        P = f"NX{k}{lang}"   # this page's placeholders
+        medium = sl[:-len(".html")]
+        signup = f"{SIGNUP}&amp;utm_source=site&amp;utm_medium={medium}&amp;utm_campaign={UTM_CAMPAIGN}"   # the box isn't in the page when the build adds the tags
+        up = [e for e in evs if f'{e["date"]}T{e["time"]}' >= NOW_NY]
+        variants = []
+        for i, e in enumerate(up):
+            at = _at(e); a1, a2 = _nx_answers(k, e, at, lang)
+            items = [{"@type": "ListItem", "position": j + 1, "name": f'{ti} {x["date"]} {x["time"]} ET'} for j, x in enumerate(up[i:i + 12])]
+            variants.append({"at": f'{e["date"]}T{e["time"]}',
+                             f"{P}TITLEQQ": _html.escape(typo(lang, _nx_title(k, at, lang))), f"{P}DESCQQ": _html.escape(typo(lang, _nx_desc(k, e, at, lang))),
+                             f"{P}BOXQQ": nbsp(lang, _nx_box(k, e, at, lang, t, signup)), f"{P}A1QQ": nbsp(lang, a1), f"{P}A2QQ": nbsp(lang, a2),
+                             f"{P}A1JQQ": json.dumps(typo(lang, a1), ensure_ascii=False)[1:-1], f"{P}A2JQQ": json.dumps(typo(lang, a2), ensure_ascii=False)[1:-1],
+                             f'"{P}LISTQQ"': json.dumps(items, ensure_ascii=False)})
+        if variants: NX[(lang, sl)] = variants
         hero = ui.hero(t, T("Economic calendar","Calendrier économique","Calendario económico"), T(f"{ti} release dates 2026–2027.", f"Dates de publication {of} 2026–2027.", f"Fechas de publicación {of} 2026–2027."), what)
-        nx = ""
-        if nxt:
-            nx = (f'<div class="nextrel reveal"><span class="eyebrow">{t(T("Next release","Prochaine publication","Próxima publicación"))}</span>'
-                  f'<b class="num" data-nx="when">{_date(t,nxt["date"])} · {nxt["time"]} ET</b><span class="st st-{nxt["status"]}" data-nx="st">{t(STATUS[nxt["status"]])}</span></div>')
         cols = 3 + (k == "gdp")
         rows, year = "", None
         for e in evs:
@@ -149,38 +297,89 @@ def make_release(key):
                      f'{f"<td>{lbl}</td>" if k=="gdp" else ""}<td><span class="st st-{e["status"]}">{t(STATUS[e["status"]])}</span></td></tr>')
         head = f'<tr><th scope="col">{t(T("Date","Date","Fecha"))}</th><th scope="col">{t(T("Time","Heure","Hora"))}</th>{"<th scope=col>"+t(T("Estimate","Estimation","Estimación"))+"</th>" if k=="gdp" else ""}<th scope="col">{t(T("Status","Statut","Estado"))}</th></tr>'
         tbl = f'<div class="cmp-wrap"><table class="cmp reltbl"><thead>{head}</thead><tbody>{rows}</tbody></table></div>'
-        note = T(f"Times in New York time (ET). Source: {src}. “Estimated” dates are projected from the usual release pattern: check the official calendar closer to the date. Not financial advice.",
-                 f"Heures de New York (ET). Source : {src}. Les dates « estimées » sont projetées selon le calendrier habituel : vérifie le calendrier officiel à l’approche. Ce n’est pas un conseil financier.",
-                 f"Horas de Nueva York (ET). Fuente: {src}. Las fechas «estimadas» se proyectan según el patrón habitual: verifica el calendario oficial cuando se acerque. No es asesoramiento financiero.")
+        sname, checked = SRC[src]; cd = datetime.date.fromisoformat(checked)
+        source = T(f'Official schedule from <a href="{SRC_URL[k]}" rel="noopener">{sname["en"]}</a>. Last checked {_long(cd, "en").split(", ", 1)[1]}.',
+                   f'Calendrier officiel : <a href="{SRC_URL[k]}" rel="noopener">{sname["fr"]}</a>. Dernière vérification : {cd.day} {MONTHS["fr"][cd.month - 1]} {cd.year}.',
+                   f'Calendario oficial: <a href="{SRC_URL[k]}" rel="noopener">{sname["es"]}</a>. Última verificación: {cd.day} de {MONTHS["es"][cd.month - 1]} de {cd.year}.')
+        note = T("Times in New York time (ET). “Estimated” dates are projected from the usual release pattern: check the official calendar closer to the date. Not financial advice.",
+                 "Heures de New York (ET). Les dates « estimées » sont projetées selon le calendrier habituel : vérifie le calendrier officiel à l’approche. Ce n’est pas un conseil financier.",
+                 "Horas de Nueva York (ET). Las fechas «estimadas» se proyectan según el patrón habitual: verifica el calendario oficial cuando se acerque. No es asesoramiento financiero.")
         why = T(f"Releases like {ti} can move NQ, ES, yields and the dollar within seconds. Sweep marks every high-impact release on your calendar, warns you in the trade ticket when one is close, and shows how you trade around them.",
                 "Des publications comme celle-ci peuvent faire bouger NQ, ES, les taux et le dollar en quelques secondes. Sweep marque chaque annonce importante dans ton calendrier, t’avertit dans le ticket quand une approche, et montre comment tu trades autour.",
                 "Datos como este pueden mover NQ, ES, los rendimientos y el dólar en segundos. Sweep marca cada dato importante en tu calendario, te avisa en el ticket cuando se acerca uno y muestra cómo operas a su alrededor.")
+        order = NEAR[k] + [r[0] for r in REL if r[0] != k and r[0] not in NEAR[k]]
         others = (f'<div class="chiprow" style="margin-top:40px"><span class="eyebrow">{t(T("Other releases","Autres publications","Otros datos"))}</span>'
-                  + "".join(f'<a class="chip" href="{href(lang,r[1])}">{_name(t, r[3])}</a>' for r in REL if r[0] != k) + "</div>")
+                  + "".join(f'<a class="chip" href="{href(lang, r[1])}">{_name(t, r[3])}</a>' for kk in order for r in REL if r[0] == kk)
+                  + f'<a class="chip" href="{href(lang, "release-dates.html")}">{t(T("All release dates", "Toutes les dates", "Todas las fechas"))}</a></div>')
         when = max(set(e["time"] for e in evs), key=lambda x: sum(1 for e in evs if e["time"] == x))   # its usual time
         hm, hh, ha = _heads(k)
         art = (f'<h2>{t(hm)}</h2>{t(MEASURE[k])}<h2>{t(hh)}</h2>{t(REACT[k])}'
                f'<h2>{t(ha)}</h2>{localize(lang, t(AROUND)).replace("{time}", _hm(when, lang))}')
         band = ui.band(t(T("Trade the news with a plan.","Trade les nouvelles avec un plan.","Opera las noticias con un plan.")), t(why),
                        ui.btn(t(T("The economic calendar in Sweep","Le calendrier économique dans Sweep","El calendario económico en Sweep")), href(lang,"economic-calendar.html"), "line"))
-        b = (ui.sec(nx + tbl + f'<p class="fine" style="margin-top:16px">{t(note)}</p>', "t", "dates", width="read")
+        q1, q2, q3, q4 = _nx_questions(k, t)
+        a3 = _first_sentence(t(REACT[k]))
+        a4 = t(T(f"The dates on this page come from the official schedule of {sname['en']}, last checked on {_long(cd, 'en').split(', ', 1)[1]}: <a href=\"{SRC_URL[k]}\" rel=\"noopener\">{SRC_URL[k].split('//')[1].split('/')[0]}</a>.",
+                 f"Les dates de cette page viennent du calendrier officiel {_de_fr(sname['fr'])}, vérifié le {cd.day} {MONTHS['fr'][cd.month - 1]} {cd.year} : <a href=\"{SRC_URL[k]}\" rel=\"noopener\">{SRC_URL[k].split('//')[1].split('/')[0]}</a>.",
+                 f"Las fechas de esta página vienen del calendario oficial {_de_es(sname['es'])}, verificado el {cd.day} de {MONTHS['es'][cd.month - 1]} de {cd.year}: <a href=\"{SRC_URL[k]}\" rel=\"noopener\">{SRC_URL[k].split('//')[1].split('/')[0]}</a>."))
+        dyn = bool(variants)
+        faqs = [(q1, {lang: f"{P}A1QQ"} if dyn else None), (q2, {lang: f"{P}A2QQ"} if dyn else None), (q3, {lang: a3}), (q4, {lang: a4})]
+        faqs = [(q, a) for q, a in faqs if a]
+        tt = lambda x: x[lang] if isinstance(x, dict) and lang in x else t(x)
+        qa = ui.qa(lambda x: tt(x), faqs)
+        box = f"{P}BOXQQ" if dyn else ""
+        b = (ui.sec(box + tbl + f'<p class="fine" style="margin-top:16px">{t(source)} {t(note)}</p>', "t", "dates", width="read")
              + ui.sec(f'<article class="article">{art}</article>', "n", "explained", width="read")
+             + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + qa, "n", "faq", width="read")
              + ui.sec(band + others, "t", "plan") + NEXT_JS)
-        ld = jsonld({"@context":"https://schema.org","@type":"ItemList","name":t(T(f"{ti} release dates",f"Dates {of}",f"Fechas {of}")),
-                     "itemListElement":[{"@type":"ListItem","position":i+1,"name":f'{ti} {e["date"]} {e["time"]} ET'} for i,e in enumerate(evs) if e["date"] >= TODAY_ISO][:12]})
-        return (t(T(f"{ti} release dates 2026 and 2027 (ET) · Sweep",f"Dates {of} 2026 et 2027 (heure de New York) · Sweep",f"Fechas {of} 2026 y 2027 (hora de Nueva York) · Sweep")),
-                t(T(f"Every {ti} release date and time for 2026 and 2027 in New York time, with the next release and what it means for futures traders.",
-                    f"Toutes les dates et heures de publication {of} pour 2026 et 2027, en heure de New York, avec la prochaine publication et son effet sur les futures.",
-                    f"Todas las fechas y horas de publicación {of} para 2026 y 2027, en hora de Nueva York, con el próximo dato y lo que significa para los futuros.")),
-                hero + b + ui.final(lang, t), ld)
+        jfaq = [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": (f"{P}A1JQQ" if i == 0 else f"{P}A2JQQ" if i == 1 else re.sub(r"<[^>]+>", "", tt(a)))}}
+                for i, (q, a) in enumerate(faqs)] if dyn else [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", tt(a))}} for q, a in faqs]
+        ld = jsonld({"@context": "https://schema.org", "@graph": [
+            {"@type": "ItemList", "name": t(T(f"{ti} release dates", f"Dates {of}", f"Fechas {of}")), "itemListElement": f"{P}LISTQQ" if dyn else []},
+            {"@type": "FAQPage", "mainEntity": jfaq}]})
+        if not dyn:   # past the last known release: the dates page without a next one
+            return (t(T(f"{ti} release dates 2026 and 2027 (ET) · Sweep", f"Dates {of} 2026 et 2027 (heure de New York) · Sweep", f"Fechas {of} 2026 y 2027 (hora de Nueva York) · Sweep")),
+                    t(T(f"Every {ti} release date and time for 2026 and 2027 in New York time, and what it means for futures traders.",
+                        f"Toutes les dates et heures de publication {of} pour 2026 et 2027, en heure de New York, et leur effet sur les futures.",
+                        f"Todas las fechas y horas de publicación {of} para 2026 y 2027, en hora de Nueva York, y lo que significan para los futuros.")),
+                    hero + b + ui.final(lang, t), ld)
+        return (f"{P}TITLEQQ", f"{P}DESCQQ", hero + b + ui.final(lang, t), ld)
     return page
 
-# the next release and the past dates, picked in the browser in New York time (the build's choice ages with the page)
+def write_ics(dist):
+    """One calendar file per release and language (/calendar/cpi-en.ics): every upcoming date, in UTC, 15 minutes long."""
+    os.makedirs(os.path.join(dist, "calendar"), exist_ok=True)
+    stamp = "20261027T000000Z"
+    esc = lambda s: s.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,")
+    for k, sl, names, title, what, src in REL:
+        evs = [e for e in sorted([e for e in _EV if e["event"] in names], key=lambda e: (e["date"], e["time"])) if e["date"] >= TODAY_ISO]
+        for L in LANGS:
+            t = lambda x, L=L: x[L] if isinstance(x, dict) else x
+            name = _name(t, title)
+            cal = {"en": f"{name} release dates", "fr": f"Dates {t(OF[k]) if k in OF else name}", "es": f"Fechas {t(OF[k]) if k in OF else name}"}[L]
+            out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Sweep//Release dates//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", f"X-WR-CALNAME:{esc(cal)}"]
+            for e in evs:
+                at = _at(e).astimezone(datetime.timezone.utc)
+                summ = {"en": f"{name} release", "fr": f"Publication {t(OF[k]) if k in OF else name}" if k != "fomc" else "Décision du FOMC", "es": f"Publicación {t(OF[k]) if k in OF else name}" if k != "fomc" else "Decisión del FOMC"}[L]
+                if k == "fomc" and L == "en": summ = "FOMC decision"
+                if k == "gdp" and e["event"] in GDP_EST: summ = t(GDP_EST[e["event"]])
+                desc = {"en": f"{_hm(e['time'], 'en')} New York time. {t(STATUS[e['status']])}.", "fr": f"{_hm(e['time'], 'fr')}, heure de New York. {t(STATUS[e['status']])}.",
+                        "es": f"{_hm(e['time'], 'es')} hora de Nueva York. {t(STATUS[e['status']])}."}[L]
+                url = f"https://{DOMAIN}{href(L, sl)}"
+                out += ["BEGIN:VEVENT", f"UID:{k}-{e['date']}-{re.sub(r'[^a-z0-9]+', '-', e['event'].lower()).strip('-')}@makeitsweep.com", f"DTSTAMP:{stamp}",
+                        f"DTSTART:{at.strftime('%Y%m%dT%H%M%SZ')}", f"DTEND:{(at + datetime.timedelta(minutes=15)).strftime('%Y%m%dT%H%M%SZ')}",
+                        f"SUMMARY:{esc(summ)}", f"DESCRIPTION:{esc(desc)}", f"URL:{url}", "END:VEVENT"]
+            out.append("END:VCALENDAR")
+            open(os.path.join(dist, "calendar", f"{k}-{L}.ics"), "w", encoding="utf-8", newline="").write("\r\n".join(out) + "\r\n")
+
+# the past dates and the countdown to the next release, in New York time, in the browser (the server picks the next release itself)
 NEXT_JS = """<script>(function(){var p={};new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).formatToParts(new Date()).forEach(function(x){p[x.type]=x.value});
-var now=p.year+'-'+p.month+'-'+p.day+'T'+p.hour+':'+p.minute,nx=null;
-document.querySelectorAll('[data-d]').forEach(function(r){var past=r.getAttribute('data-d')<now;r.classList.toggle('past',past);if(!past&&!nx)nx=r;});
-var w=document.querySelector('[data-nx="when"]'),s=document.querySelector('[data-nx="st"]');
-if(nx&&w){w.textContent=nx.querySelector('th').textContent+' · '+nx.querySelector('td').textContent;var st=nx.querySelector('.st');s.textContent=st.textContent;s.className=st.className;}
+var now=p.year+'-'+p.month+'-'+p.day+'T'+p.hour+':'+p.minute,L=document.documentElement.lang.slice(0,2);
+document.querySelectorAll('[data-d]').forEach(function(r){r.classList.toggle('past',r.getAttribute('data-d')<now);});
+var b=document.querySelector('.nx[data-at]'),c=document.querySelector('[data-nx="in"]');
+if(b&&c){var a=b.getAttribute('data-at'),d=Math.round((Date.UTC(+a.slice(0,4),+a.slice(5,7)-1,+a.slice(8,10))-Date.UTC(+p.year,+p.month-1,+p.day))/864e5);
+var w={en:['today','tomorrow','in N days'],fr:['aujourd’hui','demain','dans N jours'],es:['hoy','mañana','en N días']}[L]||['today','tomorrow','in N days'];
+if(a>=now&&d>=0)c.textContent=d===0?w[0]:d===1?w[1]:w[2].replace('N',d);}
 document.querySelectorAll('[data-next]').forEach(function(el){var l=JSON.parse(el.getAttribute('data-next'));for(var i=0;i<l.length;i++)if(l[i][0]>=now){el.textContent=l[i][1];return;}});})();</script>"""
 
 HUB_HELP = T("""<h2>Which releases matter most</h2><ul>

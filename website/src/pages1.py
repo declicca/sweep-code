@@ -186,7 +186,7 @@ def page_features(lang, t):
             + sp("logging") + row("numbers", "sync") + sp("charts", True) + sp("insights") + sp("accounts", True)
             + show("payouts") + share + sp("rules") + sp("coach", True) + coach + row("journal", "review") + sp("ai", True) + row("ask-sweep", "economic-reports")
             + mobile + sec_trust(lang, t, id_="data") + ui.read_next(lang, t, ["how-it-works.html", "prop-firm-tracker.html", "ai.html"]) + ui.final(lang, t) + tour_dialog(t))
-    return (t(T("Trading Journal Features for Futures & Prop Traders · Sweep","Journal de trading : fonctionnalités pour prop firms · Sweep","Diario de trading: funciones para prop firms · Sweep")),
+    return (t(T("Trading Journal Features for Futures & Prop Traders · Sweep","Fonctionnalités du journal de trading · Sweep","Funciones del diario de trading · Sweep")),
             t(T("Log trades in seconds, real CME charts, prop firm rules, payouts, discipline streaks and AI. Free forever, Pro from $19/mo.",
                 "Ajoute un trade en quelques secondes, vrais graphiques CME, règles des prop firms, payouts, discipline et IA. Gratuit pour toujours, Pro dès 19 $/mois.",
                 "Registra una operación en segundos, gráficos reales de CME, reglas de prop firms, payouts, rachas de disciplina e IA. Gratis para siempre, Pro desde 19 $/mes.")),

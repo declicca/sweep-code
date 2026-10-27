@@ -1,6 +1,6 @@
 {
  "TradeZella": {
-  "checked": "2026-10-10",
+  "checked": "2026-10-27",
   "sources": ["https://www.tradezella.com/pricing", "https://www.tradezella.com/prop-firm-sync"],
   "free_plan": null,
   "trial": null,
@@ -11,7 +11,7 @@
   ]
  },
  "Tradervue": {
-  "checked": "2026-10-10",
+  "checked": "2026-10-27",
   "sources": ["https://www.tradervue.com/site/pricing/", "https://help.tradervue.com/article/3420-trade-import-quota"],
   "free_plan": "30 trades a month",
   "trial": "Silver and Gold",
@@ -32,13 +32,13 @@
   ]
  },
  "Edgewonk": {
-  "checked": "2026-10-10",
+  "checked": "2026-10-27",
   "sources": ["https://edgewonk.com/pricing", "https://edgewonk.com/"],
   "free_plan": null,
   "trial": null,
   "refund_days": 14,
   "plans": [
-   {"name": "Edgewonk", "year": 197}
+   {"name": "Edgewonk", "month": 35, "year": 197}
   ]
  },
  "TradeBase": {

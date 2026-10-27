@@ -499,6 +499,8 @@ REL_INFO = {
  "funded-account-playbook.html": (T("Funded account playbook","Playbook du compte financé","Playbook de la cuenta financiada"), T("Five rules after you pass.","Cinq règles après la réussite.","Cinco reglas tras aprobar.")),
  "liquidity-sweep.html": (T("Liquidity sweep, explained","Le liquidity sweep, expliqué","El liquidity sweep, explicado"), T("What it is, and how to journal it.","Ce que c’est, et comment le journaliser.","Qué es y cómo registrarlo.")),
  "mes-vs-mnq.html": (T("MES or MNQ","MES ou MNQ","MES o MNQ"), T("Which micro to start with.","Quel micro pour débuter.","Con qué micro empezar.")),
+ "contracts/nq-futures.html": (T("NQ futures","Futures NQ","Futuros NQ"), T("$5 a tick, $20 a point.","5 $ le tick, 20 $ le point.","5 $ por tick, 20 $ por punto.")),
+ "contracts/es-futures.html": (T("ES futures","Futures ES","Futuros ES"), T("$12.50 a tick, $50 a point.","12,50 $ le tick, 50 $ le point.","12,50 $ por tick, 50 $ por punto.")),
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
  "how-we-verify-prop-firm-rules.html": (T("How we verify the rules","Notre méthode de vérification","Cómo verificamos las reglas"), T("Sources, frequency and limits.","Sources, fréquence et limites.","Fuentes, frecuencia y límites.")),
@@ -543,7 +545,7 @@ RELATED = {
  **{f"sweep-vs-{n}.html": ["best-trading-journal-for-prop-firms.html", "free-trading-journal.html", "prop-firm-tracker.html"] for n in ("tradezella", "tradervue", "tradersync", "edgewonk")},
 }
 RELATED_CONTRACT = ["position-size-calculator.html", "futures-market-hours.html", "release-dates.html"]
-RELATED_RELEASE = ["economic-calendar.html", "futures-market-hours.html", "futures-contracts.html"]
+RELATED_RELEASE = ["contracts/nq-futures.html", "contracts/es-futures.html", "economic-calendar.html"]   # the contracts a release moves most (SEO brief v2, 2.1)
 
 def related(lang, t, items):
     """Three « Read next » cards. An item is a page (described in REL_INFO) or (page, title, description)."""

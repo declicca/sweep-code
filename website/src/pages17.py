@@ -92,7 +92,7 @@ SUMMARY = {
                  T("A native mobile app on every plan", "Une app mobile native sur tous les forfaits", "Una app móvil nativa en todos los planes"),
                  T("Trade and market replay; automated backtesting on Elite", "Replay de trades et de marché ; backtesting automatisé sur Elite", "Replay de operaciones y de mercado; backtesting automatizado en Elite")],
                 [T("Native mobile apps: on the roadmap (in the browser today)", "Apps mobiles natives : prévues (dans le navigateur aujourd’hui)", "Apps móviles nativas: previstas (en el navegador hoy)"), NO_REPLAY]),
- "Edgewonk": ([T("One yearly price ($197) with every feature", "Un seul prix annuel (197 $) avec toutes les fonctions", "Un solo precio anual (197 $) con todas las funciones"),
+ "Edgewonk": ([T("Every feature in one plan: $197 a year or $35 a month", "Toutes les fonctions dans un seul forfait : 197 $ par année ou 35 $ par mois", "Todas las funciones en un solo plan: 197 $ al año o 35 $ al mes"),
                T("Tiltmeter and a weekly edge finder", "Tiltmeter et un edge finder chaque semaine", "Tiltmeter y un edge finder semanal"),
                T("Strategy testing and a performance simulator", "Test de stratégies et simulateur de performance", "Prueba de estrategias y simulador de rendimiento")],
               [T("No strategy testing or performance simulator", "Pas de test de stratégies ni de simulateur de performance", "Sin prueba de estrategias ni simulador de rendimiento"), FUTURES_ONLY]),
@@ -230,14 +230,14 @@ VS = [
 
  {"slug": "sweep-vs-edgewonk.html", "name": "Edgewonk",
   "sources": T("its public pricing and home pages", "ses pages publiques de tarifs et d’accueil", "sus páginas públicas de precios y de inicio"),
-  "them_if": [T("You want one yearly price with every feature included.","Tu veux un seul prix annuel avec toutes les fonctions incluses.","Quieres un solo precio anual con todas las funciones incluidas."),
+  "them_if": [T("You want every feature in one plan, billed yearly or monthly.","Tu veux toutes les fonctions dans un seul forfait, à l’année ou au mois.","Quieres todas las funciones en un solo plan, anual o mensual."),
               T("You focus on psychology: tilt, mistakes and missed trades.","Tu mises sur la psychologie : tilt, erreurs et trades manqués.","Te centras en la psicología: tilt, errores y operaciones perdidas."),
               T("You also trade forex, stocks or crypto.","Tu trades aussi du forex, des actions ou des cryptos.","También operas forex, acciones o cripto."),
               T("You want automatic imports from a platform other than NinjaTrader 8 or Quantower.","Tu veux des imports automatiques depuis une autre plateforme que NinjaTrader 8 ou Quantower.","Quieres importaciones automáticas desde una plataforma que no sea NinjaTrader 8 ni Quantower.")],
   "rows": [row("free", T("None on its pricing page","Aucun sur sa page de tarifs","Ninguno en su página de precios")),
            row("trial", T("No; 14-day money-back guarantee","Non ; satisfait ou remboursé 14 jours","No; garantía de reembolso de 14 días")),
-           row("month", T("No monthly plan","Pas de forfait mensuel","Sin plan mensual")),
-           row("year", T("$197 (one plan)","197 $ (un seul forfait)","197 $ (un solo plan)")),
+           row("month", T("$35","35 $","35 $")),
+           row("year", T("$197","197 $","197 $")),
            row("add", T("Automated imports, 200+ brokers","Imports automatiques, 200+ courtiers","Importación automática, más de 200 brókers")),
            row("sync", T("Automated imports","Imports automatiques","Importación automática")),
            row("rules", T("Tracks unlimited prop firm accounts; no rules listed","Suit un nombre illimité de comptes prop ; aucune règle indiquée","Sigue cuentas prop ilimitadas; sin reglas indicadas")),
@@ -250,7 +250,7 @@ VS = [
              "Edgewonk mise sur la recherche de ton edge et la correction de tes erreurs : un Tiltmeter qui montre à quelle fréquence tu enfreins tes règles, un edge finder automatique chaque dimanche, le suivi des trades manqués, le test de stratégies et un simulateur de performance. Il importe les trades automatiquement depuis plus de 200 courtiers, couvre aussi le forex, les actions et les cryptos, et coûte un seul prix annuel. Si c’est ta façon de travailler, c’est le meilleur choix.",
              "Edgewonk se centra en encontrar tu ventaja y corregir tus errores: un Tiltmeter que muestra con qué frecuencia rompes tus reglas, un edge finder automático cada domingo, seguimiento de operaciones perdidas, prueba de estrategias y un simulador de rendimiento. Importa operaciones automáticamente desde más de 200 brókers, cubre también forex, acciones y cripto, y cuesta un solo precio anual. Si es tu forma de trabajar, es la mejor opción."),
   "faq": [_free_alt("Edgewonk", "Edgewonk has no free plan or trial: it costs $197 a year, with a 14-day money-back guarantee.", "Edgewonk n’a ni forfait gratuit ni essai : il coûte 197 $ par année, avec une garantie satisfait ou remboursé de 14 jours.", "Edgewonk no tiene plan gratis ni prueba: cuesta 197 $ al año, con una garantía de reembolso de 14 días."),
-          _cheaper("Edgewonk has one plan at $197 a year, with no monthly option.", "Edgewonk a un seul forfait à 197 $ par année, sans option mensuelle.", "Edgewonk tiene un solo plan de 197 $ al año, sin opción mensual."),
+          _cheaper("Edgewonk has one plan, at $197 a year or $35 a month.", "Edgewonk a un seul forfait, à 197 $ par année ou 35 $ par mois.", "Edgewonk tiene un solo plan, de 197 $ al año o 35 $ al mes."),
           (T("Does Edgewonk track prop firm accounts?","Edgewonk suit-il les comptes de prop firms ?","¿Edgewonk sigue las cuentas de prop firms?"),
            T("Yes: it tracks unlimited prop firm accounts. Its pricing page doesn’t list prop firm rules. In Sweep, rules come preloaded for " + PF["en"] + " and each account type, and are checked against the firms’ official pages every week.",
              "Oui : il suit un nombre illimité de comptes de prop firms. Sa page de tarifs n’indique pas de règles de prop firms. Dans Sweep, les règles sont préremplies pour " + PF["fr"] + " et chaque type de compte, et vérifiées chaque semaine sur les pages officielles des firmes.",
@@ -322,7 +322,12 @@ def make_vs(c):
                       + chiprow(lang, t, T("Compare too","Compare aussi","Compara también"), others, 40), "n", "faq", width="read"))
         ld = jsonld({"@context":"https://schema.org","@type":"FAQPage","inLanguage":lang,
                      "mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":t(a)}} for q, a in faqs]})
-        title = t(T(f"Free {name} alternative: Sweep vs {name} (2026)", f"Alternative gratuite à {name} : Sweep vs {name}", f"Alternativa gratis a {name}: Sweep vs {name}"))   # FR / ES: how it's searched there
+        # « Sweep vs X » first, then « alternative » (SEO brief v2, 2.5); Tradervue has a free plan: « for futures » instead of « free »
+        fut = name == "Tradervue"
+        title = t(T(f"Sweep vs {name}: {name} Alternative for Futures (2026)" if fut else f"Sweep vs {name}: Free {name} Alternative (2026)",
+                    f"Sweep vs {name} : alternative à {name} (futures, 2026)" if fut else f"Sweep vs {name} : alternative gratuite à {name} (2026)",
+                    f"Sweep vs {name}: alternativa a {name} para futuros (2026)" if fut else f"Sweep vs {name}: alternativa gratis a {name} (2026)"))
+        if len(title) > 60: title = title.replace(" (2026)", "")
         return _fr_nbsp(lang, title, t(c["desc"]), hero + b + ui.final(lang, t), ld)
     return page
 
@@ -374,7 +379,7 @@ ALT_BEST = {
  "TradeZella": T("best all-round journal with sync, replay and backtesting","le plus complet, avec synchro, replay et backtesting","el más completo, con sincronización, replay y backtesting"),
 }
 ALT_PRICE = {
- "Edgewonk": T("$197 a year, with a 14-day refund window; no free plan.","197 $ par année, remboursable pendant 14 jours ; pas de forfait gratuit.","197 $ al año, con reembolso durante 14 días; sin plan gratis."),
+ "Edgewonk": T("$197 a year or $35 a month, with a 14-day refund window; no free plan.","197 $ par année ou 35 $ par mois, remboursable pendant 14 jours ; pas de forfait gratuit.","197 $ al año o 35 $ al mes, con reembolso durante 14 días; sin plan gratis."),
  "TraderSync": T("Pro $29.95/mo, Premium $49.95/mo, Elite $79.95/mo, with a 7-day trial; up to 25% less billed yearly.","Pro 29,95 $/mois, Premium 49,95 $/mois, Elite 79,95 $/mois, avec un essai de 7 jours ; jusqu’à 25 % de moins en facturation annuelle.","Pro 29,95 $/mes, Premium 49,95 $/mes, Elite 79,95 $/mes, con una prueba de 7 días; hasta un 25 % menos con facturación anual."),
  "Tradervue": T("Free plan limited to 30 trades a month; Silver $29.95/mo, Gold $49.95/mo, with a trial.","Forfait gratuit limité à 30 trades par mois ; Silver 29,95 $/mois, Gold 49,95 $/mois, avec un essai.","Plan gratis limitado a 30 operaciones al mes; Silver 29,95 $/mes, Gold 49,95 $/mes, con prueba."),
  "TradeZella": T("Essential $35/mo, Pro $59/mo, Ultra $99/mo; about 25% less billed yearly.","Essential 35 $/mois, Pro 59 $/mois, Ultra 99 $/mois ; environ 25 % de moins en facturation annuelle.","Essential 35 $/mes, Pro 59 $/mes, Ultra 99 $/mes; un 25 % menos aprox. con facturación anual."),

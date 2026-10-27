@@ -191,7 +191,7 @@ def page_how(lang, t):
                    cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True), visual=tour_card(lang, t))
     ld = jsonld({"@context":"https://schema.org","@graph":[{"@type":"HowTo","name":t(T("How to start with Sweep","Comment commencer avec Sweep","Cómo empezar con Sweep")),
         "step":[{"@type":"HowToStep","position":i+1,"name":t(h),"text":t(p)} for i,(_,_,h,p) in enumerate(st)]}, tour_ld(t)]})
-    return (t(T("How Sweep works · Sweep your day, discipline and social","Comment ça marche · Balaye ta journée, discipline, social","Cómo funciona Sweep · Barre tu día, disciplina y social")),
+    return (t(T("How Sweep Works: Trading Journal in 5 Steps · Sweep","Comment fonctionne Sweep : le journal de trading en 5 étapes","Cómo funciona Sweep: el diario de trading en 5 pasos · Sweep")),   # its 5 steps (SEO brief v2, 2.6)
             t(T("Create an account, add your prop accounts, log a trade from a screenshot, close your three rings, then progress with ranks, missions, bosses and leagues.",
                 "Crée un compte, ajoute tes comptes prop, ajoute un trade depuis une capture, ferme tes trois anneaux, puis progresse avec rangs, missions, boss et ligues.",
                 "Crea una cuenta, añade tus cuentas prop, registra una operación desde una captura, cierra tus tres anillos y progresa con rangos, misiones, jefes y ligas.")),
