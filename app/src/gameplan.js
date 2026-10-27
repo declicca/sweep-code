@@ -119,6 +119,16 @@
   }
 
   /* ───────────── a mission ───────────── */
+  // (27 Oct., brief « nouveau trader » N6) mission 1 asks for things the trader may have done already: each one checked when its
+  // gesture is done (a track, a real account, a plan with its max loss and max trades), never by opening a page
+  const M1T = { en: ['Your track chosen', 'Your firm and account added', 'Your guardrails filled in: the max loss and max trades of your plan'],
+    fr: ['Ton parcours choisi', 'Ta firme et ton compte ajoutés', 'Tes garde-fous remplis : la perte max et le nombre max de trades de ton plan'],
+    es: ['Tu recorrido elegido', 'Tu firma y tu cuenta añadidas', 'Tus barreras completas: la pérdida máx. y el número máx. de operaciones de tu plan'] };
+  function m1Checks() {
+    const acc = (S.accounts || []).some((x) => !x.demo), plan = (S.journals || []).some((j) => !j.demo && j.pre && +String(j.pre.max_loss || '').replace(/[^0-9.]/g, '') > 0 && +j.pre.max_trades > 0);
+    const done = [!!(ST && ST.track), acc, plan], l = M1T[LG()] || M1T.en;
+    return `<ul class="gp-m1">${l.map((x, i) => `<li class="${done[i] ? 'ok' : ''}"><i aria-hidden="true">${done[i] ? '✓' : ''}</i><span>${esc(x)}</span></li>`).join('')}</ul>`;
+  }
   function missionHtml(n) {
     const m = M(n), st = status(n), d = dateOf(n), wk = GP.weeks[m.w];
     const sub = [u('week', { n: m.w + 1 }) + ' · ' + tx(GP.words.DAY) + ' ' + n, d ? fd(d) : ''].filter(Boolean).join(' · ');
@@ -130,7 +140,7 @@
     else if (st === 'gate') act = `<p class="gp-wait">${esc(u('after_gate', { m: n > 60 ? 2 : 1 }))}</p>`;
     else if (st === 'soon') act = `<p class="gp-wait">${esc(u('opens', { d: fd(d, { weekday: 'long', day: 'numeric', month: 'long' }) }))}</p>`;
     else act = `${m.a ? `<p class="gp-auto">${esc(u('auto'))}</p>` : ''}<button type="button" class="btn primary g-big gp-act" data-gp="tick" data-n="${n}">${esc(u('tick', { n: m.min }))}</button>`;
-    return `${ui().head(esc(tx(m.t)), esc(sub))}<div class="gp-m" data-noi18n>${chips}<p class="gp-wk"><b>${esc(tx(wk.t))}</b> · ${esc(tx(wk.g))}</p><p class="gp-desc">${tx(m.d)}</p>
+    return `${ui().head(esc(tx(m.t)), esc(sub))}<div class="gp-m" data-noi18n>${chips}<p class="gp-wk"><b>${esc(tx(wk.t))}</b> · ${esc(tx(wk.g))}</p><p class="gp-desc">${tx(m.d)}</p>${n === 1 ? m1Checks() : ''}
       ${learn ? `<div class="gp-learns"><p class="gp-lt">${esc(u('learn'))}</p>${learn}</div>` : ''}
       ${quizHtml(n)}<div class="gp-dw"><b>${esc(tx(GP.words.DONE))}</b><p>${tx(m.done)}</p></div>${act}</div>`;
   }
