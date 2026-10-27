@@ -121,7 +121,7 @@ Une fois déployés, la session stratégie et tests relève les chiffres réels 
    - Le chemin est celui de Réglages › Notifications : `SweepNotify.push.on()`.
    - Sur iPhone, hors écran d'accueil : on explique les 3 gestes d'ajout, au lieu d'un refus.
    - Cette proposition remplace, pour un nouveau trader, la suggestion « rappels » du 2ᵉ jour. Une seule fois.
-2. **Les courriels, côté app** : vérifier dans Admin › Santé la tâche `emails`. Si elle dit « off: no Loops key », **Mateo doit déposer la clé** dans `sweep-private/loops-config.php` (modèle : `loops/loops-config.sample.php`). La session ne lit jamais ce fichier. Les événements utiles existent déjà (`signedUp`, `firstAccountAdded`, `firstTradeLogged`). Rien à coder, sauf si le courriel du soir doit savoir si un plan est fait : alors un événement `firstPlanSaved`, une fois par trader, comme les autres.
+2. **Les courriels partent déjà** : Loops est actif en ligne (Mateo, 27 oct.). Les événements utiles existent (`signedUp`, `firstAccountAdded`, `firstTradeLogged`). Rien à coder, sauf si le courriel du soir doit savoir si un plan est fait : alors un événement `firstPlanSaved`, une fois par trader, comme les autres.
 3. **Le texte des courriels** se rédige dans Loops, pas dans l'app. Deux courriels sont à proposer à Mateo, en EN / FR / ES, dans `ops/NOTIFICATIONS.md` :
    - « Ta séance de demain en 30 secondes » : le soir du jour 1, s'il n'y a pas encore de plan pour le lendemain ;
    - celui du 3ᵉ jour d'absence (`inactive3d`, déjà prévu).
@@ -160,5 +160,4 @@ L'étape 2 de SWEEP.md reste en attente de la semaine de mesure de l'étape 0.
 
 **De Mateo** :
 - la date du déploiement de `ade074b`, pour MESURE-0 ;
-- la clé Loops si elle manque ;
 - son accord pour chaque déploiement.

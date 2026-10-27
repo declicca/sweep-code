@@ -60,6 +60,8 @@ Les résultats bruts sont dans `mesure-0-local.json`.
 
 ## 2. En ligne : les vrais traders
 
+**Déploiement de l'étape 0** : `ade074b`, le **mardi 21 octobre 2026 à 20 h 17**, heure de New York (Mateo). La semaine de mesure se termine le **mardi 28 octobre à 20 h 17**. Les chiffres « Journées fermées » et « Bilans ouverts » se relèvent à ce moment-là, avec les mêmes filtres (toutes les semaines d'inscription, toutes les sources).
+
 Ces chiffres se lisent dans Admin › Métriques. Les deux dernières lignes sont nouvelles : elles sont lisibles une fois ce lot déployé (accord de Mateo).
 
 | Indicateur | Définition | Où le lire | Valeur au départ |
