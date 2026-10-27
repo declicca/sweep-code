@@ -1219,6 +1219,13 @@ try {
         if ($q !== '') product_event((string)$UID, 'search_no_result', ['q' => $q, 'lang' => lang_code((string)($b['lang'] ?? 'en'))]);
         json_out(200, ['ok' => true]);
     }
+    // pages and sheets opened, seconds in front, device, language, theme (ops/usage.php): for Admin › Export for Claude
+    if ($route === 'api/usage' && $method === 'POST') {
+        throttle(['us:' . $UID], 120, 3600); record_attempt(['us:' . $UID]);
+        require_once __DIR__ . '/ops/usage.php';
+        try { $n = sweep_usage_record(db(), (string)$UID, body_json(8192), time()); } catch (Throwable $e) { error_log('[Sweep usage] ' . $e->getMessage()); $n = 0; }
+        json_out(200, ['ok' => true, 'kept' => $n]);
+    }
 
     if ($route === 'api/client-error' && $method === 'POST') {
         throttle(['ce:' . $UID], 30, 3600); record_attempt(['ce:' . $UID]);
@@ -1399,6 +1406,15 @@ try {
             header('Content-Disposition: attachment; filename="sweep-erreurs-' . date('Y-m-d') . '.md"');
             header('Cache-Control: no-store');
             echo sweep_errors_report(db(), time()); exit;
+        }
+        if ($route === 'api/admin/report' && $method === 'GET') {   // Admin › Export for Claude (27 Oct.): everything Admin shows, one Markdown file
+            require_once __DIR__ . '/ops/report.php';
+            @set_time_limit(120);
+            $md = sweep_full_report(db(), $cfg, __DIR__, time());
+            header('Content-Type: text/markdown; charset=utf-8');
+            header('Content-Disposition: attachment; filename="sweep-admin-' . date('Y-m-d') . '.md"');
+            header('Cache-Control: no-store');
+            echo $md; exit;
         }
         if ($route === 'api/admin/health' && $method === 'GET') { require_once __DIR__ . '/ops/health.php'; json_out(200, sweep_health(db(), $cfg, __DIR__)); }
         // prop firm presets: last check, status per firm, « Check now » (one firm per request, then « finish »)

@@ -7,6 +7,8 @@ Sweep — Admin dashboard (brief 01 step 4), dev environment with Playwright:
    baseline (SWEEP.md, step 0): closed days, Friday recaps opened;
  - the sign-up week and source filters reload the numbers (« N of M traders »);
  - « Exporter »: the 30-day list as a Markdown file (api/admin/errors-export), with the error and where it happened;
+ - « Exporter pour Claude » (27 Oct.): everything Admin shows as one Markdown file (api/admin/report), and the app
+   sends the pages it opened, its device and language when it is hidden (api/usage);
  - FR words, phone and computer, no horizontal scroll, no page error.
 """
 import asyncio, random, sys
@@ -42,6 +44,23 @@ async def main():
       if not mob:
         r = await pg.evaluate("fetch('api/admin/errors-export', { credentials: 'same-origin' }).then(async (r) => [r.status, r.headers.get('content-type'), r.headers.get('content-disposition'), await r.text()])")
         ok(r[0] == 200 and r[1].startswith('text/markdown') and 'attachment; filename="sweep-erreurs-' in (r[2] or '') and f'## ' in r[3] and msg in r[3] and '`app.js:7`' in r[3], f'the export: a Markdown file with the error, where it happened ({r[:3]})')
+      # « Exporter pour Claude » (27 Oct.): everything Admin shows, one Markdown file (api/admin/report)
+      rep = await pg.evaluate("(() => { const a = document.querySelector('#main .ux-metrics a[data-ux-rep]'); if (!a) return null; const r = a.getBoundingClientRect(); return [a.textContent.trim(), a.getAttribute('href'), r.width > 0 && r.right <= innerWidth + 1]; })()")
+      ok(rep == ['Exporter pour Claude', 'api/admin/report', True], f'{tag} « Exporter pour Claude » at the top of Admin, visible ({rep})')
+      if not mob:
+        r = await pg.evaluate("fetch('api/admin/report', { credentials: 'same-origin' }).then(async (r) => [r.status, r.headers.get('content-type'), r.headers.get('content-disposition'), await r.text()])")
+        secs = [n for n in (1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13) if f'\n## {n}. ' not in r[3]]
+        ok(r[0] == 200 and r[1].startswith('text/markdown') and 'attachment; filename="sweep-admin-' in (r[2] or '') and not secs and msg in r[3], f'the report: one Markdown file, every section, the error ({r[:3]}, missing {secs})')
+        # the app tells how it is used: the page opened, the « + » sheet, sent when the app is hidden
+        await pg.evaluate("location.hash = '#trades'"); await pg.wait_for_timeout(1200)
+        async with pg.expect_response(lambda x: x.url.endswith('/api/usage'), timeout=8000) as rs:
+          await pg.evaluate("Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange'))")
+        res = await rs.value; sent = res.request.post_data_json or {}
+        ok(res.status == 200 and 'p:trades' in sent.get('p', {}) and 'p:admin' in sent.get('p', {}) and sent.get('lang') == 'fr' and sent.get('dev') == 'desktop',
+           f'the app sends the pages opened, the device and the language ({res.status} {sorted(sent.get("p", {}))} {sent.get("dev")})')
+        await pg.evaluate("delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); location.hash = '#admin'"); await pg.wait_for_selector('#main .ux-brief', timeout=15000); await pg.wait_for_timeout(800)
+        md = await pg.evaluate("fetch('api/admin/report', { credentials: 'same-origin' }).then((r) => r.text())")
+        ok('\n| p:trades | ' in md and '\n| p:admin | ' in md and 'desktop' in md, 'the report lists the pages opened (section 4)')
       before = await pg.evaluate("document.querySelector('#main .ux-bf small').textContent")
       opts = await pg.evaluate("[...document.querySelectorAll('#main [data-ux-mf=source] option')].map(o=>o.value)")
       ok(len(opts) >= 2 and opts[0] == '', f'{tag} the source filter lists « Toutes » and the sources ({opts})')

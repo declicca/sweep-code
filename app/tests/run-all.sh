@@ -34,6 +34,7 @@ php tests/shot_trades_test.php > "$out" 2>&1; check shot_trades_test.php $? "$ou
 php tests/fiche_test.php > "$out" 2>&1; check fiche_test.php $? "$out"
 php tests/gameplan_test.php > "$out" 2>&1; check gameplan_test.php $? "$out"
 php tests/metrics_test.php > "$out" 2>&1; check metrics_test.php $? "$out"
+php tests/usage_report_test.php > "$out" 2>&1; check usage_report_test.php $? "$out"
 php tests/weekly_test.php > "$out" 2>&1; check weekly_test.php $? "$out"
 php tests/cron_health_test.php > "$out" 2>&1; check cron_health_test.php $? "$out"
 php tests/client_errors_test.php > "$out" 2>&1; check client_errors_test.php $? "$out"

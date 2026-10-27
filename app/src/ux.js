@@ -779,6 +779,40 @@
   addEventListener('error', (e) => { if (e && e.message && !/ResizeObserver|Script error/.test(e.message)) report(e.message, e.filename, e.lineno); });
   addEventListener('unhandledrejection', (e) => { const r = e && e.reason; if (r && !(r.status >= 400 && r.status < 500)) report('Promise: ' + (r.message || r), '', 0); });
 
+  // how the app is used (ops/usage.php, Admin › Export for Claude): each page and sheet opened, the seconds it was in front,
+  // the device, installed or not, language and theme. Sent every 5 minutes and when the app is hidden; never what is typed or shown.
+  if (typeof route === 'function') (function () {
+    const P = {}, GEN = /^(evp|evp-in|g-sheet|g-in|nav-am|nav-am-in|sb-layer|sb-sheet|sb-body|sb-in|sb-out|open|hidden)$/;
+    let page = '', sheet = null, sheetK = '', t0 = Date.now(), n = 0, shown = !document.hidden;
+    const clean = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+    const add = (k, o, s) => { if (!k) return; const x = P[k] || (P[k] = [0, 0]); x[0] += o; x[1] += s; n++; };
+    const own = (el) => (el && ((el.id && el.id !== 'gSheet' && clean(el.id)) || [...el.classList].map(clean).find((c) => c && !GEN.test(c)))) || '';
+    const keyOf = (el) => own(el) || own((el.querySelector('.g-in, .nav-am-in, .sb-body, .evp-in') || {}).firstElementChild) || 'sheet';
+    const tick = () => {   // the seconds since the last tick go to the page and the sheet in front (none while hidden; 30 min at most)
+      const t = Date.now(), s = !shown ? 0 : Math.min(1800, Math.round((t - t0) / 1000)); t0 = t;
+      if (s) { add(page, 0, s); if (sheetK) add(sheetK, 0, s); }
+    };
+    const onPage = () => { const v = 'p:' + clean(route().v); if (v === page) return; tick(); page = v; add(page, 1, 0); };
+    const onSheets = () => {
+      if (sheet && !sheet.isConnected) { tick(); sheet = null; sheetK = ''; }
+      const el = [...document.body.children].reverse().find((x) => x.matches('[role="dialog"], .sb-layer'));
+      if (el && el !== sheet) { tick(); sheet = el; sheetK = 's:' + keyOf(el); add(sheetK, 1, 0); }
+    };
+    const flush = () => {
+      tick(); if (!n) return;
+      const body = { dev: matchMedia('(pointer: coarse)').matches ? (Math.min(screen.width, screen.height) >= 600 ? 'tablet' : 'phone') : 'desktop',
+        app: matchMedia('(display-mode: standalone)').matches || navigator.standalone === true, lang: typeof LANG === 'string' ? LANG : 'en',
+        theme: document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'), p: Object.assign({}, P) };
+      for (const k in P) delete P[k]; n = 0;
+      try { fetch('api/usage', { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(body) }).catch(() => {}); } catch (e) { /* next time */ }
+    };
+    addEventListener('hashchange', onPage); onPage();
+    new MutationObserver(onSheets).observe(document.body, { childList: true });
+    document.addEventListener('visibilitychange', () => { tick(); shown = !document.hidden; if (!shown) flush(); });
+    addEventListener('pagehide', flush);
+    setInterval(flush, 300000);
+  })();
+
   if (typeof render !== 'function') return;
   const T = {
     en: { title: 'Dashboard', north: 'Traders with 3+ swept days (7 d)', active: 'Active traders (7 d)', sign: 'Sign-ups', act: 'Activation: first trade within 24 h', aha: 'First swept day within 7 days', w2: 'Week 2: 3+ swept days', ai: 'AI cost', err: 'Errors (24 h)', mrr: 'Estimated MRR', src: 'Sign-ups by source (30 d)', meth: 'How trades are logged (30 d)', of: 'of {n}', today: 'today', d7: '7 days', js: 'browser', php: 'server', none: 'no data yet' },
@@ -840,7 +874,8 @@
   const card = (label, value, sub, big) => `<div class="ux-m ${big ? 'big' : ''}"><small>${label}</small><b>${value}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
   function html(d) {
     const x = t(), list = (o) => { const e = Object.entries(o || {}); return e.length ? e.map(([k, v]) => `<li><span>${esc(k)}</span><b>${v}</b></li>`).join('') : `<li class="muted">${x.none}</li>`; };
-    return `<div class="sec-h"><h2>${x.title}</h2><small class="muted">${new Date(d.generated_at).toLocaleTimeString()}</small></div>
+    const rep = ({ en: ['Export for Claude', 'Everything Admin shows, in one file to give to Claude: counts and shares only, nothing personal'], fr: ['Exporter pour Claude', 'Tout Admin dans un seul fichier à donner à Claude : des nombres et des parts, rien de personnel'], es: ['Exportar para Claude', 'Todo Admin en un solo archivo para dar a Claude: cifras y porcentajes, nada personal'] })[LANG] || ['Export for Claude', ''];
+    return `<div class="sec-h"><h2>${x.title}</h2><span class="ux-rep"><small class="muted">${new Date(d.generated_at).toLocaleTimeString()}</small><a class="btn sm primary" href="api/admin/report" download data-ux-rep title="${esc(rep[1])}">${rep[0]}</a></span></div>
       <div class="ux-mgrid">${card(x.north, d.north_star, x.active + ' : ' + d.active_7d, true)}${card(x.sign, d.signups.d7 + ' / ' + d.signups.d30, '7 j / 30 j')}
         ${d.first_trade ? card(({ en: 'Sign-up → first trade (median)', fr: 'Inscription → premier trade (médiane)', es: 'Registro → primera operación (mediana)' })[LANG] || 'Sign-up → first trade', d.first_trade.median_min == null ? '—' : (d.first_trade.median_min < 120 ? d.first_trade.median_min + ' min' : Math.round(d.first_trade.median_min / 60) + ' h'), ({ en: 'First trade on day 1: ', fr: 'Premier trade le jour 1 : ', es: 'Primera operación el día 1: ' })[LANG] + d.first_trade.day1_pct + ' %') : ''}        ${card(x.act, pct(d.activation_24h), x.of.replace('{n}', d.activation_24h.of))}${card(x.aha, pct(d.aha_7d), x.of.replace('{n}', d.aha_7d.of))}${card(x.w2, pct(d.retention_w2), x.of.replace('{n}', d.retention_w2.of))}
         ${card(x.ai, '$' + d.ai.today.toFixed(2), x.today + ' · $' + d.ai.d7.toFixed(2) + ' ' + x.d7)}${card(x.err, d.errors.js_24h + d.errors.php_24h, x.js + ' ' + d.errors.js_24h + ' · ' + x.php + ' ' + d.errors.php_24h)}
