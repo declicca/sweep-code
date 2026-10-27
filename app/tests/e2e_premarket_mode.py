@@ -6,6 +6,8 @@ clock at 08:00 New York (before the lock time):
  2  express saved before the lock time: mode express, not locked; reopened, it stays the express version, on its sheet
  3  the next day, the plan opens on the express version by itself
  4  « Plan guidé » goes back to the guided plan and keeps that choice for the next day
+ 5  (27 Oct.) a guided sheet, then 10 sessions with trades without one: the express plan is offered, « Garder le plan guidé »
+    one tap away, kept for good
 The test days are removed at the end and the trader's choice is put back.
 """
 import datetime as dt, sys
@@ -70,6 +72,20 @@ with sync_playwright() as p:
     close(pg)
     ok(open_plan(pg, d3) == 'base', f'4 {w}: the day after, the guided plan again')
     close(pg)
+    # 5. (27 Oct., brief « daily loop » step 1) a guided sheet, then 10 sessions with trades without one: the express plan is
+    #    offered, « Garder le plan guidé » one tap away; kept for good
+    g0 = '2027-02-01'; d4 = (dt.date.fromisoformat(d3) + dt.timedelta(days=1)).isoformat()   # a day with no draft yet
+    pg.evaluate("(g) => put('journals', { id: g, fiche: { mode: 'full', instrument: 'MES', scenarios: [{ k: 'A', dir: 'long' }, { k: 'B', dir: 'short' }] } })", g0)
+    pg.evaluate("() => { for (let i = 0; i < 10; i++) put('trades', { id: 'pm5-t' + i, account_id: (S.accounts.find((a) => !a.demo) || S.accounts[0]).id, instrument: 'MES', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 1000, pnl_manual: true, date: '2027-02-' + String(2 + i).padStart(2, '0'), entry_time: '10:00', exit_time: '10:05' }) }")
+    pg.wait_for_timeout(800)
+    ok(open_plan(pg, d4) == 'express' and pg.locator('#gSheet [data-pm="mode"][data-v="full"][data-keep="1"]').inner_text().strip() == 'Garder le plan guidé', f'5 {w}: no guided sheet in 10 sessions: the express plan, « Garder le plan guidé »')
+    pg.evaluate(TAP, '#gSheet [data-pm="mode"][data-v="full"]'); pg.wait_for_timeout(500)
+    ok(pg.evaluate(SCREEN) == 'base' and pg.evaluate("S.settings.pm_mode") == 'full' and pg.evaluate("!!S.settings.pm_keep_full"), f'5 {w}: « Garder le plan guidé »: the guided plan, kept for good')
+    close(pg)
+    ok(open_plan(pg, d4) == 'base', f'5 {w}: not offered again')
+    close(pg)
+    pg.evaluate("(g) => { for (let i = 0; i < 10; i++) remove('trades', 'pm5-t' + i); remove('journals', g); const s = structuredClone(S.settings); delete s.pm_keep_full; put('settings', s) }", g0)
+    pg.evaluate("(d) => { if (S.journals.some((j) => j.id === d)) remove('journals', d) }", d4)
     for x in (d1, d2, d3): pg.evaluate("(d) => { if (S.journals.some((j) => j.id === d)) remove('journals', d) }", x)
     pg.evaluate("(v) => { const s = structuredClone(S.settings); if (v) s.pm_mode = v; else delete s.pm_mode; put('settings', s) }", was)
     pg.wait_for_timeout(1500)

@@ -659,7 +659,7 @@
       d2_max_trades: 'Yesterday you went over your number of trades. What will be your signal to stop today?', d2_news_window: 'Yesterday you traded during a news window. How will you stay out of it?',
       d2_moved_stop: 'Yesterday you moved your stop. What will help you leave it in place?', d2_other: 'Yesterday you broke a rule of your sheet. What will help you hold it today?', d2_ph: 'A short sentence',
       d2_hint: 'One sentence: it stays at the top of your sheet for the whole session.',
-      x_title: 'Express plan', x_quick: 'Express plan (30 s)', x_guided: 'Guided plan', x_hint_quick: 'In 30 seconds: your bias, your key levels and your two scenarios.', x_hint: 'Your sheet’s lock time is past. In 30 seconds: your bias, your key levels and your two scenarios.', x_later: 'Later (today’s trades will be off-plan)', x_level: 'Entry', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'buy', short_sub: 'sell',
+      x_title: 'Express plan', x_quick: 'Express plan (30 s)', x_guided: 'Guided plan', x_keep: 'Keep the guided plan', x_hint_quick: 'In 30 seconds: your bias, your key levels and your two scenarios.', x_hint: 'Your sheet’s lock time is past. In 30 seconds: your bias, your key levels and your two scenarios.', x_later: 'Later (today’s trades will be off-plan)', x_level: 'Entry', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'buy', short_sub: 'sell',
       more: 'More info', adj: 'Adjust', x_bias: 'Bias', bullish: 'Bullish', bearish: 'Bearish', neutral: 'Neutral', x_levels: 'Key levels', x_levels_ph: 'e.g. PDH 21,290 · London high 21,250', x_plan: 'Expected scenario', x_plan_ph: 'e.g. A break of the London high that holds on the retest: I buy toward the PDH.', x_alt: 'Alternative scenario', x_alt_ph: 'e.g. Back under the London low: I sell toward the PDL. Otherwise, no trade.', x_need: 'Pick your bias and write your expected scenario.',
       tip_inst: 'The contract you trade today. Micros (MNQ, MES…) are worth 10 times less than minis (NQ, ES…): good to start. E.g. you trade the Nasdaq in micro → MNQ.',
       tip_london: 'The London session runs from about 3:00 to 8:00, New York time. Its high (London high) and its low (London low) are levels where price often reacts at the New York open. E.g. high 21,250, low 21,180. Read them on your chart (just above).',
@@ -720,7 +720,7 @@
       d2_max_trades: 'Hier tu as dépassé ton nombre de trades. Quel sera ton signal d’arrêt aujourd’hui ?', d2_news_window: 'Hier tu as tradé pendant une fenêtre de news. Comment vas-tu t’en tenir à l’écart ?',
       d2_moved_stop: 'Hier tu as déplacé ton stop. Qu’est-ce qui t’aidera à le laisser en place ?', d2_other: 'Hier tu as enfreint une règle de ta fiche. Qu’est-ce qui t’aidera à la tenir aujourd’hui ?', d2_ph: 'Une phrase courte',
       d2_hint: 'Une phrase : elle restera en haut de ta fiche pendant toute la séance.',
-      x_title: 'Plan express', x_quick: 'Plan express (30 s)', x_guided: 'Plan guidé', x_hint_quick: 'En 30 secondes : ton biais, tes niveaux clés et tes deux scénarios.', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton biais, tes niveaux clés et tes deux scénarios.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Entrée', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'achat', short_sub: 'vente',
+      x_title: 'Plan express', x_quick: 'Plan express (30 s)', x_guided: 'Plan guidé', x_keep: 'Garder le plan guidé', x_hint_quick: 'En 30 secondes : ton biais, tes niveaux clés et tes deux scénarios.', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton biais, tes niveaux clés et tes deux scénarios.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Entrée', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'achat', short_sub: 'vente',
       more: 'Plus d’infos', adj: 'Ajuster', x_bias: 'Biais', bullish: 'Haussier', bearish: 'Baissier', neutral: 'Neutre', x_levels: 'Niveaux clés', x_levels_ph: 'ex. PDH 21 290 · London high 21 250', x_plan: 'Scénario attendu', x_plan_ph: 'ex. Cassure du London high qui tient au retest : j’achète vers le PDH.', x_alt: 'Scénario alternatif', x_alt_ph: 'ex. Retour sous le London low : je vends vers le PDL. Sinon, pas de trade.', x_need: 'Choisis ton biais et écris ton scénario attendu.',
       tip_inst: 'Le contrat que tu trades aujourd’hui. Les micros (MNQ, MES…) valent 10 fois moins que les minis (NQ, ES…) : bien pour débuter. Ex. : tu trades le Nasdaq en micro → MNQ.',
       tip_london: 'La séance de Londres va d’environ 3 h à 8 h, heure de New York. Son plus haut (London high) et son plus bas (London low) sont des niveaux où le prix réagit souvent à l’ouverture de New York. Ex. : high 21 250, low 21 180. Lis-les sur ton graphique (juste au-dessus).',
@@ -781,7 +781,7 @@
       d2_max_trades: 'Ayer superaste tu número de operaciones. ¿Cuál será tu señal para parar hoy?', d2_news_window: 'Ayer operaste durante una ventana de noticias. ¿Cómo te mantendrás al margen?',
       d2_moved_stop: 'Ayer moviste tu stop. ¿Qué te ayudará a dejarlo en su sitio?', d2_other: 'Ayer rompiste una regla de tu ficha. ¿Qué te ayudará a mantenerla hoy?', d2_ph: 'Una frase corta',
       d2_hint: 'Una frase: quedará arriba de tu ficha durante toda la sesión.',
-      x_title: 'Plan exprés', x_quick: 'Plan exprés (30 s)', x_guided: 'Plan guiado', x_hint_quick: 'En 30 segundos: tu sesgo, tus niveles clave y tus dos escenarios.', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu sesgo, tus niveles clave y tus dos escenarios.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Entrada', x_dir: 'Dirección', long: 'Long', short: 'Short', long_sub: 'compra', short_sub: 'venta',
+      x_title: 'Plan exprés', x_quick: 'Plan exprés (30 s)', x_guided: 'Plan guiado', x_keep: 'Mantener el plan guiado', x_hint_quick: 'En 30 segundos: tu sesgo, tus niveles clave y tus dos escenarios.', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu sesgo, tus niveles clave y tus dos escenarios.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Entrada', x_dir: 'Dirección', long: 'Long', short: 'Short', long_sub: 'compra', short_sub: 'venta',
       more: 'Más información', adj: 'Ajustar', x_bias: 'Sesgo', bullish: 'Alcista', bearish: 'Bajista', neutral: 'Neutral', x_levels: 'Niveles clave', x_levels_ph: 'p. ej. PDH 21.290 · London high 21.250', x_plan: 'Escenario esperado', x_plan_ph: 'p. ej. Ruptura del London high que aguanta en el retest: compro hacia el PDH.', x_alt: 'Escenario alternativo', x_alt_ph: 'p. ej. De vuelta bajo el London low: vendo hacia el PDL. Si no, no opero.', x_need: 'Elige tu sesgo y escribe tu escenario esperado.',
       tip_inst: 'El contrato que operas hoy. Los micros (MNQ, MES…) valen 10 veces menos que los minis (NQ, ES…): bien para empezar. P. ej. operas el Nasdaq en micro → MNQ.',
       tip_london: 'La sesión de Londres va de las 3:00 a las 8:00 aprox., hora de Nueva York. Su máximo (London high) y su mínimo (London low) son niveles donde el precio suele reaccionar en la apertura de Nueva York. P. ej. high 21.250, low 21.180. Léelos en tu gráfico (justo arriba).',
@@ -1049,7 +1049,14 @@
     // the version the trader chose last time (a saved sheet keeps its own); never chosen: the express one, unless a guided sheet
     // was already saved (SWEEP.md step 2: the guided plan is a mission of week 2, not the first plan of a new trader)
     const pmMode = S.settings && S.settings.pm_mode, guidedBefore = () => (S.journals || []).some((j) => !j.demo && j.fiche && j.fiche.mode === 'full' && (j.fiche.scenarios || []).length > 0);   // a guided sheet has its scenarios in numbers
-    PM.express = old ? old.mode === 'express' : PM.late || (draft ? !!draft.express : pmMode ? pmMode === 'express' : !guidedBefore());
+    // (27 Oct., brief « daily loop » step 1) a guided sheet, but none in the last 10 sessions with trades: the express one is offered
+    // too, with one tap to keep the guided plan (settings.pm_keep_full: never offered again)
+    const guidedStale = () => {
+      const g = (S.journals || []).filter((j) => !j.demo && j.fiche && j.fiche.mode === 'full' && (j.fiche.scenarios || []).length > 0).map((j) => j.id).sort().pop();
+      return !!g && new Set((S.trades || []).filter((t) => !t.demo && t.date > g).map((t) => t.date)).size >= 10;
+    };
+    PM.offerKeep = !old && !PM.late && !draft && pmMode !== 'express' && !(S.settings && S.settings.pm_keep_full) && (pmMode === 'full' || guidedBefore()) && guidedStale();
+    PM.express = old ? old.mode === 'express' : PM.late || PM.offerKeep || (draft ? !!draft.express : pmMode ? pmMode === 'express' : !guidedBefore());
     if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
     else PM.i = Math.min(PM.i, pmScreens().length - 1);
     openSheet(pmHtml(), { cls: 'g-plan g-pm', onClose: () => pmDraftSave(true) });   // (closed by a swipe or the scrim: the draft keeps the last keystrokes)
@@ -1137,7 +1144,7 @@
         <div class="g-f"><span>${pt('x_plan')}${pmI('plan')}</span>${pmTipP('plan')}${ta('X_plan', pt('x_plan_ph'))}</div>
         <div class="g-f"><span>${pt('x_alt')}${pmI('alt')}</span>${pmTipP('alt')}${ta('X_alt', pt('x_alt_ph'))}</div>
         <div class="g-f"><span>${pt('dml')}${pmI('maxloss')}</span>${pmTipP('maxloss')}${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</div>
-        ${PM.late ? `<button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>` : `<button type="button" class="link pm-off-day" data-pm="mode" data-v="full">${pt('x_guided')}</button>`}
+        ${PM.late ? `<button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>` : `<button type="button" class="link pm-off-day" data-pm="mode" data-v="full"${PM.offerKeep ? ' data-keep="1"' : ''}>${pt(PM.offerKeep ? 'x_keep' : 'x_guided')}</button>`}
         <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;
     }
     if (name === 'd2') return `<h3 class="pm-q">${esc(pt('d2_' + PM.d2))}</h3><p class="g-hint-sm">${pt('d2_hint')}</p><label class="g-f"><textarea rows="2" maxlength="200" data-pmf="D2" placeholder="${esc(pt('d2_ph'))}">${esc(a.D2 || '')}</textarea></label>`;
@@ -1337,7 +1344,8 @@
     else if (act === 'lock') pmSave(true);
     else if (act === 'mode') {   // guided ⇄ express, kept for the next pre-markets (settings.pm_mode)
       const m = b.dataset.v === 'express' ? 'express' : 'full'; PM.express = m === 'express'; PM.i = 0; PM.err = ''; PM.bad = [];
-      if (S.settings && S.settings.pm_mode !== m) put('settings', Object.assign(structuredClone(S.settings), { pm_mode: m }));
+      const keep = b.dataset.keep === '1'; PM.offerKeep = false;   // « Keep the guided plan »: chosen for good, not offered again
+      if (S.settings && (S.settings.pm_mode !== m || keep)) put('settings', Object.assign(structuredClone(S.settings), { pm_mode: m }, keep ? { pm_keep_full: true } : {}));
       buzz(5); pmRender(); const box = document.querySelector('#gSheet .g-in'); if (box) box.scrollTop = 0;
     }
     else if (act === 'inst') { PM.hideInst = false; pmRender(); }   // « Change »: the chips come back
