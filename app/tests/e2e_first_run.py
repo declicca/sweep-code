@@ -146,8 +146,8 @@ def run(p, lang, phone, exp):
   # a trade saved with the form: the message and the coach's line in the trader's language; the « + » is back
   ok(pg.evaluate(PLUS) >= 1, f'{tag} with an account, the « + » is back ({pg.evaluate(PLUS)})')
   pg.evaluate("openTicket(null,{manual:true})"); pg.wait_for_timeout(800)
-  pg.evaluate("Object.assign(TK,{account:S.accounts[0].id,inst:'NQ',dir:'long',qty:1,entry:21000,exit:21010}); tkRefresh(); window.__toast=''; new MutationObserver(()=>{const t=document.getElementById('toast'); if(t&&t.textContent) window.__toast=t.textContent}).observe(document.getElementById('toast'),{childList:true,characterData:true,subtree:true}); tkSave()")
-  pg.wait_for_timeout(2500); msg = pg.evaluate("window.__toast")
+  pg.evaluate("Object.assign(TK,{account:S.accounts[0].id,inst:'NQ',dir:'long',qty:1,entry:21000,exit:21010}); tkRefresh(); window.__toasts=[]; new MutationObserver(()=>{const t=document.getElementById('toast'); if(t&&t.textContent&&!window.__toasts.includes(t.textContent)) window.__toasts.push(t.textContent)}).observe(document.getElementById('toast'),{childList:true,characterData:true,subtree:true}); tkSave()")
+  pg.wait_for_timeout(2500); msg = next((m for m in pg.evaluate("window.__toasts") if m.startswith(SAVED[lang])), (pg.evaluate("window.__toasts") or [""])[0])   # (every message: « Level 2 reached » may come right after, 27 Oct.)
   ok(msg.startswith(SAVED[lang]) and (lang == 'en' or 'Trade saved' not in msg), f'{tag} « {SAVED[lang]} » and the coach, in one language ({msg!r})')
   if lang != 'en':
     import re

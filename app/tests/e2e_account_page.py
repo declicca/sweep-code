@@ -46,7 +46,7 @@ async def main():
     await pg.wait_for_timeout(800); await pg.evaluate("location.hash='#account/ap-acc'"); await pg.wait_for_timeout(1800)
     # « Drawdown permis » for the rule, « Pire recul » for the tile
     labs = await pg.evaluate("[...document.querySelectorAll('#main .fgrid label.f > span')].map(s=>s.textContent.trim())")
-    tiles = await pg.evaluate("[...document.querySelectorAll('#main .statline > div > span:first-child')].map(s=>s.textContent.trim())")
+    tiles = await pg.evaluate("[...document.querySelectorAll('#main .statline > div > span:first-child')].map(s=>[...s.childNodes].filter((n)=>!(n.classList && n.classList.contains('sw-term'))).map((n)=>n.textContent).join('').trim())")   # (its « i » aside, 27 Oct.)
     ok('Drawdown permis' in labs and 'Pire recul' not in labs, f'FR the rule: « Drawdown permis » ({[x for x in labs if "rawdown" in x or "recul" in x]})')
     ok('Pire recul' in tiles, f'FR the tile stays « Pire recul » ({[x for x in tiles if "recul" in x or "rawdown" in x]})')
     # the room in points
