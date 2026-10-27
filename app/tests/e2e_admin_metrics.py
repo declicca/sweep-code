@@ -45,8 +45,8 @@ async def main():
         r = await pg.evaluate("fetch('api/admin/errors-export', { credentials: 'same-origin' }).then(async (r) => [r.status, r.headers.get('content-type'), r.headers.get('content-disposition'), await r.text()])")
         ok(r[0] == 200 and r[1].startswith('text/markdown') and 'attachment; filename="sweep-erreurs-' in (r[2] or '') and f'## ' in r[3] and msg in r[3] and '`app.js:7`' in r[3], f'the export: a Markdown file with the error, where it happened ({r[:3]})')
       # « Exporter pour Claude » (27 Oct.): everything Admin shows, one Markdown file (api/admin/report)
-      rep = await pg.evaluate("(() => { const a = document.querySelector('#main .ux-metrics a[data-ux-rep]'); if (!a) return null; const r = a.getBoundingClientRect(); return [a.textContent.trim(), a.getAttribute('href'), r.width > 0 && r.right <= innerWidth + 1]; })()")
-      ok(rep == ['Exporter pour Claude', 'api/admin/report', True], f'{tag} « Exporter pour Claude » at the top of Admin, visible ({rep})')
+      rep = await pg.evaluate("(() => { const a = document.querySelector('#main .ux-rep-bar a[data-ux-rep]'); if (!a) return null; const r = a.getBoundingClientRect(); const h = document.querySelector('#main .ux-health-admin'); return [a.textContent.trim(), a.getAttribute('href'), r.width > 0 && r.right <= innerWidth + 1, !h || !!(a.compareDocumentPosition(h) & 4)]; })()")
+      ok(rep == ['Exporter pour Claude', 'api/admin/report', True, True], f'{tag} « Exporter pour Claude » at the top of Admin, before Health, visible ({rep})')
       if not mob:
         r = await pg.evaluate("fetch('api/admin/report', { credentials: 'same-origin' }).then(async (r) => [r.status, r.headers.get('content-type'), r.headers.get('content-disposition'), await r.text()])")
         secs = [n for n in (1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13) if f'\n## {n}. ' not in r[3]]

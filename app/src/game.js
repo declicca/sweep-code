@@ -1756,13 +1756,13 @@
     es: { gameplan: 'Recorrido · día {n} marcado por Sweep', badge: 'Nueva insignia desbloqueada', level: 'Nivel {n} alcanzado', streak: 'Racha de {n} días', sweep: 'Día barrido', unlock: 'Desbloqueado: {f}', crew_goal: 'Objetivo del crew alcanzado', league_result: 'Tu resultado de liga llegó', quest_done: 'Misión de regreso completada', boss_spawn: 'Nuevo jefe: mira Progreso', freeze_used: 'Congelador usado', streak_lost: 'Racha terminada. Hoy empieza otra.', guardrail: 'Pérdida máxima del día superada', node: 'Etapa superada', mission: 'Misión completada', chest: 'Cofre listo', def: '¡Bien! Mira Progreso' },
   };
   const TS = { shown: 0, extra: 0, reset: 0 };
-  const SUMT = { en: '{n} new · See Progression', fr: '{n} nouveautés · Voir Progression', es: '{n} novedades · Ver Progreso' };
+  const SUMT = { en: '{n} new · See Progression', fr: '{n} nouveautés · Voir Progression', es: '{n} novedades · Ver Progreso' }, SUM1 = { en: '1 new · See Progression', fr: '1 nouveauté · Voir Progression', es: '1 novedad · Ver Progreso' };   // (27 Oct.) singular for 1
   async function summaryToast() {
     if (sheetOpen()) await afterSheets();
     const n = TS.extra; TS.extra = 0; if (!n) return;
     document.querySelectorAll('.gm-sumtoast').forEach((e) => e.remove());
     const el = document.createElement('button'); el.type = 'button'; el.className = 'gm-sumtoast'; el.setAttribute('data-noi18n', '');
-    el.innerHTML = `${svg('star')}<span>${esc((SUMT[L()] || SUMT.en).replace('{n}', n))}</span>`;
+    el.innerHTML = `${svg('star')}<span>${esc(n == 1 ? SUM1[L()] || SUM1.en : (SUMT[L()] || SUMT.en).replace('{n}', n))}</span>`;
     el.addEventListener('click', () => { el.remove(); openHub(); });
     document.body.append(el); requestAnimationFrame(() => el.classList.add('on'));
     setTimeout(() => { el.classList.remove('on'); setTimeout(() => el.remove(), 300); }, 5000);

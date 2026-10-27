@@ -874,8 +874,7 @@
   const card = (label, value, sub, big) => `<div class="ux-m ${big ? 'big' : ''}"><small>${label}</small><b>${value}</b>${sub ? `<span>${sub}</span>` : ''}</div>`;
   function html(d) {
     const x = t(), list = (o) => { const e = Object.entries(o || {}); return e.length ? e.map(([k, v]) => `<li><span>${esc(k)}</span><b>${v}</b></li>`).join('') : `<li class="muted">${x.none}</li>`; };
-    const rep = ({ en: ['Export for Claude', 'Everything Admin shows, in one file to give to Claude: counts and shares only, nothing personal'], fr: ['Exporter pour Claude', 'Tout Admin dans un seul fichier à donner à Claude : des nombres et des parts, rien de personnel'], es: ['Exportar para Claude', 'Todo Admin en un solo archivo para dar a Claude: cifras y porcentajes, nada personal'] })[LANG] || ['Export for Claude', ''];
-    return `<div class="sec-h"><h2>${x.title}</h2><span class="ux-rep"><small class="muted">${new Date(d.generated_at).toLocaleTimeString()}</small><a class="btn sm primary" href="api/admin/report" download data-ux-rep title="${esc(rep[1])}">${rep[0]}</a></span></div>
+    return `<div class="sec-h"><h2>${x.title}</h2><small class="muted">${new Date(d.generated_at).toLocaleTimeString()}</small></div>
       <div class="ux-mgrid">${card(x.north, d.north_star, x.active + ' : ' + d.active_7d, true)}${card(x.sign, d.signups.d7 + ' / ' + d.signups.d30, '7 j / 30 j')}
         ${d.first_trade ? card(({ en: 'Sign-up → first trade (median)', fr: 'Inscription → premier trade (médiane)', es: 'Registro → primera operación (mediana)' })[LANG] || 'Sign-up → first trade', d.first_trade.median_min == null ? '—' : (d.first_trade.median_min < 120 ? d.first_trade.median_min + ' min' : Math.round(d.first_trade.median_min / 60) + ' h'), ({ en: 'First trade on day 1: ', fr: 'Premier trade le jour 1 : ', es: 'Primera operación el día 1: ' })[LANG] + d.first_trade.day1_pct + ' %') : ''}        ${card(x.act, pct(d.activation_24h), x.of.replace('{n}', d.activation_24h.of))}${card(x.aha, pct(d.aha_7d), x.of.replace('{n}', d.aha_7d.of))}${card(x.w2, pct(d.retention_w2), x.of.replace('{n}', d.retention_w2.of))}
         ${card(x.ai, '$' + d.ai.today.toFixed(2), x.today + ' · $' + d.ai.d7.toFixed(2) + ' ' + x.d7)}${card(x.err, d.errors.js_24h + d.errors.php_24h, x.js + ' ' + d.errors.js_24h + ' · ' + x.php + ' ' + d.errors.php_24h)}
@@ -907,6 +906,13 @@
     const main = document.getElementById('main'); if (!main) return;
     let box = main.querySelector('.ux-metrics');
     if (!box) { box = document.createElement('section'); box.className = 'sec ux-metrics'; box.setAttribute('data-noi18n', ''); const anchor = main.querySelector('.page-head, h1, .ph'); if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor.nextSibling); else main.prepend(box); }
+    // « Export for Claude » (27 Oct.): the one button at the top of Admin, before Health and the dashboard
+    if (!main.querySelector('.ux-rep-bar')) {
+      const rep = ({ en: ['Export for Claude', 'Everything Admin shows, in one file to give to Claude. Counts and shares only, nothing personal.'], fr: ['Exporter pour Claude', 'Tout Admin dans un seul fichier à donner à Claude. Des nombres et des parts, rien de personnel.'], es: ['Exportar para Claude', 'Todo Admin en un solo archivo para dar a Claude. Cifras y porcentajes, nada personal.'] })[LANG] || ['Export for Claude', ''];
+      const bar = document.createElement('div'); bar.className = 'ux-rep-bar'; bar.setAttribute('data-noi18n', '');
+      bar.innerHTML = `<a class="btn primary" href="api/admin/report" download data-ux-rep>${rep[0]}</a><small class="muted">${esc(rep[1])}</small>`;
+      (main.querySelector('.ux-health-admin') || box).before(bar);
+    }
     if (data) box.innerHTML = html(data);
     if (!busy && Date.now() - at > 60000) load();   // with the chosen week and source
   }
@@ -2311,6 +2317,7 @@
     const s = stOf(); if (el || !s.due || s.state || s.auto || !realAccts().length || S.mode !== 'server' || !/^#payouts/.test(location.hash || '')) return;
     if (typeof billCan === 'function' && !billCan('payouts')) return;   // Free: My money is not in the plan
     if (document.querySelector('.nav-dlg.open, #gSheet, #tkSlide.open')) return;   // never over another window
+    if (!(S.payouts || []).some((p) => !p.demo)) return;   // (27 Oct.) from a first payout only: before, it opened on an empty My money (SWEEP.md: later a mission offers it)
     setSt({ auto: today() }); start();
   }
   addEventListener('hashchange', () => setTimeout(offer, 450));

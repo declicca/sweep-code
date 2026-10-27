@@ -3664,7 +3664,8 @@ window.SweepMO = window.SweepMO || class {
     // track A for a simulation account, B for an evaluation, a funded or a live one
     const tr = xp && xp.exp === 'new' && GPA ? { gpTrack: f.dataset.uxPhase === 'simulation' || f.dataset.acctMtype === 'simulation' ? 'A' : 'B' } : null;
     if (tr) apiJSON('api/game/gameplan/start', { method: 'POST', body: { track: tr.gpTrack } }).then((st) => { if (window.SweepGPCheck) window.SweepGPCheck(st); }).catch(() => { /* Settings can start it */ });
-    S.me = Object.assign({}, S.me || {}, { first_name: fn });
+    // (27 Oct.) the experience at once too: the coach's tone for a trader starting out (no setup asked) from the first plan, not the next load
+    S.me = Object.assign({}, S.me || {}, { first_name: fn }, b.experience ? { experience: b.experience } : {});
     fetch('api/me/profile', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(b) })
       .then((r) => r.json()).then((j) => { if (j && j.first_name) S.me = Object.assign({}, S.me, { first_name: j.first_name, last_name: j.last_name, full_name: j.full_name }); }).catch(() => { /* kept in this view; Settings can set it again */ });
   }, true);
@@ -5358,7 +5359,8 @@ document.addEventListener('click', (e) => {
     return { list: ord, shown: Math.min(3, ord.filter((q) => !q.acq).length), crit: false };
   }
   /** a question's words, with its mention */
-  const label = (q) => `${esc2(q.text || q.q || q.label || q.id)}${q.sep ? `<small class="nav-q-sep">${esc2(T.sep)}</small>` : ''}${q.acq ? ` <small class="nav-q-acq">· ${esc2(T.acq)}</small>` : ''}`;
+  // (27 Oct.) in the trader's language: the default questions are saved in English (tr: the app's dictionary, a trader's own text stays as it is)
+  const label = (q) => `${esc2(((t) => (typeof tr === 'function' ? tr(t) : t))(q.text || q.q || q.label || q.id))}${q.sep ? `<small class="nav-q-sep">${esc2(T.sep)}</small>` : ''}${q.acq ? ` <small class="nav-q-acq">· ${esc2(T.acq)}</small>` : ''}`;
   function saveRules(setup, texts) {
     if (typeof editDoc !== 'function') return;
     editDoc('settings', 'settings', (r) => {

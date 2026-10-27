@@ -3,7 +3,7 @@ Sweep — the real net from the start (step 1 of the evolution brief), dev envir
   python3 tests/e2e_realnet.py http://127.0.0.1:8095 [storage_state, unused: every case signs up its own trader]
 A. New trader, 3 languages × phone and computer: first name and « How long have you been trading? » on the first-account
    page (kept on the server) → Topstep 50K → the plan of the day, not « Your real net » (brief 03 step 1: not on the first
-   day) → a 2nd account (Apex 50K) from Accounts → My money opened for the first time → the catch-up opens by itself:
+   day) → a 2nd account (Apex 50K) from Accounts → My money opened for the first time: nothing opens without a payout (27 Oct.) → the catch-up from its link:
    period, purchases per firm (Topstep: months of subscription at $49, activation $149, « already in My money »;
    Apex: no catalogue price, typed), net payouts → the real net screen. Checks: the real net = moneyOf = My money for the
    same period, the estimated entries carry « Estimated », no English in FR/ES, nothing wider than the window, taps ≥ 44 px.
@@ -68,10 +68,13 @@ def first_account(pg, firm, typ):   # the first-account page → the plan of the
   pg.keyboard.press('Escape'); pg.wait_for_timeout(500)
   if pg.locator('#tkSlide.open').count(): pg.evaluate("closeTicket()"); pg.wait_for_timeout(400)
 
-def my_money(pg):   # My money opened for the first time: the catch-up opens by itself
+def my_money(pg):   # My money opened for the first time, no payout yet: nothing opens (27 Oct.); the catch-up opens from its link
   for b in ('.nav-inst.open [data-inst-ok]',):
     if pg.locator(b).count(): pg.locator(b).click(); pg.wait_for_timeout(300)
-  pg.evaluate("location.hash = '#payouts'"); pg.wait_for_selector('.rn.open [data-rn-per]', timeout=8000); pg.wait_for_timeout(400)
+  pg.evaluate("location.hash = '#payouts'"); pg.wait_for_timeout(1500)
+  ok(pg.locator('.rn.open').count() == 0, 'My money without a payout: « Your real net » does not open by itself (27 Oct. tour, A7)')
+  pg.evaluate("(() => { const b = document.createElement('button'); b.type = 'button'; b.dataset.rn = 'open'; b.id = 'rnLink'; document.getElementById('main').append(b); b.click(); b.remove(); })()")
+  pg.wait_for_selector('.rn.open [data-rn-per]', timeout=8000); pg.wait_for_timeout(400)
 
 def trades(pg, n):   # n trades on the first account (Today's My money card comes from the 5th)
   pg.evaluate("(n) => { for (let i = 1; i <= n; i++) put('trades', { id: 'rn-t' + i, account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: todayStr(), entry_time: '1' + i + ':00', exit_time: '1' + i + ':05' }); render() }", n)

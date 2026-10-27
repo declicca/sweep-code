@@ -530,4 +530,5 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 .ux-gm{margin-top:22px}.ux-gm h3{margin:0 0 4px;font-size:16px}.ux-gm>p{margin:0 0 10px;font-size:13px}.ux-gm-low b{color:var(--neg,#D4A24C)}
 .ux-err-a{display:flex;gap:8px;flex-wrap:wrap}
 }
-.ux-metrics .ux-rep{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.ux-rep-bar{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;margin:0 0 22px}.ux-rep-bar small{flex:1 1 220px}
+.nav-dlg.rn h2[tabindex="-1"]:focus{outline:none}   /* (27 Oct.) the title takes the focus for screen readers, without a visible frame */
