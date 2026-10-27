@@ -1957,3 +1957,6 @@ html .sb-layer .sb-sheet{transition:transform var(--dur-sheet) var(--ease-ios)!i
 @media (hover:none){[data-tip]:focus-visible::after,[data-tip]:hover::after{display:none}}
 .sw-tip{position:absolute;z-index:300;max-width:min(300px,calc(100vw - 32px));padding:10px 12px;border-radius:var(--r1,10px);background:var(--text);color:var(--bg);font-size:13px;line-height:1.45;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
 .sw-term{cursor:pointer}
+/* (27 Oct.) Stats under 5 trades: what is coming */
+.st-soon{padding:16px 18px;margin-bottom:12px}.st-soon h3{margin:0 0 10px;font-size:17px}.st-soon-bar{margin:0 0 12px}.st-soon ul{margin:0;padding-left:18px;color:var(--text2);font-size:14px;line-height:1.5}
+.st-soon-k{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin-bottom:12px}

@@ -3307,6 +3307,19 @@ function card(e, t, a, {right: n = "", cls: s = ""} = {}) {
 
 const segU = (e, t) => `<div class="seg">${t.map(([a, n]) => `<button data-act="useg" data-k="${e}" data-v="${a}" class="${U[e] === a ? "on" : ""}">${n}</button>`).join("")}</div>`;
 
+/* (27 Oct., brief « nouveau trader » step 4) Stats under 5 trades: on top « Your stats are coming: n trades of 5 », its bar and what
+   opens at 5 (your edge, your leak) and at 10 (the performance score); then the net P&L, the win rate and the calendar. The tiles
+   that need more trades are not shown until they have something to say (with 5 trades and more: the page as before). */
+function statsSoon(t, a) {
+  const X = ({ fr: [ "Tes stats arrivent : {n} sur 5", "trade", "trades", "À 5 trades : ta force et ta fuite, ce qui marche pour toi et ce qui te coûte.", "À 10 trades : ton score de performance." ],
+    es: [ "Tus estadísticas llegan: {n} de 5", "operación", "operaciones", "A las 5 operaciones: tu fuerza y tu fuga, lo que te funciona y lo que te cuesta.", "A las 10 operaciones: tu puntuación de rendimiento." ] })[LANG] || [ "Your stats are coming: {n} of 5", "trade", "trades", "At 5 trades: your edge and your leak, what works for you and what costs you.", "At 10 trades: your performance score." ];
+  const n = a.n, te = (t.at(-1) || { date: todayStr() }).date.slice(0, 7), ue = billOld(t.length ? t[0].date : todayStr(), todayStr());
+  const head = `<section class="surface st-soon" data-noi18n><h3>${esc(X[0].replace("{n}", n + " " + (n === 1 ? X[1] : X[2])))}</h3><div class="pbar st-soon-bar"><i class="pos" style="width:${Math.round(n / MIN_N * 100)}%"></i></div><ul><li>${esc(X[3])}</li><li>${esc(X[4])}</li></ul></section>`;
+  const kpis = `<div class="ikpis st-soon-k"><div class="surface ik"><span class="lbl">Net P&amp;L</span><b class="${cls(a.net)}">${cu(a.net)}</b></div><div class="surface ik"><span class="lbl">Win rate</span><b>${pct(a.wr)}</b></div></div>`;
+  const cal = card(pd(te + "-01").toLocaleDateString(LOC(), { month: "long", year: "numeric" }), "", calGrid(te, t));
+  return `${filterBar()}\n  <div ${ue ? 'data-lock="analytics_history" data-force="1" class="bill-lock"' : ""}>${head}${kpis}${cal}</div>`;
+}
+
 function vAnalytics(e) {
   [ "discipline", "behavior", "recovery", "session", "time", "weekday", "setup", "direction", "news" ].includes(e) && (U.deep = e, 
   saveU());
@@ -3314,7 +3327,8 @@ function vAnalytics(e) {
   if (!t.length) return `${filterBar()}<div class="surface empty">No trades ${periodLabel()}. Change the period or add trades to see your stats.</div>`;
   U.cmp = U.cmp || "cum", U.dur = U.dur || "pct", U.brk = U.brk || "side", U.calv = U.calv || "cal", 
   U.deep = U.deep || "discipline";
-  const few = a.n < MIN_N, FIVE = '<b class="nav-five">From 5 trades</b>';   // (brief 02 part 6: the trades of the filters, not the whole account)
+  const few = a.n < MIN_N, FIVE = '<b class="nav-five">From 5 trades</b>';
+  if (few) return statsSoon(t, a);   // (27 Oct., brief « nouveau trader » step 4) under 5 trades: one card that says what is coming, no empty tile   // (brief 02 part 6: the trades of the filters, not the whole account)
   const n = todayStr(), s = t.filter(M => M.date === n).reduce((M, ne) => M + tNet(ne), 0), i = few || !isFinite(a.pf) ? null : a.pf || 0, o = `<div class="ikpis">\n    <div class="surface ik"><span class="lbl">Net P&amp;L <span class="info" data-tip="Total profit and loss after fees for the selected trades." tabindex="0">i</span></span><b class="${cls(a.net)}">${cu(a.net)}</b><small>${s ? `<span class="${cls(s)}">${money(s)}</span>${({ fr: " aujourd’hui", es: " hoy" })[LANG] || " today"}` : `${a.n} trades · ${periodLabel()}`}</small></div>\n    <div class="surface ik"><span class="lbl">Win rate <span class="info" data-tip="Winning trades ÷ (winning + losing). Breakeven trades excluded." tabindex="0">i</span></span>${few ? FIVE : `<b>${a.wr == null ? "—" : cu(a.wr * 100, "pct")}</b>`}<div class="wl"><i style="flex:${a.wins || 0}"></i><i style="flex:${a.losses || 0}"></i></div><small>${a.wins} won · ${a.losses} lost${a.be ? ` · ${a.be} even` : ""}</small></div>\n    <div class="surface ik ik-ring"><div><span class="lbl">Profit factor <span class="info" data-tip="Gross profit ÷ gross loss. Above 1.0 is profitable." tabindex="0">i</span></span>${few ? FIVE : `<b${a.pf === 1 / 0 ? ' class="nav-five"' : ""}>${pf(a.pf)}</b>`}<small>${moneyU(a.gp)} won · ${moneyU(-a.gl)} lost</small></div>${i == null ? "" : ring(Math.min(100, i / 3 * 100), {
     size: 62,
     stroke: 6

@@ -1224,3 +1224,8 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Où** : la page de bienvenue (Drawdown, Payout, Coussin sous les tuiles ; le « i » de l'option du compte financé ; une ligne grise sous l'option de limite journalière), le plan court (Biais, marge de drawdown) et le plan express (sa marge de drawdown ; Biais avait déjà son « i »), les deux formulaires de trade (« Setup » et « R »), la page d'un compte (Pire recul, Facteur de profit ; la consistance avait déjà son explication).
 - **« Ton compte » d'un débutant en évaluation** : le choix de l'option du compte financé et l'interrupteur de limite journalière passent dans « Plus d'options », replié (le compte se crée avec les valeurs par défaut de la firme) ; il reste ouvert pendant que ses choix redessinent l'étape (`stMore`).
 - **Tests** : `e2e_terms` (nouveau : 390 FR et ES au toucher, 1300 EN).
+
+### Brief « nouveau trader », étape 4 : Stats accompagne au lieu d'une page vide
+- **Sous 5 trades** (ceux des filtres, `MIN_N`) : `statsSoon` (`src/app.js`) remplace la page. En haut, « Tes stats arrivent : 3 trades sur 5 » avec sa barre, et ce qui s'ouvre : à 5 trades ta force et ta fuite, à 10 ton score de performance. Puis le P&L net, le taux de réussite et le calendrier du mois. Les tuiles « Dès 5 trades », la courbe de drawdown, la durée, la répartition, les tendances et l'analyse détaillée ne sont pas montrées.
+- **À partir de 5 trades**, la page est la même qu'avant.
+- **Tests** : `e2e_stats` (3 trades : la carte, 2 tuiles, le calendrier, rien de « Dès 5 trades », moins de 2 écrans sur téléphone).

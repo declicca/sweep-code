@@ -1,8 +1,8 @@
 """
 Sweep — Stats and Trends (brief 02, part 6), Playwright, phone (fr, es) and computer (en):
   python3 tests/e2e_stats.py http://127.0.0.1:8095 [storage_state, unused: each run signs up its own traders]
- - under 5 trades (those of the filters): « From 5 trades » in place of the win rate, the profit factor and the average win /
-   loss; no « ∞ » anywhere on Stats; 5 winning trades: « No loss yet » (no infinite profit factor);
+ - under 5 trades (those of the filters, 27 Oct.): « Your stats are coming: n of 5 », the net P&L, the win rate and the calendar,
+   no empty tile, under 2 screens on a phone; no « ∞ » anywhere on Stats; 5 winning trades: « No loss yet » (no infinite profit factor);
  - the filters (period, account, session, direction, instrument) give the same net P&L and number of trades on Stats as on
    the trades list; a setup's line in the deep dive is the trades list filtered on that setup; a trade copied on 3
    accounts counts once on all accounts, once on its own account's view;
@@ -26,11 +26,11 @@ def unthrottle():
   try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
   except Exception: pass
 X = {
-  'fr': {'five': 'Dès 5 trades', 'noloss': 'Pas encore de perte', 'avgwl': 'Gain / perte moy.', 'rna': 'Sans stop : R indisponible', 'r': '+0,40R', 'title': 'La tendance de la semaine',
+  'fr': {'soon': 'Tes stats arrivent : 3 trades sur 5', 'five': 'Dès 5 trades', 'noloss': 'Pas encore de perte', 'avgwl': 'Gain / perte moy.', 'rna': 'Sans stop : R indisponible', 'r': '+0,40R', 'title': 'La tendance de la semaine',
          'trend': r'^Tes trades après 11 h te coûtent 900 \$ depuis le début\.', 'act': 'Essaie de t’arrêter à 11 h cette semaine.'},
-  'en': {'five': 'From 5 trades', 'noloss': 'No loss yet', 'avgwl': 'Avg win / loss', 'rna': 'No stop: R unavailable', 'r': '+0.40R', 'title': 'Trend of the week',
+  'en': {'soon': 'Your stats are coming: 3 trades of 5', 'five': 'From 5 trades', 'noloss': 'No loss yet', 'avgwl': 'Avg win / loss', 'rna': 'No stop: R unavailable', 'r': '+0.40R', 'title': 'Trend of the week',
          'trend': r'^Your trades after 11:00 cost you \$900 all time\.', 'act': 'Try stopping at 11:00 this week.'},
-  'es': {'five': 'Desde 5 operaciones', 'noloss': 'Aún sin pérdidas', 'avgwl': 'Ganancia / pérdida', 'rna': 'Sin stop: R no disponible', 'r': '+0,40R', 'title': 'La tendencia de la semana',
+  'es': {'soon': 'Tus estadísticas llegan: 3 operaciones de 5', 'five': 'Desde 5 operaciones', 'noloss': 'Aún sin pérdidas', 'avgwl': 'Ganancia / pérdida', 'rna': 'Sin stop: R no disponible', 'r': '+0,40R', 'title': 'La tendencia de la semana',
          'trend': r'^Tus operaciones después de las 11:00 te cuestan 900 \$ desde el inicio\.', 'act': 'Intenta parar a las 11:00 esta semana.'},
 }
 SET = """(rows) => { for (const r of rows) put('trades', Object.assign({ instrument: 'NQ', direction: 'long', contracts: 1, entry: 100, exit: 101, session_date: true, exit_time: '', fees_c: 0 }, r, { session: sessionFor(r.entry_time) })); render(); }"""
@@ -79,8 +79,13 @@ def run(p, lang, phone):
   pg.evaluate(FILT, {})
   # 1. under 5 trades: no ratio that means nothing, no « ∞ »
   pg.evaluate(SET, FIRST); stats_page(pg)
+  # (27 Oct., brief « nouveau trader » step 4) under 5 trades: « Your stats are coming », the net P&L, the win rate, the calendar — no empty tile
+  soon = pg.evaluate("(document.querySelector('#main .st-soon h3') || {}).textContent || ''")
   tiles = pg.evaluate(TXT, '#main .ikpis .ik b')
-  ok(tiles[1:] == [x['five']] * 3, f"{tag} 3 trades: « {x['five']} » for the win rate, profit factor, average win / loss ({tiles})")
+  ok(soon == x['soon'] and len(tiles) == 2 and x['five'] not in pg.evaluate("document.querySelector('#main').innerText") and pg.locator('#main .cal, #main .calgrid, #main [class*=cal]').count() > 0,
+     f"{tag} 3 trades: « {x['soon']} », 2 tiles (net P&L, win rate), the calendar, no « {x['five']} » ({soon!r}, {tiles})")
+  ph = pg.evaluate("document.getElementById('main').scrollHeight / innerHeight")
+  ok(ph < 2 or not phone, f'{tag} 3 trades: Stats under 2 screens on a phone ({ph:.2f})')
   ok('∞' not in pg.evaluate("document.querySelector('#main').innerText"), f'{tag} 3 trades: no « ∞ » on Stats')
   pg.evaluate(SET, FIVE_WINS); stats_page(pg)
   tiles = pg.evaluate(TXT, '#main .ikpis .ik b')
