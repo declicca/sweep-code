@@ -408,8 +408,12 @@
     const b = c.slice().sort((x, y) => x.c - y.c)[0], bl = c.slice().sort((x, y) => x.c - y.c)[0];   // (the same one: all move with the day's P&L)
     const left = Math.max(0, bl.c + sum);
     const ses = list.length ? session(day, list.length - 1, list, p) : { t: '', stop: false, code: '' };
-    const end = list.length > 0 && ((p.valid && p.maxLoss && sum <= -p.maxLoss) || ses.code === 'margin' || (p.valid && p.maxTrades && list.length >= p.maxTrades) || left <= 0);
-    return { allowed: b.c, k: b.k, a: b.a || '', left, n: list.length, m: p.valid ? p.maxTrades : 0, end, pause: !end && ses.stop, text: ses.stop ? ses.t : '' };
+    // (27 Oct., brief « nouveau trader » step 2) a trader starting out, his first 4 weeks: his mission's rule — done after 2 losses or
+    // his max number of trades — ends the day too, said as his rule (« rule »)
+    const rook = !!(window.SweepRookie && SweepRookie()), losses = list.filter((t) => net(t) < 0).length;
+    const rule = rook && list.length > 0 && (losses >= 2 || (p.valid && p.maxTrades && list.length >= p.maxTrades));
+    const end = list.length > 0 && ((p.valid && p.maxLoss && sum <= -p.maxLoss) || ses.code === 'margin' || (p.valid && p.maxTrades && list.length >= p.maxTrades) || left <= 0 || rule);
+    return { allowed: b.c, k: b.k, a: b.a || '', left, n: list.length, m: p.valid ? p.maxTrades : 0, end, rule: !!rule, pause: !end && ses.stop, text: ses.stop ? ses.t : '' };
   }
   /** one sentence about a plan: { bias, maxLoss (cents), maxTrades, setups (count) } */
   function planNote(x) {

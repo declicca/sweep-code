@@ -1209,3 +1209,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **N7** Stats : « Facteur de profit » / « Factor de beneficio » et son « i » traduit ; « Session » → « Séance » en français (dictionnaire, `src/nav.js`).
 - **N8** l'aide (`SweepGuide.open()`) s'ouvre bien aux deux tailles : pas un défaut (le tour l'avait sans doute appelée avant le chargement de `guide.js`) ; le test le garde.
 - **Tests** : `e2e_new_trader_fixes` (nouveau : 390 FR foncé, 1300 EN, 390 ES).
+
+### Brief « nouveau trader », étape 2 : les garde-fous du débutant deviennent les valeurs de l'app
+- **Qui** : `SweepRookie()` (`src/game.js`) : expérience « Moins de 6 mois » (`S.me.experience === 'new'`) et inscrit depuis moins de 28 jours (les semaines 1 à 4 du parcours de 90 jours). Les traders « 6 mois et plus » et les comptes existants ne changent pas.
+- **Le plan** (court et express) sans plan précédent : nombre max de trades **3** (court ; l'express garde 3 dans sa fiche), perte max **la moitié de la limite du jour** du compte le plus strict (500 $ sur un 50K), avec « Commence petit : tu pourras la monter. » au premier plan. Ce que le trader choisit est repris les jours suivants (le dernier plan l'emporte, comme avant).
+- **Les formulaires de trade** (à la main et par capture) proposent le **micro** du contrat habituel (`MICRO_OF` : NQ → MNQ, ES → MES, YM → MYM, RTY → M2K, CL → MCL, GC → MGC). Un mini choisi : une ligne grise « Ta règle ce mois-ci : 1 micro-contrat. », jamais de blocage.
+- **La mission** (bloc « Tes règles » du parcours et le quiz de la mission 1) : « fini après 2 pertes ou ta perte max du jour » (plus de −2R : « Maintenant » montre ce qui reste).
+- **« Maintenant » annonce l'arrêt** : après la 2ᵉ perte du jour ou au nombre max de trades (`riskNow` : `rule`), « Fini pour aujourd'hui, c'était ta règle. » et « Fermer ma journée » (la même revue que le soir), seul bouton bleu de la routine.
+- **Tests** : `e2e_rookie` (nouveau : 390 FR et ES pour le débutant, 1300 EN « Plus d'un an » inchangé).

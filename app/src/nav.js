@@ -2202,7 +2202,7 @@ window.SweepMO = window.SweepMO || class {
     SH.f.account = (accs[0] || {}).id || '';
     { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').forEach((x) => SH.copy.add(x.id)); }
     const usual = (() => { const c = {}; (S.trades || []).filter((x) => !x.demo).slice(-40).forEach((x) => { c[x.instrument] = (c[x.instrument] || 0) + 1; }); const top = Object.entries(c).sort((a, b) => b[1] - a[1])[0]; return top ? top[0] : 'NQ'; })();
-    SH.f.inst = usual;
+    SH.f.inst = typeof rookieInst === 'function' ? rookieInst(usual) : usual;   // (27 Oct.) starting out: the micro of the usual contract
     layer('nav-am-shot', '');
     paint();
   }
@@ -2245,7 +2245,7 @@ window.SweepMO = window.SweepMO || class {
         <label class="tk-f nav-am-risk"><span>${t('risk')}</span><div class="tk-in"><input data-am-f="risk" inputmode="decimal" value="${esc2(SH.f.risk ?? '')}" placeholder="$"></div></label>
         <div class="nav-am-r nav-am-wide">${rLine()}</div>
         <details class="nav-am-more-d nav-am-wide" ${SH.open ? 'open' : ''}><summary>${t('verify')}<small>${verifyLine()}</small></summary><div class="nav-am-grid">
-        <div class="tk-f nav-am-wide"><span>${t('sym')}</span>${pickBox('inst', insts.map((k) => [k, k + (typeof INSTR !== 'undefined' && INSTR[k] && INSTR[k].name ? ' — ' + INSTR[k].name : '')]), SH.f.inst)}</div>
+        <div class="tk-f nav-am-wide"><span>${t('sym')}</span>${pickBox('inst', insts.map((k) => [k, k + (typeof INSTR !== 'undefined' && INSTR[k] && INSTR[k].name ? ' — ' + INSTR[k].name : '')]), SH.f.inst)}${typeof rookieRule === 'function' ? rookieRule(SH.f.inst) : ''}</div>
         ${fld('qty', t('qty'), 'inputmode="numeric"')}
         ${fld('date', t('date'), 'type="date"')}${fld('time', t('time'), 'placeholder="hh:mm"')}
         ${fld('entry', t('entry'), 'inputmode="decimal"')}${fld('exit', t('exit'), 'inputmode="decimal"')}
@@ -4141,9 +4141,9 @@ window.SweepMO = window.SweepMO || class {
      before the first trade the risk allowed today (and the next big release with its no-trade window), during the session what
      is left, past a stop the day over; the numbers are the coach's own (SweepCoach.riskNow). Nothing once the day is reviewed. */
   const NW3 = {
-    en: { now: 'Now', risk: 'Your risk allowed today', left: 'Left today', count: 'trade {n} of {m}', end: 'Day over by your plan', plan: 'your plan’s max loss', last: 'your last plan’s max loss', dll: 'the daily limit of {a}', dd: 'your drawdown room on {a}', news: '{t} · {e}: no trade from {a} to {b}', Lplan: 'before your max loss', Llast: 'before your last plan’s max loss', Ldll: 'before the daily limit of {a}', Ldd: 'of drawdown room on {a}' },
-    fr: { now: 'Maintenant', risk: 'Ton risque permis aujourd’hui', left: 'Il te reste', count: 'trade {n} sur {m}', end: 'Journée terminée selon ton plan', plan: 'la perte max de ton plan', last: 'la perte max de ton dernier plan', dll: 'la limite du jour de {a}', dd: 'ta marge de drawdown sur {a}', news: '{t} · {e} : pas de trade de {a} à {b}', Lplan: 'avant ta perte max', Llast: 'avant la perte max de ton dernier plan', Ldll: 'avant la limite du jour de {a}', Ldd: 'de marge de drawdown sur {a}' },
-    es: { now: 'Ahora', risk: 'Tu riesgo permitido hoy', left: 'Te quedan', count: 'operación {n} de {m}', end: 'Día terminado según tu plan', plan: 'la pérdida máx. de tu plan', last: 'la pérdida máx. de tu último plan', dll: 'el límite diario de {a}', dd: 'tu margen de drawdown en {a}', news: '{t} · {e}: sin operar de {a} a {b}', Lplan: 'antes de tu pérdida máx.', Llast: 'antes de la pérdida máx. de tu último plan', Ldll: 'antes del límite diario de {a}', Ldd: 'de margen de drawdown en {a}' },
+    en: { now: 'Now', ruleEnd: 'Done for today: that was your rule.', closeDay: 'Close my day', risk: 'Your risk allowed today', left: 'Left today', count: 'trade {n} of {m}', end: 'Day over by your plan', plan: 'your plan’s max loss', last: 'your last plan’s max loss', dll: 'the daily limit of {a}', dd: 'your drawdown room on {a}', news: '{t} · {e}: no trade from {a} to {b}', Lplan: 'before your max loss', Llast: 'before your last plan’s max loss', Ldll: 'before the daily limit of {a}', Ldd: 'of drawdown room on {a}' },
+    fr: { now: 'Maintenant', ruleEnd: 'Fini pour aujourd’hui, c’était ta règle.', closeDay: 'Fermer ma journée', risk: 'Ton risque permis aujourd’hui', left: 'Il te reste', count: 'trade {n} sur {m}', end: 'Journée terminée selon ton plan', plan: 'la perte max de ton plan', last: 'la perte max de ton dernier plan', dll: 'la limite du jour de {a}', dd: 'ta marge de drawdown sur {a}', news: '{t} · {e} : pas de trade de {a} à {b}', Lplan: 'avant ta perte max', Llast: 'avant la perte max de ton dernier plan', Ldll: 'avant la limite du jour de {a}', Ldd: 'de marge de drawdown sur {a}' },
+    es: { now: 'Ahora', ruleEnd: 'Terminado por hoy: era tu regla.', closeDay: 'Cerrar mi día', risk: 'Tu riesgo permitido hoy', left: 'Te quedan', count: 'operación {n} de {m}', end: 'Día terminado según tu plan', plan: 'la pérdida máx. de tu plan', last: 'la pérdida máx. de tu último plan', dll: 'el límite diario de {a}', dd: 'tu margen de drawdown en {a}', news: '{t} · {e}: sin operar de {a} a {b}', Lplan: 'antes de tu pérdida máx.', Llast: 'antes de la pérdida máx. de tu último plan', Ldll: 'antes del límite diario de {a}', Ldd: 'de margen de drawdown en {a}' },
   };
   const nw = (k, v) => String((NW3[L] || NW3.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
   const usd0 = (c) => (typeof money === 'function' ? money(Math.abs(Math.round(c)), { sign: false, dec: 0 }) : '$' + Math.round(Math.abs(c) / 100));   // as the coach writes it (no sign)
@@ -4159,15 +4159,18 @@ window.SweepMO = window.SweepMO || class {
     const hm = (ts) => (typeof etStr === 'function' ? etStr(ts).slice(11, 16) : '');
     return `<p class="nav-now-news">${esc2(nw('news', { t: hm(e.ts), e: typeof tr === 'function' ? tr(e.event) : e.event, a: hm(e.ts - bf * 60), b: hm(e.ts + af * 60) }))}</p>`;
   }
+  let NOWEND = false;   // « Now » holds the only blue button (« Close my day »)
   function nowHtml(d, r) {
+    NOWEND = false;
     if (!d || !d.market || d.day_off || (r && r.review >= 100) || !window.SweepCoach || !SweepCoach.riskNow) return '';
     let x = null; try { x = SweepCoach.riskNow(d.day); } catch (e) { return ''; }
     if (!x) return '';
     let big, val = '', sub = '';
     if (!x.n) { big = nw('risk'); val = usd0(x.allowed); sub = nw(x.k, { a: x.a }); }
+    else if (x.end && x.rule) { big = nw('ruleEnd'); sub = ''; NOWEND = true; }   // a trader starting out: his rule, and closing the day right here
     else if (x.end) { big = nw('end'); sub = x.text; }
     else { big = nw('left'); val = usd0(x.left); sub = [nw('L' + x.k, { a: x.a }), x.m ? nw('count', { n: x.n + 1 > x.m ? x.m : x.n + 1, m: x.m }) : '', x.pause ? x.text : ''].filter(Boolean).join(' · '); }
-    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l"><b>${esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${!x.n ? newsLine(d.day) : ''}</div>`;
+    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l"><b>${esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${!x.n ? newsLine(d.day) : ''}${NOWEND ? `<div class="nav-now-a"><button type="button" class="btn sm primary" data-rt="fin">${esc2(nw('closeDay'))}</button></div>` : ''}</div>`;
   }
   /* (27 Oct., brief activation step E) the next day's appointment: right after a first plan, on a phone, once — « Shall I remind you
      tomorrow at 8:45 for your plan? », on in one tap (Settings › Notifications' own way, SweepNotify.push.on). On an iPhone outside the
@@ -4237,7 +4240,7 @@ window.SweepMO = window.SweepMO || class {
     const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
     const s3 = r.review >= 100 ? 'done' : 'todo';
     const n = [s1 !== 'todo', s2 === 'done', s3 === 'done'].filter(Boolean).length;
-    const nextI = wkReady ? 0 : s1 === 'todo' ? 1 : s3 === 'done' ? 0 : reviewTime(d) ? 3 : 2;   // only the next step is highlighted (none when the week's recap is ready)
+    const nextI = wkReady || NOWEND ? 0 : s1 === 'todo' ? 1 : s3 === 'done' ? 0 : reviewTime(d) ? 3 : 2;   // (« Now » with « Close my day »: the only blue button)   // only the next step is highlighted (none when the week's recap is ready)
     const pill = d.swept ? `<span class="nav-rt-pill ok">${svg('check')}${t('swept')}</span>` : `<span class="nav-rt-pill">${t('of', { n })}</span>`;
     const step = (i, key, ic, title, sub, state, stateTxt, btn, act, extra, short) => `<div class="nav-rt-s ${state}${i === nextI ? ' next' : ''}"${i === nextI ? ' aria-current="step"' : ''}>
         <div class="nav-rt-si"><span class="nav-rt-n">${state === 'done' ? svg('check') : i}</span><span class="nav-rt-ic">${svg(ic)}</span></div>

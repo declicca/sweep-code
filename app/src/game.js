@@ -21,7 +21,7 @@
       streak: 'Streak', best: 'Best', freezes: 'Freezes', level: 'Level', lvl: 'Lv {n}', days: '{n} days', day1: '1 day',
       start_title: 'Getting started', start_steps: { goal: 'Goal chosen', style: 'Style chosen', rules: 'Account rules', journal: 'First trade journaled', plan: 'First plan', review: 'First review' },
       plan_title: 'Plan of the day', bias: 'Bias', long: 'Long', short: 'Short', neutral: 'Neutral', no_trade: 'No trading today', setups: 'Allowed setups',
-      no_setups: 'Pick the setups you allow yourself today. They are kept for your next plans and trades.', other_setup: 'Other setup', setup_ph: 'Name of your setup', add: 'Add', max_loss: 'Max loss today', max_trades: 'Max trades', levels: 'Key levels / note',
+      no_setups: 'Pick the setups you allow yourself today. They are kept for your next plans and trades.', other_setup: 'Other setup', setup_ph: 'Name of your setup', add: 'Add', max_loss: 'Max loss today', start_small: 'Start small: you can raise it later.', max_trades: 'Max trades', levels: 'Key levels / note',
       rule: 'Rule of the day', rule_ph: 'One rule to hold today',
       gate_intro: 'Before your first trade: 30 seconds for your plan.', gate_skip: 'Skip, add my trade', gate_save: 'Save and add my trade', save_plan: 'Save my plan', confirm_plan: 'Confirm my plan', from_plan: 'From your plan of {d}: confirm or adjust.', dll_hint: 'Daily limit of {a}: {v}', dd_hint: 'Drawdown room of {a}: {v}', plan_needs: 'Pick a bias and your max loss for the day.', plan_late: 'Your first trade is already in: this plan counts as late.',
       plan_past: 'A plan can only be made for today.',
@@ -65,7 +65,7 @@
       streak: 'Streak', best: 'Meilleur', freezes: 'Gels', level: 'Niveau', lvl: 'Niv. {n}', days: '{n} jours', day1: '1 jour',
       start_title: 'Démarrage', start_steps: { goal: 'Objectif choisi', style: 'Style choisi', rules: 'Règles du compte', journal: 'Premier trade journalisé', plan: 'Premier plan', review: 'Première revue' },
       plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd’hui", setups: 'Setups autorisés',
-      no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', max_trades: 'Nombre max de trades', levels: 'Niveaux clés / note',
+      no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', start_small: 'Commence petit : tu pourras la monter.', max_trades: 'Nombre max de trades', levels: 'Niveaux clés / note',
       rule: 'Règle du jour', rule_ph: 'Une règle à tenir aujourd’hui',
       gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', save_plan: 'Enregistrer mon plan', confirm_plan: 'Confirmer mon plan', from_plan: 'Repris de ton plan du {d} : confirme ou ajuste.', dll_hint: 'Limite du jour de {a} : {v}', dd_hint: 'Marge de drawdown de {a} : {v}', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
       plan_past: "Un plan ne peut être fait que pour aujourd’hui.",
@@ -109,7 +109,7 @@
       streak: 'Racha', best: 'Mejor', freezes: 'Congeladores', level: 'Nivel', lvl: 'Nv. {n}', days: '{n} días', day1: '1 día',
       start_title: 'Primeros pasos', start_steps: { goal: 'Objetivo elegido', style: 'Estilo elegido', rules: 'Reglas de la cuenta', journal: 'Primer trade registrado', plan: 'Primer plan', review: 'Primera revisión' },
       plan_title: 'Plan del día', bias: 'Sesgo', long: 'Largo', short: 'Corto', neutral: 'Neutral', no_trade: 'Hoy no opero', setups: 'Setups permitidos',
-      no_setups: 'Elige los setups que te permites hoy. Se guardan para tus próximos planes y operaciones.', other_setup: 'Otro setup', setup_ph: 'Nombre de tu setup', add: 'Añadir', max_loss: 'Pérdida máx. del día', max_trades: 'Máx. de trades', levels: 'Niveles clave / nota',
+      no_setups: 'Elige los setups que te permites hoy. Se guardan para tus próximos planes y operaciones.', other_setup: 'Otro setup', setup_ph: 'Nombre de tu setup', add: 'Añadir', max_loss: 'Pérdida máx. del día', start_small: 'Empieza pequeño: podrás subirla después.', max_trades: 'Máx. de trades', levels: 'Niveles clave / nota',
       rule: 'Regla del día', rule_ph: 'Una regla para hoy',
       gate_intro: 'Antes de tu primera operación: 30 segundos para tu plan.', gate_skip: 'Saltar, añadir mi operación', gate_save: 'Guardar y añadir mi operación', save_plan: 'Guardar mi plan', confirm_plan: 'Confirmar mi plan', from_plan: 'Retomado de tu plan del {d}: confirma o ajusta.', dll_hint: 'Límite diario de {a}: {v}', dd_hint: 'Margen de drawdown de {a}: {v}', plan_needs: 'Elige un sesgo y tu pérdida máx. del día.', plan_late: 'Tu primer trade ya está hecho: este plan cuenta como tardío.',
       plan_past: 'Solo se puede hacer un plan para hoy.',
@@ -454,9 +454,18 @@
     const a = (S.accounts || []).filter((x) => !x.demo && x.status !== 'archived' && x.status !== 'closed' && x.rules && x.rules.dll_c > 0).sort((x, y) => x.rules.dll_c - y.rules.dll_c)[0];
     return a ? { c: a.rules.dll_c, name: a.name || '' } : null;
   }
+  /* (27 Oct., brief « nouveau trader » step 2) a trader starting out (« Less than 6 months »), in his first 4 weeks: the rules of his
+     mission become the app's values — 3 trades max, half the account's daily limit, 1 micro-contract. What he chooses is kept. */
+  function rookie() {
+    const me = S.me || {}; if (me.experience !== 'new') return false;
+    const c = me.created_at, ms = c == null || c === '' ? NaN : /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z'));
+    return !isFinite(ms) || Date.now() - ms < 28 * 864e5;
+  }
+  window.SweepRookie = rookie;
   function defaultMaxLoss() {
     const lp = lastPlan('9999');
     if (lp && lp.pre.max_loss) return String(lp.pre.max_loss).replace(/[^0-9.]/g, '');
+    if (rookie()) { const l = dailyLimit(); if (l) return String(Math.floor(l.c / 200)); }   // starting out: half the daily limit (« start small »)
     if (G.profile && G.profile.onboarding.max_loss) return String(G.profile.onboarding.max_loss / 100);
     const a = (S.accounts || []).find((x) => x.status !== 'archived' && x.rules && x.rules.dll_c && !x.demo);
     return a ? String(a.rules.dll_c / 100) : '';
@@ -472,7 +481,8 @@
     // confirms or adjusts; nothing is saved before « Confirm » (brief 02 part 5)
     const lp = pre.bias ? null : lastPlan(day, true), src = lp ? lp.pre : pre;
     PL.day = day; PL.from = lp ? lp.id : null; PL.bias = src.bias || null;
-    PL.setups = new Set(src.setups || []); PL.max_trades = src.max_trades || ''; PL.levels = pre.levels || ''; PL.extra = [];
+    PL.setups = new Set(src.setups || []); PL.max_trades = src.max_trades || (rookie() ? '3' : ''); PL.levels = pre.levels || ''; PL.extra = [];
+    PL.small = rookie() && !pre.max_loss && !lp;   // the first plan of a trader starting out: « start small »
     // the rule of the day (brief 03 step 2): the one the last review gave for the next session, or the coach's (src/coach.js)
     PL.rule = pre.rule != null ? pre.rule : ((window.SweepCoach && SweepCoach.ruleFor && SweepCoach.ruleFor(day)) || '');
     PL.ruleOn = !!PL.rule || pre.rule != null;   // shown when there is one to carry (not on a first plan: one thing at a time)
@@ -511,7 +521,7 @@
       ${PL.bias === 'no_trade' || !PL.ruleOn ? '' : `<label class="g-f g-rule"><span>${t('rule')}</span><input type="text" maxlength="160" data-gp="rule" value="${esc(PL.rule || '')}" placeholder="${esc(t('rule_ph'))}" enterkeyhint="done"></label>`}
       <div class="g-f"><span>${t('bias')}</span><div class="g-seg4">${bias.map(([v, k]) => `<button type="button" class="${PL.bias === v ? 'on' : ''} b-${v}" data-g="bias" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${PL.bias === 'no_trade' ? '' : `<div class="g-f g-setups"><span>${t('setups')}</span>${setupsHtml(setups)}</div>
-      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$">${PL.room && (!lim || PL.room.c < lim.c) ? `<small class="g-hint-sm g-dll">${esc(t('dd_hint', { a: PL.room.name, v: typeof moneyU === 'function' ? moneyU(Math.floor(PL.room.c / 100) * 100) : '$' + Math.floor(PL.room.c / 100) }))}</small>` : lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: typeof moneyU === 'function' ? moneyU(lim.c) : '$' + lim.c / 100 }))}</small>` : ''}</label>
+      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$">${PL.small ? `<small class="g-hint-sm g-small">${t('start_small')}</small>` : ''}${PL.room && (!lim || PL.room.c < lim.c) ? `<small class="g-hint-sm g-dll">${esc(t('dd_hint', { a: PL.room.name, v: typeof moneyU === 'function' ? moneyU(Math.floor(PL.room.c / 100) * 100) : '$' + Math.floor(PL.room.c / 100) }))}</small>` : lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: typeof moneyU === 'function' ? moneyU(lim.c) : '$' + lim.c / 100 }))}</small>` : ''}</label>
       <label class="g-f"><span>${t('max_trades')}</span><input inputmode="numeric" data-gp="max_trades" value="${esc(PL.max_trades)}"></label></div>
       <label class="g-f"><span>${t('levels')}</span><textarea rows="2" data-gp="levels">${esc(PL.levels)}</textarea></label>`}
       <p class="g-err" id="gErr"></p>
@@ -1029,7 +1039,7 @@
       f.no_trade_conditions = ['two_invalidations', 'time_limit'];
       // learned defaults (brief step 8): the most frequent of the last 10 sheets (2 trades and 11:30 to start)
       const last = pmRecent(day, 10), mode = (l) => { const n = new Map(); l.forEach((v) => v != null && n.set(v, (n.get(v) || 0) + 1)); let b = null, k = 0; for (const [v, c] of n) if (c > k) { b = v; k = c; } return b; };
-      f.limits.max_trades = mode(last.map((x) => x.limits.max_trades)) || 2;
+      f.limits.max_trades = mode(last.map((x) => x.limits.max_trades)) || (rookie() ? 3 : 2);   // starting out: the mission's 3 trades
       f.limits.time_limit = mode(last.map((x) => x.limits.time_limit)) || '11:30';
     }
     if (draft) { PM.i = Date.now() - (draft.at || 0) < 6e5 ? draft.i || 0 : 0; PM.instOther = !!draft.other; }   // (closed a moment ago: back on the same screen; later: from the first one, everything still filled)
@@ -1037,6 +1047,7 @@
     { const l5 = pmRecent(day, 5); PM.hideInst = !PM.instOther && l5.length === 5 && l5.every((x) => x.instrument && x.instrument === l5[0].instrument) && (!f.instrument || f.instrument === l5[0].instrument); if (PM.hideInst) f.instrument = l5[0].instrument; }
     f.answers = Object.assign({}, f.answers);
     if (f.answers.D1 == null) f.answers.D1 = PM.d1auto.value;
+    PM.small = !old && rookie() && f.answers.max_loss == null && !lastPlan('9999');   // a first plan starting out: « start small »
     if (f.answers.max_loss == null) f.answers.max_loss = pmMaxLoss(day);
     PM.f = f;
     PM.opening = Date.now();   // (the express offer waits: never two pre-market sheets at once)
@@ -1143,7 +1154,7 @@
         <div class="g-f"><span>${pt('x_levels')}${pmI('levels')}</span>${pmTipP('levels')}${pmIn('X_levels', a.X_levels, pt('x_levels_ph'), 'text')}</div>
         <div class="g-f"><span>${pt('x_plan')}${pmI('plan')}</span>${pmTipP('plan')}${ta('X_plan', pt('x_plan_ph'))}</div>
         <div class="g-f"><span>${pt('x_alt')}${pmI('alt')}</span>${pmTipP('alt')}${ta('X_alt', pt('x_alt_ph'))}</div>
-        <div class="g-f"><span>${pt('dml')}${pmI('maxloss')}</span>${pmTipP('maxloss')}${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}</div>
+        <div class="g-f"><span>${pt('dml')}${pmI('maxloss')}</span>${pmTipP('maxloss')}${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}${PM.small ? `<small class="g-hint-sm g-small">${t('start_small')}</small>` : ''}</div>
         ${PM.late ? `<button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>` : `<button type="button" class="link pm-off-day" data-pm="mode" data-v="full"${PM.offerKeep ? ' data-keep="1"' : ''}>${pt(PM.offerKeep ? 'x_keep' : 'x_guided')}</button>`}
         <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;
     }
