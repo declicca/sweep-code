@@ -4,7 +4,8 @@ Sweep — Admin dashboard (brief 01 step 4), dev environment with Playwright:
  - a JS error sent by a trader's browser (api/client-error) is listed, grouped by message, with the traders affected,
    the page, the browser and the version;
  - the four indicators of the brief (activation on the sign-up day, retention D7 and D30, swept days), then the journey's
-   baseline (SWEEP.md, step 0): closed days, Friday recaps opened;
+   baseline (SWEEP.md, step 0): closed days, Friday recaps opened; the brief activation's step C: back on the next trading
+   day, risk allowed seen on the sign-up session, when they sign up (4 moments of the New York day);
  - the sign-up week and source filters reload the numbers (« N of M traders »);
  - « Exporter »: the 30-day list as a Markdown file (api/admin/errors-export), with the error and where it happened;
  - « Exporter pour Claude » (27 Oct.): everything Admin shows as one Markdown file (api/admin/report), and the app
@@ -34,8 +35,11 @@ async def main():
         ok(r == 200, f'a JS error is received by the server ({r})')
       await pg.evaluate("location.hash='#admin'"); await pg.wait_for_selector('#main .ux-brief', timeout=15000); await pg.wait_for_timeout(800)
       cards = await pg.evaluate("[...document.querySelectorAll('#main .ux-brief .ux-m small')].map(s=>s.textContent)")
-      want = ['Activation : un trade le jour de l’inscription', 'Rétention J7', 'Rétention J30', 'Journées balayées', 'Journées fermées', 'Bilans de la semaine ouverts']
+      want = ['Activation : un trade le jour de l’inscription', 'Rétention J7', 'Rétention J30', 'Journées balayées', 'Journées fermées', 'Bilans de la semaine ouverts', 'De retour le jour de trading suivant', 'Risque permis vu le jour de l’inscription']
       ok(all(any(c.startswith(x) for c in cards) for x in want), f'{tag} the four indicators, closed days and Friday recaps opened (SWEEP.md, step 0) ({cards})')
+      # (brief activation, step C) when they sign up: the 4 moments of the New York day, each with its sign-ups and the share with a first plan or trade
+      sl = await pg.evaluate("[...document.querySelectorAll('#main .ux-slots tbody tr')].map((r) => [r.dataset.slot, r.children.length, r.getClientRects().length > 0])")
+      ok([x[0] for x in sl] == ['before', 'session', 'evening', 'weekend'] and all(x[1] == 3 and x[2] for x in sl), f'{tag} « Quand ils s’inscrivent »: 4 moments, sign-ups and first plan or trade ({sl})')
       row = await pg.evaluate(f"(()=>{{const r=[...document.querySelectorAll('#main .ux-errs tbody tr')].find(t=>t.textContent.includes('{msg}')); return r?[...r.children].map(c=>c.textContent.trim()):null}})()")
       ok(row is not None and row[1] == '1' and row[2] == '1' and row[4] == '#trades' and 'Chrome' in row[5] and row[6] == 'app.test', f'{tag} the error: 1 trader, 1 time, page, browser, version ({row})')
       # « Exporter » (13 Oct.): the 30-day list as a Markdown file, to give to Claude

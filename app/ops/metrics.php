@@ -14,6 +14,9 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * how many reached each step and the median time from the sign-up (sample-data accounts are not counted).
  * The journey's baseline (SWEEP.md, step 0), same traders: closed days (sessions with trades of the last 30 days whose
  * review is done) and Friday recaps opened (the 8 last finished weeks with a trade, recap opened: « weekly_opened »).
+ * Brief activation of 27 Oct., step C (same traders): the sign-ups by New York time of day (before the open, session, evening,
+ * weekend) with the share that made a first plan or trade on that session; the return on the next trading day (a visit, a plan
+ * or a trade; usage_daily, game_days, users.last_login); the risk allowed seen on the session of the sign-up (a first plan or trade).
  */
 function sweep_metrics(PDO $pdo, string $app, array $f = []): array
 {
@@ -134,6 +137,36 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         foreach ($users as $u) { if (!isset($at[$u['id']])) continue; $n++; if ($timed) $d[] = max(0, $at[$u['id']] - $u['ts']); }
         sort($d); return ['n' => $n, 'median_min' => $d ? (int) round($d[intdiv(count($d), 2)] / 60) : null];
     };
+    // brief activation of 27 Oct., step C: when traders sign up (New York time), who comes back on the next trading day, and
+    // who saw the risk allowed (a first plan) or « left today » (a first trade) on the session of the sign-up. A session runs
+    // from 18:00 ET the day before (the app's todayStr): its day = the New York date 6 hours later.
+    $sday = fn(int $ts) => $nyDay($ts + 6 * 3600);
+    $nextTd = function (string $d) use ($addD) { do { $d = $addD($d, 1); $w = (int) (new DateTimeImmutable($d . ' 12:00'))->format('N'); } while ($w >= 6); return $d; };
+    $slot = function (int $ts) use ($ny) {   // before the open (18:00 → 9:30), session (9:30 → 16:00), evening (16:00 → 18:00), weekend (Friday 17:00 → Sunday 18:00)
+        $t = (new DateTimeImmutable('@' . $ts))->setTimezone($ny); $w = (int) $t->format('N'); $hm = $t->format('H:i');
+        if (($w === 5 && $hm >= '17:00') || $w === 6 || ($w === 7 && $hm < '18:00')) return 'weekend';
+        return $hm >= '09:30' && $hm < '16:00' ? 'session' : ($hm >= '16:00' && $hm < '18:00' ? 'evening' : 'before');
+    };
+    $todayS = $sday($now);
+    $seen = [];   // the days a trader was there: a visit (usage of the app, the last sign-in), an activity of the game, a first plan or trade
+    if ($has('usage_daily')) foreach ($q('SELECT DISTINCT user_id, day FROM usage_daily') as $r) $seen[$r['user_id']][$r['day']] = true;
+    foreach ($activeDays as $uid => $ds) foreach ($ds as $d) $seen[$uid][$d] = true;
+    if (in_array('last_login', $cols, true)) foreach ($q('SELECT id, last_login FROM users WHERE last_login IS NOT NULL') as $r) { $t = strtotime((string) $r['last_login']); if ($t) $seen[$r['id']][$sday($t)] = true; }
+    $slots = []; foreach (['before', 'session', 'evening', 'weekend'] as $k) $slots[$k] = ['n' => 0, 'day0' => 0];
+    $d1n = $d1k = $rsN = $rsK = 0;
+    foreach ($users as $u) {
+        $s0 = $sday($u['ts']); $k = $slot($u['ts']); $slots[$k]['n']++;
+        $day0 = (isset($plan1[$u['id']]) && $sday($plan1[$u['id']]) === $s0) || (isset($first[$u['id']]) && $sday($first[$u['id']]) === $s0);
+        if ($day0) $slots[$k]['day0']++;
+        if ($s0 < $todayS) { $rsN++; if ($day0) $rsK++; }   // the session of the sign-up is over
+        $j1 = $nextTd($s0);
+        if ($j1 < $todayS) {   // that next trading day is over
+            $d1n++;
+            $back = isset($seen[$u['id']][$j1]) || (isset($plan1[$u['id']]) && $sday($plan1[$u['id']]) === $j1) || (isset($first[$u['id']]) && $sday($first[$u['id']]) === $j1);
+            if ($back) $d1k++;
+        }
+    }
+    foreach ($slots as &$x) $x['day0_pct'] = $rate($x['day0'], $x['n']); unset($x);
     $start = ['signed_up' => count($users), 'first_name' => $step($named, false), 'account' => $step($acc1), 'plan' => $step($plan1), 'trade' => $step($first)];
     $brief = [
         'start' => $start,
@@ -144,6 +177,7 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         'swept_sessions_30d' => ['pct' => $rate($sweptS, $sess), 'of' => $sess],
         'closed_sessions_30d' => ['pct' => $rate($closedS, $sess), 'of' => $sess],
         'weekly_opened_8w' => ['pct' => $rate($openedW, count($tradedWeeks)), 'of' => count($tradedWeeks)],
+        'signup_slots' => $slots, 'return_d1' => ['pct' => $rate($d1k, $d1n), 'of' => $d1n], 'risk_seen_day0' => ['pct' => $rate($rsK, $rsN), 'of' => $rsN],
     ];
     if ($has('client_errors')) {   // grouped by message, its numbers taken out (ops/client-errors.php), last 30 days
         require_once __DIR__ . '/client-errors.php';

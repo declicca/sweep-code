@@ -843,6 +843,21 @@
     const all = s.signed_up || 0, rows = [[y.stN[0], all, null], [y.stN[1], s.first_name.n, null], [y.stN[2], s.account.n, s.account.median_min], [y.stN[3], s.plan.n, s.plan.median_min], [y.stN[4], s.trade.n, s.trade.median_min]];
     return `<h4 class="ux-start-h">${y.st}</h4><div class="scroll-x"><table class="tbl ux-start"><tbody>${rows.map(([l, n, m], i) => `<tr><td>${esc(l)}</td><td class="num"><b>${n}</b></td><td class="num">${all ? Math.round(n / all * 100) + ' %' : '—'}</td><td class="num muted">${i > 1 ? dur(m) : ''}</td></tr>`).join('')}</tbody></table></div>`;
   }
+  // brief activation of 27 Oct., step C: the return on the next trading day, the risk allowed seen on the session of the sign-up,
+  // and when traders sign up (New York time), with the share that made a first plan or trade on that session
+  const SCT = {
+    en: { d1: 'Back on the next trading day: a visit, a plan or a trade', rs: 'Risk allowed seen on the sign-up session: a first plan or trade', h: 'When they sign up (New York time)', n: 'Sign-ups', p: 'First plan or trade that session',
+      k: { before: 'Before the open (6 pm → 9:30 am)', session: 'Session (9:30 am → 4 pm)', evening: 'Evening (4 pm → 6 pm)', weekend: 'Weekend (Friday 5 pm → Sunday 6 pm)' } },
+    fr: { d1: 'De retour le jour de trading suivant : une visite, un plan ou un trade', rs: 'Risque permis vu le jour de l’inscription : un premier plan ou trade', h: 'Quand ils s’inscrivent (heure de New York)', n: 'Inscrits', p: 'Premier plan ou trade ce jour-là',
+      k: { before: 'Avant l’ouverture (18 h → 9 h 30)', session: 'Séance (9 h 30 → 16 h)', evening: 'Soir (16 h → 18 h)', weekend: 'Fin de semaine (vendredi 17 h → dimanche 18 h)' } },
+    es: { d1: 'De vuelta el siguiente día de trading: una visita, un plan o una operación', rs: 'Riesgo permitido visto el día del registro: un primer plan u operación', h: 'Cuándo se registran (hora de Nueva York)', n: 'Registros', p: 'Primer plan u operación ese día',
+      k: { before: 'Antes de la apertura (18 h → 9:30)', session: 'Sesión (9:30 → 16 h)', evening: 'Tarde (16 h → 18 h)', weekend: 'Fin de semana (viernes 17 h → domingo 18 h)' } } };
+  const SC = () => SCT[LANG] || SCT.en;
+  function slotsHtml(sl) {
+    if (!sl) return '';
+    const x = SC();
+    return `<h4 class="ux-start-h">${x.h}</h4><div class="scroll-x"><table class="tbl ux-start ux-slots"><thead><tr><th></th><th class="num">${x.n}</th><th class="num">${x.p}</th></tr></thead><tbody>${['before', 'session', 'evening', 'weekend'].map((k) => `<tr data-slot="${k}"><td>${esc(x.k[k])}</td><td class="num"><b>${sl[k].n}</b></td><td class="num">${pct({ pct: sl[k].day0_pct })}</td></tr>`).join('')}</tbody></table></div>`;
+  }
   function briefHtml(d) {   // brief 01 step 4: the filters, the four indicators, the JS errors grouped by message
     const y = bt(), b = d.brief; if (!b) return '';
     const day = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
@@ -855,7 +870,7 @@
     const rows = g.map((e) => `<tr><td class="ux-err-m"><b>${esc(e.msg)}</b>${e.where ? `<small>${esc(e.where)}</small>` : ''}</td><td class="num">${e.traders}</td><td class="num">${e.n}</td><td>${when(e.last)}</td><td>${esc(e.pages.join(', '))}</td><td>${esc(e.browsers.join(', '))}</td><td>${esc(e.versions.join(', '))}</td></tr>`).join('');
     return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
-      <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}</div>
+      <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}${b.return_d1 ? card(SC().d1, pct(b.return_d1), sub(b.return_d1)) + card(SC().rs, pct(b.risk_seen_day0), sub(b.risk_seen_day0)) : ''}</div>${slotsHtml(b.signup_slots)}
       ${startHtml(b.start, y)}
       <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<span class="ux-err-a"><button type="button" class="btn sm" data-ux-errclr>${y.clr}</button><a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a></span>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }

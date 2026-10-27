@@ -69,6 +69,10 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
             ['Premier compte', $s['account']['n'], round($s['account']['n'] / $all * 100) . ' %', $dur($s['account']['median_min'])],
             ['Premier plan', $s['plan']['n'], round($s['plan']['n'] / $all * 100) . ' %', $dur($s['plan']['median_min'])],
             ['Premier trade', $s['trade']['n'], round($s['trade']['n'] / $all * 100) . ' %', $dur($s['trade']['median_min'])]]);
+    $sk = ['before' => 'Avant l\'ouverture (18 h → 9 h 30)', 'session' => 'Séance (9 h 30 → 16 h)', 'evening' => 'Soir (16 h → 18 h)', 'weekend' => 'Fin de semaine (vendredi 17 h → dimanche 18 h)'];
+    $md .= "**Quand ils s'inscrivent** (heure de New York) et la part qui fait un premier plan ou un premier trade pendant cette séance :\n\n"
+        . $tbl(['Moment', 'Inscrits', 'Premier plan ou trade ce jour-là'], array_map(fn($k) => [$sk[$k], $b['signup_slots'][$k]['n'], $pc(['pct' => $b['signup_slots'][$k]['day0_pct']])], array_keys($sk)))
+        . $tbl(['Indicateur', 'Valeur'], [['De retour le jour de trading suivant (visite, plan ou trade)', $pc($b['return_d1'])], ['Risque permis vu le jour de l\'inscription (premier plan ou trade)', $pc($b['risk_seen_day0'])]]);
 
     $md .= "## 3. D'où viennent les traders\n\n**Inscriptions par semaine** (lundi, New York) :\n\n" . $tbl(['Semaine', 'Inscrits'], array_map(null, array_keys($b['filters']['weeks']), array_values($b['filters']['weeks'])))
         . "**« Où as-tu trouvé Sweep ? »** (tous) :\n\n" . $tbl(['Réponse', 'Inscrits'], array_map(null, array_keys($b['filters']['sources']), array_values($b['filters']['sources'])))

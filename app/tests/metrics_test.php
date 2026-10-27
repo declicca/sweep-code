@@ -5,7 +5,8 @@ declare(strict_types=1);
  *   php tests/metrics_test.php
  * Known traders, hand-computed numbers: activation on the sign-up day, retention D7 / D30 (a trade or a review), swept
  * sessions, median sign-up → first trade, the cohort and source filters, JS errors grouped with the traders affected,
- * the start step by step (brief 03 step 1), closed days and Friday recaps opened (SWEEP.md, step 0).
+ * the start step by step (brief 03 step 1), closed days and Friday recaps opened (SWEEP.md, step 0); the sign-ups by time of day,
+ * the return on the next trading day and the risk allowed seen on the session of the sign-up (brief activation, step C).
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -111,6 +112,29 @@ $g = sweep_metrics($pdo, $app)['game'];
 $n = $g['active_30d'];
 $ok($n >= 3 && $g['used']['share']['n'] === 1 && $g['used']['share']['pct'] === (int) round(100 / $n) && $g['used']['chest']['n'] === 0 && $g['reached']['mission']['n'] === 2,
     "the game's use: of the $n active traders, 1 shared a card (Mateo's account and an inactive trader aside, twice counted once), no chest within 30 days, 2 missions: " . json_encode([$g['used']['share'], $g['used']['chest'], $g['reached']['mission']]));
+
+// brief activation of 27 Oct., step C, on a second throwaway database: when they sign up, the return on the next trading day,
+// the risk allowed seen on the session of the sign-up. Tuesday 1 Sept. 2026, New York time.
+$p2 = new PDO('sqlite:' . $tmp . '/c.db', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+$p2->exec('CREATE TABLE users (id TEXT PRIMARY KEY, created_at TEXT, utm_source TEXT, utm_campaign TEXT, is_internal INT DEFAULT 0, disabled INT DEFAULT 0, found_via TEXT, first_name TEXT, last_login TEXT)');
+$p2->exec('CREATE TABLE game_analytics (user_id TEXT, event TEXT, created_at INT, meta_json TEXT)');
+$p2->exec('CREATE TABLE game_days (user_id TEXT, trading_day TEXT, trades_count INT DEFAULT 0, review_done INT DEFAULT 0, is_swept INT DEFAULT 0, activity INT DEFAULT 0)');
+$p2->exec('CREATE TABLE documents (user_id TEXT, collection TEXT, id TEXT, data TEXT, created_at TEXT, updated_at TEXT)');
+$et = fn(string $s) => (new DateTimeImmutable($s, $ny))->getTimestamp();
+$u2 = fn(string $id, int $ts, int $internal = 0, ?int $login = null) => $p2->prepare('INSERT INTO users (id, created_at, found_via, is_internal, last_login) VALUES (?, ?, ?, ?, ?)')->execute([$id, gmdate('Y-m-d H:i:s', $ts), 'x', $internal, $login ? gmdate('Y-m-d\TH:i:s\Z', $login) : null]);
+$u2('s1', $et('2026-09-01 10:00'));                                  // session (Tuesday 10:00)
+$u2('s2', $et('2026-09-01 20:00'));                                  // before the open (Tuesday evening 20:00: Wednesday's session)
+$u2('s3', $et('2026-09-04 17:30'), 0, $et('2026-09-07 10:00'));      // weekend (Friday 17:30); signed in again on Monday
+$u2('s4', $et('2026-09-02 16:30'));                                  // evening (Wednesday 16:30)
+$u2('s5', $et('2026-09-01 10:00'), 1);                               // Mateo's: left out
+$p2->prepare("INSERT INTO game_analytics VALUES ('s1', 'trade_logged', ?, '{}')")->execute([$et('2026-09-01 11:00')]);   // s1: a trade the same session
+$p2->prepare("INSERT INTO game_days VALUES ('s1', '2026-09-02', 0, 1, 0, 1)")->execute();                                // s1: back on Wednesday (a review)
+$p2->prepare("INSERT INTO documents VALUES ('s2', 'journals', 'j', ?, ?, ?)")->execute(['{"pre":{"bias":"bullish","max_loss":"500","saved_at":' . $et('2026-09-02 08:00') . '}}', '2026-09-02 12:00:00', '2026-09-02 12:00:00']);   // s2: the plan before Wednesday's open
+$b2 = sweep_metrics($p2, $app)['brief'];
+$sl = array_map(fn($x) => [$x['n'], $x['day0_pct']], $b2['signup_slots']);
+$ok($sl === ['before' => [1, 100], 'session' => [1, 100], 'evening' => [1, 0], 'weekend' => [1, 0]], 'when they sign up: one trader in each slot, a first plan or trade on that session for « before » and « session »: ' . json_encode($sl));
+$ok($b2['return_d1'] === ['pct' => 50, 'of' => 4], 'back on the next trading day: s1 (a review on Wednesday), s3 (signed in on Monday after a Friday-evening sign-up); not s2 nor s4: ' . json_encode($b2['return_d1']));
+$ok($b2['risk_seen_day0'] === ['pct' => 50, 'of' => 4], 'the risk allowed seen on the session of the sign-up: s1 (a trade), s2 (the plan before the open of its session): ' . json_encode($b2['risk_seen_day0']));
 
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
