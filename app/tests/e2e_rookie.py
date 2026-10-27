@@ -36,7 +36,9 @@ with sync_playwright() as p:
     ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': exp}), headers=H)
     pg = ctx.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#dashboard'); pg.wait_for_timeout(2500)
-    pg.evaluate("put('accounts', { id: 'rk-a', name: 'Topstep 50K', status: 'active', phase: 'eval', starting_balance_c: 5000000, created_on: '2026-09-01', rules: { dd_c: 200000, dll_c: 100000, target_c: 300000 } })")
+    # (review R1, 27 Oct.) the real Topstep 50K Combine: no daily limit — fr and en; a firm with a daily limit ($1,000): es
+    dll = lang == 'es'
+    pg.evaluate("(dll) => put('accounts', { id: 'rk-a', name: 'Topstep 50K', status: 'active', phase: 'eval', starting_balance_c: 5000000, created_on: '2026-09-01', rules: Object.assign({ dd_c: 200000, dd_type: 'eod', target_c: 300000 }, dll ? { dll_c: 100000 } : {}) })", dll)
     pg.wait_for_timeout(800)
     day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || todayStr()")
     # 1. the plan (the short one of a first trade, then the express one)

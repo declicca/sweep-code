@@ -492,7 +492,7 @@
     const mg = window.SweepCoach && SweepCoach.margin ? SweepCoach.margin(day) : null, room = mg ? mg.start : null;
     PL.room = mg ? { c: room, name: mg.name } : null;
     if (!pre.max_loss && mg) {
-      if (!(+PL.max_loss > 0)) PL.max_loss = String(Math.floor(Math.min(mg.dd / 2, room) / 100));   // no daily limit (a Topstep Combine without it): half the drawdown
+      if (!(+PL.max_loss > 0)) PL.max_loss = String(Math.floor(Math.min(mg.dd / (rookie() ? 4 : 2), room) / 100));   // no daily limit (a Topstep Combine without it): half the drawdown — a quarter for a trader starting out (review R1, 27 Oct.)
       else if (+PL.max_loss > room / 100) PL.max_loss = String(Math.floor(room / 100));
     }
     openSheet(planHtml(), { cls: 'g-plan' });
@@ -983,7 +983,7 @@
     const pre = journalOf(day).pre || {}; if (pre.max_loss) return String(pre.max_loss).replace(/[^0-9.]/g, '');
     let ml = defaultMaxLoss(); const lim = dailyLimit(); if (lim && +ml > lim.c / 100) ml = String(lim.c / 100);
     const mg = window.SweepCoach && SweepCoach.margin ? SweepCoach.margin(day) : null;
-    if (mg) { if (!(+ml > 0)) ml = String(Math.floor(Math.min(mg.dd / 2, mg.start) / 100)); else if (+ml > mg.start / 100) ml = String(Math.floor(mg.start / 100)); }
+    if (mg) { if (!(+ml > 0)) ml = String(Math.floor(Math.min(mg.dd / (rookie() ? 4 : 2), mg.start) / 100)); else if (+ml > mg.start / 100) ml = String(Math.floor(mg.start / 100)); }
     return ml || '';
   }
   /** under the max loss, as the plan sheet always said: the drawdown room, or the account's daily limit */
