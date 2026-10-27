@@ -136,9 +136,9 @@ try:
   ok(rc == 0 and len(events(uid_fr, 'inactive7d')) == 1 and 'already sent' in out, 'the same run again: not twice')
   n0 = len(events(uid_en)); rc, out = cron('--all-events', '--user=' + uid_en)
   names = [e['eventName'] for e in events(uid_en)[n0:]]
-  ok(rc == 0 and len(names) == 16 and len(set(names)) == 16, f'--all-events: the 16 events once each to a test trader ({len(names)})')
+  ok(rc == 0 and len(names) == 17 and len(set(names)) == 17, f'--all-events: the 17 events once each (firstPlanSaved since 27 Oct.) to a test trader ({len(names)})')
   d = sqlite3.connect(DB); n_log = d.execute('SELECT COUNT(*) FROM email_events_log WHERE user_id = ?', (uid_en,)).fetchone()[0]; d.close()
-  ok(n_log == 5, f'--all-events records nothing (the trader keeps his 5 real events: {n_log})')
+  ok(n_log == 6, f'--all-events records nothing (the trader keeps his 6 real events, his first plan included: {n_log})')
   rc, out = cron('--now=2026-01-01 07:30')
   ok(rc == 2 and '--user' in out, '--now without --user is refused: a test date never goes to every trader')
 
