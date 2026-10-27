@@ -5,7 +5,7 @@ A trader of its own with two accounts. On the form, right above « Save »: 3 qu
 trader answers, presses « Save » before typing the entry price (refused: « Add the entry price »), waits, types it and saves:
  - the answers are in the trade from the moment it is saved (and in its copy on the other account): never lost after a
    refused save, the discipline score is never empty when the trader answered;
- - « Step 2 » shows them at once; FR phone and EN computer, no page error;
+ - saved: the form closes (no « Step 2 » since 27 Oct.), the trade page shows the score; FR phone and EN computer, no page error;
  - questions that adapt (brief edge T7, computed, never saved): the question answered « yes » on the winners and « no » on
    the losers comes first with « This question separates your winners from your losers »; one always « yes » on the last 4
    weeks goes under « See more », marked « acquired »; « Opening range breakout » picked: its own entry criterion replaces
@@ -66,8 +66,12 @@ async def main():
       ok(len(got) == 2 and all(all(g['d'].get(k) == v for k, v in want.items()) for g in got), f'{tag} the answers are in the trade and its copy as soon as they are saved ({[g["d"] for g in got]})')
       ok(all(g['score'] is not None for g in got), f'{tag} the discipline score is not empty ({[g["score"] for g in got]})')
       await pg.wait_for_timeout(600)
-      s2 = await pg.evaluate("(()=>{const s=document.querySelector('#tkSlide .score b'); return s ? s.textContent.trim() : null})()")
-      ok(s2 not in (None, '—') and s2.endswith('%'), f'{tag} « Step 2 » shows the score at once ({s2})')
+      # (27 Oct., brief « daily loop » step 2) no « Step 2 » after the save: the form closes, the app stays where it was; the trade page has the score
+      closed = await pg.evaluate("!document.querySelector('#tkSlide.open') && !location.hash.startsWith('#trade/')")
+      tid = await pg.evaluate("(S.trades.filter(t=>!t.demo)[0] || {}).id")
+      await pg.evaluate("(id) => { location.hash = '#trade/' + encodeURIComponent(id) }", tid); await pg.wait_for_timeout(1500)
+      s2 = await pg.evaluate("(()=>{const s=document.querySelector('#main .score b'); return s ? s.textContent.trim() : null})()")
+      ok(closed and s2 not in (None, '—') and s2.replace('\u202f', '').replace(' ', '').endswith('%'), f'{tag} saved: the form closes, no « Step 2 »; the trade page shows the score ({closed}, {s2})')
       # Edge T7: the questions adapt (computed, never saved)
       await pg.evaluate("document.querySelector('#tkSlide [data-act=\"s2-close\"]') && document.querySelector('#tkSlide [data-act=\"s2-close\"]').click()"); await pg.wait_for_timeout(500)
       sep, acq = allq[4], allq[2]

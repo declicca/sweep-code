@@ -2574,8 +2574,7 @@ window.SweepMO = window.SweepMO || class {
     if (SH.setup && window.SweepSetupPick) SweepSetupPick.keep(SH.setup);
     if (quiet) return;
     close();
-    if (doc.off_plan && window.SweepFiche && SweepFiche.offerLink) setTimeout(() => SweepFiche.offerLink(doc.id), 450);   // which scenario of the sheet?
-    if (typeof toast === 'function') toast(t('saved'));
+    if (typeof toast === 'function') toast(t('saved'), typeof seeTradeLink === 'function' ? { link: seeTradeLink(doc.id) } : undefined);   // (27 Oct.) no sheet « which scenario? » after the save: the chips of the form
     setTimeout(() => { if (typeof render === 'function') render(); }, 80);
   }
 

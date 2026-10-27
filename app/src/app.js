@@ -4286,8 +4286,8 @@ async function tkSave() {
   }
   !TK.id && TK.setup && window.SweepSetupPick && SweepSetupPick.keep(TK.setup);
   const u = TK.id ? [] : [ ...TK.copyTo ].filter(v => v !== TK.account && acct(v));
-  // a new trade on a day with a pre-market sheet: off-plan until linked to one of its scenarios (offered after the save)
-  !TK.id && window.SweepFiche && SweepFiche.markTrade && (SweepFiche.markTrade(c), c.off_plan && setTimeout(() => SweepFiche.offerLink(c.id), 450));
+  // a new trade on a day with a pre-market sheet: linked to its scenario, or off-plan (brief « daily loop » step 2)
+  !TK.id && window.SweepFiche && SweepFiche.markTrade && SweepFiche.markTrade(c);   // its scenario: by itself when there is no doubt, else the form's chips (27 Oct.)
   u.length && (c.copy_group = uid()), put("trades", c), lsSet("tj.last", {
     account: TK.account,
     inst: TK.inst,
@@ -4314,9 +4314,11 @@ async function tkSave() {
       E.closed && (b.pnl_c = E.realized_c);
     }
   });
-  toast(TK.id ? "Trade updated" : u.length ? `Trade saved on ${u.length + 1} accounts` : "Trade saved");
   const h = c.id, m = !TK.id;
-  location.hash = "#trade/" + h, m ? (TK = null, showStep2(h)) : closeTicket();
+  // (27 Oct., brief « daily loop » step 2) a new trade: the app stays where it was (Today), like after a screenshot — the message
+  // with the coach and « See the trade »; an edit goes back to its trade page
+  toast(TK.id ? "Trade updated" : u.length ? `Trade saved on ${u.length + 1} accounts` : "Trade saved", m ? { link: seeTradeLink(h) } : void 0);
+  m || (location.hash = "#trade/" + h), closeTicket();
 }
 
 document.addEventListener("input", e => {
@@ -9312,10 +9314,16 @@ function numOrNull(e) {
   return isFinite(t) ? t : null;
 }
 
-function toast(e, {ms: t = 2600} = {}) {
+function toast(e, {ms: t = 2600, link: l = null} = {}) {
   const a = $("#toast");
-  a.textContent = e, a.classList.add("on"), clearTimeout(toast.t), toast.t = setTimeout(() => a.classList.remove("on"), t);
+  a.textContent = e;
+  // (27 Oct.) an optional link after the message: « See the trade » once saved (the app stays on the page it was on)
+  if (l && l.href) { const k = document.createElement("a"); k.className = "toast-link"; k.href = l.href; k.textContent = l.label; k.addEventListener("click", () => a.classList.remove("on")); a.append(k); }
+  a.classList.add("on"), clearTimeout(toast.t), toast.t = setTimeout(() => a.classList.remove("on"), l ? Math.max(t, 5000) : t);
 }
+
+/** « See the trade », in the trader's language (the link of the « Trade saved » message) */
+const seeTradeLink = (id) => ({ href: "#trade/" + id, label: ({ fr: "Voir le trade", es: "Ver la operación" })[LANG] || "See the trade" });
 
 function refresh() {
   render();

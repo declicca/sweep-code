@@ -1468,9 +1468,22 @@
     s.status = 'invalidated'; f.invalidations += 1; ficheSave(f); buzz(10); ssRender(day);
   }
   /** a new trade on a day with a sheet: off-plan until linked to a scenario (the trade forms call it before saving) */
+  /* (27 Oct., brief « daily loop » step 2) no sheet « which scenario? » after the save any more. One open scenario in the trade's
+     direction: linked by itself. Otherwise (both in that direction, or none) the form shows « Scenario A · B · Off my sheet »
+     above its save button (PICK); no answer: off my sheet, as « Later » did. */
+  const PICK = { v: undefined, k: '' };
+  const openSc = (day) => { const f = ficheGet(day); return f ? f.scenarios.filter((x) => x.status !== 'invalidated') : []; };
+  const autoSc = (day, dir) => { const m = openSc(day).filter((x) => x.direction === dir); return m.length === 1 ? m[0].id : null; };
   function ficheMarkTrade(doc) {
     if (!doc || doc.demo || doc.plan_scenario) return doc;
-    const f = ficheGet(doc.date); if (f && f.scenarios.length) { doc.off_plan = true; return doc; }
+    const f = ficheGet(doc.date);
+    if (f && f.scenarios.length) {
+      const sid = PICK.v !== undefined ? PICK.v : autoSc(doc.date, doc.direction);
+      const sc = sid && f.scenarios.find((x) => x.id === sid && x.status !== 'invalidated');
+      if (sc) { doc.plan_scenario = sc.id; doc.off_plan = false; if (sc.status !== 'taken') { sc.status = 'taken'; ficheSave(f); } }
+      else doc.off_plan = true;
+      return doc;
+    }
     // the pre-market missed (no sheet, its lock time past) by a trader who makes sheets: the day's trades are off-plan
     if (!f && doc.date === ficheDayOf() && (S.journals || []).some((j) => j.fiche && j.id < doc.date) && ficheLockAt(doc.date) <= Date.now() / 1000) doc.off_plan = true;
     return doc;
@@ -1496,14 +1509,31 @@
     if (lsGet('pm.later.' + day, 0) || lsGet('pm.xshown.' + day, 0)) return;
     openPremarket(day).then(() => { if (document.querySelector('#gSheet.g-pm')) lsSet('pm.xshown.' + day, 1); });   // shown once it is on screen (19 Oct.: a reload while it opened lost it for the day)
   }
-  /** after the save: which scenario was it? (A / B still open, or « Off my sheet ») */
-  function ficheOfferLink(id) {
-    const tr = typeof getDoc === 'function' && getDoc('trades', id); if (!tr || !tr.off_plan || tr.plan_scenario) return;
-    const f = ficheGet(tr.date); if (!f) return;
-    const open = f.scenarios.filter((s) => s.status !== 'invalidated');
-    openSheet(`${head(st('link_q'))}<p class="g-hint g-hint-sm">${st('link_hint')}</p><div class="pm-links">${open.map((s) => `<button type="button" class="btn primary g-big" data-pm="link" data-id="${esc(id)}" data-s="${s.id}">${pt(s.id === 'A' ? 'sc_a' : 'sc_b')} — ${esc(pt('d_' + s.direction))} ${pmFmt(s.level)}</button>`).join('')}
-      <button type="button" class="btn g-big" data-pm="link" data-id="${esc(id)}" data-s="">${st('off')}</button></div>`, { cls: 'g-pm g-pm-link' });
+  // the chips, in the two forms (by hand: #tkSlide; by screenshot: .nav-am), above « Save », once the direction is chosen
+  function pickPaint() {
+    const forms = [['#tkSlide.open', '[data-act="tk-save"]', '.tk-dir button.on'], ['.nav-am.open', '[data-am="save"]', '[data-am-seg="dir"].on']];
+    let any = false;
+    for (const [fq, sq, dq] of forms) {
+      const box = document.querySelector(fq); if (!box) { continue; } any = true;
+      const save = box.querySelector(sq), dirB = box.querySelector(dq), dir = dirB && (dirB.dataset.v === 'short' ? 'short' : dirB.dataset.v ? 'long' : '');
+      const day = ficheDayOf(), sc = openSc(day), need = !!(save && dir && sc.length && !autoSc(day, dir));
+      let row = box.querySelector('.pm-pick');
+      if (!need) { if (row) row.remove(); continue; }
+      const k = day + dir + sc.map((x) => x.id).join() + String(PICK.v);
+      if (row && row.dataset.k === k && row.nextElementSibling === save) continue;
+      const chip = (v, l) => `<button type="button" class="chip${PICK.v === v ? ' on' : ''}" aria-pressed="${PICK.v === v}" data-pmpick="${v}">${esc(l)}</button>`;
+      const html = `<p>${esc(st('link_q'))}</p><div class="g-chips-row">${sc.map((x) => chip(x.id, pt(x.id === 'A' ? 'sc_a' : 'sc_b') + ' · ' + pt('d_' + x.direction))).join('')}${chip('', st('off'))}</div>`;
+      if (!row) { row = document.createElement('div'); row.className = 'pm-pick'; row.setAttribute('data-noi18n', ''); }
+      row.innerHTML = html; row.dataset.k = k; save.before(row);
+    }
+    if (!any && PICK.v !== undefined) PICK.v = undefined;   // the form closed: the next trade starts with no answer
   }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('.pm-pick [data-pmpick]');
+    if (b) { const v = b.dataset.pmpick; PICK.v = PICK.v === v ? undefined : v; buzz(5); }
+    setTimeout(pickPaint, 60);
+  });
+  if (window.SweepMO) new window.SweepMO(() => { try { pickPaint(); } catch (x) { /* never blocks a save */ } }).observe(document.body, { childList: true, subtree: true });
   function ficheLink(id, sid) {
     const tr = getDoc('trades', id); if (!tr) return;
     const ids = tr.copy_group ? (S.trades || []).filter((x) => x.copy_group === tr.copy_group).map((x) => x.id) : [id];
@@ -1518,7 +1548,7 @@
     else if (b.dataset.pm === 'inval') ssInvalidate(d, b.dataset.s);
     else if (b.dataset.pm === 'link') ficheLink(b.dataset.id, b.dataset.s);
   });
-  Object.assign(window.SweepFiche, { maybeExpress: ficheMaybeExpress, markTrade: ficheMarkTrade, offerLink: ficheOfferLink, link: ficheLink, over: (day) => { const f = ficheGet(day); return f ? ssOver(f) : ''; } });
+  Object.assign(window.SweepFiche, { maybeExpress: ficheMaybeExpress, markTrade: ficheMarkTrade, link: ficheLink, over: (day) => { const f = ficheGet(day); return f ? ssOver(f) : ''; } });
   Object.assign(window.SweepFiche, { open: openPremarket, scenarios: pmScenarios, target: pmTarget, compute: pmCompute, viable: pmViable, line: pmScenarioLine, sheetHtml: pmSheetHtml });
 
   /* ───────────── Quick journal (carousel) ───────────── */

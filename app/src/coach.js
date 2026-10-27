@@ -29,7 +29,7 @@
         dd75: '{a}: {p} % of the drawdown used, {r} of room left. Stop for today.', dd100: '{a}: drawdown limit reached. Check the account’s status with your firm.' },
       bTitle: 'Before this trade',
       bMax: 'Max loss reached ({m}): your session is over. This trade will be out of your plan.',
-      bDone: 'Your {m} planned trades are done: this one will be out of your plan.',
+      bDone: 'Your {m} planned trades are done: this one will be out of your plan.', bDone1: 'Your planned trade is done: this one will be out of your plan.',
       bWait: 'Your last loss was {n} min ago: wait {r} more min before entering.',
       bLoss2: '{n} losses in a row: take a 15-minute break before this trade.',
       bSize: '{n} contracts: your maximum is {m}.',
@@ -100,7 +100,7 @@
         dd75: '{a} : {p} % du drawdown utilisés, il te reste {r} de marge. Arrête pour aujourd’hui.', dd100: '{a} : limite de drawdown atteinte. Vérifie le statut du compte auprès de ta firme.' },
       bTitle: 'Avant ce trade',
       bMax: 'Perte max atteinte ({m}) : ta séance est finie. Ce trade sera hors plan.',
-      bDone: 'Tes {m} trades prévus sont faits : celui-ci sera hors plan.',
+      bDone: 'Tes {m} trades prévus sont faits : celui-ci sera hors plan.', bDone1: 'Ton trade prévu est fait : celui-ci sera hors plan.',
       bWait: 'Ta dernière perte date de {n} min : attends encore {r} min avant d’entrer.',
       bLoss2: '{n} pertes de suite : fais une pause de 15 minutes avant ce trade.',
       bSize: '{n} contrats : ton maximum est {m}.',
@@ -171,7 +171,7 @@
         dd75: '{a}: {p} % del drawdown usado, te quedan {r} de margen. Para por hoy.', dd100: '{a}: límite de drawdown alcanzado. Verifica el estado de la cuenta con tu firma.' },
       bTitle: 'Antes de esta operación',
       bMax: 'Pérdida máxima alcanzada ({m}): tu sesión terminó. Esta operación quedará fuera de tu plan.',
-      bDone: 'Tus {m} operaciones previstas están hechas: esta quedará fuera de tu plan.',
+      bDone: 'Tus {m} operaciones previstas están hechas: esta quedará fuera de tu plan.', bDone1: 'Tu operación prevista está hecha: esta quedará fuera de tu plan.',
       bWait: 'Tu última pérdida fue hace {n} min: espera {r} min más antes de entrar.',
       bLoss2: '{n} pérdidas seguidas: haz una pausa de 15 minutos antes de esta operación.',
       bSize: '{n} contratos: tu máximo es {m}.',
@@ -230,7 +230,11 @@
     },
   }[L];
   // (a percentage never leaves its number: « 89 % » with a narrow no-break space in fr / es, « 89% » in en)
-  const fill = (s, v) => String(s).replace(/\{(\w+)\}/g, (_, k) => (v && v[k] != null ? v[k] : '')).replace(/ %/g, L === 'en' ? '%' : '\u202f%');
+  // (27 Oct.) a count of 1 (0 too in French) keeps its noun in the singular: « 1 trade sur 2 », « 1 operación », « 1 trade prévu »
+  const one = (x) => (L === 'fr' ? x.replace(/(^|[^\d.,])([01]) trades\b/g, '$1$2 trade').replace(/(^|[^\d.,])([01]) prévus\b/g, '$1$2 prévu')
+    : L === 'es' ? x.replace(/(^|[^\d.,])1 operaciones\b/g, '$11 operación').replace(/(^|[^\d.,])1 previstas\b/g, '$11 prevista')
+    : x.replace(/(^|[^\d.,])1 trades\b/g, '$11 trade'));
+  const fill = (s, v) => one(String(s).replace(/\{(\w+)\}/g, (_, k) => (v && v[k] != null ? v[k] : '')).replace(/ %/g, L === 'en' ? '%' : '\u202f%'));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const usd = (c) => (typeof money === 'function' ? money(Math.abs(c), { sign: false, dec: 0 }) : '$' + Math.round(Math.abs(c) / 100));
   const cents = (v) => { const n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.]/g, '')); return isFinite(n) && n > 0 ? Math.round(n * 100) : 0; };
@@ -492,7 +496,7 @@
     const mg = day === today() ? margin(day) : null, room = mg ? mg.start + sum : null;
     if (p.valid && p.maxLoss && sum <= -p.maxLoss) { sig = fill(T.bMax, { m: usd(p.maxLoss) }); stop = true; }
     else if (mg && mg.lowAt(room)) { sig = fill(T.ddStop, { m: usd(Math.max(0, room)) }); stop = true; }
-    else if (p.valid && p.maxTrades && list.length >= p.maxTrades) { sig = fill(T.bDone, { m: p.maxTrades }); stop = true; }
+    else if (p.valid && p.maxTrades && list.length >= p.maxTrades) { sig = fill(p.maxTrades == 1 ? T.bDone1 : T.bDone, { m: p.maxTrades }); stop = true; }
     else if (gap != null && gap >= 0 && gap < 10) { sig = fill(T.bWait, { n: gap, r: 10 - gap }); mine = ownLine('revenge'); stop = true; }
     else if (losses >= 2) { sig = fill(T.bLoss2, { n: losses }); mine = ownLine('loss2'); stop = true; }
     else if (x.form === 'shot' && maxC && qty > maxC) sig = fill(T.bSize, { n: qty, m: maxC });   // (the manual form says it already)

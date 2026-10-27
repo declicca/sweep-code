@@ -53,6 +53,14 @@ with sync_playwright() as p:
     pg.evaluate("location.hash = '#trade/' + encodeURIComponent(S.trades[0].id)"); pg.wait_for_timeout(1800)
     tq = pg.evaluate("[...document.querySelectorAll('#main .qlist .q > span')].map((e) => e.textContent.trim()).filter(Boolean)")
     ok(tq and not any(q.startswith(e) for q in tq for e in EN_QS), f'A2 {tag} the trade page questions in French ({tq[:2]})')
+    # (27 Oct., brief « daily loop » step 2) the coach in the singular: a plan of 1 trade, 1 trade done
+    if phone:
+      j0 = pg.evaluate("JSON.stringify(getDoc('journals', todayStr()) || null)")
+      pg.evaluate("() => { const d = todayStr(); put('accounts', { id: 'tf-acc', name: 'Topstep 50K', status: 'active', phase: 'eval', starting_balance_c: 5000000, created_on: '2026-09-01', rules: { dd_c: 200000, dll_c: 100000 } }); put('journals', { id: d, pre: { bias: 'bullish', max_loss: '500', max_trades: '1', saved_at: Math.floor(Date.now() / 1000) } }); put('trades', { id: 'tf-one', account_id: 'tf-acc', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: d, entry_time: '10:00', exit_time: '10:05' }) }")
+      pg.wait_for_timeout(800)
+      bf = pg.evaluate("SweepCoach.before({ form: 'manual', account: 'tf-acc', date: todayStr(), qty: 1 })") or ''
+      ok('1 trades' not in bf and 'Ton trade prévu est fait' in bf, f'{tag} the coach in the singular: « Ton trade prévu est fait » ({bf[-110:]!r})')
+      pg.evaluate("(j) => { remove('trades', 'tf-one'); remove('accounts', 'tf-acc'); const o = JSON.parse(j); if (o) put('journals', o); else remove('journals', todayStr()) }", j0); pg.wait_for_timeout(500)
     # A3
     st3 = pg.evaluate("[SweepGame.sumText(1), SweepGame.sumText(3)]")
     ok(st3 == ['1 nouveauté · Voir Progression', '3 nouveautés · Voir Progression'], f'A3 {tag} « 1 nouveauté », « 3 nouveautés » ({st3})')

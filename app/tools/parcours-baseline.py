@@ -17,6 +17,8 @@ B = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('--') else '
 OUT = sys.argv[sys.argv.index('--json') + 1] if '--json' in sys.argv else ''
 DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
 SHOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'fixture-shot.png')
+# a current trader's day: two real one-trade screenshots (read by the test answers of Sweep AI, tests/samples/shot-ai-mock.json)
+DAY_SHOTS = [os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'samples', f) for f in ('shot-topstepx-one-trade.png', 'shot-tradesea-one-trade.png')]
 SAVED = {'fr': 'Trade enregistré', 'en': 'Trade saved', 'es': 'Operación guardada'}
 TAP_S, FIELD_S = 2.5, 5.0
 
@@ -159,24 +161,24 @@ def run_day(p, lang, phone):
   wait(1200); at('plan'); p0 = dict(mark['plan'])
   # 2. two trades by screenshot
   pg.evaluate("window.__toasts = []; new MutationObserver(() => { const t = document.getElementById('toast'); if (t && t.textContent && !window.__toasts.includes(t.textContent)) window.__toasts.push(t.textContent) }).observe(document.getElementById('toast'), { childList: true, characterData: true, subtree: true })")
-  saved = 0
+  saved = 0; n0 = pg.evaluate("S.trades.filter((t) => !t.demo).length")
   for i in range(2):
     if pg.locator('#gSheet').count(): pg.evaluate("document.querySelector('#gSheet [data-g=close]') && document.querySelector('#gSheet [data-g=close]').click()"); wait(400)
     if pg.evaluate("location.hash") != '#dashboard': pg.evaluate("location.hash = '#dashboard'"); wait(800)
     tap('#bottomnav .plus' if phone else '.nav-addtop'); screen('trade-sheet', '.nav-am.open'); wait(500)
     if phone:
       with pg.expect_file_chooser() as fc: tap('label.nav-am-drop')
-      fc.value.set_files(SHOT); c['taps'] += 1
+      fc.value.set_files(DAY_SHOTS[i]); c['taps'] += 1
     else:
-      pg.locator('label.nav-am-drop input[type=file]').set_input_files(SHOT); c['taps'] += 2
-    screen('shot-read', '.nav-am.open [data-am=save]'); wait(1500)
-    if not pg.evaluate("(document.querySelector('.nav-am.open [data-am-f=net]') || {}).value"): field('.nav-am.open [data-am-f=net]', '150')
-    if i == 1: pg.fill('.nav-am.open [data-am-f=net]', '-90')   # the same test image twice: another P&L, as another screenshot would read (not a tap: the duplicate check would stop it)
-    tap('.nav-am.open [data-am-seg=dir][data-v=long]'); tap('.nav-am.open [data-am=save]'); wait(1500)
+      pg.locator('label.nav-am-drop input[type=file]').set_input_files(DAY_SHOTS[i]); c['taps'] += 2
+    screen('shot-read', '.nav-am.open [data-am=save]'); wait(2500)
+    if not pg.evaluate("(document.querySelector('.nav-am.open [data-am-f=net]') || {}).value"): field('.nav-am.open [data-am-f=net]', '150')   # not read: typed
+    if not pg.evaluate("!!document.querySelector('.nav-am.open [data-am-seg=dir].on')"): tap('.nav-am.open [data-am-seg=dir][data-v=long]')
+    tap('.nav-am.open [data-am=save]'); wait(1500)
     if seen('#gSheet [data-pm=link]'): c['screens'].append('scenario'); tap('#gSheet [data-pm=link]')   # « Which scenario of your sheet? »
     wait(600)
     if pg.evaluate("location.hash").startswith('#trade/'): c['screens'].append('trade-page')
-  saved = pg.evaluate("S.trades.filter((t) => !t.demo && t.date === todayStr()).length")
+  saved = pg.evaluate("S.trades.filter((t) => !t.demo).length") - n0   # (the screenshots carry their own date)
   at('trades')
   # 3. closing the day
   if pg.evaluate("location.hash") != '#dashboard': tap('a[href="#dashboard"]'); wait(800)

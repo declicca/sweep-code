@@ -6,8 +6,9 @@ the browser's clock at 10:30 New York on the sheet's day (locked by the clock at
     the trades against the limit
  2  a box only after the one before it (the next ones are not tappable); the last one can be undone; all checked → confirmed
  3  the max of trades reached, or 2 invalidations (« Invalidate » stops a scenario) → « Journée terminée selon ton plan »
- 4  a trade saved with the full form on that day: « which scenario? »; linked to A → A taken, the trade not off-plan;
-    another one left « Hors fiche » → off-plan
+ 4  (27 Oct., brief « daily loop » step 2) a trade saved with the full form on that day: no sheet after the save; one scenario in
+    its direction → linked to it by itself (A taken, not off-plan); two in that direction → « Scénario A · B · Hors fiche » above
+    « Enregistrer », « Hors fiche » → off-plan
 The test day is removed at the end.
 """
 import datetime as dt, sys
@@ -36,7 +37,7 @@ with sync_playwright() as p:
     c.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
     pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.clock.install(time=dt.datetime(2027, 3, 16, 10, 30, tzinfo=ZoneInfo('America/New_York')))
-    pg.goto(B + '/#dashboard'); until(pg, 'window.SweepGame && window.SweepFiche && SweepFiche.offerLink && window.S && S.journals'); pg.wait_for_timeout(800)
+    pg.goto(B + '/#dashboard'); until(pg, 'window.SweepGame && window.SweepFiche && SweepFiche.markTrade && window.S && S.journals'); pg.wait_for_timeout(800)
     ok(pg.evaluate("SweepFiche.dayOf()") == DAY, f'0 {w}: the browser\'s clock is on {DAY}, 10:30 NY')
     pg.evaluate(SHEET, DAY); pg.wait_for_timeout(500)
     # 1. the session view
@@ -62,20 +63,23 @@ with sync_playwright() as p:
     acc = pg.evaluate("((S.accounts || []).find((x) => x.status !== 'archived' && x.status !== 'closed') || {}).id")
     pg.evaluate("openTicket(null, {manual: true})"); pg.wait_for_timeout(700)
     pg.evaluate("([d, a]) => { Object.assign(TK, { account: a, inst: 'MES', dir: 'long', qty: 1, entry: 5821, exit: 5850, date: d, entryTime: '10:32' }); tkRefresh(); tkSave() }", [DAY, acc]); pg.wait_for_timeout(1200)
-    until(pg, "document.querySelector('#gSheet.g-pm-link')", 5000)
-    q = pg.locator('#gSheet.g-pm-link').inner_text() if pg.locator('#gSheet.g-pm-link').count() else ''
-    ok('quel scénario' in q and pg.locator('#gSheet.g-pm-link [data-pm=link]').count() == 3, f'4 {w}: after the save: « quel scénario de ta fiche ? » with A, B and « Hors fiche »')
     tid = pg.evaluate("(d) => (S.trades.filter((t) => t.date === d && !t.demo).sort((x, y) => (y.created_at || '').localeCompare(x.created_at || ''))[0] || {}).id", DAY)
-    ok(pg.evaluate("(id) => getDoc('trades', id).off_plan === true", tid), f'4 {w}: until linked, the trade is off-plan')
-    pg.click('#gSheet.g-pm-link [data-pm=link][data-s=A]'); pg.wait_for_timeout(700)
     t1 = pg.evaluate("(id) => { const t = getDoc('trades', id); return [t.plan_scenario, t.off_plan] }", tid)
-    ok(t1 == ['A', False] and pg.evaluate("(d) => SweepFiche.get(d).scenarios[0].status", DAY) == 'taken', f'4 {w}: linked to A: the trade in the plan, A taken ({t1})')
+    ok(pg.locator('#gSheet').count() == 0 and pg.evaluate("location.hash") == '#dashboard', f'4 {w}: after the save: no sheet « which scenario? », still on Today ({pg.evaluate("location.hash")})')
+    ok(t1 == ['A', False] and pg.evaluate("(d) => SweepFiche.get(d).scenarios[0].status", DAY) == 'taken', f'4 {w}: a long trade, one long scenario: linked to A by itself, A taken ({t1})')
+    # 4b. both scenarios long: the form asks, with chips above « Save »; « Hors fiche » → off-plan
+    pg.evaluate("(d) => { const f = SweepFiche.get(d); f.scenarios[1].direction = 'long'; put('journals', Object.assign(structuredClone(getDoc('journals', d)), { fiche: f })) }", DAY); pg.wait_for_timeout(500)
     pg.evaluate("openTicket(null, {manual: true})"); pg.wait_for_timeout(700)
-    pg.evaluate("([d, a]) => { Object.assign(TK, { account: a, inst: 'MES', dir: 'short', qty: 1, entry: 5815, exit: 5812, date: d, entryTime: '10:50' }); tkRefresh(); tkSave() }", [DAY, acc]); pg.wait_for_timeout(1200)
-    until(pg, "document.querySelector('#gSheet.g-pm-link')", 5000)
+    pg.evaluate("([d, a]) => { Object.assign(TK, { account: a, inst: 'MES', qty: 1, entry: 5815, exit: 5822, date: d, entryTime: '10:50' }); tkRefresh() }", [DAY, acc]); pg.wait_for_timeout(300)
+    pg.locator('#tkSlide .tk-dir button[data-v=long]').click(); pg.wait_for_timeout(500)
+    chips = pg.evaluate("[...document.querySelectorAll('#tkSlide .pm-pick [data-pmpick]')].map((b) => b.textContent.trim())")
+    nxt = pg.evaluate("(() => { const r = document.querySelector('#tkSlide .pm-pick'); return !!(r && r.nextElementSibling && r.nextElementSibling.matches('[data-act=tk-save]')) })()")
+    ok(chips == ['Scénario A · Long', 'Scénario B · Long', 'Hors fiche'] and nxt, f'4 {w}: two long scenarios: « Scénario A · B · Hors fiche » right above « Enregistrer » ({chips}, {nxt})')
+    pg.locator('#tkSlide .pm-pick [data-pmpick=""]').click(); pg.wait_for_timeout(200)
+    pg.evaluate("tkSave()"); pg.wait_for_timeout(1200)
     tid2 = pg.evaluate("(d) => (S.trades.filter((t) => t.date === d && !t.demo && !t.plan_scenario).sort((x, y) => (y.created_at || '').localeCompare(x.created_at || ''))[0] || {}).id", DAY)
-    pg.click('#gSheet.g-pm-link [data-pm=link][data-s=""]'); pg.wait_for_timeout(600)
-    ok(pg.evaluate("(id) => getDoc('trades', id).off_plan === true && !getDoc('trades', id).plan_scenario", tid2), f'4 {w}: « Hors fiche »: off-plan')
+    ok(bool(tid2) and pg.evaluate("(id) => getDoc('trades', id).off_plan === true && !getDoc('trades', id).plan_scenario", tid2) and pg.locator('#gSheet').count() == 0, f'4 {w}: « Hors fiche »: off-plan, no sheet after the save')
+    pg.evaluate("(d) => { const f = SweepFiche.get(d); f.scenarios[1].direction = 'short'; put('journals', Object.assign(structuredClone(getDoc('journals', d)), { fiche: f })) }", DAY); pg.wait_for_timeout(500)
     # 3. invalidations → day over
     pg.evaluate("(d) => SweepGame.openPlan(d)", DAY); until(pg, "document.querySelector('#gSheet.g-pm-locked')"); pg.wait_for_timeout(300)
     ok('Trades : 2 sur 2' in pg.locator('#gSheet .pm-count').inner_text().replace('\xa0', ' '), f'1 {w}: the counter follows the trades (2 of 2)')

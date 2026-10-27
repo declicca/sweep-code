@@ -1951,3 +1951,4 @@ html .sb-layer .sb-sheet{transition:transform var(--dur-sheet) var(--ease-ios)!i
 .social-icons svg{width:19px;height:19px}
 }
 @layer legacy{html body [data-tk-miss][data-tk-miss]{box-shadow:inset 0 0 0 1.5px var(--neg),0 0 0 3px color-mix(in srgb,var(--neg) 18%,transparent)!important;border-radius:10px}}   /* (27 Oct.) the trade form: the field missing, in gold (in the legacy layer: an important outside a layer loses to the fields' own) */
+.toast-link{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;margin-left:2px}   /* (27 Oct.) « See the trade » */
