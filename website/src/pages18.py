@@ -321,6 +321,56 @@ def history(lang, t, f):
     items = "".join(f'<li><b>{day(c["date"], lang)}</b> · {prog.get(c["program"], c["program"])} {kk(c["size"])} · {change_label(c["rule"], lang, t)}{colon(lang)}{change_value(c["rule"], c["old"], lang, t)} → {change_value(c["rule"], c["new"], lang, t)}</li>' for c in rows)
     return f'<ul class="list">{items}</ul>'
 
+def glance(lang, t, f):
+    """Three answers worded like the searches (SEO brief v2, 3.1): « {firm} drawdown rules 2026 », « {firm} maximum payout », « {firm} payout rules »,
+    from the same weekly-checked rules as the tables below."""
+    name, progs = f["name"], f["programs"]
+    U = lambda v: usd(v, lang)
+    # drawdown: per account type, its kind and its range across sizes
+    dd_items = []
+    for p in progs:
+        vals = [(_ph(s, "eval").get("dd") or _ph(s, "funded").get("dd"), _ph(s, "eval").get("dd_type") or _ph(s, "funded").get("dd_type")) for s in p["sizes"]]
+        amounts = sorted({v for v, _ in vals if v}); kinds = {k for _, k in vals if k in DDT}
+        if not amounts: continue
+        one = len(amounts) == 1; lo, hi = U(amounts[0]), U(amounts[-1])
+        kind = " / ".join(t(DDT[k]).lower() for k in sorted(kinds))
+        dd_items.append(f"<li><b>{p['name']}</b>{colon(lang)}" + t(T(f"{lo if one else lo + '–' + hi} max loss, {kind}, depending on the account size.",
+                                                                   f"perte max de {lo if one else lo + ' à ' + hi}, {kind}, selon la taille du compte.",
+                                                                   f"pérdida máxima de {lo if one else lo + ' a ' + hi}, {kind}, según el tamaño de la cuenta.")) + "</li>")
+    # maximum payout: per size, per account type (the first payout's cap; a ladder shows its range)
+    def cap(s):
+        po = _po(_ph(s, "funded")); lad = po.get("ladder")
+        if lad:
+            caps = [x for x in lad if x is not None]
+            if not caps: return t(T("No cap", "Sans plafond", "Sin tope"))
+            lo, hi = min(caps), max(caps)
+            txt = U(lo) if lo == hi else f"{U(lo)} → {U(hi)}"
+            return txt + (" · " + t(T("then no cap", "puis sans plafond", "luego sin tope")) if None in lad else "")
+        if po.get("max"): return U(po["max"])
+        return "—"
+    sizes = sorted({s["size"] for p in progs for s in p["sizes"]})
+    shown = [p for p in progs if any(cap(s) != "—" for s in p["sizes"])]
+    mx = ""
+    if shown:
+        head = f'<tr><th scope="col">{t(T("Size","Taille","Tamaño"))}</th>' + "".join(f'<th scope="col">{p["name"]}</th>' for p in shown) + "</tr>"
+        rows = "".join(f'<tr><th scope="row">{kk(z)}</th>' + "".join(f'<td class="num" data-label="{html.escape(p["name"])}">{cap(s) if (s := next((x for x in p["sizes"] if x["size"] == z), None)) else "—"}</td>' for p in shown) + "</tr>" for z in sizes)
+        mx = (f'<p>{t(T("The most you can request per payout, before the profit split. When the cap changes from one payout to the next, the first and the highest are shown.", "Le maximum que tu peux demander par payout, avant le partage des profits. Quand le plafond change d’un payout à l’autre, le premier et le plus haut sont indiqués.", "Lo máximo que puedes pedir por payout, antes del reparto de beneficios. Cuando el tope cambia de un payout a otro, se indican el primero y el más alto."))}</p>'
+              f'<div class="cmp-wrap"><table class="cmp guide"><thead>{head}</thead><tbody>{rows}</tbody></table></div>')
+    # payout rules: the sentence each account type already has, for its usual size
+    po_items = [f"<li><b>{p['name']}</b>{colon(lang)}{x[lang][0].lower() + x[lang][1:]}</li>" for p in progs if (x := payout_sentence(f, p, rep(p), None))]
+    if f["id"] == "topstep":
+        h1 = T("Topstep Maximum Loss Limit 2026", "Maximum Loss Limit de Topstep (drawdown) 2026", "Maximum Loss Limit de Topstep (drawdown) 2026")
+    else:
+        h1 = T(f"{name} drawdown rules 2026", f"Règles de drawdown {fr_de(name)} 2026", f"Reglas de drawdown de {name} 2026")
+    h2 = T(f"{name} maximum payout", f"Payout maximum chez {name}", f"Payout máximo en {name}")
+    h3 = T(f"{name} payout rules", f"Règles de payout {fr_de(name)}", f"Reglas de payout de {name}")
+    go = lambda page, label: f'<p><a class="go" href="{href(lang, page)}">{t(label)} <span aria-hidden="true">→</span></a></p>'
+    out = ""
+    if dd_items: out += f'<h2 id="drawdown">{t(h1)}</h2><ul class="list">{"".join(dd_items)}</ul>' + go("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico"))
+    if mx: out += f'<h2 id="max-payout">{t(h2)}</h2>{mx}' + go("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout"))
+    if po_items: out += f'<h2 id="payouts">{t(h3)}</h2><ul class="list">{"".join(po_items)}</ul>' + go("prop-firm-payout-rules.html", T("Payout rules of every firm, compared", "Les règles de payout de chaque firme, comparées", "Las reglas de payout de cada firma, comparadas"))
+    return out
+
 def make_rules_page(f):
     CRUMBS[page_of(f)] = f["name"]
     SYSTEM_PAGES.add(page_of(f))
@@ -344,7 +394,10 @@ def make_rules_page(f):
                 f'<h1 class="wu" style="view-transition-name:firm-{slug(f)}">{words(t(T(f"{name} rules, explained.", f"Les règles {fr_de(name)}, expliquées.", f"Las reglas de {name}, explicadas.")))}</h1>'
                 f'<p class="lead rise d3">{t(lead)}</p><p class="fine rise d4 verified">{t(verified)}</p>'
                 f'<div class="cta-row rise d4"><a class="btn btn-primary btn-lg" href="{SIGNUP}" data-track="signup_rules_hero">{t(T(f"Track my {name} account", f"Suivre mon compte {name}", f"Seguir mi cuenta de {name}"))}</a></div>'
-                + ("" if len(progs) < 2 else '<div class="jump rise d5">' + "".join(f'<a class="chip" href="#{anchor(f, p)}">{p["name"]}</a>' for p in progs) + "</div>")
+                + '<div class="jump rise d5">' + "".join(f'<a class="chip" href="#{anchor(f, p)}">{p["name"]}</a>' for p in progs if len(progs) > 1)
+                + "".join(f'<a class="chip" href="#{i}">{t(x)}</a>' for i, x in (("drawdown", T("Drawdown", "Drawdown", "Drawdown")), ("max-payout", T("Max payout", "Payout max", "Payout máx.")),
+                                                                                ("payouts", T("Payouts", "Payouts", "Payouts")), ("changes", T("Rule changes", "Changements", "Cambios")),
+                                                                                ("questions", T("Questions", "Questions", "Preguntas")))) + "</div>"
                 + '</div></div>')
         secs = ""
         for p in progs:
@@ -383,6 +436,8 @@ def make_rules_page(f):
         summary = ui.stats(key, f"{p0['name']} · {kk(s0['size'])}",
                            t(T("Values for this account. Every size is in the tables below.", "Valeurs de ce compte. Toutes les tailles sont dans les tableaux ci-dessous.", "Valores de esta cuenta. Todos los tamaños están en las tablas de abajo."))) if len(key) >= 2 else ""
         b = (ui.sec(summary, "t", id_="summary") if summary else "")
+        gl = glance(lang, t, f)
+        if gl: b += ui.sec(f'<article class="article">{gl}</article>', "n", "glance", width="read")
         b += ui.sec(secs + f'<p class="fine" style="margin-top:40px">{t(disclaimer)}</p>', "n", "rules")
         b += ui.split(t, T("Track it","Suis-le","Síguelo"), T(f"Track your {name} account in Sweep.", f"Suis ton compte {name} dans Sweep.", f"Sigue tu cuenta de {name} en Sweep."),
                    T(f"Pick {name} and your account type: these rules fill in, and Sweep counts your payout conditions on every trade. Free forever, no card.",

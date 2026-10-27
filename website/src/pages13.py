@@ -562,11 +562,69 @@ HOURS_HELP = T("""<h2>What each session means for a futures trader</h2><ul>
 <h2>Horario de verano</h2><p>El horario de CME se fija en hora de EE. UU., así que las horas de Nueva York de arriba no cambian en todo el año. EE. UU. cambia la hora a mediados de marzo y a principios de noviembre, Europa a finales de marzo y a finales de octubre: durante unas semanas, la diferencia con Nueva York se mueve una hora. Esta página convierte con la zona horaria de tu dispositivo, así que la columna «Tu hora» sigue siendo correcta.</p>
 <h2>Festivos</h2><p>En los festivos de EE. UU., como Acción de Gracias, Navidad o el 4 de julio, CME cierra antes o no abre, y el horario cambia según el producto. Consulta el calendario de festivos de CME Group antes de planificar la sesión.</p>""")
 
+# ---------------------------------------------------------------- market hours, written in the page (SEO brief v2, 3.3): sessions in the cities each language's
+# traders live in, for both halves of the year, and the U.S. holidays ahead (CME confirms their hours about two weeks before)
+HOURS_CITIES = {"en": [("Chicago", "America/Chicago"), ("London", "Europe/London")],
+                "fr": [("Montréal", "America/Toronto"), ("Paris", "Europe/Paris"), ("Abidjan / Dakar", "Africa/Abidjan"), ("Casablanca", "Africa/Casablanca")],
+                "es": [("Madrid", "Europe/Madrid"), ("Ciudad de México", "America/Mexico_City"), ("Bogotá", "America/Bogota"), ("Buenos Aires", "America/Argentina/Buenos_Aires"), ("Santiago", "America/Santiago")]}
+SESSIONS_W = [(T("Globex opens", "Ouverture Globex", "Apertura de Globex"), "18:00"), (T("London open", "Ouverture de Londres", "Apertura de Londres"), "03:00"),
+              (T("U.S. data (8:30)", "Annonces américaines (8 h 30)", "Datos de EE. UU. (8:30)"), "08:30"), (T("New York open", "Ouverture de New York", "Apertura de Nueva York"), "09:30"),
+              (T("Daily break", "Pause quotidienne", "Pausa diaria"), "17:00")]
+def _us_holidays(start, n_days=370):
+    """The U.S. market holidays from `start` for about a year: (date, name). Weekend holidays move to the Friday before or the Monday after."""
+    import datetime as D
+    def nth(y, m, wd, k): d = D.date(y, m, 1); d += D.timedelta((wd - d.weekday()) % 7); return d + D.timedelta(7 * (k - 1))
+    def last(y, m, wd): d = D.date(y, m + 1, 1) - D.timedelta(1) if m < 12 else D.date(y, 12, 31); return d - D.timedelta((d.weekday() - wd) % 7)
+    def obs(d): return d - D.timedelta(1) if d.weekday() == 5 else d + D.timedelta(1) if d.weekday() == 6 else d
+    def easter(y):
+        a, b, c = y % 19, y // 100, y % 100; d, e = b // 4, b % 4; f = (b + 8) // 25; g = (b - f + 1) // 3; h = (19 * a + b - d - g + 15) % 30
+        i, k = c // 4, c % 4; l = (32 + 2 * e + 2 * i - h - k) % 7; m = (a + 11 * h + 22 * l) // 451; mo = (h + l - 7 * m + 114) // 31; da = ((h + l - 7 * m + 114) % 31) + 1
+        return D.date(y, mo, da)
+    out = []
+    for y in (start.year, start.year + 1):
+        out += [(obs(D.date(y, 1, 1)), T("New Year’s Day", "Jour de l’An", "Año Nuevo")), (nth(y, 1, 0, 3), T("Martin Luther King Jr. Day", "Martin Luther King Jr. Day", "Día de Martin Luther King Jr.")),
+                (nth(y, 2, 0, 3), T("Presidents’ Day", "Presidents’ Day", "Día de los Presidentes")), (easter(y) - D.timedelta(2), T("Good Friday", "Vendredi saint", "Viernes Santo")),
+                (last(y, 5, 0), T("Memorial Day", "Memorial Day", "Memorial Day")), (obs(D.date(y, 6, 19)), T("Juneteenth", "Juneteenth", "Juneteenth")),
+                (obs(D.date(y, 7, 4)), T("Independence Day", "Fête de l’Indépendance", "Día de la Independencia")), (nth(y, 9, 0, 1), T("Labor Day", "Labor Day", "Día del Trabajo")),
+                (nth(y, 11, 3, 4), T("Thanksgiving", "Thanksgiving", "Acción de Gracias")), (obs(D.date(y, 12, 25)), T("Christmas", "Noël", "Navidad"))]
+    return sorted((d, n) for d, n in out if start <= d <= start + D.timedelta(n_days))
+
+def hours_written(lang, t):
+    import datetime as D
+    from zoneinfo import ZoneInfo
+    ny = ZoneInfo("America/New_York")
+    y = D.date.today().year
+    seasons = [(D.date(y + 1, 1, 15), T("November to March", "Novembre à mars", "Noviembre a marzo")), (D.date(y + 1, 7, 15), T("March to November", "Mars à novembre", "Marzo a noviembre"))]
+    def at(day, hm, tz):
+        x = D.datetime.combine(day, D.time(int(hm[:2]), int(hm[3:])), ny).astimezone(ZoneInfo(tz))
+        return _hm(x.strftime("%H:%M"), lang) + (" (+1)" if x.date() > day else "")
+    cities = HOURS_CITIES[lang]
+    tables = ""
+    for day_, label in seasons:
+        head = f'<tr><th scope="col">{t(T("Moment","Moment","Momento"))}</th><th scope="col">{t(T("New York","New York","Nueva York"))}</th>' + "".join(f'<th scope="col">{c}</th>' for c, _ in cities) + "</tr>"
+        nyl = t(T("New York","New York","Nueva York"))
+        body = "".join(f'<tr><th scope="row">{t(n)}</th><td class="num" data-label="{nyl}">{_hm(hm, lang)}</td>' + "".join(f'<td class="num" data-label="{_html.escape(c)}">{at(day_, hm, tz)}</td>' for c, tz in cities) + "</tr>" for n, hm in SESSIONS_W)
+        tables += f'<h3>{t(label)}</h3><div class="cmp-wrap"><table class="cmp guide"><thead>{head}</thead><tbody>{body}</tbody></table></div>'
+    names = ", ".join(c for c, _ in cities)
+    intro = T(f"The same sessions in {names}. The United States and Europe change the clocks on different dates, so for a few weeks in March and around the start of November the gap is one hour smaller.",
+              f"Les mêmes sessions à {names}. Les États-Unis et l’Europe changent d’heure à des dates différentes : pendant quelques semaines en mars et autour du début de novembre, l’écart est plus petit d’une heure.",
+              f"Las mismas sesiones en {names}. Estados Unidos y Europa cambian la hora en fechas distintas: durante unas semanas en marzo y hacia principios de noviembre, la diferencia es una hora menor.")
+    if lang == "es": intro = {l: intro[l] + " " + {"en": "", "fr": "", "es": "México, Colombia y Argentina no cambian la hora; Chile la cambia en sentido contrario, por el hemisferio sur."}[l] for l in LANGS}
+    if lang == "fr": intro = {l: intro[l] + " " + {"en": "", "fr": "Abidjan, Dakar et Casablanca ne changent pas d’heure.", "es": ""}[l] for l in LANGS}
+    hol = _us_holidays(D.date.today())
+    hl = _html.escape(t(T("Holiday","Jour férié","Festivo")))
+    hrows = "".join(f'<tr><th scope="row" class="num">{_date(t, d.isoformat())}</th><td data-label="{hl}">{t(n)}</td></tr>' for d, n in hol)
+    holi = (f'<h2 id="holidays-ahead">{t(T("U.S. market holidays ahead","Les jours fériés américains à venir","Próximos festivos de EE. UU."))}</h2>'
+            f'<p>{t(T("On these days, CME Globex has special hours: closed, or an early close for equity, energy and metals futures. CME confirms each schedule about two weeks before on its holiday calendar.", "Ces jours-là, CME Globex a des heures spéciales : fermé, ou une fermeture anticipée pour les futures sur indices, énergie et métaux. Le CME confirme chaque horaire environ deux semaines avant dans son calendrier des jours fériés.", "Esos días, CME Globex tiene un horario especial: cerrado, o un cierre anticipado para los futuros de índices, energía y metales. CME confirma cada horario unas dos semanas antes en su calendario de festivos."))}'
+            f' <a href="https://www.cmegroup.com/tools-information/holiday-calendar.html" rel="noopener">cmegroup.com</a>.</p>'
+            f'<div class="cmp-wrap"><table class="cmp guide"><thead><tr><th scope="col">{t(T("Date","Date","Fecha"))}</th><th scope="col">{t(T("Holiday","Jour férié","Festivo"))}</th></tr></thead><tbody>{hrows}</tbody></table></div>')
+    return (f'<h2 id="your-city">{t(T("Futures hours in your city","Les heures des futures dans ta ville","El horario de futuros en tu ciudad"))}</h2><p>{t(intro)}</p>{tables}' + holi)
+
 def page_hours(lang, t):
     hero = ui.hero(t, T("Market hours","Heures de marché","Horario"), T("Futures market hours, in your time zone.","Heures des marchés futures, dans ton fuseau horaire.","Horario de los mercados de futuros, en tu zona horaria."),
         T("CME Globex sessions converted to your local time, with what’s open right now.","Les sessions CME Globex converties à ton heure locale, avec ce qui est ouvert en ce moment.","Las sesiones de CME Globex convertidas a tu hora local, con lo que está abierto ahora."))
     S = [("globex",T("Globex session","Session Globex","Sesión Globex"),"18:00","17:00"),("asia",T("Asia","Asie","Asia"),"18:00","03:00"),("london",T("London","Londres","Londres"),"03:00","08:00"),
-         ("ny",T("New York (RTH)","New York (RTH)","Nueva York (RTH)"),"09:30","16:00"),("break",T("Daily break","Pause quotidienne","Pausa diaria"),"17:00","18:00")]
+         ("ny",T("New York (RTH)","New York (RTH)","Nueva York (RTH)"),"09:30","16:00"),("nyam",T("New York AM","New York matin (AM)","Nueva York mañana (AM)"),"09:30","12:00"),("nypm",T("New York PM","New York après-midi (PM)","Nueva York tarde (PM)"),"13:30","16:00"),("break",T("Daily break","Pause quotidienne","Pausa diaria"),"17:00","18:00")]
     NYL, MEL = t(T("New York time","Heure de New York","Hora de Nueva York")), t(T("Your time","Ton heure","Tu hora"))
     rows = "".join(f'<tr data-s="{k}" data-a="{a}" data-b="{b_}"><th scope="row">{t(n)}</th><td class="num" data-label="{NYL}">{a} – {b_} ET</td><td class="num loc" data-label="{MEL}">—</td></tr>' for k,n,a,b_ in S)
     clock = (f'<dl class="stats clock" style="--n:3"><div class="stat"><dt>{t(T("New York","New York","Nueva York"))}</dt><dd><b id="hk-ny">--:--</b></dd></div>'
@@ -587,7 +645,10 @@ tick();setInterval(tick,30000);}})();</script>'''
     note = T("Hours for CME Globex equity index, energy, metals and FX futures. Holiday hours differ: check the CME Group holiday calendar. Session names are conventions.",
              "Heures CME Globex pour les futures sur indices, énergie, métaux et devises. Les jours fériés ont des heures différentes : vérifie le calendrier des jours fériés du CME Group. Les noms des sessions sont des conventions.",
              "Horario de CME Globex para futuros de índices, energía, metales y divisas. Los festivos tienen otro horario: consulta el calendario de festivos de CME Group. Los nombres de las sesiones son convenciones.")
-    b = (ui.sec(clock + f'<div style="margin-top:24px">{tbl}</div><p class="fine" style="margin-top:16px">{t(note)}</p>', "t", "hours", width="read")
+    openq = (f'<h2 id="open-now">{t(T("Is the futures market open now?","Le marché des futures est-il ouvert en ce moment ?","¿Está abierto ahora el mercado de futuros?"))}</h2>'
+             f'<p>{t(T("CME Globex futures trade from Sunday 6:00 p.m. to Friday 5:00 p.m. New York time, with a one-hour break every day from 5:00 to 6:00 p.m. The clock below says where the market stands right now.", "Les futures CME Globex se négocient du dimanche 18 h au vendredi 17 h, heure de New York, avec une pause d’une heure chaque jour de 17 h à 18 h. L’horloge ci-dessous dit où en est le marché en ce moment.", "Los futuros de CME Globex se negocian del domingo a las 18:00 al viernes a las 17:00 hora de Nueva York, con una pausa de una hora cada día de 17:00 a 18:00. El reloj de abajo dice cómo está el mercado ahora mismo."))}</p>')
+    b = (ui.sec(f'<div class="article">{openq}</div>' + clock + f'<div style="margin-top:24px">{tbl}</div><p class="fine" style="margin-top:16px">{t(note)}</p>', "t", "hours", width="read")
+         + ui.sec(f'<article class="article">{hours_written(lang, t)}</article>', "n", "city", width="read")
          + ui.sec(f'<article class="article">{localize(lang, t(HOURS_HELP))}</article>', "n", "read", width="read") + js)
     return (t(T("Futures market hours in your time zone (CME Globex) · Sweep","Heures des futures (CME Globex) dans ton fuseau · Sweep","Horario de futuros en tu zona horaria (CME Globex) · Sweep")),
             t(T("CME Globex futures hours converted to your local time: Asia, London and New York sessions, daily break, and whether the market is open now.","Les heures CME Globex converties à ton heure locale : sessions Asie, Londres et New York, pause quotidienne, et si le marché est ouvert maintenant.","El horario de CME Globex en tu hora local: sesiones de Asia, Londres y Nueva York, pausa diaria y si el mercado está abierto ahora.")),

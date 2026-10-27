@@ -50,12 +50,14 @@ def page_templates(lang, t):
             hero + b + ui.final(lang, t), "")
 SYSTEM_PAGES.add("trading-templates.html")
 
-def _article(lang, t, h1, lead, kick, sections, title, desc):
+def _article(lang, t, h1, lead, kick, sections, title, desc, extra="", faqs=None):
     import ui
     hero = ui.hero(t, kick, h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_hero"'))
-    body = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in sections)
+    body = "".join(f'<h2>{t(h)}</h2>' + "".join(f"<p>{t(p)}</p>" for p in ps) for h, ps in sections) + extra
     b = ui.sec(ui.doc(t, body), "t", "guide")
+    if faqs: b += ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read")
     ld = jsonld({"@context":"https://schema.org","@type":"Article","headline":t(h1),"description":t(desc),"inLanguage":lang,"publisher":{"@id":f"https://{DOMAIN}/#org"},"datePublished":"2026-10-06","author":{"@type":"Organization","name":"Sweep"}})
+    if faqs: ld += jsonld({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]})
     return (t(title), t(desc), hero + b + ui.final(lang, t), ld)
 
 # What to look for in a journal: a section of the best-journal guide (/how-to-choose-a-trading-journal redirects there)
@@ -101,10 +103,36 @@ def page_routine(lang, t):
      (T("Why it works","Pourquoi ça marche","Por qué funciona"),
       [T("The routine separates what you control from what you don’t. Over weeks, your journal shows which setups, sessions and habits actually make or cost you money, in your own numbers.","La routine sépare ce que tu contrôles de ce que tu ne contrôles pas. Au fil des semaines, ton journal montre quels setups, sessions et habitudes te rapportent ou te coûtent vraiment, dans tes propres chiffres.","La rutina separa lo que controlas de lo que no. Con las semanas, tu diario muestra qué setups, sesiones y hábitos te hacen ganar o perder dinero de verdad, en tus propios números.")]),
     ]
-    return _article(lang, t, T("A daily trading journal routine that sticks.","Une routine de journal de trading qui tient dans le temps.","Una rutina diaria de diario de trading que funciona."),
+    ten = [T("Check the day’s economic releases and their times.", "Regarde les annonces économiques du jour et leurs heures.", "Revisa los datos económicos del día y sus horas."),
+           T("Mark the key levels: yesterday’s high and low, the overnight range.", "Note les niveaux clés : le plus haut et le plus bas de la veille, le range de la nuit.", "Marca los niveles clave: el máximo y el mínimo de ayer, el rango de la noche."),
+           T("Write your bias in one sentence.", "Écris ton biais en une phrase.", "Escribe tu sesgo en una frase."),
+           T("Describe two scenarios, one for each direction.", "Décris deux scénarios, un pour chaque sens.", "Describe dos escenarios, uno para cada dirección."),
+           T("Set your max loss and your max trades for the day.", "Fixe ta perte max et ton nombre max de trades du jour.", "Fija tu pérdida máxima y tu máximo de operaciones del día."),
+           T("Log every trade with its result in R.", "Note chaque trade avec son résultat en R.", "Anota cada operación con su resultado en R."),
+           T("Mark whether each trade was in your plan.", "Indique si chaque trade était dans ton plan.", "Marca si cada operación estaba en tu plan."),
+           T("Rate your discipline from 1 to 5.", "Note ta discipline de 1 à 5.", "Puntúa tu disciplina del 1 al 5."),
+           T("Write one thing to improve tomorrow.", "Écris une chose à améliorer demain.", "Escribe una cosa a mejorar mañana."),
+           T("On a prop account, check the room left above the max loss and your payout conditions.", "Sur un compte prop, vérifie la marge au-dessus de la perte max et tes conditions de payout.", "En una cuenta prop, revisa el margen sobre la pérdida máxima y tus condiciones de payout.")]
+    extra = (f'<h2>{t(T("The routine in 10 points","La routine en 10 points","La rutina en 10 puntos"))}</h2>'
+             f'<p>{t(T("Before the open:","Avant l’ouverture :","Antes de la apertura:"))}</p><ol class="list">' + "".join(f"<li>{t(x)}</li>" for x in ten[:5]) + "</ol>"
+             f'<p>{t(T("After the close:","Après la clôture :","Tras el cierre:"))}</p><ol class="list" start="6">' + "".join(f"<li>{t(x)}</li>" for x in ten[5:]) + "</ol>"
+             f'<p>{t(T(f"Prefer paper? The free <a href=\"{href("en", "trading-templates.html")}\">trading plan and daily journal templates</a> (PDF) follow the same routine.", f"Tu préfères le papier ? Les <a href=\"{href("fr", "trading-templates.html")}\">modèles gratuits de plan de trading et de journal quotidien</a> (PDF) suivent la même routine.", f"¿Prefieres el papel? Las <a href=\"{href("es", "trading-templates.html")}\">plantillas gratis de plan de trading y diario</a> (PDF) siguen la misma rutina."))}</p>')
+    faqs = [(T("How long does a daily trading routine take?", "Combien de temps prend une routine de trading quotidienne ?", "¿Cuánto tiempo lleva una rutina de trading diaria?"),
+             T("About ten minutes a day: five before the open, one line per trade during the session and sixty seconds after the close, plus fifteen minutes on Friday for the weekly review.",
+               "Une dizaine de minutes par jour : cinq avant l’ouverture, une ligne par trade pendant la séance et soixante secondes après la clôture, plus quinze minutes le vendredi pour la revue de la semaine.",
+               "Unos diez minutos al día: cinco antes de la apertura, una línea por operación durante la sesión y sesenta segundos tras el cierre, más quince minutos el viernes para la revisión semanal.")),
+            (T("What should I write before the market opens?", "Que faut-il écrire avant l’ouverture ?", "¿Qué debo escribir antes de la apertura?"),
+             T("Your bias in one sentence, the key levels, two scenarios, your max loss and max trades for the day, and the economic releases during your session.",
+               "Ton biais en une phrase, les niveaux clés, deux scénarios, ta perte max et ton nombre max de trades du jour, et les annonces économiques pendant ta séance.",
+               "Tu sesgo en una frase, los niveles clave, dos escenarios, tu pérdida máxima y tu máximo de operaciones del día, y los datos económicos durante tu sesión.")),
+            (T("Is there a free template?", "Existe-t-il un modèle gratuit ?", "¿Hay una plantilla gratis?"),
+             T("Yes: the trading plan, daily journal and discipline checklist templates are free in PDF, and Sweep runs the same routine for free.",
+               "Oui : les modèles de plan de trading, de journal quotidien et de checklist de discipline sont gratuits en PDF, et Sweep fait la même routine gratuitement.",
+               "Sí: las plantillas de plan de trading, diario y checklist de disciplina son gratis en PDF, y Sweep hace la misma rutina gratis."))]
+    return _article(lang, t, T("A daily trading journal routine that sticks.","Une routine de journal de trading qui tient dans le temps.","Tu rutina de trading diaria."),
         T("Five minutes before the open, one line per trade, sixty seconds after the close.","Cinq minutes avant l’ouverture, une ligne par trade, soixante secondes après la clôture.","Cinco minutos antes de la apertura, una línea por operación, sesenta segundos tras el cierre."), T("Guide","Guide","Guía"), S,
-        T("Daily trading journal routine: before, during and after the session · Sweep","Routine de journal de trading : avant, pendant et après la séance · Sweep","Rutina de diario de trading: antes, durante y después de la sesión · Sweep"),
-        T("A simple daily routine for your trading journal: a 5-minute plan before the open, one line per trade, a 60-second review after the close and a weekly review.","Une routine simple pour ton journal : un plan de 5 minutes avant l’ouverture, une ligne par trade, une revue de 60 secondes après la clôture et une revue de la semaine.","Una rutina sencilla para tu diario: un plan de 5 minutos antes de la apertura, una línea por operación, una revisión de 60 segundos al cierre y una revisión semanal."))
+        T("Daily trading journal routine: before, during and after the session · Sweep","Routine de journal de trading : avant, pendant et après la séance · Sweep","Rutina de trading diaria (plantilla gratis) · Sweep"),
+        T("A simple daily routine for your trading journal: a 5-minute plan before the open, one line per trade, a 60-second review after the close and a weekly review.","Une routine simple pour ton journal : un plan de 5 minutes avant l’ouverture, une ligne par trade, une revue de 60 secondes après la clôture et une revue de la semaine.","Una rutina sencilla para tu diario: un plan de 5 minutos antes de la apertura, una línea por operación, una revisión de 60 segundos al cierre y una revisión semanal."), extra, faqs)
 
 SYSTEM_PAGES.add("trading-journal-routine.html")
 
@@ -208,7 +236,7 @@ def page_journal_guide(lang, t):
     b = (ui.sec(ui.doc(t, body), "t", "guide")
          + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, JG_FAQS), "n", "faq", width="read")
          + ui.read_next(lang, t, ["trading-journal-routine.html", "trading-templates.html", "best-trading-journal-for-prop-firms.html"]) + ui.final(lang, t))
-    title = T("How to Keep a Trading Journal: The Complete Guide · Sweep","Tenir un journal de trading : le guide complet · Sweep","Cómo llevar un diario de trading: guía completa · Sweep")
+    title = T("How to Keep a Trading Journal: The Complete Guide · Sweep","Journal de trading : guide complet et modèle gratuit · Sweep","Diario de trading: guía completa y plantilla gratis · Sweep")   # SEO brief v2, 3.7
     desc = T("What to record for each trade, the numbers to watch, how to review, and what changes on a prop firm account: the complete trading journal guide.",
              "Quoi noter pour chaque trade, les chiffres à suivre, comment faire ta revue et ce qui change sur un compte prop : le guide complet du journal de trading.",
              "Qué anotar en cada operación, las cifras a seguir, cómo revisar y qué cambia en una cuenta prop: la guía completa del diario de trading.")

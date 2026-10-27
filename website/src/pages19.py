@@ -77,6 +77,56 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
         {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]}]})
     return _fr_nbsp(lang, t(title), t(desc), hero + b + ui.final(lang, t), ld)
 
+# ---------------------------------------------------------------- the answer first (SEO brief v2, 3.2): two sentences with the real numbers, under each guide's title
+def _all(ph, key, size=None):
+    return [((s.get(ph) or {}).get(key), f, p, s) for f in presets.FIRMS for p in f["programs"] for s in p["sizes"] if (size is None or s["size"] == size) and (s.get(ph) or {}).get(key)]
+def _when(lang): return day(presets.CHECKED, lang)
+def answer_consistency():
+    v = [x for x, *_ in _all("eval", "consistency") + _all("funded", "consistency")]; lo, hi = min(v), max(v)
+    return T(f"A consistency rule caps how much of your profit can come from a single day: from {pc(lo, 'en')} to {pc(hi, 'en')} at the {FIRMS_N} firms Sweep tracks, depending on the firm and the account. Here is every firm’s rule, checked {_when('en')}.",
+             f"Une règle de consistance limite la part de ton profit qui peut venir d’une seule journée : de {pc(lo, 'fr')} à {pc(hi, 'fr')} chez les {FIRMS_N} firmes que suit Sweep, selon la firme et le compte. Voici la règle de chaque firme, vérifiée le {_when('fr')}.",
+             f"Una regla de consistencia limita qué parte de tu beneficio puede venir de un solo día: del {pc(lo, 'es')} al {pc(hi, 'es')} en las {FIRMS_N} firmas que sigue Sweep, según la firma y la cuenta. Aquí está la regla de cada firma, revisada el {_when('es')}.")
+def answer_drawdown():
+    v = [x for x, *_ in _all("eval", "dd", 50000)]; lo, hi = min(v), max(v)
+    return T(f"The max loss, or drawdown, is how far your balance can fall before the account fails: {usd(lo, 'en')} to {usd(hi, 'en')} on a 50K at the {FIRMS_N} firms Sweep tracks, measured at the end of the day, in real time or from a fixed level. Here is every firm’s rule, checked {_when('en')}.",
+             f"La perte max, ou drawdown, c’est jusqu’où ton solde peut descendre avant que le compte échoue : de {usd(lo, 'fr')} à {usd(hi, 'fr')} sur un 50K chez les {FIRMS_N} firmes que suit Sweep, mesurée en fin de journée, en temps réel ou depuis un niveau fixe. Voici la règle de chaque firme, vérifiée le {_when('fr')}.",
+             f"La pérdida máxima, o drawdown, es cuánto puede bajar tu saldo antes de que la cuenta falle: de {usd(lo, 'es')} a {usd(hi, 'es')} en una 50K en las {FIRMS_N} firmas que sigue Sweep, medida al cierre, en tiempo real o desde un nivel fijo. Aquí está la regla de cada firma, revisada el {_when('es')}.")
+def answer_payouts():
+    w = [(s.get("funded") or {}).get("payout", {}).get("win_days") for f in presets.FIRMS for p in f["programs"] for s in p["sizes"]]; w = [x for x in w if x]
+    return T(f"Before each payout, most firms ask for winning days ({min(w):g} to {max(w):g} of them), a minimum balance or profit, and often a consistency rule, then cap what you can request. Here are the payout conditions of {FIRMS_N} futures prop firms, account type by account type, checked {_when('en')}.",
+             f"Avant chaque payout, la plupart des firmes demandent des jours gagnants ({min(w):g} à {max(w):g}), un solde ou un profit minimum et souvent une règle de consistance, puis plafonnent ce que tu peux demander. Voici les conditions de payout de {FIRMS_N} prop firms de futures, type de compte par type de compte, vérifiées le {_when('fr')}.",
+             f"Antes de cada payout, la mayoría de las firmas piden días ganadores (de {min(w):g} a {max(w):g}), un saldo o beneficio mínimo y a menudo una regla de consistencia, y luego limitan lo que puedes pedir. Aquí están las condiciones de payout de {FIRMS_N} prop firms de futuros, tipo de cuenta por tipo de cuenta, revisadas el {_when('es')}.")
+def answer_targets():
+    v = [(x / s["size"] * 100) for x, f, p, s in _all("eval", "target")]; lo, hi = min(v), max(v)
+    t50 = [x for x, *_ in _all("eval", "target", 50000)]; common = max(set(t50), key=t50.count)
+    return T(f"The profit target is what you must make to pass the evaluation: {pc(round(lo, 1), 'en')} to {pc(round(hi, 1), 'en')} of the account at the {FIRMS_N} firms Sweep tracks, {usd(common, 'en')} on most 50K accounts. Here is every firm’s target, max loss and daily loss limit, size by size, checked {_when('en')}.",
+             f"L’objectif de profit, c’est ce que tu dois gagner pour réussir l’évaluation : de {pc(round(lo, 1), 'fr')} à {pc(round(hi, 1), 'fr')} du compte chez les {FIRMS_N} firmes que suit Sweep, {usd(common, 'fr')} sur la plupart des 50K. Voici l’objectif, la perte max et la limite du jour de chaque firme, taille par taille, vérifiés le {_when('fr')}.",
+             f"El objetivo de beneficio es lo que debes ganar para aprobar la evaluación: del {pc(round(lo, 1), 'es')} al {pc(round(hi, 1), 'es')} de la cuenta en las {FIRMS_N} firmas que sigue Sweep, {usd(common, 'es')} en la mayoría de las 50K. Aquí están el objetivo, la pérdida máxima y el límite diario de cada firma, tamaño por tamaño, revisados el {_when('es')}.")
+def answer_days():
+    v = [x for x, *_ in _all("eval", "min_days")]; lo, hi = min(v), max(v)
+    return T(f"Most firms ask for a minimum number of trading days to pass the evaluation, {lo:g} to {hi:g} at the {FIRMS_N} firms Sweep tracks (some ask for none), and for winning days before each payout. Here is every firm’s rule, checked {_when('en')}.",
+             f"La plupart des firmes demandent un nombre minimum de jours de trading pour réussir l’évaluation, de {lo:g} à {hi:g} chez les {FIRMS_N} firmes que suit Sweep (certaines n’en demandent aucun), et des jours gagnants avant chaque payout. Voici la règle de chaque firme, vérifiée le {_when('fr')}.",
+             f"La mayoría de las firmas piden un número mínimo de días de trading para aprobar la evaluación, de {lo:g} a {hi:g} en las {FIRMS_N} firmas que sigue Sweep (algunas no piden ninguno), y días ganadores antes de cada payout. Aquí está la regla de cada firma, revisada el {_when('es')}.")
+def lowest_targets(lang, t):
+    """« Prop firms with the lowest profit targets »: each firm's lowest target as a share of the account, lowest first."""
+    best = {}
+    for x, f, p, s in _all("eval", "target"):
+        pct = x / s["size"] * 100; dd = (s.get("eval") or {}).get("dd")
+        k = (pct, -(dd or 0) / x)   # the same share: the more room under the target, the easier
+        if f["name"] not in best or k < best[f["name"]][0]: best[f["name"]] = (k, f, p, s, x, dd)
+    rows = sorted(best.values(), key=lambda r: r[0])
+    head = (f'<tr><th scope="col">{t(T("Firm","Firme","Firma"))}</th><th scope="col">{t(T("Account","Compte","Cuenta"))}</th><th scope="col">{t(T("Profit target","Objectif de profit","Objetivo de beneficio"))}</th>'
+            f'<th scope="col">{t(T("Share of the account","Part du compte","Parte de la cuenta"))}</th><th scope="col">{t(T("Max loss","Perte max","Pérdida máx."))}</th></tr>')
+    L_ = [html.escape(t(x)) for x in (T("Account","Compte","Cuenta"), T("Profit target","Objectif de profit","Objetivo de beneficio"), T("Share of the account","Part du compte","Parte de la cuenta"), T("Max loss","Perte max","Pérdida máx."))]
+    body = "".join(f'<tr><th scope="row"><a href="{href(lang, page_of(f))}">{f["name"]}</a></th><td data-label="{L_[0]}">{p["name"]} {kk(s["size"])}</td><td class="num" data-label="{L_[1]}">{usd(x, lang)}</td>'
+                   f'<td class="num" data-label="{L_[2]}">{pc(round(k[0], 1), lang)}</td><td class="num" data-label="{L_[3]}">{usd(dd, lang) if dd else DASH}</td></tr>' for k, f, p, s, x, dd in rows)
+    lo = rows[0]
+    first = T(f"The lowest target in Sweep’s catalogue is {pc(round(lo[0][0], 1), 'en')} of the account, on {lo[1]['name']}’s {lo[2]['name']} {kk(lo[3]['size'])}. Each firm’s lowest target, as a share of the account:",
+              f"L’objectif le plus bas du catalogue de Sweep est de {pc(round(lo[0][0], 1), 'fr')} du compte, sur le {lo[2]['name']} {kk(lo[3]['size'])} {fr_de(lo[1]['name'])}. L’objectif le plus bas de chaque firme, en part du compte :",
+              f"El objetivo más bajo del catálogo de Sweep es el {pc(round(lo[0][0], 1), 'es')} de la cuenta, en la {lo[2]['name']} {kk(lo[3]['size'])} de {lo[1]['name']}. El objetivo más bajo de cada firma, como parte de la cuenta:")
+    return (f'<h2 id="lowest-targets">{t(T("Prop firms with the lowest profit targets","Les prop firms aux objectifs de profit les plus bas","Las prop firms con los objetivos de beneficio más bajos"))}</h2>'
+            f'<p>{t(first)}</p><div class="cmp-wrap"><table class="cmp guide"><colgroup><col style="width:30%"><col><col><col><col></colgroup><thead>{head}</thead><tbody>{body}</tbody></table></div>')   # the firm names need the room
+
 # ---------------------------------------------------------------- consistency rules
 def cons_cells(lang, t, f, p):
     """Consistency: (evaluation, funded account) for an account type."""
@@ -112,7 +162,8 @@ def page_consistency(lang, t):
     lo = min(v for v, *_ in allv) if allv else None
     strict = [(n, pn, ph) for v, n, pn, ph in allv if v == lo]
     PH = {"eval": T("evaluation", "évaluation", "evaluación"), "funded": T("funded account", "compte financé", "cuenta financiada")}
-    faqs = []
+    faqs = [(T("What is the consistency rule in a prop firm?", "C’est quoi la règle de consistance en prop firm ?", "¿Qué es la regla de consistencia en una prop firm?"),
+             {l: answer_consistency()[l].rsplit('. ', 1)[0] + '.' for l in LANGS})]   # the answer, without « Here is every firm’s rule »
     if ev["en"]:
         faqs.append((T("Which prop firms have a consistency rule in the evaluation?", "Quelles prop firms ont une règle de consistance en évaluation ?", "¿Qué prop firms tienen una regla de consistencia en la evaluación?"),
                      {l: _by_firm(ev[l], l) for l in LANGS}))
@@ -131,9 +182,7 @@ def page_consistency(lang, t):
            ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm consistency rules, compared (2026).", "Les règles de consistance des prop firms, comparées (2026).", "Las reglas de consistencia de las prop firms, comparadas (2026)."),
-        T(f"How {FIRMS_N} futures prop firms limit your best day, in evaluations and on funded accounts, account type by account type.",
-          f"Comment {FIRMS_N} prop firms de futures limitent ton meilleur jour, en évaluation et en compte financé, type de compte par type de compte.",
-          f"Cómo {FIRMS_N} prop firms de futuros limitan tu mejor día, en evaluaciones y en cuentas financiadas, tipo de cuenta por tipo de cuenta."),
+        answer_consistency(),
         intro, table, "", faqs, rel,
         T("Prop Firm Consistency Rules Compared (2026) · Sweep", "Règle de consistance des prop firms, comparée (2026) · Sweep", "Regla de consistencia de las prop firms (2026) · Sweep"),
         T(f"The consistency rule of {FIRMS_N} futures prop firms, side by side: best-day limits in evaluations and funded accounts, from Sweep’s weekly check.",
@@ -182,7 +231,10 @@ def page_drawdown_guide(lang, t):
             offs = sorted({(s.get("funded") or {}).get("dd_lock_offset") or 0 for s in p["sizes"] if (s.get("funded") or {}).get("dd_lock")})
             if offs:
                 for l in LANGS: locks[l].append((f["name"], p["name"] + (f" (+ {usd(offs[0], l)})" if offs[0] else "")))
-    faqs = []
+    faqs = [(T("How does a trailing drawdown work?", "Comment fonctionne un drawdown suiveur ?", "¿Cómo funciona un drawdown dinámico?"),
+             T(f"It follows your highest balance up, never down: with a {usd(2000, 'en')} max loss and a peak at {usd(51000, 'en')}, the account fails below {usd(49000, 'en')}. An end-of-day drawdown moves with your closing balance only; a real-time one also follows open profit during the session. Many firms stop it once it reaches your starting balance.",
+               f"Il suit ton solde le plus haut vers le haut, jamais vers le bas : avec une perte max de {usd(2000, 'fr')} et un sommet à {usd(51000, 'fr')}, le compte échoue sous {usd(49000, 'fr')}. Un drawdown de fin de journée ne bouge qu’avec ton solde de clôture ; en temps réel, il suit aussi le profit ouvert pendant la séance. Beaucoup de firmes l’arrêtent quand il atteint ton solde de départ.",
+               f"Sigue tu saldo más alto hacia arriba, nunca hacia abajo: con una pérdida máxima de {usd(2000, 'es')} y un máximo de {usd(51000, 'es')}, la cuenta falla por debajo de {usd(49000, 'es')}. Un drawdown al cierre solo se mueve con tu saldo de cierre; en tiempo real también sigue el beneficio abierto durante la sesión. Muchas firmas lo detienen cuando llega a tu saldo inicial."))]
     if eod:
         faqs.append((T("Which prop firms use an end-of-day drawdown?", "Quelles prop firms utilisent un drawdown de fin de journée ?", "¿Qué prop firms usan un drawdown al cierre?"),
                      {l: _by_firm(eod, l) for l in LANGS}))
@@ -200,9 +252,7 @@ def page_drawdown_guide(lang, t):
            ("prop-firm-profit-targets.html", T("Profit targets and max loss compared", "Objectifs et perte max comparés", "Objetivos y pérdida máx. comparados")), ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm drawdown rules, compared (2026).", "Les règles de drawdown des prop firms, comparées (2026).", "Las reglas de drawdown de las prop firms, comparadas (2026)."),
-        T(f"End of day, real time or static: how {FIRMS_N} futures prop firms trail your max loss, and when it stops, account type by account type.",
-          f"Fin de journée, temps réel ou fixe : comment {FIRMS_N} prop firms de futures font suivre ta perte max, et quand elle s’arrête, type de compte par type de compte.",
-          f"Al cierre, en tiempo real o fijo: cómo {FIRMS_N} prop firms de futuros hacen seguir tu pérdida máx. y cuándo se detiene, tipo de cuenta por tipo de cuenta."),
+        answer_drawdown(),
         intro, table, "", faqs, rel,
         T("Prop Firm Drawdown Rules Compared (2026) · Sweep", "Drawdown des prop firms : règles comparées (2026) · Sweep", "Drawdown de las prop firms: reglas comparadas (2026) · Sweep"),
         T(f"End-of-day, intraday or static drawdown at {FIRMS_N} futures prop firms, side by side: max loss on a 50K and when trailing stops, checked every week.",
@@ -395,9 +445,7 @@ def page_payout_guide(lang, t):
            (GUIDE_DD, T("Drawdown rules compared", "Règles de drawdown comparées", "Reglas de drawdown comparadas")), ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm payout rules, compared (2026).", "Les règles de payout des prop firms, comparées (2026).", "Las reglas de payout de las prop firms, comparadas (2026)."),
-        T(f"When {FIRMS_N} futures prop firms let you request a payout, how much, and how much you keep, account type by account type.",
-          f"Quand {FIRMS_N} prop firms de futures te laissent demander un payout, combien, et ce que tu gardes, type de compte par type de compte.",
-          f"Cuándo {FIRMS_N} prop firms de futuros te dejan pedir un payout, cuánto y cuánto te quedas, tipo de cuenta por tipo de cuenta."),
+        answer_payouts(),
         intro, table, "", faqs, rel,
         T("Prop Firm Payout Rules Compared (2026) · Sweep", "Payouts des prop firms : règles comparées (2026) · Sweep", "Payouts de las prop firms: reglas comparadas (2026) · Sweep"),
         T(f"Payout rules of {FIRMS_N} futures prop firms, side by side: winning days, balance to keep, caps per payout and profit split, from Sweep’s weekly check.",
@@ -492,10 +540,8 @@ def page_sizes_guide(lang, t):
            (GUIDE_PAYOUT, T("Payout rules compared", "Règles de payout comparées", "Reglas de payout comparadas")), ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm account sizes, profit targets and max loss, compared (2026).", "Tailles de compte, objectifs de profit et perte max des prop firms, comparés (2026).", "Tamaños de cuenta, objetivos de beneficio y pérdida máx. de las prop firms, comparados (2026)."),
-        T(f"The profit target, max loss and daily loss limit of every account size at {FIRMS_N} futures prop firms, from 25K to the largest.",
-          f"L’objectif de profit, la perte max et la limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, de 25K à la plus grande.",
-          f"El objetivo de beneficio, la pérdida máx. y el límite diario de cada tamaño de cuenta en {FIRMS_N} prop firms de futuros, de 25K a la mayor."),
-        intro, table, "", faqs, rel,
+        answer_targets(),
+        intro, table, lowest_targets(lang, t), faqs, rel,
         T("Prop Firm Profit Targets & Max Loss by Size (2026) · Sweep", "Objectif de profit et perte max des prop firms · Sweep", "Objetivo de beneficio y pérdida máx. de prop firms · Sweep"),
         T(f"Profit target, max loss and daily loss limit for every account size at {FIRMS_N} futures prop firms, side by side, from Sweep’s weekly check of their pages.",
           f"Objectif de profit, perte max et limite du jour de chaque taille de compte chez {FIRMS_N} prop firms de futures, côte à côte, vérifiés chaque semaine.",
@@ -566,9 +612,7 @@ def page_days_guide(lang, t):
                    "En cada cuenta, Sweep cuenta los días que operas y tus días ganadores según las reglas de tu firma, y te muestra cuándo la cuenta está lista para un payout.")))
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm minimum trading days, compared (2026).", "Les jours minimum des prop firms, comparés (2026).", "Los días mínimos de las prop firms, comparados (2026)."),
-        T(f"How many days {FIRMS_N} futures prop firms require to pass an evaluation, and how many winning days before each payout.",
-          f"Combien de jours {FIRMS_N} prop firms de futures demandent pour réussir une évaluation, et combien de jours gagnants avant chaque payout.",
-          f"Cuántos días piden {FIRMS_N} prop firms de futuros para aprobar una evaluación, y cuántos días ganadores antes de cada payout."),
+        answer_days(),
         intro, table, "", faqs, None,
         T("Prop Firm Minimum Trading Days Compared (2026) · Sweep", "Jours de trading minimum des prop firms (2026) · Sweep", "Días mínimos de trading de las prop firms (2026) · Sweep"),
         T(f"Minimum trading days to pass the evaluation and winning days before a payout at {FIRMS_N} futures prop firms, side by side, from Sweep’s weekly check.",

@@ -124,8 +124,8 @@
   "hash": "1e9e1fd8c7373667"
  },
  "futures-market-hours.html": {
-  "date": "2026-10-15",
-  "hash": "7a9a105e857f8f05"
+  "date": "2026-10-27",
+  "hash": "6daa0c2513525375"
  },
  "gdp-release-dates.html": {
   "date": "2026-10-27",
@@ -233,11 +233,11 @@
  },
  "prop-firm-consistency-rules.html": {
   "date": "2026-10-27",
-  "hash": "4749a30fd13fd6e2"
+  "hash": "7dd417aceb613b4c"
  },
  "prop-firm-drawdown-rules.html": {
   "date": "2026-10-27",
-  "hash": "0c1a85d268e9aaa4"
+  "hash": "b7419d0bf7eba990"
  },
  "prop-firm-gameplan-month-1.html": {
   "date": "2026-10-20",
@@ -253,11 +253,11 @@
  },
  "prop-firm-minimum-days.html": {
   "date": "2026-10-27",
-  "hash": "d0dd18e2c924164c"
+  "hash": "c40e2f8ed34c2e72"
  },
  "prop-firm-payout-rules.html": {
   "date": "2026-10-27",
-  "hash": "9ccc1251a9bff801"
+  "hash": "3234290ff0372a3d"
  },
  "prop-firm-position-sizing.html": {
   "date": "2026-10-20",
@@ -265,7 +265,7 @@
  },
  "prop-firm-profit-targets.html": {
   "date": "2026-10-27",
-  "hash": "12cbfe5c9c953cc3"
+  "hash": "e4465dc5888811fd"
  },
  "prop-firm-roi-calculator.html": {
   "date": "2026-10-15",
@@ -281,7 +281,7 @@
  },
  "prop-firms/alpha-futures.html": {
   "date": "2026-10-27",
-  "hash": "09f06524d52f99d3"
+  "hash": "a6009398f7e0b477"
  },
  "prop-firms/apex-vs-alpha-futures.html": {
   "date": "2026-10-27",
@@ -301,7 +301,7 @@
  },
  "prop-firms/apex.html": {
   "date": "2026-10-27",
-  "hash": "212eaa62c8874242"
+  "hash": "95577d0995a4d5a9"
  },
  "prop-firms/index.html": {
   "date": "2026-10-27",
@@ -321,7 +321,7 @@
  },
  "prop-firms/lucid.html": {
   "date": "2026-10-27",
-  "hash": "5801cbe8447de735"
+  "hash": "669d7bc7be6f9f2f"
  },
  "prop-firms/myfundedfutures-vs-alpha-futures.html": {
   "date": "2026-10-27",
@@ -329,7 +329,7 @@
  },
  "prop-firms/myfundedfutures.html": {
   "date": "2026-10-27",
-  "hash": "c7716682803f1f04"
+  "hash": "296d1502c3c977aa"
  },
  "prop-firms/take-profit-trader-vs-alpha-futures.html": {
   "date": "2026-10-27",
@@ -341,7 +341,7 @@
  },
  "prop-firms/take-profit-trader.html": {
   "date": "2026-10-27",
-  "hash": "e5559a4fac832180"
+  "hash": "148a0e52577e4ebc"
  },
  "prop-firms/topstep-vs-alpha-futures.html": {
   "date": "2026-10-27",
@@ -365,7 +365,7 @@
  },
  "prop-firms/topstep.html": {
   "date": "2026-10-27",
-  "hash": "59e75673f5d17d30"
+  "hash": "a8272daa51b382da"
  },
  "prop-firms/tradeify.html": {
   "date": "2026-10-21",
@@ -420,8 +420,8 @@
   "hash": "be9ca15e8fca1fcd"
  },
  "trading-journal-routine.html": {
-  "date": "2026-10-20",
-  "hash": "196bc8b0a8a6dd2f"
+  "date": "2026-10-27",
+  "hash": "71362fba7a7ae3e4"
  },
  "trading-templates.html": {
   "date": "2026-10-19",
