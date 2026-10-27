@@ -8,7 +8,7 @@ Sweep — Stats and Trends (brief 02, part 6), Playwright, phone (fr, es) and co
    accounts counts once on all accounts, once on its own account's view;
  - the 4 tiles' labels on one line on a phone (« Gain / perte moy. »);
  - a trade without a stop: « No stop: R unavailable », never a made-up R; with a stop, its R;
- - Today: one trend only, « Trend of the week », the costliest, with what to do: « Your trades after 11:00 cost you … »,
+ - Stats › Patterns to watch (since SWEEP.md step 3; on Today before): the costliest first, with what to do: « Your trades after 11:00 cost you … »,
    « Try stopping at 11:00 this week. ».
 Checks: no page error, nothing wider than the window, the texts in the trader's language.
 """
@@ -123,13 +123,15 @@ def trend(p, lang, phone):
   for k, day in enumerate(['2026-09-01', '2026-09-02', '2026-09-03', '2026-09-04', '2026-09-08', '2026-09-09']):
     rows += [{'id': f'e{k}', 'account_id': 'a', 'date': day, 'entry_time': '09:45:00', 'pnl_c': 20000}, {'id': f'l{k}', 'account_id': 'a', 'date': day, 'entry_time': '11:15:00', 'pnl_c': -15000}]
   pg.evaluate(SET, rows)
-  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-dash .d-trends', timeout=10000); pg.wait_for_timeout(800)
-  li = pg.evaluate(TXT, '#main .d-trends .ins li')
-  ok(pg.evaluate(TXT, '#main .d-trends h2') == [x['title']] and len(li) == 1, f"{tag} Today: one trend, « {x['title']} » ({len(li)})")
-  ok(bool(li) and re.match(x['trend'], li[0]) and pg.evaluate(TXT, '#main .d-trends .ins-act') == [x['act']], f'{tag} the costliest, with what to do: {li}')
-  ok(pg.evaluate(WIDE) <= 1, f'{tag} Today: nothing wider than the window')
-  if SHOTS: pg.locator('#main .d-trends').screenshot(path=os.path.join(SHOTS, f'p6-trend-{tag}.png'))
-  ok(not errs, f'{tag} Today: no page error ' + '; '.join(errs[:2]))
+  # (SWEEP.md step 3) the week's trend left Today: Stats › Patterns to watch, the costliest first, with what to do
+  pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(800)
+  ok(pg.locator('#main .nav-dash .d-trends').count() == 0, f'{tag} Today: no trend card any more')
+  pg.evaluate("location.hash = '#analytics'; render()"); pg.wait_for_selector('#main .ins li', timeout=10000); pg.wait_for_timeout(800)
+  li = pg.evaluate(TXT, '#main .ins li')
+  ok(bool(li) and re.match(x['trend'], li[0]) and x['act'] in li[0], f'{tag} Stats: the costliest first, with what to do: {li[:1]}')
+  ok(pg.evaluate(WIDE) <= 1, f'{tag} Stats: nothing wider than the window')
+  if SHOTS: pg.locator('#main .ins').first.screenshot(path=os.path.join(SHOTS, f'p6-trend-{tag}.png'))
+  ok(not errs, f'{tag} no page error ' + '; '.join(errs[:2]))
   br.close()
 
 with sync_playwright() as p:
