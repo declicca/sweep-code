@@ -130,7 +130,7 @@ Une fois déployés, la session stratégie et tests relève les chiffres réels 
 
 **Fini quand** :
 - après son premier plan, un nouveau trader au téléphone peut activer le rappel du lendemain en un toucher ;
-- Admin › Santé dit si les courriels partent.
+- les deux textes de courriels sont proposés à Mateo.
 
 ---
 
