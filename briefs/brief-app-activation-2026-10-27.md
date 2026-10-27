@@ -2,6 +2,8 @@
 
 **De** : la session stratégie et tests (SWEEP.md). **Pour** : la session d'exécution (le code de l'app). Décision de Mateo du 27 oct. : une session pense et vérifie, l'autre code.
 
+**Ordre mis à jour le 27 oct. (priorité de Mateo : les traders actuels)** : l'étape A de ce brief, puis `brief-app-boucle-quotidienne-2026-10-27.md`, puis les étapes B à F d'ici (B est l'étape 4 du brief de la boucle).
+
 **À lire d'abord**
 - `SWEEP.md` : la carte du parcours. Les règles de la section 6 valent pour chaque étape ci-dessous.
 - `docs/parcours/TOUR-2026-10-27.md` : le tour de l'app qui fonde les étapes A et F.

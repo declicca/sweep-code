@@ -4,6 +4,11 @@ Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajuste
 
 **Avancement (27 oct.)** : étapes 0 et 1 en ligne (le commit vert `ade074b` est servi par app.makeitsweep.com ; date exacte du déploiement à confirmer par Mateo, puis à noter dans `docs/parcours/MESURE-0.md`). Étape 2 faite, en attente de la semaine de mesure. Étape 3 en cours (lots a et b faits). Étapes 4 à 6 à faire (section 7).
 
+**Priorité de Mateo (27 oct.)** : garder les traders actuels, avec l'utilisation la plus simple et la plus rapide. L'ordre des travaux est donc :
+1. `briefs/brief-app-activation-2026-10-27.md`, étape A (les défauts) ;
+2. `briefs/brief-app-boucle-quotidienne-2026-10-27.md` (une journée à 2 trades passe d'environ 35 touchers à 15 : plan express, plus d'interruption après un trade, « Fermer ma journée », puis « Maintenant ») ;
+3. les étapes C à F du brief d'activation.
+
 **Statut** : c'est la référence de tous les développements à venir sur l'app. En cas de désaccord avec un brief plus ancien, ce fichier gagne sur le **parcours** (ce qui est visible, où, quand). `app/CONTEXTE-APP.md` reste la référence des **règles** : calculs, argent, prop firms, tests, design.
 
 ---
