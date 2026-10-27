@@ -86,9 +86,11 @@ with sync_playwright() as p:
     close(pg)
     pg.evaluate("(g) => { for (let i = 0; i < 10; i++) remove('trades', 'pm5-t' + i); remove('journals', g); const s = structuredClone(S.settings); delete s.pm_keep_full; put('settings', s) }", g0)
     pg.evaluate("(d) => { if (S.journals.some((j) => j.id === d)) remove('journals', d) }", d4)
+    pg.evaluate("Promise.all(Object.values(chains)).then(() => true)")   # every delete reached the server before the next test
     for x in (d1, d2, d3): pg.evaluate("(d) => { if (S.journals.some((j) => j.id === d)) remove('journals', d) }", x)
     pg.evaluate("(v) => { const s = structuredClone(S.settings); if (v) s.pm_mode = v; else delete s.pm_mode; put('settings', s) }", was)
     pg.wait_for_timeout(1500)
+    pg.evaluate("Promise.all(Object.values(chains)).then(() => true)")
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
   br.close()

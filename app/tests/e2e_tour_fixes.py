@@ -61,6 +61,7 @@ with sync_playwright() as p:
       bf = pg.evaluate("SweepCoach.before({ form: 'manual', account: 'tf-acc', date: todayStr(), qty: 1 })") or ''
       ok('1 trades' not in bf and 'Ton trade prévu est fait' in bf, f'{tag} the coach in the singular: « Ton trade prévu est fait » ({bf[-110:]!r})')
       pg.evaluate("(j) => { remove('trades', 'tf-one'); remove('accounts', 'tf-acc'); const o = JSON.parse(j); if (o) put('journals', o); else remove('journals', todayStr()) }", j0); pg.wait_for_timeout(500)
+      pg.evaluate("Promise.all(Object.values(chains)).then(() => true)")   # (27 Oct.: the shared trader must be left as found — a later test of the same group saw this account on the CI)
     # A3
     st3 = pg.evaluate("[SweepGame.sumText(1), SweepGame.sumText(3)]")
     ok(st3 == ['1 nouveauté · Voir Progression', '3 nouveautés · Voir Progression'], f'A3 {tag} « 1 nouveauté », « 3 nouveautés » ({st3})')

@@ -175,6 +175,7 @@ def run_day(p, lang, phone):
     if not pg.evaluate("(document.querySelector('.nav-am.open [data-am-f=net]') || {}).value"): field('.nav-am.open [data-am-f=net]', '150')   # not read: typed
     if not pg.evaluate("!!document.querySelector('.nav-am.open [data-am-seg=dir].on')"): tap('.nav-am.open [data-am-seg=dir][data-v=long]')
     tap('.nav-am.open [data-am=save]'); wait(1500)
+    pg.evaluate("(n) => { const t = S.trades.filter((x) => !x.demo).slice(n).find((x) => x.date !== todayStr()); if (t) editDoc('trades', t.id, (d) => { d.date = todayStr(); }) }", n0)   # (the test screenshots carry their own date: put on today, as a real one would be)
     if seen('#gSheet [data-pm=link]'): c['screens'].append('scenario'); tap('#gSheet [data-pm=link]')   # « Which scenario of your sheet? »
     wait(600)
     if pg.evaluate("location.hash").startswith('#trade/'): c['screens'].append('trade-page')
@@ -183,8 +184,9 @@ def run_day(p, lang, phone):
   # 3. closing the day
   if pg.evaluate("location.hash") != '#dashboard': tap('a[href="#dashboard"]'); wait(800)
   tap('#main .nav-rt [data-rt=review]'); screen('review', '#gSheet [data-g=save-review]'); wait(500)
-  for sel in ('[data-g=r-followed][data-v=yes]', '[data-g=r-score][data-v="4"]', '[data-g=r-grade][data-v=B]'):
-    if seen('#gSheet ' + sel) and not pg.evaluate("(s) => !!document.querySelector(s + '.on')", '#gSheet ' + sel): tap('#gSheet ' + sel)
+  for sel in ('[data-g=r-followed][data-v=yes]', '[data-g=r-score][data-v="4"]', '[data-g=r-grade][data-v=B]'):   # only a question with no answer yet (filled in from the day since 27 Oct.)
+    grp = sel.split(']')[0] + ']'
+    if seen('#gSheet ' + sel) and not pg.evaluate("(g) => !!document.querySelector(g + '.on')", '#gSheet ' + grp): tap('#gSheet ' + sel)
   tap('#gSheet [data-g=save-review]'); wait(1200)
   closed = pg.evaluate("(() => { const j = getDoc('journals', todayStr()); return !!(j && j.post && (j.post.reviewed_at || j.post.followed)) })()")
   at('day')

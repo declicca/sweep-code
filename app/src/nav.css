@@ -2889,3 +2889,6 @@ html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:f
 .gp-ln-late{justify-self:start;min-height:32px;padding:6px 12px;border:0;border-radius:99px;background:color-mix(in srgb,var(--neg) 16%,transparent);color:var(--neg);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 /* Today (SWEEP.md step 3): one blue button, the one of « Now » — the header's « Add a trade » goes grey while the routine is on screen */
 body:has(#main .nav-rt) .nav-addtop{background:var(--fill);color:var(--text);box-shadow:none}
+/* (27 Oct.) « I’m done for today », under the routine’s steps from the first trade */
+.nav-rt-finl{margin:10px 0 0;text-align:right}
+.nav-rt-fin{min-height:44px;padding:0 4px;font-size:14px;font-weight:600;background:none;border:0;color:var(--pos);cursor:pointer}

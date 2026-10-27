@@ -97,6 +97,7 @@ with sync_playwright() as p:
     pg.click('#gSheet [data-sc=A] [data-pm=inval]'); pg.wait_for_timeout(300); pg.click('#gSheet [data-sc=B] [data-pm=inval]'); pg.wait_for_timeout(400)
     ok('Journée terminée selon ton plan.' in pg.locator('#gSheet').inner_text() and pg.evaluate("(d) => SweepFiche.over(d)", DAY) == 'two_invalidations', f'3 {w}: 2 invalidations: « Journée terminée selon ton plan. »')
     pg.wait_for_timeout(1500); pg.evaluate("(d) => remove('journals', d)", DAY); pg.wait_for_timeout(1500)
+    pg.evaluate("Promise.all(Object.values(chains)).then(() => true)")   # every delete reached the server before the next test
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
   br.close()

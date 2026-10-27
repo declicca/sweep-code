@@ -27,7 +27,7 @@
       plan_past: 'A plan can only be made for today.',
       journal_title: 'Journal', setup: 'Setup', emotion: 'Emotion before entry', rules: 'Did you follow your rules?', yes: 'Yes', partial: 'Partly', no: 'No',
       next: 'Next', done: 'Done', skip: 'Skip', of: '{a} of {b}', all_journaled: 'Every trade is journaled.',
-      review_title: 'Daily review', improve_opt: 'One thing to improve tomorrow', discipline: 'Discipline today', save_review: 'Save my review', followed: 'Did you follow your plan?', grade: 'Your day, graded', review_needs: 'Answer the 3 questions.',
+      review_title: 'Daily review', improve_opt: 'One thing to improve tomorrow', discipline: 'Discipline today', save_review: 'Save my review', close_day: 'Close my day', close_hint: 'Filled in from your day: change any answer with one tap.', followed: 'Did you follow your plan?', grade: 'Your day, graded', review_needs: 'Answer the 3 questions.',
       today_title: 'Your day', step_plan: 'Plan before the first trade', step_exec: 'Trades inside your plan', step_review: 'Trades journaled and day reviewed',
       v_setup_not_in_plan: 'Setup outside your plan', v_no_stop: 'Stop not respected', v_against_bias: 'Against your bias', v_over_max_loss: 'Taken after your max loss', v_over_max_trades: 'Above your max number of trades',
       v_plan_no_trade: 'Taken on a day off', v_rules: 'Rules partly followed',
@@ -71,7 +71,7 @@
       plan_past: "Un plan ne peut être fait que pour aujourd’hui.",
       journal_title: 'Journaliser', setup: 'Setup', emotion: "Émotion avant l’entrée", rules: 'As-tu suivi tes règles ?', yes: 'Oui', partial: 'En partie', no: 'Non',
       next: 'Suivant', done: 'Terminé', skip: 'Passer', of: '{a} sur {b}', all_journaled: 'Tous les trades sont journalisés.',
-      review_title: 'Revue du jour', improve_opt: 'Une chose à améliorer demain', discipline: "Discipline aujourd’hui", save_review: 'Enregistrer ma revue', followed: 'As-tu suivi ton plan ?', grade: 'Ta note du jour', review_needs: 'Réponds aux 3 questions.',
+      review_title: 'Revue du jour', improve_opt: 'Une chose à améliorer demain', discipline: "Discipline aujourd’hui", save_review: 'Enregistrer ma revue', close_day: 'Fermer ma journée', close_hint: 'Rempli d’après ta journée : change une réponse d’un toucher.', followed: 'As-tu suivi ton plan ?', grade: 'Ta note du jour', review_needs: 'Réponds aux 3 questions.',
       today_title: 'Ta journée', step_plan: 'Plan avant le premier trade', step_exec: 'Trades dans ton plan', step_review: 'Trades journalisés et journée revue',
       v_setup_not_in_plan: 'Setup hors de ton plan', v_no_stop: 'Stop non respecté', v_against_bias: 'À l’inverse de ton biais', v_over_max_loss: 'Pris après ta perte max', v_over_max_trades: 'Au-delà de ton nombre max de trades',
       v_plan_no_trade: "Pris pendant un jour off", v_rules: 'Règles suivies en partie',
@@ -115,7 +115,7 @@
       plan_past: 'Solo se puede hacer un plan para hoy.',
       journal_title: 'Registrar', setup: 'Setup', emotion: 'Emoción antes de entrar', rules: '¿Seguiste tus reglas?', yes: 'Sí', partial: 'En parte', no: 'No',
       next: 'Siguiente', done: 'Listo', skip: 'Saltar', of: '{a} de {b}', all_journaled: 'Todos los trades están registrados.',
-      review_title: 'Revisión del día', improve_opt: 'Una cosa a mejorar mañana', discipline: 'Disciplina hoy', save_review: 'Guardar mi revisión', followed: '¿Seguiste tu plan?', grade: 'Tu nota del día', review_needs: 'Responde las 3 preguntas.',
+      review_title: 'Revisión del día', improve_opt: 'Una cosa a mejorar mañana', discipline: 'Disciplina hoy', save_review: 'Guardar mi revisión', close_day: 'Cerrar mi día', close_hint: 'Rellenado según tu día: cambia una respuesta con un toque.', followed: '¿Seguiste tu plan?', grade: 'Tu nota del día', review_needs: 'Responde las 3 preguntas.',
       today_title: 'Tu día', step_plan: 'Plan antes del primer trade', step_exec: 'Trades dentro de tu plan', step_review: 'Trades registrados y día revisado',
       v_setup_not_in_plan: 'Setup fuera de tu plan', v_no_stop: 'Stop no respetado', v_against_bias: 'En contra de tu sesgo', v_over_max_loss: 'Tomado después de tu pérdida máx.', v_over_max_trades: 'Por encima de tu máx. de trades',
       v_plan_no_trade: 'Tomado en un día libre', v_rules: 'Reglas seguidas en parte',
@@ -1610,6 +1610,10 @@
       if (!(post.tomorrow || '').trim()) post.tomorrow = uniq(pick(['lesson', 'wrong', 'differently'])).join('\n');
     }
     RV.score = post.discipline || null; RV.followed = post.followed || null; RV.grade = post.grade || null; RV.well = post.well || '';
+    // (27 Oct., brief « daily loop » step 3) a day not reviewed yet opens filled in from what Sweep knows — the plan followed from the
+    // day's trades in the plan, the discipline from the trades' score, a grade from both — so it closes in one tap; each answer changes in one
+    RV.guessed = false;
+    if (!post.reviewed_at && !RV.followed && !RV.score && !RV.grade) { const g = rvGuess(RV.day); if (g) { Object.assign(RV, g); RV.guessed = true; } }
     // a day with a pre-market sheet (brief step 7): « Did you follow your sheet? », then which rule, the ones the app saw pre-checked
     const fi = ficheGet(RV.day); RV.fiche = !!fi;
     RV.rules = new Set(post.rules_broken || (fi ? ficheAutoRules(fi) : []));
@@ -1621,8 +1625,19 @@
       <div class="g-f"><span>${t('grade')}</span><div class="g-dots">${grades.map((g) => `<button type="button" class="${RV.grade === g ? 'on' : ''}" data-g="r-grade" data-v="${g}">${g}</button>`).join('')}</div></div>
       <label class="g-f"><span>${RV.fiche ? pt('note_tomorrow') : t('improve_opt')}</span><textarea rows="2" data-gr="tomorrow" maxlength="400">${esc(post.tomorrow || '')}</textarea></label>
       <p class="g-err" id="gErr"></p>
-      <button type="button" class="btn primary g-big" data-g="save-review">${t('save_review')}</button>`, { cls: 'g-rv' });
+      ${RV.guessed ? `<p class="g-hint g-hint-sm">${t('close_hint')}</p>` : ''}
+      <button type="button" class="btn primary g-big" data-g="save-review">${t(post.reviewed_at ? 'save_review' : 'close_day')}</button>`, { cls: 'g-rv' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = RV.day;   // the day reviewed (the coach's lesson reads it)
+  }
+  function rvGuess(day) {
+    const d = [G.today, G.yesterday].find((x) => x && x.day === day), tr = (S.trades || []).filter((x) => !x.demo && x.date === day);
+    if (!d || !d.trades || !tr.length) return null;
+    const followed = !d.plan_valid ? 'no' : (d.compliant || 0) >= d.trades ? 'yes' : (d.compliant || 0) > 0 ? 'partly' : 'no';
+    const ds = typeof tDisc === 'function' ? tr.map(tDisc).filter((x) => x != null) : [];
+    const pct = ds.length ? ds.reduce((a, x) => a + x, 0) / ds.length : null;   // tDisc: the share of rules respected, in %
+    const score = pct == null ? ({ yes: 4, partly: 3, no: 2 })[followed] : pct >= 90 ? 5 : pct >= 75 ? 4 : pct >= 55 ? 3 : pct >= 35 ? 2 : 1;
+    const grade = followed === 'yes' ? (score >= 4 ? 'A' : 'B') : followed === 'partly' ? 'C' : score <= 1 ? 'F' : 'D';
+    return { followed, score, grade };
   }
   function saveReview() {
     const el = document.getElementById('gSheet');
