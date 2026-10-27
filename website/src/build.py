@@ -11,7 +11,7 @@ from pages8 import FIRMS, JOURNAL_MOVED
 # pages merged into another one (audit n° 3, 1.1): their address redirects there, in the 3 languages
 PAGES_MOVED = {"prop-traders": "prop-firm-tracker", "how-to-choose-a-trading-journal": "best-trading-journal-for-prop-firms"}
 from pages11 import page_import
-from pages7 import page_expectancy, page_roi, page_payoutcalc
+from pages7 import page_expectancy, page_roi, page_payoutcalc, page_rotation
 import pages12, pages13, pages14, pages17, pages18
 import pages9, re as _re
 from pages2 import page_changelog as _old_changelog
@@ -24,12 +24,13 @@ DIST = os.path.join(HERE, "..", "dist")
 PAGES = {"index.html":page_home,"features.html":page_features,"ai.html":page_ai,"how-it-works.html":page_how,"economic-calendar.html":page_econ,
  "import.html":page_import,"install.html":page_install,"security.html":page_security,"pricing.html":page_pricing6,"faq.html":page_faq,
  "about.html":page_about,"contact.html":page_contact,"changelog.html":page_changelog_new,"privacy.html":page_privacy,"terms.html":page_terms,"risk.html":page_risk,"404.html":page_404,"100":page_100,"tools.html":page_tools,"position-size-calculator.html":page_position,"trailing-drawdown-calculator.html":page_drawdown,"consistency-rule-calculator.html":page_consistency}
-PAGES.update({"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calculator.html":page_roi,"payout-calculator.html":page_payoutcalc,
+PAGES.update({"prop-firm-account-rotation.html":page_rotation,"expectancy-calculator.html":page_expectancy,"prop-firm-roi-calculator.html":page_roi,"payout-calculator.html":page_payoutcalc,
               "futures-contracts.html":pages12.page_contracts,"release-dates.html":pages13.page_release_hub,"glossary.html":pages13.page_glossary,
               "futures-market-hours.html":pages13.page_hours,"press-kit.html":pages13.page_press,
               "trading-templates.html":pages14.page_templates,"trading-journal-routine.html":pages14.page_routine,"trading-journal-guide.html":pages14.page_journal_guide,
               "best-trading-journal-for-prop-firms.html":pages17.page_best_journal})
 for _c in pages12.C: PAGES[pages12.slug(_c[0])] = pages12.make_contract(_c[0])
+for _a, _b in pages12.PAIRS: PAGES[pages12.pair_slug(_a, _b)] = pages12.make_pair(_a, _b)
 PAGES["prop-firms/index.html"] = pages18.page_hub
 for _s,_n in FIRMS:   # a firm without preloaded rules: its page says which rules to enter
     if _n not in pages18.presets.PRESET_FIRMS: PAGES[_s] = pages18.make_manual_page(_s, _n)
@@ -50,7 +51,7 @@ PAGES[pages21.GP_MONTHS[1]] = pages21.page_gp_month2
 PAGES[pages21.GP_MONTHS[2]] = pages21.page_gp_month3
 for _p, _f in zip(pages21.GP_SATS, (pages21.page_gp_eval, pages21.page_gp_size, pages21.page_gp_funded, pages21.page_gp_sweep, pages21.page_gp_micro)): PAGES[_p] = _f
 import pages19
-PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide, pages19.GUIDE_PAYOUT: pages19.page_payout_guide, pages19.GUIDE_SIZES: pages19.page_sizes_guide, pages19.GUIDE_DAYS: pages19.page_days_guide})
+PAGES.update({pages19.HUB: pages19.page_hub, pages19.GUIDE_CONS: pages19.page_consistency, pages19.GUIDE_DD: pages19.page_drawdown_guide, pages19.GUIDE_PAYOUT: pages19.page_payout_guide, pages19.GUIDE_SIZES: pages19.page_sizes_guide, pages19.GUIDE_DAYS: pages19.page_days_guide, pages19.GUIDE_BENCH: pages19.page_bench_guide})
 if pages19.COSTS_LIVE: PAGES[pages19.GUIDE_COSTS] = pages19.page_costs_guide
 for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
@@ -168,7 +169,7 @@ _GUIDES = (set(pages19.RULE_GUIDES) | set(_p21.GP_PAGES) | {g["slug"] for g in _
 _TOOLS = {x[0] for x in _p7.TOOLS} | {"tools.html"}
 def _kind(p):
     if p.startswith("prop-firms/") or p in (pages18.RULE_CHANGES, "how-we-verify-prop-firm-rules.html"): return "prop-firms"
-    if p.startswith("contracts/") or p == "futures-contracts.html": return "contracts"
+    if p.startswith("contracts/") or p in ("futures-contracts.html", *pages12.PAIR_PAGES): return "contracts"
     if p in ("release-dates.html", "economic-calendar.html", "futures-market-hours.html") or p.endswith(("-release-dates.html", "-meeting-dates.html")): return "releases"
     if p in _TOOLS: return "tools"
     if p in _GUIDES: return "guides"
@@ -269,8 +270,8 @@ RewriteRule ^ /%1 [R=301,L,NE]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}/$1.html -f
 RewriteRule ^(.+?)/$ /$1 [R=301,L]
-# release dates: release.php fills the page with the next release when it is asked for (texts written by the build in _nx/)
-RewriteRule ^((?:fr/|es/)?(?:(?:cpi|ppi|nfp|pce|gdp|retail-sales|ism-manufacturing)-release-dates|fomc-meeting-dates))/?$ /release.php?p=$1 [L,QSA]
+# release dates and the economic calendar: release.php fills the page with the next release, or the week under way, when it is asked for (texts written by the build in _nx/)
+RewriteRule ^((?:fr/|es/)?(?:(?:cpi|ppi|nfp|pce|gdp|retail-sales|ism-manufacturing)-release-dates|fomc-meeting-dates|economic-calendar))/?$ /release.php?p=$1 [L,QSA]
 # /404 is not a page: it falls through to the real 404
 RewriteCond $1 !(^|/)404$
 RewriteCond %{DOCUMENT_ROOT}/$1.html -f

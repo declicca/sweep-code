@@ -706,3 +706,80 @@ def page_press(lang, t):
             t(T("Download the Sweep logo, brand colors and app screenshots, and read the official description of Sweep, the trading journal for prop traders.","Télécharge le logo de Sweep, ses couleurs et des captures de l’app, et lis la description officielle du journal de trading des traders prop.","Descarga el logo de Sweep, sus colores y capturas de la app, y lee la descripción oficial de Sweep, el diario de trading de los traders prop.")),
             hero + b + ui.final(lang, t), "")
 SYSTEM_PAGES.add("press-kit.html")
+
+# ---------------------------------------------------------------- the economic calendar's « This week » (SEO brief v2, 4.5): the week's high-impact releases in New York time.
+# Served like the release pages: one text per week in _nx/, release.php shows the week under way (from Saturday, the next one), so it moves without a build.
+WEEK_PAGE = "economic-calendar.html"
+WK_KEY = {"CPI m/m": "cpi", "Core CPI m/m": "cpi", "PPI m/m": "ppi", "Core PPI m/m": "ppi", "Nonfarm Payrolls": "nfp", "Unemployment Rate": "nfp", "Core PCE Price Index m/m": "pce",
+          "GDP q/q (Advance)": "gdp", "Retail Sales m/m": "retail", "ISM Manufacturing PMI": "ism", "FOMC Rate Decision": "fomc", "FOMC Press Conference": "fomc", "FOMC Meeting Minutes": "fomc"}
+WK_NAME = {"CPI m/m": T("CPI", "CPI", "CPI"), "Core CPI m/m": T("core CPI", "CPI de base", "CPI subyacente"), "PPI m/m": T("PPI", "PPI", "PPI"), "Core PPI m/m": T("core PPI", "PPI de base", "PPI subyacente"),
+           "Nonfarm Payrolls": T("Nonfarm Payrolls (NFP)", "Emplois non agricoles (NFP)", "Nóminas no agrícolas (NFP)"), "Unemployment Rate": T("unemployment rate", "taux de chômage", "tasa de desempleo"),
+           "Core PCE Price Index m/m": T("Core PCE", "PCE de base", "PCE subyacente"), "GDP q/q (Advance)": T("GDP (advance)", "PIB (première estimation)", "PIB (avance)"),
+           "Retail Sales m/m": T("Retail sales", "Ventes au détail", "Ventas minoristas"), "ISM Manufacturing PMI": T("ISM Manufacturing PMI", "ISM manufacturier", "ISM manufacturero"),
+           "ISM Services PMI": T("ISM Services PMI", "ISM des services", "ISM de servicios"), "FOMC Rate Decision": T("FOMC rate decision", "Décision de taux du FOMC", "Decisión de tipos del FOMC"),
+           "FOMC Press Conference": T("FOMC press conference", "Conférence de presse du FOMC", "Conferencia de prensa del FOMC"), "FOMC Meeting Minutes": T("FOMC minutes", "Compte rendu du FOMC", "Actas del FOMC")}
+WD3 = {"en": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], "fr": ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."], "es": ["lun.", "mar.", "mié.", "jue.", "vie.", "sáb.", "dom."]}
+WEEKS_AHEAD = 30
+
+def _span(d0, d1, L):
+    """« October 26 to 30 », « du 26 au 30 octobre », « del 26 al 30 de octubre » (and across two months)."""
+    m0, m1 = MONTHS[L][d0.month - 1], MONTHS[L][d1.month - 1]
+    if L == "en": return f"{m0} {d0.day} to {d1.day}" if d0.month == d1.month else f"{m0} {d0.day} to {m1} {d1.day}"
+    if L == "fr": return f"du {d0.day} au {d1.day} {m1}" if d0.month == d1.month else f"du {d0.day} {m0} au {d1.day} {m1}"
+    return f"del {d0.day} al {d1.day} de {m1}" if d0.month == d1.month else f"del {d0.day} de {m0} al {d1.day} de {m1}"
+
+def _week_rows(d0):
+    """The high-impact releases from Monday d0 to Friday, one row per time (CPI and core CPI share theirs)."""
+    d1 = d0 + datetime.timedelta(days=4)
+    rows = {}
+    for e in sorted(_EV, key=lambda e: (e["date"], e["time"])):
+        if e["impact"] != "high" or not (d0.isoformat() <= e["date"] <= d1.isoformat()): continue
+        k = (e["date"], e["time"], WK_KEY.get(e["event"], e["event"]))
+        rows.setdefault(k, []).append(e)
+    return list(rows.items())
+
+def _week_box(d0, which, lang, t):
+    L = lang; d1 = d0 + datetime.timedelta(days=4)
+    when = (t(T("This week", "Cette semaine", "Esta semana")) if which == "this" else t(T("Next week", "La semaine prochaine", "La próxima semana")))
+    head = f'<p class="wk-when"><b>{when}</b> · {_span(d0, d1, L)}</p>'
+    rows = _week_rows(d0)
+    if not rows:
+        nxt = next((e for e in sorted(_EV, key=lambda e: (e["date"], e["time"])) if e["impact"] == "high" and e["date"] > d1.isoformat()), None)
+        none = t(T("No high-impact U.S. release is scheduled this week.", "Aucune annonce américaine à fort impact n’est prévue cette semaine.", "No hay ningún dato de EE. UU. de alto impacto previsto esta semana.")) if which == "this" else \
+               t(T("No high-impact U.S. release is scheduled next week.", "Aucune annonce américaine à fort impact n’est prévue la semaine prochaine.", "No hay ningún dato de EE. UU. de alto impacto previsto la próxima semana."))
+        if nxt:
+            d = datetime.date.fromisoformat(nxt["date"])
+            none += " " + t(T(f"Next: {WK_NAME[nxt['event']]['en']}, {WD3['en'][d.weekday()]}, {_short(d, 'en')} at {_hm(nxt['time'], 'en')}.",
+                              f"Prochaine : {WK_NAME[nxt['event']]['fr']}, {WD3['fr'][d.weekday()]} {_short(d, 'fr')} à {_hm(nxt['time'], 'fr')}.",
+                              f"Próximo: {WK_NAME[nxt['event']]['es']}, {WD3['es'][d.weekday()]} {_short(d, 'es')} a las {_hm(nxt['time'], 'es')}."))
+        return head + f"<p>{none}</p>"
+    est = t(T("estimated date", "date estimée", "fecha estimada"))
+    body = ""
+    for (date, hm, key), es in rows:
+        d = datetime.date.fromisoformat(date)
+        names = [t(WK_NAME[e["event"]]) for e in es]
+        name = names[0] + (t(T(" and ", " et ", " y ")) + ", ".join(names[1:]) if len(names) > 1 else "")
+        page = next((r[1] for r in REL if r[0] == key), None)
+        cell = f'<a href="{href(lang, page)}">{name}</a>' if page else name
+        if any(e["status"] == "estimated" for e in es): cell += f' <span class="st">{est}</span>'
+        day_ = f"{WD3[L][d.weekday()]}, {_short(d, L)}" if L == "en" else f"{WD3[L][d.weekday()]} {_short(d, L)}"
+        body += f'<tr data-d="{date}T{hm}"><th scope="row">{day_}</th><td class="num">{_hm(hm, L)}</td><td>{cell}</td></tr>'
+    th = (f'<thead><tr><th scope="col">{t(T("Day", "Jour", "Día"))}</th><th scope="col">{t(T("Time (ET)", "Heure (NY)", "Hora (NY)"))}</th>'
+          f'<th scope="col">{t(T("Release", "Annonce", "Dato"))}</th></tr></thead>')
+    return head + f'<div class="cmp-wrap"><table class="cmp reltbl wk">{th}<tbody>{body}</tbody></table></div>'
+
+def week_section(lang, t):
+    """The section of the economic calendar page: its box is a placeholder; NX keeps the text of every week to come."""
+    tok = f"NXcal{lang}WEEKQQ"
+    today = datetime.datetime.now(NYZ).date(); mon = today - datetime.timedelta(days=today.weekday())
+    variants = []
+    for w in range(WEEKS_AHEAD):
+        d0 = mon + datetime.timedelta(weeks=w)
+        if w: variants.append({"at": (d0 - datetime.timedelta(days=1)).isoformat() + "T23:59", tok: _week_box(d0, "next", lang, t)})   # Saturday and Sunday: the week to come
+        variants.append({"at": (d0 + datetime.timedelta(days=4)).isoformat() + "T23:59", tok: _week_box(d0, "this", lang, t)})
+    variants = [v for v in variants if v["at"] >= NOW_NY]
+    NX[(lang, WEEK_PAGE)] = variants
+    more = ui.go(lang, t, "release-dates.html", T("Every release date, 2026 and 2027", "Toutes les dates des annonces, 2026 et 2027", "Todas las fechas de los datos, 2026 y 2027"))
+    return ui.sec(ui.head(t, None, T("The week’s high-impact U.S. releases.", "Les annonces américaines à fort impact de la semaine.", "Los datos de EE. UU. de alto impacto de la semana."),
+                          T("In New York time (ET). Each release’s page gives its time in your city.", "En heure de New York. La page de chaque annonce donne l’heure dans ta ville.", "En hora de Nueva York. La página de cada dato da la hora en tu ciudad."))
+                  + f'<div class="wk-box">{tok}</div>' + f'<p style="margin-top:20px">{more}</p>', "t", "this-week", width="read") + NEXT_JS

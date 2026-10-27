@@ -377,7 +377,7 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .article .chiprow,.article .links{margin-top:16px}
 @media (max-width:743px){table.vs td:nth-child(2),table.glance tbody tr:first-child>*{background:none}table.vs td:nth-child(2)::before{color:var(--blue-text)}}
 
-/* ---- [pages: position-size-calculator.html trailing-drawdown-calculator.html consistency-rule-calculator.html payout-calculator.html expectancy-calculator.html prop-firm-roi-calculator.html] calculators: the form and the result side by side in one card; on phones the result follows you in a bar */
+/* ---- [pages: position-size-calculator.html trailing-drawdown-calculator.html consistency-rule-calculator.html payout-calculator.html expectancy-calculator.html prop-firm-roi-calculator.html prop-firm-account-rotation.html prop-firm-benchmark-days.html] calculators: the form and the result side by side in one card; on phones the result follows you in a bar */
 .calc{display:grid;border-radius:var(--r5);background:var(--glass);box-shadow:var(--shadow-2);overflow:hidden}
 @media (min-width:861px){.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 .calc-form,.calc-out{padding:clamp(24px,16px + 2vw,40px)}
@@ -420,6 +420,11 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .menu-open .calc-bar{opacity:0}
 @media (min-width:861px){.calc-bar{display:none}}
 
+.bd-days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.bd-add{justify-self:start}.bd-msg{font-size:15px;line-height:1.5;color:var(--muted)}.bd-msg:empty{display:none}.calc-out [hidden]{display:none}
+.ro-acc{display:grid;gap:14px;margin:0;padding:18px 0 4px;border:0;border-top:1px solid var(--line-2)}.ro-acc:first-child{border-top:0;padding-top:0}
+.ro-acc legend{padding:0;font-weight:600;color:var(--text)}
+.ro-out{display:grid;gap:12px;margin:0;padding:0;list-style:none}.ro-out li{display:grid;gap:4px;padding:14px 16px;border-radius:var(--r2);background:color-mix(in srgb,var(--text) 4%,transparent);font-size:15px;line-height:1.45}
+.ro-out li span{color:var(--muted)}.ro-out .ro-first{box-shadow:0 0 0 1px var(--blue) inset}.ro-out .ro-protect b,.ro-out .ro-protect2 b,.ro-out .ro-ordinary b{color:var(--gold)}.ro-out .ro-payout b{color:var(--blue-text)}
 /* ---- [pages: guides.html] the guides: a row of five on computers, a plain list below (an index, not a carousel) */
 @media (max-width:1067px){.cards.c5.index{display:grid;grid-template-columns:1fr;overflow:visible;margin-inline:0;padding:0}}
 
@@ -447,7 +452,7 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .lost{padding-top:clamp(96px,14vw,180px)}
 .lost h1{font-size:var(--fs-h1);line-height:1.05;letter-spacing:-.03em;max-width:16ch;margin-inline:auto}
 
-/* ---- [pages: cpi-release-dates.html nfp-release-dates.html fomc-meeting-dates.html ppi-release-dates.html pce-release-dates.html retail-sales-release-dates.html gdp-release-dates.html ism-manufacturing-release-dates.html] the next release first, the dates by year, the past ones faded */
+/* ---- [pages: cpi-release-dates.html nfp-release-dates.html fomc-meeting-dates.html ppi-release-dates.html pce-release-dates.html retail-sales-release-dates.html gdp-release-dates.html ism-manufacturing-release-dates.html economic-calendar.html] the next release first, the dates by year, the past ones faded */
 .nextrel{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-bottom:24px;padding:20px 24px;border-radius:var(--r3);background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 14%,transparent),transparent 70%),var(--glass);box-shadow:var(--shadow-1)}
 .nextrel .eyebrow{flex-basis:100%;margin:0}
 .nextrel b{font:600 clamp(20px,17px + .8vw,26px)/1.2 var(--font);letter-spacing:-.02em}
@@ -455,6 +460,7 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .st.st-official{background:var(--tint);color:var(--blue-ink)}
 table.reltbl tbody th{width:auto;color:var(--text)}
 table.reltbl tr.past>*{color:var(--faint)}
+table.wk td:last-child{font-family:var(--font)}table.wk tbody th,table.wk td.num{white-space:nowrap}
 table.reltbl tr.past .st{opacity:.55}
 .nx .nx-in{font-size:14px;color:var(--muted)}
 .nx-cities{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 20px;margin:6px 0 0;padding:14px 0 0;list-style:none;border-top:1px solid var(--line)}

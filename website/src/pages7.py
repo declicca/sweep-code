@@ -1,5 +1,6 @@
 from core import *
 import json as _json
+import html as _html
 import ui
 
 # numbers in the page's language, as everywhere on the site (never the browser's): $1,700.50 · 1 700,50 $ · 1.700,50 $ ; 52% · 52 %
@@ -291,7 +292,8 @@ def page_tools(lang, t):
     hero = ui.hero(t, T("Free tools","Outils gratuits","Herramientas gratuitas"), T("Free tools for futures and prop traders.","Outils gratuits pour traders de futures et de prop firms.","Herramientas gratuitas para traders de futuros y de fondeo."),
         T("Quick answers before you take the trade. No account needed.","Des réponses rapides avant de prendre le trade. Sans compte.","Respuestas rápidas antes de entrar en la operación. Sin cuenta."),
         cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_tools_hero"'))
-    cards = ui.cards([ui.card(t, n, d, icon=ic, more=T("Open","Ouvrir","Abrir"), url=href(lang, s)) for s, ic, n, d in TOOLS], cols=3)
+    card = lambda s, ic, n, d: ui.card(t, n, d, icon=ic, more=T("Open","Ouvrir","Abrir"), url=href(lang, s))
+    cards = ui.cards([card(*x) for x in TOOLS[:6]], cols=3) + ui.cards([card(*x) for x in TOOLS[6:]], cols=1)   # the six calculators, then the planner on its own row
     b = ui.sec(cards + f'<div class="links">{ui.go(lang, t, "prop-firms/index.html", T("Each firm’s rules, explained","Les règles de chaque firme, expliquées","Las reglas de cada firma, explicadas"))}</div>'
                + f'<p class="fine" style="margin-top:20px">{note(lang, t)}</p>', "t", "tools")
     when = [(T("Before the session.","Avant la séance.","Antes de la sesión."),
@@ -380,5 +382,107 @@ def page_payoutcalc(lang, t):
     return _simple_tool(lang, t, 5, form, res, js, howto, faqs,
         T("Prop firm payout calculator: what can you request? · Sweep","Calculateur de payout prop : combien retirer ? · Sweep","Calculadora de payout prop: ¿cuánto puedes pedir? · Sweep"),
         T("Free calculator: the payout you can request after your firm’s cushion, within the minimum and maximum per request, for any prop firm.","Calculateur gratuit : le payout que tu peux demander après le coussin de ta firme, entre le minimum et le maximum, pour toute prop firm.","Calculadora gratuita: el payout que puedes pedir tras el colchón de tu firma, entre el mínimo y el máximo, para cualquier prop firm."))
+
+# ---------------------------------------------------------------- account rotation planner (SEO brief v2, 4.1): which account to trade first today, which to protect,
+# which is ready for a payout, from each account's numbers and its firm's funded rules (the weekly-checked catalogue). In the browser only, nothing sent.
+TOOLS += [("prop-firm-account-rotation.html", "layers", T("Prop firm account rotation planner", "Planificateur de rotation des comptes prop", "Planificador de rotación de cuentas prop"),
+           T("Which account to trade today, which to protect, which is ready for a payout?", "Quel compte trader aujourd’hui, lequel protéger, lequel est prêt pour un payout ?",
+             "¿Qué cuenta operar hoy, cuál proteger, cuál está lista para un payout?"))]
+ACT["prop-firm-account-rotation.html"] = T("Sweep keeps these numbers up to date on every prop account, trade by trade, with each firm’s rules prefilled.",
+                                           "Sweep tient ces chiffres à jour sur chaque compte prop, trade après trade, avec les règles de chaque firme préremplies.",
+                                           "Sweep mantiene estas cifras al día en cada cuenta prop, operación tras operación, con las reglas de cada firma precargadas.")
+def _rot_rules():
+    """{key: funded rules} for every firm, account type and size with a funded max loss: what the planner needs, nothing else."""
+    import presets
+    out, groups = {}, []
+    for f in presets.FIRMS:
+        opts = []
+        for p in f["programs"]:
+            for s in p["sizes"]:
+                fu, ev = s.get("funded") or {}, s.get("eval") or {}; po = fu.get("payout") or {}
+                dd = fu.get("dd") or ev.get("dd")
+                if not dd: continue
+                k = f"{f['id']}|{p['id']}|{s['size']}"
+                out[k] = {"start": s["size"], "dd": dd, "typ": fu.get("dd_type") or ev.get("dd_type") or "eod", "lock": bool(fu.get("dd_lock")), "off": fu.get("dd_lock_offset") or 0,
+                          "cons": fu.get("consistency") or 0, "wd": po.get("win_days") or 0, "wm": po.get("win_min") or 0, "pmin": po.get("min") or 0, "dll": fu.get("dll") or 0}
+                opts.append((k, f"{f['name']} · {p['name']} · {s['size'] // 1000}K"))   # the firm too: a closed list shows only the option
+        if opts: groups.append((f["name"], opts))
+    return out, groups
+ROT_DEFAULT = [("A", "apex|apex-eod|50000", 52400, 52600, 2400, 800, 3), ("B", "topstep|combine|50000", 51400, 51600, 1400, 600, 2), ("C", "lucid|lucidflex|50000", 50300, 51900, 300, 300, 2)]
+def _rot_status(r, bal, peak, profit, best, wins):
+    """The planner's verdict, the same as the page's script: protect, payout, ordinary or trade (with the room and the winning days left)."""
+    liq = r["start"] - r["dd"] if r["typ"] == "static" else min(peak - r["dd"], r["start"] + r["off"] if r["lock"] else float("inf"))
+    room = bal - liq; share = best / profit * 100 if profit > 0 else 0; cons_ok = not r["cons"] or share <= r["cons"] + 1e-9
+    left = max(0, r["wd"] - wins) if r["wd"] else 0
+    if room <= (r["dll"] or r["dd"] * 0.25): st = "protect"
+    elif left == 0 and cons_ok and profit > 0 and profit >= r["pmin"]: st = "payout"
+    elif not cons_ok: st = "ordinary"
+    else: st = "trade"
+    return st, room, left, share
+HELP["prop-firm-account-rotation.html"] = {
+  "steps": [T("For each account, pick its firm, account type and size: its funded rules fill in.", "Pour chaque compte, choisis sa firme, son type et sa taille : ses règles de compte financé se remplissent.", "Para cada cuenta, elige su firma, su tipo y su tamaño: sus reglas de cuenta financiada se completan."),
+            T("Enter its balance, its highest balance, the profit and the best day since the last payout, and its winning days since then.", "Entre son solde, son solde le plus haut, le profit et le meilleur jour depuis le dernier payout, et ses jours gagnants depuis.", "Introduce su saldo, su saldo más alto, el beneficio y el mejor día desde el último payout, y sus días ganadores desde entonces."),
+            T("Read the verdict of each account and the order for today: the one to trade first, the ones to protect, the ones ready for a payout.", "Lis le verdict de chaque compte et l’ordre du jour : celui à trader en premier, ceux à protéger, ceux prêts pour un payout.", "Lee el veredicto de cada cuenta y el orden del día: la que operar primero, las que proteger, las listas para un payout.")],
+  "example": T("<p>Account A, an Apex EOD 50K, has $2,300 above its max loss and needs 2 more winning days: trade it first. Account B, a Topstep 50K, has $1,800 of room and 3 winning days to go: it comes next. Account C, a Lucid Flex 50K, has only $400 above its max loss, less than a quarter of it: protect it today, with a small size or no trade.</p>",
+               "<p>Le compte A, un Apex EOD 50K, a 2 300 $ au-dessus de sa perte max et il lui manque 2 jours gagnants : trade-le en premier. Le compte B, un Topstep 50K, a 1 800 $ de marge et 3 jours gagnants à faire : il vient ensuite. Le compte C, un Lucid Flex 50K, n’a que 400 $ au-dessus de sa perte max, moins du quart : protège-le aujourd’hui, avec une petite taille ou sans trade.</p>",
+               "<p>La cuenta A, una Apex EOD 50K, tiene 2.300 $ sobre su pérdida máxima y le faltan 2 días ganadores: opérala primero. La cuenta B, una Topstep 50K, tiene 1.800 $ de margen y 3 días ganadores por hacer: va después. La cuenta C, una Lucid Flex 50K, solo tiene 400 $ sobre su pérdida máxima, menos de una cuarta parte: protégela hoy, con poco tamaño o sin operar.</p>"),
+  "mistakes": [(T("Trading every account the same way.", "Trader tous les comptes de la même façon.", "Operar todas las cuentas igual."),
+                T("An account close to its max loss and an account close to a payout need different days. Size each one for its own room.", "Un compte proche de sa perte max et un compte proche d’un payout n’ont pas besoin de la même journée. Dimensionne chacun selon sa propre marge.", "Una cuenta cerca de su pérdida máxima y otra cerca de un payout no necesitan el mismo día. Dimensiona cada una según su margen.")),
+               (T("Chasing a big day to fix consistency.", "Chercher une grosse journée pour régler la consistance.", "Buscar un gran día para arreglar la consistencia."),
+                T("When your best day is too large a share of your profit, more ordinary days fix it; another big day makes it worse.", "Quand ton meilleur jour pèse trop dans ton profit, ce sont des journées ordinaires qui règlent ça ; une autre grosse journée aggrave le problème.", "Cuando tu mejor día pesa demasiado en tu beneficio, lo arreglan días normales; otro gran día lo empeora.")),
+               (T("Forgetting the highest balance.", "Oublier le solde le plus haut.", "Olvidar el saldo más alto."),
+                T("A trailing max loss follows your highest balance, not your current one: enter the peak, or the room looks bigger than it is.", "Une perte max suiveuse suit ton solde le plus haut, pas ton solde actuel : entre le sommet, sinon la marge paraît plus grande qu’elle ne l’est.", "Una pérdida máxima dinámica sigue tu saldo más alto, no el actual: introduce el máximo o el margen parecerá mayor de lo que es."))],
+  "faq": [(T("What is prop firm account rotation?", "C’est quoi la rotation des comptes prop ?", "¿Qué es la rotación de cuentas prop?"),
+           T("Deciding each day which of your prop accounts to trade, how big, and which to leave alone, from where each one stands: its room above the max loss, its consistency and its payout conditions.", "Décider chaque jour quels comptes prop trader, avec quelle taille, et lesquels laisser de côté, selon où en est chacun : sa marge au-dessus de la perte max, sa consistance et ses conditions de payout.", "Decidir cada día qué cuentas prop operar, con qué tamaño y cuáles dejar, según cómo va cada una: su margen sobre la pérdida máxima, su consistencia y sus condiciones de payout.")),
+          (T("Is this planner financial advice?", "Ce planificateur est-il un conseil financier ?", "¿Este planificador es asesoramiento financiero?"),
+           T("No. It’s an indicative tool that applies your firm’s published rules to the numbers you enter. Always check your firm’s current rules before you trade.", "Non. C’est un outil indicatif qui applique les règles publiées de ta firme aux chiffres que tu entres. Vérifie toujours les règles actuelles de ta firme avant de trader.", "No. Es una herramienta orientativa que aplica las reglas publicadas de tu firma a las cifras que introduces. Revisa siempre las reglas actuales de tu firma antes de operar."))]}
+
+def page_rotation(lang, t):
+    rules, groups = _rot_rules()
+    for _, k, *v in ROT_DEFAULT: assert k in rules, k   # the example accounts exist in the catalogue
+    st = [_rot_status(rules[k], *v)[0] for _, k, *v in ROT_DEFAULT]
+    assert st == ["trade", "trade", "protect"], st   # the example in the text below says so
+    def account(n, key, bal, peak, profit, best, wins):
+        opts = "".join(f'<optgroup label="{_html.escape(g)}">' + "".join(f'<option value="{k}"{" selected" if k == key else ""}>{_html.escape(lbl)}</option>' for k, lbl in os_) + "</optgroup>" for g, os_ in groups)
+        i = f"ro{n}"
+        return (f'<fieldset class="ro-acc" data-acc="{n}"><legend>{t(T("Account","Compte","Cuenta"))} {n}</legend>'
+                + _sel(f"{i}-k", t(T("Firm, account type and size","Firme, type et taille","Firma, tipo y tamaño")), opts)
+                + _num(f"{i}-bal", t(T("Balance","Solde","Saldo")), bal, "any", "$") + _num(f"{i}-peak", t(T("Highest balance","Solde le plus haut","Saldo más alto")), peak, "any", "$")
+                + _num(f"{i}-pr", t(T("Profit since the last payout","Profit depuis le dernier payout","Beneficio desde el último payout")), profit, "any", "$")
+                + _num(f"{i}-best", t(T("Best day since then","Meilleur jour depuis","Mejor día desde entonces")), best, "any", "$")
+                + _num(f"{i}-w", t(T("Winning days since then","Jours gagnants depuis","Días ganadores desde entonces")), wins, "1") + "</fieldset>")
+    form = "".join(account(*a) for a in ROT_DEFAULT)
+    results = (f'<div class="big"><span id="ro-first" class="num">—</span><span>{t(T("to trade first today","à trader en premier aujourd’hui","para operar primero hoy"))}</span></div>'
+               f'<ul class="ro-out" id="ro-out"></ul>')
+    L = {"protect": t(T("Protect: {room} above the max loss, less than a day’s loss limit. Trade small or skip today.", "Protège : {room} au-dessus de la perte max, moins d’une limite du jour. Petite taille ou pas de trade aujourd’hui.", "Protege: {room} sobre la pérdida máxima, menos de un límite diario. Poco tamaño o sin operar hoy.")),
+         "protect2": t(T("Protect: {room} above the max loss, less than a quarter of it. Trade small or skip today.", "Protège : {room} au-dessus de la perte max, moins du quart de celle-ci. Petite taille ou pas de trade aujourd’hui.", "Protege: {room} sobre la pérdida máxima, menos de una cuarta parte. Poco tamaño o sin operar hoy.")),
+         "payout": t(T("Payout ready: winning days and consistency are met. Request it, then trade it as usual.", "Prêt pour le payout : jours gagnants et consistance atteints. Demande-le, puis trade-le comme d’habitude.", "Listo para el payout: días ganadores y consistencia cumplidos. Pídelo y luego opérala como siempre.")),
+         "ordinary": t(T("Keep the day ordinary: your best day is {share} of your profit, above the {cons} limit. Normal days fix it; a big day doesn’t.", "Garde une journée ordinaire : ton meilleur jour fait {share} de ton profit, au-dessus de la limite de {cons}. Des journées normales règlent ça ; une grosse journée, non.", "Mantén un día normal: tu mejor día es el {share} de tu beneficio, por encima del límite del {cons}. Los días normales lo arreglan; un gran día no.")),
+         "first": t(T("Trade first: {left} winning days left before a payout, {room} of room.", "Trade-le en premier : {left} jours gagnants avant un payout, {room} de marge.", "Opérala primero: {left} días ganadores antes de un payout, {room} de margen.")),
+         "next": t(T("Next: {left} winning days left, {room} of room.", "Ensuite : {left} jours gagnants à faire, {room} de marge.", "Después: {left} días ganadores por hacer, {room} de margen.")),
+         "none": t(T("None today", "Aucun aujourd’hui", "Ninguna hoy")), "acc": t(T("Account","Compte","Cuenta"))}
+    script = (f"<script>(function(){{var R={_json.dumps(rules, separators=(',', ':'))},L={_json.dumps(L, ensure_ascii=False)},$=function(i){{return document.getElementById(i)}};{NUM_JS}"
+              "var money=function(v){return cur(Math.max(0,v),0)};"
+              "function one(n){var v=function(x){return parseFloat($('ro'+n+'-'+x).value)||0},r=R[$('ro'+n+'-k').value];if(!r)return null;"
+              "var liq=r.typ==='static'?r.start-r.dd:Math.min(v('peak')-r.dd,r.lock?r.start+r.off:Infinity),room=v('bal')-liq,pr=v('pr'),share=pr>0?v('best')/pr*100:0,"
+              "ok=!r.cons||share<=r.cons+1e-9,left=r.wd?Math.max(0,r.wd-v('w')):0,st;"
+              "if(room<=(r.dll||r.dd*.25))st='protect';else if(left===0&&ok&&pr>0&&pr>=r.pmin)st='payout';else if(!ok)st='ordinary';else st='trade';"
+              "return {n:n,st:st,room:room,left:left,share:share,cons:r.cons,dll:r.dll};}"
+              "function run(){var a=['A','B','C'].map(one).filter(Boolean),t=a.filter(function(x){return x.st==='trade'}).sort(function(x,y){return x.left-y.left||y.room-x.room});"
+              "var f=t[0];$('ro-first').textContent=f?L.acc+' '+f.n:L.none;"
+              "$('ro-out').innerHTML=a.map(function(x){var k=x.st==='trade'?(x===f?'first':'next'):x.st==='protect'&&!x.dll?'protect2':x.st;var s=L[k].replace('{room}',money(x.room)).replace('{left}',x.left).replace('{share}',pc(x.share,0)).replace('{cons}',pc(x.cons,0));"
+              "return '<li class=\"ro-'+k+'\"><b>'+L.acc+' '+x.n+'</b><span>'+s+'</span></li>'}).join('');}"
+              "document.querySelectorAll('[data-calc] input,[data-calc] select').forEach(function(e){e.addEventListener('input',run)});run();})();</script>")
+    howto = T("<p>For each account, the planner works out three things from your numbers and the firm’s funded rules. The room above the max loss: your balance minus your liquidation level, which follows your highest balance on a trailing account until it reaches the starting balance. The consistency: your best day as a share of the profit since your last payout, against the firm’s limit. And the winning days left before you can request a payout.</p><p>An account with less room than a day’s loss limit (or a quarter of its max loss when the firm has no daily limit) comes first to protect. An account that meets its payout conditions is ready for a payout. Among the others, the one with the fewest winning days left, then the most room, is the one to trade first.</p>",
+              "<p>Pour chaque compte, le planificateur calcule trois choses à partir de tes chiffres et des règles de compte financé de la firme. La marge au-dessus de la perte max : ton solde moins ton seuil de liquidation, qui suit ton solde le plus haut sur un compte suiveur jusqu’à atteindre le solde de départ. La consistance : ton meilleur jour en part du profit depuis ton dernier payout, comparé à la limite de la firme. Et les jours gagnants qui manquent avant de pouvoir demander un payout.</p><p>Un compte qui a moins de marge qu’une limite du jour (ou que le quart de sa perte max quand la firme n’a pas de limite du jour) est le premier à protéger. Un compte qui remplit ses conditions de payout est prêt pour un payout. Parmi les autres, celui à qui il manque le moins de jours gagnants, puis qui a le plus de marge, est celui à trader en premier.</p>",
+              "<p>Para cada cuenta, el planificador calcula tres cosas a partir de tus cifras y de las reglas de cuenta financiada de la firma. El margen sobre la pérdida máxima: tu saldo menos tu nivel de liquidación, que sigue tu saldo más alto en una cuenta dinámica hasta llegar al saldo inicial. La consistencia: tu mejor día como parte del beneficio desde tu último payout, frente al límite de la firma. Y los días ganadores que faltan para poder pedir un payout.</p><p>Una cuenta con menos margen que un límite diario (o que una cuarta parte de su pérdida máxima cuando la firma no tiene límite diario) es la primera que proteger. Una cuenta que cumple sus condiciones de payout está lista para un payout. Entre las demás, la que tiene menos días ganadores por hacer, y luego más margen, es la que operar primero.</p>")
+    howto = {l: howto[l] + hub_note()[l] + guide_note("prop-firm-payout-rules.html", T("prop firm payout rules, compared","les règles de payout des prop firms, comparées","las reglas de payout de las prop firms, comparadas"))[l] for l in LANGS}
+    idx = next(i for i, x in enumerate(TOOLS) if x[0] == "prop-firm-account-rotation.html")
+    body, ld = _tool_page(lang, t, TOOLS[idx][0], TOOLS[idx][2], TOOLS[idx][3], form, results, script, howto, [])
+    return (t(T("Prop Firm Account Rotation Planner (Free Tool) · Sweep", "Rotation des comptes prop : planificateur gratuit · Sweep", "Rotación de cuentas prop: planificador gratis · Sweep")),
+            t(T("Free planner for traders with several prop accounts: which one to trade first today, which to protect and which is ready for a payout, from each firm’s rules.",
+                "Planificateur gratuit pour les traders à plusieurs comptes prop : lequel trader en premier aujourd’hui, lequel protéger et lequel est prêt pour un payout, selon les règles de chaque firme.",
+                "Planificador gratis para traders con varias cuentas prop: cuál operar primero hoy, cuál proteger y cuál está lista para un payout, según las reglas de cada firma.")),
+            body, ld)
 
 SYSTEM_PAGES.update(s for s, _, _, _ in TOOLS)

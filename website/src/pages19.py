@@ -1,5 +1,5 @@
 from core import *
-import re, html
+import re, html, json
 import presets
 from pages18 import fr_de, page_of, anchor, usd, pc, kk, day, rep, DDT, colon, checked_of, METHOD, TRACK_PROPS, RULES_FILL
 from pages17 import _fr_nbsp
@@ -57,7 +57,7 @@ def _by_firm(pairs, lang):
     sep = " ; " if lang == "fr" else "; "
     return sep.join(firm + colon(lang) + ", ".join(groups[firm]) for firm in order) + "."
 
-def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
+def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc, tool="", script=""):
     """A rules-compared guide, on the design system: the numbers first (summary, then the table), the explanations after."""
     import ui
     hero = ui.hero(t, kick, h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_hero"'))
@@ -66,7 +66,7 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
                         (t(T("Checked","Vérifiées le","Revisadas el")), day(presets.CHECKED, lang), t(T("every week","chaque semaine","cada semana")))])
     body_intro = "".join(f"<h2>{t(h)}</h2>" + "".join(f"<p>{t(x)}</p>" for x in ps) for h, ps in intro)
     band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_card"'))
-    b = (ui.sec(summary, "t", "summary")
+    b = (ui.sec(summary, "t", "summary") + tool
          + ui.sec(ui.head(t, None, T("Firm by firm.","Firme par firme.","Firma por firma.")) + table + f'<p class="fine vs-note" style="margin-top:20px">{_checked_note(lang, t)}</p>' + band, "t", "firms")
          + ui.sec(f'<article class="article">{body_intro}</article>', "n", "explained", width="read")
          + (ui.sec(f'<article class="article">{after}</article>', "n", "more", width="read") if after else "")
@@ -75,7 +75,7 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc):
         {"@type": "Article", "headline": re.sub(r"\.$", "", t(h1)), "inLanguage": lang, "datePublished": "2026-10-13", "dateModified": presets.CHECKED,
          "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}},
         {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]}]})
-    return _fr_nbsp(lang, t(title), t(desc), hero + b + ui.final(lang, t), ld)
+    return _fr_nbsp(lang, t(title), t(desc), hero + b + ui.final(lang, t) + script, ld)
 
 # ---------------------------------------------------------------- the answer first (SEO brief v2, 3.2): two sentences with the real numbers, under each guide's title
 def _all(ph, key, size=None):
@@ -300,7 +300,7 @@ GUIDES_HELP = T("""<h2>Where to start</h2><ul>
 <h2>Cómo se mantienen exactas las comparativas</h2><p>Las tablas firma por firma salen del catálogo que Sweep usa para precargar las cuentas prop, revisado cada semana en las páginas oficiales de cada firma. Cada guía muestra la fecha de la última revisión, y «—» significa que la regla no está entre las que Sweep sigue para esa cuenta. Las firmas cambian sus reglas: confirma siempre en el sitio de la firma antes de operar. Cada guía termina con las preguntas que más hacen los traders sobre la regla.</p>
 <p>Cada guía de reglas tiene su calculadora gratuita para comprobar tus propias cifras: <a href="@trailing-drawdown-calculator.html">drawdown dinámico</a>, <a href="@consistency-rule-calculator.html">consistencia</a> y <a href="@payout-calculator.html">payout</a>.</p>""")
 
-GUIDE_ICON = {"prop-firm-payout-rules.html": "receipt", "prop-firm-profit-targets.html": "target2", "prop-firm-minimum-days.html": "calendar", "prop-firm-consistency-rules.html": "layers",
+GUIDE_ICON = {"prop-firm-payout-rules.html": "receipt", "prop-firm-profit-targets.html": "target2", "prop-firm-minimum-days.html": "calendar", "prop-firm-benchmark-days.html": "calc", "prop-firm-consistency-rules.html": "layers",
               "prop-firm-drawdown-rules.html": "shield", "prop-firm-costs.html": "tag", "best-trading-journal-for-prop-firms.html": "check", "trading-journal-routine.html": "doc", "trading-journal-guide.html": "archive"}
 JOURNAL_GUIDES = ("best-trading-journal-for-prop-firms.html", "trading-journal-guide.html", "trading-journal-routine.html", "liquidity-sweep.html")
 
@@ -622,6 +622,183 @@ def page_days_guide(lang, t):
 GUIDES.insert(2, (GUIDE_DAYS, T("Prop firm minimum trading days, compared", "Les jours minimum des prop firms, comparés", "Los días mínimos de las prop firms, comparados"),
                   T("Days to pass the evaluation, and winning days before each payout.", "Les jours pour réussir l’évaluation, et les jours gagnants avant chaque payout.", "Los días para aprobar la evaluación, y los días ganadores antes de cada payout.")))
 
+# ---------------------------------------------------------------- benchmark days (SEO brief v2, 4.2): the winning days each payout needs, firm by firm, and a counter
+GUIDE_BENCH = "prop-firm-benchmark-days.html"
+
+def _bench(p):
+    """[(size, funded payout)] for the sizes whose payout counts winning days."""
+    out = []
+    for s in p["sizes"]:
+        po = (s.get("funded") or {}).get("payout") or {}
+        if po.get("win_days"): out.append((s, po))
+    return out
+
+def _bench_min(v, lang, t): return usd(v, lang) if v else t(T("any profit", "tout profit", "cualquier beneficio"))
+
+def bench_cells(lang, t, f, p):
+    """(minimum profit of a benchmark day, by size; days needed before each payout)."""
+    b = _bench(p)
+    mins = sorted({po.get("win_min") or 0 for _, po in b})
+    if len(mins) == 1 and len(b) == len(p["sizes"]): a = _bench_min(mins[0], lang, t) + t(T(" at every size", " à toutes les tailles", " en todos los tamaños"))
+    elif len(mins) == 1: a = _bench_min(mins[0], lang, t) + " (" + ", ".join(kk(s["size"]) for s, _ in b) + ")"
+    else: a = ", ".join(f"{_bench_min(po.get('win_min'), lang, t)} ({kk(s['size'])})" for s, po in b)
+    n = sorted({po["win_days"] for _, po in b}); td = sorted({po["trade_days"] for _, po in b if po.get("trade_days")})
+    d = _days(n, lang, t)
+    if td: d += t(T(f", and {td[0]:g} traded days", f", et {td[0]:g} jours tradés", f", y {td[0]:g} días operados"))
+    for label, v in _payout_variants(p, rep(p)):
+        if not v.get("win_days"):
+            opt = t(T(f"{label['en']} option", f"option {label['fr']}", f"opción {label['es']}"))
+            d += f"<br><i>{opt}{colon(lang)}{t(T('no benchmark days', 'pas de benchmark days', 'sin benchmark days'))}" + "".join(", " + x for x in _day_conds(v, lang, t)) + "</i>"
+    return a, d
+
+BENCH_HEADS = (T("Benchmark day: minimum profit", "Benchmark day : profit minimum", "Benchmark day: beneficio mínimo"), T("Needed before each payout", "Requis avant chaque payout", "Necesarios antes de cada payout"))
+
+def _bench_firms():
+    """The catalogue, each firm with only its account types that count benchmark days."""
+    out = []
+    for f in presets.FIRMS:
+        ps = [p for p in f["programs"] if _bench(p)]
+        if ps: out.append(dict(f, programs=ps))
+    return out
+
+def _bench_50k():
+    """[(firm, program, minimum, days)] at 50K."""
+    return [(f, p, po.get("win_min") or 0, po["win_days"]) for f in presets.FIRMS for p in f["programs"] for s, po in _bench(p) if s["size"] == 50000]
+
+def _bench_example():
+    """Topstep's 50K minimum, the example of the definition."""
+    return next(m for f, p, m, _ in _bench_50k() if f["id"] == "topstep")
+
+def answer_bench():
+    v = [m for *_, m, _ in _bench_50k() if m]; n = [d for *_, d in _bench_50k()]
+    lo, hi, most = min(v), max(v), max(set(n), key=n.count)
+    return T(f"A benchmark day is a trading day on which your profit reaches the minimum your firm sets: from {usd(lo, 'en')} to {usd(hi, 'en')} on a 50K at the firms Sweep tracks. Most accounts that count them ask for {most:g} before each payout. Here is every account, with a counter for yours.",
+             f"Un benchmark day est une journée de trading où ton profit atteint le minimum fixé par ta firme : de {usd(lo, 'fr')} à {usd(hi, 'fr')} sur un 50K chez les firmes que suit Sweep. La plupart des comptes qui les comptent en demandent {most:g} avant chaque payout. Voici chaque compte, avec un compteur pour le tien.",
+             f"Un benchmark day es un día de trading en el que tu beneficio alcanza el mínimo que fija tu firma: de {usd(lo, 'es')} a {usd(hi, 'es')} en una 50K en las firmas que sigue Sweep. La mayoría de las cuentas que los cuentan piden {most:g} antes de cada payout. Aquí está cada cuenta, con un contador para la tuya.")
+
+BENCH_DEFAULT = "topstep|combine|50000"
+BENCH_DAYS = (320, -140, 90, 410)   # the example: 2 of Topstep's 5 days done, 3 to go
+
+def bench_calc(lang, t):
+    """« How many benchmark days do I have left? »: the account, then each day's result since the last payout."""
+    import ui
+    from pages7 import _num, _sel, NUM_JS, BAR_JS, note
+    rules, groups = {}, []
+    for f in presets.FIRMS:
+        opts = []
+        for p in f["programs"]:
+            for s, po in _bench(p):
+                k = f"{f['id']}|{p['id']}|{s['size']}"
+                rules[k] = [po.get("win_min") or 0, po["win_days"], po.get("trade_days") or 0]
+                opts.append((k, f"{f['name']} · {p['name']} · {kk(s['size'])}"))
+        if opts: groups.append((f["name"], opts))
+    assert BENCH_DEFAULT in rules
+    m, n, _ = rules[BENCH_DEFAULT]; ok = [d for d in BENCH_DAYS if d >= m]
+    assert (len(ok), n - len(ok)) == (2, 3), (ok, n)   # the example in the text below says so
+    opts = "".join(f'<optgroup label="{html.escape(g)}">' + "".join(f'<option value="{k}"{" selected" if k == BENCH_DEFAULT else ""}>{html.escape(lbl)}</option>' for k, lbl in os_) + "</optgroup>" for g, os_ in groups)
+    day_l = t(T("Day", "Jour", "Día"))
+    days = "".join(_num(f"bd-d{i + 1}", f"{day_l} {i + 1}", BENCH_DAYS[i] if i < len(BENCH_DAYS) else "", "any", "$") for i in range(6))
+    form = (_sel("bd-k", t(T("Firm, account type and size", "Firme, type et taille", "Firma, tipo y tamaño")), opts)
+            + f'<p class="fine" data-nolinks>{t(T("Each day’s result since your last payout, as your firm shows it. Leave a day empty if you didn’t trade.", "Le résultat de chaque journée depuis ton dernier payout, tel que ta firme l’affiche. Laisse un jour vide si tu n’as pas tradé.", "El resultado de cada día desde tu último payout, tal como lo muestra tu firma. Deja un día vacío si no operaste."))}</p>'
+            + f'<div class="bd-days" id="bd-days">{days}</div>'
+            + f'<button type="button" class="btn btn-ghost bd-add" id="bd-add">{t(T("+ Add a day", "+ Ajouter un jour", "+ Añadir un día"))}</button>')
+    row = lambda id_, lbl, extra="": f'<div{extra}><dt>{t(lbl)}</dt><dd id="{id_}">—</dd></div>'
+    results = (f'<div class="big"><span id="bd-left" class="num">—</span><span id="bd-lbl"></span></div><div class="meter"><i id="bd-bar"></i></div>'
+               "<dl>" + row("bd-done", T("Benchmark days done", "Benchmark days faits", "Benchmark days hechos")) + row("bd-min", T("Minimum profit per day", "Profit minimum par jour", "Beneficio mínimo por día"))
+               + row("bd-tr", T("Traded days", "Jours tradés", "Días operados"), ' id="bd-trow"') + "</dl>" + '<p class="bd-msg" id="bd-msg"></p>')
+    pay = href(lang, GUIDE_PAYOUT)
+    L = {"left": t(T("benchmark days left before a payout", "benchmark days restants avant un payout", "benchmark days restantes antes de un payout")),
+         "left1": t(T("benchmark day left before a payout", "benchmark day restant avant un payout", "benchmark day restante antes de un payout")),
+         "of": t(T("{a} of {b}", "{a} sur {b}", "{a} de {b}")), "any": t(T("Any profit", "Tout profit", "Cualquier beneficio")), "and": t(T(" and ", " et ", " y ")),
+         "count": t(T("Days {d} count.", "Les jours {d} comptent.", "Cuentan los días {d}.")), "count1": t(T("Day {d} counts.", "Le jour {d} compte.", "Cuenta el día {d}.")),
+         "need": t(T("{n} to go: each needs a profit of {m} or more.", "Encore {n} : chacun demande un profit de {m} ou plus.", "Faltan {n}: cada uno pide un beneficio de {m} o más.")),
+         "need1": t(T("1 to go: it needs a profit of {m} or more.", "Encore 1 : il demande un profit de {m} ou plus.", "Falta 1: pide un beneficio de {m} o más.")),
+         "needany": t(T("{n} to go: any day that ends with a profit counts.", "Encore {n} : toute journée qui finit en profit compte.", "Faltan {n}: cuenta cualquier día que cierre con beneficio.")),
+         "trade": t(T("Benchmark days done. {n} more traded days to go for this account.", "Benchmark days faits. Encore {n} jours tradés pour ce compte.", "Benchmark days hechos. Faltan {n} días operados para esta cuenta.")),
+         "done": t(T(f'Benchmark days done for this payout. Check its other conditions in the <a href="{pay}">payout rules</a>.', f'Benchmark days faits pour ce payout. Vérifie ses autres conditions dans <a href="{pay}">les règles de payout</a>.', f'Benchmark days hechos para este payout. Revisa sus otras condiciones en <a href="{pay}">las reglas de payout</a>.')),
+         "day": day_l}
+    script = (f"<script>(function(){{var R={json.dumps(rules, separators=(',', ':'))},L={json.dumps(L, ensure_ascii=False)},$=function(i){{return document.getElementById(i)}};{NUM_JS}"
+              "function run(){var r=R[$('bd-k').value];if(!r)return;var m=r[0],n=r[1],d=r[2],ok=[],tr=0;"
+              "document.querySelectorAll('#bd-days input').forEach(function(e,i){var s=e.value.trim(),v=parseFloat(s);if(s===''||isNaN(v))return;tr++;if(m?v>=m:v>0)ok.push(i+1);});"
+              "var done=Math.min(ok.length,n),left=n-done,mm=m?cur(m,0):L.any,msg;"
+              "$('bd-left').textContent=left;$('bd-left').className='num'+(left?'':' st-ok');$('bd-lbl').textContent=left===1?L.left1:L.left;"
+              "$('bd-done').textContent=L.of.replace('{a}',ok.length).replace('{b}',n);$('bd-min').textContent=mm;"
+              "$('bd-trow').hidden=!d;$('bd-tr').textContent=L.of.replace('{a}',tr).replace('{b}',d);$('bd-bar').style.setProperty('--p',done/n*100);"
+              "if(left)msg=!m?L.needany.replace('{n}',left):(left===1?L.need1:L.need).replace('{n}',left).replace('{m}',mm);else msg=d&&tr<d?L.trade.replace('{n}',d-tr):L.done;"
+              "if(ok.length)msg=(ok.length===1?L.count1.replace('{d}',ok[0]):L.count.replace('{d}',ok.slice(0,-1).join(', ')+L.and+ok[ok.length-1]))+' '+msg;"
+              "$('bd-msg').innerHTML=msg;}"
+              "$('bd-add').addEventListener('click',function(){var w=$('bd-days'),k=w.children.length+1;if(k>40)return;var lab=w.lastElementChild.cloneNode(true),inp=lab.querySelector('input');"
+              "inp.id='bd-d'+k;inp.value='';lab.querySelector('span').textContent=L.day+' '+k;w.appendChild(lab);inp.addEventListener('input',run);inp.focus();});"
+              "document.querySelectorAll('[data-calc] input,[data-calc] select').forEach(function(e){e.addEventListener('input',run)});run();})();</script>")
+    NO_DOCK.add(GUIDE_BENCH)
+    act = (f'<div class="calc-act"><b>{t(T("Track this automatically in Sweep","Suis ça automatiquement dans Sweep","Síguelo automáticamente en Sweep"))}</b>'
+           f'<p data-nolinks>{t(T("For each account, Sweep counts your winning days against your firm’s rules, and shows when the account is ready for a payout.", "Pour chaque compte, Sweep compte tes jours gagnants selon les règles de ta firme, et t’indique quand le compte est prêt pour un payout.", "En cada cuenta, Sweep cuenta tus días ganadores según las reglas de tu firma, y te muestra cuándo la cuenta está lista para un payout."))}</p>'
+           f'{ui.btn(t(CREATE_FREE), SIGNUP, attrs='data-track="signup_tool"')}</div>')
+    return (f'<div class="calc" data-calc="{GUIDE_BENCH}"><div class="calc-form">{form}</div><div class="calc-out" aria-live="polite">{results}{act}</div></div>'
+            f'<p class="fine calc-note">{note(lang, t)}</p><div class="calc-bar" aria-hidden="true"><span class="num"></span><span class="lbl"></span></div>'), script + BAR_JS
+
+def page_bench_guide(lang, t):
+    table = _table(lang, t, *BENCH_HEADS, _firm_rows(lang, t, lambda f, p: bench_cells(lang, t, f, p), _bench_firms()))
+    ex = _bench_example(); days_u, pay_u = href(lang, GUIDE_DAYS), href(lang, GUIDE_PAYOUT)
+    intro = [
+     (T("What a benchmark day is", "Ce qu’est un benchmark day", "Qué es un benchmark day"), [
+      T(f"A benchmark day is a trading day on which your profit reaches a minimum set by your firm, for example {usd(ex, 'en')} on a 50K Topstep funded account. FundedNext Futures calls them Benchmark Days; Topstep and Alpha Futures say winning days. A green day below the minimum doesn’t count.",
+        f"Un benchmark day est une journée de trading où ton profit atteint un minimum fixé par ta firme, par exemple {usd(ex, 'fr')} sur un compte financé Topstep de 50K. FundedNext Futures les appelle Benchmark Days ; Topstep et Alpha Futures parlent de jours gagnants (winning days). Une journée positive sous le minimum ne compte pas.",
+        f"Un benchmark day es un día de trading en el que tu beneficio alcanza un mínimo fijado por tu firma, por ejemplo {usd(ex, 'es')} en una cuenta financiada de Topstep de 50K. FundedNext Futures los llama Benchmark Days; Topstep y Alpha Futures hablan de días ganadores (winning days). Un día positivo por debajo del mínimo no cuenta."),
+      T(f"At the firms Sweep tracks, they count on funded accounts, before each payout: once you have the number required since your last payout, and the other conditions are met, you can ask for it. Evaluations have their own rule, a minimum number of trading days, compared in <a href=\"{days_u}\">prop firm minimum trading days</a>.",
+        f"Chez les firmes que suit Sweep, ils comptent en compte financé, avant chaque payout : une fois le nombre requis atteint depuis ton dernier payout, et les autres conditions remplies, tu peux le demander. Les évaluations ont leur propre règle, un nombre minimum de jours de trading, comparé dans <a href=\"{days_u}\">les jours minimum des prop firms</a>.",
+        f"En las firmas que sigue Sweep, cuentan en las cuentas financiadas, antes de cada payout: cuando tienes el número requerido desde tu último payout, y se cumplen las demás condiciones, puedes pedirlo. Las evaluaciones tienen su propia regla, un número mínimo de días de trading, comparado en <a href=\"{days_u}\">los días mínimos de las prop firms</a>.")]),
+     (T("How to count yours", "Comment compter les tiens", "Cómo contar los tuyos"), [
+      T(f"Count only the days since your last payout, with each day’s result as your firm shows it: a trading day runs from one session close to the next, and the firm decides whether fees are taken out. The calculator above does the count for the account you pick. A payout has other conditions too, such as a balance to keep or a consistency rule: they are compared in <a href=\"{pay_u}\">prop firm payout rules</a>.",
+        f"Compte seulement les jours depuis ton dernier payout, avec le résultat de chaque journée tel que ta firme l’affiche : une journée de trading va d’une clôture de séance à la suivante, et la firme décide si les frais sont retirés. Le calculateur plus haut fait le compte pour le compte que tu choisis. Un payout a aussi d’autres conditions, comme un solde à garder ou une règle de consistance : elles sont comparées dans <a href=\"{pay_u}\">les règles de payout des prop firms</a>.",
+        f"Cuenta solo los días desde tu último payout, con el resultado de cada día tal como lo muestra tu firma: un día de trading va de un cierre de sesión al siguiente, y la firma decide si se descuentan las comisiones. La calculadora de arriba hace la cuenta para la cuenta que elijas. Un payout tiene también otras condiciones, como un saldo a mantener o una regla de consistencia: están comparadas en <a href=\"{pay_u}\">las reglas de payout de las prop firms</a>.")]),
+    ]
+    none = {l: [] for l in LANGS}
+    for f in presets.FIRMS:
+        for p in f["programs"]:
+            if not _bench(p):
+                for l in LANGS: none[l].append((f["name"], p["name"]))
+    after = ""
+    if none["en"]:
+        h = T("Accounts without benchmark days", "Les comptes sans benchmark days", "Las cuentas sin benchmark days")
+        lead = T("Their payouts depend on other conditions, such as a profit since the last payout or days between payouts: ", "Leurs payouts dépendent d’autres conditions, comme un profit depuis le dernier payout ou des jours entre deux payouts : ", "Sus payouts dependen de otras condiciones, como un beneficio desde el último payout o días entre payouts: ")
+        after = f"<h2>{t(h)}</h2><p>{t(lead)}{_by_firm(none[lang], lang)}</p>"
+    fu = {l: [] for l in LANGS}
+    for f, p, m, d in _bench_50k():
+        for l in LANGS:
+            tl = lambda x, L=l: x[L]
+            fu[l].append((f["name"], f"{p['name']} {_days([d], l, tl)} " + (tl(T(f"of {usd(m, 'en')}+", f"de {usd(m, 'fr')} et +", f"de {usd(m, 'es')} o más")) if m else tl(T("with a profit", "en profit", "con beneficio")))))
+    faqs = [
+     (T("What is a benchmark day in a prop firm?", "Qu’est-ce qu’un benchmark day en prop firm ?", "¿Qué es un benchmark day en una prop firm?"),
+      T(f"A trading day on which your profit reaches the minimum your firm sets, for example {usd(ex, 'en')} on a 50K Topstep funded account. Before each payout, the firm asks for a number of them since your last payout.",
+        f"Une journée de trading où ton profit atteint le minimum fixé par ta firme, par exemple {usd(ex, 'fr')} sur un compte financé Topstep de 50K. Avant chaque payout, la firme en demande un certain nombre depuis ton dernier payout.",
+        f"Un día de trading en el que tu beneficio alcanza el mínimo que fija tu firma, por ejemplo {usd(ex, 'es')} en una cuenta financiada de Topstep de 50K. Antes de cada payout, la firma pide un número de ellos desde tu último payout.")),
+     (T("How many benchmark days do I need before a payout?", "Combien de benchmark days faut-il avant un payout ?", "¿Cuántos benchmark days necesito antes de un payout?"),
+      {l: {"en": "On a 50K funded account: ", "fr": "Sur un compte financé de 50K : ", "es": "En una cuenta financiada de 50K: "}[l] + _by_firm(fu[l], l) for l in LANGS}),
+     (T("Does a green day below the minimum count?", "Une journée positive sous le minimum compte-t-elle ?", "¿Cuenta un día positivo por debajo del mínimo?"),
+      T("Not as a benchmark day. Its profit still adds to your total, which sets what you can withdraw and is what a consistency rule compares your best day with.",
+        "Pas comme benchmark day. Son profit s’ajoute quand même à ton total, qui fixe ce que tu peux retirer et auquel une règle de consistance compare ton meilleur jour.",
+        "No como benchmark day. Su beneficio se suma igual a tu total, que fija lo que puedes retirar y con el que una regla de consistencia compara tu mejor día.")),
+     (T("How does Sweep count my benchmark days?", "Comment Sweep compte-t-il mes benchmark days ?", "¿Cómo cuenta Sweep mis benchmark days?"),
+      T("For each account, Sweep counts your winning days against your firm’s rules since your last payout, and shows when the account is ready for a payout.",
+        "Pour chaque compte, Sweep compte tes jours gagnants selon les règles de ta firme depuis ton dernier payout, et t’indique quand le compte est prêt pour un payout.",
+        "En cada cuenta, Sweep cuenta tus días ganadores según las reglas de tu firma desde tu último payout, y te muestra cuándo la cuenta está lista para un payout.")),
+    ]
+    calc, script = bench_calc(lang, t)
+    import ui
+    tool = ui.sec(ui.head(t, None, T("How many benchmark days do you have left?", "Combien de benchmark days te reste-t-il ?", "¿Cuántos benchmark days te quedan?")) + calc, "t", "calculator")
+    return _page(lang, t, T("Guide", "Guide", "Guía"),
+        T("Prop firm benchmark days, explained.", "Les benchmark days des prop firms, expliqués.", "Los benchmark days de las prop firms, explicados."),
+        answer_bench(), intro, table, after, faqs, None,
+        T("Prop Firm Benchmark Days Explained (+ Calculator) · Sweep", "Benchmark days en prop firm (+ calculateur) · Sweep", "Benchmark days en prop firms (+ calculadora) · Sweep"),
+        T(f"What a benchmark day is, the minimum profit and the number of days each funded account needs before a payout at {FIRMS_N} futures prop firms, and a free counter.",
+          f"Ce qu’est un benchmark day, le profit minimum et le nombre de jours requis avant un payout chez {FIRMS_N} prop firms de futures, et un compteur gratuit.",
+          f"Qué es un benchmark day, el beneficio mínimo y los días que pide cada cuenta financiada antes de un payout en {FIRMS_N} prop firms de futuros, y un contador gratis."),
+        tool=tool, script=script)
+
+GUIDES.insert(3, (GUIDE_BENCH, T("Prop firm benchmark days, explained", "Les benchmark days des prop firms, expliqués", "Los benchmark days de las prop firms, explicados"),
+                  T("The winning days each payout needs, and a counter for yours.", "Les jours gagnants requis avant chaque payout, et un compteur pour les tiens.", "Los días ganadores que pide cada payout, y un contador para los tuyos.")))
+
 # ---------------------------------------------------------------- costs
 GUIDE_COSTS = "prop-firm-costs.html"
 
@@ -701,7 +878,7 @@ COSTS_LIVE = False   # held until the app's catalogue has every firm's prices (n
 if COSTS_LIVE: GUIDES.insert(3, (GUIDE_COSTS, T("Prop firm costs, compared", "Le coût des prop firms, comparé", "El coste de las prop firms, comparado"),
                   T("Evaluation prices and activation fees, size by size.", "Prix des évaluations et frais d’activation, taille par taille.", "Precios de evaluación y tarifas de activación, tamaño por tamaño.")))
 
-RULE_GUIDES = (GUIDE_CONS, GUIDE_DD, GUIDE_PAYOUT, GUIDE_SIZES, GUIDE_DAYS) + ((GUIDE_COSTS,) if COSTS_LIVE else ())   # firm-by-firm guides built from the catalogue
+RULE_GUIDES = (GUIDE_CONS, GUIDE_DD, GUIDE_PAYOUT, GUIDE_SIZES, GUIDE_DAYS, GUIDE_BENCH) + ((GUIDE_COSTS,) if COSTS_LIVE else ())   # firm-by-firm guides built from the catalogue
 SYSTEM_PAGES.update(RULE_GUIDES)
 
 # ---------------------------------------------------------------- firm vs firm (SEO brief, Oct 15, step 4): two firms, the guides' tables side by side

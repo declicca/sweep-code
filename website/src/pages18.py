@@ -813,10 +813,10 @@ def page_rule_changes(lang, t):
                    f"<b>{n} cambio{'s' if n > 1 else ''} de regla</b> registrado{'s' if n > 1 else ''}, el último el {d}. Última verificación: {checked}.")
     b = (ui.sec(ui.state(t(status)) + f'<div class="ledger reveal">{rows}</div>', "t", "changes", width="read")
          + ui.sec(f'<article class="article">{localize(lang, t(CHANGES_HELP))}</article>', "n", "explained", width="read"))
-    return (t(T("Prop Firm Rule Changes: Every Change, Dated · Sweep", "Changements de règles des prop firms, datés · Sweep", "Cambios de reglas de las prop firms, fechados · Sweep")),
-            t(T(f"Every rule change detected on the official pages of {FIRMS_N} futures prop firms, newest first: the rule, before and after, the date and the source.",
-                f"Chaque changement de règle détecté sur les pages officielles de {FIRMS_N} prop firms de futures : la règle, avant et après, la date et la source.",
-                f"Cada cambio de regla detectado en las páginas oficiales de {FIRMS_N} prop firms de futuros: la regla, antes y después, la fecha y la fuente.")),
+    return (t(T("Prop Firm Rule Changes Log (Updated Weekly) · Sweep", "Journal des changements de règles des prop firms · Sweep", "Registro de cambios de reglas de las prop firms · Sweep")),
+            t(T(f"Every rule change found by Sweep’s weekly check of {FIRMS_N} futures prop firms’ official pages, newest first: the rule, before and after, the date, the source.",
+                f"Chaque changement de règle trouvé par la vérification hebdomadaire des pages officielles de {FIRMS_N} prop firms : avant et après, la date et la source.",
+                f"Cada cambio de regla hallado en la revisión semanal de las páginas oficiales de {FIRMS_N} prop firms de futuros: antes y después, la fecha y la fuente.")),
             hero + b + ui.final(lang, t), RSS_LINK)
 SYSTEM_PAGES.add(RULE_CHANGES)
 

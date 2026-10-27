@@ -273,8 +273,8 @@ META_SEO = {
 }
 
 # breadcrumb: Home › Section › Page (the section only where a hub page lists the page)
-CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html")
-GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "trading-journal-guide.html")
+CALC_PAGES = ("position-size-calculator.html", "trailing-drawdown-calculator.html", "consistency-rule-calculator.html", "payout-calculator.html", "expectancy-calculator.html", "prop-firm-roi-calculator.html", "prop-firm-account-rotation.html")
+GUIDE_PAGES = ("prop-firm-payout-rules.html", "prop-firm-profit-targets.html", "prop-firm-minimum-days.html", "prop-firm-benchmark-days.html", "prop-firm-costs.html", "prop-firm-consistency-rules.html", "prop-firm-drawdown-rules.html", "best-trading-journal-for-prop-firms.html", "trading-journal-routine.html", "trading-journal-guide.html")
 GP_SAT_PAGES = ("pass-prop-firm-evaluation.html", "prop-firm-position-sizing.html", "funded-account-playbook.html", "mes-vs-mnq.html")
 BRAND_LABEL = T("Sweep — Make it Sweep, home", "Sweep — Make it Sweep, accueil", "Sweep — Make it Sweep, inicio")
 NOINDEX = ("terms.html", "privacy.html", "risk.html")   # legal pages: out of search results and of the sitemap, links kept
@@ -499,9 +499,11 @@ REL_INFO = {
  "funded-account-playbook.html": (T("Funded account playbook","Playbook du compte financé","Playbook de la cuenta financiada"), T("Five rules after you pass.","Cinq règles après la réussite.","Cinco reglas tras aprobar.")),
  "liquidity-sweep.html": (T("Liquidity sweep, explained","Le liquidity sweep, expliqué","El liquidity sweep, explicado"), T("What it is, and how to journal it.","Ce que c’est, et comment le journaliser.","Qué es y cómo registrarlo.")),
  "mes-vs-mnq.html": (T("MES or MNQ","MES ou MNQ","MES o MNQ"), T("Which micro to start with.","Quel micro pour débuter.","Con qué micro empezar.")),
+ "prop-firm-account-rotation.html": (T("Account rotation planner","Rotation des comptes","Rotación de cuentas"), T("Which account to trade first today.","Quel compte trader en premier aujourd’hui.","Qué cuenta operar primero hoy.")),
  "contracts/nq-futures.html": (T("NQ futures","Futures NQ","Futuros NQ"), T("$5 a tick, $20 a point.","5 $ le tick, 20 $ le point.","5 $ por tick, 20 $ por punto.")),
  "contracts/es-futures.html": (T("ES futures","Futures ES","Futuros ES"), T("$12.50 a tick, $50 a point.","12,50 $ le tick, 50 $ le point.","12,50 $ por tick, 50 $ por punto.")),
  "prop-firm-minimum-days.html": (T("Minimum days compared","Jours minimum comparés","Días mínimos comparados"), T("To pass, and before each payout.","Pour réussir, et avant chaque payout.","Para aprobar, y antes de cada payout.")),
+ "prop-firm-benchmark-days.html": (T("Benchmark days explained","Benchmark days expliqués","Benchmark days explicados"), T("The winning days before each payout.","Les jours gagnants avant chaque payout.","Los días ganadores antes de cada payout.")),
  "prop-firm-costs.html": (T("Prop firm costs compared","Coût des prop firms comparé","Costo de las prop firms comparado"), T("Evaluation and activation fees.","Évaluation et frais d’activation.","Evaluación y tarifa de activación.")),
  "how-we-verify-prop-firm-rules.html": (T("How we verify the rules","Notre méthode de vérification","Cómo verificamos las reglas"), T("Sources, frequency and limits.","Sources, fréquence et limites.","Fuentes, frecuencia y límites.")),
  "prop-firm-rule-changes.html": (T("Prop firm rule changes","Changements de règles","Cambios de reglas"), T("Every change, dated, with its source.","Chaque changement, daté, avec sa source.","Cada cambio, fechado, con su fuente.")),
@@ -511,6 +513,7 @@ RELATED = {
  "trailing-drawdown-calculator.html": ["prop-firm-drawdown-rules.html", "prop-firm-position-sizing.html", "prop-firms/index.html"],
  "consistency-rule-calculator.html": ["prop-firm-consistency-rules.html", "payout-calculator.html", "glossary.html"],
  "payout-calculator.html": ["prop-firm-payout-rules.html", "funded-account-playbook.html", "prop-firm-roi-calculator.html"],
+ "prop-firm-account-rotation.html": ["prop-firm-tracker.html", "payout-calculator.html", "trailing-drawdown-calculator.html"],
  "expectancy-calculator.html": ["trading-journal-routine.html", "position-size-calculator.html", "glossary.html"],
  "prop-firm-roi-calculator.html": ["payout-calculator.html", "prop-firm-payout-rules.html", "payout-tracker.html"],
  "tools.html": ["guides.html", "prop-firms/index.html", "glossary.html"],
@@ -534,8 +537,7 @@ RELATED = {
  "ninjatrader.html": ["import.html", "quantower.html", "prop-firm-tracker.html"],
  "quantower.html": ["import.html", "ninjatrader.html", "prop-firm-tracker.html"],
  "prop-firm-minimum-days.html": ["pass-prop-firm-evaluation.html", "prop-firm-payout-rules.html", "trading-journal-guide.html"],
- # the two micro contracts a beginner hesitates between
- **{f"contracts/{c}-futures.html": ["mes-vs-mnq.html", "position-size-calculator.html", "futures-market-hours.html"] for c in ("mes", "mnq")},
+ "prop-firm-benchmark-days.html": ["prop-firm-payout-rules.html", "payout-calculator.html", "funded-account-playbook.html"],
  "prop-firm-costs.html": ["prop-firm-roi-calculator.html", "payout-tracker.html", "prop-firm-profit-targets.html"],
  "prop-firms/index.html": ["prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html", "prop-firm-tracker.html"],
  "best-trading-journal-for-prop-firms.html": ["free-trading-journal.html", "prop-firm-tracker.html", "pricing.html"],

@@ -216,9 +216,159 @@ def page_contracts(lang, t):
 <h2>Meses de contrato y rollover</h2><p>Cada letra es un mes de entrega: F enero, G febrero, H marzo, J abril, K mayo, M junio, N julio, Q agosto, U septiembre, V octubre, X noviembre, Z diciembre. Después va el año: NQZ6 es el contrato del Nasdaq-100 de diciembre de 2026.</p>
 <p>Los futuros sobre índices bursátiles vencen cada trimestre, el tercer viernes de marzo, junio, septiembre y diciembre. El volumen pasa al contrato siguiente más o menos una semana antes, y es cuando la mayoría de los traders hacen el rollover. El crudo tiene un contrato cada mes, y el oro se negocia sobre todo en sus meses pares.</p>
 <h2>Por qué importa en una cuenta prop</h2><p>La pérdida máx. de tu firma está en dólares, pero tu stop está en puntos. El valor del punto une las dos cosas: una pérdida máx. de 2.000 $ son 100 puntos en un NQ, 40 puntos en un ES y 1.000 puntos en un MNQ. Te dice cuántas operaciones perdedoras aguanta tu cuenta antes del límite, y la <a href="@position-size-calculator.html">calculadora de tamaño de posición</a> hace el cálculo para cualquier stop.</p>""")
-    b = (ui.sec(tbl + f'<p class="fine" style="margin-top:16px">{t(NOTE)}</p>', "t", "contracts")
+    compare = (f'<div class="chiprow" style="margin-top:32px"><span class="eyebrow">{t(T("Compare", "Comparer", "Comparar"))}</span>'
+               + "".join(f'<a class="chip" href="{href(lang, p)}">{CROSS_NAME(p)}</a>' for p in CROSS_PAGES) + "</div>")
+    b = (ui.sec(tbl + f'<p class="fine" style="margin-top:16px">{t(NOTE)}</p>' + compare, "t", "contracts")
          + ui.sec(f'<article class="article">{re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', t(guide))}</article>', "n", "read", width="read"))
     return (t(T("Futures tick values: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valeur du tick : NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep","Valor del tick: NQ, ES, YM, RTY, CL, GC, SI, 6E · Sweep")),
             t(T("Tick size, tick value and point value for NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI and 6E futures, with what a stop costs.","Taille, valeur du tick et valeur du point pour NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI et 6E, avec le coût d’un stop.","Tamaño, valor del tick y valor del punto para NQ, MNQ, ES, MES, YM, MYM, RTY, M2K, CL, MCL, GC, MGC, SI y 6E, con el coste de un stop.")),
             hero + b + ui.final(lang, t), "")
 SYSTEM_PAGES.add("futures-contracts.html")
+
+# ---------------------------------------------------------------- mini vs micro, and NQ vs ES (SEO brief v2, 4.4): the two contracts side by side, and what each one means on a 50K prop account
+PAIRS = [("NQ", "MNQ"), ("ES", "MES"), ("CL", "MCL"), ("GC", "MGC"), ("YM", "MYM"), ("NQ", "ES")]
+def pair_slug(a, b): return f"{a.lower()}-vs-{b.lower()}.html"
+PAIR_PAGES = [pair_slug(a, b) for a, b in PAIRS]
+MKT = {"NQ": T("Nasdaq-100 index", "indice Nasdaq-100", "índice Nasdaq-100"), "ES": T("S&P 500 index", "indice S&P 500", "índice S&P 500"),
+       "YM": T("Dow Jones Industrial Average", "indice Dow Jones", "índice Dow Jones"), "CL": T("WTI crude oil", "pétrole brut WTI", "crudo WTI"), "GC": T("gold", "or", "oro")}
+UNIT = {"NQ": (20, "idx"), "MNQ": (2, "idx"), "ES": (50, "idx"), "MES": (5, "idx"), "YM": (5, "idx"), "MYM": (0.5, "idx"),
+        "CL": (1000, "bbl"), "MCL": (100, "bbl"), "GC": (100, "oz"), "MGC": (10, "oz")}   # what one contract is: $ × the index, or barrels, or troy ounces (CME)
+def _unit(s, lang):
+    v, k = UNIT[s]
+    if k == "idx": return {"en": f"{_fmt(v)} × index", "fr": f"{_fmt(v, 'fr')} × indice", "es": f"{_fmt(v, 'es')} × índice"}[lang]
+    n = f"{v:,}".replace(",", {"en": ",", "fr": " ", "es": "."}[lang])
+    return {"bbl": {"en": f"{n} barrels", "fr": f"{n} barils", "es": f"{n} barriles"}, "oz": {"en": f"{n} troy ounces", "fr": f"{n} onces troy", "es": f"{n} onzas troy"}}[k][lang]
+CROSS_PAGES = [pair_slug(a, b) for a, b in PAIRS] + ["mes-vs-mnq.html"]
+CROSS_NAME = lambda p: p[:-5].upper().replace("-VS-", " vs ")
+
+def _contract_limits():
+    """(fewest, most) minis allowed on a 50K evaluation, from the app's catalogue."""
+    import presets
+    v = [s["eval"]["max_minis"] for f in presets.FIRMS for p in f["programs"] for s in p["sizes"] if s["size"] == 50000 and (s.get("eval") or {}).get("max_minis")]
+    return min(v), max(v)
+
+def make_pair(a, b):
+    ca, cb = next(c for c in C if c[0] == a), next(c for c in C if c[0] == b)
+    micro = ca[7] == b   # mini vs its micro; otherwise two minis (NQ vs ES)
+    page_id = pair_slug(a, b)
+    CRUMBS[page_id] = T(f"{a} vs {b}", f"{a} ou {b}", f"{a} o {b}")
+    SYSTEM_PAGES.add(page_id)
+    def page(lang, t):
+        F = lambda v: _fmt(v, lang); K = lambda v: _tick(v, lang)
+        loc = lambda x: re.sub(r'href="@([^"]+)"', lambda m: f'href="{href(lang, m.group(1))}"', x)
+        lo, hi = _contract_limits()
+        lk = lambda s: f'<a href="{href(lang, slug(s))}">{s}</a>'
+        if micro:
+            fam = ca[8]; pts = STOP_PTS[a]; ts = ca[3]
+            cost_a, cost_b = round(pts / ts) * ca[4], round(pts / ts) * cb[4]
+            na, nb = int(MAX_LOSS // cost_a + 1e-9), int(MAX_LOSS // cost_b + 1e-9)
+            kind = T("mini or micro?", "mini ou micro ?", "¿mini o micro?") if fam == "idx" else T("full size or micro?", "taille normale ou micro ?", "¿tamaño normal o micro?")
+            h1 = T(f"{a} vs {b}: {kind['en']}", f"{a} ou {b} : {kind['fr']}", f"{a} o {b}: {kind['es']}")
+            lead = T(f"{b} is a tenth of {a}: same {MKT[a]['en']}, same tick size ({_tick(ts)}), but {_fmt(cb[5])} a point instead of {_fmt(ca[5])}. On a 50K prop account, a {_tick(pts)}-point stop costs {_fmt(cost_a)} on 1 {a} and {_fmt(cost_b)} on 1 {b}.",
+                     f"{b} vaut un dixième de {a} : même {MKT[a]['fr']}, même taille de tick ({_tick(ts, 'fr')}), mais {_fmt(cb[5], 'fr')} le point au lieu de {_fmt(ca[5], 'fr')}. Sur un compte prop de 50K, un stop de {_tick(pts, 'fr')} point{'s' if pts >= 2 else ''} coûte {_fmt(cost_a, 'fr')} sur 1 {a} et {_fmt(cost_b, 'fr')} sur 1 {b}.",
+                     f"{b} vale una décima parte de {a}: mismo {MKT[a]['es']}, mismo tamaño de tick ({_tick(ts, 'es')}), pero {_fmt(cb[5], 'es')} por punto en lugar de {_fmt(ca[5], 'es')}. En una cuenta prop de 50K, un stop de {_tick(pts, 'es')} puntos cuesta {_fmt(cost_a, 'es')} en 1 {a} y {_fmt(cost_b, 'es')} en 1 {b}.")
+            rows = [(T("One contract", "Un contrat", "Un contrato"), _unit(a, lang), _unit(b, lang)),
+                    (T("Tick size", "Taille du tick", "Tamaño del tick"), K(ts), K(ts)), (T("Tick value", "Valeur du tick", "Valor del tick"), F(ca[4]), F(cb[4])),
+                    (T("Point value", "Valeur du point", "Valor del punto"), F(ca[5]), F(cb[5])),
+                    (T(f"A {_tick(pts)}-point stop", f"Un stop de {_tick(pts, 'fr')} point{'s' if pts >= 2 else ''}", f"Un stop de {_tick(pts, 'es')} puntos"), F(cost_a), F(cost_b)),
+                    (T(f"Losing trades before a {_fmt(MAX_LOSS)} max loss", f"Pertes avant une perte max de {_fmt(MAX_LOSS, 'fr')}", f"Pérdidas antes de una pérdida máx. de {_fmt(MAX_LOSS, 'es')}"), str(na), str(nb)),
+                    (T("Exchange", "Bourse", "Mercado"), ca[2], cb[2])]
+            body = (f'<h2>{t(T("Same chart, a tenth of the dollars", "Même graphique, dix fois moins de dollars", "Mismo gráfico, diez veces menos dólares"))}</h2>'
+                    f'<p>{t(T(f"{a} and {b} follow the same {MKT[a]["en"]}, so they move the same number of points in a session: whatever the market does, {b} gains or loses a tenth of the dollars of {a}. The volatility in points is the same; only the size of your position changes. Both trade on CME Globex, with the same hours.",
+                              f"{a} et {b} suivent le même {MKT[a]["fr"]}, donc ils bougent du même nombre de points dans une séance : quoi que fasse le marché, {b} gagne ou perd un dixième des dollars de {a}. La volatilité en points est la même ; seule la taille de ta position change. Les deux se négocient sur CME Globex, aux mêmes heures.",
+                              f"{a} y {b} siguen el mismo {MKT[a]["es"]}, así que se mueven el mismo número de puntos en una sesión: haga lo que haga el mercado, {b} gana o pierde una décima parte de los dólares de {a}. La volatilidad en puntos es la misma; solo cambia el tamaño de tu posición. Los dos cotizan en CME Globex, con el mismo horario."))}</p>'
+                    f'<h2>{t(T("Which one for a 50K prop account?", "Lequel pour un compte prop de 50K ?", "¿Cuál para una cuenta prop de 50K?"))}</h2>'
+                    f'<p>{t(T(f"Take a 50K evaluation with a {_fmt(MAX_LOSS)} max loss, a common size, and a {_tick(pts)}-point stop. On {a}, that stop costs {_fmt(cost_a)} per contract: {na} losing trades in a row reach the max loss. On {b}, it costs {_fmt(cost_b)}: {nb} losing trades. {b} also lets you size in steps, 2, 3 or 5 micros, instead of all or nothing.",
+                              f"Prends une évaluation de 50K avec une perte max de {_fmt(MAX_LOSS, 'fr')}, une taille courante, et un stop de {_tick(pts, 'fr')} point{'s' if pts >= 2 else ''}. Sur {a}, ce stop coûte {_fmt(cost_a, 'fr')} par contrat : {na} pertes de suite atteignent la perte max. Sur {b}, il coûte {_fmt(cost_b, 'fr')} : {nb} pertes. {b} permet aussi d’ajuster ta taille par paliers, 2, 3 ou 5 micros, au lieu de tout ou rien.",
+                              f"Toma una evaluación de 50K con una pérdida máxima de {_fmt(MAX_LOSS, 'es')}, un tamaño habitual, y un stop de {_tick(pts, 'es')} puntos. En {a}, ese stop cuesta {_fmt(cost_a, 'es')} por contrato: {na} pérdidas seguidas llegan a la pérdida máxima. En {b}, cuesta {_fmt(cost_b, 'es')}: {nb} pérdidas. {b} también te deja ajustar el tamaño por escalones, 2, 3 o 5 micros, en lugar de todo o nada."))}</p>'
+                    f'<p>{t(T(f"Start on {b}. Move to {a} when your plan risks at least {_fmt(cost_a)} per trade with that stop, the cost of 10 micros, and your journal shows you follow your rules at that size. Commissions are charged per contract: check what 10 {b} cost you against 1 {a}. The <a href=\"@position-size-calculator.html\">position size calculator</a> gives the number of contracts for your stop and your risk.",
+                              f"Commence sur {b}. Passe à {a} quand ton plan risque au moins {_fmt(cost_a, 'fr')} par trade avec ce stop, le coût de 10 micros, et que ton journal montre que tu suis tes règles à cette taille. Les commissions se paient par contrat : compare ce que te coûtent 10 {b} et 1 {a}. Le <a href=\"@position-size-calculator.html\">calculateur de taille de position</a> donne le nombre de contrats pour ton stop et ton risque.",
+                              f"Empieza en {b}. Pasa a {a} cuando tu plan arriesgue al menos {_fmt(cost_a, 'es')} por operación con ese stop, el coste de 10 micros, y tu diario muestre que sigues tus reglas a ese tamaño. Las comisiones se cobran por contrato: compara lo que te cuestan 10 {b} y 1 {a}. La <a href=\"@position-size-calculator.html\">calculadora de tamaño de posición</a> da el número de contratos para tu stop y tu riesgo."))}</p>')
+            faqs = [(T(f"Is {b} the same as {a}?", f"{b} est-il pareil que {a} ?", f"¿Es {b} lo mismo que {a}?"),
+                     T(f"Same market and chart, a tenth of the size: one {a} equals 10 {b}. One {b} tick is worth {_fmt(cb[4])}, one {a} tick {_fmt(ca[4])}.",
+                       f"Même marché et même graphique, dix fois plus petit : un {a} équivaut à 10 {b}. Un tick {b} vaut {_fmt(cb[4], 'fr')}, un tick {a} {_fmt(ca[4], 'fr')}.",
+                       f"Mismo mercado y mismo gráfico, una décima parte del tamaño: un {a} equivale a 10 {b}. Un tick de {b} vale {_fmt(cb[4], 'es')}, uno de {a} {_fmt(ca[4], 'es')}.")),
+                    (T(f"Should I trade {a} or {b} on a prop firm account?", f"Faut-il trader {a} ou {b} sur un compte de prop firm ?", f"¿Debo operar {a} o {b} en una cuenta de prop firm?"),
+                     T(f"Start with {b}: on a 50K with a {_fmt(MAX_LOSS)} max loss, a {_tick(pts)}-point stop is {_fmt(cost_b)} on {b} and {_fmt(cost_a)} on {a}. Move to {a} once your risk per trade covers 10 micros and you follow your rules at that size.",
+                       f"Commence par {b} : sur un 50K avec une perte max de {_fmt(MAX_LOSS, 'fr')}, un stop de {_tick(pts, 'fr')} point{'s' if pts >= 2 else ''} vaut {_fmt(cost_b, 'fr')} sur {b} et {_fmt(cost_a, 'fr')} sur {a}. Passe à {a} quand ton risque par trade couvre 10 micros et que tu suis tes règles à cette taille.",
+                       f"Empieza con {b}: en una 50K con una pérdida máxima de {_fmt(MAX_LOSS, 'es')}, un stop de {_tick(pts, 'es')} puntos son {_fmt(cost_b, 'es')} en {b} y {_fmt(cost_a, 'es')} en {a}. Pasa a {a} cuando tu riesgo por operación cubra 10 micros y sigas tus reglas a ese tamaño.")),
+                    (T(f"How much is one point on {a} and {b}?", f"Combien vaut un point sur {a} et {b} ?", f"¿Cuánto vale un punto en {a} y {b}?"),
+                     T(f"{_fmt(ca[5])} on {a} and {_fmt(cb[5])} on {b}, per contract.", f"{_fmt(ca[5], 'fr')} sur {a} et {_fmt(cb[5], 'fr')} sur {b}, par contrat.", f"{_fmt(ca[5], 'es')} en {a} y {_fmt(cb[5], 'es')} en {b}, por contrato."))]
+            name_t = {"NQ": T("Nasdaq Mini or Micro Futures?", "mini ou micro Nasdaq, lequel choisir ?", "¿mini o micro Nasdaq?"), "ES": T("S&P 500 Mini or Micro Futures?", "mini ou micro S&P 500, lequel choisir ?", "¿mini o micro S&P 500?"),
+                      "YM": T("Dow Mini or Micro Futures?", "mini ou micro Dow, lequel choisir ?", "¿mini o micro Dow?"), "CL": T("Crude Oil or Micro Crude Oil?", "pétrole brut ou micro, lequel choisir ?", "¿crudo o micro crudo?"),
+                      "GC": T("Gold or Micro Gold Futures?", "or ou micro or, lequel choisir ?", "¿oro o micro oro?")}[a]
+            title = T(f"{a} vs {b}: {name_t['en']} · Sweep", f"{a} vs {b} : {name_t['fr']} · Sweep", f"{a} vs {b}: {name_t['es']} · Sweep")
+            desc = T(f"{a} vs {b}: tick and point values side by side, what a {_tick(pts)}-point stop costs on each, and which one fits a 50K prop firm account.",
+                     f"{a} ou {b} : valeurs du tick et du point côte à côte, ce que coûte un stop de {_tick(pts, 'fr')} point{'s' if pts >= 2 else ''} sur chacun, et lequel convient à un compte prop de 50K.",
+                     f"{a} o {b}: valores del tick y del punto lado a lado, lo que cuesta un stop de {_tick(pts, 'es')} puntos en cada uno, y cuál encaja en una cuenta prop de 50K.")
+        else:   # NQ vs ES: two minis, the same dollars in points
+            pa, pb = RISK / ca[5], RISK / cb[5]; sa, sb = STOP_PTS[a], STOP_PTS[b]
+            cost_a, cost_b = sa * ca[5], sb * cb[5]
+            h1 = T(f"{a} vs {b}: which E-mini to trade?", f"{a} ou {b} : quel E-mini trader ?", f"{a} o {b}: ¿qué E-mini operar?")
+            lead = T(f"{a} follows the Nasdaq-100 at {_fmt(ca[5])} a point; {b} follows the S&P 500 at {_fmt(cb[5])} a point. Both tick in {_tick(ca[3])} points on CME. {a} usually moves more points in a session, so the same dollar risk gives a wider stop: {_fmt(RISK)} is {pa:g} {a} points or {pb:g} {b} points.",
+                     f"{a} suit le Nasdaq-100 à {_fmt(ca[5], 'fr')} le point ; {b} suit le S&P 500 à {_fmt(cb[5], 'fr')} le point. Les deux bougent par ticks de {_tick(ca[3], 'fr')} point sur le CME. {a} bouge en général de plus de points dans une séance, donc le même risque en dollars donne un stop plus large : {_fmt(RISK, 'fr')}, c’est {pa:g} points {a} ou {pb:g} points {b}.",
+                     f"{a} sigue al Nasdaq-100 a {_fmt(ca[5], 'es')} por punto; {b} sigue al S&P 500 a {_fmt(cb[5], 'es')} por punto. Los dos se mueven en ticks de {_tick(ca[3], 'es')} puntos en CME. {a} suele moverse más puntos en una sesión, así que el mismo riesgo en dólares da un stop más ancho: {_fmt(RISK, 'es')} son {pa:g} puntos de {a} o {pb:g} puntos de {b}.")
+            rows = [(T("Market", "Marché", "Mercado"), t(MKT[a]), t(MKT[b])), (T("One contract", "Un contrat", "Un contrato"), _unit(a, lang), _unit(b, lang)),
+                    (T("Tick size", "Taille du tick", "Tamaño del tick"), K(ca[3]), K(cb[3])), (T("Tick value", "Valeur du tick", "Valor del tick"), F(ca[4]), F(cb[4])),
+                    (T("Point value", "Valeur du point", "Valor del punto"), F(ca[5]), F(cb[5])),
+                    (T(f"{_fmt(RISK)} of risk, in points", f"{_fmt(RISK, 'fr')} de risque, en points", f"{_fmt(RISK, 'es')} de riesgo, en puntos"), f"{pa:g}", f"{pb:g}"),
+                    (T("Its micro (a tenth)", "Son micro (un dixième)", "Su micro (una décima parte)"), lk(ca[7]), lk(cb[7])),
+                    (T("Exchange", "Bourse", "Mercado"), ca[2], cb[2])]
+            body = (f'<h2>{t(T("Points and dollars", "Points et dollars", "Puntos y dólares"))}</h2>'
+                    f'<p>{t(T(f"The Nasdaq-100 is quoted at a higher level than the S&P 500 and usually moves more points in a session, while a tick is worth less on {a} ({_fmt(ca[4])}) than on {b} ({_fmt(cb[4])}). The same idea in dollars needs a wider stop in points on {a}: plan your stop in dollars first, then turn it into points for the contract you trade.",
+                              f"Le Nasdaq-100 est coté à un niveau plus élevé que le S&P 500 et bouge en général de plus de points dans une séance, alors qu’un tick vaut moins sur {a} ({_fmt(ca[4], 'fr')}) que sur {b} ({_fmt(cb[4], 'fr')}). La même idée en dollars demande un stop plus large en points sur {a} : fixe ton stop en dollars d’abord, puis traduis-le en points pour le contrat que tu trades.",
+                              f"El Nasdaq-100 cotiza a un nivel más alto que el S&P 500 y suele moverse más puntos en una sesión, mientras que un tick vale menos en {a} ({_fmt(ca[4], 'es')}) que en {b} ({_fmt(cb[4], 'es')}). La misma idea en dólares pide un stop más ancho en puntos en {a}: fija tu stop en dólares primero y luego pásalo a puntos para el contrato que operas."))}</p>'
+                    f'<h2>{t(T("Which one for a 50K prop account?", "Lequel pour un compte prop de 50K ?", "¿Cuál para una cuenta prop de 50K?"))}</h2>'
+                    f'<p>{t(T(f"On a 50K evaluation with a {_fmt(MAX_LOSS)} max loss, a common size, one {a} with a {sa:g}-point stop risks {_fmt(cost_a)}, and one {b} with a {sb:g}-point stop risks {_fmt(cost_b)}: {int(MAX_LOSS // cost_a)} and {int(MAX_LOSS // cost_b)} losing trades before the max loss. Both are big for a 50K. Their micros, {ca[7]} and {cb[7]}, cost a tenth: they are compared in <a href=\"@mes-vs-mnq.html\">MES vs MNQ</a>.",
+                              f"Sur une évaluation de 50K avec une perte max de {_fmt(MAX_LOSS, 'fr')}, une taille courante, un {a} avec un stop de {sa:g} points risque {_fmt(cost_a, 'fr')}, et un {b} avec un stop de {sb:g} points risque {_fmt(cost_b, 'fr')} : {int(MAX_LOSS // cost_a)} et {int(MAX_LOSS // cost_b)} pertes avant la perte max. Les deux sont gros pour un 50K. Leurs micros, {ca[7]} et {cb[7]}, coûtent dix fois moins : ils sont comparés dans <a href=\"@mes-vs-mnq.html\">MES ou MNQ</a>.",
+                              f"En una evaluación de 50K con una pérdida máxima de {_fmt(MAX_LOSS, 'es')}, un tamaño habitual, un {a} con un stop de {sa:g} puntos arriesga {_fmt(cost_a, 'es')}, y un {b} con un stop de {sb:g} puntos arriesga {_fmt(cost_b, 'es')}: {int(MAX_LOSS // cost_a)} y {int(MAX_LOSS // cost_b)} pérdidas antes de la pérdida máxima. Los dos son grandes para una 50K. Sus micros, {ca[7]} y {cb[7]}, cuestan diez veces menos: están comparados en <a href=\"@mes-vs-mnq.html\">MES o MNQ</a>."))}</p>'
+                    f'<p>{t(T("Neither is better in itself. Pick the chart you read best after watching both for a few sessions in your window, then keep it: switching markets resets what your journal can tell you.",
+                              "Aucun n’est meilleur en soi. Choisis le graphique que tu lis le mieux après avoir observé les deux quelques séances dans ta fenêtre, puis garde-le : changer de marché remet à zéro ce que ton journal peut t’apprendre.",
+                              "Ninguno es mejor en sí. Elige el gráfico que lees mejor después de observar los dos unas sesiones en tu ventana, y quédate con él: cambiar de mercado reinicia lo que tu diario puede decirte."))}</p>')
+            faqs = [(T(f"Is {a} or {b} better for prop firm trading?", f"{a} ou {b}, lequel est meilleur en prop firm ?", f"¿Es mejor {a} o {b} para operar en prop firms?"),
+                     T(f"Neither in itself. {a} is {_fmt(ca[5])} a point and usually moves more points; {b} is {_fmt(cb[5])} a point. Pick the chart you read best, size it in dollars, then keep it.",
+                       f"Aucun en soi. {a} vaut {_fmt(ca[5], 'fr')} le point et bouge en général de plus de points ; {b} vaut {_fmt(cb[5], 'fr')} le point. Choisis le graphique que tu lis le mieux, calcule ta taille en dollars, puis garde-le.",
+                       f"Ninguno en sí. {a} vale {_fmt(ca[5], 'es')} por punto y suele moverse más puntos; {b} vale {_fmt(cb[5], 'es')} por punto. Elige el gráfico que lees mejor, calcula tu tamaño en dólares y quédate con él.")),
+                    (T(f"How much is one point on {a} and {b}?", f"Combien vaut un point sur {a} et {b} ?", f"¿Cuánto vale un punto en {a} y {b}?"),
+                     T(f"{_fmt(ca[5])} on {a} and {_fmt(cb[5])} on {b}, per contract. One tick (0.25 point) is {_fmt(ca[4])} on {a} and {_fmt(cb[4])} on {b}.",
+                       f"{_fmt(ca[5], 'fr')} sur {a} et {_fmt(cb[5], 'fr')} sur {b}, par contrat. Un tick (0,25 point) vaut {_fmt(ca[4], 'fr')} sur {a} et {_fmt(cb[4], 'fr')} sur {b}.",
+                       f"{_fmt(ca[5], 'es')} en {a} y {_fmt(cb[5], 'es')} en {b}, por contrato. Un tick (0,25 puntos) vale {_fmt(ca[4], 'es')} en {a} y {_fmt(cb[4], 'es')} en {b}.")),
+                    (T(f"What are {a} and {b} trading hours?", f"Quelles sont les heures de marché de {a} et {b} ?", f"¿Cuál es el horario de {a} y {b}?"), HOURS)]
+            title = T(f"{a} vs {b}: Which E-mini Index Future to Trade? · Sweep", f"{a} vs {b} : quel E-mini trader en prop firm ? · Sweep", f"{a} vs {b}: ¿qué E-mini operar en prop firms? · Sweep")
+            desc = T(f"{a} vs {b}: tick and point values side by side, the same {_fmt(RISK)} of risk in points on each, and what one contract means on a 50K prop account.",
+                     f"{a} ou {b} : valeurs du tick et du point côte à côte, le même risque de {_fmt(RISK, 'fr')} en points sur chacun, et ce que pèse un contrat sur un compte prop de 50K.",
+                     f"{a} o {b}: valores del tick y del punto lado a lado, el mismo riesgo de {_fmt(RISK, 'es')} en puntos en cada uno, y lo que pesa un contrato en una cuenta prop de 50K.")
+        limits = (f'<h2>{t(T("Contract limits at prop firms", "Les limites de contrats des prop firms", "Los límites de contratos de las prop firms"))}</h2>'
+                  f'<p>{t(T(f"Firms also cap your size: on a 50K evaluation, the firms Sweep tracks allow {lo} to {hi} full-size contracts depending on the account, and each firm sets how micros count toward that limit. The exact limit of each account is on its firm’s <a href=\"@prop-firms/index.html\">rules page</a>.",
+                            f"Les firmes plafonnent aussi ta taille : sur une évaluation de 50K, les firmes que suit Sweep permettent de {lo} à {hi} contrats de taille normale selon le compte, et chaque firme fixe comment les micros comptent dans cette limite. La limite exacte de chaque compte est sur la <a href=\"@prop-firms/index.html\">page de règles</a> de sa firme.",
+                            f"Las firmas también limitan tu tamaño: en una evaluación de 50K, las firmas que sigue Sweep permiten de {lo} a {hi} contratos de tamaño normal según la cuenta, y cada firma fija cómo cuentan los micros en ese límite. El límite exacto de cada cuenta está en la <a href=\"@prop-firms/index.html\">página de reglas</a> de su firma."))}</p>'
+                  f'<p>{t(T(f"Full specs: {lk(a)} and {lk(b)}. Trading hours: {t(HOURS)} See <a href=\"@futures-market-hours.html\">futures market hours</a> in your time zone.",
+                            f"Fiches complètes : {lk(a)} et {lk(b)}. Heures de marché : {t(HOURS)} Voir les <a href=\"@futures-market-hours.html\">heures du marché des futures</a> dans ton fuseau.",
+                            f"Fichas completas: {lk(a)} y {lk(b)}. Horario: {t(HOURS)} Mira el <a href=\"@futures-market-hours.html\">horario del mercado de futuros</a> en tu zona horaria."))}</p>')
+        tbl = ('<div class="cmp-wrap"><table class="cmp"><thead><tr><th scope="col"><span class="sr">' + t(T("Spec", "Spécification", "Especificación")) + f'</span></th><th scope="col">{lk(a)}</th><th scope="col">{lk(b)}</th></tr></thead><tbody>'
+               + "".join(f'<tr><th scope="row">{t(r)}</th><td>{x}</td><td>{y}</td></tr>' for r, x, y in rows) + "</tbody></table></div>"
+               + f'<p class="fine" style="margin-top:16px">{t(NOTE)}</p>')
+        calc = f'<div class="cta-row" style="margin-top:24px"><a class="btn btn-line" href="{href(lang, "position-size-calculator.html")}?sym={b if micro else a}">{t(T("Position size calculator", "Calculateur de taille de position", "Calculadora de tamaño de posición"))}</a></div>'
+        others = (f'<div class="chiprow" style="margin-top:40px"><span class="eyebrow">{t(T("Other comparisons", "Autres comparaisons", "Otras comparaciones"))}</span>'
+                  + "".join(f'<a class="chip" href="{href(lang, p)}">{CROSS_NAME(p)}</a>' for p in CROSS_PAGES if p != page_id) + "</div>")
+        hero = ui.hero(t, T("Futures contracts", "Contrats à terme", "Futuros"), h1, lead, cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_contract_pair"'))
+        b_ = (ui.sec(ui.head(t, None, T("Side by side", "Côte à côte", "Lado a lado")) + tbl + calc, "t", "specs", width="read")
+              + ui.sec(f'<article class="article">{loc(body + limits)}</article>', "n", "compare", width="read")
+              + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs) + others, "n", "faq", width="read"))
+        ld = jsonld({"@context": "https://schema.org", "@graph": [
+            {"@type": "Article", "headline": t(title).split(" · ")[0], "inLanguage": lang, "datePublished": "2026-10-27", "publisher": {"@id": f"https://{DOMAIN}/#org"}, "author": {"@type": "Organization", "name": "Sweep"}},
+            {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": t(q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"<[^>]+>", "", t(x))}} for q, x in faqs]}]})
+        return (t(title), t(desc), hero + b_ + ui.final(lang, t), ld)
+    return page
+
+# « Read next »: each pair page leads to its two sheets and the calculator; each sheet leads to its comparison (SEO brief v2, lot 5)
+for _s, _n, _e, _ts, _tv, _pv, *_ in C:
+    REL_INFO.setdefault(slug(_s), (T(f"{_s} futures", f"Futures {_s}", f"Futuros {_s}"), T(f"{_fmt(_tv)} a tick, {_fmt(_pv)} a point.", f"{_fmt(_tv, 'fr')} le tick, {_fmt(_pv, 'fr')} le point.", f"{_fmt(_tv, 'es')} por tick, {_fmt(_pv, 'es')} por punto.")))
+for _a, _b in PAIRS:
+    _micro = next(c for c in C if c[0] == _a)[7] == _b
+    REL_INFO[pair_slug(_a, _b)] = (T(f"{_a} vs {_b}", f"{_a} ou {_b}", f"{_a} o {_b}"),
+        T("Mini or micro, side by side.", "Mini ou micro, côte à côte.", "Mini o micro, lado a lado.") if _micro else T("Two E-minis, side by side.", "Deux E-minis, côte à côte.", "Dos E-minis, lado a lado."))
+    RELATED[pair_slug(_a, _b)] = [slug(_a), slug(_b), "position-size-calculator.html"]
+_SHEET_REL = {"NQ": ["nq-vs-mnq.html", "nq-vs-es.html"], "ES": ["es-vs-mes.html", "nq-vs-es.html"], "MNQ": ["nq-vs-mnq.html", "mes-vs-mnq.html"], "MES": ["es-vs-mes.html", "mes-vs-mnq.html"]}
+for _a, _b in PAIRS[:5]:
+    for _s in (_a, _b): RELATED[slug(_s)] = (_SHEET_REL.get(_s) or [pair_slug(_a, _b), "futures-market-hours.html"]) + ["position-size-calculator.html"]

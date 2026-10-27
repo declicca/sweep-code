@@ -44,6 +44,7 @@ def entries():
                         (pages19.GUIDE_PAYOUT, T("Payout rules, compared", "Règles de payout, comparées", "Reglas de payout, comparadas")),
                         (pages19.GUIDE_SIZES, T("Account sizes and targets, compared", "Tailles de compte et objectifs, comparés", "Tamaños de cuenta y objetivos, comparados")),
                         (pages19.GUIDE_DAYS, T("Minimum trading days, compared", "Jours minimum, comparés", "Días mínimos, comparados")),
+                        (pages19.GUIDE_BENCH, T("Benchmark days, explained", "Benchmark days, expliqués", "Benchmark days, explicados")),
                         (pages19.GUIDE_COSTS, T("Prop firm costs, compared", "Coût des prop firms, comparé", "Costo de las prop firms, comparado"))):
         if page not in pages19.RULE_GUIDES: continue   # a guide not published yet
         out.append((page, {l: (title[l], T(f"{core.FIRMS_N} prop firms · Verified {pages18.day(when, 'en')}", f"{core.FIRMS_N} prop firms · Vérifiées le {pages18.day(when, 'fr')}",
@@ -106,6 +107,8 @@ def entries():
         out.append((pages12.slug(s), {l: (T(f"{s} futures", f"Futures {s}", f"Futuros {s}")[l],
                     T(f"Tick {pages12._tick(ts)} · {pages12._fmt(tv)} a tick · {pages12._fmt(pv)} a point", f"Tick {pages12._tick(ts, 'fr')} · {pages12._fmt(tv, 'fr')} le tick · {pages12._fmt(pv, 'fr')} le point",
                       f"Tick {pages12._tick(ts, 'es')} · {pages12._fmt(tv, 'es')} por tick · {pages12._fmt(pv, 'es')} por punto")[l]) for l in LANGS}, None))
+    for a_, b_ in pages12.PAIRS:   # mini vs micro, NQ vs ES (SEO brief v2, 4.4)
+        out.append((pages12.pair_slug(a_, b_), {l: (f"{a_} vs {b_}", core.REL_INFO[pages12.pair_slug(a_, b_)][1][l].rstrip(".")) for l in LANGS}, None))
     for k, sl, _, title, _, _ in pages13.REL:   # release dates
         nm = {l: (title[l] if isinstance(title, dict) else title) for l in LANGS}; of = {l: (pages13.OF[k][l] if k in pages13.OF else nm[l]) for l in LANGS}
         out.append((sl, {l: (T(f"{nm['en']} release dates", f"Dates de publication {of['fr']}", f"Fechas de publicación {of['es']}")[l],

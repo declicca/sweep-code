@@ -223,6 +223,20 @@
    "date": "2026-10-26"
   }
  },
+ "prop-firm-benchmark-days.html": {
+  "en": {
+   "alt": "Benchmark days, explained · 6 prop firms · Verified October 26, 2026",
+   "date": "2026-10-26"
+  },
+  "fr": {
+   "alt": "Benchmark days, expliqués · 6 prop firms · Vérifiées le 26 octobre 2026",
+   "date": "2026-10-26"
+  },
+  "es": {
+   "alt": "Benchmark days, explicados · 6 prop firms · Revisadas el 26 de octubre de 2026",
+   "date": "2026-10-26"
+  }
+ },
  "free-trading-journal.html": {
   "en": {
    "alt": "Free trading journal · For futures and prop firm traders · Free forever",
@@ -951,6 +965,90 @@
    "date": null
   }
  },
+ "nq-vs-mnq.html": {
+  "en": {
+   "alt": "NQ vs MNQ · Mini or micro, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "NQ vs MNQ · Mini ou micro, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "NQ vs MNQ · Mini o micro, lado a lado",
+   "date": null
+  }
+ },
+ "es-vs-mes.html": {
+  "en": {
+   "alt": "ES vs MES · Mini or micro, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "ES vs MES · Mini ou micro, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "ES vs MES · Mini o micro, lado a lado",
+   "date": null
+  }
+ },
+ "cl-vs-mcl.html": {
+  "en": {
+   "alt": "CL vs MCL · Mini or micro, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "CL vs MCL · Mini ou micro, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "CL vs MCL · Mini o micro, lado a lado",
+   "date": null
+  }
+ },
+ "gc-vs-mgc.html": {
+  "en": {
+   "alt": "GC vs MGC · Mini or micro, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "GC vs MGC · Mini ou micro, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "GC vs MGC · Mini o micro, lado a lado",
+   "date": null
+  }
+ },
+ "ym-vs-mym.html": {
+  "en": {
+   "alt": "YM vs MYM · Mini or micro, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "YM vs MYM · Mini ou micro, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "YM vs MYM · Mini o micro, lado a lado",
+   "date": null
+  }
+ },
+ "nq-vs-es.html": {
+  "en": {
+   "alt": "NQ vs ES · Two E-minis, side by side",
+   "date": null
+  },
+  "fr": {
+   "alt": "NQ vs ES · Deux E-minis, côte à côte",
+   "date": null
+  },
+  "es": {
+   "alt": "NQ vs ES · Dos E-minis, lado a lado",
+   "date": null
+  }
+ },
  "cpi-release-dates.html": {
   "en": {
    "alt": "CPI release dates · 2026 and 2027, New York time",
@@ -1424,6 +1522,20 @@
   },
   "es": {
    "alt": "Calculadora de payout · Calculadora gratis para traders de futuros y prop firms",
+   "date": null
+  }
+ },
+ "prop-firm-account-rotation.html": {
+  "en": {
+   "alt": "Prop firm account rotation planner · Free calculator for futures and prop traders",
+   "date": null
+  },
+  "fr": {
+   "alt": "Planificateur de rotation des comptes prop · Calculateur gratuit pour traders de futures et de prop firms",
+   "date": null
+  },
+  "es": {
+   "alt": "Planificador de rotación de cuentas prop · Calculadora gratis para traders de futuros y prop firms",
    "date": null
   }
  }
