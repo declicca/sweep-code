@@ -576,7 +576,9 @@
   // Public hooks for later features (feedback loop, wow moments, streaks…)
   /* the reminders on this device, from elsewhere (« What's new », game.js): state, and turn on from a tap */
   const push = {
-    state: async () => { if (!PU.st) await pushLoad(); const st = PU.st || {}; return { available: !!st.available, can: !!st.available && pushCan() && !iosBrowser() && Notification.permission !== 'denied', on: !!PU.dev }; },
+    // (27 Oct.) also: the plan reminder's time, as the trader reads it (« 8 h 45 »), and whether this is an iPhone outside the Home Screen
+    state: async () => { if (!PU.st) await pushLoad(); const st = PU.st || {}, at = ((st.prefs || {}).plan || {}).at || '08:45';
+      return { available: !!st.available, can: !!st.available && pushCan() && !iosBrowser() && Notification.permission !== 'denied', on: !!PU.dev, ios: iosBrowser(), denied: pushCan() && Notification.permission === 'denied', planAt: hm(at) }; },
     on: async () => { const s0 = await push.state(); if (!s0.can) return s0; if (!s0.on) await pushOn({ disabled: false }); return push.state(); },
   };
   window.SweepNotify = { refresh: () => load(true), open: openSheet, strings, t, push };

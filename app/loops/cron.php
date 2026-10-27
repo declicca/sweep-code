@@ -71,7 +71,7 @@ if (!loops_ready()) {
 if (isset($o['all-events'])) {   // every event once to a test trader (example properties), so each one can be picked as a trigger in Loops
     if (!loops_q('SELECT 1 FROM users WHERE id = ?', [$user])->fetchColumn()) { fwrite(STDERR, "No trader $user.\n"); exit(2); }
     $bad = 0;
-    foreach (['signedUp' => fn(array $c) => ['language' => $c['language'], 'plan' => $c['plan']], 'profileCompleted' => [], 'firstAccountAdded' => ['propFirm' => 'Topstep'],
+    foreach (['signedUp' => fn(array $c) => ['language' => $c['language'], 'plan' => $c['plan']], 'profileCompleted' => [], 'firstAccountAdded' => ['propFirm' => 'Topstep'], 'firstPlanSaved' => [],
               'firstTradeLogged' => [], 'tradesMilestone' => ['milestone' => 10], 'firstPayoutLogged' => [], 'subscriptionStarted' => ['plan' => 'pro', 'interval' => 'month'],
               'subscriptionCanceled' => ['plan' => 'pro'], 'paymentFailed' => ['plan' => 'pro'], 'referralRewarded' => [], 'inactive3d' => [], 'inactive7d' => [], 'inactive14d' => [], 'inactive30d' => [],
               'proTrialDaysLeft' => ['daysLeft' => 30], 'proTrialEnded' => []] as $name => $props) {

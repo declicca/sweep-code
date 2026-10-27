@@ -71,13 +71,31 @@ Sweep envoie des événements ; les courriels se rédigent et s'activent dans Lo
 
 | Événement | Déclencheur | Au plus |
 |---|---|---|
-| `signedUp`, `profileCompleted`, `firstAccountAdded`, `firstTradeLogged`, `firstPayoutLogged` | L'action dans l'app | 1 en tout chacun |
+| `signedUp`, `profileCompleted`, `firstAccountAdded`, `firstPlanSaved`, `firstTradeLogged`, `firstPayoutLogged` | L'action dans l'app (`firstPlanSaved` : le premier plan enregistré, ajouté le 27 oct. ; un trader qui avait déjà des plans est marqué, jamais prévenu) | 1 en tout chacun |
 | `tradesMilestone` (10, 50, 100) | Le 10e, 50e, 100e trade | 1 par étape |
 | `subscriptionStarted`, `paymentFailed`, `subscriptionCanceled`, `referralRewarded` | Stripe, le parrainage | à chaque fois |
 | `inactive3d`, `inactive7d`, `inactive14d`, `inactive30d` | 3, 7, 14, 30 jours sans revenir dans l'app (dès 7 h 30 ET) ; **`inactive3d` ajouté le 14 oct.** | 1 par absence et par étape ; un retour recommence le compte |
 | `proTrialDaysLeft` (30, 10, 3), `proTrialEnded` | La fin de l'essai Pro, sans paiement (jamais l'équipe Discord ni un trader qui paie) | 1 par étape |
 
 Le passage du jour envoie au plus une absence et une étape d'essai par trader.
+
+### Le soir du jour 1 : « Ta séance de demain en 30 secondes » (brief activation, étape E, 27 oct.)
+
+Dans Loops : un parcours déclenché par `signedUp`, une attente jusqu'à **18 h 30 heure de New York** le jour de l'inscription
+(ou le lendemain si l'inscription a lieu après 18 h), puis une condition « n'a pas reçu l'événement `firstPlanSaved` ».
+Le trader qui a déjà fait son plan ne reçoit rien. Ton : une seule action, aucun reproche.
+
+- **FR** — Objet : « Ta séance de demain en 30 secondes » · Texte : « Salut {firstName}, prépare ta séance de demain ce
+  soir : ton biais (haussier ou baissier), tes niveaux et ta perte max du jour. 30 secondes, et demain matin tu sais exactement ce que tu
+  risques. » · Bouton : « Faire mon plan »
+- **EN** — Subject: “Tomorrow’s session in 30 seconds” · Text: “Hi {firstName}, get tomorrow’s session ready tonight: your
+  bias (bullish or bearish), your levels and your max loss for the day. 30 seconds, and tomorrow morning you know exactly what you risk.” ·
+  Button: “Make my plan”
+- **ES** — Asunto: «Tu sesión de mañana en 30 segundos» · Texto: «Hola {firstName}, prepara esta noche tu sesión de mañana:
+  tu sesgo (alcista o bajista), tus niveles y tu pérdida máxima del día. 30 segundos, y mañana por la mañana sabes exactamente lo que
+  arriesgas.» · Botón: «Hacer mi plan»
+
+Le lien du bouton : `https://app.makeitsweep.com/#dashboard` (« Faire mon plan » est le bouton bleu de la routine le soir).
 
 ### Le retour doux (3 et 7 jours) : texte à mettre dans Loops
 

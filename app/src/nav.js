@@ -4167,6 +4167,39 @@ window.SweepMO = window.SweepMO || class {
     else { big = nw('left'); val = usd0(x.left); sub = [nw('L' + x.k, { a: x.a }), x.m ? nw('count', { n: x.n + 1 > x.m ? x.m : x.n + 1, m: x.m }) : '', x.pause ? x.text : ''].filter(Boolean).join(' · '); }
     return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l"><b>${esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${!x.n ? newsLine(d.day) : ''}</div>`;
   }
+  /* (27 Oct., brief activation step E) the next day's appointment: right after a first plan, on a phone, once — « Shall I remind you
+     tomorrow at 8:45 for your plan? », on in one tap (Settings › Notifications' own way, SweepNotify.push.on). On an iPhone outside the
+     Home Screen, the three gestures instead of a refusal. It takes the place of the « reminders » suggestion of the 2nd day. */
+  const RM_T = {
+    en: { q: 'Shall I remind you tomorrow at {t} for your plan?', yes: 'Yes, remind me', no: 'No thanks', on: 'Reminder on: tomorrow at {t}.', off: 'Notifications are blocked on this phone: Settings › Notifications.',
+      iosQ: 'Your reminders on iPhone: add Sweep to your Home Screen.', i1: 'Tap Share in Safari', i2: '« Add to Home Screen »', i3: 'Open Sweep from its icon, then turn on the reminders', ok: 'Got it' },
+    fr: { q: 'Je te rappelle demain à {t} pour ton plan ?', yes: 'Oui, rappelle-moi', no: 'Non merci', on: 'Rappel activé : demain à {t}.', off: 'Les notifications sont bloquées sur ce téléphone : Réglages › Notifications.',
+      iosQ: 'Tes rappels sur iPhone : ajoute Sweep à ton écran d’accueil.', i1: 'Touche Partager dans Safari', i2: '« Sur l’écran d’accueil »', i3: 'Ouvre Sweep depuis son icône, puis active les rappels', ok: 'Compris' },
+    es: { q: '¿Te recuerdo mañana a las {t} tu plan?', yes: 'Sí, recuérdamelo', no: 'No, gracias', on: 'Recordatorio activado: mañana a las {t}.', off: 'Las notificaciones están bloqueadas en este teléfono: Ajustes › Notificaciones.',
+      iosQ: 'Tus recordatorios en iPhone: añade Sweep a tu pantalla de inicio.', i1: 'Toca Compartir en Safari', i2: '« Añadir a pantalla de inicio »', i3: 'Abre Sweep desde su icono y activa los recordatorios', ok: 'Entendido' } };
+  const rmt = (k, v) => String((RM_T[L] || RM_T.en)[k]).replace('{t}', v || '');
+  const RM = { st: null, asked: false };
+  const rmDone = () => { try { return localStorage.getItem('sw.remind1') === '1'; } catch (e) { return true; } };
+  const rmClose = () => { try { localStorage.setItem('sw.remind1', '1'); const g = JSON.parse(localStorage.getItem('sw.sugg') || '{}') || {}; g.push = Object.assign({}, g.push, { done: true }); localStorage.setItem('sw.sugg', JSON.stringify(g)); } catch (e) { /* private mode */ } };
+  function remindRow() {
+    if (rmDone() || !(matchMedia('(pointer: coarse)').matches && innerWidth < 900) || !window.SweepNotify || !SweepNotify.push) return '';
+    const planned = (S.journals || []).some((j) => !j.demo && j.pre && j.pre.bias); if (!planned) return '';
+    if (!RM.st) { if (!RM.asked) { RM.asked = true; SweepNotify.push.state().then((x) => { RM.st = x; if (window.SweepNowRefresh) SweepNowRefresh(); }).catch(() => { /* no row */ }); } return ''; }
+    const x = RM.st; if (!x.available || x.on) return '';
+    if (x.ios) return `<div class="nav-remind"><p><b>${esc2(rmt('iosQ'))}</b></p><ol><li>${esc2(rmt('i1'))}</li><li>${esc2(rmt('i2'))}</li><li>${esc2(rmt('i3'))}</li></ol><div class="nav-remind-a"><button type="button" class="btn sm" data-rt="remind-no">${esc2(rmt('ok'))}</button></div></div>`;
+    if (!x.can) return '';
+    return `<div class="nav-remind"><p><b>${esc2(rmt('q', x.planAt))}</b></p><div class="nav-remind-a"><button type="button" class="btn sm" data-rt="remind-yes">${esc2(rmt('yes'))}</button><button type="button" class="link" data-rt="remind-no">${esc2(rmt('no'))}</button></div></div>`;
+  }
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-rt="remind-yes"], [data-rt="remind-no"]'); if (!b) return;
+    rmClose();
+    if (b.dataset.rt === 'remind-yes') {
+      b.disabled = true;
+      const r = await SweepNotify.push.on().catch(() => null);
+      if (typeof toast === 'function') toast(r && r.on ? rmt('on', r.planAt) : rmt('off'));
+    }
+    if (window.SweepNowRefresh) SweepNowRefresh();
+  });
   function card() {
     const st = window.SweepGame && SweepGame.state && SweepGame.state(); const d = st && st.today;
     if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div><div class="nav-rt-steps">${'<div class="nav-rt-s sk"></div>'.repeat(3)}</div></section>`;
@@ -4191,11 +4224,12 @@ window.SweepMO = window.SweepMO || class {
     const intT = ({ en: 'Your intention this week', fr: 'Ton intention cette semaine', es: 'Tu intención esta semana' })[L] || 'Your intention this week';
     const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : '';
     const nowRow = nowHtml(d, r);
+    const rmRow = remindRow();
     // the 90-day gameplan's mission of the day (SWEEP.md step 3: its card became this line; gameplan.js draws it, the last one kept in the browser)
     const gpRow = (() => { try { return window.SweepGP && SweepGP.line ? SweepGP.line() : localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } })();
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
-    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${gpRow}${helpT}</section>`;
+    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${rmRow}${gpRow}${helpT}</section>`;
     if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}${intRow}<p class="nav-rt-msg">${t('dayoff')}</p>${gpRow}${helpT}</section>`;
     const s1 = r.plan >= 100 ? 'done' : r.plan > 0 ? 'late' : 'todo';
     const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
@@ -4213,7 +4247,7 @@ window.SweepMO = window.SweepMO || class {
     // (27 Oct., brief « daily loop » step 3) under the steps from the first trade: « I'm done for today » opens the review at once
     const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t('inPlan', { c: d.compliant || 0, n: d.trades });
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${t('ydayB')} ›</b><span>${esc2(left(y.deadline))}</span></button>` : '';
-    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}${nowRow}${gpRow}${intRow}
+    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}${nowRow}${rmRow}${gpRow}${intRow}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}

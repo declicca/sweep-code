@@ -149,6 +149,15 @@ $ok($events('firstPayoutLogged', 'u_new') === [], 'the estimated payout of « Yo
 $doc('u_new', 'payouts', 'np1', ['net_c' => 80000, 'status' => 'requested']);
 $doc('u_new', 'payouts', 'np2', ['net_c' => 80000, 'status' => 'paid']);
 $ok(count($events('firstPayoutLogged', 'u_new')) === 1, 'firstPayoutLogged once (a payout entered, whatever its status)');
+// (27 Oct., brief activation step E) the first plan: once; a journal without a bias (a review only) is not a plan; a trader who
+// already had plans is marked, never told « first plan »
+$doc('u_new', 'journals', '2026-10-20', ['post' => ['followed' => 'yes']]);
+$ok($events('firstPlanSaved', 'u_new') === [], 'a review only: no firstPlanSaved');
+$doc('u_new', 'journals', '2026-10-21', ['pre' => ['bias' => 'bullish', 'max_loss' => '500']]);
+$doc('u_new', 'journals', '2026-10-22', ['pre' => ['bias' => 'bearish']]);
+$ok(count($events('firstPlanSaved', 'u_new')) === 1, 'firstPlanSaved once, at the first plan');
+$doc('u_imp', 'journals', 'j1', ['pre' => ['bias' => 'bullish']], false); $doc('u_imp', 'journals', 'j2', ['pre' => ['bias' => 'bullish']]);
+$ok($events('firstPlanSaved', 'u_imp') === [] && in_array('firstPlanSaved', $rows('u_imp'), true), 'plans before the event existed: marked, not sent');
 $ok(loops_claim('u_x', 'k', 1) && !loops_claim('u_x', 'k', 2), 'a claim is taken once (one statement)');
 
 // 5. Stripe

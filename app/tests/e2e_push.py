@@ -9,6 +9,8 @@ keys the test made (tests/push_ua.php), so the test opens the very message the p
  - the scheduled task at the trader's time (9:00 here, chosen in the app; nothing at 8:45): the phone gets « Ton plan du
    jour t'attend. », in the trader's language, opening Today; « Désactiver sur cet appareil » forgets the device;
  - Safari on an iPhone, not added to the Home Screen: how to do it, no button.
+ - (27 Oct.) right after a first plan, on a phone, once: « Je te rappelle demain à 8 h 45 pour ton plan ? », on in one tap; on an
+   iPhone outside the Home Screen the three gestures; never on a computer; it replaces the « reminders » suggestion of the 2nd day.
 Checks: no page error, nothing wider than the window, the texts in the trader's language.
 """
 import json, os, sqlite3, subprocess, sys, time
@@ -146,10 +148,47 @@ def run_iphone(p, lang):   # Safari on an iPhone, not added to the Home Screen
   if SHOTS: pg.locator('#ntPrefs').screenshot(path=os.path.join(SHOTS, f'p10-iphone-{lang}.png'))
   br.close()
 
+PLAN = "() => { put('journals', { id: todayStr(), pre: { bias: 'bullish', max_loss: '500', max_trades: '2', saved_at: Math.floor(Date.now() / 1000) } }); render(); }"
+RM = {'fr': ('Je te rappelle demain à 8 h 45 pour ton plan ?', 'Rappel activé : demain à 8 h 45.', 'Tes rappels sur iPhone : ajoute Sweep à ton écran d’accueil.'),
+      'en': ('Shall I remind you tomorrow at 8:45 AM for your plan?', 'Reminder on: tomorrow at 8:45 AM.', '')}
+def run_remind(p, lang, phone, ua=None):   # (27 Oct., brief activation step E) right after a first plan, once: tomorrow's reminder in one tap
+  tag = f"{'390' if phone else '1300'}-{lang}{' iPhone' if ua else ''}"; q, done, ios = RM[lang]
+  keys = json.loads(php('keys').stdout); ep = 'https://fcm.googleapis.com/fcm/send/e2e-rm-%s-%d' % (lang, int(time.time() * 1000))
+  br = p.chromium.launch(); ctx = trader(br, lang, phone, ua=ua, perm=not ua)
+  if not ua: ctx.add_init_script(STUB % json.dumps({'endpoint': ep, 'p256dh': keys['p256dh'], 'auth': keys['auth']}))
+  pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+  pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(500)
+  pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(800)
+  ok(pg.locator('#main .nav-remind').count() == 0, f'{tag} before a plan: no reminder offer')
+  pg.evaluate(PLAN); pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(600)
+  sp = lambda v: (v or '').replace('\xa0', ' ').replace('\u202f', ' ')
+  row = sp(until(lambda: pg.locator('#main .nav-rt .nav-remind').count() and pg.locator('#main .nav-rt .nav-remind').inner_text(), 8) or '')
+  if not phone:
+    ok(not row, f'{tag}: a computer: no offer ({row!r})'); br.close(); return
+  if ua:
+    if SHOTS: pg.locator('#main .nav-remind').screenshot(path=os.path.join(SHOTS, f'p10-remind-iphone-{lang}.png'))
+    ok(bool(row) and ios in row and pg.locator('#main .nav-remind ol li').count() == 3 and pg.locator('#main [data-rt=remind-yes]').count() == 0, f'{tag}: the three gestures, not a refusal ({(row or "")[:80]!r})')
+    pg.locator('#main [data-rt=remind-no]').tap(); pg.wait_for_timeout(500)
+  else:
+    ok(bool(row) and q in row, f'{tag}: after the first plan, « {q} » ({(row or "")[:80]!r})')
+    if SHOTS: pg.locator('#main .nav-rt').screenshot(path=os.path.join(SHOTS, f'p10-remind-{tag}.png'))
+    blue = pg.evaluate("[...document.querySelectorAll('#main .nav-rt .btn.primary')].filter((b) => b.getClientRects().length).length")
+    ok(blue <= 1, f'{tag}: the offer adds no blue button ({blue})')
+    pg.locator('#main [data-rt=remind-yes]').tap()
+    msg = sp(until(lambda: (pg.evaluate("(document.getElementById('toast') || {}).textContent || ''") or '').startswith(done[:12]) and pg.evaluate("document.getElementById('toast').textContent"), 10) or '')
+    ok(bool(msg) and done in msg and until(lambda: state(ctx).get('devices'), 8), f'{tag}: one tap: « {done} », this phone subscribed ({msg!r})')
+  pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=15000); pg.wait_for_timeout(2500)
+  ok(pg.locator('#main .nav-remind').count() == 0 and pg.evaluate("JSON.parse(localStorage.getItem('sw.sugg') || '{}').push.done") is True, f'{tag}: once: not offered again, and it replaces the « reminders » suggestion of the 2nd day')
+  ok(pg.evaluate(WIDE) <= 1 and not errs, f'{tag}: nothing wider than the window, no page error ({errs[:1]})')
+  br.close()
+
 if not MOCK: print('FAIL SWEEP_PUSH_MOCK is not set (tools/run.sh, tools/par.py)'); sys.exit(1)
 with sync_playwright() as p:
   run(p, 'fr', True)
   run(p, 'en', False)
   run(p, 'es', True)
   run_iphone(p, 'fr')
+  run_remind(p, 'fr', True)
+  run_remind(p, 'en', False)
+  run_remind(p, 'fr', True, ua=IPHONE)
 print('all passed' if not fails else f'{fails} failed'); sys.exit(1 if fails else 0)

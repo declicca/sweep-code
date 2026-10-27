@@ -11,7 +11,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * each return to the app (last visit, at most once an hour), profile, email, plan (Stripe, Admin), account deleted.
  * Contact properties: LOOPS_PROPS (created in Loops by the first run of loops/cron.php).
  *
- * Step 1: the events. In the app, in real time (this file): signedUp, profileCompleted, firstAccountAdded, firstTradeLogged,
+ * Step 1: the events. In the app, in real time (this file): signedUp, profileCompleted, firstAccountAdded, firstPlanSaved, firstTradeLogged,
  * tradesMilestone (10th, 50th, 100th trade), firstPayoutLogged (once each), subscriptionStarted, subscriptionCanceled,
  * paymentFailed (Stripe webhook), referralRewarded. Once a day from 7:30 New York time (loops/cron.php): inactive7d,
  * inactive14d, inactive30d, proTrialDaysLeft (30, 10, 3), proTrialEnded.
@@ -310,6 +310,19 @@ function loops_on_trade(array $p): void
     foreach ($reached as $m) if ($m !== $top) loops_claim($uid, "tradesMilestone:$m", loops_now());   // passed: never sent later
     loops_once($uid, 'tradesMilestone', ['milestone' => $top], "tradesMilestone:$top");
 }
+/** (27 Oct., brief activation step E) the first plan saved (a bias in the journal's pre-market): once. A trader who had plans before
+ *  this event existed is marked, never sent « first plan » for his tenth one. */
+function loops_on_journal(array $p): void
+{
+    $uid = (string) ($p['uid'] ?? ''); $d = (array) ($p['doc'] ?? []);
+    if ($uid === '' || !empty($d['demo']) || empty(($d['pre'] ?? [])['bias']) || !loops_ready() || in_array('firstPlanSaved', loops_done($uid), true)) return;
+    $n = 0;
+    foreach (loops_q("SELECT data FROM documents WHERE user_id = ? AND collection = 'journals'", [$uid])->fetchAll(PDO::FETCH_COLUMN) as $raw) {
+        $j = json_decode((string) $raw, true); if (is_array($j) && empty($j['demo']) && !empty(($j['pre'] ?? [])['bias'])) $n++;
+    }
+    if ($n > 1) { loops_claim($uid, 'firstPlanSaved', loops_now()); return; }
+    loops_once($uid, 'firstPlanSaved');
+}
 function loops_on_payout(array $p): void
 {
     $uid = (string) ($p['uid'] ?? ''); $d = (array) ($p['doc'] ?? []);
@@ -374,6 +387,7 @@ function loops_init(): array
         if ($n >= 1) $done[] = 'firstTradeLogged';
         foreach (LOOPS_MILESTONES as $m) if ($n >= $m) $done[] = "tradesMilestone:$m";
         if (loops_has($uid, 'payouts', fn($d) => empty($d['estimated']))) $done[] = 'firstPayoutLogged';
+        if (loops_has($uid, 'journals', fn($d) => !empty(($d['pre'] ?? [])['bias']))) $done[] = 'firstPlanSaved';
         foreach ($done as $k) if (loops_claim($uid, $k, $now)) $marked++;
     }
     loops_save_setting('loops_since', (string) $now);
@@ -437,4 +451,5 @@ if (class_exists('Events', false)) {
     Events::on('trade.created', 'loops_on_trade');
     Events::on('trade.updated', 'loops_on_trade');   // a batch fires one event per trading day: it can be an update
     Events::on('payout.recorded', 'loops_on_payout');
+    Events::on('journal.saved', 'loops_on_journal');
 }
