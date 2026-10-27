@@ -503,7 +503,7 @@ GLOSS_LINKS = {"tick-value": "futures-contracts.html", "point-value": "futures-c
                "drawdown": "prop-firm-drawdown-rules.html", "trailing-drawdown": "trailing-drawdown-calculator.html", "eod-drawdown": "prop-firm-drawdown-rules.html",
                "static-drawdown": "prop-firm-drawdown-rules.html", "intraday-drawdown": "prop-firm-drawdown-rules.html",
                "consistency": "consistency-rule-calculator.html", "profit-target": "prop-firm-profit-targets.html", "minimum-days": "prop-firm-minimum-days.html",
-               "winning-day": "prop-firm-minimum-days.html", "payout": "payout-calculator.html", "profit-split": "prop-firm-payout-rules.html", "payout-cap": "prop-firm-payout-rules.html",
+               "winning-day": "prop-firm-benchmark-days.html", "payout": "payout-calculator.html", "profit-split": "prop-firm-payout-rules.html", "payout-cap": "prop-firm-payout-rules.html",
                "evaluation": "prop-firms/index.html", "funded": "prop-firms/index.html", "rth": "futures-market-hours.html", "globex": "futures-market-hours.html",
                "settlement": "futures-market-hours.html", "flat-rule": "futures-market-hours.html", "opening-range": "futures-market-hours.html",
                "high-impact-release": "release-dates.html", "news-rule": "release-dates.html", "fomc": "fomc-meeting-dates.html", "cpi": "cpi-release-dates.html",

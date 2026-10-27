@@ -67,7 +67,8 @@ def _page(lang, t, kick, h1, lead, intro, table, after, faqs, rel, title, desc, 
     body_intro = "".join(f"<h2>{t(h)}</h2>" + "".join(f"<p>{t(x)}</p>" for x in ps) for h, ps in intro)
     band = ui.band(t(TRACK_PROPS), t(RULES_FILL), ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_guide_card"'))
     b = (ui.sec(summary, "t", "summary") + tool
-         + ui.sec(ui.head(t, None, T("Firm by firm.","Firme par firme.","Firma por firma.")) + table + f'<p class="fine vs-note" style="margin-top:20px">{_checked_note(lang, t)}</p>' + band, "t", "firms")
+         + ui.sec(ui.head(t, None, T("Firm by firm.","Firme par firme.","Firma por firma.")) + table + f'<p class="fine vs-note" style="margin-top:20px">{_checked_note(lang, t)}</p>' + band
+                  + f'<p style="margin-top:20px">{ui.go(lang, t, "prop-firm-tracker.html", T("How Sweep tracks your accounts against these rules", "Comment Sweep suit tes comptes selon ces règles", "Cómo sigue Sweep tus cuentas según estas reglas"))}</p>', "t", "firms")
          + ui.sec(f'<article class="article">{body_intro}</article>', "n", "explained", width="read")
          + (ui.sec(f'<article class="article">{after}</article>', "n", "more", width="read") if after else "")
          + ui.sec(ui.head(t, None, T("Questions","Questions","Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read"))
@@ -394,9 +395,9 @@ def page_payout_guide(lang, t):
     table = _table(lang, t, *PAYOUT_HEADS, _firm_rows(lang, t, lambda f, p: payout_cells(lang, t, f, p)))
     intro = [
      (T("How prop firm payouts work", "Comment marchent les payouts des prop firms", "Cómo funcionan los payouts de las prop firms"), [
-      T("Before each payout, firms check conditions since your last request: a number of winning days (sometimes with a minimum profit per day) or traded days, sometimes a balance to keep above your starting balance, and often a consistency rule.",
-        "Avant chaque payout, les firmes vérifient des conditions depuis ta dernière demande : un nombre de jours gagnants (parfois avec un profit minimum par jour) ou de jours tradés, parfois un solde à garder au-dessus de ton solde de départ, et souvent une règle de consistance.",
-        "Antes de cada payout, las firmas revisan condiciones desde tu última solicitud: un número de días ganadores (a veces con un beneficio mínimo por día) o de días operados, a veces un saldo a mantener por encima de tu saldo inicial y, a menudo, una regla de consistencia."),
+      T("Before each payout, firms check conditions since your last request: a number of <a href=\"" + href("en", GUIDE_BENCH) + "\">winning days</a> (sometimes with a minimum profit per day) or traded days, sometimes a balance to keep above your starting balance, and often a consistency rule.",
+        "Avant chaque payout, les firmes vérifient des conditions depuis ta dernière demande : un nombre de <a href=\"" + href("fr", GUIDE_BENCH) + "\">jours gagnants</a> (parfois avec un profit minimum par jour) ou de jours tradés, parfois un solde à garder au-dessus de ton solde de départ, et souvent une règle de consistance.",
+        "Antes de cada payout, las firmas revisan condiciones desde tu última solicitud: un número de <a href=\"" + href("es", GUIDE_BENCH) + "\">días ganadores</a> (a veces con un beneficio mínimo por día) o de días operados, a veces un saldo a mantener por encima de tu saldo inicial y, a menudo, una regla de consistencia."),
       T("Then they limit the amount: a minimum and a maximum per payout (at some firms the maximum rises with each payout), sometimes a share of your profit, and a profit split, the share you keep.",
         "Ensuite, elles limitent le montant : un minimum et un maximum par payout (chez certaines firmes, le maximum monte à chaque payout), parfois une part de ton profit, et un partage des profits, la part que tu gardes.",
         "Después limitan el importe: un mínimo y un máximo por payout (en algunas firmas el máximo sube con cada payout), a veces una parte de tu beneficio, y un reparto de beneficios, la parte que te quedas."),

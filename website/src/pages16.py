@@ -144,7 +144,15 @@ def sec_faq(lang, t):
 def faq_ld(t):
     return {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":re.sub(r"<[^>]+>","",t(a))}} for q,a in FAQ5]}
 
+HOME_FREE = [("cpi-release-dates.html", L3("Next CPI release", "Prochain CPI", "Próximo CPI")), ("ppi-release-dates.html", L3("PPI release dates", "Dates du PPI", "Fechas del PPI")),
+             ("contracts/nq-futures.html", L3("NQ tick value", "Valeur du tick NQ", "Valor del tick NQ")), ("prop-firm-account-rotation.html", L3("Account rotation planner", "Rotation des comptes prop", "Rotación de cuentas prop")),
+             ("guides.html", L3("All guides", "Tous les guides", "Todas las guías"))]
 def sec_next(lang, t):
-    return read_next(lang, t, ["features.html", "prop-firm-tracker.html", "tools.html"])
+    """« Read next », then a line of the free resources (SEO brief v2, lot 5)."""
+    free = (f'<div class="chiprow" style="margin-top:32px"><span class="eyebrow">{t(L3("Free for traders", "Gratuit pour les traders", "Gratis para traders"))}</span>'
+            + "".join(f'<a class="chip" href="{href(lang, p)}">{t(n)}</a>' for p, n in HOME_FREE) + "</div>")
+    s = read_next(lang, t, ["features.html", "prop-firm-tracker.html", "tools.html"])
+    k = s.rfind("</div></section>")
+    return s[:k] + free + s[k:]
 def sec_final(lang, t):
     return final(lang, t)

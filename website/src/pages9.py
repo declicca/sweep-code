@@ -178,7 +178,10 @@ def page_changelog(lang, t, older=""):
                    + '<ul class="list">' + "".join(f"<li>{t(x)}</li>" for x in items) + "</ul></details>" for i, (iso, label, items) in enumerate(DAYS))
     if older:
         days += f'<details class="older"><summary><span>{t(T("Earlier releases","Versions précédentes","Versiones anteriores"))}</span></summary><div class="older-body">{older}</div></details>'
-    b = (sec(grid, "t") + sec(f'<div class="read"><div class="head"><h2>{t(T("Day by day","Jour par jour","Día a día"))}</h2></div><div class="tl">{days}</div></div>', "n", "days")
+    press = t(T(f'Writing about Sweep? Logos, screenshots and facts are in the <a href="{href("en", "press-kit.html")}">press kit</a>.',
+                f'Tu écris sur Sweep ? Logos, captures et faits sont dans le <a href="{href("fr", "press-kit.html")}">kit presse</a>.',
+                f'¿Escribes sobre Sweep? Logos, capturas y datos están en el <a href="{href("es", "press-kit.html")}">kit de prensa</a>.'))
+    b = (sec(grid, "t") + sec(f'<div class="read"><div class="head"><h2>{t(T("Day by day","Jour par jour","Día a día"))}</h2></div><div class="tl">{days}</div><p class="fine" style="margin-top:24px">{press}</p></div>', "n", "days")
          + read_next(lang, t, ["features.html", "import.html", "ninjatrader.html"]) + final(lang, t))
     return (t(T("What’s new in Sweep · Changelog","Nouveautés de Sweep · Changelog","Novedades de Sweep · Changelog")),
             t(T("Log a trade from a screenshot, your platform’s real numbers, real prop firm payout rules, copy trading and a new Today page.","Ajout de trade par capture, les vrais chiffres de ta plateforme, les vraies règles de payout des prop firms, copy trading et nouvelle page Aujourd’hui.","Registro por captura, los números reales de tu plataforma, reglas de payout reales de las prop firms, copy trading y nueva página Hoy.")),

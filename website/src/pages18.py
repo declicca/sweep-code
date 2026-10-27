@@ -368,7 +368,15 @@ def glance(lang, t, f):
     out = ""
     if dd_items: out += f'<h2 id="drawdown">{t(h1)}</h2><ul class="list">{"".join(dd_items)}</ul>' + go("trailing-drawdown-calculator.html", T("Trailing drawdown calculator", "Calculateur de drawdown suiveur", "Calculadora de drawdown dinámico"))
     if mx: out += f'<h2 id="max-payout">{t(h2)}</h2>{mx}' + go("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout"))
-    if po_items: out += f'<h2 id="payouts">{t(h3)}</h2><ul class="list">{"".join(po_items)}</ul>' + go("prop-firm-payout-rules.html", T("Payout rules of every firm, compared", "Les règles de payout de chaque firme, comparées", "Las reglas de payout de cada firma, comparadas"))
+    bench, rot = href(lang, "prop-firm-benchmark-days.html"), href(lang, "prop-firm-account-rotation.html")
+    wins = any(((s.get("funded") or {}).get("payout") or {}).get("win_days") for p in progs for s in p["sizes"])
+    more = ((t(T(f'Winning days with a minimum profit are often called benchmark days: <a href="{bench}">how they count, with a counter for yours</a>. ',
+                 f'Les jours gagnants avec un profit minimum s’appellent souvent des benchmark days : <a href="{bench}">comment ils se comptent, avec un compteur pour les tiens</a>. ',
+                 f'Los días ganadores con un beneficio mínimo se llaman a menudo benchmark days: <a href="{bench}">cómo se cuentan, con un contador para los tuyos</a>. ')) if wins else "")
+            + t(T(f'Several accounts? The <a href="{rot}">account rotation planner</a> tells you which one to trade first today.',
+                  f'Plusieurs comptes ? Le <a href="{rot}">planificateur de rotation des comptes</a> te dit lequel trader en premier aujourd’hui.',
+                  f'¿Varias cuentas? El <a href="{rot}">planificador de rotación de cuentas</a> te dice cuál operar primero hoy.')))
+    if po_items: out += f'<h2 id="payouts">{t(h3)}</h2><ul class="list">{"".join(po_items)}</ul><p>{more}</p>' + go("prop-firm-payout-rules.html", T("Payout rules of every firm, compared", "Les règles de payout de chaque firme, comparées", "Las reglas de payout de cada firma, comparadas"))
     return out
 
 def make_rules_page(f):

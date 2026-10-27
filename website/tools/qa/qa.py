@@ -4,7 +4,7 @@
   qa.py quick [pages…]  the pages changed since the last deploy (or the pages given), phone 390 and computer 1300,
                         light and dark, then the SEO of every page: for a small change (about a minute)
   qa.py full            every page at 360, 390, 768, 1024, 1440 and 1920 px, light and dark
-  qa.py seo             titles, descriptions, canonicals, hreflang, sitemap, structured data, links, utm
+  qa.py seo             titles, descriptions, canonicals, hreflang, sitemap, structured data, links, utm, 3 inbound links per page
   qa.py func            menus, phone menu, size switch, tour, language and consent banners, calculators
   qa.py kbd             keyboard: skip link, menus, focus rings, phone menu
   qa.py all             full + seo + func + kbd: before a big delivery
@@ -199,6 +199,7 @@ def seo():
     olds = [re.compile(m) for m in re.findall(r"RewriteRule \^\(fr/\|es/\)\?([^\s]+?)\s", ht) + re.findall(r"RedirectMatch 301 \^/\(fr/\|es/\)\?([^\s]+?)\s", ht)]
     txt = lambda s: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", s))).strip()
     noidx = set()
+    inbound = {}   # page → pages linking to it from their content (<main>, breadcrumb aside): 3 at least (SEO brief v2, lot 5)
     for rel in files:
         s = open(os.path.join(D, rel), encoding="utf-8").read(); u = url_of(rel); head = s[:s.find("</head>")]
         err = lambda m: bad.append((u, m))
@@ -236,6 +237,9 @@ def seo():
                     ld_c = [txt(i["name"]) for i in n.get("itemListElement", [])]
                     if ld_c != vis_c: err(f"BreadcrumbList {ld_c} ≠ fil visible {vis_c}")
         if crumbs and "BreadcrumbList" not in s: err("fil d'Ariane sans BreadcrumbList")
+        main = re.search(r"<main.*?</main>", s, re.S)
+        for h in set(re.findall(r'href="(/[^"#?]*)', re.sub(r'<nav class="crumbs".*?</nav>', "", main.group(0), flags=re.S) if main else "")):
+            if (DOM + h).rstrip("/") != (DOM + u).rstrip("/"): inbound.setdefault((DOM + h).rstrip("/"), set()).add(u)
         for h in re.findall(r'href="(/[^"#?]*)', s):
             p = re.sub(r"^(fr|es)/", "", h.lstrip("/"))
             if p.endswith(".html") or any(o.fullmatch(p) or o.fullmatch(p + "/") for o in olds): err(f"lien vers une adresse qui redirige {h}")
@@ -247,6 +251,9 @@ def seo():
     missing = [url_of(r) for r in files if DOM + url_of(r) not in sm and DOM + url_of(r) not in noidx]
     for u in sorted({u for u in locs if locs.count(u) > 1}): bad.append((u, "adresse en double dans les sitemaps"))
     for m in missing: bad.append((m, "absente du sitemap"))
+    for loc in sm:
+        n = len(inbound.get(loc.rstrip("/"), ()))
+        if n < 3: bad.append((loc, f"{n} lien(s) entrant(s) dans le contenu des autres pages, 3 au minimum (orpheline si 0)"))
     print(f"== SEO : {len(files)} pages, sitemap de {len(sm)} adresses, {len(bad)} problème(s)")
     for u, m in sorted(set(bad))[:60]: print(f"   {u} : {m}")
     return len(bad)

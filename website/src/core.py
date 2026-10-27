@@ -536,7 +536,7 @@ RELATED = {
  "how-we-verify-prop-firm-rules.html": ["prop-firm-rule-changes.html", "prop-firms/index.html", "prop-firm-payout-rules.html"],
  "ninjatrader.html": ["import.html", "quantower.html", "prop-firm-tracker.html"],
  "quantower.html": ["import.html", "ninjatrader.html", "prop-firm-tracker.html"],
- "prop-firm-minimum-days.html": ["pass-prop-firm-evaluation.html", "prop-firm-payout-rules.html", "trading-journal-guide.html"],
+ "prop-firm-minimum-days.html": ["prop-firm-benchmark-days.html", "pass-prop-firm-evaluation.html", "prop-firm-payout-rules.html"],
  "prop-firm-benchmark-days.html": ["prop-firm-payout-rules.html", "payout-calculator.html", "funded-account-playbook.html"],
  "prop-firm-costs.html": ["prop-firm-roi-calculator.html", "payout-tracker.html", "prop-firm-profit-targets.html"],
  "prop-firms/index.html": ["prop-firm-rule-changes.html", "how-we-verify-prop-firm-rules.html", "prop-firm-tracker.html"],
