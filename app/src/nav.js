@@ -4219,7 +4219,7 @@ window.SweepMO = window.SweepMO || class {
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
         ${step(3, r.review || 0, 'review', t('s3'), t('s3d'), s3, s3 === 'done' ? t('reviewDone') : t('reviewTodo'), s3 === 'done' ? t('b3v') : t('b3'), 'review', '', s3 === 'done' ? t('see') : t('b3s'))}
       </div>
-      ${d.trades && s3 !== 'done' ? `<p class="nav-rt-finl"><button type="button" class="link nav-rt-fin" data-rt="review">${t('fin')} ›</button></p>` : ''}
+      ${d.trades && s3 !== 'done' ? `<p class="nav-rt-finl"><button type="button" class="link nav-rt-fin" data-rt="fin">${t('fin')} ›</button></p>` : ''}
       ${helpT}</section>`;
   }
   window.SweepNowRefresh = () => { try { place(); } catch (e) { /* never blocks */ } };
@@ -4243,7 +4243,7 @@ window.SweepMO = window.SweepMO || class {
     const b = e.target.closest && e.target.closest('[data-rt]'); if (!b) return;
     const k = b.dataset.rt, g = document.querySelector('#main .g-today');
     if (k === 'plan') { if (window.SweepGame && SweepGame.openPlan) { const nx = window.SweepNextSession && SweepNextSession(); nx ? SweepGame.openPlan(nx) : SweepGame.openPlan(); } }
-    else if (k === 'review') { if (window.SweepGame && SweepGame.openReview) SweepGame.openReview(); }
+    else if (k === 'review' || k === 'fin') { if (window.SweepGame && SweepGame.openReview) SweepGame.openReview(); }   // « I'm done for today »: the same review, at once
     else if (k === 'week') { if (window.SweepGame && SweepGame.open) SweepGame.open('weekly'); }
     else if (k === 'trade') { if (typeof openTicket === 'function') openTicket(); }
     else if (k === 'dayoff') { const o = g && g.querySelector('[data-g=dayoff]'); if (o) o.click(); }
