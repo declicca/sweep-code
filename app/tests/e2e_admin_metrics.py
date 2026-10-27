@@ -37,6 +37,10 @@ async def main():
       cards = await pg.evaluate("[...document.querySelectorAll('#main .ux-brief .ux-m small')].map(s=>s.textContent)")
       want = ['Activation : un trade le jour de l’inscription', 'Rétention J7', 'Rétention J30', 'Journées balayées', 'Journées fermées', 'Bilans de la semaine ouverts', 'De retour le jour de trading suivant', 'Risque permis vu le jour de l’inscription']
       ok(all(any(c.startswith(x) for c in cards) for x in want), f'{tag} the four indicators, closed days and Friday recaps opened (SWEEP.md, step 0) ({cards})')
+      # (brief « pertes oubliées », step 1) the complete journal: 3 figures, over 7 and 30 days
+      jr = await pg.evaluate("[...document.querySelectorAll('#main .ux-journal tbody tr')].map((r) => [r.dataset.jr, r.children.length, r.getClientRects().length > 0])")
+      ok([x[0] for x in jr] == ['high_win_20', 'losing_trades', 'days_without_loss'] and all(x[1] == 3 and x[2] for x in jr) and 'Journal complet' in (await pg.evaluate("document.getElementById('main').innerText")),
+         f'{tag} « Journal complet »: 3 figures, 7 and 30 days ({jr})')
       # (brief activation, step C) when they sign up: the 4 moments of the New York day, each with its sign-ups and the share with a first plan or trade
       sl = await pg.evaluate("[...document.querySelectorAll('#main .ux-slots tbody tr')].map((r) => [r.dataset.slot, r.children.length, r.getClientRects().length > 0])")
       ok([x[0] for x in sl] == ['before', 'session', 'evening', 'weekend'] and all(x[1] == 3 and x[2] for x in sl), f'{tag} « Quand ils s’inscrivent »: 4 moments, sign-ups and first plan or trade ({sl})')

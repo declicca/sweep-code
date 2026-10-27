@@ -858,6 +858,17 @@
     es: { d1: 'De vuelta el siguiente día de trading: una visita, un plan o una operación', rs: 'Riesgo permitido visto el día del registro: un primer plan u operación', h: 'Cuándo se registran (hora de Nueva York)', n: 'Registros', p: 'Primer plan u operación ese día',
       k: { before: 'Antes de la apertura (18 h → 9:30)', session: 'Sesión (9:30 → 16 h)', evening: 'Tarde (16 h → 18 h)', weekend: 'Fin de semana (viernes 17 h → domingo 18 h)' } } };
   const SC = () => SCT[LANG] || SCT.en;
+  // brief « pertes oubliées », step 1: a complete journal, measured before changing anything (7 and 30 days, real traders)
+  const JRT = {
+    en: { h: 'Complete journal', sub: 'Losses not logged make the journal too pretty. Real traders lose on 40 to 55 % of their trades.', d7: '7 days', d30: '30 days', hi: 'Traders with 20+ trades and over 80 % winners', loss: 'Losing trades', nol: 'Trading days without a loss' },
+    fr: { h: 'Journal complet', sub: 'Des pertes non notées rendent le journal trop beau. Chez de vrais traders, 40 à 55 % des trades sont perdants.', d7: '7 jours', d30: '30 jours', hi: 'Traders de 20 trades et plus avec plus de 80 % de gagnants', loss: 'Trades perdants', nol: 'Jours de trading sans perte' },
+    es: { h: 'Diario completo', sub: 'Las pérdidas no anotadas hacen el diario demasiado bonito. En traders reales, del 40 al 55 % de las operaciones son perdedoras.', d7: '7 días', d30: '30 días', hi: 'Traders con 20+ operaciones y más del 80 % ganadoras', loss: 'Operaciones perdedoras', nol: 'Días de trading sin pérdida' } };
+  function journalHtml(j) {
+    if (!j) return '';
+    const x = JRT[LANG] || JRT.en, y = bt(), sub = (o) => (o && o.of != null ? y.of.replace('{n}', o.of) : '');
+    const row = (k, l) => `<tr data-jr="${k}"><td>${esc(l)}</td><td class="num"><b>${pct(j.d7[k])}</b> <small class="muted">${esc(sub(j.d7[k]))}</small></td><td class="num"><b>${pct(j.d30[k])}</b> <small class="muted">${esc(sub(j.d30[k]))}</small></td></tr>`;
+    return `<h4 class="ux-start-h">${x.h}</h4><p class="muted ux-jr-sub">${esc(x.sub)}</p><div class="scroll-x"><table class="tbl ux-start ux-journal"><thead><tr><th></th><th class="num">${x.d7}</th><th class="num">${x.d30}</th></tr></thead><tbody>${row('high_win_20', x.hi)}${row('losing_trades', x.loss)}${row('days_without_loss', x.nol)}</tbody></table></div>`;
+  }
   function slotsHtml(sl) {
     if (!sl) return '';
     const x = SC();
@@ -875,7 +886,7 @@
     const rows = g.map((e) => `<tr><td class="ux-err-m"><b>${esc(e.msg)}</b>${e.where ? `<small>${esc(e.where)}</small>` : ''}</td><td class="num">${e.traders}</td><td class="num">${e.n}</td><td>${when(e.last)}</td><td>${esc(e.pages.join(', '))}</td><td>${esc(e.browsers.join(', '))}</td><td>${esc(e.versions.join(', '))}</td></tr>`).join('');
     return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
-      <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}${b.return_d1 ? card(SC().d1, pct(b.return_d1), sub(b.return_d1)) + card(SC().rs, pct(b.risk_seen_day0), sub(b.risk_seen_day0)) : ''}</div>${slotsHtml(b.signup_slots)}
+      <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}${b.return_d1 ? card(SC().d1, pct(b.return_d1), sub(b.return_d1)) + card(SC().rs, pct(b.risk_seen_day0), sub(b.risk_seen_day0)) : ''}</div>${slotsHtml(b.signup_slots)}${journalHtml(d.journal)}
       ${startHtml(b.start, y)}
       <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<span class="ux-err-a"><button type="button" class="btn sm" data-ux-errclr>${y.clr}</button><a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a></span>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }

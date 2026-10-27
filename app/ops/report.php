@@ -73,6 +73,11 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
     $md .= "**Quand ils s'inscrivent** (heure de New York) et la part qui fait un premier plan ou un premier trade pendant cette séance :\n\n"
         . $tbl(['Moment', 'Inscrits', 'Premier plan ou trade ce jour-là'], array_map(fn($k) => [$sk[$k], $b['signup_slots'][$k]['n'], $pc(['pct' => $b['signup_slots'][$k]['day0_pct']])], array_keys($sk)))
         . $tbl(['Indicateur', 'Valeur'], [['De retour le jour de trading suivant (visite, plan ou trade)', $pc($b['return_d1'])], ['Risque permis vu le jour de l\'inscription (premier plan ou trade)', $pc($b['risk_seen_day0'])]]);
+    if (!empty($m['journal'])) {   // brief « pertes oubliées », step 1
+        $j = $m['journal']; $jr = fn(string $k, string $l) => [$l, $pc($j['d7'][$k]), $pc($j['d30'][$k])];
+        $md .= "**Journal complet** (des pertes non notées rendent le journal trop beau ; chez de vrais traders, 40 à 55 % des trades sont perdants) :\n\n"
+            . $tbl(['Indicateur', '7 jours', '30 jours'], [$jr('high_win_20', 'Traders de 20 trades et plus avec plus de 80 % de gagnants'), $jr('losing_trades', 'Trades perdants'), $jr('days_without_loss', 'Jours de trading sans perte')]);
+    }
 
     $md .= "## 3. D'où viennent les traders\n\n**Inscriptions par semaine** (lundi, New York) :\n\n" . $tbl(['Semaine', 'Inscrits'], array_map(null, array_keys($b['filters']['weeks']), array_values($b['filters']['weeks'])))
         . "**« Où as-tu trouvé Sweep ? »** (tous) :\n\n" . $tbl(['Réponse', 'Inscrits'], array_map(null, array_keys($b['filters']['sources']), array_values($b['filters']['sources'])))

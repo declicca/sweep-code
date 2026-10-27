@@ -226,9 +226,43 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
             return ['median_min' => $m === null ? null : round($m / 60), 'day1_pct' => $n ? round($d1 / $n * 100) : 0, 'of' => $n];
         })(),
         'activation_24h' => ['pct' => $rate($act, $actN), 'of' => $actN], 'aha_7d' => ['pct' => $rate($aha, $ahaN), 'of' => $ahaN], 'retention_w2' => ['pct' => $rate($w2, $w2N), 'of' => $w2N],
+        'journal' => (function () use ($pdo, $all, $now, $has) { if (!$has('documents')) return null; $real = array_fill_keys(array_column($all, 'id'), true); return ['d7' => sweep_journal_metrics($pdo, $real, $now, 7), 'd30' => sweep_journal_metrics($pdo, $real, $now, 30)]; })(),
         'trade_methods_30d' => $methods, 'search_misses_30d' => array_slice($miss, 0, 20, true), 'ai' => $ai, 'errors' => $errs, 'revenue' => $rev,
         'presets' => (function () { require_once dirname(__DIR__) . '/presets/presets-lib.php'; $c = pr_current(); return ['version' => $c['version'] ?? '', 'checked_at' => $c['checked_at'] ?? null, 'origin' => $c['origin'] ?? '', 'status' => pr_status()]; })(),
     ];
+}
+
+/**
+ * Brief « pertes oubliées » of 27 Oct., step 1 — a complete journal, measured before changing anything. Over the last $days
+ * days (the trade's session date, New York), the real traders' trades (sample data aside, a trade copied on several accounts
+ * once): the share of traders with 20 trades or more and over 80 % winners (the plainest sign of losses not logged), the share
+ * of losing trades, the share of trading days (a trader, a day) without a single losing trade. Net = pnl_c − fees_c.
+ */
+function sweep_journal_metrics(PDO $pdo, array $real, int $now, int $days): array
+{
+    $from = (new DateTimeImmutable('@' . ($now - $days * 86400)))->setTimezone(new DateTimeZone('America/New_York'))->format('Y-m-d');
+    $st = $pdo->prepare("SELECT user_id, data FROM documents WHERE collection = 'trades'"); $st->execute();
+    $per = []; $seen = [];
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if (!isset($real[$r['user_id']])) continue;
+        $t = json_decode((string) $r['data'], true); if (!is_array($t) || !empty($t['demo'])) continue;
+        $d = (string) ($t['date'] ?? ''); if ($d === '' || $d < $from) continue;
+        if (!empty($t['copy_group'])) { $k = $r['user_id'] . '|' . $t['copy_group']; if (isset($seen[$k])) continue; $seen[$k] = true; }
+        $net = (int) ($t['pnl_c'] ?? 0) - (int) ($t['fees_c'] ?? 0);
+        $u = &$per[$r['user_id']]; $u ??= ['n' => 0, 'w' => 0, 'l' => 0, 'days' => []];
+        $u['n']++; if ($net > 0) $u['w']++; elseif ($net < 0) $u['l']++;
+        $u['days'][$d] = ($u['days'][$d] ?? false) || $net < 0;
+        unset($u);
+    }
+    $rate = fn(int $a, int $b) => $b ? (int) round($a / $b * 100) : null;
+    $t20 = $hi = $n = $l = $dn = $dk = 0;
+    foreach ($per as $u) {
+        $n += $u['n']; $l += $u['l'];
+        if ($u['n'] >= 20) { $t20++; if ($u['w'] / $u['n'] > 0.8) $hi++; }
+        foreach ($u['days'] as $lost) { $dn++; if (!$lost) $dk++; }
+    }
+    return ['days' => $days, 'traders' => count($per), 'high_win_20' => ['pct' => $rate($hi, $t20), 'of' => $t20], 'losing_trades' => ['pct' => $rate($l, $n), 'of' => $n],
+        'days_without_loss' => ['pct' => $rate($dk, $dn), 'of' => $dn]];
 }
 
 /** « Safari iOS 18 », « Chrome Android », « Firefox macOS »: enough to group errors, nothing personal */

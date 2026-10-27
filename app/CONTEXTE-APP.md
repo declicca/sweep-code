@@ -1230,3 +1230,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - Le P&L net garde sa ligne « n trades · période ». La carte du coach (« Ce qui fonctionne pour toi ») vient sous « Tes stats arrivent » (`paintStats`, `src/coach.js`).
 - **À partir de 5 trades**, la page est la même qu'avant.
 - **Tests** : `e2e_stats` (3 trades : la carte, 2 tuiles, le calendrier, rien de « Dès 5 trades », moins de 2 écrans sur téléphone).
+
+### Brief « pertes oubliées » (27 oct.), étape 1 : mesurer avant de changer
+- **Admin › Métriques, carte « Journal complet »** (`sweep_journal_metrics`, `ops/metrics.php` ; `journalHtml`, `src/ux.js`), sur 7 et 30 jours (la date de séance du trade, New York), traders réels seulement (comptes internes et données d'exemple à part, un trade copié une fois, net = `pnl_c − fees_c`) :
+  - la part des traders de 20 trades et plus avec plus de 80 % de gagnants (le signe le plus simple de pertes non notées) ;
+  - la part des trades perdants (chez de vrais traders, 40 à 55 %) ;
+  - la part des jours de trading (un trader, un jour) sans aucun trade perdant.
+- Aussi dans « Exporter pour Claude », section 2. Aucun nom de trader.
+- **Tests** : `metrics_test.php` (une base à part, 4 traders calculés à la main), `e2e_admin_metrics` (la carte à 390 et 1440).

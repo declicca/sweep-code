@@ -136,6 +136,31 @@ $ok($sl === ['before' => [1, 100], 'session' => [1, 100], 'evening' => [1, 0], '
 $ok($b2['return_d1'] === ['pct' => 50, 'of' => 4], 'back on the next trading day: s1 (a review on Wednesday), s3 (signed in on Monday after a Friday-evening sign-up); not s2 nor s4: ' . json_encode($b2['return_d1']));
 $ok($b2['risk_seen_day0'] === ['pct' => 50, 'of' => 4], 'the risk allowed seen on the session of the sign-up: s1 (a trade), s2 (the plan before the open of its session): ' . json_encode($b2['risk_seen_day0']));
 
+// brief « pertes oubliées », step 1: a complete journal, on a third throwaway database (7 and 30 days)
+$p3 = new PDO('sqlite:' . $tmp . '/j.db', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+$p3->exec('CREATE TABLE users (id TEXT PRIMARY KEY, created_at TEXT, utm_source TEXT, utm_campaign TEXT, is_internal INT DEFAULT 0, disabled INT DEFAULT 0, found_via TEXT, first_name TEXT, last_login TEXT)');
+$p3->exec('CREATE TABLE documents (user_id TEXT, collection TEXT, id TEXT, data TEXT, created_at TEXT, updated_at TEXT)');
+foreach (['j1' => 0, 'j2' => 0, 'j3' => 0, 'jx' => 1] as $id => $int) $p3->prepare('INSERT INTO users (id, created_at, is_internal) VALUES (?, ?, ?)')->execute([$id, '2026-09-01 12:00:00', $int]);
+$jd = fn(int $ago) => (new DateTimeImmutable('today 12:00', $ny))->modify("-$ago days")->format('Y-m-d');
+$tr = function (string $u, string $id, int $ago, int $c, array $more = []) use ($p3, $jd) { $p3->prepare("INSERT INTO documents VALUES (?, 'trades', ?, ?, '', '')")->execute([$u, $id, json_encode(array_merge(['date' => $jd($ago), 'pnl_c' => $c, 'fees_c' => 0], $more))]); };
+// j1: 25 trades over 5 days, 22 winners, the 3 losers on one day; a winner copied on a 2nd account counts once
+for ($i = 0; $i < 25; $i++) $tr('j1', "j1-$i", 1 + intdiv($i, 5), $i < 3 ? -5000 : 8000);
+$tr('j1', 'j1-copy', 5, 8000, ['copy_group' => 'g1']); $tr('j1', 'j1-copy2', 5, 8000, ['copy_group' => 'g1']);   // (the 25th day-5 trade replaced below)
+$p3->exec("DELETE FROM documents WHERE id = 'j1-24'");
+// j2: 20 trades over 4 days, 14 winners, a loser every day
+for ($i = 0; $i < 20; $i++) $tr('j2', "j2-$i", 1 + intdiv($i, 5), $i % 5 < 2 && $i < 10 ? -3000 : ($i % 5 === 0 ? -3000 : 6000));
+// j3: 5 trades in a day, 3 losers (under 20 trades: not in the first figure); a sample trade and an old loser (20 days ago)
+for ($i = 0; $i < 5; $i++) $tr('j3', "j3-$i", 2, $i < 3 ? -2000 : 4000);
+$tr('j3', 'j3-demo', 2, 9000, ['demo' => true]); $tr('j3', 'j3-old', 20, -1000);
+for ($i = 0; $i < 30; $i++) $tr('jx', "jx-$i", 1, 5000);   // Mateo's: left out
+$jm = sweep_metrics($p3, $app)['journal'];
+$w2 = array_sum(array_map(fn($i) => ($i % 5 < 2 && $i < 10) || $i % 5 === 0 ? 0 : 1, range(0, 19)));
+$ok($jm['d7']['high_win_20'] === ['pct' => 50, 'of' => 2], "7 days: 1 of the 2 traders with 20+ trades over 80 % winners (j1: 22/25; j2: $w2/20): " . json_encode($jm['d7']['high_win_20']));
+$l7 = 3 + (20 - $w2) + 3;
+$ok($jm['d7']['losing_trades'] === ['pct' => (int) round($l7 / 50 * 100), 'of' => 50], "7 days: $l7 losing trades of 50 (a copy once, the sample trade and Mateo's left out): " . json_encode($jm['d7']['losing_trades']));
+$ok($jm['d7']['days_without_loss'] === ['pct' => 40, 'of' => 10], '7 days: 4 of the 10 trading days without a loser (j1: 4 of 5, j2: 0 of 4, j3: 0 of 1): ' . json_encode($jm['d7']['days_without_loss']));
+$ok($jm['d30']['losing_trades'] === ['pct' => (int) round(($l7 + 1) / 51 * 100), 'of' => 51] && $jm['d30']['days_without_loss'] === ['pct' => 36, 'of' => 11], '30 days: the old loser of j3 too: ' . json_encode([$jm['d30']['losing_trades'], $jm['d30']['days_without_loss']]));
+
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);
