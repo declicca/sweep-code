@@ -651,9 +651,11 @@
     const host = first.parentElement && first.parentElement.id !== 'main' ? first.parentElement : first;   // before the Pro lock: the coach is for every plan
     const html = statsHtml(); let el = document.querySelector('#main .co-stats');
     if (!html) { if (el) el.remove(); return; }
-    if (el && el._h === html && el.nextElementSibling === host) return;
+    // (27 Oct.) under 5 trades « Your stats are coming » is the top card: the coach comes right under it
+    const soon = document.querySelector('#main .st-soon');
+    if (el && el._h === html && (soon ? el.previousElementSibling === soon : el.nextElementSibling === host)) return;
     const tmp = document.createElement('div'); tmp.innerHTML = html; const fresh = tmp.firstElementChild; fresh._h = html;
-    if (el) el.remove(); host.before(fresh);
+    if (el) el.remove(); soon ? soon.after(fresh) : host.before(fresh);
   }
 
   /* ── how it reads ── */

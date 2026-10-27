@@ -1227,5 +1227,6 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ### Brief « nouveau trader », étape 4 : Stats accompagne au lieu d'une page vide
 - **Sous 5 trades** (ceux des filtres, `MIN_N`) : `statsSoon` (`src/app.js`) remplace la page. En haut, « Tes stats arrivent : 3 trades sur 5 » avec sa barre, et ce qui s'ouvre : à 5 trades ta force et ta fuite, à 10 ton score de performance. Puis le P&L net, le taux de réussite et le calendrier du mois. Les tuiles « Dès 5 trades », la courbe de drawdown, la durée, la répartition, les tendances et l'analyse détaillée ne sont pas montrées.
+- Le P&L net garde sa ligne « n trades · période ». La carte du coach (« Ce qui fonctionne pour toi ») vient sous « Tes stats arrivent » (`paintStats`, `src/coach.js`).
 - **À partir de 5 trades**, la page est la même qu'avant.
 - **Tests** : `e2e_stats` (3 trades : la carte, 2 tuiles, le calendrier, rien de « Dès 5 trades », moins de 2 écrans sur téléphone).

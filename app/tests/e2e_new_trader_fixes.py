@@ -75,7 +75,8 @@ with sync_playwright() as p:
       ok(li == [True, True, True], f'N6 {tag}: mission 1, what is done is checked: track, account, guardrails ({li})')
       pg.evaluate("document.querySelector('#gSheet [data-g=close]') && document.querySelector('#gSheet [data-g=close]').click()"); pg.wait_for_timeout(400)
     else: print(f'skip N6 {tag}: no gameplan for this trader ({gp})')
-    # N7
+    # N7 (Stats shows its ratios from 5 trades, step 4: 4 more trades of earlier days)
+    pg.evaluate("() => { for (let i = 2; i <= 5; i++) put('trades', { id: 'nt-t' + i, account_id: 'nt-a', instrument: 'MNQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: i % 2 ? 9000 : -4000, pnl_manual: true, date: ymdAdd(todayStr(), -i), entry_time: '10:00', exit_time: '10:05' }) }"); pg.wait_for_timeout(800)
     pg.evaluate("location.hash = '#analytics'"); pg.wait_for_timeout(2000)
     txt = pg.evaluate("document.getElementById('main').innerText")
     ok(x['pf'] in txt and not any(e in txt for e in x['en']), f'N7 {tag}: Stats « {x["pf"]} », no English ({[e for e in x["en"] if e in txt]})')

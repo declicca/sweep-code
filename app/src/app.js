@@ -3315,7 +3315,7 @@ function statsSoon(t, a) {
     es: [ "Tus estadísticas llegan: {n} de 5", "operación", "operaciones", "A las 5 operaciones: tu fuerza y tu fuga, lo que te funciona y lo que te cuesta.", "A las 10 operaciones: tu puntuación de rendimiento." ] })[LANG] || [ "Your stats are coming: {n} of 5", "trade", "trades", "At 5 trades: your edge and your leak, what works for you and what costs you.", "At 10 trades: your performance score." ];
   const n = a.n, te = (t.at(-1) || { date: todayStr() }).date.slice(0, 7), ue = billOld(t.length ? t[0].date : todayStr(), todayStr());
   const head = `<section class="surface st-soon" data-noi18n><h3>${esc(X[0].replace("{n}", n + " " + (n === 1 ? X[1] : X[2])))}</h3><div class="pbar st-soon-bar"><i class="pos" style="width:${Math.round(n / MIN_N * 100)}%"></i></div><ul><li>${esc(X[3])}</li><li>${esc(X[4])}</li></ul></section>`;
-  const kpis = `<div class="ikpis st-soon-k"><div class="surface ik"><span class="lbl">Net P&amp;L</span><b class="${cls(a.net)}">${cu(a.net)}</b></div><div class="surface ik"><span class="lbl">Win rate</span><b>${pct(a.wr)}</b></div></div>`;
+  const kpis = `<div class="ikpis st-soon-k"><div class="surface ik"><span class="lbl">Net P&amp;L</span><b class="${cls(a.net)}">${cu(a.net)}</b><small>${a.n} trade${a.n === 1 ? "" : "s"} · ${periodLabel()}</small></div><div class="surface ik"><span class="lbl">Win rate</span><b>${pct(a.wr)}</b></div></div>`;
   const cal = card(pd(te + "-01").toLocaleDateString(LOC(), { month: "long", year: "numeric" }), "", calGrid(te, t));
   return `${filterBar()}\n  <div ${ue ? 'data-lock="analytics_history" data-force="1" class="bill-lock"' : ""}>${head}${kpis}${cal}</div>`;
 }
