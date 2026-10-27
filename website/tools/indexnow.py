@@ -1,6 +1,6 @@
 """IndexNow (Bing, Yandex, Seznam, Naver): after a real deploy of the site, submit the pages whose sitemap date changed.
 
-deploy.sh saves the live sitemap before uploading, then runs:  python3 -I website/tools/indexnow.py <old sitemap> website/dist/sitemap.xml
+deploy.sh saves the live sitemap before uploading (--snapshot reads the sitemaps of an index then), then runs:  python3 -I website/tools/indexnow.py <old sitemap> website/dist/sitemap.xml
 Pages that are new or have a new <lastmod> are sent in one request, with the key file the build writes at the site's root
 (dates are days: a page changed again on the day of an earlier deploy is not sent twice; the sitemap still has it).
 --dry prints them without sending. A failure is only reported: it never stops the deploy. Standard library only."""
@@ -26,7 +26,15 @@ def read(path, live):
             out.update(dates(open(os.path.join(os.path.dirname(os.path.abspath(path)), loc.rsplit("/", 1)[1]), encoding="utf-8").read()))
     return out
 
+def snapshot(path):
+    """deploy.sh, before the upload: an index of sitemaps becomes one sitemap with every page and its date, read from the live site
+    now (after the upload, the live sitemaps would already be the new ones)."""
+    try: old = read(path, live=True)
+    except Exception as e: print(f"IndexNow : sitemaps en ligne illisibles ({e})."); return
+    open(path, "w", encoding="utf-8").write("<urlset>" + "".join(f"<url><loc>{u}</loc><lastmod>{d}</lastmod></url>" for u, d in old.items()) + "</urlset>")
+
 def main():
+    if sys.argv[1:2] == ["--snapshot"]: return snapshot(sys.argv[2])
     args = [a for a in sys.argv[1:] if a != "--dry"]
     if len(args) != 2: sys.exit("Usage : indexnow.py <old sitemap> <new sitemap> [--dry]")
     old_path, new_path = args
