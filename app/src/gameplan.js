@@ -14,7 +14,7 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const T = {
     en: { set_pitch: 'For traders starting out: a mission a day for 90 days, the notion it needs, Sweep ticking what it can see.', f_days: 'days', f_weeks: 'weeks', f_gates: 'gates', f_min: 'min a day', start: 'Start the gameplan', more: 'Learn more', learn_s: 'For traders with less than 6 months', learn_m: 'The 3 months', learn_a: 'What Sweep ticks on its own', autos: ['Your first account', 'A trade journaled with its stop and its target', 'Your account’s limits', 'A session noted in your journal', 'A day with zero slips', 'Your weekly recap'], gate_l: 'Gate: ', set_t: '90-day gameplan', set_s: 'One mission a day for 90 days: what to learn, what to practise, what to review. Sweep ticks what it can see.', set_on: 'Day {d} of 90 · {n} missions done', set_soon: 'Starts on {d}', set_stop: 'Stop the gameplan', stop_t: 'Stop the gameplan?', stop_s: 'Your missions and the gameplan are removed. Your XP stays.', stop_go: 'Stop', month: 'Month {n}', kick: 'Your 90-day gameplan', day: 'Day {n} of 90', starts: 'Your gameplan starts on {d}.',
-      see: 'See the gameplan', late: '{n} mission to catch up', late_p: '{n} missions to catch up', today_done: 'Today’s mission is done.', next: 'Next: {t}', open: 'Open',
+      see: 'See the gameplan', see90: 'See the 90 days', late: '{n} mission to catch up', late_p: '{n} missions to catch up', today_done: 'Today’s mission is done.', next: 'Next: {t}', open: 'Open',
       learn: 'To learn today', done_when: 'Done when', tick: 'Done · +{n} XP', ticked: 'Done ✓', ticked_on: 'Done on {d}', auto: 'Sweep ticks it on its own once it’s done.', auto_by: 'Ticked by Sweep',
       opens: 'Opens on {d}', after_gate: 'Opens once the Month {m} gate is passed.', min: '{n} min', xp: '+{n} XP',
       map: 'Your 90-day gameplan', map_s: 'Day {d} · {n} missions done · {x} XP', how: 'How it works', week: 'Week {n}',
@@ -26,7 +26,7 @@
         TAGS: 'Your tags', M2_JOURNAL: 'What you journal', RULE_9: 'New rule', RULE_10: 'New rule', PATTERN: 'What you look for', REFINE_RULES: 'The rules of a refinement', REFINE_EX: 'Refinement examples',
         ARENA: 'Your arena', RULE_1_M3: 'Rule 1 in Month 3', EVAL_MATH: 'The math of an evaluation', LADDER: 'The size ladder', STEP_DOWN: 'When to step down', PLAYBOOK: 'The funded account playbook', PLAN_FIELDS: 'Your trading plan' } },
     fr: { set_pitch: 'Pour les traders qui débutent : une mission par jour pendant 90 jours, la notion qu’elle demande, Sweep qui coche ce qu’il voit.', f_days: 'jours', f_weeks: 'semaines', f_gates: 'portes', f_min: 'min par jour', start: 'Commencer le parcours', more: 'En savoir plus', learn_s: 'Pour les traders de moins de 6 mois', learn_m: 'Les 3 mois', learn_a: 'Ce que Sweep coche tout seul', autos: ['Ton premier compte', 'Un trade noté avec son stop et sa cible', 'Les limites de ton compte', 'Une séance notée au journal', 'Une journée sans écart', 'Ton bilan de la semaine'], gate_l: 'Porte : ', set_t: 'Parcours de 90 jours', set_s: 'Une mission par jour pendant 90 jours : quoi apprendre, quoi pratiquer, quoi revoir. Sweep coche ce qu’il peut voir.', set_on: 'Jour {d} sur 90 · {n} missions faites', set_soon: 'Commence le {d}', set_stop: 'Arrêter le parcours', stop_t: 'Arrêter le parcours ?', stop_s: 'Tes missions et le parcours sont retirés. Ton XP reste.', stop_go: 'Arrêter', month: 'Mois {n}', kick: 'Ton parcours de 90 jours', day: 'Jour {n} sur 90', starts: 'Ton parcours commence le {d}.',
-      see: 'Voir le parcours', late: '{n} mission à rattraper', late_p: '{n} missions à rattraper', today_done: 'La mission du jour est faite.', next: 'Ensuite : {t}', open: 'Ouvrir',
+      see: 'Voir le parcours', see90: 'Voir les 90 jours', late: '{n} mission à rattraper', late_p: '{n} missions à rattraper', today_done: 'La mission du jour est faite.', next: 'Ensuite : {t}', open: 'Ouvrir',
       learn: 'À apprendre aujourd’hui', done_when: 'C’est fait quand', tick: 'C’est fait · +{n} XP', ticked: 'Fait ✓', ticked_on: 'Fait le {d}', auto: 'Sweep la coche tout seul dès que c’est fait.', auto_by: 'Cochée par Sweep',
       opens: 'S’ouvre le {d}', after_gate: 'S’ouvre une fois la porte du mois {m} franchie.', min: '{n} min', xp: '+{n} XP',
       map: 'Ton parcours de 90 jours', map_s: 'Jour {d} · {n} missions faites · {x} XP', how: 'Comment ça marche', week: 'Semaine {n}',
@@ -38,7 +38,7 @@
         TAGS: 'Tes étiquettes', M2_JOURNAL: 'Ce que tu notes au journal', RULE_9: 'Nouvelle règle', RULE_10: 'Nouvelle règle', PATTERN: 'Ce que tu cherches', REFINE_RULES: 'Les règles d’un ajustement', REFINE_EX: 'Exemples d’ajustement',
         ARENA: 'Ton terrain', RULE_1_M3: 'La règle 1 au mois 3', EVAL_MATH: 'Les maths d’une évaluation', LADDER: 'L’échelle de taille', STEP_DOWN: 'Quand redescendre', PLAYBOOK: 'Le playbook du compte financé', PLAN_FIELDS: 'Ton plan de trading' } },
     es: { set_pitch: 'Para traders que empiezan: una misión al día durante 90 días, la noción que necesita, Sweep marcando lo que ve.', f_days: 'días', f_weeks: 'semanas', f_gates: 'puertas', f_min: 'min al día', start: 'Empezar el recorrido', more: 'Saber más', learn_s: 'Para traders con menos de 6 meses', learn_m: 'Los 3 meses', learn_a: 'Lo que Sweep marca solo', autos: ['Tu primera cuenta', 'Una operación anotada con su stop y su objetivo', 'Los límites de tu cuenta', 'Una sesión anotada en el diario', 'Un día sin deslices', 'Tu resumen semanal'], gate_l: 'Puerta: ', set_t: 'Recorrido de 90 días', set_s: 'Una misión al día durante 90 días: qué aprender, qué practicar, qué revisar. Sweep marca lo que puede ver.', set_on: 'Día {d} de 90 · {n} misiones hechas', set_soon: 'Empieza el {d}', set_stop: 'Detener el recorrido', stop_t: '¿Detener el recorrido?', stop_s: 'Se quitan tus misiones y el recorrido. Tu XP se queda.', stop_go: 'Detener', month: 'Mes {n}', kick: 'Tu recorrido de 90 días', day: 'Día {n} de 90', starts: 'Tu recorrido empieza el {d}.',
-      see: 'Ver el recorrido', late: '{n} misión por recuperar', late_p: '{n} misiones por recuperar', today_done: 'La misión de hoy está hecha.', next: 'Después: {t}', open: 'Abrir',
+      see: 'Ver el recorrido', see90: 'Ver los 90 días', late: '{n} misión por recuperar', late_p: '{n} misiones por recuperar', today_done: 'La misión de hoy está hecha.', next: 'Después: {t}', open: 'Abrir',
       learn: 'Para aprender hoy', done_when: 'Hecho cuando', tick: 'Hecho · +{n} XP', ticked: 'Hecho ✓', ticked_on: 'Hecho el {d}', auto: 'Sweep la marca solo en cuanto está hecha.', auto_by: 'Marcada por Sweep',
       opens: 'Se abre el {d}', after_gate: 'Se abre al superar la puerta del mes {m}.', min: '{n} min', xp: '+{n} XP',
       map: 'Tu recorrido de 90 días', map_s: 'Día {d} · {n} misiones hechas · {x} XP', how: 'Cómo funciona', week: 'Semana {n}',
@@ -98,31 +98,24 @@
     return `<section class="gp-learn"><h3>${esc((T[LG()] || T.en).blocks[key] || T.en.blocks[key] || '')}</h3>${body}</section>`;
   }
 
-  /* ───────────── Today: the card ───────────── */
-  function cardHtml() {
-    if (!ST || !ST.started) return '';
-    const n = focus(), m = n ? M(n) : null, mon = GP.months[m ? Math.floor((m.w) / 4) : 2];
-    const pct = Math.round((doneCount() / 90) * 100), late = lateList().length;
-    const kick = `${esc(u('kick'))} · ${esc(tx(mon.name))}`;
+  /* ───────────── Today: the mission line of « Now » ───────────── */
+  /* Today (SWEEP.md step 3, 27 Oct.): the card became one line of « Now » — the day, today's mission, the late ones,
+     « See the 90 days › ». Kept in the browser (sw.gpLine) so « Now » draws it at once next time (nothing pushed down). */
+  function lineHtml() {
+    if (!ST) { try { return localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } }
+    if (!ST.started || !ST.access) { try { localStorage.removeItem('sw.gpLine'); } catch (e) { /* private mode */ } return ''; }
+    const n = focus(), m = n ? M(n) : null, late = lateList().length;
     const dayLine = ST.day >= 1 ? u('day', { n: Math.min(ST.day, 90) }) : u('starts', { d: fd(ST.start, { weekday: 'long', day: 'numeric', month: 'long' }) });
-    const mis = m && ST.day >= 1 ? `<button type="button" class="gp-mis" data-gp="mission" data-n="${n}"><span class="gp-k k-${m.k}">${esc(tx(GP.words.KIND[m.k]))}</span><b>${esc(tx(m.t))}</b><small>${esc(u('min', { n: m.min }))} · ${esc(u('xp', { n: m.gate ? 150 : m.min }))}</small><i aria-hidden="true">›</i></button>`
-      : ST.day >= 1 ? `<p class="gp-ok">${esc(doneCount() >= 90 ? u('all_done') : u('today_done'))}</p>` : '';
-    return `<section class="surface gp-card" id="gpCard" data-noi18n><button type="button" class="gp-top" data-gp="map"><span class="gp-kick">${kick}</span><span class="gp-day">${esc(dayLine)}</span><span class="gp-see">${esc(u('see'))} ›</span></button>
-      <div class="gp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="90" aria-valuenow="${doneCount()}"><i style="width:${pct}%"></i></div>
-      ${mis}${late ? `<button type="button" class="gp-late" data-gp="mission" data-n="${lateList()[0]}">${esc(u(late > 1 ? 'late_p' : 'late', { n: late }))} ›</button>` : ''}</section>`;
+    const mis = m && ST.day >= 1 ? `<button type="button" class="gp-ln-mis" data-gp="mission" data-n="${n}"><span class="gp-ln-k">${esc(tx(GP.words.KIND[m.k]))}</span><b>${esc(tx(m.t))}</b><small>${esc(u('min', { n: m.min }))}</small><i aria-hidden="true">›</i></button>`
+      : ST.day >= 1 ? `<p class="gp-ln-ok">${esc(doneCount() >= 90 ? u('all_done') : u('today_done'))}</p>` : '';
+    const html = `<div class="gp-line" id="gpLine" data-noi18n><p class="gp-ln-h"><span>${esc(u('kick'))} · ${esc(dayLine)}</span><button type="button" class="link gp-ln-see" data-gp="map">${esc(u('see90'))} ›</button></p>${mis}${late ? `<button type="button" class="gp-ln-late" data-gp="mission" data-n="${lateList()[0]}">${esc(u(late > 1 ? 'late_p' : 'late', { n: late }))} ›</button>` : ''}</div>`;
+    try { localStorage.setItem('sw.gpLine', html); } catch (e) { /* private mode */ }
+    return html;
   }
-  function paintCard() {
-    const main = document.getElementById('main'); if (!main) return;
-    const old = document.getElementById('gpCard');
-    const onToday = typeof route === 'function' && route().v === 'dashboard';
-    if (!ST || !ST.started || !ST.access) { try { localStorage.removeItem('sw.gpCard'); } catch (e) { /* private mode */ } }
-    if (!onToday || !ST || !ST.started || !ST.access) { if (old) old.remove(); return; }
-    const html = cardHtml(); try { localStorage.setItem('sw.gpCard', html); } catch (e) { /* private mode */ }   // drawn at once next time (no jump)
-    if (old && old._h === html) return;
-    const box = document.createElement('div'); box.innerHTML = html; const el = box.firstElementChild; el._h = html;
-    if (old) { old.replaceWith(el); return; }
-    const anchor = main.querySelector('#gToday') || main.querySelector('.d-today') || main.firstElementChild;
-    if (anchor && anchor.parentElement) anchor.parentElement.insertBefore(el, anchor); else main.prepend(el);
+  function paintCard() {   // (27 Oct.) no card on Today any more: « Now » (nav.js) draws the line; this asks it to redraw
+    const old = document.getElementById('gpCard'); if (old) old.remove();
+    try { localStorage.removeItem('sw.gpCard'); } catch (e) { /* private mode */ }
+    if (typeof route === 'function' && route().v === 'dashboard' && window.SweepNowRefresh) window.SweepNowRefresh();
   }
 
   /* ───────────── a mission ───────────── */
@@ -336,12 +329,9 @@
     if (r && r.started) { try { ui().buzz(12); } catch (x) { /* quiet */ } openMap(0); }
   }, true);
 
-  /* the card stays in place when Today redraws */
-  { const m0 = document.getElementById('main');
-    if (m0) new (window.SweepMO || MutationObserver)(() => { if (!document.getElementById('gpCard')) paintCard(); }).observe(m0, { childList: true, subtree: false }); }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ST && ST.started) load(); });
 
   let loadedAt = 0; const load0 = load; load = async () => { loadedAt = Date.now(); return load0(); };
-  window.SweepGP = { data: GP, mount: (st) => { ST = st; loadedAt = Date.now(); paintCard(); paintSettings(); }, load, state: () => ST, openMap, openMission, settings, learn,
+  window.SweepGP = { data: GP, line: lineHtml, mount: (st) => { ST = st; loadedAt = Date.now(); paintCard(); paintSettings(); }, load, state: () => ST, openMap, openMission, settings, learn,
     paint: () => { paintCard(); paintSettings(); if (ST && ST.started && Date.now() - loadedAt > 20000) load(); } };   // a trade or a review saved since: Sweep may have ticked a mission
 })();

@@ -3171,15 +3171,6 @@
     e.onload = () => done(window.SweepGP); e.onerror = () => { p = null; fail(new Error('gameplan module')); };
     document.head.appendChild(e);
   }));
-  // the last card drawn, put in its place with Today itself, before the module and the server answer (20 Oct.: it pushed
-  // the page down 195 px on a computer once it came); the module then redraws it in place, same size
-  const early = () => {
-    let h = null; try { h = localStorage.getItem('sw.gpCard'); } catch (e) { return; }
-    const main = document.getElementById('main'); if (!h || !main || document.getElementById('gpCard')) return;
-    const box = document.createElement('div'); box.innerHTML = h; const el = box.firstElementChild; if (!el) return;
-    const anchor = main.querySelector('#gToday') || main.querySelector('.d-today') || main.firstElementChild;
-    if (anchor && anchor.parentElement) anchor.parentElement.insertBefore(el, anchor); else main.prepend(el);
-  };
   // Settings: its section in place at once (the last one drawn, or a space of its size), filled by the module (no jump)
   const earlySet = () => {
     const main = document.getElementById('main'); if (!main || main.querySelector('.gp-set')) return;
@@ -3190,12 +3181,11 @@
   window.SweepGPCheck = async (given) => {
     if (given && given.started) { (await window.SweepGPLoad()).mount(given); return; }   // just started (sign-up, Settings)
     if (window.SweepGP) { window.SweepGP.paint(); return; }
-    if (typeof route === 'function' && route().v === 'dashboard') early();
     if (/^#settings/.test(location.hash || '')) earlySet();
     if (/^#settings/.test(location.hash || '')) { try { (await window.SweepGPLoad()).settings(); } catch (e) { /* offline */ } return; }
     if (asked || typeof apiJSON !== 'function' || typeof S === 'undefined' || S.mode !== 'server') return;   // (S is the app's own « let », not on window)
     asked = true;
-    try { const st = await apiJSON('api/game/gameplan'); if (st && st.started && st.access) (await window.SweepGPLoad()).mount(st); else { const c = document.getElementById('gpCard'); if (c) c.remove(); try { localStorage.removeItem('sw.gpCard'); } catch (e) { /* private mode */ } } }
+    try { const st = await apiJSON('api/game/gameplan'); if (st && st.started && st.access) (await window.SweepGPLoad()).mount(st); else { try { localStorage.removeItem('sw.gpLine'); } catch (e) { /* private mode */ } } }
     catch (e) { asked = false; }
   };
 })();

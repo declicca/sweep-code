@@ -4,7 +4,7 @@ Sweep — a trade copied on 3 accounts counts once on Today (audit of 16 Oct., s
 A trader of its own, 3 accounts; on the last weekday D: a trade copied on the 3 accounts (+$450 on each) and a trade on one
 account (−$100). The decided rule: a copy counts once (the main copy's P&L, n = 1, the « +2 » badge kept). Everywhere on
 Today the day is +$350 · 2 trades — before: « +$450 · 1 trade » in the performance, « $1.4k · 3 trades » in the month card,
-« +$1,350 » in the day row. Phone 390 (fr: the strip of days, the day's numbers and rows) and computer 1300 (en: the month
+« +$1,350 » in the day row. Since SWEEP.md step 3 the month card is on Trades › Calendar only: checked there. Phone 390 (fr: the strip of days, the day's numbers and rows) and computer 1300 (en: the month
 card, the performance, the rows). No page error, nothing wider than the window.
 """
 import json, random, sys
@@ -53,10 +53,14 @@ with sync_playwright() as p:
     for k in ('cal', 'strip'):
       if v[k] is not None: ok(v[k] == short, f'{tag} the month card ({k}): {v[k]} (want {short})')
     if v['calN'] is not None: ok(v['calN'] == '2 trades', f'{tag} the month card: « {v["calN"]} » (want « 2 trades »)')
-    ok(v['cal'] is not None or v['strip'] is not None or phone, f'{tag} the month card is on Today')
     ok(len(v['kpi']) >= 2 and v['kpi'][0] == net and v['kpi'][1] == '2', f'{tag} the performance: {v["kpi"][:2]} (want {net} · 2)')
     ok(sorted(v['rows']) == sorted([['+2', copy], ['', single]]), f'{tag} the day rows: the copied trade once with « +2 » and its own P&L ({v["rows"]})')
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} nothing wider than the window')
+    # (SWEEP.md step 3) the month card left Today: the same day on Trades › Calendar
+    pg.evaluate("location.hash = '#calendar'"); pg.wait_for_timeout(1500)
+    cl = pg.evaluate("(D) => { const N = (x) => String(x).replace(/[\\s\\u00a0\\u202f]+/g, ' ').trim(); const a = document.querySelector(`#main a.d[href='#journal/${D}']`); return a ? [N((a.querySelector('.p .short') || {}).textContent || ''), N((a.querySelector('.m') || {}).textContent || '')] : null }", D)
+    dg = lambda x: ''.join(ch for ch in (x or '') if ch.isdigit())   # (the calendar cell is short: « +350 »)
+    ok(cl is not None and dg(cl[0]) == dg(short) and cl[1] in ('2 trades', '2 trade'), f'{tag} Trades › Calendar: the day {cl} (want {short} · 2 trades)')
     ok(not errs, f'{tag} no page error ({errs[:2]})')
     ctx.close()
   br.close()

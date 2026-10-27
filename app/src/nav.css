@@ -2875,3 +2875,17 @@ html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:f
 .nav-now.is-end{background:rgba(var(--neg-rgb,212,162,76),.12)}
 .nav-now.is-end small{color:var(--neg)}
 
+/* « Now »: the 90-day gameplan's mission of the day (27 Oct., its Today card became this line; in nav.css: drawn before gameplan.js loads) */
+.gp-line{margin:10px 0 2px;display:grid;gap:8px}
+.gp-ln-h{margin:0;display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.gp-ln-see{flex:none;font-size:13px;font-weight:600}
+.gp-ln-mis{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2px 10px;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:var(--r2,14px);background:var(--fill);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:transform .3s var(--spring)}
+.gp-ln-mis:active{transform:scale(.98)}
+.gp-ln-k{grid-row:1/span 2;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--pos)}
+.gp-ln-mis b{font-size:15px;font-weight:600;line-height:1.25}
+.gp-ln-mis small{grid-column:2;color:var(--muted);font-size:12px}
+.gp-ln-mis i{grid-column:3;grid-row:1/span 2;font-style:normal;font-size:20px;color:var(--muted)}
+.gp-ln-ok{margin:0;font-size:14px;color:var(--text2)}
+.gp-ln-late{justify-self:start;min-height:32px;padding:6px 12px;border:0;border-radius:99px;background:color-mix(in srgb,var(--neg) 16%,transparent);color:var(--neg);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+/* Today (SWEEP.md step 3): one blue button, the one of « Now » — the header's « Add a trade » goes grey while the routine is on screen */
+body:has(#main .nav-rt) .nav-addtop{background:var(--fill);color:var(--text);box-shadow:none}

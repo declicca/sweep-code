@@ -3,8 +3,8 @@ Sweep — UI/UX lot A (targeted fixes), dev environment with Playwright:
   python3 tests/e2e_lot_a.py http://127.0.0.1:8095 /tmp/show_state.json
 Uses the signed-in trader's data (sample data is enough) and adds then removes its own few test documents.
  1.1 the routine folds (chevron), stays folded for the session (after a reload), opens again on the next session
- 1.2 « What to watch » stays under the day, whatever the account type, on a wide screen (1680 px); the menu stays on screen
- 1.3 the Week tab shows Actual · Forecast · Previous (or « No number ») on each release
+ 1.2 « What to watch » is not on Today any more (SWEEP.md step 3), whatever the account type, on a wide screen (1680 px); the menu stays on screen
+ 1.3 Announcements › This week shows Actual · Forecast · Previous (or « No number ») on each release
  2   « Save the trade »: 44 px on a computer, 48 px on a phone, 15 px semibold (the global primary look)
  3   « Make my plan »: still solid blue on hover
  5   « Add a trade on this day » is a neutral button (not primary)
@@ -53,8 +53,8 @@ with sync_playwright() as p:
   pos = []; inside = []
   for k in ['all', 'personal', 'live', 'all']:
     pg.locator('#main [data-fx=type]').first.click(); pg.wait_for_timeout(400); inside.append(pg.evaluate("(()=>{const r=document.querySelector('#fxMenu').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight})()")); pg.locator(f'#fxMenu [data-mtype={k}]').click(); pg.wait_for_timeout(1300)   # (16 Oct.: a pill and its choices)
-    pos.append(pg.evaluate("(()=>{const w=document.querySelector('#main section.d-news'); return w ? [w.parentElement.className.includes('nav-merge'), Math.round(w.getBoundingClientRect().left)] : null})()"))
-  ok(all(x and x[0] and x[1] < 700 for x in pos), f'1.2 « À surveiller » stays under the day (left column) for Tout / Perso / Live ({pos})')
+    pos.append(pg.evaluate("!!document.querySelector('#main section.d-news')"))
+  ok(not any(pos), f'1.2 (SWEEP.md step 3) « À surveiller » is not on Today any more, for Tout / Perso / Live ({pos})')
   ok(all(inside), f'1.2 the account-type menu stays on screen, above its pill when there is no room below ({inside})')
   fold = pg.locator('#main .nav-rt-fold')
   ok(fold.count() == 1 and fold.get_attribute('aria-expanded') == 'true', '1.1 the routine has its fold button, open by default')
@@ -68,11 +68,11 @@ with sync_playwright() as p:
     b.hover(); pg.wait_for_timeout(400)
     bg = pg.evaluate("getComputedStyle(document.querySelector('#main .nav-rt-s.next .btn.primary')).backgroundColor")
     ok(bg in ('rgb(47, 111, 232)', 'rgb(42, 102, 220)'), f'3 « Faire mon plan » stays solid blue on hover ({bg})')   # the site's button blue #2F6FE8, #2A66DC pressed (design chantier)
-  wk = pg.locator('#main button').filter(has_text='Semaine')
-  if wk.count():
-    wk.first.click(); pg.wait_for_timeout(1500)
-    n = pg.evaluate("[...document.querySelectorAll('#main .d-news .nav-ev')].map(e=>!!e.querySelector('.nav-ev-v3, .nav-nonum'))")
-    ok(n and all(n), f'1.3 Week tab: every release shows Réel · Prév. · Préc. or « Sans chiffre » ({n})')
+  # 1.3 (SWEEP.md step 3) the week's releases: Announcements › « Cette semaine »
+  pg.evaluate("location.hash = '#news/week'"); pg.wait_for_timeout(2000)
+  n = pg.evaluate("[...document.querySelectorAll('#main .ff-row')].map(e=>e.classList.contains('novals') || e.querySelectorAll('.ff-v').length >= 3)")
+  ok(n and all(n), f'1.3 Announcements › This week: every release shows Réel · Prév. · Préc. or « Sans chiffre » ({n})')
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(1200)
   print('— 2 / 10 / 14 / 9 (computer)')
   pg.evaluate("openTicket(null)"); pg.wait_for_timeout(1500); shot(pg)
   sv = pg.evaluate("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/Enregistrer le trade/.test(b.textContent)&&b.getClientRects().length); if(!b) return null; const s=getComputedStyle(b); return [s.height, s.fontSize, s.fontWeight]})()")

@@ -4146,8 +4146,13 @@ window.SweepMO = window.SweepMO || class {
   };
   const nw = (k, v) => String((NW3[L] || NW3.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
   const usd0 = (c) => (typeof money === 'function' ? money(Math.abs(Math.round(c)), { sign: false, dec: 0 }) : '$' + Math.round(Math.abs(c) / 100));   // as the coach writes it (no sign)
+  const newsAsked = {};
   function newsLine(day) {   // the next high-impact release of the session, while its window is still ahead
-    const ev = typeof ECON !== 'undefined' && ECON.days && ECON.days[day]; if (!ev || !ev.length) return '';
+    const ev = typeof ECON !== 'undefined' && ECON.days && ECON.days[day];
+    if (!ev && !newsAsked[day] && typeof loadEcon === 'function') {   // (27 Oct.) not loaded yet: asked once, « Now » redrawn when they come
+      newsAsked[day] = 1; Promise.resolve(loadEcon(day, day)).then(() => window.SweepNowRefresh && SweepNowRefresh()).catch(() => { /* no line */ });
+    }
+    if (!ev || !ev.length) return '';
     const s0 = S.settings || {}, bf = s0.pm_news_before != null && s0.pm_news_before !== '' ? +s0.pm_news_before : 5, af = s0.pm_news_after != null && s0.pm_news_after !== '' ? +s0.pm_news_after : 15;
     const now = Date.now() / 1000, e = ev.filter((x) => x.impact === 'high' && x.ts + af * 60 > now).sort((x, y) => x.ts - y.ts)[0]; if (!e) return '';
     const hm = (ts) => (typeof etStr === 'function' ? etStr(ts).slice(11, 16) : '');
@@ -4173,9 +4178,11 @@ window.SweepMO = window.SweepMO || class {
     if (!pct) { const g = document.querySelector('#main .g-today'); const chip = g && [...g.querySelectorAll('*')].find((x) => /^Lv\s?\d+/i.test((x.textContent || '').trim()) && x.children.length <= 3); const bar = chip && [...chip.querySelectorAll('*')].find((x) => /width\s*:\s*[\d.]+%/.test(x.getAttribute('style') || '')); if (bar) pct = parseFloat(bar.getAttribute('style').match(/width\s*:\s*([\d.]+)%/)[1]) || 0; }
     const lv = (ring && ring.dataset.lv) || p.level || '';
     const streak = (p.streak && p.streak.current) || 0;
-    const head = (extra) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market ? foldBtn() : ''}${extra || ''}</div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span>
+    // before the first trade (27 Oct. tour): no « Discipline — », no streak « 0 », no level — they mean nothing yet; they come with it
+    const first = (S.trades || []).some((x) => !x.demo) || (S.trades || []).length > 0 && !(S.accounts || []).some((a) => !a.demo);
+    const head = (extra) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market ? foldBtn() : ''}${extra || ''}</div><div class="nav-rt-me">${first ? `<span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span>
         <button type="button" class="nav-rt-streak" data-rt="hub" title="${esc2(streak + ' ' + t(streak === 1 ? 'streak1' : 'streak'))}">${svg('fire')}<b>${streak}</b><span>${t(streak === 1 ? 'streak1' : 'streak')}</span></button>
-        <button type="button" class="nav-rt-lv ${pct ? '' : 'nopct'}" data-rt="hub">${pct ? `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" stroke-dasharray="94.25" stroke-dashoffset="${94.25 * (1 - pct / 100)}"/></svg>` : ''}<span><small>${t('level')}</small><b>${esc2(lv)}</b></span></button>
+        <button type="button" class="nav-rt-lv ${pct ? '' : 'nopct'}" data-rt="hub">${pct ? `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" stroke-dasharray="94.25" stroke-dashoffset="${94.25 * (1 - pct / 100)}"/></svg>` : ''}<span><small>${t('level')}</small><b>${esc2(lv)}</b></span></button>` : ''}
         <button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div></div>`;
     // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
     const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
@@ -4185,10 +4192,12 @@ window.SweepMO = window.SweepMO || class {
     const intT = ({ en: 'Your intention this week', fr: 'Ton intention cette semaine', es: 'Tu intención esta semana' })[L] || 'Your intention this week';
     const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : '';
     const nowRow = nowHtml(d, r);
+    // the 90-day gameplan's mission of the day (SWEEP.md step 3: its card became this line; gameplan.js draws it, the last one kept in the browser)
+    const gpRow = (() => { try { return window.SweepGP && SweepGP.line ? SweepGP.line() : localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } })();
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
-    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${helpT}</section>`;
-    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}${intRow}<p class="nav-rt-msg">${t('dayoff')}</p>${helpT}</section>`;
+    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${gpRow}${helpT}</section>`;
+    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}${intRow}<p class="nav-rt-msg">${t('dayoff')}</p>${gpRow}${helpT}</section>`;
     const s1 = r.plan >= 100 ? 'done' : r.plan > 0 ? 'late' : 'todo';
     const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
     const s3 = r.review >= 100 ? 'done' : 'todo';
@@ -4204,7 +4213,7 @@ window.SweepMO = window.SweepMO || class {
     // without a valid plan no trade is « in your plan » (audit of 16 Oct.; the server counts 0 too: game.php compliant_count)
     const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t('inPlan', { c: d.compliant || 0, n: d.trades });
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${t('ydayB')} ›</b><span>${esc2(left(y.deadline))}</span></button>` : '';
-    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}${nowRow}${intRow}
+    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}${nowRow}${gpRow}${intRow}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
@@ -4212,6 +4221,7 @@ window.SweepMO = window.SweepMO || class {
       </div>
       ${helpT}</section>`;
   }
+  window.SweepNowRefresh = () => { try { place(); } catch (e) { /* never blocks */ } };
   function place() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
     const host = document.querySelector('#main .d-today'); if (!host) return;
@@ -4827,7 +4837,7 @@ window.SweepMO = window.SweepMO || class {
     dCache = { k: key, v }; return v;
   }
   function discChip() {
-    const me = document.querySelector('#main .nav-rt .nav-rt-me'); if (!me) return;
+    const me = document.querySelector('#main .nav-rt .nav-rt-me'); if (!me || !me.querySelector('.nav-rt-streak')) return;   // before the first trade the routine shows no figures (27 Oct.)
     const v = discScore(), key = String(v); let c = me.querySelector('.nav-rt-disc:not(.nav-rt-disc-ph)');
     if (c && c.dataset.v === key) return;   // unchanged: touch nothing (a DOM change here would wake every watcher again)
     const html = `<button type="button" class="nav-rt-disc" data-disc-why data-noi18n data-v="${key}"><small>${t('disc')}</small><b>${v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%')}</b></button>`;

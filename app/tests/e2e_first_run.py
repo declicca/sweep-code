@@ -117,20 +117,20 @@ def run(p, lang, phone, exp):
   ok(pg.locator('.nav-am.open, #tkSlide.open').count() == 0, f'{tag} the trade form closes')
   pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-dash .d-today', timeout=8000); pg.wait_for_timeout(900)
   c0 = pg.evaluate(CARDS)
-  ok(c0 == ['today'], f'{tag} Today with no trade: the routine only ({c0})')
+  ok(c0 == ['today', 'acc'], f'{tag} Today with no trade: the routine and the accounts (SWEEP.md step 3: the accounts from the first account) ({c0})')
   ok(pg.locator('.rn.open').count() == 0, f'{tag} « Your real net » not on the first day')
-  if phone: pg.screenshot(path=f'/tmp/fr_{tag}_4_today0.png', full_page=True)
-  # the first trade → performance, accounts, calendar, news
+  if phone: pg.screenshot(path=f'/tmp/fr_{tag}_4_today0.png')   # (27 Oct.) never full_page on a phone context: Chromium drops the touch emulation (maxTouchPoints 0) and the install window never came
+  # the first trade → performance, accounts (SWEEP.md step 3: no month card nor news card on Today any more)
   pg.evaluate("put('trades', { id: 'fr-t1', account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 12000, pnl_manual: true, date: todayStr(), entry_time: '10:00', exit_time: '10:05' }); render()")
   pg.wait_for_timeout(1200); c1 = pg.evaluate(CARDS)
-  ok(c1 is not None and all(k in c1 for k in ('today', 'perf', 'acc', 'cal', 'news')) and not any(k in c1 for k in ('pay', 'rank', 'quick')), f'{tag} after the 1st trade: performance, accounts, calendar, news ({c1})')
+  ok(c1 == ['today', 'perf', 'acc'], f'{tag} after the 1st trade: performance, accounts; no month, news, money or rank card ({c1})')
   # (audit of 16 Oct.) nothing opens over the coach after the 1st trade: no « Add Sweep to your home screen » on the day of
   # sign-up (nor ever on a computer), no « Go Pro » banner during the trial
   ov = pg.evaluate("[document.querySelectorAll('aside.nav-inst').length, document.querySelectorAll('.sb-nudge').length]")
   ok(ov == [0, 0], f'{tag} after the 1st trade, the day of sign-up: no install window, no Pro banner ({ov})')
   pg.evaluate("for (let i = 2; i <= 5; i++) put('trades', { id: 'fr-t' + i, account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: todayStr(), entry_time: '1' + i + ':00', exit_time: '1' + i + ':05' }); render()")
   pg.wait_for_timeout(1500); c5 = pg.evaluate(CARDS)
-  ok(c5 is not None and 'pay' in c5 and 'quick' not in c5, f'{tag} from the 5th trade: My money too; no « Quick access » (removed on 18 Oct.) ({c5})')
+  ok(c5 is not None and 'pay' in c5 and 'rank' not in c5 and 'quick' not in c5, f'{tag} from the 5th trade: My money too; no rank (SWEEP.md step 3), no « Quick access » ({c5})')
   ok(pg.evaluate(WIDE) <= 0, f'{tag} Today: nothing wider than the window')
   # My money opened for the first time, no payout yet: nothing opens (27 Oct., brief A7); after a first payout → « Your real net »
   if pg.locator('.nav-inst.open [data-inst-ok]').count(): pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(400)   # « Add Sweep to your home screen », after the 1st trade
@@ -155,10 +155,14 @@ def run(p, lang, phone, exp):
     ok(not bad, f'{tag} no English on the first screens ({bad})')
   ov = pg.evaluate("[document.querySelectorAll('aside.nav-inst').length, document.querySelectorAll('.sb-nudge').length]")
   ok(ov == [0, 0], f'{tag} « {SAVED[lang]} » with the coach, nothing over it ({ov})')
-  # the 2nd day of use: the install window comes after a trade, on a phone only
+  # the 2nd day of use: the install window comes after a trade, on a phone only (« What's new » marked as seen: it would take the session's window)
+  pg.evaluate("editDoc('settings', 'settings', (r) => { r.news_seen = SweepNews.list.map((n) => n.id) })"); pg.wait_for_timeout(400)
   pg.evaluate("() => { localStorage.setItem('sw.day0', ymdAdd(todayStr(), -1)); S.me.created_at = Math.floor(Date.now() / 1000) - 2 * 86400; sessionStorage.removeItem('sw.modal'); put('trades', { id: 'fr-d2', account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 3000, pnl_manual: true, date: todayStr(), entry_time: '15:30', exit_time: '15:35' }); render() }")
   pg.wait_for_timeout(1500); n2 = pg.locator('aside.nav-inst.open').count()
-  ok(n2 == (1 if phone else 0), f'{tag} the 2nd day of use, after a trade: the install window {"opens" if phone else "never opens on a computer"} ({n2})')
+  why = '' if n2 == (1 if phone else 0) else pg.evaluate("""JSON.stringify({ coarse: matchMedia('(pointer: coarse)').matches, touch: navigator.maxTouchPoints, w: innerWidth, day0: localStorage.getItem('sw.day0'), today: todayStr(),
+    created: S.me && S.me.created_at, modal: sessionStorage.getItem('sw.modal'), sugg: localStorage.getItem('sw.sugg'), shown: localStorage.getItem('sw.installShown'),
+    open: [...document.querySelectorAll('.open, [role=dialog]')].map((e) => e.id || e.className).slice(0, 6), real: S.trades.filter((x) => !x.demo).length })""")   # (27 Oct.) what kept it closed
+  ok(n2 == (1 if phone else 0), f'{tag} the 2nd day of use, after a trade: the install window {"opens" if phone else "never opens on a computer"} ({n2} {why})')
   if n2: pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(300)
   ok(not errs, f'{tag} no page error ({errs[:2]})')
   br.close()

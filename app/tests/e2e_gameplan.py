@@ -92,15 +92,15 @@ def run(p, lang, phone, full):
   uid = pg.evaluate("fetch('api/data',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json()).then(j=>j.user&&j.user.id)")
   pg.evaluate("document.querySelector('#gSheet [data-g=close]') && document.querySelector('#gSheet [data-g=close]').click()"); pg.wait_for_timeout(500)
   # 2. Today
-  pg.evaluate("location.hash = '#dashboard'"); until(pg, "document.getElementById('gpCard')", 10000)
-  card = pg.locator('#gpCard').inner_text() if pg.locator('#gpCard').count() else ''
-  ok(T['kick'] in card, f'{tag} 2 Today: the gameplan card ({card[:70]!r})')
+  pg.evaluate("location.hash = '#dashboard'"); until(pg, "document.getElementById('gpLine')", 10000)
+  card = pg.locator('#gpLine').inner_text() if pg.locator('#gpLine').count() else ''
+  ok(T['kick'] in card, f'{tag} 2 Today: the gameplan line in « Now » (its card until 27 Oct.) ({card[:70]!r})')
   if not full: c.close(); br.close(); ok(not errs, f'{tag} no page error ({errs[:2]})'); return
-  move(uid, 9); pg.reload(); until(pg, "document.getElementById('gpCard') && /9/.test(document.getElementById('gpCard').innerText)", 12000); pg.wait_for_timeout(600)
-  card = pg.locator('#gpCard').inner_text()
-  late = pg.locator('#gpCard .gp-late').inner_text() if pg.locator('#gpCard .gp-late').count() else ''
-  ok(T['day9'] in card and pg.locator('#gpCard .gp-mis[data-n="9"]').count() == 1 and T['late'] in late, f'{tag} 2 day 9: today\'s mission (9), the late ones ({late!r})')
-  bar0 = pg.evaluate("parseFloat(document.querySelector('#gpCard .gp-bar i').style.width)")
+  move(uid, 9); pg.reload(); until(pg, "document.getElementById('gpLine') && /9/.test(document.getElementById('gpLine').innerText)", 12000); pg.wait_for_timeout(600)
+  card = pg.locator('#gpLine').inner_text()
+  late = pg.locator('#gpLine .gp-ln-late').inner_text() if pg.locator('#gpLine .gp-ln-late').count() else ''
+  ok(T['day9'] in card and pg.locator('#gpLine .gp-ln-mis[data-n="9"]').count() == 1 and T['late'] in late, f'{tag} 2 day 9: today\'s mission (9), the late ones ({late!r})')
+  bar0 = pg.evaluate("Object.keys(SweepGP.state().done || {}).length")
   if phone: pg.screenshot(path=f'/tmp/gp_{tag.replace(" ", "_")}_today.png')
   # 3. a mission that teaches: 8 (« Read the setup »)
   pg.evaluate("SweepGP.openMission(8)"); until(pg, "document.querySelector('#gSheet .gp-quiz')")
@@ -117,9 +117,9 @@ def run(p, lang, phone, full):
   pg.locator('#gSheet [data-gp="tick"][data-n="8"]').click()
   until(pg, "!document.getElementById('gSheet') && SweepGP.state().done && SweepGP.state().done['8']", 8000); pg.wait_for_timeout(700)
   xp1 = pg.evaluate("fetch('api/game/profile',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json()).then(j=>(j.profile||j).xp || 0)")
-  bar1 = pg.evaluate("parseFloat(document.querySelector('#gpCard .gp-bar i').style.width)")
-  ok(xp1 - xp0 == 20 and bar1 > bar0, f'{tag} 3 ticked: +20 XP ({xp0} → {xp1}), the bar moves ({bar0} → {bar1} %)')
-  pg.click('#gpCard [data-gp=map]'); until(pg, "document.querySelector('#gSheet .gp-map')")
+  bar1 = pg.evaluate("Object.keys(SweepGP.state().done || {}).length")
+  ok(xp1 - xp0 == 20 and bar1 > bar0, f'{tag} 3 ticked: +20 XP ({xp0} → {xp1}), one more mission done ({bar0} → {bar1})')
+  pg.click('#gpLine [data-gp=map]'); until(pg, "document.querySelector('#gSheet .gp-map')")
   states = pg.evaluate("Object.fromEntries([...document.querySelectorAll('#gSheet .gp-d')].map((d) => [d.dataset.n, d.className.split(' ').find((c) => c.startsWith('s-'))]))")
   ok(states.get('1') == 's-done' and states.get('8') == 's-done' and states.get('9') == 's-today' and states.get('5') == 's-late' and states.get('12') == 's-soon', f"{tag} 3 the map: 1 and 8 done, 9 today, 5 late, 12 to come ({[states.get(k) for k in ('1', '5', '8', '9', '12')]})")
   ok(pg.locator('#gSheet .gp-seg button').count() == 3, f'{tag} 3 the map: 3 months')

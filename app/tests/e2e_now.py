@@ -9,6 +9,8 @@ A trader of its own. Phone 390 (fr, touch) and computer 1300 (en):
  3  a −$250 trade: « Left today » $350, « before your max loss · trade 2 of 2 », the same figure as « Before this trade »
  4  a −$400 trade: « Day over by your plan », the coach's reason
  5  at each moment, one blue button in the routine card; the day reviewed: no « Now » any more
+    (27 Oct.) before the first trade no « Discipline — », streak or level in the routine; they come with it
+ 6  the 90-day gameplan: its mission of the day is a line of the routine, « See the 90 days › » opens the map; no Today card
 No page error, nothing wider than the window.
 """
 import json, os, random, sqlite3, sys
@@ -20,9 +22,10 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'risk': 'Ton risque permis aujourd’hui', 'dll': 'la limite du jour de Topstep 50K', 'plan': 'la perte max de ton plan', 'left': 'Il te reste', 'Lplan': 'avant ta perte max', 'count': 'trade 2 sur 2', 'end': 'Journée terminée selon ton plan'},
-     'en': {'risk': 'Your risk allowed today', 'dll': 'the daily limit of Topstep 50K', 'plan': 'your plan’s max loss', 'left': 'Left today', 'Lplan': 'before your max loss', 'count': 'trade 2 of 2', 'end': 'Day over by your plan'}}
+X = {'fr': {'risk': 'Ton risque permis aujourd’hui', 'dll': 'la limite du jour de Topstep 50K', 'plan': 'la perte max de ton plan', 'left': 'Il te reste', 'Lplan': 'avant ta perte max', 'count': 'trade 2 sur 2', 'see90': 'Voir les 90 jours', 'end': 'Journée terminée selon ton plan'},
+     'en': {'risk': 'Your risk allowed today', 'dll': 'the daily limit of Topstep 50K', 'plan': 'your plan’s max loss', 'left': 'Left today', 'Lplan': 'before your max loss', 'count': 'trade 2 of 2', 'end': 'Day over by your plan', 'see90': 'See the 90 days'}}
 NOW = "(() => { const n = document.querySelector('#main .nav-rt .nav-now'); return n ? { state: n.dataset.now, text: n.textContent.replace(/\\s+/g, ' ').trim(), v: (n.querySelector('.nav-now-v') || {}).textContent || '' } : null })()"
+FIG = "[...document.querySelectorAll('#main .nav-rt .nav-rt-disc, #main .nav-rt .nav-rt-streak, #main .nav-rt .nav-rt-lv')].filter((b) => b.getClientRects().length).map((b) => b.className.split(' ')[0])"
 BLUE = "[...document.querySelectorAll('#main .nav-rt .btn.primary')].filter((b) => b.getClientRects().length && getComputedStyle(b).visibility !== 'hidden').length"
 CARDS = "['.d-cal', '.d-news', '.d-trends', '.d-rank', '.d-acc'].filter((q) => { const e = document.querySelector('#main .nav-dash ' + q); return e && e.getClientRects().length })"
 WIDE = "document.documentElement.scrollWidth - innerWidth"
@@ -55,6 +58,10 @@ with sync_playwright() as p:
     cards = pg.evaluate(CARDS)
     ok(cards == ['.d-acc'], f'{tag} 1 Today: the accounts from the first account, no « This month », news card, trends or rank ({cards})')
     ok(pg.evaluate(BLUE) == 1, f'{tag} 1 one blue button in the routine ({pg.evaluate(BLUE)})')
+    ok(pg.evaluate(FIG) == [], f'{tag} 1 before the first trade: no « Discipline — », no streak, no level ({pg.evaluate(FIG)})')
+    if not phone:
+      top = pg.evaluate("(() => { const b = document.querySelector('.nav-addtop'); return b && b.getClientRects().length ? getComputedStyle(b).backgroundImage : 'absent' })()")
+      ok(top in ('none', 'absent'), f'{tag} 1 the header\'s « Add a trade » is not blue on Today: one blue button, in « Now » ({top[:40]})')
     # 2. a plan
     pg.evaluate("(d) => put('journals', { id: d, pre: { bias: 'bullish', max_loss: '600', max_trades: '2', saved_at: Math.floor(Date.now() / 1000) } })", day)
     n = today()
@@ -66,6 +73,10 @@ with sync_playwright() as p:
     before = sp(pg.evaluate("(d) => SweepCoach.before({ form: 'manual', account: 'nw-a', date: d, qty: 1 })", day))
     ok(n and n['state'] == 'during' and x['left'] in n['text'] and x['Lplan'] in n['text'] and x['count'] in n['text'] and '350' in sp(n['v']), f'{tag} 3 during the session: what is left ({n})')
     ok('350' in before, f'{tag} 3 the same figure as « Before this trade » ({before[-80:]})')
+    for _ in range(12):
+      if len(pg.evaluate(FIG)) == 3: break
+      pg.wait_for_timeout(250)
+    ok(sorted(pg.evaluate(FIG)) == ['nav-rt-disc', 'nav-rt-lv', 'nav-rt-streak'], f'{tag} 3 with the first trade: discipline, streak and level ({pg.evaluate(FIG)})')
     ok(pg.evaluate(BLUE) == 1, f'{tag} 3 one blue button in the routine ({pg.evaluate(BLUE)})')
     # 4. the max loss reached
     pg.evaluate("(d) => put('trades', { id: 'nw-t2', account_id: 'nw-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -40000, pnl_manual: true, date: d, entry_time: '10:45', exit_time: '10:50' })", day)
@@ -78,6 +89,19 @@ with sync_playwright() as p:
     pg.evaluate("(d) => editDoc('journals', d, (j) => { j.post = Object.assign(j.post || {}, { followed: 'yes', discipline: 4, grade: 'B', reviewed_at: Math.floor(Date.now() / 1000) }); })", day)
     pg.wait_for_timeout(1500); pg.evaluate("SweepGame.refresh()"); n = today()
     ok(n is None, f'{tag} 5 the day reviewed: no « Now » ({n})')
+    # 6. the 90-day gameplan started: its mission of the day is a line of the routine (its Today card until 27 Oct.)
+    st = pg.evaluate("fetch('api/game/gameplan/start', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ track: 'B' }) }).then((r) => r.json())")
+    if st and st.get('started') and st.get('access'):
+      pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=10000)
+      for _ in range(30):
+        if pg.locator('#main .nav-rt #gpLine').count(): break
+        pg.wait_for_timeout(300)
+      ln = pg.evaluate("(() => { const l = document.querySelector('#main .nav-rt #gpLine'); return l ? [l.textContent.replace(/\\s+/g, ' ').trim(), !!l.querySelector('[data-gp=map]'), l.getClientRects().length > 0] : null })()")
+      ok(ln and ln[1] and ln[2] and x['see90'] in ln[0] and pg.locator('#gpCard').count() == 0, f'{tag} 6 the gameplan: its line in the routine, « {x["see90"]} », no card ({ln})')
+      pg.click('#main #gpLine [data-gp=map]'); pg.wait_for_selector('#gSheet .gp-map', timeout=8000)
+      ok(True, f'{tag} 6 « {x["see90"]} » opens the map')
+      pg.evaluate("fetch('api/game/gameplan/stop', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: '{}' })"); pg.wait_for_timeout(500)
+    else: print(f'skip {tag} 6: no gameplan for this trader ({st})')
     ok(pg.evaluate(WIDE) <= 0, f'{tag} nothing wider than the window')
     ok(not errs, f'{tag} no page error ({errs[:2]})')
     ctx.close()
