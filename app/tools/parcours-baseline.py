@@ -1,7 +1,8 @@
 """
 Sweep — the journey's baseline, moment M1 (SWEEP.md, step 0): a new trader goes through the app as it is, with real taps,
 from the sign-up screen to (a) the plan saved (the risk allowed today is on screen) and (b) the first trade saved
-(« Trade saved » with the coach), without a screenshot (« Enter manually ») and with one (the test screenshot).
+(« Trade saved » with the coach), without a screenshot (« Enter manually ») and with one (the test screenshot); and the
+manual form with the entry price forgotten first (27 Oct.): the cursor lands in the field, the trade is still saved.
 Counts the taps, the fields typed and the screens, and the robot's time (its own pauses taken out). A rough human time is
 given too: 2.5 s a tap, 5 s a field (the same scale as the journey audit of 16 Oct.).
   sh tools/sync.sh /tmp/gpar && DEST=/tmp/gpar PORT=8495 sh tools/run.sh python3 tools/parcours-baseline.py http://127.0.0.1:8495 [--json out.json]
@@ -66,12 +67,19 @@ def run(p, lang, phone, exp, path):
   at('plan')
   screen('trade-sheet', '.nav-am.open, #tkSlide.open'); wait(600)
   pg.evaluate("window.__toasts = []; new MutationObserver(() => { const t = document.getElementById('toast'); if (t && t.textContent && !window.__toasts.includes(t.textContent)) window.__toasts.push(t.textContent) }).observe(document.getElementById('toast'), { childList: true, characterData: true, subtree: true })")   # every message (a celebration can follow « Trade saved »)
-  if path == 'manual':
+  forgot = None
+  if path in ('manual', 'forgot'):
     tap('[data-am=to-manual]'); screen('manual-form', '#tkSlide.open [data-act=tk-save]'); wait(600)
     tap('#tkSlide [data-act=tk-dir][data-v=long]')
+    if path == 'forgot':   # (27 Oct., brief A1) « Save » without the entry price: the cursor lands in the field, then the trade is saved
+      tap('#tkSlide [data-act=tk-save]'); wait(700)
+      forgot = pg.evaluate("document.activeElement === document.querySelector('#tkSlide [data-tk=entry]') && !!document.querySelector('#tkSlide [data-tk-miss]')")
+      pg.keyboard.type('21000.00'); c['fields'] += 1
+      field('#tkSlide [data-tk=exit]', '21010.00'); tap('#tkSlide [data-act=tk-save]')
     entry = float(pg.evaluate("(document.querySelector('#tkSlide [data-tk=entry]') || {}).value || '0'") or 0) or 21000
-    field('#tkSlide [data-tk=entry]', '%.2f' % entry); field('#tkSlide [data-tk=exit]', '%.2f' % (entry + 10))
-    tap('#tkSlide [data-act=tk-save]')
+    if path == 'manual':
+      field('#tkSlide [data-tk=entry]', '%.2f' % entry); field('#tkSlide [data-tk=exit]', '%.2f' % (entry + 10))
+      tap('#tkSlide [data-act=tk-save]')
   else:
     if phone:
       with pg.expect_file_chooser() as fc: tap('label.nav-am-drop')
@@ -91,13 +99,13 @@ def run(p, lang, phone, exp, path):
   human = lambda m: round(m['taps'] * TAP_S + m['fields'] * FIELD_S)
   for k in mark: mark[k]['human_s'] = human(mark[k])
   return {'case': f"{'390' if phone else '1300'}-{lang}-{path}", 'experience': exp, 'risk_allowed_shown': risk, 'plan': mark.get('plan'), 'trade': mark.get('trade'),
-          'trade_saved': saved.startswith(SAVED[lang]) and n == 1, 'toast': saved[:120], 'screens': c['screens'], 'errors': errs[:3]}
+          'trade_saved': saved.startswith(SAVED[lang]) and n == 1 and forgot is not False, 'forgot_focused': forgot, 'toast': saved[:120], 'screens': c['screens'], 'errors': errs[:3]}
 
 
 rows = []
 with sync_playwright() as p:
   for lang, phone, exp in (('fr', True, 'new'), ('en', False, 'gt1')):
-    for path in ('manual', 'shot'):
+    for path in ('manual', 'shot', 'forgot'):
       r = run(p, lang, phone, exp, path); rows.append(r)
       pl, tr = r['plan'], r['trade']
       print(f"{r['case']:<18} plan: {pl['taps']} taps, {pl['fields']} fields, {pl['screens']} screens, ~{pl['human_s']} s human ({pl['robot_s']} s robot), risk {r['risk_allowed_shown'] or '—'} | "

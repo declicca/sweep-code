@@ -2327,7 +2327,7 @@
   function invite() {
     const s = stOf(); if (el || s.state === 'done' || s.state === 'hidden' || !realAccts().length || S.mode !== 'server') return '';
     if (typeof billCan === 'function' && !billCan('payouts')) return '';   // Free: My money is not in the plan, the server would refuse the entries
-    if (!s.state) {   // an existing trader: offered on one day only
+    if (!s.state && !s.due) {   // an existing trader: offered on one day only (a new trader, due: kept until done or hidden, 27 Oct.: it no longer opens by itself)
       if (s.shown_on && s.shown_on !== today()) return '';
       if (!s.shown_on) setTimeout(() => { if (!stOf().shown_on) setSt({ shown_on: today() }); }, 0);
     }

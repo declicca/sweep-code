@@ -8,7 +8,7 @@ A brand-new trader, phone (fr, es) and computer (en), from the first screen afte
      my trade » → 3. the trade form. At most 8 taps, the first name (and the experience when tapped) kept on the server.
 Then Today grows with the trader: with 0 trades only the routine; the 1st trade brings performance, accounts, calendar and
 news; My money and the rank wait for the 5th trade (or a payout). « Your real net » is not on the first day:
-it opens the first time My money is opened. Checks: no page error, nothing wider than the window, no English in fr/es.
+it opens the first time My money is opened after a first payout (27 Oct.; before: nothing opens by itself). Checks: no page error, nothing wider than the window, no English in fr/es.
 16 Oct. (brief 00, 1.2-i): no « + » outside the page while there is no account (it opened « Add an account first », in
 English); that window in the trader's language; « Trade saved · <the coach> » in the trader's language too.
 """
@@ -132,8 +132,12 @@ def run(p, lang, phone, exp):
   pg.wait_for_timeout(1500); c5 = pg.evaluate(CARDS)
   ok(c5 is not None and 'pay' in c5 and 'quick' not in c5, f'{tag} from the 5th trade: My money too; no « Quick access » (removed on 18 Oct.) ({c5})')
   ok(pg.evaluate(WIDE) <= 0, f'{tag} Today: nothing wider than the window')
-  # My money opened for the first time → « Your real net »
+  # My money opened for the first time, no payout yet: nothing opens (27 Oct., brief A7); after a first payout → « Your real net »
   if pg.locator('.nav-inst.open [data-inst-ok]').count(): pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(400)   # « Add Sweep to your home screen », after the 1st trade
+  pg.evaluate("location.hash = '#payouts'"); pg.wait_for_timeout(1500)
+  ok(pg.locator('.rn.open').count() == 0, f'{tag} My money without a payout: « Your real net » does not open by itself')
+  pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(500)
+  pg.evaluate("put('payouts', { id: 'fr-p1', account_id: S.accounts[0].id, amount_c: 50000, status: 'paid', request_date: todayStr(), payment_date: todayStr() })"); pg.wait_for_timeout(600)
   pg.evaluate("location.hash = '#payouts'"); pg.wait_for_selector('.rn.open [data-rn-per]', timeout=6000)
   ok(pg.evaluate("(S.settings.realnet || {}).auto") == pg.evaluate("todayStr()"), f'{tag} My money opened: « Your real net » offered, once')
   pg.locator('.rn.open [data-rn=later]').click(); pg.wait_for_timeout(700)

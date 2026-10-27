@@ -1147,5 +1147,6 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **A4** page de bienvenue : plus de barre du bas (`body.sw-onb .bottomnav`), elle revient dès le premier compte.
 - **A5** page de bienvenue : la ligne « Ajoute Sweep à ton écran d'accueil » est retirée (jamais le jour de l'inscription ; la fenêtre d'installation vient après le premier trade).
 - **A6** « Moins de 6 mois » compte tout de suite : `S.me.experience` est mis à jour avec le prénom, avant la réponse du serveur ; le coach ne réclamait un setup qu'au prochain chargement.
-- **A7** « Ton vrai net » ne s'ouvre plus tout seul sur Mon argent sans payout (à partir d'un premier payout seulement) ; son titre prend le focus sans cadre visible.
-- **Tests** : `e2e_tour_fixes` (nouveau, 390 et 1300, FR) ; `e2e_realnet` (Mon argent sans payout : rien ne s'ouvre, puis le rattrapage par son lien).
+- **A7** « Ton vrai net » ne s'ouvre plus tout seul sur Mon argent sans payout (à partir d'un premier payout seulement) ; avant, son invitation reste dans la carte Mon argent d'Aujourd'hui tant que le rattrapage est dû (plus seulement un jour) ; son titre prend le focus sans cadre visible.
+- **Brief** : `briefs/brief-app-activation-2026-10-27.md`, étape A (mêmes 7 défauts).
+- **Tests** : `e2e_tour_fixes` (nouveau : 390 et 1300 en FR, A2 aussi sur la page du trade, A3 par `SweepGame.sumText`, EN et ES) ; `e2e_realnet` (Mon argent sans payout : rien ne s'ouvre, puis le rattrapage par son lien) ; `tools/parcours-baseline.py` a un 3ᵉ cas « prix d'entrée oublié » (Enregistrer sans prix : curseur dans le champ, puis le trade est enregistré ; mêmes 16 touchers).
