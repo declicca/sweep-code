@@ -145,9 +145,10 @@ async def main():
     async def review(page):   # 60 seconds: three taps and one optional sentence
       qs = await page.evaluate("[...document.querySelectorAll('#gSheet .g-f > span')].map(x => x.textContent.trim())")
       ok(qs == ['As-tu suivi ta fiche ?', 'Quelle règle ?', 'Discipline aujourd’hui', 'Ta note du jour', 'Une note pour demain ? Elle s’affiche en haut de ton prochain pré-marché.'], f'review: the sheet\'s questions (a day with a pre-market sheet, brief step 7) ({qs})')
-      await page.locator('#gSheet [data-g=save-review]').click(); await page.wait_for_timeout(300)
-      err = await page.locator('#gSheet #gErr').text_content()
-      ok(err == 'Réponds aux 3 questions.' and await page.locator('#gSheet.g-rv').count() == 1, f'review: not saved without the 3 answers (« {err} »)')
+      # (27 Oct., brief « daily loop » step 3) the review opens filled in from the day: the 3 answers already chosen, « Fermer ma journée »
+      pre = await page.evaluate("['r-followed', 'r-score', 'r-grade'].map((k) => !!document.querySelector('#gSheet [data-g=' + k + '].on'))")
+      btn = (await page.locator('#gSheet [data-g=save-review]').text_content() or '').strip()
+      ok(pre == [True, True, True] and btn == 'Fermer ma journée', f'review: filled in from the day, « Fermer ma journée » ({pre}, « {btn} »)')
       await page.locator('#gSheet [data-g=r-followed][data-v=yes]').click(); await page.wait_for_timeout(100)
       await page.locator('#gSheet [data-g=r-score][data-v="4"]').click(); await page.wait_for_timeout(100)
       await page.locator('#gSheet [data-g=r-grade][data-v=B]').click(); await page.wait_for_timeout(100)
