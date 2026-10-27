@@ -104,3 +104,21 @@ Avec 1 trade, Stats fait 3 941 px sur téléphone, avec une dizaine de tuiles «
 
 - « Graphique disponible mercredi 22 h 00 » sur la page d'un trade du jour : c'est juste, mais ça sonne comme une panne. À reformuler dans le lot « pages longues » (activation F).
 - La feuille de trade commence par « le P&L de ta plateforme » sous le titre. C'est à revoir avec le lot capture.
+
+---
+
+## Revue des étapes 1 et 2 (session stratégie et tests, 27 oct., `d43254e`, CI verte)
+
+Tour refait avec Léa (« Moins de 6 mois », Topstep 50K, téléphone, français), sur une base neuve. Aucune erreur JavaScript.
+
+**Étape 1 : validée.** « +30 $ aujourd'hui », la consistance « se calcule à partir de 2 jours gagnants » sans barre or, « Règles de payout » replié, « La mission du jour est faite », « Facteur de profit », plus d'anglais dans Stats, et l'aide s'ouvre (N8 n'était pas un défaut).
+
+**Étape 2 : une correction avant de la dire finie.**
+
+| # | Constat | Correction |
+|---|---|---|
+| R1 | **Topstep n'a pas de limite du jour** (l'étape « Ton compte » affiche « Perte du jour : aucune »). La moitié de la limite du jour ne s'applique donc pas, et le plan du débutant reste à **1 000 $**, soit la moitié de toute sa marge de drawdown (2 000 $) en une journée. `e2e_rookie` ne le voit pas, parce que son compte Topstep a une limite du jour inventée (`dll_c: 100000`). | Sans limite du jour : **le quart de la marge de drawdown** (500 $ sur un 50K), avec la même phrase « Commence petit ». `e2e_rookie` : le compte de test reprend les vraies règles du préréglage Topstep (sans limite du jour), et on ajoute un cas avec une limite du jour. |
+
+Le micro proposé (MNQ), les 3 trades et la mission (« ta perte max du jour ») sont bons. L'arrêt après 2 pertes est couvert par `e2e_rookie`. Le tour ne l'a pas revu, parce qu'il a été fait après la fermeture (voir R2).
+
+**Pour l'étape D du brief d'activation (première visite selon le moment).** Après la fermeture (tour fait à 16 h 45, heure de New York), le plan de l'inscription est enregistré pour le lendemain (« Plan du jour mercredi 28 octobre »). Mais « Enregistrer et ajouter mon trade » enregistre le trade aujourd'hui, et le coach répond aussitôt « À améliorer : pas de plan pour cette séance ». **(R2)** Un trader qui s'inscrit le soir pour noter sa journée se fait donc reprocher, dès son premier trade, de ne pas avoir fait un plan qu'il vient de faire. Le soir, la première visite doit commencer par le trade du jour, puis le plan de demain, et le coach ne doit pas reprocher l'absence de plan le jour de l'inscription.
