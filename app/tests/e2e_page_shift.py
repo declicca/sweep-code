@@ -34,7 +34,12 @@ with sync_playwright() as p:
     # 3. the gameplan's card, coming back
     pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(800)
     pg.evaluate("fetch('api/game/gameplan/start', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
-    pg.reload(); pg.wait_for_timeout(3500); pg.reload(); pg.wait_for_timeout(4500)
+    pg.reload(); pg.wait_for_timeout(3500)
+    # (27 Oct., the CI: a slower machine reloaded before the line was kept in the browser, so it came late) — the line kept first
+    for _ in range(40):
+      if pg.evaluate("!!localStorage.getItem('sw.gpLine')"): break
+      pg.wait_for_timeout(250)
+    pg.reload(); pg.wait_for_timeout(4500)
     ok(pg.locator('#gpLine').count() == 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan line in « Now », coming back: nothing pushed down ({pg.evaluate(CLS)} {pg.evaluate("window.__ls.filter((x) => x.v > 0.0005)")})')   # (21 Oct.: what moved, in the failure line — the only one GitHub shows)
     pg.evaluate("fetch('api/game/gameplan/stop', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
     c.close()
