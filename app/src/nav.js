@@ -2475,7 +2475,7 @@ window.SweepMO = window.SweepMO || class {
     const n = netC(), r = num(SH.f.risk);
     if (n == null) return `<small class="muted">${t('rHint')}</small>`;
     const m = typeof money === 'function' ? money(n) : (n / 100).toFixed(2);
-    return r ? `<b class="${n < 0 ? 'neg' : 'pos'}">${m}</b><span class="nav-am-rr">${(n / 100 / Math.abs(r) >= 0 ? '+' : '') + (n / 100 / Math.abs(r)).toFixed(2)} R</span>` : `<b class="${n < 0 ? 'neg' : 'pos'}">${m}</b><small class="muted">${t('rAdd')}</small>`;
+    return r ? `<b class="${n < 0 ? 'neg' : 'pos'}">${m}</b><span class="nav-am-rr">${(n / 100 / Math.abs(r) >= 0 ? '+' : '') + (n / 100 / Math.abs(r)).toFixed(2)} R</span>${window.SweepTerm ? SweepTerm('r') : ''}` : `<b class="${n < 0 ? 'neg' : 'pos'}">${m}</b><small class="muted">${t('rAdd')}</small>${window.SweepTerm ? SweepTerm('r') : ''}`;
   }
   function verifyLine() {
     const bits = [SH.f.inst, SH.dir ? t(SH.dir) : '', SH.f.qty ? SH.f.qty + ' ×' : '', SH.f.entry && SH.f.exit ? `${SH.f.entry} → ${SH.f.exit}` : '', SH.f.time || ''].filter(Boolean);
@@ -5362,7 +5362,9 @@ document.addEventListener('click', (e) => {
   }
   function html(day, cur) {
     const l = list(day); if (cur && !l.some((x) => low(x) === low(cur))) l.unshift(cur);
-    return `<div class="tk-f nav-sp" data-noi18n><span>${W[0]}</span><div class="nav-sp-row">${l.map((x) => `<button type="button" class="chip ${low(x) === low(cur) ? 'on' : ''}" data-sp="${esc2(x)}">${esc2(x)}</button>`).join('')}</div></div>`;
+    // (27 Oct.) its « i », and each name's meaning (a long press, or the title on a computer): the names stay the traders' English
+    const what = (x) => (window.SweepSetupWhat ? SweepSetupWhat(x) : '');
+    return `<div class="tk-f nav-sp" data-noi18n><span>${W[0]}${window.SweepTerm ? SweepTerm('setup') : ''}</span><div class="nav-sp-row">${l.map((x) => `<button type="button" class="chip ${low(x) === low(cur) ? 'on' : ''}" data-sp="${esc2(x)}"${what(x) ? ` title="${esc2(what(x))}"` : ''}>${esc2(x)}</button>`).join('')}</div></div>`;
   }
   /** a tap: one setup at most, a second tap clears it; returns the new value */
   function tap(b, cur) {

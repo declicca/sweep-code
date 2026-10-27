@@ -1791,7 +1791,7 @@ function vAccount(e) {
   }[LANG] || "Delete"}</button>` : `<button class="danger" data-act="del-account" data-id="${e}">${{
     fr: "Supprimer",
     es: "Eliminar"
-  }[LANG] || "Delete"}</button>`}\n    </div></details></div>\n  <div class="statline"><div><span>Balance</span><span>${moneyU(acctBalance(t))}</span></div><div><span>Net P&amp;L</span><span class="${cls(n.net)}">${money(n.net)}</span></div><div><span>Trades</span><span>${n.n}</span></div><div><span>Win rate</span><span>${pct(n.wr)}</span></div><div><span>Profit factor</span><span>${pf(n.pf)}</span></div><div><span>Discipline</span><span class="dc">${dpct(n.disc)}</span></div><div><span>Worst drawdown</span><span class="${n.maxDD ? "neg" : ""}">${money(n.maxDD)}</span></div></div>\n  <section class="cols" style="margin-bottom:28px"><div><div class="sec-h"><h2>Status</h2></div><div class="acards" style="grid-template-columns:1fr">${accountCard(t, {
+  }[LANG] || "Delete"}</button>`}\n    </div></details></div>\n  <div class="statline"><div><span>Balance</span><span>${moneyU(acctBalance(t))}</span></div><div><span>Net P&amp;L</span><span class="${cls(n.net)}">${money(n.net)}</span></div><div><span>Trades</span><span>${n.n}</span></div><div><span>Win rate</span><span>${pct(n.wr)}</span></div><div><span>Profit factor${TERM("pf")}</span><span>${pf(n.pf)}</span></div><div><span>Discipline</span><span class="dc">${dpct(n.disc)}</span></div><div><span>Worst drawdown${TERM("worstDD")}</span><span class="${n.maxDD ? "neg" : ""}">${money(n.maxDD)}</span></div></div>\n  <section class="cols" style="margin-bottom:28px"><div><div class="sec-h"><h2>Status</h2></div><div class="acards" style="grid-template-columns:1fr">${accountCard(t, {
     full: !0
   }).replace('<a class="acard"', '<div class="acard"').replace(/<\/a>$/, "</div>")}</div></div>\n  <div><div class="sec-h"><h2>Firm rules</h2><span class="help">Saved as you type</span></div><div class="surface pad">${rulesForm(t)}</div></div></section>\n  <section class="cols"><div><div class="sec-h"><h2>Equity</h2></div><div class="surface pad">${lineChart(equitySeries(a, "daily"), {
     lab: eqLab("daily")
@@ -4131,6 +4131,89 @@ function tkState() {
   };
 }
 
+/* (27 Oct., brief « nouveau trader » step 3) every trading word says what it means where it is shown: TERM(k) is a discreet « i »
+   with one simple sentence in the trader's language; on a phone it opens with a tap (:hover and :focus-visible never come from a finger) */
+const TERMS = {
+  en: { drawdown: "Drawdown: the most the account may lose. If your balance goes below this line, the account is lost.",
+    payout: "Payout: the money the firm pays you from a funded account, when you meet its withdrawal rules.",
+    cushion: "Cushion: the profit to keep above the drawdown line before you can withdraw money.",
+    fundedOpt: "The kind of funded account you will get after the evaluation: Standard (the base rules) or Consistency (a rule on your best day). You can choose later.",
+    dllOpt: "A loss limit per day that the firm offers as an option: if you took it, your day stops when you reach it.",
+    bias: "Bias: what you think the market will do today: go up (Long), go down (Short), or you don’t know (Neutral).",
+    ddRoom: "Drawdown room: what you can still lose before you touch your account’s drawdown line.",
+    r: "R: your planned risk on one trade (from your entry to your stop). +2R means you won twice what you risked.",
+    consistency: "Consistency: your best day ÷ your total profit. The firm wants this share to stay under its limit.",
+    worstDD: "Worst drawdown: the biggest drop of your balance from a high.",
+    pf: "Profit factor: your total gains ÷ your total losses. Above 1, you win more than you lose.",
+    setup: "A setup is the pattern you trade. Touch and hold a name to read what it means." },
+  fr: { drawdown: "Drawdown : la perte maximale permise sur le compte. Si ton solde passe sous ce seuil, le compte est perdu.",
+    payout: "Payout : l’argent que la firme te verse sur un compte financé, quand tu respectes ses règles de retrait.",
+    cushion: "Coussin : le profit à garder au-dessus du seuil de drawdown avant de pouvoir retirer de l’argent.",
+    fundedOpt: "Le type de compte financé que tu auras après l’évaluation : Standard (les règles de base) ou Consistance (une règle sur ton meilleur jour). Tu peux le choisir plus tard.",
+    dllOpt: "Une limite de perte par jour que la firme propose en option : si tu l’as prise, ta journée s’arrête quand tu l’atteins.",
+    bias: "Biais : ce que tu penses que le marché va faire aujourd’hui : monter (Long), descendre (Short), ou tu ne sais pas (Neutre).",
+    ddRoom: "Marge de drawdown : ce que tu peux encore perdre avant de toucher le seuil de drawdown de ton compte.",
+    r: "R : ton risque prévu sur un trade (de ton entrée à ton stop). +2R veut dire que tu as gagné deux fois ce que tu risquais.",
+    consistency: "Consistance : ton meilleur jour ÷ ton profit total. La firme veut que cette part reste sous sa limite.",
+    worstDD: "Pire recul : la plus grande baisse de ton solde depuis un sommet.",
+    pf: "Facteur de profit : le total de tes gains ÷ le total de tes pertes. Au-dessus de 1, tu gagnes plus que tu ne perds.",
+    setup: "Un setup, c’est la configuration que tu trades. Touche longtemps un nom pour lire ce qu’il veut dire." },
+  es: { drawdown: "Drawdown: la pérdida máxima permitida en la cuenta. Si tu saldo baja de esta línea, la cuenta se pierde.",
+    payout: "Payout: el dinero que la firma te paga desde una cuenta financiada, cuando cumples sus reglas de retiro.",
+    cushion: "Colchón: el beneficio que debes mantener por encima de la línea de drawdown antes de poder retirar dinero.",
+    fundedOpt: "El tipo de cuenta financiada que tendrás tras la evaluación: Standard (las reglas base) o Consistencia (una regla sobre tu mejor día). Puedes elegirlo después.",
+    dllOpt: "Un límite de pérdida por día que la firma ofrece como opción: si lo tomaste, tu día se detiene al alcanzarlo.",
+    bias: "Sesgo: lo que crees que hará el mercado hoy: subir (Long), bajar (Short), o no lo sabes (Neutral).",
+    ddRoom: "Margen de drawdown: lo que aún puedes perder antes de tocar la línea de drawdown de tu cuenta.",
+    r: "R: tu riesgo previsto en una operación (de tu entrada a tu stop). +2R significa que ganaste dos veces lo que arriesgabas.",
+    consistency: "Consistencia: tu mejor día ÷ tu beneficio total. La firma quiere que esta parte quede bajo su límite.",
+    worstDD: "Peor retroceso: la mayor caída de tu saldo desde un máximo.",
+    pf: "Factor de beneficio: el total de tus ganancias ÷ el total de tus pérdidas. Por encima de 1, ganas más de lo que pierdes.",
+    setup: "Un setup es la configuración que operas. Mantén pulsado un nombre para leer lo que significa." } };
+const SETUP_WHAT = {
+  en: { "Liquidity sweep": "Price runs past a recent high or low (where stops sit), then turns back: you trade the turn.", "Break & retest": "Price breaks a level, comes back to test it, and holds: you enter on the retest.",
+    "Opening range breakout": "Price leaves the range of the first minutes of the session: you trade that breakout.", "Fair value gap": "A gap left by a fast move between three candles: price often comes back to fill it.",
+    "VWAP reclaim": "Price gets back above (or below) the day’s average price, the VWAP, and holds it.", "Trend pullback": "In a clear trend, you wait for a small pullback to enter in the trend’s direction.", "Reversal": "You trade the market turning around after a move, at a level where it stops." },
+  fr: { "Liquidity sweep": "Le prix dépasse un haut ou un bas récent (là où sont les stops), puis repart en sens inverse : tu trades ce retournement.", "Break & retest": "Le prix casse un niveau, revient le tester et tient : tu entres sur le retest.",
+    "Opening range breakout": "Le prix sort de la zone des premières minutes de la séance : tu trades cette cassure.", "Fair value gap": "Un trou laissé par un mouvement rapide entre trois bougies : le prix revient souvent le combler.",
+    "VWAP reclaim": "Le prix repasse au-dessus (ou en dessous) du prix moyen de la journée, le VWAP, et y reste.", "Trend pullback": "Dans une tendance nette, tu attends un petit repli pour entrer dans le sens de la tendance.", "Reversal": "Tu trades le marché qui fait demi-tour après un mouvement, sur un niveau où il s’arrête." },
+  es: { "Liquidity sweep": "El precio supera un máximo o mínimo reciente (donde están los stops) y luego se da la vuelta: operas ese giro.", "Break & retest": "El precio rompe un nivel, vuelve a probarlo y aguanta: entras en el retest.",
+    "Opening range breakout": "El precio sale del rango de los primeros minutos de la sesión: operas esa ruptura.", "Fair value gap": "Un hueco dejado por un movimiento rápido entre tres velas: el precio suele volver a llenarlo.",
+    "VWAP reclaim": "El precio vuelve por encima (o por debajo) del precio medio del día, el VWAP, y se mantiene.", "Trend pullback": "En una tendencia clara, esperas un pequeño retroceso para entrar a favor de la tendencia.", "Reversal": "Operas el mercado que se da la vuelta tras un movimiento, en un nivel donde se detiene." } };
+const termText = k => (TERMS[LANG] || TERMS.en)[k] || TERMS.en[k] || "";
+const TERM = k => `<span class="info sw-term" data-tip="${esc(termText(k))}" tabindex="0" role="button" aria-label="${esc(termText(k))}" data-noi18n>i</span>`;
+const setupWhat = n => ((SETUP_WHAT[LANG] || SETUP_WHAT.en)[n]) || "";
+window.SweepTerm = TERM, window.SweepTermText = termText, window.SweepSetupWhat = setupWhat;
+// a tap on a « i » (any [data-tip]) on a phone: a small bubble under it, closed by the next tap or a scroll
+function swTip(el, text) {
+  const old = document.getElementById("swTip");
+  old && old.remove();
+  if (!el || !text) return;
+  const d = document.createElement("div");
+  d.id = "swTip", d.className = "sw-tip", d.setAttribute("role", "tooltip"), d.setAttribute("data-noi18n", ""), d.textContent = text, document.body.append(d);
+  const r = el.getBoundingClientRect(), w = d.offsetWidth, x = Math.max(16, Math.min(r.left + r.width / 2 - w / 2, innerWidth - 16 - w));
+  d.style.left = x + "px", d.style.top = (r.bottom + 8 + scrollY) + "px";
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-tip]");
+  if (!b || !matchMedia("(hover: none)").matches) return swTip(null);
+  const cur = document.getElementById("swTip");
+  cur && cur._for === b ? swTip(null) : (swTip(b, b.getAttribute("data-tip")), document.getElementById("swTip")._for = b);
+}, !0);
+addEventListener("scroll", () => swTip(null), { passive: !0, capture: !0 });
+// a setup chip held down: its meaning (the names stay in English, the words of traders)
+{
+  let held = null;
+  document.addEventListener("pointerdown", e => {
+    const c = e.target.closest && e.target.closest("[data-sp], [data-g=setup]"); if (!c) return;
+    const what = setupWhat(c.dataset.sp || c.dataset.v || c.textContent.trim()); if (!what) return;
+    clearTimeout(held), held = setTimeout(() => { swTip(c, what); document.getElementById("swTip") && (document.getElementById("swTip")._held = 1); c._held = Date.now(); }, 500);
+  });
+  for (const ev of [ "pointerup", "pointercancel", "pointerleave" ]) document.addEventListener(ev, () => clearTimeout(held));
+  // the long press shows the meaning: it does not also pick the setup
+  document.addEventListener("click", e => { const c = e.target.closest && e.target.closest("[data-sp], [data-g=setup]"); if (c && c._held && Date.now() - c._held < 1500) { c._held = 0; e.stopImmediatePropagation(), e.preventDefault(); } }, !0);
+}
+
 /* (27 Oct., brief « nouveau trader » step 2) a trader starting out, his first 4 weeks: the trade form offers the micro of his usual
    contract (MNQ, not NQ); a mini chosen anyway gets a grey line « Your rule this month: 1 micro-contract », never a block */
 const MICRO_OF = { NQ: "MNQ", ES: "MES", YM: "MYM", RTY: "M2K", CL: "MCL", GC: "MGC" };
@@ -4159,7 +4242,7 @@ function tkSummary(e) {
 
 function tkRisk(e) {
   const t = e.r, a = e.budget;
-  return `<div><span>Risk</span><b class="neg">${t.risk_c != null ? money(-t.risk_c) : "—"}</b><small>${t.riskPts != null ? t.riskPts.toFixed(2) + " pts" : ""}</small></div>\n    <div><span>Reward</span><b class="pos">${t.rew_c != null ? money(t.rew_c) : "—"}</b><small>${t.rewPts != null ? t.rewPts.toFixed(2) + " pts" : ""}</small></div>\n    <div><span>R : R</span><b>${t.rr ? "1 : " + t.rr.toFixed(2) : "—"}</b><small>${t.stopWrong ? '<span class="neg">Stop is on the wrong side</span>' : t.targetWrong ? '<span class="neg">Target is on the wrong side</span>' : ""}</small></div>`;
+  return `<div><span>Risk</span><b class="neg">${t.risk_c != null ? money(-t.risk_c) : "—"}</b><small>${t.riskPts != null ? t.riskPts.toFixed(2) + " pts" : ""}</small></div>\n    <div><span>Reward</span><b class="pos">${t.rew_c != null ? money(t.rew_c) : "—"}</b><small>${t.rewPts != null ? t.rewPts.toFixed(2) + " pts" : ""}</small></div>\n    <div><span>R : R${TERM("r")}</span><b>${t.rr ? "1 : " + t.rr.toFixed(2) : "—"}</b><small>${t.stopWrong ? '<span class="neg">Stop is on the wrong side</span>' : t.targetWrong ? '<span class="neg">Target is on the wrong side</span>' : ""}</small></div>`;
 }
 
 function tkAlerts(e) {

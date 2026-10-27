@@ -1953,3 +1953,7 @@ html .sb-layer .sb-sheet{transition:transform var(--dur-sheet) var(--ease-ios)!i
 @layer legacy{html body [data-tk-miss][data-tk-miss]{box-shadow:inset 0 0 0 1.5px var(--neg),0 0 0 3px color-mix(in srgb,var(--neg) 18%,transparent)!important;border-radius:10px}}   /* (27 Oct.) the trade form: the field missing, in gold (in the legacy layer: an important outside a layer loses to the fields' own) */
 .toast-link{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;margin-left:2px}   /* (27 Oct.) « See the trade » */
 .tk-rookie{display:block;margin-top:6px;font-size:12px;color:var(--muted)}   /* (27 Oct.) a mini chosen by a trader starting out */
+/* (27 Oct.) a « i » opened with a tap on a phone; the hover bubble only where there is a pointer that hovers */
+@media (hover:none){[data-tip]:focus-visible::after,[data-tip]:hover::after{display:none}}
+.sw-tip{position:absolute;z-index:300;max-width:min(300px,calc(100vw - 32px));padding:10px 12px;border-radius:var(--r1,10px);background:var(--text);color:var(--bg);font-size:13px;line-height:1.45;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
+.sw-term{cursor:pointer}

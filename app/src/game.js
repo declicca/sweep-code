@@ -519,9 +519,9 @@
       ${PL.from ? `<p class="g-hint g-from">${t('from_plan', { d: fdate(PL.from, { weekday: 'long', month: 'long', day: 'numeric' }) })}</p>` : ''}
       ${works ? `<p class="g-hint g-edge" data-noi18n>${esc(works)}</p>` : ''}
       ${PL.bias === 'no_trade' || !PL.ruleOn ? '' : `<label class="g-f g-rule"><span>${t('rule')}</span><input type="text" maxlength="160" data-gp="rule" value="${esc(PL.rule || '')}" placeholder="${esc(t('rule_ph'))}" enterkeyhint="done"></label>`}
-      <div class="g-f"><span>${t('bias')}</span><div class="g-seg4">${bias.map(([v, k]) => `<button type="button" class="${PL.bias === v ? 'on' : ''} b-${v}" data-g="bias" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
+      <div class="g-f"><span>${t('bias')}${typeof TERM === 'function' ? TERM('bias') : ''}</span><div class="g-seg4">${bias.map(([v, k]) => `<button type="button" class="${PL.bias === v ? 'on' : ''} b-${v}" data-g="bias" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${PL.bias === 'no_trade' ? '' : `<div class="g-f g-setups"><span>${t('setups')}</span>${setupsHtml(setups)}</div>
-      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$">${PL.small ? `<small class="g-hint-sm g-small">${t('start_small')}</small>` : ''}${PL.room && (!lim || PL.room.c < lim.c) ? `<small class="g-hint-sm g-dll">${esc(t('dd_hint', { a: PL.room.name, v: typeof moneyU === 'function' ? moneyU(Math.floor(PL.room.c / 100) * 100) : '$' + Math.floor(PL.room.c / 100) }))}</small>` : lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: typeof moneyU === 'function' ? moneyU(lim.c) : '$' + lim.c / 100 }))}</small>` : ''}</label>
+      <div class="g-row2"><label class="g-f"><span>${t('max_loss')}</span><input inputmode="decimal" data-gp="max_loss" value="${esc(PL.max_loss)}" placeholder="$">${PL.small ? `<small class="g-hint-sm g-small">${t('start_small')}</small>` : ''}${PL.room && (!lim || PL.room.c < lim.c) ? `<small class="g-hint-sm g-dll">${esc(t('dd_hint', { a: PL.room.name, v: typeof moneyU === 'function' ? moneyU(Math.floor(PL.room.c / 100) * 100) : '$' + Math.floor(PL.room.c / 100) }))}${typeof TERM === 'function' ? TERM('ddRoom') : ''}</small>` : lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: typeof moneyU === 'function' ? moneyU(lim.c) : '$' + lim.c / 100 }))}</small>` : ''}</label>
       <label class="g-f"><span>${t('max_trades')}</span><input inputmode="numeric" data-gp="max_trades" value="${esc(PL.max_trades)}"></label></div>
       <label class="g-f"><span>${t('levels')}</span><textarea rows="2" data-gp="levels">${esc(PL.levels)}</textarea></label>`}
       <p class="g-err" id="gErr"></p>
@@ -989,7 +989,7 @@
   /** under the max loss, as the plan sheet always said: the drawdown room, or the account's daily limit */
   function pmLimHint() {
     const lim = dailyLimit(), mg = window.SweepCoach && SweepCoach.margin ? SweepCoach.margin(PM.day) : null, mu = (c) => (typeof moneyU === 'function' ? moneyU(c) : '$' + c / 100);
-    if (mg && (!lim || mg.start < lim.c)) return `<small class="g-hint-sm g-dll">${esc(t('dd_hint', { a: mg.name, v: mu(Math.floor(mg.start / 100) * 100) }))}</small>`;
+    if (mg && (!lim || mg.start < lim.c)) return `<small class="g-hint-sm g-dll">${esc(t('dd_hint', { a: mg.name, v: mu(Math.floor(mg.start / 100) * 100) }))}${typeof TERM === 'function' ? TERM('ddRoom') : ''}</small>`;   // (27 Oct.) its « i »
     return lim ? `<small class="g-hint-sm g-dll">${esc(t('dll_hint', { a: lim.name, v: mu(lim.c) }))}</small>` : '';
   }
   /** the day's high-impact news (B1), New York time */
