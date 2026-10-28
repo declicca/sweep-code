@@ -18,6 +18,7 @@ ENV = dict(os.environ, PATH=':'.join([os.path.expanduser('~/.venvs/sweep/bin'), 
 # market weekend: the game runs on Friday 15:00 ET (tools/game-now.py), the tests need an open session
 GAME_NOW = subprocess.run([sys.executable, '-I', os.path.join(TOOLS, 'game-now.py')], capture_output=True, text=True).stdout.strip()
 if GAME_NOW: ENV['SWEEP_GAME_NOW'] = GAME_NOW
+ENV['SWEEP_BAL_FROM'] = '2026-01-01'   # the complete days (« pertes oubliées », step 4) from before today's date too
 core = re.search(r'CORE="([^"]*)"', open(os.path.join(APP, 'tests/run-all.sh')).read()).group(1).split()
 php_tests = ['presets_test.php', 'shot_trades_test.php']
 # durations of the last run (seconds); unknown tests count as 60 s

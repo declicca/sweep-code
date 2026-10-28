@@ -25,6 +25,7 @@ const GAME_BADGES = [
     'sniper'        => ['rarity' => 'rare',   'secret' => false, 'xp' => 100, 'target' => 10],
     'sacred_stop'   => ['rarity' => 'epic',   'secret' => false, 'xp' => 300, 'target' => 50],
     'reviewer_20'   => ['rarity' => 'rare',   'secret' => false, 'xp' => 100, 'target' => 20],
+    'honest_5'      => ['rarity' => 'rare',   'secret' => false, 'xp' => 100, 'target' => 5],   // « Honest journal »: 5 days in a row the platform's balance and the journal agree (« pertes oubliées », step 4)
     'resilience'    => ['rarity' => 'rare',   'secret' => true,  'xp' => 150, 'target' => 1],
     'comeback'      => ['rarity' => 'rare',   'secret' => true,  'xp' => 100, 'target' => 1],
     'perfectionist' => ['rarity' => 'epic',   'secret' => true,  'xp' => 200, 'target' => 5],
@@ -42,6 +43,12 @@ const GAME_BADGES = [
     'league_promoted' => ['rarity' => 'rare', 'secret' => false, 'xp' => 100, 'target' => 1],
     'buddy_10' => ['rarity' => 'rare', 'secret' => false, 'xp' => 150, 'target' => 1],
 ];
+
+/** (brief « pertes oubliées », step 4) from this day, a closed day counts for the streak and the review's XP only when it is
+ *  complete: each account traded that day has its platform balance checked (journal.post.bal) or was synced (NinjaTrader 8,
+ *  Quantower). The days before it keep what they had. SWEEP_BAL_FROM: the tests' earlier day. */
+define('GAME_BAL_FROM', getenv('SWEEP_BAL_FROM') ?: '2026-10-29');
+const GAME_SYNCED = ['ninjatrader', 'quantower'];
 
 const GAME_XP = [
     'plan' => 20, 'plan_late' => 10, 'journal' => 5, 'journal_cap' => 5, 'review' => 20, 'ring' => 10,

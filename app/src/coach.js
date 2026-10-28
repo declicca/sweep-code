@@ -50,7 +50,7 @@
       w: { revenge: 'going back in less than 10 minutes after a loss', over_max_loss: 'trading after your max loss', over_max_trades: 'going past your number of trades', addloser: 'adding to a loser', no_stop: 'the stop not respected', risklimit: 'a risk above your limit', oversized: 'a size above your maximum', size_up: 'raising the size after wins', against_bias: 'trading against your bias', setup_not_in_plan: 'a setup outside your plan', open5: 'entering in the first 5 minutes', plan_no_trade: 'trading on a planned day off', no_plan: 'trading without a plan', rules_no: 'your checklist', rules_partial: 'your checklist' },
       r: { over_max_loss: 'Max loss reached: I close the platform.', over_max_trades: '{m} trades max, not one more.', revenge: 'After a loss: a 10-minute break before the next trade.', addloser: 'Never add to a losing trade.', no_stop: 'A stop set before each entry, never moved.', risklimit: 'Each trade’s risk fits my limit.', oversized: 'Never more than {m} contracts.', size_up: 'The same size after wins.', against_bias: 'Only in the direction of my bias.', setup_not_in_plan: 'Only the setups of my plan.', open5: 'No trade before 9:35.', plan_no_trade: 'A planned day off stays a day off.', no_plan: 'My plan before my first trade.', rules_no: 'Every point of my checklist before I enter.', rules_partial: 'Every point of my checklist before I enter.', clean: 'Same plan, same discipline.', margin: 'Max loss {m} or no trade.' },
       title: 'Your coach', last: 'Last trade · {t}', thisT: 'This trade', fix: 'To improve',
-      inPlan: 'In your plan', stopOk: 'stop respected', sizeOk: 'size within your max', chkOk: 'checklist followed',
+      goodLoss: 'A loss within your plan, stop respected: that’s a good trade.', inPlan: 'In your plan', stopOk: 'stop respected', sizeOk: 'size within your max', chkOk: 'checklist followed',
       none: 'Nothing to fix on this trade. Do exactly the same again.', noneNew: 'First trade logged. You followed your plan: that is what counts, not the result.', noneNew2: 'You followed your plan: that is what counts, not the result.', noneDay: 'Nothing to fix on this trade. Earlier today: {w}.',
       f: {
         over_max_loss: ['Taken after your max loss of the day ({m}).', 'Once the max loss is hit, you close the platform.'],
@@ -121,7 +121,7 @@
       w: { revenge: 'revenir moins de 10 minutes après une perte', over_max_loss: 'trader après ta perte max', over_max_trades: 'dépasser ton nombre de trades', addloser: 'ajouter à un perdant', no_stop: 'le stop non respecté', risklimit: 'un risque au-dessus de ta limite', oversized: 'une taille au-dessus de ton maximum', size_up: 'monter la taille après des gains', against_bias: 'trader contre ton biais', setup_not_in_plan: 'un setup hors de ton plan', open5: 'entrer dans les 5 premières minutes', plan_no_trade: 'trader un jour prévu sans trading', no_plan: 'trader sans plan', rules_no: 'ta checklist', rules_partial: 'ta checklist' },
       r: { over_max_loss: 'Perte max atteinte : je ferme la plateforme.', over_max_trades: '{m} trades max, pas un de plus.', revenge: 'Après une perte : 10 minutes de pause avant le trade suivant.', addloser: 'Jamais d’ajout à un trade perdant.', no_stop: 'Un stop placé avant chaque entrée, jamais déplacé.', risklimit: 'Le risque de chaque trade tient dans ma limite.', oversized: 'Jamais plus de {m} contrats.', size_up: 'La même taille après des gains.', against_bias: 'Seulement dans le sens de mon biais.', setup_not_in_plan: 'Seulement les setups de mon plan.', open5: 'Pas de trade avant 9 h 35.', plan_no_trade: 'Un jour prévu sans trading reste sans trading.', no_plan: 'Mon plan avant mon premier trade.', rules_no: 'Chaque point de ma checklist avant d’entrer.', rules_partial: 'Chaque point de ma checklist avant d’entrer.', clean: 'Même plan, même discipline.', margin: 'Perte max {m} ou pas de trade.' },
       title: 'Ton coach', last: 'Dernier trade · {t}', thisT: 'Ce trade', fix: 'À améliorer',
-      inPlan: 'Dans ton plan', stopOk: 'stop respecté', sizeOk: 'taille respectée', chkOk: 'checklist suivie',
+      goodLoss: 'Perte dans ton plan, stop respecté : c’est un bon trade.', inPlan: 'Dans ton plan', stopOk: 'stop respecté', sizeOk: 'taille respectée', chkOk: 'checklist suivie',
       none: 'Rien à corriger sur ce trade. Refais exactement pareil.', noneNew: 'Premier trade noté. Tu as suivi ton plan : c’est ça qui compte, pas le résultat.', noneNew2: 'Tu as suivi ton plan : c’est ça qui compte, pas le résultat.', noneDay: 'Rien à corriger sur ce trade. Plus tôt aujourd’hui : {w}.',
       f: {
         over_max_loss: ['Pris après ta perte max du jour ({m}).', 'Ta perte max atteinte, tu fermes la plateforme.'],
@@ -192,7 +192,7 @@
       w: { revenge: 'volver menos de 10 minutos después de una pérdida', over_max_loss: 'operar después de tu pérdida máxima', over_max_trades: 'pasar tu número de operaciones', addloser: 'añadir a una perdedora', no_stop: 'el stop no respetado', risklimit: 'un riesgo por encima de tu límite', oversized: 'un tamaño por encima de tu máximo', size_up: 'subir el tamaño tras ganancias', against_bias: 'operar contra tu sesgo', setup_not_in_plan: 'un setup fuera de tu plan', open5: 'entrar en los 5 primeros minutos', plan_no_trade: 'operar un día previsto sin operar', no_plan: 'operar sin plan', rules_no: 'tu checklist', rules_partial: 'tu checklist' },
       r: { over_max_loss: 'Pérdida máxima alcanzada: cierro la plataforma.', over_max_trades: '{m} operaciones máx., ni una más.', revenge: 'Tras una pérdida: 10 minutos de pausa antes de la siguiente operación.', addloser: 'Nunca añadir a una operación perdedora.', no_stop: 'Un stop puesto antes de cada entrada, nunca movido.', risklimit: 'El riesgo de cada operación cabe en mi límite.', oversized: 'Nunca más de {m} contratos.', size_up: 'El mismo tamaño tras ganancias.', against_bias: 'Solo en el sentido de mi sesgo.', setup_not_in_plan: 'Solo los setups de mi plan.', open5: 'Ninguna operación antes de las 9:35.', plan_no_trade: 'Un día previsto sin operar sigue sin operar.', no_plan: 'Mi plan antes de mi primera operación.', rules_no: 'Cada punto de mi checklist antes de entrar.', rules_partial: 'Cada punto de mi checklist antes de entrar.', clean: 'Mismo plan, misma disciplina.', margin: 'Pérdida máxima {m} o ninguna operación.' },
       title: 'Tu coach', last: 'Última operación · {t}', thisT: 'Esta operación', fix: 'A mejorar',
-      inPlan: 'Dentro de tu plan', stopOk: 'stop respetado', sizeOk: 'tamaño respetado', chkOk: 'checklist cumplida',
+      goodLoss: 'Pérdida dentro de tu plan, stop respetado: es una buena operación.', inPlan: 'Dentro de tu plan', stopOk: 'stop respetado', sizeOk: 'tamaño respetado', chkOk: 'checklist cumplida',
       none: 'Nada que corregir en esta operación. Repite exactamente lo mismo.', noneNew: 'Primera operación anotada. Seguiste tu plan: eso es lo que cuenta, no el resultado.', noneNew2: 'Seguiste tu plan: eso es lo que cuenta, no el resultado.', noneDay: 'Nada que corregir en esta operación. Antes, hoy: {w}.',
       f: {
         over_max_loss: ['Tomada después de tu pérdida máxima del día ({m}).', 'Alcanzada la pérdida máxima, cierras la plataforma.'],
@@ -369,7 +369,9 @@
     if (maxC && +t.contracts && +t.contracts <= maxC && !issues.some(([c]) => ['oversized', 'size_up'].includes(c))) good.push(T.sizeOk);
     if (r === 'yes') good.push(T.chkOk);
     const fix = issues.length ? [fill(T.f[issues[0][0]][0], issues[0][1]), T.f[issues[0][0]][1], issues[0][0], issues[0][1]] : null;
-    return { good: good.slice(0, 2), fix, all: issues.map(([c]) => c), ses: session(day, i, list, p), n: i + 1, time: timeOf(t) };
+    // (brief « pertes oubliées », step 4) a loss taken the way it was planned, the stop respected: said as a good trade
+    const goodLoss = net(t) < 0 && !fix && good.includes(T.inPlan) && good.includes(T.stopOk);
+    return { good: good.slice(0, 2), fix, all: issues.map(([c]) => c), ses: session(day, i, list, p), n: i + 1, time: timeOf(t), goodLoss };
   }
   /** where the session stands right after the trade number i of the day (the last one when i is left out):
    *  { t: sentence, stop: true when the coach tells him to stop or pause } */
@@ -662,7 +664,7 @@
   const IC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>';
   const OK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
   function noteHtml(c, earlier) {   // earlier: the code of a mistake of another trade of the day (never « nothing to fix » then)
-    const good = c.good.length ? `<p class="co-ok">${OK}<span>${esc2(c.good.join(', ').replace(/^./, (m) => m.toUpperCase()))}.</span></p>` : '';
+    const good = c.goodLoss ? `<p class="co-ok co-goodloss">${OK}<span>${esc2(T.goodLoss)}</span></p>` : c.good.length ? `<p class="co-ok">${OK}<span>${esc2(c.good.join(', ').replace(/^./, (m) => m.toUpperCase()))}.</span></p>` : '';
     const why = c.fix && starting() && T.why[c.fix[2]] ? `<span class="co-why">${esc2(T.why[c.fix[2]])}</span>` : '';
     const mine = c.fix && ['revenge', 'size_up', 'open5'].includes(c.fix[2]) ? ownLine(c.fix[2]) : '';
     const fix = c.fix ? `<p class="co-fix"><b>${T.fix}</b><span>${esc2(c.fix[0])}</span><span class="co-do">${esc2(c.fix[1])}</span>${mine ? `<span class="co-own">${esc2(mine)}</span>` : ''}${why}</p>` : `<p class="co-fix co-none"><span>${esc2(earlier ? fill(T.noneDay, { w: T.w[earlier] || '' }) : (() => { const n = (S.trades || []).filter((x) => !x.demo).length; return n <= 1 ? T.noneNew : n === 2 ? T.noneNew2 : T.none; })())}</span></p>`;   // (27 Oct., N5) before 3 trades, the words for a trader starting
@@ -705,6 +707,8 @@
     let html = todayHtml(); const hb = html && habit(today()), lim = html ? limits() : [];
     // (replaced by a function: an amount like « $1,000 » must not read as « $1 », the first group)
     if (lim.length) html = html.replace(/<\/div>/, (m) => `${m}<p class="co-ses co-stop co-lim">${esc2(limitLine(lim[0]))}</p>`);   // right under the coach's title
+    const gp = html && window.SweepGap && SweepGap.coach ? SweepGap.coach(today()) : null;   // the first platform gap, once (brief « pertes oubliées », step 3)
+    if (gp) html = html.replace(/<\/div>/, (m) => `${m}<p class="co-ses co-gap">${esc2(gp)}</p>`);
     if (hb) html = html.replace(/<\/section>$/, () => `<p class="co-habit">${esc2(hb.text)}</p></section>`);
     // inside the routine card, between its figures and its 3 steps: it folds with them (brief of 15 Oct.)
     const put = (x) => { const rt = host.querySelector(':scope > .nav-rt'), st = rt && rt.querySelector(':scope > .nav-rt-steps'), hp = rt && rt.querySelector(':scope > .nav-rt-help-t');

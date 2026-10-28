@@ -374,12 +374,20 @@ final class GameEngine
             }
         }
         $streakBest = max((int) ($p['streak_best'] ?? 0), (int) ($p['streak_current'] ?? 0));
+        // « Honest journal »: the traded days in a row closed on the platform's balance with no gap (a gap, or a traded day not checked, starts again)
+        $jr = self::docs($uid, 'journals'); $hRun = 0; $hBest = 0;
+        foreach ($days as $d) {
+            if ((int) $d['trades_count'] === 0) continue;
+            $bal = array_filter((array) (($jr[$d['trading_day']] ?? [])['post']['bal'] ?? []), 'is_array');
+            $agree = $bal && !array_filter($bal, fn($b) => (int) ($b['gap_c'] ?? 0) !== 0);
+            $hRun = $agree ? $hRun + 1 : 0; $hBest = max($hBest, $hRun);
+        }
         return [
             'welcome' => [!empty($o['done']) ? 1 : 0, 1], 'first_plan' => [min(1, $c['plans']), 1], 'first_journal' => [$c['journaled_any'] ? 1 : 0, 1],
             'first_sweep' => [min(1, $c['swept']), 1], 'sweep_5' => [min(5, $c['swept']), 5], 'sweep_25' => [min(25, $c['swept']), 25], 'sweep_100' => [min(100, $c['swept']), 100],
             'streak_7' => [min(7, $streakBest), 7], 'streak_30' => [min(30, $streakBest), 30], 'streak_100' => [min(100, $streakBest), 100],
             'full_week' => [$fullWeek, 1], 'patience' => [$patience, 1], 'guardrail' => [min(1, $c['guardrails']), 1], 'early_plan' => [min(10, $c['early_plans']), 10],
-            'sniper' => [min(10, $c['compliant_best']), 10], 'sacred_stop' => [min(50, $c['stop_best']), 50], 'reviewer_20' => [min(20, $c['reviews']), 20],
+            'sniper' => [min(10, $c['compliant_best']), 10], 'sacred_stop' => [min(50, $c['stop_best']), 50], 'reviewer_20' => [min(20, $c['reviews']), 20], 'honest_5' => [min(5, $hBest), 5],
             'resilience' => [$resilience, 1], 'comeback' => [$comeback, 1], 'perfectionist' => [min(5, $perfBest), 5], 'zen' => [$zen, 1],
         ];
     }
@@ -471,6 +479,13 @@ final class GameEngine
         $tradesReviewed = $n > 0;
         foreach ($trades as $t) { $rv = (array) ($t['review'] ?? []); if (!($txt($rv['well'] ?? null) || $txt($rv['wrong'] ?? null) || $txt($rv['lesson'] ?? null))) { $tradesReviewed = false; break; } }
         $reviewDone = !empty($post['reviewed_at']) || $postWritten || $tradesReviewed || $dayOff;
+        // a complete day (step 4 of « pertes oubliées »): every account traded that day checked on its platform's balance, or synced
+        $checked = array_flip(array_map(fn($b) => (string) ($b['acc'] ?? ''), array_filter((array) ($post['bal'] ?? []), 'is_array')));
+        $complete = true;
+        if ($day >= GAME_BAL_FROM) foreach ($trades as $t) {
+            $a = (string) ($t['account_id'] ?? '');
+            if ($a !== '' && !isset($checked[$a]) && !in_array((string) ($t['source'] ?? ''), GAME_SYNCED, true)) { $complete = false; break; }
+        }
         $ringReview = $reviewDone ? 100 : ($n ? (int) round(60 * $jn / $n) : 0);   // the day's review closes the ring
 
         $swept = $ringPlan === 100 && $ringExec === 100 && $ringReview === 100;
@@ -478,7 +493,7 @@ final class GameEngine
         $activity = $n > 0 || $pre || $post;
         $row = [
             'ring_plan' => $ringPlan, 'ring_execution' => $ringExec, 'ring_review' => $ringReview, 'trades_count' => $n, 'compliant_count' => $planValid ? $ok : 0, 'journaled_count' => $jn,
-            'is_swept' => $swept ? 1 : 0, 'is_valid_streak' => ($ringReview === 100 || $dayOff) ? 1 : 0, 'review_done' => $reviewDone ? 1 : 0, 'day_off' => $dayOff ? 1 : 0,
+            'is_swept' => $swept ? 1 : 0, 'is_valid_streak' => (($ringReview === 100 && $complete) || $dayOff) ? 1 : 0, 'review_done' => $reviewDone ? 1 : 0, 'day_off' => $dayOff ? 1 : 0,
             'plan_valid' => $planValid ? 1 : 0, 'plan_at' => $planAt, 'plan_bias' => $bias, 'guardrail' => $guard ? 1 : 0, 'activity' => $activity ? 1 : 0, 'net_c' => $cum,
             'detail_json' => json_encode(['trades' => $det, 'perfect_docs' => $perfect && $n > 0, 'plan_past' => $planPast, 'plan_late' => $planLate ?? false, 'exec_score' => $execScore ?? null]), 'updated_at' => self::ts(),
         ];
@@ -499,7 +514,7 @@ final class GameEngine
             if (self::awardXp($uid, "journal:$day:" . $t['id'], GAME_XP['journal'])) { $paidJ++; $gained[] = ['journal', GAME_XP['journal']]; self::track($uid, 'trade_journaled'); }
         }
         if ($dayOff) { if ($pay("dayoff:$day", GAME_XP['dayoff'], 'dayoff')) self::track($uid, 'dayoff'); }
-        elseif ($reviewDone) { if (self::awardXp($uid, "review:$day", GAME_XP['review'])) { $gained[] = ['review', GAME_XP['review']]; self::track($uid, 'review_saved'); } }
+        elseif ($reviewDone && $complete) { if (self::awardXp($uid, "review:$day", GAME_XP['review'])) { $gained[] = ['review', GAME_XP['review']]; self::track($uid, 'review_saved'); } }
         foreach (['plan' => $ringPlan, 'execution' => $ringExec, 'review' => $ringReview] as $ring => $v) {
             if ($v === 100 && self::awardXp($uid, "ring:$ring:$day", GAME_XP['ring'])) { $gained[] = ["ring_$ring", GAME_XP['ring']]; self::track($uid, 'ring_closed', ['ring' => $ring]); }
         }

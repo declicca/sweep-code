@@ -1905,9 +1905,9 @@ window.SweepMO = window.SweepMO || class {
    *  payout  → My money's payout form, filled in
    * The review sheet (« Close my day ») and « Recalibrate » both use it: window.SweepGap. */
   const GT = {
-    en: { gapNeg: '{v} missing between your platform and your journal. What was it?', gapPos: '{v} more on your platform than in your journal. What was it?', trades: 'Trades I didn’t log', fees: 'Fees', payout: 'A payout', line: 'Trades not detailed', feesNote: 'Fees (platform balance)', lineAdded: 'Added: Trades not detailed {v}', feesAdded: 'Fees added: {v}', detail: 'Add the detail', lineWhat: 'The gap between your platform and your journal on {d}. It counts in your P&L and your firm’s rules. Add the detail: each trade you log on this account that day leaves this line.', lineLeft: 'Left to detail: {v}', del: 'Remove this line' },
-    fr: { gapNeg: 'Il manque {v} entre ta plateforme et ton journal. C’était quoi ?', gapPos: 'Il y a {v} de plus sur ta plateforme que dans ton journal. C’était quoi ?', trades: 'Des trades pas notés', fees: 'Des frais', payout: 'Un payout', line: 'Trades non détaillés', feesNote: 'Frais (solde de la plateforme)', lineAdded: 'Ajouté : Trades non détaillés {v}', feesAdded: 'Frais ajoutés : {v}', detail: 'Ajouter le détail', lineWhat: 'L’écart entre ta plateforme et ton journal le {d}. Il compte dans ton P&L et les règles de ta firme. Ajoute le détail : chaque trade que tu notes sur ce compte ce jour-là sort de cette ligne.', lineLeft: 'Reste à détailler : {v}', del: 'Retirer cette ligne' },
-    es: { gapNeg: 'Faltan {v} entre tu plataforma y tu diario. ¿Qué fue?', gapPos: 'Hay {v} más en tu plataforma que en tu diario. ¿Qué fue?', trades: 'Operaciones sin anotar', fees: 'Comisiones', payout: 'Un payout', line: 'Operaciones sin detallar', feesNote: 'Comisiones (saldo de la plataforma)', lineAdded: 'Añadido: Operaciones sin detallar {v}', feesAdded: 'Comisiones añadidas: {v}', detail: 'Añadir el detalle', lineWhat: 'La diferencia entre tu plataforma y tu diario el {d}. Cuenta en tu P&L y en las reglas de tu firma. Añade el detalle: cada operación que anotes en esta cuenta ese día sale de esta línea.', lineLeft: 'Queda por detallar: {v}', del: 'Quitar esta línea' } };
+    en: { gapNeg: '{v} missing between your platform and your journal. What was it?', gapPos: '{v} more on your platform than in your journal. What was it?', trades: 'Trades I didn’t log', fees: 'Fees', payout: 'A payout', line: 'Trades not detailed', feesNote: 'Fees (platform balance)', lineAdded: 'Added: Trades not detailed {v}', feesAdded: 'Fees added: {v}', detail: 'Add the detail', lineWhat: 'The gap between your platform and your journal on {d}. It counts in your P&L and your firm’s rules. Add the detail: each trade you log on this account that day leaves this line.', lineLeft: 'Left to detail: {v}', del: 'Remove this line', note: '{v} not detailed: your win rate and your edge and leak don’t count them.', coach: 'Your journal said you had {a} left before your max loss. Your platform says {b}. That’s why every trade counts: I can only protect you from what I see.' },
+    fr: { gapNeg: 'Il manque {v} entre ta plateforme et ton journal. C’était quoi ?', gapPos: 'Il y a {v} de plus sur ta plateforme que dans ton journal. C’était quoi ?', trades: 'Des trades pas notés', fees: 'Des frais', payout: 'Un payout', line: 'Trades non détaillés', feesNote: 'Frais (solde de la plateforme)', lineAdded: 'Ajouté : Trades non détaillés {v}', feesAdded: 'Frais ajoutés : {v}', detail: 'Ajouter le détail', lineWhat: 'L’écart entre ta plateforme et ton journal le {d}. Il compte dans ton P&L et les règles de ta firme. Ajoute le détail : chaque trade que tu notes sur ce compte ce jour-là sort de cette ligne.', lineLeft: 'Reste à détailler : {v}', del: 'Retirer cette ligne', note: '{v} non détaillés : ton taux de réussite et ta force/fuite ne les comptent pas.', coach: 'Ton journal disait qu’il te restait {a} avant ta perte max. Ta plateforme dit {b}. C’est pour ça que chaque trade compte : je ne peux te protéger que de ce que je vois.' },
+    es: { gapNeg: 'Faltan {v} entre tu plataforma y tu diario. ¿Qué fue?', gapPos: 'Hay {v} más en tu plataforma que en tu diario. ¿Qué fue?', trades: 'Operaciones sin anotar', fees: 'Comisiones', payout: 'Un payout', line: 'Operaciones sin detallar', feesNote: 'Comisiones (saldo de la plataforma)', lineAdded: 'Añadido: Operaciones sin detallar {v}', feesAdded: 'Comisiones añadidas: {v}', detail: 'Añadir el detalle', lineWhat: 'La diferencia entre tu plataforma y tu diario el {d}. Cuenta en tu P&L y en las reglas de tu firma. Añade el detalle: cada operación que anotes en esta cuenta ese día sale de esta línea.', lineLeft: 'Queda por detallar: {v}', del: 'Quitar esta línea', note: '{v} sin detallar: tu tasa de acierto y tu fuerza/fuga no los cuentan.', coach: 'Tu diario decía que te quedaban {a} antes de tu pérdida máx. Tu plataforma dice {b}. Por eso cuenta cada operación: solo puedo protegerte de lo que veo.' } };
   const g = (k) => (GT[L] || GT.en)[k];
   const lineOf = (aid, day) => (S.trades || []).find((x) => x.untracked && x.account_id === aid && x.date === day);
   const gapKinds = (gap) => (gap < 0 ? ['trades', 'fees', 'payout'] : ['trades', 'fees']);   // more on the platform: never a payout
@@ -1916,11 +1916,14 @@ window.SweepMO = window.SweepMO || class {
   function gapApply(aid, day, gap, kind) {
     const a = getDoc('accounts', aid); if (!a || !gap) return;
     if (kind === 'trades') {
+      const r0 = !(S.settings && S.settings.gap_coach) && window.SweepCoach && SweepCoach.riskNow ? SweepCoach.riskNow(day) : null;   // (step 3) what the journal said was left
       const ln = lineOf(aid, day);
       if (ln) { editDoc('trades', ln.id, (d) => { d.pnl_c = (+d.pnl_c || 0) + gap; d.untracked = Object.assign({ gap_c: 0, detailed_c: 0 }, d.untracked, { gap_c: ((d.untracked || {}).gap_c || 0) + gap }); }); }
       else put('trades', { id: 'ut' + uid(), account_id: aid, date: day, session_date: true, instrument: '', direction: '', contracts: 0, entry: null, exit: null, entry_time: '', exit_time: '',
         pnl_c: gap, fees_c: 0, pnl_manual: true, untracked: { gap_c: gap, detailed_c: 0 }, discipline: {}, emo: {}, review: {}, shots: [], setup: '', tags: [], notes: '' });
       if (typeof toast === 'function') toast(g('lineAdded').replace('{v}', $m(gap)));
+      // the first gap a trader's platform shows: the coach says, once, what the journal hid (S.settings.gap_coach, kept on every device)
+      if (r0) { const r1 = SweepCoach.riskNow(day); if (r1 && r1.left !== r0.left) put('settings', Object.assign(structuredClone(S.settings), { gap_coach: { day, before_c: r0.left, after_c: r1.left } })); }
     } else if (kind === 'fees') {
       const adj = { id: 'adj' + Date.now().toString(36), at: day, amount_c: gap, note: g('feesNote'), kind: 'fees' };
       editDoc('accounts', aid, (d) => { d.adjustments = [...(d.adjustments || []), adj]; });
@@ -1959,7 +1962,34 @@ window.SweepMO = window.SweepMO || class {
     if (typeof lsSet === 'function') lsSet('tj.last', Object.assign({}, lsGet('tj.last', {}), { account: ln.account_id, copyTo: [] }));   // the form opens on that account
     if (typeof openTicket === 'function') openTicket(null, { date: ln.date });
   }
-  window.SweepGap = { msg: gapMsg, chips: gapChips, kinds: gapKinds, apply: gapApply, lineOf, detail, word: g };
+  // (step 3) while a gap stays « not detailed »: a grey line on Stats and on the account page — information, not a fault (never gold)
+  function noteHtml(lines) {
+    const left = lines.reduce((s, x) => s + (+x.pnl_c || 0), 0); if (!lines.length || !left) return '';
+    const last = lines.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+    return `<p class="ut-note" data-noi18n>${esc2(g('note').replace('{v}', typeof money === 'function' ? money(Math.abs(left), { sign: false, dec: 0 }) : $m(Math.abs(left))))} <button type="button" class="link" data-ut-go="${esc2(last.id)}">${esc2(g('detail'))} ›</button></p>`;
+  }
+  function paintNote() {
+    const main = document.getElementById('main'); if (!main) return;
+    const h = location.hash || '', m = /^#account\/([^/]+)/.exec(h), stats = /^#analytics/.test(h);
+    let lines = [], host = null;
+    if (m) { const id = decodeURIComponent(m[1]); lines = (S.trades || []).filter((x) => x.untracked && x.account_id === id); host = main.querySelector('.acard'); }
+    else if (stats) { lines = (typeof ft === 'function' ? ft() : S.trades || []).filter((x) => x.untracked); host = main.querySelector('.fx') || main.firstElementChild; }
+    const html = host ? noteHtml(lines) : '';
+    let el = main.querySelector('.ut-note');
+    if (!html) { if (el) el.remove(); return; }
+    if (!el) { const w = document.createElement('div'); w.innerHTML = html; el = w.firstElementChild; host.after(el); }
+    else if (el.outerHTML !== html) { const w = document.createElement('div'); w.innerHTML = html; el.replaceWith(w.firstElementChild); }
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-ut-go]'); if (b) detail(b.dataset.utGo); });
+  const rnd = window.render;
+  if (typeof rnd === 'function' && !rnd.__utNote) {
+    const w = function () { const out = rnd.apply(this, arguments); try { paintNote(); } catch (e) { /* never blocks */ } return out; };
+    w.__utNote = true; window.render = w;
+  }
+  /** the coach's sentence, the day of the first gap (null otherwise) */
+  const u0 = (c) => (typeof money === 'function' ? money(c, { sign: false, dec: 0 }) : '$' + Math.round(c / 100));
+  const coachGap = (day) => { const c = S.settings && S.settings.gap_coach; return c && c.day === day ? g('coach').replace('{a}', u0(c.before_c)).replace('{b}', u0(c.after_c)) : null; };
+  window.SweepGap = { msg: gapMsg, chips: gapChips, kinds: gapKinds, apply: gapApply, lineOf, detail, word: g, coach: coachGap };
 
   function card() {
     const m = /^#account\/([^/]+)/.exec(location.hash); if (!m) return;
@@ -2263,7 +2293,7 @@ window.SweepMO = window.SweepMO || class {
   /* 2. the screenshot form */
   const SH = { file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: {} };
   function shotForm(opts) {
-    Object.assign(SH, { noShot: false, dupOk: false, quotaShown: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || today(), qty: '1' } });
+    Object.assign(SH, { noShot: false, ctxOpen: false, dupOk: false, quotaShown: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || today(), qty: '1' } });
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
     SH.f.account = (accs[0] || {}).id || '';
     { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').forEach((x) => SH.copy.add(x.id)); }
@@ -2318,6 +2348,7 @@ window.SweepMO = window.SweepMO || class {
         </div></details>`}
       </div>
       ${/* brief 03 step 5: 3 questions (the trader's first three), emotions in one tap; the rest, confidence and execution under « More » */ ''}
+      <div class="nav-am-ctxw ${ctxFold() ? 'fold' : ''}"><button type="button" class="chip nav-am-ctxb" data-am="ctx-open">${CTX[0]}</button>
       ${qs.length ? `<section class="nav-am-sec"><h3>${t('disc')}</h3>${(SH.allQ ? qs : qs.filter((q, i) => i < qn || SH.disc[q.id])).map((q) => `<div class="nav-am-q"><span>${qLab(q)}</span>${seg('d:' + q.id, [['y', t('yes')], ['n', t('no')], ['na', t('na')]], SH.disc[q.id] || '')}</div>`).join('')}
         <div class="nav-am-qmore">${!SH.allQ && qs.length > qn ? `<button type="button" class="chip nav-am-more" data-am="q-more">${t('moreQ').replace('{n}', qs.filter((q, i) => i >= qn && !SH.disc[q.id]).length)}</button>` : ''}<button type="button" class="chip nav-am-more" data-am="q-add">${t('addQ')}</button>${window.SweepQs ? SweepQs.addLink(SH.setup) : ''}</div></section>` : ''}
       <section class="nav-am-sec"><h3>${t('psy')}</h3><p class="muted">${t('emo')}</p>
@@ -2331,9 +2362,15 @@ window.SweepMO = window.SweepMO || class {
             + `<button type="button" class="chip nav-am-more" data-am="emo-add">${t('addEmo')}</button>`;
         })()}</div>
         ${SH.allEmo || SH.conf || SH.exec ? `<div class="nav-am-scores"><div><span>${t('conf')}</span>${seg('conf', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.conf || '')}</div><div><span>${t('exec')}</span>${seg('exec', [1, 2, 3, 4, 5].map((n) => [n, n]), SH.exec || '')}</div></div>` : ''}</section>
+      </div>
       <p class="err nav-am-err"></p>
       <button type="button" class="btn primary nav-am-save" data-am="save" ${SH.busy ? 'disabled' : ''}>${t('save')}</button>` : ''}`;
   }
+  // (brief « pertes oubliées », step 4) a loss typed: the checklist and the emotions fold under « + Add context (optional) » —
+  // noting a loss costs no more taps than a win
+  const CTX = ({ en: ['+ Add context (optional)'], fr: ['+ Ajouter le contexte (facultatif)'], es: ['+ Añadir el contexto (opcional)'] })[L] || ['+ Add context (optional)'];
+  function ctxFold() { const v = num(SH.f.net); return !SH.batch.length && !SH.ctxOpen && v != null && v < 0; }
+  function ctxPaint() { const w = document.querySelector('.nav-am .nav-am-ctxw'); if (w) w.classList.toggle('fold', ctxFold()); }
   function pickBox(k, opts, cur) {
     const lab = (opts.find((o) => o[0] === cur) || opts[0] || ['', ''])[1];
     return `<div class="nav-am-sel ${SH.openPick === k ? 'open' : ''}" data-noi18n><button type="button" class="nav-am-selb" data-am-sel="${k}" aria-expanded="${SH.openPick === k}"><span>${esc2(lab)}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>${SH.openPick === k ? `<div class="nav-am-opts" role="listbox">${opts.map((o) => `<button type="button" role="option" class="${o[0] === cur ? 'on' : ''}" data-am-pickf="${k}" data-v="${esc2(o[0])}">${esc2(o[1])}</button>`).join('')}</div>` : ''}</div>`;
@@ -2671,6 +2708,7 @@ window.SweepMO = window.SweepMO || class {
       paint(); return;
     }
     if (act === 'close') close();
+    if (act === 'ctx-open') { SH.ctxOpen = true; ctxPaint(); return; }
     if (act === 'save') save();
     if (act === 'dupok') { SH.dupOk = true; save(); }
     if (act === 'no-shot') { SH.noShot = true; paint(); const n = document.querySelector('.nav-am-shot [data-am-f=net]'); if (n) n.focus({ preventScroll: true }); return; }   // focused in the tap itself: the iPhone opens its keyboard only then
@@ -2684,7 +2722,7 @@ window.SweepMO = window.SweepMO || class {
     const v = autoPnl(), p = document.querySelector('.nav-am-net input'); if (p) p.placeholder = v != null ? ((v - (SH.f.fees || 0)) / 100).toFixed(2) : '+250';
     const r = document.querySelector('.nav-am-r'); if (r) r.innerHTML = rLine();
     const sm = document.querySelector('.nav-am-more-d summary small'); if (sm) sm.innerHTML = verifyLine();
-    coachPaint();
+    coachPaint(); ctxPaint();
   });
   document.addEventListener('change', (e) => {
     const f = e.target.closest && e.target.closest('.nav-am [data-am-file]'); if (f && f.files.length) { takeFiles([...f.files]); return; }

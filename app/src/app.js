@@ -1782,7 +1782,7 @@ function vAccounts() {
 function vAccount(e) {
   const t = getDoc("accounts", e);
   if (!t) return '<div class="empty">Account not found. <a href="#accounts">Back to accounts</a></div>';
-  const a = sorted(S.trades.filter(o => o.account_id === e)), n = stats(a), s = firm(t.firm_id), i = S.payouts.filter(o => o.account_id === e);
+  const a = sorted(S.trades.filter(o => o.account_id === e)), n = stats(a.filter(o => !o.untracked)), s = firm(t.firm_id), i = S.payouts.filter(o => o.account_id === e);   // (the win rate without a « Trades not detailed » line; the balance and the margin keep it)
   return `<div class="row" style="margin-bottom:14px"><a class="link" href="#accounts">Accounts</a><span class="faint">/</span><span class="muted">${esc(s?.name || "")} — ${esc(t.name)}</span><span style="flex:1"></span>\n    ${t.status === "archived" ? `<span class="help" style="margin-left:6px">Outcome</span>${segFor("accounts", e, "outcome", [ [ "failed", "Failed" ], [ "passed", "Passed" ], [ "other", "Closed" ] ], t.outcome || "other")}` : ""}\n    <button class="btn sm" data-act="filter-account" data-id="${e}">${{
     fr: "Voir ses stats",
     es: "Ver sus estadísticas"
@@ -3339,7 +3339,7 @@ function statsSoon(t, a) {
 function vAnalytics(e) {
   [ "discipline", "behavior", "recovery", "session", "time", "weekday", "setup", "direction", "news" ].includes(e) && (U.deep = e, 
   saveU());
-  const t = ft(), a = stats(t);
+  const t = ft().filter(x => !x.untracked), a = stats(t);   // a « Trades not detailed » line: never in the win rate or the edge (brief « pertes oubliées », step 3)
   if (!t.length) return `${filterBar()}<div class="surface empty">No trades ${periodLabel()}. Change the period or add trades to see your stats.</div>`;
   U.cmp = U.cmp || "cum", U.dur = U.dur || "pct", U.brk = U.brk || "side", U.calv = U.calv || "cal", 
   U.deep = U.deep || "discipline";

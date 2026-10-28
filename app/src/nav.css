@@ -691,6 +691,10 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-am-dir .seg{width:100%}.nav-am-dir .seg button{flex:1}
 .nav-am-grid > .nav-am-dir{align-self:end}   /* next to the net P&L: on the line of its field when its label wraps (phone) */
 .nav-am-sec{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.nav-am-ctxw{display:contents}
+.nav-am-ctxw>.nav-am-ctxb{display:none}
+.nav-am-ctxw.fold>.nav-am-sec{display:none}
+.nav-am-ctxw.fold>.nav-am-ctxb{display:inline-flex;align-self:flex-start}
 .nav-am-sec h3{margin:0;font-size:15px}
 .nav-am-sec p{margin:-4px 0 0;font-size:13px}
 .nav-am-q{display:flex;align-items:center;justify-content:space-between;gap:12px}

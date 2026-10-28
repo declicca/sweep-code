@@ -33,7 +33,7 @@
       v_plan_no_trade: 'Taken on a day off', v_rules: 'Rules partly followed',
       xp: 'XP', plus_xp: '+{n} XP', continue: 'Continue', share: 'Share', new_badge: 'New badge', level_up: 'Level {n}', rank_up: 'New rank', streak_title: '{n}-day streak',
       backfill: 'Your history already earned you {xp} XP and {n} badges.', guardrail_t: 'Guardrail respected',
-      rank_card: 'Rank', streak_card: 'Discipline streak', calendar: 'Calendar', badges: 'Badges', counters: 'Counters', swept_days: 'Days swept', reviews_done: 'Reviews done',
+      rank_card: 'Rank', streak_card: 'Complete days', calendar: 'Calendar', badges: 'Badges', counters: 'Counters', swept_days: 'Days swept', reviews_done: 'Reviews done',
       compliant_run: 'Trades in plan in a row', sound: 'Sweep sound', sound_d: 'A short, soft sound when you sweep a day.', locked: 'Locked', secret: 'Secret badge',
       ob_goal: "What's your main goal?", g_evaluation: 'Pass my evaluation', g_payout: 'Get my first payout', g_consistency: 'Become consistent', g_edge: 'Find my edge',
       ob_style: 'How do you trade?', scalp: 'Scalp', intraday: 'Intraday', swing: 'Swing', instruments: 'Instruments', other: 'Other',
@@ -51,7 +51,7 @@
         streak_7: ['One week', '7-day streak.'], streak_30: ['One month', '30-day streak.'], streak_100: ['One hundred', '100-day streak.'],
         full_week: ['Perfect week', 'Sweep every market day of one week.'], patience: ['Patience', 'Sweep a planned day off.'], guardrail: ['Guardrail', 'Stop for the day at your max loss.'],
         early_plan: ['Ready before the open', '10 plans made before 9:00 ET.'], sniper: ['Sniper', '10 trades in your plan in a row.'], sacred_stop: ['The sacred stop', '50 trades in a row with a stop.'],
-        reviewer_20: ['Introspection', '20 end-of-day reviews.'], resilience: ['Resilience', 'Sweep the day right after a red day.'], comeback: ['The comeback', 'Sweep a day after 7+ quiet market days.'],
+        reviewer_20: ['Introspection', '20 end-of-day reviews.'], honest_5: ['Honest journal', '5 days in a row your platform’s balance and your journal agree.'], resilience: ['Resilience', 'Sweep the day right after a red day.'], comeback: ['The comeback', 'Sweep a day after 7+ quiet market days.'],
         perfectionist: ['Perfectionist', '5 days in a row where every trade has a screenshot and a note.'], zen: ['Zen', '3 planned days off in a row, then a swept day.'],
       },
     },
@@ -77,7 +77,7 @@
       v_plan_no_trade: "Pris pendant un jour off", v_rules: 'Règles suivies en partie',
       xp: 'XP', plus_xp: '+{n} XP', continue: 'Continuer', share: 'Partager', new_badge: 'Nouveau badge', level_up: 'Niveau {n}', rank_up: 'Nouveau rang', streak_title: 'Streak de {n} jours',
       backfill: "Ton historique t’a déjà rapporté {xp} XP et {n} badges.", guardrail_t: 'Garde-fou respecté',
-      rank_card: 'Rang', streak_card: 'Streak de discipline', calendar: 'Calendrier', badges: 'Badges', counters: 'Compteurs', swept_days: 'Journées balayées', reviews_done: 'Revues faites',
+      rank_card: 'Rang', streak_card: 'Jours complets', calendar: 'Calendrier', badges: 'Badges', counters: 'Compteurs', swept_days: 'Journées balayées', reviews_done: 'Revues faites',
       compliant_run: 'Trades conformes de suite', sound: 'Son Sweep', sound_d: 'Un son court et feutré quand tu balaies une journée.', locked: 'Verrouillé', secret: 'Badge secret',
       ob_goal: 'Quel est ton objectif principal ?', g_evaluation: 'Passer mon évaluation', g_payout: 'Obtenir mon premier payout', g_consistency: 'Devenir constant', g_edge: 'Trouver mon edge',
       ob_style: 'Comment trades-tu ?', scalp: 'Scalp', intraday: 'Intraday', swing: 'Swing', instruments: 'Instruments', other: 'Autre',
@@ -95,7 +95,7 @@
         streak_7: ['Une semaine', 'Streak de 7 jours.'], streak_30: ['Un mois', 'Streak de 30 jours.'], streak_100: ['Cent', 'Streak de 100 jours.'],
         full_week: ['Semaine parfaite', "Balaie chaque jour de marché d’une semaine."], patience: ['Patience', 'Balaie un jour off planifié.'], guardrail: ['Garde-fou', "Arrête-toi pour la journée à ta perte max."],
         early_plan: ["Prêt avant l’ouverture", '10 plans faits avant 9 h 00 ET.'], sniper: ['Sniper', '10 trades conformes de suite.'], sacred_stop: ['Le stop sacré', '50 trades de suite avec un stop.'],
-        reviewer_20: ['Introspection', '20 revues de fin de journée.'], resilience: ['Résilience', 'Balaie la journée juste après une journée rouge.'], comeback: ['Le retour', 'Balaie une journée après 7+ jours de marché calmes.'],
+        reviewer_20: ['Introspection', '20 revues de fin de journée.'], honest_5: ['Journal honnête', '5 journées de suite où le solde de ta plateforme et ton journal sont d’accord.'], resilience: ['Résilience', 'Balaie la journée juste après une journée rouge.'], comeback: ['Le retour', 'Balaie une journée après 7+ jours de marché calmes.'],
         perfectionist: ['Perfectionniste', '5 jours de suite où chaque trade a une capture et une note.'], zen: ['Zen', '3 jours off planifiés de suite, puis une journée balayée.'],
       },
     },
@@ -121,7 +121,7 @@
       v_plan_no_trade: 'Tomado en un día libre', v_rules: 'Reglas seguidas en parte',
       xp: 'XP', plus_xp: '+{n} XP', continue: 'Continuar', share: 'Compartir', new_badge: 'Nueva insignia', level_up: 'Nivel {n}', rank_up: 'Nuevo rango', streak_title: 'Racha de {n} días',
       backfill: 'Tu historial ya te dio {xp} XP y {n} insignias.', guardrail_t: 'Límite respetado',
-      rank_card: 'Rango', streak_card: 'Racha de disciplina', calendar: 'Calendario', badges: 'Insignias', counters: 'Contadores', swept_days: 'Días barridos', reviews_done: 'Revisiones hechas',
+      rank_card: 'Rango', streak_card: 'Días completos', calendar: 'Calendario', badges: 'Insignias', counters: 'Contadores', swept_days: 'Días barridos', reviews_done: 'Revisiones hechas',
       compliant_run: 'Trades dentro del plan seguidos', sound: 'Sonido Sweep', sound_d: 'Un sonido corto y suave al barrer un día.', locked: 'Bloqueada', secret: 'Insignia secreta',
       ob_goal: '¿Cuál es tu objetivo principal?', g_evaluation: 'Pasar mi evaluación', g_payout: 'Obtener mi primer payout', g_consistency: 'Ser constante', g_edge: 'Encontrar mi ventaja',
       ob_style: '¿Cómo operas?', scalp: 'Scalp', intraday: 'Intradía', swing: 'Swing', instruments: 'Instrumentos', other: 'Otro',
@@ -139,7 +139,7 @@
         streak_7: ['Una semana', 'Racha de 7 días.'], streak_30: ['Un mes', 'Racha de 30 días.'], streak_100: ['Cien', 'Racha de 100 días.'],
         full_week: ['Semana perfecta', 'Barre cada día de mercado de una semana.'], patience: ['Paciencia', 'Barre un día libre planificado.'], guardrail: ['Límite', 'Detente en tu pérdida máxima del día.'],
         early_plan: ['Listo antes de la apertura', '10 planes antes de las 9:00 ET.'], sniper: ['Francotirador', '10 trades dentro del plan seguidos.'], sacred_stop: ['El stop sagrado', '50 trades seguidos con stop.'],
-        reviewer_20: ['Introspección', '20 revisiones de cierre.'], resilience: ['Resiliencia', 'Barre el día justo después de un día en rojo.'], comeback: ['El regreso', 'Barre un día tras 7+ días de mercado sin actividad.'],
+        reviewer_20: ['Introspección', '20 revisiones de cierre.'], honest_5: ['Diario honesto', '5 días seguidos en que el saldo de tu plataforma y tu diario coinciden.'], resilience: ['Resiliencia', 'Barre el día justo después de un día en rojo.'], comeback: ['El regreso', 'Barre un día tras 7+ días de mercado sin actividad.'],
         perfectionist: ['Perfeccionista', '5 días seguidos con captura y nota en cada trade.'], zen: ['Zen', '3 días libres planificados seguidos y luego un día barrido.'],
       },
     },
@@ -267,7 +267,7 @@
     x: '<path d="M6 6l12 12M18 6L6 18"/>', chev: '<path d="M9 6l6 6-6 6"/>',
   };
   const BADGE_IC = { welcome: 'hand', first_plan: 'flag', first_journal: 'book', first_sweep: 'sweep', sweep_5: 'sweep', sweep_25: 'sweep', sweep_100: 'sweep', streak_7: 'fire', streak_30: 'fire', streak_100: 'fire',
-    full_week: 'cal', patience: 'leaf', guardrail: 'shield', early_plan: 'sun', sniper: 'target', sacred_stop: 'stop', reviewer_20: 'eye', resilience: 'spark', comeback: 'spark', perfectionist: 'star', zen: 'leaf' };
+    full_week: 'cal', patience: 'leaf', guardrail: 'shield', early_plan: 'sun', sniper: 'target', sacred_stop: 'stop', reviewer_20: 'eye', honest_5: 'shield', resilience: 'spark', comeback: 'spark', perfectionist: 'star', zen: 'leaf' };
   const svg = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[name] || IC.star}</svg>`;
 
   /* ───────────── state ───────────── */
@@ -1774,9 +1774,9 @@
 
   /* ───────────── next useful progression step (Today rank card) and the « reward waiting » dot ───────────── */
   const NX = {
-    en: { season: 'Season reward to claim', chest: 'Your chest is ready to open', mission: 'Mission almost done: {m} {p}/{t}', league: '{t} league · {r}', streak: 'Streak {n} days · best {b}' },
-    fr: { season: 'Récompense de saison à réclamer', chest: 'Ton coffre est prêt à ouvrir', mission: 'Mission presque finie : {m} {p}/{t}', league: 'Ligue {t} · {r}', streak: 'Streak {n} jours · record {b}' },
-    es: { season: 'Recompensa de temporada por reclamar', chest: 'Tu cofre está listo', mission: 'Misión casi lista: {m} {p}/{t}', league: 'Liga {t} · {r}', streak: 'Racha {n} días · récord {b}' },
+    en: { season: 'Season reward to claim', chest: 'Your chest is ready to open', mission: 'Mission almost done: {m} {p}/{t}', league: '{t} league · {r}', streak: 'Complete days: {n} in a row · best {b}' },
+    fr: { season: 'Récompense de saison à réclamer', chest: 'Ton coffre est prêt à ouvrir', mission: 'Mission presque finie : {m} {p}/{t}', league: 'Ligue {t} · {r}', streak: 'Jours complets : {n} de suite · record {b}' },
+    es: { season: 'Recompensa de temporada por reclamar', chest: 'Tu cofre está listo', mission: 'Misión casi lista: {m} {p}/{t}', league: 'Liga {t} · {r}', streak: 'Días completos: {n} seguidos · récord {b}' },
   };
   function progNext() {
     const x = NX[L()] || NX.en, p = G.profile; if (!p) return null;
