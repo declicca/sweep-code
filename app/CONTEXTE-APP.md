@@ -1254,3 +1254,4 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Carte « Journal complet »** et « Exporter pour Claude » : la part des journées fermées avec un écart (`gap_days`), le montant total des écarts en valeur absolue (`gap_total_c`), la part des écarts détaillée en trades depuis (`gap_detailed`, en montant).
 - **Touchers** : une journée sans écart coûte un toucher de plus (16 → 17, `MESURE-BOUCLE.md`).
 - **Tests** : `e2e_platform_balance` (FR 390, EN 1300, ES 390), `metrics_test.php` (les trois chiffres calculés à la main), `parcours-baseline.py` (touche « C'est le même »).
+- **Correction en passant (CI du 28 oct.)** : « Pour la prochaine séance » (`.nav-next-ses`, `src/nav.js`) est aussi ajouté dans le même passage que le rendu de la page. Ajouté après, il poussait « Maintenant » de 25 px à chaque rendu, ce qui faisait échouer `e2e_page_shift` sur une machine lente.

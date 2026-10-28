@@ -5344,7 +5344,7 @@ document.addEventListener('click', (e) => {
     if (d && d.rings && d.rings.plan >= 100 && target === (d.day || today)) return null;   // already planned
     return h >= 16 || target !== today || !d || !d.market ? target : null;
   };
-  new window.SweepMO(() => {
+  function tagNext() {
     // never on the loading card: its steps have no title, so the tag landed next to the step, as a 4th cell of the grid (layout shift)
     const nx = window.SweepNextSession(); const s1 = document.querySelector('#main .nav-rt-s:first-child'); if (!s1 || s1.classList.contains('sk')) return;
     let tag = s1.querySelector('.nav-next-ses');
@@ -5352,7 +5352,14 @@ document.addEventListener('click', (e) => {
     const txt = ({ en: 'For the next session', fr: 'Pour la prochaine séance', es: 'Para la próxima sesión' })[L];
     if (!tag) { tag = document.createElement('small'); tag.className = 'nav-next-ses'; tag.setAttribute('data-noi18n', ''); const h = s1.querySelector('h3, b'); (h || s1).after(tag); }
     if (tag.textContent !== txt) tag.textContent = txt;
-  }).observe(document.body, { childList: true, subtree: true });
+  }
+  new window.SweepMO(tagNext).observe(document.body, { childList: true, subtree: true });
+  // (28 Oct., the CI) also in the same pass as the page's render, before it is painted: added after, it pushed « Now » down 25 px
+  const appRender = window.render;
+  if (typeof appRender === 'function' && !appRender.__nextSes) {
+    const w = function () { const out = appRender.apply(this, arguments); try { tagNext(); } catch (e) { /* never blocks */ } return out; };
+    w.__nextSes = true; window.render = w;
+  }
 })();
 
 /* D15 · the discipline checklist on the manual form, right above « Save »: 3 questions, « See more » for the rest */
