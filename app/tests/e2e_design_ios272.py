@@ -9,6 +9,8 @@ Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phon
  V5 the trade page, computer: no empty column (« Setup & costs » above the full review)
  V6 Stats: the performance score in flat bars (no 3D)
  V8 Stats' calendar: a loss day as light as a win day (the brand gold, the same opacity scale)
+ G  lot 2, the glass: the tab bar and the « New trade » sheet have their darkened rim and their top-edge shine; the tab bar's
+    labels reach 4.5:1 over a blue and a gold card under it
 No page error, nothing wider than the window.
 """
 import re, sys
@@ -21,6 +23,13 @@ def ok(c, what):
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
 PCT_SPACED = "(() => { const w = document.createTreeWalker(document.getElementById('main'), NodeFilter.SHOW_TEXT); const out = []; let n; while ((n = w.nextNode())) { if (/\\d[ \\u00a0\\u202f]%/.test(n.nodeValue)) out.push(n.nodeValue.trim().slice(0, 30)); } return out })()"
 PCT_TIGHT = "(() => { const w = document.createTreeWalker(document.getElementById('main'), NodeFilter.SHOW_TEXT); const out = []; let n; while ((n = w.nextNode())) { if (/\\d%/.test(n.nodeValue) && !(n.parentElement && n.parentElement.closest('[style*=width], svg, .chartbox'))) out.push(n.nodeValue.trim().slice(0, 30)); } return out })()"
+GLASS = "(sel) => { const e = document.querySelector(sel); if (!e) return null; const s = getComputedStyle(e), a = getComputedStyle(e, '::after'); return [s.outlineStyle === 'solid' && s.outlineWidth === '1px' && s.outlineColor !== 'rgba(0, 0, 0, 0)', /gradient/.test(a.backgroundImage) && a.height === '1px'] }"
+# the labels' colour over the bar's own fill laid on a blue and on a gold card (what the blur averages to, at worst)
+CONTRAST = """(() => { const nav = document.querySelector('.bottomnav'); if (!nav) return null; const lab = [...nav.querySelectorAll('a, button')].find((x) => !x.classList.contains('plus') && x.textContent.trim()); if (!lab) return null;
+  const rgb = (c) => (c.match(/[\\d.]+/g) || []).map(Number), fg = rgb(getComputedStyle(lab).color), bg = rgb(getComputedStyle(nav).backgroundColor);
+  const lum = (c) => { const f = c.slice(0, 3).map((v) => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4) }); return .2126 * f[0] + .7152 * f[1] + .0722 * f[2] };
+  const over = (top, under) => { const a = top[3] == null ? 1 : top[3]; return [0, 1, 2].map((i) => top[i] * a + under[i] * (1 - a)) };
+  return [[76, 141, 255], [212, 162, 76], [38, 93, 198], [132, 92, 14]].map((u) => { const b = over(bg, u), L1 = lum(fg), L2 = lum(b); return Math.round((Math.max(L1, L2) + .05) / (Math.min(L1, L2) + .05) * 10) / 10 }) })()"""
 with sync_playwright() as p:
   br = p.chromium.launch(); errs = []
   for lang, w, phone, scheme in (('en', 1300, False, 'light'), ('fr', 390, True, 'dark'), ('es', 1300, False, 'dark'), ('en', 390, True, 'light')):
@@ -55,6 +64,13 @@ with sync_playwright() as p:
     heat = pg.evaluate("[...document.querySelectorAll('#main .cal .d[style*=background]')].map((d) => d.getAttribute('style'))")
     gold = [h for h in heat if 'neg-rgb' in h]
     ok(heat and not gold, f'V8 {tag}: a loss day in the light brand gold, never the dark gold ({gold[:2]})')
+    # G. the glass (lot 2)
+    if phone:
+      g = pg.evaluate(GLASS, '.bottomnav'); ok(g and g[0] and g[1], f'G {tag}: the tab bar, rim and shine ({g})')
+      cr = pg.evaluate(CONTRAST); ok(cr and min(cr) >= 4.5, f'G {tag}: the tab bar\'s labels over blue and gold ({cr})')
+    pg.evaluate("openTicket(null)"); pg.wait_for_timeout(1000)
+    g = pg.evaluate(GLASS, '.nav-am.open, #tkSlide.open'); ok(g and g[0] and g[1], f'G {tag}: the « New trade » sheet, rim and shine ({g})')
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(300); pg.evaluate("document.querySelectorAll('.nav-am.open [data-am=close]').forEach((b) => b.click())"); pg.wait_for_timeout(300)
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag}: nothing wider than the window')
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')

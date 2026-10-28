@@ -2859,6 +2859,34 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
    title and all the content moved at each change of page. Title and buttons sit at the bottom of a fixed band. */
 html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:flex-end!important}
 @media (min-width:861px){ html body .top:has(> #title){min-height:96px} html body .main-wrap .top:has(> #title) > :not(#title){align-self:flex-end!important} }   /* the buttons on the title's line */
+/* ───── Design « iOS 27.2 », lot 2 (28 Oct.): the glass of iOS 27 — a darkened rim, a brighter top edge, a more diffused background ─────
+   (bars, sheets, menus; no halo, nothing following the mouse) */
+:root{--glass-rim:rgba(0,0,0,.35);--glass-shine:rgba(255,255,255,.18)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--glass-rim:rgba(11,11,12,.12);--glass-shine:rgba(255,255,255,.6)}}
+:root[data-theme="light"]{--glass-rim:rgba(11,11,12,.12);--glass-shine:rgba(255,255,255,.6)}
+:root[data-theme="dark"]{--glass-rim:rgba(0,0,0,.35);--glass-shine:rgba(255,255,255,.18)}
+/* dark: a denser bar, so its labels stay at 4.5:1 over a blue or a gold card passing under it */
+@media not (prefers-color-scheme:light){:root:not([data-theme="light"]){--glass-bar:rgba(18,18,22,.84)}}
+:root[data-theme="dark"]{--glass-bar:rgba(18,18,22,.84)}
+html body .bottomnav,html body .evp,html body .nav-dlg,html body .nav-am,html body #shPanel,html body .menu-pop,html body .fxm,html body .cmd-panel,html body .nav-ra,html body .cpop{outline:1px solid var(--glass-rim);outline-offset:-1px}
+@media (min-width:861px){html body aside.side{outline:1px solid var(--glass-rim);outline-offset:-1px}}
+html body.ux-scrolled aside.side{box-shadow:inset 0 -1px 0 var(--glass-rim)!important}
+html body .bottomnav::after,html body .evp::after,html body .nav-dlg::after,html body .nav-am::after,html body #shPanel::after,html body .menu-pop::after,html body .fxm::after,html body .cmd-panel::after{content:"";position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,var(--glass-shine) 30%,var(--glass-shine) 70%,transparent);pointer-events:none;z-index:2}
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  html body .bottomnav,html body.ux-scrolled aside.side{-webkit-backdrop-filter:saturate(200%) blur(36px)!important;backdrop-filter:saturate(200%) blur(36px)!important}
+  html body .evp,html body .nav-dlg,html body .nav-am,html body #shPanel,html body .menu-pop,html body .fxm{-webkit-backdrop-filter:saturate(200%) blur(36px)!important;backdrop-filter:saturate(200%) blur(36px)!important}
+}
+/* reduced transparency and more contrast: the glass is opaque, the rim stronger, no shine */
+@media (prefers-reduced-transparency:reduce){
+  :root{--glass-rim:var(--line2)}
+  html body .bottomnav::after,html body .evp::after,html body .nav-dlg::after,html body .nav-am::after,html body #shPanel::after,html body .menu-pop::after,html body .fxm::after,html body .cmd-panel::after{display:none}
+}
+@media (prefers-contrast:more){
+  :root{--glass-rim:var(--text)!important}
+  html body .bottomnav,html body .evp,html body .nav-dlg,html body .nav-am,html body #shPanel,html body .menu-pop,html body .fxm{background:var(--panel)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+}
+/* the icons of the tab bar and the sidebar: one stroke everywhere, on the pixel grid */
+html body .bottomnav svg,html body aside.side nav svg{stroke-width:1.75;shape-rendering:geometricPrecision}
 /* (28 Oct., iOS 27.2 V3) the three figures of the routine read the same: the label on top, the value under it, no coloured fill */
 html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:var(--panel2)!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
 html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > span{display:flex!important;flex-direction:column;align-items:center;gap:0;font-size:inherit}

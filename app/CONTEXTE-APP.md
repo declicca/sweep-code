@@ -1280,3 +1280,14 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **V8** : un jour de perte du calendrier de Stats prend l'or de la marque (#D4A24C) à la même échelle d'opacité que le bleu, et plus jamais l'or foncé du texte.
 - **À savoir** : `nav.css` et `app.css` sont dans le calque `legacy`. Une règle `!important` ajoutée hors du calque perd contre celles du calque : les nouvelles règles vont dans le calque.
 - **Tests** : `e2e_design_ios272` (V1 à V8 sauf V7, EN / FR / ES, 390 et 1300, clair et foncé) et `e2e_design_pages` (V7 : chaque carte finit avec son contenu).
+
+### Design « iOS 27.2 » (28 oct.), lot 2 : le verre d'iOS 27
+- **Sur la barre d'onglets, les feuilles (« New trade », plan, revue, filtres), les menus et la barre latérale** (`src/nav.css`, bloc « lot 2 ») :
+  - un bord assombri de 1 px à l'intérieur (`--glass-rim` : noir à 35 % en foncé, encre à 12 % en clair) ;
+  - sur l'arête du haut, un reflet de 1 px qui s'efface vers les côtés (`--glass-shine` : blanc à 18 % en foncé, 60 % en clair) ;
+  - un fond plus diffusé (flou de 36 px, saturation à 200 %).
+- **La barre qui défile** : la barre du haut du téléphone (`ux-scrolled`) et les en-têtes collants (`is-stuck`) existaient déjà. Le bord assombri s'y ajoute.
+- **En foncé**, la barre d'onglets est plus dense (`--glass-bar` à 84 %) : ses libellés restent au-dessus de 4,5:1 sur une carte bleue ou or (de 5,1 à 5,9:1).
+- **« Réduire la transparence »** : pas de reflet, un bord plus fort. **« Contraste élevé »** : le verre devient opaque, avec un bord de la couleur du texte.
+- **Icônes** de la barre d'onglets et de la barre latérale : un trait de 1,75 partout.
+- **Test** : `e2e_design_ios272` (G : le bord et le reflet de la barre d'onglets et de la feuille « New trade », le contraste des libellés).
