@@ -94,3 +94,11 @@ Ces chiffres sont aussi dans « Exporter pour Claude ». Pas de nom de trader.
 ## Après le brief
 
 Deux semaines après la mise en ligne de l'étape 2 : comparer la carte « Journal complet » à la mesure de l'étape 1. La session stratégie et tests en fait le point dans `docs/parcours/`.
+
+---
+
+## Revue de l'étape 1 (28 oct., `fa916db` dans `058bf24`, CI verte)
+
+**Validée** sur le rapport : la carte « Journal complet » existe sur 7 et 30 jours. `metrics_test.php` vérifie 4 traders calculés à la main : la copie comptée une fois, les données d'exemple et le compte interne exclus, et l'écart entre 7 et 30 jours.
+
+**Le point de départ** : la fenêtre de 30 jours se calcule sur l'historique déjà en base. Les chiffres réels sont donc disponibles dès la mise en ligne de `058bf24`. Mateo les colle, et la session stratégie et tests les note dans `docs/parcours/MESURE-PERTES.md` avant de mettre l'étape 2 en ligne. L'étape 2 peut être développée en local tout de suite.

@@ -122,3 +122,12 @@ Tour refait avec Léa (« Moins de 6 mois », Topstep 50K, téléphone, françai
 Le micro proposé (MNQ), les 3 trades et la mission (« ta perte max du jour ») sont bons. L'arrêt après 2 pertes est couvert par `e2e_rookie`. Le tour ne l'a pas revu, parce qu'il a été fait après la fermeture (voir R2).
 
 **Pour l'étape D du brief d'activation (première visite selon le moment).** Après la fermeture (tour fait à 16 h 45, heure de New York), le plan de l'inscription est enregistré pour le lendemain (« Plan du jour mercredi 28 octobre »). Mais « Enregistrer et ajouter mon trade » enregistre le trade aujourd'hui, et le coach répond aussitôt « À améliorer : pas de plan pour cette séance ». **(R2)** Un trader qui s'inscrit le soir pour noter sa journée se fait donc reprocher, dès son premier trade, de ne pas avoir fait un plan qu'il vient de faire. Le soir, la première visite doit commencer par le trade du jour, puis le plan de demain, et le coach ne doit pas reprocher l'absence de plan le jour de l'inscription.
+
+## Revue de R1 et des étapes 3 et 4 (28 oct., `058bf24`, CI verte)
+
+Tour refait avec Léa (Topstep 50K, téléphone, français, base neuve). Aucune erreur JavaScript.
+
+- **R1 : validée.** Le plan du débutant est prérempli à **500 $** et 3 trades.
+- **Étape 3 : validée** sur le chemin vérifié. Biais et la marge de drawdown ont leur « i ». À l'étape « Ton compte », l'option du compte financé et la limite journalière sont passées sous « Plus d'options ».
+- **Étape 4 : validée.** Avec 2 trades, Stats fait 1 395 px au lieu de 3 941, avec « Tes stats arrivent : 2 trades sur 5 » et sans tuile vide.
+- **Une incohérence à corriger dans un prochain lot (R3).** La carte annonce « À 5 trades : ta force et ta fuite », mais la carte du coach juste en dessous affiche déjà « Ta fuite : trader contre ton biais, 1 trade sur 2 » avec 2 trades. Sous 5 trades, il faut soit cacher la fuite, soit retirer « ta fuite » de l'annonce. Garder la fuite est plus utile au débutant ; l'annonce dirait alors « À 5 trades : ta force ».
