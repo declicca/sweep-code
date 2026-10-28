@@ -4322,7 +4322,7 @@ window.SweepMO = window.SweepMO || class {
     // before the first trade (27 Oct. tour): no « Discipline — », no streak « 0 », no level — they mean nothing yet; they come with it
     const first = (S.trades || []).some((x) => !x.demo) || (S.trades || []).length > 0 && !(S.accounts || []).some((a) => !a.demo);
     const head = (extra) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market ? foldBtn() : ''}${extra || ''}</div><div class="nav-rt-me">${first ? `<span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span>
-        <button type="button" class="nav-rt-streak" data-rt="hub" title="${esc2(streak + ' ' + t(streak === 1 ? 'streak1' : 'streak'))}">${svg('fire')}<b>${streak}</b><span>${t(streak === 1 ? 'streak1' : 'streak')}</span></button>
+        <button type="button" class="nav-rt-streak" data-rt="hub" title="${esc2(streak + ' ' + t(streak === 1 ? 'streak1' : 'streak'))}"><span><small>${({ en: 'Complete days', fr: 'Jours complets', es: 'Días completos' })[L] || 'Complete days'}</small><b>${svg('fire')}${streak}</b></span></button>
         <button type="button" class="nav-rt-lv ${pct ? '' : 'nopct'}" data-rt="hub">${pct ? `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" stroke-dasharray="94.25" stroke-dashoffset="${94.25 * (1 - pct / 100)}"/></svg>` : ''}<span><small>${t('level')}</small><b>${esc2(lv)}</b></span></button>` : ''}
         <button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div></div>`;
     // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
@@ -6740,4 +6740,25 @@ new window.SweepMO(() => {
     const done = () => document.querySelector('aside.nav-ask.open') || (typeof S !== 'undefined' && (S.trades || []).some((t) => t.demo)) || Date.now() - t0 > 45000 || !document.body.contains(b);
     (function wait() { if (!done()) { setTimeout(wait, 150); return; } b.classList.remove('is-busy'); b.removeAttribute('aria-busy'); b.hidden = false; st.remove(); })();
   }, true);
+})();
+
+/* ───────────── the trade page, iOS 27.2 (28 Oct., brief « design iOS 27.2 », V4 and V5; tour C3) ─────────────
+ * V4: Geist Mono for the numbers only — a value in words (a setup, a session, « the 16th at 19:14 ») reads in Geist.
+ * C3: « Economic context » only when there is an announcement (a trade without news: nothing to read there). */
+(function () {
+  'use strict';
+  const WORD = /[A-Za-zÀ-ÿ]{3,}/;
+  function paint() {
+    if (!/^#trade\//.test(location.hash || '')) return;
+    const main = document.getElementById('main'); if (!main) return;
+    main.querySelectorAll('.facts > div > span:last-child, .facts > div > b').forEach((v) => { const w = WORD.test(v.textContent || ''); if (v.classList.contains('fx-tx') !== w) v.classList.toggle('fx-tx', w); });
+    const m = /^#trade\/([^/]+)/.exec(location.hash), t = typeof getDoc === 'function' && getDoc('trades', decodeURIComponent(m[1]));
+    const box = main.querySelector('#newsCtx'), none = !!(t && Array.isArray(t.news) && !t.news.length);
+    if (box) { const h = box.previousElementSibling; box.hidden = none; if (h && h.classList.contains('sec-h')) h.hidden = none; }
+  }
+  const appRender = window.render;
+  if (typeof appRender === 'function' && !appRender.__trFace) {
+    const w = function () { const out = appRender.apply(this, arguments); try { paint(); } catch (e) { /* never blocks */ } return out; };
+    w.__trFace = true; window.render = w;
+  }
 })();

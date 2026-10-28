@@ -607,10 +607,11 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 @media (max-width:860px){html body.ux-fab-away .ask-fab{opacity:0!important;pointer-events:none!important;transform:translateX(calc(100% + 24px))!important}}   /* phone: steps aside while reading down a page, back when scrolling up (R23) */
 
 /* Day / Week and Payouts read as one section (computer and phone) */
-.nav-dash .d-col > .d-perf{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
-.nav-dash .d-col > .d-pay{border-top-left-radius:0!important;border-top-right-radius:0!important;border-top:1px solid var(--line)!important;box-shadow:none}
-@media (min-width:861px){.nav-dash .d-col-a > .d-pay{margin-top:-20px!important}}
-@media (max-width:860px){.nav-dash .d-acc{order:1!important}.nav-dash .d-perf{order:2!important}.nav-dash .d-pay{order:3!important}.nav-dash .d-col > .d-pay{margin-top:-14px!important}}   /* (SWEEP.md step 3: « Now » in the routine, the accounts, the day or the week with my money under it) */
+/* (28 Oct., iOS 27.2 V1) only when both are in the same column: moved to the other column by the balance, « My money » is a card of its own (its 26 px corners, no line) */
+.nav-dash .d-col:has(> .d-pay) > .d-perf{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important}
+.nav-dash .d-col:has(> .d-perf) > .d-pay{border-top-left-radius:0!important;border-top-right-radius:0!important;border-top:1px solid var(--line)!important;box-shadow:none}
+@media (min-width:861px){.nav-dash .d-col-a:has(> .d-perf) > .d-pay{margin-top:-20px!important}}
+@media (max-width:860px){.nav-dash .d-acc{order:1!important}.nav-dash .d-perf{order:2!important}.nav-dash .d-pay{order:3!important}.nav-dash .d-col:has(> .d-perf) > .d-pay{margin-top:-14px!important}}   /* (SWEEP.md step 3: « Now » in the routine, the accounts, the day or the week with my money under it) */
 /* computer: the day card's own « Add a trade » goes (the title row has it); its other steps (plan, journal, review) stay */
 @media (min-width:861px){.d-today .gc-cta[data-g="add"]{display:none!important}.d-today .gc-c3:has(.gc-cta[data-g="add"]:only-child){display:none}}
 /* account: recalibrate on the platform */
@@ -1101,7 +1102,6 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 @media (max-width:860px){
   .nav-rt{padding:16px 14px;gap:12px}
   .nav-rt-h h2{font-size:16px}
-  .nav-rt-streak span{display:none}
   .nav-rt-streak,.nav-rt-lv,.nav-rt-help{height:36px}
   .nav-rt-steps{gap:8px}
   .nav-rt-s{padding:12px 10px 14px;gap:10px;}
@@ -1579,9 +1579,9 @@ html body .nav-rt-h .nav-rt-pill,html body .nav-rt-h .nav-rt-y{flex-shrink:0}
 html body .nav-rt-me{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr)) 48px!important;gap:8px!important;width:100%}
 html body .nav-rt-me > *{width:100%!important;flex:none!important;min-width:0;justify-content:center;height:48px!important;border-radius:14px!important}
 .nav-rt-me .nav-rt-disc{align-items:center!important}
-html body .nav-rt-me .nav-rt-streak span{display:inline!important;font-size:12px}
+html body .nav-rt-me .nav-rt-streak > span{display:flex!important;flex-direction:column;align-items:center;font-size:12px}   /* (iOS 27.2 V3) label on top, value under it, as Discipline and Level */
 .nav-rt-me .nav-rt-help{padding:0!important}
-@media (max-width:420px){html body .nav-rt-me .nav-rt-streak span{display:none!important}html body .nav-rt-me{grid-template-columns:repeat(3,minmax(0,1fr)) 44px!important}}
+@media (max-width:420px){html body .nav-rt-me{grid-template-columns:repeat(3,minmax(0,1fr)) 44px!important}}
 @media (min-width:861px){html body .nav-rt-me{grid-template-columns:repeat(3,minmax(0,1fr)) 52px!important}}
 /* ── routine steps: the action is visible but quiet ── */
 html body .nav-rt-s{cursor:pointer}
@@ -2485,8 +2485,8 @@ html body .cmd-it.on{box-shadow:inset 2px 0 0 var(--pos)}
 html body .ask-send{color:#fff}
 
 /* ───── Design « iOS 27 », lot 2: pages ───── */
-/* Stats: two cards side by side end at the same height (« P&L breakdown » stopped half-way beside « Patterns to watch ») */
-@media (min-width:861px){#main .igrid.g-two{align-items:stretch}}
+/* Stats: two cards side by side keep their natural height (28 Oct., iOS 27.2 V7: stretched, « P&L breakdown » left 400 px empty) */
+@media (min-width:861px){#main .igrid.g-two{align-items:start}}
 /* the figure tiles centre their content in the height their row gives them (no block of empty space under a short tile:
    « Most active »… beside the drawdown curve, « Win rate » beside the P&L on a phone) */
 #main .g-ins .tiles > .it,#main .ikpis > .ik{justify-content:center}
@@ -2859,6 +2859,16 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
    title and all the content moved at each change of page. Title and buttons sit at the bottom of a fixed band. */
 html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:flex-end!important}
 @media (min-width:861px){ html body .top:has(> #title){min-height:96px} html body .main-wrap .top:has(> #title) > :not(#title){align-self:flex-end!important} }   /* the buttons on the title's line */
+/* (28 Oct., iOS 27.2 V3) the three figures of the routine read the same: the label on top, the value under it, no coloured fill */
+html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:var(--panel2)!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
+html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > span{display:flex!important;flex-direction:column;align-items:center;gap:0;font-size:inherit}
+html body .nav-rt-me .nav-rt-disc small,html body .nav-rt-me .nav-rt-streak small,html body .nav-rt-me .nav-rt-lv small{font-size:11px!important;color:var(--muted)!important;line-height:1.2}
+html body .nav-rt-me .nav-rt-disc b,html body .nav-rt-me .nav-rt-streak b,html body .nav-rt-me .nav-rt-lv b{display:inline-flex;align-items:center;gap:4px;font:600 15px var(--font-num,ui-monospace)!important;color:var(--text)!important;line-height:1.2}
+html body .nav-rt-me .nav-rt-streak b svg{width:14px;height:14px}
+html body .nav-rt-me .nav-rt-disc-ph{background:var(--panel2)!important}
+html body .nav-rt-me .nav-rt-streak > span small,html body .nav-rt-me .nav-rt-lv > span small{display:block!important;text-align:center}
+html body .nav-rt-me .nav-rt-streak > span b{display:flex!important;justify-content:center;align-items:center;gap:4px}
+html body .nav-rt-me .nav-rt-streak > span{text-align:center}
 }
 
 /* the week's intention in the routine card (SWEEP.md step 1, D5) */

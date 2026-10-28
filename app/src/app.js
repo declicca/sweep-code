@@ -993,6 +993,24 @@ function translateTree(e) {
   }
 }
 
+// (28 Oct., iOS 27.2 V2) the percent follows the language: « 75% » in English, « 75 % » in French and Spanish. The app's
+// sentences are shared by the three languages, so in English the space before « % » goes where the text is shown
+if (LANG === "en") {
+  const PCT = /(\d)[ \u00a0\u202f]%/g, one = t => { const v = t.nodeValue, r = v.replace(PCT, "$1%"); r !== v && (t.nodeValue = r); }, fix = n => {
+    if (n.nodeType === 3) return one(n);
+    if (n.nodeType !== 1 || n.closest && n.closest("script,style,textarea")) return;
+    const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT), l = [];
+    let x; for (; x = w.nextNode(); ) l.push(x);
+    l.forEach(one);
+  };
+  let q = new Set, on = !1;
+  new MutationObserver(o => {
+    for (const r of o) if (r.type === "characterData") q.add(r.target); else for (const c of r.addedNodes) q.add(c);
+    !on && q.size && (on = !0, queueMicrotask(() => { on = !1; const l = [ ...q ]; q.clear(); for (const r of l) r.isConnected && fix(r); }));
+  }).observe(document.documentElement, { childList: !0, subtree: !0, characterData: !0 });
+  document.addEventListener("DOMContentLoaded", () => fix(document.body)); document.body && fix(document.body);
+}
+
 if (LANG !== "en") {
   let e = new Set, t = !1;
   const a = () => {
@@ -2813,7 +2831,7 @@ function scoreBlock(e) {
 function heatStyle(e, t) {
   if (!e || !t) return "";
   const a = (.05 + .17 * Math.min(1, Math.abs(e) / t)).toFixed(3);
-  return `background:rgba(var(--${e > 0 ? "pos" : "neg"}-rgb),${a})`;
+  return e > 0 ? `background:rgba(var(--pos-rgb),${a})` : `background:rgba(212,162,76,${a})`;   // (iOS 27.2 V8) a loss day: the brand gold (#D4A24C) as light as the blue, never the dark gold of the text
 }
 
 const IMP = {
@@ -3265,25 +3283,8 @@ const fdur = e => {
   return t ? `${t}:${pad(a)}:${pad(n)}` : `${pad(a)}:${pad(n)}`;
 }, WD = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ];
 
-function isoScore(e) {
-  const o = (v, b, E) => [ 224 + (v - b) * 46 * .866, 258 + (v + b) * 46 * .5 - E * 46 ], r = v => v.map(b => b.toFixed(1)).join(",");
-  let p = "";
-  for (let v = 0; v <= 4; v++) p += `<line class="iso-g" x1="${o(v - 2, -2, 0)[0]}" y1="${o(v - 2, -2, 0)[1]}" x2="${o(v - 2, 2, 0)[0]}" y2="${o(v - 2, 2, 0)[1]}"/><line class="iso-g" x1="${o(-2, v - 2, 0)[0]}" y1="${o(-2, v - 2, 0)[1]}" x2="${o(2, v - 2, 0)[0]}" y2="${o(2, v - 2, 0)[1]}"/>`;
-  for (const v of [ 1, 2, 3, 4 ]) {
-    const b = v / 4 * 3.4;
-    p += `<polyline class="iso-w" points="${r(o(-2, 2, b))} ${r(o(-2, -2, b))} ${r(o(2, -2, b))}"/><text class="iso-t" x="${o(-2, 2, b)[0] - 6}" y="${o(-2, 2, b)[1] + 3}" text-anchor="end">${v * 25}</text>`;
-  }
-  p += `<line class="iso-w" x1="${o(-2, -2, 0)[0]}" y1="${o(-2, -2, 0)[1]}" x2="${o(-2, -2, 3.4)[0]}" y2="${o(-2, -2, 3.4)[1]}"/><line class="iso-w" x1="${o(-2, 2, 0)[0]}" y1="${o(-2, 2, 0)[1]}" x2="${o(-2, 2, 3.4)[0]}" y2="${o(-2, 2, 3.4)[1]}"/><line class="iso-w" x1="${o(2, -2, 0)[0]}" y1="${o(2, -2, 0)[1]}" x2="${o(2, -2, 3.4)[0]}" y2="${o(2, -2, 3.4)[1]}"/>`;
-  const u = [ [ -1.35, -1.1 ], [ .05, -1.1 ], [ 1.45, -1.1 ], [ -1.45, 1.1 ], [ -.05, 1.1 ], [ 1.35, 1.1 ] ], h = e.map((v, b) => ({
-    a: v,
-    x: u[b][0],
-    y: u[b][1]
-  })).sort((v, b) => v.x + v.y - (b.x + b.y)), m = .22;
-  for (const {a: v, x: b, y: E} of h) {
-    const R = Math.max(.06, v[1] / 100 * 3.4), L = [ o(b - m, E - m, R), o(b + m, E - m, R), o(b + m, E + m, R), o(b - m, E + m, R) ], x = [ o(b - m, E + m, 0), o(b + m, E + m, 0), o(b + m, E + m, R), o(b - m, E + m, R) ], C = [ o(b + m, E - m, 0), o(b + m, E + m, 0), o(b + m, E + m, R), o(b + m, E - m, R) ], g = o(b, E, R), P = o(b + m + .12, E + m + .12, 0);
-    p += `<g class="iso-bar"><polygon class="iso-l" points="${x.map(r).join(" ")}"/><polygon class="iso-r" points="${C.map(r).join(" ")}"/><polygon class="iso-top" points="${L.map(r).join(" ")}"/>\n      <text class="iso-v" x="${g[0]}" y="${g[1] - 9}" text-anchor="middle">${Math.round(v[1])}</text>\n      <text class="iso-lab" x="${P[0] + 4}" y="${P[1] + 10}">${esc(v[0])}</text><title>${esc(v[0])}: ${Math.round(v[1])}/100</title></g>`;
-  }
-  return `<svg class="iso" viewBox="0 0 460 360" role="img" aria-label="Performance score breakdown"><defs>\n    <linearGradient id="isoTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgb(var(--pos-rgb))" stop-opacity=".95"/><stop offset="1" stop-color="rgb(var(--pos-rgb))" stop-opacity=".7"/></linearGradient>\n    <linearGradient id="isoSide" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgb(var(--pos-rgb))" stop-opacity=".75"/><stop offset="1" stop-color="rgb(var(--pos-rgb))" stop-opacity=".12"/></linearGradient></defs>${p}</svg>`;
+function isoScore(e) {   // (28 Oct., iOS 27.2 V6) flat bars, as the other charts of Stats (it was the only 3D object of the app)
+  return `<div class="psc" role="img" aria-label="Performance score breakdown">${e.map(v => { const n = Math.max(0, Math.min(100, Math.round(v[1] || 0))); return `<div class="dr"><span class="dl">${esc(v[0])}</span><div class="dt"><i class="pos" style="width:${n}%"></i></div><span class="dv">${n}</span></div>`; }).join("")}</div>`;
 }
 
 function calDays(e, t) {

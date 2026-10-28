@@ -43,8 +43,9 @@ with sync_playwright() as p:
   for scheme in ['light', 'dark']:
     c, pg, errs = page(br, 1300, False, scheme)
     go(pg, 'analytics')
-    two = pg.evaluate("(()=>{const g=document.querySelector('#main .igrid.g-two'); if(!g) return null; return [...g.children].map(e=>Math.round(e.getBoundingClientRect().height))})()")
-    ok(two and len(two) == 2 and abs(two[0] - two[1]) <= 1, f'1 computer {scheme}: « P&L breakdown » and « Patterns to watch » are as high ({two})')
+    # (28 Oct., iOS 27.2 V7) each card keeps its natural height: no empty space at the bottom of « P&L breakdown »
+    two = pg.evaluate("(()=>{const g=document.querySelector('#main .igrid.g-two'); if(!g) return null; return [...g.children].map(e=>{const r=e.getBoundingClientRect(), k=[...e.children].filter(x=>x.getClientRects().length); const end=Math.max(...k.map(x=>x.getBoundingClientRect().bottom)); return Math.round(r.bottom-end)})})()")
+    ok(two and len(two) == 2 and all(v <= 40 for v in two), f'1 computer {scheme}: « P&L breakdown » and « Patterns to watch » end with their content ({two} px under it)')
     jc = pg.evaluate("[...document.querySelectorAll('#main .g-ins .tiles > .it, #main .ikpis > .ik')].map(e=>getComputedStyle(e).justifyContent)")
     ok(jc and all(j == 'center' for j in jc), f'1 computer {scheme}: the {len(jc)} figure tiles centre their content')
     for i, name in [(1, 'Behavior'), (7, 'Long vs short')]:

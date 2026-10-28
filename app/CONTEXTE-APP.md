@@ -1268,3 +1268,15 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Badge « Journal honnête »** (`honest_5`) : 5 jours tradés de suite fermés sur le solde de la plateforme, sans écart. Un écart, ou un jour tradé sans vérification, remet le compte à zéro.
 - **Tests** : `e2e_honest_journal` (FR 390, EN 1300, ES 390 : étapes 3 et 4).
 - **Outil** : `tools/run.sh` arrête les sous-processus du serveur avant le serveur. Avant, ils gardaient le port, et le test suivant parlait à un ancien serveur.
+
+### Design « iOS 27.2 » (28 oct.), lot 1 : les 8 défauts de l'analyse visuelle
+- **V1** : « Day / Week » et « My money » ne se collent en une section que dans la même colonne (`:has`, `src/nav.css`). Déplacée par l'équilibre des colonnes, « My money » garde ses coins de 26 px, sans trait.
+- **V2** : en anglais, « 75% » ; en français et en espagnol, « 75 % ». Les phrases sont partagées par les trois langues : en anglais, un observateur colle le « % » au nombre là où le texte s'affiche (`src/app.js`, à côté de la traduction).
+- **V3** : les trois chiffres de la routine (Discipline, « Jours complets », Niveau) ont la même mise en page, le libellé au-dessus et la valeur dessous, sur le même fond neutre.
+- **V4** : sur la page d'un trade, une valeur en mots (setup, séance, date) est en Geist (`.fx-tx`). Les nombres restent en Geist Mono.
+- **V5** et point C3 du tour : sur ordinateur, « Setup & costs » et « Economic context » passent au-dessus de « Full review », côte à côte (pleine largeur quand il n'y en a qu'une), sans colonne vide. « Economic context » ne s'affiche que s'il y a une annonce.
+- **V6** : le score de performance est en barres plates, du même style que « Duration analysis ».
+- **V7** : sur Stats, deux cartes côte à côte gardent leur hauteur naturelle. C'est l'inverse de la règle du 15 oct., qui les étirait.
+- **V8** : un jour de perte du calendrier de Stats prend l'or de la marque (#D4A24C) à la même échelle d'opacité que le bleu, et plus jamais l'or foncé du texte.
+- **À savoir** : `nav.css` et `app.css` sont dans le calque `legacy`. Une règle `!important` ajoutée hors du calque perd contre celles du calque : les nouvelles règles vont dans le calque.
+- **Tests** : `e2e_design_ios272` (V1 à V8 sauf V7, EN / FR / ES, 390 et 1300, clair et foncé) et `e2e_design_pages` (V7 : chaque carte finit avec son contenu).
