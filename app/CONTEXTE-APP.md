@@ -1291,3 +1291,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **« Réduire la transparence »** : pas de reflet, un bord plus fort. **« Contraste élevé »** : le verre devient opaque, avec un bord de la couleur du texte.
 - **Icônes** de la barre d'onglets et de la barre latérale : un trait de 1,75 partout.
 - **Test** : `e2e_design_ios272` (G : le bord et le reflet de la barre d'onglets et de la feuille « New trade », le contraste des libellés).
+
+### Design « iOS 27.2 » (28 oct.), lot 3 : deux couches, jamais trois
+- **Le principe** : le fond de la page, puis la carte. Dans une carte, les tuiles n'ont plus de fond. Les chiffres du jour, ceux de « My money », les comptes d'Aujourd'hui, les trois chiffres de la routine et les lignes de frais sont séparés par un trait fin. Une carte posée dans une autre (réglages du compte, recalibrage) n'a ni fond ni trait.
+- **Exceptions** :
+  - les trois étapes de la routine et « Maintenant » gardent leur forme de tuile, parce qu'elles se touchent comme des boutons, mais sur un fond plus proche de la carte (`--fill` à 45 %) ;
+  - les commandes (boutons, champs, puces) et les jours colorés du calendrier gardent leur fond.
+- **En foncé**, c'est la même règle.
+- **Test** : `e2e_design_ios272` (L : aucun troisième niveau de fond sur Aujourd'hui, Stats et la page d'un compte, à 390 et 1300, en clair et en foncé).

@@ -2869,7 +2869,6 @@ html body .top:has(> #title){box-sizing:border-box;min-height:70px;align-items:f
 @media not (prefers-color-scheme:light){:root:not([data-theme="light"]){--glass-bar:rgba(18,18,22,.84)}}
 :root[data-theme="dark"]{--glass-bar:rgba(18,18,22,.84)}
 html body .bottomnav,html body .evp,html body .nav-dlg,html body .nav-am,html body #shPanel,html body .menu-pop,html body .fxm,html body .cmd-panel,html body .nav-ra,html body .cpop{outline:1px solid var(--glass-rim);outline-offset:-1px}
-@media (min-width:861px){html body aside.side{outline:1px solid var(--glass-rim);outline-offset:-1px}}
 html body.ux-scrolled aside.side{box-shadow:inset 0 -1px 0 var(--glass-rim)!important}
 html body .bottomnav::after,html body .evp::after,html body .nav-dlg::after,html body .nav-am::after,html body #shPanel::after,html body .menu-pop::after,html body .fxm::after,html body .cmd-panel::after{content:"";position:absolute;top:0;left:22px;right:22px;height:1px;background:linear-gradient(90deg,transparent,var(--glass-shine) 30%,var(--glass-shine) 70%,transparent);pointer-events:none;z-index:2}
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
@@ -2887,13 +2886,21 @@ html body .bottomnav::after,html body .evp::after,html body .nav-dlg::after,html
 }
 /* the icons of the tab bar and the sidebar: one stroke everywhere, on the pixel grid */
 html body .bottomnav svg,html body aside.side nav svg{stroke-width:1.75;shape-rendering:geometricPrecision}
+/* ───── Design « iOS 27.2 », lot 3 (28 Oct.): two layers, never three — the page's background, then the card. Inside a card the
+   tiles have no fill of their own: a fine line separates them (the routine's three steps keep their tile shape, as they are
+   tapped like buttons, on a fill closer to the card's) ───── */
+html body .d-perf .nav-kpi > *,html body .d-perf .statline > *,html body .d-perf .nav-kpi-g > div,html body .d-pay .nav-kpi-g > div,
+html body .nav-dash .nav-acc,html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv,html body .nav-rt-me .nav-rt-help,html body #main .surface .nav-fee{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)!important}
+html body #main .surface .surface,html body #main .nav-accset .surface{background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html body .nav-rt-steps > .nav-rt-s{background:color-mix(in srgb,var(--fill) 45%,transparent)!important}
+html body .nav-rt .nav-now{background:color-mix(in srgb,var(--fill) 45%,transparent)!important}
 /* (28 Oct., iOS 27.2 V3) the three figures of the routine read the same: the label on top, the value under it, no coloured fill */
-html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:var(--panel2)!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
+html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
 html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > span{display:flex!important;flex-direction:column;align-items:center;gap:0;font-size:inherit}
 html body .nav-rt-me .nav-rt-disc small,html body .nav-rt-me .nav-rt-streak small,html body .nav-rt-me .nav-rt-lv small{font-size:11px!important;color:var(--muted)!important;line-height:1.2}
 html body .nav-rt-me .nav-rt-disc b,html body .nav-rt-me .nav-rt-streak b,html body .nav-rt-me .nav-rt-lv b{display:inline-flex;align-items:center;gap:4px;font:600 15px var(--font-num,ui-monospace)!important;color:var(--text)!important;line-height:1.2}
 html body .nav-rt-me .nav-rt-streak b svg{width:14px;height:14px}
-html body .nav-rt-me .nav-rt-disc-ph{background:var(--panel2)!important}
+html body .nav-rt-me .nav-rt-disc-ph{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)}
 html body .nav-rt-me .nav-rt-streak > span small,html body .nav-rt-me .nav-rt-lv > span small{display:block!important;text-align:center}
 html body .nav-rt-me .nav-rt-streak > span b{display:flex!important;justify-content:center;align-items:center;gap:4px}
 html body .nav-rt-me .nav-rt-streak > span{text-align:center}

@@ -9,6 +9,8 @@ Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phon
  V5 the trade page, computer: no empty column (« Setup & costs » above the full review)
  V6 Stats: the performance score in flat bars (no 3D)
  V8 Stats' calendar: a loss day as light as a win day (the brand gold, the same opacity scale)
+ L  lot 3, two layers: Today, Stats and an account page never have a third background inside a card (controls, the
+    calendar's coloured days and the routine's steps apart)
  G  lot 2, the glass: the tab bar and the « New trade » sheet have their darkened rim and their top-edge shine; the tab bar's
     labels reach 4.5:1 over a blue and a gold card under it
 No page error, nothing wider than the window.
@@ -23,6 +25,9 @@ def ok(c, what):
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
 PCT_SPACED = "(() => { const w = document.createTreeWalker(document.getElementById('main'), NodeFilter.SHOW_TEXT); const out = []; let n; while ((n = w.nextNode())) { if (/\\d[ \\u00a0\\u202f]%/.test(n.nodeValue)) out.push(n.nodeValue.trim().slice(0, 30)); } return out })()"
 PCT_TIGHT = "(() => { const w = document.createTreeWalker(document.getElementById('main'), NodeFilter.SHOW_TEXT); const out = []; let n; while ((n = w.nextNode())) { if (/\\d%/.test(n.nodeValue) && !(n.parentElement && n.parentElement.closest('[style*=width], svg, .chartbox'))) out.push(n.nodeValue.trim().slice(0, 30)); } return out })()"
+LAYERS = """(() => { const skip = 'button, input, textarea, select, .seg, .chip, .cal .d, .nav-rt-s, .nav-now, .fx-c, .nav-fd, .trow, .del, .csel, .ux-st-fold, .btn, .pill, .badge, .tag, [class*=chip], .bar, [class*=bar], i, svg, .skel';
+  const opaque = (e) => { const st = getComputedStyle(e), c = st.backgroundColor, a = c.startsWith('rgba') ? +c.split(',')[3].replace(')', '') : (c === 'transparent' ? 0 : 1); return a > 0.02 || (st.backgroundImage !== 'none' && !/url/.test(st.backgroundImage)); };
+  const out = []; document.querySelectorAll('#main *').forEach((e) => { if (!e.getClientRects().length || e.closest(skip) || !opaque(e)) return; const r = e.getBoundingClientRect(); if (r.width < 60 || r.height < 30) return; let n = 0, p = e.parentElement; while (p && p.id !== 'main') { if (opaque(p) && !p.closest(skip)) n++; p = p.parentElement; } if (n >= 1) out.push(String(e.className).split(' ').slice(0, 2).join('.') || e.tagName); }); return [...new Set(out)] })()"""
 GLASS = "(sel) => { const e = document.querySelector(sel); if (!e) return null; const s = getComputedStyle(e), a = getComputedStyle(e, '::after'); return [s.outlineStyle === 'solid' && s.outlineWidth === '1px' && s.outlineColor !== 'rgba(0, 0, 0, 0)', /gradient/.test(a.backgroundImage) && a.height === '1px'] }"
 # the labels' colour over the bar's own fill laid on a blue and on a gold card (what the blur averages to, at worst)
 CONTRAST = """(() => { const nav = document.querySelector('.bottomnav'); if (!nav) return null; const lab = [...nav.querySelectorAll('a, button')].find((x) => !x.classList.contains('plus') && x.textContent.trim()); if (!lab) return null;
@@ -38,6 +43,7 @@ with sync_playwright() as p:
     c.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
     pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#dashboard'); pg.wait_for_selector('#main .nav-dash', timeout=15000); pg.wait_for_timeout(2500)
+    lay = pg.evaluate(LAYERS); ok(not lay, f'L {tag}: Today, two layers ({lay[:4]})')
     # V1
     cards = pg.evaluate("[...document.querySelectorAll('#main .nav-dash .d-col > .surface')].filter((e) => e.getClientRects().length).map((e) => { const s = getComputedStyle(e), merged = e.classList.contains('d-pay') && e.parentElement.querySelector(':scope > .d-perf'); return [e.className.split(' ').filter((k) => /^d-/.test(k)).join('.'), s.borderTopLeftRadius, s.borderTopRightRadius, !!merged] })")
     bad = [x for x in cards if not x[3] and (x[1] != '26px' or x[2] != '26px')]
@@ -58,12 +64,15 @@ with sync_playwright() as p:
       ok(gap and gap[0] == gap[1], f'V5 {tag}: « Setup & costs » above the full review, no empty column ({gap})')
     # V6, V8
     pg.evaluate("location.hash = '#analytics'"); pg.wait_for_timeout(2200)
+    lay = pg.evaluate(LAYERS); ok(not lay, f'L {tag}: Stats, two layers ({lay[:4]})')
     ok(pg.locator('#main svg.iso').count() == 0, f'V6 {tag}: no 3D chart on Stats')
     if not phone:
       ok(pg.locator('#main .psc .dr').count() == 6, f'V6 {tag}: the performance score in 6 flat bars')
     heat = pg.evaluate("[...document.querySelectorAll('#main .cal .d[style*=background]')].map((d) => d.getAttribute('style'))")
     gold = [h for h in heat if 'neg-rgb' in h]
     ok(heat and not gold, f'V8 {tag}: a loss day in the light brand gold, never the dark gold ({gold[:2]})')
+    pg.evaluate("location.hash = '#account/' + S.accounts[0].id"); pg.wait_for_timeout(1800)
+    lay = pg.evaluate(LAYERS); ok(not lay, f'L {tag}: an account page, two layers ({lay[:4]})')
     # G. the glass (lot 2)
     if phone:
       g = pg.evaluate(GLASS, '.bottomnav'); ok(g and g[0] and g[1], f'G {tag}: the tab bar, rim and shine ({g})')
