@@ -1977,6 +1977,50 @@ html body .tr-side .fgrid.one{grid-template-columns:repeat(auto-fill,minmax(260p
 html body .tr-side .fgrid.one > label:first-child,html body .tr-side .fgrid.one > :not(label){grid-column:1/-1}
 html body .tr-side .sec-h{margin-top:0}
 }
+/* (activation F, C3) the trade page: the fees, the platform's P&L and the tags under « More details » */
+.tr-more{grid-column:1/-1}
+.tr-more > summary{display:flex;align-items:center;min-height:44px;list-style:none;cursor:pointer;font-size:13px;color:var(--muted)}
+.tr-more > summary::-webkit-details-marker{display:none}
+/* (activation F, C3) the trade page on a phone: a third shorter, nothing lost (the empty values were « — » rows) */
+html body #main .facts .fx-empty{display:none!important}
+@media (max-width:860px){
+html body #main .facts{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 12px!important}
+html body #main .facts > div:not(.ux-notes){flex-direction:column!important;justify-content:flex-start!important;gap:2px!important;padding:8px 0!important}
+html body #main .facts > div > span:first-child{font-size:11px}
+html body #main .facts > .ux-notes{grid-column:1/-1}
+html body #main .th-head{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;align-items:start}
+html body #main .tr-chart .sc-box{height:180px!important}html body #main .tr-chart .sc-chart{height:180px!important}
+html body #main .tr-side .ux-setups,html body #main .co .chips{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html body #main .tr-side .ux-setups > *,html body #main .co .chips > *{flex:none}
+html body #main .co textarea{min-height:44px;height:44px}
+html body #main .tr-grid{gap:12px!important;margin-top:12px}html body #main .tr-side{gap:8px!important}html body #main .tr-side .sec-h{margin:4px 0 0!important}
+html body #main .tr-side .fgrid.one{row-gap:10px}
+html body #main .tr-side .surface.pad{padding:14px 16px!important}
+html body #main .tr-more > summary{min-height:40px}
+html body #main .tr-main{min-height:0}html body #main .tr-main > *:first-child{margin-top:0}
+html body #main .facts > div:not(.ux-notes){padding:5px 0!important}
+html body #main .co .co-q{margin-top:8px!important}
+html body #main .tr-chart .sc-box,html body #main .tr-chart .sc-chart{height:160px!important}
+html body #main .facts .fx-dup{display:none!important}
+html body #main .rprog:not(:has(> * > *)){display:none!important}
+html body #main > .surface{margin-top:14px!important}
+html body #main > .tr-top,html body #main > .nav-tnav{margin-bottom:8px!important}
+html body #main .co .co-q:has(> .seg){display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:10px}
+html body #main .co .co-q:has(> .seg) > .seg{flex:none;margin:0!important}
+html body #main .th-head{padding-bottom:6px!important;row-gap:8px!important}
+html body #main .tr-main > .co-full{margin-bottom:0!important}html body #main .tr-main > .co-full > summary{padding:2px!important;min-height:40px;display:flex;align-items:center}
+html body #main .tr-side .ux-setups{margin-bottom:0!important}html body #main .tr-more{margin-top:-4px}
+html body #main .tr-grid{gap:4px!important}
+}
+/* (activation F, C2) the Trades page on a phone: one row per day */
+.tdays{display:flex;flex-direction:column}
+.tday + .tday{border-top:1px solid var(--line)}
+html body #main .tday > summary{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;gap:12px!important;align-items:center!important;min-height:52px!important;padding:0 16px!important;margin:0!important;list-style:none!important;cursor:pointer;color:var(--text)!important;font-size:15px!important;background:none!important;box-shadow:none!important;border-radius:0!important}
+html body #main .tday > summary::-webkit-details-marker{display:none}
+html body #main .tday > summary::before,html body #main .tday > summary::after{content:none!important;display:none!important}
+html body #main .tday > summary b{font-weight:600;color:var(--text)}html body #main .tday > summary .muted{font-size:13px}html body #main .tday-v{font:600 15px var(--font-num,"Geist Mono",monospace)}
+html body #main .tday[open] > summary{border-bottom:1px solid var(--line)!important}
+html body #main .tday > .tlist{margin:0!important;padding:0!important;box-shadow:none!important;background:none!important}
 /* (V6) the performance score's six measures as flat bars */
 .psc{display:flex;flex-direction:column;gap:12px;margin-top:16px}
 .psc .dr{grid-template-columns:128px minmax(0,1fr) 36px;font-size:13px}

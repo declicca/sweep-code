@@ -1310,3 +1310,17 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Admin › Métriques › « Les trois démarrages »** (et « Exporter pour Claude ») : chaque inscrit est rangé dans un cas (`start_cases`, `ops/metrics.php`), avec la part qui a vu son risque permis pendant la séance de l'inscription. Le cas « en activité » côté serveur ne lit que « Plus d'un an », pas encore le compte « déjà en cours ».
 - **Touchers jusqu'au risque permis** : 11, inchangé (`parcours-baseline.py`, l'horloge fixée sur un mardi 10 h 30).
 - **Test** : `e2e_first_run` (les trois cas, horloge fixée : un mardi 10 h 30, un mardi 20 h, un samedi 11 h, et « Plus d'un an »).
+
+### Brief « activation » (28 oct.), étape F : les pages longues (points C2 à C4 du tour)
+- **C2, la liste des trades sur téléphone** (`tradeDays`, `src/app.js`, page Trades triée par date) : une ligne par jour (date, nombre de trades, P&L), qui s'ouvre d'un toucher. Aujourd'hui est ouvert. On voit les 2 dernières semaines (sinon les 10 derniers jours), puis « Voir plus ». 123 trades : 7 891 → 1 382 px.
+- **C3, la page d'un trade** :
+  - le setup ne se choisit qu'à un endroit (« Setup & costs ») : la ligne « Setup » du tableau est masquée ;
+  - les frais, le P&L réel et les tags sont sous « Plus de détails » ;
+  - « Contexte économique » ne s'affiche que s'il y a une annonce.
+- **Sur téléphone, la page d'un trade** :
+  - les valeurs vides (« — ») sont masquées, et le P&L brut et les frais ne sont pas répétés dans le tableau (le net est en haut, les frais sont sous « Plus de détails ») ;
+  - le tableau passe sur 3 colonnes, l'en-tête sur 2 colonnes, avec un graphique de 160 px ;
+  - les puces défilent sur une ligne, et les questions Oui / Non du coach tiennent sur une ligne.
+  - Hauteur : 2 414 → 1 606 px.
+- **C4** : le formulaire manuel n'ouvre que ses champs. « Depuis une capture », l'import CSV et « Saisir avec l'IA » sont dans la feuille « + ».
+- **Test** : `e2e_long_pages` (390 fr et es, 1300 en).

@@ -2818,18 +2818,8 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('drop', (e) => { const d = e.target.closest && e.target.closest('.nav-imps-drop'); if (!d) return; e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) readImp(f); });
   window.SweepImportSheet = { open: impSheet };
 
-  /* the manual form: the same two quiet buttons as the screenshot screen, right under the title —
-   « From a screenshot » and « Import a file (Rithmic, TopstepX) » (no link in the header any more) */
-  new window.SweepMO(() => {
-    const tk = document.querySelector('#tkSlide.open'); if (!tk || (typeof TK !== 'undefined' && TK && TK.id)) return;
-    if (tk.querySelector('.nav-am-alt')) return;
-    const head = tk.querySelector('.tk-head'); if (!head) return;
-    const box = document.createElement('div'); box.className = 'nav-am-alt nav-tk-alt'; box.setAttribute('data-noi18n', '');
-    box.innerHTML = `<button type="button" class="btn" data-tk-alt="shot">${t('fromShot')}</button><button type="button" class="btn" data-tk-alt="imp">${t('impFile')}</button>`;
-    head.after(box);
-    box.querySelector('[data-tk-alt=shot]').addEventListener('click', () => { const d = typeof TK !== 'undefined' && TK ? TK.date : null; if (typeof closeTicket === 'function') closeTicket(); setTimeout(() => shotForm({ date: d }), 300); });
-    box.querySelector('[data-tk-alt=imp]').addEventListener('click', () => { if (typeof closeTicket === 'function') closeTicket(); setTimeout(impSheet, 280); });
-  }).observe(document.body, { childList: true, subtree: true });
+  // (28 Oct., activation F, C4) the manual form opens on its fields only: « From a screenshot », the CSV import and « Log with AI »
+  // are in the « + » sheet (they were two buttons and a banner right under the title)
 
   /* Settings: no « Adding a trade » choice any more (18 Oct., Mateo: always the screenshot first, never asked) */
   function settingsRow() { const r = document.querySelector('#main .nav-am-set'); if (r) r.remove(); }
@@ -6748,6 +6738,7 @@ new window.SweepMO(() => {
  * C3: « Economic context » only when there is an announcement (a trade without news: nothing to read there). */
 (function () {
   'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const WORD = /[A-Za-zÀ-ÿ]{3,}/;
   function paint() {
     if (!/^#trade\//.test(location.hash || '')) return;
@@ -6756,6 +6747,24 @@ new window.SweepMO(() => {
     const m = /^#trade\/([^/]+)/.exec(location.hash), t = typeof getDoc === 'function' && getDoc('trades', decodeURIComponent(m[1]));
     const box = main.querySelector('#newsCtx'), none = !!(t && Array.isArray(t.news) && !t.news.length);
     if (box) { const h = box.previousElementSibling; box.hidden = none; if (h && h.classList.contains('sec-h')) h.hidden = none; }
+    // (activation F, C3) the setup is chosen in one place, « Setup & costs »: not again in the facts; the fees, the platform's
+    // P&L and the tags under « More details »
+    main.querySelectorAll('.facts > div').forEach((r) => { const l = r.firstElementChild; if (l && /^Setup$/i.test(l.textContent.trim()) && !r.hidden) r.hidden = true; });
+    // a phone: the gross P&L (the header's net + the fees) and the fees (in « More details ») are not repeated in the facts
+    main.querySelectorAll('.facts > div').forEach((r) => { const l = r.firstElementChild; const k = l && /^(Gross P&L|P&L brut|P&L bruto|Fees|Frais|Comisiones)$/i.test(l.textContent.trim()); if (k !== r.classList.contains('fx-dup')) r.classList.toggle('fx-dup', !!k); });
+    // an empty value (« — ») says nothing: not a row of its own (the notes too)
+    main.querySelectorAll('.facts > div, .facts > .ux-notes').forEach((r) => { const v = r.lastElementChild; const empty = !!v && r.children.length > 1 && /^[—–-]?$/.test((v.textContent || '').trim()); if (empty !== r.classList.contains('fx-empty')) r.classList.toggle('fx-empty', empty); });
+    const fg = main.querySelector('.tr-side .fgrid.one');
+    if (fg && !fg.querySelector('.tr-more')) {
+      const rest = [...fg.children].filter((c, i) => i > 0 && !(c.matches && c.matches('datalist, .nav-sp, [class*=setup]')) && c.tagName === 'LABEL');
+      if (rest.length) {
+        const d = document.createElement('details'); d.className = 'tr-more'; d.setAttribute('data-noi18n', '');
+        d.innerHTML = `<summary>${({ en: 'More details', fr: 'Plus de détails', es: 'Más detalles' })[L] || 'More details'}</summary><div class="fgrid one"></div>`;
+        const inner = d.lastElementChild; rest[0].before(d); rest.forEach((c) => inner.append(c));
+        // the hint line under the platform's P&L follows its field
+        [...fg.children].filter((c) => c !== d && c.previousElementSibling === d && c.tagName !== 'LABEL' && c.tagName !== 'DETAILS').forEach((c) => inner.append(c));
+      }
+    }
   }
   const appRender = window.render;
   if (typeof appRender === 'function' && !appRender.__trFace) {
