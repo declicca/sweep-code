@@ -66,12 +66,38 @@ Ces chiffres se lisent dans Admin › Métriques. Les deux dernières lignes son
 
 | Indicateur | Définition | Où le lire | Valeur au départ |
 |---|---|---|---|
-| Temps de M1 | Médianes depuis l'inscription : prénom, premier compte, premier plan, premier trade | « Le démarrage » (déjà en ligne) | _à relever_ |
-| Journées fermées | Séances avec au moins un trade sur 30 jours, dont la revue est faite | « Journées fermées » (nouveau) | _à relever après déploiement_ |
-| Bilans ouverts | Semaines terminées avec au moins un trade, sur les 8 dernières, dont le bilan du vendredi a été ouvert | « Bilans de la semaine ouverts » (nouveau) | _à relever après déploiement_ |
+| Temps de M1 | Médianes depuis l'inscription : prénom, premier compte, premier plan, premier trade | « Le démarrage » (déjà en ligne) | Premier compte **2 min**, premier plan **11 min**, premier trade **43 min** (prénom : pas de médiane). Atteints : prénom 63 %, compte 86 %, plan 46 %, trade 51 % (sur 35). |
+| Journées fermées | Séances avec au moins un trade sur 30 jours, dont la revue est faite | « Journées fermées » (nouveau) | **53 %** (sur 40 séances) |
+| Bilans ouverts | Semaines terminées avec au moins un trade, sur les 8 dernières, dont le bilan du vendredi a été ouvert | « Bilans de la semaine ouverts » (nouveau) | **6 %** (sur 17 semaines) |
 
 **Les filtres** : semaine d'inscription et source, comme pour les autres indicateurs. Les comptes internes sont exclus.
 
 **À noter**
 - Le bilan ouvert est compté à partir de l'événement `weekly_opened`, qui existe depuis le 10 oct. (brief 01, étape 5, lot 1). Les semaines plus anciennes peuvent donc être sous-comptées.
 - Le relevé est à faire le jour du déploiement de ce lot, puis à noter ici, avec la date.
+
+## 3. Relevé de fin de semaine (28 oct. 2026)
+
+Export d'Admin du **mercredi 28 oct. à 3 h 49** (heure de New York), donc environ 16 h avant la fin exacte de la semaine (20 h 17). Il n'y a pas eu de séance entre les deux. 35 traders, comptes internes exclus.
+
+| Indicateur | Valeur |
+|---|---|
+| Inscriptions 7 j / 30 j | 14 / 35 |
+| Traders actifs (7 j) | 9 |
+| Un trade le jour de l'inscription | 34 % (sur 35) |
+| Premier trade en 24 h | 32 % (sur 34) |
+| De retour le jour de trading suivant | 24 % (sur 33) |
+| Risque permis vu le jour de l'inscription | 46 % (sur 35) |
+| Rétention J7 (jours 7 à 13) | 27 % (sur 15) |
+| Première journée balayée en 7 jours | 14 % (sur 21) |
+| Traders avec 3+ journées balayées (7 j), l'étoile du nord | 0 |
+
+**Selon le moment de l'inscription** (premier plan ou trade ce jour-là) : avant l'ouverture 55 % (11), séance 45 % (11), soir 60 % (5), **fin de semaine 25 % (8)**.
+
+**Appareils et langues** : 6 traders sur ordinateur, 2 dans l'app sur téléphone, 2 sur téléphone, 1 sur tablette. **7 en anglais, 1 en espagnol.** Les tours de l'app faits jusqu'ici (téléphone, français) ne suivent donc pas le trader réel. Les prochains se font d'abord en **anglais sur ordinateur**.
+
+**Ce que la semaine montre**
+- **Le moment qui compte, c'est le retour du lendemain** : 24 % reviennent le jour de trading suivant. C'est l'étape E du brief d'activation (le rendez-vous du lendemain, en ligne avec `058bf24`). À relever dans une semaine.
+- **La fermeture de la journée tient (53 %), le bilan du vendredi non (6 %).** C'est l'étape 6 du parcours (M3).
+- **L'inscription en fin de semaine active deux fois moins** (25 %). C'est l'étape D du brief d'activation (première visite selon le moment), avec R2.
+- **Le plan (46 %) est en dessous du trade (51 %)** : des traders notent un trade sans faire de plan.
