@@ -9,7 +9,8 @@ Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajuste
 2. `briefs/brief-app-boucle-quotidienne-2026-10-27.md` (une journée à 2 trades passe d'environ 35 touchers à 15 : plan express, plus d'interruption après un trade, « Fermer ma journée », puis « Maintenant ») ;
 3. `briefs/brief-app-nouveau-trader-2026-10-27.md` (étapes 1 et 2 faites, revue : corriger R1 ; accompagner un nouveau trader : 8 petites corrections, les garde-fous de la mission deviennent les valeurs du plan, chaque terme expliqué, Stats sans tuiles vides) ;
 4. `briefs/brief-app-pertes-oubliees-2026-10-27.md` (les traders ne notent pas leurs pertes : mesurer, puis « Fermer ma journée » vérifie le solde de la plateforme et l'écart devient « Trades non détaillés », montrer ce que les pertes oubliées faussent, récompenser la journée complète) ;
-5. les étapes C à F du brief d'activation.
+5. `briefs/brief-app-design-ios27-2-2026-10-28.md` (mise à jour visuelle iOS 27 : lot 1, 8 défauts visuels, avec l'étape 2 des pertes oubliées ; lots 2 et 3, le verre et moins de couches, ensuite) ;
+6. les étapes C à F du brief d'activation.
 
 **Statut** : c'est la référence de tous les développements à venir sur l'app. En cas de désaccord avec un brief plus ancien, ce fichier gagne sur le **parcours** (ce qui est visible, où, quand). `app/CONTEXTE-APP.md` reste la référence des **règles** : calculs, argent, prop firms, tests, design.
 
