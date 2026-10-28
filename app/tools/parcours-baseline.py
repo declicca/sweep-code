@@ -21,6 +21,7 @@ SHOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', '
 DAY_SHOTS = [os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tests', 'samples', f) for f in ('shot-topstepx-one-trade.png', 'shot-tradesea-one-trade.png')]
 SAVED = {'fr': 'Trade enregistré', 'en': 'Trade saved', 'es': 'Operación guardada'}
 TAP_S, FIELD_S = 2.5, 5.0
+OPEN_NOW = "window.__swNow = '2026-10-27T10:30:00-04:00'"   # a Tuesday 10:30 New York (the clock of the first visit only)
 
 
 def unthrottle():
@@ -33,6 +34,7 @@ def run(p, lang, phone, exp, path):
   br = p.chromium.launch()
   ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone,
                        locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
+  ctx.add_init_script(OPEN_NOW)   # (activation D) the first visit of a market open: the same path whatever the hour of the run
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
   c = {'taps': 0, 'fields': 0, 'screens': [], 'pause': 0.0}
 
@@ -121,6 +123,7 @@ def run_day(p, lang, phone):
   ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone,
                        locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
   ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  ctx.add_init_script(OPEN_NOW)   # (activation D) the first visit of a market open: the same path whatever the hour of the run
   H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'day%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)

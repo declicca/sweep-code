@@ -154,10 +154,15 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
     if (in_array('last_login', $cols, true)) foreach ($q('SELECT id, last_login FROM users WHERE last_login IS NOT NULL') as $r) { $t = strtotime((string) $r['last_login']); if ($t) $seen[$r['id']][$sday($t)] = true; }
     $slots = []; foreach (['before', 'session', 'evening', 'weekend'] as $k) $slots[$k] = ['n' => 0, 'day0' => 0];
     $d1n = $d1k = $rsN = $rsK = 0;
+    // (28 Oct., activation D) the three endings of the first visit: « active » (More than a year), else « open » (signed up during the
+    // session, 9:30 → 16:00 ET on a weekday) or « closed » (the rest of the time); with each, who saw his risk allowed that session
+    $xp = []; if (in_array('experience', $cols, true)) foreach ($q("SELECT id, experience FROM users WHERE experience IS NOT NULL") as $r) $xp[$r['id']] = (string) $r['experience'];
+    $cases = []; foreach (['open', 'closed', 'active'] as $k) $cases[$k] = ['n' => 0, 'day0' => 0];
     foreach ($users as $u) {
         $s0 = $sday($u['ts']); $k = $slot($u['ts']); $slots[$k]['n']++;
         $day0 = (isset($plan1[$u['id']]) && $sday($plan1[$u['id']]) === $s0) || (isset($first[$u['id']]) && $sday($first[$u['id']]) === $s0);
         if ($day0) $slots[$k]['day0']++;
+        $c = ($xp[$u['id']] ?? '') === 'gt1' ? 'active' : ($k === 'session' ? 'open' : 'closed'); $cases[$c]['n']++; if ($day0) $cases[$c]['day0']++;
         if ($s0 < $todayS) { $rsN++; if ($day0) $rsK++; }   // the session of the sign-up is over
         $j1 = $nextTd($s0);
         if ($j1 < $todayS) {   // that next trading day is over
@@ -167,6 +172,7 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         }
     }
     foreach ($slots as &$x) $x['day0_pct'] = $rate($x['day0'], $x['n']); unset($x);
+    foreach ($cases as &$x) $x['day0_pct'] = $rate($x['day0'], $x['n']); unset($x);
     $start = ['signed_up' => count($users), 'first_name' => $step($named, false), 'account' => $step($acc1), 'plan' => $step($plan1), 'trade' => $step($first)];
     $brief = [
         'start' => $start,
@@ -177,7 +183,7 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         'swept_sessions_30d' => ['pct' => $rate($sweptS, $sess), 'of' => $sess],
         'closed_sessions_30d' => ['pct' => $rate($closedS, $sess), 'of' => $sess],
         'weekly_opened_8w' => ['pct' => $rate($openedW, count($tradedWeeks)), 'of' => count($tradedWeeks)],
-        'signup_slots' => $slots, 'return_d1' => ['pct' => $rate($d1k, $d1n), 'of' => $d1n], 'risk_seen_day0' => ['pct' => $rate($rsK, $rsN), 'of' => $rsN],
+        'signup_slots' => $slots, 'start_cases' => $cases, 'return_d1' => ['pct' => $rate($d1k, $d1n), 'of' => $d1n], 'risk_seen_day0' => ['pct' => $rate($rsK, $rsN), 'of' => $rsN],
     ];
     if ($has('client_errors')) {   // grouped by message, its numbers taken out (ops/client-errors.php), last 30 days
         require_once __DIR__ . '/client-errors.php';

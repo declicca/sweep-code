@@ -36,13 +36,19 @@ WIDE = "document.documentElement.scrollWidth - innerWidth"
 PLUS = "[...document.querySelectorAll('[data-act=add-trade]')].filter((e) => !e.closest('#main') && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden').length"
 SAVED = {'fr': 'Trade enregistré', 'en': 'Trade saved', 'es': 'Operación guardada'}
 
-def run(p, lang, phone, exp):
-  tag = f"{'390' if phone else '1300'}-{lang}"
+# (28 Oct., activation D) the clock of each case, New York: a Tuesday 10:30 (market open), a Tuesday 20:00 and a Saturday 11:00 (closed)
+OPEN, EVENING, SATURDAY = '2026-10-27T10:30:00-04:00', '2026-10-27T20:00:00-04:00', '2026-10-31T11:00:00-04:00'
+CLOSED_T = {'fr': 'Prépare ta séance de demain.', 'en': 'Prepare tomorrow’s session.', 'es': 'Prepara tu sesión de mañana.'}
+HIST = {'fr': 'Ramène ton historique', 'en': 'Bring your history', 'es': 'Trae tu historial'}
+
+def run(p, lang, phone, exp, now=OPEN):
+  case = 'active' if exp == 'gt1' else ('open' if now == OPEN else 'closed')
+  tag = f"{'390' if phone else '1300'}-{lang}-{case}"
   unthrottle()
   br = p.chromium.launch()
   ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone,
                        locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang], color_scheme='dark' if phone else 'light')
-  ctx.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+  ctx.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('%s')); window.__swNow = '%s'" % (lang, now))
   n = 'fr%d' % int(time.time() * 1000)
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': n + '@t.dev', 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise RuntimeError('sign-up refused: %s %s' % (r.status, r.text()[:80]))
@@ -61,8 +67,9 @@ def run(p, lang, phone, exp):
   pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account][data-onb] [data-st-ph0=eval]', timeout=20000); pg.wait_for_timeout(700)
   t0 = time.time()
   main = pg.locator('#main .onb').inner_text()
-  ok(TXT[lang]['title'] in main and pg.locator('#title').inner_text().strip() == TXT[lang]['wel'], f'{tag} « {TXT[lang]["title"]} », page « {TXT[lang]["wel"]} »')
-  ok(pg.locator('#main .onb-steps li').count() == 3, f'{tag} 3 steps: account, plan, first trade')
+  want_t = CLOSED_T[lang] if case == 'closed' else TXT[lang]['title']
+  ok(want_t in main and pg.locator('#title').inner_text().strip() == TXT[lang]['wel'], f'{tag} « {want_t} », page « {TXT[lang]["wel"]} »')
+  ok(pg.locator('#main .onb-steps li').count() == (2 if case == 'closed' else 3), f'{tag} the steps of this case: account, plan, then the first trade (open) or nothing (closed: tomorrow\'s plan)')
   first = pg.evaluate("(() => { const f = document.querySelector('form[data-form=account][data-onb]'); return f.firstElementChild && f.firstElementChild.className })()")
   ok(first == 'nav-onb-me', f'{tag} the first name is on top of the form ({first})')
   ok(pg.locator('.nav-dlg.open, .nav-prof.open, aside.nav-prof').count() == 0, f'{tag} no « Complete your profile » window')
@@ -100,6 +107,18 @@ def run(p, lang, phone, exp):
   ok(pg.locator('.rn.open').count() == 0 and pg.locator('#tkSlide.open, .nav-am.open, .nav-am-shot.open').count() == 0, f'{tag} no « Your real net », no trade form before the plan')
   if phone: pg.screenshot(path=f'/tmp/fr_{tag}_2_plan.png')
   tap('#gSheet [data-g=bias][data-v=bullish]'); tap('#gSheet [data-g=save-plan]')
+  if case == 'active':   # « Bring your history »: the sync or the CSV in one screen; « Later » leads to the moment's case
+    pg.wait_for_selector('.nav-hist.open', timeout=8000); pg.wait_for_timeout(300)
+    hb = pg.evaluate("[...document.querySelectorAll('.nav-hist.open [data-sy], .nav-hist.open [data-am-imp]')].map((b) => b.textContent.trim())")
+    ok(HIST[lang] in pg.locator('aside.nav-hist.open').inner_text() and len(hb) == 3, f'{tag} more than a year: « {HIST[lang]} » before the first trade ({hb})')
+    tap('aside.nav-hist.open [data-hist-later]', count=False)
+  if case == 'closed':   # tomorrow's plan, then Today: never an empty trade form
+    pg.wait_for_timeout(2000)
+    ok(pg.locator('#tkSlide.open, .nav-am.open, .nav-am-shot.open').count() == 0, f'{tag} market closed: no trade form after the plan')
+    j = pg.evaluate("(() => { const d = (window.SweepNextSession && SweepNextSession()) || todayStr(); const j = getDoc('journals', d); return j && j.pre ? [j.pre.bias, j.pre.max_loss] : null })()")
+    ok(j == ['bullish', '1000'], f'{tag} the plan of the next session is saved, its risk allowed $1,000 ({j})')
+    ok(not errs, f'{tag} no page error ({errs[:2]})')
+    br.close(); return
   # 3. the trade form
   pg.wait_for_selector('#tkSlide.open, .nav-am.open, .nav-am-shot.open', timeout=8000); secs = time.time() - t0
   ok(taps[0] <= MAX_TAPS + (1 if exp else 0), f'{tag} {taps[0]} taps to the trade form (at most {MAX_TAPS}{" + the optional answer" if exp else ""}), {secs:.0f} s automated')
@@ -191,9 +210,9 @@ def topstep(p, lang, phone):
   br.close()
 
 with sync_playwright() as p:
-  for lang, phone, exp in (('fr', True, ''), ('en', False, ''), ('es', True, 'lt1')):
-    print(f"— {'phone' if phone else 'computer'} {lang}")
-    run(p, lang, phone, exp)
+  for lang, phone, exp, now in (('fr', True, '', OPEN), ('en', False, '', OPEN), ('es', True, 'lt1', OPEN), ('fr', True, '', EVENING), ('en', False, '', SATURDAY), ('es', False, 'gt1', OPEN)):
+    print(f"— {'phone' if phone else 'computer'} {lang} {now}")
+    run(p, lang, phone, exp, now)
   for lang, phone in (('es', False), ('fr', True)):
     topstep(p, lang, phone)
 print(f'{fails} failed' if fails else 'all passed')

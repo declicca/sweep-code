@@ -2894,6 +2894,10 @@ html body .nav-dash .nav-acc,html body .nav-rt-me .nav-rt-disc,html body .nav-rt
 html body #main .surface .surface,html body #main .nav-accset .surface{background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 html body .nav-rt-steps > .nav-rt-s{background:color-mix(in srgb,var(--fill) 45%,transparent)!important}
 html body .nav-rt .nav-now{background:color-mix(in srgb,var(--fill) 45%,transparent)!important}
+/* (28 Oct., activation D) « Bring your history », and the discreet way to the trade form when the market is closed */
+.nav-hist-in h2{margin:0 0 6px;font-size:22px}.nav-hist-in p{margin:0 0 16px;line-height:1.45}
+.nav-hist-b{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}.nav-hist-b .btn{min-height:48px;justify-content:center}
+.nav-now-traded{margin:8px 0 0}.nav-now-traded .link{font-size:13px}
 /* (28 Oct., iOS 27.2 V3) the three figures of the routine read the same: the label on top, the value under it, no coloured fill */
 html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
 html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > span{display:flex!important;flex-direction:column;align-items:center;gap:0;font-size:inherit}

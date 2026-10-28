@@ -4274,7 +4274,7 @@ window.SweepMO = window.SweepMO || class {
     else if (x.end && x.rule) { big = nw('ruleEnd'); sub = ''; NOWEND = true; }   // a trader starting out: his rule, and closing the day right here
     else if (x.end) { big = nw('end'); sub = x.text; }
     else { big = nw('left'); val = usd0(x.left); sub = [nw('L' + x.k, { a: x.a }), x.m ? nw('count', { n: x.n + 1 > x.m ? x.m : x.n + 1, m: x.m }) : '', x.pause ? x.text : ''].filter(Boolean).join(' · '); }
-    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l"><b>${esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${!x.n ? newsLine(d.day) : ''}${NOWEND ? `<div class="nav-now-a"><button type="button" class="btn sm primary" data-rt="fin">${esc2(nw('closeDay'))}</button></div>` : ''}</div>`;
+    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l"><b>${esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${!x.n ? newsLine(d.day) : ''}${NOWEND ? `<div class="nav-now-a"><button type="button" class="btn sm primary" data-rt="fin">${esc2(nw('closeDay'))}</button></div>` : ''}${!x.n && window.SweepStart ? SweepStart.tradedLink() : ''}</div>`;
   }
   /* (27 Oct., brief activation step E) the next day's appointment: right after a first plan, on a phone, once — « Shall I remind you
      tomorrow at 8:45 for your plan? », on in one tap (Settings › Notifications' own way, SweepNotify.push.on). On an iPhone outside the
@@ -4499,6 +4499,7 @@ window.SweepMO = window.SweepMO || class {
       const ttl = onb.querySelector('h1, h2'); if (ttl) { ttl.textContent = t('onbT'); ttl.setAttribute('data-noi18n', ''); }
       const sub = onb.querySelector('.onb-sub'); if (sub) { sub.textContent = t('onbS'); sub.setAttribute('data-noi18n', ''); }
       const ol = onb.querySelector('.onb-steps'); if (ol) { ol.setAttribute('data-noi18n', ''); ol.innerHTML = ['st1', 'st2', 'st3'].map((k, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${t(k)}</li>`).join(''); }
+      if (window.SweepStart && SweepStart.paint) SweepStart.paint();   // (activation D) the ending of this trader's case
     }
     if (onb) ['title', 'mtitle'].forEach((id) => { const el = document.getElementById(id); if (el && el.textContent !== t('wel')) el.textContent = t('wel'); });   // the page title and its collapsed copy on a phone
     // 3a. firms: initials badges
@@ -6761,4 +6762,87 @@ new window.SweepMO(() => {
     const w = function () { const out = appRender.apply(this, arguments); try { paint(); } catch (e) { /* never blocks */ } return out; };
     w.__trFace = true; window.render = w;
   }
+})();
+
+/* ───────────── the first visit fits the moment (28 Oct., brief « activation », step D) ─────────────
+ * One start, three endings after « Create account »:
+ *   open    9:30 → 16:00 ET on a weekday: the short plan (risk allowed), then the first trade (as before)
+ *   closed  the rest of the time: « Prepare tomorrow's session »: the plan of the next session and its risk allowed, then Today
+ *           (the reminder of step E) — never an empty trade form; « I traded today: add my trade » stays, discreet, in « Now »
+ *   active  « More than a year », or an account added « already running »: after the plan, « Bring your history » (the
+ *           NinjaTrader 8 / Quantower sync or the CSV import, in one screen); « Later » leads to the case of the moment
+ * The welcome page announces the right ending. window.__swNow (tests only) pins the clock. */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = {
+    en: { open: ['Your account', 'Your plan', 'Your first trade'], closed: ['Your account', 'Your plan for tomorrow'], active: ['Your account', 'Your plan', 'Your history'],
+      tOpen: 'Three steps and you’re trading.', sOpen: 'Your account, your plan for the day, your first trade: about two minutes.',
+      tClosed: 'Prepare tomorrow’s session.', sClosed: 'Your account, then your plan for the next session and your risk allowed: about a minute.',
+      tActive: 'Three steps and your journal is full.', sActive: 'Your account, your plan, then your history: Today, Stats and « Your edge » filled in from today.',
+      hT: 'Bring your history', hS: 'Sync NinjaTrader 8 or Quantower, or import a CSV of your platform: Today, Stats and « Your edge » fill up from your first visit.', csv: 'Import a CSV', later: 'Later', traded: 'I traded today: add my trade' },
+    fr: { open: ['Ton compte', 'Ton plan', 'Ton premier trade'], closed: ['Ton compte', 'Ton plan de demain'], active: ['Ton compte', 'Ton plan', 'Ton historique'],
+      tOpen: 'Trois étapes et tu trades.', sOpen: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.',
+      tClosed: 'Prépare ta séance de demain.', sClosed: 'Ton compte, puis ton plan de la prochaine séance et ton risque permis : environ une minute.',
+      tActive: 'Trois étapes et ton journal est rempli.', sActive: 'Ton compte, ton plan, puis ton historique : Aujourd’hui, Stats et « Ton edge » remplis dès aujourd’hui.',
+      hT: 'Ramène ton historique', hS: 'Synchronise NinjaTrader 8 ou Quantower, ou importe un CSV de ta plateforme : Aujourd’hui, Stats et « Ton edge » se remplissent dès ta première visite.', csv: 'Importer un CSV', later: 'Plus tard', traded: 'J’ai tradé aujourd’hui : ajouter mon trade' },
+    es: { open: ['Tu cuenta', 'Tu plan', 'Tu primera operación'], closed: ['Tu cuenta', 'Tu plan de mañana'], active: ['Tu cuenta', 'Tu plan', 'Tu historial'],
+      tOpen: 'Tres pasos y operas.', sOpen: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.',
+      tClosed: 'Prepara tu sesión de mañana.', sClosed: 'Tu cuenta, luego tu plan de la próxima sesión y tu riesgo permitido: un minuto.',
+      tActive: 'Tres pasos y tu diario está lleno.', sActive: 'Tu cuenta, tu plan y luego tu historial: Hoy, Estadísticas y « Tu ventaja » llenos desde hoy.',
+      hT: 'Trae tu historial', hS: 'Sincroniza NinjaTrader 8 o Quantower, o importa un CSV de tu plataforma: Hoy, Estadísticas y « Tu ventaja » se llenan desde tu primera visita.', csv: 'Importar un CSV', later: 'Más tarde', traded: 'Operé hoy: añadir mi operación' } };
+  const t = (k) => (T[L] || T.en)[k];
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const NYF = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  function moment() {
+    const p = {}; NYF.formatToParts(window.__swNow ? new Date(window.__swNow) : new Date()).forEach((x) => { p[x.type] = x.value; });
+    const m = (+p.hour % 24) * 60 + +p.minute;
+    return !['Sat', 'Sun'].includes(p.weekday) && m >= 570 && m < 960 ? 'open' : 'closed';
+  }
+  const running = () => (S.accounts || []).some((a) => !a.demo && Array.isArray(a.adjustments) && a.adjustments.some((x) => +x.amount_c));
+  function kind(xp) { return xp === 'gt1' || running() ? 'active' : moment(); }
+  function history(later) {
+    document.querySelectorAll('.nav-hist').forEach((x) => x.remove());
+    const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-hist open';
+    const el = document.createElement('aside'); el.className = 'nav-dlg nav-hist open'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
+    el.innerHTML = `<div class="nav-dlg-in nav-hist-in"><h2>${esc2(t('hT'))}</h2><p class="muted">${esc2(t('hS'))}</p>
+      <div class="nav-hist-b"><button type="button" class="btn" data-sy="connect" data-p="ninjatrader">NinjaTrader 8</button><button type="button" class="btn" data-sy="connect" data-p="quantower">Quantower</button><button type="button" class="btn" data-am-imp>${esc2(t('csv'))}</button></div>
+      <button type="button" class="link nav-inst-later" data-hist-later>${esc2(t('later'))}</button></div>`;
+    document.body.append(scrim, el);
+    const close = () => document.querySelectorAll('.nav-hist').forEach((x) => x.remove());
+    el.querySelectorAll('[data-sy], [data-am-imp]').forEach((b) => b.addEventListener('click', () => setTimeout(close, 0)));   // the sync or the import takes over
+    const no = () => { close(); if (typeof later === 'function') later(); };
+    scrim.addEventListener('click', no); el.querySelector('[data-hist-later]').addEventListener('click', no);
+  }
+  /** after « Create account »: the plan, then the ending of this trader's case */
+  function after(xp) {
+    const G = window.SweepGame, d = (window.SweepNextSession && SweepNextSession()) || (G && G.state && G.state() && G.state().today && G.state().today.day);
+    const byMoment = () => { if (moment() === 'open' && typeof openTicket === 'function') openTicket(null); else if (typeof render === 'function') render(); };
+    const end = () => { if (kind(xp) === 'active') history(byMoment); else byMoment(); };
+    if (G && G.openPlan && d) G.openPlan(d, { then: end }); else end();
+  }
+  /** the welcome page: the right ending announced (the experience tapped changes it) */
+  function paintWelcome(f) {
+    const onb = document.querySelector('#main .onb'); if (!onb) return;
+    const xp = ((f || onb).querySelector('[data-exp].on') || {}).dataset; const k = kind(xp && xp.exp);
+    const ol = onb.querySelector('.onb-steps'), ttl = onb.querySelector('h1, h2'), sub = onb.querySelector('.onb-sub');
+    const key = k === 'closed' ? 'Closed' : k === 'active' ? 'Active' : 'Open';
+    if (ttl && ttl.textContent !== t('t' + key)) ttl.textContent = t('t' + key);
+    if (sub && sub.textContent !== t('s' + key)) sub.textContent = t('s' + key);
+    const html = t(k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
+    if (ol && ol.innerHTML !== html) { ol.setAttribute('data-noi18n', ''); ol.innerHTML = html; }
+    onb.dataset.start = k;
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('form[data-onb] [data-exp]')) setTimeout(() => paintWelcome(e.target.closest('form')), 0); });
+  const appRender = window.render;
+  if (typeof appRender === 'function' && !appRender.__start) {
+    const w = function () { const out = appRender.apply(this, arguments); try { paintWelcome(); } catch (e) { /* never blocks */ } return out; };
+    w.__start = true; window.render = w;
+  }
+  /** « Now », a trader whose market is closed, before any trade: the discreet way to the trade form */
+  function tradedLink() {
+    if (moment() !== 'closed' || (S.trades || []).some((x) => !x.demo)) return '';
+    return `<p class="nav-now-traded"><button type="button" class="link" data-rt="trade">${esc2(t('traded'))} ›</button></p>`;
+  }
+  window.SweepStart = { moment, kind, after, history, tradedLink, paint: () => paintWelcome() };
 })();

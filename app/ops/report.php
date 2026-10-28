@@ -72,6 +72,7 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
     $sk = ['before' => 'Avant l\'ouverture (18 h → 9 h 30)', 'session' => 'Séance (9 h 30 → 16 h)', 'evening' => 'Soir (16 h → 18 h)', 'weekend' => 'Fin de semaine (vendredi 17 h → dimanche 18 h)'];
     $md .= "**Quand ils s'inscrivent** (heure de New York) et la part qui fait un premier plan ou un premier trade pendant cette séance :\n\n"
         . $tbl(['Moment', 'Inscrits', 'Premier plan ou trade ce jour-là'], array_map(fn($k) => [$sk[$k], $b['signup_slots'][$k]['n'], $pc(['pct' => $b['signup_slots'][$k]['day0_pct']])], array_keys($sk)))
+        . (!empty($b['start_cases']) ? "**Les trois démarrages** (chaque inscrit dans un cas ; risque permis vu pendant la séance de l'inscription) :\n\n" . $tbl(['Cas', 'Inscrits', 'Risque permis vu ce jour-là'], array_map(fn($k, $l) => [$l, $b['start_cases'][$k]['n'], $pc(['pct' => $b['start_cases'][$k]['day0_pct']])], ['open', 'closed', 'active'], ['Marché ouvert (premier trade)', 'Marché fermé (plan de demain)', 'Trader en activité (historique)'])) : '')
         . $tbl(['Indicateur', 'Valeur'], [['De retour le jour de trading suivant (visite, plan ou trade)', $pc($b['return_d1'])], ['Risque permis vu le jour de l\'inscription (premier plan ou trade)', $pc($b['risk_seen_day0'])]]);
     if (!empty($m['journal'])) {   // brief « pertes oubliées », step 1
         $j = $m['journal']; $jr = fn(string $k, string $l) => [$l, $pc($j['d7'][$k]), $pc($j['d30'][$k])];

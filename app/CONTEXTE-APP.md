@@ -1299,3 +1299,14 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - les commandes (boutons, champs, puces) et les jours colorés du calendrier gardent leur fond.
 - **En foncé**, c'est la même règle.
 - **Test** : `e2e_design_ios272` (L : aucun troisième niveau de fond sur Aujourd'hui, Stats et la page d'un compte, à 390 et 1300, en clair et en foncé).
+
+### Brief « activation » (28 oct.), étape D : la première visite qui s'adapte au moment
+- **Un démarrage, trois fins** (`window.SweepStart`, fin de `src/nav.js` ; appelé par `submitAccount`, `src/app.js`). Les deux premiers écrans ne changent pas.
+  - **Séance ouverte** (9 h 30 → 16 h ET, un jour de semaine) : le plan court, puis le premier trade, comme avant.
+  - **Marché fermé** (le reste du temps) : « Prépare ta séance de demain », le plan de la séance suivante (`SweepNextSession`) et son risque permis, puis Aujourd'hui, avec le rendez-vous de l'étape E. Jamais de formulaire de trade vide. Dans « Maintenant », un lien discret reste : « J'ai tradé aujourd'hui : ajouter mon trade › ».
+  - **Trader déjà en activité** (« Plus d'un an », ou un compte ajouté « déjà en cours ») : après le plan, « Ramène ton historique », en un écran (NinjaTrader 8, Quantower, Importer un CSV). « Plus tard » mène au cas du moment.
+- **La page de bienvenue** annonce la bonne fin : « Ton compte · Ton plan · Ton premier trade », « Ton compte · Ton plan de demain » ou « Ton compte · Ton plan · Ton historique ». Elle change quand l'expérience est touchée.
+- **`window.__swNow`** (tests seulement) fixe l'horloge du démarrage.
+- **Admin › Métriques › « Les trois démarrages »** (et « Exporter pour Claude ») : chaque inscrit est rangé dans un cas (`start_cases`, `ops/metrics.php`), avec la part qui a vu son risque permis pendant la séance de l'inscription. Le cas « en activité » côté serveur ne lit que « Plus d'un an », pas encore le compte « déjà en cours ».
+- **Touchers jusqu'au risque permis** : 11, inchangé (`parcours-baseline.py`, l'horloge fixée sur un mardi 10 h 30).
+- **Test** : `e2e_first_run` (les trois cas, horloge fixée : un mardi 10 h 30, un mardi 20 h, un samedi 11 h, et « Plus d'un an »).

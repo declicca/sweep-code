@@ -9493,7 +9493,11 @@ function submitAccount(e) {
     created_on: t.get("created") || todayStr()
   }), toast("Account added"), U.addAcct = !1, e.dataset.onb) {
     // the first account → the plan of the day, pre-filled (bias, max loss from the account's daily limit), then the first trade
+    // (28 Oct., activation D) then the ending of this trader's case: the first trade (market open), the plan of tomorrow
+    // (market closed), or his history (active trader) — window.SweepStart, nav.js
+    const xp = (e.querySelector("[data-exp].on") || {}).dataset;
     render(), setTimeout(() => {
+      if (window.SweepStart) return SweepStart.after(xp && xp.exp);
       const G = window.SweepGame, d = (window.SweepNextSession && SweepNextSession()) || (G && G.state && G.state() && G.state().today && G.state().today.day);
       G && G.openPlan && d ? G.openPlan(d, { then: () => openTicket(null) }) : openTicket(null);
     }, 300);

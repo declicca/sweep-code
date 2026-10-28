@@ -870,6 +870,15 @@
     const row = (k, l) => `<tr data-jr="${k}"><td>${esc(l)}</td><td class="num"><b>${pct(j.d7[k])}</b> <small class="muted">${esc(sub(j.d7[k]))}</small></td><td class="num"><b>${pct(j.d30[k])}</b> <small class="muted">${esc(sub(j.d30[k]))}</small></td></tr>`;
     return `<h4 class="ux-start-h">${x.h}</h4><p class="muted ux-jr-sub">${esc(x.sub)}</p><div class="scroll-x"><table class="tbl ux-start ux-journal"><thead><tr><th></th><th class="num">${x.d7}</th><th class="num">${x.d30}</th></tr></thead><tbody>${row('high_win_20', x.hi)}${row('losing_trades', x.loss)}${row('days_without_loss', x.nol)}${j.d7.gap_days ? row('gap_days', x.gd) + `<tr data-jr="gap_total_c"><td>${esc(x.gt)}</td><td class="num"><b>${mUSD(j.d7.gap_total_c)}</b></td><td class="num"><b>${mUSD(j.d30.gap_total_c)}</b></td></tr>` + row('gap_detailed', x.gdet) : ''}</tbody></table></div>`;
   }
+  // (28 Oct., activation D) the three endings of the first visit, each sign-up in one, and who saw his risk allowed that session
+  const CST = { en: { h: 'The three starts', open: 'Market open (first trade)', closed: 'Market closed (tomorrow’s plan)', active: 'Active trader (history)' },
+    fr: { h: 'Les trois démarrages', open: 'Marché ouvert (premier trade)', closed: 'Marché fermé (plan de demain)', active: 'Trader en activité (historique)' },
+    es: { h: 'Los tres comienzos', open: 'Mercado abierto (primera operación)', closed: 'Mercado cerrado (plan de mañana)', active: 'Trader activo (historial)' } };
+  function casesHtml(c) {
+    if (!c) return '';
+    const x = SC(), y = CST[LANG] || CST.en;
+    return `<h4 class="ux-start-h">${y.h}</h4><div class="scroll-x"><table class="tbl ux-start ux-cases"><thead><tr><th></th><th class="num">${x.n}</th><th class="num">${x.p}</th></tr></thead><tbody>${['open', 'closed', 'active'].map((k) => `<tr data-case="${k}"><td>${esc(y[k])}</td><td class="num"><b>${c[k].n}</b></td><td class="num">${pct({ pct: c[k].day0_pct })}</td></tr>`).join('')}</tbody></table></div>`;
+  }
   function slotsHtml(sl) {
     if (!sl) return '';
     const x = SC();
@@ -887,7 +896,7 @@
     const rows = g.map((e) => `<tr><td class="ux-err-m"><b>${esc(e.msg)}</b>${e.where ? `<small>${esc(e.where)}</small>` : ''}</td><td class="num">${e.traders}</td><td class="num">${e.n}</td><td>${when(e.last)}</td><td>${esc(e.pages.join(', '))}</td><td>${esc(e.browsers.join(', '))}</td><td>${esc(e.versions.join(', '))}</td></tr>`).join('');
     return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
-      <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}${b.return_d1 ? card(SC().d1, pct(b.return_d1), sub(b.return_d1)) + card(SC().rs, pct(b.risk_seen_day0), sub(b.risk_seen_day0)) : ''}</div>${slotsHtml(b.signup_slots)}${journalHtml(d.journal)}
+      <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}${b.return_d1 ? card(SC().d1, pct(b.return_d1), sub(b.return_d1)) + card(SC().rs, pct(b.risk_seen_day0), sub(b.risk_seen_day0)) : ''}</div>${slotsHtml(b.signup_slots)}${casesHtml(b.start_cases)}${journalHtml(d.journal)}
       ${startHtml(b.start, y)}
       <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<span class="ux-err-a"><button type="button" class="btn sm" data-ux-errclr>${y.clr}</button><a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a></span>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }
