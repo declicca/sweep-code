@@ -48,6 +48,7 @@ def run(p, lang, phone, full):
   br = p.chromium.launch(); errs = []
   c = br.new_context(viewport={'width': 390 if phone else 1300, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang], color_scheme='dark')
   c.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+  c.add_init_script("window.__swNow = '2026-10-27T10:30:00-04:00'")   # (activation D) a market open: the first trade after the plan, whatever the hour of the run
   c.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'gp%07d@t.dev' % random.randint(0, 9999999), 'consent': True, 'elapsed': 6000}), headers=H)
   pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
   T = TXT[lang]

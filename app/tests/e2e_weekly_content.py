@@ -48,7 +48,7 @@ async def main():
       await pg.evaluate("SweepGame.open('weekly')"); await pg.wait_for_selector('#gSheet .wk-brief', timeout=10000); await pg.wait_for_timeout(500)
       txt = re.sub(r'[\s  ]+', ' ', await pg.evaluate("document.querySelector('#gSheet .wk-body').innerText"))
       tiles = await pg.evaluate("[...document.querySelectorAll('#gSheet .wk-brief > div')].map(d=>d.innerText.replace(/\\s+/g,' ').trim())")
-      want = {'fr': ['3 jours d’affilée', f'{DISC} %', '2 sur 3 jours tradés'], 'en': ['3 days in a row', f'{DISC} %', '2 of 3 days traded']}[lang]
+      want = {'fr': ['3 jours d’affilée', f'{DISC} %', '2 sur 3 jours tradés'], 'en': ['3 days in a row', f'{DISC}%', '2 of 3 days traded']}[lang]   # (28 Oct., iOS 27.2 V2) « 0% » in English
       ok(all(any(x in re.sub(r'[  ]', ' ', t) for t in tiles) for x in want), f'{tag} streak, discipline {DISC} %, swept days out of days traded ({tiles})')
       hab = await pg.evaluate("[...document.querySelectorAll('#gSheet .wk-habits li')].map(l=>l.innerText.replace(/\\s+/g,' ').trim())")
       ok(any(('4 fois sur 4' if lang == 'fr' else '4 times out of 4') in x for x in hab), f'{tag} best habit: the question answered « yes » 4 times out of 4 ({hab[:1]})')

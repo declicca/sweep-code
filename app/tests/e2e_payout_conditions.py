@@ -52,6 +52,7 @@ def run(p, lang, phone):
   br = p.chromium.launch()
   ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone, bypass_csp=True, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
   ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1'); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+  ctx.add_init_script("window.__swNow = '2026-10-27T10:30:00-04:00'")   # (activation D) a market open: the first trade after the plan, whatever the hour of the run
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'po%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Inès', 'experience': 'gt1'}), headers=H)

@@ -5,7 +5,7 @@ Uses the signed-in trader's sample data; changes nothing. Phone 390 (fr, es) and
  C2 phone: the Trades list in one row per day (date, trades, P&L), the last 2 weeks, « Voir plus » shows the rest; a day opens
     on a tap; the whole list well under its old height (7,887 px for 130 trades)
  C3 the trade page: the setup chosen in one place (not again in the facts); the fees, the platform's P&L and the tags under
-    « Plus de détails »; « Contexte économique » only with an announcement; phone: under 1,610 px (2,414 before)
+    « Plus de détails »; « Contexte économique » only with an announcement; phone: under 1,610 px (2,414 before; at most 1,609, a third less)
  C4 the manual form opens on its fields only: no « From a screenshot », no CSV import, no « Log with AI » in it
 No page error, nothing wider than the window.
 """
@@ -50,7 +50,7 @@ with sync_playwright() as p:
     ok(news[0] != 0 or news[1] is False, f'C3 {tag}: « Economic context » only with an announcement ({news})')
     if phone:
       h = pg.evaluate("document.documentElement.scrollHeight")
-      ok(h <= 1610, f'C3 {tag}: the trade page {h} px (2,414 before)')
+      ok(h <= 1609, f'C3 {tag}: the trade page {h} px (2,414 before; at most 1,609, a third less)')
     # C4
     pg.evaluate("openTicket(null, { manual: true })"); pg.wait_for_selector('#tkSlide.open', timeout=8000); pg.wait_for_timeout(1000)
     extra = pg.evaluate("[...document.querySelectorAll('#tkSlide.open .nav-tk-alt, #tkSlide.open [data-act=ai-log], #tkSlide.open [data-tk-alt]')].length")

@@ -72,6 +72,7 @@ try:
     ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}, is_mobile=phone, has_touch=phone,
                          locale={'fr': 'fr-CA', 'en': 'en-US'}[lang], color_scheme='dark' if phone else 'light')
     ctx.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+    ctx.add_init_script("window.__swNow = '2026-10-27T10:30:00-04:00'")   # (activation D) a market open: the first trade after the plan, whatever the hour of the run
     n = 'lp%d' % int(time.time() * 1000)
     r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': n + '@t.dev', 'consent': True, 'elapsed': 6000, 'lang': lang}), headers=H)
     if r.status != 201: raise RuntimeError('sign-up refused: %s %s' % (r.status, r.text()[:80]))

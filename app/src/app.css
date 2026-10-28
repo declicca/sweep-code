@@ -2000,7 +2000,7 @@ html body #main .tr-more > summary{min-height:40px}
 html body #main .tr-main{min-height:0}html body #main .tr-main > *:first-child{margin-top:0}
 html body #main .facts > div:not(.ux-notes){padding:5px 0!important}
 html body #main .co .co-q{margin-top:8px!important}
-html body #main .tr-chart .sc-box,html body #main .tr-chart .sc-chart{height:160px!important}
+html body #main .tr-chart .sc-box,html body #main .tr-chart .sc-chart{height:150px!important}
 html body #main .facts .fx-dup{display:none!important}
 html body #main .rprog:not(:has(> * > *)){display:none!important}
 html body #main > .surface{margin-top:14px!important}

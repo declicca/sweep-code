@@ -53,7 +53,7 @@ with sync_playwright() as p:
     else: tt = pg.evaluate(PCT_TIGHT); ok(not tt, f'V2 {tag}: « 75 % » in {lang} ({tt[:3]})')
     # V3
     fig = pg.evaluate("[...document.querySelectorAll('#main .nav-rt-me .nav-rt-disc, #main .nav-rt-me .nav-rt-streak, #main .nav-rt-me .nav-rt-lv')].filter((b) => b.getClientRects().length).map((b) => { const s = b.querySelector('small'), v = b.querySelector('b'); return [!!s && !!v && s.getBoundingClientRect().bottom <= v.getBoundingClientRect().top + 2, getComputedStyle(b).backgroundColor] })")
-    ok(fig and all(f[0] for f in fig) and len(set(f[1] for f in fig)) == 1, f'V3 {tag}: the routine\'s figures, label on top, one same fill ({fig})')
+    ok(all(f[0] for f in fig) and len(set(f[1] for f in fig)) <= 1, f'V3 {tag}: the routine\'s figures, label on top, one same fill ({fig or "none before the first trade of the day"})')
     # V4, V5
     tid = pg.evaluate("(S.trades.filter((t) => !t.demo || true).filter((t) => !t.untracked && t.setup).slice(-1)[0] || {}).id")
     pg.evaluate("(id) => location.hash = '#trade/' + id", tid); pg.wait_for_selector('#main .facts', timeout=10000); pg.wait_for_timeout(1500)

@@ -46,7 +46,7 @@ with sync_playwright() as p:
     gp = ctx.request.post(B + '/api/game/gameplan/start', data=json.dumps({'track': 'B'}), headers=H).json()
     day = pg.evaluate("(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || todayStr()")
     pg.evaluate("(d) => put('journals', { id: d, pre: { bias: 'bullish', max_loss: '500', max_trades: '3', saved_at: Math.floor(Date.now() / 1000) - 3600 } })", day)
-    pg.evaluate("(d) => put('trades', { id: 'nt-t1', account_id: 'nt-a', instrument: 'MNQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 15000, pnl_manual: true, date: d, entry_time: '10:00', exit_time: '10:05', discipline: { plan: 'y', confirm: 'y', entry: 'y', size: 'y', risk: 'y' } })", day)
+    pg.evaluate("(d) => put('trades', { id: 'nt-t1', account_id: 'nt-a', instrument: 'MNQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 15000, pnl_manual: true, date: d, entry_time: '10:00', exit_time: '10:05', session: 'nyam', discipline: { plan: 'y', confirm: 'y', entry: 'y', size: 'y', risk: 'y' } })", day)   # (a session: the trade page hides an empty « Session » row since 28 Oct.)
     pg.wait_for_timeout(1500); pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(2500)
     pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=15000); pg.wait_for_timeout(2500)
     # N2

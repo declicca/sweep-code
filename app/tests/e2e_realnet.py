@@ -35,6 +35,7 @@ def new_trader(p, lang, phone, profile=False):
   br = p.chromium.launch()
   ctx = br.new_context(viewport={'width': 390, 'height': 844} if phone else {'width': 1440, 'height': 900}, is_mobile=phone, has_touch=phone, locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
   ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+  ctx.add_init_script("window.__swNow = '2026-10-27T10:30:00-04:00'")   # (activation D) a market open: the first trade after the plan, whatever the hour of the run
   n = 'rn%d' % int(time.time() * 1000)
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': n + '@t.dev', 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise RuntimeError('sign-up refused: %s %s' % (r.status, r.text()[:80]))
@@ -64,6 +65,7 @@ def first_account(pg, firm, typ):   # the first-account page → the plan of the
   pg.wait_for_selector('#gSheet [data-g=plan-skip]', timeout=8000)
   ok(pg.locator('.rn.open').count() == 0, 'the first account opens the plan, not « Your real net »')
   tap(pg, '#gSheet [data-g=plan-skip]'); pg.wait_for_timeout(700)
+  if pg.locator('aside.nav-hist.open').count(): tap(pg, 'aside.nav-hist.open [data-hist-later]'); pg.wait_for_timeout(500)   # « More than a year »: « Bring your history » first (activation D), « Later »
   pg.wait_for_selector('#tkSlide.open, .nav-am.open', timeout=6000)   # the trade form, closed as a trader would
   pg.keyboard.press('Escape'); pg.wait_for_timeout(500)
   if pg.locator('#tkSlide.open').count(): pg.evaluate("closeTicket()"); pg.wait_for_timeout(400)
