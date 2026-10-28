@@ -10,6 +10,7 @@ Brief : `briefs/brief-app-boucle-quotidienne-2026-10-27.md`. Cible : **une journ
 | Étape 1 : plan express pour tous | `34d630a` | 6 | 6 + 6 | 5 | **23** | 4 | 7 |
 | Étape 2 : plus de feuille après un trade | `f679f2c` | 6 | 4 + 4 | 5 | **19** | 2 | 7 |
 | Étape 3 : « Fermer ma journée » | `a964323` | 6 | 4 + 4 | 2 | **16** | 2 | 7 |
+| 28 oct. — Pertes oubliées, étape 2 : « Ton solde sur Topstep ? » | `SHA` | 6 | 4 + 4 | 3 | **17** | 2 | 7 |
 
 **À savoir**
 - La ligne de l'étape 1 a été mesurée avec une image que les réponses de test ne lisent pas (`tests/fixture-shot.png`) : le P&L et le sens y sont tapés à la main (6 touchers par trade). Avec une capture lue, la même étape donne 5 touchers par trade (la feuille « quel scénario ? » en plus). Les lignes suivantes utilisent les vraies captures.

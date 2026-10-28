@@ -1629,17 +1629,72 @@
     const fi = ficheGet(RV.day); RV.fiche = !!fi;
     RV.rules = new Set(post.rules_broken || (fi ? ficheAutoRules(fi) : []));
     const grades = typeof GRADES !== 'undefined' ? GRADES : ['A', 'B', 'C', 'D', 'F'];
+    RV.bal = {}; RV.balAcc = balAccounts(RV.day);   // the platform's balance, once per day (brief « pertes oubliées », step 2)
+    RV.balAcc.forEach((a) => { RV.bal[a.id] = { sweep: acctState(a).bal, plat: null, same: false, kind: null }; });
     openSheet(`${head(t('review_title'), fdate(RV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
       <div class="g-f"><span>${RV.fiche ? pt('followed_sheet') : t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${RV.fiche ? `<div class="g-f rv-rules" ${RV.followed === 'partly' || RV.followed === 'no' ? '' : 'hidden'}><span>${pt('rules_q')}</span><div class="g-chips-row wrap">${FICHE.RULES.map((r) => `<button type="button" class="chip ${RV.rules.has(r) ? 'on' : ''}" data-rv-rule="${r}">${pt('r_' + r)}</button>`).join('')}</div></div>` : ''}
       <div class="g-f"><span>${t('discipline')}</span><div class="g-dots">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="${RV.score === n ? 'on' : ''}" data-g="r-score" data-v="${n}">${n}</button>`).join('')}</div></div>
       <div class="g-f"><span>${t('grade')}</span><div class="g-dots">${grades.map((g) => `<button type="button" class="${RV.grade === g ? 'on' : ''}" data-g="r-grade" data-v="${g}">${g}</button>`).join('')}</div></div>
       <label class="g-f"><span>${RV.fiche ? pt('note_tomorrow') : t('improve_opt')}</span><textarea rows="2" data-gr="tomorrow" maxlength="400">${esc(post.tomorrow || '')}</textarea></label>
+      ${RV.balAcc.map(balRow).join('')}${RV.balAcc.length ? `<button type="button" class="link g-bal-shot" data-bal-shot>${bv('shot')} ›</button>` : ''}
       <p class="g-err" id="gErr"></p>
       ${RV.guessed ? `<p class="g-hint g-hint-sm">${t('close_hint')}</p>` : ''}
       <button type="button" class="btn primary g-big" data-g="save-review">${t(post.reviewed_at ? 'save_review' : 'close_day')}</button>`, { cls: 'g-rv' });
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = RV.day;   // the day reviewed (the coach's lesson reads it)
   }
+  /* « Your balance on Topstep? » (27 Oct., brief « pertes oubliées », step 2): the day closes on the platform's number, so a loss not
+   * logged can never make the journal look better. Each active account traded today (not one synced today by the NinjaTrader 8 or
+   * Quantower add-on), and once a week an account not traded for 3 trading days. « It matches »: one tap. Another balance: the gap
+   * is said without judging, then one tap says what it was (SweepGap, nav.js). Answered once per day: journal.post.bal. */
+  const BV = {
+    en: { q: 'Your balance on {f}?', same: 'It matches', shot: 'Import a screenshot of your trades', need: 'Confirm your balance on {f}.', needK: 'Say what the gap was, in one tap.' },
+    fr: { q: 'Ton solde sur {f} ?', same: 'C’est le même', shot: 'Importer une capture de tes trades', need: 'Confirme ton solde sur {f}.', needK: 'Dis ce qu’était l’écart, en un toucher.' },
+    es: { q: '¿Tu saldo en {f}?', same: 'Es el mismo', shot: 'Importar una captura de tus operaciones', need: 'Confirma tu saldo en {f}.', needK: 'Di qué fue la diferencia, en un toque.' } };
+  const bv = (k) => (BV[L()] || BV.en)[k];
+  const SYNCED = ['ninjatrader', 'quantower'];
+  const balWhere = (a) => { const f = typeof firm === 'function' && a.firm_id ? firm(a.firm_id) : null; return (f && f.name) || a.name || ''; };
+  const balC = (v) => { const x = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(/,(?=\d{3}(\D|$))/g, '').replace(',', '.'); return x === '' || x === '-' || !isFinite(+x) ? null : Math.round(+x * 100); };
+  function balAccounts(day) {
+    if (typeof todayStr !== 'function' || day !== todayStr() || typeof acctState !== 'function') return [];   // today's balance only says today
+    const done = new Set(((journalOf(day).post || {}).bal || []).map((b) => b.acc));
+    const tr = (S.trades || []).filter((x) => !x.demo && !x.untracked);
+    const wd = (d) => { const w = new Date(d + 'T12:00:00').getDay(); return w > 0 && w < 6; };
+    let back = day; for (let k = 0; k < 3;) { back = ymdAdd(back, -1); if (wd(back)) k++; }
+    return (S.accounts || []).filter((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && a.result !== 'failed' && !done.has(a.id)).filter((a) => {
+      const mine = tr.filter((x) => x.account_id === a.id), now = mine.filter((x) => x.date === day);
+      if (now.length) return !now.some((x) => SYNCED.includes(x.source));
+      if (mine.some((x) => x.date > back) || (a.created_on && a.created_on > back)) return false;
+      return !(a.bal_checked && a.bal_checked > ymdAdd(day, -7));   // at most once a week
+    });
+  }
+  function balRow(a) {
+    const b = RV.bal[a.id], gap = b.plat == null ? 0 : b.plat - b.sweep, G2 = window.SweepGap;
+    return `<div class="g-f g-bal" data-bal="${esc(a.id)}"><span>${esc(bv('q').replace('{f}', balWhere(a)))}</span>
+      ${balWhere(a) !== a.name ? `<small class="g-bal-a">${esc(a.name || '')}</small>` : ''}
+      <div class="g-bal-r"><input inputmode="decimal" data-bal-in="${esc(a.id)}" value="${((b.plat == null ? b.sweep : b.plat) / 100).toFixed(2)}" aria-label="${esc(bv('q').replace('{f}', balWhere(a)))}"><button type="button" class="chip ${b.same ? 'on' : ''}" data-bal-same="${esc(a.id)}">${bv('same')}</button></div>
+      <div class="g-bal-gap" ${gap && G2 ? '' : 'hidden'}>${gap && G2 ? `<p>${esc(G2.msg(gap))}</p><div class="g-chips-row wrap">${G2.chips(gap, b.kind, 'data-bal-k')}</div>` : ''}</div></div>`;
+  }
+  function balPaint(id) {
+    const el = document.querySelector(`#gSheet .g-bal[data-bal="${CSS.escape(id)}"]`), a = getDoc('accounts', id); if (!el || !a) return;
+    const b = RV.bal[id], gap = b.plat == null ? 0 : b.plat - b.sweep, box = el.querySelector('.g-bal-gap'), G2 = window.SweepGap;
+    el.querySelector('[data-bal-same]').classList.toggle('on', b.same);
+    if (gap && G2) { box.innerHTML = `<p>${esc(G2.msg(gap))}</p><div class="g-chips-row wrap">${G2.chips(gap, b.kind, 'data-bal-k')}</div>`; box.hidden = false; } else { box.innerHTML = ''; box.hidden = true; }
+  }
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest && e.target.closest('#gSheet .g-bal [data-bal-same], #gSheet .g-bal [data-bal-k], #gSheet [data-bal-shot]'); if (!el) return;
+    if (el.hasAttribute('data-bal-shot')) { closeSheet(); setTimeout(() => { if (typeof openTicket === 'function') openTicket(null, { date: RV.day }); }, 350); return; }
+    const id = el.closest('.g-bal').dataset.bal, b = RV.bal[id]; if (!b) return;
+    if (el.hasAttribute('data-bal-same')) { b.same = true; b.plat = null; b.kind = null; const i = el.parentElement.querySelector('input'); if (i) i.value = (b.sweep / 100).toFixed(2); }
+    else { b.kind = el.getAttribute('data-bal-k'); }
+    buzz(6); balPaint(id); const er = document.getElementById('gErr'); if (er) er.textContent = '';
+  });
+  document.addEventListener('input', (e) => {
+    const i = e.target.closest && e.target.closest('#gSheet [data-bal-in]'); if (!i) return;
+    const b = RV.bal[i.dataset.balIn]; if (!b) return;
+    const v = balC(i.value); b.plat = v; b.same = v != null && v === b.sweep; if (b.same) b.plat = null; b.kind = null;
+    balPaint(i.dataset.balIn);
+  });
   function rvGuess(day) {
     const d = [G.today, G.yesterday].find((x) => x && x.day === day), tr = (S.trades || []).filter((x) => !x.demo && x.date === day);
     if (!d || !d.trades || !tr.length) return null;
@@ -1653,6 +1708,10 @@
   function saveReview() {
     const el = document.getElementById('gSheet');
     if (!RV.followed || !RV.score || !RV.grade) { const e = document.getElementById('gErr'); if (e) e.textContent = t('review_needs'); buzz(20); return; }
+    for (const a of RV.balAcc || []) {   // each balance said: the same, or the gap and what it was
+      const x = RV.bal[a.id], gap = x.plat == null ? 0 : x.plat - x.sweep;
+      if ((!x.same && x.plat == null) || (gap && !x.kind)) { const e = document.getElementById('gErr'); if (e) e.textContent = gap ? bv('needK') : bv('need').replace('{f}', balWhere(a)); buzz(20); return; }
+    }
     const tom = el.querySelector('[data-gr=tomorrow]').value.trim();
     const j = structuredClone(journalOf(RV.day));
     j.id = RV.day;
@@ -1660,8 +1719,14 @@
     j.post = Object.assign({}, j.post || {}, { followed: RV.followed, discipline: RV.score, grade: RV.grade, tomorrow: tom, reviewed_at: new Date().toISOString() });
     if (RV.fiche) j.post.rules_broken = RV.followed === 'yes' ? [] : FICHE.RULES.filter((r) => RV.rules.has(r));   // the next pre-market asks about the first one (D2)
     if (!(j.post.well || '').trim() && RV.well) j.post.well = RV.well;   // what the day's trade reviews already say went well (as before)
+    const bals = (RV.balAcc || []).map((a) => { const x = RV.bal[a.id], gap = x.plat == null ? 0 : x.plat - x.sweep; return { acc: a.id, sweep_c: x.sweep, plat_c: x.plat == null ? x.sweep : x.plat, gap_c: gap, kind: gap ? x.kind : null }; });
+    if (bals.length) j.post.bal = [...(j.post.bal || []).filter((b) => !bals.some((n) => n.acc === b.acc)), ...bals];
     put('journals', j);
+    bals.forEach((b) => editDoc('accounts', b.acc, (d) => { d.bal_checked = RV.day; }));
+    const pay = bals.find((b) => b.kind === 'payout');
+    if (window.SweepGap) bals.filter((b) => b.gap_c && b.kind !== 'payout').forEach((b) => SweepGap.apply(b.acc, RV.day, b.gap_c, b.kind));
     buzz(10); closeSheet(); soon(500);
+    if (pay && window.SweepGap) setTimeout(() => SweepGap.apply(pay.acc, RV.day, pay.gap_c, 'payout'), 400);   // My money's payout form, filled in
   }
 
   /* ───────────── Day detail ───────────── */

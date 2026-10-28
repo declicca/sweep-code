@@ -76,7 +76,8 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
     if (!empty($m['journal'])) {   // brief « pertes oubliées », step 1
         $j = $m['journal']; $jr = fn(string $k, string $l) => [$l, $pc($j['d7'][$k]), $pc($j['d30'][$k])];
         $md .= "**Journal complet** (des pertes non notées rendent le journal trop beau ; chez de vrais traders, 40 à 55 % des trades sont perdants) :\n\n"
-            . $tbl(['Indicateur', '7 jours', '30 jours'], [$jr('high_win_20', 'Traders de 20 trades et plus avec plus de 80 % de gagnants'), $jr('losing_trades', 'Trades perdants'), $jr('days_without_loss', 'Jours de trading sans perte')]);
+            . $tbl(['Indicateur', '7 jours', '30 jours'], array_merge([$jr('high_win_20', 'Traders de 20 trades et plus avec plus de 80 % de gagnants'), $jr('losing_trades', 'Trades perdants'), $jr('days_without_loss', 'Jours de trading sans perte')],
+                isset($j['d7']['gap_days']) ? [$jr('gap_days', 'Journées fermées avec un écart à la plateforme'), ['Montant total des écarts', round($j['d7']['gap_total_c'] / 100) . ' $', round($j['d30']['gap_total_c'] / 100) . ' $'], $jr('gap_detailed', 'Part des écarts détaillée en trades')] : []));
     }
 
     $md .= "## 3. D'où viennent les traders\n\n**Inscriptions par semaine** (lundi, New York) :\n\n" . $tbl(['Semaine', 'Inscrits'], array_map(null, array_keys($b['filters']['weeks']), array_values($b['filters']['weeks'])))

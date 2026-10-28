@@ -574,7 +574,7 @@
   /** the real trades of the days from..to (to excluded), each with what the coach says about it */
   function span(from, to) {
     const days = [...new Set((S.trades || []).filter((t) => !t.demo && t.date >= from && t.date < to).map((t) => t.date))].sort();
-    const rows = []; days.forEach((d) => dayTrades(d).forEach((t) => rows.push({ t, c: tradeNote(t), day: d })));
+    const rows = []; days.forEach((d) => dayTrades(d).filter((t) => !t.untracked).forEach((t) => rows.push({ t, c: tradeNote(t), day: d })));   // (a « Trades not detailed » line: no setup, no checklist)
     return { days, rows };
   }
   const rate = (rows) => (rows.length ? Math.round(rows.filter((r) => net(r.t) > 0).length / rows.length * 100) : 0);

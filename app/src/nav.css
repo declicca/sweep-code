@@ -626,6 +626,8 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-recal-row input{width:100%;font-family:var(--font-num,ui-monospace)}
 .nav-recal-msg{margin:0;font-size:13px;color:var(--muted)}
 .nav-recal-msg:empty{display:none}
+.nav-recal-msg>span:first-child{display:block;color:var(--text,inherit);font-size:14px;line-height:1.4}
+.nav-recal-msg .g-chips-row{margin-top:8px}
 .nav-recal-hist{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
 .nav-recal-hh{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
 .nav-recal-it{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;font-size:13px}

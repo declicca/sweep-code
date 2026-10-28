@@ -242,7 +242,7 @@ function sweep_journal_metrics(PDO $pdo, array $real, int $now, int $days): arra
 {
     $from = (new DateTimeImmutable('@' . ($now - $days * 86400)))->setTimezone(new DateTimeZone('America/New_York'))->format('Y-m-d');
     $st = $pdo->prepare("SELECT user_id, data FROM documents WHERE collection = 'trades'"); $st->execute();
-    $per = []; $seen = [];
+    $per = []; $seen = []; $lines = $gapAbs = $detAbs = 0;
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
         if (!isset($real[$r['user_id']])) continue;
         $t = json_decode((string) $r['data'], true); if (!is_array($t) || !empty($t['demo'])) continue;
@@ -253,6 +253,18 @@ function sweep_journal_metrics(PDO $pdo, array $real, int $now, int $days): arra
         $u['n']++; if ($net > 0) $u['w']++; elseif ($net < 0) $u['l']++;
         $u['days'][$d] = ($u['days'][$d] ?? false) || $net < 0;
         unset($u);
+        if (!empty($t['untracked']) && is_array($t['untracked'])) { $lines++; $gapAbs += abs((int) ($t['untracked']['gap_c'] ?? 0)); $detAbs += abs((int) ($t['untracked']['detailed_c'] ?? 0)); }
+    }
+    // (step 2) the days closed on the platform's balance: with a gap, the gaps' total, the share detailed in trades since
+    $st = $pdo->prepare("SELECT user_id, id, data FROM documents WHERE collection = 'journals'"); $st->execute();
+    $closed = $withGap = $gapSum = 0;
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if (!isset($real[$r['user_id']]) || (string) $r['id'] < $from) continue;
+        $j = json_decode((string) $r['data'], true); $bal = is_array($j) && empty($j['demo']) ? ($j['post']['bal'] ?? null) : null;
+        if (!is_array($bal) || !$bal) continue;
+        $closed++; $g = 0;
+        foreach ($bal as $b) $g += abs((int) ($b['gap_c'] ?? 0));
+        if ($g) { $withGap++; $gapSum += $g; }
     }
     $rate = fn(int $a, int $b) => $b ? (int) round($a / $b * 100) : null;
     $t20 = $hi = $n = $l = $dn = $dk = 0;
@@ -262,7 +274,8 @@ function sweep_journal_metrics(PDO $pdo, array $real, int $now, int $days): arra
         foreach ($u['days'] as $lost) { $dn++; if (!$lost) $dk++; }
     }
     return ['days' => $days, 'traders' => count($per), 'high_win_20' => ['pct' => $rate($hi, $t20), 'of' => $t20], 'losing_trades' => ['pct' => $rate($l, $n), 'of' => $n],
-        'days_without_loss' => ['pct' => $rate($dk, $dn), 'of' => $dn]];
+        'days_without_loss' => ['pct' => $rate($dk, $dn), 'of' => $dn],
+        'gap_days' => ['pct' => $rate($withGap, $closed), 'of' => $closed], 'gap_total_c' => $gapSum, 'gap_detailed' => ['pct' => $gapAbs ? (int) round($detAbs / $gapAbs * 100) : null, 'of' => $lines]];
 }
 
 /** « Safari iOS 18 », « Chrome Android », « Firefox macOS »: enough to group errors, nothing personal */

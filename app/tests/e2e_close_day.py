@@ -2,7 +2,8 @@
 Sweep — closing the day in one tap (brief « daily loop », step 3, 27 Oct.), Playwright:
   python3 tests/e2e_close_day.py http://127.0.0.1:8095
 A trader of its own for each day, one account, the day's trades put in; then « J'ai fini pour aujourd'hui » under Execution
-(from the first trade) opens the review filled in from the day, and « Fermer ma journée » closes it: 2 taps.
+(from the first trade) opens the review filled in from the day, « C'est le même » for the platform's balance (brief « pertes
+oubliées », step 2) and « Fermer ma journée » closes it: 3 taps.
  1  a clean day (a plan, 2 trades in it, every rule respected): followed « yes », discipline 5, grade A
  2  a tilt day (a bullish plan, 4 shorts, every rule broken): « no », 1, F
  3  a day without a plan (2 trades, half the rules respected): « no », 2, D
@@ -60,11 +61,12 @@ with sync_playwright() as p:
       b = pg.locator('#gSheet [data-g=r-grade][data-v=D]'); (b.tap() if phone else b.click()); pg.wait_for_timeout(200)
       ok(pg.evaluate("(document.querySelector('#gSheet [data-g=r-grade].on') || {dataset: {}}).dataset.v") == 'D', f'{tag}: the grade changed with one tap (F → D)')
       want = (want[0], want[1], 'D')
+    for b in pg.locator('#gSheet [data-bal-same]').all(): (b.tap() if phone else b.click()); taps += 1; pg.wait_for_timeout(150)   # « Ton solde sur … ? »
     s = pg.locator('#gSheet [data-g=save-review]'); (s.tap() if phone else s.click()); taps += 1 if name != 'tilt' else 2
     pg.wait_for_timeout(1500)
     post = pg.evaluate("(d) => { const j = getDoc('journals', d) || {}; return j.post ? [j.post.followed, j.post.discipline, j.post.grade, !!j.post.reviewed_at] : null }", day)
     ok(post == [want[0], want[1], want[2], True], f'{tag}: the day closed in {taps} taps, the answers saved ({post})')
-    if name != 'tilt': ok(taps == 2, f'{tag}: 2 taps (open, close)')
+    if name != 'tilt': ok(taps == 3, f'{tag}: 3 taps (open, the same balance, close)')
     pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(2000); pg.evaluate("render()"); pg.wait_for_timeout(800)
     ok(pg.locator('#main .nav-rt .nav-rt-fin').count() == 0, f'{tag}: reviewed: no « {x["fin"]} » any more')
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag}: nothing wider than the window')

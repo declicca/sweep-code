@@ -1109,6 +1109,7 @@ const fpx = e => e == null || e === "" ? "—" : Number(e).toFixed(2), isPhone =
 function tradeRows(e) {
   return e.map(t => {
     const a = tNet(t), n = [ tradeWhen(t), location.hash === "#account/" + t.account_id ? "" : acctLabel(t.account_id) ].filter(Boolean).map(esc).join(" · ");   // (on its own account's page, not its name again: audit of 18 Oct.)
+    if (t.untracked) return `<a class="trow trow-ut" href="#trade/${t.id}"><span class="trow-dir">·</span><span class="trow-main"><b>${esc(utName())}</b><small>${n}</small></span><span class="trow-pnl ${cls(a)}">${money(a)}</span><span class="trow-go" aria-hidden="true">›</span></a>`;   // a platform-balance gap (brief « pertes oubliées », step 2)
     return `<a class="trow" href="#trade/${t.id}"><span class="trow-dir ${t.direction}">${t.direction === "long" ? "L" : "S"}</span><span class="trow-main"><b>${esc(t.instrument || "NQ")} ${t.direction === "long" ? "Long" : "Short"} · ${t.contracts || 0}</b><small>${n}</small></span><span class="trow-pnl ${cls(a)}">${money(a)}</span><span class="trow-go" aria-hidden="true">›</span></a>`;
   }).join("");
 }
@@ -1121,6 +1122,7 @@ function tradeTable(e, {compact: t = !1, sortable: a = !1, page: n = 0} = {}) {
   if (isPhone()) return `<div class="tlist">${tradeRows(e)}</div>${i}`;
   const o = (l, p, u) => a ? `<th data-sort="${l}" class="${u ? "num" : ""}">${p}${U.sort.k === l ? U.sort.d === "asc" ? " ↑" : " ↓" : ""}</th>` : `<th class="${u ? "num" : ""}">${p}</th>`, r = t ? `<tr>${o("time", "Time")}<th>Account</th><th>Session</th><th>Dir</th><th class="num">Qty</th><th class="num">Entry</th><th class="num">Exit</th><th class="num">P&amp;L</th><th class="num">R</th><th class="num">Discipline</th><th>Setup</th></tr>` : `<tr>${o("date", "Date")}${o("time", "Time")}${o("account", "Account")}${o("session", "Session")}${o("dir", "Dir")}${o("qty", "Qty", 1)}<th class="num">Entry</th><th class="num">Exit</th>${o("pnl", "P&amp;L", 1)}${o("r", "R", 1)}${o("disc", "Discipline", 1)}${o("setup", "Setup")}</tr>`, c = e.map(l => {
     const p = tNet(l);
+    if (l.untracked) return `<tr data-href="#trade/${l.id}" tabindex="0" class="tr-ut">${t ? "" : `<td>${fdate(l.date)}</td>`}<td class="muted">—</td><td>${esc(acctLabel(l.account_id))}</td><td class="muted" colspan="5">${esc(utName())}</td><td class="num ${cls(p)}">${money(p)}</td><td class="num">—</td><td class="num">—</td><td class="muted"></td></tr>`;
     return `<tr data-href="#trade/${l.id}" tabindex="0">${t ? "" : `<td>${fdate(l.date)}</td>`}<td class="muted">${esc(tradeTimeOf(l) || "—")}</td><td>${esc(acctLabel(l.account_id))}${l._copies && l._copies.length > 1 ? ` <span class="pill" title="${esc(l._copies.map(u => acctLabel(u.account_id)).join(" · "))}">+${l._copies.length - 1}</span>` : ""}</td><td class="muted">${sessName(l.session)}</td><td>${dirTag(l.direction)}</td><td class="num">${l.contracts || "—"}</td><td class="num muted">${fpx(l.entry)}</td><td class="num muted">${fpx(l.exit)}</td><td class="num ${cls(p)}">${money(p)}</td><td class="num">${rfmt(tR(l))}</td><td class="num">${dcell(tDisc(l))}</td><td class="muted">${esc(l.setup || "")}</td></tr>`;
   }).join("");
   // (on an account's own page, a full table without its « Account » column: always that account, audit of 18 Oct.)
@@ -1585,9 +1587,23 @@ function vTrades() {
   }) : '<div class="empty">No trades yet. Log your first session to start tracking. <button class="link" data-act="add-trade">Add a trade</button></div>'}</div>`;
 }
 
+const utName = () => (window.SweepGap ? SweepGap.word("line") : "Trades not detailed");
+
+/* a « Trades not detailed » line (a gap between the platform's balance and the journal): what it is, « Add the detail », remove */
+function vUntracked(t) {
+  const W = window.SweepGap ? SweepGap.word : (k => k), p = tNet(t), u = t.untracked || {};
+  return `<div class="tr-top"><a class="link back" href="#trades">‹ Trades</a></div>
+  <section class="surface pad ut-page" data-noi18n><h2>${esc(W("line"))} <span class="${cls(p)}">${money(p)}</span></h2>
+    <p class="muted">${esc(acctLabel(t.account_id))} · ${fdate(t.date, { weekday: "long", month: "long", day: "numeric" })}</p>
+    <p>${esc(W("lineWhat").replace("{d}", fdate(t.date, { month: "long", day: "numeric" })))}</p>
+    ${u.detailed_c ? `<p class="muted">${esc(W("lineLeft").replace("{v}", money(p)))}</p>` : ""}
+    <div class="row"><button type="button" class="btn primary" data-act="ut-detail" data-id="${esc(t.id)}">${esc(W("detail"))}</button><button type="button" class="link" data-act="ut-del" data-id="${esc(t.id)}">${esc(W("del"))}</button></div></section>`;
+}
+
 function vTrade(e) {
   const t = getDoc("trades", e);
   if (!t) return '<div class="empty">This trade no longer exists. <a href="#trades">Back to trades</a></div>';
+  if (t.untracked) return vUntracked(t);
   const a = sorted(S.trades), n = a.findIndex(g => g.id === e), s = a[n - 1], i = a[n + 1], o = tNet(t), r = tR(t), c = tRisk(t), l = t.emo || {}, p = t.review || {}, u = (g, P) => `<div><span>${g}</span><span>${P}</span></div>`, h = [ [ "why_in", "Why I entered" ], [ "well", "What went well" ], [ "wrong", "What went wrong" ], [ "lesson", "Main lesson" ] ], m = [ [ "thesis", "Trade thesis" ], [ "why_out", "Why I exited" ], [ "differently", "What I would do differently" ] ], v = t.shots || [], b = copiesOf(t), E = S.settings.questions.filter(g => g.active), R = Object.values(t.discipline || {}).filter(Boolean).length, L = [ [ "chk", "Discipline checklist", E.length && R >= E.length ], [ "psy", "Psychology", !!(l.before || []).length ], [ "notes", "Notes", [ ...h, ...m ].some(([g]) => (p[g] || "").trim()) ], [ "shots", "Screenshots", v.length > 0 ] ], x = L.filter(g => g[2]).length, C = (g, P, O, H, J = "") => `<section class="rstep" id="rs-${P}"><div class="rstep-h"><span class="rnum ${L[g - 1][2] ? "ok" : ""}">${L[g - 1][2] ? "✓" : g}</span><h2>${O}</h2>${J}</div><div class="surface pad">${H}</div></section>`;
   return `<div class="tr-top"><a class="link back" href="#trades">‹ Trades</a><span style="flex:1"></span>\n      <div class="seg tr-nav">${s ? `<a href="#trade/${s.id}" title="Previous trade (K)" aria-label="Previous trade">‹</a>` : '<span class="dis">‹</span>'}${i ? `<a href="#trade/${i.id}" title="Next trade (J)" aria-label="Next trade">›</a>` : '<span class="dis">›</span>'}</div>\n      <button class="btn sm" data-act="edit-trade" data-id="${t.id}">Edit trade</button>\n      <details class="menu"><summary class="btn sm" aria-label="More actions">⋯</summary><div class="menu-pop">\n        <button data-act="share" data-k="trade" data-id="${t.id}">Share trade card</button>\n        <button data-act="copy-open" data-id="${t.id}">Copy to accounts</button>\n        ${b.length > 1 ? `<button class="danger" data-act="del-trade" data-id="${t.id}">Delete this copy</button><button class="danger" data-act="del-trade-all" data-id="${t.id}">Delete all ${b.length}</button>` : `<button class="danger" data-act="del-trade" data-id="${t.id}">Delete</button>`}\n      </div></details></div>\n  ${copyPanel(t, b)}${b.length > 1 ? `<div class="surface pad row" style="margin-bottom:14px"><span class="muted">${tip(`Logged on ${b.length} accounts`, "Checklist, emotions, review, setup, grade, tags and screenshots stay in sync on every copy. Contracts, P&L and fees are per account.")}</span>${b.map(g => `<a href="#trade/${g.id}" class="chip ${g.id === t.id ? "on" : ""}" style="text-decoration:none">${esc(acctLabel(g.account_id))} · <span class="${cls(tNet(g))}">${money(tNet(g))}</span></a>`).join("")}<span class="muted" style="margin-left:auto">Total <b class="${cls(b.reduce((g, P) => g + tNet(P), 0))}">${money(b.reduce((g, P) => g + tNet(P), 0))}</b></span></div>` : ""}\n  <section class="surface"><div class="th-head">\n     <div><div class="lbl">${dirTag(t.direction)} · ${t.contracts} ${t.instrument || "NQ"} · ${esc(acctLabel(t.account_id))}</div><div class="big ${cls(o)}">${money(o)}</div></div>\n     <div><div class="lbl">R multiple</div>${r == null ? '<div class="nav-five nav-r-na">No stop: R unavailable</div>' : `<div style="font-size:18px">${rfmt(r)}</div>`}</div>\n     <div class="nav-tdisc" data-disc-why="trade" role="button" tabindex="0"><div class="lbl">Checklist</div><div style="font-size:18px" class="dc">${dpct(tDisc(t))}</div></div>\n     <div><div class="lbl">Grade</div>${segFor("trades", t.id, "grade", GRADES.map(g => [ g, g ]), t.grade)}</div>\n  </div>${window.SweepCoach && SweepCoach.tradeCard ? SweepCoach.tradeCard(t) : ""}\n  <div class="tr-chart"><div class="tk-bar"><b>${esc(t.instrument || "NQ")}</b><span class="muted">· ${isEveTrade(t) ? esc(tradeWhen(t)) : fdate(t.date, {
     weekday: "short",
@@ -3311,8 +3327,8 @@ const segU = (e, t) => `<div class="seg">${t.map(([a, n]) => `<button data-act="
    opens at 5 (your edge, your leak) and at 10 (the performance score); then the net P&L, the win rate and the calendar. The tiles
    that need more trades are not shown until they have something to say (with 5 trades and more: the page as before). */
 function statsSoon(t, a) {
-  const X = ({ fr: [ "Tes stats arrivent : {n} sur 5", "trade", "trades", "À 5 trades : ta force et ta fuite, ce qui marche pour toi et ce qui te coûte.", "À 10 trades : ton score de performance." ],
-    es: [ "Tus estadísticas llegan: {n} de 5", "operación", "operaciones", "A las 5 operaciones: tu fuerza y tu fuga, lo que te funciona y lo que te cuesta.", "A las 10 operaciones: tu puntuación de rendimiento." ] })[LANG] || [ "Your stats are coming: {n} of 5", "trade", "trades", "At 5 trades: your edge and your leak, what works for you and what costs you.", "At 10 trades: your performance score." ];
+  const X = ({ fr: [ "Tes stats arrivent : {n} sur 5", "trade", "trades", "À 5 trades : ta force, ce qui marche le mieux pour toi.", "À 10 trades : ton score de performance." ],
+    es: [ "Tus estadísticas llegan: {n} de 5", "operación", "operaciones", "A las 5 operaciones: tu fuerza, lo que mejor te funciona.", "A las 10 operaciones: tu puntuación de rendimiento." ] })[LANG] || [ "Your stats are coming: {n} of 5", "trade", "trades", "At 5 trades: your edge, what works best for you.", "At 10 trades: your performance score." ];
   const n = a.n, te = (t.at(-1) || { date: todayStr() }).date.slice(0, 7), ue = billOld(t.length ? t[0].date : todayStr(), todayStr());
   const head = `<section class="surface st-soon" data-noi18n><h3>${esc(X[0].replace("{n}", n + " " + (n === 1 ? X[1] : X[2])))}</h3><div class="pbar st-soon-bar"><i class="pos" style="width:${Math.round(n / MIN_N * 100)}%"></i></div><ul><li>${esc(X[3])}</li><li>${esc(X[4])}</li></ul></section>`;
   const kpis = `<div class="ikpis st-soon-k"><div class="surface ik"><span class="lbl">Net P&amp;L</span><b class="${cls(a.net)}">${cu(a.net)}</b><small>${a.n} trade${a.n === 1 ? "" : "s"} · ${periodLabel()}</small></div><div class="surface ik"><span class="lbl">Win rate</span><b>${pct(a.wr)}</b></div></div>`;
@@ -9913,6 +9929,16 @@ document.addEventListener("click", e => {
         i.discipline[o.id] || (i.discipline[o.id] = "y");
       });
     }), syncTrade(s.id, [ "discipline" ]), refresh();
+    break;
+
+   case "ut-detail":
+    window.SweepGap && SweepGap.detail(s.id);
+    break;
+
+   case "ut-del":
+    askIn("Delete this trade? This cannot be undone.", "Delete").then(ok => {
+      ok && (remove("trades", s.id), toast("Trade deleted"), location.hash = "#trades");
+    });
     break;
 
    case "del-trade":

@@ -1227,7 +1227,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Tests** : `e2e_terms` (nouveau : 390 FR et ES au toucher, 1300 EN).
 
 ### Brief « nouveau trader », étape 4 : Stats accompagne au lieu d'une page vide
-- **Sous 5 trades** (ceux des filtres, `MIN_N`) : `statsSoon` (`src/app.js`) remplace la page. En haut, « Tes stats arrivent : 3 trades sur 5 » avec sa barre, et ce qui s'ouvre : à 5 trades ta force et ta fuite, à 10 ton score de performance. Puis le P&L net, le taux de réussite et le calendrier du mois. Les tuiles « Dès 5 trades », la courbe de drawdown, la durée, la répartition, les tendances et l'analyse détaillée ne sont pas montrées.
+- **Sous 5 trades** (ceux des filtres, `MIN_N`) : `statsSoon` (`src/app.js`) remplace la page. En haut, « Tes stats arrivent : 3 trades sur 5 » avec sa barre, et ce qui s'ouvre : à 5 trades ta force (la fuite du coach peut venir avant, revue R3), à 10 ton score de performance. Puis le P&L net, le taux de réussite et le calendrier du mois. Les tuiles « Dès 5 trades », la courbe de drawdown, la durée, la répartition, les tendances et l'analyse détaillée ne sont pas montrées.
 - Le P&L net garde sa ligne « n trades · période ». La carte du coach (« Ce qui fonctionne pour toi ») vient sous « Tes stats arrivent » (`paintStats`, `src/coach.js`).
 - **À partir de 5 trades**, la page est la même qu'avant.
 - **Tests** : `e2e_stats` (3 trades : la carte, 2 tuiles, le calendrier, rien de « Dès 5 trades », moins de 2 écrans sur téléphone).
@@ -1239,3 +1239,18 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - la part des jours de trading (un trader, un jour) sans aucun trade perdant.
 - Aussi dans « Exporter pour Claude », section 2. Aucun nom de trader.
 - **Tests** : `metrics_test.php` (une base à part, 4 traders calculés à la main), `e2e_admin_metrics` (la carte à 390 et 1440).
+
+### Brief « pertes oubliées » (28 oct.), étape 2 : « Fermer ma journée » vérifie le solde de la plateforme
+- **Dans la revue du soir** (`openReview`, `src/game.js`, « Ton solde sur Topstep ? ») : une ligne par compte actif tradé aujourd'hui, et une fois par semaine au plus (`account.bal_checked`) un compte sans trade depuis 3 jours de trading. Pas pour un compte qui a reçu aujourd'hui des exécutions des add-ons NinjaTrader 8 ou Quantower (`trade.source`). Seulement pour le jour de trading en cours, et une fois par compte et par jour (`journal.post.bal = [{ acc, sweep_c, plat_c, gap_c, kind }]`).
+  - Le champ est prérempli avec le solde dans Sweep. « C'est le même » : un toucher. Fermer sans répondre : « Confirme ton solde sur Topstep. ».
+  - Un autre solde : « Il manque −340 $ entre ta plateforme et ton journal. C'était quoi ? », puis trois puces à toucher avant de fermer : des trades pas notés, des frais, un payout (pas de payout quand la plateforme a plus que le journal).
+  - « Importer une capture de tes trades › » ferme la revue et ouvre le formulaire par capture du jour (la lecture des captures lit des trades, pas un solde).
+- **`window.SweepGap`** (`src/nav.js`, avec le recalibrage) :
+  - **trades** : une ligne « Trades non détaillés » (un trade `untracked: { gap_c, detailed_c }`, sans instrument, sens, setup ni checklist) sur ce compte et ce jour, ajoutée à la ligne existante s'il y en a une. Elle compte dans le P&L, le calendrier, le solde, la marge et les règles de la firme. Elle ne compte pas dans les anneaux et le plan du jour (`recomputeDay`), ni dans la force et la fuite (`edge.php`, `span` de `coach.js`).
+  - **frais** : un ajustement du compte (`kind: 'fees'`) et une dépense « platform » du même montant dans Mon argent (`adj_id`) ; sur le forfait gratuit, où Mon argent est fermé, l'ajustement seulement.
+  - **payout** : Mon argent, le formulaire de payout ouvert et prérempli (compte, brut, date ; `U.addPre`).
+- **La ligne** : dans la liste des trades (téléphone et ordinateur), sa page (`vUntracked`, `src/app.js`) avec « Ajouter le détail » et « Retirer cette ligne », sans la carte de copie. « Ajouter le détail » ouvre le formulaire par capture sur ce compte. Pendant une heure, chaque nouveau trade noté sur ce compte et ce jour (formulaire, capture, import) sort de la ligne, et la ligne disparaît à 0.
+- **« Recalibrer sur ta plateforme »** (réglages du compte) : le solde réel tapé dit l'écart et propose les mêmes puces. L'ajustement manuel en $ reste comme avant.
+- **Carte « Journal complet »** et « Exporter pour Claude » : la part des journées fermées avec un écart (`gap_days`), le montant total des écarts en valeur absolue (`gap_total_c`), la part des écarts détaillée en trades depuis (`gap_detailed`, en montant).
+- **Touchers** : une journée sans écart coûte un toucher de plus (16 → 17, `MESURE-BOUCLE.md`).
+- **Tests** : `e2e_platform_balance` (FR 390, EN 1300, ES 390), `metrics_test.php` (les trois chiffres calculés à la main), `parcours-baseline.py` (touche « C'est le même »).

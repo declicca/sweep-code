@@ -61,7 +61,7 @@ final class GameEdge
         // a copied trade once: the first saved of its group (as GameEngine::onePerCopyGroup)
         $list = []; $at = [];
         foreach ($trades as $t) {
-            if (!is_array($t) || !empty($t['demo']) || !isset($t['date']) || $t['date'] < $from || $t['date'] > $day) continue;
+            if (!is_array($t) || !empty($t['demo']) || !empty($t['untracked']) || !isset($t['date']) || $t['date'] < $from || $t['date'] > $day) continue;
             $g = (string) ($t['copy_group'] ?? '');
             if ($g === '') { $list[] = $t; continue; }
             $k = (string) (($t['created_at'] ?? '') ?: ($t['id'] ?? ''));

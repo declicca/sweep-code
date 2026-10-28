@@ -1898,6 +1898,69 @@ window.SweepMO = window.SweepMO || class {
     w.__adj = true; window.acctBalance = w;
   })(0);
 
+  /* ── (27 Oct., brief « pertes oubliées », step 2) a gap between the platform's balance and the journal, said in one tap:
+   *  trades  → a « Trades not detailed » line on that day and account (a trade: in the P&L, the calendar and the firm's rules;
+   *            no instrument, setup or checklist). « Add the detail »: each trade then logged on that account and day leaves the line.
+   *  fees    → an adjustment (the recalibration) and the same amount as an expense in My money
+   *  payout  → My money's payout form, filled in
+   * The review sheet (« Close my day ») and « Recalibrate » both use it: window.SweepGap. */
+  const GT = {
+    en: { gapNeg: '{v} missing between your platform and your journal. What was it?', gapPos: '{v} more on your platform than in your journal. What was it?', trades: 'Trades I didn’t log', fees: 'Fees', payout: 'A payout', line: 'Trades not detailed', feesNote: 'Fees (platform balance)', lineAdded: 'Added: Trades not detailed {v}', feesAdded: 'Fees added: {v}', detail: 'Add the detail', lineWhat: 'The gap between your platform and your journal on {d}. It counts in your P&L and your firm’s rules. Add the detail: each trade you log on this account that day leaves this line.', lineLeft: 'Left to detail: {v}', del: 'Remove this line' },
+    fr: { gapNeg: 'Il manque {v} entre ta plateforme et ton journal. C’était quoi ?', gapPos: 'Il y a {v} de plus sur ta plateforme que dans ton journal. C’était quoi ?', trades: 'Des trades pas notés', fees: 'Des frais', payout: 'Un payout', line: 'Trades non détaillés', feesNote: 'Frais (solde de la plateforme)', lineAdded: 'Ajouté : Trades non détaillés {v}', feesAdded: 'Frais ajoutés : {v}', detail: 'Ajouter le détail', lineWhat: 'L’écart entre ta plateforme et ton journal le {d}. Il compte dans ton P&L et les règles de ta firme. Ajoute le détail : chaque trade que tu notes sur ce compte ce jour-là sort de cette ligne.', lineLeft: 'Reste à détailler : {v}', del: 'Retirer cette ligne' },
+    es: { gapNeg: 'Faltan {v} entre tu plataforma y tu diario. ¿Qué fue?', gapPos: 'Hay {v} más en tu plataforma que en tu diario. ¿Qué fue?', trades: 'Operaciones sin anotar', fees: 'Comisiones', payout: 'Un payout', line: 'Operaciones sin detallar', feesNote: 'Comisiones (saldo de la plataforma)', lineAdded: 'Añadido: Operaciones sin detallar {v}', feesAdded: 'Comisiones añadidas: {v}', detail: 'Añadir el detalle', lineWhat: 'La diferencia entre tu plataforma y tu diario el {d}. Cuenta en tu P&L y en las reglas de tu firma. Añade el detalle: cada operación que anotes en esta cuenta ese día sale de esta línea.', lineLeft: 'Queda por detallar: {v}', del: 'Quitar esta línea' } };
+  const g = (k) => (GT[L] || GT.en)[k];
+  const lineOf = (aid, day) => (S.trades || []).find((x) => x.untracked && x.account_id === aid && x.date === day);
+  const gapKinds = (gap) => (gap < 0 ? ['trades', 'fees', 'payout'] : ['trades', 'fees']);   // more on the platform: never a payout
+  const gapMsg = (gap) => g(gap < 0 ? 'gapNeg' : 'gapPos').replace('{v}', $m(gap));
+  const gapChips = (gap, on, attr) => gapKinds(gap).map((k) => `<button type="button" class="chip ${on === k ? 'on' : ''}" ${attr}="${k}">${g(k)}</button>`).join('');
+  function gapApply(aid, day, gap, kind) {
+    const a = getDoc('accounts', aid); if (!a || !gap) return;
+    if (kind === 'trades') {
+      const ln = lineOf(aid, day);
+      if (ln) { editDoc('trades', ln.id, (d) => { d.pnl_c = (+d.pnl_c || 0) + gap; d.untracked = Object.assign({ gap_c: 0, detailed_c: 0 }, d.untracked, { gap_c: ((d.untracked || {}).gap_c || 0) + gap }); }); }
+      else put('trades', { id: 'ut' + uid(), account_id: aid, date: day, session_date: true, instrument: '', direction: '', contracts: 0, entry: null, exit: null, entry_time: '', exit_time: '',
+        pnl_c: gap, fees_c: 0, pnl_manual: true, untracked: { gap_c: gap, detailed_c: 0 }, discipline: {}, emo: {}, review: {}, shots: [], setup: '', tags: [], notes: '' });
+      if (typeof toast === 'function') toast(g('lineAdded').replace('{v}', $m(gap)));
+    } else if (kind === 'fees') {
+      const adj = { id: 'adj' + Date.now().toString(36), at: day, amount_c: gap, note: g('feesNote'), kind: 'fees' };
+      editDoc('accounts', aid, (d) => { d.adjustments = [...(d.adjustments || []), adj]; });
+      if (typeof billCan !== 'function' || billCan('payouts')) put('expenses', { id: uid(), date: day, firm_id: a.firm_id || '', account_id: aid, category: 'platform', amount_c: -gap, notes: g('feesNote'), adj_id: adj.id });   // (My money is a paid feature: on Free, the adjustment only)
+      if (typeof toast === 'function') toast(g('feesAdded').replace('{v}', $m(gap)));
+    } else if (kind === 'payout') {
+      U.addP = true; U.editP = null; U.addPre = { account_id: aid, gross_c: -gap, amount_c: -gap, payment_date: day, prefill: true };
+      U.mview = 'entries'; location.hash = '#payouts';
+    }
+  }
+  // « Add the detail »: the next trades logged on that account and day (a form, a screenshot, an import) leave the line
+  let detailing = null;   // { id, aid, day, until }
+  const appPut = window.put;
+  if (typeof appPut === 'function' && !appPut.__gap) {
+    const w = function (col, doc) {
+      const fresh = col === 'trades' && doc && !doc.untracked && !doc.demo && !(S.trades || []).some((x) => x.id === doc.id);
+      const out = appPut.apply(this, arguments);
+      try {
+        const d = detailing;
+        if (fresh && d && Date.now() < d.until && doc.account_id === d.aid && doc.date === d.day) {
+          const ln = getDoc('trades', d.id), n = (+doc.pnl_c || 0) - (+doc.fees_c || 0);
+          if (ln) {
+            const left = (+ln.pnl_c || 0) - n;
+            if (Math.abs(left) < 1) { remove('trades', ln.id); detailing = null; }
+            else editDoc('trades', ln.id, (x) => { x.pnl_c = left; x.untracked = Object.assign({ gap_c: 0, detailed_c: 0 }, x.untracked); x.untracked.detailed_c = (x.untracked.detailed_c || 0) + n; });
+          }
+        }
+      } catch (e) { /* never blocks a save */ }
+      return out;
+    };
+    w.__gap = true; window.put = w;
+  }
+  function detail(id) {
+    const ln = getDoc('trades', id); if (!ln) return;
+    detailing = { id, aid: ln.account_id, day: ln.date, until: Date.now() + 3600e3 };
+    if (typeof lsSet === 'function') lsSet('tj.last', Object.assign({}, lsGet('tj.last', {}), { account: ln.account_id, copyTo: [] }));   // the form opens on that account
+    if (typeof openTicket === 'function') openTicket(null, { date: ln.date });
+  }
+  window.SweepGap = { msg: gapMsg, chips: gapChips, kinds: gapKinds, apply: gapApply, lineOf, detail, word: g };
+
   function card() {
     const m = /^#account\/([^/]+)/.exec(location.hash); if (!m) return;
     const id = decodeURIComponent(m[1]), a = typeof getDoc === 'function' && getDoc('accounts', id); if (!a) return;
@@ -1921,15 +1984,18 @@ window.SweepMO = window.SweepMO || class {
     if (box._h !== html) { const keep = [...box.querySelectorAll('[data-recal]')].map((i) => i.value); box.innerHTML = html; box._h = html; box.querySelectorAll('[data-recal]').forEach((i, k) => { if (keep[k]) i.value = keep[k]; }); }
   }
   document.addEventListener('click', (e) => {
-    const go = e.target.closest && e.target.closest('[data-recal-go]'), rm = e.target.closest && e.target.closest('[data-recal-rm]');
-    if (!go && !rm) return;
+    const go = e.target.closest && e.target.closest('[data-recal-go]'), rm = e.target.closest && e.target.closest('[data-recal-rm]'), k = e.target.closest && e.target.closest('[data-recal-k]');
+    if (!go && !rm && !k) return;
     const box = e.target.closest('.nav-recal'), id = box && box.dataset.acc; if (!id) return;
     const a = getDoc('accounts', id); if (!a) return;
     const msg = box.querySelector('.nav-recal-msg');
+    // (brief « pertes oubliées », step 2) the platform's balance: the gap, then what it was, as at « Close my day »
+    if (k) { const gap = +box.dataset.gap || 0; if (!gap) return; gapApply(id, typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10), gap, k.dataset.recalK); box.dataset.gap = ''; msg.innerHTML = ''; box.querySelectorAll('[data-recal]').forEach((i) => { i.value = ''; }); setTimeout(() => render(), 80); return; }
     if (rm) { editDoc('accounts', id, (d) => { d.adjustments = (d.adjustments || []).filter((x) => x.id !== rm.dataset.recalRm); }); setTimeout(() => render(), 80); return; }
     const kind = go.dataset.recalGo, v = toC(box.querySelector(`[data-recal="${kind}"]`).value); if (v == null) return;
     const amt = kind === 'bal' ? v - acctState(a).bal : v;
     if (!amt) { msg.textContent = t('none'); return; }
+    if (kind === 'bal') { box.dataset.gap = String(amt); msg.innerHTML = `<span>${esc2(gapMsg(amt))}</span><span class="g-chips-row wrap">${gapChips(amt, null, 'data-recal-k')}</span>`; return; }
     const entry = { id: 'adj' + Date.now().toString(36), at: typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10), amount_c: amt, note: kind === 'bal' ? t('note') : t('manualNote') };
     editDoc('accounts', id, (d) => { d.adjustments = [...(d.adjustments || []), entry]; });
     if (typeof toast === 'function') toast(t(kind === 'bal' ? 'done' : 'added').replace('{v}', $m(amt)));
@@ -2772,7 +2838,7 @@ window.SweepMO = window.SweepMO || class {
   function line() {
     const m = /^#trade\/([^/]+)/.exec(location.hash); if (!m) return;
     const id = decodeURIComponent(m[1]), t = typeof getDoc === 'function' && getDoc('trades', id);
-    if (!t) return;
+    if (!t || t.untracked) return;   // (a « Trades not detailed » line: a gap of that account, never copied)
     const main = document.getElementById('main'); if (!main) return;
     const group = typeof copiesOf === 'function' ? copiesOf(t) : [t];
     const on = new Set(group.map((x) => x.account_id));

@@ -153,13 +153,21 @@ for ($i = 0; $i < 20; $i++) $tr('j2', "j2-$i", 1 + intdiv($i, 5), $i % 5 < 2 && 
 for ($i = 0; $i < 5; $i++) $tr('j3', "j3-$i", 2, $i < 3 ? -2000 : 4000);
 $tr('j3', 'j3-demo', 2, 9000, ['demo' => true]); $tr('j3', 'j3-old', 20, -1000);
 for ($i = 0; $i < 30; $i++) $tr('jx', "jx-$i", 1, 5000);   // Mateo's: left out
+// step 2: the days closed on the platform's balance (journal.post.bal) and a « Trades not detailed » line, half detailed since
+$jn = fn(string $u, int $ago, array $gaps) => $p3->prepare("INSERT INTO documents VALUES (?, 'journals', ?, ?, '', '')")->execute([$u, $jd($ago), json_encode(['post' => ['reviewed_at' => 'x', 'bal' => array_map(fn($g) => ['acc' => 'a', 'gap_c' => $g], $gaps)]])]);
+$jn('j1', 1, [0]); $jn('j1', 2, [-34000]); $jn('j2', 3, [-10000, 5000]); $jn('j3', 20, [-2000]); $jn('jx', 1, [-9000]);   // (Mateo's: left out)
+$tr('j3', 'j3-line', 2, -17000, ['untracked' => ['gap_c' => -34000, 'detailed_c' => -17000]]);   // j3: 6 trades, 4 losers on day 2
 $jm = sweep_metrics($p3, $app)['journal'];
 $w2 = array_sum(array_map(fn($i) => ($i % 5 < 2 && $i < 10) || $i % 5 === 0 ? 0 : 1, range(0, 19)));
 $ok($jm['d7']['high_win_20'] === ['pct' => 50, 'of' => 2], "7 days: 1 of the 2 traders with 20+ trades over 80 % winners (j1: 22/25; j2: $w2/20): " . json_encode($jm['d7']['high_win_20']));
-$l7 = 3 + (20 - $w2) + 3;
-$ok($jm['d7']['losing_trades'] === ['pct' => (int) round($l7 / 50 * 100), 'of' => 50], "7 days: $l7 losing trades of 50 (a copy once, the sample trade and Mateo's left out): " . json_encode($jm['d7']['losing_trades']));
+$l7 = 3 + (20 - $w2) + 4;
+$ok($jm['d7']['losing_trades'] === ['pct' => (int) round($l7 / 51 * 100), 'of' => 51], "7 days: $l7 losing trades of 51 (a copy once, the sample trade and Mateo's left out, the « Trades not detailed » line in): " . json_encode($jm['d7']['losing_trades']));
 $ok($jm['d7']['days_without_loss'] === ['pct' => 40, 'of' => 10], '7 days: 4 of the 10 trading days without a loser (j1: 4 of 5, j2: 0 of 4, j3: 0 of 1): ' . json_encode($jm['d7']['days_without_loss']));
-$ok($jm['d30']['losing_trades'] === ['pct' => (int) round(($l7 + 1) / 51 * 100), 'of' => 51] && $jm['d30']['days_without_loss'] === ['pct' => 36, 'of' => 11], '30 days: the old loser of j3 too: ' . json_encode([$jm['d30']['losing_trades'], $jm['d30']['days_without_loss']]));
+$ok($jm['d30']['losing_trades'] === ['pct' => (int) round(($l7 + 1) / 52 * 100), 'of' => 52] && $jm['d30']['days_without_loss'] === ['pct' => 36, 'of' => 11], '30 days: the old loser of j3 too: ' . json_encode([$jm['d30']['losing_trades'], $jm['d30']['days_without_loss']]));
+
+$ok($jm['d7']['gap_days'] === ['pct' => 67, 'of' => 3] && $jm['d7']['gap_total_c'] === 49000, '7 days: 2 of 3 days closed with a gap (j1 day 2, j2 day 3), $490 in all (|−100| + |+50| for j2), Mateo\'s left out: ' . json_encode([$jm['d7']['gap_days'], $jm['d7']['gap_total_c']]));
+$ok($jm['d30']['gap_days'] === ['pct' => 75, 'of' => 4] && $jm['d30']['gap_total_c'] === 51000, '30 days: j3\'s old gap too (3 of 4, $510): ' . json_encode([$jm['d30']['gap_days'], $jm['d30']['gap_total_c']]));
+$ok($jm['d7']['gap_detailed'] === ['pct' => 50, 'of' => 1], 'the « Trades not detailed » line: half of its $340 detailed in trades since: ' . json_encode($jm['d7']['gap_detailed']));
 
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";

@@ -860,14 +860,15 @@
   const SC = () => SCT[LANG] || SCT.en;
   // brief « pertes oubliées », step 1: a complete journal, measured before changing anything (7 and 30 days, real traders)
   const JRT = {
-    en: { h: 'Complete journal', sub: 'Losses not logged make the journal too pretty. Real traders lose on 40 to 55 % of their trades.', d7: '7 days', d30: '30 days', hi: 'Traders with 20+ trades and over 80 % winners', loss: 'Losing trades', nol: 'Trading days without a loss' },
-    fr: { h: 'Journal complet', sub: 'Des pertes non notées rendent le journal trop beau. Chez de vrais traders, 40 à 55 % des trades sont perdants.', d7: '7 jours', d30: '30 jours', hi: 'Traders de 20 trades et plus avec plus de 80 % de gagnants', loss: 'Trades perdants', nol: 'Jours de trading sans perte' },
-    es: { h: 'Diario completo', sub: 'Las pérdidas no anotadas hacen el diario demasiado bonito. En traders reales, del 40 al 55 % de las operaciones son perdedoras.', d7: '7 días', d30: '30 días', hi: 'Traders con 20+ operaciones y más del 80 % ganadoras', loss: 'Operaciones perdedoras', nol: 'Días de trading sin pérdida' } };
+    en: { h: 'Complete journal', sub: 'Losses not logged make the journal too pretty. Real traders lose on 40 to 55 % of their trades.', d7: '7 days', d30: '30 days', hi: 'Traders with 20+ trades and over 80 % winners', loss: 'Losing trades', nol: 'Trading days without a loss', gd: 'Days closed with a gap to the platform', gt: 'Total of the gaps', gdet: 'Share of the gaps detailed in trades' },
+    fr: { h: 'Journal complet', sub: 'Des pertes non notées rendent le journal trop beau. Chez de vrais traders, 40 à 55 % des trades sont perdants.', d7: '7 jours', d30: '30 jours', hi: 'Traders de 20 trades et plus avec plus de 80 % de gagnants', loss: 'Trades perdants', nol: 'Jours de trading sans perte', gd: 'Journées fermées avec un écart à la plateforme', gt: 'Montant total des écarts', gdet: 'Part des écarts détaillée en trades' },
+    es: { h: 'Diario completo', sub: 'Las pérdidas no anotadas hacen el diario demasiado bonito. En traders reales, del 40 al 55 % de las operaciones son perdedoras.', d7: '7 días', d30: '30 días', hi: 'Traders con 20+ operaciones y más del 80 % ganadoras', loss: 'Operaciones perdedoras', nol: 'Días de trading sin pérdida', gd: 'Días cerrados con una diferencia con la plataforma', gt: 'Total de las diferencias', gdet: 'Parte de las diferencias detallada en operaciones' } };
+  const mUSD = (c) => (typeof money === 'function' ? money(c || 0, { sign: false, dec: 0 }) : '$' + Math.round((c || 0) / 100));
   function journalHtml(j) {
     if (!j) return '';
     const x = JRT[LANG] || JRT.en, y = bt(), sub = (o) => (o && o.of != null ? y.of.replace('{n}', o.of) : '');
     const row = (k, l) => `<tr data-jr="${k}"><td>${esc(l)}</td><td class="num"><b>${pct(j.d7[k])}</b> <small class="muted">${esc(sub(j.d7[k]))}</small></td><td class="num"><b>${pct(j.d30[k])}</b> <small class="muted">${esc(sub(j.d30[k]))}</small></td></tr>`;
-    return `<h4 class="ux-start-h">${x.h}</h4><p class="muted ux-jr-sub">${esc(x.sub)}</p><div class="scroll-x"><table class="tbl ux-start ux-journal"><thead><tr><th></th><th class="num">${x.d7}</th><th class="num">${x.d30}</th></tr></thead><tbody>${row('high_win_20', x.hi)}${row('losing_trades', x.loss)}${row('days_without_loss', x.nol)}</tbody></table></div>`;
+    return `<h4 class="ux-start-h">${x.h}</h4><p class="muted ux-jr-sub">${esc(x.sub)}</p><div class="scroll-x"><table class="tbl ux-start ux-journal"><thead><tr><th></th><th class="num">${x.d7}</th><th class="num">${x.d30}</th></tr></thead><tbody>${row('high_win_20', x.hi)}${row('losing_trades', x.loss)}${row('days_without_loss', x.nol)}${j.d7.gap_days ? row('gap_days', x.gd) + `<tr data-jr="gap_total_c"><td>${esc(x.gt)}</td><td class="num"><b>${mUSD(j.d7.gap_total_c)}</b></td><td class="num"><b>${mUSD(j.d30.gap_total_c)}</b></td></tr>` + row('gap_detailed', x.gdet) : ''}</tbody></table></div>`;
   }
   function slotsHtml(sl) {
     if (!sl) return '';
@@ -1797,7 +1798,7 @@
       <div class="fgrid mny-g">
         <label class="f"><span>${x.f.account}</span><select name="account" required>${accOpts(aid)}</select></label>
         <label class="f"><span>${x.f.date}</span><input type="date" name="date" value="${esc2((st === 'paid' ? M.pPaidOn(e) : e.request_date) || (typeof todayStr === 'function' ? todayStr() : ''))}"></label>
-        <label class="f"><span>${x.f.gross}</span><input name="gross" inputmode="decimal" value="${e.id ? gross / 100 : ''}" placeholder="$" required></label>
+        <label class="f"><span>${x.f.gross}</span><input name="gross" inputmode="decimal" value="${e.id || e.prefill ? gross / 100 : ''}" placeholder="$" required></label>
         <label class="f"><span>${x.f.split}</span><input name="split" inputmode="decimal" value="${split}"></label>
         <label class="f"><span>${x.f.fees}</span><input name="fees" inputmode="decimal" value="${fees ? fees / 100 : ''}" placeholder="0"></label>
         <label class="f"><span>${x.f.net}</span><input name="net" inputmode="decimal" value="${net0 !== '' ? net0 / 100 : ''}" data-auto="${e.id && e.net_c != null && e.net_c !== Math.round(gross * split / 100) - fees ? '0' : '1'}"></label>
@@ -1830,7 +1831,7 @@
     if (doc.status === 'paid') { doc.paid_on = date; doc.payment_date = date; doc.request_date = prev.request_date || date; doc.approval_date = prev.approval_date || date; }
     else { doc.request_date = prev.request_date && prev.status !== 'paid' ? prev.request_date : date; if (prev.status === 'paid') { doc.payment_date = ''; doc.paid_on = ''; } }
     put('payouts', doc);
-    U.editP = null; U.addP = false; render();
+    U.editP = null; U.addP = false; U.addPre = null; render();
     if (doc.status === 'paid' && prev.status !== 'paid' && typeof openShare === 'function') setTimeout(() => openShare('payout', id), 400);
   };
   expenseForm = function (e = {}) {
@@ -1903,7 +1904,7 @@
       ${seg2}
       ${mv === 'entries' ? `<div class="mny-pane" data-mny-pane="entries">
         <div class="mny-actions"><button type="button" class="btn primary nav-pz-b" data-k="payout" data-mny="addP" aria-expanded="${!!U.addP}" aria-label="${vx.addPay}">+ <span class="l">${vx.addPay}</span><span class="s">${vx.pay}</span></button><button type="button" class="btn" data-mny="addE" aria-expanded="${!!U.addE}" aria-label="${vx.addExp}">+ <span class="l">${vx.addExp}</span><span class="s">${vx.exp}</span></button></div>
-        ${U.addP ? `<section class="surface mny-addform"><div class="pz-add">${payoutForm()}</div></section>` : ''}${U.addE ? `<section class="surface mny-addform"><div class="pz-add">${expenseForm()}</div></section>` : ''}
+        ${U.addP ? `<section class="surface mny-addform"><div class="pz-add">${payoutForm(U.addPre || {})}</div></section>` : ''}${U.addE ? `<section class="surface mny-addform"><div class="pz-add">${expenseForm()}</div></section>` : ''}
         ${(() => {   // the period's totals at a glance, with the filters (19 Oct., Mateo: « plutôt que le faire manuellement »)
           const W = ({ en: ['Paid out', 'Pending', 'Expenses', ['payout', 'payouts'], ['request', 'requests'], ['expense', 'expenses']], fr: ['Payouts reçus', 'En attente', 'Dépenses', ['payout', 'payouts'], ['demande', 'demandes'], ['dépense', 'dépenses']],
             es: ['Payouts recibidos', 'Pendientes', 'Gastos', ['payout', 'payouts'], ['solicitud', 'solicitudes'], ['gasto', 'gastos']] })[L] || ['Paid out', 'Pending', 'Expenses', ['payout', 'payouts'], ['request', 'requests'], ['expense', 'expenses']];
@@ -1987,9 +1988,9 @@
     if (b.dataset.mnyView) { U.mview = b.dataset.mnyView; if (typeof saveU === 'function') saveU(); render(); return; }
     const k = b.dataset.mny;
     if (k === 'csv') csvView();
-    else if (k === 'addP') { U.addP = !U.addP; U.editP = null; render(); }
+    else if (k === 'addP') { U.addP = !U.addP; U.editP = null; U.addPre = null; render(); }
     else if (k === 'addE') { U.addE = !U.addE; U.editE = null; render(); }
-    else if (k === 'cancel') { U.addP = U.addE = false; U.editP = U.editE = null; render(); }
+    else if (k === 'cancel') { U.addP = U.addE = false; U.editP = U.editE = null; U.addPre = null; render(); }
   });
   document.addEventListener('change', (ev) => { const i = ev.target.closest && ev.target.closest('[data-mny-d]'); if (!i) return; U.mcustom = Object.assign({}, U.mcustom || {}, { [i.dataset.mnyD]: i.value }); if (typeof saveU === 'function') saveU(); render(); });
   // #money → the same page

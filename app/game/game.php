@@ -407,7 +407,9 @@ final class GameEngine
         $pre = (array) ($j['pre'] ?? []); $post = (array) ($j['post'] ?? []);
         $settings = self::docs($uid, 'meta')['settings'] ?? [];
         $userSetups = array_values(array_filter((array) ($settings['setups'] ?? [])));
-        $trades = self::dayTrades($uid, $day);
+        // (brief « pertes oubliées », step 2) the « Trades not detailed » line of a platform-balance gap: in the P&L, never a trade
+        // taken in or out of the plan (no direction, no setup, no checklist)
+        $trades = array_values(array_filter(self::dayTrades($uid, $day), fn($t) => empty($t['untracked'])));
         $n = count($trades);
 
         // plan

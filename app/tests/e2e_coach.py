@@ -175,6 +175,7 @@ def run(p, lang, phone):
   rv = pg.evaluate(TXT, '#gSheet .co-rv'); ph = pg.evaluate("document.querySelector('#gSheet [data-gr=tomorrow]').placeholder"); texts += [rv, ph]
   ok(x['lesson'] in rv and ph, f'{tag} D the review sheet: the lesson ({rv[:70]}…), a suggested rule ({ph[:50]}…)')
   for sel in ('[data-g=r-followed][data-v=partly]', '[data-g=r-score][data-v="3"]', '[data-g=r-grade][data-v=C]'): pg.locator('#gSheet ' + sel).click(); pg.wait_for_timeout(150)
+  for b in pg.locator('#gSheet [data-bal-same]').all(): b.click(); pg.wait_for_timeout(100)   # « Ton solde sur … ? » (« pertes oubliées », step 2)
   pg.evaluate("document.querySelector('#gSheet [data-gr=tomorrow]').value = ''"); pg.locator('#gSheet [data-g=save-review]').click(); pg.wait_for_timeout(1200)
   d1 = pg.evaluate(TXT, '#main .co-today'); texts.append(d1)
   rule = pg.evaluate("(d) => SweepCoach.lesson(d).rule", day)
