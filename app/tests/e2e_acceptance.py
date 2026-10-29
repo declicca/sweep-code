@@ -63,7 +63,7 @@ async def run(br,w,h,mob,lang):
   await home(); res['streak']=('0', await pg.evaluate("[...document.querySelectorAll('.nav-rank, .nav-hstreak, .g-today .gc-mid, .nav-lvring, .nav-rt-streak')].some(e=>e.offsetParent!==null && /\\d/.test(e.innerText))"))
   # 5 subscription
   await home(); await pg.locator('aside.side .who').first.click(); await pg.wait_for_timeout(400)
-  await pg.locator('#navMenu [role=menuitem][data-navm=plan]').click(); await pg.wait_for_timeout(1300)
+  await pg.locator('#navMenu .nav-menu-who[data-navm=plan]').click()   # (SWEEP.md step 6: the plan from the header line); await pg.wait_for_timeout(1300)
   res['subscription']=('2', await pg.evaluate("location.hash==='#plan' && document.querySelector('#main').innerText.length>60"))
   # 6 export data
   await home(); await pg.locator('aside.side .who').first.click(); await pg.wait_for_timeout(400)

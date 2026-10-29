@@ -3,7 +3,7 @@ Sweep — the week's recap in « Your routine » (brief 01 step 5), dev environm
   python3 tests/e2e_weekly_card.py http://127.0.0.1:8095 /tmp/show_state.json
 The moment the recap is ready is tested on the server (tests/weekly_test.php); here the server's answer is set to « ready,
 not seen » so the card can be checked whatever the day:
- - « Your week is ready » with « See my week », the routine's only primary button, and no step highlighted (in place of the next step);
+ - « Your week is ready » with « Open the weekly recap », the routine's only primary button, and no step highlighted (in place of the next step);
  - the button opens the week's recap; once opened (seen), the card no longer offers it;
  - FR / EN words, phone and computer, no horizontal scroll, no page error.
 """
@@ -11,7 +11,7 @@ import asyncio, json, sys
 from playwright.async_api import async_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
-WORDS = {'fr': ('Ta semaine est prête', 'Voir mon bilan'), 'en': ('Your week is ready', 'See my week')}
+WORDS = {'fr': ('Ta semaine est prête', 'Ouvrir le bilan de la semaine'), 'en': ('Your week is ready', 'Open the weekly recap')}   # (SWEEP.md step 6: one name)
 fails = 0
 def ok(c, what):
     global fails

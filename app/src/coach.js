@@ -619,6 +619,8 @@
   const row = (label, text) => `<p class="co-row"><b>${label}</b><span>${esc2(text)}</span></p>`;
   let wCache = { k: '', v: '' };
   const tradesKey = () => [(S.trades || []).length, (S.trades || []).reduce((m, t) => (t.updated_at > m ? t.updated_at : m), ''), (S.journals || []).reduce((m, x) => (x.updated_at > m ? x.updated_at : m), ''), today()].join('|');
+  /** the coach's rule for next week (its week card says it): the « rule » question of the week's recap starts with it (SWEEP.md step 6) */
+  function weekRule(mon) { const sp = span(mon, addDays(mon, 7)); if (!sp.rows.length) return ''; const lk = leakOf(sp); return ruleFor2(lk ? lk.code : 'clean', sp); }
   /** the Friday recap (weekly sheet, step 0): the week, in % and counts (the sheet shows one dollar amount: the payouts) */
   function weekHtml(mon) {
     const k = 'w' + mon + tradesKey(); if (wCache.k === k) return wCache.v;
@@ -1135,6 +1137,6 @@
     return `<div class="co-edgecard"><p class="co-edgecard-h"><b>${ET.edgeT}</b></p><ul>${items}</ul>${notes.map((x) => `<p class="co-own">${esc2(x)}</p>`).join('')}</div>`;
   }
   window.SweepEdge = { profile: edgeProfile, mine: edgeMine, streak: edgeStreak, card: edgeCard, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
-  window.SweepCoach = { trade: tradeNote, session, margin, riskNow, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, statsHtml, progress,
+  window.SweepCoach = { trade: tradeNote, session, margin, riskNow, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, weekRule, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();

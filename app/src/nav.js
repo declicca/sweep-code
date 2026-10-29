@@ -26,7 +26,8 @@ window.SweepMO = window.SweepMO || class {
 /*
  * Sweep — navigation (one place for it).
  * Structure: Today · Trades (List · Calendar · Journal) · Stats · Accounts (Accounts · Payouts & expenses) · Progression.
- * Avatar menu (phone and desktop): Progression, Settings, Subscription, Referral, Give feedback, Help, [Traders], Log out.
+ * Avatar menu (phone and desktop): the header line (first name · plan: the subscription), My progress, What's new, Settings,
+ * Referral, Give feedback, Help, [Traders], Log out (SWEEP.md step 6: no second « Subscription » entry).
  * Hashes stay the official addresses (old links keep working); aliases: #today, #stats, #subscription, #progress.
  * Every sub-page has a back chevron to its parent; Android back / iOS swipe closes an open sheet first.
  */
@@ -35,11 +36,11 @@ window.SweepMO = window.SweepMO || class {
   if (typeof render !== 'function' || typeof route !== 'function') return;
   const T = {
     en: { list: 'List', cal: 'Calendar', jour: 'Journal', acc: 'Accounts', pay: 'My money', today: 'Today', trades: 'Trades', stats: 'Stats',
-      prog: 'Progression', news: 'What’s new', settings: 'Settings', sub: 'Subscription', ref: 'Referral', fb: 'Give feedback', help: 'Help', admin: 'Traders', out: 'Log out', back: 'Back', menu: 'Menu', search: 'Search' },
+      prog: 'My progress', news: 'What’s new', settings: 'Settings', sub: 'Subscription', ref: 'Referral', fb: 'Give feedback', help: 'Help', admin: 'Traders', out: 'Log out', back: 'Back', menu: 'Menu', search: 'Search' },
     fr: { list: 'Liste', cal: 'Calendrier', jour: 'Journal', acc: 'Comptes', pay: 'Mon argent', today: 'Aujourd’hui', trades: 'Trades', stats: 'Stats',
-      prog: 'Progression', news: 'Quoi de neuf', settings: 'Réglages', sub: 'Abonnement', ref: 'Parrainage', fb: 'Donner mon avis', help: 'Aide', admin: 'Traders', out: 'Déconnexion', back: 'Retour', menu: 'Menu', search: 'Rechercher' },
+      prog: 'Ma progression', news: 'Quoi de neuf', settings: 'Réglages', sub: 'Abonnement', ref: 'Parrainage', fb: 'Donner mon avis', help: 'Aide', admin: 'Traders', out: 'Déconnexion', back: 'Retour', menu: 'Menu', search: 'Rechercher' },
     es: { list: 'Lista', cal: 'Calendario', jour: 'Diario', acc: 'Cuentas', pay: 'Mi dinero', today: 'Hoy', trades: 'Operaciones', stats: 'Stats',
-      prog: 'Progreso', news: 'Novedades', settings: 'Ajustes', sub: 'Suscripción', ref: 'Referidos', fb: 'Dar mi opinión', help: 'Ayuda', admin: 'Traders', out: 'Cerrar sesión', back: 'Atrás', menu: 'Menú', search: 'Buscar' },
+      prog: 'Mi progreso', news: 'Novedades', settings: 'Ajustes', sub: 'Suscripción', ref: 'Referidos', fb: 'Dar mi opinión', help: 'Ayuda', admin: 'Traders', out: 'Cerrar sesión', back: 'Atrás', menu: 'Menú', search: 'Buscar' },
   };
   const t = () => T[LANG] || T.en;
   const SEG = {
@@ -107,7 +108,7 @@ window.SweepMO = window.SweepMO || class {
     el.innerHTML = `<div class="nav-menu-bg" data-navm="close"></div><div class="nav-menu-panel" role="menu">
       ${S.me ? ((nm) => `<button type="button" class="nav-menu-who" data-navm="plan"><span class="av">${esc(nm.slice(0, 1).toUpperCase())}</span><span class="nm"><b>${esc(nm)}</b>${planLine()}</span></button>`)(String(S.me.first_name || S.me.username || '').trim() || S.me.username) : ''}
       <div class="nav-mg">${item('prog', IC.prog, x.prog)}${item('news', IC.news, x.news)}</div>
-      <div class="nav-mg">${item('settings', IC.settings, x.settings)}${item('plan', IC.sub, x.sub)}</div>
+      <div class="nav-mg">${item('settings', IC.settings, x.settings)}</div>
       <div class="nav-mg">${item('referral', IC.ref, x.ref)}${item('feedback', IC.fb, x.fb)}${item('help', IC.help, x.help)}</div>
       ${admin ? `<div class="nav-mg">${item('admin', IC.admin, x.admin)}</div>` : ''}
       <div class="nav-mg"><button type="button" role="menuitem" class="out" data-act="logout">${IC.out}<span>${x.out}</span></button></div></div>`;
@@ -215,7 +216,7 @@ window.SweepMO = window.SweepMO || class {
 
   /* ───────────── search also finds every feature and setting (labels follow the glossary, keywords in EN/FR/ES) ───────────── */
   const FIND = [
-    { l: { en: 'Progression', fr: 'Progression', es: 'Progreso' }, k: 'progression progress progreso rang rank rango streak racha xp niveau level nivel', go: () => SweepGame.open('hub') },
+    { l: { en: 'My progress', fr: 'Ma progression', es: 'Mi progreso' }, k: 'progression progress progreso rang rank rango streak racha xp niveau level nivel', go: () => SweepGame.open('hub') },
     { l: { en: 'Weekly missions', fr: 'Missions hebdomadaires', es: 'Misiones semanales' }, k: 'missions misiones mission boss jefe', go: () => SweepGame.open('missions') },
     { l: { en: 'Season pass', fr: 'Pass de saison', es: 'Pase de temporada' }, k: 'season saison temporada palier tier nivel chapitre chapter capitulo parcours journey', go: () => SweepGame.open('season') },
     { l: { en: 'Weekly league', fr: 'Ligue hebdomadaire', es: 'Liga semanal' }, k: 'league ligue liga classement ranking clasificacion', go: () => SweepGame.open('league') },
@@ -916,14 +917,16 @@ window.SweepMO = window.SweepMO || class {
     if (sp && td) sp.scrollLeft = Math.max(0, td.offsetLeft - sp.clientWidth / 2 + td.offsetWidth / 2);
   }
 
-  /* ───────────── Settings in 4 groups: Account · Discipline · Notifications · Data ───────────── */
+  /* ───────────── Settings in 5 groups: Account · My routine · Notifications · Data · Advanced; at the bottom: Appearance, Sweep AI,
+   * About (SWEEP.md step 6, 4.5: « Discipline » became « My routine », with the 90-day gameplan, the plan mode, the lock time and
+   * the risk rules) ───────────── */
   const SG = {
-    en: ['Account', 'Discipline', 'Notifications', 'Data', 'Advanced'], fr: ['Compte', 'Discipline', 'Notifications', 'Données', 'Avancé'], es: ['Cuenta', 'Disciplina', 'Notificaciones', 'Datos', 'Avanzado'],
+    en: ['Account', 'My routine', 'Notifications', 'Data', 'Advanced'], fr: ['Compte', 'Ma routine', 'Notifications', 'Données', 'Avancé'], es: ['Cuenta', 'Mi rutina', 'Notificaciones', 'Datos', 'Avanzado'],
   };
   // which section goes where (matched on the section title in any language)
   const SMAP = [
-    [0, /^(your account|ton compte|tu cuenta|appearance|apparence|apariencia)/i],
-    [1, /^(discipline checklist|checklist de discipline|checklist de disciplina|setups|risk rules|règles de risque|reglas de riesgo)/i],
+    [0, /^(your account|ton compte|tu cuenta)/i],
+    [1, /^(90-day gameplan|parcours de 90 jours|recorrido de 90 días|discipline|disciplina|checklist|discipline checklist|checklist de discipline|checklist de disciplina|setups|risk rules|règles de risque|reglas de riesgo)/i],
     // brief 03 step 5: the advanced options together, folded (nothing removed)
     [4, /^(keyboard shortcuts|raccourcis clavier|atajos de teclado|prop firms|copied trades|trades copiés|operaciones copiadas)/i],
     [2, /^(notifications|notificaciones)/i],
@@ -935,6 +938,9 @@ window.SweepMO = window.SweepMO || class {
     const secs = [...main.querySelectorAll(':scope > section')];
     const buckets = [[], [], [], [], []], rest = [];
     for (const sec of secs) {
+      const hd = sec.querySelector('h2, h3');
+      if (hd && /^(discipline|disciplina)$/i.test(hd.textContent.trim())) hd.textContent = (SG[LANG] || SG.en)[1];   // its own title: the group's
+      if (hd && /^(discipline checklist|checklist de discipline|checklist de disciplina)$/i.test(hd.textContent.trim())) hd.textContent = 'Checklist';   // (D7b) the average of the checklist is « Checklist »
       const h = ((sec.querySelector('h2, h3') || {}).textContent || '').trim();
       const m = SMAP.find(([, re]) => re.test(h));
       (m ? buckets[m[0]] : rest).push(sec);
@@ -952,7 +958,7 @@ window.SweepMO = window.SweepMO || class {
       at ? at.after(d) : main.prepend(d); at = d;
       for (const sec of list) d.append(sec);
     });
-    for (const sec of rest) main.append(sec);   // « About » and legal notes stay at the end
+    for (const sec of rest) main.append(sec);   // Appearance, « About » and legal notes stay at the end
     const VL = { fr: 'Libellé si non respectée', es: 'Etiqueta si no se cumple' }[LANG];
     if (VL) main.querySelectorAll('.q-tbl td[data-l]').forEach((td) => { td.dataset.l = VL; });
     if (matchMedia('(pointer:coarse)').matches) main.querySelectorAll(':scope > section').forEach((sec) => { if (/^(keyboard shortcuts|raccourcis clavier|atajos de teclado)/i.test(((sec.querySelector('h2,h3') || {}).textContent || '').trim())) sec.hidden = true; });
@@ -4105,9 +4111,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { net: 'Net P&L', trades: 'Trades', wr: 'Win rate', rr: 'Avg R:R', disc: 'Discipline', plan: 'Days with a plan', days: 'The week, day by day', none: 'No trade', planOk: 'Plan', revOk: 'Review', best: 'Best trade', worst: 'Worst trade', setups: 'Setups', emos: 'Before the trade', lessons: 'Lessons of the week', noLesson: 'Write your lessons in each day’s review: they gather here.', review: 'Your weekly review', empty: 'No trade this week yet. Your plans and reviews still count.' },
-    fr: { net: 'P&L net', trades: 'Trades', wr: 'Taux de réussite', rr: 'R:R moyen', disc: 'Discipline', plan: 'Jours avec un plan', days: 'La semaine, jour par jour', none: 'Aucun trade', planOk: 'Plan', revOk: 'Revue', best: 'Meilleur trade', worst: 'Pire trade', setups: 'Setups', emos: 'Avant le trade', lessons: 'Leçons de la semaine', noLesson: 'Écris tes leçons dans la revue de chaque jour : elles se rassemblent ici.', review: 'Ta revue de la semaine', empty: 'Aucun trade cette semaine pour l’instant. Tes plans et tes revues comptent quand même.' },
-    es: { net: 'P&L neto', trades: 'Operaciones', wr: 'Tasa de acierto', rr: 'R:R medio', disc: 'Disciplina', plan: 'Días con plan', days: 'La semana, día a día', none: 'Sin operaciones', planOk: 'Plan', revOk: 'Revisión', best: 'Mejor operación', worst: 'Peor operación', setups: 'Setups', emos: 'Antes de operar', lessons: 'Lecciones de la semana', noLesson: 'Escribe tus lecciones en la revisión de cada día: se reúnen aquí.', review: 'Tu revisión semanal', empty: 'Aún no hay operaciones esta semana. Tus planes y revisiones cuentan igual.' } };
+    en: { net: 'Net P&L', trades: 'Trades', wr: 'Win rate', rr: 'Avg R:R', disc: 'Checklist', plan: 'Days with a plan', days: 'The week, day by day', none: 'No trade', planOk: 'Plan', revOk: 'Review', best: 'Best trade', worst: 'Worst trade', setups: 'Setups', emos: 'Before the trade', lessons: 'Lessons of the week', noLesson: 'Write your lessons in each day’s review: they gather here.', review: 'Your weekly review', empty: 'No trade this week yet. Your plans and reviews still count.' },
+    fr: { net: 'P&L net', trades: 'Trades', wr: 'Taux de réussite', rr: 'R:R moyen', disc: 'Checklist', plan: 'Jours avec un plan', days: 'La semaine, jour par jour', none: 'Aucun trade', planOk: 'Plan', revOk: 'Revue', best: 'Meilleur trade', worst: 'Pire trade', setups: 'Setups', emos: 'Avant le trade', lessons: 'Leçons de la semaine', noLesson: 'Écris tes leçons dans la revue de chaque jour : elles se rassemblent ici.', review: 'Ta revue de la semaine', empty: 'Aucun trade cette semaine pour l’instant. Tes plans et tes revues comptent quand même.' },
+    es: { net: 'P&L neto', trades: 'Operaciones', wr: 'Tasa de acierto', rr: 'R:R medio', disc: 'Checklist', plan: 'Días con plan', days: 'La semana, día a día', none: 'Sin operaciones', planOk: 'Plan', revOk: 'Revisión', best: 'Mejor operación', worst: 'Peor operación', setups: 'Setups', emos: 'Antes de operar', lessons: 'Lecciones de la semana', noLesson: 'Escribe tus lecciones en la revisión de cada día: se reúnen aquí.', review: 'Tu revisión semanal', empty: 'Aún no hay operaciones esta semana. Tus planes y revisiones cuentan igual.' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const n1 = (x) => (typeof tNet === 'function' ? tNet(x) : (x.pnl_c || 0) - (x.fees_c || 0));
@@ -4317,7 +4323,7 @@ window.SweepMO = window.SweepMO || class {
         <button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div></div>`;
     // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
     const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
-    const wkt = ({ en: ['Your week is ready', 'See my week'], fr: ['Ta semaine est prête', 'Voir mon bilan'], es: ['Tu semana está lista', 'Ver mi semana'] })[L] || ['Your week is ready', 'See my week'];
+    const wkt = ({ en: ['Your week is ready', 'Open the weekly recap'], fr: ['Ta semaine est prête', 'Ouvrir le bilan de la semaine'], es: ['Tu semana está lista', 'Abrir el resumen semanal'] })[L]   // (SWEEP.md step 6) one name: « Bilan de la semaine » || ['Your week is ready', 'See my week'];
     const wkRow = wkReady ? `<div class="nav-rt-wk"><b>${wkt[0]}</b><button type="button" class="btn primary" data-rt="week">${wkt[1]}</button></div>` : '';
     // the intention written in last week's recap, shown all this week (SWEEP.md step 1, D5: it lived only in the game's hidden card)
     const intT = ({ en: 'Your intention this week', fr: 'Ton intention cette semaine', es: 'Tu intención esta semana' })[L] || 'Your intention this week';
@@ -5975,6 +5981,10 @@ new window.SweepMO(() => {
 (function () {
   'use strict';
   // (27 Oct., brief « nouveau trader » N7) the Stats words a French or Spanish trader still read in English, with their « i »
+  // (29 Oct., SWEEP.md step 6, D7b) the average of a trade's checklist is « Checklist » (the coach's score alone says « Discipline »)
+  const D7 = { fr: { 'Any checklist': 'Toute checklist', 'Average checklist score of today’s trades': 'Score moyen de checklist des trades du jour', 'Checklist not done': 'Checklist non remplie' },
+    es: { 'Any checklist': 'Cualquier checklist', 'Average checklist score of today’s trades': 'Puntuación media de checklist de las operaciones de hoy', 'Checklist not done': 'Checklist sin completar' } };
+  try { if (window.I18N_FR) Object.assign(window.I18N_FR, D7.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, D7.es); } catch (e) { /* the dictionaries load first */ }
   const add = { fr: { 'Profit factor': 'Facteur de profit', 'Session': 'Séance', 'Gross profit ÷ gross loss. Above 1.0 is profitable.': 'Total des gains ÷ total des pertes. Au-dessus de 1, tu gagnes plus que tu ne perds.', 'Clear': 'Effacer', 'Add an account first': 'Ajoute d’abord un compte', 'Trades belong to an account.': 'Chaque trade appartient à un compte.', 'Consistency': 'Consistance', 'Consistency rule': 'Règle de consistance', 'From': 'Du', 'To': 'Au', 'Copies': 'Copies', 'Counted once': 'Comptées une fois', 'Per contract': 'Par contrat', 'Disable': 'Désactiver', 'Replace': 'Remplacer', 'Delete this trade? This cannot be undone.': 'Supprimer ce trade ? C’est définitif.', 'My money': 'Mon argent', 'Worst drawdown': 'Pire recul', 'Max drawdown allowed': 'Drawdown permis', 'Exceeded': 'Dépassé', 'Avg win / loss': 'Gain / perte moy.', 'See its stats': 'Voir ses stats',
       'Max trades': 'Trades max', 'Entered without confirmation': 'Entrée sans confirmation', 'Broke daily loss limit': 'Limite de perte du jour dépassée', 'None recorded': 'Aucune', 'Show all accounts': 'Voir tous les comptes', 'schedule file': 'calendrier livré avec l’app', 'manual entry': 'saisie manuelle', 'ADP Non-Farm Employment Change': 'Emploi privé ADP', 'Average Hourly Earnings m/m': 'Salaire horaire moyen m/m', 'CB Consumer Confidence': 'Confiance des consommateurs (CB)', 'Core CPI m/m': 'CPI de base m/m', 'Core PCE Price Index m/m': 'Indice PCE de base m/m', 'Core PPI m/m': 'PPI de base m/m', 'FOMC Meeting Minutes': 'Procès-verbal du FOMC', 'FOMC Press Conference': 'Conférence de presse du FOMC', 'FOMC Rate Decision': 'Décision de taux du FOMC', 'GDP q/q (Advance)': 'PIB t/t (première estimation)', 'GDP q/q (Second Estimate)': 'PIB t/t (deuxième estimation)', 'GDP q/q (Third Estimate)': 'PIB t/t (troisième estimation)', 'ISM Manufacturing PMI': 'PMI manufacturier ISM', 'ISM Services PMI': 'PMI des services ISM', 'Initial Jobless Claims': 'Inscriptions au chômage', 'JOLTS Job Openings': 'Offres d’emploi JOLTS', 'Nonfarm Payrolls': 'Emplois non agricoles (NFP)', 'PCE Price Index m/m': 'Indice PCE m/m', 'Retail Sales m/m': 'Ventes au détail m/m', 'Unemployment Rate': 'Taux de chômage' },
     es: { 'Profit factor': 'Factor de beneficio', 'Gross profit ÷ gross loss. Above 1.0 is profitable.': 'Total de ganancias ÷ total de pérdidas. Por encima de 1, ganas más de lo que pierdes.', 'Clear': 'Borrar', 'Add an account first': 'Primero añade una cuenta', 'Trades belong to an account.': 'Cada operación pertenece a una cuenta.', 'From': 'Desde', 'To': 'Hasta', 'Copies': 'Copias', 'Counted once': 'Contadas una vez', 'Per contract': 'Por contrato', 'Disable': 'Desactivar', 'Replace': 'Reemplazar', 'OK': 'OK', 'Delete this trade? This cannot be undone.': '¿Eliminar esta operación? No se puede deshacer.', 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas',

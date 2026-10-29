@@ -1329,3 +1329,14 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **La cause** : la rangée d'émotions de « Réponds au coach » (`askHtml`, `src/coach.js`) montre 5 émotions choisies selon l'erreur du trade. Répondre à « Ce trade était-il dans ton plan ? » peut changer cette erreur, donc la rangée. Une émotion choisie, là ou dans la revue complète, n'apparaissait alors plus cochée.
 - **La correction** : les émotions déjà choisies sont toujours en tête de la rangée, cochées. Une émotion enregistrée en texte (vieux trades) est lue aussi.
 - **Test** : `e2e_long_pages` (E : « Patient », hors des 5, apparaît cochée).
+
+### SWEEP.md, étape 6 (29 oct.) : « Ma progression », Réglages, bilan du vendredi, un seul nom par idée
+- **« Ma progression »** (l'ancienne feuille Progression, `openHub`) : elle ne propose plus d'étape (les chapitres « Ton parcours » sont retirés de la feuille ; quoi faire ensuite, c'est « Maintenant »). Elle sort de la barre latérale. Dans l'avatar, elle s'appelle « Ma progression ». Les missions du jeu deviennent « Défis de la semaine ».
+- **L'avatar** : plus d'entrée « Abonnement » en double. Le forfait s'ouvre par la ligne d'en-tête (prénom · forfait).
+- **Réglages en 5 groupes** : Compte, Ma routine (l'ancien « Discipline » : parcours de 90 jours, plan, verrouillage, checklist, setups, règles de risque), Notifications, Données, Avancé. En bas de page : Apparence, Sweep AI, À propos.
+- **Le bilan de la semaine** :
+  - un seul nom partout : « Bilan de la semaine » (EN « Weekly recap », ES « Resumen semanal ») ;
+  - ses questions sont celles de la semaine ; la règle du coach pour la semaine prochaine (`SweepCoach.weekRule`) pré-remplit la question « règle » ;
+  - le Journal semaine garde ses chiffres, montre les réponses déjà écrites, et propose « Ouvrir le bilan de la semaine ».
+- **D7b** : la moyenne de la checklist d'un trade (`tDisc`) s'appelle « Checklist » partout (chiffres du jour, Journal semaine, page d'un trade, colonnes et filtres de Stats, cartes de partage). Le score du coach garde seul le mot « Discipline ». Les textes FR et ES sont dans un dictionnaire du code (`nav.js`, `D7`), puisque les fichiers de traduction ne se recompilent pas.
+- **Le Guide** : « Bien démarrer », « XP », « Quoi faire ensuite » (l'ancien « parcours en chapitres »), « Défis, coffre et bilan de la semaine » et « La checklist » parlent avec ces mots.

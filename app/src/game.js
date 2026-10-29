@@ -150,7 +150,7 @@
       chapter: 'Chapter {n}', journey: 'Your journey', next: 'Next step', soon: 'Coming soon', locked_ch: 'Unlock with Pro', back: 'Back', go: 'Go',
       ch: { 1: 'Foundations', 2: 'Find your edge', 3: 'Consistency', 4: 'Payout', 5: 'Scale' },
       ch_done: 'Chapter complete', node_done: 'Step completed', nodes_done: '{n} steps completed', map_backfill: 'Your history already completed {n} steps of your journey (+{xp} XP).',
-      missions: 'This week', mission_done: 'Mission complete', key: 'All 3 missions done: you earned a chest key.', keys: '{n} key', reroll: 'Swap', ends: 'Until {t}', pro: 'Pro',
+      missions: 'Weekly challenges', mission_done: 'Mission complete', key: 'All 3 missions done: you earned a chest key.', keys: '{n} key', reroll: 'Swap', ends: 'Until {t}', pro: 'Pro',
       payout_ready: 'Payout readiness', payout_full: 'Ready for payout',
       n: {
         c1_goal: ['Goal and style', 'Tell Sweep what you are working toward.'], c1_rules: ['Account rules', 'Add your account and its daily loss limit.'], c1_plan: ['First plan', 'Make a plan before you trade.'],
@@ -175,7 +175,7 @@
       chapter: 'Chapitre {n}', journey: 'Ton parcours', next: 'Prochaine étape', soon: 'Bientôt', locked_ch: 'Débloquer avec Pro', back: 'Retour', go: 'Y aller',
       ch: { 1: 'Fondations', 2: 'Trouver ton edge', 3: 'Consistance', 4: 'Payout', 5: 'Scale' },
       ch_done: 'Chapitre terminé', node_done: 'Étape franchie', nodes_done: '{n} étapes franchies', map_backfill: 'Ton historique a déjà franchi {n} étapes de ton parcours (+{xp} XP).',
-      missions: 'Cette semaine', mission_done: 'Mission accomplie', key: 'Les 3 missions sont faites : tu gagnes une clé de coffre.', keys: '{n} clé', reroll: 'Changer', ends: "Jusqu'à {t}", pro: 'Pro',
+      missions: 'Défis de la semaine', mission_done: 'Mission accomplie', key: 'Les 3 missions sont faites : tu gagnes une clé de coffre.', keys: '{n} clé', reroll: 'Changer', ends: "Jusqu'à {t}", pro: 'Pro',
       payout_ready: 'Prêt pour le payout', payout_full: 'Prêt pour le payout',
       n: {
         c1_goal: ['Objectif et style', 'Dis à Sweep vers quoi tu avances.'], c1_rules: ['Règles du compte', 'Ajoute ton compte et sa perte max quotidienne.'], c1_plan: ['Premier plan', 'Fais un plan avant de trader.'],
@@ -200,7 +200,7 @@
       chapter: 'Capítulo {n}', journey: 'Tu recorrido', next: 'Siguiente paso', soon: 'Pronto', locked_ch: 'Desbloquear con Pro', back: 'Volver', go: 'Ir',
       ch: { 1: 'Fundamentos', 2: 'Encuentra tu ventaja', 3: 'Constancia', 4: 'Payout', 5: 'Escalar' },
       ch_done: 'Capítulo completado', node_done: 'Paso completado', nodes_done: '{n} pasos completados', map_backfill: 'Tu historial ya completó {n} pasos de tu recorrido (+{xp} XP).',
-      missions: 'Esta semana', mission_done: 'Misión cumplida', key: 'Las 3 misiones hechas: ganaste una llave de cofre.', keys: '{n} llave', reroll: 'Cambiar', ends: 'Hasta {t}', pro: 'Pro',
+      missions: 'Retos de la semana', mission_done: 'Misión cumplida', key: 'Las 3 misiones hechas: ganaste una llave de cofre.', keys: '{n} llave', reroll: 'Cambiar', ends: 'Hasta {t}', pro: 'Pro',
       payout_ready: 'Listo para el payout', payout_full: 'Listo para el payout',
       n: {
         c1_goal: ['Objetivo y estilo', 'Cuéntale a Sweep hacia dónde vas.'], c1_rules: ['Reglas de la cuenta', 'Añade tu cuenta y su pérdida máxima diaria.'], c1_plan: ['Primer plan', 'Haz un plan antes de operar.'],
@@ -2518,7 +2518,7 @@
 
   /* ───────────── V2 step 2: weekly recap, chest, Edge Reveal, comeback quest, ring themes ───────────── */
   const W_T = {
-    en: { weekly: 'Weekly recap', open_chest: 'Open your chest', w_title: 'Your week', w_swept: 'Days swept', w_streak: 'Streak', w_missions: 'Missions',
+    en: { weekly: 'Weekly recap', open_chest: 'Open your chest', w_title: 'Your week', w_swept: 'Days swept', w_streak: 'Streak', w_missions: 'Challenges',
       reveal_t: 'Edge Reveal', reveal_tap: 'Tap to reveal your discovery of the week', reveal_locked: 'One Edge Reveal a month on Free. Weekly with Pro.', unlock: 'Unlock with Pro', another: 'Another reveal',
       q_best: 'Best decision of the week', q_fix: 'A pattern to fix', q_int: 'Intention for next week', save_go: 'Save and open the chest',
       chest_t: 'Your chest', chest_key: 'With a key: a richer chest', chest_open: 'Open', odds: 'Possible contents', close: 'Done',
@@ -2533,7 +2533,7 @@
         emotion: 'When you feel “{emotion}” before entering, your trades average {r}R. Worth a pause next time.', best_day: '{wd} is your best day: {r} on average over {n} trades.',
         plan_effect: 'With a plan before the open: {with}R per trade. Without: {without}R.', compliance: 'Trades inside your plan: {in_plan}R. Outside: {off_plan}R. You stay in plan {pct} % of the time.',
         beginner: 'You have logged {trades} trades, {plans} plans and {reviews} reviews. From 5 trades in the same situation, your first lead appears here.' } },
-    fr: { weekly: 'Bilan de la semaine', open_chest: 'Ouvrir ton coffre', w_title: 'Ta semaine', w_swept: 'Journées balayées', w_streak: 'Streak', w_missions: 'Missions',
+    fr: { weekly: 'Bilan de la semaine', open_chest: 'Ouvrir ton coffre', w_title: 'Ta semaine', w_swept: 'Journées balayées', w_streak: 'Streak', w_missions: 'Défis',
       reveal_t: 'Edge Reveal', reveal_tap: 'Touche pour révéler ta découverte de la semaine', reveal_locked: 'Un Edge Reveal par mois avec Gratuit. Chaque semaine avec Pro.', unlock: 'Débloquer avec Pro', another: 'Un autre reveal',
       q_best: 'Meilleure décision de la semaine', q_fix: 'Un pattern à corriger', q_int: 'Intention pour la semaine prochaine', save_go: 'Enregistrer et ouvrir le coffre',
       chest_t: 'Ton coffre', chest_key: 'Avec une clé : un coffre plus riche', chest_open: 'Ouvrir', odds: 'Contenu possible', close: 'Terminé',
@@ -2548,7 +2548,7 @@
         emotion: 'Quand tu te sens « {emotion} » avant d’entrer, tes trades font {r}R en moyenne. Une pause vaut la peine la prochaine fois.', best_day: 'Le {wd} est ton meilleur jour : {r} en moyenne sur {n} trades.',
         plan_effect: 'Avec un plan avant l’ouverture : {with}R par trade. Sans : {without}R.', compliance: 'Trades dans ton plan : {in_plan}R. Hors plan : {off_plan}R. Tu restes dans ton plan {pct} % du temps.',
         beginner: 'Tu as journalisé {trades} trades, {plans} plans et {reviews} revues. Dès 5 trades dans une même situation, ta première piste apparaîtra ici.' } },
-    es: { weekly: 'Resumen semanal', open_chest: 'Abrir tu cofre', w_title: 'Tu semana', w_swept: 'Días barridos', w_streak: 'Racha', w_missions: 'Misiones',
+    es: { weekly: 'Resumen semanal', open_chest: 'Abrir tu cofre', w_title: 'Tu semana', w_swept: 'Días barridos', w_streak: 'Racha', w_missions: 'Retos',
       reveal_t: 'Edge Reveal', reveal_tap: 'Toca para revelar tu descubrimiento de la semana', reveal_locked: 'Un Edge Reveal al mes en Gratis. Cada semana con Pro.', unlock: 'Desbloquear con Pro', another: 'Otro reveal',
       q_best: 'Mejor decisión de la semana', q_fix: 'Un patrón a corregir', q_int: 'Intención para la próxima semana', save_go: 'Guardar y abrir el cofre',
       chest_t: 'Tu cofre', chest_key: 'Con una llave: un cofre más rico', chest_open: 'Abrir', odds: 'Contenido posible', close: 'Listo',
@@ -2683,19 +2683,16 @@
         <button type="button" class="btn primary g-big" data-g="wk-next">${wq('to_q')}</button>`;
     } else if (WK.step === 1) {
       const r = weekRecap(d.week), prev = d.answers || {};
-      const qa = (k, label, hint, rows = 2) => `<label class="g-f"><span>${label}</span>${hint ? `<small class="wk-hint">${hint}</small>` : ''}<textarea rows="${rows}" maxlength="300" data-wq="${k}">${esc(prev[k] || '')}</textarea></label>`;
+      // (SWEEP.md step 6) the one « Week's recap »: its questions are the Journal week's (what worked, what hurt, what to change,
+      // the rule, the focus); the coach's rule for next week fills the rule in when nothing is written yet
+      const qa = (k, label, hint, rows = 2, def = '') => `<label class="g-f"><span>${label}</span>${hint ? `<small class="wk-hint">${hint}</small>` : ''}<textarea rows="${rows}" maxlength="300" data-wq="${k}">${esc(prev[k] || def || '')}</textarea></label>`;
       h = `<h3>${wq('q_t')}</h3>
         ${qa('best', wt('q_best'), r.best ? wq('h_best', { d: r.best.label, v: money(r.best.net) }) : '')}
         ${r.worst && r.worst.net < 0 ? qa('worst', wq('q_worst', { d: r.worst.label, v: money(r.worst.net) }), '') : ''}
         ${qa('fix', wt('q_fix'), r.fixHint)}
-        ${qa('rule', wq('q_rule'), wq('h_rule'))}
+        ${qa('rule', wq('q_rule'), wq('h_rule'), 2, !prev.rule && window.SweepCoach && SweepCoach.weekRule ? SweepCoach.weekRule(d.week) : '')}
         ${qa('intention', wt('q_int'), '')}
         <div class="g-f"><span>${wq('q_grade')}</span><div class="g-dots wk-grade">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="${+prev.grade === n ? 'on' : ''}" data-g="wk-grade" data-v="${n}">${n}</button>`).join('')}</div></div>
-        <button type="button" class="btn primary g-big" data-g="wk-save">${wt('save_go')}</button>`;
-    } else if (WK.step === 1) {
-      h = `<label class="g-f"><span>${wt('q_best')}</span><textarea rows="2" maxlength="300" data-wq="best"></textarea></label>
-        <label class="g-f"><span>${wt('q_fix')}</span><textarea rows="2" maxlength="300" data-wq="fix"></textarea></label>
-        <label class="g-f"><span>${wt('q_int')}</span><textarea rows="2" maxlength="300" data-wq="intention"></textarea></label>
         <button type="button" class="btn primary g-big" data-g="wk-save">${wt('save_go')}</button>`;
     } else if (WK.step === 2) {
       const rv = d.reveal;
@@ -3087,19 +3084,19 @@
 
   /* ───────────── progressive reveal: the « new » moment ───────────── */
   const UN_T = {
-    en: { kick: 'Unlocked', missions: ['Weekly missions', 'Three goals every Monday, picked from your own weak spots. All three done: a chest key.'],
+    en: { kick: 'Unlocked', missions: ['Weekly challenges', 'Three goals every Monday, picked from your own weak spots. All three done: a chest key.'],
       weekly: ['Weekly recap and chest', 'Every Friday after the close: your week, a truth from your own trades, and a chest to open.'],
       boss: ['Bosses', 'Sweep now spots a bad habit in your trades and turns it into a boss. Every clean day lands a hit.'],
       season: ['Seasons', 'Each month is a season with 30 tiers. Your discipline XP moves you up; claim the rewards.'],
       league: ['Weekly leagues', 'Optional: compete on discipline XP with other traders. Only your handle shows, never your P&L.'],
       social: ['Crew and buddy', 'Optional: a small crew with a shared weekly goal, or one buddy to keep each other on track.'] },
-    fr: { kick: 'Débloqué', missions: ['Missions hebdomadaires', 'Trois objectifs chaque lundi, choisis selon tes points faibles. Les trois faits : une clé de coffre.'],
+    fr: { kick: 'Débloqué', missions: ['Défis de la semaine', 'Trois objectifs chaque lundi, choisis selon tes points faibles. Les trois faits : une clé de coffre.'],
       weekly: ['Bilan de la semaine et coffre', 'Chaque vendredi après la clôture : ta semaine, une vérité tirée de tes trades, et un coffre à ouvrir.'],
       boss: ['Les boss', 'Sweep repère maintenant une mauvaise habitude dans tes trades et la transforme en boss. Chaque journée propre lui porte un coup.'],
       season: ['Les saisons', 'Chaque mois est une saison de 30 paliers. Ton XP de discipline te fait monter ; réclame tes récompenses.'],
       league: ['Ligues hebdomadaires', 'Facultatif : affronte d’autres traders sur l’XP de discipline. Seul ton pseudo s’affiche, jamais ton P&L.'],
       social: ['Crew et buddy', 'Facultatif : un petit crew avec un objectif commun, ou un buddy pour vous garder sur la bonne voie.'] },
-    es: { kick: 'Desbloqueado', missions: ['Misiones semanales', 'Tres objetivos cada lunes según tus puntos débiles. Las tres completas: una llave de cofre.'],
+    es: { kick: 'Desbloqueado', missions: ['Retos de la semana', 'Tres objetivos cada lunes según tus puntos débiles. Las tres completas: una llave de cofre.'],
       weekly: ['Resumen semanal y cofre', 'Cada viernes tras el cierre: tu semana, una verdad de tus operaciones y un cofre.'],
       boss: ['Jefes', 'Sweep detecta un mal hábito en tus operaciones y lo convierte en jefe. Cada día limpio le quita vida.'],
       season: ['Temporadas', 'Cada mes es una temporada de 30 niveles. Tu XP de disciplina te hace subir.'],
@@ -3112,11 +3109,11 @@
 
   /* ───────────── Progression: every game feature in one place (what is open, what unlocks next, your collection) ───────────── */
   const HUB_T = {
-    en: { title: 'Progression', now: 'Your shortcuts', soon: 'Coming up', col: 'Your collection', badges: 'Badges', themes: 'Ring themes', wrapped: 'Your Wrapped', open_in: 'In Settings',
+    en: { title: 'My progress', now: 'Your shortcuts', soon: 'Coming up', col: 'Your collection', badges: 'Badges', themes: 'Ring themes', wrapped: 'Your Wrapped', open_in: 'In Settings',
       lock: { missions: 'After your 1st swept day', weekly: 'After 2 swept days', boss: 'At level 3 or after 10 trades', season: 'After 7 days', league: 'After 7 days', social: 'After 7 days' } },
-    fr: { title: 'Progression', now: 'Tes raccourcis', soon: 'À débloquer', col: 'Ta collection', badges: 'Badges', themes: 'Thèmes d’anneaux', wrapped: 'Tes Wrapped', open_in: 'Dans Réglages',
+    fr: { title: 'Ma progression', now: 'Tes raccourcis', soon: 'À débloquer', col: 'Ta collection', badges: 'Badges', themes: 'Thèmes d’anneaux', wrapped: 'Tes Wrapped', open_in: 'Dans Réglages',
       lock: { missions: 'Après ta 1re journée balayée', weekly: 'Après 2 journées balayées', boss: 'Au niveau 3 ou après 10 trades', season: 'Après 7 jours', league: 'Après 7 jours', social: 'Après 7 jours' } },
-    es: { title: 'Progreso', now: 'Tus accesos', soon: 'Por desbloquear', col: 'Tu colección', badges: 'Insignias', themes: 'Temas de anillos', wrapped: 'Tus Wrapped', open_in: 'En Ajustes',
+    es: { title: 'Mi progreso', now: 'Tus accesos', soon: 'Por desbloquear', col: 'Tu colección', badges: 'Insignias', themes: 'Temas de anillos', wrapped: 'Tus Wrapped', open_in: 'En Ajustes',
       lock: { missions: 'Tras tu 1.er día barrido', weekly: 'Tras 2 días barridos', boss: 'Nivel 3 o tras 10 operaciones', season: 'Tras 7 días', league: 'Tras 7 días', social: 'Tras 7 días' } },
   };
   const hbt = (k) => k.split('.').reduce((a, x) => (a == null ? a : a[x]), HUB_T[L()]) ?? k.split('.').reduce((a, x) => (a == null ? a : a[x]), HUB_T.en);
@@ -3142,14 +3139,10 @@
     const locked = Object.keys(UN_T.en).filter((k) => k !== 'kick' && G.unlocked && !G.unlocked.includes(k));
     const pills = (G.allPills || []).join('');
     openSheet(`${head(hbt('title'))}<div class="gc-hubwrap">
-      <div class="gc-steps"><div class="skel" style="height:210px;border-radius:16px"></div></div>
       ${pills ? `<h4>${hbt('now')}</h4><div class="gc-hub">${pills}</div>` : ''}
       ${locked.length ? `<h4>${hbt('soon')}</h4><div class="gc-hub">${locked.map((k) => `<div class="gc-pill locked">${svg('lock')}<span><small>${esc(hbt('lock.' + k))}</small><b>${esc(unt(k)[0])}</b></span></div>`).join('')}</div>` : ''}
       <h4>${hbt('col')}</h4><div class="gc-hubcol"><div class="skel" style="height:160px;border-radius:16px"></div></div></div>`, { cls: 'gc-hubsheet' });
-    // « Your journey »: the steps of the current chapter, the next one highlighted, each opening what it is about
-    const drawSteps = () => { const box = document.querySelector('#gSheet .gc-steps'); if (box) box.innerHTML = stepsHtml(); };
-    if (G.mapFull) setTimeout(drawSteps, 60);
-    apiJSON('api/game/map').then((m) => { G.mapFull = m; drawSteps(); }).catch(() => { const box = document.querySelector('#gSheet .gc-steps'); if (box) box.remove(); });
+    // (29 Oct., SWEEP.md step 6) « My progress » proposes no step any more: what to do next is « Now »'s
     // the collection (badges, themes, social) is heavy: it fills once the sheet has finished sliding in
     const fill = () => { const c = document.querySelector('#gSheet .gc-hubcol'); if (c) c.innerHTML = badgesHtml(); };
     if (G.prog) setTimeout(fill, 340);
