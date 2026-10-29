@@ -150,6 +150,7 @@ async def main():
       btn = (await page.locator('#gSheet [data-g=save-review]').text_content() or '').strip()
       ok(pre == [True, True, True] and btn == 'Fermer ma journée', f'review: filled in from the day, « Fermer ma journée » ({pre}, « {btn} »)')
       await page.locator('#gSheet [data-g=r-followed][data-v=yes]').click(); await page.wait_for_timeout(100)
+      await page.evaluate("document.querySelectorAll('#gSheet .g-rv-more').forEach((d) => { d.open = true })")   # (tour T2) under « + Details »
       await page.locator('#gSheet [data-g=r-score][data-v="4"]').click(); await page.wait_for_timeout(100)
       await page.locator('#gSheet [data-g=r-grade][data-v=B]').click(); await page.wait_for_timeout(100)
       await page.locator('#gSheet [data-gr=tomorrow]').fill('Attendre la confirmation.')

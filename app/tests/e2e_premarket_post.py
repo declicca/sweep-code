@@ -41,7 +41,7 @@ with sync_playwright() as p:
     pg.click('#gSheet [data-g=r-followed][data-v=partly]'); pg.wait_for_timeout(200)
     pre = pg.evaluate("[...document.querySelectorAll('#gSheet [data-rv-rule].on')].map((b) => b.dataset.rvRule)")
     ok(pg.locator('#gSheet .rv-rules').is_visible() and pre == ['off_plan', 'max_trades'], f'1 {w}: « En partie »: « Quelle règle ? », off-plan and too many trades pre-checked ({pre})')
-    pg.click('#gSheet [data-rv-rule=no_retest]'); pg.click('#gSheet [data-g=r-score][data-v="3"]'); pg.click('#gSheet [data-g=r-grade][data-v=C]')
+    pg.click('#gSheet [data-rv-rule=no_retest]'); pg.evaluate("document.querySelectorAll('#gSheet .g-rv-more').forEach((d) => { d.open = true })"); pg.click('#gSheet [data-g=r-score][data-v="3"]'); pg.click('#gSheet [data-g=r-grade][data-v=C]')
     pg.fill('#gSheet [data-gr=tomorrow]', 'Attendre la clôture 15m.'); pg.click('#gSheet [data-g=save-review]'); pg.wait_for_timeout(900)
     post = pg.evaluate("(d) => (getDoc('journals', d) || {}).post", day)
     ok(post and post.get('rules_broken') == ['no_retest', 'off_plan', 'max_trades'] and post.get('followed') == 'partly', f"2 {w}: saved in the day's journal ({post and post.get('rules_broken')})")

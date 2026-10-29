@@ -52,6 +52,7 @@ with sync_playwright() as p:
     pg.evaluate("Promise.all(Object.values(chains)).then(() => true)"); pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(2500)
     def review():
       pg.evaluate("(d) => SweepGame.openReview(d)", day); pg.wait_for_selector('#gSheet [data-g=save-review]', timeout=8000); pg.wait_for_timeout(500)
+      pg.evaluate("document.querySelectorAll('#gSheet .g-rv-more').forEach((d) => { d.open = true })")   # (tour T2) the discipline and the grade under « + Details »
       for k in ('r-followed', 'r-score', 'r-grade'):   # (filled in by Sweep on a day it knows; else the first answer)
         if not pg.locator(f'#gSheet [data-g={k}].on').count(): tap(pg.locator(f'#gSheet [data-g={k}]').first); pg.wait_for_timeout(150)
     # 1. a day without a gap

@@ -58,6 +58,7 @@ with sync_playwright() as p:
     ok(got[:3] == list(want), f'{tag}: filled in from the day: {got[:3]} (want {list(want)})')
     ok((got[3] or '').strip() == x['close'], f'{tag}: one button « {x["close"]} » ({got[3]!r})')
     if name == 'tilt':   # 4. an answer changes with one tap
+      pg.evaluate("document.querySelectorAll('#gSheet .g-rv-more').forEach((d) => { d.open = true })")   # (tour T2) the grade under « + Details »
       b = pg.locator('#gSheet [data-g=r-grade][data-v=D]'); (b.tap() if phone else b.click()); pg.wait_for_timeout(200)
       ok(pg.evaluate("(document.querySelector('#gSheet [data-g=r-grade].on') || {dataset: {}}).dataset.v") == 'D', f'{tag}: the grade changed with one tap (F → D)')
       want = (want[0], want[1], 'D')

@@ -1634,8 +1634,9 @@
     openSheet(`${head(t('review_title'), fdate(RV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
       <div class="g-f"><span>${RV.fiche ? pt('followed_sheet') : t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${RV.fiche ? `<div class="g-f rv-rules" ${RV.followed === 'partly' || RV.followed === 'no' ? '' : 'hidden'}><span>${pt('rules_q')}</span><div class="g-chips-row wrap">${FICHE.RULES.map((r) => `<button type="button" class="chip ${RV.rules.has(r) ? 'on' : ''}" data-rv-rule="${r}">${pt('r_' + r)}</button>`).join('')}</div></div>` : ''}
+      ${'' /* (29 Oct., tour T2) the plan followed and the balance are asked; the discipline and the grade, filled in from the day, wait under « + Details » */}<details class="g-rv-more"><summary>${({ en: '+ Details', fr: '+ Détails', es: '+ Detalles' })[L()] || '+ Details'}</summary>
       <div class="g-f"><span>${t('discipline')}</span><div class="g-dots">${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="${RV.score === n ? 'on' : ''}" data-g="r-score" data-v="${n}">${n}</button>`).join('')}</div></div>
-      <div class="g-f"><span>${t('grade')}</span><div class="g-dots">${grades.map((g) => `<button type="button" class="${RV.grade === g ? 'on' : ''}" data-g="r-grade" data-v="${g}">${g}</button>`).join('')}</div></div>
+      <div class="g-f"><span>${t('grade')}</span><div class="g-dots">${grades.map((g) => `<button type="button" class="${RV.grade === g ? 'on' : ''}" data-g="r-grade" data-v="${g}">${g}</button>`).join('')}</div></div></details>
       <label class="g-f"><span>${RV.fiche ? pt('note_tomorrow') : t('improve_opt')}</span><textarea rows="2" data-gr="tomorrow" maxlength="400">${esc(post.tomorrow || '')}</textarea></label>
       ${RV.balAcc.map(balRow).join('')}${RV.balAcc.length ? `<button type="button" class="link g-bal-shot" data-bal-shot>${bv('shot')} ›</button>` : ''}
       <p class="g-err" id="gErr"></p>
@@ -1707,6 +1708,9 @@
   }
   function saveReview() {
     const el = document.getElementById('gSheet');
+    // the discipline and the grade under « + Details »: never asked twice — when nothing is chosen there, they follow the plan's answer
+    if (RV.followed && !RV.score) RV.score = ({ yes: 4, partly: 3, no: 2 })[RV.followed];
+    if (RV.followed && !RV.grade) RV.grade = ({ yes: 'B', partly: 'C', no: 'D' })[RV.followed];
     if (!RV.followed || !RV.score || !RV.grade) { const e = document.getElementById('gErr'); if (e) e.textContent = t('review_needs'); buzz(20); return; }
     for (const a of RV.balAcc || []) {   // each balance said: the same, or the gap and what it was
       const x = RV.bal[a.id], gap = x.plat == null ? 0 : x.plat - x.sweep;

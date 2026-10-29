@@ -1388,9 +1388,13 @@
     const used = {}; (S.trades || []).forEach((t) => { if (t.setup && !t.demo) used[t.setup] = (used[t.setup] || 0) + 1; });
     const mine = [...new Set([...own, ...Object.keys(used).sort((a, b) => used[b] - used[a]).slice(0, 4)])];
     const low = new Set(mine.map((x) => x.toLowerCase()));
-    const list = [...mine.slice(0, 6), ...POPULAR.filter((p) => !low.has(p.toLowerCase()))];
-    const cur = (input.value || '').trim().toLowerCase();
-    return `<div class="ux-setups" data-noi18n>${list.map((s, i) => `<button type="button" class="ux-setup ${i < Math.min(mine.length, 6) ? 'mine' : ''} ${cur === s.toLowerCase() ? 'on' : ''}" data-ux-setup="${esc(s)}">${esc(s)}</button>`).join('')}</div>`;
+    let list = [...mine.slice(0, 6), ...POPULAR.filter((p) => !low.has(p.toLowerCase()))];
+    const raw = (input.value || '').trim(), cur = raw.toLowerCase();
+    // (29 Oct., tour T6) the chips alone choose the setup, written one way: the trade's own setup takes its chip's place (its
+    // spelling), first when it is not in the list; « + Other » opens the field to type a new one
+    if (raw) list = [raw, ...list.filter((s) => s.toLowerCase() !== cur)];
+    const OTHER = ({ en: '+ Other', fr: '+ Autre', es: '+ Otro' })[LANG] || '+ Other';
+    return `<div class="ux-setups" data-noi18n>${list.map((s, i) => `<button type="button" class="ux-setup ${i < Math.min(mine.length, 6) ? 'mine' : ''} ${cur === s.toLowerCase() ? 'on' : ''}" data-ux-setup="${esc(s)}">${esc(s)}</button>`).join('')}<button type="button" class="ux-setup ux-setup-other" data-ux-other>${OTHER}</button></div>`;
   }
   function paint() {
     const main = document.getElementById('main'); if (!main) return;
@@ -1406,6 +1410,8 @@
     }
   }
   document.addEventListener('click', (e) => {
+    const o = e.target.closest && e.target.closest('[data-ux-other]');
+    if (o) { const lb = o.closest('.ux-setups').previousElementSibling; if (lb) { lb.classList.add('ux-setup-typed'); const i = lb.querySelector('input'); if (i) { i.focus(); i.select && i.select(); } } return; }
     const b = e.target.closest && e.target.closest('[data-ux-setup]'); if (!b) return;
     const row = b.closest('.ux-setups'), label = row && row.previousElementSibling;
     const input = label && (label.querySelector('input[data-bind$="|setup"]') || (label.matches('input') ? label : null)); if (!input) return;

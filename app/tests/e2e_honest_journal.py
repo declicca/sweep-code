@@ -60,6 +60,7 @@ with sync_playwright() as p:
     # 4a/3. close the day: the platform says −$190 for the day (+$150 −$50 logged): « Trades I didn't log »
     pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(1200)
     pg.evaluate("(d) => SweepGame.openReview(d)", day); pg.wait_for_selector('#gSheet [data-bal-in]', timeout=8000); pg.wait_for_timeout(500)
+    pg.evaluate("document.querySelectorAll('#gSheet .g-rv-more').forEach((d) => { d.open = true })")   # (tour T2) the discipline and the grade under « + Details »
     for k in ('r-followed', 'r-score', 'r-grade'):
       if not pg.locator(f'#gSheet [data-g={k}].on').count(): tap(pg.locator(f'#gSheet [data-g={k}]').first); pg.wait_for_timeout(150)
     pg.locator('#gSheet [data-bal-in="hj-a"]').fill('49810.00'); pg.wait_for_timeout(250)

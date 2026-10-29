@@ -385,9 +385,9 @@ window.SweepMO = window.SweepMO || class {
     const COPY = { en: 'copy traded on {n} accounts', fr: 'copié sur {n} comptes', es: 'copiado en {n} cuentas' };
     const rows = groups.slice(0, max).map((g) => {
       const t = g.t, net = g.net, unj = !t.notes && !(t.discipline && Object.keys(t.discipline).length);
-      // an evening trade says its session AND the clock time it was entered (« session of Oct 8 · entered on the 7th at 23:36 »)
-      const eve = typeof isEveTrade === 'function' && isEveTrade(t);
-      const when = eve ? tradeWhen(t) : tab === 'week' ? `${typeof fdate === 'function' ? fdate(t.date, { weekday: 'short' }) : t.date} · ${(t.entry_time || '').slice(0, 5)}` : (t.entry_time || '').slice(0, 5);
+      // (29 Oct., tour T5) the same line for every trade, an evening one too: the clock time, then the setup (the trade's page says
+      // « session of Oct 8 · entered on the 7th at 23:36 »; here it ran past the row)
+      const when = tab === 'week' ? `${typeof fdate === 'function' ? fdate(t.date, { weekday: 'short' }) : t.date} · ${(t.entry_time || '').slice(0, 5)}` : (t.entry_time || '').slice(0, 5);
       return `<a class="nav-tr" href="#trade/${esc(t.id)}"><span class="nav-tr-d ${t.direction === 'short' ? 's' : 'l'}">${t.direction === 'short' ? 'S' : 'L'}</span>
         <span class="nav-tr-m"><b>${esc(t.instrument || '')} · ${esc(String(t.contracts || ''))}${g.n > 1 ? ` <em class="nav-tr-copy" title="${(COPY[LANG] || COPY.en).replace('{n}', g.n)}" aria-label="${(COPY[LANG] || COPY.en).replace('{n}', g.n)}">+${g.n - 1}</em>` : ''}</b><small>${esc(when)}${t.setup ? ' · ' + esc(t.setup) : ''}</small></span>
         ${unj ? `<span class="nav-tolog">${x.tolog}</span>` : ''}<span class="nav-tr-p ${net > 0 ? 'pos' : net < 0 ? 'neg' : ''}">${typeof money === 'function' ? money(net) : net}</span></a>`;
@@ -4966,6 +4966,8 @@ window.SweepMO = window.SweepMO || class {
     const key = [from, (S.trades || []).length, last(S.trades), (S.journals || []).length, last(S.journals), JSON.stringify((S.settings || {}).max_contracts || '')].join('|');
     if (dCache.k === key) return dCache.v;
     let tr = (S.trades || []).filter((x) => !x.demo && x.date >= from); if (!tr.length) tr = (S.trades || []).filter((x) => x.date >= from);
+    // (29 Oct., tour T4) the trades whose checklist has an answer: no checklist filled yet, « — », never a 0 % that reads like a mark
+    tr = tr.filter((x) => typeof tDisc !== 'function' || tDisc(x) != null);
     tr = typeof mergeCopies === 'function' ? mergeCopies(tr) : tr;
     let v = null;
     if (window.SweepCoach && SweepCoach.trade) {
@@ -6798,26 +6800,28 @@ new window.SweepMO(() => {
     en: { open: ['Your account', 'Your plan', 'Your first trade'], closed: ['Your account', 'Your plan for tomorrow'], active: ['Your account', 'Your plan', 'Your history'],
       tOpen: 'Three steps and you’re trading.', sOpen: 'Your account, your plan for the day, your first trade: about two minutes.',
       tClosed: 'Prepare tomorrow’s session.', sClosed: 'Your account, then your plan for the next session and your risk allowed: about a minute.',
+      pre: ['Your account', 'Your plan for the day'], tPre: 'Prepare today’s session.', sPre: 'Your account, then your plan for the day and your risk allowed, before the open: about a minute.',
       tActive: 'Three steps and your journal is full.', sActive: 'Your account, your plan, then your history: Today, Stats and « Your edge » filled in from today.',
       hT: 'Bring your history', hS: 'Sync NinjaTrader 8 or Quantower, or import a CSV of your platform: Today, Stats and « Your edge » fill up from your first visit.', csv: 'Import a CSV', later: 'Later', traded: 'I traded today: add my trade' },
     fr: { open: ['Ton compte', 'Ton plan', 'Ton premier trade'], closed: ['Ton compte', 'Ton plan de demain'], active: ['Ton compte', 'Ton plan', 'Ton historique'],
       tOpen: 'Trois étapes et tu trades.', sOpen: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.',
       tClosed: 'Prépare ta séance de demain.', sClosed: 'Ton compte, puis ton plan de la prochaine séance et ton risque permis : environ une minute.',
+      pre: ['Ton compte', 'Ton plan du jour'], tPre: 'Prépare ta séance d’aujourd’hui.', sPre: 'Ton compte, puis ton plan du jour et ton risque permis, avant l’ouverture : environ une minute.',
       tActive: 'Trois étapes et ton journal est rempli.', sActive: 'Ton compte, ton plan, puis ton historique : Aujourd’hui, Stats et « Ton edge » remplis dès aujourd’hui.',
       hT: 'Ramène ton historique', hS: 'Synchronise NinjaTrader 8 ou Quantower, ou importe un CSV de ta plateforme : Aujourd’hui, Stats et « Ton edge » se remplissent dès ta première visite.', csv: 'Importer un CSV', later: 'Plus tard', traded: 'J’ai tradé aujourd’hui : ajouter mon trade' },
     es: { open: ['Tu cuenta', 'Tu plan', 'Tu primera operación'], closed: ['Tu cuenta', 'Tu plan de mañana'], active: ['Tu cuenta', 'Tu plan', 'Tu historial'],
       tOpen: 'Tres pasos y operas.', sOpen: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.',
       tClosed: 'Prepara tu sesión de mañana.', sClosed: 'Tu cuenta, luego tu plan de la próxima sesión y tu riesgo permitido: un minuto.',
+      pre: ['Tu cuenta', 'Tu plan del día'], tPre: 'Prepara tu sesión de hoy.', sPre: 'Tu cuenta, luego tu plan del día y tu riesgo permitido, antes de la apertura: un minuto.',
       tActive: 'Tres pasos y tu diario está lleno.', sActive: 'Tu cuenta, tu plan y luego tu historial: Hoy, Estadísticas y « Tu ventaja » llenos desde hoy.',
       hT: 'Trae tu historial', hS: 'Sincroniza NinjaTrader 8 o Quantower, o importa un CSV de tu plataforma: Hoy, Estadísticas y « Tu ventaja » se llenan desde tu primera visita.', csv: 'Importar un CSV', later: 'Más tarde', traded: 'Operé hoy: añadir mi operación' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const NYF = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-  function moment() {
-    const p = {}; NYF.formatToParts(window.__swNow ? new Date(window.__swNow) : new Date()).forEach((x) => { p[x.type] = x.value; });
-    const m = (+p.hour % 24) * 60 + +p.minute;
-    return !['Sat', 'Sun'].includes(p.weekday) && m >= 570 && m < 960 ? 'open' : 'closed';
-  }
+  function nyNow() { const p = {}; NYF.formatToParts(window.__swNow ? new Date(window.__swNow) : new Date()).forEach((x) => { p[x.type] = x.value; }); return { wk: !['Sat', 'Sun'].includes(p.weekday), m: (+p.hour % 24) * 60 + +p.minute }; }
+  function moment() { const n = nyNow(); return n.wk && n.m >= 570 && n.m < 960 ? 'open' : 'closed'; }
+  /** (29 Oct., tour T1) before the open of a weekday (midnight → 9:30 ET): the plan that opens is today's, not tomorrow's */
+  const preOpen = () => { const n = nyNow(); return n.wk && n.m < 570; };
   const running = () => (S.accounts || []).some((a) => !a.demo && Array.isArray(a.adjustments) && a.adjustments.some((x) => +x.amount_c));
   function kind(xp) { return xp === 'gt1' || running() ? 'active' : moment(); }
   function history(later) {
@@ -6845,10 +6849,10 @@ new window.SweepMO(() => {
     const onb = document.querySelector('#main .onb'); if (!onb) return;
     const xp = ((f || onb).querySelector('[data-exp].on') || {}).dataset; const k = kind(xp && xp.exp);
     const ol = onb.querySelector('.onb-steps'), ttl = onb.querySelector('h1, h2'), sub = onb.querySelector('.onb-sub');
-    const key = k === 'closed' ? 'Closed' : k === 'active' ? 'Active' : 'Open';
+    const key = k === 'closed' ? (preOpen() ? 'Pre' : 'Closed') : k === 'active' ? 'Active' : 'Open';
     if (ttl && ttl.textContent !== t('t' + key)) ttl.textContent = t('t' + key);
     if (sub && sub.textContent !== t('s' + key)) sub.textContent = t('s' + key);
-    const html = t(k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
+    const html = t(key === 'Pre' ? 'pre' : k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
     if (ol && ol.innerHTML !== html) { ol.setAttribute('data-noi18n', ''); ol.innerHTML = html; }
     onb.dataset.start = k;
   }

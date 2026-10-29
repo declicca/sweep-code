@@ -187,7 +187,7 @@ def run_day(p, lang, phone):
   # 3. closing the day
   if pg.evaluate("location.hash") != '#dashboard': tap('a[href="#dashboard"]'); wait(800)
   tap('#main .nav-rt [data-rt=review]'); screen('review', '#gSheet [data-g=save-review]'); wait(500)
-  for sel in ('[data-g=r-followed][data-v=yes]', '[data-g=r-score][data-v="4"]', '[data-g=r-grade][data-v=B]'):   # only a question with no answer yet (filled in from the day since 27 Oct.)
+  for sel in ('[data-g=r-followed][data-v=yes]',):   # (tour T2) the discipline and the grade follow the day, under « + Details »   # only a question with no answer yet (filled in from the day since 27 Oct.)
     grp = sel.split(']')[0] + ']'
     if seen('#gSheet ' + sel) and not pg.evaluate("(g) => !!document.querySelector(g + '.on')", '#gSheet ' + grp): tap('#gSheet ' + sel)
   for k in range(pg.locator('#gSheet [data-bal-same]').count()): tap(f'#gSheet [data-bal-same] >> nth={k}')   # « Your balance on Topstep? » « It matches » (brief « pertes oubliées », step 2)

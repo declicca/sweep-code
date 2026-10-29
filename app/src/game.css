@@ -834,6 +834,11 @@ html body #gSheet.g-pm .pm-insts.bad .chip,html body #gSheet.g-pm input[aria-inv
 .pm-sheet .pm-fn{margin:2px 0 0;font-size:12px;line-height:1.4;color:var(--muted)}
 @media (max-width:860px){.g-pm input,.g-pm textarea{font-size:16px}}
 
+/* (29 Oct., tour T2) the review's discipline and grade, filled in from the day, under « + Details » */
+.g-rv-more{margin:2px 0 12px}
+.g-rv-more > summary{display:inline-flex;align-items:center;min-height:40px;list-style:none;cursor:pointer;font-size:13px;color:var(--muted)}
+.g-rv-more > summary::-webkit-details-marker{display:none}
+.g-rv-more[open] > summary{margin-bottom:6px}
 /* the platform's balance in the review (brief « pertes oubliées », step 2) */
 .g-bal .g-bal-a{display:block;margin:-2px 0 2px;font-size:12px;color:var(--muted)}
 .g-bal-r{display:flex;gap:8px;align-items:center}

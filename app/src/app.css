@@ -2012,6 +2012,9 @@ html:not(.tr-uncompact) body #main .tr-main > .co-full{margin-bottom:0!important
 html:not(.tr-uncompact) body #main .tr-side .ux-setups{margin-bottom:0!important}html:not(.tr-uncompact) body #main .tr-more{margin-top:-4px}
 html:not(.tr-uncompact) body #main .tr-grid{gap:4px!important}
 }
+/* (29 Oct., tour T6) the trade page: the setup chosen with its chips only; « + Other » opens the field */
+html body #main label:has(> input[data-bind$="|setup"]):has(+ .ux-setups):not(.ux-setup-typed){display:none!important}
+html body #main .ux-setup-other{color:var(--muted);background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
 /* (activation F, C2) the Trades page on a phone: one row per day */
 .tdays{display:flex;flex-direction:column}
 .tday + .tday{border-top:1px solid var(--line)}
