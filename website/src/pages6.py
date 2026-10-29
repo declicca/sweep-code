@@ -16,12 +16,12 @@ def sec_sweep_day(lang, t, id_="sweep-the-day", rule=True):
     """The daily loop (How it works), on the design system: a phone video beside the text."""
     import ui
     return ui.split(t, T("The daily loop","La boucle quotidienne","El ciclo diario"), T("Sweep your day.","Balaye ta journée.","Barre tu día."),
-      T("Three rings every market day: plan before the open, trade by your rules, review after the session. Close all three and your day is swept, and your discipline streak moves forward. Streak freezes protect your runs, and weekends never count against you.",
-        "Trois anneaux chaque jour de marché : planifier avant l’ouverture, trader selon tes règles, réviser après la séance. Ferme les trois et ta journée est balayée : ton streak de discipline avance. Les gels de streak protègent tes séries, et le week-end ne compte jamais contre toi.",
-        "Tres anillos cada día de mercado: planificar antes de la apertura, operar según tus reglas, revisar tras la sesión. Cierra los tres y tu día queda barrido: tu racha de disciplina avanza. Las congelaciones protegen tus series y los fines de semana nunca cuentan en tu contra."),
-      [T("<b>Daily plan in 2 minutes:</b> bias, levels, scenario, max loss","<b>Plan du jour en 2 minutes :</b> biais, niveaux, scénario, perte max","<b>Plan del día en 2 minutos:</b> sesgo, niveles, escenario, pérdida máxima"),
-       T("<b>Execution</b> measured by your own discipline checklist (13 questions, the first 3 on the form)","<b>Exécution</b> mesurée par ta propre checklist de discipline (13 questions, les 3 premières sur le formulaire)","<b>Ejecución</b> medida con tu propio checklist de disciplina (13 preguntas, las 3 primeras en el formulario)"),
-       T("<b>Review in 60 seconds,</b> without leaving Today","<b>Revue en 60 secondes,</b> sans quitter Aujourd’hui","<b>Revisión en 60 segundos,</b> sin salir de Hoy"),
+      T("Three rings every market day: plan before the open, trade by your rules, review after the session. Close all three and your day is swept. A day counts for your discipline streak once your platform balance is checked or synced, winning or losing. Streak freezes protect your runs, and weekends never count against you.",
+        "Trois anneaux chaque jour de marché : planifier avant l’ouverture, trader selon tes règles, réviser après la séance. Les trois faites, ta journée est balayée. Une journée compte pour ton streak de discipline dès que le solde de ta plateforme est vérifié ou synchronisé, gagnante ou perdante. Les gels de streak protègent tes séries, et le week-end ne compte jamais contre toi.",
+        "Tres anillos cada día de mercado: planificar antes de la apertura, operar según tus reglas, revisar tras la sesión. Completa los tres y tu día queda barrido. Un día cuenta para tu racha de disciplina cuando el saldo de tu plataforma está verificado o sincronizado, ganador o perdedor. Las congelaciones protegen tus series y los fines de semana nunca cuentan en tu contra."),
+      [T("<b>Daily plan in 30 seconds:</b> bias, key levels, two scenarios, max loss. The guided plan is one tap away","<b>Plan du jour en 30 secondes :</b> biais, niveaux clés, deux scénarios, perte max. Le plan guidé est à un toucher","<b>Plan del día en 30 segundos:</b> sesgo, niveles clave, dos escenarios, pérdida máxima. El plan guiado está a un toque"),
+       T("<b>Execution</b> measured by your own discipline checklist (13 questions by default, the 3 that matter most for you on the form)","<b>Exécution</b> mesurée par ta propre checklist de discipline (13 questions par défaut, les 3 qui comptent le plus pour toi sur le formulaire)","<b>Ejecución</b> medida con tu propio checklist de disciplina (13 preguntas por defecto, las 3 que más cuentan para ti en el formulario)"),
+       T("<b>Close your day in 2 taps:</b> your review opens filled in from your day, and you confirm your platform balance","<b>Ferme ta journée en 2 touchers :</b> ta revue s’ouvre remplie d’après ta journée, et tu confirmes le solde de ta plateforme","<b>Cierra tu día en 2 toques:</b> tu revisión se abre rellenada según tu día y confirmas el saldo de tu plataforma"),
        T("<b>Discipline streak</b> plus freezes: 1 on Free, 2 on Pro, 3 on Elite per week","<b>Streak de discipline</b> et gels : 1 en Free, 2 en Pro, 3 en Elite par semaine","<b>Racha de disciplina</b> y congelaciones: 1 en Free, 2 en Pro, 3 en Elite por semana"),
        T("<b>Guardrail:</b> if you go past your max daily loss, Sweep tells you, without judgment","<b>Garde-fou :</b> si tu dépasses ta perte max du jour, Sweep te le dit, sans jugement","<b>Salvaguarda:</b> si superas tu pérdida máxima del día, Sweep te lo dice, sin juzgarte")],
       ui.frame_p("v6-poster-today-phone.webp", t(T("Today on a phone: rings, days, releases","Aujourd’hui sur téléphone : anneaux, jours, annonces","Hoy en el teléfono: anillos, días, datos")), t, video="v6-video-today-phone.mp4"),
@@ -54,21 +54,21 @@ def sec_trust(lang, t, id_="data"):
 
 GAME = [
  ("ecran-parcours.webp", "progression", T("Progression","Progression","Progresión"), T("XP, levels and 7 ranks","XP, niveaux et 7 rangs","XP, niveles y 7 rangos"),
-  T("Recruit → Apprentice → Disciplined → Consistent → Seasoned → Master → Sweeper. 31 badges, including secret ones, and a 5-chapter path from “First steps” to “Ready for payout”. Each step you unlock guides you to the next.",
-    "Recrue → Apprenti → Discipliné → Constant → Aguerri → Maître → Sweeper. 31 badges (dont des badges secrets) et un parcours en 5 chapitres, de « Premiers pas » jusqu’à « Prêt pour le payout ». Chaque étape débloquée te guide vers la suivante.",
-    "Recluta → Aprendiz → Disciplinado → Constante → Curtido → Maestro → Sweeper. 31 insignias (algunas secretas) y un recorrido en 5 capítulos, de «Primeros pasos» a «Listo para el payout». Cada etapa desbloqueada te guía hacia la siguiente.")),
- (None, "missions", T("Weekly missions","Missions hebdomadaires","Misiones semanales"), T("3 missions every Monday","3 missions chaque lundi","3 misiones cada lunes"),
-  T("Every Monday, 3 missions tailored to your weak spots of the past weeks. Finish all three and earn a chest key.",
-    "Chaque lundi, 3 missions adaptées à tes points faibles des dernières semaines. Termine les trois et gagne une clé de coffre.",
-    "Cada lunes, 3 misiones adaptadas a tus puntos débiles de las últimas semanas. Completa las tres y gana una llave de cofre.")),
+  T("Rookie → Apprentice → Disciplined → Consistent → Seasoned → Master → Sweeper. 37 badges, 14 of them secret, all in “My progress”. What to do next is always in “Now”, at the top of Today.",
+    "Recrue → Apprenti → Discipliné → Constant → Aguerri → Maître → Sweeper. 37 badges, dont 14 secrets, réunis dans « Ma progression ». Quoi faire ensuite ? « Maintenant », en haut d’Aujourd’hui, te le dit toujours.",
+    "Novato → Aprendiz → Disciplinado → Constante → Veterano → Maestro → Sweeper. 37 insignias, 14 de ellas secretas, todas en «Mi progreso». Qué hacer después: «Ahora», arriba en Hoy, siempre te lo dice.")),
+ (None, "missions", T("Weekly challenges","Défis de la semaine","Retos de la semana"), T("3 challenges every Monday","3 défis chaque lundi","3 retos cada lunes"),
+  T("Every Monday, 3 challenges picked from your weak spots of the past weeks. Finish all three and earn a chest key.",
+    "Chaque lundi, 3 défis choisis selon tes points faibles des dernières semaines. Réussis les trois et gagne une clé de coffre.",
+    "Cada lunes, 3 retos elegidos según tus puntos débiles de las últimas semanas. Completa los tres y gana una llave de cofre.")),
  ("ecran-boss-revenge.webp", "boss", T("Bosses","Boss","Jefes"), T("Your bad habits, as bosses","Tes mauvaises habitudes, en boss","Tus malos hábitos, como jefes"),
   T("Sweep detects your bad habits in your own data and turns them into bosses: The Revenge, The Opening FOMO, The Oversize, The Slipping Stop, The Overheat, The Improviser… Every clean day takes a hit point off. Beat it for good.",
     "Sweep détecte tes mauvaises habitudes dans tes propres données et les transforme en boss : Le Revenge, Le FOMO de l’ouverture, L’Oversize, Le Stop fuyant, Le Surchauffe, L’Improvisateur… Chaque journée propre lui retire un point de vie. Bats-le pour de bon.",
     "Sweep detecta tus malos hábitos en tus propios datos y los convierte en jefes: El Revenge, El FOMO de la apertura, El Oversize, El Stop huidizo, El Sobrecalentamiento, El Improvisador… Cada día limpio le quita un punto de vida. Derrótalo para siempre.")),
- ("ecran-revue-semaine.webp", "weekly", T("Weekly review","Revue de la semaine","Revisión semanal"), T("A chest every Friday","Un coffre chaque vendredi","Un cofre cada viernes"),
-  T("Every Friday evening: your week at a glance, your discovery of the week, three questions, then a chest to open (XP, streak freezes, ring themes, days of Pro…). Odds shown, never sold.",
-    "Chaque vendredi soir : ta semaine en un coup d’œil, ta découverte de la semaine, trois questions, puis un coffre à ouvrir (XP, gels de streak, thèmes d’anneaux, jours de Pro…). Probabilités affichées, jamais vendu.",
-    "Cada viernes por la noche: tu semana de un vistazo, tu descubrimiento de la semana, tres preguntas y un cofre para abrir (XP, congelaciones de racha, temas de anillos, días de Pro…). Probabilidades visibles, nunca se vende.")),
+ ("ecran-revue-semaine.webp", "weekly", T("Weekly recap","Bilan de la semaine","Resumen semanal"), T("A chest every Friday","Un coffre chaque vendredi","Un cofre cada viernes"),
+  T("Once your Friday is closed (or at 5 p.m. New York time): your week at a glance, a few questions with your rule for next week already suggested, your discovery of the week, then a chest to open (XP, streak freezes, ring themes, days of Pro…). Odds shown, never sold.",
+    "Dès ta journée du vendredi fermée (ou à 17 h, heure de New York) : ta semaine en un coup d’œil, quelques questions avec ta règle pour la semaine suivante déjà proposée, ta découverte de la semaine, puis un coffre à ouvrir (XP, gels de streak, thèmes d’anneaux, jours de Pro…). Probabilités affichées, jamais vendu.",
+    "En cuanto cierras tu viernes (o a las 17 h, hora de Nueva York): tu semana de un vistazo, unas preguntas con tu regla para la próxima semana ya sugerida, tu descubrimiento de la semana y un cofre para abrir (XP, congelaciones de racha, temas de anillos, días de Pro…). Probabilidades visibles, nunca se vende.")),
  ("ecran-edge-reveal.webp", "edge", T("Edge Reveal","Edge Reveal","Edge Reveal"), T("One truth from your trades","Une vérité tirée de tes trades","Una verdad de tus operaciones"),
   T("Each week in Pro (once a month in Free), Sweep reveals one truth drawn from your edge: your best time slot, your most profitable setup in R, the condition where you win most.",
     "Chaque semaine en Pro (une fois par mois en Free), Sweep révèle une vérité tirée de ton edge : ton meilleur créneau horaire, ton setup le plus rentable en R, la condition où tu gagnes le plus.",
@@ -86,9 +86,9 @@ GAME = [
     "100 trades journalisés, ta première semaine sans trade hors plan, ton meilleur mois de discipline : Sweep célèbre chaque étape.",
     "100 operaciones registradas, tu primera semana sin operaciones fuera del plan, tu mejor mes de disciplina: Sweep celebra cada paso.")),
 ]
-GAME_INTRO = T("The traders who last aren’t the most gifted. They’re the most consistent. Sweep makes your consistency visible with levels, ranks, badges, missions and bosses to beat, all earned through process. Never through profit.",
-               "Les traders qui durent ne sont pas les plus doués. Ce sont les plus réguliers. Sweep rend ta régularité visible avec des niveaux, des rangs, des badges, des missions et des boss à battre, tous gagnés par le processus. Jamais par le profit.",
-               "Los traders que duran no son los más talentosos. Son los más constantes. Sweep hace visible tu constancia con niveles, rangos, insignias, misiones y jefes que vencer, todo ganado con el proceso. Nunca con el beneficio.")
+GAME_INTRO = T("The traders who last aren’t the most gifted. They’re the most consistent. Sweep makes your consistency visible with levels, ranks, badges, weekly challenges and bosses to beat, all earned through process. Never through profit.",
+               "Les traders qui durent ne sont pas les plus doués. Ce sont les plus réguliers. Sweep rend ta régularité visible avec des niveaux, des rangs, des badges, des défis de la semaine et des boss à battre, tous gagnés par le processus. Jamais par le profit.",
+               "Los traders que duran no son los más talentosos. Son los más constantes. Sweep hace visible tu constancia con niveles, rangos, insignias, retos de la semana y jefes que vencer, todo ganado con el proceso. Nunca con el beneficio.")
 GAME_TITLE = T("Discipline, video-game style.","La discipline, version jeu vidéo.","La disciplina, al estilo videojuego.")
 
 SOCIAL_POINTS = [
@@ -176,6 +176,13 @@ def page_how(lang, t):
     shots = ["v6-20-signup-m.webp", "v6-13-accounts-m.webp", "ecran-plan-du-jour.webp", "v6-03-log-by-screenshot-m.webp", "v6-22-today-swept-m.webp"]
     steps = ui.sec(ui.cards([ui.card_media(t, h, p, ui.phone_img(f"/img/captures/{shots[i]}", t(h), "50% 36%" if shots[i].startswith("ecran-plan") else "50% 0%"), crop=True, kick=T(f"0{i + 1}", f"0{i + 1}", f"0{i + 1}"))
                              for i, (_, _, h, p) in enumerate(st)], 5, cls="stagger steps5"), "t", "start")
+    # a new trader's first weeks: one discovery mission per trading day (app, 29 Oct.)
+    discover = ui.split(t, T("Your first weeks","Tes premières semaines","Tus primeras semanas"), T("One discovery mission a day.","Une mission de découverte par jour.","Una misión de descubrimiento al día."),
+        T("New traders get 15 short missions, one per trading day, each ticked by what you do, with a “Do it now” button. My money, the guided plan, Sweep AI and the full game show up at their mission; “Show everything” opens them all at once.",
+          "Un nouveau trader reçoit 15 courtes missions, une par jour de trading, cochées par ce que tu fais, avec un bouton « Faire maintenant ». Mon argent, le plan guidé, Sweep AI et le jeu complet arrivent à leur mission ; « Tout montrer » les ouvre tous d’un coup.",
+          "Un trader nuevo recibe 15 misiones cortas, una por día de trading, marcadas por lo que haces, con un botón «Hacerlo ahora». Mi dinero, el plan guiado, Sweep AI y el juego completo aparecen en su misión; «Mostrar todo» los abre todos a la vez."),
+        [], ui.frame_p("ecran-missions-decouverte.webp", t(T("The day’s discovery mission with “Do it now”, sample data","La mission de découverte du jour avec « Faire maintenant », données d’exemple","La misión de descubrimiento del día con «Hacerlo ahora», datos de ejemplo")), t=t),
+        flip=True, id_="discovery", phone=True)
     G = {g[1]: g for g in GAME}
     POS = {"progression": "50% 16%", "boss": "50% 22%", "weekly": "50% 14%", "edge": "50% 74%", "seasons": "50% 16%", "moments": "50% 30%"}
     def gcard(aid):
@@ -197,7 +204,7 @@ def page_how(lang, t):
             t(T("Create an account, add your prop accounts, log a trade from a screenshot, close your three rings, then progress with ranks, missions, bosses and leagues.",
                 "Crée un compte, ajoute tes comptes prop, ajoute un trade depuis une capture, ferme tes trois anneaux, puis progresse avec rangs, missions, boss et ligues.",
                 "Crea una cuenta, añade tus cuentas prop, registra una operación desde una captura, cierra tus tres anillos y progresa con rangos, misiones, jefes y ligas.")),
-            hero + ui.subnav(t, T("How it works","Comment ça marche","Cómo funciona"), anchors) + steps + sec_sweep_day(lang, t) + disc + sec_social(lang, t)
+            hero + ui.subnav(t, T("How it works","Comment ça marche","Cómo funciona"), anchors) + steps + discover + sec_sweep_day(lang, t) + disc + sec_social(lang, t)
             + ui.read_next(lang, t, ["features.html", "prop-firm-tracker.html", "pricing.html"]) + ui.final(lang, t) + tour_dialog(t), ld)
 SYSTEM_PAGES.add("how-it-works.html")
 
@@ -236,8 +243,7 @@ def page_pricing(lang, t):
      grp(T("The game","Le jeu","El juego")),
      (T("Rings, streak, badges, ranks","Anneaux, streak, badges, rangs","Anillos, racha, insignias, rangos"),Y,Y,Y),
      (T("Streak freezes per week","Gels de streak / semaine","Congelaciones de racha / semana"),"1","2","3"),
-     (T("Path","Parcours","Recorrido"),*lim(T("Chapters 1 and 2","Chapitres 1 et 2","Capítulos 1 y 2"),T("Complete","Complet","Completo"),T("Complete","Complet","Completo"))),
-     (T("Weekly missions","Missions hebdomadaires","Misiones semanales"),"1","3",t(T("3 + 1 reroll","3 + 1 relance","3 + 1 relanzamiento"))),
+     (T("Weekly challenges","Défis de la semaine","Retos de la semana"),"1","3",t(T("3 + 1 reroll","3 + 1 relance","3 + 1 relanzamiento"))),
      (T("Active bosses","Boss actifs","Jefes activos"),"1","1",t(T("2 + rematch","2 + revanche","2 + revancha"))),
      (T("Edge Reveal","Edge Reveal","Edge Reveal"),*lim(T("1 a month","1 par mois","1 al mes"),T("Every week","Chaque semaine","Cada semana"),T("Every week + a 2nd","Chaque semaine + un 2e","Cada semana + un 2.º"))),
      (T("Monthly and yearly Wrapped","Wrapped mensuel et annuel","Wrapped mensual y anual"),*lim(T("Short version","Version courte","Versión corta"),T("Complete","Complet","Completo"),T("Complete","Complet","Completo"))),
@@ -269,7 +275,7 @@ def page_pricing(lang, t):
             T("<b>Your whole history</b> in your stats","<b>Tout ton historique</b> dans tes stats","<b>Todo tu historial</b> en tus estadísticas"),
             T("Sweep AI: 50 messages a day, unlimited screenshots, 3 trade reviews a month","Sweep AI : 50 messages par jour, captures illimitées, 3 avis sur un trade par mois","Sweep AI: 50 mensajes al día, capturas ilimitadas, 3 opiniones sobre una operación al mes"),
             T("<b>The 90-day gameplan</b> for traders starting out","<b>Le parcours de 90 jours</b> pour les traders qui débutent","<b>El recorrido de 90 días</b> para traders que empiezan"),
-            T("The whole game: full path, 3 missions a week, a weekly Edge Reveal","Tout le jeu : parcours complet, 3 missions par semaine, un Edge Reveal chaque semaine","Todo el juego: recorrido completo, 3 misiones por semana, un Edge Reveal cada semana")],
+            T("The whole game: 3 weekly challenges, a weekly Edge Reveal","Tout le jeu : 3 défis par semaine, un Edge Reveal chaque semaine","Todo el juego: 3 retos por semana, un Edge Reveal cada semana")],
      "elite":[T("Everything in Pro, plus:","Tout Pro, plus :","Todo lo de Pro, más:"),
               T("<b>An AI review on every trade</b>","<b>Un avis de l’IA sur chaque trade</b>","<b>Una opinión de la IA en cada operación</b>"),
               T("<b>A weekly AI report</b> on your edge, your leaks and your habits","<b>Un rapport IA chaque semaine</b> sur ton edge, tes fuites et tes habitudes","<b>Un informe de IA cada semana</b> sobre tu edge, tus fugas y tus hábitos"),

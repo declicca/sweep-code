@@ -560,7 +560,14 @@ def page_gp_hub(lang, t):
     months = [ui.card(t, NAMES[i], texts[i], kick=T(f"{MONTH(i + 1)['en']} · {SPANS[i]['en']}", f"{MONTH(i + 1)['fr']} · {SPANS[i]['fr']}", f"{MONTH(i + 1)['es']} · {SPANS[i]['es']}"),
                       more=T("Open the month","Ouvrir le mois","Abrir el mes"), url=href(lang, GP_MONTHS[i])) for i in range(3)]
     sweep = _app_band(t, "signup_gameplan_hub")
-    b = (ui.sec(ui.head(t, None, T("Three months, one process","Trois mois, un processus","Tres meses, un proceso")) + ui.cards(months, 3), "t", "months")
+    # in Sweep, each trading word explains itself where it shows (app, 27 Oct.)
+    words = ui.split(t, T("New to prop trading?","Nouveau en prop firm ?","¿Nuevo en las prop firms?"), T("Every trading word, explained where you see it.","Chaque mot de trading, expliqué là où tu le vois.","Cada palabra de trading, explicada donde la ves."),
+        T("In Sweep, tap the “i” next to drawdown, payout, cushion, R, consistency or profit factor: a short explanation opens right there. Starting out, your first plans also start small: 3 trades, half your daily limit and the micro contract suggested.",
+          "Dans Sweep, touche le « i » à côté de drawdown, payout, coussin, R, consistance ou facteur de profit : une courte explication s’ouvre sur place. Si tu débutes, tes premiers plans commencent aussi petit : 3 trades, la moitié de ta limite du jour et le micro proposé.",
+          "En Sweep, toca la «i» junto a drawdown, payout, colchón, R, consistencia o factor de beneficio: se abre una explicación corta ahí mismo. Si empiezas, tus primeros planes también empiezan pequeño: 3 operaciones, la mitad de tu límite diario y el micro sugerido."),
+        [], ui.frame_p("ecran-explication-i.webp", t(T("The “i” of the drawdown cushion, open on an account’s page, sample data","Le « i » de la marge de drawdown, ouvert sur la page d’un compte, données d’exemple","La «i» del margen de drawdown, abierta en la página de una cuenta, datos de ejemplo")), t=t),
+        flip=True, id_="words", phone=True)
+    b = (ui.sec(ui.head(t, None, T("Three months, one process","Trois mois, un processus","Tres meses, un proceso")) + ui.cards(months, 3), "t", "months") + words
          + ui.sec(f'<article class="article">{localize(lang, t(HUB_WHY))}<h2>{t(T("The three gates","Les trois portes","Las tres puertas"))}</h2>{_tbl(t, GATES)}</article>', "n", "how", width="read")
          + ui.sec(ui.head(t, None, T("One question at a time","Une question à la fois","Una pregunta a la vez")) + ui.cards([ui.card(t, REL_INFO[p][0], REL_INFO[p][1], more=T("Read","Lire","Leer"), url=href(lang, p)) for p in GP_SATS], 5), "t", "deeper")
          + ui.sec(sweep, "t", "sweep")
