@@ -2915,6 +2915,7 @@ html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > spa
 html body .nav-rt-me .nav-rt-disc small,html body .nav-rt-me .nav-rt-streak small,html body .nav-rt-me .nav-rt-lv small{font-size:11px!important;color:var(--muted)!important;line-height:1.2}
 html body .nav-rt-me .nav-rt-disc b,html body .nav-rt-me .nav-rt-streak b,html body .nav-rt-me .nav-rt-lv b{display:inline-flex;align-items:center;gap:4px;font:600 15px var(--font-num,ui-monospace)!important;color:var(--text)!important;line-height:1.2}
 html body .nav-rt-me .nav-rt-streak b svg{width:14px;height:14px}
+html body .nav-rt-me .nav-rt-help{width:44px;max-width:44px;justify-self:start;padding:0;justify-content:center}   /* alone before the first trade: its own size, not a wide box */
 html body .nav-rt-me .nav-rt-disc-ph{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)}
 html body .nav-rt-me .nav-rt-streak > span small,html body .nav-rt-me .nav-rt-lv > span small{display:block!important;text-align:center}
 html body .nav-rt-me .nav-rt-streak > span b{display:flex!important;justify-content:center;align-items:center;gap:4px}
