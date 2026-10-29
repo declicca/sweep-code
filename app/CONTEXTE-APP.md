@@ -1368,3 +1368,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **T5** : sur Aujourd'hui, un trade du soir a la même ligne que les autres : l'heure, puis le setup.
 - **T6** : sur la page d'un trade, le setup se choisit par ses puces seulement. Le setup du trade y figure avec son écriture à lui, et « + Autre » ouvre le champ pour en taper un.
 - **Test** : `e2e_tour_1029` (390 fr foncé, 1300 en clair).
+
+### Vérifications du 29 oct.
+- **La vitesse après le verre d'iOS 27.2** (`tools/perf.py`, A/B en alternance, médiane de 5 passages, `9756914` contre l'état du 29 oct., derrière `gzproxy.py`, téléphone ralenti 4×) : rien ne ralentit.
+  - Aujourd'hui, Calendrier et Comptes sont identiques à quelques millisecondes près.
+  - Trades est plus rapide sur téléphone (TBT 70 → 16 ms, script 226 → 176 ms) grâce à la liste par jour.
+  - Stats sur téléphone prend 23 ms de plus de styles (136 → 159 ms), sans effet sur le TBT. CLS 0 partout sur téléphone.
+- **« Ramène ton historique » jusqu'au bout** (`e2e_history_sync`) : NinjaTrader 8 ouvre la connexion avec la clé personnelle ; un envoi de l'add-on avec cette clé, puis le compte relié, donnent le trade dans le journal, et la mission 8 se coche.
+- **`e2e_page_shift`** : son message dit maintenant le nombre de comptes au premier dessin et à la fin, et la hauteur de la carte des comptes, pour trouver la cause du décalage qui apparaît parfois sur la CI (une carte poussée de 327 px sous les comptes), introuvable sur le Mac.
