@@ -244,7 +244,9 @@ def live(p, lang, phone):   # brief 03 step 3: during the session
     ok(bool(txt) and y['left'] in txt and (early or (y['wait'] in txt and y['own'] in txt)), f'{tag} G the {name} form: « {txt[:110]}… »')
   # H. 80 % then 100 % of the daily limit (the account: $1,000)
   pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(500)
-  pg.evaluate(TRADE, ['t4', pg.evaluate("todayStr()"), '23:58', '23:59', 'long', -70000, {}]); pg.evaluate("toast('Trade saved')"); pg.wait_for_timeout(150)
+  pg.evaluate(TRADE, ['t4', pg.evaluate("todayStr()"), '23:58', '23:59', 'long', -70000, {}]); pg.evaluate("toast('Trade saved')")
+  try: pg.wait_for_function("(w) => (document.getElementById('toast') || {}).textContent.includes(w)", arg=y['d75'], timeout=3000)   # (29 Oct.: read at 150 ms, a slow CI saw the toast before its coach line)
+  except Exception: pass
   toast = pg.evaluate("document.getElementById('toast').textContent"); pg.evaluate("render()"); pg.wait_for_timeout(2600)
   card = pg.evaluate(TXT, '#main .co-lim')
   bell = [i.get('title_key') for i in ctx.request.get(B + '/api/notifications', headers=H).json().get('items', [])]
