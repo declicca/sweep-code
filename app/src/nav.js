@@ -6746,10 +6746,10 @@ new window.SweepMO(() => {
     main.querySelectorAll('.facts > div > span:last-child, .facts > div > b').forEach((v) => { const w = WORD.test(v.textContent || ''); if (v.classList.contains('fx-tx') !== w) v.classList.toggle('fx-tx', w); });
     const m = /^#trade\/([^/]+)/.exec(location.hash), t = typeof getDoc === 'function' && getDoc('trades', decodeURIComponent(m[1]));
     const box = main.querySelector('#newsCtx'), none = !!(t && Array.isArray(t.news) && !t.news.length);
-    if (box) { const h = box.previousElementSibling; box.hidden = none; if (h && h.classList.contains('sec-h')) h.hidden = none; }
+    if (box) { const h = box.previousElementSibling; box.classList.toggle('fx-none', none); if (h && h.classList.contains('sec-h')) h.classList.toggle('fx-none', none); }
     // (activation F, C3) the setup is chosen in one place, « Setup & costs »: not again in the facts; the fees, the platform's
     // P&L and the tags under « More details »
-    main.querySelectorAll('.facts > div').forEach((r) => { const l = r.firstElementChild; if (l && /^Setup$/i.test(l.textContent.trim()) && !r.hidden) r.hidden = true; });
+    main.querySelectorAll('.facts > div').forEach((r) => { const l = r.firstElementChild; const k = !!l && /^Setup$/i.test(l.textContent.trim()); if (k !== r.classList.contains('fx-setup')) r.classList.toggle('fx-setup', k); });
     // a phone: the gross P&L (the header's net + the fees) and the fees (in « More details ») are not repeated in the facts
     main.querySelectorAll('.facts > div').forEach((r) => { const l = r.firstElementChild; const k = l && /^(Gross P&L|P&L brut|P&L bruto|Fees|Frais|Comisiones)$/i.test(l.textContent.trim()); if (k !== r.classList.contains('fx-dup')) r.classList.toggle('fx-dup', !!k); });
     // an empty value (« — ») says nothing: not a row of its own (the notes too)

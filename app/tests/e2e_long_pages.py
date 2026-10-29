@@ -49,8 +49,10 @@ with sync_playwright() as p:
     news = pg.evaluate("(() => { const t = getDoc('trades', location.hash.split('/')[1]), b = document.getElementById('newsCtx'); return [Array.isArray(t.news) ? t.news.length : null, b ? !!b.getClientRects().length : null] })()")
     ok(news[0] != 0 or news[1] is False, f'C3 {tag}: « Economic context » only with an announcement ({news})')
     if phone:
+      # the same trade both ways: compact, then as before (html.tr-uncompact turns the phone layout off, « More details » open)
       h = pg.evaluate("document.documentElement.scrollHeight")
-      ok(h <= 1609, f'C3 {tag}: the trade page {h} px (2,414 before; at most 1,609, a third less)')
+      h0 = pg.evaluate("(() => { document.documentElement.classList.add('tr-uncompact'); const d = document.querySelector('#main .tr-more'); if (d) d.open = true; const v = document.documentElement.scrollHeight; document.documentElement.classList.remove('tr-uncompact'); if (d) d.open = false; return v })()")
+      ok(h <= h0 * 2 / 3 + 4, f'C3 {tag}: the trade page {h} px, {h0} px as before ({round((1 - h / h0) * 100)} % shorter, at least a third)')
     # C4
     pg.evaluate("openTicket(null, { manual: true })"); pg.wait_for_selector('#tkSlide.open', timeout=8000); pg.wait_for_timeout(1000)
     extra = pg.evaluate("[...document.querySelectorAll('#tkSlide.open .nav-tk-alt, #tkSlide.open [data-act=ai-log], #tkSlide.open [data-tk-alt]')].length")

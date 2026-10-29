@@ -1982,35 +1982,35 @@ html body .tr-side .sec-h{margin-top:0}
 .tr-more > summary{display:flex;align-items:center;min-height:44px;list-style:none;cursor:pointer;font-size:13px;color:var(--muted)}
 .tr-more > summary::-webkit-details-marker{display:none}
 /* (activation F, C3) the trade page on a phone: a third shorter, nothing lost (the empty values were « — » rows) */
-html body #main .facts .fx-empty{display:none!important}
+html:not(.tr-uncompact) body #main .facts .fx-empty,html:not(.tr-uncompact) body #main .facts .fx-setup,html:not(.tr-uncompact) body #main .fx-none{display:none!important}
 @media (max-width:860px){
-html body #main .facts{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 12px!important}
-html body #main .facts > div:not(.ux-notes){flex-direction:column!important;justify-content:flex-start!important;gap:2px!important;padding:8px 0!important}
-html body #main .facts > div > span:first-child{font-size:11px}
-html body #main .facts > .ux-notes{grid-column:1/-1}
-html body #main .th-head{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;align-items:start}
-html body #main .tr-chart .sc-box{height:180px!important}html body #main .tr-chart .sc-chart{height:180px!important}
-html body #main .tr-side .ux-setups,html body #main .co .chips{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-html body #main .tr-side .ux-setups > *,html body #main .co .chips > *{flex:none}
-html body #main .co textarea{min-height:44px;height:44px}
-html body #main .tr-grid{gap:12px!important;margin-top:12px}html body #main .tr-side{gap:8px!important}html body #main .tr-side .sec-h{margin:4px 0 0!important}
-html body #main .tr-side .fgrid.one{row-gap:10px}
-html body #main .tr-side .surface.pad{padding:14px 16px!important}
-html body #main .tr-more > summary{min-height:40px}
-html body #main .tr-main{min-height:0}html body #main .tr-main > *:first-child{margin-top:0}
-html body #main .facts > div:not(.ux-notes){padding:5px 0!important}
-html body #main .co .co-q{margin-top:8px!important}
-html body #main .tr-chart .sc-box,html body #main .tr-chart .sc-chart{height:150px!important}
-html body #main .facts .fx-dup{display:none!important}
-html body #main .rprog:not(:has(> * > *)){display:none!important}
-html body #main > .surface{margin-top:14px!important}
-html body #main > .tr-top,html body #main > .nav-tnav{margin-bottom:8px!important}
-html body #main .co .co-q:has(> .seg){display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:10px}
-html body #main .co .co-q:has(> .seg) > .seg{flex:none;margin:0!important}
-html body #main .th-head{padding-bottom:6px!important;row-gap:8px!important}
-html body #main .tr-main > .co-full{margin-bottom:0!important}html body #main .tr-main > .co-full > summary{padding:2px!important;min-height:40px;display:flex;align-items:center}
-html body #main .tr-side .ux-setups{margin-bottom:0!important}html body #main .tr-more{margin-top:-4px}
-html body #main .tr-grid{gap:4px!important}
+html:not(.tr-uncompact) body #main .facts{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0 12px!important}
+html:not(.tr-uncompact) body #main .facts > div:not(.ux-notes){flex-direction:column!important;justify-content:flex-start!important;gap:2px!important;padding:8px 0!important}
+html:not(.tr-uncompact) body #main .facts > div > span:first-child{font-size:11px}
+html:not(.tr-uncompact) body #main .facts > .ux-notes{grid-column:1/-1}
+html:not(.tr-uncompact) body #main .th-head{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;align-items:start}
+html:not(.tr-uncompact) body #main .tr-chart .sc-box{height:180px!important}html:not(.tr-uncompact) body #main .tr-chart .sc-chart{height:180px!important}
+html:not(.tr-uncompact) body #main .tr-side .ux-setups,html:not(.tr-uncompact) body #main .co .chips{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+html:not(.tr-uncompact) body #main .tr-side .ux-setups > *,html:not(.tr-uncompact) body #main .co .chips > *{flex:none}
+html:not(.tr-uncompact) body #main .co textarea{min-height:44px;height:44px}
+html:not(.tr-uncompact) body #main .tr-grid{gap:12px!important;margin-top:12px}html:not(.tr-uncompact) body #main .tr-side{gap:8px!important}html:not(.tr-uncompact) body #main .tr-side .sec-h{margin:4px 0 0!important}
+html:not(.tr-uncompact) body #main .tr-side .fgrid.one{row-gap:10px}
+html:not(.tr-uncompact) body #main .tr-side .surface.pad{padding:14px 16px!important}
+html:not(.tr-uncompact) body #main .tr-more > summary{min-height:40px}
+html:not(.tr-uncompact) body #main .tr-main{min-height:0}html:not(.tr-uncompact) body #main .tr-main > *:first-child{margin-top:0}
+html:not(.tr-uncompact) body #main .facts > div:not(.ux-notes){padding:5px 0!important}
+html:not(.tr-uncompact) body #main .co .co-q{margin-top:8px!important}
+html:not(.tr-uncompact) body #main .tr-chart .sc-box,html:not(.tr-uncompact) body #main .tr-chart .sc-chart{height:150px!important}
+html:not(.tr-uncompact) body #main .facts .fx-dup{display:none!important}
+html:not(.tr-uncompact) body #main .rprog:not(:has(> * > *)){display:none!important}
+html:not(.tr-uncompact) body #main > .surface{margin-top:14px!important}
+html:not(.tr-uncompact) body #main > .tr-top,html:not(.tr-uncompact) body #main > .nav-tnav{margin-bottom:8px!important}
+html:not(.tr-uncompact) body #main .co .co-q:has(> .seg){display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:10px}
+html:not(.tr-uncompact) body #main .co .co-q:has(> .seg) > .seg{flex:none;margin:0!important}
+html:not(.tr-uncompact) body #main .th-head{padding-bottom:6px!important;row-gap:8px!important}
+html:not(.tr-uncompact) body #main .tr-main > .co-full{margin-bottom:0!important}html:not(.tr-uncompact) body #main .tr-main > .co-full > summary{padding:2px!important;min-height:40px;display:flex;align-items:center}
+html:not(.tr-uncompact) body #main .tr-side .ux-setups{margin-bottom:0!important}html:not(.tr-uncompact) body #main .tr-more{margin-top:-4px}
+html:not(.tr-uncompact) body #main .tr-grid{gap:4px!important}
 }
 /* (activation F, C2) the Trades page on a phone: one row per day */
 .tdays{display:flex;flex-direction:column}
