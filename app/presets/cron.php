@@ -4,7 +4,7 @@ declare(strict_types=1);
  * Sweep — weekly check of the prop firm presets.
  *
  * The work itself is in presets/check.php (shared with Admin → Presets → « Check now »): limits, payout rules and prices
- * read on each firm's own pages, validated, doubtful changes kept « to review », the rest applied, and every trader with
+ * read on each firm's own pages, validated, doubtful changes applied only when a second reading confirms them, the rest applied, and every trader with
  * an active account at a firm that changed gets a notification. Accounts keep their rules until the trader applies the new ones.
  *
  * cPanel → Cron Jobs → once a week (Monday 05:00):

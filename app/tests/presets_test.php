@@ -115,25 +115,36 @@ ok($st['notified'] === 1, 'the admin sees « 1 trader notified »');
 [$st2, $new2] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['apex']);
 ok($st2['status'] === 'unchanged', 'the same reading a second time: « unchanged »');
 
-echo "— Doubtful changes are never applied\n";
+echo "— Doubtful changes: applied only when a second reading confirms them, never « to review » (29 Oct.)\n";
 $cur = pr_current();
-mock(['topstep' => answer_of('topstep', function (&$a) { $a['programs'][0]['sizes'][0]['funded']['payout']['max'] = 9000; })]);
-[$st, $new] = pr_check_firm($pdo, array_column($cur['firms'], null, 'id')['topstep']);
-ok($st['status'] === 'review' && $new === null && (bool) array_filter($st['errors'], fn($e) => strpos($e, 'payout max 2000 → 9000') !== false), 'a payout cap ×4.5 → « to review », not applied');
+$tsOf = fn() => array_column(pr_current()['firms'], null, 'id')['topstep'];
+mock(['topstep' => [answer_of('topstep', function (&$a) { $a['programs'][0]['sizes'][0]['funded']['payout']['max'] = 9000; }), answer_of('topstep')]]);
+[$st, $new] = pr_check_firm($pdo, $tsOf());
+ok($st['status'] === 'unchanged' && $new === null && strpos(implode(' ', $st['errors']), 'funded.payout.max 2000 → 9000') !== false, 'a payout cap ×4.5 the second reading does not give: not applied, read again next week (' . $st['status'] . ')');
 pr_apply($pdo, 'topstep', $st, $new);
 ok(pr_rules_of(pr_current(), 'topstep|combine|50000|funded|')['rules']['payout_max_c'] === 200000, 'Topstep keeps its previous cap');
 mock(['topstep' => answer_of('topstep', function (&$a) { $a['programs'][0]['sizes'][1]['price']['eval'] = 990; })]);
-[$st] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['topstep']);
-ok($st['status'] === 'review', 'an evaluation price ×10 → « to review »');
+[$st, $new] = pr_check_firm($pdo, $tsOf());
+ok($st['status'] === 'updated' && $new && $new['programs'][0]['sizes'][1]['price']['eval'] === 990 && !$st['errors'], 'an evaluation price ×10 that both readings give: applied (' . $st['status'] . ')');
 mock(['topstep' => answer_of('topstep', function (&$a) { $a['programs'][0]['sizes'][0]['funded']['payout']['win_days'] = 50; })]);
-[$st] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['topstep']);
-ok($st['status'] === 'review', 'an impossible payout rule (50 winning days) → « to review »');
+[$st, $new] = pr_check_firm($pdo, $tsOf());
+ok($st['status'] === 'unchanged' && $new === null && strpos(implode(' ', $st['errors']), 'previous version kept') !== false, 'an impossible payout rule (50 winning days), even read twice: the previous version stays (' . $st['status'] . ')');
 mock(['topstep' => answer_of('topstep', function (&$a) { unset($a['programs'][0]['sizes'][0]['funded']['payout'], $a['programs'][0]['sizes'][0]['price']); })]);
-[$st, $new] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['topstep']);
+[$st, $new] = pr_check_firm($pdo, $tsOf());
 ok($st['status'] === 'unchanged', 'a payout rule or a price not found on the page is kept (not « removed »)');
 mock(['lucid' => ['programs' => [answer_of('lucid')['programs'][0]]]]);
-[$st] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['lucid']);
-ok($st['status'] === 'review', 'half of Lucid’s accounts gone at once → « to review »');
+[$st, $new] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['lucid']);
+ok($st['status'] === 'unchanged' && $new === null && strpos(implode(' ', $st['errors']), '4 of 5 account types not found') !== false, 'most of Lucid’s accounts gone at once, even twice: nothing removed (' . $st['status'] . ')');
+mock(['mffu' => answer_of('mffu', function (&$a) { $a['programs'] = array_values(array_filter($a['programs'], fn($p) => $p['id'] !== 'mffu-rapid-eod')); })]);
+[$st, $new] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['mffu']);
+$eod = $new ? array_column($new['programs'], null, 'id')['mffu-rapid-eod'] ?? null : null;
+ok($st['status'] === 'updated' && $eod && !empty($eod['legacy']) && $eod['label']['fr'] && $eod['label']['es'] && count($eod['sizes']) === 1, 'an account type found in neither reading: « no longer sold » (Legacy), kept for the accounts that have it (' . $st['status'] . ')');
+mock(['mffu' => [answer_of('mffu', function (&$a) { $a['programs'] = array_values(array_filter($a['programs'], fn($p) => $p['id'] !== 'mffu-rapid-eod')); }), answer_of('mffu')]]);
+[$st, $new] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['mffu']);
+ok($st['status'] === 'unchanged' && $new === null, '… found again by the second reading: it stays sold');
+mock(['tpt' => answer_of('tpt', function (&$a) { $a['programs'][] = ['id' => 'tpt-new', 'name' => 'New', 'sizes' => [['size' => 50000, 'eval' => ['target' => 3000, 'dd' => 2000, 'dd_type' => 'eod']]]]; $a['programs'][0]['sizes'][0]['funded']['payout']['max'] = 99000; })]);
+[$st, $new] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['tpt']);
+ok($st['status'] === 'updated' && $new && in_array('tpt-new', array_column($new['programs'], 'id'), true) && $new['programs'][0]['sizes'][0] == array_column(pr_current()['firms'], null, 'id')['tpt']['programs'][0]['sizes'][0], 'a new account type read twice is added; in the same reading, an impossible cap keeps the previous version of its account type');
 putenv('SWEEP_PRESETS_MOCK=' . $DATA . '/none.json'); file_put_contents($DATA . '/none.json', '{}');
 [$st] = pr_check_firm($pdo, array_column(pr_current()['firms'], null, 'id')['mffu']);
 ok($st['status'] === 'error' && $st['errors'], 'a reading that fails → « error », with the message for the admin');
@@ -185,31 +196,37 @@ $l['seed_version'] = '2026-01-02'; file_put_contents(pr_live_path(), json_encode
 $st = pr_status(); $st['recheck_for'] = $seedV; pr_save_status($st);
 ok(!pr_recheck_due(), 'a check already tried for this seed (even a failed one) is not repeated every 15 minutes: the weekly task tries again');
 
-echo "— A check never removes on its own: an account or a rule no longer read goes to review (12 Oct.)\n";
+echo "— A check never removes on its own: an account or a rule no longer read stays (12 Oct.)\n";
 $firmOf = function (string $id) { foreach (pr_current()['firms'] as $f) if ($f['id'] === $id) return $f; return null; };
 $run1 = function (string $id, callable $edit) use ($pdo, $firmOf) { mock([$id => answer_of($id, $edit)]); [$st, $new] = pr_check_firm($pdo, $firmOf($id)); return pr_apply($pdo, $id, $st, $new); };
+// a first reading with the edit, a second one without it (the readings disagree)
+$run2 = function (string $id, callable $edit) use ($pdo, $firmOf) { mock([$id => [answer_of($id, $edit), answer_of($id)]]); [$st, $new] = pr_check_firm($pdo, $firmOf($id)); return pr_apply($pdo, $id, $st, $new); };
 $st = $run1('topstep', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) unset($s['funded']['dll_optional']); });
-ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'dll_optional') !== false, "Topstep's optional daily loss limit no longer read on the pages: to review, not applied (" . ($st['errors'][0] ?? '') . ')');
+ok($st['status'] === 'unchanged', "Topstep's optional daily loss limit no longer read on the pages: nothing changes (" . $st['status'] . ')');
 ok(!empty($firmOf('topstep')['programs'][0]['sizes'][0]['funded']['dll_optional']), '… and traders are still offered the option');
 $st = $run1('mffu', function (array &$a) { array_pop($a['programs'][0]['sizes']); });
-ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'no longer found on the official pages') !== false, 'an account no longer found on the pages: to review, the account stays');
+ok($st['status'] === 'unchanged' && count($firmOf('mffu')['programs'][0]['sizes']) === 4, 'an account size no longer found on the pages: the account stays (' . $st['status'] . ')');
 $st = $run1('tpt', function (array &$a) { $a['programs'][0]['name'] = 'Test'; });
 ok($st['status'] === 'unchanged' && $firmOf('tpt')['programs'][0]['name'] === 'Test → PRO', 'a program read under another name keeps ours (« Test → PRO »): nothing changes (' . $st['status'] . ')');
 $st = $run1('topstep', function (array &$a) { foreach ($a['programs'][0]['sizes'] as &$s) $s['funded']['max_minis'] = ($s['funded']['max_minis'] ?? 0) + 1; });
 ok($st['status'] === 'updated' && $firmOf('topstep')['programs'][0]['sizes'][0]['funded']['max_minis'] >= 1, 'a number read on the pages (max contracts) is still applied automatically (' . $st['status'] . ')');
 
-// Alpha, 12 Oct.: « up to 4 times a month » read as « 4 payouts in all » — a limit on the number of payouts that appears is not applied on its own
-$st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) if (isset($s['funded']['payout'])) $s['funded']['payout']['max_payouts'] = 4; });
-ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'max_payouts none → 4') !== false && pr_rules_of(pr_current(), 'alpha|zero|50000|funded|')['rules']['payout_max_n'] === null, 'a payout count limit read where there was none: to review, not applied (' . ($st['errors'][0] ?? $st['status']) . ')');
+// Alpha, 12 Oct.: « up to 4 times a month » read as « 4 payouts in all » — a limit on the number of payouts that appears needs a second reading that gives it
+$st = $run2('alpha', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) if (isset($s['funded']['payout'])) $s['funded']['payout']['max_payouts'] = 4; });
+ok($st['status'] === 'unchanged' && strpos(implode(' ', $st['errors']), 'funded.payout.max_payouts NULL → 4') !== false && pr_rules_of(pr_current(), 'alpha|zero|50000|funded|')['rules']['payout_max_n'] === null, 'a payout count limit read where there was none, not given by the second reading: not applied (' . $st['status'] . ')');
 // Alpha, 13 Oct.: the check after the update added « profitable since the last payout » (the Payout Policy asks 5 new winning days, or the Direct target)
-$st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) if (isset($s['funded']['payout'])) $s['funded']['payout']['cycle_pos'] = true; });
-ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'cycle_pos none → true') !== false && pr_rules_of(pr_current(), 'alpha|zero|50000|funded|')['rules']['payout_cycle_pos'] === null, '« profitable since the last payout » read where there was none: to review, not applied');
-$st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) if ($p['id'] === 'advanced') foreach ($p['sizes'] as &$s) $s['funded']['consistency'] = 40; });
-ok($st['status'] === 'review' && strpos(implode(' ', $st['errors']), 'funded consistency none → 40') !== false && pr_rules_of(pr_current(), 'alpha|advanced|50000|funded|')['rules']['consistency_pct'] === null, 'a funded consistency read where there was none (Alpha Advanced): to review, not applied');
+$st = $run2('alpha', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) if (isset($s['funded']['payout'])) $s['funded']['payout']['cycle_pos'] = true; });
+ok($st['status'] === 'unchanged' && strpos(implode(' ', $st['errors']), 'funded.payout.cycle_pos NULL → true') !== false && pr_rules_of(pr_current(), 'alpha|zero|50000|funded|')['rules']['payout_cycle_pos'] === null, '« profitable since the last payout » read where there was none, not given by the second reading: not applied');
+$st = $run2('alpha', function (array &$a) { foreach ($a['programs'] as &$p) if ($p['id'] === 'advanced') foreach ($p['sizes'] as &$s) $s['funded']['consistency'] = 40; });
+ok($st['status'] === 'unchanged' && strpos(implode(' ', $st['errors']), 'funded.consistency NULL → 40') !== false && pr_rules_of(pr_current(), 'alpha|advanced|50000|funded|')['rules']['consistency_pct'] === null, 'a funded consistency read where there was none (Alpha Advanced), not given by the second reading: not applied');
 $st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) if ($p['id'] === 'zero') foreach ($p['sizes'] as &$s) $s['funded']['payout']['win_days'] = 6; });
 ok($st['status'] === 'updated' && pr_rules_of(pr_current(), 'alpha|zero|50000|funded|')['rules']['payout_win_days'] === 6, 'a condition the catalogue has already, read with a new value (5 → 6 winning days): still applied (' . $st['status'] . ')');
 $st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) foreach ($p['sizes'] as &$s) if (isset($s['funded']['payout'])) unset($s['funded']['payout']['first_min'], $s['funded']['payout']['min'], $s['funded']['payout']['max_pct']); });
 ok(in_array($st['status'], ['unchanged', 'updated'], true) && pr_rules_of(pr_current(), 'alpha|direct|25000|funded|')['rules']['payout_first_min_c'] === 150000 && pr_rules_of(pr_current(), 'alpha|zero|25000|funded|')['rules']['payout_min_c'] === 20000, 'payout rules the pages do not repeat (first target, minimum, 50 %) keep their value (' . $st['status'] . ')');
+
+$st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) if ($p['id'] === 'advanced') foreach ($p['sizes'] as &$s) $s['funded']['consistency'] = 40; });
+ok($st['status'] === 'updated' && pr_rules_of(pr_current(), 'alpha|advanced|50000|funded|')['rules']['consistency_pct'] === 40 && ($st['notified'] ?? null) !== null, 'the same funded consistency given by both readings: applied, traders notified (' . $st['status'] . ')');
+ok(!in_array('review', array_column(pr_admin_summary()['firms'], 'status'), true), 'no firm is ever « to review »');
 
 exec('rm -rf ' . escapeshellarg($DATA));
 echo "\n" . ($n - $fails) . "/$n passed\n";

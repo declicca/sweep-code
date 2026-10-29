@@ -9,8 +9,9 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * evaluation and funded limits, PAYOUT rules (winning days and minimum per day, cap per request or ladder, payout
  * consistency, safety net / buffer, max number of payouts) and PRICES (evaluation, activation). Then Sweep:
  *   1. validates every number (impossible values never reach a trader);
- *   2. refuses doubtful changes: half the accounts gone, a price or a payout cap that moves by more than half, a ladder
- *      that changes length… The firm goes « to review » and keeps its previous rules — never applied automatically;
+ *   2. doubtful changes (half the accounts gone, a price or a payout cap that moves by more than half, a ladder that
+ *      changes length, a rule no longer read…) go through a second, independent reading: only what both readings give
+ *      is applied, the rest keeps its previous value and is read again next week (pr_settle). No one has to review;
  *   3. applies what passes (previous version kept in data/presets-history/) and tells every trader with an active
  *      account at that firm what changes for THEIR account. Their account keeps its rules until they apply the new ones.
  */
@@ -37,7 +38,14 @@ function pr_fetch_text(string $url): string
 function pr_ask(PDO $pdo, array $firm, string $pages): array
 {
     // tests: SWEEP_PRESETS_MOCK=file.json answers instead of Gemini ({"firm-id": {"programs": [...]}})
-    if ($mock = getenv('SWEEP_PRESETS_MOCK')) { $m = json_decode((string) file_get_contents($mock), true); if (!isset($m[$firm['id']])) throw new RuntimeException('no mock answer'); return [$m[$firm['id']], ['mock']]; }
+    // a list of answers is one per reading, in order (the second reading of a doubtful change); the last one repeats
+    if ($mock = getenv('SWEEP_PRESETS_MOCK')) {
+        static $calls = []; $raw = (string) file_get_contents($mock); $m = json_decode($raw, true);
+        if (!isset($m[$firm['id']])) throw new RuntimeException('no mock answer');
+        $a = $m[$firm['id']]; if (!array_is_list($a)) return [$a, ['mock']];
+        $k = md5($raw) . $firm['id']; $i = $calls[$k] = ($calls[$k] ?? -1) + 1;
+        return [$a[min($i, count($a) - 1)], ['mock']];
+    }
     if (!function_exists('sai_config')) require_once dirname(__DIR__) . '/ai/ai-core.php';
     $cfg = sai_config();
     if (!$cfg['enabled']) throw new RuntimeException('AI is disabled in ai-config.php');
@@ -166,7 +174,7 @@ function pr_carry_over(array $old, array $new): array
     return $new;
 }
 
-/** Changes too big to be trusted from one reading: the firm goes « to review », nothing is applied. */
+/** Changes too big to be trusted from one reading: applied only when a second reading of the pages gives the same value (pr_settle). */
 function pr_doubtful(array $old, array $new): array
 {
     $e = [];
@@ -175,52 +183,137 @@ function pr_doubtful(array $old, array $new): array
     $jump = fn($x, $y) => is_numeric($x) && is_numeric($y) && $x > 0 && abs($y - $x) / $x > 0.5;
     // something that disappears is never applied automatically: an account no longer found (traders' accounts are linked to
     // it), or a rule no longer read (Topstep's optional daily loss limit, 12 Oct.: the pages still offer it at checkout)
-    foreach ($a as $k => $s) if (!isset($b[$k])) $e[] = "$k no longer found on the official pages: to review";   // (no-longer-sold programs are kept by pr_carry_over)
+    foreach ($a as $k => $s) if (!isset($b[$k])) $e[] = "$k no longer found on the official pages";   // (no-longer-sold programs are kept by pr_carry_over)
     foreach ($b as $k => $s) {
         if (!isset($a[$k])) continue;
         foreach (['eval', 'funded'] as $ph) foreach (['target', 'dd', 'dll', 'dll_optional', 'consistency', 'min_days'] as $f)
-            if (isset($a[$k][$ph][$f]) && $a[$k][$ph][$f] !== false && !isset($s[$ph][$f])) $e[] = "$k $ph $f " . var_export($a[$k][$ph][$f], true) . ' → no longer read: to review';
+            if (isset($a[$k][$ph][$f]) && $a[$k][$ph][$f] !== false && !isset($s[$ph][$f])) $e[] = "$k $ph $f " . var_export($a[$k][$ph][$f], true) . ' → no longer read';
     }
     foreach ($b as $k => $s) {
         if (!isset($a[$k])) continue;
         $po = (array) ($a[$k]['funded']['payout'] ?? []); $pn = (array) ($s['funded']['payout'] ?? []);
-        foreach (['min', 'max', 'max_dll', 'min_bal', 'win_min'] as $f) if ($jump($po[$f] ?? null, $pn[$f] ?? null)) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]} (more than half): to review";
-        foreach (['win_days', 'trade_days', 'max_payouts'] as $f) if (isset($po[$f], $pn[$f]) && abs($pn[$f] - $po[$f]) > 3) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]}: to review";
+        foreach (['min', 'max', 'max_dll', 'min_bal', 'win_min'] as $f) if ($jump($po[$f] ?? null, $pn[$f] ?? null)) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]} (more than half)";
+        foreach (['win_days', 'trade_days', 'max_payouts'] as $f) if (isset($po[$f], $pn[$f]) && abs($pn[$f] - $po[$f]) > 3) $e[] = "$k payout $f {$po[$f]} → {$pn[$f]}";
         // a payout condition that appears where there was none makes « Ready for a payout » harder: never applied on its own
         // (Alpha, 12–13 Oct.: « up to 4 times a month » read as 4 payouts in all, then « profitable since the last payout » added;
         // Apex, 12 Oct.: the Legacy rules — 8 traded days, 30 % per request — put on the EOD and Intraday accounts)
         if (isset($a[$k]['funded'])) {
             foreach (['win_days', 'trade_days', 'min_bal', 'cycle_pos', 'cycle_min', 'first_min', 'max_payouts', 'max_pct'] as $f)
-                if (empty($po[$f]) && !empty($pn[$f])) $e[] = "$k payout $f none → " . var_export($pn[$f], true) . ': to review';
-            if (empty($a[$k]['funded']['consistency']) && !empty($s['funded']['consistency'])) $e[] = "$k funded consistency none → {$s['funded']['consistency']}: to review";
+                if (empty($po[$f]) && !empty($pn[$f])) $e[] = "$k payout $f none → " . var_export($pn[$f], true) . '';
+            if (empty($a[$k]['funded']['consistency']) && !empty($s['funded']['consistency'])) $e[] = "$k funded consistency none → {$s['funded']['consistency']}";
         }
-        if (isset($po['ladder'], $pn['ladder']) && count((array) $po['ladder']) !== count((array) $pn['ladder'])) $e[] = "$k payout ladder changes length: to review";
-        foreach (['eval', 'funded'] as $ph) { $x = $a[$k][$ph]['consistency'] ?? null; $y = $s[$ph]['consistency'] ?? null; if (is_numeric($x) && is_numeric($y) && abs($y - $x) > 20) $e[] = "$k $ph consistency $x → $y: to review"; }
-        foreach (['eval', 'activation'] as $f) { $x = $a[$k]['price'][$f] ?? null; $y = $s['price'][$f] ?? null; if ($jump($x, $y)) $e[] = "$k price $f $x → $y (more than half): to review"; }
+        if (isset($po['ladder'], $pn['ladder']) && count((array) $po['ladder']) !== count((array) $pn['ladder'])) $e[] = "$k payout ladder changes length";
+        foreach (['eval', 'funded'] as $ph) { $x = $a[$k][$ph]['consistency'] ?? null; $y = $s[$ph]['consistency'] ?? null; if (is_numeric($x) && is_numeric($y) && abs($y - $x) > 20) $e[] = "$k $ph consistency $x → $y"; }
+        foreach (['eval', 'activation'] as $f) { $x = $a[$k]['price'][$f] ?? null; $y = $s['price'][$f] ?? null; if ($jump($x, $y)) $e[] = "$k price $f $x → $y (more than half)"; }
     }
     return $e;
 }
 
-/** Check one firm. Returns the status line and the new firm (null when nothing is to be applied). */
+/** The leaves of one account size (its rules and its price), « funded.payout.max » => value. */
+function pr_leaves(array $s, string $pre = ''): array
+{
+    $o = [];
+    foreach ($s as $k => $v) {
+        if (($pre === '' && in_array($k, ['size', 'variants', 'live'], true)) || $k === 'checked') continue;   // ours, not read on the pages
+        $path = $pre === '' ? (string) $k : "$pre.$k";
+        if (is_array($v) && $v && !array_is_list($v)) $o += pr_leaves($v, $path); else $o[$path] = $v;
+    }
+    return $o;
+}
+function pr_set_leaf(array &$a, string $path, $v): void
+{
+    $r = &$a;
+    foreach (explode('.', $path) as $k) { if (!isset($r[$k]) || !is_array($r[$k])) $r[$k] = []; $r = &$r[$k]; }
+    $r = $v;
+}
+
+/**
+ * A reading with doubts (a big change, an impossible number, an account or a rule no longer found) settled with a second,
+ * independent reading, with no one to review it (29 Oct.):
+ *  - a rule or a price that changes is applied only when both readings give the same value; otherwise ours stays and the
+ *    next week's check reads it again;
+ *  - a rule no longer read, an account size no longer found: ours stays (traders' accounts are linked to it);
+ *  - an account type found in neither reading is no longer sold: it becomes Legacy (kept for the accounts that have it,
+ *    no longer offered), never more than half of the firm's types at once;
+ *  - a new account type or size is added only when both readings have it, with the same rules;
+ *  - an account type whose rules come out impossible keeps its previous version.
+ * Returns the firm to save and what was not applied.
+ */
+function pr_settle(array $old, array $a, array $b): array
+{
+    $idx = function (array $f) { $o = []; foreach ((array) $f['programs'] as $p) if (empty($p['legacy'])) $o[$p['id']] = ['p' => $p, 's' => array_column((array) $p['sizes'], null, 'size')]; return $o; };
+    $A = $idx($a); $B = $idx($b); $O = $idx($old);
+    $same = fn($x, $y) => $x !== null && $y !== null && pr_leaves($x) == pr_leaves($y);
+    $out = $old; $held = []; $gone = [];
+    foreach ($out['programs'] as $pi => &$p) {
+        if (!empty($p['legacy'])) continue;
+        $pa = $A[$p['id']] ?? null; $pb = $B[$p['id']] ?? null;
+        if (!$pa) { if (!$pb) $gone[] = $pi; continue; }
+        foreach ($p['sizes'] as &$s) {
+            $sa = $pa['s'][$s['size']] ?? null; if (!$sa) continue;
+            $lo = pr_leaves($s); $lb = isset($pb['s'][$s['size']]) ? pr_leaves($pb['s'][$s['size']]) : [];
+            foreach (pr_leaves($sa) as $k => $v) {
+                if (array_key_exists($k, $lo) && $lo[$k] == $v) continue;
+                if (array_key_exists($k, $lb) && $lb[$k] == $v) { pr_set_leaf($s, $k, $v); if (strpos($k, 'price.') === 0) $s['price']['checked'] = gmdate('Y-m-d'); }
+                else $held[] = $p['id'] . ' ' . ((int) $s['size'] / 1000) . "K $k " . var_export($lo[$k] ?? null, true) . ' → ' . var_export($v, true);
+            }
+        }
+        unset($s);
+        foreach ($pa['s'] as $size => $sa) if (!isset($O[$p['id']]['s'][$size])) {
+            if ($same($sa, $pb['s'][$size] ?? null)) $p['sizes'][] = $sa; else $held[] = $p['id'] . ' ' . ((int) $size / 1000) . 'K new size';
+        }
+        usort($p['sizes'], fn($x, $y) => $x['size'] <=> $y['size']);
+    }
+    unset($p);
+    foreach ($A as $id => $x) if (!isset($O[$id])) {
+        $y = $B[$id] ?? null; $ok = $y && count($x['s']) === count($y['s']);
+        foreach ($x['s'] as $size => $sa) $ok = $ok && $same($sa, $y['s'][$size] ?? null);
+        if ($ok) array_splice($out['programs'], count(array_filter($out['programs'], fn($q) => empty($q['legacy']))), 0, [$x['p']]); else $held[] = "$id new account type";
+    }
+    $sold = count($O);
+    if ($gone && count($gone) * 2 <= $sold) foreach ($gone as $pi) {
+        $n = $out['programs'][$pi]['name'];
+        $out['programs'][$pi]['legacy'] = true;
+        $out['programs'][$pi]['label'] = ['fr' => "$n (plus vendu)", 'en' => "$n (no longer sold)", 'es' => "$n (ya no se vende)"];
+    }
+    elseif ($gone) $held[] = count($gone) . " of $sold account types not found";
+    // an account type whose rules come out impossible keeps its previous version (a new one is not added)
+    foreach ($out['programs'] as $pi => $p) if (pr_validate_firm(['id' => $old['id'], 'name' => $old['name'], 'programs' => [$p]])) {
+        $prev = $O[$p['id']]['p'] ?? null;
+        $held[] = $p['id'] . ': rules out of range, previous version kept';
+        if ($prev) $out['programs'][$pi] = $prev; else unset($out['programs'][$pi]);
+    }
+    $out['programs'] = array_values($out['programs']);
+    return [$out, $held];
+}
+
+/** Check one firm. Returns the status line and the new firm (null when nothing is to be applied). Never waits for a person. */
 function pr_check_firm(PDO $pdo, array $firm): array
 {
     $st = ['checked_at' => gmdate('c'), 'status' => 'unchanged', 'changes' => [], 'errors' => [], 'sources' => [], 'name' => $firm['name']];
     try {
         $pages = '';
         foreach (array_slice((array) $firm['sources'], 0, 3) as $u) { $t = pr_fetch_text($u); if ($t !== '') $pages .= "\n--- $u ---\n" . mb_substr($t, 0, 25000); }
-        [$answer, $sources] = pr_ask($pdo, $firm, $pages);
+        $read = function () use ($pdo, $firm, $pages) {
+            [$answer, $sources] = pr_ask($pdo, $firm, $pages);
+            $new = $firm; $new['programs'] = pr_clean_programs((array) $answer['programs']);
+            return [$new['programs'] ? pr_carry_over($firm, $new) : null, $sources];
+        };
+        [$new, $sources] = $read();
         $st['sources'] = array_slice($sources, 0, 8);
-        $new = $firm; $new['programs'] = pr_clean_programs((array) $answer['programs']);
-        $read = count($new['programs']);
-        $new = pr_carry_over($firm, $new);
-        $errors = pr_validate_firm($new);
+        if (!$new) throw new RuntimeException('no account found on the official pages');
+        $doubts = pr_validate_firm($new);
         $oldCount = array_sum(array_map(fn($p) => empty($p['legacy']) ? count($p['sizes'] ?? []) : 0, $firm['programs']));
         $newCount = array_sum(array_map(fn($p) => empty($p['legacy']) ? count($p['sizes'] ?? []) : 0, $new['programs']));
-        if (!$read) $errors[] = 'no account found on the official pages';
-        if ($oldCount > 0 && $newCount < $oldCount / 2) $errors[] = "only $newCount accounts found (was $oldCount): kept the previous rules, to review";
-        $errors = array_merge($errors, pr_doubtful($firm, $new));
+        if ($oldCount > 0 && $newCount < $oldCount / 2) $doubts[] = "only $newCount accounts found (was $oldCount)";
+        $doubts = array_merge($doubts, pr_doubtful($firm, $new));
+        if ($doubts) {
+            [$second] = $read();   // a second, independent reading settles the doubts
+            [$new, $held] = pr_settle($firm, $new, $second ?: ['programs' => []]);
+            if ($held) $st['errors'] = array_slice(array_map(fn($h) => "not applied (not confirmed by a second reading, read again next week): $h", $held), 0, 12);
+            $st['doubts'] = array_slice($doubts, 0, 12);
+        }
         $diff = pr_diff_firm($firm, $new);
-        if ($errors) { $st['status'] = 'review'; $st['errors'] = array_slice($errors, 0, 12); $st['changes'] = array_slice($diff, 0, 40); return [$st, null]; }
         if ($diff) { $st['status'] = 'updated'; $st['changes'] = array_slice($diff, 0, 40); return [$st, $new]; }
     } catch (Throwable $e) {
         $st['status'] = 'error'; $st['errors'] = [$e->getMessage()];

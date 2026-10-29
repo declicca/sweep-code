@@ -261,6 +261,8 @@ function pr_diff_firm(array $old, array $new): array
     $a = $idx($old); $b = $idx($new);
     foreach ($b as $k => $s) if (!isset($a[$k])) $d[] = "new: $k";
     foreach ($a as $k => $s) if (!isset($b[$k])) $d[] = "removed: $k";
+    $was = array_column((array) ($old['programs'] ?? []), null, 'id');
+    foreach ((array) ($new['programs'] ?? []) as $p) if (!empty($p['legacy']) && isset($was[$p['id']]) && empty($was[$p['id']]['legacy'])) $d[] = "no longer sold: {$p['name']}";
     foreach ($b as $k => $s) {
         if (!isset($a[$k])) continue;
         foreach (['eval', 'funded'] as $ph) foreach (['target', 'dd', 'dd_type', 'dll', 'dll_optional', 'consistency', 'min_days', 'max_minis'] as $f) {
