@@ -14,7 +14,7 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-OBS = """window.__ls = []; new PerformanceObserver((l) => { for (const e of l.getEntries()) { if (e.hadRecentInput) continue; window.__ls.push({ v: +e.value.toFixed(4), t: Math.round(e.startTime), s: (e.sources || []).slice(0, 3).map((x) => { const n = x.node; if (!n || !n.tagName) return '?'; return (n.tagName + '.' + String(n.className || '').split(' ').slice(0, 2).join('.') + (n.id ? '#' + n.id : '')).slice(0, 50) + ' ' + Math.round(x.previousRect.y) + '→' + Math.round(x.currentRect.y); }) }); } }).observe({ type: 'layout-shift', buffered: true });"""
+OBS = """requestAnimationFrame(() => { try { window.__acc0 = (window.S && S.accounts || []).length } catch (e) {} }); window.__ls = []; new PerformanceObserver((l) => { for (const e of l.getEntries()) { if (e.hadRecentInput) continue; window.__ls.push({ v: +e.value.toFixed(4), t: Math.round(e.startTime), s: (e.sources || []).slice(0, 3).map((x) => { const n = x.node; if (!n || !n.tagName) return '?'; return (n.tagName + '.' + String(n.className || '').split(' ').slice(0, 2).join('.') + (n.id ? '#' + n.id : '')).slice(0, 50) + ' ' + Math.round(x.previousRect.y) + '→' + Math.round(x.currentRect.y); }) }); } }).observe({ type: 'layout-shift', buffered: true });"""
 CLS = "Math.round(window.__ls.reduce((a, x) => a + x.v, 0) * 10000) / 10000"
 PAGES = ['dashboard', 'trades', 'journal', 'calendar', 'analytics', 'accounts', 'payouts', 'settings', 'news', 'dashboard']
 with sync_playwright() as p:
@@ -40,7 +40,9 @@ with sync_playwright() as p:
       if pg.evaluate("!!localStorage.getItem('sw.gpLine')"): break
       pg.wait_for_timeout(250)
     pg.reload(); pg.wait_for_timeout(4500)
-    ok(pg.locator('#gpLine').count() == 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan line in « Now », coming back: nothing pushed down ({pg.evaluate(CLS)} {pg.evaluate("window.__ls.filter((x) => x.v > 0.0005)")})')   # (21 Oct.: what moved, in the failure line — the only one GitHub shows)
+    # (29 Oct.) what changed under the card that moved, for the next failure on the CI (the accounts arriving after the first paint?)
+    acc = pg.evaluate("[window.__acc0 ?? null, (S.accounts || []).length, Math.round((document.querySelector('#main .d-acc') || { getBoundingClientRect: () => ({ height: 0 }) }).getBoundingClientRect().height)]")
+    ok(pg.locator('#gpLine').count() == 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan line in « Now », coming back: nothing pushed down ({pg.evaluate(CLS)} {pg.evaluate("window.__ls.filter((x) => x.v > 0.0005)")}; accounts at the first paint, at the end, the accounts card height: {acc})')   # (21 Oct.: what moved, in the failure line — the only one GitHub shows)
     pg.evaluate("fetch('api/game/gameplan/stop', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')
