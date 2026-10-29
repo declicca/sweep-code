@@ -21,14 +21,14 @@ const WP_HOST_SUFFIXES = ['.push.apple.com', '.notify.windows.com', '.push.servi
 const WP_MAX_DEVICES = 10;
 /** the bell's own words (src/game.js, g_plan / g_review / g_weekly) */
 const WP_TEXT = [
-    'en' => ['plan' => ['Your plan of the day is waiting.', 'Two minutes before the open.'],
-             'review' => ['60 seconds to sweep your day.', 'Journal and review while it is fresh.'],
+    'en' => ['plan' => ['Your plan of the day is waiting.', '30 seconds before the open.'],
+             'review' => ['Close your day in 2 taps.', 'Journal and review while it is fresh.'],
              'weekly' => ['Your week is ready.', 'Your streak, your discipline and your swept days, in one place.']],
-    'fr' => ['plan' => ['Ton plan du jour t’attend.', 'Deux minutes avant l’ouverture.'],
-             'review' => ['60 secondes pour balayer ta journée.', 'Journalise et fais ta revue tant que c’est frais.'],
+    'fr' => ['plan' => ['Ton plan du jour t’attend.', '30 secondes avant l’ouverture.'],
+             'review' => ['Ferme ta journée en 2 touchers.', 'Journalise et fais ta revue tant que c’est frais.'],
              'weekly' => ['Ta semaine est prête.', 'Ton streak, ta discipline et tes journées balayées, au même endroit.']],
-    'es' => ['plan' => ['Tu plan del día te espera.', 'Dos minutos antes de la apertura.'],
-             'review' => ['60 segundos para barrer tu día.', 'Registra y revisa mientras está fresco.'],
+    'es' => ['plan' => ['Tu plan del día te espera.', '30 segundos antes de la apertura.'],
+             'review' => ['Cierra tu día en 2 toques.', 'Registra y revisa mientras está fresco.'],
              'weekly' => ['Tu semana está lista.', 'Tu racha, tu disciplina y tus días barridos, en un solo lugar.']],
 ];
 

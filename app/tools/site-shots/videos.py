@@ -129,9 +129,10 @@ def today_phone(br, lang):
 VIDEOS = {'hero-loop': lambda br: hero(br), 'tour': lambda br: tour(br),
           'v6-video-today-phone': lambda br: [today_phone(br, l) for l in ('en', 'fr')]}
 
-with sync_playwright() as p:
-  br = p.chromium.launch()
-  for n, f in VIDEOS.items():
-    if ONLY and n not in ONLY: continue
-    f(br)
-  br.close()
+if __name__ == '__main__':
+  with sync_playwright() as p:
+    br = p.chromium.launch()
+    for n, f in VIDEOS.items():
+      if ONLY and n not in ONLY: continue
+      f(br)
+    br.close()

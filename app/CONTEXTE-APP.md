@@ -1392,3 +1392,9 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - une question sans mot à chercher (« how to », « comment ») mène à l'Aide ;
   - « Missions hebdomadaires » devient « Défis de la semaine » dans la recherche aussi.
 - **Test** : `e2e_tour_1029` (taper un setup après « + Autre » sans erreur, et les 8 recherches).
+
+### Le site mis à jour d'après l'app (brief `briefs/brief-app-pour-site-2026-10-29.md`, 29 oct.)
+- **Textes** : `livraison/app-pour-site-2026-10-29.md` (phrases du site juste / corrigées, nouveautés du 21 au 29 oct. en EN, FR, ES). Les faits plus larges (forfaits, synchro, catalogue) : `livraison/site-2026-10-29/`.
+- **Captures** : `tools/site-shots/shots.py` refait les écrans du brief aux mêmes noms et tailles (« Maintenant » avant le premier trade, la revue ouverte avec « + Détails », « Ma progression » pour `ecran-parcours`, la page d'un trade avec « Réponds au coach » sur ordinateur aussi) et 3 nouveaux : `ecran-fermer-journee`, `ecran-explication-i`, `ecran-missions-decouverte` (Alex remis à « tout montrer » après). Alex voit tout (`discovery_done = 1` après l'amorçage, comme un compte d'avant les missions).
+- **v7** (`tools/site-shots/v7.py`, `v7videos.py`) : captures PNG 2880 × 1800 et 1170 × 2532, vidéos MP4 + WebM + aperçu, séquence WebP de la journée fermée ; sortie hors du dépôt (`livraison/site-2026-10-29/`).
+- **Mots alignés** (vus en écrivant les textes) : le plan prend 30 secondes partout (Guide, mission de découverte 2, notification du plan : « 30 secondes avant l'ouverture ») ; la notification de la revue dit « Ferme ta journée en 2 touchers » (au lieu de « 60 secondes pour balayer ta journée ») ; la tuile de série du bilan de la semaine dit « Jours complets », comme Aujourd'hui.

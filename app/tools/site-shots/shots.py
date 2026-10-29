@@ -102,7 +102,7 @@ def new_trade_filled(pg, lang, img='trades'):
 def by_screenshot(pg, lang): new_trade_filled(pg, lang, 'chart')
 
 def by_hand(pg, lang):
-  new_trade(pg, lang); click_text(pg, r'^(Enter by hand|Saisir à la main|Entrer à la main|Ingresar a mano|A mano|Saisie manuelle)', wait=2200)
+  new_trade(pg, lang); click_text(pg, r'^(Enter by hand|Saisir à la main|Saisir manuellement|Entrer à la main|Introducir (a mano|manualmente)|Ingresar a mano|A mano|Saisie manuelle)', wait=2200)
 
 TODAY_TRADE = 't-2026-10-15-0-a2'   # 9:41, copied on the 5 accounts
 YDAY_TRADE = 't-2026-10-14-0-a2'
@@ -211,11 +211,38 @@ def edge_reveal(pg, lang):   # the week's recap, its Edge Reveal card turned ove
 def econ_week(pg, lang):
   go(pg, '#news', 2500); click_text(pg, r'^(This week|Cette semaine|Esta semana)$', '#main', 2000)
 
+# ───── brief of 29 Oct. (briefs/brief-app-pour-site-2026-10-29.md) ─────
+def today_now(pg, lang):   # Today with « Now » on top: the risk allowed and the next release (before the day's first trade, in the page only)
+  go(pg, '#dashboard', 2000)
+  pg.evaluate("S.trades = S.trades.filter((t) => t.date !== todayStr()); render()"); pg.wait_for_timeout(2500); top(pg)
+
+def review_open(pg, lang):   # « Close my day » opened, filled from the day, « + Details » unfolded (plan followed, discipline, grade)
+  go(pg, '#dashboard', 2000); pg.evaluate("SweepGame.openReview(todayStr())"); pg.wait_for_timeout(2800)
+  pg.evaluate("() => { const d = document.querySelector('#gSheet details.g-rv-more'); if (d) d.open = true; }"); pg.wait_for_timeout(900)
+
+def close_day(pg, lang):   # « Close my day »: « Your balance on Topstep? », prefilled, « It's the same »
+  go(pg, '#dashboard', 2000); pg.evaluate("SweepGame.openReview(todayStr())"); pg.wait_for_timeout(2800)
+  pg.evaluate("() => { const b = document.querySelector('#gSheet .g-bal'), sc = b && [...document.querySelectorAll('#gSheet *')].find((x) => x.scrollHeight > x.clientHeight + 40 && /auto|scroll/.test(getComputedStyle(x).overflowY)); if (b && sc) sc.scrollTop += b.getBoundingClientRect().top - sc.getBoundingClientRect().top - 260; }"); pg.wait_for_timeout(800)
+
+def term_i(pg, lang):   # a trading word explained by its « i », open (the account page: drawdown margin, consistency)
+  go(pg, '#account/a3', 3000)
+  pg.evaluate("() => { const i = [...document.querySelectorAll('#main .sw-term, #main [data-tip]')].find((e) => e.getClientRects().length && /drawdown|consist/i.test(e.getAttribute('data-tip') || '')) || [...document.querySelectorAll('#main .sw-term')].find((e) => e.getClientRects().length); if (i) scrollTo(0, i.getBoundingClientRect().top + scrollY - 330); }"); pg.wait_for_timeout(700)
+  pg.evaluate("() => { const i = [...document.querySelectorAll('#main .sw-term, #main [data-tip]')].find((e) => e.getClientRects().length && /drawdown|consist/i.test(e.getAttribute('data-tip') || '')) || [...document.querySelectorAll('#main .sw-term')].find((e) => e.getClientRects().length); if (i) i.click(); }"); pg.wait_for_timeout(1200)
+
+def discovery(pg, lang):   # the discovery missions, as a new trader sees them: the day's mission and « Do it now » (Alex put back to « everything shown » after)
+  import sqlite3
+  uid = pg.evaluate("S.uid"); db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60); db.execute('UPDATE users SET discovery_done = 0 WHERE id = ?', (uid,)); db.commit(); db.close()
+  pg.reload(); pg.wait_for_selector('#main .nav-dash', timeout=30000); pg.wait_for_timeout(3500)
+  pg.evaluate("() => { const e = document.querySelector('#main .nav-disc'); if (e) scrollTo(0, e.getBoundingClientRect().top + scrollY - 260); }"); pg.wait_for_timeout(800)
+def discovery_back(pg):
+  import sqlite3
+  uid = pg.evaluate("S.uid"); db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60); db.execute('UPDATE users SET discovery_done = 1 WHERE id = ?', (uid,)); db.commit(); db.close()
+
 SHOTS = {
   # phone, captures/{en,fr} (900 × 1948)
-  'v6-01-today-m': ('m', ('en', 'fr'), 'captures', today),
+  'v6-01-today-m': ('m', ('en', 'fr'), 'captures', today_now),
   'v6-03-log-by-screenshot-m': ('m', ('en', 'fr'), 'captures', by_screenshot),
-  'v6-04-discipline-psychology-m': ('m', ('en', 'fr'), 'captures', psychology),
+  'v6-04-discipline-psychology-m': ('m', ('en', 'fr'), 'captures', review_open),
   'v6-05-log-by-hand-m': ('m', ('en', 'fr'), 'captures', by_hand),
   'v6-06-trade-review-m': ('m', ('en', 'fr'), 'captures', trade_review),
   'v6-07-stats-m': ('m', ('en', 'fr'), 'captures', page('#analytics')),
@@ -230,7 +257,7 @@ SHOTS = {
   'v6-23-discipline-checklist-m': ('m', ('en', 'fr'), 'captures', checklist),
   'v6-24-new-trade-filled-m': ('m', ('en', 'fr'), 'captures', new_trade_filled),
   'v6-25-new-trade-empty-m': ('m', ('en', 'fr'), 'captures', new_trade),
-  'ecran-parcours': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'map', None, 2200)),
+  'ecran-parcours': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'hub', None, 3500)),   # « My progress » (29 Oct.)
   'ecran-boss-revenge': ('m', ('en', 'fr'), 'captures', boss),
   'ecran-saison': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'season', None, 2200)),
   'ecran-badges': ('m', ('en', 'fr'), 'captures', badges),
@@ -241,11 +268,13 @@ SHOTS = {
   'ecran-wrapped-2': ('m', ('en', 'fr'), 'captures', wrapped(2)),
   'ecran-wrapped-3': ('m', ('en', 'fr'), 'captures', wrapped(3)),
   'ecran-connexions': ('m', ('en', 'fr'), 'captures', connections),
+  'ecran-fermer-journee': ('m', ('en', 'fr'), 'captures', close_day),
+  'ecran-explication-i': ('m', ('en', 'fr'), 'captures', term_i),
   # computer, captures/{en,fr} (2400 × 1500)
-  'v6-01-today-d': ('d', ('en', 'fr'), 'captures', today_d),
+  'v6-01-today-d': ('d', ('en', 'fr'), 'captures', today_now),
   'v6-04-discipline-psychology-d': ('d', ('en', 'fr'), 'captures', discipline_d),
   'v6-05-log-by-hand-d': ('d', ('en', 'fr'), 'captures', by_hand),
-  'v6-06-trade-review-d': ('d', ('en', 'fr'), 'captures', trade_chart),
+  'v6-06-trade-review-d': ('d', ('en', 'fr'), 'captures', trade_review),
   'v6-07-stats-d': ('d', ('en', 'fr'), 'captures', page('#analytics')),
   'v6-08-payout-conditions-d': ('d', ('en', 'fr'), 'captures', account_payout),
   'v6-11-calendar-d': ('d', ('en', 'fr'), 'captures', page('#calendar')),
@@ -267,6 +296,7 @@ SHOTS = {
   'desktop-{lang}-dark-calendar-2400': ('d2400', ('en', 'fr', 'es'), 'img', page('#calendar')),
   'desktop-{lang}-dark-economic-calendar-2400': ('d2400', ('en', 'fr', 'es'), 'img', econ_week),
   # last: they write today's review
+  'ecran-missions-decouverte': ('m', ('en', 'fr'), 'captures', discovery),
   'v6-22-today-swept-m': ('m', ('en', 'fr'), 'captures', swept),
   'v6-22-today-swept-d': ('d', ('en', 'fr'), 'captures', swept),
 }
@@ -274,7 +304,7 @@ SIGNED_OUT = {'v6-20-signup-m'}
 # Friday after the close (SHOTS_NOW="2026-10-16 17:30", a second server: serve.sh with DEST=/tmp/gs2 PORT=8997): the week's recap
 FRIDAY = {'ecran-revue-semaine', 'ecran-edge-reveal'}
 EVENING = NOW.weekday() == 4 and NOW.hour >= 17
-CLEAN = {'v6-06-trade-review-m': tmp_clean, 'v6-26-connections-d': relink}
+CLEAN = {'v6-06-trade-review-m': tmp_clean, 'v6-06-trade-review-d': tmp_clean, 'v6-26-connections-d': relink, 'ecran-missions-decouverte': discovery_back}
 
 # ───────────── the share cards: the app's own « Save image » (or the game's card), at the site's sizes ─────────────
 SAVE = r'^(Save image|Enregistrer l.image|Guardar (la )?imagen)$'
@@ -358,6 +388,12 @@ def seed(langs):
   r = subprocess.run(['php', os.path.join(DEST, 'tools', 'site-shots', 'social.php'), NOW.strftime('%Y-%m-%d'), *[x for l in uids for x in (uids[l], H[l])]], capture_output=True, text=True)
   print('social', r.stdout.strip(), r.stderr.strip()[-300:])
   for lang in uids: subprocess.run([sys.executable, os.path.join(HERE, 'connect.py'), B, f'{STATE}-{lang}.json'], check=True, capture_output=True)
+  # Alex has used Sweep for weeks: he sees everything, like every account from before the discovery missions (29 Oct.)
+  import sqlite3
+  db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60)
+  try: db.execute("UPDATE users SET discovery_done = 1 WHERE id IN (%s)" % ','.join('?' * len(uids)), list(uids.values())); db.commit()
+  except sqlite3.OperationalError as e: print('discovery:', e)
+  db.close()
   econ()
 
 # the week's releases (fictional figures): the calendar shows them published, with their forecast and previous
@@ -430,4 +466,4 @@ def shoot():
     br.close()
   print('page errors:'); [print('  ', e) for e in errs]
 
-main()
+if __name__ == "__main__": main()

@@ -118,7 +118,7 @@ $at('2026-10-19 08:45'); GameNotifyService::run('p1', true); $s = $sent();
 $by = []; foreach ($s as $x) $by[$x['endpoint']] = $x;
 $fr = $open($by['https://fcm.googleapis.com/fcm/send/p1-fr'] ?? ['body' => ''], $kfr); $en = $open($by['https://web.push.apple.com/p1-en'] ?? ['body' => ''], $ken);
 $h = $by['https://web.push.apple.com/p1-en']['headers'] ?? [];
-$ok($bell('p1') === ['g_plan'] && count($s) === 2 && ($fr['title'] ?? '') === 'Ton plan du jour t’attend.' && ($fr['body'] ?? '') === 'Deux minutes avant l’ouverture.' && ($fr['url'] ?? '') === '#dashboard'
+$ok($bell('p1') === ['g_plan'] && count($s) === 2 && ($fr['title'] ?? '') === 'Ton plan du jour t’attend.' && ($fr['body'] ?? '') === '30 secondes avant l’ouverture.' && ($fr['url'] ?? '') === '#dashboard'
     && ($en['title'] ?? '') === 'Your plan of the day is waiting.' && ($en['tag'] ?? '') === 'sweep-plan', '8:45: the bell, and each phone in its language (FR, EN), opening Today (' . json_encode([$fr, $en], JSON_UNESCAPED_UNICODE) . ')');
 $ok(($h['TTL'] ?? '') === '14400' && ($h['Topic'] ?? '') === 'plan' && ($h['Content-Encoding'] ?? '') === 'aes128gcm' && strpos($h['Authorization'] ?? '', 'vapid t=') === 0
     && json_decode(wp_b64u_d(explode('.', substr($h['Authorization'], 8))[1] ?? ''), true)['aud'] === 'https://web.push.apple.com', 'its headers: 4 hours to live, topic, aes128gcm, VAPID for Apple\'s service');
@@ -141,7 +141,7 @@ $ok($bell('p5') === [] && $sent() === [], 'during the session (10:00, 15:59), Sa
 $trader('p6', [['2026-10-16', 0, 0], ['2026-10-19', 2, 0]]); $sub('p6', 'https://fcm.googleapis.com/fcm/send/p6', $kfr, 'fr'); $sub('p6', 'https://fcm.googleapis.com/fcm/send/gone-p6', $ken, 'en');
 $at('2026-10-19 16:15'); GameNotifyService::run('p6', true); $early = $bell('p6'); $sent();
 $at('2026-10-19 16:30'); GameNotifyService::run('p6', true); $s = $sent();
-$ok($early === [] && $bell('p6') === ['g_review'] && count($s) === 2 && ($open($s[0], $kfr)['title'] ?? $open($s[1], $kfr)['title'] ?? '') === '60 secondes pour balayer ta journée.' && wp_devices($pdo, 'p6') === 1,
+$ok($early === [] && $bell('p6') === ['g_review'] && count($s) === 2 && ($open($s[0], $kfr)['title'] ?? $open($s[1], $kfr)['title'] ?? '') === 'Ferme ta journée en 2 touchers.' && wp_devices($pdo, 'p6') === 1,
     'review at 16:30 (not 16:15), in French; the device the push service says gone (410) is forgotten');
 $trader('p6b', [['2026-10-16', 0, 0], ['2026-10-19', 2, 0]]); $sub('p6b', 'https://fcm.googleapis.com/fcm/send/p6b', $kfr, 'fr'); wp_set_pref($pdo, 'p6b', 'review', ['at' => '18:30']);
 $at('2026-10-19 18:30'); GameNotifyService::run('p6b', true); $s = $sent();

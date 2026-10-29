@@ -35,7 +35,7 @@ def one(br, lang):
   ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'));" % lang)
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': PASS, 'email': 'alex.morgan.%s@example.com' % lang, 'username': USER[lang], 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise SystemExit('sign-up refused: %s %s' % (r.status, r.text()[:200]))
-  r = ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Alex', 'last_name': 'Morgan', 'experience': 'gt1'}), headers=H)
+  r = ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Alex', 'last_name': os.environ.get('SHOTS_LAST', 'Morgan'), 'experience': 'gt1'}), headers=H)
   assert r.ok, r.text()
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:200]))
   pg.goto(B + '/'); pg.wait_for_function("typeof bulkPut === 'function' && typeof S !== 'undefined' && S.mode === 'server' && !!window.SweepPresets", timeout=60000)
