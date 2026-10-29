@@ -1324,3 +1324,8 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - Hauteur : 2 414 → 1 606 px.
 - **C4** : le formulaire manuel n'ouvre que ses champs. « Depuis une capture », l'import CSV et « Saisir avec l'IA » sont dans la feuille « + ».
 - **Test** : `e2e_long_pages` (390 fr et es, 1300 en).
+
+### Correctif (29 oct.) : l'émotion qui ne restait pas cochée sur la page d'un trade
+- **La cause** : la rangée d'émotions de « Réponds au coach » (`askHtml`, `src/coach.js`) montre 5 émotions choisies selon l'erreur du trade. Répondre à « Ce trade était-il dans ton plan ? » peut changer cette erreur, donc la rangée. Une émotion choisie, là ou dans la revue complète, n'apparaissait alors plus cochée.
+- **La correction** : les émotions déjà choisies sont toujours en tête de la rangée, cochées. Une émotion enregistrée en texte (vieux trades) est lue aussi.
+- **Test** : `e2e_long_pages` (E : « Patient », hors des 5, apparaît cochée).

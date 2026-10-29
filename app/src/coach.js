@@ -735,14 +735,17 @@
   let fullOpen; try { fullOpen = new Set(JSON.parse(sessionStorage.getItem('sw.coFull') || '[]')); } catch (e) { fullOpen = new Set(); }
   function askHtml(t) {
     const c = tradeNote(t), qs = ((S.settings && S.settings.questions) || []).filter((q) => q.active), has = (id) => qs.some((q) => q.id === id);
-    const d = t.discipline || {}, emo = (t.emo && t.emo.before) || [], rv = t.review || {}, id = esc2(t.id), items = [];
+    const eb = t.emo && t.emo.before, d = t.discipline || {}, emo = Array.isArray(eb) ? eb : (typeof eb === 'string' && eb ? [eb] : []), rv = t.review || {}, id = esc2(t.id), items = [];   // (an old trade: one emotion as a string)
     const yn = (k, label) => { items.push({ ok: !!d[k], h: `<div class="co-q"><span>${esc2(label)}</span><div class="seg yn">${[['y', T.yes], ['n', T.no]].map(([v, l]) => `<button class="${v} ${d[k] === v ? 'on' : ''}" data-act="set" data-col="trades" data-id="${id}" data-path="discipline.${k}" data-v="${v}">${l}</button>`).join('')}</div></div>` }); };
     if (has('plan')) yn('plan', T.aPlan);
     const code = c.fix && c.fix[2];
     if ((code === 'no_stop' || code === 'risklimit') && has('stop')) yn('stop', T.aStop);
     else if ((code === 'oversized' || code === 'size_up') && has('size')) yn('size', T.aSize);
     else {
-      const set = code ? ['Frustrated', 'Trying to recover a loss', 'Impulsive', 'FOMO', 'Calm'] : ['Calm', 'Confident', 'FOMO', 'Frustrated', 'Hesitant'];
+      const set0 = code ? ['Frustrated', 'Trying to recover a loss', 'Impulsive', 'FOMO', 'Calm'] : ['Calm', 'Confident', 'FOMO', 'Frustrated', 'Hesitant'];
+      // (29 Oct.) the emotions already chosen always stay in the row, checked: the row changes with the trade's mistake (answering
+      // « in your plan? » can change it), and an emotion chosen there or in the full review vanished — it no longer looked checked
+      const set = [...emo.filter((k) => typeof k === 'string' && !set0.includes(k)), ...set0];
       items.push({ ok: emo.length > 0, h: `<div class="co-q"><span>${esc2(code ? T.aWhy : T.aEmo)}</span><div class="chips">${set.map((k) => `<button class="chip ${emo.includes(k) ? 'on' : ''}" data-act="toggle" data-col="trades" data-id="${id}" data-path="emo.before" data-v="${esc2(k)}">${esc2(emoT(k))}</button>`).join('')}</div></div>` });
     }
     const eq = edgeReview(t);   // brief edge T7: in the edge, off it, a streak

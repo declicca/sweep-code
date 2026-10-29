@@ -6,6 +6,8 @@ Uses the signed-in trader's sample data; changes nothing. Phone 390 (fr, es) and
     on a tap; the whole list well under its old height (7,887 px for 130 trades)
  C3 the trade page: the setup chosen in one place (not again in the facts); the fees, the platform's P&L and the tags under
     « Plus de détails »; « Contexte économique » only with an announcement; phone: under 1,610 px (2,414 before; at most 1,609, a third less)
+ E  the coach's emotion row keeps the emotions already chosen, checked (chosen in the full review, or before the row changed
+    with the trade's mistake): « Patient », not one of its five, shows checked (29 Oct.)
  C4 the manual form opens on its fields only: no « From a screenshot », no CSV import, no « Log with AI » in it
 No page error, nothing wider than the window.
 """
@@ -53,6 +55,13 @@ with sync_playwright() as p:
       h = pg.evaluate("document.documentElement.scrollHeight")
       h0 = pg.evaluate("(() => { document.documentElement.classList.add('tr-uncompact'); const d = document.querySelector('#main .tr-more'); if (d) d.open = true; const v = document.documentElement.scrollHeight; document.documentElement.classList.remove('tr-uncompact'); if (d) d.open = false; return v })()")
       ok(h <= h0 * 2 / 3 + 4, f'C3 {tag}: the trade page {h} px, {h0} px as before ({round((1 - h / h0) * 100)} % shorter, at least a third)')
+    # E (the trade put back as it was)
+    before = pg.evaluate("(id) => JSON.stringify((getDoc('trades', id).emo || {}).before ?? null)", tid)
+    pg.evaluate("(id) => { editDoc('trades', id, (d) => { d.emo = Object.assign({}, d.emo, { before: ['Patient'] }); }); render(); }", tid); pg.wait_for_timeout(1200)
+    em = pg.evaluate("[...document.querySelectorAll('#main .co-ask [data-path=\"emo.before\"]')].map((b) => b.dataset.v + (b.classList.contains('on') ? '*' : ''))")
+    ok(not em or 'Patient*' in em, f'E {tag}: an emotion chosen elsewhere stays checked in the coach\'s row ({em})')
+    pg.evaluate("([id, b]) => { editDoc('trades', id, (d) => { d.emo = Object.assign({}, d.emo, { before: JSON.parse(b) }); if (d.emo.before === null) delete d.emo.before; }); }", [tid, before]); pg.wait_for_timeout(500)
+    pg.evaluate("Promise.all(Object.values(chains)).then(() => true)")
     # C4
     pg.evaluate("openTicket(null, { manual: true })"); pg.wait_for_selector('#tkSlide.open', timeout=8000); pg.wait_for_timeout(1000)
     extra = pg.evaluate("[...document.querySelectorAll('#tkSlide.open .nav-tk-alt, #tkSlide.open [data-act=ai-log], #tkSlide.open [data-tk-alt]')].length")
