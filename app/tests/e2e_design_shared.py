@@ -87,7 +87,9 @@ with sync_playwright() as p:
       g = pg.evaluate("(()=>{const s=document.querySelector('#main .statline'); if(!s||s.children.length<4) return null; const L=[...s.children].map(d=>Math.round(d.getBoundingClientRect().left)); return [L[0]===L[2], L[1]===L[3], L]})()")
       ok(g and g[0] and g[1], f'3 phone {w} {scheme} {h.split("/")[0]}: the figures line up in two columns ({g})')
     go(pg, 'trades')
-    sep = pg.evaluate("(()=>{const r=[...document.querySelectorAll('#main .tlist > .trow')][1]; if(!r) return null; const s=getComputedStyle(r); return [s.borderTopWidth, s.backgroundImage.startsWith('linear-gradient'), s.backgroundPositionX]})()")
+    # (28 Oct., activation C2) the list in one row per day on a phone: a row under another one of the same day
+    pg.evaluate("document.querySelectorAll('#main .tday').forEach((d)=>{d.open=true})"); pg.wait_for_timeout(200)
+    sep = pg.evaluate("(()=>{const r=document.querySelector('#main .tlist > .trow + .trow'); if(!r) return null; const s=getComputedStyle(r); return [s.borderTopWidth, s.backgroundImage.startsWith('linear-gradient'), s.backgroundPositionX]})()")
     ok(sep and sep[0] == '0px' and sep[1] and sep[2] == '58px', f'4 phone {w} {scheme}: the trade list separators are inset ({sep})')
     small = pg.evaluate(TOUCH)
     acc = pg.evaluate("S.accounts.find(a=>a.status!=='archived').id")
