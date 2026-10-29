@@ -1384,7 +1384,7 @@
   const POPULAR = ['Opening Range Breakout', 'Liquidity Sweep', 'Fair Value Gap', 'Break & Retest', 'VWAP Bounce', 'Trend Pullback', 'Order Block', 'Break of Structure', 'Key Level Reversal', 'Gap Fill'];
   const NOSHOT = { fr: 'Aucune capture pour l’instant.', es: 'Aún no hay capturas.' };
   function chips(input) {
-    const own = (S.settings && S.settings.setups) || [];
+    const own = ((S.settings && S.settings.setups) || []).filter((x) => typeof x === 'string' && x.trim());   // (a setup saved as anything else than a name: never a chip)
     const used = {}; (S.trades || []).forEach((t) => { if (t.setup && !t.demo) used[t.setup] = (used[t.setup] || 0) + 1; });
     const mine = [...new Set([...own, ...Object.keys(used).sort((a, b) => used[b] - used[a]).slice(0, 4)])];
     const low = new Set(mine.map((x) => x.toLowerCase()));
@@ -1417,13 +1417,14 @@
     const input = label && (label.querySelector('input[data-bind$="|setup"]') || (label.matches('input') ? label : null)); if (!input) return;
     input.value = b.dataset.uxSetup === input.value ? '' : b.dataset.uxSetup;   // tap again to clear
     input.dispatchEvent(new Event('input', { bubbles: true })); input.dispatchEvent(new Event('change', { bubbles: true }));
-    row.querySelectorAll('.ux-setup').forEach((x) => x.classList.toggle('on', x === b && !!input.value));
+    row.querySelectorAll('[data-ux-setup]').forEach((x) => x.classList.toggle('on', x === b && !!input.value));
     if (typeof haptic === 'function') try { haptic(6); } catch (x) { /* web */ }
   });
   document.addEventListener('input', (e) => {
     if (!e.target.matches || !e.target.matches('input[data-bind$="|setup"]')) return;
     const label = e.target.closest('label') || e.target.parentElement, row = label && label.nextElementSibling;
-    if (row && row.classList.contains('ux-setups')) row.querySelectorAll('.ux-setup').forEach((x) => x.classList.toggle('on', x.dataset.uxSetup.toLowerCase() === e.target.value.trim().toLowerCase()));
+    // (29 Oct.) the setups' chips only: « + Other » has no setup name (it threw « reading 'toLowerCase' » on typing, the trade page)
+    if (row && row.classList.contains('ux-setups')) row.querySelectorAll('[data-ux-setup]').forEach((x) => x.classList.toggle('on', String(x.dataset.uxSetup || '').toLowerCase() === e.target.value.trim().toLowerCase()));
   });
   const appRender = render;
   render = function () { const out = appRender.apply(this, arguments); try { paint(); } catch (e) { /* never blocks */ } return out; };

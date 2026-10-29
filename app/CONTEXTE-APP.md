@@ -1377,3 +1377,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **« Ramène ton historique » jusqu'au bout** (`e2e_history_sync`) : NinjaTrader 8 ouvre la connexion avec la clé personnelle ; un envoi de l'add-on avec cette clé, puis le compte relié, donnent le trade dans le journal, et la mission 8 se coche.
 - **`e2e_page_shift`** : son message dit maintenant le nombre de comptes au premier dessin et à la fin, et la hauteur de la carte des comptes, pour trouver la cause du décalage qui apparaît parfois sur la CI (une carte poussée de 327 px sous les comptes), introuvable sur le Mac.
 - **Le contraste vérifié par axe-core** (`e2e_axe_contrast`, axe-core 4.10.2 dans `tests/vendor/axe.min.js`, jamais déployé) : la règle « color-contrast » ne trouve aucun texte sous son seuil sur Aujourd'hui, Stats et Trades, à 390 et 1300, en clair et en foncé, ni dans la barre d'onglets au-dessus des cartes. Ce qu'axe ne peut pas mesurer (un texte sur un dégradé ou sur du verre flouté) est compté. Pour la barre d'onglets, le calcul de `e2e_design_ios272` (G) le couvre.
+
+### D'après l'export Admin du 29 oct.
+- **L'erreur « Cannot read properties of undefined (reading 'toLowerCase') »** (page d'un trade, 5 fois, 1 trader) : le bouton « + Autre » des puces de setup portait la classe des puces sans nom de setup. Taper dans le champ du setup faisait planter le marquage des puces. Les puces se marquent maintenant par `[data-ux-setup]` seulement. Un setup enregistré autrement qu'en texte n'est jamais une puce.
+- **Les recherches sans résultat** (« how to », « how to ad », « appeareance », « how to insert my setups », « coa », « coac », « routine », « rout ») :
+  - trois entrées de plus : Ma routine (elle ouvre ce groupe de Réglages), Ton coach, Apparence (faute de frappe comprise) ;
+  - une question sans mot à chercher (« how to », « comment ») mène à l'Aide ;
+  - « Missions hebdomadaires » devient « Défis de la semaine » dans la recherche aussi.
+- **Test** : `e2e_tour_1029` (taper un setup après « + Autre » sans erreur, et les 8 recherches).

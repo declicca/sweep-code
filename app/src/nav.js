@@ -217,7 +217,11 @@ window.SweepMO = window.SweepMO || class {
   /* ───────────── search also finds every feature and setting (labels follow the glossary, keywords in EN/FR/ES) ───────────── */
   const FIND = [
     { l: { en: 'My progress', fr: 'Ma progression', es: 'Mi progreso' }, k: 'progression progress progreso rang rank rango streak racha xp niveau level nivel', go: () => SweepGame.open('hub') },
-    { l: { en: 'Weekly missions', fr: 'Missions hebdomadaires', es: 'Misiones semanales' }, k: 'missions misiones mission boss jefe', go: () => SweepGame.open('missions') },
+    { l: { en: 'Weekly challenges', fr: 'Défis de la semaine', es: 'Retos de la semana' }, k: 'challenges defis retos missions misiones mission boss jefe', go: () => SweepGame.open('missions') },
+    // (29 Oct., searches that found nothing in Admin: « routine », « coach », « appeareance », « how to insert my setups »)
+    { l: { en: 'My routine (checklist, setups, risk rules)', fr: 'Ma routine (checklist, setups, règles de risque)', es: 'Mi rutina (checklist, setups, reglas de riesgo)' }, k: 'routine rutina checklist setup setups insert inserer insertar ajouter add anadir create creer crear regles rules reglas risque risk riesgo parcours gameplan verrouillage lock bloqueo discipline disciplina', go: () => { try { const o = new Set(JSON.parse(sessionStorage.getItem('sw.sgd') || '[0]')); o.add(1); sessionStorage.setItem('sw.sgd', JSON.stringify([...o])); } catch (e) { /* private mode */ } location.hash = '#settings'; } },
+    { l: { en: 'Your coach', fr: 'Ton coach', es: 'Tu coach' }, k: 'coach coaching entraineur entrenador conseil conseils advice consejo consejos lecon lesson leccion', go: '#dashboard' },
+    { l: { en: 'Appearance (theme, language)', fr: 'Apparence (thème, langue)', es: 'Apariencia (tema, idioma)' }, k: 'appearance appeareance apearance apparence apariencia theme tema sombre dark clair light oscuro claro mode langue language idioma', go: '#settings' },
     { l: { en: 'Season pass', fr: 'Pass de saison', es: 'Pase de temporada' }, k: 'season saison temporada palier tier nivel chapitre chapter capitulo parcours journey', go: () => SweepGame.open('season') },
     { l: { en: 'Weekly league', fr: 'Ligue hebdomadaire', es: 'Liga semanal' }, k: 'league ligue liga classement ranking clasificacion', go: () => SweepGame.open('league') },
     { l: { en: 'Crew & buddy', fr: 'Crew et buddy', es: 'Crew y buddy' }, k: 'crew buddy equipe equipo ami amigo friend', go: () => SweepGame.open('social') },
@@ -264,6 +268,8 @@ window.SweepMO = window.SweepMO || class {
   function helpFind(q, n) {
     const ts = tokens(q), s = norm(q).trim(); if (!s) return [];
     const out = [];
+    // a question with no word left to search (« how to », « comment ») : the help, never nothing
+    if (!ts.length && /^(how|comment|como|why|pourquoi|por que|what|quoi|que)\b/.test(s)) { const h = FIND.find((f) => /^help\b/i.test(f.l.en)); if (h) return [{ sc: 1, kind: 'page', t: h.l[LANG] || h.l.en, run: h.go }]; }
     FIND.forEach((f, i) => {
       const words = (norm(f.l[LANG] || f.l.en) + ' ' + norm(f.k)).split(/[^a-z0-9]+/);
       let sc = ts.filter((t) => words.some((w) => fits(t, w))).length;

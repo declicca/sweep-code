@@ -7,7 +7,8 @@ A trader of its own; phone 390 (fr, touch, dark) and computer 1300 (en, light).
  T3 the coach: « No trade without a mistake today (1 trade) », never « 0 trades of 1 »
  T4 Today: Discipline « — » while no checklist is filled (not « 0 % »)
  T5 Today: an evening trade's line is the clock time, like the others (no « session of … entered on … »)
- T6 the trade page: the setup with its chips only (written one way), « + Other » opens the field
+ T6 the trade page: the setup with its chips only (written one way), « + Other » opens the field, typing in it throws nothing
+ S  the 8 searches Admin saw find nothing (« routine », « coach », « appeareance », « how to »…) each find something
 No page error, nothing wider than the window.
 """
 import json, os, random, sqlite3, sys
@@ -74,6 +75,13 @@ with sync_playwright() as p:
     ok(st[0] is False and 'Liquidity sweep*' in st[1] and not any(c.lower().startswith('liquidity sweep') and c != 'Liquidity sweep*' for c in st[1]) and st[1][-1] == x['other'], f'T6 {tag}: the setup with its chips only, written one way, « {x["other"]} » last ({st[1][:4]}…)')
     pg.locator('#main [data-ux-other]').click(); pg.wait_for_timeout(300)
     ok(pg.evaluate("""(() => { const i = document.querySelector('#main input[data-bind$="|setup"]'); return !!i && !!i.closest('label').getClientRects().length })()"""), f'T6 {tag}: « {x["other"]} » opens the field')
+    # (29 Oct., Admin: « reading 'toLowerCase' » on the trade page) typing in the field after « + Other »: no error
+    pg.locator('#main input[data-bind$="|setup"]').fill('My own setup'); pg.wait_for_timeout(400)
+    ok(not [e for e in errs if 'toLowerCase' in e], f'T6 {tag}: typing a setup after « {x["other"]} »: no error ({errs[-1:]})')
+    pg.locator('#main input[data-bind$="|setup"]').fill('Liquidity sweep'); pg.wait_for_timeout(300)
+    # (29 Oct., Admin: searches that found nothing) each now finds something
+    found = pg.evaluate("['how to ad', 'appeareance', 'how to', 'how to insert my setups', 'coa', 'coac', 'routine', 'rout'].map((q) => [q, SweepHelp.find(q, 1).length])")
+    ok(all(n for q, n in found), f'S {tag}: the 8 searches that found nothing find something ({[q for q, n in found if not n]})')
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag}: nothing wider than the window')
     pg.evaluate(FLUSH)
     ctx.close()
