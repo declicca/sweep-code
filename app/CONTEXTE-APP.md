@@ -1340,3 +1340,20 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - le Journal semaine garde ses chiffres, montre les réponses déjà écrites, et propose « Ouvrir le bilan de la semaine ».
 - **D7b** : la moyenne de la checklist d'un trade (`tDisc`) s'appelle « Checklist » partout (chiffres du jour, Journal semaine, page d'un trade, colonnes et filtres de Stats, cartes de partage). Le score du coach garde seul le mot « Discipline ». Les textes FR et ES sont dans un dictionnaire du code (`nav.js`, `D7`), puisque les fichiers de traduction ne se recompilent pas.
 - **Le Guide** : « Bien démarrer », « XP », « Quoi faire ensuite » (l'ancien « parcours en chapitres »), « Défis, coffre et bilan de la semaine » et « La checklist » parlent avec ces mots.
+
+### SWEEP.md, étape 5 (29 oct.) : les missions de découverte
+- **Le moteur** (`GameDiscovery`, `game/discovery.php` ; `api/game/discovery`, aussi dans `api/game/today`) : les 15 missions de la section 5.2 de SWEEP.md.
+  - **Le cochage** : chaque mission se coche par un comportement que le serveur lit, en lecture seule, dans les données du trader. Ouvrir une page ne coche rien. La première fois, 20 XP une seule fois (`awardXp « disc:N »`).
+  - **Le rythme** : une mission par jour de trading au plus. Un trader de « Plus d'un an » en a deux par jour.
+  - **Les fonctions cachées** tant que leur mission n'est pas faite : Mon argent (mission 12, ou dès un premier payout), le plan guidé (mission 14, ou choisi dans Réglages), « Ma progression » au-delà du niveau et du streak (mission 15), Sweep AI (mission 15 ou à partir du 11ᵉ jour de trading).
+- **Les comptes existants** (la migration) : la colonne `users.discovery_done` est créée seule au premier appel. Tous les comptes qui existent à ce moment reçoivent 1 : toutes les missions faites, rien de caché. Cette marque n'est jamais retirée. « Tout montrer » (Réglages › Ma routine) la pose aussi.
+- **Dans l'app** (`window.SweepDisc`, fin de `src/nav.js`) :
+  - la mission du jour est dans la routine (« Mission 2 sur 15 », sa phrase, « Faire maintenant ») ; quand le parcours de 90 jours est actif, c'est sa mission qui s'affiche ;
+  - les fonctions non découvertes sont cachées par des classes sur `body` (`disc-no-money`, `disc-no-ai`, `disc-no-guided`, `disc-no-game`) ;
+  - la mission 10 (installation ou rappels) est dite par l'appareil (`settings.discovery.device`).
+- **Le parcours de 90 jours** : « Faire maintenant » sur ses missions qui touchent une fonction (compte, limites, trade, revue, bilan). Ouvrir la fonction ne coche rien.
+- **Tests** : `SWEEP_DISC_ALL=1` (dans `tools/run.sh` et `par.py`) fait voir tout aux comptes de test, sauf à un compte marqué 2. `e2e_discovery` suit un trader marqué 2 : les fonctions cachées, chaque comportement qui coche, l'ouverture d'une page qui ne coche rien, une mission par jour, « Tout montrer », et un compte d'avant qui voit tout.
+
+### Revue R2 (29 oct.) et « Les trois démarrages »
+- **R2** : le jour de son inscription, le coach ne reproche plus à un trader l'absence de plan (`signupSession`, `src/coach.js`). Un trader inscrit le soir note sa journée, et le plan qu'il fait ce soir-là est celui de demain.
+- **« Les trois démarrages »** (Admin › Métriques) : un compte ajouté « déjà en cours » range le trader dans le cas « en activité », comme « Plus d'un an ».

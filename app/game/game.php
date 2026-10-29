@@ -17,6 +17,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  */
 
 require_once __DIR__ . '/catalog.php';
+require_once __DIR__ . '/discovery.php';   // the discovery missions (SWEEP.md step 5)
 require_once __DIR__ . '/v2.php';
 require_once __DIR__ . '/boss.php';
 require_once __DIR__ . '/v2b.php';
@@ -764,6 +765,7 @@ function game_route(string $route, string $method, string $uid): void
     GameEngine::schema();
     $p = GameEngine::profile($uid);           // first open creates the profile + history backfill
     if (strpos($route, 'api/game/gameplan') === 0) { gameplan_route($route, $method, $uid); json_out(404, ['error' => 'not_found']); }
+    if (strpos($route, 'api/game/discovery') === 0) { discovery_route($route, $method, $uid); json_out(404, ['error' => 'not_found']); }
 
     if ($route === 'api/game/today' && $method === 'GET') {
         GameEngine::catchUp($uid);
@@ -790,6 +792,7 @@ function game_route(string $route, string $method, string $uid): void
             'season' => (function () use ($uid) { $s = GameSeason::state($uid); return ['id' => $s['id'], 'number' => $s['number'], 'name' => $s['name'], 'tier' => $s['tier'], 'claimable' => $s['claimable'], 'points' => $s['points'], 'per_tier' => $s['per_tier']]; })(),
             'wrapped' => (function () use ($uid) { GameWrapped::ensure($uid); try { GameWrappedYear::ensure($uid); } catch (Throwable $e) { error_log('[Sweep wrapped year] ' . $e->getMessage()); } try { GameNotifyService::run($uid); } catch (Throwable $e) { error_log('[Sweep notify] ' . $e->getMessage()); }
                 $w = GameWrapped::state($uid)['items'][0] ?? null; return $w && $w['fresh'] ? ['month' => $w['month'], 'new' => $w['new']] : null; })(),
+            'discovery' => (function () use ($uid) { try { return GameDiscovery::state($uid); } catch (Throwable $e) { error_log('[Sweep discovery] ' . $e->getMessage()); return ['all' => true, 'shown' => ['money' => true, 'guided' => true, 'game' => true, 'ai' => true]]; } })(),
             'celebrations' => GameEngine::pendingCelebrations($uid),
         ]);
     }

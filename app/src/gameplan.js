@@ -129,6 +129,22 @@
     const done = [!!(ST && ST.track), acc, plan], l = M1T[LG()] || M1T.en;
     return `<ul class="gp-m1">${l.map((x, i) => `<li class="${done[i] ? 'ok' : ''}"><i aria-hidden="true">${done[i] ? '✓' : ''}</i><span>${esc(x)}</span></li>`).join('')}</ul>`;
   }
+  // (29 Oct., SWEEP.md step 5) « Do it now » on the missions that touch a function (account, limits, trade, review, weekly recap):
+  // it opens the function, it ticks nothing (the same kinds as the server's GP_MISSIONS)
+  const GO_K = {"1":"account","2":"trade","5":"weekly","12":"weekly","22":"journal","23":"zero","24":"zero","25":"zero","26":"weekly","29":"journal","33":"weekly","40":"weekly","44":"journal","45":"journal","46":"zero","47":"weekly","50":"journal","51":"journal","52":"limits","54":"weekly","57":"journal","58":"journal","67":"journal","71":"journal","73":"journal","74":"zero","75":"weekly","78":"journal","80":"journal","81":"zero","82":"weekly","85":"journal","86":"journal","87":"journal","88":"zero"};
+  const GO_T = ({ en: 'Do it now', fr: 'Faire maintenant', es: 'Hacerlo ahora' })[(typeof LANG !== 'undefined' && LANG) || 'en'] || 'Do it now';
+  function goKind(k) {
+    const G = window.SweepGame, acc = (S.accounts || []).find((a) => !a.demo);
+    ui().close(true);
+    setTimeout(() => {
+      if (k === 'account') location.hash = '#accounts';
+      else if (k === 'limits') location.hash = acc ? '#account/' + acc.id : '#accounts';
+      else if (k === 'trade') { if (typeof openTicket === 'function') openTicket(null); }
+      else if (k === 'journal' || k === 'zero') { if (G && G.openReview) G.openReview(); }
+      else if (k === 'weekly') { if (G && G.open) G.open('weekly'); }
+    }, 250);
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-gp-go]'); if (b) goKind(b.dataset.gpGo); });
   function missionHtml(n) {
     const m = M(n), st = status(n), d = dateOf(n), wk = GP.weeks[m.w];
     const sub = [u('week', { n: m.w + 1 }) + ' · ' + tx(GP.words.DAY) + ' ' + n, d ? fd(d) : ''].filter(Boolean).join(' · ');
@@ -139,7 +155,7 @@
     if (st === 'done') act = `<button type="button" class="btn g-big gp-act is-done" disabled>${esc(doneBy ? u('auto_by') : u('ticked'))}</button>`;
     else if (st === 'gate') act = `<p class="gp-wait">${esc(u('after_gate', { m: n > 60 ? 2 : 1 }))}</p>`;
     else if (st === 'soon') act = `<p class="gp-wait">${esc(u('opens', { d: fd(d, { weekday: 'long', day: 'numeric', month: 'long' }) }))}</p>`;
-    else act = `${m.a ? `<p class="gp-auto">${esc(u('auto'))}</p>` : ''}<button type="button" class="btn primary g-big gp-act" data-gp="tick" data-n="${n}">${esc(u('tick', { n: m.min }))}</button>`;
+    else act = `${m.a ? `<p class="gp-auto">${esc(u('auto'))}</p>` : ''}${GO_K[n] ? `<button type="button" class="btn g-big gp-go" data-gp-go="${GO_K[n]}">${esc(GO_T)} ›</button>` : ''}<button type="button" class="btn primary g-big gp-act" data-gp="tick" data-n="${n}">${esc(u('tick', { n: m.min }))}</button>`;
     return `${ui().head(esc(tx(m.t)), esc(sub))}<div class="gp-m" data-noi18n>${chips}<p class="gp-wk"><b>${esc(tx(wk.t))}</b> · ${esc(tx(wk.g))}</p><p class="gp-desc">${tx(m.d)}</p>${n === 1 ? m1Checks() : ''}
       ${learn ? `<div class="gp-learns"><p class="gp-lt">${esc(u('learn'))}</p>${learn}</div>` : ''}
       ${quizHtml(n)}<div class="gp-dw"><b>${esc(tx(GP.words.DONE))}</b><p>${tx(m.done)}</p></div>${act}</div>`;

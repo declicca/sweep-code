@@ -2898,6 +2898,17 @@ html body .nav-rt .nav-now{background:color-mix(in srgb,var(--fill) 45%,transpar
 .nav-hist-in h2{margin:0 0 6px;font-size:22px}.nav-hist-in p{margin:0 0 16px;line-height:1.45}
 .nav-hist-b{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}.nav-hist-b .btn{min-height:48px;justify-content:center}
 .nav-now-traded{margin:8px 0 0}.nav-now-traded .link{font-size:13px}
+/* (29 Oct., SWEEP.md step 5) the discovery mission in the routine; what is not discovered yet is not shown */
+.nav-disc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;margin:10px 0 0;padding:12px 14px;border-radius:var(--r-tile,20px);box-shadow:inset 0 0 0 1px var(--line)}
+.nav-disc small{grid-column:1/-1;font-size:11px;color:var(--pos);font-weight:600;letter-spacing:.02em}
+.nav-disc p{margin:0;display:flex;flex-direction:column;gap:2px;min-width:0}.nav-disc p b{font-size:15px}.nav-disc p span{font-size:13px;color:var(--muted);line-height:1.4}
+.nav-disc .btn{white-space:nowrap}
+@media (max-width:420px){.nav-disc{grid-template-columns:1fr}.nav-disc .btn{justify-self:start}}
+.nav-disc-all{margin-top:10px}.nav-disc-all p{margin:0 0 10px}
+html body.disc-no-money #main .d-pay,html body.disc-no-money a[href="#payouts"]{display:none!important}
+html body.disc-no-ai #askFab,html body.disc-no-ai .nav-ask-side,html body.disc-no-ai .ai-only{display:none!important}
+html body.disc-no-guided [data-pm="mode"][data-v="full"]{display:none!important}
+html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > h4:not(:last-of-type),html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hub{display:none!important}
 /* (28 Oct., iOS 27.2 V3) the three figures of the routine read the same: the label on top, the value under it, no coloured fill */
 html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
 html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > span{display:flex!important;flex-direction:column;align-items:center;gap:0;font-size:inherit}

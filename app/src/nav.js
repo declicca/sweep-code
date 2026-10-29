@@ -4331,7 +4331,7 @@ window.SweepMO = window.SweepMO || class {
     const nowRow = nowHtml(d, r);
     const rmRow = remindRow();
     // the 90-day gameplan's mission of the day (SWEEP.md step 3: its card became this line; gameplan.js draws it, the last one kept in the browser)
-    const gpRow = (() => { try { return window.SweepGP && SweepGP.line ? SweepGP.line() : localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } })();
+    const gpRow = (() => { try { return window.SweepGP && SweepGP.line ? SweepGP.line() : localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } })() || (window.SweepDisc ? SweepDisc.line() : '');   // (SWEEP.md step 5) the gameplan's mission, else the discovery mission
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
     if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${rmRow}${gpRow}${helpT}</section>`;
@@ -6864,4 +6864,72 @@ new window.SweepMO(() => {
     return `<p class="nav-now-traded"><button type="button" class="link" data-rt="trade">${esc2(t('traded'))} ›</button></p>`;
   }
   window.SweepStart = { moment, kind, after, history, tradedLink, paint: () => paintWelcome() };
+})();
+
+
+/* ───────────── the discovery missions (29 Oct., SWEEP.md step 5): the mission of the day in the routine, « Do it now », and the
+ * functions not yet discovered hidden (the server says which: GameDiscovery, game/discovery.php) ───────────── */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const M = {
+    en: { kick: 'Mission {n} of {of}', go: 'Do it now', all: 'Show everything', allS: 'Every mission done and every function shown, now.',
+      1: ['Add your account', 'Its firm rules fill in: your margin and your target are right from day one.'], 2: ['Your risk allowed', 'Two minutes before the open: the most you can lose today, on screen.'], 3: ['Your first trade', 'A screenshot or your P&L: the journal starts.'], 4: ['Close your day', 'One tap at the end of the session: the day counts.'],
+      5: ['A trade in your plan', 'In the way of your bias, under your max loss and your max trades.'], 6: ['Your setup in one tap', 'Its checklist adapts: your stats will say which setup pays.'], 7: ['Answer your coach', 'One sentence, your lesson: the coach learns from it.'], 8: ['Your trades on their own', 'NinjaTrader 8, Quantower or a CSV: no more typing.'],
+      9: ['Stay within your margin', 'A day closed whose loss stayed under your risk allowed.'], 10: ['Sweep on your home screen', 'Install it, turn on your reminders: your plan before the open.'], 11: ['Your weekly recap', 'Friday: your week, your rule for the next one.'], 12: ['Your real net', 'My money: payouts minus fees, what trading really made you.'],
+      13: ['Trade your edge', 'What works for you, in Stats: a plan that takes its rule.'], 14: ['The guided plan', 'Levels, scenarios, a locked sheet: the plan of serious days.'], 15: ['Three days in a row', 'Three complete days: « My progress » opens.'] },
+    fr: { kick: 'Mission {n} sur {of}', go: 'Faire maintenant', all: 'Tout montrer', allS: 'Toutes les missions faites et toutes les fonctions montrées, tout de suite.',
+      1: ['Ajoute ton compte', 'Les règles de ta firme se remplissent : ta marge et ton objectif sont justes dès le premier jour.'], 2: ['Ton risque permis', 'Deux minutes avant l’ouverture : ce que tu peux perdre aujourd’hui, à l’écran.'], 3: ['Ton premier trade', 'Une capture ou ton P&L : le journal commence.'], 4: ['Ferme ta journée', 'Un toucher à la fin de la séance : la journée compte.'],
+      5: ['Un trade dans ton plan', 'Dans le sens de ton biais, sous ta perte max et ton nombre max de trades.'], 6: ['Ton setup en un toucher', 'Sa checklist s’adapte : tes stats diront quel setup paie.'], 7: ['Réponds au coach', 'Une phrase, ta leçon : le coach apprend d’elle.'], 8: ['Tes trades arrivent seuls', 'NinjaTrader 8, Quantower ou un CSV : plus rien à taper.'],
+      9: ['Reste dans ta marge', 'Une journée fermée dont la perte est restée sous ton risque permis.'], 10: ['Sweep sur ton écran d’accueil', 'Installe-le, active tes rappels : ton plan avant l’ouverture.'], 11: ['Ton bilan de la semaine', 'Vendredi : ta semaine, ta règle pour la suivante.'], 12: ['Ton vrai net', 'Mon argent : les payouts moins les frais, ce que le trading te rapporte vraiment.'],
+      13: ['Trade ton edge', 'Ce qui marche pour toi, dans Stats : un plan qui reprend sa règle.'], 14: ['Le plan guidé', 'Niveaux, scénarios, fiche verrouillée : le plan des jours sérieux.'], 15: ['Trois journées de suite', 'Trois journées complètes : « Ma progression » s’ouvre.'] },
+    es: { kick: 'Misión {n} de {of}', go: 'Hacerlo ahora', all: 'Mostrar todo', allS: 'Todas las misiones hechas y todas las funciones visibles, ahora.',
+      1: ['Añade tu cuenta', 'Las reglas de tu firma se completan: tu margen y tu objetivo son correctos desde el primer día.'], 2: ['Tu riesgo permitido', 'Dos minutos antes de la apertura: lo que puedes perder hoy, en pantalla.'], 3: ['Tu primera operación', 'Una captura o tu P&L: el diario empieza.'], 4: ['Cierra tu día', 'Un toque al final de la sesión: el día cuenta.'],
+      5: ['Una operación en tu plan', 'En el sentido de tu sesgo, bajo tu pérdida máx. y tu número máx. de operaciones.'], 6: ['Tu setup en un toque', 'Su checklist se adapta: tus stats dirán qué setup paga.'], 7: ['Responde a tu coach', 'Una frase, tu lección: el coach aprende de ella.'], 8: ['Tus operaciones llegan solas', 'NinjaTrader 8, Quantower o un CSV: nada más que escribir.'],
+      9: ['Quédate en tu margen', 'Un día cerrado cuya pérdida quedó bajo tu riesgo permitido.'], 10: ['Sweep en tu pantalla de inicio', 'Instálalo, activa tus recordatorios: tu plan antes de la apertura.'], 11: ['Tu resumen semanal', 'Viernes: tu semana, tu regla para la siguiente.'], 12: ['Tu neto real', 'Mi dinero: los payouts menos las comisiones, lo que el trading te deja de verdad.'],
+      13: ['Opera tu ventaja', 'Lo que te funciona, en Estadísticas: un plan que retoma su regla.'], 14: ['El plan guiado', 'Niveles, escenarios, ficha bloqueada: el plan de los días serios.'], 15: ['Tres días seguidos', 'Tres días completos: « Mi progreso » se abre.'] } };
+  const x = M[L] || M.en;
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const st = () => (window.SweepGame && SweepGame.state && SweepGame.state().discovery) || null;
+  /** « Do it now »: the page or the sheet of the mission (opening it ticks nothing) */
+  function go(n) {
+    const G = window.SweepGame, last = (S.trades || []).filter((t) => !t.demo && !t.untracked).slice(-1)[0], acc = (S.accounts || []).find((a) => !a.demo);
+    const A = { 1: () => { location.hash = '#accounts'; }, 2: () => G && G.openPlan && G.openPlan(), 3: () => typeof openTicket === 'function' && openTicket(null), 4: () => G && G.openReview && G.openReview(),
+      5: () => typeof openTicket === 'function' && openTicket(null), 6: () => typeof openTicket === 'function' && openTicket(null), 7: () => { location.hash = last ? '#trade/' + last.id : '#trades'; }, 8: () => { location.hash = '#settings'; },
+      9: () => { location.hash = acc ? '#account/' + acc.id : '#accounts'; }, 10: () => window.SweepInstall && SweepInstall.show(), 11: () => G && G.open && G.open('weekly'), 12: () => { location.hash = '#payouts'; },
+      13: () => { location.hash = '#analytics'; }, 14: () => window.SweepFiche && SweepFiche.open ? SweepFiche.open() : G && G.openPlan && G.openPlan(), 15: () => G && G.openReview && G.openReview() };
+    (A[n] || (() => {}))();
+  }
+  function line() {
+    const d = st(); if (!d || d.all || !d.current) return '';
+    const n = d.current, m = x[n] || ['', ''];
+    return `<div class="nav-disc" data-disc="${n}"><small>${esc2(x.kick.replace('{n}', n).replace('{of}', d.of || 15))}</small><p><b>${esc2(m[0])}</b><span>${esc2(m[1])}</span></p><button type="button" class="btn sm" data-disc-go="${n}">${esc2(x.go)} ›</button></div>`;
+  }
+  /** what is not discovered yet is not shown */
+  function apply() {
+    const d = st(), sh = (d && d.shown) || { money: true, guided: true, game: true, ai: true }, b = document.body; if (!b) return;
+    [['money', 'disc-no-money'], ['guided', 'disc-no-guided'], ['game', 'disc-no-game'], ['ai', 'disc-no-ai']].forEach(([k, c]) => { const on = !sh[k]; if (b.classList.contains(c) !== on) b.classList.toggle(c, on); });
+    // mission 10, said by this device: installed, or the reminders on
+    if (d && !d.all && !(d.done || []).includes(10) && S.settings && !(S.settings.discovery || {}).device) {
+      const inst = (navigator.standalone === true) || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+      const push = (typeof Notification !== 'undefined' && Notification.permission === 'granted');
+      if (inst || push) put('settings', Object.assign(structuredClone(S.settings), { discovery: Object.assign({}, S.settings.discovery, { device: true }) }));
+    }
+    // Settings › My routine: « Show everything »
+    if (d && !d.all && route().v === 'settings') {
+      const grp = [...document.querySelectorAll('#main details.nav-sgd')].find((g) => g.dataset.i === '1');
+      if (grp && !grp.querySelector('.nav-disc-all')) grp.insertAdjacentHTML('beforeend', `<section class="surface pad nav-disc-all" data-noi18n><p class="muted">${esc2(x.allS)}</p><button type="button" class="btn" data-disc-all>${esc2(x.all)}</button></section>`);
+    }
+  }
+  document.addEventListener('click', (e) => {
+    const g = e.target.closest && e.target.closest('[data-disc-go]'); if (g) { go(+g.dataset.discGo); return; }
+    const a = e.target.closest && e.target.closest('[data-disc-all]');
+    if (a) { a.disabled = true; apiJSON('api/game/discovery/all', { method: 'POST', body: {} }).then(() => window.SweepGame && SweepGame.refresh && SweepGame.refresh()).then(() => setTimeout(() => { apply(); render(); }, 400)).catch(() => { a.disabled = false; }); }
+  });
+  const appRender = window.render;
+  if (typeof appRender === 'function' && !appRender.__disc) {
+    const w = function () { const out = appRender.apply(this, arguments); try { apply(); } catch (e) { /* never blocks */ } return out; };
+    w.__disc = true; window.render = w;
+  }
+  window.SweepDisc = { line, go, apply };
 })();

@@ -157,6 +157,11 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
     // (28 Oct., activation D) the three endings of the first visit: « active » (More than a year), else « open » (signed up during the
     // session, 9:30 → 16:00 ET on a weekday) or « closed » (the rest of the time); with each, who saw his risk allowed that session
     $xp = []; if (in_array('experience', $cols, true)) foreach ($q("SELECT id, experience FROM users WHERE experience IS NOT NULL") as $r) $xp[$r['id']] = (string) $r['experience'];
+    // an account added « already running » (its balance moved by an adjustment) makes an active trader too
+    if ($has('documents')) foreach ($q("SELECT user_id, data FROM documents WHERE collection = 'accounts'") as $r) {
+        $a = json_decode((string) $r['data'], true); if (!is_array($a) || !empty($a['demo'])) continue;
+        foreach ((array) ($a['adjustments'] ?? []) as $x) if (is_array($x) && (int) ($x['amount_c'] ?? 0) !== 0 && ($x['kind'] ?? '') !== 'fees') { $xp[$r['user_id']] = 'gt1'; break; }
+    }
     $cases = []; foreach (['open', 'closed', 'active'] as $k) $cases[$k] = ['n' => 0, 'day0' => 0];
     foreach ($users as $u) {
         $s0 = $sday($u['ts']); $k = $slot($u['ts']); $slots[$k]['n']++;

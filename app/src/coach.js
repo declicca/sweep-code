@@ -338,6 +338,12 @@
   }
 
   /** what the coach says about one trade: { good: [labels], fix: [problem, advice, code, values] | null, all: [codes], ses: session(), n, time } */
+  /** the session of the sign-up (New York; 18:00 ET or later = the next session, as todayStr) */
+  function signupSession() {
+    const c = S.me && S.me.created_at; if (c == null || c === '') return '';
+    const ms = /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z'));
+    return isFinite(ms) ? new Date(ms + 216e5).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) : '';
+  }
   function tradeNote(t) {
     if (!t) return null;
     const day = t.date, list = dayTrades(day), key = t.copy_group || t.id;
@@ -359,7 +365,9 @@
     if (p.valid && p.setups.length && t.setup && !p.setups.includes(String(t.setup).trim().toLowerCase())) add('setup_not_in_plan', { s: t.setup });
     { const e = min(timeOf(t)); if (e != null && e >= 570 && e < 575 && ownLine('open5')) add('open5'); }
     if (p.valid && p.bias === 'no_trade') add('plan_no_trade');
-    if (!p.valid) add('no_plan');
+    // (29 Oct., review R2) the session of the sign-up: a trader who signs up in the evening to log his day is never told he had no
+    // plan — he could not have made one (the plan he makes that evening is tomorrow's)
+    if (!p.valid && day !== signupSession()) add('no_plan');
     const r = rulesOf(t); if (r === 'no') add('rules_no'); else if (r === 'partial') add('rules_partial');
     // what was right (the plan, the stop, the size, the checklist), never more than two
     const planBad = issues.some(([c]) => ['over_max_loss', 'over_max_trades', 'against_bias', 'setup_not_in_plan', 'plan_no_trade', 'no_plan'].includes(c));

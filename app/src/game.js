@@ -280,7 +280,7 @@
     G.busy = true;
     try {
       const r = await apiJSON('api/game/today');
-      G.today = r.today; G.yesterday = r.yesterday; G.profile = r.profile; G.start = r.start; G.map = r.map; G.missions = r.missions; G.unlocked = r.unlocked || null; G.weekly = r.weekly; G.quest = r.quest; G.wrapped = r.wrapped; G.season = r.season; G.league = r.league; G.crew = r.crew; G.buddy = r.buddy; if (r.cosmetic !== G.cosmetic) { G.cosmetic = r.cosmetic; applyTheme(r.cosmetic); } G.at = Date.now();
+      G.today = r.today; G.yesterday = r.yesterday; G.profile = r.profile; G.start = r.start; G.map = r.map; G.missions = r.missions; G.unlocked = r.unlocked || null; G.weekly = r.weekly; G.quest = r.quest; G.wrapped = r.wrapped; G.season = r.season; G.league = r.league; G.crew = r.crew; G.buddy = r.buddy; G.discovery = r.discovery || null; if (r.cosmetic !== G.cosmetic) { G.cosmetic = r.cosmetic; applyTheme(r.cosmetic); } G.at = Date.now();
       queue(r.celebrations || []);
       paint();
       loadBoss();
@@ -3273,7 +3273,7 @@
   paint();
   window.SweepGame = { refresh: () => load(true), sumText, openPlan, openReview, weekBrief, suggestedSetups: SUGGESTED_SETUPS,
     // the plan first (once a day) before a new trade — used by the screenshot way of adding a trade too
-    state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
+    state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null, discovery: G.discovery || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
     planFirst: (then) => { if (!document.getElementById('gSheet') && planGateNeeded()) { openPlan(G.today.day, { then }); return true; } return false; }, openJournal: () => openJournal(), openGoal: () => openGoalQuestions(), t,
     next: () => { try { return progNext(); } catch (e) { return null; } },
     summary: () => (G.profile ? { rank: rankName(G.profile.rank), level: G.profile.level, streak: G.profile.streak.current, best: G.profile.streak.best, valid: G.profile.streak.today_valid } : null),
