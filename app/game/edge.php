@@ -55,9 +55,10 @@ final class GameEdge
     }
 
     /** @param array $trades all the trader's trades; @param array $journals journals (id = session day, pre = the plan); @param string $day the session */
-    public static function profile(array $trades, array $journals, string $day): array
+    /** the trades of the 56 days up to $day (a copy once, in the real order) with their dimensions */
+    private static function prep(array $trades, array $journals, string $day): array
     {
-        $from = self::addDays($day, -55); $mid = self::addDays($day, -27); $wk = self::addDays($day, -6);
+        $from = self::addDays($day, -55);
         // a copied trade once: the first saved of its group (as GameEngine::onePerCopyGroup)
         $list = []; $at = [];
         foreach ($trades as $t) {
@@ -74,7 +75,13 @@ final class GameEdge
             return strcmp($a['date'], $b['date']) ?: strcmp($rk($a), $rk($b)) ?: strcmp((string) ($a['created_at'] ?? ''), (string) ($b['created_at'] ?? '')) ?: strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? ''));
         });
         $pre = []; foreach ($journals as $j) if (is_array($j) && isset($j['id'])) $pre[(string) $j['id']] = $j['pre'] ?? null;
-        $dims = self::dimsOf($list, $pre);
+        return [$list, self::dimsOf($list, $pre)];
+    }
+
+    public static function profile(array $trades, array $journals, string $day): array
+    {
+        $mid = self::addDays($day, -27); $wk = self::addDays($day, -6);
+        [$list, $dims] = self::prep($trades, $journals, $day);
         $withR = 0; foreach ($list as $t) if ((int) ($t['risk_c'] ?? 0) > 0) $withR++;
         $unit = $list && $withR >= 0.8 * count($list) ? 'R' : '$';
         $rows = [];
@@ -140,6 +147,27 @@ final class GameEdge
     }
 
     /** the trader's profile as the server reads it (Edge Reveal, the weekly recap) */
+    /**
+     * (29 Oct., SWEEP.md step 5, mission 13) a trade taken « in your edge » and in the plan: on one of the last $days sessions, a trade
+     * whose dimensions are those of the trader's first winning condition — the edge as it stood the day before (never the trade
+     * proving itself) — and that sits in the day's plan.
+     */
+    public static function tradedInEdge(array $trades, array $journals, string $day, int $days = 21): bool
+    {
+        for ($k = 0; $k < $days; $k++) {
+            $d = self::addDays($day, -$k);
+            $top = (self::profile($trades, $journals, self::addDays($d, -1))['wins'] ?? [])[0] ?? null; if (!$top) continue;
+            [$list, $dims] = self::prep($trades, $journals, $d);
+            foreach ($list as $i => $t) {
+                if ($t['date'] !== $d || ($dims[$i]['plan'] ?? '') !== 'in') continue;
+                $all = true;
+                foreach ($top['dims'] as [$dim, $v]) { $x = $dims[$i][$dim] ?? null; if ($x === null || ($dim === 'setup' ? self::low($x) !== self::low($v) : (string) $x !== (string) $v)) { $all = false; break; } }
+                if ($all) return true;
+            }
+        }
+        return false;
+    }
+
     public static function forUser(string $uid, ?string $day = null): array
     {
         return self::profile(GameEngine::docs($uid, 'trades'), GameEngine::docs($uid, 'journals'), $day ?? GameEngine::today());

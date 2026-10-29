@@ -91,8 +91,19 @@ final class GameDiscovery
         if (!empty(($set['discovery'] ?? [])['device'])) $done[10] = true;   // installed or reminders on: said by the device
         try { if ((int) GameEngine::q('SELECT COUNT(*) FROM weekly_reviews WHERE user_id = ?', [$uid])->fetchColumn() > 0) $done[11] = true; } catch (Throwable $e) { /* no weekly yet */ }
         if ($pay || (($set['realnet'] ?? [])['state'] ?? '') === 'done') $done[12] = true;
-        // 13: a plan that takes the rule Stats proposes, or a trade in the plan with a setup (the edge grows from there)
-        if (array_filter($jr, fn($j) => trim((string) (($j['pre'] ?? [])['rule'] ?? '')) !== '')) $done[13] = true;
+        // 13: a trade taken in your edge and in your plan; no edge yet (fewer than 5 trades in one situation): a plan that takes
+        // the rule Stats proposes
+        $paid = [];   // the missions already paid: done for good (the edge is not read again)
+        try { foreach (GameEngine::q("SELECT event_key FROM xp_events WHERE user_id = ? AND event_key LIKE 'disc:%'", [$uid])->fetchAll(PDO::FETCH_COLUMN) as $k) $paid[(int) substr((string) $k, 5)] = true; } catch (Throwable $e) { /* no game yet */ }
+        if (!empty($paid[13])) $done[13] = true;
+        else try {
+            if (class_exists('GameEdge')) {
+                $T = GameEngine::docs($uid, 'trades'); $J = GameEngine::docs($uid, 'journals');
+                if (GameEdge::tradedInEdge($T, $J, GameEngine::today())) $done[13] = true;
+                elseif (empty(GameEdge::profile($T, $J, GameEngine::today())['wins']) && array_filter($jr, fn($j) => trim((string) (($j['pre'] ?? [])['rule'] ?? '')) !== '')) $done[13] = true;
+            }
+        } catch (Throwable $e) { error_log('[Sweep discovery] ' . $e->getMessage()); }
+        foreach ($paid as $n => $x) $done[$n] = true;
         if (array_filter($jr, fn($j) => !empty($j['fiche']))) $done[14] = true;
         try { $st = GameEngine::q('SELECT streak_best FROM user_game_profile WHERE user_id = ?', [$uid])->fetchColumn(); if ((int) $st >= 3) $done[15] = true; } catch (Throwable $e) { /* no profile yet */ }
         return $done;

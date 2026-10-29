@@ -83,5 +83,14 @@ $ok(array_intersect($keys, ['plan=in', 'setup=orb', 'side=long']) && $p7['leak']
 $O = $T; $O[] = $tr(80, '09:45', 900000, ['setup' => 'Old']); $O[] = $tr(-2, '09:45', 900000, ['setup' => 'Future']);
 $ok(GameEdge::profile($O, [], $day)['n'] === 28, 'a trade older than 8 weeks or after the day is not read');
 
+// (29 Oct., SWEEP.md step 5, mission 13) a trade taken in your edge (as it stood the day before) and in your plan
+$top = GameEdge::profile($T, [], $d(1))['wins'][0] ?? null;
+$plan = [['id' => $day, 'pre' => ['bias' => 'bullish', 'max_loss' => '500']]];
+$E = $T; $E[] = $tr(0, '09:45', 4000, ['setup' => 'Opening Range Breakout']);
+$ok($top && GameEdge::tradedInEdge($E, $plan, $day, 1), 'mission 13: the edge\'s trade, in the plan, ticks it (' . ($top['key'] ?? '-') . ')');
+$ok(!GameEdge::tradedInEdge($E, [], $day, 1), 'mission 13: the same trade without a plan does not');
+$R = $T; $R[] = $tr(0, '13:15', 4000, ['setup' => 'Reversal']);
+$ok(!GameEdge::tradedInEdge($R, $plan, $day, 1), 'mission 13: a trade out of the edge, in the plan, does not');
+
 echo $fail ? "$fail failed\n" : "all passed\n";
 exit($fail ? 1 : 0);

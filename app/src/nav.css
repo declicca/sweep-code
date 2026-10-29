@@ -2908,7 +2908,8 @@ html body .nav-rt .nav-now{background:color-mix(in srgb,var(--fill) 45%,transpar
 html body.disc-no-money #main .d-pay,html body.disc-no-money a[href="#payouts"]{display:none!important}
 html body.disc-no-ai #askFab,html body.disc-no-ai .nav-ask-side,html body.disc-no-ai .ai-only{display:none!important}
 html body.disc-no-guided [data-pm="mode"][data-v="full"]{display:none!important}
-html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > h4:not(:last-of-type),html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hub{display:none!important}
+html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > h4,html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hub,html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hubcol{display:none!important}   /* before mission 15: the level and the streak only */
+.nav-disc-hub{display:flex;flex-direction:column;gap:6px;padding:4px 2px 8px}.nav-disc-hub b{font:600 22px var(--font-num,ui-monospace)}.nav-disc-hub p{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
 /* (28 Oct., iOS 27.2 V3) the three figures of the routine read the same: the label on top, the value under it, no coloured fill */
 html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
 html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > span{display:flex!important;flex-direction:column;align-items:center;gap:0;font-size:inherit}

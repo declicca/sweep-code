@@ -6936,5 +6936,15 @@ new window.SweepMO(() => {
     const w = function () { const out = appRender.apply(this, arguments); try { apply(); } catch (e) { /* never blocks */ } return out; };
     w.__disc = true; window.render = w;
   }
+  // « My progress » before mission 15: the level and the streak, and when the rest opens (badges, challenges, boss, season…)
+  const HUB = { en: ['Level {l} · {s} complete days in a row', 'Badges, weekly challenges and the rest open with mission 15: three days in a row.'],
+    fr: ['Niveau {l} · {s} jours complets de suite', 'Les badges, les défis de la semaine et le reste s’ouvrent avec la mission 15 : trois journées de suite.'],
+    es: ['Nivel {l} · {s} días completos seguidos', 'Las insignias, los retos de la semana y el resto se abren con la misión 15: tres días seguidos.'] };
+  function hub() {
+    const w = document.querySelector('#gSheet.gc-hubsheet .gc-hubwrap'); if (!w || !document.body.classList.contains('disc-no-game') || w.querySelector('.nav-disc-hub')) return;
+    const pr = (window.SweepGame && SweepGame.state && SweepGame.state().profile) || {}, h = HUB[L] || HUB.en;
+    w.insertAdjacentHTML('afterbegin', `<div class="nav-disc-hub" data-noi18n><b>${esc2(h[0].replace('{l}', pr.level || 1).replace('{s}', (pr.streak && pr.streak.current) || 0))}</b><p>${esc2(h[1])}</p></div>`);
+  }
+  if (window.SweepMO) new window.SweepMO(hub).observe(document.body, { childList: true });
   window.SweepDisc = { line, go, apply };
 })();

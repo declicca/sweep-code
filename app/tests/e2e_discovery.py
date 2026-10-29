@@ -6,7 +6,8 @@ SWEEP_DISC_ALL); phone 390 (fr, touch) and computer 1300 (en).
  1  day 1: My money and Sweep AI are not shown; the routine shows « Mission 1 of 15 »
  2  each mission ticks by its behaviour: the account, the plan, the first trade, the day closed — never by opening its page
     (« Do it now » opens the plan: still mission 2); 20 XP once each (disc:N)
- 3  one mission a trading day: the 4 of day 1 done, nothing more today (mission 5 waits for day 2)
+ 3  one mission a trading day: the 4 of day 1 done, nothing more today (mission 5 waits for day 2); « My progress » shows the
+    level and the streak only until mission 15
  4  « Show everything » (Settings › My routine): every function shown, at once
  5  an account from before the missions sees everything (nothing lost)
 No page error, nothing wider than the window.
@@ -71,6 +72,11 @@ with sync_playwright() as p:
     ok(xp == len(d['done']), f'2 {tag}: 20 XP once for each mission done ({xp} for {len(d["done"])})')
     # 3. one mission a trading day
     ok(d['current'] is None and pg.locator('#main .nav-disc').count() == 0, f'3 {tag}: the 4 of day 1 done, nothing more today (next: {d["next"]})')
+    # 3b. « My progress » before mission 15: the level and the streak only (no badges, no challenges)
+    pg.evaluate("SweepGame.open('hub')"); pg.wait_for_selector('#gSheet.gc-hubsheet', timeout=8000); pg.wait_for_timeout(1200)
+    hb = pg.evaluate("(() => { const s = document.querySelector('#gSheet.gc-hubsheet'); const vis = (q) => [...s.querySelectorAll(q)].some((e) => e.checkVisibility()); return [vis('.nav-disc-hub'), vis('.gc-hubcol'), vis('.gc-hub')] })()")
+    ok(hb == [True, False, False], f'3 {tag}: « My progress » before mission 15: the level and the streak only ({hb})')
+    pg.evaluate("document.querySelector('#gSheet [data-g=close]') && document.querySelector('#gSheet [data-g=close]').click()"); pg.wait_for_timeout(500)
     # 4. « Show everything »
     pg.evaluate("location.hash = '#settings'"); pg.wait_for_timeout(1500)
     pg.evaluate("document.querySelectorAll('#main details.nav-sgd').forEach((g) => { if (g.dataset.i === '1') g.open = true })"); pg.wait_for_timeout(400)
