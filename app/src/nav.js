@@ -4966,8 +4966,9 @@ window.SweepMO = window.SweepMO || class {
     const key = [from, (S.trades || []).length, last(S.trades), (S.journals || []).length, last(S.journals), JSON.stringify((S.settings || {}).max_contracts || '')].join('|');
     if (dCache.k === key) return dCache.v;
     let tr = (S.trades || []).filter((x) => !x.demo && x.date >= from); if (!tr.length) tr = (S.trades || []).filter((x) => x.date >= from);
-    // (29 Oct., tour T4) the trades whose checklist has an answer: no checklist filled yet, « — », never a 0 % that reads like a mark
-    tr = tr.filter((x) => typeof tDisc !== 'function' || tDisc(x) != null);
+    // (29 Oct., tour T4) while no checklist at all is filled, « — » (never a 0 % that reads like a mark); once one is, every trade
+    // counts, the way the coach counts (R10, 16 Oct.: a mistake without a checklist still counts)
+    if (typeof tDisc === 'function' && !tr.some((x) => tDisc(x) != null)) tr = [];
     tr = typeof mergeCopies === 'function' ? mergeCopies(tr) : tr;
     let v = null;
     if (window.SweepCoach && SweepCoach.trade) {

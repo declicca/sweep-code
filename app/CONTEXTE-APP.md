@@ -1362,7 +1362,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **T1** : sur la page de bienvenue, avant l'ouverture d'un jour de semaine (minuit → 9 h 30 ET), c'est « Prépare ta séance d'aujourd'hui » et « Ton plan du jour ». « Demain » ne s'affiche qu'après la fermeture.
 - **T2** : la revue du jour demande « As-tu suivi ton plan ? » et le solde. La discipline et la note, préremplies d'après la journée, sont sous « + Détails » (replié). Sans réponse, elles suivent la première question : oui 4 et B, en partie 3 et C, non 2 et D.
 - **T3** : le coach dit « Aucun trade sans erreur aujourd'hui (1 trade) », et « 1 trade sur n », au singulier comme au pluriel, en EN, FR et ES.
-- **T4** : le score de discipline ne compte que les trades dont la checklist a une réponse. Tant qu'aucune n'est remplie, il affiche « — ».
+- **T4** : tant qu'aucune checklist n'est remplie, le score de discipline affiche « — », pas « 0 % ». Dès qu'une l'est, tous les trades comptent, comme le coach (R10, 16 oct.).
 - **T5** : sur Aujourd'hui, un trade du soir a la même ligne que les autres : l'heure, puis le setup.
 - **T6** : sur la page d'un trade, le setup se choisit par ses puces seulement. Le setup du trade y figure avec son écriture à lui, et « + Autre » ouvre le champ pour en taper un.
 - **Test** : `e2e_tour_1029` (390 fr foncé, 1300 en clair).
