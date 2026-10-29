@@ -4,7 +4,7 @@ Sweep — « Bring your history » to the end (activation D, 29 Oct.), Playwrigh
 A trader of « More than a year » signs up on a market open (the clock pinned: a Tuesday 10:30 New York), phone 390 (fr, touch):
  1  the first account, the plan, then « Ramène ton historique »: NinjaTrader 8 opens the connection with the personal key
  2  the add-on's push with that key (its executions), the account linked: the trade in the journal, on Today, mission 8 of the
-    discovery missions ticked by it
+    discovery missions ticked by it; the account's page shows the balance read on the platform
 No page error, nothing wider than the window.
 """
 import json, os, random, sqlite3, sys, time
@@ -59,6 +59,10 @@ with sync_playwright() as p:
   tr = pg.evaluate("S.trades.filter((t) => t.source === 'ninjatrader').map((t) => [t.instrument, t.contracts, t.pnl_c, t.date])")
   ok(tr == [['MNQ', 1, 2400, '2026-10-07']], f'2 the trade in the journal ({tr})')
   ok('MNQ' in pg.evaluate("document.getElementById('main').innerText"), '2 the Trades page shows it')
+  # (29 Oct.) the account's page: the balance the add-on read on the platform, and Sweep's when they differ
+  pg.evaluate("(id) => { location.hash = '#account/' + id }", aid); pg.wait_for_timeout(2500)
+  line = pg.evaluate("(document.querySelector('#main .sy-acct') || {}).textContent || ''")
+  ok('NinjaTrader' in line and '50\u202f024' in line and 'Sweep' in line, f'2 the account: « solde sur NinjaTrader : 50 024 $ », and Sweep\'s balance next to it ({line!r})')
   pg.evaluate("location.hash = '#dashboard'"); pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(2500)
   dd = pg.evaluate("(SweepGame.state() && SweepGame.state().discovery) || null")
   ok(dd and 8 in (dd.get('done') or []), f'2 mission 8 « Tes trades arrivent seuls » ticked by the sync ({dd and dd.get("done")})')

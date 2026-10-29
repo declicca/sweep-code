@@ -14,6 +14,10 @@ $B = fn(array $fills, array $o = []) => sync_build($fills, $o + ['source' => 'ni
 // contracts → the app's instruments
 ok(sync_root('MNQ 12-26') === ['MNQ', false] && sync_root('MNQZ6') === ['MNQ', false] && sync_root('ES 03-27') === ['ES', false] && sync_root('MGC 02-27') === ['MGC', false], 'contracts: « MNQ 12-26 », « MNQZ6 », « ES 03-27 », « MGC 02-27 » → MNQ, MNQ, ES, MGC');
 ok(sync_root('ZC 12-26') === ['ZC', true] && sync_root('ZCZ6') === ['ZC', true], 'a contract the app does not know keeps its root (ZC), marked unknown');
+// ProjectX (TopstepX through Quantower, 29 Oct.): CQG roots in « CON.F.US.<root>.<month> »
+ok(sync_root('CON.F.US.MNQ.Z25') === ['MNQ', false] && sync_root('CON.F.US.ENQ.H26') === ['NQ', false] && sync_root('CON.F.US.EP.Z25') === ['ES', false] && sync_root('F.US.MES') === ['MES', false] && sync_root('CON.F.US.GCE.Z25') === ['GC', false],
+   'ProjectX names: « CON.F.US.MNQ.Z25 » → MNQ, ENQ → NQ, EP → ES, « F.US.MES » → MES, GCE → GC');
+ok(sync_root('CON.F.US.ZZZ.Z25') === ['ZZZ', true], 'a ProjectX root the app does not know: its root, marked unknown (Admin › Sync lists it)');
 
 // 1. scale-in and partial exits → ONE trade
 $r = $B([

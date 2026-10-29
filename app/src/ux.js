@@ -2478,7 +2478,7 @@
       pv: 'Linking to {a}:', add1: '1 trade to add', addN: '{n} trades to add', cmp1: '1 trade typed by hand, completed (your notes stay)', cmpN: '{n} trades typed by hand, completed (your notes stay)',
       man1: '1 trade typed by hand with no match, kept as it is', manN: '{n} trades typed by hand with no match, kept as they are', open1: '1 open position, added when it closes', openN: '{n} open positions, added when they close',
       none: 'No trade yet: they arrive as you trade.', link: 'Link', newNote: 'Create the account: it is linked right after.', create: 'Create the account', ignoreGo: 'Ignore',
-      linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', editT: 'Edit trade',
+      linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', platBal: 'balance on {p}: {v}', platGap: 'Sweep: {v}', editT: 'Edit trade',
       editNote: 'Prices, times, contracts and P&L come from {p} and update on their own. Notes, review, setup, tags and screenshots are edited on the trade page.', target: 'Target', save: 'Save', saved: 'Trade updated',
       s4: 'Come back here: the accounts the add-on finds show up below, ready to link.', liveOn: 'Add-on connected', liveNone: 'No account yet: connect {p} to your broker.',
       go1: 'Link my account', goN: 'Link my {n} accounts', allNote: 'For each account found, pick its Sweep account, then link them all at once.', choose: 'Choose…',
@@ -2497,7 +2497,7 @@
       pv: 'En le reliant à {a} :', add1: '1 trade à ajouter', addN: '{n} trades à ajouter', cmp1: '1 trade saisi à la main, complété (tes notes restent)', cmpN: '{n} trades saisis à la main, complétés (tes notes restent)',
       man1: '1 trade saisi à la main sans équivalent, gardé tel quel', manN: '{n} trades saisis à la main sans équivalent, gardés tels quels', open1: '1 position ouverte, ajoutée à sa fermeture', openN: '{n} positions ouvertes, ajoutées à leur fermeture',
       none: 'Aucun trade pour l’instant : ils arrivent au fil de tes trades.', link: 'Relier', newNote: 'Crée le compte : il sera relié juste après.', create: 'Créer le compte', ignoreGo: 'Ignorer',
-      linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', editT: 'Modifier le trade',
+      linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', platBal: 'solde sur {p} : {v}', platGap: 'Sweep : {v}', editT: 'Modifier le trade',
       editNote: 'Prix, heures, contrats et P&L viennent de {p} et se mettent à jour seuls. Notes, bilan, setup, tags et captures se modifient sur la page du trade.', target: 'Cible', save: 'Enregistrer', saved: 'Trade mis à jour',
       s4: 'Reviens ici : les comptes que l’add-on trouve s’affichent juste en dessous, prêts à relier.', liveOn: 'Add-on connecté', liveNone: 'Aucun compte pour l’instant : connecte {p} à ton courtier.',
       go1: 'Relier mon compte', goN: 'Relier mes {n} comptes', allNote: 'Pour chaque compte trouvé, choisis son compte Sweep, puis relie-les tous d’un coup.', choose: 'Choisir…',
@@ -2516,7 +2516,7 @@
       pv: 'Al vincularla a {a}:', add1: '1 operación por añadir', addN: '{n} operaciones por añadir', cmp1: '1 operación anotada a mano, completada (tus notas se quedan)', cmpN: '{n} operaciones anotadas a mano, completadas (tus notas se quedan)',
       man1: '1 operación anotada a mano sin equivalente, se queda igual', manN: '{n} operaciones anotadas a mano sin equivalente, se quedan igual', open1: '1 posición abierta, añadida al cerrarse', openN: '{n} posiciones abiertas, añadidas al cerrarse',
       none: 'Aún no hay operaciones: llegan a medida que operas.', link: 'Vincular', newNote: 'Crea la cuenta: se vincula justo después.', create: 'Crear la cuenta', ignoreGo: 'Ignorar',
-      linkedT: 'Vinculada · {n} operaciones añadidas', linked0: 'Vinculada', ignoredT: 'Cuenta ignorada', loading: 'Cargando…', syncedWith: 'Sincronizada con {p}', editT: 'Editar operación',
+      linkedT: 'Vinculada · {n} operaciones añadidas', linked0: 'Vinculada', ignoredT: 'Cuenta ignorada', loading: 'Cargando…', syncedWith: 'Sincronizada con {p}', platBal: 'saldo en {p}: {v}', platGap: 'Sweep: {v}', editT: 'Editar operación',
       editNote: 'Precios, horas, contratos y P&L vienen de {p} y se actualizan solos. Notas, revisión, setup, etiquetas y capturas se editan en la página de la operación.', target: 'Objetivo', save: 'Guardar', saved: 'Operación actualizada',
       s4: 'Vuelve aquí: las cuentas que encuentra el add-on aparecen justo debajo, listas para vincular.', liveOn: 'Add-on conectado', liveNone: 'Ninguna cuenta por ahora: conecta {p} a tu bróker.',
       go1: 'Vincular mi cuenta', goN: 'Vincular mis {n} cuentas', allNote: 'Para cada cuenta encontrada, elige su cuenta de Sweep y vincúlalas todas de una vez.', choose: 'Elegir…',
@@ -2621,7 +2621,14 @@
     const id = decodeURIComponent(m[1]), a = accts().find((x) => x.state === 'linked' && x.account_id === id);
     if (!a) { if (el) el.remove(); return; }
     const c = conn(a.platform);
-    const html = `<p class="sy-acct" data-noi18n><i class="sy-dot${recent(c) ? ' on' : ''}${a.error ? ' err' : ''}"></i><span>${h(t('syncedWith').replace('{p}', PLAT[a.platform]))} · ${h(a.name)}${c && c.last_seen_at ? ' · ' + h(t('seen').replace('{t}', ago(c.last_seen_at))) : ''}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</p>`;
+    // the balance the add-on read on the platform (its last push), and Sweep's when they differ by a dollar or more
+    let bal = '';
+    const cash = a.info && typeof a.info.cash === 'number' && isFinite(a.info.cash) ? Math.round(a.info.cash * 100) : null;
+    if (cash != null && typeof moneyU === 'function') {
+      let st = null; try { const acc = (S.accounts || []).find((x) => x.id === id); st = acc ? acctState(acc) : null; } catch (e) { st = null; }
+      bal = ' · ' + t('platBal').replace('{p}', PLAT[a.platform]).replace('{v}', moneyU(cash)) + (st && Math.abs(cash - st.bal) >= 100 ? ' · ' + t('platGap').replace('{v}', moneyU(st.bal)) : '');
+    }
+    const html = `<p class="sy-acct" data-noi18n><i class="sy-dot${recent(c) ? ' on' : ''}${a.error ? ' err' : ''}"></i><span>${h(t('syncedWith').replace('{p}', PLAT[a.platform]))} · ${h(a.name)}${c && c.last_seen_at ? ' · ' + h(t('seen').replace('{t}', ago(c.last_seen_at))) : ''}${h(bal)}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</p>`;
     if (!el) { const row = main.querySelector(':scope > .row') || main.firstElementChild; if (row) row.insertAdjacentHTML('afterend', html); }
     else if (el.outerHTML !== html) el.outerHTML = html;
   }

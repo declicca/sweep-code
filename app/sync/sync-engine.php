@@ -34,9 +34,18 @@ function sync_session_name(string $hm): string
     return 'other';
 }
 
-/** « MNQ 12-26 », « MNQZ6 » → the app's instrument (MNQ); a contract the app does not know keeps its own root (ZC 12-26 → ZC) */
+/** ProjectX (TopstepX through Quantower) names its contracts with CQG roots: « CON.F.US.ENQ.Z25 » is NQ */
+const SYNC_CQG = ['EP' => 'ES', 'ENQ' => 'NQ', 'CLE' => 'CL', 'MCLE' => 'MCL', 'GCE' => 'GC', 'SIE' => 'SI', 'NGE' => 'NG', 'HGE' => 'HG', 'DSX' => '6E'];
+
+/** « MNQ 12-26 », « MNQZ6 », « CON.F.US.MNQ.Z25 » → the app's instrument (MNQ); a contract the app does not know keeps its own root (ZC 12-26 → ZC) */
 function sync_root(string $contract): array
 {
+    // ProjectX: « CON.F.US.MNQ.Z25 », « F.US.ENQ » (the root between the exchange and the month code)
+    if (preg_match('/^(?:CON\.)?F\.[A-Z]{2,4}\.([A-Z0-9]+)(?:\.[FGHJKMNQUVXZ]\d{1,2})?$/', strtoupper(trim($contract)), $m)) {
+        $r = shot_root(SYNC_CQG[$m[1]] ?? $m[1]);
+        if ($r !== null) return [$r, false];
+        return [$m[1], true];
+    }
     $r = shot_root($contract);
     if ($r !== null) return [$r, false];
     $s = strtoupper(trim($contract));

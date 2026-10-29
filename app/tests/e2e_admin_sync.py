@@ -43,7 +43,7 @@ with sync_playwright() as p:
   key = a.post('/api/sync/key', data=json.dumps({'platform': 'quantower'}), headers=H).json()['key']
   fills = [{'id': 'q1', 'account': 'APEX-901-01', 'contract': 'MNQZ6', 'side': 'buy', 'qty': 1, 'price': 21000, 'ts': ms('2026-10-07 10:00:00'), 'point_value': 2},
            {'id': 'q2', 'account': 'APEX-901-01', 'contract': 'MNQZ6', 'side': 'sell', 'qty': 1, 'price': 21010, 'ts': ms('2026-10-07 10:05:00'), 'point_value': 2},
-           {'id': 'q3', 'account': 'APEX-901-01', 'contract': 'CON.F.US.ENQ.Z25', 'side': 'buy', 'qty': 1, 'price': 21020, 'ts': ms('2026-10-07 10:20:00'), 'point_value': 20}]   # still open: no trade
+           {'id': 'q3', 'account': 'APEX-901-01', 'contract': 'CON.F.US.ZZZ.Z25', 'side': 'buy', 'qty': 1, 'price': 21020, 'ts': ms('2026-10-07 10:20:00'), 'point_value': 20}]   # still open: no trade
   r = a.post('/api/sync/push', data=json.dumps({'client': 'Sweep Quantower test', 'accounts': [{'name': 'APEX-901-01', 'connection': 'Rithmic', 'provider': 'Rithmic'}], 'fills': fills}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
   sid = [x for x in a.get('/api/sync', headers=H).json()['accounts'] if x['name'] == 'APEX-901-01'][0]['id']
   ln = a.post('/api/sync/accounts/' + sid, data=json.dumps({'action': 'link', 'account_id': 'acc-as'}), headers=H).json()
@@ -72,8 +72,8 @@ with sync_playwright() as p:
     ok(ra and '1 relié(s) · 0 à relier · 0 ignoré(s) · 1 trade(s) (1 en 7 j)' in ra['t'], f'{tag} trader A: accounts and trades')
     unk = pg.evaluate("(e)=>{const l=[...document.querySelectorAll('#main .ux-sy-list li')].find(x=>x.innerText.includes(e)); return l && [(l.querySelector('[data-sy-ctr]')||{}).textContent, (l.querySelector('[data-sy-unk]')||{}).textContent, getComputedStyle(l.querySelector('[data-sy-unk]')).color]}", ea)
     alert = pg.inner_text('#main .ux-sync-admin [data-sy-alert]') if pg.locator('#main .ux-sync-admin [data-sy-alert]').count() else ''
-    ok(unk and unk[0] == 'Contrats (30 j) : MNQZ6 → MNQ' and unk[1] == 'Non reconnu(s) : CON.F.US.ENQ.Z25' and unk[2] == 'rgb(200, 30, 30)', f'{tag} trader A: contracts received (MNQZ6 → MNQ) and the one Sweep does not recognize, in red ({unk})')
-    ok('CON.F.US.ENQ.Z25 (Quantower)' in alert and 'gardent le bon P&L, pas le bon instrument' in alert, f'{tag} alert above the list: the contracts Sweep does not recognize ({alert[:120]})')
+    ok(unk and unk[0] == 'Contrats (30 j) : MNQZ6 → MNQ' and unk[1] == 'Non reconnu(s) : CON.F.US.ZZZ.Z25' and unk[2] == 'rgb(200, 30, 30)', f'{tag} trader A: contracts received (MNQZ6 → MNQ) and the one Sweep does not recognize, in red ({unk})')
+    ok('CON.F.US.ZZZ.Z25 (Quantower)' in alert and 'gardent le bon P&L, pas le bon instrument' in alert, f'{tag} alert above the list: the contracts Sweep does not recognize ({alert[:120]})')
     ok(rb and rb['c'] == 'ux-hl-late' and rb['chip'] == 'Add-on jamais vu' and 'NinjaTrader 8' in rb['t'] and 'installé ? clé collée ?' in rb['t'], f'{tag} trader B: gold « Add-on jamais vu », NinjaTrader 8, what to check ({rb and rb["t"][:140]})')
     order = pg.evaluate("(a)=>{const l=[...document.querySelectorAll('#main .ux-sy-list li')].map(x=>x.innerText); return [l.findIndex(t=>t.includes(a[0])), l.findIndex(t=>t.includes(a[1]))]}", [ea, eb])
     ok(0 <= order[0] < order[1], f'{tag} most recently seen first (A before B: {order})')
