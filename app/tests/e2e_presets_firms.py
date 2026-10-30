@@ -6,7 +6,9 @@ Sweep — prop firm presets in the browser (dev environment with Playwright, not
   3. Apex: « Rules from before March 2026 »;
   4. a firm changed its rules: the account page shows what changes, « Apply the new rules » / « Keep my rules »;
   5. Admin → Presets: last check, status per firm, red alert after 8 days, « Check now ».
-The server must run with SWEEP_PRESETS_MOCK=tests/presets_mock.json so « Check now » reads the simulated pages.
+The server must run with SWEEP_PRESETS_MOCK=tests/presets_mock.json so « Check now » reads the simulated pages. Its Apex answer
+(older rules) is doubtful and the second reading finds nothing: nothing is applied, so the other tests on the same server
+keep the shipped catalogue (29 Oct.: since the check settles doubts by a second reading, two equal readings would apply it).
 """
 import asyncio, json, sys, os, time, datetime
 from playwright.async_api import async_playwright
