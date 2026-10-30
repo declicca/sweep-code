@@ -139,6 +139,16 @@ I = {
  "command": '<path d="M9 6a3 3 0 10-3 3h12a3 3 0 10-3-3v12a3 3 0 103-3H6a3 3 0 103 3V6z"/>',
 }
 
+# NinjaTrader add-on 1.1: the synced account's balance follows the platform. Prepared, off until Mateo says the add-on is
+# checked under Windows (30 Oct.); never about Quantower until he confirms it. Changelog (30 Oct.), NinjaTrader, Import, Features.
+NT_BALANCE_LIVE = False
+NT_BALANCE = T("Your synced account’s balance now follows NinjaTrader by itself: update the add-on once.",
+               "Le solde de ton compte synchronisé suit maintenant NinjaTrader tout seul : mets l’add-on à jour une fois.",
+               "El saldo de tu cuenta sincronizada ahora sigue a NinjaTrader solo: actualiza el complemento una vez.")
+def nt_balance(x, sep=" "):
+    """x with the balance sentence after it, once NT_BALANCE_LIVE."""
+    return {l: x[l] + sep + NT_BALANCE[l] for l in x} if NT_BALANCE_LIVE else x
+
 NAV = [("features.html", T("Features","Fonctionnalités","Funciones")),
        ("how-it-works.html", T("How it works","Comment ça marche","Cómo funciona")),
        ("prop-firm-tracker.html", T("Prop traders","Traders prop","Traders prop")),

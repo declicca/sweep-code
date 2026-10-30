@@ -32,6 +32,9 @@ CARDS = [
  (None,None,T("Ask Sweep everywhere","Ask Sweep partout","Ask Sweep en todas partes"),T("On every page, with questions that fit the page. One tap and it’s sent.","Sur chaque page, avec des questions adaptées. Un toucher et c’est envoyé.","En cada página, con preguntas adaptadas. Un toque y se envía.")),
 ]
 DAYS = [
+ ("2026-10-30", T("October 30","30 octobre","30 de octubre"), [
+   T("Trading on TopstepX through Quantower? Your trades now show the right contract.","Tu trades sur TopstepX par Quantower ? Tes trades affichent maintenant le bon contrat.","¿Operas en TopstepX con Quantower? Tus operaciones ahora muestran el contrato correcto."),
+  ] + ([NT_BALANCE] if NT_BALANCE_LIVE else [])),
  ("2026-10-29", T("October 29","29 octobre","29 de octubre"), [
    T("The prop firm rules are now checked fully automatically every Monday: when a reading looks doubtful, a second independent reading settles it, and your accounts never change without you.","Les règles des prop firms sont maintenant vérifiées de façon entièrement automatique chaque lundi : quand une lecture laisse un doute, une deuxième lecture indépendante tranche, et tes comptes ne changent jamais sans toi.","Las reglas de las prop firms ahora se revisan de forma totalmente automática cada lunes: cuando una lectura deja una duda, una segunda lectura independiente decide, y tus cuentas nunca cambian sin ti."),
    T("New traders get 15 short discovery missions, one per trading day, each ticked by what you do, with a “Do it now” button.","Un nouveau trader reçoit 15 courtes missions de découverte, une par jour de trading, cochées par ce que tu fais, avec un bouton « Faire maintenant ».","Un trader nuevo recibe 15 misiones cortas de descubrimiento, una por día de trading, marcadas por lo que haces, con un botón «Hacerlo ahora»."),
