@@ -1892,7 +1892,7 @@
     es: { gameplan: 'Recorrido · día {n} marcado por Sweep', badge: 'Nueva insignia desbloqueada', level: 'Nivel {n} alcanzado', streak: 'Racha de {n} días', sweep: 'Día barrido', unlock: 'Desbloqueado: {f}', crew_goal: 'Objetivo del crew alcanzado', league_result: 'Tu resultado de liga llegó', quest_done: 'Misión de regreso completada', boss_spawn: 'Nuevo jefe: mira Progreso', freeze_used: 'Congelador usado', streak_lost: 'Racha terminada. Hoy empieza otra.', guardrail: 'Pérdida máxima del día superada', node: 'Etapa superada', mission: 'Misión completada', chest: 'Cofre listo', def: '¡Bien! Mira Progreso' },
   };
   const TS = { shown: 0, extra: 0, reset: 0 };
-  const SUMT = { en: '{n} new · See Progression', fr: '{n} nouveautés · Voir Progression', es: '{n} novedades · Ver Progreso' }, SUM1 = { en: '1 new · See Progression', fr: '1 nouveauté · Voir Progression', es: '1 novedad · Ver Progreso' };   // (27 Oct.) singular for 1
+  const SUMT = { en: '{n} new · See My progress', fr: '{n} nouveautés · Voir Ma progression', es: '{n} novedades · Ver Mi progreso' }, SUM1 = { en: '1 new · See My progress', fr: '1 nouveauté · Voir Ma progression', es: '1 novedad · Ver Mi progreso' };   // (27 Oct.) singular for 1
   const sumText = (n) => (n == 1 ? SUM1[L()] || SUM1.en : (SUMT[L()] || SUMT.en).replace('{n}', n));
   async function summaryToast() {
     if (sheetOpen()) await afterSheets();

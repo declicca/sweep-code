@@ -4,7 +4,7 @@ Sweep — « Bring your history » to the end (activation D, 29 Oct.), Playwrigh
 A trader of « More than a year » signs up on a market open (the clock pinned: a Tuesday 10:30 New York), phone 390 (fr, touch):
  1  the first account, the plan, then « Ramène ton historique »: NinjaTrader 8 opens the connection with the personal key
  2  the add-on's push with that key (its executions), the account linked: the trade in the journal, on Today, mission 8 of the
-    discovery missions ticked by it; the account's page shows the balance read on the platform
+    discovery missions ticked by it; the account's balance aligned on the platform's, by itself (one adjustment of the day)
 No page error, nothing wider than the window.
 """
 import json, os, random, sqlite3, sys, time
@@ -59,10 +59,31 @@ with sync_playwright() as p:
   tr = pg.evaluate("S.trades.filter((t) => t.source === 'ninjatrader').map((t) => [t.instrument, t.contracts, t.pnl_c, t.date])")
   ok(tr == [['MNQ', 1, 2400, '2026-10-07']], f'2 the trade in the journal ({tr})')
   ok('MNQ' in pg.evaluate("document.getElementById('main').innerText"), '2 the Trades page shows it')
-  # (29 Oct.) the account's page: the balance the add-on read on the platform, and Sweep's when they differ
-  pg.evaluate("(id) => { location.hash = '#account/' + id }", aid); pg.wait_for_timeout(2500)
+  # (29-30 Oct.) the account's page: its balance aligned on the one the add-on read on the platform (one adjustment of the day)
+  pg.evaluate("(id) => { location.hash = '#account/' + id }", aid)
+  for _ in range(30):
+    pg.wait_for_timeout(500)
+    if pg.evaluate("(id) => Math.round(acctState(getDoc('accounts', id)).bal)", aid) == 5002400: break
+  pg.wait_for_timeout(800)
   line = pg.evaluate("(document.querySelector('#main .sy-acct') || {}).textContent || ''")
-  ok('NinjaTrader' in line and '50\u202f024' in line and 'Sweep' in line, f'2 the account: « solde sur NinjaTrader : 50 024 $ », and Sweep\'s balance next to it ({line!r})')
+  adj = pg.evaluate("(id) => (getDoc('accounts', id).adjustments || []).filter((j) => j.kind === 'sync').map((j) => [j.note, j.amount_c])", aid)
+  ok(pg.evaluate("(id) => Math.round(acctState(getDoc('accounts', id)).bal)", aid) == 5002400 and len(adj) == 1 and adj[0][0] == 'Aligné sur NinjaTrader',
+     f'2 the account follows the platform: balance 50 024 $, one adjustment « Aligné sur NinjaTrader » ({adj})')
+  ok('solde aligné sur NinjaTrader' in line and '50\u202f024' in line and 'Sweep :' not in line, f'2 its page: « solde aligné sur NinjaTrader : 50 024 $ », no gap left ({line!r})')
+  # the add-on reads a new balance (a fee charged on the platform): the same adjustment of the day takes it
+  bare.post(B + '/api/sync/push', data=json.dumps({'client': 'Sweep NT8 1.1.0', 'accounts': [{'name': 'APEX-H-01', 'connection': 'Apex', 'provider': 'Rithmic', 'currency': 'USD', 'cash': 50019.5}], 'fills': []}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
+  pg.evaluate("SweepSync.load()")
+  for _ in range(30):
+    pg.wait_for_timeout(500)
+    if pg.evaluate("(id) => Math.round(acctState(getDoc('accounts', id)).bal)", aid) == 5001950: break
+  adj = pg.evaluate("(id) => (getDoc('accounts', id).adjustments || []).filter((j) => j.kind === 'sync').map((j) => j.amount_c)", aid)
+  ok(pg.evaluate("(id) => Math.round(acctState(getDoc('accounts', id)).bal)", aid) == 5001950 and len(adj) == 1, f'2 a new balance on the platform ($50,019.50): still one adjustment of the day ({adj})')
+  # an add-on of before 1.1.0 (no balance): the page says to update it, nothing is aligned
+  bare.post(B + '/api/sync/push', data=json.dumps({'client': 'Sweep NT8 1.0.0', 'accounts': [{'name': 'APEX-H-01', 'connection': 'Apex', 'provider': 'Rithmic', 'currency': 'USD'}], 'fills': []}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
+  pg.evaluate("SweepSync.load()"); pg.wait_for_timeout(2500); pg.evaluate("render()"); pg.wait_for_timeout(1500)
+  upd = pg.evaluate("(document.querySelector('#main .sy-acct .sy-upd') || {}).textContent || ''")
+  ok(upd.startswith('Mets à jour l’add-on : ton solde suivra NinjaTrader') and pg.evaluate("(id) => Math.round(acctState(getDoc('accounts', id)).bal)", aid) == 5001950, f'2 an add-on 1.0.0: « {upd} », the balance stays')
+  pg.screenshot(path='/tmp/sync-upd-390.png')
   pg.evaluate("location.hash = '#dashboard'"); pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(2500)
   dd = pg.evaluate("(SweepGame.state() && SweepGame.state().discovery) || null")
   ok(dd and 8 in (dd.get('done') or []), f'2 mission 8 « Tes trades arrivent seuls » ticked by the sync ({dd and dd.get("done")})')

@@ -2478,7 +2478,7 @@
       pv: 'Linking to {a}:', add1: '1 trade to add', addN: '{n} trades to add', cmp1: '1 trade typed by hand, completed (your notes stay)', cmpN: '{n} trades typed by hand, completed (your notes stay)',
       man1: '1 trade typed by hand with no match, kept as it is', manN: '{n} trades typed by hand with no match, kept as they are', open1: '1 open position, added when it closes', openN: '{n} open positions, added when they close',
       none: 'No trade yet: they arrive as you trade.', link: 'Link', newNote: 'Create the account: it is linked right after.', create: 'Create the account', ignoreGo: 'Ignore',
-      linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', platBal: 'balance on {p}: {v}', platGap: 'Sweep: {v}', editT: 'Edit trade',
+      linkedT: 'Linked · {n} trades added', linked0: 'Linked', ignoredT: 'Account ignored', loading: 'Loading…', syncedWith: 'Synced with {p}', platBal: 'balance aligned on {p}: {v}', platGap: 'Sweep: {v}', alignNote: 'Aligned on {p}', updAddon: 'Update the add-on: your balance will follow {p} ›', editT: 'Edit trade',
       editNote: 'Prices, times, contracts and P&L come from {p} and update on their own. Notes, review, setup, tags and screenshots are edited on the trade page.', target: 'Target', save: 'Save', saved: 'Trade updated',
       s4: 'Come back here: the accounts the add-on finds show up below, ready to link.', liveOn: 'Add-on connected', liveNone: 'No account yet: connect {p} to your broker.',
       go1: 'Link my account', goN: 'Link my {n} accounts', allNote: 'For each account found, pick its Sweep account, then link them all at once.', choose: 'Choose…',
@@ -2497,7 +2497,7 @@
       pv: 'En le reliant à {a} :', add1: '1 trade à ajouter', addN: '{n} trades à ajouter', cmp1: '1 trade saisi à la main, complété (tes notes restent)', cmpN: '{n} trades saisis à la main, complétés (tes notes restent)',
       man1: '1 trade saisi à la main sans équivalent, gardé tel quel', manN: '{n} trades saisis à la main sans équivalent, gardés tels quels', open1: '1 position ouverte, ajoutée à sa fermeture', openN: '{n} positions ouvertes, ajoutées à leur fermeture',
       none: 'Aucun trade pour l’instant : ils arrivent au fil de tes trades.', link: 'Relier', newNote: 'Crée le compte : il sera relié juste après.', create: 'Créer le compte', ignoreGo: 'Ignorer',
-      linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', platBal: 'solde sur {p} : {v}', platGap: 'Sweep : {v}', editT: 'Modifier le trade',
+      linkedT: 'Relié · {n} trades ajoutés', linked0: 'Relié', ignoredT: 'Compte ignoré', loading: 'Chargement…', syncedWith: 'Synchronisé avec {p}', platBal: 'solde aligné sur {p} : {v}', platGap: 'Sweep : {v}', alignNote: 'Aligné sur {p}', updAddon: 'Mets à jour l’add-on : ton solde suivra {p} ›', editT: 'Modifier le trade',
       editNote: 'Prix, heures, contrats et P&L viennent de {p} et se mettent à jour seuls. Notes, bilan, setup, tags et captures se modifient sur la page du trade.', target: 'Cible', save: 'Enregistrer', saved: 'Trade mis à jour',
       s4: 'Reviens ici : les comptes que l’add-on trouve s’affichent juste en dessous, prêts à relier.', liveOn: 'Add-on connecté', liveNone: 'Aucun compte pour l’instant : connecte {p} à ton courtier.',
       go1: 'Relier mon compte', goN: 'Relier mes {n} comptes', allNote: 'Pour chaque compte trouvé, choisis son compte Sweep, puis relie-les tous d’un coup.', choose: 'Choisir…',
@@ -2516,7 +2516,7 @@
       pv: 'Al vincularla a {a}:', add1: '1 operación por añadir', addN: '{n} operaciones por añadir', cmp1: '1 operación anotada a mano, completada (tus notas se quedan)', cmpN: '{n} operaciones anotadas a mano, completadas (tus notas se quedan)',
       man1: '1 operación anotada a mano sin equivalente, se queda igual', manN: '{n} operaciones anotadas a mano sin equivalente, se quedan igual', open1: '1 posición abierta, añadida al cerrarse', openN: '{n} posiciones abiertas, añadidas al cerrarse',
       none: 'Aún no hay operaciones: llegan a medida que operas.', link: 'Vincular', newNote: 'Crea la cuenta: se vincula justo después.', create: 'Crear la cuenta', ignoreGo: 'Ignorar',
-      linkedT: 'Vinculada · {n} operaciones añadidas', linked0: 'Vinculada', ignoredT: 'Cuenta ignorada', loading: 'Cargando…', syncedWith: 'Sincronizada con {p}', platBal: 'saldo en {p}: {v}', platGap: 'Sweep: {v}', editT: 'Editar operación',
+      linkedT: 'Vinculada · {n} operaciones añadidas', linked0: 'Vinculada', ignoredT: 'Cuenta ignorada', loading: 'Cargando…', syncedWith: 'Sincronizada con {p}', platBal: 'saldo alineado con {p}: {v}', platGap: 'Sweep: {v}', alignNote: 'Alineado con {p}', updAddon: 'Actualiza el complemento: tu saldo seguirá {p} ›', editT: 'Editar operación',
       editNote: 'Precios, horas, contratos y P&L vienen de {p} y se actualizan solos. Notas, revisión, setup, etiquetas y capturas se editan en la página de la operación.', target: 'Objetivo', save: 'Guardar', saved: 'Operación actualizada',
       s4: 'Vuelve aquí: las cuentas que encuentra el add-on aparecen justo debajo, listas para vincular.', liveOn: 'Add-on conectado', liveNone: 'Ninguna cuenta por ahora: conecta {p} a tu bróker.',
       go1: 'Vincular mi cuenta', goN: 'Vincular mis {n} cuentas', allNote: 'Para cada cuenta encontrada, elige su cuenta de Sweep y vincúlalas todas de una vez.', choose: 'Elegir…',
@@ -2567,10 +2567,41 @@
     if (!server()) return Promise.resolve(null);
     if (SY.busy) return SY.busy;
     if (!force && SY.st && Date.now() - SY.at < 20000) return Promise.resolve(SY.st);
-    SY.busy = apiJSON('api/sync').then((d) => { SY.st = d; return d; }).catch(() => SY.st)
+    SY.busy = apiJSON('api/sync').then((d) => { SY.st = d; setTimeout(align, 0); return d; }).catch(() => SY.st)
       .finally(() => { SY.at = Date.now(); SY.busy = null; try { paint(); redraw(); } catch (e) { /* never blocks */ } });
     return SY.busy;
   }
+
+  /* ───── the balance follows the platform (30 Oct., Mateo: « toujours synchro et automatique ») ─────
+     Each linked account whose add-on sends its balance (1.1.0) is aligned on it: the gap goes into one adjustment of the day
+     (« Aligned on NinjaTrader », in the account's « Recalibrate » history), so the trades, the stats and the daily P&L stay
+     untouched. The trades the add-on sent with that balance are pulled first; a gap left by a trade still on its way is
+     corrected at the next reading (the same adjustment of the day). */
+  let aligning = false;
+  async function align() {
+    const st = SY.st; if (aligning || !st || !Array.isArray(st.accounts) || typeof acctState !== 'function' || typeof editDoc !== 'function') return;
+    const cashOf = (x) => (x.state === 'linked' && x.account_id && x.info && typeof x.info.cash === 'number' && isFinite(x.info.cash) && (!x.info.currency || x.info.currency === 'USD') ? Math.round(x.info.cash * 100) : null);
+    const todo = st.accounts.filter((x) => cashOf(x) != null); if (!todo.length) return;
+    aligning = true;
+    try {
+      if (typeof syncNow === 'function') { try { await syncNow(); } catch (e) { /* the next reading */ } }
+      const day = typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10);
+      for (const x of todo) {
+        const acc = getDoc('accounts', x.account_id); if (!acc || acc.demo || ['archived', 'closed'].includes(acc.status)) continue;
+        let gap = 0; try { gap = cashOf(x) - acctState(acc).bal; } catch (e) { continue; }
+        if (!gap) continue;
+        editDoc('accounts', acc.id, (d) => {
+          const L = Array.isArray(d.adjustments) ? d.adjustments.slice() : [], k = L.findIndex((j) => j.kind === 'sync' && j.at === day);
+          if (k >= 0) L[k] = Object.assign({}, L[k], { amount_c: (+L[k].amount_c || 0) + gap });
+          else L.push({ id: 'adj' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), at: day, amount_c: gap, note: t('alignNote').replace('{p}', PLAT[x.platform] || x.platform), kind: 'sync' });
+          d.adjustments = L.filter((j) => j.kind !== 'sync' || +j.amount_c);
+        });
+      }
+    } finally { aligning = false; }
+  }
+  // with a platform linked, its balance is read again every minute while the app is open
+  setTimeout(() => { try { load(true); } catch (e) { /* later */ } }, 5000);
+  setInterval(() => { try { if (!document.hidden && SY.st && (SY.st.accounts || []).some((x) => x.state === 'linked')) load(true); } catch (e) { /* next minute */ } }, 60000);
 
   /* ───── Settings › Data › Connections ───── */
   function rowHtml(a) {
@@ -2628,7 +2659,7 @@
       let st = null; try { const acc = (S.accounts || []).find((x) => x.id === id); st = acc ? acctState(acc) : null; } catch (e) { st = null; }
       bal = ' · ' + t('platBal').replace('{p}', PLAT[a.platform]).replace('{v}', moneyU(cash)) + (st && Math.abs(cash - st.bal) >= 100 ? ' · ' + t('platGap').replace('{v}', moneyU(st.bal)) : '');
     }
-    const html = `<p class="sy-acct" data-noi18n><i class="sy-dot${recent(c) ? ' on' : ''}${a.error ? ' err' : ''}"></i><span>${h(t('syncedWith').replace('{p}', PLAT[a.platform]))} · ${h(a.name)}${c && c.last_seen_at ? ' · ' + h(t('seen').replace('{t}', ago(c.last_seen_at))) : ''}${h(bal)}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</p>`;
+    const html = `<p class="sy-acct" data-noi18n><i class="sy-dot${recent(c) ? ' on' : ''}${a.error ? ' err' : ''}"></i><span>${h(t('syncedWith').replace('{p}', PLAT[a.platform]))} · ${h(a.name)}${c && c.last_seen_at ? ' · ' + h(t('seen').replace('{t}', ago(c.last_seen_at))) : ''}${h(bal)}${!bal && a.platform === 'ninjatrader' && c && /^Sweep NT8 1\.0\./.test(c.client || '') ? ` · <a class="sy-upd" href="#settings/sync">${h(t('updAddon').replace('{p}', PLAT[a.platform]))}</a>` : ''}</span>${a.error ? `<small class="sy-err">${h(t('err_' + a.error))}</small>` : ''}</p>`;
     if (!el) { const row = main.querySelector(':scope > .row') || main.firstElementChild; if (row) row.insertAdjacentHTML('afterend', html); }
     else if (el.outerHTML !== html) el.outerHTML = html;
   }

@@ -64,7 +64,7 @@ with sync_playwright() as p:
       pg.evaluate("Promise.all(Object.values(chains)).then(() => true)")   # (27 Oct.: the shared trader must be left as found — a later test of the same group saw this account on the CI)
     # A3
     st3 = pg.evaluate("[SweepGame.sumText(1), SweepGame.sumText(3)]")
-    ok(st3 == ['1 nouveauté · Voir Progression', '3 nouveautés · Voir Progression'], f'A3 {tag} « 1 nouveauté », « 3 nouveautés » ({st3})')
+    ok(st3 == ['1 nouveauté · Voir Ma progression', '3 nouveautés · Voir Ma progression'], f'A3 {tag} « 1 nouveauté », « 3 nouveautés » ({st3})')
     c.close()
 
     # a new trader, French: the welcome page
@@ -99,7 +99,7 @@ with sync_playwright() as p:
     ok(not any('Pas de setup choisi' in t for t in seen), 'A6 ' + tag + ' the coach never asks a setup of a trader starting out')
     c.close()
   # EN and ES (phone, dark): the singular, and the Spanish checklist not in English
-  for lang, one in (('en', '1 new · See Progression'), ('es', '1 novedad · Ver Progreso')):
+  for lang, one in (('en', '1 new · See My progress'), ('es', '1 novedad · Ver Mi progreso')):
     c = br.new_context(storage_state=STATE, viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, locale={'en': 'en-US', 'es': 'es-ES'}[lang], color_scheme='dark')
     c.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
     pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))

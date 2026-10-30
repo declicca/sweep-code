@@ -19,7 +19,8 @@ using NinjaTrader.Gui.Tools;
 
 // Sweep Sync — NinjaTrader 8 add-on of Sweep (app.makeitsweep.com).
 // Sends every execution of every connected account to the trader's Sweep journal, with the trader's personal key.
-// Read-only: it never places, changes or cancels an order. Nothing else leaves the computer (no password, no market data).
+// Read-only: it never places, changes or cancels an order. Besides the executions, only the accounts leave the computer: name,
+// connection, currency and balance (so that Sweep's balance follows the platform). No password, no market data.
 //  - every new or amended execution is queued (Documents\NinjaTrader 8\SweepSync\queue.txt, kept if NinjaTrader closes);
 //  - the queue is sent every 2 seconds (500 executions at most per request); a « hello » every 5 minutes says the add-on runs;
 //  - at start and when an account connects, the executions of its current session are sent again (Sweep never doubles them);
@@ -75,7 +76,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 	/// <summary>The sync itself: one instance for the whole platform (a recompile ends it and starts it again).</summary>
 	public static class SweepSyncEngine
 	{
-		public const string Version = "1.0.0";
+		public const string Version = "1.1.0";
 		private const string DefaultUrl = "https://app.makeitsweep.com/api/sync/push";
 		private const int MaxPerPush = 500;
 		private static readonly object Gate = new object();
@@ -272,7 +273,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 			finally { Interlocked.Exchange(ref busy, 0); }
 		}
 
-		/// <summary>What NinjaTrader says about the accounts (name, connection, provider, currency) — never a balance or a password.</summary>
+		/// <summary>What NinjaTrader says about the accounts (name, connection, provider, currency, cash balance) — never a password.</summary>
 		private static string AccountsJson()
 		{
 			List<Account> list;
@@ -290,7 +291,9 @@ namespace NinjaTrader.NinjaScript.AddOns
 					}
 					string cur = a.Denomination.ToString();
 					cur = cur == "UsDollar" ? "USD" : cur == "Euro" ? "EUR" : cur;
-					parts.Add("{\"name\":" + J(a.Name) + ",\"connection\":" + J(conn) + ",\"provider\":" + J(provider) + ",\"currency\":" + J(cur) + "}");
+					string cash = "";   // (1.1.0) the account's balance: Sweep's balance follows it
+					try { double v = a.Get(AccountItem.CashValue, a.Denomination); if (!double.IsNaN(v) && !double.IsInfinity(v)) cash = ",\"cash\":" + v.ToString("0.##", CultureInfo.InvariantCulture); } catch { }
+					parts.Add("{\"name\":" + J(a.Name) + ",\"connection\":" + J(conn) + ",\"provider\":" + J(provider) + ",\"currency\":" + J(cur) + cash + "}");
 				}
 				catch { }
 			}

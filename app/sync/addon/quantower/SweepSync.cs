@@ -15,7 +15,8 @@ using TradingPlatform.PresentationLayer.Plugins;
 // Sweep Sync — Quantower add-on of Sweep (app.makeitsweep.com): a panel (Plugin, not a Strategy: Topstep's free Quantower
 // has no Strategy Manager). Sends every execution of every connected account to the trader's Sweep journal, with the
 // trader's personal key (a Quantower key: Sweep > Settings > Data > Connections > Quantower).
-// Read-only: it never places, changes or cancels an order. Nothing else leaves the computer (no password, no balance, no market data).
+// Read-only: it never places, changes or cancels an order. Besides the executions, only the accounts leave the computer: name,
+// connection, currency and balance (so that Sweep's balance follows the platform). No password, no market data.
 //  - the sync starts when the panel opens (Quantower reopens it with the workspace) and runs until Quantower closes;
 //  - every new execution is queued (%LocalAppData%\SweepSync\Quantower\queue.txt, kept if Quantower closes);
 //  - the queue is sent every 2 seconds (500 executions at most per request); a « hello » every 5 minutes says the add-on runs;
@@ -125,7 +126,7 @@ namespace SweepSync
     /// <summary>The sync itself: one for the whole platform, started by the first panel, running until Quantower closes.</summary>
     public static class SweepSyncEngine
     {
-        public const string Version = "1.0.0";
+        public const string Version = "1.1.0";
         private const string DefaultUrl = "https://app.makeitsweep.com/api/sync/push";
         private const int MaxPerPush = 500;
         private const int HistoryDays = 7;
@@ -340,7 +341,7 @@ namespace SweepSync
             finally { Interlocked.Exchange(ref busy, 0); }
         }
 
-        /// <summary>What Quantower says about the accounts (name, connection, provider, currency) — never a balance or a password.</summary>
+        /// <summary>What Quantower says about the accounts (name, connection, provider, currency, balance) — never a password.</summary>
         private static string AccountsJson()
         {
             List<string> parts = new List<string>();
@@ -361,7 +362,9 @@ namespace SweepSync
                             provider = c.VendorName ?? "";
                         }
                         string cur = a.AccountCurrency != null ? a.AccountCurrency.Name ?? "" : "";
-                        parts.Add("{\"name\":" + J(a.Name) + ",\"connection\":" + J(conn) + ",\"provider\":" + J(provider) + ",\"currency\":" + J(cur) + "}");
+                        string cash = "";   // (1.1.0) the account's balance: Sweep's balance follows it
+                        try { double v = a.Balance; if (!double.IsNaN(v) && !double.IsInfinity(v)) cash = ",\"cash\":" + v.ToString("0.##", CultureInfo.InvariantCulture); } catch { }
+                        parts.Add("{\"name\":" + J(a.Name) + ",\"connection\":" + J(conn) + ",\"provider\":" + J(provider) + ",\"currency\":" + J(cur) + cash + "}");
                     }
                     catch { }
                 }

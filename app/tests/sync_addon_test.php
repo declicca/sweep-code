@@ -38,7 +38,9 @@ ok(str_contains($cs, '"https://app.makeitsweep.com/api/sync/push"'), 'it sends t
 
 // read-only: no order function of NinjaTrader is ever called
 ok(preg_match('/\.(Submit|CreateOrder|Cancel|CancelAllOrders|Change|Flatten)\s*\(/', $cs) === 0, 'read-only: no Submit, CreateOrder, Cancel, Change or Flatten');
-ok(preg_match('/\bPassword\b|AccountItem\./', $cs) === 0, 'it never reads a password or an account balance');
+ok(preg_match('/\bPassword\b/', $cs) === 0, 'it never reads a password');
+// (1.1.0, 30 Oct.) the balance of each account, for Sweep's balance to follow the platform: the cash value only, no other account item
+ok(preg_match_all('/AccountItem\.(\w+)/', $cs, $m) === 1 && $m[1] === ['CashValue'] && strpos($cs, '\\"cash\\":') !== false, 'it sends the balance of each account (its cash value), nothing else of the account');
 ok(str_contains($cs, 'J("Sweep NT8 " + Version)') && str_contains($store, "'Sweep NT8' => 'ninjatrader'"), 'it names itself « Sweep NT8 … », the name the server ties to NinjaTrader 8');
 
 // Quantower: the same language, from a panel
@@ -54,7 +56,8 @@ ok(str_contains($q, '? "buy" : "sell"') && str_contains($q, 'TryAddWithoutValida
 ok(str_contains($q, 'J("Sweep Quantower " + Version)') && str_contains($store, "'Sweep Quantower' => 'quantower'"), 'Quantower: it names itself « Sweep Quantower … », the name the server ties to Quantower (a NinjaTrader key is refused)');
 ok(preg_match('/MaxPerPush = (\d+)/', $q, $m) === 1 && (int) $m[1] <= (int) $m2[1] && str_contains($q, '"https://app.makeitsweep.com/api/sync/push"'), 'Quantower: never more executions per request than the server takes, sent to app.makeitsweep.com');
 ok(preg_match('/\b(PlaceOrder|CancelOrder|ModifyOrder|ClosePosition|SendCustomRequest)\b|\.(Close|Cancel)\s*\(/', $q) === 0, 'Quantower: read-only, no PlaceOrder, CancelOrder, ModifyOrder or Close');
-ok(preg_match('/\bPassword\b|\.Balance\b/', $q) === 0, 'Quantower: it never reads a password or an account balance');
+ok(preg_match('/\bPassword\b/', $q) === 0, 'Quantower: it never reads a password');
+ok(substr_count($q, '.Balance') === 1 && strpos($q, '\\"cash\\":') !== false, 'Quantower: it sends the balance of each account (1.1.0)');
 ok(preg_match_all('/public static readonly string\[\] (En|Fr|Es) = \{(.*)\};/', $q, $tx) === 3 && count(array_unique(array_map(fn($x) => preg_match_all('/"(?:[^"\\\\]|\\\\.)*"/', $x), $tx[2]))) === 1, 'Quantower: the panel\'s texts in English, French and Spanish, as many in each');
 foreach (['intro', 'label', 'key', 'save', 'status'] as $id) ok(str_contains($qh, 'id="' . $id . '"') && (in_array($id, ['key', 'save'], true) ? str_contains($q, '"' . $id . '"') : true), "Quantower: the panel's page has « $id »");
 ok(str_contains($qh, 'paint: function (intro, label, save, status)') && str_contains($q, '"sweep.paint("'), 'Quantower: the add-on writes the page through sweep.paint');
