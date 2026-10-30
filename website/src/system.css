@@ -799,7 +799,9 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
 .ddmenu.two{min-width:560px}
 .ddcols{display:grid;grid-template-columns:1fr 1fr;gap:4px}
 .ddh{display:block;padding:8px 12px 4px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
-.newdot{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.newdot{display:inline-block;flex:none;width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.nav-main>a.navnew{gap:6px}.sheet-nav .navnew .newdot{margin-left:8px;vertical-align:middle}
+@media (max-width:1180px){.nav-main>a,.ddbtn{padding:0 9px}}   /* one line down to the phone menu, with What’s new at the top level */
 .nav-cta{display:flex;align-items:center;gap:8px}
 .nav-cta .btn{min-height:36px;padding:0 16px;font-size:14px}
 .langsel{position:relative}

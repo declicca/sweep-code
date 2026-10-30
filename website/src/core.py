@@ -145,8 +145,9 @@ NAV = [("features.html", T("Features","Fonctionnalités","Funciones")),
        ("ai.html", T("Sweep AI","Sweep AI","Sweep AI")),
        ("pricing.html", T("Pricing","Tarifs","Precios"))]
 PRODUCT = [("features.html", T("Features","Fonctionnalités","Funciones"), T("Everything Sweep does","Tout ce que fait Sweep","Todo lo que hace Sweep")),
-           ("how-it-works.html", T("How it works","Comment ça marche","Cómo funciona"), T("From sign-up to a swept day","De l’inscription à ta journée balayée","Del registro a tu día barrido")),
-           ("changelog.html", T("What’s new","Nouveautés","Novedades"), T("Every update, dated","Chaque mise à jour, datée","Cada actualización, fechada"))]   # in sight on desktop (Mateo, 30 Oct.): Resources keeps its 8 entries
+           ("how-it-works.html", T("How it works","Comment ça marche","Cómo funciona"), T("From sign-up to a swept day","De l’inscription à ta journée balayée","Del registro a tu día barrido"))]
+NEW = ("changelog.html", T("What’s new","Nouveautés","Novedades"))   # top level of the menu, seen at first glance (Mateo, 30 Oct.)
+NEWDOT = '<span class="newdot" aria-hidden="true"></span>'
 # Resources menu: two groups on desktop, one simple list in the mobile menu
 RES_TOOLS = [("tools.html", T("Free calculators","Calculateurs gratuits","Calculadoras gratuitas"), T("Position size, drawdown, payout, expectancy","Taille de position, drawdown, payout, espérance","Tamaño de posición, drawdown, payout, esperanza")),
              ("futures-contracts.html", T("Contract specs","Fiches contrats","Fichas de contratos"), T("Tick values for NQ, ES, CL, GC…","Valeurs de tick NQ, ES, CL, GC…","Valores de tick NQ, ES, CL, GC…")),
@@ -344,7 +345,7 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     CHEV = '<svg class="chev" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 3.5l3 3 3-3"/></svg>'
     def dd(label, items, key, groups=None):
         cur = any(p == page for p, _, _ in items)
-        def links(its): return "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}><b>{t(l)}{"<span class=\"newdot\" aria-hidden=\"true\"></span>" if p=="changelog.html" else ""}</b><span>{t(d)}</span></a>' for p, l, d in its)
+        def links(its): return "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}><b>{t(l)}</b><span>{t(d)}</span></a>' for p, l, d in its)
         menu = ('<div class="ddcols">' + "".join(f'<div class="ddgrp" role="group" aria-label="{t(g)}"><span class="ddh" aria-hidden="true">{t(g)}</span>{links(its)}</div>' for g, its in groups) + '</div>') if groups else links(items)
         return (f'<div class="navdd" data-dd="{key}"><button type="button" class="ddbtn{" cur" if cur else ""}" aria-expanded="false">{t(label)}{CHEV}</button>'
                 f'<div class="ddmenu{" two" if groups else ""}">{menu}</div></div>')   # a disclosure of links (site navigation), not an ARIA menu
@@ -352,10 +353,12 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
     nav = (dd(T("Product","Produit","Producto"), PRODUCT, "product")
            + dd(T("Prop firms","Prop firms","Prop firms"), fm, "firms", fg)
            + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l in NAV[3:])
+           + f'<a class="navnew" href="{href(lang,NEW[0])}"{CURP if NEW[0]==page else ""}>{t(NEW[1])}{NEWDOT}</a>'
            + dd(T("Resources","Ressources","Recursos"), RES_TOOLS + RES_MENU, "res", RES_GROUPS))
     ARROW = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>'
     sheet = "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}><span>{t(l)}</span>{ARROW}</a>' for p, l in NAV)
-    sheet += '<div class="sheet-res">' + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l, _ in RESOURCES) + '</div>'
+    sheet += f'<a class="navnew" href="{href(lang,NEW[0])}"{CURP if NEW[0]==page else ""}><span>{t(NEW[1])}{NEWDOT}</span>{ARROW}</a>'
+    sheet += '<div class="sheet-res">' + "".join(f'<a href="{href(lang,p)}"{CURP if p==page else ""}>{t(l)}</a>' for p, l, _ in RESOURCES if p != NEW[0]) + '</div>'
     names = {"en":"English","fr":"Français","es":"Español"}
     codes = {"en":"EN","fr":"FR","es":"ES"}
     GLOBE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg>'
