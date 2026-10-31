@@ -176,12 +176,12 @@
   "hash": "ff5c45c5f8a79db8"
  },
  "import.html": {
-  "date": "2026-10-18",
-  "hash": "4d6d76d6baa4885d"
+  "date": "2026-11-01",
+  "hash": "b222de4798501d92"
  },
  "index.html": {
-  "date": "2026-10-31",
-  "hash": "a4b2c1afa6217fd0"
+  "date": "2026-11-01",
+  "hash": "fdb3596ed7466e98"
  },
  "install.html": {
   "date": "2026-10-27",
@@ -420,8 +420,8 @@
   "hash": "0be65a81ea76364e"
  },
  "sweep-vs-edgewonk.html": {
-  "date": "2026-10-27",
-  "hash": "e1e2ab66dd1adb0f"
+  "date": "2026-11-01",
+  "hash": "860b4ccf20697b96"
  },
  "sweep-vs-tradersync.html": {
   "date": "2026-10-27",
@@ -432,16 +432,16 @@
   "hash": "8bdf95d76707313f"
  },
  "sweep-vs-tradezella.html": {
-  "date": "2026-10-27",
-  "hash": "0e35021cfbc13b71"
+  "date": "2026-11-01",
+  "hash": "5993d97d8c28a439"
  },
  "terms.html": {
   "date": "2026-10-18",
   "hash": "e4ce67e29558f4bd"
  },
  "tools.html": {
-  "date": "2026-10-27",
-  "hash": "586a5cd532fa26fc"
+  "date": "2026-11-01",
+  "hash": "46798ce32331b770"
  },
  "trading-journal-guide.html": {
   "date": "2026-10-27",
@@ -458,6 +458,10 @@
  "trailing-drawdown-calculator.html": {
   "date": "2026-10-27",
   "hash": "8b4fc4f8d34332b4"
+ },
+ "wrapped.html": {
+  "date": "2026-11-01",
+  "hash": "4ea641558a1f172b"
  },
  "ym-vs-mym.html": {
   "date": "2026-10-27",
