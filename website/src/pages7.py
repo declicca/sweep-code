@@ -294,6 +294,8 @@ def page_tools(lang, t):
         cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_tools_hero"'))
     card = lambda s, ic, n, d: ui.card(t, n, d, icon=ic, more=T("Open","Ouvrir","Abrir"), url=href(lang, s))
     cards = ui.cards([card(*x) for x in TOOLS[:6]], cols=3) + ui.cards([card(*x) for x in TOOLS[6:]], cols=1)   # the six calculators, then the planner on its own row
+    cards += ui.cards([card("wrapped.html", "spark", T("Sweep Wrapped","Sweep Wrapped","Sweep Wrapped"),
+                            T("Drop your CSV export and see your trading month as a story, with a card to share. In your browser, nothing uploaded.","Dépose ton export CSV et vois ton mois de trading en histoire, avec une carte à partager. Dans ton navigateur, rien n’est envoyé.","Suelta tu exportación CSV y mira tu mes de trading como una historia, con una tarjeta para compartir. En tu navegador, nada se envía."))], cols=1)
     b = ui.sec(cards + f'<div class="links">{ui.go(lang, t, "prop-firms/index.html", T("Each firm’s rules, explained","Les règles de chaque firme, expliquées","Las reglas de cada firma, explicadas"))}</div>'
                + f'<p class="fine" style="margin-top:20px">{note(lang, t)}</p>', "t", "tools")
     when = [(T("Before the session.","Avant la séance.","Antes de la sesión."),

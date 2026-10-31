@@ -1441,6 +1441,20 @@
    "date": null
   }
  },
+ "wrapped.html": {
+  "en": {
+   "alt": "Sweep Wrapped · Your trading month, as a story",
+   "date": null
+  },
+  "fr": {
+   "alt": "Sweep Wrapped · Ton mois de trading, en histoire",
+   "date": null
+  },
+  "es": {
+   "alt": "Sweep Wrapped · Tu mes de trading, como una historia",
+   "date": null
+  }
+ },
  "position-size-calculator.html": {
   "en": {
    "alt": "Position size calculator · Free calculator for futures and prop traders",

@@ -270,6 +270,7 @@ def faq_ld(t):
 
 HOME_FREE = [("cpi-release-dates.html", L3("Next CPI release", "Prochain CPI", "Próximo CPI")), ("ppi-release-dates.html", L3("PPI release dates", "Dates du PPI", "Fechas del PPI")),
              ("contracts/nq-futures.html", L3("NQ tick value", "Valeur du tick NQ", "Valor del tick NQ")), ("prop-firm-account-rotation.html", L3("Account rotation planner", "Rotation des comptes prop", "Rotación de cuentas prop")),
+             ("wrapped.html", L3("Your month as a story", "Ton mois en histoire", "Tu mes como historia")),
              ("guides.html", L3("All guides", "Tous les guides", "Todas las guías"))]
 def sec_next(lang, t):
     """« Read next », then a line of the free resources (SEO brief v2, lot 5)."""

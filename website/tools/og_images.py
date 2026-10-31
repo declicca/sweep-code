@@ -133,7 +133,8 @@ def entries():
                              ("contact.html", T("Contact Sweep", "Contacter Sweep", "Contactar con Sweep"), T("hello@makeitsweep.com", "hello@makeitsweep.com", "hello@makeitsweep.com")),
                              ("press-kit.html", T("Sweep press kit", "Kit presse de Sweep", "Kit de prensa de Sweep"), T("Logos, screenshots and facts", "Logos, captures et faits", "Logos, capturas y datos")),
                              ("security.html", T("Security and privacy", "Sécurité et confidentialité", "Seguridad y privacidad"),
-                              T("How Sweep protects your journal", "Comment Sweep protège ton journal", "Cómo Sweep protege tu diario"))):
+                              T("How Sweep protects your journal", "Comment Sweep protège ton journal", "Cómo Sweep protege tu diario")),
+                             ("wrapped.html", T("Sweep Wrapped", "Sweep Wrapped", "Sweep Wrapped"), T("Your trading month, as a story", "Ton mois de trading, en histoire", "Tu mes de trading, como una historia"))):
         if page not in done: out.append((page, {l: (title[l], sub[l]) for l in LANGS}, None))
     for slug, _, name, _ in pages7.TOOLS:
         out.append((slug, {l: (name[l], T("Free calculator for futures and prop traders", "Calculateur gratuit pour traders de futures et de prop firms", "Calculadora gratis para traders de futuros y prop firms")[l]) for l in LANGS}, None))

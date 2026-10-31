@@ -43,6 +43,8 @@ PAGES["payout-tracker.html"] = pages20.page_payout_tracker
 PAGES[pages18.RULE_CHANGES] = pages18.page_rule_changes
 PAGES[pages18.METHOD] = pages18.page_method
 PAGES["ninjatrader.html"] = pages20.page_ninjatrader
+import pages22
+PAGES[pages22.WRAPPED] = pages22.page_wrapped   # Sweep Wrapped: a CSV export as a story, in the browser
 PAGES["quantower.html"] = pages20.page_quantower
 import pages21   # the 90-day gameplan: a pillar page and one page per month
 PAGES[pages21.GP_HUB] = pages21.page_gp_hub
@@ -166,7 +168,7 @@ PRIO.setdefault(pages19.HUB, "0.7")
 import pages7 as _p7, pages11 as _p11, pages21 as _p21
 _GUIDES = (set(pages19.RULE_GUIDES) | set(_p21.GP_PAGES) | {g["slug"] for g in _p11.EXPORT_GUIDES}
            | {"liquidity-sweep.html", "guides.html", "trading-journal-guide.html", "trading-journal-routine.html", "trading-templates.html", "glossary.html"})
-_TOOLS = {x[0] for x in _p7.TOOLS} | {"tools.html"}
+_TOOLS = {x[0] for x in _p7.TOOLS} | {"tools.html", "wrapped.html"}
 def _kind(p):
     if p.startswith("prop-firms/") or p in (pages18.RULE_CHANGES, "how-we-verify-prop-firm-rules.html"): return "prop-firms"
     if p.startswith("contracts/") or p in ("futures-contracts.html", *pages12.PAIR_PAGES): return "contracts"
