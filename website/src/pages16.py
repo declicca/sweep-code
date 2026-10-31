@@ -1,7 +1,7 @@
 """Home page sections, built with the design system (ui.py, system.css)."""
 from core import *
 from ui import sec, head, go, split, card, card_media, cards, tiles, frame_d, phone_img, qa, final, read_next, bullets, rings
-import re, json
+import re, json, html
 
 L3 = lambda en, fr, es: T(en, fr, es)
 
@@ -115,6 +115,38 @@ def sec_disc(lang, t):
                        "Tres pasos cada día de trading: el Plan antes de la apertura, la Ejecución durante la sesión y la Revisión después del cierre. Completa los tres y tu día queda barrido."),
                     links=link(lang, t, "how-it-works.html", L3("See how discipline works","Voir comment fonctionne la discipline","Ver cómo funciona la disciplina"), "#discipline"), center=True)
                + rings(t) + points + shot, "a", "discipline", cls="show", width="wide")
+
+# ---------------------------------------------------------------- the Friday review, as the app shows it (brief « avance concurrentielle », step 5)
+# Structure and words: the weekly recap's first step in the app (renderWk, step 0, and its WQ texts in app/src/game.js), checklist
+# questions as the app translates them; figures: the demo account (« Alex »), as in the App session's capture v7-07 of 29 Oct.
+WEEK_DEMO = {"range": T("Oct 12 – Oct 16", "12 oct. – 16 oct.", "12 oct – 16 oct"), "streak": 29, "disc": 90, "swept": 5, "traded": 5,
+             "days": T(["Mon", "Tue", "Wed", "Thu", "Fri"], ["lun.", "mar.", "mer.", "jeu.", "ven."], ["lun", "mar", "mié", "jue", "vie"]),
+             "best": (T("Did I avoid adding to a losing trade?", "Ai-je évité d’ajouter à un trade perdant ?", "¿Evité aumentar una operación perdedora?"), 10, 10),
+             "work": T("Did I avoid chasing price?", "Ai-je évité de courir après le prix ?", "¿Evité perseguir el precio?")}
+MINI_RINGS = ('<svg viewBox="0 0 36 36" width="40" height="40" aria-hidden="true"><g fill="none" stroke-width="3.2">'
+              '<circle cx="18" cy="18" r="15.5" stroke="var(--blue)"/><circle cx="18" cy="18" r="10.5" stroke="color-mix(in srgb,var(--blue) 70%,#fff)"/>'
+              '<circle cx="18" cy="18" r="5.5" stroke="var(--blue)"/></g></svg>')
+
+def sec_friday(lang, t):
+    d = WEEK_DEMO
+    W = {"en": dict(t="Your week", streak="Complete days", streak_v="{n} days in a row", disc="Discipline this week", swept="Swept days", swept_v="{a} of {b} days traded",
+                    habit="Your best habit", habit_v="« {q} » — yes {y} times out of {n}", work="For next week", work_v="Aim for a « yes » to « {q} » on every trade."),
+         "fr": dict(t="Ta semaine", streak="Jours complets", streak_v="{n} jours d’affilée", disc="Discipline de la semaine", swept="Journées balayées", swept_v="{a} sur {b} jours tradés",
+                    habit="Ta meilleure habitude", habit_v="« {q} » — oui {y} fois sur {n}", work="Pour la semaine prochaine", work_v="Vise un « oui » à « {q} » sur chaque trade."),
+         "es": dict(t="Tu semana", streak="Días completos", streak_v="{n} días seguidos", disc="Disciplina de la semana", swept="Días barridos", swept_v="{a} de {b} días operados",
+                    habit="Tu mejor hábito", habit_v="« {q} » — sí {y} veces de {n}", work="Para la próxima semana", work_v="Apunta a un « sí » en « {q} » en cada operación.")}[lang]
+    nb = (lambda x: x.replace("« ", "« ").replace(" »", " »").replace(" ?", " ?")) if lang == "fr" else (lambda x: x)   # as the app (nbFr)
+    q, y, n = d["best"]
+    pct = f'{d["disc"]} %'
+    card = (f'<div class="wk-card reveal"><h3>{W["t"]}</h3><p class="wk-range">{t(d["range"])}</p>'
+            f'<div class="wk-sum"><div><small>{W["streak"]}</small><b>{W["streak_v"].replace("{n}", str(d["streak"]))}</b></div>'
+            f'<div><small>{W["disc"]}</small><b class="pos">{pct}</b></div>'
+            f'<div><small>{W["swept"]}</small><b>{W["swept_v"].replace("{a}", str(d["swept"])).replace("{b}", str(d["traded"]))}</b></div></div>'
+            f'<div class="wk-week">' + "".join(f'<span><i>{x}</i>{MINI_RINGS}</span>' for x in t(d["days"])) + '</div>'
+            f'<ul class="wk-notes"><li><b>{W["habit"]}</b><span>{html.escape(nb(W["habit_v"].replace("{q}", t(q)).replace("{y}", str(y)).replace("{n}", str(n))))}</span></li>'
+            f'<li><b>{W["work"]}</b><span>{html.escape(nb(W["work_v"].replace("{q}", t(d["work"]))))}</span></li></ul></div>')
+    return sec(head(t, L3("Your Friday review · Example", "Ton bilan du vendredi · Exemple", "Tu resumen del viernes · Ejemplo"), L3("Weekly recap", "Bilan de la semaine", "Resumen semanal"), center=True)
+               + card + f'<p class="cap wk-cap">{t(L3("Sample data from the Sweep demo account.", "Données d’exemple du compte démo de Sweep.", "Datos de ejemplo de la cuenta demo de Sweep."))}</p>', "n", "friday-review")
 
 def sec_ai(lang, t):
     L = "fr" if lang == "fr" else ("es" if lang == "es" else "en")
