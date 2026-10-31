@@ -377,7 +377,7 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .article .chiprow,.article .links{margin-top:16px}
 @media (max-width:743px){table.vs td:nth-child(2),table.glance tbody tr:first-child>*{background:none}table.vs td:nth-child(2)::before{color:var(--blue-text)}}
 
-/* ---- [pages: position-size-calculator.html trailing-drawdown-calculator.html consistency-rule-calculator.html payout-calculator.html expectancy-calculator.html prop-firm-roi-calculator.html prop-firm-account-rotation.html prop-firm-benchmark-days.html] calculators: the form and the result side by side in one card; on phones the result follows you in a bar */
+/* ---- [pages: index.html position-size-calculator.html trailing-drawdown-calculator.html consistency-rule-calculator.html payout-calculator.html expectancy-calculator.html prop-firm-roi-calculator.html prop-firm-account-rotation.html prop-firm-benchmark-days.html] calculators: the form and the result side by side in one card; on phones the result follows you in a bar */
 .calc{display:grid;border-radius:var(--r5);background:var(--glass);box-shadow:var(--shadow-2);overflow:hidden}
 @media (min-width:861px){.calc{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 .calc-form,.calc-out{padding:clamp(24px,16px + 2vw,40px)}
@@ -396,6 +396,25 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 .big{display:grid;gap:8px}
 .big .num{font:600 clamp(44px,36px + 2vw,64px)/1 var(--font);letter-spacing:-.035em;color:var(--blue-text)}
 .big span:last-child{font-size:15px;color:var(--muted)}
+/* the real cost of evals (home) */
+.ec-range>span{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.ec-range b{font:600 17px/1 var(--mono);color:var(--text)}
+.ec-range input{-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;background:transparent;cursor:pointer;touch-action:pan-y}
+.ec-range input::-webkit-slider-runnable-track{height:6px;border-radius:var(--r-pill);background:linear-gradient(var(--blue),var(--blue)) 0/var(--p,20%) 100% no-repeat,color-mix(in srgb,var(--text) 12%,transparent)}
+.ec-range input::-moz-range-track{height:6px;border-radius:var(--r-pill);background:linear-gradient(var(--blue),var(--blue)) 0/var(--p,20%) 100% no-repeat,color-mix(in srgb,var(--text) 12%,transparent)}
+.ec-range input::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.08)}
+.ec-range input::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.ec-cost{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ec-cost .seg{margin:0}
+.ec-cost .seg button{padding:0 12px}
+.ec-cost .inp{width:120px}
+.ec-cost .inp input{height:42px}
+.ec .calc-out{gap:14px;font-size:16px;line-height:1.5;color:var(--muted)}
+.ec .calc-out b{color:var(--text);font-weight:600;font-family:var(--font);font-variant-numeric:tabular-nums;letter-spacing:0}
+.ec .ec-y{font-size:clamp(19px,17px + .5vw,24px);line-height:1.35;color:var(--text);letter-spacing:-.01em}
+.ec .ec-y b{color:var(--blue-text);font-variant-numeric:tabular-nums}
+.ec-go{margin-top:auto;padding-top:18px;border-top:1px solid var(--line-2);display:grid;gap:14px;justify-items:start}
+.ec-exit{font-size:14.5px}
 .calc-out dl{border-top:1px solid var(--line-2)}
 .calc-out dl div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-2);font-size:15px}
 .calc-out dt{color:var(--muted)}

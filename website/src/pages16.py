@@ -1,7 +1,7 @@
 """Home page sections, built with the design system (ui.py, system.css)."""
 from core import *
 from ui import sec, head, go, split, card, card_media, cards, tiles, frame_d, phone_img, qa, final, read_next, bullets, rings
-import re
+import re, json
 
 L3 = lambda en, fr, es: T(en, fr, es)
 
@@ -112,6 +112,50 @@ def sec_trust(lang, t):
     return sec(head(t, None, L3("Your data stays yours.","Tes données t’appartiennent.","Tus datos son tuyos."),
                     links=link(lang, t, "security.html", L3("Security and data","Sécurité et données","Seguridad y datos")))
                + tiles(t, items) + f'<p class="fine" style="margin-top:20px">{t(L3("Sweep doesn’t offer financial advice.","Sweep n’offre pas de conseils financiers.","Sweep no ofrece asesoría financiera."))}</p>', "t", "trust")
+
+# ---------------------------------------------------------------- the real cost of evals (brief « avance concurrentielle », step 2)
+EVAL_PRICES = (49, 99, 150, 250)
+PRO_YEAR = 159   # Pro, annual billing (pricing page)
+
+def sec_evalcost(lang, t):
+    """« One blown eval costs more than a year of Sweep »: evals per month × average cost, live, against Pro annual."""
+    from pages7 import NUM_JS
+    n0, c0 = 2, 150
+    y0 = n0 * c0 * 12
+    money = lambda v: f"${v:,}" if lang == "en" else f"{v:,}".replace(",", " " if lang == "fr" else ".") + " $"
+    avoid0 = -(-PRO_YEAR // c0)   # blown accounts to avoid for Pro to pay for itself
+    L = {"one": t(L3("Avoid <b>one</b> blown account and it has paid for itself.", "Évite <b>un seul</b> compte perdu et il est payé.", "Evita <b>una sola</b> cuenta perdida y ya se pagó.")),
+         "many": t(L3("Avoid <b>{n}</b> blown accounts and it has paid for itself.", "Évite <b>{n}</b> comptes perdus et il est payé.", "Evita <b>{n}</b> cuentas perdidas y ya se pagó.")),
+         "times": t(L3("That’s <b>{n}×</b> the cost of Sweep Pro.", "C’est <b>{n}×</b> le prix de Sweep Pro.", "Es <b>{n}×</b> el precio de Sweep Pro."))}
+    times = lambda y: (f"{y / PRO_YEAR:.1f}".replace(".", "," if lang != "en" else ".") if y / PRO_YEAR < 10 else f"{round(y / PRO_YEAR)}")
+    pills = "".join(f'<button type="button" data-c="{v}" aria-pressed="{"true" if v == c0 else "false"}">{money(v)}</button>' for v in EVAL_PRICES)
+    form = (f'<label class="fld ec-range"><span>{t(L3("Evals or resets per month", "Évaluations ou resets par mois", "Evaluaciones o resets al mes"))}<b class="num" id="ec-nv">{n0}</b></span>'
+            f'<input id="ec-n" type="range" min="0" max="10" step="1" value="{n0}" style="--p:{n0 * 10}%"></label>'
+            f'<div class="fld"><span id="ec-cl">{t(L3("Average cost of an eval", "Coût moyen d’une évaluation", "Costo medio de una evaluación"))}</span>'
+            f'<div class="ec-cost"><div class="seg" role="group" aria-labelledby="ec-cl">{pills}</div>'
+            f'<span class="inp"><input id="ec-c" type="number" inputmode="decimal" min="0" step="any" placeholder="{t(L3("Other", "Autre", "Otro"))}" aria-label="{t(L3("Other cost", "Autre coût", "Otro costo"))}"><em>$</em></span></div></div>')
+    out = (f'<p class="ec-y" aria-live="polite">{t(L3("You spend <b class=\"num\" id=\"ec-y\">{y}</b> a year on evals.", "Tu dépenses <b class=\"num\" id=\"ec-y\">{y}</b> par année en évaluations.", "Gastas <b class=\"num\" id=\"ec-y\">{y}</b> al año en evaluaciones.")).replace("{y}", money(y0))}</p>'
+           f'<p>{t(L3("Sweep Pro is <b class=\"num\">{p}</b> a year.", "Sweep Pro coûte <b class=\"num\">{p}</b> par année.", "Sweep Pro cuesta <b class=\"num\">{p}</b> al año.")).replace("{p}", money(PRO_YEAR))} '
+           f'<span id="ec-a">{(L["one"] if avoid0 == 1 else L["many"].replace("{n}", str(avoid0)))}</span></p>'
+           f'<p id="ec-t"{"" if y0 > PRO_YEAR else " hidden"}>{L["times"].replace("{n}", times(y0))}</p>')
+    script = ("<script>(function(){var $=function(i){return document.getElementById(i)},L=" + json.dumps(L, ensure_ascii=False) + f",P={PRO_YEAR};" + NUM_JS +
+              "var n=$('ec-n'),c=$('ec-c'),pills=document.querySelectorAll('.ec-cost .seg button'),cost=" + str(c0) + ",shown=" + str(y0) + ",raf=0,"
+              "rm=matchMedia('(prefers-reduced-motion: reduce)').matches;"
+              "function show(v){$('ec-y').textContent=cur(Math.round(v),0)}"
+              "function run(){var k=+n.value,y=k*cost*12,a=cost>0?Math.ceil(P/cost):0;$('ec-nv').textContent=k;n.style.setProperty('--p',k*10+'%');"
+              "$('ec-a').innerHTML=a===1?L.one:a>1?L.many.replace('{n}',a):'';"
+              "var x=y/P;$('ec-t').hidden=!(y>P);$('ec-t').innerHTML=L.times.replace('{n}',x<10?dec(x,1):dec(Math.round(x),0));"
+              "cancelAnimationFrame(raf);if(rm){shown=y;show(y);return}var f=shown,t0=performance.now();"   # out-expo, 600 ms
+              "(function step(now){var p=Math.min(1,(now-t0)/600),e=p===1?1:1-Math.pow(2,-10*p);shown=f+(y-f)*e;show(shown);if(p<1)raf=requestAnimationFrame(step)})(t0)}"
+              "n.addEventListener('input',run);"
+              "pills.forEach(function(b){b.addEventListener('click',function(){cost=+b.dataset.c;c.value='';pills.forEach(function(x){x.setAttribute('aria-pressed',x===b)});run()})});"
+              "c.addEventListener('input',function(){var v=parseFloat(c.value);if(isNaN(v)||v<0)return;cost=v;pills.forEach(function(x){x.setAttribute('aria-pressed','false')});run()});"
+              "})()</script>")
+    exitl = (f'<p class="ec-exit">{t(L3("Sweep tracks every eval, reset and payout, so you see what trading really costs you.", "Sweep suit chaque évaluation, reset et payout : tu vois ce que le trading te coûte vraiment.", "Sweep registra cada evaluación, reset y payout: ves lo que el trading te cuesta de verdad."))}</p>'
+             f'<a class="btn btn-primary" href="{SIGNUP}" data-track="signup_evalcost">{t(CREATE_FREE)}</a>')
+    return sec(head(t, None, L3("One blown eval costs more than a year of Sweep.", "Une évaluation ratée coûte plus qu’un an de Sweep.", "Una evaluación perdida cuesta más que un año de Sweep."))
+               + f'<div class="calc ec reveal"><div class="calc-form">{form}</div><div class="calc-out">{out}<div class="ec-go">{exitl}</div></div></div>' + script,
+               "n", "eval-cost")
 
 def sec_pricing(lang, t):
     tiles_ = [("Free", L3("$0","0 $","0 $"), L3("forever","pour toujours","para siempre"), L3("2 prop accounts, your coach and your edge","2 comptes prop, ton coach et ton edge","2 cuentas prop, tu coach y tu edge")),
