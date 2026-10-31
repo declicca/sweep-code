@@ -38,7 +38,7 @@ def sec_only(lang, t):
      (L3("Your firm’s rules, always current.", "Les règles de ta firme, toujours à jour.", "Las reglas de tu firma, siempre al día."),
       L3("Pick your firm and account type. Rules are checked every week.", "Choisis ta firme et ton type de compte. Les règles sont vérifiées chaque semaine.", "Elige tu firma y tu tipo de cuenta. Las reglas se verifican cada semana."),
       "ecran-regles-firme.webp", L3("Adding an account: funded, Topstep, XFA, then the size", "Ajout d’un compte : financé, Topstep, XFA, puis la taille", "Añadir una cuenta: fondeada, Topstep, XFA y luego el tamaño"), "50% 30%"),
-     (L3("A trading day that ends at 6 PM ET.", "Une journée de trading qui finit à 18 h ET.", "Un día de trading que termina a las 6 p. m. ET."),
+     (L3("A trading day that ends at 5 PM ET.", "Une journée de trading qui finit à 17 h ET.", "Un día de trading que termina a las 5 p. m. ET."),
       L3("Like the market, not like your calendar.", "Comme le marché, pas comme ton calendrier.", "Como el mercado, no como tu calendario."),
       "v6-01-today-m.webp", L3("Today: the session’s routine and accounts, sample data", "Aujourd’hui : la routine et les comptes de la séance, données d’exemple", "Hoy: la rutina y las cuentas de la sesión, datos de ejemplo"), "50% 0%"),
      (L3("Show your discipline, not just your dollars.", "Montre ta discipline, pas juste tes dollars.", "Muestra tu disciplina, no solo tus dólares."),
