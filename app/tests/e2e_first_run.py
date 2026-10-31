@@ -39,6 +39,7 @@ SAVED = {'fr': 'Trade enregistré', 'en': 'Trade saved', 'es': 'Operación guard
 # (28 Oct., activation D) the clock of each case, New York: a Tuesday 10:30 (market open), a Tuesday 20:00 and a Saturday 11:00 (closed)
 OPEN, EVENING, SATURDAY = '2026-10-27T10:30:00-04:00', '2026-10-27T20:00:00-04:00', '2026-10-31T11:00:00-04:00'
 CLOSED_T = {'fr': 'Prépare ta séance de demain.', 'en': 'Prepare tomorrow’s session.', 'es': 'Prepara tu sesión de mañana.'}
+MON_T = {'fr': 'Prépare ta séance de lundi.', 'en': 'Prepare Monday’s session.', 'es': 'Prepara tu sesión del lunes.'}   # (30 Oct., tour W2) on Saturday the next session is Monday's
 HIST = {'fr': 'Ramène ton historique', 'en': 'Bring your history', 'es': 'Trae tu historial'}
 
 def run(p, lang, phone, exp, now=OPEN):
@@ -67,7 +68,7 @@ def run(p, lang, phone, exp, now=OPEN):
   pg.goto(B + '/'); pg.wait_for_selector('form[data-form=account][data-onb] [data-st-ph0=eval]', timeout=20000); pg.wait_for_timeout(700)
   t0 = time.time()
   main = pg.locator('#main .onb').inner_text()
-  want_t = CLOSED_T[lang] if case == 'closed' else TXT[lang]['title']
+  want_t = (MON_T if now == SATURDAY else CLOSED_T)[lang] if case == 'closed' else TXT[lang]['title']
   ok(want_t in main and pg.locator('#title').inner_text().strip() == TXT[lang]['wel'], f'{tag} « {want_t} », page « {TXT[lang]["wel"]} »')
   ok(pg.locator('#main .onb-steps li').count() == (2 if case == 'closed' else 3), f'{tag} the steps of this case: account, plan, then the first trade (open) or nothing (closed: tomorrow\'s plan)')
   first = pg.evaluate("(() => { const f = document.querySelector('form[data-form=account][data-onb]'); return f.firstElementChild && f.firstElementChild.className })()")

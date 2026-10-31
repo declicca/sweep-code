@@ -368,7 +368,7 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0 and not errs, f'{tag} M nothing wider than the window, no page error ({errs[:2]})')
   br.close()
 
-W5 = {'fr': ('Réponds au coach', 'Avancé'), 'en': ('Answer your coach', 'Advanced'), 'es': ('Responde a tu coach', 'Avanzado')}
+W5 = {'fr': ('Réponds au coach', 'Compte'), 'en': ('Answer your coach', 'Account'), 'es': ('Responde a tu coach', 'Cuenta')}   # (30 Oct., W3) « Account » last
 def fewer(p, lang, phone):   # brief 03 step 5
   tag = f"{'390' if phone else '1300'}-{lang}"; w = W5[lang]
   unthrottle()

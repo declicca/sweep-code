@@ -150,6 +150,7 @@ def run(p, lang, phone, full):
   ok((st.get('gates') or {}).get('1') == 'pass' and st['open_to'] == 31, f"{tag} 4 passed: Month 2 open (open to {st['open_to']})")
   # 5. Settings
   pg.evaluate("location.hash = '#settings'"); until(pg, "document.querySelector('#main .gp-set')", 10000); pg.wait_for_timeout(400)
+  ok(pg.evaluate("(() => { const d = document.querySelector('#main .gp-set').closest('details.nav-sgd'); if (d) d.open = true; return !!d && d.dataset.i === '1' })()"), f'{tag} 5 Settings: the gameplan in « My routine » (30 Oct., tour W3)'); pg.wait_for_timeout(300)
   s = pg.locator('#main .gp-set').inner_text()
   ok(T['set'] in s and '31' in s and T['stop'] in s, f'{tag} 5 Settings: the gameplan, its day, « {T["stop"]} »')
   pg.locator('#main .gp-set [data-gp="stop"]').click(); until(pg, "document.querySelector('aside.nav-ask.open')", 4000)

@@ -3300,9 +3300,9 @@
   // Settings: its section in place at once (the last one drawn, or a space of its size), filled by the module (no jump)
   const earlySet = () => {
     const main = document.getElementById('main'); if (!main || main.querySelector('.gp-set')) return;
-    const after = main.querySelector('.nav-set-prof') || main.querySelector('.surface'); if (!after) return;
+    const g = main.querySelector('details.nav-sgd[data-i="1"] > summary'), first = main.querySelector(':scope > section'); if (!g && !first) return;   // first in « My routine » (the groups put it there when they come after)
     let h = ''; try { h = localStorage.getItem('sw.gpSet') || ''; } catch (e) { /* private mode */ }
-    const sec = document.createElement('section'); sec.className = 'surface gp-set' + (h ? '' : ' gp-set-ph'); sec.setAttribute('data-noi18n', ''); sec.innerHTML = h; after.after(sec);
+    const sec = document.createElement('section'); sec.className = 'surface gp-set' + (h ? '' : ' gp-set-ph'); sec.setAttribute('data-noi18n', ''); sec.innerHTML = h; g ? g.after(sec) : first.before(sec);
   };
   window.SweepGPCheck = async (given) => {
     if (given && given.started) { (await window.SweepGPLoad()).mount(given); return; }   // just started (sign-up, Settings)

@@ -17,7 +17,9 @@ ENV = dict(os.environ, PATH=':'.join([os.path.expanduser('~/.venvs/sweep/bin'), 
                                       '/opt/homebrew/opt/gnu-sed/libexec/gnubin', os.environ.get('PATH', '')]))
 # market weekend: the game runs on Friday 15:00 ET (tools/game-now.py), the tests need an open session
 GAME_NOW = subprocess.run([sys.executable, '-I', os.path.join(TOOLS, 'game-now.py')], capture_output=True, text=True).stdout.strip()
-if GAME_NOW: ENV['SWEEP_GAME_NOW'] = GAME_NOW
+if GAME_NOW:
+    ENV['SWEEP_GAME_NOW'] = GAME_NOW
+    ENV['PYTHONPATH'] = os.path.join(TOOLS, 'clientclock') + (':' + ENV['PYTHONPATH'] if ENV.get('PYTHONPATH') else '')   # the tests' pages on that time too
 ENV['SWEEP_DISC_ALL'] = '1'   # (SWEEP.md step 5) every test account sees everything, except one marked for the discovery missions
 ENV['SWEEP_BAL_FROM'] = '2026-01-01'   # the complete days (« pertes oubliées », step 4) from before today's date too
 core = re.search(r'CORE="([^"]*)"', open(os.path.join(APP, 'tests/run-all.sh')).read()).group(1).split()

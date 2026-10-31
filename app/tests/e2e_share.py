@@ -116,7 +116,8 @@ def run(p, lang, phone):
   ok(im.status == 200 and im.headers.get('content-type') in ('image/jpeg', 'image/png') and len(im.body()) > 10000, f"{tag} the preview image served ({im.status}, {im.headers.get('content-type')})")
   pg.evaluate("closeShare()"); pg.wait_for_timeout(300)
   # 3. the public discipline profile
-  pg.goto(B + '/#settings'); pg.wait_for_selector('#main .nav-set-prof [data-pub]:not([disabled])', timeout=20000); pg.wait_for_timeout(300)
+  pg.goto(B + '/#settings'); pg.wait_for_selector('#main .nav-set-prof [data-pub]:not([disabled])', state='attached', timeout=20000)
+  pg.evaluate("(() => { const d = document.querySelector('#main .nav-set-prof').closest('details.nav-sgd'); if (d) d.open = true })()"); pg.wait_for_timeout(300)   # (30 Oct., W3) « Account » folded on arrival
   ok(pg.evaluate(TXT, '#main .nav-pub-row b') == [x['pub']] and not pg.evaluate("document.querySelector('#main [data-pub]').checked") and not pg.evaluate("!!document.querySelector('#main .nav-pub-link')"),
      f"{tag} Settings › Profile: « {x['pub']} », off by default")
   pg.click('#main .nav-pub-row .sw'); pg.wait_for_selector('#main .nav-pub-link input', timeout=10000); pg.wait_for_timeout(300)

@@ -923,7 +923,7 @@ window.SweepMO = window.SweepMO || class {
     if (sp && td) sp.scrollLeft = Math.max(0, td.offsetLeft - sp.clientWidth / 2 + td.offsetWidth / 2);
   }
 
-  /* ───────────── Settings in 5 groups: Account · My routine · Notifications · Data · Advanced; at the bottom: Appearance, Sweep AI,
+  /* ───────────── Settings in 5 groups: My routine · Notifications · Data · Advanced · Account; at the bottom: Appearance, Sweep AI,
    * About (SWEEP.md step 6, 4.5: « Discipline » became « My routine », with the 90-day gameplan, the plan mode, the lock time and
    * the risk rules) ───────────── */
   const SG = {
@@ -948,15 +948,17 @@ window.SweepMO = window.SweepMO || class {
       if (hd && /^(discipline|disciplina)$/i.test(hd.textContent.trim())) hd.textContent = (SG[LANG] || SG.en)[1];   // its own title: the group's
       if (hd && /^(discipline checklist|checklist de discipline|checklist de disciplina)$/i.test(hd.textContent.trim())) hd.textContent = 'Checklist';   // (D7b) the average of the checklist is « Checklist »
       const h = ((sec.querySelector('h2, h3') || {}).textContent || '').trim();
-      const m = SMAP.find(([, re]) => re.test(h));
+      const m = sec.classList.contains('gp-set') ? [1] : SMAP.find(([, re]) => re.test(h));   // the gameplan, even while its section waits for its text
       (m ? buckets[m[0]] : rest).push(sec);
     }
     const names = SG[LANG] || SG.en;
     const anchor = main.querySelector('.nav-back');
     let at = anchor || null;
     // B15: foldable groups (Account, Discipline, Notifications, Data, Advanced); the open ones stay open while you navigate
-    let openSet; try { openSet = new Set(JSON.parse(sessionStorage.getItem('sw.sgd') || '[0]')); } catch (e) { openSet = new Set([0]); }
-    buckets.forEach((list, i) => {
+    // (30 Oct., tour W3) all folded on arrival; « Account » last, before « About »
+    let openSet; try { openSet = new Set(JSON.parse(sessionStorage.getItem('sw.sgd') || '[]')); } catch (e) { openSet = new Set(); }
+    [1, 2, 3, 4, 0].forEach((i) => {
+      const list = buckets[i];
       if (!list.length) return;
       const d = document.createElement('details'); d.className = 'nav-sgd'; d.dataset.i = i; d.open = openSet.has(i);
       d.innerHTML = `<summary class="nav-sgrp" data-noi18n><h2>${names[i]}</h2></summary>`;
@@ -2279,6 +2281,15 @@ window.SweepMO = window.SweepMO || class {
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
+  /* the day a new trade goes to: today's session, or, while the market is closed (17:00–18:00 ET, Friday 17:00 to Sunday
+     18:00), the last session that ended (a Friday evening's trade is Friday's, never Saturday's) */
+  const sheetDay = () => {
+    const n = typeof nowET === 'function' ? nowET() : ''; if (!n || typeof ymdAdd !== 'function') return today();
+    const d = n.slice(0, 10), hm = n.slice(11, 16), wd = new Date(d + 'T12:00:00Z').getUTCDay();
+    if (!(wd === 6 || (wd === 5 && hm >= '17:00') || (wd === 0 && hm < '18:00') || (hm >= '17:00' && hm < '18:00'))) return today();
+    let x = d; while ([0, 6].includes(new Date(x + 'T12:00:00Z').getUTCDay())) x = ymdAdd(x, -1);
+    return x;
+  };
   let origTicket = null;
 
   /* the overlay (same family as the other sheets: back button and Escape close it) */
@@ -2305,7 +2316,7 @@ window.SweepMO = window.SweepMO || class {
   /* 2. the screenshot form */
   const SH = { file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: {} };
   function shotForm(opts) {
-    Object.assign(SH, { noShot: false, ctxOpen: false, dupOk: false, quotaShown: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || today(), qty: '1' } });
+    Object.assign(SH, { noShot: false, ctxOpen: false, dupOk: false, quotaShown: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || sheetDay(), qty: '1' } });
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
     SH.f.account = (accs[0] || {}).id || '';
     { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').forEach((x) => SH.copy.add(x.id)); }
@@ -3789,7 +3800,7 @@ window.SweepMO = window.SweepMO || class {
   function settings() {
     if (!/^#settings/.test(location.hash || '')) return;
     const main = document.getElementById('main'); if (!main || main.querySelector('.nav-set-prof')) return;
-    const first = main.querySelector('.surface'); if (!first) return;
+    const first = main.querySelector('details.nav-sgd[data-i="0"] .surface') || main.querySelector('.surface'); if (!first) return;   // in « Account », wherever its group stands
     const sec = document.createElement('section'); sec.className = 'surface nav-set-prof'; sec.setAttribute('data-noi18n', '');
     sec.innerHTML = `<h2>${t('prof')}</h2>${fields(S.me || {}, true)}<p class="err nav-prof-err"></p><button type="button" class="btn primary" data-prof-save>${t('save')}</button><div class="nav-pub" data-pub-box>${pubHtml()}</div>`;
     first.before(sec);
@@ -6804,31 +6815,33 @@ new window.SweepMO(() => {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { open: ['Your account', 'Your plan', 'Your first trade'], closed: ['Your account', 'Your plan for tomorrow'], active: ['Your account', 'Your plan', 'Your history'],
+    en: { open: ['Your account', 'Your plan', 'Your first trade'], closed: ['Your account', 'Your plan for tomorrow'], mon: ['Your account', 'Your plan for Monday'], active: ['Your account', 'Your plan', 'Your history'],
       tOpen: 'Three steps and you’re trading.', sOpen: 'Your account, your plan for the day, your first trade: about two minutes.',
-      tClosed: 'Prepare tomorrow’s session.', sClosed: 'Your account, then your plan for the next session and your risk allowed: about a minute.',
+      tClosed: 'Prepare tomorrow’s session.', tMon: 'Prepare Monday’s session.', sClosed: 'Your account, then your plan for the next session and your risk allowed: about a minute.',
       pre: ['Your account', 'Your plan for the day'], tPre: 'Prepare today’s session.', sPre: 'Your account, then your plan for the day and your risk allowed, before the open: about a minute.',
       tActive: 'Three steps and your journal is full.', sActive: 'Your account, your plan, then your history: Today, Stats and « Your edge » filled in from today.',
       hT: 'Bring your history', hS: 'Sync NinjaTrader 8 or Quantower, or import a CSV of your platform: Today, Stats and « Your edge » fill up from your first visit.', csv: 'Import a CSV', later: 'Later', traded: 'I traded today: add my trade' },
-    fr: { open: ['Ton compte', 'Ton plan', 'Ton premier trade'], closed: ['Ton compte', 'Ton plan de demain'], active: ['Ton compte', 'Ton plan', 'Ton historique'],
+    fr: { open: ['Ton compte', 'Ton plan', 'Ton premier trade'], closed: ['Ton compte', 'Ton plan de demain'], mon: ['Ton compte', 'Ton plan de lundi'], active: ['Ton compte', 'Ton plan', 'Ton historique'],
       tOpen: 'Trois étapes et tu trades.', sOpen: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.',
-      tClosed: 'Prépare ta séance de demain.', sClosed: 'Ton compte, puis ton plan de la prochaine séance et ton risque permis : environ une minute.',
+      tClosed: 'Prépare ta séance de demain.', tMon: 'Prépare ta séance de lundi.', sClosed: 'Ton compte, puis ton plan de la prochaine séance et ton risque permis : environ une minute.',
       pre: ['Ton compte', 'Ton plan du jour'], tPre: 'Prépare ta séance d’aujourd’hui.', sPre: 'Ton compte, puis ton plan du jour et ton risque permis, avant l’ouverture : environ une minute.',
       tActive: 'Trois étapes et ton journal est rempli.', sActive: 'Ton compte, ton plan, puis ton historique : Aujourd’hui, Stats et « Ton edge » remplis dès aujourd’hui.',
       hT: 'Ramène ton historique', hS: 'Synchronise NinjaTrader 8 ou Quantower, ou importe un CSV de ta plateforme : Aujourd’hui, Stats et « Ton edge » se remplissent dès ta première visite.', csv: 'Importer un CSV', later: 'Plus tard', traded: 'J’ai tradé aujourd’hui : ajouter mon trade' },
-    es: { open: ['Tu cuenta', 'Tu plan', 'Tu primera operación'], closed: ['Tu cuenta', 'Tu plan de mañana'], active: ['Tu cuenta', 'Tu plan', 'Tu historial'],
+    es: { open: ['Tu cuenta', 'Tu plan', 'Tu primera operación'], closed: ['Tu cuenta', 'Tu plan de mañana'], mon: ['Tu cuenta', 'Tu plan del lunes'], active: ['Tu cuenta', 'Tu plan', 'Tu historial'],
       tOpen: 'Tres pasos y operas.', sOpen: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.',
-      tClosed: 'Prepara tu sesión de mañana.', sClosed: 'Tu cuenta, luego tu plan de la próxima sesión y tu riesgo permitido: un minuto.',
+      tClosed: 'Prepara tu sesión de mañana.', tMon: 'Prepara tu sesión del lunes.', sClosed: 'Tu cuenta, luego tu plan de la próxima sesión y tu riesgo permitido: un minuto.',
       pre: ['Tu cuenta', 'Tu plan del día'], tPre: 'Prepara tu sesión de hoy.', sPre: 'Tu cuenta, luego tu plan del día y tu riesgo permitido, antes de la apertura: un minuto.',
       tActive: 'Tres pasos y tu diario está lleno.', sActive: 'Tu cuenta, tu plan y luego tu historial: Hoy, Estadísticas y « Tu ventaja » llenos desde hoy.',
       hT: 'Trae tu historial', hS: 'Sincroniza NinjaTrader 8 o Quantower, o importa un CSV de tu plataforma: Hoy, Estadísticas y « Tu ventaja » se llenan desde tu primera visita.', csv: 'Importar un CSV', later: 'Más tarde', traded: 'Operé hoy: añadir mi operación' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const NYF = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-  function nyNow() { const p = {}; NYF.formatToParts(window.__swNow ? new Date(window.__swNow) : new Date()).forEach((x) => { p[x.type] = x.value; }); return { wk: !['Sat', 'Sun'].includes(p.weekday), m: (+p.hour % 24) * 60 + +p.minute }; }
+  function nyNow() { const p = {}; NYF.formatToParts(window.__swNow ? new Date(window.__swNow) : new Date()).forEach((x) => { p[x.type] = x.value; }); return { wk: !['Sat', 'Sun'].includes(p.weekday), wd: p.weekday, m: (+p.hour % 24) * 60 + +p.minute }; }
   function moment() { const n = nyNow(); return n.wk && n.m >= 570 && n.m < 960 ? 'open' : 'closed'; }
   /** (29 Oct., tour T1) before the open of a weekday (midnight → 9:30 ET): the plan that opens is today's, not tomorrow's */
   const preOpen = () => { const n = nyNow(); return n.wk && n.m < 570; };
+  /** (30 Oct., tour W2) Friday after the close and Saturday: the next session is Monday's, « tomorrow » only when it is */
+  const toMonday = () => { const n = nyNow(); return n.wd === 'Sat' || (n.wd === 'Fri' && n.m >= 570); };
   const running = () => (S.accounts || []).some((a) => !a.demo && Array.isArray(a.adjustments) && a.adjustments.some((x) => +x.amount_c));
   function kind(xp) { return xp === 'gt1' || running() ? 'active' : moment(); }
   function history(later) {
@@ -6856,10 +6869,11 @@ new window.SweepMO(() => {
     const onb = document.querySelector('#main .onb'); if (!onb) return;
     const xp = ((f || onb).querySelector('[data-exp].on') || {}).dataset; const k = kind(xp && xp.exp);
     const ol = onb.querySelector('.onb-steps'), ttl = onb.querySelector('h1, h2'), sub = onb.querySelector('.onb-sub');
-    const key = k === 'closed' ? (preOpen() ? 'Pre' : 'Closed') : k === 'active' ? 'Active' : 'Open';
+    const key = k === 'closed' ? (preOpen() ? 'Pre' : toMonday() ? 'Mon' : 'Closed') : k === 'active' ? 'Active' : 'Open';
     if (ttl && ttl.textContent !== t('t' + key)) ttl.textContent = t('t' + key);
-    if (sub && sub.textContent !== t('s' + key)) sub.textContent = t('s' + key);
-    const html = t(key === 'Pre' ? 'pre' : k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
+    const sk = key === 'Mon' ? 'sClosed' : 's' + key;
+    if (sub && sub.textContent !== t(sk)) sub.textContent = t(sk);
+    const html = t(key === 'Pre' ? 'pre' : key === 'Mon' ? 'mon' : k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
     if (ol && ol.innerHTML !== html) { ol.setAttribute('data-noi18n', ''); ol.innerHTML = html; }
     onb.dataset.start = k;
   }

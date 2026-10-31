@@ -11,6 +11,7 @@ export SWEEP_AI_OFFLINE=1   # the AI without a mock (economic calendar) never ca
 export SWEEP_PUSH_CONFIG="$TOOLS/push-config.local.php" SWEEP_PUSH_MOCK="$DEST/data/push-sent.jsonl"   # notifications on the phone: test keys, messages to a file
 # market weekend: the game runs on Friday 15:00 ET (tools/game-now.py), the tests need an open session
 GN=$(python3 -I "$TOOLS/game-now.py"); [ -n "$GN" ] && export SWEEP_GAME_NOW="$GN" && echo "SWEEP_GAME_NOW=$GN (market weekend)" >&2
+[ -n "$GN" ] && export PYTHONPATH="$TOOLS/clientclock${PYTHONPATH:+:$PYTHONPATH}"   # the tests' pages on that time too (tools/clientclock/sitecustomize.py)
 (cd "$DEST" && PHP_CLI_SERVER_WORKERS=4 exec php -S 127.0.0.1:$PORT router.php > "${TMPDIR:-/tmp}/sweep-php-$PORT.log" 2>&1) &
 SRV=$!
 for i in $(seq 1 50); do curl -s -o /dev/null "http://127.0.0.1:$PORT/api/auth/config" && break; sleep 0.2; done

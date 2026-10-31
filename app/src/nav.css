@@ -2026,6 +2026,9 @@ html body #main .nav-sgd>section>.sec-h{padding:0 4px}
 .nav-split{margin:8px 2px 0;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
 .nav-split b{font-family:'Geist Mono',monospace;font-weight:600;color:var(--text2,var(--text))}
 .nav-split .nav-split-live b,.nav-split .nav-split-personal b{color:var(--text)}
+/* (30 Oct., tour W5) the words in Geist, the amounts in Geist Mono (the block around is all figures) */
+html body .nav-kpi-b .nav-split{font-family:var(--font-ui)!important;font-variant-numeric:normal;font-weight:400}
+html body .nav-kpi-b .nav-split b{font-family:var(--font-num)!important;font-variant-numeric:tabular-nums}
 .d-money .nav-mny-l{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:4px}
 .d-money .nav-mny-big{font:600 28px/1.15 'Geist Mono',monospace;letter-spacing:-.02em;margin:6px 0 12px;white-space:nowrap}
 .d-money .nav-mny-g small{display:flex;flex-wrap:wrap;gap:4px;align-items:center}

@@ -82,7 +82,8 @@ with sync_playwright() as p:
     Cc.close()
     # 4. Settings › Your devices on B: sign out A
     pg = Bc.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-    pg.goto(B + '/#settings'); pg.wait_for_selector('#main .nav-devs', timeout=15000); pg.wait_for_timeout(600)
+    pg.goto(B + '/#settings'); pg.wait_for_selector('#main .nav-devs', state='attached', timeout=15000)
+    pg.evaluate("(() => { const d = document.querySelector('#main .nav-devs').closest('details.nav-sgd'); if (d) d.open = true })()"); pg.wait_for_timeout(600)   # (30 Oct., W3) « Account » folded on arrival
     txt = pg.evaluate("document.querySelector('#main .nav-devs').textContent")
     ok(x['h'] in txt and x['me'] in txt and pg.locator('#main [data-dev-out]').count() >= 1, f'{tag} 4 « {x["h"]} »: this browser marked, the other one can be signed out')
     pg.locator('#main [data-dev-out]').first.click(); pg.wait_for_timeout(600)
