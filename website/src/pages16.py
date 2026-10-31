@@ -168,6 +168,31 @@ def sec_pricing(lang, t):
                + f'<div class="links" style="justify-content:center">{link(lang, t, "pricing.html", L3("Compare plans","Comparer les forfaits","Comparar planes"))}{link(lang, t, "best-trading-journal-for-prop-firms.html", L3("Compare Sweep","Comparer Sweep","Comparar Sweep"))}</div>',
                "n", "pricing")
 
+# ---------------------------------------------------------------- 3 years of journal costs (brief « avance concurrentielle », step 3)
+# Every price comes from data/competitors.json (each company's pricing page, with its check date). Off until TraderSync shows
+# its regular annual price again: on 31 Oct. its page only showed a limited-time offer (Pro $179.64 instead of $359.40 crossed out).
+RENT_LIVE = False
+RENT_ROWS = [("TradeZella", "Essential", "TradeZella Essential"), ("TradeZella", "Pro", "TradeZella Pro"), ("TraderSync", "Pro", "TraderSync Pro"), ("Edgewonk", "Edgewonk", "Edgewonk")]
+
+def sec_rent(lang, t):
+    """« Stop paying rent on your journal. »: what each journal costs after 1, 2 and 3 years, billed yearly."""
+    if not RENT_LIVE: return ""
+    from pages17 import COMP, _day, _usd
+    year = lambda name, plan: next(p["year"] for p in COMP[name]["plans"] if p["name"] == plan)
+    rows = [(lbl, year(n, p), "") for n, p, lbl in RENT_ROWS]
+    rows += [("Sweep Free", 0, "sw"), (t(L3("Sweep Pro (annual)", "Sweep Pro (annuel)", "Sweep Pro (anual)")), PRO_YEAR, "sw")]
+    when = _day(min(COMP[n]["checked"] for n, _, _ in RENT_ROWS), lang)
+    yl = t(L3("Year", "Année", "Año"))
+    body = "".join(f'<tr{f" class={c}" if c else ""}><th scope="row">{l}</th>' + "".join(f'<td>{_usd(round(v * k, 2), lang)}</td>' for k in (1, 2, 3)) + "</tr>" for l, v, c in rows)
+    table = (f'<div class="cmp-wrap"><table class="cmp rent"><thead><tr><th scope="col"><span class="sr">{t(L3("Journal", "Journal", "Diario"))}</span></th>'
+             + "".join(f'<th scope="col">{yl} {k}</th>' for k in (1, 2, 3)) + f'</tr></thead><tbody>{body}</tbody></table></div>')
+    note = t(L3(f"Prices in USD, taken from each company’s pricing page on {when}, billed yearly, without limited-time offers. They can change. Names are trademarks of their owners; Sweep isn’t affiliated with any of them.",
+                f"Prix en USD, relevés sur la page de tarifs de chaque entreprise le {when}, en facturation annuelle, sans offre à durée limitée. Ils peuvent changer. Les noms sont des marques de leurs propriétaires ; Sweep n’est affilié à aucune d’elles.",
+                f"Precios en USD, tomados de la página de precios de cada empresa el {when}, con facturación anual, sin ofertas por tiempo limitado. Pueden cambiar. Los nombres son marcas de sus propietarios; Sweep no está afiliado a ninguna de ellas."))
+    return sec(head(t, None, L3("Stop paying rent on your journal.", "Arrête de payer un loyer pour ton journal.", "Deja de pagar alquiler por tu diario."),
+                    L3("What each journal costs over 3 years, billed yearly.", "Ce que coûte chaque journal sur 3 ans, en facturation annuelle.", "Lo que cuesta cada diario en 3 años, con facturación anual."))
+               + table + f'<p class="fine rent-note">{note}</p>', "n", "rent")
+
 FAQ5 = [
  (L3("Is Sweep really free?","Sweep est-il vraiment gratuit ?","¿Sweep es realmente gratis?"),
   L3("Yes. The Free plan has no time limit and needs no card. Every new account also gets 60 days of Pro, so you can try everything before deciding.","Oui. Le forfait Free n’a pas de limite de temps et ne demande aucune carte. Chaque nouveau compte reçoit aussi 60 jours de Pro pour tout essayer avant de décider.","Sí. El plan Free no tiene límite de tiempo ni pide tarjeta. Cada cuenta nueva recibe además 60 días de Pro para probarlo todo antes de decidir.")),

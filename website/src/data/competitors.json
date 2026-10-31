@@ -1,6 +1,6 @@
 {
  "TradeZella": {
-  "checked": "2026-10-27",
+  "checked": "2026-10-31",
   "sources": ["https://www.tradezella.com/pricing", "https://www.tradezella.com/prop-firm-sync"],
   "free_plan": null,
   "trial": null,
@@ -32,7 +32,7 @@
   ]
  },
  "Edgewonk": {
-  "checked": "2026-10-27",
+  "checked": "2026-10-31",
   "sources": ["https://edgewonk.com/pricing", "https://edgewonk.com/"],
   "free_plan": null,
   "trial": null,

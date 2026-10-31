@@ -1007,6 +1007,17 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 @media (min-width:744px){.trust.five{grid-template-columns:repeat(2,minmax(0,1fr))}.trust.five>:last-child{grid-column:1/-1}}
 @media (min-width:1068px){.trust.five{grid-template-columns:repeat(5,minmax(0,1fr))}.trust.five>:last-child{grid-column:auto}}
 .trust.five .tile{flex-direction:column}
+/* ---- [pages: index.html] 3 years of journal costs: Sweep's rows in glass, figures in blue; the others secondary */
+table.rent tbody th{width:40%}
+table.rent td{font-family:var(--font);color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:0}
+table.rent tbody th{color:var(--muted)}
+table.rent tr.sw>*{background:var(--glass);border-bottom-color:transparent}
+table.rent tr.sw th{color:var(--text);font-weight:600}
+table.rent tr.sw td{color:var(--blue-text);font-weight:600}
+table.rent tr.sw>:first-child{border-radius:var(--r2) 0 0 var(--r2)}table.rent tr.sw>:last-child{border-radius:0 var(--r2) var(--r2) 0}
+table.rent tr.sw+tr.sw>*{box-shadow:none}
+.rent-note{margin-top:16px}
+@media (max-width:743px){table.rent th,table.rent td{padding:12px 8px;font-size:13.5px}table.rent tbody th{width:34%}}
 /* ---- [pages: index.html] plans in the home band */
 .plans-mini{display:grid;gap:12px;max-width:880px;margin:0 auto}
 @media (min-width:744px){.plans-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
