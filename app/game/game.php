@@ -852,7 +852,7 @@ function game_route(string $route, string $method, string $uid): void
     if ($route === 'api/game/history' && $method === 'GET') {
         $from = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['from'] ?? '')) ? $_GET['from'] : GameEngine::addDays(GameEngine::today(), -40);
         $to = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['to'] ?? '')) ? $_GET['to'] : GameEngine::today();
-        $st = db()->prepare('SELECT trading_day, ring_plan, ring_execution, ring_review, is_swept, is_valid_streak, day_off, freeze_used FROM game_days WHERE user_id = ? AND trading_day BETWEEN ? AND ? ORDER BY trading_day');
+        $st = db()->prepare('SELECT trading_day, ring_plan, ring_execution, ring_review, is_swept, is_valid_streak, day_off, freeze_used, trades_count, compliant_count, plan_valid FROM game_days WHERE user_id = ? AND trading_day BETWEEN ? AND ? ORDER BY trading_day');
         $st->execute([$uid, $from, $to]);
         $hol = db()->prepare('SELECT day FROM market_holidays WHERE day BETWEEN ? AND ?'); $hol->execute([$from, $to]);
         json_out(200, ['days' => $st->fetchAll(PDO::FETCH_ASSOC), 'holidays' => array_column($hol->fetchAll(PDO::FETCH_ASSOC), 'day'), 'started_on' => $p['started_on'], 'today' => GameEngine::today()]);

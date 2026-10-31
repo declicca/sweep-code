@@ -47,7 +47,7 @@ with sync_playwright() as p:
     if not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')   # (the day's max loss, as the plan always had)
     pg.click('#gSheet [data-pm="next"]'); pg.wait_for_timeout(300)
     t = pg.locator('#gSheet .pm-sheet').inner_text().replace('\xa0', ' ')
-    ok(pg.locator('#gSheet [data-pm-screen=sheet]').count() == 1 and 'Biais · Haussier' in t and 'Niveaux clés · PDH 5850 · London high 5820' in t and 'Scénario attendu · Cassure du London high' in t and 'Scénario alternatif · Retour sous 5800' in t, f'2 {w}: the sheet: bias, key levels, the two scenarios ({t[:120]!r})')
+    ok(pg.locator('#gSheet [data-pm-screen=sheet]').count() == 1 and 'Biais · Long' in t and 'Niveaux clés · PDH 5850 · London high 5820' in t and 'Scénario attendu · Cassure du London high' in t and 'Scénario alternatif · Retour sous 5800' in t, f'2 {w}: the sheet: bias, key levels, the two scenarios ({t[:120]!r})')
     pg.click('#gSheet [data-pm="save"]'); pg.wait_for_timeout(900)
     f = pg.evaluate("(d) => SweepFiche.get(d)", day); pre = pg.evaluate("(d) => (getDoc('journals', d) || {}).pre || {}", day)
     ok(f and f['mode'] == 'express' and len(f['scenarios']) == 0 and pg.evaluate("(d) => SweepFiche.locked(SweepFiche.get(d))", day) and pre.get('bias') == 'bullish' and pre.get('levels') == 'PDH 5850 · London high 5820' and pre.get('scenario', '').startswith('Cassure') and pre.get('alt', '').startswith('Retour'),

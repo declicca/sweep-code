@@ -647,6 +647,7 @@
       trades.forEach((x) => { x.session_date = true; });
       toast(dt('adding'), { ms: 60000 });
       try {
+        if (typeof demoDdFit === 'function') demoDdFit(accounts, trades);   // (31 Oct., C4) one sample account past its drawdown, not four
         await bulkPut('firms', firms); await bulkPut('accounts', accounts); await bulkPut('trades', trades); await bulkPut('journals', journals);
         await bulkPut('payouts', payouts); await bulkPut('expenses', expenses);
         toast(dt('added', { n: trades.length }));

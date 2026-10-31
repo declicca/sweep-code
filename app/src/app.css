@@ -848,6 +848,12 @@ main.anim *,main.anim>*{animation:none!important}
 .side.open .handle{opacity:1}
 .side .handle svg{width:14px;height:14px}
 }
+@media (min-width:1100px){
+.app{grid-template-columns:216px minmax(0,1fr)}
+.side,.side.open{width:216px;cursor:default;box-shadow:none;transition:none}
+.side .handle{display:none}
+.side .nav .grp{height:auto;background:0 0;font-size:12px;padding:10px 12px 6px;margin:0}
+}
 .info{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--line2);font:600 10px"Geist",sans-serif;color:var(--muted);margin-left:4px;vertical-align:1px;cursor:help;border-bottom:1px solid var(--line2)}
 .ikpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .ik{padding:18px 20px;display:flex;flex-direction:column;gap:6px}
@@ -1334,7 +1340,7 @@ details.menu>summary::-webkit-details-marker{display:none}
 .s2sec h3{font-size:13px;color:var(--text2);margin:0}
 .cal .cev{gap:1px;margin-top:2px;font-size:11px;color:var(--muted);line-height:1.25;overflow:hidden}
 .cal .cev>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cal .cev i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--nh,var(--gold));margin-right:4px;vertical-align:1px}
+.cal .cev i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted);margin-right:4px;vertical-align:1px}
 @media (max-width:600px){
 .cal .cev>span{font-size:0}
 .cal .cev>span i{margin:0}

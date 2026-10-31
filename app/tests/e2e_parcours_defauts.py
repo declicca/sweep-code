@@ -56,11 +56,9 @@ with sync_playwright() as p:
     h2 = pg.locator('aside.nav-dwhy.open h2').inner_text().strip(); tip = pg.locator('aside.nav-dwhy.open p.muted').count()
     ok(h2 == x['ckT'] and tip == 0, f'{tag} D7a its window explains this trade\'s checklist (« {h2} »), without the tips to raise the 30-day score')
     pg.locator('aside.nav-dwhy.open [data-dwhy-ok]').click(); pg.wait_for_timeout(300)
-    # the routine's discipline chip keeps the 30-day score and its text
-    pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_selector('#main .nav-rt [data-disc-why]', timeout=8000); pg.wait_for_timeout(600)
-    pg.locator('#main .nav-rt [data-disc-why]').first.click(); pg.wait_for_selector('aside.nav-dwhy.open', timeout=4000)
-    ok(x['discT'] in pg.locator('aside.nav-dwhy.open').inner_text(), f'{tag} D7a the routine\'s discipline chip: « {x["discT"]} », unchanged')
-    pg.locator('aside.nav-dwhy.open [data-dwhy-ok]').click()
+    # (31 Oct., C5) the routine has no discipline chip any more: one line « Level … · … › » under its title
+    pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_selector('#main .nav-rt .nav-rt-sum', timeout=8000); pg.wait_for_timeout(600)
+    ok(pg.locator('#main .nav-rt [data-disc-why]').count() == 0, f'{tag} D7a the routine: no discipline chip, its one line instead (31 Oct., C5)')
     ok(pg.evaluate(WIDE) <= 0, f'{tag} nothing wider than the window')
     ok(not errs, f'{tag} no page error ({errs[:2]})')
     ctx.close()

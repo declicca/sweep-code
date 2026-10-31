@@ -19,8 +19,8 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'no': 'Pas de capture ? Entre ton P&L', 'sub': 'le P&L de ta plateforme', 'saved': 'Trade enregistré'},
-     'en': {'no': 'No screenshot? Enter your P&L', 'sub': 'your platform’s P&L', 'saved': 'Trade saved'}}
+X = {'fr': {'no': 'Pas de capture ? Entre ton P&L', 'noP': 'Sans capture', 'sub': 'le P&L de ta plateforme', 'saved': 'Trade enregistré'},
+     'en': {'no': 'No screenshot? Enter your P&L', 'noP': 'Without a screenshot', 'sub': 'your platform’s P&L', 'saved': 'Trade saved'}}
 SCREEN = "(document.querySelector('#gSheet.g-pm [data-pm-screen]') || {dataset: {}}).dataset.pmScreen || ''"
 WIDE = "document.documentElement.scrollWidth - innerWidth"
 NEXT = "(d) => { const n = new Date(d + 'T12:00:00'); do n.setDate(n.getDate() + 1); while (n.getDay() === 0 || n.getDay() === 6); return n.toISOString().slice(0, 10) }"
@@ -44,13 +44,14 @@ with sync_playwright() as p:
     taps = 0
     act('[data-act=add-trade]:visible'); taps += 1; pg.wait_for_selector('.nav-am.open [data-am=no-shot]', timeout=8000); pg.wait_for_timeout(400)
     ln = pg.locator('.nav-am.open [data-am=no-shot]')
-    ok(ln.is_visible() and x['no'] in ln.inner_text() and pg.locator('.nav-am.open [data-am-f=net]').count() == 0, f'{tag} 1 under the drop zone: « {x["no"]} », no field yet')
+    nol = x['noP'] if phone else x['no']   # (31 Oct., C1) « Sans capture › » on a phone
+    ok(ln.is_visible() and nol in ln.inner_text() and pg.locator('.nav-am.open [data-am-f=net]').count() == 0, f'{tag} 1 under the drop zone: « {nol} », no field yet')
     box = ln.bounding_box(); ok(box and box['height'] >= 44, f'{tag} 1 the line is a 44 px target ({box and box["height"]})')
     act('.nav-am.open [data-am=no-shot]'); taps += 1; pg.wait_for_timeout(300)
     foc = pg.evaluate("!!(document.activeElement && document.activeElement.dataset && document.activeElement.dataset.amF === 'net')")
     sub = pg.locator('.nav-am.open .nav-am-head .muted').first.inner_text()
     ok(foc and pg.locator('.nav-am.open [data-am-f=net]').is_visible() and pg.locator('.nav-am.open [data-am-seg=dir]').count() == 2, f'{tag} 1 one tap: the net P&L focused, Long / Short there')
-    ok(sub == x['sub'] and pg.locator('.nav-am.open label.nav-am-drop').count() == 1 and not pg.locator('.nav-am.open [data-am-f=entry]').is_visible(), f'{tag} 1 « {sub} », the drop zone kept, no price asked')
+    ok(sub == x['sub'] and pg.locator('.nav-am.open label.nav-am-drop').count() == (0 if phone else 1) and not pg.locator('.nav-am.open [data-am-f=entry]').is_visible(), f'{tag} 1 « {sub} », the drop zone kept on a computer only (31 Oct., C1), no price asked')
     # 2. saved
     pg.evaluate("window.__toasts = []; new MutationObserver(() => { const t = document.getElementById('toast'); if (t && t.textContent && !window.__toasts.includes(t.textContent)) window.__toasts.push(t.textContent) }).observe(document.getElementById('toast'), { childList: true, characterData: true, subtree: true })")
     pg.keyboard.type('250')

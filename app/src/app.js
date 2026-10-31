@@ -1126,7 +1126,7 @@ const fpx = e => e == null || e === "" ? "—" : Number(e).toFixed(2), isPhone =
 
 function tradeRows(e) {
   return e.map(t => {
-    const a = tNet(t), n = [ tradeWhen(t), location.hash === "#account/" + t.account_id ? "" : acctLabel(t.account_id) ].filter(Boolean).map(esc).join(" · ");   // (on its own account's page, not its name again: audit of 18 Oct.)
+    const a = tNet(t), n = [ fdate(t.date), String(t.entry_time || "").slice(0, 5), t.setup, location.hash === "#account/" + t.account_id ? "" : acctLabel(t.account_id) ].filter(Boolean).map(esc).join(" · ");   // (31 Oct., A4) the same line everywhere: the clock time, then the setup   // (on its own account's page, not its name again: audit of 18 Oct.)
     if (t.untracked) return `<a class="trow trow-ut" href="#trade/${t.id}"><span class="trow-dir">·</span><span class="trow-main"><b>${esc(utName())}</b><small>${n}</small></span><span class="trow-pnl ${cls(a)}">${money(a)}</span><span class="trow-go" aria-hidden="true">›</span></a>`;   // a platform-balance gap (brief « pertes oubliées », step 2)
     return `<a class="trow" href="#trade/${t.id}"><span class="trow-dir ${t.direction}">${t.direction === "long" ? "L" : "S"}</span><span class="trow-main"><b>${esc(t.instrument || "NQ")} ${t.direction === "long" ? "Long" : "Short"} · ${t.contracts || 0}</b><small>${n}</small></span><span class="trow-pnl ${cls(a)}">${money(a)}</span><span class="trow-go" aria-hidden="true">›</span></a>`;
   }).join("");
@@ -1718,7 +1718,7 @@ function vJournal(e) {
     })}</small><b>${b.getDate()}</b><i class="${v ? cls(v.net) : "none"}"></i></a>`;
   }).join("")}<label class="jpick" aria-label="Go to date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><input type="date" data-act-change="goto-journal" value="${a}"></label></div>\n    <div>\n      <div class="row" style="margin-bottom:14px"><h2 style="font-size:15px">${fdateL(a)}</h2><span class="help" style="margin-left:auto">Saves as you type</span>${aiBtn("ai-day", "Debrief my day", `data-v="${a}"`)}${l ? shareBtn("day", a, "Share") : ""}</div>\n      <div class="statline"><div><span>Daily P&amp;L</span><span class="${cls(p.net)}">${p.n ? money(p.net) : "—"}</span></div><div><span>Trades</span><span>${p.n}</span></div><div><span>Win rate</span><span>${pct(p.wr)}</span></div><div><span>Discipline</span><span class="dc">${dpct(p.disc)}</span></div>${r.max_loss && p.net < 0 && -p.net > parseMoney(r.max_loss) ? '<div><span>Daily loss limit</span><span class="neg">Exceeded</span></div>' : ""}${r.max_trades && p.n > Number(r.max_trades) ? `<div><span>Max trades</span><span class="neg">Exceeded (${p.n}/${esc(r.max_trades)})</span></div>` : ""}</div>\n      <section style="margin-bottom:28px"><div class="sec-h"><h2>Trades</h2><button class="link" data-act="add-trade" data-date="${a}">Add trade for this day</button></div><div class="surface">${l ? tradeTable(l.trades, {
     compact: !0
-  }) : '<div class="empty">No trades on this day.</div>'}</div></section>\n      <div class="cols even">\n        <section><div class="sec-h"><h2>Pre-market</h2></div><div class="surface pad">\n          ${h("Market bias", segFor("journals", a, "pre.bias", [ [ "bullish", "Bullish" ], [ "bearish", "Bearish" ], [ "neutral", "Neutral" ], [ "no_trade", {
+  }) : '<div class="empty">No trades on this day.</div>'}</div></section>\n      <div class="cols even">\n        <section><div class="sec-h"><h2>Pre-market</h2></div><div class="surface pad">\n          ${h("Market bias", segFor("journals", a, "pre.bias", [ [ "bullish", "Long" ], [ "bearish", "Short" ], [ "neutral", "Neutral" ], [ "no_trade", {
     fr: "Pas de trade",
     es: "Sin operar"
   }[LANG] || "No trade" ] ], r.bias))}${typeof journalSetupsHtml == "function" ? h({
@@ -1798,8 +1798,11 @@ function vCalendar(e) {
   })}\n  <div class="row" style="margin-bottom:14px"><a class="btn sm" href="#calendar/${s}" aria-label="Previous month">‹</a><h2 style="font-size:15px;min-width:150px;text-align:center">${n.toLocaleDateString(LOC(), {
     month: "long",
     year: "numeric"
-  })}</h2><a class="btn sm" href="#calendar/${i}" aria-label="Next month">›</a>${t !== m.slice(0, 7) ? '<a class="link" href="#calendar">This month</a>' : ""}</div>\n  <div class="statline">${C("Monthly P&amp;L", money(r.net), cls(r.net))}${C("Trading days", c.size)}${C("Winning days", r.winDays)}${C("Losing days", r.lossDays)}${C("Day win rate", c.size ? pct(r.winDays / c.size) : "—")}${C("Avg daily P&amp;L", c.size ? money(r.net / c.size) : "—", c.size ? cls(r.net) : "")}${C("Avg discipline", p.length ? Math.round(p.reduce((g, P) => g + P.disc, 0) / p.length) + "%" : "—", "dc")}</div>\n  <div class="surface cal-wrap ${U.calSw ? "sw-" + U.calSw : ""}" data-prev="${s}" data-next="${i}" style="overflow:hidden" ${billOld(a, addDays(ymd(new Date(n.getFullYear(), n.getMonth() + 1, 1)), -1)) ? 'data-lock="analytics_history" data-force="1"' : ""}><div class="cal d${L}">${x}</div></div>`;
+  })}</h2><a class="btn sm" href="#calendar/${i}" aria-label="Next month">›</a>${t !== m.slice(0, 7) ? '<a class="link" href="#calendar">This month</a>' : ""}</div>\n  <div class="statline">${C("Monthly P&amp;L", money(r.net), cls(r.net))}${C("Trading days", c.size)}${C("Winning days", r.winDays)}${C("Losing days", r.lossDays)}${C("Day win rate", c.size ? pct(r.winDays / c.size) : "—")}${C("Avg daily P&amp;L", c.size ? money(r.net / c.size) : "—", c.size ? cls(r.net) : "")}${C("Avg discipline", p.length ? Math.round(p.reduce((g, P) => g + P.disc, 0) / p.length) + "%" : "—", "dc")}</div>\n  <div class="surface cal-wrap ${U.calSw ? "sw-" + U.calSw : ""}" data-prev="${s}" data-next="${i}" style="overflow:hidden" ${billOld(a, addDays(ymd(new Date(n.getFullYear(), n.getMonth() + 1, 1)), -1)) ? 'data-lock="analytics_history" data-force="1"' : ""}><div class="cal d${L}">${x}</div></div>${x.includes('class="cev"') ? econLegend() : ""}`;
 }
+
+/* (31 Oct., B1) the economic releases' dots are grey (gold means a loss), and say what they are under the calendar */
+const econLegend = () => `<p class="cal-legend" data-noi18n><i></i>${{ fr: "Annonce économique forte", es: "Anuncio económico importante" }[LANG] || "Major economic release"}</p>`;
 
 function accountForm() {
   const e = S.firms.slice().sort((t, a) => t.name.localeCompare(a.name));
@@ -1854,7 +1857,7 @@ function vAccount(e) {
     kind: "money"
   })}</label>\n    <label class="f"><span>Created</span>${bindIn("accounts", e, "created_on", t.created_on, {
     type: "date"
-  })}</label>\n    <label class="f full"><span>Notes</span>${bindTA("accounts", e, "notes", t.notes)}</label></div></div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Trades</h2></div><div class="surface">${a.length ? tradeTable(a.slice().reverse().slice(0, 50)) : '<div class="empty">No trades yet. <button class="link" data-act="add-trade">Add your first trade</button></div>'}</div></section>\n  ${i.length ? `<section class="sec"><div class="sec-h"><h2>Payouts</h2></div><div class="surface">${payoutTable(i)}</div></section>` : ""}`;
+  })}</label>\n    <label class="f full"><span>Notes</span>${bindTA("accounts", e, "notes", t.notes)}</label></div></div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Trades</h2></div><div class="surface">${a.length ? tradeTable(a.slice().reverse().slice(0, 5)) + (a.length > 5 ? `<div class="more-row"><button class="link acct-all-tr" data-act="acct-trades" data-id="${e}" data-noi18n>${({ fr: "Voir ses {n} trades ›", es: "Ver sus {n} operaciones ›" }[LANG] || "See its {n} trades ›").replace("{n}", a.length)}</button></div>` : "") : '<div class="empty">No trades yet. <button class="link" data-act="add-trade">Add your first trade</button></div>'}</div></section>\n  ${i.length ? `<section class="sec"><div class="sec-h"><h2>Payouts</h2></div><div class="surface">${payoutTable(i)}</div></section>` : ""}`;
 }
 
 function payoutTable(e) {
@@ -3249,10 +3252,16 @@ document.addEventListener("input", e => {
 
 const SKELETON = `<div class="skel" style="height:22px;width:260px;margin-bottom:26px"></div><div class="skel" style="height:170px;border-radius:18px"></div><div class="acards" style="margin-top:40px">${'<div class="skel" style="height:220px;border-radius:18px"></div>'.repeat(3)}</div>`, desk = () => innerWidth > 860;
 
+/* (31 Oct., A2) from 1100 px the rail keeps its names beside the icons (like an iPad sidebar); below, the icons alone */
+const railWide = () => innerWidth >= 1100;
+
 function sideOpen(e) {
   const t = $(".side");
-  t && t.classList.toggle("open", e && desk());
+  t && t.classList.toggle("open", e && desk() || railWide());
 }
+
+addEventListener("resize", () => sideOpen(!1));
+document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => sideOpen(!1)) : sideOpen(!1);
 
 document.addEventListener("click", e => {
   const t = $(".side");
@@ -3277,6 +3286,7 @@ document.addEventListener("click", e => {
 }, !0);
 
 function labelRail() {
+  railWide() !== $(".side")?.classList.contains("open") && sideOpen(!1);
   $$(".side a[data-v]").forEach(e => {
     e.dataset.label || (e.dataset.label = e.textContent.trim());
   });
@@ -9666,6 +9676,19 @@ async function importData(e) {
 
 const ACC_W = () => ({ fr: "Compte", es: "Cuenta" })[LANG] || "Account";   // the sample accounts' names in the trader's language (brief 02 part 7)
 
+/* (31 Oct., C4) the sample shows one account past its drawdown (demo-a4), the others within their rules: each other account's
+   drawdown covers its own worst fall from a closing high (in $500 steps, $500 to spare), never less than the sample's $2,000 */
+function demoDdFit(accounts, trades) {
+  for (const a of accounts) {
+    if (a.id === "demo-a4" || !a.rules || !a.rules.dd_c) continue;
+    const days = new Map();
+    trades.filter(t => t.account_id === a.id).forEach(t => days.set(t.date, (days.get(t.date) || 0) + tNet(t)));
+    let bal = a.starting_balance_c || 0, peak = bal, worst = 0;
+    [ ...days.keys() ].sort().forEach(d => { const lo = bal + Math.min(0, ...trades.filter(t => t.account_id === a.id && t.date === d).map(t => tNet(t))); bal += days.get(d); worst = Math.max(worst, peak - Math.min(bal, lo)); peak = Math.max(peak, bal); });
+    a.rules.dd_c = Math.max(a.rules.dd_c, Math.ceil((worst + 5e4) / 5e4) * 5e4);
+  }
+}
+
 async function loadDemo() {
   toast("Adding sample data…", {
     ms: 6e4
@@ -9819,7 +9842,7 @@ async function loadDemo() {
     h.session_date = !0;
   });
   try {
-    await bulkPut("firms", s), await bulkPut("accounts", i), await bulkPut("trades", r), 
+    demoDdFit(i, r), await bulkPut("firms", s), await bulkPut("accounts", i), await bulkPut("trades", r), 
     await bulkPut("journals", c), await bulkPut("payouts", p), await bulkPut("expenses", u), 
     toast(`Added ${r.length} sample trades`);
   } catch (h) {
@@ -10087,6 +10110,10 @@ document.addEventListener("click", e => {
 
    case "filter-account":
     F.account = s.id, F.firm = "all", saveF(), location.hash = "#analytics";
+    break;
+
+   case "acct-trades":   // (31 Oct., A4) the account's page shows its 5 last trades; the rest in Trades, filtered on it
+    F.account = s.id, F.firm = "all", saveF(), location.hash = "#trades";
     break;
 
    case "ui-disc-none":

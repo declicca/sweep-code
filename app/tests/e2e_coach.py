@@ -221,7 +221,7 @@ def live(p, lang, phone):   # brief 03 step 3: during the session
   pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
   pg.goto(B + '/'); pg.wait_for_selector('form[data-onb]', timeout=20000); pg.wait_for_timeout(600); pg.evaluate(GUIDED)
   pg.evaluate(SEED); pg.wait_for_selector('#main .nav-dash', timeout=10000); pg.wait_for_timeout(700)
-  early = pg.evaluate("(() => { const [h, m] = nowET().slice(11, 16).split(':').map(Number); return h * 60 + m < 70 })()")
+  early = pg.evaluate("(() => { const [h, m] = nowET().slice(11, 16).split(':').map(Number); return h * 60 + m < 70 || offHoursET() })()")   # (31 Oct., C3) the wait only in the session
   if early: print(f'      {tag}: just after midnight New York, the « minutes since the last loss » part is left out')
   # his history: 5 past days with a re-entry 3 min after a loss (losing), the rest winning
   pg.evaluate("""() => { const d0 = new Date(todayStr() + 'T12:00:00'); for (let k = 20; k < 25; k++) { const d = new Date(d0); d.setDate(d0.getDate() - k);

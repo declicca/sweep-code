@@ -76,7 +76,7 @@ with sync_playwright() as p:
     for _ in range(12):
       if len(pg.evaluate(FIG)) == 3: break
       pg.wait_for_timeout(250)
-    ok(sorted(pg.evaluate(FIG)) == ['nav-rt-disc', 'nav-rt-lv', 'nav-rt-streak'], f'{tag} 3 with the first trade: discipline, streak and level ({pg.evaluate(FIG)})')
+    ok(pg.evaluate(FIG) == [] and pg.locator('#main .nav-rt .nav-rt-sum').count() == 1, f'{tag} 3 with the first trade: the line « Level … · … › » (31 Oct., C5: no pills) ({pg.evaluate(FIG)})')
     ok(pg.evaluate(BLUE) == 1, f'{tag} 3 one blue button in the routine ({pg.evaluate(BLUE)})')
     # 4. the max loss reached
     pg.evaluate("(d) => put('trades', { id: 'nw-t2', account_id: 'nw-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -40000, pnl_manual: true, date: d, entry_time: '10:45', exit_time: '10:50' })", day)

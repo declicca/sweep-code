@@ -3,7 +3,7 @@ Sweep — the small consistencies of the audit of 16 Oct. (R15-R18, R21, R22), P
   python3 tests/e2e_small_fixes.py http://127.0.0.1:8095
 A trader of its own. Phone 390 (fr) and computer 1300 (en):
  R15  the full manual form: no « Daily risk left » box (the coach's line says what is left), a warning only past the limit;
- R16  the screenshot sheet: « Touche pour choisir une capture » on a phone, « Paste or drop your screenshot (Ctrl+V) » on a computer;
+ R16  the screenshot sheet: « Choisir une capture » on a phone (31 Oct., C1), « Paste or drop your screenshot (Ctrl+V) » on a computer;
  R17  « Your real net » done since January, nothing yet this month: My money on Today shows the real net since January, not $0;
  R18  an account added « already running » (an adjustment), no trade yet: the Accounts card is on Today;
  R21  « Not trading today » chosen in the plan: a day off (the routine says so, nothing else to do);
@@ -23,7 +23,7 @@ def shot(pg):   # « New trade » shows its fields once a screenshot is there (1
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'drop': 'Touche pour choisir une capture', 'since': 'Net réel depuis janvier'}, 'en': {'drop': 'Paste or drop your screenshot (Ctrl+V)', 'since': 'Net real money · since January'}}
+X = {'fr': {'drop': 'Choisir une capture', 'since': 'Net réel depuis janvier'}, 'en': {'drop': 'Paste or drop your screenshot (Ctrl+V)', 'since': 'Net real money · since January'}}
 GAMEDAY = "(SweepGame.state() && SweepGame.state().today && SweepGame.state().today.day) || todayStr()"
 with sync_playwright() as p:
   br = p.chromium.launch(); allerr = []

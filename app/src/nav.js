@@ -7,6 +7,8 @@ try { if ((window.matchMedia && matchMedia('(display-mode: standalone)').matches
 /* never a zoom (20 Oct., Mateo: a double tap by mistake zoomed): Safari ignores user-scalable=no, its pinch is stopped here; ctrl/⌘ + wheel or trackpad pinch and ctrl/⌘ + − / = / 0 on a computer */
 (() => { const no = (e) => e.preventDefault(); ['gesturestart', 'gesturechange', 'gestureend'].forEach((t) => document.addEventListener(t, no, { passive: false })); addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false }); addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && !e.altKey && ['+', '=', '-', '_', '0'].includes(e.key)) e.preventDefault(); }); document.addEventListener('touchmove', (e) => { if (e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false }); })();
 window.SW_MQ6 = window.SW_MQ6 || matchMedia('(max-width: 600px)');
+/* (31 Oct., C4) only the sample data so far (no account or trade of the trader's own) */
+window.sampleOnly = () => typeof S !== 'undefined' && (S.accounts || []).some((a) => a.demo) && !(S.accounts || []).some((a) => !a.demo) && !(S.trades || []).some((x) => !x.demo);
 /* Performance: every DOM watcher of this file is batched to one call per frame (they used to run on every
  * single DOM change: 13 watchers × hundreds of changes when a page renders). The callback still runs before the
  * next paint, so nothing flashes. */
@@ -389,8 +391,9 @@ window.SweepMO = window.SweepMO || class {
     if (!list.length) return `<p class="nav-empty">${tab === 'week' ? x.none_w : x.none_d}</p>`;
     const max = window.SW_MQ.matches ? 5 : 8, groups = byDecision(list);
     const COPY = { en: 'copy traded on {n} accounts', fr: 'copié sur {n} comptes', es: 'copiado en {n} cuentas' };
+    const toLog = new Set();   // (31 Oct., B5) « Checklist to do » once a day: on its last trade without one (newest first here)
     const rows = groups.slice(0, max).map((g) => {
-      const t = g.t, net = g.net, unj = !t.notes && !(t.discipline && Object.keys(t.discipline).length);
+      const t = g.t, net = g.net, unj = !t.notes && !(t.discipline && Object.keys(t.discipline).length) && !toLog.has(t.date) && !!toLog.add(t.date);
       // (29 Oct., tour T5) the same line for every trade, an evening one too: the clock time, then the setup (the trade's page says
       // « session of Oct 8 · entered on the 7th at 23:36 »; here it ran past the row)
       const when = tab === 'week' ? `${typeof fdate === 'function' ? fdate(t.date, { weekday: 'short' }) : t.date} · ${(t.entry_time || '').slice(0, 5)}` : (t.entry_time || '').slice(0, 5);
@@ -472,7 +475,7 @@ window.SweepMO = window.SweepMO || class {
   function feedCard(tab) {
     const x = KT[LANG] || KT.en;
     return `<section class="surface nav-kpi nav-card d-perf nav-feed" data-noi18n><div class="nav-kpi-h"><div class="seg nav-kseg" role="tablist"><button type="button" role="tab" aria-selected="${tab === 'day'}" data-kt="day" class="${tab === 'day' ? 'on' : ''}">${x.day}</button><button type="button" role="tab" aria-selected="${tab === 'week'}" data-kt="week" class="${tab === 'week' ? 'on' : ''}">${x.week}</button></div>${typeSeg()}<a class="nav-all" href="#calendar">${(FD[LANG] || FD.en).cal}</a></div>
-      <div class="nav-fstrip" role="list">${feedStrip()}</div>
+      ${((fs) => `<div class="nav-fstrip" role="list">${fs}</div>${fs.includes('nav-fd-e') && typeof econLegend === 'function' ? econLegend() : ''}`)(feedStrip())}
       <div class="nav-fdate">${feedDate()}</div>
       <div class="nav-kpi-b">${kpiHtml(tab)}</div><div class="nav-kpi-t">${tradesHtml(tab)}</div></section>`;   // (the releases: the « Now » line and News, SWEEP.md step 3)
   }
@@ -858,7 +861,7 @@ window.SweepMO = window.SweepMO || class {
       strip.push(`<a class="nav-sd ${net == null ? '' : net > 0 ? 'p' : net < 0 ? 'n' : 'z'} ${histDays[k] ? 'nav-sw' : ''} ${k === ymd(now) ? 'today' : ''} ${k < ymd(now) ? 'past' : ''}" href="#journal/${k}" data-day="${k}" title="${esc(tip)}"><small>${WD[wd]}</small><b>${d}</b><span>${net != null ? short(net) : evs.length ? '<i></i>' : '·'}</span></a>`);
     }
     const wk = LANG === 'en' ? ['M', 'T', 'W', 'T', 'F'] : LANG === 'es' ? ['L', 'M', 'X', 'J', 'V'] : ['L', 'M', 'M', 'J', 'V'];
-    return `<section class="surface nav-card d-cal" data-noi18n>${head(x.cal, '#calendar')}<div class="nav-strip" role="list">${strip.join('')}</div><div class="nav-cal"><div class="nav-cw">${wk.map((w) => `<span>${w}</span>`).join('')}</div><div class="nav-cg">${cells.join('')}</div></div></section>`;
+    return `<section class="surface nav-card d-cal" data-noi18n>${head(x.cal, '#calendar')}<div class="nav-strip" role="list">${strip.join('')}</div><div class="nav-cal"><div class="nav-cw">${wk.map((w) => `<span>${w}</span>`).join('')}</div><div class="nav-cg">${cells.join('')}</div></div>${typeof econLegend === 'function' && /nav-cd-e|<i><\/i><\/span><\/a>/.test(cells.join('') + strip.join('')) ? econLegend() : ''}</section>`;
   }
   // an existing section of the app becomes a card: whole header clickable, one « See all », short empty state
   function asCard(sec, cls, title, href, emptyMsg) {
@@ -1530,19 +1533,19 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { add: 'Add a trade', addDay: 'Add a trade on this day', usdExit: 'Or the result in $', usdExitPh: 'e.g. -350', usdRisk: 'Or risk in $', usdGain: 'Or target in $', usdNeed: 'Pick Buy / Sell and the entry price first.', unit: 'Enter as', px: 'Price', usd: '$ amount', rRisk: 'Stop loss ($)', rGain: 'Take profit ($)', sl: 'Stop loss (SL)', tp: 'Take profit (TP)', rRes: 'Result ($)', eq: '= {v}', multi: '+ Several entries or exits', recap: 'Recap', plan: 'Plan', exec: 'In your plan', review: 'Review', lesson: 'Lesson', none: '—', done: 'Done', todo: 'To do', pre: 'Pre-market', post: 'Post-market', fill: 'To fill in', open: 'Open', close: 'Close', bias: { bullish: 'Bullish', bearish: 'Bearish', neutral: 'Neutral', no_trade: 'No trading' }, followed: { yes: 'Plan followed', partly: 'Plan partly followed', no: 'Plan not followed' } },
-    fr: { add: 'Ajouter un trade', addDay: 'Ajouter un trade ce jour-là', usdExit: 'Ou le résultat en $', usdExitPh: 'ex. -350', usdRisk: 'Ou le risque en $', usdGain: 'Ou l’objectif en $', usdNeed: 'Choisis Achat / Vente et le prix d’entrée d’abord.', unit: 'Saisir en', px: 'Prix', usd: 'Montant $', rRisk: 'Stop loss ($)', rGain: 'Take profit ($)', sl: 'Stop loss (SL)', tp: 'Take profit (TP)', rRes: 'Résultat ($)', eq: '= {v}', multi: '+ Plusieurs entrées ou sorties', recap: 'Récap', plan: 'Plan', exec: 'Dans ton plan', review: 'Revue', lesson: 'Leçon', none: '—', done: 'Faite', todo: 'À faire', pre: 'Pré-marché', post: 'Post-marché', fill: 'À compléter', open: 'Ouvrir', close: 'Fermer', bias: { bullish: 'Haussier', bearish: 'Baissier', neutral: 'Neutre', no_trade: 'Pas de trading' }, followed: { yes: 'Plan suivi', partly: 'Plan suivi en partie', no: 'Plan non suivi' } },
-    es: { add: 'Añadir una operación', addDay: 'Añadir una operación ese día', usdExit: 'O el resultado en $', usdExitPh: 'ej. -350', usdRisk: 'O el riesgo en $', usdGain: 'O el objetivo en $', usdNeed: 'Elige Compra / Venta y el precio de entrada primero.', unit: 'Introducir en', px: 'Precio', usd: 'Importe $', rRisk: 'Stop loss ($)', rGain: 'Take profit ($)', sl: 'Stop loss (SL)', tp: 'Take profit (TP)', rRes: 'Resultado ($)', eq: '= {v}', multi: '+ Varias entradas o salidas', recap: 'Resumen', plan: 'Plan', exec: 'En tu plan', review: 'Revisión', lesson: 'Lección', none: '—', done: 'Hecha', todo: 'Pendiente', pre: 'Pre-mercado', post: 'Post-mercado', fill: 'Por completar', open: 'Abrir', close: 'Cerrar', bias: { bullish: 'Alcista', bearish: 'Bajista', neutral: 'Neutral', no_trade: 'No operar' }, followed: { yes: 'Plan seguido', partly: 'Plan seguido en parte', no: 'Plan no seguido' } } };
+    en: { add: 'Add a trade', addDay: 'Add a trade on this day', usdExit: 'Or the result in $', usdExitPh: 'e.g. -350', usdRisk: 'Or risk in $', usdGain: 'Or target in $', usdNeed: 'Pick Buy / Sell and the entry price first.', unit: 'Enter as', px: 'Price', usd: '$ amount', rRisk: 'Stop loss ($)', rGain: 'Take profit ($)', sl: 'Stop loss (SL)', tp: 'Take profit (TP)', rRes: 'Result ($)', eq: '= {v}', multi: '+ Several entries or exits', recap: 'Recap', plan: 'Plan', exec: 'In your plan', review: 'Review', lesson: 'Lesson', none: '—', done: 'Done', todo: 'To do', pre: 'Pre-market', post: 'Post-market', fill: 'To fill in', open: 'Open', close: 'Close', bias: { bullish: 'Long', bearish: 'Short', neutral: 'Neutral', no_trade: 'No trading' }, followed: { yes: 'Plan followed', partly: 'Plan partly followed', no: 'Plan not followed' } },
+    fr: { add: 'Ajouter un trade', addDay: 'Ajouter un trade ce jour-là', usdExit: 'Ou le résultat en $', usdExitPh: 'ex. -350', usdRisk: 'Ou le risque en $', usdGain: 'Ou l’objectif en $', usdNeed: 'Choisis Achat / Vente et le prix d’entrée d’abord.', unit: 'Saisir en', px: 'Prix', usd: 'Montant $', rRisk: 'Stop loss ($)', rGain: 'Take profit ($)', sl: 'Stop loss (SL)', tp: 'Take profit (TP)', rRes: 'Résultat ($)', eq: '= {v}', multi: '+ Plusieurs entrées ou sorties', recap: 'Récap', plan: 'Plan', exec: 'Dans ton plan', review: 'Revue', lesson: 'Leçon', none: '—', done: 'Faite', todo: 'À faire', pre: 'Pré-marché', post: 'Post-marché', fill: 'À compléter', open: 'Ouvrir', close: 'Fermer', bias: { bullish: 'Long', bearish: 'Short', neutral: 'Neutre', no_trade: 'Pas de trading' }, followed: { yes: 'Plan suivi', partly: 'Plan suivi en partie', no: 'Plan non suivi' } },
+    es: { add: 'Añadir una operación', addDay: 'Añadir una operación ese día', usdExit: 'O el resultado en $', usdExitPh: 'ej. -350', usdRisk: 'O el riesgo en $', usdGain: 'O el objetivo en $', usdNeed: 'Elige Compra / Venta y el precio de entrada primero.', unit: 'Introducir en', px: 'Precio', usd: 'Importe $', rRisk: 'Stop loss ($)', rGain: 'Take profit ($)', sl: 'Stop loss (SL)', tp: 'Take profit (TP)', rRes: 'Resultado ($)', eq: '= {v}', multi: '+ Varias entradas o salidas', recap: 'Resumen', plan: 'Plan', exec: 'En tu plan', review: 'Revisión', lesson: 'Lección', none: '—', done: 'Hecha', todo: 'Pendiente', pre: 'Pre-mercado', post: 'Post-mercado', fill: 'Por completar', open: 'Abrir', close: 'Cerrar', bias: { bullish: 'Long', bearish: 'Short', neutral: 'Neutral', no_trade: 'No operar' }, followed: { yes: 'Plan seguido', partly: 'Plan seguido en parte', no: 'Plan no seguido' } } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const PLUS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>';
 
-  /* 1. « Add a trade » in the title row of Trades, Calendar and Journal (the Journal day: on that day) */
+  /* 1. « Add a trade » in the title row of Trades, Calendar and Journal (the Journal day: on that day); never on Today */
   function addButton() {
     const top = document.querySelector('.main-wrap .top'); if (!top) return;
     const v = (location.hash.slice(1).split('/')[0] || 'dashboard');
     let b = top.querySelector('.nav-addtop');
-    const want = ['trades', 'calendar', 'journal'].includes(v) || ((v === 'dashboard' || v === 'today') && !window.SW_MQ.matches);
+    const want = ['trades', 'calendar', 'journal'].includes(v);   // (31 Oct., A3) not on Today: the rail's « + » (N) and the Execution step are enough
     if (!want) { if (b) b.hidden = true; return; }
     const m = /^#journal\/(\d{4}-\d{2}-\d{2})/.exec(location.hash);
     const day = m ? m[1] : (v === 'journal' ? (document.querySelector('#main [data-act="add-trade"][data-date]') || {}).dataset?.date : '');
@@ -1670,6 +1673,16 @@ window.SweepMO = window.SweepMO || class {
 
   /* 3. Journal day: a recap at the top; pre- and post-market folded into one line each until opened */
   const opened = new Set();
+  /* (31 Oct., B4) « In your plan » counted once, by the server (game_days.compliant_count), as Today's Execution step says it */
+  const GD = {};
+  function gameDay(day, k) {
+    const st = window.SweepGame && SweepGame.state && SweepGame.state();
+    for (const k of ['today', 'yesterday']) { const d = st && st[k]; if (d && d.day === day) return { n: +d.trades || 0, c: d.plan_valid ? +d.compliant || 0 : 0 }; }
+    if (day in GD && (!GD[day] || GD[day].k === k)) return GD[day];   // read again when the day's trades change
+    GD[day] = null;
+    if (typeof apiJSON === 'function') apiJSON(`api/game/history?from=${day}&to=${day}`).then((r) => { const d = (r && r.days || [])[0]; GD[day] = Object.assign(d ? { n: +d.trades_count || 0, c: +d.plan_valid ? +d.compliant_count || 0 : 0 } : { n: 0, c: 0 }, { k }); journalRecap(); }).catch(() => {});
+    return null;
+  }
   function journalRecap() {
     const m = /^#journal\/(\d{4}-\d{2}-\d{2})$/.exec(location.hash) || (/^#journal$/.test(location.hash) || location.hash === '#journal/' ? [null, (document.querySelector('#main [data-act="add-trade"][data-date]') || {}).dataset?.date] : null);
     if (!m || !m[1]) return;
@@ -1681,7 +1694,8 @@ window.SweepMO = window.SweepMO || class {
     const biasTxt = pre.bias ? ((t('bias')[pre.bias] || pre.bias) + (Array.isArray(pre.setups) && pre.setups.length ? ' · ' + pre.setups.slice(0, 2).join(', ') : '')) : t('fill');
     const reviewed = !!(post.reviewed_at || (post.well || '').trim() || (post.tomorrow || '').trim() || (post.lesson || '').trim() || (post.wrong || '').trim());
     const lesson = (post.lesson || post.tomorrow || post.well || '').trim();
-    const inPlan = trades.length ? `${trades.filter((x) => (x.stop != null && x.stop !== '') && x.rules_followed !== 'no' && x.rules_followed !== 'partial').length} / ${trades.length}` : t('none');
+    const gd = trades.length ? gameDay(day, trades.length) : null;
+    const inPlan = !trades.length ? t('none') : gd ? `${gd.c} / ${gd.n || trades.length}` : '…';
     const html = `<div class="nav-recap" data-noi18n><h3>${t('recap')}</h3><div class="nav-recap-g">
       <div><span>${t('plan')}</span><b>${esc2(biasTxt)}</b></div>
       <div><span>${t('exec')}</span><b>${inPlan}</b></div>
@@ -2274,9 +2288,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { dup: 'This trade looks like the one at {t}. Add it anyway?', dupOk: 'Add anyway', shot: 'With a screenshot', man: 'By hand', title: 'New trade', sub: 'from a screenshot', subNo: 'your platform’s P&L', noShot: 'No screenshot? Enter your P&L ›', cancel: 'Cancel', byHand: 'Enter by hand', fromShot: 'From a screenshot', impFile: 'Import CSV', toMan: 'Enter by hand ›', toShot: 'From a screenshot ›', drop: 'Paste or drop your screenshot (Ctrl+V)', dropT: 'Tap to choose a screenshot', reading: 'Reading the screenshot…', read: 'Filled in from the screenshot: check and complete.', noAi: 'Fill in the key fields.', aiFail: 'Could not read it: fill in the key fields.', acc: 'Account', sym: 'Symbol', dir: 'Direction', long: 'Long', short: 'Short', date: 'Date', time: 'Entry time (ET)', qty: 'Contracts', entry: 'Entry price', exit: 'Exit price', pnl: 'Result ($)', pnlH: 'Calculated from the prices when both are there.', disc: 'Discipline', psy: 'Psychology', emo: 'How did you feel before the trade?', conf: 'Confidence', exec: 'Execution', yes: 'Yes', no: 'No', na: 'N/A', save: 'Save the trade', saved: 'Trade saved', need: 'The account and the net P&L (or the prices) are needed.', set: 'Adding a trade', setS: 'What « Add a trade » opens first.', more: '+ More', addEmo: '+ Add yours', addEmoQ: 'Your emotion (one or two words)', moreQ: '+ {n} more questions', addQ: '+ Add a question', addQQ: 'Your question (e.g. « Did I wait for my level? »)', also: 'Also on (copy trading)', alsoS: 'Also on', net: 'Net P&L (as on your platform)', risk: 'Risk ($)', rHint: 'Enter the net P&L shown by your platform.', rAdd: 'Add the risk to see the R.', verify: 'Check the trade details ›', alsoH: 'Same trade saved on each account you pick.', needDir: 'Long or Short? Tap one to save the trade.', shotQuota: '3 screenshots a day with Free: fill in the key fields, or read without limit with Pro.', dupDay: 'This trade looks like one already saved that day. Add it anyway?' },
-    fr: { dup: 'Ce trade ressemble à celui de {t}. L’ajouter quand même ?', dupOk: 'Ajouter quand même', shot: 'Avec une capture d’écran', man: 'Manuellement', title: 'Nouveau trade', sub: 'par capture d’écran', subNo: 'le P&L de ta plateforme', noShot: 'Pas de capture ? Entre ton P&L ›', cancel: 'Annuler', byHand: 'Saisir à la main', fromShot: 'Par capture d’écran', impFile: 'Importer un CSV', toMan: 'Saisir manuellement ›', toShot: 'Par capture d’écran ›', drop: 'Colle ou dépose ta capture (Ctrl+V)', dropT: 'Touche pour choisir une capture', reading: 'Lecture de la capture…', read: 'Rempli à partir de la capture : vérifie et complète.', noAi: 'Remplis les infos principales.', aiFail: 'Lecture impossible : remplis les infos principales.', acc: 'Compte', sym: 'Symbole', dir: 'Sens', long: 'Long', short: 'Short', date: 'Date', time: 'Heure d’entrée (ET)', qty: 'Contrats', entry: 'Prix d’entrée', exit: 'Prix de sortie', pnl: 'Résultat ($)', pnlH: 'Calculé à partir des prix quand les deux sont là.', disc: 'Discipline', psy: 'Psychologie', emo: 'Comment te sentais-tu avant le trade ?', conf: 'Confiance', exec: 'Exécution', yes: 'Oui', no: 'Non', na: 'N/A', save: 'Enregistrer le trade', saved: 'Trade enregistré', need: 'Il faut le compte et le P&L net (ou les prix).', set: 'Ajout d’un trade', setS: 'Ce que « Ajouter un trade » ouvre en premier.', more: '+ Voir plus', addEmo: '+ Ajouter la tienne', addEmoQ: 'Ton émotion (un ou deux mots)', moreQ: '+ {n} autres questions', addQ: '+ Ajouter une question', addQQ: 'Ta question (ex. « Ai-je attendu mon niveau ? »)', also: 'Aussi sur (copy trading)', alsoS: 'Aussi sur', net: 'P&L net (comme sur ta plateforme)', risk: 'Risque ($)', rHint: 'Entre le P&L net affiché par ta plateforme.', rAdd: 'Ajoute le risque pour voir le R.', verify: 'Vérifier le trade ›', alsoH: 'Le même trade est enregistré sur chaque compte choisi.', needDir: 'Long ou Short ? Touche un des deux pour enregistrer le trade.', shotQuota: '3 captures par jour avec Free : remplis les infos principales, ou lis-les sans limite avec Pro.', dupDay: 'Ce trade ressemble à un trade déjà enregistré ce jour-là. L’ajouter quand même ?' },
-    es: { dup: 'Esta operación se parece a la de las {t}. ¿Añadirla de todos modos?', dupOk: 'Añadir de todos modos', shot: 'Con una captura', man: 'Manualmente', title: 'Nueva operación', sub: 'por captura', subNo: 'el P&L de tu plataforma', noShot: '¿Sin captura? Escribe tu P&L ›', cancel: 'Cancelar', byHand: 'Introducir a mano', fromShot: 'Desde una captura', impFile: 'Importar CSV', toMan: 'Introducir manualmente ›', toShot: 'Con una captura ›', drop: 'Pega o suelta tu captura (Ctrl+V)', dropT: 'Toca para elegir una captura', reading: 'Leyendo la captura…', read: 'Rellenado desde la captura: revisa y completa.', noAi: 'Rellena los datos principales.', aiFail: 'No se pudo leer: rellena los datos principales.', acc: 'Cuenta', sym: 'Símbolo', dir: 'Sentido', long: 'Long', short: 'Short', date: 'Fecha', time: 'Hora de entrada (ET)', qty: 'Contratos', entry: 'Precio de entrada', exit: 'Precio de salida', pnl: 'Resultado ($)', pnlH: 'Calculado con los precios cuando están los dos.', disc: 'Disciplina', psy: 'Psicología', emo: '¿Cómo te sentías antes de la operación?', conf: 'Confianza', exec: 'Ejecución', yes: 'Sí', no: 'No', na: 'N/A', save: 'Guardar la operación', saved: 'Operación guardada', need: 'Hacen falta la cuenta y el P&L neto (o los precios).', set: 'Añadir una operación', setS: 'Lo que « Añadir una operación » abre primero.', more: '+ Ver más', addEmo: '+ Añadir la tuya', addEmoQ: 'Tu emoción (una o dos palabras)', moreQ: '+ {n} preguntas más', addQ: '+ Añadir una pregunta', addQQ: 'Tu pregunta (ej. « ¿Esperé mi nivel? »)', also: 'También en (copy trading)', alsoS: 'También en', net: 'P&L neto (como en tu plataforma)', risk: 'Riesgo ($)', rHint: 'Introduce el P&L neto de tu plataforma.', rAdd: 'Añade el riesgo para ver la R.', verify: 'Revisar la operación ›', alsoH: 'La misma operación se guarda en cada cuenta elegida.', needDir: '¿Long o Short? Toca uno para guardar la operación.', shotQuota: '3 capturas al día con Free: rellena los datos principales, o léelas sin límite con Pro.', dupDay: 'Esta operación se parece a una ya guardada ese día. ¿Añadirla de todos modos?' } };
+    en: { dup: 'This trade looks like the one at {t}. Add it anyway?', dupOk: 'Add anyway', shot: 'With a screenshot', man: 'By hand', title: 'New trade', sub: 'from a screenshot', subNo: 'your platform’s P&L', noShot: 'No screenshot? Enter your P&L ›', cancel: 'Cancel', byHand: 'Enter by hand', fromShot: 'From a screenshot', impFile: 'Import CSV', toMan: 'Enter by hand ›', toShot: 'From a screenshot ›', drop: 'Paste or drop your screenshot (Ctrl+V)', dropT: 'Choose a screenshot', noShotP: 'Without a screenshot ›', reading: 'Reading the screenshot…', read: 'Filled in from the screenshot: check and complete.', noAi: 'Fill in the key fields.', aiFail: 'Could not read it: fill in the key fields.', acc: 'Account', sym: 'Symbol', dir: 'Direction', long: 'Long', short: 'Short', date: 'Date', time: 'Entry time (ET)', qty: 'Contracts', entry: 'Entry price', exit: 'Exit price', pnl: 'Result ($)', pnlH: 'Calculated from the prices when both are there.', disc: 'Discipline', psy: 'Psychology', emo: 'How did you feel before the trade?', conf: 'Confidence', exec: 'Execution', yes: 'Yes', no: 'No', na: 'N/A', save: 'Save the trade', saved: 'Trade saved', need: 'The account and the net P&L (or the prices) are needed.', set: 'Adding a trade', setS: 'What « Add a trade » opens first.', more: '+ More', addEmo: '+ Add yours', addEmoQ: 'Your emotion (one or two words)', moreQ: '+ {n} more questions', addQ: '+ Add a question', addQQ: 'Your question (e.g. « Did I wait for my level? »)', also: 'Also on (copy trading)', alsoS: 'Also on', net: 'Net P&L (as on your platform)', risk: 'Risk ($)', rHint: 'Enter the net P&L shown by your platform.', rAdd: 'Add the risk to see the R.', verify: 'Check the trade details ›', alsoH: 'Same trade saved on each account you pick.', needDir: 'Long or Short? Tap one to save the trade.', shotQuota: '3 screenshots a day with Free: fill in the key fields, or read without limit with Pro.', dupDay: 'This trade looks like one already saved that day. Add it anyway?' },
+    fr: { dup: 'Ce trade ressemble à celui de {t}. L’ajouter quand même ?', dupOk: 'Ajouter quand même', shot: 'Avec une capture d’écran', man: 'Manuellement', title: 'Nouveau trade', sub: 'par capture d’écran', subNo: 'le P&L de ta plateforme', noShot: 'Pas de capture ? Entre ton P&L ›', cancel: 'Annuler', byHand: 'Saisir à la main', fromShot: 'Par capture d’écran', impFile: 'Importer un CSV', toMan: 'Saisir manuellement ›', toShot: 'Par capture d’écran ›', drop: 'Colle ou dépose ta capture (Ctrl+V)', dropT: 'Choisir une capture', noShotP: 'Sans capture ›', reading: 'Lecture de la capture…', read: 'Rempli à partir de la capture : vérifie et complète.', noAi: 'Remplis les infos principales.', aiFail: 'Lecture impossible : remplis les infos principales.', acc: 'Compte', sym: 'Symbole', dir: 'Sens', long: 'Long', short: 'Short', date: 'Date', time: 'Heure d’entrée (ET)', qty: 'Contrats', entry: 'Prix d’entrée', exit: 'Prix de sortie', pnl: 'Résultat ($)', pnlH: 'Calculé à partir des prix quand les deux sont là.', disc: 'Discipline', psy: 'Psychologie', emo: 'Comment te sentais-tu avant le trade ?', conf: 'Confiance', exec: 'Exécution', yes: 'Oui', no: 'Non', na: 'N/A', save: 'Enregistrer le trade', saved: 'Trade enregistré', need: 'Il faut le compte et le P&L net (ou les prix).', set: 'Ajout d’un trade', setS: 'Ce que « Ajouter un trade » ouvre en premier.', more: '+ Voir plus', addEmo: '+ Ajouter la tienne', addEmoQ: 'Ton émotion (un ou deux mots)', moreQ: '+ {n} autres questions', addQ: '+ Ajouter une question', addQQ: 'Ta question (ex. « Ai-je attendu mon niveau ? »)', also: 'Aussi sur (copy trading)', alsoS: 'Aussi sur', net: 'P&L net (comme sur ta plateforme)', risk: 'Risque ($)', rHint: 'Entre le P&L net affiché par ta plateforme.', rAdd: 'Ajoute le risque pour voir le R.', verify: 'Vérifier le trade ›', alsoH: 'Le même trade est enregistré sur chaque compte choisi.', needDir: 'Long ou Short ? Touche un des deux pour enregistrer le trade.', shotQuota: '3 captures par jour avec Free : remplis les infos principales, ou lis-les sans limite avec Pro.', dupDay: 'Ce trade ressemble à un trade déjà enregistré ce jour-là. L’ajouter quand même ?' },
+    es: { dup: 'Esta operación se parece a la de las {t}. ¿Añadirla de todos modos?', dupOk: 'Añadir de todos modos', shot: 'Con una captura', man: 'Manualmente', title: 'Nueva operación', sub: 'por captura', subNo: 'el P&L de tu plataforma', noShot: '¿Sin captura? Escribe tu P&L ›', cancel: 'Cancelar', byHand: 'Introducir a mano', fromShot: 'Desde una captura', impFile: 'Importar CSV', toMan: 'Introducir manualmente ›', toShot: 'Con una captura ›', drop: 'Pega o suelta tu captura (Ctrl+V)', dropT: 'Elegir una captura', noShotP: 'Sin captura ›', reading: 'Leyendo la captura…', read: 'Rellenado desde la captura: revisa y completa.', noAi: 'Rellena los datos principales.', aiFail: 'No se pudo leer: rellena los datos principales.', acc: 'Cuenta', sym: 'Símbolo', dir: 'Sentido', long: 'Long', short: 'Short', date: 'Fecha', time: 'Hora de entrada (ET)', qty: 'Contratos', entry: 'Precio de entrada', exit: 'Precio de salida', pnl: 'Resultado ($)', pnlH: 'Calculado con los precios cuando están los dos.', disc: 'Disciplina', psy: 'Psicología', emo: '¿Cómo te sentías antes de la operación?', conf: 'Confianza', exec: 'Ejecución', yes: 'Sí', no: 'No', na: 'N/A', save: 'Guardar la operación', saved: 'Operación guardada', need: 'Hacen falta la cuenta y el P&L neto (o los precios).', set: 'Añadir una operación', setS: 'Lo que « Añadir una operación » abre primero.', more: '+ Ver más', addEmo: '+ Añadir la tuya', addEmoQ: 'Tu emoción (una o dos palabras)', moreQ: '+ {n} preguntas más', addQ: '+ Añadir una pregunta', addQQ: 'Tu pregunta (ej. « ¿Esperé mi nivel? »)', also: 'También en (copy trading)', alsoS: 'También en', net: 'P&L neto (como en tu plataforma)', risk: 'Riesgo ($)', rHint: 'Introduce el P&L neto de tu plataforma.', rAdd: 'Añade el riesgo para ver la R.', verify: 'Revisar la operación ›', alsoH: 'La misma operación se guarda en cada cuenta elegida.', needDir: '¿Long o Short? Toca uno para guardar la operación.', shotQuota: '3 capturas al día con Free: rellena los datos principales, o léelas sin límite con Pro.', dupDay: 'Esta operación se parece a una ya guardada ese día. ¿Añadirla de todos modos?' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
@@ -2342,17 +2356,20 @@ window.SweepMO = window.SweepMO || class {
     const QO = window.SweepQs ? SweepQs.order(SH.setup) : { list: ((S.settings && S.settings.questions) || []).filter((q) => q.active), shown: 3 };   // edge T7: the setup's criteria, the question that separates, the acquired ones
     const qs = QO.list, qn = QO.shown, qLab = (q) => (window.SweepQs ? SweepQs.label(q) : esc2(q.text));
     const emos = typeof EMO !== 'undefined' ? EMO : ['Calm', 'Confident', 'Patient', 'Focused', 'FOMO', 'Fearful', 'Frustrated', 'Greedy', 'Hesitant', 'Impulsive'];
+    // (31 Oct., C1) on a phone: « Choose a screenshot », one « Without a screenshot › » (the full form is inside it), never Ctrl+V,
+    // and the screenshot area does not come back once in the P&L entry
+    const ph = !!(window.SW_MQ6 && SW_MQ6.matches);
     const pnl = autoPnl(), has = !!(SH.batch.length || SH.src || SH.noShot);   // the screenshot is there (or « No screenshot? »): the rest of the sheet shows
     el.closest('.nav-am').classList.toggle('nav-am-min', !has);   // before it: a short sheet, its height its content (phone)
     const fld = (k, label, attrs = '') => `<label class="tk-f"><span>${label}</span><div class="tk-in"><input data-am-f="${k}" value="${esc2(SH.f[k] ?? '')}" ${attrs}></div></label>`;
     const seg = (key, vals, cur) => `<div class="seg yn">${vals.map(([v, l]) => `<button type="button" class="${String(cur) === String(v) ? 'on' : ''}" data-am-seg="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
     // same header as the manual form: title, subtitle, the other way, « Cancel » on the right
     el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${t(SH.noShot && !SH.src ? 'subNo' : 'sub')}</span>${has ? `<button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button>` : ''}</div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
-      ${SH.batch.length ? batchTop() : `<label class="nav-am-drop ${SH.src ? 'has' : SH.noShot ? 'slim' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t(window.matchMedia && matchMedia('(pointer: coarse)').matches ? 'dropT' : 'drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
+      ${SH.batch.length ? batchTop() : ph && SH.noShot && !SH.src ? '' : `<label class="nav-am-drop ${SH.src ? 'has' : SH.noShot ? 'slim' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t(ph || (window.matchMedia && matchMedia('(pointer: coarse)').matches) ? 'dropT' : 'drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
       ${SH.status ? `<p class="nav-am-st ${SH.busy ? 'busy' : ''}">${SH.status}</p>` : ''}`}
-      ${has ? '' : `<button type="button" class="link nav-am-noshot" data-am="no-shot">${t('noShot')}</button>`}
+      ${has ? '' : `<button type="button" class="link nav-am-noshot" data-am="no-shot">${t(ph ? 'noShotP' : 'noShot')}</button>`}
       ${/* (SWEEP.md step 2) the same quick sheet without an image: account, net P&L, Long / Short, setup… — no prices to type */ ''}
-      ${has ? '' : `<div class="nav-am-alt"><button type="button" class="btn" data-am="to-manual">${t('byHand')}</button><button type="button" class="btn" data-am-imp>${t('impFile')}</button></div>`}
+      ${has ? '' : `<div class="nav-am-alt">${ph ? '' : `<button type="button" class="btn" data-am="to-manual">${t('byHand')}</button>`}<button type="button" class="btn" data-am-imp>${t('impFile')}</button></div>`}
       ${/* nothing else until the screenshot is there (18 Oct., Mateo: a minimal first screen) */ ''}${has ? `
       <div class="nav-am-co">${coachBefore()}</div>
       <div class="nav-am-grid">
@@ -3977,6 +3994,11 @@ window.SweepMO = window.SweepMO || class {
       // under « More options » (brief 03 step 1): the cost, the count and « new or already running » are inserted in it
       if (host) host.insertAdjacentHTML('beforebegin', `<details class="nav-acc-opt" data-noi18n><summary><span>${t('opts')}</span><small class="muted nav-acc-opt-s"></small></summary><div class="nav-acc-xs"><label class="f nav-acc-x" data-noi18n><span>${t('cost')}</span><input name="nav_cost" inputmode="decimal" placeholder="$"><small class="muted">${t('costH')}</small></label><label class="f nav-acc-x" data-noi18n><span>${t('qty')}</span><input name="nav_qty" type="number" min="1" max="20" value="1" inputmode="numeric"><small class="muted">${t('qtyH')}</small></label></div></details>`);
     }
+    // (31 Oct., C2) one « More options » in the account step: the firm's choices open and close with it
+    if (af && !af.dataset.optOne) {
+      af.dataset.optOne = '1';
+      af.addEventListener('toggle', (e) => { if (e.target.matches && e.target.matches('.nav-acc-opt')) af.querySelectorAll('.ux-st-more').forEach((x) => { if (x.open !== e.target.open) x.open = e.target.open; }); }, true);
+    }
     // 6. payout and expense forms: also for other accounts
     document.querySelectorAll('form[data-form="payout"], form[data-form="expense"]').forEach((f) => {
       if (f.querySelector('.nav-also') || f.dataset.id) return;   // only when adding
@@ -4276,12 +4298,13 @@ window.SweepMO = window.SweepMO || class {
     const hm = (ts) => (typeof etStr === 'function' ? etStr(ts).slice(11, 16) : '');
     return `<p class="nav-now-news">${esc2(nw('news', { t: hm(e.ts), e: typeof tr === 'function' ? tr(e.event) : e.event, a: hm(e.ts - bf * 60), b: hm(e.ts + af * 60) }))}</p>`;
   }
-  let NOWEND = false;   // « Now » holds the only blue button (« Close my day »)
+  let NOWEND = false, NOWSTOP = false;   // « Now » holds the only blue button (« Close my day »); « Now » says stop
   function nowHtml(d, r) {
-    NOWEND = false;
+    NOWEND = NOWSTOP = false;
     if (!d || !d.market || d.day_off || (r && r.review >= 100) || !window.SweepCoach || !SweepCoach.riskNow) return '';
     let x = null; try { x = SweepCoach.riskNow(d.day); } catch (e) { return ''; }
     if (!x) return '';
+    NOWSTOP = !!x.end;
     let big, val = '', sub = '';
     if (!x.n) { big = nw('risk'); val = usd0(x.allowed); sub = nw(x.k, { a: x.a }); }
     else if (x.end && x.rule) { big = nw('ruleEnd'); sub = ''; NOWEND = true; }   // a trader starting out: his rule, and closing the day right here
@@ -4323,7 +4346,9 @@ window.SweepMO = window.SweepMO || class {
     if (window.SweepNowRefresh) SweepNowRefresh();
   });
   function card() {
-    const st = window.SweepGame && SweepGame.state && SweepGame.state(); const d = st && st.today;
+    const st = window.SweepGame && SweepGame.state && SweepGame.state(); let d = st && st.today;
+    // (31 Oct., C4) sample data only: the routine counts the sample trades listed under it (the server never sees them)
+    if (d && !d.trades && sampleOnly()) { const n = (S.trades || []).filter((x) => x.demo && x.date === d.day).length; if (n) d = Object.assign({}, d, { trades: n }); }
     if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div><div class="nav-rt-steps">${'<div class="nav-rt-s sk"></div>'.repeat(3)}</div></section>`;
     const p = st.profile || {}, y = st.yesterday && st.yesterday.market && !st.yesterday.valid && (st.yesterday.trades > 0 || st.yesterday.plan_valid) ? st.yesterday : null;   // only a day that was started is « not finished »
     const r = d.rings || {}, ring = document.querySelector('.nav-lvring');
@@ -4334,10 +4359,10 @@ window.SweepMO = window.SweepMO || class {
     const streak = (p.streak && p.streak.current) || 0;
     // before the first trade (27 Oct. tour): no « Discipline — », no streak « 0 », no level — they mean nothing yet; they come with it
     const first = (S.trades || []).some((x) => !x.demo) || (S.trades || []).length > 0 && !(S.accounts || []).some((a) => !a.demo);
-    const head = (extra) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market ? foldBtn() : ''}${extra || ''}</div><div class="nav-rt-me">${first ? `<span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span>
-        <button type="button" class="nav-rt-streak" data-rt="hub" title="${esc2(streak + ' ' + t(streak === 1 ? 'streak1' : 'streak'))}"><span><small>${({ en: 'Complete days', fr: 'Jours complets', es: 'Días completos' })[L] || 'Complete days'}</small><b>${svg('fire')}${streak}</b></span></button>
-        <button type="button" class="nav-rt-lv ${pct ? '' : 'nopct'}" data-rt="hub">${pct ? `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" stroke-dasharray="94.25" stroke-dashoffset="${94.25 * (1 - pct / 100)}"/></svg>` : ''}<span><small>${t('level')}</small><b>${esc2(lv)}</b></span></button>` : ''}
-        <button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div></div>`;
+    // (31 Oct., C5) the discipline, streak and level pills became one line under the title: « Level 2 · 0 complete days › » (My progress)
+    const SUM = { en: ['Level {l}', '{n} complete day', '{n} complete days'], fr: ['Niveau {l}', '{n} jour complet', '{n} jours complets'], es: ['Nivel {l}', '{n} día completo', '{n} días completos'] }[L] || ['Level {l}', '{n} complete day', '{n} complete days'];
+    const sumLine = first ? `<button type="button" class="nav-rt-sum" data-rt="hub">${[lv ? SUM[0].replace('{l}', esc2(lv)) : '', SUM[streak === 1 || (streak === 0 && L === 'fr') ? 1 : 2].replace('{n}', streak)].filter(Boolean).join(' · ')} ›</button>` : '';
+    const head = (extra) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market ? foldBtn() : ''}${extra || ''}</div></div><div class="nav-rt-sub">${sumLine}<button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div>`;
     // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
     const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
     const wkt = ({ en: ['Your week is ready', 'Open the weekly recap'], fr: ['Ta semaine est prête', 'Ouvrir le bilan de la semaine'], es: ['Tu semana está lista', 'Abrir el resumen semanal'] })[L]   // (SWEEP.md step 6) one name: « Bilan de la semaine » || ['Your week is ready', 'See my week'];
@@ -4375,7 +4400,7 @@ window.SweepMO = window.SweepMO || class {
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
         ${step(3, r.review || 0, 'review', t('s3'), t('s3d'), s3, s3 === 'done' ? t('reviewDone') : t('reviewTodo'), s3 === 'done' ? t('b3v') : t('b3'), 'review', '', s3 === 'done' ? t('see') : t('b3s'))}
       </div>
-      ${d.trades && s3 !== 'done' ? `<p class="nav-rt-finl"><button type="button" class="link nav-rt-fin" data-rt="fin">${t('fin')} ›</button></p>` : ''}
+      ${NOWSTOP && s3 !== 'done' ? `<p class="nav-rt-finl"><button type="button" class="link nav-rt-fin" data-rt="fin">${t('fin')} ›</button></p>` : ''}
       ${helpT}</section>`;
   }
   window.SweepNowRefresh = () => { try { place(); } catch (e) { /* never blocks */ } };
@@ -6926,7 +6951,7 @@ new window.SweepMO(() => {
     (A[n] || (() => {}))();
   }
   function line() {
-    const d = st(); if (!d || d.all || !d.current) return '';
+    const d = st(); if (!d || d.all || !d.current || sampleOnly()) return '';   // (31 Oct., C4) not beside the sample's 5 accounts
     const n = d.current, m = x[n] || ['', ''];
     return `<div class="nav-disc" data-disc="${n}"><small>${esc2(x.kick.replace('{n}', n).replace('{of}', d.of || 15))}</small><p><b>${esc2(m[0])}</b><span>${esc2(m[1])}</span></p><button type="button" class="btn sm" data-disc-go="${n}">${esc2(x.go)} ›</button></div>`;
   }

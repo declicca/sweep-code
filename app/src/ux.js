@@ -528,7 +528,7 @@
         ${((h) => {   // (27 Oct., brief « nouveau trader » step 3) a trader starting out, an evaluation: these choices only serve once funded —
           // folded in « More options », the firm's defaults kept
           const rk = d.phase === 'eval' && ((window.SweepRookie && SweepRookie()) || !!document.querySelector('.nav-onb-me [data-exp="new"].on'));
-          return rk && h.trim() ? `<details class="ux-st-more"${d.stMore === '1' ? ' open' : ''}><summary>${esc(({ fr: 'Plus d’options', es: 'Más opciones' })[LANG] || 'More options')}</summary>${h}</details>` : h;
+          return rk && h.trim() ? `<details class="ux-st-more"${d.stMore === '1' || (w.closest('form') && w.closest('form').querySelector('.nav-acc-opt[open]')) ? ' open' : ''}><summary>${esc(({ fr: 'Plus d’options', es: 'Más opciones' })[LANG] || 'More options')}</summary>${h}</details>` : h;
         })(`${choicesFor(p, d.phase === 'eval' ? 'funded' : d.phase).map((o) => { const cur = d['opt_' + o.id] || o.default; return `<div class="ux-st-choice"><p class="ux-st-cl">${esc(L3(o.label))}${(typeof TERM === 'function' ? TERM('fundedOpt') : '')}${d.phase === 'eval' ? ` <small>${({ en: '(you can choose it later, when the account is funded)', fr: '(tu peux le choisir plus tard, au passage en financé)', es: '(puedes elegirla más tarde, al pasar a financiada)' })[LANG] || ''}</small>` : ''}</p><div class="seg ux-st-phase" role="tablist">${o.choices.map((c) => `<button type="button" role="tab" aria-selected="${c.id === cur}" class="${c.id === cur ? 'on' : ''}" data-st-opt="${esc(o.id)}" data-st-val="${esc(c.id)}">${esc(L3(c.label))}</button>`).join('')}</div>${((c) => (c && c.sub ? `<small class="ux-st-note">${esc(L3(c.sub))}</small>` : ''))(o.choices.find((c) => c.id === cur))}</div>`; }).join('')}${r && r.dll && r.dll_optional ? `<label class="ux-st-opt"><span>${pt('withDll')} · ${usd(r.dll)}</span><span class="sw"><input type="checkbox" data-st-dll ${d.dll === '1' ? 'checked' : ''}><i></i></span></label>${typeof termText === 'function' ? `<small class="ux-st-gl1">${esc(termText('dllOpt'))}</small>` : ''}` : ''}`)}
         <div class="ux-st-sum">${summary(d.firm, d.type, d.size, d.phase, (stValue(w) || '').split('|')[4] || '')}</div>
         ${mode === 'apply' ? `<button type="button" class="btn primary" data-pk-apply="${esc(d.acct)}">${pt('applyBtn')}</button>` : ''}`;
@@ -2078,7 +2078,8 @@
   // one pill that opens its choices (16 Oct.: one line of filters); « mny-tsw » kept so nothing adds it twice
   window.SweepTypeSeg = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return `<button type="button" class="fx-c fx-type mny-tsw ${k !== 'all' ? 'fx-set' : ''}" data-fx="type" aria-haspopup="true" aria-label="${x.label} · ${x[k]}" data-noi18n>${k === 'all' ? x.label : x[k]}<i aria-hidden="true"></i></button>`; };
   window.SweepFxOpts = Object.assign(window.SweepFxOpts || {}, { type: () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return { title: x.label, cur: k, opts: ['all', 'eval', 'funded', 'live', 'personal', 'simulation'].map((v) => [v, x[v]]), attr: 'data-mtype', pick: (v) => { U.mtype = v; if (typeof saveU === 'function') saveU(); render(); } }; } });
-  window.SweepTypeTag = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return k === 'all' ? `<span class="mny-tag perf">${x.perf}</span>` : `<span class="mny-tag ${k === 'live' || k === 'personal' ? 'real' : 'sim'}">${k === 'live' || k === 'personal' ? x.real : x.sim}</span>`; };
+  window.SweepTypeTag = () => { const k = (typeof U !== 'undefined' && U.mtype) || 'all'; return k === 'all' ? `<span class="info" data-tip="${x.note}" tabindex="0">i</span>` :   // (31 Oct., B2) no « Performance » pill: its « i » says what it is
+    `<span class="mny-tag ${k === 'live' || k === 'personal' ? 'real' : 'sim'}">${k === 'live' || k === 'personal' ? x.real : x.sim}</span>`; };
   // Trades and Stats lists follow it (they show the selector); Calendar and Journal always show every trade
   window.mtypeOK = (t) => { if (!/^#(analytics|progress|trades|calendar)/.test(location.hash || '')) return true; const k = typeof U !== 'undefined' && U.mtype; if (!k || k === 'all') return true; const a = (S.accounts || []).find((y) => y.id === t.account_id); return M.moneyTypeOf(a) === k; };
   function paint() {
@@ -2090,9 +2091,10 @@
     if (!seg) { const fx = main.querySelector('.fx'); if (fx) { const per = fx.querySelector('.fx-per'); per ? per.insertAdjacentHTML('afterend', html) : fx.insertAdjacentHTML('afterbegin', html); } }   // (filterBar already has it)
     // the P&L card says what it is: performance, simulated or real
     const kp = [...main.querySelectorAll('.kpis > div, .ik')].find((d) => /P&L/.test((d.querySelector('.lbl') || {}).textContent || ''));
-    if (kp && !kp.querySelector('.mny-ptag')) {
-      const lab = kp.querySelector('.lbl'); const tag = k === 'all' ? `<span class="mny-tag perf mny-ptag">${x.perf}</span>` : `<span class="mny-tag ${k === 'live' || k === 'personal' ? 'real' : 'sim'} mny-ptag">${k === 'live' || k === 'personal' ? x.real : x.sim}</span>`;
-      if (lab) lab.insertAdjacentHTML('beforeend', ' ' + tag);
+    if (kp && !kp.querySelector('.mny-ptag, .mny-psplit')) {
+      const lab = kp.querySelector('.lbl'); const inf = lab && lab.querySelector('.info'); if (k === 'all' && inf) inf.dataset.tip = x.note;   // (31 Oct., B2) the « i » says it; no « Performance » pill
+      const tag = k === 'all' ? '' : `<span class="mny-tag ${k === 'live' || k === 'personal' ? 'real' : 'sim'} mny-ptag">${k === 'live' || k === 'personal' ? x.real : x.sim}</span>`;
+      if (lab && tag) lab.insertAdjacentHTML('beforeend', ' ' + tag);
       if (k === 'all') {
         const [a, b] = typeof periodRange === 'function' ? periodRange() : ['', ''];
         const pf = M.moneyOf({ from: a, to: b, account: F.account !== 'all' ? F.account : '', firm: F.firm !== 'all' ? F.firm : '' }).perf.byType;

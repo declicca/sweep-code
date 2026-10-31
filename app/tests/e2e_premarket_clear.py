@@ -143,7 +143,7 @@ with sync_playwright() as p:
     tap(pg, '#gSheet .pm-chart-slot [data-pre-chart]')
     tap(pg, '#gSheet [data-pm="mode"][data-v="express"]')
     t = text(pg); bias = pg.evaluate("[...document.querySelectorAll('#gSheet [data-q=X_bias]')].map((x) => x.textContent)")
-    ok(bias == ['Haussier', 'Baissier', 'Neutre'] and 'Niveaux clés' in t and 'Scénario attendu' in t and 'Scénario alternatif' in t and 'facultatif' not in t and pg.locator('#gSheet [data-pmf=X_stop], #gSheet [data-pmf=C3_A]').count() == 0,
+    ok(bias == ['Long', 'Short', 'Neutre'] and 'Niveaux clés' in t and 'Scénario attendu' in t and 'Scénario alternatif' in t and 'facultatif' not in t and pg.locator('#gSheet [data-pmf=X_stop], #gSheet [data-pmf=C3_A]').count() == 0,
        f'7 {w}: the express plan: bias, key levels, expected and alternative scenario, no prices to set ({bias})')
     tap(pg, '#gSheet [data-pm=tip][data-k=plan]')
     tip = pg.evaluate("(document.querySelector('#gSheet .pm-tip:not([hidden])') || {}).textContent || ''")

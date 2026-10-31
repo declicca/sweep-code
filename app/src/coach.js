@@ -30,7 +30,7 @@
       bTitle: 'Before this trade',
       bMax: 'Max loss reached ({m}): your session is over. This trade will be out of your plan.',
       bDone: 'Your {m} planned trades are done: this one will be out of your plan.', bDone1: 'Your planned trade is done: this one will be out of your plan.',
-      bWait: 'Your last loss was {n} min ago: wait {r} more min before entering.',
+      bWait: 'Your last loss was {n} min ago: wait {r} more min before entering.', bWait0: 'Your last loss was just now: wait {r} more min before entering.',
       bLoss2: '{n} losses in a row: take a 15-minute break before this trade.',
       bSize: '{n} contracts: your maximum is {m}.',
       bUp: 'After {w} wins in a row, keep your size ({c}).',
@@ -69,7 +69,7 @@
         rules_no: ['Your checklist was not followed.', 'Reread your checklist before each entry.'],
         rules_partial: ['Checklist partly followed.', 'Take the next entry only if every point is ticked.'],
       },
-      bias: { bullish: 'bullish', bearish: 'bearish' },
+      bias: { bullish: 'Long', bearish: 'Short' },
       maxHit: 'Max loss reached ({m}): your session is over for today.',
       loss2: '{n} losses in a row: take a 15-minute break before the next trade.',
       done: '{n} of {m} planned trades: your session is done.',
@@ -101,7 +101,7 @@
       bTitle: 'Avant ce trade',
       bMax: 'Perte max atteinte ({m}) : ta séance est finie. Ce trade sera hors plan.',
       bDone: 'Tes {m} trades prévus sont faits : celui-ci sera hors plan.', bDone1: 'Ton trade prévu est fait : celui-ci sera hors plan.',
-      bWait: 'Ta dernière perte date de {n} min : attends encore {r} min avant d’entrer.',
+      bWait: 'Ta dernière perte date de {n} min : attends encore {r} min avant d’entrer.', bWait0: 'Ta dernière perte date d’à l’instant : attends encore {r} min avant d’entrer.',
       bLoss2: '{n} pertes de suite : fais une pause de 15 minutes avant ce trade.',
       bSize: '{n} contrats : ton maximum est {m}.',
       bUp: 'Après {w} gains de suite, garde ta taille ({c}).',
@@ -140,7 +140,7 @@
         rules_no: ['Ta checklist n’est pas respectée.', 'Relis ta checklist avant chaque entrée.'],
         rules_partial: ['Checklist suivie en partie.', 'Prends la prochaine entrée seulement si chaque point est coché.'],
       },
-      bias: { bullish: 'haussier', bearish: 'baissier' },
+      bias: { bullish: 'Long', bearish: 'Short' },
       maxHit: 'Perte max atteinte ({m}) : ta séance est finie pour aujourd’hui.',
       loss2: '{n}ᵉ perte de suite : fais une pause de 15 minutes avant le prochain trade.',
       done: '{n} trades sur {m} prévus : ta séance est faite.',
@@ -172,7 +172,7 @@
       bTitle: 'Antes de esta operación',
       bMax: 'Pérdida máxima alcanzada ({m}): tu sesión terminó. Esta operación quedará fuera de tu plan.',
       bDone: 'Tus {m} operaciones previstas están hechas: esta quedará fuera de tu plan.', bDone1: 'Tu operación prevista está hecha: esta quedará fuera de tu plan.',
-      bWait: 'Tu última pérdida fue hace {n} min: espera {r} min más antes de entrar.',
+      bWait: 'Tu última pérdida fue hace {n} min: espera {r} min más antes de entrar.', bWait0: 'Tu última pérdida fue hace un instante: espera {r} min más antes de entrar.',
       bLoss2: '{n} pérdidas seguidas: haz una pausa de 15 minutos antes de esta operación.',
       bSize: '{n} contratos: tu máximo es {m}.',
       bUp: 'Tras {w} ganancias seguidas, mantén tu tamaño ({c}).',
@@ -211,7 +211,7 @@
         rules_no: ['Tu checklist no se cumplió.', 'Relee tu checklist antes de cada entrada.'],
         rules_partial: ['Checklist cumplida en parte.', 'Toma la próxima entrada solo si cada punto está marcado.'],
       },
-      bias: { bullish: 'alcista', bearish: 'bajista' },
+      bias: { bullish: 'Long', bearish: 'Short' },
       maxHit: 'Pérdida máxima alcanzada ({m}): tu sesión terminó por hoy.',
       loss2: '{n} pérdidas seguidas: haz una pausa de 15 minutos antes de la próxima operación.',
       done: '{n} de {m} operaciones previstas: tu sesión está hecha.',
@@ -512,7 +512,9 @@
     if (p.valid && p.maxLoss && sum <= -p.maxLoss) { sig = fill(T.bMax, { m: usd(p.maxLoss) }); stop = true; }
     else if (mg && mg.lowAt(room)) { sig = fill(T.ddStop, { m: usd(Math.max(0, room)) }); stop = true; }
     else if (p.valid && p.maxTrades && list.length >= p.maxTrades) { sig = fill(p.maxTrades == 1 ? T.bDone1 : T.bDone, { m: p.maxTrades }); stop = true; }
-    else if (gap != null && gap >= 0 && gap < 10) { sig = fill(T.bWait, { n: gap, r: 10 - gap }); mine = ownLine('revenge'); stop = true; }
+    // (31 Oct., C3) the wait only for a trade being taken now: in the session, no other time typed than now (the manual form puts
+    // the clock's time in); a trade logged afterwards is in the past
+    else if (gap != null && gap >= 0 && gap < 10 && nowHm && (!x.time || Math.abs(min(x.time) - min(nowHm)) <= 2) && !(typeof offHoursET === 'function' && offHoursET())) { sig = fill(gap ? T.bWait : T.bWait0, { n: gap, r: 10 - gap }); mine = ownLine('revenge'); stop = true; }
     else if (losses >= 2) { sig = fill(T.bLoss2, { n: losses }); mine = ownLine('loss2'); stop = true; }
     else if (x.form === 'shot' && maxC && qty > maxC) sig = fill(T.bSize, { n: qty, m: maxC });   // (the manual form says it already)
     else if (wins >= 2 && last && qty > +last.contracts) { sig = fill(T.bUp, { w: wins, c: last.contracts }); mine = ownLine('size_up'); }

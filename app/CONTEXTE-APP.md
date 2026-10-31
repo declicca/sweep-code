@@ -1422,3 +1422,28 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **L'heure des pages de test** : pendant la fin de semaine du marché, le serveur de test était déjà fixé au vendredi 15 h ET, mais les pages restaient à l'heure réelle. Avec W1, un trade saisi par un test un vendredi soir allait donc au vendredi, alors que le test l'attendait au samedi : 10 tests échouaient. `tools/clientclock/sitecustomize.py`, chargé par `run.sh` et `par.py` (PYTHONPATH) seulement quand `SWEEP_GAME_NOW` est fixé, met les pages des tests sur la même heure. Un test qui fixe sa propre horloge (`clock.set_fixed_time`, `window.__swNow`) garde la sienne. Rien n'est déployé : c'est dans `tools/`.
 - **Réglages fermés à l'arrivée** : `e2e_gameplan`, `e2e_twofa` et `e2e_share` ouvrent le groupe dont ils ont besoin.
 - **Test** : `e2e_tour_1030` (390 fr foncé, 1300 en clair, 390 es clair). W1 est vérifié à heure fixée : vendredi 18 h 44, samedi midi, dimanche midi, mardi 17 h 30 et mardi 19 h. `e2e_clarity` et `e2e_coach` attendent maintenant « Compte » en dernier.
+
+### Tour du 31 oct. (`briefs/brief-app-navigation-2026-10-31.md`) : navigation, compréhension, utilisation (15 points)
+- **A1** : il n'y a jamais de barre d'onglets à un seul onglet. Tant que « Mon argent » est caché (`body.disc-no-money`), Comptes n'a pas de barre. Sur la page Mon argent, les deux onglets s'affichent toujours.
+- **A2** : à partir de 1100 px, la barre latérale garde les noms à côté des icônes (216 px par media query, `.side.open` posée par `sideOpen` dans `app.js` dès le chargement). En dessous, les icônes seules, comme avant.
+- **A3** : Aujourd'hui n'a plus de « Ajouter un trade » dans la ligne du titre. Restent le « + » (touche N) et l'étape Exécution. Trades, Calendrier et Journal le gardent.
+- **A4** : la page d'un compte montre ses 5 derniers trades, puis « Voir ses N trades › », qui ouvre Trades filtré sur ce compte (`acct-trades`). La ligne d'un trade (`tradeRows`) est la même partout : la date, l'heure, puis le setup. Plus jamais « session of … entered … ».
+- **B1** : les points des annonces économiques fortes sont gris (`--muted`) : dans le Calendrier, le mini-calendrier et la bande des jours d'Aujourd'hui. Une légende « • Annonce économique forte » s'affiche dessous (`econLegend()`).
+- **B2** : la pastille « Performance » est retirée. Le « i » de « P&L net » dit « Ton habileté, pas de l'argent gagné : l'argent réel est dans Mon argent. » (Aujourd'hui et Stats). Les pastilles Réel et Simulé restent quand un type de compte est choisi.
+- **B3** : le biais se dit Long, Short ou Neutre partout : plan express et guidé, Journal, coach. La valeur enregistrée reste `bullish` / `bearish`.
+- **B4** : « Dans ton plan » du Journal vient du même compte que l'étape Exécution d'Aujourd'hui (`game_days.compliant_count`, renvoyé par `api/game/history`).
+- **B5** : « Checklist à faire » est en gris, une seule fois par jour, sur le dernier trade du jour sans checklist.
+- **B6** : le P&L de la page d'un trade ne se coupe jamais après son signe. Sur téléphone, il est un peu plus petit.
+- **C1** : sur téléphone, la feuille « Nouveau trade » propose :
+  - « Choisir une capture », sans Ctrl+V ;
+  - un seul lien « Sans capture › » ;
+  - « Importer un CSV ».
+  « Saisir à la main » n'est plus sur ce premier écran. Une fois dans la saisie du P&L, la zone de capture ne revient pas.
+- **C2** : dans l'étape « Ton compte », il n'y a plus qu'un seul « Plus d'options ». Les choix de la firme s'ouvrent et se ferment avec lui.
+- **C3** : le coach ne demande d'attendre après une perte que pour un trade pris pendant la séance, sans heure tapée. À 0 minute, il dit « à l'instant ».
+- **C4** : avec les données d'exemple seules (`sampleOnly()`) :
+  - les missions sont cachées ;
+  - l'étape Exécution compte les trades d'exemple ;
+  - un seul compte d'exemple dépasse son drawdown (`demoDdFit` : celui de chaque autre compte couvre sa pire baisse).
+- **C5** : les pastilles Discipline, Jours complets et Niveau deviennent une seule ligne sous le titre, « Niveau 2 · 0 jour complet › », qui ouvre Ma progression. Le « ? » est au bout de cette ligne. « J'ai fini pour aujourd'hui » n'apparaît qu'à l'arrêt annoncé par « Maintenant ».
+- **Test** : `e2e_nav_1031` (390 fr foncé, 1300 en clair, 390 es clair). Tests mis à jour : `e2e_premarket_express`, `e2e_premarket_clear`, `e2e_small_fixes`, `e2e_terms` et `e2e_coach` (l'attente seulement pendant la séance).

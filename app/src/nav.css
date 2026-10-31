@@ -207,7 +207,7 @@ html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
   .nav-acc{flex:0 0 72%;scroll-snap-align:start}
 }
 /* recent trades: 5 on phones, 8 on computers; trades to journal are marked */
-.nav-tolog{display:inline-block;margin-left:6px;font-size:11px;font-weight:600;padding:1px 8px;border-radius:var(--r-pill);background:var(--negbg);color:var(--neg);white-space:nowrap}
+.nav-tolog{display:inline-block;margin-left:6px;font-size:11px;font-weight:600;padding:1px 8px;border-radius:var(--r-pill);background:var(--fill);color:var(--muted);white-space:nowrap}   /* (31 Oct., B5) grey: gold means a loss */
 /* mini calendar */
 .nav-cal{display:flex;flex-direction:column;gap:6px}
 .nav-cw,.nav-cg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}   /* equal columns: an event name never widens its day (it ends with …) */
@@ -257,7 +257,7 @@ html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
 .nav-cd.p .nav-cd-p{color:var(--pos)}.nav-cd.n .nav-cd-p{color:var(--neg)}
 .nav-cd-n{font-size:11px;color:var(--muted)}
 .nav-cd-e{display:block;margin-top:auto;font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}   /* block: a long event name ends with … */
-.nav-cd-e i{display:inline-block;vertical-align:middle;margin:-2px 3px 0 0;width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--neg)}
+.nav-cd-e i{display:inline-block;vertical-align:middle;margin:-2px 3px 0 0;width:6px;height:6px;flex-shrink:0;border-radius:50%;background:var(--muted)}
 .nav-cd.past:not(.p):not(.n){opacity:.55}
 @media (max-width:860px){.nav-cd{min-height:58px;padding:4px}.nav-cd-n{display:none}.nav-cd-e{font-size:0}.nav-cd-e i{width:7px;height:7px}}
 /* cards come in once, gently (opacity/transform only: no layout shift) */
@@ -421,7 +421,7 @@ body.evp-lock{overscroll-behavior:none}
   .nav-sd small{font-size:11px;color:var(--muted);font-weight:600}
   .nav-sd b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
   .nav-sd span{min-height:14px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted)}
-  .nav-sd span i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--neg)}
+  .nav-sd span i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted)}
   .nav-sd.p{background:var(--posbg)}.nav-sd.p span{color:var(--pos)}
   .nav-sd.n{background:var(--negbg)}.nav-sd.n span{color:var(--neg)}
   .nav-sd.today{box-shadow:inset 0 0 0 1.5px var(--pos)}
@@ -736,7 +736,7 @@ body:not(.ask-on) .nav-ask-side{display:none!important}
 .nav-fd.sel{background:var(--pos);box-shadow:none;color:var(--btntext)}
 .nav-fd.sel small,.nav-fd.sel .nav-fd-p{color:var(--btntext)!important;}
 .nav-fd.fut{opacity:.75}
-.nav-fd-e{position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--neg)}
+.nav-fd-e{position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:var(--muted)}
 .nav-fd.sel .nav-fd-e{background:var(--btntext)}
 .nav-fn:empty{display:none}
 .nav-fnews{display:flex;flex-direction:column;gap:2px;padding:8px 0 4px;border-top:1px solid var(--line)}
@@ -1089,7 +1089,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 .nav-rt-sb small{font-size:13px;color:var(--muted)}
 .nav-rt-st{margin-top:6px;font-size:13px;font-weight:500;color:var(--text2)}
 .nav-rt-s.done .nav-rt-st{color:var(--pos)}
-.nav-rt-s.late .nav-rt-st,.nav-rt-s.part .nav-rt-st{color:#F2A541}
+.nav-rt-s.late .nav-rt-st,.nav-rt-s.part .nav-rt-st{color:var(--text2)}   /* (31 Oct.) its words readable (1.76:1 in orange on light); the bar keeps the orange */
 .nav-rt-sa{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:auto}
 
 .nav-rt-off{font-size:13px;color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
@@ -2908,7 +2908,9 @@ html body .nav-rt .nav-now{background:color-mix(in srgb,var(--fill) 45%,transpar
 .nav-disc .btn{white-space:nowrap}
 @media (max-width:420px){.nav-disc{grid-template-columns:1fr}.nav-disc .btn{justify-self:start}}
 .nav-disc-all{margin-top:10px}.nav-disc-all p{margin:0 0 10px}
-html body.disc-no-money #main .d-pay,html body.disc-no-money a[href="#payouts"]{display:none!important}
+html body.disc-no-money #main .d-pay,html body.disc-no-money a[href="#payouts"]:not(.nav-seg a){display:none!important}
+/* (31 Oct., A1) no tab bar with a single tab: on Accounts the bar goes with « My money »; on My money (a link) both tabs stay */
+html body.disc-no-money #main .nav-seg:has(a[href="#payouts"]):not(:has(a.on[href="#payouts"])){display:none!important}
 html body.disc-no-ai #askFab,html body.disc-no-ai .nav-ask-side,html body.disc-no-ai .ai-only{display:none!important}
 html body.disc-no-guided [data-pm="mode"][data-v="full"]{display:none!important}
 html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > h4,html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hub,html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hubcol{display:none!important}   /* before mission 15: the level and the streak only */
@@ -2970,3 +2972,21 @@ body:has(#main .nav-rt) .nav-addtop{background:var(--fill);color:var(--text);box
 .nav-remind-a{display:flex;align-items:center;gap:14px;margin-top:10px}
 .nav-remind-a .btn{min-height:40px}.nav-remind-a .link{min-height:40px;font-size:13px;color:var(--muted);background:none;border:0;cursor:pointer}
 .nav-now-a{margin-top:10px}   /* (27 Oct.) « Close my day » in « Now », when a trader starting out reached his rule */
+
+/* (31 Oct., B1) the legend of the grey dots: the strong economic releases */
+.cal-legend{display:flex;align-items:center;gap:6px;margin:10px 4px 0;font-size:12px;color:var(--muted)}
+.cal-legend i{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.d-cal .cal-legend{margin:10px 2px 0}
+/* (31 Oct., B6) the trade's P&L never breaks after its sign; on a phone a little smaller so it fits its half */
+html body .th-head .big{white-space:nowrap}
+@media (max-width:600px){html body .th-head .big{font-size:clamp(19px,5.6vw,28px)!important}}
+/* (31 Oct., C2) the firm's choices fold under the form's own « More options »: no second link */
+form[data-form="account"].ux-st-final:has(.nav-acc-opt) .ux-st-more>summary{display:none}
+/* (31 Oct., C5) one line under the routine's title instead of four pills: « Level 2 · 0 complete days › » */
+.nav-rt-sub{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-6px 0 10px}
+.nav-rt-sum{display:block;margin:0;padding:0;border:0;background:none;font:inherit;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;text-align:left}
+.nav-rt-sum:hover{color:var(--text)}
+.nav-feed .cal-legend{margin:4px 2px 8px}
+.nav-rt-sub .nav-rt-help{margin-left:auto;width:30px;height:30px;min-height:30px;padding:0;border:0;background:none;box-shadow:none;color:var(--muted)}
+/* (31 Oct., A2) « New trade » now shows its name beside the « + »: white like every blue button (dark text on the blue fell under 4.5:1) */
+html body aside.side .new,html body aside.side .new .lbl{color:#fff!important}

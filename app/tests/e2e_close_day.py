@@ -1,8 +1,8 @@
 """
 Sweep — closing the day in one tap (brief « daily loop », step 3, 27 Oct.), Playwright:
   python3 tests/e2e_close_day.py http://127.0.0.1:8095
-A trader of its own for each day, one account, the day's trades put in; then « J'ai fini pour aujourd'hui » under Execution
-(from the first trade) opens the review filled in from the day, « C'est le même » for the platform's balance (brief « pertes
+A trader of its own for each day, one account, the day's trades put in; then the Review step (or « J'ai fini pour aujourd'hui » when « Now » says stop,
+31 Oct.) opens the review filled in from the day, « C'est le même » for the platform's balance (brief « pertes
 oubliées », step 2) and « Fermer ma journée » closes it: 3 taps.
  1  a clean day (a plan, 2 trades in it, every rule respected): followed « yes », discipline 5, grade A
  2  a tilt day (a bullish plan, 4 shorts, every rule broken): « no », 1, F
@@ -48,10 +48,12 @@ with sync_playwright() as p:
       pg.evaluate("([d, i, dr]) => put('trades', { id: 'cd-t' + i, account_id: 'cd-a', instrument: 'NQ', direction: dr, contracts: 1, entry: 1, exit: 2, pnl_c: dr === 'long' ? 9000 : -12000, pnl_manual: true, date: d, entry_time: '1' + i + ':00', exit_time: '1' + i + ':05', discipline: %s })" % DISC[ds], [day, i, dr])
     pg.wait_for_timeout(1500); pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(2500)
     pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-rt', timeout=10000); pg.wait_for_timeout(1500)
-    fin = pg.locator('#main .nav-rt .nav-rt-fin')
-    ok(fin.count() == 1 and fin.first.is_visible() and fin.first.inner_text().replace('›', '').strip() == x['fin'], f'{tag}: « {x["fin"]} » under the routine\'s steps, from the first trade')
+    # (31 Oct., C5) one way to the review: the Review step; « I'm done for today » only at the stop « Now » announces
+    fin, end = pg.locator('#main .nav-rt .nav-rt-fin'), pg.locator('#main .nav-now.is-end').count() > 0
+    ok(fin.count() == (1 if end else 0) and (not end or fin.first.inner_text().replace('›', '').strip() == x['fin']), f'{tag}: « {x["fin"]} » only when « Now » says stop ({fin.count()}, stop: {end})')
+    go = fin.first if end else pg.locator('#main .nav-rt [data-rt=review]').first
     taps = 0
-    (fin.first.tap() if phone else fin.first.click()); taps += 1
+    (go.tap() if phone else go.click()); taps += 1
     pg.wait_for_selector('#gSheet [data-g=save-review]', timeout=8000); pg.wait_for_timeout(500)
     got = pg.evaluate("""(() => { const v = (k) => ((document.querySelector('#gSheet [data-g=' + k + '].on') || {}).dataset || {}).v;
       return [v('r-followed'), +v('r-score') || null, v('r-grade'), (document.querySelector('#gSheet [data-g=save-review]') || {}).textContent] })()""")

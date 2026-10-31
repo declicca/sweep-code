@@ -52,7 +52,7 @@ with sync_playwright() as p:
     more = pg.evaluate("(() => { const d = document.querySelector('#main .ux-st-more'); return d ? [d.open, d.querySelector('summary').textContent.trim(), !!d.querySelector('.ux-st-choice, .ux-st-opt')] : null })()")
     ok(more is None or (more[0] is False and more[1] == x['more'] and more[2]), f'1 {tag}: starting out, an evaluation: the funded-account choices in « {x["more"]} », folded ({more})')
     if more:
-      tap(pg.locator('#main .ux-st-more > summary')); pg.wait_for_timeout(300)
+      tap(pg.locator('#main form[data-form=account] .nav-acc-opt > summary')); pg.wait_for_timeout(300)   # (31 Oct., C2) one « More options » for both
       if pg.locator('#main .ux-st-more .ux-st-cl .sw-term').count():
         ok(len(tip_of('#main .ux-st-more .ux-st-cl .sw-term')) > 40, f'1 {tag}: the funded-account option has its « i »')
     # (the account itself, put in: the rest of the first day)
