@@ -144,7 +144,7 @@ p,li{max-width:56ch}   /* about 75 characters a line in Geist (1ch is the width 
 .btn-primary:active{background:var(--blue-btn-press)}
 .cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:32px}
 .center .cta-row,.cta-row.center{justify-content:center}
-.reassure{margin-top:16px;font-size:var(--fs-small);color:var(--faint)}
+.reassure{margin-top:16px;text-wrap:balance;font-size:var(--fs-small);color:var(--faint)}
 .go,.tlink{display:inline-flex;align-items:center;gap:6px;color:var(--blue-text);font-weight:500;text-decoration:none}
 .go span[aria-hidden],.tlink span[aria-hidden]{transition:transform var(--t-mid) var(--spring)}
 @media (hover:hover){.go:hover span[aria-hidden],.tlink:hover span[aria-hidden]{transform:translateX(3px)}}
@@ -919,6 +919,8 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .c100 .pill{margin-bottom:28px}
 .h1-eyebrow{font-size:clamp(14px,13.26px + .19vw,16px);font-weight:500;letter-spacing:-.005em;color:var(--muted);line-height:1.4}
 .h1-promise{font-size:var(--fs-display);line-height:1.02;letter-spacing:-.035em;max-width:13ch}
+.hero .offer{margin:24px auto 0;max-width:42ch;line-height:1.35;text-wrap:balance;font-size:clamp(17px,15.5px + .4vw,20px);font-weight:500;letter-spacing:-.01em;color:var(--text)}
+.hero .offer+.lead{margin-top:12px}
 .hero .lead{margin:24px auto 0;max-width:46ch}
 .hero .cta-row{justify-content:center;margin-top:36px}
 .hero .pill{margin-bottom:28px}
