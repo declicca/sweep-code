@@ -110,7 +110,7 @@ def sec_social(lang, t, id_="social", flip=True):
 # ----------------------------------------------------------------- HOME
 def page_home(lang, t):
     """Home, on the design system (ui.py, system.css)."""
-    from pages16 import bar, sec_oneplace, sec_story, sec_disc, sec_ai, sec_trust, sec_evalcost, sec_pricing, sec_rent, sec_faq, sec_next, sec_final, faq_ld
+    from pages16 import bar, sec_oneplace, sec_only, sec_story, sec_disc, sec_ai, sec_trust, sec_evalcost, sec_pricing, sec_rent, sec_faq, sec_next, sec_final, faq_ld
     from pages15 import IDENTITY
     reel = (f'<video class="hero-loop" muted loop playsinline preload="none" data-auto aria-label="{html.escape(t(T("Sweep in action: your day, a trade logged in seconds, your rules, every trade, payout ready, your progress","Sweep en action : ta journée, un trade ajouté en quelques secondes, tes règles, chaque trade, payout prêt, ta progression","Sweep en acción: tu día, una operación registrada en segundos, tus reglas, cada operación, payout listo, tu progreso")))}">'
             '<source src="/video/hero-loop-720.webm" type="video/webm" media="(max-width: 860px)"><source src="/video/hero-loop-720.mp4" type="video/mp4" media="(max-width: 860px)">'
@@ -132,7 +132,7 @@ def page_home(lang, t):
          "description":t(IDENTITY),"inLanguage":["en","fr","es"],
          "offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro","price":"19","priceCurrency":"USD"},{"@type":"Offer","name":"Elite","price":"39","priceCurrency":"USD"}]},
         faq_ld(t), tour_ld(t)]})
-    body = (hero + sec_oneplace(lang,t) + sec_story(lang,t) + sec_disc(lang,t) + sec_ai(lang,t)
+    body = (hero + sec_oneplace(lang,t) + sec_only(lang,t) + sec_story(lang,t) + sec_disc(lang,t) + sec_ai(lang,t)
             + sec_trust(lang,t) + sec_evalcost(lang,t) + sec_pricing(lang,t) + sec_rent(lang,t) + sec_faq(lang,t) + sec_next(lang,t) + sec_final(lang,t) + COHORT_JS + tour_dialog(t))
     return (t(T("Sweep — Trading Journal for Prop Firm Traders · Free","Sweep — Journal de trading pour prop firms · Gratuit","Sweep — Diario de trading para prop firms · Gratis")),
             t(T("Track every prop firm account, payout and expense in one place. Free forever, Pro from $19/mo. Built for Topstep, Apex, Lucid and more.","Suis chaque compte prop, payout et dépense au même endroit. Gratuit pour toujours, Pro dès 19 $/mois. Conçu pour Topstep, Apex, Lucid et plus.","Sigue cada cuenta prop, payout y gasto en un solo lugar. Gratis para siempre, Pro desde 19 $/mes. Hecho para Topstep, Apex, Lucid y más.")),

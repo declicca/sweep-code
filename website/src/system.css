@@ -1100,6 +1100,7 @@ table.rent tr.sw+tr.sw>*{box-shadow:none}
   .reveal,.head>*,.stagger>*{transition:opacity var(--t-slow) var(--spring),transform var(--t-slow) var(--spring)}
   .head>*:nth-child(2){transition-delay:.06s}.head>*:nth-child(3){transition-delay:.12s}.head>*:nth-child(4){transition-delay:.18s}
   .stagger>*{transition-delay:calc(var(--i,0) * 70ms)}
+  .stagger.st60>*{transition-delay:calc(var(--i,0) * 60ms)}
   .io .reveal.zoom:not(.in){transform:translateY(32px) scale(.96)}
   .io .fr-p.reveal:not(.in) .scr{transform:perspective(1200px) rotateX(10deg)}
   .fr-p .scr{transition:transform 1.1s var(--spring)}

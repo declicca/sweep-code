@@ -27,6 +27,29 @@ def sec_oneplace(lang, t):
                     "Una hoja de cálculo para tus operaciones. El panel de tu firma para el drawdown. Notas para tu plan. Capturas en tu galería. Sweep lo reúne todo en un solo lugar, con calma."),
                  None, viz, id_="one-place")
 
+# ---------------------------------------------------------------- what only Sweep does (brief « avance concurrentielle », step 4)
+def sec_only(lang, t):
+    """Five tiles, one real app screen each, revealed 60 ms apart."""
+    C = "/img/captures/"
+    items = [
+     (L3("Real money, not eval money.", "Ton vrai argent, pas celui des évaluations.", "Dinero real, no dinero de evaluación."),
+      L3("Evals, funded and live P&L kept apart, with every expense and payout. You see what you really earn.", "Le P&L des évaluations, des comptes financés et du live reste séparé, avec chaque dépense et chaque payout. Tu vois ce que tu gagnes vraiment.", "El P&L de evaluaciones, cuentas fondeadas y live va por separado, con cada gasto y cada payout. Ves lo que ganas de verdad."),
+      "v6-12-payouts-m.webp", L3("My money: payouts, pending requests and expenses, sample data", "Mon argent : payouts, demandes en attente et dépenses, données d’exemple", "Mi dinero: payouts, solicitudes pendientes y gastos, datos de ejemplo"), "50% 0%"),
+     (L3("Your firm’s rules, always current.", "Les règles de ta firme, toujours à jour.", "Las reglas de tu firma, siempre al día."),
+      L3("Pick your firm and account type. Rules are checked every week.", "Choisis ta firme et ton type de compte. Les règles sont vérifiées chaque semaine.", "Elige tu firma y tu tipo de cuenta. Las reglas se verifican cada semana."),
+      "ecran-regles-firme.webp", L3("Adding an account: funded, Topstep, XFA, then the size", "Ajout d’un compte : financé, Topstep, XFA, puis la taille", "Añadir una cuenta: fondeada, Topstep, XFA y luego el tamaño"), "50% 30%"),
+     (L3("A trading day that ends at 6 PM ET.", "Une journée de trading qui finit à 18 h ET.", "Un día de trading que termina a las 6 p. m. ET."),
+      L3("Like the market, not like your calendar.", "Comme le marché, pas comme ton calendrier.", "Como el mercado, no como tu calendario."),
+      "v6-01-today-m.webp", L3("Today: the session’s routine and accounts, sample data", "Aujourd’hui : la routine et les comptes de la séance, données d’exemple", "Hoy: la rutina y las cuentas de la sesión, datos de ejemplo"), "50% 0%"),
+     (L3("Show your discipline, not just your dollars.", "Montre ta discipline, pas juste tes dollars.", "Muestra tu disciplina, no solo tus dólares."),
+      L3("Share streaks and rules kept. Hide the amounts if you want.", "Partage tes séries et tes règles respectées. Cache les montants si tu veux.", "Comparte tus rachas y reglas cumplidas. Oculta los montos si quieres."),
+      "v6-14b-share-stats-options-m.webp", L3("Share options: show my name, show amounts, show prop firm", "Options de partage : afficher mon nom, les montants, la prop firm", "Opciones para compartir: mostrar mi nombre, los montos, la prop firm"), "50% 0%"),
+     (L3("A 90-day gameplan for new traders.", "Un plan de 90 jours pour les nouveaux traders.", "Un plan de 90 días para traders nuevos."),
+      L3("Clear missions from day one, inside the app.", "Des missions claires dès le premier jour, dans l’app.", "Misiones claras desde el primer día, dentro de la app."),
+      "ecran-plan-90-jours.webp", L3("Your 90-day gameplan: month 1, week by week", "Ton plan de 90 jours : le mois 1, semaine par semaine", "Tu plan de 90 días: el mes 1, semana a semana"), "50% 8%")]
+    return sec(head(t, None, L3("Built for how prop traders actually work.", "Pensé pour la vraie façon de travailler des traders prop.", "Hecho para cómo trabajan de verdad los traders prop."))
+               + cards([card_media(t, ti, tx, phone_img(C + img, t(alt), pos), crop=True) for ti, tx, img, alt, pos in items], 5, "stagger st60"), "n", "only-sweep")
+
 def sec_story(lang, t):
     """Logging, the firm's rules, payouts: one narration. On computers the text scrolls and one app screen stays,
     changing with it (an empty trade fills in, then the rules, then the payouts); on phones each part has its own screen."""
