@@ -84,8 +84,11 @@ with sync_playwright() as p:
     pg = Bc.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#settings'); pg.wait_for_selector('#main .nav-devs', state='attached', timeout=15000)
     # (30 Oct., W3) « Account » folded on arrival; (1 Nov., the CI) Settings can redraw once more after the list arrives: open it on the page as it is then
-    pg.wait_for_function("(() => { const v = document.querySelector('#main .nav-devs'); const d = v && v.closest('details.nav-sgd'); if (d) d.open = true; return !!v })()", timeout=15000); pg.wait_for_timeout(600)
-    pg.wait_for_function("(() => { const v = document.querySelector('#main .nav-devs'); const d = v && v.closest('details.nav-sgd'); if (d) d.open = true; return !!v && (!d || d.open) })()", timeout=15000)
+    for _ in range(30):   # (pg.evaluate, not wait_for_function: the app's CSP refuses the string it evaluates)
+      if pg.evaluate("(() => { const v = document.querySelector('#main .nav-devs'); const d = v && v.closest('details.nav-sgd'); if (d) d.open = true; return !!v && (!d || d.open) })()"): break
+      pg.wait_for_timeout(200)
+    pg.wait_for_timeout(600)
+    pg.evaluate("(() => { const v = document.querySelector('#main .nav-devs'); const d = v && v.closest('details.nav-sgd'); if (d) d.open = true })()")
     txt = pg.evaluate("(document.querySelector('#main .nav-devs') || {}).textContent || ''")
     ok(x['h'] in txt and x['me'] in txt and pg.locator('#main [data-dev-out]').count() >= 1, f'{tag} 4 « {x["h"]} »: this browser marked, the other one can be signed out')
     pg.locator('#main [data-dev-out]').first.click(); pg.wait_for_timeout(600)
