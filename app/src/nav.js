@@ -3519,6 +3519,7 @@ window.SweepMO = window.SweepMO || class {
     const w = function () { const out = appRender.apply(this, arguments); try { statsButton(); } catch (e) { /* never blocks */ } return out; };
     w.__shst = true; window.render = w;
   }
+  addEventListener('sw:page', () => { try { statsButton(); } catch (e) { /* never blocks */ } });   // (1 Nov.) in the page's first image: the instant pages showed it a frame early
   window.addEventListener('hashchange', () => setTimeout(() => { try { statsButton(); } catch (e) { /* never blocks */ } }, 50));
 })();
 
@@ -4016,6 +4017,7 @@ window.SweepMO = window.SweepMO || class {
   }
   document.addEventListener('click', (e) => { const c = e.target.closest && e.target.closest('[data-also]'); if (c) { c.classList.toggle('on'); } });
   new window.SweepMO(() => { try { pass(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+  addEventListener('sw:page', () => { try { pass(); } catch (e) { /* never blocks */ } });   // (1 Nov.) in the page's first image: the instant pages showed it a frame early
   window.addEventListener('hashchange', () => setTimeout(() => { try { pass(); } catch (e) { /* never blocks */ } }, 60));
   { const ar = window.render; if (typeof ar === 'function' && !ar.__imp) { const w = function () { const o = ar.apply(this, arguments); try { pass(); } catch (e) { /* never blocks */ } return o; }; w.__imp = true; window.render = w; } }
 
@@ -4226,6 +4228,7 @@ window.SweepMO = window.SweepMO || class {
     const w = function () { const out = appRender.apply(this, arguments); try { place(); } catch (e) { /* never blocks */ } return out; };
     w.__wk = true; window.render = w;
   }
+  addEventListener('sw:page', () => { try { place(); } catch (e) { /* never blocks */ } });   // (1 Nov.) in the page's first image: the instant pages showed it a frame early
   window.addEventListener('hashchange', () => setTimeout(() => { try { place(); } catch (e) { /* never blocks */ } }, 80));
 })();
 
@@ -6440,6 +6443,7 @@ new window.SweepMO(() => {
     Object.keys(appRender).forEach((k) => { w[k] = appRender[k]; });
     w.__accsel = true; window.render = w;
   }
+  addEventListener('sw:page', () => { try { decorate(); } catch (e) { /* never blocks */ } });   // (1 Nov.) in the page's first image: the instant pages showed it a frame early
   window.addEventListener('hashchange', () => setTimeout(() => { try { decorate(); } catch (e) { /* never blocks */ } }, 30));
   // a quiet sync redraws the list without render(): the boxes and icons are back before the browser paints (no jump)
   { const m0 = document.getElementById('main');
@@ -7017,7 +7021,7 @@ new window.SweepMO(() => {
     if (ROOT[view(to)]) tab = ROOT[view(to)];
     mem[tab] = to;
     const args = arguments, self = this;
-    const draw = () => { const out = r0.apply(self, args); place(y); return out; };
+    const draw = () => { const out = r0.apply(self, args); try { dispatchEvent(new Event('sw:page')); } catch (e) { /* never blocks */ } place(y); return out; };   // the page's own decorations, in the same image
     if (dir && !noVT && document.startViewTransition && !document.hidden) {
       document.documentElement.dataset.vt = back && dir === 'push' ? 'pop' : dir;
       try { const vt = document.startViewTransition(draw); vt.finished.finally(() => { delete document.documentElement.dataset.vt; }); return; }

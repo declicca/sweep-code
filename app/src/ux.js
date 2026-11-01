@@ -1978,6 +1978,7 @@
     w.__mnyexp = true; window.render = w;
   }
   window.addEventListener('hashchange', () => setTimeout(() => { try { exportButton(); } catch (e) { /* never blocks */ } }, 50));
+  addEventListener('sw:page', () => { try { exportButton(); } catch (e) { /* never blocks */ } });   // (1 Nov.) in the page's first image too
   const EST = () => ({ en: 'estimated', fr: 'estimé', es: 'estimado' })[L] || 'estimated';   // catch-up entries (section 29)
   /** the CSV of what is on screen: the active period and every active filter (account type, firm, account) */
   function csvView() {

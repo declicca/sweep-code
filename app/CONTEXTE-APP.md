@@ -1450,6 +1450,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 
 ### Fluidité « iOS 27 » (31 oct., `briefs/brief-app-fluidite-ios27-2026-10-31.md`) : les 3 lots
 - **Lot 1, les mouvements** (`nav.js`, dernier module « moving between pages like iOS ») :
+  - **Décorations au premier dessin** : le module émet `sw:page` juste après avoir dessiné une nouvelle page. Les décorations qui attendaient 30 à 80 ms après le changement d'adresse (aide de Nouvelles, bouton d'export, routine, bouton de Stats) s'y font aussi, dans la même image. Sur une machine lente (la CI), elles décalaient la page après son affichage ; l'ancienne animation d'entrée le cachait.
   - **Changement d'onglet et retour** : instantanés. Le module des blocs qui montaient (`sw-in`), `nav-dash-in` et `ANIM` au changement d'adresse sont retirés. N'animent que les éléments qui apparaissent dans une page déjà affichée.
   - **Mémoire par onglet** : chaque onglet (Aujourd'hui, Trades, Stats, Comptes) garde sa position et sa sous-page. Toucher l'onglet actif remonte en haut ; le toucher encore revient à sa racine.
   - **Position au retour** : le retour remet la position exacte (`history.scrollRestoration = 'manual'`, position gardée par adresse, `history.state.swI` pour savoir si c'est un retour). L'app ne remonte plus en haut d'elle-même au changement d'adresse : c'est ce module qui place la page.
