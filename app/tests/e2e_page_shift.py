@@ -26,13 +26,13 @@ with sync_playwright() as p:
     pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160])); pg.goto(B + '/#dashboard'); pg.wait_for_timeout(3500)
     tops, shifts, srcs = {}, {}, {}
     for r in PAGES:
-      SNAP = "[...document.querySelectorAll('#main > *, .main-wrap > .top, body')].map((e) => (e.className || e.tagName).toString().split(' ').slice(0, 2).join('.') + ':' + Math.round(e.getBoundingClientRect().height)).join(' ') + ' | ' + document.body.className.split(' ').filter((c) => /^disc|bill|ux-|nav-/.test(c)).join('.')"
-      pg.evaluate("window.__ls = []"); first = pg.evaluate(f"""new Promise((res) => {{ location.hash = '#{r}'; requestAnimationFrame(() => requestAnimationFrame(() => res({SNAP}))) }})"""); pg.wait_for_timeout(2200)
-      last = pg.evaluate(SNAP)
+      # (1 Nov.) the elements whose height changed between the page's first image and the end, the largest first
+      pg.evaluate("window.__ls = []"); pg.evaluate(f"""new Promise((res) => {{ location.hash = '#{r}'; requestAnimationFrame(() => requestAnimationFrame(() => {{ window.__h0 = new Map([...document.querySelectorAll('#main *')].map((e) => [e, Math.round(e.getBoundingClientRect().height)])); res(1) }})) }})"""); pg.wait_for_timeout(2200)
+      first = ''; last = pg.evaluate("""[...(window.__h0 || new Map())].map(([e, h]) => [e, h, e.isConnected ? Math.round(e.getBoundingClientRect().height) : -1]).filter(([e, h, n]) => n !== h).sort((a, b) => Math.abs(b[2] - b[1]) - Math.abs(a[2] - a[1])).slice(0, 4).map(([e, h, n]) => (e.tagName + '.' + String(e.className || '').split(' ').slice(0, 2).join('.')).slice(0, 40) + ' ' + h + '→' + n + ' «' + (e.textContent || '').trim().slice(0, 30) + '»').join(' ; ')""")
       tops[r] = pg.evaluate("Math.round(document.getElementById('main').getBoundingClientRect().top + scrollY)")
       shifts[r] = pg.evaluate(CLS)
       srcs[r] = pg.evaluate("window.__ls.filter((x) => x.v >= 0.002).map((x) => x.t + 'ms ' + x.v + ' ' + x.s.join(', ')).slice(0, 3)")
-      if first != last: srcs[r].append('first: ' + first + ' // end: ' + last)
+      if last and shifts[r] >= 0.005: srcs[r].append('changed: ' + last)
     ok(len(set(tops.values())) == 1, f'1 {tag}: the content starts at the same place on every page ({tops})')
     ok(max(shifts.values()) < 0.005, f'2 {tag}: nothing moves once a page is drawn ({ {k: v for k, v in shifts.items() if v} })' + ''.join(f' | {k}: {srcs[k]}' for k, v in shifts.items() if v >= 0.005))   # what moved (1 Nov.: only the CI saw it)
     # 3. the gameplan's card, coming back
