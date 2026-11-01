@@ -18,9 +18,13 @@ window.SweepMO = window.SweepMO || class {
     this.o = new MutationObserver((recs) => {
       for (const r of recs) q.push(r);
       if (pending) return; pending = true;
-      requestAnimationFrame(() => { pending = false; const b = q; q = []; try { cb(b, this); } catch (e) { /* never blocks */ } });
+      requestAnimationFrame(() => { pending = false; const b = q; q = []; if (!b.length) return; try { cb(b, this); } catch (e) { /* never blocks */ } });
     });
+    // (1 Nov.) a page just drawn: what waits for the next frame runs now, before its first image (SweepMO.flushAll)
+    this.flush = () => { const b = q.concat(this.o.takeRecords()); q = []; if (!b.length) return false; try { cb(b, this); } catch (e) { /* never blocks */ } return true; };
+    (window.__swMOs || (window.__swMOs = [])).push(this);
   }
+  static flushAll() { for (let k = 0; k < 3; k++) { let any = false; (window.__swMOs || []).forEach((m) => { if (m.flush()) any = true; }); if (!any) return; } }
   observe(t, o) { this.o.observe(t, o); }
   disconnect() { this.o.disconnect(); }
   takeRecords() { return this.o.takeRecords(); }
@@ -7021,7 +7025,7 @@ new window.SweepMO(() => {
     if (ROOT[view(to)]) tab = ROOT[view(to)];
     mem[tab] = to;
     const args = arguments, self = this;
-    const draw = () => { const out = r0.apply(self, args); try { dispatchEvent(new Event('sw:page')); } catch (e) { /* never blocks */ } place(y); return out; };   // the page's own decorations, in the same image
+    const draw = () => { const out = r0.apply(self, args); try { dispatchEvent(new Event('sw:page')); window.SweepMO.flushAll(); queueMicrotask(() => { try { window.SweepMO.flushAll(); } catch (e) { /* never blocks */ } }); } catch (e) { /* never blocks */ } place(y); return out; };   // the page's own decorations in the same image, and once every wrapper of render has drawn (still before the image)   // the page's own decorations, in the same image
     if (dir && !noVT && document.startViewTransition && !document.hidden) {
       document.documentElement.dataset.vt = back && dir === 'push' ? 'pop' : dir;
       try { const vt = document.startViewTransition(draw); vt.ready.catch(() => {}); vt.updateCallbackDone.catch(() => {}); vt.finished.catch(() => {}).finally(() => { delete document.documentElement.dataset.vt; }); return; }   // (a transition skipped by the next one: never an error)
