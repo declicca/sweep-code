@@ -31,7 +31,7 @@ with sync_playwright() as p:
       shifts[r] = pg.evaluate(CLS)
       srcs[r] = pg.evaluate("window.__ls.filter((x) => x.v >= 0.002).map((x) => x.t + 'ms ' + x.v + ' ' + x.s.join(', ')).slice(0, 3)")
     ok(len(set(tops.values())) == 1, f'1 {tag}: the content starts at the same place on every page ({tops})')
-    ok(max(shifts.values()) < 0.005, f'2 {tag}: nothing moves once a page is drawn ({ {k: v for k, v in shifts.items() if v} })' + ''.join(f'\n     {k}: {srcs[k]}' for k, v in shifts.items() if v >= 0.005))   # what moved (1 Nov.: only the CI saw it)
+    ok(max(shifts.values()) < 0.005, f'2 {tag}: nothing moves once a page is drawn ({ {k: v for k, v in shifts.items() if v} })' + ''.join(f' | {k}: {srcs[k]}' for k, v in shifts.items() if v >= 0.005))   # what moved (1 Nov.: only the CI saw it)
     # 3. the gameplan's card, coming back
     pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(800)
     pg.evaluate("fetch('api/game/gameplan/start', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
