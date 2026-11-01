@@ -479,10 +479,14 @@
       const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml();
     }
   }
-  async function pushPref(el) {
+  let prefQ = Promise.resolve();   // (1 Nov.) one change at a time: the server rewrites all the reminders, two at once lost the first
+  function pushPref(el) {
     const k = el.dataset.ntPushAt || el.dataset.ntPush, body = el.dataset.ntPushAt ? { kind: k, at: el.value } : { kind: k, on: el.checked };
-    try { PU.st = await post('api/push/prefs', body); if (typeof haptic === 'function') haptic(6); }
-    catch (e) { toast(t('error')); const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml(); }
+    prefQ = prefQ.then(async () => {
+      try { PU.st = await post('api/push/prefs', body); if (typeof haptic === 'function') haptic(6); }
+      catch (e) { toast(t('error')); const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml(); }
+    });
+    return prefQ;
   }
   /** once per visit: this device's subscription again (its language, a renewed address) */
   async function pushSync() {
