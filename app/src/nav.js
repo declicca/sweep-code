@@ -7024,7 +7024,7 @@ new window.SweepMO(() => {
     const draw = () => { const out = r0.apply(self, args); try { dispatchEvent(new Event('sw:page')); } catch (e) { /* never blocks */ } place(y); return out; };   // the page's own decorations, in the same image
     if (dir && !noVT && document.startViewTransition && !document.hidden) {
       document.documentElement.dataset.vt = back && dir === 'push' ? 'pop' : dir;
-      try { const vt = document.startViewTransition(draw); vt.finished.finally(() => { delete document.documentElement.dataset.vt; }); return; }
+      try { const vt = document.startViewTransition(draw); vt.ready.catch(() => {}); vt.updateCallbackDone.catch(() => {}); vt.finished.catch(() => {}).finally(() => { delete document.documentElement.dataset.vt; }); return; }   // (a transition skipped by the next one: never an error)
       catch (e) { delete document.documentElement.dataset.vt; }
     }
     noVT = false; pos[from] = pos[from] ?? 0;

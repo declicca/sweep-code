@@ -27,8 +27,8 @@ with sync_playwright() as p:
     tops, shifts, srcs = {}, {}, {}
     for r in PAGES:
       # (1 Nov.) the elements whose height changed between the page's first image and the end, the largest first
-      pg.evaluate("window.__ls = []"); pg.evaluate(f"""new Promise((res) => {{ location.hash = '#{r}'; requestAnimationFrame(() => requestAnimationFrame(() => {{ window.__h0 = new Map([...document.querySelectorAll('#main *')].map((e) => [e, Math.round(e.getBoundingClientRect().height)])); res(1) }})) }})"""); pg.wait_for_timeout(2200)
-      first = ''; last = pg.evaluate("""[...(window.__h0 || new Map())].map(([e, h]) => [e, h, e.isConnected ? Math.round(e.getBoundingClientRect().height) : -1]).filter(([e, h, n]) => n !== h).sort((a, b) => Math.abs(b[2] - b[1]) - Math.abs(a[2] - a[1])).slice(0, 4).map(([e, h, n]) => (e.tagName + '.' + String(e.className || '').split(' ').slice(0, 2).join('.')).slice(0, 40) + ' ' + h + '→' + n + ' «' + (e.textContent || '').trim().slice(0, 30) + '»').join(' ; ')""")
+      pg.evaluate("window.__ls = []"); pg.evaluate(f"""new Promise((res) => {{ location.hash = '#{r}'; requestAnimationFrame(() => requestAnimationFrame(() => {{ window.__h0 = new Map([...document.querySelectorAll('body *')].map((e) => [e, Math.round(e.getBoundingClientRect().height)])); window.__y0 = scrollY; res(1) }})) }})"""); pg.wait_for_timeout(2200)
+      first = ''; last = pg.evaluate("""[...(window.__h0 || new Map())].map(([e, h]) => [e, h, e.isConnected ? Math.round(e.getBoundingClientRect().height) : -1]).filter(([e, h, n]) => n !== h).sort((a, b) => Math.abs(b[2] - b[1]) - Math.abs(a[2] - a[1])).slice(0, 5).map(([e, h, n]) => (e.tagName + '.' + String(e.className || '').split(' ').slice(0, 2).join('.')).slice(0, 40) + ' ' + h + '→' + n + ' «' + (e.textContent || '').trim().slice(0, 30) + '»').join(' ; ') + ' ; scroll ' + window.__y0 + '→' + scrollY""")
       tops[r] = pg.evaluate("Math.round(document.getElementById('main').getBoundingClientRect().top + scrollY)")
       shifts[r] = pg.evaluate(CLS)
       srcs[r] = pg.evaluate("window.__ls.filter((x) => x.v >= 0.002).map((x) => x.t + 'ms ' + x.v + ' ' + x.s.join(', ')).slice(0, 3)")
