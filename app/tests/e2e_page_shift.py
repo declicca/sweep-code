@@ -4,9 +4,11 @@ Sweep — no page jump (20 Oct., Mateo: « still page jumps »), phone 390 and c
  1  the page header has one height on every page (it changed with the page's buttons and with Today's greeting line):
     the content starts at the same place on every page
  2  from one page to another, nothing moves after it is drawn (layout shift under 0.005)
- 3  Today with the 90-day gameplan's card, a trader coming back: the card is there from the first paint, nothing pushed down
+ 3  Today with the 90-day gameplan's card, a trader coming back on a slow server (each answer 250 ms late, as on the CI): the card
+    is there from the first paint, the loading card has the real card's size, nothing pushed down
 """
 import sys
+import time
 from playwright.sync_api import sync_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
@@ -43,7 +45,11 @@ with sync_playwright() as p:
     for _ in range(40):
       if pg.evaluate("!!localStorage.getItem('sw.gpLine')"): break
       pg.wait_for_timeout(250)
+    # (1 Nov.) a slow server, as the CI's: the game's answer comes after the first paint; the loading card has the real card's size
+    # (without the mission line and with shorter steps, it grew 100 px and pushed the accounts down)
+    pg.route('**/api/**', lambda r: (time.sleep(0.25), r.continue_()))
     pg.reload(); pg.wait_for_timeout(4500)
+    pg.unroute('**/api/**')
     # (29 Oct.) what changed under the card that moved, for the next failure on the CI (the accounts arriving after the first paint?)
     acc = pg.evaluate("[window.__acc0 ?? null, (S.accounts || []).length, Math.round((document.querySelector('#main .d-acc') || { getBoundingClientRect: () => ({ height: 0 }) }).getBoundingClientRect().height)]")
     ok(pg.locator('#gpLine').count() == 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan line in « Now », coming back: nothing pushed down ({pg.evaluate(CLS)} {pg.evaluate("window.__ls.filter((x) => x.v > 0.0005)")}; accounts at the first paint, at the end, the accounts card height: {acc})')   # (21 Oct.: what moved, in the failure line — the only one GitHub shows)

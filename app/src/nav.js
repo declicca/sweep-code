@@ -4353,7 +4353,14 @@ window.SweepMO = window.SweepMO || class {
     const st = window.SweepGame && SweepGame.state && SweepGame.state(); let d = st && st.today;
     // (31 Oct., C4) sample data only: the routine counts the sample trades listed under it (the server never sees them)
     if (d && !d.trades && sampleOnly()) { const n = (S.trades || []).filter((x) => x.demo && x.date === d.day).length; if (n) d = Object.assign({}, d, { trades: n }); }
-    if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div><div class="nav-rt-steps">${'<div class="nav-rt-s sk"></div>'.repeat(3)}</div></section>`;
+    // the 90-day gameplan's mission of the day (SWEEP.md step 3: its card became this line; gameplan.js draws it, the last one kept in the browser)
+    const gpLine = () => (() => { try { return window.SweepGP && SweepGP.line ? SweepGP.line() : localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } })() || (window.SweepDisc ? SweepDisc.line() : '');   // (SWEEP.md step 5) the gameplan's mission, else the discovery mission
+    // (1 Nov.) the loading card has the card's size: the mission line kept in the browser, and steps with the real texts, hidden
+    // (a 70 px line and steps 28 px taller arrived with the game's answer on a slow server: the accounts card was pushed down 100 px)
+    const skStep = (a, b, c, d2, x) => `<div class="nav-rt-s sk"><div class="nav-rt-si"><span class="nav-rt-n">1</span></div><div class="nav-rt-sb"><b>${t(a)}</b><small>${t(b)}</small><span class="nav-rt-st">${t(d2)}</span></div><div class="nav-rt-sa"><button type="button" class="btn sm" tabindex="-1"><span class="l">${t(c)}</span><span class="s">${t(c + 's')}</span></button>${x ? `<span class="link nav-rt-off">${t('off')}</span>` : ''}</div></div>`;
+    // and the height the real card had last time at this width (kept in the browser: rows the loading card cannot know, as « Yesterday is not finished »)
+    const rtH = (() => { try { const k = JSON.parse(localStorage.getItem('sw.rtH') || 'null'); return k && k.w === innerWidth && k.h > 0 ? k.h : 0; } catch (e) { return 0; } })();
+    if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"${rtH ? ` style="min-height:${rtH}px"` : ''}><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div>${gpLine()}<div class="nav-rt-steps">${skStep('s1', 's1d', 'b1', 'todo', !(S.trades || []).some((x) => typeof todayStr === 'function' && x.date === todayStr()))}${skStep('s2', 's2d', 'b2', 'noTrade')}${skStep('s3', 's3d', 'b3', 'reviewTodo')}</div></section>`;
     const p = st.profile || {}, y = st.yesterday && st.yesterday.market && !st.yesterday.valid && (st.yesterday.trades > 0 || st.yesterday.plan_valid) ? st.yesterday : null;   // only a day that was started is « not finished »
     const r = d.rings || {}, ring = document.querySelector('.nav-lvring');
     // level progress: from the game's own level bar (or the ring made from it)
@@ -4376,8 +4383,7 @@ window.SweepMO = window.SweepMO || class {
     const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : '';
     const nowRow = nowHtml(d, r);
     const rmRow = remindRow();
-    // the 90-day gameplan's mission of the day (SWEEP.md step 3: its card became this line; gameplan.js draws it, the last one kept in the browser)
-    const gpRow = (() => { try { return window.SweepGP && SweepGP.line ? SweepGP.line() : localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } })() || (window.SweepDisc ? SweepDisc.line() : '');   // (SWEEP.md step 5) the gameplan's mission, else the discovery mission
+    const gpRow = gpLine();
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
     if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${rmRow}${gpRow}${helpT}</section>`;
@@ -4424,6 +4430,7 @@ window.SweepMO = window.SweepMO || class {
     else if (window.SweepCoach && SweepCoach.paintToday) SweepCoach.paintToday();   // (1 Nov.) the coach in the same image as its card: it pushed the 3 steps down one frame later
     el.classList.toggle('closed-rt', rtClosed());
     document.body.classList.add('nav-rt-on');
+    if (!el.classList.contains('ph')) requestAnimationFrame(() => { try { if (el.isConnected) localStorage.setItem('sw.rtH', JSON.stringify({ w: innerWidth, h: Math.round(el.getBoundingClientRect().height) })); } catch (e) { /* private mode */ } });
   }
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('[data-rt]'); if (!b) return;

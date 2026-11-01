@@ -1130,6 +1130,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 .nav-rt-sk{display:inline-block;width:64px;height:40px;border-radius:14px;background:var(--panel2)}
 .nav-rt-sk.w{width:132px}
 .nav-rt-s.sk{background:var(--panel2);animation:nav-rt-pulse 1.4s var(--spring) infinite}
+.nav-rt-s.sk > *{visibility:hidden}
 @keyframes nav-rt-pulse{50%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){.nav-rt-s.sk{animation:none}}
 @media (max-width:860px){.nav-rt-s{min-height:150px}.nav-rt-sk{height:36px;width:52px}.nav-rt-sk.w{width:60px}
