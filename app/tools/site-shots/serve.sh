@@ -14,5 +14,5 @@ rm -rf "$SHOTS_BARS" && python3 "$HERE/bars.py" "$SHOTS_BARS" >/dev/null
 SRV=$!
 for i in $(seq 1 50); do curl -s -o /dev/null "http://127.0.0.1:$PORT/api/auth/config" && break; sleep 0.2; done
 "$@"; rc=$?
-kill $SRV 2>/dev/null; pkill -P $SRV 2>/dev/null; wait $SRV 2>/dev/null
+pkill -P $SRV 2>/dev/null; kill $SRV 2>/dev/null; wait $SRV 2>/dev/null   # the workers first (PHP_CLI_SERVER_WORKERS), as run.sh: with the parent gone first they kept the port
 exit $rc

@@ -7,7 +7,7 @@ Uses the signed-in trader's sample data; changes nothing. Phone 390 and computer
  2  short: no transition over 350 ms on the main pages; sheets 340 ms; the page entrance ≤ 350 ms
  3  the decorative loops stop by themselves (the Sweep AI star: 3 rounds, not forever)
  4  transform / opacity: Wrapped's story bar scales (no width), the skeletons breathe in opacity, the entrance has no blur
- 5  « Reduce motion »: transitions and animations are instant
+ 5  « Reduce motion »: transitions and animations are instant; a sub-page fades in 150 ms instead of sliding (31 Oct.)
  6  « Reduce transparency »: the bottom bar and the sheets are opaque, without blur
  7  « More contrast »: the secondary grey is as dark as the grey, lines stronger
 """
@@ -56,6 +56,11 @@ with sync_playwright() as p:
   c, pg, errs = page(br, 390, True, reduced_motion='reduce')
   r = pg.evaluate("(()=>{const b=document.querySelector('.bottomnav'); const s=getComputedStyle(b); return [s.transitionDuration.split(', ').map(parseFloat).every(x=>x<0.02), document.getAnimations().every(a=>(a.effect.getComputedTiming().duration||0)<20)]})()")
   ok(r[0] and r[1], f'5 reduce motion: instant ({r})')
+  # (31 Oct., fluidity 7) opening a sub-page: the slide becomes a 150 ms fade
+  vt = pg.evaluate("""(async () => { const id = (S.trades.filter((t) => !t.untracked).slice(-1)[0] || {}).id; location.hash = '#trade/' + id; const out = [];
+    for (let k = 0; k < 12 && !out.length; k++) { await new Promise((r) => requestAnimationFrame(r)); document.getAnimations().filter((a) => a.effect && /view-transition-(old|new)\\(root\\)/.test(a.effect.pseudoElement || '')).forEach((a) => out.push([a.animationName, a.effect.getComputedTiming().duration])); }
+    return out })()""")
+  ok(not vt or all(n.startswith('sw-vt-fade') and d == 150 for n, d in vt), f'5 reduce motion: a sub-page fades in 150 ms, no slide ({vt})')
   allerr += errs; c.close()
   # (Chromium has no switch for « reduce transparency » / « more contrast »: the rules are read from the style sheets)
   c, pg, errs = page(br, 390, True)

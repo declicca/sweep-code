@@ -319,7 +319,7 @@
   const etHM = () => new Intl.DateTimeFormat('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
   function nextAction(d) {
     if (!d || !d.market) return null;
-    const unj = d.trades - d.journaled, hm = etHM(), inSession = hm < '16:00', nextSession = hm >= '18:00';
+    const unj = d.trades - d.journaled, hm = etHM(), inSession = hm < '17:00', nextSession = hm >= '18:00';
     const weekly = G.weekly && G.weekly.open && !(G.weekly.done && G.weekly.chest_opened) && (!G.unlocked || G.unlocked.includes('weekly'));
     if (d.swept) return weekly ? { k: 'weekly', label: wt('weekly') } : { k: 'swept', label: t('cta_swept') };
     if (nextSession && unj <= 0) {

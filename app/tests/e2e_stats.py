@@ -111,7 +111,7 @@ def run(p, lang, phone):
     net_t, cnt_t = pg.evaluate(NUM, tb[0]), int(re.sub(r'\D', '', tb[2]) or -1)
     ok(net_s == net_t and cnt_s == cnt_t == n and sub.startswith(str(n)), f'{tag} filters {f or "none"}: Stats {net_s} $ · {cnt_s} trades = trades list {net_t} $ · {cnt_t} trades (want {n})')
   # a setup: the deep dive's line = the trades list filtered on it
-  pg.evaluate(FILT, {}); pg.evaluate("location.hash = '#analytics/setup'; render()"); pg.wait_for_selector('#main .ikpis', timeout=10000); pg.wait_for_timeout(700)
+  pg.evaluate(FILT, {}); pg.evaluate("location.hash = '#analytics/setup'; render()"); pg.wait_for_selector('#main .deep table', timeout=10000)   # (31 Oct., fluidity 12) a tab of the detailed analysis: its own sub-page; pg.wait_for_timeout(700)
   row = pg.evaluate("(() => { const tr = [...document.querySelectorAll('#main table tr')].find((r) => r.cells[0] && r.cells[0].textContent.trim() === 'ORB'); return tr ? [tr.cells[1].textContent, tr.cells[2].textContent] : null; })()")
   pg.evaluate("location.hash = '#trades'; U.setup = 'ORB'; render()"); pg.wait_for_selector('#main .tstats', state='attached', timeout=10000); pg.wait_for_timeout(500)
   tb = pg.evaluate("[...document.querySelectorAll('#main .tstats b')].map((b) => b.textContent)")

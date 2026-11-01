@@ -1447,3 +1447,42 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - un seul compte d'exemple dépasse son drawdown (`demoDdFit` : celui de chaque autre compte couvre sa pire baisse).
 - **C5** : les pastilles Discipline, Jours complets et Niveau deviennent une seule ligne sous le titre, « Niveau 2 · 0 jour complet › », qui ouvre Ma progression. Le « ? » est au bout de cette ligne. « J'ai fini pour aujourd'hui » n'apparaît qu'à l'arrêt annoncé par « Maintenant ».
 - **Test** : `e2e_nav_1031` (390 fr foncé, 1300 en clair, 390 es clair). Tests mis à jour : `e2e_premarket_express`, `e2e_premarket_clear`, `e2e_small_fixes`, `e2e_terms` et `e2e_coach` (l'attente seulement pendant la séance).
+
+### Fluidité « iOS 27 » (31 oct., `briefs/brief-app-fluidite-ios27-2026-10-31.md`) : les 3 lots
+- **Lot 1, les mouvements** (`nav.js`, dernier module « moving between pages like iOS ») :
+  - **Changement d'onglet et retour** : instantanés. Le module des blocs qui montaient (`sw-in`), `nav-dash-in` et `ANIM` au changement d'adresse sont retirés. N'animent que les éléments qui apparaissent dans une page déjà affichée.
+  - **Mémoire par onglet** : chaque onglet (Aujourd'hui, Trades, Stats, Comptes) garde sa position et sa sous-page. Toucher l'onglet actif remonte en haut ; le toucher encore revient à sa racine.
+  - **Position au retour** : le retour remet la position exacte (`history.scrollRestoration = 'manual'`, position gardée par adresse, `history.state.swI` pour savoir si c'est un retour). L'app ne remonte plus en haut d'elle-même au changement d'adresse : c'est ce module qui place la page.
+  - **Sous-pages** : un trade, un compte, Réglages, Quoi de neuf, Ma progression et l'analyse détaillée de Stats (`#analytics/…`) arrivent de la droite avec `startViewTransition`. La page de dessous part de 30 % à gauche, assombrie. Le retour fait l'inverse. La barre d'onglets et la barre latérale ne bougent pas (`view-transition-name`). En « Réduire les animations », c'est un fondu de 150 ms.
+  - **Geste de retour** : dans l'app installée, glisser depuis le bord gauche (moins de 20 px) revient en arrière. La page suit le doigt, revient au-delà d'un tiers ou si le geste est rapide. Rien dans Safari.
+  - **Barre d'onglets réduite** (téléphone) : elle se réduit en descendant (`body.bn-mini`) à l'onglet actif et au « + ». Elle revient en remontant ou en haut de la page. La toucher réduite la rouvre d'abord, comme iOS.
+- **Lot 2, le toucher** :
+  - Deux réactions seulement dans tout le CSS : `scale(.97)` pour les boutons, puces, onglets et le « + » ; le fond `--fill` pour les lignes et les cartes qui ouvrent une page. Les autres valeurs (.86 à .99, opacités .6 et .7) sont parties.
+  - Trois styles de bouton : principal et secondaire en pilule de 44 px, puce ou segment de 38 px (`.btn.sm` compris).
+  - Toute cible de moins de 44 px reçoit une zone invisible de 44 × 44 (`.sw-hit` / `.sw-hit-b`, posées par `nav.js` quand l'élément apparaît, après la première image), sans changer son dessin.
+- **Lot 3, alléger** :
+  - Un trade se dessine en environ 115 ms sur le téléphone ralenti 4 fois. La pose des zones de 44 px passe après la première image ; `railWide` lit une media query, plus la largeur.
+  - Stats sur téléphone fait environ 2 350 px : les 4 chiffres, le score, la courbe, « À surveiller » (3 lignes, puis « Voir les N autres ») et le calendrier, puis « Analyse détaillée › ». Cette sous-page (`#analytics/deep`) contient « Most active », le drawdown, les durées, la répartition du P&L et le « Deep dive ». Rien n'est retiré.
+  - La recherche sur téléphone est une feuille (poignée, glisser pour fermer, champ prêt), sans les commandes de thème ni de partage.
+  - Le menu du profil a 4 lignes : Ma progression, Quoi de neuf, Réglages, Aide. Parrainage et Donner mon avis sont dans Réglages › Aide ; Déconnexion y était déjà.
+  - La feuille Filtres n'a plus « Importer un CSV ».
+- **Tests** :
+  - `e2e_motion_ios` vérifie les points 1, 2, 3, 6, 8 et 10.
+  - `e2e_design_motion` vérifie le fondu de 150 ms en mouvement réduit.
+- **Outils** : `tools/site-shots/serve.sh` arrête maintenant les workers avant le serveur, comme `run.sh` ; avant, ils gardaient le port 8996.
+
+### Les heures du marché (1ᵉʳ nov., Mateo : « le marché ferme à 17 h et réouvre à 18 h comme il le fait réellement »)
+- **La règle partout** : le marché (CME) ferme à 17 h ET et rouvre à 18 h. La fin de semaine va du vendredi 17 h au dimanche 18 h. Une séance commencée à 18 h appartient au lendemain (`todayStr`, `GameEngine::today`). Ce qui disait « la clôture de 16 h » dit maintenant 17 h :
+  - **Revue** : proposée à 17 h (`reviewTime`). Le rappel de revue est à 17 h 15 par défaut, réglable de 17 h à 20 h 45 (`WP_KINDS`, `v2c.php`). Le bilan de la semaine se règle de 17 h à 20 h 45 (17 h par défaut).
+  - **Préparer la séance suivante** : le Plan et le Journal sans date préparent la séance suivante de 17 h à 18 h (`SweepNextSession`).
+  - **Routine** : la prochaine action de la carte compte la séance jusqu'à 17 h (`game.js`).
+  - **Rappels** : silence de 9 h 30 à 17 h (`v2c.php`).
+  - **Admin** : les créneaux d'inscription sont « Séance 9 h 30 → 17 h » et « Marché fermé 17 h → 18 h » (`ops/metrics.php`, `ops/report.php`, `ux.js`).
+- **Bienvenue** : on y voit le parcours « marché ouvert » (le premier trade) chaque fois que le marché est ouvert, la nuit comprise. Le parcours « marché fermé » (préparer la séance suivante) ne s'affiche que de 17 h à 18 h en semaine et en fin de semaine : « lundi » le vendredi soir et le samedi, « demain » le dimanche. L'ancien cas « avant 9 h 30 » n'existe plus, puisque le marché est ouvert à cette heure.
+- **Le formulaire complet** propose encore, le soir, la séance qui vient de finir (décision du brief 00, Q2), avec « Maintenant » pour la nuit. La feuille rapide sans heure suit le marché lui-même (W1).
+- **Tests** :
+  - `e2e_tour_1029` : à 8 h, le marché est ouvert.
+  - `e2e_first_run` : le soir se teste à 17 h 30.
+  - `e2e_routine_parity` : la clôture se teste à 17 h 30.
+  - `push_test` et `e2e_push` : le rappel de revue est à 17 h 15.
+  - `metrics_test` : le créneau « fermé » se teste à 17 h 30.

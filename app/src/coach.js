@@ -1148,6 +1148,6 @@
     return `<div class="co-edgecard"><p class="co-edgecard-h"><b>${ET.edgeT}</b></p><ul>${items}</ul>${notes.map((x) => `<p class="co-own">${esc2(x)}</p>`).join('')}</div>`;
   }
   window.SweepEdge = { profile: edgeProfile, mine: edgeMine, streak: edgeStreak, card: edgeCard, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
-  window.SweepCoach = { trade: tradeNote, session, margin, riskNow, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, weekRule, statsHtml, progress,
+  window.SweepCoach = { paintToday: () => { try { paintToday(); } catch (e) { /* never blocks */ } }, trade: tradeNote, session, margin, riskNow, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, weekRule, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();

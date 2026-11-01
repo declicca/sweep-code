@@ -29,7 +29,7 @@
 /* back chevron */
 .nav-back{display:inline-flex;align-items:center;gap:2px;margin:0 0 10px -6px;padding:6px 8px 6px 2px;border-radius:10px;color:var(--pos);text-decoration:none;font-weight:500;font-size:15px}
 .nav-back svg{width:20px;height:20px}
-.nav-back:active{opacity:.6}
+.nav-back:active{transform:scale(.97)}
 /* avatar menu (phone: under the header, right; desktop: above the avatar) */
 .nav-menu{position:fixed;inset:0;z-index:470}
 .nav-menu-bg{position:absolute;inset:0;background:rgba(0,0,0,.3);opacity:0;transition:opacity .2s var(--ease-ios)}
@@ -105,7 +105,7 @@
 @media (pointer:coarse){#cmd .cmd-in kbd{display:none}#cmdq{font-size:16px}}
 /* pressed feedback on the new cards */
 .nav-rank,.nav-kpi a,.nav-menu-panel button,.nav-back,.nav-seg a,.nav-tnav button{-webkit-tap-highlight-color:transparent}
-.nav-rank:active{transform:scale(.985)}
+.nav-rank:active{background:var(--fill)}
 .nav-rank{transition:transform .2s var(--ease-ios)}
 
 /* Today: replaced sections never painted (day numbers → Day · Week card, accounts → accounts card, period → curve header) */
@@ -1547,7 +1547,7 @@ html body .nav-inst-ic{background:linear-gradient(180deg,rgba(var(--pos-rgb),.22
 /* touch feedback, iOS-like: rows and cards answer the finger at once */
 html body a.trow,html body a.nav-tr,html body a.nav-acc,html body tr[data-href],html body .nav-wk-d{transition:background-color .2s var(--ease-ios),transform .2s var(--ease-ios)!important;-webkit-tap-highlight-color:transparent}
 html body a.trow:active,html body a.nav-tr:active,html body tr[data-href]:active{background:var(--fill)!important}
-html body a.nav-acc:active,html body .nav-wk-d:active{transform:scale(.98)!important}
+html body a.nav-acc:active,html body .nav-wk-d:active{background:var(--fill)!important}
 @media (hover:hover){html body tr[data-href]:hover{background:rgba(255,255,255,.025)!important}}
 /* sheets and windows: one spring, open 350 ms, close 200 ms */
 html body .evp,html body #gSheet,html body .nav-am,html body .nav-dlg,html body #shPanel{transition-duration:.35s!important;transition-timing-function:var(--ease-ios)!important}
@@ -1703,7 +1703,7 @@ html body .add-row{transition:color .18s var(--ease-ios),opacity .18s var(--ease
 html body .add-row .add-ic{transition:background-color .18s var(--ease-ios),color .18s var(--ease-ios),transform .2s var(--ease-ios)}
 html body .add-row:hover .add-ic{color:#fff!important}
 html body .add-row:hover{color:var(--text)!important}
-html body .add-row:active{opacity:.7}
+html body .add-row:active{background:var(--fill)}
 html body .add-row:active .add-ic{transform:scale(.97)}
 /* payouts / expenses: the row and the form at the top of their list card */
 html body .nav-pz-list > .nav-pz-b{margin:0!important;border-bottom:1px solid var(--hair)}
@@ -1957,7 +1957,7 @@ html body #main .nav-rt.closed-rt .nav-rt-steps{display:grid!important}
 /* payouts / expenses: the whole row opens it (no « Edit » button); « Share » stays on paid payouts */
 #main li.pz-row.pz-open{cursor:pointer;transition:background-color .15s var(--ease-ios),transform .15s var(--ease-ios)}
 @media (hover:hover){html body #main li.pz-row.pz-open:hover{background:var(--fill,rgba(255,255,255,.04))}}
-#main li.pz-row.pz-open:active{transform:scale(.99)}
+#main li.pz-row.pz-open:active{background:var(--fill)}
 #main li.pz-row.pz-open:focus-visible{outline:2px solid var(--pos);outline-offset:-2px}
 html body #main li.pz-row .pz-acts2:empty{display:none}
 /* accounts: no line above the add-account box */
@@ -2801,9 +2801,9 @@ html body #main .nav-accset-in > *{margin:0}
 #main table.tbl.tbl-own-acc th:nth-child(3),#main table.tbl.tbl-own-acc td:nth-child(3){display:none!important}   /* its own page: no « Account » column */
 /* Stats on a phone: « More stats », folded (audit of 18 Oct., lot 3) — the same look as « Account settings » */
 /* My money: « My entries / Analysis » in the filters' line, the height of its chips */
-html body #main .fx-row > .mny-view.mny-view-fx{flex:0 0 auto;width:auto;max-width:none;height:40px;box-sizing:border-box;margin:0;padding:0;border:0!important;box-shadow:inset 0 0 0 1px var(--hair)}
+html body #main .fx-row > .mny-view.mny-view-fx{flex:0 0 auto;width:auto;max-width:none;height:44px;box-sizing:border-box;margin:0;padding:0;border:0!important;box-shadow:inset 0 0 0 1px var(--hair)}
 html body #main .fx-row > .mny-view.mny-view-fx > button{flex:0 0 auto;height:100%;min-height:0;padding:0 16px;white-space:nowrap}
-@media (max-width:860px){html body #main .fx-row > .mny-view.mny-view-fx{height:44px}}   /* a 44 px touch zone on phones, centred on the chips' line; 40 px tracks on a computer (design rule) */
+/* (31 Oct., fluidity 9) a 44 px track everywhere: segments of 38, like every other chooser */
 /* the accounts' table: no blue line on the hovered row (19 Oct., Mateo: it looked like a glitch, the row's own hover is enough) */
 #main table.acct-tbl tbody tr[data-href]:hover td:first-child{box-shadow:none}
 /* Accounts on a phone: one « Edit » on the line of « Add an account » (19 Oct.) */
@@ -2953,7 +2953,7 @@ html body .nav-rt-me .nav-rt-streak > span{text-align:center}
 .gp-ln-h{margin:0;display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
 .gp-ln-see{flex:none;font-size:13px;font-weight:600}
 .gp-ln-mis{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2px 10px;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:var(--r2,14px);background:var(--fill);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:transform .3s var(--spring)}
-.gp-ln-mis:active{transform:scale(.98)}
+.gp-ln-mis:active{background:var(--fill)}
 .gp-ln-k{grid-row:1/span 2;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--pos)}
 .gp-ln-mis b{font-size:15px;font-weight:600;line-height:1.25}
 .gp-ln-mis small{grid-column:2;color:var(--muted);font-size:12px}
@@ -2990,3 +2990,56 @@ form[data-form="account"].ux-st-final:has(.nav-acc-opt) .ux-st-more>summary{disp
 .nav-rt-sub .nav-rt-help{margin-left:auto;width:30px;height:30px;min-height:30px;padding:0;border:0;background:none;box-shadow:none;color:var(--muted)}
 /* (31 Oct., A2) « New trade » now shows its name beside the « + »: white like every blue button (dark text on the blue fell under 4.5:1) */
 html body aside.side .new,html body aside.side .new .lbl{color:#fff!important}
+/* ───────────── (31 Oct., fluidity lot 1) pages: a sub-page slides in from the right, the page under it 30 % to the left ───────────── */
+::view-transition-old(root),::view-transition-new(root){animation-duration:.35s;animation-timing-function:var(--spring,cubic-bezier(.32,.72,0,1));mix-blend-mode:normal}
+html[data-vt=push]::view-transition-old(root){animation-name:sw-vt-out-l}
+html[data-vt=push]::view-transition-new(root){animation-name:sw-vt-in-r}
+html[data-vt=pop]::view-transition-old(root){animation-name:sw-vt-out-r;z-index:2}
+html[data-vt=pop]::view-transition-new(root){animation-name:sw-vt-in-l}
+@keyframes sw-vt-in-r{from{transform:translateX(100%)}to{transform:none}}
+@keyframes sw-vt-out-l{from{transform:none}to{transform:translateX(-30%);filter:brightness(.82)}}
+@keyframes sw-vt-out-r{from{transform:none}to{transform:translateX(100%)}}
+@keyframes sw-vt-in-l{from{transform:translateX(-30%);filter:brightness(.82)}to{transform:none}}
+@keyframes sw-vt-fade-in{from{opacity:0}}
+@keyframes sw-vt-fade-out{to{opacity:0}}
+html body .bottomnav{view-transition-name:sw-tabbar}
+@media (min-width:861px){html body aside.side{view-transition-name:sw-rail}}
+::view-transition-group(sw-tabbar),::view-transition-group(sw-rail),::view-transition-old(sw-tabbar),::view-transition-new(sw-tabbar),::view-transition-old(sw-rail),::view-transition-new(sw-rail){animation:none}
+@media (prefers-reduced-motion:reduce){
+  html[data-vt]::view-transition-old(root){animation:sw-vt-fade-out .15s linear both}
+  html[data-vt]::view-transition-new(root){animation:sw-vt-fade-in .15s linear both}
+}
+/* the tab bar shrinks while scrolling down (phone): the active tab and the « + » */
+@media (max-width:860px){
+  html body .bottomnav a{max-width:140px;transition:max-width .32s var(--spring),opacity .2s ease,padding .32s var(--spring),margin .32s var(--spring)}
+  html body.bn-mini .bottomnav a:not(.on){max-width:0;opacity:0;padding-left:0!important;padding-right:0!important;margin:0!important;overflow:hidden;pointer-events:none}
+}
+@media (max-width:860px) and (prefers-reduced-motion:reduce){html body .bottomnav a{transition:none}}
+/* (31 Oct., fluidity 8) two reactions to a touch in the whole app: a button, a chip, a tab, the « + » shrink to .97 with the spring; a row or a card that opens a page lights up (--fill), never shrinks (the :active rules of every file follow it) */
+/* (31 Oct., fluidity 9) three button styles in the whole app: the main button and the secondary one, pills of 44 px (one blue
+   per screen); the chip or segment, 38 px */
+html body .btn:not(.sm):not(.link){min-height:44px;border-radius:var(--r-pill)}
+html body .btn.sm,html body .chip,html body .seg > button,html body .seg > a,html body .tabs > button,html body .tabs > a{min-height:38px;border-radius:var(--r-pill)}
+/* (31 Oct., fluidity 12) Stats on a phone: the essentials, then « Detailed analysis › » (a sub-page) */
+#main:not(.st-deep) .st-back{display:none}
+@media (max-width:860px){
+  #main.st-main .st-detail,#main.st-deep .st-keep,#main.st-deep .st-more{display:none!important}
+  #main.st-main .g-two{display:block}
+  .st-more{display:flex;align-items:center;justify-content:center;min-height:44px;margin:14px 0 4px;border-radius:var(--r-pill);background:var(--fill);color:var(--text);font-weight:600;text-decoration:none}
+  #main.st-deep .st-back{display:inline-flex;margin:0 0 10px}
+}
+@media (max-width:860px){#main.st-main ul.ins:not(.st-all) > li:nth-child(n+4){display:none}.st-ins-more{display:block;margin:8px auto 0;min-height:44px}}
+/* (31 Oct., fluidity 13) the search on a phone: a sheet from the bottom (handle, slide down to close), the field ready */
+@media (max-width:600px){
+  #cmd .cmd-panel{position:absolute;left:0;right:0;bottom:0;margin:0;width:auto;max-height:86vh;display:flex;flex-direction:column;border-radius:var(--r-xl,26px) var(--r-xl,26px) 0 0;padding-bottom:env(safe-area-inset-bottom,0px);animation:sw-cmd-up .35s var(--spring) both}
+  #cmd .cmd-list{max-height:none;flex:1;min-height:0}
+  #cmd .cmd-grab{display:block;width:36px;height:5px;margin:8px auto 2px;border-radius:3px;background:var(--line2,rgba(127,127,127,.4))}
+}
+@keyframes sw-cmd-up{from{transform:translateY(100%)}}
+@media (prefers-reduced-motion:reduce){#cmd .cmd-panel{animation:none}}
+.nav-set-rows{display:flex;flex-direction:column;margin-top:12px;border-top:1px solid var(--line)}
+.nav-set-rows a{display:flex;align-items:center;min-height:44px;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none;font-weight:500}
+.nav-set-rows a:last-child{border-bottom:0}
+.nav-set-rows a:active{background:var(--fill)}
+/* (31 Oct., fluidity 9) the quick sheet's net P&L field as tall as its Long / Short segment (44 px): one line, one touch size */
+html body .nav-am-net input{min-height:44px;box-sizing:border-box}

@@ -852,11 +852,11 @@
   // and when traders sign up (New York time), with the share that made a first plan or trade on that session
   const SCT = {
     en: { d1: 'Back on the next trading day: a visit, a plan or a trade', rs: 'Risk allowed seen on the sign-up session: a first plan or trade', h: 'When they sign up (New York time)', n: 'Sign-ups', p: 'First plan or trade that session',
-      k: { before: 'Before the open (6 pm → 9:30 am)', session: 'Session (9:30 am → 4 pm)', evening: 'Evening (4 pm → 6 pm)', weekend: 'Weekend (Friday 5 pm → Sunday 6 pm)' } },
+      k: { before: 'Before the open (6 pm → 9:30 am)', session: 'Session (9:30 am → 5 pm)', evening: 'Market closed (5 pm → 6 pm)', weekend: 'Weekend (Friday 5 pm → Sunday 6 pm)' } },
     fr: { d1: 'De retour le jour de trading suivant : une visite, un plan ou un trade', rs: 'Risque permis vu le jour de l’inscription : un premier plan ou trade', h: 'Quand ils s’inscrivent (heure de New York)', n: 'Inscrits', p: 'Premier plan ou trade ce jour-là',
-      k: { before: 'Avant l’ouverture (18 h → 9 h 30)', session: 'Séance (9 h 30 → 16 h)', evening: 'Soir (16 h → 18 h)', weekend: 'Fin de semaine (vendredi 17 h → dimanche 18 h)' } },
+      k: { before: 'Avant l’ouverture (18 h → 9 h 30)', session: 'Séance (9 h 30 → 17 h)', evening: 'Marché fermé (17 h → 18 h)', weekend: 'Fin de semaine (vendredi 17 h → dimanche 18 h)' } },
     es: { d1: 'De vuelta el siguiente día de trading: una visita, un plan o una operación', rs: 'Riesgo permitido visto el día del registro: un primer plan u operación', h: 'Cuándo se registran (hora de Nueva York)', n: 'Registros', p: 'Primer plan u operación ese día',
-      k: { before: 'Antes de la apertura (18 h → 9:30)', session: 'Sesión (9:30 → 16 h)', evening: 'Tarde (16 h → 18 h)', weekend: 'Fin de semana (viernes 17 h → domingo 18 h)' } } };
+      k: { before: 'Antes de la apertura (18 h → 9:30)', session: 'Sesión (9:30 → 17 h)', evening: 'Mercado cerrado (17 h → 18 h)', weekend: 'Fin de semana (viernes 17 h → domingo 18 h)' } } };
   const SC = () => SCT[LANG] || SCT.en;
   // brief « pertes oubliées », step 1: a complete journal, measured before changing anything (7 and 30 days, real traders)
   const JRT = {

@@ -37,7 +37,7 @@ PLUS = "[...document.querySelectorAll('[data-act=add-trade]')].filter((e) => !e.
 SAVED = {'fr': 'Trade enregistré', 'en': 'Trade saved', 'es': 'Operación guardada'}
 
 # (28 Oct., activation D) the clock of each case, New York: a Tuesday 10:30 (market open), a Tuesday 20:00 and a Saturday 11:00 (closed)
-OPEN, EVENING, SATURDAY = '2026-10-27T10:30:00-04:00', '2026-10-27T20:00:00-04:00', '2026-10-31T11:00:00-04:00'
+OPEN, EVENING, SATURDAY = '2026-10-27T10:30:00-04:00', '2026-10-27T17:30:00-04:00', '2026-10-31T11:00:00-04:00'   # (1 Nov.) the evening case: 17:30, the hour the CME is closed (it reopens at 18:00)
 CLOSED_T = {'fr': 'Prépare ta séance de demain.', 'en': 'Prepare tomorrow’s session.', 'es': 'Prepara tu sesión de mañana.'}
 MON_T = {'fr': 'Prépare ta séance de lundi.', 'en': 'Prepare Monday’s session.', 'es': 'Prepara tu sesión del lunes.'}   # (30 Oct., tour W2) on Saturday the next session is Monday's
 HIST = {'fr': 'Ramène ton historique', 'en': 'Bring your history', 'es': 'Trae tu historial'}

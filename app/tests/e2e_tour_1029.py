@@ -2,7 +2,7 @@
 Sweep — the 6 points of the 29 Oct. tour (briefs/brief-app-tour-2026-10-29.md), Playwright:
   python3 tests/e2e_tour_1029.py http://127.0.0.1:8095
 A trader of its own; phone 390 (fr, touch, dark) and computer 1300 (en, light).
- T1 the welcome before the open (a Tuesday 8:00 New York): « Prépare ta séance d'aujourd'hui », « Ton plan du jour » (not tomorrow)
+ T1 the welcome on a Tuesday 8:00 New York: the market is open (1 Nov.: it closes at 17:00 and reopens at 18:00), so « Trois étapes et tu trades », ending on the first trade (never tomorrow's plan)
  T2 the review: « Did you follow your plan? » and the balance; the discipline and the grade, filled in, under « + Details » (folded)
  T3 the coach: « No trade without a mistake today (1 trade) », never « 0 trades of 1 »
  T4 Today: Discipline « — » while no checklist is filled (not « 0 % »)
@@ -20,8 +20,8 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'pre': 'Prépare ta séance d’aujourd’hui.', 'st2': 'Ton plan du jour', 'more': '+ Détails', 'none': 'Aucun trade sans erreur aujourd’hui (1 trade)', 'other': '+ Autre'},
-     'en': {'pre': 'Prepare today’s session.', 'st2': 'Your plan for the day', 'more': '+ Details', 'none': 'No trade without a mistake today (1 trade)', 'other': '+ Other'}}
+X = {'fr': {'pre': 'Trois étapes et tu trades.', 'st2': 'Ton premier trade', 'more': '+ Détails', 'none': 'Aucun trade sans erreur aujourd’hui (1 trade)', 'other': '+ Autre'},
+     'en': {'pre': 'Three steps and you’re trading.', 'st2': 'Your first trade', 'more': '+ Details', 'none': 'No trade without a mistake today (1 trade)', 'other': '+ Other'}}
 FLUSH = "Promise.all(Object.values(chains)).then(() => true)"
 SWC = "document.querySelectorAll('.g-sweep [data-g=sw-close]').forEach((b) => b.click())"
 with sync_playwright() as p:
@@ -36,7 +36,7 @@ with sync_playwright() as p:
     c1.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'tq%06d@t.dev' % random.randint(0, 999999), 'consent': True, 'elapsed': 6000}), headers=H)
     p1 = c1.new_page(); p1.on('pageerror', lambda e: errs.append(str(e)[:160])); p1.goto(B + '/'); p1.wait_for_selector('#main .onb', timeout=20000); p1.wait_for_timeout(800)
     txt = p1.locator('#main .onb').inner_text(); steps = p1.evaluate("[...document.querySelectorAll('#main .onb-steps li')].map((l) => l.textContent.replace(/^\\d+/, '').trim())")
-    ok(x['pre'] in txt and steps[-1:] == [x['st2']], f'T1 {tag}: before the open, « {x["pre"]} », « {x["st2"]} » ({steps})')
+    ok(x['pre'] in txt and steps[-1:] == [x['st2']], f'T1 {tag}: 8:00, the market open: « {x["pre"]} », « {x["st2"]} » ({steps})')
     c1.close()
     try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
     except Exception: pass

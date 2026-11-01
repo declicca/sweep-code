@@ -125,7 +125,7 @@ $u2 = fn(string $id, int $ts, int $internal = 0, ?int $login = null) => $p2->pre
 $u2('s1', $et('2026-09-01 10:00'));                                  // session (Tuesday 10:00)
 $u2('s2', $et('2026-09-01 20:00'));                                  // before the open (Tuesday evening 20:00: Wednesday's session)
 $u2('s3', $et('2026-09-04 17:30'), 0, $et('2026-09-07 10:00'));      // weekend (Friday 17:30); signed in again on Monday
-$u2('s4', $et('2026-09-02 16:30'));                                  // evening (Wednesday 16:30)
+$u2('s4', $et('2026-09-02 17:30'));                                  // the market closed (Wednesday 17:30: closes at 17:00, reopens at 18:00)
 $u2('s5', $et('2026-09-01 10:00'), 1);                               // Mateo's: left out
 $p2->prepare("INSERT INTO game_analytics VALUES ('s1', 'trade_logged', ?, '{}')")->execute([$et('2026-09-01 11:00')]);   // s1: a trade the same session
 $p2->prepare("INSERT INTO game_days VALUES ('s1', '2026-09-02', 0, 1, 0, 1)")->execute();                                // s1: back on Wednesday (a review)

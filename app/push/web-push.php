@@ -14,7 +14,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  */
 
 /** [default time, earliest, latest] of each reminder, New York time (the bell's windows end at 9:30, the open, and 21:00) */
-const WP_KINDS = ['plan' => ['08:45', '07:00', '09:15'], 'review' => ['16:30', '16:00', '20:45'], 'weekly' => ['17:00', '16:00', '20:45']];
+const WP_KINDS = ['plan' => ['08:45', '07:00', '09:15'], 'review' => ['17:15', '17:00', '20:45'], 'weekly' => ['17:00', '17:00', '20:45']];   // (1 Nov.) the review after the 17:00 close (the CME reopens at 18:00)
 /** push services only: the server never posts anywhere else (a subscription is an address the browser gives) */
 const WP_HOSTS = ['fcm.googleapis.com', 'android.googleapis.com', 'updates.push.services.mozilla.com', 'web.push.apple.com'];
 const WP_HOST_SUFFIXES = ['.push.apple.com', '.notify.windows.com', '.push.services.mozilla.com'];

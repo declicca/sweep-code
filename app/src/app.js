@@ -1500,7 +1500,7 @@ function filterDefs({session: e, dir: t, trades: a}) {
 
 function fsheetHtml() {
   const e = filterDefs(FSPEC);
-  return `<div class="fs-head"><h2>Filters</h2>${e.filter(a => String(a.val) !== String(a.all)).length ? '<button class="link" data-act="freset">Reset</button>' : ""}</div>\n   <div class="fs-list">${e.map(a => `<label class="fs-row"><span>${a.label}</span><span class="fs-val"><select data-native ${a.src === "F" ? `data-filter="${a.k}"` : `data-ui="${a.k}"`} aria-label="${a.label}">${opts(a.opts, a.val)}</select><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></label>`).join("")}</div>\n   ${FSPEC.trades ? '<a class="btn fs-import" href="#import" data-act="fsheet-close">Import CSV</a>' : ""}\n   <button class="btn primary fs-done" data-act="fsheet-close">${FSPEC.trades ? `Show ${fsCount()} trades` : "Done"}</button>`;
+  return `<div class="fs-head"><h2>Filters</h2>${e.filter(a => String(a.val) !== String(a.all)).length ? '<button class="link" data-act="freset">Reset</button>' : ""}</div>\n   <div class="fs-list">${e.map(a => `<label class="fs-row"><span>${a.label}</span><span class="fs-val"><select data-native ${a.src === "F" ? `data-filter="${a.k}"` : `data-ui="${a.k}"`} aria-label="${a.label}">${opts(a.opts, a.val)}</select><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></label>`).join("")}</div>\n   <button class="btn primary fs-done" data-act="fsheet-close">${FSPEC.trades ? `Show ${fsCount()} trades` : "Done"}</button>`;
 }
 
 function fsCount() {
@@ -3165,8 +3165,8 @@ function cmdItems(e) {
     applyTheme("light"), render();
   } ], [ "Match device theme", () => {
     applyTheme("auto"), render();
-  } ] ], s = i => !e || i.toLowerCase().includes(e);
-  return n.filter(i => s(i[0])).forEach(i => t.push({
+  } ] ], s = i => !e || i.toLowerCase().includes(e), ph = isPhone() && /^(Share |Switch to |Match device)/;   // (31 Oct., fluidity 13) a phone: the pages and the help (the theme is in Settings, sharing on its page)
+  return n.filter(i => s(i[0]) && !(ph && ph.test(i[0]))).forEach(i => t.push({
     g: "Actions",
     t: i[0],
     run: i[1]
@@ -3200,6 +3200,13 @@ function openCmd() {
   e || (e = document.createElement("div"), e.id = "cmd", document.body.append(e)), 
   e.innerHTML = '<div class="cmd-bg" data-cmd="close"></div><div class="cmd-panel" role="dialog" aria-label="Command menu"><div class="cmd-in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="cmdq" placeholder="Search or ask Sweep…" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div><div class="cmd-list" id="cmdl"></div></div>', 
   e.hidden = !1, drawCmd(), setTimeout(() => $("#cmdq").focus(), 10);
+  // (31 Oct., fluidity 13) a phone: a sheet with its handle, closed by sliding it down, the field ready
+  const p = e.querySelector(".cmd-panel");
+  isPhone() && p && (p.insertAdjacentHTML("afterbegin", '<span class="cmd-grab" aria-hidden="true"></span>'), typeof swipeDismiss == "function" && swipeDismiss(p, {
+    scroller: () => p.querySelector(".cmd-list"),
+    onClose: closeCmd,
+    ignore: "input"
+  }));
 }
 
 function closeCmd() {
@@ -3253,7 +3260,7 @@ document.addEventListener("input", e => {
 const SKELETON = `<div class="skel" style="height:22px;width:260px;margin-bottom:26px"></div><div class="skel" style="height:170px;border-radius:18px"></div><div class="acards" style="margin-top:40px">${'<div class="skel" style="height:220px;border-radius:18px"></div>'.repeat(3)}</div>`, desk = () => innerWidth > 860;
 
 /* (31 Oct., A2) from 1100 px the rail keeps its names beside the icons (like an iPad sidebar); below, the icons alone */
-const railWide = () => innerWidth >= 1100;
+const railWide = () => (railWide.mq || (railWide.mq = matchMedia("(min-width: 1100px)"))).matches;   // (no layout read)
 
 function sideOpen(e) {
   const t = $(".side");
@@ -4070,8 +4077,9 @@ let TK = null;
 const hms = e => (e = String(e || "").trim(), /^\d{1,2}:\d{2}$/.test(e) && (e += ":00"), 
 /^\d{1,2}:\d{2}:\d{2}$/.test(e) ? e.padStart(8, "0") : "");
 
-/* the evening (17:00 to 9:30 ET) and the weekend: no session open to trade in — a trade typed now is most often one of the
-   session that just ended (brief 00, Q2): the form proposes that session, its times empty; « Now » is there for night trading */
+/* the evening (17:00 to 9:30 ET) and the weekend: the CME closes at 17:00 and reopens at 18:00, but a trade typed then is most
+   often one of the day session that just ended (brief 00, Q2): the form proposes that session, its times empty; « Now » is there
+   for night trading (the quick sheet without a time follows the market itself: nav.js sheetDay, 30 Oct.) */
 const offHoursET = () => { const n = nowET(), hm = n.slice(11, 16), wd = new Date(n.slice(0, 10) + "T12:00:00Z").getUTCDay(); return hm >= "17:00" || hm < "09:30" || wd === 0 || wd === 6; },
   lastSessionET = () => { const n = nowET(); let d = n.slice(11, 16) >= "17:00" ? n.slice(0, 10) : ymdAdd(n.slice(0, 10), -1); while ([ 0, 6 ].includes(new Date(d + "T12:00:00Z").getUTCDay())) d = ymdAdd(d, -1); return d; };
 
@@ -10686,9 +10694,9 @@ function render() {
   runCountUps(s), clearTimeout(render.t), render.t = setTimeout(() => s.classList.remove("anim"), 1400));
 }
 
-addEventListener("hashchange", () => {
-  ANIM = !0, closeSelect(), U.editP = U.editE = null, CP.id = null, ADM.temp = null, 
-  REC.code = null, deferred = !1, render(), window.scrollTo(0, 0);
+addEventListener("hashchange", () => {   // (31 Oct., fluidity 1) no entry animation; the scroll is nav.js's (each tab keeps its own, back restores it)
+  closeSelect(), U.editP = U.editE = null, CP.id = null, ADM.temp = null, 
+  REC.code = null, deferred = !1, render();
 }), document.addEventListener("dragover", e => {
   const t = e.target.closest && e.target.closest("#drop");
   t && (e.preventDefault(), t.classList.add("over"));

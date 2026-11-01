@@ -18,10 +18,10 @@ def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
 
-MOVE = r"""async (sel)=>{const e=[...document.querySelectorAll(sel)].filter(x=>x.getClientRects().length)[0]; if(!e) return null;
+MOVE = r"""async (sel)=>{const e=[...document.querySelectorAll(sel)].filter(x=>x.getClientRects().length && !x.closest('.co-ask'))[0]; if(!e) return null;   // the checklist's own buttons (1 Nov.: an answer in « Answer your coach » moves the coach to its next question)
   e.scrollIntoView({block:'center'}); await new Promise(r=>setTimeout(r,400)); const k=[...e.attributes].filter(a=>/^data-(act|path|v|id)$/.test(a.name)).map(a=>`[${a.name}="${CSS.escape(a.value)}"]`).join('');
   const y0=e.getBoundingClientRect().top; e.click(); let worst=0; const t0=performance.now();
-  while(performance.now()-t0<900){await new Promise(r=>requestAnimationFrame(r)); const n=document.contains(e)?e:document.querySelector(k); if(n){const d=n.getBoundingClientRect().top-y0; if(Math.abs(d)>Math.abs(worst)) worst=d}}
+  while(performance.now()-t0<900){await new Promise(r=>requestAnimationFrame(r)); const n=document.contains(e)?e:[...document.querySelectorAll(k)].find(x=>!x.closest('.co-ask')); if(n){const d=n.getBoundingClientRect().top-y0; if(Math.abs(d)>Math.abs(worst)) worst=d}}
   return Math.round(worst)}"""
 
 with sync_playwright() as p:

@@ -80,10 +80,10 @@ $ok(wp_devices($pdo, 'x1') === 0 && wp_devices($pdo, 'x2') === 1, 'the same phon
 for ($i = 0; $i < 12; $i++) $sub('x3', "https://fcm.googleapis.com/fcm/send/d$i", $k, 'en');
 $ok(wp_devices($pdo, 'x3') === 10, 'at most 10 devices: the oldest go');
 // 4. each reminder's time: 15-minute steps inside its window; on by default
-$ok(wp_prefs($pdo, 'x3') === ['plan' => ['on' => true, 'at' => '08:45'], 'review' => ['on' => true, 'at' => '16:30'], 'weekly' => ['on' => true, 'at' => '17:00']]
-    && wp_times('plan')[0] === '07:00' && array_slice(wp_times('plan'), -1) === ['09:15'] && array_slice(wp_times('review'), -1) === ['20:45'], 'defaults 8:45, 16:30, 17:00; plan 7:00 to 9:15 (before the 9:30 open), review and week until 20:45');
+$ok(wp_prefs($pdo, 'x3') === ['plan' => ['on' => true, 'at' => '08:45'], 'review' => ['on' => true, 'at' => '17:15'], 'weekly' => ['on' => true, 'at' => '17:00']]
+    && wp_times('plan')[0] === '07:00' && array_slice(wp_times('plan'), -1) === ['09:15'] && array_slice(wp_times('review'), -1) === ['20:45'], 'defaults 8:45, 17:15 (after the 17:00 close), 17:00; plan 7:00 to 9:15 (before the 9:30 open), review and week until 20:45');
 $ok(!wp_set_pref($pdo, 'x3', 'plan', ['at' => '10:00']) && !wp_set_pref($pdo, 'x3', 'plan', ['at' => '08:50']) && !wp_set_pref($pdo, 'x3', 'streak', ['on' => false])
-    && wp_set_pref($pdo, 'x3', 'review', ['on' => false]) && wp_prefs($pdo, 'x3')['review'] === ['on' => false, 'at' => '16:30'], 'a time in the session or off the steps, an unknown reminder: refused; off kept');
+    && wp_set_pref($pdo, 'x3', 'review', ['on' => false]) && wp_prefs($pdo, 'x3')['review'] === ['on' => false, 'at' => '17:15'], 'a time in the session or off the steps, an unknown reminder: refused; off kept');
 
 // 5. at most 2 a day that alert (New York day)
 $send = fn(string $type, array $o = []) => Notify::send('c1', $type, [], ['dedupe_key' => $type . ':' . bin2hex(random_bytes(4))] + $o);
@@ -137,18 +137,18 @@ $ok($bell('p4') === ['g_plan'] && $sent() === [], 'from the app (the trader is i
 $trader('p5'); $sub('p5', 'https://fcm.googleapis.com/fcm/send/p5', $kfr, 'fr');
 foreach (['2026-10-19 10:00', '2026-10-19 15:59', '2026-10-24 08:45', '2026-10-19 21:30'] as $t) { $at($t); GameNotifyService::run('p5', true); }
 $ok($bell('p5') === [] && $sent() === [], 'during the session (10:00, 15:59), Saturday 8:45, 21:30: nothing');
-// review: 16:30 by default; a gone device is forgotten; over the day's 2, the review waits (no bell, no push)
+// review: 17:15 by default (the CME closes at 17:00); a gone device is forgotten; over the day's 2, the review waits (no bell, no push)
 $trader('p6', [['2026-10-16', 0, 0], ['2026-10-19', 2, 0]]); $sub('p6', 'https://fcm.googleapis.com/fcm/send/p6', $kfr, 'fr'); $sub('p6', 'https://fcm.googleapis.com/fcm/send/gone-p6', $ken, 'en');
-$at('2026-10-19 16:15'); GameNotifyService::run('p6', true); $early = $bell('p6'); $sent();
-$at('2026-10-19 16:30'); GameNotifyService::run('p6', true); $s = $sent();
+$at('2026-10-19 17:00'); GameNotifyService::run('p6', true); $early = $bell('p6'); $sent();
+$at('2026-10-19 17:15'); GameNotifyService::run('p6', true); $s = $sent();
 $ok($early === [] && $bell('p6') === ['g_review'] && count($s) === 2 && ($open($s[0], $kfr)['title'] ?? $open($s[1], $kfr)['title'] ?? '') === 'Ferme ta journée en 2 touchers.' && wp_devices($pdo, 'p6') === 1,
-    'review at 16:30 (not 16:15), in French; the device the push service says gone (410) is forgotten');
+    'review at 17:15 (not 17:00), in French; the device the push service says gone (410) is forgotten');
 $trader('p6b', [['2026-10-16', 0, 0], ['2026-10-19', 2, 0]]); $sub('p6b', 'https://fcm.googleapis.com/fcm/send/p6b', $kfr, 'fr'); wp_set_pref($pdo, 'p6b', 'review', ['at' => '18:30']);
 $at('2026-10-19 18:30'); GameNotifyService::run('p6b', true); $s = $sent();
 $ok($bell('p6b') === ['g_review'] && count($s) === 1, 'review at 18:30 (after the next session began at 18:00): the day that closed, reminded (before 14 Oct.: nothing)');
 $trader('p7', [['2026-10-16', 0, 0], ['2026-10-19', 2, 0]]); $sub('p7', 'https://fcm.googleapis.com/fcm/send/p7', $kfr, 'fr');
 Notify::send('p7', 'fb_planned', [], ['dedupe_key' => 'x7a']); Notify::send('p7', 'chart_ready', [], ['dedupe_key' => 'x7b']);
-$at('2026-10-19 16:30'); GameNotifyService::run('p7', true);
+$at('2026-10-19 17:15'); GameNotifyService::run('p7', true);
 $ok($bell('p7') === ['fb_planned', 'chart_ready'] && $sent() === [], 'already 2 notifications today: the review waits (no bell, no push)');
 // the week's recap: Friday, from 17:00 (or the trader's time), once
 $trader('p8', [['2026-10-16', 0, 0], ['2026-10-20', 1, 1]]); $sub('p8', 'https://fcm.googleapis.com/fcm/send/p8', $kfr, 'en');

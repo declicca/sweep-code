@@ -52,8 +52,8 @@ with sync_playwright() as p:
     tr = []
     for h in ['trades', 'journal', 'analytics', 'payouts']:
       go(pg, h); tr += [dict(t, page=h) for t in pg.evaluate(TRACKS)]
-    bad = [t for t in tr if not t['pill'] or t['inv'] or t['h'] not in (40, 41)]
-    ok(tr and not bad, f'1 computer {scheme}: {len(tr)} choosers, pill tracks 40 px, no inverted tab ({bad[:3]})')
+    bad = [t for t in tr if not t['pill'] or t['inv'] or t['h'] not in (44, 45)]   # (31 Oct., fluidity 9) its segments 38 px: the track 44
+    ok(tr and not bad, f'1 computer {scheme}: {len(tr)} choosers, pill tracks 44 px (segments of 38), no inverted tab ({bad[:3]})')
     go(pg, 'calendar')
     cols = pg.evaluate("(()=>{const s=document.querySelector('#main .statline'); if(!s) return null; return [getComputedStyle(s).display, [...s.children].map(d=>Math.round(d.getBoundingClientRect().left))]})()")
     ok(cols and cols[0] == 'grid', f'3 computer {scheme}: the Calendar month figures are a grid ({cols})')

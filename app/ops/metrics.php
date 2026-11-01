@@ -145,7 +145,7 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
     $slot = function (int $ts) use ($ny) {   // before the open (18:00 → 9:30), session (9:30 → 16:00), evening (16:00 → 18:00), weekend (Friday 17:00 → Sunday 18:00)
         $t = (new DateTimeImmutable('@' . $ts))->setTimezone($ny); $w = (int) $t->format('N'); $hm = $t->format('H:i');
         if (($w === 5 && $hm >= '17:00') || $w === 6 || ($w === 7 && $hm < '18:00')) return 'weekend';
-        return $hm >= '09:30' && $hm < '16:00' ? 'session' : ($hm >= '16:00' && $hm < '18:00' ? 'evening' : 'before');
+        return $hm >= '09:30' && $hm < '17:00' ? 'session' : ($hm >= '17:00' && $hm < '18:00' ? 'evening' : 'before');   // (1 Nov.) the close at 17:00, the reopening at 18:00
     };
     $todayS = $sday($now);
     $seen = [];   // the days a trader was there: a visit (usage of the app, the last sign-in), an activity of the game, a first plan or trade

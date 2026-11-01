@@ -191,7 +191,7 @@ body.evp-lock,html.sai-locked,html.sai-locked body,html.sb-lock{overflow:hidden}
 .sai-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
 .sai-or{color:var(--sai-mute);font-size:13px}
 .sai-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--sai-line);background:var(--sai-bg);color:var(--sai-text);font:inherit;font-size:15px;font-weight:600;padding:11px 16px;border-radius:14px;cursor:pointer;transition:transform .12s,opacity .12s}
-.sai-btn:active{transform:scale(.98)}
+.sai-btn:active{transform:scale(.97)}
 .sai-btn.is-disabled,.sai-btn:disabled{opacity:.45;pointer-events:none}
 .sai-dots i,.sai-primary{background:var(--sai-blue)}
 .sai-primary{border-color:var(--sai-blue);color:#fff}
@@ -318,7 +318,7 @@ body.evp-lock,html.sai-locked,html.sai-locked body,html.sb-lock{overflow:hidden}
 .sb-bens li{position:relative;padding-left:26px;font-size:15px;line-height:1.35}
 .sb-bens li::before{content:"";position:absolute;left:2px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--sb-accent)url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.3l2.3 2.3 4.7-4.9' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")center/16px no-repeat}
 .sb-cta{display:block;width:100%;border:0;border-radius:var(--r-pill);padding:15px 16px;font:inherit;font-size:17px;font-weight:600;background:var(--blue-btn);color:var(--on-blue);cursor:pointer;transition:transform .1s,opacity .15s}
-.sb-cta:active{transform:scale(.985)}
+.sb-cta:active{transform:scale(.97)}
 .sb-cta:disabled{opacity:.6;cursor:progress}
 .sb-cta.sb-sm{padding:9px 10px;font-size:14px;border-radius:var(--r-pill);margin-top:10px}
 .sb-err,.sb-trust{text-align:center;font-size:13px;color:var(--sb-muted);margin:10px 0 0}
@@ -1430,8 +1430,8 @@ a.acard:hover{transform:translateY(-2px);box-shadow:0 18px 40px -26px rgba(0,0,0
 .tbl tbody tr[data-href]{transition:background var(--dur-1) var(--spring)}
 }
 .add-row,.bottomnav a,.bottomnav button,.btn,.cal a.d,.chip,.ff-row,.menu-pop button,.onb-feat,.rprog-steps a,.seg a,.seg button,.sheet-panel a,.side .new,.tk-dir button,.trow{-webkit-tap-highlight-color:transparent;transition:transform var(--dur-1) var(--spring),background-color var(--dur-2) var(--spring),color var(--dur-2) var(--spring),border-color var(--dur-2) var(--spring),box-shadow var(--dur-2) var(--spring),opacity var(--dur-2)}
-.add-row:active,.btn:active,.chip:active,.menu-pop button:active,.rprog-steps a:active,.seg button:active,.tk-dir button:active{transform:scale(.97)}
-.cal a.d:active,.ff-row:active,.sheet-panel a:active,.trow:active{transform:scale(.985);background:var(--hover)}
+.btn:active,.chip:active,.menu-pop button:active,.rprog-steps a:active,.seg button:active,.tk-dir button:active{transform:scale(.97)}.add-row:active{background:var(--fill)}
+.cal a.d:active,.ff-row:active,.sheet-panel a:active,.trow:active{background:var(--fill)}
 .bottomnav .plus:active,.side .new:active{transform:scale(.97)}
 main.anim>*{animation:rise .46s var(--ease-ios) both}
 main.anim>:nth-child(2){animation-delay:40ms}
@@ -1517,7 +1517,7 @@ body.evp-lock main{transform:none;opacity:1}
 .fs-val svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
 .fs-row:active{background:var(--hover)}
 .fs-done{min-height:50px!important;font-size:16px;width:100%}
-.fs-done,.fs-import{justify-content:center}
+.fs-done{justify-content:center}
 .msearch{min-width:0}
 .fbtn{flex-shrink:0}
 .mfb-row .fbtn:only-child{margin-left:0}
@@ -1532,7 +1532,7 @@ body.ai-on .ai-banner.ai-only{display:grid!important}
 .ai-banner b{display:block;font-weight:500}
 .ai-banner i,.ai-banner small,.ask-head small{color:var(--muted);font-size:13px}
 .ai-banner i{font-style:normal;font-size:17px}
-.ai-banner:active{transform:scale(.985)}
+.ai-banner:active{background:var(--fill)}
 .air-box{display:flex;gap:12px}
 
 

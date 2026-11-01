@@ -7,7 +7,7 @@ is set to the same instant:
  - morning, D 08:30 ET: nothing done → next step: the plan, made from the routine card (max loss from the account's limit);
  - session, D 11:00 ET: a trade → next step: still « add a trade », unless the day's last announcement is past (then the
    review); checked both ways with an announcement at 10:00 and at 15:00;
- - close, D 16:30 ET: next step: the review, made from the routine card → day swept, nothing highlighted;
+ - close, D 17:30 ET (the CME closes at 17:00): next step: the review, made from the routine card → day swept, nothing highlighted;
  - evening, D 19:30 ET: the session of D+1 has started (18:00 ET) → plan first; a trade at 19:35 counts on D+1, D stays swept;
    the plan of D+1 (the pre-market questionnaire) starts from D's levels, max loss $1,500 → the account's $1,000 limit, saved
    only with its sheet.
@@ -181,7 +181,7 @@ async def main():
     async def trade_kept(page): box['next'] = await trade(page)
     await at(f'{D} 11:00', 'session', trade_kept, next_before=2)
     await at(f'{D} 11:00', 'session, the real announcements of the day', None, next_before=box.get('next'))
-    await at(f'{D} 16:30', 'close', sheet_review, next_before=3, next_after=0)
+    await at(f'{D} 17:30', 'close', sheet_review, next_before=3, next_after=0)
     await at(f'{D} 19:30', 'evening (after 18:00 ET)', evening, next_before=1, next_after=2)
     # the evening trade is on D+1, D keeps its one trade and stays swept
     srv = server_at(f'{D} 19:30')

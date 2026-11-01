@@ -32,13 +32,13 @@ def php(*a):
   return subprocess.run(['php', os.path.join(APP, 'tests', 'push_ua.php')] + list(a), capture_output=True, text=True, env=os.environ, timeout=60)
 X = {
   'fr': {'denied': 'Les notifications sont bloquées pour Sweep.', 'h': 'Sur cet appareil', 'on': 'Activer les notifications', 'off': 'Désactiver sur cet appareil', 'rows': ['Rappel du plan', 'Rappel de la revue', 'Bilan de la semaine'],
-         'times': ['8 h 45', '16 h 30', '17 h 00'], 'nine': '9 h 00', 'title': 'Ton plan du jour t’attend.', 'ios': 'Sur iPhone : ajoute Sweep à ton écran d’accueil',
+         'times': ['8 h 45', '17 h 15', '17 h 00'], 'nine': '9 h 00', 'title': 'Ton plan du jour t’attend.', 'ios': 'Sur iPhone : ajoute Sweep à ton écran d’accueil',
          'help': 'Heure de New York, pour la cloche aussi.'},
   'en': {'denied': 'Notifications are blocked for Sweep.', 'h': 'On this device', 'on': 'Turn on notifications', 'off': 'Turn off on this device', 'rows': ['Plan reminder', 'Review reminder', 'Your week'],
-         'times': ['8:45 AM', '4:30 PM', '5:00 PM'], 'nine': '9:00 AM', 'title': 'Your plan of the day is waiting.', 'ios': 'On iPhone: add Sweep to your Home Screen',
+         'times': ['8:45 AM', '5:15 PM', '5:00 PM'], 'nine': '9:00 AM', 'title': 'Your plan of the day is waiting.', 'ios': 'On iPhone: add Sweep to your Home Screen',
          'help': 'New York time, for the bell too.'},
   'es': {'denied': 'Las notificaciones están bloqueadas para Sweep.', 'h': 'En este dispositivo', 'on': 'Activar las notificaciones', 'off': 'Desactivar en este dispositivo', 'rows': ['Recordatorio del plan', 'Recordatorio de la revisión', 'Balance de la semana'],
-         'times': ['8:45', '16:30', '17:00'], 'nine': '9:00', 'title': 'Tu plan del día te espera.', 'ios': 'En iPhone: añade Sweep a tu pantalla de inicio',
+         'times': ['8:45', '17:15', '17:00'], 'nine': '9:00', 'title': 'Tu plan del día te espera.', 'ios': 'En iPhone: añade Sweep a tu pantalla de inicio',
          'help': 'Hora de Nueva York, también para la campana.'},
 }
 SEED = """() => { put('accounts', { id: 'a', name: 'Main 50K', status: 'active', starting_balance_c: 5000000, rules: {} }); render(); }"""

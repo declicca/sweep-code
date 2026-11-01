@@ -28,7 +28,7 @@
 .nt-grp li+li .nt-item{border-top:1px solid var(--line)}
 .nt-item{display:grid;grid-template-columns:36px minmax(0,1fr) 8px;gap:12px;align-items:start;width:100%;padding:12px 14px;border:0;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background var(--dur-2,.22s) var(--ease-ios)}
 .nt-item:hover{background:var(--hover)}
-.nt-item:active{background:var(--hover);transform:scale(.99)}
+.nt-item:active{background:var(--fill)}
 .nt-ic{width:36px;height:36px;border-radius:14px;display:grid;place-items:center;background:var(--panel);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
 .nt-ic svg{width:18px;height:18px}
 .nt-ic.cel{background:var(--posbg);color:var(--pos);box-shadow:none}

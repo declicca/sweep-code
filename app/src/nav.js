@@ -52,7 +52,7 @@ window.SweepMO = window.SweepMO || class {
   const GROUP = { trades: 'trades', calendar: 'trades', journal: 'trades', accounts: 'accounts', payouts: 'accounts' };
   // parent of each sub-page (the back chevron)
   const PARENT = { trade: ['#trades', 'trades'], import: ['#trades', 'trades'], account: ['#accounts', 'acc'], news: ['#dashboard', 'today'],
-    settings: ['#dashboard', 'today'], plan: ['#dashboard', 'today'], referral: ['#dashboard', 'today'], feedback: ['#dashboard', 'today'], admin: ['#dashboard', 'today'] };
+    settings: ['#dashboard', 'today'], plan: ['#dashboard', 'today'], referral: ['#settings', 'settings'], feedback: ['#settings', 'settings'], admin: ['#dashboard', 'today'] };
   const IC = {
     news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
@@ -111,9 +111,9 @@ window.SweepMO = window.SweepMO || class {
       ${S.me ? ((nm) => `<button type="button" class="nav-menu-who" data-navm="plan"><span class="av">${esc(nm.slice(0, 1).toUpperCase())}</span><span class="nm"><b>${esc(nm)}</b>${planLine()}</span></button>`)(String(S.me.first_name || S.me.username || '').trim() || S.me.username) : ''}
       <div class="nav-mg">${item('prog', IC.prog, x.prog)}${item('news', IC.news, x.news)}</div>
       <div class="nav-mg">${item('settings', IC.settings, x.settings)}</div>
-      <div class="nav-mg">${item('referral', IC.ref, x.ref)}${item('feedback', IC.fb, x.fb)}${item('help', IC.help, x.help)}</div>
+      <div class="nav-mg">${item('help', IC.help, x.help)}</div>
       ${admin ? `<div class="nav-mg">${item('admin', IC.admin, x.admin)}</div>` : ''}
-      <div class="nav-mg"><button type="button" role="menuitem" class="out" data-act="logout">${IC.out}<span>${x.out}</span></button></div></div>`;
+</div>`;   // (31 Oct., fluidity 14) 4 lines: My progress, What's new, Settings, Help — Referral, Give feedback and Log out are in Settings
     document.body.append(el);
     const r = anchor && anchor.getBoundingClientRect(), panel = el.querySelector('.nav-menu-panel');
     if (r && !window.SW_MQ.matches) { panel.style.left = Math.max(12, r.left) + 'px'; panel.style.bottom = Math.max(12, innerHeight - r.top + 8) + 'px'; panel.style.maxHeight = (r.top - 20) + 'px'; panel.classList.add('up'); }
@@ -880,8 +880,6 @@ window.SweepMO = window.SweepMO || class {
     }
     return sec;
   }
-  let dashEnteredAt = '', navCount = 0;
-  addEventListener('hashchange', () => { navCount++; });
   function composeToday() {
     if (route().v !== 'dashboard') return;
     const main = document.getElementById('main'); if (!main) return;
@@ -901,7 +899,6 @@ window.SweepMO = window.SweepMO || class {
     if (missing.length && !reported) { reported = true; report('Today: section(s) not found: ' + missing.join(', ')); }
     const card = document.getElementById('gToday');
     const dash = document.createElement('div'); dash.className = 'nav-dash';
-    if (dashEnteredAt !== location.hash + '|' + navCount) { dashEnteredAt = location.hash + '|' + navCount; dash.classList.add('nav-dash-in'); }
     // two columns on a computer, each card at its natural height (no stretched empty cards); one list on a phone (CSS order)
     const sg = stage();
     dash.innerHTML = `<div class="d-col d-col-a"><div class="d-today"></div>${typeof window.SweepTrialCard === 'function' ? window.SweepTrialCard() : ''}${sg.perf ? kpiCard() : ''}</div><div class="d-col d-col-b">${sg.acc ? accountsCard() : ''}${sg.money ? payoutsCard() : ''}</div>`;
@@ -1075,14 +1072,19 @@ window.SweepMO = window.SweepMO || class {
     const key = e.target.closest('[data-v],[data-act],[data-path]') || e.target, h0 = location.hash, t0 = performance.now();
     const sel = ['data-act', 'data-path', 'data-v', 'data-id', 'data-col'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join('');
     const y0 = key.getBoundingClientRect().top;
-    const find = () => (document.contains(key) ? key : sel ? [...main.querySelectorAll(sel)].sort((a, b) => Math.abs(a.getBoundingClientRect().top - y0) - Math.abs(b.getBoundingClientRect().top - y0))[0] : null);
-    const tick = () => {
+    // (1 Nov.) the same control in the same card only: an answer given in « Answer your coach » moves the coach to its next
+    // question, and the checklist's button of that question further down is another control (the page jumped 171 px to it)
+    const zone = (x) => { const z = x.closest('section, .surface'); return z ? z.className.split(' ').filter((c) => !/^(open|on|is-|has-)/.test(c)).sort().join(' ') : ''; }, z0 = zone(key);
+    const find = () => (document.contains(key) ? key : sel ? [...main.querySelectorAll(sel)].filter((c) => zone(c) === z0).sort((a, b) => Math.abs(a.getBoundingClientRect().top - y0) - Math.abs(b.getBoundingClientRect().top - y0))[0] : null);
+    const fix = () => {
       if (location.hash !== h0 || userMoved > t0) return;
       const el = find();
       if (el) { const d = el.getBoundingClientRect().top - y0; if (Math.abs(d) >= 2) window.scrollBy(0, d); }
-      if (performance.now() - t0 < 700) requestAnimationFrame(tick);
     };
+    const tick = () => { fix(); if (performance.now() - t0 < 700) requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
+    // (1 Nov.) and as soon as the page is redrawn (a redraw scheduled in a later frame moved it for one image before the tick)
+    const mo = new MutationObserver(fix); mo.observe(main, { childList: true, subtree: true }); setTimeout(() => mo.disconnect(), 700);
   }, true);
 
   /* ───────────── jump report (trade review page, phones) ─────────────
@@ -3823,7 +3825,8 @@ window.SweepMO = window.SweepMO || class {
     first.before(sec);
     if (!PUB) pubLoad();
     const help = document.createElement('section'); help.className = 'surface nav-set-help'; help.setAttribute('data-noi18n', '');
-    help.innerHTML = `<h2>${t('help')}</h2><p class="muted">${t('helpS')}</p><a class="btn" href="mailto:${SUPPORT}">${SUPPORT}</a>`;
+    const RF = { en: ['Referral', 'Give feedback'], fr: ['Parrainage', 'Donner mon avis'], es: ['Referidos', 'Dar mi opinión'] }[LANG] || ['Referral', 'Give feedback'];   // (31 Oct., fluidity 14) out of the profile menu
+    help.innerHTML = `<h2>${t('help')}</h2><p class="muted">${t('helpS')}</p><a class="btn" href="mailto:${SUPPORT}">${SUPPORT}</a><div class="nav-set-rows"><a href="#referral">${RF[0]} ›</a><a href="#feedback">${RF[1]} ›</a></div>`;
     main.append(help);
   }
   // brief 02 part 12: the public discipline profile, off by default (growth/public-profile.php)
@@ -4266,12 +4269,12 @@ window.SweepMO = window.SweepMO || class {
   const FOLD = { en: ['Fold the routine', 'Unfold the routine'], fr: ['Replier la routine', 'Déplier la routine'], es: ['Plegar la rutina', 'Desplegar la rutina'] };
   const foldBtn = () => { const c = rtClosed(), f = FOLD[L] || FOLD.en; return `<button type="button" class="nav-rt-fold" data-rt="toggle" aria-expanded="${!c}" aria-label="${c ? f[1] : f[0]}"><svg class="nav-rt-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>`; };
   const left = (dl) => { if (!dl) return ''; const s = Math.max(0, dl - Date.now() / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return h ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`; };
-  /** the review is offered when the session is done (brief 02 part 5): at the 16:00 ET close, or earlier once a trade is
+  /** the review is offered when the session is done (brief 02 part 5): at the 17:00 ET close (the CME closes at 17:00, reopens at 18:00), or earlier once a trade is
    *  logged and the day's last announcement is past (a logged trade is a closed one: Sweep sees no open position) */
   function reviewTime(d) {
     const now = Math.floor(Date.now() / 1000), et = typeof etStr === 'function' ? etStr(now) : ''; if (!et) return true;
     const date = et.slice(0, 10), hm = et.slice(11, 16);
-    if (date > d.day || (date === d.day && hm >= '16:00')) return true;
+    if (date > d.day || (date === d.day && hm >= '17:00')) return true;
     if (date < d.day || !d.trades) return false;   // the evening before the session (from 18:00 ET), or nothing traded yet
     const ev = typeof ECON !== 'undefined' && ECON.days && ECON.days[d.day];
     return !!(ev && ev.length && now > ev[ev.length - 1].ts);
@@ -4417,6 +4420,7 @@ window.SweepMO = window.SweepMO || class {
     host.insertAdjacentHTML('afterbegin', html);
     el = host.querySelector('.nav-rt'); el._h = html; if (open && el.querySelector('.nav-rt-help-t')) el.querySelector('.nav-rt-help-t').hidden = false;
     if (co) { const st = el.querySelector(':scope > .nav-rt-steps'), hp = el.querySelector(':scope > .nav-rt-help-t'); st ? st.before(co) : hp ? hp.before(co) : el.append(co); }
+    else if (window.SweepCoach && SweepCoach.paintToday) SweepCoach.paintToday();   // (1 Nov.) the coach in the same image as its card: it pushed the 3 steps down one frame later
     el.classList.toggle('closed-rt', rtClosed());
     document.body.classList.add('nav-rt-on');
   }
@@ -5142,28 +5146,6 @@ window.SweepMO = window.SweepMO || class {
   new window.SweepMO(() => { [rows, accountsExtras, filterPill, platformMark, discChip, trialCard, noAiLine, copiesFromGroup].forEach((f) => { try { f(); } catch (e) { if (!f.__warned) { f.__warned = true; console.warn('Sweep:', f.name, e && e.message); } } }); /* each on its own: one failing never stops the others */ }).observe(document.body, { childList: true, subtree: true });
 })();
 
-/* motion: blocks rise into place when a page opens — only the blocks of that first draw. A later redraw of the same
- * page (data arriving, a sync) shows its content directly: it never fades in a second time. */
-(function () {
-  'use strict';
-  let last = null, pending = false;
-  window.addEventListener('hashchange', () => { const page = (location.hash || '#dashboard').split('/')[0]; if (page !== last) { last = page; pending = true; mark(); } });
-  window.addEventListener('load', () => { last = (location.hash || '#dashboard').split('/')[0]; pending = true; setTimeout(mark, 30); });
-  function mark() {
-    if (!pending) return;
-    const main = document.getElementById('main'); if (!main || !main.children.length) return;
-    pending = false;
-    const els = [...main.querySelectorAll(':scope > *:not(.nav-dash), :scope > .nav-dash > .d-today, :scope > .nav-dash > * > *')].filter((e) => !e.classList.contains('d-today') || e.parentElement.classList.contains('nav-dash'));
-    els.slice(0, 12).forEach((e, i) => { e.classList.remove('sw-in'); e.style.animationDelay = Math.min(i, 4) * (window.SW_MQ && SW_MQ.matches ? 30 : 40) + 'ms'; e.classList.add('sw-in'); });
-    clearTimeout(mark.t); mark.t = setTimeout(() => els.forEach((e) => { e.classList.remove('sw-in'); e.style.animationDelay = ''; }), 900);
-  }
-  const appRender = window.render;
-  if (typeof appRender === 'function' && !appRender.__swin) {
-    const w = function () { const out = appRender.apply(this, arguments); try { mark(); } catch (e) { /* never blocks */ } return out; };
-    w.__swin = true; window.render = w;
-  }
-})();
-
 /* routine: the whole step is the button (the small action inside stays as the visible cue) */
 document.addEventListener('click', (e) => {
   const st = e.target.closest && e.target.closest('#main .nav-rt-s'); if (!st || e.target.closest('button, a')) return;
@@ -5407,22 +5389,22 @@ document.addEventListener('click', (e) => {
   setTimeout(() => { if (typeof toast === 'function') toast(({ en: 'Add your account first: every trade belongs to one.', fr: 'Ajoute d’abord ton compte : chaque trade lui appartient.', es: 'Añade primero tu cuenta: cada operación pertenece a una.' })[(typeof LANG !== 'undefined' && LANG) || 'en']); }, 250);
 }, true);
 
-/* B9 · after the 16:00 ET close (or on a day without a session), the Plan step prepares the next session */
+/* B9 · after the 17:00 ET close (or on a day without a session), the Plan step prepares the next session */
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const HOUR_ET = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: '2-digit', hourCycle: 'h23' });   // one formatter, not one per call
-  /** the session the Plan prepares: from 16:00 to 18:00 the day is over → the next one; from 18:00 the new day has started
+  /** the session the Plan prepares: from 17:00 (the close) to 18:00 (the reopening) the day is over → the next one; from 18:00 the new day has started
    *  (todayStr is already that day); weekends → Monday. null when it is simply today's plan, already done or not. */
   window.SweepNextSession = function () {
     const st = window.SweepGame && SweepGame.state && SweepGame.state(); const d = st && st.today;
     const h = +HOUR_ET.format(new Date()) % 24, today = typeof todayStr === 'function' ? todayStr() : null; if (!today) return null;
     const n = new Date(today + 'T12:00:00');
-    if (h >= 16 && h < 18) n.setDate(n.getDate() + 1);
+    if (h >= 17 && h < 18) n.setDate(n.getDate() + 1);
     while (n.getDay() === 0 || n.getDay() === 6) n.setDate(n.getDate() + 1);
     const target = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
     if (d && d.rings && d.rings.plan >= 100 && target === (d.day || today)) return null;   // already planned
-    return h >= 16 || target !== today || !d || !d.market ? target : null;
+    return h >= 17 || target !== today || !d || !d.market ? target : null;
   };
   function tagNext() {
     // never on the loading card: its steps have no title, so the tag landed next to the step, as a 4th cell of the grid (layout shift)
@@ -6245,7 +6227,7 @@ new window.SweepMO(() => {
   });
 })();
 
-/* Journal without a date, after the day is over (16:00–18:00 ET) or on a weekend: if the plan was made for the next
+/* Journal without a date, after the day is over (17:00–18:00 ET) or on a weekend: if the plan was made for the next
    session, the journal opens on that day — where the plan is (otherwise it would show today's empty sheet). */
 (function () {
   'use strict';
@@ -6254,7 +6236,7 @@ new window.SweepMO(() => {
       if ((location.hash || '') !== '#journal') return;
       const nx = window.SweepNextSession && SweepNextSession(); if (!nx || nx === (typeof todayStr === 'function' ? todayStr() : nx)) return;
       const j = typeof getDoc === 'function' && getDoc('journals', nx);
-      if (j && j.pre && (j.pre.bias || (j.pre.setups || []).length || j.pre.levels)) history.replaceState(null, '', '#journal/' + nx);
+      if (j && j.pre && (j.pre.bias || (j.pre.setups || []).length || j.pre.levels)) history.replaceState(history.state, '', '#journal/' + nx);
     } catch (e) { /* stays on today */ }
   };
   addEventListener('hashchange', go, true); go();
@@ -6830,8 +6812,9 @@ new window.SweepMO(() => {
 
 /* ───────────── the first visit fits the moment (28 Oct., brief « activation », step D) ─────────────
  * One start, three endings after « Create account »:
- *   open    9:30 → 16:00 ET on a weekday: the short plan (risk allowed), then the first trade (as before)
- *   closed  the rest of the time: « Prepare tomorrow's session »: the plan of the next session and its risk allowed, then Today
+ *   open    the market is open (it closes at 17:00 ET and reopens at 18:00; the weekend: Friday 17:00 → Sunday 18:00, 1 Nov.):
+ *           the short plan (risk allowed), then the first trade (as before)
+ *   closed  17:00 → 18:00 on a weekday, and the weekend: « Prepare tomorrow's session »: the plan of the next session and its risk allowed, then Today
  *           (the reminder of step E) — never an empty trade form; « I traded today: add my trade » stays, discreet, in « Now »
  *   active  « More than a year », or an account added « already running »: after the plan, « Bring your history » (the
  *           NinjaTrader 8 / Quantower sync or the CSV import, in one screen); « Later » leads to the case of the moment
@@ -6843,30 +6826,25 @@ new window.SweepMO(() => {
     en: { open: ['Your account', 'Your plan', 'Your first trade'], closed: ['Your account', 'Your plan for tomorrow'], mon: ['Your account', 'Your plan for Monday'], active: ['Your account', 'Your plan', 'Your history'],
       tOpen: 'Three steps and you’re trading.', sOpen: 'Your account, your plan for the day, your first trade: about two minutes.',
       tClosed: 'Prepare tomorrow’s session.', tMon: 'Prepare Monday’s session.', sClosed: 'Your account, then your plan for the next session and your risk allowed: about a minute.',
-      pre: ['Your account', 'Your plan for the day'], tPre: 'Prepare today’s session.', sPre: 'Your account, then your plan for the day and your risk allowed, before the open: about a minute.',
       tActive: 'Three steps and your journal is full.', sActive: 'Your account, your plan, then your history: Today, Stats and « Your edge » filled in from today.',
       hT: 'Bring your history', hS: 'Sync NinjaTrader 8 or Quantower, or import a CSV of your platform: Today, Stats and « Your edge » fill up from your first visit.', csv: 'Import a CSV', later: 'Later', traded: 'I traded today: add my trade' },
     fr: { open: ['Ton compte', 'Ton plan', 'Ton premier trade'], closed: ['Ton compte', 'Ton plan de demain'], mon: ['Ton compte', 'Ton plan de lundi'], active: ['Ton compte', 'Ton plan', 'Ton historique'],
       tOpen: 'Trois étapes et tu trades.', sOpen: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.',
       tClosed: 'Prépare ta séance de demain.', tMon: 'Prépare ta séance de lundi.', sClosed: 'Ton compte, puis ton plan de la prochaine séance et ton risque permis : environ une minute.',
-      pre: ['Ton compte', 'Ton plan du jour'], tPre: 'Prépare ta séance d’aujourd’hui.', sPre: 'Ton compte, puis ton plan du jour et ton risque permis, avant l’ouverture : environ une minute.',
       tActive: 'Trois étapes et ton journal est rempli.', sActive: 'Ton compte, ton plan, puis ton historique : Aujourd’hui, Stats et « Ton edge » remplis dès aujourd’hui.',
       hT: 'Ramène ton historique', hS: 'Synchronise NinjaTrader 8 ou Quantower, ou importe un CSV de ta plateforme : Aujourd’hui, Stats et « Ton edge » se remplissent dès ta première visite.', csv: 'Importer un CSV', later: 'Plus tard', traded: 'J’ai tradé aujourd’hui : ajouter mon trade' },
     es: { open: ['Tu cuenta', 'Tu plan', 'Tu primera operación'], closed: ['Tu cuenta', 'Tu plan de mañana'], mon: ['Tu cuenta', 'Tu plan del lunes'], active: ['Tu cuenta', 'Tu plan', 'Tu historial'],
       tOpen: 'Tres pasos y operas.', sOpen: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.',
       tClosed: 'Prepara tu sesión de mañana.', tMon: 'Prepara tu sesión del lunes.', sClosed: 'Tu cuenta, luego tu plan de la próxima sesión y tu riesgo permitido: un minuto.',
-      pre: ['Tu cuenta', 'Tu plan del día'], tPre: 'Prepara tu sesión de hoy.', sPre: 'Tu cuenta, luego tu plan del día y tu riesgo permitido, antes de la apertura: un minuto.',
       tActive: 'Tres pasos y tu diario está lleno.', sActive: 'Tu cuenta, tu plan y luego tu historial: Hoy, Estadísticas y « Tu ventaja » llenos desde hoy.',
       hT: 'Trae tu historial', hS: 'Sincroniza NinjaTrader 8 o Quantower, o importa un CSV de tu plataforma: Hoy, Estadísticas y « Tu ventaja » se llenan desde tu primera visita.', csv: 'Importar un CSV', later: 'Más tarde', traded: 'Operé hoy: añadir mi operación' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const NYF = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
   function nyNow() { const p = {}; NYF.formatToParts(window.__swNow ? new Date(window.__swNow) : new Date()).forEach((x) => { p[x.type] = x.value; }); return { wk: !['Sat', 'Sun'].includes(p.weekday), wd: p.weekday, m: (+p.hour % 24) * 60 + +p.minute }; }
-  function moment() { const n = nyNow(); return n.wk && n.m >= 570 && n.m < 960 ? 'open' : 'closed'; }
-  /** (29 Oct., tour T1) before the open of a weekday (midnight → 9:30 ET): the plan that opens is today's, not tomorrow's */
-  const preOpen = () => { const n = nyNow(); return n.wk && n.m < 570; };
+  function moment() { const n = nyNow(); return n.wd === 'Sat' || (n.wd === 'Fri' && n.m >= 1020) || (n.wd === 'Sun' && n.m < 1080) || (n.m >= 1020 && n.m < 1080) ? 'closed' : 'open'; }
   /** (30 Oct., tour W2) Friday after the close and Saturday: the next session is Monday's, « tomorrow » only when it is */
-  const toMonday = () => { const n = nyNow(); return n.wd === 'Sat' || (n.wd === 'Fri' && n.m >= 570); };
+  const toMonday = () => { const n = nyNow(); return n.wd === 'Sat' || (n.wd === 'Fri' && n.m >= 1020); };
   const running = () => (S.accounts || []).some((a) => !a.demo && Array.isArray(a.adjustments) && a.adjustments.some((x) => +x.amount_c));
   function kind(xp) { return xp === 'gt1' || running() ? 'active' : moment(); }
   function history(later) {
@@ -6894,11 +6872,11 @@ new window.SweepMO(() => {
     const onb = document.querySelector('#main .onb'); if (!onb) return;
     const xp = ((f || onb).querySelector('[data-exp].on') || {}).dataset; const k = kind(xp && xp.exp);
     const ol = onb.querySelector('.onb-steps'), ttl = onb.querySelector('h1, h2'), sub = onb.querySelector('.onb-sub');
-    const key = k === 'closed' ? (preOpen() ? 'Pre' : toMonday() ? 'Mon' : 'Closed') : k === 'active' ? 'Active' : 'Open';
+    const key = k === 'closed' ? (toMonday() ? 'Mon' : 'Closed') : k === 'active' ? 'Active' : 'Open';
     if (ttl && ttl.textContent !== t('t' + key)) ttl.textContent = t('t' + key);
     const sk = key === 'Mon' ? 'sClosed' : 's' + key;
     if (sub && sub.textContent !== t(sk)) sub.textContent = t(sk);
-    const html = t(key === 'Pre' ? 'pre' : key === 'Mon' ? 'mon' : k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
+    const html = t(key === 'Mon' ? 'mon' : k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
     if (ol && ol.innerHTML !== html) { ol.setAttribute('data-noi18n', ''); ol.innerHTML = html; }
     onb.dataset.start = k;
   }
@@ -6992,4 +6970,188 @@ new window.SweepMO(() => {
   }
   if (window.SweepMO) new window.SweepMO(hub).observe(document.body, { childList: true });
   window.SweepDisc = { line, go, apply };
+})();
+
+/* ───────────── (31 Oct., brief « fluidité iOS 27 », lot 1) moving between pages like iOS ─────────────
+ * 1 a tab change and a back are instant: no entry animation (only what appears in a page already shown animates);
+ * 2 each tab keeps its scroll and its open sub-page; the active tab tapped: to the top, tapped again: to its root;
+ * 3 back and forward put the scroll back exactly (history.scrollRestoration manual, the scroll kept per address);
+ * 4 a sub-page (a trade, an account, Settings, What's new, My progress, Stats' detailed analysis) slides in from the right,
+ *   the page under it leaves 30 % to the left, dimmed; back does the opposite (startViewTransition, else no animation);
+ * 5 the installed app: a swipe from the left edge follows the finger and goes back past a third or when fast;
+ * 6 phone: the tab bar shrinks to the active tab and the « + » while scrolling down, and comes back scrolling up. */
+(function () {
+  'use strict';
+  if (typeof render !== 'function') return;
+  try { history.scrollRestoration = 'manual'; } catch (e) { /* old browser */ }
+  const view = (h) => (decodeURIComponent(String(h || '').replace(/^#/, '')) || 'dashboard').split('/')[0];
+  const ROOT = { dashboard: 'dashboard', today: 'dashboard', trades: 'trades', calendar: 'trades', journal: 'trades', analytics: 'analytics', accounts: 'accounts', payouts: 'accounts' };
+  const SUB = ['trade', 'account', 'settings', 'news', 'progress'];   // the brief's sub-pages (the others open as before)
+  const depth = (h) => (SUB.includes(view(h)) || /^#analytics\/./.test(h || '') ? 1 : 0);   // (#analytics/deep and its tabs: Stats' detailed analysis)
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const pos = {}, mem = {};
+  let shown = location.hash || '#dashboard', idx = 0, tab = ROOT[view(shown)] || 'dashboard', want = null, noVT = false;
+  try { if (history.state && history.state.swI != null) idx = history.state.swI; else history.replaceState(Object.assign({}, history.state, { swI: 0 }), ''); } catch (e) { /* sandboxed */ }
+  mem[tab] = shown;
+  addEventListener('scroll', () => { if (!want) pos[shown] = scrollY; }, { passive: true });
+  // the scroll a page opens at: kept for back, forward and a tab coming back; the top for a new page
+  function place(y) {
+    want = { y, t: Date.now() };
+    const go = () => { if (!want) return; const max = document.documentElement.scrollHeight - innerHeight; scrollTo(0, Math.min(want.y, Math.max(0, max))); };
+    go(); requestAnimationFrame(go); setTimeout(go, 120);
+    setTimeout(() => { go(); want = null; pos[shown] = scrollY; }, 320);   // the cards that fill in after the first image
+  }
+  ['wheel', 'touchstart', 'keydown'].forEach((k) => addEventListener(k, () => { want = null; }, { passive: true }));   // the trader scrolls: his scroll wins
+  let restoreTab = false;
+  const r0 = window.render;
+  const w = function () {
+    const to = location.hash || '#dashboard';
+    if (to === shown) return r0.apply(this, arguments);
+    const st = history.state; let back = false;
+    if (st && st.swI != null) { back = st.swI < idx; idx = st.swI; }
+    else { idx += 1; try { history.replaceState(Object.assign({}, st, { swI: idx }), ''); } catch (e) { /* sandboxed */ } }
+    const keep = back || (st && st.swI != null && !back) || restoreTab;   // back, forward, or a tab coming back to where it was
+    const y = keep && pos[to] != null ? pos[to] : 0;
+    const dir = depth(to) > depth(shown) ? 'push' : depth(to) < depth(shown) ? 'pop' : '';
+    const from = shown; shown = to; restoreTab = false;
+    if (ROOT[view(to)]) tab = ROOT[view(to)];
+    mem[tab] = to;
+    const args = arguments, self = this;
+    const draw = () => { const out = r0.apply(self, args); place(y); return out; };
+    if (dir && !noVT && document.startViewTransition && !document.hidden) {
+      document.documentElement.dataset.vt = back && dir === 'push' ? 'pop' : dir;
+      try { const vt = document.startViewTransition(draw); vt.finished.finally(() => { delete document.documentElement.dataset.vt; }); return; }
+      catch (e) { delete document.documentElement.dataset.vt; }
+    }
+    noVT = false; pos[from] = pos[from] ?? 0;
+    return draw();
+  };
+  w.__swnav = true; window.render = w;
+  // 2 the tabs (phone bar and computer rail)
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('#bottomnav a[data-v], aside.side .nav a[data-v]'); if (!a || e.metaKey || e.ctrlKey) return;
+    const t = ROOT[a.dataset.v]; if (!t) return;
+    e.preventDefault();
+    if (document.body.classList.contains('bn-mini') && a.closest('#bottomnav')) { document.body.classList.remove('bn-mini'); if (typeof placeTabPill === 'function') setTimeout(placeTabPill, 340); return; }   // the small bar opens first, as iOS
+    if (t === tab) {
+      if (scrollY > 4) { scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' }); return; }
+      if (location.hash !== '#' + a.dataset.v) location.hash = '#' + a.dataset.v;
+      return;
+    }
+    const h = mem[t] || '#' + a.dataset.v; restoreTab = true; noVT = true;
+    if (location.hash === h) { restoreTab = false; noVT = false; return; }
+    location.hash = h;
+  }, true);
+  // 5 the installed app: back from the left edge
+  if (document.documentElement.classList.contains('pwa') || matchMedia('(display-mode: standalone)').matches) {
+    let sx = null, sy = 0, st0 = 0, dx = 0, on = false;
+    const pane = () => document.querySelector('.main-wrap');
+    const busy = () => document.querySelector('.nav-am.open, #gSheet.open, .evp.open, .nav-dlg.open, #tkSlide.open, .sheet:not([hidden]), #navMenu.open');
+    addEventListener('touchstart', (e) => { const t = e.touches[0]; sx = t.clientX < 20 && depth(shown) && !busy() ? t.clientX : null; sy = t.clientY; st0 = Date.now(); dx = 0; on = false; }, { passive: true });
+    addEventListener('touchmove', (e) => {
+      if (sx == null) return; const t = e.touches[0]; dx = Math.max(0, t.clientX - sx);
+      if (!on && Math.abs(t.clientY - sy) > dx) { sx = null; return; }
+      on = true; const p = pane(); if (p) { p.style.transition = 'none'; p.style.transform = `translateX(${dx}px)`; }
+    }, { passive: true });
+    addEventListener('touchend', () => {
+      if (sx == null || !on) { sx = null; return; } sx = null;
+      const p = pane(); if (!p) return; const fast = dx / Math.max(1, Date.now() - st0) > 0.5;
+      p.style.transition = reduced() ? 'none' : 'transform .3s var(--spring)';
+      if (dx > innerWidth / 3 || fast) { p.style.transform = 'translateX(100%)'; noVT = true; setTimeout(() => { history.back(); setTimeout(() => { p.style.transition = 'none'; p.style.transform = ''; }, 60); }, reduced() ? 0 : 260); }
+      else { p.style.transform = ''; }
+    });
+  }
+  // 6 phone: the tab bar shrinks while scrolling down
+  let lastY = scrollY;
+  addEventListener('scroll', () => {
+    if (!(window.SW_MQ && SW_MQ.matches)) return;
+    const y = scrollY, b = document.body;
+    const was = b.classList.contains('bn-mini');
+    if (y < 40 || y < lastY - 6) b.classList.remove('bn-mini');
+    else if (y > lastY + 6 && y > 80 && !want) b.classList.add('bn-mini');
+    if (was !== b.classList.contains('bn-mini') && typeof placeTabPill === 'function') { placeTabPill(); setTimeout(placeTabPill, 340); }
+    if (Math.abs(y - lastY) > 6) lastY = y;
+  }, { passive: true });
+  addEventListener('hashchange', () => { document.body.classList.remove('bn-mini'); lastY = 0; });
+})();
+
+/* ───────────── (31 Oct., fluidity 10) every touch target has a 44 × 44 area, its drawing unchanged ─────────────
+ * A kind of target smaller than 44 px (its tag and classes) gets an invisible area around it, in a style sheet of its own
+ * (its free ::after, else its ::before). The page's elements are never touched: the pages that redraw when their HTML differs
+ * keep their nodes (a class added to them made them redraw, and a tapped answer lost its place). Measured after the first image. */
+(function () {
+  'use strict';
+  const SEL = '#main a[href], #main button, #main [role=button], #main summary, #main [data-act], .main-wrap .top a, .main-wrap .top button';
+  const STATE = /^(on|sel|active|open|is-|has-|nav-sw|pos|neg|z|p|n|fut|today|past|done|todo|wait|part|late|next)$/;
+  const seen = new WeakSet(), rules = new Map();
+  let sheet = null, t = 0;
+  const free = (e, ps) => { const c = getComputedStyle(e, ps).content; return !c || c === 'none' || c === 'normal'; };
+  const later = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 400 }) : setTimeout(fn, 120));
+  const kind = (e) => {
+    const at = e.closest('#main') ? '#main ' : '.main-wrap .top ';   // where it was measured only (never a sheet's link over its buttons)
+    const cl = [...e.classList].filter((c) => !STATE.test(c) && /^[a-z][\w-]*$/i.test(c));
+    if (cl.length) return at + e.tagName.toLowerCase() + '.' + cl.join('.');
+    const p = e.parentElement, pc = p && [...p.classList].filter((c) => !STATE.test(c) && /^[a-z][\w-]*$/i.test(c))[0];
+    return pc ? at + '.' + pc + ' > ' + e.tagName.toLowerCase() : '';
+  };
+  function pass() {
+    let added = false;
+    document.querySelectorAll(SEL).forEach((e) => {
+      if (seen.has(e) || !e.getClientRects().length) return;
+      const r = e.getBoundingClientRect(); if (r.width < 1) return;
+      seen.add(e);
+      if (r.width >= 44 && r.height >= 44) return;
+      if (e.parentElement && e.parentElement.closest('a[href], button, [role=button], summary')) return;
+      const k = kind(e); if (!k || rules.has(k)) return;
+      const ps = free(e, '::after') ? '::after' : free(e, '::before') ? '::before' : '';
+      if (!ps) { if (e.tagName === 'SUMMARY') rules.set(k, `html body ${k}{min-height:44px}`); added = true; return; }
+      rules.set(k, rule(k, ps)); added = true;
+    });
+    if (!added) return;
+    write();
+    // a kind whose pseudo-element another page rule draws somewhere (a « › » on the routine's buttons): the other one, or none
+    for (const [k, v] of [...rules]) {
+      const ps = v.includes('::after{') ? '::after' : v.includes('::before{') ? '::before' : ''; if (!ps) continue;
+      const els = [...document.querySelectorAll(k)].filter((e) => e.getClientRects().length);
+      if (els.every((e) => getComputedStyle(e, ps).content === '""')) continue;
+      const other = ps === '::after' ? '::before' : '';
+      rules.delete(k); write();
+      if (other && els.every((e) => free(e, other))) { rules.set(k, rule(k, other)); write(); }
+    }
+  }
+  // its area around itself: relative when nothing else positions it (:where, no weight: an element placed by the page keeps its place)
+  const rule = (k, ps) => `:where(html body ${k}){position:relative}html body ${k}${ps}{content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%);background:transparent;pointer-events:auto}`;
+  function write() { if (!sheet) { sheet = document.createElement('style'); sheet.id = 'sw-hit'; document.head.append(sheet); } sheet.textContent = [...rules.values()].join('\n'); }
+  const soon = () => { if (!t) t = later(() => { t = 0; pass(); }); };
+  new window.SweepMO(soon).observe(document.body, { childList: true, subtree: true });
+  addEventListener('load', soon); addEventListener('hashchange', soon); document.addEventListener('toggle', soon, true);
+})();
+
+/* ───────────── (31 Oct., fluidity 12) Stats on a phone in about two screens ─────────────
+ * Stats: the 4 figures, the score and the curve, « Patterns to watch » and the calendar, then « Detailed analysis › ». The rest
+ * (most active, drawdown, durations, P&L breakdown and the « Deep dive » with its 9 tabs) is one level down: #analytics/deep
+ * (or a tab: #analytics/time…), a sub-page that slides in. Nothing removed: the same blocks, shown on one page or the other. */
+(function () {
+  'use strict';
+  const T = { en: ['Detailed analysis ›', '‹ Stats', 'Show {n} more'], fr: ['Analyse détaillée ›', '‹ Stats', 'Voir les {n} autres'], es: ['Análisis detallado ›', '‹ Stats', 'Ver {n} más'] };
+  const t = () => T[(typeof LANG !== 'undefined' && LANG) || 'en'] || T.en;
+  function split() {
+    const main = document.getElementById('main'); if (!main) return;
+    const on = /^#analytics/.test(location.hash || '') && window.SW_MQ && SW_MQ.matches;
+    if (!on) { main.classList.remove('st-main', 'st-deep'); return; }
+    const box = main.querySelector('.g-top') && main.querySelector('.g-top').parentElement; if (!box) return;
+    const two = box.querySelector(':scope > .g-two');
+    [box.querySelector(':scope > .g-ins'), two && two.children[0], box.querySelector(':scope > .deep')].forEach((x) => { if (x && !x.classList.contains('st-detail')) x.classList.add('st-detail'); });
+    [box.querySelector(':scope > .ikpis'), box.querySelector(':scope > .g-top'), two && two.children[1], [...box.querySelectorAll(':scope > section.ic')].pop()].forEach((x) => { if (x && !x.classList.contains('st-keep')) x.classList.add('st-keep'); });
+    const deep = /^#analytics\/./.test(location.hash || '');
+    main.classList.toggle('st-deep', deep); main.classList.toggle('st-main', !deep);
+    if (!box.querySelector(':scope > .st-more')) box.insertAdjacentHTML('beforeend', `<a class="st-more" href="#analytics/deep" data-noi18n>${t()[0]}</a>`);
+    // « Patterns to watch »: its first 3, the others open in place with one tap
+    const ul = two && two.children[1] && two.children[1].querySelector('ul.ins'), n = ul ? ul.children.length - 3 : 0;
+    if (ul && n > 0 && !ul.nextElementSibling?.classList.contains('st-ins-more') && !ul.classList.contains('st-all')) ul.insertAdjacentHTML('afterend', `<button type="button" class="link st-ins-more" data-noi18n>${t()[2].replace('{n}', n)}</button>`);
+    if (!main.querySelector(':scope > .st-back')) main.insertAdjacentHTML('afterbegin', `<a class="nav-back st-back" href="#analytics" data-noi18n>${t()[1]}</a>`);
+  }
+  new window.SweepMO(() => { try { split(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+  addEventListener('hashchange', () => { try { split(); } catch (e) { /* never blocks */ } });
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('.st-ins-more'); if (!b) return; const ul = b.previousElementSibling; if (ul) ul.classList.add('st-all'); b.remove(); });
 })();

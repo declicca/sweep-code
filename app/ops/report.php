@@ -69,7 +69,7 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
             ['Premier compte', $s['account']['n'], round($s['account']['n'] / $all * 100) . ' %', $dur($s['account']['median_min'])],
             ['Premier plan', $s['plan']['n'], round($s['plan']['n'] / $all * 100) . ' %', $dur($s['plan']['median_min'])],
             ['Premier trade', $s['trade']['n'], round($s['trade']['n'] / $all * 100) . ' %', $dur($s['trade']['median_min'])]]);
-    $sk = ['before' => 'Avant l\'ouverture (18 h → 9 h 30)', 'session' => 'Séance (9 h 30 → 16 h)', 'evening' => 'Soir (16 h → 18 h)', 'weekend' => 'Fin de semaine (vendredi 17 h → dimanche 18 h)'];
+    $sk = ['before' => 'Avant l\'ouverture (18 h → 9 h 30)', 'session' => 'Séance (9 h 30 → 17 h)', 'evening' => 'Marché fermé (17 h → 18 h)', 'weekend' => 'Fin de semaine (vendredi 17 h → dimanche 18 h)'];
     $md .= "**Quand ils s'inscrivent** (heure de New York) et la part qui fait un premier plan ou un premier trade pendant cette séance :\n\n"
         . $tbl(['Moment', 'Inscrits', 'Premier plan ou trade ce jour-là'], array_map(fn($k) => [$sk[$k], $b['signup_slots'][$k]['n'], $pc(['pct' => $b['signup_slots'][$k]['day0_pct']])], array_keys($sk)))
         . (!empty($b['start_cases']) ? "**Les trois démarrages** (chaque inscrit dans un cas ; risque permis vu pendant la séance de l'inscription) :\n\n" . $tbl(['Cas', 'Inscrits', 'Risque permis vu ce jour-là'], array_map(fn($k, $l) => [$l, $b['start_cases'][$k]['n'], $pc(['pct' => $b['start_cases'][$k]['day0_pct']])], ['open', 'closed', 'active'], ['Marché ouvert (premier trade)', 'Marché fermé (plan de demain)', 'Trader en activité (historique)'])) : '')

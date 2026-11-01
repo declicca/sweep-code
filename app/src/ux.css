@@ -54,7 +54,7 @@ img,svg{-webkit-user-drag:none}
   .bottomnav .plus{background:var(--blue-btn)!important;transition:transform .3s var(--ease-ios),box-shadow .3s var(--ease-ios)}
   .bottomnav .plus:active{transform:scale(.97)!important}
   .bottomnav a svg,.bottomnav button svg{transition:transform .3s var(--ease-ios)}
-  .bottomnav a:active svg,.bottomnav button:not(.plus):active svg{transform:scale(.86)}
+  .bottomnav a:active svg,.bottomnav button:not(.plus):active svg{transform:scale(.97)}
 }
 
 /* ───────────── 5. "More" menu → native-feeling bottom sheet (phone) ───────────── */
@@ -70,7 +70,7 @@ img,svg{-webkit-user-drag:none}
   .sheet-panel>a.on{background:transparent}
   .sheet-panel>a.on svg{background:var(--posbg);color:var(--pos)!important;box-shadow:none}
   .sheet-panel>a:active{background:transparent;transform:none}
-  .sheet-panel>a:active svg{transform:scale(.88)}
+  .sheet-panel>a:active svg{transform:scale(.97)}
   /* after the divider = settings rows, full width */
   .sheet-panel hr{grid-column:1/-1;margin:6px 6px}
   .sheet-panel hr~a,.sheet-panel hr~button{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;font-size:15px;text-align:left;border-radius:14px}
@@ -98,7 +98,7 @@ img,svg{-webkit-user-drag:none}
 
 /* ───────────── 7. Micro-interactions ───────────── */
 @media (hover:none){
-  .acard:active,.trow:active,.ff-row:active,.cal a.d:active,.fb-item:active,.nt-item:active{transform:scale(.985);transition-duration:.08s}
+  .acard:active,.trow:active,.ff-row:active,.cal a.d:active,.fb-item:active,.nt-item:active{transition-duration:.08s;background:var(--fill)}
 }
 .btn.primary,.sb-cta,.fb-send,.tk-save{position:relative;overflow:hidden}
 .btn.primary::after,.tk-save::after{content:"";position:absolute;inset:0;border-radius:inherit;background:none;pointer-events:none}

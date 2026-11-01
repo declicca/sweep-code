@@ -8,7 +8,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * no P&L, no amount anywhere (R and counts only). Free sees screens 1, 2, 7 and 8; the others show as a locked preview.
  * Reminders: in-app notifications through the existing notification center; the plan, the review and the week's recap also
  * reach the phone (push/web-push.php, brief 02 part 10), from the scheduled task only (never while the trader is in the app).
- * Never between 9:30 and 16:00 ET, never pushing to take a trade, at most 2 a day (and 2 notifications a day in all,
+ * Never between 9:30 and the 17:00 ET close, never pushing to take a trade, at most 2 a day (and 2 notifications a day in all,
  * notify/notify.php), each switchable in Settings (category « streaks » for daily reminders, « achievements » for weekly
  * review and Wrapped). The plan, review and recap come at the trader's time (Settings › Notifications, New York time).
  */
@@ -34,7 +34,7 @@ final class GameNotifyService
         if (!class_exists('Notify', false)) return;
         $now = (new DateTimeImmutable('@' . GameEngine::ts()))->setTimezone(new DateTimeZone('America/New_York'));
         $hm = $now->format('H:i'); $date = $now->format('Y-m-d'); $dow = (int) $now->format('N');
-        if ($hm >= '09:30' && $hm < '16:00') return;                                   // market hours: silence
+        if ($hm >= '09:30' && $hm < '17:00') return;                                   // the session, until the 17:00 close: silence
         // at most 2 game reminders per day
         try { $sent = (int) db()->query("SELECT COUNT(*) FROM notifications WHERE user_id = " . db()->quote($uid) . " AND dedupe_key LIKE " . db()->quote("g:%:$date"))->fetchColumn(); }
         catch (Throwable $e) { $sent = 0; }
@@ -48,8 +48,8 @@ final class GameNotifyService
         $day = $date;
         $g = GameEngine::q('SELECT * FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $day])->fetch(PDO::FETCH_ASSOC) ?: null;
         $market = GameEngine::isMarketDay($day);
-        // the trader's times (Settings › Notifications; 8:45, 16:30 and 17:00 New York by default), never after 9:30 / 21:00
-        $at = ['plan' => '08:45', 'review' => '16:30', 'weekly' => '17:00'];
+        // the trader's times (Settings › Notifications; 8:45, 17:15 and 17:00 New York by default), never after 9:30 / 21:00
+        $at = ['plan' => '08:45', 'review' => '17:15', 'weekly' => '17:00'];
         if (function_exists('wp_prefs')) { try { foreach (wp_prefs(GameEngine::pdo(), $uid) as $k => $v) $at[$k] = $v['at']; } catch (Throwable $e) { error_log('[Sweep push] prefs: ' . $e->getMessage()); } }
         $todo = [];
         if ($active && $market && $hm >= $at['plan'] && $hm < '09:30' && !($g && (int) $g['plan_valid'])) $todo[] = ['g_plan', [], '#dashboard'];
@@ -70,7 +70,7 @@ final class GameNotifyService
                 if ($row) $todo[] = ['g_intention', ['intention' => $int !== '' ? $int : '—'], '#dashboard'];
             }
         }
-        if ((int) $now->format('j') === 1 && ($hm >= '16:00' || $hm < '09:30')) {
+        if ((int) $now->format('j') === 1 && ($hm >= '17:00' || $hm < '09:30')) {
             $m = (new DateTimeImmutable($date))->modify('first day of last month')->format('Y-m');
             if (GameEngine::q('SELECT 1 FROM monthly_wrapped WHERE user_id = ? AND month = ?', [$uid, $m])->fetchColumn()) $todo[] = ['g_wrapped', ['month' => $m], '#dashboard'];
         }
