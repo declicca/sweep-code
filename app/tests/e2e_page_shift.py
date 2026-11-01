@@ -24,13 +24,14 @@ with sync_playwright() as p:
     c = br.new_context(storage_state=STATE, viewport={'width': w, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, locale='fr-CA')
     c.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'));" + ("Object.defineProperty(navigator, 'standalone', { get: () => true });" if pwa else '') + OBS)
     pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160])); pg.goto(B + '/#dashboard'); pg.wait_for_timeout(3500)
-    tops, shifts = {}, {}
+    tops, shifts, srcs = {}, {}, {}
     for r in PAGES:
       pg.evaluate("window.__ls = []"); pg.evaluate(f"location.hash = '#{r}'"); pg.wait_for_timeout(2200)
       tops[r] = pg.evaluate("Math.round(document.getElementById('main').getBoundingClientRect().top + scrollY)")
       shifts[r] = pg.evaluate(CLS)
+      srcs[r] = pg.evaluate("window.__ls.filter((x) => x.v >= 0.002).map((x) => x.t + 'ms ' + x.v + ' ' + x.s.join(', ')).slice(0, 3)")
     ok(len(set(tops.values())) == 1, f'1 {tag}: the content starts at the same place on every page ({tops})')
-    ok(max(shifts.values()) < 0.005, f'2 {tag}: nothing moves once a page is drawn ({ {k: v for k, v in shifts.items() if v} })')
+    ok(max(shifts.values()) < 0.005, f'2 {tag}: nothing moves once a page is drawn ({ {k: v for k, v in shifts.items() if v} })' + ''.join(f'\n     {k}: {srcs[k]}' for k, v in shifts.items() if v >= 0.005))   # what moved (1 Nov.: only the CI saw it)
     # 3. the gameplan's card, coming back
     pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_timeout(800)
     pg.evaluate("fetch('api/game/gameplan/start', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
