@@ -1,0 +1,23 @@
+{
+ "en": {
+  "month": "A steady month: you stayed inside your plan more often than not. Your best days came from patience.",
+  "edge": "Your morning ORB, taken after a retest.",
+  "cost": "Two trades taken after the stop was hit: they cost the most.",
+  "journal": "Waited for the retest before entering.",
+  "next": "Write one line after every losing trade."
+ },
+ "fr": {
+  "month": "Un mois régulier : tu es resté dans ton plan plus souvent qu’autrement. Tes meilleures journées sont venues de ta patience.",
+  "edge": "Ton ORB du matin, pris après un retest.",
+  "cost": "Deux trades pris après le stop : ce sont eux qui ont coûté le plus.",
+  "journal": "J’ai attendu le retest avant d’entrer.",
+  "next": "Écris une ligne après chaque trade perdant."
+ },
+ "es": {
+  "month": "Un mes constante: te mantuviste en tu plan la mayoría de las veces. Tus mejores días vinieron de la paciencia.",
+  "edge": "Tu ORB de la mañana, tomado tras un retest.",
+  "cost": "Dos trades tomados después del stop: fueron los que más costaron.",
+  "journal": "Esperé el retest antes de entrar.",
+  "next": "Escribe una línea después de cada trade perdedor."
+ }
+}

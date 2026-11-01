@@ -13,7 +13,7 @@
   const D = {
     en: {
       progress: 'Progress', today: 'Today', plan: 'Plan', execution: 'Execution', review: 'Review',
-      swept_title: 'Day swept.', cta_plan: 'Make my plan', cta_journal: 'Checklist to do · {n} trades', cta_journal1: 'Checklist to do · 1 trade', cta_review: 'Daily review',
+      swept_title: 'Day complete.', cta_plan: 'Make my plan', cta_journal: 'Checklist to do · {n} trades', cta_journal1: 'Checklist to do · 1 trade', cta_review: 'Daily review',
       cta_swept: 'Day swept', cta_dayoff: 'Not trading today', dayoff_msg: 'A planned day off is a win too.', dayoff_confirm: 'Mark today as a day off? Taking a trade later will count as off-plan.',
       guardrail_msg: "You stopped at the right time. That's discipline.", streak_lost: 'Fresh start. Your best streak is still {n} days.',
       freeze_used: 'A freeze protected your streak on {day}.', offplan: 'This trade was outside your plan.', next_level: '{xp} XP to {rank}',
@@ -57,7 +57,7 @@
     },
     fr: {
       progress: 'Progression', today: "Aujourd'hui", plan: 'Plan', execution: 'Exécution', review: 'Revue',
-      swept_title: 'Journée réussie.', cta_plan: 'Faire mon plan', cta_journal: 'Checklist à faire · {n} trades', cta_journal1: 'Checklist à faire · 1 trade', cta_review: 'Revue du jour',
+      swept_title: 'Journée complète.', cta_plan: 'Faire mon plan', cta_journal: 'Checklist à faire · {n} trades', cta_journal1: 'Checklist à faire · 1 trade', cta_review: 'Revue du jour',
       cta_swept: 'Journée balayée', cta_dayoff: "Pas de trading aujourd’hui", dayoff_msg: "Un jour off planifié, c’est aussi une victoire.", dayoff_confirm: 'Déclarer un jour off ? Un trade pris ensuite comptera comme hors plan.',
       guardrail_msg: "Tu t’es arrêté au bon moment. C'est ça, la discipline.", streak_lost: 'Nouveau départ. Ton meilleur streak reste à {n} jours.',
       freeze_used: 'Un gel a protégé ton streak {day}.', offplan: 'Ce trade était hors de ton plan.', next_level: '{xp} XP avant {rank}',
@@ -101,7 +101,7 @@
     },
     es: {
       progress: 'Progreso', today: 'Hoy', plan: 'Plan', execution: 'Ejecución', review: 'Revisión',
-      swept_title: 'Día barrido.', cta_plan: 'Hacer mi plan', cta_journal: 'Checklist pendiente · {n} operaciones', cta_journal1: 'Checklist pendiente · 1 operación', cta_review: 'Revisión del día',
+      swept_title: 'Día completado.', cta_plan: 'Hacer mi plan', cta_journal: 'Checklist pendiente · {n} operaciones', cta_journal1: 'Checklist pendiente · 1 operación', cta_review: 'Revisión del día',
       cta_swept: 'Día barrido', cta_dayoff: 'Hoy no opero', dayoff_msg: 'Un día libre planificado también es una victoria.', dayoff_confirm: '¿Marcar hoy como día libre? Un trade tomado después contará fuera del plan.',
       guardrail_msg: 'Te detuviste en el momento justo. Eso es disciplina.', streak_lost: 'Nuevo comienzo. Tu mejor racha sigue siendo de {n} días.',
       freeze_used: 'Un congelador protegió tu racha el {day}.', offplan: 'Este trade estaba fuera de tu plan.', next_level: '{xp} XP para {rank}',
@@ -279,8 +279,8 @@
     if (!on() || (G.busy && !force) || (!force && Date.now() - G.at < 4000)) return;
     G.busy = true;
     try {
-      const r = await apiJSON('api/game/today');
-      G.today = r.today; G.yesterday = r.yesterday; G.profile = r.profile; G.start = r.start; G.map = r.map; G.missions = r.missions; G.unlocked = r.unlocked || null; G.weekly = r.weekly; G.quest = r.quest; G.wrapped = r.wrapped; G.season = r.season; G.league = r.league; G.crew = r.crew; G.buddy = r.buddy; G.discovery = r.discovery || null; if (r.cosmetic !== G.cosmetic) { G.cosmetic = r.cosmetic; applyTheme(r.cosmetic); } G.at = Date.now();
+      const r = await apiJSON('api/game/today?lang=' + L());   // (the language the Month in Review's AI part is written in, game.php)
+      G.today = r.today; G.yesterday = r.yesterday; G.profile = r.profile; G.start = r.start; G.map = r.map; G.missions = r.missions; G.unlocked = r.unlocked || null; G.weekly = r.weekly; G.quest = r.quest; G.wrapped = r.wrapped; G.mr = r.month_review || null; G.season = r.season; G.league = r.league; G.crew = r.crew; G.buddy = r.buddy; G.discovery = r.discovery || null; if (r.cosmetic !== G.cosmetic) { G.cosmetic = r.cosmetic; applyTheme(r.cosmetic); } G.at = Date.now();
       queue(r.celebrations || []);
       paint();
       loadBoss();
@@ -487,6 +487,7 @@
     PL.rule = pre.rule != null ? pre.rule : ((window.SweepCoach && SweepCoach.ruleFor && SweepCoach.ruleFor(day)) || '');
     PL.ruleOn = !!PL.rule || pre.rule != null;   // shown when there is one to carry (not on a first plan: one thing at a time)
     PL.max_loss = pre.max_loss ? num(pre.max_loss) : (lp && num(lp.pre.max_loss)) || defaultMaxLoss();
+    { const cz = !pre.max_loss && window.SweepCoach && SweepCoach.caution ? SweepCoach.caution(day) : null; if (cz && cz.cap) PL.max_loss = String(Math.floor(cz.cap / 100)); }   // (D1) caution: the halved max loss
     const lim = dailyLimit(); if (!pre.max_loss && lim && +PL.max_loss > lim.c / 100) PL.max_loss = String(lim.c / 100);   // never above the account's own limit
     // nor above the drawdown room (audit of 16 Oct., src/coach.js margin()): the room before this day's trades
     const mg = window.SweepCoach && SweepCoach.margin ? SweepCoach.margin(day) : null, room = mg ? mg.start : null;
@@ -669,8 +670,8 @@
       d2_max_trades: 'Yesterday you went over your number of trades. What will be your signal to stop today?', d2_news_window: 'Yesterday you traded during a news window. How will you stay out of it?',
       d2_moved_stop: 'Yesterday you moved your stop. What will help you leave it in place?', d2_other: 'Yesterday you broke a rule of your sheet. What will help you hold it today?', d2_ph: 'A short sentence',
       d2_hint: 'One sentence: it stays at the top of your sheet for the whole session.',
-      x_title: 'Express plan', x_quick: 'Express plan (30 s)', x_guided: 'Guided plan', x_keep: 'Keep the guided plan', x_hint_quick: 'In 30 seconds: your bias, your key levels and your two scenarios.', x_hint: 'Your sheet’s lock time is past. In 30 seconds: your bias, your key levels and your two scenarios.', x_later: 'Later (today’s trades will be off-plan)', x_level: 'Entry', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'buy', short_sub: 'sell',
-      more: 'More info', adj: 'Adjust', x_bias: 'Bias', bullish: 'Long', bearish: 'Short', neutral: 'Neutral', x_levels: 'Key levels', x_levels_ph: 'e.g. PDH 21,290 · London high 21,250', x_plan: 'Expected scenario', x_plan_ph: 'e.g. A break of the London high that holds on the retest: I buy toward the PDH.', x_alt: 'Alternative scenario', x_alt_ph: 'e.g. Back under the London low: I sell toward the PDL. Otherwise, no trade.', x_need: 'Pick your bias and write your expected scenario.',
+      x_title: 'Express plan', x_quick: 'Express plan (30 s)', x_guided: 'Guided plan', x_keep: 'Keep the guided plan', x_hint_quick: 'In 30 seconds: your bias and your max loss. Your levels and scenarios if you want.', x_hint: 'Your sheet’s lock time is past. In 30 seconds: your bias and your max loss.', x_resume: 'Use yesterday’s plan', x_resume_l: 'Use my last plan', x_resumed: 'Your plan of {d} is back: change what you want.', x_later: 'Later (today’s trades will be off-plan)', x_level: 'Entry', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'buy', short_sub: 'sell',
+      more: 'More info', adj: 'Adjust', x_bias: 'Bias', bullish: 'Long', bearish: 'Short', neutral: 'Neutral', x_levels: 'Key levels', x_levels_ph: 'e.g. PDH 21,290 · London high 21,250', x_plan: 'Expected scenario', x_plan_ph: 'e.g. A break of the London high that holds on the retest: I buy toward the PDH.', x_alt: 'Alternative scenario', x_alt_ph: 'e.g. Back under the London low: I sell toward the PDL. Otherwise, no trade.', x_need: 'Pick your bias and your max loss.',
       tip_inst: 'The contract you trade today. Micros (MNQ, MES…) are worth 10 times less than minis (NQ, ES…): good to start. E.g. you trade the Nasdaq in micro → MNQ.',
       tip_london: 'The London session runs from about 3:00 to 8:00, New York time. Its high (London high) and its low (London low) are levels where price often reacts at the New York open. E.g. high 21,250, low 21,180. Read them on your chart (just above).',
       tip_prev: 'PDH (previous day high) and PDL (previous day low): the high and the low of yesterday’s session. They are often a target or an obstacle. E.g. PDH 21,290, PDL 21,120. They help propose your targets.',
@@ -730,8 +731,8 @@
       d2_max_trades: 'Hier tu as dépassé ton nombre de trades. Quel sera ton signal d’arrêt aujourd’hui ?', d2_news_window: 'Hier tu as tradé pendant une fenêtre de news. Comment vas-tu t’en tenir à l’écart ?',
       d2_moved_stop: 'Hier tu as déplacé ton stop. Qu’est-ce qui t’aidera à le laisser en place ?', d2_other: 'Hier tu as enfreint une règle de ta fiche. Qu’est-ce qui t’aidera à la tenir aujourd’hui ?', d2_ph: 'Une phrase courte',
       d2_hint: 'Une phrase : elle restera en haut de ta fiche pendant toute la séance.',
-      x_title: 'Plan express', x_quick: 'Plan express (30 s)', x_guided: 'Plan guidé', x_keep: 'Garder le plan guidé', x_hint_quick: 'En 30 secondes : ton biais, tes niveaux clés et tes deux scénarios.', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton biais, tes niveaux clés et tes deux scénarios.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Entrée', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'achat', short_sub: 'vente',
-      more: 'Plus d’infos', adj: 'Ajuster', x_bias: 'Biais', bullish: 'Long', bearish: 'Short', neutral: 'Neutre', x_levels: 'Niveaux clés', x_levels_ph: 'ex. PDH 21 290 · London high 21 250', x_plan: 'Scénario attendu', x_plan_ph: 'ex. Cassure du London high qui tient au retest : j’achète vers le PDH.', x_alt: 'Scénario alternatif', x_alt_ph: 'ex. Retour sous le London low : je vends vers le PDL. Sinon, pas de trade.', x_need: 'Choisis ton biais et écris ton scénario attendu.',
+      x_title: 'Plan express', x_quick: 'Plan express (30 s)', x_guided: 'Plan guidé', x_keep: 'Garder le plan guidé', x_hint_quick: 'En 30 secondes : ton biais et ta perte max. Tes niveaux et tes scénarios si tu veux.', x_hint: 'L’heure de verrouillage de ta fiche est passée. En 30 secondes : ton biais et ta perte max.', x_resume: 'Reprendre mon plan d’hier', x_resume_l: 'Reprendre mon dernier plan', x_resumed: 'Ton plan du {d} est repris\u00a0: change ce que tu veux.', x_later: 'Plus tard (les trades du jour seront hors plan)', x_level: 'Entrée', x_dir: 'Direction', long: 'Long', short: 'Short', long_sub: 'achat', short_sub: 'vente',
+      more: 'Plus d’infos', adj: 'Ajuster', x_bias: 'Biais', bullish: 'Long', bearish: 'Short', neutral: 'Neutre', x_levels: 'Niveaux clés', x_levels_ph: 'ex. PDH 21 290 · London high 21 250', x_plan: 'Scénario attendu', x_plan_ph: 'ex. Cassure du London high qui tient au retest : j’achète vers le PDH.', x_alt: 'Scénario alternatif', x_alt_ph: 'ex. Retour sous le London low : je vends vers le PDL. Sinon, pas de trade.', x_need: 'Choisis ton biais et ta perte max.',
       tip_inst: 'Le contrat que tu trades aujourd’hui. Les micros (MNQ, MES…) valent 10 fois moins que les minis (NQ, ES…) : bien pour débuter. Ex. : tu trades le Nasdaq en micro → MNQ.',
       tip_london: 'La séance de Londres va d’environ 3 h à 8 h, heure de New York. Son plus haut (London high) et son plus bas (London low) sont des niveaux où le prix réagit souvent à l’ouverture de New York. Ex. : high 21 250, low 21 180. Lis-les sur ton graphique (juste au-dessus).',
       tip_prev: 'PDH (previous day high) et PDL (previous day low) : le plus haut et le plus bas de la séance d’hier. Ils servent souvent de cible ou d’obstacle. Ex. : PDH 21 290, PDL 21 120. Ils aident à proposer tes cibles.',
@@ -791,8 +792,8 @@
       d2_max_trades: 'Ayer superaste tu número de operaciones. ¿Cuál será tu señal para parar hoy?', d2_news_window: 'Ayer operaste durante una ventana de noticias. ¿Cómo te mantendrás al margen?',
       d2_moved_stop: 'Ayer moviste tu stop. ¿Qué te ayudará a dejarlo en su sitio?', d2_other: 'Ayer rompiste una regla de tu ficha. ¿Qué te ayudará a mantenerla hoy?', d2_ph: 'Una frase corta',
       d2_hint: 'Una frase: quedará arriba de tu ficha durante toda la sesión.',
-      x_title: 'Plan exprés', x_quick: 'Plan exprés (30 s)', x_guided: 'Plan guiado', x_keep: 'Mantener el plan guiado', x_hint_quick: 'En 30 segundos: tu sesgo, tus niveles clave y tus dos escenarios.', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu sesgo, tus niveles clave y tus dos escenarios.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Entrada', x_dir: 'Dirección', long: 'Long', short: 'Short', long_sub: 'compra', short_sub: 'venta',
-      more: 'Más información', adj: 'Ajustar', x_bias: 'Sesgo', bullish: 'Long', bearish: 'Short', neutral: 'Neutral', x_levels: 'Niveles clave', x_levels_ph: 'p. ej. PDH 21.290 · London high 21.250', x_plan: 'Escenario esperado', x_plan_ph: 'p. ej. Ruptura del London high que aguanta en el retest: compro hacia el PDH.', x_alt: 'Escenario alternativo', x_alt_ph: 'p. ej. De vuelta bajo el London low: vendo hacia el PDL. Si no, no opero.', x_need: 'Elige tu sesgo y escribe tu escenario esperado.',
+      x_title: 'Plan exprés', x_quick: 'Plan exprés (30 s)', x_guided: 'Plan guiado', x_keep: 'Mantener el plan guiado', x_hint_quick: 'En 30 segundos: tu sesgo y tu pérdida máxima. Tus niveles y escenarios si quieres.', x_hint: 'La hora de bloqueo de tu ficha ya pasó. En 30 segundos: tu sesgo y tu pérdida máxima.', x_resume: 'Retomar mi plan de ayer', x_resume_l: 'Retomar mi último plan', x_resumed: 'Tu plan del {d} está de vuelta: cambia lo que quieras.', x_later: 'Más tarde (las operaciones de hoy contarán fuera del plan)', x_level: 'Entrada', x_dir: 'Dirección', long: 'Long', short: 'Short', long_sub: 'compra', short_sub: 'venta',
+      more: 'Más información', adj: 'Ajustar', x_bias: 'Sesgo', bullish: 'Long', bearish: 'Short', neutral: 'Neutral', x_levels: 'Niveles clave', x_levels_ph: 'p. ej. PDH 21.290 · London high 21.250', x_plan: 'Escenario esperado', x_plan_ph: 'p. ej. Ruptura del London high que aguanta en el retest: compro hacia el PDH.', x_alt: 'Escenario alternativo', x_alt_ph: 'p. ej. De vuelta bajo el London low: vendo hacia el PDL. Si no, no opero.', x_need: 'Elige tu sesgo y tu pérdida máxima.',
       tip_inst: 'El contrato que operas hoy. Los micros (MNQ, MES…) valen 10 veces menos que los minis (NQ, ES…): bien para empezar. P. ej. operas el Nasdaq en micro → MNQ.',
       tip_london: 'La sesión de Londres va de las 3:00 a las 8:00 aprox., hora de Nueva York. Su máximo (London high) y su mínimo (London low) son niveles donde el precio suele reaccionar en la apertura de Nueva York. P. ej. high 21.250, low 21.180. Léelos en tu gráfico (justo arriba).',
       tip_prev: 'PDH (previous day high) y PDL (previous day low): el máximo y el mínimo de la sesión de ayer. Suelen servir de objetivo o de obstáculo. P. ej. PDH 21.290, PDL 21.120. Ayudan a proponer tus objetivos.',
@@ -981,6 +982,7 @@
   /** the max loss the plan sheet always offered (account limit, drawdown room): kept as a limit of the day */
   function pmMaxLoss(day) {
     const pre = journalOf(day).pre || {}; if (pre.max_loss) return String(pre.max_loss).replace(/[^0-9.]/g, '');
+    const cz = window.SweepCoach && SweepCoach.caution ? SweepCoach.caution(day) : null; if (cz && cz.cap) return String(Math.floor(cz.cap / 100));   // (1 Nov., brief dans le temps D1) caution: the halved max loss
     let ml = defaultMaxLoss(); const lim = dailyLimit(); if (lim && +ml > lim.c / 100) ml = String(lim.c / 100);
     const mg = window.SweepCoach && SweepCoach.margin ? SweepCoach.margin(day) : null;
     if (mg) { if (!(+ml > 0)) ml = String(Math.floor(Math.min(mg.dd / (rookie() ? 4 : 2), mg.start) / 100)); else if (+ml > mg.start / 100) ml = String(Math.floor(mg.start / 100)); }
@@ -1010,7 +1012,7 @@
   /** the screens that apply, in order: the levels, the read of the market (with the news), the scenarios, the limits (with what
    *  stops the day), the sheet; the last session's result and yesterday's broken rule only when they have something to ask */
   function pmScreens() {
-    if (PM.express) return ['express', 'sheet'];
+    if (PM.express) return ['express'];   // (1 Nov., brief dans le temps D2) one screen, saved from it
     const s = ['base', 'pos', 'scen'];
     if (PM.d1auto && !PM.d1auto.reviewed) s.push('d1');
     if (PM.d2) s.push('d2');
@@ -1021,10 +1023,21 @@
   const PM_DRAFT = 'pm.draft';
   function pmDraftSave(closing) { clearTimeout(PM.dt); if (PM.f && PM.day && !PM.old && !PM.done && (closing || document.querySelector('#gSheet.g-pm:not(.g-pm-locked)'))) lsSet(PM_DRAFT, { day: PM.day, f: PM.f, i: PM.i, express: !!PM.express, other: !!PM.instOther, at: Date.now() }); }
   function pmDraftClear() { clearTimeout(PM.dt); try { localStorage.removeItem(PM_DRAFT); } catch (e) { /* private mode */ } }
+  /* (1 Nov., brief dans le temps D2) « Use yesterday's plan »: the last plan of a trading day (an express sheet, or the plan of the
+     sign-up / the short form) comes back in one tap — bias, levels, scenarios, max loss —, then the trader changes what he wants */
+  function pmResumeOf(day) { const j = lastPlan(day, true); return j && (j.fiche && j.fiche.mode === 'express' && (j.fiche.answers || {}).X_bias || ['bullish', 'bearish', 'neutral'].includes(j.pre.bias)) ? j : null; }
+  function pmResume() {
+    const j = pmResumeOf(PM.day); if (!j) return;
+    const x = (j.fiche && j.fiche.mode === 'express' && j.fiche.answers) || {}, pre = j.pre || {}, a = PM.f.answers;
+    a.X_bias = x.X_bias || pre.bias; a.X_levels = x.X_levels || pre.levels || ''; a.X_plan = x.X_plan || pre.scenario || ''; a.X_alt = x.X_alt || pre.alt || '';
+    if (!(window.SweepCoach && SweepCoach.caution && SweepCoach.caution(PM.day))) { const ml = String(pre.max_loss || x.max_loss || '').replace(/[^0-9.]/g, ''); if (+ml > 0) a.max_loss = ml; }   // (in caution mode the halved max loss stays: D1)
+    if (!PM.f.instrument && j.fiche && j.fiche.instrument) PM.f.instrument = j.fiche.instrument;
+    PM.resumed = j.id; PM.err = ''; PM.bad = [];
+  }
   async function openPremarket(day, opts) {
     day = day || (window.SweepFiche ? SweepFiche.dayOf() : G.today && G.today.day);
     const old = ficheGet(day);
-    PM.day = day; PM.i = 0; PM.err = ''; PM.bad = []; PM.warned = ''; PM.instOther = false; PM.old = !!old; PM.done = false; PM.adj = {}; PM.then = opts && typeof opts.then === 'function' ? opts.then : null;
+    PM.day = day; PM.i = 0; PM.err = ''; PM.bad = []; PM.warned = ''; PM.instOther = false; PM.old = !!old; PM.done = false; PM.adj = {}; PM.then = opts && typeof opts.then === 'function' ? opts.then : null; PM.resumed = null;
     PM.d1auto = pmLastResult(day);
     PM.note = (window.SweepCoach && SweepCoach.ruleFor && SweepCoach.ruleFor(day)) || '';   // the last review's note for this session
     { const br = (journalOf(pmPrevDay(day)).post || {}).rules_broken || []; PM.d2 = FICHE.RULES.find((r) => br.includes(r)) || null; }   // a rule broken last session: D2
@@ -1068,6 +1081,8 @@
     };
     PM.offerKeep = !old && !PM.late && !draft && pmMode !== 'express' && !(S.settings && S.settings.pm_keep_full) && (pmMode === 'full' || guidedBefore()) && guidedStale();
     PM.express = old ? old.mode === 'express' : PM.late || PM.offerKeep || (draft ? !!draft.express : pmMode ? pmMode === 'express' : !guidedBefore());
+    if (!old && opts && opts.resume) { PM.express = true; pmResume(); }   // (C1, D2) the coach's « Use yesterday's plan? »: one tap, the plan is back
+    if (PM.express && !f.instrument) { const lt = (S.trades || []).filter((x) => !x.demo && x.instrument).sort((x, y) => String(y.date).localeCompare(String(x.date)))[0]; if (lt) { f.instrument = lt.instrument; PM.hideInst = true; } }   // (D2) never asked again on the first day
     if (old) PM.i = pmScreens().length - 1;   // a saved sheet opens on itself (« Back » to change an answer)
     else PM.i = Math.min(PM.i, pmScreens().length - 1);
     openSheet(pmHtml(), { cls: 'g-plan g-pm', onClose: () => pmDraftSave(true) });   // (closed by a swipe or the scrim: the draft keeps the last keystrokes)
@@ -1147,7 +1162,9 @@
     if (name === 'scen') return `<h3 class="pm-q">${pt('c')}${pmI('scen')}</h3>${pmTipP('scen')}${pmBuild(f).map((s) => pmCard(f, s)).join('')}`;
     if (name === 'express') {   // the quick plan (brief step 6, and the trader's choice): bias, key levels, the expected and the alternative scenario, as in the journal's Pre-market
       const ta = (k, ph) => `<textarea rows="2" maxlength="300" data-pmf="${k}" placeholder="${esc(ph)}">${esc(a[k] || '')}</textarea>`;
+      const rs = !PM.old && pmResumeOf(PM.day), rsY = rs && rs.id === pmPrevDay(PM.day);
       return `${pmTop()}<h3 class="pm-q">${pt('x_title')}</h3><p class="g-hint g-hint-sm">${pt(PM.late ? 'x_hint' : 'x_hint_quick')}</p>
+        ${PM.resumed ? `<p class="g-hint g-hint-sm pm-resumed">${esc(pt('x_resumed', { d: fdate(PM.resumed, { day: 'numeric', month: 'long' }) }))}</p>` : rs ? `<button type="button" class="btn pm-resume" data-pm="resume">${pt(rsY ? 'x_resume' : 'x_resume_l')}</button>` : ''}
         ${pmInstHtml(f)}
         <div class="pm-chart-slot"></div>
         <h3 class="pm-q">${pt('x_bias')}${pmI('bias')}</h3>${pmTipP('bias')}${pmSeg('X_bias', ['bullish', 'bearish', 'neutral'], a.X_bias)}
@@ -1174,7 +1191,7 @@
     return '';
   }
   function pmHtml() {
-    const scr = pmScreens(), i = Math.min(PM.i, scr.length - 1), name = scr[i], last = name === 'sheet', past = ficheLockAt(PM.day) <= Date.now() / 1000;
+    const scr = pmScreens(), i = Math.min(PM.i, scr.length - 1), name = scr[i], last = name === 'sheet' || name === 'express', past = ficheLockAt(PM.day) <= Date.now() / 1000;
     return `${head(pt('title'), `${fdate(PM.day, { weekday: 'long', month: 'long', day: 'numeric' })} · ${pt('of', { a: i + 1, b: scr.length })}`)}
       <div class="pm-body" data-pm-screen="${name}">${pmScreen(name)}</div>
       ${PM.err ? `<p class="g-err pm-err" role="alert">${esc(PM.err)}</p>` : ''}
@@ -1229,7 +1246,7 @@
   /** can the screen be left? (the needed fields, viable scenarios); the fields at fault are kept in PM.bad (outlined in gold) */
   function pmCheck(name) {
     const f = PM.f, a = f.answers, lv = f.levels; PM.bad = [];
-    if ((name === 'base' || name === 'express') && !f.instrument) { PM.bad = ['instrument']; return pt('inst_need'); }
+    if (name === 'base' && !f.instrument) { PM.bad = ['instrument']; return pt('inst_need'); }   // (D2) the express plan never asks it
     if (name === 'base') {
       const miss = [['lv.london_high', 'lh', lv.london_high], ['lv.london_low', 'll', lv.london_low]].filter((x) => x[2] == null);
       if (miss.length) { PM.bad = miss.map((x) => x[0]); return pt('missing', { l: miss.map((x) => pt(x[1])).join(', ') }); }
@@ -1249,8 +1266,8 @@
     }
     if (name === 'd1') return a.D1 ? '' : pt('needs');
     if (name === 'express') {   // the bias and the expected scenario, and the day's max loss as the plan always had
-      if (!a.X_bias || !String(a.X_plan || '').trim()) { PM.bad = a.X_bias ? ['X_plan'] : []; return pt('x_need'); }
-      if (!(parseFloat(a.max_loss) > 0)) { PM.bad = ['max_loss']; return pt('needs'); }
+      // (1 Nov., brief dans le temps D2) only the bias and the max loss, as at sign-up: the levels and scenarios are offered, not imposed
+      if (!a.X_bias || !(parseFloat(a.max_loss) > 0)) { PM.bad = a.X_bias ? ['max_loss'] : []; return pt('x_need'); }
       return '';
     }
     if (name === 'limits') {
@@ -1360,6 +1377,7 @@
       buzz(5); pmRender(); const box = document.querySelector('#gSheet .g-in'); if (box) box.scrollTop = 0;
     }
     else if (act === 'inst') { PM.hideInst = false; pmRender(); }   // « Change »: the chips come back
+    else if (act === 'resume') { pmResume(); buzz(5); pmRender(); }
     else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); PM.done = true; pmDraftClear(); closeSheet(); }   // no sheet today: its trades will be off-plan
     else if (act === 'dayoff') {   // « Not trading today »: a day off before any trade of the day, the same as the routine's button
       const j = structuredClone(journalOf(PM.day)); j.id = PM.day;
@@ -1517,7 +1535,7 @@
     if ((PM.opening && Date.now() - PM.opening < 10000) || Date.now() - (window.__gSheetClosed || 0) < 3000) return;   // a sheet opening, or one just closed
     if (ficheLockAt(day) > Date.now() / 1000 || !(S.journals || []).some((j) => j.fiche && j.id < day)) return;
     const j = journalOf(day); if (j.pre && j.pre.day_off) return;
-    if (lsGet('pm.later.' + day, 0) || lsGet('pm.xshown.' + day, 0)) return;
+    if (lsGet('pm.later.' + day, 0) || lsGet('pm.xshown.' + day, 0) || quiet()) return;   // (1 Nov., brief dans le temps C2) never once the session has a trade
     openPremarket(day).then(() => { if (document.querySelector('#gSheet.g-pm')) lsSet('pm.xshown.' + day, 1); });   // shown once it is on screen (19 Oct.: a reload while it opened lost it for the day)
   }
   // the chips, in the two forms (by hand: #tkSlide; by screenshot: .nav-am), above « Save », once the direction is chosen
@@ -1630,7 +1648,9 @@
     RV.rules = new Set(post.rules_broken || (fi ? ficheAutoRules(fi) : []));
     const grades = typeof GRADES !== 'undefined' ? GRADES : ['A', 'B', 'C', 'D', 'F'];
     RV.bal = {}; RV.balAcc = balAccounts(RV.day);   // the platform's balance, once per day (brief « pertes oubliées », step 2)
-    RV.balAcc.forEach((a) => { RV.bal[a.id] = { sweep: acctState(a).bal, plat: null, same: false, kind: null }; });
+    // (1 Nov., brief dans le temps D3) « It matches » chosen in advance: asked only when a trade of the day on the account has no
+    // screenshot (typed by hand) or when the account's last check found a gap (the computed balance may be off)
+    RV.balAcc.forEach((a) => { RV.bal[a.id] = { sweep: acctState(a).bal, plat: null, same: !balAsk(a, RV.day), kind: null }; });
     openSheet(`${head(t('review_title'), fdate(RV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
       <div class="g-f"><span>${RV.fiche ? pt('followed_sheet') : t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${RV.fiche ? `<div class="g-f rv-rules" ${RV.followed === 'partly' || RV.followed === 'no' ? '' : 'hidden'}><span>${pt('rules_q')}</span><div class="g-chips-row wrap">${FICHE.RULES.map((r) => `<button type="button" class="chip ${RV.rules.has(r) ? 'on' : ''}" data-rv-rule="${r}">${pt('r_' + r)}</button>`).join('')}</div></div>` : ''}
@@ -1676,6 +1696,11 @@
       if (mine.some((x) => x.date > back) || (a.created_on && a.created_on > back)) return false;
       return !(a.bal_checked && a.bal_checked > ymdAdd(day, -7));   // at most once a week
     });
+  }
+  function balAsk(a, day) {
+    const typed = (S.trades || []).some((x) => !x.demo && !x.untracked && x.account_id === a.id && x.date === day && !(x.shots && x.shots.length) && (!x.source || x.source === 'manual'));
+    const last = (S.journals || []).filter((j) => j.id < day && !j.demo && j.post && Array.isArray(j.post.bal) && j.post.bal.some((b) => b.acc === a.id)).sort((x, y) => y.id.localeCompare(x.id))[0];
+    return typed || !!(last && last.post.bal.some((b) => b.acc === a.id && b.gap_c));
   }
   function balRow(a) {
     const b = RV.bal[a.id], gap = b.plat == null ? 0 : b.plat - b.sweep, G2 = window.SweepGap;
@@ -1830,7 +1855,8 @@
   function newsRecent() {   // the last 60 days
     const now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
     const old = new Date(now + 'T12:00:00'); old.setDate(old.getDate() - 60); const from = nyDay(old.getTime());
-    return NEWS.filter((n) => n.d >= from && n.d <= now);
+    const sd = signupDay();   // (1 Nov., brief dans le temps B2) only what came out after the sign-up: a new trader is not told what was always there
+    return NEWS.filter((n) => n.d >= from && n.d <= now && (!sd || n.d > sd));
   }
   async function newsDue(all) {   // all: the window opened by the trader (seen ones too)
     const seen = new Set((S.settings && S.settings.news_seen) || []);
@@ -1843,7 +1869,7 @@
     const sd = signupDay(), now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
     if (!sd || sd >= now) return;   // never on the day of sign-up (the first day has its own steps)
     bell();
-    if (modalUsed()) return;
+    if (modalUsed() || quiet()) return;   // (C2) never between the first trade and the review
     const list = await newsDue(); if (!list.length || G.wnOpen || document.querySelector('#gSheet') || !useModal()) return;
     newsSheet(list);
   }
@@ -1895,9 +1921,9 @@
   const isMajor = (c) => (c.type === 'level' && c.data && c.data.rank_up) || (c.type === 'badge' && c.data && /epic|legend/.test(c.data.rarity || '')) || c.type === 'payout_ready' || c.type === 'boss_defeated';
   const fresh = (c) => !c.created_at || Date.now() / 1000 - c.created_at < 300;
   const TOAST = {
-    en: { gameplan: 'Gameplan · day {n} checked by Sweep', badge: 'New badge unlocked', level: 'Level {n} reached', streak: '{n}-day streak', sweep: 'Day swept', unlock: 'Unlocked: {f}', crew_goal: 'Crew goal reached', league_result: 'Your league result is in', quest_done: 'Comeback quest complete', boss_spawn: 'New boss: see Progression', freeze_used: 'Streak freeze used', streak_lost: 'Streak ended. A new one starts today.', guardrail: 'Daily max loss passed', node: 'Step completed', mission: 'Mission complete', chest: 'Chest ready', def: 'Nice: see Progression' },
-    fr: { gameplan: 'Parcours · jour {n} coché par Sweep', badge: 'Nouveau badge débloqué', level: 'Niveau {n} atteint', streak: 'Streak de {n} jours', sweep: 'Journée balayée', unlock: 'Débloqué : {f}', crew_goal: 'Objectif du crew atteint', league_result: 'Ton résultat de ligue est arrivé', quest_done: 'Quête de retour réussie', boss_spawn: 'Nouveau boss : vois Progression', freeze_used: 'Gel de streak utilisé', streak_lost: 'Streak terminé. Un nouveau commence aujourd’hui.', guardrail: 'Perte max du jour dépassée', node: 'Étape franchie', mission: 'Mission accomplie', chest: 'Coffre prêt', def: 'Bravo : vois Progression' },
-    es: { gameplan: 'Recorrido · día {n} marcado por Sweep', badge: 'Nueva insignia desbloqueada', level: 'Nivel {n} alcanzado', streak: 'Racha de {n} días', sweep: 'Día barrido', unlock: 'Desbloqueado: {f}', crew_goal: 'Objetivo del crew alcanzado', league_result: 'Tu resultado de liga llegó', quest_done: 'Misión de regreso completada', boss_spawn: 'Nuevo jefe: mira Progreso', freeze_used: 'Congelador usado', streak_lost: 'Racha terminada. Hoy empieza otra.', guardrail: 'Pérdida máxima del día superada', node: 'Etapa superada', mission: 'Misión completada', chest: 'Cofre listo', def: '¡Bien! Mira Progreso' },
+    en: { gameplan: 'Gameplan · day {n} checked by Sweep', badge: 'New badge unlocked', level: 'Level {n} reached', streak: '{n}-day streak', sweep: 'Day complete', unlock: 'Unlocked: {f}', crew_goal: 'Crew goal reached', league_result: 'Your league result is in', quest_done: 'Comeback quest complete', boss_spawn: 'New boss: see Progression', freeze_used: 'Streak freeze used', streak_lost: 'Streak ended. A new one starts today.', guardrail: 'Daily max loss passed', node: 'Step completed', mission: 'Mission complete', chest: 'Chest ready', def: 'Nice: see Progression' },
+    fr: { gameplan: 'Parcours · jour {n} coché par Sweep', badge: 'Nouveau badge débloqué', level: 'Niveau {n} atteint', streak: 'Streak de {n} jours', sweep: 'Journée complète', unlock: 'Débloqué : {f}', crew_goal: 'Objectif du crew atteint', league_result: 'Ton résultat de ligue est arrivé', quest_done: 'Quête de retour réussie', boss_spawn: 'Nouveau boss : vois Progression', freeze_used: 'Gel de streak utilisé', streak_lost: 'Streak terminé. Un nouveau commence aujourd’hui.', guardrail: 'Perte max du jour dépassée', node: 'Étape franchie', mission: 'Mission accomplie', chest: 'Coffre prêt', def: 'Bravo : vois Progression' },
+    es: { gameplan: 'Recorrido · día {n} marcado por Sweep', badge: 'Nueva insignia desbloqueada', level: 'Nivel {n} alcanzado', streak: 'Racha de {n} días', sweep: 'Día completado', unlock: 'Desbloqueado: {f}', crew_goal: 'Objetivo del crew alcanzado', league_result: 'Tu resultado de liga llegó', quest_done: 'Misión de regreso completada', boss_spawn: 'Nuevo jefe: mira Progreso', freeze_used: 'Congelador usado', streak_lost: 'Racha terminada. Hoy empieza otra.', guardrail: 'Pérdida máxima del día superada', node: 'Etapa superada', mission: 'Misión completada', chest: 'Cofre listo', def: '¡Bien! Mira Progreso' },
   };
   const TS = { shown: 0, extra: 0, reset: 0 };
   const SUMT = { en: '{n} new · See My progress', fr: '{n} nouveautés · Voir Ma progression', es: '{n} novedades · Ver Mi progreso' }, SUM1 = { en: '1 new · See My progress', fr: '1 nouveauté · Voir Ma progression', es: '1 novedad · Ver Mi progreso' };   // (27 Oct.) singular for 1
@@ -1913,7 +1939,7 @@
     setTimeout(() => { el.classList.remove('on'); setTimeout(() => el.remove(), 300); }, 5000);
   }
   // a window or a sheet is open: the progression's toasts wait for it to close (audit of 16 Oct., R23: they covered the sheets)
-  const sheetOpen = () => !!document.querySelector('#gSheet.open, .evp.open, .nav-am.open, #tkSlide.open, aside.nav-dlg.open, .sb-layer, #shPanel.open');
+  const sheetOpen = () => !!document.querySelector('#gSheet.open, .evp.open, .nav-am.open, #tkSlide.open, aside.nav-dlg.open, .sb-layer, #shPanel.open, .mr');   // (.mr: the Month in Review, 1 Nov.)
   const afterSheets = () => new Promise((r) => { let n = 0; (function w() { if (!sheetOpen() || ++n > 60) r(); else setTimeout(w, 500); })(); });
   async function smallToast(c) {
     if (sheetOpen()) await afterSheets();
@@ -1923,25 +1949,67 @@
     const T = TOAST[L()] || TOAST.en, d = c.data || {};
     let msg = T[c.type] || (/node|map/.test(c.type) ? T.node : /mission/.test(c.type) ? T.mission : /chest|key/.test(c.type) ? T.chest : T.def);
     msg = msg.replace('{n}', d.level || d.n || d.days || '').replace('{f}', c.type === 'unlock' && unt(d.feature) ? unt(d.feature)[0] : '');
-    if (c.data && c.data.xp) msg += ` · +${c.data.xp} XP`;
-    if (typeof toast === 'function') toast(msg);
+    if (typeof toast === 'function') toast(msg);   // (1 Nov., brief dans le temps E1) no « +XP » any more: it stays in My progress
     return new Promise((r) => setTimeout(r, 3200));
+  }
+
+  /* ───────────── one layer of reward (1 Nov., brief dans le temps E1, C2) ─────────────
+     XP, badges, levels and ranks, bosses, seasons, the chest and its keys, the map's nodes and chapters, leagues and crews: no more
+     toast nor window — they stay in My progress for whoever goes to see them (nothing removed from the game). The rest of the reward
+     (« Day complete », the streak, a mission, the gameplan, a feature opened) is said once a day at most, after the day's review, never
+     in the morning nor during the session; a feature « unlocked » only from 3 complete days. Other windows (a quest, a streak frozen)
+     never open between the day's first trade and its review (SweepQuiet): they wait for it, or for the next morning. */
+  // (payout_ready is a badge too: the account's card says « Ready for payout » where it belongs, and an evaluation is not a payout)
+  const SILENT = new Set(['xp', 'badge', 'level', 'boss_spawn', 'boss_defeated', 'key', 'chapter', 'node', 'map_backfill', 'league_result', 'crew_goal', 'backfill', 'guardrail', 'payout_ready']);
+  const REWARD = new Set(['sweep', 'streak', 'mission', 'gameplan', 'quest_done', 'unlock']);
+  const QUIET_UNLOCK = new Set(['boss', 'season', 'league', 'social']);   // the systems not announced any more
+  const RW = 'sw.rwDay';
+  /** the session has a real trade and its review is not done yet: nothing opens over the app (the trader's own gestures aside) */
+  function quiet() {
+    try {
+      const day = (G.today && G.today.day) || (typeof todayStr === 'function' ? todayStr() : '');
+      if (!day || !(S.trades || []).some((x) => !x.demo && x.date === day)) return false;
+      return !reviewed(day);
+    } catch (e) { return false; }
+  }
+  function reviewed(day) {
+    if (G.today && G.today.day === day && G.today.review_done) return true;
+    const j = typeof getDoc === 'function' ? getDoc('journals', day) : null; return !!(j && j.post && j.post.reviewed_at);
+  }
+  window.SweepQuiet = quiet;
+  /** a reward of the bell (a discipline milestone): the same rule, after the day's review, one a day — true when it may be said now */
+  window.SweepReward = () => { const day = G.today && G.today.day; if (!day || !reviewed(day) || rwToday()) return false; try { localStorage.setItem(RW, day); } catch (e) { /* private mode */ } return true; };
+  const rwToday = () => { const day = (G.today && G.today.day) || ''; try { return !!day && localStorage.getItem(RW) === day; } catch (e) { return false; } };
+  /** what to do with a celebration now: 'silent' (seen, nothing shown), 'wait' (left for later: not seen), 'show' */
+  function gate(c) {
+    if (SILENT.has(c.type) || (c.type === 'unlock' && QUIET_UNLOCK.has(c.data && c.data.feature))) return 'silent';
+    const day = G.today && G.today.day;
+    if (REWARD.has(c.type)) {
+      if (c.at && day && nyDay(c.at * 1000 + 216e5) < day) return 'silent';   // a reward of a past session never said: it stays in My progress (nothing piles up)
+      if (c.type === 'unlock' && ((G.profile && G.profile.complete_days) || 0) < 3) return 'wait';
+      if (!day || !reviewed(day)) return 'wait';   // after the review only (never the morning, never in the session)
+      return rwToday() ? 'silent' : 'show';        // one a day
+    }
+    return quiet() ? 'wait' : 'show';
   }
 
   /* ───────────── celebrations ───────────── */
   function queue(list) {
     const seen = new Set(G.cq.map((c) => c.id));
     for (const c of list) if (!seen.has(c.id) && !(G.done || new Set()).has(c.id)) G.cq.push(c);
+    G.cq.sort((a, b) => (a.type === 'sweep' ? 0 : 1) - (b.type === 'sweep' ? 0 : 1));   // (E1) « Day complete » is the day's reward when there is one
     runQueue();
   }
   G.done = new Set();
   async function runQueue() {
     if (G.showing || !G.cq.length || G.obOpen) return;
-    if (document.querySelector('#gSheet, .nt-modal, .sb-layer, .sai.sai-open, #tkSlide.open')) { setTimeout(runQueue, 1500); return; }
+    if (document.querySelector('#gSheet, .nt-modal, .sb-layer, .sai.sai-open, #tkSlide.open, .nav-pass, .nav-inst')) { setTimeout(runQueue, 1500); return; }   // (1 Nov.: never two windows at once, the evaluation's and the suggestions' too)
     G.showing = true;
-    // merge consecutive XP toasts into one
     let c = G.cq.shift();
-    if (c.type === 'xp') { let xp = c.data.xp || 0; const ids = [c.id]; while (G.cq[0] && G.cq[0].type === 'xp') { const n = G.cq.shift(); xp += n.data.xp || 0; ids.push(n.id); } seenIds(ids); await xpFloat(xp); G.showing = false; runQueue(); return; }
+    const g = gate(c);
+    if (g === 'silent') { seenIds([c.id]); G.showing = false; runQueue(); return; }
+    if (g === 'wait') { G.showing = false; runQueue(); return; }   // not seen: the next load brings it back (after the review, the next morning)
+    if (REWARD.has(c.type)) { try { localStorage.setItem(RW, G.today.day); } catch (e) { /* private mode */ } }
     seenIds([c.id]);
     try {
       if (!['sweep'].includes(c.type) && c.type !== 'quest_start' && !isMajor(c)) { await smallToast(c); }
@@ -2029,7 +2097,7 @@
           <line class="g-sw-line" x1="56" y1="140" x2="144" y2="140" opacity="0"/>
           <g class="g-sw-candle" opacity="0"><line class="c-top" x1="100" y1="58" x2="100" y2="72"/><rect class="c-body" x="88" y="70" width="24" height="40" rx="5"/><line class="c-mid" x1="100" y1="108" x2="100" y2="120"/><line class="c-wick" x1="100" y1="120" x2="100" y2="150"/></g>
         </svg>
-        <h2 class="g-sw-t">${esc(t('swept_title'))}</h2><span class="g-sw-xp">${t('plus_xp', { n: data.xp || 50 })}</span>
+        <h2 class="g-sw-t">${esc(t('swept_title'))}</h2>
         <div class="g-sw-acts"><button type="button" class="btn" data-g="share" data-k="sweep">${svg('share')}${t('share')}</button><button type="button" class="btn primary" data-g="sw-close">${t('continue')}</button></div></div>`;
       document.body.append(ov);
       lsSetJ('g.rings.today', { plan: 100, execution: 100, review: 100 });
@@ -2059,7 +2127,6 @@
       cand.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(10px)', offset: .4 }, { transform: 'translateY(-6px)', offset: .75 }, { transform: 'translateY(0)' }], { duration: 520, delay: 760, easing: ios });
       // 1100–1600 ms: title + XP
       q('.g-sw-t').animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: 1100, easing: ios, fill: 'backwards' });
-      q('.g-sw-xp').animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 500, delay: 1250, easing: ios, fill: 'backwards' });
       q('.g-sw-acts').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 1500, fill: 'backwards' });
     });
   }
@@ -2272,17 +2339,17 @@
   }
 
   /* ───────────── share cards (1080×1920, never any amount — except the payouts received, when the trader adds them to the week's card) ───────────── */
-  async function shareCard(kind, v) {
+  async function shareCard(kind, v, o = {}) {   // o.blob: the image only (the Month in Review's preview), o.data: that month's snapshot
     const W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const x = cv.getContext('2d');
-    try { await Promise.all([document.fonts.load('600 120px Geist'), document.fonts.load('500 40px Geist')]); } catch (e) { /* system font */ }
+    try { await Promise.all([document.fonts.load('600 120px Geist'), document.fonts.load('500 40px Geist'), kind === 'month' ? document.fonts.load('700 120px Geist') : 0, kind === 'month' ? document.fonts.load('600 120px "Geist Mono"') : 0]); } catch (e) { /* system font */ }
     const F = 'Geist, -apple-system, "SF Pro Display", system-ui, sans-serif', BLUE = '#4C8DFF', GOLD = '#D4A24C', TXT = '#F2F2F3', MUT = '#9A9AA2';
     x.fillStyle = '#0B0B0C'; x.fillRect(0, 0, W, H);
     let g = x.createRadialGradient(W * .5, H * .38, 0, W * .5, H * .38, W * .9); g.addColorStop(0, 'rgba(76,141,255,.20)'); g.addColorStop(1, 'rgba(76,141,255,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
     // logo
     const logo = (cx, cy, s, wick = BLUE, body = TXT) => { x.save(); x.translate(cx - 60 * s, cy - 59 * s); x.scale(s, s); x.lineCap = 'round'; x.strokeStyle = body; x.fillStyle = body; x.lineWidth = 7; x.beginPath(); x.moveTo(60, 14); x.lineTo(60, 30); x.stroke(); rr(46, 28, 28, 44, 6); x.fill(); x.lineCap = 'butt'; x.beginPath(); x.moveTo(60, 70); x.lineTo(60, 84); x.stroke(); x.lineCap = 'round'; x.strokeStyle = wick; x.beginPath(); x.moveTo(60, 84); x.lineTo(60, 104); x.stroke(); x.restore(); };
     const rr = (a, b, w, h, r) => { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); };
-    logo(140, 170, .9); x.fillStyle = TXT; x.font = `500 58px ${F}`; x.textBaseline = 'middle'; x.fillText('sweep', 196, 172);
+    if (kind !== 'month') { logo(140, 170, .9); x.fillStyle = TXT; x.font = `500 58px ${F}`; x.textBaseline = 'middle'; x.fillText('sweep', 196, 172); }
     const cx = W / 2, cy = 820;
     let title = '', sub = t('share_sub'), tone = BLUE;
     if (kind === 'sweep') {
@@ -2316,6 +2383,31 @@
         x.fillStyle = MUT; fit(l, W - 340, 400, 38, 28); x.fillText(l, 170, y0 + 66);
         x.fillStyle = col || TXT; fit(val, W - 340, 600, 60, 36); x.fillText(val, 170, y0 + 136);
       });
+    } else if (kind === 'month' && o.data) {   // (1 Nov., brief avance 6) the Month in Review: the opening, the net result (amounts hidden: the win rate, journaled days and streak) and the discipline
+      const d = o.data, hide = v === 'hide', hw = d.how || {}, txt = [], FM = '"Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+      const fit = (str, w, wt, fs, min, f = F) => { x.font = `${wt} ${fs}px ${f}`; while (x.measureText(str).width > w && fs > min) { fs -= 4; x.font = `${wt} ${fs}px ${f}`; } };
+      const put = (str, y, col) => { x.fillStyle = col; x.fillText(str, cx, y); txt.push(str); };
+      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+      const pl = mrt('open'); x.font = `600 32px ${F}`; const pw = x.measureText(pl).width + 72; rr(cx - pw / 2, 250, pw, 72, 36); x.fillStyle = 'rgba(255,255,255,.08)'; x.fill(); put(pl, 298, MUT);
+      const ttl = cap(new Date(d.month + '-15T12:00:00').toLocaleDateString(loc(), { month: 'long', year: 'numeric' })); fit(ttl, W - 160, 700, 124, 64); put(ttl, 470, TXT);
+      x.font = `400 42px ${FM}`; put(mrTd(d), 550, MUT);
+      x.font = `600 32px ${F}`; put(hide ? mrt('wr').toUpperCase() : mrt('net'), 740, MUT);
+      const val = hide ? (d.win_rate != null ? mrPct(d.win_rate) : '—') : money(d.net); fit(val, W - 200, 600, 180, 90, FM); put(val, 920, hide ? TXT : d.net < 0 ? GOLD : BLUE);
+      const days = (k) => (k === 1 ? mrt('day1') : mrt('days', { n: k }));
+      let rows = (hw.bars || []).slice(0, hide ? 2 : 3).map((b) => [mrt('b_' + b.k), mrPct(b.pct), b.pct / 100]);
+      if (hide || !rows.length) rows = [[mrt('jdays'), `${hw.journaled || 0}/${hw.traded || 0}`], [mrt('lstreak'), days(hw.streak || 0)], ...rows];
+      const top = 1050, rh = 124; rr(120, top, W - 240, rows.length * rh + 24, 40); x.fillStyle = 'rgba(255,255,255,.05)'; x.fill();
+      rows.forEach(([l, val2, p], k) => {
+        const y0 = top + 12 + k * rh;
+        x.textAlign = 'left'; x.fillStyle = MUT; fit(l, W - 560, 400, 38, 26); x.fillText(l, 170, y0 + 64); txt.push(l);
+        x.textAlign = 'right'; x.fillStyle = TXT; x.font = `600 48px ${FM}`; x.fillText(val2, W - 170, y0 + 66); txt.push(val2);
+        if (p != null) { rr(170, y0 + 88, W - 340, 10, 5); x.fillStyle = 'rgba(255,255,255,.08)'; x.fill(); if (p > 0) { rr(170, y0 + 88, Math.max(10, (W - 340) * Math.min(1, p)), 10, 5); x.fillStyle = BLUE; x.fill(); } }
+      });
+      x.textAlign = 'center';
+      x.fillStyle = 'rgba(255,255,255,.08)'; x.fillRect(120, 1620, W - 240, 2);
+      logo(cx - 96, 1712, .62); x.fillStyle = TXT; x.font = `500 52px ${F}`; x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillText('sweep', cx - 52, 1714); x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+      x.fillStyle = BLUE; x.font = `500 44px ${F}`; x.fillText('makeitsweep.com', cx, 1816); txt.push('sweep', 'makeitsweep.com');
+      G.mrShareTxt = txt;
     } else if (kind === 'payout') {
       x.beginPath(); x.arc(cx, cy, 300, 0, Math.PI * 2); x.strokeStyle = GOLD; x.lineWidth = 40; x.stroke();
       logo(cx, cy, 2.4, GOLD, TXT); title = wrt('pay_t'); tone = GOLD;
@@ -2333,16 +2425,19 @@
       title = isRank ? t('share_rank', { rank: rankName(v) }) : kind === 'chapter' ? t('v2.ch.' + v) : kind === 'boss' ? bt('share', { name: bossName(v) }) : bName(v); sub = isRank || kind === 'boss' ? t('share_sub') : kind === 'chapter' ? t('v2.ch_done') : t('share_badge'); tone = col;
     }
     x.textAlign = 'center'; x.fillStyle = TXT; x.textBaseline = 'alphabetic';
-    if (kind !== 'week') {
+    if (kind !== 'week' && kind !== 'month') {
       let fs = 96; x.font = `600 ${fs}px ${F}`; while (x.measureText(title).width > W - 160 && fs > 48) { fs -= 6; x.font = `600 ${fs}px ${F}`; }
       x.fillText(title, cx, 1330);
       x.fillStyle = MUT; x.font = `400 44px ${F}`; x.fillText(sub, cx, 1410);
     }
-    x.fillStyle = 'rgba(255,255,255,.08)'; x.fillRect(120, 1640, W - 240, 2);
-    x.fillStyle = tone; x.font = `500 46px ${F}`; x.fillText('makeitsweep.com', cx, 1730);
-    const ref = G.prog && G.prog.ref;
-    if (ref) { x.fillStyle = MUT; x.font = `400 36px ${F}`; x.fillText(t('code', { c: ref }), cx, 1790); }
+    if (kind !== 'month') {
+      x.fillStyle = 'rgba(255,255,255,.08)'; x.fillRect(120, 1640, W - 240, 2);
+      x.fillStyle = tone; x.font = `500 46px ${F}`; x.fillText('makeitsweep.com', cx, 1730);
+      const ref = G.prog && G.prog.ref;
+      if (ref) { x.fillStyle = MUT; x.font = `400 36px ${F}`; x.fillText(t('code', { c: ref }), cx, 1790); }
+    }
     const blob = await new Promise((r) => cv.toBlob(r, 'image/png'));
+    if (o.blob) return blob;
     apiJSON('api/game/share', { method: 'POST', body: { kind } }).catch(() => {});
     const file = new File([blob], `sweep-${kind}.png`, { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -2800,9 +2895,10 @@
   if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings({ en: WR_T.en.n, fr: WR_T.fr.n, es: WR_T.es.n }); } catch (e) { /* older notify module */ } }
   const monthName = (m) => new Date(m + '-15T12:00:00').toLocaleDateString(loc(), { month: 'long' });
 
-  async function openWrapped(month) {
+  async function openWrapped(month, el) {
     let st; try { st = await apiJSON('api/game/wrapped'); } catch (e) { return; }
     const it = (st.items || []).find((x) => !month || x.month === month); if (!it) return;
+    if (it.data && +it.data.v >= 2) return openMonth(it, el);   // (1 Nov., brief avance 6) the Month in Review; older months open as they were
     G.wr = it; const d = it.data, free = st.plan === 'free', M = d.kind === 'year' ? String(d.year) : monthName(d.month);
     const lockH = `<div class="wr-lock">${svg('lock')}<b>${wrt('locked')}</b><button type="button" class="btn" data-g="locked">${t('v2.locked_ch')}</button></div>`;
     const big = (v, sub) => `<b class="wr-big" data-count="${v}">${v}</b><p>${sub}</p>`;
@@ -2856,6 +2952,239 @@
     return `<button type="button" class="gc-pill wr-pill ${w.new ? 'new' : ''}" data-g="wrapped" data-v="${w.month}">${svg('spark')}<span><small>Wrapped</small><b>${esc(/-AN$/.test(w.month) ? wrt('ypill', { y: w.month.slice(0, 4) }) : wrt('pill', { m: monthName(w.month) }))}</b></span></button>`;
   }
   const archiveHtml = () => (G.wrList && G.wrList.length ? `<div class="sec-h" style="margin-top:18px"><h2>${wrt('archive')}</h2></div><div class="wr-arch">${G.wrList.map((x) => `<button type="button" class="wr-ai" data-g="wrapped" data-v="${x.month}"><b>${esc(/-AN$/.test(x.month) ? x.month.slice(0, 4) : monthName(x.month))}</b><small>${x.data.swept} ${svg('sweep')}</small></button>`).join('')}</div>` : '');
+
+  /* ───────────── (1 Nov., brief avance 6) « Month in Review »: the month as a story, from its frozen snapshot (v 2, GameWrapped::build).
+     One idea per screen, a screen without data is left out; discipline before dollars; a losing month gets the same flow, its colors
+     going from gold to blue. The snapshot holds every value: nothing is recomputed here. ───────────── */
+  const MR_T = {
+    en: { card: 'Your {month} is ready', tap: 'Tap to continue', open: 'MONTH IN REVIEW', net: 'NET RESULT', shape: 'THE SHAPE OF IT', best: 'BEST TRADE', tough: 'TOUGHEST TRADE',
+      how: 'HOW YOU TRADED', ai: 'YOUR AI BREAKDOWN', end_win: 'That was {month}.', end_loss: '{month} is closed. {next} starts clean.', replay: 'Replay', share: 'Share',
+      hide_amounts: 'Hide dollar amounts', slogan: 'Your edge, finally in one place.', tn: '{n} trades', tn1: '1 trade', dn: '{n} trading days', dn1: '1 trading day',
+      wr: 'Win rate', win: 'Winners', loss: 'Losers', eval: 'Evaluation', funded: 'Funded', live: 'Live', bday: 'Best day', wday: 'Toughest day',
+      t_note: 'You logged it. That’s how it stops repeating.', t_none: 'Logged and done. Next month, write one line about it.',
+      b_plan: 'In your plan', b_disc: 'Clean trades', b_check: 'Checklist answered yes', b_grade: 'Graded A or B',
+      sess: 'Best session · {s}', setup: 'Best setup · {s}', jd: 'Journaled {a} of {b} days', streak: 'Longest streak · {n} days', streak1: 'Longest streak · 1 day',
+      s_asia: 'Asia', s_london: 'London', s_nyam: 'New York AM', s_nypm: 'New York PM',
+      a_month: 'THE MONTH', a_edge: 'YOUR EDGE', a_cost: 'WHAT COST YOU', a_journal: 'YOUR JOURNAL SAID', a_next: 'NEXT MONTH',
+      prev: 'Previous', nextb: 'Next', close: 'Close', pause: 'Paused', sh_t: 'Share your month', jdays: 'Journaled days', lstreak: 'Longest streak', days: '{n} days', day1: '1 day',
+      mission: 'Your mission this month' },
+    fr: { card: 'Ton {month} est prêt', tap: 'Touche pour continuer', open: 'TON MOIS EN REVUE', net: 'RÉSULTAT NET', shape: 'LA FORME DU MOIS', best: 'MEILLEUR TRADE', tough: 'TRADE LE PLUS DUR',
+      how: 'TA DISCIPLINE', ai: 'TON ANALYSE IA', end_win: 'C’était {month}.', end_loss: '{month} est fermé. {next} repart à zéro.', replay: 'Revoir', share: 'Partager',
+      hide_amounts: 'Masquer les montants', slogan: 'Ton edge, enfin au même endroit.', tn: '{n} trades', tn1: '1 trade', dn: '{n} jours de trading', dn1: '1 jour de trading',
+      wr: 'Réussite', win: 'Gagnants', loss: 'Perdants', eval: 'Évaluation', funded: 'Financé', live: 'Live', bday: 'Meilleure journée', wday: 'Journée la plus dure',
+      t_note: 'Tu l’as noté. C’est comme ça qu’il ne se répète plus.', t_none: 'Noté, c’est fait. Le mois prochain, écris une ligne dessus.',
+      b_plan: 'Dans ton plan', b_disc: 'Trades sans erreur', b_check: 'Checklist respectée', b_grade: 'Notés A ou B',
+      sess: 'Meilleure séance · {s}', setup: 'Meilleur setup · {s}', jd: 'Journal écrit {a} jours sur {b}', jd1: 'Journal écrit {a} jour sur {b}', streak: 'Plus long streak · {n} jours', streak1: 'Plus long streak · 1 jour',
+      s_asia: 'Asie', s_london: 'Londres', s_nyam: 'Matin de New York', s_nypm: 'Après-midi de New York',
+      a_month: 'LE MOIS', a_edge: 'TON EDGE', a_cost: 'CE QUI T’A COÛTÉ', a_journal: 'TON JOURNAL DISAIT', a_next: 'LE MOIS PROCHAIN',
+      prev: 'Précédent', nextb: 'Suivant', close: 'Fermer', pause: 'En pause', sh_t: 'Partage ton mois', jdays: 'Jours avec journal', lstreak: 'Plus long streak', days: '{n} jours', day1: '1 jour',
+      mission: 'Ta mission ce mois-ci' },
+    es: { card: 'Tu {month} está listo', tap: 'Toca para continuar', open: 'TU MES EN REVISIÓN', net: 'RESULTADO NETO', shape: 'LA FORMA DEL MES', best: 'MEJOR TRADE', tough: 'TRADE MÁS DIFÍCIL',
+      how: 'TU DISCIPLINA', ai: 'TU ANÁLISIS IA', end_win: 'Así fue {month}.', end_loss: '{month} está cerrado. {next} empieza limpio.', replay: 'Ver de nuevo', share: 'Compartir',
+      hide_amounts: 'Ocultar montos', slogan: 'Tu edge, por fin en un solo lugar.', tn: '{n} trades', tn1: '1 trade', dn: '{n} días de trading', dn1: '1 día de trading',
+      wr: 'Acierto', win: 'Ganadores', loss: 'Perdedores', eval: 'Evaluación', funded: 'Financiada', live: 'Live', bday: 'Mejor día', wday: 'Día más difícil',
+      t_note: 'Lo registraste. Así es como deja de repetirse.', t_none: 'Registrado y listo. El próximo mes, escribe una línea sobre él.',
+      b_plan: 'Dentro de tu plan', b_disc: 'Trades sin errores', b_check: 'Checklist cumplida', b_grade: 'Calificados A o B',
+      sess: 'Mejor sesión · {s}', setup: 'Mejor setup · {s}', jd: 'Diario escrito {a} de {b} días', streak: 'Racha más larga · {n} días', streak1: 'Racha más larga · 1 día',
+      s_asia: 'Asia', s_london: 'Londres', s_nyam: 'Mañana de Nueva York', s_nypm: 'Tarde de Nueva York',
+      a_month: 'EL MES', a_edge: 'TU EDGE', a_cost: 'LO QUE TE COSTÓ', a_journal: 'TU DIARIO DECÍA', a_next: 'EL PRÓXIMO MES',
+      prev: 'Anterior', nextb: 'Siguiente', close: 'Cerrar', pause: 'En pausa', sh_t: 'Comparte tu mes', jdays: 'Días con diario', lstreak: 'Racha más larga', days: '{n} días', day1: '1 día',
+      mission: 'Tu misión este mes' } };
+  // French: a non-breaking space before : ; ? ! » and after «
+  const mrt = (k, p) => { let s = (MR_T[L()] || MR_T.en)[k]; if (s == null) s = MR_T.en[k] || k; if (p) s = s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)); return s; };
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const mrName = (m) => new Date(m + '-15T12:00:00').toLocaleDateString(loc(), { month: 'long' });
+  const mrNext = (m) => { const d = new Date(m + '-15T12:00:00'); d.setMonth(d.getMonth() + 1); return d.toISOString().slice(0, 7); };
+  const mrDay = (d) => new Date(d + 'T12:00:00').toLocaleDateString(loc(), { month: 'short', day: 'numeric' });
+  const mrPct = (v) => (L() === 'en' ? v + '%' : v + ' %');
+  const mrTd = (d) => (d.trades === 1 ? mrt('tn1') : mrt('tn', { n: d.trades })) + ' · ' + (d.days === 1 ? mrt('dn1') : mrt('dn', { n: d.days }));
+  const mrQ = (q) => (L() === 'fr' ? '«\u00a0' + q + '\u00a0»' : L() === 'es' ? '«' + q + '»' : '“' + q + '”');   // the trader's own words, quoted the way each language does
+  const mrCls = (v) => (v > 0 ? 'pos' : v < 0 ? 'neg' : '');
+  /** the screens of a snapshot, in order; a screen without enough data is not in the list */
+  function mrScreens(d) {
+    const M = mrName(d.month), out = [], esc2 = esc;
+    const a = (i, h, cls = '') => `<div class="mr-a ${cls}" style="--i:${i}">${h}</div>`;
+    const pill = (k) => a(0, `<span class="mr-pill">${mrt(k)}</span>`);
+    const td = mrTd(d);
+    out.push({ k: 'open', h: pill('open') + a(1, `<b class="mr-title">${esc2(cap(new Date(d.month + '-15T12:00:00').toLocaleDateString(loc(), { month: 'long', year: 'numeric' })))}</b>`) + a(2, `<p class="mr-sub mr-mono">${td}</p>`) });
+    const sp = d.split || {};
+    const split = ['eval', 'funded', 'live'].filter((k) => sp[k]).map((k) => `${mrt(k)} <span class="mr-mono ${mrCls(sp[k])}">${money(sp[k])}</span>`).join(' · ');
+    out.push({ k: 'net', h: pill('net') + a(1, `<b class="mr-hero mr-mono ${mrCls(d.net)}" data-count="${+d.net || 0}"><span class="g">${money(d.net)}</span><span class="v">${money(d.net)}</span></b>`)
+      + a(2, `<div class="mr-mini">${[[mrt('wr'), d.win_rate != null ? mrPct(d.win_rate) : '—'], [mrt('win'), d.winners || 0], [mrt('loss'), d.losers || 0]].map(([l, v]) => `<span><b class="mr-mono">${v}</b><small>${l}</small></span>`).join('')}</div>`)
+      + (split ? a(3, `<p class="mr-split">${split}</p>`) : '') });
+    const cv = d.curve || [];
+    if (cv.length >= 2) {
+      const W = 300, H = 150, pts = [0, ...cv.map((p) => p.c)], lo = Math.min(...pts), hi = Math.max(...pts), sx = W / (pts.length - 1), sy = (v) => H - 8 - ((v - lo) / Math.max(1, hi - lo)) * (H - 16);
+      const path = pts.map((v, i) => `${i ? 'L' : 'M'}${(i * sx).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+      const dot = (x, k) => { if (!x) return ''; const i = cv.findIndex((p) => p.d === x.d); return i < 0 ? '' : `<circle class="mr-dot ${k}" cx="${((i + 1) * sx).toFixed(1)}" cy="${sy(cv[i].c).toFixed(1)}" r="5"/>`; };
+      const day = (x, k, lab) => (x ? `<p class="mr-day ${k}"><small>${lab}</small> <span class="mr-mono">${mrDay(x.d)} · ${money(x.v)}</span></p>` : '');
+      out.push({ k: 'shape', h: pill('shape') + a(1, `<svg class="mr-curve ${d.net < 0 ? 'neg' : 'pos'}" viewBox="-6 -6 ${W + 12} ${H + 12}" aria-hidden="true"><line class="mr-zero" x1="0" x2="${W}" y1="${sy(0).toFixed(1)}" y2="${sy(0).toFixed(1)}"/><path pathLength="1" d="${path}"/>${dot(d.best_day, 'pos')}${dot(d.worst_day, 'neg')}</svg>`)
+        + a(2, day(d.best_day, 'pos', mrt('bday')) + day(d.worst_day, 'neg', mrt('wday'))) });
+    }
+    const tcard = (x) => `<div class="mr-card"><p class="mr-mono">${mrDay(x.date)} · ${esc2(x.instrument)}${x.direction ? ' · ' + esc2(x.direction.toUpperCase()) : ''}</p>${x.setup ? `<p>${esc2(x.setup)}</p>` : ''}${x.note ? `<p class="mr-q">${esc2(mrQ(x.note))}</p>` : ''}</div>`;
+    if (d.best_trade) out.push({ k: 'best', h: pill('best') + a(1, `<b class="mr-hero mr-mono pos">${money(d.best_trade.pnl)}</b>`) + a(2, tcard(d.best_trade)) });
+    if (d.tough_trade) out.push({ k: 'tough', h: pill('tough') + a(1, `<b class="mr-hero mr-mono neg">${money(d.tough_trade.pnl)}</b>`) + a(2, tcard(d.tough_trade)) + a(3, `<p class="mr-sub">${mrt(d.tough_trade.note ? 't_note' : 't_none')}</p>`) });
+    const hw = d.how || {}, bars = hw.bars || [];
+    const l1 = [hw.session ? mrt('sess', { s: mrt('s_' + hw.session) }) : '', hw.setup ? mrt('setup', { s: esc2(hw.setup) }) : ''].filter(Boolean).join('<br>');
+    const l2 = [hw.traded ? mrt((hw.journaled || 0) <= 1 && L() === 'fr' ? 'jd1' : 'jd', { a: hw.journaled || 0, b: hw.traded }) : '', hw.streak ? (hw.streak === 1 ? mrt('streak1') : mrt('streak', { n: hw.streak })) : ''].filter(Boolean).join('<br>');
+    if (bars.length || l1 || l2) out.push({ k: 'how', h: pill('how') + a(1, `<div class="mr-bars2">${bars.map((b, i) => `<div class="mr-bar"><span>${mrt('b_' + b.k)}</span><b class="mr-mono">${mrPct(b.pct)}</b><i><s style="--w:${Math.max(0, Math.min(100, b.pct)) / 100};--j:${i}"></s></i></div>`).join('')}</div>`)
+      + (l1 ? a(2, `<p class="mr-sub">${l1}</p>`) : '') + (l2 ? a(3, `<p class="mr-sub">${l2}</p>`) : '') });
+    const ai = d.ai;
+    if (ai && ai.month) out.push({ k: 'ai', dur: 9000, h: pill('ai') + [['a_month', ai.month], ['a_edge', ai.edge], ['a_cost', ai.cost], ['a_journal', ai.journal ? mrQ(ai.journal) : null], ['a_next', ai.next]].filter((x) => x[1]).map(([k, v], i) => a(1 + i, `<div class="mr-ai"><small>${mrt(k)}</small><p>${esc2(v)}</p></div>`)).join('') });
+    const end = d.net < 0 ? mrt('end_loss', { month: cap(M), next: cap(mrName(mrNext(d.month))) }) : mrt('end_win', { month: M });
+    out.push({ k: 'end', dur: 0, h: a(0, `<b class="mr-end">${esc2(end)}</b>`) + a(1, `<p class="mr-sub">${mrt('slogan')}</p>`)
+      + a(2, `<div class="mr-acts"><button type="button" class="btn" data-mr="replay">${mrt('replay')}</button><button type="button" class="btn primary" data-mr="share">${svg('share')}${mrt('share')}</button></div>`) });
+    return out;
+  }
+  /** the story; el: the Today card it grows from (and shrinks back to) */
+  function openMonth(it, el) {
+    const d = it.data, sc = mrScreens(d), n = sc.length, loss = d.net < 0, rm = reduced();
+    if (document.querySelector('.mr')) return;
+    G.mrOpen = d.month;
+    const ov = document.createElement('div');
+    ov.className = 'mr' + (loss ? ' loss' : ''); ov.setAttribute('data-noi18n', ''); ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', mrt('open'));
+    ov.innerHTML = `<div class="mr-box"><div class="mr-bg" aria-hidden="true"></div><div class="mr-prog">${sc.map(() => '<i><s></s></i>').join('')}</div>
+      <button type="button" class="mr-x" data-mr="close" aria-label="${mrt('close')}">${svg('x')}</button>
+      <div class="mr-stage">${sc.map((s, i) => `<section class="mr-s" data-k="${s.k}" aria-hidden="true">${s.h}</section>`).join('')}</div>
+      <small class="mr-tap">${mrt('tap')}</small><span class="mr-paused" aria-live="polite"></span></div>
+      <button type="button" class="mr-arr l" data-mr="prev" aria-label="${mrt('prev')}">${svg('chev')}</button><button type="button" class="mr-arr r" data-mr="next" aria-label="${mrt('nextb')}">${svg('chev')}</button>`;
+    document.body.append(ov); document.body.classList.add('mr-lock');
+    const box = ov.querySelector('.mr-box'), secs = [...ov.querySelectorAll('.mr-s')], bars = [...ov.querySelectorAll('.mr-prog s')];
+    let i = -1, el0 = 0, last = 0, paused = false, raf = 0, closed = false, cnt = null, seen = false;
+    const dur = (k) => (sc[k].dur != null ? sc[k].dur : 5000);
+    const setPause = (p) => { paused = p; ov.classList.toggle('paused', p); ov.querySelector('.mr-paused').textContent = p ? mrt('pause') : ''; };
+    const count = (num) => {   // 0 → the month's net in 900 ms, ease-out; stops with the story
+      const to = +num.dataset.count, v = num.querySelector('.v'); if (rm || !to) return null;
+      return { t: 0, step(dt) { this.t = Math.min(900, this.t + dt); const p = 1 - Math.pow(1 - this.t / 900, 3); v.textContent = this.t < 900 ? money(Math.round(to * p / 100) * 100) : money(to); return this.t < 900; } };   // (whole dollars while it counts)
+    };
+    const go = (k) => {
+      if (k < 0) k = 0;
+      if (k >= n) return;
+      const prev = i; i = k; el0 = 0;
+      secs.forEach((s, j) => { s.classList.toggle('on', j === i); s.classList.toggle('off', j === prev && j !== i); s.setAttribute('aria-hidden', j === i ? 'false' : 'true'); });
+      if (prev !== i && secs[i]) { secs[i].classList.remove('play'); void secs[i].offsetWidth; secs[i].classList.add('play'); }   // the entry plays again on replay / back
+      bars.forEach((b, j) => { b.style.transform = `scaleX(${j < i || (j === i && (rm || !dur(i))) ? 1 : 0})`; });
+      box.style.setProperty('--p', loss ? String(n > 1 ? i / (n - 1) : 1) : '1');   // a losing month: gold at the start, blue at the end
+      const num = secs[i].querySelector('[data-count]'); cnt = num ? count(num) : null; if (num && !cnt) num.querySelector('.v').textContent = money(+num.dataset.count);
+      ov.classList.toggle('at-end', i === n - 1);
+      if (i === n - 1 && !seen) { seen = true; apiJSON('api/game/wrapped/viewed', { method: 'POST', body: { month: d.month, done: true } }).catch(() => {}); if (G.mr && G.mr.month === d.month) G.mr.done = true; }   // seen to its end: the Today card goes (once the story is closed)
+      buzz(4);
+    };
+    const tick = (now) => {
+      if (closed) return;
+      const dt = last ? Math.min(100, now - last) : 0; last = now;
+      if (!paused && i >= 0) {
+        if (cnt && !cnt.step(dt)) cnt = null;
+        const D = dur(i);
+        if (D) { el0 += dt; if (!rm) bars[i].style.transform = `scaleX(${Math.min(1, el0 / D)})`; if (el0 >= D) go(i + 1); }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    const after = () => { if (seen && window.SweepNowRefresh) SweepNowRefresh(); };
+    const close = () => {
+      if (closed) return; closed = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', key, true); G.mrOpen = null;
+      const card = el && el.isConnected ? el.getBoundingClientRect() : null, done = () => { ov.remove(); document.body.classList.remove('mr-lock'); if (el && el.isConnected) el.focus({ preventScroll: true }); after(); };
+      if (rm) return done();
+      const b = box.getBoundingClientRect();
+      box.style.transition = 'transform .38s var(--spring), border-radius .38s var(--spring)';
+      box.style.transform = card && card.width ? `translate(${card.left - b.left}px, ${card.top - b.top}px) scale(${card.width / b.width}, ${card.height / b.height})` : 'translateY(110%)';
+      ov.classList.add('out'); setTimeout(done, 380);
+    };
+    // share: the preview, a switch to hide the dollar amounts, then the phone's share sheet (or a download)
+    const preview = async () => {
+      setPause(true);
+      let p = ov.querySelector('.mr-sh'); if (!p) { p = document.createElement('div'); p.className = 'mr-sh'; box.append(p); }
+      p.innerHTML = `<div class="mr-sh-in"><b>${mrt('sh_t')}</b><div class="mr-sh-img"><img alt=""></div><label class="mr-sw"><input type="checkbox" data-mr="hide"><span>${mrt('hide_amounts')}</span></label>
+        <div class="mr-acts"><button type="button" class="btn" data-mr="sh-close">${mrt('close')}</button><button type="button" class="btn primary" data-mr="sh-go">${svg('share')}${mrt('share')}</button></div></div>`;
+      p.querySelector('[data-mr=hide]').addEventListener('change', () => paintShare(p));   // the switch: the image again, with or without the amounts
+      requestAnimationFrame(() => p.classList.add('in'));
+      await paintShare(p);
+    };
+    const paintShare = async (p) => {
+      const hide = !!(p.querySelector('[data-mr=hide]') || {}).checked, img = p.querySelector('img'), my = (p._n = (p._n || 0) + 1);
+      const blob = await shareCard('month', hide ? 'hide' : '', { blob: true, data: d });
+      if (!img.isConnected || my !== p._n) return;   // (the switch touched while the first image was drawn: only the latest counts)
+      if (img.src) URL.revokeObjectURL(img.src);
+      img.src = URL.createObjectURL(blob); img.dataset.txt = (G.mrShareTxt || []).join(' | '); img.dataset.hide = hide ? '1' : '0';
+    };
+    const tap = (e) => {
+      const b = e.target.closest('[data-mr]');
+      if (b) {
+        const k = b.dataset.mr;
+        if (k === 'close') close();
+        else if (k === 'prev') go(i - 1);
+        else if (k === 'next') go(i + 1);
+        else if (k === 'replay') { setPause(false); go(0); }
+        else if (k === 'share') preview();
+        else if (k === 'sh-close') { const p = ov.querySelector('.mr-sh'); if (p) p.remove(); setPause(false); }
+        else if (k === 'sh-go') shareCard('month', ov.querySelector('.mr-sh [data-mr=hide]:checked') ? 'hide' : '', { data: d });
+        return true;
+      }
+      return !!e.target.closest('.mr-sh, label, input');
+    };
+    ov.addEventListener('click', (e) => { if (e.target.closest('[data-mr], .mr-sh')) { tap(e); e.stopPropagation(); } else if (e.target === ov) close(); });
+    // the story's own gestures, as on iOS: tap right = next, the left third = back, hold = pause, slide down = close
+    let ps = null;
+    box.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('[data-mr], .mr-sh') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      ps = { x: e.clientX, y: e.clientY, t: performance.now(), lp: false, drag: false, was: paused };
+      try { box.setPointerCapture(e.pointerId); } catch (x) { /* an old browser */ }
+      ps.timer = setTimeout(() => { if (ps && !ps.drag) { ps.lp = true; setPause(true); } }, 300);
+    });
+    box.addEventListener('pointermove', (e) => {
+      if (!ps) return; const dx = e.clientX - ps.x, dy = e.clientY - ps.y;
+      if (!ps.drag && dy > 10 && dy > Math.abs(dx)) { ps.drag = true; clearTimeout(ps.timer); setPause(true); box.style.transition = 'none'; }
+      if (ps.drag) box.style.transform = `translateY(${Math.max(0, dy)}px) scale(${1 - Math.min(0.06, Math.max(0, dy) / 3000)})`;
+    });
+    const up = (e) => {
+      if (!ps) return; const s = ps; ps = null; clearTimeout(s.timer);
+      if (s.drag) {
+        const dy = e.clientY - s.y, v = dy / Math.max(1, performance.now() - s.t);
+        if (dy > 110 || v > 0.6) { buzz(6); box.style.transition = 'transform .3s var(--spring)'; box.style.transform = 'translateY(110%)'; closed = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', key, true); G.mrOpen = null; setTimeout(() => { ov.remove(); document.body.classList.remove('mr-lock'); after(); }, 300); return; }
+        box.style.transition = 'transform .3s var(--spring)'; box.style.transform = ''; setPause(s.was); return;
+      }
+      if (s.lp) { setPause(s.was); return; }
+      if (e.type === 'pointercancel') return;
+      const r = box.getBoundingClientRect();
+      go((e.clientX - r.left) / r.width < 1 / 3 ? i - 1 : i + 1);
+    };
+    box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
+    box.addEventListener('contextmenu', (e) => e.preventDefault());
+    const key = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); const p = ov.querySelector('.mr-sh'); if (p) { p.remove(); setPause(false); } else close(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); go(i + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); go(i - 1); }
+      else if (e.key === ' ' && !e.target.closest('button, input')) { e.preventDefault(); setPause(!paused); }
+    };
+    document.addEventListener('keydown', key, true);
+    // opening: the Today card grows into the story (FLIP; nothing with reduced motion)
+    const from = el && el.isConnected ? el.getBoundingClientRect() : null;
+    if (from && from.width && !rm) {
+      const b = box.getBoundingClientRect();
+      box.style.transition = 'none'; box.style.transformOrigin = '0 0';
+      box.style.transform = `translate(${from.left - b.left}px, ${from.top - b.top}px) scale(${from.width / b.width}, ${from.height / b.height})`;
+      void box.offsetWidth;
+      box.style.transition = 'transform .42s var(--spring)'; box.style.transform = '';
+    } else if (!rm) { box.style.transition = 'none'; box.style.transform = 'translateY(100%)'; void box.offsetWidth; box.style.transition = 'transform .42s var(--spring)'; box.style.transform = ''; }
+    ov.classList.add('in');
+    setTimeout(() => { if (!closed) { box.style.transition = ''; box.style.transformOrigin = ''; go(0); raf = requestAnimationFrame(tick); } }, rm ? 0 : 420);
+    apiJSON('api/game/wrapped/viewed', { method: 'POST', body: { month: d.month } }).catch(() => {});
+    if (G.wrapped && G.wrapped.month === d.month) G.wrapped.new = false;
+    ov.querySelector('.mr-x').focus({ preventScroll: true });
+    return { close };
+  }
+  /** Today: « Your October is ready » until the story is seen to its end (at most the 7th of the next month, game.php) */
+  function monthCard() {
+    const m = G.mr; if (!m || m.done) return '';
+    return `<button type="button" class="nav-mr" data-rt="month" data-v="${esc(m.month)}" data-noi18n><span class="nav-mr-k">${mrt('open')}</span><b>${esc(mrt('card', { month: mrName(m.month) }))}</b><small>${mrt('tap')}</small><span class="nav-mr-go">${svg('chev')}</span></button>`;
+  }
+  /** the AI's « next month » mission, proposed on Today in the first days of that month once the story is seen */
+  function monthMission() {
+    const m = G.mr; if (!m || !m.done || !m.mission) return '';
+    const now = typeof todayStr === 'function' ? todayStr().slice(0, 7) : '';
+    if (now !== mrNext(m.month)) return '';
+    return `<p class="nav-rt-int nav-mr-mis"><b>${mrt('mission')}</b> · ${esc(m.mission)}</p>`;
+  }
 
   /* payout readiness at 100 %: the gold moment */
   function payoutReady() {
@@ -3285,12 +3614,13 @@
   paint();
   window.SweepGame = { refresh: () => load(true), sumText, openPlan, openReview, weekBrief, suggestedSetups: SUGGESTED_SETUPS,
     // the plan first (once a day) before a new trade — used by the screenshot way of adding a trade too
-    state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null, discovery: G.discovery || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
+    state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null, discovery: G.discovery || null, month_review: G.mr || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
     planFirst: (then) => { if (!document.getElementById('gSheet') && planGateNeeded()) { openPlan(G.today.day, { then }); return true; } return false; }, openJournal: () => openJournal(), openGoal: () => openGoalQuestions(), t,
     next: () => { try { return progNext(); } catch (e) { return null; } },
     summary: () => (G.profile ? { rank: rankName(G.profile.rank), level: G.profile.level, streak: G.profile.streak.current, best: G.profile.streak.best, valid: G.profile.streak.today_valid } : null),
     ui: { sheet: openSheet, close: closeSheet, head, xp: xpFloat, buzz, svg, chime },   // for the 90-day gameplan module (src/gameplan.js)
-    open: (k, v) => ({ hub: openHub, map: openMap, missions: missionsSheet, season: openSeason, league: openLeague, social: () => openSocial(v), weekly: openWeekly, plan: openPlan, review: openReview, wrapped: () => openWrapped(v) })[k]?.() };
+    open: (k, v, el) => ({ hub: openHub, map: openMap, missions: missionsSheet, season: openSeason, league: openLeague, social: () => openSocial(v), weekly: openWeekly, plan: openPlan, review: openReview, wrapped: () => openWrapped(v, el), month: () => openWrapped(v, el) })[k]?.(),
+    monthCard: () => { try { return monthCard(); } catch (e) { return ''; } }, monthMission: () => { try { return monthMission(); } catch (e) { return ''; } } };   // (1 Nov., brief avance 6) the Today card
 })();
 
 /* the 90-day gameplan (brief « Parcours de 90 jours », 20 Oct.): its module (src/gameplan.js) is loaded on demand — once the

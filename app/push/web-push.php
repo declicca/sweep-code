@@ -14,22 +14,26 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  */
 
 /** [default time, earliest, latest] of each reminder, New York time (the bell's windows end at 9:30, the open, and 21:00) */
-const WP_KINDS = ['plan' => ['08:45', '07:00', '09:15'], 'review' => ['17:15', '17:00', '20:45'], 'weekly' => ['17:00', '17:00', '20:45']];   // (1 Nov.) the review after the 17:00 close (the CME reopens at 18:00)
+const WP_KINDS = ['plan' => ['08:45', '07:00', '09:15'], 'review' => ['17:15', '17:00', '20:45'], 'weekly' => ['17:00', '17:00', '20:45'],   // (1 Nov.) the review after the 17:00 close (the CME reopens at 18:00)
+    'lock' => ['', '', '']];   // (1 Nov., brief avance 4) the day's lock: at the moment the limit is reached, no time to choose
 /** push services only: the server never posts anywhere else (a subscription is an address the browser gives) */
 const WP_HOSTS = ['fcm.googleapis.com', 'android.googleapis.com', 'updates.push.services.mozilla.com', 'web.push.apple.com'];
 const WP_HOST_SUFFIXES = ['.push.apple.com', '.notify.windows.com', '.push.services.mozilla.com'];
 const WP_MAX_DEVICES = 10;
-/** the bell's own words (src/game.js, g_plan / g_review / g_weekly) */
+/** the bell's own words (src/game.js, g_plan / g_review / g_weekly; src/coach.js, g_lock) */
 const WP_TEXT = [
     'en' => ['plan' => ['Your plan of the day is waiting.', '30 seconds before the open.'],
              'review' => ['Close your day in 2 taps.', 'Journal and review while it is fresh.'],
-             'weekly' => ['Your week is ready.', 'Your streak, your discipline and your swept days, in one place.']],
+             'weekly' => ['Your week is ready.', 'Your streak, your discipline and your swept days, in one place.'],
+             'lock' => ['Day closed: your limit is reached.', 'Your account is protected. Grade your trades and close your day.']],
     'fr' => ['plan' => ['Ton plan du jour t’attend.', '30 secondes avant l’ouverture.'],
              'review' => ['Ferme ta journée en 2 touchers.', 'Journalise et fais ta revue tant que c’est frais.'],
-             'weekly' => ['Ta semaine est prête.', 'Ton streak, ta discipline et tes journées balayées, au même endroit.']],
+             'weekly' => ['Ta semaine est prête.', 'Ton streak, ta discipline et tes journées balayées, au même endroit.'],
+             'lock' => ['Journée fermée : ta limite est atteinte.', 'Ton compte est protégé. Note tes trades et ferme ta journée.']],
     'es' => ['plan' => ['Tu plan del día te espera.', '30 segundos antes de la apertura.'],
              'review' => ['Cierra tu día en 2 toques.', 'Registra y revisa mientras está fresco.'],
-             'weekly' => ['Tu semana está lista.', 'Tu racha, tu disciplina y tus días barridos, en un solo lugar.']],
+             'weekly' => ['Tu semana está lista.', 'Tu racha, tu disciplina y tus días barridos, en un solo lugar.'],
+             'lock' => ['Día cerrado: alcanzaste tu límite.', 'Tu cuenta está protegida. Califica tus operaciones y cierra tu día.']],
 ];
 
 /* ───────────── keys ───────────── */
@@ -176,6 +180,7 @@ function wp_times(string $kind): array
 {
     [, $from, $to] = WP_KINDS[$kind];
     $out = [];
+    if ($from === '') return $out;   // (the day's lock: sent when it happens)
     for ($m = (int) substr($from, 0, 2) * 60 + (int) substr($from, 3); $m <= (int) substr($to, 0, 2) * 60 + (int) substr($to, 3); $m += 15) $out[] = sprintf('%02d:%02d', intdiv($m, 60), $m % 60);
     return $out;
 }

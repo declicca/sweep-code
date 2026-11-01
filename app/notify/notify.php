@@ -243,7 +243,8 @@ final class Notify
         $live = '(expires_at IS NULL OR expires_at > ?)';
         $limit = max(10, min(200, (int) self::cfg()['list_limit']));
         $items = self::q("SELECT * FROM notifications WHERE user_id = ? AND $live ORDER BY created_at DESC, id DESC LIMIT $limit", [$uid, $now])->fetchAll(PDO::FETCH_ASSOC);
-        $unread = (int) self::q("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND read_at IS NULL AND $live", [$uid, $now])->fetchColumn();
+        // (1 Nov., brief dans le temps B2) the badge counts what concerns the trader, not the announcements (« What's new » stays in the list)
+        $unread = (int) self::q("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND read_at IS NULL AND type <> 'news' AND $live", [$uid, $now])->fetchColumn();
         $modal = self::q("SELECT * FROM notifications WHERE user_id = ? AND priority = 'celebration' AND shown_as_modal_at IS NULL AND read_at IS NULL AND $live
                           ORDER BY created_at ASC, id ASC LIMIT 1", [$uid, $now])->fetch(PDO::FETCH_ASSOC);
         return ['items' => array_map([self::class, 'out'], $items), 'unread' => $unread, 'modal' => $modal ? self::out($modal) : null];

@@ -50,8 +50,10 @@ with sync_playwright() as p:
     pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-rt', timeout=10000); pg.wait_for_timeout(1500)
     # (31 Oct., C5) one way to the review: the Review step; « I'm done for today » only at the stop « Now » announces
     fin, end = pg.locator('#main .nav-rt .nav-rt-fin'), pg.locator('#main .nav-now.is-end').count() > 0
-    ok(fin.count() == (1 if end else 0) and (not end or fin.first.inner_text().replace('›', '').strip() == x['fin']), f'{tag}: « {x["fin"]} » only when « Now » says stop ({fin.count()}, stop: {end})')
-    go = fin.first if end else pg.locator('#main .nav-rt [data-rt=review]').first
+    lockd = pg.locator('#main .nav-rt .nav-lock').count() > 0   # (1 Nov., brief avance 4) the day's limit reached (the tilt day's 2 trades): « Day closed » and its « Close my day »
+    if lockd: ok(fin.count() == 0 and pg.locator('#main .nav-lock [data-rt=fin]').inner_text().strip() == x['close'], f'{tag}: the limit reached: « Day closed », its « {x["close"]} »')
+    else: ok(fin.count() == (1 if end else 0) and (not end or fin.first.inner_text().replace('›', '').strip() == x['fin']), f'{tag}: « {x["fin"]} » only when « Now » says stop ({fin.count()}, stop: {end})')
+    go = pg.locator('#main .nav-lock [data-rt=fin]').first if lockd else fin.first if end else pg.locator('#main .nav-rt [data-rt=review]').first
     taps = 0
     (go.tap() if phone else go.click()); taps += 1
     pg.wait_for_selector('#gSheet [data-g=save-review]', timeout=8000); pg.wait_for_timeout(500)

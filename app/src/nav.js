@@ -94,6 +94,26 @@ window.SweepMO = window.SweepMO || class {
         a.innerHTML = `${IC.back}<span>${t()[p[1]]}</span>`; main.prepend(a);
       }
     }
+    topBack(main, p);
+  }
+  /* (1 Nov., brief visuel iOS 27.2, C1) one back link, as on iOS: « ‹ Trades » in blue, above the large title, on the left, the
+     same on every page; the page's own (« ‹ Trades » grey on a trade, « ‹ Accounts » blue under the title…) is hidden, its
+     place and target kept */
+  function topBack(main, p) {
+    const top = document.querySelector('.main-wrap .top'); if (!top) return;
+    let tb = top.querySelector(':scope > .top-back');
+    const own = main.querySelector(':scope > .nav-back, .tr-top > a.back');
+    const href = own ? own.getAttribute('href') : '';
+    const label = own ? own.textContent.replace(/^\s*[‹<]\s*/, '').trim() : '';
+    if (!tb) { tb = document.createElement('a'); tb.className = 'top-back'; tb.setAttribute('data-noi18n', ''); top.prepend(tb); }
+    // a page without a parent keeps the row, empty (as iOS's navigation bar above a large title): the header has one height on
+    // every page, the content never moves when going from a tab to a sub-page
+    if (!href || !label) { tb.classList.add('off'); tb.removeAttribute('href'); tb.setAttribute('aria-hidden', 'true'); tb.tabIndex = -1; document.body.classList.remove('sw-top-back'); return; }
+    tb.classList.remove('off'); tb.removeAttribute('aria-hidden'); tb.removeAttribute('tabindex');
+    const html = `${IC.back}<span>${esc(label)}</span>`;
+    if (tb.getAttribute('href') !== href) tb.setAttribute('href', href);
+    if (tb._h !== html) { tb.innerHTML = html; tb._h = html; }
+    own.classList.add('sw-own-back'); document.body.classList.add('sw-top-back');
   }
 
   /* ───────────── avatar menu (same on phone and desktop) ───────────── */
@@ -425,9 +445,17 @@ window.SweepMO = window.SweepMO || class {
   }
   /* ───── phone: one card for the day — scroll the days (P&L, news dot), see the day's numbers, releases and trades ───── */
   const FD = { en: { news: 'Releases', none: 'No important US release.', loading: 'Loading the releases…', fc: 'Fcst', act: 'Act', cal: 'Calendar ›', jr: 'Journal ›', all: 'All ›' }, fr: { news: 'Annonces', none: 'Aucune annonce américaine importante.', loading: 'Chargement des annonces…', fc: 'Prév.', act: 'Réel', cal: 'Calendrier ›', jr: 'Journal ›', all: 'Tout voir ›' }, es: { news: 'Publicaciones', none: 'Sin publicaciones importantes de EE. UU.', loading: 'Cargando publicaciones…', fc: 'Prev.', act: 'Real', cal: 'Calendario ›', jr: 'Diario ›', all: 'Ver todo ›' } };
+  // (1 Nov., brief dans le temps B3) the strip starts on the trader's first day — the session of the sign-up, or the first trade when
+  // imported ones are older —, not three empty weeks before he was there (still 3 weeks at most)
+  function firstDay() {
+    const c = S.me && S.me.created_at; let f = '';
+    if (c != null && c !== '') { const ms = /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z')); if (isFinite(ms)) f = new Date(ms + 216e5).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); }
+    (S.trades || []).forEach((t) => { if (t.date && (!f || t.date < f)) f = t.date; });
+    return f;
+  }
   function stripDays() {
-    const today = etToday(), out = [], t0 = new Date(today + 'T12:00:00');
-    for (let i = -21; i <= 7; i++) { const d = new Date(t0); d.setDate(t0.getDate() + i); if (d.getDay() === 0 || d.getDay() === 6) continue; out.push(ymd(d)); }
+    const today = etToday(), out = [], t0 = new Date(today + 'T12:00:00'), f = firstDay();
+    for (let i = -21; i <= 7; i++) { const d = new Date(t0); d.setDate(t0.getDate() + i); if (d.getDay() === 0 || d.getDay() === 6) continue; const k = ymd(d); if (f && k < f && k < today) continue; out.push(k); }
     return out;
   }
   function feedStrip() {
@@ -729,7 +757,7 @@ window.SweepMO = window.SweepMO || class {
         <span class="nav-acc-bal">${st ? fmtU(st.bal) : '—'}</span>
         ${(() => { const f = typeof acctFlag === 'function' ? acctFlag(a) : null; return f && f.k ? `<span class="nav-acc-flag">${esc(f.t)}</span>` : ''; })()}
         ${room != null ? `<span class="nav-acc-dd"><small>${evalA && st.target && !ready ? (({ en: 'Target {a} / {b} · room {m}', fr: 'Objectif {a} / {b} · marge {m}', es: 'Objetivo {a} / {b} · margen {m}' })[LANG] || 'Target {a} / {b} · room {m}').replace('{a}', fmtU(Math.max(0, st.net))).replace('{b}', fmtU(st.target)).replace('{m}', fmtU(st.breached ? 0 : Math.max(0, st.buffer))) : `${x.dd} · ${fmtU(st.breached ? 0 : Math.max(0, st.buffer))}`}</small><i><s class="${room < 0.25 ? 'neg' : 'pos'}" style="width:${(room * 100).toFixed(0)}%"></s></i></span>` : ''}
-        ${ready ? `<span class="nav-ready">${(a.phase === 'eval' || (!a.phase && !ps && a.rules && a.rules.target_c)) ? ({ en: 'Objectives reached', fr: 'Objectifs atteints', es: 'Objetivos alcanzados' }[LANG] || 'Objectives reached') : x.ready}</span>` : ''}</a>`;   // an evaluation is « passed », not « ready for payout »
+        ${ready ? `<span class="nav-ready">${(a.phase === 'eval' || (!a.phase && !ps && a.rules && a.rules.target_c)) ? ({ en: 'Objectives reached', fr: 'Objectifs atteints', es: 'Objetivos alcanzados' }[LANG] || 'Objectives reached') + (a.pass_asked && window.SweepPass ? ' · ' + SweepPass.wait() : '') : x.ready}</span>` : ''}</a>`;   // (1 Nov., brief dans le temps F) after « Not yet »: waiting for the firm   // an evaluation is « passed », not « ready for payout »
     }).join('');
     const more = accs.length - shown.length;   // the full list is one tap away
     const MORE = { en: 'See the {n} other accounts ›', fr: 'Voir les {n} autres comptes ›', es: 'Ver las {n} otras cuentas ›' };
@@ -3102,9 +3130,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { t: 'You passed {n}!', s: 'Profit target reached{d}, without breaking the drawdown. Did your firm confirm the pass?', go: 'Yes, move it to funded', later: 'Not yet', note: 'The evaluation stays in your history (archived, marked passed). A new funded account starts with the same firm and size{r}.', rules: ' and its funded rules', done: 'Funded account created', btn: 'Move to funded', btnS: 'Passed the evaluation? Create the funded account.', badge: 'Objectives reached', fund: 'Funded' },
-    fr: { t: 'Tu as réussi {n} !', s: 'Objectif de profit atteint{d}, sans toucher au drawdown. Ta firme a confirmé la réussite ?', go: 'Oui, passer en financé', later: 'Pas encore', note: 'L’évaluation reste dans ton historique (archivée, marquée réussie). Un nouveau compte financé démarre avec la même firme et la même taille{r}.', rules: ' et ses règles de compte financé', done: 'Compte financé créé', btn: 'Passer en financé', btnS: 'Évaluation réussie ? Crée le compte financé.', badge: 'Objectifs atteints', fund: 'Financé' },
-    es: { t: '¡Aprobaste {n}!', s: 'Objetivo de beneficio alcanzado{d}, sin tocar el drawdown. ¿Tu firma confirmó la aprobación?', go: 'Sí, pasar a financiada', later: 'Todavía no', note: 'La evaluación queda en tu historial (archivada, marcada aprobada). Una nueva cuenta financiada empieza con la misma firma y tamaño{r}.', rules: ' y sus reglas de cuenta financiada', done: 'Cuenta financiada creada', btn: 'Pasar a financiada', btnS: '¿Evaluación aprobada? Crea la cuenta financiada.', badge: 'Objetivos alcanzados', fund: 'Financiada' } };
+    en: { t: 'You passed {n}!', s: 'Profit target reached{d}, without going past your drawdown.{m} Did your firm confirm the pass?', low: ' Your room went down to {v} on {w}.', wait: 'waiting for your firm', go: 'Yes, move it to funded', later: 'Not yet', note: 'The evaluation stays in your history (archived, marked passed). A new funded account starts with the same firm and size{r}.', rules: ' and its funded rules', done: 'Funded account created', btn: 'Move to funded', btnS: 'Passed the evaluation? Create the funded account.', badge: 'Objectives reached', fund: 'Funded' },
+    fr: { t: 'Tu as réussi {n} !', s: 'Objectif de profit atteint{d}, sans dépasser ton drawdown.{m} Ta firme a confirmé la réussite\u00a0?', low: ' Ta marge est descendue à {v} le {w}.', wait: 'en attente de ta firme', go: 'Oui, passer en financé', later: 'Pas encore', note: 'L’évaluation reste dans ton historique (archivée, marquée réussie). Un nouveau compte financé démarre avec la même firme et la même taille{r}.', rules: ' et ses règles de compte financé', done: 'Compte financé créé', btn: 'Passer en financé', btnS: 'Évaluation réussie ? Crée le compte financé.', badge: 'Objectifs atteints', fund: 'Financé' },
+    es: { t: '¡Aprobaste {n}!', s: 'Objetivo de beneficio alcanzado{d}, sin superar tu drawdown.{m} ¿Tu firma confirmó la aprobación?', low: ' Tu margen bajó a {v} el {w}.', wait: 'esperando a tu firma', go: 'Sí, pasar a financiada', later: 'Todavía no', note: 'La evaluación queda en tu historial (archivada, marcada aprobada). Una nueva cuenta financiada empieza con la misma firma y tamaño{r}.', rules: ' y sus reglas de cuenta financiada', done: 'Cuenta financiada creada', btn: 'Pasar a financiada', btnS: '¿Evaluación aprobada? Crea la cuenta financiada.', badge: 'Objetivos alcanzados', fund: 'Financiada' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
@@ -3158,13 +3186,20 @@ window.SweepMO = window.SweepMO || class {
     const el = document.createElement('aside'); el.className = 'nav-dlg nav-pass'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
     const d = st.days ? ` · ${st.days} ${L === 'en' ? 'days' : L === 'es' ? 'días' : 'jours'}` : '';
     el.innerHTML = `<div class="nav-dlg-in"><div class="nav-pass-ic" aria-hidden="true">🏁</div><h2>${esc2(t('t').replace('{n}', a.name))}</h2>
-      <p class="nav-pass-s">${t('s').replace('{d}', esc2(d))}</p>
+      <p class="nav-pass-s">${t('s').replace('{d}', esc2(d)).replace('{m}', esc2(lowRoom(st)))}</p>
       <p class="muted nav-pass-n">${t('note').replace('{r}', fr.from ? t('rules') : '')}</p>
       ${choicesHtml(a) || `<button type="button" class="btn primary nav-am-save" data-pass-go="${esc2(a.id)}">${t('go')}</button>`}
       <button type="button" class="btn nav-pass-later" data-pass-later="${esc2(a.id)}">${t('later')}</button></div>`;
     document.body.append(scrim, el);
     requestAnimationFrame(() => { el.classList.add('open'); scrim.classList.add('open'); });
     scrim.addEventListener('click', () => later(a.id));
+  }
+  /** (1 Nov., brief dans le temps A2) the room went under half of the drawdown on the way: said, with the day (« without touching
+   *  the drawdown » was said to a trader whose room had gone down to $950 of $2,000) */
+  function lowRoom(st) {
+    if (!st || st.lowRoom == null || !st.dd || st.lowRoom >= st.dd / 2 || !st.lowDay) return '';
+    const w = new Date(st.lowDay + 'T12:00:00').toLocaleDateString(L === 'en' ? 'en-US' : L === 'fr' ? 'fr-CA' : 'es-ES', { day: 'numeric', month: 'short' });
+    return t('low').replace('{v}', typeof money === 'function' ? money(Math.max(0, st.lowRoom), { sign: false, dec: 0 }) : '$' + Math.round(st.lowRoom / 100)).replace('{w}', w);
   }
   /** the firm asks for a choice when the account becomes funded (Topstep: Standard or Consistency): one button per option */
   function choicesHtml(a) {
@@ -3183,14 +3218,16 @@ window.SweepMO = window.SweepMO || class {
     else if (b) { const a = getDoc('accounts', b.dataset.passBtn); if (a) ask(a); }
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.querySelector('.nav-pass.open')) { e.stopPropagation(); const b = document.querySelector('[data-pass-later]'); if (b) later(b.dataset.passLater); } }, true);
-  /* when to ask: an evaluation just passed, once a day at most, never on top of another window */
+  /* when to ask: an evaluation just passed, once, never on top of another window. (1 Nov., brief dans le temps C2) never between the
+     day's first trade and its review (SweepQuiet: it waits for the review or the next morning); after « Not yet » never again as a
+     window: the account's card says « Objectives reached · waiting for your firm » and its page keeps the button */
   let asking = false;
   function check() {
-    if (asking || document.querySelector('.nav-pass, #gSheet.open, #tkSlide.open, .nav-am.open, #gOb, .evp.open')) return;
-    const a = (S.accounts || []).find((x) => passed(x) && x.pass_asked !== today());
+    if (asking || document.querySelector('.nav-pass, #gSheet.open, #tkSlide.open, .nav-am.open, #gOb, .evp.open, .g-sweep, .nav-inst') || (window.SweepQuiet && SweepQuiet())) return;
+    const a = (S.accounts || []).find((x) => passed(x) && !x.pass_asked);
     if (!a) return;
     if (a.preset && window.SweepPresets && SweepPresets.ready && !SweepPresets.ready()) SweepPresets.load();   // its choices (Topstep Standard / Consistency) are in the catalogue
-    asking = true; setTimeout(() => { asking = false; if (passed(getDoc('accounts', a.id) || a) && !document.querySelector('.nav-pass')) ask(a); }, 900);
+    asking = true; setTimeout(() => { asking = false; if (passed(getDoc('accounts', a.id) || a) && !document.querySelector('.nav-pass, .g-sweep, .nav-inst, #gSheet.open') && !(window.SweepQuiet && SweepQuiet())) ask(a); }, 900);
   }
   /* the account page: a clear button on a passed evaluation (and a small one on any evaluation) */
   function pageButton() {
@@ -3201,7 +3238,7 @@ window.SweepMO = window.SweepMO || class {
     const ok = passed(a);
     let st = null; try { st = acctState(a); } catch (e) { st = null; }
     // « Move to funded » only once the evaluation is really passed; target reached but something missing → say what
-    const html = ok ? `<div class="nav-pass-row ok" data-noi18n><span>🏁 <b>${t('badge')}</b> · ${t('btnS')}</span><button type="button" class="btn sm primary" data-pass-btn="${esc2(id)}">${t('btn')}</button></div>`
+    const html = ok ? `<div class="nav-pass-row ok" data-noi18n><span>🏁 <b>${t('badge')}</b> · ${a.pass_asked ? t('wait') : t('btnS')}</span><button type="button" class="btn sm primary" data-pass-btn="${esc2(id)}">${t('btn')}</button></div>`
       : st && st.reached && !st.breached && st.missing && st.missing.length ? `<div class="nav-pass-row nav-pass-miss" data-noi18n><span>${esc2(evalMissLabel(st.missing))}</span></div>` : '';
     if (!html) { if (el) el.remove(); return; }
     if (!el) { const back = main.querySelector(':scope > .row'); if (!back) return; back.insertAdjacentHTML('afterend', html); }
@@ -3212,7 +3249,7 @@ window.SweepMO = window.SweepMO || class {
     const w = function () { const out = appRender.apply(this, arguments); try { pageButton(); } catch (e) { /* never blocks */ } setTimeout(() => { try { check(); } catch (e) { /* never blocks */ } }, 50); return out; };
     w.__pass = true; window.render = w;
   }
-  window.SweepPass = { passed, toFunded, ask, choicesOf: (a) => (a && a.preset && window.SweepPresets && SweepPresets.fundedChoices ? SweepPresets.fundedChoices(a.preset) : []) };
+  window.SweepPass = { passed, toFunded, ask, wait: () => t('wait'), choicesOf: (a) => (a && a.preset && window.SweepPresets && SweepPresets.fundedChoices ? SweepPresets.fundedChoices(a.preset) : []) };
 })();
 
 /* ───────────── live accounts, put forward ─────────────
@@ -4241,21 +4278,21 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day swept', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
+    en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day complete', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
       s1: 'Plan', s1d: 'Make your plan', s2: 'Execution', s2d: 'Trade your plan', s3: 'Review', s3d: 'Do your review',
       todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', inPlan1: '{c} of 1 trade in your plan', noPlanN: '{n} trades · no plan', noPlan1: '1 trade · no plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
       b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', b1s: 'Plan it', b2s: '+ Trade', b3s: 'Review', see: 'See',
-      help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day swept »: your streak goes on and you earn XP. Profit never counts, only the process.' },
-    fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée réussie', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
+      help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day complete »: your streak goes on. Profit never counts, only the process.' },
+    fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée complète', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
       s1: 'Plan', s1d: 'Fais ton plan', s2: 'Exécution', s2d: 'Respecte ton plan', s3: 'Revue', s3d: 'Fais ta revue',
       todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', inPlan1: '{c} sur 1 trade dans ton plan', noPlanN: '{n} trades · pas de plan', noPlan1: '1 trade · pas de plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
       b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', b1s: 'Planifier', b2s: '+ Trade', b3s: 'Réviser', see: 'Voir',
-      help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée réussie » : ta série continue et tu gagnes de l’XP. Le profit ne compte jamais, seulement le processus.' },
+      help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée complète » : ta série continue. Le profit ne compte jamais, seulement le processus.' },
     es: { title: 'Tu rutina de hoy', how: 'Cómo funciona', of: '{n} de 3 hechas', swept: 'Día completado', closed: 'Los mercados están cerrados hoy. El descanso es parte del proceso.', dayoffT: 'Día libre', dayoff: 'Sin operar hoy: tu racha está protegida.',
       s1: 'Plan', s1d: 'Haz tu plan', s2: 'Ejecución', s2d: 'Respeta tu plan', s3: 'Revisión', s3d: 'Haz tu revisión',
       todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', inPlan1: '{c} de 1 operación en tu plan', noPlanN: '{n} operaciones · sin plan', noPlan1: '1 operación · sin plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
       b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', b1s: 'Planificar', b2s: '+ Operación', b3s: 'Revisar', see: 'Ver',
-      help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue y ganas XP. El beneficio nunca cuenta, solo el proceso.' } };
+      help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue. El beneficio nunca cuenta, solo el proceso.' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const IC = {
@@ -4284,9 +4321,15 @@ window.SweepMO = window.SweepMO || class {
      before the first trade the risk allowed today (and the next big release with its no-trade window), during the session what
      is left, past a stop the day over; the numbers are the coach's own (SweepCoach.riskNow). Nothing once the day is reviewed. */
   const NW3 = {
-    en: { now: 'Now', ruleEnd: 'Done for today: that was your rule.', closeDay: 'Close my day', risk: 'Your risk allowed today', left: 'Left today', count: 'trade {n} of {m}', end: 'Day over by your plan', plan: 'your plan’s max loss', last: 'your last plan’s max loss', dll: 'the daily limit of {a}', dd: 'your drawdown room on {a}', news: '{t} · {e}: no trade from {a} to {b}', Lplan: 'before your max loss', Llast: 'before your last plan’s max loss', Ldll: 'before the daily limit of {a}', Ldd: 'of drawdown room on {a}' },
-    fr: { now: 'Maintenant', ruleEnd: 'Fini pour aujourd’hui, c’était ta règle.', closeDay: 'Fermer ma journée', risk: 'Ton risque permis aujourd’hui', left: 'Il te reste', count: 'trade {n} sur {m}', end: 'Journée terminée selon ton plan', plan: 'la perte max de ton plan', last: 'la perte max de ton dernier plan', dll: 'la limite du jour de {a}', dd: 'ta marge de drawdown sur {a}', news: '{t} · {e} : pas de trade de {a} à {b}', Lplan: 'avant ta perte max', Llast: 'avant la perte max de ton dernier plan', Ldll: 'avant la limite du jour de {a}', Ldd: 'de marge de drawdown sur {a}' },
-    es: { now: 'Ahora', ruleEnd: 'Terminado por hoy: era tu regla.', closeDay: 'Cerrar mi día', risk: 'Tu riesgo permitido hoy', left: 'Te quedan', count: 'operación {n} de {m}', end: 'Día terminado según tu plan', plan: 'la pérdida máx. de tu plan', last: 'la pérdida máx. de tu último plan', dll: 'el límite diario de {a}', dd: 'tu margen de drawdown en {a}', news: '{t} · {e}: sin operar de {a} a {b}', Lplan: 'antes de tu pérdida máx.', Llast: 'antes de la pérdida máx. de tu último plan', Ldll: 'antes del límite diario de {a}', Ldd: 'de margen de drawdown en {a}' },
+    en: { now: 'Now', ruleEnd: 'Done for today: that was your rule.', closeDay: 'Close my day', risk: 'Your risk allowed today', left: 'Left today', count: 'trade {n} of {m}', end: 'Day over by your plan', plan: 'your plan’s max loss', last: 'your last plan’s max loss', dll: 'the daily limit of {a}', dd: 'your drawdown room on {a}', news: '{t} · {e}: no trade from {a} to {b}', Lplan: 'before your max loss', Llast: 'before your last plan’s max loss', Ldll: 'before the daily limit of {a}', Ldd: 'of drawdown room on {a}',
+      set: 'your daily max loss', Lset: 'before your daily max loss', cnt: '{n}/{m} trades · {v} left today', cnt1: '{n} trade · {v} left today', cntN: '{n} trades · {v} left today',
+      limit: 'Your limit today', caution: 'half your last max loss', Lcaution: 'before half your last max loss', czRoom: 'Room at {m}: risk cut in half today ({r})', czLoss: 'After a day past your max loss: risk cut in half today ({r})', rule: 'Your rule today' },
+    fr: { now: 'Maintenant', ruleEnd: 'Fini pour aujourd’hui, c’était ta règle.', closeDay: 'Fermer ma journée', risk: 'Ton risque permis aujourd’hui', left: 'Il te reste', count: 'trade {n} sur {m}', end: 'Journée terminée selon ton plan', plan: 'la perte max de ton plan', last: 'la perte max de ton dernier plan', dll: 'la limite du jour de {a}', dd: 'ta marge de drawdown sur {a}', news: '{t} · {e} : pas de trade de {a} à {b}', Lplan: 'avant ta perte max', Llast: 'avant la perte max de ton dernier plan', Ldll: 'avant la limite du jour de {a}', Ldd: 'de marge de drawdown sur {a}',
+      set: 'ta perte max par jour', Lset: 'avant ta perte max par jour', cnt: '{n}/{m} trades · {v} restants aujourd’hui', cnt1: '{n} trade · {v} restants aujourd’hui', cntN: '{n} trades · {v} restants aujourd’hui',
+      limit: 'Ta limite aujourd’hui', caution: 'la moitié de ta dernière perte max', Lcaution: 'avant la moitié de ta dernière perte max', czRoom: 'Marge à {m}\u00a0: risque réduit de moitié aujourd’hui ({r})', czLoss: 'Après une journée au-delà de ta perte max\u00a0: risque réduit de moitié aujourd’hui ({r})', rule: 'Ta règle d’aujourd’hui' },
+    es: { now: 'Ahora', ruleEnd: 'Terminado por hoy: era tu regla.', closeDay: 'Cerrar mi día', risk: 'Tu riesgo permitido hoy', left: 'Te quedan', count: 'operación {n} de {m}', end: 'Día terminado según tu plan', plan: 'la pérdida máx. de tu plan', last: 'la pérdida máx. de tu último plan', dll: 'el límite diario de {a}', dd: 'tu margen de drawdown en {a}', news: '{t} · {e}: sin operar de {a} a {b}', Lplan: 'antes de tu pérdida máx.', Llast: 'antes de la pérdida máx. de tu último plan', Ldll: 'antes del límite diario de {a}', Ldd: 'de margen de drawdown en {a}',
+      set: 'tu pérdida máx. por día', Lset: 'antes de tu pérdida máx. por día', cnt: '{n}/{m} operaciones · {v} restantes hoy', cnt1: '{n} operación · {v} restantes hoy', cntN: '{n} operaciones · {v} restantes hoy',
+      limit: 'Tu límite hoy', caution: 'la mitad de tu última pérdida máx.', Lcaution: 'antes de la mitad de tu última pérdida máx.', czRoom: 'Margen en {m}: riesgo reducido a la mitad hoy ({r})', czLoss: 'Tras un día más allá de tu pérdida máx.: riesgo reducido a la mitad hoy ({r})', rule: 'Tu regla de hoy' },
   };
   const nw = (k, v) => String((NW3[L] || NW3.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
   const usd0 = (c) => (typeof money === 'function' ? money(Math.abs(Math.round(c)), { sign: false, dec: 0 }) : '$' + Math.round(Math.abs(c) / 100));   // as the coach writes it (no sign)
@@ -4310,11 +4353,16 @@ window.SweepMO = window.SweepMO || class {
     if (!x) return '';
     NOWSTOP = !!x.end;
     let big, val = '', sub = '';
-    if (!x.n) { big = nw('risk'); val = usd0(x.allowed); sub = nw(x.k, { a: x.a }); }
+    // (1 Nov., brief dans le temps A4) the drawdown room is shown as a limit, never as a « risk allowed »
+    if (!x.n) { big = nw(x.k === 'dd' ? 'limit' : 'risk'); val = usd0(x.allowed); sub = nw(x.k, { a: x.a }); }
     else if (x.end && x.rule) { big = nw('ruleEnd'); sub = ''; NOWEND = true; }   // a trader starting out: his rule, and closing the day right here
     else if (x.end) { big = nw('end'); sub = x.text; }
-    else { big = nw('left'); val = usd0(x.left); sub = [nw('L' + x.k, { a: x.a }), x.m ? nw('count', { n: x.n + 1 > x.m ? x.m : x.n + 1, m: x.m }) : '', x.pause ? x.text : ''].filter(Boolean).join(' · '); }
-    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l"><b>${esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${!x.n ? newsLine(d.day) : ''}${NOWEND ? `<div class="nav-now-a"><button type="button" class="btn sm primary" data-rt="fin">${esc2(nw('closeDay'))}</button></div>` : ''}${!x.n && window.SweepStart ? SweepStart.tradedLink() : ''}</div>`;
+    // (1 Nov., brief avance 4) in the session, one discreet counter « 2/3 trades · $180 left today » (was « Left today $180 · trade 3 of 3 »)
+    else { const [c0, c1] = nw(x.m ? 'cnt' : x.n === 1 ? 'cnt1' : 'cntN', { n: x.n, m: x.m, v: '\u0001' }).split('\u0001'); big = `${esc2(c0)}<span class="nav-now-v">${esc2(usd0(x.left))}</span>${esc2(c1)}`; sub = [nw('L' + x.k, { a: x.a }), x.pause ? x.text : ''].filter(Boolean).join(' · '); }
+    // (D1) the caution mode, the morning after a hard day: one line; (D4) the rule the trader wrote last night for this session
+    const cz = !x.n && x.caution ? `<p class="nav-now-cz">${esc2(nw(x.caution.why === 'room' && x.caution.room != null ? 'czRoom' : 'czLoss', { m: usd0(x.caution.room || 0), r: usd0(x.caution.cap) }))}</p>` : '';
+    const pr = (getDoc('journals', d.day) || {}).pre || {}, r0 = !x.n && x.rule0 && !pr.rule ? `<p class="nav-now-rule"><b>${esc2(nw('rule'))}</b> · ${esc2(/^\p{Lu}\p{Ll}/u.test(x.rule0) ? x.rule0.charAt(0).toLowerCase() + x.rule0.slice(1) : x.rule0)}</p>` : '';
+    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l${x.n && !x.end ? ' nav-now-cnt' : ''}"><b>${x.n && !x.end ? big : esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${cz}${r0}${!x.n ? newsLine(d.day) : ''}${NOWEND ? `<div class="nav-now-a"><button type="button" class="btn sm primary" data-rt="fin">${esc2(nw('closeDay'))}</button></div>` : ''}${!x.n && window.SweepStart ? SweepStart.tradedLink() : ''}</div>`;
   }
   /* (27 Oct., brief activation step E) the next day's appointment: right after a first plan, on a phone, once — « Shall I remind you
      tomorrow at 8:45 for your plan? », on in one tap (Settings › Notifications' own way, SweepNotify.push.on). On an iPhone outside the
@@ -4349,6 +4397,44 @@ window.SweepMO = window.SweepMO || class {
     }
     if (window.SweepNowRefresh) SweepNowRefresh();
   });
+  /* (1 Nov., brief avance 4) « Day closed »: the day's limit reached (max loss or max trades: SweepCoach.dayLock, the same as the
+     server's record), the routine's steps give way to a calm screen until 18:00 ET — the time to the next session, a sentence of the
+     coach that protects without guilt, two actions (grade the day's trades, close the day). Never a sheet over the app: the + and the
+     trades stay where they are, entry and grading are never blocked, and nothing lifts it before 18:00. */
+  const LK = {
+    en: { pill: 'Day closed', loss: 'Your max loss of {m} is reached.', trades: 'Your {n} trades of the day are taken.', trades1: 'Your trade of the day is taken.', next: 'Next session in', at: '6:00 PM, New York time', atSun: 'Sunday, 6:00 PM, New York time', d: '{d} d {h} h',
+      coL: 'Stopping here is what protects your account: the day is over, not you. Next session, cut your size after a first loss.', coT: 'Your number is reached: stopping now is keeping your word. Next session, keep your trades for your best setups.',
+      grade: 'Grade my trades', close: 'Close my day', seeRv: 'See my review' },
+    fr: { pill: 'Journée fermée', loss: 'Ta perte max de {m} est atteinte.', trades: 'Tes {n} trades du jour sont pris.', trades1: 'Ton trade du jour est pris.', next: 'Prochaine séance dans', at: '18\u00a0h, heure de New York', atSun: 'Dimanche, 18\u00a0h, heure de New York', d: '{d}\u00a0j {h}\u00a0h',
+      coL: 'T’arrêter ici, c’est ce qui protège ton compte\u00a0: la journée est finie, pas toi. À la prochaine séance, réduis ta taille après une première perte.', coT: 'Ton nombre est atteint\u00a0: t’arrêter maintenant, c’est tenir parole. À la prochaine séance, garde tes trades pour tes meilleurs setups.',
+      grade: 'Noter mes trades', close: 'Fermer ma journée', seeRv: 'Voir ma revue' },
+    es: { pill: 'Día cerrado', loss: 'Alcanzaste tu pérdida máx. de {m}.', trades: 'Tus {n} operaciones del día están hechas.', trades1: 'Tu operación del día está hecha.', next: 'Próxima sesión en', at: '18:00, hora de Nueva York', atSun: 'Domingo, 18:00, hora de Nueva York', d: '{d} d {h} h',
+      coL: 'Parar aquí es lo que protege tu cuenta: el día terminó, tú no. En la próxima sesión, reduce tu tamaño después de una primera pérdida.', coT: 'Llegaste a tu número: parar ahora es cumplir tu palabra. En la próxima sesión, guarda tus operaciones para tus mejores setups.',
+      grade: 'Calificar mis operaciones', close: 'Cerrar mi día', seeRv: 'Ver mi revisión' } };
+  const lt = (k, v) => String((LK[L] || LK.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
+  // (lifted at 18:00 ET by the page's own clock too: the app left open past 18:00 opens the next session even before the game answers)
+  const lockOf = (d) => { try { return window.SweepCoach && SweepCoach.dayLock && !(typeof todayStr === 'function' && todayStr() > d.day) ? SweepCoach.dayLock(d.day) : null; } catch (e) { return null; } };
+  /** the next session opens at 18:00 ET the evening before the next weekday (Friday → Sunday 18:00) */
+  function reopen(day) {
+    const n = new Date(day + 'T12:00:00'); do n.setDate(n.getDate() + 1); while (n.getDay() === 0 || n.getDay() === 6);
+    n.setDate(n.getDate() - 1);
+    const ymd = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+    return { ts: typeof etEpoch === 'function' ? etEpoch(ymd + ' 18:00') : 0, sun: n.getDay() === 0 };
+  }
+  const cdown = (ts) => { const s = Math.max(0, ts - Date.now() / 1000), dd = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60); return dd ? lt('d', { d: dd, h }) : h ? `${h}\u00a0h\u00a0${String(m).padStart(2, '0')}` : `${m}\u00a0min`; };
+  /** the day's trades, a copy once, in their order (the « Trades not detailed » line is not a trade) */
+  const lockTrades = (day) => { const seen = new Set(); return (S.trades || []).filter((x) => x.date === day && !x.demo && !x.untracked).sort((a, b) => String(a.entry_time || '').localeCompare(String(b.entry_time || '')) || String(a.created_at || '').localeCompare(String(b.created_at || ''))).filter((x) => { if (!x.copy_group) return true; if (seen.has(x.copy_group)) return false; seen.add(x.copy_group); return true; }); };
+  /** graded = journaled, as the server counts it (GameEngine::journaled): a setup, the emotion before, the checklist answered */
+  const graded = (x) => !!String(x.setup || '').trim() && !!(x.emo && x.emo.before && x.emo.before.length) && (['yes', 'partial', 'no'].includes(x.rules_followed) || Object.values(x.discipline || {}).some((v) => v === 'y' || v === 'n'));
+  function lockHtml(d, r, lk) {
+    const ro = reopen(d.day), rv = r && r.review >= 100;
+    const what = lk.why === 'loss' ? lt('loss', { m: usd0(lk.loss_c) }) : lt(+lk.trades === 1 ? 'trades1' : 'trades', { n: lk.trades });
+    return `<div class="nav-lock" data-lock="${lk.why === 'loss' ? 'loss' : 'trades'}"><span class="nav-lock-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
+      <p class="nav-lock-w">${esc2(what)}</p>
+      <p class="nav-lock-cd"><small>${esc2(lt('next'))}</small><b class="nav-lock-n">${esc2(cdown(ro.ts))}</b><small>${esc2(lt(ro.sun ? 'atSun' : 'at'))}</small></p>
+      <p class="nav-lock-co">${esc2(lt(lk.why === 'loss' ? 'coL' : 'coT'))}</p>
+      <div class="nav-lock-a"><button type="button" class="btn" data-rt="lock-grade">${esc2(lt('grade'))}</button>${rv ? `<button type="button" class="btn" data-rt="review">${esc2(lt('seeRv'))}</button>` : `<button type="button" class="btn primary" data-rt="fin">${esc2(lt('close'))}</button>`}</div></div>`;
+  }
   function card() {
     const st = window.SweepGame && SweepGame.state && SweepGame.state(); let d = st && st.today;
     // (31 Oct., C4) sample data only: the routine counts the sample trades listed under it (the server never sees them)
@@ -4373,21 +4459,27 @@ window.SweepMO = window.SweepMO || class {
     // (31 Oct., C5) the discipline, streak and level pills became one line under the title: « Level 2 · 0 complete days › » (My progress)
     const SUM = { en: ['Level {l}', '{n} complete day', '{n} complete days'], fr: ['Niveau {l}', '{n} jour complet', '{n} jours complets'], es: ['Nivel {l}', '{n} día completo', '{n} días completos'] }[L] || ['Level {l}', '{n} complete day', '{n} complete days'];
     const sumLine = first ? `<button type="button" class="nav-rt-sum" data-rt="hub">${[lv ? SUM[0].replace('{l}', esc2(lv)) : '', SUM[streak === 1 || (streak === 0 && L === 'fr') ? 1 : 2].replace('{n}', streak)].filter(Boolean).join(' · ')} ›</button>` : '';
-    const head = (extra) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market ? foldBtn() : ''}${extra || ''}</div></div><div class="nav-rt-sub">${sumLine}<button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div>`;
+    const head = (extra, still) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market && !still ? foldBtn() : ''}${extra || ''}</div></div><div class="nav-rt-sub">${sumLine}<button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div>`;
     // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
     const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
     const wkt = ({ en: ['Your week is ready', 'Open the weekly recap'], fr: ['Ta semaine est prête', 'Ouvrir le bilan de la semaine'], es: ['Tu semana está lista', 'Abrir el resumen semanal'] })[L]   // (SWEEP.md step 6) one name: « Bilan de la semaine » || ['Your week is ready', 'See my week'];
     const wkRow = wkReady ? `<div class="nav-rt-wk"><b>${wkt[0]}</b><button type="button" class="btn primary" data-rt="week">${wkt[1]}</button></div>` : '';
     // the intention written in last week's recap, shown all this week (SWEEP.md step 1, D5: it lived only in the game's hidden card)
     const intT = ({ en: 'Your intention this week', fr: 'Ton intention cette semaine', es: 'Tu intención esta semana' })[L] || 'Your intention this week';
-    const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : '';
+    // (1 Nov., brief avance 6) else, in the first days of a month, the mission the Month in Review's AI proposed for it
+    const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : (!wkReady && window.SweepGame && SweepGame.monthMission ? SweepGame.monthMission() : '');
+    // (1 Nov., brief avance 6) « Your October is ready »: the Month in Review, at the top of the card until seen to its end
+    const mrRow = window.SweepGame && SweepGame.monthCard ? SweepGame.monthCard() : '';
     const nowRow = nowHtml(d, r);
     const rmRow = remindRow();
     const gpRow = gpLine();
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
-    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${rmRow}${gpRow}${helpT}</section>`;
-    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}${intRow}<p class="nav-rt-msg">${t('dayoff')}</p>${gpRow}${helpT}</section>`;
+    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${mrRow}${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${rmRow}${gpRow}${helpT}</section>`;
+    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${mrRow}${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}${intRow}<p class="nav-rt-msg">${t('dayoff')}</p>${gpRow}${helpT}</section>`;
+    // (1 Nov., brief avance 4) the day's limit reached: « Day closed » in place of « Now » and the 3 steps, until 18:00 ET (no fold: it is the day)
+    const lk = lockOf(d);
+    if (lk) return `<section class="surface nav-rt nav-lockd" data-noi18n>${head(`<span class="nav-rt-pill lk">${esc2(lt('pill'))}</span>`, true)}${lockHtml(d, r, lk)}${helpT}</section>`;
     const s1 = r.plan >= 100 ? 'done' : r.plan > 0 ? 'late' : 'todo';
     const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
     const s3 = r.review >= 100 ? 'done' : 'todo';
@@ -4404,7 +4496,7 @@ window.SweepMO = window.SweepMO || class {
     // (27 Oct., brief « daily loop » step 3) under the steps from the first trade: « I'm done for today » opens the review at once
     const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t(d.trades === 1 ? 'inPlan1' : 'inPlan', { c: d.compliant || 0, n: d.trades });
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${t('ydayB')} ›</b><span>${esc2(left(y.deadline))}</span></button>` : '';
-    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${wkRow}${nowRow}${rmRow}${gpRow}${intRow}
+    return `<section class="surface nav-rt" data-noi18n>${mrRow}${head(pill + ych)}${wkRow}${nowRow}${rmRow}${gpRow}${intRow}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
@@ -4417,7 +4509,7 @@ window.SweepMO = window.SweepMO || class {
   function place() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
     const host = document.querySelector('#main .d-today'); if (!host) return;
-    const cl = rtClosed(); const cur = host.querySelector('.nav-rt'); if (cur) cur.classList.toggle('closed-rt', cl);
+    const cl = rtClosed(); const cur = host.querySelector('.nav-rt'); if (cur) cur.classList.toggle('closed-rt', cl && !cur.classList.contains('nav-lockd'));   // (the closed day never folds)
     const html = card(); if (!html) return;
     let el = host.querySelector('.nav-rt');
     const ht = el && el.querySelector('.nav-rt-help-t'); const open = !!(ht && !ht.hidden);   // the loading card has no help text
@@ -4428,7 +4520,7 @@ window.SweepMO = window.SweepMO || class {
     el = host.querySelector('.nav-rt'); el._h = html; if (open && el.querySelector('.nav-rt-help-t')) el.querySelector('.nav-rt-help-t').hidden = false;
     if (co) { const st = el.querySelector(':scope > .nav-rt-steps'), hp = el.querySelector(':scope > .nav-rt-help-t'); st ? st.before(co) : hp ? hp.before(co) : el.append(co); }
     else if (window.SweepCoach && SweepCoach.paintToday) SweepCoach.paintToday();   // (1 Nov.) the coach in the same image as its card: it pushed the 3 steps down one frame later
-    el.classList.toggle('closed-rt', rtClosed());
+    el.classList.toggle('closed-rt', rtClosed() && !el.classList.contains('nav-lockd'));
     document.body.classList.add('nav-rt-on');
     if (!el.classList.contains('ph')) requestAnimationFrame(() => { try { if (el.isConnected) localStorage.setItem('sw.rtH', JSON.stringify({ w: innerWidth, h: Math.round(el.getBoundingClientRect().height) })); } catch (e) { /* private mode */ } });
   }
@@ -4438,7 +4530,12 @@ window.SweepMO = window.SweepMO || class {
     if (k === 'plan') { if (window.SweepGame && SweepGame.openPlan) { const nx = window.SweepNextSession && SweepNextSession(); nx ? SweepGame.openPlan(nx) : SweepGame.openPlan(); } }
     else if (k === 'review' || k === 'fin') { if (window.SweepGame && SweepGame.openReview) SweepGame.openReview(); }   // « I'm done for today »: the same review, at once
     else if (k === 'week') { if (window.SweepGame && SweepGame.open) SweepGame.open('weekly'); }
+    else if (k === 'month') { if (window.SweepGame && SweepGame.open) SweepGame.open('month', b.dataset.v, b); }   // (1 Nov., brief avance 6) the story grows from the card
     else if (k === 'trade') { if (typeof openTicket === 'function') openTicket(); }
+    else if (k === 'lock-grade') {   // (1 Nov., brief avance 4) the next trade of the day not graded yet, else the day's trades (Journal)
+      const day = rtDay() || (typeof todayStr === 'function' ? todayStr() : ''), nx = lockTrades(day).find((x) => !graded(x));
+      location.hash = nx ? '#trade/' + encodeURIComponent(nx.id) : '#journal/' + day;
+    }
     else if (k === 'dayoff') { const o = g && g.querySelector('[data-g=dayoff]'); if (o) o.click(); }
     else if (k === 'yday') { const o = document.querySelector('#main [data-g=yday]'); if (o) o.click(); }
     else if (k === 'hub') {
@@ -4464,6 +4561,49 @@ window.SweepMO = window.SweepMO || class {
   setInterval(() => { try { place(); } catch (e) { /* next minute */ } }, 60000);   // the review's moment comes with the clock, not with a change on the page
 })();
 
+
+/* (1 Nov., brief avance 4) Settings › My routine › Risk rules: the trader's own daily limits — max loss per day and max trades per
+ * day — that close the day on Today (SweepCoach.dayLimits: with the day's plan and the account's daily limit, the tightest wins).
+ * A change applies from the next session: settings.day_lock = { loss_c, trades, from, was } (the values in force until `from`), so
+ * a limit is never lifted in the middle of the day it guards. Blank: none of his own (the plan and the firm's limit still count). */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = {
+    en: { loss: 'Max loss per day', trades: 'Max trades per day', none: 'None', help: 'Once one is reached, Today closes your day until 6:00 PM New York time. A change applies from your next session.', firm: 'Blank: your plan and your account’s daily limit ({a}).',
+      wait: 'From {d}: these limits. Today: {o}.', off: 'no limit of your own', tr: '{n} trades', tr1: '1 trade', saved: 'Saved: it applies from your next session.' },
+    fr: { loss: 'Perte max par jour', trades: 'Trades max par jour', none: 'Aucun', help: 'Une fois une limite atteinte, Aujourd’hui ferme ta journée jusqu’à 18\u00a0h, heure de New York. Un changement s’applique à ta prochaine séance.', firm: 'Vide\u00a0: ton plan et la limite du jour de ton compte ({a}).',
+      wait: 'À partir du {d}\u00a0: ces limites. Pour aujourd’hui\u00a0: {o}.', off: 'aucune limite à toi', tr: '{n} trades', tr1: '1 trade', saved: 'Enregistré\u00a0: ça s’applique à ta prochaine séance.' },
+    es: { loss: 'Pérdida máx. por día', trades: 'Operaciones máx. por día', none: 'Ninguno', help: 'Al alcanzar un límite, Hoy cierra tu día hasta las 18:00, hora de Nueva York. Un cambio se aplica desde tu próxima sesión.', firm: 'Vacío: tu plan y el límite diario de tu cuenta ({a}).',
+      wait: 'Desde el {d}: estos límites. Para hoy: {o}.', off: 'ningún límite propio', tr: '{n} operaciones', tr1: '1 operación', saved: 'Guardado: se aplica desde tu próxima sesión.' } };
+  const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const usd = (c) => (typeof money === 'function' ? money(c, { sign: false, dec: 0 }) : '$' + Math.round(c / 100));
+  const day0 = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
+  const now = (day) => (window.SweepCoach && SweepCoach.standing ? SweepCoach.standing(day) : { loss: 0, trades: 0 });
+  const say = (x) => [x.loss ? usd(x.loss) : '', x.trades ? t(x.trades === 1 ? 'tr1' : 'tr', { n: x.trades }) : ''].filter(Boolean).join(' · ') || t('off');
+  function fields() {
+    const x = (S.settings && S.settings.day_lock) || {}, d = day0(), lim = (S.accounts || []).filter((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && a.rules && a.rules.dll_c > 0).sort((a, b) => a.rules.dll_c - b.rules.dll_c)[0];
+    const lv = +x.loss_c > 0 ? String(Math.round(x.loss_c / 100)) : '', tv = +x.trades > 0 ? String(x.trades) : '';
+    const wait = x.from && d < x.from ? t('wait', { d: new Date(x.from + 'T12:00:00').toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { weekday: 'long', day: 'numeric', month: 'long' }), o: say(now(d)) }) : '';
+    return `<label class="f" data-noi18n><span>${esc2(t('loss'))}</span><input type="text" inputmode="decimal" data-daylock="loss" value="${esc2(lv)}" placeholder="${esc2(lim ? usd(lim.rules.dll_c) : '$')}"></label>
+    <label class="f" data-noi18n><span>${esc2(t('trades'))}</span><input type="text" inputmode="numeric" data-daylock="trades" value="${esc2(tv)}" placeholder="${esc2(t('none'))}"></label>
+    <p class="help nav-dl-help" data-noi18n>${esc2(t('help'))}${lim ? ' ' + esc2(t('firm', { a: usd(lim.rules.dll_c) + ' · ' + (lim.name || '') })) : ''}${wait ? `<b class="nav-dl-wait">${esc2(wait)}</b>` : ''}</p>`;
+  }
+  document.addEventListener('change', (e) => {
+    const el = e.target; if (!el.matches || !el.matches('input[data-daylock]')) return;
+    const box = el.closest('.fgrid') || document, num = (k) => { const v = parseFloat(String((box.querySelector(`input[data-daylock="${k}"]`) || {}).value || '').replace(/[^0-9.]/g, '')); return isFinite(v) && v > 0 ? v : 0; };
+    const d = day0(), x = (S.settings && S.settings.day_lock) || {};
+    const next = new Date(d + 'T12:00:00'); next.setDate(next.getDate() + 1);
+    const from = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
+    const cur = now(d), was = x.from && d < x.from ? x.was || { loss_c: 0, trades: 0 } : { loss_c: cur.loss, trades: cur.trades };   // a change already waiting keeps what today had
+    const dl = { loss_c: Math.round(num('loss') * 100), trades: Math.min(99, Math.floor(num('trades'))), from, was };
+    if (dl.loss_c === (+x.loss_c || 0) && dl.trades === (+x.trades || 0)) return;
+    if (typeof editDoc === 'function') editDoc('settings', 'settings', (s) => { s.day_lock = dl; });
+    if (typeof toast === 'function') toast(t('saved'));
+  });
+  window.SweepDayLock = { fields };
+})();
 
 /* left menu (computer): search and notifications get their label when the menu opens, like the other links */
 (function () {
@@ -4670,7 +4810,10 @@ window.SweepMO = window.SweepMO || class {
   addEventListener('appinstalled', () => { bip = null; LS('sw.installShown', '1'); });
   const SG = () => { try { return JSON.parse(LS('sw.sugg') || '{}') || {}; } catch (e) { return {}; } };
   const sgSet = (id, f) => { const all = SG(), r = all[id] || {}; f(r); all[id] = r; LS('sw.sugg', JSON.stringify(all)); };
-  const sgOk = (id) => { const r = SG()[id] || {}; return !r.done && (r.n || 0) < 3 && !(r.until && r.until > Date.now()); };
+  // (1 Nov., brief dans le temps C2) « Later » means 7 days on every device: kept in Settings too (the browser's copy was lost with a
+  // new session, and the same window came back the next day)
+  const sgOk = (id) => { const r = SG()[id] || {}, u = (S.settings && S.settings.sugg_later && +S.settings.sugg_later[id]) || 0; return !r.done && (r.n || 0) < 3 && !(r.until && r.until > Date.now()) && !(u > Date.now()); };
+  const laterSet = (id) => { const until = Date.now() + 7 * 864e5; sgSet(id, (r) => { r.until = until; }); if (typeof editDoc === 'function' && S.settings) editDoc('settings', 'settings', (x) => { x.sugg_later = Object.assign({}, x.sugg_later, { [id]: until }); }); };
   const planOk = (j) => !!(j && j.pre && j.pre.bias && (j.pre.bias === 'no_trade' || parseFloat(String(j.pre.max_loss || '').replace(/[^0-9.]/g, '')) > 0));
   function noPlanRun() {   // the last 3 sessions with trades had no plan, and none yet for today
     const now = nowDay(), days = [...new Set((S.trades || []).filter((x) => !x.demo && x.date < now).map((x) => x.date))].sort().slice(-3);
@@ -4684,10 +4827,11 @@ window.SweepMO = window.SweepMO || class {
     if (sgOk('plan') && noPlanRun()) return 'plan';
     return '';
   }
-  let seenTrades = null, forced = false, loadT = 0, busy = false;
+  let seenTrades = null, forced = false, loadT = 0, busy = false, held = false;
   function install() {   // called on every change of the page: cheap unless there is something new
     if (typeof S === 'undefined' || !Array.isArray(S.trades)) return;
     const n = S.trades.filter((x) => !x.demo).length;
+    if (held && !(window.SweepQuiet && SweepQuiet())) { held = false; seenTrades = n; suggest(false); return; }   // the review done (or the next morning): now
     if (seenTrades === null) { seenTrades = n; if (!LS('sw.day0')) LS('sw.day0', nowDay()); if (!loadT) loadT = setTimeout(() => suggest(false), 5000); return; }
     if (n <= seenTrades && !forced) { seenTrades = n; return; }
     seenTrades = n; suggest(forced); forced = false;
@@ -4695,9 +4839,11 @@ window.SweepMO = window.SweepMO || class {
   async function suggest(force) {
     if (busy || document.querySelector('.nav-inst')) return;
     if (!force && (!phone() || !secondDay() || !S.me)) return;
+    if (!force && window.SweepQuiet && SweepQuiet()) { held = true; return; }   // (C2) nothing over the app between the first trade and the review
     try { if (!force && sessionStorage.getItem('sw.modal') === '1') return; } catch (x) { /* private mode */ }
     busy = true; let id = ''; try { id = await pick(force); } finally { busy = false; }
-    if (!id || document.querySelector('.nav-inst, #gSheet.open, .nav-am.open, #tkSlide.open')) return;
+    if (!id || document.querySelector('.nav-inst, .nav-pass, #gSheet.open, .nav-am.open, #tkSlide.open')) return;   // (never two windows at once: the evaluation's too)
+    if (!force && window.SweepQuiet && SweepQuiet()) { held = true; return; }
     try { if (!force && sessionStorage.getItem('sw.modal') === '1') return; sessionStorage.setItem('sw.modal', '1'); } catch (x) { /* private mode */ }
     sgSet(id, (r) => { r.n = (r.n || 0) + 1; });
     show(id);
@@ -4722,14 +4868,14 @@ window.SweepMO = window.SweepMO || class {
     el.innerHTML = `<div class="nav-dlg-in nav-inst-in">${head}${body}<button type="button" class="btn primary nav-am-save" data-inst-ok>${go}</button><button type="button" class="link nav-inst-later" data-inst-later>${t('later')}</button></div>`;
     document.body.append(scrim, el);
     const close = () => document.querySelectorAll('.nav-inst').forEach((x) => x.remove());
-    const later = () => { sgSet(id, (r) => { r.until = Date.now() + 7 * 864e5; }); close(); };
+    const later = () => { laterSet(id); close(); };
     scrim.addEventListener('click', later); el.querySelector('[data-inst-later]').addEventListener('click', later);
     el.querySelector('[data-inst-ok]').addEventListener('click', async () => {
       close();
       if (id === 'install') {
         if (!bip) { sgSet(id, (r) => { r.done = true; }); return; }   // the gestures read: not asked again on this device
         const e = bip; bip = null;
-        try { e.prompt(); const c = await e.userChoice; if (c && c.outcome === 'accepted') { LS('sw.installShown', '1'); sgSet(id, (r) => { r.done = true; }); } else sgSet(id, (r) => { r.until = Date.now() + 7 * 864e5; }); } catch (x) { /* the browser said no */ }
+        try { e.prompt(); const c = await e.userChoice; if (c && c.outcome === 'accepted') { LS('sw.installShown', '1'); sgSet(id, (r) => { r.done = true; }); } else laterSet(id); } catch (x) { /* the browser said no */ }
       } else if (id === 'push') {
         const r = window.SweepNotify && SweepNotify.push ? await SweepNotify.push.on().catch(() => null) : null;
         if (r && r.on) sgSet(id, (x) => { x.done = true; }); else location.hash = '#settings';   // refused: Settings says why
@@ -5283,8 +5429,8 @@ document.addEventListener('click', (e) => {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { label: 'Day swept', eb: 'I completed my discipline today', sub: 'Have you completed yours?', streak: 'Streak', disc: 'Discipline', swept: 'Days swept', cap: (s) => `I completed my discipline today: plan, execution, review ✅${s ? ` ${s}-day streak.` : ''} Have you completed yours? makeitsweep.com` },
-    fr: { label: 'Journée réussie', eb: 'J’ai complété ma discipline aujourd’hui', sub: 'Et toi, as-tu complété la tienne ?', streak: 'Série', disc: 'Discipline', swept: 'Journées balayées', cap: (s) => `J’ai complété ma discipline aujourd’hui : plan, exécution, revue ✅${s ? ` ${s} jours de suite.` : ''} Et toi, as-tu complété la tienne ? makeitsweep.com` },
+    en: { label: 'Day complete', eb: 'I completed my discipline today', sub: 'Have you completed yours?', streak: 'Streak', disc: 'Discipline', swept: 'Days swept', cap: (s) => `I completed my discipline today: plan, execution, review ✅${s ? ` ${s}-day streak.` : ''} Have you completed yours? makeitsweep.com` },
+    fr: { label: 'Journée complète', eb: 'J’ai complété ma discipline aujourd’hui', sub: 'Et toi, as-tu complété la tienne ?', streak: 'Série', disc: 'Discipline', swept: 'Journées balayées', cap: (s) => `J’ai complété ma discipline aujourd’hui : plan, exécution, revue ✅${s ? ` ${s} jours de suite.` : ''} Et toi, as-tu complété la tienne ? makeitsweep.com` },
     es: { label: 'Día completado', eb: 'Hoy completé mi disciplina', sub: '¿Y tú, completaste la tuya?', streak: 'Racha', disc: 'Disciplina', swept: 'Días barridos', cap: (s) => `Hoy completé mi disciplina: plan, ejecución, revisión ✅${s ? ` ${s} días seguidos.` : ''} ¿Y tú, completaste la tuya? makeitsweep.com` } };
   const t = (k) => (T[L] || T.en)[k];
   let swept = null, disc = null;

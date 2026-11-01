@@ -1,8 +1,8 @@
 /* Sweep — the 90-day gameplan (brief « Parcours de 90 jours », 20 Oct.): Mateo's three « Learning Edition » PDFs, played.
    Loaded on demand (window.SWEEP_LAZY.gameplan, see the loader at the end of game.js) once the trader has a plan or is offered one.
-   - Today: the day's mission (or the late ones), the plan's progress; one tap opens the mission.
+   - Today: the day's mission, the plan's progress (missions done); one tap opens the mission.
    - A mission: what to do, the notion it needs that day, its « Done when », its XP; Sweep ticks the measurable ones itself.
-   - The map: 3 months, 12 weeks, every day done, late, today or to come; the gates at days 30, 60 and 90.
+   - The map: 3 months, 12 weeks, every day done, open, today or to come; the gates at days 30, 60 and 90.
    The texts come from the site (website/src/pages21.py, built into GP below by a script, 20 Oct.); the server keeps the
    state (game/gameplan.php). */
 (function () {
@@ -14,7 +14,7 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const T = {
     en: { set_pitch: 'For traders starting out: a mission a day for 90 days, the notion it needs, Sweep ticking what it can see.', f_days: 'days', f_weeks: 'weeks', f_gates: 'gates', f_min: 'min a day', start: 'Start the gameplan', more: 'Learn more', learn_s: 'For traders with less than 6 months', learn_m: 'The 3 months', learn_a: 'What Sweep ticks on its own', autos: ['Your first account', 'A trade journaled with its stop and its target', 'Your account’s limits', 'A session noted in your journal', 'A day with zero slips', 'Your weekly recap'], gate_l: 'Gate: ', set_t: '90-day gameplan', set_s: 'One mission a day for 90 days: what to learn, what to practise, what to review. Sweep ticks what it can see.', set_on: 'Day {d} of 90 · {n} missions done', set_on1: 'Day {d} of 90 · {n} mission done', set_soon: 'Starts on {d}', set_stop: 'Stop the gameplan', stop_t: 'Stop the gameplan?', stop_s: 'Your missions and the gameplan are removed. Your XP stays.', stop_go: 'Stop', month: 'Month {n}', kick: 'Your 90-day gameplan', day: 'Day {n} of 90', starts: 'Your gameplan starts on {d}.',
-      see: 'See the gameplan', see90: 'See the 90 days', late: '{n} mission to catch up', late_p: '{n} missions to catch up', today_done: 'Today’s mission is done.', next: 'Next: {t}', open: 'Open',
+      see: 'See the gameplan', see90: 'See the 90 days', today_done: 'Today’s mission is done.', next: 'Next: {t}', open: 'Open',
       learn: 'To learn today', done_when: 'Done when', tick: 'Done · +{n} XP', ticked: 'Done ✓', ticked_on: 'Done on {d}', auto: 'Sweep ticks it on its own once it’s done.', auto_by: 'Ticked by Sweep',
       opens: 'Opens on {d}', after_gate: 'Opens once the Month {m} gate is passed.', min: '{n} min', xp: '+{n} XP',
       map: 'Your 90-day gameplan', map_s: 'Day {d} · {n} missions done · {x} XP', map_s1: 'Day {d} · {n} mission done · {x} XP', how: 'How it works', week: 'Week {n}',
@@ -26,7 +26,7 @@
         TAGS: 'Your tags', M2_JOURNAL: 'What you journal', RULE_9: 'New rule', RULE_10: 'New rule', PATTERN: 'What you look for', REFINE_RULES: 'The rules of a refinement', REFINE_EX: 'Refinement examples',
         ARENA: 'Your arena', RULE_1_M3: 'Rule 1 in Month 3', EVAL_MATH: 'The math of an evaluation', LADDER: 'The size ladder', STEP_DOWN: 'When to step down', PLAYBOOK: 'The funded account playbook', PLAN_FIELDS: 'Your trading plan' } },
     fr: { set_pitch: 'Pour les traders qui débutent : une mission par jour pendant 90 jours, la notion qu’elle demande, Sweep qui coche ce qu’il voit.', f_days: 'jours', f_weeks: 'semaines', f_gates: 'portes', f_min: 'min par jour', start: 'Commencer le parcours', more: 'En savoir plus', learn_s: 'Pour les traders de moins de 6 mois', learn_m: 'Les 3 mois', learn_a: 'Ce que Sweep coche tout seul', autos: ['Ton premier compte', 'Un trade noté avec son stop et sa cible', 'Les limites de ton compte', 'Une séance notée au journal', 'Une journée sans écart', 'Ton bilan de la semaine'], gate_l: 'Porte : ', set_t: 'Parcours de 90 jours', set_s: 'Une mission par jour pendant 90 jours : quoi apprendre, quoi pratiquer, quoi revoir. Sweep coche ce qu’il peut voir.', set_on: 'Jour {d} sur 90 · {n} missions faites', set_on1: 'Jour {d} sur 90 · {n} mission faite', set_soon: 'Commence le {d}', set_stop: 'Arrêter le parcours', stop_t: 'Arrêter le parcours ?', stop_s: 'Tes missions et le parcours sont retirés. Ton XP reste.', stop_go: 'Arrêter', month: 'Mois {n}', kick: 'Ton parcours de 90 jours', day: 'Jour {n} sur 90', starts: 'Ton parcours commence le {d}.',
-      see: 'Voir le parcours', see90: 'Voir les 90 jours', late: '{n} mission à rattraper', late_p: '{n} missions à rattraper', today_done: 'La mission du jour est faite.', next: 'Ensuite : {t}', open: 'Ouvrir',
+      see: 'Voir le parcours', see90: 'Voir les 90 jours', today_done: 'La mission du jour est faite.', next: 'Ensuite : {t}', open: 'Ouvrir',
       learn: 'À apprendre aujourd’hui', done_when: 'C’est fait quand', tick: 'C’est fait · +{n} XP', ticked: 'Fait ✓', ticked_on: 'Fait le {d}', auto: 'Sweep la coche tout seul dès que c’est fait.', auto_by: 'Cochée par Sweep',
       opens: 'S’ouvre le {d}', after_gate: 'S’ouvre une fois la porte du mois {m} franchie.', min: '{n} min', xp: '+{n} XP',
       map: 'Ton parcours de 90 jours', map_s: 'Jour {d} · {n} missions faites · {x} XP', map_s1: 'Jour {d} · {n} mission faite · {x} XP', how: 'Comment ça marche', week: 'Semaine {n}',
@@ -38,7 +38,7 @@
         TAGS: 'Tes étiquettes', M2_JOURNAL: 'Ce que tu notes au journal', RULE_9: 'Nouvelle règle', RULE_10: 'Nouvelle règle', PATTERN: 'Ce que tu cherches', REFINE_RULES: 'Les règles d’un ajustement', REFINE_EX: 'Exemples d’ajustement',
         ARENA: 'Ton terrain', RULE_1_M3: 'La règle 1 au mois 3', EVAL_MATH: 'Les maths d’une évaluation', LADDER: 'L’échelle de taille', STEP_DOWN: 'Quand redescendre', PLAYBOOK: 'Le playbook du compte financé', PLAN_FIELDS: 'Ton plan de trading' } },
     es: { set_pitch: 'Para traders que empiezan: una misión al día durante 90 días, la noción que necesita, Sweep marcando lo que ve.', f_days: 'días', f_weeks: 'semanas', f_gates: 'puertas', f_min: 'min al día', start: 'Empezar el recorrido', more: 'Saber más', learn_s: 'Para traders con menos de 6 meses', learn_m: 'Los 3 meses', learn_a: 'Lo que Sweep marca solo', autos: ['Tu primera cuenta', 'Una operación anotada con su stop y su objetivo', 'Los límites de tu cuenta', 'Una sesión anotada en el diario', 'Un día sin deslices', 'Tu resumen semanal'], gate_l: 'Puerta: ', set_t: 'Recorrido de 90 días', set_s: 'Una misión al día durante 90 días: qué aprender, qué practicar, qué revisar. Sweep marca lo que puede ver.', set_on: 'Día {d} de 90 · {n} misiones hechas', set_on1: 'Día {d} de 90 · {n} misión hecha', set_soon: 'Empieza el {d}', set_stop: 'Detener el recorrido', stop_t: '¿Detener el recorrido?', stop_s: 'Se quitan tus misiones y el recorrido. Tu XP se queda.', stop_go: 'Detener', month: 'Mes {n}', kick: 'Tu recorrido de 90 días', day: 'Día {n} de 90', starts: 'Tu recorrido empieza el {d}.',
-      see: 'Ver el recorrido', see90: 'Ver los 90 días', late: '{n} misión por recuperar', late_p: '{n} misiones por recuperar', today_done: 'La misión de hoy está hecha.', next: 'Después: {t}', open: 'Abrir',
+      see: 'Ver el recorrido', see90: 'Ver los 90 días', today_done: 'La misión de hoy está hecha.', next: 'Después: {t}', open: 'Abrir',
       learn: 'Para aprender hoy', done_when: 'Hecho cuando', tick: 'Hecho · +{n} XP', ticked: 'Hecho ✓', ticked_on: 'Hecho el {d}', auto: 'Sweep la marca solo en cuanto está hecha.', auto_by: 'Marcada por Sweep',
       opens: 'Se abre el {d}', after_gate: 'Se abre al superar la puerta del mes {m}.', min: '{n} min', xp: '+{n} XP',
       map: 'Tu recorrido de 90 días', map_s: 'Día {d} · {n} misiones hechas · {x} XP', map_s1: 'Día {d} · {n} misión hecha · {x} XP', how: 'Cómo funciona', week: 'Semana {n}',
@@ -61,22 +61,24 @@
   const dateOf = (n) => (ST && ST.start ? addD(ST.start, n - 1) : '');
   const fd = (d, o) => (d ? new Date(d + 'T12:00:00').toLocaleDateString(LOC(), o || { weekday: 'short', day: 'numeric', month: 'short' }) : '');
   const isDone = (n) => !!(ST && ST.done && ST.done[n]);
-  /** done · today · late · open · gate (waits for a gate) · soon */
+  /** done · today · open · gate (waits for a gate) · soon */
   function status(n) {
     if (isDone(n)) return 'done';
     if (!ST || !ST.started) return 'soon';
-    if (n <= (ST.open_to || 0)) return n === ST.day ? 'today' : n < ST.day ? 'late' : 'open';
+    if (n <= (ST.open_to || 0)) return n === focus() ? 'today' : 'open';   // (1 Nov., brief dans le temps B1) never « late »: the plan follows the missions done
     return n <= ST.day ? 'gate' : 'soon';
   }
   const doneCount = () => (ST && ST.done ? Object.keys(ST.done).length : 0);
   const xpTotal = () => (ST && ST.done ? Object.keys(ST.done).reduce((a, n) => a + (M(+n) ? M(+n).min : 0), 0) + Object.keys(ST.gates || {}).length * 150 : 0);
-  const lateList = () => { const out = []; for (let n = 1; n <= Math.min(ST.open_to || 0, (ST.day || 0) - 1); n++) if (!isDone(n) && !M(n).gate) out.push(n); return out; };
-  /** the mission of the card: today's, else the oldest late one, else the gate waiting, else none */
+  /** (1 Nov., brief dans le temps B1) the plan moves when the trader does his mission, not with the calendar: « Day 4 of 90 » = 4 missions
+   *  done (the calendar only opens them, one a day at most ahead); no « missions to catch up » counter any more */
+  const progress = () => Math.max(1, Math.min(90, doneCount()));
+  const doneToday = () => { const nyD = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }), now = typeof todayStr === 'function' ? todayStr() : nyD(Date.now());
+    return Object.values((ST && ST.done) || {}).some((x) => x && x.at && nyD(x.at * 1000 + 216e5) === now); };   // (18:00 ET or later = the next session, as todayStr)
+  /** the mission of the card: the first one not done among those open (a gate once every mission before it is done), else none */
   function focus() {
     if (!ST || !ST.started || (ST.day || 0) < 1) return 1;
-    const d = Math.min(ST.day || 0, 90);
-    if (d >= 1 && d <= ST.open_to && !isDone(d)) return d;
-    const late = lateList(); if (late.length) return late[0];
+    for (let n = 1; n <= Math.min(ST.open_to || 0, 90); n++) if (!isDone(n)) return n;
     for (const g of [30, 60, 90]) if (ST.day >= g && !isDone(g)) return g;
     return 0;
   }
@@ -100,16 +102,18 @@
   }
 
   /* ───────────── Today: the mission line of « Now » ───────────── */
-  /* Today (SWEEP.md step 3, 27 Oct.): the card became one line of « Now » — the day, today's mission, the late ones,
+  /* Today (SWEEP.md step 3, 27 Oct.): the card became one line of « Now » — the day, today's mission (1 Nov.: no late ones any more),
      « See the 90 days › ». Kept in the browser (sw.gpLine) so « Now » draws it at once next time (nothing pushed down). */
   function lineHtml() {
     if (!ST) { try { return localStorage.getItem('sw.gpLine') || ''; } catch (e) { return ''; } }
     if (!ST.started || !ST.access) { try { localStorage.removeItem('sw.gpLine'); } catch (e) { /* private mode */ } return ''; }
-    const n = focus(), m = n ? M(n) : null, late = lateList().length;
-    const dayLine = ST.day >= 1 ? u('day', { n: Math.min(ST.day, 90) }) : u('starts', { d: fd(ST.start, { weekday: 'long', day: 'numeric', month: 'long' }) });
-    const mis = m && ST.day >= 1 ? `<button type="button" class="gp-ln-mis" data-gp="mission" data-n="${n}"><span class="gp-ln-k">${esc(tx(GP.words.KIND[m.k]))}</span><b>${esc(tx(m.t))}</b><small>${esc(u('min', { n: m.min }))}</small><i aria-hidden="true">›</i></button>`
+    const n = focus(), m = n ? M(n) : null, td = doneToday();
+    const dayLine = ST.day >= 1 ? u('day', { n: progress() }) : u('starts', { d: fd(ST.start, { weekday: 'long', day: 'numeric', month: 'long' }) });
+    // today's mission done: said, and the next one stays one tap away (« Next: … »)
+    const mis = m && ST.day >= 1 && td ? `<p class="gp-ln-ok">${esc(u('today_done'))}</p><button type="button" class="link gp-ln-see" data-gp="mission" data-n="${n}">${esc(u('next', { t: tx(m.t) }))} ›</button>`
+      : m && ST.day >= 1 ? `<button type="button" class="gp-ln-mis" data-gp="mission" data-n="${n}"><span class="gp-ln-k">${esc(tx(GP.words.KIND[m.k]))}</span><b>${esc(tx(m.t))}</b><small>${esc(u('min', { n: m.min }))}</small><i aria-hidden="true">›</i></button>`
       : ST.day >= 1 ? `<p class="gp-ln-ok">${esc(doneCount() >= 90 ? u('all_done') : u('today_done'))}</p>` : '';
-    const html = `<div class="gp-line" id="gpLine" data-noi18n><p class="gp-ln-h"><span>${esc(u('kick'))} · ${esc(dayLine)}</span><button type="button" class="link gp-ln-see" data-gp="map">${esc(u('see90'))} ›</button></p>${mis}${late ? `<button type="button" class="gp-ln-late" data-gp="mission" data-n="${lateList()[0]}">${esc(u(late > 1 ? 'late_p' : 'late', { n: late }))} ›</button>` : ''}</div>`;
+    const html = `<div class="gp-line" id="gpLine" data-noi18n><p class="gp-ln-h"><span>${esc(u('kick'))} · ${esc(dayLine)}</span><button type="button" class="link gp-ln-see" data-gp="map">${esc(u('see90'))} ›</button></p>${mis}</div>`;
     try { localStorage.setItem('sw.gpLine', html); } catch (e) { /* private mode */ }
     return html;
   }
@@ -257,7 +261,7 @@
 
   /* ───────────── the map ───────────── */
   function mapHtml() {
-    const cur = ST && ST.day >= 1 ? Math.min(2, Math.floor((Math.min(ST.day, 90) - 1) / 30)) : 0;
+    const cur = ST && ST.day >= 1 ? Math.min(2, Math.floor(((focus() || progress()) - 1) / 30)) : 0;
     const mo = MONTH == null ? cur : MONTH;
     const seg = `<div class="seg gp-seg" role="tablist">${GP.months.map((x, i) => `<button type="button" role="tab" aria-selected="${i === mo}" class="${i === mo ? 'on' : ''}" data-gp="month" data-m="${i}">${esc(u('month', { n: i + 1 }))}</button>`).join('')}</div>`;
     const weeks = GP.weeks.filter((w) => w.m === mo).map((w, wi) => {
@@ -268,7 +272,7 @@
       }
       return `<section class="gp-w"><h3>${esc(tx(w.t))}</h3><p>${esc(tx(w.g))}</p><div class="gp-days">${days.join('')}</div></section>`;
     }).join('');
-    const sub = ST && ST.started ? u(one(doneCount()) ? 'map_s1' : 'map_s', { d: Math.max(0, Math.min(ST.day, 90)), n: doneCount(), x: xpTotal() }) : '';
+    const sub = ST && ST.started ? u(one(doneCount()) ? 'map_s1' : 'map_s', { d: progress(), n: doneCount(), x: xpTotal() }) : '';
     return `${ui().head(esc(u('map')), esc(sub))}<div class="gp-map" data-noi18n>${seg}<p class="gp-span"><b>${esc(tx(GP.months[mo].name))}</b> · ${esc(tx(GP.months[mo].span))}</p>${weeks}
       <details class="gp-how"><summary>${esc(u('how'))}</summary><ul class="gp-ul">${GP.how.map((x) => `<li>${tx(x)}</li>`).join('')}</ul></details>
       <p class="gp-disc">${esc(tx(GP.words.DISCLAIM))}</p></div>`;
@@ -320,7 +324,7 @@
   function setHtml() {
     if (!ST) return '';
     const head = `<div class="gp-set-h"><span class="gp-set-ic">${flagIc}</span><div><h2>${esc(u('set_t'))}${ST.access ? '' : ` <span class="pill">Pro</span>`}</h2><p>${esc(ST.access ? u('set_pitch') : u('locked_s'))}</p></div></div>`;
-    const prog = ST.started ? `<div class="gp-set-p"><p>${esc(ST.day >= 1 ? u(one(doneCount()) ? 'set_on1' : 'set_on', { d: Math.min(ST.day, 90), n: doneCount() }) : u('set_soon', { d: fd(ST.start, { weekday: 'long', day: 'numeric', month: 'long' }) }))}</p><div class="gp-bar"><i style="width:${Math.round((doneCount() / 90) * 100)}%"></i></div></div>` : facts();
+    const prog = ST.started ? `<div class="gp-set-p"><p>${esc(ST.day >= 1 ? u(one(doneCount()) ? 'set_on1' : 'set_on', { d: progress(), n: doneCount() }) : u('set_soon', { d: fd(ST.start, { weekday: 'long', day: 'numeric', month: 'long' }) }))}</p><div class="gp-bar"><i style="width:${Math.round((doneCount() / 90) * 100)}%"></i></div></div>` : facts();
     const stop = ST.started ? `<button type="button" class="link gp-stop" data-gp="stop">${esc(u('set_stop'))}</button>` : '';
     return `${head}${prog}<div class="gp-set-go">${goBtn()}<button type="button" class="btn" data-gp="learn">${esc(u('more'))}</button></div>${stop}`;
   }

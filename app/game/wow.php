@@ -40,14 +40,20 @@ final class GameWow
             $seen[] = $key;
             if (!$init) $send[] = ['wow_' . $k, ['n' => $n], $n >= self::BIG[$k]];
         }
-        // first week (Mon-Fri, locked) with 3+ trades and none outside the plan
+        // first week (Mon-Fri, locked) with 3+ trades and none outside the plan. (1 Nov., brief dans le temps A1) a trade on a day
+        // without a valid plan is outside the plan (it had no violation only because nothing was planned: the praise was true by
+        // default for a trader who never planned), and the week needs at least one trading day with a plan.
         if (!in_array('clean_week', $seen, true)) {
             $mon = GameEngine::addDays(GameEngine::monday(GameEngine::today()), -7);
             for ($w = 0; $w < 8; $w++, $mon = GameEngine::addDays($mon, -7)) {
-                $rows = GameEngine::q('SELECT detail_json, plan_valid FROM game_days WHERE user_id = ? AND trading_day BETWEEN ? AND ?', [$uid, $mon, GameEngine::addDays($mon, 4)])->fetchAll(PDO::FETCH_ASSOC);
-                $n = 0; $off = 0;
-                foreach ($rows as $r) foreach ((json_decode((string) $r['detail_json'], true)['trades'] ?? []) as $x) { $n++; if (!empty($x['v'])) $off++; }
-                if ($n >= 3 && $off === 0) { $seen[] = 'clean_week'; if (!$init) $send[] = ['wow_clean_week', [], true]; break; }
+                $rows = GameEngine::q('SELECT detail_json, plan_valid, plan_bias FROM game_days WHERE user_id = ? AND trading_day BETWEEN ? AND ?', [$uid, $mon, GameEngine::addDays($mon, 4)])->fetchAll(PDO::FETCH_ASSOC);
+                $n = 0; $off = 0; $planned = 0;
+                foreach ($rows as $r) {
+                    $ts = json_decode((string) $r['detail_json'], true)['trades'] ?? []; $pv = (int) $r['plan_valid'] && $r['plan_bias'] !== 'no_trade';
+                    if ($ts && $pv) $planned++;
+                    foreach ($ts as $x) { $n++; if (!$pv || !empty($x['v'])) $off++; }
+                }
+                if ($n >= 3 && $off === 0 && $planned > 0) { $seen[] = 'clean_week'; if (!$init) $send[] = ['wow_clean_week', [], true]; break; }
             }
         }
         // best month of discipline (share of valid market days), told on the 1st, once per month

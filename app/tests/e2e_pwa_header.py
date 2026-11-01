@@ -31,7 +31,7 @@ with sync_playwright() as p:
       c.close(); continue
     top = pg.evaluate(side)
     ok(pg.evaluate("document.documentElement.classList.contains('pwa')"), '1 installed: html.pwa')
-    ok(top[0] == '6px' and top[1] == 'rgba(0, 0, 0, 0)' and top[2] == 'rgba(0, 0, 0, 0)' and top[3] == 'none', f'1 installed, top of the page: the header right under the status bar and transparent ({top})')
+    ok(top[0] == '4px' and top[1] == 'rgba(0, 0, 0, 0)' and top[2] == 'rgba(0, 0, 0, 0)' and top[3] == 'none', f'1 installed, top of the page: the header right under the status bar (the safe area + 4 px, as scrolled: 1 Nov.) and transparent ({top})')
     pg.evaluate("scrollTo(0, 500)"); pg.wait_for_timeout(700)
     sc = pg.evaluate(side)
     ok(sc[3] == 'none' and sc[2] != 'rgba(0, 0, 0, 0)' and sc[0] == '4px', f'2 scrolled: the whole row below the clock (safe area + 4 px), a line, no blurred shadow ({sc[0]}, {sc[2]}, {sc[3]})')

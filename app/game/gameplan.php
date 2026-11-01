@@ -64,14 +64,18 @@ final class GameGameplan
             case 'trade':   // a trade journaled with its stop and its target, on the mission's day or after
                 foreach (GameEngine::docs($uid, 'trades') as $t) { $d = GameEngine::tradeDay($t); if ($d !== null && $d >= $date && GameEngine::hasStop($t) && ($t['target'] ?? '') !== '' && $t['target'] !== null) return true; }
                 return false;
-            case 'journal': return (bool) self::q('SELECT review_done FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $date])->fetchColumn();
+            // (1 Nov., brief dans le temps B1) the plan follows the missions done, not the calendar: a mission reached after its
+            // date is met by any day from its date to today (before, only its own date counted: a trader behind never got it)
+            case 'journal': return (bool) self::q('SELECT 1 FROM game_days WHERE user_id = ? AND trading_day BETWEEN ? AND ? AND review_done = 1 LIMIT 1', [$uid, $date, GameEngine::today()])->fetchColumn();
             case 'zero':    // « zero slips »: a plan for the day (not a day off), the day reviewed, every trade in the plan (the
                             // server's own rules, game_days.detail_json; no trade at all keeps to the plan too). Before 21 Oct.
                             // it needed the guardrail XP, paid only when the max loss was hit: a clean day never ticked it.
-                $g = self::q('SELECT plan_valid, plan_bias, review_done, detail_json FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $date])->fetch(PDO::FETCH_ASSOC);
-                if (!$g || !(int) $g['plan_valid'] || !(int) $g['review_done'] || $g['plan_bias'] === 'no_trade') return false;
-                foreach ((array) ((json_decode((string) $g['detail_json'], true) ?: [])['trades'] ?? []) as $t) if (empty($t['ok'])) return false;
-                return true;
+                foreach (self::q('SELECT plan_valid, plan_bias, review_done, detail_json FROM game_days WHERE user_id = ? AND trading_day BETWEEN ? AND ?', [$uid, $date, GameEngine::today()])->fetchAll(PDO::FETCH_ASSOC) as $g) {
+                    if (!(int) $g['plan_valid'] || !(int) $g['review_done'] || $g['plan_bias'] === 'no_trade') continue;
+                    $clean = true; foreach ((array) ((json_decode((string) $g['detail_json'], true) ?: [])['trades'] ?? []) as $t) if (empty($t['ok'])) $clean = false;
+                    if ($clean) return true;
+                }
+                return false;
             case 'weekly':
                 try { return (bool) self::q('SELECT 1 FROM weekly_reviews WHERE user_id = ? AND week_start = ?', [$uid, GameEngine::monday($date)])->fetchColumn(); }
                 catch (Throwable $e) { return false; }
@@ -98,7 +102,9 @@ final class GameGameplan
         $r = self::row($uid); if (!$r) return $out;
         $done = json_decode((string) $r['done_json'], true) ?: []; $gates = json_decode((string) $r['gates_json'], true) ?: [];
         $day = self::dayOf($r['start_day'], $today);
-        return array_merge($out, ['started' => true, 'start' => $r['start_day'], 'track' => $r['track'], 'day' => min($day, 999),
+        // progress (1 Nov., brief dans le temps B1): the missions done — « Day 4 of 90 » means 4 missions done; `day` stays the calendar
+        // day, which only opens the missions (one a day at most ahead of the trader)
+        return array_merge($out, ['started' => true, 'start' => $r['start_day'], 'track' => $r['track'], 'day' => min($day, 999), 'progress' => count($done),
             'done' => (object) $done, 'gates' => (object) $gates, 'open_to' => self::openTo($day, $gates)]);
     }
 
@@ -150,7 +156,7 @@ final class GameGameplan
         if (GP_MISSIONS[$n][2]) return ['error' => 'gate'];   // a gate is decided, not ticked
         $done = json_decode((string) $r['done_json'], true) ?: [];
         if (isset($done[(string) $n])) return self::state($uid, $by !== 'sweep');
-        $done[(string) $n] = ['at' => time(), 'by' => $by === 'sweep' ? 'sweep' : 'trader'];
+        $done[(string) $n] = ['at' => GameEngine::ts(), 'by' => $by === 'sweep' ? 'sweep' : 'trader'];   // (the game's clock: « today's mission is done »)
         self::q('UPDATE game_gameplan SET done_json = ?, updated_at = ? WHERE user_id = ?', [json_encode($done), time(), $uid]);
         $xp = GP_MISSIONS[$n][0];
         if (GameEngine::awardXp($uid, 'gp:' . $n, $xp, ['by' => $by]) && $by === 'sweep') GameEngine::celebrate($uid, 'gameplan', ['n' => $n, 'xp' => $xp]);   // ticked by the trader: the app shows it there and then

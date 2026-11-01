@@ -36,6 +36,7 @@ nouveau type (code : `notify/listeners.php` pour les types de la cloche, `push/w
 | `buddy_invite`, `buddy_cheer`, `buddy_swept` | Accomplissements | Un buddy invite, encourage, balaie sa journée | invitation : 1 par buddy ; encouragement et journée balayée : 1 / jour |
 | `sync_found` | Compte et données | Un add-on de synchro trouve de nouveaux comptes | 1 / plateforme / jour |
 | `prop_limit` (`prop_dll75`, `prop_dll100`, `prop_dd75`, `prop_dd100`) | Alertes prop firm | L'app, après un trade : limite du jour ou drawdown à 75 % puis 100 % | 1 par compte, sorte et niveau / séance · **hors plafond** |
+| `g_lock` « Journée fermée : ta limite est atteinte. » (1er nov., brief avance 4) | Alertes prop firm | Serveur (`recomputeDay`), au moment où la perte max ou les trades max du jour sont atteints (trade saisi, copié ou synchronisé) | 1 / séance · **hors plafond** · **push** (`lock`, sans heure) |
 | `rules_changed` | Alertes prop firm | Les règles d'une firme changent (vérification du lundi) | 1 par compte et version · **hors plafond** |
 | `test_normal`, `test_celebration` | — | Bouton de test d'un administrateur | à la demande |
 
@@ -47,6 +48,7 @@ Chaque catégorie se coupe dans Réglages › Notifications. Les célébrations 
   plus), seulement depuis Sweep ajouté à l'écran d'accueil ; l'app explique comment. Android et ordinateur : tout navigateur
   qui le permet.
 - **Les 3 rappels** : `g_plan`, `g_review`, `g_weekly` (tableau ci-dessus), chacun avec son interrupteur et son heure
+- **La journée fermée** : `g_lock` (push `lock`), envoyée au moment du verrou, pendant la séance aussi ; son interrupteur, sans heure
   (heure de New York, par quart d'heure ; l'heure vaut aussi pour la cloche). Envoyés par la tâche `game` (toutes les
   15 minutes) seulement, pas quand le trader ouvre l'app. Texte de la cloche, dans la langue de l'appareil ; un toucher ouvre
   Aujourd'hui.

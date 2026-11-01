@@ -24,7 +24,8 @@ Then, brief 03 step 5 (fewer options in sight, nothing removed):
      answers saved in the same fields; the full review folded, still open after a tap in it; the screenshot form and the
      manual form's step 2: 3 questions, the rest one tap away; Settings: « Advanced » last, folded.
 Then, the audit of 16 Oct. (step 2), a LucidPro 50K ($2,000 drawdown, $1,200 daily limit) with $870 of drawdown room left:
-  K. the plan's max loss starts at $870 (not $1,200), « Drawdown room of LucidPro 50K: $870 » under it; the coach before a
+  K. the plan's max loss starts at $600 (1 Nov., caution mode: the room is under half the drawdown after a red session, half the
+     $1,200 daily limit; before: the $870 room), « Drawdown room of LucidPro 50K: $870 » under it; the coach before a
      trade says $870 left (a $1,200 plan typed anyway too); after a −$780 trade ($90 left): « Room: $90. Stop for today. » (after the trade, before the next
      one, on Today), and the rule for the next session « Max loss $90 or no trade ».
 Then, the audit of 16 Oct. (step 5), a day with a trade against the bias and a trade saved without a time:
@@ -437,7 +438,9 @@ def room(p, lang, phone):
   ok(m == [87000, 87000, False], f'{tag} the room is the account page\'s: $870 ({m})')
   premarket(pg, day=day, stop_at=('limits', 'express'))   # (the express version after the lock time: the max loss there too)
   ml = pg.evaluate("(document.querySelector('#gSheet [data-pmf=max_loss]') || {}).value"); hint = pg.evaluate(TXT, '#gSheet .g-dll')
-  ok(ml == '870' and x['hint'] in hint and '870' in hint, f'{tag} the plan\'s max loss starts at the room, not the $1,200 daily limit ({ml}, « {hint} »)')
+  # (1 Nov., brief dans le temps D1) a red session and the room under half the drawdown: the caution mode, the plan prefilled with half
+  # the usual max loss (here the account's $1,200 daily limit: $600), below the room
+  ok(ml == '600' and x['hint'] in hint and '870' in hint, f'{tag} the plan\'s max loss starts at the caution\'s $600 (the room $870 under half the drawdown), not the $1,200 daily limit ({ml}, « {hint} »)')
   # he types $1,200 anyway: the coach still counts the room
   premarket(pg, max_loss=1200)
   b1 = pg.evaluate("(d) => { const h = SweepCoach.before({ form: 'shot', account: 'la', date: d, qty: 1 }); const e = document.createElement('div'); e.innerHTML = h; return e.textContent.replace(/\\s+/g, ' ') }", day)

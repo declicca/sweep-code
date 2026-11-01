@@ -4,14 +4,15 @@ Sweep — the 90-day gameplan (brief « Parcours de 90 jours », 20 Oct.), phone
  1  sign-up: « less than 6 months » offers the gameplan right under it, no second question: its track comes from the account
     (an evaluation → B; a simulation account, the new account type → A); « Create account » starts it today, Sweep ticks
     mission 1 (the account) at once; no field says « optional »; « Explore with sample data » shows it is preparing
- 2  Today: the gameplan's card (before the Monday: when it starts); on day 9: today's mission, the late ones, the progress
+ 2  Today: the gameplan's card (before the Monday: when it starts); on day 9 of the calendar (1 Nov., brief dans le temps B1): « Day N »
+    = the missions done, the mission of the card the first one not done, no « missions to catch up »
  3  a mission: the notion of the day, « Test yourself » answered at once (right in blue, wrong in gold, why), « Done when »;
-    ticked → its XP, the card moves; the map: 3 months, days done / today / late / to come, nothing wider than the screen
+    ticked → its XP, the card moves; the map: 3 months, days done / today / open / to come (never « late »), nothing wider than the screen
  4  day 31: nothing of Month 2 before the gate; the gate's criteria, « On to Month 2 » only once all are ticked → Month 2 open, 150 XP
  5  Settings: the gameplan's day, « Stop » asks first, then « Start » again (the map opens)
 The plan's dates are moved in the test database (SWEEP_TEST_DB), as if days had passed.
 """
-import datetime as dt, json, os, random, sqlite3, sys
+import datetime as dt, json, os, random, re, sqlite3, sys
 from zoneinfo import ZoneInfo
 from playwright.sync_api import sync_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
@@ -99,8 +100,11 @@ def run(p, lang, phone, full):
   if not full: c.close(); br.close(); ok(not errs, f'{tag} no page error ({errs[:2]})'); return
   move(uid, 9); pg.reload(); until(pg, "document.getElementById('gpLine') && /9/.test(document.getElementById('gpLine').innerText)", 12000); pg.wait_for_timeout(600)
   card = pg.locator('#gpLine').inner_text()
-  late = pg.locator('#gpLine .gp-ln-late').inner_text() if pg.locator('#gpLine .gp-ln-late').count() else ''
-  ok(T['day9'] in card and pg.locator('#gpLine .gp-ln-mis[data-n="9"]').count() == 1 and T['late'] in late, f'{tag} 2 day 9: today\'s mission (9), the late ones ({late!r})')
+  st9 = pg.evaluate(STATE); dn = len(st9.get('done') or {}); first = next(n for n in range(1, 10) if str(n) not in (st9.get('done') or {}))
+  dayN = re.sub(r'\d+', str(max(1, dn)), T['day9'], count=1)
+  until(pg, f"document.getElementById('gpLine') && document.getElementById('gpLine').innerText.includes({json.dumps(dayN)})", 6000); card = pg.locator('#gpLine').inner_text()
+  ok(dayN in card and pg.locator(f'#gpLine [data-gp="mission"][data-n="{first}"]').count() == 1 and pg.locator('#gpLine .gp-ln-late').count() == 0 and T['late'] not in card,
+     f'{tag} 2 calendar day 9: « {dayN} » (the missions done), the first one not done ({first}), no missions to catch up ({card[:90]!r})')
   bar0 = pg.evaluate("Object.keys(SweepGP.state().done || {}).length")
   if phone: pg.screenshot(path=f'/tmp/gp_{tag.replace(" ", "_")}_today.png')
   # 3. a mission that teaches: 8 (« Read the setup »)
@@ -122,7 +126,7 @@ def run(p, lang, phone, full):
   ok(xp1 - xp0 == 20 and bar1 > bar0, f'{tag} 3 ticked: +20 XP ({xp0} → {xp1}), one more mission done ({bar0} → {bar1})')
   pg.click('#gpLine [data-gp=map]'); until(pg, "document.querySelector('#gSheet .gp-map')")
   states = pg.evaluate("Object.fromEntries([...document.querySelectorAll('#gSheet .gp-d')].map((d) => [d.dataset.n, d.className.split(' ').find((c) => c.startsWith('s-'))]))")
-  ok(states.get('1') == 's-done' and states.get('8') == 's-done' and states.get('9') == 's-today' and states.get('5') == 's-late' and states.get('12') == 's-soon', f"{tag} 3 the map: 1 and 8 done, 9 today, 5 late, 12 to come ({[states.get(k) for k in ('1', '5', '8', '9', '12')]})")
+  ok(states.get('1') == 's-done' and states.get('8') == 's-done' and states.get(str(first)) == 's-today' and states.get('9') == 's-open' and 's-late' not in states.values() and states.get('12') == 's-soon', f"{tag} 3 the map: 1 and 8 done, {first} today, 9 open, none late, 12 to come ({[states.get(k) for k in ('1', str(first), '8', '9', '12')]})")
   ok(pg.locator('#gSheet .gp-seg button').count() == 3, f'{tag} 3 the map: 3 months')
   if phone: pg.screenshot(path=f'/tmp/gp_{tag.replace(" ", "_")}_map.png'); ok(pg.evaluate(WIDE) <= 1, f'{tag} 3 the map fits the screen ({pg.evaluate(WIDE)})')
   pg.evaluate("document.querySelector('#gSheet [data-g=close]').click()"); pg.wait_for_timeout(400)
@@ -152,7 +156,8 @@ def run(p, lang, phone, full):
   pg.evaluate("location.hash = '#settings'"); until(pg, "document.querySelector('#main .gp-set')", 10000); pg.wait_for_timeout(400)
   ok(pg.evaluate("(() => { const d = document.querySelector('#main .gp-set').closest('details.nav-sgd'); if (d) d.open = true; return !!d && d.dataset.i === '1' })()"), f'{tag} 5 Settings: the gameplan in « My routine » (30 Oct., tour W3)'); pg.wait_for_timeout(300)
   s = pg.locator('#main .gp-set').inner_text()
-  ok(T['set'] in s and '31' in s and T['stop'] in s, f'{tag} 5 Settings: the gameplan, its day, « {T["stop"]} »')
+  dn5 = max(1, len(pg.evaluate(STATE).get('done') or {}))   # (1 Nov., brief dans le temps B1: the day is the missions done, not the calendar's 31)
+  ok(T['set'] in s and re.search(r'\b%d\b' % dn5, s) is not None and T['stop'] in s, f'{tag} 5 Settings: the gameplan, its day ({dn5}: the missions done), « {T["stop"]} »')
   pg.locator('#main .gp-set [data-gp="stop"]').click(); until(pg, "document.querySelector('aside.nav-ask.open')", 4000)
   pg.locator('aside.nav-ask.open [data-ask="1"]').click(); until(pg, "document.querySelector('#main .gp-set [data-gp=go]')", 6000)
   ok(not pg.evaluate(STATE)['started'] and pg.locator('#main .gp-set [data-gp=go]').count() == 1 and pg.locator('#main .gp-set .gp-facts span').count() == 4, f'{tag} 5 « Stop » asked first, then the gameplan is gone; « {T["go"]} » and its 4 facts')

@@ -5,7 +5,7 @@ A trader of its own. Phone 390 (fr):
  1  the day of sign-up: nothing offered;
  2  from the next day: Sweep on the home screen first — iPhone / Android gestures (« Compris », « Plus tard »); with Chrome's
     own prompt: « Installer » installs it in one tap (the prompt is the browser's);
- 3  « Plus tard »: not again for 7 days, the next one comes: the reminders on this phone (« Activer »: turned on), then a plan
+ 3  « Plus tard »: not again for 7 days (kept in Settings too: every device, 1 Nov.), the next one comes: the reminders on this phone (« Activer »: turned on), then a plan
     after 3 sessions without one (« Faire mon plan »: the plan sheet);
  4  3 times at most each; one window per session.
 Computer 1300 (en): never offered. No page error, nothing wider than the window.
@@ -51,6 +51,8 @@ with sync_playwright() as p:
     pg.locator('aside.nav-inst.open [data-inst-later]').click(); pg.wait_for_timeout(400)
     until = pg.evaluate("(SweepInstall.state().install || {}).until - Date.now()")
     ok(until and 6.9 * 864e5 < until <= 7 * 864e5, f'{tag} « Plus tard »: not again for 7 days ({round((until or 0) / 864e5, 2)} d)')
+    u2 = pg.evaluate("((S.settings.sugg_later || {}).install || 0) - Date.now()")
+    ok(6.9 * 864e5 < u2 <= 7 * 864e5, f'{tag} « Plus tard » kept in Settings too: 7 days on every device (1 Nov., brief dans le temps C2) ({round(u2 / 864e5, 2)} d)')
     pg.evaluate(PUSH)
     s = ask(pg)
     ok(s and s['id'] == 'push' and s['go'] == 'Activer', f'{tag} then the reminders on this phone ({s})')
@@ -61,7 +63,7 @@ with sync_playwright() as p:
     ok(ask(pg) is None, f'{tag} nothing else to offer yet')
     pg.evaluate("() => { for (let k = 1; k <= 3; k++) put('trades', { id: 'sg-t' + k, account_id: 'sg-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: ymdAdd(todayStr(), -k), session_date: true, entry_time: '10:00', exit_time: '10:05' }) }"); pg.wait_for_timeout(1200)
     if pg.locator('aside.nav-inst.open').count(): pg.locator('aside.nav-inst.open [data-inst-later]').click(); pg.wait_for_timeout(300)
-    pg.evaluate("() => { const r = SweepInstall.state(); delete r.plan; localStorage.setItem('sw.sugg', JSON.stringify(r)); }")
+    pg.evaluate("() => { const r = SweepInstall.state(); delete r.plan; localStorage.setItem('sw.sugg', JSON.stringify(r)); if (S.settings.sugg_later) delete S.settings.sugg_later.plan; }")
     s = ask(pg)
     ok(s and s['id'] == 'plan' and s['go'] == 'Faire mon plan', f'{tag} 3 sessions without a plan: « Ton plan avant ton prochain trade » ({s})')
     pg.locator('aside.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(1200)
@@ -71,7 +73,7 @@ with sync_playwright() as p:
     pg.evaluate("() => localStorage.setItem('sw.sugg', JSON.stringify({ install: { n: 3 }, push: { done: true }, plan: { done: true } }))")
     ok(ask(pg) is None, f'{tag} shown 3 times: not again')
     # Chrome's own prompt: « Installer » in one tap
-    pg.evaluate("() => { localStorage.setItem('sw.sugg', '{}'); const e = new Event('beforeinstallprompt'); e.prompt = () => { window.__prompted = 1 }; e.userChoice = Promise.resolve({ outcome: 'accepted' }); dispatchEvent(e); }")
+    pg.evaluate("() => { localStorage.setItem('sw.sugg', '{}'); S.settings.sugg_later = {}; const e = new Event('beforeinstallprompt'); e.prompt = () => { window.__prompted = 1 }; e.userChoice = Promise.resolve({ outcome: 'accepted' }); dispatchEvent(e); }")
     s = ask(pg)
     ok(s and s['id'] == 'install' and s['go'] == 'Installer' and s['steps'] == 0, f'{tag} Android / Chrome: « Installer », no gestures to read ({s})')
     pg.screenshot(path='/tmp/suggest_android_390.png')

@@ -489,6 +489,17 @@ final class GameEngine
         }
         $ringReview = $reviewDone ? 100 : ($n ? (int) round(60 * $jn / $n) : 0);   // the day's review closes the ring
 
+        // (1 Nov., brief avance 4) the end-of-day lock: reached once, by the session's own trades (copies once; typed, copied or
+        // synced), against the day's limits (dayLimits: the same as SweepCoach.dayLimits); kept until the day ends at 18:00 ET,
+        // even if a trade is edited or deleted afterwards. Only the session in progress locks (never a past day computed later).
+        $prevDet = json_decode((string) ($prev['detail_json'] ?? ''), true) ?: [];
+        $lock = is_array($prevDet['lock'] ?? null) ? $prevDet['lock'] : null; $newLock = false;
+        if (!$lock && $n > 0 && $day === self::today()) {
+            $lim = self::dayLimits($uid, $day, $planValid && $bias !== 'no_trade' ? (int) $maxLoss : 0, $planValid ? $maxTrades : 0);
+            $sum = array_sum(array_map([self::class, 'net'], self::dayTrades($uid, $day)));   // the « Trades not detailed » line is a loss too
+            $why = $lim['loss_c'] > 0 && $sum <= -$lim['loss_c'] ? 'loss' : ($lim['trades'] > 0 && $n >= $lim['trades'] ? 'trades' : null);
+            if ($why) { $lock = ['why' => $why, 'at' => self::ts(), 'loss_c' => $lim['loss_c'], 'trades' => $lim['trades'], 'n' => $n, 'net_c' => $sum]; $newLock = true; }
+        }
         $swept = $ringPlan === 100 && $ringExec === 100 && $ringReview === 100;
         $guard = $planValid && $maxLoss && $guardIdx !== null && $guardIdx === $n - 1 && $n > 0;
         $activity = $n > 0 || $pre || $post;
@@ -496,7 +507,7 @@ final class GameEngine
             'ring_plan' => $ringPlan, 'ring_execution' => $ringExec, 'ring_review' => $ringReview, 'trades_count' => $n, 'compliant_count' => $planValid ? $ok : 0, 'journaled_count' => $jn,
             'is_swept' => $swept ? 1 : 0, 'is_valid_streak' => (($ringReview === 100 && $complete) || $dayOff) ? 1 : 0, 'review_done' => $reviewDone ? 1 : 0, 'day_off' => $dayOff ? 1 : 0,
             'plan_valid' => $planValid ? 1 : 0, 'plan_at' => $planAt, 'plan_bias' => $bias, 'guardrail' => $guard ? 1 : 0, 'activity' => $activity ? 1 : 0, 'net_c' => $cum,
-            'detail_json' => json_encode(['trades' => $det, 'perfect_docs' => $perfect && $n > 0, 'plan_past' => $planPast, 'plan_late' => $planLate ?? false, 'exec_score' => $execScore ?? null]), 'updated_at' => self::ts(),
+            'detail_json' => json_encode(['trades' => $det, 'perfect_docs' => $perfect && $n > 0, 'plan_past' => $planPast, 'plan_late' => $planLate ?? false, 'exec_score' => $execScore ?? null] + ($lock ? ['lock' => $lock] : [])), 'updated_at' => self::ts(),
         ];
         if ($prev) {
             self::q('UPDATE game_days SET ' . implode(', ', array_map(fn($k) => "$k = ?", array_keys($row))) . ' WHERE user_id = ? AND trading_day = ?', [...array_values($row), $uid, $day]);
@@ -524,6 +535,7 @@ final class GameEngine
             self::track($uid, 'day_swept', ['day_off' => $dayOff]);
             $gained = [];
         }
+        if ($newLock) self::onLock($uid, $day, $lock);
         if ($guard && $reviewDone) self::guardrail($uid, $day);
         if ($gained) self::celebrate($uid, 'xp', ['xp' => array_sum(array_column($gained, 1)), 'items' => array_column($gained, 0)]);
 
@@ -531,6 +543,34 @@ final class GameEngine
         self::startProgress($uid);
         if (class_exists('GameV2', false)) { try { GameV2::onDay($uid, $day); } catch (Throwable $e) { error_log('[Sweep game v2] ' . $e->getMessage()); } }
         return self::q('SELECT * FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, $day])->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /** (1 Nov., brief avance 4) the trader's standing limits in force on a day (Settings › My routine, settings.day_lock): a change
+     *  applies from the next session (`from`); before it, the values it replaced (`was`). Same as standing() in src/coach.js. */
+    public static function standingLimits(array $settings, string $day): array
+    {
+        $x = is_array($settings['day_lock'] ?? null) ? $settings['day_lock'] : [];
+        $v = (string) ($x['from'] ?? '') === '' || $day >= (string) $x['from'] ? $x : (is_array($x['was'] ?? null) ? $x['was'] : []);
+        return ['loss_c' => max(0, (int) ($v['loss_c'] ?? 0)), 'trades' => max(0, (int) ($v['trades'] ?? 0))];
+    }
+    /** the day's limits, the tightest of each: the day's plan, the standing limits, the daily loss limit of the trader's active
+     *  accounts (from the firm's preset, the account page); a limit of 0 = none. Same as SweepCoach.dayLimits (src/coach.js). */
+    public static function dayLimits(string $uid, string $day, int $planLoss, int $planTrades): array
+    {
+        $s = self::standingLimits(self::docs($uid, 'meta')['settings'] ?? [], $day);
+        $loss = array_filter([$planLoss, $s['loss_c']], fn($v) => $v > 0);
+        foreach (self::docs($uid, 'accounts') as $a) {
+            if (in_array($a['status'] ?? '', ['archived', 'closed'], true)) continue;
+            $d = (int) round((float) (((array) ($a['rules'] ?? []))['dll_c'] ?? 0)); if ($d > 0) $loss[] = $d;
+        }
+        $tr = array_filter([$planTrades, $s['trades']], fn($v) => $v > 0);
+        return ['loss_c' => $loss ? (int) min($loss) : 0, 'trades' => $tr ? (int) min($tr) : 0];
+    }
+    /** the moment the day locks: once (its key), in the bell and on the phone (push kind « lock »), never capped (prop_alerts) */
+    private static function onLock(string $uid, string $day, array $lock): void
+    {
+        self::track($uid, 'day_locked', ['why' => $lock['why']]);
+        if (class_exists('GameNotifyService', false)) GameNotifyService::send($uid, 'g_lock', ['why' => $lock['why']], "lock:$day", '#dashboard', [], true);
     }
 
     private static function guardrail(string $uid, string $day): void
@@ -650,6 +690,7 @@ final class GameEngine
             'swept' => (bool) ($g['is_swept'] ?? 0), 'valid' => (bool) ($g['is_valid_streak'] ?? 0), 'review_done' => (bool) ($g['review_done'] ?? 0),
             'day_off' => (bool) ($g['day_off'] ?? 0), 'plan_valid' => (bool) ($g['plan_valid'] ?? 0), 'plan_past' => !empty($det['plan_past']), 'plan_late' => !empty($det['plan_late']), 'exec_score' => $det['exec_score'] ?? null,
             'guardrail' => (bool) ($g['guardrail'] ?? 0), 'freeze_used' => (bool) ($g['freeze_used'] ?? 0), 'detail' => $det['trades'] ?? [],
+            'lock' => $det['lock'] ?? null,   // (1 Nov., brief avance 4) the end-of-day lock, once reached
         ];
     }
 
@@ -705,6 +746,7 @@ final class GameEngine
             'streak' => ['current' => $streak, 'best' => max((int) $p['streak_best'], $streak), 'today_valid' => $todayValid,
                          'freezes' => (int) $p['freezes_available'], 'quota' => self::freezeQuota($uid)],
             'sound' => (bool) $p['sound_enabled'], 'started_on' => $p['started_on'],
+            'complete_days' => (int) self::q('SELECT COUNT(*) FROM game_days WHERE user_id = ? AND is_swept = 1', [$uid])->fetchColumn(),   // (1 Nov., brief dans le temps E1) nothing « unlocked » before 3
             'onboarding' => ['whats_new_due' => empty($o['whats_new']) && (string) ($p['started_on'] ?? '') !== '' && (string) $p['started_on'] < GAME_RELEASE_DATE && (bool) self::q('SELECT 1 FROM game_days WHERE user_id = ? AND trading_day < ? AND (activity = 1 OR trades_count > 0 OR plan_valid = 1 OR review_done = 1) LIMIT 1', [$uid, GAME_RELEASE_DATE])->fetchColumn(), 'seen' => !empty($o['seen']), 'existing' => !empty($o['existing']), 'done' => !empty($o['done']),
                              'goal' => $p['goal'], 'style' => $p['trading_style'], 'instruments' => $p['instruments'] ? explode(',', (string) $p['instruments']) : [],
                              'max_loss' => $p['default_max_loss'] !== null ? (int) $p['default_max_loss'] : null],
@@ -790,8 +832,9 @@ function game_route(string $route, string $method, string $uid): void
             'league' => (function () use ($uid) { try { $l = GameSocial::league($uid); } catch (Throwable $e) { return null; } if (!$l['group']) return null;
                 $rank = 0; foreach ($l['group']['members'] as $i => $m) if ($m['me']) $rank = $i + 1; return ['tier' => $l['profile']['league_tier'], 'rank' => $rank, 'of' => count($l['group']['members'])]; })(),
             'season' => (function () use ($uid) { $s = GameSeason::state($uid); return ['id' => $s['id'], 'number' => $s['number'], 'name' => $s['name'], 'tier' => $s['tier'], 'claimable' => $s['claimable'], 'points' => $s['points'], 'per_tier' => $s['per_tier']]; })(),
-            'wrapped' => (function () use ($uid) { GameWrapped::ensure($uid); try { GameWrappedYear::ensure($uid); } catch (Throwable $e) { error_log('[Sweep wrapped year] ' . $e->getMessage()); } try { GameNotifyService::run($uid); } catch (Throwable $e) { error_log('[Sweep notify] ' . $e->getMessage()); }
+            'wrapped' => (function () use ($uid) { GameWrapped::ensure($uid, (string) ($_GET['lang'] ?? '')); /* (the app's language: the Month in Review's AI part is written in it) */ try { GameWrappedYear::ensure($uid); } catch (Throwable $e) { error_log('[Sweep wrapped year] ' . $e->getMessage()); } try { GameNotifyService::run($uid); } catch (Throwable $e) { error_log('[Sweep notify] ' . $e->getMessage()); }
                 $w = GameWrapped::state($uid)['items'][0] ?? null; return $w && $w['fresh'] ? ['month' => $w['month'], 'new' => $w['new']] : null; })(),
+            'month_review' => (function () use ($uid) { try { return GameWrapped::card($uid); } catch (Throwable $e) { error_log('[Sweep month review] ' . $e->getMessage()); return null; } })(),   // (1 Nov., brief avance 6) the Today card
             'discovery' => (function () use ($uid) { try { return GameDiscovery::state($uid); } catch (Throwable $e) { error_log('[Sweep discovery] ' . $e->getMessage()); return ['all' => true, 'shown' => ['money' => true, 'guided' => true, 'game' => true, 'ai' => true]]; } })(),
             'celebrations' => GameEngine::pendingCelebrations($uid),
         ]);
@@ -833,7 +876,7 @@ function game_route(string $route, string $method, string $uid): void
     if ($route === 'api/game/season' && $method === 'GET') json_out(200, GameSeason::state($uid));
     if ($route === 'api/game/season/claim' && $method === 'POST') { $b = body_json(256); $r = GameSeason::claim($uid, (int) ($b['tier'] ?? 0), (string) ($b['track'] ?? '')); json_out(isset($r['error']) ? 400 : 200, $r + ['season' => GameSeason::state($uid)]); }
     if ($route === 'api/game/wrapped' && $method === 'GET') json_out(200, GameWrapped::state($uid));
-    if ($route === 'api/game/wrapped/viewed' && $method === 'POST') { $b = body_json(256); if (preg_match('/^\d{4}-(\d{2}|AN)$/', (string) ($b['month'] ?? ''))) GameWrapped::viewed($uid, $b['month']); json_out(200, ['ok' => true]); }   // (« YYYY-AN »: the year's Wrapped, never recorded before 14 Oct.)
+    if ($route === 'api/game/wrapped/viewed' && $method === 'POST') { $b = body_json(256); if (preg_match('/^\d{4}-(\d{2}|AN)$/', (string) ($b['month'] ?? ''))) GameWrapped::viewed($uid, $b['month'], !empty($b['done'])); json_out(200, ['ok' => true]); }   // (« YYYY-AN »: the year's Wrapped, never recorded before 14 Oct.)
     if ($route === 'api/game/weekly' && $method === 'GET') { $w = GameV2b::weeklyState($uid); if (!empty($w['open'])) GameV2b::markSeen($uid, (string) $w['week']); json_out(200, $w); }   // opening the recap = seen (no reminder, no email after)
     if ($route === 'api/game/weekly' && $method === 'POST') { $r = GameV2b::saveWeekly($uid, body_json(4096)); json_out(isset($r['error']) ? 400 : 200, $r + ['celebrations' => GameEngine::pendingCelebrations($uid)]); }
     if ($route === 'api/game/chest' && $method === 'POST') { $r = GameV2b::openChest($uid); json_out(isset($r['error']) ? 400 : 200, $r + ['cosmetics' => GameV2b::cosmetics($uid)]); }

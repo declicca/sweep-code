@@ -6,8 +6,8 @@ A trader of its own. Phone 390 (fr, touch) and computer 1300 (en):
     the accounts card is on Today from the first account (no trade yet); « This month », the news card, the trends and the
     rank are not on Today any more
  2  a plan with a $600 max loss and 2 trades max: the risk allowed is $600, « your plan's max loss »
- 3  a −$250 trade: « Left today » $350, « before your max loss · trade 2 of 2 », the same figure as « Before this trade »
- 4  a −$400 trade: « Day over by your plan », the coach's reason
+ 3  a −$250 trade: « 1/2 trades · $350 left today », « before your max loss » (1 Nov., brief avance 4: one counter), the same figure as « Before this trade »
+ 4  a −$400 trade: the max loss reached, Today shows « Day closed » in place of « Now » (1 Nov., brief avance 4; tests/e2e_day_lock.py)
  5  at each moment, one blue button in the routine card; the day reviewed: no « Now » any more
     (27 Oct.) before the first trade no « Discipline — », streak or level in the routine; they come with it
  6  the 90-day gameplan: its mission of the day is a line of the routine, « See the 90 days › » opens the map; no Today card
@@ -22,8 +22,8 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'risk': 'Ton risque permis aujourd’hui', 'dll': 'la limite du jour de Topstep 50K', 'plan': 'la perte max de ton plan', 'left': 'Il te reste', 'Lplan': 'avant ta perte max', 'count': 'trade 2 sur 2', 'see90': 'Voir les 90 jours', 'end': 'Journée terminée selon ton plan'},
-     'en': {'risk': 'Your risk allowed today', 'dll': 'the daily limit of Topstep 50K', 'plan': 'your plan’s max loss', 'left': 'Left today', 'Lplan': 'before your max loss', 'count': 'trade 2 of 2', 'end': 'Day over by your plan', 'see90': 'See the 90 days'}}
+X = {'fr': {'risk': 'Ton risque permis aujourd’hui', 'dll': 'la limite du jour de Topstep 50K', 'plan': 'la perte max de ton plan', 'left': 'restants aujourd’hui', 'Lplan': 'avant ta perte max', 'count': '1/2 trades', 'closed': 'Journée fermée', 'see90': 'Voir les 90 jours', 'end': 'Journée terminée selon ton plan'},
+     'en': {'risk': 'Your risk allowed today', 'dll': 'the daily limit of Topstep 50K', 'plan': 'your plan’s max loss', 'left': 'left today', 'Lplan': 'before your max loss', 'count': '1/2 trades', 'closed': 'Day closed', 'end': 'Day over by your plan', 'see90': 'See the 90 days'}}
 NOW = "(() => { const n = document.querySelector('#main .nav-rt .nav-now'); return n ? { state: n.dataset.now, text: n.textContent.replace(/\\s+/g, ' ').trim(), v: (n.querySelector('.nav-now-v') || {}).textContent || '' } : null })()"
 FIG = "[...document.querySelectorAll('#main .nav-rt .nav-rt-disc, #main .nav-rt .nav-rt-streak, #main .nav-rt .nav-rt-lv')].filter((b) => b.getClientRects().length).map((b) => b.className.split(' ')[0])"
 BLUE = "[...document.querySelectorAll('#main .nav-rt .btn.primary')].filter((b) => b.getClientRects().length && getComputedStyle(b).visibility !== 'hidden').length"
@@ -78,18 +78,7 @@ with sync_playwright() as p:
       pg.wait_for_timeout(250)
     ok(pg.evaluate(FIG) == [] and pg.locator('#main .nav-rt .nav-rt-sum').count() == 1, f'{tag} 3 with the first trade: the line « Level … · … › » (31 Oct., C5: no pills) ({pg.evaluate(FIG)})')
     ok(pg.evaluate(BLUE) == 1, f'{tag} 3 one blue button in the routine ({pg.evaluate(BLUE)})')
-    # 4. the max loss reached
-    pg.evaluate("(d) => put('trades', { id: 'nw-t2', account_id: 'nw-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -40000, pnl_manual: true, date: d, entry_time: '10:45', exit_time: '10:50' })", day)
-    n = today()
-    ok(n and n['state'] == 'end' and x['end'] in n['text'] and '600' in sp(n['text']), f'{tag} 4 the max loss reached: the day is over, the coach\'s reason ({n})')
-    co = pg.evaluate("(document.querySelector('#main .co-today') || {}).textContent || ''")
-    ok(x['end'] not in co and sp(co).count('600') <= 1, f'{tag} 4 the coach card does not say it again ({co[:120]!r})')
-    ok(pg.evaluate(BLUE) == 1, f'{tag} 4 one blue button in the routine ({pg.evaluate(BLUE)})')
-    # 5. the day reviewed
-    pg.evaluate("(d) => editDoc('journals', d, (j) => { j.post = Object.assign(j.post || {}, { followed: 'yes', discipline: 4, grade: 'B', reviewed_at: Math.floor(Date.now() / 1000) }); })", day)
-    pg.wait_for_timeout(1500); pg.evaluate("SweepGame.refresh()"); n = today()
-    ok(n is None, f'{tag} 5 the day reviewed: no « Now » ({n})')
-    # 6. the 90-day gameplan started: its mission of the day is a line of the routine (its Today card until 27 Oct.)
+    # 6. the 90-day gameplan started: its mission of the day is a line of the routine (its Today card until 27 Oct.) — (1 Nov.) before the max loss: past it, « Day closed » takes the routine until 18:00
     st = pg.evaluate("fetch('api/game/gameplan/start', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ track: 'B' }) }).then((r) => r.json())")
     if st and st.get('started') and st.get('access'):
       pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=10000)
@@ -100,8 +89,20 @@ with sync_playwright() as p:
       ok(ln and ln[1] and ln[2] and x['see90'] in ln[0] and pg.locator('#gpCard').count() == 0, f'{tag} 6 the gameplan: its line in the routine, « {x["see90"]} », no card ({ln})')
       pg.click('#main #gpLine [data-gp=map]'); pg.wait_for_selector('#gSheet .gp-map', timeout=8000)
       ok(True, f'{tag} 6 « {x["see90"]} » opens the map')
+      pg.keyboard.press('Escape'); pg.wait_for_timeout(500)
       pg.evaluate("fetch('api/game/gameplan/stop', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: '{}' })"); pg.wait_for_timeout(500)
     else: print(f'skip {tag} 6: no gameplan for this trader ({st})')
+    # 4. the max loss reached
+    pg.evaluate("(d) => put('trades', { id: 'nw-t2', account_id: 'nw-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: -40000, pnl_manual: true, date: d, entry_time: '10:45', exit_time: '10:50' })", day)
+    n = today(); lk = sp(pg.evaluate("(document.querySelector('#main .nav-rt .nav-lock') ? document.querySelector('#main .nav-rt').textContent : '')"))
+    ok(n is None and x['closed'] in lk and '600' in lk, f'{tag} 4 the max loss reached: « {x["closed"]} » in place of « Now », the limit said ({n}, {lk[:90]!r})')
+    co = pg.evaluate("(document.querySelector('#main .co-today') || {}).textContent || ''")
+    ok(x['end'] not in co and sp(co).count('600') <= 1, f'{tag} 4 the coach card does not say it again ({co[:120]!r})')
+    ok(pg.evaluate(BLUE) == 1, f'{tag} 4 one blue button in the routine ({pg.evaluate(BLUE)})')
+    # 5. the day reviewed
+    pg.evaluate("(d) => editDoc('journals', d, (j) => { j.post = Object.assign(j.post || {}, { followed: 'yes', discipline: 4, grade: 'B', reviewed_at: Math.floor(Date.now() / 1000) }); })", day)
+    pg.wait_for_timeout(1500); pg.evaluate("SweepGame.refresh()"); n = today()
+    ok(n is None, f'{tag} 5 the day reviewed: no « Now » ({n})')
     ok(pg.evaluate(WIDE) <= 0, f'{tag} nothing wider than the window')
     ok(not errs, f'{tag} no page error ({errs[:2]})')
     ctx.close()

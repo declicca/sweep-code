@@ -2055,11 +2055,15 @@ function vSettings() {
   return `${accountSection()}<section class="${S.mode === "server" && S.me ? "sec" : ""}"><div class="sec-h"><h2>Discipline checklist</h2><span class="help">Each question is answered Yes / No / N/A per trade. The violation label is used in analytics.</span></div>\n   <div class="surface"><div class="scroll-x"><table class="tbl q-tbl"><thead><tr><th style="width:44%">Question</th><th>Violation label</th><th>Active</th><th></th></tr></thead><tbody>${e.questions.map((a, n) => `<tr><td><textarea class="q-ta" rows="1" data-bind="settings|settings|questions.${n}.text">${esc(tr(a.text))}</textarea></td><td data-l="Violation label"><input style="width:100%" data-bind="settings|settings|questions.${n}.viol" value="${esc(tr(a.viol))}"></td><td><label class="sw"><input type="checkbox" data-act-change="q-active" data-i="${n}" ${a.active ? "checked" : ""} aria-label="Active"><i></i></label></td><td class="num">${S.trades.some(s => (s.discipline || {})[a.id]) ? '<span class="faint" title="Answered on existing trades — deactivate instead">In use</span>' : `<button class="link" data-act="q-del" data-i="${n}">Remove</button>`}</td></tr>`).join("")}</tbody></table></div>\n   <div class="pad row"><input id="newQ" placeholder="Add a question, e.g. Did I trade only my A+ setup?" style="flex:1;min-width:220px"><button class="btn" data-act="q-add">Add question</button></div></div>\n   <div class="row" style="margin-top:12px"><span class="muted">Good-process threshold</span><input type="number" min="50" max="100" style="width:80px" data-bind="settings|settings|threshold" data-kind="int" value="${e.threshold}"><span class="muted">% — trades at or above count as disciplined.</span></div></section>\n  <section class="sec"><div class="sec-h"><h2>Setups</h2><span class="help">Suggested when logging trades. You can also type new ones directly.</span></div>\n   <div class="surface pad"><div class="chips" style="margin-bottom:10px">${(e.setups || []).map((a, n) => `<span class="chip on">${esc(a)} <button class="link" data-act="setup-del" data-i="${n}" aria-label="Remove ${esc(a)}">×</button></span>`).join("") || '<span class="muted">No saved setups yet.</span>'}</div>\n   <div class="row"><input id="newSetup" placeholder="Setup name"><button class="btn" data-act="setup-add">Add setup</button></div>${window.SweepQs ? SweepQs.rulesHtml() : ""}</div></section>\n  <section class="sec"><div class="sec-h"><h2>Prop firms</h2></div><div class="surface pad">${S.firms.length ? S.firms.map(a => `<div class="row" style="margin-bottom:6px"><input data-bind="firms|${a.id}|name" value="${esc(a.name)}"><span class="muted">${S.accounts.filter(n => n.firm_id === a.id).length} accounts</span></div>`).join("") : '<span class="muted">Prop firms are created when you add an account.</span>'}</div></section>\n  <section class="sec"><div class="sec-h"><h2>Risk rules</h2><span class="help">Used by the trade ticket to flag oversized positions and excessive risk.</span></div><div class="surface pad"><div class="fgrid">\n    <label class="f"><span>Maximum contracts per trade</span>${bindIn("settings", "settings", "max_contracts", e.max_contracts ?? "", {
     type: "number",
     kind: "int",
-    ph: "e.g. 3"
+    ph: {
+      en: "e.g. 3",
+      fr: "ex. 3",
+      es: "p. ej. 3"
+    }[LANG] || "e.g. 3"
   })}</label>\n    <label class="f"><span>Maximum risk per trade</span>${bindIn("settings", "settings", "max_trade_risk_c", e.max_trade_risk_c != null ? (e.max_trade_risk_c / 100).toFixed(0) : "", {
     kind: "money",
     ph: "$"
-  })}</label>\n    <label class="f"><span>Pre-market sheet locks at (New York)</span>${bindIn("settings", "settings", "plan_lock_hm", e.plan_lock_hm || "09:25", {
+  })}</label>\n    ${window.SweepDayLock ? SweepDayLock.fields() : ""}<label class="f"><span>Pre-market sheet locks at (New York)</span>${bindIn("settings", "settings", "plan_lock_hm", e.plan_lock_hm || "09:25", {
     type: "time"
   })}</label>\n    <div class="f"><span>&nbsp;</span><span class="help">The daily limit comes from each account's firm rules.</span></div></div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Appearance</h2></div><div class="surface pad row"><span class="muted">Theme</span><div class="seg">${[ [ "auto", "Match my device" ], [ "light", "Light" ], [ "dark", "Dark" ] ].map(([a, n]) => `<button data-act="theme" data-v="${a}" class="${lsGet("tj.theme", "auto") === a ? "on" : ""}">${n}</button>`).join("")}</div>\n    <span class="muted" style="margin-left:18px">Language</span><div class="seg" data-noi18n>${[ [ "auto", LANG === "fr" ? "Automatique" : LANG === "es" ? "Automático" : "Automatic" ], [ "en", "English" ], [ "fr", "Français" ], [ "es", "Español" ] ].map(([a, n]) => `<button data-act="lang" data-v="${a}" class="${langPref() === a ? "on" : ""}">${n}</button>`).join("")}</div></div></section>\n  <section class="sec"><div class="sec-h"><h2>Copied trades</h2></div><div class="surface pad">\n    <label class="row" style="cursor:pointer"><input type="checkbox" data-act-change="merge-copies" ${e.mergeCopies !== !1 ? "checked" : ""}> Count a trade copied on several accounts as one trade when all accounts are shown</label>\n    <p class="help" style="margin:6px 0 0;max-width:75ch" data-noi18n>${{
     en: "It counts as its original (the account you logged it on first), so win rate, discipline and behavior statistics reflect your decisions rather than how many accounts you copy to. Per-account views always show each copy.",
@@ -2706,16 +2710,20 @@ function acctState(e) {
   }, AT = () => {
     c <= l && (p = !0), r = Math.max(r, c), l = m(r - u);
   };
+  // (1 Nov., brief dans le temps A2) the lowest drawdown room at the end of a trading day, and that day: « your room went down to $950 on Nov 12 »
+  let MB = null, MD = "";
+  const LOW = H => { l != null && (MB == null || c - l < MB) && (MB = c - l, MD = H); };
   if (u) if (l = a - u, t.dd_type === "static") {
-    for (const H of n) ADJ(H.date, AS), PAY(H.date), c += tNet(H), c <= l && (p = !0);
+    for (const H of n) ADJ(H.date, AS), PAY(H.date), c += tNet(H), c <= l && (p = !0), LOW(H.date);
     FIN(AS);
   } else if (t.dd_type === "trade") {
-    for (const H of n) ADJ(H.date, AT), PAY(H.date), c += tNet(H), c <= l && (p = !0), r = Math.max(r, c), l = m(r - u);
+    for (const H of n) ADJ(H.date, AT), PAY(H.date), c += tNet(H), c <= l && (p = !0), LOW(H.date), r = Math.max(r, c), l = m(r - u);
     FIN(AT);
   } else {
     for (const H of dayMap(n).values()) {
       H.trades[0] && (ADJ(H.trades[0].date, AT), PAY(H.trades[0].date));
       for (const J of H.trades) c += tNet(J), c <= l && (p = !0);
+      H.trades[0] && LOW(H.trades[0].date);
       r = Math.max(r, c), l = m(r - u);
     }
     FIN(AT);
@@ -2727,6 +2735,7 @@ function acctState(e) {
     thr: l,
     buffer: C,
     breached: p,
+    lowRoom: MB, lowDay: MD,
     dd: lv ? Math.max(0, o) : u,
     live: lv,
     target: t.target_c || 0,

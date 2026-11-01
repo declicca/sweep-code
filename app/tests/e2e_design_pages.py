@@ -65,7 +65,7 @@ with sync_playwright() as p:
     ok(mt and len(mt) == 3 and max(mt) - min(mt) <= 3, f'5 computer {scheme}: Today · the three money amounts end on one line ({mt})')
     go(pg, 'settings')
     sg = pg.evaluate("[...document.querySelectorAll('#main details.nav-sgd')].map(d=>[getComputedStyle(d).boxShadow, getComputedStyle(d.querySelector('summary')).borderTopLeftRadius])")
-    ok(sg and all(x[0] == 'none' and x[1] == '20px' for x in sg), f'8 computer {scheme}: {len(sg)} Settings groups, rounded headers, no frame ({sg[:1]})')
+    ok(sg and all(x[0] == 'none' for x in sg) and sg[0][1] == '20px' and all(x[1] == '0px' for x in sg[1:]), f'8 computer {scheme}: {len(sg)} Settings groups in one grouped list (1 Nov., brief visuel C4): the first row rounded, no frame ({sg})')
     go(pg, 'accounts')
     al = pg.evaluate("(()=>{const td=document.querySelector('#main table.acct-tbl tbody tr td'); if(!td) return null; const tn=[...td.childNodes].find(n=>n.nodeType===3&&n.textContent.trim()); const r=document.createRange(); r.selectNodeContents(tn); const th=document.querySelector('#main table.acct-tbl thead th'); const ln=td.querySelector('.acc-line'); return [Math.round(r.getBoundingClientRect().left), ln?Math.round(ln.getBoundingClientRect().left):null, Math.round(th.getBoundingClientRect().left+parseFloat(getComputedStyle(th).paddingLeft))]})()")
     ok(al and al[0] == al[2] and (al[1] is None or al[1] == al[0]), f'9 computer {scheme}: the account name lines up with its column ({al})')

@@ -62,7 +62,7 @@ with sync_playwright() as p:
     hd = []
     for h in ['dashboard', 'trades', 'analytics']:
       go(pg, h); hd += pg.evaluate("[...document.querySelectorAll('.top .nav-addtop, .top .nav-imp-b, .top .sh-btn')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect(); return [e.className.split(' ')[0], Math.round(r.height), getComputedStyle(e).borderTopLeftRadius]})")
-    ok(len(hd) >= 3 and all(x[1] == 40 and x[2] == '999px' for x in hd), f'8 computer {scheme}: the header actions are 40 px pills ({hd})')
+    ok(len(hd) >= 3 and all(x[1] == 44 and x[2] == '999px' for x in hd), f'8 computer {scheme}: the header actions are 44 px pills, as every button (1 Nov., brief visuel: three heights) ({hd})')
     bd = []
     for h in ['accounts', 'payouts', 'analytics']:
       go(pg, h); bd += pg.evaluate("[...document.querySelectorAll('#main .mny-tag, #main .pz-pill, #main .acc-flag, #main .est')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect(); return [e.className.split(' ')[0], Math.round(r.height), getComputedStyle(e).borderTopLeftRadius, getComputedStyle(e).fontSize]})")

@@ -4,7 +4,8 @@ Sweep — « What's new » (16 Oct., step 1 of the announcements), Playwright:
 A trader of its own. Phone 390 (fr) and computer 1300 (en):
  1  the day of sign-up: no window;
  2  from the next day: one window « What's new » with each new feature and the button that does it (the reminders on the phone
-    only when this device can have them and they are not on yet);
+    only when this device can have them and they are not on yet) — since 1 Nov. (brief dans le temps B2), only the features that
+    came out after the sign-up: none for a trader of 3 days, those of the last 60 days for one of 90 days;
  3  a feature's button closes the window and goes there (« See my accounts » → Accounts; « Turn on » where the phone cannot:
     Settings, which says why); every feature shown is seen once, on every device: after a reload, no window;
  4  one automatic window per session: none when another one already opened;
@@ -22,7 +23,10 @@ def ok(c, what):
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
 X = {'fr': {'h': 'Quoi de neuf', 'acc': 'Voir mes comptes', 'push': 'Des rappels sur ton téléphone', 'on': 'Activer', 'debrief': 'Débriefe ta journée, même sans trade'},
      'en': {'h': 'What’s new', 'acc': 'See my accounts', 'push': 'Reminders on your phone', 'on': 'Turn on', 'debrief': 'Debrief your day, even without trades'}}
-OLD = "() => { S.me.created_at = Math.floor(Date.now() / 1000) - 3 * 86400; sessionStorage.removeItem('sw.modal'); }"
+# (1 Nov., brief dans le temps B2) only what came out after the sign-up: a trader of 3 days sees none of the features (all older); one
+# who signed up 90 days ago sees those of the last 60 days
+NEW3 = "() => { S.me.created_at = Math.floor(Date.now() / 1000) - 3 * 86400; sessionStorage.removeItem('sw.modal'); }"
+OLD = "() => { S.me.created_at = Math.floor(Date.now() / 1000) - 90 * 86400; sessionStorage.removeItem('sw.modal'); }"
 SHOWN = "() => { const s = document.querySelector('#gSheet.g-wnsheet'); return s ? { h: s.querySelector('h2').textContent, items: [...s.querySelectorAll('.g-wn-it b')].map((b) => b.textContent), btns: [...s.querySelectorAll('.g-wn-go')].map((b) => b.textContent) } : null }"
 with sync_playwright() as p:
   br = p.chromium.launch(); allerr = []
@@ -41,7 +45,9 @@ with sync_playwright() as p:
     # 4. another automatic window already this session
     pg.evaluate("() => { S.me.created_at = Math.floor(Date.now() / 1000) - 3 * 86400; sessionStorage.setItem('sw.modal', '1'); SweepNews.show() }"); pg.wait_for_timeout(900)
     ok(pg.evaluate(SHOWN) is None, f'{tag} one automatic window per session: none after another one')
-    # 2. the next days
+    # 2. the next days: nothing from before the sign-up (B2), then a trader of 90 days
+    pg.evaluate(NEW3); pg.evaluate("SweepNews.show()"); pg.wait_for_timeout(1200)
+    ok(pg.evaluate(SHOWN) is None, f'{tag} 3 days after the sign-up: no « {x["h"]} » for features older than the sign-up (B2)')
     pg.evaluate(OLD); pg.evaluate("SweepNews.show()"); pg.wait_for_timeout(1200)
     s = pg.evaluate(SHOWN)
     ok(s and s['h'] == x['h'] and len(s['items']) >= 2 and x['acc'] in s['btns'], f'{tag} from the next day: « {x["h"]} », each feature with its button ({s})')

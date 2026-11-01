@@ -76,7 +76,7 @@ with sync_playwright() as p:
       b = pg.locator('#main .nav-now [data-rt=fin]'); b.tap(); pg.wait_for_selector('#gSheet [data-g=save-review]', timeout=8000)
       ok(True, f'4 {tag}: « {tx[5]} » opens the review')
     else:
-      ok('Left today' in now and not btn, f'4 {tag}: more than a year: 2 losses do not end the day ({now[:80]!r})')
+      ok('left today' in now and not btn, f'4 {tag}: more than a year: 2 losses do not end the day ({now[:80]!r})')   # (1 Nov., brief avance 4: « 2/5 trades · $880 left today »)
     ctx.close()
   ok(not errs, f'no page error ({errs[:2]})')
   br.close()

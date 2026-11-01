@@ -35,6 +35,8 @@
       'push.review.d': 'After the close',
       'push.weekly': 'Your week',
       'push.weekly.d': 'Friday, after the close',
+      'push.lock': 'Day closed',
+      'push.lock.d': 'The moment your daily limit is reached',
       'push.at': 'Time',
       'push.help': 'New York time, for the bell too. Never during the session, 2 notifications a day at most.',
       'push.ios': 'On iPhone: add Sweep to your Home Screen (Share › Add to Home Screen), then open it from its icon to turn on notifications.',
@@ -91,6 +93,8 @@
       'push.review.d': 'Après la clôture',
       'push.weekly': 'Bilan de la semaine',
       'push.weekly.d': 'Le vendredi, après la clôture',
+      'push.lock': 'Journée fermée',
+      'push.lock.d': 'Dès que ta limite du jour est atteinte',
       'push.at': 'Heure',
       'push.help': 'Heure de New York, pour la cloche aussi. Jamais pendant la séance, 2 notifications par jour au plus.',
       'push.ios': 'Sur iPhone : ajoute Sweep à ton écran d’accueil (Partager › Sur l’écran d’accueil), puis ouvre-le depuis son icône pour activer les notifications.',
@@ -147,6 +151,8 @@
       'push.review.d': 'Después del cierre',
       'push.weekly': 'Balance de la semana',
       'push.weekly.d': 'El viernes, después del cierre',
+      'push.lock': 'Día cerrado',
+      'push.lock.d': 'En cuanto alcanzas tu límite del día',
       'push.at': 'Hora',
       'push.help': 'Hora de Nueva York, también para la campana. Nunca durante la sesión, 2 notificaciones al día como máximo.',
       'push.ios': 'En iPhone: añade Sweep a tu pantalla de inicio (Compartir › Añadir a pantalla de inicio) y ábrelo desde su icono para activar las notificaciones.',
@@ -352,7 +358,7 @@
     if (!n) return;
     if (!n.read) {
       n.read = true;
-      NT.unread = Math.max(0, NT.unread - 1);
+      if (n.type !== 'news') NT.unread = Math.max(0, NT.unread - 1);   // (B2) the badge never counted the announcements
       paintBadge();
       post(`api/notifications/${id}/read`).catch(() => {});
     }
@@ -372,6 +378,7 @@
     const n = NT.modal;
     if (!n || NT.modalDone || !on() || document.visibilityState !== 'visible') return;
     if (document.body.classList.contains('evp-lock') || document.querySelector('.drawer.on, .nt-modal, .sb-layer, .sai-open')) return;   // never on top of another sheet
+    if (window.SweepReward && !SweepReward()) return;   // (1 Nov., brief dans le temps E1) a reward: after the day's review, one a day (it stays in the bell)
     NT.modalDone = true;
     post(`api/notifications/${n.id}/shown`).catch(() => {});
     // one automatic modal per session belongs to the game (onboarding, rank); notification celebrations are a short toast
@@ -408,7 +415,7 @@
   /* ── on this device: the plan, review and week reminders as phone notifications (web push, brief 02 part 10; push/web-push.php).
      Shown only when the server has its keys. iPhone: only from the app added to the Home Screen (iOS 16.4+). ── */
   const PU = { st: null, busy: false, dev: null, synced: false };   // st: server state; dev: this device's subscription (false: none)
-  const KINDS = ['plan', 'review', 'weekly'];
+  const KINDS = ['plan', 'review', 'weekly', 'lock'];   // (1 Nov., brief avance 4) « Day closed »: when it happens, no time to choose
   const pushCan = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   const iosBrowser = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
   const keyBytes = (k) => Uint8Array.from(atob((k + '='.repeat((4 - k.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
@@ -434,9 +441,10 @@
     else if (Notification.permission === 'denied') body = `<p class="muted nt-push-note">${esc(t('push.denied'))}</p>`;
     else if (!PU.dev) body = `<div class="nt-push-on"><p class="muted">${esc(t('push.pitch'))}</p><button type="button" class="btn primary" data-nt="push-on">${esc(t('push.on'))}</button></div>`;
     else body = KINDS.map((k) => {
-      const p = st.prefs[k], opts = st.times[k].map((v) => `<option value="${v}"${v === p.at ? ' selected' : ''}>${esc(hm(v))}</option>`).join('');
+      const p = st.prefs[k]; if (!p) return '';
+      const opts = (st.times[k] || []).map((v) => `<option value="${v}"${v === p.at ? ' selected' : ''}>${esc(hm(v))}</option>`).join('');
       return `<div class="nt-prow nt-push-row"><span><b>${esc(t('push.' + k))}</b><small>${esc(t('push.' + k + '.d'))}</small></span>
-        <span class="nt-push-ctl"><select data-nt-push-at="${k}" aria-label="${esc(t('push.' + k) + ' · ' + t('push.at'))}">${opts}</select>
+        <span class="nt-push-ctl">${opts ? `<select data-nt-push-at="${k}" aria-label="${esc(t('push.' + k) + ' · ' + t('push.at'))}">${opts}</select>` : ''}
         <label class="sw"><input type="checkbox" data-nt-push="${k}" ${p.on ? 'checked' : ''} aria-label="${esc(t('push.' + k))}"><i></i></label></span></div>`;
     }).join('') + `<div class="nt-push-foot"><button type="button" class="link" data-nt="push-off">${esc(t('push.off'))}</button></div>`;
     return `<h3 class="nt-push-h">${esc(t('push.h'))}</h3><div class="surface nt-plist nt-push">${body}</div><p class="help nt-push-help">${esc(t('push.help'))}</p>`;

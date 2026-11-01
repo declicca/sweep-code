@@ -83,3 +83,7 @@ html body #main .nav-rt.closed-rt > .co-today{display:none}
 .co-full > summary::after{content:' ▾'}.co-full[open] > summary::after{content:' ▴'}
 .s2-more{margin-top:10px}
 }
+/* (1 Nov., brief dans le temps C1) « Use yesterday's plan again? » and its one tap */
+.co-resume{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+.co-resume .btn{min-height:38px;border-radius:var(--r-pill,999px);padding:0 16px}
+.co-protect b{font-weight:600;color:var(--text)}

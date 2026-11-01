@@ -739,13 +739,13 @@
           es: { trades: 'Aún no hay operaciones', calendar: 'Tu mes, día a día', analytics: 'Tus stats empiezan aquí', payouts: 'Aún no hay payouts ni gastos' } },
     en: { trades: 'Every trade you log lands here, with its chart, its R and its discipline score.', calendar: 'Each market day will light up with its result, your discipline and the day’s news.',
       analytics: 'Here you will see which setups, hours and emotions really pay off for you.', payouts: 'Log every payout and every evaluation fee to see your real result across firms.',
-      add: 'Add my first trade', sample: 'Preview with sample data', sample_d: 'Removable in one tap', demo_on: 'You are looking at sample data.', demo_off: 'Remove sample data' },
+      add: 'Add my first trade', sample: 'Preview with sample data', sample_d: 'Removable in one tap', demo_on: 'You are looking at sample data.', demo_off: 'Remove sample data', demo_s: 'Sample data', demo_rm: 'Remove' },
     fr: { trades: 'Chaque trade journalisé arrive ici, avec son graphique, son R et sa note de discipline.', calendar: 'Chaque jour de marché s’allumera avec son résultat, ta discipline et les nouvelles du jour.',
       analytics: 'Ici, tu verras quels setups, quelles heures et quelles émotions te rapportent vraiment.', payouts: 'Note chaque payout et chaque frais d’évaluation pour voir ton vrai résultat, toutes firmes confondues.',
-      add: 'Ajouter mon premier trade', sample: 'Aperçu avec des données d’exemple', sample_d: 'Retirables en un geste', demo_on: 'Tu regardes des données d’exemple.', demo_off: 'Retirer les données d’exemple' },
+      add: 'Ajouter mon premier trade', sample: 'Aperçu avec des données d’exemple', sample_d: 'Retirables en un geste', demo_on: 'Tu regardes des données d’exemple.', demo_off: 'Retirer les données d’exemple', demo_s: 'Données d’exemple', demo_rm: 'Retirer' },
     es: { trades: 'Cada operación registrada llega aquí, con su gráfico, su R y su nota de disciplina.', calendar: 'Cada día de mercado se iluminará con su resultado, tu disciplina y las noticias del día.',
       analytics: 'Aquí verás qué setups, horas y emociones te rinden de verdad.', payouts: 'Registra cada payout y cada cuota de evaluación para ver tu resultado real.',
-      add: 'Añadir mi primera operación', sample: 'Vista previa con datos de ejemplo', sample_d: 'Se quitan con un toque', demo_on: 'Estás viendo datos de ejemplo.', demo_off: 'Quitar los datos de ejemplo' },
+      add: 'Añadir mi primera operación', sample: 'Vista previa con datos de ejemplo', sample_d: 'Se quitan con un toque', demo_on: 'Estás viendo datos de ejemplo.', demo_off: 'Quitar los datos de ejemplo', demo_s: 'Datos de ejemplo', demo_rm: 'Quitar' },
   };
   const t = () => T[LANG] || T.en;
   const IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v4M12 17v4M8 7h8v10H8z"/></svg>';
@@ -756,7 +756,7 @@
     const emptyPay = v === 'payouts' && !(S.payouts || []).length && !(S.expenses || []).length;
     let html = '';
     if (v === 'payouts' ? emptyPay : !real.length) {
-      if (demo && v !== 'payouts') html = `<div class="ux-empty demo"><span>${t().demo_on}</span><button type="button" class="link" data-act="demo-del">${t().demo_off}</button></div>`;
+      if (demo && v !== 'payouts') html = `<div class="ux-empty demo"><span>${t().demo_s}<span class="info" role="img" title="${t().demo_on}" aria-label="${t().demo_on}">i</span></span><button type="button" class="chip ux-demo-rm" data-act="demo-del" aria-label="${t().demo_off}">${t().demo_rm}</button></div>`;   // (1 Nov., brief visuel C5) one line: « Sample data » and a « Remove » capsule; the sentence in the « i »
       else if (!demo || v === 'payouts') html = `<div class="ux-empty"><span class="ux-e-ic">${IC}</span><h3>${(T.tt[LANG] || T.tt.en)[v]}</h3><p>${t()[v]}</p><div class="ux-e-acts">${v !== 'payouts' ? `<button type="button" class="btn primary" data-act="add-trade">${t().add}</button>` : ''}${!trades.length && v !== 'payouts' ? `<button type="button" class="link" data-act="demo">${t().sample}<small>${t().sample_d}</small></button>` : ''}</div></div>`;
     }
     const old = main.querySelector('.ux-empty');

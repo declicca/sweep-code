@@ -90,7 +90,7 @@ async def main():
           n = sum([want[0] != 'todo', want[1] == 'done', want[2] == 'done'])
           ok(b['today'] == b['card'] == srvst['day'], f"{label} {when}: same day in the browser, on the card and on the server ({b['today']} / {b['card']} / {srvst['day']})")
           ok(b['s'] == want, f"{label} {when}: the card shows the server's rings {r} → {b['s']}")
-          pill_ok = ('réussie' in b['pill']) if srvst['swept'] else (f'{n} sur 3' in b['pill'])
+          pill_ok = ('complète' in b['pill']) if srvst['swept'] else (f'{n} sur 3' in b['pill'])   # (1 Nov., brief dans le temps A3: « Journée complète », was « réussie »)
           ok(pill_ok, f"{label} {when}: « {b['pill'].strip()} » (server: {n} of 3{', swept' if srvst['swept'] else ''})")
           if srvst['trades'] and srvst['plan_valid']: ok(f"{srvst['compliant']} sur {srvst['trades']}" in b['exec'], f"{label} {when}: « {b['exec']} » (server: {srvst['compliant']} of {srvst['trades']})")
           elif srvst['trades']: ok(srvst['compliant'] == 0 and 'pas de plan' in b['exec'], f"{label} {when}: no plan: « {b['exec']} » (server: {srvst['compliant']} in the plan, audit of 16 Oct.)")

@@ -250,6 +250,14 @@ function sai_call_run(PDO $pdo, string $uid, string $task, string $prompt, array
 {
     // tests only: SWEEP_AI_CHAT_MOCK (a JSON file) answers the chat without calling Google; never set on the server
     if ($task === 'chat' && ($mf = (string) getenv('SWEEP_AI_CHAT_MOCK')) !== '' && is_file($mf)) return sai_chat_mock($pdo, $uid, $prompt, $mf);
+    // tests only: SWEEP_AI_MONTH_MOCK (a JSON file, one answer per language, or « error ») writes the Month in Review's AI part (1 Nov., brief avance 6)
+    if ($task === 'month_review' && ($mf = (string) getenv('SWEEP_AI_MONTH_MOCK')) !== '' && is_file($mf)) {
+        $m = json_decode((string) file_get_contents($mf), true) ?: [];
+        if (!empty($m['error'])) throw new SaiError((string) $m['error'], 502);
+        $l = preg_match('/LANGUAGE: (en|fr|es)/', $prompt, $x) ? $x[1] : 'en';
+        sai_q($pdo, 'INSERT INTO ai_log (user_id, task, input_tokens, output_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?)', [$uid, $task, 0, 0, 0.0001, sai_now()]);
+        return ['data' => (array) ($m[$l] ?? $m['en'] ?? []), 'cached' => false];
+    }
     $parts = [['text' => $prompt]];
     if ($image) $parts[] = ['inlineData' => ['mimeType' => $image['mime'], 'data' => $image['data']]];
     $body = [

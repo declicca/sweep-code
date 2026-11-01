@@ -27,6 +27,8 @@ def premarket(pg, day=None, max_loss=None, max_trades=None, short=False, save=Tr
       pg.fill('#gSheet [data-pmf="X_levels"]', 'London high 5820 · London low 5800'); pg.fill('#gSheet [data-pmf="X_plan"]', 'Cassure du London low : vente.' if short else 'Cassure du London high : achat.')
       if max_loss is not None: pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
+      if save: pg.evaluate(TAP, '#gSheet [data-pm="save"]'); pg.wait_for_timeout(900)   # (1 Nov., brief dans le temps D2: one screen, saved from it)
+      return True
     elif s == 'pos':
       if pg.locator('#gSheet [data-q="A2"]').count(): pg.evaluate(TAP, f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); pg.wait_for_timeout(150)
     elif s == 'd1':
@@ -63,6 +65,8 @@ async def apremarket(pg, day=None, max_loss=None, max_trades=None, short=False, 
       await pg.fill('#gSheet [data-pmf="X_levels"]', 'London high 5820 · London low 5800'); await pg.fill('#gSheet [data-pmf="X_plan"]', 'Cassure du London low : vente.' if short else 'Cassure du London high : achat.')
       if max_loss is not None: await pg.fill('#gSheet [data-pmf="max_loss"]', str(max_loss))
       elif not await pg.input_value('#gSheet [data-pmf="max_loss"]'): await pg.fill('#gSheet [data-pmf="max_loss"]', '500')
+      if save: await pg.evaluate(TAP, '#gSheet [data-pm="save"]'); await pg.wait_for_timeout(900)
+      return True
     elif s == 'pos':
       if await pg.locator('#gSheet [data-q="A2"]').count(): await pg.evaluate(TAP, f'#gSheet [data-q="A2"][data-v="{"low" if short else "high"}"]'); await pg.wait_for_timeout(150)
     elif s == 'd1':

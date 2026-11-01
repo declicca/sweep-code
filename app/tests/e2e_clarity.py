@@ -2,7 +2,7 @@
 Sweep — clarity (points B9 to B17), dev environment with Playwright:
   python3 tests/e2e_clarity.py http://127.0.0.1:8095 /tmp/show_state.json
 """
-import asyncio, sys
+import asyncio, os, sqlite3, sys
 from playwright.async_api import async_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
@@ -29,13 +29,23 @@ async def main():
     ctx, pg, dlg = await page(br, False)
     await pg.wait_for_timeout(6000)
     ok(await pg.locator('#main .nav-rt').count() == 1 and await pg.locator('#main .nav-rt.closed-rt').count() == 0, 'B9 the routine is open (still open after 8 s)')
-    ok(await pg.locator('#main .nav-rt-s.next .btn.primary').count() == 1, 'B9 the next step stands out with its own button')
+    # (the shared trader's day may have moved on with an earlier test of the same group: the day already reviewed, the day closed at its
+    # limit (the lock is kept even once that test's trades are removed), or the week's recap / « Close my day » holding the only blue
+    # button — then no step is « next »; otherwise the next step has it)
+    st = await pg.evaluate("""(() => { const q = (s) => [...document.querySelectorAll(s)].filter((e) => e.getClientRects().length).length, s = document.querySelectorAll('#main .nav-rt-steps .nav-rt-s');
+      return { next: q('#main .nav-rt-s.next .btn.primary'), closed: s.length === 3 && s[2].classList.contains('done'), other: q('#main .nav-rt-wk .btn.primary, #main .nav-now .btn.primary, #main .nav-lock .btn.primary'), steps: (document.querySelector('#main .nav-rt-steps') || {}).dataset?.next } })()""")
+    ok(st['next'] == 1 or (st['next'] == 0 and (st['closed'] or st['other'] == 1)), f'B9 the next step stands out with its own button, or the one blue button is elsewhere for a reason ({st})')
     await pg.evaluate("""(async()=>{const a=S.accounts.find(x=>x.status!=='archived'); put('trades',{id:'b10-big',account_id:a.id,instrument:'NQ',direction:'short',contracts:1,entry:1,exit:2,pnl_c:-1234567,pnl_manual:true,date:todayStr(),entry_time:'10:00',exit_time:'10:01',session_date:true}); await new Promise(r=>setTimeout(r,1800));})()""")
     cut = []
     for h in ['#dashboard', '#accounts', '#analytics', '#trades']:
       await pg.evaluate(f"location.hash='{h}'"); await pg.wait_for_timeout(1500); cut += [f'{h}: {x}' for x in await pg.evaluate(CUT)]
     ok(not cut, f'B10 a −12,345.67 day at 390 px: no figure cut ({cut[:4]})')
-    await pg.evaluate("remove('trades','b10-big')"); await pg.wait_for_timeout(500)
+    await pg.evaluate("remove('trades','b10-big')"); await pg.wait_for_timeout(1500)
+    # (1 Nov., brief avance 4) that loss closed the shared trader's day, and a lock reached is kept once the trade is deleted: lift it,
+    # so the tests after this one find the day open (e2e_weekly_card, e2e_plan_journal)
+    try:
+      d = sqlite3.connect(os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')); d.execute("UPDATE game_days SET detail_json = json_remove(detail_json, '$.lock') WHERE user_id = 'mateo' AND detail_json LIKE '%\"lock\"%'"); d.commit(); d.close()
+    except Exception as e: print('  note: lock not lifted:', e)
     # B12 account page
     acc = await pg.evaluate("(S.accounts.find(a=>a.status!=='archived'&&S.trades.some(t=>t.account_id===a.id))||{}).id")
     await pg.evaluate(f"location.hash='#account/{acc}'"); await pg.wait_for_timeout(1600)
@@ -43,7 +53,7 @@ async def main():
     ok(len([x for x in row if x != '⋯']) == 1 and '⋯' in row, f'B12 one button + the « ⋯ » menu ({row})')
     items = await pg.evaluate("[...document.querySelectorAll('#main .acc-menu .menu-pop button')].map(b=>b.textContent.trim())")
     ok(any('Retirer le compte' in x for x in items) and not any('Fermer' in x for x in items) and any('chou' in x for x in items) and any('Supprimer' in x for x in items), f'B12 the menu: remove (with a result, 15 Oct.), mark as failed, delete ({items})')
-    backs = await pg.evaluate("[...document.querySelectorAll('#main a[href=\"#accounts\"]')].filter(a=>a.getClientRects().length).length")
+    backs = await pg.evaluate("[...document.querySelectorAll('.main-wrap a[href=\"#accounts\"]')].filter(a=>a.getClientRects().length).length")   # (1 Nov., brief visuel C1) the back link is in the header, above the title
     ok(backs == 1, f'B12 one way back ({backs})')
     ok('Ouvrir le tableau de bord' not in await pg.evaluate("document.getElementById('main').innerText"), 'B12 no « Ouvrir le tableau de bord »')
     txt = await pg.evaluate("document.getElementById('main').innerText")

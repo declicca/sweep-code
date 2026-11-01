@@ -3,7 +3,8 @@ Sweep — the pre-market missed (brief « Plan pre-market adaptatif », step 6),
 after 09:25 New York:
   python3 tests/e2e_premarket_express.py http://127.0.0.1:8095 /tmp/show_state.json
  1  a trader who makes sheets opens the app after the lock time without one: the express version opens by itself, once
- 2  bias, key levels, the expected and the alternative scenario (and the day's max loss; 20 Oct.: no prices to set); saved: mode express, locked, the session view, the journal's Pre-market
+ 2  bias, key levels, the expected and the alternative scenario (and the day's max loss; 20 Oct.: no prices to set); 1 Nov.: one screen,
+    only the bias and the max loss needed; saved: mode express, locked, the session view, the journal's Pre-market
  3  « Later »: no sheet; the day's new trades are off-plan (nothing to link)
 The test days are removed at the end.
 """
@@ -40,14 +41,12 @@ with sync_playwright() as p:
     # 2. bias, key levels, the two scenarios
     pg.click('#gSheet [data-pm="inst-pick"][data-v="MES"]'); pg.wait_for_timeout(150)   # (the instrument: one chip)
     ok(pg.locator('#gSheet [data-pmf="X_level"], #gSheet [data-pmf="X_stop"]').count() == 0 and pg.locator('#gSheet [data-q="X_bias"]').count() == 3, f'2 {w}: no entry / stop / target to set: the bias (3 choices)')
-    pg.click('#gSheet [data-pm="next"]'); pg.wait_for_timeout(250)
-    ok(pg.locator('#gSheet [data-pm-screen=express]').count() == 1 and 'Choisis ton biais et écris ton scénario attendu.' in pg.locator('#gSheet .pm-err').inner_text(), f'2 {w}: without bias nor scenario: it says so and stays')
+    pg.click('#gSheet [data-pm="save"]'); pg.wait_for_timeout(250)   # (1 Nov., brief dans le temps D2: one screen, saved from it; the bias and the max loss only)
+    ok(pg.locator('#gSheet [data-pm-screen=express]').count() == 1 and 'Choisis ton biais et ta perte max.' in pg.locator('#gSheet .pm-err').inner_text(), f'2 {w}: without a bias: it says so and stays')
     pg.click('#gSheet [data-q="X_bias"][data-v="bullish"]'); pg.wait_for_timeout(150)
     pg.fill('#gSheet [data-pmf="X_levels"]', 'PDH 5850 · London high 5820'); pg.fill('#gSheet [data-pmf="X_plan"]', 'Cassure du London high qui tient au retest : achat vers le PDH.'); pg.fill('#gSheet [data-pmf="X_alt"]', 'Retour sous 5800 : pas de trade.')
     if not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')   # (the day's max loss, as the plan always had)
-    pg.click('#gSheet [data-pm="next"]'); pg.wait_for_timeout(300)
-    t = pg.locator('#gSheet .pm-sheet').inner_text().replace('\xa0', ' ')
-    ok(pg.locator('#gSheet [data-pm-screen=sheet]').count() == 1 and 'Biais · Long' in t and 'Niveaux clés · PDH 5850 · London high 5820' in t and 'Scénario attendu · Cassure du London high' in t and 'Scénario alternatif · Retour sous 5800' in t, f'2 {w}: the sheet: bias, key levels, the two scenarios ({t[:120]!r})')
+    ok(pg.locator('#gSheet [data-pm="next"]').count() == 0, f'2 {w}: one screen: saved from it, no second step')
     pg.click('#gSheet [data-pm="save"]'); pg.wait_for_timeout(900)
     f = pg.evaluate("(d) => SweepFiche.get(d)", day); pre = pg.evaluate("(d) => (getDoc('journals', d) || {}).pre || {}", day)
     ok(f and f['mode'] == 'express' and len(f['scenarios']) == 0 and pg.evaluate("(d) => SweepFiche.locked(SweepFiche.get(d))", day) and pre.get('bias') == 'bullish' and pre.get('levels') == 'PDH 5850 · London high 5820' and pre.get('scenario', '').startswith('Cassure') and pre.get('alt', '').startswith('Retour'),

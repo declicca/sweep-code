@@ -182,7 +182,12 @@ def run(p, lang, phone, exp, now=OPEN):
   why = '' if n2 == (1 if phone else 0) else pg.evaluate("""JSON.stringify({ coarse: matchMedia('(pointer: coarse)').matches, touch: navigator.maxTouchPoints, w: innerWidth, day0: localStorage.getItem('sw.day0'), today: todayStr(),
     created: S.me && S.me.created_at, modal: sessionStorage.getItem('sw.modal'), sugg: localStorage.getItem('sw.sugg'), shown: localStorage.getItem('sw.installShown'),
     open: [...document.querySelectorAll('.open, [role=dialog]')].map((e) => e.id || e.className).slice(0, 6), real: S.trades.filter((x) => !x.demo).length })""")   # (27 Oct.) what kept it closed
-  ok(n2 == (1 if phone else 0), f'{tag} the 2nd day of use, after a trade: the install window {"opens" if phone else "never opens on a computer"} ({n2} {why})')
+  # (1 Nov., brief dans le temps C2) nothing opens over the app between the day's first trade and its review: the window waits for the review
+  ok(n2 == 0, f'{tag} the 2nd day of use, right after a trade: no window during the session ({n2})')
+  pg.evaluate("() => { const j = structuredClone(getDoc('journals', todayStr()) || { id: todayStr() }); j.id = todayStr(); j.post = Object.assign({}, j.post, { reviewed_at: new Date().toISOString(), tomorrow: 'Patience' }); put('journals', j); render(); }")
+  pg.wait_for_timeout(1800); n2 = pg.locator('aside.nav-inst.open').count()
+  why = '' if n2 == (1 if phone else 0) else pg.evaluate("JSON.stringify({ sugg: localStorage.getItem('sw.sugg'), modal: sessionStorage.getItem('sw.modal'), quiet: window.SweepQuiet && SweepQuiet(), open: [...document.querySelectorAll('.open, [role=dialog]')].map((e) => e.id || e.className).slice(0, 6) })")
+  ok(n2 == (1 if phone else 0), f'{tag} the 2nd day of use, once the day is reviewed: the install window {"opens" if phone else "never opens on a computer"} ({n2} {why})')
   if n2: pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(300)
   ok(not errs, f'{tag} no page error ({errs[:2]})')
   br.close()

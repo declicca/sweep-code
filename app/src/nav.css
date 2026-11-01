@@ -1168,7 +1168,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 /* title row: « Import CSV » glued to the left of « Add a trade », both centred on the title line */
 .main-wrap .top > .nav-imp.top{margin:0 8px 0 auto!important;align-self:center;display:inline-flex}
 .main-wrap .top > .nav-imp.top + .nav-addtop{margin-left:0!important;align-self:center}
-.main-wrap .top > .nav-imp.top .nav-imp-b{height:40px!important;margin:0!important;padding:0 14px!important;border-radius:14px!important;font-size:14px;font-weight:500}
+.main-wrap .top > .nav-imp.top .nav-imp-b{height:44px!important;margin:0!important;padding:0 14px!important;border-radius:var(--r-pill)!important;font-size:14px;font-weight:500}
 @media (max-width:860px){
   .main-wrap .top > .nav-imp.top{position:absolute;right:68px;top:50%;transform:translateY(-50%);margin:0!important}
   .main-wrap .top > .nav-imp.top .nav-imp-b{padding:0 12px!important;font-size:13px}
@@ -1354,7 +1354,7 @@ html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + var(--ptr-y,0px) * .5)
 .nav-arch > div{display:flex;flex-direction:column;margin-top:10px}
 .nav-arch-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 4px;border-top:.5px solid var(--hair);color:var(--text);text-decoration:none}
 .nav-arch-t{font-size:12px;font-weight:600;padding:2px 10px;border-radius:var(--r-pill);background:var(--fill);color:var(--text2)}
-.nav-arch-t.failed{background:rgba(229,72,77,.14);color:#ff6b6b}.nav-arch-t.passed,.nav-arch-t.live{background:var(--posbg);color:var(--pos)}
+.nav-arch-t.failed{background:var(--negbg);color:var(--neg)}.nav-arch-t.passed,.nav-arch-t.live{background:var(--posbg);color:var(--pos)}
 /* account filter pill */
 .nav-fpill{display:inline-flex;align-items:center;gap:10px;margin:0 0 12px;padding:7px 8px 7px 14px;border:0;border-radius:var(--r-pill);background:var(--posbg);color:var(--pos);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .nav-fpill b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(var(--pos-rgb),.18);font-size:11px}
@@ -1462,7 +1462,7 @@ html.pwa .nav-ptr{top:calc(env(safe-area-inset-top,0px) + var(--ptr-y,0px) * .5)
 :root,:root[data-theme="dark"]{
   --ink2:#0E0E11;--line2:#34343B;--text2:#C9C9CF;
   --posbg:rgba(76,141,255,.14);--negbg:rgba(212,162,76,.14);--btntext:#FFFFFF;
-  --r-chip:10px;
+  --r-chip:999px;   /* (1 Nov., brief visuel R3) every chip is a capsule (the emotion chips were 10) */
   --t-fast:.2s;--t-base:.35s;--t-slow:.7s;
   --font-ui:'Geist',-apple-system,'SF Pro Display',system-ui,sans-serif;--font-num:'Geist Mono',ui-monospace,'SF Mono',monospace;
   --ambient:radial-gradient(1100px 700px at 12% -10%,rgba(76,141,255,.14),transparent 60%),radial-gradient(900px 600px at 105% 110%,rgba(212,162,76,.08),transparent 60%);
@@ -2285,7 +2285,7 @@ html body #main .mny-pane{display:flex;flex-direction:column;gap:20px}
 html body #main .mny-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;max-width:560px}
 html body #main .mny-actions .btn{height:44px;font-size:15px;font-weight:600;border-radius:var(--r-pill);justify-content:center;white-space:nowrap}
 html body #main .mny-addform{padding-top:18px}
-@media (max-width:860px){html body #main .mny-view{max-width:none}html body #main .mny-actions{max-width:none}html body #main .mny-actions .btn{height:48px;padding:0 10px}}
+@media (max-width:860px){html body #main .mny-view{max-width:none}html body #main .mny-actions{max-width:none}html body #main .mny-actions .btn{height:44px;padding:0 10px}}
 html body #main .mny-actions .btn .s{display:none}
 @media (max-width:600px){html body #main .mny-actions .btn .l{display:none}html body #main .mny-actions .btn .s{display:inline}}
 
@@ -2679,8 +2679,8 @@ html body #main .tstats b{font:600 20px "Geist Mono",ui-monospace,monospace;lett
   html body #main .fx{display:block;margin:0 0 16px}
   html body #main .fx-row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:3px 20px;scroll-padding:0 20px}
   #main .fx-row::-webkit-scrollbar{display:none}
-  html body .fx-c{height:40px;padding:0 15px;font-size:15px}
-  html body .fx-c::after{content:"";position:absolute;inset:-2px 0}
+  html body .fx-c{height:38px;padding:0 15px;font-size:15px}
+  html body .fx-c::after{content:"";position:absolute;inset:-3px 0}   /* (1 Nov.) 38 px, its zone 44 (the row has 3 px above and below) */
   html body #main .fx-search{width:auto;height:44px;margin:10px 0 0;font-size:16px}
   html body #main .fx-search input{font-size:16px;height:100%!important}   /* (the whole 44 px is the field) */
   html body #main .nav-kpi-h{flex-wrap:wrap;row-gap:10px}
@@ -2711,7 +2711,7 @@ html body #main .tstats b{font:600 20px "Geist Mono",ui-monospace,monospace;lett
 /* the type pill keeps the old selector's class (« mny-tsw ») only to be found: none of its old margins and layout */
 html body #main .fx-c.mny-tsw{display:inline-flex!important;flex-wrap:nowrap;max-width:none;margin:0!important;gap:7px}
 html body #main .fx-c.fbtn{min-height:0;height:36px;border-radius:var(--r-pill);margin:0}
-@media (max-width:860px){html body #main .fx-c.fbtn{height:40px}}
+@media (max-width:860px){html body #main .fx-c.fbtn{height:38px}}
 
 /* Sweep AI · « Debrief my day » (15 Oct.): the trader may leave his trades out, and say the day in his own words */
 .sai .sai-check{display:flex;align-items:center;gap:10px;min-height:44px;margin:4px 0 2px;font-size:15px;cursor:pointer}
@@ -2742,10 +2742,15 @@ body.sw-onb .bottomnav{display:none!important}   /* (27 Oct.) the welcome page: 
 /* (19 Oct., Mateo's recording) on his iPhone the installed app does not match « display-mode: standalone »: the app
    marks itself (html.pwa, src/nav.js, from navigator.standalone too) and these rules follow that mark. */
 @media (max-width:860px){
-  /* the header right under the status bar (18 Oct., Mateo: too much empty space at the top): the safe area already holds the
-     room below the clock, so 6 px less instead of 10 px more; the compact title stays on the logo's row */
-  html.pwa body aside.side{padding-top:max(6px,min(env(safe-area-inset-top,0px),44px),calc(env(safe-area-inset-top,0px) - 10px))!important}   /* (19 Oct.: 4 px higher again; never under the clock: 44 px on the iPhones with a notch, the safe area − 10 px with the Dynamic Island) */
-  html.pwa body.ux-scrolled aside.side{padding-top:calc(env(safe-area-inset-top,0px) + 4px)!important}   /* scrolled, the bar's glass is on: the whole row below the clock (19 Oct., it was tucked a little under it) */
+  /* (1 Nov., brief visuel iOS 27.2, 1) the safe areas in one place each: never on html (its padding counted them twice, and until
+     the page scrolled iOS lifted the fixed tab bar by the clock's band: 78 pt from the bottom on an empty Trades, 23 pt
+     scrolled; the logo 121 pt from the top, 72 pt scrolled). The header holds the top one, the tab bar the bottom one, the
+     page's end leaves the bar's room, and the page is never shorter than the whole screen (its background to the bottom) */
+  html.pwa{padding-top:0!important;padding-bottom:0!important;height:auto!important}
+  html.pwa body{min-height:100lvh}
+  html.pwa body main{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+  html.pwa body.ask-on main{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+  html.pwa body aside.side{padding-top:calc(env(safe-area-inset-top,0px) + 4px)!important}   /* the same at the top of the page and scrolled: the header never jumps */
   html.pwa aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 10px)}
   /* at the top of a page the header is the page itself (no band, no line when the page is pulled down: 19 Oct.) */
   html.pwa body:not(.ux-scrolled) aside.side{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:transparent!important}
@@ -2847,7 +2852,7 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 /* Settings › Appearance, the language (19 Oct., Mateo: badly fitted on a phone): its 4 choices in a 2 × 2 grid, rounded as a block */
 @media (max-width:600px){
   html body .seg:has(> [data-act=lang]){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;width:100%;box-sizing:border-box;padding:4px;border-radius:var(--r3)!important}
-  html body .seg:has(> [data-act=lang]) > button{width:auto;min-width:0;margin:0!important;box-sizing:border-box;min-height:44px;border-radius:var(--r2)!important}
+  html body .seg:has(> [data-act=lang]) > button{width:auto;min-width:0;margin:0!important;box-sizing:border-box;min-height:44px;border-radius:var(--r-pill)!important}
   html body .fgrid.two:has([data-imp=account]){grid-template-columns:minmax(0,1fr)}   /* Import: the account in full, the formats under it (20 Oct.: « Topstep — Co… ») */
 }
 /* a computer up to 1440 px: the 12 columns of Trades fit without a side scroll (20 Oct.: Setup cut at 1300 px) */
@@ -2946,6 +2951,10 @@ html body .nav-rt-me .nav-rt-streak > span{text-align:center}
 .nav-now-v{font-family:'Geist Mono',ui-monospace,monospace;font-size:22px;font-weight:600;color:var(--text);white-space:nowrap}
 .nav-now-s,.nav-now-news{margin:4px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
 .nav-now-news{color:var(--neg)}
+/* (1 Nov., brief dans le temps) the caution line (D1) and the trader's own rule for the session (D4): text colours, never gold (gold is for losses) */
+.nav-now-cz{margin:6px 0 0;font-size:13px;line-height:1.4;font-weight:600;color:var(--text)}
+.nav-now-rule{margin:4px 0 0;font-size:13px;line-height:1.4;color:var(--muted)}
+.nav-now-rule b{font-weight:600;color:var(--text)}
 .nav-now.is-end{background:rgba(var(--neg-rgb,212,162,76),.12)}
 .nav-now.is-end small{color:var(--neg)}
 
@@ -2960,7 +2969,6 @@ html body .nav-rt-me .nav-rt-streak > span{text-align:center}
 .gp-ln-mis small{grid-column:2;color:var(--muted);font-size:12px}
 .gp-ln-mis i{grid-column:3;grid-row:1/span 2;font-style:normal;font-size:20px;color:var(--muted)}
 .gp-ln-ok{margin:0;font-size:14px;color:var(--text2)}
-.gp-ln-late{justify-self:start;min-height:32px;padding:6px 12px;border:0;border-radius:99px;background:color-mix(in srgb,var(--neg) 16%,transparent);color:var(--neg);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 /* Today (SWEEP.md step 3): one blue button, the one of « Now » — the header's « Add a trade » goes grey while the routine is on screen */
 body:has(#main .nav-rt) .nav-addtop{background:var(--fill);color:var(--text);box-shadow:none}
 /* (27 Oct.) « I’m done for today », under the routine’s steps from the first trade */
@@ -3042,3 +3050,112 @@ html body .nav-am-net input{min-height:44px;box-sizing:border-box}
 html body #main details.co-full > summary{min-height:44px;display:flex;align-items:center}
 /* (31 Oct., fluidity 10) the 1-to-5 scales of a trade (confidence, execution…): 44 px each (5 × 44 fits a phone), drawn so from the first image */
 html body #main .f > .seg > button{min-width:44px}
+
+/* ───────────── (1 Nov., brief visuel iOS 27.2, 2) everything touched is round, as on iOS 27: a button with words is a
+   capsule, a button with one icon is a circle; cards and tiles keep their radii. Three heights of capsule: 44 (button),
+   38 (chip, segment), 34 (icon button in a bar) ───────────── */
+html body .bottomnav .plus{border-radius:50%!important}   /* R1 the « + » */
+html body .bottomnav .bn-pill{border-radius:var(--r-pill)!important}   /* R1 the active tab's background */
+html body .bottomnav a{border-radius:var(--r-pill)}
+html body .nav-imp-b{border-radius:var(--r-pill)!important}   /* R2 « CSV », as « Export » */
+html body #main .chips .chip,html body #main .chip{border-radius:var(--r-pill)!important}   /* R3 the emotion chips */
+html body .sc-ic{border-radius:50%!important}   /* R3 the chart's full-screen button */
+html body .seg button,html body .seg a{border-radius:var(--r-pill)!important;box-sizing:border-box}   /* R4 a capsule in the capsule (theme, language); 38 px, never 46 or 48 (padding added to the height) */
+/* R5 every label is a capsule of one height */
+html body .pill,html body .pz-pill,html body .mny-tag,html body .nav-live,html body .nav-arch-t{display:inline-flex;align-items:center;height:22px;box-sizing:border-box;padding-top:0;padding-bottom:0;border-radius:var(--r-pill)!important;vertical-align:middle;line-height:1}
+/* R6 « Checklist » is a tile as « R multiple » beside it: no outline, the blue on the number only */
+html body .nav-tdisc{box-shadow:none!important;background:none!important;padding:0!important;border-radius:0}
+html body .nav-tdisc:hover{box-shadow:none!important}
+html body .nav-tdisc .dc{color:var(--pos)}
+
+/* ───────────── (1 Nov., brief visuel iOS 27.2, 3) the same gesture looks the same everywhere ───────────── */
+/* C1 the back link: blue, above the large title, on the left (nav.js topBack); the page's own one is hidden */
+html body .main-wrap .top{position:relative}
+/* the back link sits in the free room above the large title (the header keeps its 96 px on every page, its title at the bottom) */
+html body .main-wrap .top > .top-back{position:absolute!important;top:8px;left:34px;display:inline-flex;align-items:center;gap:2px;width:max-content;max-width:100%;min-height:36px;margin:0 0 2px -6px;padding:0 8px 0 0;color:var(--pos);text-decoration:none;font-weight:500;font-size:16px;-webkit-tap-highlight-color:transparent}
+html body .main-wrap .top > .top-back.off{visibility:hidden;pointer-events:none}
+html body .main-wrap .top > .top-back svg{width:22px;height:22px;flex:0 0 auto}
+html body .main-wrap .top > .top-back span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body .main-wrap .top > .top-back:active{transform:scale(.97)}
+html body #main .sw-own-back{display:none!important}
+/* C2 what folds open has one shape: the label, then a chevron on its right that turns 90° when open (Settings had ⌄ on the
+   right, a trade « › Full review · 2 of 4 ▾ » with two arrows, « + » / « − » elsewhere) */
+html body #main details:not(.menu):not(.nav-arch):not(.acc-menu):not(.tday)>summary:not(.btn)::before{content:none!important;display:none!important}
+html body #main details:not(.menu):not(.nav-arch):not(.acc-menu):not(.tday)>summary:not(.btn)::after{content:""!important;display:inline-block!important;flex:none;width:7px!important;height:7px!important;margin:0 2px 0 0!important;border:0!important;border-top:2px solid currentColor!important;border-right:2px solid currentColor!important;background:none!important;transform:rotate(45deg)!important;transition:transform .25s var(--spring)!important}
+html body #main details[open]:not(.menu):not(.nav-arch):not(.acc-menu):not(.tday)>summary:not(.btn)::after{transform:rotate(135deg)!important}
+html body #main details.nav-sgd>summary::after{color:var(--muted);margin-left:auto!important}
+@media (prefers-reduced-motion:reduce){html body #main details>summary::after{transition:none!important}}
+/* C3 the « i »: always right after its label, centred on its line, one size (Stats had it in the tile's corner, an account above the line) */
+html body #main :is(.ikpis .lbl,.statline > div > span:first-child,.kpi .lbl,.k .lbl) > .info{position:relative!important;top:auto!important;right:auto!important;width:16px!important;height:16px!important;margin:0 0 0 4px!important;vertical-align:middle!important;align-self:center;flex:none}
+html body #main .statline > div > span:first-child{display:inline-flex;align-items:center}
+html body #main .ikpis .ik .lbl{display:inline-flex;align-items:center}
+/* C4 Settings: one grouped list, as Settings on an iPhone — rows in one card, a thin line between them */
+html body #main .nav-sgd{margin:0!important}
+html body #main .nav-sgd:not(.nav-sgd + .nav-sgd){margin-top:10px!important}
+html body #main .nav-sgd:not(:has(+ .nav-sgd)){margin-bottom:10px!important}
+html body #main .nav-sgd>summary{border-radius:0!important;box-shadow:none!important;background:var(--panel);margin:0!important}
+html body #main .nav-sgd + .nav-sgd>summary{border-top:1px solid var(--line)}
+html body #main .nav-sgd:not(.nav-sgd + .nav-sgd)>summary,html body #main .nav-sgd[open] + .nav-sgd>summary{border-top-left-radius:var(--r-tile,20px)!important;border-top-right-radius:var(--r-tile,20px)!important;border-top:0}
+html body #main .nav-sgd:not(:has(+ .nav-sgd))>summary,html body #main .nav-sgd[open]>summary{border-bottom-left-radius:var(--r-tile,20px)!important;border-bottom-right-radius:var(--r-tile,20px)!important}
+html body #main .nav-sgd[open]{margin-bottom:22px!important}
+html body #main .nav-sgd[open] + .nav-sgd{margin-top:0!important}
+/* C5 the sample data's line: one line, « Sample data » and a « Remove » capsule on the right */
+html body #main .ux-empty.demo{flex-wrap:nowrap;align-items:center;gap:12px;padding:8px 8px 8px 16px}
+html body #main .ux-empty.demo > span{display:inline-flex;align-items:center;white-space:nowrap;min-width:0}
+html body #main .ux-empty.demo .ux-demo-rm{flex:none;height:38px;padding:0 16px;margin-left:auto}
+/* C6 « Your lesson » grows with its text */
+html body .co-q-l textarea{field-sizing:content;resize:none;overflow:hidden}
+/* C7 the chart's time frames scroll without cutting anything: a fade at the edge, as the other scrolling rows */
+@media (max-width:860px){html body .sc-bar .seg.sc-tfs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);padding-right:18px;scroll-padding-right:18px}
+  html body .sc-bar .seg.sc-tfs button{flex:none}}
+/* the three heights, on the computer too: the header's buttons (Export, Share my stats, Add a trade, CSV) 44; a small button,
+   a chip, a segment, a filter 38; an icon button in a row 34 */
+html body .main-wrap .top .btn.sm,html body .main-wrap .top .nav-addtop,html body .main-wrap .top .sh-btn,html body .main-wrap .top .mny-exp{height:44px;min-height:44px;box-sizing:border-box}
+html body #main .tr-top .btn.sm,html body #main .tr-top .seg.tr-nav > a,html body #main .tr-top .seg.tr-nav > span{height:38px;min-height:38px;box-sizing:border-box}
+html body .fx-c{height:38px}
+html body #main .ux-setup{height:38px;min-height:38px}
+html body #main .acc-ic{width:34px;height:34px;min-height:34px;border-radius:50%}
+/* (1 Nov., brief avance 6) « Your October is ready »: the Month in Review at the top of the routine card, one tap; the story grows from it */
+html body #main .nav-mr{position:relative;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;width:100%;margin:0 0 14px;padding:14px 16px;border:0;border-radius:var(--r3,20px);background:linear-gradient(140deg,rgba(var(--pos-rgb),.20),rgba(var(--pos-rgb),.05));box-shadow:inset 0 0 0 1px rgba(var(--pos-rgb),.32),inset 0 1px 0 var(--hi);color:var(--text);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .2s var(--spring)}
+html body #main .nav-mr:active{transform:scale(.97)}
+html body #main .nav-mr .nav-mr-k{grid-column:1;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--pos)}
+html body #main .nav-mr b{grid-column:1;font-size:17px;font-weight:600;letter-spacing:-.01em}
+html body #main .nav-mr small{grid-column:1;font-size:13px;color:var(--muted)}
+html body #main .nav-mr .nav-mr-go{grid-column:2;grid-row:1/4;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--pos-fill,var(--blue-btn));color:#fff}
+html body #main .nav-mr .nav-mr-go svg{width:16px;height:16px}
+/* C1 on a phone the back link is in the top bar, where the logo is, as iOS's navigation bar: it takes no room above the title
+   (the header keeps one height on every page) and stays there while scrolling; a 44 px target */
+html body .main-wrap .top > .top-back::after{content:"";position:absolute;inset:-4px 0}
+@media (max-width:860px){
+  html body .main-wrap .top > .top-back{position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:41;min-height:44px;margin:0;max-width:calc(100vw - 170px)}
+  html.pwa body .main-wrap .top > .top-back{top:calc(env(safe-area-inset-top,0px) + 4px)}
+  html body .main-wrap .top > .top-back::after{content:none}
+  html body .main-wrap .top > .top-back.off{display:none}
+  html body.sw-top-back aside.side .brand{visibility:hidden}
+}
+/* a header button is 44 px but takes the title's height in the row (the row never grows when a page's button arrives) */
+@media (min-width:861px){html body .main-wrap .top .btn.sm,html body .main-wrap .top .nav-addtop,html body .main-wrap .top .sh-btn,html body .main-wrap .top .mny-exp,html body .main-wrap .top .nav-imp-b{margin-top:-3px!important;margin-bottom:-3px!important}}
+/* the title's row is 44 px on every page, with or without its header buttons (44 px since this tour): it never grows when a
+   page's button arrives */
+@media (max-width:860px){html body .main-wrap .top > #title{min-height:44px;display:flex;align-items:center}}
+/* the « i » now follows its label in a Stats tile: on a phone the tile gives the label a little more room, so the longest
+   Spanish labels (« Factor de beneficio », « Ganancia / pérdida ») stay on one line with it */
+@media (max-width:600px){html body #main .ikpis .ik{padding-left:14px!important;padding-right:12px!important}html body #main .ikpis .ik .lbl{font-size:12.5px;letter-spacing:-.01em;white-space:nowrap}html body #main .ikpis .ik .lbl > .info{margin-left:3px!important}}
+/* (1 Nov., brief avance 4) « Day closed »: the day's limit reached, a calm screen in place of « Now » and the 3 steps until 18:00 ET
+   (no fold, no coach card under it: two actions only); the counter « 2/3 trades · $180 left today » before it; Settings' limits */
+html body #main .nav-rt.nav-lockd > .co-today{display:none!important}
+.nav-rt-pill.lk{background:var(--fill);color:var(--text2);box-shadow:inset 0 0 0 1px var(--line)}
+.nav-lock{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;margin:8px 0 4px;padding:24px 16px 18px;border-radius:var(--r3,20px);background:var(--fill)}
+.nav-lock-ic{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:rgba(var(--pos-rgb),.1);color:var(--pos)}
+.nav-lock-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-lock-w{margin:2px 0 0;max-width:42ch;font-size:15px;font-weight:600;line-height:1.4;color:var(--text)}
+.nav-lock-cd{display:flex;flex-direction:column;align-items:center;gap:2px;margin:6px 0 0}
+.nav-lock-cd small{font-size:12px;color:var(--muted)}
+.nav-lock-n{font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.nav-lock-co{margin:6px 0 0;max-width:46ch;font-size:14px;line-height:1.5;color:var(--muted)}
+.nav-lock-a{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%;margin-top:8px}
+html body #main .nav-lock-a .btn{min-height:44px;padding:0 20px;border-radius:999px;justify-content:center;flex:1 1 150px;max-width:260px}
+.nav-now-cnt b{font-size:15px;font-weight:500;color:var(--text)}
+.nav-now-cnt .nav-now-v{font-size:inherit;font-weight:600}
+.fgrid > .nav-dl-help{grid-column:1/-1;margin:0}
+.nav-dl-wait{display:block;margin-top:4px;font-weight:600;color:var(--text)}

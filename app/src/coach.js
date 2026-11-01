@@ -229,6 +229,22 @@
       first: 'Tras tu primera operación, te digo qué estuvo bien y la única cosa a mejorar.',
     },
   }[L];
+  /* (1 Nov., brief dans le temps) the coach over the weeks: never the same sentence three days in a row (C1), the caution mode the
+     morning after a hard day (D1), « taken right after a loss » (F) */
+  const TW = {
+    en: { noPlanS: 'Before your session: your plan.', noPlan2: 'Your plan takes 30 seconds: your bias and your max loss.', noPlan3: '{n} sessions in a row without a plan. A bias and a max loss are enough: 30 seconds.',
+      resumeY: 'Use yesterday’s plan again?', resumeL: 'Use your last plan again?', resumeB: 'Use it', pOk2: '{n} sessions in a row with a plan: max loss {m}, {t} trades max.', pOk2b: '{n} sessions in a row with a plan: max loss {m}.',
+      noneRun: '{n} sessions in a row without a mistake. Keep the same routine.', noPlanRun: ['{n} sessions in a row without a plan.', 'Use your last plan again in one tap, from Today.'],
+      revenge0: 'Taken right after a loss.', protect: 'Today, protect your account: half your usual risk, only your best setups.' },
+    fr: { noPlanS: 'Avant ta séance\u00a0: ton plan.', noPlan2: 'Ton plan prend 30 secondes\u00a0: ton biais et ta perte max.', noPlan3: '{n} séances de suite sans plan. Un biais et une perte max suffisent\u00a0: 30 secondes.',
+      resumeY: 'Reprends ton plan d’hier\u00a0?', resumeL: 'Reprends ton dernier plan\u00a0?', resumeB: 'Le reprendre', pOk2: '{n}ᵉ séance de suite avec un plan\u00a0: perte max {m}, {t} trades max.', pOk2b: '{n}ᵉ séance de suite avec un plan\u00a0: perte max {m}.',
+      noneRun: '{n} séances de suite sans erreur. Garde la même routine.', noPlanRun: ['{n}ᵉ séance de suite sans plan.', 'Reprends ton dernier plan en un toucher, depuis Aujourd’hui.'],
+      revenge0: 'Pris tout de suite après une perte.', protect: 'Aujourd’hui, protège ton compte\u00a0: la moitié de ton risque habituel, seulement tes meilleurs setups.' },
+    es: { noPlanS: 'Antes de tu sesión: tu plan.', noPlan2: 'Tu plan toma 30 segundos: tu sesgo y tu pérdida máxima.', noPlan3: '{n} sesiones seguidas sin plan. Un sesgo y una pérdida máxima bastan: 30 segundos.',
+      resumeY: '¿Retomas tu plan de ayer?', resumeL: '¿Retomas tu último plan?', resumeB: 'Retomarlo', pOk2: '{n}.ª sesión seguida con un plan: pérdida máx. {m}, {t} operaciones máx.', pOk2b: '{n}.ª sesión seguida con un plan: pérdida máx. {m}.',
+      noneRun: '{n} sesiones seguidas sin errores. Mantén la misma rutina.', noPlanRun: ['{n}.ª sesión seguida sin plan.', 'Retoma tu último plan en un toque, desde Hoy.'],
+      revenge0: 'Tomada justo después de una pérdida.', protect: 'Hoy, protege tu cuenta: la mitad de tu riesgo habitual, solo tus mejores setups.' },
+  }[L];
   // (a percentage never leaves its number: « 89 % » with a narrow no-break space in fr / es, « 89% » in en)
   // (27 Oct.) a count of 1 (0 too in French) keeps its noun in the singular: « 1 trade sur 2 », « 1 operación », « 1 trade prévu »
   const one = (x) => (L === 'fr' ? x.replace(/(^|[^\d.,])([01]) trades\b/g, '$1$2 trade').replace(/(^|[^\d.,])([01]) prévus\b/g, '$1$2 prévu')
@@ -265,10 +281,72 @@
     const bias = ['bullish', 'bearish', 'neutral', 'no_trade'].includes(pre.bias) ? pre.bias : null, ml = cents(pre.max_loss);
     return { bias, maxLoss: ml, maxTrades: parseInt(pre.max_trades, 10) || 0, setups: (pre.setups || []).map((s) => String(s).trim().toLowerCase()).filter(Boolean), valid: !!bias && (bias === 'no_trade' || ml > 0) };
   }
+  /** (1 Nov., brief dans le temps A4) the last max loss the trader chose — his last plan's before this day —, with no time limit */
+  function lastMaxLoss(day) {
+    const j = (S.journals || []).filter((x) => x.id < day && !x.demo && x.pre && x.pre.bias && x.pre.bias !== 'no_trade' && cents(x.pre.max_loss) > 0).sort((a, b) => b.id.localeCompare(a.id))[0];
+    return j ? cents(j.pre.max_loss) : 0;
+  }
+  /** the sessions with real trades before this day, newest first */
+  const pastDays = (day) => [...new Set((S.trades || []).filter((t) => !t.demo && t.date && t.date < day).map((t) => t.date))].sort().reverse();
+  /** (C1) how many sessions in a row before this day went the same way (a plan, no plan, no mistake): the coach changes its words */
+  function runOf(day, f) { let n = 0; for (const d of pastDays(day)) { if (!f(d)) break; n++; } return n; }
+  const noPlanRun = (day) => runOf(day, (d) => !planOf(d).valid);
+  const planRun = (day) => runOf(day, (d) => planOf(d).valid && planOf(d).bias !== 'no_trade');
+  /** (1 Nov., brief dans le temps D1) the caution mode, the morning after a hard day: the drawdown room under half, or a session lost beyond
+   *  its max loss (its plan's, else the last one chosen); it ends after 2 green sessions. Its risk: half the last max loss chosen.
+   *  { why: 'room' | 'loss', room (cents, the room before this day), cap (cents) } | null. The day's lock follows the plan the
+   *  trader saves (prefilled with this cap): the caution itself never locks the day. */
+  function caution(day) {
+    day = day || today();
+    const days = pastDays(day); if (!days.length) return null;
+    const dayNet = (d) => dayTrades(d).reduce((a, t) => a + net(t), 0);
+    let green = 0, beyond = false, red = false, lim = 0;
+    for (const d of days) {   // newest first: the green sessions since the last red one, and whether that red one went beyond its max loss
+      const n = dayNet(d);
+      if (n > 0) { green++; continue; }
+      if (n < 0) { const p = planOf(d); lim = p.valid && p.bias !== 'no_trade' && p.maxLoss ? p.maxLoss : lastMaxLoss(d) || standing(d).loss; red = true; beyond = !!lim && -n > lim; break; }
+    }
+    if (green >= 2 || !red) return null;
+    const mg = margin(day), low = !!(mg && mg.start < mg.dd / 2);
+    if (!beyond && !low) return null;
+    // half of the max loss of that red session (not of a plan made since in caution: never halved twice)
+    const base = lim || standing(day).loss || (accountLimit() || {}).c || 0; if (!base) return null;
+    return { why: low ? 'room' : 'loss', room: mg ? mg.start : null, cap: Math.round(base / 200) * 100 };
+  }
+  /** (D4) the rule the trader wrote for this session in his last review (within a week), in his own words; '' when none */
+  function ownRule(day) {
+    const wk = new Date(day + 'T12:00:00'); wk.setDate(wk.getDate() - 7); const from = wk.toISOString().slice(0, 10);
+    const j = (S.journals || []).filter((x) => x.id < day && x.id >= from && !x.demo && x.post && x.post.reviewed_at && !(x.pre && x.pre.bias === 'no_trade')).sort((a, b) => b.id.localeCompare(a.id))[0];
+    return j ? String(j.post.tomorrow || '').split('\n').map((x) => x.trim()).find(Boolean) || '' : '';
+  }
   /** the tightest daily loss limit of the trader's active accounts (the same as the plan sheet's hint) */
   function accountLimit() {
     const a = (S.accounts || []).filter((x) => !x.demo && x.status !== 'archived' && x.status !== 'closed' && x.rules && x.rules.dll_c > 0).sort((x, y) => x.rules.dll_c - y.rules.dll_c)[0];
     return a ? { c: a.rules.dll_c, name: a.name || '' } : null;
+  }
+  /* (1 Nov., brief avance 4) the end-of-day lock. The trader's standing limits (Settings › My routine, settings.day_lock): a change
+     applies from the next session (`from`); before it, the values it replaced (`was`). Same as GameEngine::standingLimits. */
+  function standing(day) {
+    const x = (S.settings && S.settings.day_lock) || {}, v = !x.from || day >= x.from ? x : x.was || {};
+    return { loss: Math.max(0, Math.round(+v.loss_c || 0)), trades: Math.max(0, parseInt(v.trades, 10) || 0) };
+  }
+  /** the day's limits, the tightest of each — the day's plan, the standing limits, the daily limit of the active accounts (their
+   *  firm's preset, on their page); 0 = none. Same as GameEngine::dayLimits (game/game.php). */
+  function dayLimits(day) {
+    const p = planOf(day), s = standing(day), lim = accountLimit();
+    const l = [p.valid && p.bias !== 'no_trade' ? p.maxLoss : 0, s.loss, lim ? +lim.c : 0].filter((v) => v > 0), n = [p.valid ? p.maxTrades : 0, s.trades].filter((v) => v > 0);
+    return { loss: l.length ? Math.min(...l) : 0, trades: n.length ? Math.min(...n) : 0 };
+  }
+  /** the session's lock: the one the server recorded (kept until 18:00 ET, even if a trade is deleted), else the one the trades reach
+   *  now (the screen changes at once; the server records it with the save). { why: 'loss' | 'trades', loss_c, trades, n, net_c } | null */
+  function dayLock(day) {
+    day = day || today();
+    const st = window.SweepGame && SweepGame.state && SweepGame.state(), sv = st && st.today && st.today.day === day ? st.today.lock : null;
+    if (sv) return sv;
+    const list = dayTrades(day), n = list.filter((t) => !t.untracked).length; if (!n) return null;   // (the « Trades not detailed » line: a loss, never a trade)
+    const L = dayLimits(day), sum = list.reduce((a, t) => a + net(t), 0);
+    const why = L.loss && sum <= -L.loss ? 'loss' : L.trades && n >= L.trades ? 'trades' : null;
+    return why ? { why, loss_c: L.loss, trades: L.trades, n, net_c: sum } : null;
   }
   /** the drawdown room of the trader's active accounts, as their own page shows it (acctState), the tightest one (audit of
    *  16 Oct.: the plan and the « you have X left » lines never go past it): { c: room now, start: room before the trades of day,
@@ -354,7 +432,7 @@
     const add = (code, v) => issues.push([code, v || {}]);
     if (p.valid && p.maxLoss && before <= -p.maxLoss) add('over_max_loss', { m: usd(p.maxLoss) });
     if (p.valid && p.maxTrades && i >= p.maxTrades) add('over_max_trades', { n: i + 1, m: p.maxTrades });
-    if (prev && net(prev) < 0) { const a = min(prev.exit_time || timeOf(prev)), b = min(timeOf(t)), g = a != null && b != null ? (b - a + 1440) % 1440 : null; if (g != null && g < 10) add('revenge', { n: g }); }   // across midnight too
+    if (prev && net(prev) < 0) { const a = min(prev.exit_time || timeOf(prev)), b = min(timeOf(t)), g = a != null && b != null ? (b - a + 1440) % 1440 : null; if (g != null && g < 10) add('revenge', { n: g }); }   // across midnight too (« 0 min »: said « right after », F)
     if (flags.includes('addloser')) add('addloser');
     if (stopAnswer(t) === 'n' || flags.includes('stop')) add('no_stop');
     if (flags.includes('risklimit')) add('risklimit');
@@ -376,10 +454,12 @@
     if (!issues.some(([c]) => c === 'no_stop') && (stopAnswer(t) === 'y' || (t.stop != null && t.stop !== ''))) good.push(T.stopOk);
     if (maxC && +t.contracts && +t.contracts <= maxC && !issues.some(([c]) => ['oversized', 'size_up'].includes(c))) good.push(T.sizeOk);
     if (r === 'yes') good.push(T.chkOk);
-    const fix = issues.length ? [fill(T.f[issues[0][0]][0], issues[0][1]), T.f[issues[0][0]][1], issues[0][0], issues[0][1]] : null;
+    // (1 Nov., brief dans le temps) « Taken right after a loss » for 0 min (F); a third session in a row without a plan: other words (C1)
+    const fx = (c, v) => (c === 'revenge' && !(+v.n > 0) ? [TW.revenge0, T.f.revenge[1]] : c === 'no_plan' && noPlanRun(day) >= 2 ? [fill(TW.noPlanRun[0], { n: noPlanRun(day) + 1 }), TW.noPlanRun[1]] : T.f[c]);
+    const fix = issues.length ? [fill(fx(issues[0][0], issues[0][1])[0], issues[0][1]), fx(issues[0][0], issues[0][1])[1], issues[0][0], issues[0][1]] : null;
     // (brief « pertes oubliées », step 4) a loss taken the way it was planned, the stop respected: said as a good trade
     const goodLoss = net(t) < 0 && !fix && good.includes(T.inPlan) && good.includes(T.stopOk);
-    return { good: good.slice(0, 2), fix, all: issues.map(([c]) => c), ses: session(day, i, list, p), n: i + 1, time: timeOf(t), goodLoss };
+    return { good: good.slice(0, 2), fix, all: issues.map(([c]) => c), ses: session(day, i, list, p), n: i + 1, time: timeOf(t), goodLoss, day };
   }
   /** where the session stands right after the trade number i of the day (the last one when i is left out):
    *  { t: sentence, stop: true when the coach tells him to stop or pause } */
@@ -405,13 +485,11 @@
   function riskNow(day) {
     day = day || today();
     const list = dayTrades(day), p = planOf(day); let sum = 0; list.forEach((t) => { sum += net(t); });
-    const c = [];
-    if (p.valid && p.bias !== 'no_trade' && p.maxLoss) c.push({ c: p.maxLoss, k: 'plan' });
-    else {
-      const wk = new Date(day + 'T12:00:00'); wk.setDate(wk.getDate() - 7); const from = wk.toISOString().slice(0, 10);
-      const j = (S.journals || []).filter((x) => x.id < day && x.id >= from && !x.demo && x.pre && x.pre.bias && x.pre.bias !== 'no_trade' && cents(x.pre.max_loss) > 0).sort((a, b) => b.id.localeCompare(a.id))[0];
-      if (j) c.push({ c: cents(j.pre.max_loss), k: 'last' });
-    }
+    const c = [], cz = caution(day);
+    if (p.valid && p.bias !== 'no_trade' && p.maxLoss) c.push({ c: p.maxLoss, k: 'plan' });   // the trader's own plan for the day (prefilled with the caution's cap) wins
+    else if (cz) c.push({ c: cz.cap, k: 'caution' });   // (1 Nov., brief dans le temps D1) the morning after a hard day: half the last max loss
+    else { const lm = lastMaxLoss(day); if (lm) c.push({ c: lm, k: 'last' }); }   // (A4) the last max loss chosen, with no time limit (it was 7 days, then the whole room)
+    const sl = standing(day).loss; if (sl) c.push({ c: sl, k: 'set' });   // (1 Nov., brief avance 4) the trader's own daily max loss (Settings)
     const lim = accountLimit(); if (lim) c.push({ c: lim.c, k: 'dll', a: lim.name });
     const mg = day === today() ? margin(day) : null; if (mg) c.push({ c: mg.start, k: 'dd', a: mg.name });
     if (!c.length) return null;
@@ -422,8 +500,10 @@
     // his max number of trades — ends the day too, said as his rule (« rule »)
     const rook = !!(window.SweepRookie && SweepRookie()), losses = list.filter((t) => net(t) < 0).length;
     const rule = rook && list.length > 0 && (losses >= 2 || (p.valid && p.maxTrades && list.length >= p.maxTrades));
-    const end = list.length > 0 && ((p.valid && p.maxLoss && sum <= -p.maxLoss) || ses.code === 'margin' || (p.valid && p.maxTrades && list.length >= p.maxTrades) || left <= 0 || rule);
-    return { allowed: b.c, k: b.k, a: b.a || '', left, n: list.length, m: p.valid ? p.maxTrades : 0, end, rule: !!rule, pause: !end && ses.stop, text: ses.stop ? ses.t : '' };
+    const mt = dayLimits(day).trades, lock = dayLock(day);   // (1 Nov., brief avance 4) the max trades of the plan or of Settings; the day's lock
+    const end = list.length > 0 && ((p.valid && p.maxLoss && sum <= -p.maxLoss) || ses.code === 'margin' || (mt && list.length >= mt) || left <= 0 || rule) || !!lock;
+    // (A4) the drawdown room is a limit, never a « risk allowed »: shown as such (k 'dd') only when it is the tightest
+    return { allowed: b.c, k: b.k, a: b.a || '', left, n: list.length, m: mt, end, rule: !!rule, pause: !end && ses.stop, text: ses.stop ? ses.t : '', lock, caution: !(p.valid && p.bias !== 'no_trade' && p.maxLoss) ? cz : null, rule0: ownRule(day) };
   }
   /** one sentence about a plan: { bias, maxLoss (cents), maxTrades, setups (count) } */
   function planNote(x) {
@@ -437,6 +517,10 @@
     return fill(T.pOk, { m: usd(x.maxLoss), n: x.maxTrades });
   }
 
+  /* (1 Nov., brief visuel C6) « Your lesson » grows with its text: the example fits whole (« Make your plan before the next trade:
+     30 seconds » was cut at two lines), and what is typed never scrolls inside the field */
+  const lessonRows = (ph, v) => Math.max(2, Math.ceil(Math.max(String(ph || '').length, String(v || '').length) / 30));
+  document.addEventListener('input', (e) => { const a = e.target; if (!a.matches || !a.matches('.co-q-l textarea')) return; a.style.height = 'auto'; a.style.height = a.scrollHeight + 2 + 'px'; });
   /** the lesson of a session: how many trades without a mistake, what cost the most, and the rule that answers it */
   function dayLesson(day) {
     const list = dayTrades(day); if (!list.length) return { text: T.lOff, rule: '', code: null, n: 0 };
@@ -680,7 +764,7 @@
     const good = c.goodLoss ? `<p class="co-ok co-goodloss">${OK}<span>${esc2(T.goodLoss)}</span></p>` : c.good.length ? `<p class="co-ok">${OK}<span>${esc2(c.good.join(', ').replace(/^./, (m) => m.toUpperCase()))}.</span></p>` : '';
     const why = c.fix && starting() && T.why[c.fix[2]] ? `<span class="co-why">${esc2(T.why[c.fix[2]])}</span>` : '';
     const mine = c.fix && ['revenge', 'size_up', 'open5'].includes(c.fix[2]) ? ownLine(c.fix[2]) : '';
-    const fix = c.fix ? `<p class="co-fix"><b>${T.fix}</b><span>${esc2(c.fix[0])}</span><span class="co-do">${esc2(c.fix[1])}</span>${mine ? `<span class="co-own">${esc2(mine)}</span>` : ''}${why}</p>` : `<p class="co-fix co-none"><span>${esc2(earlier ? fill(T.noneDay, { w: T.w[earlier] || '' }) : (() => { const n = (S.trades || []).filter((x) => !x.demo).length; return n <= 1 ? T.noneNew : n === 2 ? T.noneNew2 : T.none; })())}</span></p>`;   // (27 Oct., N5) before 3 trades, the words for a trader starting
+    const fix = c.fix ? `<p class="co-fix"><b>${T.fix}</b><span>${esc2(c.fix[0])}</span><span class="co-do">${esc2(c.fix[1])}</span>${mine ? `<span class="co-own">${esc2(mine)}</span>` : ''}${why}</p>` : `<p class="co-fix co-none"><span>${esc2(earlier ? fill(T.noneDay, { w: T.w[earlier] || '' }) : (() => { const n = (S.trades || []).filter((x) => !x.demo).length; if (n <= 1) return T.noneNew; if (n === 2) return T.noneNew2; const r = c.day ? runOf(c.day, (d) => dayTrades(d).every((x) => !tradeNote(x).fix)) : 0; return r >= 2 ? fill(TW.noneRun, { n: r + 1 }) : T.none; })())}</span></p>`;   // (C1) a run of clean sessions: the count, not the same words   // (27 Oct., N5) before 3 trades, the words for a trader starting
     const l2 = c.ses.code === 'loss2' ? ownLine('loss2') : '';
     return good + fix + (c.ses.t ? `<p class="co-ses ${c.ses.stop ? 'co-stop' : ''}">${esc2(c.ses.t)}</p>` : '') + (l2 ? `<p class="co-own">${esc2(l2)}</p>` : '');
   }
@@ -710,9 +794,24 @@
     }
     const nx = (window.SweepNextSession && SweepNextSession()) || day, p = planOf(nx), j = typeof getDoc === 'function' && getDoc('journals', nx);
     const first = !(S.trades || []).some((t) => !t.demo);
-    const keep = edgeLine('keep'), kp = keep ? `<p class="co-ses co-edge in">${esc2(keep)}</p>` : '';   // « Your edge » before the session (brief edge T4)
-    if (p.valid) { const pre = (j && j.pre) || {}; return card(T.planT, `${pre.rule ? ruleLine(T.ruleD, pre.rule) : ''}${kp}<p class="co-ses">${esc2(planNote({ bias: p.bias, maxLoss: p.maxLoss, maxTrades: p.maxTrades, setups: (pre.setups || []).length }))}</p>${first ? `<p class="co-ses muted">${esc2(T.first)}</p>` : ''}`, 'co-today'); }
-    return card('', `${kp}<p class="co-ses">${esc2(T.noPlan)}</p>`, 'co-today');
+    // (1 Nov., brief dans le temps D1) in caution mode the coach speaks of protecting the account, not of « what works »
+    const cz = caution(nx), keep = cz ? '' : edgeLine('keep'), kp = cz ? `<p class="co-ses co-protect"><b>${esc2(TW.protect)}</b></p>` : keep ? `<p class="co-ses co-edge in">${esc2(keep)}</p>` : '';   // « Your edge » before the session (brief edge T4); the caution's words in the text colour (blue is for gains and actions)
+    if (p.valid) {
+      const pre = (j && j.pre) || {}, k = planRun(nx), note = planNote({ bias: p.bias, maxLoss: p.maxLoss, maxTrades: p.maxTrades, setups: (pre.setups || []).length });
+      // (C1) the same plan day after day: from the third session in a row, the count says it (never the same sentence three days running)
+      const say = k >= 2 && p.bias !== 'no_trade' && p.maxLoss ? fill(p.maxTrades ? TW.pOk2 : TW.pOk2b, { n: k + 1, m: usd(p.maxLoss), t: p.maxTrades }) : note;
+      return card(T.planT, `${pre.rule ? ruleLine(T.ruleD, pre.rule) : ''}${kp}<p class="co-ses">${esc2(say)}</p>${first ? `<p class="co-ses muted">${esc2(T.first)}</p>` : ''}`, 'co-today');
+    }
+    // (C1) no plan: the explanation the first week only; then other words each day — the third session without one, « Use yesterday's
+    // plan again? » in one tap (it opens the express plan with it, D2), and the count the day after
+    const k = noPlanRun(nx), wk1 = (() => { const s0 = signupSession(); if (!s0) return true; const d = new Date(s0 + 'T12:00:00'); d.setDate(d.getDate() + 7); return nx < d.toISOString().slice(0, 10); })();
+    const lp = (S.journals || []).filter((x) => x.id < nx && !x.demo && x.pre && ['bullish', 'bearish', 'neutral'].includes(x.pre.bias)).sort((a, b) => b.id.localeCompare(a.id))[0];
+    if (k >= 2 && k % 2 === 0 && lp) {
+      const y = pastDays(nx)[0] === lp.id;
+      return card('', `${kp}<p class="co-ses co-resume"><span>${esc2(y ? TW.resumeY : TW.resumeL)}</span><button type="button" class="btn sm" data-co="resume">${esc2(TW.resumeB)}</button></p>`, 'co-today');
+    }
+    const say = k >= 2 ? fill(TW.noPlan3, { n: k + 1 }) : k === 1 ? TW.noPlan2 : wk1 ? T.noPlan : TW.noPlanS;
+    return card('', `${kp}<p class="co-ses">${esc2(say)}</p>`, 'co-today');
   }
   function paintToday() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
@@ -763,7 +862,7 @@
     }
     const eq = edgeReview(t);   // brief edge T7: in the edge, off it, a streak
     if (eq) items.push({ ok: !!String(rv.edge || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(eq)}</span><textarea rows="2" data-bind="trades|${id}|review.edge">${esc2(rv.edge || '')}</textarea></label>` });
-    items.push({ ok: !!String(rv.lesson || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(T.aLesson)}</span><textarea rows="2" data-bind="trades|${id}|review.lesson" placeholder="${esc2(c.fix ? c.fix[1] : T.aLessonPh)}">${esc2(rv.lesson || '')}</textarea></label>` });
+    items.push({ ok: !!String(rv.lesson || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(T.aLesson)}</span><textarea rows="${lessonRows(c.fix ? c.fix[1] : T.aLessonPh, rv.lesson)}" data-bind="trades|${id}|review.lesson" placeholder="${esc2(c.fix ? c.fix[1] : T.aLessonPh)}">${esc2(rv.lesson || '')}</textarea></label>` });
     return `<section class="surface co co-ask" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.askT}</b><small>${fill(T.askN, { k: items.filter((x) => x.ok).length, n: items.length })}</small></div>${items.map((x) => x.h).join('')}</section>`;
   }
   const fullLabel = (x) => fill(T.fullT, { x });
@@ -862,15 +961,18 @@
     en: { 'prop_dll75.title': 'Daily limit: {pct}% used', 'prop_dll75.body': '{account}: ${used} of ${limit}. Keep your size, or stop here.',
       'prop_dll100.title': 'Daily limit reached', 'prop_dll100.body': '{account}: ${limit} lost today. Your session is over on this account.',
       'prop_dd75.title': 'Drawdown: {pct}% used', 'prop_dd75.body': '{account}: ${left} of room left before the limit. Trade smaller until it comes back.',
-      'prop_dd100.title': 'Drawdown limit reached', 'prop_dd100.body': '{account}: the account’s max loss is reached. Check its status with your firm.' },
+      'prop_dd100.title': 'Drawdown limit reached', 'prop_dd100.body': '{account}: the account’s max loss is reached. Check its status with your firm.',
+      'g_lock.title': 'Day closed: your limit is reached.', 'g_lock.body': 'Your account is protected. Grade your trades and close your day.' },
     fr: { 'prop_dll75.title': 'Limite du jour : {pct} % utilisés', 'prop_dll75.body': '{account} : {used} $ sur {limit} $. Garde ta taille, ou arrête-toi ici.',
       'prop_dll100.title': 'Limite du jour atteinte', 'prop_dll100.body': '{account} : {limit} $ perdus aujourd’hui. Ta séance est finie sur ce compte.',
       'prop_dd75.title': 'Drawdown : {pct} % utilisés', 'prop_dd75.body': '{account} : il reste {left} $ de marge avant la limite. Trade plus petit jusqu’à ce qu’elle remonte.',
-      'prop_dd100.title': 'Limite de drawdown atteinte', 'prop_dd100.body': '{account} : la perte max du compte est atteinte. Vérifie son statut auprès de ta firme.' },
+      'prop_dd100.title': 'Limite de drawdown atteinte', 'prop_dd100.body': '{account} : la perte max du compte est atteinte. Vérifie son statut auprès de ta firme.',
+      'g_lock.title': 'Journée fermée : ta limite est atteinte.', 'g_lock.body': 'Ton compte est protégé. Note tes trades et ferme ta journée.' },
     es: { 'prop_dll75.title': 'Límite diario: {pct} % usado', 'prop_dll75.body': '{account}: {used} $ de {limit} $. Mantén tu tamaño, o para aquí.',
       'prop_dll100.title': 'Límite diario alcanzado', 'prop_dll100.body': '{account}: {limit} $ perdidos hoy. Tu sesión terminó en esta cuenta.',
       'prop_dd75.title': 'Drawdown: {pct} % usado', 'prop_dd75.body': '{account}: quedan {left} $ de margen antes del límite. Opera más pequeño hasta que se recupere.',
-      'prop_dd100.title': 'Límite de drawdown alcanzado', 'prop_dd100.body': '{account}: se alcanzó la pérdida máxima de la cuenta. Verifica su estado con tu firma.' },
+      'prop_dd100.title': 'Límite de drawdown alcanzado', 'prop_dd100.body': '{account}: se alcanzó la pérdida máxima de la cuenta. Verifica su estado con tu firma.',
+      'g_lock.title': 'Día cerrado: alcanzaste tu límite.', 'g_lock.body': 'Tu cuenta está protegida. Califica tus operaciones y cierra tu día.' },
   };
   const reg = () => { if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings(N); } catch (e) { /* older module */ } return true; } return false; };
   if (!reg()) setTimeout(reg, 1500);
@@ -1148,6 +1250,8 @@
     return `<div class="co-edgecard"><p class="co-edgecard-h"><b>${ET.edgeT}</b></p><ul>${items}</ul>${notes.map((x) => `<p class="co-own">${esc2(x)}</p>`).join('')}</div>`;
   }
   window.SweepEdge = { profile: edgeProfile, mine: edgeMine, streak: edgeStreak, card: edgeCard, dims: EDGE_DIMS, words: edgeWords, value: edgeValue, match: edgeMatch, line: edgeLine, first: edgeFirst };
-  window.SweepCoach = { paintToday: () => { try { paintToday(); } catch (e) { /* never blocks */ } }, trade: tradeNote, session, margin, riskNow, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, weekRule, statsHtml, progress,
+  // « Use it »: the coach's one tap opens the express plan with the last plan in it (D2)
+  document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-co="resume"]'); if (!b || !window.SweepGame || !SweepGame.openPlan) return; SweepGame.openPlan(null, { resume: true }); });
+  window.SweepCoach = { paintToday: () => { try { paintToday(); } catch (e) { /* never blocks */ } }, trade: tradeNote, session, margin, riskNow, dayLock, dayLimits, standing, caution, ownRule, lastMaxLoss, plan: planNote, today: todayHtml, lesson: dayLesson, ruleFor, habit, before: beforeHtml, own: ownLine, limits, weekHtml, weekRule, statsHtml, progress,
     tradeCard, askHtml, fullOpen: (id) => fullOpen.has(id), fullLabel };
 })();

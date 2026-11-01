@@ -7,7 +7,8 @@ declare(strict_types=1);
  * best habit and point to work on): a group of 3 copies (2, 2 and 1 contracts) is one trade, the original's P&L, with its 3
  * accounts — like the app's Stats, Journal, My money and the weekly recap. Asked about one account, Sweep AI reads that
  * account's own trade (16 Oct.; before: nothing when the account only had the copy), like Stats filtered on an account.
- * Wrapped (the month's and the year's, 16 Oct.): a copied trade counts once in the signature setup and the golden slot.
+ * Wrapped (the month's and the year's, 16 Oct.): a copied trade counts once in the signature setup and the golden slot
+ * (the month's became the Month in Review on 1 Nov.: its best setup).
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -57,7 +58,7 @@ $put('v2', ['instrument' => 'MNQ', 'direction' => 'long', 'date' => '2026-10-15'
 for ($i = 1; $i <= 12; $i++) $pdo->prepare("INSERT OR REPLACE INTO game_days (user_id, trading_day, activity, detail_json, updated_at) VALUES ('u1', ?, 1, '{}', 0)")->execute([sprintf('2026-10-%02d', $i + 1)]);
 GameEngine::forget('u1');
 $wm = GameWrapped::build('u1', '2026-10'); $wy = GameWrappedYear::build('u1', 2026);
-$ok(($wm['signature']['setup'] ?? null) === 'VWAP' && ($wm['signature']['n'] ?? null) === 2, 'monthly Wrapped: the signature setup counts a copied trade once (VWAP 2, not ORB 3) (' . json_encode($wm['signature'] ?? null) . ')');
+$ok(($wm['how']['setup'] ?? null) === 'VWAP', 'Month in Review (1 Nov., brief avance 6): the best setup counts a copied trade once (VWAP 2 trades, not ORB 3) (' . json_encode($wm['how'] ?? null) . ')');
 $ok(($wy['signature']['setup'] ?? null) === 'VWAP' && ($wy['signature']['n'] ?? null) === 2, 'yearly Wrapped: the same (' . json_encode($wy['signature'] ?? null) . ')');
 $pdo = null; array_map('unlink', glob($tmp . '/*') ?: []); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";

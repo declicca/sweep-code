@@ -27,6 +27,7 @@ Rédigé le 20 octobre 2026, **approuvé par Mateo le 21 octobre** avec 4 ajuste
 | **M1** | **Les premières minutes** | Inscription → premier compte → première chose utile | En moins de 2 min : son compte, son **risque permis aujourd'hui** (en $), et une première action faite (plan ou trade) |
 | **M2** | **La boucle quotidienne** | La journée de séance : 18 h la veille → 18 h | **Avant** (jusqu'à 9 h 30) : risque permis + mission du jour. **Pendant** : « il te reste X $ », ajouter un trade. **Après** : fermer la journée en **un toucher** |
 | **M3** | **Le vendredi** | Dernier jour de trading, dès la revue ou 17 h, jusqu'au dimanche 23 h 59 | Le bilan de la semaine, puis la règle de la semaine suivante |
+| M3 du mois | **La fin du mois** (1er nov., brief avance 6) | Dernier jour de trading du mois, dès sa revue ou 17 h, jusqu'au 7 du mois suivant | « Ton mois en revue » : l'histoire du mois, puis la mission du mois suivant |
 
 **Aujourd'hui dit quoi faire maintenant.** Une seule carte en tête, qui change selon le moment : une phrase, un chiffre, **un seul bouton bleu**. Le reste est secondaire, plus bas ou ailleurs.
 
@@ -78,7 +79,7 @@ Légende de la colonne **Cible** :
 | Ancien écran `onboarding()` (puces firme / solde) | `app.js:1512` | M1 | Retirer s'il n'est plus atteignable (remplacé par la page Bienvenue) |
 | « Ton vrai net » (rattrapage, 4 écrans), ouvert seul la 1ʳᵉ fois sur Mon argent | `ux.js` §29 | — | **Mission** (voir 5, semaine 2) |
 | « Classe tes comptes » (fenêtre une fois) | `ux.js` §27 | — | Garder (seulement pour les anciens comptes sans type) |
-| Fenêtre « Quoi de neuf » | `game.js:1665` | — | Garder (jamais le jour de l'inscription : déjà) |
+| Fenêtre « Quoi de neuf » | `game.js:1665` | — | Garder (jamais le jour de l'inscription : déjà). **1er nov. (brief dans le temps B2/E3)** : seulement ce qui est sorti après l'inscription, jamais entre le premier trade et la revue ; la pastille de la cloche ne compte plus les annonces |
 | Suggestions « fais-le maintenant » : écran d'accueil, rappels, plan | `nav.js:4440` | M2 | **Fusion** dans les missions (voir 5) : une seule voix qui dit quoi faire |
 
 ### 1.3 Aujourd'hui (`#dashboard`)
@@ -94,7 +95,7 @@ Légende de la colonne **Cible** :
 | « Pas de trading aujourd'hui » (lien de l'étape Plan) | `nav.js:4175` | M2 | Garder |
 | « Terminer hier › » | `nav.js:4135` | M2 | Garder |
 | Carte du coach (dans la routine) : règle du jour, dernier trade, leçon, « il te reste », alertes 75 / 100 %, habitude de la semaine, série de l'edge | `coach.js:648` | M2 | **Fusion** dans la carte « Maintenant » : **une phrase** selon le moment, pas un bloc |
-| Carte du parcours de 90 jours (jour N, mission du jour, à rattraper) | `gameplan.js:102` | M1 / M2 | **Fusion** : devient la ligne « Mission du jour » de la carte « Maintenant » |
+| Carte du parcours de 90 jours (jour N, mission du jour) | `gameplan.js:102` | M1 / M2 | **Fusion** : devient la ligne « Mission du jour » de la carte « Maintenant ». **1er nov. (B1)** : « Jour N » = missions faites ; plus de compteur « à rattraper » |
 | Carte de fin d'essai Pro (jour 50) | `nav.js:4869` | — | Garder (rare, utile, 10 jours) |
 | Carte « Jour / Semaine » (téléphone) : sélecteur de type de compte, bande des jours, P&L, trades, taux de réussite, « Annonces », 5 trades | `nav.js:457` | M2 | **Garder**, allégée : sans « Annonces » (fusion avec À surveiller) ; sélecteur de type seulement à partir de 2 types de comptes |
 | Performance (ordinateur) : Jour / Semaine, « Tout voir › » | `nav.js:397` | M2 | Garder (même contenu que la carte Jour du téléphone) |
@@ -177,14 +178,15 @@ Légende de la colonne **Cible** :
 
 | Élément | Où | Moment | Cible |
 |---|---|---|---|
-| Anneaux Plan / Exécution / Revue, « Journée balayée », XP, niveaux, rangs, streak, gels | `game/game.php`, `game.js` | M2 | **Garder** (les anneaux sont les 3 étapes de la boucle) |
-| Célébrations (une fenêtre par séance, le reste en toasts), « {n} nouveautés · Voir Progression » | `game.js:1795` | M2 | Garder ; une célébration n'arrive jamais par-dessus « Maintenant » |
+| Anneaux Plan / Exécution / Revue, « Journée complète » (« Journée réussie » jusqu'au 1er nov.), XP, niveaux, rangs, streak, gels | `game/game.php`, `game.js` | M2 | **Garder** (les anneaux sont les 3 étapes de la boucle) |
+| Célébrations (une fenêtre par séance, le reste en toasts), « {n} nouveautés · Voir Progression » | `game.js:1795` | M2 | Garder ; une célébration n'arrive jamais par-dessus « Maintenant ». **1er nov. (brief dans le temps E1)** : une seule couche visible — XP, badges, rangs, boss, saisons, coffre sans toast ni fenêtre (dans Ma progression) ; au plus une récompense par jour, après la revue ; rien de « débloqué » avant 3 jours complets |
 | Progression (feuille : « Ton parcours » 5 chapitres, raccourcis, « À débloquer », collection) | `game.js:3008` | — | **Devient « Ma progression »** : niveau, badges, collection, saison. Les chapitres deviennent les missions de découverte (voir 5) |
 | « Ton parcours » à 5 chapitres (`GAME_MAP`, Free : 1–2) | `game/v2.php` | — | **Fusion** dans les missions de découverte |
 | Liste « Démarrage » (`GAME_START_STEPS`) | `game/catalog.php` | M1 | **Fusion** dans les missions de découverte |
 | Missions de la semaine (3, relance, coffre) | `game/v2.php:32` | — | **Mission** : débloquées après la découverte (semaine 3) ; renommées **« Défis de la semaine »** (le mot « mission » est réservé au parcours) |
 | Boss (« Mission spéciale »), saison, ligues, crew, binôme, Wrapped, rôles Discord, thèmes d'anneaux, son | `game/*.php`, `game.js` | — | **Mission** : rien avant la semaine 3 ; ensuite dans « Ma progression » seulement. Décision par l'usage le 13 nov. (Admin › Métriques › Jeu, fonctions sous 10 %) |
 | Bilan du vendredi : 1. la semaine (streak, discipline, jours balayés, meilleure habitude, point à travailler, payouts, coach, partager) ; 2. questions ; 3. Edge Reveal ; 4. coffre | `game.js:2528` | **M3** | **Garder** : c'est M3. Écran 2 reçoit la « revue de la semaine » du Journal |
+| **« Ton mois en revue »** (1er nov., remplace le Wrapped du mois) : carte « Ton octobre est prêt » en haut de « Maintenant », histoire plein écran (ouverture, résultat net, forme du mois, meilleur et pire trade, discipline, analyse IA, fin et partage) | `game/v2c.php`, `game.js` | fin du mois | **Garder** : tous les forfaits, sans attendre la mission de la semaine 3 (dès 3 jours de trading dans le mois). Vue jusqu'au bout ou après le 7 : la carte part ; l'historique dans « Ma progression ». La mission du mois suivant (IA) s'affiche à la place de l'intention de la semaine du 1er au 7 |
 | Rappels plan / revue / semaine (cloche et téléphone), courriel « Ta semaine » | `game/v2c.php`, `weekly-mail.php` | M2 / M3 | Garder |
 | Coach : règle du jour, règle de demain, habitude de la semaine, alertes 75 / 100 % | `coach.js` | M2 | Garder (une phrase dans « Maintenant ») |
 | Parcours de 90 jours : feuille de mission, carte des 90 jours, portes, quiz | `gameplan.js` | M1 / M2 | Garder (voir 5) |
@@ -290,12 +292,15 @@ Légende de la colonne **Cible** :
 
 | État (heure de New York) | Phrase et chiffre | Bouton bleu | Ligne mission |
 |---|---|---|---|
-| **Avant la séance**, plan pas fait (18 h la veille → 9 h 30) | « Ton risque permis aujourd'hui : **450 $** » (le plus petit de la perte max du dernier plan, de la limite du jour et de la marge de drawdown des comptes actifs, déjà calculés par le coach) ; annonce à fort impact : « 10 h 00 · CPI : pas de trade de 9 h 55 à 10 h 15 » | **Faire mon plan** (express par défaut) | Mission du jour |
+| **Avant la séance**, plan pas fait (18 h la veille → 9 h 30) | « Ton risque permis aujourd'hui : **450 $** » (le plus petit de la perte max du dernier plan — sans limite de temps depuis le 1er nov. —, de la limite du jour et de la marge de drawdown des comptes actifs, déjà calculés par le coach ; quand la marge est la plus serrée, « Ta limite aujourd'hui » : jamais un « risque permis », brief dans le temps A4) ; annonce à fort impact : « 10 h 00 · CPI : pas de trade de 9 h 55 à 10 h 15 » | **Faire mon plan** (express par défaut) | Mission du jour |
 | Avant la séance, plan fait | « Plan prêt · perte max 450 $ · 2 trades max » + règle du jour | — (« + » suffit) | Mission du jour |
-| **Pendant la séance** | « Il te reste **300 $** · trade 1 sur 2 » ; la phrase du coach du moment (pause, arrêt, edge) | **Ajouter un trade** | Mission du jour |
+| **Pendant la séance** | « 1/2 trades · **300 $** restants aujourd’hui » (1er nov., brief avance 4 : un compteur discret) ; la phrase du coach du moment (pause, arrêt, edge) | **Ajouter un trade** | Mission du jour |
+| **Limite du jour atteinte** (1er nov., brief avance 4) : perte max ou trades max (plan, Réglages, limite du compte : la plus serrée) | « Journée fermée » : la limite, « Prochaine séance dans 2 h 41 » (18 h ET), une phrase du coach qui protège sans culpabiliser ; à la place de « Maintenant » et des 3 étapes, jusqu’à 18 h, impossible à lever ; le « + » reste | **Fermer ma journée** (et « Noter mes trades », gris) | — |
 | Signal d'arrêt (perte max, marge sous 25 %, trades prévus faits) | « Journée terminée selon ton plan. » | **Fermer ma journée** | — |
 | **Après la séance** : dès 16 h, ou dès que le trader le décide (lien « J'ai fini pour aujourd'hui » sous l'étape Exécution dès un trade) | « 2 trades · +180 $ · 1 hors plan » | **Fermer ma journée** | — |
-| Journée fermée | « Journée balayée » ou « Journée fermée » + leçon + « Règle de demain » | — | Prochaine mission (demain) |
+| Journée fermée | « Journée complète » ou « Journée fermée » + leçon + « Règle de demain » | — | Prochaine mission (demain) |
+| **Le matin après une séance difficile** (1er nov., brief dans le temps D1) : séance au-delà de sa perte max, ou marge sous la moitié | « Marge à 950 $ : risque réduit de moitié aujourd'hui (250 $) » ; plan prérempli avec ce montant ; le coach parle de protéger le compte ; fini après 2 séances vertes | **Faire mon plan** | Mission du jour |
+| Le matin, une règle écrite la veille (D4) | « Ta règle d'aujourd'hui · attendre la confirmation » | — | — |
 | Jour sans trade choisi (« Pas de trading aujourd'hui ») | « Journée de repos · comptée dans ta série » | — | — |
 | **Vendredi**, bilan prêt (M3) | « Ta semaine est prête » | **Voir mon bilan** | — |
 | Fin de semaine | L'intention de la semaine (enfin visible) + « Lundi : prépare ton plan dès dimanche 18 h » | — | — |
@@ -549,7 +554,7 @@ Un bouton « Fermer ma journée » enregistre les mêmes champs (`post.*`) et do
 
 **Le lien « J'ai fini pour aujourd'hui »** sous l'étape Exécution, dès un trade, rend « Fermer ma journée » bleu tout de suite (`reviewTime`, `nav.js:4127`). Le signal d'arrêt du coach fait de même.
 
-**Après** : la célébration « Journée balayée », ou « Journée fermée » si les 3 anneaux ne sont pas fermés. Puis la leçon et la règle de demain sur « Maintenant ».
+**Après** : la célébration « Journée complète » (1er nov. ; « balayée » puis « réussie » avant), ou « Journée fermée » si les 3 anneaux ne sont pas fermés. Puis la leçon et la règle de demain sur « Maintenant ».
 
 **Rien ne change** : la revue détaillée reste possible (toucher une réponse la modifie), ainsi que « Terminer hier » et la revue du soir jusqu'au verrouillage de la journée.
 
@@ -624,6 +629,8 @@ Un bouton « Fermer ma journée » enregistre les mêmes champs (`post.*`) et do
 - F, les pages longues.
 
 C'est dans cet ordre qu'il s'enchaîne avec les étapes de cette section. D et E précisent l'étape 5 (les missions) pour les premières minutes.
+
+- **Brief « L'app dans le temps » (1er nov.)** : deux traders sur 3 semaines simulées ; corrigé : l'éloge de la semaine sans plan, « sans toucher au drawdown », « Journée réussie », le risque permis qui devenait toute la marge, le compteur de missions en retard, Quoi de neuf aux nouveaux, la bande des jours avant l'inscription, le coach qui se répète, les fenêtres en pleine séance, les toasts de récompense ; ajouté : le mode prudence, « Reprendre mon plan d'hier », le solde déjà confirmé, la règle du jour dans « Maintenant ». Détails : `app/CONTEXTE-APP.md`.
 
 **Le 13 novembre** : la liste des fonctions du jeu utilisées par moins de 10 % des traders actifs (Admin › Métriques › Jeu), pour la décision de Mateo (garder, cacher plus longtemps, retirer).
 - **Fin du gel** : quand les étapes 0 à 6 sont en ligne et que les mesures M1, journées fermées et bilans ouverts sont relevées. Toute nouvelle fonction passe alors par la section 6.

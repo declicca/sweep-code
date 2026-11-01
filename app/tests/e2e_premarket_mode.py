@@ -3,7 +3,7 @@ Sweep — the pre-market, guided or express at any time (the trader's choice is 
 clock at 08:00 New York (before the lock time):
   python3 tests/e2e_premarket_mode.py http://127.0.0.1:8095 /tmp/show_state.json
  1  the guided plan opens; « Plan express (30 s) » switches to the express version (no « Later » before the lock time) and keeps the choice
- 2  express saved before the lock time: mode express, not locked; reopened, it stays the express version, on its sheet
+ 2  express saved before the lock time (one screen, 1 Nov.): mode express, not locked; reopened, it stays the express version, its answers there
  3  the next day, the plan opens on the express version by itself
  4  « Plan guidé » goes back to the guided plan and keeps that choice for the next day
  5  (27 Oct.) a guided sheet, then 10 sessions with trades without one: the express plan is offered, « Garder le plan guidé »
@@ -55,14 +55,12 @@ with sync_playwright() as p:
     pg.click('#gSheet [data-pm="inst-pick"][data-v="MES"]'); pg.wait_for_timeout(150)
     pg.fill('#gSheet [data-pmf="X_levels"]', 'London high 5820'); pg.fill('#gSheet [data-pmf="X_plan"]', 'Cassure du London high : achat.')
     if not pg.input_value('#gSheet [data-pmf="max_loss"]'): pg.fill('#gSheet [data-pmf="max_loss"]', '500')
-    pg.evaluate(TAP, '#gSheet [data-pm="next"]'); pg.wait_for_timeout(300)
-    ok(pg.evaluate(SCREEN) == 'sheet' and 'Scénario attendu · Cassure du London high : achat.' in pg.locator('#gSheet .pm-sheet').inner_text(), f'2 {w}: the sheet')
+    ok(pg.locator('#gSheet [data-pm="next"]').count() == 0 and pg.locator('#gSheet [data-pm="save"]').count() == 1, f'2 {w}: one screen, saved from it (1 Nov., brief dans le temps D2)')
     pg.evaluate(TAP, '#gSheet [data-pm="save"]'); pg.wait_for_timeout(900)
     f = pg.evaluate("(d) => SweepFiche.get(d)", d1)
     ok(f and f['mode'] == 'express' and not pg.evaluate("(d) => SweepFiche.locked(SweepFiche.get(d))", d1), f'2 {w}: saved: mode express, not locked before 09:25')
-    ok(open_plan(pg, d1) == 'sheet' and '2 sur 2' in pg.locator('#gSheet').inner_text(), f'2 {w}: reopened: the express sheet (2 of 2), not the guided screens')
-    pg.evaluate(TAP, '#gSheet [data-pm="back"]'); pg.wait_for_timeout(300)
-    ok(pg.evaluate(SCREEN) == 'express' and pg.input_value('#gSheet [data-pmf="X_levels"]') == 'London high 5820', f'2 {w}: « Retour »: its answers are there')
+    ok(open_plan(pg, d1) == 'express' and '1 sur 1' in pg.locator('#gSheet').inner_text() and pg.input_value('#gSheet [data-pmf="X_levels"]') == 'London high 5820' and pg.input_value('#gSheet [data-pmf="X_plan"]') == 'Cassure du London high : achat.',
+       f'2 {w}: reopened: the express plan with its answers (1 of 1), not the guided screens')
     close(pg)
     # 3. the next day: express by itself
     ok(open_plan(pg, d2) == 'express', f'3 {w}: the next day, the express version opens by itself')

@@ -26,6 +26,9 @@ Notify::register('test_celebration', ['category' => 'achievements', 'priority' =
 foreach (['g_plan' => 'streaks', 'g_review' => 'streaks', 'g_streak' => 'streaks', 'g_weekly' => 'achievements', 'g_intention' => 'achievements', 'g_wrapped' => 'achievements'] as $type => $cat) {
     Notify::register($type, ['category' => $cat, 'icon' => $cat === 'streaks' ? 'flame' : 'star']);
 }
+// (1 Nov., brief avance 4) the end-of-day lock (game/game.php onLock): once a day, at the moment it locks; with the account
+// limits (prop_alerts: neither capped nor counted), also on the phone (push kind « lock »)
+Notify::register('g_lock', ['category' => 'prop_alerts', 'icon' => 'info']);
 
 // Listeners: none yet. Example for a later feature:
 // Events::on('trade.created', function (array $p): void {
