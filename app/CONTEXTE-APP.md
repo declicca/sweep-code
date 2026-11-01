@@ -1459,7 +1459,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Lot 2, le toucher** :
   - Deux réactions seulement dans tout le CSS : `scale(.97)` pour les boutons, puces, onglets et le « + » ; le fond `--fill` pour les lignes et les cartes qui ouvrent une page. Les autres valeurs (.86 à .99, opacités .6 et .7) sont parties.
   - Trois styles de bouton : principal et secondaire en pilule de 44 px, puce ou segment de 38 px (`.btn.sm` compris).
-  - Toute cible de moins de 44 px reçoit une zone invisible de 44 × 44 (`.sw-hit` / `.sw-hit-b`, posées par `nav.js` quand l'élément apparaît, après la première image), sans changer son dessin.
+  - **Cibles de moins de 44 px** : chaque sorte de cible trop petite (sa balise et ses classes) reçoit une zone invisible de 44 × 44. Cette zone est écrite dans une feuille de style à part (`<style id="sw-hit">`, `nav.js`), après la première image, sans changer le dessin.
+    - Les éléments de la page ne sont jamais modifiés : une classe ajoutée faisait redessiner les pages qui comparent leur HTML, et un contrôle touché perdait sa place.
+    - Une règle n'est gardée que si les éléments de sa sorte ne bougent pas d'un pixel et que la zone reste hors du flux.
+    - Rien dans une boîte qui défile.
+    - Les échelles de 1 à 5 d'un trade font 44 px de large, et « Revue complète » 44 px de haut, en CSS dès la première image.
 - **Lot 3, alléger** :
   - Un trade se dessine en environ 115 ms sur le téléphone ralenti 4 fois. La pose des zones de 44 px passe après la première image ; `railWide` lit une media query, plus la largeur.
   - Stats sur téléphone fait environ 2 350 px : les 4 chiffres, le score, la courbe, « À surveiller » (3 lignes, puis « Voir les N autres ») et le calendrier, puis « Analyse détaillée › ». Cette sous-page (`#analytics/deep`) contient « Most active », le drawdown, les durées, la répartition du P&L et le « Deep dive ». Rien n'est retiré.

@@ -3045,3 +3045,5 @@ html body .btn.sm,html body .chip,html body .seg > button,html body .seg > a,htm
 html body .nav-am-net input{min-height:44px;box-sizing:border-box}
 /* (31 Oct., fluidity 10) the trade page's « Full review » summary: a 44 px line from the first image */
 html body #main details.co-full > summary{min-height:44px;display:flex;align-items:center}
+/* (31 Oct., fluidity 10) the 1-to-5 scales of a trade (confidence, execution…): 44 px each (5 × 44 fits a phone), drawn so from the first image */
+html body #main .f > .seg > button{min-width:44px}

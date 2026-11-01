@@ -7087,6 +7087,8 @@ new window.SweepMO(() => {
   const seen = new WeakSet(), rules = new Map();
   let sheet = null, t = 0;
   const free = (e, ps) => { const c = getComputedStyle(e, ps).content; return !c || c === 'none' || c === 'normal'; };
+  // inside a box that scrolls: an area past its edge would give it a scrollbar (one that takes room on Linux and Windows)
+  const inScroller = (e) => { for (let p = e.parentElement; p && p.id !== 'main' && p !== document.body; p = p.parentElement) { const c = getComputedStyle(p); if (/auto|scroll/.test(c.overflowX + c.overflowY)) return true; } return false; };
   const later = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 400 }) : setTimeout(fn, 120));
   const kind = (e) => {
     const at = e.closest('#main') ? '#main ' : '.main-wrap .top ';   // where it was measured only (never a sheet's link over its buttons)
@@ -7096,26 +7098,31 @@ new window.SweepMO(() => {
     return pc ? at + '.' + pc + ' > ' + e.tagName.toLowerCase() : '';
   };
   function pass() {
-    let added = false;
+    let added = false; const fresh = [];
     document.querySelectorAll(SEL).forEach((e) => {
       if (seen.has(e) || !e.getClientRects().length) return;
       const r = e.getBoundingClientRect(); if (r.width < 1) return;
       seen.add(e);
       if (r.width >= 44 && r.height >= 44) return;
       if (e.parentElement && e.parentElement.closest('a[href], button, [role=button], summary')) return;
-      const k = kind(e); if (!k || rules.has(k)) return;
+      const k = kind(e); if (!k || rules.has(k) || inScroller(e)) return;
       const ps = free(e, '::after') ? '::after' : free(e, '::before') ? '::before' : '';
       if (!ps) return;   // (a summary drawing both: its 44 px in nav.css, from the first image — never a height added later)
       // a static element whose children are placed against something above it: a position of its own would move them
       if (getComputedStyle(e).position === 'static' && [...e.querySelectorAll('*')].some((c) => /absolute|fixed/.test(getComputedStyle(c).position))) return;
-      rules.set(k, rule(k, ps)); added = true;
+      rules.set(k, rule(k, ps)); added = true; fresh.push(k);
     });
-    if (!added) return;
-    write();
+    // a new kind's area must leave every element of that kind exactly where and as big as it was (never in the flow)
+    const box = (x) => { const r = x.getBoundingClientRect(); return Math.round(r.top) + ',' + Math.round(r.left) + ',' + Math.round(r.width) + ',' + Math.round(r.height); };
+    const before = new Map(); fresh.forEach((k) => document.querySelectorAll(k).forEach((x) => before.set(x, box(x))));
+    if (added) write();
+    fresh.forEach((k) => { const v = rules.get(k) || '', ps = v.includes('::after{') ? '::after' : '::before';
+      if ([...document.querySelectorAll(k)].some((x) => before.get(x) !== box(x) || getComputedStyle(x, ps).position !== 'absolute')) { rules.delete(k); write(); } });
     // a kind whose pseudo-element another page rule draws somewhere (a « › » on the routine's buttons): the other one, or none
     for (const [k, v] of [...rules]) {
       const ps = v.includes('::after{') ? '::after' : v.includes('::before{') ? '::before' : ''; if (!ps) continue;
       const els = [...document.querySelectorAll(k)].filter((e) => e.getClientRects().length);
+      if (els.some(inScroller)) { rules.delete(k); write(); continue; }   // the same kind inside a scrolling box elsewhere: none
       if (els.every((e) => getComputedStyle(e, ps).content === '""')) continue;
       const other = ps === '::after' ? '::before' : '';
       rules.delete(k); write();

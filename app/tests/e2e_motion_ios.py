@@ -7,7 +7,8 @@ The shared trader and its sample data; phone 390 (en, touch, dark) and computer 
  3  back puts the scroll back exactly (Trades → a trade → back; Today → an account → back)
  6  phone: the tab bar shrinks while scrolling down (the active tab and « + »), and comes back scrolling up
  8  the CSS has two reactions to a touch: scale(.97), or a background for rows; no other scale, no opacity
- 10 no touch target under 44 × 44 px (its own box or an invisible area around it) on Today, Trades, a trade and an account
+ 10 on a phone, no touch target under 44 × 44 px (its own box or an invisible area around it) on Today, Trades, a trade and an
+    account; never an area that would make a scrolling box scroll (a scrollbar takes room on Linux and Windows)
 No page error.
 """
 import json, re, sys
@@ -87,6 +88,7 @@ with sync_playwright() as p:
     if lang == 'en': bad = pg.evaluate(PRESS); ok(not bad, f'8 {tag}: two reactions to a touch only ({len(bad)}: {bad[:5]})')
     # 10
     small = []
+    if not phone: ctx.close(); continue   # (10 is about touch: a computer has a mouse; its filter chips stay 36 px)
     for h in ('#dashboard', '#trades', '#trade/' + tid, '#account/' + acc):
       pg.evaluate("(h) => { location.hash = h }", h); pg.wait_for_timeout(1500); pg.evaluate("scrollTo(0, 0)"); pg.wait_for_timeout(200)
       small += [f'{h.split("/")[0]}: {x}' for x in pg.evaluate(SMALL)]
