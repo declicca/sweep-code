@@ -7,7 +7,7 @@ Sweep — points 10, 11, 12 (dev environment with Playwright, not on the server)
  11. the copy panel and the « ⋯ » menu of a trade have no English left in French and Spanish.
  12. at 20:30 New York time, with the device clock in UTC, Europe/Paris and Asia/Tokyo: the header date, the strip of
      days, the trade form after « Now » and the saved trade all show the same session (the next day: futures sessions start at
-     18:00); without « Now », the form proposes the session that just ended (brief 00, Q2, 16 Oct.).
+     18:00); without « Now » too (1 Nov.: the form follows the market, open again since 18:00).
 """
 import asyncio, sys, re
 from playwright.async_api import async_playwright
@@ -135,9 +135,8 @@ async def main():
       today = await pg.evaluate('todayStr()')
       await pg.evaluate("editDoc('settings','settings',d=>{d.add_mode='manual'})"); await pg.wait_for_timeout(300)   # the form, not the screenshot reader
       await pg.evaluate("openTicket(null,{manual:true})"); await pg.wait_for_timeout(900)
-      ended = await pg.evaluate("TK && [TK.date, TK.entryTime, S.trades.some(t => !t.demo && t.date === todayStr())]")   # 20:30: the session that just ended, no time made up (brief 00, Q2)
-      tonight = ended[2]   # the previous time zone's pass saved a trade tonight: he is trading tonight, the form keeps the session open
-      ok(ended[:2] == ['2026-10-07', ''] if not tonight else (ended[0] == '2026-10-08' and ended[1].startswith('20:30')), f'[{tz}] 20:30 ET → ' + ('the form keeps the session open (a trade tonight already)' if tonight else 'the form proposes the session that just ended, times empty') + f' ({ended[:2]})')
+      opened = await pg.evaluate("TK && [TK.date, TK.entryTime]")   # 20:30: the market is open again, the next session at the time now (1 Nov.)
+      ok(opened[0] == '2026-10-08' and (opened[1] or '').startswith('20:30'), f'[{tz}] 20:30 ET → the form proposes the session open (Oct 8) and the time ({opened})')
       await pg.evaluate("document.querySelector('#tkSlide [data-act=tk-now]').click()"); await pg.wait_for_timeout(300)   # a night trader: « Now »
       form = await pg.evaluate("TK && TK.date"); etime = await pg.evaluate("TK && TK.entryTime")
       # save a trade from the form (entry and exit typed): the trade's date

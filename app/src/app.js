@@ -4077,10 +4077,12 @@ let TK = null;
 const hms = e => (e = String(e || "").trim(), /^\d{1,2}:\d{2}$/.test(e) && (e += ":00"), 
 /^\d{1,2}:\d{2}:\d{2}$/.test(e) ? e.padStart(8, "0") : "");
 
-/* the evening (17:00 to 9:30 ET) and the weekend: the CME closes at 17:00 and reopens at 18:00, but a trade typed then is most
-   often one of the day session that just ended (brief 00, Q2): the form proposes that session, its times empty; « Now » is there
-   for night trading (the quick sheet without a time follows the market itself: nav.js sheetDay, 30 Oct.) */
+/* outside the day session (17:00 to 9:30 ET) and the weekend: the coach's wait (coach.js) */
 const offHoursET = () => { const n = nowET(), hm = n.slice(11, 16), wd = new Date(n.slice(0, 10) + "T12:00:00Z").getUTCDay(); return hm >= "17:00" || hm < "09:30" || wd === 0 || wd === 6; },
+  /* the CME is closed: 17:00 to 18:00 ET, and from Friday 17:00 to Sunday 18:00 (1 Nov.: the form follows the market itself,
+     as the quick sheet does, nav.js sheetDay: a trade typed then is the last session's, its times empty; from 18:00 it is the
+     next session's, at the time typed) */
+  marketClosedET = () => { const n = nowET(), hm = n.slice(11, 16), wd = new Date(n.slice(0, 10) + "T12:00:00Z").getUTCDay(); return wd === 6 || wd === 5 && hm >= "17:00" || wd === 0 && hm < "18:00" || hm >= "17:00" && hm < "18:00"; },
   lastSessionET = () => { const n = nowET(); let d = n.slice(11, 16) >= "17:00" ? n.slice(0, 10) : ymdAdd(n.slice(0, 10), -1); while ([ 0, 6 ].includes(new Date(d + "T12:00:00Z").getUTCDay())) d = ymdAdd(d, -1); return d; };
 
 function ticketFrom(e, t) {
@@ -4126,8 +4128,7 @@ function ticketFrom(e, t) {
       tf: 1
     };
   }
-  // trading tonight (the session open already has a trade): that session and the time, as in the day
-  const s = nowET(), off = !/^d:/.test(t || "") && offHoursET() && !S.trades.some(o => !o.demo && o.date === todayStr()), i = /^d:\d{4}-\d{2}-\d{2}$/.test(t || "") ? t.slice(2) : off ? lastSessionET() : todayStr();
+  const s = nowET(), off = !/^d:/.test(t || "") && marketClosedET(), i = /^d:\d{4}-\d{2}-\d{2}$/.test(t || "") ? t.slice(2) : off ? lastSessionET() : todayStr();
   return {
     id: null,
     inst: rookieInst(INSTR[a.inst] ? a.inst : "NQ"),   // (27 Oct.) starting out: the micro of the usual contract

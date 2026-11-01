@@ -1,10 +1,11 @@
 """
-Sweep — a trade typed in the evening (brief 00, phase 1.2-a; Q2, recommendation A), Playwright, phone and computer:
+Sweep — a trade typed in the evening (brief 00, phase 1.2-a; Q2), Playwright, phone and computer:
   python3 tests/e2e_evening_entry.py http://127.0.0.1:8095 [storage_state, unused: it signs up its own trader]
-The clock is set in the browser (New York time). From 17:00 to 9:30 ET the new trade form proposes the session that just
-ended (Saturday → Friday), its times empty; « Now » puts today's session and the time, for who trades at night. In the day
-nothing changes (today, now), and in the evening too once the session open has a trade (trading tonight). The exit time never fills itself (typing the exit price used to put « now »); a time not
-typed is saved empty, never invented; the direction is the Buy / Sell button's, never the order of the times.
+The clock is set in the browser (New York time). The new trade form follows the market (1 Nov., as the quick sheet): while
+the CME is closed (17:00 to 18:00 ET, Friday 17:00 to Sunday 18:00) it proposes the session that just ended, its times empty;
+from 18:00 the session open (the next day's), at the time now; in the day, today and now. « Now » puts the session open and
+the time. The exit time never fills itself (typing the exit price used to put « now »); a time not typed is saved empty,
+never invented; the direction is the Buy / Sell button's, never the order of the times.
 Before 16 Oct.: at 21:00 on Tuesday a 10:15 trade went to Wednesday's session, at « 21:00 », and an exit time before the
 made-up entry time turned a Buy into a Short.
 """
@@ -38,10 +39,10 @@ with sync_playwright() as p:
       pg.evaluate("openTicket(null,{manual:true})"); pg.wait_for_timeout(900)
       return c, pg, errs
     form = "[TK.date, TK.entryTime || '', TK.exitTime || '']"
-    # Tuesday 13 Oct, 21:00 ET
-    c, pg, errs = page(utc(2026, 10, 13, 21))
+    # Tuesday 13 Oct, 17:30 ET (the market closed)
+    c, pg, errs = page(utc(2026, 10, 13, 17, 30))
     f = pg.evaluate(form)
-    ok(f == ['2026-10-13', '', ''], f'{tag} 21:00 Tue: the session that just ended (Tue 13), times empty ({f})')
+    ok(f == ['2026-10-13', '', ''], f'{tag} 17:30 Tue, the market closed: the session that just ended (Tue 13), times empty ({f})')
     pg.locator('[data-tk="exit"]').first.fill('21010'); pg.wait_for_timeout(300)
     ok(pg.evaluate("TK.exitTime || ''") == '', f'{tag} typing the exit price leaves the exit time empty ({pg.evaluate("TK.exitTime")!r})')
     r = pg.evaluate(SAVE, {'account': 'ee-a', 'inst': 'NQ', 'dir': 'long', 'qty': 1, 'entry': 21000, 'exit': 21010})
@@ -49,7 +50,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1500); pg.evaluate("typeof closeTicket === 'function' && closeTicket()"); pg.wait_for_timeout(600)   # the saved trade's « How did it go? » step first
     pg.evaluate("openTicket(null,{manual:true})"); pg.wait_for_timeout(900)
     r = pg.evaluate(SAVE, {'account': 'ee-a', 'inst': 'NQ', 'dir': 'long', 'qty': 1, 'entry': 21000, 'exit': 21010, 'entryTime': '10:15:00', 'exitTime': '10:05:00'})
-    ok(r and r[0] == '2026-10-13' and r[1] == '10:15' and r[3] == 'long', f'{tag} a 10:15 Buy typed at 21:00: Tue 13, Long even with an exit time before it ({r})')
+    ok(r and r[0] == '2026-10-13' and r[1] == '10:15' and r[3] == 'long', f'{tag} a 10:15 Buy typed at 17:30: Tue 13, Long even with an exit time before it ({r})')
     pg.wait_for_timeout(1500); pg.evaluate("typeof closeTicket === 'function' && closeTicket()"); pg.wait_for_timeout(600)   # the saved trade's « How did it go? » step first
     pg.evaluate("openTicket(null,{manual:true})"); pg.wait_for_timeout(900)
     b = pg.locator('#tkSlide [data-act="tk-now"]')
@@ -57,22 +58,18 @@ with sync_playwright() as p:
     if b.count():
       b.click(); pg.wait_for_timeout(400)
       f = pg.evaluate(form)
-      ok(f[0] == '2026-10-14' and f[1].startswith('21:0'), f'{tag} « {NOW[lang]} »: the session now open (Wed 14) and the time ({f})')
-      ok(pg.evaluate("(document.querySelector('[data-tk=date]')||{}).value") == '2026-10-14' and pg.evaluate("(document.querySelector('[data-tk=entryTime]')||{}).value").startswith('21:0'), f'{tag} the fields show it')
+      ok(f[0] == '2026-10-13' and f[1].startswith('17:3'), f'{tag} « {NOW[lang]} »: today (Tue 13) and the time ({f})')
+      ok(pg.evaluate("(document.querySelector('[data-tk=date]')||{}).value") == '2026-10-13' and pg.evaluate("(document.querySelector('[data-tk=entryTime]')||{}).value").startswith('17:3'), f'{tag} the fields show it')
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} nothing wider than the window')
     allerr += errs; c.close()
     if lang != 'fr': continue
-    # Wednesday 14 Oct, 8:00 ET (before the open) → Tue 13 ; Saturday 17 Oct, 10:00 → Fri 16 ; Tuesday 13 Oct, 11:00 (day) → today, now
-    for at, want, what in ((utc(2026, 10, 14, 8), ['2026-10-13', '', ''], '8:00 Wed, before the open: Tue 13'), (utc(2026, 10, 17, 10), ['2026-10-16', '', ''], '10:00 Sat: Fri 16')):
+    # the market closed: Saturday 17 Oct 10:00 and Sunday 18 Oct 17:00 → Fri 16, times empty; open: Tuesday 13 Oct 21:00 → Wed 14,
+    # Wednesday 14 Oct 8:00 → Wed 14, Sunday 18 Oct 19:00 → Mon 19, at the time now; Tuesday 13 Oct 11:00 (day) → today, now
+    for at, want, what in ((utc(2026, 10, 17, 10), ['2026-10-16', ''], '10:00 Sat: Fri 16, times empty'), (utc(2026, 10, 18, 17), ['2026-10-16', ''], '17:00 Sun: Fri 16, times empty'),
+                           (utc(2026, 10, 13, 21), ['2026-10-14', '21:0'], '21:00 Tue, the market open again: Wed 14 and the time'), (utc(2026, 10, 14, 8), ['2026-10-14', '08:0'], '8:00 Wed: Wed 14 and the time'),
+                           (utc(2026, 10, 18, 19), ['2026-10-19', '19:0'], '19:00 Sun, the week open: Mon 19 and the time'), (utc(2026, 10, 13, 11), ['2026-10-13', '11:0'], '11:00 Tue, in the day: today and now')):
       c, pg, errs = page(at); f = pg.evaluate(form)
-      ok(f == want, f'{tag} {what}, times empty ({f})'); allerr += errs; c.close()
-    # trading tonight: the session open already has a trade → that session and the time, no « Now » needed
-    c, pg, errs = page(utc(2026, 10, 13, 21))
-    pg.evaluate("closeTicket(); put('trades',{id:'ee-n1',account_id:'ee-a',instrument:'NQ',direction:'long',contracts:1,entry:1,exit:2,pnl_c:1000,pnl_manual:true,date:'2026-10-14',session_date:true,entry_time:'20:40',exit_time:'20:45'})"); pg.wait_for_timeout(800)
-    pg.evaluate("openTicket(null,{manual:true})"); pg.wait_for_timeout(900); f = pg.evaluate(form)
-    ok(f[0] == '2026-10-14' and f[1].startswith('21:0'), f'{tag} 21:00 Tue, a trade already tonight (20:40): the session open (Wed 14) and the time ({f})'); allerr += errs; c.close()
-    c, pg, errs = page(utc(2026, 10, 13, 11)); f = pg.evaluate(form)
-    ok(f[0] == '2026-10-13' and f[1].startswith('11:0'), f'{tag} 11:00 Tue, in the day: unchanged, today and now ({f})'); allerr += errs; c.close()
+      ok(f[0] == want[0] and (f[1].startswith(want[1]) if want[1] else f[1] == '') and f[2] == '', f'{tag} {what} ({f})'); allerr += errs; c.close()
   ok(not allerr, f'no page error ({allerr[:2]})')
   br.close()
 print(f'{fails} failed' if fails else 'all passed')

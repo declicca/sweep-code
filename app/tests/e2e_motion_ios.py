@@ -5,7 +5,7 @@ The shared trader and its sample data; phone 390 (en, touch, dark) and computer 
  1  a tab change starts no entry animation
  2  each tab keeps its scroll (Trades → Stats → Trades)
  3  back puts the scroll back exactly (Trades → a trade → back; Today → an account → back)
- 6  phone: the tab bar shrinks while scrolling down (the active tab and « + »), and comes back scrolling up
+ 6  phone: the tab bar stays whole while scrolling (1 Nov.: shrinking it to the active tab and « + » looked like a bug)
  8  the CSS has two reactions to a touch: scale(.97), or a background for rows; no other scale, no opacity
  10 on a phone, no touch target under 44 × 44 px (its own box or an invisible area around it) on Today, Trades, a trade and an
     account; never an area that would make a scrolling box scroll (a scrollbar takes room on Linux and Windows)
@@ -49,7 +49,6 @@ with sync_playwright() as p:
     pg.evaluate("document.querySelectorAll('.g-sweep [data-g=sw-close]').forEach((b) => b.click())")
     tabs = '#bottomnav' if phone else 'aside.side .nav'
     def tab(v):
-      if phone and pg.evaluate("document.body.classList.contains('bn-mini')"): pg.locator('#bottomnav a.on').first.tap(); pg.wait_for_timeout(450)   # the small bar opens first
       (pg.locator(f'{tabs} a[data-v={v}]').first.tap() if phone else pg.locator(f'{tabs} a[data-v={v}]').first.click())
     # 1
     tab('trades'); pg.wait_for_timeout(60); a1 = pg.evaluate(ANIMS); pg.wait_for_timeout(600)
@@ -79,11 +78,11 @@ with sync_playwright() as p:
       tab('trades'); pg.wait_for_timeout(800); pg.evaluate("scrollTo(0, 0)"); pg.wait_for_timeout(300)
       for k in range(6): pg.mouse.wheel(0, 120); pg.wait_for_timeout(80)
       pg.wait_for_timeout(500)
-      mini = pg.evaluate("[document.body.classList.contains('bn-mini'), [...document.querySelectorAll('#bottomnav a')].filter((a) => a.getBoundingClientRect().width > 4).length, !!document.querySelector('#bottomnav .plus').getBoundingClientRect().width]")
+      whole = pg.evaluate("[...document.querySelectorAll('#bottomnav a')].filter((a) => a.getBoundingClientRect().width > 4).length")
       for k in range(3): pg.mouse.wheel(0, -120); pg.wait_for_timeout(80)
       pg.wait_for_timeout(500)
-      back = pg.evaluate("[document.body.classList.contains('bn-mini'), [...document.querySelectorAll('#bottomnav a')].filter((a) => a.getBoundingClientRect().width > 4).length]")
-      ok(mini == [True, 1, True] and back == [False, 4], f'6 {tag}: scrolling down, the tab bar shrinks to the active tab and « + » ({mini}); up, it comes back ({back})')
+      back = pg.evaluate("[...document.querySelectorAll('#bottomnav a')].filter((a) => a.getBoundingClientRect().width > 4).length")
+      ok(whole == 4 and back == 4 and not pg.evaluate("document.body.classList.contains('bn-mini')"), f'6 {tag}: scrolling down then up, the tab bar stays whole ({whole}, {back})')
     # 8
     if lang == 'en': bad = pg.evaluate(PRESS); ok(not bad, f'8 {tag}: two reactions to a touch only ({len(bad)}: {bad[:5]})')
     # 10

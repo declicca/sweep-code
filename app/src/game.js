@@ -1655,7 +1655,15 @@
   const bv = (k) => (BV[L()] || BV.en)[k];
   const SYNCED = ['ninjatrader', 'quantower'];
   const balWhere = (a) => { const f = typeof firm === 'function' && a.firm_id ? firm(a.firm_id) : null; return (f && f.name) || a.name || ''; };
-  const balC = (v) => { const x = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(/,(?=\d{3}(\D|$))/g, '').replace(',', '.'); return x === '' || x === '-' || !isFinite(+x) ? null : Math.round(+x * 100); };
+  /** a balance typed in any of the three ways (« 158,211.60 », « 158 211,60 », « 158.211,60 »): the last of « , » and « . » is the
+      decimal point when both are there; a comma alone groups thousands only before three digits at the end */
+  const balC = (v) => { let x = String(v == null ? '' : v).replace(/[\s\u00a0\u202f$]/g, '');
+    if (x.includes(',') && x.includes('.')) x = x.lastIndexOf(',') < x.lastIndexOf('.') ? x.replace(/,/g, '') : x.replace(/\./g, '').replace(',', '.');
+    else x = x.replace(/,(?=\d{3}(\D|$))/g, '').replace(',', '.');
+    return x === '' || x === '-' || !isFinite(+x) ? null : Math.round(+x * 100); };
+  /** the balance put in the field, written as in the language (1 Nov.: « 158211.60 » on the French capture) */
+  const balIn = (c) => { const s = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
+    return LANG === 'fr' || LANG === 'es' ? s.replace(/[,.]/g, (m) => (m === ',' ? '\0' : ',')).replace(/\0/g, LANG === 'fr' ? '\u202f' : '.') : s; };
   function balAccounts(day) {
     if (typeof todayStr !== 'function' || day !== todayStr() || typeof acctState !== 'function') return [];   // today's balance only says today
     const done = new Set(((journalOf(day).post || {}).bal || []).map((b) => b.acc));
@@ -1673,7 +1681,7 @@
     const b = RV.bal[a.id], gap = b.plat == null ? 0 : b.plat - b.sweep, G2 = window.SweepGap;
     return `<div class="g-f g-bal" data-bal="${esc(a.id)}"><span>${esc(bv('q').replace('{f}', balWhere(a)))}</span>
       ${balWhere(a) !== a.name ? `<small class="g-bal-a">${esc(a.name || '')}</small>` : ''}
-      <div class="g-bal-r"><input inputmode="decimal" data-bal-in="${esc(a.id)}" value="${((b.plat == null ? b.sweep : b.plat) / 100).toFixed(2)}" aria-label="${esc(bv('q').replace('{f}', balWhere(a)))}"><button type="button" class="chip ${b.same ? 'on' : ''}" data-bal-same="${esc(a.id)}">${bv('same')}</button></div>
+      <div class="g-bal-r"><input inputmode="decimal" data-bal-in="${esc(a.id)}" value="${balIn(b.plat == null ? b.sweep : b.plat)}" aria-label="${esc(bv('q').replace('{f}', balWhere(a)))}"><button type="button" class="chip ${b.same ? 'on' : ''}" data-bal-same="${esc(a.id)}">${bv('same')}</button></div>
       <div class="g-bal-gap" ${gap && G2 ? '' : 'hidden'}>${gap && G2 ? `<p>${esc(G2.msg(gap))}</p><div class="g-chips-row wrap">${G2.chips(gap, b.kind, 'data-bal-k')}</div>` : ''}</div></div>`;
   }
   function balPaint(id) {
@@ -1686,7 +1694,7 @@
     const el = e.target.closest && e.target.closest('#gSheet .g-bal [data-bal-same], #gSheet .g-bal [data-bal-k], #gSheet [data-bal-shot]'); if (!el) return;
     if (el.hasAttribute('data-bal-shot')) { closeSheet(); setTimeout(() => { if (typeof openTicket === 'function') openTicket(null, { date: RV.day }); }, 350); return; }
     const id = el.closest('.g-bal').dataset.bal, b = RV.bal[id]; if (!b) return;
-    if (el.hasAttribute('data-bal-same')) { b.same = true; b.plat = null; b.kind = null; const i = el.parentElement.querySelector('input'); if (i) i.value = (b.sweep / 100).toFixed(2); }
+    if (el.hasAttribute('data-bal-same')) { b.same = true; b.plat = null; b.kind = null; const i = el.parentElement.querySelector('input'); if (i) i.value = balIn(b.sweep); }
     else { b.kind = el.getAttribute('data-bal-k'); }
     buzz(6); balPaint(id); const er = document.getElementById('gErr'); if (er) er.textContent = '';
   });

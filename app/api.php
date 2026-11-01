@@ -598,6 +598,28 @@ function cohort_count(): array {
     @file_put_contents($file, json_encode($out));
     return $out;
 }
+/** Website counters (brief app pour site, 1 Nov.): four totals over every real trader (internal/test accounts, administrators and
+ *  the sample data excluded), nothing per trader. A trade is a journaled trade (not a « Trades not detailed » line); an evaluation
+ *  passed is an evaluation account marked passed (« Passed → funded »: result passed); a payout is a payout marked paid. Cached 1 h. */
+function public_totals(): array {
+    global $DATA;
+    $file = $DATA . '/public-totals.json';
+    if (is_file($file) && time() - filemtime($file) < 3600) { $j = json_decode((string)file_get_contents($file), true); if (is_array($j)) return $j; }
+    $real = 'u.is_admin = 0 AND COALESCE(u.is_internal, 0) = 0 AND u.disabled = 0';
+    $docs = function (string $col, string $like = '') use ($real): int {
+        return (int) q("SELECT COUNT(*) FROM documents d JOIN users u ON u.id = d.user_id WHERE $real AND d.collection = ? AND d.data NOT LIKE '%\"demo\":true%'"
+            . ($like !== '' ? ' AND d.data LIKE ?' : '') . ($col === 'trades' ? " AND d.data NOT LIKE '%\"untracked\":true%'" : ''), $like !== '' ? [$col, $like] : [$col])->fetchColumn();
+    };
+    $out = [
+        'traders' => (int) q("SELECT COUNT(*) FROM users u WHERE $real")->fetchColumn(),
+        'trades' => $docs('trades'),
+        'evals_passed' => $docs('accounts', '%"result":"passed"%'),
+        'payouts' => $docs('payouts', '%"status":"paid"%'),
+        'at' => gmdate('Y-m-d\TH:i:s\Z'),
+    ];
+    @file_put_contents($file, json_encode($out));
+    return $out;
+}
 /** Billing module (billing/) + private config (sweep-private/billing-config.php). Off when either is missing: the app works as before. */
 function billing_on(): bool {
     static $on = null; if ($on !== null) return $on;
@@ -734,6 +756,15 @@ try {
         if ($method === 'OPTIONS') { header('Access-Control-Allow-Methods: GET'); http_response_code(204); exit; }
         $out = json_encode(cohort_count());
         http_response_code(200); header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: public, max-age=60');
+        echo $out; exit;
+    }
+    // the website's counters (public-totals), public: four totals, cached 1 h, readable from makeitsweep.com only
+    if (in_array($route, ['api/public-totals.php', 'api/public-totals'], true)) {
+        $origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
+        if (in_array($origin, ['https://makeitsweep.com', 'https://www.makeitsweep.com'], true)) { header('Access-Control-Allow-Origin: ' . $origin); header('Vary: Origin'); }
+        if ($method === 'OPTIONS') { header('Access-Control-Allow-Methods: GET'); http_response_code(204); exit; }
+        $out = json_encode(public_totals());
+        http_response_code(200); header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: public, max-age=3600');
         echo $out; exit;
     }
     // /r/CODE (referral link): remember the code, then go to sign-up

@@ -3009,12 +3009,6 @@ html body .bottomnav{view-transition-name:sw-tabbar}
   html[data-vt]::view-transition-old(root){animation:sw-vt-fade-out .15s linear both}
   html[data-vt]::view-transition-new(root){animation:sw-vt-fade-in .15s linear both}
 }
-/* the tab bar shrinks while scrolling down (phone): the active tab and the « + » */
-@media (max-width:860px){
-  html body .bottomnav a{max-width:140px;transition:max-width .32s var(--spring),opacity .2s ease,padding .32s var(--spring),margin .32s var(--spring)}
-  html body.bn-mini .bottomnav a:not(.on){max-width:0;opacity:0;padding-left:0!important;padding-right:0!important;margin:0!important;overflow:hidden;pointer-events:none}
-}
-@media (max-width:860px) and (prefers-reduced-motion:reduce){html body .bottomnav a{transition:none}}
 /* (31 Oct., fluidity 8) two reactions to a touch in the whole app: a button, a chip, a tab, the « + » shrink to .97 with the spring; a row or a card that opens a page lights up (--fill), never shrinks (the :active rules of every file follow it) */
 /* (31 Oct., fluidity 9) three button styles in the whole app: the main button and the secondary one, pills of 44 px (one blue
    per screen); the chip or segment, 38 px */

@@ -2302,14 +2302,8 @@ window.SweepMO = window.SweepMO || class {
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
   /* the day a new trade goes to: today's session, or, while the market is closed (17:00–18:00 ET, Friday 17:00 to Sunday
-     18:00), the last session that ended (a Friday evening's trade is Friday's, never Saturday's) */
-  const sheetDay = () => {
-    const n = typeof nowET === 'function' ? nowET() : ''; if (!n || typeof ymdAdd !== 'function') return today();
-    const d = n.slice(0, 10), hm = n.slice(11, 16), wd = new Date(d + 'T12:00:00Z').getUTCDay();
-    if (!(wd === 6 || (wd === 5 && hm >= '17:00') || (wd === 0 && hm < '18:00') || (hm >= '17:00' && hm < '18:00'))) return today();
-    let x = d; while ([0, 6].includes(new Date(x + 'T12:00:00Z').getUTCDay())) x = ymdAdd(x, -1);
-    return x;
-  };
+     18:00), the last session that ended (a Friday evening's trade is Friday's, never Saturday's): app.js marketClosedET, as the form */
+  const sheetDay = () => (typeof marketClosedET === 'function' && marketClosedET() ? lastSessionET() : today());
   let origTicket = null;
 
   /* the overlay (same family as the other sheets: back button and Escape close it) */
@@ -7040,7 +7034,6 @@ new window.SweepMO(() => {
     const a = e.target.closest && e.target.closest('#bottomnav a[data-v], aside.side .nav a[data-v]'); if (!a || e.metaKey || e.ctrlKey) return;
     const t = ROOT[a.dataset.v]; if (!t) return;
     e.preventDefault();
-    if (document.body.classList.contains('bn-mini') && a.closest('#bottomnav')) { document.body.classList.remove('bn-mini'); if (typeof placeTabPill === 'function') setTimeout(placeTabPill, 340); return; }   // the small bar opens first, as iOS
     if (t === tab) {
       if (scrollY > 4) { scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' }); return; }
       if (location.hash !== '#' + a.dataset.v) location.hash = '#' + a.dataset.v;
@@ -7069,18 +7062,6 @@ new window.SweepMO(() => {
       else { p.style.transform = ''; }
     });
   }
-  // 6 phone: the tab bar shrinks while scrolling down
-  let lastY = scrollY;
-  addEventListener('scroll', () => {
-    if (!(window.SW_MQ && SW_MQ.matches)) return;
-    const y = scrollY, b = document.body;
-    const was = b.classList.contains('bn-mini');
-    if (y < 40 || y < lastY - 6) b.classList.remove('bn-mini');
-    else if (y > lastY + 6 && y > 80 && !want) b.classList.add('bn-mini');
-    if (was !== b.classList.contains('bn-mini') && typeof placeTabPill === 'function') { placeTabPill(); setTimeout(placeTabPill, 340); }
-    if (Math.abs(y - lastY) > 6) lastY = y;
-  }, { passive: true });
-  addEventListener('hashchange', () => { document.body.classList.remove('bn-mini'); lastY = 0; });
 })();
 
 /* ───────────── (31 Oct., fluidity 10) every touch target has a 44 × 44 area, its drawing unchanged ─────────────

@@ -2,7 +2,7 @@
 Sweep — « Close my day » checks the platform's balance (brief « pertes oubliées », step 2, 27 Oct.), Playwright:
   python3 tests/e2e_platform_balance.py http://127.0.0.1:8095
 A trader of its own, a Topstep 50K evaluation; phone 390 (fr, touch), computer 1300 (en), phone 390 (es).
- 1  a day without a gap: « Ton solde sur Topstep ? », filled in with Sweep's balance; closing without it asks for it, one tap on
+ 1  a day without a gap: « Ton solde sur Topstep ? », filled in with Sweep's balance (« 50 000,00 », « 50.000,00 » in Spanish); closing without it asks for it, one tap on
     « C'est le même » and the day closes (one tap more than before); the balance is kept (journal.post.bal), no line
  2  a day with a gap: +$150 logged, the platform says −$190: « Il manque −340 $… C'était quoi ? », three chips; « Des trades pas
     notés »: a « Trades non détaillés −340 $ » line on that account and day; the day's P&L −$190, the balance and the drawdown
@@ -59,7 +59,8 @@ with sync_playwright() as p:
     review()
     rows = pg.evaluate("[...document.querySelectorAll('#gSheet .g-bal')].map((e) => [e.dataset.bal, e.querySelector(':scope > span').textContent, e.querySelector('input').value])")
     bal = pg.evaluate("acctState(getDoc('accounts', 'pb-a')).bal")
-    ok(len(rows) == 1 and rows[0][0] == 'pb-a' and rows[0][1] == x['q'] and abs(float(rows[0][2]) * 100 - bal) < 1, f'1 {tag}: « {x["q"]} », filled in with Sweep\'s balance ({rows}, {bal})')
+    en = f'{bal / 100:,.2f}'; want = {'en': en, 'fr': en.replace(',', '\u202f').replace('.', ','), 'es': en.replace(',', ' ').replace('.', ',').replace(' ', '.')}[lang]   # (1 Nov.) « 50 000,00 » in French, « 50.000,00 » in Spanish
+    ok(len(rows) == 1 and rows[0][0] == 'pb-a' and rows[0][1] == x['q'] and rows[0][2] == want, f'1 {tag}: « {x["q"]} », filled in with Sweep\'s balance, written as in the language ({rows}, {want!r})')
     tap(pg.locator('#gSheet [data-g=save-review]')); pg.wait_for_timeout(400)
     ok(pg.evaluate(ERR) == x['need'] and pg.evaluate(OPEN), f'1 {tag}: closing without it asks for it ({pg.evaluate(ERR)!r})')
     tap(pg.locator('#gSheet [data-bal-same]')); pg.wait_for_timeout(200)

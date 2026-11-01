@@ -1456,7 +1456,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - **Position au retour** : le retour remet la position exacte (`history.scrollRestoration = 'manual'`, position gardée par adresse, `history.state.swI` pour savoir si c'est un retour). L'app ne remonte plus en haut d'elle-même au changement d'adresse : c'est ce module qui place la page.
   - **Sous-pages** : un trade, un compte, Réglages, Quoi de neuf, Ma progression et l'analyse détaillée de Stats (`#analytics/…`) arrivent de la droite avec `startViewTransition`. La page de dessous part de 30 % à gauche, assombrie. Le retour fait l'inverse. La barre d'onglets et la barre latérale ne bougent pas (`view-transition-name`). En « Réduire les animations », c'est un fondu de 150 ms.
   - **Geste de retour** : dans l'app installée, glisser depuis le bord gauche (moins de 20 px) revient en arrière. La page suit le doigt, revient au-delà d'un tiers ou si le geste est rapide. Rien dans Safari.
-  - **Barre d'onglets réduite** (téléphone) : elle se réduit en descendant (`body.bn-mini`) à l'onglet actif et au « + ». Elle revient en remontant ou en haut de la page. La toucher réduite la rouvre d'abord, comme iOS.
+  - **Barre d'onglets toujours entière** (téléphone, 1er nov.) : la réduction en descendant (`body.bn-mini`, onglet actif et « + » seulement) est retirée, Mateo trouvait que les icônes qui disparaissaient faisaient bogue. Test : e2e_motion_ios 6.
 - **Lot 2, le toucher** :
   - Deux réactions seulement dans tout le CSS : `scale(.97)` pour les boutons, puces, onglets et le « + » ; le fond `--fill` pour les lignes et les cartes qui ouvrent une page. Les autres valeurs (.86 à .99, opacités .6 et .7) sont parties.
   - Trois styles de bouton : principal et secondaire en pilule de 44 px, puce ou segment de 38 px (`.btn.sm` compris).
@@ -1484,10 +1484,14 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
   - **Rappels** : silence de 9 h 30 à 17 h (`v2c.php`).
   - **Admin** : les créneaux d'inscription sont « Séance 9 h 30 → 17 h » et « Marché fermé 17 h → 18 h » (`ops/metrics.php`, `ops/report.php`, `ux.js`).
 - **Bienvenue** : on y voit le parcours « marché ouvert » (le premier trade) chaque fois que le marché est ouvert, la nuit comprise. Le parcours « marché fermé » (préparer la séance suivante) ne s'affiche que de 17 h à 18 h en semaine et en fin de semaine : « lundi » le vendredi soir et le samedi, « demain » le dimanche. L'ancien cas « avant 9 h 30 » n'existe plus, puisque le marché est ouvert à cette heure.
-- **Le formulaire complet** propose encore, le soir, la séance qui vient de finir (décision du brief 00, Q2), avec « Maintenant » pour la nuit. La feuille rapide sans heure suit le marché lui-même (W1).
+- **Le formulaire complet suit aussi le marché (1er nov.)** : marché fermé (17 h à 18 h ET, vendredi 17 h au dimanche 18 h), il propose la séance qui vient de finir, heures vides ; dès 18 h, la séance ouverte (celle du lendemain) à l’heure qu’il est ; le jour, aujourd’hui et maintenant. Même règle que la feuille rapide (`marketClosedET` dans app.js, `sheetDay` dans nav.js). Le minuteur du coach garde `offHoursET` (17 h à 9 h 30). Test : e2e_evening_entry.
 - **Tests** :
   - `e2e_tour_1029` : à 8 h, le marché est ouvert.
   - `e2e_first_run` : le soir se teste à 17 h 30.
   - `e2e_routine_parity` : la clôture se teste à 17 h 30.
   - `push_test` et `e2e_push` : le rappel de revue est à 17 h 15.
   - `metrics_test` : le créneau « fermé » se teste à 17 h 30.
+
+## Pour le site, 1er nov. (briefs/brief-app-pour-site-2026-11-01.md)
+- **`api/public-totals`** (ou `api/public-totals.php`) : `{"traders", "trades", "evals_passed", "payouts", "at"}`, public, lecture seule, CORS makeitsweep.com seulement, gardé 1 h (`data/public-totals.json`, `public_totals()` dans api.php). Sur tous les traders réels : comptes d'Admin, internes (`is_internal`) et désactivés exclus, données d'exemple (`demo`) exclues. Un trade = un trade journalisé (pas une ligne « Trades non détaillés »). Une évaluation réussie = un compte d'évaluation marqué réussi (`result: passed`, posé par « Réussi → financé »). Un payout = un payout marqué payé (un payout demandé ou approuvé ne compte pas). Test : e2e_noindex.
+- **Solde de « Fermer ma journée »** : prérempli comme dans la langue (« 158 211,60 » en français, « 158.211,60 » en espagnol, « 158,211.60 » en anglais) ; les trois façons se lisent (`balIn` / `balC` dans game.js). Test : e2e_platform_balance.
