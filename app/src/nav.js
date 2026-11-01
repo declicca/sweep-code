@@ -7078,7 +7078,8 @@ new window.SweepMO(() => {
 /* ───────────── (31 Oct., fluidity 10) every touch target has a 44 × 44 area, its drawing unchanged ─────────────
  * A kind of target smaller than 44 px (its tag and classes) gets an invisible area around it, in a style sheet of its own
  * (its free ::after, else its ::before). The page's elements are never touched: the pages that redraw when their HTML differs
- * keep their nodes (a class added to them made them redraw, and a tapped answer lost its place). Measured after the first image. */
+ * keep their nodes (a class added to them made them redraw, and a tapped answer lost its place). Measured after the first image,
+ * so nothing it adds moves the page: an invisible area only, never a height. */
 (function () {
   'use strict';
   const SEL = '#main a[href], #main button, #main [role=button], #main summary, #main [data-act], .main-wrap .top a, .main-wrap .top button';
@@ -7104,7 +7105,9 @@ new window.SweepMO(() => {
       if (e.parentElement && e.parentElement.closest('a[href], button, [role=button], summary')) return;
       const k = kind(e); if (!k || rules.has(k)) return;
       const ps = free(e, '::after') ? '::after' : free(e, '::before') ? '::before' : '';
-      if (!ps) { if (e.tagName === 'SUMMARY') rules.set(k, `html body ${k}{min-height:44px}`); added = true; return; }
+      if (!ps) return;   // (a summary drawing both: its 44 px in nav.css, from the first image — never a height added later)
+      // a static element whose children are placed against something above it: a position of its own would move them
+      if (getComputedStyle(e).position === 'static' && [...e.querySelectorAll('*')].some((c) => /absolute|fixed/.test(getComputedStyle(c).position))) return;
       rules.set(k, rule(k, ps)); added = true;
     });
     if (!added) return;
