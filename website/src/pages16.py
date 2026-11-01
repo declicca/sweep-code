@@ -1,6 +1,6 @@
 """Home page sections, built with the design system (ui.py, system.css)."""
 from core import *
-from ui import sec, head, go, split, card, card_media, cards, tiles, frame_d, phone_img, qa, final, read_next, bullets, rings
+from ui import sec, head, go, split, card, card_media, cards, tiles, frame_d, phone_img, qa, final, read_next, bullets, rings, stats
 import re, json, html
 
 L3 = lambda en, fr, es: T(en, fr, es)
@@ -222,6 +222,18 @@ def sec_pricing(lang, t):
                + f'<div class="plans-mini stagger">{tl}</div><p class="cap">{t(L3("Annual billing: −30%. Prices before tax.","Facturation annuelle : −30 %. Prix avant taxes.","Facturación anual: −30 %. Precios antes de impuestos."))}</p>'
                + f'<div class="links" style="justify-content:center">{link(lang, t, "pricing.html", L3("Compare plans","Comparer les forfaits","Comparar planes"))}{link(lang, t, "best-trading-journal-for-prop-firms.html", L3("Compare Sweep","Comparer Sweep","Comparar Sweep"))}</div>',
                "n", "pricing")
+
+# ---------------------------------------------------------------- live totals under the hero (brief « avance concurrentielle », step 9)
+# The page holds only the TOTALS_MARK; the build writes this banner to _nx/<lang>-totals.html with {traders}… placeholders, and
+# static/totals.php fills it with the app's public totals (api/public-totals, four counts, nothing personal) once every threshold
+# is reached (TOTALS_MIN in totals.php). Until then the home page is served as built, without the banner.
+TOTALS_MARK = "<!--totals-->"
+
+def sec_totals(lang, t):
+    items = [(t(T("Traders","Traders","Traders")), "{traders}", ""), (t(T("Trades journaled","Trades journalisés","Operaciones registradas")), "{trades}", ""),
+             (t(T("Evaluations passed","Évaluations réussies","Evaluaciones superadas")), "{evals_passed}", ""), (t(T("Payouts received","Payouts reçus","Payouts recibidos")), "{payouts}", "")]
+    note = t(T("Live totals from Sweep traders. Counts only, nothing personal.","Totaux en direct des traders Sweep. Des nombres seulement, rien de personnel.","Totales en directo de los traders de Sweep. Solo cifras, nada personal."))
+    return sec(stats(items) + f'<p class="totals-note">{note}</p>', rhythm="t", id_="totals")
 
 # ---------------------------------------------------------------- 3 years of journal costs (brief « avance concurrentielle », step 3)
 # Every price comes from data/competitors.json (each company's pricing page, with its check date). Off until TraderSync shows

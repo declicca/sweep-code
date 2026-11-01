@@ -964,6 +964,9 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .cohort .cbar{width:120px;height:4px;border-radius:2px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden}
 .cohort .cbar i{display:block;height:100%;background:var(--blue);border-radius:inherit;transform:scaleX(var(--c,0));transform-origin:0 50%;transition:transform 1.2s var(--spring)}
 .cohort .ctext{font-size:13px;color:var(--muted)}
+/* the live totals banner (totals.php writes it in once its thresholds are reached) */
+#totals .stat dd{font-variant-numeric:tabular-nums}
+.totals-note{margin-top:12px;font-size:13px;color:var(--muted)}
 /* ---- [pages: index.html] the narration: the text scrolls, one app screen stays beside it and changes with it */
 .narr-media{display:none}
 .narr-beat+.narr-beat,.narr-pair+.narr-beat{margin-top:var(--sec-t)}

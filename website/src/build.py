@@ -102,6 +102,7 @@ shutil.copytree(os.path.join(STATIC,"img"), os.path.join(DIST,"img"))
 for d in ("icons","social","video","press","templates"): shutil.copytree(os.path.join(STATIC,d), os.path.join(DIST,d))
 shutil.copy(os.path.join(STATIC,"site.webmanifest"), os.path.join(DIST,"site.webmanifest"))
 shutil.copy(os.path.join(STATIC,"release.php"), os.path.join(DIST,"release.php"))   # the release dates pages, with the next release (pages13.NX)
+shutil.copy(os.path.join(STATIC,"totals.php"), os.path.join(DIST,"totals.php"))   # the home page, with the live totals banner once its thresholds are reached
 def _text(body):
     """A page's visible text, without tags, scripts or styles: what its sitemap date follows."""
     return _re.sub(r"\s+", " ", _re.sub(r"<[^>]+>", " ", _re.sub(r"<script\b.*?</script>|<style\b.*?</style>", " ", body, flags=_re.S))).strip()
@@ -238,6 +239,10 @@ for (_l, _p), _vs in pages13.NX.items():
     if _re.search(r"NX[a-z]+(?:en|fr|es)[A-Z0-9]+QQ", _s): raise SystemExit(f"build: a placeholder is left in {_l}/{_p}")
     open(_f, "w", encoding="utf-8").write(_s)
 open(os.path.join(DIST, "llms.txt"), "w", encoding="utf-8").write(_llms)
+# live totals on the home page (brief « avance concurrentielle », step 9): the banner with its {traders}… placeholders, for totals.php
+import pages16
+for _l in LANGS:
+    open(os.path.join(DIST, "_nx", f"{_l}-totals.html"), "w", encoding="utf-8").write(pages16.sec_totals(_l, lambda d, L=_l: d[L]))
 pages13.write_ics(DIST)
 open(os.path.join(DIST,".htaccess"),"w").write("""# makeitsweep.com (Apache / cPanel)
 Options -Indexes
@@ -274,6 +279,8 @@ RewriteCond %{DOCUMENT_ROOT}/$1.html -f
 RewriteRule ^(.+?)/$ /$1 [R=301,L]
 # release dates and the economic calendar: release.php fills the page with the next release, or the week under way, when it is asked for (texts written by the build in _nx/)
 RewriteRule ^((?:fr/|es/)?(?:(?:cpi|ppi|nfp|pce|gdp|retail-sales|ism-manufacturing)-release-dates|fomc-meeting-dates|economic-calendar))/?$ /release.php?p=$1 [L,QSA]
+# the home page: totals.php adds the live totals banner once the thresholds are reached (otherwise the page as built)
+RewriteRule ^((?:fr|es)/)?$ /totals.php?p=$1 [L,QSA]
 # /404 is not a page: it falls through to the real 404
 RewriteCond $1 !(^|/)404$
 RewriteCond %{DOCUMENT_ROOT}/$1.html -f
@@ -296,7 +303,7 @@ Header always set X-Frame-Options "DENY"
 Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 Header always set Strict-Transport-Security "max-age=31536000"
 # pages only load from the site itself (and call the app); inline scripts and styles stay allowed (the site uses them). Not on files like the PDFs
-<FilesMatch "(\\.html|^release\\.php)$">
+<FilesMatch "(\\.html|^(release|totals)\\.php)$">
 Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://app.makeitsweep.com; media-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 </FilesMatch>
 <FilesMatch "\\.woff2$">
@@ -309,7 +316,7 @@ Header set Cache-Control "public, max-age=86400, stale-while-revalidate=2592000"
 <FilesMatch "\\.[0-9a-f]{10}\\.(css|js)$">
 Header set Cache-Control "public, max-age=31536000, immutable"
 </FilesMatch>
-<FilesMatch "(\\.(html|xml|txt|webmanifest|ics)|^release\\.php)$">
+<FilesMatch "(\\.(html|xml|txt|webmanifest|ics)|^(release|totals)\\.php)$">
 Header set Cache-Control "no-cache, must-revalidate"
 </FilesMatch>
 <FilesMatch "^$">

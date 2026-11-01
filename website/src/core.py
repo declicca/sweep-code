@@ -751,9 +751,6 @@ def slot(name, kind, alt, t, fallback=None, cap=True, video=False, poster=None, 
 # Founding cohort: minimum confirmed count shown while the app endpoint catches up (never inflates: the real count wins as soon as it is higher)
 COHORT_FLOOR = 0   # live count only (from the app database)
 
-# Activity numbers appear on the home page only once there are at least this many trades journaled
-STATS_MIN = 250
-
 def shell(lang, page, title, desc, body, t, extra_head=""):
     out = _shell_raw(lang, page, title, desc, body, t, extra_head)
     medium = "home" if page == "index.html" else page.replace("/index.html", "").replace(".html", "").replace("/", "-")
