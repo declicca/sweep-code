@@ -1406,6 +1406,7 @@ window.SweepMO = window.SweepMO || class {
     ['real_pnl_c', 'pnl_real', 'import_key'].forEach((x) => delete d[x]);
     if (d.source && d.source !== 'screenshot') delete d.source;   // a copy made in Sweep is not the platform's trade
     d.id = typeof uid === 'function' ? uid() : 't' + Math.random().toString(36).slice(2); d.account_id = accId; d.copy_group = group;
+    d.copy_src = src.id;   // a copy made by Sweep: a synced trade of that account takes its place, whatever its size (sync_match)
     // the original stays the earliest created: a group is counted as its original (Stats, Journal, My money, the coach, the server)
     d.created_at = new Date(Math.max(Date.now(), Date.parse(src.created_at || '') || 0) + 1 + (k || 0)).toISOString();
     const n0 = +src.contracts || 1, n = sizeFor(accId, n0), f = n / n0;
@@ -2381,7 +2382,7 @@ window.SweepMO = window.SweepMO || class {
     Object.assign(SH, { aiText: (opts && opts.aiText) || '', aiDone: false, aiBusy: false, aiLow: new Set(), aiAsk: false, noShot: false, ctxOpen: false, dupOk: false, quotaShown: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || sheetDay(), qty: '1' } });
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
     SH.f.account = (accs[0] || {}).id || '';
-    { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').forEach((x) => SH.copy.add(x.id)); }
+    { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (window.SweepCopy && SweepCopy.targets ? SweepCopy.targets(a0.id) : (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').map((x) => x.id)).forEach((x) => SH.copy.add(x)); }
     const usual = (() => { const c = {}; (S.trades || []).filter((x) => !x.demo).slice(-40).forEach((x) => { c[x.instrument] = (c[x.instrument] || 0) + 1; }); const top = Object.entries(c).sort((a, b) => b[1] - a[1])[0]; return top ? top[0] : 'NQ'; })();
     SH.f.inst = typeof rookieInst === 'function' ? rookieInst(usual) : usual;   // (27 Oct.) starting out: the micro of the usual contract
     layer('nav-am-shot', '');
@@ -2827,7 +2828,7 @@ window.SweepMO = window.SweepMO || class {
     if (a.dataset.sp != null) { SH.setup = window.SweepSetupPick ? SweepSetupPick.tap(a, SH.setup) : ''; repaintKeep(); return; }   // the coach (edge T3) and the questions (edge T7) follow the setup; the row keeps its scroll
     if (a.dataset.amRm) { SH.batch = SH.batch.filter((b) => b.id !== a.dataset.amRm); if (SH.batch.length === 1) { const b = SH.batch[0]; SH.batch = []; Object.assign(SH, { file: b.file, src: b.src, shot: b.shot, dir: b.f.dir || SH.dir }); Object.assign(SH.f, b.f); } paint(); return; }
     if (a.dataset.amSel) { SH.openPick = SH.openPick === a.dataset.amSel ? null : a.dataset.amSel; paint(); return; }
-    if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; SH.aiLow.delete(AK[a.dataset.amPickf]); if (a.dataset.amPickf === 'account') { SH.f.accountPicked = true; SH.aiAsk = false; } SH.openPick = null; if (a.dataset.amPickf === 'account') SH.copy.delete(a.dataset.v); paint(); return; }
+    if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; SH.aiLow.delete(AK[a.dataset.amPickf]); if (a.dataset.amPickf === 'account') { SH.f.accountPicked = true; SH.aiAsk = false; } SH.openPick = null; if (a.dataset.amPickf === 'account') { SH.copy.delete(a.dataset.v); if (window.SweepCopy && SweepCopy.leadOf && SweepCopy.leadOf(a.dataset.v)) SH.copy = new Set(SweepCopy.targets(a.dataset.v)); } paint(); return; }
     if (a.dataset.amCopy) { const k = a.dataset.amCopy; SH.copy.has(k) ? SH.copy.delete(k) : SH.copy.add(k); a.classList.toggle('on'); return; }
     if (a.dataset.amSeg) { const k = a.dataset.amSeg, v = a.dataset.v; if (k === 'dir') { SH.dir = v; SH.aiLow.delete('direction'); } else if (k === 'conf') SH.conf = +v; else if (k === 'exec') SH.exec = +v; else if (k.startsWith('d:')) SH.disc[k.slice(2)] = v; paint(); return; }
     if (a.dataset.amEmo) { const k = a.dataset.amEmo; SH.emo.has(k) ? SH.emo.delete(k) : SH.emo.add(k); a.classList.toggle('on'); return; }
@@ -5022,8 +5023,13 @@ window.SweepMO = window.SweepMO || class {
     const end = setTimeout(() => { el.classList.remove('on'); setTimeout(() => el.remove(), 300); if (!undone && after) after(); }, 5000);
     el.querySelector('button').addEventListener('click', () => { undone = true; clearTimeout(end); restore(); el.classList.remove('on'); setTimeout(() => el.remove(), 300); if (typeof render === 'function') render(); });
   }
-  function softDelete(coll, id, then) {
+  function softDelete(coll, id, then, one) {
     const doc = getDoc(coll, id); if (!doc) return;
+    // a trade logged on several accounts (brief « avance concurrentielle », step 2): on all of them, or this one only? asked
+    if (coll === 'trades' && !one && typeof siblings === 'function' && siblings(id).length && window.SweepCopyGroup) {
+      SweepCopyGroup.askDelete(id).then((k) => { if (k === 'all') deleteAllCopies(id); else if (k === 'one') softDelete(coll, id, then, true); });
+      return;
+    }
     const snap = JSON.parse(JSON.stringify(doc));
     const solo = coll !== 'trades' || !(typeof siblings === 'function' && siblings(id).length);
     remove(coll, id);
@@ -5038,7 +5044,7 @@ window.SweepMO = window.SweepMO || class {
     const group = typeof copiesOf === 'function' ? copiesOf(doc) : [doc];
     const snaps = group.map((x) => JSON.parse(JSON.stringify(x)));
     group.forEach((x) => remove('trades', x.id));
-    location.hash = '#trades';
+    if (/^#trade\//.test(location.hash || '')) location.hash = '#trades';   // from a row of a list: the list stays
     if (typeof render === 'function') render();
     undoToast(t('delAll').replace('{n}', group.length), () => snaps.forEach((x) => put('trades', x)), () => {
       const shots = new Set(); snaps.forEach((x) => (x.shots || []).forEach((r) => shots.add(r.id)));   // the files go only once nobody undid
@@ -5390,6 +5396,9 @@ window.SweepMO = window.SweepMO || class {
     if (typeof TK === 'undefined' || !TK || TK.id || !document.querySelector('#tkSlide.open') || !TK.copyTo) return;
     if (grpFor === TK.account) return; grpFor = TK.account;
     const a = getDoc('accounts', TK.account); if (!a || !a.group_id) return;
+    // a group with a master account (brief « avance concurrentielle », step 2): its followers only, from the master only
+    const lead = window.SweepCopy && SweepCopy.leadOf ? SweepCopy.leadOf(a.id) : null;
+    if (lead) { TK.copyTo = new Set(SweepCopy.targets(a.id)); if (typeof tkRefresh === 'function') tkRefresh({ panel: true }); return; }
     const sib = (S.accounts || []).filter((x) => x.group_id === a.group_id && x.id !== a.id && x.status !== 'archived'); if (!sib.length) return;
     sib.forEach((x) => TK.copyTo.add(x.id)); if (typeof tkRefresh === 'function') tkRefresh({ panel: true });
   }
@@ -7410,4 +7419,214 @@ new window.SweepMO(() => {
   new window.SweepMO(() => { try { split(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
   addEventListener('hashchange', () => { try { split(); } catch (e) { /* never blocks */ } });
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('.st-ins-more'); if (!b) return; const ul = b.previousElementSibling; if (ul) ul.classList.add('st-all'); b.remove(); });
+})();
+
+/* ───────────── Copy groups: a master account and its followers (brief « avance concurrentielle », step 2, 2 Nov.) ─────────────
+ * Prop traders copy one master account on several accounts; typing the same trade five times kills the journal habit.
+ * Built on the reusable groups of brief 02 part 4 (accounts' group_id, SweepCopy.make): the master is the account with
+ * copy_lead, the followers are the other accounts of its group, each with a contract multiplier (copy_pct ÷ 100, ×1 by default).
+ *  - Accounts › « Copy trading »: the groups, « Create a copy group » / « Edit » → one sheet (master, followers, ×);
+ *  - a trade saved on the master: its followers are chosen in the form, in sight (SweepCopy.targets), never a follower synced
+ *    itself (its own synced trade wins: no double); a synced master trade is copied by the server (sync/sync-store.php);
+ *  - editing the trade (prices, times, size) or deleting it asks: the whole group, or this account only (askEdit, askDelete);
+ *    the setup, grade, emotions and notes stay shared as before;
+ *  - the Journal, Trades: one row « ×5 accounts » that unfolds (tradeRows, tradeTable in app.js).
+ * Pro and Elite (limit copy_groups); Free sees the card and the plans sheet. */
+(function () {
+  'use strict';
+  const NB = ' ';
+  const TX = {
+    en: { title: 'Copy trading', card: 'Log a trade once on a master account: Sweep puts it on its followers, sized by their multiplier.', create: 'Create a copy group', edit: 'Edit',
+      sheet: 'Copy group', leadL: 'Master account', folL: 'Followers · contract multiplier', help: 'Each trade logged or synced on the master is copied to every follower, its P&L × the multiplier. Setup, grade, emotions and notes are shared.',
+      synced: 'Synced: its own trades count, never a copy', save: 'Save the group', saved: 'Copy group saved', remove: 'Remove the group', removed: 'Copy group removed',
+      fol1: '1 follower', folN: '{n} followers', lead: 'master', close: 'Close', less: 'Smaller', more: 'Larger',
+      editT: 'Apply to the group?', editS: 'This trade is on {n} accounts. Make the same change on the other {k}? Setup, grade, emotions and notes are already shared.', editAll: 'Apply to all {n} accounts', editOne: 'Only this account',
+      delT: 'Delete this trade?', delS: 'It is logged on {n} accounts.', delAll: 'Delete on all {n} accounts', delOne: 'Only on {a}', cancel: 'Cancel',
+      roleLead: 'Master of a copy group: {f}', roleFol: 'Follows {m} · ×{x}' },
+    fr: { title: 'Copy trading', card: `Saisis un trade une fois sur un compte maître${NB}: Sweep le reporte sur ses suiveurs, à la taille de leur multiplicateur.`, create: 'Créer un groupe de copie', edit: 'Modifier',
+      sheet: 'Groupe de copie', leadL: 'Compte maître', folL: 'Suiveurs · multiplicateur de contrats', help: 'Chaque trade saisi ou synchronisé sur le maître est copié sur chaque suiveur, son P&L × le multiplicateur. Le setup, le grade, l’émotion et les notes sont partagés.',
+      synced: `Synchronisé${NB}: ses propres trades comptent, jamais une copie`, save: 'Enregistrer le groupe', saved: 'Groupe de copie enregistré', remove: 'Retirer le groupe', removed: 'Groupe de copie retiré',
+      fol1: '1 suiveur', folN: '{n} suiveurs', lead: 'maître', close: 'Fermer', less: 'Plus petit', more: 'Plus grand',
+      editT: `Appliquer au groupe${NB}?`, editS: `Ce trade est sur {n} comptes. Faire la même modification sur les {k} autres${NB}? Le setup, le grade, l’émotion et les notes sont déjà partagés.`, editAll: 'Appliquer aux {n} comptes', editOne: 'Ce compte seulement',
+      delT: `Supprimer ce trade${NB}?`, delS: 'Il est enregistré sur {n} comptes.', delAll: 'Supprimer sur les {n} comptes', delOne: 'Seulement sur {a}', cancel: 'Annuler',
+      roleLead: `Maître d’un groupe de copie${NB}: {f}`, roleFol: 'Suit {m} · ×{x}' },
+    es: { title: 'Copy trading', card: 'Registra una operación una vez en una cuenta maestra: Sweep la lleva a sus seguidoras, según su multiplicador.', create: 'Crear un grupo de copia', edit: 'Editar',
+      sheet: 'Grupo de copia', leadL: 'Cuenta maestra', folL: 'Seguidoras · multiplicador de contratos', help: 'Cada operación registrada o sincronizada en la maestra se copia en cada seguidora, su P&L × el multiplicador. El setup, la calificación, la emoción y las notas se comparten.',
+      synced: 'Sincronizada: cuentan sus propias operaciones, nunca una copia', save: 'Guardar el grupo', saved: 'Grupo de copia guardado', remove: 'Quitar el grupo', removed: 'Grupo de copia quitado',
+      fol1: '1 seguidora', folN: '{n} seguidoras', lead: 'maestra', close: 'Cerrar', less: 'Más pequeño', more: 'Más grande',
+      editT: '¿Aplicar al grupo?', editS: 'Esta operación está en {n} cuentas. ¿Hacer el mismo cambio en las otras {k}? El setup, la calificación, la emoción y las notas ya se comparten.', editAll: 'Aplicar a las {n} cuentas', editOne: 'Solo esta cuenta',
+      delT: '¿Eliminar esta operación?', delS: 'Está registrada en {n} cuentas.', delAll: 'Eliminar en las {n} cuentas', delOne: 'Solo en {a}', cancel: 'Cancelar',
+      roleLead: 'Maestra de un grupo de copia: {f}', roleFol: 'Sigue a {m} · ×{x}' } };
+  const L = () => (typeof LANG !== 'undefined' && TX[LANG] ? LANG : 'en');
+  const t = (k, o) => String(TX[L()][k] != null ? TX[L()][k] : TX.en[k]).replace(/\{(\w+)\}/g, (x, y) => (o && o[y] != null ? o[y] : x));
+  const h = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const accs = () => (typeof S !== 'undefined' && S.accounts) || [];
+  const usable = (a) => !!a && !a.demo && a.status !== 'archived' && a.status !== 'closed';
+  const frozen = (id) => typeof billFrozen === 'function' && billFrozen(id);
+  const can = () => (typeof billCan === 'function' ? billCan('copy_groups') : true);
+  const nameOf = (id) => (typeof acctLabel === 'function' ? acctLabel(id) : ((accs().find((a) => a.id === id) || {}).name || ''));
+  const mult = (a) => (a && +a.copy_pct > 0 ? +a.copy_pct : 100) / 100;
+  const fx = (m) => { const s = String(Math.round(m * 100) / 100); return L() === 'en' ? s : s.replace('.', ','); };
+  const STEPS = [0.5, 1, 2, 3, 4, 5, 6, 8, 10];   // contracts: half size (micro-style), then whole multiples
+  /** the accounts synced with their platform (Settings › Connections): their own trades arrive, a copy would be a double */
+  const linked = () => { try { const st = window.SweepSync && SweepSync.state(); return new Set(((st && st.accounts) || []).filter((x) => x.state === 'linked' && x.account_id).map((x) => x.account_id)); } catch (e) { return new Set(); } };
+
+  /** the groups that have a master: [{ g, lead, followers }] */
+  function leadGroups() {
+    const out = [];
+    for (const m of accs()) {
+      if (!m.copy_lead || !m.group_id || !usable(m) || out.some((x) => x.g === m.group_id)) continue;
+      const f = accs().filter((a) => a.group_id === m.group_id && a.id !== m.id && usable(a));
+      if (f.length) out.push({ g: m.group_id, lead: m, followers: f });
+    }
+    return out;
+  }
+  /** the group with a master an account is in (master or follower), while the plan includes it */
+  const leadOf = (id) => (can() ? leadGroups().find((x) => x.lead.id === id || x.followers.some((a) => a.id === id)) || null : null);
+  /** where a new trade of this account is copied: from a master, its followers (not a synced one, not one paused by the plan);
+   *  from a follower, nowhere; a group without a master (brief 02 part 4): every account of it, as before */
+  function targets(id) {
+    const a = accs().find((x) => x.id === id); if (!a || !a.group_id) return [];
+    const G = leadOf(id);
+    if (G) { if (G.lead.id !== id) return []; const ln = linked(); return G.followers.filter((x) => !ln.has(x.id) && !frozen(x.id)).map((x) => x.id); }
+    return accs().filter((x) => x.group_id === a.group_id && x.id !== a.id && x.status !== 'archived').map((x) => x.id);
+  }
+  if (window.SweepCopy) Object.assign(window.SweepCopy, { targets, leadOf });
+
+  /* ── the app's own window: two choices (never the browser's) ── */
+  function ask(title, text, a, b, { danger = false, cancel = true, dflt = null } = {}) {
+    return new Promise((done) => {
+      const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-ask cg-ask-scrim';
+      const el = document.createElement('aside'); el.className = 'nav-dlg nav-ask cg-ask'; el.setAttribute('role', 'alertdialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
+      el.innerHTML = `<div class="nav-dlg-in"><h2>${h(title)}</h2><p class="nav-pass-s">${h(text)}</p><button type="button" class="btn primary ${danger ? 'danger' : ''} cg-ask-b" data-cg-ask="a">${h(a)}</button><button type="button" class="btn cg-ask-b" data-cg-ask="b">${h(b)}</button>${cancel ? `<button type="button" class="btn nav-pass-later cg-ask-b" data-cg-ask="0">${h(t('cancel'))}</button>` : ''}</div>`;
+      document.body.append(scrim, el); requestAnimationFrame(() => { el.classList.add('open'); scrim.classList.add('open'); });
+      const close = (v) => { [el, scrim].forEach((x) => { x.classList.remove('open'); setTimeout(() => x.remove(), 250); }); done(v); };
+      el.addEventListener('click', (e) => { const x = e.target.closest('[data-cg-ask]'); if (x) close(x.dataset.cgAsk === '0' ? null : x.dataset.cgAsk); });
+      scrim.addEventListener('click', () => close(dflt));
+      setTimeout(() => { const x = el.querySelector('[data-cg-ask="b"]'); if (x) x.focus(); }, 50);
+    });
+  }
+  /** an edited trade with copies: true = the same change on every account */
+  const askEdit = (id, n) => ask(t('editT'), t('editS', { n, k: n - 1 }), t('editAll', { n }), t('editOne'), { cancel: false, dflt: 'b' }).then((v) => v === 'a');
+  /** a trade with copies to delete: 'all', 'one' or null */
+  function askDelete(id) {
+    const d = typeof getDoc === 'function' && getDoc('trades', id); if (!d) return Promise.resolve(null);
+    const n = (typeof siblings === 'function' ? siblings(id).length : 0) + 1;
+    return ask(t('delT'), t('delS', { n }), t('delAll', { n }), t('delOne', { a: nameOf(d.account_id) }), { danger: true }).then((v) => (v === 'a' ? 'all' : v === 'b' ? 'one' : null));
+  }
+
+  /* ── Accounts › « Copy trading » ── */
+  function lineOf(G) { return `→ ${G.followers.map((a) => `${h(nameOf(a.id))} <span class="cg-x">×${fx(mult(a))}</span>`).join(' · ')}`; }
+  function cardHtml() {
+    const G = leadGroups(), ok = can(), taken = new Set(G.flatMap((x) => [x.lead.id, ...x.followers.map((a) => a.id)])), room = accs().filter((a) => usable(a) && !taken.has(a.id)).length >= 2;
+    const rows = ok ? G.map((x) => `<button type="button" class="cg-grp" data-cg-edit="${h(x.g)}"><span class="cg-grp-t"><b>${h(nameOf(x.lead.id))}</b><small>${h(t('lead'))} · ${h(x.followers.length === 1 ? t('fol1') : t('folN', { n: x.followers.length }))}</small><span class="cg-grp-l">${lineOf(x)}</span></span><span class="cg-grp-e">${h(t('edit'))}</span></button>`).join('') : '';
+    return `<div class="sec-h"><h2>${h(t('title'))}</h2></div><div class="surface pad cg-box">${rows || `<p class="cg-pitch">${h(t('card'))}</p>`}${rows && !room ? '' : `<button type="button" class="btn sm cg-new" data-cg-new>${h(t('create'))}${ok ? '' : ' <em class="cg-pro">Pro</em>'}</button>`}</div>`;
+  }
+  function card() {
+    if (!/^#accounts$/.test(location.hash || '')) return;
+    const main = document.getElementById('main'); if (!main) return;
+    const tbl = main.querySelector('table.acct-tbl'), sec = tbl && tbl.closest('section'); if (!sec) return;
+    const show = accs().filter(usable).length >= 2;   // copy trading shows from the 2nd account (SWEEP.md, missions: « au 2ᵉ compte »)
+    let el = main.querySelector('.cg-card');
+    if (!show) { if (el) el.remove(); return; }
+    const html = cardHtml();
+    if (!el) { el = document.createElement('section'); el.className = 'sec cg-card'; el.setAttribute('data-noi18n', ''); sec.after(el); }
+    else if (el.previousElementSibling !== sec) sec.after(el);
+    if (el.__h !== html) { el.innerHTML = html; el.__h = html; }
+  }
+  /* the account page: its role in the group, and « Edit » (the line « Copy group: … » of brief 02 part 4) */
+  function accountLine() {
+    const m = /^#account\/([^/]+)/.exec(location.hash || ''); if (!m) return;
+    const main = document.getElementById('main'), gb = main && main.querySelector('.nav-grp'); if (!gb || gb.querySelector('.cg-role')) return;
+    const id = decodeURIComponent(m[1]), G = leadOf(id); if (!G) return;
+    const me = accs().find((a) => a.id === id);
+    const txt = G.lead.id === id ? t('roleLead', { f: G.followers.length === 1 ? t('fol1') : t('folN', { n: G.followers.length }) }) : t('roleFol', { m: nameOf(G.lead.id), x: fx(mult(me)) });
+    gb.insertAdjacentHTML('beforeend', `<small class="help cg-role" data-noi18n>${h(txt)} · <button type="button" class="link" data-cg-edit="${h(G.g)}">${h(t('edit'))}</button></small>`);
+  }
+
+  /* ── the sheet ── */
+  const CG = { g: null, lead: null, sel: new Map() };
+  function sheet() {
+    let el = document.getElementById('cgSheet'); if (el) return el;
+    el = document.createElement('aside'); el.id = 'cgSheet'; el.className = 'evp sysh cgsh';
+    el.setAttribute('data-noi18n', ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+    el.innerHTML = '<div class="evp-in sy-in cg-in"></div>'; document.body.append(el);
+    const sc = document.createElement('div'); sc.id = 'cgScrim'; sc.className = 'evp-scrim'; sc.addEventListener('click', close); document.body.append(sc);
+    if (typeof swipeDismiss === 'function') swipeDismiss(el, { scroller: () => el.querySelector('.evp-in'), onClose: close, ignore: '.cg-chips, .cg-step' });
+    return el;
+  }
+  const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  function viewHtml() {
+    const list = accs().filter(usable), ln = linked();
+    const others = list.filter((a) => a.id !== CG.lead);
+    return `<div class="sy-head"><h2>${h(t('sheet'))}</h2><button type="button" class="sy-x" data-cg="close" aria-label="${h(t('close'))}">${X}</button></div>
+      <p class="sy-note">${h(t('help'))}</p>
+      <p class="sy-q">${h(t('leadL'))}</p>
+      <div class="cg-chips" role="radiogroup">${list.map((a) => `<button type="button" class="chip${a.id === CG.lead ? ' on' : ''}" role="radio" aria-checked="${a.id === CG.lead}" data-cg-lead="${h(a.id)}">${h(nameOf(a.id))}</button>`).join('')}</div>
+      <p class="sy-q">${h(t('folL'))}</p>
+      <div class="sy-opts cg-fol">${others.map((a) => { const on = CG.sel.has(a.id), m = CG.sel.get(a.id) || mult(a), i = STEPS.indexOf(m);
+        return `<div class="cg-f${on ? ' on' : ''}"><button type="button" class="sy-opt cg-pick${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" data-cg-pick="${h(a.id)}"><i></i><span>${h(nameOf(a.id))}${ln.has(a.id) ? `<small>${h(t('synced'))}</small>` : ''}</span></button>${on ? `<span class="cg-step"><button type="button" data-cg-m="-1" data-id="${h(a.id)}" aria-label="${h(t('less'))}"${i === 0 ? ' disabled' : ''}>−</button><b>×${fx(m)}</b><button type="button" data-cg-m="1" data-id="${h(a.id)}" aria-label="${h(t('more'))}"${i === STEPS.length - 1 ? ' disabled' : ''}>+</button></span>` : ''}</div>`; }).join('')}</div>
+      <button type="button" class="btn primary sy-main" data-cg="save"${CG.sel.size ? '' : ' disabled'}>${h(t('save'))}</button>${CG.g ? `<button type="button" class="btn danger sy-wide" data-cg="remove">${h(t('remove'))}</button>` : ''}`;
+  }
+  function paint() { const el = document.getElementById('cgSheet'); if (el) el.querySelector('.cg-in').innerHTML = viewHtml(); }
+  function open(g) {
+    if (!can()) { if (window.SweepBilling && SweepBilling.paywall) SweepBilling.paywall('copy_groups'); return; }
+    const list = accs().filter(usable); if (list.length < 2) return;
+    const G = g ? leadGroups().find((x) => x.g === g) : null;
+    if (G) { CG.g = G.g; CG.lead = G.lead.id; CG.sel = new Map(G.followers.map((a) => [a.id, snap(mult(a))])); }
+    else {
+      const taken = new Set(leadGroups().flatMap((x) => [x.lead.id, ...x.followers.map((a) => a.id)]));
+      const free = list.filter((a) => !taken.has(a.id)), lead = free[0] || list[0];
+      CG.g = null; CG.lead = lead.id; CG.sel = new Map(free.filter((a) => a.id !== lead.id).map((a) => [a.id, snap(mult(a))]));
+    }
+    const el = sheet(); paint(); el.setAttribute('aria-label', t('sheet'));
+    requestAnimationFrame(() => { el.classList.add('open'); document.getElementById('cgScrim').classList.add('open'); document.body.classList.add('evp-lock'); });
+  }
+  const snap = (m) => STEPS.reduce((b, s) => (Math.abs(s - m) < Math.abs(b - m) ? s : b), 1);
+  function close() {
+    const el = document.getElementById('cgSheet'); if (!el) return;
+    el.classList.remove('open'); const sc = document.getElementById('cgScrim'); if (sc) sc.classList.remove('open');
+    if (!document.querySelector('.evp.open')) document.body.classList.remove('evp-lock');
+  }
+  /** a group left with one account is no group */
+  function tidy(ids) { ids.forEach((g) => { const rest = accs().filter((a) => a.group_id === g); if (rest.length === 1) editDoc('accounts', rest[0].id, (d) => { delete d.group_id; delete d.copy_lead; }); }); }
+  function save() {
+    if (!CG.sel.size || !CG.lead) return;
+    const g = CG.g || 'grp-' + (typeof uid === 'function' ? uid() : Date.now().toString(36));
+    const keep = new Set([CG.lead, ...CG.sel.keys()]), left = new Set();
+    accs().filter((a) => a.group_id === g && !keep.has(a.id)).forEach((a) => editDoc('accounts', a.id, (d) => { delete d.group_id; delete d.copy_lead; }));
+    for (const id of keep) {
+      const a = accs().find((x) => x.id === id); if (a && a.group_id && a.group_id !== g) left.add(a.group_id);
+      editDoc('accounts', id, (d) => {
+        d.group_id = g;
+        if (id === CG.lead) d.copy_lead = true;
+        else { delete d.copy_lead; const m = CG.sel.get(id) || 1; if (m === 1) delete d.copy_pct; else d.copy_pct = Math.round(m * 100); }
+      });
+    }
+    tidy(left);
+    close(); if (typeof toast === 'function') toast(t('saved')); if (typeof render === 'function') render();
+  }
+  function remove() {
+    const g = CG.g; if (!g) return;
+    const was = accs().filter((a) => a.group_id === g).map((a) => ({ id: a.id, g: a.group_id, lead: !!a.copy_lead }));
+    was.forEach((x) => editDoc('accounts', x.id, (d) => { delete d.group_id; delete d.copy_lead; }));   // the trades stay as they are
+    close(); if (typeof render === 'function') render();
+    const undo = () => { was.forEach((x) => editDoc('accounts', x.id, (d) => { d.group_id = x.g; if (x.lead) d.copy_lead = true; })); if (typeof render === 'function') render(); };
+    if (window.SweepUndo && SweepUndo.toast) SweepUndo.toast(t('removed'), undo); else if (typeof toast === 'function') toast(t('removed'));
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-cg-new], [data-cg-edit], #cgSheet [data-cg], #cgSheet [data-cg-lead], #cgSheet [data-cg-pick], #cgSheet [data-cg-m]'); if (!b) return;
+    e.preventDefault();
+    if (b.hasAttribute('data-cg-new')) return open(null);
+    if (b.dataset.cgEdit) return open(b.dataset.cgEdit);
+    if (b.dataset.cgLead) { const was = CG.lead; CG.lead = b.dataset.cgLead; CG.sel.delete(CG.lead); if (was && was !== CG.lead) CG.sel.set(was, 1); return paint(); }
+    if (b.dataset.cgPick) { const id = b.dataset.cgPick; if (CG.sel.has(id)) CG.sel.delete(id); else CG.sel.set(id, snap(mult(accs().find((a) => a.id === id)))); return paint(); }
+    if (b.dataset.cgM) { const id = b.dataset.id, i = STEPS.indexOf(CG.sel.get(id) || 1), j = Math.min(STEPS.length - 1, Math.max(0, i + +b.dataset.cgM)); CG.sel.set(id, STEPS[j]); return paint(); }
+    const k = b.dataset.cg;
+    if (k === 'close') close(); else if (k === 'save') save(); else if (k === 'remove') remove();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.querySelector('#cgSheet.open')) { e.stopPropagation(); close(); } }, true);
+
+  window.SweepCopyGroup = { leadGroups, leadOf, targets, askEdit, askDelete, open, close };
+  new window.SweepMO(() => { [card, accountLine].forEach((f) => { try { f(); } catch (e) { if (!f.__warned) { f.__warned = true; console.warn('Sweep:', f.name, e && e.message); } } }); }).observe(document.body, { childList: true, subtree: true });
 })();

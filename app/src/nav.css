@@ -3200,3 +3200,44 @@ html body .nav-ai-today input[data-ai-today][type=text]:not([type=checkbox]):not
 .nav-ai-cam:hover{color:var(--pos);background:var(--posbg)}
 .nav-ai-cam svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 html body .nav-ai-today input[data-ai-today]::placeholder{font-size:14px;text-overflow:ellipsis}
+
+/* ───────────── copy groups: a master account and its followers (brief « avance concurrentielle », step 2) ───────────── */
+.cg-box{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.cg-pitch{margin:0;font-size:14px;line-height:1.5;color:var(--text2)}
+.cg-grp{box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;min-height:52px;padding:10px 14px;border:0;border-radius:14px;background:var(--panel2);color:var(--text);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cg-grp-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cg-grp-t b{font-weight:500}
+.cg-grp-t small{color:var(--text2);font-size:12px}
+.cg-grp-l{font-size:13px;line-height:1.45;color:var(--text2);overflow-wrap:anywhere}
+.cg-x{font-family:var(--font-num);color:var(--text)}
+.cg-grp-e{flex-shrink:0;color:var(--pos);font-size:14px}
+.cg-new{min-height:38px;border-radius:var(--r-pill)}
+.cg-pro{font-style:normal;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--panel2);color:var(--text2);margin-left:4px}
+.cg-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:0 16px;flex-shrink:0}
+.cg-chips::-webkit-scrollbar{display:none}
+.cg-chips .chip{flex:none;min-height:34px;border-radius:var(--r-pill)}
+.cg-f{display:flex;align-items:center;gap:8px;padding-right:10px;min-width:0}
+.cg-f+.cg-f{border-top:1px solid var(--line)}
+.cg-f .sy-opt{flex:1;min-width:0}
+.cg-f .sy-opt span{display:flex;flex-direction:column;min-width:0;overflow-wrap:anywhere}
+.cg-f .sy-opt small{font-size:12px;line-height:1.35;color:var(--text2)}
+.cg-step{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.cg-step button{width:34px;height:34px;border-radius:50%;border:0;background:var(--panel);color:var(--text);font:inherit;font-size:18px;line-height:1;cursor:pointer;box-shadow:inset 0 0 0 1px var(--line);-webkit-tap-highlight-color:transparent}
+.cg-step button:disabled{opacity:.35;cursor:default}
+.cg-step b{min-width:42px;text-align:center;font-family:var(--font-num);font-weight:500}
+.cg-ask .cg-ask-b{width:100%;min-height:44px;justify-content:center}
+/* « ×5 accounts »: one row for a trade copied on several accounts, unfolded in place */
+.trow-cg{display:flex;flex-direction:column}
+.trow-cg .cg-tog{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;min-height:34px;margin:0 0 6px 44px;padding:0 12px;border:0;border-radius:var(--r-pill);background:var(--panel2);color:var(--text2);font:inherit;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cg-tog svg,.cg-pill svg{width:12px;height:12px;flex:none;transition:transform .3s var(--ease-ios)}
+.trow-cg.open .cg-tog svg,.cg-pill[aria-expanded="true"] svg{transform:rotate(180deg)}
+.cg-list{display:flex;flex-direction:column;margin:0 12px 8px 44px;border-radius:14px;background:var(--panel2);overflow:hidden}
+.cg-list[hidden]{display:none}
+.cg-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;min-height:44px;padding:0 14px;color:var(--text);text-decoration:none;font-size:14px}
+.cg-r+.cg-r{border-top:1px solid var(--line)}
+.cg-r-a{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cg-r-q{color:var(--text2);font-family:var(--font-num);font-size:13px}
+.cg-r-p{font-family:var(--font-num);text-align:right}
+.cg-pill{display:inline-flex;align-items:center;gap:4px;border:0;font:inherit;cursor:pointer}
+html body #main tr.cg-sub[hidden]{display:none!important}
+tr.cg-sub td{background:var(--panel2)}

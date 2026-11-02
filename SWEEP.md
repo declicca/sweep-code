@@ -392,7 +392,7 @@ Elle **ne propose plus d'étape** : les chapitres « Ton parcours » et « Déma
 | 14 | Semaine 2 | Le plan guidé | Pré-marché (niveaux, scénarios, 2R, verrouillage, vue séance) | Essayer le plan guidé | fiche guidée enregistrée |
 | 15 | Semaine 3 | Trois journées de suite | « Ma progression » : streak, badges, défis, saison, ligue | Fermer ma journée | **3 journées fermées de suite** (jours de trading ; une journée de repos compte, comme le streak) ; la célébration ouvre « Ma progression » |
 | — | Semaine 3+ | (quand utile) Sweep AI : débrief, avis sur un trade | Sweep AI | Débriefer ma journée | 1ʳᵉ utilisation |
-| — | Au 2ᵉ compte | (contexte) Copie sur tes comptes | « Aussi sur », groupes de copies | Ouvrir mon dernier trade | 1ʳᵉ copie |
+| — | Au 2ᵉ compte | (contexte) Copie sur tes comptes | « Aussi sur », groupes de copies ; Pro et Elite : groupe de copie avec un compte maître (Comptes › Copy trading : un trade saisi ou synchronisé sur le maître va sur ses suiveurs, « ×5 comptes » dans le journal ; avance concurrentielle, étape 2) | Ouvrir mon dernier trade | 1ʳᵉ copie |
 | — | Semaine 3+ | (quand utile) Partage ta discipline | Carte Discipline, profil public | Partager ma semaine | 1er partage |
 
 **Ce qui n'apparaît pas avant sa mission** : Sweep AI (bouton flottant et menu), Mon argent (onglet et carte), le plan guidé, « Ma progression » au-delà du niveau et du streak, les défis, le boss, la saison, la ligue, la crew, le Wrapped.
