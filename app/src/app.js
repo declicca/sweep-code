@@ -9192,6 +9192,227 @@ const REF_T = {
   }
 };
 
+// creator program (brief « avance concurrentielle », step 5): the Creator section of the Referrals tab, only for creators, and Admin › Creators
+const CR_T = {
+  fr: {
+    tag: "Creator",
+    headline: "Ton programme Creator",
+    lead: "Tu gagnes {r} de chaque paiement des traders que tu amènes, pendant {m} mois. Avec ton code, ils ont {p} de rabais sur leurs {pm} premiers mois.",
+    code: "Ton code promo",
+    copied: "Lien copié",
+    clicks: "Clics",
+    signups: "Inscriptions",
+    paying: "Abonnés payants",
+    month: "Gains du mois",
+    toPay: "Gains à verser",
+    total: "Gagné au total : {e} · déjà versé : {p}",
+    foot: "Sweep te verse tes gains chaque mois. Un paiement remboursé retire sa commission.",
+    shareText: "Je suis mon trading avec Sweep. Avec mon code {c}, tu as {p} de rabais sur tes {pm} premiers mois.",
+    adm: {
+      title: "Creators",
+      lead: "Le statut se donne ici seulement. Sweep crée le code promo dans Stripe ({p} de rabais, {pm} premiers mois) ; le créateur gagne {r} des paiements pendant {m} mois. Les versements se font à la main.",
+      user: "Nom d’utilisateur ou courriel",
+      codeOpt: "Code (facultatif)",
+      make: "Donner le statut Creator",
+      made: "Statut Creator donné",
+      creator: "Créateur",
+      none: "Aucun créateur pour l’instant.",
+      months: "Relevés",
+      monthCol: "Mois",
+      payments: "Paiements",
+      refunds: "Remboursements",
+      commission: "Commission",
+      status: "Statut",
+      paidOn: "Versé le {d}",
+      inProgress: "En cours",
+      markPaid: "Marquer versé",
+      markQ: "Marquer {m} comme versé à {u} ?",
+      markS: "{a}. Rien n’est envoyé par Sweep : fais le virement toi-même.",
+      marked: "Mois marqué versé",
+      export: "Exporter le relevé",
+      exportT: "Le relevé du mois choisi, en CSV : chaque paiement et remboursement, puis le total de chaque créateur"
+    }
+  },
+  en: {
+    tag: "Creator",
+    headline: "Your Creator program",
+    lead: "You earn {r} of every payment from the traders you bring, for {m} months. With your code, they get {p} off their first {pm} months.",
+    code: "Your promo code",
+    copied: "Link copied",
+    clicks: "Clicks",
+    signups: "Sign-ups",
+    paying: "Paying subscribers",
+    month: "Earned this month",
+    toPay: "To be paid",
+    total: "Earned in total: {e} · already paid: {p}",
+    foot: "Sweep pays your earnings every month. A refunded payment takes its commission back.",
+    shareText: "I track my trading with Sweep. With my code {c}, you get {p} off your first {pm} months.",
+    adm: {
+      title: "Creators",
+      lead: "The status is given here only. Sweep creates the promo code in Stripe ({p} off, first {pm} months); the creator earns {r} of payments for {m} months. Payouts are made by hand.",
+      user: "Username or email",
+      codeOpt: "Code (optional)",
+      make: "Give Creator status",
+      made: "Creator status given",
+      creator: "Creator",
+      none: "No creator yet.",
+      months: "Statements",
+      monthCol: "Month",
+      payments: "Payments",
+      refunds: "Refunds",
+      commission: "Commission",
+      status: "Status",
+      paidOn: "Paid on {d}",
+      inProgress: "In progress",
+      markPaid: "Mark paid",
+      markQ: "Mark {m} as paid to {u}?",
+      markS: "{a}. Sweep sends nothing: make the transfer yourself.",
+      marked: "Month marked paid",
+      export: "Export statement",
+      exportT: "The chosen month’s statement as CSV: every payment and refund, then each creator’s total"
+    }
+  },
+  es: {
+    tag: "Creator",
+    headline: "Tu programa Creator",
+    lead: "Ganas el {r} de cada pago de los traders que traes, durante {m} meses. Con tu código, tienen un {p} de descuento en sus {pm} primeros meses.",
+    code: "Tu código promocional",
+    copied: "Enlace copiado",
+    clicks: "Clics",
+    signups: "Registros",
+    paying: "Suscriptores de pago",
+    month: "Ganado este mes",
+    toPay: "Por pagar",
+    total: "Ganado en total: {e} · ya pagado: {p}",
+    foot: "Sweep te paga tus ganancias cada mes. Un pago reembolsado retira su comisión.",
+    shareText: "Sigo mi trading con Sweep. Con mi código {c}, tienes un {p} de descuento en tus {pm} primeros meses.",
+    adm: {
+      title: "Creators",
+      lead: "El estado se da solo aquí. Sweep crea el código promocional en Stripe ({p} de descuento, {pm} primeros meses); el creador gana el {r} de los pagos durante {m} meses. Los pagos se hacen a mano.",
+      user: "Usuario o correo",
+      codeOpt: "Código (opcional)",
+      make: "Dar el estado Creator",
+      made: "Estado Creator dado",
+      creator: "Creador",
+      none: "Aún no hay creadores.",
+      months: "Extractos",
+      monthCol: "Mes",
+      payments: "Pagos",
+      refunds: "Reembolsos",
+      commission: "Comisión",
+      status: "Estado",
+      paidOn: "Pagado el {d}",
+      inProgress: "En curso",
+      markPaid: "Marcar pagado",
+      markQ: "¿Marcar {m} como pagado a {u}?",
+      markS: "{a}. Sweep no envía nada: haz la transferencia tú mismo.",
+      marked: "Mes marcado pagado",
+      export: "Exportar el extracto",
+      exportT: "El extracto del mes elegido en CSV: cada pago y reembolso, luego el total de cada creador"
+    }
+  }
+}, CRT = () => CR_T[LANG] || CR_T.en, crPct = e => e + (LANG === "en" ? "%" : " %"), crMonthName = e => {
+  const t = new Date(+e.slice(0, 4), +e.slice(5, 7) - 1, 15);
+  return t.toLocaleDateString(LOC(), {
+    month: "long",
+    year: "numeric"
+  });
+}, crVars = e => ({
+  r: crPct(e.rate),
+  m: e.months,
+  p: crPct(e.promo.percent),
+  pm: e.promo.months
+});
+
+function crHero(e) {
+  const t = CRT(), a = RT(), n = [ [ "clicks", e.clicks, !1 ], [ "signups", e.signups, !1 ], [ "paying", e.paying, !1 ], [ "month", e.month_c, !0 ], [ "toPay", e.to_pay_c, !0 ] ].map(([s, i, o]) => `<div class="rf-cr-t" data-cr="${s}"><small>${esc(t[s])}</small><b class="num${o && i > 0 ? " pos" : o && i < 0 ? " neg" : ""}">${o ? esc(money(i, {
+    sign: !1,
+    dec: 2
+  })) : i}</b></div>`).join("");
+  return `<section class="rf-hero rf-cr"><span class="rf-cr-tag">${esc(t.tag)}</span><h2>${esc(t.headline)}</h2><p>${esc(fmtT(t.lead, crVars(e)))}</p>\n     <div class="rf-link"><div><small>${esc(t.code)}</small><b>${esc(e.code)}</b><span>${esc(e.link.replace(/^https?:\/\//, ""))}</span></div><button class="btn sm" data-act="ref-copy">${esc(a.copy)}</button></div>\n     <button class="btn primary rf-share" data-act="ref-share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>${esc(a.share)}</button>\n     <div class="rf-cr-tiles">${n}</div>\n     <small class="rf-cr-foot">${esc(fmtT(t.total, {
+    e: money(e.earned_c, {
+      sign: !1,
+      dec: 2
+    }),
+    p: money(e.paid_c, {
+      sign: !1,
+      dec: 2
+    })
+  }))}<br>${esc(t.foot)}</small>\n   </section>`;
+}
+
+function creatorsAdmin() {
+  const e = GR.adm, t = CRT().adm;
+  e.cr == null && !e.crBusy && (e.crBusy = !0, apiJSON("api/admin/creators").then(c => {
+    e.cr = c, e.crBusy = !1, render();
+  }).catch(c => {
+    e.cr = {
+      items: [],
+      err: c.message
+    }, e.crBusy = !1, render();
+  }));
+  const a = e.cr || {
+    items: []
+  }, n = c => esc(money(c, {
+    sign: !1,
+    dec: 2
+  })), s = a.rate ? fmtT(t.lead, {
+    r: crPct(a.rate),
+    m: a.window,
+    p: crPct(20),
+    pm: 3
+  }) : "", i = a.items.map(c => `<tr data-cr-row="${esc(c.uid)}"><td><b>${esc(c.username || "?")}</b><br><small class="muted">${esc(c.code)}</small></td><td class="num">${c.clicks}</td><td class="num">${c.signups}</td><td class="num">${c.paying}</td><td class="num">${n(c.month_c)}</td><td class="num${c.to_pay_c > 0 ? " pos" : c.to_pay_c < 0 ? " neg" : ""}">${n(c.to_pay_c)}</td></tr>`).join(""), o = [];
+  a.items.forEach(c => (c.months || []).forEach(l => o.push([ c, l ])));
+  const r = o.map(([c, l]) => `<tr data-cr-month-row="${esc(c.uid)}:${l.month}"><td>${esc(c.username || "?")}</td><td>${esc(crMonthName(l.month))}</td><td class="num">${n(l.payments_c)}</td><td class="num">${n(l.refunds_c)}</td><td class="num">${n(l.commission_c)}</td><td class="num">${l.paid_at ? esc(fmtT(t.paidOn, {
+    d: fdate(new Date(l.paid_at * 1e3).toISOString().slice(0, 10), {
+      month: "short",
+      day: "numeric"
+    })
+  })) : l.month >= a.month ? `<span class="muted">${esc(t.inProgress)}</span>` : `<button class="link" data-act="cr-paid" data-id="${esc(c.uid)}" data-v="${l.month}" data-u="${esc(c.username || "")}" data-a="${n(l.commission_c)}">${esc(t.markPaid)}</button>`}</td></tr>`).join(""), d = [ ...new Set([ a.month, ...o.map(([, c]) => c.month) ].filter(Boolean)) ].sort().reverse(), m = e.crMonth && d.includes(e.crMonth) ? e.crMonth : d[1] || d[0] || "";
+  return `<section class="sec cr-adm" data-noi18n><div class="sec-h"><h2>${esc(t.title)}</h2><span class="help">${a.items.length}</span></div>${s ? `<p class="help cr-adm-lead">${esc(s)}</p>` : ""}\n     <form class="surface pad cr-adm-form" data-form="cr-make" autocomplete="off"><div class="fgrid two"><label class="f"><span>${esc(t.user)}</span><input name="user" required autocapitalize="none" spellcheck="false"></label><label class="f"><span>${esc(t.codeOpt)}</span><input name="code" maxlength="16" autocapitalize="characters" spellcheck="false" placeholder="TRADERJOE"></label></div>\n       <div class="row" style="margin-top:12px"><button class="btn primary" type="submit">${esc(t.make)}</button></div>${e.crErr ? `<p class="help cr-adm-err" role="alert">${esc(e.crErr)}</p>` : ""}${a.err ? `<p class="help cr-adm-err">${esc(a.err)}</p>` : ""}</form>\n     <div class="surface" style="margin-top:12px"><div class="scroll-x"><table class="tbl cr-adm-tbl"><thead><tr><th>${esc(t.creator)}</th><th class="num">${esc(CRT().clicks)}</th><th class="num">${esc(CRT().signups)}</th><th class="num">${esc(CRT().paying)}</th><th class="num">${esc(CRT().month)}</th><th class="num">${esc(CRT().toPay)}</th></tr></thead><tbody>${i || `<tr><td colspan="6" class="muted">${esc(t.none)}</td></tr>`}</tbody></table></div></div>\n     <div class="sec-h" style="margin-top:18px"><h2>${esc(t.months)}</h2>${d.length ? `<span class="cr-adm-exp"><select data-cr-month data-native aria-label="${esc(t.monthCol)}">${d.map(c => `<option value="${c}" ${c === m ? "selected" : ""}>${esc(crMonthName(c))}</option>`).join("")}</select><a class="btn sm" href="api/admin/creators/export?month=${m}" download title="${esc(t.exportT)}" data-cr-export>${esc(t.export)}</a></span>` : ""}</div>\n     <div class="surface"><div class="scroll-x"><table class="tbl cr-adm-st"><thead><tr><th>${esc(t.creator)}</th><th>${esc(t.monthCol)}</th><th class="num">${esc(t.payments)}</th><th class="num">${esc(t.refunds)}</th><th class="num">${esc(t.commission)}</th><th class="num">${esc(t.status)}</th></tr></thead><tbody>${r || '<tr><td colspan="6" class="muted">—</td></tr>'}</tbody></table></div></div></section>`;
+}
+
+async function crMake(e) {
+  const t = CRT().adm, a = new FormData(e);
+  GR.adm.crErr = null;
+  try {
+    await apiJSON("api/admin/creators", {
+      method: "POST",
+      body: {
+        user: String(a.get("user") || "").trim(),
+        code: String(a.get("code") || "").trim()
+      }
+    }), toast(t.made), GR.adm.cr = null, GR.ref = null;
+  } catch (n) {
+    GR.adm.crErr = n.message;
+  }
+  render();
+}
+
+async function crPaid(e) {
+  const t = CRT().adm;
+  if (await (window.SweepUndo && SweepUndo.ask ? SweepUndo.ask(fmtT(t.markQ, {
+    m: crMonthName(e.v),
+    u: e.u
+  }), fmtT(t.markS, {
+    a: e.a
+  }), t.markPaid, !1) : Promise.resolve(!1))) try {
+    await apiJSON("api/admin/creators/paid", {
+      method: "POST",
+      body: {
+        uid: e.id,
+        month: e.v
+      }
+    }), toast(t.marked), GR.adm.cr = null, render();
+  } catch (a) {
+    toast(a.message);
+  }
+}
+
+document.addEventListener("change", e => {
+  e.target.matches && e.target.matches("[data-cr-month]") && (GR.adm.crMonth = e.target.value, render());
+});
+
 function loadRef(e) {
   S.mode !== "server" || !e && GR.ref && Date.now() - GR.refAt < 3e4 || (GR.refAt = Date.now(), 
   apiJSON("api/referral").then(t => {
@@ -9233,6 +9454,7 @@ function vReferral() {
     K: a.days,
     r: r.days_left
   }))}</small>` : ""}</div>\n      <span class="rf-st s-${s[r.status] || "p"}">${esc(e.status[r.status] || r.status)}</span></li>`).join("") : `<li class="rf-empty">${esc(e.empty)}</li>`, o = e.candles[n.earned_year === 1 ? 0 : 1];
+  if (t.creator) return `<div class="rf rf-is-cr" data-noi18n>\n   ${crHero(t.creator)}\n   <section class="sec"><div class="sec-h"><h2>${esc(e.invites)}</h2><span class="help">${esc(e.summary(n))}</span></div><ul class="rf-list surface">${i}</ul></section>\n  </div>`;
   return `<div class="rf" data-noi18n>\n   <section class="rf-hero"><div class="rf-gift" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8c-2-4-6-4-6-1.5S9 8 12 8zm0 0c2-4 6-4 6-1.5S15 8 12 8z"/></svg></div>\n     <h2>${esc(e.headline)}</h2><p>${esc(fmtT(e.lead, {
     d: a.referee_days
   }))}</p>\n     <div class="rf-link"><div><small>${esc(e.yourCode)}</small><b>${esc(t.code)}</b><span>${esc(t.link.replace(/^https?:\/\//, ""))}</span></div><button class="btn sm" data-act="ref-copy">${esc(e.copy)}</button></div>\n     <button class="btn primary rf-share" data-act="ref-share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>${esc(e.share)}</button>\n     <div class="rf-cand"><div class="rf-candles">${candles(n.earned_year, a.max_year)}</div><small>${esc(fmtT(o, {
@@ -9253,14 +9475,18 @@ function vReferral() {
 async function refShare() {
   const e = RT(), t = GR.ref;
   if (!t) return;
-  const a = fmtT(e.shareText, {
+  const c = t.creator, a = c ? fmtT(CRT().shareText, {
+    c: c.code,
+    p: crPct(c.promo.percent),
+    pm: c.promo.months
+  }) : fmtT(e.shareText, {
     d: t.rules.referee_days
   });
   if (navigator.share) try {
     await navigator.share({
       title: "Sweep",
       text: a,
-      url: t.link
+      url: c ? c.link : t.link
     });
     return;
   } catch (n) {
@@ -9271,10 +9497,11 @@ async function refShare() {
 
 async function refCopy() {
   const e = RT(), t = GR.ref;
+  const a = t && t.creator ? t.creator.link : t && t.link;
   if (t) try {
-    await navigator.clipboard.writeText(t.link), toast(e.copied), haptic && haptic(6);
+    await navigator.clipboard.writeText(a), toast(t.creator ? CRT().copied : e.copied), haptic && haptic(6);
   } catch {
-    prompt(e.copy, t.link);
+    prompt(e.copy, a);
   }
 }
 
@@ -9418,7 +9645,7 @@ function growthAdmin() {
     month: "short",
     day: "numeric"
   })}</td>\n      <td class="num">${o.status === "review" ? `<button class="link" data-act="gadm-ref" data-id="${o.id}" data-v="approve">Approve</button> · ` : ""}${[ "review", "pending" ].includes(o.status) ? `<button class="link" data-act="gadm-ref" data-id="${o.id}" data-v="reject" style="color:var(--neg)">Reject</button>` : ""}</td></tr>`).join("");
-  return `<section class="sec" data-noi18n><div class="sec-h"><h2>Feedback</h2><span class="help">${a.new} new${a.avg_rating_30d != null ? ` · ${a.avg_rating_30d}/5 (30 d)` : ""}</span></div>\n     <div class="chips gadm-chips">${n("st", "", "All")}${[ "new", "planned", "in_progress", "shipped", "declined" ].map(o => n("st", o, t.status[o])).join("")}<span class="gadm-sep"></span>${n("ty", "", "All types")}${[ "bug", "idea", "experience" ].map(o => n("ty", o, t["t_" + o])).join("")}</div>\n     <ul class="fb-list">${s}</ul></section>\n   <section class="sec" data-noi18n><div class="sec-h"><h2>Referrals</h2><span class="help">${(e.ref || []).length} total · ${(e.ref || []).filter(o => o.status === "review").length} to review</span></div>\n     <div class="surface"><div class="scroll-x"><table class="tbl"><thead><tr><th>Referrer</th><th>Friend</th><th>Status</th><th>Reward</th><th>Joined</th><th></th></tr></thead><tbody>${i || '<tr><td colspan="6" class="muted">—</td></tr>'}</tbody></table></div></div></section>`;
+  return `<section class="sec" data-noi18n><div class="sec-h"><h2>Feedback</h2><span class="help">${a.new} new${a.avg_rating_30d != null ? ` · ${a.avg_rating_30d}/5 (30 d)` : ""}</span></div>\n     <div class="chips gadm-chips">${n("st", "", "All")}${[ "new", "planned", "in_progress", "shipped", "declined" ].map(o => n("st", o, t.status[o])).join("")}<span class="gadm-sep"></span>${n("ty", "", "All types")}${[ "bug", "idea", "experience" ].map(o => n("ty", o, t["t_" + o])).join("")}</div>\n     <ul class="fb-list">${s}</ul></section>\n   <section class="sec" data-noi18n><div class="sec-h"><h2>Referrals</h2><span class="help">${(e.ref || []).length} total · ${(e.ref || []).filter(o => o.status === "review").length} to review</span></div>\n     <div class="surface"><div class="scroll-x"><table class="tbl"><thead><tr><th>Referrer</th><th>Friend</th><th>Status</th><th>Reward</th><th>Joined</th><th></th></tr></thead><tbody>${i || '<tr><td colspan="6" class="muted">—</td></tr>'}</tbody></table></div></div></section>\n   ${creatorsAdmin()}`;
 }
 
 async function gadmSave(e) {
@@ -10354,6 +10581,10 @@ document.addEventListener("click", e => {
     gadmRef(s.id, s.v);
     break;
 
+   case "cr-paid":
+    crPaid(s);
+    break;
+
    case "adm-manage":
     admManage(s.id);
     break;
@@ -10534,7 +10765,7 @@ function onBind(e, t) {
 document.addEventListener("submit", e => {
   e.preventDefault();
   const t = e.target;
-  t.dataset.form === "account" ? submitAccount(t) : t.dataset.form === "payout" ? submitPayout(t) : t.dataset.form === "expense" ? submitExpense(t) : t.dataset.form === "password" ? changePassword(t) : t.dataset.form === "email" ? changeEmail(t) : t.dataset.form === "econ" ? addEcon(t) : t.dataset.form === "recovery" ? newRecovery(t) : t.dataset.form === "access" ? saveAccess(t) : t.dataset.form === "delete-account" && deleteAccount(t);
+  t.dataset.form === "account" ? submitAccount(t) : t.dataset.form === "payout" ? submitPayout(t) : t.dataset.form === "expense" ? submitExpense(t) : t.dataset.form === "password" ? changePassword(t) : t.dataset.form === "email" ? changeEmail(t) : t.dataset.form === "econ" ? addEcon(t) : t.dataset.form === "recovery" ? newRecovery(t) : t.dataset.form === "access" ? saveAccess(t) : t.dataset.form === "cr-make" ? crMake(t) : t.dataset.form === "delete-account" && deleteAccount(t);
 }), document.addEventListener("keydown", e => {
   const t = e.target.closest && e.target.closest("input,textarea,select,[contenteditable]");
   if (e.key === "Escape") {

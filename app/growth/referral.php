@@ -158,6 +158,8 @@ function ref_reward(PDO $pdo, array $r, string $reason): bool
     $now = time();
     $claim = ref_q($pdo, "UPDATE referrals SET status = 'qualified', qualify_reason = ?, qualified_at = ? WHERE id = ? AND status = 'pending'", [$reason, $now, $r['id']]);
     if ($claim->rowCount() !== 1) return false;
+    // a creator (growth/creators.php) earns a commission on payments instead of free months
+    if (function_exists('cr_get') && cr_get($pdo, (string) $r['referrer_id'])) { ref_q($pdo, "UPDATE referrals SET reward_type = 'commission' WHERE id = ?", [$r['id']]); return false; }
     $earned = (int) ref_q($pdo, "SELECT COUNT(*) FROM referrals WHERE referrer_id = ? AND status = 'rewarded' AND rewarded_at > ?", [$r['referrer_id'], $now - 365 * 86400])->fetchColumn();
     if ($earned >= REF_MAX_YEAR) return false;   // qualified, but the yearly cap is reached
     $type = 'bonus_days'; $value = REF_REWARD_DAYS;
@@ -216,7 +218,8 @@ function ref_dashboard(PDO $pdo, string $uid, string $baseUrl): array
         if ($st === 'rewarded' && (int) $r['rewarded_at'] > time() - 365 * 86400) $stats['earned_year']++;
         $name = ref_display_name((string) ($r['username'] ?? '?'));
         $item = ['name' => $name, 'initials' => g_upper(g_sub($name, 0, 1)), 'joined' => gmdate('c', (int) $r['created_at']), 'status' => $st, 'reward' => $r['reward_type']];
-        if ($r['status'] === 'pending' || $r['status'] === 'review') $item += ref_progress($pdo, $r);
+        // (a creator earns on payments: the 10-trade progress toward a free month means nothing to him)
+        if (($r['status'] === 'pending' || $r['status'] === 'review') && !(function_exists('cr_get') && cr_get($pdo, $uid))) $item += ref_progress($pdo, $r);
         $list[] = $item;
     }
     $bonus = null;

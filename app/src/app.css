@@ -1894,6 +1894,21 @@ html .sb-layer .sb-sheet{transition:transform var(--dur-sheet) var(--ease-ios)!i
 .rf-empty{padding:18px 16px;list-style:none}
 .rf-terms{margin-top:12px;font-size:13px}
 .rf-terms-list{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:10px;line-height:1.55;color:var(--text2)}
+/* creator program (brief « avance concurrentielle », step 5): the Creator section of the Referrals tab, Admin › Creators */
+.rf-cr-tag{align-self:flex-start;font-weight:600;font-size:12px;letter-spacing:.02em;padding:4px 10px;border-radius:var(--r-pill);background:var(--posbg);color:var(--pos)}
+.rf-cr-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rf-cr-t{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:14px;background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line2);min-width:0}
+.rf-cr-t small{font-size:12px;color:var(--muted);line-height:1.3}
+.rf-cr-t b{font:600 20px var(--font-num);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.rf-cr-t[data-cr=toPay]{grid-column:1/-1}
+.rf-cr-t b.pos,.cr-adm-tbl td.pos{color:var(--pos)}
+.rf-cr-t b.neg,.cr-adm-tbl td.neg{color:var(--neg)}
+.rf-cr-foot{color:var(--muted);font-size:12.5px;line-height:1.5}
+.cr-adm .sec-h{flex-wrap:wrap;gap:8px}
+.cr-adm-lead{margin:-4px 0 12px;max-width:75ch}
+.cr-adm-err{color:var(--neg);margin:10px 0 0}
+.cr-adm-exp{display:flex;gap:8px;align-items:center;min-width:0}
+.cr-adm-exp select{min-width:0;max-width:200px}
 .evp.grsh{width:min(460px,100vw)}
 @media (max-width:600px){
 .evp.grsh{height:auto;max-height:86dvh}
