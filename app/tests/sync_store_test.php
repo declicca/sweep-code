@@ -196,6 +196,12 @@ sync_receive($pdo, sync_auth($pdo, $k3['key']), ['fills' => [$fill('w1', 'TX-1',
 $ad2 = sync_admin($pdo); $u2c = null; foreach ($ad2['rows'] as $r) if ($r['user_id'] === 'u2') $u2c = $r['contracts'];
 ok($u2c && $u2c[0]['contract'] === 'CON.F.US.ZZZ.Z25' && $u2c[0]['known'] === false && $ad2['unknown'] === [['platform' => 'quantower', 'contract' => 'CON.F.US.ZZZ.Z25', 'instrument' => 'ZZZ']], 'Admin › Sync: a contract Sweep does not recognize (« CON.F.US.ZZZ.Z25 », a root it does not know) is flagged on its row and listed apart');
 
+// 14d. an account named with digits only (« 1234567 », a broker's account number): PHP turns such an array key into an int
+$k4 = sync_new_key($pdo, 'u2', 'ninjatrader');
+$r4 = sync_receive($pdo, sync_auth($pdo, $k4['key']), ['client' => 'Sweep NT8 1.2.0', 'accounts' => [['name' => '1234567', 'connection' => 'Rithmic'], ['name' => 'Sim101']], 'fills' => [$fill('d1', '1234567', 'buy', 1, 21000, '2026-10-09 10:00:00')]]);
+$c4 = $pdo->query("SELECT client, last_seen_at FROM sync_connections WHERE user_id = 'u2' AND platform = 'ninjatrader' AND status = 'active'")->fetch();
+ok(!empty($r4['ok']) && $r4['new'] === 1 && $r4['accounts'][0] === ['name' => '1234567', 'state' => 'new'] && $sa('u2', '1234567') && $c4['client'] === 'Sweep NT8 1.2.0' && (int) $c4['last_seen_at'] > 0, 'an account named « 1234567 » is received like any other (the add-on is seen, the account found, its execution kept)');
+
 // 15. a trader deletes their Sweep account: everything of the sync goes
 sync_delete_user($pdo, 'u1');
 $left = 0; foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $tb) $left += (int) $pdo->query("SELECT COUNT(*) FROM $tb WHERE user_id = 'u1'")->fetchColumn();

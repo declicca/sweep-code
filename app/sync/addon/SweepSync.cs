@@ -25,7 +25,8 @@ using NinjaTrader.Gui.Tools;
 //  - the queue is sent every 2 seconds (500 executions at most per request); a « hello » every 5 minutes says the add-on runs;
 //  - at start and when an account connects, the executions of its current session are sent again (Sweep never doubles them);
 //  - times are sent in UTC (milliseconds), converted from the time zone set in Tools > Options > General;
-//  - no connection: the executions wait and are sent later (waiting longer after each failure, 5 minutes at most).
+//  - no connection: the executions wait and are sent later (waiting longer after each failure, 5 minutes at most);
+//  - (1.2.0) every failure is written in NinjaScript Output: HTTP code, Sweep's message, URL, the key's last 4 characters only.
 namespace NinjaTrader.NinjaScript.AddOns
 {
 	public class SweepSync : AddOnBase
@@ -76,7 +77,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 	/// <summary>The sync itself: one instance for the whole platform (a recompile ends it and starts it again).</summary>
 	public static class SweepSyncEngine
 	{
-		public const string Version = "1.1.0";
+		public const string Version = "1.2.0";
 		private const string DefaultUrl = "https://app.makeitsweep.com/api/sync/push";
 		private const int MaxPerPush = 500;
 		private static readonly object Gate = new object();
@@ -93,7 +94,10 @@ namespace NinjaTrader.NinjaScript.AddOns
 		public static string Key = "";
 		public static string Url = DefaultUrl;
 		public static DateTime LastOk = DateTime.MinValue;
-		public static string LastError = "";   // "", "key", "network", "server", "error"
+		public static DateTime LastTry = DateTime.MinValue;
+		public static string LastError = "";   // "", "key", "platform", "network", "server", "error"
+		public static int LastCode;            // the last HTTP code (0: no answer)
+		public static int Sent;                // executions accepted by Sweep since NinjaTrader started
 
 		public static int Pending { get { lock (Gate) return pending.Count; } }
 		public static string[] Accounts { get { lock (Gate) return watched.Select(a => a.Name).OrderBy(n => n).ToArray(); } }
@@ -145,7 +149,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 				LastError = "";
 				failures = 0;
 				retryAt = DateTime.MinValue;
-				nextHello = DateTime.MinValue;
+				nextHello = DateTime.MinValue;   // a hello right away: Sweep shows the add-on within seconds, even before a trade
 				sent.Clear();
 			}
 			SaveConfig();
@@ -153,6 +157,13 @@ namespace NinjaTrader.NinjaScript.AddOns
 			lock (Gate) list = watched.ToList();
 			foreach (Account a in list) AddSession(a);
 			return true;
+		}
+
+		/// <summary>« Test connection »: a hello now, whatever the wait after a failure.</summary>
+		public static void TestNow()
+		{
+			lock (Gate) { retryAt = DateTime.MinValue; nextHello = DateTime.MinValue; }
+			ThreadPool.QueueUserWorkItem(_ => Tick());
 		}
 
 		private static void OnAccountStatus(object sender, AccountStatusEventArgs e)
@@ -239,9 +250,15 @@ namespace NinjaTrader.NinjaScript.AddOns
 				}
 				if (batch.Count == 0 && !hello) return;
 				string body = "{\"client\":" + J("Sweep NT8 " + Version) + ",\"accounts\":[" + AccountsJson() + "],\"fills\":[" + string.Join(",", batch.Select(b => b.Value)) + "]}";
-				int code = Post(body);
+				string message;
+				int code = Post(body, out message);
+				// written in NinjaScript Output outside the lock (the window reads it too): every failure, and the first success after one
+				if (code != 200) Log((code == 0 ? "cannot reach " : "HTTP " + code + " from ") + Url + " (key ..." + Hint + "): " + message);
+				else if (LastOk == DateTime.MinValue || LastError != "") Log("connected to Sweep (key ..." + Hint + ")");
 				lock (Gate)
 				{
+					LastTry = DateTime.Now;
+					LastCode = code;
 					if (code == 200)
 					{
 						foreach (KeyValuePair<string, string> b in batch)
@@ -250,6 +267,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 							if (pending.TryGetValue(b.Key, out now) && now == b.Value) pending.Remove(b.Key);   // amended meanwhile: sent next time
 							sent.Add(b.Key + "|" + b.Value);
 						}
+						Sent += batch.Count;
 						LastOk = DateTime.Now;
 						LastError = "";
 						failures = 0;
@@ -257,7 +275,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 					}
 					else if (code == 401)
 					{
-						LastError = "key";   // revoked or wrong key: wait for a new one
+						LastError = message.Contains("This key is for") ? "platform" : "key";   // revoked, wrong or another platform's key: wait for a new one
 						retryAt = DateTime.UtcNow.AddMinutes(5);
 					}
 					else
@@ -269,7 +287,11 @@ namespace NinjaTrader.NinjaScript.AddOns
 				}
 				if (code == 200) SaveQueue();
 			}
-			catch (Exception ex) { LastError = "error"; Log("send: " + ex.Message); }
+			catch (Exception ex)
+			{
+				lock (Gate) { LastError = "error"; failures++; retryAt = DateTime.UtcNow.AddSeconds(Math.Min(300, 5 * Math.Pow(2, Math.Min(failures, 6)))); }
+				Log("send: " + ex.Message);
+			}
 			finally { Interlocked.Exchange(ref busy, 0); }
 		}
 
@@ -300,8 +322,13 @@ namespace NinjaTrader.NinjaScript.AddOns
 			return string.Join(",", parts);
 		}
 
-		private static int Post(string body)
+		/// <summary>The key's last 4 characters, the only part ever written in NinjaScript Output.</summary>
+		private static string Hint { get { return Key.Length > 4 ? Key.Substring(Key.Length - 4) : ""; } }
+
+		/// <summary>The HTTP code (0: no answer) and, when it fails, why: Sweep's message, or the network error.</summary>
+		private static int Post(string body, out string message)
 		{
+			message = "";
 			try
 			{
 				ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
@@ -320,10 +347,25 @@ namespace NinjaTrader.NinjaScript.AddOns
 			catch (WebException we)
 			{
 				HttpWebResponse r = we.Response as HttpWebResponse;
-				if (r == null) Log("network: " + we.Message);
-				return r != null ? (int)r.StatusCode : 0;
+				if (r == null)
+				{
+					message = we.Status + ": " + we.Message + (we.InnerException != null ? " " + we.InnerException.Message : "");   // TLS, DNS, firewall…
+					return 0;
+				}
+				int code = (int)r.StatusCode;
+				try
+				{
+					using (r)
+					using (StreamReader rd = new StreamReader(r.GetResponseStream(), Encoding.UTF8))
+					{
+						Match m = Regex.Match(rd.ReadToEnd(), "\"error\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
+						message = m.Success ? Regex.Unescape(m.Groups[1].Value) : r.StatusDescription;
+					}
+				}
+				catch { message = we.Message; }
+				return code;
 			}
-			catch (Exception ex) { Log("network: " + ex.Message); return 0; }
+			catch (Exception ex) { message = ex.Message; return 0; }
 		}
 
 		/* ---------- files: the key and the executions waiting ---------- */
@@ -429,11 +471,13 @@ namespace NinjaTrader.NinjaScript.AddOns
 		private readonly DispatcherTimer refresh;
 		private readonly string[] L;
 		private bool badKey;
+		private DateTime testAt = DateTime.MinValue;
 
-		// intro, key label, save, no key, sent, waiting, key refused, no connection, waiting count, accounts, bad key format
-		private static readonly string[] En = { "Sweep Sync sends the executions of all your accounts to your Sweep journal. Read-only: it never places, changes or cancels an order.", "Your Sweep key (Sweep > Settings > Data > Connections)", "Save", "Paste your key to start.", "Connected · last sent at {0}", "Waiting to send…", "Key refused: create a new one in Sweep and paste it here.", "No connection to Sweep: the executions wait and will be sent.", "{0} execution(s) waiting", "Accounts followed: {0}", "This is not a Sweep key (it starts with swk_)." };
-		private static readonly string[] Fr = { "Sweep Sync envoie les exécutions de tous tes comptes à ton journal Sweep. Lecture seule : il ne passe, ne modifie et n’annule jamais d’ordre.", "Ta clé Sweep (Sweep > Réglages > Données > Connexions)", "Enregistrer", "Colle ta clé pour commencer.", "Connecté · dernier envoi à {0}", "Envoi en attente…", "Clé refusée : crée une nouvelle clé dans Sweep et colle-la ici.", "Pas de connexion à Sweep : les exécutions attendent et seront envoyées.", "{0} exécution(s) en attente", "Comptes suivis : {0}", "Ce n’est pas une clé Sweep (elle commence par swk_)." };
-		private static readonly string[] Es = { "Sweep Sync envía las ejecuciones de todas tus cuentas a tu diario de Sweep. Solo lectura: nunca envía, modifica ni cancela una orden.", "Tu clave de Sweep (Sweep > Ajustes > Datos > Conexiones)", "Guardar", "Pega tu clave para empezar.", "Conectado · último envío a las {0}", "Envío pendiente…", "Clave rechazada: crea una nueva en Sweep y pégala aquí.", "Sin conexión con Sweep: las ejecuciones esperan y se enviarán.", "{0} ejecución(es) pendiente(s)", "Cuentas seguidas: {0}", "No es una clave de Sweep (empieza por swk_)." };
+		// intro, key label, save, no key, sent, waiting, key refused, no connection, waiting count, accounts, bad key format,
+		// (1.2.0) server error, another platform's key, connected without an execution yet, test button, testing
+		private static readonly string[] En = { "Sweep Sync sends the executions of all your accounts to your Sweep journal. Read-only: it never places, changes or cancels an order.", "Your Sweep key (Sweep > Settings > Data > Connections)", "Save", "Paste your key to start.", "Connected · last sent at {0}", "Waiting to send…", "Key refused: create a new one in Sweep and paste it here.", "Sweep cannot be reached (internet, firewall or antivirus?). The executions wait and will be sent.", "{0} execution(s) waiting", "Accounts followed: {0}", "This is not a Sweep key (it starts with swk_).", "Sweep could not save (HTTP {0}). The executions wait and will be sent again. Details: NinjaScript Output.", "This key is for another platform: create a NinjaTrader 8 key in Sweep and paste it here.", "Connected · Sweep sees this add-on. Your trades appear after your next execution.", "Test connection", "Testing…" };
+		private static readonly string[] Fr = { "Sweep Sync envoie les exécutions de tous tes comptes à ton journal Sweep. Lecture seule : il ne passe, ne modifie et n’annule jamais d’ordre.", "Ta clé Sweep (Sweep > Réglages > Données > Connexions)", "Enregistrer", "Colle ta clé pour commencer.", "Connecté · dernier envoi à {0}", "Envoi en attente…", "Clé refusée : crée une nouvelle clé dans Sweep et colle-la ici.", "Sweep est injoignable (internet, pare-feu ou antivirus ?). Les exécutions attendent et seront envoyées.", "{0} exécution(s) en attente", "Comptes suivis : {0}", "Ce n’est pas une clé Sweep (elle commence par swk_).", "Sweep n’a pas pu enregistrer (HTTP {0}). Les exécutions attendent et seront renvoyées. Détails : NinjaScript Output.", "Cette clé est pour une autre plateforme : crée une clé NinjaTrader 8 dans Sweep et colle-la ici.", "Connecté · Sweep voit cet add-on. Tes trades apparaîtront après ta prochaine exécution.", "Tester la connexion", "Test en cours…" };
+		private static readonly string[] Es = { "Sweep Sync envía las ejecuciones de todas tus cuentas a tu diario de Sweep. Solo lectura: nunca envía, modifica ni cancela una orden.", "Tu clave de Sweep (Sweep > Ajustes > Datos > Conexiones)", "Guardar", "Pega tu clave para empezar.", "Conectado · último envío a las {0}", "Envío pendiente…", "Clave rechazada: crea una nueva en Sweep y pégala aquí.", "No se puede conectar con Sweep (¿internet, firewall o antivirus?). Las ejecuciones esperan y se enviarán.", "{0} ejecución(es) pendiente(s)", "Cuentas seguidas: {0}", "No es una clave de Sweep (empieza por swk_).", "Sweep no pudo guardar (HTTP {0}). Las ejecuciones esperan y se enviarán de nuevo. Detalles: NinjaScript Output.", "Esta clave es de otra plataforma: crea una clave de NinjaTrader 8 en Sweep y pégala aquí.", "Conectado · Sweep ve este add-on. Tus operaciones aparecerán después de tu próxima ejecución.", "Probar la conexión", "Probando…" };
 
 		public SweepSyncWindow()
 		{
@@ -441,7 +485,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 			L = lang == "fr" ? Fr : lang == "es" ? Es : En;
 			Caption = "Sweep Sync";
 			Width = 480;
-			Height = 320;
+			Height = 340;
 			Brush text = Application.Current.TryFindResource("FontControlBrush") as Brush;
 			StackPanel panel = new StackPanel { Margin = new Thickness(18) };
 			panel.Children.Add(MakeText(L[0], text, new Thickness(0, 0, 0, 14)));
@@ -450,7 +494,12 @@ namespace NinjaTrader.NinjaScript.AddOns
 			panel.Children.Add(keyBox);
 			Button save = new Button { Content = L[2], HorizontalAlignment = HorizontalAlignment.Left, Padding = new Thickness(16, 4, 16, 4) };
 			save.Click += (o, e) => { badKey = !SweepSyncEngine.SetKey(keyBox.Text); Refresh(); };
-			panel.Children.Add(save);
+			Button test = new Button { Content = L[14], Margin = new Thickness(8, 0, 0, 0), Padding = new Thickness(16, 4, 16, 4) };
+			test.Click += (o, e) => { if (string.IsNullOrEmpty(SweepSyncEngine.Key)) return; testAt = DateTime.Now; SweepSyncEngine.TestNow(); Refresh(); };
+			StackPanel buttons = new StackPanel { Orientation = Orientation.Horizontal };
+			buttons.Children.Add(save);
+			buttons.Children.Add(test);
+			panel.Children.Add(buttons);
 			status = MakeText("", text, new Thickness(0, 14, 0, 0));
 			panel.Children.Add(status);
 			Content = panel;
@@ -473,8 +522,12 @@ namespace NinjaTrader.NinjaScript.AddOns
 			List<string> lines = new List<string>();
 			if (badKey) lines.Add(L[10]);
 			else if (string.IsNullOrEmpty(SweepSyncEngine.Key)) lines.Add(L[3]);
+			else if (testAt > SweepSyncEngine.LastTry) lines.Add(L[15]);
 			else if (SweepSyncEngine.LastError == "key") lines.Add(L[6]);
-			else if (SweepSyncEngine.LastError == "network" || SweepSyncEngine.LastError == "server") lines.Add(L[7]);
+			else if (SweepSyncEngine.LastError == "platform") lines.Add(L[12]);
+			else if (SweepSyncEngine.LastError == "network") lines.Add(L[7]);
+			else if (SweepSyncEngine.LastError == "server") lines.Add(string.Format(L[11], SweepSyncEngine.LastCode));
+			else if (SweepSyncEngine.LastOk != DateTime.MinValue && SweepSyncEngine.Sent == 0 && SweepSyncEngine.Pending == 0) lines.Add(L[13]);
 			else if (SweepSyncEngine.LastOk != DateTime.MinValue) lines.Add(string.Format(L[4], SweepSyncEngine.LastOk.ToString("HH:mm:ss")));
 			else lines.Add(L[5]);
 			int n = SweepSyncEngine.Pending;

@@ -41,6 +41,11 @@ ok(preg_match('/\.(Submit|CreateOrder|Cancel|CancelAllOrders|Change|Flatten)\s*\
 ok(preg_match('/\bPassword\b/', $cs) === 0, 'it never reads a password');
 // (1.1.0, 30 Oct.) the balance of each account, for Sweep's balance to follow the platform: the cash value only, no other account item
 ok(preg_match_all('/AccountItem\.(\w+)/', $cs, $m) === 1 && $m[1] === ['CashValue'] && strpos($cs, '\\"cash\\":') !== false, 'it sends the balance of each account (its cash value), nothing else of the account');
+// (1.2.0, 2 Nov.) never a silent failure: every one is written in NinjaScript Output with the HTTP code, Sweep's message and the
+// URL, the key's last 4 characters only; a hello as soon as a key is saved; « Test connection » sends one now
+ok(str_contains($cs, 'Log((code == 0 ? "cannot reach " : "HTTP " + code + " from ") + Url + " (key ..." + Hint + "): " + message)') && preg_match_all('/Log\([^;]*\bKey\b/', $cs) === 0, 'every failure is written in NinjaScript Output (code, message, URL), never the whole key');
+ok(preg_match('/SetKey\(string key\)[\s\S]*?nextHello = DateTime\.MinValue;[\s\S]*?\n\t\t}/', $cs) === 1 && str_contains($cs, 'public static void TestNow()') && str_contains($cs, 'SweepSyncEngine.TestNow()'), 'a hello right after a key is saved, and a « Test connection » button');
+foreach (['En', 'Fr', 'Es'] as $lg) ok(preg_match('/string\[\] ' . $lg . ' = \{(.*)\};/', $cs, $m) === 1 && substr_count($m[1], '", "') === 15, "window texts in $lg: the same 16 lines");
 ok(str_contains($cs, 'J("Sweep NT8 " + Version)') && str_contains($store, "'Sweep NT8' => 'ninjatrader'"), 'it names itself « Sweep NT8 … », the name the server ties to NinjaTrader 8');
 
 // Quantower: the same language, from a panel

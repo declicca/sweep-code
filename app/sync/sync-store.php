@@ -182,7 +182,8 @@ function sync_receive(PDO $pdo, array $conn, array $p): array
     $stats = ['new' => 0, 'changed' => 0, 'skipped' => 0];
     $client = sync_name($p['client'] ?? '') ?: null; $cid = (string) $conn['id'];
     [$rows, $touched] = sync_tx($pdo, function () use ($pdo, $uid, $platform, $names, $fills, $now, $min, $max, $client, $cid, &$stats) {
-        $rows = []; foreach ($names as $n => $info) $rows[$n] = sync_account_row($pdo, $uid, $platform, $n, $info, $now);
+        // (string): PHP turns a key of digits only (an account « 1234567 ») into an int
+        $rows = []; foreach ($names as $n => $info) $rows[$n] = sync_account_row($pdo, $uid, $platform, (string) $n, $info, $now);
         $touched = [];
         foreach ($fills as $raw) {
             $acct = is_array($raw) ? sync_name($raw['account'] ?? '') : '';
@@ -217,7 +218,7 @@ function sync_receive(PDO $pdo, array $conn, array $p): array
         $r = sync_apply($pdo, $uid, $sa, array_keys($contracts));
         foreach ($written as $k => $v) $written[$k] += $r[$k] ?? 0;
     }
-    $states = []; foreach ($rows as $n => $r) $states[] = ['name' => $n, 'state' => $r['state']];
+    $states = []; foreach ($rows as $n => $r) $states[] = ['name' => (string) $n, 'state' => $r['state']];
     // new accounts to link: the trader hears it in the app (bell), wherever they are; one notification per platform and day at most
     $fresh = 0; foreach ($rows as $r) if ($r['state'] === 'new' && !empty($r['_found'])) $fresh++;
     if ($fresh && class_exists('Notify')) {

@@ -2476,7 +2476,7 @@
       cTitle: 'Connect {p}', s1: 'Download the Sweep add-on for {p}.', dl: 'Download', soon: 'Available soon', s2: 'In NinjaTrader: Tools › Import › NinjaScript Add-On, then pick the file.',
       s2q: 'Unzip it into the Quantower folder: Settings › Scripts › plug-ins, then restart Quantower.', s3q: 'In Quantower, open the Sweep Sync panel and paste your key:',
       s3: 'Paste your key in the Sweep window of NinjaTrader:', copy: 'Copy', copied: 'Key copied', once: 'This key is shown only once. It only sends your executions to Sweep: it can never place an order.', done: 'Done',
-      key: 'Key', addon: 'Add-on', lastSeen: 'Last seen', never: 'Never', newKey: 'New key', newKeyHelp: 'The current key stops working.', stop: 'Stop the sync', stopHelp: 'Trades already synced stay in your journal.', stopped: 'Sync stopped',
+      key: 'Key', addon: 'Add-on', lastSeen: 'Last seen', neverHelp: 'Sweep has not heard from the add-on yet. In {p}, open Sweep Sync, paste your key, then Save: it shows here within a minute. Still nothing? The add-on’s window says why.', newKey: 'New key', newKeyHelp: 'The current key stops working.', stop: 'Stop the sync', stopHelp: 'Trades already synced stay in your journal.', stopped: 'Sync stopped',
       which: 'Which Sweep account is it?', newAcc: '+ New account', ignore: 'Ignore this account', current: 'Linked to {a}', unlink: 'Unlink', unlinkHelp: 'Trades already synced stay.',
       pv: 'Linking to {a}:', add1: '1 trade to add', addN: '{n} trades to add', cmp1: '1 trade typed by hand, completed (your notes stay)', cmpN: '{n} trades typed by hand, completed (your notes stay)',
       man1: '1 trade typed by hand with no match, kept as it is', manN: '{n} trades typed by hand with no match, kept as they are', open1: '1 open position, added when it closes', openN: '{n} open positions, added when they close',
@@ -2495,7 +2495,7 @@
       cTitle: 'Connecter {p}', s1: 'Télécharge l’add-on Sweep pour {p}.', dl: 'Télécharger', soon: 'Bientôt disponible', s2: 'Dans NinjaTrader : Tools › Import › NinjaScript Add-On, puis choisis le fichier.',
       s2q: 'Décompresse-le dans le dossier de Quantower : Settings › Scripts › plug-ins, puis redémarre Quantower.', s3q: 'Dans Quantower, ouvre le panneau Sweep Sync et colle ta clé :',
       s3: 'Colle ta clé dans la fenêtre Sweep de NinjaTrader :', copy: 'Copier', copied: 'Clé copiée', once: 'Cette clé n’est montrée qu’une fois. Elle sert seulement à envoyer tes exécutions à Sweep : elle ne peut jamais passer un ordre.', done: 'Terminé',
-      key: 'Clé', addon: 'Add-on', lastSeen: 'Vu pour la dernière fois', never: 'Jamais', newKey: 'Nouvelle clé', newKeyHelp: 'La clé actuelle cessera de fonctionner.', stop: 'Arrêter la synchro', stopHelp: 'Les trades déjà synchronisés restent dans ton journal.', stopped: 'Synchro arrêtée',
+      key: 'Clé', addon: 'Add-on', lastSeen: 'Vu pour la dernière fois', neverHelp: 'Sweep n’a encore rien reçu de l’add-on. Dans {p}, ouvre Sweep Sync, colle ta clé puis Enregistrer : il s’affiche ici en moins d’une minute. Toujours rien ? La fenêtre de l’add-on dit pourquoi.', newKey: 'Nouvelle clé', newKeyHelp: 'La clé actuelle cessera de fonctionner.', stop: 'Arrêter la synchro', stopHelp: 'Les trades déjà synchronisés restent dans ton journal.', stopped: 'Synchro arrêtée',
       which: 'C’est quel compte Sweep ?', newAcc: '+ Nouveau compte', ignore: 'Ignorer ce compte', current: 'Relié à {a}', unlink: 'Délier', unlinkHelp: 'Les trades déjà synchronisés restent.',
       pv: 'En le reliant à {a} :', add1: '1 trade à ajouter', addN: '{n} trades à ajouter', cmp1: '1 trade saisi à la main, complété (tes notes restent)', cmpN: '{n} trades saisis à la main, complétés (tes notes restent)',
       man1: '1 trade saisi à la main sans équivalent, gardé tel quel', manN: '{n} trades saisis à la main sans équivalent, gardés tels quels', open1: '1 position ouverte, ajoutée à sa fermeture', openN: '{n} positions ouvertes, ajoutées à leur fermeture',
@@ -2514,7 +2514,7 @@
       cTitle: 'Conectar {p}', s1: 'Descarga el add-on de Sweep para {p}.', dl: 'Descargar', soon: 'Disponible pronto', s2: 'En NinjaTrader: Tools › Import › NinjaScript Add-On y elige el archivo.',
       s2q: 'Descomprímelo en la carpeta de Quantower: Settings › Scripts › plug-ins y reinicia Quantower.', s3q: 'En Quantower, abre el panel Sweep Sync y pega tu clave:',
       s3: 'Pega tu clave en la ventana Sweep de NinjaTrader:', copy: 'Copiar', copied: 'Clave copiada', once: 'Esta clave solo se muestra una vez. Solo envía tus ejecuciones a Sweep: nunca puede enviar una orden.', done: 'Listo',
-      key: 'Clave', addon: 'Add-on', lastSeen: 'Visto por última vez', never: 'Nunca', newKey: 'Nueva clave', newKeyHelp: 'La clave actual dejará de funcionar.', stop: 'Detener la sincronización', stopHelp: 'Las operaciones ya sincronizadas se quedan en tu diario.', stopped: 'Sincronización detenida',
+      key: 'Clave', addon: 'Add-on', lastSeen: 'Visto por última vez', neverHelp: 'Sweep aún no ha recibido nada del add-on. En {p}, abre Sweep Sync, pega tu clave y pulsa Guardar: aparece aquí en menos de un minuto. ¿Sigue sin nada? La ventana del add-on dice por qué.', newKey: 'Nueva clave', newKeyHelp: 'La clave actual dejará de funcionar.', stop: 'Detener la sincronización', stopHelp: 'Las operaciones ya sincronizadas se quedan en tu diario.', stopped: 'Sincronización detenida',
       which: '¿Qué cuenta de Sweep es?', newAcc: '+ Nueva cuenta', ignore: 'Ignorar esta cuenta', current: 'Vinculada a {a}', unlink: 'Desvincular', unlinkHelp: 'Las operaciones ya sincronizadas se quedan.',
       pv: 'Al vincularla a {a}:', add1: '1 operación por añadir', addN: '{n} operaciones por añadir', cmp1: '1 operación anotada a mano, completada (tus notas se quedan)', cmpN: '{n} operaciones anotadas a mano, completadas (tus notas se quedan)',
       man1: '1 operación anotada a mano sin equivalente, se queda igual', manN: '{n} operaciones anotadas a mano sin equivalente, se quedan igual', open1: '1 posición abierta, añadida al cerrarse', openN: '{n} posiciones abiertas, añadidas al cerrarse',
@@ -2724,8 +2724,9 @@
     }
     if (v.k === 'manage') {
       const c = conn(v.p) || {};
-      return head + `<div class="sy-kv"><span>${t('key')}</span><b>····${h(c.hint || '')}</b></div><div class="sy-kv"><span>${t('addon')}</span><b>${h(c.client || '—')}</b></div>
-        <div class="sy-kv"><span>${t('lastSeen')}</span><b>${c.last_seen_at ? h(ago(c.last_seen_at)) : t('never')}</b></div>
+      // never seen: what to do instead of « Add-on — · Last seen: Never »
+      return head + `<div class="sy-kv"><span>${t('key')}</span><b>····${h(c.hint || '')}</b></div>${c.last_seen_at ? `<div class="sy-kv"><span>${t('addon')}</span><b>${h(c.client || '—')}</b></div>
+        <div class="sy-kv"><span>${t('lastSeen')}</span><b>${h(ago(c.last_seen_at))}</b></div>` : `<p class="sy-note sy-never">${h(t('neverHelp').replace('{p}', NAME[v.p]))}</p>`}
         <button type="button" class="btn sy-wide" data-sy="newkey">${t('newKey')}</button><p class="sy-note">${t('newKeyHelp')}</p>
         <button type="button" class="btn danger sy-wide" data-sy="stop">${t('stop')}</button><p class="sy-note">${t('stopHelp')}</p>`;
     }

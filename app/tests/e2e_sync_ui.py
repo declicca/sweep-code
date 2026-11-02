@@ -118,6 +118,12 @@ def case_fr(p, phone):
   tap(pg, '#sySheet [data-sy="copy"]'); pg.wait_for_timeout(300)
   tap(pg, '#sySheet [data-sy="close"].sy-main'); pg.wait_for_timeout(500)
   ok(not pg.locator('#sySheet.open').count(), f'{tag}: « Terminé » closes the sheet')
+  # (2 Nov.) the add-on never seen yet: the manage sheet says what to do, not « Add-on — · Vu pour la dernière fois : Jamais »
+  tap(pg, '#main .sy-sec [data-sy="manage"]'); pg.wait_for_selector('#sySheet.open .sy-never', timeout=8000); pg.wait_for_timeout(600)
+  mt = pg.inner_text('#sySheet')
+  ok('Sweep n’a encore rien reçu de l’add-on. Dans NinjaTrader 8, ouvre Sweep Sync, colle ta clé puis Enregistrer' in mt and 'Jamais' not in mt and 'Vu pour la dernière fois' not in mt and in_screen(pg) == '', f'{tag}: manage sheet, add-on never seen: what to do instead of « Jamais » ({in_screen(pg)})')
+  pg.screenshot(path=f'{SHOTS}/sync-never-{tag}.png')
+  tap(pg, '#sySheet .sy-x'); pg.wait_for_timeout(500)
   # the add-on pushes (key only)
   r = ctx.request.post(B + '/api/sync/push', data=json.dumps({'client': 'Sweep NT8 test', 'accounts': [{'name': 'APEX-555-01', 'connection': 'Apex', 'provider': 'Rithmic'}], 'fills': FILLS}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
   ok(r.status == 200, f'{tag}: executions received with the key')
