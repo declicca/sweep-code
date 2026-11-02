@@ -2392,7 +2392,14 @@ window.SweepMO = window.SweepMO || class {
   }
   /** copy groups (« ou le groupe de copie », built separately): when they exist, offer each group here as one more option of
    *  the account asked (picking one = its lead account in SH.f.account, the others in SH.copy). Today: the accounts only. */
-  function aiAccountOptions(accs) { return accs.map((a) => [a.id, typeof acctLabel === 'function' ? acctLabel(a.id) : a.name]); }
+  // (brief avance, steps 2 and 3) « which account? »: a copy group's master says its copies — picking it fills the group (SH.copy)
+  const AIG = { en: '{a} + its {n} copies', fr: '{a} + ses {n} copies', es: '{a} + sus {n} copias' };
+  function aiAccountOptions(accs) {
+    return accs.map((a) => {
+      const l = typeof acctLabel === 'function' ? acctLabel(a.id) : a.name, G = window.SweepCopy && SweepCopy.leadOf ? SweepCopy.leadOf(a.id) : null, n = G && G.lead.id === a.id ? SweepCopy.targets(a.id).length : 0;
+      return [a.id, n ? (AIG[typeof LANG === 'string' ? LANG : 'en'] || AIG.en).replace('{a}', l).replace('{n}', n) : l];
+    });
+  }
   const accList = () => ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
   /** several accounts and none known for this trade: the sheet asks (empty, highlighted, « Save » says so) */
   function askAccount() { if (accList().length > 1 && !SH.f.accountPicked) { SH.f.account = ''; SH.copy = new Set(); SH.aiAsk = true; SH.aiLow.add('account_id'); } }
