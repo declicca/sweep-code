@@ -42,13 +42,13 @@ def unthrottle():
 N = lambda s: re.sub(r'\s+', ' ', str(s).replace(' ', ' ').replace(' ', ' ')).strip()
 
 X = {
-  'en': {'now': '+$821.60 today · 2/3 trades', 'sym': 'Symbol', 'acc': 'Account', 'disc': 'Discipline', 'add': 'Add a trade', 'dur': '8 min',
+  'en': {'now': '+$821.60 today · 2/3 trades', 'sym': 'Symbol', 'acc': 'Account', 'disc': 'Discipline', 'add': 'Add a trade', 'rt': 'Add', 'dur': '8 min',
          'also': 'Also on 4 accounts · total', 'cal': 'Calendar ›', 'other': '+ Other', 'dd': 'Drawdown room', 'ddOld': 'DD room', 'cat': 'Liquidity Sweep',
          'catNo': ['Opening Range Breakout', 'Break & Retest', 'Fair Value Gap'], 'catEn': [], 'none': 'No trades match these filters.'},
-  'fr': {'now': '+821,60 $ aujourd’hui · 2/3 trades', 'sym': 'Symbole', 'acc': 'Compte', 'disc': 'Discipline', 'add': 'Ajouter un trade', 'dur': '8 min',
+  'fr': {'now': '+821,60 $ aujourd’hui · 2/3 trades', 'sym': 'Symbole', 'acc': 'Compte', 'disc': 'Discipline', 'add': 'Ajouter un trade', 'rt': 'Ajouter', 'dur': '8 min',
          'also': 'Aussi sur 4 comptes · total', 'cal': 'Calendrier ›', 'other': '+ Autre', 'dd': 'Marge de drawdown', 'ddOld': 'Marge DD', 'cat': 'Prise de liquidité',
          'catNo': ['Cassure du range d’ouverture', 'Opening Range Breakout', 'Break & Retest', 'Fair Value Gap'], 'catEn': ['Liquidity Sweep', 'VWAP Bounce', 'Gap Fill'], 'none': 'Aucun trade ne correspond à ces filtres.'},
-  'es': {'now': '+821,60 $ hoy · 2/3 operaciones', 'sym': 'Símbolo', 'acc': 'Cuenta', 'disc': 'Disciplina', 'add': 'Añadir una operación', 'dur': '8 min',
+  'es': {'now': '+821,60 $ hoy · 2/3 operaciones', 'sym': 'Símbolo', 'acc': 'Cuenta', 'disc': 'Disciplina', 'add': 'Añadir una operación', 'rt': 'Añadir', 'dur': '8 min',
          'also': 'También en 4 cuentas · total', 'cal': 'Calendario ›', 'other': '+ Otro', 'dd': 'Margen de drawdown', 'ddOld': 'Margen DD', 'cat': 'Barrido de liquidez',
          'catNo': ['Ruptura del rango de apertura', 'Opening Range Breakout', 'Break & Retest', 'Fair Value Gap'], 'catEn': ['Liquidity Sweep', 'VWAP Bounce', 'Gap Fill'], 'none': 'Ninguna operación coincide con estos filtros.'},
 }
@@ -137,7 +137,8 @@ def run(p, lang, phone, dark):
   ok(r1 and r1['y'] == 0 and 0 < r1['b'] <= r1['h'], f"{tag} C1 the day's P&L visible without scrolling ({r1})")
   d = pg.evaluate(DIRS); ok(d['n'] > 0 and not d['bad'], f"{tag} C2 Today: L / S in neutral ink ({d['n']} marks, {d['bad'][:2]})")
   b2 = pg.evaluate(TXT, '#main .nav-rt-s [data-rt="trade"] .l, #main .nav-rt-s [data-rt="trade"] .s')
-  ok(b2 and all(v == x['add'] for v in b2), f"{tag} G2 the routine says « {x['add']} » (long and short label: {b2})")
+  rt = x['rt'] if phone else x['add']   # (2 Nov., tour visuel 8) the short « Add » on a phone, to fit one line
+  ok(b2 and all(v == rt for v in b2), f"{tag} G2 the routine says « {rt} » (long and short label: {b2})")
   look('Today')
   if SHOTS: pg.screenshot(path=os.path.join(SHOTS, f'tf-today-{tag}.png'))
   if phone:
@@ -216,7 +217,7 @@ def run(p, lang, phone, dark):
   head = pg.evaluate("(() => { const h = document.querySelector('#main .th-head'), l = h.querySelector('.lbl'), b = h.querySelector('.big'); return [l.textContent.replace(/\\s+/g, ' ').trim(), b.textContent.replace(/[\\u00a0\\u202f]/g, ' ').trim(), b.className]; })()")
   ok(head[0] == 'NQ · ' + ('Largo' if lang == 'es' else 'Long') + ' · 1' and head[1].replace(' ', '') in ('+$235.80', '+235,80$') and 'pos' in head[2], f'{tag} G1 the trade opens on « NQ · Long · 1 » and its P&L ({head})')
   cp = pg.evaluate("(() => { const d = document.querySelector('#main .tr-copies'), h = document.querySelector('#main .th-head'); return d ? [d.open, d.querySelector('summary').textContent.replace(/[\\u00a0\\u202f]/g, ' ').replace(/\\s+/g, ' ').trim(), !!(h.compareDocumentPosition(d) & Node.DOCUMENT_POSITION_FOLLOWING)] : null; })()")
-  ok(cp and cp[0] is False and cp[1].startswith(x['also']) and cp[1].replace(' ', '').endswith(('+$554.44›', '+554,44$›')) and cp[2], f"{tag} G1 one folded line under the result « {x['also']} … » ({cp})")
+  ok(cp and cp[0] is False and cp[1].startswith(x['also']) and cp[1].replace(' ', '').endswith(('+$554.44', '+554,44$')) and cp[2], f"{tag} G1 one folded line under the result « {x['also']} … » ({cp})")
   banner = ' '.join(pg.evaluate(TXT, '#main .nav-copy'))
   ok(not re.search(r'Also on|Aussi sur|También en', banner), f'{tag} G1 no « Also on » banner ({banner[:80]})')
   tap('#main .tr-copies summary'); pg.wait_for_timeout(500)

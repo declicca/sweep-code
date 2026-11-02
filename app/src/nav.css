@@ -3277,6 +3277,7 @@ html body .nav-rt-y b{overflow:hidden;text-overflow:ellipsis;min-width:0}
 /* 2 the grade A–F: the five in the column's width (234 px of buttons in 144: D and F could not be chosen) */
 html body #main .th-head .seg[role=group]{display:flex!important;width:100%!important;max-width:100%!important;overflow:visible!important;gap:0!important;padding:2px!important;box-sizing:border-box!important}
 html body #main .th-head .seg[role=group] > button{flex:1 1 0!important;min-width:0!important;padding-left:0!important;padding-right:0!important}
+@media (max-width:860px){html body #main .th-head > div:has(> .seg[role=group]){grid-column:1/-1!important}html body #main .th-head .seg[role=group] > button{min-width:44px!important}}   /* the grade on its own line on a phone: 5 touch zones of 44 px */
 @media (min-width:861px){html body #main .th-head .seg[role=group]{width:auto!important;display:inline-flex!important}html body #main .th-head .seg[role=group] > button{flex:0 0 auto!important;min-width:34px!important;padding-left:8px!important;padding-right:8px!important}}
 /* 3 « Also on 4 accounts »: one arrow, the summary's own chevron (its « › » written out is gone) */
 html body #main .tr-copies > summary > span{flex:1 1 auto!important;min-width:0!important}
@@ -3340,3 +3341,4 @@ html body #newsCtx .nctx-f .link{white-space:nowrap!important}   /* « View deta
    wrap; the trades table's setup a little narrower (Spanish: 7 px left) */
 html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl th:first-child{white-space:normal!important;min-width:120px}
 @media (min-width:861px) and (max-width:1440px){html body #main table.tbl td.tt-set{max-width:120px!important}}
+@media (min-width:861px){html body #main table.tbl-day td.tt-set,html body #main table.tbl-day td:first-child{white-space:normal!important;overflow-wrap:anywhere}html body #main table.tbl-day th,html body #main table.tbl-day td{padding-left:5px!important;padding-right:5px!important}}   /* the journal's day table, beside the list of days: a long setup or an evening time (« le 1 à 19:12 ») on 2 lines and tighter cells, rather than a side scroll (2 Nov.) */

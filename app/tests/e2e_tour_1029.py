@@ -35,7 +35,7 @@ with sync_playwright() as p:
     c1.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('%s')); window.__swNow = '2026-10-27T08:00:00-04:00'" % lang)
     c1.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'tq%06d@t.dev' % random.randint(0, 999999), 'consent': True, 'elapsed': 6000}), headers=H)
     p1 = c1.new_page(); p1.on('pageerror', lambda e: errs.append(str(e)[:160])); p1.goto(B + '/'); p1.wait_for_selector('#main .onb', timeout=20000); p1.wait_for_timeout(800)
-    txt = p1.locator('#main .onb').inner_text(); steps = p1.evaluate("[...document.querySelectorAll('#main .onb-steps li')].map((l) => l.textContent.replace(/^\\d+/, '').trim())")
+    txt = p1.locator('#main .onb').inner_text(); steps = p1.evaluate("[...document.querySelectorAll('#main .onb-steps li')].map((l) => (l.querySelector('.onb-l') || l).textContent.replace(/^\\d+/, '').trim())")
     ok(x['pre'] in txt and steps[-1:] == [x['st2']], f'T1 {tag}: 8:00, the market open: « {x["pre"]} », « {x["st2"]} » ({steps})')
     c1.close()
     try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
