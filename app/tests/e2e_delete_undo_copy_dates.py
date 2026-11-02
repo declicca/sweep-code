@@ -1,7 +1,7 @@
 """
 Sweep — points 10, 11, 12 (dev environment with Playwright, not on the server):
   python3 tests/e2e_delete_undo_copy_dates.py http://127.0.0.1:8095 /tmp/show_state.json
- 10. a trade copied on 3 accounts → « Delete all » → no browser window, « Deleted on 3 accounts · Undo » for 5 s → Undo:
+ 10. a trade copied on 3 accounts → « Delete » → « on all 3 accounts » → no browser window, « Deleted on 3 accounts · Undo » for 5 s → Undo:
      3 trades back, same copy_group, checklist intact (also after a reload). Screenshot, checklist question, sample data
      and Sweep-account deletions never open the browser's window either.
  11. the copy panel and the « ⋯ » menu of a trade have no English left in French and Spanish.
@@ -68,11 +68,12 @@ async def main():
       grp_ids = await pg.evaluate(f"S.trades.filter(t=>t.copy_group==='{grp}').map(t=>t.id)")
       ok(len(grp_ids) == 3, 'the trade is on 3 accounts, one copy_group')
       before = await pg.evaluate(f"JSON.stringify(S.trades.filter(t=>t.copy_group==='{grp}').map(t=>[t.id,t.account_id,t.discipline,t.notes]).sort())")
-      # « Delete all 3 »
+      # « Delete » asks (brief « avance concurrentielle », step 2: on all 3 accounts, or this one only) → « on all 3 »
       await pg.evaluate(f"location.hash='#trade/{tid}'"); await pg.wait_for_timeout(1200)
       await pg.locator('#main details.menu summary').first.click(); await pg.wait_for_timeout(300)
-      dall = pg.locator('#main [data-act=del-trade-all]')
-      ok((await dall.inner_text()).strip() == 'Tout supprimer (3)', 'the menu says « Tout supprimer (3) »')
+      await pg.locator('#main [data-act=del-trade]').click(); await pg.wait_for_selector('.cg-ask.open', timeout=5000)
+      dall = pg.locator('.cg-ask [data-cg-ask=a]')
+      ok((await dall.inner_text()).strip() == 'Supprimer sur les 3 comptes', 'the app asks: « Supprimer sur les 3 comptes »')
       await dall.click(); await pg.wait_for_timeout(500)
       ok(not dialogs, 'no browser window' + ('' if not dialogs else f': {dialogs}'))
       und = pg.locator('.nav-undo')
@@ -86,7 +87,7 @@ async def main():
       ok(again == before, 'still there after a reload (saved on the server)')
       # the toast leaves after 5 s if nothing is done: delete all again and wait
       await pg.evaluate(f"location.hash='#trade/{tid}'"); await pg.wait_for_timeout(1200)
-      await pg.locator('#main details.menu summary').first.click(); await pg.locator('#main [data-act=del-trade-all]').click(); await pg.wait_for_timeout(5600)
+      await pg.locator('#main details.menu summary').first.click(); await pg.locator('#main [data-act=del-trade]').click(); await pg.locator('.cg-ask [data-cg-ask=a]').click(); await pg.wait_for_timeout(5600)
       ok(await pg.locator('.nav-undo').count() == 0 and await pg.evaluate(f"S.trades.filter(t=>t.copy_group==='{grp}').length") == 0, 'without « Annuler », the toast leaves after 5 s and the copies stay deleted')
       # the other deletions that used the browser's window
       await pg.goto(B + '/?x=2#settings'); await pg.wait_for_timeout(2500)

@@ -13,7 +13,7 @@ require_once __DIR__ . '/ai-features.php';
 
 const ASK_GUIDE = "Sweep app guide (for how-to questions):\n"
     . "- Today: the day's routine (Plan, Execution, Review rings), the coach, the news of the day, your accounts.\n"
-    . "- Add a trade: the + button: by hand (symbol, buy/sell, time, contracts, entry, stop, exit) or from a screenshot of your platform. Copy it to your other accounts there or later from the trade's page (« Copy to my group »).\n"
+    . "- Add a trade: the + button: by hand (symbol, buy/sell, time, contracts, entry, stop, exit) or from a screenshot of your platform. Copy it to your other accounts there or later from the trade's page (« Copy to my group »). Copy group (Pro, Elite): Accounts › Copy trading › « Create a copy group »: a master account and followers, each with a contract multiplier; every trade logged or synced on the master is copied to the followers (a follower synced itself keeps its own trade), and Journal shows it once, « ×5 accounts », unfolding.\n"
     . "- Trade page: the coach's verdict, « Answer your coach », the full review (checklist, psychology, notes, screenshots), the chart, AI feedback.\n"
     . "- Stats: net P&L, win rate, profit factor (from 5 trades), « What works for you », trends, deep dives (discipline, behavior, recovery, sessions, time of day, setups, news).\n"
     . "- Calendar: P&L by day with U.S. news. Journal: the day's plan and review, the weekly review.\n"

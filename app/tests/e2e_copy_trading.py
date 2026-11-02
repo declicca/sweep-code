@@ -10,8 +10,8 @@ account outside the group, and sample data (an account and a trade, flagged demo
    account's commission (or the original's fees for that size), « Undo »; the group counts once, as its original;
  - the copy panel: « Apex group · 3 » selects the group in one tap, a copy's size shows when it differs, « Save these
    2 accounts as a group » → the account page says « Copy group: 2 accounts », « Leave the group »;
- - the add form: the group's copies stay in sight in the short form; editing the original moves every copy (its own size,
-   MNQ's point value, not NQ's).
+ - the add form: the group's copies stay in sight in the short form; editing the original asks, then moves every copy (its own
+   size, MNQ's point value, not NQ's).
 Checks: no page error, nothing wider than the window, the texts in the trader's language.
 """
 import json, os, sqlite3, sys, time
@@ -133,7 +133,8 @@ def run(p, lang, phone):
   ok(pg.evaluate(COPIES, oid) == [['a3', 1, 2000, 500, True]], f"{tag} saved: Apex C at 1 MNQ, $20, half of Apex A's $10 of fees ({pg.evaluate(COPIES, oid)})")
   pg.evaluate("() => { try { closeTicket(); } catch (e) {} }"); pg.wait_for_timeout(400)
   pg.evaluate(f"() => {{ openTicket('{oid}'); TK.exit = 205; tkRefresh(); }}"); pg.wait_for_selector('#tkSlide.open', timeout=5000); pg.wait_for_timeout(500)
-  pg.click('#tkSlide [data-act="tk-save"]'); pg.wait_for_timeout(1200)
+  pg.click('#tkSlide [data-act="tk-save"]'); pg.wait_for_selector('.cg-ask.open', timeout=5000)   # (brief « avance concurrentielle », step 2) the group, asked
+  pg.click('.cg-ask [data-cg-ask="a"]'); pg.wait_for_timeout(1200)
   c = pg.evaluate(f"(() => {{ const t = getDoc('trades', '{oid}'); const k = S.trades.find((x) => x.copy_group === t.copy_group && x.id !== t.id); return [t.pnl_c, k.contracts, k.pnl_c, k.exit]; }})()")
   ok(c == [2000, 1, 1000, 205], f'{tag} the original edited (exit 205): Apex C follows at its size, 1 MNQ × 5 points = $10 ({c})')
   ok(not errs, f'{tag} no page error ' + '; '.join(errs[:2]))

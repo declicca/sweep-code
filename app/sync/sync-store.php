@@ -48,6 +48,8 @@ function sync_schema(PDO $pdo): void
            sig CHAR(40) NOT NULL, fills TEXT NOT NULL, entry_at VARCHAR(19) NOT NULL, inst VARCHAR(20) NOT NULL, dir VARCHAR(5) NOT NULL, copy_group VARCHAR(40) NULL,
            created_at INT NOT NULL, updated_at INT NOT NULL, PRIMARY KEY (user_id, trade_id), INDEX sync_tr_doc (user_id, doc_id), INDEX sync_tr_acct (sync_account_id),
            INDEX sync_tr_at (user_id, entry_at)) DEFAULT CHARSET=utf8mb4',
+        'CREATE TABLE IF NOT EXISTS sync_copies (user_id VARCHAR(120) NOT NULL, src_doc VARCHAR(120) NOT NULL, account_id VARCHAR(120) NOT NULL, doc_id VARCHAR(120) NOT NULL,
+           created_at INT NOT NULL, PRIMARY KEY (user_id, src_doc, account_id)) DEFAULT CHARSET=utf8mb4',
     ] : [
         'CREATE TABLE IF NOT EXISTS sync_connections (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, platform TEXT NOT NULL, key_hash TEXT NOT NULL UNIQUE,
            key_hint TEXT NOT NULL, status TEXT NOT NULL, client TEXT, last_seen_at INTEGER, last_push_at INTEGER, created_at INTEGER NOT NULL, revoked_at INTEGER)',
@@ -65,6 +67,8 @@ function sync_schema(PDO $pdo): void
         'CREATE INDEX IF NOT EXISTS sync_trades_doc ON sync_trades(user_id, doc_id)',
         'CREATE INDEX IF NOT EXISTS sync_trades_acct ON sync_trades(sync_account_id)',
         'CREATE INDEX IF NOT EXISTS sync_trades_at ON sync_trades(user_id, entry_at)',
+        'CREATE TABLE IF NOT EXISTS sync_copies (user_id TEXT NOT NULL, src_doc TEXT NOT NULL, account_id TEXT NOT NULL, doc_id TEXT NOT NULL, created_at INTEGER NOT NULL,
+           PRIMARY KEY (user_id, src_doc, account_id))',
     ];
     foreach ($sql as $s) $pdo->exec($s);
 }
@@ -236,7 +240,8 @@ function sync_match(array $t, array &$manual): ?string
     $at = strtotime($t['executions'][0]['t'] . ' America/New_York');
     $best = null; $bestD = PHP_INT_MAX;
     foreach ($manual as $id => $m) {
-        if (($m['instrument'] ?? '') !== $t['instrument'] || ($m['direction'] ?? '') !== $t['direction'] || (int) ($m['contracts'] ?? 0) !== (int) $t['contracts'] || $m['_at'] === null) continue;
+        // a copy made by Sweep (copy_src) is that trade whatever its size: the synced trade wins over the copy (copy groups, brief « avance concurrentielle », step 2)
+        if (($m['instrument'] ?? '') !== $t['instrument'] || ($m['direction'] ?? '') !== $t['direction'] || (empty($m['copy_src']) && (int) ($m['contracts'] ?? 0) !== (int) $t['contracts']) || $m['_at'] === null) continue;
         $d = abs(intdiv($m['_at'], 60) - intdiv($at, 60));
         if ($d <= SYNC_MATCH_MIN && ($d < $bestD || ($d === $bestD && strcmp((string) $id, (string) $best) < 0))) { $best = (string) $id; $bestD = $d; }
     }
@@ -329,7 +334,7 @@ function sync_apply(PDO $pdo, string $uid, array $sa, ?array $contracts = null, 
         $out['manual'] = count($manual);
         // copy groups with the synced trades of the trader's other accounts at the same minutes
         $groups = sync_groups($pdo, $uid, $sa['id'], array_column($plan, 0), $dry);
-        $now = time(); $iso = sync_iso(); $creates = 0;
+        $now = time(); $iso = sync_iso(); $creates = 0; $written = [];
         foreach ($plan as [$t, $docId, $kind, $prevTid, $fids]) {
             $t['copy_group'] = $groups[$t['id']] ?? null;
             $sig = sha1(json_encode([array_intersect_key($t, array_flip(SYNC_TRADE_FIELDS)), $accountId, $t['copy_group']]));
@@ -350,7 +355,9 @@ function sync_apply(PDO $pdo, string $uid, array $sa, ?array $contracts = null, 
             $json = sync_put($pdo, $uid, $docId, $doc, $raw !== null, $iso);
             $events[] = [$docId, json_decode($json, true), $raw === null ? null : (json_decode($raw, true) ?: [])];
             sync_row($pdo, $uid, $sa['id'], $row, $prevTid, $now);
+            $written[] = [$docId, $kind];
         }
+        if (!$dry) $creates += sync_follow($pdo, $uid, $accountId, $written, $events);   // a master account's trades on its followers
         if (!$dry && $creates > 0) {
             $max = (int) ($GLOBALS['MAX_DOCS'] ?? 50000);
             if ((int) sync_q($pdo, 'SELECT COUNT(*) FROM documents WHERE user_id = ?', [$uid])->fetchColumn() > $max) throw new SyncLimit();
@@ -365,7 +372,7 @@ function sync_apply(PDO $pdo, string $uid, array $sa, ?array $contracts = null, 
     }
     // after the commit, as api/docs/batch: the game and the notifications once per trading day touched, the referral check once
     if (function_exists('nt_doc_event')) {
-        $byDay = []; foreach ($events as $ev) $byDay[($ev[1]['date'] ?? '') . '|' . $accountId] = $ev;
+        $byDay = []; foreach ($events as $ev) $byDay[($ev[1]['date'] ?? '') . '|' . ($ev[1]['account_id'] ?? $accountId)] = $ev;
         foreach ($byDay as $ev) { try { nt_doc_event($uid, 'trades', $ev[0], $ev[1], $ev[2]); } catch (Throwable $e) { error_log('[Sweep sync] event: ' . $e->getMessage()); } }
     }
     if ($out['created'] > 0 && function_exists('ref_check_user')) { try { ref_check_user($pdo, $uid); } catch (Throwable $e) { /* referral check next time */ } }
@@ -432,6 +439,159 @@ function sync_groups(PDO $pdo, string $uid, string $sid, array $trades, bool $dr
         sync_put($pdo, $uid, $r['doc_id'], $d, true, sync_iso());
     }
     return $out;
+}
+
+/* ---------------- copy groups with a master account (brief « avance concurrentielle », step 2, 2 Nov.) ----------------
+ * Accounts › « Copy group »: a master account (copy_lead) and its followers (same group_id), each with a contract
+ * multiplier (copy_pct ÷ 100, ×1 by default). A trade the sync writes for the first time on the master is copied on each
+ * follower, the way the app copies (SweepCopy.make, nav.js): its size × the multiplier (at least 1 contract), its P&L for
+ * that size, the follower's commission; the setup, grade, emotions and notes of the moment. Later platform corrections of
+ * the master's trade move its copies (platform fields only); a copy the trader deleted is never written again.
+ * A follower synced itself is never copied: its own synced trade joins the master trade's group (no double).
+ * Pro and Elite (limit copy_groups). */
+
+/** the copy group of a Sweep account when the group has a master: ['group', 'lead', 'followers'], else null */
+function sync_lead_group(PDO $pdo, string $uid, string $accountId): ?array
+{
+    $all = [];
+    foreach (sync_q($pdo, "SELECT id, data FROM documents WHERE user_id = ? AND collection = 'accounts'", [$uid]) as $r) {
+        $d = json_decode((string) $r['data'], true); if (is_array($d)) $all[(string) $r['id']] = ['id' => (string) $r['id']] + $d;
+    }
+    $g = (string) ($all[$accountId]['group_id'] ?? ''); if ($g === '') return null;
+    $ok = fn(array $a) => empty($a['demo']) && !in_array($a['status'] ?? 'active', ['archived', 'closed'], true);
+    $lead = null; $fol = [];
+    foreach ($all as $a) if ((string) ($a['group_id'] ?? '') === $g && $ok($a)) { if ($lead === null && !empty($a['copy_lead'])) $lead = $a; else $fol[] = $a; }
+    if ($lead) $fol = array_values(array_filter($fol, fn($a) => $a['id'] !== $lead['id']));
+    return $lead && $fol ? ['group' => $g, 'lead' => $lead, 'followers' => $fol] : null;
+}
+/** the plan decides (Pro and Elite); without billing, or before it is live for this trader, everyone */
+function sync_copy_allowed(PDO $pdo, string $uid): bool
+{
+    if (!function_exists('billing_on') || !billing_on() || !function_exists('sb_can')) return true;
+    if (function_exists('sb_live') && !sb_live($uid)) return true;
+    return sb_can($pdo, $uid, 'copy_groups');
+}
+/** the trade of an account taken at the same moment as $m (instrument, side, entry within SYNC_MATCH_MIN minutes); with $grp, in no other group */
+function sync_twin(PDO $pdo, string $uid, string $accountId, array $m, ?string $grp): ?array
+{
+    $at = sync_doc_at($m); if ($at === null || empty($m['date'])) return null;
+    $acc = '%"account_id":' . json_encode($accountId, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '%';
+    $best = null; $bestD = PHP_INT_MAX;
+    foreach (sync_q($pdo, "SELECT id, data FROM documents WHERE user_id = ? AND collection = 'trades' AND data LIKE ? AND data LIKE ?", [$uid, $acc, '%"date":"' . $m['date'] . '"%']) as $r) {
+        $d = json_decode((string) $r['data'], true); if (!is_array($d) || ($d['account_id'] ?? '') !== $accountId || !empty($d['demo'])) continue;
+        if (($d['instrument'] ?? '') !== ($m['instrument'] ?? '') || ($d['direction'] ?? '') !== ($m['direction'] ?? '')) continue;
+        $cg = (string) ($d['copy_group'] ?? ''); if ($grp !== null && $cg !== '' && $cg !== $grp && !str_starts_with($cg, 'cg-')) continue;
+        $x = sync_doc_at($d); if ($x === null) continue;
+        $dd = abs(intdiv($x, 60) - intdiv($at, 60));
+        if ($dd <= SYNC_MATCH_MIN && $dd < $bestD) { $best = ['id' => (string) $r['id']] + $d; $bestD = $dd; }
+    }
+    return $best;
+}
+/** a trade document's copy group, and nothing else the trader wrote */
+function sync_set_group(PDO $pdo, string $uid, string $docId, string $grp): void
+{
+    $raw = sync_doc($pdo, $uid, 'trades', $docId); if ($raw === null) return;
+    $d = json_decode($raw); if (!($d instanceof stdClass) || (string) ($d->copy_group ?? '') === $grp) return;
+    $d->copy_group = $grp; sync_put($pdo, $uid, $docId, $d, true, sync_iso());
+}
+function sync_ts_of($v): int { $t = is_string($v) && $v !== '' ? strtotime($v) : false; return $t === false ? 0 : $t; }
+/** a copy of the master's trade $m on follower $f (its size, P&L, commission); $prev: the copy already written (platform fields only) */
+function sync_copy_doc(array $m, array $f, string $grp, string $cid, int $k, ?array $prev): array
+{
+    $n0 = max(1, (int) ($m['contracts'] ?? 1)); $p = (float) ($f['copy_pct'] ?? 0); if ($p <= 0) $p = 100;
+    $n = max(1, (int) round($n0 * $p / 100)); $x = $n / $n0;
+    if ($prev === null) {
+        $d = $m; unset($d['real_pnl_c'], $d['pnl_real']);
+        // the original stays the earliest: a group counts as its original (Stats, Journal, My money, the coach, the server)
+        $d['created_at'] = gmdate('Y-m-d\TH:i:s\Z', max(time(), sync_ts_of($m['created_at'] ?? null)) + 1 + $k);
+        if ($x != 1 && isset($m['risk_c']) && is_numeric($m['risk_c'])) $d['risk_c'] = (int) round($m['risk_c'] * $x);
+    } else {
+        $d = $prev;
+        foreach (SYNC_TRADE_FIELDS as $q) { if (array_key_exists($q, $m)) $d[$q] = $m[$q]; else unset($d[$q]); }
+    }
+    unset($d['import_key'], $d['source']);   // a copy made by Sweep is not the platform's trade
+    $d['id'] = $cid; $d['account_id'] = (string) $f['id']; $d['copy_group'] = $grp; $d['copy_src'] = (string) $m['id'];
+    $d['contracts'] = $n;
+    $ex = is_array($m['executions'] ?? null) ? $m['executions'] : [];
+    if ($x != 1) {
+        $ex = array_map(fn($e) => ['qty' => max(1, (int) round(((float) ($e['qty'] ?? 0)) * $x))] + $e, $ex);
+        if (isset($m['pnl_c']) && is_numeric($m['pnl_c'])) $d['pnl_c'] = (int) round($m['pnl_c'] * $x);
+    }
+    $d['executions'] = $ex;
+    $fee = (int) ($f['fee_rt_c'] ?? 0);
+    if ($fee > 0) {   // its own commission, one round trip per contract bought or sold (turnsOf in nav.js)
+        $side = $ex[0]['side'] ?? null; $q = 0; foreach ($ex as $e) if (($e['side'] ?? null) === $side) $q += (int) ($e['qty'] ?? 0);
+        $d['fees_c'] = (int) round($fee * ($q > 0 ? $q : $n)); $d['fees_auto'] = true;
+    } elseif (isset($m['fees_c']) && is_numeric($m['fees_c'])) { $d['fees_c'] = (int) round($m['fees_c'] * $x); unset($d['fees_auto']); }
+    return sync_objs($d);
+}
+/** read as arrays, an empty {} came back as []: the trader's maps stay maps (a checklist answer added later must keep its key) */
+function sync_objs(array $d): array { foreach (['discipline', 'emo', 'review'] as $q) if (array_key_exists($q, $d) && $d[$q] === []) $d[$q] = new stdClass(); return $d; }
+/**
+ * After a sync wrote trades on $accountId: on a master, its new trades are copied on its followers (a synced follower's own
+ * trade joins the group instead) and its corrected trades move their copies; on a synced follower, each trade joins the group
+ * of the master's trade taken at the same moment. Returns the number of documents created (the record limit).
+ */
+function sync_follow(PDO $pdo, string $uid, string $accountId, array $written, array &$events): int
+{
+    if (!$written) return 0;
+    $G = sync_lead_group($pdo, $uid, $accountId); if (!$G || !sync_copy_allowed($pdo, $uid)) return 0;
+    $linked = [];
+    foreach (sync_q($pdo, "SELECT account_id FROM sync_accounts WHERE user_id = ? AND state = 'linked' AND account_id IS NOT NULL", [$uid]) as $r) $linked[(string) $r['account_id']] = true;
+    $iso = sync_iso(); $made = 0;
+    $groupOf = function (string $docId, array &$m) use ($pdo, $uid): string {
+        $g = (string) ($m['copy_group'] ?? '');
+        if ($g === '') { $g = 'mg-' . substr(sha1($uid . '|' . $docId), 0, 20); sync_set_group($pdo, $uid, $docId, $g); $m['copy_group'] = $g; }
+        return $g;
+    };
+    if ((string) $G['lead']['id'] !== $accountId) {
+        // a follower synced with its platform: its trade joins the master's trade of the same moment (never a copy of it)
+        if (!isset($linked[$accountId])) return 0;
+        foreach ($written as [$docId]) {
+            $raw = sync_doc($pdo, $uid, 'trades', $docId); $d = $raw === null ? null : json_decode($raw, true); if (!is_array($d)) continue;
+            $cur = (string) ($d['copy_group'] ?? ''); if ($cur !== '' && !str_starts_with($cur, 'cg-')) continue;   // grouped by the trader
+            $m = sync_twin($pdo, $uid, (string) $G['lead']['id'], $d, null); if (!$m) continue;   // the master's trade, whatever its group
+            $g = $groupOf((string) $m['id'], $m);
+            if ($cur !== $g) sync_set_group($pdo, $uid, $docId, $g);
+        }
+        return 0;
+    }
+    foreach ($written as [$docId, $kind]) {
+        $raw = sync_doc($pdo, $uid, 'trades', $docId); $m = $raw === null ? null : json_decode($raw, true);
+        if (!is_array($m) || !empty($m['demo'])) continue;
+        $m['id'] = $docId; $k = 0; $grp = null;
+        foreach ($G['followers'] as $f) {
+            $fid = (string) $f['id'];
+            if (isset($linked[$fid])) {   // synced itself: its own trade wins, in the same group
+                $tw = sync_twin($pdo, $uid, $fid, $m, (string) ($m['copy_group'] ?? ''));
+                if ($tw) { $grp ??= $groupOf($docId, $m); if ((string) ($tw['copy_group'] ?? '') !== $grp) sync_set_group($pdo, $uid, (string) $tw['id'], $grp); }
+                continue;
+            }
+            $cid = sync_q($pdo, 'SELECT doc_id FROM sync_copies WHERE user_id = ? AND src_doc = ? AND account_id = ?', [$uid, $docId, $fid])->fetchColumn();
+            if ($cid === false) {
+                // only a trade new to Sweep: one typed in the app (then completed by the sync) had its copies chosen in the form
+                if ($kind !== 'create' || sync_guard($pdo, $uid, $fid)) continue;
+                $grp ??= $groupOf($docId, $m);
+                $cid = 'cp-' . substr(sha1($uid . '|' . $docId . '|' . $fid), 0, 20);
+                if (sync_doc($pdo, $uid, 'trades', $cid) !== null) continue;
+                $c = sync_copy_doc($m, $f, $grp, $cid, $k++, null);
+                $json = sync_put($pdo, $uid, $cid, json_decode(json_encode($c, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)), false, $iso);
+                sync_q($pdo, 'INSERT INTO sync_copies (user_id, src_doc, account_id, doc_id, created_at) VALUES (?, ?, ?, ?, ?)', [$uid, $docId, $fid, $cid, time()]);
+                $events[] = [$cid, json_decode($json, true), null]; $made++;
+                continue;
+            }
+            $cid = (string) $cid; $craw = sync_doc($pdo, $uid, 'trades', $cid);
+            if ($craw === null) continue;   // the trader deleted this copy: never written again
+            if (sync_q($pdo, 'SELECT 1 FROM sync_trades WHERE user_id = ? AND doc_id = ?', [$uid, $cid])->fetchColumn()) continue;   // now the platform's own trade
+            $prev = json_decode($craw, true); if (!is_array($prev)) continue; $prev = sync_objs($prev);
+            $grp ??= $groupOf($docId, $m);
+            $c = sync_copy_doc($m, $f, $grp, $cid, 0, $prev);
+            if ($c == $prev) continue;
+            $json = sync_put($pdo, $uid, $cid, json_decode(json_encode($c, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)), true, $iso);
+            $events[] = [$cid, json_decode($json, true), $prev];
+        }
+    }
+    return $made;
 }
 
 /* ---------------- what the trader does ---------------- */
@@ -543,5 +703,5 @@ function sync_admin(PDO $pdo, int $now = 0): array
 /** a trader deletes their Sweep account: everything of the sync goes too */
 function sync_delete_user(PDO $pdo, string $uid): void
 {
-    foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $t) { try { sync_q($pdo, "DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* tables not created yet */ } }
+    foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections', 'sync_copies'] as $t) { try { sync_q($pdo, "DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* tables not created yet */ } }
 }

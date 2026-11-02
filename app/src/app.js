@@ -1124,8 +1124,24 @@ function dirTag(e) {
 
 const fpx = e => e == null || e === "" ? "—" : Number(e).toFixed(2), isPhone = () => (window.__mqP || (window.__mqP = matchMedia("(max-width: 600px)"))).matches;
 
+/* (brief « avance concurrentielle », step 2) a trade copied on several accounts: one row « ×5 accounts » that unfolds
+   (each account, its contracts and its P&L); the row itself counts once, as its original (mergeCopies) */
+const CGO = new Set, cgN = l => l && l._copies && l._copies.length > 1 ? l._copies.length : 0, cgLab = n => ({
+  fr: `×${n} comptes`,
+  es: `×${n} cuentas`
+}[LANG] || `×${n} accounts`), CG_CHEV = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const cgSorted = l => l._copies.slice().sort((a, b) => a.id === l.id ? -1 : b.id === l.id ? 1 : acctLabel(a.account_id).localeCompare(acctLabel(b.account_id)));
+
+function cgList(l) {
+  const o = CGO.has(l.copy_group);
+  return `<div class="cg-list"${o ? "" : " hidden"}>${cgSorted(l).map(c => `<a class="cg-r" href="#trade/${c.id}"><span class="cg-r-a">${esc(acctLabel(c.account_id))}</span><span class="cg-r-q">${c.contracts || 0} ct</span><span class="cg-r-p ${cls(tNet(c))}">${money(tNet(c))}</span></a>`).join("")}</div>`;
+}
+
 function tradeRows(e) {
   return e.map(t => {
+    const k = cgN(t);
+    if (k && !t.untracked) return `<div class="trow-cg${CGO.has(t.copy_group) ? " open" : ""}" data-noi18n>${tradeRows([ { ...t, _copies: null } ])}<button type="button" class="cg-tog" data-cg-tog="${esc(t.copy_group)}" aria-expanded="${CGO.has(t.copy_group)}">${cgLab(k)}${CG_CHEV}</button>${cgList(t)}</div>`;
     const a = tNet(t), n = [ fdate(t.date), String(t.entry_time || "").slice(0, 5), t.setup, location.hash === "#account/" + t.account_id ? "" : acctLabel(t.account_id) ].filter(Boolean).map(esc).join(" · ");   // (31 Oct., A4) the same line everywhere: the clock time, then the setup   // (on its own account's page, not its name again: audit of 18 Oct.)
     if (t.untracked) return `<a class="trow trow-ut" href="#trade/${t.id}"><span class="trow-dir">·</span><span class="trow-main"><b>${esc(utName())}</b><small>${n}</small></span><span class="trow-pnl ${cls(a)}">${money(a)}</span><span class="trow-go" aria-hidden="true">›</span></a>`;   // a platform-balance gap (brief « pertes oubliées », step 2)
     return `<a class="trow" href="#trade/${t.id}"><span class="trow-dir ${t.direction}">${t.direction === "long" ? "L" : "S"}</span><span class="trow-main"><b>${esc(t.instrument || "NQ")} ${t.direction === "long" ? "Long" : "Short"} · ${t.contracts || 0}</b><small>${n}</small></span><span class="trow-pnl ${cls(a)}">${money(a)}</span><span class="trow-go" aria-hidden="true">›</span></a>`;
@@ -1156,11 +1172,30 @@ function tradeTable(e, {compact: t = !1, sortable: a = !1, page: n = 0, byDay: y
   const o = (l, p, u) => a ? `<th data-sort="${l}" class="${u ? "num" : ""}">${p}${U.sort.k === l ? U.sort.d === "asc" ? " ↑" : " ↓" : ""}</th>` : `<th class="${u ? "num" : ""}">${p}</th>`, r = t ? `<tr>${o("time", "Time")}<th>Account</th><th>Session</th><th>Dir</th><th class="num">Qty</th><th class="num">Entry</th><th class="num">Exit</th><th class="num">P&amp;L</th><th class="num">R</th><th class="num">Checklist</th><th>Setup</th></tr>` : `<tr>${o("date", "Date")}${o("time", "Time")}${o("account", "Account")}${o("session", "Session")}${o("dir", "Dir")}${o("qty", "Qty", 1)}<th class="num">Entry</th><th class="num">Exit</th>${o("pnl", "P&amp;L", 1)}${o("r", "R", 1)}${o("disc", "Checklist", 1)}${o("setup", "Setup")}</tr>`, c = e.map(l => {
     const p = tNet(l);
     if (l.untracked) return `<tr data-href="#trade/${l.id}" tabindex="0" class="tr-ut">${t ? "" : `<td>${fdate(l.date)}</td>`}<td class="muted">—</td><td>${esc(acctLabel(l.account_id))}</td><td class="muted" colspan="5">${esc(utName())}</td><td class="num ${cls(p)}">${money(p)}</td><td class="num">—</td><td class="num">—</td><td class="muted"></td></tr>`;
-    return `<tr data-href="#trade/${l.id}" tabindex="0">${t ? "" : `<td>${fdate(l.date)}</td>`}<td class="muted">${esc(tradeTimeOf(l) || "—")}</td><td>${esc(acctLabel(l.account_id))}${l._copies && l._copies.length > 1 ? ` <span class="pill" title="${esc(l._copies.map(u => acctLabel(u.account_id)).join(" · "))}">+${l._copies.length - 1}</span>` : ""}</td><td class="muted">${sessName(l.session)}</td><td>${dirTag(l.direction)}</td><td class="num">${l.contracts || "—"}</td><td class="num muted">${fpx(l.entry)}</td><td class="num muted">${fpx(l.exit)}</td><td class="num ${cls(p)}">${money(p)}</td><td class="num">${rfmt(tR(l))}</td><td class="num">${dcell(tDisc(l))}</td><td class="muted">${esc(l.setup || "")}</td></tr>`;
+    const k = cgN(l), g = l.copy_group, o = k && CGO.has(g), row = (x, sub) => `<tr data-href="#trade/${x.id}" tabindex="0"${sub ? ` class="cg-sub" data-cg-of="${esc(g)}"${o ? "" : " hidden"}` : ""}>${t ? "" : `<td>${sub ? "" : fdate(x.date)}</td>`}<td class="muted">${sub ? "" : esc(tradeTimeOf(x) || "—")}</td><td>${esc(acctLabel(x.account_id))}${!sub && k ? ` <button type="button" class="pill cg-pill" data-noi18n data-cg-tog="${esc(g)}" aria-expanded="${!!o}">${cgLab(k)}${CG_CHEV}</button>` : ""}</td><td class="muted">${sessName(x.session)}</td><td>${dirTag(x.direction)}</td><td class="num">${x.contracts || "—"}</td><td class="num muted">${fpx(x.entry)}</td><td class="num muted">${fpx(x.exit)}</td><td class="num ${cls(tNet(x))}">${money(tNet(x))}</td><td class="num">${rfmt(tR(x))}</td><td class="num">${dcell(tDisc(x))}</td><td class="muted">${esc(x.setup || "")}</td></tr>`;
+    return row(l) + (k ? cgSorted(l).map(x => row(x, 1)).join("") : "");   // (brief « avance concurrentielle », step 2) « ×5 accounts » unfolds each account
   }).join("");
   // (on an account's own page, a full table without its « Account » column: always that account, audit of 18 Oct.)
   return `<div class="scroll-x"><table class="tbl${t ? " tbl-day" : ""}${!t && /^#account\//.test(location.hash) ? " tbl-own-acc" : ""}"><thead>${r}</thead><tbody>${c}</tbody></table></div>${i}`;
 }
+
+document.addEventListener("click", e => {   // « ×5 accounts »: unfolds in place (no redraw), stays open while the page is redrawn
+  const b = e.target.closest && e.target.closest("[data-cg-tog]");
+  if (!b) return;
+  e.preventDefault(), e.stopImmediatePropagation();
+  const g = b.dataset.cgTog, o = !CGO.has(g);
+  o ? CGO.add(g) : CGO.delete(g), b.setAttribute("aria-expanded", String(o));
+  const w = b.closest(".trow-cg");
+  if (w) {
+    w.classList.toggle("open", o);
+    const l = w.querySelector(".cg-list");
+    l && (l.hidden = !o);
+  }
+  const tb = b.closest("tbody");
+  tb && tb.querySelectorAll("tr.cg-sub").forEach(r => {
+    r.dataset.cgOf === g && (r.hidden = !o);
+  });
+}, !0);
 
 function acctTable(e, {totals: t = !1} = {}) {
   if (!e.length) return '<div class="empty">No accounts yet. <a href="#accounts">Add an account</a></div>';
@@ -1639,7 +1674,7 @@ function vTrade(e) {
   if (!t) return '<div class="empty">This trade no longer exists. <a href="#trades">Back to trades</a></div>';
   if (t.untracked) return vUntracked(t);
   const a = sorted(S.trades), n = a.findIndex(g => g.id === e), s = a[n - 1], i = a[n + 1], o = tNet(t), r = tR(t), c = tRisk(t), l = t.emo || {}, p = t.review || {}, u = (g, P) => `<div><span>${g}</span><span>${P}</span></div>`, h = [ [ "why_in", "Why I entered" ], [ "well", "What went well" ], [ "wrong", "What went wrong" ], [ "lesson", "Main lesson" ] ], m = [ [ "thesis", "Trade thesis" ], [ "why_out", "Why I exited" ], [ "differently", "What I would do differently" ] ], v = t.shots || [], b = copiesOf(t), E = S.settings.questions.filter(g => g.active), R = Object.values(t.discipline || {}).filter(Boolean).length, L = [ [ "chk", "Checklist", E.length && R >= E.length ], [ "psy", "Psychology", !!(l.before || []).length ], [ "notes", "Notes", [ ...h, ...m ].some(([g]) => (p[g] || "").trim()) ], [ "shots", "Screenshots", v.length > 0 ] ], x = L.filter(g => g[2]).length, C = (g, P, O, H, J = "") => `<section class="rstep" id="rs-${P}"><div class="rstep-h"><span class="rnum ${L[g - 1][2] ? "ok" : ""}">${L[g - 1][2] ? "✓" : g}</span><h2>${O}</h2>${J}</div><div class="surface pad">${H}</div></section>`;
-  return `<div class="tr-top"><a class="link back" href="#trades">‹ Trades</a><span style="flex:1"></span>\n      <div class="seg tr-nav">${s ? `<a href="#trade/${s.id}" title="Previous trade (K)" aria-label="Previous trade">‹</a>` : '<span class="dis">‹</span>'}${i ? `<a href="#trade/${i.id}" title="Next trade (J)" aria-label="Next trade">›</a>` : '<span class="dis">›</span>'}</div>\n      <button class="btn sm" data-act="edit-trade" data-id="${t.id}">Edit trade</button>\n      <details class="menu"><summary class="btn sm" aria-label="More actions">⋯</summary><div class="menu-pop">\n        <button data-act="share" data-k="trade" data-id="${t.id}">Share trade card</button>\n        <button data-act="copy-open" data-id="${t.id}">Copy to accounts</button>\n        ${b.length > 1 ? `<button class="danger" data-act="del-trade" data-id="${t.id}">Delete this copy</button><button class="danger" data-act="del-trade-all" data-id="${t.id}">Delete all ${b.length}</button>` : `<button class="danger" data-act="del-trade" data-id="${t.id}">Delete</button>`}\n      </div></details></div>\n  ${copyPanel(t, b)}${b.length > 1 ? `<div class="surface pad row" style="margin-bottom:14px"><span class="muted">${tip(`Logged on ${b.length} accounts`, "Checklist, emotions, review, setup, grade, tags and screenshots stay in sync on every copy. Contracts, P&L and fees are per account.")}</span>${b.map(g => `<a href="#trade/${g.id}" class="chip ${g.id === t.id ? "on" : ""}" style="text-decoration:none">${esc(acctLabel(g.account_id))} · <span class="${cls(tNet(g))}">${money(tNet(g))}</span></a>`).join("")}<span class="muted" style="margin-left:auto">Total <b class="${cls(b.reduce((g, P) => g + tNet(P), 0))}">${money(b.reduce((g, P) => g + tNet(P), 0))}</b></span></div>` : ""}\n  <section class="surface"><div class="th-head">\n     <div><div class="lbl">${dirTag(t.direction)} · ${t.contracts} ${t.instrument || "NQ"} · ${esc(acctLabel(t.account_id))}</div><div class="big ${cls(o)}">${money(o)}</div></div>\n     <div><div class="lbl">R multiple</div>${r == null ? '<div class="nav-five nav-r-na">No stop: R unavailable</div>' : `<div style="font-size:18px">${rfmt(r)}</div>`}</div>\n     <div class="nav-tdisc" data-disc-why="trade" role="button" tabindex="0"><div class="lbl">Checklist</div><div style="font-size:18px" class="dc">${dpct(tDisc(t))}</div></div>\n     <div><div class="lbl">Grade</div>${segFor("trades", t.id, "grade", GRADES.map(g => [ g, g ]), t.grade)}</div>\n  </div>${window.SweepCoach && SweepCoach.tradeCard ? SweepCoach.tradeCard(t) : ""}\n  <div class="tr-chart"><div class="tk-bar"><b>${esc(t.instrument || "NQ")}</b><span class="muted">· ${isEveTrade(t) ? esc(tradeWhen(t)) : fdate(t.date, {
+  return `<div class="tr-top"><a class="link back" href="#trades">‹ Trades</a><span style="flex:1"></span>\n      <div class="seg tr-nav">${s ? `<a href="#trade/${s.id}" title="Previous trade (K)" aria-label="Previous trade">‹</a>` : '<span class="dis">‹</span>'}${i ? `<a href="#trade/${i.id}" title="Next trade (J)" aria-label="Next trade">›</a>` : '<span class="dis">›</span>'}</div>\n      <button class="btn sm" data-act="edit-trade" data-id="${t.id}">Edit trade</button>\n      <details class="menu"><summary class="btn sm" aria-label="More actions">⋯</summary><div class="menu-pop">\n        <button data-act="share" data-k="trade" data-id="${t.id}">Share trade card</button>\n        <button data-act="copy-open" data-id="${t.id}">Copy to accounts</button>\n        <button class="danger" data-act="del-trade" data-id="${t.id}">Delete</button>\n      </div></details></div>\n  ${copyPanel(t, b)}${b.length > 1 ? `<div class="surface pad row" style="margin-bottom:14px"><span class="muted">${tip(`Logged on ${b.length} accounts`, "Checklist, emotions, review, setup, grade, tags and screenshots stay in sync on every copy. Contracts, P&L and fees are per account.")}</span>${b.map(g => `<a href="#trade/${g.id}" class="chip ${g.id === t.id ? "on" : ""}" style="text-decoration:none">${esc(acctLabel(g.account_id))} · <span class="${cls(tNet(g))}">${money(tNet(g))}</span></a>`).join("")}<span class="muted" style="margin-left:auto">Total <b class="${cls(b.reduce((g, P) => g + tNet(P), 0))}">${money(b.reduce((g, P) => g + tNet(P), 0))}</b></span></div>` : ""}\n  <section class="surface"><div class="th-head">\n     <div><div class="lbl">${dirTag(t.direction)} · ${t.contracts} ${t.instrument || "NQ"} · ${esc(acctLabel(t.account_id))}</div><div class="big ${cls(o)}">${money(o)}</div></div>\n     <div><div class="lbl">R multiple</div>${r == null ? '<div class="nav-five nav-r-na">No stop: R unavailable</div>' : `<div style="font-size:18px">${rfmt(r)}</div>`}</div>\n     <div class="nav-tdisc" data-disc-why="trade" role="button" tabindex="0"><div class="lbl">Checklist</div><div style="font-size:18px" class="dc">${dpct(tDisc(t))}</div></div>\n     <div><div class="lbl">Grade</div>${segFor("trades", t.id, "grade", GRADES.map(g => [ g, g ]), t.grade)}</div>\n  </div>${window.SweepCoach && SweepCoach.tradeCard ? SweepCoach.tradeCard(t) : ""}\n  <div class="tr-chart"><div class="tk-bar"><b>${esc(t.instrument || "NQ")}</b><span class="muted">· ${isEveTrade(t) ? esc(tradeWhen(t)) : fdate(t.date, {
     weekday: "short",
     month: "short",
     day: "numeric"
@@ -4401,7 +4436,7 @@ async function tkSave() {
   }
   const s = t.ex.slice().sort((v, b) => v.t < b.t ? -1 : 1), i = etEpoch(a.start), o = etEpoch(a.end);
   await loadEcon(etStr(i - 86400).slice(0, 10), etStr(o + 86400).slice(0, 10));
-  const r = TK.id ? structuredClone(getDoc("trades", TK.id)) : null, c = r || {
+  const r = TK.id ? structuredClone(getDoc("trades", TK.id)) : null, r0 = r ? structuredClone(r) : null, c = r || {
     id: uid(),
     discipline: {},
     emo: {},
@@ -4474,20 +4509,36 @@ async function tkSave() {
     account_id: v,
     created_at: void 0
   }));
-  // its copies follow an edit: same prices and times, each at its own size (the P&L for that size and instrument, its fees)
-  if (r && r.copy_group) for (const v of siblings(c.id)) editDoc("trades", v.id, b => {
-    [ ...SHARED_FIELDS, "duration_s", "news", "news_min", "news_near", "auto_flags", "exit_time", "entry_time" ].forEach(R => {
-      b[R] = JSON.parse(JSON.stringify(c[R] ?? null));
+  // an edit and its copies (brief « avance concurrentielle », step 2): the setup, grade, tags and notes are shared at once; the
+  // trade itself (prices, times, size) goes to the other accounts only if the trader says so — same prices and times, each at
+  // its own size (the master's new size × its multiplier), the P&L for that size and instrument, its fees
+  if (r && r.copy_group) {
+    const sib = siblings(c.id), J = [ "setup", "grade", "tags", "notes" ], P = [ ...SHARED_FIELDS.filter(R => !J.includes(R)), "duration_s", "news", "news_min", "news_near", "auto_flags", "instrument", "contracts", "executions", "pnl_c" ];
+    for (const v of sib) editDoc("trades", v.id, b => {
+      J.forEach(R => {
+        b[R] = JSON.parse(JSON.stringify(c[R] ?? null));
+      });
     });
-    if (window.SweepCopy) SweepCopy.follow(b, c); else {
-      b.executions = JSON.parse(JSON.stringify(c.executions ?? null));
-      const E = positionOf((b.executions || []).map(R => ({
-        ...R,
-        qty: R.qty * (b.contracts / (c.contracts || 1))
-      })), c.instrument || "NQ");
-      E.closed && (b.pnl_c = E.realized_c);
-    }
-  });
+    const snap = JSON.parse(JSON.stringify(c)), grew = r0 && +r0.contracts !== +c.contracts, go = () => {
+      for (const v of siblings(snap.id)) editDoc("trades", v.id, b => {
+        P.filter(R => ![ "instrument", "contracts", "executions", "pnl_c" ].includes(R)).forEach(R => {
+          b[R] = JSON.parse(JSON.stringify(snap[R] ?? null));
+        });
+        grew && window.SweepCopy && (b.contracts = SweepCopy.sizeFor(b.account_id, snap.contracts));
+        if (window.SweepCopy) SweepCopy.follow(b, snap); else {
+          b.executions = JSON.parse(JSON.stringify(snap.executions ?? null));
+          const E = positionOf((b.executions || []).map(R => ({
+            ...R,
+            qty: R.qty * (b.contracts / (snap.contracts || 1))
+          })), snap.instrument || "NQ");
+          E.closed && (b.pnl_c = E.realized_c);
+        }
+      });
+      render();
+    };
+    const K = x => JSON.stringify([ ...[ "date", "direction", "entry", "exit", "entry_time", "exit_time", "stop", "target", "instrument", "contracts", "pnl_c" ].map(R => /_time$/.test(R) ? String(x[R] || "").slice(0, 5) : x[R] ?? null), (x.executions || []).map(E => [ E.side, +E.qty, +E.price, String(E.t || "").slice(0, 16) ]) ]);   // what the trader can change in the form
+    sib.length && r0 && K(r0) !== K(c) && (window.SweepCopyGroup ? setTimeout(() => SweepCopyGroup.askEdit(c.id, sib.length + 1).then(ok => ok && go()), 350) : go());
+  }
   const h = c.id, m = !TK.id;
   // (27 Oct., brief « daily loop » step 2) a new trade: the app stays where it was (Today), like after a screenshot — the message
   // with the coach and « See the trade »; an edit goes back to its trade page
@@ -7587,6 +7638,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_add_account: "Free covers {a}. Pro has no limit.",
       h_frozen_account: "This account is paused",
       s_frozen_account: "Its trades are safe and visible. Upgrade to log on all your accounts again.",
+      h_copy_groups: "Log once, on every account",
+      s_copy_groups: "A copy group puts each trade of your master account on its followers, sized by their multiplier. Included with Pro.",
       h_payouts: "Know what your trading really pays",
       s_payouts: "Track payouts, evaluations, resets and fees, so you see your true profit.",
       h_payouts_n: "You’ve logged {amount} in payouts",
@@ -7618,6 +7671,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_generic: "Unlock more of Sweep",
       s_generic: "Pick the plan that fits how you trade.",
       b_accounts: "Unlimited trading accounts",
+      b_copy: "Copy groups: one trade, every account",
       b_payouts: "Payouts and expenses tracking",
       b_analytics: "Full analytics on your whole history",
       b_ai_import: "AI import from screenshots and statements",
@@ -7749,6 +7803,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_add_account: "Free inclut {a}. Pro n’a aucune limite.",
       h_frozen_account: "Ce compte est en pause",
       s_frozen_account: "Ses trades sont conservés et visibles. Passe à Pro pour enregistrer sur tous tes comptes.",
+      h_copy_groups: "Une saisie, sur tous tes comptes",
+      s_copy_groups: "Un groupe de copie reporte chaque trade de ton compte maître sur ses suiveurs, à la taille de leur multiplicateur. Inclus avec Pro.",
       h_payouts: "Sache ce que ton trading rapporte vraiment",
       s_payouts: "Suis tes payouts, évaluations, resets et frais pour voir ton vrai profit.",
       h_payouts_n: "Tu as enregistré {amount} en payouts",
@@ -7780,6 +7836,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_generic: "Débloque plus de Sweep",
       s_generic: "Choisis le abonnement qui correspond à ta façon de trader.",
       b_accounts: "Comptes de trading illimités",
+      b_copy: "Groupes de copie : un trade, tous tes comptes",
       b_payouts: "Suivi des payouts et des dépenses",
       b_analytics: "Analyses complètes sur tout ton historique",
       b_ai_import: "Import IA depuis captures et relevés",
@@ -7911,6 +7968,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_add_account: "Free incluye {a}. Pro no tiene límite.",
       h_frozen_account: "Esta cuenta está en pausa",
       s_frozen_account: "Sus trades están guardados y visibles. Pasa a Pro para registrar en todas tus cuentas.",
+      h_copy_groups: "Un registro, en todas tus cuentas",
+      s_copy_groups: "Un grupo de copia lleva cada operación de tu cuenta maestra a sus seguidoras, según su multiplicador. Incluido con Pro.",
       h_payouts: "Descubre lo que tu trading paga de verdad",
       s_payouts: "Registra payouts, evaluaciones, resets y comisiones para ver tu ganancia real.",
       h_payouts_n: "Has registrado {amount} en payouts",
@@ -7942,6 +8001,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_generic: "Desbloquea más de Sweep",
       s_generic: "Elige el plan que encaja con tu forma de operar.",
       b_accounts: "Cuentas de trading ilimitadas",
+      b_copy: "Grupos de copia: una operación, todas tus cuentas",
       b_payouts: "Seguimiento de payouts y gastos",
       b_analytics: "Análisis completos de todo tu historial",
       b_ai_import: "Importación con IA desde capturas y estados",
@@ -8059,6 +8119,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     payouts: {
       plan: "pro",
       b: [ "b_payouts", "b_accounts", "b_analytics" ]
+    },
+    copy_groups: {
+      plan: "pro",
+      b: [ "b_copy", "b_accounts", "b_payouts" ]
     },
     analytics_history: {
       plan: "pro",

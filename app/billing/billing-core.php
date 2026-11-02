@@ -86,6 +86,8 @@ function sb_plan_limits(string $plan): array
     $L = sb_with_shots((array) ($plans[$plan] ?? $plans['free'] ?? []));
     // the 90-day gameplan (20 Oct.): the first paid plan and up, unless the config says otherwise
     if (!array_key_exists('gameplan', $L)) $L['gameplan'] = isset($plans[$plan]) && $plan !== 'free';
+    // copy groups, a master account and its followers (brief « avance concurrentielle », step 2): Pro and Elite, same rule
+    if (!array_key_exists('copy_groups', $L)) $L['copy_groups'] = isset($plans[$plan]) && $plan !== 'free';
     return $L;
 }
 
