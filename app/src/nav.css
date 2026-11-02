@@ -3170,3 +3170,5 @@ html body .nav-rt .nav-rt-sub + .nav-now{margin-top:0}
 }
 /* (2 Nov.) scrolled, the page's small title comes into the header row: the back link keeps its chevron only (the title after it) */
 @media (max-width:860px){html body.sw-top-back.tcollapsed aside.side > .top-back span{display:none}}
+/* (2 Nov.) every « i »: its own small font, whatever the text around it (in « Sample data » a 17 px line pushed it out of its circle) */
+html body .info{font:600 10px/1 "Geist",sans-serif!important;letter-spacing:0!important;text-transform:none!important}
