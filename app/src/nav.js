@@ -407,7 +407,7 @@ window.SweepMO = window.SweepMO || class {
     const x = KT[LANG] || KT.en, k = kpis(tab);
     const pf = perfOf(tab); if (pf) k.net = pf.total;   // the same performance as Stats: a copied trade counts once
     const fmt = (c) => (typeof money === 'function' ? money(c) : (c / 100).toFixed(2));   // same formatter as Stats and Trades
-    return `<div class="nav-kpi-g"><div><small>${x.net} ${window.SweepTypeTag ? SweepTypeTag() : ''}</small><b class="${k.net > 0 ? 'pos' : k.net < 0 ? 'neg' : ''}">${fmt(k.net)}</b></div><div><small>${x.trades}</small><b>${k.n}</b></div><div><small>${x.win}</small><b>${k.win == null ? '—' : k.win + ' %'}</b></div></div>${splitHtml(pf)}`;
+    return `<div class="nav-kpi-g"><div><small>${x.net} ${window.SweepTypeTag ? SweepTypeTag() : ''}</small><b class="${k.net > 0 ? 'pos' : k.net < 0 ? 'neg' : ''}">${fmt(k.net)}</b></div><div><small>${x.trades}</small><b>${k.n}</b></div><div><small>${x.win}</small><b>${k.win == null || k.n < 5 ? '—' : k.win + ' %'}</b></div></div>${splitHtml(pf)}`;   // (2 Nov., analyse débutant C5) « — » under 5 trades, as Stats (« 0 % » after one trade)
   }
   const TL = { en: { none_d: 'No trade today yet.', none_w: 'No trade this week yet.', all: 'See all ›', tolog: 'Checklist to do', perf: 'Performance' },
     fr: { none_d: 'Aucun trade aujourd’hui pour l’instant.', none_w: 'Aucun trade cette semaine pour l’instant.', all: 'Tout voir ›', tolog: 'Checklist à faire', perf: 'Performance' },
@@ -2459,6 +2459,10 @@ window.SweepMO = window.SweepMO || class {
     const ph = !!(window.SW_MQ6 && SW_MQ6.matches);
     const pnl = autoPnl(), has = !!(SH.batch.length || SH.src || SH.noShot || SH.aiDone);   // the screenshot is there (or « No screenshot? », or a sentence read): the rest of the sheet shows
     el.closest('.nav-am').classList.toggle('nav-am-min', !has);   // before it: a short sheet, its height its content (phone)
+    // (2 Nov., analyse débutant C6) a trader of the 90-day gameplan: the instrument in sight (the last one used, a tap to change it), not
+    // folded under « Check the trade »; a line says what the risk is and what the R is
+    const gp = typeof gpTrader === 'function' && gpTrader();
+    const instBox = `<div class="tk-f nav-am-wide${lowC('instrument')}"><span>${t('sym')}${chk('instrument')}</span>${pickBox('inst', insts.map((k) => [k, k + (typeof INSTR !== 'undefined' && INSTR[k] && INSTR[k].name ? ' — ' + INSTR[k].name : '')]), SH.f.inst)}${typeof rookieRule === 'function' ? rookieRule(SH.f.inst) : ''}</div>`;
     const fld = (k, label, attrs = '') => `<label class="tk-f${lowC(AK[k])}"><span>${label}${chk(AK[k])}</span><div class="tk-in"><input data-am-f="${k}" value="${esc2(SH.f[k] ?? '')}" ${attrs}></div></label>`;
     const seg = (key, vals, cur) => `<div class="seg yn">${vals.map(([v, l]) => `<button type="button" class="${String(cur) === String(v) ? 'on' : ''}" data-am-seg="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
     // same header as the manual form: title, subtitle, the other way, « Cancel » on the right
@@ -2476,10 +2480,10 @@ window.SweepMO = window.SweepMO || class {
         ${SH.batch.length ? batchList() : `<label class="tk-f nav-am-net${lowC('pnl_c')}"><span>${t('net')}${chk('pnl_c')}</span><div class="tk-in"><input data-am-f="net" inputmode="decimal" value="${esc2(SH.f.net ?? '')}" placeholder="${pnl != null ? ((pnl - (SH.f.fees || 0)) / 100).toFixed(2) : '+250'}"></div></label>
         <div class="tk-f nav-am-dir${lowC('direction')}"><span>${t('dir')}${chk('direction')}</span>${seg('dir', [['long', t('long')], ['short', t('short')]], SH.dir)}</div>
         ${window.SweepSetupPick ? `<div class="nav-am-wide">${SweepSetupPick.html(SH.f.date, SH.setup)}</div>` : ''}
-        <label class="tk-f nav-am-risk"><span>${t('risk')}</span><div class="tk-in"><input data-am-f="risk" inputmode="decimal" value="${esc2(SH.f.risk ?? '')}" placeholder="$"></div></label>
+        ${gp ? instBox : ''}<label class="tk-f nav-am-risk"><span>${t('risk')}</span><div class="tk-in"><input data-am-f="risk" inputmode="decimal" value="${esc2(SH.f.risk ?? '')}" placeholder="$"></div>${gp ? `<small class="muted nav-am-riskh">${esc2(RISKH[L] || RISKH.en)}</small>` : ''}</label>
         <div class="nav-am-r nav-am-wide">${rLine()}</div>
         <details class="nav-am-more-d nav-am-wide" ${SH.open ? 'open' : ''}><summary>${t('verify')}<small>${verifyLine()}</small></summary><div class="nav-am-grid">
-        <div class="tk-f nav-am-wide${lowC('instrument')}"><span>${t('sym')}${chk('instrument')}</span>${pickBox('inst', insts.map((k) => [k, k + (typeof INSTR !== 'undefined' && INSTR[k] && INSTR[k].name ? ' — ' + INSTR[k].name : '')]), SH.f.inst)}${typeof rookieRule === 'function' ? rookieRule(SH.f.inst) : ''}</div>
+        ${gp ? '' : instBox}
         ${fld('qty', t('qty'), 'inputmode="numeric"')}
         ${fld('date', t('date'), 'type="date"')}${fld('time', t('time'), 'placeholder="hh:mm"')}
         ${fld('entry', t('entry'), 'inputmode="decimal"')}${fld('exit', t('exit'), 'inputmode="decimal"')}
@@ -2506,7 +2510,8 @@ window.SweepMO = window.SweepMO || class {
   }
   // (brief « pertes oubliées », step 4) a loss typed: the checklist and the emotions fold under « + Add context (optional) » —
   // noting a loss costs no more taps than a win
-  const CTX = ({ en: ['+ Add context (optional)'], fr: ['+ Ajouter le contexte (facultatif)'], es: ['+ Añadir el contexto (opcional)'] })[L] || ['+ Add context (optional)'];
+  const RISKH = { en: 'What you lose if your stop is hit. It gives your R (your result divided by your risk).', fr: 'Ce que tu perds si ton stop est touché. Il sert à calculer ton R (ton résultat divisé par ton risque).', es: 'Lo que pierdes si tocan tu stop. Sirve para calcular tu R (tu resultado dividido por tu riesgo).' };
+  const CTX = ({ en: ['+ Add context'], fr: ['+ Ajouter le contexte'], es: ['+ Añadir el contexto'] })[L] || ['+ Add context'];   // (2 Nov., analyse débutant C6) no « (optional) » next to a field
   function ctxFold() { const v = num(SH.f.net); return !SH.batch.length && !SH.ctxOpen && v != null && v < 0; }
   function ctxPaint() { const w = document.querySelector('.nav-am .nav-am-ctxw'); if (w) w.classList.toggle('fold', ctxFold()); }
   function pickBox(k, opts, cur, ph) {
@@ -4385,17 +4390,17 @@ window.SweepMO = window.SweepMO || class {
     en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day complete', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
       s1: 'Plan', s1d: 'Make your plan', s2: 'Execution', s2d: 'Trade your plan', s3: 'Review', s3d: 'Do your review',
       todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', inPlan1: '{c} of 1 trade in your plan', noPlanN: '{n} trades · no plan', noPlan1: '1 trade · no plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
-      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', b1s: 'Plan it', b2s: 'Add a trade', b3s: 'Review', see: 'See',
+      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', ydayP: 'Yesterday: {t} left', b1s: 'Plan it', b2s: 'Add a trade', b3s: 'Review', see: 'See',
       help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day complete »: your streak goes on. Profit never counts, only the process.' },
     fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée complète', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
       s1: 'Plan', s1d: 'Fais ton plan', s2: 'Exécution', s2d: 'Respecte ton plan', s3: 'Revue', s3d: 'Fais ta revue',
       todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', inPlan1: '{c} sur 1 trade dans ton plan', noPlanN: '{n} trades · pas de plan', noPlan1: '1 trade · pas de plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
-      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', b1s: 'Planifier', b2s: 'Ajouter un trade', b3s: 'Réviser', see: 'Voir',
+      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', ydayP: 'Hier : encore {t}', b1s: 'Planifier', b2s: 'Ajouter un trade', b3s: 'Réviser', see: 'Voir',
       help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée complète » : ta série continue. Le profit ne compte jamais, seulement le processus.' },
     es: { title: 'Tu rutina de hoy', how: 'Cómo funciona', of: '{n} de 3 hechas', swept: 'Día completado', closed: 'Los mercados están cerrados hoy. El descanso es parte del proceso.', dayoffT: 'Día libre', dayoff: 'Sin operar hoy: tu racha está protegida.',
       s1: 'Plan', s1d: 'Haz tu plan', s2: 'Ejecución', s2d: 'Respeta tu plan', s3: 'Revisión', s3d: 'Haz tu revisión',
       todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', inPlan1: '{c} de 1 operación en tu plan', noPlanN: '{n} operaciones · sin plan', noPlan1: '1 operación · sin plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
-      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', b1s: 'Planificar', b2s: 'Añadir una operación', b3s: 'Revisar', see: 'Ver',
+      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', ydayP: 'Ayer: quedan {t}', b1s: 'Planificar', b2s: 'Añadir una operación', b3s: 'Revisar', see: 'Ver',
       help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue. El beneficio nunca cuenta, solo el proceso.' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -4564,7 +4569,8 @@ window.SweepMO = window.SweepMO || class {
     const first = (S.trades || []).some((x) => !x.demo) || (S.trades || []).length > 0 && !(S.accounts || []).some((a) => !a.demo);
     // (31 Oct., C5) the discipline, streak and level pills became one line under the title: « Level 2 · 0 complete days › » (My progress)
     const SUM = { en: ['Level {l}', '{n} complete day', '{n} complete days'], fr: ['Niveau {l}', '{n} jour complet', '{n} jours complets'], es: ['Nivel {l}', '{n} día completo', '{n} días completos'] }[L] || ['Level {l}', '{n} complete day', '{n} complete days'];
-    const sumLine = first ? `<button type="button" class="nav-rt-sum" data-rt="hub">${[lv ? SUM[0].replace('{l}', esc2(lv)) : '', SUM[streak === 1 || (streak === 0 && L === 'fr') ? 1 : 2].replace('{n}', streak)].filter(Boolean).join(' · ')} ›</button>` : '';
+    // (2 Nov., analyse débutant C2) « Level 2 » alone until a first day is complete (« · 0 complete days » read as a counter at zero)
+    const sumLine = first ? `<button type="button" class="nav-rt-sum" data-rt="hub">${[lv ? SUM[0].replace('{l}', esc2(lv)) : '', streak || !lv ? SUM[streak === 1 || (streak === 0 && L === 'fr') ? 1 : 2].replace('{n}', streak) : ''].filter(Boolean).join(' · ')} ›</button>` : '';
     const head = (extra, still) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market && !still ? foldBtn() : ''}${extra || ''}</div></div><div class="nav-rt-sub">${sumLine}<button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div>`;
     // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
     const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
@@ -4601,7 +4607,8 @@ window.SweepMO = window.SweepMO || class {
     // without a valid plan no trade is « in your plan » (audit of 16 Oct.; the server counts 0 too: game.php compliant_count)
     // (27 Oct., brief « daily loop » step 3) under the steps from the first trade: « I'm done for today » opens the review at once
     const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t(d.trades === 1 ? 'inPlan1' : 'inPlan', { c: d.compliant || 0, n: d.trades });
-    const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${t('ydayB')} ›</b><span>${esc2(left(y.deadline))}</span></button>` : '';
+    // (2 Nov., analyse débutant C4) « Yesterday: 15 h 19 left › »: « Finish yesterday › 15 h 19 » read the time left as a clock time
+    const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${esc2(t('ydayP', { t: left(y.deadline) }))} ›</b></button>` : '';
     return `<section class="surface nav-rt" data-noi18n>${mrRow}${head(pill + ych)}${wkRow}${nowRow}${rmRow}${gpRow}${intRow}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
@@ -5764,16 +5771,22 @@ document.addEventListener('click', (e) => {
     if (out.length < 3) ((window.SweepGame && SweepGame.suggestedSetups) || []).forEach(add);
     return out.slice(0, 12);
   }
-  function html(day, cur) {
-    const l = list(day); if (cur && !l.some((x) => low(x) === low(cur))) l.unshift(cur);
+  // (2 Nov., analyse débutant C6) a trader of the 90-day gameplan, before mission 8 (« Read the setup »): the one setup it teaches, the
+  // Sweep Setup, and « + Other » for the rest — not « Liquidity sweep », « Break & retest »… on his first days
+  const OTHER = { en: '+ Other', fr: '+ Autre', es: '+ Otro' };
+  const gpEarly = () => { try { const st = window.SweepGP && SweepGP.state && SweepGP.state(); return !!(st && st.started && st.access && !(st.done && st.done[8])); } catch (e) { return false; } };
+  function html(day, cur, all) {
+    const few = !all && gpEarly();
+    const l = few ? ['Sweep Setup'] : list(day); if (cur && !l.some((x) => low(x) === low(cur))) l.unshift(cur);
     // (27 Oct.) its « i », and each name's meaning (a long press, or the title on a computer): the names stay the traders' English
     const what = (x) => (window.SweepSetupWhat ? SweepSetupWhat(x) : '');
-    return `<div class="tk-f nav-sp" data-noi18n><span>${W[0]}${window.SweepTerm ? SweepTerm('setup') : ''}</span><div class="nav-sp-row">${l.map((x) => `<button type="button" class="chip ${low(x) === low(cur) ? 'on' : ''}" data-sp="${esc2(x)}"${what(x) ? ` title="${esc2(what(x))}"` : ''}>${esc2(x)}</button>`).join('')}</div></div>`;
+    return `<div class="tk-f nav-sp" data-noi18n data-day="${esc2(day || '')}" data-cur="${esc2(cur || '')}"><span>${W[0]}${window.SweepTerm ? SweepTerm('setup') : ''}</span><div class="nav-sp-row">${l.map((x) => `<button type="button" class="chip ${low(x) === low(cur) ? 'on' : ''}" data-sp="${esc2(x)}"${what(x) ? ` title="${esc2(what(x))}"` : ''}>${esc2(x)}</button>`).join('')}${few ? `<button type="button" class="chip nav-more nav-sp-other" data-sp-other>${esc2(OTHER[L] || OTHER.en)}</button>` : ''}</div></div>`;
   }
   /** a tap: one setup at most, a second tap clears it; returns the new value */
   function tap(b, cur) {
     const v = low(b.dataset.sp) === low(cur) ? '' : b.dataset.sp;
     b.closest('.nav-sp-row').querySelectorAll('[data-sp]').forEach((x) => x.classList.toggle('on', !!v && x === b));
+    const w = b.closest('.nav-sp'); if (w) w.dataset.cur = v;
     return v;
   }
   /** a setup used on a trade joins the trader's list (as when it is picked in the plan) */
@@ -5782,6 +5795,11 @@ document.addEventListener('click', (e) => {
     if (((S.settings && S.settings.setups) || []).some((x) => low(x) === low(v))) return;
     editDoc('settings', 'settings', (r) => { r.setups = r.setups || []; if (!r.setups.some((x) => low(x) === low(v))) r.setups.push(v); });
   }
+  document.addEventListener('click', (e) => {   // « + Other »: the whole list, in place
+    const b = e.target.closest && e.target.closest('[data-sp-other]'); if (!b) return;
+    const w = b.closest('.nav-sp'); if (!w) return;
+    const t = document.createElement('div'); t.innerHTML = html(w.dataset.day, w.dataset.cur, true); w.replaceWith(t.firstElementChild);
+  });
   window.SweepSetupPick = { list, html, tap, keep };
   // the manual form (a new trade): the row above the notes
   new window.SweepMO(() => {

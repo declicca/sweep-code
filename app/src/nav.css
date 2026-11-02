@@ -3267,3 +3267,6 @@ html body #main .tr-copies-l .help{margin:10px 14px 14px;font-size:13px}
 html body #main .ux-setup[hidden]{display:none!important}
 /* (2 Nov., audit « transfuge » G2) one label for the action, « Add a trade », on the phone too: it wraps in its narrow step */
 @media (max-width:860px){html body .nav-rt-sa .btn{white-space:normal!important;text-align:left!important;justify-content:flex-start!important}}
+/* (2 Nov., analyse débutant C4) « Yesterday: 15 h 19 left › » never past the card's edge on a phone: it may shrink, its text cut last */
+html body .nav-rt-h .nav-rt-y{flex-shrink:1!important;min-width:0;max-width:100%}
+html body .nav-rt-y b{overflow:hidden;text-overflow:ellipsis;min-width:0}

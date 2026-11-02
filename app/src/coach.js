@@ -910,11 +910,30 @@
     const html = `<span class="co-ic">${IC}</span><span><b>${T.title}</b> · ${esc2(txt)}</span>`;
     if (el._h !== html) { el.innerHTML = html; el._h = html; }
   }
+  /* (2 Nov., analyse débutant A2) a trader of the 90-day gameplan: « One thing to improve tomorrow » proposes the habit of the week he is
+     on (week 1 « Protect »: « My stop is set before I enter »), not « Same plan, same discipline » */
+  const GPW = {
+    en: ['My stop is set before I enter.', 'I only take the Sweep Setup, or I let it pass.', 'One behavior today, the same routine.', 'The same process, nothing bigger.',
+      'Every trade tagged: level, time block, grade.', 'I note where I slip, not only where I win.', 'My one change, and nothing else moves.', 'My firm’s limits checked before each trade.',
+      'My market and my hours chosen before the open.', 'My size moves only by the ladder.', 'Near the target or the drawdown: the same process.', 'I trade only from my written plan.'],
+    fr: ['Mon stop est posé avant d’entrer.', 'Je ne prends que le Sweep Setup, ou je le laisse passer.', 'Un seul comportement aujourd’hui, la même routine.', 'Le même processus, rien de plus gros.',
+      'Chaque trade étiqueté : niveau, bloc horaire, note.', 'Je note où je dérape, pas seulement où je gagne.', 'Mon seul changement, et rien d’autre ne bouge.', 'Les limites de ma firme vérifiées avant chaque trade.',
+      'Mon marché et mes heures choisis avant l’ouverture.', 'Ma taille ne bouge que selon l’échelle.', 'Près de l’objectif ou du drawdown : le même processus.', 'Je ne trade qu’à partir de mon plan écrit.'],
+    es: ['Mi stop está puesto antes de entrar.', 'Solo tomo el Sweep Setup, o lo dejo pasar.', 'Un solo comportamiento hoy, la misma rutina.', 'El mismo proceso, nada más grande.',
+      'Cada operación etiquetada: nivel, bloque horario, nota.', 'Anoto dónde fallo, no solo dónde gano.', 'Mi único cambio, y nada más se mueve.', 'Los límites de mi firma revisados antes de cada operación.',
+      'Mi mercado y mis horas elegidos antes de la apertura.', 'Mi tamaño solo se mueve según la escalera.', 'Cerca del objetivo o del drawdown: el mismo proceso.', 'Solo opero desde mi plan escrito.'] };
+  function gpWeekRule() {
+    try {
+      const G = window.SweepGP, st = G && G.state && G.state(); if (!st || !st.started || !st.access || !G.data) return '';
+      const n = Math.min(90, Object.keys(st.done || {}).length + 1), w = G.data.weeks.findIndex((x) => n >= x.from && n <= x.to);
+      return w >= 0 ? (GPW[L] || GPW.en)[w] || '' : '';
+    } catch (e) { return ''; }
+  }
   function paintReview() {
     const sh = document.getElementById('gSheet'); if (!sh || !sh.querySelector('[data-gr="tomorrow"]')) return;
     const err = sh.querySelector('#gErr'), ta = sh.querySelector('[data-gr="tomorrow"]'); if (!err) return;
-    const l = dayLesson(sh.dataset.day || today());
-    if (l.rule && !ta.placeholder) ta.placeholder = fill(T.rulePh, { r: l.rule });
+    const l = dayLesson(sh.dataset.day || today()), wr = gpWeekRule();
+    if ((wr || l.rule) && !ta.placeholder) ta.placeholder = fill(T.rulePh, { r: wr || l.rule });
     let el = sh.querySelector('.co-plan'); if (!el) { el = document.createElement('p'); el.className = 'co-plan co-rv'; el.setAttribute('data-noi18n', ''); err.before(el); }
     const html = `<span class="co-ic">${IC}</span><span><b>${T.title}</b> · ${esc2(l.text)}</span>`;
     if (el._h !== html) { el.innerHTML = html; el._h = html; }
@@ -1057,9 +1076,9 @@
         c.ids.add(k);
       });
     });
-    const win = [], loss = [];
+    const win = [], loss = [], nMin = typeof gpTrader === 'function' && gpTrader() ? 20 : 5;   // (2 Nov., analyse débutant A1) a trader of the gameplan: no edge under 20 trades
     C.forEach((c) => {
-      if (c.n < 5) return;
+      if (c.n < nMin) return;
       const m = c.s / c.w;
       if (m > 0 && m - M >= 0.25 * A && A > 0) win.push(Object.assign(c, { m, score: (m - M) * Math.sqrt(c.n) }));
       else if (m < 0 && M - m >= 0.25 * A && A > 0) loss.push(Object.assign(c, { m, score: (M - m) * Math.sqrt(c.n) }));

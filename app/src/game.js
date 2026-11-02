@@ -3176,6 +3176,9 @@
   /** Today: « Your October is ready » until the story is seen to its end (at most the 7th of the next month, game.php) */
   function monthCard() {
     const m = G.mr; if (!m || m.done) return '';
+    // (2 Nov., analyse débutant A3) a trader of the 90-day gameplan: his month in review from 10 trading days in that month (5 days of
+    // October became « Your October is ready », the first card of Today, above « Now »)
+    if (typeof gpTrader === 'function' && gpTrader() && new Set((S.trades || []).filter((t) => !t.demo && !t.untracked && String(t.date || '').slice(0, 7) === m.month).map((t) => t.date)).size < 10) return '';
     return `<button type="button" class="nav-mr" data-rt="month" data-v="${esc(m.month)}" data-noi18n><span class="nav-mr-k">${mrt('open')}</span><b>${esc(mrt('card', { month: mrName(m.month) }))}</b><small>${mrt('tap')}</small><span class="nav-mr-go">${svg('chev')}</span></button>`;
   }
   /** the AI's « next month » mission, proposed on Today in the first days of that month once the story is seen */

@@ -61,8 +61,10 @@ final class GameGameplan
             case 'limits':
                 foreach (GameEngine::docs($uid, 'accounts') as $a) { $r = (array) ($a['rules'] ?? []); if ($live($a) && ((int) ($r['dll_c'] ?? 0) > 0 || (int) ($r['dd_c'] ?? 0) > 0)) return true; }
                 return false;
-            case 'trade':   // a trade journaled with its stop and its target, on the mission's day or after
-                foreach (GameEngine::docs($uid, 'trades') as $t) { $d = GameEngine::tradeDay($t); if ($d !== null && $d >= $date && GameEngine::hasStop($t) && ($t['target'] ?? '') !== '' && $t['target'] !== null) return true; }
+            case 'trade':   // a trade journaled with its risk (a stop, or the « Risk ($) » of the quick forms), on the mission's day or after
+                            // (2 Nov., analyse débutant B1: the target was required too, and the quick forms the app puts first have
+                            // none — the plan stayed at mission 2 for good; the trades already logged tick it at the next load)
+                foreach (GameEngine::docs($uid, 'trades') as $t) { $d = GameEngine::tradeDay($t); if ($d !== null && $d >= $date && GameEngine::hasStop($t)) return true; }
                 return false;
             // (1 Nov., brief dans le temps B1) the plan follows the missions done, not the calendar: a mission reached after its
             // date is met by any day from its date to today (before, only its own date counted: a trader behind never got it)
