@@ -1,13 +1,14 @@
-import asyncio, datetime, json
+import asyncio, datetime, json, sys
 from playwright.async_api import async_playwright
-B='http://127.0.0.1:8095'
+B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
+STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
 NOW=datetime.datetime(2026,10,1,20,20,0,tzinfo=datetime.timezone.utc)
 G=json.dumps({"tips":{},"visited":{"analytics":1},"hideStart":True})
 WEEK={'en':'Week','fr':'Semaine','es':'Semana'}; SUB={'en':'Subscription','fr':'Abonnement','es':'Suscripción'}; SET={'en':'Settings','fr':'Réglages','es':'Ajustes'}
 EXP={'en':'Export','fr':'Export','es':'Export'}
 OLD=['#dashboard','#calendar','#journal','#journal/weekly','#payouts','#news','#analytics','#plan','#settings','#referral','#feedback','#import','#accounts','#trades','#today','#stats','#subscription','#progress']
 async def run(br,w,h,mob,lang):
-  ctx=await br.new_context(viewport={'width':w,'height':h},device_scale_factor=1,is_mobile=mob,has_touch=mob,color_scheme='dark',locale={'fr':'fr-CA','en':'en-US','es':'es-ES'}[lang],storage_state='/tmp/show_state.json')
+  ctx=await br.new_context(viewport={'width':w,'height':h},device_scale_factor=1,is_mobile=mob,has_touch=mob,color_scheme='dark',locale={'fr':'fr-CA','en':'en-US','es':'es-ES'}[lang],storage_state=STATE)
   await ctx.add_init_script(f"localStorage.setItem('sw.guide', {json.dumps(G)}); localStorage.setItem('tj.lang', JSON.stringify('{lang}')); sessionStorage.setItem('sw.modal','1')")
   pg=await ctx.new_page(); await pg.clock.install(time=NOW); errs=[]; pg.on('pageerror',lambda e: errs.append(str(e)[:120]))
   async def home():

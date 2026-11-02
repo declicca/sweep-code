@@ -240,7 +240,8 @@ function sai_kind(string $task): ?string
 {
     if ($task === 'health' || str_starts_with($task, 'game_')) return null;   // short game texts (boss intro…) never use the trader's AI allowance
     if ($task === 'trade_feedback') return 'review';
-    if ($task === 'trade_import') return 'shot';   // a trade screenshot: 3 a day on Free (18 Oct.), unlimited on Pro and Elite
+    if ($task === 'trade_import' || str_starts_with($task, 'trade_shot')) return 'shot';   // a trade screenshot: 3 a day on Free (18 Oct.), unlimited on Pro and Elite (the reader's task is « trade_shot2 »: it used the AI messages)
+    if ($task === 'trade_entry') return 'entry';   // a trade from a sentence (brief avance, step 3): per month, Free 10, Pro 150, Elite unlimited
     if ($task === 'receipt_scan') return 'import';   // a receipt (My money): Pro and Elite
     return 'chat';
 }
@@ -258,6 +259,8 @@ function sai_call_run(PDO $pdo, string $uid, string $task, string $prompt, array
         sai_q($pdo, 'INSERT INTO ai_log (user_id, task, input_tokens, output_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?)', [$uid, $task, 0, 0, 0.0001, sai_now()]);
         return ['data' => (array) ($m[$l] ?? $m['en'] ?? []), 'cached' => false];
     }
+    // tests only: SWEEP_AI_ENTRY_MOCK (a JSON file of rules, as the chat's) answers « trade_entry » (a trade from a sentence) without calling Google
+    if ($task === 'trade_entry' && ($mf = (string) getenv('SWEEP_AI_ENTRY_MOCK')) !== '' && is_file($mf)) return sai_entry_mock($pdo, $uid, $prompt, $mf);
     $parts = [['text' => $prompt]];
     if ($image) $parts[] = ['inlineData' => ['mimeType' => $image['mime'], 'data' => $image['data']]];
     $body = [
@@ -270,8 +273,14 @@ function sai_call_run(PDO $pdo, string $uid, string $task, string $prompt, array
     ];
     if ($system !== '') $body['systemInstruction'] = ['parts' => [['text' => $system]]];
     if (!empty($cfg['thinking_level'])) $body['generationConfig']['thinkingConfig'] = ['thinkingLevel' => (string) $cfg['thinking_level']];
+    if (!empty($opts['schema'])) $body['generationConfig']['responseSchema'] = $opts['schema'];   // strict JSON (trade_entry): the provider enforces the shape
 
     [$status, $raw] = sai_http($cfg, $body);
+    // a model that refuses the schema: once more without it (the answer is still checked field by field)
+    if ($status === 400 && isset($body['generationConfig']['responseSchema']) && stripos((string) $raw, 'schema') !== false) {
+        unset($body['generationConfig']['responseSchema']);
+        [$status, $raw] = sai_http($cfg, $body);
+    }
     // Some models don't accept a thinking setting: retry once without it.
     if ($status === 400 && isset($body['generationConfig']['thinkingConfig']) && stripos((string) $raw, 'thinking') !== false) {
         unset($body['generationConfig']['thinkingConfig']);
@@ -319,6 +328,22 @@ function sai_chat_mock(PDO $pdo, string $uid, string $prompt, string $file): arr
     $codes = ['network' => 502, 'provider' => 502, 'provider_busy' => 503, 'bad_output' => 502];
     if (!empty($rule['error'])) throw new SaiError((string) $rule['error'], $codes[$rule['error']] ?? 502);
     sai_q($pdo, 'INSERT INTO ai_log (user_id, task, input_tokens, output_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?)', [$uid, 'chat', 0, 0, (float) ($rule['cost'] ?? 0.0001), sai_now()]);
+    return ['data' => (array) ($rule['out'] ?? []), 'cached' => false];
+}
+
+/** The sentence reader's test stand-in: the first rule whose « match » is in the sentence answers with « out » (JSON), « raw » (text as the model
+ *  wrote it) or fails with « error ». The use is logged like a real call (cost 0.0001 unless the rule says otherwise). */
+function sai_entry_mock(PDO $pdo, string $uid, string $prompt, string $file): array
+{
+    $m = json_decode((string) file_get_contents($file), true) ?: [];
+    $i = strrpos($prompt, "Trader sentence:\n\"\"\"\n"); $msg = $i !== false ? substr($prompt, $i + 21, -4) : '';
+    $rule = null;
+    foreach ((array) ($m['rules'] ?? []) as $r) if (isset($r['match']) && mb_stripos($msg, (string) $r['match']) !== false) { $rule = $r; break; }
+    $rule = $rule ?? ['out' => $m['default'] ?? []];
+    $codes = ['network' => 502, 'provider' => 502, 'provider_busy' => 503, 'bad_output' => 502];
+    if (!empty($rule['error'])) throw new SaiError((string) $rule['error'], $codes[$rule['error']] ?? 502);
+    sai_q($pdo, 'INSERT INTO ai_log (user_id, task, input_tokens, output_tokens, cost_usd, created_at) VALUES (?, ?, ?, ?, ?, ?)', [$uid, 'trade_entry', 0, 0, (float) ($rule['cost'] ?? 0.0001), sai_now()]);
+    if (isset($rule['raw'])) { $d = sai_json((string) $rule['raw']); if ($d === null) throw new SaiError('bad_output', 502); return ['data' => $d, 'cached' => false]; }
     return ['data' => (array) ($rule['out'] ?? []), 'cached' => false];
 }
 

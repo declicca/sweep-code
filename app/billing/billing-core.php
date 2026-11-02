@@ -83,7 +83,7 @@ function sb_ts($v): ?int
 function sb_plan_limits(string $plan): array
 {
     $plans = sb_cfg()['plans'] ?? [];
-    $L = sb_with_shots((array) ($plans[$plan] ?? $plans['free'] ?? []));
+    $L = sb_with_entry(sb_with_shots((array) ($plans[$plan] ?? $plans['free'] ?? [])), isset($plans[$plan]) ? $plan : 'free');
     // the 90-day gameplan (20 Oct.): the first paid plan and up, unless the config says otherwise
     if (!array_key_exists('gameplan', $L)) $L['gameplan'] = isset($plans[$plan]) && $plan !== 'free';
     return $L;
@@ -94,6 +94,14 @@ function sb_plan_limits(string $plan): array
 function sb_with_shots(array $L): array
 {
     if (!array_key_exists('ai_import_daily', $L)) $L['ai_import_daily'] = empty($L['ai_import']) ? 3 : null;
+    return $L;
+}
+
+/** Trades logged from a sentence by Sweep AI (brief avance, step 3): per New York month, Free 10, Pro 150, Elite unlimited
+ *  (within the day's AI budget), unless the config says otherwise ('ai_entry_monthly'; null = unlimited) */
+function sb_with_entry(array $L, string $plan): array
+{
+    if (!array_key_exists('ai_entry_monthly', $L)) $L['ai_entry_monthly'] = $plan === 'elite' ? null : ($plan === 'pro' ? 150 : 10);
     return $L;
 }
 
@@ -318,7 +326,7 @@ function sb_founding(PDO $pdo, string $uid, array $user, array $eff): array
 function sb_period(string $metric): string
 {
     $d = (new DateTime('@' . sb_now()))->setTimezone(new DateTimeZone('America/New_York'));   // New York's day and month (« they reset at midnight, New York »)
-    return $metric === 'ai_reviews' ? $d->format('Y-m') : $d->format('Y-m-d');
+    return in_array($metric, ['ai_reviews', 'ai_entry'], true) ? $d->format('Y-m') : $d->format('Y-m-d');
 }
 
 function sb_usage(PDO $pdo, string $uid, string $metric): int
@@ -340,7 +348,7 @@ function sb_usage_inc(PDO $pdo, string $uid, string $metric, int $by = 1): void
 function sb_reset_at(string $metric): string
 {
     $d = (new DateTime('@' . sb_now()))->setTimezone(new DateTimeZone('America/New_York'));
-    $d->modify($metric === 'ai_reviews' ? 'first day of next month midnight' : 'tomorrow midnight');   // the next New York midnight (or month)
+    $d->modify(in_array($metric, ['ai_reviews', 'ai_entry'], true) ? 'first day of next month midnight' : 'tomorrow midnight');   // the next New York midnight (or month)
     return gmdate('c', $d->getTimestamp());
 }
 
@@ -365,6 +373,17 @@ function sb_ai_consume(PDO $pdo, string $uid, string $kind = 'chat', bool $count
         if ($count) sb_usage_inc($pdo, $uid, 'ai_import_daily');
         return ['ok' => true, 'plan' => $plan, 'feature' => 'ai_import_daily', 'used' => $used + ($count ? 1 : 0), 'limit' => (int) $limit];
     }
+    if ($kind === 'entry') {   // a trade from a sentence: its own monthly count on every plan, never the AI messages
+        $limit = $L['ai_entry_monthly'] ?? null;
+        $used = sb_usage($pdo, $uid, 'ai_entry');
+        if ($limit !== null && $used >= (int) $limit) {
+            $next = $plan === 'free' ? 'pro' : ($plan === 'pro' ? 'elite' : null);
+            return ['ok' => false, 'code' => $next ? 'upgrade_required' : 'quota', 'feature' => 'ai_entry_monthly', 'trigger' => 'entry_quota', 'plan' => $plan,
+                    'used' => $used, 'limit' => (int) $limit, 'reset_at' => sb_reset_at('ai_entry'), 'upgrade_to' => $next];
+        }
+        if ($count) sb_usage_inc($pdo, $uid, 'ai_entry');
+        return ['ok' => true, 'plan' => $plan, 'feature' => 'ai_entry_monthly', 'used' => $used + ($count ? 1 : 0), 'limit' => $limit === null ? null : (int) $limit];
+    }
     if ($kind === 'shot') $kind = 'import';   // Pro, Elite: as before (the AI messages count)
     if ($kind === 'import' && empty($L['ai_import'])) {
         return ['ok' => false, 'code' => 'upgrade_required', 'feature' => 'ai_import', 'plan' => $plan, 'upgrade_to' => sb_plan_for('ai_import')];
@@ -385,7 +404,7 @@ function sb_ai_consume(PDO $pdo, string $uid, string $kind = 'chat', bool $count
 /** Give a use back when the AI call itself failed (so users don't pay quota for errors). */
 function sb_ai_refund(PDO $pdo, string $uid, string $kind = 'chat'): void
 {
-    $metric = $kind === 'review' ? 'ai_reviews' : ($kind === 'shot' && empty(sb_plan_limits(sb_plan($pdo, $uid))['ai_import']) ? 'ai_import_daily' : 'ai_daily');
+    $metric = $kind === 'review' ? 'ai_reviews' : ($kind === 'entry' ? 'ai_entry' : ($kind === 'shot' && empty(sb_plan_limits(sb_plan($pdo, $uid))['ai_import']) ? 'ai_import_daily' : 'ai_daily'));
     sb_q($pdo, 'UPDATE billing_usage SET count = CASE WHEN count > 0 THEN count - 1 ELSE 0 END WHERE uid = ? AND metric = ? AND period = ?', [$uid, $metric, sb_period($metric)]);
 }
 
@@ -623,11 +642,12 @@ function sb_state(PDO $pdo, string $uid, array $user = []): array
         'plan'      => $plan,
         'source'    => $eff['source'],
         'limits'    => $L,
-        'plans'     => array_map('sb_with_shots', (array) $cfg['plans']),
+        'plans'     => (function (array $P) { foreach ($P as $k => $v) $P[$k] = sb_with_entry(sb_with_shots((array) $v), (string) $k); return $P; })((array) $cfg['plans']),
         'usage'     => [
             'ai_daily'   => ['used' => sb_usage($pdo, $uid, 'ai_daily'), 'limit' => $L['ai_daily'] ?? null, 'reset_at' => sb_reset_at('ai_daily')],
             'ai_reviews' => ['used' => sb_usage($pdo, $uid, 'ai_reviews'), 'limit' => $reviewLimit, 'reset_at' => sb_reset_at('ai_reviews')],
             'ai_import_daily' => ['used' => sb_usage($pdo, $uid, 'ai_import_daily'), 'limit' => $L['ai_import_daily'], 'reset_at' => sb_reset_at('ai_import_daily')],
+            'ai_entry'   => ['used' => sb_usage($pdo, $uid, 'ai_entry'), 'limit' => $L['ai_entry_monthly'], 'reset_at' => sb_reset_at('ai_entry')],
         ],
         'trial'        => $trial,
         'pro_used'     => $trial && $trial['days_left'] <= 10 && !$sub ? sb_pro_used($pdo, $uid) : null,   // the day-50 card (brief 02 part 13)

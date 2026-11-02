@@ -2333,6 +2333,19 @@ window.SweepMO = window.SweepMO || class {
     fr: { dup: 'Ce trade ressemble à celui de {t}. L’ajouter quand même ?', dupOk: 'Ajouter quand même', shot: 'Avec une capture d’écran', man: 'Manuellement', title: 'Nouveau trade', sub: 'par capture d’écran', subNo: 'le P&L de ta plateforme', noShot: 'Pas de capture ? Entre ton P&L ›', cancel: 'Annuler', byHand: 'Saisir à la main', fromShot: 'Par capture d’écran', impFile: 'Importer un CSV', toMan: 'Saisir manuellement ›', toShot: 'Par capture d’écran ›', drop: 'Colle ou dépose ta capture (Ctrl+V)', dropT: 'Choisir une capture', noShotP: 'Sans capture ›', reading: 'Lecture de la capture…', read: 'Rempli à partir de la capture : vérifie et complète.', noAi: 'Remplis les infos principales.', aiFail: 'Lecture impossible : remplis les infos principales.', acc: 'Compte', sym: 'Symbole', dir: 'Sens', long: 'Long', short: 'Short', date: 'Date', time: 'Heure d’entrée (ET)', qty: 'Contrats', entry: 'Prix d’entrée', exit: 'Prix de sortie', pnl: 'Résultat ($)', pnlH: 'Calculé à partir des prix quand les deux sont là.', disc: 'Discipline', psy: 'Psychologie', emo: 'Comment te sentais-tu avant le trade ?', conf: 'Confiance', exec: 'Exécution', yes: 'Oui', no: 'Non', na: 'N/A', save: 'Enregistrer le trade', saved: 'Trade enregistré', need: 'Il faut le compte et le P&L net (ou les prix).', set: 'Ajout d’un trade', setS: 'Ce que « Ajouter un trade » ouvre en premier.', more: '+ Voir plus', addEmo: '+ Ajouter la tienne', addEmoQ: 'Ton émotion (un ou deux mots)', moreQ: '+ {n} autres questions', addQ: '+ Ajouter une question', addQQ: 'Ta question (ex. « Ai-je attendu mon niveau ? »)', also: 'Aussi sur (copy trading)', alsoS: 'Aussi sur', net: 'P&L net (comme sur ta plateforme)', risk: 'Risque ($)', rHint: 'Entre le P&L net affiché par ta plateforme.', rAdd: 'Ajoute le risque pour voir le R.', verify: 'Vérifier le trade ›', alsoH: 'Le même trade est enregistré sur chaque compte choisi.', needDir: 'Long ou Short ? Touche un des deux pour enregistrer le trade.', shotQuota: '3 captures par jour avec Free : remplis les infos principales, ou lis-les sans limite avec Pro.', dupDay: 'Ce trade ressemble à un trade déjà enregistré ce jour-là. L’ajouter quand même ?' },
     es: { dup: 'Esta operación se parece a la de las {t}. ¿Añadirla de todos modos?', dupOk: 'Añadir de todos modos', shot: 'Con una captura', man: 'Manualmente', title: 'Nueva operación', sub: 'por captura', subNo: 'el P&L de tu plataforma', noShot: '¿Sin captura? Escribe tu P&L ›', cancel: 'Cancelar', byHand: 'Introducir a mano', fromShot: 'Desde una captura', impFile: 'Importar CSV', toMan: 'Introducir manualmente ›', toShot: 'Con una captura ›', drop: 'Pega o suelta tu captura (Ctrl+V)', dropT: 'Elegir una captura', noShotP: 'Sin captura ›', reading: 'Leyendo la captura…', read: 'Rellenado desde la captura: revisa y completa.', noAi: 'Rellena los datos principales.', aiFail: 'No se pudo leer: rellena los datos principales.', acc: 'Cuenta', sym: 'Símbolo', dir: 'Sentido', long: 'Long', short: 'Short', date: 'Fecha', time: 'Hora de entrada (ET)', qty: 'Contratos', entry: 'Precio de entrada', exit: 'Precio de salida', pnl: 'Resultado ($)', pnlH: 'Calculado con los precios cuando están los dos.', disc: 'Disciplina', psy: 'Psicología', emo: '¿Cómo te sentías antes de la operación?', conf: 'Confianza', exec: 'Ejecución', yes: 'Sí', no: 'No', na: 'N/A', save: 'Guardar la operación', saved: 'Operación guardada', need: 'Hacen falta la cuenta y el P&L neto (o los precios).', set: 'Añadir una operación', setS: 'Lo que « Añadir una operación » abre primero.', more: '+ Ver más', addEmo: '+ Añadir la tuya', addEmoQ: 'Tu emoción (una o dos palabras)', moreQ: '+ {n} preguntas más', addQ: '+ Añadir una pregunta', addQQ: 'Tu pregunta (ej. « ¿Esperé mi nivel? »)', also: 'También en (copy trading)', alsoS: 'También en', net: 'P&L neto (como en tu plataforma)', risk: 'Riesgo ($)', rHint: 'Introduce el P&L neto de tu plataforma.', rAdd: 'Añade el riesgo para ver la R.', verify: 'Revisar la operación ›', alsoH: 'La misma operación se guarda en cada cuenta elegida.', needDir: '¿Long o Short? Toca uno para guardar la operación.', shotQuota: '3 capturas al día con Free: rellena los datos principales, o léelas sin límite con Pro.', dupDay: 'Esta operación se parece a una ya guardada ese día. ¿Añadirla de todos modos?' } };
   const t = (k) => (T[L] || T.en)[k];
+  /* (brief avance, step 3) one field for a sentence or a screenshot: « long NQ 2 contracts +$400 » fills the sheet (api/ai/entry:
+     a plain sentence is read without AI, else Sweep AI with a strict JSON answer and a confidence per field); the low ones are
+     highlighted, the account is asked when several are possible; nothing is saved before « Save » */
+  const AI = {
+    en: { ph: 'Describe your trade or drop a screenshot', ex: 'e.g. « long NQ 2 contracts +$400 »', go: 'Fill in', reading: 'Reading your trade…', read: 'Filled in from your sentence: check the highlighted fields.', readOk: 'Filled in from your sentence: check and save.', fail: 'Sweep AI could not read this sentence: fill in the main fields.', quota: 'Your {n} AI entries this month are used: fill in the main fields.', sub: 'from your sentence', accAsk: 'Which account?', chk: 'Check', needAcc: 'Pick the account of this trade.', shotAcc: 'Read from the screenshot: pick the account of this trade.' },
+    fr: { ph: 'Décris ton trade ou dépose une capture', ex: 'ex. « long NQ 2 contrats +400 $ »', go: 'Remplir', reading: 'Lecture de ton trade…', read: 'Rempli à partir de ta phrase\u00a0: vérifie les champs en évidence.', readOk: 'Rempli à partir de ta phrase\u00a0: vérifie et enregistre.', fail: 'Sweep AI n’a pas pu lire cette phrase\u00a0: remplis les infos principales.', quota: 'Tes {n} saisies IA du mois sont utilisées\u00a0: remplis les infos principales.', sub: 'à partir de ta phrase', accAsk: 'Quel compte\u00a0?', chk: 'À vérifier', needAcc: 'Choisis le compte de ce trade.', shotAcc: 'Lu sur la capture\u00a0: choisis le compte de ce trade.' },
+    es: { ph: 'Describe tu operación o suelta una captura', ex: 'p. ej. « long NQ 2 contratos +400 $ »', go: 'Rellenar', reading: 'Leyendo tu operación…', read: 'Rellenado a partir de tu frase: revisa los campos resaltados.', readOk: 'Rellenado a partir de tu frase: revisa y guarda.', fail: 'Sweep AI no pudo leer esta frase: rellena los datos principales.', quota: 'Usaste tus {n} entradas con IA del mes: rellena los datos principales.', sub: 'a partir de tu frase', accAsk: '¿Qué cuenta?', chk: 'Revisar', needAcc: 'Elige la cuenta de esta operación.', shotAcc: 'Leído en la captura: elige la cuenta de esta operación.' } };
+  const ta = (k) => (AI[L] || AI.en)[k];
+  // the sheet's fields → the names of the entry's answer (its confidence per field)
+  const AK = { account: 'account_id', inst: 'instrument', dir: 'direction', qty: 'contracts', net: 'pnl_c', time: 'time', date: 'date', entry: 'entry', exit: 'exit' };
+  const lowC = (k) => (SH.aiLow && SH.aiLow.has(k) ? ' ai-low' : '');
+  const chk = (k) => (SH.aiLow && SH.aiLow.has(k) ? ` <em class="nav-ai-chk">${ta('chk')}</em>` : '');
+  const ICGO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const num = (v) => { const s = String(v == null ? '' : v).replace(/[\s\u00a0$]/g, '').replace(',', '.'); return s === '' || s === '-' || !isFinite(+s) ? null : +s; };
   const today = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
@@ -2365,7 +2378,7 @@ window.SweepMO = window.SweepMO || class {
   /* 2. the screenshot form */
   const SH = { file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: {} };
   function shotForm(opts) {
-    Object.assign(SH, { noShot: false, ctxOpen: false, dupOk: false, quotaShown: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || sheetDay(), qty: '1' } });
+    Object.assign(SH, { aiText: (opts && opts.aiText) || '', aiDone: false, aiBusy: false, aiLow: new Set(), aiAsk: false, noShot: false, ctxOpen: false, dupOk: false, quotaShown: false, batch: [], open: false, setup: '', copy: new Set(), allEmo: false, allQ: false, file: null, shot: null, src: '', dir: '', emo: new Set(), conf: 0, exec: 0, disc: {}, status: '', busy: false, f: { date: (opts && opts.date) || sheetDay(), qty: '1' } });
     const accs = ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
     SH.f.account = (accs[0] || {}).id || '';
     { const a0 = getDoc('accounts', SH.f.account); if (a0 && a0.group_id) (S.accounts || []).filter((x) => x.group_id === a0.group_id && x.id !== a0.id && x.status !== 'archived').forEach((x) => SH.copy.add(x.id)); }
@@ -2373,6 +2386,56 @@ window.SweepMO = window.SweepMO || class {
     SH.f.inst = typeof rookieInst === 'function' ? rookieInst(usual) : usual;   // (27 Oct.) starting out: the micro of the usual contract
     layer('nav-am-shot', '');
     paint();
+    if (opts && opts.aiText) aiRun(opts.aiText);   // typed on Today
+    else if (opts && opts.files && opts.files.length) takeFiles([...opts.files]);   // a screenshot dropped or chosen on Today
+  }
+  /** copy groups (« ou le groupe de copie », built separately): when they exist, offer each group here as one more option of
+   *  the account asked (picking one = its lead account in SH.f.account, the others in SH.copy). Today: the accounts only. */
+  function aiAccountOptions(accs) { return accs.map((a) => [a.id, typeof acctLabel === 'function' ? acctLabel(a.id) : a.name]); }
+  const accList = () => ((l) => (l.some((a) => !a.demo) ? l.filter((a) => !a.demo) : l))((S.accounts || []).filter((a) => a.status !== 'archived'));
+  /** several accounts and none known for this trade: the sheet asks (empty, highlighted, « Save » says so) */
+  function askAccount() { if (accList().length > 1 && !SH.f.accountPicked) { SH.f.account = ''; SH.copy = new Set(); SH.aiAsk = true; SH.aiLow.add('account_id'); } }
+  /* the sentence → the sheet filled in (never saved here) */
+  async function aiRun(text) {
+    text = String(text || '').trim(); if (!text || SH.aiBusy) return;
+    SH.aiText = text; SH.aiBusy = SH.busy = true; SH.status = ta('reading'); paint();
+    let res = null, j = {};
+    try {
+      res = await fetch('api/ai/entry', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ text, lang: L }) });
+      j = await res.json().catch(() => ({}));
+    } catch (e) { res = null; }
+    if (!document.querySelector('.nav-am-shot')) return;   // the sheet was closed meanwhile
+    SH.aiBusy = SH.busy = false; SH.aiDone = true; SH.aiLow = new Set(); SH.aiAsk = false;
+    if (res && res.status === 402) {   // the month's AI entries used: the plans' window, the sheet to fill by hand
+      SH.status = ta('quota').replace('{n}', j.limit || 10); paint();
+      if (window.SweepBilling && SweepBilling.handleApiError) SweepBilling.handleApiError(j);
+      return;
+    }
+    if (!res || !res.ok || !j.trade) { SH.status = ta('fail'); paint(); return; }
+    const tr = j.trade, accs = accList(), insts = typeof INSTR !== 'undefined' ? Object.keys(INSTR) : [];
+    (j.low || []).forEach((k) => SH.aiLow.add(k));
+    if (tr.account_id && accs.some((a) => a.id === tr.account_id)) { SH.f.account = tr.account_id; SH.f.accountPicked = true; SH.copy.delete(tr.account_id); }
+    else if (accs.length === 1) SH.f.account = accs[0].id;
+    else askAccount();
+    if (tr.instrument && (!insts.length || insts.includes(tr.instrument))) SH.f.inst = tr.instrument; else SH.aiLow.add('instrument');   // not said (or unknown): the usual one, to check
+    if (tr.direction) SH.dir = tr.direction; else SH.aiLow.add('direction');
+    if (tr.contracts) { SH.f.qty = String(tr.contracts); delete SH.f.turns; }
+    if (tr.entry != null) SH.f.entry = String(tr.entry);
+    if (tr.exit != null) SH.f.exit = String(tr.exit);
+    if (tr.pnl_c != null) SH.f.net = (tr.pnl_c / 100).toFixed(2); else if (tr.entry == null || tr.exit == null) SH.aiLow.add('pnl_c');
+    if (tr.time) SH.f.time = tr.time;
+    if (tr.date) SH.f.date = tr.date;
+    if (['instrument', 'contracts', 'time', 'date', 'entry', 'exit'].some((k) => SH.aiLow.has(k))) SH.open = true;   // « Check the trade » open on what to check
+    SH.status = SH.aiLow.size ? ta('read') : ta('readOk');
+    paint();
+  }
+  function aiBox() {
+    const ph = !!(window.SW_MQ6 && SW_MQ6.matches) || (window.matchMedia && matchMedia('(pointer: coarse)').matches);
+    return `<div class="nav-ai-box" data-ai-box>
+      <div class="nav-ai-in"><textarea data-ai-text rows="2" enterkeyhint="go" autocomplete="off" placeholder="${esc2(ta('ph'))}" aria-label="${esc2(ta('ph'))}" ${SH.aiBusy ? 'disabled' : ''}>${esc2(SH.aiText)}</textarea>
+        <button type="button" class="nav-ai-go" data-am="ai-go" aria-label="${esc2(ta('go'))}" ${SH.aiText.trim() && !SH.aiBusy ? '' : 'hidden'}>${ICGO}</button></div>
+      <label class="nav-am-drop nav-ai-pick"><span class="nav-am-ic">${ICS}</span><b>${t(ph ? 'dropT' : 'drop')}</b><input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
+      ${SH.status ? `<p class="nav-am-st ${SH.busy ? 'busy' : ''}">${SH.status}</p>` : `<small class="nav-ai-ex muted">${esc2(ta('ex'))}</small>`}</div>`;
   }
   // the coach before this trade (brief 03 step 3, src/coach.js): one trade only (not a batch of screenshots)
   const coachBefore = () => (!SH.batch.length && window.SweepCoach && SweepCoach.before ? SweepCoach.before({ form: 'shot', account: SH.f.account, date: SH.f.date, qty: +SH.f.qty || 0, time: String(SH.f.time || '').slice(0, 5), setup: SH.setup, dir: SH.dir, inst: SH.f.inst }) : '');
@@ -2394,13 +2457,13 @@ window.SweepMO = window.SweepMO || class {
     // (31 Oct., C1) on a phone: « Choose a screenshot », one « Without a screenshot › » (the full form is inside it), never Ctrl+V,
     // and the screenshot area does not come back once in the P&L entry
     const ph = !!(window.SW_MQ6 && SW_MQ6.matches);
-    const pnl = autoPnl(), has = !!(SH.batch.length || SH.src || SH.noShot);   // the screenshot is there (or « No screenshot? »): the rest of the sheet shows
+    const pnl = autoPnl(), has = !!(SH.batch.length || SH.src || SH.noShot || SH.aiDone);   // the screenshot is there (or « No screenshot? », or a sentence read): the rest of the sheet shows
     el.closest('.nav-am').classList.toggle('nav-am-min', !has);   // before it: a short sheet, its height its content (phone)
-    const fld = (k, label, attrs = '') => `<label class="tk-f"><span>${label}</span><div class="tk-in"><input data-am-f="${k}" value="${esc2(SH.f[k] ?? '')}" ${attrs}></div></label>`;
+    const fld = (k, label, attrs = '') => `<label class="tk-f${lowC(AK[k])}"><span>${label}${chk(AK[k])}</span><div class="tk-in"><input data-am-f="${k}" value="${esc2(SH.f[k] ?? '')}" ${attrs}></div></label>`;
     const seg = (key, vals, cur) => `<div class="seg yn">${vals.map(([v, l]) => `<button type="button" class="${String(cur) === String(v) ? 'on' : ''}" data-am-seg="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
     // same header as the manual form: title, subtitle, the other way, « Cancel » on the right
-    el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${t(SH.noShot && !SH.src ? 'subNo' : 'sub')}</span>${has ? `<button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button>` : ''}</div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
-      ${SH.batch.length ? batchTop() : ph && SH.noShot && !SH.src ? '' : `<label class="nav-am-drop ${SH.src ? 'has' : SH.noShot ? 'slim' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t(ph || (window.matchMedia && matchMedia('(pointer: coarse)').matches) ? 'dropT' : 'drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
+    el.innerHTML = `<div class="tk-head nav-am-head"><div><h2>${t('title')}</h2><span class="muted">${SH.aiDone && !SH.src ? ta('sub') : t(SH.noShot && !SH.src ? 'subNo' : 'sub')}</span>${has ? `<button type="button" class="link nav-am-sw" data-am="to-manual">${t('toMan')}</button>` : ''}</div><button type="button" class="link" data-am="close">${t('cancel')}</button></div>
+      ${SH.batch.length ? batchTop() : !has ? aiBox() : SH.aiDone && !SH.src ? `${ph ? '' : `<label class="nav-am-drop slim"><span class="nav-am-ic">${ICS}</span><b>${t('drop')}</b><input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>`}<p class="nav-ai-said" data-noi18n>« ${esc2(SH.aiText)} »</p>${SH.status ? `<p class="nav-am-st">${SH.status}</p>` : ''}` : ph && SH.noShot && !SH.src ? '' : `<label class="nav-am-drop ${SH.src ? 'has' : SH.noShot ? 'slim' : ''}">${SH.src ? `<img src="${SH.src}" alt="">` : `<span class="nav-am-ic">${ICS}</span><b>${t(ph || (window.matchMedia && matchMedia('(pointer: coarse)').matches) ? 'dropT' : 'drop')}</b>`}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-am-file></label>
       ${SH.status ? `<p class="nav-am-st ${SH.busy ? 'busy' : ''}">${SH.status}</p>` : ''}`}
       ${has ? '' : `<button type="button" class="link nav-am-noshot" data-am="no-shot">${t(ph ? 'noShotP' : 'noShot')}</button>`}
       ${/* (SWEEP.md step 2) the same quick sheet without an image: account, net P&L, Long / Short, setup… — no prices to type */ ''}
@@ -2408,15 +2471,15 @@ window.SweepMO = window.SweepMO || class {
       ${/* nothing else until the screenshot is there (18 Oct., Mateo: a minimal first screen) */ ''}${has ? `
       <div class="nav-am-co">${coachBefore()}</div>
       <div class="nav-am-grid">
-        <div class="tk-f nav-am-wide"><span>${t('acc')}</span>${pickBox('account', accs.map((a) => [a.id, typeof acctLabel === 'function' ? acctLabel(a.id) : a.name]), SH.f.account)}</div>
-        ${accs.length > 1 ? `<div class="tk-copies nav-am-wide nav-am-copy"><span class="help">${t('alsoS')}</span>${accs.filter((a) => a.id !== SH.f.account).map((a) => `<button type="button" class="chip ${SH.copy.has(a.id) ? 'on' : ''}" data-am-copy="${esc2(a.id)}">${esc2(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</button>`).join('')}</div>` : ''}
-        ${SH.batch.length ? batchList() : `<label class="tk-f nav-am-net"><span>${t('net')}</span><div class="tk-in"><input data-am-f="net" inputmode="decimal" value="${esc2(SH.f.net ?? '')}" placeholder="${pnl != null ? ((pnl - (SH.f.fees || 0)) / 100).toFixed(2) : '+250'}"></div></label>
-        <div class="tk-f nav-am-dir"><span>${t('dir')}</span>${seg('dir', [['long', t('long')], ['short', t('short')]], SH.dir)}</div>
+        <div class="tk-f nav-am-wide${lowC('account_id')}"><span>${t('acc')}${chk('account_id')}</span>${pickBox('account', aiAccountOptions(accs), SH.f.account, SH.aiAsk ? ta('accAsk') : '')}</div>
+        ${accs.length > 1 && SH.f.account ? `<div class="tk-copies nav-am-wide nav-am-copy"><span class="help">${t('alsoS')}</span>${accs.filter((a) => a.id !== SH.f.account).map((a) => `<button type="button" class="chip ${SH.copy.has(a.id) ? 'on' : ''}" data-am-copy="${esc2(a.id)}">${esc2(typeof acctLabel === 'function' ? acctLabel(a.id) : a.name)}</button>`).join('')}</div>` : ''}
+        ${SH.batch.length ? batchList() : `<label class="tk-f nav-am-net${lowC('pnl_c')}"><span>${t('net')}${chk('pnl_c')}</span><div class="tk-in"><input data-am-f="net" inputmode="decimal" value="${esc2(SH.f.net ?? '')}" placeholder="${pnl != null ? ((pnl - (SH.f.fees || 0)) / 100).toFixed(2) : '+250'}"></div></label>
+        <div class="tk-f nav-am-dir${lowC('direction')}"><span>${t('dir')}${chk('direction')}</span>${seg('dir', [['long', t('long')], ['short', t('short')]], SH.dir)}</div>
         ${window.SweepSetupPick ? `<div class="nav-am-wide">${SweepSetupPick.html(SH.f.date, SH.setup)}</div>` : ''}
         <label class="tk-f nav-am-risk"><span>${t('risk')}</span><div class="tk-in"><input data-am-f="risk" inputmode="decimal" value="${esc2(SH.f.risk ?? '')}" placeholder="$"></div></label>
         <div class="nav-am-r nav-am-wide">${rLine()}</div>
         <details class="nav-am-more-d nav-am-wide" ${SH.open ? 'open' : ''}><summary>${t('verify')}<small>${verifyLine()}</small></summary><div class="nav-am-grid">
-        <div class="tk-f nav-am-wide"><span>${t('sym')}</span>${pickBox('inst', insts.map((k) => [k, k + (typeof INSTR !== 'undefined' && INSTR[k] && INSTR[k].name ? ' — ' + INSTR[k].name : '')]), SH.f.inst)}${typeof rookieRule === 'function' ? rookieRule(SH.f.inst) : ''}</div>
+        <div class="tk-f nav-am-wide${lowC('instrument')}"><span>${t('sym')}${chk('instrument')}</span>${pickBox('inst', insts.map((k) => [k, k + (typeof INSTR !== 'undefined' && INSTR[k] && INSTR[k].name ? ' — ' + INSTR[k].name : '')]), SH.f.inst)}${typeof rookieRule === 'function' ? rookieRule(SH.f.inst) : ''}</div>
         ${fld('qty', t('qty'), 'inputmode="numeric"')}
         ${fld('date', t('date'), 'type="date"')}${fld('time', t('time'), 'placeholder="hh:mm"')}
         ${fld('entry', t('entry'), 'inputmode="decimal"')}${fld('exit', t('exit'), 'inputmode="decimal"')}
@@ -2446,9 +2509,9 @@ window.SweepMO = window.SweepMO || class {
   const CTX = ({ en: ['+ Add context (optional)'], fr: ['+ Ajouter le contexte (facultatif)'], es: ['+ Añadir el contexto (opcional)'] })[L] || ['+ Add context (optional)'];
   function ctxFold() { const v = num(SH.f.net); return !SH.batch.length && !SH.ctxOpen && v != null && v < 0; }
   function ctxPaint() { const w = document.querySelector('.nav-am .nav-am-ctxw'); if (w) w.classList.toggle('fold', ctxFold()); }
-  function pickBox(k, opts, cur) {
-    const lab = (opts.find((o) => o[0] === cur) || opts[0] || ['', ''])[1];
-    return `<div class="nav-am-sel ${SH.openPick === k ? 'open' : ''}" data-noi18n><button type="button" class="nav-am-selb" data-am-sel="${k}" aria-expanded="${SH.openPick === k}"><span>${esc2(lab)}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>${SH.openPick === k ? `<div class="nav-am-opts" role="listbox">${opts.map((o) => `<button type="button" role="option" class="${o[0] === cur ? 'on' : ''}" data-am-pickf="${k}" data-v="${esc2(o[0])}">${esc2(o[1])}</button>`).join('')}</div>` : ''}</div>`;
+  function pickBox(k, opts, cur, ph) {
+    const hit = opts.find((o) => o[0] === cur), lab = hit ? hit[1] : ph || (opts[0] || ['', ''])[1];   // ph: nothing chosen yet (« Which account? »)
+    return `<div class="nav-am-sel ${SH.openPick === k ? 'open' : ''}" data-noi18n><button type="button" class="nav-am-selb${!hit && ph ? ' ph' : ''}" data-am-sel="${k}" aria-expanded="${SH.openPick === k}"><span>${esc2(lab)}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>${SH.openPick === k ? `<div class="nav-am-opts" role="listbox">${opts.map((o) => `<button type="button" role="option" class="${o[0] === cur ? 'on' : ''}" data-am-pickf="${k}" data-v="${esc2(o[0])}">${esc2(o[1])}</button>`).join('')}</div>` : ''}</div>`;
   }
   /* several screenshots: one trade each, same account, discipline and psychology for all */
   function batchTop() {
@@ -2682,6 +2745,7 @@ window.SweepMO = window.SweepMO || class {
       const d = trs[0];
       if (d) {   // one trade: the screen as before
         if (j.account_suggest && !SH.f.accountPicked) SH.f.account = j.account_suggest;
+        else askAccount();   // (brief avance, step 3) several accounts, none on the screenshot: the sheet asks
         if (d.instrument) SH.f.inst = d.instrument;
         if (d.direction) SH.dir = d.direction;
         if (d.contracts) SH.f.qty = String(d.contracts);
@@ -2692,7 +2756,7 @@ window.SweepMO = window.SweepMO || class {
         if (d.exit != null) SH.f.exit = String(d.exit);
         if (d.pnl_c != null) SH.f.net = ((d.pnl_c - (d.fees_c || 0)) / 100).toFixed(2);
         SH.f.exitTime = d.exit_time || ''; SH.f.fees = d.fees_c || 0;
-        SH.status = t('read');
+        SH.status = SH.aiAsk ? ta('shotAcc') : t('read');
       } else {
         // say why: the server's message, a symbol Sweep does not know, or no trade table on the image
         const W = { en: ['No trade table found on this screenshot.', 'Symbol not known by Sweep: {s}.', 'Sweep AI could not read it ({e}).'], fr: ['Aucun tableau de trades trouvé sur cette capture.', 'Symbole inconnu de Sweep : {s}.', 'Sweep AI n’a pas pu la lire ({e}).'], es: ['No se encontró una tabla de operaciones en esta captura.', 'Símbolo desconocido para Sweep: {s}.', 'Sweep AI no pudo leerla ({e}).'] }[L] || null;
@@ -2726,7 +2790,7 @@ window.SweepMO = window.SweepMO || class {
     if (!SH.dir && e != null && x != null && typed != null) SH.dir = (x > e) === (typed > 0) ? 'long' : 'short';   // read from the prices
     if (!SH.dir && quiet) SH.dir = 'long';   // several screenshots: the side read on each (as before)
     const net = typed != null ? typed : netC();
-    if (!SH.f.account || net == null) { if (err) err.textContent = t('need'); return; }
+    if (!SH.f.account || net == null) { if (err) err.textContent = !SH.f.account && SH.aiAsk ? ta('needAcc') : t('need'); if (!SH.f.account && SH.aiAsk) { const b = document.querySelector('.nav-am-shot .nav-am-selb[data-am-sel=account]'); if (b) b.focus(); } return; }
     if (!SH.dir) { if (err) err.textContent = t('needDir'); return; }   // never guessed on the quick sheet
     const pnl = net + (SH.f.fees || 0);
     // no entry time on today's session: the New York time of the save (todayStr() is already the session: 18:00 ET or later = next day)
@@ -2763,9 +2827,9 @@ window.SweepMO = window.SweepMO || class {
     if (a.dataset.sp != null) { SH.setup = window.SweepSetupPick ? SweepSetupPick.tap(a, SH.setup) : ''; repaintKeep(); return; }   // the coach (edge T3) and the questions (edge T7) follow the setup; the row keeps its scroll
     if (a.dataset.amRm) { SH.batch = SH.batch.filter((b) => b.id !== a.dataset.amRm); if (SH.batch.length === 1) { const b = SH.batch[0]; SH.batch = []; Object.assign(SH, { file: b.file, src: b.src, shot: b.shot, dir: b.f.dir || SH.dir }); Object.assign(SH.f, b.f); } paint(); return; }
     if (a.dataset.amSel) { SH.openPick = SH.openPick === a.dataset.amSel ? null : a.dataset.amSel; paint(); return; }
-    if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; if (a.dataset.amPickf === 'account') SH.f.accountPicked = true; SH.openPick = null; if (a.dataset.amPickf === 'account') SH.copy.delete(a.dataset.v); paint(); return; }
+    if (a.dataset.amPickf) { SH.f[a.dataset.amPickf] = a.dataset.v; SH.aiLow.delete(AK[a.dataset.amPickf]); if (a.dataset.amPickf === 'account') { SH.f.accountPicked = true; SH.aiAsk = false; } SH.openPick = null; if (a.dataset.amPickf === 'account') SH.copy.delete(a.dataset.v); paint(); return; }
     if (a.dataset.amCopy) { const k = a.dataset.amCopy; SH.copy.has(k) ? SH.copy.delete(k) : SH.copy.add(k); a.classList.toggle('on'); return; }
-    if (a.dataset.amSeg) { const k = a.dataset.amSeg, v = a.dataset.v; if (k === 'dir') SH.dir = v; else if (k === 'conf') SH.conf = +v; else if (k === 'exec') SH.exec = +v; else if (k.startsWith('d:')) SH.disc[k.slice(2)] = v; paint(); return; }
+    if (a.dataset.amSeg) { const k = a.dataset.amSeg, v = a.dataset.v; if (k === 'dir') { SH.dir = v; SH.aiLow.delete('direction'); } else if (k === 'conf') SH.conf = +v; else if (k === 'exec') SH.exec = +v; else if (k.startsWith('d:')) SH.disc[k.slice(2)] = v; paint(); return; }
     if (a.dataset.amEmo) { const k = a.dataset.amEmo; SH.emo.has(k) ? SH.emo.delete(k) : SH.emo.add(k); a.classList.toggle('on'); return; }
     const act = a.dataset.am;
     if (act === 'emo-more') { SH.allEmo = true; paint(); return; }
@@ -2783,6 +2847,7 @@ window.SweepMO = window.SweepMO || class {
       paint(); return;
     }
     if (act === 'close') close();
+    if (act === 'ai-go') { const x = document.querySelector('.nav-am-shot [data-ai-text]'); aiRun(x ? x.value : SH.aiText); return; }
     if (act === 'ctx-open') { SH.ctxOpen = true; ctxPaint(); return; }
     if (act === 'save') save();
     if (act === 'dupok') { SH.dupOk = true; save(); }
@@ -2792,7 +2857,10 @@ window.SweepMO = window.SweepMO || class {
   document.addEventListener('toggle', (e) => { if (e.target.classList && e.target.classList.contains('nav-am-more-d')) SH.open = e.target.open; }, true);
   document.addEventListener('input', (e) => {
     const bn = e.target.closest && e.target.closest('.nav-am [data-am-bnet]'); if (bn) { const b = SH.batch.find((x) => x.id === bn.dataset.amBnet); if (b) b.f.net = bn.value; return; }
+    const tx = e.target.closest && e.target.closest('.nav-am [data-ai-text]');
+    if (tx) { SH.aiText = tx.value; const g = document.querySelector('.nav-am-shot .nav-ai-go'); if (g) g.hidden = !tx.value.trim(); return; }
     const f = e.target.closest && e.target.closest('.nav-am [data-am-f]'); if (!f) return;
+    { const ak = AK[f.dataset.amF]; if (ak && SH.aiLow.delete(ak)) { const w = f.closest('.tk-f'); if (w) { w.classList.remove('ai-low'); const c = w.querySelector('.nav-ai-chk'); if (c) c.remove(); } } }   // corrected by the trader: no longer highlighted
     SH.f[f.dataset.amF] = f.value; if (f.dataset.amF === 'qty') delete SH.f.turns;   // contracts typed by the trader: a simple trade of that size
     const v = autoPnl(), p = document.querySelector('.nav-am-net input'); if (p) p.placeholder = v != null ? ((v - (SH.f.fees || 0)) / 100).toFixed(2) : '+250';
     const r = document.querySelector('.nav-am-r'); if (r) r.innerHTML = rLine();
@@ -2803,6 +2871,34 @@ window.SweepMO = window.SweepMO || class {
     const f = e.target.closest && e.target.closest('.nav-am [data-am-file]'); if (f && f.files.length) { takeFiles([...f.files]); return; }
     const s = e.target.closest && e.target.closest('.nav-am select[data-am-f]'); if (s) SH.f[s.dataset.amF] = s.value;
   });
+  // the sentence sent with Enter (Shift+Enter: a new line); a screenshot dropped on the field (here and on Today)
+  document.addEventListener('keydown', (e) => {
+    const x = e.target.closest && e.target.closest('.nav-am [data-ai-text]');
+    if (x && e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); aiRun(x.value); }
+  });
+  document.addEventListener('dragover', (e) => { if (e.target.closest && e.target.closest('.nav-ai-box, .nav-ai-today')) e.preventDefault(); });
+  document.addEventListener('drop', (e) => {
+    const box = e.target.closest && e.target.closest('.nav-ai-box, .nav-ai-today'); if (!box) return;
+    const fs = [...((e.dataTransfer && e.dataTransfer.files) || [])].filter((f) => /^image\//.test(f.type)); if (!fs.length) return;
+    e.preventDefault();
+    if (box.classList.contains('nav-ai-today')) { if (typeof openTicket === 'function') openTicket(null, { files: fs }); } else takeFiles(fs);
+  });
+  /* Today: the same field, one line under the day's card; it opens the sheet with the sentence read, or the screenshot */
+  const ICAI = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
+  window.SweepAiToday = function (host) {
+    if (!host || !accList().length) { const o = host && host.querySelector('.nav-ai-today'); if (o) o.remove(); return; }
+    let el = host.querySelector(':scope > .nav-ai-today');
+    if (!el) {
+      el = document.createElement('form'); el.className = 'nav-ai-today'; el.setAttribute('data-noi18n', ''); el.setAttribute('autocomplete', 'off');
+      el.innerHTML = `<span class="nav-ai-ic">${ICAI}</span><input type="text" data-ai-today enterkeyhint="go" placeholder="${esc2(ta('ph'))}" aria-label="${esc2(ta('ph'))}"><label class="nav-ai-cam" aria-label="${esc2(t('dropT'))}">${ICS}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden multiple data-ai-today-file></label><button type="submit" class="nav-ai-go" aria-label="${esc2(ta('go'))}" hidden>${ICGO}</button>`;
+      el.addEventListener('submit', (e) => { e.preventDefault(); const i = el.querySelector('[data-ai-today]'), v = i.value.trim(); if (!v) return; i.value = ''; el.querySelector('.nav-ai-go').hidden = true; i.blur(); if (typeof openTicket === 'function') openTicket(null, { aiText: v }); });
+      el.addEventListener('input', (e) => { if (e.target.matches('[data-ai-today]')) el.querySelector('.nav-ai-go').hidden = !e.target.value.trim(); });
+      el.addEventListener('change', (e) => { const f = e.target.closest('[data-ai-today-file]'); if (f && f.files.length) { const fs = [...f.files]; f.value = ''; if (typeof openTicket === 'function') openTicket(null, { files: fs }); } });
+    }
+    const card = host.querySelector(':scope > .nav-rt');
+    if (card && el.previousElementSibling !== card) card.after(el); else if (!card && !el.parentNode) host.prepend(el);
+  };
+
   /* (the default is no longer switched to « by hand » after a manual trade: screenshot stays first) */
   document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('[data-am-imp]'); if (a) { e.preventDefault(); close(); setTimeout(impSheet, 280); } });   // the CSV in a sheet too (19 Oct.)
   document.addEventListener('paste', (e) => {
@@ -4516,6 +4612,7 @@ window.SweepMO = window.SweepMO || class {
   function place() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
     const host = document.querySelector('#main .d-today'); if (!host) return;
+    if (window.SweepAiToday) SweepAiToday(host);   // (brief avance, step 3) « Describe your trade or drop a screenshot », under the card
     const cl = rtClosed(); const cur = host.querySelector('.nav-rt'); if (cur) cur.classList.toggle('closed-rt', cl && !cur.classList.contains('nav-lockd'));   // (the closed day never folds)
     const html = card(); if (!html) return;
     let el = host.querySelector('.nav-rt');

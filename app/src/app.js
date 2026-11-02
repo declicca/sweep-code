@@ -7597,6 +7597,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_ai_quota: "Free includes {n} a day. Pro gives you {m}.",
       h_shot_quota: "You’ve read today’s 3 screenshots",
       s_shot_quota: "Free reads 3 screenshots a day, again from midnight (New York). Pro reads them without limit.",
+      h_entry_quota: "You’ve used this month’s 10 AI entries",
+      s_entry_quota: "Free logs 10 trades a month from a sentence with Sweep AI, again on the 1st (New York). Pro logs 150 a month.",
+      h_entry_quota_pro: "You’ve used this month’s 150 AI entries",
+      s_entry_quota_pro: "Elite logs your trades from a sentence with no monthly limit.",
       h_ai_quota_pro: "You’ve used today’s AI messages",
       s_ai_quota_pro: "Elite gives you {m} a day.",
       h_ai_import: "Stop typing your trades",
@@ -7657,6 +7661,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       f_payouts: "My money: payouts, expenses and real net",
       f_ai_daily: "Sweep AI messages",
       f_ai_import: "Trades read from a screenshot",
+      f_ai_entry: "Trades logged from a sentence",
       f_ai_reviews: "AI trade reviews",
       f_calendar: "Economic calendar notes",
       f_weekly: "Weekly AI report",
@@ -7759,6 +7764,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_ai_quota: "Free en inclut {n} par jour. Pro t’en donne {m}.",
       h_shot_quota: "Tu as utilisé tes 3 captures du jour",
       s_shot_quota: "Free lit 3 captures par jour, de nouveau dès minuit (New York). Pro les lit sans limite.",
+      h_entry_quota: "Tu as utilisé tes 10 saisies IA du mois",
+      s_entry_quota: "Free note 10 trades par mois à partir d’une phrase avec Sweep AI, de nouveau le 1er (New York). Pro en note 150 par mois.",
+      h_entry_quota_pro: "Tu as utilisé tes 150 saisies IA du mois",
+      s_entry_quota_pro: "Elite note tes trades à partir d’une phrase, sans limite par mois.",
       h_ai_quota_pro: "Tu as utilisé tes messages IA du jour",
       s_ai_quota_pro: "Elite t’en donne {m} par jour.",
       h_ai_import: "Arrête de taper tes trades",
@@ -7819,6 +7828,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       f_payouts: "Mon argent : payouts, dépenses et vrai net",
       f_ai_daily: "Messages Sweep AI",
       f_ai_import: "Trades lus depuis une capture",
+      f_ai_entry: "Trades notés à partir d’une phrase",
       f_ai_reviews: "Avis IA sur un trade",
       f_calendar: "Notes du calendrier économique",
       f_weekly: "Rapport IA de la semaine",
@@ -7921,6 +7931,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       s_ai_quota: "Free incluye {n} al día. Pro te da {m}.",
       h_shot_quota: "Usaste tus 3 capturas de hoy",
       s_shot_quota: "Free lee 3 capturas al día, de nuevo desde medianoche (Nueva York). Pro las lee sin límite.",
+      h_entry_quota: "Usaste tus 10 entradas con IA del mes",
+      s_entry_quota: "Free registra 10 operaciones al mes a partir de una frase con Sweep AI, de nuevo el día 1 (Nueva York). Pro registra 150 al mes.",
+      h_entry_quota_pro: "Usaste tus 150 entradas con IA del mes",
+      s_entry_quota_pro: "Elite registra tus operaciones a partir de una frase, sin límite mensual.",
       h_ai_quota_pro: "Usaste tus mensajes de IA de hoy",
       s_ai_quota_pro: "Elite te da {m} al día.",
       h_ai_import: "Deja de escribir tus trades",
@@ -7981,6 +7995,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       f_payouts: "Mi dinero: payouts, gastos y neto real",
       f_ai_daily: "Mensajes de Sweep AI",
       f_ai_import: "Operaciones leídas desde una captura",
+      f_ai_entry: "Operaciones registradas a partir de una frase",
       f_ai_reviews: "Opiniones de IA sobre una operación",
       f_calendar: "Notas del calendario económico",
       f_weekly: "Informe semanal de IA",
@@ -8076,6 +8091,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       plan: "pro",
       b: [ "b_ai_import", "b_ai_more", "b_accounts" ]
     },
+    entry_quota: {
+      plan: "pro",
+      b: [ "b_ai_import", "b_ai_more", "b_accounts" ]
+    },
     ai_review: {
       plan: "elite",
       b: [ "b_reviews_all", "b_weekly", "b_calendar" ]
@@ -8116,6 +8135,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     payouts: "payouts",
     ai_import: "ai_import",
     ai_import_daily: "shot_quota",
+    ai_entry_monthly: "entry_quota",
     ai_daily: "ai_quota",
     ai_reviews: "ai_review",
     calendar_notes: "calendar_notes",
@@ -8344,6 +8364,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     if (Z === "ai_quota" && i && i.plan === "pro") return [ l("h_ai_quota_pro"), l("s_ai_quota_pro", {
       m: G.ai_daily
     }) ];
+    if (Z === "entry_quota" && i && i.plan === "pro") return [ l("h_entry_quota_pro"), l("s_entry_quota_pro") ];
     const ge = i && i.trial ? R(i.trial.days_left) : "";
     return [ l("h_" + Z, {
       d: ge
@@ -8555,7 +8576,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       n: ie
     }) : de === "month" || de === "rev" ? l("per_month_n", {
       n: ie
-    }) : de === "notes" ? l(ie) : String(ie)), G = [ [ "f_accounts", "accounts", "" ], [ "f_history", "analytics_days", "hist" ], [ "f_payouts", "payouts", "bool" ], [ "f_ai_daily", "ai_daily", "day" ], [ "f_ai_import", "ai_import_daily", "day" ], [ "f_ai_reviews", "ai_reviews", "rev" ], [ "f_calendar", "calendar_notes", "notes" ], [ "f_weekly", "weekly_report", "bool" ], [ "f_support", "priority_support", "bool" ] ];
+    }) : de === "notes" ? l(ie) : String(ie)), G = [ [ "f_accounts", "accounts", "" ], [ "f_history", "analytics_days", "hist" ], [ "f_payouts", "payouts", "bool" ], [ "f_ai_daily", "ai_daily", "day" ], [ "f_ai_import", "ai_import_daily", "day" ], [ "f_ai_entry", "ai_entry_monthly", "month" ], [ "f_ai_reviews", "ai_reviews", "rev" ], [ "f_calendar", "calendar_notes", "notes" ], [ "f_weekly", "weekly_report", "bool" ], [ "f_support", "priority_support", "bool" ] ];
     const pr = de => {
       if (de === "free") return { s: "", b: v(0), sub: "" };
       const m = (i.prices[de] || {}).month || {}, cur = (i.prices[de] || {})[A] || {}, now = cur.founding ?? cur.amount ?? 0, per = A === "year" ? now / 12 : now, full = m.amount || 0;

@@ -22,7 +22,7 @@ import hashlib, hmac, json, os, signal, sqlite3, subprocess, sys, time, urllib.r
 from playwright.sync_api import sync_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
-APPDIR = '/tmp/g'   # the served copy (each shard has its own)
+APPDIR = os.path.dirname(os.path.dirname(os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')))   # the served copy (its data/ holds the database; each shard has its own)
 P1 = int(B.rsplit(':', 1)[1]) + 1; B1 = f'http://127.0.0.1:{P1}'
 DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
 SECRET = 'whsec_local_test_only'   # tools/billing-config.local.php

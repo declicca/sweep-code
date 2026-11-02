@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from playwright.sync_api import sync_playwright
 B0 = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
-APPDIR = '/tmp/g'   # the served copy (each shard has its own)
+APPDIR = os.path.dirname(os.path.dirname(os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')))   # the served copy (its data/ holds the database; each shard has its own)
 P = int(B0.rsplit(':', 1)[1]); B = f'http://127.0.0.1:{P + 2}'; MOCK = P + 3
 DB = os.environ.get('SWEEP_TEST_DB', APPDIR + '/data/journal.db')
 H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
