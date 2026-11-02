@@ -53,7 +53,7 @@ async def main():
     ok(len([x for x in row if x != '⋯']) == 1 and '⋯' in row, f'B12 one button + the « ⋯ » menu ({row})')
     items = await pg.evaluate("[...document.querySelectorAll('#main .acc-menu .menu-pop button')].map(b=>b.textContent.trim())")
     ok(any('Retirer le compte' in x for x in items) and not any('Fermer' in x for x in items) and any('chou' in x for x in items) and any('Supprimer' in x for x in items), f'B12 the menu: remove (with a result, 15 Oct.), mark as failed, delete ({items})')
-    backs = await pg.evaluate("[...document.querySelectorAll('.main-wrap a[href=\"#accounts\"]')].filter(a=>a.getClientRects().length).length")   # (1 Nov., brief visuel C1) the back link is in the header, above the title
+    backs = await pg.evaluate("[...document.querySelectorAll('.main-wrap a[href=\"#accounts\"], aside.side > .top-back[href=\"#accounts\"]')].filter(a=>a.getClientRects().length).length")   # (1 Nov., brief visuel C1) the back link is in the header, above the title (2 Nov.: on a phone, in the header row)
     ok(backs == 1, f'B12 one way back ({backs})')
     ok('Ouvrir le tableau de bord' not in await pg.evaluate("document.getElementById('main').innerText"), 'B12 no « Ouvrir le tableau de bord »')
     txt = await pg.evaluate("document.getElementById('main').innerText")

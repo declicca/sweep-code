@@ -21,7 +21,7 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'q': 'Ton solde sur Topstep ?', 'same': 'C’est le même', 'need': 'Confirme ton solde sur Topstep.', 'gap': 'Il manque', 'what': 'C’était quoi ?', 'trades': 'Des trades pas notés', 'fees': 'Des frais', 'payout': 'Un payout', 'line': 'Trades non détaillés', 'detail': 'Ajouter le détail'},
+X = {'fr': {'q': 'Ton solde sur Topstep\xa0?', 'same': 'C’est le même', 'need': 'Confirme ton solde sur Topstep.', 'gap': 'Il manque', 'what': 'C’était quoi\xa0?', 'trades': 'Des trades pas notés', 'fees': 'Des frais', 'payout': 'Un payout', 'line': 'Trades non détaillés', 'detail': 'Ajouter le détail'},
      'en': {'q': 'Your balance on Topstep?', 'same': 'It matches', 'need': 'Confirm your balance on Topstep.', 'gap': 'missing between your platform', 'what': 'What was it?', 'trades': 'Trades I didn’t log', 'fees': 'Fees', 'payout': 'A payout', 'line': 'Trades not detailed', 'detail': 'Add the detail'},
      'es': {'q': '¿Tu saldo en Topstep?', 'same': 'Es el mismo', 'need': 'Confirma tu saldo en Topstep.', 'gap': 'Faltan', 'what': '¿Qué fue?', 'trades': 'Operaciones sin anotar', 'fees': 'Comisiones', 'payout': 'Un payout', 'line': 'Operaciones sin detallar', 'detail': 'Añadir el detalle'}}
 ACC = "([id, name]) => put('accounts', { id, name, firm_id: 'pb-f', status: 'active', phase: 'eval', starting_balance_c: 5000000, created_on: '2026-09-01', rules: { dd_c: 200000, dd_type: 'eod', dll_c: 100000, target_c: 300000, consistency_pct: 50 } })"

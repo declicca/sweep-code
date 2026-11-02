@@ -135,7 +135,7 @@ def case_fr(p, phone):
   opts = pg.inner_text('#sySheet .sy-opts')
   chips = pg.eval_on_selector_all('#sySheet .sy-sub .sy-chip', 'l => l.map(x => x.textContent)')
   ok(chips == ['Apex · Évaluation', 'Rithmic'], f'{tag}: the account\'s chips, « Apex » once ({chips})')
-  ok('Apex 1' in opts and '+ Nouveau compte' in opts and 'Ignorer ce compte' in opts and 'C’est quel compte Sweep ?' in pg.inner_text('#sySheet'), f'{tag}: link sheet: the Sweep account, + Nouveau compte, Ignorer ce compte')
+  ok('Apex 1' in opts and '+ Nouveau compte' in opts and 'Ignorer ce compte' in opts and 'C’est quel compte Sweep\xa0?' in pg.inner_text('#sySheet'), f'{tag}: link sheet: the Sweep account, + Nouveau compte, Ignorer ce compte')
   tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000); pg.wait_for_timeout(300)
   pv = pg.inner_text('#sySheet .sy-pv')
   ok('1 trade à ajouter' in pv and '1 trade saisi à la main, complété (tes notes restent)' in pv, f'{tag}: preview: 1 trade to add, 1 typed by hand completed')

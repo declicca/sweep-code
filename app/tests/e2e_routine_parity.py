@@ -144,7 +144,7 @@ async def main():
       await review(page)
     async def review(page):   # 60 seconds: three taps and one optional sentence
       qs = await page.evaluate("[...document.querySelectorAll('#gSheet .g-f > span')].map(x => x.textContent.trim())")
-      ok(qs[:5] == ['As-tu suivi ta fiche ?', 'Quelle règle ?', 'Discipline aujourd’hui', 'Ta note du jour', 'Une note pour demain ? Elle s’affiche en haut de ton prochain pré-marché.'] and all(q.startswith('Ton solde sur ') for q in qs[5:]), f'review: the sheet\'s questions (a day with a pre-market sheet, brief step 7; the platform\'s balance, « pertes oubliées » step 2) ({qs})')
+      ok(qs[:5] == ['As-tu suivi ta fiche\xa0?', 'Quelle règle\xa0?', 'Discipline aujourd’hui', 'Ta note du jour', 'Une note pour demain ? Elle s’affiche en haut de ton prochain pré-marché.'] and all(q.startswith('Ton solde sur ') for q in qs[5:]), f'review: the sheet\'s questions (a day with a pre-market sheet, brief step 7; the platform\'s balance, « pertes oubliées » step 2) ({qs})')
       # (27 Oct., brief « daily loop » step 3) the review opens filled in from the day: the 3 answers already chosen, « Fermer ma journée »
       pre = await page.evaluate("['r-followed', 'r-score', 'r-grade'].map((k) => !!document.querySelector('#gSheet [data-g=' + k + '].on'))")
       btn = (await page.locator('#gSheet [data-g=save-review]').text_content() or '').strip()

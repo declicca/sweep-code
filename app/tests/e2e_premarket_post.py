@@ -37,7 +37,7 @@ with sync_playwright() as p:
     # 1. the review
     pg.evaluate("(d) => SweepGame.openReview(d)", day); until(pg, "document.querySelector('#gSheet.g-rv')"); pg.wait_for_timeout(300)
     lab = pg.evaluate("[...document.querySelectorAll('#gSheet .g-f > span')].map((x) => x.textContent.trim())")
-    ok(lab[0] == 'As-tu suivi ta fiche ?' and pg.locator('#gSheet .rv-rules').is_hidden() and any('Une note pour demain' in x for x in lab), f'1 {w}: « As-tu suivi ta fiche ? », no rule asked yet, a note for tomorrow ({lab})')
+    ok(lab[0] == 'As-tu suivi ta fiche\xa0?' and pg.locator('#gSheet .rv-rules').is_hidden() and any('Une note pour demain' in x for x in lab), f'1 {w}: « As-tu suivi ta fiche ? », no rule asked yet, a note for tomorrow ({lab})')
     pg.click('#gSheet [data-g=r-followed][data-v=partly]'); pg.wait_for_timeout(200)
     pre = pg.evaluate("[...document.querySelectorAll('#gSheet [data-rv-rule].on')].map((b) => b.dataset.rvRule)")
     ok(pg.locator('#gSheet .rv-rules').is_visible() and pre == ['off_plan', 'max_trades'], f'1 {w}: « En partie »: « Quelle règle ? », off-plan and too many trades pre-checked ({pre})')
@@ -48,7 +48,7 @@ with sync_playwright() as p:
     # 2. a day without a sheet: as before
     pg.evaluate("(d) => SweepGame.openReview(d)", plain); until(pg, "document.querySelector('#gSheet.g-rv')"); pg.wait_for_timeout(300)
     lab2 = pg.evaluate("[...document.querySelectorAll('#gSheet .g-f > span')].map((x) => x.textContent.trim())")
-    ok(lab2[0] == 'As-tu suivi ton plan ?' and pg.locator('#gSheet .rv-rules').count() == 0, f'2 {w}: a day without a sheet: the review as it was ({lab2[0]})')
+    ok(lab2[0] == 'As-tu suivi ton plan\xa0?' and pg.locator('#gSheet .rv-rules').count() == 0, f'2 {w}: a day without a sheet: the review as it was ({lab2[0]})')
     pg.evaluate("document.querySelector('#gSheet [data-g=close]').click()"); pg.wait_for_timeout(300)
     # 3. the next pre-market
     pg.evaluate("(d) => SweepGame.openPlan(d)", nx); until(pg, "document.querySelector('#gSheet.g-pm [data-pm-screen]')"); pg.wait_for_timeout(300)
@@ -56,7 +56,7 @@ with sync_playwright() as p:
     ok('Attendre la clôture 15m.' in note, f'3 {w}: the note for tomorrow at the top of the pre-market ({note!r})')
     premarket(pg, stop_at='d2')
     q = pg.evaluate("(document.querySelector('#gSheet [data-pm-screen=d2] .pm-q') || {}).textContent || ''")
-    ok(q == 'Hier tu es entré sans attendre le retest en 5 min. Qu’est-ce qui t’aidera à attendre aujourd’hui ?', f'3 {w}: the D2 question of the first rule broken ({q!r})')
+    ok(q == 'Hier tu es entré sans attendre le retest en 5 min. Qu’est-ce qui t’aidera à attendre aujourd’hui\xa0?', f'3 {w}: the D2 question of the first rule broken ({q!r})')
     pg.fill('#gSheet [data-pmf=D2]', 'Je pose une alerte, je regarde, je ne clique pas avant le retest.'); premarket(pg)
     f = pg.evaluate("(d) => SweepFiche.get(d)", nx)
     ok(f and f['reminder'] == 'Je pose une alerte, je regarde, je ne clique pas avant le retest.', f"3 {w}: D2's answer is the sheet's reminder")

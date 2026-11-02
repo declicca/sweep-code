@@ -109,13 +109,15 @@ with sync_playwright() as p:
     # 5. grade my trades: the next one not graded, then the day's trades
     t3 = sv3[0] if isinstance(sv3, list) else ''
     seen = []
-    for tid in ('dl-t1', 'dl-t2', t3):
+    # (2 Nov.) in the order of their entry time, as the app goes: the trade typed now takes the clock's time (before 09:45 some mornings)
+    order = [x for _, x in sorted([('09:45', 'dl-t1'), ('10:45', 'dl-t2'), (pg.evaluate("(id) => (getDoc('trades', id) || {}).entry_time || ''", t3), t3)])]
+    for tid in order:
       pg.locator('#main [data-rt="lock-grade"]').click(); pg.wait_for_timeout(900)
       seen.append(pg.evaluate("location.hash"))
       pg.evaluate("(id) => editDoc('trades', id, (t) => { t.setup = 'ORB'; t.emo = Object.assign({}, t.emo, { before: ['calm'] }); t.rules_followed = 'yes'; })", tid)
       today(800)
     pg.locator('#main [data-rt="lock-grade"]').click(); pg.wait_for_timeout(900); seen.append(pg.evaluate("location.hash"))
-    ok(seen == ['#trade/dl-t1', '#trade/dl-t2', '#trade/' + t3, '#journal/' + day], f'{tag} 5 « {x["grade"]} »: each trade not graded in turn, then the day\'s trades ({seen})')
+    ok(seen == ['#trade/' + x for x in order] + ['#journal/' + day], f'{tag} 5 « {x["grade"]} »: each trade not graded in turn, then the day\'s trades ({seen})')
     jn = 0
     for _ in range(15):
       pg.evaluate("SweepGame.refresh && SweepGame.refresh()"); pg.wait_for_timeout(700)

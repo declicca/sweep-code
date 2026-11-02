@@ -61,11 +61,13 @@ with sync_playwright() as p:
     hh = sorted({int(x.split(':')[0]) for x in heights})
     ok(set(hh) <= {34, 38, 44}, f'2 {tag}: the capsules have three heights, 44, 38, 34 ({hh}: {sorted(x for x in heights if int(x.split(":")[0]) not in (34, 38, 44))[:6]})')
     # 3. C1 the back link above the large title
-    for h in ('#trade/' + tid, '#account/' + acc, '#settings'):
+    for h in ('#trade/' + tid, '#account/' + acc):   # (2 Nov.) Settings: its parent is Today, a tab — no back link (it showed over the logo)
       pg.evaluate("(h) => { location.hash = h }", h); pg.wait_for_timeout(1400)
-      r = pg.evaluate("(() => { const b = document.querySelector('.main-wrap .top > .top-back'), t = document.getElementById('title'); if (!b || b.classList.contains('off')) return null; const own = [...document.querySelectorAll('#main .nav-back, #main .tr-top > a.back')].filter((x) => x.getClientRects().length).length; return [b.getBoundingClientRect().bottom <= t.getBoundingClientRect().top + 1, getComputedStyle(b).color === getComputedStyle(document.documentElement).getPropertyValue('--pos').trim() || /76, 141, 255|47, 111, 228|0, 113, 227/.test(getComputedStyle(b).color), own, b.textContent.trim()] })()")
+      r = pg.evaluate("(() => { const b = document.querySelector('.top-back'), t = document.getElementById('title'); if (!b || b.classList.contains('off')) return null; const own = [...document.querySelectorAll('#main .nav-back, #main .tr-top > a.back')].filter((x) => x.getClientRects().length).length; return [b.getBoundingClientRect().bottom <= t.getBoundingClientRect().top + 1, getComputedStyle(b).color === getComputedStyle(document.documentElement).getPropertyValue('--pos').trim() || /76, 141, 255|47, 111, 228|0, 113, 227/.test(getComputedStyle(b).color), own, b.textContent.trim()] })()")
       ok(r and r[0] and r[2] == 0, f'3 {tag} C1 {h.split("/")[0]}: « ‹ {r and r[3]} » above the large title, the page\'s own hidden ({r})')
     # C2 one chevron after the label; C4 one grouped list
+    pg.evaluate("location.hash = '#settings'"); pg.wait_for_timeout(1400)
+    ok(pg.evaluate("!!document.querySelector('.top-back:not(.off)')") is False, f'3 {tag} C1 Settings: no back link (Today is a tab)')
     sg = pg.evaluate("(() => { const a = [...document.querySelectorAll('#main .nav-sgd')]; const gaps = a.slice(1).map((d, i) => Math.round(d.getBoundingClientRect().top - a[i].getBoundingClientRect().bottom)); const s = a[0] && a[0].querySelector('summary'); return [a.length, gaps, s ? getComputedStyle(s, '::before').content : null, s ? getComputedStyle(s, '::after').borderTopStyle : null] })()")
     ok(sg[0] >= 4 and all(g <= 1 for g in sg[1]) and sg[2] in ('none', 'normal') and sg[3] == 'solid', f'3 {tag} C2/C4 Settings: one grouped list, no gap between its rows, one chevron after the label ({sg})')
     # C5 the sample data's line

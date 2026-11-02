@@ -55,7 +55,7 @@ with sync_playwright() as p:
     ok(pg.locator('#gSheet [data-pm=inst-pick]').count() > 1 and on == 'MES', f'1 {w}: « Modifier » brings the chips back, MES chosen ({on!r})')
     premarket(pg, stop_at='scen')
     note = pg.evaluate("(document.querySelector('#gSheet .pm-never') || {}).textContent || ''")
-    ok(note == 'Ce scénario n’a pas été pris depuis 10 séances. Le garder ?', f'3 {w}: under B, the note ({note!r})')
+    ok(note == 'Ce scénario n’a pas été pris depuis 10 séances. Le garder\xa0?', f'3 {w}: under B, the note ({note!r})')
     premarket(pg, stop_at='limits')
     lim = [pg.input_value('#gSheet [data-pmf="lim.max_trades"]'), pg.input_value('#gSheet [data-pmf="lim.time_limit"]')]
     ok(lim == ['3', '11:00'], f'2 {w}: the limits from the last 10 sheets ({lim})')

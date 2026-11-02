@@ -23,7 +23,7 @@ def ok(c, what):
 def unthrottle():   # every case signs up a trader: the sign-up limiter (5 per hour) is cleared on the dev database
   try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
   except Exception: pass
-EXP = {'fr': 'Tu trades depuis combien de temps ?', 'en': 'How long have you been trading?', 'es': '¿Desde cuándo operas?'}
+EXP = {'fr': 'Tu trades depuis combien de temps\xa0?', 'en': 'How long have you been trading?', 'es': '¿Desde cuándo operas?'}
 MONTHS = {'fr': 'Mois d’abonnement', 'en': 'Months of subscription', 'es': 'Meses de suscripción'}
 POS = {'fr': 'Tu es rentable de', 'en': 'You’re up', 'es': 'Eres rentable en'}
 NEG = {'fr': 'C’est ton point de départ', 'en': 'This is your starting point', 'es': 'Este es tu punto de partida'}

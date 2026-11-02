@@ -3073,10 +3073,11 @@ html body .nav-tdisc .dc{color:var(--pos)}
 html body .main-wrap .top{position:relative}
 /* the back link sits in the free room above the large title (the header keeps its 96 px on every page, its title at the bottom) */
 html body .main-wrap .top > .top-back{position:absolute!important;top:8px;left:34px;display:inline-flex;align-items:center;gap:2px;width:max-content;max-width:100%;min-height:36px;margin:0 0 2px -6px;padding:0 8px 0 0;color:var(--pos);text-decoration:none;font-weight:500;font-size:16px;-webkit-tap-highlight-color:transparent}
-html body .main-wrap .top > .top-back.off{visibility:hidden;pointer-events:none}
-html body .main-wrap .top > .top-back svg{width:22px;height:22px;flex:0 0 auto}
-html body .main-wrap .top > .top-back span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html body .main-wrap .top > .top-back:active{transform:scale(.97)}
+html body aside.side > .top-back{display:inline-flex;align-items:center;gap:2px;width:max-content;padding:0 8px 0 0;color:var(--pos);text-decoration:none;font-weight:500;font-size:16px;-webkit-tap-highlight-color:transparent}   /* (2 Nov.) on a phone, in the header row (nav.js topBack) */
+html body :is(.main-wrap .top, aside.side) > .top-back.off{visibility:hidden;pointer-events:none}
+html body :is(.main-wrap .top, aside.side) > .top-back svg{width:22px;height:22px;flex:0 0 auto}
+html body :is(.main-wrap .top, aside.side) > .top-back span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body :is(.main-wrap .top, aside.side) > .top-back:active{transform:scale(.97)}
 html body #main .sw-own-back{display:none!important}
 /* C2 what folds open has one shape: the label, then a chevron on its right that turns 90° when open (Settings had ⌄ on the
    right, a trade « › Full review · 2 of 4 ▾ » with two arrows, « + » / « − » elsewhere) */
@@ -3086,7 +3087,7 @@ html body #main details[open]:not(.menu):not(.nav-arch):not(.acc-menu):not(.tday
 html body #main details.nav-sgd>summary::after{color:var(--muted);margin-left:auto!important}
 @media (prefers-reduced-motion:reduce){html body #main details>summary::after{transition:none!important}}
 /* C3 the « i »: always right after its label, centred on its line, one size (Stats had it in the tile's corner, an account above the line) */
-html body #main :is(.ikpis .lbl,.statline > div > span:first-child,.kpi .lbl,.k .lbl) > .info{position:relative!important;top:auto!important;right:auto!important;width:16px!important;height:16px!important;margin:0 0 0 4px!important;vertical-align:middle!important;align-self:center;flex:none}
+html body #main :is(.ikpis .lbl,.statline > div > span:first-child,.kpi .lbl,.k .lbl) > .info{position:relative!important;top:auto!important;right:auto!important;width:16px!important;height:16px!important;margin:0 0 0 4px!important;vertical-align:middle!important;align-self:center;flex:none;font:600 10px/1 "Geist",sans-serif!important;letter-spacing:0!important}   /* (2 Nov.) a value's 20 px font pushed the « i » out of its circle */
 html body #main .statline > div > span:first-child{display:inline-flex;align-items:center}
 html body #main .ikpis .ik .lbl{display:inline-flex;align-items:center}
 /* C4 Settings: one grouped list, as Settings on an iPhone — rows in one card, a thin line between them */
@@ -3104,7 +3105,7 @@ html body #main .ux-empty.demo{flex-wrap:nowrap;align-items:center;gap:12px;padd
 html body #main .ux-empty.demo > span{display:inline-flex;align-items:center;white-space:nowrap;min-width:0}
 html body #main .ux-empty.demo .ux-demo-rm{flex:none;height:38px;padding:0 16px;margin-left:auto}
 /* C6 « Your lesson » grows with its text */
-html body .co-q-l textarea{field-sizing:content;resize:none;overflow:hidden}
+html body .co-q-l textarea{field-sizing:content;resize:none;overflow:hidden;min-height:calc(2lh + 22px)!important}   /* (2 Nov.) the hint (placeholder) on two lines was cut in half */
 /* C7 the chart's time frames scroll without cutting anything: a fade at the edge, as the other scrolling rows */
 @media (max-width:860px){html body .sc-bar .seg.sc-tfs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);padding-right:18px;scroll-padding-right:18px}
   html body .sc-bar .seg.sc-tfs button{flex:none}}
@@ -3127,17 +3128,17 @@ html body #main .nav-mr .nav-mr-go svg{width:16px;height:16px}
    (the header keeps one height on every page) and stays there while scrolling; a 44 px target */
 html body .main-wrap .top > .top-back::after{content:"";position:absolute;inset:-4px 0}
 @media (max-width:860px){
-  html body .main-wrap .top > .top-back{position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:41;min-height:44px;margin:0;max-width:calc(100vw - 170px)}
-  html.pwa body .main-wrap .top > .top-back{top:calc(env(safe-area-inset-top,0px) + 4px)}
-  html body .main-wrap .top > .top-back::after{content:none}
-  html body .main-wrap .top > .top-back.off{display:none}
+  html body aside.side > .top-back{position:fixed!important;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;z-index:41;min-height:44px;margin:0;max-width:calc(100vw - 170px)}
+  html.pwa body aside.side > .top-back{top:calc(env(safe-area-inset-top,0px) + 4px)}
+  html body aside.side > .top-back::after{content:none}
+  html body aside.side > .top-back.off{display:none}
   html body.sw-top-back aside.side .brand{visibility:hidden}
 }
 /* a header button is 44 px but takes the title's height in the row (the row never grows when a page's button arrives) */
 @media (min-width:861px){html body .main-wrap .top .btn.sm,html body .main-wrap .top .nav-addtop,html body .main-wrap .top .sh-btn,html body .main-wrap .top .mny-exp,html body .main-wrap .top .nav-imp-b{margin-top:-3px!important;margin-bottom:-3px!important}}
 /* the title's row is 44 px on every page, with or without its header buttons (44 px since this tour): it never grows when a
    page's button arrives */
-@media (max-width:860px){html body .main-wrap .top > #title{min-height:44px;display:flex;align-items:center}}
+@media (max-width:860px){html body .main-wrap .top > #title{min-height:44px}}   /* (2 Nov.) no flex: Today's greeting (::before) sat beside the title, over it */
 /* the « i » now follows its label in a Stats tile: on a phone the tile gives the label a little more room, so the longest
    Spanish labels (« Factor de beneficio », « Ganancia / pérdida ») stay on one line with it */
 @media (max-width:600px){html body #main .ikpis .ik{padding-left:14px!important;padding-right:12px!important}html body #main .ikpis .ik .lbl{font-size:12.5px;letter-spacing:-.01em;white-space:nowrap}html body #main .ikpis .ik .lbl > .info{margin-left:3px!important}}
@@ -3159,3 +3160,13 @@ html body #main .nav-lock-a .btn{min-height:44px;padding:0 20px;border-radius:99
 .nav-now-cnt .nav-now-v{font-size:inherit;font-weight:600}
 .fgrid > .nav-dl-help{grid-column:1/-1;margin:0}
 .nav-dl-wait{display:block;margin-top:4px;font-weight:600;color:var(--text)}
+/* (2 Nov.) « Now » right under « Level · days »: the card's own gap only (39 px above it, 15 below, looked like a hole) */
+html body .nav-rt .nav-rt-sub:has(+ .nav-now){margin-bottom:0}
+html body .nav-rt .nav-rt-sub + .nav-now{margin-top:0}
+/* (2 Nov.) the text links are 20 px tall: on a touch screen their zone grows to 44 px, the page does not move (padding and the
+   same negative margin) */
+@media (pointer:coarse){
+  html body #main :is(.nav-rt-sum, .nav-all, .nav-fdate > a, .legal a, .nav-fold-t, .acct-all-tr){padding-block:12px!important;margin-block:-12px!important}
+}
+/* (2 Nov.) scrolled, the page's small title comes into the header row: the back link keeps its chevron only (the title after it) */
+@media (max-width:860px){html body.sw-top-back.tcollapsed aside.side > .top-back span{display:none}}

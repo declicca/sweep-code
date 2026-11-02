@@ -6816,7 +6816,7 @@ const ASK = {
     hi: "Salut ! Je suis l'assistant de Sweep. Pose-moi une question sur tes trades, les nouvelles du jour ou l'utilisation de l'app.",
     ph: "Pose ta question…",
     send: "Envoyer",
-    starters: [ "Comment s'est passée ma semaine ?", "Quel setup me rapporte le plus ?", "Qu'y a-t-il au calendrier économique aujourd'hui ?", "Comment ajouter un trade ?" ],
+    starters: [ "Comment s'est passée ma semaine ?", "Quel setup me rapporte le plus ?", "Qu'y a-t-il au calendrier économique aujourd'hui ?", "Comment ajouter un trade ?" ],
     left: e => `${e} actions IA restantes aujourd'hui`,
     think: "Réflexion",
     clear: "Nouvelle conversation",
@@ -6834,7 +6834,7 @@ const ASK = {
     },
     src: "D’après tes {n} trades du {a} au {b}.",
     src1: "D’après ton trade du {a}.",
-    help: "Ces pages peuvent t’aider :",
+    help: "Ces pages peuvent t’aider :",
     act: {
       new_trade: "Ouvrir le ticket",
       ai_log: "Saisir avec l'IA",
@@ -9065,7 +9065,7 @@ const REF_T = {
     t_experience: "Expérience",
     t_idea: "Idée",
     t_bug: "Bug",
-    rateQ: "Comment se passe ton expérience avec Sweep ?",
+    rateQ: "Comment se passe ton expérience avec Sweep ?",
     rates: [ "Mauvaise", "Bof", "Correcte", "Bonne", "Excellente" ],
     label: {
       experience: "Raconte-nous",

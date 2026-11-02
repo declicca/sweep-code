@@ -27,7 +27,7 @@ def unthrottle():
 X = {
   'fr': {'q_pay': 'comment ajouter un payout', 'pay': 'Ajouter un payout', 'q_hours': 'mes pires heures', 'hours': 'Mes meilleures et pires heures', 'q_imp': 'importer tradovate', 'imp': 'Importer des trades',
          'help_g': 'Aide', 'none': 'Aucun résultat', 'q_month': 'Combien j’ai fait ce mois ?', 'src': 'D’après tes 3 trades du {a} au {b}.', 'q_out': 'Comment importer mes trades ? (panne)',
-         'err': 'Sweep AI ne répond pas pour l’instant.', 'help': 'Ces pages peuvent t’aider :'},
+         'err': 'Sweep AI ne répond pas pour l’instant.', 'help': 'Ces pages peuvent t’aider\xa0:'},
   'en': {'q_pay': 'how do I add a payout', 'pay': 'Add a payout', 'q_hours': 'my worst hours', 'hours': 'My best and worst hours', 'q_imp': 'import tradovate', 'imp': 'Import trades',
          'help_g': 'Help', 'none': 'No results', 'q_month': 'How much did I make this month?', 'src': 'Based on your 3 trades from {a} to {b}.', 'q_out': 'How do I import my trades? (outage)',
          'err': "Sweep AI isn't answering right now.", 'help': 'These pages can help:'},

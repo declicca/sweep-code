@@ -640,7 +640,7 @@
       } catch (x) { /* news context is optional */ }
       // B16: the app's own window (never the browser's), with the exact number of trades it will add
       const ASK = { en: ['Add sample data?', 'Adds {n} sample trades on real NQ candles, in {a} sample accounts. You can remove them anytime in Settings.', 'Add {n} trades'],
-        fr: ['Ajouter des données d’exemple ?', 'Ajoute {n} trades d’exemple sur de vraies bougies NQ, dans {a} comptes d’exemple. Tu peux les retirer quand tu veux dans les Réglages.', 'Ajouter {n} trades'],
+        fr: ['Ajouter des données d’exemple ?', 'Ajoute {n} trades d’exemple sur de vraies bougies NQ, dans {a} comptes d’exemple. Tu peux les retirer quand tu veux dans les Réglages.', 'Ajouter {n} trades'],
         es: ['¿Añadir datos de ejemplo?', 'Añade {n} operaciones de ejemplo sobre velas reales de NQ, en {a} cuentas de ejemplo. Puedes quitarlas cuando quieras en Ajustes.', 'Añadir {n} operaciones'] }[LANG] || null;
       const A = (ASK || ['Add sample data?', 'Adds {n} sample trades on real NQ candles, in {a} sample accounts.', 'Add {n} trades']).map((x) => x.replace('{n}', trades.length).replace('{a}', accounts.length));
       if (window.SweepUndo && SweepUndo.demo) { if (!(await SweepUndo.demo(trades.length, accounts.length))) return; } else if (window.SweepUndo && SweepUndo.ask) { if (!(await SweepUndo.ask(A[0], A[1], A[2], false))) return; }
