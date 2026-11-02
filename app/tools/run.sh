@@ -9,8 +9,8 @@ export SWEEP_DISC_ALL=1   # (SWEEP.md step 5) every test account sees everything
 export SWEEP_BAL_FROM=2026-01-01   # the complete days (« pertes oubliées », step 4) checked in the tests whatever the date
 export SWEEP_AI_OFFLINE=1   # the AI without a mock (economic calendar) never calls Google from a test
 export SWEEP_PUSH_CONFIG="$TOOLS/push-config.local.php" SWEEP_PUSH_MOCK="$DEST/data/push-sent.jsonl"   # notifications on the phone: test keys, messages to a file
-# market weekend: the game runs on Friday 15:00 ET (tools/game-now.py), the tests need an open session
-GN=$(python3 -I "$TOOLS/game-now.py"); [ -n "$GN" ] && export SWEEP_GAME_NOW="$GN" && echo "SWEEP_GAME_NOW=$GN (market weekend)" >&2
+# the game and the pages on a session in progress, 15:00 ET (tools/game-now.py): every day, not only the market weekend
+GN=$(python3 -I "$TOOLS/game-now.py"); [ -n "$GN" ] && export SWEEP_GAME_NOW="$GN" && echo "SWEEP_GAME_NOW=$GN" >&2
 [ -n "$GN" ] && export PYTHONPATH="$TOOLS/clientclock${PYTHONPATH:+:$PYTHONPATH}"   # the tests' pages on that time too (tools/clientclock/sitecustomize.py)
 (cd "$DEST" && PHP_CLI_SERVER_WORKERS=4 exec php -S 127.0.0.1:$PORT router.php > "${TMPDIR:-/tmp}/sweep-php-$PORT.log" 2>&1) &
 SRV=$!

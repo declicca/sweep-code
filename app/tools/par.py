@@ -15,7 +15,7 @@ PART, PARTS = (int(x) for x in (os.environ.get('SWEEP_PART') or '1/1').split('/'
 TIMES = os.path.join(TOOLS, 'test-times.json')
 ENV = dict(os.environ, PATH=':'.join([os.path.expanduser('~/.venvs/sweep/bin'), '/opt/homebrew/bin', '/opt/homebrew/opt/coreutils/libexec/gnubin',
                                       '/opt/homebrew/opt/gnu-sed/libexec/gnubin', os.environ.get('PATH', '')]))
-# market weekend: the game runs on Friday 15:00 ET (tools/game-now.py), the tests need an open session
+# the game and the pages on a session in progress, 15:00 ET (tools/game-now.py): every day, not only the market weekend
 GAME_NOW = subprocess.run([sys.executable, '-I', os.path.join(TOOLS, 'game-now.py')], capture_output=True, text=True).stdout.strip()
 if GAME_NOW:
     ENV['SWEEP_GAME_NOW'] = GAME_NOW
@@ -82,7 +82,7 @@ def stop(srv):   # php -S with workers: the whole process group (the workers are
 
 def main():
     t0 = time.time()
-    if GAME_NOW: print('SWEEP_GAME_NOW=%s (market weekend)' % GAME_NOW, flush=True)
+    if GAME_NOW: print('SWEEP_GAME_NOW=%s' % GAME_NOW, flush=True)
     print('shards:', ' | '.join('%d: %d tests ~%d s' % (i + 1, len(s), load[i]) for i, s in enumerate(shares)), flush=True)
     for i in range(N): prepare(i)
     procs = []
