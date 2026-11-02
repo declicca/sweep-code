@@ -345,7 +345,7 @@ body.evp-lock{overscroll-behavior:none}
 @media (max-width:600px){
   #main .tr-top .ai-btn,#main .tr-top [data-act="edit-trade"]{width:40px;min-width:40px;padding:0}
   #main .tr-top .ai-btn .ai-sp{font-size:17px;line-height:1;display:block}
-  #main .tr-top [data-act="edit-trade"]::before{width:17px;height:17px}
+  #main .tr-top [data-act="edit-trade"]::before{width:17px;height:17px;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}   /* (2 Nov., tour visuel 1) the pencil drawn in its 17 px: an SVG without a size, at « auto », left an empty grey circle */
 }
 @media (hover:hover){#main .tr-top .tr-nav > a:hover,#main .tr-top > .btn:hover,#main .tr-top details.menu > summary:hover{background:var(--panel2)}}
 /* touch screens keep no « hover » look after a tap (iOS keeps :hover on the last tapped chip) */
@@ -2861,7 +2861,7 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 html body #main table.tbl td.tt-acc{white-space:nowrap}
 /* (2 Nov., audit « transfuge » C4, reste) a long short name (« Combine 150K ») and its « ×5 accounts » pill made the table 10 to 16 px too wide
    at 1300 (French, Spanish): the name cut first (whole on hover), the pill whole */
-html body #main table.tbl td.tt-acc .tt-an{display:inline-block;max-width:96px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+html body #main table.tbl td.tt-acc .tt-an{display:inline-block;max-width:88px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
 @media (min-width:861px) and (max-width:1440px){ html body #main table.tbl th,html body #main table.tbl td{padding-left:8px;padding-right:8px}
   html body #main table.tbl td.tt-set{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} }   /* a long setup: cut, whole on hover */
 html body #main table.tbl td.tt-sym{font-family:"Geist Mono",ui-monospace,monospace;font-weight:500}
@@ -3259,13 +3259,12 @@ html body #main .tr-copies{margin:0 24px 12px;border-top:1px solid var(--line);b
 html body #main .tr-copies>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 2px;cursor:pointer;font-size:14px;color:var(--text2)}
 html body #main .tr-copies>summary::-webkit-details-marker{display:none}
 html body #main .tr-copies>summary b{font-family:var(--font-num);font-weight:600}
-html body #main .tr-copies-go{margin-left:auto;font-size:18px;color:var(--muted);transition:transform .32s var(--spring)}
-html body #main .tr-copies[open] .tr-copies-go{transform:rotate(90deg)}
 html body #main .tr-copies-l{border-top:1px solid var(--line)}
 html body #main .tr-copies-l .cg-r{padding:0 2px}
 html body #main .tr-copies-l .help{margin:10px 14px 14px;font-size:13px}
 /* (2 Nov., audit « transfuge » G4) Stats: « Calendar › » in place of its second calendar */
-#main .st-cal-link{margin:4px 0 18px}
+#main .st-cal-link{display:flex;align-items:center;gap:12px;margin:4px 0 18px;padding:14px 18px;min-height:56px;box-sizing:border-box;text-decoration:none;color:var(--text)}
+#main .st-cal-link span{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}#main .st-cal-link small{color:var(--muted);font-size:13px}#main .st-cal-link i{font-style:normal;color:var(--muted);font-size:18px}
 /* (2 Nov., audit « transfuge » G5) the common setups wait behind « + Other » */
 html body #main .ux-setup[hidden]{display:none!important}
 /* (2 Nov., audit « transfuge » G2) one label for the action, « Add a trade », on the phone too: it wraps in its narrow step */
@@ -3273,3 +3272,71 @@ html body #main .ux-setup[hidden]{display:none!important}
 /* (2 Nov., analyse débutant C4) « Yesterday: 15 h 19 left › » never past the card's edge on a phone: it may shrink, its text cut last */
 html body .nav-rt-h .nav-rt-y{flex-shrink:1!important;min-width:0;max-width:100%}
 html body .nav-rt-y b{overflow:hidden;text-overflow:ellipsis;min-width:0}
+
+/* ───── (2 Nov.) tour visuel : 19 défauts de placement (docs/parcours/TOUR-VISUEL-2026-11-02.md) ───── */
+/* 2 the grade A–F: the five in the column's width (234 px of buttons in 144: D and F could not be chosen) */
+html body #main .th-head .seg[role=group]{display:flex!important;width:100%!important;max-width:100%!important;overflow:visible!important;gap:0!important;padding:2px!important;box-sizing:border-box!important}
+html body #main .th-head .seg[role=group] > button{flex:1 1 0!important;min-width:0!important;padding-left:0!important;padding-right:0!important}
+@media (min-width:861px){html body #main .th-head .seg[role=group]{width:auto!important;display:inline-flex!important}html body #main .th-head .seg[role=group] > button{flex:0 0 auto!important;min-width:34px!important;padding-left:8px!important;padding-right:8px!important}}
+/* 3 « Also on 4 accounts »: one arrow, the summary's own chevron (its « › » written out is gone) */
+html body #main .tr-copies > summary > span{flex:1 1 auto!important;min-width:0!important}
+/* 4 « Your coach » inside the result card: the card's own 24 px each side (it touched its edges, and went past them on a computer) */
+html body #main .surface > .co-trade{margin-left:24px!important;margin-right:24px!important}
+@media (max-width:600px){html body #main .surface > .co-trade{margin-left:16px!important;margin-right:16px!important}}   /* (as « Also on … » above it) */
+/* 6 a computer: ‹ › « Edit trade » ⋯ on the title's line, at its right (as « Share my stats » on Stats), not alone on a row under it */
+@media (min-width:861px){html body #main > .tr-top{position:relative!important;z-index:6!important;margin-top:-60px!important;pointer-events:none!important}html body #main > .tr-top > *{pointer-events:auto!important}}
+/* 7 « Setup & costs » the full width, as the card above it (two columns of sections left half of the page empty without the economic context) */
+html body #main .tr-side{display:flex!important;flex-direction:column!important;align-items:stretch!important}
+/* 8 the routine's three tiles on a phone: one action each, the same capsule at the same place (the tile's bottom), a one-line label
+   (« Add », « See », « Review »); only the step to do now is filled (it was « See › » text, « Add a trade › » on 2 lines, a blue button) */
+@media (max-width:860px){
+  html body .nav-rt-s .nav-rt-sa{margin-top:auto!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important}
+  html body .nav-rt-s .nav-rt-sa .btn,html body .nav-rt-s:hover .nav-rt-sa .btn{width:100%!important;height:38px!important;min-height:38px!important;padding:0 10px!important;border-radius:var(--r-pill)!important;background:var(--fill)!important;color:var(--text)!important;align-self:stretch!important;font-size:14px!important;font-weight:600!important}
+  html body .nav-rt-s .nav-rt-sa .btn::after{content:none!important}
+  html body .nav-rt-s .nav-rt-sa .btn.primary,html body .nav-rt-s:hover .nav-rt-sa .btn.primary{background:var(--pos-fill,var(--pos))!important;color:var(--on-blue,#fff)!important}
+  html body .nav-rt-s .nav-rt-sa .btn .s{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+}
+/* 9 Today's « My money »: the three amounts on one line, at the bottom of their tiles, whatever the label's height (a « Simulated » pill,
+   a label on 2 lines pushed some lower) */
+html body .nav-mny-g > div{display:flex!important;flex-direction:column!important;align-items:flex-start!important}
+html body .nav-mny-g > div > b{margin-top:auto!important}
+/* 17 a phone's payouts: the firm's name on its own line, the amount and its pill under it (« Lucid Trading — Fle… » was cut) */
+@media (max-width:600px){html body .pz-row{grid-template-columns:minmax(0,1fr)!important}html body .pz-row .pz-right{justify-content:flex-start!important}html body .pz-row .pz-main b{white-space:normal!important}}
+/* 11 the welcome's 3 steps on one line on a phone, with their short words (« Account · Plan · 1st trade ») */
+.onb-steps em{font-style:normal!important}
+.onb-steps .onb-s{display:none!important}
+@media (max-width:600px){.onb-steps .onb-l{display:none!important}.onb-steps .onb-s{display:inline!important}.onb-steps{flex-wrap:nowrap!important}.onb-steps li{white-space:nowrap!important;flex:0 1 auto!important;min-width:0!important}}
+/* 14 the chart axes: 11 px on screen whatever the chart's scale (nav.js sets --ax-fs), in the app's numbers font */
+html body #main svg.chart text{font-size:var(--ax-fs,11px)!important;font-family:"Geist Mono",ui-monospace,monospace!important}
+/* 15 Stats' six small tiles (a computer): each label at the top of its tile, its « i » on the label's last line (centred, « Most active » sat
+   high and « Most profitable » lower; the « i » of « Least profitable » alone on a line) */
+html body #main .g-ins .tiles > .it{justify-content:flex-start!important}
+html body #main .it .lbl .nw{white-space:nowrap!important}
+/* 16 an account's line: its parts side by side, wrapping without a « · » left at a line's end */
+html body .acc-line{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:4px 8px!important}
+/* 18 Settings › Help: the rows « Referral › » and « Give feedback › » the card's whole width, their lines too (they stopped mid-card) */
+html body .nav-set-rows{align-self:stretch!important;width:100%!important;box-sizing:border-box!important}
+/* 19 the economic calendar's periods: their short words on a phone (nav-s), the whole ones on a computer */
+#main .seg .nr-s{display:none!important}
+@media (max-width:600px){#main .seg .nr-l{display:none!important}#main .seg .nr-s{display:inline!important}}
+/* 19 Stats › durations: its choice « By % of trades / By win rate » whole, on the next line when the legend leaves no room (Spanish:
+   8 px cut); the P&L sheet's Long / Short in its box (3 px of scroll); a badge's name on one line (« First Sweep ») */
+html body #main .dur-foot{flex-wrap:wrap!important}
+html body #main .dur-foot .seg{flex:0 0 auto!important;max-width:100%!important}
+html body .nav-am-dir .seg{width:100%!important;min-width:0!important;overflow:visible!important}
+html body .nav-am-dir .seg{padding:3px!important;gap:0!important}
+html body .nav-am-dir .seg > button{flex:1 1 0!important;min-width:0!important;padding-left:4px!important;padding-right:4px!important}
+html body .g-badges .g-bdg{white-space:nowrap!important;min-width:0!important}
+/* 10 « Less than 6 months », « 6 months to 1 year », « More than a year »: one line each, the same height, side by side (the first was on 2) */
+html body .nav-onb-me .nav-prof-chips,html body .nav-onb-me .nav-onb-exp .nav-prof-chips{display:flex!important;flex-wrap:wrap!important;gap:8px!important;overflow:visible!important}
+html body .nav-onb-me .nav-prof-chips > .chip{flex:0 0 auto!important;white-space:nowrap!important;justify-content:center!important}   /* (each on one line, the same height; the row wraps when a language is too long for 390 px) */
+/* 6 (computer) the ‹ › pair in its capsule (2 px over) */
+html body #main .tr-top .tr-nav{overflow:visible!important;padding:0 2px!important}
+/* 12 the plan's bias on a phone: Long / Short / Neutral on a row, « No trading » on its own line under them (in the row of four it took 2 to 3 lines) */
+@media (max-width:600px){html body .g-seg4:has(> .b-no_trade){display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}html body .g-seg4 > .b-no_trade{grid-column:1/-1!important}}
+html body #newsCtx .nctx-f .link{white-space:nowrap!important}   /* « View details » on one line */
+@media (min-width:861px) and (max-width:1440px){html body #main table.tbl th,html body #main table.tbl td{padding-left:7px!important;padding-right:7px!important}}   /* the trades table: 1 px of scroll left at 1300 */
+/* 19 the tables of a computer (1300): no side scroll of a few px — Stats' detailed tables let their first column (a rule, an infraction)
+   wrap; the trades table's setup a little narrower (Spanish: 7 px left) */
+html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl th:first-child{white-space:normal!important;min-width:120px}
+@media (min-width:861px) and (max-width:1440px){html body #main table.tbl td.tt-set{max-width:120px!important}}

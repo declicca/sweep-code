@@ -4390,17 +4390,17 @@ window.SweepMO = window.SweepMO || class {
     en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day complete', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
       s1: 'Plan', s1d: 'Make your plan', s2: 'Execution', s2d: 'Trade your plan', s3: 'Review', s3d: 'Do your review',
       todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', inPlan1: '{c} of 1 trade in your plan', noPlanN: '{n} trades · no plan', noPlan1: '1 trade · no plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
-      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', ydayP: 'Yesterday: {t} left', b1s: 'Plan it', b2s: 'Add a trade', b3s: 'Review', see: 'See',
+      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', ydayP: 'Yesterday: {t} left', b1s: 'Plan it', b2s: 'Add', b3s: 'Review', see: 'See',
       help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day complete »: your streak goes on. Profit never counts, only the process.' },
     fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée complète', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
       s1: 'Plan', s1d: 'Fais ton plan', s2: 'Exécution', s2d: 'Respecte ton plan', s3: 'Revue', s3d: 'Fais ta revue',
       todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', inPlan1: '{c} sur 1 trade dans ton plan', noPlanN: '{n} trades · pas de plan', noPlan1: '1 trade · pas de plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
-      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', ydayP: 'Hier : encore {t}', b1s: 'Planifier', b2s: 'Ajouter un trade', b3s: 'Réviser', see: 'Voir',
+      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', ydayP: 'Hier : encore {t}', b1s: 'Planifier', b2s: 'Ajouter', b3s: 'Réviser', see: 'Voir',
       help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée complète » : ta série continue. Le profit ne compte jamais, seulement le processus.' },
     es: { title: 'Tu rutina de hoy', how: 'Cómo funciona', of: '{n} de 3 hechas', swept: 'Día completado', closed: 'Los mercados están cerrados hoy. El descanso es parte del proceso.', dayoffT: 'Día libre', dayoff: 'Sin operar hoy: tu racha está protegida.',
       s1: 'Plan', s1d: 'Haz tu plan', s2: 'Ejecución', s2d: 'Respeta tu plan', s3: 'Revisión', s3d: 'Haz tu revisión',
       todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', inPlan1: '{c} de 1 operación en tu plan', noPlanN: '{n} operaciones · sin plan', noPlan1: '1 operación · sin plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
-      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', ydayP: 'Ayer: quedan {t}', b1s: 'Planificar', b2s: 'Añadir una operación', b3s: 'Revisar', see: 'Ver',
+      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', ydayP: 'Ayer: quedan {t}', b1s: 'Planificar', b2s: 'Añadir', b3s: 'Revisar', see: 'Ver',
       help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue. El beneficio nunca cuenta, solo el proceso.' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -7157,6 +7157,9 @@ new window.SweepMO(() => {
     const end = () => { if (kind(xp) === 'active') history(byMoment); else byMoment(); };
     if (G && G.openPlan && d) G.openPlan(d, { then: end }); else end();
   }
+  const SHORT = { en: { 'Your account': 'Account', 'Your plan': 'Plan', 'Your first trade': '1st trade', 'Your history': 'History', 'Your plan for tomorrow': 'Tomorrow’s plan', 'Your plan for Monday': 'Monday’s plan' },
+    fr: { 'Ton compte': 'Compte', 'Ton plan': 'Plan', 'Ton premier trade': '1er trade', 'Ton historique': 'Historique', 'Ton plan de demain': 'Plan de demain', 'Ton plan de lundi': 'Plan de lundi' },
+    es: { 'Tu cuenta': 'Cuenta', 'Tu plan': 'Plan', 'Tu primera operación': '1.ª operación', 'Tu historial': 'Historial', 'Tu plan de mañana': 'Plan de mañana', 'Tu plan del lunes': 'Plan del lunes' } };
   /** the welcome page: the right ending announced (the experience tapped changes it) */
   function paintWelcome(f) {
     const onb = document.querySelector('#main .onb'); if (!onb) return;
@@ -7166,7 +7169,9 @@ new window.SweepMO(() => {
     if (ttl && ttl.textContent !== t('t' + key)) ttl.textContent = t('t' + key);
     const sk = key === 'Mon' ? 'sClosed' : 's' + key;
     if (sub && sub.textContent !== t(sk)) sub.textContent = t(sk);
-    const html = t(key === 'Mon' ? 'mon' : k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span>${esc2(x)}</li>`).join('');
+    // (2 Nov., tour visuel 11) a phone: the short words, the 3 steps on one line (« 3 Your first trade » fell on a 2nd line)
+    const sh = (x) => ((SHORT[L] || SHORT.en)[x] || x);
+    const html = t(key === 'Mon' ? 'mon' : k).map((x, i) => `<li class="${i ? '' : 'on'}"><span>${i + 1}</span><em class="onb-l">${esc2(x)}</em><em class="onb-s">${esc2(sh(x))}</em></li>`).join('');
     if (ol && ol.innerHTML !== html) { ol.setAttribute('data-noi18n', ''); ol.innerHTML = html; }
     onb.dataset.start = k;
   }
@@ -7652,3 +7657,24 @@ new window.SweepMO(() => {
   window.SweepCopyGroup = { leadGroups, leadOf, targets, askEdit, askDelete, open, close };
   new window.SweepMO(() => { [card, accountLine].forEach((f) => { try { f(); } catch (e) { if (!f.__warned) { f.__warned = true; console.warn('Sweep:', f.name, e && e.message); } } }); }).observe(document.body, { childList: true, subtree: true });
 })();
+
+/* (2 Nov., tour visuel 14) the numbers of the chart axes at the app's small text size, 11 px in Geist Mono: a chart is drawn on a fixed
+   width (its viewBox) and shrunk into its card, and its 11 units read about 6 px — the size is set again from the chart's real scale */
+(function () {
+  'use strict';
+  let raf = 0;
+  function fit() {
+    raf = 0;
+    document.querySelectorAll('#main svg.chart').forEach((s) => {
+      const vb = s.viewBox && s.viewBox.baseVal, w = s.getBoundingClientRect().width; if (!vb || !vb.width || !w) return;
+      const fs = (11 * vb.width / w).toFixed(1); if (s.dataset.fs !== fs) { s.dataset.fs = fs; s.style.setProperty('--ax-fs', fs + 'px'); }
+    });
+  }
+  const soon = () => { if (!raf) raf = requestAnimationFrame(fit); };
+  addEventListener('sw:page', soon); addEventListener('resize', soon);
+  const go = () => { const m = document.getElementById('main'); if (!m) { setTimeout(go, 300); return; } new MutationObserver(soon).observe(m, { childList: true, subtree: true }); soon(); };
+  go();
+})();
+
+/* (2 Nov., tour visuel 19) Stats › durations in Spanish: its two choices without « Por », side by side in their card (8 px cut) */
+if (window.I18N_ES) { window.I18N_ES['By % of trades'] = '% de operaciones'; window.I18N_ES['By win rate'] = 'Tasa de acierto'; }

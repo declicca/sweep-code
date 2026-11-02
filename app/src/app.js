@@ -1703,7 +1703,7 @@ const TRC = {
 
 function trCopies(t, b) {
   const W = TRC[LANG] || TRC.en, o = b.filter(g => g.id !== t.id), v = b.reduce((g, P) => g + tNet(P), 0);
-  return `<details class="tr-copies" data-noi18n><summary><span>${esc(W.also(o.length))} · ${esc(W.total)} <b class="${cls(v)}">${money(v)}</b></span><span class="tr-copies-go" aria-hidden="true">›</span></summary><div class="tr-copies-l">${o.map(g => `<a href="#trade/${g.id}" class="cg-r"><span class="cg-r-a">${esc(acctLabel(g.account_id))}</span><span class="cg-r-q">${g.contracts || 0} ct</span><span class="cg-r-p ${cls(tNet(g))}">${money(tNet(g))}</span></a>`).join("")}<p class="help">${esc(W.sync)}</p></div></details>`;
+  return `<details class="tr-copies" data-noi18n><summary><span>${esc(W.also(o.length))} · ${esc(W.total)} <b class="${cls(v)}">${money(v)}</b></span></summary><div class="tr-copies-l">${o.map(g => `<a href="#trade/${g.id}" class="cg-r"><span class="cg-r-a">${esc(acctLabel(g.account_id))}</span><span class="cg-r-q">${g.contracts || 0} ct</span><span class="cg-r-p ${cls(tNet(g))}">${money(tNet(g))}</span></a>`).join("")}<p class="help">${esc(W.sync)}</p></div></details>`;
 }
 
 function vTrade(e) {
@@ -2725,11 +2725,11 @@ function acctLine(e) {
     es: "Margen de drawdown"
   }[n] || "Drawdown room"} ${moneyU(t.k === "br" ? 0 : Math.max(0, a.buffer))}</span>`);
   const i = window.SweepPayout && SweepPayout.status && SweepPayout.status(e);
-  i && i.ready && s.push(`<span class="pos">${{
+  i && i.ready && s.push(`<span class="pill pos acc-ready">${{
     fr: "Prêt pour le payout",
     es: "Listo para el payout"
   }[n] || "Ready for a payout"}</span>`);
-  return s.length ? `<small class="acc-line" data-noi18n>${s.join(" · ")}</small>` : "";
+  return s.length ? `<small class="acc-line" data-noi18n>${s.join(" ")}</small>` : "";   // (2 Nov., tour visuel 16) no « · » left hanging at a line's end: a row that wraps, « Ready for a payout » a pill
 }
 
 const acctStateV1 = e => {
@@ -3447,7 +3447,9 @@ const segU = (e, t) => `<div class="seg">${t.map(([a, n]) => `<button data-act="
    opens at 5 (your edge, your leak) and at 10 (the performance score); then the net P&L, the win rate and the calendar. The tiles
    that need more trades are not shown until they have something to say (with 5 trades and more: the page as before). */
 // (2 Nov., audit « transfuge » G4) Stats no longer draws a second full calendar (the same as Trades › Calendar): a link to it
-const statsCalLink = () => `<p class="st-cal-link" data-noi18n><a class="link" href="#calendar">${esc({ fr: "Calendrier", es: "Calendario" }[LANG] || "Calendar")} ›</a></p>`;
+// (2 Nov., tour visuel 13) the link in a card of its own, as a row (it floated outside any card, under « Trends to watch »)
+const statsCalLink = () => { const X = ({ fr: [ "Calendrier", "Tes journées, gagnantes et perdantes, mois par mois" ], es: [ "Calendario", "Tus días, ganadores y perdedores, mes a mes" ] })[LANG] || [ "Calendar", "Your days, winning and losing, month by month" ];
+  return `<a class="surface st-cal-link" href="#calendar" data-noi18n><span><b>${esc(X[0])}</b><small>${esc(X[1])}</small></span><i aria-hidden="true">›</i></a>`; };
 
 function statsSoon(t, a) {
   const X = ({ fr: [ "Tes stats arrivent : {n} sur 5", "trade", "trades", "À 5 trades : ta force, ce qui marche le mieux pour toi.", "À 10 trades : ton score de performance." ],
@@ -3499,7 +3501,7 @@ function vAnalytics(e) {
       net: j
     });
   }
-  const E = stats(t.filter(M => M.direction === "long")), R = stats(t.filter(M => M.direction === "short")), L = E.n >= R.n ? [ "Long", E, R ] : [ "Short", R, E ], x = (M, ne, k, A, j, N = "") => `<div class="surface it"><span class="lbl">${M} <span class="info" data-tip="${esc(ne)}" tabindex="0">i</span></span><b>${k}</b>${A != null ? `<em class="${j || ""}">${A}</em>` : ""}${N ? `<small>${N}</small>` : ""}</div>`, C = `${x("Most active", "Weekday with the most trades per trading day.", WD[m.k], decl(m.avg.toFixed(1)), "", "avg trades per day")}\n    ${x("Most profitable", "Weekday with the highest net P&L.", WD[v.k], money(v.net), cls(v.net))}\n    ${x("Least profitable", "Weekday with the lowest net P&L.", WD[b.k], money(b.net), cls(b.net))}\n    ${x("Trade direction", "Direction you trade most, with its share of trades and net P&L.", L[0], Math.round(L[1].n / a.n * 100) + "%", "", `<span class="${cls(L[1].net)}">${money(L[1].net)}</span> vs <span class="${cls(L[2].net)}">${money(L[2].net)}</span>`)}${(() => {
+  const E = stats(t.filter(M => M.direction === "long")), R = stats(t.filter(M => M.direction === "short")), L = E.n >= R.n ? [ "Long", E, R ] : [ "Short", R, E ], x = (M, ne, k, A, j, N = "") => `<div class="surface it"><span class="lbl">${M.slice(0, M.lastIndexOf(" ") + 1)}<span class="nw">${M.slice(M.lastIndexOf(" ") + 1)} <span class="info" data-tip="${esc(ne)}" tabindex="0">i</span></span></span><b>${k}</b>${A != null ? `<em class="${j || ""}">${A}</em>` : ""}${N ? `<small>${N}</small>` : ""}</div>`, C = `${x("Most active", "Weekday with the most trades per trading day.", WD[m.k], decl(m.avg.toFixed(1)), "", "avg trades per day")}\n    ${x("Most profitable", "Weekday with the highest net P&L.", WD[v.k], money(v.net), cls(v.net))}\n    ${x("Least profitable", "Weekday with the lowest net P&L.", WD[b.k], money(b.net), cls(b.net))}\n    ${x("Trade direction", "Direction you trade most, with its share of trades and net P&L.", L[0], Math.round(L[1].n / a.n * 100) + "%", "", `<span class="${cls(L[1].net)}">${money(L[1].net)}</span> vs <span class="${cls(L[2].net)}">${money(L[2].net)}</span>`)}${(() => {
     // the longest winning streak and the green days in a row (brief edge T5), in the trader's language
     const W = ({ fr: [ "Plus longue série gagnante", "Trades gagnants de suite, le record de la période.", "trades gagnants de suite", "Jours verts de suite", "Jours en profit de suite, jusqu’au dernier jour tradé.", "record" ], es: [ "Racha ganadora más larga", "Operaciones ganadoras seguidas, el récord del periodo.", "operaciones ganadoras seguidas", "Días en verde seguidos", "Días en beneficio seguidos, hasta el último día operado.", "récord" ] })[LANG] || [ "Longest winning streak", "Winning trades in a row, the record of the period.", "winning trades in a row", "Green days in a row", "Days in profit in a row, up to the last day traded.", "best" ];
     const sp = v => `<span data-noi18n>${v}</span>`;
@@ -4814,6 +4816,9 @@ function eventRow(e) {
   }[LANG]}">${e.previous != null && e.previous !== "" ? esc(econL(e.previous)) : '<span class="faint">—</span>'}${n ? `<small class="faint" title="${{ en: "Previously reported", fr: "Valeur publiée précédemment", es: "Valor publicado anteriormente" }[LANG] || "Previously reported"}">rev. ${esc(econL(e.revised))}</small>` : ""}</span><span class="ff-go">›</span></button>`;
 }
 
+// (2 Nov., tour visuel 19) a phone: the period in short words, the four on one line (« Semaine prochaine », « Próxima semana » were cut)
+const NEWS_SHORT = { en: { today: "Today", tomorrow: "Tomorrow", week: "This week", next: "Next week" }, fr: { today: "Aujourd’hui", tomorrow: "Demain", week: "Semaine", next: "Suivante" }, es: { today: "Hoy", tomorrow: "Mañana", week: "Esta semana", next: "Próxima" } };
+
 function vNews(e) {
   [ "today", "tomorrow", "week", "next" ].includes(e) && (NEWS.range = e);
   const [t, a] = newsRange(NEWS.range), n = [ ...Array(Math.round((pd(a) - pd(t)) / 864e5) + 1) ].every((o, r) => ECON.days[addDays(t, r)]);
@@ -4835,7 +4840,7 @@ function vNews(e) {
     s = r ? `<div class="surface ff"><div class="ff-head"><span>Time</span><span>Cur</span><span>Imp</span><span>Event</span><span class="r">Actual</span><span class="r">Forecast</span><span class="r">Previous</span><span></span></div>${r}</div>` : '<div class="surface empty">No major U.S. economic events in this period.</div>';
   }
   const i = S.mode === "server" && S.me && S.me.is_admin;
-  return `<div class="row" style="margin-bottom:18px"><div class="seg">${[ [ "today", "Today" ], [ "tomorrow", "Tomorrow" ], [ "week", "This week" ], [ "next", "Next week" ] ].map(([o, r]) => `<a class="btnlike ${NEWS.range === o ? "on" : ""}" href="#news/${o}">${r}</a>`).join("")}</div>\n    <span class="muted" style="margin-left:auto">USD · <span class="imp high"><i></i>High</span> <span class="imp medium"><i></i>Medium</span> · Eastern Time</span></div>\n  ${s}\n  <p class="help" style="margin-top:12px">Click an event for details. <span class="est">est.</span> = date projected from the usual release pattern. Numbers come from the economic data provider.</p>\n  ${i ? '<div class="row" style="margin-top:24px"><label class="btn sm">Import schedule file (JSON)<input type="file" accept=".json,application/json" data-econ-import hidden></label><span class="help">Same format as econ-us-2026-2027.json. Existing events are kept.</span></div>' : ""}\n  ${i ? `<details class="more" style="margin-top:12px"><summary>Add an event manually</summary><form data-form="econ" class="fgrid four surface pad" autocomplete="off">\n    <label class="f"><span>Date</span><input type="date" name="date" value="${todayStr()}" required></label><label class="f"><span>Time (ET)</span><input name="time" placeholder="08:30" required></label>\n    <label class="f" style="grid-column:span 2"><span>Event</span><input name="event" required placeholder="CPI m/m"></label>\n    <label class="f"><span>Impact</span><select name="impact">${opts([ [ "high", "High" ], [ "medium", "Medium" ] ], "high")}</select></label>\n    <label class="f"><span>Actual</span><input name="actual"></label><label class="f"><span>Forecast</span><input name="forecast"></label><label class="f"><span>Previous</span><input name="previous"></label>\n    <div class="f full"><div><button class="btn primary" type="submit">Add event</button></div></div></form></details>` : ""}`;
+  return `<div class="row" style="margin-bottom:18px"><div class="seg">${[ [ "today", "Today" ], [ "tomorrow", "Tomorrow" ], [ "week", "This week" ], [ "next", "Next week" ] ].map(([o, r]) => `<a class="btnlike ${NEWS.range === o ? "on" : ""}" href="#news/${o}"><span class="nr-l">${r}</span><span class="nr-s" data-noi18n>${esc(((NEWS_SHORT[LANG] || NEWS_SHORT.en)[o]) || r)}</span></a>`).join("")}</div>\n    <span class="muted" style="margin-left:auto">USD · <span class="imp high"><i></i>High</span> <span class="imp medium"><i></i>Medium</span> · Eastern Time</span></div>\n  ${s}\n  <p class="help" style="margin-top:12px">Click an event for details. <span class="est">est.</span> = date projected from the usual release pattern. Numbers come from the economic data provider.</p>\n  ${i ? '<div class="row" style="margin-top:24px"><label class="btn sm">Import schedule file (JSON)<input type="file" accept=".json,application/json" data-econ-import hidden></label><span class="help">Same format as econ-us-2026-2027.json. Existing events are kept.</span></div>' : ""}\n  ${i ? `<details class="more" style="margin-top:12px"><summary>Add an event manually</summary><form data-form="econ" class="fgrid four surface pad" autocomplete="off">\n    <label class="f"><span>Date</span><input type="date" name="date" value="${todayStr()}" required></label><label class="f"><span>Time (ET)</span><input name="time" placeholder="08:30" required></label>\n    <label class="f" style="grid-column:span 2"><span>Event</span><input name="event" required placeholder="CPI m/m"></label>\n    <label class="f"><span>Impact</span><select name="impact">${opts([ [ "high", "High" ], [ "medium", "Medium" ] ], "high")}</select></label>\n    <label class="f"><span>Actual</span><input name="actual"></label><label class="f"><span>Forecast</span><input name="forecast"></label><label class="f"><span>Previous</span><input name="previous"></label>\n    <div class="f full"><div><button class="btn primary" type="submit">Add event</button></div></div></form></details>` : ""}`;
 }
 
 async function addEcon(e) {

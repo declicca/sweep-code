@@ -41,6 +41,9 @@
   }
 
   /* ───────────── New York wall clock (the chart's time axis) ───────────── */
+  // (2 Nov., tour visuel 5) the hours of the time axis as everywhere in the app, « 10:00 » (fr-CA wrote « 10 h 00 », wider than its
+  // slot: « 0 h 00 » at the left edge, « 10 h 5 »); the days and months as the library writes them in the trader's language
+  const hhmm = (t, kind) => { if (kind !== 3 && kind !== 4) return null; const d = new Date((typeof t === 'number' ? t : 0) * 1000), p = (n) => String(n).padStart(2, '0'); return p(d.getUTCHours()) + ':' + p(d.getUTCMinutes()) + (kind === 4 ? ':' + p(d.getUTCSeconds()) : ''); };
   const nyFmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const offCache = new Map();
   /** UTC seconds → New York wall clock written as UTC seconds (so the axis reads in ET) */
@@ -215,7 +218,7 @@
       layout: { background: { type: 'solid', color: 'transparent' }, textColor: th.muted, fontFamily: 'Geist, -apple-system, system-ui, sans-serif', fontSize: 11, attributionLogo: true },
       grid: { vertLines: { color: alpha(th.text, 0.04) }, horzLines: { color: alpha(th.text, 0.05) } },
       rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.12, bottom: 0.1 } },
-      timeScale: { borderVisible: false, timeVisible: true, secondsVisible: sec < 60, rightOffset: 4, barSpacing: 7 },
+      timeScale: { borderVisible: false, timeVisible: true, secondsVisible: sec < 60, rightOffset: 4, barSpacing: 7, tickMarkFormatter: hhmm },
       crosshair: { mode: L.CrosshairMode.Normal, vertLine: { color: alpha(th.text, 0.25), labelBackgroundColor: th.text }, horzLine: { color: alpha(th.text, 0.25), labelBackgroundColor: th.text } },
       localization: { locale: loc(), priceFormatter: (p) => Number(p).toFixed(dec) },
       handleScale: { pinch: true, mouseWheel: true, axisPressedMouseMove: true }, handleScroll: { vertTouchDrag: false },
@@ -404,7 +407,7 @@
       autoSize: true,
       layout: { background: { type: 'solid', color: 'transparent' }, textColor: th.muted, fontFamily: 'Geist, -apple-system, system-ui, sans-serif', fontSize: 11, attributionLogo: true },
       grid: { vertLines: { color: alpha(th.text, 0.04) }, horzLines: { color: alpha(th.text, 0.05) } },
-      rightPriceScale: { borderVisible: false }, timeScale: { borderVisible: false, timeVisible: true, rightOffset: 3, barSpacing: 6 },
+      rightPriceScale: { borderVisible: false }, timeScale: { borderVisible: false, timeVisible: true, rightOffset: 3, barSpacing: 6, tickMarkFormatter: hhmm },
       crosshair: { mode: L.CrosshairMode.Normal, vertLine: { color: alpha(th.text, 0.3), labelBackgroundColor: th.text }, horzLine: { color: alpha(th.text, 0.3), labelBackgroundColor: th.text } },
       localization: { locale: loc(), priceFormatter: (p) => Number(p).toFixed(TKC.dec) }, handleScroll: { vertTouchDrag: false },
     });

@@ -240,9 +240,9 @@ def run(p, lang, phone, dark):
 
   # ── Stats: G4, R4
   go('#analytics', '#main .st-cal-link, #main .st-soon')
-  ok(pg.locator('#main .cal').count() == 0 and N(pg.evaluate("(document.querySelector('#main .st-cal-link a') || {}).textContent || ''")) == x['cal'], f"{tag} G4 Stats: no second calendar, « {x['cal']} »")
+  ok(pg.locator('#main .cal').count() == 0 and N(pg.evaluate("(document.querySelector('#main .st-cal-link b') || {}).textContent || ''")) + ' ›' == x['cal'], f"{tag} G4 Stats: no second calendar, « {x['cal']} »")
   per_s = pg.evaluate(TXT, '#main .fx-per')[:1]
-  tap('#main .st-cal-link a'); pg.wait_for_timeout(900)
+  tap('#main a.st-cal-link'); pg.wait_for_timeout(900)
   ok(pg.evaluate('location.hash') == '#calendar', f'{tag} G4 the link opens Trades › Calendar')
   go('#trades', '#main')
   per_t = pg.evaluate(TXT, '#main .fx-per')[:1]

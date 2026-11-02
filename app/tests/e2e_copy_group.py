@@ -133,7 +133,7 @@ def run(p, lang, phone, dark):
 
   # 3. the Journal: one row « ×3 accounts » that unfolds
   pg.evaluate(f"location.hash = '#journal/{day}'"); pg.wait_for_selector('#main [data-cg-tog]', timeout=10000); pg.wait_for_timeout(500)
-  ok(pg.evaluate(TXT, '#main [data-cg-tog]') == [x['x3']], f"{tag} the Journal: one row « {x['x3']} » ({pg.evaluate(TXT, '#main [data-cg-tog]')})")
+  ok(pg.evaluate(CGL) == [x['x3']], f"{tag} the Journal: one row « {x['x3']} » ({pg.evaluate(CGL)})")
   hid = "() => [...document.querySelectorAll('#main .cg-list .cg-r, #main tr.cg-sub')].filter((e) => e.getClientRects().length).length"
   n0 = pg.evaluate(hid)
   tap(pg, '#main [data-cg-tog]', phone); pg.wait_for_timeout(400)
@@ -165,7 +165,7 @@ def run(p, lang, phone, dark):
   ok(len(m11) == 1 and len(f111) == 1 and len(f211) == 1 and len(s11) == 1, f'{tag} the synced master trade: one copy on Apex 2 and 3, Apex 4 keeps its own (no double)')
   ok(g11 and f111[0]['g'] == g11 and f211[0]['g'] == g11 and s11[0]['g'] == g11 and f211[0]['n'] == 2 and f211[0]['pnl'] == 40000 and f111[0]['src'] == m11[0]['id'], f'{tag} one group of 4: Apex 3 at 2 contracts +$400 ({m11}, {f211}, {s11})')
   pg.evaluate(f"location.hash = '#journal/{day}'"); pg.wait_for_selector('#main [data-cg-tog]', timeout=10000); pg.wait_for_timeout(500)
-  ok(sorted(pg.evaluate(TXT, '#main [data-cg-tog]')) == sorted([x['x3'], x['x4']]), f"{tag} the Journal: « {x['x4']} » for the synced trade ({pg.evaluate(TXT, '#main [data-cg-tog]')})")
+  ok(sorted(pg.evaluate(CGL)) == sorted([x['x3'], x['x4']]), f"{tag} the Journal: « {x['x4']} » for the synced trade ({pg.evaluate(CGL)})")
 
   # 6. deleting the master's trade asks: all 3 accounts, or this one only
   pg.evaluate(f"location.hash = '#trade/{mid}'"); pg.wait_for_selector('#main details.menu summary', timeout=10000); pg.wait_for_timeout(600)
@@ -220,6 +220,9 @@ def free(p, lang, phone):
   if SHOTS: pg.screenshot(path=os.path.join(SHOTS, f'cg-free-{tag}.png'))
   ok(not errs, f'{tag} no page error ' + '; '.join(errs[:2]))
   br.close()
+
+# the copies' pill: its words (« ×3 accounts »), written out on a phone, in its label on a computer's table where it reads « ×3 » (2 Nov.)
+CGL = "[...document.querySelectorAll('#main [data-cg-tog]')].filter((e) => e.getClientRects().length).map((e) => (e.getAttribute('aria-label') || e.textContent).replace(/\\s+/g, ' ').trim())"
 
 with sync_playwright() as p:
   run(p, 'fr', True, False)

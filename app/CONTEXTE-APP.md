@@ -415,6 +415,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Un seul zip par lot de demandes**, pas un zip par point.
 - **Les règles des firmes sont vérifiées ailleurs** et fournies confirmées. Ne refaire la vérification web que si une valeur semble contradictoire.
 - **Rapport de livraison en 3 lignes** : ce qui change, les fichiers modifiés, les tests passés.
+- **Chaque lot finit avec e2e_layout_guard vert + un coup d'œil aux captures des écrans touchés, 390 et 1300, clair et foncé.** La règle va aussi dans le « Fini quand » de chaque brief.
 
 ## Passation (9 octobre — audit visuel / animations / vitesse, étapes 1 à 4 livrées)
 
@@ -1646,3 +1647,15 @@ Source : `docs/parcours/ANALYSE-DEBUTANT-2026-11-02.md`, section 5 (hors git). S
 9. **Petits mots** : la pastille « Hier : encore 15 h 19 › » (au lieu de « Terminer hier › 15 h 19 »), qui rétrécit sans dépasser de la carte ; le taux de réussite d'Aujourd'hui en « — » jusqu'à 5 trades (même seuil que Stats).
 Test : `e2e_debutant_31j` (Léa sur 31 jours : trade par le P&L et le risque, « Mission 3 sur 90 » au jour 3, mots expliqués dans les missions 1 à 30, rien à l'impératif dans Stats, Sweep AI caché au jour 1, feuille rapide ; FR 390 foncé, EN 1300 clair, ES 390 clair).
 - Restes du contrôle de a2a4032 (2 nov.) : le tableau des trades tient sans défiler à 1 300 px même avec un nom court long et un groupe de copies — dans le tableau, la pastille des copies dit « ×5 » (« ×5 comptes » au survol et pour les lecteurs d'écran) et le nom court s'arrête à 96 px (`e2e_transfuge` mesure 0 px d'écart) ; après « Enregistrer » d'un trade, le parcours de 90 jours se relit aussi (game.js, comme l'état du jeu) : la ligne passe à « Mission faite · Lire la leçon » sans recharger (`e2e_debutant_31j`).
+
+## Tour visuel du 2 nov. : 19 défauts de placement et le garde permanent
+
+Source : `docs/parcours/TOUR-VISUEL-2026-11-02.md` (hors git). Corrections en fin de `src/nav.css` (bloc « (2 Nov.) tour visuel », en `!important` pour passer devant les couches) et dans app.js, nav.js, game.js, chart.js.
+- **Fiche d'un trade** : « Modifier le trade » réduit à son icône crayon sur téléphone (plus de rond vide) ; la note A–F prend toute la largeur sur téléphone et garde sa taille sur ordinateur ; « Aussi sur N comptes » n'a plus qu'une flèche ; « Ton coach » a sa marge dans la carte ; heures du graphique en « HH:MM » ; sur ordinateur, ‹ › « Modifier le trade » ⋯ à droite du titre ; « Setup et coûts » sur toute la largeur.
+- **Aujourd'hui** : les trois tuiles de la routine ont leur action au même endroit, sur une ligne (« Ajouter », « Voir », « Réviser »), seule l'étape en cours en bouton plein ; Mon argent : montants alignés en bas des tuiles.
+- **Premier jour** : les pastilles d'expérience restent sur une ligne ; les 3 étapes en libellés courts (« Compte · Plan · 1er trade ») sur une ligne à 390 px ; « Pas de trading » (No trading / Sin operar), sur sa propre ligne sur téléphone.
+- **Stats** : le lien Calendrier devient une carte avec un sous-titre (EN/FR/ES) ; chiffres des axes à la taille des petits textes, en Geist Mono ; les 6 petites tuiles ont leur libellé en haut et le (i) sur la même ligne.
+- **Comptes, Payouts, Réglages** : « Prêt pour le payout » en pastille (plus de « · » qui pend) ; sur téléphone, le montant et la pastille du payout sous le nom de la firme ; traits de séparation sur toute la largeur.
+- **Petits débordements** : libellés courts des segments du calendrier économique ; ES « % de operaciones » / « Tasa de acierto » ; choix Long / Short sans défilement ; tableau des trades sans défilement à 1300 px en FR et ES ; badges de Ma progression sur une ligne.
+
+**Le garde `tests/e2e_layout_guard.py`** (dans la suite, `run-all.sh`) parcourt 12 pages, la fiche d'un trade (copiée et seule), 7 feuilles (+, P&L, Plan, Revue, Ma progression, Notifications, Recherche) et 4 écrans de bienvenue, à 390 tactile et 1300, en EN, FR et ES clair et FR foncé. Il échoue sur : page plus large que l'écran ; défilement de 1 à 23 px ; contenu coupé ou option de segment serrée contre son libellé ; libellé court sur 2 lignes ou rangée d'étapes sur 2 lignes ; élément hors de sa carte (> 2 px) ; rangée de hauteurs ou d'alignements inégaux ; élément touchable caché sous la barre du bas ou Ask Sweep ; bouton sans texte ni icône ; double flèche. Chaque échec donne la page, la taille, la langue, le thème et le sélecteur ; avec `SHOTS=dossier`, une capture avec l'élément entouré en rouge ; `GUARD_ONLY=1300-fr-light,…` limite les configurations. Exception unique : les durées du graphique (15s 30s…) qui défilent exprès sur téléphone. Lancé sur a2a4032, il trouve les défauts 1, 2, 3, 8, 10, 11, 12 et 19.

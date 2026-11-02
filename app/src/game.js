@@ -20,7 +20,7 @@
       market_closed: 'Markets are closed. Rest is part of the process.', yday: 'Yesterday is still open until {t}', yday_cta: 'Finish yesterday',
       streak: 'Streak', best: 'Best', freezes: 'Freezes', level: 'Level', lvl: 'Lv {n}', days: '{n} days', day1: '1 day',
       start_title: 'Getting started', start_steps: { goal: 'Goal chosen', style: 'Style chosen', rules: 'Account rules', journal: 'First trade journaled', plan: 'First plan', review: 'First review' },
-      plan_title: 'Plan of the day', bias: 'Bias', long: 'Long', short: 'Short', neutral: 'Neutral', no_trade: 'No trading today', setups: 'Allowed setups',
+      plan_title: 'Plan of the day', bias: 'Bias', long: 'Long', short: 'Short', neutral: 'Neutral', no_trade: 'No trading today', no_trade_s: 'No trading', setups: 'Allowed setups',
       no_setups: 'Pick the setups you allow yourself today. They are kept for your next plans and trades.', other_setup: 'Other setup', setup_ph: 'Name of your setup', add: 'Add', max_loss: 'Max loss today', start_small: 'Start small: you can raise it later.', max_trades: 'Max trades', levels: 'Key levels / note',
       rule: 'Rule of the day', rule_ph: 'One rule to hold today',
       gate_intro: 'Before your first trade: 30 seconds for your plan.', gate_skip: 'Skip, add my trade', gate_save: 'Save and add my trade', save_plan: 'Save my plan', confirm_plan: 'Confirm my plan', from_plan: 'From your plan of {d}: confirm or adjust.', dll_hint: 'Daily limit of {a}: {v}', dd_hint: 'Drawdown room of {a}: {v}', plan_needs: 'Pick a bias and your max loss for the day.', plan_late: 'Your first trade is already in: this plan counts as late.',
@@ -64,7 +64,7 @@
       market_closed: 'Les marchés sont fermés. Le repos fait partie du processus.', yday: "Hier reste ouvert jusqu’à {t}", yday_cta: 'Terminer hier',
       streak: 'Streak', best: 'Meilleur', freezes: 'Gels', level: 'Niveau', lvl: 'Niv. {n}', days: '{n} jours', day1: '1 jour',
       start_title: 'Démarrage', start_steps: { goal: 'Objectif choisi', style: 'Style choisi', rules: 'Règles du compte', journal: 'Premier trade journalisé', plan: 'Premier plan', review: 'Première revue' },
-      plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd’hui", setups: 'Setups autorisés',
+      plan_title: 'Plan du jour', bias: 'Biais', long: 'Long', short: 'Short', neutral: 'Neutre', no_trade: "Pas de trading aujourd’hui", no_trade_s: 'Pas de trading', setups: 'Setups autorisés',
       no_setups: 'Choisis les setups que tu t’autorises aujourd’hui. Ils sont gardés pour tes prochains plans et trades.', other_setup: 'Autre setup', setup_ph: 'Nom de ton setup', add: 'Ajouter', max_loss: 'Perte max du jour', start_small: 'Commence petit : tu pourras la monter.', max_trades: 'Nombre max de trades', levels: 'Niveaux clés / note',
       rule: 'Règle du jour', rule_ph: 'Une règle à tenir aujourd’hui',
       gate_intro: 'Avant ton premier trade : 30 secondes pour ton plan.', gate_skip: 'Passer, ajouter mon trade', gate_save: 'Enregistrer et ajouter mon trade', save_plan: 'Enregistrer mon plan', confirm_plan: 'Confirmer mon plan', from_plan: 'Repris de ton plan du {d} : confirme ou ajuste.', dll_hint: 'Limite du jour de {a} : {v}', dd_hint: 'Marge de drawdown de {a} : {v}', plan_needs: 'Choisis un biais et ta perte max du jour.', plan_late: 'Ton premier trade est déjà fait : ce plan compte comme tardif.',
@@ -108,7 +108,7 @@
       market_closed: 'Los mercados están cerrados. El descanso es parte del proceso.', yday: 'Ayer sigue abierto hasta {t}', yday_cta: 'Terminar ayer',
       streak: 'Racha', best: 'Mejor', freezes: 'Congeladores', level: 'Nivel', lvl: 'Nv. {n}', days: '{n} días', day1: '1 día',
       start_title: 'Primeros pasos', start_steps: { goal: 'Objetivo elegido', style: 'Estilo elegido', rules: 'Reglas de la cuenta', journal: 'Primer trade registrado', plan: 'Primer plan', review: 'Primera revisión' },
-      plan_title: 'Plan del día', bias: 'Sesgo', long: 'Largo', short: 'Corto', neutral: 'Neutral', no_trade: 'Hoy no opero', setups: 'Setups permitidos',
+      plan_title: 'Plan del día', bias: 'Sesgo', long: 'Largo', short: 'Corto', neutral: 'Neutral', no_trade: 'Hoy no opero', no_trade_s: 'Sin operar', setups: 'Setups permitidos',
       no_setups: 'Elige los setups que te permites hoy. Se guardan para tus próximos planes y operaciones.', other_setup: 'Otro setup', setup_ph: 'Nombre de tu setup', add: 'Añadir', max_loss: 'Pérdida máx. del día', start_small: 'Empieza pequeño: podrás subirla después.', max_trades: 'Máx. de trades', levels: 'Niveles clave / nota',
       rule: 'Regla del día', rule_ph: 'Una regla para hoy',
       gate_intro: 'Antes de tu primera operación: 30 segundos para tu plan.', gate_skip: 'Saltar, añadir mi operación', gate_save: 'Guardar y añadir mi operación', save_plan: 'Guardar mi plan', confirm_plan: 'Confirmar mi plan', from_plan: 'Retomado de tu plan del {d}: confirma o ajusta.', dll_hint: 'Límite diario de {a}: {v}', dd_hint: 'Margen de drawdown de {a}: {v}', plan_needs: 'Elige un sesgo y tu pérdida máx. del día.', plan_late: 'Tu primer trade ya está hecho: este plan cuenta como tardío.',
@@ -518,7 +518,7 @@
     const works = PL.bias === 'no_trade' || !window.SweepEdge || !SweepEdge.line ? '' : SweepEdge.line('works');
     const d = G.today || {};
     const lim = dailyLimit();
-    const bias = [['bullish', 'long'], ['bearish', 'short'], ['neutral', 'neutral'], ['no_trade', 'no_trade']];
+    const bias = [['bullish', 'long'], ['bearish', 'short'], ['neutral', 'neutral'], ['no_trade', 'no_trade_s']];   // (2 Nov., tour visuel 12) « No trading » in the row of four (« No trading today » took 3 lines)
     return `${head(t('plan_title'), fdate(PL.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
       ${PL.then ? `<p class="g-hint g-gate">${t('gate_intro')}</p>` : ''}
       ${d.trades > 0 && !d.plan_valid && !PL.then ? `<p class="g-hint">${t('plan_late')}</p>` : ''}
