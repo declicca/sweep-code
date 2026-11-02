@@ -191,12 +191,12 @@ with sync_playwright() as p:
       gl = ''
       dn = t.ev("fetch('api/game/gameplan', {headers: {'X-Requested-With': 'fetch'}}).then((r) => r.json()).then((s) => Object.keys(s.done || {}).length)")
       for _ in range(30):   # (the line kept in the browser is drawn first, the gameplan's state a moment later)
-        gl = gpline(t); mN = re.search(r'(?:Jour|Day|Día) (\d+)', gl or '')
+        gl = gpline(t); mN = re.search(r'(?:Mission|Misión) (\d+)', gl or '')   # (2 Nov., analyse débutant C2: « Mission N of 90 », the mission he is on)
         if mN and int(mN.group(1)) == max(1, dn): break
         t.pg.wait_for_timeout(200)
       ok('rattraper' not in t.ev("document.getElementById('main').innerText") and 'catch up' not in t.ev("document.getElementById('main').innerText") and t.ev("document.querySelectorAll('#main .gp-ln-late').length") == 0,
          f'{t.name} {day} B1 no counter of missions to catch up ({gl[:60]!r})')
-      ok(bool(mN) and int(mN.group(1)) == max(1, dn), f'{t.name} {day} B1 « Day N of 90 » = the missions done ({mN and mN.group(1)} / {dn} done)')
+      ok(bool(mN) and int(mN.group(1)) in (max(1, dn), dn + 1), f'{t.name} {day} B1 « Mission N of 90 » = the mission he is on (the next one, or the last done when the next is not open yet) ({mN and mN.group(1)} / {dn} done)')
       if t is leo:   # his plan: through the express plan with « Use yesterday's plan » on day 1, else saved as the app saves it
         if i == 1:
           t.ev("SweepGame.openPlan()"); t.pg.wait_for_selector('#gSheet.g-pm', timeout=8000); t.pg.wait_for_timeout(700)

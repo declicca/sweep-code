@@ -7,7 +7,7 @@ A trader of its own, a Topstep 50K evaluation; phone 390 (fr, touch), computer 1
  3b the coach, the first gap: « Ton journal disait qu'il te restait … Ta plateforme dit … », once (a second gap says nothing more)
  4a a day closed on the platform's balance counts (« Jours complets »); a day reviewed without it does not
  4b the coach after a loss in the plan, stop respected: « Perte dans ton plan, stop respecté : c'est un bon trade. »
- 4c the form, a loss typed: checklist and emotions folded under « + Ajouter le contexte (facultatif) »; a loss in as many taps as a win
+ 4c the form, a loss typed: checklist and emotions folded under « + Ajouter le contexte » (2 Nov., analyse débutant C6: no « (facultatif) » next to a field); a loss in as many taps as a win
  4d the badge « Journal honnête » on the 5th day in a row the platform and the journal agree
 No page error, nothing wider than the window.
 """
@@ -20,9 +20,9 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'note': 'non détaillés : ton taux de réussite et ta force/fuite ne les comptent pas.', 'detail': 'Ajouter le détail', 'coach': 'Ton journal disait qu’il te restait', 'plat': 'Ta plateforme dit', 'good': 'Perte dans ton plan, stop respecté : c’est un bon trade.', 'ctx': '+ Ajouter le contexte (facultatif)', 'days': 'Jours complets'},
-     'en': {'note': 'not detailed: your win rate and your edge and leak don’t count them.', 'detail': 'Add the detail', 'coach': 'Your journal said you had', 'plat': 'Your platform says', 'good': 'A loss within your plan, stop respected: that’s a good trade.', 'ctx': '+ Add context (optional)', 'days': 'Complete days'},
-     'es': {'note': 'sin detallar: tu tasa de acierto y tu fuerza/fuga no los cuentan.', 'detail': 'Añadir el detalle', 'coach': 'Tu diario decía que te quedaban', 'plat': 'Tu plataforma dice', 'good': 'Pérdida dentro de tu plan, stop respetado: es una buena operación.', 'ctx': '+ Añadir el contexto (opcional)', 'days': 'Días completos'}}
+X = {'fr': {'note': 'non détaillés : ton taux de réussite et ta force/fuite ne les comptent pas.', 'detail': 'Ajouter le détail', 'coach': 'Ton journal disait qu’il te restait', 'plat': 'Ta plateforme dit', 'good': 'Perte dans ton plan, stop respecté : c’est un bon trade.', 'ctx': '+ Ajouter le contexte', 'days': 'Jours complets'},
+     'en': {'note': 'not detailed: your win rate and your edge and leak don’t count them.', 'detail': 'Add the detail', 'coach': 'Your journal said you had', 'plat': 'Your platform says', 'good': 'A loss within your plan, stop respected: that’s a good trade.', 'ctx': '+ Add context', 'days': 'Complete days'},
+     'es': {'note': 'sin detallar: tu tasa de acierto y tu fuerza/fuga no los cuentan.', 'detail': 'Añadir el detalle', 'coach': 'Tu diario decía que te quedaban', 'plat': 'Tu plataforma dice', 'good': 'Pérdida dentro de tu plan, stop respetado: es una buena operación.', 'ctx': '+ Añadir el contexto', 'days': 'Días completos'}}
 ACC = "([id, name]) => put('accounts', { id, name, status: 'active', phase: 'eval', starting_balance_c: 5000000, created_on: '2026-09-01', rules: { dd_c: 200000, dd_type: 'eod', dll_c: 100000, target_c: 300000 } })"
 TRADE = "([id, acc, d, c, more]) => put('trades', Object.assign({ id, account_id: acc, instrument: 'MNQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: c, pnl_manual: true, date: d, entry_time: '10:00', exit_time: '10:05', discipline: { plan: 'y', stop: 'y' } }, more || {}))"
 FLUSH = "Promise.all(Object.values(chains)).then(() => true)"

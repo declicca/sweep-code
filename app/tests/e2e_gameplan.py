@@ -27,9 +27,9 @@ def until(pg, expr, ms=12000):
     if pg.evaluate(f'!!({expr})'): return True
     pg.wait_for_timeout(150)
   return False
-TXT = {'fr': {'more': 'En savoir plus', 'a': 'Moins de 6 mois', 'gp': 'Ton parcours de 90 jours est inclus', 'opt': 'facultatif', 'prep': 'Préparation des données', 'kick': 'Ton parcours de 90 jours', 'day9': 'Jour 9 sur 90', 'late': 'à rattraper', 'quiz': 'Teste-toi', 'dw': 'C’est fait quand', 'gate': 'La porte du mois 1', 'pass': 'Passer au mois 2', 'set': 'Parcours de 90 jours', 'stop': 'Arrêter le parcours', 'go': 'Commencer le parcours'},
-       'en': {'more': 'Learn more', 'a': 'Less than 6 months', 'gp': 'Your 90-day gameplan is included', 'opt': 'optional', 'prep': 'Preparing the sample data', 'kick': 'Your 90-day gameplan', 'day9': 'Day 9 of 90', 'late': 'to catch up', 'quiz': 'Test yourself', 'dw': 'Done when', 'gate': 'The Month 1 gate', 'pass': 'On to Month 2', 'set': '90-day gameplan', 'stop': 'Stop the gameplan', 'go': 'Start the gameplan'},
-       'es': {'more': 'Saber más', 'a': 'Menos de 6 meses', 'gp': 'Tu recorrido de 90 días está incluido', 'opt': 'opcional', 'prep': 'Preparando los datos', 'kick': 'Tu recorrido de 90 días', 'day9': 'Día 9 de 90', 'late': 'por recuperar', 'quiz': 'Ponte a prueba', 'dw': 'Hecho cuando', 'gate': 'La puerta del mes 1', 'pass': 'Pasar al mes 2', 'set': 'Recorrido de 90 días', 'stop': 'Detener el recorrido', 'go': 'Empezar el recorrido'}}
+TXT = {'fr': {'more': 'En savoir plus', 'a': 'Moins de 6 mois', 'gp': 'Ton parcours de 90 jours est inclus', 'opt': 'facultatif', 'prep': 'Préparation des données', 'kick': 'Ton parcours de 90 jours', 'day9': 'Mission 9 sur 90', 'late': 'à rattraper', 'quiz': 'Teste-toi', 'dw': 'C’est fait quand', 'gate': 'La porte du mois 1', 'pass': 'Passer au mois 2', 'set': 'Parcours de 90 jours', 'stop': 'Arrêter le parcours', 'go': 'Commencer le parcours'},
+       'en': {'more': 'Learn more', 'a': 'Less than 6 months', 'gp': 'Your 90-day gameplan is included', 'opt': 'optional', 'prep': 'Preparing the sample data', 'kick': 'Your 90-day gameplan', 'day9': 'Mission 9 of 90', 'late': 'to catch up', 'quiz': 'Test yourself', 'dw': 'Done when', 'gate': 'The Month 1 gate', 'pass': 'On to Month 2', 'set': '90-day gameplan', 'stop': 'Stop the gameplan', 'go': 'Start the gameplan'},
+       'es': {'more': 'Saber más', 'a': 'Menos de 6 meses', 'gp': 'Tu recorrido de 90 días está incluido', 'opt': 'opcional', 'prep': 'Preparando los datos', 'kick': 'Tu recorrido de 90 días', 'day9': 'Misión 9 de 90', 'late': 'por recuperar', 'quiz': 'Ponte a prueba', 'dw': 'Hecho cuando', 'gate': 'La puerta del mes 1', 'pass': 'Pasar al mes 2', 'set': 'Recorrido de 90 días', 'stop': 'Detener el recorrido', 'go': 'Empezar el recorrido'}}
 WIDE = "Math.max(...[...document.querySelectorAll('#gSheet, #gSheet *, #main *')].map((e) => e.getBoundingClientRect().right)) - innerWidth"
 STATE = "fetch('api/game/gameplan', {headers: {'X-Requested-With': 'fetch'}}).then((r) => r.json())"
 def today_ny():   # the game's trading day: New York + 6 h — at the server's time (pinned to Friday 15:00 during the market's
@@ -101,10 +101,10 @@ def run(p, lang, phone, full):
   move(uid, 9); pg.reload(); until(pg, "document.getElementById('gpLine') && /9/.test(document.getElementById('gpLine').innerText)", 12000); pg.wait_for_timeout(600)
   card = pg.locator('#gpLine').inner_text()
   st9 = pg.evaluate(STATE); dn = len(st9.get('done') or {}); first = next(n for n in range(1, 10) if str(n) not in (st9.get('done') or {}))
-  dayN = re.sub(r'\d+', str(max(1, dn)), T['day9'], count=1)
+  dayN = re.sub(r'\d+', str(first), T['day9'], count=1)   # (2 Nov., analyse débutant C2: one counter, « Mission N of 90 », the mission the trader is on)
   until(pg, f"document.getElementById('gpLine') && document.getElementById('gpLine').innerText.includes({json.dumps(dayN)})", 6000); card = pg.locator('#gpLine').inner_text()
   ok(dayN in card and pg.locator(f'#gpLine [data-gp="mission"][data-n="{first}"]').count() == 1 and pg.locator('#gpLine .gp-ln-late').count() == 0 and T['late'] not in card,
-     f'{tag} 2 calendar day 9: « {dayN} » (the missions done), the first one not done ({first}), no missions to catch up ({card[:90]!r})')
+     f'{tag} 2 calendar day 9: « {dayN} » (the mission he is on), the first one not done ({first}), no missions to catch up ({card[:90]!r})')
   bar0 = pg.evaluate("Object.keys(SweepGP.state().done || {}).length")
   if phone: pg.screenshot(path=f'/tmp/gp_{tag.replace(" ", "_")}_today.png')
   # 3. a mission that teaches: 8 (« Read the setup »)
