@@ -503,7 +503,7 @@
     const mt = dayLimits(day).trades, lock = dayLock(day);   // (1 Nov., brief avance 4) the max trades of the plan or of Settings; the day's lock
     const end = list.length > 0 && ((p.valid && p.maxLoss && sum <= -p.maxLoss) || ses.code === 'margin' || (mt && list.length >= mt) || left <= 0 || rule) || !!lock;
     // (A4) the drawdown room is a limit, never a « risk allowed »: shown as such (k 'dd') only when it is the tightest
-    return { allowed: b.c, k: b.k, a: b.a || '', left, n: list.length, m: mt, end, rule: !!rule, pause: !end && ses.stop, text: ses.stop ? ses.t : '', lock, caution: !(p.valid && p.bias !== 'no_trade' && p.maxLoss) ? cz : null, rule0: ownRule(day) };
+    return { allowed: b.c, k: b.k, a: b.a || '', left, pnl: sum, n: list.length, m: mt, end, rule: !!rule, pause: !end && ses.stop, text: ses.stop ? ses.t : '', lock, caution: !(p.valid && p.bias !== 'no_trade' && p.maxLoss) ? cz : null, rule0: ownRule(day) };
   }
   /** one sentence about a plan: { bias, maxLoss (cents), maxTrades, setups (count) } */
   function planNote(x) {

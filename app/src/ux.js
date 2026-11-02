@@ -1377,24 +1377,41 @@
   render = function () { const out = appRender.apply(this, arguments); try { polish(); fitSoon(); } catch (e) { /* never blocks */ } return out; };
 })();
 
-/* ───────────── 21. Setup: one-tap chips (your own setups first, then the 10 most common) ───────────── */
+/* ───────────── 21. Setup: one-tap chips (your own setups first; the common ones, in your language, behind « + Other ») ───────────── */
 (function () {
   'use strict';
   if (typeof render !== 'function') return;
-  const POPULAR = ['Opening Range Breakout', 'Liquidity Sweep', 'Fair Value Gap', 'Break & Retest', 'VWAP Bounce', 'Trend Pullback', 'Order Block', 'Break of Structure', 'Key Level Reversal', 'Gap Fill'];
+  // (2 Nov., audit « transfuge » G5) the catalogue in the trader's language, each one known by its other spellings: one already
+  // among the trader's own setups (« Cassure et retest », « Retest de FVG », « Opening range ») is not offered a second time
+  const POPULAR = [
+    { en: 'Opening Range Breakout', fr: 'Cassure du range d’ouverture', es: 'Ruptura del rango de apertura', k: /opening.?range|\borb\b|range d.ouverture|rango de apertura/i },
+    { en: 'Liquidity Sweep', fr: 'Prise de liquidité', es: 'Barrido de liquidez', k: /liquidit|liquidez|\bsweep|barrido/i },
+    { en: 'Fair Value Gap', fr: 'Fair Value Gap (FVG)', es: 'Fair Value Gap (FVG)', k: /\bfvg\b|fair.?value/i },
+    { en: 'Break & Retest', fr: 'Cassure et retest', es: 'Ruptura y retest', k: /break.{0,5}retest|cassure.{0,6}retest|ruptura.{0,4}retest/i },
+    { en: 'VWAP Bounce', fr: 'Rebond sur le VWAP', es: 'Rebote en el VWAP', k: /vwap/i },
+    { en: 'Trend Pullback', fr: 'Pullback dans la tendance', es: 'Retroceso en tendencia', k: /pull.?back|retroceso/i },
+    { en: 'Order Block', fr: 'Order block', es: 'Order block', k: /order.?block/i },
+    { en: 'Break of Structure', fr: 'Cassure de structure', es: 'Ruptura de estructura', k: /break of structure|\bbos\b|cassure de structure|ruptura de estructura/i },
+    { en: 'Key Level Reversal', fr: 'Retournement sur niveau clé', es: 'Giro en nivel clave', k: /reversal|retournement|\bgiro\b|reversi[oó]n/i },
+    { en: 'Gap Fill', fr: 'Comblement de gap', es: 'Cierre de gap', k: /gap.?fill|comblement|cierre de(l)? gap/i },
+  ];
   const NOSHOT = { fr: 'Aucune capture pour l’instant.', es: 'Aún no hay capturas.' };
+  let catOpen = false;   // « + Other » tapped on this page: the catalogue stays shown while the page redraws
+  addEventListener('hashchange', () => { catOpen = false; });
   function chips(input) {
     const own = ((S.settings && S.settings.setups) || []).filter((x) => typeof x === 'string' && x.trim());   // (a setup saved as anything else than a name: never a chip)
     const used = {}; (S.trades || []).forEach((t) => { if (t.setup && !t.demo) used[t.setup] = (used[t.setup] || 0) + 1; });
-    const mine = [...new Set([...own, ...Object.keys(used).sort((a, b) => used[b] - used[a]).slice(0, 4)])];
+    const mine = [...new Set([...own, ...Object.keys(used).sort((a, b) => used[b] - used[a]).slice(0, 4)])].slice(0, 6);
     const low = new Set(mine.map((x) => x.toLowerCase()));
-    let list = [...mine.slice(0, 6), ...POPULAR.filter((p) => !low.has(p.toLowerCase()))];
+    const cat = POPULAR.filter((p) => !mine.some((m) => p.k.test(m))).map((p) => p[LANG] || p.en).filter((p) => !low.has(p.toLowerCase()));
     const raw = (input.value || '').trim(), cur = raw.toLowerCase();
     // (29 Oct., tour T6) the chips alone choose the setup, written one way: the trade's own setup takes its chip's place (its
-    // spelling), first when it is not in the list; « + Other » opens the field to type a new one
-    if (raw) list = [raw, ...list.filter((s) => s.toLowerCase() !== cur)];
+    // spelling), first when it is not among the trader's own; « + Other » shows the common setups and opens the field to type one
+    let list = mine.slice();
+    if (raw && !low.has(cur)) list = [raw, ...list];   // (a catalogue setup chosen: shown first, as his)
+    const open = catOpen || !mine.length;   // (no setup of his own yet: the common ones are his first choice)
     const OTHER = ({ en: '+ Other', fr: '+ Autre', es: '+ Otro' })[LANG] || '+ Other';
-    return `<div class="ux-setups" data-noi18n>${list.map((s, i) => `<button type="button" class="ux-setup ${i < Math.min(mine.length, 6) ? 'mine' : ''} ${cur === s.toLowerCase() ? 'on' : ''}" data-ux-setup="${esc(s)}">${esc(s)}</button>`).join('')}<button type="button" class="ux-setup ux-setup-other" data-ux-other>${OTHER}</button></div>`;
+    return `<div class="ux-setups" data-noi18n>${list.map((s) => `<button type="button" class="ux-setup ${low.has(s.toLowerCase()) ? 'mine' : ''} ${cur === s.toLowerCase() ? 'on' : ''}" data-ux-setup="${esc(s)}">${esc(s)}</button>`).join('')}${cat.filter((s) => s.toLowerCase() !== cur).map((s) => `<button type="button" class="ux-setup ux-setup-cat${cur === s.toLowerCase() ? ' on' : ''}" data-ux-setup="${esc(s)}"${open ? '' : ' hidden'}>${esc(s)}</button>`).join('')}<button type="button" class="ux-setup ux-setup-other" data-ux-other>${OTHER}</button></div>`;
   }
   function paint() {
     const main = document.getElementById('main'); if (!main) return;
@@ -1411,7 +1428,12 @@
   }
   document.addEventListener('click', (e) => {
     const o = e.target.closest && e.target.closest('[data-ux-other]');
-    if (o) { const lb = o.closest('.ux-setups').previousElementSibling; if (lb) { lb.classList.add('ux-setup-typed'); const i = lb.querySelector('input'); if (i) { i.focus(); i.select && i.select(); } } return; }
+    if (o) {   // (2 Nov., G5) « + Other »: the common setups in the trader's language, and the field to type a new one
+      const row = o.closest('.ux-setups'), lb = row.previousElementSibling, hid = [...row.querySelectorAll('.ux-setup-cat[hidden]')];
+      catOpen = true; hid.forEach((x) => { x.hidden = false; });
+      if (lb) { lb.classList.add('ux-setup-typed'); const i = lb.querySelector('input'); if (i && !hid.length) { i.focus(); i.select && i.select(); } }
+      return;
+    }
     const b = e.target.closest && e.target.closest('[data-ux-setup]'); if (!b) return;
     const row = b.closest('.ux-setups'), label = row && row.previousElementSibling;
     const input = label && (label.querySelector('input[data-bind$="|setup"]') || (label.matches('input') ? label : null)); if (!input) return;
@@ -1452,17 +1474,42 @@
 
   // Ask Sweep steps aside while the trader reads down a page (it covered values on the right, like an account's profit
   // target) and comes back on the way up, near the top and at the bottom (R23). Phones only (the CSS).
-  let lastY = scrollY, tick = false;
+  // (2 Nov., audit « transfuge ») at rest too, it never covers anything: once the page stops moving, it steps aside while a text,
+  // an amount or a button of the page lies under it (Today's review button, an account's balance), and comes back over empty space
+  let lastY = scrollY, tick = false, covered = false, settle = 0;
+  const fab = () => document.querySelector('.ask-fab');
+  function coversContent() {
+    const f = fab(); if (!f || !matchMedia('(max-width: 860px)').matches || !document.body.classList.contains('ask-on')) return false;
+    const cs = getComputedStyle(f), w = f.offsetWidth, h = f.offsetHeight; if (!w || !h) return false;
+    const R = innerWidth - parseFloat(cs.right), B = innerHeight - parseFloat(cs.bottom), r = { l: R - w - 6, r: R + 6, t: B - h - 6, b: B + 6 };   // its place at rest, with a margin
+    const main = document.getElementById('main'); if (!main) return false;
+    const hit = (q) => q.width > 0 && q.height > 0 && q.left < r.r && q.right > r.l && q.top < r.b && q.bottom > r.t;
+    for (const e of main.querySelectorAll('a, button, input, select, textarea, img, svg, canvas')) { if (hit(e.getBoundingClientRect()) && getComputedStyle(e).visibility !== 'hidden') return true; }
+    const tw = document.createTreeWalker(main, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+    const g = document.createRange();
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) { g.selectNodeContents(n); for (const q of g.getClientRects()) if (hit(q)) return true; }
+    return false;
+  }
+  function place() {   // after a scroll or a redraw has settled
+    covered = coversContent(); document.body.classList.toggle('ux-fab-away', covered || document.body.classList.contains('ux-fab-scroll'));
+  }
+  const later = () => { clearTimeout(settle); settle = setTimeout(place, 160); };
+  window.SweepFabPlace = place;
   addEventListener('scroll', () => {
     if (tick) return; tick = true;
     requestAnimationFrame(() => {
-      tick = false; const y = scrollY, end = y + innerHeight >= document.documentElement.scrollHeight - 8;
-      if (y < 120 || end || y < lastY - 8) document.body.classList.remove('ux-fab-away');
-      else if (y > lastY + 8) document.body.classList.add('ux-fab-away');
+      tick = false; const y = scrollY, end = y + innerHeight >= document.documentElement.scrollHeight - 8, b = document.body.classList;
+      if (y < 120 || end || y < lastY - 8) b.remove('ux-fab-scroll');
+      else if (y > lastY + 8) b.add('ux-fab-scroll');
+      b.toggle('ux-fab-away', covered || b.contains('ux-fab-scroll'));
       if (Math.abs(y - lastY) > 8 || y < 120) lastY = y;
+      later();
     });
   }, { passive: true });
-  addEventListener('hashchange', () => { document.body.classList.remove('ux-fab-away'); lastY = 0; });
+  addEventListener('hashchange', () => { document.body.classList.remove('ux-fab-scroll'); lastY = 0; later(); });
+  addEventListener('resize', later);
+  if (typeof render === 'function') { const r0 = render; render = function () { const out = r0.apply(this, arguments); later(); return out; }; }
+  new MutationObserver(later).observe(document.getElementById('main') || document.body, { childList: true, subtree: true });
   // (19 Oct., Mateo: back at the bottom right on a phone — no longer hidden at rest when it sits on a text, R23 above stays)
 })();
 

@@ -226,8 +226,7 @@ html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
 .nav-trs{display:flex;flex-direction:column}
 .nav-tr{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 2px;border-bottom:1px solid var(--line);color:var(--text);text-decoration:none}
 .nav-tr:last-child{border-bottom:0}
-.nav-tr-d{width:26px;height:26px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--posbg);color:var(--pos)}
-.nav-tr-d.s{background:var(--negbg);color:var(--neg)}
+.nav-tr-d{width:26px;height:26px;flex-shrink:0;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:700;background:rgba(127,127,127,.14);color:var(--text)}   /* (2 Nov., audit « transfuge » C2) L and S in neutral ink: blue and gold say a result only */
 .nav-tr-m{flex:1;min-width:0;display:flex;flex-direction:column}
 .nav-tr-m b{font-size:14px;font-weight:600}.nav-tr-m small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav-tr-p{font-variant-numeric:tabular-nums;font-weight:600;font-size:14px}
@@ -2804,7 +2803,7 @@ html body #main .nav-accset > summary small{color:var(--muted);font-size:13px}
 #main .nav-accset[open] > summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
 html body #main .nav-accset-in{display:grid;gap:20px;padding:4px 14px 16px}
 html body #main .nav-accset-in > *{margin:0}
-#main table.tbl.tbl-own-acc th:nth-child(3),#main table.tbl.tbl-own-acc td:nth-child(3){display:none!important}   /* its own page: no « Account » column */
+#main table.tbl.tbl-own-acc th:nth-child(4),#main table.tbl.tbl-own-acc td:nth-child(4){display:none!important}   /* its own page: no « Account » column */
 /* Stats on a phone: « More stats », folded (audit of 18 Oct., lot 3) — the same look as « Account settings » */
 /* My money: « My entries / Analysis » in the filters' line, the height of its chips */
 html body #main .fx-row > .mny-view.mny-view-fx{flex:0 0 auto;width:auto;max-width:none;height:44px;box-sizing:border-box;margin:0;padding:0;border:0!important;box-shadow:inset 0 0 0 1px var(--hair)}
@@ -2857,7 +2856,12 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 }
 /* a computer up to 1440 px: the 12 columns of Trades fit without a side scroll (20 Oct.: Setup cut at 1300 px) */
 @media (min-width:861px) and (max-width:1440px){ html body #main table.tbl th,html body #main table.tbl td{padding-left:10px;padding-right:10px}
-  html body #main table.tbl-day th:nth-child(3),html body #main table.tbl-day td:nth-child(3){display:none} }   /* a day's trades (Journal): no « Session », its time says it */
+}   /* (2 Nov., audit « transfuge ») no « Session » column in any trades table any more */
+/* (2 Nov., C3, C4) the account by its short name on one line (the full name on hover), the symbol in the platforms' mono */
+html body #main table.tbl td.tt-acc{white-space:nowrap}
+@media (min-width:861px) and (max-width:1440px){ html body #main table.tbl th,html body #main table.tbl td{padding-left:8px;padding-right:8px}
+  html body #main table.tbl td.tt-set{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} }   /* a long setup: cut, whole on hover */
+html body #main table.tbl td.tt-sym{font-family:"Geist Mono",ui-monospace,monospace;font-weight:500}
 /* « Explore with sample data first »: preparing (20 Oct.) */
 [data-act="demo"].is-busy{display:none!important}
 .nav-busy-l{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;font-size:13px;color:var(--pos)}
@@ -3158,6 +3162,9 @@ html body #main .nav-rt.nav-lockd > .co-today{display:none!important}
 html body #main .nav-lock-a .btn{min-height:44px;padding:0 20px;border-radius:999px;justify-content:center;flex:1 1 150px;max-width:260px}
 .nav-now-cnt b{font-size:15px;font-weight:500;color:var(--text)}
 .nav-now-cnt .nav-now-v{font-size:inherit;font-weight:600}
+/* (2 Nov., audit « transfuge » C1) the day's P&L, first on « Now », in the colour of its result */
+.nav-now-p.pos{color:var(--pos)}.nav-now-p.neg{color:var(--neg)}
+.nav-now-pl .nav-now-p{font-size:inherit}
 .fgrid > .nav-dl-help{grid-column:1/-1;margin:0}
 .nav-dl-wait{display:block;margin-top:4px;font-weight:600;color:var(--text)}
 /* (2 Nov.) « Now » right under « Level · days »: the card's own gap only (39 px above it, 15 below, looked like a hole) */
@@ -3241,3 +3248,22 @@ html body .nav-ai-today input[data-ai-today]::placeholder{font-size:14px;text-ov
 .cg-pill{display:inline-flex;align-items:center;gap:4px;border:0;font:inherit;cursor:pointer}
 html body #main tr.cg-sub[hidden]{display:none!important}
 tr.cg-sub td{background:var(--panel2)}
+/* (2 Nov., audit « transfuge » G1) the trade page: its result first; the other accounts folded in one line under it */
+html body #main .th-head .th-res .lbl{color:var(--text);font-weight:500}   /* « NQ · Long · 1 », read first */
+html body #main .th-head .th-acc{font-size:13px;margin-top:4px}
+html body #main .tr-copies{margin:0 24px 12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+@media (max-width:600px){html body #main .tr-copies{margin:0 16px 10px}}
+html body #main .tr-copies>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:48px;padding:0 2px;cursor:pointer;font-size:14px;color:var(--text2)}
+html body #main .tr-copies>summary::-webkit-details-marker{display:none}
+html body #main .tr-copies>summary b{font-family:var(--font-num);font-weight:600}
+html body #main .tr-copies-go{margin-left:auto;font-size:18px;color:var(--muted);transition:transform .32s var(--spring)}
+html body #main .tr-copies[open] .tr-copies-go{transform:rotate(90deg)}
+html body #main .tr-copies-l{border-top:1px solid var(--line)}
+html body #main .tr-copies-l .cg-r{padding:0 2px}
+html body #main .tr-copies-l .help{margin:10px 14px 14px;font-size:13px}
+/* (2 Nov., audit « transfuge » G4) Stats: « Calendar › » in place of its second calendar */
+#main .st-cal-link{margin:4px 0 18px}
+/* (2 Nov., audit « transfuge » G5) the common setups wait behind « + Other » */
+html body #main .ux-setup[hidden]{display:none!important}
+/* (2 Nov., audit « transfuge » G2) one label for the action, « Add a trade », on the phone too: it wraps in its narrow step */
+@media (max-width:860px){html body .nav-rt-sa .btn{white-space:normal!important;text-align:left!important;justify-content:flex-start!important}}

@@ -397,6 +397,11 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 - **Page de connexion** : bouton principal blanc sur le bleu profond (44 px ordinateur, 48 px téléphone), comme dans l'app. Les aperçus (`img/app-overview-*.webp`, `img/app-phone-*.webp`, `?v=20261015`) montrent l'app actuelle (Aujourd'hui, foncé, données d'exemple, noms de comptes dans la langue) ; à refaire quand Aujourd'hui change beaucoup (`?v=` à changer).
 - **Sélecteur collant** (Comptes / Mon argent, Liste / Calendrier / Journal, onglets d'un trade) : opaque une fois collé, avec sa bande de fond (une règle générale plus forte l'avait rendu transparent : on voyait passer les contours dessous).
 
+- **Trois règles de lecture (audit « le transfuge », 2 nov., pour tout écran futur)** — le trader lit Sweep avec les réflexes de sa plateforme et de son ancien journal :
+  1. **Le chiffre d'abord.** Sur Aujourd'hui, le P&L du jour est dans la carte « Maintenant ». Sur la page d'un trade, le résultat est en tête (« NQ · Long · 1 » et son P&L). Dans le tableau des trades, le symbole vient tout de suite après la date et l'heure.
+  2. **La couleur ne dit que le résultat.** Bleu et or sont réservés aux montants (gain / perte). Long et Short (et Achat / Vente, les pastilles « L » / « S ») sont en encre neutre, partout.
+  3. **Un nom par chose, une place par chose.** Une action, un libellé (« Ajouter un trade »). Une mesure, un nom (« Discipline »). Une vue de la journée par page (Stats n'a plus son propre calendrier).
+
 ## 9. Préférences de travail de Mateo
 
 - Une seule option plutôt que plusieurs ; trancher quand c'est raisonnable.
@@ -1606,3 +1611,18 @@ Un trader de prop firm copie un compte maître sur plusieurs comptes : il saisit
 - Fichiers : src/nav.js, src/nav.css, src/app.js, sync/sync-store.php, billing/billing-core.php, ai/chat.php, tests/run-all.sh. Table `sync_copies` créée toute seule (`sync_schema`, SQLite et MySQL), effacée avec le compte. Aucune tâche cron.
 - Tests : `copy_group_test.php` (18 : copies du maître synchronisé, tailles, commission, `{}` gardé, événements, correction, copie supprimée, suiveur relié plus tard à une autre taille, suiveur synchronisé dans le groupe, Free, compte en pause, groupe sans maître, forfaits, suppression du compte) et `e2e_copy_group` (390 tactile FR clair et ES foncé, 1300 EN foncé et FR clair, par les vraies routes de la synchro ; Free sur un 2ᵉ serveur au port + 1, FR et EN). Mis à jour (comportement changé par le brief) : `e2e_copy_trading` (la modification de l'original demande), `e2e_delete_undo_copy_dates` (« Supprimer » demande, puis « sur les 3 comptes »).
 - Étapes 2 et 3 ensemble (2 nov.) : quand la saisie par IA demande le compte, le compte maître d'un groupe de copie s'affiche « Apex 1 + ses 3 copies » (EN/FR/ES) ; le choisir présélectionne ses suiveurs, comme dans le formulaire (`aiAccountOptions`, nav.js).
+
+## Audit « le transfuge » (2 nov.) : les 10 ajustements de lecture
+
+Source : `docs/parcours/AUDIT-TRANSFUGE-2026-11-02.md`, section 4 (hors git). Sans nouvelle fonction ; les trois règles sont dans la section design.
+1. Textes anglais restants traduits (« No trades match these filters. », « Logged on N accounts », en-têtes triables du tableau, flèche comprise).
+2. Long / Short (et Achat / Vente, pastilles « L » / « S ») en encre neutre partout ; l'or seulement pour les montants négatifs.
+3. Durée d'un trade en « 45 s », « 8 min », « 1 h 05 » (plus « 08:00 »).
+4. « Maintenant » : le P&L du jour en premier (« +821,60 $ aujourd'hui · 2/3 trades · 1 422 $ restants ») ; avant le premier trade, la ligne ne change pas.
+5. Tableau des trades (ordinateur) : le symbole après la date et l'heure, plus de colonne Séance (elle reste dans les filtres et la page du trade), le compte par son nom court (nom complet au survol) ; pas de défilement horizontal à 1 300 px.
+6. Page d'un trade : en tête « NQ · Long · 1 » et le P&L de ce compte ; les autres comptes repliés en une ligne « Aussi sur 4 comptes · total … › » (le bandeau « Aussi sur » et le bloc « Logged on » retirés).
+7. Une action, un libellé : « Ajouter un trade » partout (la ligne « + Ajouter un trade » du tableau retirée) ; une mesure, un nom : « Discipline » (la colonne « Checklist » renommée).
+8. Stats n'a plus son calendrier : un lien « Calendrier › » vers Trades › Calendrier.
+9. Setups : ceux du trader d'abord ; le catalogue par défaut traduit, sans doublons, derrière « + Autre ».
+10. Téléphone : le bouton flottant de Sweep AI ne couvre plus rien ; « Marge DD » écrit « Marge de drawdown ».
+Test : `e2e_transfuge` (les 16 réflexes R1–R5, C1–C6, G1–G5 ; EN/FR/ES, 390 tactile et 1 300, clair et foncé ; P&L du jour visible sans défiler, tableau sans défilement horizontal, aucun texte anglais en français).

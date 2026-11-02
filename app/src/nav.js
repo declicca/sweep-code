@@ -82,7 +82,9 @@ window.SweepMO = window.SweepMO || class {
       main.prepend(el);
     }
     const NT = { en: 'Add a trade (N)', fr: 'Ajouter un trade (N)', es: 'Añadir una operación (N)' };
-    document.querySelectorAll('aside.side .new, #bottomnav .plus').forEach((b) => { b.title = NT[LANG] || NT.en; b.setAttribute('aria-keyshortcuts', 'N'); });
+    // (2 Nov., audit « transfuge » G2) one name for the action, everywhere: « Add a trade » (it was « New trade » here)
+    const NA = { en: 'Add a trade', fr: 'Ajouter un trade', es: 'Añadir una operación' }, na = NA[LANG] || NA.en;
+    document.querySelectorAll('aside.side .new, #bottomnav .plus').forEach((b) => { b.title = NT[LANG] || NT.en; b.setAttribute('aria-keyshortcuts', 'N'); b.setAttribute('aria-label', na); if (b.dataset.label) b.dataset.label = na; const l = b.querySelector('.lbl'); if (l && l.textContent !== na) { l.setAttribute('data-noi18n', ''); l.textContent = na; } });
     // the reward dot pulses once per visit, then stays still (the avatar is redrawn on every render)
     const dot = rewardWaiting(); document.querySelectorAll('aside.side .who').forEach((w) => { w.classList.toggle('nav-dot', dot); w.classList.toggle('nav-dot-still', dot && dotPulsed); });
     if (dot && !dotPulsed) setTimeout(() => { dotPulsed = true; }, 3800);
@@ -1602,17 +1604,7 @@ window.SweepMO = window.SweepMO || class {
     if (lk && !lk.classList.contains('nav-addday')) { lk.classList.remove('link'); lk.classList.add('btn', 'sm', 'nav-addday'); /* a neutral button: the page's one primary action is elsewhere (5, 15.1) */ lk.innerHTML = `${PLUS}<span>${t('addDay')}</span>`; lk.setAttribute('data-noi18n', ''); }
   }
 
-  function tradesAddRow() {
-    if (!/^#trades(\/list)?$|^#trades$/.test(location.hash || '') && location.hash !== '' && !/^#trades\b/.test(location.hash)) return;
-    if (!/^#trades/.test(location.hash || '')) return;
-    const main = document.getElementById('main'); if (!main || main.querySelector('.nav-addrow')) return;
-    const list = main.querySelector('.tlist, .tbl'); if (!list) return;
-    const host = list.closest('.surface') || list.parentElement;
-    if (!host || host.closest('.jlayout')) return;
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'add-row nav-addrow'; b.setAttribute('data-act', 'add-trade'); b.setAttribute('data-noi18n', '');
-    b.innerHTML = `<span class="add-ic">+</span>${t('add')}`;
-    host.prepend(b);
-  }
+  // (2 Nov., audit « transfuge » G2) no « + Add a trade » row on top of the trades list any more: the title row's button is enough
 
   /* 2. the form: « several entries or exits » right under the entry price; amounts in $ that fill the prices */
   const mem = {};
@@ -1770,7 +1762,7 @@ window.SweepMO = window.SweepMO || class {
 
   const appRender = window.render;
   if (typeof appRender === 'function' && !appRender.__addj) {
-    const w = function () { const out = appRender.apply(this, arguments); [addButton, journalRecap, tradesAddRow].forEach((f) => { try { f(); } catch (e) { /* never blocks */ } }); return out; };
+    const w = function () { const out = appRender.apply(this, arguments); [addButton, journalRecap].forEach((f) => { try { f(); } catch (e) { /* never blocks */ } }); return out; };
     w.__addj = true; window.render = w;
   }
 })();
@@ -3060,9 +3052,10 @@ window.SweepMO = window.SweepMO || class {
     const panelOpen = typeof CP !== 'undefined' && CP && CP.id === t.id;
     const G = groupOf(t, on);
     let html = '';
-    if (G && G.left.length && !panelOpen) html = `<div class="nav-copy" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${others.length ? tx.also.replace('{l}', esc2(others.join(', '))) : tx.only.replace('{a}', esc2(name(t.account_id)))}</span><button type="button" class="btn sm primary" data-copy-grp="${esc2(G.g)}" data-id="${esc2(t.id)}">${esc2((G.name ? tx.grp.replace('{g}', G.name) : tx.grp0).replace('{n}', accN(G.left.length)))}</button></div>`;
-    else if (free.length && !panelOpen) html = `<div class="nav-copy" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${others.length ? tx.also.replace('{l}', esc2(others.join(', '))) : tx.only.replace('{a}', esc2(name(t.account_id)))} <b>${tx.ask}</b></span><button type="button" class="btn sm primary" data-act="copy-open" data-id="${esc2(t.id)}">${tx.btn}</button></div>`;
-    else if (others.length && !panelOpen) html = `<div class="nav-copy done" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${tx.also.replace('{l}', esc2(others.join(', ')))}</span></div>`;
+    // (2 Nov., audit « transfuge » G1) the accounts it is already on: only in the folded line under the result (« Also on 4 accounts
+    // · total … »), never here too; this banner stays only to offer the copy
+    if (G && G.left.length && !panelOpen) html = `<div class="nav-copy" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${others.length ? `<b>${tx.ask}</b>` : tx.only.replace('{a}', esc2(name(t.account_id)))}</span><button type="button" class="btn sm primary" data-copy-grp="${esc2(G.g)}" data-id="${esc2(t.id)}">${esc2((G.name ? tx.grp.replace('{g}', G.name) : tx.grp0).replace('{n}', accN(G.left.length)))}</button></div>`;
+    else if (free.length && !panelOpen) html = `<div class="nav-copy" data-noi18n><span class="nav-copy-ic">${ICON}</span><span class="nav-copy-t">${others.length ? '' : tx.only.replace('{a}', esc2(name(t.account_id))) + ' '}<b>${tx.ask}</b></span><button type="button" class="btn sm primary" data-act="copy-open" data-id="${esc2(t.id)}">${tx.btn}</button></div>`;
     let el = main.querySelector('.nav-copy');
     if (!html) { if (el) el.remove(); return; }
     if (!el) {
@@ -4301,9 +4294,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { net: 'Net P&L', trades: 'Trades', wr: 'Win rate', rr: 'Avg R:R', disc: 'Checklist', plan: 'Days with a plan', days: 'The week, day by day', none: 'No trade', planOk: 'Plan', revOk: 'Review', best: 'Best trade', worst: 'Worst trade', setups: 'Setups', emos: 'Before the trade', lessons: 'Lessons of the week', noLesson: 'Write your lessons in each day’s review: they gather here.', review: 'Your weekly review', empty: 'No trade this week yet. Your plans and reviews still count.' },
-    fr: { net: 'P&L net', trades: 'Trades', wr: 'Taux de réussite', rr: 'R:R moyen', disc: 'Checklist', plan: 'Jours avec un plan', days: 'La semaine, jour par jour', none: 'Aucun trade', planOk: 'Plan', revOk: 'Revue', best: 'Meilleur trade', worst: 'Pire trade', setups: 'Setups', emos: 'Avant le trade', lessons: 'Leçons de la semaine', noLesson: 'Écris tes leçons dans la revue de chaque jour : elles se rassemblent ici.', review: 'Ta revue de la semaine', empty: 'Aucun trade cette semaine pour l’instant. Tes plans et tes revues comptent quand même.' },
-    es: { net: 'P&L neto', trades: 'Operaciones', wr: 'Tasa de acierto', rr: 'R:R medio', disc: 'Checklist', plan: 'Días con plan', days: 'La semana, día a día', none: 'Sin operaciones', planOk: 'Plan', revOk: 'Revisión', best: 'Mejor operación', worst: 'Peor operación', setups: 'Setups', emos: 'Antes de operar', lessons: 'Lecciones de la semana', noLesson: 'Escribe tus lecciones en la revisión de cada día: se reúnen aquí.', review: 'Tu revisión semanal', empty: 'Aún no hay operaciones esta semana. Tus planes y revisiones cuentan igual.' } };
+    en: { net: 'Net P&L', trades: 'Trades', wr: 'Win rate', rr: 'Avg R:R', disc: 'Discipline', plan: 'Days with a plan', days: 'The week, day by day', none: 'No trade', planOk: 'Plan', revOk: 'Review', best: 'Best trade', worst: 'Worst trade', setups: 'Setups', emos: 'Before the trade', lessons: 'Lessons of the week', noLesson: 'Write your lessons in each day’s review: they gather here.', review: 'Your weekly review', empty: 'No trade this week yet. Your plans and reviews still count.' },
+    fr: { net: 'P&L net', trades: 'Trades', wr: 'Taux de réussite', rr: 'R:R moyen', disc: 'Discipline', plan: 'Jours avec un plan', days: 'La semaine, jour par jour', none: 'Aucun trade', planOk: 'Plan', revOk: 'Revue', best: 'Meilleur trade', worst: 'Pire trade', setups: 'Setups', emos: 'Avant le trade', lessons: 'Leçons de la semaine', noLesson: 'Écris tes leçons dans la revue de chaque jour : elles se rassemblent ici.', review: 'Ta revue de la semaine', empty: 'Aucun trade cette semaine pour l’instant. Tes plans et tes revues comptent quand même.' },
+    es: { net: 'P&L neto', trades: 'Operaciones', wr: 'Tasa de acierto', rr: 'R:R medio', disc: 'Disciplina', plan: 'Días con plan', days: 'La semana, día a día', none: 'Sin operaciones', planOk: 'Plan', revOk: 'Revisión', best: 'Mejor operación', worst: 'Peor operación', setups: 'Setups', emos: 'Antes de operar', lessons: 'Lecciones de la semana', noLesson: 'Escribe tus lecciones en la revisión de cada día: se reúnen aquí.', review: 'Tu revisión semanal', empty: 'Aún no hay operaciones esta semana. Tus planes y revisiones cuentan igual.' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const n1 = (x) => (typeof tNet === 'function' ? tNet(x) : (x.pnl_c || 0) - (x.fees_c || 0));
@@ -4392,17 +4385,17 @@ window.SweepMO = window.SweepMO || class {
     en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day complete', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
       s1: 'Plan', s1d: 'Make your plan', s2: 'Execution', s2d: 'Trade your plan', s3: 'Review', s3d: 'Do your review',
       todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', inPlan1: '{c} of 1 trade in your plan', noPlanN: '{n} trades · no plan', noPlan1: '1 trade · no plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
-      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', b1s: 'Plan it', b2s: '+ Trade', b3s: 'Review', see: 'See',
+      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', b1s: 'Plan it', b2s: 'Add a trade', b3s: 'Review', see: 'See',
       help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day complete »: your streak goes on. Profit never counts, only the process.' },
     fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée complète', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
       s1: 'Plan', s1d: 'Fais ton plan', s2: 'Exécution', s2d: 'Respecte ton plan', s3: 'Revue', s3d: 'Fais ta revue',
       todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', inPlan1: '{c} sur 1 trade dans ton plan', noPlanN: '{n} trades · pas de plan', noPlan1: '1 trade · pas de plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
-      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', b1s: 'Planifier', b2s: '+ Trade', b3s: 'Réviser', see: 'Voir',
+      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', b1s: 'Planifier', b2s: 'Ajouter un trade', b3s: 'Réviser', see: 'Voir',
       help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée complète » : ta série continue. Le profit ne compte jamais, seulement le processus.' },
     es: { title: 'Tu rutina de hoy', how: 'Cómo funciona', of: '{n} de 3 hechas', swept: 'Día completado', closed: 'Los mercados están cerrados hoy. El descanso es parte del proceso.', dayoffT: 'Día libre', dayoff: 'Sin operar hoy: tu racha está protegida.',
       s1: 'Plan', s1d: 'Haz tu plan', s2: 'Ejecución', s2d: 'Respeta tu plan', s3: 'Revisión', s3d: 'Haz tu revisión',
       todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', inPlan1: '{c} de 1 operación en tu plan', noPlanN: '{n} operaciones · sin plan', noPlan1: '1 operación · sin plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
-      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', b1s: 'Planificar', b2s: '+ Operación', b3s: 'Revisar', see: 'Ver',
+      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', b1s: 'Planificar', b2s: 'Añadir una operación', b3s: 'Revisar', see: 'Ver',
       help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue. El beneficio nunca cuenta, solo el proceso.' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -4433,13 +4426,13 @@ window.SweepMO = window.SweepMO || class {
      is left, past a stop the day over; the numbers are the coach's own (SweepCoach.riskNow). Nothing once the day is reviewed. */
   const NW3 = {
     en: { now: 'Now', ruleEnd: 'Done for today: that was your rule.', closeDay: 'Close my day', risk: 'Your risk allowed today', left: 'Left today', count: 'trade {n} of {m}', end: 'Day over by your plan', plan: 'your plan’s max loss', last: 'your last plan’s max loss', dll: 'the daily limit of {a}', dd: 'your drawdown room on {a}', news: '{t} · {e}: no trade from {a} to {b}', Lplan: 'before your max loss', Llast: 'before your last plan’s max loss', Ldll: 'before the daily limit of {a}', Ldd: 'of drawdown room on {a}',
-      set: 'your daily max loss', Lset: 'before your daily max loss', cnt: '{n}/{m} trades · {v} left today', cnt1: '{n} trade · {v} left today', cntN: '{n} trades · {v} left today',
+      set: 'your daily max loss', Lset: 'before your daily max loss', pl: '{p} today', cnt: '{p} today · {n}/{m} trades · {v} left', cnt1: '{p} today · {n} trade · {v} left', cntN: '{p} today · {n} trades · {v} left',
       limit: 'Your limit today', caution: 'half your last max loss', Lcaution: 'before half your last max loss', czRoom: 'Room at {m}: risk cut in half today ({r})', czLoss: 'After a day past your max loss: risk cut in half today ({r})', rule: 'Your rule today' },
     fr: { now: 'Maintenant', ruleEnd: 'Fini pour aujourd’hui, c’était ta règle.', closeDay: 'Fermer ma journée', risk: 'Ton risque permis aujourd’hui', left: 'Il te reste', count: 'trade {n} sur {m}', end: 'Journée terminée selon ton plan', plan: 'la perte max de ton plan', last: 'la perte max de ton dernier plan', dll: 'la limite du jour de {a}', dd: 'ta marge de drawdown sur {a}', news: '{t} · {e} : pas de trade de {a} à {b}', Lplan: 'avant ta perte max', Llast: 'avant la perte max de ton dernier plan', Ldll: 'avant la limite du jour de {a}', Ldd: 'de marge de drawdown sur {a}',
-      set: 'ta perte max par jour', Lset: 'avant ta perte max par jour', cnt: '{n}/{m} trades · {v} restants aujourd’hui', cnt1: '{n} trade · {v} restants aujourd’hui', cntN: '{n} trades · {v} restants aujourd’hui',
+      set: 'ta perte max par jour', Lset: 'avant ta perte max par jour', pl: '{p} aujourd’hui', cnt: '{p} aujourd’hui · {n}/{m} trades · {v} restants', cnt1: '{p} aujourd’hui · {n} trade · {v} restants', cntN: '{p} aujourd’hui · {n} trades · {v} restants',
       limit: 'Ta limite aujourd’hui', caution: 'la moitié de ta dernière perte max', Lcaution: 'avant la moitié de ta dernière perte max', czRoom: 'Marge à {m}\u00a0: risque réduit de moitié aujourd’hui ({r})', czLoss: 'Après une journée au-delà de ta perte max\u00a0: risque réduit de moitié aujourd’hui ({r})', rule: 'Ta règle d’aujourd’hui' },
     es: { now: 'Ahora', ruleEnd: 'Terminado por hoy: era tu regla.', closeDay: 'Cerrar mi día', risk: 'Tu riesgo permitido hoy', left: 'Te quedan', count: 'operación {n} de {m}', end: 'Día terminado según tu plan', plan: 'la pérdida máx. de tu plan', last: 'la pérdida máx. de tu último plan', dll: 'el límite diario de {a}', dd: 'tu margen de drawdown en {a}', news: '{t} · {e}: sin operar de {a} a {b}', Lplan: 'antes de tu pérdida máx.', Llast: 'antes de la pérdida máx. de tu último plan', Ldll: 'antes del límite diario de {a}', Ldd: 'de margen de drawdown en {a}',
-      set: 'tu pérdida máx. por día', Lset: 'antes de tu pérdida máx. por día', cnt: '{n}/{m} operaciones · {v} restantes hoy', cnt1: '{n} operación · {v} restantes hoy', cntN: '{n} operaciones · {v} restantes hoy',
+      set: 'tu pérdida máx. por día', Lset: 'antes de tu pérdida máx. por día', pl: '{p} hoy', cnt: '{p} hoy · {n}/{m} operaciones · {v} restantes', cnt1: '{p} hoy · {n} operación · {v} restantes', cntN: '{p} hoy · {n} operaciones · {v} restantes',
       limit: 'Tu límite hoy', caution: 'la mitad de tu última pérdida máx.', Lcaution: 'antes de la mitad de tu última pérdida máx.', czRoom: 'Margen en {m}: riesgo reducido a la mitad hoy ({r})', czLoss: 'Tras un día más allá de tu pérdida máx.: riesgo reducido a la mitad hoy ({r})', rule: 'Tu regla de hoy' },
   };
   const nw = (k, v) => String((NW3[L] || NW3.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
@@ -4456,6 +4449,7 @@ window.SweepMO = window.SweepMO || class {
     const hm = (ts) => (typeof etStr === 'function' ? etStr(ts).slice(11, 16) : '');
     return `<p class="nav-now-news">${esc2(nw('news', { t: hm(e.ts), e: typeof tr === 'function' ? tr(e.event) : e.event, a: hm(e.ts - bf * 60), b: hm(e.ts + af * 60) }))}</p>`;
   }
+  const nowPnl = (c) => `<span class="nav-now-v nav-now-p ${c > 0 ? 'pos' : c < 0 ? 'neg' : ''}">${esc2(typeof money === 'function' ? money(c || 0) : String(c))}</span>`;   // (2 Nov., C1)
   let NOWEND = false, NOWSTOP = false;   // « Now » holds the only blue button (« Close my day »); « Now » says stop
   function nowHtml(d, r) {
     NOWEND = NOWSTOP = false;
@@ -4469,11 +4463,12 @@ window.SweepMO = window.SweepMO || class {
     else if (x.end && x.rule) { big = nw('ruleEnd'); sub = ''; NOWEND = true; }   // a trader starting out: his rule, and closing the day right here
     else if (x.end) { big = nw('end'); sub = x.text; }
     // (1 Nov., brief avance 4) in the session, one discreet counter « 2/3 trades · $180 left today » (was « Left today $180 · trade 3 of 3 »)
-    else { const [c0, c1] = nw(x.m ? 'cnt' : x.n === 1 ? 'cnt1' : 'cntN', { n: x.n, m: x.m, v: '\u0001' }).split('\u0001'); big = `${esc2(c0)}<span class="nav-now-v">${esc2(usd0(x.left))}</span>${esc2(c1)}`; sub = [nw('L' + x.k, { a: x.a }), x.pause ? x.text : ''].filter(Boolean).join(' · '); }
+    // (2 Nov., audit « transfuge » C1) the day's P&L first, as in the header of every platform: « +$821.60 today · 2/3 trades · $1,422 left »
+    else { big = esc2(nw(x.m ? 'cnt' : x.n === 1 ? 'cnt1' : 'cntN', { n: x.n, m: x.m, v: '\u0001', p: '\u0002' })).replace('\u0002', nowPnl(x.pnl)).replace('\u0001', `<span class="nav-now-v">${esc2(usd0(x.left))}</span>`); sub = [nw('L' + x.k, { a: x.a }), x.pause ? x.text : ''].filter(Boolean).join(' · '); }
     // (D1) the caution mode, the morning after a hard day: one line; (D4) the rule the trader wrote last night for this session
     const cz = !x.n && x.caution ? `<p class="nav-now-cz">${esc2(nw(x.caution.why === 'room' && x.caution.room != null ? 'czRoom' : 'czLoss', { m: usd0(x.caution.room || 0), r: usd0(x.caution.cap) }))}</p>` : '';
     const pr = (getDoc('journals', d.day) || {}).pre || {}, r0 = !x.n && x.rule0 && !pr.rule ? `<p class="nav-now-rule"><b>${esc2(nw('rule'))}</b> · ${esc2(/^\p{Lu}\p{Ll}/u.test(x.rule0) ? x.rule0.charAt(0).toLowerCase() + x.rule0.slice(1) : x.rule0)}</p>` : '';
-    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l${x.n && !x.end ? ' nav-now-cnt' : ''}"><b>${x.n && !x.end ? big : esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${cz}${r0}${!x.n ? newsLine(d.day) : ''}${NOWEND ? `<div class="nav-now-a"><button type="button" class="btn sm primary" data-rt="fin">${esc2(nw('closeDay'))}</button></div>` : ''}${!x.n && window.SweepStart ? SweepStart.tradedLink() : ''}</div>`;
+    return `<div class="nav-now ${x.end ? 'is-end' : ''}" data-now="${!x.n ? 'before' : x.end ? 'end' : 'during'}"><small>${esc2(nw('now'))}</small><p class="nav-now-l${x.n && !x.end ? ' nav-now-cnt' : ''}"><b>${x.n && !x.end ? big : esc2(big)}</b>${val ? `<span class="nav-now-v">${esc2(val)}</span>` : ''}</p>${x.n && x.end ? `<p class="nav-now-s nav-now-pl">${esc2(nw('pl', { p: '\u0002' })).replace('\u0002', nowPnl(x.pnl))}</p>` : ''}${sub ? `<p class="nav-now-s">${esc2(sub)}</p>` : ''}${cz}${r0}${!x.n ? newsLine(d.day) : ''}${NOWEND ? `<div class="nav-now-a"><button type="button" class="btn sm primary" data-rt="fin">${esc2(nw('closeDay'))}</button></div>` : ''}${!x.n && window.SweepStart ? SweepStart.tradedLink() : ''}</div>`;
   }
   /* (27 Oct., brief activation step E) the next day's appointment: right after a first plan, on a phone, once — « Shall I remind you
      tomorrow at 8:45 for your plan? », on in one tap (Settings › Notifications' own way, SweepNotify.push.on). On an iPhone outside the
@@ -6286,6 +6281,8 @@ new window.SweepMO(() => {
   const D7 = { fr: { 'Any checklist': 'Toute checklist', 'Average checklist score of today’s trades': 'Score moyen de checklist des trades du jour', 'Checklist not done': 'Checklist non remplie' },
     es: { 'Any checklist': 'Cualquier checklist', 'Average checklist score of today’s trades': 'Puntuación media de checklist de las operaciones de hoy', 'Checklist not done': 'Checklist sin completar' } };
   try { if (window.I18N_FR) Object.assign(window.I18N_FR, D7.fr); if (window.I18N_ES) Object.assign(window.I18N_ES, D7.es); } catch (e) { /* the dictionaries load first */ }
+  // (2 Nov., audit « transfuge » G2) one name for the action in Spanish too (the dictionary said « Añadir operación »)
+  try { if (window.I18N_ES) Object.assign(window.I18N_ES, { 'Add a trade': 'Añadir una operación' }); } catch (e) { /* as it was */ }
   const add = { fr: { 'Profit factor': 'Facteur de profit', 'Session': 'Séance', 'Gross profit ÷ gross loss. Above 1.0 is profitable.': 'Total des gains ÷ total des pertes. Au-dessus de 1, tu gagnes plus que tu ne perds.', 'Clear': 'Effacer', 'Add an account first': 'Ajoute d’abord un compte', 'Trades belong to an account.': 'Chaque trade appartient à un compte.', 'Consistency': 'Consistance', 'Consistency rule': 'Règle de consistance', 'From': 'Du', 'To': 'Au', 'Copies': 'Copies', 'Counted once': 'Comptées une fois', 'Per contract': 'Par contrat', 'Disable': 'Désactiver', 'Replace': 'Remplacer', 'Delete this trade? This cannot be undone.': 'Supprimer ce trade ? C’est définitif.', 'My money': 'Mon argent', 'Worst drawdown': 'Pire recul', 'Max drawdown allowed': 'Drawdown permis', 'Exceeded': 'Dépassé', 'Avg win / loss': 'Gain / perte moy.', 'See its stats': 'Voir ses stats',
       'Max trades': 'Trades max', 'Entered without confirmation': 'Entrée sans confirmation', 'Broke daily loss limit': 'Limite de perte du jour dépassée', 'None recorded': 'Aucune', 'Show all accounts': 'Voir tous les comptes', 'schedule file': 'calendrier livré avec l’app', 'manual entry': 'saisie manuelle', 'ADP Non-Farm Employment Change': 'Emploi privé ADP', 'Average Hourly Earnings m/m': 'Salaire horaire moyen m/m', 'CB Consumer Confidence': 'Confiance des consommateurs (CB)', 'Core CPI m/m': 'CPI de base m/m', 'Core PCE Price Index m/m': 'Indice PCE de base m/m', 'Core PPI m/m': 'PPI de base m/m', 'FOMC Meeting Minutes': 'Procès-verbal du FOMC', 'FOMC Press Conference': 'Conférence de presse du FOMC', 'FOMC Rate Decision': 'Décision de taux du FOMC', 'GDP q/q (Advance)': 'PIB t/t (première estimation)', 'GDP q/q (Second Estimate)': 'PIB t/t (deuxième estimation)', 'GDP q/q (Third Estimate)': 'PIB t/t (troisième estimation)', 'ISM Manufacturing PMI': 'PMI manufacturier ISM', 'ISM Services PMI': 'PMI des services ISM', 'Initial Jobless Claims': 'Inscriptions au chômage', 'JOLTS Job Openings': 'Offres d’emploi JOLTS', 'Nonfarm Payrolls': 'Emplois non agricoles (NFP)', 'PCE Price Index m/m': 'Indice PCE m/m', 'Retail Sales m/m': 'Ventes au détail m/m', 'Unemployment Rate': 'Taux de chômage' },
     es: { 'Profit factor': 'Factor de beneficio', 'Gross profit ÷ gross loss. Above 1.0 is profitable.': 'Total de ganancias ÷ total de pérdidas. Por encima de 1, ganas más de lo que pierdes.', 'Clear': 'Borrar', 'Add an account first': 'Primero añade una cuenta', 'Trades belong to an account.': 'Cada operación pertenece a una cuenta.', 'From': 'Desde', 'To': 'Hasta', 'Copies': 'Copias', 'Counted once': 'Contadas una vez', 'Per contract': 'Por contrato', 'Disable': 'Desactivar', 'Replace': 'Reemplazar', 'OK': 'OK', 'Delete this trade? This cannot be undone.': '¿Eliminar esta operación? No se puede deshacer.', 'My money': 'Mi dinero', 'Worst drawdown': 'Peor retroceso', 'Max drawdown allowed': 'Drawdown permitido', 'Exceeded': 'Superado', 'Avg win / loss': 'Ganancia / pérdida', 'See its stats': 'Ver sus estadísticas',
