@@ -72,7 +72,7 @@ async def main():
     await pg.evaluate("location.hash='#accounts'"); await pg.wait_for_timeout(1800)
     rows = await pg.evaluate("[...document.querySelectorAll('#main tr[data-href^=\"#account/\"]')].map(r=>[r.dataset.href, r.innerText.replace(/\\s+/g,' ')])")
     apx = [r for r in rows if r[0] == '#account/t-apx']
-    ok(apx and 'Drawdown dépassé' in apx[0][1] and ('Marge DD $0' in apx[0][1] or 'Marge DD 0\u00a0$' in apx[0][1] or 'Marge DD 0 $' in apx[0][1]), f"A5 Accounts list: label + « Marge DD $0 » ({apx[0][1][:110] if apx else ''})")
+    ok(apx and 'Drawdown dépassé' in apx[0][1] and ('Marge de drawdown 0\u00a0$' in apx[0][1] or 'Marge de drawdown 0 $' in apx[0][1]), f"A5 Accounts list: label + « Marge de drawdown 0 $ » (2 Nov., written out) ({apx[0][1][:110] if apx else ''})")
     flagged = [i for i, r in enumerate(rows) if 'Drawdown dépassé' in r[1]]
     tables = await pg.evaluate("[...document.querySelectorAll('#main table')].map(t=>[...t.querySelectorAll('tr[data-href^=\"#account/\"]')].map(r=>r.innerText.includes('Drawdown dépassé')?1:0))")
     good = all(fl == sorted(fl) for fl in tables if fl)   # in each table: every exceeded account after the others

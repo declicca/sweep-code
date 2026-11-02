@@ -8,7 +8,7 @@ Uses the signed-in trader's sample data; changes nothing. Computer 1300 and phon
  V4 the trade page: Geist Mono for the numbers only, never for a value in words (setup, session, date)
  V5 the trade page, computer: no empty column (« Setup & costs » above the full review)
  V6 Stats: the performance score in flat bars (no 3D)
- V8 Stats' calendar: a loss day as light as a win day (the brand gold, the same opacity scale)
+ V8 the calendar (Trades › Calendar since 2 Nov.): a loss day as light as a win day (the brand gold, the same opacity scale)
  L  lot 3, two layers: Today, Stats and an account page never have a third background inside a card (controls, the
     calendar's coloured days and the routine's steps apart)
  G  lot 2, the glass: the tab bar and the « New trade » sheet have their darkened rim and their top-edge shine; the tab bar's
@@ -68,7 +68,8 @@ with sync_playwright() as p:
     ok(pg.locator('#main svg.iso').count() == 0, f'V6 {tag}: no 3D chart on Stats')
     if not phone:
       ok(pg.locator('#main .psc .dr').count() == 6, f'V6 {tag}: the performance score in 6 flat bars')
-    heat = pg.evaluate("[...document.querySelectorAll('#main .cal .d[style*=background]')].map((d) => d.getAttribute('style'))")
+    pg.evaluate("location.hash = '#calendar'"); pg.wait_for_timeout(1800)   # (2 Nov., audit « transfuge » G4: one calendar, Trades › Calendar; Stats links to it)
+    heat = pg.evaluate("[...document.querySelectorAll('#main .cal .d[style*=background], #main .cal-g [style*=background], #main [class*=cal] [style*=background]')].map((d) => d.getAttribute('style'))")
     gold = [h for h in heat if 'neg-rgb' in h]
     ok(heat and not gold, f'V8 {tag}: a loss day in the light brand gold, never the dark gold ({gold[:2]})')
     pg.evaluate("location.hash = '#account/' + S.accounts[0].id"); pg.wait_for_timeout(1800)

@@ -84,7 +84,11 @@ with sync_playwright() as p:
     pg.evaluate("scrollBy(0, -150)"); pg.wait_for_timeout(700)
     back = pg.evaluate("getComputedStyle(document.querySelector('.ask-fab')).opacity")
     side = pg.evaluate("(() => { const b = document.querySelector('aside.side .nav-ask-side'); return !!b && getComputedStyle(b).display !== 'none' })()")
-    if phone: ok(away == '0' and back == '1', f'{tag} R23 Sweep AI steps aside reading down an account (phone), back at the bottom right scrolling up (19 Oct.: always) ({away}, {back})')
+    # (2 Nov., audit « transfuge ») back on the way up only over empty space: with a text, an amount or a button of the page under its
+    # place it stays aside (it covered an account's balance)
+    under = pg.evaluate("""(() => { const f = document.querySelector('.ask-fab'); if (!f) return false; const cs = getComputedStyle(f), x = innerWidth - parseFloat(cs.right) - f.offsetWidth / 2, y = innerHeight - parseFloat(cs.bottom) - f.offsetHeight / 2;
+      return document.elementsFromPoint(x, y).some((e) => e.closest('#main') && (e.matches('button, a, input, b, strong, .num, [class*=val]') || [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()))) })()""")
+    if phone: ok(away == '0' and (back == '1' or (back == '0' and under)), f'{tag} R23 Sweep AI steps aside reading down an account (phone), back scrolling up unless the page shows something under it ({away}, {back}, content under it: {under})')
     else: ok(pg.evaluate("getComputedStyle(document.querySelector('.ask-fab')).display") == 'none' and side, f'{tag} audit 18 Oct.: on a computer, Sweep AI is in the left menu, nothing floats over the cards ({side})')
     ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} nothing wider than the window')
     allerr += errs; ctx.close()

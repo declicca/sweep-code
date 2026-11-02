@@ -52,13 +52,14 @@ $ok((GameGameplan::done($U, 3)['error'] ?? '') === 'not_open', '2 day 3 is tomor
 $at('2026-11-03 09:00');   // day 9
 $ok(!isset(GameGameplan::done($U, 4)['error']) && !isset(GameGameplan::done($U, 9)['error']), '2 day 9: a late mission (4) and today\'s (9) can be done');
 $ok((GameGameplan::done($U, 999)['error'] ?? '') === 'bad_mission', '2 an unknown mission: refused');
-// 2b. what Sweep sees: the trade with stop and target (day 2 done by hand above), the day's review, the weekly recap
+// 2b. what Sweep sees: a trade with its risk (day 2 done by hand above), the day's review, the weekly recap
 $W = 'g3'; GameEngine::profile($W); $at('2026-10-26 09:00'); GameGameplan::start($W, []);
 $at('2026-10-27 15:00');   // day 2
-$doc('trades', ['id' => 't0', 'account_id' => 'a', 'date' => '2026-10-27', 'entry_time' => '10:00', 'instrument' => 'MES', 'direction' => 'long', 'contracts' => 1, 'entry' => 5800, 'exit' => 5810, 'stop' => 5795], $W);
-$ok(!isset(((array) GameGameplan::state($W)['done'])['2']), '2b a trade without its target: mission 2 waits');
-$doc('trades', ['id' => 't1', 'account_id' => 'a', 'date' => '2026-10-27', 'entry_time' => '10:30', 'instrument' => 'MES', 'direction' => 'long', 'contracts' => 1, 'entry' => 5800, 'exit' => 5810, 'stop' => 5795, 'target' => 5810], $W);
-$ok((((array) GameGameplan::state($W)['done'])['2']['by'] ?? '') === 'sweep', '2b with its stop and target: Sweep ticks mission 2');
+// (2 Nov., analyse débutant B1) a trade with its risk ticks it: a stop, or the « Risk ($) » of the quick forms; no target needed
+$doc('trades', ['id' => 't0', 'account_id' => 'a', 'date' => '2026-10-27', 'entry_time' => '10:00', 'instrument' => 'MES', 'direction' => 'long', 'contracts' => 1, 'pnl_c' => -18000, 'pnl_manual' => true], $W);
+$ok(!isset(((array) GameGameplan::state($W)['done'])['2']), '2b a trade without its risk (no stop, no risk): mission 2 waits');
+$doc('trades', ['id' => 't1', 'account_id' => 'a', 'date' => '2026-10-27', 'entry_time' => '10:30', 'instrument' => 'MES', 'direction' => 'long', 'contracts' => 1, 'pnl_c' => -18000, 'pnl_manual' => true, 'risk_c' => 20000], $W);
+$ok((((array) GameGameplan::state($W)['done'])['2']['by'] ?? '') === 'sweep', '2b by its P&L and its risk, no target: Sweep ticks mission 2');
 $at('2026-11-23 15:00');   // day 29, « Final session » (session journaled)
 $pdo->prepare('INSERT INTO game_days (user_id, trading_day, review_done, updated_at) VALUES (?, ?, 1, ?)')->execute([$W, '2026-11-23', time()]);
 $st = (array) GameGameplan::state($W)['done'];

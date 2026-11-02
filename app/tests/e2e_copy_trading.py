@@ -94,7 +94,7 @@ def run(p, lang, phone):
   pg.click('.nav-undo button'); pg.wait_for_timeout(600)
   ok(pg.evaluate("S.trades.filter((t) => t.date === window.__D.d3).length") == 1 and not pg.evaluate("getDoc('trades', 'ta1').copy_group"), f'{tag} « Undo »: the copies are gone, the original as before')
   pg.click('#main .nav-copy [data-copy-grp]'); pg.wait_for_timeout(700)
-  ok(len(pg.evaluate(COPIES, 'ta1')) == 2 and pg.locator('#main .nav-copy.done').count() == 1, f'{tag} copied again: the line says where it is')
+  ok(len(pg.evaluate(COPIES, 'ta1')) == 2 and pg.locator('#main .tr-copies').count() == 1, f'{tag} copied again: the line says where it is')   # (2 Nov., audit « transfuge » G1: the folded « Also on 2 accounts » line under the result, not a banner)
   rep = pg.evaluate("(() => { const g = getDoc('trades', 'ta1').copy_group; const keep = F.account; F.account = 'all'; try { const m = mergeCopies(sorted(S.trades.filter((t) => t.copy_group === g).reverse())); return m.map((t) => [t.id, t.pnl_c, t._copies.length]); } finally { F.account = keep; } })()")
   ok(rep == [['ta1', 4000, 3]], f'{tag} the group counts once, as its original ({rep})')
   # 4. the copy panel: a whole group in one tap, the size of each copy, a group saved, then left

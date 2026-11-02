@@ -3,7 +3,7 @@ Sweep — the journey's step 1, the defects (SWEEP.md, section 3), Playwright:
   python3 tests/e2e_parcours_defauts.py http://127.0.0.1:8095
 A trader of its own. Phone 390 (fr) and computer 1300 (en):
  D5   the intention written in last week's recap is on the routine card all this week (it lived only in the game's hidden card);
- D7a  the trade page: the box of a trade's checklist says « Checklist », and its window explains that very number (before:
+ D7a  the trade page: the box of a trade's checklist says « Discipline » (2 Nov., audit « transfuge » G3: one name for the measure), and its window explains that very number (before:
       « Discipline », with the text of the 30-day discipline score, another number).
 No page error, nothing wider than the window.
 """
@@ -16,8 +16,8 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'int': 'Ton intention cette semaine', 'ck': 'Checklist', 'ckT': 'La checklist de ce trade', 'discT': 'Ton score de discipline'},
-     'en': {'int': 'Your intention this week', 'ck': 'Checklist', 'ckT': 'The checklist of this trade', 'discT': 'Your discipline score'}}
+X = {'fr': {'int': 'Ton intention cette semaine', 'ck': 'Discipline', 'ckT': 'La checklist de ce trade', 'discT': 'Ton score de discipline'},
+     'en': {'int': 'Your intention this week', 'ck': 'Discipline', 'ckT': 'The checklist of this trade', 'discT': 'Your discipline score'}}
 WIDE = "document.documentElement.scrollWidth - innerWidth"
 with sync_playwright() as p:
   br = p.chromium.launch()

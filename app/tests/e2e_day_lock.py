@@ -2,7 +2,7 @@
 Sweep — the end-of-day lock (1 Nov., brief avance 4), Playwright:
   python3 tests/e2e_day_lock.py http://127.0.0.1:8095
 A trader of its own each time: phone 390 (fr, touch, dark), phone 390 (es, light), computer 1300 (en, light).
- 1  before the limit, the discreet counter of « Now »: « 1/3 trades · $350 left today »
+ 1  before the limit, the discreet counter of « Now »: « 1/3 trades · $350 left » (2 Nov., audit « transfuge » C1: « today » goes with the day's P&L, first)
  2  Settings › My routine: the max loss lowered to $200 says it applies from the next session; today keeps its limits
  3  the trade that reaches the plan's max loss: Today switches to « Day closed » — the countdown to the next session, the coach's
     sentence, exactly two actions (grade my trades, close my day: the only blue button), no « Now », no steps; the server agrees
@@ -24,11 +24,11 @@ def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
 X = {
-  'fr': {'cnt': r'1/3 trades · 350 \$ restants aujourd’hui', 'pill': 'Journée fermée', 'loss': 'Ta perte max de 600 $ est atteinte.', 'next': 'Prochaine séance dans', 'co': 'protège ton compte',
+  'fr': {'cnt': r'1/3 trades · 350 \$ restants', 'pill': 'Journée fermée', 'loss': 'Ta perte max de 600 $ est atteinte.', 'next': 'Prochaine séance dans', 'co': 'protège ton compte',
          'grade': 'Noter mes trades', 'close': 'Fermer ma journée', 'wait': 'À partir du', 'label': 'Perte max par jour'},
-  'es': {'cnt': r'1/3 operaciones · 350 \$ restantes hoy', 'pill': 'Día cerrado', 'loss': 'Alcanzaste tu pérdida máx. de 600 $.', 'next': 'Próxima sesión en', 'co': 'protege tu cuenta',
+  'es': {'cnt': r'1/3 operaciones · 350 \$ restantes', 'pill': 'Día cerrado', 'loss': 'Alcanzaste tu pérdida máx. de 600 $.', 'next': 'Próxima sesión en', 'co': 'protege tu cuenta',
          'grade': 'Calificar mis operaciones', 'close': 'Cerrar mi día', 'wait': 'Desde el', 'label': 'Pérdida máx. por día'},
-  'en': {'cnt': r'1/3 trades · \$350 left today', 'pill': 'Day closed', 'loss': 'Your max loss of $600 is reached.', 'next': 'Next session in', 'co': 'protects your account',
+  'en': {'cnt': r'1/3 trades · \$350 left', 'pill': 'Day closed', 'loss': 'Your max loss of $600 is reached.', 'next': 'Next session in', 'co': 'protects your account',
          'grade': 'Grade my trades', 'close': 'Close my day', 'wait': 'From ', 'label': 'Max loss per day'},
 }
 EN = ['Day closed', 'Next session', 'Grade my trades', 'Close my day', 'left today', 'max loss', 'Max loss per day', 'Max trades per day', 'New York time', 'your next session']

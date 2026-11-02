@@ -148,7 +148,7 @@ def run(p, lang, phone):
   pg.evaluate(TRADE, ['c1', day, '09:41', '09:50', 'long', 30000, {'discipline': {'stop': 'y'}, 'stop': 1}]); pg.evaluate("render()"); pg.wait_for_timeout(700)
   b1 = pg.evaluate(TXT, '#main .co-today'); texts.append(b1)
   now1 = pg.evaluate("(document.querySelector('#main .nav-now[data-now=during]') || {}).textContent || ''")   # (what is left: « Now », on top of the routine, SWEEP.md step 3)
-  ok(x['ok'] in b1 and pg.locator('#main .nav-now[data-now=during] .nav-now-v').count() == 1, f'{tag} B a clean trade: « {x["ok"]} »; the money left before the max loss in « Now » ({b1[-50:]} | {now1[:70]})')
+  ok(x['ok'] in b1 and pg.locator('#main .nav-now[data-now=during] .nav-now-v:not(.nav-now-p)').count() == 1, f'{tag} B a clean trade: « {x["ok"]} »; the money left before the max loss in « Now » ({b1[-50:]} | {now1[:70]})')
   pg.evaluate(TRADE, ['c2', day, '10:05', '10:20', 'long', -45000, {}]); pg.wait_for_timeout(500)   # (two trades saved by hand are never milliseconds apart)
   pg.evaluate(TRADE, ['c3', day, '10:24', '10:30', 'short', -20000, {}]); pg.evaluate("toast('Trade saved')"); pg.wait_for_timeout(150)
   toast = pg.evaluate("document.getElementById('toast').textContent"); texts.append(toast)

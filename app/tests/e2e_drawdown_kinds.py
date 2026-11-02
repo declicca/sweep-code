@@ -83,7 +83,7 @@ async def main():
       ok(today.endswith(room), f'{aid} Today: « {today} » (expects {room})')
       await pg.evaluate("location.hash='#accounts'"); await pg.wait_for_timeout(1500)
       row = sp(await pg.evaluate(f"(document.querySelector('#main [data-href=\"#account/{aid}\"]')||{{}}).innerText||''"))
-      ok(('Marge DD ' + room) in row, f'{aid} Accounts list: « Marge DD {room} » ({row[:90]})')
+      ok(('Marge de drawdown ' + room) in row, f'{aid} Accounts list: « Marge de drawdown {room} » ({row[:90]})')   # (2 Nov., audit « transfuge »: « Marge DD » written out)
       await pg.evaluate(f"location.hash='#account/{aid}'"); await pg.wait_for_timeout(1600)
       page = await pg.evaluate("(()=>{const r=[...document.querySelectorAll('#main .rule')].find(x=>/Marge de drawdown/.test(x.textContent)); return r?r.querySelector('b').textContent:''})()")
       ok(sp(page).strip() == room, f'{aid} account page: « Marge de drawdown {sp(page).strip()} » (expects {room})')
