@@ -3,7 +3,8 @@ Sweep — Léa, a trader of less than 6 months, over 31 days (analyse « débuta
   python3 tests/e2e_debutant_31j.py http://127.0.0.1:8095
 A trader of her own each run (« Less than 6 months », the 90-day gameplan started with her account, following the discovery
 missions: users.discovery_done = 2), phone 390 (fr, dark, touch), computer 1300 (en, light), phone 390 (es, light).
- 1  day 1: a trade typed by its P&L alone, with its risk (« No screenshot? »), no target; Sweep AI not shown yet
+ 1  day 1: Sweep AI not shown yet; day 2: a trade typed by its P&L alone, with its risk (« No screenshot? »), no target — the line of
+    the gameplan says « Mission done · Read the lesson » right after « Save », without a reload
  2  day 3: the gameplan moved — mission 2 ticked by that trade, « Mission 3 of 90 » on Today, the lesson of the mission Sweep ticked one
     tap away; one counter (no « Day N of 90 »), « Level N » without « · 0 complete days »
  3  missions 1 to 30: every trading word in a mission (PDH / PDL, R, window, micro, stop, target, process grade, setup) is explained
@@ -71,7 +72,8 @@ def run(p, lang, phone, scheme):
   pg.keyboard.press('Escape'); pg.wait_for_timeout(500); pg.evaluate("document.querySelectorAll('#gSheet [data-g=close]').forEach((b) => b.click())")
   pg.goto(B + '/#dashboard'); pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=15000); pg.wait_for_timeout(1500)
   ok(not pg.evaluate("(() => { const f = document.getElementById('askFab'); return !!f && f.getClientRects().length > 0 && getComputedStyle(f).display !== 'none' })()"), f'{tag} day 1: Sweep AI not shown yet')
-  # 1. a trade by its P&L alone, with its risk, no target (« No screenshot? »)
+  # 1. day 2 (mission 2 open): a trade by its P&L alone, with its risk, no target (« No screenshot? »)
+  move(uid, 2); pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=15000); pg.wait_for_timeout(2500)
   pg.evaluate("openTicket ? openTicket(null) : null"); pg.wait_for_timeout(900)
   if not pg.locator('.nav-am [data-am="no-shot"]').count(): pg.locator('#bottomnav .plus, .bn-plus').first.click(); pg.wait_for_timeout(900)
   pg.locator('.nav-am [data-am="no-shot"]').first.click(); pg.wait_for_timeout(700)
@@ -89,6 +91,14 @@ def run(p, lang, phone, scheme):
   tr = pg.evaluate("S.trades.filter((t) => !t.demo).map((t) => [t.pnl_c, t.risk_c, t.target || null, t.date])")
   ok(len(tr) == 1 and tr[0][0] == -18000 and tr[0][1] == 20000 and tr[0][2] is None, f'{tag} 1 day 1: the trade by its P&L and its risk, no target ({tr})')
   day1 = tr[0][3] if tr else today_ny().isoformat()
+  # (2 Nov., reste) right after « Save », no reload: the line of the gameplan says the mission is done, its lesson one tap away
+  pg.evaluate("location.hash = '#dashboard'")
+  live = ''
+  for _ in range(30):
+    live = pg.evaluate("(document.getElementById('gpLine') || {}).innerText || ''").replace('\u00a0', ' ')
+    if x['read'] in live: break
+    pg.wait_for_timeout(300)
+  ok(x['read'] in live, f'{tag} 1 right after « Save », without a reload: « {x["read"]} » on the line of the gameplan ({live[:120]!r})')
   # 2. day 3: the gameplan moved
   move(uid, 3)
   pg.goto(B + '/#dashboard'); pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=15000); pg.wait_for_timeout(2500)

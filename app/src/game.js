@@ -288,7 +288,7 @@
     } catch (e) { /* the game never blocks the journal */ }
     G.busy = false;
   }
-  let reloadT = 0;
+  let reloadT = 0, gpT = 0;
   const soon = (ms = 700) => { clearTimeout(reloadT); reloadT = setTimeout(() => load(true), ms); };
 
   // refresh after the server saved a trade or a journal page (it recomputes the rings on save)
@@ -296,7 +296,12 @@
     const orig = srvSend;
     srvSend = async function (col) {
       const out = await orig.apply(this, arguments);
-      if (col === 'trades' || col === 'journals') soon();
+      if (col === 'trades' || col === 'journals') {
+        soon();
+        // (2 Nov., analyse débutant, reste) the 90-day gameplan too: the server ticks « Your first trade » on this read, and the line of
+        // « Now » says « Mission done · Read the lesson » right after « Save », not at the next reload
+        clearTimeout(gpT); gpT = setTimeout(() => { try { const P = window.SweepGP; if (P && P.state && P.state() && P.state().started) P.load(); } catch (e) { /* never blocks */ } }, 700);
+      }
       return out;
     };
   }

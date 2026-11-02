@@ -2859,6 +2859,9 @@ html body .nav-imp-sheet .nav-imps-help{align-self:center;min-height:44px}
 }   /* (2 Nov., audit « transfuge ») no « Session » column in any trades table any more */
 /* (2 Nov., C3, C4) the account by its short name on one line (the full name on hover), the symbol in the platforms' mono */
 html body #main table.tbl td.tt-acc{white-space:nowrap}
+/* (2 Nov., audit « transfuge » C4, reste) a long short name (« Combine 150K ») and its « ×5 accounts » pill made the table 10 to 16 px too wide
+   at 1300 (French, Spanish): the name cut first (whole on hover), the pill whole */
+html body #main table.tbl td.tt-acc .tt-an{display:inline-block;max-width:96px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
 @media (min-width:861px) and (max-width:1440px){ html body #main table.tbl th,html body #main table.tbl td{padding-left:8px;padding-right:8px}
   html body #main table.tbl td.tt-set{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} }   /* a long setup: cut, whole on hover */
 html body #main table.tbl td.tt-sym{font-family:"Geist Mono",ui-monospace,monospace;font-weight:500}
