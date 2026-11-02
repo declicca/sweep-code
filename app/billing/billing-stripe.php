@@ -12,6 +12,9 @@ require_once __DIR__ . '/billing-core.php';
 function sb_stripe(string $method, string $path, array $params = [], string $idem = ''): array
 {
     if (isset($GLOBALS['SB_STRIPE_MOCK'])) return ($GLOBALS['SB_STRIPE_MOCK'])($method, $path, $params);
+    // local tests only (tests/e2e_creator.py): a stand-in Stripe that writes each call to a file; never with a live key
+    $mockFile = (string) getenv('SWEEP_STRIPE_MOCK');
+    if ($mockFile !== '' && strpos((string) (sb_cfg()['stripe_secret_key'] ?? ''), 'sk_live_') !== 0) return sb_stripe_file_mock($mockFile, $method, $path, $params);
     $key = (string) sb_cfg()['stripe_secret_key'];
     if ($key === '' || strpos($key, 'sk_') !== 0) throw new RuntimeException('Stripe secret key missing in billing-config.php');
     $url = rtrim((string) (sb_cfg()['stripe_api_base'] ?? 'https://api.stripe.com/v1'), '/') . '/' . ltrim($path, '/');
@@ -44,6 +47,23 @@ function sb_stripe(string $method, string $path, array $params = [], string $ide
     $json = json_decode((string) $raw, true) ?: [];
     if ($code >= 400) throw new RuntimeException('Stripe ' . $code . ': ' . ($json['error']['message'] ?? 'error'));
     return $json;
+}
+
+/** SWEEP_STRIPE_MOCK: calls appended to the file (JSON lines); coupons and promotion codes made up (a code starting with FAIL is
+ *  refused, like Stripe would); subscriptions read from « <file>.subs.json » ({id: subscription}). Anything else is refused. */
+function sb_stripe_file_mock(string $file, string $method, string $path, array $params): array
+{
+    @file_put_contents($file, json_encode(['m' => $method, 'path' => $path, 'p' => $params], JSON_UNESCAPED_SLASHES) . "\n", FILE_APPEND | LOCK_EX);
+    if ($method === 'POST' && $path === 'coupons') return ['id' => 'co_mock_' . substr(md5(json_encode($params)), 0, 10), 'object' => 'coupon'] + $params;
+    if ($method === 'POST' && $path === 'promotion_codes') {
+        if (strpos((string) ($params['code'] ?? ''), 'FAIL') === 0) throw new RuntimeException('Stripe 400: This promotion code is not allowed (mock)');
+        return ['id' => 'promo_mock_' . ($params['code'] ?? ''), 'object' => 'promotion_code', 'code' => $params['code'] ?? '', 'coupon' => ['id' => $params['coupon'] ?? '']];
+    }
+    if ($method === 'GET' && preg_match('#^subscriptions/(.+)$#', $path, $m)) {
+        $subs = json_decode((string) @file_get_contents($file . '.subs.json'), true) ?: [];
+        if (isset($subs[$m[1]])) return $subs[$m[1]];
+    }
+    throw new RuntimeException("Stripe mock: unexpected call $method $path");
 }
 
 function sb_price_map(): array
@@ -89,7 +109,10 @@ function sb_checkout(PDO $pdo, string $uid, string $plan, string $interval, stri
         'metadata' => ['uid' => $uid, 'trigger' => substr($trigger, 0, 48), 'founding' => $founding ? '1' : '0'],
         'subscription_data' => ['metadata' => ['uid' => $uid, 'founding' => $founding ? '1' : '0']],
     ];
+    // a trader a creator brought (growth/creators.php): the creator's code is applied by itself, until his first payment
+    $creatorPromo = !$founding && function_exists('cr_checkout_promo') ? cr_checkout_promo($pdo, $uid) : null;
     if ($founding) $p['discounts'] = [['coupon' => (string) $cfg['stripe_founding_coupon']]];
+    elseif ($creatorPromo) $p['discounts'] = [['promotion_code' => $creatorPromo]];
     else $p['allow_promotion_codes'] = 'true';
     if (!empty($cfg['stripe_automatic_tax'])) {
         $p['automatic_tax'] = ['enabled' => 'true'];
@@ -192,6 +215,11 @@ function sb_handle_event(PDO $pdo, array $event): string
         case 'customer.subscription.resumed':
             $uid = sb_sync_subscription($pdo, $obj);
             $result = 'synced ' . ($obj['status'] ?? '') . ' ' . ($uid ?? '?');
+            // creators: a cancelled subscription stops the commission on what this trader pays afterwards
+            if ($type === 'customer.subscription.deleted' && $uid && function_exists('cr_on_cancel')) cr_on_cancel($pdo, (string) $uid);
+            break;
+        case 'charge.refunded':   // creators: a refund takes back the commission of that payment
+            if (function_exists('cr_on_refund')) $result = 'refund: ' . cr_on_refund($pdo, $obj);
             break;
         case 'invoice.paid':
         case 'invoice.payment_failed':
@@ -200,6 +228,8 @@ function sb_handle_event(PDO $pdo, array $event): string
             if ($subId) {
                 $uid = sb_sync_subscription($pdo, sb_stripe('GET', 'subscriptions/' . $subId));
                 $result = 'invoice synced ' . ($uid ?? '?');
+                // creators: 30 % of what this trader paid (before the referral check: a creator's code typed at checkout links him first)
+                if ($type === 'invoice.paid' && $uid && function_exists('cr_on_invoice_paid')) $result .= ', creator: ' . cr_on_invoice_paid($pdo, (string) $uid, $obj);
                 // referrals: a friend's first real payment qualifies the referral
                 if ($type === 'invoice.paid' && $uid && (int) ($obj['amount_paid'] ?? 0) > 0 && function_exists('ref_on_first_payment')) {
                     try { ref_on_first_payment($pdo, (string) $uid); } catch (Throwable $e) { error_log('[Sweep referral] payment hook: ' . $e->getMessage()); }

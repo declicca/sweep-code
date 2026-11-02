@@ -112,4 +112,5 @@ function growth_delete_user(PDO $pdo, string $uid): void
         fb_q($pdo, 'DELETE FROM feedback WHERE user_id = ?', [$uid]); } catch (Throwable $e) {}
     try { ref_schema($pdo); fb_q($pdo, 'DELETE FROM ref_users WHERE uid = ?', [$uid]); fb_q($pdo, 'DELETE FROM referral_clicks WHERE referrer_id = ?', [$uid]);
         fb_q($pdo, "UPDATE referrals SET status = 'rejected' WHERE referee_id = ? AND status IN ('pending','review')", [$uid]); } catch (Throwable $e) {}
+    if (function_exists('cr_delete_user')) { try { cr_delete_user($pdo, $uid); } catch (Throwable $e) {} }   // creators (growth/creators.php)
 }

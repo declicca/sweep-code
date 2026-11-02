@@ -741,6 +741,7 @@ try {
         } catch (Throwable $e) { error_log('Sweep cron watch: ' . $e->getMessage()); }
     });
     require_once __DIR__ . '/growth/referral.php';
+    require_once __DIR__ . '/growth/creators.php';   // creator program: commission through Stripe's webhooks (brief « avance concurrentielle », step 5)
     require_once __DIR__ . '/growth/feedback.php';
     if (is_file(__DIR__ . '/notify/notify.php')) require_once __DIR__ . '/notify/notify.php';   // notification center + events (Feature 0)
     if (!empty($cfg['push_config']) && !defined('SWEEP_PUSH_CONFIG')) define('SWEEP_PUSH_CONFIG', (string)$cfg['push_config']);
@@ -766,6 +767,12 @@ try {
         $out = json_encode(public_totals());
         http_response_code(200); header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: public, max-age=3600');
         echo $out; exit;
+    }
+    // /?ref=CODE (a creator's link makeitsweep.com/?ref=CODE, passed on to the app): the same as /r/CODE, the other parameters kept
+    if ($route === 'app' && $method === 'GET' && isset($_GET['ref']) && is_string($_GET['ref'])) {
+        if (preg_match('/^[A-Za-z0-9]{3,16}$/', $_GET['ref'])) { try { ref_capture(db(), $_GET['ref']); } catch (Throwable $e) { error_log('[Sweep referral] capture: ' . $e->getMessage()); } }
+        $qs = array_filter($_GET, fn($v, $k) => is_string($v) && !in_array($k, ['ref', 'r'], true), ARRAY_FILTER_USE_BOTH);
+        header('Location: /?' . http_build_query(['signup' => '1'] + $qs), true, 302); exit;
     }
     // /r/CODE (referral link): remember the code, then go to sign-up
     if (preg_match('#^ref/([A-Za-z0-9]{3,16})$#', $route, $rm)) {
@@ -1019,7 +1026,7 @@ try {
     // Referrals and feedback (growth/)
     if ($route === 'api/referral' && $method === 'GET') {
         $base = $APP_URL !== '/' ? $APP_URL : ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/');
-        json_out(200, ref_dashboard(db(), (string)$UID, $base));
+        json_out(200, ref_dashboard(db(), (string)$UID, $base) + ['creator' => cr_dashboard(db(), (string)$UID)]);
     }
     if ($route === 'api/feedback' && $method === 'GET') json_out(200, ['items' => fb_list_mine(db(), (string)$UID)]);
     if ($route === 'api/feedback' && $method === 'POST') {
@@ -1488,6 +1495,26 @@ try {
             elseif ($act === 'reject' && in_array($r['status'], ['review', 'pending'], true)) q("UPDATE referrals SET status = 'rejected' WHERE id = ?", [$r['id']]);
             else json_out(400, ['error' => 'Nothing to do.']);
             json_out(200, ['ok' => true]);
+        }
+        // Admin › Creators (brief « avance concurrentielle », step 5): give the status, the numbers, mark a month paid, the month's statement
+        if ($route === 'api/admin/creators' && $method === 'GET') json_out(200, cr_admin_list(db()));
+        if ($route === 'api/admin/creators' && $method === 'POST') {
+            $b = body_json(2048); $who = strtolower(trim((string)($b['user'] ?? '')));
+            $cu = $who === '' ? '' : (string)(q('SELECT id FROM users WHERE ' . (strpos($who, '@') !== false ? 'email_lc' : 'username_lc') . ' = ?', [$who])->fetchColumn() ?: '');
+            if (billing_on()) require_once __DIR__ . '/billing/billing-stripe.php';
+            $r = cr_make(db(), $cu, (string)($b['code'] ?? ''), (string)$UID);
+            json_out(isset($r['error']) ? 400 : 200, $r);
+        }
+        if ($route === 'api/admin/creators/paid' && $method === 'POST') {
+            $b = body_json(1024); $r = cr_mark_paid(db(), (string)($b['uid'] ?? ''), (string)($b['month'] ?? ''), (string)$UID);
+            json_out(isset($r['error']) ? 400 : 200, $r);
+        }
+        if ($route === 'api/admin/creators/export' && $method === 'GET') {
+            $mo = preg_match('/^\d{4}-\d{2}$/', (string)($_GET['month'] ?? '')) ? (string)$_GET['month'] : cr_month(time());
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="sweep-creators-' . $mo . '.csv"');
+            header('Cache-Control: no-store');
+            $o = fopen('php://output', 'w'); foreach (cr_statement(db(), $mo) as $row) fputcsv($o, $row); fclose($o); exit;
         }
         if ($route === 'api/admin/ai-usage' && $method === 'GET') {
             try {
