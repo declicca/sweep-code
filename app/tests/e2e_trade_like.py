@@ -17,7 +17,8 @@ def ok(c, what):
     print(('ok   ' if c else 'FAIL ') + what); fails += 0 if c else 1
 async def trader(br, lang, w, h, mob, tag):
     ctx = await br.new_context(base_url=B, locale=lang, viewport={'width': w, 'height': h}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1)
-    await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+    # (2 Nov.) every period: the lists and Stats open on « this month », and the first days of a month the test's earlier trades are in the month before
+    await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('tj.filters', JSON.stringify({ period: 'all' }));" % lang)
     H = {'X-Requested-With': 'fetch', 'Content-Type': 'application/json'}
     r = await ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'tl%06d@t.dev' % random.randint(0, 999999), 'consent': True, 'elapsed': 6000}), headers=H)
     ok(r.ok, f'{tag} a trader of its own ({r.status})')
@@ -54,7 +55,10 @@ async def main():
       ok(st['on'] == ['short'], f'{tag} « short » shows as chosen ({st["on"]})')
       n0 = await pg.evaluate("S.trades.length")
       await pg.evaluate("() => { TK.date = '2026-10-09'; TK.entryTime = '10:00:00'; TK.exitTime = '10:10:00'; TK.entry = 21020; TK.exit = 21015; tkRefresh(); }")
-      await pg.locator('#tkSlide [data-act="tk-save"]').click(); await pg.wait_for_function(f"S.trades.length > {n0}", timeout=10000)
+      await pg.locator('#tkSlide [data-act="tk-save"]').click()
+      for _ in range(40):   # (the page's CSP refuses wait_for_function's string)
+        if await pg.evaluate("S.trades.length") > n0: break
+        await pg.wait_for_timeout(250)
       t = await pg.evaluate("(()=>{const t=S.trades.find(x=>x.date==='2026-10-09'); return t ? {acc:t.account_id, inst:t.instrument, dir:t.direction, qty:t.contracts, pnl:t.pnl_c} : null})()")
       ok(t == {'acc': 'tl-b', 'inst': 'MNQ', 'dir': 'short', 'qty': 3, 'pnl': 3000}, f'{tag} saved with them: short 3 MNQ 21020 → 21015 = 5 pts × 3 × $2 = $30 ({t})')
       ok(await pg.evaluate("document.documentElement.scrollWidth <= innerWidth"), f'{tag} no horizontal scroll')

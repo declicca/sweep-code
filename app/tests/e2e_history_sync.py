@@ -24,7 +24,8 @@ with sync_playwright() as p:
   try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
   except Exception: pass
   ctx = br.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, locale='fr-CA')
-  ctx.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('fr')); window.__swNow = '2026-10-27T10:30:00-04:00'")
+  # (2 Nov.) every period: the lists and Stats open on « this month », and the first days of a month the test's earlier trades are in the month before
+  ctx.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('fr')); window.__swNow = '2026-10-27T10:30:00-04:00'; localStorage.setItem('tj.filters', JSON.stringify({ period: 'all' }));")
   r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'hs%06d@t.dev' % random.randint(0, 999999), 'consent': True, 'elapsed': 6000}), headers=H)
   if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
   pg = ctx.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))

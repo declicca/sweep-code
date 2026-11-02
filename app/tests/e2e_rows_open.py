@@ -17,10 +17,11 @@ async def main():
   async with async_playwright() as p:
     br = await p.chromium.launch()
     ctx = await br.new_context(viewport={'width': 1440, 'height': 900}, locale='fr-CA', storage_state=STATE)
-    await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+    # (2 Nov.) every period: the lists and Stats open on « this month », and the first days of a month the test's earlier trades are in the month before; My money keeps its own period (U.mper)
+    await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr')); localStorage.setItem('tj.filters', JSON.stringify({ period: 'all' }));")
     pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
     await pg.goto(B + '/?x=1#payouts'); await pg.wait_for_timeout(2500)
-    await pg.evaluate("""(()=>{const a=S.accounts.find(x=>x.status!=='archived'); put('payouts',{id:'ro-p1',account_id:a.id,amount_c:123400,status:'paid',request_date:'2026-10-01',payment_date:'2026-10-02'}); put('payouts',{id:'ro-p2',account_id:a.id,amount_c:50000,status:'requested',request_date:'2026-10-05'}); put('expenses',{id:'ro-e1',account_id:a.id,firm_id:a.firm_id,amount_c:9900,category:'evaluation',date:'2026-10-03'}); render();})()""")
+    await pg.evaluate("""(()=>{const a=S.accounts.find(x=>x.status!=='archived'); put('payouts',{id:'ro-p1',account_id:a.id,amount_c:123400,status:'paid',request_date:'2026-10-01',payment_date:'2026-10-02'}); put('payouts',{id:'ro-p2',account_id:a.id,amount_c:50000,status:'requested',request_date:'2026-10-05'}); put('expenses',{id:'ro-e1',account_id:a.id,firm_id:a.firm_id,amount_c:9900,category:'evaluation',date:'2026-10-03'}); U.mper='all'; render();})()""")
     await pg.wait_for_timeout(1200)
     ok(await pg.locator('#main .pz-row [data-act=edit-payout]:not(li), #main .pz-row [data-act=edit-expense]:not(li)').count() == 0, 'no « Edit » button in the rows')
     await pg.locator('#main li[data-id="ro-p1"] .pz-main').click(); await pg.wait_for_timeout(700)

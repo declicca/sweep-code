@@ -1111,12 +1111,12 @@ window.SweepMO = window.SweepMO || class {
     const fix = () => {
       if (location.hash !== h0 || userMoved > t0) return;
       const el = find();
-      if (el) { const d = el.getBoundingClientRect().top - y0; if (Math.abs(d) >= 2) window.scrollBy(0, d); }
+      if (el) { const d = el.getBoundingClientRect().top - y0; if (Math.abs(d) >= 0.5) window.scrollBy(0, d); }   // (2 Nov.: 1 px left was still seen)
     };
     const tick = () => { fix(); if (performance.now() - t0 < 700) requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
     // (1 Nov.) and as soon as the page is redrawn (a redraw scheduled in a later frame moved it for one image before the tick)
-    const mo = new MutationObserver(fix); mo.observe(main, { childList: true, subtree: true }); setTimeout(() => mo.disconnect(), 700);
+    const mo = new MutationObserver(fix); mo.observe(main, { childList: true, subtree: true, attributes: true, characterData: true }); setTimeout(() => mo.disconnect(), 700);   // (2 Nov.: a text or a class changed after the redraw left 10 px for one image)
   }, true);
 
   /* ───────────── jump report (trade review page, phones) ─────────────

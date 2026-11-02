@@ -10,6 +10,7 @@ Sweep — A1: one session-date rule everywhere (dev environment with Playwright)
 Uses today's session of the server (the game only scores days up to today).
 """
 import asyncio, sys, json, sqlite3, datetime
+from zoneinfo import ZoneInfo
 from playwright.async_api import async_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
@@ -30,8 +31,9 @@ async def main():
     D = h['today']
     # test fixture: the game profile must have started before D (a fresh test trader started today)
     con = sqlite3.connect(DB); con.execute("UPDATE user_game_profile SET started_on = ? WHERE started_on > ?", (add(D, -30), add(D, -30))); con.commit(); con.close()
-    # 23:36 New York (EDT, UTC-4) on the evening before D = 03:36 UTC on D
-    pg = await ctx.new_page(); await pg.clock.install(time=f'{D}T03:36:00Z')
+    # 23:36 New York on the evening before D (UTC-4 in summer, UTC-5 in winter: 1 Nov., the first day on standard time failed)
+    at = datetime.datetime.fromisoformat(add(D, -1) + 'T23:36:00').replace(tzinfo=ZoneInfo('America/New_York')).astimezone(datetime.timezone.utc)
+    pg = await ctx.new_page(); await pg.clock.install(time=at.strftime('%Y-%m-%dT%H:%M:%SZ'))
     await pg.goto(B + '/?x=1#trades'); await pg.wait_for_timeout(2800)
     acc = await pg.evaluate("(S.accounts.find(a=>a.status!=='archived')||{}).id")
     await pg.evaluate("editDoc('settings','settings',d=>{d.add_mode='manual'})")

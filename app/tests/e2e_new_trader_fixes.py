@@ -36,7 +36,8 @@ with sync_playwright() as p:
     except Exception: pass
     ctx = br.new_context(viewport={'width': w, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, color_scheme=scheme,
                          locale={'fr': 'fr-CA', 'en': 'en-US', 'es': 'es-ES'}[lang])
-    ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
+    # (2 Nov.) every period: the lists and Stats open on « this month », and the first days of a month the test's earlier trades are in the month before
+    ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); sessionStorage.setItem('sw.modal', '1'); localStorage.setItem('tj.filters', JSON.stringify({ period: 'all' })); } catch (e) {}" % lang)
     r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'nt%06d@t.dev' % random.randint(0, 999999), 'consent': True, 'elapsed': 6000}), headers=H)
     if r.status != 201: raise RuntimeError('sign-up refused: %s' % r.status)
     ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Léa', 'experience': 'new'}), headers=H)
