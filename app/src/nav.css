@@ -1116,7 +1116,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 /* phone: the routine card shows at the top of Today (the old block stays hidden) */
 @media (max-width:860px){
   body.nav-rt-on .nav-dash .d-today{display:block!important;order:0!important;margin-bottom:12px}
-  body.nav-rt-on .nav-dash .d-today > :not(.nav-rt):not(.co-today){display:none!important}   /* (« Your coach » stays under it) */
+  body.nav-rt-on .nav-dash .d-today > :not(.nav-rt):not(.co-today):not(.nav-ai-today){display:none!important}   /* (« Your coach » stays under it) */
 }
 .nav-rt-sa .btn .s{display:none}
 .nav-rt-lv.nopct{padding:0 12px}
@@ -1135,7 +1135,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 @media (prefers-reduced-motion:reduce){.nav-rt-s.sk{animation:none}}
 @media (max-width:860px){.nav-rt-s{min-height:150px}.nav-rt-sk{height:36px;width:52px}.nav-rt-sk.w{width:60px}
   .nav-dash .d-today{display:block!important;order:0!important;margin-bottom:12px}
-  .nav-dash .d-today > :not(.nav-rt):not(.co-today){display:none!important}}
+  .nav-dash .d-today > :not(.nav-rt):not(.co-today):not(.nav-ai-today){display:none!important}}
 @media (min-width:861px){.nav-dash .d-today > .g-today,.nav-dash .d-today > div:not(.nav-rt):not(.d-rank){display:none!important}}
 
 /* left menu (computer): every icon on the same axis when closed; search and notifications labelled when open */
@@ -3170,3 +3170,31 @@ html body .nav-rt .nav-rt-sub + .nav-now{margin-top:0}
 }
 /* (2 Nov.) scrolled, the page's small title comes into the header row: the back link keeps its chevron only (the title after it) */
 @media (max-width:860px){html body.sw-top-back.tcollapsed aside.side > .top-back span{display:none}}
+/* (brief avance, step 3) one field for a sentence or a screenshot: « long NQ 2 contracts +$400 » fills the add-trade sheet */
+.nav-ai-box{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:20px;border:1.5px dashed rgba(var(--pos-rgb),.5);background:var(--posbg)}
+.nav-ai-in{display:flex;align-items:flex-end;gap:8px}
+html body .nav-ai-in textarea{flex:1;min-width:0;min-height:52px;resize:none;padding:12px 14px;font:inherit;font-size:16px;line-height:1.35;color:var(--text);background:var(--surface)!important}
+.nav-ai-go{flex:none;display:grid;place-items:center;width:44px;height:44px;padding:0;border-radius:999px;border:0;background:var(--pos-fill,var(--pos));color:var(--on-blue,#fff);cursor:pointer;transition:transform .2s var(--ease-ios)}
+.nav-ai-go:active{transform:scale(.94)}
+.nav-ai-go[hidden]{display:none}
+.nav-ai-go svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.nav-ai-box .nav-ai-pick{flex-direction:row;justify-content:flex-start;min-height:44px;padding:0;gap:10px;border:0;border-radius:14px;background:none;text-align:left}
+.nav-ai-box .nav-ai-pick .nav-am-ic{width:36px;height:36px;border-radius:10px}
+.nav-ai-box .nav-ai-pick b{font-size:14px}
+.nav-ai-box .nav-am-st{margin:0}
+.nav-ai-ex{font-size:12px;line-height:1.35}
+.nav-ai-said{margin:0;font-size:14px;line-height:1.4;color:var(--text2,var(--text));overflow-wrap:anywhere}
+/* a field read with a low confidence: outlined and « Check » until the trader touches it */
+.nav-ai-chk{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-style:normal;font-size:11px;font-weight:700;line-height:1.5;vertical-align:1px;color:var(--neg);box-shadow:inset 0 0 0 1px rgba(var(--neg-rgb),.5)}
+html body .tk-f.ai-low .tk-in,html body .tk-f.ai-low .nav-am-selb,html body .tk-f.ai-low > .seg{box-shadow:inset 0 0 0 1.5px rgba(var(--neg-rgb),.75)!important}
+.nav-am-selb.ph span{color:var(--muted)}
+/* Today: the same field in one line under the day's card */
+.nav-ai-today{display:flex;align-items:center;gap:6px;margin:12px 0 0;padding:4px 4px 4px 14px;min-height:52px;box-sizing:border-box;border-radius:20px;background:var(--glass,var(--surface));border:1px solid var(--line);box-shadow:inset 0 1px 0 var(--hi,transparent)}
+.nav-ai-today:focus-within{box-shadow:inset 0 0 0 1px rgba(var(--pos-rgb),.6),0 0 0 4px rgba(var(--pos-rgb),.18)}
+.nav-ai-ic{flex:none;display:grid;place-items:center;color:var(--pos)}
+.nav-ai-ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+html body .nav-ai-today input[data-ai-today][type=text]:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]){flex:1;min-width:0;height:44px;padding:0 4px;font-size:16px;background:transparent!important;box-shadow:none!important;border:0!important;outline:none}
+.nav-ai-cam{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:999px;color:var(--muted);cursor:pointer}
+.nav-ai-cam:hover{color:var(--pos);background:var(--posbg)}
+.nav-ai-cam svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html body .nav-ai-today input[data-ai-today]::placeholder{font-size:14px;text-overflow:ellipsis}

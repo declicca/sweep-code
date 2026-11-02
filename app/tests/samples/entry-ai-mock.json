@@ -1,0 +1,106 @@
+{
+ "_about": "tests only (tools/run.sh: SWEEP_AI_ENTRY_MOCK): Sweep AI's answers for a trade from a sentence (ai/ai-entry.php); the first rule whose « match » is in the sentence answers",
+ "rules": [
+  {
+   "match": "this morning",
+   "out": {
+    "account": null,
+    "instrument": "NQZ6",
+    "direction": "long",
+    "contracts": 2,
+    "entry": null,
+    "exit": null,
+    "pnl_usd": 400,
+    "time": "09:35",
+    "date": null,
+    "confidence": {
+     "account": 0,
+     "instrument": 0.95,
+     "direction": 0.95,
+     "contracts": 0.5,
+     "entry": 0,
+     "exit": 0,
+     "pnl_usd": 0.9,
+     "time": 0.6,
+     "date": 0
+    }
+   }
+  },
+  {
+   "match": "ce matin",
+   "out": {
+    "account": null,
+    "instrument": "NQZ6",
+    "direction": "long",
+    "contracts": 2,
+    "entry": null,
+    "exit": null,
+    "pnl_usd": 400,
+    "time": "09:35",
+    "date": null,
+    "confidence": {
+     "account": 0,
+     "instrument": 0.95,
+     "direction": 0.95,
+     "contracts": 0.5,
+     "entry": 0,
+     "exit": 0,
+     "pnl_usd": 0.9,
+     "time": 0.6,
+     "date": 0
+    }
+   }
+  },
+  {
+   "match": "esta mañana",
+   "out": {
+    "account": null,
+    "instrument": "NQZ6",
+    "direction": "long",
+    "contracts": 2,
+    "entry": null,
+    "exit": null,
+    "pnl_usd": 400,
+    "time": "09:35",
+    "date": null,
+    "confidence": {
+     "account": 0,
+     "instrument": 0.95,
+     "direction": 0.95,
+     "contracts": 0.5,
+     "entry": 0,
+     "exit": 0,
+     "pnl_usd": 0.9,
+     "time": 0.6,
+     "date": 0
+    }
+   }
+  },
+  {
+   "match": "unreadable",
+   "error": "bad_output"
+  }
+ ],
+ "default": {
+  "account": null,
+  "instrument": "ES",
+  "direction": "short",
+  "contracts": 1,
+  "entry": null,
+  "exit": null,
+  "pnl_usd": -50,
+  "time": null,
+  "date": null,
+  "confidence": {
+   "account": 0,
+   "instrument": 1,
+   "direction": 1,
+   "contracts": 1,
+   "entry": 0,
+   "exit": 0,
+   "pnl_usd": 1,
+   "time": 0,
+   "date": 0
+  }
+ }
+}

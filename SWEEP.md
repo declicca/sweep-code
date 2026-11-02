@@ -114,7 +114,7 @@ Légende de la colonne **Cible** :
 
 | Élément | Où | Moment | Cible |
 |---|---|---|---|
-| Feuille « Nouveau trade · par capture » (zone de capture, « Saisir à la main », « Importer un CSV ») | `nav.js:2199` | M2 | Garder |
+| Feuille « Nouveau trade · par capture » (un champ « Décris ton trade ou dépose une capture » depuis le 2 nov. — une phrase ou une capture —, « Saisir à la main », « Importer un CSV ») | `nav.js` (`shotForm`, `aiBox`) | M2 | Garder |
 | Après la capture : compte, « Aussi sur », P&L net, Long/Short, setup en un toucher, risque, « Vérifier le trade », 3 questions, émotions, Enregistrer | `nav.js:2219` | M2 | Garder |
 | « Ton coach · Avant ce trade » (perte max, pause après une perte, edge, leçon qui revient) | `coach.js:460` | M2 | **Garder** : c'est le « il te reste X $ » de M2 |
 | « X trades trouvés » (une capture, plusieurs trades) | `nav.js:2342` | M2 | Garder |
@@ -304,6 +304,8 @@ Légende de la colonne **Cible** :
 | Jour sans trade choisi (« Pas de trading aujourd'hui ») | « Journée de repos · comptée dans ta série » | — | — |
 | **Vendredi**, bilan prêt (M3) | « Ta semaine est prête » | **Voir mon bilan** | — |
 | Fin de semaine | L'intention de la semaine (enfin visible) + « Lundi : prépare ton plan dès dimanche 18 h » | — | — |
+
+**Juste sous la carte** (2 nov., brief avance 3) : le champ « Décris ton trade ou dépose une capture » ; une phrase ou une capture ouvre la feuille « + » remplie, rien n'est enregistré sans « Enregistrer ».
 
 **Sous « Maintenant »**, dans cet ordre, rien d'autre :
 1. **Comptes** (dès le premier compte, même sans trade) : marge ou objectif de chaque compte, « Prêt pour le payout ».

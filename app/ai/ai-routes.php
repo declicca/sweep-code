@@ -16,6 +16,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 require_once __DIR__ . '/ai-core.php';
 require_once __DIR__ . '/ai-stats.php';
 require_once __DIR__ . '/ai-features.php';
+require_once __DIR__ . '/ai-entry.php';
 
 function sai_out(int $code, array $data): void
 {
@@ -61,6 +62,10 @@ function sweep_ai_route(string $route, string $method, string $uid, PDO $pdo): v
             case 'api/ai/parse-trades':
                 if (!$post) break;
                 sai_out(200, $withUsage(sai_parse_trades($pdo, $uid, (string) ($b['text'] ?? ''), $lang)));
+
+            case 'api/ai/entry':   // a trade from one sentence: read here when plain (no quota), else Sweep AI; it only fills the sheet
+                if (!$post) break;
+                sai_out(200, sai_entry($pdo, $uid, (string) ($b['text'] ?? ''), $lang));
 
             case 'api/ai/import':
                 if (!$post) break;
