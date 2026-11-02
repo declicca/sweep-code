@@ -152,7 +152,9 @@ def plan_sheet(pg, lang):   # the express plan, being filled: his bias, his leve
   P = {'en': ('PDH 24,412 · London high 24,380 · London low 24,318', 'Sweep of the London low that holds: long toward the London high.', 'Back under 24,318: short toward the PDL. Otherwise, no trade.'),
        'fr': ('PDH 24 412 · London high 24 380 · London low 24 318', 'Sweep du London low qui tient : achat vers le London high.', 'Retour sous 24 318 : vente vers le PDL. Sinon, pas de trade.'),
        'es': ('PDH 24.412 · London high 24.380 · London low 24.318', 'Sweep del London low que aguanta: compra hacia el London high.', 'Vuelta bajo 24.318: venta hacia el PDL. Si no, sin operación.')}[lang]
-  go(pg, '#dashboard', 1500); tap(pg, '#main [data-rt="plan"]', 2500)
+  go(pg, '#dashboard', 1500)
+  pg.locator('#main [data-rt="plan"]').first.evaluate("(e) => e.scrollIntoView({ block: 'center' })"); pg.wait_for_timeout(400)   # (2 Nov.) the routine card is taller (the day's counter): the step was under the tab bar
+  tap(pg, '#main [data-rt="plan"]', 2500)
   click_text(pg, r'^(Bullish|Haussier|Alcista)$', '#gSheet', 800)
   ta = pg.locator('#gSheet input[type=text]:visible, #gSheet textarea:visible')
   for i, v in enumerate(P):
