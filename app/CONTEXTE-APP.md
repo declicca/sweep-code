@@ -1691,3 +1691,12 @@ Source : `docs/parcours/TOUR-VISUEL-2026-11-02.md` (hors git). Corrections en fi
   - feuille « Nouveau trade » sur téléphone : « Sans capture » et « Importer un CSV » côte à côte, deux boutons de même largeur et de 44 px de haut (avant : un lien centré au-dessus d'un bouton à moitié de largeur) ;
   - en-tête de l'app installée (`html.pwa`) : le titre de la page est sur la même ligne que le logo et les icônes (il était 7 px plus haut). Une fois la page défilée, le fond de l'en-tête est plein, sans flou d'arrière-plan : iOS floutait le titre à travers ce flou (« une ombre par-dessus ») ;
   - les barres d'onglets collées sous l'en-tête (`.nav-seg`, `.nav-tnav`) ont leur propre calque (`translateZ(0)`) : iOS dessinait par-dessus les lignes qui défilent dessous (« Évaluations · Simulé » sur Comptes).
+
+## Gardien de compte (brief du 3 nov., SWEEP.md section 8)
+
+- **Étape 2, le moteur** : `guard/guard.php`, seule source des chiffres du Gardien.
+  - `guard_path()` refait côté serveur le chemin de drawdown d'`acctState` (`src/app.js`), ajustements de « Recalibrer » compris (`src/nav.js`) : statique, suiveur en fin de journée, suiveur trade par trade, arrêt au solde de départ (+ `dd_lock_offset_c`), payouts payés et ajustements datés, compte live sans règles (plancher 0 $).
+  - `guard_compute()` applique les formules du brief : plancher de drawdown, plancher journalier (solde de début de journée − `dll_c`), marge, risque restant (le plus petit entre la marge et le risque prévu + P&L du jour), niveau (`calm` > 50 % de la marge du début de journée, `watch` 25–50 %, `danger` < 25 % ou sous la perte habituelle, `stopped`, `breached`), consistance (et le gain max du jour qui la garde), objectif d'une évaluation, drapeau `estimate` (suiveur trade par trade d'un compte non synchronisé), indicateurs absents (`missing`).
+  - `guard_state()` : les comptes actifs, le plus à risque d'abord ; Free : seul le premier a ses chiffres.
+  - Risque prévu = perte max du plan du jour, sinon la perte max par jour de Réglages. Perte habituelle = moyenne des 20 dernières pertes du trader.
+  - Test : `tests/guard_test.php` (26 cas, chiffres vérifiés à la main dans le fichier).

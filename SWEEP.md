@@ -677,3 +677,11 @@ Le Gardien montre pendant la séance combien le trader peut encore perdre sans m
 
 ### 8.2 Décisions — Gardien de compte
 
+- **Moteur en PHP, chemin d'`acctState` porté** (étape 2) : aucun calcul de marge n'existait côté serveur ; le brief demande une fonction PHP source de vérité. `guard_path()` reprend pas à pas `acctState` (ajustements et payouts compris) plutôt qu'une formule simplifiée, pour que la marge du Gardien soit celle de la page du compte (règle 7). Un test de parité navigateur / serveur le vérifie (étape 3).
+- **Plancher suiveur de fin de journée** : comme la page du compte, la journée en cours compte comme si elle fermait maintenant (le plus haut solde inclut le solde actuel). Sinon les deux écrans montreraient deux marges.
+- **Risque prévu** : la perte max du plan du jour, sinon la perte max par jour de Réglages › Ma routine. La « dernière perte max » et la « prudence » de « Maintenant » ne sont pas reprises : elles sont des suggestions pour le plan, pas un risque prévu par le trader.
+- **Perte habituelle** : moyenne des 20 dernières pertes du trader, tous comptes (le brief parle du trader), hors ligne « Trades non détaillés ».
+- **Plancher touché** : un solde égal au plancher est `breached`, comme la page du compte (`<=`). Un compte passé sous son plancher un jour précédent reste `breached` même s'il remonte.
+- **Plancher journalier atteint** : `breached` aussi (le brief : « a dépassé un plancher ») ; le texte dit « sa limite », sans parler de compte perdu.
+- **Objectif** : seulement pour un compte qui n'est ni `funded` ni `live`.
+- **Consistance, gain max du jour** : le meilleur jour possible = limite × profit des autres jours ÷ (1 − limite) ; rien quand les autres jours ne sont pas en profit.
