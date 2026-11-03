@@ -3369,13 +3369,12 @@ html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl t
 .nav-guard.warn .nav-guard-msg,.nav-guard-sh.warn .nav-guard-msg{color:var(--neg)}
 .nav-guard-pills{display:flex;gap:8px;overflow-x:auto;padding:0 18px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .nav-guard-pills::-webkit-scrollbar{display:none}
-.nav-guard-pill{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;min-height:32px;padding:0 12px;border-radius:32px;border:1px solid var(--line);background:transparent;color:var(--text2);font:500 13px/1 inherit;font-family:inherit;text-decoration:none;cursor:pointer;white-space:nowrap}
+.nav-guard-pill{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;height:34px;box-sizing:border-box;padding:0 12px;border-radius:32px;border:1px solid var(--line);background:transparent;color:var(--text2);font:500 13px/1 inherit;font-family:inherit;text-decoration:none;cursor:pointer;white-space:nowrap}
 .nav-guard-pill.on{background:var(--fill,rgba(127,127,127,.12));color:var(--text);border-color:transparent}
 .nav-guard-pill.is-locked{opacity:.6}
 .nav-guard-pill svg{width:12px;height:12px;fill:currentColor}
 .nav-guard-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0}
 .nav-guard-dot.warn{background:var(--gold)}
-@media (pointer:coarse){.nav-guard-pill{min-height:36px}}
 .nav-guard-sh .nav-guard-v{margin-top:2px}
 .nav-guard-estl{margin:10px 0 0;font-size:13px;line-height:1.4;color:var(--text2)}
 .nav-guard-estl .nav-guard-est{margin-left:0;margin-right:4px}
@@ -3411,3 +3410,6 @@ html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl t
    screen (36 in French, « Toute la période ») — the row scrolled for so little it looked broken; a little less padding, gap and size and they fit */
 @media (max-width:400px){html body #main .fx-row{gap:6px}html body #main .fx-row > .fx-c{font-size:13.5px;gap:5px}html body #main .fx-row > .fx-c:not(.fx-on){padding:0 9px}}
 html body #main .nav-guard > .nav-guard-up{display:inline-flex;align-items:center;padding:0 8px;line-height:1.2;box-sizing:border-box}
+.nav-guard-pill{position:relative}
+.nav-guard-pill::after{content:"";position:absolute;inset:-6px 0}   /* 34 px, its zone 44 (the row has 5 px above and below) */
+.nav-guard-pills{padding-top:7px;padding-bottom:9px;margin-top:-7px}

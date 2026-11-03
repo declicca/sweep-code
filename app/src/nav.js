@@ -942,7 +942,7 @@ window.SweepMO = window.SweepMO || class {
     const dash = document.createElement('div'); dash.className = 'nav-dash';
     // two columns on a computer, each card at its natural height (no stretched empty cards); one list on a phone (CSS order)
     const sg = stage();
-    dash.innerHTML = `<div class="d-col d-col-a"><div class="d-today"></div>${typeof window.SweepTrialCard === 'function' ? window.SweepTrialCard() : ''}${sg.perf ? kpiCard() : ''}</div><div class="d-col d-col-b">${sg.acc ? accountsCard() : ''}${sg.money ? payoutsCard() : ''}</div>`;
+    dash.innerHTML = `<div class="d-col d-col-a">${typeof window.SweepGuardCard === 'function' ? window.SweepGuardCard() : ''}<div class="d-today"></div>${typeof window.SweepTrialCard === 'function' ? window.SweepTrialCard() : ''}${sg.perf ? kpiCard() : ''}</div><div class="d-col d-col-b">${sg.acc ? accountsCard() : ''}${sg.money ? payoutsCard() : ''}</div>`;
     const greetEl = main.querySelector(':scope > .greet');
     // computer: the news, calendar and payouts go under the day card before the first paint (no card jumping a frame later)
     try { if (typeof newsUnderDay === 'function') newsUnderDay(dash); if (typeof deskToday === 'function') deskToday(dash); } catch (e) { /* the observers do it */ }
@@ -7798,6 +7798,7 @@ if (window.I18N_ES) { window.I18N_ES['By % of trades'] = '% de operaciones'; win
     let el = col.querySelector(':scope > .nav-guard');
     const html = cardHtml();
     if (!html) { if (el) el.remove(); return; }
+    if (el && !el._h && el.outerHTML.replace(/\s+/g, ' ') === html.trim().replace(/\s+/g, ' ')) el._h = html;   // the one drawn with Today
     if (el && el._h === html) { if (col.firstElementChild !== el) col.prepend(el); return; }
     const tmp = document.createElement('div'); tmp.innerHTML = html; const nx = tmp.firstElementChild; nx._h = html;
     const sx = el && el.querySelector('.nav-guard-pills') ? el.querySelector('.nav-guard-pills').scrollLeft : 0;
@@ -7916,4 +7917,5 @@ if (window.I18N_ES) { window.I18N_ES['By % of trades'] = '% de operaciones'; win
     es: { 'g_guard_watch.title': '{account}: usaste la mitad de tu margen', 'g_guard_watch.body': 'Baja el ritmo, solo tus mejores setups.', 'g_guard_danger.title': '{account}: una pérdida más podría costar esta cuenta', 'g_guard_danger.body': 'Protégela: mira lo que aún puedes perder hoy.' } };
   (function reg(n) { if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings(NB); } catch (e) { /* older module */ } } else if (n < 40) setTimeout(() => reg(n + 1), 150); })(0);
   window.SweepGuard = { load, state: () => G.st, shown, t, open: openSheet, update: openUpdate };
+  window.SweepGuardCard = () => { try { return cardHtml(); } catch (e) { return ''; } };   // drawn with Today itself (composeToday): there at its first image
 })();

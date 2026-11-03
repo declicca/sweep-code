@@ -1716,4 +1716,4 @@ Source : `docs/parcours/TOUR-VISUEL-2026-11-02.md` (hors git). Corrections en fi
 - **Étape 7** : `GET api/guardian` est le point d'accès des futurs widgets (format dans SWEEP.md 8.4).
 - **Au passage** : sur un téléphone de 400 px ou moins, la ligne de filtres (« Ce mois-ci · Type de compte · Filtres ») dépassait l'écran de 20 à 36 px selon la langue ; marges, écart et police un peu réduits, elle tient.
 - Tests : `tests/day_lock_test.php` (2 pertes à la suite, 0 = éteint, la récompense gardée ou perdue), `e2e_guard` étapes 7 (mise à jour) et 8 (coupe-circuit).
-  - La carte est dessinée dès la première image d'Aujourd'hui avec les derniers chiffres vus sur l'appareil (`localStorage` `sw.guard`, même trader et même séance), puis mise à jour : rien n'est poussé vers le bas.
+  - La carte est dessinée avec la page Aujourd'hui elle-même (`SweepGuardCard()` dans `composeToday`), avec les derniers chiffres vus sur l'appareil (`localStorage` `sw.guard`, même trader et même séance), puis mise à jour : rien n'est poussé vers le bas (`e2e_page_shift`). Pastilles de 34 px, zone de toucher de 46 px.
