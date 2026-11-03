@@ -7667,16 +7667,17 @@ new window.SweepMO(() => {
     raf = 0;
     document.querySelectorAll('#main svg.chart').forEach((s) => {
       const vb = s.viewBox && s.viewBox.baseVal, w = s.getBoundingClientRect().width; if (!vb || !vb.width || !w) return;
-      const box = s.parentElement && s.parentElement.classList.contains('chartbox') ? s.parentElement : null, W0 = w + (box ? +(box.dataset.pl || 0) : 0);
-      const font = (px) => { const fs = (11 * vb.width / px).toFixed(1); if (s.dataset.fs !== fs) { s.dataset.fs = fs; s.style.setProperty('--ax-fs', fs + 'px'); } return +fs; };
-      // (3 Nov.) the amounts on the left, at 11 px, went past the chart's edge (« 0 k $ » for « −20 k $ »): room beside the chart for the
-      // widest, worked out from the width without that room (W0) and from its characters (Geist Mono, 0.6 em each: the same before and
-      // after the font loads), so the same on every pass: set once, before the chart is first shown
-      const tx = [...s.querySelectorAll(':scope > text')], y = Math.max(...tx.map((t) => +t.getAttribute('y') || 0));
-      let pad = 0;
-      tx.filter((t) => +t.getAttribute('y') !== y && t.getAttribute('text-anchor') === 'end').forEach((t) => { const ax = +t.getAttribute('x') || 0, px = t.textContent.length * 6.6, k = ax / vb.width; if (k < 1) pad = Math.max(pad, Math.ceil((px + 2 - k * W0) / (1 - k))); });
-      if (box && +(box.dataset.pl || 0) !== pad) { box.dataset.pl = pad; box.style.paddingLeft = pad ? pad + 'px' : ''; s.style.overflow = pad ? 'visible' : ''; }   // (drawn in that room: past the drawing's own edge)
-      const fs = font(W0 - (box ? pad : 0));
+      // (3 Nov.) the amounts on the left, at 11 px, went past the chart's edge (« 0 k $ » for « −20 k $ »): the view opens to the left
+      // of 0 by what the widest needs, its height in proportion — the drawing narrows a little inside a box of the same size (nothing
+      // moves on the page, e2e_page_shift); worked out from the drawn width (W0) and from the characters (Geist Mono, 0.6 em each:
+      // the same before and after the font loads), so the same on every pass
+      if (!s.dataset.vb0) s.dataset.vb0 = [vb.x, vb.y, vb.width, vb.height].join(' ');
+      const [, , W0, H0] = s.dataset.vb0.split(' ').map(Number), tx = [...s.querySelectorAll(':scope > text')], y = Math.max(...tx.map((t) => +t.getAttribute('y') || 0));
+      let pu = 0;
+      tx.filter((t) => +t.getAttribute('y') !== y && t.getAttribute('text-anchor') === 'end').forEach((t) => { const ax = +t.getAttribute('x') || 0, px = t.textContent.length * 6.6 + 2; if (px < w) pu = Math.max(pu, Math.ceil((px * W0 / w - ax) / (1 - px / w))); });
+      const vw = W0 + pu, vh = H0 * vw / W0, want = [-pu, -(vh - H0) / 2, vw, vh].map((n) => +n.toFixed(1)).join(' ');
+      if (s.getAttribute('viewBox') !== want) s.setAttribute('viewBox', want);
+      const fs = (11 * vw / w).toFixed(1); if (s.dataset.fs !== fs) { s.dataset.fs = fs; s.style.setProperty('--ax-fs', fs + 'px'); }
       // the dates under the chart at that size: one that would touch the one before it skips (« 12 oct.15 oct. » at the end, 3 Nov.)
       let right = -Infinity;
       tx.filter((t) => +t.getAttribute('y') === y).sort((a, b) => +a.getAttribute('x') - +b.getAttribute('x')).forEach((t) => {

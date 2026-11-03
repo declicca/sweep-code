@@ -3124,13 +3124,13 @@ document.addEventListener("pointermove", e => {
   } catch {
     return;
   }
-  const o = (e.clientX - n.left) / n.width * s;
+  const V = a.viewBox.baseVal, o = V.x + (e.clientX - n.left) / n.width * (V.width || s);   // (3 Nov.: the view may start left of 0, room for the amounts, nav.js)
   let r = i[0];
   for (const E of i) Math.abs(E[0] - o) < Math.abs(r[0] - o) && (r = E);
   const c = a.viewBox.baseVal, l = n.width / c.width, p = a.querySelector(".xh"), u = a.querySelector(".xdot"), h = t.querySelector(".ctip");
   p.setAttribute("x1", r[0]), p.setAttribute("x2", r[0]), u.setAttribute("cx", r[0]), 
   u.setAttribute("cy", r[1]), t.classList.add("hov"), h.innerHTML = `<span>${esc(r[2] || "Start")}</span><b class="${cls(r[3])}">${money(r[3])}</b>${r[4] != null ? `<i class="${cls(r[4])}">${money(r[4])}</i>` : ""}`;
-  const m = t.getBoundingClientRect(), v = n.left - m.left + r[0] * l, b = n.top - m.top + r[1] * l;
+  const m = t.getBoundingClientRect(), v = n.left - m.left + (r[0] - c.x) * l, b = n.top - m.top + (r[1] - c.y) * l;
   h.style.left = Math.max(60, Math.min(m.width - 60, v)) + "px", h.style.top = b + "px";
 }), document.addEventListener("pointerout", e => {
   const t = e.target.closest && e.target.closest(".chartbox");
