@@ -88,6 +88,9 @@ function sb_plan_limits(string $plan): array
     if (!array_key_exists('gameplan', $L)) $L['gameplan'] = isset($plans[$plan]) && $plan !== 'free';
     // copy groups, a master account and its followers (brief « avance concurrentielle », step 2): Pro and Elite, same rule
     if (!array_key_exists('copy_groups', $L)) $L['copy_groups'] = isset($plans[$plan]) && $plan !== 'free';
+    // the account guardian (brief « Gardien de compte », 3 Nov.): every account and the stop rule with Pro and Elite; Free, one account
+    if (!array_key_exists('guard_all', $L)) $L['guard_all'] = isset($plans[$plan]) && $plan !== 'free';
+    if (!array_key_exists('guard_stop', $L)) $L['guard_stop'] = isset($plans[$plan]) && $plan !== 'free';
     return $L;
 }
 

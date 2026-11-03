@@ -112,6 +112,13 @@ $ok($g['pnl_c'] === $K(-300) && $g['room_c'] === $K(700) && $g['typed'] !== null
 $g = guard_account($b, $bt, [], ['today' => $TODAY, 'live' => ['bal_c' => $K(50300), 'at' => '2026-11-04T01:00:00.000Z']]);
 $ok($g['pnl_c'] === $K(-600) && $g['typed'] === null, 'B a trade saved after the typed balance: the trades count again');
 
+// a Sunday-evening trade is Monday's session (the app's dayMap): Sunday +1,000 and Monday −400 are one day of +600 —
+// the highest close is $50,600, not $51,000 → floor 48,100 (as the account page)
+$g = guard_account($b2, [$tr('B', '2026-11-01', $K(1000), '19:00'), $tr('B', '2026-11-02', $K(-400)), $tr('B', $TODAY, $K(-600))], [], ['today' => $TODAY]);
+$ok($g['floors']['drawdown_c'] === $K(48100) && $g['room_c'] === $K(1900), 'Sunday evening counts on Monday: floor 48,100, room 1,900 (' . json_encode([$g['floors']['drawdown_c'], $g['room_c']]) . ')');
+$g = guard_account($b2, [$tr('B', '2026-11-08', $K(300), '19:00'), $tr('B', '2026-11-09', $K(-100))], [], ['today' => '2026-11-09']);
+$ok($g['pnl_c'] === $K(200) && $g['sod_c'] === $K(50000), 'on Monday, Sunday evening\'s trade is in today\'s P&L (+300 − 100 = +200)');
+
 // the session boundary and Free, through the documents
 $uid = 'u1';
 $put($uid, 'accounts', $b + ['status' => 'active']); $put($uid, 'accounts', $d + ['status' => 'active']);

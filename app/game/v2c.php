@@ -18,7 +18,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 final class GameNotifyService
 {
     /** the reminders that also reach the phone (push/web-push.php: kind) */
-    private const PUSH = ['g_plan' => 'plan', 'g_review' => 'review', 'g_weekly' => 'weekly', 'g_lock' => 'lock'];   // (1 Nov., brief avance 4) the day's lock, sent by GameEngine::recomputeDay
+    private const PUSH = ['g_plan' => 'plan', 'g_review' => 'review', 'g_weekly' => 'weekly', 'g_lock' => 'lock', 'g_guard_watch' => 'guard', 'g_guard_danger' => 'guard'];   // (3 Nov.) the account guardian (guard/guard.php)   // (1 Nov., brief avance 4) the day's lock, sent by GameEngine::recomputeDay
 
     /** channels: the bell; and the phone ($push: the scheduled task) for the 3 reminders above. A reminder over the day's 2 waits. */
     public static function send(string $uid, string $type, array $params, string $dedupe, string $url, array $opts = [], bool $push = false): bool

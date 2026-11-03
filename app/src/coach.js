@@ -328,15 +328,19 @@
      applies from the next session (`from`); before it, the values it replaced (`was`). Same as GameEngine::standingLimits. */
   function standing(day) {
     const x = (S.settings && S.settings.day_lock) || {}, v = !x.from || day >= x.from ? x : x.was || {};
-    return { loss: Math.max(0, Math.round(+v.loss_c || 0)), trades: Math.max(0, parseInt(v.trades, 10) || 0) };
+    // (3 Nov., the account guardian's stop rule, Pro and Elite) losing trades in a row: 2 unless the trader chose (0 = off)
+    const on = typeof billCan !== 'function' || billCan('guard_stop'), ls = v.losses == null || v.losses === '' ? 2 : Math.max(0, parseInt(v.losses, 10) || 0);
+    return { loss: Math.max(0, Math.round(+v.loss_c || 0)), trades: Math.max(0, parseInt(v.trades, 10) || 0), losses: on ? ls : 0 };
   }
   /** the day's limits, the tightest of each — the day's plan, the standing limits, the daily limit of the active accounts (their
    *  firm's preset, on their page); 0 = none. Same as GameEngine::dayLimits (game/game.php). */
   function dayLimits(day) {
     const p = planOf(day), s = standing(day), lim = accountLimit();
     const l = [p.valid && p.bias !== 'no_trade' ? p.maxLoss : 0, s.loss, lim ? +lim.c : 0].filter((v) => v > 0), n = [p.valid ? p.maxTrades : 0, s.trades].filter((v) => v > 0);
-    return { loss: l.length ? Math.min(...l) : 0, trades: n.length ? Math.min(...n) : 0 };
+    return { loss: l.length ? Math.min(...l) : 0, trades: n.length ? Math.min(...n) : 0, losses: s.losses };
   }
+  /** the losing trades in a row that end the list (the « Trades not detailed » line is not a trade) */
+  const lossRun = (list) => { let k = 0; for (let i = list.length - 1; i >= 0 && net(list[i]) < 0; i--) k++; return k; };
   /** the session's lock: the one the server recorded (kept until 18:00 ET, even if a trade is deleted), else the one the trades reach
    *  now (the screen changes at once; the server records it with the save). { why: 'loss' | 'trades', loss_c, trades, n, net_c } | null */
   function dayLock(day) {
@@ -344,9 +348,9 @@
     const st = window.SweepGame && SweepGame.state && SweepGame.state(), sv = st && st.today && st.today.day === day ? st.today.lock : null;
     if (sv) return sv;
     const list = dayTrades(day), n = list.filter((t) => !t.untracked).length; if (!n) return null;   // (the « Trades not detailed » line: a loss, never a trade)
-    const L = dayLimits(day), sum = list.reduce((a, t) => a + net(t), 0);
-    const why = L.loss && sum <= -L.loss ? 'loss' : L.trades && n >= L.trades ? 'trades' : null;
-    return why ? { why, loss_c: L.loss, trades: L.trades, n, net_c: sum } : null;
+    const L = dayLimits(day), sum = list.reduce((a, t) => a + net(t), 0), run = lossRun(list.filter((t) => !t.untracked));
+    const why = L.loss && sum <= -L.loss ? 'loss' : L.trades && n >= L.trades ? 'trades' : L.losses && run >= L.losses ? 'losses' : null;
+    return why ? { why, loss_c: L.loss, trades: L.trades, losses: L.losses, n, net_c: sum } : null;
   }
   /** the drawdown room of the trader's active accounts, as their own page shows it (acctState), the tightest one (audit of
    *  16 Oct.: the plan and the « you have X left » lines never go past it): { c: room now, start: room before the trades of day,

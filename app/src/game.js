@@ -1655,7 +1655,8 @@
     RV.bal = {}; RV.balAcc = balAccounts(RV.day);   // the platform's balance, once per day (brief « pertes oubliées », step 2)
     // (1 Nov., brief dans le temps D3) « It matches » chosen in advance: asked only when a trade of the day on the account has no
     // screenshot (typed by hand) or when the account's last check found a gap (the computed balance may be off)
-    RV.balAcc.forEach((a) => { RV.bal[a.id] = { sweep: acctState(a).bal, plat: null, same: !balAsk(a, RV.day), kind: null }; });
+    // (3 Nov., the account guardian) a balance typed today in « Update » is the platform's balance proposed
+    RV.balAcc.forEach((a) => { const sw = acctState(a).bal, lv = typedBal(a.id, RV.day); RV.bal[a.id] = { sweep: sw, plat: lv != null && lv !== sw ? lv : null, same: lv != null ? lv === sw : !balAsk(a, RV.day), kind: null }; });
     openSheet(`${head(t('review_title'), fdate(RV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
       <div class="g-f"><span>${RV.fiche ? pt('followed_sheet') : t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${RV.fiche ? `<div class="g-f rv-rules" ${RV.followed === 'partly' || RV.followed === 'no' ? '' : 'hidden'}><span>${pt('rules_q')}</span><div class="g-chips-row wrap">${FICHE.RULES.map((r) => `<button type="button" class="chip ${RV.rules.has(r) ? 'on' : ''}" data-rv-rule="${r}">${pt('r_' + r)}</button>`).join('')}</div></div>` : ''}
@@ -1685,10 +1686,15 @@
   const balC = (v) => { let x = String(v == null ? '' : v).replace(/[\s\u00a0\u202f$]/g, '');
     if (x.includes(',') && x.includes('.')) x = x.lastIndexOf(',') < x.lastIndexOf('.') ? x.replace(/,/g, '') : x.replace(/\./g, '').replace(',', '.');
     else x = x.replace(/,(?=\d{3}(\D|$))/g, '').replace(',', '.');
+    // (3 Nov.) « 49.700.00 »: a Spanish « 49.700,00 » once the decimal fields turned its comma into a point as it was typed (ux.js) —
+    // the last point is the decimal one before 1 or 2 digits, the others group thousands
+    if ((x.match(/\./g) || []).length > 1) { const k = x.lastIndexOf('.'); x = /^\d{1,2}$/.test(x.slice(k + 1)) ? x.slice(0, k).replace(/\./g, '') + '.' + x.slice(k + 1) : x.replace(/\./g, ''); }
     return x === '' || x === '-' || !isFinite(+x) ? null : Math.round(+x * 100); };
   /** the balance put in the field, written as in the language (1 Nov.: « 158211.60 » on the French capture) */
   const balIn = (c) => { const s = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
     return LANG === 'fr' || LANG === 'es' ? s.replace(/[,.]/g, (m) => (m === ',' ? '\0' : ',')).replace(/\0/g, LANG === 'fr' ? '\u202f' : '.') : s; };
+  /** the balance typed today in the guardian's « Update » (journals/{day}.guard.live, src/nav.js), or null */
+  const typedBal = (id, day) => { const x = ((journalOf(day).guard || {}).live || {})[id]; return x && Number.isFinite(+x.bal_c) ? +x.bal_c : null; };
   function balAccounts(day) {
     if (typeof todayStr !== 'function' || day !== todayStr() || typeof acctState !== 'function') return [];   // today's balance only says today
     const done = new Set(((journalOf(day).post || {}).bal || []).map((b) => b.acc));
@@ -1698,6 +1704,7 @@
     return (S.accounts || []).filter((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && a.result !== 'failed' && !done.has(a.id)).filter((a) => {
       const mine = tr.filter((x) => x.account_id === a.id), now = mine.filter((x) => x.date === day);
       if (now.length) return !now.some((x) => SYNCED.includes(x.source));
+      if (typedBal(a.id, day) != null) return true;   // its balance typed today in the guardian: checked at the close
       if (mine.some((x) => x.date > back) || (a.created_on && a.created_on > back)) return false;
       return !(a.bal_checked && a.bal_checked > ymdAdd(day, -7));   // at most once a week
     });

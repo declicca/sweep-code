@@ -52,9 +52,11 @@ $acc = fn(string $uid, string $id, int $dll) => $save($uid, 'accounts', ['id' =>
 
 // 0. the limits in force on a day
 $s = ['day_lock' => ['loss_c' => 20000, 'trades' => 2, 'from' => $N, 'was' => ['loss_c' => 50000, 'trades' => 0]]];
-$ok(GameEngine::standingLimits($s, $D) === ['loss_c' => 50000, 'trades' => 0] && GameEngine::standingLimits($s, $N) === ['loss_c' => 20000, 'trades' => 2]
-    && GameEngine::standingLimits(['day_lock' => ['loss_c' => 30000, 'from' => '']], $D) === ['loss_c' => 30000, 'trades' => 0] && GameEngine::standingLimits([], $D) === ['loss_c' => 0, 'trades' => 0],
-    'standing limits: the edited values from the next session (from), the values they replaced before it (was), none when never set');
+// (3 Nov., the account guardian's stop rule) losing trades in a row: 2 unless set (0 = off), with the same from / was
+$ok(GameEngine::standingLimits($s, $D) === ['loss_c' => 50000, 'trades' => 0, 'losses' => 2] && GameEngine::standingLimits($s, $N) === ['loss_c' => 20000, 'trades' => 2, 'losses' => 2]
+    && GameEngine::standingLimits(['day_lock' => ['loss_c' => 30000, 'from' => '']], $D) === ['loss_c' => 30000, 'trades' => 0, 'losses' => 2] && GameEngine::standingLimits([], $D) === ['loss_c' => 0, 'trades' => 0, 'losses' => 2]
+    && GameEngine::standingLimits(['day_lock' => ['losses' => 0, 'from' => $N, 'was' => ['losses' => 3]]], $D)['losses'] === 3 && GameEngine::standingLimits(['day_lock' => ['losses' => 0, 'from' => $N, 'was' => ['losses' => 3]]], $N)['losses'] === 0,
+    'standing limits: the edited values from the next session (from), the values they replaced before it (was), none when never set (2 losses in a row by default)');
 
 // 1. the max loss: the plan's $500, tighter than the account's $1,000
 $at("$D 08:00"); GameEngine::profile('u1');
@@ -140,6 +142,25 @@ wp_subscribe($pdo, 'u6', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/u6'
 wp_set_pref($pdo, 'u6', 'lock', ['on' => false]);
 $at("$D 10:05"); $save('u6', 'trades', $tr('w1', 'h1', -12000, '10:00'));
 $ok(($lock('u6', $D)['why'] ?? '') === 'loss' && $lock('u6', $D)['loss_c'] === 10000 && count($bell('u6')) === 1 && !$sent(), 'the account\'s own daily limit ($100, its preset) locks too; its push switched off: the bell only');
+
+// 7. (3 Nov., the account guardian's stop rule) two losing trades in a row lock the day, under every money limit; kept (the day
+//    closed with no new losing trade after it): the guardrail's reward; another loss saved after it: none; 0 in Settings: off
+$xp = fn(string $uid, string $d) => (int) $pdo->query("SELECT COUNT(*) FROM xp_events WHERE user_id = " . $pdo->quote($uid) . " AND event_key = " . $pdo->quote("guardrail:$d"))->fetchColumn();
+$review = fn(string $uid) => $save($uid, 'journals', ['id' => $D, 'post' => ['followed' => 'yes', 'discipline' => 4, 'grade' => 'B', 'reviewed_at' => '2026-10-30T21:20:00Z', 'tomorrow' => 'Smaller after a loss.']]);
+foreach (['u7' => false, 'u8' => true] as $u => $more) {
+    $at("$D 08:00"); GameEngine::profile($u); $acc($u, $u . 'a', 100000);
+    $at("$D 10:05"); $save($u, 'trades', $tr($u . 't1', $u . 'a', -10000, '10:00', ['created_at' => '2026-10-30T14:05:00.000Z']));
+    $ok($lock($u, $D) === null, "$u one loss of \$100 (daily limit \$1,000): not locked");
+    $at("$D 10:20"); $save($u, 'trades', $tr($u . 't2', $u . 'a', -15000, '10:15', ['created_at' => '2026-10-30T14:20:00.000Z']));
+    $l = $lock($u, $D);
+    $ok(($l['why'] ?? '') === 'losses' && $l['losses'] === 2 && $l['n'] === 2, "$u a second loss in a row: the day locks by the stop rule (" . json_encode($l) . ')');
+    if ($more) { $at("$D 10:40"); $save($u, 'trades', $tr($u . 't3', $u . 'a', -5000, '10:35', ['created_at' => '2026-10-30T14:40:00.000Z'])); }
+    $at("$D 17:20"); $review($u);
+    $ok($xp($u, $D) === ($more ? 0 : 1), $more ? "$u a loss saved after the stop: no reward for the stop rule" : "$u the day closed without a new loss: the guardrail's reward (kept its stop rule)");
+}
+$at("$D 08:00"); GameEngine::profile('u9'); $acc('u9', 'u9a', 100000); $save('u9', 'meta', ['id' => 'settings', 'day_lock' => ['losses' => 0]]);
+$at("$D 10:05"); $save('u9', 'trades', $tr('u9t1', 'u9a', -10000, '10:00')); $save('u9', 'trades', $tr('u9t2', 'u9a', -10000, '10:10'));
+$ok($lock('u9', $D) === null, 'the stop rule set to 0 in Settings: two losses do not lock');
 
 echo "\n$pass passed, $fail failed\n";
 if ($fail) echo "failed\n";

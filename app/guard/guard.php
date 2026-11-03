@@ -25,6 +25,14 @@ function guard_tkey(array $t): string
     return ($t['date'] ?? '') . ' ' . (GameEngine::hasSessionDate($t) && $tm >= '18' ? '0' : '1') . ($tm !== '' ? $tm : '99:99') . ' ' . ($t['created_at'] ?? '');
 }
 
+/** the day a trade counts on in the account's days (dayMap, wrapped in src/nav.js): a Sunday-evening trade belongs to Monday's
+ *  session (the futures week opens Sunday 6 pm ET) */
+function guard_day(array $t): string
+{
+    $d = (string) ($t['date'] ?? '');
+    return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d) && (int) (new DateTimeImmutable($d . ' 12:00'))->format('w') === 0 ? (new DateTimeImmutable($d . ' 12:00'))->modify('+1 day')->format('Y-m-d') : $d;
+}
+
 /**
  * The drawdown path (acctState, src/app.js, with the adjustments of src/nav.js): balance, limit, breached, the highest balance
  * the limit follows. $trades: the account's own trades (any order). $pays: the trader's payouts (only this account's paid ones count).
@@ -71,7 +79,7 @@ function guard_path(array $a, array $trades, array $pays): array
         }
     };
     $days = [];
-    foreach ($n as $t) { $d = (string) ($t['date'] ?? ''); $days[$d] = ($days[$d] ?? 0) + GameEngine::net($t); }
+    foreach ($n as $t) { $d = guard_day($t); $days[$d] = ($days[$d] ?? 0) + GameEngine::net($t); }
     if ($u) {
         $l = $start - $u;
         if ($type === 'static') {
@@ -81,7 +89,7 @@ function guard_path(array $a, array $trades, array $pays): array
             foreach ($n as $t) { $ADJ((string) $t['date'], $AT); $PAY((string) $t['date']); $c += GameEngine::net($t); if ($c <= $l) $br = true; $peak = max($peak, $c); $l = $cap($peak - $u); }
             $FIN($AT);
         } else {   // trailing at the end of the day (the default type, as acctState)
-            $byDay = []; foreach ($n as $t) $byDay[(string) $t['date']][] = $t;
+            $byDay = []; foreach ($n as $t) $byDay[guard_day($t)][] = $t;
             foreach ($byDay as $d => $list) {
                 $ADJ((string) $d, $AT); $PAY((string) $d);
                 foreach ($list as $t) { $c += GameEngine::net($t); if ($c <= $l) $br = true; }
@@ -194,14 +202,14 @@ function guard_account(array $a, array $trades, array $pays, array $ctx): array
 {
     $today = (string) $ctx['today']; $id = (string) ($a['id'] ?? '');
     $mine = array_values(array_filter($trades, fn($t) => ($t['account_id'] ?? '') === $id));
-    $before = array_values(array_filter($mine, fn($t) => (string) ($t['date'] ?? '') !== $today));
+    $before = array_values(array_filter($mine, fn($t) => guard_day($t) !== $today));   // today's session: a Sunday-evening trade is Monday's
     $now = guard_path($a, $mine, $pays); $sod = guard_path($a, $before, $pays);
     $pnl = $now['bal'] - $sod['bal'];
     // a balance typed today (an account without sync, step 4) is the balance now while no trade of the day came after it
     $lv = $ctx['live'] ?? null; $typed = false;
     if (is_array($lv) && isset($lv['bal_c'])) {
         $typed = true;
-        foreach ($mine as $t) if ((string) ($t['date'] ?? '') === $today && strcmp((string) (($t['updated_at'] ?? '') ?: ($t['created_at'] ?? '')), (string) ($lv['at'] ?? '')) > 0) $typed = false;
+        foreach ($mine as $t) if (guard_day($t) === $today && strcmp((string) (($t['updated_at'] ?? '') ?: ($t['created_at'] ?? '')), (string) ($lv['at'] ?? '')) > 0) $typed = false;
         if ($typed) $pnl = (int) $lv['bal_c'] - $sod['bal'];
     }
     $r = (array) ($a['rules'] ?? []); $bal = $sod['bal'] + $pnl;
@@ -272,3 +280,51 @@ function guard_state(string $uid, bool $all, array $opts = []): array
     if (!$all) foreach ($out as $k => $g) if ($k > 0) $out[$k] = ['id' => $g['id'], 'name' => $g['name'], 'locked' => true];
     return ['day' => $day, 'all' => $all, 'accounts' => $out];
 }
+
+/** step 5: the stop rule reached today — the day's lock the game recorded (game_days, GameEngine::recomputeDay: the max loss,
+ *  the max trades or the losing trades in a row; kept until 18:00 ET), or null */
+function guard_lock(string $uid): ?array
+{
+    try { $j = GameEngine::q('SELECT detail_json FROM game_days WHERE user_id = ? AND trading_day = ?', [$uid, GameEngine::today()])->fetchColumn(); }
+    catch (Throwable $e) { return null; }   // no game tables yet
+    $d = json_decode((string) $j, true); $l = is_array($d['lock'] ?? null) ? $d['lock'] : null;
+    return $l ? ['why' => (string) ($l['why'] ?? ''), 'at' => (int) ($l['at'] ?? 0), 'n' => (int) ($l['n'] ?? 0), 'net_c' => (int) ($l['net_c'] ?? 0), 'losses' => (int) ($l['losses'] ?? 0), 'loss_c' => (int) ($l['loss_c'] ?? 0), 'trades' => (int) ($l['trades'] ?? 0)] : null;
+}
+
+/** the plan decides (guard_all: every account; guard_stop: the stop rule — Pro and Elite); without billing, or before it is live
+ *  for this trader, everyone (as sync_copy_allowed) */
+function guard_allowed(string $uid, string $feature): bool
+{
+    if (!function_exists('billing_on') || !billing_on() || !function_exists('sb_can')) return true;
+    if (function_exists('sb_live') && !sb_live($uid)) return true;
+    try { return sb_can(db(), $uid, $feature); } catch (Throwable $e) { return false; }
+}
+
+function guard_route(string $route, string $method, string $uid): void
+{
+    if ($route === 'api/guardian' && $method === 'GET') {
+        $stop = guard_allowed($uid, 'guard_stop'); $lock = $stop ? guard_lock($uid) : null;
+        $s = guard_state($uid, guard_allowed($uid, 'guard_all'), ['stopped' => $lock ? ['*' => true] : []]);
+        guard_alerts($uid, $s);
+        json_out(200, $s + ['stop_rule' => $stop, 'stop' => $lock]);
+    }
+}
+
+/* step 4: the alerts — an account at « watch », then at « danger »: once per account, level and day, in the bell and on the phone
+   (push kind « guard », Settings › Notifications). Accounts the plan does not watch (Free: all but one) send nothing. */
+if (class_exists('Notify', false)) foreach (['g_guard_watch', 'g_guard_danger'] as $type) Notify::register($type, ['category' => 'prop_alerts', 'icon' => 'shield']);
+function guard_alerts(string $uid, array $state): void
+{
+    if (!class_exists('GameNotifyService', false)) return;
+    foreach ($state['accounts'] as $g) {
+        if (!empty($g['locked']) || !in_array($g['level'] ?? '', ['watch', 'danger'], true)) continue;
+        GameNotifyService::send($uid, 'g_guard_' . $g['level'], ['account' => mb_substr((string) $g['name'], 0, 80)], 'guard:' . $g['id'] . ':' . $g['level'] . ':' . $state['day'], '#dashboard', [], true);
+    }
+}
+/** after a trade (typed, copied or synced) or a journal page (a balance typed in « Update »): the levels again, their alerts */
+function guard_on_doc(array $p): void
+{
+    $uid = (string) ($p['uid'] ?? ''); if ($uid === '') return;
+    try { GameEngine::forget($uid); $lock = guard_allowed($uid, 'guard_stop') ? guard_lock($uid) : null; guard_alerts($uid, guard_state($uid, guard_allowed($uid, 'guard_all'), ['stopped' => $lock ? ['*' => true] : []])); } catch (Throwable $e) { error_log('[Sweep guard] ' . $e->getMessage()); }
+}
+if (class_exists('Events', false)) foreach (['trade.created', 'trade.updated', 'journal.saved'] as $ev) Events::on($ev, 'guard_on_doc');

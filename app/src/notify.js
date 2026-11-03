@@ -37,6 +37,8 @@
       'push.weekly.d': 'Friday, after the close',
       'push.lock': 'Day closed',
       'push.lock.d': 'The moment your daily limit is reached',
+      'push.guard': 'Account guardian',
+      'push.guard.d': 'When half of an account’s room is used, then when one more loss could cost it',
       'push.at': 'Time',
       'push.help': 'New York time, for the bell too. Never during the session, 2 notifications a day at most.',
       'push.ios': 'On iPhone: add Sweep to your Home Screen (Share › Add to Home Screen), then open it from its icon to turn on notifications.',
@@ -95,6 +97,8 @@
       'push.weekly.d': 'Le vendredi, après la clôture',
       'push.lock': 'Journée fermée',
       'push.lock.d': 'Dès que ta limite du jour est atteinte',
+      'push.guard': 'Gardien de compte',
+      'push.guard.d': 'Quand la moitié de la marge d’un compte est utilisée, puis quand une perte de plus pourrait le coûter',
       'push.at': 'Heure',
       'push.help': 'Heure de New York, pour la cloche aussi. Jamais pendant la séance, 2 notifications par jour au plus.',
       'push.ios': 'Sur iPhone : ajoute Sweep à ton écran d’accueil (Partager › Sur l’écran d’accueil), puis ouvre-le depuis son icône pour activer les notifications.',
@@ -153,6 +157,8 @@
       'push.weekly.d': 'El viernes, después del cierre',
       'push.lock': 'Día cerrado',
       'push.lock.d': 'En cuanto alcanzas tu límite del día',
+      'push.guard': 'Guardián de cuenta',
+      'push.guard.d': 'Cuando usas la mitad del margen de una cuenta, y cuando una pérdida más podría costarla',
       'push.at': 'Hora',
       'push.help': 'Hora de Nueva York, también para la campana. Nunca durante la sesión, 2 notificaciones al día como máximo.',
       'push.ios': 'En iPhone: añade Sweep a tu pantalla de inicio (Compartir › Añadir a pantalla de inicio) y ábrelo desde su icono para activar las notificaciones.',
@@ -415,7 +421,7 @@
   /* ── on this device: the plan, review and week reminders as phone notifications (web push, brief 02 part 10; push/web-push.php).
      Shown only when the server has its keys. iPhone: only from the app added to the Home Screen (iOS 16.4+). ── */
   const PU = { st: null, busy: false, dev: null, synced: false };   // st: server state; dev: this device's subscription (false: none)
-  const KINDS = ['plan', 'review', 'weekly', 'lock'];   // (1 Nov., brief avance 4) « Day closed »: when it happens, no time to choose
+  const KINDS = ['plan', 'review', 'weekly', 'lock', 'guard'];   // (3 Nov.) the account guardian: at « watch » then « danger »   // (1 Nov., brief avance 4) « Day closed »: when it happens, no time to choose
   const pushCan = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   const iosBrowser = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
   const keyBytes = (k) => Uint8Array.from(atob((k + '='.repeat((4 - k.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));

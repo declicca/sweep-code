@@ -3351,3 +3351,64 @@ html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl t
 /* (3 Nov., Mateo's iPhone) a sticky segmented control on its own layer: iOS drew the rows scrolling under it (a group's
    « Evaluations · Simulated » on Accounts) over the control */
 @media (max-width:860px){html body #main .nav-seg,html body #main .nav-tnav{-webkit-transform:translateZ(0);transform:translateZ(0)}}
+
+/* ───────────── The account guardian (3 Nov., SWEEP.md section 8): on top of Today, its sheet ───────────── */
+.nav-dash .nav-guard{order:-1;margin-bottom:12px;padding:0;overflow:hidden;border-radius:20px}
+.nav-guard-main{display:block;padding:16px 18px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:20px}
+.nav-guard-main:active{transform:scale(.985);transition:transform .18s var(--ease-ios,cubic-bezier(.32,.72,0,1))}
+.nav-guard-h{display:flex;align-items:baseline;gap:8px;min-width:0}
+.nav-guard-h small{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.01em;white-space:nowrap}
+.nav-guard-acc{font-size:12px;font-weight:500;color:var(--text3,var(--text2));min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-guard-est{margin-left:auto;flex-shrink:0;font-size:11px;font-weight:600;color:var(--text2);border:1px solid var(--line2,var(--line));border-radius:10px;padding:1px 7px;white-space:nowrap}
+.nav-guard-v{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:8px}
+.nav-guard-v span{font-size:14px;color:var(--text2)}
+.nav-guard-n{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1;color:var(--text);white-space:nowrap}
+.nav-guard-bar{display:block;height:6px;border-radius:10px;background:var(--line);margin-top:10px;overflow:hidden}
+.nav-guard-bar>i{display:block;height:100%;border-radius:10px;background:var(--blue);transition:width .5s var(--ease-ios,cubic-bezier(.32,.72,0,1))}
+.nav-guard.warn .nav-guard-bar>i,.nav-guard-sh.warn .nav-guard-bar>i{background:var(--gold)}
+.nav-guard-msg{margin:9px 0 0;font-size:14px;line-height:1.4;color:var(--text)}
+.nav-guard.warn .nav-guard-msg,.nav-guard-sh.warn .nav-guard-msg{color:var(--neg)}
+.nav-guard-pills{display:flex;gap:8px;overflow-x:auto;padding:0 18px 14px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.nav-guard-pills::-webkit-scrollbar{display:none}
+.nav-guard-pill{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;min-height:32px;padding:0 12px;border-radius:32px;border:1px solid var(--line);background:transparent;color:var(--text2);font:500 13px/1 inherit;font-family:inherit;text-decoration:none;cursor:pointer;white-space:nowrap}
+.nav-guard-pill.on{background:var(--fill,rgba(127,127,127,.12));color:var(--text);border-color:transparent}
+.nav-guard-pill.is-locked{opacity:.6}
+.nav-guard-pill svg{width:12px;height:12px;fill:currentColor}
+.nav-guard-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0}
+.nav-guard-dot.warn{background:var(--gold)}
+@media (pointer:coarse){.nav-guard-pill{min-height:36px}}
+.nav-guard-sh .nav-guard-v{margin-top:2px}
+.nav-guard-estl{margin:10px 0 0;font-size:13px;line-height:1.4;color:var(--text2)}
+.nav-guard-estl .nav-guard-est{margin-left:0;margin-right:4px}
+.nav-guard-rows{margin-top:14px;border-radius:14px;background:var(--fill,rgba(127,127,127,.08));overflow:hidden}
+.nav-guard-r{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border-top:1px solid var(--line)}
+.nav-guard-r:first-child{border-top:0}
+.nav-guard-r>div{min-width:0}
+.nav-guard-r b{display:block;font-size:14px;font-weight:600}
+.nav-guard-r small{display:block;margin-top:2px;font-size:12px;line-height:1.35;color:var(--text2)}
+.nav-guard-rv{flex-shrink:0;font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600;text-align:right}
+.nav-guard-h3{margin:18px 0 0;font-size:13px;font-weight:600;color:var(--text2)}
+.nav-guard{position:relative}
+.nav-guard-up{position:absolute;top:9px;right:10px;min-height:34px;padding:0 8px;font-size:13px;font-weight:600;color:var(--blue-text,var(--blue));background:none;border:0;cursor:pointer;z-index:1}
+.nav-guard:has(> .nav-guard-up) .nav-guard-h{padding-right:104px}
+@media (pointer:coarse){.nav-guard-up{min-height:44px;top:8px}}
+.nav-guard-upf .g-f input{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:20px}
+/* the stop rule's sheet (step 5): calm, centred; full screen on a phone */
+.nav-guard-stop .g-head h2:empty{display:none}
+.nav-guard-stopin{display:flex;flex-direction:column;align-items:center;text-align:center;padding:4px 4px 8px}
+.nav-guard-stopin .nav-lock-ic{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:rgba(var(--pos-rgb),.14);margin-bottom:14px}
+.nav-guard-stopin .nav-lock-ic svg{width:26px;height:26px;fill:none;stroke:var(--blue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-guard-stopin h2{margin:0;font-size:24px;line-height:1.2;letter-spacing:-.02em;text-wrap:balance}
+.nav-guard-stopt{margin:10px 0 0;font-size:15px;line-height:1.45;color:var(--text2);max-width:34ch;text-wrap:pretty}
+.nav-guard-stopn{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin:22px 0}
+.nav-guard-stopn>div{padding:14px 10px;border-radius:14px;background:var(--fill,rgba(127,127,127,.08))}
+.nav-guard-stopn small{display:block;font-size:12px;color:var(--text2)}
+.nav-guard-stopn b{display:block;margin-top:4px;font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:24px;font-weight:600}
+.nav-guard-stopin .g-big{width:100%}
+@media (max-width:860px){#gSheet.nav-guard-stop{top:0!important;height:100%!important;max-height:none!important;border-radius:0!important}
+  #gSheet.nav-guard-stop .g-in{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding-top:calc(env(safe-area-inset-top,0px) + 16px)!important;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px)!important}}
+.nav-guard-msg{text-wrap:pretty}
+/* (3 Nov.) a phone of 390 px, in English or Spanish, « This month » chosen (the default): the 3 filters were 20 px wider than the
+   screen (36 in French) — the row scrolled for so little it looked broken; a little less padding, gap and size and they fit */
+@media (max-width:400px){html body #main .fx-row{gap:6px}html body #main .fx-row > .fx-c{font-size:14px}html body #main .fx-row > .fx-c:not(.fx-on){padding:0 10px}}
+html body #main .nav-guard > .nav-guard-up{display:inline-flex;align-items:center;padding:0 8px;line-height:1.2;box-sizing:border-box}

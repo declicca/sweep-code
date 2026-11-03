@@ -747,6 +747,7 @@ try {
     if (!empty($cfg['push_config']) && !defined('SWEEP_PUSH_CONFIG')) define('SWEEP_PUSH_CONFIG', (string)$cfg['push_config']);
     if (is_file(__DIR__ . '/push/web-push.php')) require_once __DIR__ . '/push/web-push.php';   // notifications on the phone (brief 02 part 10): off without keys
     if (is_file(__DIR__ . '/game/game.php')) require_once __DIR__ . '/game/game.php';
+    if (is_file(__DIR__ . '/guard/guard.php')) require_once __DIR__ . '/guard/guard.php';   // the account guardian (3 Nov., SWEEP.md section 8)
     if (is_file(__DIR__ . '/loops/loops.php')) require_once __DIR__ . '/loops/loops.php';   // automatic emails (Loops): contact + events, off without a key
     if (!empty($cfg['chart_config']) && !defined('SWEEP_CHART_CONFIG')) define('SWEEP_CHART_CONFIG', (string)$cfg['chart_config']);
     if (is_file(__DIR__ . '/chart/chart.php')) require_once __DIR__ . '/chart/chart.php';     // real candle charts (Databento)         // gamification V1 « Sweep the day »
@@ -1048,6 +1049,8 @@ try {
 
     // Gamification (game/)
     if (strpos($route, 'api/game/') === 0 && function_exists('game_route')) game_route($route, $method, (string)$UID);
+    // the account guardian (guard/guard.php): read only, by plan
+    if (strpos($route, 'api/guardian') === 0 && function_exists('guard_route')) guard_route($route, $method, (string)$UID);
 
     // Automatic sync of trades (sync/): personal key, accounts found, linking
     if ($route === 'api/sync' || strpos($route, 'api/sync/') === 0) { require_once __DIR__ . '/sync/sync-routes.php'; sync_route($route, $method, (string)$UID); }

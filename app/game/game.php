@@ -497,11 +497,20 @@ final class GameEngine
         if (!$lock && $n > 0 && $day === self::today()) {
             $lim = self::dayLimits($uid, $day, $planValid && $bias !== 'no_trade' ? (int) $maxLoss : 0, $planValid ? $maxTrades : 0);
             $sum = array_sum(array_map([self::class, 'net'], self::dayTrades($uid, $day)));   // the « Trades not detailed » line is a loss too
-            $why = $lim['loss_c'] > 0 && $sum <= -$lim['loss_c'] ? 'loss' : ($lim['trades'] > 0 && $n >= $lim['trades'] ? 'trades' : null);
-            if ($why) { $lock = ['why' => $why, 'at' => self::ts(), 'loss_c' => $lim['loss_c'], 'trades' => $lim['trades'], 'n' => $n, 'net_c' => $sum]; $newLock = true; }
+            $run = 0; for ($k = $n - 1; $k >= 0 && self::net($trades[$k]) < 0; $k--) $run++;   // losing trades in a row, the last ones
+            $why = $lim['loss_c'] > 0 && $sum <= -$lim['loss_c'] ? 'loss' : ($lim['trades'] > 0 && $n >= $lim['trades'] ? 'trades' : ($lim['losses'] > 0 && $run >= $lim['losses'] ? 'losses' : null));
+            if ($why) { $lock = ['why' => $why, 'at' => self::ts(), 'loss_c' => $lim['loss_c'], 'trades' => $lim['trades'], 'losses' => $lim['losses'], 'n' => $n, 'net_c' => $sum]; $newLock = true; }
         }
         $swept = $ringPlan === 100 && $ringExec === 100 && $ringReview === 100;
         $guard = $planValid && $maxLoss && $guardIdx !== null && $guardIdx === $n - 1 && $n > 0;
+        // (3 Nov., the account guardian, step 6) the stop rule kept: the day locked (Pro and Elite), then no losing trade saved after
+        // it — the same reward as stopping at the plan's max loss, once the day is closed
+        if (!$guard && $lock && (!function_exists('guard_allowed') || guard_allowed($uid, 'guard_stop'))) {
+            // the trades in the order they were saved: the first `n` were there when it locked, the next ones came after
+            $bySave = $trades; usort($bySave, fn($a, $b) => strcmp((string) ($a['created_at'] ?? ''), (string) ($b['created_at'] ?? '')));
+            $after = array_filter(array_slice($bySave, (int) ($lock['n'] ?? $n)), fn($t) => self::net($t) < 0);
+            $guard = !$after;
+        }
         $activity = $n > 0 || $pre || $post;
         $row = [
             'ring_plan' => $ringPlan, 'ring_execution' => $ringExec, 'ring_review' => $ringReview, 'trades_count' => $n, 'compliant_count' => $planValid ? $ok : 0, 'journaled_count' => $jn,
@@ -551,7 +560,8 @@ final class GameEngine
     {
         $x = is_array($settings['day_lock'] ?? null) ? $settings['day_lock'] : [];
         $v = (string) ($x['from'] ?? '') === '' || $day >= (string) $x['from'] ? $x : (is_array($x['was'] ?? null) ? $x['was'] : []);
-        return ['loss_c' => max(0, (int) ($v['loss_c'] ?? 0)), 'trades' => max(0, (int) ($v['trades'] ?? 0))];
+        // (3 Nov., the account guardian's stop rule) losing trades in a row: 2 unless the trader chose (0 = off); the plan decides (dayLimits)
+        return ['loss_c' => max(0, (int) ($v['loss_c'] ?? 0)), 'trades' => max(0, (int) ($v['trades'] ?? 0)), 'losses' => !isset($v['losses']) || $v['losses'] === '' ? 2 : max(0, (int) $v['losses'])];
     }
     /** the day's limits, the tightest of each: the day's plan, the standing limits, the daily loss limit of the trader's active
      *  accounts (from the firm's preset, the account page); a limit of 0 = none. Same as SweepCoach.dayLimits (src/coach.js). */
@@ -564,7 +574,8 @@ final class GameEngine
             $d = (int) round((float) (((array) ($a['rules'] ?? []))['dll_c'] ?? 0)); if ($d > 0) $loss[] = $d;
         }
         $tr = array_filter([$planTrades, $s['trades']], fn($v) => $v > 0);
-        return ['loss_c' => $loss ? (int) min($loss) : 0, 'trades' => $tr ? (int) min($tr) : 0];
+        $stop = !function_exists('guard_allowed') || guard_allowed($uid, 'guard_stop');   // Pro and Elite (guard/guard.php)
+        return ['loss_c' => $loss ? (int) min($loss) : 0, 'trades' => $tr ? (int) min($tr) : 0, 'losses' => $stop ? $s['losses'] : 0];
     }
     /** the moment the day locks: once (its key), in the bell and on the phone (push kind « lock »), never capped (prop_alerts) */
     private static function onLock(string $uid, string $day, array $lock): void

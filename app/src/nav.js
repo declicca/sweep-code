@@ -4514,13 +4514,13 @@ window.SweepMO = window.SweepMO || class {
      coach that protects without guilt, two actions (grade the day's trades, close the day). Never a sheet over the app: the + and the
      trades stay where they are, entry and grading are never blocked, and nothing lifts it before 18:00. */
   const LK = {
-    en: { pill: 'Day closed', loss: 'Your max loss of {m} is reached.', trades: 'Your {n} trades of the day are taken.', trades1: 'Your trade of the day is taken.', next: 'Next session in', at: '6:00 PM, New York time', atSun: 'Sunday, 6:00 PM, New York time', d: '{d} d {h} h',
+    en: { pill: 'Day closed', loss: 'Your max loss of {m} is reached.', trades: 'Your {n} trades of the day are taken.', trades1: 'Your trade of the day is taken.', losses: '{n} losing trades in a row: your stop rule.', next: 'Next session in', at: '6:00 PM, New York time', atSun: 'Sunday, 6:00 PM, New York time', d: '{d} d {h} h',
       coL: 'Stopping here is what protects your account: the day is over, not you. Next session, cut your size after a first loss.', coT: 'Your number is reached: stopping now is keeping your word. Next session, keep your trades for your best setups.',
       grade: 'Grade my trades', close: 'Close my day', seeRv: 'See my review' },
-    fr: { pill: 'Journée fermée', loss: 'Ta perte max de {m} est atteinte.', trades: 'Tes {n} trades du jour sont pris.', trades1: 'Ton trade du jour est pris.', next: 'Prochaine séance dans', at: '18\u00a0h, heure de New York', atSun: 'Dimanche, 18\u00a0h, heure de New York', d: '{d}\u00a0j {h}\u00a0h',
+    fr: { pill: 'Journée fermée', loss: 'Ta perte max de {m} est atteinte.', trades: 'Tes {n} trades du jour sont pris.', trades1: 'Ton trade du jour est pris.', losses: '{n} trades perdants à la suite\u00a0: ta règle d’arrêt.', next: 'Prochaine séance dans', at: '18\u00a0h, heure de New York', atSun: 'Dimanche, 18\u00a0h, heure de New York', d: '{d}\u00a0j {h}\u00a0h',
       coL: 'T’arrêter ici, c’est ce qui protège ton compte\u00a0: la journée est finie, pas toi. À la prochaine séance, réduis ta taille après une première perte.', coT: 'Ton nombre est atteint\u00a0: t’arrêter maintenant, c’est tenir parole. À la prochaine séance, garde tes trades pour tes meilleurs setups.',
       grade: 'Noter mes trades', close: 'Fermer ma journée', seeRv: 'Voir ma revue' },
-    es: { pill: 'Día cerrado', loss: 'Alcanzaste tu pérdida máx. de {m}.', trades: 'Tus {n} operaciones del día están hechas.', trades1: 'Tu operación del día está hecha.', next: 'Próxima sesión en', at: '18:00, hora de Nueva York', atSun: 'Domingo, 18:00, hora de Nueva York', d: '{d} d {h} h',
+    es: { pill: 'Día cerrado', loss: 'Alcanzaste tu pérdida máx. de {m}.', trades: 'Tus {n} operaciones del día están hechas.', trades1: 'Tu operación del día está hecha.', losses: '{n} operaciones perdedoras seguidas: tu regla de stop.', next: 'Próxima sesión en', at: '18:00, hora de Nueva York', atSun: 'Domingo, 18:00, hora de Nueva York', d: '{d} d {h} h',
       coL: 'Parar aquí es lo que protege tu cuenta: el día terminó, tú no. En la próxima sesión, reduce tu tamaño después de una primera pérdida.', coT: 'Llegaste a tu número: parar ahora es cumplir tu palabra. En la próxima sesión, guarda tus operaciones para tus mejores setups.',
       grade: 'Calificar mis operaciones', close: 'Cerrar mi día', seeRv: 'Ver mi revisión' } };
   const lt = (k, v) => String((LK[L] || LK.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
@@ -4540,11 +4540,11 @@ window.SweepMO = window.SweepMO || class {
   const graded = (x) => !!String(x.setup || '').trim() && !!(x.emo && x.emo.before && x.emo.before.length) && (['yes', 'partial', 'no'].includes(x.rules_followed) || Object.values(x.discipline || {}).some((v) => v === 'y' || v === 'n'));
   function lockHtml(d, r, lk) {
     const ro = reopen(d.day), rv = r && r.review >= 100;
-    const what = lk.why === 'loss' ? lt('loss', { m: usd0(lk.loss_c) }) : lt(+lk.trades === 1 ? 'trades1' : 'trades', { n: lk.trades });
-    return `<div class="nav-lock" data-lock="${lk.why === 'loss' ? 'loss' : 'trades'}"><span class="nav-lock-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
+    const what = lk.why === 'loss' ? lt('loss', { m: usd0(lk.loss_c) }) : lk.why === 'losses' ? lt('losses', { n: lk.losses || 2 }) : lt(+lk.trades === 1 ? 'trades1' : 'trades', { n: lk.trades });   // (3 Nov.) losing trades in a row: the guardian's stop rule
+    return `<div class="nav-lock" data-lock="${lk.why === 'loss' || lk.why === 'losses' ? lk.why : 'trades'}"><span class="nav-lock-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
       <p class="nav-lock-w">${esc2(what)}</p>
       <p class="nav-lock-cd"><small>${esc2(lt('next'))}</small><b class="nav-lock-n">${esc2(cdown(ro.ts))}</b><small>${esc2(lt(ro.sun ? 'atSun' : 'at'))}</small></p>
-      <p class="nav-lock-co">${esc2(lt(lk.why === 'loss' ? 'coL' : 'coT'))}</p>
+      <p class="nav-lock-co">${esc2(lt(lk.why === 'trades' ? 'coT' : 'coL'))}</p>
       <div class="nav-lock-a"><button type="button" class="btn" data-rt="lock-grade">${esc2(lt('grade'))}</button>${rv ? `<button type="button" class="btn" data-rt="review">${esc2(lt('seeRv'))}</button>` : `<button type="button" class="btn primary" data-rt="fin">${esc2(lt('close'))}</button>`}</div></div>`;
   }
   function card() {
@@ -4686,23 +4686,25 @@ window.SweepMO = window.SweepMO || class {
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
     en: { loss: 'Max loss per day', trades: 'Max trades per day', none: 'None', help: 'Once one is reached, Today closes your day until 6:00 PM New York time. A change applies from your next session.', firm: 'Blank: your plan and your account’s daily limit ({a}).',
-      wait: 'From {d}: these limits. Today: {o}.', off: 'no limit of your own', tr: '{n} trades', tr1: '1 trade', saved: 'Saved: it applies from your next session.' },
+      wait: 'From {d}: these limits. Today: {o}.', off: 'no limit of your own', tr: '{n} trades', tr1: '1 trade', saved: 'Saved: it applies from your next session.', losses: 'Losing trades in a row', lossesH: 'Your stop rule: after this many losses in a row, Today closes your day (2 by default, 0 turns it off). Sweep advises; your platform still takes your orders.', ls: '{n} losses in a row' },
     fr: { loss: 'Perte max par jour', trades: 'Trades max par jour', none: 'Aucun', help: 'Une fois une limite atteinte, Aujourd’hui ferme ta journée jusqu’à 18\u00a0h, heure de New York. Un changement s’applique à ta prochaine séance.', firm: 'Vide\u00a0: ton plan et la limite du jour de ton compte ({a}).',
-      wait: 'À partir du {d}\u00a0: ces limites. Pour aujourd’hui\u00a0: {o}.', off: 'aucune limite à toi', tr: '{n} trades', tr1: '1 trade', saved: 'Enregistré\u00a0: ça s’applique à ta prochaine séance.' },
+      wait: 'À partir du {d}\u00a0: ces limites. Pour aujourd’hui\u00a0: {o}.', off: 'aucune limite à toi', tr: '{n} trades', tr1: '1 trade', saved: 'Enregistré\u00a0: ça s’applique à ta prochaine séance.', losses: 'Trades perdants à la suite', lossesH: 'Ta règle d’arrêt\u00a0: après ce nombre de pertes à la suite, Aujourd’hui ferme ta journée (2 par défaut, 0 la désactive). Sweep conseille\u00a0; ta plateforme prend toujours tes ordres.', ls: '{n} pertes à la suite' },
     es: { loss: 'Pérdida máx. por día', trades: 'Operaciones máx. por día', none: 'Ninguno', help: 'Al alcanzar un límite, Hoy cierra tu día hasta las 18:00, hora de Nueva York. Un cambio se aplica desde tu próxima sesión.', firm: 'Vacío: tu plan y el límite diario de tu cuenta ({a}).',
-      wait: 'Desde el {d}: estos límites. Para hoy: {o}.', off: 'ningún límite propio', tr: '{n} operaciones', tr1: '1 operación', saved: 'Guardado: se aplica desde tu próxima sesión.' } };
+      wait: 'Desde el {d}: estos límites. Para hoy: {o}.', off: 'ningún límite propio', tr: '{n} operaciones', tr1: '1 operación', saved: 'Guardado: se aplica desde tu próxima sesión.', losses: 'Operaciones perdedoras seguidas', lossesH: 'Tu regla de stop: tras este número de pérdidas seguidas, Hoy cierra tu día (2 por defecto, 0 la desactiva). Sweep aconseja; tu plataforma sigue aceptando tus órdenes.', ls: '{n} pérdidas seguidas' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const usd = (c) => (typeof money === 'function' ? money(c, { sign: false, dec: 0 }) : '$' + Math.round(c / 100));
   const day0 = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
   const now = (day) => (window.SweepCoach && SweepCoach.standing ? SweepCoach.standing(day) : { loss: 0, trades: 0 });
-  const say = (x) => [x.loss ? usd(x.loss) : '', x.trades ? t(x.trades === 1 ? 'tr1' : 'tr', { n: x.trades }) : ''].filter(Boolean).join(' · ') || t('off');
+  const say = (x) => [x.loss ? usd(x.loss) : '', x.trades ? t(x.trades === 1 ? 'tr1' : 'tr', { n: x.trades }) : '', x.losses ? t('ls', { n: x.losses }) : ''].filter(Boolean).join(' · ') || t('off');
+  const stopOn = () => typeof billCan !== 'function' || billCan('guard_stop');   // (3 Nov.) the stop rule: Pro and Elite
   function fields() {
     const x = (S.settings && S.settings.day_lock) || {}, d = day0(), lim = (S.accounts || []).filter((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && a.rules && a.rules.dll_c > 0).sort((a, b) => a.rules.dll_c - b.rules.dll_c)[0];
     const lv = +x.loss_c > 0 ? String(Math.round(x.loss_c / 100)) : '', tv = +x.trades > 0 ? String(x.trades) : '';
     const wait = x.from && d < x.from ? t('wait', { d: new Date(x.from + 'T12:00:00').toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { weekday: 'long', day: 'numeric', month: 'long' }), o: say(now(d)) }) : '';
     return `<label class="f" data-noi18n><span>${esc2(t('loss'))}</span><input type="text" inputmode="decimal" data-daylock="loss" value="${esc2(lv)}" placeholder="${esc2(lim ? usd(lim.rules.dll_c) : '$')}"></label>
     <label class="f" data-noi18n><span>${esc2(t('trades'))}</span><input type="text" inputmode="numeric" data-daylock="trades" value="${esc2(tv)}" placeholder="${esc2(t('none'))}"></label>
+    ${stopOn() ? `<label class="f" data-noi18n><span>${esc2(t('losses'))}</span><input type="text" inputmode="numeric" data-daylock="losses" value="${esc2(x.losses == null || x.losses === '' ? '2' : String(x.losses))}" placeholder="2"></label><p class="help nav-dl-help" data-noi18n>${esc2(t('lossesH'))}</p>` : ''}
     <p class="help nav-dl-help" data-noi18n>${esc2(t('help'))}${lim ? ' ' + esc2(t('firm', { a: usd(lim.rules.dll_c) + ' · ' + (lim.name || '') })) : ''}${wait ? `<b class="nav-dl-wait">${esc2(wait)}</b>` : ''}</p>`;
   }
   document.addEventListener('change', (e) => {
@@ -4712,8 +4714,10 @@ window.SweepMO = window.SweepMO || class {
     const next = new Date(d + 'T12:00:00'); next.setDate(next.getDate() + 1);
     const from = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
     const cur = now(d), was = x.from && d < x.from ? x.was || { loss_c: 0, trades: 0 } : { loss_c: cur.loss, trades: cur.trades };   // a change already waiting keeps what today had
-    const dl = { loss_c: Math.round(num('loss') * 100), trades: Math.min(99, Math.floor(num('trades'))), from, was };
-    if (dl.loss_c === (+x.loss_c || 0) && dl.trades === (+x.trades || 0)) return;
+    const lsIn = box.querySelector('input[data-daylock="losses"]'), lsV = lsIn ? parseInt(String(lsIn.value).replace(/[^0-9]/g, ''), 10) : NaN;
+    const losses = lsIn ? (isFinite(lsV) ? Math.min(20, lsV) : 2) : (x.losses == null ? undefined : x.losses);   // blank: the default (2)
+    const dl = Object.assign({ loss_c: Math.round(num('loss') * 100), trades: Math.min(99, Math.floor(num('trades'))), from, was: Object.assign({}, was, cur.losses != null && !(x.from && d < x.from) ? { losses: x.losses } : {}) }, losses === undefined ? {} : { losses });
+    if (dl.loss_c === (+x.loss_c || 0) && dl.trades === (+x.trades || 0) && String(dl.losses) === String(x.losses == null ? (lsIn ? 2 : undefined) : x.losses)) return;
     if (typeof editDoc === 'function') editDoc('settings', 'settings', (s) => { s.day_lock = dl; });
     if (typeof toast === 'function') toast(t('saved'));
   });
@@ -6248,7 +6252,7 @@ new window.SweepMO(() => {
     for (let i = 0; i < 6; i++) {
       const ha = h(a), hb = h(b), big = ha > hb ? a : b, small = big === a ? b : a, hi = Math.max(ha, hb), lo = Math.min(ha, hb);
       if (!hi || (hi - lo) / hi <= 0.2) return;
-      let movable = [...big.children].filter((x) => x.getClientRects().length && !x.dataset.balMoved && !tried.has(x) && !x.matches('.d-today, .nav-rt, .d-perf, .nav-merge, .d-news, .nav-trial'));   // « What to watch » never moves: it stays under the day, whatever the filter
+      let movable = [...big.children].filter((x) => x.getClientRects().length && !x.dataset.balMoved && !tried.has(x) && !x.matches('.d-today, .nav-rt, .d-perf, .nav-merge, .d-news, .nav-trial, .nav-guard'));   // « What to watch » never moves: it stays under the day, whatever the filter
       if (!movable.length) { const mg = big.querySelector(':scope > .nav-merge'); const kids = mg ? [...mg.children].filter((x) => x.matches('.d-pay, .d-cal') && !x.dataset.balMoved && !tried.has(x) && x.getClientRects().length) : []; if (kids.length) movable = [kids[kids.length - 1]]; }
       const c = movable[movable.length - 1]; if (!c) return;
       if (c.parentElement && c.parentElement.classList.contains('nav-merge')) c.dataset.balFrom = 'merge';
@@ -7696,3 +7700,211 @@ new window.SweepMO(() => {
 
 /* (2 Nov., tour visuel 19) Stats › durations in Spanish: its two choices without « Por », side by side in their card (8 px cut) */
 if (window.I18N_ES) { window.I18N_ES['By % of trades'] = '% de operaciones'; window.I18N_ES['By win rate'] = 'Tasa de acierto'; }
+
+/* ───────────── The account guardian (brief « Gardien de compte », 3 Nov., SWEEP.md section 8) ─────────────
+ * On top of Today: how much the account most at risk can still lose today (« Risk left today ») with its room as a bar — blue
+ * while calm, gold from « watch » —, one calm sentence, the other accounts as pills (a tap shows one; Free: one account, the
+ * others locked with a link to the plans). A tap on the card opens its sheet: the two floors, the room, the consistency, the
+ * target, and what the firm's rules do not say. Every number comes from the server (guard/guard.php, api/guardian). */
+(function () {
+  'use strict';
+  const L = (typeof LANG !== 'undefined' && LANG) || 'en';
+  const T = {
+    en: { title: 'Account guardian', risk: 'Risk left today', calm: 'You have room. Trade your plan.', watch: 'Half your room is used. Slow down, A+ setups only.',
+      danger: 'One more loss could cost this account. Protect it.', stoppedT: 'Session done. That’s discipline.', stoppedS: 'You hit your stop rule. Closing now keeps tomorrow’s account alive.',
+      breached: 'This account crossed its limit. Your history stays safe in Sweep.', close: 'Close my day', update: 'Update', estimate: 'Estimate', missing: 'Not set in this firm’s rules',
+      ddFloor: 'Drawdown floor', ddFloorS: 'The balance this account must stay above.', dayFloor: 'Daily floor', dayFloorS: 'Today’s lowest balance allowed: the start of the day minus the daily loss limit.',
+      room: 'Room', roomS: 'Your balance minus the higher floor: {a} at the start of the day.', bal: 'Balance now', pnl: 'Today', plan: 'Planned risk', planS: 'Your plan’s max loss for the day.',
+      cons: 'Consistency', consS: 'Your best day’s share of your profit: {p} of {l} allowed.', consNone: 'No profit yet: it counts from your first winning days.', consMax: 'Up to {m} more today keeps it.',
+      goal: 'Profit target', goalS: '{m} left to reach {t}.', days: 'Trading days', daysS: '{n} more of {m}.', notSet: 'Not available', estS: 'Trailing trade by trade: Sweep sees your closed trades, not the highs of an open trade. Synced accounts are exact.',
+      types: { static: 'static', eod: 'trailing at the end of the day', trade: 'trailing trade by trade', live: 'live: your balance' },
+      keys: { dd: 'Drawdown floor', dll: 'Daily loss limit', consistency: 'Consistency rule', target: 'Profit target', min_days: 'Minimum trading days' },
+      more: 'Every account with Pro', locked: 'With Pro, the guardian watches every account.', levels: { calm: 'Calm', watch: 'Watch', danger: 'Danger', stopped: 'Stopped', breached: 'Limit crossed' },
+      upT: 'Balance now', upS: 'The balance {p} shows right now. Sweep uses it until your next trade is saved, then proposes it when you close your day.', upSave: 'Save', upBad: 'Enter the balance your platform shows.', upDone: 'Updated', stTrades: 'Trades today', stPnl: 'Today’s P&L' },
+    fr: { title: 'Gardien de compte', risk: 'Risque restant aujourd’hui', calm: 'Tu as de la marge. Suis ton plan.', watch: 'La moitié de ta marge est utilisée. Ralentis, seulement tes meilleurs setups.',
+      danger: 'Encore une perte pourrait coûter ce compte. Protège-le.', stoppedT: 'Séance terminée. C’est ça, la discipline.', stoppedS: 'Tu as atteint ta règle d’arrêt. Fermer maintenant garde ton compte en vie pour demain.',
+      breached: 'Ce compte a dépassé sa limite. Ton historique reste en sécurité dans Sweep.', close: 'Fermer ma journée', update: 'Mettre à jour', estimate: 'Estimation', missing: 'Non défini dans les règles de cette firme',
+      ddFloor: 'Plancher de drawdown', ddFloorS: 'Le solde au-dessus duquel ce compte doit rester.', dayFloor: 'Plancher du jour', dayFloorS: 'Le plus bas solde permis aujourd’hui : le début de la journée moins la perte journalière max.',
+      room: 'Marge', roomS: 'Ton solde moins le plus haut des planchers : {a} au début de la journée.', bal: 'Solde actuel', pnl: 'Aujourd’hui', plan: 'Risque prévu', planS: 'La perte max de ton plan du jour.',
+      cons: 'Consistance', consS: 'La part de ton meilleur jour dans ton profit : {p} sur {l} permis.', consNone: 'Pas encore de profit : elle compte dès tes premiers jours gagnants.', consMax: 'Jusqu’à {m} de plus aujourd’hui la garde.',
+      goal: 'Objectif de profit', goalS: 'Encore {m} pour atteindre {t}.', days: 'Jours de trading', daysS: 'Encore {n} sur {m}.', notSet: 'Non disponible', estS: 'Suiveur trade par trade : Sweep voit tes trades fermés, pas les hauts d’un trade ouvert. Les comptes synchronisés sont exacts.',
+      types: { static: 'statique', eod: 'suiveur en fin de journée', trade: 'suiveur trade par trade', live: 'live : ton solde' },
+      keys: { dd: 'Plancher de drawdown', dll: 'Perte journalière max', consistency: 'Règle de consistance', target: 'Objectif de profit', min_days: 'Jours de trading minimums' },
+      more: 'Tous les comptes avec Pro', locked: 'Avec Pro, le Gardien veille sur tous tes comptes.', levels: { calm: 'Calme', watch: 'Attention', danger: 'Danger', stopped: 'Arrêt', breached: 'Limite dépassée' },
+      upT: 'Solde actuel', upS: 'Le solde affiché par {p} en ce moment. Sweep l’utilise jusqu’à ton prochain trade enregistré, puis te le propose quand tu fermes ta journée.', upSave: 'Enregistrer', upBad: 'Entre le solde affiché par ta plateforme.', upDone: 'Mis à jour', stTrades: 'Trades du jour', stPnl: 'P&L du jour' },
+    es: { title: 'Guardián de cuenta', risk: 'Riesgo restante hoy', calm: 'Tienes margen. Sigue tu plan.', watch: 'Usaste la mitad de tu margen. Baja el ritmo, solo tus mejores setups.',
+      danger: 'Una pérdida más podría costarte esta cuenta. Protégela.', stoppedT: 'Sesión terminada. Eso es disciplina.', stoppedS: 'Alcanzaste tu regla de stop. Cerrar ahora mantiene viva tu cuenta para mañana.',
+      breached: 'Esta cuenta superó su límite. Tu historial sigue a salvo en Sweep.', close: 'Cerrar mi día', update: 'Actualizar', estimate: 'Estimación', missing: 'No definido en las reglas de esta firma',
+      ddFloor: 'Piso de drawdown', ddFloorS: 'El saldo por encima del cual debe quedarse esta cuenta.', dayFloor: 'Piso del día', dayFloorS: 'El saldo más bajo permitido hoy: el inicio del día menos la pérdida diaria máx.',
+      room: 'Margen', roomS: 'Tu saldo menos el piso más alto: {a} al inicio del día.', bal: 'Saldo actual', pnl: 'Hoy', plan: 'Riesgo previsto', planS: 'La pérdida máx. de tu plan del día.',
+      cons: 'Consistencia', consS: 'La parte de tu mejor día en tu beneficio: {p} de {l} permitido.', consNone: 'Aún sin beneficio: cuenta desde tus primeros días ganadores.', consMax: 'Hasta {m} más hoy la mantiene.',
+      goal: 'Objetivo de beneficio', goalS: 'Faltan {m} para llegar a {t}.', days: 'Días de trading', daysS: 'Faltan {n} de {m}.', notSet: 'No disponible', estS: 'Dinámico operación por operación: Sweep ve tus operaciones cerradas, no los máximos de una operación abierta. Las cuentas sincronizadas son exactas.',
+      types: { static: 'estático', eod: 'dinámico al cierre del día', trade: 'dinámico operación por operación', live: 'live: tu saldo' },
+      keys: { dd: 'Piso de drawdown', dll: 'Pérdida diaria máx.', consistency: 'Regla de consistencia', target: 'Objetivo de beneficio', min_days: 'Días de trading mínimos' },
+      more: 'Todas las cuentas con Pro', locked: 'Con Pro, el guardián vigila todas tus cuentas.', levels: { calm: 'Calma', watch: 'Atención', danger: 'Peligro', stopped: 'Parada', breached: 'Límite superado' },
+      upT: 'Saldo actual', upS: 'El saldo que muestra {p} ahora mismo. Sweep lo usa hasta tu próxima operación guardada, y te lo propone al cerrar tu día.', upSave: 'Guardar', upBad: 'Introduce el saldo que muestra tu plataforma.', upDone: 'Actualizado', stTrades: 'Operaciones de hoy', stPnl: 'P&L de hoy' },
+  };
+  const X = T[L] || T.en;
+  const t = (k, v) => String(X[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
+  const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const usd = (c, sign) => (typeof money === 'function' ? money(c, { sign: !!sign, dec: 0 }) : '$' + Math.round(c / 100));
+  const pct = (v) => (L === 'en' ? v + '%' : String(v).replace('.', ',') + ' %');
+  const LOCK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 7V5a3 3 0 0 1 6 0v2h.5A1.5 1.5 0 0 1 13 8.5v5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5v-5A1.5 1.5 0 0 1 4.5 7H5Zm1.5 0h3V5a1.5 1.5 0 0 0-3 0v2Z"/></svg>';
+  const G = { st: null, at: 0, busy: false, pick: null };
+  try { G.pick = sessionStorage.getItem('sw.guardPick'); } catch (e) { /* private mode */ }
+  const onToday = () => /^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''));
+  const tone = (lv) => (lv === 'calm' ? 'ok' : 'warn');
+  const shown = () => { const a = (G.st && G.st.accounts) || []; return a.find((x) => x.id === G.pick && !x.locked) || a[0] || null; };
+  const line = (g) => (g.level === 'stopped' ? t('stoppedT') : t(g.level));
+
+  async function load(force) {
+    if ((typeof S === 'undefined' || S.mode !== 'server') || typeof apiJSON !== 'function') return;
+    if (G.busy) { if (force) G.again = true; return; }   // a save during a load: once more after it
+    if (!force && G.st && Date.now() - G.at < 30000) return;
+    G.busy = true; G.again = false;
+    try { G.st = await apiJSON('api/guardian'); G.at = Date.now(); } catch (e) { /* the guardian never blocks Today */ }
+    G.busy = false; place(); paintSheet(); stopSheet();
+    if (G.again) load(true);
+  }
+  let soonT = 0; const soon = (ms) => { clearTimeout(soonT); soonT = setTimeout(() => load(true), ms || 800); };
+
+  function cardHtml() {
+    const g = shown(); if (!g) return '';
+    const all = G.st.accounts, w = g.room_pct == null ? 0 : Math.max(0, Math.min(100, g.room_pct));
+    const big = g.level === 'breached' ? 0 : g.left_c;
+    const pills = all.length > 1 ? `<div class="nav-guard-pills" role="group" aria-label="${esc2(t('title'))}">${all.map((a) => a.locked
+      ? `<a class="nav-guard-pill is-locked" href="#plan" title="${esc2(t('locked'))}">${LOCK}<span>${esc2(a.name)}</span></a>`
+      : `<button type="button" class="nav-guard-pill${a.id === g.id ? ' on' : ''}" data-guard-pick="${esc2(a.id)}" aria-pressed="${a.id === g.id}"><i class="nav-guard-dot ${tone(a.level)}" aria-hidden="true"></i><span>${esc2(a.name)}</span></button>`).join('')}</div>` : '';
+    return `<section class="surface nav-guard lv-${g.level} ${tone(g.level)}" data-noi18n data-guard="${esc2(g.id)}">
+      <div class="nav-guard-main" role="button" tabindex="0" data-guard-open aria-label="${esc2(t('title') + ' · ' + g.name)}">
+        <div class="nav-guard-h"><small>${esc2(t('title'))}</small><b class="nav-guard-acc">${esc2(g.name)}</b>${g.estimate ? `<span class="nav-guard-est">${esc2(t('estimate'))}</span>` : ''}</div>
+        <div class="nav-guard-v"><span>${esc2(t('risk'))}</span><b class="nav-guard-n">${big == null ? '—' : esc2(usd(big))}</b></div>
+        ${g.room_c == null ? '' : `<i class="nav-guard-bar" aria-hidden="true"><i style="width:${w.toFixed(1)}%"></i></i>`}
+        <p class="nav-guard-msg">${esc2(line(g))}</p>
+      </div>${g.synced ? '' : `<button type="button" class="link nav-guard-up" data-guard-up="${esc2(g.id)}">${esc2(t('update'))}</button>`}${pills}</section>`;
+  }
+  function place() {
+    if (!onToday()) return;
+    const col = document.querySelector('#main .nav-dash .d-col-a'); if (!col) return;
+    let el = col.querySelector(':scope > .nav-guard');
+    const html = cardHtml();
+    if (!html) { if (el) el.remove(); return; }
+    if (el && el._h === html) { if (col.firstElementChild !== el) col.prepend(el); return; }
+    const tmp = document.createElement('div'); tmp.innerHTML = html; const nx = tmp.firstElementChild; nx._h = html;
+    const sx = el && el.querySelector('.nav-guard-pills') ? el.querySelector('.nav-guard-pills').scrollLeft : 0;
+    if (el) el.replaceWith(nx); else col.prepend(nx);
+    const pl = nx.querySelector('.nav-guard-pills'); if (pl && sx) pl.scrollLeft = sx;
+  }
+
+  /* step 5: the stop rule reached (Pro and Elite; the day's lock recorded by the server, game/game.php): once a day, a calm sheet —
+     full screen on a phone — with the day in two numbers and « Close my day » (the review, in one tap). Nothing is blocked: the +
+     and the trades stay; Sweep cannot stop orders on the trading platform and never says so. Seen: journals/{day}.guard.stop_seen. */
+  function stopSheet() {
+    const st = G.st, lk = st && st.stop_rule && st.stop; if (!lk || !onToday() || !window.SweepGame || !SweepGame.ui || !SweepGame.openReview) return;
+    const j = typeof getDoc === 'function' ? getDoc('journals', st.day) : null;
+    if ((j && j.guard && j.guard.stop_seen) || (j && j.post && j.post.reviewed_at) || G.stopShown === st.day) return;
+    if (document.querySelector('#gSheet, .evp.open, .sb-layer, .nt-modal')) { setTimeout(stopSheet, 2500); return; }   // never over another sheet: a bit later
+    G.stopShown = st.day;
+    editDoc('journals', st.day, (d) => { d.guard = Object.assign({}, d.guard, { stop_seen: new Date().toISOString() }); });
+    SweepGame.ui.sheet(`${SweepGame.ui.head('', '')}<div class="nav-guard-stopin">
+      <span class="nav-lock-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
+      <h2>${esc2(t('stoppedT'))}</h2><p class="nav-guard-stopt">${esc2(t('stoppedS'))}</p>
+      <div class="nav-guard-stopn"><div><small>${esc2(t('stPnl'))}</small><b class="${lk.net_c > 0 ? 'pos' : lk.net_c < 0 ? 'neg' : ''}">${esc2(usd(lk.net_c, true))}</b></div><div><small>${esc2(t('stTrades'))}</small><b>${esc2(String(lk.n))}</b></div></div>
+      <button type="button" class="btn primary g-big" data-guard-close>${esc2(t('close'))}</button></div>`, { cls: 'nav-guard-stop' });
+  }
+
+  /* the sheet: every number of the account shown */
+  const row = (k, v, sub, cls) => `<div class="nav-guard-r${cls ? ' ' + cls : ''}"><div><b>${esc2(k)}</b>${sub ? `<small>${esc2(sub)}</small>` : ''}</div><span class="nav-guard-rv">${v}</span></div>`;
+  function sheetHtml(g) {
+    const f = g.floors || {}, r = [];
+    if (f.drawdown_c != null) r.push(row(t('ddFloor'), esc2(usd(f.drawdown_c)), t('ddFloorS') + (f.type ? ' (' + (X.types[f.type] || f.type) + ')' : '')));
+    if (f.daily_c != null) r.push(row(t('dayFloor'), esc2(usd(f.daily_c)), t('dayFloorS')));
+    if (g.room_c != null) r.push(row(t('room'), esc2(usd(Math.max(0, g.room_c))), g.room_start_c != null ? t('roomS', { a: usd(Math.max(0, g.room_start_c)) }) : ''));
+    r.push(row(t('bal'), esc2(usd(g.balance_c)), ''));
+    r.push(row(t('pnl'), `<span class="${g.pnl_c > 0 ? 'pos' : g.pnl_c < 0 ? 'neg' : ''}">${esc2(usd(g.pnl_c, true))}</span>`, ''));
+    if (g.plan_c) r.push(row(t('plan'), esc2(usd(g.plan_c)), t('planS')));
+    const c = g.consistency;
+    if (c) r.push(row(t('cons'), c.pct == null ? '—' : `<span class="${c.ok ? '' : 'neg'}">${esc2(pct(c.pct))}</span>`, c.pct == null ? t('consNone') : t('consS', { p: pct(c.pct), l: pct(c.limit) }) + (c.max_today_c != null ? ' ' + t('consMax', { m: usd(c.max_today_c) }) : '')));
+    const o = g.goal || {};
+    if (o.target_c) r.push(row(t('goal'), esc2(usd(o.left_c)), t('goalS', { m: usd(o.left_c), t: usd(o.target_c) })));
+    if (o.min_days) r.push(row(t('days'), esc2(String(o.days_left)), t('daysS', { n: o.days_left, m: o.min_days })));
+    const miss = (g.missing || []).map((k) => row(X.keys[k] || k, `<span class="faint">—</span>`, t('missing'), 'is-miss')).join('');
+    const head = window.SweepGame && SweepGame.ui ? SweepGame.ui.head(esc2(g.name), esc2(t('title'))) : `<h2>${esc2(g.name)}</h2>`;
+    return `${head}<div class="nav-guard-sh lv-${g.level} ${tone(g.level)}" data-guard-sheet="${esc2(g.id)}">
+      <div class="nav-guard-v"><span>${esc2(t('risk'))}</span><b class="nav-guard-n">${esc2(usd(g.level === 'breached' ? 0 : (g.left_c || 0)))}</b></div>
+      ${g.room_c == null ? '' : `<i class="nav-guard-bar" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, g.room_pct || 0)).toFixed(1)}%"></i></i>`}
+      <p class="nav-guard-msg">${esc2(line(g))}</p>
+      ${g.estimate ? `<p class="nav-guard-estl"><span class="nav-guard-est">${esc2(t('estimate'))}</span> ${esc2(t('estS'))}</p>` : ''}
+      <div class="nav-guard-rows">${r.join('')}</div>
+      ${miss ? `<h3 class="nav-guard-h3">${esc2(t('notSet'))}</h3><div class="nav-guard-rows">${miss}</div>` : ''}</div>`;
+  }
+  function openSheet(id) {
+    const g = ((G.st && G.st.accounts) || []).find((x) => x.id === id && !x.locked); if (!g || !window.SweepGame || !SweepGame.ui) return;
+    SweepGame.ui.sheet(sheetHtml(g), { cls: 'nav-guard-sheet' });
+  }
+  function paintSheet() {   // the sheet open follows the new numbers
+    const sh = document.querySelector('#gSheet.nav-guard-sheet [data-guard-sheet]'); if (!sh) return;
+    const g = ((G.st && G.st.accounts) || []).find((x) => x.id === sh.dataset.guardSheet && !x.locked); if (!g) return;
+    const inner = sh.closest('.g-in'); if (inner) inner.innerHTML = sheetHtml(g);
+  }
+  /* step 4: « Update » — one field, the balance the platform shows now (an account without sync): a value of the day kept in
+     journals/{day}.guard.live, used until the next trade saved, proposed by « Close my day » as the platform's balance */
+  const balC = (v) => { let x = String(v == null ? '' : v).replace(/[\s\u00a0\u202f$]/g, '');
+    if (x.includes(',') && x.includes('.')) x = x.lastIndexOf(',') < x.lastIndexOf('.') ? x.replace(/,/g, '') : x.replace(/\./g, '').replace(',', '.');
+    else x = x.replace(/,(?=\d{3}(\D|$))/g, '').replace(',', '.');
+    if ((x.match(/\./g) || []).length > 1) { const k = x.lastIndexOf('.'); x = /^\d{1,2}$/.test(x.slice(k + 1)) ? x.slice(0, k).replace(/\./g, '') + '.' + x.slice(k + 1) : x.replace(/\./g, ''); }   // (as the review's, game.js)
+    return x === '' || x === '-' || !isFinite(+x) ? null : Math.round(+x * 100); };
+  const balIn = (c) => { const s = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(c / 100);
+    return L === 'fr' || L === 'es' ? s.replace(/[,.]/g, (m) => (m === ',' ? '\0' : ',')).replace(/\0/g, L === 'fr' ? '\u202f' : '.') : s; };
+  function openUpdate(id) {
+    const g = ((G.st && G.st.accounts) || []).find((x) => x.id === id && !x.locked); if (!g || !window.SweepGame || !SweepGame.ui) return;
+    const a = typeof getDoc === 'function' ? getDoc('accounts', id) : null, f = a && a.firm_id && typeof firm === 'function' ? firm(a.firm_id) : null;
+    const where = (f && f.name) || ({ en: 'your platform', fr: 'ta plateforme', es: 'tu plataforma' })[L] || 'your platform';
+    SweepGame.ui.sheet(`${SweepGame.ui.head(esc2(t('upT')), esc2(g.name))}<div class="nav-guard-upf">
+      <label class="g-f"><span>${esc2(t('upS', { p: where }))}</span><input inputmode="decimal" autocomplete="off" data-guard-bal value="${esc2(balIn(g.balance_c))}" aria-label="${esc2(t('upT') + ' · ' + g.name)}"></label>
+      <p class="g-err nav-guard-uperr" role="alert"></p>
+      <button type="button" class="btn primary g-big" data-guard-save="${esc2(id)}">${esc2(t('upSave'))}</button></div>`, { cls: 'nav-guard-upsheet' });
+    const i = document.querySelector('#gSheet [data-guard-bal]'); if (i && !matchMedia('(pointer: coarse)').matches) { i.focus(); i.select(); }
+  }
+  async function saveUpdate(id, btn) {
+    const i = document.querySelector('#gSheet [data-guard-bal]'), err = document.querySelector('#gSheet .nav-guard-uperr'), v = i ? balC(i.value) : null;
+    if (v == null || v < 0) { if (err) err.textContent = t('upBad'); if (i) i.focus(); return; }
+    btn.disabled = true;
+    const day = (G.st && G.st.day) || (typeof todayStr === 'function' ? todayStr() : '');
+    editDoc('journals', day, (j) => { j.guard = Object.assign({}, j.guard); j.guard.live = Object.assign({}, j.guard.live, { [id]: { bal_c: v, at: new Date().toISOString() } }); });
+    // the card follows at once (the server's numbers come right after)
+    const g = G.st.accounts.find((x) => x.id === id);
+    if (g && g.room_c != null) { const d = v - g.balance_c; g.balance_c = v; g.pnl_c += d; g.room_c += d; if (g.left_c != null) g.left_c = Math.max(0, g.left_c + d); place(); }
+    if (window.SweepGame && SweepGame.ui) SweepGame.ui.close();
+    if (typeof toast === 'function') toast(t('upDone'));
+    try { if (typeof chains !== 'undefined') await chains['journals/' + day]; } catch (e) { /* the save says its own error */ }
+    load(true);
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.matches && e.target.matches('#gSheet [data-guard-bal]')) { e.preventDefault(); const b = document.querySelector('#gSheet [data-guard-save]'); if (b) b.click(); } });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest && e.target.closest('[data-guard-close]')) { SweepGame.ui.close(true); setTimeout(() => SweepGame.openReview(), 60); return; }
+    const up = e.target.closest && e.target.closest('[data-guard-up]');
+    if (up) { openUpdate(up.dataset.guardUp); return; }
+    const sv = e.target.closest && e.target.closest('[data-guard-save]');
+    if (sv) { saveUpdate(sv.dataset.guardSave, sv); return; }
+    const p = e.target.closest && e.target.closest('[data-guard-pick]');
+    if (p) { G.pick = p.dataset.guardPick; try { sessionStorage.setItem('sw.guardPick', G.pick); } catch (x) { /* private mode */ } place(); return; }
+    const o = e.target.closest && e.target.closest('[data-guard-open]');
+    if (o) { const c = o.closest('.nav-guard'); if (c) openSheet(c.dataset.guard); }
+  });
+  document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-guard-open]')) { e.preventDefault(); e.target.click(); } });
+  // a trade, a plan, an account or a payout saved on the server: the numbers again
+  if (typeof srvSend === 'function') {
+    const orig = srvSend;
+    srvSend = async function (col) { const out = await orig.apply(this, arguments); if (['trades', 'journals', 'accounts', 'payouts', 'meta', 'settings'].includes(col)) soon(); return out; };
+  }
+  new window.SweepMO(() => { if (onToday()) { place(); load(false); } }).observe(document.body, { childList: true, subtree: true });   // (#main is drawn again by the app: its own node can change)
+  setInterval(() => { if (onToday() && document.visibilityState === 'visible') load(true); }, 60000);
+  // the bell's words for the alerts (guard/guard.php guard_alerts: once per account, level and day)
+  const NB = {
+    en: { 'g_guard_watch.title': '{account}: half your room is used', 'g_guard_watch.body': 'Slow down, A+ setups only.', 'g_guard_danger.title': '{account}: one more loss could cost this account', 'g_guard_danger.body': 'Protect it: see what you can still lose today.' },
+    fr: { 'g_guard_watch.title': '{account} : la moitié de ta marge est utilisée', 'g_guard_watch.body': 'Ralentis, seulement tes meilleurs setups.', 'g_guard_danger.title': '{account} : encore une perte pourrait coûter ce compte', 'g_guard_danger.body': 'Protège-le : vois ce que tu peux encore perdre aujourd’hui.' },
+    es: { 'g_guard_watch.title': '{account}: usaste la mitad de tu margen', 'g_guard_watch.body': 'Baja el ritmo, solo tus mejores setups.', 'g_guard_danger.title': '{account}: una pérdida más podría costar esta cuenta', 'g_guard_danger.body': 'Protégela: mira lo que aún puedes perder hoy.' } };
+  (function reg(n) { if (window.SweepNotify && SweepNotify.strings) { try { SweepNotify.strings(NB); } catch (e) { /* older module */ } } else if (n < 40) setTimeout(() => reg(n + 1), 150); })(0);
+  window.SweepGuard = { load, state: () => G.st, shown, t, open: openSheet, update: openUpdate };
+})();

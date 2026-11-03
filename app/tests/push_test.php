@@ -80,7 +80,7 @@ $ok(wp_devices($pdo, 'x1') === 0 && wp_devices($pdo, 'x2') === 1, 'the same phon
 for ($i = 0; $i < 12; $i++) $sub('x3', "https://fcm.googleapis.com/fcm/send/d$i", $k, 'en');
 $ok(wp_devices($pdo, 'x3') === 10, 'at most 10 devices: the oldest go');
 // 4. each reminder's time: 15-minute steps inside its window; on by default
-$ok(wp_prefs($pdo, 'x3') === ['plan' => ['on' => true, 'at' => '08:45'], 'review' => ['on' => true, 'at' => '17:15'], 'weekly' => ['on' => true, 'at' => '17:00'], 'lock' => ['on' => true, 'at' => '']]
+$ok(wp_prefs($pdo, 'x3') === ['plan' => ['on' => true, 'at' => '08:45'], 'review' => ['on' => true, 'at' => '17:15'], 'weekly' => ['on' => true, 'at' => '17:00'], 'lock' => ['on' => true, 'at' => ''], 'guard' => ['on' => true, 'at' => '']]
     && wp_times('plan')[0] === '07:00' && array_slice(wp_times('plan'), -1) === ['09:15'] && array_slice(wp_times('review'), -1) === ['20:45'], 'defaults 8:45, 17:15 (after the 17:00 close), 17:00; plan 7:00 to 9:15 (before the 9:30 open), review and week until 20:45; the day\'s lock (1 Nov.) on, no time');
 $ok(!wp_set_pref($pdo, 'x3', 'plan', ['at' => '10:00']) && !wp_set_pref($pdo, 'x3', 'plan', ['at' => '08:50']) && !wp_set_pref($pdo, 'x3', 'streak', ['on' => false])
     && wp_set_pref($pdo, 'x3', 'review', ['on' => false]) && wp_prefs($pdo, 'x3')['review'] === ['on' => false, 'at' => '17:15'], 'a time in the session or off the steps, an unknown reminder: refused; off kept');

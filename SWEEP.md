@@ -685,3 +685,50 @@ Le Gardien montre pendant la séance combien le trader peut encore perdre sans m
 - **Plancher journalier atteint** : `breached` aussi (le brief : « a dépassé un plancher ») ; le texte dit « sa limite », sans parler de compte perdu.
 - **Objectif** : seulement pour un compte qui n'est ni `funded` ni `live`.
 - **Consistance, gain max du jour** : le meilleur jour possible = limite × profit des autres jours ÷ (1 − limite) ; rien quand les autres jours ne sont pas en profit.
+- **Place de la carte** (étape 3) : la première de la colonne de gauche, au-dessus de « Ta routine du jour ». « Maintenant » reste le seul bouton bleu (section 6, règle 4) : la carte n'a pas de bouton principal.
+- **Deux chiffres « il te reste »** : « Maintenant » parle de la journée du trader (tous comptes, son plan) ; le Gardien parle d'un compte. Ils peuvent différer ; chacun dit de quoi il parle (« avant la limite du jour de … » / le nom du compte sur la carte).
+- **Free, pastilles verrouillées** : le nom seul et un cadenas, sans point de couleur (le niveau d'un compte non suivi n'est pas montré), lien vers `#plan`.
+- **Jour de séance** : un trade du dimanche soir compte pour le lundi, comme les calendriers et la page du compte (`dayMap`).
+- **Compte sans règles** : pas de carte (rien à garder). Un compte live sans règles est gardé : son plancher est 0 $, comme sur sa page.
+- **Mise à jour rapide = le solde** (étape 4) : « Fermer ma journée » demande déjà le solde de la plateforme ; le champ du Gardien est donc le solde actuel, pas le P&L. Il reste valable jusqu'au prochain trade enregistré du compte, puis les trades reprennent la main.
+- **Alertes** : le système de notifications existe (cloche + push) ; deux types (`watch`, `danger`) et une seule sorte de push « Gardien de compte » (un seul interrupteur dans Réglages).
+- **Coupe-circuit = le verrou de fin de journée existant** (étape 5) : il gérait déjà la perte max du jour (le plan d'abord : c'est le « risque prévu ») et le nombre de trades, avec son écran calme jusqu'à 18 h ; la règle « N trades perdants à la suite » s'y ajoute au lieu d'un deuxième système. Pro et Elite seulement pour cette règle ; Free garde le verrou tel qu'il était.
+- **`stopped`** : tout verrou du jour atteint (Pro et Elite) met tous les comptes suivis à `stopped` (le verrou porte sur la journée du trader, pas sur un compte) ; `breached` reste prioritaire.
+- **Feuille d'arrêt une fois par jour** : marquée dans le journal du jour (`guard.stop_seen`), donc une fois sur tous les appareils ; jamais par-dessus une autre feuille ; pas après la revue.
+- **Récompense** (étape 6) : celle du garde-fou existant (XP et célébration « Tu t'es arrêté au bon moment »), pas un nouvel événement de jeu. « Après le déclenchement » se lit dans l'ordre d'enregistrement des trades, pas à l'horloge (une saisie en retard d'un trade d'avant le verrou ne compte pas comme une rechute).
+- **Un commit pour les étapes 3 à 6** : elles touchent les mêmes fichiers (`src/nav.js`, `src/nav.css`, `guard/guard.php`, `tests/e2e_guard.py`) et ont été testées ensemble ; les séparer après coup aurait livré des étapes jamais testées seules.
+
+### 8.3 Ce qui est livré (étapes 3 à 7)
+
+Voir `app/CONTEXTE-APP.md`, section « Gardien de compte ».
+
+### 8.4 `GET api/guardian` (étape 7, pour les futurs widgets et Live Activities)
+
+Authentifié (cookie de session, en-tête `X-Requested-With: fetch`), lecture seule ; il peut seulement envoyer les alertes du jour pas encore envoyées.
+
+```json
+{
+  "day": "2026-11-03",            // la séance (New York ; 18 h = la suivante)
+  "all": true,                     // false : Free, seul le premier compte a ses chiffres
+  "stop_rule": true,               // le coupe-circuit est inclus dans le forfait
+  "stop": null,                    // ou { "why": "loss|trades|losses", "at": 1793736000, "n": 2, "net_c": -21000, "losses": 2, "loss_c": 50000, "trades": 0 }
+  "accounts": [                    // le plus à risque d'abord (niveau, puis la plus petite marge)
+    {
+      "id": "…", "name": "Apex 50K", "phase": "eval|funded|live", "synced": false,
+      "level": "calm|watch|danger|stopped|breached",
+      "left_c": 40000,             // risque restant aujourd'hui (cents ; null sans plancher)
+      "room_c": 40000, "room_start_c": 100000, "room_pct": 40.0,
+      "balance_c": 5000000, "sod_c": 5060000, "pnl_c": -60000, "plan_c": 80000,
+      "floors": { "drawdown_c": 4850000, "daily_c": 4960000, "type": "static|eod|trade|live" },
+      "consistency": { "pct": 55.6, "limit": 40, "ok": false, "max_today_c": 70000 },   // ou null
+      "goal": { "left_c": 300000, "target_c": 300000, "days_left": 4, "min_days": 7 },  // ou null (financé, live)
+      "estimate": false,           // true : suiveur trade par trade d'un compte non synchronisé
+      "missing": ["consistency"],  // dd, dll, consistency, target, min_days : absents des règles de la firme
+      "typed": null                // ou l'heure (ISO) d'un solde saisi dans « Mettre à jour »
+    },
+    { "id": "…", "name": "Topstep 50K", "locked": true }   // Free : un compte non suivi, son nom seul
+  ]
+}
+```
+
+Montants en cents, signés. Un widget n'affiche que `left_c`, `level`, `room_pct` et `name` ; le reste est pour la feuille de détail.
