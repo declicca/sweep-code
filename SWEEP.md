@@ -733,3 +733,31 @@ Authentifié (cookie de session, en-tête `X-Requested-With: fetch`), lecture se
 ```
 
 Montants en cents, signés. Un widget n'affiche que `left_c`, `level`, `room_pct` et `name` ; le reste est pour la feuille de détail.
+
+### 8.5 Rapport (étape 8, 3 nov.)
+
+**Livré**
+- Moteur `app/guard/guard.php` (planchers, marge, risque restant, niveaux, consistance, objectif, estimation, indicateurs absents) : même marge que la page du compte sur 60 comptes tirés au hasard.
+- Carte « Gardien de compte » en tête d'Aujourd'hui et sa feuille de détail ; Free sur un compte, Pro et Elite sur tous.
+- « Mettre à jour » (un champ : le solde de la plateforme), repris par « Fermer ma journée » ; alertes `watch` puis `danger` une fois par jour (cloche et téléphone).
+- Coupe-circuit (Pro, Elite) à activer dans Réglages › Ma routine : 2 trades perdants à la suite par défaut, en plus de la perte max et du nombre de trades du verrou existant. Une seule feuille d'arrêt par jour, « Fermer ma journée » en un toucher. Remis à zéro à 18 h ET.
+- Récompense : le garde-fou existant quand la journée est fermée sans nouvelle perte après l'arrêt.
+- `GET api/guardian` documenté pour les futurs widgets (8.4).
+
+**Vérifié**
+- 390 tactile et 1300, clair et foncé, EN / FR / ES.
+- Aucun compte avec règles, un compte, plusieurs comptes, compte synchronisé et compte saisi à la main, compte au plancher, préréglage incomplet.
+- Évaluation, financé, live sans règles ; 17 h 59 / 18 h à New York ; Free (serveur avec facturation).
+- Suite complète : 161 réussis ; `e2e_weekly_card`, instable en parallèle, passe seul.
+
+**Sauté, et pourquoi**
+- Widgets et Live Activities natifs : hors périmètre (données prêtes).
+- Nouveau système de notifications : celui qui existe est utilisé.
+
+**Limites connues**
+- Suiveur trade par trade d'un compte saisi à la main : une estimation, Sweep ne voit pas les hauts d'un trade ouvert.
+- Elite n'a pas de test à part : il suit la même règle que Pro (`guard_all`, `guard_stop`).
+- La notification sur le téléphone a un texte unique pour `watch` et `danger` ; la cloche dit le niveau et le compte.
+- Le solde saisi reste valable jusqu'au prochain trade enregistré du compte, pas au-delà.
+- La règle d'arrêt, comme les autres limites, compte à partir de la séance suivante quand on l'active.
+- Au passage, deux défauts qui existaient déjà sont corrigés : la ligne de filtres trop large sur un téléphone de 390 px, et un solde espagnol mal lu dans « Fermer ma journée ».
