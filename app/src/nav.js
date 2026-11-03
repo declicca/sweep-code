@@ -6877,11 +6877,12 @@ new window.SweepMO(() => {
   async function register() {
     const o = await post('api/me/passkey/options'); if (!o.ok) throw new Error('options');
     const c = await navigator.credentials.create({ publicKey: { challenge: unb(o.d.challenge), rp: o.d.rp, user: { id: unb(o.d.user.id), name: o.d.user.name, displayName: o.d.user.displayName },
-      pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, attestation: 'none', timeout: 60000,
-      excludeCredentials: (o.d.exclude || []).map((x) => ({ type: 'public-key', id: unb(x.id) })) } });
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }], authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' }, attestation: 'none', timeout: 60000 } });
     const r = await post('api/me/passkey/register', { id: c.id, clientDataJSON: b64u(c.response.clientDataJSON), attestationObject: b64u(c.response.attestationObject) });
-    if (!r.ok) throw new Error('register');
+    if (!r.ok) throw new Error('register ' + r.status);
   }
+  // a failure is noted in Admin › Errors (its reason: the phone's or the server's), the trader only sees « try again »
+  const report = (e) => { if (e && e.name === 'NotAllowedError') return; try { post('api/client-error', { msg: 'Face ID: ' + String((e && (e.name + ': ' + e.message)) || e).slice(0, 400), page: location.hash || '#', src: 'nav.js faceid' }).catch(() => {}); } catch (x) { /* offline */ } };
   function dialog(html, cls) {
     const scrim = document.createElement('div'); scrim.className = 'nav-dlg-scrim nav-fid open ' + (cls || '');
     const el = document.createElement('aside'); el.className = 'nav-dlg nav-fid open ' + (cls || ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('data-noi18n', '');
@@ -6900,7 +6901,7 @@ new window.SweepMO(() => {
     const el = dialog(`<h2>${t('askT')}</h2><p class="muted">${t('askS')}</p><button type="button" class="btn primary nav-am-save" data-fid-on>${t('on')}</button><button type="button" class="link nav-inst-later" data-fid-later>${t('later')}</button>`);
     el.querySelector('[data-fid-later]').addEventListener('click', () => { LS('sw.fidLater', String(Date.now() + 7 * 864e5)); close(); });
     el.querySelector('[data-fid-on]').addEventListener('click', async () => {
-      try { await register(); close(); if (typeof toast === 'function') toast(t('done')); } catch (e) { close(); if (typeof toast === 'function') toast(t('fail')); }
+      try { await register(); close(); if (typeof toast === 'function') toast(t('done')); } catch (e) { report(e); close(); if (typeof toast === 'function') toast(t('fail')); }
     });
   }
   /* the lock: any request answered 423 */
@@ -6937,7 +6938,7 @@ new window.SweepMO(() => {
     box.insertBefore(row, box.querySelector('ul, p.muted'));
     row.querySelector('[data-fid-set]').addEventListener('click', async (e) => {
       const off = e.currentTarget.dataset.fidSet === 'off';
-      try { if (off) await post('api/me/passkey/remove'); else await register(); if (typeof toast === 'function' && !off) toast(t('done')); } catch (x) { if (typeof toast === 'function') toast(t('fail')); }
+      try { if (off) await post('api/me/passkey/remove'); else await register(); if (typeof toast === 'function' && !off) toast(t('done')); } catch (x) { report(x); if (typeof toast === 'function') toast(t('fail')); }
       row.remove(); settingsLine();
     });
   }

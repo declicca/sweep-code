@@ -6,7 +6,9 @@ WebAuthn RP id cannot be an IP address). A trader of its own. Phone 390 (fr) and
  1  turning it on: a passkey of this phone (the server keeps its public key);
  2  12 hours without the app: every data request answers « locked » (423), the lock screen covers the app;
  3  « Unlock with Face ID »: the phone signs, the server checks the signature, the app opens;
- 4  a forged answer is refused; « Use my password »: signed out, the log-in page.
+ 4  a forged answer is refused; « Use my password »: signed out, the log-in page;
+ 5  (3 Nov., Mateo's iPhone) turning it on again when the phone's keychain already holds this account's passkey (made on an
+    earlier install of the app, another remembered browser): no « It could not be turned on ».
 No page error, nothing wider than the window.
 """
 import json, os, random, sqlite3, sys, time
@@ -27,7 +29,8 @@ with sync_playwright() as p:
     tag = f'{w}-{lang}'; x = X[lang]
     ctx = br.new_context(viewport={'width': w, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, locale='fr-CA' if lang == 'fr' else 'en-US')
     ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); sessionStorage.setItem('sw.modal', '1') } catch (e) {}" % lang)
-    r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'fi%06d@t.dev' % random.randint(0, 999999), 'consent': True, 'elapsed': 6000, 'lang': lang}), headers=H)
+    em = 'fi%06d@t.dev' % random.randint(0, 999999)
+    r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': em, 'consent': True, 'elapsed': 6000, 'lang': lang}), headers=H)
     ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Fay', 'experience': 'gt1'}), headers=H)
     pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     cdp = ctx.new_cdp_session(pg); cdp.send('WebAuthn.enable')
@@ -59,6 +62,13 @@ with sync_playwright() as p:
     idle(uid, 13); pg.reload(); pg.wait_for_timeout(3500)
     pg.locator('aside.nav-lock [data-fid-pw]').click(); pg.wait_for_timeout(3000)
     ok(pg.locator('#username').count() == 1, f'{tag} 4 « {x["pw"]} »: signed out, the log-in page')
+    # 5. the app installed again: the server's passkey belongs to an earlier remembered browser, the keychain still holds it
+    d = sqlite3.connect(DB); d.execute("UPDATE passkeys SET device = 'an-earlier-install' WHERE user_id = ?", (uid,)); d.execute('UPDATE sessions SET passkey = 0 WHERE user_id = ?', (uid,)); d.commit(); d.close()
+    lg = ctx.request.post(B + '/api/auth/login', data=json.dumps({'username': em, 'password': 'Testpass123!'}), headers=H)
+    pg.goto(B + '/#settings'); pg.reload(); pg.wait_for_function("typeof S !== 'undefined' && S.me && window.SweepFaceID", timeout=20000); pg.wait_for_timeout(800)
+    r5 = pg.evaluate("SweepFaceID.register().then(() => 'ok', (e) => String(e))")
+    st5 = pg.evaluate("apiJSON('api/me/passkey')")
+    ok(lg.status == 200 and r5 == 'ok' and st5.get('has') is True, f'{tag} 5 on again over an earlier install: a passkey of this phone ({lg.status}, {r5}, {st5})')
     allerr += errs; ctx.close()
   ok(not allerr, f'no page error ({allerr[:2]})')
   br.close()

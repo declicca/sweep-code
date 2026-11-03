@@ -111,8 +111,9 @@ function pk_route(string $route, string $method, ?array $me): void {
     }
     if ($route === 'api/me/passkey/options' && $method === 'POST') {
         if (!$s || !$s['device']) json_out(400, ['error' => 'Log in again on this phone first.']);
-        $ex = array_map(fn($r) => ['type' => 'public-key', 'id' => $r['cred_id']], q('SELECT cred_id FROM passkeys WHERE user_id = ?', [$me['id']])->fetchAll());
-        json_out(200, ['challenge' => pk_challenge((string) $me['id'], 'create'), 'rp' => ['id' => pk_rp(), 'name' => 'Sweep'], 'user' => ['id' => pk_b64u(hash('sha256', 'sweep|' . $me['id'], true)), 'name' => (string) ($me['email'] ?: $me['username']), 'displayName' => (string) ($me['first_name'] ?: $me['username'])], 'exclude' => $ex]);
+        // no « exclude » list (3 Nov., Mateo's iPhone): the keychain often still holds this account's passkey from an earlier
+        // install of the app; excluded, iOS refused right after Face ID. The same user id replaces it on the phone instead.
+        json_out(200, ['challenge' => pk_challenge((string) $me['id'], 'create'), 'rp' => ['id' => pk_rp(), 'name' => 'Sweep'], 'user' => ['id' => pk_b64u(hash('sha256', 'sweep|' . $me['id'], true)), 'name' => (string) ($me['email'] ?: $me['username']), 'displayName' => (string) ($me['first_name'] ?: $me['username'])]]);
     }
     if ($route === 'api/me/passkey/register' && $method === 'POST') {
         if (!$s || !$s['device']) json_out(400, ['error' => 'Log in again on this phone first.']);
