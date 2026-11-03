@@ -3408,7 +3408,7 @@ html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl t
 .nav-guard-msg{text-wrap:pretty}
 /* (3 Nov.) a phone of 390 px, in English or Spanish, « This month » chosen (the default): the 3 filters were 20 px wider than the
    screen (36 in French, « Toute la période ») — the row scrolled for so little it looked broken; a little less padding, gap and size and they fit */
-@media (max-width:400px){html body #main .fx-row{gap:6px}html body #main .fx-row > .fx-c{font-size:13.5px;gap:5px}html body #main .fx-row > .fx-c:not(.fx-on){padding:0 9px}}
+@media (max-width:400px){html body #main .fx-row{gap:5px}html body #main .fx-row > .fx-c{font-size:13.5px;gap:4px}html body #main .fx-row > .fx-c:not(.fx-on){padding:0 8px}}   /* (room left for Linux's wider fonts: the CI) */
 html body #main .nav-guard > .nav-guard-up{display:inline-flex;align-items:center;padding:0 8px;line-height:1.2;box-sizing:border-box}
 .nav-guard-pill{position:relative}
 .nav-guard-pill::after{content:"";position:absolute;inset:-6px 0}   /* 34 px, its zone 44 (the row has 5 px above and below) */
