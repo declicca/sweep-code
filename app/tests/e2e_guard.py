@@ -89,7 +89,6 @@ with sync_playwright() as p:
     ctx = context(br, lang, w, phone, theme); signup(ctx, B, 'gd')
     pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#dashboard'); until(pg, "typeof put === 'function' && !!window.SweepGuard")
-    pg.evaluate("editDoc('settings', 'settings', (s) => { s.day_lock = { losses: 0 }; })")   # (the stop rule is checked in 8: off here)
     # 1. an account without rules
     pg.evaluate("put('accounts', { id: 'g0', name: 'Perso', status: 'active', phase: 'eval', starting_balance_c: 1000000, rules: {} }); render()")
     pg.wait_for_timeout(800); fresh(pg)
@@ -172,6 +171,7 @@ with sync_playwright() as p:
     ctx = context(br, lang, w, phone, theme); signup(ctx, B, 'gs')
     pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#dashboard'); until(pg, "typeof put === 'function' && !!window.SweepGuard")
+    pg.evaluate("editDoc('settings', 'settings', (s) => { s.day_lock = { stop: true }; })")   # his stop rule turned on (2 losses in a row by default)
     pg.evaluate("put('accounts', %s)" % json.dumps(acc('s1', 'Apex 50K', 5000000, {'dd_c': 250000, 'dd_type': 'eod', 'dll_c': 100000})))
     trades(pg, [['s1a', 's1', 0, -12000, '09:40']]); fresh(pg)
     ok(pg.evaluate("!document.querySelector('#gSheet.nav-guard-stop')") and pg.evaluate(CARD)['msg'] != s[0], f'{tag} one loss: no stop')

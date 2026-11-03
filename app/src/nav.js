@@ -4686,17 +4686,17 @@ window.SweepMO = window.SweepMO || class {
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
     en: { loss: 'Max loss per day', trades: 'Max trades per day', none: 'None', help: 'Once one is reached, Today closes your day until 6:00 PM New York time. A change applies from your next session.', firm: 'Blank: your plan and your account’s daily limit ({a}).',
-      wait: 'From {d}: these limits. Today: {o}.', off: 'no limit of your own', tr: '{n} trades', tr1: '1 trade', saved: 'Saved: it applies from your next session.', losses: 'Losing trades in a row', lossesH: 'Your stop rule: after this many losses in a row, Today closes your day (2 by default, 0 turns it off). Sweep advises; your platform still takes your orders.', ls: '{n} losses in a row' },
+      wait: 'From {d}: these limits. Today: {o}.', off: 'no limit of your own', tr: '{n} trades', tr1: '1 trade', saved: 'Saved: it applies from your next session.', stop: 'My stop rule: close my day after losing trades in a row', losses: 'Losing trades in a row', lossesH: 'Once your stop rule or one of these limits is reached, the account guardian tells you to stop and offers to close your day. Sweep advises; your platform still takes your orders.', ls: '{n} losses in a row' },
     fr: { loss: 'Perte max par jour', trades: 'Trades max par jour', none: 'Aucun', help: 'Une fois une limite atteinte, Aujourd’hui ferme ta journée jusqu’à 18\u00a0h, heure de New York. Un changement s’applique à ta prochaine séance.', firm: 'Vide\u00a0: ton plan et la limite du jour de ton compte ({a}).',
-      wait: 'À partir du {d}\u00a0: ces limites. Pour aujourd’hui\u00a0: {o}.', off: 'aucune limite à toi', tr: '{n} trades', tr1: '1 trade', saved: 'Enregistré\u00a0: ça s’applique à ta prochaine séance.', losses: 'Trades perdants à la suite', lossesH: 'Ta règle d’arrêt\u00a0: après ce nombre de pertes à la suite, Aujourd’hui ferme ta journée (2 par défaut, 0 la désactive). Sweep conseille\u00a0; ta plateforme prend toujours tes ordres.', ls: '{n} pertes à la suite' },
+      wait: 'À partir du {d}\u00a0: ces limites. Pour aujourd’hui\u00a0: {o}.', off: 'aucune limite à toi', tr: '{n} trades', tr1: '1 trade', saved: 'Enregistré\u00a0: ça s’applique à ta prochaine séance.', stop: 'Ma règle d’arrêt\u00a0: fermer ma journée après des trades perdants à la suite', losses: 'Trades perdants à la suite', lossesH: 'Une fois ta règle d’arrêt ou une de ces limites atteinte, le Gardien de compte te dit de t’arrêter et te propose de fermer ta journée. Sweep conseille\u00a0; ta plateforme prend toujours tes ordres.', ls: '{n} pertes à la suite' },
     es: { loss: 'Pérdida máx. por día', trades: 'Operaciones máx. por día', none: 'Ninguno', help: 'Al alcanzar un límite, Hoy cierra tu día hasta las 18:00, hora de Nueva York. Un cambio se aplica desde tu próxima sesión.', firm: 'Vacío: tu plan y el límite diario de tu cuenta ({a}).',
-      wait: 'Desde el {d}: estos límites. Para hoy: {o}.', off: 'ningún límite propio', tr: '{n} operaciones', tr1: '1 operación', saved: 'Guardado: se aplica desde tu próxima sesión.', losses: 'Operaciones perdedoras seguidas', lossesH: 'Tu regla de stop: tras este número de pérdidas seguidas, Hoy cierra tu día (2 por defecto, 0 la desactiva). Sweep aconseja; tu plataforma sigue aceptando tus órdenes.', ls: '{n} pérdidas seguidas' } };
+      wait: 'Desde el {d}: estos límites. Para hoy: {o}.', off: 'ningún límite propio', tr: '{n} operaciones', tr1: '1 operación', saved: 'Guardado: se aplica desde tu próxima sesión.', stop: 'Mi regla de stop: cerrar mi día tras operaciones perdedoras seguidas', losses: 'Operaciones perdedoras seguidas', lossesH: 'Al alcanzar tu regla de stop o uno de estos límites, el guardián de cuenta te dice que pares y te propone cerrar tu día. Sweep aconseja; tu plataforma sigue aceptando tus órdenes.', ls: '{n} pérdidas seguidas' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w)\}/g, (m0, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const usd = (c) => (typeof money === 'function' ? money(c, { sign: false, dec: 0 }) : '$' + Math.round(c / 100));
   const day0 = () => (typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10));
   const now = (day) => (window.SweepCoach && SweepCoach.standing ? SweepCoach.standing(day) : { loss: 0, trades: 0 });
-  const say = (x) => [x.loss ? usd(x.loss) : '', x.trades ? t(x.trades === 1 ? 'tr1' : 'tr', { n: x.trades }) : '', x.losses ? t('ls', { n: x.losses }) : ''].filter(Boolean).join(' · ') || t('off');
+  const say = (x) => [x.loss ? usd(x.loss) : '', x.trades ? t(x.trades === 1 ? 'tr1' : 'tr', { n: x.trades }) : '', x.stop && x.losses ? t('ls', { n: x.losses }) : ''].filter(Boolean).join(' · ') || t('off');
   const stopOn = () => typeof billCan !== 'function' || billCan('guard_stop');   // (3 Nov.) the stop rule: Pro and Elite
   function fields() {
     const x = (S.settings && S.settings.day_lock) || {}, d = day0(), lim = (S.accounts || []).filter((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && a.rules && a.rules.dll_c > 0).sort((a, b) => a.rules.dll_c - b.rules.dll_c)[0];
@@ -4704,7 +4704,8 @@ window.SweepMO = window.SweepMO || class {
     const wait = x.from && d < x.from ? t('wait', { d: new Date(x.from + 'T12:00:00').toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { weekday: 'long', day: 'numeric', month: 'long' }), o: say(now(d)) }) : '';
     return `<label class="f" data-noi18n><span>${esc2(t('loss'))}</span><input type="text" inputmode="decimal" data-daylock="loss" value="${esc2(lv)}" placeholder="${esc2(lim ? usd(lim.rules.dll_c) : '$')}"></label>
     <label class="f" data-noi18n><span>${esc2(t('trades'))}</span><input type="text" inputmode="numeric" data-daylock="trades" value="${esc2(tv)}" placeholder="${esc2(t('none'))}"></label>
-    ${stopOn() ? `<label class="f" data-noi18n><span>${esc2(t('losses'))}</span><input type="text" inputmode="numeric" data-daylock="losses" value="${esc2(x.losses == null || x.losses === '' ? '2' : String(x.losses))}" placeholder="2"></label><p class="help nav-dl-help" data-noi18n>${esc2(t('lossesH'))}</p>` : ''}
+    ${stopOn() ? `<label class="chk nav-dl-stop" data-noi18n><input type="checkbox" data-daylock="stop"${x.stop ? ' checked' : ''}><span>${esc2(t('stop'))}</span></label>
+    <label class="f" data-noi18n><span>${esc2(t('losses'))}</span><input type="text" inputmode="numeric" data-daylock="losses" value="${esc2(x.losses == null || x.losses === '' ? '2' : String(x.losses))}" placeholder="2"></label><p class="help nav-dl-stoph" data-noi18n>${esc2(t('lossesH'))}</p>` : ''}
     <p class="help nav-dl-help" data-noi18n>${esc2(t('help'))}${lim ? ' ' + esc2(t('firm', { a: usd(lim.rules.dll_c) + ' · ' + (lim.name || '') })) : ''}${wait ? `<b class="nav-dl-wait">${esc2(wait)}</b>` : ''}</p>`;
   }
   document.addEventListener('change', (e) => {
@@ -4714,10 +4715,11 @@ window.SweepMO = window.SweepMO || class {
     const next = new Date(d + 'T12:00:00'); next.setDate(next.getDate() + 1);
     const from = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
     const cur = now(d), was = x.from && d < x.from ? x.was || { loss_c: 0, trades: 0 } : { loss_c: cur.loss, trades: cur.trades };   // a change already waiting keeps what today had
-    const lsIn = box.querySelector('input[data-daylock="losses"]'), lsV = lsIn ? parseInt(String(lsIn.value).replace(/[^0-9]/g, ''), 10) : NaN;
-    const losses = lsIn ? (isFinite(lsV) ? Math.min(20, lsV) : 2) : (x.losses == null ? undefined : x.losses);   // blank: the default (2)
-    const dl = Object.assign({ loss_c: Math.round(num('loss') * 100), trades: Math.min(99, Math.floor(num('trades'))), from, was: Object.assign({}, was, cur.losses != null && !(x.from && d < x.from) ? { losses: x.losses } : {}) }, losses === undefined ? {} : { losses });
-    if (dl.loss_c === (+x.loss_c || 0) && dl.trades === (+x.trades || 0) && String(dl.losses) === String(x.losses == null ? (lsIn ? 2 : undefined) : x.losses)) return;
+    const lsIn = box.querySelector('input[data-daylock="losses"]'), stIn = box.querySelector('input[data-daylock="stop"]');
+    const lsV = lsIn ? parseInt(String(lsIn.value).replace(/[^0-9]/g, ''), 10) : NaN, losses = lsIn ? (isFinite(lsV) && lsV > 0 ? Math.min(20, lsV) : 2) : x.losses, stop = stIn ? stIn.checked : !!x.stop;   // blank: 2
+    const keep = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined));
+    const dl = keep({ loss_c: Math.round(num('loss') * 100), trades: Math.min(99, Math.floor(num('trades'))), stop, losses, from, was: keep(Object.assign({}, was, x.from && d < x.from ? {} : { stop: !!x.stop, losses: x.losses })) });
+    if (dl.loss_c === (+x.loss_c || 0) && dl.trades === (+x.trades || 0) && dl.stop === !!x.stop && String(dl.losses) === String(x.losses == null ? (lsIn ? 2 : undefined) : x.losses)) return;
     if (typeof editDoc === 'function') editDoc('settings', 'settings', (s) => { s.day_lock = dl; });
     if (typeof toast === 'function') toast(t('saved'));
   });
@@ -7762,13 +7764,20 @@ if (window.I18N_ES) { window.I18N_ES['By % of trades'] = '% de operaciones'; win
     if (G.busy) { if (force) G.again = true; return; }   // a save during a load: once more after it
     if (!force && G.st && Date.now() - G.at < 30000) return;
     G.busy = true; G.again = false;
-    try { G.st = await apiJSON('api/guardian'); G.at = Date.now(); } catch (e) { /* the guardian never blocks Today */ }
+    try { G.st = await apiJSON('api/guardian'); G.at = Date.now(); try { localStorage.setItem('sw.guard', JSON.stringify({ uid: S.uid, st: G.st })); } catch (x) { /* private mode */ } } catch (e) { /* the guardian never blocks Today */ }
     G.busy = false; place(); paintSheet(); stopSheet();
     if (G.again) load(true);
   }
   let soonT = 0; const soon = (ms) => { clearTimeout(soonT); soonT = setTimeout(() => load(true), ms || 800); };
 
+  /* the last numbers seen on this device (the same trader, the same session): the card is there at Today's first image, nothing
+     pushed down when the server answers (e2e_page_shift) */
+  function cached() {
+    if (G.st || G.noCache || typeof S === 'undefined' || !S.uid) return; G.noCache = true;
+    try { const c = JSON.parse(localStorage.getItem('sw.guard') || 'null'); if (c && c.uid === S.uid && c.st && c.st.day === (typeof todayStr === 'function' ? todayStr() : '')) G.st = c.st; } catch (e) { /* private mode */ }
+  }
   function cardHtml() {
+    cached();
     const g = shown(); if (!g) return '';
     const all = G.st.accounts, w = g.room_pct == null ? 0 : Math.max(0, Math.min(100, g.room_pct));
     const big = g.level === 'breached' ? 0 : g.left_c;

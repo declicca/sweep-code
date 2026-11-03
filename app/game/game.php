@@ -505,7 +505,7 @@ final class GameEngine
         $guard = $planValid && $maxLoss && $guardIdx !== null && $guardIdx === $n - 1 && $n > 0;
         // (3 Nov., the account guardian, step 6) the stop rule kept: the day locked (Pro and Elite), then no losing trade saved after
         // it — the same reward as stopping at the plan's max loss, once the day is closed
-        if (!$guard && $lock && (!function_exists('guard_allowed') || guard_allowed($uid, 'guard_stop'))) {
+        if (!$guard && $lock && self::standingLimits($settings, $day)['stop'] && (!function_exists('guard_allowed') || guard_allowed($uid, 'guard_stop'))) {
             // the trades in the order they were saved: the first `n` were there when it locked, the next ones came after
             $bySave = $trades; usort($bySave, fn($a, $b) => strcmp((string) ($a['created_at'] ?? ''), (string) ($b['created_at'] ?? '')));
             $after = array_filter(array_slice($bySave, (int) ($lock['n'] ?? $n)), fn($t) => self::net($t) < 0);
@@ -560,8 +560,9 @@ final class GameEngine
     {
         $x = is_array($settings['day_lock'] ?? null) ? $settings['day_lock'] : [];
         $v = (string) ($x['from'] ?? '') === '' || $day >= (string) $x['from'] ? $x : (is_array($x['was'] ?? null) ? $x['was'] : []);
-        // (3 Nov., the account guardian's stop rule) losing trades in a row: 2 unless the trader chose (0 = off); the plan decides (dayLimits)
-        return ['loss_c' => max(0, (int) ($v['loss_c'] ?? 0)), 'trades' => max(0, (int) ($v['trades'] ?? 0)), 'losses' => !isset($v['losses']) || $v['losses'] === '' ? 2 : max(0, (int) $v['losses'])];
+        // (3 Nov., the account guardian's stop rule, turned on in Settings: `stop`) losing trades in a row, 2 by default; the plan decides (dayLimits)
+        $stop = !empty($v['stop']);
+        return ['loss_c' => max(0, (int) ($v['loss_c'] ?? 0)), 'trades' => max(0, (int) ($v['trades'] ?? 0)), 'losses' => $stop ? (!isset($v['losses']) || $v['losses'] === '' ? 2 : max(0, (int) $v['losses'])) : 0, 'stop' => $stop];
     }
     /** the day's limits, the tightest of each: the day's plan, the standing limits, the daily loss limit of the trader's active
      *  accounts (from the firm's preset, the account page); a limit of 0 = none. Same as SweepCoach.dayLimits (src/coach.js). */

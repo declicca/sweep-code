@@ -3355,7 +3355,6 @@ html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl t
 /* ───────────── The account guardian (3 Nov., SWEEP.md section 8): on top of Today, its sheet ───────────── */
 .nav-dash .nav-guard{order:-1;margin-bottom:12px;padding:0;overflow:hidden;border-radius:20px}
 .nav-guard-main{display:block;padding:16px 18px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;outline-offset:-3px;border-radius:20px}
-.nav-guard-main:active{transform:scale(.985);transition:transform .18s var(--ease-ios,cubic-bezier(.32,.72,0,1))}
 .nav-guard-h{display:flex;align-items:baseline;gap:8px;min-width:0}
 .nav-guard-h small{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.01em;white-space:nowrap}
 .nav-guard-acc{font-size:12px;font-weight:500;color:var(--text3,var(--text2));min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -3409,6 +3408,6 @@ html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl t
   #gSheet.nav-guard-stop .g-in{min-height:100%;display:flex;flex-direction:column;justify-content:center;padding-top:calc(env(safe-area-inset-top,0px) + 16px)!important;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px)!important}}
 .nav-guard-msg{text-wrap:pretty}
 /* (3 Nov.) a phone of 390 px, in English or Spanish, « This month » chosen (the default): the 3 filters were 20 px wider than the
-   screen (36 in French) — the row scrolled for so little it looked broken; a little less padding, gap and size and they fit */
-@media (max-width:400px){html body #main .fx-row{gap:6px}html body #main .fx-row > .fx-c{font-size:14px}html body #main .fx-row > .fx-c:not(.fx-on){padding:0 10px}}
+   screen (36 in French, « Toute la période ») — the row scrolled for so little it looked broken; a little less padding, gap and size and they fit */
+@media (max-width:400px){html body #main .fx-row{gap:6px}html body #main .fx-row > .fx-c{font-size:13.5px;gap:5px}html body #main .fx-row > .fx-c:not(.fx-on){padding:0 9px}}
 html body #main .nav-guard > .nav-guard-up{display:inline-flex;align-items:center;padding:0 8px;line-height:1.2;box-sizing:border-box}

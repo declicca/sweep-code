@@ -328,9 +328,9 @@
      applies from the next session (`from`); before it, the values it replaced (`was`). Same as GameEngine::standingLimits. */
   function standing(day) {
     const x = (S.settings && S.settings.day_lock) || {}, v = !x.from || day >= x.from ? x : x.was || {};
-    // (3 Nov., the account guardian's stop rule, Pro and Elite) losing trades in a row: 2 unless the trader chose (0 = off)
-    const on = typeof billCan !== 'function' || billCan('guard_stop'), ls = v.losses == null || v.losses === '' ? 2 : Math.max(0, parseInt(v.losses, 10) || 0);
-    return { loss: Math.max(0, Math.round(+v.loss_c || 0)), trades: Math.max(0, parseInt(v.trades, 10) || 0), losses: on ? ls : 0 };
+    // (3 Nov., the account guardian's stop rule, Pro and Elite, turned on in Settings: `stop`) losing trades in a row, 2 by default
+    const on = (typeof billCan !== 'function' || billCan('guard_stop')) && !!v.stop, ls = v.losses == null || v.losses === '' ? 2 : Math.max(0, parseInt(v.losses, 10) || 0);
+    return { loss: Math.max(0, Math.round(+v.loss_c || 0)), trades: Math.max(0, parseInt(v.trades, 10) || 0), losses: on ? ls : 0, stop: on };
   }
   /** the day's limits, the tightest of each — the day's plan, the standing limits, the daily limit of the active accounts (their
    *  firm's preset, on their page); 0 = none. Same as GameEngine::dayLimits (game/game.php). */

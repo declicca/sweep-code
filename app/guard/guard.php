@@ -291,6 +291,12 @@ function guard_lock(string $uid): ?array
     return $l ? ['why' => (string) ($l['why'] ?? ''), 'at' => (int) ($l['at'] ?? 0), 'n' => (int) ($l['n'] ?? 0), 'net_c' => (int) ($l['net_c'] ?? 0), 'losses' => (int) ($l['losses'] ?? 0), 'loss_c' => (int) ($l['loss_c'] ?? 0), 'trades' => (int) ($l['trades'] ?? 0)] : null;
 }
 
+/** the stop rule is on: in the plan (Pro, Elite) and turned on in Settings › My routine (settings.day_lock.stop, in force today) */
+function guard_stop_on(string $uid): bool
+{
+    return guard_allowed($uid, 'guard_stop') && GameEngine::standingLimits(GameEngine::docs($uid, 'meta')['settings'] ?? [], GameEngine::today())['stop'];
+}
+
 /** the plan decides (guard_all: every account; guard_stop: the stop rule — Pro and Elite); without billing, or before it is live
  *  for this trader, everyone (as sync_copy_allowed) */
 function guard_allowed(string $uid, string $feature): bool
@@ -303,7 +309,7 @@ function guard_allowed(string $uid, string $feature): bool
 function guard_route(string $route, string $method, string $uid): void
 {
     if ($route === 'api/guardian' && $method === 'GET') {
-        $stop = guard_allowed($uid, 'guard_stop'); $lock = $stop ? guard_lock($uid) : null;
+        $stop = guard_stop_on($uid); $lock = $stop ? guard_lock($uid) : null;
         $s = guard_state($uid, guard_allowed($uid, 'guard_all'), ['stopped' => $lock ? ['*' => true] : []]);
         guard_alerts($uid, $s);
         json_out(200, $s + ['stop_rule' => $stop, 'stop' => $lock]);
@@ -325,6 +331,6 @@ function guard_alerts(string $uid, array $state): void
 function guard_on_doc(array $p): void
 {
     $uid = (string) ($p['uid'] ?? ''); if ($uid === '') return;
-    try { GameEngine::forget($uid); $lock = guard_allowed($uid, 'guard_stop') ? guard_lock($uid) : null; guard_alerts($uid, guard_state($uid, guard_allowed($uid, 'guard_all'), ['stopped' => $lock ? ['*' => true] : []])); } catch (Throwable $e) { error_log('[Sweep guard] ' . $e->getMessage()); }
+    try { GameEngine::forget($uid); $lock = guard_stop_on($uid) ? guard_lock($uid) : null; guard_alerts($uid, guard_state($uid, guard_allowed($uid, 'guard_all'), ['stopped' => $lock ? ['*' => true] : []])); } catch (Throwable $e) { error_log('[Sweep guard] ' . $e->getMessage()); }
 }
 if (class_exists('Events', false)) foreach (['trade.created', 'trade.updated', 'journal.saved'] as $ev) Events::on($ev, 'guard_on_doc');
