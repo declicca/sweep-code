@@ -636,3 +636,44 @@ C'est dans cet ordre qu'il s'enchaîne avec les étapes de cette section. D et E
 
 **Le 13 novembre** : la liste des fonctions du jeu utilisées par moins de 10 % des traders actifs (Admin › Métriques › Jeu), pour la décision de Mateo (garder, cacher plus longtemps, retirer).
 - **Fin du gel** : quand les étapes 0 à 6 sont en ligne et que les mesures M1, journées fermées et bilans ouverts sont relevées. Toute nouvelle fonction passe alors par la section 6.
+
+---
+
+## 8. Gardien de compte (brief du 3 nov.)
+
+Le Gardien montre pendant la séance combien le trader peut encore perdre sans mettre son compte en danger, et lui dit de s'arrêter avant le dérapage. Moment servi : M2 (pendant la séance). Le brief l'emporte sur deux règles de la section 6 : il ajoute **une** carte sur Aujourd'hui (règle 5) et elle s'affiche dès qu'un compte actif a des règles de firme (règle 2).
+
+### 8.1 Carte de l'existant (étape 1)
+
+**Ce qui existe et sera réutilisé**
+
+| Besoin du Gardien | Où c'est aujourd'hui |
+| --- | --- |
+| Marge de drawdown d'un compte (statique, suiveur fin de journée, suiveur trade par trade, plafond au solde de départ + `dd_lock_offset_c`, payouts et ajustements datés, compte live sans règles) | `acctState(a)` dans `app/src/app.js` (côté navigateur seulement ; aucune copie PHP) |
+| Le compte le plus serré, la marge du début de journée, « un point de l'instrument habituel » | `SweepCoach.margin(day)` dans `app/src/coach.js` |
+| « Ton risque permis aujourd'hui » et ce qu'il en reste | `SweepCoach.riskNow(day)` (`coach.js`), affiché par « Maintenant » (`nowHtml`, `app/src/nav.js`) |
+| Risque prévu par le trader | plan du jour : `journals[jour].pre.max_loss` (`planOf`), sinon la dernière perte max, sinon `settings.day_lock.loss_c` |
+| Perte journalière, drawdown, objectif, consistance, jours minimums d'un compte | `accounts[].rules` : `dll_c`, `dd_c`, `dd_type` (`static` / `eod` / `trade`), `dd_lock`, `dd_lock_offset_c`, `target_c`, `consistency_pct`, `consistency_base`, `min_days` ; remplis par les préréglages (`app/presets/presets-lib.php`, `app/presets/check.php`) |
+| Type de compte | `accounts[].phase` / `money_type` : `eval`, `funded`, `live` |
+| Consistance | `consPct()` (`app.js`) = `GameV2::consPct` (PHP) |
+| Frontière de journée | `todayStr()` (JS) et `GameEngine::today()` (PHP) : heure de New York + 6 h, donc 18 h = séance suivante ; `SWEEP_GAME_NOW` fixe l'heure dans les tests |
+| Coupe-circuit existant | le verrou de fin de journée : `settings.day_lock` (`loss_c`, `trades`, `from`, `was`), Réglages › Ma routine › Règles de risque (`SweepDayLock`, `nav.js`) ; `SweepCoach.dayLimits` / `dayLock` = `GameEngine::standingLimits` / `dayLimits` / `recomputeDay` (`app/game/game.php`), qui l'enregistre une fois par jour jusqu'à 18 h ; écran calme « Journée fermée » sur Aujourd'hui (`lockHtml`, `nav.js`) |
+| Fermer ma journée | `SweepGame.openReview()` (`app/src/game.js`) ; le contrôle du solde de la plateforme est gardé dans `journals[jour].post.bal` |
+| Notifications | `Notify::send` (`app/notify/notify.php`), `GameNotifyService::send` avec push (`app/game/v2c.php`, `app/push/web-push.php`, sorte `lock`) ; alertes de compte à 75 % / 100 % (`api/notifications/prop-alert`) |
+| Comptes synchronisés | table `sync_accounts` (`account_id`), trades avec `source` = `ninjatrader` / `quantower` (`GAME_SYNCED`, `app/game/catalog.php`) |
+| Forfaits | `sb_plan_limits()` (`app/billing/billing-core.php`, valeurs par défaut écrites dans le code comme `copy_groups`), `billCan()` côté navigateur |
+| Récompense d'un arrêt | `GameEngine::guardrail()` : XP « garde-fou » quand le dernier trade du jour atteint la perte max du plan et que la journée est revue |
+| Recharger après un enregistrement | `srvSend` enrobé par `game.js` (trades, journals) |
+| Documents | table `documents` (`user_id`, `collection`, `id`, `data`) ; `GameEngine::docs()` les lit côté serveur |
+
+**Ce qui manque**
+
+- Aucun calcul de marge côté serveur : il faut porter `acctState` en PHP (étape 2). Un test de parité compare les deux, pour garder une seule formule à l'écran (section 6, règle 7).
+- Aucun plancher journalier par compte au sens du brief (solde de début de journée − perte journalière max), ni de niveaux `calm` / `watch` / `danger`.
+- Aucune « perte habituelle » (moyenne des 20 dernières pertes).
+- Aucune règle « N trades perdants à la suite ».
+- Aucun solde provisoire de la journée pour un compte saisi à la main.
+- Aucun point d'accès en lecture seule pour de futurs widgets.
+
+### 8.2 Décisions — Gardien de compte
+
