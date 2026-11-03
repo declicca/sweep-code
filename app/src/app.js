@@ -2205,6 +2205,18 @@ function vAdmin() {
   }[(ADM.prov || {}).econ] || "manual entry")}</b></span><span class="faint">·</span><span>Market data: <b>${(ADM.prov || {}).market === "databento" ? "Databento" : "not configured"}</b></span><span class="help">Set in config.php</span></div>\n  <p class="help" style="margin-top:10px;max-width:75ch">Traders' journals are private: this page shows account information and usage only, never their trades or notes.</p>\n  ${aiUsageSection()}${attributionSection()}${growthAdmin()}`;
 }
 
+/* Admin › Emails (3 Nov.): its module (src/mail.js) is loaded on demand, for an administrator who opens #mail */
+function vMail(e) {
+  if (!S.me || !S.me.is_admin) return '<div class="empty">Administrators only.</div>';
+  if (window.SweepMail) return SweepMail.view(e);
+  const t = window.SWEEP_LAZY && window.SWEEP_LAZY.mail;
+  if (t && !document.querySelector("script[data-sweep-mail]")) {
+    const a = document.createElement("script");
+    a.src = t, a.async = !0, a.dataset.sweepMail = "1", a.onload = () => route().v === "mail" && render(), document.head.appendChild(a);
+  }
+  return SKELETON;
+}
+
 // brief 02 part 14: never the browser's confirm() / alert(): the app's own window (nav.js SweepUndo.ask), in the trader's language
 const askIn = (q, go = "OK", d = !0) => window.SweepUndo && SweepUndo.ask ? SweepUndo.ask(tr(q), "", tr(go), d) : Promise.resolve(!1);
 
@@ -10947,6 +10959,7 @@ const TITLES = {
   analytics: "Stats",
   settings: "Settings",
   admin: "Traders",
+  mail: "Email",
   import: "Import trades",
   news: "Economic calendar"
 };
@@ -11033,6 +11046,7 @@ function render() {
     analytics: vAnalytics,
     settings: vSettings,
     admin: vAdmin,
+    mail: vMail,
     import: vImport,
     news: vNews
   }[e.v];

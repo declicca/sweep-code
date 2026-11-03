@@ -23,6 +23,10 @@ return [
     'smtp'          => ['host' => 'mail.makeitsweep.com', 'port' => 465, 'user' => 'hello@makeitsweep.com', 'pass' => ''],
     // a code by email on a new browser (auth/twofa.php): on whenever 'smtp' is set; false turns it off (emergency only)
     'twofa'         => true,
+    // our own campaigns (Admin › Emails, mail/): what bounces comes back to this address (cPanel › Forwarders › pipe to
+    // mail/bounce.php); the hourly cap starts at 'start' and doubles each week up to 'max' (keep 'max' under WHM's hourly limit)
+    'mail_bounce'   => 'bounces@makeitsweep.com',
+    'mail_per_hour' => ['start' => 100, 'max' => 500],
     'support_email' => 'hello@makeitsweep.com',              // replies to reset emails go here
 
     // Where the database and screenshots are stored.

@@ -40,7 +40,7 @@ async def main():
       rows = await pg.evaluate("[...document.querySelectorAll('#main .ux-hl-list li')].map(l=>({c:l.className, b:l.querySelector('b').textContent, chip:l.querySelector('.ux-pr-chip').textContent, t:l.innerText.replace(/\\s+/g,' ')}))")
       want = [('ux-hl-ok', 'Jeu, rappels, courriel « Ta semaine »', 'OK'), ('ux-hl-bad', 'Graphiques des trades', 'Échec'), ('ux-hl-bad', 'Vérification des règles des firmes', 'Jamais exécutée'),
               ('ux-hl-late', 'Sauvegarde', 'En retard'), ('ux-hl-ok', 'Test de restauration', 'En cours'),
-              ('ux-hl-bad', 'Courriels : événements du jour (Loops)', 'Jamais exécutée')]
+              ('ux-hl-bad', 'Courriels : événements du jour (Loops)', 'Jamais exécutée'), ('ux-hl-bad', 'Courriels : envoi des campagnes', 'Jamais exécutée')]
       got = [(r['c'], r['b'], r['chip']) for r in rows]
       ok(got == want, f'{tag} one line per task: OK, Échec, Jamais exécutée, En retard, En cours, Jamais exécutée ({got})')
       ok('Databento: 401 Unauthorized' in rows[1]['t'] and 'toutes les heures' in rows[1]['t'], f'{tag} the failed task shows its error and its schedule')

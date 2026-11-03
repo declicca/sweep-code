@@ -42,11 +42,11 @@ window.SweepMO = window.SweepMO || class {
   if (typeof render !== 'function' || typeof route !== 'function') return;
   const T = {
     en: { list: 'List', cal: 'Calendar', jour: 'Journal', acc: 'Accounts', pay: 'My money', today: 'Today', trades: 'Trades', stats: 'Stats',
-      prog: 'My progress', news: 'What’s new', settings: 'Settings', sub: 'Subscription', ref: 'Referral', fb: 'Give feedback', help: 'Help', admin: 'Traders', out: 'Log out', back: 'Back', menu: 'Menu', search: 'Search' },
+      prog: 'My progress', news: 'What’s new', settings: 'Settings', sub: 'Subscription', ref: 'Referral', fb: 'Give feedback', help: 'Help', admin: 'Traders', mail: 'Emails', out: 'Log out', back: 'Back', menu: 'Menu', search: 'Search' },
     fr: { list: 'Liste', cal: 'Calendrier', jour: 'Journal', acc: 'Comptes', pay: 'Mon argent', today: 'Aujourd’hui', trades: 'Trades', stats: 'Stats',
-      prog: 'Ma progression', news: 'Quoi de neuf', settings: 'Réglages', sub: 'Abonnement', ref: 'Parrainage', fb: 'Donner mon avis', help: 'Aide', admin: 'Traders', out: 'Déconnexion', back: 'Retour', menu: 'Menu', search: 'Rechercher' },
+      prog: 'Ma progression', news: 'Quoi de neuf', settings: 'Réglages', sub: 'Abonnement', ref: 'Parrainage', fb: 'Donner mon avis', help: 'Aide', admin: 'Traders', mail: 'Courriels', out: 'Déconnexion', back: 'Retour', menu: 'Menu', search: 'Rechercher' },
     es: { list: 'Lista', cal: 'Calendario', jour: 'Diario', acc: 'Cuentas', pay: 'Mi dinero', today: 'Hoy', trades: 'Operaciones', stats: 'Stats',
-      prog: 'Mi progreso', news: 'Novedades', settings: 'Ajustes', sub: 'Suscripción', ref: 'Referidos', fb: 'Dar mi opinión', help: 'Ayuda', admin: 'Traders', out: 'Cerrar sesión', back: 'Atrás', menu: 'Menú', search: 'Buscar' },
+      prog: 'Mi progreso', news: 'Novedades', settings: 'Ajustes', sub: 'Suscripción', ref: 'Referidos', fb: 'Dar mi opinión', help: 'Ayuda', admin: 'Traders', mail: 'Correos', out: 'Cerrar sesión', back: 'Atrás', menu: 'Menú', search: 'Buscar' },
   };
   const t = () => T[LANG] || T.en;
   const SEG = {
@@ -56,7 +56,7 @@ window.SweepMO = window.SweepMO || class {
   const GROUP = { trades: 'trades', calendar: 'trades', journal: 'trades', accounts: 'accounts', payouts: 'accounts' };
   // parent of each sub-page (the back chevron)
   const PARENT = { trade: ['#trades', 'trades'], import: ['#trades', 'trades'], account: ['#accounts', 'acc'], news: ['#dashboard', 'today'],
-    settings: ['#dashboard', 'today'], plan: ['#dashboard', 'today'], referral: ['#settings', 'settings'], feedback: ['#settings', 'settings'], admin: ['#dashboard', 'today'] };
+    settings: ['#dashboard', 'today'], plan: ['#dashboard', 'today'], referral: ['#settings', 'settings'], feedback: ['#settings', 'settings'], admin: ['#dashboard', 'today'], mail: ['#admin', 'admin'] };
   const IC = {
     news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
@@ -66,6 +66,7 @@ window.SweepMO = window.SweepMO || class {
     ref: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8" width="17" height="12" rx="2"/><path d="M12 8v12M3.5 12h17M12 8c-1.5-3-5-3.5-5-1.2C7 8 9.5 8 12 8zm0 0c1.5-3 5-3.5 5-1.2C17 8 14.5 8 12 8z"/></svg>',
     fb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.8 7L4 20l1-4.2A8 8 0 1 1 20 12z"/></svg>',
     help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6M12 17h.01"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>',
     admin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c-.5-2.6-2-4.3-4-5"/></svg>',
     out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>',
   };
@@ -145,7 +146,7 @@ window.SweepMO = window.SweepMO || class {
       <div class="nav-mg">${item('prog', IC.prog, x.prog)}${item('news', IC.news, x.news)}</div>
       <div class="nav-mg">${item('settings', IC.settings, x.settings)}</div>
       <div class="nav-mg">${item('help', IC.help, x.help)}</div>
-      ${admin ? `<div class="nav-mg">${item('admin', IC.admin, x.admin)}</div>` : ''}
+      ${admin ? `<div class="nav-mg">${item('admin', IC.admin, x.admin)}${item('mail', IC.mail, x.mail)}</div>` : ''}
 </div>`;   // (31 Oct., fluidity 14) 4 lines: My progress, What's new, Settings, Help — Referral, Give feedback and Log out are in Settings
     document.body.append(el);
     const r = anchor && anchor.getBoundingClientRect(), panel = el.querySelector('.nav-menu-panel');

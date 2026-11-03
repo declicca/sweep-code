@@ -675,6 +675,8 @@ function delete_user_everything(string $uid): void {
     try { require_once __DIR__ . '/growth/share-links.php'; sl_delete_user(db(), $uid); } catch (Throwable $e) { error_log('[Sweep share] delete: ' . $e->getMessage()); }   // public links and their images (they stayed online before 14 Oct.)
     try { require_once __DIR__ . '/growth/public-profile.php'; pp_delete_user(db(), $uid); } catch (Throwable $e) { error_log('[Sweep profile] delete: ' . $e->getMessage()); }
     foreach (['ai_cache', 'ai_log'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* AI tables not created yet */ } }
+    // our own emails (3 Nov.): a campaign's numbers stay, without the address, the name or the link to the account; the set-aside line goes
+    try { $em0 = strtolower(trim((string) q('SELECT email FROM users WHERE id = ?', [$uid])->fetchColumn())); q("UPDATE mail_queue SET user_id = NULL, email = 'deleted', first_name = NULL, subject = NULL, text_body = NULL, html_body = NULL WHERE user_id = ?", [$uid]); if ($em0 !== '') q('DELETE FROM mail_suppress WHERE email_lc = ?', [$em0]); } catch (Throwable $e) { /* mail tables not created yet */ }
     foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* sync tables not created yet */ } }   // sync/: keys, executions, accounts found
     if (billing_on()) {
         try {
@@ -816,6 +818,8 @@ try {
     // « Your week » email: the link at its bottom stops (or starts again) the email, without signing in: the link carries the trader's own token
     // (no CSRF header: mail apps post the one-click « Unsubscribe » themselves, List-Unsubscribe-Post)
     if ($route === 'api/email/weekly' && class_exists('GameWeeklyMail')) GameWeeklyMail::page($method, (string) ($_GET['t'] ?? ''));
+    // our own emails (mail/): the open image, the tracked links and the unsubscribe page of a campaign email, without signing in
+    if (strpos($route, 'api/m/') === 0) { require_once __DIR__ . '/mail/mail-admin.php'; ml_public_route($route, $method); }
     $ACCESS = access();
     if ($method !== 'GET' && $method !== 'HEAD') require_csrf();
 
@@ -1403,6 +1407,7 @@ try {
     /* ---------- administration ---------- */
     if (strpos($route, 'api/admin/') === 0) {
         if (!$me['is_admin']) json_out(403, ['error' => 'Administrators only.']);
+        if ($route === 'api/admin/mail' || strpos($route, 'api/admin/mail/') === 0) { require_once __DIR__ . '/mail/mail-admin.php'; ml_admin_route($route, $method, $me); }   // Admin › Emails (3 Nov.)
         // campaign attribution report: per post, sign-ups, activated, 3+ trading days, still logging on day 7 and day 14
         if ($route === 'api/admin/attribution' && $method === 'GET') {
             $since = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($_GET['since'] ?? '')) ? $_GET['since'] : '2026-10-05';

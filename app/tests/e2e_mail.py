@@ -1,0 +1,177 @@
+"""
+Sweep — Admin › Emails (our own campaigns, 3 Nov.), dev environment with Playwright:
+  python3 tests/e2e_mail.py http://127.0.0.1:8095 /tmp/show_state.json      (SWEEP_TEST_DB: the dev server's SQLite file)
+Three traders of its own (FR, EN, an address that refuses). As the administrator (fr-CA, computer 1300×850 and phone 390×844,
+light and dark):
+ - the menu has « Courriels »; #mail: the 30-day numbers, the list, the sending pace, the campaigns; a trader gets 403;
+ - a draft: name, FR / EN tabs, the toolbar (« Prénom » adds {first}), the preview drawn in its own shadow root, the audience
+   count; saved on its own; « M'envoyer un test » goes to the administrator's address;
+ - « Envoyer maintenant » asks in the app's own window, then mail/send-cron.php sends: each trader in their language, with the
+   one-click unsubscribe headers; the refusing address is set aside;
+ - the open image, a signed tracked link (a tampered one goes home), the one-click unsubscribe (no CSRF header), a bounce
+   report piped to mail/bounce.php (silent, exit 0);
+ - the campaign's numbers page: delivered, opened, clicked, the 48 hours, the links; no horizontal scroll, no page error.
+"""
+import json, os, random, re, sqlite3, subprocess, sys, time, base64
+from urllib.parse import urlparse, parse_qs
+from playwright.sync_api import sync_playwright
+B = (sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095').rstrip('/')
+STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
+DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
+DEST = os.path.dirname(os.path.dirname(DB)); SENT = os.path.join(DEST, 'data', 'mail-sent.jsonl')
+SHOTS = os.environ.get('TMPDIR', '/tmp').rstrip('/')
+H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
+fails = 0
+def ok(c, what):
+  global fails
+  fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
+def sql(q, a=()):
+  d = sqlite3.connect(DB); r = d.execute(q, a).fetchall(); d.commit(); d.close(); return r
+def unthrottle():
+  try: sql('DELETE FROM attempts')
+  except Exception: pass
+def sent_lines():
+  try: return [json.loads(l) for l in open(SENT, encoding='utf-8') if l.strip()]
+  except OSError: return []
+def cron():
+  env = dict(os.environ, SWEEP_TEST_DB=DB)
+  return subprocess.run(['php', os.path.join(DEST, 'mail', 'send-cron.php')], capture_output=True, text=True, env=env, cwd=DEST)
+tag = '%06d' % random.randint(0, 999999)
+
+def trader(p, first, lang, email=None):
+  unthrottle()
+  ctx = p.request.new_context(base_url=B)
+  email = email or 'ml%s%s@t.dev' % (first.lower(), tag)
+  r = ctx.post('/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': email, 'consent': True, 'elapsed': 6000, 'lang': lang}), headers=H)
+  if r.status != 201: raise RuntimeError('sign-up refused: %s %s' % (r.status, r.text()[:80]))
+  ctx.post('/api/me/profile', data=json.dumps({'first_name': first, 'last_name': 'Mail', 'experience': 'gt1'}), headers=H)
+  return ctx, email
+
+with sync_playwright() as p:
+  a, ea = trader(p, 'Amelie', 'fr'); b, eb = trader(p, 'Bob', 'en'); c, ec = trader(p, 'Carl', 'en', 'bounce-hard%s@t.dev' % tag)
+  ok(a.get('/api/admin/mail', headers=H).status == 403, 'api/admin/mail: administrators only (403 for a trader)')
+  adm = p.request.new_context(base_url=B, storage_state=STATE)
+  had = sql("SELECT email FROM users WHERE username = 'mateo'")[0][0]
+  if not had: sql("UPDATE users SET email = ?, email_lc = ? WHERE username = 'mateo'", ('mateo-ml%s@t.dev' % tag, 'mateo-ml%s@t.dev' % tag))
+  try:
+    content = {'en': {'subject': 'News for {first} ' + tag, 'preheader': 'Two minutes', 'body': "# What is new\n\nHello {first}, read the [guide](https://makeitsweep.com/guide).\n\n[[Open Sweep|https://app.makeitsweep.com/#dashboard]]"},
+               'fr': {'subject': 'Du nouveau, {first} ' + tag, 'preheader': '', 'body': 'Salut {first}, voici le [guide](https://makeitsweep.com/guide).'}, 'es': {'subject': '', 'preheader': '', 'body': ''}}
+    cid = adm.post('/api/admin/mail/campaigns', data=json.dumps({'name': 'Test ' + tag, 'content': content, 'audience': {'joined': 1}}), headers=H).json()['id']
+    pv = adm.post('/api/admin/mail/preview', data=json.dumps({'content': content, 'lang': 'fr'}), headers=H).json()
+    ok(pv['subject'].startswith('Du nouveau, ') and 'api/m/' not in pv['html'] and 'Me désinscrire' in pv['html'], 'preview: the French version, nothing tracked (%s)' % pv['subject'][:40])
+    n0 = len(sent_lines())
+    tr = adm.post('/api/admin/mail/test', data=json.dumps({'content': content, 'lang': 'en'}), headers=H)
+    last = sent_lines()[-1] if len(sent_lines()) > n0 else {}
+    me = sql("SELECT email FROM users WHERE username = 'mateo'")[0][0]
+    ok(tr.status == 200 and last.get('subject', '').startswith('[Test] News for') and last.get('to') == me, 'test: to the administrator, at once (%s)' % last.get('to'))
+
+    br = p.chromium.launch()
+    shots = []
+    for w, hgt, mob, scheme in ((1300, 850, False, 'dark'), (390, 844, True, 'light'), (390, 844, True, 'dark'), (1300, 850, False, 'light')):
+      t = f'{w}px {scheme}'
+      ctx = br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': w, 'height': hgt}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme=scheme)
+      ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+      pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
+      pg.goto(B + '/#dashboard'); pg.wait_for_timeout(800)
+      pg.click('.who'); pg.wait_for_selector('#navMenu [data-navm="mail"]', timeout=8000)
+      ok(pg.inner_text('#navMenu [data-navm="mail"]').strip() == 'Courriels', f'{t} the menu: « Courriels » under Traders')
+      pg.click('#navMenu [data-navm="mail"]'); pg.wait_for_selector('#main .ml-kpis', timeout=15000); pg.wait_for_timeout(500)
+      ok(pg.inner_text('#title').strip() == 'Courriels' and pg.locator('#main .ml h2').count() == 0 and pg.locator('#main .ml-kpis .ux-m').count() == 5, f'{t} #mail: the title « Courriels » once, the 5 numbers of the last 30 days')
+      row = pg.locator(f'#main .ml-list a[href="#mail/{cid}"]')
+      ok(row.count() == 1 and 'Brouillon' in row.inner_text(), f'{t} the draft in the list, « Brouillon »')
+      ok('peuvent recevoir les campagnes' in pg.inner_text('#main .ml-two') and 'cette heure' in pg.inner_text('#main .ml-two'), f'{t} the list and the sending pace')
+      ov = pg.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+      ok(ov <= 0, f'{t} #mail: no horizontal scroll ({ov})')
+      pg.screenshot(path=f'{SHOTS}/e2e_mail_list_{w}_{scheme}.png', full_page=True); shots.append(f'list {w} {scheme}')
+      row.click(); pg.wait_for_selector('#main .ml-ed textarea', timeout=15000); pg.wait_for_timeout(700)
+      ok(pg.inner_text('.top-back').strip() == 'Courriels' and pg.get_attribute('.top-back', 'href') == '#mail', f'{t} a campaign: « ‹ Courriels » as the way back')
+      ok(pg.input_value('#main [data-mlf="name"]') == 'Test ' + tag and pg.locator('#main .ml-tabs .chip').count() == 3, f'{t} the editor: name, 3 language tabs')
+      pg.click('#main .ml-tabs [data-v="fr"]'); pg.wait_for_timeout(500)
+      ok(pg.input_value('#main [data-mlf="subject"]').startswith('Du nouveau'), f'{t} FR tab: the French subject')
+      if w == 1300 and scheme == 'dark':   # once: type, the toolbar, saved on its own
+        pg.fill('#main [data-mlf="subject"]', 'Du nouveau, {first} ? ' + tag)
+        pg.click('#main textarea[data-mlf="body"]'); pg.keyboard.press('End'); pg.keyboard.type(' ')
+        pg.click('#main .ml-tools [data-v="first"]'); pg.wait_for_timeout(1400)
+        ok(pg.input_value('#main textarea[data-mlf="body"]').endswith('{first}'), f'{t} toolbar « Prénom »: {{first}} at the cursor')
+        saved = adm.get(f'/api/admin/mail/campaigns/{cid}', headers=H).json()['campaign']['content']['fr']
+        ok(saved['body'].endswith('{first}') and saved['subject'].startswith('Du nouveau, {first} ?'), f'{t} saved on its own')
+      pg.wait_for_function("(()=>{const r=document.querySelector('#main [data-ml-prev]'); return r && r.shadowRoot && r.shadowRoot.textContent.includes('Du nouveau')})()", timeout=10000)
+      ok(True, f'{t} the preview: the email in its own shadow root')
+      cnt = pg.inner_text('#main [data-ml-count]')
+      ok(re.search(r'Rejoint \d+ traders', cnt) is not None, f'{t} the audience count ({cnt.strip()[:60]})')
+      ov = pg.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+      ok(ov <= 0, f'{t} editor: no horizontal scroll ({ov})')
+      pg.screenshot(path=f'{SHOTS}/e2e_mail_editor_{w}_{scheme}.png', full_page=True)
+      ok(not errs, f'{t} no page error {errs[:2]}')
+      ctx.close()
+
+    # send now, from the page (phone): the app's own window asks first
+    ctx = br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, device_scale_factor=2)
+    ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+    pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
+    pg.goto(B + f'/#mail/{cid}'); pg.wait_for_selector('#main .ml-ed [data-ml="now"]', timeout=15000); pg.wait_for_timeout(600)
+    pg.click('#main [data-ml="now"]'); pg.wait_for_selector('.nav-dlg [data-ask="1"]', timeout=8000)
+    ok('Envoyer « Test ' + tag in pg.inner_text('.nav-dlg'), 'send now: the app asks first (« Envoyer « … » à N traders ? »)')
+    pg.click('.nav-dlg [data-ask="1"]'); pg.wait_for_timeout(1500)
+    st = adm.get(f'/api/admin/mail/campaigns/{cid}', headers=H).json()['campaign']['status']
+    ok(st == 'scheduled', f'confirmed: scheduled for now ({st})')
+
+    # the sender: only this campaign's three lines are sent here (the dev database has many test traders)
+    n0 = len(sent_lines())
+    r = cron()
+    mine = (ea, eb, ec)
+    sql("UPDATE mail_queue SET state = 'skipped' WHERE campaign_id = ? AND state = 'queued' AND email NOT IN (?, ?, ?)", (cid, *mine))
+    for _ in range(4):
+      if not sql("SELECT COUNT(*) FROM mail_queue WHERE campaign_id = ? AND state = 'queued'", (cid,))[0][0]: break
+      cron()
+    got = {m['to']: m for m in sent_lines()[n0:]}
+    ok(r.returncode == 0 and ea in got and eb in got, f'mail/send-cron.php: sent ({r.stderr[:120]})')
+    ok(got.get(ea, {}).get('subject', '') == 'Du nouveau, Amelie ? ' + tag and got.get(eb, {}).get('subject', '') == 'News for Bob ' + tag, 'each trader in their language, with their first name')
+    hd = got.get(eb, {}).get('headers', {})
+    ok(hd.get('List-Unsubscribe-Post') == 'List-Unsubscribe=One-Click' and '/api/m/u/' in hd.get('List-Unsubscribe', ''), 'one-click unsubscribe headers')
+    ok(sql("SELECT state FROM mail_queue WHERE campaign_id = ? AND email = ?", (cid, ec))[0][0] == 'failed' and sql('SELECT reason FROM mail_suppress WHERE email_lc = ?', (ec,))[0][0] == 'hard', 'the refusing address: failed, set aside')
+    ok(sql('SELECT status FROM mail_campaigns WHERE id = ?', (cid,))[0][0] == 'sent', 'nothing left: the campaign is « sent »')
+    ok(any(t[0] == 'mail' for t in sql('SELECT task FROM cron_runs')), 'Admin › Health: the « mail » task recorded its run')
+
+    # opens, clicks, unsubscribe, bounce
+    tka, tkb = got[ea]['token'], got[eb]['token']
+    pub = p.request.new_context(base_url=B)
+    time.sleep(1)
+    o1 = pub.get(f'/api/m/o/{tka}', headers={'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15'})
+    o2 = pub.get(f'/api/m/o/{tkb}', headers={'User-Agent': 'Mozilla/5.0'})
+    ok(o1.status == 200 and o1.headers.get('content-type') == 'image/gif', 'the open image (a gif, never an error)')
+    link = re.search(r'href="([^"]*/api/m/c/' + tka + r'[^"]*)"', got[ea]['html']).group(1).replace('&amp;', '&')
+    path = urlparse(link).path + '?' + urlparse(link).query
+    c1 = pub.get(path, max_redirects=0)
+    ok(c1.status == 302 and c1.headers.get('location') == 'https://makeitsweep.com/guide', 'a tracked link: counted, then the real page')
+    c2 = pub.get(path.replace('&s=', '&s=0'), max_redirects=0)
+    ok(c2.status == 302 and 'makeitsweep.com/guide' not in c2.headers.get('location', '') and '127.0.0.1' in c2.headers.get('location', ''), 'a tampered link: home, not an open redirect')
+    u = pub.post(f'/api/m/u/{tkb}', form={'List-Unsubscribe': 'One-Click'})
+    ok(u.status == 200 and 'Subscribe again' in u.text(), 'one-click unsubscribe from the mail app: no session, no CSRF header (English page)')
+    ok(sql("SELECT marketing FROM email_prefs WHERE user_id = (SELECT id FROM users WHERE email_lc = ?)", (eb,))[0][0] == 0, 'unsubscribed: off the list')
+    rep = "Subject: Undelivered Mail Returned to Sender\nAction: failed\nStatus: 4.2.2\nDiagnostic-Code: smtp; 452 mailbox full\n\nX-Sweep-Id: " + tka + "\n"
+    bp = subprocess.run(['php', os.path.join(DEST, 'mail', 'bounce.php')], input=rep, capture_output=True, text=True, env=dict(os.environ, SWEEP_TEST_DB=DB), cwd=DEST)
+    ok(bp.returncode == 0 and bp.stdout == '' and sql("SELECT COUNT(*) FROM mail_events e JOIN mail_queue q ON q.id = e.queue_id WHERE q.token = ? AND e.type = 'soft_bounce'", (tka,))[0][0] == 1, 'mail/bounce.php: the report recorded, silent, exit 0')
+    s = adm.get(f'/api/admin/mail/campaigns/{cid}', headers=H).json()['stats']
+    ok(s['opens'] == 1 and s['opens_auto'] == 1 and s['clicks'] == 1 and s['unsubs'] == 1 and s['bounces'] == 1, 'numbers: 1 real open (+1 machine), 1 click, 1 unsubscribed, 1 bounce (%s)' % json.dumps({k: s[k] for k in ('sent', 'opens', 'opens_auto', 'clicks', 'unsubs', 'bounces')}))
+
+    # the numbers page
+    for w, hgt, mob, scheme in ((390, 844, True, 'dark'), (1300, 850, False, 'light')):
+      t = f'{w}px {scheme}'
+      cx = br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': w, 'height': hgt}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme=scheme)
+      cx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+      q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150]))
+      q.goto(B + f'/#mail/{cid}'); q.wait_for_selector('#main .ml-rep .ml-kpis', timeout=15000); q.wait_for_timeout(600)
+      txt = q.inner_text('#main .ml-rep')
+      ok('Envoyée' in txt and 'Livrés' in txt and 'Ouverts' in txt and 'Cliqués' in txt and 'Désinscrits' in txt, f'{t} the numbers page: delivered, opened, clicked, unsubscribed')
+      ok('ouverture' in txt and 'automatique' in txt and q.locator('#main .ml-bars rect').count() >= 48 and 'makeitsweep.com/guide' in txt, f'{t} machine opens apart, the 48 hours, the most clicked link')
+      ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+      ok(ov <= 0 and not er, f'{t} no horizontal scroll ({ov}), no page error {er[:2]}')
+      q.screenshot(path=f'{SHOTS}/e2e_mail_report_{w}_{scheme}.png', full_page=True)
+      cx.close()
+    ok(not errs, f'send page: no page error {errs[:2]}')
+    br.close()
+  finally:
+    if not had: sql("UPDATE users SET email = NULL, email_lc = NULL WHERE username = 'mateo'")
+print('screenshots: ' + SHOTS + '/e2e_mail_*.png')
+sys.exit(1 if fails else 0)
