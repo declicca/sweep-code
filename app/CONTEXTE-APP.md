@@ -1664,7 +1664,7 @@ Source : `docs/parcours/TOUR-VISUEL-2026-11-02.md` (hors git). Corrections en fi
 - **Contrôle du 3 nov. (382736f)** :
   - les 4 petites tuiles de Stats sont de nouveau traduites. Le libellé est traduit (`tr`) avant d'être coupé autour de son dernier mot ;
   - les dates sous les courbes du P&L et de drawdown ne se collent plus : une date qui toucherait la précédente est masquée ;
-  - les montants à gauche ont leur place (« 0 k $ » se lisait pour « −20 k $ ») ;
+  - les montants à gauche ont leur place (« 0 k $ » se lisait pour « −20 k $ »). Cette place est réservée à gauche du graphique, calculée d'après le nombre de caractères (Geist Mono) et avant le premier affichage : rien ne bouge ensuite (`e2e_page_shift`) ;
   - un graphique replié est mis à sa taille quand il s'ouvre ;
   - à 390 px, « Moins de 6 mois · 6 mois à 1 an · Plus d'un an » tiennent sur une ligne en FR ;
   - le graphique d'un trade garde 28 px libres à droite, pour que la dernière heure ne soit plus coupée.

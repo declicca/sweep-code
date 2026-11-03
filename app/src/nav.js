@@ -7667,17 +7667,22 @@ new window.SweepMO(() => {
     raf = 0;
     document.querySelectorAll('#main svg.chart').forEach((s) => {
       const vb = s.viewBox && s.viewBox.baseVal, w = s.getBoundingClientRect().width; if (!vb || !vb.width || !w) return;
-      const fs = (11 * vb.width / w).toFixed(1); if (s.dataset.fs !== fs) { s.dataset.fs = fs; s.style.setProperty('--ax-fs', fs + 'px'); }
-      // the dates under the chart at that size: one that would touch the one before it skips (« 12 oct.15 oct. » at the end, 3 Nov.)
+      const box = s.parentElement && s.parentElement.classList.contains('chartbox') ? s.parentElement : null, W0 = w + (box ? +(box.dataset.pl || 0) : 0);
+      const font = (px) => { const fs = (11 * vb.width / px).toFixed(1); if (s.dataset.fs !== fs) { s.dataset.fs = fs; s.style.setProperty('--ax-fs', fs + 'px'); } return +fs; };
+      // (3 Nov.) the amounts on the left, at 11 px, went past the chart's edge (« 0 k $ » for « −20 k $ »): room beside the chart for the
+      // widest, worked out from the width without that room (W0) and from its characters (Geist Mono, 0.6 em each: the same before and
+      // after the font loads), so the same on every pass: set once, before the chart is first shown
       const tx = [...s.querySelectorAll(':scope > text')], y = Math.max(...tx.map((t) => +t.getAttribute('y') || 0));
+      let pad = 0;
+      tx.filter((t) => +t.getAttribute('y') !== y && t.getAttribute('text-anchor') === 'end').forEach((t) => { const ax = +t.getAttribute('x') || 0, px = t.textContent.length * 6.6, k = ax / vb.width; if (k < 1) pad = Math.max(pad, Math.ceil((px + 2 - k * W0) / (1 - k))); });
+      if (box && +(box.dataset.pl || 0) !== pad) { box.dataset.pl = pad; box.style.paddingLeft = pad ? pad + 'px' : ''; s.style.overflow = pad ? 'visible' : ''; }   // (drawn in that room: past the drawing's own edge)
+      const fs = font(W0 - (box ? pad : 0));
+      // the dates under the chart at that size: one that would touch the one before it skips (« 12 oct.15 oct. » at the end, 3 Nov.)
       let right = -Infinity;
       tx.filter((t) => +t.getAttribute('y') === y).sort((a, b) => +a.getAttribute('x') - +b.getAttribute('x')).forEach((t) => {
         t.style.display = ''; const r = t.getBBox();
         if (r.x < right + fs * 0.6) t.style.display = 'none'; else right = r.x + r.width;
       });
-      // the amounts on the left at that size went past the chart's edge (« 0 k $ » for « −20 k $ »): room for them beside it
-      const lx = Math.min(0, ...tx.filter((t) => +t.getAttribute('y') !== y).map((t) => t.getBBox().x)), pad = lx < 0 ? Math.ceil(-lx * w / vb.width) + 2 : 0;
-      if (s.parentElement && s.parentElement.classList.contains('chartbox') && +(s.parentElement.dataset.pl || 0) !== pad) { s.parentElement.dataset.pl = pad; s.parentElement.style.paddingLeft = pad ? pad + 'px' : ''; s.style.overflow = pad ? 'visible' : ''; }
     });
   }
   const soon = () => { if (!raf) raf = requestAnimationFrame(fit); };
