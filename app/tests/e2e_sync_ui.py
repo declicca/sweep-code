@@ -1,7 +1,8 @@
 """
 Sweep — automatic sync, the screens (step 3), phone 390×844 (touch) and computer 1300×850, fr-CA; then EN and ES:
   python3 tests/e2e_sync_ui.py http://127.0.0.1:8095 [storage_state, unused: each case signs up its own trader]
-Settings › Data › Connections → Connect (a key shown once, the 3 steps) → executions pushed with that key (as the add-on) →
+Settings › Data › Connections → Connect (3 Nov.: no key made; the computer downloads the add-on with its key inside, the phone
+is told where to go and gets a key to paste through « New key ») → executions pushed with that key (as the add-on) →
 « 1 account found » → its sheet: the Sweep accounts, + New account, Ignore → the preview (1 to add, 1 typed by hand completed)
 → Link → the synced trades in the journal (the hand-typed one kept its notes), the NinjaTrader chip, « Edit » only changes the
 stop and target (the platform's prices stay exact), the account page says « Synced with NinjaTrader », a CSV row already synced
@@ -13,7 +14,7 @@ picked, one ignored), and a new account found later rings the bell, whose link o
 Quantower (2nd platform, open to every trader since 13 Oct.): shown once its add-on exists (sync/addon/SweepSync-Quantower.zip),
 its own block, connect sheet and key, its account found under it, linked, the Quantower chip and « Synced with Quantower ».
 """
-import json, os, sqlite3, sys, time
+import io, json, os, re, sqlite3, sys, time, zipfile
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from playwright.sync_api import sync_playwright
@@ -108,20 +109,30 @@ def case_fr(p, phone):
   settings(pg)
   sec = pg.locator('#main .sy-sec')
   ok(pg.evaluate("!!document.querySelector('#main details.nav-sgd[data-i=\"3\"] .sy-sec')") and 'Connexions' in sec.inner_text() and 'NinjaTrader 8' in sec.inner_text() and 'Tes trades arrivent seuls' in sec.inner_text(), f'{tag}: Réglages › Données › Connexions, NinjaTrader 8 not connected yet')
-  tap(pg, '#main .sy-sec [data-sy="connect"]'); pg.wait_for_selector('#sySheet.open .sy-key code', timeout=8000); pg.wait_for_timeout(500)
-  key = pg.inner_text('#sySheet .sy-key code').strip(); txt = pg.inner_text('#sySheet')
-  ok(key.startswith('swk_') and len(key) == 44 and 'Connecter NinjaTrader 8' in txt and 'Tools › Import › NinjaScript Add-On' in txt and 'ne peut jamais passer un ordre' in txt, f'{tag}: connect sheet: the key, the 3 steps, the key cannot trade')
-  dl = pg.evaluate("(async()=>{const a=document.querySelector('#sySheet a[download]'); if(!a) return null; const r=await fetch(a.href,{headers:{'X-Requested-With':'fetch'}}); const b=new Uint8Array(await r.arrayBuffer()); return [a.textContent.trim(), r.status, r.headers.get('content-type'), b.length, String.fromCharCode(b[0],b[1])]})()")
-  ok(dl and dl[0] == 'Télécharger' and dl[1] == 200 and dl[2] == 'application/zip' and dl[3] > 1000 and dl[4] == 'PK', f'{tag}: « Télécharger » gives the add-on (zip) ({dl})')
-  ok(in_screen(pg) == '', f'{tag}: connect sheet inside the screen ({in_screen(pg)})')
-  pg.screenshot(path=f'{SHOTS}/sync-connect-{tag}.png')
-  tap(pg, '#sySheet [data-sy="copy"]'); pg.wait_for_timeout(300)
+  # (3 Nov., brief CONNEXION-NINJATRADER) « Connecter » makes no key: the download carries it; on a phone, where to go instead
+  tap(pg, '#main .sy-sec [data-sy="connect"]'); pg.wait_for_selector('#sySheet.open .sy-main', timeout=8000); pg.wait_for_timeout(500)
+  txt = pg.inner_text('#sySheet')
+  ok(not pg.locator('#sySheet .sy-key').count() and api(pg)['connections'] == [], f'{tag}: « Connecter » makes no key, none shown')
+  if phone:
+    ok('Ouvre app.makeitsweep.com sur l’ordinateur où tourne NinjaTrader : Réglages › Connexions.' in txt and not pg.locator('#sySheet a[download]').count(), f'{tag}: phone: no download, the one line saying where to go')
+    ok(in_screen(pg) == '', f'{tag}: connect sheet inside the screen ({in_screen(pg)})')
+    pg.screenshot(path=f'{SHOTS}/sync-connect-{tag}.png')
+    key = ctx.request.post(B + '/api/sync/key', data=json.dumps({'platform': 'ninjatrader'}), headers=H).json()['key']   # « Nouvelle clé » (Gérer): a key to paste
+    never = 'Sweep n’a encore rien reçu de l’add-on. Dans NinjaTrader 8, ouvre Sweep Sync, colle ta clé puis Enregistrer'
+  else:
+    ok('Connecter NinjaTrader 8' in txt and 'Tools › Import › NinjaScript Add-On' in txt and 'Rien à coller : ta clé est dedans.' in txt and 'il ne peut jamais passer d’ordre' in txt and 'Colle ta clé' not in txt, f'{tag}: connect sheet: download, import, come back; nothing to paste')
+    key, ents = download(pg)
+    ok(sorted(ents) == ['AddOns/SweepSync.cs', 'Info.xml'] and key and api(pg)['connections'][0]['downloaded_at'] > 0, f'{tag}: « Télécharger » gives the add-on (Info.xml, AddOns/SweepSync.cs) with a key of the trader in it ({sorted(ents)})')
+    ok(in_screen(pg) == '', f'{tag}: connect sheet inside the screen ({in_screen(pg)})')
+    pg.screenshot(path=f'{SHOTS}/sync-connect-{tag}.png')
+    never = 'Sweep n’a encore rien reçu de l’add-on. Dans NinjaTrader : Tools › Import › NinjaScript Add-On avec le fichier téléchargé, puis Control Center › New › Sweep Sync'
   tap(pg, '#sySheet [data-sy="close"].sy-main'); pg.wait_for_timeout(500)
   ok(not pg.locator('#sySheet.open').count(), f'{tag}: « Terminé » closes the sheet')
   # (2 Nov.) the add-on never seen yet: the manage sheet says what to do, not « Add-on — · Vu pour la dernière fois : Jamais »
+  pg.evaluate("SweepSync.load()"); pg.wait_for_selector('#main .sy-sec [data-sy="manage"]', timeout=10000)
   tap(pg, '#main .sy-sec [data-sy="manage"]'); pg.wait_for_selector('#sySheet.open .sy-never', timeout=8000); pg.wait_for_timeout(600)
   mt = pg.inner_text('#sySheet')
-  ok('Sweep n’a encore rien reçu de l’add-on. Dans NinjaTrader 8, ouvre Sweep Sync, colle ta clé puis Enregistrer' in mt and 'Jamais' not in mt and 'Vu pour la dernière fois' not in mt and in_screen(pg) == '', f'{tag}: manage sheet, add-on never seen: what to do instead of « Jamais » ({in_screen(pg)})')
+  ok(never in mt and 'Jamais' not in mt and 'Vu pour la dernière fois' not in mt and in_screen(pg) == '', f'{tag}: manage sheet, add-on never seen: what to do instead of « Jamais » ({in_screen(pg)})')
   pg.screenshot(path=f'{SHOTS}/sync-never-{tag}.png')
   tap(pg, '#sySheet .sy-x'); pg.wait_for_timeout(500)
   # the add-on pushes (key only)
@@ -190,6 +201,13 @@ def case_fr(p, phone):
   br.close()
 
 def S_trades(pg): return pg.evaluate("S.trades.filter(t => !t.demo)")
+def api(pg): return pg.evaluate("fetch('api/sync',{headers:{'X-Requested-With':'fetch'}}).then(r=>r.json())")
+def download(pg):   # the sheet's « Télécharger »: the zip, its files, the key written in it
+  b = pg.evaluate("(async()=>{const a=document.querySelector('#sySheet a.sy-dl'); if(!a) return null; const r=await fetch(a.href,{headers:{'X-Requested-With':'fetch'}}); return r.ok ? Array.from(new Uint8Array(await r.arrayBuffer())) : null})()")
+  if not b: return None, {}
+  z = zipfile.ZipFile(io.BytesIO(bytes(b))); ents = {n: z.read(n).decode('utf-8') for n in z.namelist()}
+  m = re.search(r'public const string EmbeddedKey = "(swk_[0-9a-f]{40})";', ents.get('AddOns/SweepSync.cs', ''))
+  return (m.group(1) if m else None), ents
 
 def case_multi(p, phone):   # after the key: the sheet follows the add-on; several accounts linked at once; the bell
   tag = 'M' + ('390' if phone else '1300')
@@ -207,7 +225,7 @@ def case_multi(p, phone):   # after the key: the sheet follows the add-on; sever
   pg.screenshot(path=f'{SHOTS}/sync-live-{tag}.png')
   tap(pg, '#sySheet [data-sy="linkall"]'); pg.wait_for_selector('#sySheet.open .sy-all select', timeout=8000); pg.wait_for_timeout(400)
   rows = pg.eval_on_selector_all('#sySheet .sy-all-row', 'l => l.map(x => [x.querySelector("b").textContent, x.querySelector("select").value])')
-  ok(pg.inner_text('#sySheet .sy-head h2') == 'Relier mes comptes' and [r0 for r0, _ in rows] == ['APEX-555-01', 'APEX-777-02', 'PA-APEX-3-01'] and dict(rows)['APEX-777-02'] == 'acc-sy2' and dict(rows)['APEX-555-01'] == '', f'{tag}: all the accounts found at once; the Sweep account with the same name chosen already ({rows})')
+  ok(pg.inner_text('#sySheet .sy-head h2') == 'Relier mes comptes' and [r0 for r0, _ in rows] == ['APEX-555-01', 'APEX-777-02', 'PA-APEX-3-01'] and dict(rows)['APEX-777-02'] == 'acc-sy2' and dict(rows)['APEX-555-01'] == 'new', f'{tag}: all the accounts found at once; the Sweep account with the same name chosen already, else « New account » ({rows})')
   sel = pg.locator('#sySheet .sy-all-row').nth(0).locator('select'); sel.select_option('acc-sy'); pg.wait_for_timeout(300)
   pg.locator('#sySheet .sy-all-row').nth(2).locator('select').select_option('ignore'); pg.wait_for_timeout(300)
   until(pg, "[...document.querySelectorAll('#sySheet .sy-all-pv')].length === 2 && ![...document.querySelectorAll('#sySheet .sy-all-pv')].some(x => x.textContent.includes('Chargement'))", 10)
@@ -287,10 +305,11 @@ def case_lang(p, lang):   # the section, the sheets and the preview in English a
   W = {'en': ['Connections', 'Your trades arrive on their own', 'Connect'], 'es': ['Conexiones', 'Tus operaciones llegan solas', 'Conectar']}[lang]
   s = pg.inner_text('#main .sy-sec')
   ok(all(w in s for w in W), f'{lang}: Connections section translated')
-  tap(pg, '#main .sy-sec [data-sy="connect"]'); pg.wait_for_selector('#sySheet.open .sy-key code', timeout=8000)
-  key = pg.inner_text('#sySheet .sy-key code').strip(); txt = pg.inner_text('#sySheet')
-  ok(({'en': 'Paste your key', 'es': 'Pega tu clave'}[lang]) in txt and 'Colle' not in txt and (lang == 'en' or 'Paste' not in txt), f'{lang}: connect sheet translated')
+  tap(pg, '#main .sy-sec [data-sy="connect"]'); pg.wait_for_selector('#sySheet.open .sy-phone', timeout=8000)
+  txt = pg.inner_text('#sySheet')
+  ok(({'en': 'Open app.makeitsweep.com on the computer where NinjaTrader runs: Settings › Connections.', 'es': 'Abre app.makeitsweep.com en el ordenador donde corre NinjaTrader: Ajustes › Conexiones.'}[lang]) in txt and 'Ouvre' not in txt, f'{lang}: connect sheet (phone) translated')
   tap(pg, '#sySheet [data-sy="close"].sy-main')
+  key = ctx.request.post(B + '/api/sync/key', data=json.dumps({'platform': 'ninjatrader'}), headers=H).json()['key']
   ctx.request.post(B + '/api/sync/push', data=json.dumps({'fills': FILLS}), headers={'Content-Type': 'application/json', 'X-Sweep-Key': key})
   pg.evaluate("SweepSync.load()"); pg.wait_for_timeout(600)
   tap(pg, '#main .sy-sec .sy-found [data-sy="linkall"]'); tap(pg, '#sySheet [data-sy="pick"][data-v="acc-sy"]'); pg.wait_for_selector('#sySheet .sy-pv li:not(.muted)', timeout=8000)
@@ -315,9 +334,11 @@ def case_trader(p):   # every trader sees Connections (the beta for administrato
   blocks = pg.eval_on_selector_all('#main .sy-sec .sy-plat', 'l => l.map(x => x.dataset.p)')
   ok(blocks == ['ninjatrader', 'quantower'], f'a trader sees NinjaTrader 8 and Quantower in Connections ({blocks})')
   pg.goto(B + '/#import'); pg.wait_for_selector('#main .sy-tip [data-sy="connect"]', timeout=20000)
-  tap(pg, '#main .sy-tip [data-sy="connect"]'); pg.wait_for_selector('#sySheet.open .sy-key code', timeout=8000)
-  ok(pg.inner_text('#sySheet .sy-key code').startswith('swk_'), 'the invitation\'s « Connecter » opens the connect sheet with the key')
-  tap(pg, '#sySheet [data-sy="close"].sy-main'); pg.goto(B + '/#accounts'); pg.goto(B + '/#import'); pg.wait_for_timeout(1500)
+  tap(pg, '#main .sy-tip [data-sy="connect"]'); pg.wait_for_selector('#sySheet.open .sy-phone', timeout=8000)
+  ok(pg.locator('#sySheet .sy-key').count() == 0, 'the invitation\'s « Connecter » opens the connect sheet (phone: where to go, no key)')
+  tap(pg, '#sySheet [data-sy="close"].sy-main')
+  ctx.request.get(B + '/api/sync/addon?platform=ninjatrader', headers=H)   # downloaded on the computer
+  pg.evaluate("SweepSync.load(true)"); pg.goto(B + '/#accounts'); pg.goto(B + '/#import'); pg.wait_for_timeout(1500)
   ok(pg.locator('#main .sy-tip').count() == 0 and pg.locator('#main #drop').count() == 1 and not errs, 'connected: no more invitation on the import page')
   br.close()
 

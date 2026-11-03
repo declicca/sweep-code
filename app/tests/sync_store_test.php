@@ -183,7 +183,7 @@ $ad = sync_admin($pdo); $row = function (string $uid, string $pl) use ($ad) { fo
 $q1 = $row('u1', 'quantower'); $n1 = $row('u1', 'ninjatrader'); $q2 = $row('u2', 'quantower');
 ok($q1 && $q1['state'] === 'ok' && $q1['name'] === 'Lea Test' && $q1['email'] === 'lea@t.dev' && $q1['client'] === 'Sweep Quantower test' && $q1['accounts'] === ['new' => 1, 'linked' => 1, 'ignored' => 0] && $q1['trades'] === 1 && $q1['trades_7d'] === 1 && $q1['last_seen_at'] > 0, 'Admin › Sync: Quantower, linked and writing trades → « ok » (1 linked, 1 to link, 1 trade)');
 ok($n1 && $n1['state'] === 'error' && in_array('limit', $n1['errors'], true), 'Admin › Sync: NinjaTrader 8 with an account over the record limit → « error » (limit)');
-ok($q2 && $q2['state'] === 'never' && $q2['last_seen_at'] === null && $q2['team'] === true && $q2['name'] === 'max@t.dev', 'Admin › Sync: a key never used by the add-on → « never »; an internal trader is marked team');
+ok($q2 && $q2['state'] === 'key_only' && $q2['downloaded_at'] === null && $q2['last_seen_at'] === null && $q2['team'] === true && $q2['name'] === 'max@t.dev', 'Admin › Sync: a key to paste never used by the add-on → « key_only »; an internal trader is marked team');
 ok(array_search($q2, $ad['rows'], true) > array_search($q1, $ad['rows'], true) && $ad['platforms']['quantower'] === ['traders' => 2, 'seen_24h' => 1, 'linked' => 1, 'trades_7d' => 1] && $ad['platforms']['ninjatrader']['traders'] === 1, 'Admin › Sync: most recently seen first; per platform: traders, seen within 24 h, accounts linked, trades in 7 days');
 $js = json_encode($ad);
 ok(!str_contains($js, 'swk_') && !str_contains($js, $k3['hint']) && !str_contains($js, 'key_hash') && !str_contains($js, '21004'), 'Admin › Sync: never a key, a key hint or an execution');
@@ -201,6 +201,31 @@ $k4 = sync_new_key($pdo, 'u2', 'ninjatrader');
 $r4 = sync_receive($pdo, sync_auth($pdo, $k4['key']), ['client' => 'Sweep NT8 1.2.0', 'accounts' => [['name' => '1234567', 'connection' => 'Rithmic'], ['name' => 'Sim101']], 'fills' => [$fill('d1', '1234567', 'buy', 1, 21000, '2026-10-09 10:00:00')]]);
 $c4 = $pdo->query("SELECT client, last_seen_at FROM sync_connections WHERE user_id = 'u2' AND platform = 'ninjatrader' AND status = 'active'")->fetch();
 ok(!empty($r4['ok']) && $r4['new'] === 1 && $r4['accounts'][0] === ['name' => '1234567', 'state' => 'new'] && $sa('u2', '1234567') && $c4['client'] === 'Sweep NT8 1.2.0' && (int) $c4['last_seen_at'] > 0, 'an account named « 1234567 » is received like any other (the add-on is seen, the account found, its execution kept)');
+
+// 14e. (3 Nov., brief CONNEXION-NINJATRADER) the download carries the key: nothing to paste, the earlier keys keep working
+$pdo->exec("INSERT INTO users (id) VALUES ('u3')");
+$zf = sync_addon_zip($pdo, 'u3', 'ninjatrader');
+$ze = []; if ($zf) { $z = new ZipArchive(); $z->open($zf); for ($i = 0; $i < $z->numFiles; $i++) $ze[$z->getNameIndex($i)] = $z->getFromIndex($i); $z->close(); @unlink($zf); }
+ok(isset($ze['Info.xml'], $ze['AddOns/SweepSync.cs']) && count($ze) === 2 && str_contains($ze['Info.xml'], '<Version>8.1.0.0</Version>'), 'download: the zip holds Info.xml and AddOns/SweepSync.cs');
+ok(preg_match('/public const string EmbeddedKey = "(swk_[0-9a-f]{40})";/', $ze['AddOns/SweepSync.cs'] ?? '', $km) === 1 && str_contains($ze['AddOns/SweepSync.cs'], 'Version = "1.3.0"'), 'download: the add-on (1.3.0) carries a key in EmbeddedKey');
+$kd1 = $km[1] ?? '';
+$hello = sync_receive($pdo, sync_auth($pdo, $kd1) ?? ['id' => '', 'user_id' => '', 'platform' => 'ninjatrader'], ['client' => 'Sweep NT8 1.3.0', 'accounts' => [], 'fills' => []]);
+$cd = $pdo->query("SELECT * FROM sync_connections WHERE key_hash = '" . hash('sha256', $kd1) . "'")->fetch();
+ok(sync_auth($pdo, $kd1) !== null && !empty($hello['ok']) && $cd['user_id'] === 'u3' && (int) $cd['downloaded_at'] > 0 && (int) $cd['last_seen_at'] > 0 && $cd['client'] === 'Sweep NT8 1.3.0', 'download: a « hello » sent with that key is accepted (the trader\'s add-on, seen)');
+$zf2 = sync_addon_zip($pdo, 'u3', 'ninjatrader'); $z = new ZipArchive(); $z->open($zf2); preg_match('/EmbeddedKey = "(swk_[0-9a-f]{40})"/', (string) $z->getFromName('AddOns/SweepSync.cs'), $km2); $z->close(); @unlink($zf2);
+$kd2 = $km2[1] ?? '';
+ok($kd2 !== '' && $kd2 !== $kd1 && sync_auth($pdo, $kd1) !== null && sync_auth($pdo, $kd2) !== null, 'a 2nd download: a new key, and both keys are accepted');
+$st3 = sync_status($pdo, 'u3');
+ok(count($st3['connections']) === 1 && $st3['connections'][0]['last_seen_at'] > 0 && $st3['addons']['ninjatrader']['embed'] === true && $st3['addons']['quantower']['embed'] === false, 'Connections: one NinjaTrader 8 connection (the key seen), its add-on carries the key; Quantower\'s does not');
+$pdo->exec("UPDATE sync_connections SET last_seen_at = NULL WHERE user_id = 'u3'");
+$a3 = null; foreach (sync_admin($pdo)['rows'] as $r) if ($r['user_id'] === 'u3') { ok($a3 === null, 'Admin › Sync: one row per trader and platform, whatever the number of keys'); $a3 = $r; }
+ok($a3 && $a3['state'] === 'downloaded' && $a3['downloaded_at'] >= (int) $cd['downloaded_at'], 'Admin › Sync: downloaded, never seen → « downloaded », with the time of the download');
+sync_revoke($pdo, 'u3', 'ninjatrader');
+ok(sync_auth($pdo, $kd1) === null && sync_auth($pdo, $kd2) === null, '« Stop the sync »: no key of the downloads is accepted any more');
+$k5 = sync_new_key($pdo, 'u3', 'ninjatrader'); $zf3 = sync_addon_zip($pdo, 'u3', 'ninjatrader'); @unlink((string) $zf3); $k6 = sync_new_key($pdo, 'u3', 'ninjatrader');
+ok(sync_auth($pdo, $k5['key']) === null && sync_auth($pdo, $k6['key']) !== null && (int) $pdo->query("SELECT COUNT(*) FROM sync_connections WHERE user_id = 'u3' AND status = 'active'")->fetchColumn() === 1, '« New key » (to paste): the earlier keys, downloaded ones too, stop at once');
+define('SYNC_NO_EMBED', true);
+ok(sync_addon_zip($pdo, 'u3', 'ninjatrader') === null && sync_status($pdo, 'u3')['addons']['ninjatrader']['embed'] === false && (int) $pdo->query("SELECT COUNT(*) FROM sync_connections WHERE user_id = 'u3' AND status = 'active'")->fetchColumn() === 1, 'without ZipArchive: no zip made, no key made, the key to paste as before');
 
 // 15. a trader deletes their Sweep account: everything of the sync goes
 sync_delete_user($pdo, 'u1');

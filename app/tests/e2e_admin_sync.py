@@ -1,10 +1,12 @@
 """
 Sweep — Admin › Sync, dev environment with Playwright:
   python3 tests/e2e_admin_sync.py http://127.0.0.1:8095 /tmp/show_state.json      (SWEEP_TEST_DB: the dev server's SQLite file)
-Two traders of its own: one linked a Quantower account and has a synced trade, one created a NinjaTrader 8 key the add-on
-never used. On the Admin page (an administrator, fr-CA, computer 1300×850 and phone 390×844):
+Three traders of its own: one linked a Quantower account and has a synced trade, one created a NinjaTrader 8 key to paste the
+add-on never used, one downloaded the NinjaTrader 8 add-on (its key inside, 3 Nov.) that never called. On the Admin page (an
+administrator, fr-CA, computer 1300×850 and phone 390×844):
  - « Synchro » comes after « Préréglages », with one card per platform (traders, seen within 24 h, accounts linked, trades in 7 d);
- - one line per key: name, platform, state chip (blue « Synchronise », gold « Add-on jamais vu »), email, add-on version,
+ - one line per trader and platform: name, platform, state chip (blue « Synchronise », gold « Clé créée, pas téléchargé » or
+   « Téléchargé, jamais vu » with the time of the download), email, add-on version,
    seen how long ago, accounts and trades, the contracts received with the instrument Sweep reads (MNQZ6 → MNQ), one it does
    not recognize in red (a ProjectX-style name), also in an alert above; and what a gold state means;
  - never a key; only administrators can read it; no horizontal scroll, no page error.
@@ -48,9 +50,13 @@ with sync_playwright() as p:
   sid = [x for x in a.get('/api/sync', headers=H).json()['accounts'] if x['name'] == 'APEX-901-01'][0]['id']
   ln = a.post('/api/sync/accounts/' + sid, data=json.dumps({'action': 'link', 'account_id': 'acc-as'}), headers=H).json()
   ok(r.status == 200 and ln.get('ok') and ln.get('created') == 1, 'trader A: Quantower key, executions pushed, account linked (1 trade)')
-  # B: a NinjaTrader 8 key the add-on never used → « Add-on jamais vu »
+  # B: a NinjaTrader 8 key to paste, the add-on never used → « Clé créée, pas téléchargé »
   b, eb = trader(p, 'Bruno')
   ok(b.post('/api/sync/key', data=json.dumps({'platform': 'ninjatrader'}), headers=H).status == 200, 'trader B: a NinjaTrader 8 key, never used')
+  # C (3 Nov.): the add-on downloaded with its key, never seen → « Téléchargé, jamais vu », with the time of the download
+  c, ec = trader(p, 'Chloe')
+  zr = c.get('/api/sync/addon?platform=ninjatrader', headers=H)
+  ok(zr.status == 200 and zr.body()[:2] == b'PK' and len(c.get('/api/sync', headers=H).json()['connections']) == 1, 'trader C: the NinjaTrader 8 add-on downloaded (its key made by the download)')
   # a trader who is not an administrator cannot read it
   ok(b.get('/api/admin/sync', headers=H).status == 403, 'api/admin/sync: administrators only (403 for a trader)')
 
@@ -74,7 +80,9 @@ with sync_playwright() as p:
     alert = pg.inner_text('#main .ux-sync-admin [data-sy-alert]') if pg.locator('#main .ux-sync-admin [data-sy-alert]').count() else ''
     ok(unk and unk[0] == 'Contrats (30 j) : MNQZ6 → MNQ' and unk[1] == 'Non reconnu(s) : CON.F.US.ZZZ.Z25' and unk[2] == 'rgb(200, 30, 30)', f'{tag} trader A: contracts received (MNQZ6 → MNQ) and the one Sweep does not recognize, in red ({unk})')
     ok('CON.F.US.ZZZ.Z25 (Quantower)' in alert and 'gardent le bon P&L, pas le bon instrument' in alert, f'{tag} alert above the list: the contracts Sweep does not recognize ({alert[:120]})')
-    ok(rb and rb['c'] == 'ux-hl-late' and rb['chip'] == 'Add-on jamais vu' and 'NinjaTrader 8' in rb['t'] and 'installé ? clé collée ?' in rb['t'], f'{tag} trader B: gold « Add-on jamais vu », NinjaTrader 8, what to check ({rb and rb["t"][:140]})')
+    ok(rb and rb['c'] == 'ux-hl-late' and rb['chip'] == 'Clé créée, pas téléchargé' and 'NinjaTrader 8' in rb['t'] and 'installé ? clé collée' in rb['t'], f'{tag} trader B: gold « Clé créée, pas téléchargé », NinjaTrader 8, what to check ({rb and rb["t"][:140]})')
+    rc = row(ec)
+    ok(rc and rc['c'] == 'ux-hl-late' and rc['chip'] == 'Téléchargé, jamais vu' and 'téléchargé ' in rc['t'] and 'Tools › Import › NinjaScript Add-On' in rc['t'], f'{tag} trader C: gold « Téléchargé, jamais vu », when it was downloaded, where to look ({rc and rc["t"][:160]})')
     order = pg.evaluate("(a)=>{const l=[...document.querySelectorAll('#main .ux-sy-list li')].map(x=>x.innerText); return [l.findIndex(t=>t.includes(a[0])), l.findIndex(t=>t.includes(a[1]))]}", [ea, eb])
     ok(0 <= order[0] < order[1], f'{tag} most recently seen first (A before B: {order})')
     ok('swk_' not in pg.inner_text('#main .ux-sync-admin'), f'{tag} never a key')
@@ -84,6 +92,6 @@ with sync_playwright() as p:
     pg.screenshot(path=f'{SHOTS}/admin-sync-{w}.png')
     ctx.close()
   br.close()
-  a.dispose(); b.dispose()
+  a.dispose(); b.dispose(); c.dispose()
 print('\n%s' % ('%d failed' % fails if fails else 'all passed'))
 sys.exit(1 if fails else 0)

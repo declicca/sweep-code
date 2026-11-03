@@ -95,7 +95,7 @@ ok(d1[0] == 200 and d1[1] == 'application/zip' and d1[2] == b'PK' and st['addons
 
 # heartbeat (no executions) and a revoked key
 ok(call(bare, 'POST', 'api/sync/push', {'client': 'Sweep NT8 test', 'fills': []}, AK)[0] == 200, 'heartbeat without executions → 200')
-ok(call(web, 'DELETE', 'api/sync/key?platform=ninjatrader', None, H)[1].get('revoked') == 1, 'stop the sync (key revoked)')
+ok(call(web, 'DELETE', 'api/sync/key?platform=ninjatrader', None, H)[1].get('revoked') == 2, 'stop the sync: every key revoked (the one pasted and the one of the download above, 3 Nov.)')
 ok(call(bare, 'POST', 'api/sync/push', push, AK)[0] == 401, 'the revoked key no longer works')
 s, data3 = call(web, 'GET', 'api/data', None, H)
 ok(len([x for x in data3.get('trades', []) if x.get('source') == 'ninjatrader']) == 1, 'the synced trade stays after stopping (it is the trader\'s)')

@@ -27,6 +27,8 @@ using NinjaTrader.Gui.Tools;
 //  - times are sent in UTC (milliseconds), converted from the time zone set in Tools > Options > General;
 //  - no connection: the executions wait and are sent later (waiting longer after each failure, 5 minutes at most);
 //  - (1.2.0) every failure is written in NinjaScript Output: HTTP code, Sweep's message, URL, the key's last 4 characters only.
+//  - (1.3.0) the add-on downloaded from Sweep carries the trader's key (EmbeddedKey, written by Sweep in the download): nothing
+//    to paste. It is used at start when no key is saved, or when this download is newer than the one the saved key came from.
 namespace NinjaTrader.NinjaScript.AddOns
 {
 	public class SweepSync : AddOnBase
@@ -77,7 +79,8 @@ namespace NinjaTrader.NinjaScript.AddOns
 	/// <summary>The sync itself: one instance for the whole platform (a recompile ends it and starts it again).</summary>
 	public static class SweepSyncEngine
 	{
-		public const string Version = "1.2.0";
+		public const string Version = "1.3.0";
+		public const string EmbeddedKey = "";   // filled in by Sweep in each download (sync/sync-routes.php); empty in the source
 		private const string DefaultUrl = "https://app.makeitsweep.com/api/sync/push";
 		private const int MaxPerPush = 500;
 		private static readonly object Gate = new object();
@@ -92,6 +95,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 		private static DateTime nextHello = DateTime.MinValue;
 
 		public static string Key = "";
+		private static string Seed = "";   // the embedded key the saved key came from (config.txt « seed= »)
 		public static string Url = DefaultUrl;
 		public static DateTime LastOk = DateTime.MinValue;
 		public static DateTime LastTry = DateTime.MinValue;
@@ -379,8 +383,15 @@ namespace NinjaTrader.NinjaScript.AddOns
 					foreach (string line in File.ReadAllLines(cfg))
 					{
 						if (line.StartsWith("key=")) Key = line.Substring(4).Trim();
+						else if (line.StartsWith("seed=")) Seed = line.Substring(5).Trim();
 						else if (line.StartsWith("url=") && line.Length > 4) Url = line.Substring(4).Trim();   // tests only: another Sweep server
 					}
+				// the key of the download: a first install, or a new download imported over an older one
+				if (Regex.IsMatch(EmbeddedKey, "^swk_[0-9a-f]{40}$") && (string.IsNullOrEmpty(Key) || Seed != EmbeddedKey))
+				{
+					Key = EmbeddedKey; Seed = EmbeddedKey; SaveConfig();
+					Log("key from the download (key ..." + Hint + ")");
+				}
 				string q = Path.Combine(Folder, "queue.txt");
 				if (File.Exists(q))
 					lock (Gate)
@@ -399,6 +410,7 @@ namespace NinjaTrader.NinjaScript.AddOns
 			{
 				Directory.CreateDirectory(Folder);
 				List<string> lines = new List<string> { "key=" + Key };
+				if (Seed != "") lines.Add("seed=" + Seed);
 				if (Url != DefaultUrl) lines.Add("url=" + Url);
 				WriteAll(Path.Combine(Folder, "config.txt"), lines);
 			}

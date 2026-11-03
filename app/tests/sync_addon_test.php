@@ -24,6 +24,10 @@ ok(array_keys($entries) === ['Info.xml', 'AddOns/SweepSync.cs'] || (isset($entri
 ok(str_contains($entries['Info.xml'] ?? '', '<Version>8.1.0.0</Version>'), 'Info.xml: made for NinjaTrader 8.1');
 ok(($entries['AddOns/SweepSync.cs'] ?? '') === str_replace("\n", "\r\n", str_replace("\r\n", "\n", $cs)), 'the zip is up to date with sync/addon/SweepSync.cs (else: python3 -I tools/addon-zip.py)');
 
+// (1.3.0) the key of the download: empty in the source (each download writes its own), used at start when none is saved
+ok(substr_count($cs, 'public const string EmbeddedKey = "";') === 1 && str_contains($store, 'public const string EmbeddedKey = "";'), 'EmbeddedKey: empty in the source, the exact line the server fills in');
+ok(str_contains($cs, 'Regex.IsMatch(EmbeddedKey, "^swk_[0-9a-f]{40}$") && (string.IsNullOrEmpty(Key) || Seed != EmbeddedKey)'), 'the add-on takes the key of its download when none is saved, or when the download is newer');
+
 // what the add-on sends = what the server reads
 foreach (['id', 'account', 'contract', 'side', 'qty', 'price', 'ts', 'fee', 'point_value'] as $k)
     ok(str_contains($cs, '\"' . $k . '\":') && preg_match("/\\['" . $k . "'\\]/", $store) === 1, "execution field « $k »: sent by the add-on, read by the server");

@@ -71,6 +71,8 @@ function sync_schema(PDO $pdo): void
            PRIMARY KEY (user_id, src_doc, account_id))',
     ];
     foreach ($sql as $s) $pdo->exec($s);
+    // (3 Nov.) when the add-on was downloaded with this key in it (null: a key made to be pasted, before 1.3.0 or without ZipArchive)
+    try { $pdo->query('SELECT downloaded_at FROM sync_connections LIMIT 0'); } catch (Throwable $e) { $pdo->exec('ALTER TABLE sync_connections ADD COLUMN downloaded_at INT NULL'); }
 }
 
 /** one write at a time (SQLite: the lock is taken at the start, so two pushes never build the same trade twice) */
@@ -84,15 +86,44 @@ function sync_tx(PDO $pdo, callable $fn)
 
 /* ---------------- the personal key ---------------- */
 
-/** a new key for a platform, shown once; the previous one stops working at once */
-function sync_new_key(PDO $pdo, string $uid, string $platform): array
+/**
+ * a new key for a platform. To paste (« New key »): shown once, the previous ones stop working at once. In a download
+ * ($download): written in the add-on, the previous ones keep working (a 2nd download, a 2nd computer) until « Stop the sync »
+ */
+function sync_new_key(PDO $pdo, string $uid, string $platform, bool $download = false): array
 {
     sync_schema($pdo);
     $key = 'swk_' . bin2hex(random_bytes(20)); $now = time(); $id = 'sc_' . bin2hex(random_bytes(8));
-    sync_q($pdo, "UPDATE sync_connections SET status = 'revoked', revoked_at = ? WHERE user_id = ? AND platform = ? AND status = 'active'", [$now, $uid, $platform]);
-    sync_q($pdo, 'INSERT INTO sync_connections (id, user_id, platform, key_hash, key_hint, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [$id, $uid, $platform, hash('sha256', $key), substr($key, -4), 'active', $now]);
+    if (!$download) sync_q($pdo, "UPDATE sync_connections SET status = 'revoked', revoked_at = ? WHERE user_id = ? AND platform = ? AND status = 'active'", [$now, $uid, $platform]);
+    sync_q($pdo, 'INSERT INTO sync_connections (id, user_id, platform, key_hash, key_hint, status, created_at, downloaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [$id, $uid, $platform, hash('sha256', $key), substr($key, -4), 'active', $now, $download ? $now : null]);
     return ['id' => $id, 'platform' => $platform, 'key' => $key, 'hint' => substr($key, -4)];
+}
+/** the add-ons that carry the trader's key in their download (NinjaTrader 8, 1.3.0); without ZipArchive: the key to paste, as before */
+function sync_can_embed(string $platform): bool
+{
+    return $platform === 'ninjatrader' && class_exists('ZipArchive') && !defined('SYNC_NO_EMBED') && is_file(SYNC_ADDONS[$platform]);
+}
+/**
+ * the NinjaTrader 8 add-on with a new key of the trader in it (EmbeddedKey in AddOns/SweepSync.cs): a zip in a temporary file,
+ * or null when it cannot be made (then nothing was created)
+ */
+function sync_addon_zip(PDO $pdo, string $uid, string $platform): ?string
+{
+    if (!sync_can_embed($platform)) return null;
+    $src = new ZipArchive(); if ($src->open(SYNC_ADDONS[$platform]) !== true) return null;
+    $files = []; for ($i = 0; $i < $src->numFiles; $i++) { $nm = (string) $src->getNameIndex($i); $files[$nm] = (string) $src->getFromIndex($i); }
+    $src->close();
+    $cs = $files['AddOns/SweepSync.cs'] ?? '';
+    if (!isset($files['Info.xml']) || substr_count($cs, 'public const string EmbeddedKey = "";') !== 1) return null;
+    $tmp = tempnam(sys_get_temp_dir(), 'swz'); if ($tmp === false) return null;
+    $k = sync_new_key($pdo, $uid, $platform, true);
+    $files['AddOns/SweepSync.cs'] = str_replace('public const string EmbeddedKey = "";', 'public const string EmbeddedKey = "' . $k['key'] . '";', $cs);
+    $z = new ZipArchive();
+    if ($z->open($tmp, ZipArchive::OVERWRITE) !== true) { sync_q($pdo, 'DELETE FROM sync_connections WHERE id = ?', [$k['id']]); @unlink($tmp); return null; }
+    foreach ($files as $nm => $data) $z->addFromString($nm, $data);
+    $z->close();
+    return $tmp;
 }
 function sync_revoke(PDO $pdo, string $uid, string $platform): int
 {
@@ -632,20 +663,25 @@ function sync_set_state(PDO $pdo, string $uid, string $sid, string $state): arra
 function sync_status(PDO $pdo, string $uid): array
 {
     sync_schema($pdo);
-    $conns = [];
-    foreach (sync_q($pdo, "SELECT platform, key_hint, status, client, last_seen_at, last_push_at, created_at FROM sync_connections WHERE user_id = ? AND status = 'active' ORDER BY created_at", [$uid]) as $c)
-        $conns[] = ['platform' => $c['platform'], 'hint' => $c['key_hint'], 'client' => $c['client'], 'last_seen_at' => $c['last_seen_at'] === null ? null : (int) $c['last_seen_at'], 'last_push_at' => $c['last_push_at'] === null ? null : (int) $c['last_push_at'], 'created_at' => (int) $c['created_at']];
+    $conns = [];   // one per platform: the key last seen, else the newest (several keys live after several downloads)
+    foreach (sync_q($pdo, "SELECT platform, key_hint, status, client, last_seen_at, last_push_at, created_at, downloaded_at FROM sync_connections WHERE user_id = ? AND status = 'active' ORDER BY created_at", [$uid]) as $c) {
+        $row = ['platform' => $c['platform'], 'hint' => $c['key_hint'], 'client' => $c['client'], 'last_seen_at' => $c['last_seen_at'] === null ? null : (int) $c['last_seen_at'], 'last_push_at' => $c['last_push_at'] === null ? null : (int) $c['last_push_at'], 'created_at' => (int) $c['created_at'], 'downloaded_at' => $c['downloaded_at'] === null ? null : (int) $c['downloaded_at']];
+        $o = $conns[$c['platform']] ?? null;
+        if ($o === null || [(int) $row['last_seen_at'], $row['created_at']] >= [(int) $o['last_seen_at'], $o['created_at']]) $conns[$c['platform']] = $row;
+    }
+    $conns = array_values($conns);
     $n = []; foreach (sync_q($pdo, 'SELECT sync_account_id, COUNT(*) n FROM sync_trades WHERE user_id = ? GROUP BY sync_account_id', [$uid]) as $r) $n[$r['sync_account_id']] = (int) $r['n'];
     $accts = [];
     foreach (sync_q($pdo, 'SELECT * FROM sync_accounts WHERE user_id = ? ORDER BY created_at, ext_id', [$uid]) as $a)
         $accts[] = ['id' => $a['id'], 'platform' => $a['platform'], 'name' => $a['ext_id'], 'info' => json_decode((string) $a['info'], true) ?: null, 'guess' => sync_guess((string) $a['ext_id'], (string) $a['platform']) ?: null,
             'state' => $a['state'], 'account_id' => $a['account_id'], 'trades' => $n[$a['id']] ?? 0, 'last_fill_at' => $a['last_fill_at'] === null ? null : (int) $a['last_fill_at'], 'error' => $a['last_error']];
-    $addons = []; foreach (SYNC_ADDONS as $pl => $f) $addons[$pl] = is_file($f) ? ['url' => 'api/sync/addon?platform=' . $pl, 'size' => filesize($f)] : null;
+    $addons = []; foreach (SYNC_ADDONS as $pl => $f) $addons[$pl] = is_file($f) ? ['url' => 'api/sync/addon?platform=' . $pl, 'size' => filesize($f), 'embed' => sync_can_embed($pl)] : null;
     return ['connections' => $conns, 'accounts' => $accts, 'addons' => $addons];
 }
 /**
  * Admin › Sync: per platform (traders with a key, add-on seen within 24 h, accounts linked, trades written in 7 days), then one
- * row per active key, most recently seen first, with where the trader is: never (key made, add-on never seen), no_accounts
+ * row per trader and platform (their active keys together), most recently seen first, with where the trader is: key_only (a key
+ * made to be pasted, add-on never seen), downloaded (the add-on downloaded with its key, never seen; downloaded_at), no_accounts
  * (add-on seen, no account found), to_link (accounts found, none linked), error (an account in error: plan, limit,
  * account_gone), ok (linked); and the contracts received in 30 days with the instrument Sweep reads in each (a contract Sweep does
  * not recognize keeps its P&L, from the platform's point value, but not its instrument: listed apart, « unknown »).
@@ -671,7 +707,18 @@ function sync_admin(PDO $pdo, int $now = 0): array
         if (count($ctr[$k] ?? []) < 12) $ctr[$k][] = ['contract' => (string) $r['contract'], 'instrument' => $inst, 'known' => !$odd, 'n' => (int) $r['n']];
         if ($odd) $unknown[$r['platform'] . '|' . $r['contract']] = ['platform' => (string) $r['platform'], 'contract' => (string) $r['contract'], 'instrument' => $inst];
     }
-    $conns = sync_q($pdo, "SELECT user_id, platform, client, last_seen_at, last_push_at, created_at FROM sync_connections WHERE status = 'active'")->fetchAll();
+    // a trader's active keys of a platform, together: the last seen (its add-on), the newest key, the last download
+    $conns = [];
+    foreach (sync_q($pdo, "SELECT user_id, platform, client, last_seen_at, last_push_at, created_at, downloaded_at FROM sync_connections WHERE status = 'active' ORDER BY created_at") as $c) {
+        $k = $c['user_id'] . '|' . $c['platform']; $o = $conns[$k] ?? null;
+        if ($o === null) { $conns[$k] = $c; continue; }
+        if ((int) $c['last_seen_at'] > (int) $o['last_seen_at']) { $o['last_seen_at'] = $c['last_seen_at']; $o['client'] = $c['client']; }
+        if ((int) $c['last_push_at'] > (int) $o['last_push_at']) $o['last_push_at'] = $c['last_push_at'];
+        if ((int) $c['downloaded_at'] > (int) $o['downloaded_at']) $o['downloaded_at'] = $c['downloaded_at'];
+        $o['created_at'] = max((int) $o['created_at'], (int) $c['created_at']);
+        $conns[$k] = $o;
+    }
+    $conns = array_values($conns);
     $users = [];
     if ($conns) {
         $ids = array_values(array_unique(array_column($conns, 'user_id')));
@@ -685,12 +732,13 @@ function sync_admin(PDO $pdo, int $now = 0): array
         $k = $c['user_id'] . '|' . $c['platform'];
         $a = $acc[$k] ?? ['new' => 0, 'linked' => 0, 'ignored' => 0, 'errors' => []]; $t = $tr[$k] ?? ['n' => 0, 'n7' => 0];
         $seen = $c['last_seen_at'] === null ? null : (int) $c['last_seen_at'];
-        $state = $seen === null ? 'never' : ($a['errors'] ? 'error' : (!($a['new'] + $a['linked'] + $a['ignored']) ? 'no_accounts' : (!$a['linked'] ? 'to_link' : 'ok')));
+        $dl = $c['downloaded_at'] === null ? null : (int) $c['downloaded_at'];
+        $state = $seen === null ? ($dl !== null ? 'downloaded' : 'key_only') : ($a['errors'] ? 'error' : (!($a['new'] + $a['linked'] + $a['ignored']) ? 'no_accounts' : (!$a['linked'] ? 'to_link' : 'ok')));
         $u = $users[$c['user_id']] ?? [];
         $name = trim(((string) ($u['first_name'] ?? '')) . ' ' . ((string) ($u['last_name'] ?? '')));
         $rows[] = ['user_id' => (string) $c['user_id'], 'name' => $name !== '' ? $name : (string) ($u['username'] ?? $c['user_id']), 'email' => (string) ($u['email'] ?? ''),
             'team' => !empty($u['is_admin']) || !empty($u['is_internal']), 'platform' => (string) $c['platform'], 'client' => $c['client'],
-            'created_at' => (int) $c['created_at'], 'last_seen_at' => $seen, 'last_push_at' => $c['last_push_at'] === null ? null : (int) $c['last_push_at'],
+            'created_at' => (int) $c['created_at'], 'downloaded_at' => $dl, 'last_seen_at' => $seen, 'last_push_at' => $c['last_push_at'] === null ? null : (int) $c['last_push_at'],
             'accounts' => ['new' => $a['new'], 'linked' => $a['linked'], 'ignored' => $a['ignored']], 'errors' => $a['errors'],
             'trades' => $t['n'], 'trades_7d' => $t['n7'], 'contracts' => $ctr[$k] ?? [], 'state' => $state];
         if (isset($plat[$c['platform']])) {

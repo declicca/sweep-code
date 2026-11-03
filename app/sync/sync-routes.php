@@ -5,11 +5,12 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * Sweep — automatic sync, HTTP routes (loaded by api.php only for api/sync…).
  *   POST   api/sync/push                    an add-on (NinjaTrader 8, Quantower): accounts and executions, key in the X-Sweep-Key header (no session)
  *   GET    api/sync                         connections and accounts found (the Connections screen)
- *   POST   api/sync/key {platform}          a new personal key, shown once (the previous one stops working)
+ *   POST   api/sync/key {platform}          a new personal key, shown once (the previous ones stop working)
  *   DELETE api/sync/key?platform=…          stop the sync (the trades already written stay)
  *   GET    api/sync/accounts/ID/preview?account_id=…   what linking would do: trades to add, typed by hand to complete
  *   POST   api/sync/accounts/ID {action: link, account_id} | {action: ignore} | {action: unlink}
- *   GET    api/sync/addon?platform=…        a platform's add-on (zip; NinjaTrader 8 by default), for a signed-in trader
+ *   GET    api/sync/addon?platform=…        a platform's add-on (zip; NinjaTrader 8 by default), for a signed-in trader. NinjaTrader 8:
+ *                                            a new key of the trader written in it (nothing to paste; the earlier keys keep working)
  */
 require_once __DIR__ . '/sync-store.php';
 
@@ -40,6 +41,15 @@ function sync_route(string $route, string $method, string $uid): void
         $f = SYNC_ADDONS[(string) ($_GET['platform'] ?? 'ninjatrader')] ?? null;
         if ($f === null) json_out(400, ['error' => 'Unknown platform.']);
         if (!is_file($f)) json_out(404, ['error' => 'Not available yet.']);
+        $pl = (string) ($_GET['platform'] ?? 'ninjatrader');
+        if (sync_can_embed($pl)) {
+            throttle(['synckey:' . $uid], 10, 3600); record_attempt(['synckey:' . $uid]);
+            $tmp = sync_addon_zip($pdo, $uid, $pl);
+            if ($tmp !== null) {
+                header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="' . basename($f) . '"'); header('Content-Length: ' . filesize($tmp)); header('Cache-Control: no-store');
+                readfile($tmp); @unlink($tmp); exit;
+            }
+        }
         header('Content-Type: application/zip'); header('Content-Disposition: attachment; filename="' . basename($f) . '"'); header('Content-Length: ' . filesize($f)); header('Cache-Control: no-store');
         readfile($f); exit;
     }

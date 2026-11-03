@@ -1048,20 +1048,23 @@
   /* ───── Admin → Sync: who connected NinjaTrader 8 or Quantower and where each one is (read-only, api/admin/sync) ───── */
   const ST = {
     en: { h: 'Sync', sub: 'Traders who created a key, most recently seen first. Read-only.', card: 'Traders on {p}', cardSub: '{a} seen in 24 h · {b} accounts linked · {c} trades in 7 d',
-      st: { ok: 'Syncing', to_link: 'Accounts to link', no_accounts: 'No account found', never: 'Add-on never seen', error: 'Error' },
-      why: { never: 'Key created, the add-on never sent anything: installed? key pasted?', no_accounts: 'The add-on runs but sees no account: is the platform connected to the broker?', to_link: 'Accounts found, none linked yet: the trader has to link them (Settings › Connections).' },
+      st: { ok: 'Syncing', to_link: 'Accounts to link', no_accounts: 'No account found', key_only: 'Key created, not downloaded', downloaded: 'Downloaded, never seen', error: 'Error' },
+      dl: 'downloaded {t}',
+      why: { key_only: 'A key to paste, the add-on never sent anything: installed? key pasted?', downloaded: 'Add-on downloaded with its key, never heard from: imported in NinjaTrader (Tools › Import › NinjaScript Add-On)?', no_accounts: 'The add-on runs but sees no account: is the platform connected to the broker?', to_link: 'Accounts found, none linked yet: the trader has to link them (Settings › Connections).' },
       err: { plan: 'frozen on the Free plan', limit: 'record limit reached', account_gone: 'linked Sweep account deleted' },
       seen: 'seen {t}', acc: '{l} linked · {n} to link · {i} ignored', tr: '{n} trades ({w} in 7 d)', team: 'team', none: 'No trader has created a key yet.',
       ctr: 'Contracts (30 d): {l}', unk: 'Not recognized: {l}', alert: 'Contracts Sweep does not recognize: {l}. Their trades keep the right P&L, not the right instrument.' },
     fr: { h: 'Synchro', sub: 'Les traders qui ont créé une clé, les plus récemment vus en premier. Lecture seule.', card: 'Traders sur {p}', cardSub: '{a} vu(s) en 24 h · {b} compte(s) relié(s) · {c} trade(s) en 7 j',
-      st: { ok: 'Synchronise', to_link: 'Comptes à relier', no_accounts: 'Aucun compte trouvé', never: 'Add-on jamais vu', error: 'Erreur' },
-      why: { never: 'Clé créée, l’add-on n’a jamais rien envoyé : installé ? clé collée ?', no_accounts: 'L’add-on tourne mais ne voit aucun compte : la plateforme est-elle connectée au courtier ?', to_link: 'Comptes trouvés, aucun relié : le trader doit les relier (Réglages › Connexions).' },
+      st: { ok: 'Synchronise', to_link: 'Comptes à relier', no_accounts: 'Aucun compte trouvé', key_only: 'Clé créée, pas téléchargé', downloaded: 'Téléchargé, jamais vu', error: 'Erreur' },
+      dl: 'téléchargé {t}',
+      why: { key_only: 'Une clé à coller, l’add-on n’a jamais rien envoyé : installé ? clé collée ?', downloaded: 'Add-on téléchargé avec sa clé, jamais vu : importé dans NinjaTrader (Tools › Import › NinjaScript Add-On) ?', no_accounts: 'L’add-on tourne mais ne voit aucun compte : la plateforme est-elle connectée au courtier ?', to_link: 'Comptes trouvés, aucun relié : le trader doit les relier (Réglages › Connexions).' },
       err: { plan: 'compte gelé (forfait Free)', limit: 'limite d’enregistrements atteinte', account_gone: 'compte Sweep relié supprimé' },
       seen: 'vu {t}', acc: '{l} relié(s) · {n} à relier · {i} ignoré(s)', tr: '{n} trade(s) ({w} en 7 j)', team: 'équipe', none: 'Aucun trader n’a encore créé de clé.',
       ctr: 'Contrats (30 j) : {l}', unk: 'Non reconnu(s) : {l}', alert: 'Contrats que Sweep ne reconnaît pas : {l}. Leurs trades gardent le bon P&L, pas le bon instrument.' },
     es: { h: 'Sincronización', sub: 'Los traders que crearon una clave, los vistos más recientemente primero. Solo lectura.', card: 'Traders en {p}', cardSub: '{a} vistos en 24 h · {b} cuentas vinculadas · {c} operaciones en 7 d',
-      st: { ok: 'Sincroniza', to_link: 'Cuentas por vincular', no_accounts: 'Ninguna cuenta encontrada', never: 'Add-on nunca visto', error: 'Error' },
-      why: { never: 'Clave creada, el add-on nunca envió nada: ¿instalado? ¿clave pegada?', no_accounts: 'El add-on funciona pero no ve ninguna cuenta: ¿la plataforma está conectada al bróker?', to_link: 'Cuentas encontradas, ninguna vinculada: el trader debe vincularlas (Ajustes › Conexiones).' },
+      st: { ok: 'Sincroniza', to_link: 'Cuentas por vincular', no_accounts: 'Ninguna cuenta encontrada', key_only: 'Clave creada, sin descargar', downloaded: 'Descargado, nunca visto', error: 'Error' },
+      dl: 'descargado {t}',
+      why: { key_only: 'Una clave para pegar, el add-on nunca envió nada: ¿instalado? ¿clave pegada?', downloaded: 'Add-on descargado con su clave, nunca visto: ¿importado en NinjaTrader (Tools › Import › NinjaScript Add-On)?', no_accounts: 'El add-on funciona pero no ve ninguna cuenta: ¿la plataforma está conectada al bróker?', to_link: 'Cuentas encontradas, ninguna vinculada: el trader debe vincularlas (Ajustes › Conexiones).' },
       err: { plan: 'cuenta congelada (plan Free)', limit: 'límite de registros alcanzado', account_gone: 'cuenta de Sweep vinculada eliminada' },
       seen: 'visto {t}', acc: '{l} vinculada(s) · {n} por vincular · {i} ignorada(s)', tr: '{n} operación(es) ({w} en 7 d)', team: 'equipo', none: 'Ningún trader ha creado una clave todavía.',
       ctr: 'Contratos (30 d): {l}', unk: 'No reconocido(s): {l}', alert: 'Contratos que Sweep no reconoce: {l}. Sus operaciones mantienen el P&L correcto, no el instrumento correcto.' },
@@ -1072,7 +1075,7 @@
     const x = ST[LANG] || ST.en, cls = { ok: 'ok', error: 'bad' };
     const cards = Object.entries(d.platforms || {}).map(([p, v]) => card(x.card.replace('{p}', PLATS[p] || p), v.traders, x.cardSub.replace('{a}', v.seen_24h).replace('{b}', v.linked).replace('{c}', v.trades_7d))).join('');
     const rows = (d.rows || []).map((r) => {
-      const info = [r.email !== r.name ? r.email : '', r.client || '', r.last_seen_at ? x.seen.replace('{t}', ago(r.last_seen_at, d.now)) : '', r.team ? x.team : ''].filter(Boolean).map(esc).join(' · ');
+      const info = [r.email !== r.name ? r.email : '', r.client || '', r.last_seen_at ? x.seen.replace('{t}', ago(r.last_seen_at, d.now)) : r.downloaded_at ? x.dl.replace('{t}', ago(r.downloaded_at, d.now)) : '', r.team ? x.team : ''].filter(Boolean).map(esc).join(' · ');
       const acc = x.acc.replace('{l}', r.accounts.linked).replace('{n}', r.accounts.new).replace('{i}', r.accounts.ignored) + ' · ' + x.tr.replace('{n}', r.trades).replace('{w}', r.trades_7d);
       const why = r.state === 'error' ? `<small class="neg">${esc(r.errors.map((e) => x.err[e] || e).join(' · '))}</small>` : x.why[r.state] ? `<small>${esc(x.why[r.state])}</small>` : '';
       // the contracts received and the instrument Sweep reads in each; one it does not recognize, in red
@@ -2533,6 +2536,10 @@
       s4: 'Come back here: the accounts the add-on finds show up below, ready to link.', liveOn: 'Add-on connected', liveNone: 'No account yet: connect {p} to your broker.',
       go1: 'Link my account', goN: 'Link my {n} accounts', allNote: 'For each account found, pick its Sweep account, then link them all at once.', choose: 'Choose…',
       do1: 'Link 1 account', doN: 'Link {n} accounts', doneN: '{n} accounts linked · {t} trades added', noFree: 'No free Sweep account: choose « + New account ».',
+      s2e: 'In NinjaTrader: Tools › Import › NinjaScript Add-On, then pick the file. Nothing to paste: your key is inside.', onceE: 'The add-on only sends your executions to Sweep: it can never place an order.',
+      phone: 'Open app.makeitsweep.com on the computer where NinjaTrader runs: Settings › Connections.', late: 'Still nothing? In NinjaTrader: Control Center › New › Sweep Sync. Its window says why.',
+      neverDl: 'Sweep has not heard from the add-on yet. In NinjaTrader: Tools › Import › NinjaScript Add-On with the downloaded file, then Control Center › New › Sweep Sync: its window says why.',
+      allNoteE: 'Each account found is filled in already: your free Sweep account of the same firm and phase, or a new account named as in {p}. Change a line if needed.', newAs: 'New account: {d}', todo: 'To complete',
       tipImport: 'On NinjaTrader 8 or Quantower? Connect it once: your trades arrive on their own, no more imports.', tipAcct: 'Trading on NinjaTrader 8 or Quantower? Connect it: your accounts are found and your trades arrive on their own.' },
     fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis {p}, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
       seen: 'Add-on vu {t}', now: 'à l’instant', min: 'il y a {n} min', hr: 'il y a {n} h', day: 'il y a {n} j', found1: '1 compte trouvé', foundN: '{n} comptes trouvés', linkMine: 'Relier mes comptes',
@@ -2552,6 +2559,10 @@
       s4: 'Reviens ici : les comptes que l’add-on trouve s’affichent juste en dessous, prêts à relier.', liveOn: 'Add-on connecté', liveNone: 'Aucun compte pour l’instant : connecte {p} à ton courtier.',
       go1: 'Relier mon compte', goN: 'Relier mes {n} comptes', allNote: 'Pour chaque compte trouvé, choisis son compte Sweep, puis relie-les tous d’un coup.', choose: 'Choisir…',
       do1: 'Relier 1 compte', doN: 'Relier {n} comptes', doneN: '{n} comptes reliés · {t} trades ajoutés', noFree: 'Aucun compte Sweep libre : choisis « + Nouveau compte ».',
+      s2e: 'Dans NinjaTrader : Tools › Import › NinjaScript Add-On, puis choisis le fichier. Rien à coller : ta clé est dedans.', onceE: 'L’add-on envoie seulement tes exécutions à Sweep : il ne peut jamais passer d’ordre.',
+      phone: 'Ouvre app.makeitsweep.com sur l’ordinateur où tourne NinjaTrader : Réglages › Connexions.', late: 'Toujours rien ? Dans NinjaTrader : Control Center › New › Sweep Sync. Sa fenêtre dit pourquoi.',
+      neverDl: 'Sweep n’a encore rien reçu de l’add-on. Dans NinjaTrader : Tools › Import › NinjaScript Add-On avec le fichier téléchargé, puis Control Center › New › Sweep Sync : sa fenêtre dit pourquoi.',
+      allNoteE: 'Chaque compte trouvé est déjà rempli : ton compte Sweep libre de la même firme et de la même phase, ou un nouveau compte nommé comme dans {p}. Change une ligne au besoin.', newAs: 'Nouveau compte : {d}', todo: 'À compléter',
       tipImport: 'Sur NinjaTrader 8 ou Quantower ? Connecte-le une fois : tes trades arrivent seuls, plus besoin d’importer.', tipAcct: 'Tu trades sur NinjaTrader 8 ou Quantower ? Connecte-le : tes comptes sont trouvés et tes trades arrivent seuls.' },
     es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde {p}, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
       seen: 'Add-on visto {t}', now: 'justo ahora', min: 'hace {n} min', hr: 'hace {n} h', day: 'hace {n} d', found1: '1 cuenta encontrada', foundN: '{n} cuentas encontradas', linkMine: 'Vincular mis cuentas',
@@ -2571,6 +2582,10 @@
       s4: 'Vuelve aquí: las cuentas que encuentra el add-on aparecen justo debajo, listas para vincular.', liveOn: 'Add-on conectado', liveNone: 'Ninguna cuenta por ahora: conecta {p} a tu bróker.',
       go1: 'Vincular mi cuenta', goN: 'Vincular mis {n} cuentas', allNote: 'Para cada cuenta encontrada, elige su cuenta de Sweep y vincúlalas todas de una vez.', choose: 'Elegir…',
       do1: 'Vincular 1 cuenta', doN: 'Vincular {n} cuentas', doneN: '{n} cuentas vinculadas · {t} operaciones añadidas', noFree: 'Ninguna cuenta de Sweep libre: elige « + Nueva cuenta ».',
+      s2e: 'En NinjaTrader: Tools › Import › NinjaScript Add-On y elige el archivo. Nada que pegar: tu clave va dentro.', onceE: 'El add-on solo envía tus ejecuciones a Sweep: nunca puede enviar una orden.',
+      phone: 'Abre app.makeitsweep.com en el ordenador donde corre NinjaTrader: Ajustes › Conexiones.', late: '¿Sigue sin nada? En NinjaTrader: Control Center › New › Sweep Sync. Su ventana dice por qué.',
+      neverDl: 'Sweep aún no ha recibido nada del add-on. En NinjaTrader: Tools › Import › NinjaScript Add-On con el archivo descargado, luego Control Center › New › Sweep Sync: su ventana dice por qué.',
+      allNoteE: 'Cada cuenta encontrada ya está rellenada: tu cuenta de Sweep libre de la misma firma y fase, o una cuenta nueva con el nombre de {p}. Cambia una línea si hace falta.', newAs: 'Cuenta nueva: {d}', todo: 'Por completar',
       tipImport: '¿En NinjaTrader 8 o Quantower? Conéctalo una vez: tus operaciones llegan solas, sin importar más.', tipAcct: '¿Operas en NinjaTrader 8 o Quantower? Conéctalo: tus cuentas se encuentran y tus operaciones llegan solas.' },
   };
   const t = (k) => { const x = (T[L] || T.en)[k]; return x == null ? T.en[k] : x; };
@@ -2586,6 +2601,10 @@
   const NAME = { ninjatrader: 'NinjaTrader 8', quantower: 'Quantower' };   // in Connections, in this order
   const STEPS = { ninjatrader: ['s2', 's3'], quantower: ['s2q', 's3q'] };   // how its add-on is installed, then where the key goes
   const FIRMS = { apex: 'Apex' };
+  const FIRM_NAME = { apex: 'Apex Trader Funding' };   // a firm created for a new account: the catalogue's name (presets)
+  // (3 Nov., brief CONNEXION-NINJATRADER) NinjaTrader 8's download carries the key: nothing to paste. Not on a phone (no NinjaTrader there)
+  const embed = (p) => !!(SY.st && (SY.st.addons || {})[p] && SY.st.addons[p].embed);
+  const phone = () => !!(window.matchMedia && matchMedia('(max-width: 860px) and (pointer: coarse)').matches);
   const isSynced = (d) => !!(d && PLAT[d.source]);
   const IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5"/></svg>';
   const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -2761,9 +2780,16 @@
     const head = `<div class="sy-head"><h2>${h(titleOf())}</h2><button type="button" class="sy-x" data-sy="close" aria-label="${t('close')}">${X}</button></div>`;
     if (v.k === 'connect') {
       const ad = SY.st && (SY.st.addons || {})[v.p], [s2, s3] = STEPS[v.p];
+      const noKey = !v.key && embed(v.p);   // NinjaTrader 8: the download is the key
       // 4th step: what the add-on did since the key, live (waiting · connected · N accounts found → link them here)
       const c = conn(v.p), fr = accts(v.p).filter((x) => x.state === 'new'), on = !!(c && c.last_seen_at);
       const live = `<p class="sy-live"><i class="sy-dot${on ? ' on' : ''}"></i><span>${on ? t('liveOn') + (fr.length ? ' · ' + P(fr.length, 'found1', 'foundN') : '') : t('waiting') + '…'}</span></p>${on && !fr.length ? `<p class="sy-note">${h(t('liveNone').replace('{p}', NAME[v.p]))}</p>` : ''}`;
+      const end = fr.length ? `<button type="button" class="btn primary sy-main" data-sy="linkall" data-p="${v.p}">${P(fr.length, 'go1', 'goN')}</button>` : `<button type="button" class="btn primary sy-main" data-sy="close">${t('done')}</button>`;
+      if (noKey && phone()) return head + `<p class="sy-note sy-phone">${h(t('phone'))}</p>${live}${end}`;
+      // still nothing 2 minutes after the download: where to look in NinjaTrader
+      const late = !on && v.dlAt && Date.now() - v.dlAt > 120000 ? `<p class="sy-note sy-late">${h(t('late'))}</p>` : '';
+      if (noKey) return head + `<ol class="sy-steps"><li><span>${h(t('s1').replace('{p}', NAME[v.p]))}</span><a class="btn sm sy-dl" href="${h(ad.url)}" download>${t('dl')}</a></li>
+        <li><span>${t('s2e')}</span></li><li><span>${t('s4')}</span>${live}${late}</li></ol><p class="sy-note">${t('onceE')}</p>${end}`;
       return head + `<ol class="sy-steps"><li><span>${h(t('s1').replace('{p}', NAME[v.p]))}</span>${ad ? `<a class="btn sm" href="${h(ad.url)}" download>${t('dl')}</a>` : `<em class="sy-soon">${t('soon')}</em>`}</li>
         <li><span>${t(s2)}</span></li><li><span>${t(s3)}</span><div class="sy-key"><code>${h(v.key)}</code><button type="button" class="btn sm" data-sy="copy">${t('copy')}</button></div></li>
         <li><span>${t('s4')}</span>${live}</li></ol>
@@ -2773,7 +2799,7 @@
       const c = conn(v.p) || {};
       // never seen: what to do instead of « Add-on — · Last seen: Never »
       return head + `<div class="sy-kv"><span>${t('key')}</span><b>····${h(c.hint || '')}</b></div>${c.last_seen_at ? `<div class="sy-kv"><span>${t('addon')}</span><b>${h(c.client || '—')}</b></div>
-        <div class="sy-kv"><span>${t('lastSeen')}</span><b>${h(ago(c.last_seen_at))}</b></div>` : `<p class="sy-note sy-never">${h(t('neverHelp').replace('{p}', NAME[v.p]))}</p>`}
+        <div class="sy-kv"><span>${t('lastSeen')}</span><b>${h(ago(c.last_seen_at))}</b></div>` : `<p class="sy-note sy-never">${h(t(c.downloaded_at ? 'neverDl' : 'neverHelp').replace('{p}', NAME[v.p]))}</p>`}
         <button type="button" class="btn sy-wide" data-sy="newkey">${t('newKey')}</button><p class="sy-note">${t('newKeyHelp')}</p>
         <button type="button" class="btn danger sy-wide" data-sy="stop">${t('stop')}</button><p class="sy-note">${t('stopHelp')}</p>`;
     }
@@ -2789,11 +2815,13 @@
       const pvText = (pv) => (!pv ? t('loading') : pv.error ? '' : [pv.add ? P(pv.add, 'add1', 'addN') : '', pv.complete ? P(pv.complete, 'cmp1', 'cmpN') : '', pv.manual ? P(pv.manual, 'man1', 'manN') : '', pv.open ? P(pv.open, 'open1', 'openN') : ''].filter(Boolean).join(' · ') || t('none'));
       const rows = list.map((a) => {
         const cur = v.picks[a.id] || '', other = mine(a.id), g = guessOf(a), isAcc = cur && cur !== 'ignore';
-        const opts = `<option value="">${t('choose')}</option>${own.map((x) => `<option value="${h(x.id)}"${cur === x.id ? ' selected' : ''}${other.has(x.id) ? ' disabled' : ''}>${h(nameOf(x.id))}</option>`).join('')}<option value="new">${t('newAcc')}</option><option value="ignore"${cur === 'ignore' ? ' selected' : ''}>${t('ignoreGo')}</option>`;
-        return `<li class="sy-all-row"><div class="sy-all-a"><b>${h(a.name)}</b>${g ? `<em class="sy-chip">${h(g)}</em>` : ''}</div><select data-syall="${h(a.id)}" aria-label="${h(t('which') + ' ' + a.name)}">${opts}</select>${isAcc ? `<small class="sy-all-pv">${h(pvText(v.pv[a.id]))}</small>` : ''}${v.err[a.id] ? `<small class="sy-err">${h(v.err[a.id])}</small>` : ''}</li>`;
+        const isNew = cur === 'new';
+        const opts = `<option value="">${t('choose')}</option>${own.map((x) => `<option value="${h(x.id)}"${cur === x.id ? ' selected' : ''}${other.has(x.id) ? ' disabled' : ''}>${h(nameOf(x.id))}</option>`).join('')}<option value="new"${isNew ? ' selected' : ''}>${t('newAcc')}</option><option value="ignore"${cur === 'ignore' ? ' selected' : ''}>${t('ignoreGo')}</option>`;
+        const pvLine = isNew ? t('newAs').replace('{d}', newDesc(a)) : isAcc ? pvText(v.pv[a.id]) : '';
+        return `<li class="sy-all-row"><div class="sy-all-a"><b>${h(a.name)}</b>${g ? `<em class="sy-chip">${h(g)}</em>` : ''}</div><select data-syall="${h(a.id)}" aria-label="${h(t('which') + ' ' + a.name)}">${opts}</select>${pvLine ? `<small class="sy-all-pv">${h(pvLine)}</small>` : ''}${v.err[a.id] ? `<small class="sy-err">${h(v.err[a.id])}</small>` : ''}</li>`;
       }).join('');
       const nLink = list.filter((a) => v.picks[a.id] && v.picks[a.id] !== 'ignore').length, nIgn = list.filter((a) => v.picks[a.id] === 'ignore').length;
-      return head + `<p class="sy-note">${t('allNote')}</p>${own.length ? '' : `<p class="sy-note">${t('noFree')}</p>`}<ul class="sy-all">${rows}</ul>
+      return head + `<p class="sy-note">${h(t('allNoteE').replace('{p}', NAME[v.p]))}</p><ul class="sy-all">${rows}</ul>
         <button type="button" class="btn primary sy-main" data-sy="doall"${(!nLink && !nIgn) || v.busy ? ' disabled' : ''}>${nLink ? P(nLink, 'do1', 'doN') : t('save')}</button>`;
     }
     const a = accts().find((x) => x.id === v.id); if (!a) return head;
@@ -2806,7 +2834,7 @@
     if (a.state === 'linked') out += `<div class="sy-kv"><span>${h(t('current').replace('{a}', nameOf(a.account_id)))}</span><button type="button" class="btn sm" data-sy="unlink">${t('unlink')}</button></div><p class="sy-note">${t('unlinkHelp')}</p>`;
     else {
       out += `<p class="sy-q">${t('which')}</p><div class="sy-opts" role="radiogroup">${own.map((x) => opt(x.id, h(nameOf(x.id)))).join('')}${opt('new', t('newAcc'))}${opt('ignore', t('ignore'), ' sy-quiet')}</div>`;
-      if (v.pick === 'new') out += `<p class="sy-note">${t('newNote')}</p><button type="button" class="btn primary sy-main" data-sy="create">${t('create')}</button>`;
+      if (v.pick === 'new') out += `<p class="sy-note">${h(t('newAs').replace('{d}', newDesc(a)))}. ${t('newNote')}</p><button type="button" class="btn primary sy-main" data-sy="create">${t('create')}</button>`;
       else if (v.pick === 'ignore') out += `<button type="button" class="btn primary sy-main" data-sy="ignore">${t('ignoreGo')}</button>`;
       else if (v.pick) {
         const pv = v.pv;
@@ -2821,30 +2849,57 @@
     const taken = new Set(accts().filter((x) => x.state === 'linked').map((x) => x.account_id));
     return (S.accounts || []).filter((x) => x.status !== 'archived' && !x.demo && !taken.has(x.id));
   }
-  /** the accounts found of a platform, all at once; a Sweep account with the same name is chosen already (preview fetched) */
+  /**
+   * the accounts found of a platform, all at once, each line filled in already (3 Nov., brief CONNEXION-NINJATRADER): the free
+   * Sweep account of the same name, else of the same firm and phase (Apex evaluation, Apex funded), else « New account »,
+   * created on the spot when linking (previews fetched for the accounts chosen)
+   */
   function openAll(p) {
     const v = { k: 'all', p, picks: {}, pv: {}, err: {}, busy: false }, own = freeOwn();
-    accts(p).filter((x) => x.state === 'new').forEach((a) => {
-      const same = own.find((x) => String(x.name || '').trim().toLowerCase() === String(a.name).trim().toLowerCase() && !Object.values(v.picks).includes(x.id));
+    const used = () => new Set(Object.values(v.picks));
+    const firmIs = (x, f) => { const fm = typeof firm === 'function' ? firm(x.firm_id) : null; return !!(fm && new RegExp(FIRMS[f] || f, 'i').test(fm.name)); };
+    const list = accts(p).filter((x) => x.state === 'new');
+    list.forEach((a) => {
+      const same = own.find((x) => String(x.name || '').trim().toLowerCase() === String(a.name).trim().toLowerCase() && !used().has(x.id));
       if (same) v.picks[a.id] = same.id;
+    });
+    list.forEach((a) => {
+      if (v.picks[a.id]) return;
+      const g = a.guess || {};
+      const twin = g.firm && g.phase ? own.find((x) => !used().has(x.id) && firmIs(x, g.firm) && x.phase === g.phase) : null;
+      v.picks[a.id] = twin ? twin.id : 'new';
     });
     open(v); Object.keys(v.picks).forEach((sid) => preview(v, sid));
   }
+  // a new account from a platform account: its name, the firm and phase its name says (Apex), the size its balance says
+  const SIZES = [25000, 50000, 75000, 100000, 150000, 200000, 250000, 300000];
+  function sizeOf(a) {
+    const cash = a.info && typeof a.info.cash === 'number' && isFinite(a.info.cash) ? a.info.cash : null; if (cash == null || cash <= 0) return null;
+    const s = SIZES.reduce((b, x) => (Math.abs(x - cash) < Math.abs(b - cash) ? x : b), SIZES[0]);
+    return Math.abs(s - cash) <= s * 0.12 ? s : Math.round(cash);   // a balance near a firm's size: that size (the gains or losses since are trades)
+  }
+  function newDesc(a) {
+    const g = a.guess || {}, sz = sizeOf(a);
+    return [g.firm ? (FIRMS[g.firm] || g.firm) + (g.phase ? ' · ' + t(g.phase) : '') : t('todo'), sz ? (typeof moneyU === 'function' ? moneyU(sz * 100) : '$' + sz) : ''].filter(Boolean).join(' · ');
+  }
+  /** creates the Sweep account of a platform account and waits until the server has it (null: refused, e.g. the plan's limit) */
+  async function createAcc(a) {
+    const g = a.guess || {}, sz = sizeOf(a);
+    let fid = null;
+    if (g.firm) {
+      const fm = (S.firms || []).find((f) => new RegExp(FIRMS[g.firm] || g.firm, 'i').test(f.name || ''));
+      fid = fm ? fm.id : put('firms', { id: uid(), name: FIRM_NAME[g.firm] || FIRMS[g.firm] || g.firm }, { silent: true }).id;
+    }
+    const d = { id: uid(), firm_id: fid, name: String(a.name).slice(0, 120), starting_balance_c: sz ? sz * 100 : 0, status: 'active', created_on: typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10) };
+    if (g.phase) { d.phase = g.phase; d.money_type = g.phase; }
+    put('accounts', d, { silent: true });
+    try { if (typeof chains !== 'undefined') { if (fid && chains['firms/' + fid]) await chains['firms/' + fid]; await chains['accounts/' + d.id]; } } catch (e) { /* checked below */ }
+    return (S.accounts || []).some((x) => x.id === d.id) ? d.id : null;
+  }
   async function preview(v, sid) {
-    const pick = v.picks[sid]; if (!pick || pick === 'ignore') return;
+    const pick = v.picks[sid]; if (!pick || pick === 'ignore' || pick === 'new') return;   // a new account: nothing on the server yet
     try { const pv = await apiJSON(`api/sync/accounts/${encodeURIComponent(sid)}/preview?account_id=${encodeURIComponent(pick)}`); if (SY.view === v && v.picks[sid] === pick) { v.pv[sid] = pv; redraw(); } }
     catch (e) { if (SY.view === v) { v.pv[sid] = { error: true }; v.err[sid] = t('err'); redraw(); } }
-  }
-  /** « + New account » for one platform account: the app's own form, named like it; linked once saved (preview first) */
-  function createFor(sid) {
-    const a = accts().find((x) => x.id === sid);
-    try { sessionStorage.setItem('sw.syPend', JSON.stringify({ sid, ids: (S.accounts || []).map((x) => x.id), at: Date.now() })); } catch (e) { /* private mode: linked by hand */ }
-    close(); location.hash = '#accounts';
-    setTimeout(() => {
-      const all = document.querySelectorAll('#main [data-act="acct-add"][data-v="1"]'), btn = all[all.length - 1];
-      if (btn && !document.querySelector('#main form[data-form="account"]')) btn.click();
-      setTimeout(() => { const i = document.querySelector('#main form[data-form="account"] input[name="name"]'); if (i && a && !i.value) { i.value = a.name; i.dispatchEvent(new Event('input', { bubbles: true })); } }, 120);
-    }, 400);
   }
   /** the next account still to link, or nothing */
   const nextFresh = (skip) => accts().find((x) => x.state === 'new' && x.id !== skip);
@@ -2867,9 +2922,14 @@
     }
     if (k === 'doall') {
       v.busy = true; redraw();
-      let linked = 0, added = 0;
+      let linked = 0, added = 0, refused = false;
       for (const a of accts(v.p).filter((x) => x.state === 'new')) {
-        const pick = v.picks[a.id]; if (!pick) continue;
+        let pick = v.picks[a.id]; if (!pick) continue;
+        if (pick === 'new') {   // one refusal (the plan's account limit) stops the creations: the plan sheet is shown once
+          pick = refused ? null : await createAcc(a);
+          if (!pick) { refused = true; v.err[a.id] = t('err'); continue; }
+          v.picks[a.id] = pick;
+        }
         try {
           const r = await apiJSON(`api/sync/accounts/${encodeURIComponent(a.id)}`, { method: 'POST', body: pick === 'ignore' ? { action: 'ignore' } : { action: 'link', account_id: pick } });
           if (pick !== 'ignore') { linked++; added += (r.created || 0) + (r.merged || 0); }
@@ -2877,11 +2937,15 @@
         } catch (e) { v.err[a.id] = e && e.status === 409 && e.data && e.data.error === 'taken' ? t('err_taken') : t('err'); }
       }
       v.busy = false;
+      if (linked && typeof render === 'function') render();
       if (linked && typeof syncNow === 'function') syncNow({ manual: true });
       if (linked && typeof toast === 'function') toast(linked === 1 ? t('linkedT').replace('{n}', added) : t('doneN').replace('{n}', linked).replace('{t}', added));
       await load(true);
       if (SY.view === v && !Object.keys(v.err).length && !accts(v.p).some((x) => x.state === 'new')) close(); else redraw();
       return;
+    }
+    if (k === 'connect' && embed(b.dataset.p || 'ninjatrader')) {   // NinjaTrader 8: no key made here, the download makes it
+      SY.stopping = false; open({ k: 'connect', p: b.dataset.p || 'ninjatrader' }); load(true); return;
     }
     if (k === 'connect' || k === 'newkey') {
       b.disabled = true;
@@ -2929,7 +2993,13 @@
       catch (e) { if (typeof toast === 'function') toast(t('err')); }
       return;
     }
-    if (k === 'create') return createFor(v.id);   // the app's own « Add account » form, named like the platform account; linked once saved
+    if (k === 'create') {   // (3 Nov.) created on the spot, named like the platform account, then linked: the sheet stays
+      const a = accts().find((x) => x.id === v.id); if (!a || v.busy) return;
+      v.busy = true; redraw();
+      const id = await createAcc(a); v.busy = false;
+      if (!id) { v.err = t('err'); redraw(); return; }
+      v.pick = id; return act({ dataset: { sy: 'link' } });
+    }
     if (k === 'save-edit') {
       const d = typeof getDoc === 'function' ? getDoc('trades', v.id) : null; if (!d) return close();
       const val = (f) => { const x = document.querySelector(`#sySheet [data-syf="${f}"]`); const s = x ? String(x.value).trim().replace(/\s/g, '').replace(',', '.') : ''; return s === '' || !isFinite(+s) ? null : +s; };
@@ -2945,11 +3015,12 @@
   }
   document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('[data-sy]'); if (!b || (b.disabled)) return; e.preventDefault(); act(b); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && SY.view) close(); });
+  // the download (a real link, not a [data-sy] button): its time, for « still nothing after 2 minutes »
+  document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('#sySheet a.sy-dl'); if (a && SY.view && SY.view.k === 'connect') SY.view.dlAt = Date.now(); });
   document.addEventListener('change', (e) => {
     const sel = e.target.closest && e.target.closest('#sySheet select[data-syall]'), v = SY.view; if (!sel || !v || v.k !== 'all') return;
     const sid = sel.dataset.syall;
-    if (sel.value === 'new') return createFor(sid);
-    if (sel.value) v.picks[sid] = sel.value; else delete v.picks[sid];
+    if (sel.value) v.picks[sid] = sel.value; else delete v.picks[sid];   // « New account »: created when linking, without leaving the sheet
     delete v.pv[sid]; delete v.err[sid]; redraw(); preview(v, sid);
   });
 
@@ -2961,17 +3032,6 @@
       if (isSynced(d)) { open({ k: 'edit', id }); return; }
       return orig.apply(this, arguments);
     };
-  }
-
-  /* a Sweep account created from « + New account »: once it exists, its link is proposed (with the preview) */
-  function pending() {
-    let p = null; try { p = JSON.parse(sessionStorage.getItem('sw.syPend') || 'null'); } catch (e) { p = null; }
-    if (!p || typeof S === 'undefined') return;
-    if (Date.now() - p.at > 30 * 60000) { try { sessionStorage.removeItem('sw.syPend'); } catch (e) { /* private mode */ } return; }
-    const nu = (S.accounts || []).find((a) => !a.demo && !p.ids.includes(a.id)); if (!nu) return;
-    if (document.querySelector('.evp.open, .nav-dlg.open, #gSheet.open, .nt-modal, #tkSlide.open')) return;   // never on top of another window: next render
-    try { sessionStorage.removeItem('sw.syPend'); } catch (e) { /* private mode */ }
-    load(true).then(() => { if (!accts().some((x) => x.id === p.sid)) return; open({ k: 'acct', id: p.sid, pick: null }); const b = document.querySelector(`#sySheet [data-sy="pick"][data-v="${CSS.escape(nu.id)}"]`); if (b) act(b); });
   }
 
   /* CSV import: a row that is already a synced trade (same account, instrument, side, contracts, entry within 2 min) takes
@@ -3009,12 +3069,23 @@
     const html = `<div class="sy-tip" data-noi18n data-sytip="${on}"><span class="sy-ic">${IC}</span><span class="sy-txt"><span>${h(t(on))}</span></span><span class="sy-tip-b">${['ninjatrader', 'quantower'].map((p) => `<button type="button" class="btn sm" data-sy="connect" data-p="${p}">${NAME[p]}</button>`).join('')}</span></div>`;   // both platforms (Mateo, 18 Oct.: « Quantower partout »)
     host.insertAdjacentHTML(on === 'tipImport' ? 'beforebegin' : 'afterend', html);
   }
-  function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); paintTips(); }
+  /* Accounts: an account created from a platform account without a known firm or size says « To complete » in its firm column */
+  function paintTodo() {
+    if (!/^#accounts/.test(location.hash || '')) return;
+    const linked = new Set(accts().filter((x) => x.state === 'linked').map((x) => x.account_id)); if (!linked.size) return;
+    document.querySelectorAll('#main table.acct-tbl tr[data-href^="#account/"]').forEach((tr) => {
+      const id = decodeURIComponent(tr.dataset.href.slice(9)), d = linked.has(id) && typeof getDoc === 'function' ? getDoc('accounts', id) : null, td = tr.children[1];
+      const todo = !!(d && (!d.firm_id || !d.starting_balance_c)), has = td && td.querySelector('.sy-todo');
+      if (todo && td && !has) td.insertAdjacentHTML('beforeend', ` <em class="sy-chip sy-todo" data-noi18n>${h(t('todo'))}</em>`);
+      else if (!todo && has) has.remove();
+    });
+  }
+  function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); paintTips(); paintTodo(); }
   const appRender = render;
   render = function () {
     try { importKeys(); } catch (e) { /* never blocks */ }
     const out = appRender.apply(this, arguments);
-    try { paint(); pending(); } catch (e) { /* never blocks */ }
+    try { paint(); } catch (e) { /* never blocks */ }
     return out;
   };
   window.SweepSync = { load: () => load(true), state: () => SY.st };
