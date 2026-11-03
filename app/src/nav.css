@@ -1625,7 +1625,7 @@ html body .nav-rt .nav-rt-sa .btn:not(.primary):not(.danger),html body .nav-rt .
 @media (min-width:861px){.nav-dash .d-col-a > .d-news{order:4!important}.nav-dash .d-col-a > .d-pay{order:6!important}.nav-dash .d-col-a > .d-perf{order:3!important}}
 /* the two other ways under the drop zone: side by side, quiet */
 .nav-am-alt{grid-template-columns:1fr 1fr!important;gap:8px!important}
-html body .nav-am-alt .btn{min-height:42px!important;font-size:14px!important;font-weight:600!important;padding:6px 12px!important;white-space:normal;line-height:1.25;text-align:center}
+html body .nav-am-alt .btn{min-height:44px!important;font-size:14px!important;font-weight:600!important;padding:6px 12px!important;white-space:normal;line-height:1.25;text-align:center}
 
 /* manual form: the two other ways under the title, same look as on the screenshot screen */
 #tkSlide .nav-tk-alt{margin:0 0 14px}
@@ -2750,7 +2750,11 @@ body.sw-onb .bottomnav{display:none!important}   /* (27 Oct.) the welcome page: 
   html.pwa body main{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
   html.pwa body.ask-on main{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
   html.pwa body aside.side{padding-top:calc(env(safe-area-inset-top,0px) + 4px)!important}   /* the same at the top of the page and scrolled: the header never jumps */
-  html.pwa aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 10px)}
+  /* (3 Nov., Mateo's iPhone) the page title on the same line as the logo and the icons (it sat 7 px higher), above the bar's
+     background, and no backdrop blur in the installed app: iOS blurred the title through it (a « shadow » over it); the
+     background is solid once scrolled instead (96 % without the blur let the rows show through it) */
+  html.pwa aside.side .mtitle{top:calc(50% + env(safe-area-inset-top,0px) / 2 - 3px);z-index:1}
+  html.pwa body aside.side::before{background:var(--bg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   /* at the top of a page the header is the page itself (no band, no line when the page is pulled down: 19 Oct.) */
   html.pwa body:not(.ux-scrolled) aside.side{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:transparent!important}
   html.pwa body .bottomnav{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px))!important;margin-bottom:0!important}
@@ -3343,3 +3347,7 @@ html body #newsCtx .nctx-f .link{white-space:nowrap!important}   /* « View deta
 html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl th:first-child{white-space:normal!important;min-width:120px}
 @media (min-width:861px) and (max-width:1440px){html body #main table.tbl td.tt-set{max-width:120px!important}}
 @media (min-width:861px){html body #main table.tbl-day td.tt-set,html body #main table.tbl-day td:first-child{white-space:normal!important;overflow-wrap:anywhere}html body #main table.tbl-day th,html body #main table.tbl-day td{padding-left:5px!important;padding-right:5px!important}}   /* the journal's day table, beside the list of days: a long setup or an evening time (« le 1 à 19:12 ») on 2 lines and tighter cells, rather than a side scroll (2 Nov.) */
+
+/* (3 Nov., Mateo's iPhone) a sticky segmented control on its own layer: iOS drew the rows scrolling under it (a group's
+   « Evaluations · Simulated » on Accounts) over the control */
+@media (max-width:860px){html body #main .nav-seg,html body #main .nav-tnav{-webkit-transform:translateZ(0);transform:translateZ(0)}}

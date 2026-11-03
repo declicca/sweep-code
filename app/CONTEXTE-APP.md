@@ -1672,3 +1672,7 @@ Source : `docs/parcours/TOUR-VISUEL-2026-11-02.md` (hors git). Corrections en fi
     - un nombre d'axe coupé au bord du graphique ;
     - deux dates collées ;
     - un libellé anglais du dictionnaire affiché tel quel sur une page FR ou ES (règle 10).
+- **iPhone de Mateo, 3 nov. (app installée)** :
+  - feuille « Nouveau trade » sur téléphone : « Sans capture » et « Importer un CSV » côte à côte, deux boutons de même largeur et de 44 px de haut (avant : un lien centré au-dessus d'un bouton à moitié de largeur) ;
+  - en-tête de l'app installée (`html.pwa`) : le titre de la page est sur la même ligne que le logo et les icônes (il était 7 px plus haut). Une fois la page défilée, le fond de l'en-tête est plein, sans flou d'arrière-plan : iOS floutait le titre à travers ce flou (« une ombre par-dessus ») ;
+  - les barres d'onglets collées sous l'en-tête (`.nav-seg`, `.nav-tnav`) ont leur propre calque (`translateZ(0)`) : iOS dessinait par-dessus les lignes qui défilent dessous (« Évaluations · Simulé » sur Comptes).

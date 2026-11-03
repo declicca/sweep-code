@@ -22,9 +22,9 @@ fails = 0
 def ok(c, what):
   global fails
   fails += (not c); print(('ok   ' if c else 'FAIL ') + what)
-X = {'fr': {'one': '1 sur 2 trades dans ton plan', 'drop': 'Choisir une capture', 'no': 'Sans capture ›', 'all': 'Voir ses 7 trades ›', 'tolog': 'Checklist à faire', 'lv': 'Niveau'},
-     'en': {'one': '1 of 2 trades in your plan', 'drop': 'Choose a screenshot', 'no': 'Without a screenshot ›', 'all': 'See its 7 trades ›', 'tolog': 'Checklist to do', 'lv': 'Level'},
-     'es': {'one': '1 de 2 operaciones en tu plan', 'drop': 'Elegir una captura', 'no': 'Sin captura ›', 'all': 'Ver sus 7 operaciones ›', 'tolog': 'Checklist pendiente', 'lv': 'Nivel'}}
+X = {'fr': {'one': '1 sur 2 trades dans ton plan', 'drop': 'Choisir une capture', 'no': 'Sans capture', 'all': 'Voir ses 7 trades ›', 'tolog': 'Checklist à faire', 'lv': 'Niveau'},
+     'en': {'one': '1 of 2 trades in your plan', 'drop': 'Choose a screenshot', 'no': 'Without a screenshot', 'all': 'See its 7 trades ›', 'tolog': 'Checklist to do', 'lv': 'Level'},
+     'es': {'one': '1 de 2 operaciones en tu plan', 'drop': 'Elegir una captura', 'no': 'Sin captura', 'all': 'Ver sus 7 operaciones ›', 'tolog': 'Checklist pendiente', 'lv': 'Nivel'}}
 FLUSH = "Promise.all(Object.values(chains)).then(() => true)"
 SWC = "document.querySelectorAll('.g-sweep [data-g=sw-close]').forEach((b) => b.click())"
 VIS = "(s) => [...document.querySelectorAll(s)].filter((e) => e.getClientRects().length).length"

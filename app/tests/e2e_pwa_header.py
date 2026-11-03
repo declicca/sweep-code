@@ -3,7 +3,8 @@ Sweep — the app added to the Home Screen (19 Oct., Mateo's recording), phone 3
   python3 tests/e2e_pwa_header.py http://127.0.0.1:8095 /tmp/show_state.json
  1  the app marks itself (html.pwa) even without « display-mode: standalone », and its own rules apply: the header right
     under the status bar (here, without a safe area: 6 px), transparent at the top of a page (no band, no line)
- 2  scrolled: a clean line under the header, no blurred shadow fading the text under it
+ 2  scrolled: a clean line under the header, no blurred shadow fading the text under it; a solid band, no backdrop blur
+    (iOS blurred the title through it, 3 Nov.), the page title on the line of the logo and the icons
  3  pull to refresh: iOS's own bounce off (what it showed above the page made a dark line), the header and the page follow
     the finger and come back; the blue ring turns with the pull, a haptic tap once
     far enough (the switch of Safari 18, toggled once), then it spins and goes away
@@ -36,7 +37,11 @@ with sync_playwright() as p:
     sc = pg.evaluate(side)
     ok(sc[3] == 'none' and sc[2] != 'rgba(0, 0, 0, 0)' and sc[0] == '4px', f'2 scrolled: the whole row below the clock (safe area + 4 px), a line, no blurred shadow ({sc[0]}, {sc[2]}, {sc[3]})')
     gl = pg.evaluate("(() => { const s = getComputedStyle(document.querySelector('aside.side')), b = getComputedStyle(document.querySelector('aside.side'), '::before'); return [s.backdropFilter, b.backdropFilter, b.opacity, b.zIndex] })()")
-    ok(gl[0] == 'none' and 'blur' in gl[1] and gl[2] == '1' and gl[3] == '-1', f'2 scrolled: the glass on a layer behind the bar, the bar itself not filtered (its logo and icons sharp) ({gl})')
+    # (3 Nov., Mateo's iPhone) no backdrop blur in the installed app (iOS blurred the page title through it): a solid band instead
+    gl = pg.evaluate("(() => { const s = getComputedStyle(document.querySelector('aside.side')), b = getComputedStyle(document.querySelector('aside.side'), '::before'); return [s.backdropFilter, b.backdropFilter, b.opacity, b.zIndex, b.backgroundColor, getComputedStyle(document.body).backgroundColor] })()")
+    ok(gl[0] == 'none' and gl[1] == 'none' and gl[2] == '1' and gl[3] == '-1' and gl[4] not in ('rgba(0, 0, 0, 0)', 'transparent') and not gl[4].startswith('rgba'), f'2 scrolled: a solid band behind the bar, nothing blurred (its title, logo and icons sharp) ({gl})')
+    tl = pg.evaluate("(() => { const c = (e) => { const r = e.getBoundingClientRect(); return (r.top + r.bottom) / 2 }; const m = document.querySelector('aside.side .mtitle'), i = document.querySelector('aside.side .nav-bell, aside.side [aria-label*=otif]'); return m && i ? [Math.round(c(m)), Math.round(c(i)), getComputedStyle(m).opacity, getComputedStyle(m).zIndex] : null })()")
+    ok(tl and abs(tl[0] - tl[1]) <= 1 and tl[2] == '1' and tl[3] == '1', f'2 scrolled: the page title on the line of the icons, above the band ({tl})')
     pg.evaluate("scrollTo(0, 0)"); pg.wait_for_timeout(500)
     pg.evaluate(TOUCH, ['touchstart', 100]); pg.evaluate(TOUCH, ['touchmove', 145]); pg.wait_for_timeout(100)
     mv = pg.evaluate("[getComputedStyle(document.documentElement).overscrollBehaviorY, getComputedStyle(document.querySelector('.main-wrap')).transform, getComputedStyle(document.querySelector('aside.side')).transform, getComputedStyle(document.querySelector('.nav-ptr i')).borderTopColor, getComputedStyle(document.documentElement).getPropertyValue('--pos').trim()]")
