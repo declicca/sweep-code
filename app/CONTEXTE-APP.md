@@ -1661,3 +1661,14 @@ Source : `docs/parcours/TOUR-VISUEL-2026-11-02.md` (hors git). Corrections en fi
 - **Petits débordements** : libellés courts des segments du calendrier économique ; ES « % de operaciones » / « Tasa de acierto » ; choix Long / Short sans défilement ; tableau des trades sans défilement à 1300 px en FR et ES ; badges de Ma progression sur une ligne.
 
 **Le garde `tests/e2e_layout_guard.py`** (dans la suite, `run-all.sh`) parcourt 12 pages, la fiche d'un trade (copiée et seule), 7 feuilles (+, P&L, Plan, Revue, Ma progression, Notifications, Recherche) et 4 écrans de bienvenue, à 390 tactile et 1300, en EN, FR et ES clair et FR foncé. Il échoue sur : page plus large que l'écran ; défilement de 1 à 23 px ; contenu coupé ou option de segment serrée contre son libellé ; libellé court sur 2 lignes ou rangée d'étapes sur 2 lignes ; élément hors de sa carte (> 2 px) ; rangée de hauteurs ou d'alignements inégaux ; élément touchable caché sous la barre du bas ou Ask Sweep ; bouton sans texte ni icône ; double flèche. Chaque échec donne la page, la taille, la langue, le thème et le sélecteur ; avec `SHOTS=dossier`, une capture avec l'élément entouré en rouge ; `GUARD_ONLY=1300-fr-light,…` limite les configurations. Exception unique : les durées du graphique (15s 30s…) qui défilent exprès sur téléphone. Lancé sur a2a4032, il trouve les défauts 1, 2, 3, 8, 10, 11, 12 et 19.
+- **Contrôle du 3 nov. (382736f)** :
+  - les 4 petites tuiles de Stats sont de nouveau traduites. Le libellé est traduit (`tr`) avant d'être coupé autour de son dernier mot ;
+  - les dates sous les courbes du P&L et de drawdown ne se collent plus : une date qui toucherait la précédente est masquée ;
+  - les montants à gauche ont leur place (« 0 k $ » se lisait pour « −20 k $ ») ;
+  - un graphique replié est mis à sa taille quand il s'ouvre ;
+  - à 390 px, « Moins de 6 mois · 6 mois à 1 an · Plus d'un an » tiennent sur une ligne en FR ;
+  - le graphique d'un trade garde 28 px libres à droite, pour que la dernière heure ne soit plus coupée.
+  - Le garde a 3 nouvelles règles :
+    - un nombre d'axe coupé au bord du graphique ;
+    - deux dates collées ;
+    - un libellé anglais du dictionnaire affiché tel quel sur une page FR ou ES (règle 10).

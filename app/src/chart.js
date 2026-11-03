@@ -280,7 +280,9 @@
     const focus = () => {
       if (tIn == null) { chart.timeScale().fitContent(); return; }
       const pad = Math.max(sec * 25, (tOut - tIn) * 0.6);
-      chart.timeScale().setVisibleRange({ from: snap(tIn - pad), to: snap(tOut + pad) });
+      const ts = chart.timeScale(); ts.setVisibleRange({ from: snap(tIn - pad), to: snap(tOut + pad) });
+      // a margin of 28 px on the right: the last time under the chart sat on the edge and was cut (« 10:5 », 3 Nov.)
+      const lr = ts.getVisibleLogicalRange(), w = ts.width(); if (lr && w > 0) ts.setVisibleLogicalRange({ from: lr.from, to: lr.to + 28 * (lr.to - lr.from) / w });
     };
     try { focus(); } catch (x) { chart.timeScale().fitContent(); }
     if (typeof chart.subscribeDblClick === 'function') chart.subscribeDblClick(focus); else box.addEventListener('dblclick', focus);

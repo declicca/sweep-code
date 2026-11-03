@@ -13,6 +13,7 @@ dark in FR. It fails on:
  7 at the end of a page, something to touch left under the tab bar or the Ask Sweep button
  8 a button with neither a visible text nor an icon
  9 a link with two arrows in a row (« › › »)
+ 10 an English label left on a French or Spanish page (one of the dictionary's labels, shown whole: « Most active »)
 Each failure says the screen, the size, the language, the theme and the element; with SHOTS=<folder>, a screenshot with the
 element outlined in red. EXCEPTIONS lists what is let through, each with its reason (empty at the start).
 """
@@ -108,10 +109,26 @@ CHECK = r"""(atEnd) => {
     if (d > 1) add('3 a segmented control wider than its box', g, Math.round(d) + ' px (' + (g.innerText || '').replace(/\s+/g, ' ').slice(0, 30) + ')');
     for (const o of [...g.children].filter(vis)) { const r = document.createRange(); r.selectNodeContents(o); const tw = r.getBoundingClientRect().width;   // an option squeezed to its label, no room left around it (the grade A–F run together as « ABCDF » at 1300, 2 Nov.)
       if (tw > 0 && tw + 6 > o.getBoundingClientRect().width) add('3 an option squeezed to its label', o, Math.round(o.getBoundingClientRect().width) + ' px for ' + Math.round(tw) + ' px (' + (o.innerText || '').trim().slice(0, 20) + ')'); } }
+  for (const g of document.querySelectorAll('svg.chart')) {   // 3. the numbers of a chart's axes: cut at its edge, or two dates run together (« 12 oct.15 oct. », « 0 k $ », 3 Nov.)
+    if (!vis(g) || !rendered(g)) continue; const G = g.getBoundingClientRect(), open = getComputedStyle(g).overflow === 'visible', tx = [...g.querySelectorAll(':scope > text')].filter((t) => t.style.display !== 'none' && t.getClientRects().length);
+    for (const t of tx) { const r = t.getBoundingClientRect(); if (!open && (r.left < G.left - 1 || r.right > G.right + 1)) add('3 a chart number cut at its edge', t, Math.round(Math.max(G.left - r.left, r.right - G.right)) + ' px'); }
+    const y = Math.max(...tx.map((t) => +t.getAttribute('y') || 0)), xs = tx.filter((t) => +t.getAttribute('y') === y).map((t) => [t, t.getBoundingClientRect()]).sort((a, b) => a[1].left - b[1].left);
+    for (let i = 1; i < xs.length; i++) if (xs[i][1].left < xs[i - 1][1].right + 2) add('3 two dates of a chart run together', xs[i][0], (xs[i - 1][0].textContent + xs[i][0].textContent).slice(0, 30));
+  }
   for (const a of document.querySelectorAll('*')) { const s = getComputedStyle(a); if (!/(auto|scroll)/.test(s.overflowX) || !vis(a)) continue; const d = a.scrollWidth - a.clientWidth; if (d > 0 && d < 24) add('2 a thin side scroll', a, d + ' px'); }   // 2
   const ov = document.documentElement.scrollWidth - W; if (ov > 0) out.push({ k: '1 page wider than the screen', name: '', at: '', x: ov + ' px', id: 0 });   // 1
   return out;
 }"""
+ENG = """(() => {   // 10. an English label left on a French or Spanish page: one of the dictionary's own English labels, shown whole
+  if (typeof I18N_D !== 'function' || typeof LANG === 'undefined' || LANG === 'en') return [];
+  const d = I18N_D(), keys = new Set(Object.keys(d).filter((k) => d[k] && d[k] !== k && k.length >= 9 && /^[A-Z][a-z]+( [a-z]+)+$/.test(k))), out = new Set();
+  for (const e of document.querySelectorAll('#main *, [role=dialog] *, .nav-am.open *, #gSheet *')) {
+    if (!e.getClientRects().length || /^(INPUT|TEXTAREA|SELECT|OPTION|SCRIPT|STYLE)$/.test(e.tagName)) continue;
+    const t = (e.innerText || '').replace(/\\s+/g, ' ').trim().replace(/ i$/, ''); if (t.length < 9 || t.length > 60) continue;
+    if (keys.has(t)) out.add(t);
+  }
+  return [...out];
+})()"""
 TOEND = "(() => { const s = [...document.querySelectorAll('[role=dialog], #gSheet .g-sheet, #gSheet, .nav-am.open, #tkSlide.open')].find((e) => e.offsetParent && e.scrollHeight > e.clientHeight + 4); if (s) s.scrollTop = s.scrollHeight; else scrollTo(0, document.documentElement.scrollHeight); })()"
 CLOSE = "(() => { document.querySelectorAll('#gSheet [data-g=close], .nav-am.open [data-am=close], aside.open [data-close], .nav-dlg.open [data-close]').forEach((b) => b.click()); if (typeof closeTicket === 'function') try { closeTicket() } catch (e) {} })()"
 
@@ -130,6 +147,7 @@ def check(pg, screen, tag, scroll=True):
         pg.evaluate("(i) => { const e = document.querySelector(`[data-guard='${i}']`); if (e) { e.style.outline = '3px solid red'; e.style.outlineOffset = '1px'; e.scrollIntoView({ block: 'center', inline: 'nearest' }); } }", x['id'])
         pg.screenshot(path=os.path.join(SHOTS, f"{tag}-{screen}-{len(found)}.png"))
         pg.evaluate("(i) => { const e = document.querySelector(`[data-guard='${i}']`); if (e) e.style.outline = ''; }", x['id'])
+  for t in pg.evaluate(ENG): found.append({'k': '10 an English label on a French or Spanish page', 'name': t, 'at': '', 'x': '', 'id': 0})
   ok(not found, f"{tag} {screen}: nothing out of place" + ('' if not found else ' — ' + ' | '.join(f"{x['k']}: « {x['name']} » at {x['at']} ({x['x']})" for x in found[:6])))
 
 def pages(p, phone, lang, theme):

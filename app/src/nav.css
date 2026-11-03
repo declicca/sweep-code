@@ -3331,6 +3331,7 @@ html body .g-badges .g-bdg{white-space:nowrap!important;min-width:0!important}
 /* 10 « Less than 6 months », « 6 months to 1 year », « More than a year »: one line each, the same height, side by side (the first was on 2) */
 html body .nav-onb-me .nav-prof-chips,html body .nav-onb-me .nav-onb-exp .nav-prof-chips{display:flex!important;flex-wrap:wrap!important;gap:8px!important;overflow:visible!important}
 html body .nav-onb-me .nav-prof-chips > .chip{flex:0 0 auto!important;white-space:nowrap!important;justify-content:center!important}   /* (each on one line, the same height; the row wraps when a language is too long for 390 px) */
+html body .nav-onb-me .nav-onb-exp .nav-prof-chips{gap:6px!important}html body .nav-onb-me .nav-onb-exp .nav-prof-chips > .chip{flex:1 1 auto!important}   /* (the three on one line at 390 px in FR: « Plus d’un an » fell alone on a 2nd, 1 px short) */
 /* 6 (computer) the ‹ › pair in its capsule (2 px over) */
 html body #main .tr-top .tr-nav{overflow:visible!important;padding:0 2px!important}
 /* 12 the plan's bias on a phone: Long / Short / Neutral on a row, « No trading » on its own line under them (in the row of four it took 2 to 3 lines) */
