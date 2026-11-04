@@ -236,9 +236,9 @@ def sec_totals(lang, t):
     return sec(stats(items) + f'<p class="totals-note">{note}</p>', rhythm="t", id_="totals")
 
 # ---------------------------------------------------------------- 3 years of journal costs (brief « avance concurrentielle », step 3)
-# Every price comes from data/competitors.json (each company's pricing page, with its check date). Off until TraderSync shows
-# its regular annual price again: on 31 Oct. its page only showed a limited-time offer (Pro $179.64 instead of $359.40 crossed out).
-RENT_LIVE = False
+# Every price comes from data/competitors.json (each company's pricing page, with its check date). Was off from 31 Oct. to 4 Nov.,
+# while TraderSync's page only showed a limited-time offer; its regular annual price (Pro $269.52) was back on 4 Nov.
+RENT_LIVE = True
 RENT_ROWS = [("TradeZella", "Essential", "TradeZella Essential"), ("TradeZella", "Pro", "TradeZella Pro"), ("TraderSync", "Pro", "TraderSync Pro"), ("Edgewonk", "Edgewonk", "Edgewonk")]
 
 def sec_rent(lang, t):
