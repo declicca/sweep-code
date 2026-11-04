@@ -89,3 +89,19 @@
 .ml-auto .ml-sched{margin:4px 0 2px}
 .ml-auto .ml-f small code{font-family:var(--mono,'Geist Mono',ui-monospace,monospace);font-size:12px;white-space:nowrap}
 .ml-test{margin-top:14px}
+.ml-ans{margin-top:10px}
+.ml-ans h4+.ml-q,.ml-q+.ml-q{margin-top:4px}
+.ml-q{padding:8px 0;border-top:1px solid var(--line)}
+.ml-ans h4+.ml-q,.ml-ans h4+p+.ml-q{border-top:0}
+.ml-qt{font-size:14px;font-weight:600;margin:0 0 2px}
+.ml-qa{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.ml-qa li{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr) 3em;align-items:center;gap:10px;font-size:13px}
+.ml-qa span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ml-qa i{display:block;height:8px;border-radius:var(--r-pill);background:var(--fill-2);overflow:hidden}
+.ml-qa b{display:block;height:100%;background:var(--blue);border-radius:inherit}
+.ml-qa em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.ml-notes{list-style:none;margin:0;padding:0}
+.ml-notes li{padding:6px 0;border-top:1px solid var(--line);font-size:13px;line-height:1.45}
+.ml-notes li:first-child{border-top:0}
+.ml-notes b{display:inline-block;margin-right:6px;padding:0 8px;border-radius:var(--r-pill);background:var(--tint);color:var(--blue-text);font-size:12px}
+.ml-ans h4:not(:first-child){margin-top:14px}

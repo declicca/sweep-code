@@ -18,7 +18,9 @@
       pace: 'Sending pace', paceL: '{a} of {b} this hour · {q} waiting', paceW: 'The hourly cap doubles each week from the first email, up to {m}: a new sending address earns its reputation slowly.', paceN: 'Cap at the start: {b} an hour, doubled each week up to {m}.',
       noSmtp: 'No mailbox (SMTP) in config.php: nothing can go out.', addr: 'Postal address at the bottom of every email', addrHelp: 'Required by anti-spam laws (CASL, CAN-SPAM). Your full address.', save: 'Save', saved: 'Saved',
       name: 'Name (only you see it)', namePh: 'November news', content: 'Content', subject: 'Subject', pre: 'Preview text (grey, after the subject)', body: 'Message',
-      tools: { h: 'Title', b: 'Bold', l: 'Link', btn: 'Button', first: 'First name' }, linkTxt: 'text', btnTxt: 'Open Sweep',
+      tools: { h: 'Title', b: 'Bold', l: 'Link', btn: 'Button', first: 'First name', qn: 'Rating 1-5', qc: 'Choices' }, linkTxt: 'text', btnTxt: 'Open Sweep', qcTxt: 'Yes|No',
+      helpQ: 'A question answered in one click: [[?note]] (1 to 5) or [[?choix|A|B|C]], alone on its line, under the question. Answers go to Admin › Feedback.',
+      ans: 'Answers', ansNone: 'No answer yet.', ansN: '{n} answers', ans1: '1 answer', notes: 'Last comments', rowAns: '{a} % answered',
       help: 'A blank line starts a new paragraph. {first} becomes the trader’s first name. An empty language gets the English version.',
       prev: 'Preview', prevNone: 'Write a subject and a message to see the email.', aud: 'Audience',
       aLang: 'Language', aPlan: 'Plan', aAct: 'Activity', all: 'All', act: { a0: 'All', j30: 'Joined < 30 days', a7: 'Active 7 days', a30: 'Active 30 days', i14: 'Inactive 14 days', i30: 'Inactive 30 days', i60: 'Inactive 60 days' },
@@ -28,7 +30,7 @@
       askDel: 'Delete « {n} »?', askDelS: 'The draft is removed.', askDelGo: 'Delete',
       err: { name: 'Give the campaign a name.', content: 'Write at least a subject and a message (English, or the language of the audience).', no_email: 'Your account has no email address.', send: 'The mailbox refused: {d}', at: 'Choose a time within 90 days.', sent: 'This campaign already went out.' },
       pause: 'Pause', resume: 'Resume', dup: 'Duplicate', paused: { bounces: 'Paused on its own: more than 3 % of addresses bounced. Check the list before resuming.', complaints: 'Paused on its own: too many people marked it as spam.', manual: 'Paused.' },
-      prog: '{a} of {b} sent', rk: { delivered: 'Delivered', opens: 'Opened', clicks: 'Clicked', cto: 'Clicked after opening', unsub: 'Unsubscribed', bounce: 'Bounced', compl: 'Marked as spam' },
+      prog: '{a} of {b} sent', rk: { delivered: 'Delivered', opens: 'Opened', clicks: 'Clicked', cto: 'Clicked after opening', unsub: 'Unsubscribed', bounce: 'Bounced', compl: 'Marked as spam', answers: 'Answered' },
       auto: '+ {n} machine opens (Apple Mail, antivirus) not counted', auto1: '+ 1 machine open (Apple Mail, antivirus) not counted', h48: 'The first 48 hours', leg: ['Opened', 'Clicked'], hrs: '{h} h',
       byLang: 'By language', links: 'Most clicked links', noLinks: 'No click yet.', lg: { en: 'English', fr: 'French', es: 'Spanish' }, sent2: 'Sent', shown: 'What was sent',
       autos: 'Automations', autosSub: 'Sent on their own when a trader does something, or stops. Open one to change its text or switch it off.', autoRow: '{n} sent in 30 days', autoNone: 'Nothing sent in 30 days',
@@ -46,7 +48,9 @@
       pace: 'Rythme d’envoi', paceL: '{a} sur {b} cette heure · {q} en attente', paceW: 'Le plafond par heure double chaque semaine à partir du premier courriel, jusqu’à {m} : une nouvelle adresse d’envoi gagne sa réputation lentement.', paceN: 'Plafond au départ : {b} par heure, doublé chaque semaine jusqu’à {m}.',
       noSmtp: 'Aucune boîte (SMTP) dans config.php : rien ne peut partir.', addr: 'Adresse postale au bas de chaque courriel', addrHelp: 'Exigée par les lois anti-pourriel (LCAP, CAN-SPAM). Ton adresse complète.', save: 'Enregistrer', saved: 'Enregistré',
       name: 'Nom (toi seul le vois)', namePh: 'Nouvelles de novembre', content: 'Contenu', subject: 'Objet', pre: 'Texte d’aperçu (gris, après l’objet)', body: 'Message',
-      tools: { h: 'Titre', b: 'Gras', l: 'Lien', btn: 'Bouton', first: 'Prénom' }, linkTxt: 'texte', btnTxt: 'Ouvrir Sweep',
+      tools: { h: 'Titre', b: 'Gras', l: 'Lien', btn: 'Bouton', first: 'Prénom', qn: 'Note 1 à 5', qc: 'Choix' }, linkTxt: 'texte', btnTxt: 'Ouvrir Sweep', qcTxt: 'Oui|Non',
+      helpQ: 'Une question en un clic : [[?note]] (1 à 5) ou [[?choix|A|B|C]], seule sur sa ligne, sous la question. Les réponses arrivent dans Admin › Feedback.',
+      ans: 'Réponses', ansNone: 'Aucune réponse pour l’instant.', ansN: '{n} réponses', ans1: '1 réponse', notes: 'Derniers commentaires', rowAns: '{a} % ont répondu',
       help: 'Une ligne vide commence un nouveau paragraphe. {first} devient le prénom du trader. Une langue vide reçoit la version anglaise.',
       prev: 'Aperçu', prevNone: 'Écris un objet et un message pour voir le courriel.', aud: 'Audience',
       aLang: 'Langue', aPlan: 'Forfait', aAct: 'Activité', all: 'Toutes', act: { a0: 'Tous', j30: 'Inscrits < 30 jours', a7: 'Actifs 7 jours', a30: 'Actifs 30 jours', i14: 'Inactifs 14 jours', i30: 'Inactifs 30 jours', i60: 'Inactifs 60 jours' },
@@ -56,7 +60,7 @@
       askDel: 'Supprimer « {n} » ?', askDelS: 'Le brouillon est effacé.', askDelGo: 'Supprimer',
       err: { name: 'Donne un nom à la campagne.', content: 'Écris au moins un objet et un message (en anglais, ou dans la langue de l’audience).', no_email: 'Ton compte n’a pas d’adresse courriel.', send: 'La boîte a refusé : {d}', at: 'Choisis une heure dans les 90 prochains jours.', sent: 'Cette campagne est déjà partie.' },
       pause: 'Mettre en pause', resume: 'Reprendre', dup: 'Dupliquer', paused: { bounces: 'Mise en pause toute seule : plus de 3 % des adresses ont rebondi. Vérifie la liste avant de reprendre.', complaints: 'Mise en pause toute seule : trop de personnes l’ont signalée comme indésirable.', manual: 'En pause.' },
-      prog: '{a} sur {b} envoyés', rk: { delivered: 'Livrés', opens: 'Ouverts', clicks: 'Cliqués', cto: 'Clics après ouverture', unsub: 'Désinscrits', bounce: 'Rebonds', compl: 'Signalés indésirables' },
+      prog: '{a} sur {b} envoyés', rk: { delivered: 'Livrés', opens: 'Ouverts', clicks: 'Cliqués', cto: 'Clics après ouverture', unsub: 'Désinscrits', bounce: 'Rebonds', compl: 'Signalés indésirables', answers: 'Ont répondu' },
       auto: '+ {n} ouvertures automatiques (Apple Mail, antivirus) non comptées', auto1: '+ 1 ouverture automatique (Apple Mail, antivirus) non comptée', h48: 'Les 48 premières heures', leg: ['Ouverts', 'Cliqués'], hrs: '{h} h',
       byLang: 'Par langue', links: 'Liens les plus cliqués', noLinks: 'Aucun clic pour l’instant.', lg: { en: 'Anglais', fr: 'Français', es: 'Espagnol' }, sent2: 'Envoyés', shown: 'Ce qui a été envoyé',
       autos: 'Automatisations', autosSub: 'Envoyés tout seuls quand un trader fait quelque chose, ou arrête. Ouvre-en un pour changer son texte ou l’éteindre.', autoRow: '{n} envoyés en 30 jours', autoNone: 'Rien d’envoyé en 30 jours',
@@ -74,7 +78,9 @@
       pace: 'Ritmo de envío', paceL: '{a} de {b} esta hora · {q} en espera', paceW: 'El límite por hora se duplica cada semana desde el primer correo, hasta {m}: una nueva dirección de envío gana su reputación poco a poco.', paceN: 'Límite al inicio: {b} por hora, duplicado cada semana hasta {m}.',
       noSmtp: 'Ningún buzón (SMTP) en config.php: nada puede salir.', addr: 'Dirección postal al pie de cada correo', addrHelp: 'Exigida por las leyes antispam (CASL, CAN-SPAM). Tu dirección completa.', save: 'Guardar', saved: 'Guardado',
       name: 'Nombre (solo tú lo ves)', namePh: 'Novedades de noviembre', content: 'Contenido', subject: 'Asunto', pre: 'Texto de vista previa (gris, después del asunto)', body: 'Mensaje',
-      tools: { h: 'Título', b: 'Negrita', l: 'Enlace', btn: 'Botón', first: 'Nombre' }, linkTxt: 'texto', btnTxt: 'Abrir Sweep',
+      tools: { h: 'Título', b: 'Negrita', l: 'Enlace', btn: 'Botón', first: 'Nombre', qn: 'Nota 1 a 5', qc: 'Opciones' }, linkTxt: 'texto', btnTxt: 'Abrir Sweep', qcTxt: 'Sí|No',
+      helpQ: 'Una pregunta en un clic: [[?note]] (1 a 5) o [[?choix|A|B|C]], sola en su línea, debajo de la pregunta. Las respuestas llegan a Admin › Feedback.',
+      ans: 'Respuestas', ansNone: 'Ninguna respuesta por ahora.', ansN: '{n} respuestas', ans1: '1 respuesta', notes: 'Últimos comentarios', rowAns: '{a} % respondieron',
       help: 'Una línea vacía empieza un párrafo nuevo. {first} se convierte en el nombre del trader. Un idioma vacío recibe la versión en inglés.',
       prev: 'Vista previa', prevNone: 'Escribe un asunto y un mensaje para ver el correo.', aud: 'Audiencia',
       aLang: 'Idioma', aPlan: 'Plan', aAct: 'Actividad', all: 'Todos', act: { a0: 'Todos', j30: 'Inscritos < 30 días', a7: 'Activos 7 días', a30: 'Activos 30 días', i14: 'Inactivos 14 días', i30: 'Inactivos 30 días', i60: 'Inactivos 60 días' },
@@ -84,7 +90,7 @@
       askDel: '¿Eliminar « {n} »?', askDelS: 'El borrador se borra.', askDelGo: 'Eliminar',
       err: { name: 'Ponle un nombre a la campaña.', content: 'Escribe al menos un asunto y un mensaje (en inglés, o en el idioma de la audiencia).', no_email: 'Tu cuenta no tiene dirección de correo.', send: 'El buzón rechazó: {d}', at: 'Elige una hora dentro de los próximos 90 días.', sent: 'Esta campaña ya salió.' },
       pause: 'Pausar', resume: 'Reanudar', dup: 'Duplicar', paused: { bounces: 'Pausada sola: más del 3 % de las direcciones rebotaron. Revisa la lista antes de reanudar.', complaints: 'Pausada sola: demasiadas personas la marcaron como spam.', manual: 'En pausa.' },
-      prog: '{a} de {b} enviados', rk: { delivered: 'Entregados', opens: 'Abiertos', clicks: 'Con clic', cto: 'Clics tras abrir', unsub: 'Bajas', bounce: 'Rebotes', compl: 'Marcados como spam' },
+      prog: '{a} de {b} enviados', rk: { delivered: 'Entregados', opens: 'Abiertos', clicks: 'Con clic', cto: 'Clics tras abrir', unsub: 'Bajas', bounce: 'Rebotes', compl: 'Marcados como spam', answers: 'Respondieron' },
       auto: '+ {n} aperturas automáticas (Apple Mail, antivirus) no contadas', auto1: '+ 1 apertura automática (Apple Mail, antivirus) no contada', h48: 'Las primeras 48 horas', leg: ['Abiertos', 'Con clic'], hrs: '{h} h',
       byLang: 'Por idioma', links: 'Enlaces más pulsados', noLinks: 'Ningún clic por ahora.', lg: { en: 'Inglés', fr: 'Francés', es: 'Español' }, sent2: 'Enviados', shown: 'Lo que se envió',
       autos: 'Automatizaciones', autosSub: 'Se envían solos cuando un trader hace algo, o deja de hacerlo. Abre uno para cambiar su texto o apagarlo.', autoRow: '{n} enviados en 30 días', autoNone: 'Nada enviado en 30 días',
@@ -123,7 +129,7 @@
     const m = d.month, L = d.list, P = d.sending;
     const rows = d.campaigns.map((c) => {
       const info = c.status === 'draft' ? f(X.row.edited, { d: when(c.updated_at) }) : c.status === 'scheduled' ? f(X.row.at, { d: when(c.scheduled_at) })
-        : [f(X.row.sent, { n: num(c.sent) }), c.open_rate != null ? f(X.row.opens, { a: pct(c.open_rate) }) : '', c.click_rate != null ? f(X.row.clicks, { a: pct(c.click_rate) }) : '', c.started_at ? when(c.started_at) : ''].filter(Boolean).join(' · ');
+        : [f(X.row.sent, { n: num(c.sent) }), c.open_rate != null ? f(X.row.opens, { a: pct(c.open_rate) }) : '', c.click_rate != null ? f(X.row.clicks, { a: pct(c.click_rate) }) : '', c.answer_rate != null ? f(X.rowAns, { a: pct(c.answer_rate) }) : '', c.started_at ? when(c.started_at) : ''].filter(Boolean).join(' · ');
       return `<li><a class="ml-row" href="#mail/${c.id}"><div><b>${h(c.name || X.untitled)}</b>${chip(c.status)}</div><small>${h(info)}</small></a></li>`;
     }).join('');
     return `<section class="sec ml" data-noi18n>
@@ -136,7 +142,7 @@
       <h3 class="ml-h3">${h(X.camps)}</h3>
       ${rows ? `<ul class="ml-list">${rows}</ul>` : `<p class="muted ml-empty">${h(X.none)}</p>`}
       <h3 class="ml-h3">${h(X.autos)}</h3><p class="muted ml-sub">${h(X.autosSub)}</p>
-      <ul class="ml-list ml-autos">${(d.autos || []).map((a) => `<li><a class="ml-row" href="#mail/${a.id}"><div><b>${h(a.name[LANG] || a.name.en)}</b>${chip(a.status)}</div><small>${h(a.when[LANG] || a.when.en)}</small><small>${h([a.sent ? f(X.autoRow, { n: num(a.sent) }) : X.autoNone, a.open_rate != null ? f(X.row.opens, { a: pct(a.open_rate) }) : '', a.click_rate != null ? f(X.row.clicks, { a: pct(a.click_rate) }) : ''].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ul>
+      <ul class="ml-list ml-autos">${(d.autos || []).map((a) => `<li><a class="ml-row" href="#mail/${a.id}"><div><b>${h(a.name[LANG] || a.name.en)}</b>${chip(a.status)}</div><small>${h(a.when[LANG] || a.when.en)}</small><small>${h([a.sent ? f(X.autoRow, { n: num(a.sent) }) : X.autoNone, a.open_rate != null ? f(X.row.opens, { a: pct(a.open_rate) }) : '', a.click_rate != null ? f(X.row.clicks, { a: pct(a.click_rate) }) : '', a.answer_rate != null ? f(X.rowAns, { a: pct(a.answer_rate) }) : ''].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ul>
       <div class="ml-two">
         <div class="ml-box"><h4>${h(X.list)}</h4><p><b>${h(f(X.reach, { n: num(L.reachable) }))}</b></p><p class="muted">${h(f(X.off, { n: num(L.unsubscribed) }))} · ${h(f(X.sup, { n: num(L.suppressed) }))}</p></div>
         <div class="ml-box"><h4>${h(X.pace)}</h4><p><b>${h(f(X.paceL, { a: num(P.last_hour), b: num(P.cap), q: num(P.left) }))}</b></p><p class="muted">${h(f(P.warm_start ? X.paceW : X.paceN, { b: num(P.cap), m: num(P.max) }))}</p></div>
@@ -191,7 +197,7 @@
     return `<section class="sec ml ml-ed" data-noi18n>
       <div class="sec-h"><h2>${h(E.name || X.untitled)}</h2>${chip(c.status)}<small class="muted ml-saved" data-ml-saved>${M.saving ? h(X.saving) : ''}</small></div>
       <label class="ml-f"><span>${h(X.name)}</span><input type="text" data-mlf="name" maxlength="120" value="${h(E.name)}" placeholder="${h(X.namePh)}"></label>
-      ${contentBlock(h(X.help))}
+      ${contentBlock(h(X.help) + '<br>' + h(X.helpQ))}
       <h3 class="ml-h3">${h(X.aud)}</h3>
       ${row(X.aLang, 'lang', [['', X.all], ['en', 'EN'], ['fr', 'FR'], ['es', 'ES']])}
       ${row(X.aPlan, 'plan', [['', X.all], ['free', 'Free'], ['pro', 'Pro'], ['elite', 'Elite']])}
@@ -206,11 +212,24 @@
     </section>`;
   }
   const rate = (v) => (v == null ? '—' : pct(v) + ' %');
+  // the one-click answers: each question, how many chose each option (EN, FR and ES added up), the last comments
+  function answersBox(d) {
+    const X = x(), qs = d.questions || [];
+    if (!qs.length) return '';
+    const pick = (o) => (o && (o[LANG] || o.en || Object.values(o)[0])) || '';
+    const body = qs.map((q) => {
+      const opts = pick(q.opts) || [], max = Math.max(1, ...opts.map((_, i) => q.counts[i] || 0));
+      return `<div class="ml-q"><p class="ml-qt">${h(pick(q.text) || '—')}</p><small class="muted">${h(q.total === 1 ? X.ans1 : f(X.ansN, { n: num(q.total) }))}</small>
+        <ul class="ml-qa">${opts.map((o, i) => { const n = q.counts[i] || 0; return `<li><span>${h(o)}</span><i><b style="width:${Math.round((n / max) * 100)}%"></b></i><em>${num(n)}</em></li>`; }).join('')}</ul></div>`;
+    }).join('');
+    const notes = (d.comments || []).map((c) => `<li><b>${h(c.answer)}</b> ${h(c.message)}</li>`).join('');
+    return `<div class="ml-box ml-ans"><h4>${h(X.ans)}</h4>${qs.some((q) => q.total) ? body : `<p class="muted">${h(X.ansNone)}</p>${body}`}${notes ? `<h4>${h(X.notes)}</h4><ul class="ml-notes">${notes}</ul>` : ''}</div>`;
+  }
   function vAuto(id, d) {
     const X = x(), c = d.campaign, I = d.info || { name: {}, when: {}, vars: [] }, s = d.stats, on = c.status === 'active';
     const langs = d.langs.map((l) => `<tr><td>${h(X.lg[l.lang])}</td><td class="ml-n">${num(l.sent)}</td><td class="ml-n">${rate(l.open_rate)}</td><td class="ml-n">${rate(l.click_rate)}</td></tr>`).join('');
     const links = d.links.map((l) => `<li><span>${h(l.url.replace(/^https?:\/\//, ''))}</span><b>${num(l.clicks)}</b></li>`).join('');
-    const help = h(X.help.replace(/\s[^.]*\{first\}[^.]*\./, '')) + '<br>' + h(X.vars) + ' ' + ['first'].concat(I.vars).map((k) => `<code>${h(X.v[k])}</code>`).join(', ');
+    const help = h(X.help.replace(/\s[^.]*\{first\}[^.]*\./, '')) + '<br>' + h(X.vars) + ' ' + ['first'].concat(I.vars).map((k) => `<code>${h(X.v[k])}</code>`).join(', ') + '<br>' + h(X.helpQ);
     return `<section class="sec ml ml-ed ml-auto" data-noi18n>
       <div class="sec-h"><h2>${h(I.name[LANG] || I.name.en || c.name)}</h2>${chip(c.status)}<small class="muted ml-saved" data-ml-saved>${M.saving ? h(X.saving) : ''}</small>
         <div class="ml-acts ml-top"><button type="button" class="btn sm ${on ? '' : 'primary'}" data-ml="auto" aria-pressed="${on}">${h(on ? X.offB : X.on)}</button></div></div>
@@ -221,12 +240,13 @@
       <p class="ml-msg ${M.msgBad ? 'bad' : ''}" role="status" data-ml-msg>${h(M.msg)}</p>
       <h3 class="ml-h3">${h(X.since)}</h3>
       <div class="ux-mgrid ml-kpis">${kpi(X.sent2, num(s.sent))}${kpi(X.rk.opens, rate(s.open_rate), num(s.opens))}${kpi(X.rk.clicks, rate(s.click_rate), num(s.clicks))}
-        ${kpi(X.rk.unsub, rate(s.unsub_rate), num(s.unsubs))}${kpi(X.rk.bounce, rate(s.bounce_rate), num(s.bounces))}</div>
+        ${kpi(X.rk.unsub, rate(s.unsub_rate), num(s.unsubs))}${kpi(X.rk.bounce, rate(s.bounce_rate), num(s.bounces))}${s.answers || (d.questions || []).length ? kpi(X.rk.answers, rate(s.answer_rate), num(s.answers)) : ''}</div>
       ${s.opens_auto ? `<p class="muted ml-note">${h(s.opens_auto === 1 ? X.auto1 : f(X.auto, { n: num(s.opens_auto) }))}</p>` : ''}
       <div class="ml-two">
         <div class="ml-box"><h4>${h(X.byLang)}</h4>${langs ? `<table class="ml-tbl"><thead><tr><th></th><th class="ml-n">${h(X.sent2)}</th><th class="ml-n">${h(X.rk.opens)}</th><th class="ml-n">${h(X.rk.clicks)}</th></tr></thead><tbody>${langs}</tbody></table>` : '<p class="muted">—</p>'}</div>
         <div class="ml-box"><h4>${h(X.links)}</h4>${links ? `<ul class="ml-links">${links}</ul>` : `<p class="muted">${h(X.noLinks)}</p>`}</div>
       </div>
+      ${answersBox(d)}
     </section>`;
   }
   function bars(hours) {
@@ -251,13 +271,14 @@
       <div class="ml-progress" role="progressbar" aria-valuenow="${done}" aria-valuemin="0" aria-valuemax="100"><i style="width:${done}%"></i></div>
       <p class="muted ml-pl">${h(f(X.prog, { a: num(s.sent), b: num(s.recipients) }))}${c.started_at ? ' · ' + h(when(c.started_at)) : ''}</p>
       <div class="ux-mgrid ml-kpis">${kpi(X.rk.delivered, num(s.delivered))}${kpi(X.rk.opens, r(s.open_rate), num(s.opens))}${kpi(X.rk.clicks, r(s.click_rate), num(s.clicks))}${kpi(X.rk.cto, r(s.click_to_open))}
-        ${kpi(X.rk.unsub, r(s.unsub_rate), num(s.unsubs))}${kpi(X.rk.bounce, r(s.bounce_rate), num(s.bounces))}${kpi(X.rk.compl, num(s.complaints))}</div>
+        ${kpi(X.rk.unsub, r(s.unsub_rate), num(s.unsubs))}${kpi(X.rk.bounce, r(s.bounce_rate), num(s.bounces))}${kpi(X.rk.compl, num(s.complaints))}${s.answers || (d.questions || []).length ? kpi(X.rk.answers, r(s.answer_rate), num(s.answers)) : ''}</div>
       ${s.opens_auto ? `<p class="muted ml-note">${h(s.opens_auto === 1 ? X.auto1 : f(X.auto, { n: num(s.opens_auto) }))}</p>` : ''}
       <h3 class="ml-h3">${h(X.h48)}</h3>${bars(d.hours)}
       <div class="ml-two">
         <div class="ml-box"><h4>${h(X.byLang)}</h4>${langs ? `<table class="ml-tbl"><thead><tr><th></th><th class="ml-n">${h(X.sent2)}</th><th class="ml-n">${h(X.rk.opens)}</th><th class="ml-n">${h(X.rk.clicks)}</th></tr></thead><tbody>${langs}</tbody></table>` : '<p class="muted">—</p>'}</div>
         <div class="ml-box"><h4>${h(X.links)}</h4>${links ? `<ul class="ml-links">${links}</ul>` : `<p class="muted">${h(X.noLinks)}</p>`}</div>
       </div>
+      ${answersBox(d)}
       <details class="ml-set ml-shown"><summary>${h(X.shown)}</summary><div class="ml-chips ml-tabs">${LANGS.map((l) => `<button type="button" class="chip ${M.tab === l ? 'on' : ''}" data-ml="rtab" data-v="${l}">${l.toUpperCase()}</button>`).join('')}</div><div class="ml-prev" data-ml-prev></div></details>
     </section>`;
   }
@@ -314,7 +335,8 @@
     let add, caret;
     if (kind === 'h') { const ls = v.lastIndexOf('\n', a - 1) + 1; ta.value = v.slice(0, ls) + '# ' + v.slice(ls); caret = b + 2; }
     else {
-      add = kind === 'b' ? `**${sel || X.tools.b}**` : kind === 'l' ? `[${sel || X.linkTxt}](https://)` : kind === 'btn' ? `\n\n[[${sel || X.btnTxt}|https://app.makeitsweep.com/]]\n\n` : '{first}';
+      add = kind === 'b' ? `**${sel || X.tools.b}**` : kind === 'l' ? `[${sel || X.linkTxt}](https://)` : kind === 'btn' ? `\n\n[[${sel || X.btnTxt}|https://app.makeitsweep.com/]]\n\n`
+        : kind === 'qn' ? '\n\n[[?note]]\n\n' : kind === 'qc' ? `\n\n[[?choix|${X.qcTxt}]]\n\n` : '{first}';
       ta.value = v.slice(0, a) + add + v.slice(b); caret = a + add.length - (kind === 'l' ? 1 : 0);
     }
     ta.focus(); ta.setSelectionRange(caret, caret); ta.dispatchEvent(new Event('input', { bubbles: true }));

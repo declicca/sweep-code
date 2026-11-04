@@ -18,13 +18,68 @@ require_once __DIR__ . '/mail-core.php';
 require_once __DIR__ . '/mail-smtp.php';
 require_once __DIR__ . '/mail-auto.php';
 
-/** api/m/o, api/m/c, api/m/u: before the session and the CSRF check (mail apps and the trader's inbox call them) */
+/** api/m/o, api/m/c, api/m/u, api/m/r: before the session and the CSRF check (mail apps and the trader's inbox call them) */
 function ml_public_route(string $route, string $method): void
 {
-    if (!preg_match('#^api/m/([ocu])/([a-f0-9]{24})$#', $route, $m)) return;
+    if (!preg_match('#^api/m/([ocur])/([a-f0-9]{24})$#', $route, $m)) return;
     if ($m[1] === 'o') ml_open(db(), $m[2]);
     if ($m[1] === 'c') ml_click(db(), $m[2]);
+    if ($m[1] === 'r') ml_answer_page(db(), $method, $m[2]);
     ml_unsub_page(db(), $method, $m[2]);
+}
+
+/**
+ * A one-click answer, as Admin › Feedback keeps it: one line per email and question (a second answer replaces the first;
+ * a comment is added to it). The email's « answer » event once. False: not a trader's email (nothing kept).
+ */
+function ml_answer_save(PDO $pdo, array $q, int $qn, string $a, ?string $comment): bool
+{
+    if ($q['user_id'] === null || !function_exists('fb_schema')) return false;
+    fb_schema($pdo);
+    $cid = $q['campaign_id'] !== null ? (int) $q['campaign_id'] : null;
+    $c = $cid !== null ? ml_campaign($pdo, $cid) : null;
+    $v = $c ? ml_version($c['content'], (string) $q['lang']) : null;
+    $Q = $v ? (ml_questions($v['body'], ['{app}' => ml_base()])[$qn] ?? null) : null;
+    $i = $Q ? array_search($a, $Q['opts'], true) : false;
+    $rating = $Q && $Q['kind'] === 'note' && $Q['opts'] === ['1', '2', '3', '4', '5'] ? (int) $a : null;   // a note from 1 to 5 counts in the experience rating
+    $now = time();
+    $old = ml_q($pdo, 'SELECT id, message FROM feedback WHERE src_queue = ? AND src_q = ?', [(int) $q['id'], $qn])->fetch(PDO::FETCH_ASSOC);
+    $more = $comment !== null && trim($comment) !== '';
+    $msg = $more ? mb_substr(trim($comment), 0, 2000) : (string) ($old['message'] ?? '');
+    if ($old) ml_q($pdo, 'UPDATE feedback SET answer = ?, answer_i = ?, rating = ?, message = ?, updated_at = ? WHERE id = ?', [$a, $i !== false ? $i : null, $rating, $msg, $now, (int) $old['id']]);
+    else ml_q($pdo, 'INSERT INTO feedback (user_id, type, rating, message, page, context, status, created_at, src_queue, src_campaign, src_q, question, answer, answer_i) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [(string) $q['user_id'], $rating !== null ? 'experience' : 'answer', $rating, $msg, 'email', json_encode(['lang' => $q['lang'], 'plan' => ml_plan_of($pdo, (string) $q['user_id'])]), 'new', $now,
+         (int) $q['id'], $cid, $qn, $Q['question'] ?? null, $a, $i !== false ? $i : null]);
+    $fid = $old ? (int) $old['id'] : (int) $pdo->lastInsertId();
+    if (!(int) ml_q($pdo, "SELECT COUNT(*) FROM mail_events WHERE queue_id = ? AND type = 'answer'", [(int) $q['id']])->fetchColumn()) ml_event($pdo, (int) $q['id'], $cid, 'answer');
+    if ($more && function_exists('fb_notify')) fb_notify($pdo, $fid, 'answer', $rating, $a . ' — ' . $msg, (string) $q['user_id']);   // only a written comment reaches the support box
+    return true;
+}
+/**
+ * api/m/r/<token>?q=…&a=…&s=…: the one-click answer (signed: a link changed by hand is refused). The page records it on
+ * its own (a script: link scanners, which open every link without running it, never answer for the trader); its form adds a
+ * comment, and records the answer too without the script.
+ */
+function ml_answer_page(PDO $pdo, string $method, string $token): void
+{
+    $in = $method === 'POST' ? $_POST : $_GET;
+    $qn = (int) ($in['q'] ?? -1); $a = mb_substr((string) ($in['a'] ?? ''), 0, 120);
+    $q = ml_by_token($pdo, $token);
+    $ok = $q && $qn >= 0 && $qn < 10 && $a !== '' && hash_equals(ml_answer_sig($pdo, $token, $qn, $a), (string) ($in['s'] ?? ''));
+    $lang = ml_lang($q['lang'] ?? substr((string) ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en'), 0, 2));
+    $L = ML_T[$lang]; $h = fn($x) => htmlspecialchars((string) $x, ENT_QUOTES, 'UTF-8');
+    $nb = fn(string $x) => $lang === 'fr' ? preg_replace('/ ([?:!;])/u', "\u{00A0}$1", $x) : $x;
+    if (!$ok) { http_response_code(404); ml_page($lang, 'Sweep', '<h1>Sweep</h1><p>' . $h($L['pg_bad']) . '</p>'); }
+    if ($method === 'POST') {
+        try { ml_answer_save($pdo, $q, $qn, $a, isset($_POST['more']) ? (string) $_POST['more'] : null); } catch (Throwable $e) { error_log('[Sweep mail] answer: ' . $e->getMessage()); }
+        if (!empty($_POST['auto'])) { http_response_code(204); exit; }   // the page's own script
+        ml_page($lang, $L['ans_done_t'], '<h1>' . $h($nb($L['ans_done_t'])) . '</h1><p>' . $h($nb($L['ans_done_p'])) . '</p><a class="b p" href="' . $h(ml_base()) . '">' . $h($L['ans_open']) . '</a>');
+    }
+    $nonce = bin2hex(random_bytes(12));
+    $hidden = '<input type="hidden" name="q" value="' . $qn . '"><input type="hidden" name="a" value="' . $h($a) . '"><input type="hidden" name="s" value="' . $h((string) $in['s']) . '">';
+    ml_page($lang, $L['ans_t'], '<h1>' . $h($nb($L['ans_t'])) . '</h1><p>' . $h($nb($L['ans_p'])) . ' <span class="a">' . $h($a) . '</span></p>'
+        . '<form method="post" action="">' . $hidden . '<label for="more">' . $h($nb($L['ans_more'])) . '</label><textarea id="more" name="more" maxlength="2000"></textarea><button type="submit" class="p">' . $h($L['ans_send']) . '</button></form>',
+        $nonce, "(function(){var f=document.querySelector('form'),d=new FormData(f);d.delete('more');d.append('auto','1');fetch(location.pathname,{method:'POST',body:new URLSearchParams(d),credentials:'omit'}).catch(function(){});})();");
 }
 
 function ml_admin_route(string $route, string $method, array $me): void

@@ -176,15 +176,21 @@ const ML_T = [
     'en' => ['why' => 'You get this email because you have a Sweep account.', 'off' => 'Unsubscribe', 'hi' => 'trader',
         'pg_t' => 'Unsubscribe from Sweep news?', 'pg_p' => 'You will stop getting news and tips by email. Emails about your account (security, billing) still come.', 'pg_b' => 'Unsubscribe',
         'pg_off_t' => 'You are unsubscribed', 'pg_off_p' => 'No more news and tips from Sweep. Changed your mind?', 'pg_off_b' => 'Subscribe again',
-        'pg_on_t' => 'You are subscribed again', 'pg_on_p' => 'Sweep news and tips will reach you again.', 'pg_bad' => 'This link is not valid anymore.'],
+        'pg_on_t' => 'You are subscribed again', 'pg_on_p' => 'Sweep news and tips will reach you again.', 'pg_bad' => 'This link is not valid anymore.',
+        'lo' => 'not at all', 'hi_n' => 'absolutely', 'ans_t' => 'Thank you!', 'ans_p' => 'Your answer:', 'ans_more' => 'Want to tell us more? (optional)', 'ans_send' => 'Send',
+        'ans_done_t' => 'Got it, thank you', 'ans_done_p' => 'We read every answer: it decides what we build next.', 'ans_open' => 'Open Sweep'],
     'fr' => ['why' => 'Tu reçois ce courriel parce que tu as un compte Sweep.', 'off' => 'Me désinscrire', 'hi' => 'trader',
         'pg_t' => 'Ne plus recevoir les nouvelles de Sweep ?', 'pg_p' => 'Tu ne recevras plus les nouvelles et conseils par courriel. Les courriels sur ton compte (sécurité, facturation) continuent.', 'pg_b' => 'Me désinscrire',
         'pg_off_t' => 'Tu es désinscrit', 'pg_off_p' => 'Plus de nouvelles ni de conseils de Sweep. Tu as changé d’avis ?', 'pg_off_b' => 'Me réinscrire',
-        'pg_on_t' => 'Tu es réinscrit', 'pg_on_p' => 'Les nouvelles et conseils de Sweep te parviendront de nouveau.', 'pg_bad' => 'Ce lien n’est plus valide.'],
+        'pg_on_t' => 'Tu es réinscrit', 'pg_on_p' => 'Les nouvelles et conseils de Sweep te parviendront de nouveau.', 'pg_bad' => 'Ce lien n’est plus valide.',
+        'lo' => 'pas du tout', 'hi_n' => 'tout à fait', 'ans_t' => 'Merci !', 'ans_p' => 'Ta réponse :', 'ans_more' => 'Tu veux en dire plus ? (facultatif)', 'ans_send' => 'Envoyer',
+        'ans_done_t' => 'C’est noté, merci', 'ans_done_p' => 'On lit chaque réponse : c’est elle qui décide de ce qu’on construit ensuite.', 'ans_open' => 'Ouvrir Sweep'],
     'es' => ['why' => 'Recibes este correo porque tienes una cuenta de Sweep.', 'off' => 'Darme de baja', 'hi' => 'trader',
         'pg_t' => '¿Dejar de recibir las novedades de Sweep?', 'pg_p' => 'Dejarás de recibir novedades y consejos por correo. Los correos sobre tu cuenta (seguridad, facturación) siguen llegando.', 'pg_b' => 'Darme de baja',
         'pg_off_t' => 'Te has dado de baja', 'pg_off_p' => 'No más novedades ni consejos de Sweep. ¿Cambiaste de opinión?', 'pg_off_b' => 'Suscribirme de nuevo',
-        'pg_on_t' => 'Estás suscrito de nuevo', 'pg_on_p' => 'Las novedades y consejos de Sweep volverán a llegarte.', 'pg_bad' => 'Este enlace ya no es válido.'],
+        'pg_on_t' => 'Estás suscrito de nuevo', 'pg_on_p' => 'Las novedades y consejos de Sweep volverán a llegarte.', 'pg_bad' => 'Este enlace ya no es válido.',
+        'lo' => 'para nada', 'hi_n' => 'totalmente', 'ans_t' => '¡Gracias!', 'ans_p' => 'Tu respuesta:', 'ans_more' => '¿Quieres contarnos más? (opcional)', 'ans_send' => 'Enviar',
+        'ans_done_t' => 'Anotado, gracias', 'ans_done_p' => 'Leemos cada respuesta: decide lo que construimos después.', 'ans_open' => 'Abrir Sweep'],
 ];
 /** one campaign's content, cleaned: per language subject, preheader, body (light markup, see ml_render) */
 function ml_clean_content($c): array
@@ -210,9 +216,42 @@ function ml_link(PDO $pdo, string $token, string $url): string
     return ml_base() . 'api/m/c/' . $token . '?u=' . rtrim(strtr(base64_encode($url), '+/', '-_'), '=') . '&s=' . substr(hash_hmac('sha256', $token . '|' . $url, ml_secret($pdo)), 0, 16);
 }
 /**
+ * A question answered in one click, alone on its line: [[?note]] (1 to 5), [[?note|0-10]] (a range), [[?choix|A|B|C]] (also
+ * [[?choice|…]]). Returns ['kind' => note|choice, 'opts' => [...]] or null. The question asked is the paragraph just above.
+ */
+function ml_question_of(string $blk): ?array
+{
+    if (!preg_match('/^\[\[\?(note|rating|choix|choice)(?:\|([^\]]*))?\]\]$/u', trim($blk), $m)) return null;
+    if ($m[1] === 'note' || $m[1] === 'rating') {
+        [$a, $b] = preg_match('/^(\d{1,2})\s*-\s*(\d{1,2})$/', trim($m[2] ?? ''), $r) ? [(int) $r[1], (int) $r[2]] : [1, 5];
+        if ($b <= $a || $b - $a > 10) [$a, $b] = [1, 5];
+        return ['kind' => 'note', 'opts' => array_map('strval', range($a, $b))];
+    }
+    $o = array_values(array_filter(array_map(fn($x) => mb_substr(trim($x), 0, 60), explode('|', $m[2] ?? '')), fn($x) => $x !== ''));
+    return $o ? ['kind' => 'choice', 'opts' => array_slice($o, 0, 8)] : null;
+}
+/** the questions of a body, in order: [['kind', 'opts', 'question' => the paragraph above, plain text]] ($vars filled in) */
+function ml_questions(string $body, array $map = []): array
+{
+    $out = []; $prev = '';
+    foreach (preg_split('/\n\s*\n/', trim(strtr($body, $map))) as $blk) {
+        if ($q = ml_question_of($blk)) { $out[] = $q + ['question' => $prev]; continue; }
+        $prev = mb_substr(trim(preg_replace(['/^#\s+/u', '/\*\*/', '/\[([^\]]+)\]\([^)]*\)/u', '/\[\[([^|\]]+)\|[^\]]*\]\]/u'], ['', '', '$1', '$1'], trim($blk))), 0, 300);
+    }
+    return $out;
+}
+function ml_answer_sig(PDO $pdo, string $token, int $qn, string $a): string { return substr(hash_hmac('sha256', 'a|' . $token . '|' . $qn . '|' . $a, ml_secret($pdo)), 0, 16); }
+/** the one-click answer's link (api/m/r/…); without a token (preview, test) the app's feedback page */
+function ml_answer_link(PDO $pdo, string $token, int $qn, string $a): string
+{
+    if ($token === '') return ml_base() . '#feedback';
+    return ml_base() . 'api/m/r/' . $token . '?q=' . $qn . '&a=' . rawurlencode($a) . '&s=' . ml_answer_sig($pdo, $token, $qn, $a);
+}
+/**
  * The body's light markup, one idea per line:
  *   # A title            a blank line separates paragraphs        **bold**
  *   [text](https://…)    a link                                    [[Button text|https://…]]  a button (alone on its line)
+ *   [[?note]] [[?note|0-10]] [[?choix|A|B|C]]   a question answered in one click (alone on its line, see ml_question_of)
  *   {first}              the trader's first name (« trader » without one), also in the subject
  *   {app}                https://app.makeitsweep.com/        $vars: an automation's values ({milestone}, {days}…)
  * Returns [subject, text, html]. $token '' (preview, test): links are not tracked, no open image.
@@ -237,9 +276,17 @@ function ml_render(PDO $pdo, array $v, string $lang, string $first, string $toke
         }, $s);
     };
     $body = $fill($v['body']);
-    $html = ''; $text = '';
+    $html = ''; $text = ''; $qn = 0;
     foreach (preg_split('/\n\s*\n/', trim($body)) as $blk) {
         $blk = trim($blk); if ($blk === '') continue;
+        if ($Q = ml_question_of($blk)) {
+            $n = $qn++; $btn = 'display:inline-block;margin:0 6px 8px 0;text-decoration:none;color:#f2f2f3;font-size:15px;font-weight:600;border:1px solid #3a3a42;background:#1d1d21;';
+            $cells = array_map(fn($o) => '<a href="' . $h(ml_answer_link($pdo, $token, $n, $o)) . '" style="' . $btn . ($Q['kind'] === 'note'
+                ? 'min-width:40px;padding:10px 0;text-align:center;border-radius:12px' : 'padding:10px 16px;border-radius:999px') . '">' . $h($nb($o)) . '</a>', $Q['opts']);
+            $legend = $Q['kind'] === 'note' ? '<div style="font-size:12px;color:#8a8a94;margin-top:2px">' . $h($nb(reset($Q['opts']) . ' = ' . $L['lo'] . ' · ' . end($Q['opts']) . ' = ' . $L['hi_n'])) . '</div>' : '';
+            $html .= '<div style="margin:4px 0 20px">' . implode('', $cells) . $legend . '</div>';
+            $text .= implode("\n", array_map(fn($o) => $o . ': ' . ml_answer_link($pdo, $token, $n, $o), $Q['opts'])) . "\n\n"; continue;
+        }
         if (preg_match('/^\[\[([^|\]]+)\|([^\]\s]+)\]\]$/u', $blk, $m) && ($u = $safeUrl($m[2])) !== '') {
             $html .= '<div style="margin:24px 0"><a href="' . $h($go($u)) . '" style="display:inline-block;background:#4c8dff;color:#0b0b0c;font-weight:600;font-size:15px;text-decoration:none;padding:13px 24px;border-radius:999px">' . $h($nb(trim($m[1]))) . '</a></div>';
             $text .= trim($m[1]) . ': ' . $go($u) . "\n\n"; continue;
@@ -517,17 +564,26 @@ function ml_unsub_page(PDO $pdo, string $method, string $token): void
         : ($state === 'on' ? [$L['pg_on_t'], $L['pg_on_p'], '', false] : [$L['pg_t'], $L['pg_p'], $L['pg_b'], false]));
     if ($lang === 'fr') { $t = str_replace(' ?', "\u{00A0}?", $t); $p = str_replace(' ?', "\u{00A0}?", $p); }
     http_response_code($q ? 200 : 404);
+    $form = $label === '' ? '' : '<form method="post" action="">' . ($on ? '<input type="hidden" name="on" value="1">' : '') . '<button type="submit"' . ($on ? ' class="p"' : '') . '>' . $h($label) . '</button></form>';
+    ml_page($lang, $t, '<h1>' . $h($t) . '</h1><p>' . $h($p) . '</p>' . $form);
+}
+/** the pages the emails open (unsubscribe, an answer): the email's look, light or dark like the trader's device */
+function ml_page(string $lang, string $title, string $inner, string $nonce = '', string $script = ''): void
+{
+    $h = fn($x) => htmlspecialchars((string) $x, ENT_QUOTES, 'UTF-8');
     header('Content-Type: text/html; charset=utf-8'); header('Cache-Control: no-store'); header('X-Robots-Tag: noindex'); header('Referrer-Policy: no-referrer');
-    header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
-    $form = $label === '' ? '' : '<form method="post" action="">' . ($on ? '<input type="hidden" name="on" value="1">' : '')
-        . '<button type="submit" style="font:inherit;font-size:15px;font-weight:600;border:0;border-radius:999px;padding:13px 24px;cursor:pointer;background:' . ($on ? '#4c8dff;color:#0b0b0c' : '#2a2a30;color:#f2f2f3') . '">' . $h($label) . '</button></form>';
-    echo '<!doctype html><html lang="' . $lang . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>' . $h($t) . ' · Sweep</title></head>'
-        . '<body style="margin:0;min-height:100vh;background:#0b0b0c;color:#f2f2f3;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box">'
-        . '<main style="max-width:420px;width:100%;background:#141416;border:1px solid #26262a;border-radius:26px;padding:32px 28px;box-sizing:border-box">'
-        . '<div style="font-size:18px;font-weight:700;margin-bottom:24px">sweep</div><h1 style="font-size:22px;line-height:1.25;margin:0 0 10px">' . $h($t) . '</h1>'
-        . '<p style="margin:0 0 24px;font-size:15px;line-height:1.55;color:#b9b9c2">' . $h($p) . '</p>' . $form . '</main></body></html>';
+    header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'" . ($nonce !== '' ? "; script-src 'nonce-$nonce'; connect-src 'self'" : ''));
+    echo '<!doctype html><html lang="' . $lang . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="color-scheme" content="light dark"><title>' . $h($title) . ' · Sweep</title>'
+        . '<style>:root{--bg:#f4f4f6;--card:#fff;--line:#e2e2e8;--text:#08080a;--muted:#5c5c66;--fill:#ececf0}@media (prefers-color-scheme:dark){:root{--bg:#08080a;--card:#141416;--line:#26262a;--text:#f2f2f3;--muted:#b9b9c2;--fill:#2a2a30}}'
+        . 'body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:Geist,-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px 16px;box-sizing:border-box}'
+        . 'main{max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:26px;padding:32px 28px;box-sizing:border-box}h1{font-size:22px;line-height:1.25;margin:0 0 10px}p{margin:0 0 24px;font-size:15px;line-height:1.55;color:var(--muted)}'
+        . 'button,.b{font:inherit;font-size:15px;font-weight:600;border:0;border-radius:999px;padding:13px 24px;cursor:pointer;background:var(--fill);color:var(--text);text-decoration:none;display:inline-block}.p{background:#4c8dff;color:#08080a}'
+        . 'textarea{width:100%;box-sizing:border-box;min-height:110px;font:inherit;font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 16px;resize:vertical}'
+        . 'label{display:block;font-size:13px;color:var(--muted);margin:0 0 8px}.a{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--fill);color:var(--text);font-weight:600}</style></head>'
+        . '<body><main><div style="font-size:18px;font-weight:700;margin-bottom:24px">sweep</div>' . $inner . '</main>' . ($script !== '' ? '<script nonce="' . $nonce . '">' . $script . '</script>' : '') . '</body></html>';
     exit;
 }
+
 
 /* ───── bounces (mail/bounce.php reads what reaches bounces@) ───── */
 /**
@@ -576,7 +632,7 @@ function ml_stats(PDO $pdo, ?int $cid, int $since = 0): array
     $delivered = max(0, $sent - $later); $clicks = $ev['click'] ?? 0;
     return ['recipients' => array_sum($st), 'queued' => ($st['queued'] ?? 0) + ($st['sending'] ?? 0), 'sent' => $sent, 'failed' => $st['failed'] ?? 0, 'skipped' => $st['skipped'] ?? 0,
         'delivered' => $delivered, 'bounces' => $bounce, 'soft' => $ev['soft_bounce'] ?? 0, 'opens' => $real, 'opens_auto' => max(0, $any - $real), 'clicks' => $clicks,
-        'unsubs' => $ev['unsub'] ?? 0, 'complaints' => $ev['complaint'] ?? 0,
+        'unsubs' => $ev['unsub'] ?? 0, 'complaints' => $ev['complaint'] ?? 0, 'answers' => $ev['answer'] ?? 0, 'answer_rate' => ml_rate($ev['answer'] ?? 0, $delivered),
         'open_rate' => ml_rate($real, $delivered), 'open_rate_all' => ml_rate($any, $delivered), 'click_rate' => ml_rate($clicks, $delivered), 'click_to_open' => ml_rate($clicks, $real),
         'unsub_rate' => ml_rate($ev['unsub'] ?? 0, $delivered), 'bounce_rate' => ml_rate($bounce, $sent + ($st['failed'] ?? 0))];
 }
@@ -597,7 +653,34 @@ function ml_campaign_report(PDO $pdo, int $cid): array
     if ($t0) foreach (ml_q($pdo, "SELECT type, queue_id, MIN(at) at FROM mail_events WHERE campaign_id = ? AND type IN ('open', 'click') AND at < ? GROUP BY type, queue_id", [$cid, $t0 + 48 * 3600])->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $h = max(0, min(47, intdiv((int) $r['at'] - $t0, 3600))); $hours[$h][$r['type'] === 'click' ? 1 : 0]++;
     }
-    return ['campaign' => $c, 'stats' => $s, 'langs' => $byLang, 'links' => $links, 'hours' => $hours];
+    return ['campaign' => $c, 'stats' => $s, 'langs' => $byLang, 'links' => $links, 'hours' => $hours] + ml_answers($pdo, $c);
+}
+/**
+ * The one-click answers of a campaign (Admin › Feedback keeps them): each question in its languages, how many chose each
+ * option (by its place, so EN, FR and ES add up), and the last comments.
+ */
+function ml_answers(PDO $pdo, array $c): array
+{
+    $qs = [];
+    foreach (ML_LANGS as $l) {
+        $v = $c['content'][$l] ?? null; if (!$v || trim($v['body']) === '') continue;
+        foreach (ml_questions($v['body'], ['{app}' => ml_base()]) as $n => $Q) {
+            $qs[$n] = $qs[$n] ?? ['q' => $n, 'kind' => $Q['kind'], 'text' => [], 'opts' => [], 'counts' => [], 'total' => 0];
+            $qs[$n]['text'][$l] = $Q['question']; $qs[$n]['opts'][$l] = $Q['opts'];
+        }
+    }
+    $comments = [];
+    try {
+        foreach (ml_q($pdo, 'SELECT src_q, answer_i, COUNT(*) n FROM feedback WHERE src_campaign = ? GROUP BY src_q, answer_i', [(int) $c['id']])->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $n = (int) $r['src_q']; if (!isset($qs[$n])) continue;
+            if ($r['answer_i'] !== null) $qs[$n]['counts'][(int) $r['answer_i']] = (int) $r['n'];
+            $qs[$n]['total'] += (int) $r['n'];
+        }
+        $comments = array_map(fn($r) => ['answer' => $r['answer'], 'message' => $r['message'], 'at' => (int) ($r['updated_at'] ?? $r['created_at'])],
+            ml_q($pdo, "SELECT answer, message, created_at, updated_at FROM feedback WHERE src_campaign = ? AND message <> '' ORDER BY COALESCE(updated_at, created_at) DESC LIMIT 5", [(int) $c['id']])->fetchAll(PDO::FETCH_ASSOC));
+    } catch (Throwable $e) { /* no answer yet: the feedback table comes with the first one */ }
+    foreach ($qs as &$Q) $Q['counts'] = (object) $Q['counts'];
+    return ['questions' => array_values($qs), 'comments' => $comments];
 }
 function ml_overview(PDO $pdo, ?int $now = null): array
 {
@@ -606,11 +689,11 @@ function ml_overview(PDO $pdo, ?int $now = null): array
         $s = ml_stats($pdo, (int) $r['id']);
         return ['id' => (int) $r['id'], 'name' => $r['name'], 'status' => $r['status'], 'paused_reason' => $r['paused_reason'], 'recipients' => (int) $r['recipients'],
             'scheduled_at' => $r['scheduled_at'] !== null ? (int) $r['scheduled_at'] : null, 'started_at' => $r['started_at'] !== null ? (int) $r['started_at'] : null,
-            'updated_at' => (int) $r['updated_at'], 'sent' => $s['sent'], 'queued' => $s['queued'], 'open_rate' => $s['open_rate'], 'click_rate' => $s['click_rate']];
+            'updated_at' => (int) $r['updated_at'], 'sent' => $s['sent'], 'queued' => $s['queued'], 'open_rate' => $s['open_rate'], 'click_rate' => $s['click_rate'], 'answer_rate' => $s['answers'] ? $s['answer_rate'] : null];
     }, ml_q($pdo, 'SELECT id, name, status, paused_reason, recipients, scheduled_at, started_at, updated_at FROM mail_campaigns WHERE auto IS NULL ORDER BY COALESCE(started_at, scheduled_at, updated_at) DESC LIMIT 100')->fetchAll(PDO::FETCH_ASSOC));
     $autos = array_map(function ($r) use ($pdo, $now) {
         $s = ml_stats($pdo, (int) $r['id'], $now - 30 * 86400);
-        return ['id' => (int) $r['id'], 'auto' => $r['auto'], 'status' => $r['status'], 'sent' => $s['sent'], 'open_rate' => $s['open_rate'], 'click_rate' => $s['click_rate']];
+        return ['id' => (int) $r['id'], 'auto' => $r['auto'], 'status' => $r['status'], 'sent' => $s['sent'], 'open_rate' => $s['open_rate'], 'click_rate' => $s['click_rate'], 'answer_rate' => $s['answers'] ? $s['answer_rate'] : null];
     }, ml_q($pdo, 'SELECT id, auto, status FROM mail_campaigns WHERE auto IS NOT NULL ORDER BY id')->fetchAll(PDO::FETCH_ASSOC));
     $cap = ml_cap($pdo, $now);
     return ['now' => $now, 'campaigns' => $list, 'autos' => $autos, 'month' => ml_stats($pdo, null, $now - 30 * 86400), 'list' => ml_list_health($pdo),

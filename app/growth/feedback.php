@@ -6,6 +6,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * Types: experience (rating 1-5), idea, bug. 2000 characters max. Optional screenshot (PNG/JPG/WebP, 5 MB),
  * stored in the data folder with a random name. Statuses: new, planned, in_progress, shipped, declined.
  * 10 sends per trader per day. Email to the support address on each send (sweep_mail: the SMTP mailbox, like every other email).
+ * A one-click answer in an email (mail/mail-admin.php, api/m/r/…) is a line here too: src_queue (the email), src_q (its
+ * question), answer and answer_i (the choice and its place), type experience (a note from 1 to 5) or answer.
  */
 const FB_TYPES = ['bug', 'idea', 'experience'], FB_STATUSES = ['new', 'planned', 'in_progress', 'shipped', 'declined'];
 const FB_MAX_CHARS = 2000, FB_MAX_SHOT = 5 * 1048576, FB_MAX_PER_DAY = 10;
@@ -18,6 +20,9 @@ function fb_schema(PDO $pdo): void
     $k = $my ? 'VARCHAR(64)' : 'TEXT'; $txt = $my ? 'MEDIUMTEXT' : 'TEXT';
     $pdo->exec("CREATE TABLE IF NOT EXISTS feedback (id $id, user_id $k NOT NULL, type $k NOT NULL, rating INTEGER NULL, message $txt NOT NULL, page $k NULL,
         context $txt NULL, screenshot $k NULL, status $k NOT NULL, reply $txt NULL, created_at INTEGER NOT NULL, updated_at INTEGER NULL)" . ($my ? ' DEFAULT CHARSET=utf8mb4' : ''));
+    foreach (['src_queue' => 'INTEGER NULL', 'src_campaign' => 'INTEGER NULL', 'src_q' => 'INTEGER NULL', 'question' => "$txt NULL", 'answer' => 'VARCHAR(120) NULL', 'answer_i' => 'INTEGER NULL'] as $c => $t) {
+        try { $pdo->exec("ALTER TABLE feedback ADD COLUMN $c $t"); } catch (Throwable $e) { /* already there */ }
+    }
 }
 function fb_q(PDO $pdo, string $sql, array $a = []): PDOStatement { $st = $pdo->prepare($sql); $st->execute($a); return $st; }
 function fb_dir(): string { global $DATA; return $DATA . '/feedback'; }
@@ -70,6 +75,7 @@ function fb_out(array $r, bool $admin = false): array
     $o = ['id' => (int) $r['id'], 'type' => $r['type'], 'rating' => $r['rating'] !== null ? (int) $r['rating'] : null, 'message' => $r['message'], 'status' => $r['status'],
         'reply' => $r['reply'], 'created' => gmdate('c', (int) $r['created_at']), 'shot' => $r['screenshot'] ? 'api/feedback/shot/' . (int) $r['id'] : null];
     if ($admin) { $o['page'] = $r['page']; $o['context'] = json_decode((string) $r['context'], true); $o['user'] = $r['username'] ?? null; $o['email'] = $r['email'] ?? null; }
+    if (($r['src_queue'] ?? null) !== null) $o['mail'] = ['question' => $r['question'], 'answer' => $r['answer'], 'campaign' => $r['src_campaign'] !== null ? (int) $r['src_campaign'] : null];
     return $o;
 }
 function fb_list_mine(PDO $pdo, string $uid): array { fb_schema($pdo); return array_map('fb_out', fb_q($pdo, 'SELECT * FROM feedback WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [$uid])->fetchAll(PDO::FETCH_ASSOC)); }
@@ -78,11 +84,19 @@ function fb_admin_list(PDO $pdo, ?string $status, ?string $type): array
     fb_schema($pdo);
     $sql = 'SELECT f.*, u.username, u.email FROM feedback f LEFT JOIN users u ON u.id = f.user_id WHERE 1=1'; $a = [];
     if ($status && in_array($status, FB_STATUSES, true)) { $sql .= ' AND f.status = ?'; $a[] = $status; }
-    if ($type && in_array($type, FB_TYPES, true)) { $sql .= ' AND f.type = ?'; $a[] = $type; }
-    $rows = fb_q($pdo, $sql . ' ORDER BY f.created_at DESC LIMIT 300', $a)->fetchAll(PDO::FETCH_ASSOC);
+    if ($type && in_array($type, FB_TYPES, true)) { $sql .= ' AND f.type = ? AND f.src_queue IS NULL'; $a[] = $type; }
+    if ($type === 'mail') $sql .= ' AND f.src_queue IS NOT NULL';   // the one-click answers in the emails
+    $rows = fb_q($pdo, $sql . ' ORDER BY COALESCE(f.updated_at, f.created_at) DESC LIMIT 300', $a)->fetchAll(PDO::FETCH_ASSOC);
+    // an answer's email: its name (an automation's in the three languages)
+    $names = [];
+    try {
+        foreach (fb_q($pdo, 'SELECT id, name, auto FROM mail_campaigns')->fetchAll(PDO::FETCH_ASSOC) as $c)
+            $names[(int) $c['id']] = $c['auto'] !== null && function_exists('ma_info') && ($i = ma_info($c['auto'])) ? $i['name'] : ['en' => $c['name']];
+    } catch (Throwable $e) { /* no email sent yet */ }
     $avg = fb_q($pdo, 'SELECT AVG(rating) FROM feedback WHERE rating IS NOT NULL AND created_at > ?', [time() - 30 * 86400])->fetchColumn();
     $new = (int) fb_q($pdo, "SELECT COUNT(*) FROM feedback WHERE status = 'new'")->fetchColumn();
-    return ['items' => array_map(fn($r) => fb_out($r, true), $rows), 'avg_rating_30d' => $avg !== null && $avg !== false ? round((float) $avg, 2) : null, 'new' => $new];
+    $items = array_map(function ($r) use ($names) { $o = fb_out($r, true); if (isset($o['mail'])) $o['mail']['name'] = $names[$o['mail']['campaign'] ?? 0] ?? null; return $o; }, $rows);
+    return ['items' => $items, 'avg_rating_30d' => $avg !== null && $avg !== false ? round((float) $avg, 2) : null, 'new' => $new];
 }
 function fb_update(PDO $pdo, int $id, string $status, ?string $reply): bool
 {

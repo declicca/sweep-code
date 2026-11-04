@@ -57,7 +57,7 @@ with sync_playwright() as p:
   if not had: sql("UPDATE users SET email = ?, email_lc = ? WHERE username = 'mateo'", ('mateo-ml%s@t.dev' % tag, 'mateo-ml%s@t.dev' % tag))
   try:
     content = {'en': {'subject': 'News for {first} ' + tag, 'preheader': 'Two minutes', 'body': "# What is new\n\nHello {first}, read the [guide](https://makeitsweep.com/guide).\n\n[[Open Sweep|https://app.makeitsweep.com/#dashboard]]"},
-               'fr': {'subject': 'Du nouveau, {first} ' + tag, 'preheader': '', 'body': 'Salut {first}, voici le [guide](https://makeitsweep.com/guide).'}, 'es': {'subject': '', 'preheader': '', 'body': ''}}
+               'fr': {'subject': 'Du nouveau, {first} ' + tag, 'preheader': '', 'body': 'Qu\'est-ce qui te manque le plus ?\n\n[[?choix|Les stats|La synchro]]\n\nSalut {first}, voici le [guide](https://makeitsweep.com/guide).'}, 'es': {'subject': '', 'preheader': '', 'body': ''}}
     cid = adm.post('/api/admin/mail/campaigns', data=json.dumps({'name': 'Test ' + tag, 'content': content, 'audience': {'joined': 1}}), headers=H).json()['id']
     pv = adm.post('/api/admin/mail/preview', data=json.dumps({'content': content, 'lang': 'fr'}), headers=H).json()
     ok(pv['subject'].startswith('Du nouveau, ') and 'api/m/' not in pv['html'] and 'Me désinscrire' in pv['html'], 'preview: the French version, nothing tracked (%s)' % pv['subject'][:40])
@@ -155,7 +155,34 @@ with sync_playwright() as p:
     rep = "Subject: Undelivered Mail Returned to Sender\nAction: failed\nStatus: 4.2.2\nDiagnostic-Code: smtp; 452 mailbox full\n\nX-Sweep-Id: " + tka + "\n"
     bp = subprocess.run(['php', os.path.join(DEST, 'mail', 'bounce.php')], input=rep, capture_output=True, text=True, env=dict(os.environ, SWEEP_TEST_DB=DB), cwd=DEST)
     ok(bp.returncode == 0 and bp.stdout == '' and sql("SELECT COUNT(*) FROM mail_events e JOIN mail_queue q ON q.id = e.queue_id WHERE q.token = ? AND e.type = 'soft_bounce'", (tka,))[0][0] == 1, 'mail/bounce.php: the report recorded, silent, exit 0')
-    s = adm.get(f'/api/admin/mail/campaigns/{cid}', headers=H).json()['stats']
+    rp = adm.get(f'/api/admin/mail/campaigns/{cid}', headers=H).json(); s = rp['stats']
+    # a one-click answer (feedback brief, step 1): the page records it by its script, a comment is added; a scanner (no script) answers nothing
+    al = [x.replace('&amp;', '&') for x in re.findall(r'href="([^"]*/api/m/r/' + tka + r'[^"]*)"', got[ea]['html'])]
+    ok(len(al) == 2 and 'a=La%20synchro' in al[1], f'the email: one signed answer link per option ({len(al)})')
+    apath = urlparse(al[1]).path + '?' + urlparse(al[1]).query
+    pub.get(apath)
+    try: n_fb = sql('SELECT COUNT(*) FROM feedback WHERE src_queue = (SELECT id FROM mail_queue WHERE token = ?)', (tka,))[0][0]
+    except sqlite3.OperationalError: n_fb = 0   # (a fresh copy: no feedback table before the first one)
+    ok(n_fb == 0, 'a link scanner (no script) opening the answer: nothing recorded')
+    ok(pub.get(apath.replace('&s=', '&s=0')).status == 404, 'an answer link changed by hand: refused (404)')
+    for w, hgt, mob, scheme in ((390, 844, True, 'light'), (1300, 850, False, 'dark')):
+      cx = br.new_context(locale='fr-CA', viewport={'width': w, 'height': hgt}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme=scheme)
+      q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150])); q.on('console', lambda m: er.append(m.text[:150]) if m.type == 'error' else None)
+      q.goto(B + apath); q.wait_for_selector('textarea#more'); q.wait_for_timeout(900)
+      txt = q.inner_text('main'); bg = q.evaluate('getComputedStyle(document.body).backgroundColor')
+      ok('Merci' in txt and 'La synchro' in txt and 'Tu veux en dire plus' in txt and (bg == 'rgb(8, 8, 10)') == (scheme == 'dark'), f'{w}px {scheme} the answer page: « Merci », the answer, the comment box, the device\'s theme ({bg})')
+      r = sql('SELECT answer, answer_i, type, question FROM feedback WHERE src_queue = (SELECT id FROM mail_queue WHERE token = ?)', (tka,))
+      ok(len(r) == 1 and r[0][0] == 'La synchro' and r[0][1] == 1 and r[0][2] == 'answer' and r[0][3].startswith('Qu'), f'{w}px {scheme} recorded on its own by the page: one line ({r})')
+      ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+      ok(ov <= 0 and not er, f'{w}px {scheme} the answer page: no horizontal scroll ({ov}), no error {er[:2]}')
+      if w == 390:
+        q.fill('textarea#more', 'Tradovate ' + tag); q.click('button[type=submit]'); q.wait_for_selector('h1')
+        ok('C’est noté' in q.inner_text('main') and sql('SELECT message FROM feedback WHERE src_queue = (SELECT id FROM mail_queue WHERE token = ?)', (tka,))[0][0] == 'Tradovate ' + tag, f'{w}px the comment: « C’est noté », kept with the answer')
+      q.screenshot(path=f'{SHOTS}/e2e_mail_answer_{w}_{scheme}.png', full_page=True)
+      cx.close()
+    ok(sql('SELECT message FROM feedback WHERE src_queue = (SELECT id FROM mail_queue WHERE token = ?)', (tka,))[0][0] == 'Tradovate ' + tag, 'the page opened again: the comment stays')
+    ra = adm.get(f'/api/admin/mail/campaigns/{cid}', headers=H).json()
+    ok(ra['stats']['answers'] == 1 and ra['questions'][0]['counts'].get('1') == 1 and ra['comments'][0]['message'] == 'Tradovate ' + tag, 'the campaign\'s numbers: 1 answered, « La synchro » 1, the comment')
     ok(s['opens'] == 1 and s['opens_auto'] == 1 and s['clicks'] == 1 and s['unsubs'] == 1 and s['bounces'] == (cst == 'failed'), 'numbers: 1 real open (+1 machine), 1 click, 1 unsubscribed, 1 bounce (%s)' % json.dumps({k: s[k] for k in ('sent', 'opens', 'opens_auto', 'clicks', 'unsubs', 'bounces')}))
 
     # the numbers page
@@ -167,12 +194,25 @@ with sync_playwright() as p:
       q.goto(B + f'/#mail/{cid}'); q.wait_for_selector('#main .ml-rep .ml-kpis', timeout=15000); q.wait_for_timeout(600)
       txt = q.inner_text('#main .ml-rep')
       ok('Envoyée' in txt and 'Livrés' in txt and 'Ouverts' in txt and 'Cliqués' in txt and 'Désinscrits' in txt, f'{t} the numbers page: delivered, opened, clicked, unsubscribed')
+      ok('Ont répondu' in txt and 'Réponses' in txt and 'La synchro' in txt and 'Tradovate ' + tag in txt, f'{t} the answers: answered, each option, the last comment')
       ok('ouverture' in txt and 'automatique' in txt and q.locator('#main .ml-bars rect').count() >= 48 and 'makeitsweep.com/guide' in txt, f'{t} machine opens apart, the 48 hours, the most clicked link')
       ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
       ok(ov <= 0 and not er, f'{t} no horizontal scroll ({ov}), no page error {er[:2]}')
       q.screenshot(path=f'{SHOTS}/e2e_mail_report_{w}_{scheme}.png', full_page=True)
       cx.close()
     ok(not errs, f'send page: no page error {errs[:2]}')
+    # Admin › Feedback « Depuis un courriel »: the answer with its email and question
+    for w, hgt, mob, scheme in ((390, 844, True, 'dark'), (1300, 850, False, 'light')):
+      cx = br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': w, 'height': hgt}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme=scheme)
+      cx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+      q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150]))
+      q.goto(B + '/#admin'); q.wait_for_selector('[data-act="gadm-f"][data-v="mail"]', timeout=20000); q.click('[data-act="gadm-f"][data-v="mail"]'); q.wait_for_timeout(1500)
+      it = q.locator('.fb-item.adm', has_text='Tradovate ' + tag)
+      ok(q.inner_text('[data-act="gadm-f"][data-v="mail"]').strip() == 'Depuis un courriel' and it.count() == 1 and 'La synchro' in it.inner_text() and 'Test ' + tag in it.inner_text() and 'manque' in it.inner_text(), f'{w}px {scheme} Admin › Feedback « Depuis un courriel »: the email, the question, the answer, the comment')
+      ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+      ok(ov <= 0 and not er, f'{w}px {scheme} Admin › Feedback: no horizontal scroll ({ov}), no page error {er[:2]}')
+      it.scroll_into_view_if_needed(); it.screenshot(path=f'{SHOTS}/e2e_mail_fb_{w}_{scheme}.png')
+      cx.close()
 
     # the automations (step 5): in the list, an automation's page (its text, on or off, a test, its numbers; no audience, no delete)
     autos = adm.get('/api/admin/mail', headers=H).json()['autos']

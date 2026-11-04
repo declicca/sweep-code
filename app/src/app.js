@@ -9202,6 +9202,8 @@ const REF_T = {
     title: "Feedback",
     lead: "Ton avis façonne Sweep. On lit chaque message.",
     t_experience: "Expérience",
+    t_answer: "Réponse",
+    t_mail: "Depuis un courriel",
     t_idea: "Idée",
     t_bug: "Bug",
     rateQ: "Comment se passe ton expérience avec Sweep ?",
@@ -9240,6 +9242,8 @@ const REF_T = {
     title: "Feedback",
     lead: "Your input shapes Sweep. We read every message.",
     t_experience: "Experience",
+    t_answer: "Answer",
+    t_mail: "From an email",
     t_idea: "Idea",
     t_bug: "Bug",
     rateQ: "How is your experience with Sweep?",
@@ -9278,6 +9282,8 @@ const REF_T = {
     title: "Comentarios",
     lead: "Tu opinión da forma a Sweep. Leemos cada mensaje.",
     t_experience: "Experiencia",
+    t_answer: "Respuesta",
+    t_mail: "Desde un correo",
     t_idea: "Idea",
     t_bug: "Error",
     rateQ: "¿Cómo va tu experiencia con Sweep?",
@@ -9689,16 +9695,17 @@ function loadFb(e) {
 const FACES = [ "😞", "😕", "😐", "🙂", "😄" ], FB_ICON = {
   bug: '<path d="M8 8a4 4 0 0 1 8 0v6a4 4 0 0 1-8 0z"/><path d="M4 12h4M16 12h4M5 7l3 2M19 7l-3 2M5 18l3-2M19 18l-3-2"/>',
   idea: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5.9 1.2.9 2V16h5.2v-.1c0-.8.3-1.5.9-2A6 6 0 0 0 12 3z"/>',
-  experience: '<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M8.5 14.5s1.2 1.5 3.5 1.5 3.5-1.5 3.5-1.5M9 9.5h.01M15 9.5h.01"/>'
+  experience: '<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M8.5 14.5s1.2 1.5 3.5 1.5 3.5-1.5 3.5-1.5M9 9.5h.01M15 9.5h.01"/>',
+  answer: '<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>'
 };
 
 function vFeedback() {
   if (S.mode !== "server") return `<div class="empty">${FT().errors.server}</div>`;
   loadFb();
-  const e = FT(), t = GR.type, a = GR.fb == null ? '<li class="rf-empty">…</li>' : GR.fb.length ? GR.fb.map(n => `<li class="fb-item"><div class="fb-top"><span class="fb-ic t-${n.type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${FB_ICON[n.type]}</svg></span>\n      <b>${esc(e["t_" + n.type])}${n.rating ? ` ${FACES[n.rating - 1]}` : ""}</b><small>${esc(fdate(n.created.slice(0, 10), {
+  const e = FT(), t = GR.type, a = GR.fb == null ? '<li class="rf-empty">…</li>' : GR.fb.length ? GR.fb.map(n => `<li class="fb-item"><div class="fb-top"><span class="fb-ic t-${n.type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${FB_ICON[n.mail ? "answer" : n.type]}</svg></span>\n      <b>${esc(e[n.mail ? "t_answer" : "t_" + n.type])}${n.rating ? ` ${FACES[n.rating - 1]}` : ""}</b><small>${esc(fdate(n.created.slice(0, 10), {
     month: "short",
     day: "numeric"
-  }))}</small><span class="fb-st s-${n.status}">${esc(e.status[n.status] || n.status)}</span></div>\n      <p>${esc(n.message)}</p>${n.shot ? `<img class="fb-shot" src="${esc(n.shot)}" alt="" loading="lazy" data-act="zoom">` : ""}\n      ${n.reply ? `<div class="fb-reply"><small>${esc(e.reply)}</small><p>${esc(n.reply)}</p></div>` : ""}</li>`).join("") : `<li class="rf-empty">${esc(e.empty)}</li>`;
+  }))}</small><span class="fb-st s-${n.status}">${esc(e.status[n.status] || n.status)}</span></div>\n      ${n.mail ? `<p class="fb-mail"><small>${esc(n.mail.question || "")}</small><b>${esc(n.mail.answer || "")}</b></p>` : ""}${n.message ? `<p>${esc(n.message)}</p>` : ""}${n.shot ? `<img class="fb-shot" src="${esc(n.shot)}" alt="" loading="lazy" data-act="zoom">` : ""}\n      ${n.reply ? `<div class="fb-reply"><small>${esc(e.reply)}</small><p>${esc(n.reply)}</p></div>` : ""}</li>`).join("") : `<li class="rf-empty">${esc(e.empty)}</li>`;
   return `<div class="fb" data-noi18n>\n   <p class="fb-lead">${esc(e.lead)}</p>\n   <section class="surface pad fb-form">\n     <div class="seg fb-seg" role="tablist">${[ "experience", "idea", "bug" ].map(n => `<button role="tab" data-act="fb-type" data-v="${n}" class="${t === n ? "on" : ""}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${FB_ICON[n]}</svg>${esc(e["t_" + n])}</button>`).join("")}</div>\n     ${t === "experience" ? `<p class="fb-q">${esc(e.rateQ)}</p><div class="fb-faces" role="radiogroup">${FACES.map((n, s) => `<button type="button" role="radio" aria-checked="${GR.rating === s + 1}" aria-label="${esc(e.rates[s])}" data-act="fb-rate" data-v="${s + 1}" class="${GR.rating === s + 1 ? "on" : ""}"><span>${n}</span><small>${esc(e.rates[s])}</small></button>`).join("")}</div>` : ""}\n     <label class="fb-l" for="fbMsg">${esc(e.label[t])}</label>\n     <textarea id="fbMsg" rows="5" maxlength="2000" placeholder="${esc(e.ph[t])}">${esc(GR.draft || "")}</textarea>\n     <div class="fb-row">${GR.shot ? `<span class="fb-thumb"><img src="${GR.shot}" alt=""><button type="button" data-act="fb-unshot" aria-label="Remove">✕</button></span>` : `<label class="btn sm fb-attach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>${esc(e.attach)}<input type="file" accept="image/png,image/jpeg,image/webp" data-fb-shot hidden></label>`}\n       <span class="fb-count" id="fbCount">${(GR.draft || "").length}/2000</span></div>\n     <button class="btn primary fb-send" data-act="fb-send" ${GR.busy ? "disabled" : ""}>${esc(e.send)}</button>\n   </section>\n   <section class="sec"><div class="sec-h"><h2>${esc(e.mine)}</h2></div><ul class="fb-list">${a}</ul></section>\n  </div>`;
 }
 
@@ -9770,10 +9777,10 @@ function growthAdmin() {
     items: [],
     new: 0,
     avg_rating_30d: null
-  }, n = (o, r, c) => `<button class="chip ${e[o] === r ? "on" : ""}" data-act="gadm-f" data-k="${o}" data-v="${r}">${esc(c)}</button>`, s = a.items.map(o => `<li class="fb-item adm" id="fb${o.id}"><div class="fb-top"><span class="fb-ic t-${o.type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${FB_ICON[o.type]}</svg></span>\n      <b>${esc(o.user || "?")}${o.rating ? ` · ${FACES[o.rating - 1]} ${o.rating}/5` : ""}</b><small>${esc(fdate(o.created.slice(0, 10), {
+  }, n = (o, r, c) => `<button class="chip ${e[o] === r ? "on" : ""}" data-act="gadm-f" data-k="${o}" data-v="${r}">${esc(c)}</button>`, s = a.items.map(o => `<li class="fb-item adm" id="fb${o.id}"><div class="fb-top"><span class="fb-ic t-${o.type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${FB_ICON[o.mail ? "answer" : o.type]}</svg></span>\n      <b>${esc(o.user || "?")}${o.rating ? ` · ${FACES[o.rating - 1]} ${o.rating}/5` : ""}</b><small>${esc(fdate(o.created.slice(0, 10), {
     month: "short",
     day: "numeric"
-  }))}${o.page ? " · " + esc(o.page) : ""}${o.context && o.context.plan ? " · " + esc(o.context.plan) : ""}</small></div>\n      <p>${esc(o.message)}</p>${o.shot ? `<img class="fb-shot" src="${esc(o.shot)}" alt="" loading="lazy" data-act="zoom">` : ""}\n      <small class="faint">${esc([ o.email, o.context && o.context.screen, o.context && o.context.lang, o.context && o.context.version ].filter(Boolean).join(" · "))}</small>\n      <div class="gadm-row"><select data-gadm-status="${o.id}" data-native>${[ "new", "planned", "in_progress", "shipped", "declined" ].map(r => `<option value="${r}" ${o.status === r ? "selected" : ""}>${esc(t.status[r])}</option>`).join("")}</select>\n      <textarea data-gadm-reply="${o.id}" rows="2" placeholder="${esc(t.reply)}">${esc(o.reply || "")}</textarea><button class="btn sm primary" data-act="gadm-save" data-id="${o.id}">OK</button></div></li>`).join("") || '<li class="rf-empty">—</li>', i = (e.ref || []).map(o => `<tr><td>${esc(o.referrer || "?")}</td><td>${esc(o.referee || "?")}</td><td><span class="rf-st s-${{
+  }))}${o.page ? " · " + esc(o.page) : ""}${o.context && o.context.plan ? " · " + esc(o.context.plan) : ""}</small></div>\n      ${o.mail ? `<p class="fb-mail"><small>${esc([ o.mail.name && (o.mail.name[LANG] || o.mail.name.en), o.mail.question ].filter(Boolean).join(" · "))}</small><b>${esc(o.mail.answer || "")}</b></p>` : ""}${o.message ? `<p>${esc(o.message)}</p>` : ""}${o.shot ? `<img class="fb-shot" src="${esc(o.shot)}" alt="" loading="lazy" data-act="zoom">` : ""}\n      <small class="faint">${esc([ o.email, o.context && o.context.screen, o.context && o.context.lang, o.context && o.context.version ].filter(Boolean).join(" · "))}</small>\n      <div class="gadm-row"><select data-gadm-status="${o.id}" data-native>${[ "new", "planned", "in_progress", "shipped", "declined" ].map(r => `<option value="${r}" ${o.status === r ? "selected" : ""}>${esc(t.status[r])}</option>`).join("")}</select>\n      <textarea data-gadm-reply="${o.id}" rows="2" placeholder="${esc(t.reply)}">${esc(o.reply || "")}</textarea><button class="btn sm primary" data-act="gadm-save" data-id="${o.id}">OK</button></div></li>`).join("") || '<li class="rf-empty">—</li>', i = (e.ref || []).map(o => `<tr><td>${esc(o.referrer || "?")}</td><td>${esc(o.referee || "?")}</td><td><span class="rf-st s-${{
     pending: "p",
     review: "v",
     qualified: "q",
@@ -9784,7 +9791,7 @@ function growthAdmin() {
     month: "short",
     day: "numeric"
   })}</td>\n      <td class="num">${o.status === "review" ? `<button class="link" data-act="gadm-ref" data-id="${o.id}" data-v="approve">Approve</button> · ` : ""}${[ "review", "pending" ].includes(o.status) ? `<button class="link" data-act="gadm-ref" data-id="${o.id}" data-v="reject" style="color:var(--neg)">Reject</button>` : ""}</td></tr>`).join("");
-  return `<section class="sec" data-noi18n><div class="sec-h"><h2>Feedback</h2><span class="help">${a.new} new${a.avg_rating_30d != null ? ` · ${a.avg_rating_30d}/5 (30 d)` : ""}</span></div>\n     <div class="chips gadm-chips">${n("st", "", "All")}${[ "new", "planned", "in_progress", "shipped", "declined" ].map(o => n("st", o, t.status[o])).join("")}<span class="gadm-sep"></span>${n("ty", "", "All types")}${[ "bug", "idea", "experience" ].map(o => n("ty", o, t["t_" + o])).join("")}</div>\n     <ul class="fb-list">${s}</ul></section>\n   <section class="sec" data-noi18n><div class="sec-h"><h2>Referrals</h2><span class="help">${(e.ref || []).length} total · ${(e.ref || []).filter(o => o.status === "review").length} to review</span></div>\n     <div class="surface"><div class="scroll-x"><table class="tbl"><thead><tr><th>Referrer</th><th>Friend</th><th>Status</th><th>Reward</th><th>Joined</th><th></th></tr></thead><tbody>${i || '<tr><td colspan="6" class="muted">—</td></tr>'}</tbody></table></div></div></section>\n   ${creatorsAdmin()}`;
+  return `<section class="sec" data-noi18n><div class="sec-h"><h2>Feedback</h2><span class="help">${a.new} new${a.avg_rating_30d != null ? ` · ${a.avg_rating_30d}/5 (30 d)` : ""}</span></div>\n     <div class="chips gadm-chips">${n("st", "", "All")}${[ "new", "planned", "in_progress", "shipped", "declined" ].map(o => n("st", o, t.status[o])).join("")}<span class="gadm-sep"></span>${n("ty", "", "All types")}${[ "bug", "idea", "experience", "mail" ].map(o => n("ty", o, t["t_" + o])).join("")}</div>\n     <ul class="fb-list">${s}</ul></section>\n   <section class="sec" data-noi18n><div class="sec-h"><h2>Referrals</h2><span class="help">${(e.ref || []).length} total · ${(e.ref || []).filter(o => o.status === "review").length} to review</span></div>\n     <div class="surface"><div class="scroll-x"><table class="tbl"><thead><tr><th>Referrer</th><th>Friend</th><th>Status</th><th>Reward</th><th>Joined</th><th></th></tr></thead><tbody>${i || '<tr><td colspan="6" class="muted">—</td></tr>'}</tbody></table></div></div></section>\n   ${creatorsAdmin()}`;
 }
 
 async function gadmSave(e) {
