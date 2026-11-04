@@ -312,6 +312,13 @@ def _crumb(lang, t, page, title=""):
     return re.split(r"\s[·|—]\s", title)[0].strip()
 
 # Share images made by tools/og_images.py for some pages (firms, comparisons, compared rules, calculators); the others use the site's image
+def _capture_lang(s, lang):
+    """/img/captures/<file> → /img/captures/<lang>/<file>; a Spanish page falls back to the English file it doesn't have."""
+    def sub(m):
+        cl = "en" if lang == "es" and not os.path.exists(os.path.join(STATIC, "img", "captures", "es", m.group(1))) else lang
+        return f"/img/captures/{cl}/{m.group(1)}"
+    return re.sub(r"/img/captures/([\w.-]*)", sub, s)
+
 OG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "static", "social", "og")
 try: OG = json.load(open(os.path.join(OG_DIR, "manifest.json"), encoding="utf-8"))
 except (OSError, ValueError): OG = {}
@@ -344,11 +351,9 @@ def _shell_raw(lang, page, title, desc, body, t, extra_head=""):
                       + f'<li aria-current="page">{html.escape(items[-1][0])}</li></ol></div></nav>')
     extra_head += jsonld({"@context":"https://schema.org","@graph":graph})
     if page in NOINDEX: extra_head += '<meta name="robots" content="noindex, follow">'   # never a result for a brand search (brief of Oct 19)
-    cl = "fr" if lang == "fr" else "en"   # Spanish pages use the English captures
     for _o, _n in CAPTURE_V6.items():
         body = body.replace(f"/img/captures/{_o}-1200.webp", f"/img/captures/{_n}-1200.webp").replace(f"/img/captures/{_o}.webp", f"/img/captures/{_n}.webp")
-    body = body.replace("/img/captures/", f"/img/captures/{cl}/")
-    extra_head = extra_head.replace("/img/captures/", f"/img/captures/{cl}/")
+    body, extra_head = _capture_lang(body, lang), _capture_lang(extra_head, lang)
     url = f"https://{DOMAIN}{href(lang,page)}"
     alts = "".join(f'<link rel="alternate" hreflang="{l}" href="https://{DOMAIN}{href(l,page)}">' for l in LANGS)
     alts += f'<link rel="alternate" hreflang="x-default" href="https://{DOMAIN}{href("en",page)}">'
