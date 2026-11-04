@@ -2,7 +2,7 @@
 Sweep — the site's captures (brief of 20 Oct. 2026, briefs/brief-captures-site-2026-10-20.md), from the current app, dark
 theme, sample trader « Alex » (seed.py), each in its languages, at the exact size of the file it replaces.
   sh tools/site-shots/serve.sh python3 tools/site-shots/shots.py <out_dir> [name …]
-Writes <out_dir>/captures/{en,fr}/<name>.webp and <out_dir>/img/<name>.webp (the names and sizes of website/static/img),
+Writes <out_dir>/captures/{en,fr,es}/<name>.webp and <out_dir>/img/<name>.webp (the names and sizes of website/static/img),
 plus a PNG next to each for checking. Nothing is written to the site.
 """
 import datetime as dt, json, os, subprocess, sys
@@ -55,7 +55,7 @@ def swept(pg, lang):
   pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(2500)
   go(pg, '#dashboard', 2500)
   for i in range(6):   # the « Day swept » moment (it can come a little later), then Today with its 3 steps done
-    if pg.evaluate("!!document.querySelector('[data-g=sw-close]')"): g(pg, 'sw-close', None, 1200)
+    if pg.evaluate("!!document.querySelector('[data-g=sw-close]')"): pg.evaluate("document.querySelector('[data-g=sw-close]').click()"); pg.wait_for_timeout(1200)   # (4 Nov.) the overlay's own button: it listens on itself
     pg.wait_for_timeout(700)
   top(pg)
 
@@ -120,6 +120,9 @@ def tmp_trade(pg):
     t.pnl_c = calcPnl(t.direction, t.entry, t.exit, t.contracts, t.instrument); put('trades', t); }""", TMP); pg.wait_for_timeout(1500)
 def tmp_clean(pg):
   pg.evaluate("(id) => remove('trades', id)", TMP); pg.wait_for_timeout(1200)
+  import sqlite3   # (4 Nov.) the extra trade reached the routine's 3 trades a day: the day lock it left behind is removed with it
+  uid = pg.evaluate("S.uid"); db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60)
+  db.execute("UPDATE game_days SET locked_at = NULL, detail_json = json_remove(detail_json, '$.lock') WHERE user_id = ? AND trading_day = ?", (uid, NOW.strftime('%Y-%m-%d'))); db.commit(); db.close()
 
 def trade_review(pg, lang):   # the trade's page, « Answer your coach »
   go(pg, '#dashboard', 1500); tmp_trade(pg); go(pg, '#trade/' + TMP, 3000); top(pg)
@@ -149,9 +152,9 @@ def signup(pg, lang):
   click_text(pg, r'^(Create account|Créer un compte|Crear cuenta)$', 'body', 1200)
 
 def plan_sheet(pg, lang):   # the express plan, being filled: his bias, his levels, his two scenarios
-  P = {'en': ('PDH 24,412 · London high 24,380 · London low 24,318', 'Sweep of the London low that holds: long toward the London high.', 'Back under 24,318: short toward the PDL. Otherwise, no trade.'),
-       'fr': ('PDH 24 412 · London high 24 380 · London low 24 318', 'Sweep du London low qui tient : achat vers le London high.', 'Retour sous 24 318 : vente vers le PDL. Sinon, pas de trade.'),
-       'es': ('PDH 24.412 · London high 24.380 · London low 24.318', 'Sweep del London low que aguanta: compra hacia el London high.', 'Vuelta bajo 24.318: venta hacia el PDL. Si no, sin operación.')}[lang]
+  P = {'en': ('PDH 24,412 · London low 24,318', 'Sweep of the London low that holds: long toward the London high.', 'Back under 24,318: short toward the PDL. Otherwise, no trade.'),
+       'fr': ('PDH 24 412 · London low 24 318', 'Sweep du London low qui tient : achat vers le London high.', 'Retour sous 24 318 : vente vers le PDL. Sinon, pas de trade.'),
+       'es': ('PDH 24.412 · London low 24.318', 'Sweep del London low que aguanta: compra hacia el London high.', 'Vuelta bajo 24.318: venta hacia el PDL. Si no, sin operación.')}[lang]
   go(pg, '#dashboard', 1500)
   pg.locator('#main [data-rt="plan"]').first.evaluate("(e) => e.scrollIntoView({ block: 'center' })"); pg.wait_for_timeout(400)   # (2 Nov.) the routine card is taller (the day's counter): the step was under the tab bar
   tap(pg, '#main [data-rt="plan"]', 2500)
@@ -177,8 +180,8 @@ def wrapped(n):
   return f
 
 def connections(pg, lang):
-  import sqlite3, time   # « add-on seen 2 min ago » (the server counts from the real clock)
-  db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60); db.execute('UPDATE sync_connections SET last_seen_at = ?, last_push_at = ?', (int(time.time()) - 130, int(time.time()) - 130)); db.commit(); db.close()
+  import sqlite3   # « add-on seen 2 min ago », from the capture's clock (4 Nov.: the page counts from the browser's fixed clock)
+  db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60); db.execute('UPDATE sync_connections SET last_seen_at = ?, last_push_at = ?', (int(NOW.timestamp()) - 130, int(NOW.timestamp()) - 130)); db.commit(); db.close()
   go(pg, '#settings', 2500)
   pg.evaluate("() => { const d = document.querySelector('#main details.nav-sgd[data-i=\\'3\\']'); if (d) d.open = true; }"); pg.wait_for_timeout(1200)
   scroll_text(pg, r'^(Connections|Connexions|Conexiones)$', '#main h2, #main h3, #main h4, #main b', 90 if phone(pg) else 30)
@@ -228,8 +231,8 @@ def close_day(pg, lang):   # « Close my day »: « Your balance on Topstep? »,
 
 def term_i(pg, lang):   # a trading word explained by its « i », open (the account page: drawdown margin, consistency)
   go(pg, '#account/a3', 3000)
-  pg.evaluate("() => { const i = [...document.querySelectorAll('#main .sw-term, #main [data-tip]')].find((e) => e.getClientRects().length && /drawdown|consist/i.test(e.getAttribute('data-tip') || '')) || [...document.querySelectorAll('#main .sw-term')].find((e) => e.getClientRects().length); if (i) scrollTo(0, i.getBoundingClientRect().top + scrollY - 330); }"); pg.wait_for_timeout(700)
-  pg.evaluate("() => { const i = [...document.querySelectorAll('#main .sw-term, #main [data-tip]')].find((e) => e.getClientRects().length && /drawdown|consist/i.test(e.getAttribute('data-tip') || '')) || [...document.querySelectorAll('#main .sw-term')].find((e) => e.getClientRects().length); if (i) i.click(); }"); pg.wait_for_timeout(1200)
+  pg.evaluate("() => { const i = [...document.querySelectorAll('#main .sw-term, #main [data-tip]')].find((e) => e.getClientRects().length && /drawdown/i.test(e.getAttribute('data-tip') || '') && /limit|límite/i.test(e.getAttribute('data-tip') || '')) || [...document.querySelectorAll('#main .sw-term')].find((e) => e.getClientRects().length); if (i) scrollTo(0, i.getBoundingClientRect().top + scrollY - 330); }"); pg.wait_for_timeout(700)
+  pg.evaluate("() => { const i = [...document.querySelectorAll('#main .sw-term, #main [data-tip]')].find((e) => e.getClientRects().length && /drawdown/i.test(e.getAttribute('data-tip') || '') && /limit|límite/i.test(e.getAttribute('data-tip') || '')) || [...document.querySelectorAll('#main .sw-term')].find((e) => e.getClientRects().length); if (i) i.click(); }"); pg.wait_for_timeout(1200)
 
 def discovery(pg, lang):   # the discovery missions, as a new trader sees them: the day's mission and « Do it now » (Alex put back to « everything shown » after)
   import sqlite3
@@ -240,56 +243,79 @@ def discovery_back(pg):
   import sqlite3
   uid = pg.evaluate("S.uid"); db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60); db.execute('UPDATE users SET discovery_done = 1 WHERE id = ?', (uid,)); db.commit(); db.close()
 
+def firm_rules(pg, lang):   # Add an account: funded › Topstep › XFA, then « Which size? » (the firm's rules filled in on their own)
+  go(pg, '#accounts', 2500)
+  click_text(pg, r'^\+?\s*(Add (an )?account|Ajouter un compte|Agregar (una )?cuenta|Añadir (una )?cuenta)', 'body', 2200)
+  for sel in ('[data-st-ph0=funded]', '[data-st-firm=topstep]'):
+    if pg.locator(sel).count(): pg.locator(sel).first.click(); pg.wait_for_timeout(1200)
+  pg.evaluate("() => { const e = [...document.querySelectorAll('[data-st-type]')].find((x) => x.getClientRects().length && /XFA/.test(x.textContent)); if (e) e.click(); }"); pg.wait_for_timeout(1500)
+  pg.evaluate("() => { const e = [...document.querySelectorAll('[data-st-size]')].find((x) => x.getClientRects().length); if (e) e.scrollIntoView({ block: 'center' }); }"); pg.wait_for_timeout(700)
+
+def gameplan(pg, lang):   # the 90-day plan, month 1 week by week (started three weeks ago, start day moved in the capture copy)
+  import sqlite3
+  pg.evaluate("fetch('api/game/gameplan/start', { method: 'POST', headers: { 'X-Requested-With': 'fetch', 'Content-Type': 'application/json' }, body: JSON.stringify({ track: 'B' }) })"); pg.wait_for_timeout(1200)
+  uid = pg.evaluate("S.uid")
+  db = sqlite3.connect(os.path.join(DEST, 'data', 'journal.db'), timeout=60); db.execute("UPDATE game_gameplan SET start_day = '2026-09-28' WHERE user_id = ?", (uid,)); db.commit(); db.close()
+  pg.evaluate("SweepGPLoad().then((g) => g.openMap())"); pg.wait_for_timeout(3500)
+
+def share_options(pg, lang):   # the stats share window: show my name, the amounts, the prop firm
+  go(pg, '#analytics', 2500)
+  pg.evaluate("openShare('stats', 'month')"); pg.wait_for_timeout(2200); second_tab(pg)
+  pg.evaluate("() => { const t = [...document.querySelectorAll('#shPanel input[type=checkbox], #shPanel [role=switch]')].find((e) => e.getClientRects().length); const sc = t && [...document.querySelectorAll('#shPanel, #shPanel *')].find((x) => x.scrollHeight > x.clientHeight + 40 && /auto|scroll/.test(getComputedStyle(x).overflowY)); if (t && sc) sc.scrollTop += t.getBoundingClientRect().top - sc.getBoundingClientRect().top - 500; }"); pg.wait_for_timeout(900)
+
+L3 = ('en', 'fr', 'es')
 SHOTS = {
-  # phone, captures/{en,fr} (900 × 1948)
-  'v6-01-today-m': ('m', ('en', 'fr'), 'captures', today_now),
-  'v6-03-log-by-screenshot-m': ('m', ('en', 'fr'), 'captures', by_screenshot),
-  'v6-04-discipline-psychology-m': ('m', ('en', 'fr'), 'captures', review_open),
-  'v6-05-log-by-hand-m': ('m', ('en', 'fr'), 'captures', by_hand),
-  'v6-06-trade-review-m': ('m', ('en', 'fr'), 'captures', trade_review),
-  'v6-07-stats-m': ('m', ('en', 'fr'), 'captures', page('#analytics')),
-  'v6-08-payout-conditions-m': ('m', ('en', 'fr'), 'captures', account_payout),
-  'v6-10-journal-m': ('m', ('en', 'fr'), 'captures', page('#journal/2026-10-14')),
-  'v6-11-calendar-m': ('m', ('en', 'fr'), 'captures', page('#calendar')),
-  'v6-12-payouts-m': ('m', ('en', 'fr'), 'captures', money),
-  'v6-13-accounts-m': ('m', ('en', 'fr'), 'captures', page('#accounts')),
-  'v6-17b-share-one-payout-m': ('m', ('en', 'fr'), 'captures', share_payout),
-  'v6-18-add-trade-choice-m': ('m', ('en', 'fr'), 'captures', new_trade),
-  'v6-20-signup-m': ('m', ('en', 'fr'), 'captures', signup),
-  'v6-23-discipline-checklist-m': ('m', ('en', 'fr'), 'captures', checklist),
-  'v6-24-new-trade-filled-m': ('m', ('en', 'fr'), 'captures', new_trade_filled),
-  'v6-25-new-trade-empty-m': ('m', ('en', 'fr'), 'captures', new_trade),
-  'ecran-parcours': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'hub', None, 3500)),   # « My progress » (29 Oct.)
-  'ecran-boss-revenge': ('m', ('en', 'fr'), 'captures', boss),
-  'ecran-saison': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'season', None, 2200)),
-  'ecran-badges': ('m', ('en', 'fr'), 'captures', badges),
-  'ecran-ligue': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'league', None, 2500)),
-  'ecran-crew': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'social', None, 2500)),
-  'ecran-plan-du-jour': ('m', ('en', 'fr'), 'captures', plan_sheet),
-  'ecran-wrapped-1': ('m', ('en', 'fr'), 'captures', wrapped(1)),
-  'ecran-wrapped-2': ('m', ('en', 'fr'), 'captures', wrapped(2)),
-  'ecran-wrapped-3': ('m', ('en', 'fr'), 'captures', wrapped(3)),
-  'ecran-connexions': ('m', ('en', 'fr'), 'captures', connections),
-  'ecran-fermer-journee': ('m', ('en', 'fr'), 'captures', close_day),
-  'ecran-explication-i': ('m', ('en', 'fr'), 'captures', term_i),
-  # computer, captures/{en,fr} (2400 × 1500)
-  'v6-01-today-d': ('d', ('en', 'fr'), 'captures', today_now),
-  'v6-04-discipline-psychology-d': ('d', ('en', 'fr'), 'captures', discipline_d),
-  'v6-05-log-by-hand-d': ('d', ('en', 'fr'), 'captures', by_hand),
-  'v6-06-trade-review-d': ('d', ('en', 'fr'), 'captures', trade_review),
-  'v6-07-stats-d': ('d', ('en', 'fr'), 'captures', page('#analytics')),
-  'v6-08-payout-conditions-d': ('d', ('en', 'fr'), 'captures', account_payout),
-  'v6-11-calendar-d': ('d', ('en', 'fr'), 'captures', page('#calendar')),
-  'v6-12-payouts-d': ('d', ('en', 'fr'), 'captures', money),
-  'v6-13-accounts-d': ('d', ('en', 'fr'), 'captures', page('#accounts')),
-  'v6-17b-share-one-payout-d': ('d', ('en', 'fr'), 'captures', share_payout),
-  'v6-18-add-trade-choice-d': ('d', ('en', 'fr'), 'captures', new_trade),
-  'v6-24-new-trade-filled-d': ('d', ('en', 'fr'), 'captures', new_trade_filled),
-  'v6-25-new-trade-empty-d': ('d', ('en', 'fr'), 'captures', new_trade),
-  'v6-26-connections-d': ('d', ('en', 'fr'), 'captures', connections_link),
+  # phone, captures/{en,fr,es} (900 × 1948)
+  'ecran-regles-firme': ('m', L3, 'captures', firm_rules),
+  'ecran-plan-90-jours': ('m', L3, 'captures', gameplan),
+  'v6-14b-share-stats-options-m': ('m', L3, 'captures', share_options),
+  'v6-01-today-m': ('m', L3, 'captures', today_now),
+  'v6-03-log-by-screenshot-m': ('m', L3, 'captures', by_screenshot),
+  'v6-04-discipline-psychology-m': ('m', L3, 'captures', review_open),
+  'v6-05-log-by-hand-m': ('m', L3, 'captures', by_hand),
+  'v6-06-trade-review-m': ('m', L3, 'captures', trade_review),
+  'v6-07-stats-m': ('m', L3, 'captures', page('#analytics')),
+  'v6-08-payout-conditions-m': ('m', L3, 'captures', account_payout),
+  'v6-10-journal-m': ('m', L3, 'captures', page('#journal/2026-10-14')),
+  'v6-11-calendar-m': ('m', L3, 'captures', page('#calendar')),
+  'v6-12-payouts-m': ('m', L3, 'captures', money),
+  'v6-13-accounts-m': ('m', L3, 'captures', page('#accounts')),
+  'v6-17b-share-one-payout-m': ('m', L3, 'captures', share_payout),
+  'v6-18-add-trade-choice-m': ('m', L3, 'captures', new_trade),
+  'v6-20-signup-m': ('m', L3, 'captures', signup),
+  'v6-23-discipline-checklist-m': ('m', L3, 'captures', checklist),
+  'v6-24-new-trade-filled-m': ('m', L3, 'captures', new_trade_filled),
+  'ecran-parcours': ('m', L3, 'captures', lambda pg, l: g(pg, 'hub', None, 3500)),   # « My progress » (29 Oct.)
+  'ecran-boss-revenge': ('m', L3, 'captures', boss),
+  'ecran-saison': ('m', L3, 'captures', lambda pg, l: g(pg, 'season', None, 2200)),
+  'ecran-badges': ('m', L3, 'captures', badges),
+  'ecran-ligue': ('m', L3, 'captures', lambda pg, l: g(pg, 'league', None, 2500)),
+  'ecran-crew': ('m', L3, 'captures', lambda pg, l: g(pg, 'social', None, 2500)),
+  'ecran-plan-du-jour': ('m', L3, 'captures', plan_sheet),
+  'ecran-wrapped-1': ('m', L3, 'captures', wrapped(1)),
+  'ecran-wrapped-2': ('m', L3, 'captures', wrapped(2)),
+  'ecran-wrapped-3': ('m', L3, 'captures', wrapped(3)),
+  'ecran-connexions': ('m', L3, 'captures', connections),
+  'ecran-fermer-journee': ('m', L3, 'captures', close_day),
+  'ecran-explication-i': ('m', L3, 'captures', term_i),
+  # computer, captures/{en,fr,es} (2400 × 1500)
+  'v6-01-today-d': ('d', L3, 'captures', today_now),
+  'v6-04-discipline-psychology-d': ('d', L3, 'captures', discipline_d),
+  'v6-05-log-by-hand-d': ('d', L3, 'captures', by_hand),
+  'v6-06-trade-review-d': ('d', L3, 'captures', trade_chart),   # (4 Nov. brief) the trade on its CME chart
+  'v6-07-stats-d': ('d', L3, 'captures', page('#analytics')),
+  'v6-08-payout-conditions-d': ('d', L3, 'captures', account_payout),
+  'v6-11-calendar-d': ('d', L3, 'captures', page('#calendar')),
+  'v6-12-payouts-d': ('d', L3, 'captures', money),
+  'v6-13-accounts-d': ('d', L3, 'captures', page('#accounts')),
+  'v6-17b-share-one-payout-d': ('d', L3, 'captures', share_payout),
+  'v6-18-add-trade-choice-d': ('d', L3, 'captures', new_trade),
+  'v6-24-new-trade-filled-d': ('d', L3, 'captures', new_trade_filled),
+  'v6-25-new-trade-empty-d': ('d', L3, 'captures', new_trade),
+  'v6-26-connections-d': ('d', L3, 'captures', connections_link),
   # img/ (en, fr, es)
-  'ecran-revue-semaine': ('m', ('en', 'fr'), 'captures', lambda pg, l: g(pg, 'weekly', None, 2500)),
-  'ecran-edge-reveal': ('m', ('en', 'fr'), 'captures', edge_reveal),
+  'ecran-revue-semaine': ('m', L3, 'captures', lambda pg, l: g(pg, 'weekly', None, 2500)),
+  'ecran-edge-reveal': ('m', L3, 'captures', edge_reveal),
   'mobile-{lang}-dark-ask-sweep-786': ('m786', ('en', 'fr', 'es'), 'img', ask_sweep),
   'mobile-{lang}-dark-calendar-786': ('m786', ('en', 'fr', 'es'), 'img', page('#calendar')),
   'mobile-{lang}-dark-economic-calendar-786': ('m786', ('en', 'fr', 'es'), 'img', econ_week),
@@ -298,15 +324,15 @@ SHOTS = {
   'desktop-{lang}-dark-calendar-2400': ('d2400', ('en', 'fr', 'es'), 'img', page('#calendar')),
   'desktop-{lang}-dark-economic-calendar-2400': ('d2400', ('en', 'fr', 'es'), 'img', econ_week),
   # last: they write today's review
-  'ecran-missions-decouverte': ('m', ('en', 'fr'), 'captures', discovery),
-  'v6-22-today-swept-m': ('m', ('en', 'fr'), 'captures', swept),
-  'v6-22-today-swept-d': ('d', ('en', 'fr'), 'captures', swept),
+  'ecran-missions-decouverte': ('m', L3, 'captures', discovery),
+  'v6-22-today-swept-m': ('m', L3, 'captures', swept),
+  'v6-22-today-swept-d': ('d', L3, 'captures', swept),
 }
 SIGNED_OUT = {'v6-20-signup-m'}
 # Friday after the close (SHOTS_NOW="2026-10-16 17:30", a second server: serve.sh with DEST=/tmp/gs2 PORT=8997): the week's recap
 FRIDAY = {'ecran-revue-semaine', 'ecran-edge-reveal'}
 EVENING = NOW.weekday() == 4 and NOW.hour >= 17
-CLEAN = {'v6-06-trade-review-m': tmp_clean, 'v6-06-trade-review-d': tmp_clean, 'v6-26-connections-d': relink, 'ecran-missions-decouverte': discovery_back}
+CLEAN = {'v6-06-trade-review-m': tmp_clean, 'v6-26-connections-d': relink, 'ecran-missions-decouverte': discovery_back}
 
 # ───────────── the share cards: the app's own « Save image » (or the game's card), at the site's sizes ─────────────
 SAVE = r'^(Save image|Enregistrer l.image|Guardar (la )?imagen)$'
@@ -387,7 +413,7 @@ def seed(langs):
     r = subprocess.run(['php', os.path.join(DEST, 'tools', 'site-shots', 'history.php'), uid, GAME_FROM, NOW.strftime('%Y-%m-%d'), NOW.strftime('%H:%M')], capture_output=True, text=True)
     print('history', lang, r.stdout.strip(), r.stderr.strip()[-300:])
   uids = json.load(open(STATE + '-uids.json')); H = {'en': 'AlexM', 'fr': 'Alex.M', 'es': 'Alex_M'}
-  r = subprocess.run(['php', os.path.join(DEST, 'tools', 'site-shots', 'social.php'), NOW.strftime('%Y-%m-%d'), *[x for l in uids for x in (uids[l], H[l])]], capture_output=True, text=True)
+  r = subprocess.run(['php', os.path.join(DEST, 'tools', 'site-shots', 'social.php'), NOW.strftime('%Y-%m-%d'), *[x for l in ('en', 'fr', 'es') if l in uids for x in (uids[l], H[l])]], capture_output=True, text=True)   # social.php gives the languages in this order (4 Nov.: the FR and ES crews were swapped)
   print('social', r.stdout.strip(), r.stderr.strip()[-300:])
   for lang in uids: subprocess.run([sys.executable, os.path.join(HERE, 'connect.py'), B, f'{STATE}-{lang}.json'], check=True, capture_output=True)
   # Alex has used Sweep for weeks: he sees everything, like every account from before the discovery missions (29 Oct.)

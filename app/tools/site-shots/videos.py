@@ -3,7 +3,7 @@ Sweep — the site's videos (brief of 20 Oct. 2026, section 5): one source each,
 the capture server (serve.sh, sample trader Alex). The frames are Chromium's own screencast (sharp, unlike a recorded
 WebM), put together by ffmpeg at their real timing.
   sh tools/site-shots/serve.sh python3 tools/site-shots/videos.py <out_dir> [name …] [--keep]
-  hero-loop.mp4 (1920 × 1080, ~14 s), tour.mp4 (1920 × 1080, 60 s), captures/{en,fr}/v6-video-today-phone.mp4 (780 × 1688, ~24 s)
+  hero-loop.mp4 (1920 × 1080, ~14 s), tour.mp4 (1920 × 1080, 60 s), captures/{en,fr,es}/v6-video-today-phone.mp4 (780 × 1688, ~24 s)
 """
 import base64, datetime as dt, json, os, shutil, subprocess, sys, tempfile, time
 from zoneinfo import ZoneInfo
@@ -79,17 +79,17 @@ def hero(br, lang='en'):
   """~14 s, in a loop: your day, a trade added in seconds, your rules, each trade, payout ready, your progress"""
   c = ctx_for(br, lang, 1920, 1080, False); pg = c.new_page()
   pg.goto(B + '/#dashboard'); pg.wait_for_selector('#main .nav-dash'); pg.wait_for_timeout(3500); no_nudge(pg)
-  r = Rec(pg, 1920, 1080); r.start(); pg.wait_for_timeout(1300)                 # your day
+  r = Rec(pg, 1920, 1080); r.start(); pg.wait_for_timeout(800)                  # your day (4 Nov.: shorter waits, the app's steps take longer: 14.4 s again)
   add_by_screenshot(pg)                                                           # a trade in seconds (~4.6 s)
-  hash_go(pg, '#account/a1', 1500)                                                # your rules (the account's limits)
+  hash_go(pg, '#account/a1', 1000)                                                # your rules (the account's limits)
   hash_go(pg, '#trade/t-2026-10-15-0-a2', 900)                                    # each trade, on its chart
   pg.evaluate("() => { const b = [...document.querySelectorAll('#main button')].find((e) => e.textContent.trim() === '1m'); if (b) b.click(); }"); pg.wait_for_timeout(500)
-  pg.evaluate("() => { const b = [...document.querySelectorAll('#main button')].find((e) => e.textContent.trim() === '1m'); const x = b && (b.closest('.tr-chart') || b.parentElement); if (x) scrollTo({ top: x.getBoundingClientRect().top + scrollY - 24, behavior: 'smooth' }); }"); pg.wait_for_timeout(1500)
+  pg.evaluate("() => { const b = [...document.querySelectorAll('#main button')].find((e) => e.textContent.trim() === '1m'); const x = b && (b.closest('.tr-chart') || b.parentElement); if (x) scrollTo({ top: x.getBoundingClientRect().top + scrollY - 24, behavior: 'smooth' }); }"); pg.wait_for_timeout(1200)
   hash_go(pg, '#account/a4', 600)                                                 # payout ready
-  pg.evaluate("() => { const h = [...document.querySelectorAll('#main h2, #main h3')].find((e) => /^(Payout|Pago|Retiro)$/i.test(e.textContent.trim())); if (h) scrollTo({ top: h.getBoundingClientRect().top + scrollY - 30, behavior: 'smooth' }); }"); pg.wait_for_timeout(1700)
-  hash_go(pg, '#dashboard', 400); g(pg, 'league', None, 1700)                     # your progress
+  pg.evaluate("() => { const h = [...document.querySelectorAll('#main h2, #main h3')].find((e) => /^(Payout|Pago|Retiro)$/i.test(e.textContent.trim())); if (h) scrollTo({ top: h.getBoundingClientRect().top + scrollY - 30, behavior: 'smooth' }); }"); pg.wait_for_timeout(1300)
+  hash_go(pg, '#dashboard', 400); g(pg, 'league', None, 1300)                     # your progress
   close_sheet(pg, 500); pg.wait_for_timeout(600)
-  r.stop(os.path.join(OUT, 'video', 'hero-loop.mp4'), length=14.4); c.close()
+  r.stop(os.path.join(OUT, 'video', 'hero-loop.mp4'), length=float(os.environ.get('HERO_LEN', '14.4')) or None); c.close()
 
 def tour(br, lang='en'):
   """60 s: the product in one minute"""
@@ -127,7 +127,7 @@ def today_phone(br, lang):
   r.stop(os.path.join(OUT, 'captures', lang, 'v6-video-today-phone.mp4'), length=24.0); c.close()
 
 VIDEOS = {'hero-loop': lambda br: hero(br), 'tour': lambda br: tour(br),
-          'v6-video-today-phone': lambda br: [today_phone(br, l) for l in ('en', 'fr')]}
+          'v6-video-today-phone': lambda br: [today_phone(br, l) for l in ('en', 'fr', 'es')]}
 
 if __name__ == '__main__':
   with sync_playwright() as p:

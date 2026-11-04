@@ -16,11 +16,14 @@ for root, _, files in os.walk(OUT):
     if not (f.endswith('.webp') or f.endswith('.mp4')): continue
     src = os.path.join(root, f); rel = os.path.relpath(src, OUT)
     dst = os.path.join(SITE, 'img', rel) if rel.startswith('captures') else os.path.join(SITE, rel)   # captures/… → img/captures/…, img/… and video/… as they are
-    have = os.path.exists(dst)
+    ref = dst
+    if not os.path.exists(ref) and rel.startswith(os.path.join('captures', 'es')):   # (4 Nov.) captures/es/ is new: same size as its English one
+      ref = dst.replace(os.sep + 'es' + os.sep, os.sep + 'en' + os.sep)
+    have = os.path.exists(ref)
     if f.endswith('.webp'):
       w, h = Image.open(src).size
       if have:
-        ow, oh = Image.open(dst).size
+        ow, oh = Image.open(ref).size
         ok = (w, h) == (ow, oh)
       else: ok = f in NEW; ow = oh = None
       rows.append(f"{'ok  ' if ok else 'BAD '} {rel:58s} {w}×{h}{'' if have else '  (new)'}{'' if ok or not have else f'  ≠ {ow}×{oh}'}  {os.path.getsize(src) // 1024} KB")
