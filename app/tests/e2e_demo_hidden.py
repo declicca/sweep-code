@@ -67,8 +67,11 @@ with sync_playwright() as p:
     pg.locator('aside.nav-ask.open [data-ask="0"]').click(); pg.wait_for_timeout(1200)
     ok(pg.evaluate(DATA)['trades'] == n0, f'{tag} Cancel: kept')
     pg.locator('#main .nav-demo-hid [data-act="demo-remove"]').click(); pg.wait_for_timeout(700)
-    pg.locator('aside.nav-ask.open [data-ask="1"]').click(); pg.wait_for_timeout(4000)
-    srv = pg.evaluate(DATA)
+    pg.locator('aside.nav-ask.open [data-ask="1"]').click(); pg.wait_for_timeout(1000)
+    for _ in range(40):   # (4 Nov.) the removal goes through the queue: GitHub's machine is slower than 4 s
+      srv = pg.evaluate(DATA)
+      if srv == {'trades': 0, 'accounts': 0, 'payouts': 0}: break
+      pg.wait_for_timeout(500)
     ok(srv == {'trades': 0, 'accounts': 0, 'payouts': 0}, f'{tag} Remove: gone from the server ({srv})')
     ok(pg.evaluate("!!getDoc('trades','dh-t1') && !!getDoc('accounts','dh-a') && !document.querySelector('#main .nav-demo-hid')"), f'{tag} his own trade and account untouched, the line gone')
     ok(not errs and pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} no page error, nothing wider than the window ({errs[:1]})')

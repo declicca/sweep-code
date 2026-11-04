@@ -42,7 +42,12 @@ with sync_playwright() as p:
   tap('#gSheet [data-g=bias][data-v=bullish]'); tap('#gSheet [data-g=save-plan]')
   pg.wait_for_selector('aside.nav-hist.open', timeout=8000); pg.wait_for_timeout(300)
   tap('aside.nav-hist.open [data-sy=connect][data-p=ninjatrader]')
-  pg.wait_for_selector('#sySheet .sy-key code', timeout=10000); pg.wait_for_timeout(500)
+  # (4 Nov.) GitHub's machine is slower: the key can take more than 10 s, and a tap during the sheet's opening can be lost
+  try: pg.wait_for_selector('#sySheet .sy-key code', timeout=15000)
+  except Exception:
+    if pg.locator('aside.nav-hist.open [data-sy=connect][data-p=ninjatrader]').count(): tap('aside.nav-hist.open [data-sy=connect][data-p=ninjatrader]')
+    pg.wait_for_selector('#sySheet .sy-key code', timeout=20000)
+  pg.wait_for_timeout(500)
   key = pg.evaluate("document.querySelector('#sySheet .sy-key code').textContent.trim()")
   ok(key.startswith('swk_') and pg.locator('aside.nav-hist.open').count() == 0, f'1 « Ramène ton historique » › NinjaTrader 8: the connection opens with the personal key ({key[:8]}…)')
   # 2. the add-on's push (its own request: no session, the key alone), then the account linked
