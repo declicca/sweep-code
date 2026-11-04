@@ -1,6 +1,6 @@
 {
- "version": "2026-10-19-050019",
- "checked_at": "2026-10-26T23:30:46+00:00",
+ "version": "2026-11-02-050117",
+ "checked_at": "2026-11-02T05:01:17+00:00",
  "origin": "checked",
  "firms": [
   {
@@ -30,7 +30,8 @@
         "target": 1250,
         "dd": 1000,
         "dd_type": "eod",
-        "max_minis": 2
+        "max_minis": 2,
+        "consistency": 40
        },
        "funded": {
         "dd": 1000,
@@ -39,8 +40,17 @@
         "consistency": 40,
         "dd_lock": true,
         "payout": {
-         "min": 500
-        }
+         "min": 500,
+         "cycle_min": 250,
+         "first_min": 250,
+         "split_pct": 90
+        },
+        "max_minis": 2
+       },
+       "price": {
+        "activation": 0,
+        "checked": "2026-11-02",
+        "eval_period": "once"
        }
       },
       {
@@ -50,7 +60,8 @@
         "dd": 2000,
         "dd_type": "eod",
         "dll": 1200,
-        "max_minis": 4
+        "max_minis": 4,
+        "consistency": 40
        },
        "funded": {
         "dd": 2000,
@@ -59,8 +70,17 @@
         "consistency": 40,
         "dd_lock": true,
         "payout": {
-         "min": 500
-        }
+         "min": 500,
+         "cycle_min": 500,
+         "first_min": 500,
+         "split_pct": 90
+        },
+        "max_minis": 4
+       },
+       "price": {
+        "activation": 0,
+        "checked": "2026-11-02",
+        "eval_period": "once"
        }
       },
       {
@@ -70,7 +90,8 @@
         "dd": 3000,
         "dd_type": "eod",
         "dll": 1800,
-        "max_minis": 6
+        "max_minis": 6,
+        "consistency": 40
        },
        "funded": {
         "dd": 3000,
@@ -79,8 +100,17 @@
         "consistency": 40,
         "dd_lock": true,
         "payout": {
-         "min": 500
-        }
+         "min": 500,
+         "cycle_min": 750,
+         "first_min": 750,
+         "split_pct": 90
+        },
+        "max_minis": 6
+       },
+       "price": {
+        "activation": 0,
+        "checked": "2026-11-02",
+        "eval_period": "once"
        }
       },
       {
@@ -90,7 +120,8 @@
         "dd": 4500,
         "dd_type": "eod",
         "dll": 2700,
-        "max_minis": 10
+        "max_minis": 10,
+        "consistency": 40
        },
        "funded": {
         "dd": 4500,
@@ -99,8 +130,17 @@
         "consistency": 40,
         "dd_lock": true,
         "payout": {
-         "min": 500
-        }
+         "min": 500,
+         "cycle_min": 1000,
+         "first_min": 1000,
+         "split_pct": 90
+        },
+        "max_minis": 10
+       },
+       "price": {
+        "activation": 0,
+        "checked": "2026-11-02",
+        "eval_period": "once"
        }
       }
      ],
@@ -512,7 +552,8 @@
          "win_min": 150,
          "min": 125,
          "max_pct": 50
-        }
+        },
+        "max_minis": 5
        },
        "live": {
         "dd_type": "static",
@@ -582,7 +623,8 @@
          "win_min": 150,
          "min": 125,
          "max_pct": 50
-        }
+        },
+        "max_minis": 10
        },
        "live": {
         "dd_type": "static",
@@ -652,7 +694,8 @@
          "win_min": 150,
          "min": 125,
          "max_pct": 50
-        }
+        },
+        "max_minis": 15
        },
        "live": {
         "dd_type": "static",
@@ -1511,7 +1554,7 @@
        "eval": {
         "target": 1500,
         "dd": 1000,
-        "dd_type": "eod",
+        "dd_type": "trade",
         "consistency": 50,
         "min_days": 2
        },
@@ -1521,8 +1564,15 @@
         "dd_lock": true,
         "payout": {
          "min": 500,
-         "min_bal": 26100
+         "min_bal": 26100,
+         "split_pct": 90
         }
+       },
+       "price": {
+        "eval": 125,
+        "checked": "2026-11-02",
+        "activation": 0,
+        "eval_period": "once"
        }
       },
       {
@@ -1530,7 +1580,7 @@
        "eval": {
         "target": 3000,
         "dd": 2000,
-        "dd_type": "eod",
+        "dd_type": "trade",
         "consistency": 50,
         "min_days": 2
        },
@@ -1540,8 +1590,15 @@
         "dd_lock": true,
         "payout": {
          "min": 500,
-         "min_bal": 52100
+         "min_bal": 52100,
+         "split_pct": 90
         }
+       },
+       "price": {
+        "eval": 209,
+        "checked": "2026-11-02",
+        "activation": 0,
+        "eval_period": "once"
        }
       },
       {
@@ -1597,6 +1654,28 @@
      },
      "sizes": [
       {
+       "size": 25000,
+       "eval": {
+        "dd": 1000,
+        "dd_type": "eod",
+        "target": 1500,
+        "min_days": 4
+       },
+       "funded": {
+        "dd": 1000,
+        "dd_type": "eod",
+        "payout": {
+         "split_pct": 90
+        }
+       },
+       "price": {
+        "eval": 135,
+        "activation": 0,
+        "eval_period": "once",
+        "checked": "2026-11-02"
+       }
+      },
+      {
        "size": 50000,
        "eval": {
         "target": 3000,
@@ -1613,8 +1692,15 @@
         "dd_lock": true,
         "payout": {
          "min": 500,
-         "min_bal": 52100
+         "min_bal": 52100,
+         "split_pct": 90
         }
+       },
+       "price": {
+        "eval": 225,
+        "checked": "2026-11-02",
+        "activation": 0,
+        "eval_period": "once"
        }
       }
      ],
@@ -1652,8 +1738,15 @@
         "payout": {
          "min": 1000,
          "min_bal": 52100,
-         "cycle_days": 14
+         "cycle_days": 14,
+         "split_pct": 80
         }
+       },
+       "price": {
+        "eval": 159,
+        "checked": "2026-11-02",
+        "activation": 0,
+        "eval_period": "once"
        }
       },
       {
@@ -1673,8 +1766,15 @@
         "payout": {
          "min": 1000,
          "min_bal": 103100,
-         "cycle_days": 14
+         "cycle_days": 14,
+         "split_pct": 80
         }
+       },
+       "price": {
+        "eval": 265,
+        "checked": "2026-11-02",
+        "activation": 0,
+        "eval_period": "once"
        }
       },
       {
@@ -1718,7 +1818,8 @@
         "target": 1500,
         "dd": 1000,
         "dd_type": "eod",
-        "min_days": 1
+        "min_days": 1,
+        "consistency": 50
        },
        "funded": {
         "dd": 1000,
@@ -1726,8 +1827,15 @@
         "dd_lock": true,
         "consistency": 50,
         "payout": {
-         "min": 500
+         "min": 500,
+         "split_pct": 80
         }
+       },
+       "price": {
+        "eval": 92,
+        "checked": "2026-11-02",
+        "activation": 0,
+        "eval_period": "once"
        }
       },
       {
@@ -1737,7 +1845,8 @@
         "dd": 2000,
         "dd_type": "eod",
         "dll": 1000,
-        "min_days": 1
+        "min_days": 1,
+        "consistency": 50
        },
        "funded": {
         "dd": 2000,
@@ -1752,8 +1861,15 @@
          "max": 2000,
          "cycle_min": 500,
          "min_bal": 52100,
-         "max_payouts": 5
+         "max_payouts": 5,
+         "split_pct": 80
         }
+       },
+       "price": {
+        "eval": 153,
+        "checked": "2026-11-02",
+        "activation": 0,
+        "eval_period": "once"
        }
       }
      ],
@@ -1856,9 +1972,10 @@
         }
        },
        "price": {
-        "eval": 139,
+        "eval": 169,
         "activation": 0,
-        "eval_period": "month"
+        "eval_period": "month",
+        "checked": "2026-11-02"
        }
       },
       {
@@ -2041,7 +2158,8 @@
          "max_pct": 50,
          "first_min": 1500,
          "cycle_min": 1000,
-         "split_pct": 90
+         "split_pct": 90,
+         "cycle_pos": true
         }
        },
        "price": {
@@ -2063,7 +2181,8 @@
          "max_pct": 50,
          "first_min": 3000,
          "cycle_min": 2000,
-         "split_pct": 90
+         "split_pct": 90,
+         "cycle_pos": true
         }
        },
        "price": {
@@ -2085,7 +2204,8 @@
          "max_pct": 50,
          "first_min": 6000,
          "cycle_min": 4000,
-         "split_pct": 90
+         "split_pct": 90,
+         "cycle_pos": true
         }
        },
        "price": {
@@ -2107,7 +2227,8 @@
          "max_pct": 50,
          "first_min": 9000,
          "cycle_min": 6000,
-         "split_pct": 90
+         "split_pct": 90,
+         "cycle_pos": true
         }
        },
        "price": {

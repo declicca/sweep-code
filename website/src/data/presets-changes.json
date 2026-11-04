@@ -1,5 +1,824 @@
 [
  {
+  "date": "2026-11-02",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 100000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 150000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 25000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "alpha",
+  "program": "direct",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "alpha",
+  "program": "zero",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": 139,
+  "new": 169
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 6
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "funded.payout.cycle_min",
+  "old": null,
+  "new": 750
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "funded.payout.first_min",
+  "old": null,
+  "new": 750
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 10
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "funded.payout.cycle_min",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "funded.payout.first_min",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 150000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 2
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "funded.payout.cycle_min",
+  "old": null,
+  "new": 250
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "funded.payout.first_min",
+  "old": null,
+  "new": 250
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 40
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "funded.payout.cycle_min",
+  "old": null,
+  "new": 500
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "funded.payout.first_min",
+  "old": null,
+  "new": 500
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "lucid",
+  "program": "lucidpro",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 25000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 50
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 25000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 92
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 50000,
+  "rule": "eval.consistency",
+  "old": null,
+  "new": 50
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 153
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 100000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 100000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 100000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 100000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 265
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 100000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 80
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 159
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-pro",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 25000,
+  "rule": "eval.dd_type",
+  "old": "eod",
+  "new": "trade"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 25000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 125
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 50000,
+  "rule": "eval.dd_type",
+  "old": "eod",
+  "new": "trade"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 209
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "eval.dd",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "eval.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "eval.min_days",
+  "old": null,
+  "new": 4
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "eval.target",
+  "old": null,
+  "new": 1500
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "funded.dd",
+  "old": null,
+  "new": 1000
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "funded.dd_type",
+  "old": null,
+  "new": "eod"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 135
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 50000,
+  "rule": "funded.payout.split_pct",
+  "old": null,
+  "new": 90
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 50000,
+  "rule": "price.activation",
+  "old": null,
+  "new": 0
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 50000,
+  "rule": "price.checked",
+  "old": null,
+  "new": "2026-11-02"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 50000,
+  "rule": "price.eval",
+  "old": null,
+  "new": 225
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 50000,
+  "rule": "price.eval_period",
+  "old": null,
+  "new": "once"
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "topstep",
+  "program": "combine",
+  "size": 100000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 10
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "topstep",
+  "program": "combine",
+  "size": 150000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 15
+ },
+ {
+  "date": "2026-11-02",
+  "firm": "topstep",
+  "program": "combine",
+  "size": 50000,
+  "rule": "funded.max_minis",
+  "old": null,
+  "new": 5
+ },
+ {
   "date": "2026-10-19",
   "firm": "tpt",
   "program": "tpt-test",
