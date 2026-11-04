@@ -8,6 +8,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *   GET  api/admin/mail/campaigns/<id>           the campaign and its numbers
  *   POST api/admin/mail/campaigns/<id>           save a draft · DELETE: delete a draft
  *   POST api/admin/mail/campaigns/<id>/send      {at: unix time, or none for now} · …/unschedule · …/pause {pause} · …/duplicate
+ *   POST api/admin/mail/campaigns/<id>/auto      {on}: an automation switched on or off (mail/mail-auto.php)
  *   POST api/admin/mail/audience                 {audience} → how many traders it reaches, per language
  *   POST api/admin/mail/preview                  {content, lang} → subject and HTML (nothing tracked)
  *   POST api/admin/mail/test                     {content, lang} → to the administrator's own address, at once
@@ -15,6 +16,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  */
 require_once __DIR__ . '/mail-core.php';
 require_once __DIR__ . '/mail-smtp.php';
+require_once __DIR__ . '/mail-auto.php';
 
 /** api/m/o, api/m/c, api/m/u: before the session and the CSRF check (mail apps and the trader's inbox call them) */
 function ml_public_route(string $route, string $method): void
@@ -27,10 +29,15 @@ function ml_public_route(string $route, string $method): void
 
 function ml_admin_route(string $route, string $method, array $me): void
 {
-    $pdo = db(); ml_schema($pdo);
+    $pdo = db(); ml_schema($pdo); ma_seed($pdo);
     $b = $method === 'POST' ? body_json(262144) : [];
     $err = fn(string $code, int $st = 400) => json_out($st, ['error' => $code]);
-    if ($route === 'api/admin/mail' && $method === 'GET') json_out(200, ml_overview($pdo));
+    if ($route === 'api/admin/mail' && $method === 'GET') {
+        $o = ml_overview($pdo);
+        $o['autos'] = array_values(array_filter(array_map(fn($r) => ($i = ma_info($r['auto'])) ? $r + $i : null, $o['autos'])));   // in the catalog's order
+        usort($o['autos'], fn($p, $q) => $p['order'] <=> $q['order']);
+        json_out(200, $o);
+    }
     if ($route === 'api/admin/mail/campaigns' && $method === 'POST') json_out(200, ml_campaign_save($pdo, null, $b));
     if ($route === 'api/admin/mail/audience' && $method === 'POST') {
         $who = ml_audience($pdo, (array) ($b['audience'] ?? []));
@@ -42,7 +49,7 @@ function ml_admin_route(string $route, string $method, array $me): void
         $v = ml_version($content, $lang);
         if (!$v) $err('content');
         $first = trim((string) ($me['first_name'] ?? '')) ?: (string) ($me['username'] ?? '');
-        [$s, $t, $h] = ml_render($pdo, $v, $v['lang'], $first, '', false);
+        [$s, $t, $h] = ml_render($pdo, $v, $v['lang'], $first, '', false, ['milestone' => 10, 'days' => 10, 'plan' => 'Pro', 'firm' => 'Topstep']);   // an automation's values, as an example
         if ($route === 'api/admin/mail/preview') json_out(200, ['subject' => $s, 'html' => $h, 'lang' => $v['lang']]);
         $to = trim((string) ($me['email'] ?? ''));
         if ($to === '') $err('no_email');
@@ -55,10 +62,16 @@ function ml_admin_route(string $route, string $method, array $me): void
         if (mb_strlen($a) < 10) $err('address');
         ml_set_setting($pdo, 'mail_address', $a); json_out(200, ['ok' => true]);
     }
-    if (preg_match('#^api/admin/mail/campaigns/(\d+)(?:/(send|unschedule|pause|duplicate))?$#', $route, $m)) {
+    if (preg_match('#^api/admin/mail/campaigns/(\d+)(?:/(send|unschedule|pause|duplicate|auto))?$#', $route, $m)) {
         $id = (int) $m[1]; $act = $m[2] ?? '';
         $c = ml_campaign($pdo, $id); if (!$c) $err('not_found', 404);
-        if ($act === '' && $method === 'GET') json_out(200, ml_campaign_report($pdo, $id) + ['audience_count' => in_array($c['status'], ['draft', 'scheduled'], true) ? count(ml_audience($pdo, $c['audience'])) : null]);
+        if ($c['auto'] !== null && !in_array($act, ['', 'auto'], true) || ($c['auto'] !== null && $method === 'DELETE')) $err('auto', 409);   // an automation is switched on or off, never sent by hand nor deleted
+        if ($act === 'auto' && $method === 'POST') {
+            if ($c['auto'] === null) $err('not_auto', 409);
+            ml_q($pdo, 'UPDATE mail_campaigns SET status = ?, updated_at = ? WHERE id = ?', [!empty($b['on']) ? 'active' : 'off', time(), $id]);
+            json_out(200, ['ok' => true, 'status' => !empty($b['on']) ? 'active' : 'off']);
+        }
+        if ($act === '' && $method === 'GET') json_out(200, ml_campaign_report($pdo, $id) + ['info' => $c['auto'] !== null ? ma_info($c['auto']) : null, 'audience_count' => in_array($c['status'], ['draft', 'scheduled'], true) ? count(ml_audience($pdo, $c['audience'])) : null]);
         if ($act === '' && $method === 'POST') { $r = ml_campaign_save($pdo, $id, $b); isset($r['error']) ? $err($r['error'], 409) : json_out(200, $r); }
         if ($act === '' && $method === 'DELETE') {
             if (!in_array($c['status'], ['draft', 'scheduled'], true)) $err('sent', 409);

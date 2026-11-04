@@ -1,7 +1,7 @@
 # Tout ce que Sweep envoie à un trader (brief 02, partie 10, 14 oct. 2026)
 
 La liste complète des notifications et des courriels : déclencheur, canal, fréquence maximale. À tenir à jour à chaque
-nouveau type (code : `notify/listeners.php` pour les types de la cloche, `push/web-push.php`, `loops/loops.php`).
+nouveau type (code : `notify/listeners.php` pour les types de la cloche, `push/web-push.php`, `mail/mail-auto.php` et `mail/mail-auto-texts.php`).
 
 ## La règle : 2 notifications par jour au plus
 
@@ -67,9 +67,13 @@ Chaque catégorie se coupe dans Réglages › Notifications. Les célébrations 
 | Préréglages pas vérifiés depuis 8 jours | support | Vérification des firmes en retard | 1 / jour |
 | Nouvelle erreur de l'app | support | Une erreur pas vue depuis 7 jours | 10 / jour |
 
-## 4. Les courriels automatiques (Loops) — `loops/`
+## 4. Les courriels automatiques — `mail/mail-auto.php`
 
-Sweep envoie des événements ; les courriels se rédigent et s'activent dans Loops (sans clé, rien ne part).
+Envoyés par notre serveur (courriels maison, étape 5, 4 nov. ; Loops retiré). Chaque événement a son courriel dans
+**Admin › Courriels › Automatisations** : texte EN / FR / ES modifiable, allumé ou éteint, un test, ses statistiques.
+Les textes de départ sont dans `mail/mail-auto-texts.php` (posés une fois, jamais réécrits ensuite). Marketing : respecte la
+désinscription et le plafond par heure ; sur le compte (abonnement, paiement refusé, parrainage) : envoyé à tous.
+Éteints au départ : `profileCompleted`, `firstAccountAdded`, `firstPlanSaved`, `firstTradeLogged` (le soir du jour 1 les couvre).
 
 | Événement | Déclencheur | Au plus |
 |---|---|---|
@@ -83,40 +87,40 @@ Le passage du jour envoie au plus une absence et une étape d'essai par trader.
 
 ### Le soir du jour 1 : « Ta séance de demain en 30 secondes » (brief activation, étape E, 27 oct.)
 
-Dans Loops : un parcours déclenché par `signedUp`, une attente jusqu'à **18 h 30 heure de New York** le jour de l'inscription
-(ou le lendemain si l'inscription a lieu après 18 h), puis une condition « n'a pas reçu l'événement `firstPlanSaved` ».
+L'automatisation `day1Evening` : **18 h 30 heure de New York** le jour de l'inscription (ou le lendemain si l'inscription
+a lieu après 18 h), seulement si aucun plan n'est enregistré ; abandonnée 6 h après l'heure prévue.
 Le trader qui a déjà fait son plan ne reçoit rien. Ton : une seule action, aucun reproche.
 
-- **FR** — Objet : « Ta séance de demain en 30 secondes » · Texte : « Salut {firstName}, prépare ta séance de demain ce
+- **FR** — Objet : « Ta séance de demain en 30 secondes » · Texte : « Salut {first}, prépare ta séance de demain ce
   soir : ton biais (haussier ou baissier), tes niveaux et ta perte max du jour. 30 secondes, et demain matin tu sais exactement ce que tu
   risques. » · Bouton : « Faire mon plan »
-- **EN** — Subject: “Tomorrow’s session in 30 seconds” · Text: “Hi {firstName}, get tomorrow’s session ready tonight: your
+- **EN** — Subject: “Tomorrow’s session in 30 seconds” · Text: “Hi {first}, get tomorrow’s session ready tonight: your
   bias (bullish or bearish), your levels and your max loss for the day. 30 seconds, and tomorrow morning you know exactly what you risk.” ·
   Button: “Make my plan”
-- **ES** — Asunto: «Tu sesión de mañana en 30 segundos» · Texto: «Hola {firstName}, prepara esta noche tu sesión de mañana:
+- **ES** — Asunto: «Tu sesión de mañana en 30 segundos» · Texto: «Hola {first}, prepara esta noche tu sesión de mañana:
   tu sesgo (alcista o bajista), tus niveles y tu pérdida máxima del día. 30 segundos, y mañana por la mañana sabes exactamente lo que
   arriesgas.» · Botón: «Hacer mi plan»
 
 Le lien du bouton : `https://app.makeitsweep.com/#dashboard` (« Faire mon plan » est le bouton bleu de la routine le soir).
 
-### Le retour doux (3 et 7 jours) : texte à mettre dans Loops
+### Le retour doux (3 et 7 jours)
 
-Déclencheurs dans Loops : `inactive3d` et `inactive7d`. Un seul courriel par absence et par étape (Sweep s'en charge).
+Automatisations `inactive3d` et `inactive7d`. Un seul courriel par absence et par étape (Sweep s'en charge).
 Ton : aucune culpabilité, pas de chiffre de pertes, une seule action.
 
-- **FR, 3 jours** — Objet : « Ta discipline t'attend » · Texte : « Salut {firstName}, ta discipline t'attend : reprends là
+- **FR, 3 jours** — Objet : « Ta discipline t'attend » · Texte : « Salut {first}, ta discipline t'attend : reprends là
   où tu étais. Ton prochain plan prend 30 secondes. » · Bouton : « Ouvrir Sweep »
-- **FR, 7 jours** — Objet : « Reprends là où tu étais » · Texte : « Salut {firstName}, une semaine sans journal, ça arrive.
+- **FR, 7 jours** — Objet : « Reprends là où tu étais » · Texte : « Salut {first}, une semaine sans journal, ça arrive.
   Rien n'est perdu : tes trades, tes comptes et ta progression t'attendent. Une revue suffit pour repartir. » · Bouton :
   « Reprendre »
-- **EN, 3 days** — Subject: “Your discipline is waiting” · Text: “Hi {firstName}, your discipline is waiting: pick up where
+- **EN, 3 days** — Subject: “Your discipline is waiting” · Text: “Hi {first}, your discipline is waiting: pick up where
   you left off. Your next plan takes 30 seconds.” · Button: “Open Sweep”
-- **EN, 7 days** — Subject: “Pick up where you left off” · Text: “Hi {firstName}, a week without journaling happens. Nothing
+- **EN, 7 days** — Subject: “Pick up where you left off” · Text: “Hi {first}, a week without journaling happens. Nothing
   is lost: your trades, your accounts and your progress are waiting. One review is enough to get going again.” · Button:
   “Get back to it”
-- **ES, 3 días** — Asunto: «Tu disciplina te espera» · Texto: «Hola {firstName}, tu disciplina te espera: retoma donde lo
+- **ES, 3 días** — Asunto: «Tu disciplina te espera» · Texto: «Hola {first}, tu disciplina te espera: retoma donde lo
   dejaste. Tu próximo plan toma 30 segundos.» · Botón: «Abrir Sweep»
-- **ES, 7 días** — Asunto: «Retoma donde lo dejaste» · Texto: «Hola {firstName}, una semana sin diario pasa. Nada se
+- **ES, 7 días** — Asunto: «Retoma donde lo dejaste» · Texto: «Hola {first}, una semana sin diario pasa. Nada se
   pierde: tus operaciones, tus cuentas y tu progreso te esperan. Basta una revisión para volver.» · Botón: «Retomar»
 
 ## 5. Dans l'app seulement (pas des notifications)

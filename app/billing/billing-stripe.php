@@ -237,9 +237,9 @@ function sb_handle_event(PDO $pdo, array $event): string
             }
             break;
     }
-    // automatic emails (loops/loops.php): subscriptionStarted, subscriptionCanceled, paymentFailed, or the contact's new plan
-    if ($uid && function_exists('loops_stripe')) {
-        try { loops_stripe($pdo, $type, $obj, (array) ($event['data']['previous_attributes'] ?? []), (string) $uid); } catch (Throwable $e) { error_log('[Sweep loops] stripe ' . $type . ': ' . $e->getMessage()); }
+    // automatic emails (mail/mail-auto.php): subscriptionStarted, subscriptionCanceled, paymentFailed
+    if ($uid && function_exists('ma_stripe')) {
+        try { ma_stripe($pdo, $type, $obj, (array) ($event['data']['previous_attributes'] ?? []), (string) $uid); } catch (Throwable $e) { error_log('[Sweep mail auto] stripe ' . $type . ': ' . $e->getMessage()); }
     }
     sb_q($pdo, 'INSERT INTO billing_webhooks (event_id, type, at) VALUES (?, ?, ?)', [$id, $type, sb_now()]);
     return $result;

@@ -84,3 +84,8 @@
   .ml .sec-h{flex-wrap:wrap}
   .ml-top{margin:0;width:100%}
 }
+.ml-st-active{background:var(--tint);color:var(--blue-text)}
+.ml-autos .ml-row small+small{margin-top:2px}
+.ml-auto .ml-sched{margin:4px 0 2px}
+.ml-auto .ml-f small code{font-family:var(--mono,'Geist Mono',ui-monospace,monospace);font-size:12px;white-space:nowrap}
+.ml-test{margin-top:14px}

@@ -2,6 +2,7 @@
    Loaded on demand (window.SWEEP_LAZY.mail, vMail in app.js) for an administrator who opens #mail:
    #mail            the last 30 days, the list, the sending pace, the campaigns
    #mail/<id>       a draft: content in EN / FR / ES, audience, preview, test, send · a campaign that went out: its numbers
+                    · an automation (mail/mail-auto.php): its text, on or off, a test, its numbers
    Server: mail/mail-admin.php (api/admin/mail…). */
 (function () {
   'use strict';
@@ -11,7 +12,7 @@
       kSub: { open: '{a} % counting machine opens', click: '{a} % of people who opened', unsub: '{n} people', bounce: '{n} addresses', unsub1: '1 person', bounce1: '1 address' },
       note: 'Opens: Apple Mail and some antivirus software open every email on their own. Those opens are counted apart; clicks are the sure number.',
       camps: 'Campaigns', none: 'No campaign yet. Start with « New campaign ».',
-      st: { draft: 'Draft', scheduled: 'Scheduled', sending: 'Sending', paused: 'Paused', sent: 'Sent' },
+      st: { draft: 'Draft', scheduled: 'Scheduled', sending: 'Sending', paused: 'Paused', sent: 'Sent', active: 'On', off: 'Off' },
       row: { sent: '{n} sent', opens: '{a} % opened', clicks: '{a} % clicked', at: 'for {d}', edited: 'edited {d}' },
       list: 'The list', reach: '{n} traders can receive campaigns', off: '{n} unsubscribed', sup: '{n} set aside (bounce or complaint)',
       pace: 'Sending pace', paceL: '{a} of {b} this hour · {q} waiting', paceW: 'The hourly cap doubles each week from the first email, up to {m}: a new sending address earns its reputation slowly.', paceN: 'Cap at the start: {b} an hour, doubled each week up to {m}.',
@@ -30,13 +31,16 @@
       prog: '{a} of {b} sent', rk: { delivered: 'Delivered', opens: 'Opened', clicks: 'Clicked', cto: 'Clicked after opening', unsub: 'Unsubscribed', bounce: 'Bounced', compl: 'Marked as spam' },
       auto: '+ {n} machine opens (Apple Mail, antivirus) not counted', auto1: '+ 1 machine open (Apple Mail, antivirus) not counted', h48: 'The first 48 hours', leg: ['Opened', 'Clicked'], hrs: '{h} h',
       byLang: 'By language', links: 'Most clicked links', noLinks: 'No click yet.', lg: { en: 'English', fr: 'French', es: 'Spanish' }, sent2: 'Sent', shown: 'What was sent',
+      autos: 'Automations', autosSub: 'Sent on their own when a trader does something, or stops. Open one to change its text or switch it off.', autoRow: '{n} sent in 30 days', autoNone: 'Nothing sent in 30 days',
+      on: 'Switch on', offB: 'Switch off', kind: { marketing: 'Respects unsubscribes and the hourly cap.', transactional: 'About the account: also sent to traders who unsubscribed from campaigns.' },
+      vars: 'Filled in for each trader:', v: { first: '{first} the first name', firm: '{firm} the prop firm', milestone: '{milestone} the number of trades (10, 50, 100)', days: '{days} the days left', plan: '{plan} the plan (Pro, Elite)' }, since: 'Since the start',
       saving: 'Saving…', savedAt: 'Saved', untitled: 'New campaign' },
     fr: { h: 'Courriels', sub: 'Campagnes envoyées par le serveur de Sweep. Seuls les administrateurs voient cette page.', nw: 'Nouvelle campagne', back: 'Courriels',
       k: { sent: 'Envoyés (30 jours)', open: 'Taux d’ouverture', click: 'Taux de clic', unsub: 'Désinscriptions', bounce: 'Rebonds' },
       kSub: { open: '{a} % avec les ouvertures automatiques', click: '{a} % de ceux qui ont ouvert', unsub: '{n} personnes', bounce: '{n} adresses', unsub1: '1 personne', bounce1: '1 adresse' },
       note: 'Ouvertures : Apple Mail et certains antivirus ouvrent chaque courriel tout seuls. Ces ouvertures sont comptées à part ; les clics sont le chiffre sûr.',
       camps: 'Campagnes', none: 'Aucune campagne pour l’instant. Commence par « Nouvelle campagne ».',
-      st: { draft: 'Brouillon', scheduled: 'Planifiée', sending: 'En cours', paused: 'En pause', sent: 'Envoyée' },
+      st: { draft: 'Brouillon', scheduled: 'Planifiée', sending: 'En cours', paused: 'En pause', sent: 'Envoyée', active: 'Allumé', off: 'Éteint' },
       row: { sent: '{n} envoyés', opens: '{a} % ouverts', clicks: '{a} % de clics', at: 'pour le {d}', edited: 'modifiée le {d}' },
       list: 'La liste', reach: '{n} traders peuvent recevoir les campagnes', off: '{n} désinscrits', sup: '{n} mis de côté (rebond ou plainte)',
       pace: 'Rythme d’envoi', paceL: '{a} sur {b} cette heure · {q} en attente', paceW: 'Le plafond par heure double chaque semaine à partir du premier courriel, jusqu’à {m} : une nouvelle adresse d’envoi gagne sa réputation lentement.', paceN: 'Plafond au départ : {b} par heure, doublé chaque semaine jusqu’à {m}.',
@@ -55,13 +59,16 @@
       prog: '{a} sur {b} envoyés', rk: { delivered: 'Livrés', opens: 'Ouverts', clicks: 'Cliqués', cto: 'Clics après ouverture', unsub: 'Désinscrits', bounce: 'Rebonds', compl: 'Signalés indésirables' },
       auto: '+ {n} ouvertures automatiques (Apple Mail, antivirus) non comptées', auto1: '+ 1 ouverture automatique (Apple Mail, antivirus) non comptée', h48: 'Les 48 premières heures', leg: ['Ouverts', 'Cliqués'], hrs: '{h} h',
       byLang: 'Par langue', links: 'Liens les plus cliqués', noLinks: 'Aucun clic pour l’instant.', lg: { en: 'Anglais', fr: 'Français', es: 'Espagnol' }, sent2: 'Envoyés', shown: 'Ce qui a été envoyé',
+      autos: 'Automatisations', autosSub: 'Envoyés tout seuls quand un trader fait quelque chose, ou arrête. Ouvre-en un pour changer son texte ou l’éteindre.', autoRow: '{n} envoyés en 30 jours', autoNone: 'Rien d’envoyé en 30 jours',
+      on: 'Allumer', offB: 'Éteindre', kind: { marketing: 'Respecte les désinscriptions et le plafond par heure.', transactional: 'Sur le compte : envoyé aussi aux traders désinscrits des campagnes.' },
+      vars: 'Remplis pour chaque trader :', v: { first: '{first} le prénom', firm: '{firm} la firme prop', milestone: '{milestone} le nombre de trades (10, 50, 100)', days: '{days} les jours qui restent', plan: '{plan} le forfait (Pro, Elite)' }, since: 'Depuis le début',
       saving: 'Enregistrement…', savedAt: 'Enregistré', untitled: 'Nouvelle campagne' },
     es: { h: 'Correos', sub: 'Campañas enviadas desde el servidor de Sweep. Solo los administradores ven esta página.', nw: 'Nueva campaña', back: 'Correos',
       k: { sent: 'Enviados (30 días)', open: 'Tasa de apertura', click: 'Tasa de clics', unsub: 'Bajas', bounce: 'Rebotes' },
       kSub: { open: '{a} % con las aperturas automáticas', click: '{a} % de quienes abrieron', unsub: '{n} personas', bounce: '{n} direcciones', unsub1: '1 persona', bounce1: '1 dirección' },
       note: 'Aperturas: Apple Mail y algunos antivirus abren cada correo por sí solos. Esas aperturas se cuentan aparte; los clics son la cifra segura.',
       camps: 'Campañas', none: 'Ninguna campaña por ahora. Empieza con « Nueva campaña ».',
-      st: { draft: 'Borrador', scheduled: 'Programada', sending: 'Enviando', paused: 'En pausa', sent: 'Enviada' },
+      st: { draft: 'Borrador', scheduled: 'Programada', sending: 'Enviando', paused: 'En pausa', sent: 'Enviada', active: 'Encendido', off: 'Apagado' },
       row: { sent: '{n} enviados', opens: '{a} % abiertos', clicks: '{a} % de clics', at: 'para el {d}', edited: 'editada el {d}' },
       list: 'La lista', reach: '{n} traders pueden recibir las campañas', off: '{n} dados de baja', sup: '{n} apartados (rebote o queja)',
       pace: 'Ritmo de envío', paceL: '{a} de {b} esta hora · {q} en espera', paceW: 'El límite por hora se duplica cada semana desde el primer correo, hasta {m}: una nueva dirección de envío gana su reputación poco a poco.', paceN: 'Límite al inicio: {b} por hora, duplicado cada semana hasta {m}.',
@@ -80,6 +87,9 @@
       prog: '{a} de {b} enviados', rk: { delivered: 'Entregados', opens: 'Abiertos', clicks: 'Con clic', cto: 'Clics tras abrir', unsub: 'Bajas', bounce: 'Rebotes', compl: 'Marcados como spam' },
       auto: '+ {n} aperturas automáticas (Apple Mail, antivirus) no contadas', auto1: '+ 1 apertura automática (Apple Mail, antivirus) no contada', h48: 'Las primeras 48 horas', leg: ['Abiertos', 'Con clic'], hrs: '{h} h',
       byLang: 'Por idioma', links: 'Enlaces más pulsados', noLinks: 'Ningún clic por ahora.', lg: { en: 'Inglés', fr: 'Francés', es: 'Español' }, sent2: 'Enviados', shown: 'Lo que se envió',
+      autos: 'Automatizaciones', autosSub: 'Se envían solos cuando un trader hace algo, o deja de hacerlo. Abre uno para cambiar su texto o apagarlo.', autoRow: '{n} enviados en 30 días', autoNone: 'Nada enviado en 30 días',
+      on: 'Encender', offB: 'Apagar', kind: { marketing: 'Respeta las bajas y el límite por hora.', transactional: 'Sobre la cuenta: se envía también a los traders dados de baja de las campañas.' },
+      vars: 'Se completa para cada trader:', v: { first: '{first} el nombre', firm: '{firm} la firma prop', milestone: '{milestone} el número de operaciones (10, 50, 100)', days: '{days} los días que quedan', plan: '{plan} el plan (Pro, Elite)' }, since: 'Desde el inicio',
       saving: 'Guardando…', savedAt: 'Guardado', untitled: 'Nueva campaña' },
   };
   const x = () => T[LANG] || T.en;
@@ -125,6 +135,8 @@
       <p class="muted ml-note">${h(X.note)}</p>
       <h3 class="ml-h3">${h(X.camps)}</h3>
       ${rows ? `<ul class="ml-list">${rows}</ul>` : `<p class="muted ml-empty">${h(X.none)}</p>`}
+      <h3 class="ml-h3">${h(X.autos)}</h3><p class="muted ml-sub">${h(X.autosSub)}</p>
+      <ul class="ml-list ml-autos">${(d.autos || []).map((a) => `<li><a class="ml-row" href="#mail/${a.id}"><div><b>${h(a.name[LANG] || a.name.en)}</b>${chip(a.status)}</div><small>${h(a.when[LANG] || a.when.en)}</small><small>${h([a.sent ? f(X.autoRow, { n: num(a.sent) }) : X.autoNone, a.open_rate != null ? f(X.row.opens, { a: pct(a.open_rate) }) : '', a.click_rate != null ? f(X.row.clicks, { a: pct(a.click_rate) }) : ''].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ul>
       <div class="ml-two">
         <div class="ml-box"><h4>${h(X.list)}</h4><p><b>${h(f(X.reach, { n: num(L.reachable) }))}</b></p><p class="muted">${h(f(X.off, { n: num(L.unsubscribed) }))} · ${h(f(X.sup, { n: num(L.suppressed) }))}</p></div>
         <div class="ml-box"><h4>${h(X.pace)}</h4><p><b>${h(f(X.paceL, { a: num(P.last_hour), b: num(P.cap), q: num(P.left) }))}</b></p><p class="muted">${h(f(P.warm_start ? X.paceW : X.paceN, { b: num(P.cap), m: num(P.max) }))}</p></div>
@@ -135,27 +147,42 @@
   }
 
   /* ───── #mail/<id> ───── */
+  const editable = (c) => c.auto != null || ['draft', 'scheduled'].includes(c.status);   // an automation's text is edited at any time
   function loadRep(id, force) {
     if (M['rb' + id] || (!force && M.rep[id] && Date.now() - (M.repAt[id] || 0) < 30000)) return;
     M['rb' + id] = true;
     api('api/admin/mail/campaigns/' + id).then((d) => {
       M['rb' + id] = false; M.rep[id] = d; M.repAt[id] = Date.now();
       const c = d.campaign;
-      if (['draft', 'scheduled'].includes(c.status) && M.editId !== id) { M.edit = { name: c.name, content: c.content, audience: c.audience }; M.editId = id; M.aud = d.audience_count != null ? { count: d.audience_count } : null; M.prev = null; M.msg = ''; countAud(); }
+      if (editable(c) && M.editId !== id) { M.edit = { name: c.name, content: c.content, audience: c.audience }; M.editId = id; M.aud = d.audience_count != null ? { count: d.audience_count } : null; M.prev = null; M.msg = ''; if (c.auto == null) countAud(); }
       repaint(); if (M.editId === id) refreshPrev();
     }).catch((e) => { M['rb' + id] = false; M.repErr = errText(e); repaint(); });
   }
   function vCampaign(id) {
     const d = M.rep[id]; loadRep(id);
     const X = x(), back = '';
-    if (d && ['draft', 'scheduled'].includes(d.campaign.status) && M.editId !== id) { delete M.rep[id]; loadRep(id, true); }   // another draft was open: its latest saved version
+    if (d && editable(d.campaign) && M.editId !== id) { delete M.rep[id]; loadRep(id, true); }   // another draft was open: its latest saved version
     if (!M.rep[id]) return `<section class="sec ml" data-noi18n>${back}${M.repErr ? `<div class="empty">${h(M.repErr)}</div>` : SKELETON}</section>`;
-    return ['draft', 'scheduled'].includes(d.campaign.status) && M.editId === id ? vEditor(id, d) : vReport(id, d);
+    if (d.campaign.auto != null) return M.editId === id ? vAuto(id, d) : `<section class="sec ml" data-noi18n>${SKELETON}</section>`;
+    return editable(d.campaign) && M.editId === id ? vEditor(id, d) : vReport(id, d);
   }
   const filled = (v) => v && v.subject.trim() && v.body.trim();
-  function vEditor(id, d) {
-    const X = x(), E = M.edit, v = E.content[M.tab], c = d.campaign, sched = c.status === 'scheduled';
+  // the text in EN / FR / ES and its preview: a draft and an automation share it
+  function contentBlock(help) {
+    const X = x(), E = M.edit, v = E.content[M.tab];
     const tabs = LANGS.map((l) => `<button type="button" class="chip ${M.tab === l ? 'on' : ''}" data-ml="tab" data-v="${l}" aria-pressed="${M.tab === l}">${l.toUpperCase()}${filled(E.content[l]) ? ' ✓' : ''}</button>`).join('');
+    return `<h3 class="ml-h3">${h(X.content)}</h3>
+      <div class="ml-chips ml-tabs" role="group" aria-label="${h(X.content)}">${tabs}</div>
+      <label class="ml-f"><span>${h(X.subject)}</span><input type="text" data-mlf="subject" maxlength="200" value="${h(v.subject)}"></label>
+      <label class="ml-f"><span>${h(X.pre)}</span><input type="text" data-mlf="preheader" maxlength="200" value="${h(v.preheader)}"></label>
+      <div class="ml-f"><span id="ml-body-l">${h(X.body)}</span>
+        <div class="ml-chips ml-tools">${Object.entries(X.tools).map(([k, lab]) => `<button type="button" class="chip" data-ml="tool" data-v="${k}">${h(lab)}</button>`).join('')}</div>
+        <textarea data-mlf="body" rows="12" aria-labelledby="ml-body-l">${h(v.body)}</textarea><small class="muted">${help}</small></div>
+      <h3 class="ml-h3">${h(X.prev)}</h3>
+      <div class="ml-prev" data-ml-prev aria-label="${h(X.prev)}"></div>`;
+  }
+  function vEditor(id, d) {
+    const X = x(), E = M.edit, c = d.campaign, sched = c.status === 'scheduled';
     const row = (label, k, opts) => `<div class="ml-arow"><span>${h(label)}</span><div class="ml-chips">${opts.map(([val, lab]) => `<button type="button" class="chip ${String(E.audience[k] || '') === String(val) ? 'on' : ''}" data-ml="aud" data-k="${k}" data-v="${val}">${h(lab)}</button>`).join('')}</div></div>`;
     const act = actOf(E.audience);
     const A = M.aud;
@@ -164,15 +191,7 @@
     return `<section class="sec ml ml-ed" data-noi18n>
       <div class="sec-h"><h2>${h(E.name || X.untitled)}</h2>${chip(c.status)}<small class="muted ml-saved" data-ml-saved>${M.saving ? h(X.saving) : ''}</small></div>
       <label class="ml-f"><span>${h(X.name)}</span><input type="text" data-mlf="name" maxlength="120" value="${h(E.name)}" placeholder="${h(X.namePh)}"></label>
-      <h3 class="ml-h3">${h(X.content)}</h3>
-      <div class="ml-chips ml-tabs" role="group" aria-label="${h(X.content)}">${tabs}</div>
-      <label class="ml-f"><span>${h(X.subject)}</span><input type="text" data-mlf="subject" maxlength="200" value="${h(v.subject)}"></label>
-      <label class="ml-f"><span>${h(X.pre)}</span><input type="text" data-mlf="preheader" maxlength="200" value="${h(v.preheader)}"></label>
-      <div class="ml-f"><span id="ml-body-l">${h(X.body)}</span>
-        <div class="ml-chips ml-tools">${Object.entries(X.tools).map(([k, lab]) => `<button type="button" class="chip" data-ml="tool" data-v="${k}">${h(lab)}</button>`).join('')}</div>
-        <textarea data-mlf="body" rows="12" aria-labelledby="ml-body-l">${h(v.body)}</textarea><small class="muted">${h(X.help)}</small></div>
-      <h3 class="ml-h3">${h(X.prev)}</h3>
-      <div class="ml-prev" data-ml-prev aria-label="${h(X.prev)}"></div>
+      ${contentBlock(h(X.help))}
       <h3 class="ml-h3">${h(X.aud)}</h3>
       ${row(X.aLang, 'lang', [['', X.all], ['en', 'EN'], ['fr', 'FR'], ['es', 'ES']])}
       ${row(X.aPlan, 'plan', [['', X.all], ['free', 'Free'], ['pro', 'Pro'], ['elite', 'Elite']])}
@@ -184,6 +203,30 @@
            <div class="ml-inline ml-at"><input type="datetime-local" data-ml-at value="${lv(soon.getTime())}" min="${lv(Date.now())}" aria-label="${h(X.at)}"><button type="button" class="btn" data-ml="at">${h(X.at)}</button></div>`}
       <p class="ml-msg ${M.msgBad ? 'bad' : ''}" role="status" data-ml-msg>${h(M.msg)}</p>
       <div class="ml-acts ml-del"><button type="button" class="btn danger" data-ml="del">${h(X.del)}</button></div>
+    </section>`;
+  }
+  const rate = (v) => (v == null ? '—' : pct(v) + ' %');
+  function vAuto(id, d) {
+    const X = x(), c = d.campaign, I = d.info || { name: {}, when: {}, vars: [] }, s = d.stats, on = c.status === 'active';
+    const langs = d.langs.map((l) => `<tr><td>${h(X.lg[l.lang])}</td><td class="ml-n">${num(l.sent)}</td><td class="ml-n">${rate(l.open_rate)}</td><td class="ml-n">${rate(l.click_rate)}</td></tr>`).join('');
+    const links = d.links.map((l) => `<li><span>${h(l.url.replace(/^https?:\/\//, ''))}</span><b>${num(l.clicks)}</b></li>`).join('');
+    const help = h(X.help.replace(/\s[^.]*\{first\}[^.]*\./, '')) + '<br>' + h(X.vars) + ' ' + ['first'].concat(I.vars).map((k) => `<code>${h(X.v[k])}</code>`).join(', ');
+    return `<section class="sec ml ml-ed ml-auto" data-noi18n>
+      <div class="sec-h"><h2>${h(I.name[LANG] || I.name.en || c.name)}</h2>${chip(c.status)}<small class="muted ml-saved" data-ml-saved>${M.saving ? h(X.saving) : ''}</small>
+        <div class="ml-acts ml-top"><button type="button" class="btn sm ${on ? '' : 'primary'}" data-ml="auto" aria-pressed="${on}">${h(on ? X.offB : X.on)}</button></div></div>
+      <p class="ml-sched"><b>${h(I.when[LANG] || I.when.en || '')}</b></p>
+      <p class="muted ml-sub">${h(X.kind[I.kind] || X.kind.marketing)}</p>
+      ${contentBlock(help)}
+      <div class="ml-acts ml-test"><button type="button" class="btn" data-ml="test">${h(X.test)}</button></div>
+      <p class="ml-msg ${M.msgBad ? 'bad' : ''}" role="status" data-ml-msg>${h(M.msg)}</p>
+      <h3 class="ml-h3">${h(X.since)}</h3>
+      <div class="ux-mgrid ml-kpis">${kpi(X.sent2, num(s.sent))}${kpi(X.rk.opens, rate(s.open_rate), num(s.opens))}${kpi(X.rk.clicks, rate(s.click_rate), num(s.clicks))}
+        ${kpi(X.rk.unsub, rate(s.unsub_rate), num(s.unsubs))}${kpi(X.rk.bounce, rate(s.bounce_rate), num(s.bounces))}</div>
+      ${s.opens_auto ? `<p class="muted ml-note">${h(s.opens_auto === 1 ? X.auto1 : f(X.auto, { n: num(s.opens_auto) }))}</p>` : ''}
+      <div class="ml-two">
+        <div class="ml-box"><h4>${h(X.byLang)}</h4>${langs ? `<table class="ml-tbl"><thead><tr><th></th><th class="ml-n">${h(X.sent2)}</th><th class="ml-n">${h(X.rk.opens)}</th><th class="ml-n">${h(X.rk.clicks)}</th></tr></thead><tbody>${langs}</tbody></table>` : '<p class="muted">—</p>'}</div>
+        <div class="ml-box"><h4>${h(X.links)}</h4>${links ? `<ul class="ml-links">${links}</ul>` : `<p class="muted">${h(X.noLinks)}</p>`}</div>
+      </div>
     </section>`;
   }
   function bars(hours) {
@@ -302,6 +345,7 @@
         if (!(await (window.SweepAsk ? SweepAsk(f(X.askDel, { n: (M.edit && M.edit.name) || X.untitled }), X.askDelS, X.askDelGo) : Promise.resolve(false)))) return;
         await api('api/admin/mail/campaigns/' + id, undefined, 'DELETE'); M.editId = 0; M.edit = null; M.ov = null; delete M.rep[id]; location.hash = '#mail'; return;
       }
+      if (k === 'auto') { const c = M.rep[id].campaign; b.disabled = true; const r = await api('api/admin/mail/campaigns/' + id + '/auto', { on: c.status !== 'active' }); c.status = r.status; M.ov = null; repaint(); return; }
       if (k === 'pause' || k === 'resume') { await api('api/admin/mail/campaigns/' + id + '/pause', { pause: k === 'pause' }); await reload(id); return; }
       if (k === 'dup') { const r = await api('api/admin/mail/campaigns/' + id + '/duplicate', { lang: LANG }); M.ov = null; location.hash = '#mail/' + r.id; return; }
     } catch (err) { setMsg(errText(err), true); if (k !== 'test' && typeof toast === 'function') toast(errText(err)); }

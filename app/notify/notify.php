@@ -4,7 +4,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 /**
  * Sweep — Notification center + event system (Feature 0).
  *
- * The one channel to talk to traders inside the app (emails: notify/mail.php, game/weekly-mail.php, loops/; the list of
+ * The one channel to talk to traders inside the app (emails: notify/mail.php, game/weekly-mail.php, mail/; the list of
  * everything Sweep sends: ops/NOTIFICATIONS.md). Three reminders also reach the installed app's phone (push/web-push.php).
  *
  *   Events::on('trade.created', function (array $p) { ... });   // register a listener (notify/listeners.php)

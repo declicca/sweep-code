@@ -495,7 +495,6 @@ function create_session(string $userId, ?string $device = null): void {   // $de
     q('INSERT INTO sessions (token_hash, user_id, created_at, expires_at, device) VALUES (?, ?, ?, ?, ?)', [hash('sha256', $token), $userId, time(), $exp, $device]);
     pk_bind(hash('sha256', $token), $device);   // a phone with its Face ID: this session locks after 12 h too
     q('UPDATE users SET last_login = ? WHERE id = ?', [now(), $userId]);
-    if (function_exists('loops_sync')) loops_sync($userId);   // Loops: last visit
     set_session_cookie($token, $exp);
     if (random_int(1, 20) === 1) {
         q('DELETE FROM sessions WHERE expires_at < ?', [time()]);
@@ -519,11 +518,8 @@ function current_user(): ?array {
         q('UPDATE sessions SET expires_at = ? WHERE token_hash = ?', [$exp, hash('sha256', $t)]);
         set_session_cookie($t, $exp);
     }
-    // last visit: a trader stays signed in for 30 days, so coming back counts too (at most once an hour; Loops absences, Admin › Traders)
-    if ((int) strtotime((string) ($row['last_login'] ?? '')) < time() - 3600) {
-        q('UPDATE users SET last_login = ? WHERE id = ?', [now(), $row['id']]);
-        if (function_exists('loops_sync')) loops_sync((string) $row['id']);
-    }
+    // last visit: a trader stays signed in for 30 days, so coming back counts too (at most once an hour; the absence emails, Admin › Traders)
+    if ((int) strtotime((string) ($row['last_login'] ?? '')) < time() - 3600) q('UPDATE users SET last_login = ? WHERE id = ?', [now(), $row['id']]);
     return ['id' => $row['id'], 'username' => $row['username'], 'full_name' => $row['full_name'] ?? null, 'first_name' => $row['first_name'] ?? null, 'last_name' => $row['last_name'] ?? null, 'email' => $row['email'] ?? null, 'created_at' => $row['created_at'] ?? null, 'is_admin' => (int)$row['is_admin'] === 1,
             'has_recovery' => !empty($row['recovery_hash']), 'recovery_created' => $row['recovery_created'], 'experience' => $row['experience'] ?? null];
 }
@@ -559,7 +555,12 @@ function send_reset_email(string $to, string $username, string $token, string $l
       . '<p style="margin:24px 0 0;font-size:13px;line-height:1.55;color:#8a8a94">' . $h($L['p2']) . '</p>'
       . '<p style="margin:16px 0 0;font-size:13px;color:#8a8a94">' . $h($L['help']) . ' <a href="mailto:' . $h($sup) . '" style="color:#4c8dff">' . $h($sup) . '</a></p>'
       . '</td></tr></table><p style="font-size:12px;color:#5c5c66;margin:16px 0 0">' . $h($L['sig']) . ' · makeitsweep.com</p></td></tr></table></body></html>';
-    return sweep_mail($to, $L['s'], $text, $html);
+    // through the queue (Admin › Emails counts it, a bounce sets the address aside), sent at once: the trader is waiting; not sent, the cron tries again
+    require_once __DIR__ . '/mail/mail-core.php'; require_once __DIR__ . '/mail/mail-smtp.php';
+    $uid = q('SELECT id FROM users WHERE email_lc = ?', [strtolower($to)])->fetchColumn();
+    [$qid] = ml_enqueue(db(), $uid !== false ? (string) $uid : null, $to, $lang, 'transactional', $L['s'], $text, $html);
+    $smtp = new MlSmtp((array) ($GLOBALS['cfg']['smtp'] ?? []));
+    try { return ml_send_now(db(), $qid, fn($a, $s, $t, $h, $hd, $tok) => $smtp->send($a, $s, $t, $h, $hd, $tok)); } finally { $smtp->close(); }
 }
 /** Campaign attribution: UTM tags from the website's sweep_utm cookie (first touch) + the two optional sign-up answers. */
 function save_signup_attribution(string $uid, array $b): void {
@@ -663,7 +664,7 @@ function throttle(array $keys, int $max, int $window): void {
 function record_attempt(array $keys): void { foreach ($keys as $k) q('INSERT INTO attempts (k, at) VALUES (?, ?)', [$k, time()]); }
 function delete_user_everything(string $uid): void {
     global $DATA;
-    if (function_exists('loops_forget')) loops_forget($uid);   // Loops contact and email_events_log (reads the email before the users row goes)
+    if (function_exists('ma_forget')) ma_forget($uid);   // its lines of email_events_log (the automatic emails)
     foreach (q('SELECT id FROM uploads WHERE user_id = ?', [$uid])->fetchAll() as $r) @unlink($DATA . '/uploads/' . $r['id']);
     q('DELETE FROM uploads WHERE user_id = ?', [$uid]);
     q('DELETE FROM documents WHERE user_id = ?', [$uid]);
@@ -750,7 +751,7 @@ try {
     if (is_file(__DIR__ . '/push/web-push.php')) require_once __DIR__ . '/push/web-push.php';   // notifications on the phone (brief 02 part 10): off without keys
     if (is_file(__DIR__ . '/game/game.php')) require_once __DIR__ . '/game/game.php';
     if (is_file(__DIR__ . '/guard/guard.php')) require_once __DIR__ . '/guard/guard.php';   // the account guardian (3 Nov., SWEEP.md section 8)
-    if (is_file(__DIR__ . '/loops/loops.php')) require_once __DIR__ . '/loops/loops.php';   // automatic emails (Loops): contact + events, off without a key
+    require_once __DIR__ . '/mail/mail-core.php'; require_once __DIR__ . '/mail/mail-auto.php';   // automatic emails (Admin › Emails › Automations): the app's events
     if (!empty($cfg['chart_config']) && !defined('SWEEP_CHART_CONFIG')) define('SWEEP_CHART_CONFIG', (string)$cfg['chart_config']);
     if (is_file(__DIR__ . '/chart/chart.php')) require_once __DIR__ . '/chart/chart.php';     // real candle charts (Databento)         // gamification V1 « Sweep the day »
     // /100 page counter, public: no personal data, cached 60 s, readable from makeitsweep.com only
@@ -889,7 +890,7 @@ try {
         product_event($id, 'signup_completed', ['lang' => lang_code($b['lang'] ?? 'en'), 'utm_source' => substr((string)($b['utm_source'] ?? ''), 0, 60), 'utm_campaign' => substr((string)($b['utm_campaign'] ?? ''), 0, 60),
             'device' => preg_match('/iPhone|Android|Mobile/i', (string)($_SERVER['HTTP_USER_AGENT'] ?? '')) ? 'mobile' : 'desktop']);
         create_session($id, tf_trust($id));   // the browser that signs up is the trader's
-        if (function_exists('loops_once')) loops_once($id, 'signedUp', fn(array $c) => ['language' => $c['language'], 'plan' => $c['plan']]);
+        if (function_exists('ma_once')) ma_once($id, 'signedUp');
         json_out(201, ['ok' => true]);
     }
 
@@ -1117,7 +1118,7 @@ try {
         foreach (['found_via' => 40, 'found_video' => 120, 'accounts_info' => 160] as $k => $n) if (isset($b[$k])) $set[$k . ' = ?'] = $clean($b[$k], $n);
         if (isset($b['experience'])) $set['experience = ?'] = in_array($b['experience'], ['new', 'lt1', 'gt1'], true) ? $b['experience'] : null;   // « How long have you been trading? » (onboarding)
         q('UPDATE users SET ' . implode(', ', array_keys($set)) . ' WHERE id = ?', array_merge(array_values($set), [$UID]));
-        if (function_exists('loops_once') && !loops_once((string) $UID, 'profileCompleted')) loops_sync((string) $UID);   // the first name is the profile (brief 03 step 1)
+        if (function_exists('ma_once')) ma_once((string) $UID, 'profileCompleted');   // the first name is the profile (brief 03 step 1)
         json_out(200, ['ok' => true, 'first_name' => $fn, 'last_name' => $ln, 'full_name' => trim($fn . ' ' . $ln), 'username' => $set['username = ?'] ?? $me['username'], 'experience' => array_key_exists('experience = ?', $set) ? $set['experience = ?'] : ($me['experience'] ?? null)]);
     }
     if ($route === 'api/me/name' && $method === 'POST') {
@@ -1135,7 +1136,6 @@ try {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) json_out(400, ['error' => 'Enter a valid email.']);
         if (q('SELECT 1 FROM users WHERE email_lc = ? AND id <> ?', [$email, $UID])->fetch()) json_out(409, ['error' => 'An account already uses this email.']);
         q('UPDATE users SET email = ?, email_lc = ? WHERE id = ?', [$email, $email, $UID]);
-        if (function_exists('loops_sync')) loops_sync((string) $UID);   // Loops finds the contact by its userId and takes the new email
         json_out(200, ['ok' => true, 'email' => $email]);
     }
     if ($route === 'api/health') json_out(200, ['ok' => true, 'php' => PHP_VERSION, 'drivers' => PDO::getAvailableDrivers()]);
@@ -1588,7 +1588,6 @@ try {
                 $days = $action === 'permanent' ? 36500 : max(1, min(365, (int)($b['days'] ?? 14)));
                 sb_grant(db(), $tid, $plan, $days, $action === 'permanent' ? 'comp' : 'admin_trial');
             } elseif ($action !== 'remove') json_out(400, ['error' => 'Unknown action.']);
-            if (function_exists('loops_sync')) loops_sync($tid);   // plan, Discord crew (Elite for life)
             json_out(200, ['ok' => true, 'plan' => billing_admin_plan($tid)]);
         }
         if (preg_match('#^api/admin/users/([A-Za-z0-9_.-]{1,120})/role$#', $route, $m) && $method === 'POST') {

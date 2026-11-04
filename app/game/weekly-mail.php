@@ -13,7 +13,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  */
 final class GameWeeklyMail
 {
-    /** tests: replaces sweep_mail(to, subject, text, html, headers) */
+    /** tests: replaces the queue (mail/mail-core.php, ml_enqueue): mailer(to, subject, text, html, headers) */
     public static $mailer = null;
 
     /** the default checklist (DEFAULT_QS in src/app.js) and its words in FR / ES (assets/i18n-fr.js, i18n-es.js) */
@@ -249,8 +249,10 @@ final class GameWeeklyMail
         $lang = self::lang($u['lang'] ?? 'en');
         $off = self::base() . 'api/email/weekly?t=' . $pref['token'];
         [$subject, $text, $html] = self::compose(self::brief($uid, $mon, $lang), $lang, trim((string) ($u['first_name'] ?? '')) ?: (string) ($u['username'] ?? ''), $mon, $last, $off);
-        $send = self::$mailer ?? (function_exists('sweep_mail') ? 'sweep_mail' : null);
-        $ok = $send !== null && (bool) $send($to, $subject, $text, $html, ['List-Unsubscribe' => '<' . $off . '>', 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click']);
+        $hdr = ['List-Unsubscribe' => '<' . $off . '>', 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click'];
+        // the queue sends it within the minute (mail/send-cron.php, hourly cap), counted in Admin › Emails
+        $send = self::$mailer ?? (function_exists('ml_enqueue') ? function ($to, $s, $t, $h, $hd) use ($uid, $lang) { ml_enqueue(GameEngine::pdo(), $uid, $to, $lang, 'weekly', $s, $t, $h, $hd); return true; } : null);
+        $ok = $send !== null && (bool) $send($to, $subject, $text, $html, $hdr);
         if ($ok) GameEngine::q('UPDATE weekly_emails SET ok = 1 WHERE user_id = ? AND week_start = ?', [$uid, $mon]);
         else error_log('[Sweep weekly email] not sent: ' . $uid . ' ' . $mon);
         return $ok;

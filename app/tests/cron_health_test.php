@@ -26,7 +26,6 @@ $run = function (string $task, string $body) use ($app, $db, $tmp): int {
 };
 $row = fn(string $t) => $pdo->query('SELECT * FROM cron_runs WHERE task = ' . $pdo->quote($t))->fetch() ?: [];
 
-$run('emails', "sweep_cron_note('nothing due');");   // the hourly Loops task runs fine all along (it only turns orange later)
 $run('mail', "sweep_cron_note('0 sent');");          // the every-minute email sender (3 Nov.): fine, then late like the others
 $c = $run('game', "usleep(120000); sweep_cron_note('3 player(s)');");
 $r = $row('game');

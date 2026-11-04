@@ -35,7 +35,7 @@ function billing_on(): bool {
 }
 
 if (!empty($cfg['push_config']) && !defined('SWEEP_PUSH_CONFIG')) define('SWEEP_PUSH_CONFIG', (string) $cfg['push_config']);
-foreach (['/notify/notify.php', '/notify/listeners.php', '/notify/mail.php', '/push/web-push.php'] as $f) if (is_file($root . $f)) require_once $root . $f;   // reminders go through the notification center (and the phone)
+foreach (['/notify/notify.php', '/notify/listeners.php', '/notify/mail.php', '/mail/mail-core.php', '/push/web-push.php'] as $f) if (is_file($root . $f)) require_once $root . $f;   // reminders go through the notification center (and the phone)
 require_once __DIR__ . '/game.php';
 if (is_file($root . '/money/money.php')) require_once $root . '/money/money.php';
 GameEngine::setPdo($pdo);
