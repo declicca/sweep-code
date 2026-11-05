@@ -23,6 +23,9 @@ async def main():
       tag = f'{lang} {w}px'; W = WORDS[lang]; seen = {'v': False}
       ctx = await br.new_context(storage_state=STATE, locale=lang, viewport={'width': w, 'height': h}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1)
       await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+      # and the day not closed by the day's limit (« Day closed » takes the whole card): an earlier test of the same copy may have
+      # reached the shared trader's limit today (5 Nov.: the order of the tests on GitHub changed with a new test)
+      await ctx.add_init_script("Object.defineProperty(window, 'SweepCoach', { configurable: true, get() { return this._swc; }, set(v) { if (v) v.dayLock = () => null; this._swc = v; } })")
       async def today(route):   # the server says: this week's recap is ready (seen once opened)
         r = await route.fetch(); d = await r.json()
         d['weekly'] = dict(d.get('weekly') or {}, open=True, week='2026-10-05', seen=seen['v'], done=False)
@@ -31,7 +34,7 @@ async def main():
         seen['v'] = True; await route.continue_()
       await ctx.route('**/api/game/today*', today); await ctx.route('**/api/game/weekly*', weekly)
       pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
-      await pg.goto(B + '/#dashboard'); await pg.wait_for_selector('#main .nav-rt .nav-rt-wk', timeout=30000)   # 30 s: a slow GitHub machine timed out at 15 (5 Nov.); await pg.wait_for_timeout(600)
+      await pg.goto(B + '/#dashboard'); await pg.wait_for_selector('#main .nav-rt .nav-rt-wk', timeout=15000); await pg.wait_for_timeout(600)
       row = await pg.evaluate("(()=>{const r=document.querySelector('#main .nav-rt .nav-rt-wk'); return {t:r.querySelector('b').textContent, b:r.querySelector('button').textContent, prim:r.querySelector('button').classList.contains('primary')}})()")
       ok(row['t'] == W[0] and row['b'] == W[1] and row['prim'], f'{tag} « {W[0]} » + « {W[1]} » ({row})')
       # every primary button of the card (the « Getting started » rows inside it are quiet since brief 02 part 5)
