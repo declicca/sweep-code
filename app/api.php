@@ -1488,7 +1488,7 @@ try {
             $fc = (string) ($_GET['cohort'] ?? ''); $fs = substr((string) ($_GET['source'] ?? ''), 0, 40);
             json_out(200, sweep_metrics(db(), __DIR__, ['cohort' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $fc) ? $fc : '', 'source' => $fs]));
         }
-        if ($route === 'api/admin/feedback' && $method === 'GET') json_out(200, fb_admin_list(db(), $_GET['status'] ?? null, $_GET['type'] ?? null));
+        if ($route === 'api/admin/feedback' && $method === 'GET') json_out(200, fb_admin_list(db(), $_GET['status'] ?? null, $_GET['type'] ?? null, array_intersect_key($_GET, array_flip(['camp', 'q', 'a', 'nps', 'notes']))));
         if (preg_match('#^api/admin/feedback/(\d+)$#', $route, $fm) && $method === 'POST') {
             $b = body_json(65536);
             $before = q('SELECT user_id, status FROM feedback WHERE id = ?', [(int)$fm[1]])->fetch();

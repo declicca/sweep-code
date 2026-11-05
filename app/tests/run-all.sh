@@ -47,6 +47,7 @@ php tests/mail_answer_test.php > "$out" 2>&1; check mail_answer_test.php $? "$ou
 php tests/mail_usage_test.php > "$out" 2>&1; check mail_usage_test.php $? "$out"
 php tests/mail_texts_test.php > "$out" 2>&1; check mail_texts_test.php $? "$out"
 php tests/mail_feedback_test.php > "$out" 2>&1; check mail_feedback_test.php $? "$out"
+php tests/mail_insights_test.php > "$out" 2>&1; check mail_insights_test.php $? "$out"
 php tests/mail_test.php > "$out" 2>&1; check mail_test.php $? "$out"
 php tests/billing_test.php > "$out" 2>&1; check billing_test.php $? "$out"
 php tests/creator_test.php > "$out" 2>&1; check creator_test.php $? "$out"

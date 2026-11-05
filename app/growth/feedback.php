@@ -79,10 +79,20 @@ function fb_out(array $r, bool $admin = false): array
     return $o;
 }
 function fb_list_mine(PDO $pdo, string $uid): array { fb_schema($pdo); return array_map('fb_out', fb_q($pdo, 'SELECT * FROM feedback WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [$uid])->fetchAll(PDO::FETCH_ASSOC)); }
-function fb_admin_list(PDO $pdo, ?string $status, ?string $type): array
+/**
+ * $f, the filters of « What traders say » (Admin › Feedback): camp (an email), q and a (one of its questions, one option),
+ * nps (p 9-10, pa 7-8, d 0-6: the « Day 30 » email's notes), notes (only the lines with a comment).
+ */
+function fb_admin_list(PDO $pdo, ?string $status, ?string $type, array $f = []): array
 {
     fb_schema($pdo);
     $sql = 'SELECT f.*, u.username, u.email FROM feedback f LEFT JOIN users u ON u.id = f.user_id WHERE 1=1'; $a = [];
+    if (isset($f['camp']) && $f['camp'] !== '') { $sql .= ' AND f.src_campaign = ?'; $a[] = (int) $f['camp'];
+        if (isset($f['q']) && $f['q'] !== '') { $sql .= ' AND f.src_q = ?'; $a[] = (int) $f['q']; }
+        if (isset($f['a']) && $f['a'] !== '') { $sql .= ' AND f.answer_i = ?'; $a[] = (int) $f['a']; } }
+    $np = ['p' => [9, 10], 'pa' => [7, 8], 'd' => [0, 6]][$f['nps'] ?? ''] ?? null;
+    if ($np) { $sql .= " AND f.src_campaign IN (SELECT id FROM mail_campaigns WHERE auto = 'nps30') AND f.answer_i BETWEEN ? AND ?"; array_push($a, ...$np); }
+    if (!empty($f['notes'])) $sql .= " AND f.message <> ''";
     if ($status && in_array($status, FB_STATUSES, true)) { $sql .= ' AND f.status = ?'; $a[] = $status; }
     if ($type && in_array($type, FB_TYPES, true)) { $sql .= ' AND f.type = ? AND f.src_queue IS NULL'; $a[] = $type; }
     if ($type === 'mail') $sql .= ' AND f.src_queue IS NOT NULL';   // the one-click answers in the emails

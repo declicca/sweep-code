@@ -723,6 +723,44 @@ function ml_answers(PDO $pdo, array $c): array
     foreach ($qs as &$Q) $Q['counts'] = (object) $Q['counts'];
     return ['questions' => array_values($qs), 'comments' => $comments];
 }
+/**
+ * Admin › Feedback « What traders say » (feedback brief, step 5): the NPS of the « Day 30 » email (share of 9-10 minus share
+ * of 0-6, last 90 days, the 90 days before, and each of the last 6 months), the one-click answers of each email that got some
+ * (its questions and how many chose each option), what the active traders use (mu_summary) and the last 10 comments.
+ */
+const ML_NPS_DAYS = 90;
+function ml_nps(array $notes): array
+{
+    $n = count($notes); $p = count(array_filter($notes, fn($v) => $v >= 9)); $d = count(array_filter($notes, fn($v) => $v <= 6));
+    return ['score' => $n ? (int) round(($p - $d) / $n * 100) : null, 'n' => $n, 'p' => $p, 'pa' => $n - $p - $d, 'd' => $d];
+}
+function ml_insights(PDO $pdo, ?int $now = null): array
+{
+    ml_schema($pdo); $now = $now ?? time();
+    if (function_exists('fb_schema')) fb_schema($pdo);
+    $nps = ml_nps([]); $prev = null; $months = [];
+    $npsId = (int) ml_q($pdo, "SELECT id FROM mail_campaigns WHERE auto = 'nps30'")->fetchColumn();
+    $rows = $npsId ? ml_q($pdo, 'SELECT answer_i, COALESCE(updated_at, created_at) at FROM feedback WHERE src_campaign = ? AND answer_i IS NOT NULL AND COALESCE(updated_at, created_at) > CAST(? AS INTEGER)',
+        [$npsId, $now - 200 * 86400])->fetchAll(PDO::FETCH_ASSOC) : [];
+    $in = fn(int $from, int $to) => array_map(fn($r) => (int) $r['answer_i'], array_filter($rows, fn($r) => (int) $r['at'] > $from && (int) $r['at'] <= $to));
+    $nps = ml_nps($in($now - ML_NPS_DAYS * 86400, $now));
+    $prev = ml_nps($in($now - 2 * ML_NPS_DAYS * 86400, $now - ML_NPS_DAYS * 86400))['score'];
+    $m0 = new DateTimeImmutable(gmdate('Y-m-01', $now) . ' 00:00:00', new DateTimeZone('UTC'));
+    for ($k = 5; $k >= 0; $k--) {
+        $a = $m0->modify("-$k month"); $b = $a->modify('+1 month');
+        $months[] = ['m' => $a->format('Y-m'), 'score' => ($x = ml_nps($in($a->getTimestamp() - 1, $b->getTimestamp() - 1)))['score'], 'n' => $x['n']];
+    }
+    // the emails that got answers, the last answered first (the NPS aside: it has its own box)
+    $emails = [];
+    foreach (ml_q($pdo, 'SELECT src_campaign, MAX(COALESCE(updated_at, created_at)) at FROM feedback WHERE src_campaign IS NOT NULL AND src_campaign <> ? GROUP BY src_campaign ORDER BY at DESC LIMIT 8', [$npsId])->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $c = ml_campaign($pdo, (int) $r['src_campaign']); if (!$c) continue;
+        $qs = array_values(array_filter(ml_answers($pdo, $c)['questions'], fn($q) => $q['total'] > 0)); if (!$qs) continue;
+        $emails[] = ['id' => $c['id'], 'name' => $c['auto'] !== null && function_exists('ma_info') && ($i = ma_info($c['auto'])) ? $i['name'] : ['en' => $c['name']], 'questions' => $qs];
+    }
+    $notes = array_map(fn($r) => ['id' => (int) $r['id'], 'type' => $r['type'], 'answer' => $r['answer'], 'message' => $r['message'], 'user' => $r['username'], 'at' => (int) $r['at']],
+        ml_q($pdo, "SELECT f.id, f.type, f.answer, f.message, u.username, COALESCE(f.updated_at, f.created_at) at FROM feedback f LEFT JOIN users u ON u.id = f.user_id WHERE f.message <> '' ORDER BY at DESC LIMIT 10")->fetchAll(PDO::FETCH_ASSOC));
+    return ['nps' => $nps + ['prev' => $prev, 'days' => ML_NPS_DAYS, 'campaign' => $npsId ?: null, 'months' => $months], 'emails' => $emails, 'usage' => mu_summary($pdo, $now), 'notes' => $notes];
+}
 function ml_overview(PDO $pdo, ?int $now = null): array
 {
     ml_schema($pdo); $now = $now ?? time();

@@ -9766,10 +9766,67 @@ document.addEventListener("input", e => {
   }
 });
 
+/* Admin › Feedback « What traders say » (feedback brief, step 5): the NPS and its trend, the one-click answers, what traders
+   use, the last comments (api/admin/mail/insights). A click opens the list below, filtered (GR.adm.fx). */
+const FI_T = {
+  en: { h: "What traders say", nps: "NPS", npsHelp: "Would they recommend Sweep? Share of 9–10 (promoters) minus share of 0–6 (detractors), from −100 to +100. Last {d} days, « Day 30: the score » email.",
+    npsN: "{n} answers", npsN1: "1 answer", npsNone: "No score yet: the « Day 30: the score » email asks for it.", vs: "{d} vs the {n} days before",
+    grp: { p: "Promoters (9–10)", pa: "Passives (7–8)", d: "Detractors (0–6)" }, months: "Each month",
+    ans: "One-click answers", ansNone: "No answer yet. They come from the emails with a question.",
+    use: "What they use", useSub: "Share of active traders (last 30 days) who used each feature.", useNone: "No active trader yet.", top: "Most used", low: "Least tried",
+    notes: "Last comments", notesNone: "No comment yet.", shown: "Showing: {l}", all: "Show all", withNote: "With a comment" },
+  fr: { h: "Ce que disent les traders", nps: "NPS", npsHelp: "Recommanderaient-ils Sweep ? Part des 9–10 (promoteurs) moins part des 0–6 (détracteurs), de −100 à +100. {d} derniers jours, courriel « Jour 30 : la note ».",
+    npsN: "{n} réponses", npsN1: "1 réponse", npsNone: "Pas encore de note : le courriel « Jour 30 : la note » la demande.", vs: "{d} par rapport aux {n} jours d’avant",
+    grp: { p: "Promoteurs (9–10)", pa: "Neutres (7–8)", d: "Détracteurs (0–6)" }, months: "Chaque mois",
+    ans: "Réponses en un clic", ansNone: "Pas encore de réponse. Elles viennent des courriels qui posent une question.",
+    use: "Ce qu’ils utilisent", useSub: "Part des traders actifs (30 derniers jours) qui ont utilisé chaque fonction.", useNone: "Pas encore de trader actif.", top: "Les plus utilisées", low: "Les moins essayées",
+    notes: "Derniers commentaires", notesNone: "Pas encore de commentaire.", shown: "Affiché : {l}", all: "Tout afficher", withNote: "Avec un commentaire" },
+  es: { h: "Lo que dicen los traders", nps: "NPS", npsHelp: "¿Recomendarían Sweep? Parte de 9–10 (promotores) menos parte de 0–6 (detractores), de −100 a +100. Últimos {d} días, correo « Día 30: la nota ».",
+    npsN: "{n} respuestas", npsN1: "1 respuesta", npsNone: "Aún no hay nota: el correo « Día 30: la nota » la pide.", vs: "{d} frente a los {n} días anteriores",
+    grp: { p: "Promotores (9–10)", pa: "Pasivos (7–8)", d: "Detractores (0–6)" }, months: "Cada mes",
+    ans: "Respuestas en un clic", ansNone: "Aún no hay respuestas. Vienen de los correos con una pregunta.",
+    use: "Lo que usan", useSub: "Parte de los traders activos (últimos 30 días) que usaron cada función.", useNone: "Aún no hay traders activos.", top: "Las más usadas", low: "Las menos probadas",
+    notes: "Últimos comentarios", notesNone: "Aún no hay comentarios.", shown: "Mostrando: {l}", all: "Mostrar todo", withNote: "Con un comentario" }
+};
+
+function feedbackInsights() {
+  const e = GR.adm, X = FI_T[LANG] || FI_T.en, d = e.ins, pk = o => o && (o[LANG] || o.en || Object.values(o)[0]) || "", N = v => Number(v || 0).toLocaleString(LOC()),
+    sg = v => v == null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v);
+  if (e.ins === void 0) e.ins = null, apiJSON("api/admin/mail/insights").then(o => {
+    e.ins = o, render();
+  }).catch(() => {});
+  if (!d) return "";
+  const bar = (label, n, w, fx) => `<li><button type="button" data-act="gadm-x" data-fx='${esc(JSON.stringify(fx))}'><span>${esc(label)}</span><i><b style="width:${w}%"></b></i><em>${esc(n)}</em></button></li>`,
+    P = d.nps, nn = P.n === 1 ? X.npsN1 : fmtT(X.npsN, { n: N(P.n) }),
+    npsBox = `<div class="fi-box fi-nps"><h4>${esc(X.nps)}</h4>${P.n ? `<p class="fi-score ${P.score < 0 ? "neg" : ""}"><b>${sg(P.score)}</b><small>${esc(nn)}${P.prev != null ? " · " + esc(fmtT(X.vs, { d: sg(P.score - P.prev), n: P.days })) : ""}</small></p>
+      <ul class="fi-bars">${[ "p", "pa", "d" ].map(g => bar(X.grp[g], N(P[g]), Math.round(P[g] / P.n * 100), { nps: g, l: X.nps + " · " + X.grp[g] })).join("")}</ul>` : `<p class="muted">${esc(X.npsNone)}</p>`}
+      ${P.months.some(m => m.n) ? `<h4>${esc(X.months)}</h4><ol class="fi-months">${P.months.map(m => `<li class="${m.score != null && m.score < 0 ? "neg" : ""}"><i><b style="height:${m.score == null ? 0 : Math.max(4, Math.round((m.score + 100) / 2))}%"></b></i><em>${sg(m.score)}</em><small>${esc(new Date(m.m + "-15").toLocaleString(LOC(), { month: "short" }))}</small></li>`).join("")}</ol>` : ""}
+      <p class="muted fi-help">${esc(fmtT(X.npsHelp, { d: P.days }))}</p></div>`,
+    U = d.usage || { active: 0, features: [] }, tried = U.features.filter(f => f.key !== "rules"),
+    useRow = f => `<li><span>${esc(pk(f.name))}</span><i><b style="width:${f.pct}%"></b></i><em>${f.pct} %</em></li>`,
+    useBox = `<div class="fi-box fi-use"><h4>${esc(X.use)}</h4>${U.active ? `<p class="muted">${esc(X.useSub)}</p><h5>${esc(X.top)}</h5><ul class="fi-bars fi-ro">${tried.slice(0, 3).map(useRow).join("")}</ul>
+      <h5>${esc(X.low)}</h5><ul class="fi-bars fi-ro">${tried.slice(-3).reverse().map(useRow).join("")}</ul>` : `<p class="muted">${esc(X.useNone)}</p>`}</div>`,
+    ansBox = `<div class="fi-box fi-ans"><h4>${esc(X.ans)}</h4>${d.emails.length ? d.emails.map(m => m.questions.map(q => {
+      const opts = pk(q.opts) || [], max = Math.max(1, ...opts.map((_, i) => q.counts[i] || 0)), nm = pk(m.name);
+      return `<div class="fi-q"><p><small class="muted">${esc(nm)}</small>${esc(pk(q.text) || "—")}</p><ul class="fi-bars">${opts.map((o, i) => bar(o, N(q.counts[i] || 0), Math.round((q.counts[i] || 0) / max * 100), { camp: m.id, q: q.q, a: i, l: nm + " · " + o })).join("")}</ul></div>`;
+    }).join("")).join("") : `<p class="muted">${esc(X.ansNone)}</p>`}</div>`,
+    notesBox = `<div class="fi-box fi-notes"><h4>${esc(X.notes)}</h4>${d.notes.length ? `<ul>${d.notes.map(n => `<li><button type="button" data-act="gadm-x" data-fx='${esc(JSON.stringify({ notes: 1, l: X.withNote, go: n.id }))}'><small class="muted">${esc([ n.user, fdate(new Date(n.at * 1e3).toISOString().slice(0, 10), { month: "short", day: "numeric" }), n.answer ].filter(Boolean).join(" · "))}</small><span>${esc(n.message)}</span></button></li>`).join("")}</ul>` : `<p class="muted">${esc(X.notesNone)}</p>`}</div>`;
+  return `<div class="fi"><h3>${esc(X.h)}</h3><div class="fi-grid">${npsBox}${useBox}${ansBox}${notesBox}</div></div>`;
+}
+
+function feedbackFilter() {
+  const f = GR.adm.fx, X = FI_T[LANG] || FI_T.en;
+  return f ? `<p class="fi-on" id="fiList"><span>${esc(fmtT(X.shown, { l: f.l }))}</span><button type="button" class="chip on" data-act="gadm-x" data-fx="">${esc(X.all)} ×</button></p>` : "";
+}
+
 function growthAdmin() {
   const e = GR.adm;
-  e.fb == null && (e.fb = [], apiJSON("api/admin/feedback" + (e.st || e.ty ? `?status=${e.st}&type=${e.ty}` : "")).then(o => {
+  e.fb == null && (e.fb = [], apiJSON("api/admin/feedback?" + new URLSearchParams(Object.assign({ status: e.st || "", type: e.ty || "" }, e.fx ? { camp: e.fx.camp ?? "", q: e.fx.q ?? "", a: e.fx.a ?? "", nps: e.fx.nps || "", notes: e.fx.notes || "" } : {}))).then(o => {
     e.fb = o, render();
+    e.fx && setTimeout(() => {
+      const g = e.fx && (e.fx.go && document.getElementById("fb" + e.fx.go) || document.getElementById("fiList"));
+      g && g.scrollIntoView({ block: e.fx.go ? "center" : "start" });
+    }, 80);
   }).catch(() => {}), apiJSON("api/admin/referrals").then(o => {
     e.ref = o.items || [], render();
   }).catch(() => {}));
@@ -9791,7 +9848,7 @@ function growthAdmin() {
     month: "short",
     day: "numeric"
   })}</td>\n      <td class="num">${o.status === "review" ? `<button class="link" data-act="gadm-ref" data-id="${o.id}" data-v="approve">Approve</button> · ` : ""}${[ "review", "pending" ].includes(o.status) ? `<button class="link" data-act="gadm-ref" data-id="${o.id}" data-v="reject" style="color:var(--neg)">Reject</button>` : ""}</td></tr>`).join("");
-  return `<section class="sec" data-noi18n><div class="sec-h"><h2>Feedback</h2><span class="help">${a.new} new${a.avg_rating_30d != null ? ` · ${a.avg_rating_30d}/5 (30 d)` : ""}</span></div>\n     <div class="chips gadm-chips">${n("st", "", "All")}${[ "new", "planned", "in_progress", "shipped", "declined" ].map(o => n("st", o, t.status[o])).join("")}<span class="gadm-sep"></span>${n("ty", "", "All types")}${[ "bug", "idea", "experience", "mail" ].map(o => n("ty", o, t["t_" + o])).join("")}</div>\n     <ul class="fb-list">${s}</ul></section>\n   <section class="sec" data-noi18n><div class="sec-h"><h2>Referrals</h2><span class="help">${(e.ref || []).length} total · ${(e.ref || []).filter(o => o.status === "review").length} to review</span></div>\n     <div class="surface"><div class="scroll-x"><table class="tbl"><thead><tr><th>Referrer</th><th>Friend</th><th>Status</th><th>Reward</th><th>Joined</th><th></th></tr></thead><tbody>${i || '<tr><td colspan="6" class="muted">—</td></tr>'}</tbody></table></div></div></section>\n   ${creatorsAdmin()}`;
+  return `<section class="sec" data-noi18n><div class="sec-h"><h2>Feedback</h2><span class="help">${a.new} new${a.avg_rating_30d != null ? ` · ${a.avg_rating_30d}/5 (30 d)` : ""}</span></div>\n     ${feedbackInsights()}<div class="chips gadm-chips">${n("st", "", "All")}${[ "new", "planned", "in_progress", "shipped", "declined" ].map(o => n("st", o, t.status[o])).join("")}<span class="gadm-sep"></span>${n("ty", "", "All types")}${[ "bug", "idea", "experience", "mail" ].map(o => n("ty", o, t["t_" + o])).join("")}</div>\n     ${feedbackFilter()}<ul class="fb-list">${s}</ul></section>\n   <section class="sec" data-noi18n><div class="sec-h"><h2>Referrals</h2><span class="help">${(e.ref || []).length} total · ${(e.ref || []).filter(o => o.status === "review").length} to review</span></div>\n     <div class="surface"><div class="scroll-x"><table class="tbl"><thead><tr><th>Referrer</th><th>Friend</th><th>Status</th><th>Reward</th><th>Joined</th><th></th></tr></thead><tbody>${i || '<tr><td colspan="6" class="muted">—</td></tr>'}</tbody></table></div></div></section>\n   ${creatorsAdmin()}`;
 }
 
 async function gadmSave(e) {
@@ -10717,6 +10774,10 @@ document.addEventListener("click", e => {
 
    case "gadm-f":
     GR.adm[s.k] = s.v, GR.adm.fb = null, render();
+    break;
+
+   case "gadm-x":
+    GR.adm.fx = s.fx ? JSON.parse(s.fx) : null, GR.adm.fb = null, render();
     break;
 
    case "gadm-save":

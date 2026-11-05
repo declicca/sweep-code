@@ -13,6 +13,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *   POST api/admin/mail/audience                 {audience} → how many traders it reaches, per language
  *   POST api/admin/mail/preview                  {content, lang} → subject and HTML (nothing tracked)
  *   POST api/admin/mail/test                     {content, lang} → to the administrator's own address, at once
+ *   GET  api/admin/mail/insights                 Admin › Feedback « What traders say »: NPS, one-click answers, what they use, last comments
  *   POST api/admin/mail/settings                 {address}: the postal address at the bottom (required by anti-spam laws)
  */
 require_once __DIR__ . '/mail-core.php';
@@ -94,6 +95,7 @@ function ml_admin_route(string $route, string $method, array $me): void
         usort($o['autos'], fn($p, $q) => $p['order'] <=> $q['order']);
         json_out(200, $o);
     }
+    if ($route === 'api/admin/mail/insights' && $method === 'GET') json_out(200, ml_insights($pdo));
     if ($route === 'api/admin/mail/campaigns' && $method === 'POST') json_out(200, ml_campaign_save($pdo, null, $b));
     if ($route === 'api/admin/mail/audience' && $method === 'POST') {
         $who = ml_audience($pdo, (array) ($b['audience'] ?? []));

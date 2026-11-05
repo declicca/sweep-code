@@ -16,6 +16,8 @@ light and dark):
  - what each trader uses (feedback brief, step 2, 5 Nov.): the Stats page opened counts once a day; « Ce qu'ils utilisent »
    on #mail with the share of active traders for each feature; {progress} and the others in the preview and in the help;
  - a new text that did not replace Mateo's (step 3): « Nouvelle version » in the list, the proposal on the automation, kept or taken;
+ - Admin › Feedback « Ce que disent les traders » (step 5): the NPS explained, the answers, what they use, the last comments;
+   a click opens the list filtered (the promoters, a comment), « Tout afficher » takes it off.
  - the 5 feedback emails (step 4) off; « Une fonction à découvrir »: its values in the help, the stats as an example in the preview.
 """
 import json, os, random, re, sqlite3, subprocess, sys, time, base64
@@ -343,6 +345,40 @@ with sync_playwright() as p:
       ok(ov <= 0 and cw <= 0.5 and not er, f'{t} feature to discover: no horizontal scroll ({ov}), the values inside the help ({cw}), no page error {er[:2]}')
       q.screenshot(path=f'{SHOTS}/e2e_mail_feature_{w}_{scheme}.png', full_page=True)
       cx.close()
+    # Admin › Feedback « Ce que disent les traders » (step 5): the NPS (2 promoters, 1 detractor → +33), the answers, what they
+    # use, the last comments; a click opens the list filtered, « Tout afficher » takes the filter off
+    nid = next(x for x in autos if x['auto'] == 'nps30')['id']; ua = sql('SELECT id FROM users WHERE email = ?', (ea,))[0][0]; ub = sql('SELECT id FROM users WHERE email = ?', (eb,))[0][0]
+    now = int(time.time())
+    for u, n, m in ((ua, 10, 'Le plan du matin ' + tag), (ub, 9, ''), (ua, 4, '')):
+      sql("INSERT INTO feedback (user_id, type, message, status, created_at, src_queue, src_campaign, src_q, answer, answer_i) VALUES (?, 'answer', ?, 'new', ?, 0, ?, 0, ?, ?)", (u, m, now - 3600, nid, str(n), n))
+    ins = adm.get('/api/admin/mail/insights', headers=H).json()
+    ok(ins['nps']['score'] == 33 and ins['nps']['n'] == 3 and any(e['id'] == cid for e in ins['emails']) and any(n['message'] == 'Le plan du matin ' + tag for n in ins['notes']) and 'active' in ins['usage'], 'api insights: NPS +33 of 3, the test campaign\'s answers, its comment among the last, the usage')
+    ok(a.get('/api/admin/mail/insights', headers=H).status == 403, 'api insights: administrators only')
+    for w, hgt, mob, scheme in ((390, 844, True, 'light'), (390, 844, True, 'dark'), (1300, 850, False, 'light'), (1300, 850, False, 'dark')):
+      t = f'{w}px {scheme}'
+      cx = br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': w, 'height': hgt}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme=scheme)
+      cx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+      q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150]))
+      q.goto(B + '/#admin'); q.wait_for_selector('#main .fi .fi-nps', timeout=20000)
+      txt = q.inner_text('#main .fi')
+      ok('Ce que disent les traders' in txt and '+33' in txt and 'Promoteurs (9–10)' in txt and 'détracteurs' in txt and 'Ce qu’ils utilisent' in txt and 'Les moins essayées' in txt and 'Le plan du matin ' + tag in txt, f'{t} « Ce que disent les traders »: NPS +33 explained, groups, usage, comments')
+      ok('Réponses en un clic' in txt and 'Test ' + tag in txt, f'{t} the one-click answers, by email')
+      ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+      ok(ov <= 0 and not er, f'{t} the card: no horizontal scroll ({ov}), no page error {er[:2]}')
+      q.locator('#main .fi').screenshot(path=f'{SHOTS}/e2e_mail_insights_{w}_{scheme}.png')
+      q.click('#main .fi-nps [data-act="gadm-x"] >> nth=0'); q.wait_for_selector('#main .fi-on', timeout=10000); q.wait_for_timeout(1200)
+      items = q.locator('#main .fb-item.adm')
+      ok('Promoteurs' in q.inner_text('#main .fi-on') and items.count() == 2 and all(items.nth(i).locator('.fb-mail b').inner_text() in ('10', '9') for i in range(items.count())), f'{t} a click on the promoters: the list shows their 2 answers')
+      q.click('#main .fi-on [data-act="gadm-x"]'); q.wait_for_timeout(1200)
+      ok(q.locator('#main .fi-on').count() == 0 and q.locator('#main .fb-item.adm').count() > 2, f'{t} « Tout afficher »: the whole list again')
+      q.locator('#main .fi-notes [data-act="gadm-x"]', has_text='Le plan du matin ' + tag).click(); q.wait_for_selector('#main .fi-on', timeout=10000); q.wait_for_timeout(1200)
+      it = q.locator('#main .fb-item.adm', has_text='Le plan du matin ' + tag)
+      box = it.bounding_box() if it.count() else None
+      ok('Avec un commentaire' in q.inner_text('#main .fi-on') and it.count() == 1 and box and 0 <= box['y'] < hgt, f'{t} a comment clicked: the list with comments, scrolled to it')
+      if w == 390 and scheme == 'light': q.screenshot(path=f'{SHOTS}/e2e_mail_insights_list_{w}.png')
+      ok(not er, f'{t} the clicks: no page error {er[:2]}')
+      cx.close()
+    sql('DELETE FROM feedback WHERE src_campaign = ? AND created_at = ?', (nid, now - 3600))
     br.close()
   finally:
     if not had: sql("UPDATE users SET email = NULL, email_lc = NULL WHERE username = 'mateo'")
