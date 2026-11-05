@@ -11,8 +11,9 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *  - in the app, right away: signedUp, profileCompleted, firstAccountAdded, firstPlanSaved, firstTradeLogged,
  *    tradesMilestone (10th, 50th, 100th trade), firstPayoutLogged (once each), subscriptionStarted, subscriptionCanceled,
  *    paymentFailed (Stripe webhook), referralRewarded;
- *  - by mail/send-cron.php: once a New York day from 7:30, inactive3d / 7d / 14d / 30d and proTrialDaysLeft (30, 10, 3),
- *    proTrialEnded, phoneInstall (day 3: a trade, no phone with notifications); every run, day1Evening (18:30 New York on the
+ *  - by mail/send-cron.php: once a New York day from 7:30, inactive3d / 7d / 14d / 30d and proTrialDaysLeft (10, 3),
+ *    proTrialEnded, phoneInstall (day 3: a trade, no phone with notifications), pauseEnding (3 days before a paused
+ *    subscription resumes); every run, day1Evening (18:30 New York on the
  *    day of sign-up, or the next day after 18:00, when no plan is saved yet; given up 6 hours later);
  *  - the feedback emails (brief « Courriels de feedback », step 4): weekOne, nps30, featureDiscover, months3 in the same
  *    daily run (ma_feedback_due), feedbackShipped when Admin › Feedback sets a trader's feedback to « shipped ».
@@ -27,7 +28,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 
 const MA_MILESTONES = [10, 50, 100];   // tradesMilestone
 const MA_INACTIVE = [3, 7, 14, 30];    // inactive3d … inactive30d: days without coming back
-const MA_TRIAL_LEFT = [3, 10, 30];     // proTrialDaysLeft: days before the end of the Pro trial
+const MA_TRIAL_LEFT = [3, 10];         // proTrialDaysLeft: days before the end of the Pro trial (30 days long from 5 Nov.: no « 30 left »)
 const MA_NY = 'America/New_York';
 const MA_FEATURES = ['plan', 'review', 'stats', 'sync'];   // featureDiscover: the useful ones, in this order (mail/mail-usage.php names)
 const MA_ASKS = ['weekOne', 'nps30', 'months3'];             // the daily feedback emails that ask for an opinion (one per 30 days, ML_ASK_DAYS)
@@ -70,7 +71,7 @@ function ma_seed(PDO $pdo): void
     $done = true;
 }
 
-const MA_TEXTS_V = 2;   // the version of mail/mail-auto-texts.php: +1 each time its texts change (the ones replaced go into mail-auto-texts-before.php)
+const MA_TEXTS_V = 3;   // the version of mail/mail-auto-texts.php: +1 each time its texts change (the ones replaced go into mail-auto-texts-before.php)
 /** a text's fingerprint (one language: subject, preheader, body as ml_clean_content keeps them) */
 function ma_text_sig(array $v): string { return substr(sha1(json_encode(['subject' => $v['subject'], 'preheader' => $v['preheader'], 'body' => $v['body']], JSON_UNESCAPED_UNICODE)), 0, 16); }
 /**
@@ -80,10 +81,12 @@ function ma_text_sig(array $v): string { return substr(sha1(json_encode(['subjec
  */
 function ma_upgrade(PDO $pdo): array
 {
-    if ((int) ml_setting($pdo, 'mail_auto_texts_v', '1') >= MA_TEXTS_V) return [0, 0];
+    if (($from = (int) ml_setting($pdo, 'mail_auto_texts_v', '1')) >= MA_TEXTS_V) return [0, 0];
     $before = (array) require __DIR__ . '/mail-auto-texts-before.php'; $cat = ma_catalog(); $done = [0, 0];
+    // only the automations whose text changed since this server's version (a text set aside is not proposed again)
+    $changed = []; foreach ($before as $v => $list) if ((int) $v >= $from) $changed += (array) $list;
     foreach (ml_q($pdo, 'SELECT id, auto, content_json, proposed_json FROM mail_campaigns WHERE auto IS NOT NULL')->fetchAll(PDO::FETCH_ASSOC) as $r) {
-        if (!isset($cat[$r['auto']])) continue;
+        if (!isset($cat[$r['auto']]) || !isset($changed[$r['auto']])) continue;
         $cur = ml_clean_content(json_decode((string) $r['content_json'], true)); $new = ml_clean_content($cat[$r['auto']]['content']);
         $prop = (array) (json_decode((string) ($r['proposed_json'] ?? ''), true) ?: []); [$was, $had] = [$cur, $prop];
         foreach (ML_LANGS as $i => $l) {
@@ -339,7 +342,7 @@ function ma_last_seen(array $u): int { return (int) (strtotime((string) (($u['la
 /** plan, pays (Stripe), Discord crew (Elite for life, given in Admin), permanent access, end of the Pro trial. */
 function ma_billing(string $uid, array $u): array
 {
-    $out = ['plan' => 'elite', 'paying' => false, 'crew' => false, 'permanent' => false, 'trial_end' => null, 'live' => false];   // billing off: nothing is limited
+    $out = ['plan' => 'elite', 'paying' => false, 'crew' => false, 'permanent' => false, 'trial_end' => null, 'live' => false, 'pause' => null];   // billing off: nothing is limited
     if (!function_exists('billing_on') || !billing_on()) return $out;
     try {
         $pdo = ma_pdo(); sb_schema($pdo);
@@ -356,6 +359,7 @@ function ma_billing(string $uid, array $u): array
         $out['crew'] = $perm === 'elite';
         $end = sb_q($pdo, "SELECT MAX(ends_at) FROM billing_grants WHERE uid = ? AND reason IN ('trial','early_access')", [$uid])->fetchColumn();
         $out['trial_end'] = $end ? (int) $end : null;
+        if ($out['live'] && ($p = sb_paused_sub($pdo, $uid))) $out['pause'] = ['until' => (int) $p['paused_until'], 'plan' => ucfirst((string) $p['plan'])];
     } catch (Throwable $e) { error_log('[Sweep mail auto] plan of ' . $uid . ': ' . $e->getMessage()); }
     return $out;
 }
@@ -393,7 +397,7 @@ function ma_init(): int
  * The daily steps of a trader that came due in ($from, $now]: [line in email_events_log, automation, values, since].
  * One step of each kind at most, the latest (several come due together only after the server missed days):
  *  - absence: 3, 7, 14 and 30 days after the last visit; « since » = that visit, so a new absence starts over;
- *  - Pro trial: 30, 10 and 3 days before its end, then its end; never for the Discord crew (or another access for life)
+ *  - Pro trial: 10 and 3 days before its end, then its end; never for the Discord crew (or another access for life)
  *    nor a trader who pays. $b: ma_billing().
  */
 function ma_daily_due(array $u, array $b, int $from, int $now): array
@@ -414,6 +418,8 @@ function ma_daily_due(array $u, array $b, int $from, int $now): array
         foreach (MA_TRIAL_LEFT as $d) $steps[] = ["proTrialDaysLeft:$d", 'proTrialDaysLeft', ['days' => $d], $end - $d * 86400];
         foreach ($steps as [$key, $name, $vars, $due]) if ($due > $from && $due <= $now) { $out[] = [$key, $name, $vars, 0]; break; }
     }
+    // (brief monétisation, step 4) a « Pause 1 month » ending: 3 days before Stripe bills again, once per pause
+    if (!empty($b['pause']) && ($due = (int) $b['pause']['until'] - 3 * 86400) > $from && $due <= $now) $out[] = ['pauseEnding:' . (int) $b['pause']['until'], 'pauseEnding', ['plan' => $b['pause']['plan']], 0];
     return $out;
 }
 

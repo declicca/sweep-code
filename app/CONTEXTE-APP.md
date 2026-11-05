@@ -1777,5 +1777,19 @@ Mateo : « faire des envois à même le serveur sans application externe […] u
 - **Étape 1 livrée** : Admin › Métriques, « 5 trades dans les 7 premiers jours », par semaine d'inscription (8 dernières
   semaines ; `five_in_7` de `ops/metrics.php` : vrais trades, une copie compte une fois, données d'exemple à part ; une semaine
   dont les 7 jours ne sont pas finis est « en cours »). Test : `metrics_test.php`.
-- **Étapes 2 à 4** (essai de 30 jours, offre fondateur aux 100 premiers abonnés, « Mettre en pause » avant « Annuler ») :
-  attendent le signal de Mateo (« on passe à 100 »). Décisions : 3 forfaits, prix inchangés, pas de carte au départ.
+- **Étape 2, essai de 30 jours** : la durée vient de `trial.days` dans la config privée (Mateo la met à 30 ; défaut du code
+  inchangé). Un essai déjà accordé garde sa fin (`billing_grants.ends_at` jamais recalculé). Rappels `proTrialDaysLeft` à 10
+  et 3 jours (`MA_TRIAL_LEFT`, plus de « 30 jours restants ») ; `proTrialEnded` ne dit plus « 60 jours » (`MA_TEXTS_V` 3 :
+  remplacé là où Mateo n'a pas changé le texte ; `ma_upgrade` ne touche plus que les automatisations dont le texte a changé
+  depuis la version du serveur). Le site : note `livraison/app-pour-site-2026-11-05-essai-30-jours.md`.
+- **Étape 3, offre fondateur** : `founding_cap` (défaut 100) ; une place est prise par chaque trader dont un abonnement
+  fondateur a vraiment commencé (pas `incomplete`), pour de bon. `sb_founding` rend `left` et `cap` ; page des forfaits :
+  « Offre fondateur : 50 % de rabais à vie · places restantes : N sur 100. Se termine dans … ». Pour tous les traders :
+  `founding_for` = `everyone` et `founding_deadline` = 1er déc. 23 h 59 ET (`2026-12-02T04:59:59Z`) dans la config privée.
+- **Étape 4, « Mettre en pause » avant « Annuler »** : « Gérer la facturation » ouvre d'abord « Tu fais une pause de
+  trading ? » (« Mettre en pause 1 mois » ou « Carte, forfait ou annulation » → Stripe). `POST api/billing/pause` :
+  `pause_collection` (void, reprise dans 30 jours) ; `POST api/billing/resume` : « Reprendre maintenant ». Pendant la pause
+  le trader est sur Free (rien supprimé ; `billing_subs.paused_until`, `paused_at`, colonnes ajoutées toutes seules), pas
+  d'offre fondateur ni de 2ᵉ abonnement, bandeau « Pro est en pause jusqu'au … ». Une pause par 6 mois, jamais sur un
+  abonnement qui se termine. Courriel `pauseEnding` (transactionnel, allumé) et sa notification (`both`, éteinte au départ)
+  3 jours avant la reprise, une fois par pause. Tests : `monetize_test.php`, `e2e_monetize.py`.

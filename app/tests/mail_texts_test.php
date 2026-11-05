@@ -46,8 +46,14 @@ $ok($fr['question'] === 'Une dernière chose : qu’est-ce qui t’amène dans S
 
 // the earlier texts: the new ones without {progress} nor the questions, as their fingerprints say
 $before = (array) require $app . '/mail/mail-auto-texts-before.php';
-$old = function (string $k) use ($cat): array {
+// version 2 → 3 (5 Nov., the 30-day trial): proTrialEnded said « your 60 days of Pro »
+$v2 = function (string $k) use ($cat): array {
     $c = ml_clean_content($cat[$k]['content']);
+    if ($k === 'proTrialEnded') foreach (['en' => ['Your free Pro is over', 'Your 60 days of Pro are over'], 'fr' => ['Ton Pro gratuit est terminé', 'Tes 60 jours de Pro sont terminés'], 'es' => ['Tu Pro gratis terminó', 'Tus 60 días de Pro terminaron']] as $l => [$a, $b]) $c[$l]['body'] = str_replace($a, $b, $c[$l]['body']);
+    return $c;
+};
+$old = function (string $k) use ($v2): array {
+    $c = $v2($k);
     foreach (ML_LANGS as $l) $c[$l]['body'] = ml_without_questions(str_replace("\n\n{progress}", '', $c[$l]['body']));
     return $c;
 };
@@ -75,7 +81,11 @@ $ok($c14['fr'] === $mine['fr'] && $c14['en'] === ml_clean_content($cat['inactive
     '14 days: Mateo’s FR kept, the new FR proposed; EN and ES replaced');
 $ok($content('signedUp')['en']['subject'] === 'Welcome aboard, {first}' && $content('signedUp')['fr'] === ml_clean_content($cat['signedUp']['content'])['fr'], 'welcome: Mateo’s EN kept, FR replaced');
 $ok($content('profileCompleted') === ml_clean_content($cat['profileCompleted']['content']) && $content('tradesMilestone') === ml_clean_content($cat['tradesMilestone']['content']), 'the unchanged texts stay, the others take the new version');
-$ok(ma_upgrade($pdo) === [0, 0] && ml_setting($pdo, 'mail_auto_texts_v') === '2', 'once per version: a second run does nothing');
+$ok(ma_upgrade($pdo) === [0, 0] && ml_setting($pdo, 'mail_auto_texts_v') === '3', 'once per version: a second run does nothing');
+$miss2 = []; foreach ($before[2] as $k => $_) foreach (ML_LANGS as $i => $l) if ($before[2][$k][$i] !== ma_text_sig($v2($k)[$l])) $miss2[] = "$k/$l";
+$ok(array_keys($before[2]) === ['proTrialEnded'] && $miss2 === [], 'version 2: the 3 « 60 days of Pro » texts, as their fingerprints say');
+$set->execute([json_encode($v2('proTrialEnded'), JSON_UNESCAPED_UNICODE), 'proTrialEnded']); $pdo->exec("UPDATE app_settings SET v = '2' WHERE k = 'mail_auto_texts_v'");
+$ok(ma_upgrade($pdo) === [3, 0] && $content('proTrialEnded') === ml_clean_content($cat['proTrialEnded']['content']), 'version 2 → 3: « 60 days of Pro » replaced in EN, FR and ES; Mateo’s texts set aside are not proposed again');
 $id14 = (int) $pdo->query("SELECT id FROM mail_campaigns WHERE auto = 'inactive14d'")->fetchColumn(); $idW = (int) $pdo->query("SELECT id FROM mail_campaigns WHERE auto = 'signedUp'")->fetchColumn();
 $c = ml_campaign($pdo, $id14);
 $ok(array_keys($c['proposed']) === ['fr'] && ml_campaign($pdo, (int) $pdo->query("SELECT id FROM mail_campaigns WHERE auto = 'inactive3d'")->fetchColumn())['proposed'] === null, 'ml_campaign: the proposal, by language (null without one)');

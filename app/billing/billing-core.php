@@ -16,6 +16,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 
 const SB_RANK = ['free' => 0, 'pro' => 1, 'elite' => 2];
 const SB_DAY  = 86400;
+const SB_PAUSE_DAYS  = 30;    // « Pause 1 month » (brief monétisation, step 4)
+const SB_PAUSE_EVERY = 183;   // one pause per 6 months
 
 /* ───────────────────────────── config ───────────────────────────── */
 
@@ -39,7 +41,7 @@ function sb_config(): array
         'campaign_grants' => ['100' => ['plan' => 'elite', 'days' => 30], '100traders' => ['plan' => 'elite', 'days' => 30], '100futurestraders' => ['plan' => 'elite', 'days' => 30],
                               'lookingfor100' => ['plan' => 'elite', 'days' => 30], 'lookingfor100futurestraders' => ['plan' => 'elite', 'days' => 30], 'founding100' => ['plan' => 'elite', 'days' => 30]], 'founding_for' => 'early_access', 'past_due_grace_days' => 7,
         'ai_reviews_fair_use_monthly' => 200, 'paywall_max_blocking_per_week' => 3, 'currency' => 'USD',
-        'display_prices' => [], 'founding_percent_off' => 50, 'stripe_prices' => [], 'stripe_founding_coupon' => '',
+        'display_prices' => [], 'founding_percent_off' => 50, 'founding_cap' => 100, 'stripe_prices' => [], 'stripe_founding_coupon' => '',
         'stripe_automatic_tax' => false, 'app_url' => '/', 'comp_users' => [],
     ];
     return $cfg;
@@ -137,6 +139,10 @@ function sb_schema(PDO $pdo): void
         plan VARCHAR(16) NULL, at INTEGER NOT NULL)");
     $pdo->exec("CREATE TABLE IF NOT EXISTS billing_webhooks (
         event_id $key PRIMARY KEY, type VARCHAR(64) NOT NULL, at INTEGER NOT NULL)");
+    // the pause (brief monétisation, step 4): until when Stripe holds the payments, and when the last pause started
+    foreach (['paused_until', 'paused_at'] as $col) {
+        try { $pdo->query("SELECT $col FROM billing_subs LIMIT 1"); } catch (Throwable $e) { $pdo->exec("ALTER TABLE billing_subs ADD COLUMN $col INTEGER NULL"); }
+    }
     foreach (['CREATE INDEX IF NOT EXISTS billing_subs_uid ON billing_subs (uid)',
               'CREATE INDEX IF NOT EXISTS billing_grants_uid ON billing_grants (uid)',
               'CREATE INDEX IF NOT EXISTS billing_upsell_uid ON billing_upsell (uid, at)'] as $sql) {
@@ -243,10 +249,41 @@ function sb_active_sub(PDO $pdo, string $uid): ?array
         $ok = in_array($s['status'], ['active', 'trialing'], true)
             || ($s['status'] === 'past_due' && $s['past_due_since'] !== null
                 && $now < (int) $s['past_due_since'] + (int) $cfg['past_due_grace_days'] * SB_DAY);
-        if (!$ok) continue;
+        if (!$ok || sb_is_paused($s, $now)) continue;   // paused: Free until it resumes, nothing deleted
         if ($best === null || SB_RANK[$s['plan']] > SB_RANK[$best['plan']]) $best = $s;
     }
     return $best;
+}
+
+function sb_is_paused(array $s, int $now): bool
+{
+    return !empty($s['paused_until']) && (int) $s['paused_until'] > $now && in_array($s['status'], ['active', 'trialing', 'past_due'], true);
+}
+
+/** The subscription on pause right now (Stripe holds its payments until paused_until), or null. */
+function sb_paused_sub(PDO $pdo, string $uid): ?array
+{
+    $now = sb_now();
+    foreach (sb_q($pdo, 'SELECT * FROM billing_subs WHERE uid = ? AND paused_until > ?', [$uid, $now])->fetchAll(PDO::FETCH_ASSOC) as $s) if (sb_is_paused($s, $now)) return $s;
+    return null;
+}
+
+/**
+ * « Pause 1 month » before « Cancel » (brief monétisation, step 4): ['paused' => bool, 'until' => ISO|null, 'plan' => the plan
+ * paused|null, 'can' => a pause can be asked now, 'next' => ISO|null, when the next one can]. One pause per 6 months, on a
+ * running Stripe subscription (not one ending, not a payment late).
+ */
+function sb_pause_state(PDO $pdo, string $uid, ?array $sub): array
+{
+    $p = sb_paused_sub($pdo, $uid);
+    if ($p) return ['paused' => true, 'until' => gmdate('c', (int) $p['paused_until']), 'plan' => (string) $p['plan'], 'can' => false, 'next' => null];
+    $out = ['paused' => false, 'until' => null, 'plan' => null, 'can' => false, 'next' => null];
+    if (!$sub || ($sub['source'] ?? '') !== 'stripe' || $sub['status'] !== 'active' || (int) $sub['cancel_at_period_end'] === 1) return $out;
+    $last = (int) sb_q($pdo, 'SELECT MAX(paused_at) FROM billing_subs WHERE uid = ?', [$uid])->fetchColumn();
+    $next = $last ? $last + SB_PAUSE_EVERY * SB_DAY : 0;
+    $out['can'] = $next <= sb_now();
+    if (!$out['can']) $out['next'] = gmdate('c', $next);
+    return $out;
 }
 
 function sb_active_grant(PDO $pdo, string $uid): ?array
@@ -315,14 +352,19 @@ function sb_founding(PDO $pdo, string $uid, array $user, array $eff): array
     $deadline = (int) sb_ts($cfg['founding_deadline']);
     $locked = $eff['sub'] && (int) $eff['sub']['founding'] === 1;
     $who = $cfg['founding_for'] === 'everyone' || sb_is_early_access((int) $user['created_at']);
-    $paid = $eff['sub'] !== null;
+    $paid = $eff['sub'] !== null || sb_paused_sub($pdo, $uid) !== null;
+    // the first N subscribers (founding_cap, Mateo 5 Nov.: 100): a subscription that really started takes a place for good
+    $taken = (int) sb_q($pdo, "SELECT COUNT(DISTINCT uid) FROM billing_subs WHERE founding = 1 AND status NOT IN ('incomplete', 'incomplete_expired')")->fetchColumn();
+    $left = max(0, (int) $cfg['founding_cap'] - $taken);
     return [
         // nothing to buy for a comped account (admin, partner) or a permanent Elite: no founding banner then
-        'eligible' => sb_live($uid) && $who && !$paid && sb_now() < $deadline && !empty($cfg['stripe_founding_coupon'])
+        'eligible' => sb_live($uid) && $who && !$paid && $left > 0 && sb_now() < $deadline && !empty($cfg['stripe_founding_coupon'])
             && !in_array($eff['source'] ?? '', ['comp', 'comp_grant'], true) && !(($eff['plan'] ?? '') === 'elite' && empty($eff['grant'])),
         'locked'   => $locked,
         'deadline' => gmdate('c', $deadline),
         'percent'  => (int) $cfg['founding_percent_off'],
+        'left'     => $left,
+        'cap'      => (int) $cfg['founding_cap'],
     ];
 }
 
@@ -667,5 +709,6 @@ function sb_state(PDO $pdo, string $uid, array $user = []): array
         'accounts'     => $accounts,
         'paywall'      => ['blocking_left' => sb_live($uid) ? sb_paywall_left($pdo, $uid) : 0],
         'can_manage'   => !empty($u['stripe_customer']),
+        'pause'        => sb_pause_state($pdo, $uid, $eff['sub']),
     ];
 }

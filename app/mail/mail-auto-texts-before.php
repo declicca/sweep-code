@@ -28,4 +28,8 @@ return [
         'paymentFailed' => ['84af7b86b9189787', 'eee086ab9da054a5', '5b7d12bd84629c1b'],
         'referralRewarded' => ['412e43840bbff597', '24cc43667b87451e', 'bd3922a6f13c38ac'],
     ],
+    // version 2 (5 Nov. 2026): « your 60 days of Pro » before the 30-day trial (brief monétisation, step 2)
+    2 => [
+        'proTrialEnded' => ['56c65babf4008b5e', '53d38bbd0fd79ff8', '1ba1d8c19dfccfaf'],
+    ],
 ];

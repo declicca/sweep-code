@@ -86,7 +86,8 @@ désinscription et le plafond par heure ; sur le compte (abonnement, paiement re
 | `tradesMilestone` (10, 50, 100) | Le 10e, 50e, 100e trade | 1 par étape |
 | `subscriptionStarted`, `paymentFailed`, `subscriptionCanceled`, `referralRewarded` | Stripe, le parrainage | à chaque fois |
 | `inactive3d`, `inactive7d`, `inactive14d`, `inactive30d` | 3, 7, 14, 30 jours sans revenir dans l'app (dès 7 h 30 ET) ; **`inactive3d` ajouté le 14 oct.** | 1 par absence et par étape ; un retour recommence le compte |
-| `proTrialDaysLeft` (30, 10, 3), `proTrialEnded` | La fin de l'essai Pro, sans paiement (jamais l'équipe Discord ni un trader qui paie) | 1 par étape |
+| `proTrialDaysLeft` (10, 3 ; le 30 retiré le 5 nov. avec l'essai de 30 jours), `proTrialEnded` | La fin de l'essai Pro, sans paiement (jamais l'équipe Discord ni un trader qui paie) | 1 par étape |
+| `pauseEnding` | 3 jours avant la reprise d'un abonnement mis en pause 1 mois (5 nov., brief monétisation, étape 4) | 1 par pause |
 
 Le passage du jour envoie au plus une absence et une étape d'essai par trader.
 
@@ -144,7 +145,7 @@ ES, interrupteur, chiffres sur 30 jours : envoyées, ouvertes, courriels de rela
 |---|---|---|
 | `day1Evening`, `inactive3d`, `inactive7d`, `referralRewarded` | téléphone d'abord, courriel 24 h plus tard s'il n'a pas été ouvert et que le trader n'est pas revenu | Ma routine / Mes progrès |
 | `firstTradeLogged`, `tradesMilestone`, `firstPayoutLogged` | idem, seulement quand le trader n'est pas dans l'app (dans l'app : le courriel comme avant) | Mes progrès |
-| `proTrialDaysLeft`, `proTrialEnded`, `subscriptionStarted`, `paymentFailed` | téléphone et courriel en même temps | Nouveautés et abonnement |
+| `proTrialDaysLeft`, `proTrialEnded`, `subscriptionStarted`, `paymentFailed`, `pauseEnding` | téléphone et courriel en même temps | Nouveautés et abonnement |
 | `inactive14d`, `inactive30d`, `subscriptionCanceled`, `signedUp`, `phoneInstall`… | courriel seulement | — |
 | `payoutReady` (une fois par cycle de payout), `goalReached` (avec ce qui reste), `evalPassed` (une fois par compte) | téléphone + cloche (`pa_alert`, alertes prop firm), pendant la séance aussi, hors des 5 de la semaine | Mes comptes |
 | `feedbackShipped` « Tu l'as demandé, c'est fait » | téléphone et courriel en même temps | Mes progrès |

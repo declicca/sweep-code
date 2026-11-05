@@ -60,6 +60,10 @@ return [
         'en' => ['Your payment did not go through', 'Update your card to keep {plan}: it takes a minute.'],
         'fr' => ['Ton paiement n’est pas passé', 'Mets ta carte à jour pour garder {plan} : ça prend une minute.'],
         'es' => ['Tu pago no se procesó', 'Actualiza tu tarjeta para mantener {plan}: toma un minuto.']]],
+    'pauseEnding' => ['ch' => 'both', 'group' => 'news', 'url' => '#plan', 'text' => [
+        'en' => ['{plan} resumes in 3 days', 'Your pause ends and Stripe bills again. Everything you logged is still there.'],
+        'fr' => ['{plan} reprend dans 3 jours', 'Ta pause se termine et Stripe facture de nouveau. Tout ce que tu as journalisé est là.'],
+        'es' => ['{plan} se reanuda en 3 días', 'Tu pausa termina y Stripe cobra de nuevo. Todo lo que registraste sigue ahí.']]],
     // the account's moments (push/push-auto.php pa_account_moments, after each trade): no email
     'payoutReady' => ['ch' => 'alert', 'group' => 'accounts', 'url' => '#account/{id}', 'icon' => 'star',
         'name' => ['en' => 'Payout possible', 'fr' => 'Payout possible', 'es' => 'Payout posible'],

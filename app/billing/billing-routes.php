@@ -21,6 +21,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *   GET  api/billing/me               → plan, limits, usage, trial, founding, prices, frozen accounts…
  *   POST api/billing/checkout         {plan: pro|elite, interval: month|year, trigger} → {url}
  *   POST api/billing/portal           → {url}   (manage / cancel / switch plan / change card)
+ *   POST api/billing/pause            → {ok, pause}  « Pause 1 month » (one per 6 months)
+ *   POST api/billing/resume           → {ok}         back before the month is over
  *   POST api/billing/active-accounts  {ids: [...]} → choose which accounts stay active on Free
  *   POST api/billing/upsell           {trigger, action: shown|dismissed|clicked, blocking: bool}
  *   GET  api/billing/funnel           → conversion by paywall trigger (only for user ids listed in admin_users)
@@ -60,6 +62,13 @@ function sweep_billing_route(string $route, string $method, string $uid, PDO $pd
                 $r = sb_portal($pdo, $uid);
                 if (isset($r['error'])) error_log('[Sweep billing] api/billing/portal: ' . $r['error'] . ' (' . ($r['code'] ?? '') . ')');
                 sb_out(isset($r['error']) ? 400 : 200, $r + (isset($r['error']) && (sb_is_admin($uid) || !empty($user['is_admin'])) ? ['detail' => $r['error']] : []));
+
+            case 'api/billing/pause':
+            case 'api/billing/resume':
+                if (!$post) break;
+                $r = $route === 'api/billing/pause' ? sb_pause($pdo, $uid) : sb_resume($pdo, $uid);
+                if (isset($r['error'])) error_log('[Sweep billing] ' . $route . ': ' . $r['error'] . ' (' . ($r['code'] ?? '') . ')');
+                sb_out(isset($r['error']) ? 400 : 200, $r);
 
             case 'api/billing/active-accounts':
                 if (!$post) break;

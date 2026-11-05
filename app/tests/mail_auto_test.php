@@ -5,7 +5,7 @@ declare(strict_types=1);
  *   php tests/mail_auto_test.php
  *  - nothing before the first run, which marks what existing traders already did (a trader with 12 trades never gets
  *    « first trade »); after Loops, its marks are kept and the past is not marked again;
- *  - the 24 automations are seeded once with their EN / FR / ES text, never overwritten; the 4 first steps of day one and the
+ *  - the 25 automations are seeded once with their EN / FR / ES text, never overwritten; the 4 first steps of day one and the
  *    5 feedback emails (tests/mail_feedback_test.php) and « Sweep on your phone » (5 Nov.) off;
  *  - each event « once » is queued once: sign-up, profile, first account ({firm}), first trade, 10th / 50th / 100th trade,
  *    first payout, first plan, even after a delete and a new add; copies once, sample data never; an import: the highest milestone;
@@ -75,12 +75,12 @@ $autoSet = fn(string $key, bool $on) => $pdo->prepare('UPDATE mail_campaigns SET
 ma_seed($pdo);
 $a = $pdo->query('SELECT auto, status, content_json FROM mail_campaigns WHERE auto IS NOT NULL')->fetchAll();
 $st = array_column($a, 'status', 'auto');
-$ok(count($a) === 24 && count(array_filter($a, fn($r) => array_map(fn($v) => $v['subject'] !== '' && $v['body'] !== '', json_decode($r['content_json'], true)) === ['en' => true, 'fr' => true, 'es' => true])) === 24,
-    '24 automations, each with a subject and a body in EN, FR and ES');
-$ok(array_keys(array_filter($st, fn($s) => $s === 'off')) === ['profileCompleted', 'firstAccountAdded', 'firstPlanSaved', 'firstTradeLogged', 'weekOne', 'nps30', 'featureDiscover', 'feedbackShipped', 'months3', 'phoneInstall'], 'the 4 first steps of day one and the 5 feedback emails start off, the 14 others on');
+$ok(count($a) === 25 && count(array_filter($a, fn($r) => array_map(fn($v) => $v['subject'] !== '' && $v['body'] !== '', json_decode($r['content_json'], true)) === ['en' => true, 'fr' => true, 'es' => true])) === 25,
+    '25 automations, each with a subject and a body in EN, FR and ES');
+$ok(array_keys(array_filter($st, fn($s) => $s === 'off')) === ['profileCompleted', 'firstAccountAdded', 'firstPlanSaved', 'firstTradeLogged', 'weekOne', 'nps30', 'featureDiscover', 'feedbackShipped', 'months3', 'phoneInstall'], 'the 4 first steps of day one and the 5 feedback emails start off, the 15 others on');
 $pdo->exec("UPDATE mail_campaigns SET content_json = '{\"en\":{\"subject\":\"Mine\",\"preheader\":\"\",\"body\":\"Edited\"}}' WHERE auto = 'inactive30d'");
 ma_seed($pdo);
-$ok(strpos((string) $pdo->query("SELECT content_json FROM mail_campaigns WHERE auto = 'inactive30d'")->fetchColumn(), 'Edited') !== false && (int) $pdo->query('SELECT COUNT(*) FROM mail_campaigns WHERE auto IS NOT NULL')->fetchColumn() === 24,
+$ok(strpos((string) $pdo->query("SELECT content_json FROM mail_campaigns WHERE auto = 'inactive30d'")->fetchColumn(), 'Edited') !== false && (int) $pdo->query('SELECT COUNT(*) FROM mail_campaigns WHERE auto IS NOT NULL')->fetchColumn() === 25,
     'a text edited in Admin is never overwritten, nothing added twice');
 foreach (['profileCompleted', 'firstAccountAdded', 'firstPlanSaved', 'firstTradeLogged'] as $k) $autoSet($k, true);   // all on for the steps below
 
@@ -243,8 +243,8 @@ for ($d = 0; $d <= 64; $d++) {
 $when = function (string $what) use ($runs): array { $o = []; foreach ($runs as $k => $l) foreach ($l as $x) if ($x === $what) $o[] = $k; return $o; };
 $ok($when('u_abs:inactive3d') === ['2026-11-06', '2026-12-09'] && $when('u_abs:inactive7d') === ['2026-11-10', '2026-12-13'] && $when('u_abs:inactive14d') === ['2026-11-17', '2026-12-20'] && $when('u_abs:inactive30d') === ['2026-12-03', '2027-01-05'],
     'absence: 3 days (Nov 6), 7 (Nov 10), 14 (Nov 17), 30 (Dec 3) after Monday 15:00; back on Dec 5, a new absence: Dec 9, Dec 13, Dec 20, Jan 5');
-$ok($when('u_trial:proTrialDaysLeft30') === ['2026-12-02'] && $when('u_trial:proTrialDaysLeft10') === ['2026-12-22'] && $when('u_trial:proTrialDaysLeft3') === ['2026-12-29'] && $when('u_trial:proTrialEnded') === ['2027-01-01'],
-    'Pro trial (ends Jan 1, 7:00 New York): 30 days left Dec 2, 10 Dec 22, 3 Dec 29, ended Jan 1');
+$ok($when('u_trial:proTrialDaysLeft30') === [] && $when('u_trial:proTrialDaysLeft10') === ['2026-12-22'] && $when('u_trial:proTrialDaysLeft3') === ['2026-12-29'] && $when('u_trial:proTrialEnded') === ['2027-01-01'],
+    'Pro trial (ends Jan 1, 7:00 New York): 10 days left Dec 22, 3 Dec 29, ended Jan 1; no « 30 left » (30-day trial, 5 Nov.)');
 $ok($when('u_ea:proTrialEnded') === ['2027-01-01'], 'an early-access Pro (free Pro from the launch) counts as the trial');
 foreach (['u_paying' => 'a trader who pays', 'u_crew' => 'the Discord crew (Admin)', 'u_cfg' => 'the Discord crew (config)', 'u_comp' => 'a permanent Pro'] as $id => $who)
     $ok(array_filter(array_merge(...array_values($runs)), fn($x) => strpos($x, "$id:proTrial") === 0) === [] && $when("$id:inactive7d") === ['2026-11-10'], "never the trial steps for $who (the absences yes)");

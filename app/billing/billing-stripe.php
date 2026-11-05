@@ -59,9 +59,14 @@ function sb_stripe_file_mock(string $file, string $method, string $path, array $
         if (strpos((string) ($params['code'] ?? ''), 'FAIL') === 0) throw new RuntimeException('Stripe 400: This promotion code is not allowed (mock)');
         return ['id' => 'promo_mock_' . ($params['code'] ?? ''), 'object' => 'promotion_code', 'code' => $params['code'] ?? '', 'coupon' => ['id' => $params['coupon'] ?? '']];
     }
-    if ($method === 'GET' && preg_match('#^subscriptions/(.+)$#', $path, $m)) {
+    if (preg_match('#^subscriptions/(.+)$#', $path, $m)) {
         $subs = json_decode((string) @file_get_contents($file . '.subs.json'), true) ?: [];
-        if (isset($subs[$m[1]])) return $subs[$m[1]];
+        if ($method === 'GET' && isset($subs[$m[1]])) return $subs[$m[1]];
+        if ($method === 'POST' && isset($subs[$m[1]]) && array_key_exists('pause_collection', $params)) {   // the pause and its end
+            $subs[$m[1]]['pause_collection'] = is_array($params['pause_collection']) ? ['behavior' => $params['pause_collection']['behavior'] ?? 'void', 'resumes_at' => (int) ($params['pause_collection']['resumes_at'] ?? 0)] : null;
+            file_put_contents($file . '.subs.json', json_encode($subs));
+            return $subs[$m[1]];
+        }
     }
     throw new RuntimeException("Stripe mock: unexpected call $method $path");
 }
@@ -96,6 +101,8 @@ function sb_checkout(PDO $pdo, string $uid, string $plan, string $interval, stri
     $state = sb_state($pdo, $uid, $user);
     // Already paying: plan switches happen in the portal (prorated, keeps the founding discount).
     if ($state['subscription']) return sb_portal($pdo, $uid);
+    // on pause: the same subscription resumes, never a second one
+    if ($state['pause']['paused']) return ['error' => 'Subscription on pause', 'code' => 'paused'];
 
     $base = rtrim((string) $cfg['app_url'], '/') . '/';
     $founding = $state['founding']['eligible'];
@@ -132,6 +139,31 @@ function sb_portal(PDO $pdo, string $uid): array
         'return_url' => rtrim((string) sb_cfg()['app_url'], '/') . '/?billing=portal',
     ]);
     return ['url' => (string) $s['url']];
+}
+
+/**
+ * « Pause 1 month » (brief monétisation, step 4): Stripe holds the payments (pause_collection, invoices voided) and resumes by
+ * itself after SB_PAUSE_DAYS; meanwhile the trader is on Free, nothing deleted. One pause per SB_PAUSE_EVERY days.
+ */
+function sb_pause(PDO $pdo, string $uid): array
+{
+    if (!sb_live($uid)) return ['error' => 'Billing is not live yet', 'code' => 'not_live'];
+    $sub = sb_active_sub($pdo, $uid);
+    if (!sb_pause_state($pdo, $uid, $sub)['can']) return ['error' => 'No pause possible now', 'code' => 'no_pause'];
+    $s = sb_stripe('POST', 'subscriptions/' . $sub['id'], ['pause_collection' => ['behavior' => 'void', 'resumes_at' => sb_now() + SB_PAUSE_DAYS * SB_DAY]]);
+    sb_sync_subscription($pdo, $s, $uid);
+    return ['ok' => true, 'pause' => sb_pause_state($pdo, $uid, null)];
+}
+
+/** Back before the month is over: Stripe bills again from now on. */
+function sb_resume(PDO $pdo, string $uid): array
+{
+    if (!sb_live($uid)) return ['error' => 'Billing is not live yet', 'code' => 'not_live'];
+    $sub = sb_paused_sub($pdo, $uid);
+    if (!$sub) return ['error' => 'Nothing on pause', 'code' => 'not_paused'];
+    $s = sb_stripe('POST', 'subscriptions/' . $sub['id'], ['pause_collection' => '']);
+    sb_sync_subscription($pdo, $s, $uid);
+    return ['ok' => true];
 }
 
 /* ───────────────────────────── webhooks ───────────────────────────── */
@@ -172,16 +204,21 @@ function sb_sync_subscription(PDO $pdo, array $sub, ?string $uidHint = null): ?s
     $status = (string) ($sub['status'] ?? 'incomplete');
     $periodEnd = $sub['current_period_end'] ?? $item['current_period_end'] ?? null;
     $now = sb_now();
-    $prev = sb_q($pdo, 'SELECT past_due_since, founding FROM billing_subs WHERE id = ?', [$sub['id']])->fetch(PDO::FETCH_ASSOC);
+    $prev = sb_q($pdo, 'SELECT past_due_since, founding, paused_until, paused_at FROM billing_subs WHERE id = ?', [$sub['id']])->fetch(PDO::FETCH_ASSOC);
     if ($prev && (int) $prev['founding'] === 1) $founding = true;   // founding price is for life on this subscription
     $pastDueSince = $status === 'past_due' ? (int) (($prev['past_due_since'] ?? null) ?: $now) : null;
 
+    // the pause: until when Stripe holds the payments; a new pause starts the 6 months before the next one
+    $pausedUntil = is_array($sub['pause_collection'] ?? null) && !empty($sub['pause_collection']['resumes_at']) ? (int) $sub['pause_collection']['resumes_at'] : null;
+    $pausedAt = $prev ? ($prev['paused_at'] !== null ? (int) $prev['paused_at'] : null) : null;
+    if ($pausedUntil && empty($prev['paused_until'])) $pausedAt = $now;
+
     $vals = [$uid, 'stripe', $plan, $interval, $status, $founding ? 1 : 0, $priceId, $periodEnd ? (int) $periodEnd : null,
-             !empty($sub['cancel_at_period_end']) ? 1 : 0, $pastDueSince, $now];
+             !empty($sub['cancel_at_period_end']) ? 1 : 0, $pastDueSince, $pausedUntil, $pausedAt, $now];
     if ($prev !== false) {
-        sb_q($pdo, 'UPDATE billing_subs SET uid=?, source=?, plan=?, billing_interval=?, status=?, founding=?, price_id=?, period_end=?, cancel_at_period_end=?, past_due_since=?, updated_at=? WHERE id = ?', [...$vals, $sub['id']]);
+        sb_q($pdo, 'UPDATE billing_subs SET uid=?, source=?, plan=?, billing_interval=?, status=?, founding=?, price_id=?, period_end=?, cancel_at_period_end=?, past_due_since=?, paused_until=?, paused_at=?, updated_at=? WHERE id = ?', [...$vals, $sub['id']]);
     } else {
-        sb_q($pdo, 'INSERT INTO billing_subs (uid, source, plan, billing_interval, status, founding, price_id, period_end, cancel_at_period_end, past_due_since, updated_at, id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [...$vals, $sub['id']]);
+        sb_q($pdo, 'INSERT INTO billing_subs (uid, source, plan, billing_interval, status, founding, price_id, period_end, cancel_at_period_end, past_due_since, paused_until, paused_at, updated_at, id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [...$vals, $sub['id']]);
     }
     if ($customer) sb_q($pdo, 'UPDATE billing_users SET stripe_customer = ? WHERE uid = ? AND (stripe_customer IS NULL OR stripe_customer = \'\')', [$customer, $uid]);
     return $uid;

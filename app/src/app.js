@@ -7683,7 +7683,17 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       not_now: "Not now",
       compare: "Compare all plans",
       trust: "Cancel anytime. Your data is never deleted.",
-      founding_strip: "Founding price: {p}% off for life. Ends in {t}.",
+      founding_strip: "Founding offer: {p}% off for life · spots left: {n} of {c}. Ends in {t}.",
+      pz_status: "On pause until {date}",
+      pz_resume: "Resume now",
+      pz_banner: "{plan} is on pause until {date}. Everything you logged is kept.",
+      pz_t: "Taking a break from trading?",
+      pz_s: "Keep everything, without paying this month. During the pause you are on Free, nothing is deleted, and {plan} resumes by itself on {date}.",
+      pz_go: "Pause for 1 month",
+      pz_manage: "Card, plan or cancellation",
+      pz_done: "{plan} is on pause until {date}.",
+      pz_back: "{plan} is back.",
+      pz_err: "The pause didn’t go through. Try again.",
       founding_locked: "Founding price locked in for life",
       wait_reset: "Wait for the reset ({t})",
       redirecting: "Opening secure checkout…",
@@ -7725,7 +7735,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_trial_ended: "Your Pro trial ended",
       s_trial_ended: "Your data is safe. Upgrade to unlock it again.",
       h_founding: "Founding member price",
-      s_founding: "You were here early. Get {p}% off Pro or Elite, for as long as you stay subscribed.",
+      s_founding: "For the first {c} subscribers: {p}% off Pro or Elite, for as long as you stay subscribed.",
       h_generic: "Unlock more of Sweep",
       s_generic: "Pick the plan that fits how you trade.",
       b_accounts: "Unlimited trading accounts",
@@ -7853,7 +7863,17 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       not_now: "Plus tard",
       compare: "Comparer les abonnements",
       trust: "Annule quand tu veux. Tes données ne sont jamais supprimées.",
-      founding_strip: "Prix fondateur : {p} % de rabais à vie. Se termine dans {t}.",
+      founding_strip: "Offre fondateur : {p} % de rabais à vie · places restantes : {n} sur {c}. Se termine dans {t}.",
+      pz_status: "En pause jusqu’au {date}",
+      pz_resume: "Reprendre maintenant",
+      pz_banner: "{plan} est en pause jusqu’au {date}. Tout ce que tu as journalisé est gardé.",
+      pz_t: "Tu fais une pause de trading ?",
+      pz_s: "Garde tout, sans payer ce mois-ci. Pendant la pause tu es sur Free, rien n’est supprimé, et {plan} reprend tout seul le {date}.",
+      pz_go: "Mettre en pause 1 mois",
+      pz_manage: "Carte, forfait ou annulation",
+      pz_done: "{plan} est en pause jusqu’au {date}.",
+      pz_back: "{plan} est de retour.",
+      pz_err: "La pause n’a pas fonctionné. Réessaie.",
       founding_locked: "Prix fondateur garanti à vie",
       wait_reset: "Attendre la remise à zéro ({t})",
       redirecting: "Ouverture du paiement sécurisé…",
@@ -7895,7 +7915,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_trial_ended: "Ton essai Pro est terminé",
       s_trial_ended: "Tes données sont en sécurité. Passe à Pro pour les débloquer.",
       h_founding: "Prix membre fondateur",
-      s_founding: "Tu étais là tôt. Obtiens {p} % de rabais sur Pro ou Elite, tant que tu restes abonné.",
+      s_founding: "Pour les {c} premiers abonnés : {p} % de rabais sur Pro ou Elite, tant que tu restes abonné.",
       h_generic: "Débloque plus de Sweep",
       s_generic: "Choisis le abonnement qui correspond à ta façon de trader.",
       b_accounts: "Comptes de trading illimités",
@@ -8023,7 +8043,17 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       not_now: "Ahora no",
       compare: "Comparar suscripciones",
       trust: "Cancela cuando quieras. Tus datos nunca se borran.",
-      founding_strip: "Precio fundador: {p} % de descuento de por vida. Termina en {t}.",
+      founding_strip: "Oferta fundador: {p} % de descuento de por vida · plazas restantes: {n} de {c}. Termina en {t}.",
+      pz_status: "En pausa hasta el {date}",
+      pz_resume: "Reanudar ahora",
+      pz_banner: "{plan} está en pausa hasta el {date}. Todo lo que registraste se conserva.",
+      pz_t: "¿Te tomas un descanso del trading?",
+      pz_s: "Conserva todo, sin pagar este mes. Durante la pausa estás en Free, no se borra nada, y {plan} se reanuda solo el {date}.",
+      pz_go: "Pausar 1 mes",
+      pz_manage: "Tarjeta, plan o cancelación",
+      pz_done: "{plan} está en pausa hasta el {date}.",
+      pz_back: "{plan} está de vuelta.",
+      pz_err: "La pausa no se aplicó. Inténtalo de nuevo.",
       founding_locked: "Precio fundador asegurado de por vida",
       wait_reset: "Esperar al reinicio ({t})",
       redirecting: "Abriendo el pago seguro…",
@@ -8065,7 +8095,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       h_trial_ended: "Tu prueba Pro terminó",
       s_trial_ended: "Tus datos están a salvo. Pasa a Pro para desbloquearlos.",
       h_founding: "Precio de miembro fundador",
-      s_founding: "Llegaste temprano. Obtén {p} % de descuento en Pro o Elite mientras sigas suscrito.",
+      s_founding: "Para los primeros {c} suscriptores: {p} % de descuento en Pro o Elite mientras sigas suscrito.",
       h_generic: "Desbloquea más de Sweep",
       s_generic: "Elige el plan que encaja con tu forma de operar.",
       b_accounts: "Cuentas de trading ilimitadas",
@@ -8491,7 +8521,8 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       m: B.ai_daily,
       d: N.analytics_days,
       a: N.accounts == null ? "" : pn(N.accounts, "fw_acc"),
-      p: i ? i.founding.percent : 50
+      p: i ? i.founding.percent : 50,
+      c: i && i.founding.cap || 100
     }) ];
   }
   function me(k, A) {
@@ -8627,7 +8658,10 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     const G = i.subscription;
     if (G && G.status === "past_due" ? (A = l("bn_past_due", {
       plan: p(G.plan)
-    }), j = l("bn_update_card"), N = pe, B = "warn") : i.trial && i.trial.days_left <= 5 && !G ? (A = l("bn_trial", {
+    }), j = l("bn_update_card"), N = pe, B = "warn") : i.pause && i.pause.paused ? (A = l("pz_banner", {
+      plan: p(i.pause.plan),
+      date: b(i.pause.until)
+    }), j = l("pz_resume"), N = rs) : i.trial && i.trial.days_left <= 5 && !G ? (A = l("bn_trial", {
       plan: p(i.trial.plan),
       d: R(i.trial.days_left)
     }), j = l("bn_see_plans"), N = () => oe("trial_ending")) : i.founding.eligible ? (A = l("bn_founding", {
@@ -8673,6 +8707,38 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
       toast(l("error"));
     }
   }
+  /* « Manage billing » (brief monétisation, step 4): « Pause 1 month » first, then Stripe's page (card, plan, cancellation).
+     One pause per 6 months (i.pause.can, from the server); without it, straight to Stripe. During the pause: Free, nothing
+     deleted, the subscription resumes by itself (or « Resume now »). */
+  function pz(done) {
+    const P0 = i && i.pause, sub = i && i.subscription;
+    if (!P0 || !P0.can || !sub) return pe();
+    const until = new Date(Date.now() + 30 * 864e5).toISOString(), scrim = document.createElement("div"), el = document.createElement("aside");
+    scrim.className = "nav-dlg-scrim nav-ask", el.className = "nav-dlg nav-ask sb-pz", el.setAttribute("role", "dialog"), el.setAttribute("aria-modal", "true"), el.setAttribute("data-noi18n", "");
+    el.innerHTML = '<div class="nav-dlg-in"><h2>' + u(l("pz_t")) + '</h2><p class="nav-pass-s">' + u(l("pz_s", { plan: p(sub.plan), date: b(until) })) + '</p><button type="button" class="btn primary nav-am-save" data-pz="go">' + u(l("pz_go")) + '</button><button type="button" class="btn nav-pass-later" data-pz="portal">' + u(l("pz_manage")) + "</button></div>";
+    document.body.append(scrim, el), requestAnimationFrame(() => { el.classList.add("open"), scrim.classList.add("open"); });
+    const close = () => [ el, scrim ].forEach(x => { x.classList.remove("open"), setTimeout(() => x.remove(), 250); });
+    scrim.onclick = close, el.onclick = async e => {
+      const t = e.target.closest("[data-pz]");
+      if (!t) return;
+      if (t.dataset.pz === "portal") return close(), pe();
+      t.disabled = !0;
+      try {
+        const r = await L("api/billing/pause", {});
+        close(), toast(l("pz_done", { plan: p(sub.plan), date: b(r.pause && r.pause.until || until) })), await C(), done && done();
+      } catch {
+        t.disabled = !1, toast(l("pz_err"));
+      }
+    };
+  }
+  async function rs() {
+    const plan = i && i.pause && i.pause.plan;
+    try {
+      await L("api/billing/resume", {}), toast(l("pz_back", { plan: p(plan || "pro") })), await C();
+    } catch {
+      toast(l("pz_err"));
+    }
+  }
   /* during a trial (audit of 16 Oct., R20): what happens on the last day, said plainly — the date, the accounts that stay
      active with Free (the server's own limit), nothing charged — and « Keep Pro » (the checkout), never a countdown */
   function trialNext() {
@@ -8706,6 +8772,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
     }, keep = de => !!(i.trial && !i.subscription && i.trial.ends_at && (i.trial.plan || "pro") === de);
     function Z() {
       const ie = i.subscription;
+      if (PZ) return u(l("pz_status", { date: b(i.pause.until) }));
       return ie ? (ie.cancel_at_period_end ? l("ends_on", {
         date: b(ie.period_end)
       }) : ie.period_end ? l("renews", {
@@ -8715,7 +8782,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
         d: R(i.trial.days_left)
       })) : u(l("free_desc"));
     }
-    const ge = () => window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
+    const ge = () => window.matchMedia && window.matchMedia("(max-width: 640px)").matches, PZ = !!(i.pause && i.pause.paused);   // on pause: no new subscription, « Resume now »
     function Te() {
       return '<div class="sb-pcards">' + (i.plan === "elite" ? [ "elite", "pro", "free" ] : i.plan === "pro" ? [ "elite", "pro", "free" ] : [ "pro", "elite", "free" ]).map(de => {
         const se = (i.prices[de] || {})[A], ee = se ? se.founding ?? se.amount : 0, fe = se ? se.amount : 0, ke = A === "year" ? ee / 12 : ee, he = i.plan === de, be = de === "pro" && i.plan === "free";
@@ -8728,6 +8795,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
         }) : l("upgrade_to", {
           plan: p(de)
         })) + "</button>");
+        PZ && (_e = "");
         const $e = (P.s ? "<s>" + u(P.s) + "</s>" : "") + "<b>" + u(P.b) + "</b>", ve = G.map(([Se, Ae, Le]) => {
           const Me = j[de][Ae], d = Le === "bool" ? !Me : Le === "rev" ? Me === 0 : !1, f = Le === "bool" || d ? "" : B(Me, Le);
           return '<li class="' + (d ? "sb-off" : "") + '"><i aria-hidden="true">' + (d ? "–" : "✓") + "</i><span>" + u(l(Se)) + "</span>" + (f ? "<b>" + f + "</b>" : "") + "</li>";
@@ -8744,11 +8812,13 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
           plan: p(se)
         })) + "</button>"), he && (be = '<span class="sb-cur">' + u(l("current")) + "</span>"), keep(se) && (be = '<button type="button" class="sb-cta sb-sm" data-buy="' + se + '">' + u(l("keep_plan", {
           plan: p(se)
-        })) + "</button>"), 
+        })) + "</button>"), PZ && !he && (be = ""), 
         '<th scope="col"' + (se === "pro" ? ' class="sb-hl"' : "") + '><span class="sb-th-name">' + u(p(se)) + '</span><span class="sb-th-desc">' + u(l(se + "_desc")) + '</span><span class="sb-th-price">' + (P.s ? "<s>" + u(P.s) + "</s> " : "") + u(P.b) + "<small>" + u(l("per_month")) + '</small></span><span class="sb-th-sub">' + (P.sub ? u(P.sub) : "&nbsp;") + "</span>" + be + "</th>";
       }).join(""), de = G.map(([se, ee, fe]) => '<tr><th scope="row">' + u(l(se)) + "</th>" + [ "free", "pro", "elite" ].map(ke => "<td" + (ke === "pro" ? ' class="sb-hl"' : "") + ">" + B(j[ke][ee], fe) + "</td>").join("") + "</tr>").join("");
-      k.innerHTML = '<section class="sb-plans"><div class="sb-card"><div><span class="sb-label">' + u(l("your_plan")) + '</span><b class="sb-big">' + u(p(i.plan)) + '</b><span class="sb-status">' + Z() + "</span></div>" + (i.can_manage && i.subscription ? '<button type="button" class="sb-btn2 sb-manage">' + u(l("manage")) + "</button>" : "") + "</div>" + trialNext() + (N.eligible ? '<p class="sb-founding">' + u(l("founding_strip", {
+      k.innerHTML = '<section class="sb-plans"><div class="sb-card"><div><span class="sb-label">' + u(l("your_plan")) + '</span><b class="sb-big">' + u(p(i.plan)) + '</b><span class="sb-status">' + Z() + "</span></div>" + (PZ ? '<button type="button" class="sb-btn2 sb-resume">' + u(l("pz_resume")) + "</button>" : i.can_manage && i.subscription ? '<button type="button" class="sb-btn2 sb-manage">' + u(l("manage")) + "</button>" : "") + "</div>" + trialNext() + (N.eligible ? '<p class="sb-founding">' + u(l("founding_strip", {
         p: N.percent,
+        n: N.left,
+        c: N.cap,
         t: E(N.deadline)
       })) + "</p>" : "") + '<div class="sb-seg" role="tablist"><button type="button" role="tab" data-iv="month" aria-selected="' + (A === "month") + '">' + u(l("monthly")) + '</button><button type="button" role="tab" data-iv="year" aria-selected="' + (A === "year") + '">' + u(l("yearly")) + " <em>" + u(l("save", {
         p: (() => {
@@ -8771,7 +8841,11 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
         return;
       }
       if (ie.target.closest(".sb-manage")) {
-        pe();
+        pz(() => k.isConnected && ue(k));
+        return;
+      }
+      if (ie.target.closest(".sb-resume")) {
+        ie.target.closest(".sb-resume").disabled = !0, rs().then(() => k.isConnected && ue(k));
         return;
       }
       const se = ie.target.closest("[data-buy]");
@@ -8796,7 +8870,7 @@ const shareBtn = (e, t, a, n = "btn sm") => `<button class="${n} sh-btn" data-ac
      choice of the accounts that stay active when there are more than Free keeps. It opens by itself once (the server
      remembers it: free_window.seen), or while accounts wait for that choice; the banner opens it again for 14 days. */
   async function M(k) {
-    if (!i || !i.live || i.plan !== "free") return;
+    if (!i || !i.live || i.plan !== "free" || !k && i.pause && i.pause.paused) return;   // on pause: the banner says it, no « back on Free » window
     const W = i.free_window, acc = i.accounts, frz = !!(acc && acc.frozen.length);
     if (!W && !frz) return;
     if (!k && (h.get("sb_fw") || !(W && !W.seen) && !(acc && acc.needs_choice))) return;
