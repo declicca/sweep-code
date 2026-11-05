@@ -947,6 +947,14 @@ function game_route(string $route, string $method, string $uid): void
         else GameEngine::track($uid, !empty($b['shared']) ? 'share_card_shared' : 'share_card_created', ['kind' => substr((string) ($b['kind'] ?? ''), 0, 20)]);
         json_out(200, ['ok' => true]);
     }
+    if ($route === 'api/game/seen' && $method === 'POST') {   // a page opened, once a New York day (what each trader uses, mail/mail-usage.php)
+        $b = body_json(256); $what = (string) ($b['what'] ?? '');
+        if ($what === 'stats') {
+            $day = (new DateTimeImmutable('@' . GameEngine::ts()))->setTimezone(new DateTimeZone('America/New_York'))->setTime(0, 0)->getTimestamp();
+            if (!GameEngine::q("SELECT 1 FROM game_analytics WHERE user_id = ? AND event = 'stats_viewed' AND created_at >= ?", [$uid, $day])->fetchColumn()) GameEngine::track($uid, 'stats_viewed');
+        }
+        json_out(200, ['ok' => true]);
+    }
     json_out(404, ['error' => 'not found']);
 }
 

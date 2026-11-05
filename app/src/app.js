@@ -10981,6 +10981,14 @@ function route() {
 
 let rq = !1, deferred = !1;
 
+// the Stats page opened: told to the server once a day (what each trader uses, mail/mail-usage.php; 5 Nov.)
+let statsSeenDay = "";
+function seenStats() {
+  const d = new Date().toDateString();
+  if (S.mode !== "server" || !S.me || statsSeenDay === d) return;
+  statsSeenDay = d, apiJSON("api/game/seen", { method: "POST", body: { what: "stats" } }).catch(() => {});
+}
+
 function isEditing() {
   const e = document.activeElement;
   return e && $("#main").contains(e) && e.matches("input:not([type=checkbox]):not([type=file]),textarea");
@@ -11064,7 +11072,7 @@ function render() {
   }
   _lastPhone = isPhone(), _lastMob = isMobileUI(), typeof econPoll == "function" && econPoll(), 
   e.v === "trade" && requestAnimationFrame(() => tradeChartMount(getDoc("trades", e.arg))), 
-  watchTitle(), requestAnimationFrame(placeTabPill);
+  e.v === "analytics" && seenStats(), watchTitle(), requestAnimationFrame(placeTabPill);
   {
     const o = document.querySelector(".jstrip a.on");
     if (o) {

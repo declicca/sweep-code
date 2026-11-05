@@ -12,7 +12,9 @@ light and dark):
    report piped to mail/bounce.php (silent, exit 0);
  - the campaign's numbers page: delivered, opened, clicked, the 48 hours, the links; no horizontal scroll, no page error;
  - the automations (step 5): the 18 in the list with what sends each; one opened: its text, switched off and on, edited and
-   saved on its own, a test; never sent by hand nor deleted.
+   saved on its own, a test; never sent by hand nor deleted;
+ - what each trader uses (feedback brief, step 2, 5 Nov.): the Stats page opened counts once a day; « Ce qu'ils utilisent »
+   on #mail with the share of active traders for each feature; {progress} and the others in the preview and in the help.
 """
 import json, os, random, re, sqlite3, subprocess, sys, time, base64
 from urllib.parse import urlparse, parse_qs
@@ -67,6 +69,18 @@ with sync_playwright() as p:
     me = sql("SELECT email FROM users WHERE username = 'mateo'")[0][0]
     ok(tr.status == 200 and last.get('subject', '').startswith('[Test] News for') and last.get('to') == me, 'test: to the administrator, at once (%s)' % last.get('to'))
 
+    # (5 Nov.) what each trader uses: Amélie opens the Stats twice today (counted once), then « Ce qu'ils utilisent » is computed again
+    for _ in range(2): a.post('/api/game/seen', data=json.dumps({'what': 'stats'}), headers=H)
+    aid = sql('SELECT id FROM users WHERE email_lc = ?', (ea.lower(),))[0][0]
+    ok(sql("SELECT COUNT(*) FROM game_analytics WHERE user_id = ? AND event = 'stats_viewed'", (aid,))[0][0] == 1, 'the Stats opened twice the same day: counted once')
+    try: sql('DELETE FROM mail_usage')
+    except Exception: pass
+    use = adm.get('/api/admin/mail', headers=H).json().get('usage') or {}
+    st = next((x for x in use.get('features', []) if x['key'] == 'stats'), {})
+    ok(use.get('active', 0) >= 1 and len(use.get('features', [])) == 10 and st.get('n', 0) >= 1, f"#mail: what they use, 10 features, the Stats used ({use.get('active')} active, stats {st.get('pct')} %)")
+    pu = adm.post('/api/admin/mail/preview', data=json.dumps({'content': {'fr': {'subject': 'Ta semaine', 'preheader': '', 'body': 'Salut {first},\n\n{progress}\n\nTa fonction : {top_feature}.'}}, 'lang': 'fr'}), headers=H).json()
+    ok('12 trades journalisés' in pu['html'] and 'le plan du matin' in pu['html'] and '{progress}' not in pu['html'], 'preview: {progress} and {top_feature} filled in with the example')
+
     br = p.chromium.launch()
     shots = []
     for w, hgt, mob, scheme in ((1300, 850, False, 'dark'), (390, 844, True, 'light'), (390, 844, True, 'dark'), (1300, 850, False, 'light')):
@@ -82,6 +96,9 @@ with sync_playwright() as p:
       row = pg.locator(f'#main .ml-list a[href="#mail/{cid}"]')
       ok(row.count() == 1 and 'Brouillon' in row.inner_text(), f'{t} the draft in the list, « Brouillon »')
       ok('peuvent recevoir les campagnes' in pg.inner_text('#main .ml-two') and 'cette heure' in pg.inner_text('#main .ml-two'), f'{t} the list and the sending pace')
+      ut = pg.inner_text('#main .ml-use') if pg.locator('#main .ml-use').count() else ''
+      bw = pg.evaluate("Math.max(...[...document.querySelectorAll('#main .ml-use li')].map((l) => l.getBoundingClientRect().right)) - document.querySelector('#main .ml-use').getBoundingClientRect().right")
+      ok('Ce qu’ils utilisent' in ut and 'Payouts (argent reçu d’une firme)' in ut and 'Stats' in ut and pg.locator('#main .ml-use li').count() == 10 and bw <= 0, f'{t} « Ce qu’ils utilisent »: the 10 features with their share, inside the card ({bw})')
       ov = pg.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
       ok(ov <= 0, f'{t} #mail: no horizontal scroll ({ov})')
       pg.screenshot(path=f'{SHOTS}/e2e_mail_list_{w}_{scheme}.png', full_page=True); shots.append(f'list {w} {scheme}')
@@ -104,6 +121,11 @@ with sync_playwright() as p:
       ov = pg.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
       ok(ov <= 0, f'{t} editor: no horizontal scroll ({ov})')
       pg.screenshot(path=f'{SHOTS}/e2e_mail_editor_{w}_{scheme}.png', full_page=True)
+      if w == 1300 and scheme == 'dark':   # (5 Nov.) the Stats page opened in the app: told to the server
+        mid = sql("SELECT id FROM users WHERE username = 'mateo'")[0][0]; s0 = sql("SELECT COUNT(*) FROM game_analytics WHERE user_id = ? AND event = 'stats_viewed'", (mid,))[0][0]
+        pg.goto(B + '/#analytics'); pg.wait_for_timeout(1800)
+        s1 = sql("SELECT COUNT(*) FROM game_analytics WHERE user_id = ? AND event = 'stats_viewed'", (mid,))[0][0]
+        ok(s1 >= 1 and s1 - s0 <= 1, f'{t} #analytics: the Stats opened, counted for the day ({s0} → {s1})')
       ok(not errs, f'{t} no page error {errs[:2]}')
       ctx.close()
 
@@ -233,7 +255,7 @@ with sync_playwright() as p:
         row.click(); q.wait_for_selector('#main .ml-auto textarea', timeout=15000); q.wait_for_timeout(600)
         q.click('#main .ml-tabs [data-v="fr"]'); q.wait_for_timeout(400)
         txt = q.inner_text('#main .ml-auto')
-        ok(q.input_value('#main [data-mlf="subject"]') == orig['content']['fr']['subject'] and 'Respecte les désinscriptions' in txt and '{first} le prénom' in txt, f'{t} the automation: its French text, its kind, the values it fills in')
+        ok(q.input_value('#main [data-mlf="subject"]') == orig['content']['fr']['subject'] and 'Respecte les désinscriptions' in txt and '{first} le prénom' in txt and '{progress} une phrase tirée de ses vrais chiffres' in txt and '{top_feature} la fonction' in txt, f'{t} the automation: its French text, its kind, the values it fills in (the usage ones too)')
         ok(q.locator('#main .ml-auto [data-ml="del"], #main .ml-auto [data-ml-count], #main .ml-auto [data-mlf="name"], #main .ml-auto [data-ml="now"]').count() == 0 and q.locator('#main .ml-auto .ml-kpis .ux-m').count() == 5, f'{t} no audience, no name, no send, no delete; its 5 numbers')
         q.wait_for_function("(()=>{const r=document.querySelector('#main [data-ml-prev]'); return r && r.shadowRoot && r.shadowRoot.textContent.includes('Bienvenue dans Sweep')})()", timeout=10000)
         ok(True, f'{t} the preview of the automation')

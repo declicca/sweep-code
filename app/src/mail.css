@@ -105,3 +105,6 @@
 .ml-notes li:first-child{border-top:0}
 .ml-notes b{display:inline-block;margin-right:6px;padding:0 8px;border-radius:var(--r-pill);background:var(--tint);color:var(--blue-text);font-size:12px}
 .ml-ans h4:not(:first-child){margin-top:14px}
+.ml-use{margin-top:24px}
+.ml-use .ml-qa li{grid-template-columns:minmax(0,14em) minmax(0,1fr) 3em}
+.ml-use .ml-qa span{white-space:normal;line-height:1.3}

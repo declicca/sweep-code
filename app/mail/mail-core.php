@@ -12,6 +12,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * Tables are created on first use (SQLite and MySQL). A dev copy (SWEEP_TEST_DB) never sends: data/mail-sent.jsonl.
  */
 
+require_once __DIR__ . '/mail-usage.php';   // {top_feature}, {trades_week}, {streak}, {progress}
+
 const ML_LANGS = ['en', 'fr', 'es'];
 const ML_BOUNCE_LIMIT = 0.03;      // a campaign pauses itself above 3 % hard bounces…
 const ML_COMPLAINT_LIMIT = 0.002;  // …or 0.2 % complaints (Gmail's limit is 0.3 %), once 100 emails went out
@@ -254,6 +256,7 @@ function ml_answer_link(PDO $pdo, string $token, int $qn, string $a): string
  *   [[?note]] [[?note|0-10]] [[?choix|A|B|C]]   a question answered in one click (alone on its line, see ml_question_of)
  *   {first}              the trader's first name (« trader » without one), also in the subject
  *   {app}                https://app.makeitsweep.com/        $vars: an automation's values ({milestone}, {days}…)
+ *   {top_feature} {trades_week} {streak} {progress}   what the trader uses (mail/mail-usage.php), filled in at sending
  * Returns [subject, text, html]. $token '' (preview, test): links are not tracked, no open image.
  */
 function ml_render(PDO $pdo, array $v, string $lang, string $first, string $token, bool $track = true, array $vars = []): array
@@ -393,7 +396,9 @@ function ml_compose(PDO $pdo, array $q, array &$camps): ?array
         if (!array_key_exists($cid, $camps)) $camps[$cid] = ml_campaign($pdo, $cid);
         $c = $camps[$cid]; if (!$c || $c['status'] === 'off') return null;   // an automation switched off since: not sent
         $v = ml_version($c['content'], (string) $q['lang']); if (!$v) return null;
-        [$s, $t, $h] = ml_render($pdo, $v, $v['lang'], (string) ($q['first_name'] ?? ''), (string) $q['token'], true, (array) (json_decode((string) ($q['vars_json'] ?? ''), true) ?: []));
+        $vars = (array) (json_decode((string) ($q['vars_json'] ?? ''), true) ?: []);
+        if ($q['user_id'] !== null && mu_uses($v['subject'] . $v['body'])) $vars += mu_vars(mu_save($pdo, (string) $q['user_id']), $v['lang']);   // what the trader uses, as of now
+        [$s, $t, $h] = ml_render($pdo, $v, $v['lang'], (string) ($q['first_name'] ?? ''), (string) $q['token'], true, $vars);
         $off = ml_base() . 'api/m/u/' . $q['token'];
         $hdr += ['List-Unsubscribe' => '<' . $off . '>, <mailto:' . ml_bounce_addr() . '?subject=unsubscribe-' . $q['token'] . '>', 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
             'Feedback-ID' => 'c' . $cid . ':' . ($c['auto'] !== null ? 'auto' : 'campaign') . ':sweep'];
@@ -699,5 +704,6 @@ function ml_overview(PDO $pdo, ?int $now = null): array
     return ['now' => $now, 'campaigns' => $list, 'autos' => $autos, 'month' => ml_stats($pdo, null, $now - 30 * 86400), 'list' => ml_list_health($pdo),
         'sending' => ['cap' => $cap, 'last_hour' => ml_hour($pdo, $now), 'left' => ml_left($pdo),
             'warm_start' => (int) ml_setting($pdo, 'mail_warm_start', '0') ?: null, 'max' => max(1, (int) (((array) (ml_cfg()['mail_per_hour'] ?? []))['max'] ?? 500))],
-        'address' => ml_address($pdo), 'from' => ml_from(), 'smtp' => !empty(((array) (ml_cfg()['smtp'] ?? []))['pass'])];
+        'address' => ml_address($pdo), 'from' => ml_from(), 'smtp' => !empty(((array) (ml_cfg()['smtp'] ?? []))['pass']),
+        'usage' => (function () use ($pdo, $now) { try { return mu_summary($pdo, $now); } catch (Throwable $e) { error_log('[Sweep usage] ' . $e->getMessage()); return null; } })()];
 }

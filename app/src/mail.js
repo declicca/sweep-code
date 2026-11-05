@@ -35,7 +35,7 @@
       byLang: 'By language', links: 'Most clicked links', noLinks: 'No click yet.', lg: { en: 'English', fr: 'French', es: 'Spanish' }, sent2: 'Sent', shown: 'What was sent',
       autos: 'Automations', autosSub: 'Sent on their own when a trader does something, or stops. Open one to change its text or switch it off.', autoRow: '{n} sent in 30 days', autoNone: 'Nothing sent in 30 days',
       on: 'Switch on', offB: 'Switch off', kind: { marketing: 'Respects unsubscribes and the hourly cap.', transactional: 'About the account: also sent to traders who unsubscribed from campaigns.' },
-      vars: 'Filled in for each trader:', v: { first: '{first} the first name', firm: '{firm} the prop firm', milestone: '{milestone} the number of trades (10, 50, 100)', days: '{days} the days left', plan: '{plan} the plan (Pro, Elite)' }, since: 'Since the start',
+      vars: 'Filled in for each trader:', v: { first: '{first} the first name', firm: '{firm} the prop firm', milestone: '{milestone} the number of trades (10, 50, 100)', days: '{days} the days left', plan: '{plan} the plan (Pro, Elite)', top_feature: '{top_feature} the feature they use the most', trades_week: '{trades_week} their trades of the last 7 days', streak: '{streak} their days in a row', progress: '{progress} a sentence from their real numbers (empty when there is nothing true to say: keep it alone on its line)' }, use: 'What they use', useSub: 'Among the {n} traders active in the last 30 days, the share who used each feature. Computed every morning at 7:30 (New York).', useSub1: 'Among the 1 trader active in the last 30 days, the share who used each feature. Computed every morning at 7:30 (New York).', useNone: 'No trader active in the last 30 days yet.', since: 'Since the start',
       saving: 'Saving…', savedAt: 'Saved', untitled: 'New campaign' },
     fr: { h: 'Courriels', sub: 'Campagnes envoyées par le serveur de Sweep. Seuls les administrateurs voient cette page.', nw: 'Nouvelle campagne', back: 'Courriels',
       k: { sent: 'Envoyés (30 jours)', open: 'Taux d’ouverture', click: 'Taux de clic', unsub: 'Désinscriptions', bounce: 'Rebonds' },
@@ -65,7 +65,7 @@
       byLang: 'Par langue', links: 'Liens les plus cliqués', noLinks: 'Aucun clic pour l’instant.', lg: { en: 'Anglais', fr: 'Français', es: 'Espagnol' }, sent2: 'Envoyés', shown: 'Ce qui a été envoyé',
       autos: 'Automatisations', autosSub: 'Envoyés tout seuls quand un trader fait quelque chose, ou arrête. Ouvre-en un pour changer son texte ou l’éteindre.', autoRow: '{n} envoyés en 30 jours', autoNone: 'Rien d’envoyé en 30 jours',
       on: 'Allumer', offB: 'Éteindre', kind: { marketing: 'Respecte les désinscriptions et le plafond par heure.', transactional: 'Sur le compte : envoyé aussi aux traders désinscrits des campagnes.' },
-      vars: 'Remplis pour chaque trader :', v: { first: '{first} le prénom', firm: '{firm} la firme prop', milestone: '{milestone} le nombre de trades (10, 50, 100)', days: '{days} les jours qui restent', plan: '{plan} le forfait (Pro, Elite)' }, since: 'Depuis le début',
+      vars: 'Remplis pour chaque trader :', v: { first: '{first} le prénom', firm: '{firm} la firme prop', milestone: '{milestone} le nombre de trades (10, 50, 100)', days: '{days} les jours qui restent', plan: '{plan} le forfait (Pro, Elite)', top_feature: '{top_feature} la fonction qu’il utilise le plus', trades_week: '{trades_week} ses trades des 7 derniers jours', streak: '{streak} ses jours d’affilée', progress: '{progress} une phrase tirée de ses vrais chiffres (vide s’il n’y a rien de vrai à dire : seule sur sa ligne)' }, use: 'Ce qu’ils utilisent', useSub: 'Parmi les {n} traders actifs des 30 derniers jours, la part qui a utilisé chaque fonction. Calculé chaque matin à 7 h 30 (New York).', useSub1: 'Le seul trader actif des 30 derniers jours : les fonctions qu’il a utilisées. Calculé chaque matin à 7 h 30 (New York).', useNone: 'Aucun trader actif dans les 30 derniers jours pour l’instant.', since: 'Depuis le début',
       saving: 'Enregistrement…', savedAt: 'Enregistré', untitled: 'Nouvelle campagne' },
     es: { h: 'Correos', sub: 'Campañas enviadas desde el servidor de Sweep. Solo los administradores ven esta página.', nw: 'Nueva campaña', back: 'Correos',
       k: { sent: 'Enviados (30 días)', open: 'Tasa de apertura', click: 'Tasa de clics', unsub: 'Bajas', bounce: 'Rebotes' },
@@ -95,7 +95,7 @@
       byLang: 'Por idioma', links: 'Enlaces más pulsados', noLinks: 'Ningún clic por ahora.', lg: { en: 'Inglés', fr: 'Francés', es: 'Español' }, sent2: 'Enviados', shown: 'Lo que se envió',
       autos: 'Automatizaciones', autosSub: 'Se envían solos cuando un trader hace algo, o deja de hacerlo. Abre uno para cambiar su texto o apagarlo.', autoRow: '{n} enviados en 30 días', autoNone: 'Nada enviado en 30 días',
       on: 'Encender', offB: 'Apagar', kind: { marketing: 'Respeta las bajas y el límite por hora.', transactional: 'Sobre la cuenta: se envía también a los traders dados de baja de las campañas.' },
-      vars: 'Se completa para cada trader:', v: { first: '{first} el nombre', firm: '{firm} la firma prop', milestone: '{milestone} el número de operaciones (10, 50, 100)', days: '{days} los días que quedan', plan: '{plan} el plan (Pro, Elite)' }, since: 'Desde el inicio',
+      vars: 'Se completa para cada trader:', v: { first: '{first} el nombre', firm: '{firm} la firma prop', milestone: '{milestone} el número de operaciones (10, 50, 100)', days: '{days} los días que quedan', plan: '{plan} el plan (Pro, Elite)', top_feature: '{top_feature} la función que más usa', trades_week: '{trades_week} sus operaciones de los últimos 7 días', streak: '{streak} sus días seguidos', progress: '{progress} una frase con sus números reales (vacía si no hay nada cierto que decir: sola en su línea)' }, use: 'Lo que usan', useSub: 'Entre los {n} traders activos de los últimos 30 días, la parte que usó cada función. Se calcula cada mañana a las 7:30 (Nueva York).', useSub1: 'El único trader activo de los últimos 30 días: las funciones que usó. Se calcula cada mañana a las 7:30 (Nueva York).', useNone: 'Todavía no hay traders activos en los últimos 30 días.', since: 'Desde el inicio',
       saving: 'Guardando…', savedAt: 'Guardado', untitled: 'Nueva campaña' },
   };
   const x = () => T[LANG] || T.en;
@@ -122,6 +122,14 @@
   }
   const kpi = (label, value, sub) => `<div class="ux-m"><small>${h(label)}</small><b>${value}</b>${sub ? `<span>${h(sub)}</span>` : ''}</div>`;
   const chip = (st) => `<span class="ml-st ml-st-${h(st)}">${h(x().st[st] || st)}</span>`;
+  const USE = ['top_feature', 'trades_week', 'streak', 'progress'];   // what each trader uses (mail/mail-usage.php)
+  const varsHelp = (keys) => h(x().vars) + ' ' + ['first'].concat(keys, USE).map((k) => `<code>${h(x().v[k])}</code>`).join(', ');
+  function useBox(u) {
+    if (!u) return '';
+    const X = x(), pick = (o) => o[LANG] || o.en;
+    const rows = u.features.map((r) => `<li><span>${h(pick(r.name))}</span><i><b style="width:${r.pct}%"></b></i><em>${r.pct} %</em></li>`).join('');
+    return `<div class="ml-box ml-use"><h4>${h(X.use)}</h4>${u.active ? `<p class="muted">${h(u.active === 1 ? X.useSub1 : f(X.useSub, { n: num(u.active) }))}</p><ul class="ml-qa ml-usel">${rows}</ul>` : `<p class="muted">${h(X.useNone)}</p>`}</div>`;
+  }
   function vList() {
     loadOv();
     const X = x(), d = M.ov;
@@ -143,6 +151,7 @@
       ${rows ? `<ul class="ml-list">${rows}</ul>` : `<p class="muted ml-empty">${h(X.none)}</p>`}
       <h3 class="ml-h3">${h(X.autos)}</h3><p class="muted ml-sub">${h(X.autosSub)}</p>
       <ul class="ml-list ml-autos">${(d.autos || []).map((a) => `<li><a class="ml-row" href="#mail/${a.id}"><div><b>${h(a.name[LANG] || a.name.en)}</b>${chip(a.status)}</div><small>${h(a.when[LANG] || a.when.en)}</small><small>${h([a.sent ? f(X.autoRow, { n: num(a.sent) }) : X.autoNone, a.open_rate != null ? f(X.row.opens, { a: pct(a.open_rate) }) : '', a.click_rate != null ? f(X.row.clicks, { a: pct(a.click_rate) }) : '', a.answer_rate != null ? f(X.rowAns, { a: pct(a.answer_rate) }) : ''].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ul>
+      ${useBox(d.usage)}
       <div class="ml-two">
         <div class="ml-box"><h4>${h(X.list)}</h4><p><b>${h(f(X.reach, { n: num(L.reachable) }))}</b></p><p class="muted">${h(f(X.off, { n: num(L.unsubscribed) }))} · ${h(f(X.sup, { n: num(L.suppressed) }))}</p></div>
         <div class="ml-box"><h4>${h(X.pace)}</h4><p><b>${h(f(X.paceL, { a: num(P.last_hour), b: num(P.cap), q: num(P.left) }))}</b></p><p class="muted">${h(f(P.warm_start ? X.paceW : X.paceN, { b: num(P.cap), m: num(P.max) }))}</p></div>
@@ -197,7 +206,7 @@
     return `<section class="sec ml ml-ed" data-noi18n>
       <div class="sec-h"><h2>${h(E.name || X.untitled)}</h2>${chip(c.status)}<small class="muted ml-saved" data-ml-saved>${M.saving ? h(X.saving) : ''}</small></div>
       <label class="ml-f"><span>${h(X.name)}</span><input type="text" data-mlf="name" maxlength="120" value="${h(E.name)}" placeholder="${h(X.namePh)}"></label>
-      ${contentBlock(h(X.help) + '<br>' + h(X.helpQ))}
+      ${contentBlock(h(X.help.replace(/\s[^.]*\{first\}[^.]*\./, '')) + '<br>' + varsHelp([]) + '<br>' + h(X.helpQ))}
       <h3 class="ml-h3">${h(X.aud)}</h3>
       ${row(X.aLang, 'lang', [['', X.all], ['en', 'EN'], ['fr', 'FR'], ['es', 'ES']])}
       ${row(X.aPlan, 'plan', [['', X.all], ['free', 'Free'], ['pro', 'Pro'], ['elite', 'Elite']])}
@@ -229,7 +238,7 @@
     const X = x(), c = d.campaign, I = d.info || { name: {}, when: {}, vars: [] }, s = d.stats, on = c.status === 'active';
     const langs = d.langs.map((l) => `<tr><td>${h(X.lg[l.lang])}</td><td class="ml-n">${num(l.sent)}</td><td class="ml-n">${rate(l.open_rate)}</td><td class="ml-n">${rate(l.click_rate)}</td></tr>`).join('');
     const links = d.links.map((l) => `<li><span>${h(l.url.replace(/^https?:\/\//, ''))}</span><b>${num(l.clicks)}</b></li>`).join('');
-    const help = h(X.help.replace(/\s[^.]*\{first\}[^.]*\./, '')) + '<br>' + h(X.vars) + ' ' + ['first'].concat(I.vars).map((k) => `<code>${h(X.v[k])}</code>`).join(', ') + '<br>' + h(X.helpQ);
+    const help = h(X.help.replace(/\s[^.]*\{first\}[^.]*\./, '')) + '<br>' + varsHelp(I.vars) + '<br>' + h(X.helpQ);
     return `<section class="sec ml ml-ed ml-auto" data-noi18n>
       <div class="sec-h"><h2>${h(I.name[LANG] || I.name.en || c.name)}</h2>${chip(c.status)}<small class="muted ml-saved" data-ml-saved>${M.saving ? h(X.saving) : ''}</small>
         <div class="ml-acts ml-top"><button type="button" class="btn sm ${on ? '' : 'primary'}" data-ml="auto" aria-pressed="${on}">${h(on ? X.offB : X.on)}</button></div></div>

@@ -399,7 +399,8 @@ function ma_evening_run(int $now): int
 
 /**
  * Every run of mail/send-cron.php: the first run marks the past; the evening of day one; from 7:30 New York, once a day,
- * the absences and the trial (what came due since the previous daily run, a whole day the first time). A short note.
+ * the absences and the trial (what came due since the previous daily run, a whole day the first time), then what each
+ * trader uses (mu_daily). A short note.
  */
 function ma_cron(PDO $pdo, ?int $now = null): string
 {
@@ -414,6 +415,7 @@ function ma_cron(PDO $pdo, ?int $now = null): string
         $r = ma_daily_run(ma_q('SELECT id FROM users WHERE disabled = 0 ORDER BY created_at')->fetchAll(PDO::FETCH_COLUMN), $from, $now);
         if ($r['failed'] === 0) { ml_set_setting($pdo, 'mail_auto_daily_at', (string) $now); ml_set_setting($pdo, 'mail_auto_day', $day); }
         $note[] = $r['sent'] ? array_sum($r['sent']) . ' daily' : 'daily: nothing due';
+        try { $note[] = mu_daily($pdo, $now) . ' usage profiles'; } catch (Throwable $e) { $note[] = 'usage: ' . $e->getMessage(); }   // what each trader uses (mail/mail-usage.php)
         if ($r['failed']) $note[] = $r['failed'] . ' daily not queued (' . $r['error'] . ')';
     }
     return implode(', ', $note);

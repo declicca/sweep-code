@@ -127,6 +127,7 @@ $ok(!ml_auto_open('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0) AppleWebKit', '24.48
 $qa = $q('ana@t.dev', $id); $qb = $q('ben@t.dev', $id); $qc = $q('cruz@t.dev', $id);
 ml_event($pdo, (int) $qa['id'], $id, 'open'); ml_event($pdo, (int) $qa['id'], $id, 'open');
 ml_event($pdo, (int) $qb['id'], $id, 'open_auto'); ml_event($pdo, (int) $qc['id'], $id, 'click', 'https://makeitsweep.com/guide');
+ml_q($pdo, 'UPDATE mail_events SET at = (SELECT started_at FROM mail_campaigns WHERE id = ?) + 600 WHERE campaign_id = ?', [$id, $id]);   // (5 Nov.) in the campaign's first hours, whatever today's date
 $s = ml_stats($pdo, $id);
 $ok($s['sent'] === 3 && $s['failed'] === 1 && $s['delivered'] === 3 && $s['opens'] === 2 && $s['opens_auto'] === 1 && $s['clicks'] === 1, 'numbers: 3 delivered, 2 real opens (a click counts), 1 machine open apart, 1 click (' . json_encode($s) . ')');
 $ok($s['open_rate'] === 66.7 && $s['open_rate_all'] === 100.0 && $s['click_rate'] === 33.3 && $s['click_to_open'] === 50.0 && $s['bounce_rate'] === 25.0, 'rates: opens 66.7 % (100 % with machines), clicks 33.3 %, 50 % of openers, bounces 25 %');
