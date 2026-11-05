@@ -105,7 +105,7 @@ function ml_admin_route(string $route, string $method, array $me): void
         $v = ml_version($content, $lang);
         if (!$v) $err('content');
         $first = trim((string) ($me['first_name'] ?? '')) ?: (string) ($me['username'] ?? '');
-        [$s, $t, $h] = ml_render($pdo, $v, $v['lang'], $first, '', false, ['milestone' => 10, 'days' => 10, 'plan' => 'Pro', 'firm' => 'Topstep'] + mu_example($v['lang']));   // an automation's values, as an example
+        [$s, $t, $h] = ml_render($pdo, $v, $v['lang'], $first, '', false, ['milestone' => 10, 'days' => 10, 'plan' => 'Pro', 'firm' => 'Topstep'] + ma_example($v['lang']) + mu_example($v['lang']));   // an automation's values, as an example
         if ($route === 'api/admin/mail/preview') json_out(200, ['subject' => $s, 'html' => $h, 'lang' => $v['lang']]);
         $to = trim((string) ($me['email'] ?? ''));
         if ($to === '') $err('no_email');

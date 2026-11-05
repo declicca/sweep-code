@@ -245,9 +245,9 @@ function ml_questions(string $body, array $map = []): array
     return $out;
 }
 /** an email that asked this trader for an opinion went out in the last ML_ASK_DAYS days (not counting the line $qid) */
-function ml_asked_lately(PDO $pdo, string $uid, int $qid): bool
+function ml_asked_lately(PDO $pdo, string $uid, int $qid, ?int $now = null): bool
 {
-    return (bool) ml_q($pdo, "SELECT 1 FROM mail_queue WHERE user_id = ? AND asked = 1 AND state = 'sent' AND sent_at >= ? AND id <> ? LIMIT 1", [$uid, time() - ML_ASK_DAYS * 86400, $qid])->fetchColumn();
+    return (bool) ml_q($pdo, "SELECT 1 FROM mail_queue WHERE user_id = ? AND asked = 1 AND state = 'sent' AND sent_at >= ? AND id <> ? LIMIT 1", [$uid, ($now ?? time()) - ML_ASK_DAYS * 86400, $qid])->fetchColumn();
 }
 /** a body without its one-click questions, nor the paragraph that asks each one */
 function ml_without_questions(string $body): string

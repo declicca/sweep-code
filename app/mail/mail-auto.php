@@ -13,7 +13,9 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *    paymentFailed (Stripe webhook), referralRewarded;
  *  - by mail/send-cron.php: once a New York day from 7:30, inactive3d / 7d / 14d / 30d and proTrialDaysLeft (30, 10, 3),
  *    proTrialEnded; every run, day1Evening (18:30 New York on the day of sign-up, or the next day after 18:00, when no plan
- *    is saved yet; given up 6 hours later).
+ *    is saved yet; given up 6 hours later);
+ *  - the feedback emails (brief « Courriels de feedback », step 4): weekOne, nps30, featureDiscover, months3 in the same
+ *    daily run (ma_feedback_due), feedbackShipped when Admin › Feedback sets a trader's feedback to « shipped ».
  * Rules:
  *  - an event « once » leaves once per trader, even after a delete and a new add: it is claimed in email_events_log before
  *    it is queued (one statement); trades count copies once and never sample data;
@@ -27,6 +29,23 @@ const MA_MILESTONES = [10, 50, 100];   // tradesMilestone
 const MA_INACTIVE = [3, 7, 14, 30];    // inactive3d … inactive30d: days without coming back
 const MA_TRIAL_LEFT = [3, 10, 30];     // proTrialDaysLeft: days before the end of the Pro trial
 const MA_NY = 'America/New_York';
+const MA_FEATURES = ['plan', 'review', 'stats', 'sync'];   // featureDiscover: the useful ones, in this order (mail/mail-usage.php names)
+const MA_ASKS = ['weekOne', 'nps30', 'months3'];             // the daily feedback emails that ask for an opinion (one per 30 days, ML_ASK_DAYS)
+/** featureDiscover's values: the feature in a sentence ({feature}), its pitch in a few lines (jargon explained), its button and link */
+const MA_PITCH = [
+    'en' => ['plan' => ['The morning plan takes 30 seconds before the session: your bias (do you expect the market to go up or down?), your key levels and your max loss for the day. In the evening, Sweep compares what you planned with what you did.', 'Make my plan', '#dashboard'],
+             'review' => ['The evening review takes two taps after the session: how the day went and whether you followed your plan. Week after week, Sweep shows which days cost you, and why.', 'Close my day', '#dashboard'],
+             'stats' => ['Your stats show your edge in numbers: what makes you win over many trades. Your best setups, hours and days, and the ones that cost you, all from the trades already in your journal.', 'See my stats', '#analytics'],
+             'sync' => ['Import and sync bring your trades in from your platform (a file, or NinjaTrader 8 and Quantower live): no more typing them one by one. Set it up once, your journal stays up to date.', 'Bring in my trades', '#import']],
+    'fr' => ['plan' => ['Le plan du matin prend 30 secondes avant la séance : ton biais (tu t’attends à ce que le marché monte ou baisse ?), tes niveaux clés et ta perte max du jour. Le soir, Sweep compare ce que tu avais prévu et ce que tu as fait.', 'Faire mon plan', '#dashboard'],
+             'review' => ['La revue du soir prend deux touchers après la séance : comment s’est passée la journée, et si tu as suivi ton plan. Semaine après semaine, Sweep montre quels jours te coûtent, et pourquoi.', 'Fermer ma journée', '#dashboard'],
+             'stats' => ['Tes stats montrent ton edge en chiffres : ce qui te fait gagner sur beaucoup de trades. Tes meilleurs setups, heures et jours, et ceux qui te coûtent, à partir des trades déjà dans ton journal.', 'Voir mes stats', '#analytics'],
+             'sync' => ['L’import et la synchro font entrer tes trades depuis ta plateforme (un fichier, ou NinjaTrader 8 et Quantower en direct) : plus besoin de les taper un par un. Tu le fais une fois, ton journal reste à jour.', 'Faire entrer mes trades', '#import']],
+    'es' => ['plan' => ['El plan de la mañana toma 30 segundos antes de la sesión: tu sesgo (¿esperas que el mercado suba o baje?), tus niveles clave y tu pérdida máxima del día. Por la tarde, Sweep compara lo que planeaste con lo que hiciste.', 'Hacer mi plan', '#dashboard'],
+             'review' => ['La revisión de la tarde toma dos toques después de la sesión: cómo fue el día y si seguiste tu plan. Semana tras semana, Sweep muestra qué días te cuestan, y por qué.', 'Cerrar mi día', '#dashboard'],
+             'stats' => ['Tus estadísticas muestran tu edge en números: lo que te hace ganar en muchas operaciones. Tus mejores setups, horas y días, y los que te cuestan, con las operaciones que ya están en tu diario.', 'Ver mis estadísticas', '#analytics'],
+             'sync' => ['La importación y la sincronización traen tus operaciones desde tu plataforma (un archivo, o NinjaTrader 8 y Quantower en directo): ya no hay que escribirlas una por una. Lo haces una vez, tu diario se mantiene al día.', 'Traer mis operaciones', '#import']],
+];
 
 function ma_pdo(): PDO { return db(); }
 function ma_q(string $sql, array $args = []): PDOStatement { $st = ma_pdo()->prepare($sql); $st->execute($args); return $st; }
@@ -130,7 +149,7 @@ function ma_unclaim(string $uid, string $key, int $at): void
 /**
  * One email of an automation for a trader, in the queue now. True when there is nothing more to do (queued, the
  * automation off, or no address); false only when the database refused (the claim is then given back).
- * $vars: the event's values ({firm}, {milestone}, {days}, {plan}).
+ * $vars: the event's values ({firm}, {milestone}, {days}, {plan}, {request}, {reply}; featureDiscover: the feature, its text in the trader's language).
  */
 function ma_send(string $uid, string $key, array $vars = []): bool
 {
@@ -142,6 +161,7 @@ function ma_send(string $uid, string $key, array $vars = []): bool
         $u = ma_q('SELECT email, first_name, lang, disabled FROM users WHERE id = ?', [$uid])->fetch(PDO::FETCH_ASSOC);
         if (!$u || (int) ($u['disabled'] ?? 0) === 1 || !filter_var(trim((string) $u['email']), FILTER_VALIDATE_EMAIL)) return true;
         if (isset($vars['plan'])) $vars['plan'] = ucfirst((string) $vars['plan']);
+        if ($key === 'featureDiscover') $vars = ma_feature_vars((string) ($vars['feature'] ?? ''), ml_lang($u['lang'] ?? ''));   // the feature in the trader's language
         $now = time();
         ml_q($pdo, "INSERT INTO mail_queue (campaign_id, user_id, email, lang, first_name, kind, vars_json, token, state, next_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, ?)",
             [(int) $c['id'], $uid, trim((string) $u['email']), ml_lang($u['lang'] ?? ''), mb_substr(trim((string) ($u['first_name'] ?? '')), 0, 40), ma_kind($key),
@@ -267,6 +287,16 @@ function ma_on_payout(array $p): void
     $uid = (string) ($p['uid'] ?? ''); $d = (array) ($p['doc'] ?? []);
     if ($uid === '' || !empty($d['demo']) || !empty($d['estimated'])) return;   // a payout the trader entered, not the estimate of « Your real net »
     ma_once($uid, 'firstPayoutLogged');
+}
+/** Admin › Feedback: a trader's feedback set to « shipped » → feedbackShipped {request} {reply}, once per feedback */
+function ma_on_feedback(array $p): void
+{
+    $uid = (string) ($p['uid'] ?? ''); $id = (int) ($p['item_id'] ?? 0);
+    if ($uid === '' || !$id || ($p['to'] ?? '') !== 'shipped' || ($p['from'] ?? '') === 'shipped') return;
+    $f = ma_q('SELECT message, reply FROM feedback WHERE id = ? AND user_id = ?', [$id, $uid])->fetch(PDO::FETCH_ASSOC);
+    if (!$f || trim((string) $f['message']) === '') return;   // a one-click answer without a comment: nothing to quote
+    $req = trim(preg_replace('/\s+/u', ' ', (string) $f['message']));
+    ma_once($uid, 'feedbackShipped', ['request' => mb_strlen($req) > 200 ? rtrim(mb_substr($req, 0, 199)) . '…' : $req, 'reply' => trim((string) ($p['reply'] ?? $f['reply'] ?? ''))], 'feedbackShipped:' . $id);
 }
 
 /**
@@ -405,6 +435,61 @@ function ma_daily_run(array $ids, int $from, int $now, bool $dry = false, ?calla
     return ['sent' => $sent, 'failed' => $failed, 'error' => $err];
 }
 
+/**
+ * The daily feedback email of a trader, if one is due: [line in email_events_log, automation, values] or null. One at most,
+ * in this order: months3 (90 days, used Sweep in the last 30), nps30 (30 days, seen in the last 30), weekOne (days 7 to 21),
+ * featureDiscover (from 14 days, seen in the last 30: the first of MA_FEATURES never tried nor already presented; one a
+ * week). An automation switched off is not claimed: it starts with the traders due once switched on. Never within 3 days of
+ * an automatic news email (queued or sent), nor a question within ML_ASK_DAYS of another request for an opinion: tried
+ * again the next day. $p: the trader's profile (mail/mail-usage.php), $on: the automations switched on.
+ */
+function ma_feedback_due(array $u, array $p, array $on, int $now): ?array
+{
+    $uid = (string) $u['id']; $age = ($now - (int) strtotime((string) $u['created_at'])) / 86400; $seen = ma_last_seen($u) >= $now - 30 * 86400;
+    $used = array_sum(array_intersect_key((array) ($p['days'] ?? []), array_flip(array_diff(MU_FEATURES, ['rules'])))) > 0;
+    if (ma_q("SELECT 1 FROM mail_queue q JOIN mail_campaigns c ON c.id = q.campaign_id WHERE q.user_id = ? AND c.auto IS NOT NULL AND q.kind = 'marketing' AND q.created_at > ? LIMIT 1", [$uid, $now - 3 * 86400])->fetchColumn()) return null;
+    $asked = null; $canAsk = function () use (&$asked, $uid, $now): bool { return !($asked = $asked ?? ml_asked_lately(ma_pdo(), $uid, 0, $now)); };
+    $done = array_flip(ma_done($uid));
+    foreach ([['months3', $age >= 90 && $used], ['nps30', $age >= 30 && $seen], ['weekOne', $age >= 7 && $age < 21]] as [$k, $due])
+        if ($due && isset($on[$k]) && !isset($done[$k]) && $canAsk()) return [$k, $k, []];
+    if (isset($on['featureDiscover']) && $age >= 14 && $seen && !ma_q("SELECT 1 FROM email_events_log WHERE user_id = ? AND event_name LIKE 'featureDiscover:%' AND sent_at >= ? LIMIT 1", [$uid, $now - 7 * 86400])->fetchColumn())
+        foreach (MA_FEATURES as $f) if (!in_array($f, (array) ($p['ever'] ?? []), true) && !isset($done["featureDiscover:$f"])) return ["featureDiscover:$f", 'featureDiscover', ['feature' => $f]];
+    return null;
+}
+/** featureDiscover's values in the trader's language (ma_send fills them in at queueing: the feature is in vars_json) */
+function ma_feature_vars(string $f, string $lang): array
+{
+    $P = MA_PITCH[$lang] ?? MA_PITCH['en']; if (!isset($P[$f])) return [];
+    return ['feature' => (MU_T[$lang] ?? MU_T['en'])['in'][$f], 'feature_pitch' => $P[$f][0], 'feature_button' => $P[$f][1], 'feature_link' => ml_base() . $P[$f][2]];
+}
+/** the preview's and the test email's example of the feedback emails' values */
+function ma_example(string $lang): array
+{
+    $ex = ['en' => ['Add a calendar view of my trades.', 'You will find it under Calendar.'], 'fr' => ['Ajouter une vue calendrier de mes trades.', 'Tu la trouves sous Calendrier.'], 'es' => ['Agregar una vista de calendario de mis operaciones.', 'La encuentras en Calendario.']][$lang] ?? null;
+    return ['request' => ($ex ?? [''])[0], 'reply' => ($ex ?? ['', ''])[1]] + ma_feature_vars('stats', $lang);
+}
+/** The daily feedback emails over these traders (after mu_daily: their profiles are fresh). [automation => n] */
+function ma_feedback_run(array $ids, int $now): array
+{
+    $pdo = ma_pdo(); $sent = [];
+    $on = array_flip(ml_q($pdo, "SELECT auto FROM mail_campaigns WHERE auto IN ('weekOne', 'nps30', 'months3', 'featureDiscover') AND status = 'active'")->fetchAll(PDO::FETCH_COLUMN));
+    if (!$on) return $sent;
+    foreach ($ids as $uid) {
+        $uid = (string) $uid;
+        try {
+            $u = ma_q('SELECT id, email, lang, created_at, last_login, disabled FROM users WHERE id = ?', [$uid])->fetch(PDO::FETCH_ASSOC);
+            if (!$u || (int) $u['disabled'] === 1 || !filter_var(trim((string) $u['email']), FILTER_VALIDATE_EMAIL)) continue;
+            if (ma_q('SELECT 1 FROM email_prefs WHERE user_id = ? AND marketing = 0', [$uid])->fetchColumn()) continue;   // unsubscribed: never claimed
+            $p = (array) (json_decode((string) (ma_q('SELECT data_json FROM mail_usage WHERE user_id = ?', [$uid])->fetchColumn() ?: ''), true) ?: []);
+            if (!($d = ma_feedback_due($u, $p, $on, $now))) continue;
+            [$key, $name, $vars] = $d;
+            if (!ma_claim($uid, $key, $now)) continue;
+            if (ma_send($uid, $name, $vars)) $sent[$name] = ($sent[$name] ?? 0) + 1; else ma_unclaim($uid, $key, $now);
+        } catch (Throwable $e) { error_log('[Sweep mail auto] feedback ' . $uid . ': ' . $e->getMessage()); }
+    }
+    return $sent;
+}
+
 /** 18:30 New York on the trader's day of sign-up, or the next day when they signed up from 18:00 */
 function ma_evening_due(int $signup): int
 {
@@ -445,6 +530,8 @@ function ma_cron(PDO $pdo, ?int $now = null): string
         if ($r['failed'] === 0) { ml_set_setting($pdo, 'mail_auto_daily_at', (string) $now); ml_set_setting($pdo, 'mail_auto_day', $day); }
         $note[] = $r['sent'] ? array_sum($r['sent']) . ' daily' : 'daily: nothing due';
         try { $note[] = mu_daily($pdo, $now) . ' usage profiles'; } catch (Throwable $e) { $note[] = 'usage: ' . $e->getMessage(); }   // what each trader uses (mail/mail-usage.php)
+        try { if ($f = ma_feedback_run(ma_q('SELECT id FROM users WHERE disabled = 0 ORDER BY created_at')->fetchAll(PDO::FETCH_COLUMN), $now)) $note[] = array_sum($f) . ' feedback'; }
+        catch (Throwable $e) { $note[] = 'feedback: ' . $e->getMessage(); }   // the feedback emails (weekOne, nps30, featureDiscover, months3)
         if ($r['failed']) $note[] = $r['failed'] . ' daily not queued (' . $r['error'] . ')';
     }
     return implode(', ', $note);
@@ -456,4 +543,5 @@ if (class_exists('Events', false)) {
     Events::on('trade.updated', 'ma_on_trade');   // a batch fires one event per trading day: it can be an update
     Events::on('payout.recorded', 'ma_on_payout');
     Events::on('journal.saved', 'ma_on_journal');
+    Events::on('feedback.status_changed', 'ma_on_feedback');
 }

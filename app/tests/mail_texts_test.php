@@ -30,16 +30,16 @@ ml_schema($pdo);
 
 /* ───── the texts ───── */
 $cat = ma_catalog();
-$prog = ['tradesMilestone', 'firstPayoutLogged', 'inactive3d', 'inactive7d', 'inactive14d', 'inactive30d', 'proTrialDaysLeft', 'proTrialEnded'];
-$asks = ['signedUp', 'inactive14d', 'subscriptionCanceled'];
+$prog = ['tradesMilestone', 'firstPayoutLogged', 'inactive3d', 'inactive7d', 'inactive14d', 'inactive30d', 'proTrialDaysLeft', 'proTrialEnded', 'weekOne', 'months3'];
+$asks = ['signedUp', 'inactive14d', 'subscriptionCanceled', 'weekOne', 'nps30', 'months3'];
 $withP = []; $withQ = []; $long = [];
 foreach ($cat as $k => $a) foreach (ML_LANGS as $l) {
     $b = $a['content'][$l]['body'];
     if (strpos($b, "\n\n{progress}\n\n") !== false) $withP[$k][] = $l;
     foreach (ml_questions($b) as $Q) { $withQ[$k][] = $l; foreach ($Q['opts'] as $o) if (mb_strlen($o) > 45) $long[] = "$k/$l: $o"; if ($Q['question'] === '') $long[] = "$k/$l: no question"; }
 }
-$ok(array_keys($withP) === $prog && count(array_filter($withP, fn($x) => $x === ML_LANGS)) === 8, '{progress} on its own line in the 8 texts, EN, FR and ES (' . implode(', ', array_keys($withP)) . ')');
-$ok(array_keys($withQ) === $asks && count(array_filter($withQ, fn($x) => $x === ML_LANGS)) === 3, 'a one-click question in the welcome, the 14-day absence and the cancellation only, in the 3 languages');
+$ok(array_keys($withP) === $prog && count(array_filter($withP, fn($x) => $x === ML_LANGS)) === 10, '{progress} on its own line in the 10 texts (8 + 2 feedback emails), EN, FR and ES (' . implode(', ', array_keys($withP)) . ')');
+$ok(array_keys($withQ) === $asks && count(array_filter($withQ, fn($x) => array_values(array_unique($x)) === ML_LANGS)) === 6, 'a one-click question in the welcome, the 14-day absence, the cancellation and 3 feedback emails only, in the 3 languages');
 $ok($long === [], 'each option short, each question asked by the paragraph above' . ($long ? ' (' . implode(' · ', $long) . ')' : ''));
 $fr = ml_questions($cat['signedUp']['content']['fr']['body'])[0];
 $ok($fr['question'] === 'Une dernière chose : qu’est-ce qui t’amène dans Sweep ? Un clic suffit.' && count($fr['opts']) === 5 && $fr['opts'][4] === 'Autre chose', 'welcome FR: « qu’est-ce qui t’amène » with 5 chips, the last « Autre chose »');
@@ -52,7 +52,7 @@ $old = function (string $k) use ($cat): array {
     return $c;
 };
 $miss = [];
-foreach ($cat as $k => $a) foreach (ML_LANGS as $i => $l) if (($before[1][$k][$i] ?? '') !== ma_text_sig($old($k)[$l])) $miss[] = "$k/$l";
+foreach ($before[1] as $k => $_) foreach (ML_LANGS as $i => $l) if (!isset($cat[$k]) || $before[1][$k][$i] !== ma_text_sig($old($k)[$l])) $miss[] = "$k/$l";   // the automations of version 1
 $ok(count($before[1]) === 18 && $miss === [], 'the 54 earlier texts are the new ones without {progress} nor the questions' . ($miss ? ' (' . implode(', ', $miss) . ')' : ''));
 
 /* ───── ma_upgrade ───── */
@@ -64,7 +64,7 @@ $ok(ml_setting($pdo, 'mail_auto_texts_v') === (string) MA_TEXTS_V && $content('s
     && (int) $pdo->query('SELECT COUNT(*) FROM mail_campaigns WHERE proposed_json IS NOT NULL')->fetchColumn() === 0, 'a fresh install: the new texts, nothing proposed');
 // a server on version 1: our earlier texts, Mateo changed the 14-day FR and the welcome EN
 $set = $pdo->prepare('UPDATE mail_campaigns SET content_json = ? WHERE auto = ?');
-foreach (array_keys($cat) as $k) $set->execute([json_encode($old($k), JSON_UNESCAPED_UNICODE), $k]);
+foreach (array_keys($before[1]) as $k) $set->execute([json_encode($old($k), JSON_UNESCAPED_UNICODE), $k]);
 $mine = $old('inactive14d'); $mine['fr']['body'] = "Salut {first}, ton journal t’attend.\n\n[[Revenir|{app}#dashboard]]"; $set->execute([json_encode($mine, JSON_UNESCAPED_UNICODE), 'inactive14d']);
 $mine2 = $old('signedUp'); $mine2['en']['subject'] = 'Welcome aboard, {first}'; $set->execute([json_encode($mine2, JSON_UNESCAPED_UNICODE), 'signedUp']);
 $pdo->exec("UPDATE app_settings SET v = '1' WHERE k = 'mail_auto_texts_v'");

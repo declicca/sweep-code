@@ -11,11 +11,12 @@ light and dark):
  - the open image, a signed tracked link (a tampered one goes home), the one-click unsubscribe (no CSRF header), a bounce
    report piped to mail/bounce.php (silent, exit 0);
  - the campaign's numbers page: delivered, opened, clicked, the 48 hours, the links; no horizontal scroll, no page error;
- - the automations (step 5): the 18 in the list with what sends each; one opened: its text, switched off and on, edited and
+ - the automations (step 5): the 23 in the list with what sends each; one opened: its text, switched off and on, edited and
    saved on its own, a test; never sent by hand nor deleted;
  - what each trader uses (feedback brief, step 2, 5 Nov.): the Stats page opened counts once a day; « Ce qu'ils utilisent »
    on #mail with the share of active traders for each feature; {progress} and the others in the preview and in the help;
- - a new text that did not replace Mateo's (step 3): « Nouvelle version » in the list, the proposal on the automation, kept or taken.
+ - a new text that did not replace Mateo's (step 3): « Nouvelle version » in the list, the proposal on the automation, kept or taken;
+ - the 5 feedback emails (step 4) off; « Une fonction à découvrir »: its values in the help, the stats as an example in the preview.
 """
 import json, os, random, re, sqlite3, subprocess, sys, time, base64
 from urllib.parse import urlparse, parse_qs
@@ -240,7 +241,7 @@ with sync_playwright() as p:
     # the automations (step 5): in the list, an automation's page (its text, on or off, a test, its numbers; no audience, no delete)
     autos = adm.get('/api/admin/mail', headers=H).json()['autos']
     wel = next(x for x in autos if x['auto'] == 'signedUp')
-    ok(len(autos) == 18 and wel['kind'] == 'marketing' and next(x for x in autos if x['auto'] == 'paymentFailed')['kind'] == 'transactional', f'api: the 18 automations, their kind ({len(autos)})')
+    ok(len(autos) == 23 and wel['kind'] == 'marketing' and next(x for x in autos if x['auto'] == 'paymentFailed')['kind'] == 'transactional', f'api: the 23 automations, their kind ({len(autos)})')
     ok(adm.post(f"/api/admin/mail/campaigns/{wel['id']}/send", data='{}', headers=H).status == 409 and adm.delete(f"/api/admin/mail/campaigns/{wel['id']}", headers=H).status == 409, 'an automation is never sent by hand nor deleted (409)')
     orig = adm.get(f"/api/admin/mail/campaigns/{wel['id']}", headers=H).json()['campaign']
     try:
@@ -251,7 +252,7 @@ with sync_playwright() as p:
         q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150]))
         q.goto(B + '/#mail'); q.wait_for_selector('#main .ml-autos .ml-row', timeout=15000); q.wait_for_timeout(500)
         row = q.locator(f"#main .ml-autos a[href=\"#mail/{wel['id']}\"]")
-        ok(q.locator('#main .ml-autos .ml-row').count() == 18 and 'Automatisations' in q.inner_text('#main .ml') and 'Bienvenue' in row.inner_text() and 'Allumé' in row.inner_text() and 'Juste après l’inscription' in row.inner_text(), f'{t} #mail: « Automatisations », 18 rows, « Bienvenue » allumé, what sends it')
+        ok(q.locator('#main .ml-autos .ml-row').count() == 23 and 'Automatisations' in q.inner_text('#main .ml') and 'Bienvenue' in row.inner_text() and 'Allumé' in row.inner_text() and 'Juste après l’inscription' in row.inner_text(), f'{t} #mail: « Automatisations », 23 rows, « Bienvenue » allumé, what sends it')
         q.screenshot(path=f'{SHOTS}/e2e_mail_autos_{w}_{scheme}.png', full_page=True)
         row.click(); q.wait_for_selector('#main .ml-auto textarea', timeout=15000); q.wait_for_timeout(600)
         q.click('#main .ml-tabs [data-v="fr"]'); q.wait_for_timeout(400)
@@ -321,6 +322,27 @@ with sync_playwright() as p:
     finally:
       sql('UPDATE mail_campaigns SET proposed_json = NULL WHERE id = ?', (a14['id'],))
       adm.post(f"/api/admin/mail/campaigns/{a14['id']}", data=json.dumps({'content': o14['content']}), headers=H)
+
+    # the feedback emails (step 4): off in the list; « Une fonction à découvrir »: its values in the help, an example in the preview
+    fd = next(x for x in autos if x['auto'] == 'featureDiscover')
+    ok([x['status'] for x in autos if x['auto'] in ('weekOne', 'nps30', 'featureDiscover', 'feedbackShipped', 'months3')] == ['off'] * 5, 'api: the 5 feedback emails, off')
+    for w, hgt, mob, scheme in ((390, 844, True, 'light'), (390, 844, True, 'dark'), (1300, 850, False, 'light'), (1300, 850, False, 'dark')):
+      t = f'{w}px {scheme}'
+      cx = br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': w, 'height': hgt}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme=scheme)
+      cx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+      q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150]))
+      q.goto(B + f"/#mail/{fd['id']}"); q.wait_for_selector('#main .ml-auto textarea', timeout=15000); q.click('#main .ml-tabs [data-v="fr"]'); q.wait_for_timeout(500)
+      txt = q.inner_text('#main .ml-auto')
+      ok('Une fonction à découvrir' in txt and 'Éteint' in txt and '{feature_pitch} son texte' in txt and '{feature} la fonction à découvrir' in txt, f'{t} « Une fonction à découvrir »: off, its values in the help')
+      try:
+        q.wait_for_function("(()=>{const r=document.querySelector('#main [data-ml-prev]'); return r && r.shadowRoot && r.shadowRoot.textContent.includes('Tes stats montrent')})()", timeout=10000); pv = True
+      except Exception: pv = False
+      ok(pv, f'{t} its preview: the stats as an example, in French')
+      ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+      cw = q.evaluate("Math.max(...[...document.querySelectorAll('#main .ml-f small code')].map((c) => c.getBoundingClientRect().right)) - document.querySelector('#main .ml-f small').getBoundingClientRect().right")
+      ok(ov <= 0 and cw <= 0.5 and not er, f'{t} feature to discover: no horizontal scroll ({ov}), the values inside the help ({cw}), no page error {er[:2]}')
+      q.screenshot(path=f'{SHOTS}/e2e_mail_feature_{w}_{scheme}.png', full_page=True)
+      cx.close()
     br.close()
   finally:
     if not had: sql("UPDATE users SET email = NULL, email_lc = NULL WHERE username = 'mateo'")

@@ -91,7 +91,7 @@
 .ml-new .ml-newb{margin:0 0 14px;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted);max-height:260px;overflow:auto}
 .ml-autos .ml-row small+small{margin-top:2px}
 .ml-auto .ml-sched{margin:4px 0 2px}
-.ml-auto .ml-f small code{font-family:var(--mono,'Geist Mono',ui-monospace,monospace);font-size:12px;white-space:nowrap}
+.ml-f small code{font-family:var(--mono,'Geist Mono',ui-monospace,monospace);font-size:12px;overflow-wrap:anywhere}
 .ml-test{margin-top:14px}
 .ml-ans{margin-top:10px}
 .ml-ans h4+.ml-q,.ml-q+.ml-q{margin-top:4px}
