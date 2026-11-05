@@ -21,6 +21,7 @@
       tools: { h: 'Title', b: 'Bold', l: 'Link', btn: 'Button', first: 'First name', qn: 'Rating 1-5', qc: 'Choices' }, linkTxt: 'text', btnTxt: 'Open Sweep', qcTxt: 'Yes|No',
       helpQ: 'A question answered in one click: [[?note]] (1 to 5) or [[?choix|A|B|C]], alone on its line, under the question. Answers go to Admin › Feedback.',
       ans: 'Answers', ansNone: 'No answer yet.', ansN: '{n} answers', ans1: '1 answer', notes: 'Last comments', rowAns: '{a} % answered',
+      newB: 'New version', newT: 'New version proposed', newP: 'You changed this text, so we did not replace it. Here is our new version ({l}): take it, or keep yours.', take: 'Use the new version', keep: 'Keep mine',
       help: 'A blank line starts a new paragraph. {first} becomes the trader’s first name. An empty language gets the English version.',
       prev: 'Preview', prevNone: 'Write a subject and a message to see the email.', aud: 'Audience',
       aLang: 'Language', aPlan: 'Plan', aAct: 'Activity', all: 'All', act: { a0: 'All', j30: 'Joined < 30 days', a7: 'Active 7 days', a30: 'Active 30 days', i14: 'Inactive 14 days', i30: 'Inactive 30 days', i60: 'Inactive 60 days' },
@@ -51,6 +52,7 @@
       tools: { h: 'Titre', b: 'Gras', l: 'Lien', btn: 'Bouton', first: 'Prénom', qn: 'Note 1 à 5', qc: 'Choix' }, linkTxt: 'texte', btnTxt: 'Ouvrir Sweep', qcTxt: 'Oui|Non',
       helpQ: 'Une question en un clic : [[?note]] (1 à 5) ou [[?choix|A|B|C]], seule sur sa ligne, sous la question. Les réponses arrivent dans Admin › Feedback.',
       ans: 'Réponses', ansNone: 'Aucune réponse pour l’instant.', ansN: '{n} réponses', ans1: '1 réponse', notes: 'Derniers commentaires', rowAns: '{a} % ont répondu',
+      newB: 'Nouvelle version', newT: 'Nouvelle version proposée', newP: 'Tu as modifié ce texte, alors on ne l’a pas remplacé. Voici notre nouvelle version ({l}) : prends-la, ou garde la tienne.', take: 'Utiliser la nouvelle version', keep: 'Garder la mienne',
       help: 'Une ligne vide commence un nouveau paragraphe. {first} devient le prénom du trader. Une langue vide reçoit la version anglaise.',
       prev: 'Aperçu', prevNone: 'Écris un objet et un message pour voir le courriel.', aud: 'Audience',
       aLang: 'Langue', aPlan: 'Forfait', aAct: 'Activité', all: 'Toutes', act: { a0: 'Tous', j30: 'Inscrits < 30 jours', a7: 'Actifs 7 jours', a30: 'Actifs 30 jours', i14: 'Inactifs 14 jours', i30: 'Inactifs 30 jours', i60: 'Inactifs 60 jours' },
@@ -81,6 +83,7 @@
       tools: { h: 'Título', b: 'Negrita', l: 'Enlace', btn: 'Botón', first: 'Nombre', qn: 'Nota 1 a 5', qc: 'Opciones' }, linkTxt: 'texto', btnTxt: 'Abrir Sweep', qcTxt: 'Sí|No',
       helpQ: 'Una pregunta en un clic: [[?note]] (1 a 5) o [[?choix|A|B|C]], sola en su línea, debajo de la pregunta. Las respuestas llegan a Admin › Feedback.',
       ans: 'Respuestas', ansNone: 'Ninguna respuesta por ahora.', ansN: '{n} respuestas', ans1: '1 respuesta', notes: 'Últimos comentarios', rowAns: '{a} % respondieron',
+      newB: 'Nueva versión', newT: 'Nueva versión propuesta', newP: 'Cambiaste este texto, así que no lo reemplazamos. Esta es nuestra nueva versión ({l}): tómala o quédate con la tuya.', take: 'Usar la nueva versión', keep: 'Quedarme con la mía',
       help: 'Una línea vacía empieza un párrafo nuevo. {first} se convierte en el nombre del trader. Un idioma vacío recibe la versión en inglés.',
       prev: 'Vista previa', prevNone: 'Escribe un asunto y un mensaje para ver el correo.', aud: 'Audiencia',
       aLang: 'Idioma', aPlan: 'Plan', aAct: 'Actividad', all: 'Todos', act: { a0: 'Todos', j30: 'Inscritos < 30 días', a7: 'Activos 7 días', a30: 'Activos 30 días', i14: 'Inactivos 14 días', i30: 'Inactivos 30 días', i60: 'Inactivos 60 días' },
@@ -150,7 +153,7 @@
       <h3 class="ml-h3">${h(X.camps)}</h3>
       ${rows ? `<ul class="ml-list">${rows}</ul>` : `<p class="muted ml-empty">${h(X.none)}</p>`}
       <h3 class="ml-h3">${h(X.autos)}</h3><p class="muted ml-sub">${h(X.autosSub)}</p>
-      <ul class="ml-list ml-autos">${(d.autos || []).map((a) => `<li><a class="ml-row" href="#mail/${a.id}"><div><b>${h(a.name[LANG] || a.name.en)}</b>${chip(a.status)}</div><small>${h(a.when[LANG] || a.when.en)}</small><small>${h([a.sent ? f(X.autoRow, { n: num(a.sent) }) : X.autoNone, a.open_rate != null ? f(X.row.opens, { a: pct(a.open_rate) }) : '', a.click_rate != null ? f(X.row.clicks, { a: pct(a.click_rate) }) : '', a.answer_rate != null ? f(X.rowAns, { a: pct(a.answer_rate) }) : ''].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ul>
+      <ul class="ml-list ml-autos">${(d.autos || []).map((a) => `<li><a class="ml-row" href="#mail/${a.id}"><div><b>${h(a.name[LANG] || a.name.en)}</b>${chip(a.status)}${a.proposed ? `<span class="ml-st ml-st-new">${h(X.newB)}</span>` : ''}</div><small>${h(a.when[LANG] || a.when.en)}</small><small>${h([a.sent ? f(X.autoRow, { n: num(a.sent) }) : X.autoNone, a.open_rate != null ? f(X.row.opens, { a: pct(a.open_rate) }) : '', a.click_rate != null ? f(X.row.clicks, { a: pct(a.click_rate) }) : '', a.answer_rate != null ? f(X.rowAns, { a: pct(a.answer_rate) }) : ''].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ul>
       ${useBox(d.usage)}
       <div class="ml-two">
         <div class="ml-box"><h4>${h(X.list)}</h4><p><b>${h(f(X.reach, { n: num(L.reachable) }))}</b></p><p class="muted">${h(f(X.off, { n: num(L.unsubscribed) }))} · ${h(f(X.sup, { n: num(L.suppressed) }))}</p></div>
@@ -234,6 +237,14 @@
     const notes = (d.comments || []).map((c) => `<li><b>${h(c.answer)}</b> ${h(c.message)}</li>`).join('');
     return `<div class="ml-box ml-ans"><h4>${h(X.ans)}</h4>${qs.some((q) => q.total) ? body : `<p class="muted">${h(X.ansNone)}</p>${body}`}${notes ? `<h4>${h(X.notes)}</h4><ul class="ml-notes">${notes}</ul>` : ''}</div>`;
   }
+  // an automation's new text that did not replace Mateo's (mail/mail-auto.php, ma_upgrade): seen in the language open, taken or set aside
+  function newBox(c) {
+    const X = x(), P = c.proposed; if (!P) return '';
+    const ls = LANGS.filter((l) => P[l]), v = P[M.tab] || P[ls[0]];
+    return `<div class="ml-box ml-new"><h4>${h(X.newT)}</h4><p class="muted ml-sub">${h(f(X.newP, { l: ls.map((l) => l.toUpperCase()).join(', ') }))}</p>
+      <p class="ml-newt"><b>${h(v.subject)}</b></p><p class="ml-newb">${h(v.body)}</p>
+      <div class="ml-acts"><button type="button" class="btn primary" data-ml="take">${h(X.take)}</button><button type="button" class="btn" data-ml="keep">${h(X.keep)}</button></div></div>`;
+  }
   function vAuto(id, d) {
     const X = x(), c = d.campaign, I = d.info || { name: {}, when: {}, vars: [] }, s = d.stats, on = c.status === 'active';
     const langs = d.langs.map((l) => `<tr><td>${h(X.lg[l.lang])}</td><td class="ml-n">${num(l.sent)}</td><td class="ml-n">${rate(l.open_rate)}</td><td class="ml-n">${rate(l.click_rate)}</td></tr>`).join('');
@@ -244,6 +255,7 @@
         <div class="ml-acts ml-top"><button type="button" class="btn sm ${on ? '' : 'primary'}" data-ml="auto" aria-pressed="${on}">${h(on ? X.offB : X.on)}</button></div></div>
       <p class="ml-sched"><b>${h(I.when[LANG] || I.when.en || '')}</b></p>
       <p class="muted ml-sub">${h(X.kind[I.kind] || X.kind.marketing)}</p>
+      ${newBox(c)}
       ${contentBlock(help)}
       <div class="ml-acts ml-test"><button type="button" class="btn" data-ml="test">${h(X.test)}</button></div>
       <p class="ml-msg ${M.msgBad ? 'bad' : ''}" role="status" data-ml-msg>${h(M.msg)}</p>
@@ -377,6 +389,7 @@
         await api('api/admin/mail/campaigns/' + id, undefined, 'DELETE'); M.editId = 0; M.edit = null; M.ov = null; delete M.rep[id]; location.hash = '#mail'; return;
       }
       if (k === 'auto') { const c = M.rep[id].campaign; b.disabled = true; const r = await api('api/admin/mail/campaigns/' + id + '/auto', { on: c.status !== 'active' }); c.status = r.status; M.ov = null; repaint(); return; }
+      if (k === 'take' || k === 'keep') { b.disabled = true; await api('api/admin/mail/campaigns/' + id + '/proposal', { take: k === 'take' }); M.ov = null; if (k === 'take') M.editId = 0; else M.rep[id].campaign.proposed = null; k === 'take' ? await reload(id) : repaint(); return; }
       if (k === 'pause' || k === 'resume') { await api('api/admin/mail/campaigns/' + id + '/pause', { pause: k === 'pause' }); await reload(id); return; }
       if (k === 'dup') { const r = await api('api/admin/mail/campaigns/' + id + '/duplicate', { lang: LANG }); M.ov = null; location.hash = '#mail/' + r.id; return; }
     } catch (err) { setMsg(errText(err), true); if (k !== 'test' && typeof toast === 'function') toast(errText(err)); }

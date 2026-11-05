@@ -18,6 +18,8 @@ const ML_LANGS = ['en', 'fr', 'es'];
 const ML_BOUNCE_LIMIT = 0.03;      // a campaign pauses itself above 3 % hard bounces…
 const ML_COMPLAINT_LIMIT = 0.002;  // …or 0.2 % complaints (Gmail's limit is 0.3 %), once 100 emails went out
 const ML_SOFT_MAX = 3;             // 3 soft bounces in a row: the address is set aside
+const ML_ASK_DAYS = 30;            // one request for an opinion per trader every 30 days at most (automations)…
+const ML_ASK_FREE = ['signedUp'];  // …the welcome's « What brings you? » is about the trader, not an opinion: never held, never counted
 
 function ml_my(PDO $pdo): bool { return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'; }
 function ml_q(PDO $pdo, string $sql, array $a = []): PDOStatement { $st = $pdo->prepare($sql); $st->execute($a); return $st; }
@@ -38,8 +40,8 @@ function ml_schema(PDO $pdo): void
     $pdo->exec("CREATE TABLE IF NOT EXISTS mail_suppress (email_lc VARCHAR(190) NOT NULL PRIMARY KEY, reason VARCHAR(16) NOT NULL, soft INT NOT NULL DEFAULT 0, at INT NOT NULL)$cs");
     // the table of the « Your week » email (game/weekly-mail.php): same definition, plus the marketing choice
     $pdo->exec("CREATE TABLE IF NOT EXISTS email_prefs (user_id $K NOT NULL PRIMARY KEY, token VARCHAR(40) NOT NULL, weekly_off INT NOT NULL DEFAULT 0, updated_at INT NOT NULL)$cs");
-    foreach (['email_prefs' => ['marketing' => 'INT NULL', 'marketing_at' => 'INT NULL'], 'mail_campaigns' => ['auto' => 'VARCHAR(40) NULL'], 'mail_queue' => ['vars_json' => 'TEXT NULL']] as $tb => $cols)
-        foreach ($cols as $c => $t) { try { $pdo->exec("ALTER TABLE $tb ADD COLUMN $c $t"); } catch (Throwable $e) { /* already there */ } }   // auto: an automation (mail/mail-auto.php); vars_json: its values
+    foreach (['email_prefs' => ['marketing' => 'INT NULL', 'marketing_at' => 'INT NULL'], 'mail_campaigns' => ['auto' => 'VARCHAR(40) NULL', 'proposed_json' => 'TEXT NULL'], 'mail_queue' => ['vars_json' => 'TEXT NULL', 'asked' => 'INT NULL']] as $tb => $cols)
+        foreach ($cols as $c => $t) { try { $pdo->exec("ALTER TABLE $tb ADD COLUMN $c $t"); } catch (Throwable $e) { /* already there */ } }   // auto: an automation (mail/mail-auto.php), proposed_json: its new text waiting for Mateo; vars_json: its values, asked: it asked for an opinion
     foreach ($my ? ['ALTER TABLE mail_queue ADD UNIQUE KEY uq_mq_token (token)', 'ALTER TABLE mail_queue ADD KEY ix_mq_send (state, next_at)', 'ALTER TABLE mail_queue ADD KEY ix_mq_camp (campaign_id)',
                     'ALTER TABLE mail_events ADD KEY ix_me_q (queue_id)', 'ALTER TABLE mail_events ADD KEY ix_me_c (campaign_id, type)']
                  : ['CREATE UNIQUE INDEX IF NOT EXISTS uq_mq_token ON mail_queue (token)', 'CREATE INDEX IF NOT EXISTS ix_mq_send ON mail_queue (state, next_at)', 'CREATE INDEX IF NOT EXISTS ix_mq_camp ON mail_queue (campaign_id)',
@@ -242,6 +244,21 @@ function ml_questions(string $body, array $map = []): array
     }
     return $out;
 }
+/** an email that asked this trader for an opinion went out in the last ML_ASK_DAYS days (not counting the line $qid) */
+function ml_asked_lately(PDO $pdo, string $uid, int $qid): bool
+{
+    return (bool) ml_q($pdo, "SELECT 1 FROM mail_queue WHERE user_id = ? AND asked = 1 AND state = 'sent' AND sent_at >= ? AND id <> ? LIMIT 1", [$uid, time() - ML_ASK_DAYS * 86400, $qid])->fetchColumn();
+}
+/** a body without its one-click questions, nor the paragraph that asks each one */
+function ml_without_questions(string $body): string
+{
+    $out = [];
+    foreach (preg_split('/\n\s*\n/', trim($body)) as $blk) {
+        if (!ml_question_of($blk)) { $out[] = $blk; continue; }
+        $last = end($out); if ($last !== false && !preg_match('/^\[\[[^?]/u', trim($last))) array_pop($out);
+    }
+    return implode("\n\n", $out);
+}
 function ml_answer_sig(PDO $pdo, string $token, int $qn, string $a): string { return substr(hash_hmac('sha256', 'a|' . $token . '|' . $qn . '|' . $a, ml_secret($pdo)), 0, 16); }
 /** the one-click answer's link (api/m/r/…); without a token (preview, test) the app's feedback page */
 function ml_answer_link(PDO $pdo, string $token, int $qn, string $a): string
@@ -324,7 +341,8 @@ function ml_campaign(PDO $pdo, int $id): ?array
     $r['id'] = (int) $r['id']; $r['recipients'] = (int) $r['recipients']; $r['auto'] = $r['auto'] ?? null;
     foreach (['scheduled_at', 'started_at', 'finished_at', 'created_at', 'updated_at'] as $k) $r[$k] = $r[$k] !== null ? (int) $r[$k] : null;
     $r['content'] = ml_clean_content(json_decode((string) $r['content_json'], true)); $r['audience'] = ml_clean_audience(json_decode((string) $r['audience_json'], true));
-    unset($r['content_json'], $r['audience_json']);
+    $p = (array) (json_decode((string) ($r['proposed_json'] ?? ''), true) ?: []); $r['proposed'] = $p ? array_intersect_key(ml_clean_content($p), $p) : null;   // per language
+    unset($r['content_json'], $r['audience_json'], $r['proposed_json']);
     return $r;
 }
 function ml_campaign_save(PDO $pdo, ?int $id, array $b): array
@@ -345,6 +363,12 @@ function ml_campaign_save(PDO $pdo, ?int $id, array $b): array
     if (!in_array($c['status'], ['draft', 'scheduled'], true)) return ['error' => 'sent'];   // what went out is not rewritten
     ml_q($pdo, 'UPDATE mail_campaigns SET name = ?, content_json = ?, audience_json = ?, updated_at = ? WHERE id = ?', [$name, $content, $aud, $now, $id]);
     return ['id' => $id];
+}
+/** An automation's proposed text (mail/mail-auto.php, ma_upgrade): $take puts it in place of Mateo's, else it is set aside. */
+function ml_campaign_proposal(PDO $pdo, array $c, bool $take): void
+{
+    if ($take && $c['proposed']) ml_q($pdo, 'UPDATE mail_campaigns SET content_json = ?, updated_at = ? WHERE id = ?', [json_encode(array_merge($c['content'], $c['proposed']), JSON_UNESCAPED_UNICODE), time(), $c['id']]);
+    ml_q($pdo, 'UPDATE mail_campaigns SET proposed_json = NULL WHERE id = ?', [$c['id']]);
 }
 /** what is missing before it can go: a name, at least the English version or the one of each language targeted */
 function ml_campaign_ready(array $c): ?string
@@ -398,6 +422,10 @@ function ml_compose(PDO $pdo, array $q, array &$camps): ?array
         $v = ml_version($c['content'], (string) $q['lang']); if (!$v) return null;
         $vars = (array) (json_decode((string) ($q['vars_json'] ?? ''), true) ?: []);
         if ($q['user_id'] !== null && mu_uses($v['subject'] . $v['body'])) $vars += mu_vars(mu_save($pdo, (string) $q['user_id']), $v['lang']);   // what the trader uses, as of now
+        if ($q['user_id'] !== null && !in_array($c['auto'], ML_ASK_FREE, true) && ml_questions($v['body'])) {
+            if ($c['auto'] !== null && ml_asked_lately($pdo, (string) $q['user_id'], (int) $q['id'])) $v['body'] = ml_without_questions($v['body']);   // asked lately: the email goes without its question
+            else ml_q($pdo, 'UPDATE mail_queue SET asked = 1 WHERE id = ?', [(int) $q['id']]);
+        }
         [$s, $t, $h] = ml_render($pdo, $v, $v['lang'], (string) ($q['first_name'] ?? ''), (string) $q['token'], true, $vars);
         $off = ml_base() . 'api/m/u/' . $q['token'];
         $hdr += ['List-Unsubscribe' => '<' . $off . '>, <mailto:' . ml_bounce_addr() . '?subject=unsubscribe-' . $q['token'] . '>', 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
@@ -698,8 +726,8 @@ function ml_overview(PDO $pdo, ?int $now = null): array
     }, ml_q($pdo, 'SELECT id, name, status, paused_reason, recipients, scheduled_at, started_at, updated_at FROM mail_campaigns WHERE auto IS NULL ORDER BY COALESCE(started_at, scheduled_at, updated_at) DESC LIMIT 100')->fetchAll(PDO::FETCH_ASSOC));
     $autos = array_map(function ($r) use ($pdo, $now) {
         $s = ml_stats($pdo, (int) $r['id'], $now - 30 * 86400);
-        return ['id' => (int) $r['id'], 'auto' => $r['auto'], 'status' => $r['status'], 'sent' => $s['sent'], 'open_rate' => $s['open_rate'], 'click_rate' => $s['click_rate'], 'answer_rate' => $s['answers'] ? $s['answer_rate'] : null];
-    }, ml_q($pdo, 'SELECT id, auto, status FROM mail_campaigns WHERE auto IS NOT NULL ORDER BY id')->fetchAll(PDO::FETCH_ASSOC));
+        return ['id' => (int) $r['id'], 'auto' => $r['auto'], 'status' => $r['status'], 'sent' => $s['sent'], 'open_rate' => $s['open_rate'], 'click_rate' => $s['click_rate'], 'answer_rate' => $s['answers'] ? $s['answer_rate'] : null, 'proposed' => !empty($r['proposed_json'])];
+    }, ml_q($pdo, 'SELECT id, auto, status, proposed_json FROM mail_campaigns WHERE auto IS NOT NULL ORDER BY id')->fetchAll(PDO::FETCH_ASSOC));
     $cap = ml_cap($pdo, $now);
     return ['now' => $now, 'campaigns' => $list, 'autos' => $autos, 'month' => ml_stats($pdo, null, $now - 30 * 86400), 'list' => ml_list_health($pdo),
         'sending' => ['cap' => $cap, 'last_hour' => ml_hour($pdo, $now), 'left' => ml_left($pdo),

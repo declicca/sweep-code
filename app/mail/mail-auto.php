@@ -47,7 +47,36 @@ function ma_seed(PDO $pdo): void
         ml_q($pdo, 'INSERT INTO mail_campaigns (name, status, content_json, audience_json, auto, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [$a['name']['en'], $a['on'] ? 'active' : 'off', json_encode(ml_clean_content($a['content']), JSON_UNESCAPED_UNICODE), '{}', $key, $now, $now]);
     }
+    ma_upgrade($pdo);
     $done = true;
+}
+
+const MA_TEXTS_V = 2;   // the version of mail/mail-auto-texts.php: +1 each time its texts change (the ones replaced go into mail-auto-texts-before.php)
+/** a text's fingerprint (one language: subject, preheader, body as ml_clean_content keeps them) */
+function ma_text_sig(array $v): string { return substr(sha1(json_encode(['subject' => $v['subject'], 'preheader' => $v['preheader'], 'body' => $v['body']], JSON_UNESCAPED_UNICODE)), 0, 16); }
+/**
+ * New texts in the catalog (once per MA_TEXTS_V): each automation's language still on an earlier text of ours takes the new
+ * one; a language Mateo changed in Admin is never overwritten, the new text is proposed (mail_campaigns.proposed_json, taken
+ * or set aside in Admin, ml_campaign_proposal). Returns [replaced, proposed] (languages).
+ */
+function ma_upgrade(PDO $pdo): array
+{
+    if ((int) ml_setting($pdo, 'mail_auto_texts_v', '1') >= MA_TEXTS_V) return [0, 0];
+    $before = (array) require __DIR__ . '/mail-auto-texts-before.php'; $cat = ma_catalog(); $done = [0, 0];
+    foreach (ml_q($pdo, 'SELECT id, auto, content_json, proposed_json FROM mail_campaigns WHERE auto IS NOT NULL')->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if (!isset($cat[$r['auto']])) continue;
+        $cur = ml_clean_content(json_decode((string) $r['content_json'], true)); $new = ml_clean_content($cat[$r['auto']]['content']);
+        $prop = (array) (json_decode((string) ($r['proposed_json'] ?? ''), true) ?: []); [$was, $had] = [$cur, $prop];
+        foreach (ML_LANGS as $i => $l) {
+            if (ma_text_sig($cur[$l]) === ma_text_sig($new[$l])) { unset($prop[$l]); continue; }
+            $ours = false; foreach ($before as $v) if (($v[$r['auto']][$i] ?? '') === ma_text_sig($cur[$l])) $ours = true;
+            if ($ours) { $cur[$l] = $new[$l]; unset($prop[$l]); $done[0]++; } else { $prop[$l] = $new[$l]; $done[1]++; }
+        }
+        if ($cur !== $was) ml_q($pdo, 'UPDATE mail_campaigns SET content_json = ?, updated_at = ? WHERE id = ?', [json_encode($cur, JSON_UNESCAPED_UNICODE), time(), (int) $r['id']]);
+        if ($prop !== $had) ml_q($pdo, 'UPDATE mail_campaigns SET proposed_json = ? WHERE id = ?', [$prop ? json_encode($prop, JSON_UNESCAPED_UNICODE) : null, (int) $r['id']]);
+    }
+    ml_set_setting($pdo, 'mail_auto_texts_v', (string) MA_TEXTS_V);
+    return $done;
 }
 /** What Admin shows of an automation: its name and trigger in the three languages, its kind, its own variables, its place in the list */
 function ma_info(string $key): ?array

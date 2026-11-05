@@ -14,7 +14,8 @@ light and dark):
  - the automations (step 5): the 18 in the list with what sends each; one opened: its text, switched off and on, edited and
    saved on its own, a test; never sent by hand nor deleted;
  - what each trader uses (feedback brief, step 2, 5 Nov.): the Stats page opened counts once a day; « Ce qu'ils utilisent »
-   on #mail with the share of active traders for each feature; {progress} and the others in the preview and in the help.
+   on #mail with the share of active traders for each feature; {progress} and the others in the preview and in the help;
+ - a new text that did not replace Mateo's (step 3): « Nouvelle version » in the list, the proposal on the automation, kept or taken.
 """
 import json, os, random, re, sqlite3, subprocess, sys, time, base64
 from urllib.parse import urlparse, parse_qs
@@ -256,7 +257,7 @@ with sync_playwright() as p:
         q.click('#main .ml-tabs [data-v="fr"]'); q.wait_for_timeout(400)
         txt = q.inner_text('#main .ml-auto')
         ok(q.input_value('#main [data-mlf="subject"]') == orig['content']['fr']['subject'] and 'Respecte les désinscriptions' in txt and '{first} le prénom' in txt and '{progress} une phrase tirée de ses vrais chiffres' in txt and '{top_feature} la fonction' in txt, f'{t} the automation: its French text, its kind, the values it fills in (the usage ones too)')
-        ok(q.locator('#main .ml-auto [data-ml="del"], #main .ml-auto [data-ml-count], #main .ml-auto [data-mlf="name"], #main .ml-auto [data-ml="now"]').count() == 0 and q.locator('#main .ml-auto .ml-kpis .ux-m').count() == 5, f'{t} no audience, no name, no send, no delete; its 5 numbers')
+        ok(q.locator('#main .ml-auto [data-ml="del"], #main .ml-auto [data-ml-count], #main .ml-auto [data-mlf="name"], #main .ml-auto [data-ml="now"]').count() == 0 and q.locator('#main .ml-auto .ml-kpis .ux-m').count() == 6, f'{t} no audience, no name, no send, no delete; its 6 numbers (answered: the welcome asks « what brings you »)')
         q.wait_for_function("(()=>{const r=document.querySelector('#main [data-ml-prev]'); return r && r.shadowRoot && r.shadowRoot.textContent.includes('Bienvenue dans Sweep')})()", timeout=10000)
         ok(True, f'{t} the preview of the automation')
         if w == 1300 and scheme == 'dark':   # once: switched off and on, the text edited and saved on its own, a test
@@ -279,6 +280,47 @@ with sync_playwright() as p:
     finally:
       adm.post(f"/api/admin/mail/campaigns/{wel['id']}", data=json.dumps({'content': orig['content']}), headers=H)
       adm.post(f"/api/admin/mail/campaigns/{wel['id']}/auto", data=json.dumps({'on': orig['status'] == 'active'}), headers=H)
+
+    # a new text that did not replace Mateo's (feedback brief, step 3): proposed in the list and on the automation, taken or set aside
+    a14 = next(x for x in autos if x['auto'] == 'inactive14d'); o14 = adm.get(f"/api/admin/mail/campaigns/{a14['id']}", headers=H).json()['campaign']
+    prop = json.dumps({'fr': {'subject': 'Proposé ' + tag, 'preheader': '', 'body': 'Nouveau texte ' + tag + '\n\n{progress}'}}, ensure_ascii=False)
+    try:
+      for w, hgt, mob, scheme in ((390, 844, True, 'light'), (390, 844, True, 'dark'), (1300, 850, False, 'light'), (1300, 850, False, 'dark')):
+        t = f'{w}px {scheme}'
+        sql('UPDATE mail_campaigns SET proposed_json = ? WHERE id = ?', (prop, a14['id']))
+        cx = br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': w, 'height': hgt}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1, color_scheme=scheme)
+        cx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+        q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150]))
+        q.goto(B + '/#mail'); q.wait_for_selector('#main .ml-autos .ml-row', timeout=15000); q.wait_for_timeout(500)
+        row = q.locator(f"#main .ml-autos a[href=\"#mail/{a14['id']}\"]")
+        ok(row.locator('.ml-st-new').count() == 1 and 'Nouvelle version' in row.inner_text() and q.locator('#main .ml-autos .ml-st-new').count() == 1, f'{t} #mail: « Nouvelle version » on the 14-day absence only')
+        bx = row.locator('.ml-st-new').bounding_box(); rb = row.bounding_box()
+        ok(bx and bx['x'] + bx['width'] <= rb['x'] + rb['width'] + 0.5, f'{t} the badge inside its row')
+        row.screenshot(path=f'{SHOTS}/e2e_mail_newrow_{w}_{scheme}.png')
+        row.click(); q.wait_for_selector('#main .ml-new', timeout=15000); q.click('#main .ml-tabs [data-v="fr"]'); q.wait_for_timeout(400)
+        nt = q.inner_text('#main .ml-new')
+        ok('Nouvelle version proposée' in nt and '(FR)' in nt and 'Proposé ' + tag in nt and 'Nouveau texte ' + tag in nt and q.input_value('#main [data-mlf="subject"]') == o14['content']['fr']['subject'], f'{t} the automation: the proposal (FR) above, Mateo’s text still in the editor')
+        bb = [q.locator(f'#main .ml-new [data-ml="{k}"]').bounding_box() for k in ('take', 'keep')]; nb = q.locator('#main .ml-new').bounding_box()
+        ok(all(b and b['x'] >= nb['x'] - 0.5 and b['x'] + b['width'] <= nb['x'] + nb['width'] + 0.5 for b in bb), f'{t} « Utiliser la nouvelle version », « Garder la mienne » inside the card')
+        q.locator('#main .ml-new').screenshot(path=f'{SHOTS}/e2e_mail_new_{w}_{scheme}.png')
+        if scheme == 'light':
+          q.click('#main [data-ml="keep"]'); q.wait_for_timeout(900)
+          c = adm.get(f"/api/admin/mail/campaigns/{a14['id']}", headers=H).json()['campaign']
+          ok(c['proposed'] is None and c['content'] == o14['content'] and q.locator('#main .ml-new').count() == 0, f'{t} « Garder la mienne »: the proposal gone, the text untouched')
+        else:
+          q.click('#main [data-ml="take"]')
+          for _ in range(40):
+            if q.locator('#main [data-mlf="subject"]').count() and q.input_value('#main [data-mlf="subject"]').startswith('Proposé'): break
+            q.wait_for_timeout(250)
+          c = adm.get(f"/api/admin/mail/campaigns/{a14['id']}", headers=H).json()['campaign']
+          ok(c['proposed'] is None and c['content']['fr']['subject'] == 'Proposé ' + tag and c['content']['en'] == o14['content']['en'] and q.locator('#main .ml-new').count() == 0 and q.input_value('#main [data-mlf="subject"]') == 'Proposé ' + tag, f'{t} « Utiliser la nouvelle version »: the FR text replaced, EN untouched, in the editor')
+          adm.post(f"/api/admin/mail/campaigns/{a14['id']}", data=json.dumps({'content': o14['content']}), headers=H)
+        ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
+        ok(ov <= 0 and not er, f'{t} new version: no horizontal scroll ({ov}), no page error {er[:2]}')
+        cx.close()
+    finally:
+      sql('UPDATE mail_campaigns SET proposed_json = NULL WHERE id = ?', (a14['id'],))
+      adm.post(f"/api/admin/mail/campaigns/{a14['id']}", data=json.dumps({'content': o14['content']}), headers=H)
     br.close()
   finally:
     if not had: sql("UPDATE users SET email = NULL, email_lc = NULL WHERE username = 'mateo'")
