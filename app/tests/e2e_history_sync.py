@@ -42,13 +42,18 @@ with sync_playwright() as p:
   tap('#gSheet [data-g=bias][data-v=bullish]'); tap('#gSheet [data-g=save-plan]')
   pg.wait_for_selector('aside.nav-hist.open', timeout=8000); pg.wait_for_timeout(300)
   tap('aside.nav-hist.open [data-sy=connect][data-p=ninjatrader]')
-  # (4 Nov.) GitHub's machine is slower: the key can take more than 10 s, and a tap during the sheet's opening can be lost
-  try: pg.wait_for_selector('#sySheet .sy-key code', timeout=15000)
+  # (4 Nov.) GitHub's machine is slower: the sheet can take more than 10 s, and a tap during the sheet's opening can be lost.
+  # (5 Nov.) Where PHP has ZipArchive (GitHub's machine), NinjaTrader 8's download carries the key and the sheet shows none
+  # once the sync state is loaded (on a phone, only « do it from the computer »): the key is then the one the app makes for the other platforms (api/sync/key).
+  try: pg.wait_for_selector('#sySheet .sy-head', timeout=15000)
   except Exception:
     if pg.locator('aside.nav-hist.open [data-sy=connect][data-p=ninjatrader]').count(): tap('aside.nav-hist.open [data-sy=connect][data-p=ninjatrader]')
-    pg.wait_for_selector('#sySheet .sy-key code', timeout=20000)
+    pg.wait_for_selector('#sySheet .sy-head', timeout=20000)
   pg.wait_for_timeout(500)
-  key = pg.evaluate("document.querySelector('#sySheet .sy-key code').textContent.trim()")
+  if pg.locator('#sySheet .sy-key code').count(): key = pg.evaluate("document.querySelector('#sySheet .sy-key code').textContent.trim()")
+  else:
+    ok(pg.locator('#sySheet a.sy-dl, #sySheet .sy-phone').count() == 1, '1 NinjaTrader 8: the download that carries the key (on a phone: do it from the computer)')
+    key = ctx.request.post(B + '/api/sync/key', data=json.dumps({'platform': 'ninjatrader'}), headers=H).json().get('key', '')
   ok(key.startswith('swk_') and pg.locator('aside.nav-hist.open').count() == 0, f'1 « Ramène ton historique » › NinjaTrader 8: the connection opens with the personal key ({key[:8]}…)')
   # 2. the add-on's push (its own request: no session, the key alone), then the account linked
   fills = [{'id': 'h1', 'account': 'APEX-H-01', 'contract': 'MNQ 12-26', 'side': 'buy', 'qty': 1, 'price': 21000.25, 'ts': ms('2026-10-07 09:31:05'), 'fee': 0.62, 'point_value': 2},
