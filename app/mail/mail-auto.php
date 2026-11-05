@@ -12,8 +12,8 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *    tradesMilestone (10th, 50th, 100th trade), firstPayoutLogged (once each), subscriptionStarted, subscriptionCanceled,
  *    paymentFailed (Stripe webhook), referralRewarded;
  *  - by mail/send-cron.php: once a New York day from 7:30, inactive3d / 7d / 14d / 30d and proTrialDaysLeft (30, 10, 3),
- *    proTrialEnded; every run, day1Evening (18:30 New York on the day of sign-up, or the next day after 18:00, when no plan
- *    is saved yet; given up 6 hours later);
+ *    proTrialEnded, phoneInstall (day 3: a trade, no phone with notifications); every run, day1Evening (18:30 New York on the
+ *    day of sign-up, or the next day after 18:00, when no plan is saved yet; given up 6 hours later);
  *  - the feedback emails (brief « Courriels de feedback », step 4): weekOne, nps30, featureDiscover, months3 in the same
  *    daily run (ma_feedback_due), feedbackShipped when Admin › Feedback sets a trader's feedback to « shipped ».
  * Rules:
@@ -156,16 +156,20 @@ function ma_send(string $uid, string $key, array $vars = []): bool
     $pdo = ma_pdo();
     try {
         ma_seed($pdo);
-        $c = ml_q($pdo, 'SELECT id, status FROM mail_campaigns WHERE auto = ?', [$key])->fetch(PDO::FETCH_ASSOC);
-        if (!$c || $c['status'] !== 'active') return true;
         $u = ma_q('SELECT email, first_name, lang, disabled FROM users WHERE id = ?', [$uid])->fetch(PDO::FETCH_ASSOC);
-        if (!$u || (int) ($u['disabled'] ?? 0) === 1 || !filter_var(trim((string) $u['email']), FILTER_VALIDATE_EMAIL)) return true;
+        if (!$u || (int) ($u['disabled'] ?? 0) === 1) return true;
         if (isset($vars['plan'])) $vars['plan'] = ucfirst((string) $vars['plan']);
         if ($key === 'featureDiscover') $vars = ma_feature_vars((string) ($vars['feature'] ?? ''), ml_lang($u['lang'] ?? ''));   // the feature in the trader's language
+        // (5 Nov., brief notifications) the phone first (push/push-auto.php): the email then waits 24 h, and leaves only if the
+        // notification was not opened; without a device, or for the account and its money, the email at once
+        $p = function_exists('pa_dispatch') ? pa_dispatch($uid, $key, $vars) : ['delay' => 0, 'pid' => null];
+        $c = ml_q($pdo, 'SELECT id, status FROM mail_campaigns WHERE auto = ?', [$key])->fetch(PDO::FETCH_ASSOC);
+        if (!$c || $c['status'] !== 'active' || !filter_var(trim((string) $u['email']), FILTER_VALIDATE_EMAIL)) return true;
         $now = time();
         ml_q($pdo, "INSERT INTO mail_queue (campaign_id, user_id, email, lang, first_name, kind, vars_json, token, state, next_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, ?)",
             [(int) $c['id'], $uid, trim((string) $u['email']), ml_lang($u['lang'] ?? ''), mb_substr(trim((string) ($u['first_name'] ?? '')), 0, 40), ma_kind($key),
-             $vars ? json_encode(array_map('strval', $vars), JSON_UNESCAPED_UNICODE) : null, ml_token(), $now, $now]);
+             $vars ? json_encode(array_map('strval', $vars), JSON_UNESCAPED_UNICODE) : null, ml_token(), $now + (int) $p['delay'], $now]);
+        if ($p['pid'] !== null) pa_link((int) $p['pid'], (int) $pdo->lastInsertId());
         ml_q($pdo, 'UPDATE mail_campaigns SET recipients = recipients + 1 WHERE id = ?', [(int) $c['id']]);
         return true;
     } catch (Throwable $e) { error_log('[Sweep mail auto] ' . $key . ' ' . $uid . ': ' . $e->getMessage()); return false; }
@@ -400,6 +404,10 @@ function ma_daily_due(array $u, array $b, int $from, int $now): array
         $due = $seen + $d * 86400;
         if ($due > $from && $due <= $now) { $out[] = ["inactive{$d}d", "inactive{$d}d", [], $seen]; break; }
     }
+    // (5 Nov., brief notifications) Sweep on the phone: 3 days after sign-up, with a trade journaled and no phone receiving notifications
+    $up = (int) (strtotime((string) ($u['created_at'] ?? '')) ?: 0);
+    if ($up && $up + 3 * 86400 > $from && $up + 3 * 86400 <= $now && ma_trade_count((string) $u['id']) > 0
+        && !(function_exists('wp_devices') && function_exists('wp_config') && wp_config() && wp_devices(ma_pdo(), (string) $u['id']) > 0)) $out[] = ['phoneInstall', 'phoneInstall', [], 0];
     if ($b['live'] && $b['trial_end'] && !$b['paying'] && !$b['crew'] && !$b['permanent']) {
         $end = (int) $b['trial_end'];
         $steps = [['proTrialEnded', 'proTrialEnded', [], $end]];

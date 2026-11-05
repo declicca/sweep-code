@@ -5,8 +5,8 @@ declare(strict_types=1);
  *   php tests/mail_auto_test.php
  *  - nothing before the first run, which marks what existing traders already did (a trader with 12 trades never gets
  *    « first trade »); after Loops, its marks are kept and the past is not marked again;
- *  - the 23 automations are seeded once with their EN / FR / ES text, never overwritten; the 4 first steps of day one and the
- *    5 feedback emails (tests/mail_feedback_test.php) off;
+ *  - the 24 automations are seeded once with their EN / FR / ES text, never overwritten; the 4 first steps of day one and the
+ *    5 feedback emails (tests/mail_feedback_test.php) and « Sweep on your phone » (5 Nov.) off;
  *  - each event « once » is queued once: sign-up, profile, first account ({firm}), first trade, 10th / 50th / 100th trade,
  *    first payout, first plan, even after a delete and a new add; copies once, sample data never; an import: the highest milestone;
  *  - Stripe: subscriptionStarted, subscriptionCanceled (asked, or stopped right away), paymentFailed {plan}; referralRewarded;
@@ -75,12 +75,12 @@ $autoSet = fn(string $key, bool $on) => $pdo->prepare('UPDATE mail_campaigns SET
 ma_seed($pdo);
 $a = $pdo->query('SELECT auto, status, content_json FROM mail_campaigns WHERE auto IS NOT NULL')->fetchAll();
 $st = array_column($a, 'status', 'auto');
-$ok(count($a) === 23 && count(array_filter($a, fn($r) => array_map(fn($v) => $v['subject'] !== '' && $v['body'] !== '', json_decode($r['content_json'], true)) === ['en' => true, 'fr' => true, 'es' => true])) === 23,
-    '23 automations, each with a subject and a body in EN, FR and ES');
-$ok(array_keys(array_filter($st, fn($s) => $s === 'off')) === ['profileCompleted', 'firstAccountAdded', 'firstPlanSaved', 'firstTradeLogged', 'weekOne', 'nps30', 'featureDiscover', 'feedbackShipped', 'months3'], 'the 4 first steps of day one and the 5 feedback emails start off, the 14 others on');
+$ok(count($a) === 24 && count(array_filter($a, fn($r) => array_map(fn($v) => $v['subject'] !== '' && $v['body'] !== '', json_decode($r['content_json'], true)) === ['en' => true, 'fr' => true, 'es' => true])) === 24,
+    '24 automations, each with a subject and a body in EN, FR and ES');
+$ok(array_keys(array_filter($st, fn($s) => $s === 'off')) === ['profileCompleted', 'firstAccountAdded', 'firstPlanSaved', 'firstTradeLogged', 'weekOne', 'nps30', 'featureDiscover', 'feedbackShipped', 'months3', 'phoneInstall'], 'the 4 first steps of day one and the 5 feedback emails start off, the 14 others on');
 $pdo->exec("UPDATE mail_campaigns SET content_json = '{\"en\":{\"subject\":\"Mine\",\"preheader\":\"\",\"body\":\"Edited\"}}' WHERE auto = 'inactive30d'");
 ma_seed($pdo);
-$ok(strpos((string) $pdo->query("SELECT content_json FROM mail_campaigns WHERE auto = 'inactive30d'")->fetchColumn(), 'Edited') !== false && (int) $pdo->query('SELECT COUNT(*) FROM mail_campaigns WHERE auto IS NOT NULL')->fetchColumn() === 23,
+$ok(strpos((string) $pdo->query("SELECT content_json FROM mail_campaigns WHERE auto = 'inactive30d'")->fetchColumn(), 'Edited') !== false && (int) $pdo->query('SELECT COUNT(*) FROM mail_campaigns WHERE auto IS NOT NULL')->fetchColumn() === 24,
     'a text edited in Admin is never overwritten, nothing added twice');
 foreach (['profileCompleted', 'firstAccountAdded', 'firstPlanSaved', 'firstTradeLogged'] as $k) $autoSet($k, true);   // all on for the steps below
 

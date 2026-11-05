@@ -13,17 +13,20 @@ nouveau type (code : `notify/listeners.php` pour les types de la cloche, `push/w
 - **Exception : les alertes prop firm** (`prop_alerts` : la limite du jour ou le drawdown d'un compte à 75 % puis 100 %,
   les règles d'une firme qui changent). Elles répondent au trade que le trader vient d'enregistrer, ou à ses comptes ; jamais
   plafonnées ni comptées (brief 03, étape 3). Jamais sur le téléphone.
-- **Sur le téléphone** (push) : seulement 3 rappels, ceux de la cloche, donc dans les mêmes 2 par jour. Jamais pendant la
-  séance (9 h 30 – 16 h ET), jamais avant l'heure choisie par le trader, jamais quand il est dans l'app.
+- **Sur le téléphone** (push) : les rappels de la cloche (plan, revue, semaine, streak), donc dans les mêmes 2 par jour, plus
+  les messages automatiques (section 5). Jamais pendant la séance (9 h 30 – 16 h ET) sauf les alertes de compte, jamais avant
+  l'heure choisie par le trader, jamais quand il est dans l'app. **Heures calmes à l'heure du téléphone** (5 nov.) : rien de
+  21 h à 7 h sur l'horloge de l'appareil (fuseau envoyé par l'app), sauf le rappel du plan (son heure est choisie) et les
+  alertes de compte.
 
 ## 1. La cloche (dans l'app) — `notifications`
 
 | Type | Catégorie | Déclencheur | Au plus |
 |---|---|---|---|
-| `g_plan` « Ton plan du jour t'attend. » | Séries | Jour de marché, de l'heure du trader (8 h 45 par défaut, 7 h à 9 h 15) à 9 h 30 ET ; plan pas fait ; Sweep utilisé dans les 14 jours | 1 / jour · **push** |
+| `g_plan` « Ton plan du jour t'attend. » (sur le téléphone, depuis le 5 nov., la ligne nomme l'annonce importante du jour : « Annonce importante aujourd’hui : CPI à 8 h 30. Prévois-la dans ton plan. ») | Séries | Jour de marché, de l'heure du trader (8 h 45 par défaut, 7 h à 9 h 15) à 9 h 30 ET ; plan pas fait ; Sweep utilisé dans les 14 jours | 1 / jour · **push** |
 | `g_review` « 60 secondes pour balayer ta journée. » | Séries | Jour de marché, de l'heure du trader (16 h 30 par défaut, 16 h à 20 h 45) à 21 h ; revue pas faite ; un trade ou un plan | 1 / jour · **push** |
 | `g_weekly` « Ta semaine est prête. » | Accomplissements | Le bilan de la semaine prêt (dernier jour de bourse, après sa revue ou 17 h), de l'heure du trader (17 h par défaut) à 21 h, jusqu'au dimanche ; pas déjà ouvert | 1 / semaine · **push** |
-| `g_streak` « Ton streak de N jours est encore sauvable. » | Séries | Jour de marché, dès 21 h, streak de 3 jours et plus pas encore validé | 1 / jour |
+| `g_streak` « Ton streak de N jours est encore sauvable. » | Séries | Jour de marché, dès 19 h 30 (21 h avant le 5 nov.), streak de 3 jours et plus pas encore validé | 1 / jour · **push** |
 | `g_intention` « Nouvelles missions demain. » | Accomplissements | Dimanche dès 18 h, une revue de la semaine existe | 1 / semaine |
 | `g_wrapped` « Ton Wrapped du mois est prêt. » | Accomplissements | Le 1er du mois, hors séance, le Wrapped du mois passé existe | 1 / mois |
 | `trial_ending` | Compte et données | Essai Pro (ou accès anticipé) : 10 puis 2 jours avant la fin, sans abonnement | 2 en tout |
@@ -47,7 +50,9 @@ Chaque catégorie se coupe dans Réglages › Notifications. Les célébrations 
 - **Activer** : Réglages › Notifications › « Sur cet appareil » › « Activer les notifications ». Sur iPhone (iOS 16.4 et
   plus), seulement depuis Sweep ajouté à l'écran d'accueil ; l'app explique comment. Android et ordinateur : tout navigateur
   qui le permet.
-- **Les 3 rappels** : `g_plan`, `g_review`, `g_weekly` (tableau ci-dessus), chacun avec son interrupteur et son heure
+- **4 interrupteurs** (5 nov.) : Ma routine (plan, revue, semaine, streak ; les heures des 3 rappels dessous), Mes comptes
+  (Gardien, journée fermée, payout possible, objectif atteint), Mes progrès, Nouveautés et abonnement (`WP_GROUPS`).
+- **Les rappels** : `g_plan`, `g_review`, `g_weekly`, `g_streak` (tableau ci-dessus), l'heure des trois premiers au choix
 - **La journée fermée** : `g_lock` (push `lock`), envoyée au moment du verrou, pendant la séance aussi ; son interrupteur, sans heure
   (heure de New York, par quart d'heure ; l'heure vaut aussi pour la cloche). Envoyés par la tâche `game` (toutes les
   15 minutes) seulement, pas quand le trader ouvre l'app. Texte de la cloche, dans la langue de l'appareil ; un toucher ouvre
@@ -128,3 +133,35 @@ Ton : aucune culpabilité, pas de chiffre de pertes, une seule action.
 Toasts de confirmation et « Annuler » ; célébrations du jeu (une fenêtre par visite pour les grands moments, 2 petits toasts
 au plus puis « N nouveautés ») ; bandeau « nouvelle version » ; bannière et rappel de fin d'essai ; « Déconnecté ». Ils
 apparaissent seulement quand le trader est dans l'app.
+
+## 6. Le téléphone d'abord (5 nov., brief « Notifications ») — `push/push-auto.php`
+
+Chaque message automatique a trois sorties : le téléphone, le courriel (même clé, section 4) et, pour une alerte de compte,
+la cloche. Chaque notification part **éteinte** : Admin › Courriels › une automatisation › « Sur le téléphone » (texte EN / FR /
+ES, interrupteur, chiffres sur 30 jours : envoyées, ouvertes, courriels de relais partis, courriels évités).
+
+| Message | Canal | Interrupteur |
+|---|---|---|
+| `day1Evening`, `inactive3d`, `inactive7d`, `referralRewarded` | téléphone d'abord, courriel 24 h plus tard s'il n'a pas été ouvert et que le trader n'est pas revenu | Ma routine / Mes progrès |
+| `firstTradeLogged`, `tradesMilestone`, `firstPayoutLogged` | idem, seulement quand le trader n'est pas dans l'app (dans l'app : le courriel comme avant) | Mes progrès |
+| `proTrialDaysLeft`, `proTrialEnded`, `subscriptionStarted`, `paymentFailed` | téléphone et courriel en même temps | Nouveautés et abonnement |
+| `inactive14d`, `inactive30d`, `subscriptionCanceled`, `signedUp`, `phoneInstall`… | courriel seulement | — |
+| `payoutReady` (une fois par cycle de payout), `goalReached` (avec ce qui reste), `evalPassed` (une fois par compte) | téléphone + cloche (`pa_alert`, alertes prop firm), pendant la séance aussi, hors des 5 de la semaine | Mes comptes |
+| `feedbackShipped` « Tu l'as demandé, c'est fait » | téléphone et courriel en même temps | Mes progrès |
+| `weekOne` « Une semaine de Sweep », `featureDiscover` (fonction à découvrir) | téléphone d'abord, courriel 24 h plus tard (le courriel allumé déclenche l'envoi) | Mes progrès |
+| `nps30`, `months3` (questions longues) | courriel seulement | — |
+| `news` la nouveauté du mois | téléphone seulement, envoyée à la main par Mateo, une fois par 28 jours au plus | Nouveautés et abonnement |
+
+Garde-fous (le téléphone seulement) : 2 par jour avec les rappels de la cloche (sinon le lendemain, 2 fois au plus, puis le
+courriel), **5 par semaine** (alertes de compte à part), heures calmes et séance comme plus haut, **fatigue** (les 4 dernières
+d'un groupe ignorées : 1 par semaine au plus jusqu'à une ouverture), **30 jours d'absence** : plus rien. Une notification qui ne
+part pas libère son courriel tout de suite. Ouverture : le service worker appelle `api/p/o/<jeton>`. Envoi : `mail/send-cron.php`
+(chaque minute), aucune nouvelle ligne cron.
+
+**Sweep sur le téléphone** : code QR sur ordinateur (Réglages › Notifications, et une ligne de la routine une fois qu'un trade
+est journalisé, « Plus tard » = 7 jours), qui ouvre `/?i=qr` et montre l'installation sur le téléphone ; courriel `phoneInstall`
+au jour 3 (un trade, aucun téléphone abonné ; éteint au départ) ; sur téléphone, à la première alerte du Gardien ou première
+journée fermée vue dans l'app, « Reçois cette alerte sur ton téléphone » (une fois chacune, jamais entre le premier trade et la
+revue, jamais à moins de 7 jours d'une autre proposition). Admin › Métriques : la part des traders actifs avec l'app installée
+et avec les notifications.
+

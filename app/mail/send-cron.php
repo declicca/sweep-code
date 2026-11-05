@@ -13,6 +13,11 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require __DIR__ . '/boot.php';
 require_once __DIR__ . '/mail-auto.php';
 require_once $root . '/ops/cron-lib.php';
+// (5 Nov., brief notifications) the phone notifications of the automatic messages (push/push-auto.php), sent before the emails
+if (!empty($cfg['push_config']) && !defined('SWEEP_PUSH_CONFIG')) define('SWEEP_PUSH_CONFIG', (string) $cfg['push_config']);
+require_once $root . '/notify/notify.php';
+require_once $root . '/push/web-push.php';
+require_once $root . '/push/push-auto.php';
 $dry = in_array('--dry-run', $argv, true);
 ml_schema($pdo);
 if ($dry) { echo json_encode(['cap' => ml_cap($pdo), 'left' => ml_left($pdo), 'due' => ml_q($pdo, "SELECT id, name FROM mail_campaigns WHERE status = 'scheduled' AND scheduled_at <= ?", [time()])->fetchAll()]) . "\n"; exit; }
@@ -22,6 +27,8 @@ sweep_cron_start($pdo, 'mail');
 $smtp = new MlSmtp((array) ($cfg['smtp'] ?? []));
 try {
     $auto = ma_cron($pdo);
+    $pa = pa_run();
+    if ($pa['sent'] || $pa['skipped']) $auto .= ($auto !== '' ? ', ' : '') . $pa['sent'] . ' notifications' . ($pa['skipped'] ? ' (' . $pa['skipped'] . ' held back)' : '');
     $r = ml_run($pdo, fn($to, $s, $t, $h, $hd, $tok) => $smtp->send($to, $s, $t, $h, $hd, $tok));
     $smtp->close();
     sweep_cron_note(($auto !== '' ? $auto . ' · ' : '') . $r['sent'] . ' sent' . ($r['failed'] ? ', ' . $r['failed'] . ' failed' : '') . ' · ' . $r['left'] . ' queued · ' . $r['hour'] . ' of ' . $r['cap'] . ' this hour');

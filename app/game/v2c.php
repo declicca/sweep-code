@@ -18,7 +18,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 final class GameNotifyService
 {
     /** the reminders that also reach the phone (push/web-push.php: kind) */
-    private const PUSH = ['g_plan' => 'plan', 'g_review' => 'review', 'g_weekly' => 'weekly', 'g_lock' => 'lock', 'g_guard_watch' => 'guard', 'g_guard_danger' => 'guard'];   // (3 Nov.) the account guardian (guard/guard.php)   // (1 Nov., brief avance 4) the day's lock, sent by GameEngine::recomputeDay
+    private const PUSH = ['g_plan' => 'plan', 'g_review' => 'review', 'g_weekly' => 'weekly', 'g_streak' => 'streak', 'g_lock' => 'lock', 'g_guard_watch' => 'guard', 'g_guard_danger' => 'guard'];   // (5 Nov., brief notifications) the streak too   // (3 Nov.) the account guardian (guard/guard.php)   // (1 Nov., brief avance 4) the day's lock, sent by GameEngine::recomputeDay
 
     /** channels: the bell; and the phone ($push: the scheduled task) for the 3 reminders above. A reminder over the day's 2 waits. */
     public static function send(string $uid, string $type, array $params, string $dedupe, string $url, array $opts = [], bool $push = false): bool
@@ -26,7 +26,7 @@ final class GameNotifyService
         if (!class_exists('Notify', false)) return false;
         $id = Notify::send($uid, $type, $params, ['dedupe_key' => $dedupe, 'action_url' => $url] + $opts + ['over_cap' => 'skip']);
         if ($id) GameEngine::track($uid, 'notification_sent', ['type' => $type]);
-        if ($id && $push && !Notify::$quiet && isset(self::PUSH[$type]) && function_exists('wp_notify')) wp_notify(GameEngine::pdo(), $uid, self::PUSH[$type], $url);
+        if ($id && $push && !Notify::$quiet && isset(self::PUSH[$type]) && function_exists('wp_notify')) wp_notify(GameEngine::pdo(), $uid, self::PUSH[$type], $url, array_filter($params, 'is_scalar'));
         return (bool) $id;
     }
 
@@ -57,7 +57,8 @@ final class GameNotifyService
         if ($active && $market && $hm >= $at['plan'] && $hm < '09:30' && !($g && (int) $g['plan_valid'])) $todo[] = ['g_plan', [], '#dashboard'];
         if ($active && $market && $hm >= $at['review'] && $hm < '21:00' && $g && !(int) $g['review_done'] && ((int) $g['trades_count'] > 0 || (int) $g['plan_valid'])) $todo[] = ['g_review', [], '#dashboard'];
         $streak = GameEngine::profileState($uid)['streak'];
-        if ($market && $hm >= '21:00' && !($g && (int) $g['is_valid_streak']) && $streak['current'] >= 3) $todo[] = ['g_streak', ['n' => $streak['current']], '#dashboard'];
+        // (5 Nov., brief notifications) from 19:30 (before: 21:00), so it can also reach the phone before its quiet hours
+        if ($market && $hm >= '19:30' && !($g && (int) $g['is_valid_streak']) && $streak['current'] >= 3) $todo[] = ['g_streak', ['n' => $streak['current']], '#dashboard'];
         if (class_exists('GameV2b', false)) {
             $w = GameV2b::weeklyState($uid, true);
             // the week's recap (brief 01 step 5): ONE notification when it is ready (review of the last trading day, or its close),

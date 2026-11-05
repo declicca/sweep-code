@@ -336,7 +336,7 @@ $('otp').addEventListener('input',()=>{const c=$('otp').value.replace(/\D/g,'').
 document.addEventListener('click',async e=>{if(!e.target.closest('#resendBtn'))return;e.preventDefault();const r=await post('api/auth/code/resend',{}).catch(()=>null);const ok=$('okmsg'),err=$('err');
   if(r&&r.ok){err.textContent='';ok.textContent=tx('resent');ok.hidden=false}else{ok.hidden=true;err.textContent=r?(srv(r.d.error)||tx('eGen',{n:r.status})):tx('eNet')}});
 async function post(url,body){const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'fetch'},body:JSON.stringify(body)});const d=await res.json().catch(()=>({}));return {ok:res.ok,status:res.status,d}}
-const enter=()=>{location.href='/'};
+const enter=()=>{location.href=params.get('i')==='qr'?'/?i=qr':'/'};/* (5 Nov.) the QR code of a computer: the phone shows how to install once signed in */
 $('f').addEventListener('submit',async e=>{
   e.preventDefault();const err=$('err');err.textContent='';
   const v=id=>$(id).value.trim(),pw=$('password').value;let url,body;

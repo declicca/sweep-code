@@ -4500,6 +4500,28 @@ window.SweepMO = window.SweepMO || class {
     if (!x.can) return '';
     return `<div class="nav-remind"><p><b>${esc2(rmt('q', x.planAt))}</b></p><div class="nav-remind-a"><button type="button" class="btn sm" data-rt="remind-yes">${esc2(rmt('yes'))}</button><button type="button" class="link" data-rt="remind-no">${esc2(rmt('no'))}</button></div></div>`;
   }
+  /* (5 Nov., brief notifications) on a computer, once a trade is journaled: « Sweep on your phone » with the QR code (the phone then
+     shows how to install, /?i=qr); never blue. « Later »: 7 days; « Done »: never again. Not when a phone already gets notifications. */
+  const QR_T = {
+    en: { t: 'Sweep on your phone', s: 'Scan this code: your alerts and reminders follow you, even when Sweep is closed.', later: 'Later', done: 'Done' },
+    fr: { t: 'Sweep sur ton téléphone', s: 'Scanne ce code : tes alertes et tes rappels te suivent, même quand Sweep est fermé.', later: 'Plus tard', done: 'C’est fait' },
+    es: { t: 'Sweep en tu teléfono', s: 'Escanea este código: tus alertas y recordatorios te siguen, incluso con Sweep cerrado.', later: 'Más tarde', done: 'Listo' } };
+  const qrt = (k) => (QR_T[L] || QR_T.en)[k];
+  const QR = { st: null, asked: false };
+  function qrRow() {
+    let off = false; try { off = localStorage.getItem('sw.qr1') === '1' || +(localStorage.getItem('sw.qrLater') || 0) > Date.now(); } catch (e) { off = true; }
+    if (off || !matchMedia('(pointer: fine)').matches || matchMedia('(pointer: coarse)').matches || !window.SweepNotify || !SweepNotify.push) return '';
+    if (!(S.trades || []).some((x) => !x.demo)) return '';
+    if (!QR.st) { if (!QR.asked) { QR.asked = true; SweepNotify.push.state().then((x) => { QR.st = x; if (window.SweepNowRefresh) SweepNowRefresh(); }).catch(() => { /* no row */ }); } return ''; }
+    if (!QR.st.available || QR.st.devices > 0) return '';
+    return `<div class="nav-remind nav-qr"><img src="img/qr-app.svg" alt="" width="84" height="84"><div><p><b>${esc2(qrt('t'))}</b></p><p class="muted">${esc2(qrt('s'))}</p>
+      <div class="nav-remind-a"><button type="button" class="btn sm" data-rt="qr-done">${esc2(qrt('done'))}</button><button type="button" class="link" data-rt="qr-later">${esc2(qrt('later'))}</button></div></div></div>`;
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-rt="qr-done"], [data-rt="qr-later"]'); if (!b) return;
+    try { if (b.dataset.rt === 'qr-done') localStorage.setItem('sw.qr1', '1'); else localStorage.setItem('sw.qrLater', String(Date.now() + 7 * 864e5)); } catch (x) { /* private mode */ }
+    if (window.SweepNowRefresh) SweepNowRefresh();
+  });
   document.addEventListener('click', async (e) => {
     const b = e.target.closest && e.target.closest('[data-rt="remind-yes"], [data-rt="remind-no"]'); if (!b) return;
     rmClose();
@@ -4585,7 +4607,7 @@ window.SweepMO = window.SweepMO || class {
     // (1 Nov., brief avance 6) « Your October is ready »: the Month in Review, at the top of the card until seen to its end
     const mrRow = window.SweepGame && SweepGame.monthCard ? SweepGame.monthCard() : '';
     const nowRow = nowHtml(d, r);
-    const rmRow = remindRow();
+    const rmRow = remindRow() || qrRow();
     const gpRow = gpLine();
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
@@ -4796,9 +4818,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { later: 'Later', instGo: 'Install', pushT: 'Turn on your reminders', pushS: 'Your plan before the open, your review after the session, your Friday recap: Sweep reminds you on this phone.', pushGo: 'Turn on', planT: 'Your plan before your next trade', planS: 'Your last 3 sessions were traded without a plan. 30 seconds before the open: your bias and your max loss.', planGo: 'Make my plan', onbT: 'Three steps and you’re trading.', onbS: 'Your account, your plan for the day, your first trade: about two minutes.', st1: 'Your account', st2: 'Your plan', st3: 'Your first trade', wel: 'Welcome', feeN: '${a} of fees added to your expenses', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
-    fr: { later: 'Plus tard', instGo: 'Installer', pushT: 'Active tes rappels', pushS: 'Ton plan avant l’ouverture, ta revue après la séance, ton bilan du vendredi : Sweep te les rappelle sur ce téléphone.', pushGo: 'Activer', planT: 'Ton plan avant ton prochain trade', planS: 'Tes 3 dernières séances se sont faites sans plan. 30 secondes avant l’ouverture : ton biais et ta perte max.', planGo: 'Faire mon plan', onbT: 'Trois étapes et tu trades.', onbS: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.', st1: 'Ton compte', st2: 'Ton plan', st3: 'Ton premier trade', wel: 'Bienvenue', feeN: '{a} $ de frais ajoutés à tes dépenses', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
-    es: { later: 'Más tarde', instGo: 'Instalar', pushT: 'Activa tus recordatorios', pushS: 'Tu plan antes de la apertura, tu revisión tras la sesión, tu resumen del viernes: Sweep te lo recuerda en este teléfono.', pushGo: 'Activar', planT: 'Tu plan antes de tu próxima operación', planS: 'Tus 3 últimas sesiones se operaron sin plan. 30 segundos antes de la apertura: tu sesgo y tu pérdida máxima.', planGo: 'Hacer mi plan', onbT: 'Tres pasos y operas.', onbS: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.', st1: 'Tu cuenta', st2: 'Tu plan', st3: 'Tu primera operación', wel: 'Bienvenido', feeN: '{a} $ de comisiones añadidas a tus gastos', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
+    en: { pushAT: 'Get this alert on your phone', pushAS: 'Even when Sweep is closed: your account guardian and your day closed, the moment they happen.', pushAGo: 'Turn on', later: 'Later', instGo: 'Install', pushT: 'Turn on your reminders', pushS: 'Your plan before the open, your review after the session, your Friday recap: Sweep reminds you on this phone.', pushGo: 'Turn on', planT: 'Your plan before your next trade', planS: 'Your last 3 sessions were traded without a plan. 30 seconds before the open: your bias and your max loss.', planGo: 'Make my plan', onbT: 'Three steps and you’re trading.', onbS: 'Your account, your plan for the day, your first trade: about two minutes.', st1: 'Your account', st2: 'Your plan', st3: 'Your first trade', wel: 'Welcome', feeN: '${a} of fees added to your expenses', state: 'New or already running?', nw: 'New', run: 'Already running', cur: 'Current balance ($)', peak: 'Highest balance reached ($)', peakH: 'Only for a drawdown that trails your highest balance.', more: 'More details', less: 'Fewer details', netH: 'or your net P&L', instT: 'Add Sweep to your home screen', instS: 'Open it like an app, full screen, in one tap.', ios: 'iPhone', and: 'Android', i1: 'In Safari, tap Share', i2: 'Choose « Add to Home Screen »', i3: 'Tap « Add »', a1: 'In Chrome, tap the ⋮ menu', a2: 'Choose « Install app » or « Add to Home screen »', a3: 'Confirm', ok: 'Got it' },
+    fr: { pushAT: 'Reçois cette alerte sur ton téléphone', pushAS: 'Même quand Sweep est fermé : ton Gardien de compte et ta journée fermée, au moment où ça arrive.', pushAGo: 'Activer', later: 'Plus tard', instGo: 'Installer', pushT: 'Active tes rappels', pushS: 'Ton plan avant l’ouverture, ta revue après la séance, ton bilan du vendredi : Sweep te les rappelle sur ce téléphone.', pushGo: 'Activer', planT: 'Ton plan avant ton prochain trade', planS: 'Tes 3 dernières séances se sont faites sans plan. 30 secondes avant l’ouverture : ton biais et ta perte max.', planGo: 'Faire mon plan', onbT: 'Trois étapes et tu trades.', onbS: 'Ton compte, ton plan du jour, ton premier trade : environ deux minutes.', st1: 'Ton compte', st2: 'Ton plan', st3: 'Ton premier trade', wel: 'Bienvenue', feeN: '{a} $ de frais ajoutés à tes dépenses', state: 'Neuf ou déjà en cours ?', nw: 'Neuf', run: 'Déjà en cours', cur: 'Solde actuel ($)', peak: 'Plus haut solde atteint ($)', peakH: 'Seulement pour un drawdown qui suit ton plus haut solde.', more: 'Plus de détails', less: 'Moins de détails', netH: 'ou ton P&L net', instT: 'Ajoute Sweep à ton écran d’accueil', instS: 'Ouvre-le comme une app, plein écran, en un toucher.', ios: 'iPhone', and: 'Android', i1: 'Dans Safari, touche Partager', i2: 'Choisis « Sur l’écran d’accueil »', i3: 'Touche « Ajouter »', a1: 'Dans Chrome, touche le menu ⋮', a2: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »', a3: 'Confirme', ok: 'Compris' },
+    es: { pushAT: 'Recibe esta alerta en tu teléfono', pushAS: 'Incluso con Sweep cerrado: tu guardián de cuenta y tu día cerrado, en el momento en que ocurren.', pushAGo: 'Activar', later: 'Más tarde', instGo: 'Instalar', pushT: 'Activa tus recordatorios', pushS: 'Tu plan antes de la apertura, tu revisión tras la sesión, tu resumen del viernes: Sweep te lo recuerda en este teléfono.', pushGo: 'Activar', planT: 'Tu plan antes de tu próxima operación', planS: 'Tus 3 últimas sesiones se operaron sin plan. 30 segundos antes de la apertura: tu sesgo y tu pérdida máxima.', planGo: 'Hacer mi plan', onbT: 'Tres pasos y operas.', onbS: 'Tu cuenta, tu plan del día, tu primera operación: unos dos minutos.', st1: 'Tu cuenta', st2: 'Tu plan', st3: 'Tu primera operación', wel: 'Bienvenido', feeN: '{a} $ de comisiones añadidas a tus gastos', state: '¿Nueva o ya en curso?', nw: 'Nueva', run: 'Ya en curso', cur: 'Saldo actual ($)', peak: 'Saldo más alto alcanzado ($)', peakH: 'Solo para un drawdown que sigue tu saldo más alto.', more: 'Más detalles', less: 'Menos detalles', netH: 'o tu P&L neto', instT: 'Añade Sweep a tu pantalla de inicio', instS: 'Ábrelo como una app, a pantalla completa, con un toque.', ios: 'iPhone', and: 'Android', i1: 'En Safari, toca Compartir', i2: 'Elige « Añadir a pantalla de inicio »', i3: 'Toca « Añadir »', a1: 'En Chrome, toca el menú ⋮', a2: 'Elige « Instalar aplicación » o « Añadir a pantalla de inicio »', a3: 'Confirma', ok: 'Entendido' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return null; };
@@ -4907,7 +4929,7 @@ window.SweepMO = window.SweepMO || class {
     const m = e.target.closest && e.target.closest('.nav-more-b');
     if (m) { const tk = m.closest('#tkSlide'); const on = tk.classList.toggle('nav-tk-min'); LS('sw.tkMore', on ? '0' : '1'); m.textContent = on ? t('more') + ' ▾' : t('less') + ' ▴'; }
   });
-  new window.SweepMO(() => { try { pass(); install(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
+  new window.SweepMO(() => { try { pass(); install(); moment(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 
 
   // 7. suggestions « do it now » (16 Oct., step 2 of the announcements): something useful not done yet, offered with the button
@@ -4979,8 +5001,9 @@ window.SweepMO = window.SweepMO || class {
   function show(id) {
     const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const step = (n2, ic, txt) => `<li><span class="nav-inst-n">${n2}</span><span class="nav-inst-ic">${ic}</span><span>${txt}</span></li>`;
+    LS('sw.suggAt', String(Date.now()));   // (5 Nov.) the last offer, whatever it was (the moments below wait a week after it)
     const head = id === 'install' ? `<div class="nav-inst-app" aria-hidden="true"><img src="icons/icon-192.png?v=2" alt="" onerror="this.remove()"></div><h2>${t('instT')}</h2><p class="muted">${t('instS')}</p>`
-      : `<div class="nav-inst-app nav-inst-sg" aria-hidden="true">${id === 'push' ? BELL_I : PLAN_I}</div><h2>${t(id + 'T')}</h2><p class="muted">${t(id + 'S')}</p>`;
+      : `<div class="nav-inst-app nav-inst-sg" aria-hidden="true">${id === 'push' || id === 'pushA' ? BELL_I : PLAN_I}</div><h2>${t(id + 'T')}</h2><p class="muted">${t(id + 'S')}</p>`;
     const body = id !== 'install' || bip ? '' : `<div class="seg nav-inst-seg"><button type="button" class="${ios ? 'on' : ''}" data-inst="ios">${t('ios')}</button><button type="button" class="${ios ? '' : 'on'}" data-inst="and">${t('and')}</button></div>
       <ol class="nav-inst-l" data-for="ios" ${ios ? '' : 'hidden'}>${step(1, SH_I, t('i1'))}${step(2, ADD_I, t('i2'))}${step(3, OK_I, t('i3'))}</ol>
       <ol class="nav-inst-l" data-for="and" ${ios ? 'hidden' : ''}>${step(1, DOT_I, t('a1'))}${step(2, ADD_I, t('a2'))}${step(3, OK_I, t('a3'))}</ol>`;
@@ -4998,13 +5021,43 @@ window.SweepMO = window.SweepMO || class {
         if (!bip) { sgSet(id, (r) => { r.done = true; }); return; }   // the gestures read: not asked again on this device
         const e = bip; bip = null;
         try { e.prompt(); const c = await e.userChoice; if (c && c.outcome === 'accepted') { LS('sw.installShown', '1'); sgSet(id, (r) => { r.done = true; }); } else laterSet(id); } catch (x) { /* the browser said no */ }
-      } else if (id === 'push') {
+      } else if (id === 'push' || id === 'pushA') {
         const r = window.SweepNotify && SweepNotify.push ? await SweepNotify.push.on().catch(() => null) : null;
         if (r && r.on) sgSet(id, (x) => { x.done = true; }); else location.hash = '#settings';   // refused: Settings says why
       } else if (id === 'plan') { sgSet(id, (x) => { x.done = true; }); if (window.SweepGame && SweepGame.openPlan) SweepGame.openPlan(); }
     });
     el.querySelectorAll('[data-inst]').forEach((b) => b.addEventListener('click', () => { el.querySelectorAll('[data-inst]').forEach((x) => x.classList.toggle('on', x === b)); el.querySelectorAll('.nav-inst-l').forEach((l) => { l.hidden = l.dataset.for !== b.dataset.inst; }); }));
   }
+  /* (5 Nov., brief notifications) the right moments on the phone: the first account guardian alert seen in the app (« watch » or
+     « danger ») and the first day closed → « Get this alert on your phone, even when Sweep is closed » (on an iPhone in Safari: Sweep
+     on the home screen first, notifications live there). Once each on this device; never between the first trade and the review
+     (offered after it), never within 7 days of another offer, never two windows at once. */
+  let mBusy = false;
+  async function moment() {
+    if (mBusy || typeof S === 'undefined' || !S.me || !phone()) return;
+    const seen = document.querySelector('#main .nav-guard.lv-watch, #main .nav-guard.lv-danger') ? 'guard' : document.querySelector('#main .nav-lock') ? 'lock' : '';
+    if (seen && !(SG()['m_' + seen] || {}).done && !LS('sw.momentDue')) LS('sw.momentDue', seen);
+    const due = LS('sw.momentDue'); if (!due) return;
+    if ((window.SweepQuiet && SweepQuiet()) || document.querySelector('.nav-inst, .nav-pass, #gSheet.open, .nav-am.open, #tkSlide.open, .nt-modal')) return;
+    if (+(LS('sw.suggAt') || 0) > Date.now() - 7 * 864e5) return;
+    mBusy = true;
+    try {
+      const p = window.SweepNotify && SweepNotify.push ? await SweepNotify.push.state().catch(() => null) : null;
+      const done = () => { sgSet('m_' + due, (r) => { r.done = true; }); try { localStorage.removeItem('sw.momentDue'); } catch (e) { /* private */ } };
+      if (!p || !p.available || p.on || (!p.can && !p.ios)) { done(); return; }   // nothing to offer (already on, blocked, or no push here)
+      try { if (sessionStorage.getItem('sw.modal') === '1') return; sessionStorage.setItem('sw.modal', '1'); } catch (x) { /* private mode */ }
+      done(); show(p.ios ? 'install' : 'pushA');
+    } finally { mBusy = false; }
+  }
+  /* (5 Nov.) the QR code shown on a computer opens /?i=qr on the phone: there, once signed in, « Sweep on your home screen » (its own
+     address cleaned, so a reload does not show it again); already installed, or on a computer: nothing */
+  try {
+    if (new URLSearchParams(location.search).get('i') === 'qr') {
+      history.replaceState(null, '', location.pathname + location.hash);
+      const qrGo = () => { if (typeof S === 'undefined' || !S.me) { setTimeout(qrGo, 400); return; } if (phone() && !standalone() && window.SweepInstall) SweepInstall.show(); };
+      setTimeout(qrGo, 800);
+    }
+  } catch (e) { /* never blocks */ }
   window.SweepInstall = { show: () => { forced = true; LS('sw.installShown', '0'); try { sessionStorage.removeItem('sw.modal'); } catch (e) { /* private */ } suggest(true); },
     suggest: () => suggest(false), state: SG };
 })();

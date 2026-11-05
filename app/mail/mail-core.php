@@ -311,6 +311,10 @@ function ml_render(PDO $pdo, array $v, string $lang, string $first, string $toke
             $html .= '<div style="margin:24px 0"><a href="' . $h($go($u)) . '" style="display:inline-block;background:#4c8dff;color:#0b0b0c;font-weight:600;font-size:15px;text-decoration:none;padding:13px 24px;border-radius:999px">' . $h($nb(trim($m[1]))) . '</a></div>';
             $text .= trim($m[1]) . ': ' . $go($u) . "\n\n"; continue;
         }
+        if ($blk === '[[qr]]') {   // (5 Nov.) the QR code that opens Sweep on a phone (img/qr-app.png, tools/qr-make.py)
+            $html .= '<div style="margin:8px 0 20px"><img src="' . $h(ml_base() . 'img/qr-app.png') . '" width="148" height="148" alt="QR" style="display:block;width:148px;height:148px;border:0;border-radius:12px"></div>';
+            continue;
+        }
         if (preg_match('/^#\s+(.+)$/u', $blk, $m)) {
             $html .= '<h2 style="margin:24px 0 8px;font-size:19px;line-height:1.3;color:#f2f2f3">' . $inline($m[1]) . '</h2>';
             $text .= mb_strtoupper(trim($m[1])) . "\n\n"; continue;
@@ -456,6 +460,10 @@ function ml_run(PDO $pdo, callable $send, ?int $now = null): array
     if ($room > 0) $rows = array_merge($rows, ml_q($pdo, "$pick AND q.kind <> 'transactional' ORDER BY CASE WHEN c.auto IS NOT NULL OR q.kind = 'weekly' THEN 0 ELSE 1 END, q.id LIMIT " . (int) $room, [$now])->fetchAll(PDO::FETCH_ASSOC));
     $camps = [];
     foreach ($rows as $q) {
+        // (5 Nov.) the email that relays a phone notification (push/push-auto.php): not needed once it was opened, or not yet
+        $hold = function_exists('pa_hold') ? pa_hold($q) : null;
+        if ($hold === 'hold') { ml_q($pdo, "UPDATE mail_queue SET state = 'pushed' WHERE id = ? AND state = 'queued'", [$q['id']]); continue; }
+        if (is_int($hold) && $hold > $now) { ml_q($pdo, "UPDATE mail_queue SET next_at = ? WHERE id = ? AND state = 'queued'", [$hold, $q['id']]); continue; }
         if (ml_q($pdo, "UPDATE mail_queue SET state = 'sending', next_at = ? WHERE id = ? AND state = 'queued'", [$now, $q['id']])->rowCount() !== 1) continue;
         $skip = ($q['kind'] === 'marketing' && (ml_suppressed($pdo, (string) $q['email'])
             || ($q['user_id'] !== null && (int) ml_q($pdo, 'SELECT COUNT(*) FROM email_prefs WHERE user_id = ? AND marketing = 0', [$q['user_id']])->fetchColumn() > 0)))

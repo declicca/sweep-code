@@ -918,10 +918,22 @@
     return `<div class="sec-h"><h2>${x.title}</h2><small class="muted">${new Date(d.generated_at).toLocaleTimeString()}</small></div>
       <div class="ux-mgrid">${card(x.north, d.north_star, x.active + ' : ' + d.active_7d, true)}${card(x.sign, d.signups.d7 + ' / ' + d.signups.d30, '7 j / 30 j')}
         ${d.first_trade ? card(({ en: 'Sign-up → first trade (median)', fr: 'Inscription → premier trade (médiane)', es: 'Registro → primera operación (mediana)' })[LANG] || 'Sign-up → first trade', d.first_trade.median_min == null ? '—' : (d.first_trade.median_min < 120 ? d.first_trade.median_min + ' min' : Math.round(d.first_trade.median_min / 60) + ' h'), ({ en: 'First trade on day 1: ', fr: 'Premier trade le jour 1 : ', es: 'Primera operación el día 1: ' })[LANG] + d.first_trade.day1_pct + ' %') : ''}        ${card(x.act, pct(d.activation_24h), x.of.replace('{n}', d.activation_24h.of))}${card(x.aha, pct(d.aha_7d), x.of.replace('{n}', d.aha_7d.of))}${card(x.w2, pct(d.retention_w2), x.of.replace('{n}', d.retention_w2.of))}
+        ${d.phone ? card(({ en: 'Sweep on the phone (30 d)', fr: 'Sweep sur le téléphone (30 j)', es: 'Sweep en el teléfono (30 d)' })[LANG] || 'Sweep on the phone (30 d)', d.phone.app.pct == null ? '—' : d.phone.app.pct + ' %',
+          (({ en: 'Notifications on: {p} · of {n} active', fr: 'Notifications activées : {p} · sur {n} actifs', es: 'Notificaciones activadas: {p} · de {n} activos' })[LANG] || '').replace('{p}', d.phone.push.pct == null ? '—' : d.phone.push.pct + ' %').replace('{n}', d.phone.active_30d)) : ''}
         ${card(x.ai, '$' + d.ai.today.toFixed(2), x.today + ' · $' + d.ai.d7.toFixed(2) + ' ' + x.d7)}${card(x.err, d.errors.js_24h + d.errors.php_24h, x.js + ' ' + d.errors.js_24h + ' · ' + x.php + ' ' + d.errors.php_24h)}
         ${card(x.mrr, d.revenue.mrr != null ? '$' + d.revenue.mrr : '—', (d.revenue.subs || []).map((s) => `${s.plan} ${s.i || ''} ×${s.n}`).join(' · '))}</div>
       <div class="ux-mlists"><div><h4>${x.src}</h4><ul>${list(d.signups.by_source_30d)}</ul></div><div><h4>${x.meth}</h4><ul>${list(d.trade_methods_30d)}</ul></div><div><h4>${{ en: 'Searches with no result (30 d)', fr: 'Recherches sans résultat (30 j)', es: 'Búsquedas sin resultado (30 d)' }[LANG] || 'Searches with no result (30 d)'}</h4><ul>${list(d.search_misses_30d)}</ul></div>
-      </div>${briefHtml(d)}${gameHtml(d)}`;
+      </div>${fiveHtml(d)}${briefHtml(d)}${gameHtml(d)}`;
+  }
+  // (5 Nov., brief monétisation, étape 1) « 5 trades in 7 days » by week of sign-up: the activation to watch around the « 100 traders » switch
+  function fiveHtml(d) {
+    const w = d.five_in_7; if (!w || !w.length) return '';
+    const T5 = { en: ['5 trades in the first 7 days', 'New traders who journaled 5 real trades in their first week, by week of sign-up.', 'week of', 'signed up', 'in progress'],
+      fr: ['5 trades dans les 7 premiers jours', 'Les nouveaux traders qui ont journalisé 5 vrais trades dans leur première semaine, par semaine d’inscription.', 'semaine du', 'inscrits', 'en cours'],
+      es: ['5 operaciones en los 7 primeros días', 'Los nuevos traders que registraron 5 operaciones reales en su primera semana, por semana de registro.', 'semana del', 'registrados', 'en curso'] }[LANG] || [];
+    const day = (d) => new Date(d + 'T12:00:00').toLocaleDateString(typeof LOC === 'function' ? LOC() : 'en-US', { day: 'numeric', month: 'short' });
+    const rows = w.map((r) => `<li><span>${esc(T5[2] + ' ' + day(r.week))} · ${r.n} ${esc(T5[3])}${r.open ? ' · ' + esc(T5[4]) : ''}</span><b>${r.pct == null ? '—' : r.pct + '\u00a0%'}</b></li>`).join('');
+    return `<div class="ux-mlists ux-five"><div><h4>${esc(T5[0])}</h4><p class="muted" style="margin:0 0 8px;font-size:12px">${esc(T5[1])}</p><ul>${rows}</ul></div></div>`;
   }
   // brief 02 part 11: each game feature, the share of the active traders (30 d) who used it or reached it; under 10 % in gold
   const GL = {

@@ -31,15 +31,15 @@ def unthrottle():
 def php(*a):
   return subprocess.run(['php', os.path.join(APP, 'tests', 'push_ua.php')] + list(a), capture_output=True, text=True, env=os.environ, timeout=60)
 X = {
-  'fr': {'denied': 'Les notifications sont bloquées pour Sweep.', 'h': 'Sur cet appareil', 'on': 'Activer les notifications', 'off': 'Désactiver sur cet appareil', 'rows': ['Rappel du plan', 'Rappel de la revue', 'Bilan de la semaine', 'Journée fermée', 'Gardien de compte'],
+  'fr': {'denied': 'Les notifications sont bloquées pour Sweep.', 'h': 'Sur cet appareil', 'on': 'Activer les notifications', 'off': 'Désactiver sur cet appareil', 'rows': ['Ma routine', 'Mes comptes', 'Mes progrès', 'Nouveautés et abonnement'],
          'times': ['8 h 45', '17 h 15', '17 h 00'], 'nine': '9 h 00', 'title': 'Ton plan du jour t’attend.', 'ios': 'Sur iPhone : ajoute Sweep à ton écran d’accueil',
-         'help': 'Heure de New York, pour la cloche aussi.'},
-  'en': {'denied': 'Notifications are blocked for Sweep.', 'h': 'On this device', 'on': 'Turn on notifications', 'off': 'Turn off on this device', 'rows': ['Plan reminder', 'Review reminder', 'Your week', 'Day closed', 'Account guardian'],
+         'help': 'Les heures des rappels sont celles de New York, pour la cloche aussi.'},
+  'en': {'denied': 'Notifications are blocked for Sweep.', 'h': 'On this device', 'on': 'Turn on notifications', 'off': 'Turn off on this device', 'rows': ['My routine', 'My accounts', 'My progress', 'News and subscription'],
          'times': ['8:45 AM', '5:15 PM', '5:00 PM'], 'nine': '9:00 AM', 'title': 'Your plan of the day is waiting.', 'ios': 'On iPhone: add Sweep to your Home Screen',
-         'help': 'New York time, for the bell too.'},
-  'es': {'denied': 'Las notificaciones están bloqueadas para Sweep.', 'h': 'En este dispositivo', 'on': 'Activar las notificaciones', 'off': 'Desactivar en este dispositivo', 'rows': ['Recordatorio del plan', 'Recordatorio de la revisión', 'Balance de la semana', 'Día cerrado', 'Guardián de cuenta'],
+         'help': 'Reminder times are New York time, for the bell too.'},
+  'es': {'denied': 'Las notificaciones están bloqueadas para Sweep.', 'h': 'En este dispositivo', 'on': 'Activar las notificaciones', 'off': 'Desactivar en este dispositivo', 'rows': ['Mi rutina', 'Mis cuentas', 'Mi progreso', 'Novedades y suscripción'],
          'times': ['8:45', '17:15', '17:00'], 'nine': '9:00', 'title': 'Tu plan del día te espera.', 'ios': 'En iPhone: añade Sweep a tu pantalla de inicio',
-         'help': 'Hora de Nueva York, también para la campana.'},
+         'help': 'Las horas de los recordatorios son de Nueva York, también para la campana.'},
 }
 SEED = """() => { put('accounts', { id: 'a', name: 'Main 50K', status: 'active', starting_balance_c: 5000000, rules: {} }); render(); }"""
 STUB = """(() => {   // the browser's push service, replaced: a subscription with the test's keys; the permission too
@@ -110,15 +110,16 @@ def run(p, lang, phone):
   sw = pg.evaluate("navigator.serviceWorker.getRegistration('/').then((r) => { const w = r && (r.active || r.waiting || r.installing); return w ? w.scriptURL : ''; })")
   ok(st['devices'] == 1 and sw.endswith('/sw.js') and pg.evaluate("window.__key") == 65, f"{tag} turned on: /sw.js registered, this device on the server, the server's key given to the browser ({st['devices']}, {sw})")
   names = pg.evaluate(TXT, '#ntPrefs .nt-push-row b')
-  times = pg.evaluate("[...document.querySelectorAll('#ntPrefs .nt-push-row select')].map((s) => s.options[s.selectedIndex].textContent)")
+  times = pg.evaluate("[...document.querySelectorAll('#ntPrefs .nt-push-sub select')].map((s) => s.options[s.selectedIndex].textContent)")
   ok(names == x['rows'] and times == x['times'] and pg.evaluate("[...document.querySelectorAll('#ntPrefs [data-nt-push]')].every((i) => i.checked)"),
-     f"{tag} the plan, the review and the week, on, at {times} ({names})")
+     f"{tag} (5 Nov.) the four switches, on; under « My routine » the plan, the review and the week at {times} ({names})")
   ok(pg.evaluate(TXT, '#ntPrefs .nt-push-help')[0].startswith(x['help']), f"{tag} « {x['help']} »")
-  # 3. the plan at 9:00, the review off: saved on the server
+  # 3. the plan at 9:00, « My accounts » off: saved on the server (its four kinds together, the routine kept)
   pg.select_option('#ntPrefs select[data-nt-push-at="plan"]', '09:00')
-  pg.click('#ntPrefs .nt-push-row:nth-child(2) .sw')
-  st = until(lambda: (lambda s: s if s['prefs']['plan']['at'] == '09:00' and s['prefs']['review']['on'] is False else None)(state(ctx)), 25)   # (24 Oct.: 10 s were not enough on a busy CI machine)
-  ok(bool(st) and st['prefs']['weekly'] == {'on': True, 'at': '17:00'}, f"{tag} plan at 9:00, review off: saved ({st and st['prefs']})")
+  pg.click('#ntPrefs .nt-push-row:has([data-nt-push="accounts"]) .sw')
+  st = until(lambda: (lambda s: s if s['prefs']['plan']['at'] == '09:00' and s['prefs']['lock']['on'] is False else None)(state(ctx)), 25)   # (24 Oct.: 10 s were not enough on a busy CI machine)
+  ok(bool(st) and st['prefs']['weekly'] == {'on': True, 'at': '17:00'} and all(st['prefs'][k]['on'] is False for k in ('lock', 'guard', 'payout', 'goal')) and st['groups'] == {'routine': True, 'accounts': False, 'progress': True, 'news': True},
+     f"{tag} plan at 9:00, « My accounts » off: saved ({st and st['prefs']})")
   ok(pg.evaluate("(() => { const s = document.querySelector('#ntPrefs select[data-nt-push-at=\"plan\"]'); return s.options[s.selectedIndex].textContent; })()") == x['nine'], f"{tag} it reads « {x['nine']} »")
   ok(pg.evaluate(WIDE) <= 1, f'{tag} nothing wider than the window')
   if SHOTS: pg.locator('#ntPrefs').screenshot(path=os.path.join(SHOTS, f'p10-on-{tag}.png'))

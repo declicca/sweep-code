@@ -102,6 +102,37 @@
       saving: 'Guardando…', savedAt: 'Guardado', untitled: 'Nueva campaña' },
   };
   const x = () => T[LANG] || T.en;
+  // (5 Nov., brief notifications) the phone notification of each message (push/push-auto.php, api/admin/push)
+  const PT = {
+    en: { h: 'On the phone', sub: 'The phone first: the email leaves 24 hours later, only if the notification was not opened. Each notification starts off: read it, then switch it on.',
+      reach: '{n} traders have notifications on', reach1: '1 trader has notifications on', reachG: 'My routine {routine} · My accounts {accounts} · My progress {progress} · News {news}', noKeys: 'No push keys on the server: nothing can reach the phones.',
+      ch: { push: 'Phone first, the email 24 h later if it was not opened', push_away: 'Phone first when the trader is not in the app, the email 24 h later if it was not opened', both: 'Phone and email at once (the account and its money)', only: 'Phone only', alert: 'Phone only, and in the bell: an account alert, never in the week’s 5, allowed during the session' },
+      title: 'Title', line: 'Line', save: 'Save', saved: 'Saved', on: 'Switch on', off: 'Switch off', vars: 'Filled in for each trader:',
+      st: '{s} sent · {o} opened ({r}) · {e} emails relayed · {p} emails spared', stNone: 'Nothing sent in 30 days',
+      only: 'Notifications without an email', onlySub: 'The moments of the trader’s accounts.',
+      news: 'Sweep news of the month', newsSub: 'Sent to every phone with « News » on, once a month at most. Write it in the 3 languages.', newsSend: 'Send to the phones', newsNext: 'Next one possible on {d}', newsLast: 'Last one sent on {d}',
+      askNews: 'Send this news to the phones?', askNewsS: 'It leaves within a minute, outside each phone’s quiet hours. It cannot be taken back.', askGo: 'Send', newsOk: '{n} notifications on their way',
+      err: { text: 'Write at least the English title and line.', too_soon: 'One news a month at most.' } },
+    fr: { h: 'Sur le téléphone', sub: 'Le téléphone d’abord : le courriel part 24 h plus tard, seulement si la notification n’a pas été ouverte. Chaque notification part éteinte : relis-la, puis allume-la.',
+      reach: '{n} traders ont activé les notifications', reach1: '1 trader a activé les notifications', reachG: 'Ma routine {routine} · Mes comptes {accounts} · Mes progrès {progress} · Nouveautés {news}', noKeys: 'Pas de clés push sur le serveur : rien ne peut partir vers les téléphones.',
+      ch: { push: 'Le téléphone d’abord, le courriel 24 h plus tard s’il n’a pas été ouvert', push_away: 'Le téléphone d’abord quand le trader n’est pas dans l’app, le courriel 24 h plus tard s’il n’a pas été ouvert', both: 'Le téléphone et le courriel en même temps (le compte et son argent)', only: 'Le téléphone seulement', alert: 'Le téléphone seulement, et dans la cloche : une alerte de compte, jamais dans les 5 de la semaine, permise pendant la séance' },
+      title: 'Titre', line: 'Ligne', save: 'Enregistrer', saved: 'Enregistré', on: 'Allumer', off: 'Éteindre', vars: 'Rempli pour chaque trader :',
+      st: '{s} envoyées · {o} ouvertes ({r}) · {e} courriels de relais partis · {p} courriels évités', stNone: 'Rien d’envoyé en 30 jours',
+      only: 'Notifications sans courriel', onlySub: 'Les moments des comptes du trader.',
+      news: 'La nouveauté du mois', newsSub: 'Envoyée à chaque téléphone où « Nouveautés » est allumé, une fois par mois au plus. Écris-la dans les 3 langues.', newsSend: 'Envoyer aux téléphones', newsNext: 'Prochaine possible le {d}', newsLast: 'Dernière envoyée le {d}',
+      askNews: 'Envoyer cette nouveauté aux téléphones ?', askNewsS: 'Elle part dans la minute, hors des heures calmes de chaque téléphone. Impossible de la reprendre.', askGo: 'Envoyer', newsOk: '{n} notifications en route',
+      err: { text: 'Écris au moins le titre et la ligne en anglais.', too_soon: 'Une nouveauté par mois au plus.' } },
+    es: { h: 'En el teléfono', sub: 'El teléfono primero: el correo sale 24 h después, solo si la notificación no se abrió. Cada notificación empieza apagada: léela y luego enciéndela.',
+      reach: '{n} traders activaron las notificaciones', reach1: '1 trader activó las notificaciones', reachG: 'Mi rutina {routine} · Mis cuentas {accounts} · Mi progreso {progress} · Novedades {news}', noKeys: 'No hay claves push en el servidor: nada puede llegar a los teléfonos.',
+      ch: { push: 'El teléfono primero, el correo 24 h después si no se abrió', push_away: 'El teléfono primero cuando el trader no está en la app, el correo 24 h después si no se abrió', both: 'El teléfono y el correo a la vez (la cuenta y su dinero)', only: 'Solo el teléfono', alert: 'Solo el teléfono, y en la campana: una alerta de cuenta, nunca en las 5 de la semana, permitida durante la sesión' },
+      title: 'Título', line: 'Línea', save: 'Guardar', saved: 'Guardado', on: 'Encender', off: 'Apagar', vars: 'Se completa para cada trader:',
+      st: '{s} enviadas · {o} abiertas ({r}) · {e} correos de relevo enviados · {p} correos evitados', stNone: 'Nada enviado en 30 días',
+      only: 'Notificaciones sin correo', onlySub: 'Los momentos de las cuentas del trader.',
+      news: 'La novedad del mes', newsSub: 'Se envía a cada teléfono con « Novedades » encendido, una vez al mes como máximo. Escríbela en los 3 idiomas.', newsSend: 'Enviar a los teléfonos', newsNext: 'La próxima es posible el {d}', newsLast: 'La última se envió el {d}',
+      askNews: '¿Enviar esta novedad a los teléfonos?', askNewsS: 'Sale en un minuto, fuera de las horas de silencio de cada teléfono. No se puede deshacer.', askGo: 'Enviar', newsOk: '{n} notificaciones en camino',
+      err: { text: 'Escribe al menos el título y la línea en inglés.', too_soon: 'Una novedad al mes como máximo.' } },
+  };
+  const px = () => PT[LANG] || PT.en;
   const f = (s, p) => String(s).replace(/\{(\w+)\}/g, (m, k) => (p && p[k] != null ? p[k] : m));
   const h = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const loc = () => (typeof LOC === 'function' ? LOC() : 'en-US');
@@ -111,11 +142,82 @@
   const LANGS = ['en', 'fr', 'es'];
   const ACT = { a0: {}, j30: { joined: 30 }, a7: { active: 7 }, a30: { active: 30 }, i14: { inactive: 14 }, i30: { inactive: 30 }, i60: { inactive: 60 } };
   const actOf = (a) => Object.keys(ACT).find((k) => ['joined', 'active', 'inactive'].every((n) => (ACT[k][n] || 0) === (a[n] || 0))) || 'a0';
-  const M = { ov: null, ovAt: 0, rep: {}, repAt: {}, edit: null, editId: 0, tab: 'en', aud: null, prev: null, msg: '', msgBad: false, saveT: 0, prevT: 0, saving: 0 };
+  const M = { pu: null, puAt: 0, puEd: {}, ov: null, ovAt: 0, rep: {}, repAt: {}, edit: null, editId: 0, tab: 'en', aud: null, prev: null, msg: '', msgBad: false, saveT: 0, prevT: 0, saving: 0 };
   const api = (path, body, method) => apiJSON(path, body !== undefined ? { method: method || 'POST', body } : method ? { method } : {});
   const errText = (e) => { const c = e && e.data && e.data.error; return (c && x().err[c]) ? f(x().err[c], { d: (e.data.detail || '').slice(0, 120) }) : (e && e.message) || 'Error'; };
   const here = () => route().v === 'mail';
   const repaint = () => { if (here() && typeof render === 'function') render(); };
+
+  /* ───── the phone (5 Nov.): each message's notification, the news of the month ───── */
+  function puLoad(force) {
+    if (M.puBusy || (!force && M.pu && Date.now() - M.puAt < 30000)) return;
+    M.puBusy = true;
+    api('api/admin/push').then((d) => { M.pu = d; M.puAt = Date.now(); M.puBusy = false; repaint(); }).catch(() => { M.puBusy = false; });
+  }
+  const puItem = (k) => (M.pu && M.pu.items.find((i) => i.key === k)) || null;
+  function puBox(it, head) {
+    const P = px(), k = it.key, E = M.puEd[k] || (M.puEd[k] = JSON.parse(JSON.stringify(it.text))), v = E[M.tab] || ['', ''], s = it.stats, news = k === 'news';
+    const tabs = LANGS.map((l) => `<button type="button" class="chip ${M.tab === l ? 'on' : ''}" data-ml="tab" data-v="${l}" aria-pressed="${M.tab === l}">${l.toUpperCase()}${E[l][0] && E[l][1] ? ' ✓' : ''}</button>`).join('');
+    const stat = s.sent ? f(P.st, { s: num(s.sent), o: num(s.opened), r: s.open_rate != null ? pct(s.open_rate) + ' %' : '—', e: num(s.relayed), p: num(s.spared) }) : P.stNone;
+    const acts = news
+      ? `<button type="button" class="btn primary" data-ml="pu-news" ${M.pu.news_next && M.pu.news_next * 1000 > Date.now() ? 'disabled' : ''}>${h(P.newsSend)}</button>`
+      : `<button type="button" class="btn" data-ml="pu-save" data-k="${k}">${h(P.save)}</button><button type="button" class="btn ${it.on ? '' : 'primary'}" data-ml="pu-on" data-k="${k}" aria-pressed="${it.on}">${h(it.on ? P.off : P.on)}</button>`;
+    const newsLine = news ? [M.pu.news_last ? f(P.newsLast, { d: when(M.pu.news_last) }) : '', M.pu.news_next && M.pu.news_next * 1000 > Date.now() ? f(P.newsNext, { d: when(M.pu.news_next) }) : ''].filter(Boolean).join(' · ') : '';
+    return `<div class="ml-box ml-pu" data-pu="${h(k)}">
+      <div class="ml-pu-h">${head}${news ? '' : chip(it.on ? 'active' : 'off')}</div>
+      <p class="muted ml-pu-ch">${h(news ? P.newsSub : P.ch[it.ch] || '')}</p>
+      <div class="ml-chips ml-tabs" role="group">${tabs}</div>
+      <label class="ml-f"><span>${h(P.title)}</span><input type="text" maxlength="80" data-pu-f="0" data-k="${h(k)}" value="${h(v[0])}"></label>
+      <label class="ml-f"><span>${h(P.line)}</span><input type="text" maxlength="160" data-pu-f="1" data-k="${h(k)}" value="${h(v[1])}"></label>
+      ${it.vars.length ? `<p class="muted ml-pu-vars">${h(P.vars)} ${it.vars.map((n) => `<code>{${h(n)}}</code>`).join(' ')}</p>` : ''}
+      <div class="ml-acts">${acts}</div>
+      <p class="muted ml-pu-st" data-pu-msg="${h(k)}">${h(news ? newsLine : stat)}</p>
+    </div>`;
+  }
+  /** the automation's page: its notification under its email */
+  function puFor(key) {
+    puLoad();
+    const it = puItem(key); if (!it) return '';
+    return puBox(it, `<h4>${h(px().h)}</h4>`);
+  }
+  /** #mail: the reach, the notifications without an email, the news of the month */
+  function puList() {
+    puLoad();
+    const P = px(), d = M.pu; if (!d) return '';
+    const r = d.reach, g = r.groups;
+    const only = d.items.filter((i) => (i.ch === 'alert' || i.ch === 'only') && i.key !== 'news').map((i) => puBox(i, `<b>${h((i.name && (i.name[LANG] || i.name.en)) || i.key)}</b><small class="muted">${h((i.when && (i.when[LANG] || i.when.en)) || '')}</small>`)).join('');
+    const news = puItem('news');
+    return `<h3 class="ml-h3">${h(P.h)}</h3><p class="muted ml-sub">${h(P.sub)}</p>
+      ${r.keys ? `<p class="ml-pu-reach"><b>${h(r.devices === 1 ? P.reach1 : f(P.reach, { n: num(r.devices) }))}</b><br><span class="muted">${h(f(P.reachG, { routine: num(g.routine), accounts: num(g.accounts), progress: num(g.progress), news: num(g.news) }))}</span></p>` : `<div class="ml-alert" role="alert">${h(P.noKeys)}</div>`}
+      <h4 class="ml-h4">${h(P.only)}</h4><p class="muted ml-sub">${h(P.onlySub)}</p>
+      <div class="ml-pu-list">${only}</div>
+      ${news ? `<h4 class="ml-h4">${h(P.news)}</h4>${puBox(news, '')}` : ''}`;
+  }
+  function puMsg(k, t) { const el = document.querySelector(`#main [data-pu-msg="${k}"]`); if (el) el.textContent = t; }
+  document.addEventListener('input', (e) => {
+    const el = e.target; if (!here() || !el.dataset || el.dataset.puF == null) return;
+    const k = el.dataset.k, E = M.puEd[k]; if (!E) return;
+    E[M.tab][+el.dataset.puF] = el.value;
+  });
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-ml^="pu-"]'); if (!b || !here()) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    const P = px(), a = b.dataset.ml, k = b.dataset.k;
+    const fail = (err) => { const c = err && err.data && err.data.error; const t = (c && P.err[c]) || errText(err); puMsg(k || 'news', t); if (typeof toast === 'function') toast(t); };
+    try {
+      if (a === 'pu-save' || a === 'pu-on') {
+        b.disabled = true; const it = puItem(k);
+        const r = await api('api/admin/push/' + k, a === 'pu-on' ? { on: !it.on, text: M.puEd[k] } : { text: M.puEd[k] });
+        Object.assign(it, r); M.puEd[k] = JSON.parse(JSON.stringify(r.text)); repaint(); if (a === 'pu-save') puMsg(k, P.saved); return;
+      }
+      if (a === 'pu-news') {
+        if (!(await (window.SweepAsk ? SweepAsk(P.askNews, P.askNewsS, P.askGo) : Promise.resolve(false)))) return;
+        b.disabled = true; const r = await api('api/admin/push/news/send', { text: M.puEd.news });
+        if (typeof toast === 'function') toast(f(P.newsOk, { n: num(r.queued) }));
+        M.puEd.news = null; delete M.puEd.news; puLoad(true); return;
+      }
+    } catch (err) { b.disabled = false; fail(err); }
+  }, true);
 
   /* ───── #mail: overview ───── */
   function loadOv(force) {
@@ -154,6 +256,7 @@
       ${rows ? `<ul class="ml-list">${rows}</ul>` : `<p class="muted ml-empty">${h(X.none)}</p>`}
       <h3 class="ml-h3">${h(X.autos)}</h3><p class="muted ml-sub">${h(X.autosSub)}</p>
       <ul class="ml-list ml-autos">${(d.autos || []).map((a) => `<li><a class="ml-row" href="#mail/${a.id}"><div><b>${h(a.name[LANG] || a.name.en)}</b>${chip(a.status)}${a.proposed ? `<span class="ml-st ml-st-new">${h(X.newB)}</span>` : ''}</div><small>${h(a.when[LANG] || a.when.en)}</small><small>${h([a.sent ? f(X.autoRow, { n: num(a.sent) }) : X.autoNone, a.open_rate != null ? f(X.row.opens, { a: pct(a.open_rate) }) : '', a.click_rate != null ? f(X.row.clicks, { a: pct(a.click_rate) }) : '', a.answer_rate != null ? f(X.rowAns, { a: pct(a.answer_rate) }) : ''].filter(Boolean).join(' · '))}</small></a></li>`).join('')}</ul>
+      ${puList()}
       ${useBox(d.usage)}
       <div class="ml-two">
         <div class="ml-box"><h4>${h(X.list)}</h4><p><b>${h(f(X.reach, { n: num(L.reachable) }))}</b></p><p class="muted">${h(f(X.off, { n: num(L.unsubscribed) }))} · ${h(f(X.sup, { n: num(L.suppressed) }))}</p></div>
@@ -259,6 +362,7 @@
       ${contentBlock(help)}
       <div class="ml-acts ml-test"><button type="button" class="btn" data-ml="test">${h(X.test)}</button></div>
       <p class="ml-msg ${M.msgBad ? 'bad' : ''}" role="status" data-ml-msg>${h(M.msg)}</p>
+      ${puFor(c.auto)}
       <h3 class="ml-h3">${h(X.since)}</h3>
       <div class="ux-mgrid ml-kpis">${kpi(X.sent2, num(s.sent))}${kpi(X.rk.opens, rate(s.open_rate), num(s.opens))}${kpi(X.rk.clicks, rate(s.click_rate), num(s.clicks))}
         ${kpi(X.rk.unsub, rate(s.unsub_rate), num(s.unsubs))}${kpi(X.rk.bounce, rate(s.bounce_rate), num(s.bounces))}${s.answers || (d.questions || []).length ? kpi(X.rk.answers, rate(s.answer_rate), num(s.answers)) : ''}</div>

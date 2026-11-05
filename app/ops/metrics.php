@@ -226,8 +226,40 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         $n = count($act30); $pc = fn(array $x) => ['n' => count($x), 'pct' => $n ? (int) round(count($x) / $n * 100) : 0];
         $game = ['active_30d' => $n, 'used' => array_map($pc, $used), 'reached' => array_map($pc, $reached)];
     }
+    // (5 Nov., brief notifications) Sweep on the phone: of the traders active in 30 days (a visit, a trade, a plan or a review),
+    // those who opened the installed app (usage_daily « -app ») and those with notifications on a device (push_subscriptions)
+    $phone = null;
+    if ($has('usage_daily')) {
+        $realP = array_fill_keys(array_column($all, 'id'), true); $from = $nyDay($now - 30 * $day); $actP = [];
+        foreach ($q('SELECT DISTINCT user_id FROM usage_daily WHERE day >= ?', [$from])->fetchAll(PDO::FETCH_COLUMN) as $u) if (isset($realP[$u])) $actP[$u] = true;
+        if ($has('game_days')) foreach ($q('SELECT DISTINCT user_id FROM game_days WHERE activity = 1 AND trading_day >= ?', [$from])->fetchAll(PDO::FETCH_COLUMN) as $u) if (isset($realP[$u])) $actP[$u] = true;
+        $inApp = 0; foreach ($q("SELECT DISTINCT user_id FROM usage_daily WHERE day >= ? AND device LIKE '%-app'", [$from])->fetchAll(PDO::FETCH_COLUMN) as $u) if (isset($actP[$u])) $inApp++;
+        $push = 0; if ($has('push_subscriptions')) foreach ($q('SELECT DISTINCT user_id FROM push_subscriptions')->fetchAll(PDO::FETCH_COLUMN) as $u) if (isset($actP[$u])) $push++;
+        $phone = ['active_30d' => count($actP), 'app' => ['n' => $inApp, 'pct' => $rate($inApp, count($actP))], 'push' => ['n' => $push, 'pct' => $rate($push, count($actP))]];
+    }
+    // (5 Nov., brief monétisation, étape 1) the activation to watch before and after the « 100 traders » switch: the share of new
+    // traders who journal 5 real trades (sample data aside, a trade copied on several accounts once) in their first 7 days, by week
+    // of sign-up (Monday, New York), the last 8 weeks; a week whose 7 days are not over yet is marked « open »
+    $five = null;
+    if ($has('documents')) {
+        $five = [];
+        foreach (array_slice(array_keys($weeks), 0, 8) as $w) $five[$w] = ['week' => $w, 'n' => 0, 'k' => 0, 'open' => false];
+        foreach ($all as $u) {
+            if (!isset($five[$u['week']])) continue;
+            $five[$u['week']]['n']++; if ($now - $u['ts'] < 7 * $day) $five[$u['week']]['open'] = true;
+            $n = 0; $seenG = [];
+            foreach ($q("SELECT data, created_at FROM documents WHERE user_id = ? AND collection = 'trades'", [$u['id']]) as $r) {
+                $t = strtotime((string) $r['created_at']); if (!$t || $t - $u['ts'] > 7 * $day) continue;
+                $d = json_decode((string) $r['data'], true); if (!is_array($d) || !empty($d['demo'])) continue;
+                $g = (string) ($d['copy_group'] ?? ''); if ($g !== '') { if (isset($seenG[$g])) continue; $seenG[$g] = true; }
+                if (++$n >= 5) break;
+            }
+            if ($n >= 5) $five[$u['week']]['k']++;
+        }
+        $five = array_values(array_map(fn($x) => $x + ['pct' => $rate($x['k'], $x['n'])], $five));
+    }
     return [
-        'generated_at' => gmdate('c'), 'users' => count($users), 'brief' => $brief, 'game' => $game,
+        'generated_at' => gmdate('c'), 'users' => count($users), 'brief' => $brief, 'game' => $game, 'phone' => $phone, 'five_in_7' => $five,
         'signups' => ['d7' => count(array_filter($users, fn($u) => $now - $u['ts'] <= 7 * $day)), 'd30' => count(array_filter($users, fn($u) => $now - $u['ts'] <= 30 * $day)), 'by_source_30d' => array_slice($src, 0, 8, true)],
         'north_star' => $north, 'active_7d' => $active7,
         'first_trade' => (function () use ($users, $first) {   // time from sign-up to the first trade (median), and how many log it on day 1

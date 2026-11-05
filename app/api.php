@@ -673,6 +673,7 @@ function delete_user_everything(string $uid): void {
     if (class_exists('GameEngine', false)) { try { foreach (['user_game_profile', 'game_days', 'xp_events', 'user_badges', 'game_celebrations', 'game_analytics', 'user_map_nodes', 'user_missions', 'user_rewards', 'user_bosses', 'weekly_reviews', 'edge_reveals', 'user_cosmetics', 'user_quests', 'monthly_wrapped', 'user_season', 'social_profile', 'league_members', 'crew_reactions'] as $tb) db()->prepare("DELETE FROM $tb WHERE user_id = ?")->execute([$uid]); } catch (Throwable $e) { error_log('[Sweep game] delete: ' . $e->getMessage()); } }
     if (class_exists('Notify', false)) { try { Notify::deleteUser($uid); } catch (Throwable $e) { error_log('[Sweep notify] delete: ' . $e->getMessage()); } }
     if (function_exists('wp_delete_user')) { try { wp_delete_user(db(), $uid); } catch (Throwable $e) { error_log('[Sweep push] delete: ' . $e->getMessage()); } }
+    if (function_exists('pa_forget')) pa_forget($uid);
     try { require_once __DIR__ . '/growth/share-links.php'; sl_delete_user(db(), $uid); } catch (Throwable $e) { error_log('[Sweep share] delete: ' . $e->getMessage()); }   // public links and their images (they stayed online before 14 Oct.)
     try { require_once __DIR__ . '/growth/public-profile.php'; pp_delete_user(db(), $uid); } catch (Throwable $e) { error_log('[Sweep profile] delete: ' . $e->getMessage()); }
     foreach (['ai_cache', 'ai_log'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* AI tables not created yet */ } }
@@ -749,6 +750,7 @@ try {
     if (is_file(__DIR__ . '/notify/notify.php')) require_once __DIR__ . '/notify/notify.php';   // notification center + events (Feature 0)
     if (!empty($cfg['push_config']) && !defined('SWEEP_PUSH_CONFIG')) define('SWEEP_PUSH_CONFIG', (string)$cfg['push_config']);
     if (is_file(__DIR__ . '/push/web-push.php')) require_once __DIR__ . '/push/web-push.php';   // notifications on the phone (brief 02 part 10): off without keys
+    if (is_file(__DIR__ . '/push/push-auto.php')) require_once __DIR__ . '/push/push-auto.php';   // (5 Nov.) the automatic messages on the phone first, the email as relay
     if (is_file(__DIR__ . '/game/game.php')) require_once __DIR__ . '/game/game.php';
     if (is_file(__DIR__ . '/guard/guard.php')) require_once __DIR__ . '/guard/guard.php';   // the account guardian (3 Nov., SWEEP.md section 8)
     require_once __DIR__ . '/mail/mail-core.php'; require_once __DIR__ . '/mail/mail-auto.php';   // automatic emails (Admin › Emails › Automations): the app's events
@@ -821,6 +823,8 @@ try {
     if ($route === 'api/email/weekly' && class_exists('GameWeeklyMail')) GameWeeklyMail::page($method, (string) ($_GET['t'] ?? ''));
     // our own emails (mail/): the open image, the tracked links and the unsubscribe page of a campaign email, without signing in
     if (strpos($route, 'api/m/') === 0) { require_once __DIR__ . '/mail/mail-admin.php'; ml_public_route($route, $method); }
+    // a phone notification opened (the service worker, no session: its token)
+    if (strpos($route, 'api/p/o/') === 0 && function_exists('pa_public_route')) pa_public_route($route, $method);
     $ACCESS = access();
     if ($method !== 'GET' && $method !== 'HEAD') require_csrf();
 
@@ -1408,6 +1412,7 @@ try {
     if (strpos($route, 'api/admin/') === 0) {
         if (!$me['is_admin']) json_out(403, ['error' => 'Administrators only.']);
         if ($route === 'api/admin/mail' || strpos($route, 'api/admin/mail/') === 0) { require_once __DIR__ . '/mail/mail-admin.php'; ml_admin_route($route, $method, $me); }   // Admin › Emails (3 Nov.)
+        if (($route === 'api/admin/push' || strpos($route, 'api/admin/push/') === 0) && function_exists('pa_admin_route')) pa_admin_route($route, $method);   // (5 Nov.) the phone notification of each message
         // campaign attribution report: per post, sign-ups, activated, 3+ trading days, still logging on day 7 and day 14
         if ($route === 'api/admin/attribution' && $method === 'GET') {
             $since = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($_GET['since'] ?? '')) ? $_GET['since'] : '2026-10-05';

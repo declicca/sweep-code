@@ -26,7 +26,7 @@ Version : dépôt git `declicca/sweep-code`, dossier `app/` (9 octobre 2026 : é
 | `presets/` | `seed.json` (catalogue), `presets-lib.php` (fusion, validation), `check.php` (vérification d'une firme), `cron.php` (vérification hebdomadaire) |
 | `sync/` | Synchro automatique des trades : `sync-engine.php` (exécutions → trades, fonctions pures), `sync-store.php` (tables, clé personnelle, réception, rattachement, écriture des trades), `sync-routes.php` (`api/sync/push` pour les add-ons NinjaTrader 8 et Quantower, `api/sync…` pour le trader, `api/sync/addon?platform=…` pour télécharger un add-on). Écrans : `src/ux.js` section 30 (+ styles `ux.css`). Add-on NinjaTrader 8 : `sync/addon/SweepSync.cs` (source C#) et `SweepSync.zip` (import, fait par `tools/addon-zip.py`). Add-on Quantower : `sync/addon/quantower/` (source C#, projet, page du panneau), compilé dans `SweepSync-Quantower.zip` par `tools/addon-quantower.py` |
 | `ai/` | Sweep AI (Gemini) : `ai-core.php`, `ai-features.php`, `ai-routes.php`, `ai-stats.php` (table des contrats), `shot-trades.php` (construction des trades depuis une capture), `econ-ai.php` |
-| `push/` | Notifications sur le téléphone (brief 02, partie 10) : `web-push.php` (Web Push, VAPID et chiffrement aes128gcm en PHP pur, appareils, heures des rappels, routes `api/push`), `push-config.sample.php` ; `/sw.js` à la racine (le service worker, push seulement) ; la liste de tout ce que Sweep envoie : `ops/NOTIFICATIONS.md` |
+| `push/` | Notifications sur le téléphone (brief 02, partie 10) : `web-push.php` (Web Push, VAPID et chiffrement aes128gcm en PHP pur, appareils, heures des rappels, 4 interrupteurs, heures calmes à l'heure du téléphone, routes `api/push`), `push-auto.php` + `push-auto-texts.php` (5 nov. : le téléphone d'abord, le courriel en relais, `api/p/o`, `api/admin/push`), `push-config.sample.php` ; `/sw.js` à la racine (le service worker, push seulement) ; la liste de tout ce que Sweep envoie : `ops/NOTIFICATIONS.md` |
 | `loops/` | Retiré le 4 nov. (courriels maison, étape 5) : remplacé par `mail/mail-auto.php`. La table `email_events_log` reste (ce qui est déjà parti ne repart pas). |
 | `mail/` | Nos propres courriels (brief « Courriels maison », 3 nov.) : `mail-core.php` (tables, audience, rendu, file, envoi, suivi, rebonds, statistiques), `mail-smtp.php` (une connexion SMTP pour un lot), `mail-admin.php` (Admin › Courriels, `api/admin/mail…`, et les liens des courriels `api/m/o`, `api/m/c`, `api/m/u`), `send-cron.php` (chaque minute, tâche `mail`), `bounce.php` (ce qui revient à bounces@), `boot.php` ; écran `src/mail.js` + `src/mail.css`, chargé à la demande (`SWEEP_LAZY.mail`, `#mail`) |
 | `notify/`, `chart/`, `billing/`, `growth/`, `econ.php` | Notifications et envoi des courriels (`notify/mail.php` : `sweep_mail()`, partagée par `api.php` et les tâches cron), bougies (cron horaire), forfaits Free/Pro/Elite + Stripe, partage public (`growth/share-links.php` : liens `/s/` ; `growth/public-profile.php` : profil public de discipline `/p/`), calendrier économique |
@@ -1743,3 +1743,38 @@ Mateo : « faire des envois à même le serveur sans application externe […] u
 - **Nouveaux courriels de feedback** (5 nov., même brief, étape 4) : 5 automatisations de plus (23 en tout), **éteintes au départ** (Mateo relit et allume). Au passage quotidien de 7 h 30 New York, après le profil d'usage (`ma_feedback_run`, une au plus par trader et par jour, dans cet ordre) : « Trois mois actifs » `months3` (90 jours, a utilisé Sweep dans les 30 derniers jours : « Quelle fonction utilises-tu le plus ? » puis « Laquelle améliorer en premier ? », 7 puces), « Jour 30 : la note » `nps30` (30 jours, venu dans les 30 derniers : « Recommanderais-tu Sweep à un autre trader ? » de 0 à 10, puis le pourquoi dans la case de la page Merci), « Une semaine de Sweep » `weekOne` (jours 7 à 21 : `{progress}` puis « Qu'est-ce qui te manque dans Sweep ? » en puces), « Une fonction à découvrir » `featureDiscover` (dès 14 jours, venu dans les 30 derniers : la première de plan du matin, revue du soir, stats, import et synchro jamais essayée ni déjà présentée ; une par semaine au plus ; valeurs `{feature}`, `{feature_pitch}` (3 lignes, jargon expliqué), `{feature_button}`, `{feature_link}`, dans la langue du trader : `MA_PITCH`). Jamais dans les 3 jours d'un autre courriel automatique de nouvelles, jamais une question dans les 30 jours d'une autre demande d'avis : remis au lendemain. Désinscrit : jamais réclamé. Éteinte, une automatisation n'est pas réclamée : allumée, elle part aux traders qui y ont droit. « Tu l'as demandé, c'est fait » `feedbackShipped` : un feedback écrit passé à « Livré » dans Admin › Feedback (événement `feedback.status_changed`) envoie à son auteur `{request}` (sa demande, une ligne, 200 caractères) et `{reply}` (la réponse de Mateo), une fois par feedback.
 - Tests : `tests/mail_test.php` (55 vérifications, base jetable), `tests/mail_auto_test.php` (67), `tests/mail_answer_test.php` (25), `tests/mail_usage_test.php` (22), `tests/mail_texts_test.php` (22), `tests/mail_feedback_test.php` (21) et `tests/e2e_mail.py` (390 × 844 tactile et 1300 × 850, clair et foncé, fr-CA ; une copie locale n'envoie jamais : `data/mail-sent.jsonl`).
 
+## Notifications : le téléphone d'abord (5 nov., brief `briefs/brief-app-notifications-2026-11-05.md`, étapes 1 à 4)
+
+- **Le moteur** (`push/push-auto.php`, textes de départ `push/push-auto-texts.php`) : `ma_send` (mail/mail-auto.php) appelle
+  `pa_dispatch` ; avec un appareil et la notification allumée, la notification part (`push_msgs`, envoyée par `pa_run` dans
+  `mail/send-cron.php`) et le courriel attend 24 h ; `ml_run` demande `pa_hold` : ouverte (`api/p/o/<jeton>`, appelé par `/sw.js`
+  à côté de l'ouverture de la fenêtre) ou trader revenu → courriel « pushed », jamais envoyé. Argent et compte : les deux en même
+  temps. Tables `push_auto` (interrupteur et texte de chaque message) et `push_msgs`, créées toutes seules. Tout part **éteint**.
+- **Garde-fous**, sorte d'alerte à part : 2 / jour avec la cloche, 5 / semaine, heures calmes 21 h – 7 h sur l'horloge de chaque
+  téléphone (`push_subscriptions.tz`, envoyé par l'app), séance 9 h 30 – 16 h ET, fatigue (4 ignorées d'un groupe), 30 jours
+  d'absence. Le streak (`g_streak`) part dès 19 h 30 et aussi sur le téléphone. Le rappel du plan nomme l'annonce importante du
+  jour (`wp_econ_line`, d'après `econ-us-2026-2027.json`).
+- **Réglages › Notifications › Sur cet appareil** : 4 interrupteurs (`WP_GROUPS`), les heures des 3 rappels sous « Ma routine » ;
+  sur ordinateur, le code QR (`img/qr-app.svg`, fait par `tools/qr-make.py`, vérifié par la lecture de CoreImage du Mac).
+- **Moments de compte** (`pa_account_moments`, après chaque trade, payout ou compte) : payout possible (`GameV2::payoutStatus`),
+  objectif atteint avec ce qui reste, évaluation réussie ; cloche `pa_alert` (alertes prop firm) et téléphone.
+- **Installation** : ligne « Sweep sur ton téléphone » dans la routine sur ordinateur (`qrRow`, nav.js), `/?i=qr` sur le téléphone
+  (fenêtre d'installation, gardé par `auth.html` à la connexion), courriel `phoneInstall` (jour 3, bloc `[[qr]]` de `ml_render`),
+  fenêtre « Reçois cette alerte sur ton téléphone » à la première alerte du Gardien ou journée fermée (`moment`, nav.js).
+- **Courriels de feedback** (autre session, 5 nov.) : `feedbackShipped` part sur le téléphone et en courriel ; `weekOne` et
+  `featureDiscover` sur le téléphone d'abord ; `nps30` et `months3` en courriel seulement.
+- **Admin** : Admin › Courriels (« Sur le téléphone » : portée, notifications sans courriel, nouveauté du mois ; la notification
+  sous chaque automatisation), Admin › Métriques (« Sweep sur le téléphone (30 j) »).
+- **Tests** : `push_auto_test.php` (45), `e2e_push_auto` (390 FR sombre / ES clair, 1300 EN clair / FR sombre), `push_test.php`,
+  `mail_auto_test.php` et `e2e_push` mis à jour (19 automatisations, 4 interrupteurs).
+- **Pour Mateo** : relire et allumer les notifications dans Admin › Courriels (et le courriel `phoneInstall`). Aucune migration
+  à faire à la main, aucune ligne cron.
+
+
+## Monétisation au passage à 100 traders (5 nov., brief `briefs/brief-app-monetisation-100-traders-2026-11-05.md`)
+
+- **Étape 1 livrée** : Admin › Métriques, « 5 trades dans les 7 premiers jours », par semaine d'inscription (8 dernières
+  semaines ; `five_in_7` de `ops/metrics.php` : vrais trades, une copie compte une fois, données d'exemple à part ; une semaine
+  dont les 7 jours ne sont pas finis est « en cours »). Test : `metrics_test.php`.
+- **Étapes 2 à 4** (essai de 30 jours, offre fondateur aux 100 premiers abonnés, « Mettre en pause » avant « Annuler ») :
+  attendent le signal de Mateo (« on passe à 100 »). Décisions : 3 forfaits, prix inchangés, pas de carte au départ.

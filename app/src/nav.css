@@ -2990,6 +2990,11 @@ body:has(#main .nav-rt) .nav-addtop{background:var(--fill);color:var(--text);box
 .nav-remind p{margin:0;font-size:14px;line-height:1.4}
 .nav-remind ol{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.5;color:var(--text2)}
 .nav-remind-a{display:flex;align-items:center;gap:14px;margin-top:10px}
+/* (5 Nov.) the QR code on a computer */
+.nav-qr{display:flex;gap:14px;align-items:center}
+.nav-qr img{flex:none;width:84px;height:84px;border-radius:8px}
+.nav-qr p.muted{margin-top:2px;font-size:13px;color:var(--muted)}
+.nav-qr .nav-remind-a{margin-top:8px}
 .nav-remind-a .btn{min-height:40px}.nav-remind-a .link{min-height:40px;font-size:13px;color:var(--muted);background:none;border:0;cursor:pointer}
 .nav-now-a{margin-top:10px}   /* (27 Oct.) « Close my day » in « Now », when a trader starting out reached his rule */
 

@@ -112,3 +112,19 @@
 .ml-use{margin-top:24px}
 .ml-use .ml-qa li{grid-template-columns:minmax(0,14em) minmax(0,1fr) 3em}
 .ml-use .ml-qa span{white-space:normal;line-height:1.3}
+/* (5 Nov.) the phone notification of each message */
+.ml-h4{margin:22px 0 6px;font-size:14px;font-weight:600}
+.ml-pu{margin:16px 0}
+.ml-pu-list{display:grid;gap:10px}
+.ml-pu-list .ml-pu{margin:0}
+.ml-pu-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:6px}
+.ml-pu-h h4{margin:0}
+.ml-pu-h small{flex-basis:100%;font-size:12px;line-height:1.4}
+.ml-pu .ml-pu-ch{font-size:12px;margin:0 0 10px}
+.ml-pu .ml-tabs{margin-bottom:10px}
+.ml-pu .ml-f{margin-bottom:10px}
+.ml-pu .ml-acts{margin:4px 0 6px}
+.ml-pu .ml-pu-vars code{font-family:var(--mono,'Geist Mono',ui-monospace,monospace);font-size:12px}
+.ml-pu .ml-pu-st{margin:0;font-size:12px}
+.ml-pu-reach{margin:0 0 6px;font-size:14px;line-height:1.5}
+

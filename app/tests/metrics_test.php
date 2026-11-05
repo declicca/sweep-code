@@ -169,6 +169,17 @@ $ok($jm['d7']['gap_days'] === ['pct' => 67, 'of' => 3] && $jm['d7']['gap_total_c
 $ok($jm['d30']['gap_days'] === ['pct' => 75, 'of' => 4] && $jm['d30']['gap_total_c'] === 51000, '30 days: j3\'s old gap too (3 of 4, $510): ' . json_encode([$jm['d30']['gap_days'], $jm['d30']['gap_total_c']]));
 $ok($jm['d7']['gap_detailed'] === ['pct' => 50, 'of' => 1], 'the « Trades not detailed » line: half of its $340 detailed in trades since: ' . json_encode($jm['d7']['gap_detailed']));
 
+// (5 Nov., brief monétisation, étape 1) « 5 trades in 7 days » by week of sign-up: copies once, sample data and later trades aside
+$fs = $at(16);
+$user('f5a', $fs, 'x'); $user('f5b', $fs, 'x'); $user('f5c', $fs, 'x');
+for ($i = 0; $i < 5; $i++) $doc('f5a', 'trades', "t$i", '{"pnl_c":100}', $fs + 3600 * ($i + 1));                          // 5 in its first week
+for ($i = 0; $i < 5; $i++) $doc('f5b', 'trades', "c$i", '{"copy_group":"g1"}', $fs + 3600);                              // one trade copied on 5 accounts
+for ($i = 0; $i < 4; $i++) $doc('f5b', 'trades', "s$i", '{"demo":true}', $fs + 3600);                                    // sample data
+for ($i = 0; $i < 5; $i++) $doc('f5c', 'trades', "l$i", '{}', $fs + 8 * $D + $i);                                        // after its first week
+$wk = (new DateTimeImmutable('@' . $fs))->setTimezone($ny)->modify('monday this week')->format('Y-m-d');
+$f7 = array_values(array_filter(sweep_metrics($pdo, $app)['five_in_7'] ?? [], fn($r) => $r['week'] === $wk))[0] ?? null;
+$ok($f7 !== null && $f7['k'] === 1 && $f7['n'] >= 3 && !$f7['open'], '5 trades in 7 days: the 3 traders of that week, 1 of them (copies once, no sample data, not after day 7) ' . json_encode($f7));
+
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);

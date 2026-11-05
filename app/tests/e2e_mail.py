@@ -11,7 +11,7 @@ light and dark):
  - the open image, a signed tracked link (a tampered one goes home), the one-click unsubscribe (no CSRF header), a bounce
    report piped to mail/bounce.php (silent, exit 0);
  - the campaign's numbers page: delivered, opened, clicked, the 48 hours, the links; no horizontal scroll, no page error;
- - the automations (step 5): the 23 in the list with what sends each; one opened: its text, switched off and on, edited and
+ - the automations (step 5): the 24 in the list (« Sweep on your phone » since 5 Nov.) with what sends each; one opened: its text, switched off and on, edited and
    saved on its own, a test; never sent by hand nor deleted;
  - what each trader uses (feedback brief, step 2, 5 Nov.): the Stats page opened counts once a day; « Ce qu'ils utilisent »
    on #mail with the share of active traders for each feature; {progress} and the others in the preview and in the help;
@@ -241,7 +241,7 @@ with sync_playwright() as p:
     # the automations (step 5): in the list, an automation's page (its text, on or off, a test, its numbers; no audience, no delete)
     autos = adm.get('/api/admin/mail', headers=H).json()['autos']
     wel = next(x for x in autos if x['auto'] == 'signedUp')
-    ok(len(autos) == 23 and wel['kind'] == 'marketing' and next(x for x in autos if x['auto'] == 'paymentFailed')['kind'] == 'transactional', f'api: the 23 automations, their kind ({len(autos)})')
+    ok(len(autos) == 24 and wel['kind'] == 'marketing' and next(x for x in autos if x['auto'] == 'paymentFailed')['kind'] == 'transactional', f'api: the 24 automations, their kind ({len(autos)})')
     ok(adm.post(f"/api/admin/mail/campaigns/{wel['id']}/send", data='{}', headers=H).status == 409 and adm.delete(f"/api/admin/mail/campaigns/{wel['id']}", headers=H).status == 409, 'an automation is never sent by hand nor deleted (409)')
     orig = adm.get(f"/api/admin/mail/campaigns/{wel['id']}", headers=H).json()['campaign']
     try:
@@ -252,7 +252,7 @@ with sync_playwright() as p:
         q = cx.new_page(); er = []; q.on('pageerror', lambda e: er.append(str(e)[:150]))
         q.goto(B + '/#mail'); q.wait_for_selector('#main .ml-autos .ml-row', timeout=15000); q.wait_for_timeout(500)
         row = q.locator(f"#main .ml-autos a[href=\"#mail/{wel['id']}\"]")
-        ok(q.locator('#main .ml-autos .ml-row').count() == 23 and 'Automatisations' in q.inner_text('#main .ml') and 'Bienvenue' in row.inner_text() and 'Allumé' in row.inner_text() and 'Juste après l’inscription' in row.inner_text(), f'{t} #mail: « Automatisations », 23 rows, « Bienvenue » allumé, what sends it')
+        ok(q.locator('#main .ml-autos .ml-row').count() == 24 and 'Automatisations' in q.inner_text('#main .ml') and 'Bienvenue' in row.inner_text() and 'Allumé' in row.inner_text() and 'Juste après l’inscription' in row.inner_text(), f'{t} #mail: « Automatisations », 23 rows, « Bienvenue » allumé, what sends it')
         q.screenshot(path=f'{SHOTS}/e2e_mail_autos_{w}_{scheme}.png', full_page=True)
         row.click(); q.wait_for_selector('#main .ml-auto textarea', timeout=15000); q.wait_for_timeout(600)
         q.click('#main .ml-tabs [data-v="fr"]'); q.wait_for_timeout(400)

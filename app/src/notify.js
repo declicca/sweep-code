@@ -26,7 +26,7 @@
       'now': 'Just now',
       'prefs.help': 'Choose what Sweep tells you about.',
       'push.h': 'On this device',
-      'push.pitch': 'Your plan before the open, your review after the close, your week on Friday.',
+      'push.pitch': 'Your plan before the open, your review after the close, and your accounts’ alerts.',
       'push.on': 'Turn on notifications',
       'push.off': 'Turn off on this device',
       'push.plan': 'Plan reminder',
@@ -40,7 +40,14 @@
       'push.guard': 'Account guardian',
       'push.guard.d': 'When half of an account’s room is used, then when one more loss could cost it',
       'push.at': 'Time',
-      'push.help': 'New York time, for the bell too. Never during the session, 2 notifications a day at most.',
+      'push.help': 'Reminder times are New York time, for the bell too. Nothing at night on your phone (9 PM to 7 AM), nothing during the session except your accounts’ alerts, 2 notifications a day at most.',
+      'push.g.routine': 'My routine', 'push.g.routine.d': 'Plan, review, your week and your streak',
+      'push.g.accounts': 'My accounts', 'push.g.accounts.d': 'Account guardian, day closed, payout possible, profit target',
+      'push.g.progress': 'My progress', 'push.g.progress.d': 'Milestones reached and your suggestions shipped',
+      'push.g.news': 'News and subscription', 'push.g.news.d': 'One Sweep news a month at most, your trial and your subscription',
+      'pa_alert.title': '{t}', 'pa_alert.body': '{b}',
+      'qr.h': 'Sweep on your phone', 'qr.t': 'Scan this code with your phone', 'qr.s': 'Your alerts and reminders follow you there, even when Sweep is closed.',
+      'qr.i': 'iPhone: Share › Add to Home Screen', 'qr.a': 'Android: ⋮ › Install app', 'qr.n': 'Open Sweep from its icon, then turn on notifications',
       'push.ios': 'On iPhone: add Sweep to your Home Screen (Share › Add to Home Screen), then open it from its icon to turn on notifications.',
       'push.none': "This browser can't receive notifications. Install Sweep on your phone to get them.",
       'push.denied': "Notifications are blocked for Sweep. Allow them in your device's settings, then come back here.",
@@ -86,7 +93,7 @@
       'now': "À l’instant",
       'prefs.help': 'Choisis ce dont Sweep te parle.',
       'push.h': 'Sur cet appareil',
-      'push.pitch': 'Ton plan avant l’ouverture, ta revue après la clôture, ta semaine le vendredi.',
+      'push.pitch': 'Ton plan avant l’ouverture, ta revue après la clôture, et les alertes de tes comptes.',
       'push.on': 'Activer les notifications',
       'push.off': 'Désactiver sur cet appareil',
       'push.plan': 'Rappel du plan',
@@ -100,7 +107,13 @@
       'push.guard': 'Gardien de compte',
       'push.guard.d': 'Quand la moitié de la marge d’un compte est utilisée, puis quand une perte de plus pourrait le coûter',
       'push.at': 'Heure',
-      'push.help': 'Heure de New York, pour la cloche aussi. Jamais pendant la séance, 2 notifications par jour au plus.',
+      'push.help': 'Les heures des rappels sont celles de New York, pour la cloche aussi. Rien la nuit sur ton téléphone (21 h à 7 h), rien pendant la séance sauf les alertes de tes comptes, 2 notifications par jour au plus.',
+      'push.g.routine': 'Ma routine', 'push.g.routine.d': 'Plan, revue, bilan de la semaine et streak',
+      'push.g.accounts': 'Mes comptes', 'push.g.accounts.d': 'Gardien de compte, journée fermée, payout possible, objectif atteint',
+      'push.g.progress': 'Mes progrès', 'push.g.progress.d': 'Les étapes franchies et tes suggestions livrées',
+      'qr.h': 'Sweep sur ton téléphone', 'qr.t': 'Scanne ce code avec ton téléphone', 'qr.s': 'Tes alertes et tes rappels t’y suivent, même quand Sweep est fermé.',
+      'qr.i': 'iPhone : Partager › Sur l’écran d’accueil', 'qr.a': 'Android : ⋮ › Installer l’application', 'qr.n': 'Ouvre Sweep depuis son icône, puis active les notifications',
+      'push.g.news': 'Nouveautés et abonnement', 'push.g.news.d': 'Une nouveauté de Sweep par mois au plus, ton essai et ton abonnement',
       'push.ios': 'Sur iPhone : ajoute Sweep à ton écran d’accueil (Partager › Sur l’écran d’accueil), puis ouvre-le depuis son icône pour activer les notifications.',
       'push.none': 'Ce navigateur ne peut pas recevoir de notifications. Installe Sweep sur ton téléphone pour les recevoir.',
       'push.denied': 'Les notifications sont bloquées pour Sweep. Autorise-les dans les réglages de ton appareil, puis reviens ici.',
@@ -146,7 +159,7 @@
       'now': 'Ahora',
       'prefs.help': 'Elige de qué te avisa Sweep.',
       'push.h': 'En este dispositivo',
-      'push.pitch': 'Tu plan antes de la apertura, tu revisión después del cierre, tu semana el viernes.',
+      'push.pitch': 'Tu plan antes de la apertura, tu revisión después del cierre y las alertas de tus cuentas.',
       'push.on': 'Activar las notificaciones',
       'push.off': 'Desactivar en este dispositivo',
       'push.plan': 'Recordatorio del plan',
@@ -160,7 +173,13 @@
       'push.guard': 'Guardián de cuenta',
       'push.guard.d': 'Cuando usas la mitad del margen de una cuenta, y cuando una pérdida más podría costarla',
       'push.at': 'Hora',
-      'push.help': 'Hora de Nueva York, también para la campana. Nunca durante la sesión, 2 notificaciones al día como máximo.',
+      'push.help': 'Las horas de los recordatorios son de Nueva York, también para la campana. Nada de noche en tu teléfono (21:00 a 7:00), nada durante la sesión salvo las alertas de tus cuentas, 2 notificaciones al día como máximo.',
+      'push.g.routine': 'Mi rutina', 'push.g.routine.d': 'Plan, revisión, balance de la semana y racha',
+      'push.g.accounts': 'Mis cuentas', 'push.g.accounts.d': 'Guardián de cuenta, día cerrado, payout posible, objetivo alcanzado',
+      'push.g.progress': 'Mi progreso', 'push.g.progress.d': 'Los hitos alcanzados y tus sugerencias entregadas',
+      'qr.h': 'Sweep en tu teléfono', 'qr.t': 'Escanea este código con tu teléfono', 'qr.s': 'Tus alertas y recordatorios te siguen allí, incluso con Sweep cerrado.',
+      'qr.i': 'iPhone: Compartir › Añadir a pantalla de inicio', 'qr.a': 'Android: ⋮ › Instalar aplicación', 'qr.n': 'Abre Sweep desde su icono y activa las notificaciones',
+      'push.g.news': 'Novedades y suscripción', 'push.g.news.d': 'Una novedad de Sweep al mes como máximo, tu prueba y tu suscripción',
       'push.ios': 'En iPhone: añade Sweep a tu pantalla de inicio (Compartir › Añadir a pantalla de inicio) y ábrelo desde su icono para activar las notificaciones.',
       'push.none': 'Este navegador no puede recibir notificaciones. Instala Sweep en tu teléfono para recibirlas.',
       'push.denied': 'Las notificaciones están bloqueadas para Sweep. Permítelas en los ajustes de tu dispositivo y vuelve aquí.',
@@ -415,13 +434,15 @@
       <button type="button" class="btn sm" data-nt="test" data-k="normal">${esc(t('test.normal'))}</button>
       <button type="button" class="btn sm" data-nt="test" data-k="celebration">${esc(t('test.celebration'))}</button></div>` : '';
     return `<div class="sec-h"><h2>${esc(t('Notifications'))}</h2><span class="help">${esc(t('prefs.help'))}</span></div>
-      <div class="surface nt-plist">${rows}</div>${pushHtml()}${admin}`;
+      <div class="surface nt-plist">${rows}</div>${pushHtml()}${qrHtml()}${admin}`;
   }
 
   /* ── on this device: the plan, review and week reminders as phone notifications (web push, brief 02 part 10; push/web-push.php).
      Shown only when the server has its keys. iPhone: only from the app added to the Home Screen (iOS 16.4+). ── */
   const PU = { st: null, busy: false, dev: null, synced: false };   // st: server state; dev: this device's subscription (false: none)
-  const KINDS = ['plan', 'review', 'weekly', 'lock', 'guard'];   // (3 Nov.) the account guardian: at « watch » then « danger »   // (1 Nov., brief avance 4) « Day closed »: when it happens, no time to choose
+  // (5 Nov., brief notifications) four switches instead of one per kind (push/web-push.php WP_GROUPS); the times of the 3 reminders stay, under « My routine »
+  const GROUPS = ['routine', 'accounts', 'progress', 'news'], TIMED = ['plan', 'review', 'weekly'];
+  const tzName = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } };   // (5 Nov.) quiet hours on the phone's clock
   const pushCan = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   const iosBrowser = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
   const keyBytes = (k) => Uint8Array.from(atob((k + '='.repeat((4 - k.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
@@ -446,14 +467,24 @@
     if (!pushCan() || iosBrowser()) body = `<p class="muted nt-push-note">${esc(t(iosBrowser() ? 'push.ios' : 'push.none'))}</p>`;
     else if (Notification.permission === 'denied') body = `<p class="muted nt-push-note">${esc(t('push.denied'))}</p>`;
     else if (!PU.dev) body = `<div class="nt-push-on"><p class="muted">${esc(t('push.pitch'))}</p><button type="button" class="btn primary" data-nt="push-on">${esc(t('push.on'))}</button></div>`;
-    else body = KINDS.map((k) => {
-      const p = st.prefs[k]; if (!p) return '';
-      const opts = (st.times[k] || []).map((v) => `<option value="${v}"${v === p.at ? ' selected' : ''}>${esc(hm(v))}</option>`).join('');
-      return `<div class="nt-prow nt-push-row"><span><b>${esc(t('push.' + k))}</b><small>${esc(t('push.' + k + '.d'))}</small></span>
-        <span class="nt-push-ctl">${opts ? `<select data-nt-push-at="${k}" aria-label="${esc(t('push.' + k) + ' · ' + t('push.at'))}">${opts}</select>` : ''}
-        <label class="sw"><input type="checkbox" data-nt-push="${k}" ${p.on ? 'checked' : ''} aria-label="${esc(t('push.' + k))}"><i></i></label></span></div>`;
+    else body = GROUPS.map((g) => {
+      const on = !!(st.groups || {})[g];
+      const times = g === 'routine' && on ? TIMED.map((k) => {
+        const p = st.prefs[k]; if (!p || !(st.times[k] || []).length) return '';
+        const opts = st.times[k].map((v) => `<option value="${v}"${v === p.at ? ' selected' : ''}>${esc(hm(v))}</option>`).join('');
+        return `<div class="nt-push-sub"><span>${esc(t('push.' + k))}</span><select data-nt-push-at="${k}" aria-label="${esc(t('push.' + k) + ' · ' + t('push.at'))}">${opts}</select></div>`;
+      }).join('') : '';
+      return `<div class="nt-prow nt-push-row"><span><b>${esc(t('push.g.' + g))}</b><small>${esc(t('push.g.' + g + '.d'))}</small></span>
+        <span class="nt-push-ctl"><label class="sw"><input type="checkbox" data-nt-push="${g}" ${on ? 'checked' : ''} aria-label="${esc(t('push.g.' + g))}"><i></i></label></span></div>${times}`;
     }).join('') + `<div class="nt-push-foot"><button type="button" class="link" data-nt="push-off">${esc(t('push.off'))}</button></div>`;
     return `<h3 class="nt-push-h">${esc(t('push.h'))}</h3><div class="surface nt-plist nt-push">${body}</div><p class="help nt-push-help">${esc(t('push.help'))}</p>`;
+  }
+  /* (5 Nov., brief notifications) on a computer: the QR code that opens Sweep on the phone (img/qr-app.svg, tools/qr-make.py) */
+  const desk = () => !!(window.matchMedia && matchMedia('(pointer: fine)').matches && !matchMedia('(pointer: coarse)').matches);
+  function qrHtml() {
+    if (!desk() || !PU.st || !PU.st.available) return '';
+    return `<h3 class="nt-qr-h">${esc(t('qr.h'))}</h3><div class="surface nt-qr"><img src="img/qr-app.svg" alt="" width="128" height="128">
+      <div><p><b>${esc(t('qr.t'))}</b></p><p class="muted">${esc(t('qr.s'))}</p><ol><li>${esc(t('qr.i'))}</li><li>${esc(t('qr.a'))}</li><li>${esc(t('qr.n'))}</li></ol></div></div>`;
   }
   async function pushOn(btn) {
     btn.disabled = true;
@@ -462,7 +493,7 @@
       await navigator.serviceWorker.register('/sw.js', { scope: '/' });
       const reg = await navigator.serviceWorker.ready;
       const sub = (await reg.pushManager.getSubscription()) || (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(PU.st.key) }));
-      PU.st = await post('api/push/subscribe', Object.assign(sub.toJSON(), { lang: lang() }));
+      PU.st = await post('api/push/subscribe', Object.assign(sub.toJSON(), { lang: lang(), tz: tzName() }));
       PU.dev = sub;
       if (typeof haptic === 'function') haptic(6);
     } catch (e) {
@@ -489,7 +520,7 @@
   function pushPref(el) {
     const k = el.dataset.ntPushAt || el.dataset.ntPush, body = el.dataset.ntPushAt ? { kind: k, at: el.value } : { kind: k, on: el.checked };
     prefQ = prefQ.then(async () => {
-      try { PU.st = await post('api/push/prefs', body); if (typeof haptic === 'function') haptic(6); }
+      try { PU.st = await post('api/push/prefs', body); if (typeof haptic === 'function') haptic(6); if (GROUPS.includes(k)) { const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml(); } }
       catch (e) { toast(t('error')); const s = document.getElementById('ntPrefs'); if (s) s.innerHTML = prefsHtml(); }
     });
     return prefQ;
@@ -499,7 +530,7 @@
     PU.synced = true;
     if (!pushCan() || Notification.permission !== 'granted') return;
     const sub = await devSub();
-    if (sub) post('api/push/subscribe', Object.assign(sub.toJSON(), { lang: lang() })).catch(() => {});
+    if (sub) post('api/push/subscribe', Object.assign(sub.toJSON(), { lang: lang(), tz: tzName() })).catch(() => {});
   }
   function paintPrefs() {
     if (!on() || !/^#settings/.test(location.hash)) return;
@@ -596,7 +627,7 @@
   const push = {
     // (27 Oct.) also: the plan reminder's time, as the trader reads it (« 8 h 45 »), and whether this is an iPhone outside the Home Screen
     state: async () => { if (!PU.st) await pushLoad(); const st = PU.st || {}, at = ((st.prefs || {}).plan || {}).at || '08:45';
-      return { available: !!st.available, can: !!st.available && pushCan() && !iosBrowser() && Notification.permission !== 'denied', on: !!PU.dev, ios: iosBrowser(), denied: pushCan() && Notification.permission === 'denied', planAt: hm(at) }; },
+      return { devices: st.devices || 0, available: !!st.available, can: !!st.available && pushCan() && !iosBrowser() && Notification.permission !== 'denied', on: !!PU.dev, ios: iosBrowser(), denied: pushCan() && Notification.permission === 'denied', planAt: hm(at) }; },
     on: async () => { const s0 = await push.state(); if (!s0.can) return s0; if (!s0.on) await pushOn({ disabled: false }); return push.state(); },
   };
   window.SweepNotify = { refresh: () => load(true), open: openSheet, strings, t, push };
