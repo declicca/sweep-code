@@ -381,4 +381,13 @@
     var railQ = false, railSoon = function(){ if(railQ) return; railQ = true; requestAnimationFrame(function(){ railQ = false; railList.forEach(place); }); };
     window.addEventListener('resize', railSoon); if(fine.addEventListener) fine.addEventListener('change', railSoon); window.addEventListener('load', railSoon); railSoon();
   }
+
+  // key figures (7 Nov., « expérience Apple », step 2): a figure too wide for its tile gets smaller, 2 px at a time, never cut
+  var figs = document.querySelectorAll('.stat dd');
+  if(figs.length){
+    var fit = function(){ figs.forEach(function(d){ d.style.fontSize = ''; var fs = parseFloat(getComputedStyle(d).fontSize);
+      while(d.scrollWidth > d.clientWidth + 1 && fs > 18){ fs -= 2; d.style.fontSize = fs + 'px'; } }); };
+    var fitQ = false; window.addEventListener('resize', function(){ if(fitQ) return; fitQ = true; requestAnimationFrame(function(){ fitQ = false; fit(); }); });
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit); fit();
+  }
 })();

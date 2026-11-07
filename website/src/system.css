@@ -242,7 +242,8 @@ p,li{max-width:56ch}   /* about 75 characters a line in Geist (1ch is the width 
 @media (max-width:860px){.stat:last-child:nth-child(odd){grid-column:1/-1}}   /* an odd count: the last one takes the whole row */
 .stat{padding:20px 22px;border-radius:var(--r3);background:var(--glass);box-shadow:var(--shadow-1)}
 .stat dt{font-size:13px;color:var(--muted);line-height:1.4}
-.stat dd{margin-top:8px;font:600 clamp(22px,19px + .8vw,30px)/1.1 var(--mono);letter-spacing:-.02em;color:var(--text)}
+.stat dd{margin-top:8px;font:600 clamp(28px,21px + 1.6vw,44px)/1.05 var(--mono);letter-spacing:-.035em;color:var(--text);overflow-wrap:normal}   /* the figure leads, as Apple's stats and the app's hero figures (7 Nov.); too wide, site.js makes it smaller, never cut */
+.stat dd.long{font-size:clamp(22px,19px + .8vw,30px);letter-spacing:-.02em}
 .stat dd small{display:block;margin-top:6px;font:400 13px/1.4 var(--font);letter-spacing:0;color:var(--faint)}
 .stats-cap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;align-items:baseline;margin-bottom:16px}
 .stats-cap b{font-size:15px}

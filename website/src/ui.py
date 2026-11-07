@@ -127,7 +127,8 @@ def rings(t):
 
 def stats(items, caption="", note=""):
     """Key numbers: (label, value, small note)."""
-    dl = "".join(f'<div class="stat"><dt>{a}</dt><dd>{b}{f"<small>{c}</small>" if c else ""}</dd></div>' for a, b, c in items)
+    # a short figure leads (7 Nov.); a date or a phrase keeps the smaller size
+    dl = "".join(f'<div class="stat"><dt>{a}</dt><dd{" class=\"long\"" if len(re.sub(r"<[^>]+>", "", str(b))) > 9 else ""}>{b}{f"<small>{c}</small>" if c else ""}</dd></div>' for a, b, c in items)
     cap = f'<div class="stats-cap"><b>{caption}</b><span>{note}</span></div>' if caption else ""
     return f'{cap}<dl class="stats reveal" style="--n:{len(items)}">{dl}</dl>'
 
