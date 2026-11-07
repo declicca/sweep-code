@@ -648,6 +648,14 @@ table.reltbl tr.past .st{opacity:.55}
 @media (max-width:560px){.tbl th,.tbl td{display:block;width:auto;padding:0}.tbl th{padding-top:16px}.tbl td{padding:6px 0 16px}}
 .tbl+.fine{margin-top:24px}
 
+/* ---- a row that scrolls sideways, on a computer (site.js, 7 Nov.): ‹ › over its ends as Apple's carousel paddles, its edge fading where
+   there is more; the same buttons as the app's (5deb76b) */
+.pad{position:absolute;z-index:3;width:36px;height:36px;margin:-18px 0 0 -18px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:var(--glass-menu);color:var(--text);box-shadow:var(--shadow-1);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);cursor:pointer;transition:scale var(--t-fast) var(--spring),opacity var(--t-fast)}
+.pad svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pad:hover{scale:1.06}.pad:active{scale:.94}.pad[hidden]{display:none}
+.rail-on.more-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 64px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 64px),transparent)}
+.rail-on.more-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 64px);mask-image:linear-gradient(90deg,transparent,#000 64px)}
+.rail-on.more-l.more-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 64px,#000 calc(100% - 64px),transparent);mask-image:linear-gradient(90deg,transparent,#000 64px,#000 calc(100% - 64px),transparent)}
 /* ---- a line of chips (scrolls on phones) */
 .chiprow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .chiprow .eyebrow{margin:0 8px 0 0}

@@ -353,4 +353,32 @@
     var sio = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(a){ a.classList.remove('on'); }); var a = map[e.target.id]; if(a){ a.classList.add('on'); var c=a.parentElement; c.scrollTo({left:a.offsetLeft-c.clientWidth/2+a.clientWidth/2,behavior:reduce?'auto':'smooth'}); } } }); }, {rootMargin:'-40% 0px -55% 0px'});
     Object.keys(map).forEach(function(id){ var s = document.getElementById(id); if(s) sio.observe(s); });
   }
+
+  // rows that scroll sideways, on a computer (7 Nov., « expérience Apple », step 1): their scrollbar is hidden, so a mouse could not
+  // reach their end. A row that runs past its width gets two round buttons over its ends, as Apple's carousels and the app (5deb76b):
+  // ‹ once it has moved, › while there is more; a click moves it by most of its width; its edge fades where there is more.
+  // Laid over the row's content edges (absolute, in its offset parent): nothing moves. None with a finger, none for a row that fits.
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+  var PADT = {en:['Previous','Next'], fr:['Précédent','Suivant'], es:['Anterior','Siguiente']}[(root.lang || 'en').slice(0,2)] || ['Previous','Next'];
+  var place = function(r){
+    var p = r._pads, over = r.scrollWidth - r.clientWidth > 2 && r.getClientRects().length && r.offsetParent;
+    if(!over || !fine.matches){ if(p){ p.forEach(function(b){ b.remove(); }); r._pads = null; r.classList.remove('rail-on','more-l','more-r'); } return; }
+    if(!p || p[0].parentElement !== r.offsetParent){
+      if(p) p.forEach(function(b){ b.remove(); });
+      r._pads = [0,1].map(function(d){ var b = document.createElement('button'); b.type = 'button'; b.className = 'pad ' + (d ? 'pad-r' : 'pad-l'); b.setAttribute('aria-label', PADT[d]);
+        b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (d ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6') + '"/></svg>';
+        b.addEventListener('click', function(){ r.scrollBy({left:(d ? 1 : -1) * Math.max(120, r.clientWidth * .8), behavior: reduce ? 'auto' : 'smooth'}); });
+        r.offsetParent.appendChild(b); return b; });
+      if(!r._padScroll){ r._padScroll = true; r.addEventListener('scroll', function(){ place(r); }, {passive:true}); }
+      r.classList.add('rail-on');
+    }
+    var l = r._pads[0], rt = r._pads[1], x = r.scrollLeft, end = r.scrollWidth - r.clientWidth - x;
+    l.style.top = rt.style.top = (r.offsetTop + r.offsetHeight / 2) + 'px'; var cs = getComputedStyle(r); l.style.left = (r.offsetLeft + parseFloat(cs.paddingLeft)) + 'px'; rt.style.left = (r.offsetLeft + r.offsetWidth - parseFloat(cs.paddingRight)) + 'px';
+    l.hidden = x <= 2; rt.hidden = end <= 2; r.classList.toggle('more-l', x > 2); r.classList.toggle('more-r', end > 2);
+  };
+  var railList = document.querySelectorAll('.subnav .sn,.phones-row,.cards.c5,.chiprow,.plans.three,.shares.stories');
+  if(railList.length){
+    var railQ = false, railSoon = function(){ if(railQ) return; railQ = true; requestAnimationFrame(function(){ railQ = false; railList.forEach(place); }); };
+    window.addEventListener('resize', railSoon); if(fine.addEventListener) fine.addEventListener('change', railSoon); window.addEventListener('load', railSoon); railSoon();
+  }
 })();
