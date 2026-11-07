@@ -10,12 +10,17 @@ Sweep — Admin dashboard (brief 01 step 4), dev environment with Playwright:
  - « Exporter »: the 30-day list as a Markdown file (api/admin/errors-export), with the error and where it happened;
  - « Exporter pour Claude » (27 Oct.): everything Admin shows as one Markdown file (api/admin/report), and the app
    sends the pages it opened, its device and language when it is hidden (api/usage);
+ - (7 Nov., brief « premier plan », step 1) a new trader opens his first plan and closes it without saving: the app sends the
+   screen and « closed » (api/usage); « Le premier plan, écran par écran » lists it (reached, left here, median time), by start
+   and device (the device list redraws the table);
  - FR words, phone and computer, no horizontal scroll, no page error.
 """
-import asyncio, random, sys
+import asyncio, json, os, random, sqlite3, sys, time
 from playwright.async_api import async_playwright
 B = sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8095'
 STATE = sys.argv[2] if len(sys.argv) > 2 else '/tmp/show_state.json'
+DB = os.environ.get('SWEEP_TEST_DB', '/tmp/g/data/journal.db')
+H = {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}
 fails = 0
 def ok(c, what):
     global fails
@@ -24,6 +29,21 @@ async def main():
   async with async_playwright() as p:
     br = await p.chromium.launch()
     msg = 'Test error %06d' % random.randint(0, 999999)
+    # a new trader's first plan, closed without saving (the cross), on a computer
+    try: d = sqlite3.connect(DB); d.execute('DELETE FROM attempts'); d.commit(); d.close()
+    except Exception: pass
+    nc = await br.new_context(locale='fr-CA', viewport={'width': 1300, 'height': 850})
+    await nc.add_init_script("localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+    r = await nc.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'fp%d@t.dev' % int(time.time() * 1000), 'consent': True, 'elapsed': 6000}), headers=H)
+    ok(r.status == 201, f'a new trader signs up ({r.status})')
+    np_ = await nc.new_page(); await np_.goto(B + '/'); await np_.wait_for_function("() => !!(window.SweepGame && SweepGame.openPlan)", timeout=20000); await np_.wait_for_timeout(800)
+    await np_.evaluate("SweepGame.openPlan((window.SweepNextSession && SweepNextSession()) || new Date().toISOString().slice(0, 10), { then: () => {} })")
+    await np_.wait_for_selector('#gSheet.g-plan.open', timeout=8000); await np_.wait_for_timeout(1200)
+    async with np_.expect_request(lambda x: x.url.endswith('/api/usage') and '"fp"' in (x.post_data or ''), timeout=8000) as rq:
+      await np_.locator('#gSheet [data-g=close]').click()
+    fp = ((await rq.value).post_data_json or {}).get('fp') or {}
+    ok(fp.get('end') == 'closed' and [x[0] for x in fp.get('s', [])] == ['form'], f'the first plan closed without saving is sent: the short form, « closed » ({fp})')
+    await np_.wait_for_timeout(500); await nc.close()
     for w, h, mob in ((1440, 900, False), (390, 844, True)):
       tag = f'{w}px'
       ctx = await br.new_context(storage_state=STATE, locale='fr-CA', viewport={'width': w, 'height': h}, is_mobile=mob, has_touch=mob, device_scale_factor=2 if mob else 1)
@@ -45,6 +65,15 @@ async def main():
       # (brief activation, step C) when they sign up: the 4 moments of the New York day, each with its sign-ups and the share with a first plan or trade
       sl = await pg.evaluate("[...document.querySelectorAll('#main .ux-slots tbody tr')].map((r) => [r.dataset.slot, r.children.length, r.getClientRects().length > 0])")
       ok([x[0] for x in sl] == ['before', 'session', 'evening', 'weekend'] and all(x[1] == 3 and x[2] for x in sl), f'{tag} « Quand ils s’inscrivent »: 4 moments, sign-ups and first plan or trade ({sl})')
+      # (brief « premier plan », step 1) the first plan, screen by screen; on a computer, the device list redraws it
+      fpt = await pg.evaluate("(() => { const b = document.querySelector('#main .ux-fp'); if (!b) return null; const r = b.querySelector('tr[data-fps=form]'); const x = b.querySelector('.scroll-x'); return [b.querySelector('h4').textContent, [...b.querySelectorAll('thead th')].map((t) => t.textContent), r ? [...r.children].map((c) => c.textContent.trim()) : null, b.querySelectorAll('select').length, x.scrollWidth <= x.clientWidth] })()")
+      ok(fpt and fpt[0] == 'Le premier plan, écran par écran' and fpt[1] == ['Écran', 'Atteignent', 'Partent ici', 'Temps médian'] and fpt[2] and fpt[2][0] == 'Plan court (un écran)' and int(fpt[2][1]) >= 1 and int(fpt[2][2]) >= 1 and fpt[3] == 2 and fpt[4],
+         f'{tag} « Le premier plan, écran par écran »: the short form reached and left, the start and device lists, the 4 columns in the width ({fpt})')
+      await pg.select_option('#main [data-ux-fp=d]', 'desktop'); await pg.wait_for_timeout(300)
+      fpd = await pg.evaluate("(() => { const r = document.querySelector('#main .ux-fp tr[data-fps=form]'); return [document.querySelector('#main [data-ux-fp=d]').value, r ? +r.children[2].textContent : 0, (document.querySelector('#main .ux-fp-end') || {}).textContent || ''] })()")
+      ok(fpd[0] == 'desktop' and fpd[1] >= 1 and fpd[2].startswith('Plans mesurés'), f'{tag} « Ordinateur »: the table redrawn, the new trader\'s plan in it ({fpd})')
+      await pg.evaluate("document.querySelector('#main .ux-fp').scrollIntoView({block: 'center'})"); await pg.wait_for_timeout(300); await pg.screenshot(path=f'/tmp/admin_first_plan_{w}.png')
+      await pg.select_option('#main [data-ux-fp=d]', 'all'); await pg.wait_for_timeout(200)
       row = await pg.evaluate(f"(()=>{{const r=[...document.querySelectorAll('#main .ux-errs tbody tr')].find(t=>t.textContent.includes('{msg}')); return r?[...r.children].map(c=>c.textContent.trim()):null}})()")
       ok(row is not None and row[1] == '1' and row[2] == '1' and row[4] == '#trades' and 'Chrome' in row[5] and row[6] == 'app.test', f'{tag} the error: 1 trader, 1 time, page, browser, version ({row})')
       # « Exporter » (13 Oct.): the 30-day list as a Markdown file, to give to Claude

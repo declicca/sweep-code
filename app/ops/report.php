@@ -74,6 +74,21 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
         . $tbl(['Moment', 'Inscrits', 'Premier plan ou trade ce jour-là'], array_map(fn($k) => [$sk[$k], $b['signup_slots'][$k]['n'], $pc(['pct' => $b['signup_slots'][$k]['day0_pct']])], array_keys($sk)))
         . (!empty($b['start_cases']) ? "**Les trois démarrages** (chaque inscrit dans un cas ; risque permis vu pendant la séance de l'inscription) :\n\n" . $tbl(['Cas', 'Inscrits', 'Risque permis vu ce jour-là'], array_map(fn($k, $l) => [$l, $b['start_cases'][$k]['n'], $pc(['pct' => $b['start_cases'][$k]['day0_pct']])], ['open', 'closed', 'active'], ['Marché ouvert (premier trade)', 'Marché fermé (plan de demain)', 'Trader en activité (historique)'])) : '')
         . $tbl(['Indicateur', 'Valeur'], [['De retour le jour de trading suivant (visite, plan ou trade)', $pc($b['return_d1'])], ['Risque permis vu le jour de l\'inscription (premier plan ou trade)', $pc($b['risk_seen_day0'])]]);
+    if (!empty($b['first_plan'])) {   // brief « premier plan », step 1: the first plan, screen by screen, by start and device
+        $fpS = ['form' => 'Plan court (un écran, après « Créer le compte » ou avant un trade)', 'express' => 'Plan rapide (un écran)', 'base' => 'Plan guidé : niveaux', 'pos' => 'Plan guidé : position',
+            'scen' => 'Plan guidé : scénarios', 'd1' => 'Plan guidé : dernier résultat', 'd2' => 'Plan guidé : règle enfreinte', 'limits' => 'Plan guidé : limites', 'sheet' => 'Plan guidé : la fiche'];
+        $fpC = ['all' => 'Tous', 'open' => 'Marché ouvert', 'closed' => 'Marché fermé', 'active' => 'Trader en activité']; $fpD = ['all' => 'tous appareils', 'phone' => 'téléphone', 'desktop' => 'ordinateur'];
+        $sec = fn($s) => $s < 120 ? $s . ' s' : round($s / 60) . ' min';
+        $ends = []; $rows = [];
+        foreach ($b['first_plan'] as $c => $byDev) foreach ($byDev as $dv => $x) {
+            if (!$x['n']) continue;
+            $ends[] = [$fpC[$c], $fpD[$dv], $x['n'], $x['end']['saved'], $x['end']['closed'], $x['end']['skipped'], $x['end']['left']];
+            foreach ($x['screens'] as $r) $rows[] = [$fpC[$c], $fpD[$dv], $fpS[$r['screen']] ?? $r['screen'], $r['reached'], $r['left'], $sec($r['median_s'])];
+        }
+        $md .= "**Le premier plan, écran par écran** (le premier plan de chaque trader, une fois, sans les données d'exemple ; « partent » : leur dernier écran, sans enregistrer) :\n\n"
+            . ($ends ? $tbl(['Démarrage', 'Appareil', 'Plans mesurés', 'Enregistrés', 'Fermés sans enregistrer', 'Passés (« Passer », « Plus tard »)', 'Page quittée'], $ends)
+                . $tbl(['Démarrage', 'Appareil', 'Écran', 'Atteignent', 'Partent', 'Temps médian'], $rows) : "Aucun premier plan mesuré pour l'instant.\n\n");
+    }
     if (!empty($m['journal'])) {   // brief « pertes oubliées », step 1
         $j = $m['journal']; $jr = fn(string $k, string $l) => [$l, $pc($j['d7'][$k]), $pc($j['d30'][$k])];
         $md .= "**Journal complet** (des pertes non notées rendent le journal trop beau ; chez de vrais traders, 40 à 55 % des trades sont perdants) :\n\n"

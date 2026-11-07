@@ -917,6 +917,35 @@
     const all = s.signed_up || 0, rows = [[y.stN[0], all, null], [y.stN[1], s.first_name.n, null], [y.stN[2], s.account.n, s.account.median_min], [y.stN[3], s.plan.n, s.plan.median_min], [y.stN[4], s.trade.n, s.trade.median_min]];
     return `<h4 class="ux-start-h">${y.st}</h4><div class="scroll-x"><table class="tbl ux-start"><tbody>${rows.map(([l, n, m], i) => `<tr><td>${esc(l)}</td><td class="num"><b>${n}</b></td><td class="num">${all ? Math.round(n / all * 100) + ' %' : '—'}</td><td class="num muted">${i > 1 ? dur(m) : ''}</td></tr>`).join('')}</tbody></table></div>`;
   }
+  // (7 Nov., brief « premier plan », step 1) the first plan, screen by screen: per screen the traders who reached it, those who left on it
+  // (their last screen, not saved) and the median time on it; by start and device (two lists, the numbers come computed for each)
+  const FPT = {
+    en: { h: 'The first plan, screen by screen', sub: 'Each trader’s first plan, once (sample data aside). « Left here »: their last screen, not saved.', st: 'Start', dv: 'Device', all: 'All', phone: 'Phone', desktop: 'Computer',
+      sc: 'Screen', re: 'Reached', le: 'Left here', md: 'Median time', ends: 'Plans measured {n} · saved {a} · closed without saving {b} · skipped {c} · page left {d}', none: 'No first plan measured yet.',
+      s: { form: 'Short plan (one screen)', express: 'Quick plan (one screen)', base: 'Guided plan: levels', pos: 'Guided plan: position', scen: 'Guided plan: scenarios', d1: 'Guided plan: last result', d2: 'Guided plan: rule broken', limits: 'Guided plan: limits', sheet: 'Guided plan: the sheet' } },
+    fr: { h: 'Le premier plan, écran par écran', sub: 'Le premier plan de chaque trader, une fois (sans les données d’exemple). « Partent ici » : leur dernier écran, sans enregistrer.', st: 'Démarrage', dv: 'Appareil', all: 'Tous', phone: 'Téléphone', desktop: 'Ordinateur',
+      sc: 'Écran', re: 'Atteignent', le: 'Partent ici', md: 'Temps médian', ends: 'Plans mesurés {n} · enregistrés {a} · fermés sans enregistrer {b} · passés {c} · page quittée {d}', none: 'Aucun premier plan mesuré pour l’instant.',
+      s: { form: 'Plan court (un écran)', express: 'Plan rapide (un écran)', base: 'Plan guidé : niveaux', pos: 'Plan guidé : position', scen: 'Plan guidé : scénarios', d1: 'Plan guidé : dernier résultat', d2: 'Plan guidé : règle enfreinte', limits: 'Plan guidé : limites', sheet: 'Plan guidé : la fiche' } },
+    es: { h: 'El primer plan, pantalla por pantalla', sub: 'El primer plan de cada trader, una vez (sin los datos de ejemplo). « Se van aquí »: su última pantalla, sin guardar.', st: 'Comienzo', dv: 'Dispositivo', all: 'Todos', phone: 'Teléfono', desktop: 'Ordenador',
+      sc: 'Pantalla', re: 'Llegan', le: 'Se van aquí', md: 'Tiempo mediano', ends: 'Planes medidos {n} · guardados {a} · cerrados sin guardar {b} · saltados {c} · página abandonada {d}', none: 'Aún no se ha medido ningún primer plan.',
+      s: { form: 'Plan corto (una pantalla)', express: 'Plan rápido (una pantalla)', base: 'Plan guiado: niveles', pos: 'Plan guiado: posición', scen: 'Plan guiado: escenarios', d1: 'Plan guiado: último resultado', d2: 'Plan guiado: regla incumplida', limits: 'Plan guiado: límites', sheet: 'Plan guiado: la ficha' } } };
+  let fpc = 'all', fpd = 'all';
+  function firstPlanHtml(fp) {
+    if (!fp) return '';
+    const y = FPT[LANG] || FPT.en, c = CST[LANG] || CST.en, x = (fp[fpc] || fp.all)[fpd] || fp.all.all;
+    const opt = (v, l, cur) => `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`;
+    const sec = (s) => (s < 120 ? s + ' s' : Math.round(s / 60) + ' min');
+    const rows = x.screens.map((r) => `<tr data-fps="${esc(r.screen)}"><td>${esc(y.s[r.screen] || r.screen)}</td><td class="num"><b>${r.reached}</b></td><td class="num">${r.left}</td><td class="num muted">${sec(r.median_s)}</td></tr>`).join('');
+    return `<div class="ux-fp"><h4 class="ux-start-h">${y.h}</h4><p class="muted ux-jr-sub">${esc(y.sub)}</p>
+      <div class="ux-bf"><label class="f"><span>${y.st}</span><select data-ux-fp="c">${opt('all', y.all, fpc)}${['open', 'closed', 'active'].map((k) => opt(k, c[k], fpc)).join('')}</select></label><label class="f"><span>${y.dv}</span><select data-ux-fp="d">${['all', 'phone', 'desktop'].map((k) => opt(k, y[k], fpd)).join('')}</select></label></div>
+      ${x.n ? `<p class="muted ux-fp-end">${esc(y.ends.replace('{n}', x.n).replace('{a}', x.end.saved).replace('{b}', x.end.closed).replace('{c}', x.end.skipped).replace('{d}', x.end.left))}</p>
+      <div class="scroll-x"><table class="tbl ux-start ux-first-plan"><thead><tr><th>${y.sc}</th><th class="num">${y.re}</th><th class="num">${y.le}</th><th class="num">${y.md}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.none}</p>`}</div>`;
+  }
+  document.addEventListener('change', (e) => {
+    const sel = e.target.closest && e.target.closest('[data-ux-fp]'); if (!sel || !data || !data.brief) return;
+    if (sel.dataset.uxFp === 'c') fpc = sel.value; else fpd = sel.value;
+    const box = document.querySelector('#main .ux-fp'); if (box) box.outerHTML = firstPlanHtml(data.brief.first_plan);
+  });
   // brief activation of 27 Oct., step C: the return on the next trading day, the risk allowed seen on the session of the sign-up,
   // and when traders sign up (New York time), with the share that made a first plan or trade on that session
   const SCT = {
@@ -966,7 +995,7 @@
     return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
       <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}${b.return_d1 ? card(SC().d1, pct(b.return_d1), sub(b.return_d1)) + card(SC().rs, pct(b.risk_seen_day0), sub(b.risk_seen_day0)) : ''}</div>${slotsHtml(b.signup_slots)}${casesHtml(b.start_cases)}${journalHtml(d.journal)}
-      ${startHtml(b.start, y)}
+      ${startHtml(b.start, y)}${firstPlanHtml(b.first_plan)}
       <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<span class="ux-err-a"><button type="button" class="btn sm" data-ux-errclr>${y.clr}</button><a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a></span>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }
   const load = () => { busy = true; apiJSON('api/admin/metrics' + (fc || fs ? '?' + new URLSearchParams({ cohort: fc, source: fs }) : '')).then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) b.innerHTML = html(d); }).catch(() => { busy = false; at = Date.now(); }); };

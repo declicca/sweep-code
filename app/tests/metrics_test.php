@@ -6,7 +6,8 @@ declare(strict_types=1);
  * Known traders, hand-computed numbers: activation on the sign-up day, retention D7 / D30 (a trade or a review), swept
  * sessions, median sign-up → first trade, the cohort and source filters, JS errors grouped with the traders affected,
  * the start step by step (brief 03 step 1), closed days and Friday recaps opened (SWEEP.md, step 0); the sign-ups by time of day,
- * the return on the next trading day and the risk allowed seen on the session of the sign-up (brief activation, step C).
+ * the return on the next trading day and the risk allowed seen on the session of the sign-up (brief activation, step C); the first
+ * plan screen by screen, by start and device, and in « Export for Claude » (brief « premier plan », step 1).
  */
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 $app = dirname(__DIR__);
@@ -179,6 +180,33 @@ for ($i = 0; $i < 5; $i++) $doc('f5c', 'trades', "l$i", '{}', $fs + 8 * $D + $i)
 $wk = (new DateTimeImmutable('@' . $fs))->setTimezone($ny)->modify('monday this week')->format('Y-m-d');
 $f7 = array_values(array_filter(sweep_metrics($pdo, $app)['five_in_7'] ?? [], fn($r) => $r['week'] === $wk))[0] ?? null;
 $ok($f7 !== null && $f7['k'] === 1 && $f7['n'] >= 3 && !$f7['open'], '5 trades in 7 days: the 3 traders of that week, 1 of them (copies once, no sample data, not after day 7) ' . json_encode($f7));
+
+// (7 Nov., brief « premier plan », step 1) the first plan, screen by screen, hand-computed: 3 traders of a week of their own (Tuesday 4 March
+// 2025, New York): pA at 10:00 (market open) saves the short form on a computer; pB at 20:00 (market closed) goes through 2 screens of the
+// guided plan on a phone, back to the first and on to the second again, then closes it; pC (« More than a year »: active) leaves the page
+// on the quick plan, on a phone. Sent as the app sends them (ops/usage.php): a second plan, or another ending of an ended plan, is not kept.
+require_once $app . '/ops/usage.php';
+$pdo->exec('ALTER TABLE users ADD COLUMN experience TEXT');
+$tue = fn(string $hm) => (new DateTimeImmutable('2025-03-04 ' . $hm, $ny))->getTimestamp();
+$user('pA', $tue('10:00'), 'x'); $user('pB', $tue('20:00'), 'x'); $user('pC', $tue('20:30'), 'x'); $pdo->exec("UPDATE users SET experience = 'gt1' WHERE id = 'pC'");
+$rep = fn(string $u, string $dev, array $fp) => sweep_usage_record($pdo, $u, ['dev' => $dev, 'lang' => 'en', 'theme' => 'dark', 'p' => [], 'fp' => $fp], $tue('22:00'));
+$rep('pA', 'desktop', ['id' => 'aaaa1', 'end' => 'saved', 's' => [['form', 40]]]);
+$rep('pA', 'desktop', ['id' => 'aaaa2', 'end' => 'closed', 's' => [['express', 5]]]);                                         // a second plan: not kept
+$rep('pB', 'phone', ['id' => 'bbbb1', 'end' => 'left', 's' => [['base', 30]]]);                                               // the app hidden a moment…
+$rep('pB', 'phone', ['id' => 'bbbb1', 'end' => 'closed', 's' => [['base', 30], ['pos', 50], ['base', 10], ['pos', 20]]]);    // …then closed on screen 2
+$rep('pB', 'phone', ['id' => 'bbbb1', 'end' => 'saved', 's' => [['base', 30]]]);                                              // already ended: not kept
+$rep('pC', 'phone', ['id' => 'cccc1', 'end' => 'left', 's' => [['express', 20]]]);
+$rep('pC', 'phone', ['id' => 'cccc1', 'end' => 'saved', 's' => [['bad screen!', 1]]]);                                        // not a screen name: refused
+$fp = sweep_metrics($pdo, $app, ['cohort' => '2025-03-03'])['brief']['first_plan'];
+$sc = fn(array $x) => array_map(fn($r) => [$r['screen'], $r['reached'], $r['left'], $r['median_s']], $x['screens']);
+$ok($fp['all']['all']['n'] === 3 && $fp['all']['all']['end'] === ['saved' => 1, 'closed' => 1, 'skipped' => 0, 'left' => 1], 'first plan: 3 measured, 1 saved, 1 closed, 1 page left ' . json_encode($fp['all']['all']['end']));
+$ok($sc($fp['all']['all']) === [['form', 1, 0, 40], ['express', 1, 1, 20], ['base', 1, 0, 40], ['pos', 1, 1, 70]], 'first plan, every screen: reached, left on it (the last screen, not saved), median seconds (a screen seen twice added up) ' . json_encode($sc($fp['all']['all'])));
+$ok($sc($fp['open']['all']) === [['form', 1, 0, 40]] && $sc($fp['closed']['phone']) === [['base', 1, 0, 40], ['pos', 1, 1, 70]] && $sc($fp['active']['phone']) === [['express', 1, 1, 20]], 'first plan by start: market open (pA), market closed (pB), active trader (pC)');
+$ok($fp['all']['desktop']['n'] === 1 && $fp['all']['phone']['n'] === 2 && $fp['closed']['desktop']['n'] === 0 && $sc($fp['all']['phone']) === [['express', 1, 1, 20], ['base', 1, 0, 40], ['pos', 1, 1, 70]], 'first plan by device: 1 computer, 2 phones');
+$ok(sweep_metrics($pdo, $app, ['cohort' => '2025-03-10'])['brief']['first_plan']['all']['all']['n'] === 0, 'first plan: another week, none measured');
+require_once $app . '/ops/report.php';
+$md = sweep_full_report($pdo, [], $app, time());
+$ok(str_contains($md, 'Le premier plan, écran par écran') && str_contains($md, '| Tous | tous appareils | 3 | 1 | 1 | 0 | 1 |') && str_contains($md, '| Marché fermé | téléphone | Plan guidé : position | 1 | 1 | 70 s |'), 'Export for Claude: the first plan, by start and device');
 
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";

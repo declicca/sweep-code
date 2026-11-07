@@ -17,6 +17,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * Brief activation of 27 Oct., step C (same traders): the sign-ups by New York time of day (before the open, session, evening,
  * weekend) with the share that made a first plan or trade on that session; the return on the next trading day (a visit, a plan
  * or a trade; usage_daily, game_days, users.last_login); the risk allowed seen on the session of the sign-up (a first plan or trade).
+ * Brief « premier plan » of 7 Nov., step 1 (block « first_plan », same traders): the first plan screen by screen, by start and device.
  */
 function sweep_metrics(PDO $pdo, string $app, array $f = []): array
 {
@@ -162,12 +163,13 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         $a = json_decode((string) $r['data'], true); if (!is_array($a) || !empty($a['demo'])) continue;
         foreach ((array) ($a['adjustments'] ?? []) as $x) if (is_array($x) && (int) ($x['amount_c'] ?? 0) !== 0 && ($x['kind'] ?? '') !== 'fees') { $xp[$r['user_id']] = 'gt1'; break; }
     }
-    $cases = []; foreach (['open', 'closed', 'active'] as $k) $cases[$k] = ['n' => 0, 'day0' => 0];
+    $cases = []; foreach (['open', 'closed', 'active'] as $k) $cases[$k] = ['n' => 0, 'day0' => 0]; $caseOf = [];
     foreach ($users as $u) {
         $s0 = $sday($u['ts']); $k = $slot($u['ts']); $slots[$k]['n']++;
         $day0 = (isset($plan1[$u['id']]) && $sday($plan1[$u['id']]) === $s0) || (isset($first[$u['id']]) && $sday($first[$u['id']]) === $s0);
         if ($day0) $slots[$k]['day0']++;
         $c = ($xp[$u['id']] ?? '') === 'gt1' ? 'active' : ($k === 'session' ? 'open' : 'closed'); $cases[$c]['n']++; if ($day0) $cases[$c]['day0']++;
+        $caseOf[$u['id']] = $c;
         if ($s0 < $todayS) { $rsN++; if ($day0) $rsK++; }   // the session of the sign-up is over
         $j1 = $nextTd($s0);
         if ($j1 < $todayS) {   // that next trading day is over
@@ -178,6 +180,33 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
     }
     foreach ($slots as &$x) $x['day0_pct'] = $rate($x['day0'], $x['n']); unset($x);
     foreach ($cases as &$x) $x['day0_pct'] = $rate($x['day0'], $x['n']); unset($x);
+    // (7 Nov., brief « premier plan », step 1) the first plan, screen by screen (ops/usage.php, usage_first_plan), same traders: by start
+    // (all, open, closed, active) and device (all, phone, desktop): the plans measured, their endings, and per screen the traders who
+    // reached it, those who left on it (their last screen, not saved) and the median seconds on it (a screen seen twice: added up)
+    $firstPlan = null;
+    if ($has('usage_first_plan')) {
+        $order = ['form', 'express', 'base', 'pos', 'scen', 'd1', 'd2', 'limits', 'sheet'];
+        $box = []; foreach (['all', 'open', 'closed', 'active'] as $c) foreach (['all', 'phone', 'desktop'] as $dv) $box[$c][$dv] = ['n' => 0, 'end' => ['saved' => 0, 'closed' => 0, 'skipped' => 0, 'left' => 0], 'sc' => []];
+        foreach ($q('SELECT user_id, device, screens, ending FROM usage_first_plan') as $r) {
+            if (!isset($ids[$r['user_id']])) continue;
+            $sc = json_decode((string) $r['screens'], true); if (!is_array($sc) || !$sc) continue;
+            $secs = []; foreach ($sc as $x) $secs[$x[0]] = ($secs[$x[0]] ?? 0) + (int) $x[1];
+            $last = end($sc)[0]; $end = (string) $r['ending'];
+            foreach (['all', $caseOf[$r['user_id']] ?? 'closed'] as $c) foreach (['all', $r['device'] === 'desktop' ? 'desktop' : 'phone'] as $dv) {
+                $x = &$box[$c][$dv]; $x['n']++; if (isset($x['end'][$end])) $x['end'][$end]++;
+                foreach ($secs as $k => $v) { $x['sc'][$k]['d'][] = $v; $x['sc'][$k]['left'] = ($x['sc'][$k]['left'] ?? 0) + ($end !== 'saved' && $k === $last ? 1 : 0); }
+                unset($x);
+            }
+        }
+        foreach ($box as &$byDev) foreach ($byDev as &$x) {
+            $rows = [];
+            uksort($x['sc'], fn($a, $b) => [array_search($a, $order, true) === false ? 99 : array_search($a, $order, true), $a] <=> [array_search($b, $order, true) === false ? 99 : array_search($b, $order, true), $b]);
+            foreach ($x['sc'] as $k => $v) { $d = $v['d']; sort($d); $rows[] = ['screen' => $k, 'reached' => count($d), 'left' => $v['left'], 'median_s' => $d[intdiv(count($d), 2)]]; }
+            $x = ['n' => $x['n'], 'end' => $x['end'], 'screens' => $rows];
+        }
+        unset($byDev, $x);
+        $firstPlan = $box;
+    }
     $start = ['signed_up' => count($users), 'first_name' => $step($named, false), 'account' => $step($acc1), 'plan' => $step($plan1), 'trade' => $step($first)];
     $brief = [
         'start' => $start,
@@ -189,6 +218,7 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         'closed_sessions_30d' => ['pct' => $rate($closedS, $sess), 'of' => $sess],
         'weekly_opened_8w' => ['pct' => $rate($openedW, count($tradedWeeks)), 'of' => count($tradedWeeks)],
         'signup_slots' => $slots, 'start_cases' => $cases, 'return_d1' => ['pct' => $rate($d1k, $d1n), 'of' => $d1n], 'risk_seen_day0' => ['pct' => $rate($rsK, $rsN), 'of' => $rsN],
+        'first_plan' => $firstPlan,
     ];
     if ($has('client_errors')) {   // grouped by message, its numbers taken out (ops/client-errors.php), last 30 days
         require_once __DIR__ . '/client-errors.php';

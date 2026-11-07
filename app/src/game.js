@@ -445,8 +445,38 @@
     el.classList.remove('open'); if (sc) sc.classList.remove('open');
     if (!document.querySelector('.evp.open:not(.g-sheet)')) document.body.classList.remove('evp-lock');
     setTimeout(() => { el.remove(); if (sc) sc.remove(); }, instant ? 0 : 350);
+    if (FP.on && el === FP.el) fpEnd('closed');   // swiped, the cross, the scrim, the back button or another sheet over it
     if (cb) cb();
   }
+  /* (7 Nov., brief « premier plan », step 1) the first plan of a trader, measured once: each screen shown with its seconds in front,
+     and how it ends: « saved », « closed » (without saving), « skipped » (« Skip, add my trade », the late plan's « later ») or « left » (the page hidden or
+     gone; a later ending replaces it). Not with sample data, never after a plan was saved. Sent with the app's usage (api/usage,
+     ops/usage.php): the screens' names and seconds only. */
+  const FP = { on: false, el: null, id: '', s: [], cur: null, t0: 0 };
+  function fpStart(name, el) {
+    if (FP.on || !el) return;
+    try { if (localStorage.getItem('sw.fp1')) return; } catch (e) { return; }
+    if ((S.accounts || []).some((a) => a.demo) || (S.trades || []).some((x) => x.demo)) return;   // sample data
+    if ((S.journals || []).some((j) => !j.demo && ((j.pre && j.pre.bias) || j.fiche))) return;   // a plan already saved
+    FP.on = true; FP.el = el; FP.id = Math.random().toString(36).slice(2, 12); FP.s = []; FP.cur = null;
+    try { localStorage.setItem('sw.fp1', FP.id); } catch (e) { /* private mode */ }
+    fpScreen(name);
+  }
+  function fpTick() { if (FP.cur && FP.t0) FP.cur[1] += Math.round((Date.now() - FP.t0) / 1000); FP.t0 = document.hidden ? 0 : Date.now(); }
+  function fpScreen(name) {
+    if (!FP.on || (FP.cur && FP.cur[0] === name) || FP.s.length >= 30) return;
+    fpTick(); FP.cur = [name, 0]; FP.s.push(FP.cur);
+  }
+  function fpSend(end) {
+    fpTick();
+    const body = { dev: matchMedia('(pointer: coarse)').matches ? (Math.min(screen.width, screen.height) >= 600 ? 'tablet' : 'phone') : 'desktop',
+      app: matchMedia('(display-mode: standalone)').matches || navigator.standalone === true, lang: typeof LANG === 'string' ? LANG : 'en',
+      theme: document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'), p: {}, fp: { id: FP.id, end, s: FP.s } };
+    try { fetch('api/usage', { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify(body) }).catch(() => {}); } catch (e) { /* not measured */ }
+  }
+  function fpEnd(end) { if (!FP.on) return; FP.on = false; FP.el = null; fpSend(end); }
+  document.addEventListener('visibilitychange', () => { if (!FP.on) return; if (document.hidden) fpSend('left'); else FP.t0 = Date.now(); });
+  addEventListener('pagehide', () => { if (FP.on) fpSend('left'); });
   const head = (title, sub) => `<div class="g-head"><div><h2>${title}</h2>${sub ? `<span class="muted">${sub}</span>` : ''}</div><button type="button" class="g-x" data-g="close" aria-label="Close">${svg('x')}</button></div>`;
 
   /* ───────────── Plan sheet ───────────── */
@@ -501,8 +531,9 @@
       if (!(+PL.max_loss > 0)) PL.max_loss = String(Math.floor(Math.min(mg.dd / (rookie() ? 4 : 2), room) / 100));   // no daily limit (a Topstep Combine without it): half the drawdown — a quarter for a trader starting out (review R1, 27 Oct.)
       else if (+PL.max_loss > room / 100) PL.max_loss = String(Math.floor(room / 100));
     }
-    openSheet(planHtml(), { cls: 'g-plan' });
-    const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;   // the pre-market chart and screenshots attach to this day
+    const sh = openSheet(planHtml(), { cls: 'g-plan' });
+    sh.dataset.day = day;   // the pre-market chart and screenshots attach to this day
+    fpStart('form', sh);
   }
   /** common setups offered until the trader has a few of their own (tapping one keeps it in their list) */
   const SUGGESTED_SETUPS = ['Liquidity sweep', 'Break & retest', 'Opening range breakout', 'Fair value gap', 'VWAP reclaim', 'Trend pullback', 'Reversal'];
@@ -553,7 +584,7 @@
     // « Not trading today » chosen in the plan, before any trade of the day: the same day off as the routine's button (audit of
     // 16 Oct., R21: the routine still asked for a trade and a review of 3 questions); another bias: no longer a day off
     j.pre.day_off = PL.bias === 'no_trade' && !(S.trades || []).some((t) => !t.demo && t.date === PL.day);
-    put('journals', j);
+    put('journals', j); fpEnd('saved');
     const own = S.settings && S.settings.setups || [], add = [...PL.setups].filter((x) => !own.some((y) => y.toLowerCase() === x.toLowerCase()));
     if (add.length && typeof editDoc === 'function') editDoc('settings', 'settings', (r) => { r.setups = [...(r.setups || []), ...add]; });
     const then = PL.then; PL.then = null;
@@ -1093,6 +1124,7 @@
     openSheet(pmHtml(), { cls: 'g-plan g-pm', onClose: () => pmDraftSave(true) });   // (closed by a swipe or the scrim: the draft keeps the last keystrokes)
     const sh = document.getElementById('gSheet'); if (sh) sh.dataset.day = day;
     pmAfter(sh);
+    if (!old) fpStart(pmScreens()[PM.i], sh);
   }
   const pmSeg = (q, opts, cur, subs) => `<div class="g-seg4 pm-seg">${opts.map((o) => `<button type="button" class="${cur === o ? 'on' : ''}" aria-pressed="${cur === o}" data-pm="ans" data-q="${q}" data-v="${o}">${esc(pt(o))}${subs && subs[o] ? `<small data-noi18n>${esc(subs[o])}</small>` : ''}</button>`).join('')}</div>`;
   const pmIn = (k, v, ph, mode) => `<input type="text" inputmode="${mode || 'decimal'}" data-pmf="${k}" value="${v == null ? '' : esc(String(v))}" placeholder="${esc(ph || '')}" enterkeyhint="next" autocomplete="off" spellcheck="false"${PM.bad.includes(k) ? ' aria-invalid="true"' : ''}>`;
@@ -1294,6 +1326,7 @@
     const el = document.querySelector('#gSheet.g-pm .g-in'); if (!el) return;
     const fk = keepFocus && document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.pmf : null;
     el.innerHTML = pmHtml(); pmAfter(document.getElementById('gSheet'));
+    if (FP.on) { const scr = pmScreens(); fpScreen(scr[Math.min(PM.i, scr.length - 1)]); }
     if (fk) { const i = el.querySelector(`[data-pmf="${fk}"]`); if (i) { i.focus(); const n = i.value.length; try { i.setSelectionRange(n, n); } catch (e) { /* time inputs */ } } }
     pmDraftSave();
   }
@@ -1324,7 +1357,7 @@
       setups: (j.pre && j.pre.setups) || (prev && prev.pre.setups) || [], max_loss: parseFloat(a.max_loss) > 0 ? String(parseFloat(a.max_loss)) : (j.pre && j.pre.max_loss) || '', max_trades: String(f.limits.max_trades),
       levels: X ? String(a.X_levels || '').trim() : lvTxt, rule: f.reminder || PM.note || (j.pre && j.pre.rule) || '', day_off: false });
     if (X) Object.assign(j.pre, { scenario: String(a.X_plan || '').trim(), alt: String(a.X_alt || '').trim() });   // the journal's own « Expected / Alternative scenario »
-    PM.done = true; put('journals', j); pmDraftClear();
+    PM.done = true; put('journals', j); pmDraftClear(); fpEnd('saved');
     const then = PM.then; PM.then = null;
     buzz(10); closeSheet(); soon(500);
     if (then) setTimeout(then, 380);
@@ -1383,11 +1416,11 @@
     }
     else if (act === 'inst') { PM.hideInst = false; pmRender(); }   // « Change »: the chips come back
     else if (act === 'resume') { pmResume(); buzz(5); pmRender(); }
-    else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); PM.done = true; pmDraftClear(); closeSheet(); }   // no sheet today: its trades will be off-plan
+    else if (act === 'later') { lsSet('pm.later.' + PM.day, 1); PM.done = true; pmDraftClear(); fpEnd('skipped'); closeSheet(); }   // no sheet today: its trades will be off-plan
     else if (act === 'dayoff') {   // « Not trading today »: a day off before any trade of the day, the same as the routine's button
       const j = structuredClone(journalOf(PM.day)); j.id = PM.day;
       j.pre = Object.assign({}, j.pre || {}, { saved_at: (j.pre && j.pre.saved_at) || Math.floor(Date.now() / 1000), bias: 'no_trade', day_off: !(S.trades || []).some((x) => !x.demo && x.date === PM.day) });
-      PM.done = true; put('journals', j); pmDraftClear(); buzz(10); closeSheet(); soon(500);
+      PM.done = true; put('journals', j); pmDraftClear(); fpEnd('saved'); buzz(10); closeSheet(); soon(500);
     }
   });
   document.addEventListener('input', (e) => {
@@ -3512,7 +3545,7 @@
     const a = b.dataset.g, v = b.dataset.v;
     if (a === 'plan') { closeSheet(true); openPlan(G.detailDay && document.getElementById('gSheet') ? G.detailDay.day : null); }
     else if (a === 'add') { if (typeof openTicket === 'function') openTicket(null); }
-    else if (a === 'plan-skip') { try { localStorage.setItem(skipKey, PL.day); } catch (x) { /* private mode */ } const then = PL.then; PL.then = null; closeSheet(true); if (then) setTimeout(then, 60); }
+    else if (a === 'plan-skip') { try { localStorage.setItem(skipKey, PL.day); } catch (x) { /* private mode */ } fpEnd('skipped'); const then = PL.then; PL.then = null; closeSheet(true); if (then) setTimeout(then, 60); }
     else if (a === 'journal') { const d = G.detailDay && b.closest('#gSheet') ? G.detailDay : G.today; closeSheet(true); openJournal(d); }
     else if (a === 'review') { const d = G.detailDay && b.closest('#gSheet') ? G.detailDay : G.today; closeSheet(true); openReview(d.day); }
     else if (a === 'detail' || a === 'swept') openDetail(G.today);

@@ -8,7 +8,10 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  * theme. Counted per New York day, trader and key: never a trade, an amount, a text typed or an address.
  *  - usage_daily: day, user_id, k, device, opens, secs (one row per day × trader × key × device)
  *  - usage_env: the last device, installed or not, language and theme of each trader
- * Kept 180 days.
+ *  - usage_first_plan (7 Nov., brief « premier plan », step 1): the first plan of each trader, once: the screens shown in order
+ *    with their seconds, the device and how it ended (saved, closed, skipped, left); « left » is replaced by a later ending of
+ *    the same plan, any other ending is final and a second plan is never kept
+ * Kept 180 days (usage_daily).
  */
 const SWEEP_USAGE_KEYS = 60;      // keys per report
 const SWEEP_USAGE_DAYS = 180;
@@ -18,6 +21,26 @@ function sweep_usage_schema(PDO $pdo): void
     $pdo->exec('CREATE TABLE IF NOT EXISTS usage_daily (day VARCHAR(10) NOT NULL, user_id VARCHAR(120) NOT NULL, k VARCHAR(44) NOT NULL, device VARCHAR(16) NOT NULL,
         opens INTEGER NOT NULL DEFAULT 0, secs INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, user_id, k, device))');
     $pdo->exec('CREATE TABLE IF NOT EXISTS usage_env (user_id VARCHAR(120) NOT NULL PRIMARY KEY, device VARCHAR(16) NOT NULL, lang VARCHAR(4) NOT NULL, theme VARCHAR(8) NOT NULL, seen_at INTEGER NOT NULL)');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS usage_first_plan (user_id VARCHAR(120) NOT NULL PRIMARY KEY, id VARCHAR(16) NOT NULL, device VARCHAR(16) NOT NULL, screens TEXT NOT NULL,
+        ending VARCHAR(8) NOT NULL, started_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)');
+}
+
+/** The first plan of a trader (['id' => 'k3x…', 'end' => 'saved', 's' => [['form', 42], …]]): kept once; « left » waits for a later ending of the same plan. */
+function sweep_first_plan_record(PDO $pdo, string $uid, array $fp, string $dev, int $now): bool
+{
+    $id = (string) ($fp['id'] ?? ''); $end = (string) ($fp['end'] ?? '');
+    if (!preg_match('/^[a-z0-9]{4,16}$/', $id) || !in_array($end, ['saved', 'closed', 'skipped', 'left'], true)) return false;
+    $s = [];
+    foreach (array_slice((array) ($fp['s'] ?? []), 0, 30) as $x) {
+        if (!is_array($x) || !is_string($x[0] ?? null) || !preg_match('/^[a-z0-9_-]{1,20}$/', $x[0])) return false;
+        $s[] = [$x[0], max(0, min(86400, (int) ($x[1] ?? 0)))];
+    }
+    if (!$s) return false;
+    $st = $pdo->prepare('SELECT id, ending FROM usage_first_plan WHERE user_id = ?'); $st->execute([$uid]); $old = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$old) { $pdo->prepare('INSERT INTO usage_first_plan (user_id, id, device, screens, ending, started_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$uid, $id, $dev, json_encode($s), $end, $now, $now]); return true; }
+    if ($old['id'] !== $id || $old['ending'] !== 'left') return false;   // a second plan, or this one already ended
+    $pdo->prepare('UPDATE usage_first_plan SET screens = ?, ending = ?, updated_at = ? WHERE user_id = ?')->execute([json_encode($s), $end, $now, $uid]);
+    return true;
 }
 
 /** One report from the app: ['dev' => 'phone', 'app' => true, 'lang' => 'fr', 'theme' => 'dark', 'p' => ['p:dashboard' => [opens, secs], …]]. Returns the keys kept. */
@@ -44,6 +67,7 @@ function sweep_usage_record(PDO $pdo, string $uid, array $b, int $now): int
         ? 'INSERT INTO usage_env (user_id, device, lang, theme, seen_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE device = VALUES(device), lang = VALUES(lang), theme = VALUES(theme), seen_at = VALUES(seen_at)'
         : 'INSERT INTO usage_env (user_id, device, lang, theme, seen_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id) DO UPDATE SET device = excluded.device, lang = excluded.lang, theme = excluded.theme, seen_at = excluded.seen_at');
     $env->execute([$uid, $dev, $lang, $theme, $now]);
+    if (is_array($b['fp'] ?? null)) sweep_first_plan_record($pdo, $uid, $b['fp'], explode('-', $dev)[0], $now);
     if (random_int(1, 200) === 1) $pdo->prepare('DELETE FROM usage_daily WHERE day < ?')->execute([gmdate('Y-m-d', $now - SWEEP_USAGE_DAYS * 86400)]);
     return $n;
 }

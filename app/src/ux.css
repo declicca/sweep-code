@@ -525,6 +525,8 @@ form.ux-st-on.ux-st-final > label.f:has([name=name]){grid-column:1/-1}
 /* Admin › the start (brief 03 step 1) */
 .ux-start-h{margin:18px 0 8px}
 .ux-start td:first-child{width:50%}
+.ux-first-plan td,.ux-first-plan th{white-space:normal}   /* (7 Nov.) the first plan screen by screen: 4 columns in 390 px, the long words on two lines */
+@media (max-width:600px){.ux-first-plan td,.ux-first-plan th{padding-left:8px;padding-right:8px}}
 
 /* Admin › Metrics: the game's use over 30 days (brief 02 part 11) */
 .ux-gm{margin-top:22px}.ux-gm h3{margin:0 0 4px;font-size:16px}.ux-gm>p{margin:0 0 10px;font-size:13px}.ux-gm-low b{color:var(--neg,#D4A24C)}

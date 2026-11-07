@@ -9,6 +9,7 @@ A brand-new trader, phone (fr, es) and computer (en), from the first screen afte
 Then Today grows with the trader: with 0 trades only the routine; the 1st trade brings performance, accounts, calendar and
 news; My money and the rank wait for the 5th trade (or a payout). « Your real net » is not on the first day:
 it opens the first time My money is opened after a first payout (27 Oct.; before: nothing opens by itself). Checks: no page error, nothing wider than the window, no English in fr/es.
+7 Nov. (brief « premier plan », step 1): the first plan sends its screen and « saved » (api/usage).
 16 Oct. (brief 00, 1.2-i): no « + » outside the page while there is no account (it opened « Add an account first », in
 English); that window in the trader's language; « Trade saved · <the coach> » in the trader's language too.
 """
@@ -107,7 +108,11 @@ def run(p, lang, phone, exp, now=OPEN):
   ok(TXT[lang]['gate'] in sh and ml == '1000', f'{tag} the plan opens, its max loss from the account daily limit ({ml})')
   ok(pg.locator('.rn.open').count() == 0 and pg.locator('#tkSlide.open, .nav-am.open, .nav-am-shot.open').count() == 0, f'{tag} no « Your real net », no trade form before the plan')
   if phone: pg.screenshot(path=f'/tmp/fr_{tag}_2_plan.png')
-  tap('#gSheet [data-g=bias][data-v=bullish]'); tap('#gSheet [data-g=save-plan]')
+  tap('#gSheet [data-g=bias][data-v=bullish]')
+  # (7 Nov., brief « premier plan », step 1) the first plan is measured once: its screen, its seconds, how it ended (api/usage)
+  with pg.expect_request(lambda x: x.url.endswith('/api/usage') and '"fp"' in (x.post_data or ''), timeout=8000) as rq: tap('#gSheet [data-g=save-plan]')
+  fp = (rq.value.post_data_json or {}).get('fp') or {}
+  ok(fp.get('end') == 'saved' and [x[0] for x in fp.get('s', [])] == ['form'] and isinstance(fp['s'][0][1], int) and fp.get('id'), f'{tag} the first plan is measured: the short form, saved ({fp})')
   if case == 'active':   # « Bring your history »: the sync or the CSV in one screen; « Later » leads to the moment's case
     pg.wait_for_selector('.nav-hist.open', timeout=8000); pg.wait_for_timeout(300)
     hb = pg.evaluate("[...document.querySelectorAll('.nav-hist.open [data-sy], .nav-hist.open [data-am-imp]')].map((b) => b.textContent.trim())")
