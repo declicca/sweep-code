@@ -116,7 +116,7 @@ def run_routine_qr(p, lang, theme):
   shot(pg, f'pa-routine-qr-{tag}', '#main .nav-rt')
   pg.click('#main .nav-qr [data-rt="qr-later"]'); pg.wait_for_timeout(500)
   pg.reload(); pg.wait_for_selector('#main .nav-rt', timeout=15000); pg.wait_for_timeout(1200)
-  ok(not pg.evaluate("!!document.querySelector('#main .nav-qr')") and float(pg.evaluate("localStorage.getItem('sw.qrLater') || 0")) > time.time() * 1000 + 6 * 864e5, f"{tag} « {x['later']} »: gone for 7 days")
+  ok(not pg.evaluate("!!document.querySelector('#main .nav-qr')") and pg.evaluate("+(localStorage.getItem('sw.qrLater') || 0) > Date.now() + 6 * 864e5"), f"{tag} « {x['later']} »: gone for 7 days")
   ok(not errs, f'{tag} no page error ' + '; '.join(errs[:2]))
   br.close()
 

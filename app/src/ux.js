@@ -6,6 +6,7 @@
  *  3. Direction hint for the page entrance animation (CSS only)
  *  4. Tap the active tab again → smooth scroll to top
  *  5. A page's cards come in as they reach the screen (Apple's pages)
+ *  6. On a computer, a row that runs past its width gets ‹ › at its ends (Apple's carousels)
  */
 (function () {
   'use strict';
@@ -86,6 +87,39 @@
     new MutationObserver(() => { if (!scanQ) { scanQ = true; requestAnimationFrame(() => { scanQ = false; scan(); }); } }).observe(main, { childList: true, subtree: true });
     scan();
   }
+
+  /* 6 (7 Nov., brief « expérience Apple », step 3) on a computer (a mouse), the rows that scroll sideways hide their scrollbar
+     (« filters on one scrolling line »): a mouse could not reach their end. A row that runs past its width gets two round
+     buttons over its ends, as Apple's carousels: ‹ shown once it has moved, › while there is more; a tap moves it by most of
+     its width; its edge fades where there is more. Laid over the row (absolute, in the row's offset parent): nothing moves.
+     None on a phone or a tablet (a finger slides the row), none for a row that fits. */
+  const fine = matchMedia('(hover: hover) and (pointer: fine)');
+  const RAILS = '.tabs, .seg, .nav-strip, .nav-fstrip, .mny-tseg, .nav-sp-row';
+  const PADT = { en: ['Previous', 'Next'], fr: ['Précédent', 'Suivant'], es: ['Anterior', 'Siguiente'] };
+  const CHEV = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6'}"/></svg>`;
+  const rails = new Set();
+  const place = (r) => {
+    const p = r.__pads, over = r.scrollWidth - r.clientWidth > 2 && r.getClientRects().length && r.offsetParent;
+    if (!over || !fine.matches || !r.isConnected) { if (p) { p.forEach((b) => b.remove()); r.__pads = null; r.classList.remove('sw-rail', 'sw-more-l', 'sw-more-r'); } if (!r.isConnected) rails.delete(r); return; }
+    if (!p || !p[0].isConnected || p[0].parentElement !== r.offsetParent) {
+      if (p) p.forEach((b) => b.remove());
+      const t = PADT[typeof LANG === 'string' ? LANG : 'en'] || PADT.en;
+      r.__pads = [0, 1].map((d) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'sw-pad ' + (d ? 'sw-pad-r' : 'sw-pad-l'); b.setAttribute('aria-label', t[d]); b.innerHTML = CHEV(d);
+        b.addEventListener('click', () => r.scrollBy({ left: (d ? 1 : -1) * Math.max(120, r.clientWidth * 0.8), behavior: reduced() ? 'auto' : 'smooth' })); r.offsetParent.appendChild(b); return b; });
+      if (!r.__padScroll) { r.__padScroll = true; r.addEventListener('scroll', () => place(r), { passive: true }); }
+      r.classList.add('sw-rail');
+    }
+    const [l, rt] = r.__pads, y = r.offsetTop + r.offsetHeight / 2, x = r.scrollLeft, end = r.scrollWidth - r.clientWidth - x;
+    l.style.top = rt.style.top = y + 'px'; l.style.left = r.offsetLeft + 'px'; rt.style.left = (r.offsetLeft + r.offsetWidth) + 'px';
+    l.hidden = x <= 2; rt.hidden = end <= 2; r.classList.toggle('sw-more-l', x > 2); r.classList.toggle('sw-more-r', end > 2);
+  };
+  const railScan = () => {
+    if (main) main.querySelectorAll(RAILS).forEach((r) => { if (!r.closest('.sw-pad')) rails.add(r); });
+    rails.forEach(place);
+  };
+  let railQ = false;
+  const railSoon = () => { if (!railQ) { railQ = true; requestAnimationFrame(() => { railQ = false; railScan(); }); } };
+  if (main) { new MutationObserver(railSoon).observe(main, { childList: true, subtree: true }); addEventListener('resize', railSoon); fine.addEventListener && fine.addEventListener('change', railSoon); railSoon(); }
 
   onScroll();
 })();

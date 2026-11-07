@@ -365,7 +365,9 @@ with sync_playwright() as p:
       ok('Réponses en un clic' in txt and 'Test ' + tag in txt, f'{t} the one-click answers, by email')
       ov = q.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth')
       ok(ov <= 0 and not er, f'{t} the card: no horizontal scroll ({ov}), no page error {er[:2]}')
-      q.locator('#main .fi').screenshot(path=f'{SHOTS}/e2e_mail_insights_{w}_{scheme}.png')
+      try: q.locator('#main .fi').screenshot(path=f'{SHOTS}/e2e_mail_insights_{w}_{scheme}.png')
+      except Exception:   # (7 Nov., the CI: the card was drawn again during the capture) once more, once it is still
+        q.wait_for_timeout(1500); q.locator('#main .fi').screenshot(path=f'{SHOTS}/e2e_mail_insights_{w}_{scheme}.png')
       q.click('#main .fi-nps [data-act="gadm-x"] >> nth=0'); q.wait_for_selector('#main .fi-on', timeout=10000); q.wait_for_timeout(1200)
       items = q.locator('#main .fb-item.adm')
       ok('Promoteurs' in q.inner_text('#main .fi-on') and items.count() == 2 and all(items.nth(i).locator('.fb-mail b').inner_text() in ('10', '9') for i in range(items.count())), f'{t} a click on the promoters: the list shows their 2 answers')
