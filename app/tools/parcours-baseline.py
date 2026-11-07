@@ -71,6 +71,11 @@ def run(p, lang, phone, exp, path):
   risk = pg.evaluate("(document.querySelector('#gSheet [data-gp=max_loss]') || {}).value || ''")
   tap('#gSheet [data-g=bias][data-v=bullish]'); tap('#gSheet [data-g=save-plan]')
   at('plan')
+  try: pg.wait_for_selector('.nav-am.open, #tkSlide.open', timeout=4000)
+  except Exception:   # (7 Nov.) a trader of more than a year is offered « Bring your history » first: « Later », then « Add a trade »
+    hist = pg.locator('[data-hist-later]').count() > 0
+    if hist: c['screens'].append('history'); tap('[data-hist-later]')
+    if not pg.locator('.nav-am.open, #tkSlide.open').count(): tap('#bottomnav .plus' if phone else '.side [data-act=add-trade]')
   screen('trade-sheet', '.nav-am.open, #tkSlide.open'); wait(600)
   pg.evaluate("window.__toasts = []; new MutationObserver(() => { const t = document.getElementById('toast'); if (t && t.textContent && !window.__toasts.includes(t.textContent)) window.__toasts.push(t.textContent) }).observe(document.getElementById('toast'), { childList: true, characterData: true, subtree: true })")   # every message (a celebration can follow « Trade saved »)
   forgot = None
@@ -81,6 +86,8 @@ def run(p, lang, phone, exp, path):
     pg.keyboard.type('250'); c['fields'] += 1
     tap('.nav-am.open [data-am-seg=dir][data-v=long]'); tap('.nav-am.open [data-am=save]')
   elif path in ('manual', 'forgot'):
+    if not pg.locator('.nav-am.open [data-am=to-manual]').first.is_visible():   # (2 Nov., AI entry) the phone offers « No screenshot? Enter your P&L » only
+      br.close(); return {'case': f"{'390' if phone else '1300'}-{lang}-{path}", 'skipped': 'no « Enter manually » on this screen (the P&L path instead)'}
     tap('[data-am=to-manual]'); screen('manual-form', '#tkSlide.open [data-act=tk-save]'); wait(600)
     tap('#tkSlide [data-act=tk-dir][data-v=long]')
     if path == 'forgot':   # (27 Oct., brief A1) « Save » without the entry price: the cursor lands in the field, then the trade is saved
@@ -158,7 +165,8 @@ def run_day(p, lang, phone):
     if not pg.evaluate("!!document.querySelector('#gSheet [data-pm=inst-pick].on')") and seen('#gSheet [data-pm=inst-pick]'): tap('#gSheet [data-pm=inst-pick]')
     field('#gSheet [data-pmf="X_levels"]', 'PDH 21000'); field('#gSheet [data-pmf="X_plan"]', 'Cassure du PDH')
     if not pg.input_value('#gSheet [data-pmf="max_loss"]'): field('#gSheet [data-pmf="max_loss"]', '500')
-    tap('#gSheet [data-pm="next"]'); screen('plan-sheet', '#gSheet [data-pm="save"]'); tap('#gSheet [data-pm="save"]')
+    if seen('#gSheet [data-pm="next"]'): tap('#gSheet [data-pm="next"]'); screen('plan-sheet', '#gSheet [data-pm="save"]')   # (7 Nov.: one screen, « Save my sheet » at its foot)
+    tap('#gSheet [data-pm="save"]')
   elif mode == 'short':
     tap('#gSheet [data-g=bias][data-v=bullish]'); tap('#gSheet [data-g=save-plan]')
   wait(1200); at('plan'); p0 = dict(mark['plan'])
@@ -168,7 +176,7 @@ def run_day(p, lang, phone):
   for i in range(2):
     if pg.locator('#gSheet').count(): pg.evaluate("document.querySelector('#gSheet [data-g=close]') && document.querySelector('#gSheet [data-g=close]').click()"); wait(400)
     if pg.evaluate("location.hash") != '#dashboard': pg.evaluate("location.hash = '#dashboard'"); wait(800)
-    tap('#bottomnav .plus' if phone else '.nav-addtop'); screen('trade-sheet', '.nav-am.open'); wait(500)
+    tap('#bottomnav .plus' if phone else '.side [data-act=add-trade]'); screen('trade-sheet', '.nav-am.open'); wait(500)
     if phone:
       with pg.expect_file_chooser() as fc: tap('label.nav-am-drop')
       fc.value.set_files(DAY_SHOTS[i]); c['taps'] += 1
@@ -186,7 +194,7 @@ def run_day(p, lang, phone):
   at('trades')
   # 3. closing the day
   if pg.evaluate("location.hash") != '#dashboard': tap('a[href="#dashboard"]'); wait(800)
-  tap('#main .nav-rt [data-rt=review]'); screen('review', '#gSheet [data-g=save-review]'); wait(500)
+  tap('#main :is([data-rt=review], [data-rt=fin]):visible');   # (SWEEP.md step 4) « Close my day » in « Now », else the review step screen('review', '#gSheet [data-g=save-review]'); wait(500)
   for sel in ('[data-g=r-followed][data-v=yes]',):   # (tour T2) the discipline and the grade follow the day, under « + Details »   # only a question with no answer yet (filled in from the day since 27 Oct.)
     grp = sel.split(']')[0] + ']'
     if seen('#gSheet ' + sel) and not pg.evaluate("(g) => !!document.querySelector(g + '.on')", '#gSheet ' + grp): tap('#gSheet ' + sel)
@@ -204,6 +212,7 @@ with sync_playwright() as p:
   for lang, phone, exp in (('fr', True, 'new'), ('en', False, 'gt1')):
     for path in ([p for p in ('manual', 'shot', 'noshot', 'forgot') if p in os.environ.get('BASELINE_PATHS', 'manual shot noshot forgot').split()]):
       r = run(p, lang, phone, exp, path); rows.append(r)
+      if r.get('skipped'): print(f"{r['case']:<18} skipped: {r['skipped']}"); r['trade_saved'] = True; r['errors'] = []; continue
       pl, tr = r['plan'], r['trade']
       print(f"{r['case']:<18} plan: {pl['taps']} taps, {pl['fields']} fields, {pl['screens']} screens, ~{pl['human_s']} s human ({pl['robot_s']} s robot), risk {r['risk_allowed_shown'] or '—'} | "
             f"trade: {tr['taps']} taps, {tr['fields']} fields, {tr['screens']} screens, ~{tr['human_s']} s human ({tr['robot_s']} s robot) | saved {r['trade_saved']} {'' if not r['errors'] else r['errors']}")
