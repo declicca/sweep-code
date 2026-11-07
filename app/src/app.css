@@ -2122,7 +2122,7 @@ html body #main .ik b>span{display:block;max-width:100%;white-space:nowrap}   /*
 .sw-pad{position:absolute;z-index:3;width:32px;height:32px;margin-top:-16px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:var(--panel);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.14),inset 0 0 0 1px var(--line);cursor:pointer;transition:transform .2s var(--spring),opacity .2s var(--spring)}
 .sw-pad-r{margin-left:-32px}
 .sw-pad svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.sw-pad:hover{transform:scale(1.06)}.sw-pad:active{transform:scale(.94)}
+.sw-pad:hover{transform:scale(1.06)}.sw-pad:active{transform:scale(.97)}
 .sw-pad[hidden]{display:none}
 .sw-rail.sw-more-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 56px),transparent)}
 .sw-rail.sw-more-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 56px);mask-image:linear-gradient(90deg,transparent,#000 56px)}
