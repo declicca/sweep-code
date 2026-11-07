@@ -6273,7 +6273,7 @@ new window.SweepMO(() => {
   function fit() {
     q = 0;
     const main = document.getElementById('main'); if (!main) return;
-    fitAll([...main.querySelectorAll('.neg, .pos, .big, .nav-acc-bal, .v, .num, b, strong')]);
+    fitAll([...main.querySelectorAll('.neg, .pos, .big, .nav-acc-bal, .nav-now-v, .ik b > span, .v, .num, b, strong')]);   // (7 Nov.: « Now »'s figure, at Apple's display size, and Stats' tiles, whose figure is a span in the b: 7 digits went past the tile)
   }
   // the key figure tiles (a handful of elements) are fitted right after each redraw, before the browser paints:
   // a page redrawn by a sync never shows its P&L cut for a frame (the rest of the page keeps the per-frame pass).

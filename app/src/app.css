@@ -2104,3 +2104,16 @@ html body #main .tday > .tlist{margin:0!important;padding:0!important;box-shadow
   html:not(.no-reveal) #main .rv-wait{opacity:0;transform:translateY(24px)}
   html:not(.no-reveal) #main .rv-in{animation:sw-reveal .35s var(--spring)}
 }
+/* (7 Nov., brief « expérience Apple », step 2) one figure in the spotlight per page, at Apple's display scale (« 22 more hours »):
+   the risk allowed (or the money left) in « Now », Stats' net P&L (computer), My money's real net. A long amount still fits: the figures'
+   own fit (nav.js, fitAll) shrinks it in its box, never « … » */
+html body #main .nav-now-l:not(.nav-now-cnt){flex-wrap:wrap}
+html body #main .nav-now-l:not(.nav-now-cnt)>b{flex:1 1 0;min-width:9em}
+html body #main .nav-now-l:not(.nav-now-cnt) .nav-now-v{font-size:30px;letter-spacing:-.03em;line-height:1.1;flex:none;max-width:100%;margin-left:auto}   /* (beside its label, which wraps; a figure too long for that goes under it, on the right; still too long for its line: seen as such, then shrunk) */
+html body #main .d-money .nav-mny-big{font-size:34px;letter-spacing:-.03em}
+html body #main .ik b>span{display:block;max-width:100%;white-space:nowrap}   /* (a block: a figure too long for its tile is seen, then shrunk — 7 digits went past the tile) */
+@media (min-width:861px){
+  html body #main .nav-now-l:not(.nav-now-cnt) .nav-now-v{font-size:36px}
+  html body #main .ikpis>.ik:first-child b{font-size:40px;font-weight:600;letter-spacing:-.04em}   /* (computer only: on a phone the tile is half the width) */
+  html body #main .d-money .nav-mny-big{font-size:40px}
+}
