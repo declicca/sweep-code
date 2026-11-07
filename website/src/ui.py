@@ -17,10 +17,18 @@ def sec(inner, rhythm="n", id_="", cls="", width="", flush=False):
     k = " ".join(x for x in (RHYTHM[rhythm], "s-flush-top" if flush else "", cls) if x)
     return f'<section class="{k}"{f" id=\"{id_}\"" if id_ else ""}><div class="{c}">{inner}</div></section>'
 
+def _lead_key(text):
+    """A section lead's last sentence, its payoff, in the text colour, the rest stays grey: the paragraphs of Apple's pages (7 Nov.).
+    Only for a plain lead of two sentences or more."""
+    if "<" in text: return text
+    parts = re.split(r'(?<=[.!?])\s+(?=[A-ZÀ-ÖØ-Þ¿¡«“"])', text)
+    if len(parts) < 2: return text
+    return " ".join(parts[:-1]) + f' <span class="lk">{parts[-1]}</span>'
+
 def head(t, kick=None, title=None, lead=None, links="", center=False, level=2, cls=""):
     k = f'<span class="eyebrow">{t(kick)}</span>' if kick else ""
     h = f'<h{level}>{t(title)}</h{level}>' if title else ""
-    p = f'<p class="lead">{t(lead)}</p>' if lead else ""
+    p = f'<p class="lead">{_lead_key(t(lead))}</p>' if lead else ""
     l = f'<div class="links">{links}</div>' if links else ""
     return f'<div class="head{" center" if center else ""}{" " + cls if cls else ""}">{k}{h}{p}{l}</div>'
 

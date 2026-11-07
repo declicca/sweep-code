@@ -123,6 +123,7 @@ h2,.h2{font-size:var(--fs-h2);line-height:1.08;letter-spacing:-.025em}
 h3,.h3{font-size:var(--fs-h3);line-height:1.25;letter-spacing:-.01em}
 .lead{font-size:var(--fs-lead);line-height:1.5;letter-spacing:-.005em;color:var(--muted);max-width:46ch;margin-top:20px}
 .head.center .lead{margin-inline:auto}
+.lead .lk{color:var(--text)}   /* the payoff sentence (ui._lead_key) */
 p,li{max-width:56ch}   /* about 75 characters a line in Geist (1ch is the width of 0, wider than an average letter) */
 .fine,small{font-size:var(--fs-small);line-height:1.5;color:var(--faint)}
 .cap{font-size:var(--fs-cap);line-height:1.4;color:var(--faint);text-align:center;margin-top:16px;max-width:none}
