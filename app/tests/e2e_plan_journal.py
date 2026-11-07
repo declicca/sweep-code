@@ -16,6 +16,9 @@ async def main():
   async with async_playwright() as p:
     br = await p.chromium.launch(); ctx = await br.new_context(viewport={'width': 1440, 'height': 900}, locale='fr-CA', storage_state=STATE)
     await ctx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('fr'))")
+    # the day not closed by the day's limit (« Day closed » takes the whole routine card): an earlier test of the same copy may
+    # have reached the shared trader's limit today (7 Nov.: e2e_tour_fixes, after the order of the tests on GitHub changed)
+    await ctx.add_init_script("Object.defineProperty(window, 'SweepCoach', { configurable: true, get() { return this._swc; }, set(v) { if (v) v.dayLock = () => null; this._swc = v; } })")
     pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:150]))
     await pg.goto(B + '/?x=1#dashboard'); await pg.wait_for_timeout(3000)
     await pg.locator('#main .nav-rt [data-rt=plan]').first.click(); await pg.wait_for_timeout(900)
