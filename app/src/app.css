@@ -2097,3 +2097,10 @@ html body #main .tday > .tlist{margin:0!important;padding:0!important;box-shadow
 .fb-mail{display:flex;flex-direction:column;gap:4px;white-space:normal}
 .fb-mail small{color:var(--muted);font-size:12px;line-height:1.45}
 .fb-mail b{align-self:flex-start;padding:2px 10px;border-radius:var(--r-pill);background:var(--tint);color:var(--blue-text);font-size:13px}
+/* (7 Nov., brief « expérience Apple », step 1) a page's cards come in as they reach the screen (ux.js §5): waiting below the
+   screen, faded and 24 px lower; then once, 350 ms on the spring (the motion rule: ≤ 350 ms); transform and opacity only (no layout shift) */
+@keyframes sw-reveal{from{opacity:0;transform:translateY(24px)}}
+@media (prefers-reduced-motion:no-preference){
+  html:not(.no-reveal) #main .rv-wait{opacity:0;transform:translateY(24px)}
+  html:not(.no-reveal) #main .rv-in{animation:sw-reveal .35s var(--spring)}
+}

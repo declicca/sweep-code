@@ -5,6 +5,7 @@
  *  2. Tab bar hidden while typing (the keyboard would push it over the field)
  *  3. Direction hint for the page entrance animation (CSS only)
  *  4. Tap the active tab again → smooth scroll to top
+ *  5. A page's cards come in as they reach the screen (Apple's pages)
  */
 (function () {
   'use strict';
@@ -51,6 +52,40 @@
     clearTimeout(dirT);
     dirT = setTimeout(() => { delete document.documentElement.dataset.uxDir; }, 1600);
   });
+
+  /* 5 (7 Nov., brief « expérience Apple », step 1) a card drawn below the screen waits, faded and 24 px lower; when a tenth of it
+     reaches the screen it rises in once (sw-reveal, the spring), then the classes go: no lasting transform or opacity (a card's
+     menus never pass under the next card). A card drawn on screen, or above it, never moves. Top-level cards of the page only
+     (#main .surface not inside another); none with « reduce motion » or for robots (html.no-reveal, app.html) */
+  const main = document.getElementById('main');
+  if (main && 'IntersectionObserver' in window && !document.documentElement.classList.contains('no-reveal')) {
+    const done = (el) => el.classList.remove('rv-wait', 'rv-in');
+    const waiting = new Set();
+    const io = new IntersectionObserver((list) => list.forEach((x) => {
+      if (!x.isIntersecting) return;
+      const el = x.target; io.unobserve(el); waiting.delete(el);
+      el.classList.replace('rv-wait', 'rv-in');
+      el.addEventListener('animationend', () => done(el), { once: true }); setTimeout(() => done(el), 900);   // (an animation that never ran)
+    }), { threshold: 0.1 });
+    const scan = () => {
+      if (reduced()) return;
+      main.querySelectorAll('.surface:not(.rv-seen)').forEach((el) => {
+        el.classList.add('rv-seen');
+        if (el.parentElement.closest('#main .surface')) return;
+        if (el.getBoundingClientRect().top < innerHeight) return;   // on screen (or above): stays as it is
+        el.classList.add('rv-wait'); io.observe(el); waiting.add(el);
+      });
+    };
+    // a card passed over without being seen (a jump to the foot, a link to further down) is simply there when one comes back
+    let passQ = false;
+    addEventListener('scroll', () => {
+      if (passQ || !waiting.size) return; passQ = true;
+      requestAnimationFrame(() => { passQ = false; waiting.forEach((el) => { if (!el.isConnected || el.getBoundingClientRect().bottom < 0) { io.unobserve(el); waiting.delete(el); done(el); } }); });
+    }, { passive: true });
+    let scanQ = false;
+    new MutationObserver(() => { if (!scanQ) { scanQ = true; requestAnimationFrame(() => { scanQ = false; scan(); }); } }).observe(main, { childList: true, subtree: true });
+    scan();
+  }
 
   onScroll();
 })();
