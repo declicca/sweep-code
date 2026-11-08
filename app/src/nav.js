@@ -1111,6 +1111,7 @@ window.SweepMO = window.SweepMO || class {
   addEventListener('click', (e) => {
     if (route().v !== 'trade' || !window.SW_MQ.matches) return;
     const main = document.getElementById('main'); if (!main || !main.contains(e.target)) return;
+    if (e.target.closest('[data-sc="full"]')) return;   // (8 Nov.) the chart's full screen moves its button on purpose: following it scrolled the page 323 px
     const key = e.target.closest('[data-v],[data-act],[data-path]') || e.target, h0 = location.hash, t0 = performance.now();
     const sel = ['data-act', 'data-path', 'data-v', 'data-id', 'data-col'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join('');
     const y0 = key.getBoundingClientRect().top;
@@ -1139,6 +1140,7 @@ window.SweepMO = window.SweepMO || class {
   addEventListener('click', (e) => {
     if (jumpReports >= 5 || route().v !== 'trade' || !window.SW_MQ.matches) return;
     const main = document.getElementById('main'); if (!main || !main.contains(e.target)) return;
+    if (e.target.closest('[data-sc="full"]')) return;   // (8 Nov.) entering or leaving the chart's full screen is not a jump
     const blocks = () => [...main.children].map((c, i) => { const r = c.getBoundingClientRect(); return { k: (c.className || c.tagName).toString().split(' ').slice(0, 2).join('.') || ('#' + i), h: Math.round(r.height), top: Math.round(r.top) }; });
     const base = blocks(), t0 = performance.now(), seen = {}, key = (e.target.closest('[data-v],[data-act],[data-path]') || e.target);
     const at = (x) => x.getBoundingClientRect().top, h0 = location.hash;   // (on the screen: what the trader sees, after the anchoring above)

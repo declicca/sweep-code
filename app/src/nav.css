@@ -1796,6 +1796,10 @@ html body .main-wrap > .top.nav-3l #title,html[data-home] body .main-wrap > .top
 @media (max-width:860px){html body .main-wrap > .top.nav-3l #title,html[data-home] body .main-wrap > .top #title{font-size:28px!important}html body .main-wrap > .top.nav-3l #title::before,html[data-home] body .main-wrap > .top #title::before{font-size:12px!important}}
 /* 5 · info bubbles always on top: the hovered card rises above its neighbours */
 #main .surface:hover,#main .surface:focus-within{position:relative;z-index:30}
+/* (8 Nov.) the card of a chart in full screen: no z-index 30 (it kept the chart, fixed at 420, under the top bar and the tab bar,
+   « exit full screen » out of reach on a phone) and no blur (a backdrop-filter holds a fixed child in the card: on a computer the
+   full screen stayed the size of the card) */
+#main .surface:has(.sc-full){z-index:auto;-webkit-backdrop-filter:none;backdrop-filter:none}
 /* only the floating bubbles (chart, trade chart): « [class*=tip] » also caught cards in the page (the first-ring tip, the sync tip), which then covered the side sheets */
 #main .ctip,#main .tc-tip,#main [role="tooltip"]{z-index:1000!important}
 /* 8 · Cancel: a small round ✕ on a transparent dark background */
