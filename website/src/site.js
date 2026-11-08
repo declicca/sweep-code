@@ -17,17 +17,19 @@
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var nav = document.querySelector('.nav'), root = document.documentElement, lastY = window.scrollY, menuOpen = false;
+  var wide = window.matchMedia('(min-width: 1068px)');
   function onScroll(){
     var y = window.scrollY;
     if(nav){
       nav.classList.toggle('scrolled', y > 8);
-      var hide = !menuOpen && y > 160 && y > lastY + 2;
+      var hide = !menuOpen && !wide.matches && y > 160 && y > lastY + 2;   // a computer keeps it (7 Nov., as Apple's local nav)
       if(y < lastY - 6 || y < 160) hide = false;
       if(hide !== nav.classList.contains('hide') && (Math.abs(y - lastY) > 2)){ nav.classList.toggle('hide', hide); root.classList.toggle('nav-hidden', hide); }
     }
     lastY = y;
   }
   onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+  if(wide.addEventListener) wide.addEventListener('change', function(){ if(wide.matches && nav){ nav.classList.remove('hide'); root.classList.remove('nav-hidden'); } });
 
   // mobile menu
   var btn = document.querySelector('.menu-btn'), sheet = document.getElementById('sheet');
