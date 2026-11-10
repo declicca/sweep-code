@@ -9,7 +9,6 @@ A new trader, three funded accounts from the catalogue: Apex EOD 50K, Topstep 50
    « Record my request » → My money's form, open, for this account, « requested », $900; saved → the account's history
    says « Payout 1 of 6 », the counter starts again (« 5 more winning days », payouts made 1 / 6);
  - Today: « Ready for payout » on the LucidPro account → the same pre-filled request;
- - the server's « ready for a payout » (the game's map) is the app's (100 % for LucidPro).
 Checks: no page error, nothing wider than the window, the texts in the trader's language.
 """
 import json, os, sqlite3, sys, time
@@ -104,10 +103,7 @@ def run(p, lang, phone):
     pill.click(); pg.wait_for_selector('#main form[data-form="payout"]', timeout=10000); pg.wait_for_timeout(600)
     f = pg.evaluate("() => { const f = document.querySelector('#main form[data-form=\"payout\"]'); return { acc: f.elements.account.value, st: (f.querySelector('input[name=status]:checked') || {}).value, gross: f.elements.gross.value } }")
     ok(f == {'acc': 'pl', 'st': 'requested', 'gross': '900'}, f'{tag} Today → the request for LucidPro, $900 ({f})')
-  # the server counts the same way (the game's map)
-  srv = ctx.request.get(B + '/api/game/today', headers=H).json().get('map', {}).get('payout', {})
-  app = pg.evaluate("Math.max(...['pa', 'pt', 'pl'].map((id) => SweepPayout.status(getDoc('accounts', id)).pct))")
-  ok(srv.get('configured') is True and srv.get('ready') == app == 100, f'{tag} the server says the same: {srv} (app {app})')
+  # (the server's « same count » check read the game's map, retired 10 Nov., brief « produit final »)
   ok(not errs, f'{tag} no page error ' + '; '.join(errs[:2]))
   br.close()
 

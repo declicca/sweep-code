@@ -155,7 +155,8 @@ def run(p, lang, phone, exp, now=OPEN):
   ok(ov == [0, 0], f'{tag} after the 1st trade, the day of sign-up: no install window, no Pro banner ({ov})')
   pg.evaluate("for (let i = 2; i <= 5; i++) put('trades', { id: 'fr-t' + i, account_id: S.accounts[0].id, instrument: 'NQ', direction: 'long', contracts: 1, entry: 1, exit: 2, pnl_c: 5000, pnl_manual: true, date: todayStr(), entry_time: '1' + i + ':00', exit_time: '1' + i + ':05' }); render()")
   pg.wait_for_timeout(1500); c5 = pg.evaluate(CARDS)
-  ok(c5 is not None and 'pay' in c5 and 'rank' not in c5 and 'quick' not in c5, f'{tag} from the 5th trade: My money too; no rank (SWEEP.md step 3), no « Quick access » ({c5})')
+  inv = pg.evaluate("!!document.querySelector('#main .d-money .rn-inv')")
+  ok(c5 is not None and ('pay' in c5) == inv and 'rank' not in c5 and 'quick' not in c5, f'{tag} 5 trades, no payout nor expense: My money only for its « real net » invitation (10 Nov., brief « produit final » step 2); no rank, no « Quick access » ({c5}, invitation {inv})')
   ok(pg.evaluate(WIDE) <= 0, f'{tag} Today: nothing wider than the window')
   # My money opened for the first time, no payout yet: nothing opens (27 Oct., brief A7); after a first payout → « Your real net »
   if pg.locator('.nav-inst.open [data-inst-ok]').count(): pg.locator('.nav-inst.open [data-inst-ok]').click(); pg.wait_for_timeout(400)   # « Add Sweep to your home screen », after the 1st trade

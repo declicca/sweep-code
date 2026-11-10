@@ -53,3 +53,5 @@ body.sc-lock{overflow:hidden}
 .sc-cbad{display:block;margin-top:4px;font-size:12px;color:var(--neg)}
 .sc-chelp{display:block;margin:6px 2px 0;font-size:12px;line-height:1.45;color:var(--muted)}
 }
+/* (10 Nov., brief « produit final » step 3) phone: the timeframe in one pill (the app's own picker) */
+.sc-tfsel{display:inline-flex;align-items:center;flex:none}

@@ -405,9 +405,8 @@
     if (document.body.classList.contains('evp-lock') || document.querySelector('.drawer.on, .nt-modal, .sb-layer, .sai-open')) return;   // never on top of another sheet
     if (window.SweepReward && !SweepReward()) return;   // (1 Nov., brief dans le temps E1) a reward: after the day's review, one a day (it stays in the bell)
     NT.modalDone = true;
+    // (10 Nov., brief « produit final » step 7) no automatic celebration when the app opens: it is marked shown and stays in the bell
     post(`api/notifications/${n.id}/shown`).catch(() => {});
-    // one automatic modal per session belongs to the game (onboarding, rank); notification celebrations are a short toast
-    if (typeof toast === 'function') toast(t(n.title_key, n.params));
   }
   function closeModal(follow) {
     const m = document.querySelector('.nt-modal');

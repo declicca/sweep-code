@@ -8,8 +8,7 @@ Sweep — sharing (brief 02 part 12), Playwright, phone (fr, es: Android Chrome)
    file (navigator.share with files, as Android Chrome and iPhone Safari do);
  - « Créer un lien »: the page's preview tags (og:image = the wide preview 1200 × 675, its size, og:url, twitter:card and
    title), noindex; the preview image served;
- - the public discipline profile: off by default in Settings › Profile; on: a personal link, the page (first name, 4 weeks,
-   no amount, noindex), « Vérifié » once every trade comes from a sync (sync_trades), off again: « not public » (404).
+ - the public discipline profile is gone (10 Nov., brief « produit final »): nothing in Settings, /p/… is no profile page.
 Checks: no page error, nothing wider than the window, the texts in the trader's language.
 """
 import json, os, re, sqlite3, sys, time
@@ -115,33 +114,11 @@ def run(p, lang, phone):
   im = ctx.request.get(B + '/s/%s-og.png' % sid)
   ok(im.status == 200 and im.headers.get('content-type') in ('image/jpeg', 'image/png') and len(im.body()) > 10000, f"{tag} the preview image served ({im.status}, {im.headers.get('content-type')})")
   pg.evaluate("closeShare()"); pg.wait_for_timeout(300)
-  # 3. the public discipline profile
-  pg.goto(B + '/#settings'); pg.wait_for_selector('#main .nav-set-prof [data-pub]:not([disabled])', state='attached', timeout=20000)
-  pg.evaluate("(() => { const d = document.querySelector('#main .nav-set-prof').closest('details.nav-sgd'); if (d) d.open = true })()"); pg.wait_for_timeout(300)   # (30 Oct., W3) « Account » folded on arrival
-  ok(pg.evaluate(TXT, '#main .nav-pub-row b') == [x['pub']] and not pg.evaluate("document.querySelector('#main [data-pub]').checked") and not pg.evaluate("!!document.querySelector('#main .nav-pub-link')"),
-     f"{tag} Settings › Profile: « {x['pub']} », off by default")
-  pg.click('#main .nav-pub-row .sw'); pg.wait_for_selector('#main .nav-pub-link input', timeout=10000); pg.wait_for_timeout(300)
-  purl = pg.input_value('#main .nav-pub-link input'); slug = purl.rsplit('/', 1)[-1]
-  ok(re.match(r'^https?://[^/]+/p/[A-Za-z0-9]{14}$', purl) is not None, f"{tag} on: a personal link ({purl})")
-  if SHOTS: pg.locator('#main .nav-set-prof').screenshot(path=os.path.join(SHOTS, f'p12-settings-{tag}.png'))
-  ok(pg.evaluate(WIDE) <= 1, f'{tag} Settings: nothing wider than the window')
-  r = ctx.request.get(B + '/p/' + slug, headers={'Accept-Language': x['al']}); page = r.text().replace(slug, '')
-  ok(r.status == 200 and r.headers.get('x-robots-tag') == 'noindex' and '<h1>Noa</h1>' in page and x['sub'] in page and '$' not in page and 'Tremblay' not in page and x['ver'] not in page,
-     f"{tag} the profile page: the first name, « {x['sub']} », no dollar, no last name, not verified, noindex")
-  pp = br.new_page(viewport={'width': 390, 'height': 844} if phone else {'width': 1300, 'height': 850}); pp.goto(B + '/p/' + slug); pp.wait_for_timeout(400)
-  ok(pp.evaluate(WIDE) <= 1, f'{tag} the profile page: nothing wider than the window')
-  if SHOTS: pp.screenshot(path=os.path.join(SHOTS, f'p12-profile-{tag}.png'), full_page=True)
-  pp.close()
-  d = sqlite3.connect(DB)
-  d.execute('CREATE TABLE IF NOT EXISTS sync_trades (user_id TEXT NOT NULL, trade_id TEXT NOT NULL, doc_id TEXT NOT NULL, sync_account_id TEXT NOT NULL, sig TEXT NOT NULL, fills TEXT NOT NULL, entry_at TEXT NOT NULL, inst TEXT NOT NULL, dir TEXT NOT NULL, copy_group TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, PRIMARY KEY (user_id, trade_id))')   # (sync/sync-store.php, if no sync ran yet)
-  for i, tid in enumerate(['x0', 'x1', 'x2']):
-    d.execute("INSERT OR REPLACE INTO sync_trades (user_id, trade_id, doc_id, sync_account_id, sig, fills, entry_at, inst, dir, created_at, updated_at) VALUES (?, ?, ?, 'sa', 'x', '[]', '2026-10-01 09:30:00', 'NQ', 'long', 0, 0)", (uid, 'e2e%d' % i, tid))
-  d.commit(); d.close()
-  page = ctx.request.get(B + '/p/' + slug, headers={'Accept-Language': x['al']}).text()
-  ok('✓ ' + x['ver'] in page, f"{tag} every trade from a sync: « ✓ {x['ver']} »")
-  pg.click('#main .nav-pub-row .sw'); pg.wait_for_function("!document.querySelector('#main .nav-pub-link')", timeout=10000)
-  r = ctx.request.get(B + '/p/' + slug, headers={'Accept-Language': x['al']})
-  ok(r.status == 404 and x['gone'] in r.text() and 'Noa' not in r.text(), f"{tag} off again: « {x['gone']} » (404), nothing of the trader")
+  # 3. the public discipline profile is gone (10 Nov., brief « produit final »): nothing in Settings, /p/… not served
+  pg.goto(B + '/#settings'); pg.wait_for_selector('#main details.nav-sgd', timeout=20000); pg.wait_for_timeout(800)
+  ok(not pg.evaluate("!!document.querySelector('#main [data-pub], #main .nav-pub-row')"), f"{tag} Settings: no public profile")
+  r = ctx.request.get(B + '/p/abcdefghijklmn')
+  ok(r.status != 200 or 'Noa' not in r.text(), f"{tag} /p/… is not a profile page ({r.status})")
   ok(not errs, f'{tag} no page error ' + '; '.join(errs[:2]))
   br.close()
 

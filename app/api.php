@@ -669,7 +669,6 @@ function delete_user_everything(string $uid): void {
     q('DELETE FROM uploads WHERE user_id = ?', [$uid]);
     q('DELETE FROM documents WHERE user_id = ?', [$uid]);
     growth_delete_user(db(), $uid);
-    if (class_exists('GameCrew', false)) { try { GameCrew::schema(); GameCrew::leave($uid); GameCrew::end($uid); if (class_exists('GameDiscord', false)) GameDiscord::unlink($uid); } catch (Throwable $e) { error_log('[Sweep crew] delete: ' . $e->getMessage()); } }
     if (class_exists('GameEngine', false)) { try { foreach (['user_game_profile', 'game_days', 'xp_events', 'user_badges', 'game_celebrations', 'game_analytics', 'user_map_nodes', 'user_missions', 'user_rewards', 'user_bosses', 'weekly_reviews', 'edge_reveals', 'user_cosmetics', 'user_quests', 'monthly_wrapped', 'user_season', 'social_profile', 'league_members', 'crew_reactions'] as $tb) db()->prepare("DELETE FROM $tb WHERE user_id = ?")->execute([$uid]); } catch (Throwable $e) { error_log('[Sweep game] delete: ' . $e->getMessage()); } }
     if (class_exists('Notify', false)) { try { Notify::deleteUser($uid); } catch (Throwable $e) { error_log('[Sweep notify] delete: ' . $e->getMessage()); } }
     if (function_exists('wp_delete_user')) { try { wp_delete_user(db(), $uid); } catch (Throwable $e) { error_log('[Sweep push] delete: ' . $e->getMessage()); } }
@@ -789,11 +788,6 @@ try {
     if (preg_match('#^s/([A-Za-z0-9]{10,24})(-og)?(\.png)?$#', $route, $sm) && (empty($sm[2]) || !empty($sm[3]))) {
         require_once __DIR__ . '/growth/share-links.php';
         sl_public(db(), $sm[1], !empty($sm[3]), !empty($sm[2]));   // -og.png: the link's wide preview
-    }
-    // /p/ID: the trader's public discipline profile (brief 02 part 12), only when turned on in Settings › Profile
-    if (preg_match('#^p/([A-Za-z0-9]{10,24})$#', $route, $pm)) {
-        require_once __DIR__ . '/growth/public-profile.php';
-        pp_public(db(), $pm[1]);
     }
     // sign-up step 1: keep the email (never the password) so an unfinished sign-up can be followed up
     if ($route === 'api/auth/lead' && $method === 'POST') {
@@ -987,14 +981,6 @@ try {
         if ($route === 'api/share/create' && $method === 'POST') { $r = sl_create(db(), $me, $b); if (isset($r['error'])) json_out($r['error'] === 'slow_down' ? 429 : 400, $r); json_out(200, $r + ['url' => '/s/' . $r['id']]); }
         if ($route === 'api/share/list' && $method === 'GET') json_out(200, ['links' => sl_list(db(), $me)]);
         if ($route === 'api/share/delete' && $method === 'POST') json_out(200, ['ok' => sl_delete(db(), $me, (string) ($b['id'] ?? ''))]);
-        json_out(404, ['error' => 'not found']);
-    }
-    // the public discipline profile: on / off and its link (off by default)
-    if ($route === 'api/profile/public') {
-        if (!$me) json_out(401, ['error' => 'Sign in first.']);
-        require_once __DIR__ . '/growth/public-profile.php';
-        if ($method === 'GET') json_out(200, pp_state(db(), (string) $me['id']));
-        if ($method === 'POST') { $b = body_json(512); json_out(200, pp_set(db(), (string) $me['id'], !empty($b['on']))); }
         json_out(404, ['error' => 'not found']);
     }
     // prop firm presets (firm → account type → size → rules), kept up to date by presets/cron.php

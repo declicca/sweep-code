@@ -19,15 +19,10 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
 require_once __DIR__ . '/catalog.php';
 require_once __DIR__ . '/discovery.php';   // the discovery missions (SWEEP.md step 5)
 require_once __DIR__ . '/v2.php';
-require_once __DIR__ . '/boss.php';
 require_once __DIR__ . '/v2b.php';
 require_once __DIR__ . '/edge.php';   // « Your edge » (brief edge T2)
 require_once __DIR__ . '/v2c.php';
 require_once __DIR__ . '/weekly-mail.php';   // « Your week » email (brief 01 step 5)
-require_once __DIR__ . '/v3s.php';
-require_once __DIR__ . '/v3l.php';
-require_once __DIR__ . '/v3c.php';
-require_once __DIR__ . '/v3d.php';
 require_once __DIR__ . '/wow.php';
 require_once __DIR__ . '/gameplan.php';   // the 90-day gameplan (20 Oct.)
 
@@ -290,8 +285,6 @@ final class GameEngine
     {
         self::q('INSERT INTO game_celebrations (user_id, type, payload_json, created_at) VALUES (?, ?, ?, ?)', [$uid, $type, json_encode($payload), self::ts()]);
         self::$made[$uid][] = $type;
-        if (class_exists('GameDiscord', false)) { try { GameDiscord::onCelebrate($uid, $type, $payload); } catch (Throwable $e) { error_log('[Sweep discord] ' . $e->getMessage()); } }
-        if (class_exists('GameCrew', false)) { try { GameCrew::schema(); GameCrew::onCelebrate($uid, $type, $payload); } catch (Throwable $e) { error_log('[Sweep crew] ' . $e->getMessage()); } }
     }
     public static function track(string $uid, string $event, array $meta = []): void
     {
@@ -643,7 +636,6 @@ final class GameEngine
                     }
                 }
                 if ($g) self::q('UPDATE game_days SET locked_at = ? WHERE user_id = ? AND trading_day = ?', [self::ts(), $uid, $d]);
-                if (class_exists('GameBoss', false)) { try { GameBoss::onLock($uid, $d); } catch (Throwable $e) { error_log('[Sweep boss] ' . $e->getMessage()); } }
                 if ($f) self::setProfile($uid, $f);
             }
             self::setProfile($uid, ['last_locked_day' => $d]);
@@ -758,6 +750,7 @@ final class GameEngine
             'streak' => ['current' => $streak, 'best' => max((int) $p['streak_best'], $streak), 'today_valid' => $todayValid,
                          'freezes' => (int) $p['freezes_available'], 'quota' => self::freezeQuota($uid)],
             'sound' => (bool) $p['sound_enabled'], 'started_on' => $p['started_on'],
+            'swept_days' => (int) self::q('SELECT COUNT(*) FROM game_days WHERE user_id = ? AND is_swept = 1', [$uid])->fetchColumn(),   // (10 Nov., brief « produit final »: « n swept days › » on Today, in place of the level)
             'complete_days' => (int) self::q('SELECT COUNT(*) FROM game_days WHERE user_id = ? AND is_swept = 1', [$uid])->fetchColumn(),   // (1 Nov., brief dans le temps E1) nothing « unlocked » before 3
             'onboarding' => ['whats_new_due' => empty($o['whats_new']) && (string) ($p['started_on'] ?? '') !== '' && (string) $p['started_on'] < GAME_RELEASE_DATE && (bool) self::q('SELECT 1 FROM game_days WHERE user_id = ? AND trading_day < ? AND (activity = 1 OR trades_count > 0 OR plan_valid = 1 OR review_done = 1) LIMIT 1', [$uid, GAME_RELEASE_DATE])->fetchColumn(), 'seen' => !empty($o['seen']), 'existing' => !empty($o['existing']), 'done' => !empty($o['done']),
                              'goal' => $p['goal'], 'style' => $p['trading_style'], 'instruments' => $p['instruments'] ? explode(',', (string) $p['instruments']) : [],
@@ -828,25 +821,13 @@ function game_route(string $route, string $method, string $uid): void
         $y = GameEngine::addDays($today, -1);
         while (!GameEngine::isMarketDay($y) && $y > GameEngine::addDays($today, -5)) $y = GameEngine::addDays($y, -1);
         if (!GameEngine::isLocked($y)) GameEngine::recomputeDay($uid, $y);
+        try { GameNotifyService::run($uid); } catch (Throwable $e) { error_log('[Sweep notify] ' . $e->getMessage()); }   // the reminders due (the scheduled task does the same)
         json_out(200, [
             'today' => GameEngine::dayState($uid, $today),
-            'unlocked' => GameEngine::unlocks($uid),
             'yesterday' => GameEngine::isLocked($y) ? null : GameEngine::dayState($uid, $y),
             'profile' => GameEngine::profileState($uid),
             'start' => GameEngine::startProgress($uid),
-            'map' => (function () use ($uid) { GameV2::backfillMap($uid); GameV2::evaluateMap($uid); $m = GameV2::mapState($uid); return ['next' => $m['next'], 'current' => $m['current'], 'payout' => $m['payout']]; })(),
-            'missions' => GameV2::missionsState($uid),
             'weekly' => GameV2b::weeklyState($uid, true),
-            'quest' => (function () use ($uid) { GameV2b::schema(); GameV2b::checkAbsence($uid); return GameV2b::questState($uid); })(),
-            'cosmetic' => GameV2b::cosmetics($uid)['equipped'],
-            'crew' => (function () use ($uid) { try { $c = GameCrew::crewOf($uid); if (!$c) return null; $w = GameCrew::weekProgress($c); return ['name' => $c['name'], 'done' => $w['done'], 'goal' => $w['goal']]; } catch (Throwable $e) { return null; } })(),
-            'buddy' => (function () use ($uid) { try { $b = GameCrew::buddyState($uid)['buddy']; return $b ? ['status' => $b['status'], 'incoming' => $b['incoming'], 'handle' => $b['card']['handle'] ?? null] : null; } catch (Throwable $e) { return null; } })(),
-            'league' => (function () use ($uid) { try { $l = GameSocial::league($uid); } catch (Throwable $e) { return null; } if (!$l['group']) return null;
-                $rank = 0; foreach ($l['group']['members'] as $i => $m) if ($m['me']) $rank = $i + 1; return ['tier' => $l['profile']['league_tier'], 'rank' => $rank, 'of' => count($l['group']['members'])]; })(),
-            'season' => (function () use ($uid) { $s = GameSeason::state($uid); return ['id' => $s['id'], 'number' => $s['number'], 'name' => $s['name'], 'tier' => $s['tier'], 'claimable' => $s['claimable'], 'points' => $s['points'], 'per_tier' => $s['per_tier']]; })(),
-            'wrapped' => (function () use ($uid) { GameWrapped::ensure($uid, (string) ($_GET['lang'] ?? '')); /* (the app's language: the Month in Review's AI part is written in it) */ try { GameWrappedYear::ensure($uid); } catch (Throwable $e) { error_log('[Sweep wrapped year] ' . $e->getMessage()); } try { GameNotifyService::run($uid); } catch (Throwable $e) { error_log('[Sweep notify] ' . $e->getMessage()); }
-                $w = GameWrapped::state($uid)['items'][0] ?? null; return $w && $w['fresh'] ? ['month' => $w['month'], 'new' => $w['new']] : null; })(),
-            'month_review' => (function () use ($uid) { try { return GameWrapped::card($uid); } catch (Throwable $e) { error_log('[Sweep month review] ' . $e->getMessage()); return null; } })(),   // (1 Nov., brief avance 6) the Today card
             'discovery' => (function () use ($uid) { try { return GameDiscovery::state($uid); } catch (Throwable $e) { error_log('[Sweep discovery] ' . $e->getMessage()); return ['all' => true, 'shown' => ['money' => true, 'guided' => true, 'game' => true, 'ai' => true]]; } })(),
             'celebrations' => GameEngine::pendingCelebrations($uid),
         ]);
@@ -858,51 +839,8 @@ function game_route(string $route, string $method, string $uid): void
         try { if (function_exists('ref_get_code')) $ref = ref_get_code(db(), $uid); } catch (Throwable $e) { $ref = null; }
         json_out(200, ['profile' => GameEngine::profileState($uid), 'counters' => $c, 'badges' => GameEngine::badgesState($uid), 'ref' => $ref]);
     }
-    if ($route === 'api/game/discord' && $method === 'GET') json_out(200, GameDiscord::state_($uid));
-    if ($route === 'api/game/discord/start' && $method === 'GET') { $u = GameDiscord::authorizeUrl($uid); if (!$u) json_out(404, ['error' => 'discord_off']); header('Location: ' . $u, true, 302); exit; }
-    if ($route === 'api/game/discord/callback' && $method === 'GET') {
-        $ok = GameDiscord::callback($uid, (string) ($_GET['code'] ?? ''), (string) ($_GET['state'] ?? ''));
-        $base = rtrim(str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/'))), '/');
-        header('Location: ' . $base . '/' . ($ok ? '?discord=linked' : '?discord=error') . '#settings', true, 302); exit;
-    }
-    if ($route === 'api/game/discord/unlink' && $method === 'POST') { GameDiscord::unlink($uid); json_out(200, GameDiscord::state_($uid)); }
-    if ($route === 'api/game/discord/share' && $method === 'POST') { $b = body_json(256); GameDiscord::setShare($uid, !empty($b['on'])); json_out(200, GameDiscord::state_($uid)); }
-    if ($route === 'api/game/crew' && $method === 'GET') json_out(200, GameCrew::crewState($uid) + ['buddy' => GameCrew::buddyState($uid)['buddy']]);
-    if (strpos($route, 'api/game/crew/') === 0 && $method === 'POST') {
-        $b = body_json(1024); $a = substr($route, 14);
-        $r = match ($a) { 'create' => GameCrew::create($uid, (string) ($b['name'] ?? '')), 'join' => GameCrew::join($uid, (string) ($b['code'] ?? '')),
-            'leave' => (GameCrew::leave($uid) ?? ['ok' => true]), 'goal' => ['ok' => GameCrew::setGoal($uid, (int) ($b['factor'] ?? 3))],
-            'react' => ['ok' => GameCrew::react($uid, (int) ($b['id'] ?? 0), (string) ($b['emoji'] ?? ''))], default => ['error' => 'not_found'] };
-        json_out(isset($r['error']) ? 400 : 200, $r + GameCrew::crewState($uid) + ['buddy' => GameCrew::buddyState($uid)['buddy']]);
-    }
-    if (strpos($route, 'api/game/buddy/') === 0 && $method === 'POST') {
-        $b = body_json(1024); $a = substr($route, 15);
-        $r = match ($a) { 'invite' => GameCrew::invite($uid, (string) ($b['handle'] ?? '')), 'respond' => (GameCrew::respond($uid, !empty($b['accept'])) ?? ['ok' => true]),
-            'end' => (GameCrew::end($uid) ?? ['ok' => true]), 'cheer' => GameCrew::cheer($uid), default => ['error' => 'not_found'] };
-        json_out(isset($r['error']) ? 400 : 200, $r + ['buddy' => GameCrew::buddyState($uid)['buddy']]);
-    }
-    if ($route === 'api/game/league' && $method === 'GET') json_out(200, GameSocial::league($uid));
-    if ($route === 'api/game/social' && $method === 'GET') json_out(200, GameSocial::profile($uid));
-    if ($route === 'api/game/social' && $method === 'POST') { $r = GameSocial::save($uid, body_json(1024)); json_out(isset($r['error']) ? 400 : 200, $r); }
-    if ($route === 'api/game/report' && $method === 'POST') { $b = body_json(1024); GameSocial::report($uid, (string) ($b['type'] ?? 'handle'), (string) ($b['id'] ?? ''), (string) ($b['reason'] ?? '')); json_out(200, ['ok' => true]); }
-    if ($route === 'api/game/season' && $method === 'GET') json_out(200, GameSeason::state($uid));
-    if ($route === 'api/game/season/claim' && $method === 'POST') { $b = body_json(256); $r = GameSeason::claim($uid, (int) ($b['tier'] ?? 0), (string) ($b['track'] ?? '')); json_out(isset($r['error']) ? 400 : 200, $r + ['season' => GameSeason::state($uid)]); }
-    if ($route === 'api/game/wrapped' && $method === 'GET') json_out(200, GameWrapped::state($uid));
-    if ($route === 'api/game/wrapped/viewed' && $method === 'POST') { $b = body_json(256); if (preg_match('/^\d{4}-(\d{2}|AN)$/', (string) ($b['month'] ?? ''))) GameWrapped::viewed($uid, $b['month'], !empty($b['done'])); json_out(200, ['ok' => true]); }   // (« YYYY-AN »: the year's Wrapped, never recorded before 14 Oct.)
     if ($route === 'api/game/weekly' && $method === 'GET') { $w = GameV2b::weeklyState($uid); if (!empty($w['open'])) GameV2b::markSeen($uid, (string) $w['week']); json_out(200, $w); }   // opening the recap = seen (no reminder, no email after)
     if ($route === 'api/game/weekly' && $method === 'POST') { $r = GameV2b::saveWeekly($uid, body_json(4096)); json_out(isset($r['error']) ? 400 : 200, $r + ['celebrations' => GameEngine::pendingCelebrations($uid)]); }
-    if ($route === 'api/game/chest' && $method === 'POST') { $r = GameV2b::openChest($uid); json_out(isset($r['error']) ? 400 : 200, $r + ['cosmetics' => GameV2b::cosmetics($uid)]); }
-    if ($route === 'api/game/reveal/flip' && $method === 'POST') { $b = body_json(1024); json_out(200, GameV2b::flip($uid, (int) ($b['id'] ?? 0), in_array($b['lang'] ?? '', ['fr', 'es'], true) ? $b['lang'] : 'en')); }
-    if ($route === 'api/game/reveal/second' && $method === 'GET') { $w = GameV2b::openWeek($uid); json_out(200, ['reveal' => $w ? GameV2b::reveal($uid, $w, 2) : null]); }
-    if ($route === 'api/game/cosmetics' && $method === 'GET') json_out(200, GameV2b::cosmetics($uid));
-    if ($route === 'api/game/cosmetics' && $method === 'POST') { $b = body_json(512); GameV2b::equip($uid, (string) ($b['id'] ?? '')); json_out(200, GameV2b::cosmetics($uid)); }
-    if ($route === 'api/game/boss' && $method === 'GET') { GameEngine::catchUp($uid); json_out(200, GameBoss::state($uid, in_array($_GET['lang'] ?? '', ['fr', 'es'], true) ? $_GET['lang'] : 'en')); }
-    if ($route === 'api/game/map' && $method === 'GET') { GameV2::backfillMap($uid); GameV2::evaluateMap($uid); json_out(200, GameV2::mapState($uid)); }
-    if ($route === 'api/game/missions/reroll' && $method === 'POST') {
-        $b = body_json(1024);
-        $ok = GameV2::reroll($uid, (int) ($b['id'] ?? 0));
-        json_out($ok ? 200 : 400, ['ok' => $ok, 'missions' => GameV2::missionsState($uid)]);
-    }
     if ($route === 'api/game/badges' && $method === 'GET') json_out(200, ['badges' => GameEngine::badgesState($uid)]);
     if ($route === 'api/game/history' && $method === 'GET') {
         $from = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['from'] ?? '')) ? $_GET['from'] : GameEngine::addDays(GameEngine::today(), -40);
@@ -935,17 +873,6 @@ function game_route(string $route, string $method, string $uid): void
         $st = db()->prepare('UPDATE user_game_profile SET ' . implode(', ', array_map(fn($k) => "$k = ?", array_keys($f))) . ', updated_at = ? WHERE user_id = ?');
         $st->execute([...array_values($f), GameEngine::ts(), $uid]);
         json_out(200, ['start' => GameEngine::startProgress($uid), 'profile' => GameEngine::profileState($uid), 'celebrations' => GameEngine::pendingCelebrations($uid)]);
-    }
-    if ($route === 'api/game/sound' && $method === 'POST') {
-        $b = body_json(1024);
-        db()->prepare('UPDATE user_game_profile SET sound_enabled = ?, updated_at = ? WHERE user_id = ?')->execute([!empty($b['on']) ? 1 : 0, GameEngine::ts(), $uid]);
-        json_out(200, ['ok' => true]);
-    }
-    if ($route === 'api/game/share' && $method === 'POST') {
-        $b = body_json(2048);
-        if (($b['kind'] ?? '') === 'locked_tap') GameEngine::track($uid, 'locked_feature_tapped');
-        else GameEngine::track($uid, !empty($b['shared']) ? 'share_card_shared' : 'share_card_created', ['kind' => substr((string) ($b['kind'] ?? ''), 0, 20)]);
-        json_out(200, ['ok' => true]);
     }
     if ($route === 'api/game/seen' && $method === 'POST') {   // a page opened, once a New York day (what each trader uses, mail/mail-usage.php)
         $b = body_json(256); $what = (string) ($b['what'] ?? '');

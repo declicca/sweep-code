@@ -44,11 +44,13 @@ with sync_playwright() as p:
     c, pg, errs = page(br, 1300, False, scheme)
     go(pg, 'analytics')
     # (28 Oct., iOS 27.2 V7) each card keeps its natural height: no empty space at the bottom of « P&L breakdown »
-    two = pg.evaluate("(()=>{const g=document.querySelector('#main .igrid.g-two'); if(!g) return null; return [...g.children].map(e=>{const r=e.getBoundingClientRect(), k=[...e.children].filter(x=>x.getClientRects().length); const end=Math.max(...k.map(x=>x.getBoundingClientRect().bottom)); return Math.round(r.bottom-end)})})()")
+    two = pg.evaluate("(()=>{const g=[...document.querySelectorAll('#main .igrid.g-ins, #main .igrid.g-two')]; if(!g.length) return null; return g.flatMap(x=>[...x.children]).filter(e=>/Répartition du P&L|P&L breakdown|Tendances à surveiller|Patterns to watch/.test(e.textContent)).map(e=>{const r=e.getBoundingClientRect(), k=[...e.children].filter(x=>x.getClientRects().length); const end=Math.max(...k.map(x=>x.getBoundingClientRect().bottom)); return Math.round(r.bottom-end)})})()")
     ok(two and len(two) == 2 and all(v <= 40 for v in two), f'1 computer {scheme}: « P&L breakdown » and « Patterns to watch » end with their content ({two} px under it)')
     jc = pg.evaluate("[...document.querySelectorAll('#main .ikpis > .ik')].map(e=>getComputedStyle(e).justifyContent)")
     ok(jc and all(j == 'center' for j in jc), f'1 computer {scheme}: the {len(jc)} figure tiles centre their content')
-    jt = pg.evaluate("[...document.querySelectorAll('#main .g-ins .tiles > .it')].map(e=>getComputedStyle(e).justifyContent)")   # (2 Nov., tour visuel 15) the 6 small tiles: their label at the top, at one height
+    # (2 Nov., tour visuel 15) the small tiles: their label at the top, at one height (10 Nov., brief « produit final »: they are in the Deep dive's « Behavior » tab)
+    pg.locator('#main section.deep [data-k="deep"][data-v="behavior"]').click(); pg.wait_for_timeout(600)
+    jt = pg.evaluate("[...document.querySelectorAll('#main section.deep .tiles > .it')].map(e=>getComputedStyle(e).justifyContent)")
     ok(jt and all(j == 'flex-start' for j in jt), f'1 computer {scheme}: the {len(jt)} small tiles start at the top')
     for i, name in [(1, 'Behavior'), (7, 'Long vs short')]:
       pg.locator('section.deep .tabs > button').nth(i).click(); pg.wait_for_timeout(1200)

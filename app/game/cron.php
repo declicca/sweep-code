@@ -44,13 +44,11 @@ GameEngine::schema();
 $mode = $argv[1] ?? 'lock';
 require_once $root . '/ops/cron-lib.php';   // Admin › Health: last run, duration, success or error (brief 02 step 0)
 if ($mode === 'lock') sweep_cron_start($pdo, 'game');
-try { GameDiscord::cron(); } catch (Throwable $e) { fwrite(STDERR, '[Sweep discord] ' . $e->getMessage() . "\n"); }
-try { GameSocial::ensureWeek(); } catch (Throwable $e) { fwrite(STDERR, '[Sweep league] ' . $e->getMessage() . "\n"); }   // Monday: close last week, form this week
 $users = $pdo->query('SELECT user_id FROM user_game_profile')->fetchAll(PDO::FETCH_COLUMN);
 $n = 0;
 foreach ($users as $uid) {
     try {
-        if ($mode === 'backfill') { GameEngine::backfill((string) $uid); GameV2::backfillMap((string) $uid); } else { GameEngine::catchUp((string) $uid); GameV2::ensureMissions((string) $uid); GameWrapped::ensure((string) $uid); GameWrappedYear::ensure((string) $uid); GameWow::check((string) $uid); GameNotifyService::run((string) $uid, true); }
+        if ($mode === 'backfill') { GameEngine::backfill((string) $uid); GameV2::backfillMap((string) $uid); } else { GameEngine::catchUp((string) $uid); GameWow::check((string) $uid); GameNotifyService::run((string) $uid, true); }
         if ($mode !== 'backfill') { try { GameWeeklyMail::run((string) $uid); } catch (Throwable $e) { fwrite(STDERR, "[Sweep weekly email] $uid: " . $e->getMessage() . "\n"); } }   // Friday 17:30 ET: « Your week », if not opened in the app
         try { if (class_exists('SweepMoneyServer')) SweepMoneyServer::monthly($pdo, (string) $uid); } catch (Throwable $e) { fwrite(STDERR, "[Sweep money] $uid: " . $e->getMessage() . "\n"); }   // the 1st: « The reality of the month »
         GameEngine::forget((string) $uid);

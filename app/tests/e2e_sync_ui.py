@@ -57,6 +57,10 @@ def new_trader(p, lang, phone):
   pg.on('response', lambda r: bad.append('%d %s' % (r.status, r.url[len(B):][:80])) if r.status >= 400 and '/api/' not in r.url else None)
   return br, ctx, pg, errs, bad
 
+def edit_trade(pg):
+  # (10 Nov., brief « produit final »: on the phone « Edit trade » is in the page's « ⋯ » menu, the pencil is hidden)
+  pg.evaluate("(() => { if (![...document.querySelectorAll('#main [data-act=edit-trade]')].some((e) => e.checkVisibility())) { const d = document.querySelector('#main details.menu'); if (d) d.open = true; } })()")
+  tap(pg, '#main [data-act="edit-trade"]:visible')
 def tap(pg, sel):
   last = None
   for _ in range(6):
@@ -160,7 +164,7 @@ def case_fr(p, phone):
   sid = pg.evaluate("S.trades.find(t => t.source === 'ninjatrader' && t.id !== 'man-sy').id")
   pg.goto(B + '/#trade/' + sid); pg.wait_for_selector('#main .th-head .lbl .sy-chip', timeout=20000)
   ok(pg.inner_text('#main .th-head .lbl .sy-chip') == 'NinjaTrader', f'{tag}: trade page: the NinjaTrader chip')
-  tap(pg, '#main [data-act="edit-trade"]'); pg.wait_for_selector('#sySheet.open [data-syf="stop"]', timeout=8000)
+  edit_trade(pg); pg.wait_for_selector('#sySheet.open [data-syf="stop"]', timeout=8000)
   ok(not pg.locator('#tkSlide.open').count() and 'viennent de NinjaTrader' in pg.inner_text('#sySheet'), f'{tag}: « Modifier » opens the stop / target editor, not the trade form')
   pg.screenshot(path=f'{SHOTS}/sync-edit-{tag}.png')
   pg.fill('#sySheet [data-syf="stop"]', '21035,5'); pg.fill('#sySheet [data-syf="target"]', '21010'); tap(pg, '#sySheet [data-sy="save-edit"]'); pg.wait_for_timeout(800)
@@ -283,7 +287,7 @@ def case_quantower(p, phone):   # the 2nd platform: its block, connect sheet, ac
   sid = pg.evaluate("S.trades.find(t => t.source === 'quantower' && t.id !== 'man-sy').id")
   pg.goto(B + '/#trade/' + sid); pg.wait_for_selector('#main .th-head .lbl .sy-chip', timeout=20000)
   ok(pg.inner_text('#main .th-head .lbl .sy-chip') == 'Quantower', f'{tag}: trade page: the Quantower chip')
-  tap(pg, '#main [data-act="edit-trade"]'); pg.wait_for_selector('#sySheet.open [data-syf="stop"]', timeout=8000)
+  edit_trade(pg); pg.wait_for_selector('#sySheet.open [data-syf="stop"]', timeout=8000)
   ok('viennent de Quantower' in pg.inner_text('#sySheet') and not pg.locator('#tkSlide.open').count(), f'{tag}: « Modifier »: stop / target only, « viennent de Quantower »')
   tap(pg, '#sySheet [data-sy="close"]'); pg.wait_for_timeout(400)
   pg.goto(B + '/#account/acc-sy'); pg.wait_for_selector('#main .sy-acct', timeout=20000)

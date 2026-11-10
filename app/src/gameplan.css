@@ -113,11 +113,11 @@
 .gp-d span{font-size:10px;text-transform:uppercase;letter-spacing:.04em;opacity:.7}
 .gp-d b{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums}
 .gp-d.s-done{background:var(--pos);color:var(--btntext,#fff)}
-.gp-d.s-today{box-shadow:inset 0 0 0 2px var(--pos);color:var(--text);animation:gp-breathe 2.4s ease-in-out infinite}
+.gp-d.s-today{box-shadow:inset 0 0 0 2px var(--pos);color:var(--text)}
 .gp-d.s-soon,.gp-d.s-gate{opacity:.45}
 .gp-d.is-gate b{color:var(--neg)}
 .gp-d.is-gate.s-done b{color:inherit}
-@keyframes gp-breathe{50%{box-shadow:inset 0 0 0 2px var(--pos),0 0 0 4px rgba(var(--pos-rgb),.18)}}
+
 .gp-how{padding:12px 14px;border-radius:var(--r2);background:var(--panel2)}
 .gp-how summary{font-weight:600;cursor:pointer}
 .gp-how .gp-ul{margin-top:10px}

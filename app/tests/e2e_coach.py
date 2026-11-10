@@ -347,8 +347,9 @@ def edge_case(p, lang, phone):   # brief edge T3: « Your edge » before the tra
   sk = pg.evaluate("(() => [...document.querySelectorAll('#main .co-today .co-edge')].map((q) => q.textContent).join(' | '))()")
   slot = pg.evaluate("SweepEdge.words({ dims: [['slot', '09:30']] })")
   ok(ES[lang][0] in sk and (ES[lang][1] + slot) in sk, f'{tag} O 4 winners before 10:00: « {ES[lang][0]} … {ES[lang][1]}{slot} » ({sk[:140]})')
-  pg.evaluate("location.hash = '#analytics'"); pg.wait_for_selector('#main .g-ins .tiles', state='attached', timeout=10000); pg.wait_for_timeout(800)
-  mt = pg.evaluate("(document.querySelector('#main .g-ins .tiles') || {}).textContent || ''")
+  # (10 Nov., brief « produit final » step 5) the small tiles are in the Deep dive's « Behavior » tab
+  pg.evaluate("location.hash = '#analytics/behavior'"); pg.wait_for_selector('#main section.deep .tiles', state='attached', timeout=10000); pg.wait_for_timeout(800)
+  mt = pg.evaluate("(document.querySelector('#main section.deep .tiles') || {}).textContent || ''")
   ok(ES[lang][2] in mt and ES[lang][3] in mt, f'{tag} O Stats › Trading stats: « {ES[lang][2]} » ({mt[mt.find(ES[lang][2][:6]):][:60] if ES[lang][2][:6] in mt else mt[:80]})')
   # P. (T6) the profile's card: Stats (top) and the Friday recap, in counts and %
   pg.wait_for_selector('#main .co-stats', state='attached', timeout=10000); pg.wait_for_timeout(500)

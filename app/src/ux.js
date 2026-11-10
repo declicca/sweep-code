@@ -2535,13 +2535,16 @@
   setTimeout(offer, 1500);   // the app opened directly on My money
 
   /* Today's « My money » card: the invitation (new trader who chose « later », or an existing trader, one day) */
+  // (10 Nov.) whether the invitation is due, without side effect: Today shows « My money » for it before a first payout or expense
+  function pending() {
+    const s = stOf(); if (el || s.state === 'done' || s.state === 'hidden' || !realAccts().length || S.mode !== 'server') return false;
+    if (typeof billCan === 'function' && !billCan('payouts')) return false;   // Free: My money is not in the plan, the server would refuse the entries
+    return !!(s.state || s.due || !s.shown_on || s.shown_on === today());   // an existing trader: offered on one day only (a new trader, due: kept until done or hidden, 27 Oct.: it no longer opens by itself)
+  }
   function invite() {
-    const s = stOf(); if (el || s.state === 'done' || s.state === 'hidden' || !realAccts().length || S.mode !== 'server') return '';
-    if (typeof billCan === 'function' && !billCan('payouts')) return '';   // Free: My money is not in the plan, the server would refuse the entries
-    if (!s.state && !s.due) {   // an existing trader: offered on one day only (a new trader, due: kept until done or hidden, 27 Oct.: it no longer opens by itself)
-      if (s.shown_on && s.shown_on !== today()) return '';
-      if (!s.shown_on) setTimeout(() => { if (!stOf().shown_on) setSt({ shown_on: today() }); }, 0);
-    }
+    if (!pending()) return '';
+    const s = stOf();
+    if (!s.state && !s.due && !s.shown_on) setTimeout(() => { if (!stOf().shown_on) setSt({ shown_on: today() }); }, 0);
     return `<div class="rn-inv"><button type="button" class="rn-inv-go" data-rn="open"><b>${s.state === 'later' ? x.invNew : x.invOld}</b><small>${x.invS}</small></button>
       <button type="button" class="rn-inv-x" data-rn="hide" aria-label="${x.hide}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
   }
@@ -2611,7 +2614,7 @@
   const fromNet = () => { const s = stOf(); if (s.state !== 'done') return null; if (s.from) return s.from;
     const d = [...(S.expenses || []).filter((e) => e.estimated && /^est-/.test(e.id)), ...(S.payouts || []).filter((p) => p.id === 'est-payouts')].map((e) => e.date || e.paid_on).filter(Boolean).sort()[0];
     return d || null; };
-  window.SweepRealNet = { invite, open: () => { W = null; start(); }, state: stOf, showNet, from: fromNet };
+  window.SweepRealNet = { invite, pending, open: () => { W = null; start(); }, state: stOf, showNet, from: fromNet };
 })();
 
 /* ───────────── 30. Automatic sync (NinjaTrader 8, Quantower): Settings › Data › Connections, accounts found, synced trades ─────────────

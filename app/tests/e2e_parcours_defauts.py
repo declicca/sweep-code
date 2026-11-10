@@ -44,8 +44,9 @@ with sync_playwright() as p:
     pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-rt', timeout=8000); pg.wait_for_timeout(1000)
     wk = pg.evaluate("(SweepGame.state() && SweepGame.state().weekly) || {}")
     it = pg.locator('#main .nav-rt .nav-rt-int')
-    if wk.get('open') and not wk.get('seen'):
-      ok(it.count() == 0, f'{tag} D5 the week\'s recap is ready: its row comes first, no intention line')
+    # (10 Nov., brief « produit final » step 2) one line under « Now »: an offer, the recap or the mission goes before the intention
+    if (wk.get('open') and not wk.get('seen')) or pg.locator('#main .nav-rt #gpLine, #main .nav-rt .nav-rt-wk, #main .nav-rt .nav-remind').count():
+      ok(it.count() == 0, f'{tag} D5 the recap, the mission or a one-time offer comes first, no intention line')
     else:
       ok(it.count() == 1 and it.is_visible() and x['int'] in it.inner_text() and 'Attendre la clôture 5 min' in it.inner_text(), f'{tag} D5 the intention of last week\'s recap on the routine card ({it.inner_text() if it.count() else None!r})')
     # D7a: the trade page, the checklist box and its window
@@ -57,7 +58,7 @@ with sync_playwright() as p:
     ok(h2 == x['ckT'] and tip == 0, f'{tag} D7a its window explains this trade\'s checklist (« {h2} »), without the tips to raise the 30-day score')
     pg.locator('aside.nav-dwhy.open [data-dwhy-ok]').click(); pg.wait_for_timeout(300)
     # (31 Oct., C5) the routine has no discipline chip any more: one line « Level … · … › » under its title
-    pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_selector('#main .nav-rt .nav-rt-sum', timeout=8000); pg.wait_for_timeout(600)
+    pg.evaluate("location.hash = '#dashboard'"); pg.wait_for_selector('#main section.nav-rt:not(.ph)', timeout=8000); pg.wait_for_timeout(600)
     ok(pg.locator('#main .nav-rt [data-disc-why]').count() == 0, f'{tag} D7a the routine: no discipline chip, its one line instead (31 Oct., C5)')
     ok(pg.evaluate(WIDE) <= 0, f'{tag} nothing wider than the window')
     ok(not errs, f'{tag} no page error ({errs[:2]})')

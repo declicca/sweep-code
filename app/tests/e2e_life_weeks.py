@@ -196,7 +196,9 @@ with sync_playwright() as p:
         t.pg.wait_for_timeout(200)
       ok('rattraper' not in t.ev("document.getElementById('main').innerText") and 'catch up' not in t.ev("document.getElementById('main').innerText") and t.ev("document.querySelectorAll('#main .gp-ln-late').length") == 0,
          f'{t.name} {day} B1 no counter of missions to catch up ({gl[:60]!r})')
-      ok(bool(mN) and int(mN.group(1)) in (max(1, dn), dn + 1), f'{t.name} {day} B1 « Mission N of 90 » = the mission he is on (the next one, or the last done when the next is not open yet) ({mN and mN.group(1)} / {dn} done)')
+      # (10 Nov., brief « produit final » step 2: one line under the routine's title at most; « Now » in the session, an offer or the week's recap goes first)
+      other = '' if gl else t.ev("(() => { const h = document.querySelector('#main section.nav-rt > .nav-rt-h'); let n = h && h.nextElementSibling; if (n && /nav-rt-sub/.test(n.className)) n = n.nextElementSibling; return n && !/nav-rt-(steps|msg|help)/.test(n.className) ? n.className || n.tagName : '' })()")
+      ok((bool(mN) and int(mN.group(1)) in (max(1, dn), dn + 1)) or bool(other), f'{t.name} {day} B1 « Mission N of 90 » = the mission he is on (the next one, or the last done when the next is not open yet), or a line before it ({mN and mN.group(1)} / {dn} done, {other!r})')
       if t is leo:   # his plan: through the express plan with « Use yesterday's plan » on day 1, else saved as the app saves it
         if i == 1:
           t.ev("SweepGame.openPlan()"); t.pg.wait_for_selector('#gSheet.g-pm', timeout=8000); t.pg.wait_for_timeout(700)

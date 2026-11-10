@@ -4,7 +4,7 @@ Sweep — the fixes of the 27 Oct. app tour (group A), dev environment with Play
  A1  the manual form: the entry price has no number as a hint (it looked filled in); « Save » without it: the field is
      scrolled to, outlined in gold, the cursor in it; typing a price takes the outline away
  A2  the checklist of the trade form and of the trade page in the trader's language (the default questions are saved in English)
- A3  « 1 nouveauté » in the singular
+ A3  (retired 10 Nov., brief « produit final »: the « n new · See My progress » toast is gone)
  A4  the welcome page: no bar at the bottom over its account tiles
  A5  the welcome page: no « add Sweep to your home screen » on the sign-up day
  A6  « Less than 6 months » counts at once: the coach's tone for a trader starting out, never « No setup chosen »
@@ -62,9 +62,6 @@ with sync_playwright() as p:
       ok('1 trades' not in bf and 'Ton trade prévu est fait' in bf, f'{tag} the coach in the singular: « Ton trade prévu est fait » ({bf[-110:]!r})')
       pg.evaluate("(j) => { remove('trades', 'tf-one'); remove('accounts', 'tf-acc'); const o = JSON.parse(j); if (o) put('journals', o); else remove('journals', todayStr()) }", j0); pg.wait_for_timeout(500)
       pg.evaluate("Promise.all(Object.values(chains)).then(() => true)")   # (27 Oct.: the shared trader must be left as found — a later test of the same group saw this account on the CI)
-    # A3
-    st3 = pg.evaluate("[SweepGame.sumText(1), SweepGame.sumText(3)]")
-    ok(st3 == ['1 nouveauté · Voir Ma progression', '3 nouveautés · Voir Ma progression'], f'A3 {tag} « 1 nouveauté », « 3 nouveautés » ({st3})')
     c.close()
 
     # a new trader, French: the welcome page
@@ -98,13 +95,12 @@ with sync_playwright() as p:
       else: pg.wait_for_timeout(800)
     ok(not any('Pas de setup choisi' in t for t in seen), 'A6 ' + tag + ' the coach never asks a setup of a trader starting out')
     c.close()
-  # EN and ES (phone, dark): the singular, and the Spanish checklist not in English
-  for lang, one in (('en', '1 new · See My progress'), ('es', '1 novedad · Ver Mi progreso')):
+  # EN and ES (phone, dark): the Spanish checklist not in English
+  for lang in ('en', 'es'):
     c = br.new_context(storage_state=STATE, viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, locale={'en': 'en-US', 'es': 'es-ES'}[lang], color_scheme='dark')
     c.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
     pg = c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#dashboard'); pg.wait_for_selector('#main .nav-dash', timeout=15000); pg.wait_for_timeout(1200)
-    ok(pg.evaluate("SweepGame.sumText(1)") == one, f'A3 390 {lang} « {one} »')
     if lang == 'es':
       pg.evaluate("location.hash = '#trade/' + encodeURIComponent(S.trades[0].id)"); pg.wait_for_timeout(1800)
       tq = pg.evaluate("[...document.querySelectorAll('#main .qlist .q > span')].map((e) => e.textContent.trim()).filter(Boolean)")

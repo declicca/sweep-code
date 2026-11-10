@@ -16,8 +16,8 @@
   const L = (typeof LANG !== 'undefined' && ['fr', 'es'].includes(LANG)) ? LANG : 'en';
   const T = {
     en: {
-      askT: 'Answer your coach', askN: '{k} of {n}', aPlan: 'Was this trade in your plan?', aStop: 'Did you respect your stop?', aSize: 'Did you respect your max size?',
-      aWhy: 'What pushed you to enter?', aEmo: 'Your emotion before entering?', aLesson: 'Your lesson, in one sentence', aLessonPh: 'What you do again, or what you change.', yes: 'Yes', no: 'No', fullT: 'Full review · {x} of 4',
+      askT: 'Answer your coach', aPlan: 'Was this trade in your plan?', aStop: 'Did you respect your stop?', aSize: 'Did you respect your max size?',
+      aWhy: 'What pushed you to enter?', aEmo: 'Your emotion before entering?', aLesson: 'Your lesson, in one sentence', aLessonPh: 'What you do again, or what you change.', yes: 'Yes', no: 'No', fullT: 'Checklist, emotions, notes, screenshots',
       wkT: 'Your week', stT: 'What works for you', stSub: 'Your last 4 weeks · {n} trades', strong: 'Your strength', leak: 'Your leak', rule: 'Your rule', ruleW: 'Your rule for next week',
       sPlan: 'In your plan: {a} % winning trades over {n} (off plan: {b} % over {m}).', sSetup: 'Your best setup: “{s}”, {a} % winning trades over {n}.',
       sSlot: 'Your best time: {s}, {a} % winning trades over {n}.', sClean: '{k} of {n} sessions without a mistake.',
@@ -87,8 +87,8 @@
       first: 'After your first trade, I tell you what was right and the one thing to improve.',
     },
     fr: {
-      askT: 'Réponds au coach', askN: '{k} sur {n}', aPlan: 'Ce trade était-il dans ton plan ?', aStop: 'As-tu respecté ton stop ?', aSize: 'As-tu respecté ta taille max ?',
-      aWhy: 'Qu’est-ce qui t’a poussé à entrer ?', aEmo: 'Ton émotion avant d’entrer ?', aLesson: 'Ta leçon, en une phrase', aLessonPh: 'Ce que tu refais, ou ce que tu changes.', yes: 'Oui', no: 'Non', fullT: 'Revue complète · {x} sur 4',
+      askT: 'Réponds au coach', aPlan: 'Ce trade était-il dans ton plan ?', aStop: 'As-tu respecté ton stop ?', aSize: 'As-tu respecté ta taille max ?',
+      aWhy: 'Qu’est-ce qui t’a poussé à entrer ?', aEmo: 'Ton émotion avant d’entrer ?', aLesson: 'Ta leçon, en une phrase', aLessonPh: 'Ce que tu refais, ou ce que tu changes.', yes: 'Oui', no: 'Non', fullT: 'Checklist, émotions, notes, captures',
       wkT: 'Ta semaine', stT: 'Ce qui fonctionne pour toi', stSub: 'Tes 4 dernières semaines · {n} trades', strong: 'Ta force', leak: 'Ta fuite', rule: 'Ta règle', ruleW: 'Ta règle pour la semaine prochaine',
       sPlan: 'Dans ton plan : {a} % de trades gagnants sur {n} (hors plan : {b} % sur {m}).', sSetup: 'Ton meilleur setup : « {s} », {a} % de trades gagnants sur {n}.',
       sSlot: 'Ton meilleur moment : {s}, {a} % de trades gagnants sur {n}.', sClean: '{k} séances sur {n} sans erreur.',
@@ -158,8 +158,8 @@
       first: 'Après ton premier trade, je te dis ce qui était bien et la seule chose à améliorer.',
     },
     es: {
-      askT: 'Responde a tu coach', askN: '{k} de {n}', aPlan: '¿Esta operación estaba en tu plan?', aStop: '¿Respetaste tu stop?', aSize: '¿Respetaste tu tamaño máximo?',
-      aWhy: '¿Qué te empujó a entrar?', aEmo: '¿Tu emoción antes de entrar?', aLesson: 'Tu lección, en una frase', aLessonPh: 'Lo que repites, o lo que cambias.', yes: 'Sí', no: 'No', fullT: 'Revisión completa · {x} de 4',
+      askT: 'Responde a tu coach', aPlan: '¿Esta operación estaba en tu plan?', aStop: '¿Respetaste tu stop?', aSize: '¿Respetaste tu tamaño máximo?',
+      aWhy: '¿Qué te empujó a entrar?', aEmo: '¿Tu emoción antes de entrar?', aLesson: 'Tu lección, en una frase', aLessonPh: 'Lo que repites, o lo que cambias.', yes: 'Sí', no: 'No', fullT: 'Checklist, emociones, notas, capturas',
       wkT: 'Tu semana', stT: 'Lo que funciona para ti', stSub: 'Tus últimas 4 semanas · {n} operaciones', strong: 'Tu fortaleza', leak: 'Tu fuga', rule: 'Tu regla', ruleW: 'Tu regla para la próxima semana',
       sPlan: 'Dentro de tu plan: {a} % de operaciones ganadoras en {n} (fuera del plan: {b} % en {m}).', sSetup: 'Tu mejor setup: « {s} », {a} % de operaciones ganadoras en {n}.',
       sSlot: 'Tu mejor momento: {s}, {a} % de operaciones ganadoras en {n}.', sClean: '{k} de {n} sesiones sin error.',
@@ -867,7 +867,7 @@
     const eq = edgeReview(t);   // brief edge T7: in the edge, off it, a streak
     if (eq) items.push({ ok: !!String(rv.edge || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(eq)}</span><textarea rows="2" data-bind="trades|${id}|review.edge">${esc2(rv.edge || '')}</textarea></label>` });
     items.push({ ok: !!String(rv.lesson || '').trim(), h: `<label class="co-q co-q-l"><span>${esc2(T.aLesson)}</span><textarea rows="${lessonRows(c.fix ? c.fix[1] : T.aLessonPh, rv.lesson)}" data-bind="trades|${id}|review.lesson" placeholder="${esc2(c.fix ? c.fix[1] : T.aLessonPh)}">${esc2(rv.lesson || '')}</textarea></label>` });
-    return `<section class="surface co co-ask" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.askT}</b><small>${fill(T.askN, { k: items.filter((x) => x.ok).length, n: items.length })}</small></div>${items.map((x) => x.h).join('')}</section>`;
+    return `<section class="surface co co-ask" data-noi18n><div class="co-h"><span class="co-ic">${IC}</span><b>${T.askT}</b></div>${items.map((x) => x.h).join('')}</section>`;
   }
   const fullLabel = (x) => fill(T.fullT, { x });
   // (the full review's open state: kept per trade while the tab lives)
@@ -893,15 +893,6 @@
     const tmp = document.createElement('div'); tmp.innerHTML = html; const fresh = tmp.firstElementChild; fresh._h = html;
     if (el) el.replaceWith(fresh); else prog.after(fresh);
   }
-  // the « Review » tab of the trade's page goes to the coach's questions (the full review is folded under them)
-  document.addEventListener('click', (e) => {
-    const b = e.target.closest && e.target.closest('.nav-tnav [data-tn="2"]'), ask = document.querySelector('#main .co-ask'); if (!b || !ask) return;
-    e.stopPropagation();
-    b.parentElement.querySelectorAll('button').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
-    const bar = b.parentElement, y = ask.getBoundingClientRect().top + scrollY - (bar.offsetHeight + (window.SW_MQ && window.SW_MQ.matches ? 70 : 20));
-    scrollTo({ top: Math.max(0, y), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-  }, true);
-
   /* the plan sheet: one sentence, live, above the error line and the button */
   function paintPlan() {
     const sh = document.querySelector('#gSheet.g-plan, #gSheet .g-plan') && document.getElementById('gSheet'); if (!sh || !sh.querySelector('[data-g="save-plan"]')) return;

@@ -69,13 +69,9 @@
 .nav-sgrp{margin:24px 0 8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .nav-sgrp:first-of-type{margin-top:6px}
 /* Trade review mini-navigation */
-.nav-tnav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:20;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;margin:0 0 14px;max-width:520px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-@media (max-width:860px){.nav-tnav{top:calc(var(--nav-hdr,56px) + 6px)}}
-.nav-tnav button{min-height:34px;border:0;background:transparent;color:inherit;font:inherit;font-size:14px;cursor:pointer;border-radius:var(--r-pill)}
-.nav-tnav button.on{background:var(--panel);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12),inset 0 0 0 1px var(--line)}
 /* Progression: journey inside the Season, boss as a special mission, collection */
-.ss-journey{margin-top:24px}.ss-journey h4,.gc-hubwrap h4{margin:14px 0 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.gm-special{width:100%;margin-bottom:12px;background:linear-gradient(135deg,rgba(var(--pos-rgb),.16),rgba(var(--pos-rgb),.04))!important}
+.gc-hubwrap h4{margin:14px 0 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
 .gc-hubcol .sec-h{display:none}
 
 /* sliding selection in segmented controls */
@@ -99,12 +95,12 @@
 /* sticky segmented controls: solid, and the gap above them is covered (no content peeking through) */
 @media (max-width:860px){
   /* the background band only exists while the bar is stuck under the header (at rest it would cover the buttons above it) */
-  #main .nav-seg.is-stuck::before,#main .nav-tnav.is-stuck::before{content:"";position:absolute;left:-24px;right:-24px;bottom:100%;height:8px;background:var(--bg);pointer-events:none}
+  #main .nav-seg.is-stuck::before{content:"";position:absolute;left:-24px;right:-24px;bottom:100%;height:8px;background:var(--bg);pointer-events:none}
 }
 /* search on phones: room for the full placeholder, no zoom on focus, no keyboard hint */
 @media (pointer:coarse){#cmd .cmd-in kbd{display:none}#cmdq{font-size:16px}}
 /* pressed feedback on the new cards */
-.nav-rank,.nav-kpi a,.nav-menu-panel button,.nav-back,.nav-seg a,.nav-tnav button{-webkit-tap-highlight-color:transparent}
+.nav-rank,.nav-kpi a,.nav-menu-panel button,.nav-back,.nav-seg a{-webkit-tap-highlight-color:transparent}
 .nav-rank:active{background:var(--fill)}
 .nav-rank{transition:transform .2s var(--ease-ios)}
 
@@ -124,11 +120,7 @@ html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
 .nav-kseg button.on{background:var(--panel);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12),inset 0 0 0 1px var(--line)}
 @media (pointer:coarse){.nav-kseg button{position:relative}.nav-kseg button::after{content:"";position:absolute;inset:-6px 0}}
 /* « reward waiting » dot (avatar and rank card); it goes once Progression is opened */
-.nav-dot{position:relative}
-.nav-dot::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--pos);box-shadow:0 0 0 2px var(--bg);animation:nav-dot 1.2s var(--spring) 3}
-.side .who.nav-dot::after{top:4px;right:2px}
-@keyframes nav-dot{50%{transform:scale(.8);opacity:.75}}
-@media (prefers-reduced-motion:reduce){.nav-dot::after{animation:none}}
+
 /* avatar menu: header + groups */
 .nav-menu-who{width:100%;border:0;background:transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer;border-radius:14px}
 .nav-menu-who:hover{background:var(--panel2)}
@@ -156,8 +148,8 @@ html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
   #cmdq{min-height:44px}
 }
 /* Stats: the progression card keeps its place while it loads (no shift) */
-.gm-ins:empty{min-height:156px;border-radius:20px;background:linear-gradient(90deg,var(--panel) 0%,var(--panel2) 50%,var(--panel) 100%);background-size:200% 100%;animation:nav-sk 1.4s linear infinite}
-@keyframes nav-sk{50%{opacity:.55}}   /* a skeleton breathes in opacity (it moved its background: a paint every frame) */
+
+   /* a skeleton breathes in opacity (it moved its background: a paint every frame) */
 @media (max-width:860px){body.tcollapsed aside.side .mtitle{transition-delay:.14s}body.tcollapsed .side .brand .wordmark{transition-duration:.12s}body:not(.tcollapsed) aside.side .mtitle{transition-duration:.1s}}
 
 /* ───── desktop sheets: centered window, rounded, dimmed background (Esc and outside click close them) ───── */
@@ -173,10 +165,10 @@ html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
 }
 /* ───── keyboard: one focus ring everywhere; consistent hover ───── */
 :where(button,a,[role=tab],[tabindex],input,select,textarea,summary):focus-visible{outline:2px solid var(--pos);outline-offset:2px;border-radius:10px}
-.nav-seg a:focus-visible,.nav-kseg button:focus-visible,.nav-tnav button:focus-visible{outline-offset:-2px;border-radius:var(--r-pill)}
+.nav-seg a:focus-visible,.nav-kseg button:focus-visible{outline-offset:-2px;border-radius:var(--r-pill)}
 @media (hover:hover){
   .nav-rank:hover,.nav-kpi:hover{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pos) 35%,var(--line))}
-  .nav-seg a:not(.on):hover,.nav-kseg button:not(.on):hover,.nav-tnav button:not(.on):hover{color:var(--text)}
+  .nav-seg a:not(.on):hover,.nav-kseg button:not(.on):hover{color:var(--text)}
   .nav-back:hover{background:var(--panel2)}
 }
 .nav-menu-panel{max-height:calc(100vh - 80px);overflow-y:auto}
@@ -288,7 +280,6 @@ html.nav-js #main:has(> .greet) > section.sec:has(a[href="#news"]){display:none}
 /* one entrance on Today: the cards stagger in, the page itself does not rise on top of that */
 main.anim > .nav-dash{animation:none}
 
-.nav-dot-still::after{animation:none!important}
 /* selected chips are unmistakable (emotions, filters…): filled, not just outlined */
 .chip.on{border-color:transparent!important;}
 
@@ -328,9 +319,9 @@ body.evp-lock{overscroll-behavior:none}
 /* trade review top bar on phones: one row (AI and Edit become icon buttons), the ⋯ menu always stays on screen */
 @media (max-width:600px){
   #main .tr-top{flex-wrap:nowrap;gap:8px}
-  #main .tr-top .ai-btn,#main .tr-top [data-act="edit-trade"]{font-size:0;justify-content:center}
+  #main .tr-top .ai-btn,#main .tr-top > [data-act="edit-trade"]{font-size:0;justify-content:center}
   #main .tr-top .ai-btn .ai-sp{margin:0}
-  #main .tr-top [data-act="edit-trade"]::before{content:"";background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E") center/contain no-repeat}
+  #main .tr-top > [data-act="edit-trade"]::before{content:"";background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E") center/contain no-repeat}
 }
 #main .tr-top details.menu{position:relative}
 #main .tr-top .menu-pop{max-width:calc(100vw - 24px)}
@@ -343,9 +334,9 @@ body.evp-lock{overscroll-behavior:none}
 #main .tr-top details.menu > summary{width:40px;padding:0;list-style:none;font-size:20px;line-height:1;letter-spacing:1px}
 #main .tr-top details.menu > summary::-webkit-details-marker{display:none}
 @media (max-width:600px){
-  #main .tr-top .ai-btn,#main .tr-top [data-act="edit-trade"]{width:40px;min-width:40px;padding:0}
+  #main .tr-top .ai-btn,#main .tr-top > [data-act="edit-trade"]{width:40px;min-width:40px;padding:0}
   #main .tr-top .ai-btn .ai-sp{font-size:17px;line-height:1;display:block}
-  #main .tr-top [data-act="edit-trade"]::before{width:17px;height:17px;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}   /* (2 Nov., tour visuel 1) the pencil drawn in its 17 px: an SVG without a size, at « auto », left an empty grey circle */
+  #main .tr-top > [data-act="edit-trade"]::before{width:17px;height:17px;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}   /* (2 Nov., tour visuel 1) the pencil drawn in its 17 px: an SVG without a size, at « auto », left an empty grey circle */
 }
 @media (hover:hover){#main .tr-top .tr-nav > a:hover,#main .tr-top > .btn:hover,#main .tr-top details.menu > summary:hover{background:var(--panel2)}}
 /* touch screens keep no « hover » look after a tap (iOS keeps :hover on the last tapped chip) */
@@ -403,8 +394,8 @@ body.evp-lock{overscroll-behavior:none}
 @media (min-width:1400px){.nav-dash{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)!important}}
 @media (min-width:861px){.d-today .g-today.g-skel,.d-today:empty{min-height:90px!important}.d-today .g-today{min-height:90px}}
 
-.nav-seg.has-thumb,.nav-tnav.has-thumb{position:relative}
-@media (max-width:860px){#main .nav-seg.has-thumb,#main .nav-tnav.has-thumb{position:sticky}}
+.nav-seg.has-thumb{position:relative}
+@media (max-width:860px){#main .nav-seg.has-thumb{position:sticky}}
 
 /* ───── phone Today, grouped: what to watch → your day → the month strip → performance + accounts (one card) ───── */
 .nav-strip{display:none}
@@ -1873,7 +1864,6 @@ html body .nav-tr-copy{display:inline-grid!important;place-items:center;min-widt
 
 /* trade page: the sticky Chart / Details / Review / Setup bar is solid and sits under the app header (nothing shows through it);
    its background follows the theme (a fixed dark one made the tabs unreadable in light mode, seen 13 Oct.) */
-@media (max-width:860px){#main .nav-tnav{top:calc(var(--nav-hdr,56px) + 6px)!important;-webkit-backdrop-filter:saturate(180%) blur(24px)!important;backdrop-filter:saturate(180%) blur(24px)!important;}}
 /* news rows: Actual · Forecast · Previous side by side, compact */
 .nav-ev-v3{display:inline-grid!important;grid-auto-flow:column;gap:12px;align-items:end;margin-left:auto;flex-shrink:0}
 .nav-ev-v3 > span{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:38px}
@@ -2249,7 +2239,7 @@ body.nav-few-trades #main .msearch{display:none!important}
 /* #4  a blue fill behind white text or icons is one shade deeper (white on it ≥ 4.6:1); the gains blue of the figures is unchanged.
        Each filled element gets its own --pos, so its rules stay as they are */
 
-.ask-fab-ic,.ask-msg.u>div,.ask-send,.bottomnav .plus,.chip.on,.fb-st.s-shipped,.fbtn b,.g-dots button.on,.g-ob .chip.on,.g-seg3 button.on,.g-seg4 button.on,.g-sheet .chip.on,.g-xpf,.gc-step.done .gc-step-ic,.gm-mrow.done .gm-mic,.gm-node.done .gm-dot,.jstrip a.on,.lg-row b i,.nav-ck-b button.on[data-v=y],.nav-hplus,.nav-po-c li.ok i,.nav-rt-s.done .nav-rt-n,.nt-badge,.onb-steps li.on span,.rf-gift,.rnum.ok,.rprog-steps a.ok span,.sb-pcard .sb-tag,.sc-tool.exit.on,.sc-tool.target.on,.side .new,.ss-col.cur .ss-n,.ux-setup.on,.add-row:hover .add-ic,.chip.on,.chip[aria-pressed=true],.nav-rt .nav-rt-s .nav-rt-sa .btn.primary,.nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary,.nav-rt .nav-rt-sa .btn.primary{--pos:var(--pos-fill)}
+.ask-fab-ic,.ask-msg.u>div,.ask-send,.bottomnav .plus,.chip.on,.fb-st.s-shipped,.fbtn b,.g-dots button.on,.g-ob .chip.on,.g-seg3 button.on,.g-seg4 button.on,.g-sheet .chip.on,.gc-step.done .gc-step-ic,.jstrip a.on,.nav-ck-b button.on[data-v=y],.nav-hplus,.nav-po-c li.ok i,.nav-rt-s.done .nav-rt-n,.nt-badge,.onb-steps li.on span,.rf-gift,.rnum.ok,.rprog-steps a.ok span,.sb-pcard .sb-tag,.sc-tool.exit.on,.sc-tool.target.on,.side .new,.ux-setup.on,.add-row:hover .add-ic,.chip.on,.chip[aria-pressed=true],.nav-rt .nav-rt-s .nav-rt-sa .btn.primary,.nav-rt .nav-rt-s:hover .nav-rt-sa .btn.primary,.nav-rt .nav-rt-sa .btn.primary{--pos:var(--pos-fill)}
 html body .btn.primary,html body .tk-save,html body button.tk-save{background:var(--blue-btn)!important}
 .nav-fd.sel small,.nav-fd.sel .nav-fd-p{opacity:1}
 /* the « Discipline » label of its tile, at full strength (it was faded to 80 %) */
@@ -2514,10 +2504,10 @@ html body #main .nav-mny-g > div{display:flex;flex-direction:column}
 html body #main .nav-mny-g > div > b{margin-top:auto}
 /* the selector that stays at the top while scrolling (Accounts / My money, Trades / Calendar / Journal, a trade's tabs): the
    same look, opaque — the selectors and cards going under it showed through as ghost outlines */
-html body #main .nav-seg.is-stuck,html body #main .nav-tnav.is-stuck{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important;box-shadow:inset 0 0 0 1px var(--hair),0 -6px 0 14px var(--bg)!important}
+html body #main .nav-seg.is-stuck{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important;box-shadow:inset 0 0 0 1px var(--hair),0 -6px 0 14px var(--bg)!important}
 /* phone: opaque all the time, not only once « stuck » is seen (18 Oct., the installed app on iPhone: the class came late or not
    at all and « Accounts / My money » showed the cards through it); at rest the same look, the page's background under it */
-@media (max-width:860px){html body #main .nav-seg,html body #main .nav-tnav{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important;box-shadow:inset 0 0 0 1px var(--hair),0 0 0 10px var(--bg)!important}}   /* (and a 10 px band of the page's colour around it, always: on iPhone « stuck » came late, the cards showed beside and above it, 19 Oct.; at rest it falls on the page's own background) */
+@media (max-width:860px){html body #main .nav-seg{background:linear-gradient(var(--fill),var(--fill)),var(--bg)!important;box-shadow:inset 0 0 0 1px var(--hair),0 0 0 10px var(--bg)!important}}   /* (and a 10 px band of the page's colour around it, always: on iPhone « stuck » came late, the cards showed beside and above it, 19 Oct.; at rest it falls on the page's own background) */
 @media (max-width:860px){
   #main .mfb-row > .mny-tsw .mny-tag{padding:0 7px}
   html body #main .nav-mny-g .mny-tag{padding:0 7px;max-width:100%}
@@ -2556,13 +2546,13 @@ html body .g-arc,html body .g-bar i,html body .nav-rt-lv .fg,html body .nav-rt-b
 html body main.anim .ln.draw,html body main.anim .ring-fg,html body main.anim .pbar i,html body main.anim .dt i{animation-duration:.35s!important;animation-delay:0s!important;animation-timing-function:var(--spring)!important}
 html body main.anim .chart .area,html body main.anim .endpt,html body main.anim .ln.glow,html body main.anim .radar polygon.val,html body main.anim .bt i{animation-duration:.3s!important;animation-delay:.1s!important;animation-timing-function:var(--spring)!important}
 /* the weekly chest and its cards, Wrapped's slides, the game's « pop »: short, on the one curve */
-html body .wk-card .wk-back,html body .wk-card .wk-front,html body .wk-chest .ch-lid,html body .wk-chest .ch-glow,html body .wr-s,html body .gb-hp s{transition-duration:.35s!important}
-html body .wk-items li,html body .lg-row,html body .gc-c2 .gc-pill,html body .ss-cell.flash,html body .g-profile-card,html body .sh-prev,html body .rf-gift,html body .ask-fab,html body .sb-check svg,html body .okmark svg{animation-duration:.32s!important;animation-timing-function:var(--spring)!important}
+html body .wk-card .wk-back,html body .wk-card .wk-front{transition-duration:.35s!important}
+html body .g-profile-card,html body .sh-prev,html body .rf-gift,html body .ask-fab,html body .sb-check svg,html body .okmark svg{animation-duration:.32s!important;animation-timing-function:var(--spring)!important}
 .ask-fab{animation-delay:.2s!important}
 /* decorative loops stop by themselves after 3 rounds (the Sweep AI star, the next mission, the chest, a ready cell, the dot of
    « AI ready ») and Wrapped's moving background plays once; the functional ones stay: loading skeletons, spinners, « Sweep AI is
    typing », the Undo countdown, Wrapped's story bar */
-.ask-fab-ic i,.gm-node.next .gm-dot,.gb-art-w .gb-art,.ss-cell.ready,.air-dot{animation-iteration-count:3!important}
+.air-dot{animation-iteration-count:3!important}
 .wr::before{animation-iteration-count:1!important}
 }
 /* app.css's skeletons breathe in opacity instead of moving their background (a paint every frame) */
@@ -2570,7 +2560,7 @@ html body .wk-items li,html body .lg-row,html body .gc-c2 .gc-pill,html body .ss
 html body .skel,html body .sh-skel{animation-timing-function:var(--spring)!important}
 /* reduced transparency: the glass bars and sheets become opaque */
 @media (prefers-reduced-transparency:reduce){
-  html body .bottomnav,html body .side,html body .main-wrap > .top,html body .evp,html body .nav-dlg,html body #main .nav-tnav,html body .cmd-panel,html body #askFab{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--panel)!important}
+  html body .bottomnav,html body .side,html body .main-wrap > .top,html body .evp,html body .nav-dlg,html body .cmd-panel,html body #askFab{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--panel)!important}
 }
 /* more contrast: stronger lines, the secondary grey as dark as the grey */
 @media (prefers-contrast:more){
@@ -2763,9 +2753,9 @@ body.sw-onb .bottomnav{display:none!important}   /* (27 Oct.) the welcome page: 
   html.pwa body:not(.ux-scrolled) aside.side{background:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-bottom-color:transparent!important}
   html.pwa body .bottomnav{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 8px))!important;margin-bottom:0!important}
   /* what sits above the bar comes down with it (26 px), the same gap as in the browser */
-  html.pwa body .ask-fab,html.pwa body .nav-update,html.pwa body .gm-sumtoast,html.pwa body .acc-bar{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
+  html.pwa body .ask-fab,html.pwa body .nav-update,html.pwa body .acc-bar{bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
   html.pwa body .nav-undo{bottom:calc(66px + env(safe-area-inset-bottom,0px))!important}
-  html.pwa body .g-xpf{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+  
   html.pwa body .sheet-panel{bottom:calc(60px + env(safe-area-inset-bottom,0px))!important}
 
 }
@@ -2934,8 +2924,7 @@ html body.disc-no-money #main .d-pay,html body.disc-no-money a[href="#payouts"]:
 html body.disc-no-money #main .nav-seg:has(a[href="#payouts"]):not(:has(a.on[href="#payouts"])){display:none!important}
 html body.disc-no-ai #askFab,html body.disc-no-ai .nav-ask-side,html body.disc-no-ai .ai-only{display:none!important}
 html body.disc-no-guided [data-pm="mode"][data-v="full"]{display:none!important}
-html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > h4,html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hub,html body.disc-no-game #gSheet.gc-hubsheet .gc-hubwrap > .gc-hubcol{display:none!important}   /* before mission 15: the level and the streak only */
-.nav-disc-hub{display:flex;flex-direction:column;gap:6px;padding:4px 2px 8px}.nav-disc-hub b{font:600 22px var(--font-num,ui-monospace)}.nav-disc-hub p{margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
+.nav-disc-hub{margin:18px 2px 0;font-size:13px;line-height:1.45;color:var(--muted)}
 /* (28 Oct., iOS 27.2 V3) the three figures of the routine read the same: the label on top, the value under it, no coloured fill */
 html body .nav-rt-me .nav-rt-disc,html body .nav-rt-me .nav-rt-streak,html body .nav-rt-me .nav-rt-lv{background:transparent!important;box-shadow:inset 0 0 0 1px var(--line)!important;color:var(--text)!important;flex-direction:column;align-items:center!important;justify-content:center}
 html body .nav-rt-me .nav-rt-streak > span,html body .nav-rt-me .nav-rt-lv > span{display:flex!important;flex-direction:column;align-items:center;gap:0;font-size:inherit}
@@ -3324,7 +3313,7 @@ html body .nav-mny-g > div > b{margin-top:auto!important}
 html body #main svg.chart text{font-size:var(--ax-fs,11px)!important;font-family:"Geist Mono",ui-monospace,monospace!important}
 /* 15 Stats' six small tiles (a computer): each label at the top of its tile, its « i » on the label's last line (centred, « Most active » sat
    high and « Most profitable » lower; the « i » of « Least profitable » alone on a line) */
-html body #main .g-ins .tiles > .it{justify-content:flex-start!important}
+html body #main .g-ins .tiles > .it,html body #main .deep .tiles > .it{justify-content:flex-start!important}
 html body #main .it .lbl .nw{white-space:nowrap!important}
 /* 16 an account's line: its parts side by side, wrapping without a « · » left at a line's end */
 html body .acc-line{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:4px 8px!important}
@@ -3359,7 +3348,7 @@ html body #main .deep table.tbl td:first-child,html body #main .deep table.tbl t
 
 /* (3 Nov., Mateo's iPhone) a sticky segmented control on its own layer: iOS drew the rows scrolling under it (a group's
    « Evaluations · Simulated » on Accounts) over the control */
-@media (max-width:860px){html body #main .nav-seg,html body #main .nav-tnav{-webkit-transform:translateZ(0);transform:translateZ(0)}}
+@media (max-width:860px){html body #main .nav-seg{-webkit-transform:translateZ(0);transform:translateZ(0)}}
 
 /* ───────────── The account guardian (3 Nov., SWEEP.md section 8): on top of Today, its sheet ───────────── */
 .nav-dash .nav-guard{order:-1;margin-bottom:12px;padding:0;overflow:hidden;border-radius:20px}
@@ -3422,3 +3411,50 @@ html body #main .nav-guard > .nav-guard-up{display:inline-flex;align-items:cente
 .nav-guard-pill{position:relative}
 .nav-guard-pill::after{content:"";position:absolute;inset:-6px 0}   /* 34 px, its zone 44 (the row has 5 px above and below) */
 .nav-guard-pills{padding-top:7px;padding-bottom:9px;margin-top:-7px}
+/* (10 Nov., brief « produit final » step 2) the routine's « ? » in its title row when no line sits under the title;
+   on a computer the two columns keep their own height (the performance card was stretched to the accounts' height, empty) */
+html body .nav-rt-tg > .nav-rt-help{flex:none;width:30px;height:30px;min-height:30px;padding:0;border:0;background:none;box-shadow:none;color:var(--muted)}
+@media (min-width:861px){html body .nav-dash{align-items:start!important}html body .nav-dash .d-col > :not([hidden]):last-child{flex:0 0 auto}}
+/* (step 3) phone, a trade's or an account's page: the floating AI button stays away */
+@media (max-width:860px){html body.nav-detail .ask-fab{display:none!important}}
+/* (step 3) the grade under the discipline, its label and its five letters on one line; phone: « Edit trade » in the « ⋯ » menu */
+html body #main .th-head > div:has(> .seg[role=group]){grid-column:1/-1!important;display:flex;align-items:center;gap:12px}
+html body #main .th-head > div:has(> .seg[role=group]) > .lbl{margin:0;flex:none}
+html body #main .th-head > div:has(> .seg[role=group]) > .seg{flex:1 1 auto}
+@media (max-width:860px){html body #main .tr-top > [data-act=edit-trade]{display:none!important}}
+@media (min-width:861px){html body #main .menu-pop > .tr-edit-m{display:none!important}}
+@media (max-width:860px){html body #main .tr-top > .tr-nav{display:none!important}}   /* (step 3) phone: back to the list in one tap, no ‹ › */
+/* (step 1) « My progress »: a badge's name wraps inside its tile (one line ran out of it in the computer's side panel) */
+html body .gc-hubwrap .g-badges{grid-template-columns:repeat(auto-fill,minmax(136px,1fr))}
+/* (step 4) the payout rules folded, their summary on the line */
+html body #main details.nav-po-rules > summary{gap:8px;flex-wrap:wrap}
+html body #main details.nav-po-rules > summary small{font-size:13px;font-weight:400;color:var(--muted)}
+/* (step 4) an account's page: its status no longer repeats the name and the balance of the page's top */
+html body.nav-detail #main .acards .acard > .ac-top,html body.nav-detail #main .acards .acard .ac-bal > span:first-child{display:none!important}
+html body.nav-detail #main .acards .acard .ac-bal .ac-sub{margin-top:0}
+/* (step 4) an account's page: no second equity curve in its status (« Equity » shows it), its 3 last trades (« See its n trades »
+   for all), and no sentence over the payout rules' line when they are not set (their summary says it) */
+html body.nav-detail #main .acards .acard .spark{display:none!important}
+html body.nav-detail #main .tlist > .nav-ra-row:nth-of-type(n+4){display:none!important}
+html body.nav-detail #main .nav-po > .nav-po-none{display:none!important}
+/* (10 Nov., brief « produit final » step 5) Stats: the drawdown and the P&L breakdown side by side, « Patterns to watch » on its
+   own row; the small tiles moved to the « Deep dive » tabs they summed up (day of week, long vs short, behavior) */
+@media (min-width:861px){html body #main .igrid.g-ins{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;align-items:start}html body #main .igrid.g-two{grid-template-columns:minmax(0,1fr)!important}}
+html body #main .deep .tiles.an-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 0 18px}
+/* (step 6) Settings: the AI in one line, its detail behind « Learn more »; the support rows in « About Sweep » */
+html body #main details.ai-more{margin-top:6px}
+html body #main details.ai-more > summary{list-style:none;cursor:pointer;color:var(--pos);font-size:14px;font-weight:500;min-height:32px;display:flex;align-items:center}
+html body #main details.ai-more > summary::-webkit-details-marker{display:none}
+html body #main .about .nav-about-rows{margin-top:12px}
+/* (step 6) Settings: the five groups' rows a little shorter; « Language » and its picker under « Theme » */
+html body #main .nav-sgd>summary{min-height:52px!important;padding-top:4px!important;padding-bottom:4px!important}
+html body #main select[data-act-change="lang"]{margin-left:0}
+html body #main span:has(+ select[data-act-change="lang"]){margin-left:0!important}
+@media (max-width:600px){html body #main span:has(+ select[data-act-change="lang"]){flex:1 1 auto;margin-top:8px!important}html body #main select[data-act-change="lang"]{margin-top:8px}}   /* « Language » and its picker on one line */
+html body #main .about .legal{gap:4px 16px!important;margin-bottom:6px}
+html body #main .about .legal a{font-size:14px}
+html body #main .about .disclaimer{font-size:12px;line-height:1.45;margin-top:10px}
+html body #main .about .nav-about-rows{margin-top:6px}
+html body #main .about .sc-legal{margin:8px 0 0;text-align:left}
+html body #main .about .surface > .nav-ver{margin:6px 0 0}
+@media (max-width:600px){html body .nav-rt-tg > .nav-rt-fold{width:30px!important;min-width:30px!important}html body .nav-rt-tg > .nav-rt-help{width:28px}}   /* « Your routine today » whole, with its « ? » */

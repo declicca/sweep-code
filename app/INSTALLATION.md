@@ -23,7 +23,6 @@ Version complète de l'app au 3 octobre 2026. Ce zip **ne contient jamais** `con
 | `billing-config.php` | — (déjà en place) | Stripe, forfaits, essai 60 jours, bonus de campagne (`campaign_grants`) | Oui |
 | `chart-config.php` | `chart/chart-config.sample.php` | Clé Databento, budget quotidien, délai de 24 h | Oui (graphiques) |
 | `backup-config.php` | `ops/backup-config.sample.php` | Phrase de passe des sauvegardes, copie hors serveur S3 | **Oui** |
-| `discord-config.php` | `game/discord-config.sample.php` | Bot des rangs Discord | Non |
 
 ⚠️ La phrase de passe des sauvegardes doit aussi être gardée **hors du serveur** (gestionnaire de mots de passe).
 

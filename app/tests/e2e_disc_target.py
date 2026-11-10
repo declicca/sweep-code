@@ -38,9 +38,9 @@ with sync_playwright() as p:
     pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#dashboard'); pg.wait_for_timeout(3000)
     pg.evaluate(SEED); pg.wait_for_timeout(1800)
-    pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main .nav-rt-sum', timeout=10000); pg.wait_for_timeout(1500)
+    pg.evaluate("location.hash = '#dashboard'; render()"); pg.wait_for_selector('#main section.nav-rt:not(.ph)', timeout=10000); pg.wait_for_timeout(1500)
     # (31 Oct., C5) the Discipline tile left Today: the routine has one line « Level … · … complete days › » instead of its pills
-    ok(pg.locator('#main .nav-rt-disc').count() == 0 and pg.locator('#main .nav-rt-sum').count() == 1, f'{tag} R10 no Discipline tile on Today, one line under the routine\'s title (tour of 31 Oct., C5)')
+    ok(pg.locator('#main .nav-rt-disc').count() == 0 and pg.locator('#main .nav-rt-sum').count() <= 1, f'{tag} R10 no Discipline tile on Today, at most one line under the routine\'s title (tour of 31 Oct., C5; 10 Nov.: no level, the line comes with a streak)')
     want = pg.evaluate("(o) => o.replace('{a}', moneyU(130000)).replace('{b}', moneyU(300000)).replace('{m}', moneyU(330000))", x['obj'])
     got = pg.evaluate("(document.querySelector('#main .d-acc .nav-acc-dd small') || {}).textContent || ''")
     ok(got == want, f'{tag} R11 the Accounts card: « {got} » (want « {want} »)')

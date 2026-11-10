@@ -13,15 +13,15 @@
   const S_ = {
     en: { adv: 'Advanced options', contract_lbl: 'Contract month', contract_help: 'Only if you traded another month than the main contract (e.g. around a rollover). Sweep then loads that exact contract\'s chart.', contract_bad: 'Format: root + month + year, e.g. NQZ6', snap: 'Snap', hint: 'Tap a candle: {tool}', too_recent_tk: 'The chart for this date will be ready {date}. The form works as usual.', pending: "This trade's chart will be ready {date}. We'll add it to your recap automatically.", unsupported: 'Chart not available yet for this instrument.',
       soon: 'Chart available soon.', far: "This trade's prices are far from the market that day: check the instrument, date or prices.", mismatch: "This price doesn't match that candle. Check the time or price.", save: 'Save image', saved: 'Chart added to your screenshots',
-      source: '{contract} · CME data', full: 'Full screen', close: 'Close', entry: 'Entry', exit: 'Exit', stop: 'Stop', target: 'Target', pts: 'pts', recenter: 'Double-tap to recenter',
+      source: '{contract} · CME data', full: 'Full screen', tf: 'Timeframe', close: 'Close', entry: 'Entry', exit: 'Exit', stop: 'Stop', target: 'Target', pts: 'pts', recenter: 'Double-tap to recenter',
       legal: 'Charts by TradingView Lightweight Charts™ (Apache 2.0) · tradingview.com' },
     fr: { adv: 'Options avancées', contract_lbl: 'Mois du contrat', contract_help: 'Seulement si tu as tradé un autre mois que le contrat principal (par exemple autour d’un rollover). Sweep charge alors le graphique de ce contrat précis.', contract_bad: 'Format : racine + mois + année, ex. NQZ6', snap: 'Aimanter', hint: 'Touche une bougie : {tool}', too_recent_tk: 'Le graphique de cette date sera disponible {date}. Le formulaire fonctionne normalement.', pending: "Le graphique de ce trade sera disponible {date}. On l'ajoutera automatiquement à ton récap.", unsupported: 'Graphique pas encore disponible pour cet instrument.',
       soon: 'Graphique disponible bientôt.', far: "Les prix de ce trade sont loin du marché ce jour-là : vérifie l'instrument, la date ou les prix.", mismatch: "Le prix ne correspond pas à cette bougie, vérifie l'heure ou le prix.", save: "Enregistrer l'image", saved: 'Graphique ajouté à tes captures',
-      source: '{contract} · données CME', full: 'Plein écran', close: 'Fermer', entry: 'Entrée', exit: 'Sortie', stop: 'Stop', target: 'Objectif', pts: 'pts', recenter: 'Double-tap pour recentrer',
+      source: '{contract} · données CME', full: 'Plein écran', tf: 'Unité de temps', close: 'Fermer', entry: 'Entrée', exit: 'Sortie', stop: 'Stop', target: 'Objectif', pts: 'pts', recenter: 'Double-tap pour recentrer',
       legal: 'Graphiques : TradingView Lightweight Charts™ (Apache 2.0) · tradingview.com' },
     es: { adv: 'Opciones avanzadas', contract_lbl: 'Mes del contrato', contract_help: 'Solo si operaste otro mes distinto del contrato principal (por ejemplo, cerca de un rollover). Sweep carga entonces el gráfico de ese contrato exacto.', contract_bad: 'Formato: raíz + mes + año, p. ej. NQZ6', snap: 'Imantar', hint: 'Toca una vela: {tool}', too_recent_tk: 'El gráfico de esta fecha estará listo {date}. El formulario funciona normalmente.', pending: 'El gráfico de este trade estará listo {date}. Lo añadiremos automáticamente a tu resumen.', unsupported: 'Gráfico aún no disponible para este instrumento.',
       soon: 'Gráfico disponible pronto.', far: 'Los precios de este trade están lejos del mercado ese día: revisa el instrumento, la fecha o los precios.', mismatch: 'El precio no coincide con esa vela. Revisa la hora o el precio.', save: 'Guardar imagen', saved: 'Gráfico añadido a tus capturas',
-      source: '{contract} · datos CME', full: 'Pantalla completa', close: 'Cerrar', entry: 'Entrada', exit: 'Salida', stop: 'Stop', target: 'Objetivo', pts: 'pts', recenter: 'Doble toque para recentrar',
+      source: '{contract} · datos CME', full: 'Pantalla completa', tf: 'Temporalidad', close: 'Cerrar', entry: 'Entrada', exit: 'Salida', stop: 'Stop', target: 'Objetivo', pts: 'pts', recenter: 'Doble toque para recentrar',
       legal: 'Gráficos: TradingView Lightweight Charts™ (Apache 2.0) · tradingview.com' },
   };
   const t = (k, p) => { let s = (S_[LANG] || S_.en)[k] || S_.en[k] || k; if (p) s = s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)); return s; };
@@ -153,7 +153,9 @@
   function shell(e, tf, durOk) {
     const tfs = TFS.filter(([k, s]) => s >= 60 || durOk);
     return `<div class="tk-bar sc-bar" data-noi18n><b>${esc(e.instrument || 'NQ')}</b><span class="muted">· ${fdate(e.date, { weekday: 'short', month: 'short', day: 'numeric' })}</span><span style="flex:1"></span>
-      <div class="seg sc-tfs">${tfs.map(([k]) => `<button type="button" data-sc-tf="${k}" class="${k === tf ? 'on' : ''}">${k}</button>`).join('')}</div>
+      ${window.SW_MQ && window.SW_MQ.matches   // (10 Nov., brief « produit final » step 3) phone: the timeframe is one pill, not six buttons
+        ? `<label class="sc-tfs sc-tfsel"><select data-sc-tf-sel aria-label="${t('tf')}">${tfs.map(([k]) => `<option value="${k}"${k === tf ? ' selected' : ''}>${k}</option>`).join('')}</select></label>`
+        : `<div class="seg sc-tfs">${tfs.map(([k]) => `<button type="button" data-sc-tf="${k}" class="${k === tf ? 'on' : ''}">${k}</button>`).join('')}</div>`}
       <button type="button" class="sc-ic" data-sc="full" aria-label="${t('full')}" title="${t('full')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
       <div class="sc-box"><div class="sc-chart" id="scChart"><div class="sc-skel"></div></div></div>
       <div class="sc-foot" data-noi18n><span class="sc-src"></span><span class="sc-warn"></span><span style="flex:1"></span><button type="button" class="link sc-save" data-sc="save" hidden>${t('save')}</button></div>`;
@@ -199,6 +201,7 @@
       return;
     }
     wrap.querySelectorAll('[data-sc-tf]').forEach((b) => b.classList.toggle('on', b.dataset.scTf === r.tf));
+    const tsel = wrap.querySelector('[data-sc-tf-sel]'); if (tsel && r.tf) tsel.value = r.tf;
     let L;
     try { L = await lwc(); } catch (x) { box.innerHTML = `<div class="sc-card"><p>${esc(t('soon'))}</p></div>`; return; }
     draw(L, box, wrap, e, r, ex);
@@ -293,6 +296,12 @@
   }
 
   /* ───────────── controls ───────────── */
+  document.addEventListener('change', (ev) => {
+    const sel = ev.target.closest && ev.target.closest('[data-sc-tf-sel]'); if (!sel) return;
+    const wrap = sel.closest('.sc-wrap'); if (!wrap) return;
+    const id = wrap.dataset.trade, e = typeof getDoc === 'function' ? getDoc('trades', id) : null;
+    pick[id] = sel.value; if (e) tradeChartMount(e);
+  });
   document.addEventListener('click', async (ev) => {
     const b = ev.target.closest && ev.target.closest('[data-sc-tf],[data-sc]');
     if (!b) return;
@@ -674,7 +683,7 @@
         }
         if (route().v === 'settings') {
           const main = document.getElementById('main');
-          if (main && !main.querySelector('.sc-legal')) { const p = document.createElement('p'); p.className = 'sc-legal'; p.setAttribute('data-noi18n', ''); p.innerHTML = `${esc(t('legal')).replace('tradingview.com', '<a href="https://www.tradingview.com/" target="_blank" rel="noopener">tradingview.com</a>')}`; main.append(p); }
+          if (main && !main.querySelector('.sc-legal')) { const p = document.createElement('p'); p.className = 'sc-legal'; p.setAttribute('data-noi18n', ''); p.innerHTML = `${esc(t('legal')).replace('tradingview.com', '<a href="https://www.tradingview.com/" target="_blank" rel="noopener">tradingview.com</a>')}`; (main.querySelector('section.about .surface') || main).append(p); }
         }
       } catch (x) { /* never blocks */ }
       return out;

@@ -51,7 +51,8 @@ with sync_playwright() as p:
     rt = pg.evaluate("(document.querySelector('#main .nav-rt') || {}).innerText || ''")
     ok(x['one'] in rt, f'B4 {tag}: Today « {x["one"]} »')
     # C5
-    ok(pg.evaluate(VIS, '#main .nav-rt .nav-rt-disc, #main .nav-rt .nav-rt-streak, #main .nav-rt .nav-rt-lv') == 0 and x['lv'] in pg.evaluate("(document.querySelector('#main .nav-rt-sum') || {}).textContent || ''"), f'C5 {tag}: one line « {x["lv"]} … › », no pills')
+    # (10 Nov., brief « produit final » step 1: no level any more; the line under the title is the streak of complete days)
+    ok(pg.evaluate(VIS, '#main .nav-rt .nav-rt-disc, #main .nav-rt .nav-rt-streak, #main .nav-rt .nav-rt-lv') == 0 and x['lv'] not in pg.evaluate("(document.querySelector('#main .nav-rt') || {}).innerText || ''"), f'C5 {tag}: no « {x["lv"]} », no pills')
     ok(pg.evaluate(VIS, '#main .nav-rt [data-rt=fin]') == 0, f'C5 {tag}: no « done for today » link before « Now » says stop')
     # B2, B5
     ok(pg.evaluate(VIS, '#main .mny-tag.perf') == 0, f'B2 {tag}: no « Performance » pill')
@@ -67,7 +68,7 @@ with sync_playwright() as p:
     pg.evaluate("location.hash = '#account/nv-a'"); pg.wait_for_timeout(2500)
     rows = pg.evaluate("[...document.querySelectorAll('#main .trow, #main tr[data-href^=\"#trade/\"]')].filter((e) => e.getClientRects().length).length")
     more = pg.evaluate("(document.querySelector('#main .acct-all-tr') || {}).textContent || ''")
-    ok(rows == 5 and more == x['all'], f'A4 {tag}: 5 trades, then « {more} » ({rows})')
+    ok(rows == (3 if phone else 5) and more == x['all'], f'A4 {tag}: 5 trades (3 on the phone, 10 Nov.), then « {more} » ({rows})')
     if phone:
       line = pg.evaluate("(document.querySelector('#main .trow small') || {}).textContent || ''")
       ok(line.endswith('10:20 · Liquidity sweep'), f'A4 {tag}: the line: date, time, setup ({line!r})')

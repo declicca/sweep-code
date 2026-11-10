@@ -117,3 +117,11 @@ La suite qui protège est celle de `tests/run-all.sh` (liste `CORE`), plus `ops/
 - `e2e_weekly_recap_questions`
 - `e2e_what_now_batch1`
 - `e2e_what_now_batch2`
+
+# Retirés le 10 novembre 2026 (brief « produit final », étape 1)
+
+Le Mois en revue (Wrapped), le partage de la semaine et les autres fonctions du jeu peu utilisées (saisons, ligues, crews et buddy, boss, coffre, Edge Reveal, thèmes d'anneaux, son, Discord, profil public) ont été retirés de l'app. Leurs tests partent avec eux :
+
+- `month_review_test.php`
+- `e2e_month_review`
+- `e2e_weekly_share`

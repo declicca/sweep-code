@@ -90,10 +90,7 @@ to{opacity:1;transform:none}
 0%{opacity:0;transform:translateY(16px) scale(.98)}
 to{opacity:1;transform:none}
 }
-@keyframes toastIn{
-0%{opacity:0;transform:translate(-50%,10px) scale(.96)}
-to{opacity:1;transform:translate(-50%,0)}
-}
+
 @keyframes popIn{
 0%{opacity:0;transform:scale(.6)}
 to{opacity:1;transform:none}
@@ -105,10 +102,7 @@ to{stroke-dashoffset:0}
 0%{opacity:.3;transform:scale(.8)}
 to{opacity:1;transform:scale(1.15)}
 }
-@keyframes twinkle{
-0%,to{transform:scale(1) rotate(0)}
-50%{transform:scale(1.18) rotate(20deg)}
-}
+
 @keyframes askIn{
 0%{opacity:0;transform:translateY(14px) scale(.9)}
 to{opacity:1;transform:none}
@@ -1576,7 +1570,7 @@ body.ask-open .ask-fab,body.evp-lock .ask-fab{opacity:0;pointer-events:none;tran
 .ask-fab-ic{position:relative;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--pos);color:var(--btntext)}
 .ask-fab-ic svg{height:22px;width:auto;color:var(--btntext)}
 .ask-fab-ic svg line:last-child{stroke:var(--btntext);opacity:.65}
-.ask-fab-ic i{position:absolute;top:-3px;right:-4px;font-style:normal;font-size:12px;color:var(--pos);background:var(--panel);border-radius:50%;width:17px;height:17px;display:grid;place-items:center;box-shadow:0 0 0 1px var(--line2);animation:twinkle 2.6s var(--spring) infinite}
+.ask-fab-ic i{position:absolute;top:-3px;right:-4px;font-style:normal;font-size:12px;color:var(--pos);background:var(--panel);border-radius:50%;width:17px;height:17px;display:grid;place-items:center;box-shadow:0 0 0 1px var(--line2)}
 @media (max-width:860px){
 .ask-fab{padding:6px;gap:0}
 .ask-fab-l{display:none}
@@ -1740,7 +1734,7 @@ body.ask-on main{padding-bottom:calc(150px + env(safe-area-inset-bottom,0))}
 .sh-acts .sh-go{grid-column:1/-1;min-height:50px;font-size:16px;gap:9px}
 .sh-acts .sh-go svg{width:19px;height:19px}
 .sh-acts .btn,.sh-acts .sh-go{justify-content:center}
-.confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:200}
+
 html .sb-badge,html .sb-banner,html .sb-layer,html .sb-lockover,html .sb-nudge,html .sb-plans,html [data-noi18n].plan-root{--sb-bg:var(--panel);--sb-surface:var(--panel2);--sb-surface-2:var(--hover);--sb-text:var(--text);--sb-muted:var(--muted);--sb-line:var(--line);--sb-accent:var(--pos);--sb-accent-ink:var(--btntext);--sb-gold:var(--neg);--sb-gold-bg:var(--negbg);--sb-warn:var(--neg);--sb-scrim:rgba(0,0,0,.55);--sb-radius:20px;--sb-font:var(--font-ui)}
 html .sb-layer .sb-sheet{transition:transform var(--dur-sheet) var(--ease-ios)!important}
 .bill-banner:empty{display:none}
@@ -2069,7 +2063,7 @@ html:not(.tr-uncompact) body #main .tr-chart .sc-box,html:not(.tr-uncompact) bod
 html:not(.tr-uncompact) body #main .facts .fx-dup{display:none!important}
 html:not(.tr-uncompact) body #main .rprog:not(:has(> * > *)){display:none!important}
 html:not(.tr-uncompact) body #main > .surface{margin-top:14px!important}
-html:not(.tr-uncompact) body #main > .tr-top,html:not(.tr-uncompact) body #main > .nav-tnav{margin-bottom:8px!important}
+html:not(.tr-uncompact) body #main > .tr-top{margin-bottom:8px!important}
 html:not(.tr-uncompact) body #main .co .co-q:has(> .seg){display:flex!important;flex-direction:row!important;align-items:center;justify-content:space-between;gap:10px}
 html:not(.tr-uncompact) body #main .co .co-q:has(> .seg) > .seg{flex:none;margin:0!important}
 html:not(.tr-uncompact) body #main .th-head{padding-bottom:6px!important;row-gap:8px!important}

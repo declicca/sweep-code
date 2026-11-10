@@ -30,9 +30,11 @@ with sync_playwright() as p:
     pg = c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
     pg.goto(B + '/#dashboard'); pg.wait_for_timeout(2600)
     now, mny = pg.evaluate(FS, '#main .nav-now-l:not(.nav-now-cnt) .nav-now-v'), pg.evaluate(FS, '#main .d-money .nav-mny-big')
-    ok(now == (30 if phone else 36), f'{tag} Today: « Now »\'s figure at {now} px')
+    # (10 Nov.) the sample data are drawn at random: their day may be closed at its limit (« Day closed » in place of « Now »)
+    locked = pg.evaluate("!!document.querySelector('#main .nav-lockd')")
+    ok(locked or now == (30 if phone else 36), f'{tag} Today: « Now »\'s figure at {now} px' + (' (the sample day is closed at its limit: no « Now »)' if locked else ''))
     ok(mny == (34 if phone else 40), f'{tag} My money\'s real net at {mny} px')
-    for sel, box in (('#main .nav-now-l:not(.nav-now-cnt) .nav-now-v', '.nav-now'), ('#main .d-money .nav-mny-big', '.d-money')):
+    for sel, box in ((() if locked else (('#main .nav-now-l:not(.nav-now-cnt) .nav-now-v', '.nav-now'),)) + (('#main .d-money .nav-mny-big', '.d-money'),)):
       pg.evaluate("([s, t]) => { document.querySelector(s).textContent = t }", [sel, BIG]); pg.wait_for_timeout(900)
       r = pg.evaluate(INSIDE, [sel, box])
       ok(r and r['fits'] and not r['cut'], f'{tag} 7 digits in {sel.split(" ")[-1]}: shrunk inside its card ({r})')

@@ -60,9 +60,10 @@ async def main():
     ok(await pg.locator('.nav-pass.open').count() == 0, '« Pas encore »: not asked again today')
     # the account page button
     await pg.evaluate(f"location.hash='#account/{ev['id']}'"); await pg.wait_for_timeout(1500)
-    row = await pg.evaluate("(document.querySelector('#main .nav-pass-row')||{innerText:''}).innerText.replace(/\\n/g,' ')")
-    ok('Passer en financé' in row, f'the account page offers « Passer en financé » ({row})')
-    await pg.locator('#main [data-pass-btn]').click(); await pg.wait_for_timeout(700)
+    # (10 Nov., brief « produit final » step 4) « Passer en financé » is in the page's « ⋯ » menu
+    row = await pg.evaluate("(() => { const d = document.querySelector('#main details.menu'); if (d) d.open = true; return (document.querySelector('#main details.menu [data-pass-btn]')||{innerText:''}).innerText.replace(/\\n/g,' ') })()")
+    ok('Passer en financé' in row, f'the account page offers « Passer en financé » in « ⋯ » ({row})')
+    await pg.locator('#main details.menu [data-pass-btn]').click(); await pg.wait_for_timeout(700)
     await pg.locator("[data-pass-go]").first.click(); await pg.wait_for_timeout(2000)   # Topstep asks Standard / Consistency: Standard (the default)
     r=await pg.evaluate(f"(()=>{{const o=getDoc('accounts','{ev['id']}'), n=S.accounts.find(x=>x.from_eval==='{ev['id']}'); return {{old:{{status:o.status,result:o.result,funded_id:o.funded_id}}, new:n?{{name:n.name,phase:n.phase,preset:n.preset,target:n.rules.target_c,win:n.rules.payout_win_days,win_min:n.rules.payout_win_min_c,bal:n.starting_balance_c}}:null, page:location.hash}}}})()")
     o, n = r['old'], r['new']

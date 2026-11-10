@@ -76,6 +76,18 @@ window.SweepMO = window.SweepMO || class {
   /* ───────────── segmented controls + back chevron (drawn with each page) ───────────── */
   function chrome() {
     const v = route().v, main = document.getElementById('main'); if (!main) return;
+    // (10 Nov., brief « produit final » step 3) a trade's or an account's page: no floating AI button on a phone (it covered the
+    // cards); the AI stays in the search and the « ⋯ » menu
+    document.body.classList.toggle('nav-detail', v === 'trade' || v === 'account');
+    if ((v === 'trade' || v === 'account') && document.body.classList.contains('ask-on') && typeof askToggle === 'function') {
+      const pop = main.querySelector('details.menu > .menu-pop');
+      if (pop && !pop.querySelector('.nav-ask-m')) {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'nav-ask-m'; b.setAttribute('data-noi18n', '');
+        b.textContent = ({ en: 'Ask Sweep AI', fr: 'Demander à Sweep AI', es: 'Preguntar a Sweep AI' })[LANG] || 'Ask Sweep AI';
+        b.addEventListener('click', () => { const d = b.closest('details'); if (d) d.open = false; askToggle(true); });
+        pop.prepend(b);
+      }
+    }
     const g = GROUP[v];
     if (g && !main.querySelector('.nav-seg')) {
       const el = document.createElement('div'); el.className = 'seg nav-seg'; el.setAttribute('role', 'tablist'); el.setAttribute('data-noi18n', '');
@@ -86,9 +98,6 @@ window.SweepMO = window.SweepMO || class {
     // (2 Nov., audit « transfuge » G2) one name for the action, everywhere: « Add a trade » (it was « New trade » here)
     const NA = { en: 'Add a trade', fr: 'Ajouter un trade', es: 'Añadir una operación' }, na = NA[LANG] || NA.en;
     document.querySelectorAll('aside.side .new, #bottomnav .plus').forEach((b) => { b.title = NT[LANG] || NT.en; b.setAttribute('aria-keyshortcuts', 'N'); b.setAttribute('aria-label', na); if (b.dataset.label) b.dataset.label = na; const l = b.querySelector('.lbl'); if (l && l.textContent !== na) { l.setAttribute('data-noi18n', ''); l.textContent = na; } });
-    // the reward dot pulses once per visit, then stays still (the avatar is redrawn on every render)
-    const dot = rewardWaiting(); document.querySelectorAll('aside.side .who').forEach((w) => { w.classList.toggle('nav-dot', dot); w.classList.toggle('nav-dot-still', dot && dotPulsed); });
-    if (dot && !dotPulsed) setTimeout(() => { dotPulsed = true; }, 3800);
     const p = PARENT[v];
     if (p && !main.querySelector('.nav-back') && !main.querySelector('.crumbs, .bc, .back-link')) {
       const has = [...main.querySelectorAll('a')].slice(0, 6).some((a) => /^\s*[‹<]/.test(a.textContent) || a.classList.contains('crumb'));
@@ -178,7 +187,7 @@ window.SweepMO = window.SweepMO || class {
     }
     if (e.target.closest && e.target.closest('#navMenu [data-act="logout"]')) closeMenu(true);
   });
-  let lastTrigger = null, trapped = null, kbdUser = false, dotPulsed = false;
+  let lastTrigger = null, trapped = null, kbdUser = false;
   addEventListener('keydown', (e) => { if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ' || String(e.key || '').startsWith('Arrow')) kbdUser = true; }, true);   // (a browser's autofill sends keydown without a key: Admin › Errors, 13 and 8 Oct.)
   addEventListener('pointerdown', () => { kbdUser = false; }, true);
   document.addEventListener('focusin', (e) => { const top = [...document.querySelectorAll(OVERLAYS)].pop(); if (!top) lastTrigger = e.target; });
@@ -252,19 +261,15 @@ window.SweepMO = window.SweepMO || class {
 
   /* ───────────── search also finds every feature and setting (labels follow the glossary, keywords in EN/FR/ES) ───────────── */
   const FIND = [
-    { l: { en: 'My progress', fr: 'Ma progression', es: 'Mi progreso' }, k: 'progression progress progreso rang rank rango streak racha xp niveau level nivel', go: () => SweepGame.open('hub') },
-    { l: { en: 'Weekly challenges', fr: 'Défis de la semaine', es: 'Retos de la semana' }, k: 'challenges defis retos missions misiones mission boss jefe', go: () => SweepGame.open('missions') },
+    { l: { en: 'My progress', fr: 'Ma progression', es: 'Mi progreso' }, k: 'progression progress progreso rang rank rango streak racha', go: () => SweepGame.open('hub') },
     // (29 Oct., searches that found nothing in Admin: « routine », « coach », « appeareance », « how to insert my setups »)
     { l: { en: 'My routine (checklist, setups, risk rules)', fr: 'Ma routine (checklist, setups, règles de risque)', es: 'Mi rutina (checklist, setups, reglas de riesgo)' }, k: 'routine rutina checklist setup setups insert inserer insertar ajouter add anadir create creer crear regles rules reglas risque risk riesgo parcours gameplan verrouillage lock bloqueo discipline disciplina', go: () => { try { const o = new Set(JSON.parse(sessionStorage.getItem('sw.sgd') || '[0]')); o.add(1); sessionStorage.setItem('sw.sgd', JSON.stringify([...o])); } catch (e) { /* private mode */ } location.hash = '#settings'; } },
     { l: { en: 'Your coach', fr: 'Ton coach', es: 'Tu coach' }, k: 'coach coaching entraineur entrenador conseil conseils advice consejo consejos lecon lesson leccion', go: '#dashboard' },
     { l: { en: 'Appearance (theme, language)', fr: 'Apparence (thème, langue)', es: 'Apariencia (tema, idioma)' }, k: 'appearance appeareance apearance apparence apariencia theme tema sombre dark clair light oscuro claro mode langue language idioma', go: '#settings' },
-    { l: { en: 'Season pass', fr: 'Pass de saison', es: 'Pase de temporada' }, k: 'season saison temporada palier tier nivel chapitre chapter capitulo parcours journey', go: () => SweepGame.open('season') },
-    { l: { en: 'Weekly league', fr: 'Ligue hebdomadaire', es: 'Liga semanal' }, k: 'league ligue liga classement ranking clasificacion', go: () => SweepGame.open('league') },
-    { l: { en: 'Crew & buddy', fr: 'Crew et buddy', es: 'Crew y buddy' }, k: 'crew buddy equipe equipo ami amigo friend', go: () => SweepGame.open('social') },
-    { l: { en: 'Weekly recap', fr: 'Bilan de la semaine', es: 'Resumen semanal' }, k: 'weekly recap bilan semaine resumen semanal coffre chest cofre edge reveal', go: () => SweepGame.open('weekly') },
+    { l: { en: 'Weekly recap', fr: 'Bilan de la semaine', es: 'Resumen semanal' }, k: 'weekly recap bilan semaine resumen semanal', go: () => SweepGame.open('weekly') },
     { l: { en: 'Plan of the day', fr: 'Plan du jour', es: 'Plan del día' }, k: 'plan du jour plan of the day plan del dia biais bias sesgo', go: () => SweepGame.open('plan') },
     { l: { en: 'Daily review', fr: 'Revue du jour', es: 'Revisión del día' }, k: 'daily review revue du jour revision del dia', go: () => SweepGame.open('review') },
-    { l: { en: 'Badges & ring themes', fr: 'Badges et thèmes d’anneaux', es: 'Insignias y temas' }, k: 'badge badges insignia insignias themes theme themes temas tema collection coleccion anneaux rings anillos', go: () => SweepGame.open('hub') },
+    { l: { en: 'Badges', fr: 'Badges', es: 'Insignias' }, k: 'badge badges insignia insignias collection coleccion', go: () => SweepGame.open('hub') },
     { l: { en: 'Subscription', fr: 'Abonnement', es: 'Suscripción' }, k: 'subscription abonnement suscripcion forfait billing facturation facturacion pro elite upgrade', go: '#plan' },
     { l: { en: 'Export all my data (ZIP)', fr: 'Exporter toutes mes données (ZIP)', es: 'Exportar todos mis datos (ZIP)' }, k: 'export exporter exportar zip donnees data datos sauvegarde backup', go: '#settings' },
     { l: { en: 'Import trades (Tradovate, Rithmic, TopstepX)', fr: 'Importer des trades (Tradovate, Rithmic, TopstepX)', es: 'Importar operaciones (Tradovate, Rithmic, TopstepX)' }, k: 'import importer importar csv tradovate rithmic topstepx topstep', go: '#import' },
@@ -282,6 +287,7 @@ window.SweepMO = window.SweepMO || class {
     { l: { en: 'Settings', fr: 'Réglages', es: 'Ajustes' }, k: 'settings reglages ajustes parametres preferences', go: '#settings' },
     { l: { en: 'Notifications', fr: 'Notifications', es: 'Notificaciones' }, k: 'notifications notificaciones rappels reminders recordatorios', go: '#settings' },
     { l: { en: 'Help', fr: 'Aide', es: 'Ayuda' }, k: 'help aide ayuda guide guia comment how como', go: () => window.SweepGuide && SweepGuide.open() },
+    { l: { en: 'Sweep AI', fr: 'Sweep AI', es: 'Sweep AI' }, k: 'ai ia sweep assistant ask demander preguntar question pregunta', go: () => typeof askToggle === 'function' && askToggle(true), when: () => document.body.classList.contains('ask-on') },
   ];
   function askWith(q) {
     if (typeof askToggle !== 'function') return;
@@ -307,6 +313,7 @@ window.SweepMO = window.SweepMO || class {
     // a question with no word left to search (« how to », « comment ») : the help, never nothing
     if (!ts.length && /^(how|comment|como|why|pourquoi|por que|what|quoi|que)\b/.test(s)) { const h = FIND.find((f) => /^help\b/i.test(f.l.en)); if (h) return [{ sc: 1, kind: 'page', t: h.l[LANG] || h.l.en, run: h.go }]; }
     FIND.forEach((f, i) => {
+      if (f.when && !f.when()) return;
       const words = (norm(f.l[LANG] || f.l.en) + ' ' + norm(f.k)).split(/[^a-z0-9]+/);
       let sc = ts.filter((t) => words.some((w) => fits(t, w))).length;
       if (norm(f.l[LANG] || f.l.en).includes(s)) sc += 3;
@@ -565,21 +572,6 @@ window.SweepMO = window.SweepMO || class {
     const tl = card.querySelector('.nav-kpi-t'); if (tl) tl.innerHTML = tradesHtml(b.dataset.kt);
     DESK_TAB = b.dataset.kt; const nc = document.querySelector('#main .d-news'); if (nc) nc.outerHTML = newsCard();   // Day → the day's releases, Week → the whole week
   });
-  const progSeen = () => { try { return localStorage.getItem('sw.progSeen') || ''; } catch (e) { return ''; } };
-  function rewardWaiting() { const n = window.SweepGame && SweepGame.next && SweepGame.next(); return !!(n && n.dot && n.sig !== progSeen()); }
-  function markProgSeen() {
-    const n = window.SweepGame && SweepGame.next && SweepGame.next();
-    try { if (n && n.sig) localStorage.setItem('sw.progSeen', n.sig); } catch (e) { /* private mode */ }
-    document.querySelectorAll('.nav-dot').forEach((e) => e.classList.remove('nav-dot'));
-  }
-  document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-nav="progress"], [data-navm="prog"], [data-g="hub"]')) markProgSeen(); }, true);
-  function rankCard() {
-    const p = window.SweepGame && SweepGame.summary && SweepGame.summary(); if (!p) return '';
-    const nx = SweepGame.next && SweepGame.next();
-    const SL = { en: 'Streak {n} days · best {b}', fr: 'Streak {n} jours · record {b}', es: 'Racha {n} días · récord {b}' };
-    const line = nx && nx.text ? nx.text : (SL[LANG] || SL.en).replace('{n}', p.streak).replace('{b}', p.best);
-    return `<button type="button" class="surface nav-rank ${rewardWaiting() ? 'nav-dot' + (dotPulsed ? ' nav-dot-still' : '') : ''}" data-nav="progress" data-noi18n><span class="nav-rank-ic">${IC.prog}</span><span class="nav-rank-t"><b>${esc(p.rank)} · ${esc(SweepGame.t ? SweepGame.t('lvl', { n: p.level }) : 'Lv ' + p.level)}</b><small>${esc(line)}</small></span>${IC.back.replace('M15 6l-6 6 6 6', 'M9 6l6 6-6 6')}</button>`;
-  }
   const report = (msg) => { try { fetch('api/client-error', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, body: JSON.stringify({ msg, page: '#dashboard', src: 'nav.js' }) }).catch(() => {}); } catch (e) { /* offline */ } };
   let reported = false;
   // a suggested question is sent as soon as it is tapped (no « Ask » needed); keeping the focus avoids the keyboard closing and moving the button under the finger
@@ -598,7 +590,7 @@ window.SweepMO = window.SweepMO || class {
   const running = () => (S.accounts || []).some((a) => !a.demo && a.status !== 'archived' && a.status !== 'closed' && Array.isArray(a.adjustments) && a.adjustments.some((x) => +x.amount_c));
   // (SWEEP.md step 3: the accounts from the first one — their room is the risk allowed; « This month », the news card, the trends
   // and the rank left Today: Trades › Calendar, the « Now » line, Stats, the routine's level)
-  const stage = () => { const n = (S.trades || []).length; return { n, perf: n >= 1, acc: true, more: n >= 5, money: n >= 5 || (S.payouts || []).length > 0 }; };
+  const stage = () => { const n = (S.trades || []).length; return { n, perf: n >= 1, acc: true, more: n >= 5, money: (S.payouts || []).length > 0 || (S.expenses || []).length > 0 || !!(n >= 5 && window.SweepRealNet && SweepRealNet.pending && SweepRealNet.pending()) }; };   // (10 Nov., brief « produit final » step 2) « My money » from the first payout or expense, or from 5 trades while its « real net in 1 minute » invitation is due: before, a card of $0
   function deskToday(dash) {
     if (dash && !stage().more) return;   // the rank in the day card: from the 5th trade (« Quick access » removed: audit of 18 Oct.)
     if (!dash || window.SW_MQ.matches) return;
@@ -958,7 +950,6 @@ window.SweepMO = window.SweepMO || class {
     // the old economic section, equity curve and recent trades are replaced (news card, performance card with its trades)
     [econ, curve, recent].forEach((sec) => sec && sec.classList.add('nav-old'));
 
-    if (dash.querySelector('.nav-rank.ph')) setTimeout(() => fillRank(0), 400);
     headDay();
     deskToday(dash);
     const sp = dash.querySelector('.nav-strip'), td = sp && sp.querySelector('.today');
@@ -976,7 +967,7 @@ window.SweepMO = window.SweepMO || class {
     [0, /^(your account|ton compte|tu cuenta)/i],
     [1, /^(90-day gameplan|parcours de 90 jours|recorrido de 90 días|discipline|disciplina|checklist|discipline checklist|checklist de discipline|checklist de disciplina|setups|risk rules|règles de risque|reglas de riesgo)/i],
     // brief 03 step 5: the advanced options together, folded (nothing removed)
-    [4, /^(keyboard shortcuts|raccourcis clavier|atajos de teclado|prop firms|copied trades|trades copiés|operaciones copiadas)/i],
+    [4, /^(keyboard shortcuts|raccourcis clavier|atajos de teclado|prop firms|copied trades|trades copiés|operaciones copiadas|✦?\s*sweep ai)/i],   // (10 Nov., step 6) Sweep AI too
     [2, /^(notifications|notificaciones)/i],
     [3, /^(data|données|datos|connections|connexions|conexiones)/i],
   ];
@@ -1013,34 +1004,11 @@ window.SweepMO = window.SweepMO || class {
     if (VL) main.querySelectorAll('.q-tbl td[data-l]').forEach((td) => { td.dataset.l = VL; });
     if (matchMedia('(pointer:coarse)').matches) main.querySelectorAll(':scope > section').forEach((sec) => { if (/^(keyboard shortcuts|raccourcis clavier|atajos de teclado)/i.test(((sec.querySelector('h2,h3') || {}).textContent || '').trim())) sec.hidden = true; });
     main.querySelectorAll('.nav-sgrp').forEach((g) => { const n = g.nextElementSibling, h = n && (n.querySelector('h2,h3') || {}).textContent; const next2 = n && n.nextElementSibling; if (h && h.trim().toLowerCase() === g.textContent.trim().toLowerCase() && (!next2 || next2.classList.contains('nav-sgrp') || next2.tagName !== 'SECTION')) { const hh = n.querySelector('h2,h3'); if (hh) hh.hidden = true; } });   // one section with the group's name: its own title goes, the group stays foldable
-    const legal = main.querySelector(':scope > .sc-legal'); if (legal) main.append(legal);
+    // (10 Nov., step 6) the chart's data credit at the end of « About Sweep », inside its card
+    const legal = main.querySelector(':scope > .sc-legal'), ab = main.querySelector('section.about .surface'); if (legal) (ab || main).append(legal);
     // B15: « Log out » at the very bottom, on its own
     const out = main.querySelector('[data-act="logout"]');
     if (out) { const w = document.createElement('div'); w.className = 'nav-logout'; out.style.marginLeft = ''; w.append(out); main.append(w); }
-  }
-
-  /* ───────────── Trade review: sticky mini-navigation (Chart · Details · Review · Setup) ───────────── */
-  const TN = { en: ['Chart', 'Details', 'Review', 'Setup'], fr: ['Graphique', 'Détails', 'Bilan', 'Setup'], es: ['Gráfico', 'Detalles', 'Revisión', 'Setup'] };
-  function tradeNav() {
-    if (route().v !== 'trade') return;
-    const main = document.getElementById('main'); if (!main || main.querySelector('.nav-tnav')) return;
-    const chart = main.querySelector('.sc-wrap, .tchart, .sc-chart');
-    const facts = main.querySelector('.facts');
-    const review = main.querySelector('.rprog');
-    const setup = [...main.querySelectorAll('h2, h3, .sec-h')].find((h) => /^(setup)/i.test(h.textContent.trim()));
-    const targets = [chart, facts, review, setup];
-    if (targets.filter(Boolean).length < 2) return;
-    const el = document.createElement('div'); el.className = 'seg nav-tnav'; el.setAttribute('data-noi18n', '');
-    el.setAttribute('role', 'tablist');
-    el.innerHTML = (TN[LANG] || TN.en).map((l, i) => targets[i] ? `<button type="button" role="tab" aria-selected="false" data-tn="${i}">${l}</button>` : '').join('');
-    const top = main.querySelector('.tr-top'); top ? top.after(el) : main.prepend(el);
-    el.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-tn]'); if (!b) return;
-      const tgt = targets[+b.dataset.tn]; if (!tgt) return;
-      el.querySelectorAll('button').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
-      const y = tgt.getBoundingClientRect().top + scrollY - (el.offsetHeight + (window.SW_MQ.matches ? 70 : 20));
-      scrollTo({ top: Math.max(0, y), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-    });
   }
 
   /* ───────────── Add a trade: the last account and instrument you used are pre-selected ───────────── */
@@ -1077,12 +1045,12 @@ window.SweepMO = window.SweepMO || class {
   /* ───────────── segmented controls: the selection slides from where it was ───────────── */
   let segPrev = {};
   function animateSeg() {
-    document.querySelectorAll('#main .nav-seg, #main .nav-tnav').forEach((seg) => {
+    document.querySelectorAll('#main .nav-seg').forEach((seg) => {
       if (seg.querySelector('.nav-thumb')) return;
       const on = seg.querySelector('.on'); if (!on) return;
       seg.classList.add('has-thumb');   // positioned first: the thumb is measured inside the control, never against the page
       const th = document.createElement('i'); th.className = 'nav-thumb'; th.setAttribute('aria-hidden', 'true'); seg.prepend(th);
-      const key = seg.classList.contains('nav-tnav') ? 'tnav' : [...seg.querySelectorAll('a')].map((a) => a.getAttribute('href')).join();
+      const key = [...seg.querySelectorAll('a')].map((a) => a.getAttribute('href')).join();
       const place = (el, anim) => { th.style.transition = anim ? '' : 'none'; const r = el.getBoundingClientRect(), b = seg.getBoundingClientRect(); th.style.width = r.width + 'px'; th.style.transform = `translateX(${r.left - b.left - seg.clientLeft}px)`; };
       const prev = segPrev[key]; const from = prev != null && seg.children[prev + 1];
       if (from && from !== on) { place(from, false); requestAnimationFrame(() => requestAnimationFrame(() => place(on, true))); } else place(on, false);
@@ -1090,15 +1058,6 @@ window.SweepMO = window.SweepMO || class {
       seg.classList.add('has-thumb');
       seg.addEventListener('click', (e) => { const b = e.target.closest('a, button'); if (b && b.parentElement === seg) { segPrev[key] = [...seg.children].indexOf(b) - 1; place(b, true); } });
     });
-  }
-
-  /* ───────────── Today: the rank card has a placeholder until the game data is in ───────────── */
-  function fillRank(n = 0) {
-    const ph = document.querySelector('#main .nav-rank.ph'); if (!ph) return;
-    const html = rankCard();
-    if (html) { ph.outerHTML = html; return; }
-    if (n >= 4) { ph.remove(); return; }                       // no game data: the card is simply left out
-    setTimeout(() => fillRank(n + 1), 400 * Math.pow(2, n));    // 0.4 s, 0.8, 1.6, 3.2, 6.4
   }
 
 
@@ -1173,7 +1132,7 @@ window.SweepMO = window.SweepMO || class {
   let stuckRaf = 0;
   function markStuck() {
     stuckRaf = 0;
-    document.querySelectorAll('#main .nav-seg, #main .nav-tnav').forEach((b) => {
+    document.querySelectorAll('#main .nav-seg').forEach((b) => {
       const top = parseFloat(getComputedStyle(b).top) || 0;
       b.classList.toggle('is-stuck', scrollY > 0 && Math.abs(b.getBoundingClientRect().top - top) < 3);   // (iOS rounds the sticky position: 1.5 px missed it)
     });
@@ -1223,7 +1182,7 @@ window.SweepMO = window.SweepMO || class {
     const L = { en: 'Version', fr: 'Version', es: 'Versión' }[LANG] || 'Version';
     const p = document.createElement('p'); p.className = 'nav-ver muted'; p.setAttribute('data-noi18n', '');
     p.textContent = `${L} ${myBuild.slice(0, 7)}${when ? ' · ' + when.toLocaleString(LANG === 'en' ? 'en-US' : LANG + '-CA', { dateStyle: 'medium', timeStyle: 'short' }) : ''}`;
-    about.append(p);
+    (about.querySelector(':scope > .surface') || about).append(p);   // (10 Nov., step 6) inside the card
   }
 
   /* any « ⋯ » menu stays inside the screen, whatever wraps around it */
@@ -1303,7 +1262,7 @@ window.SweepMO = window.SweepMO || class {
   render = function () {
     const out = appRender.apply(this, arguments);
     // each step on its own: one failing never stops the others
-    [chrome, greetOff, composeToday, groupSettings, tradeNav, measureHeader, animateSeg, markStuck, versionLine, iconLabels, questionAdd, headDay, hideWeekends].forEach((f) => { try { f(); } catch (e) { /* never blocks */ } });
+    [chrome, greetOff, composeToday, groupSettings, measureHeader, animateSeg, markStuck, versionLine, iconLabels, questionAdd, headDay, hideWeekends].forEach((f) => { try { f(); } catch (e) { /* never blocks */ } });
     return out;
   };
   window.SweepNav = { openMenu, t };
@@ -3092,17 +3051,17 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { t: 'Payout', rules: 'Payout rules', ready: 'Ready for a payout', notyet: 'Not yet', avail: 'You can request up to {v}', since: 'Counted since your last request ({d}).', first: 'Counted since the start of the account.', win: 'Winning days of {m}+', winAny: 'Profitable days', tdays: 'Traded days', cons: 'Best day ≤ {p} of the profit', pos: 'Profitable since the last payout', cmin: 'Profit since the last payout', fmin: 'Profit before the first payout', bal: 'Balance to keep', amt: 'Amount available (min {m})', maxn: 'Payouts made', req: 'Record my request',
+    en: { sumD: '{d} winning days', sumM: 'min {m}', sum0: 'not set yet', t: 'Payout', rules: 'Payout rules', ready: 'Ready for a payout', notyet: 'Not yet', avail: 'You can request up to {v}', since: 'Counted since your last request ({d}).', first: 'Counted since the start of the account.', win: 'Winning days of {m}+', winAny: 'Profitable days', tdays: 'Traded days', cons: 'Best day ≤ {p} of the profit', pos: 'Profitable since the last payout', cmin: 'Profit since the last payout', fmin: 'Profit before the first payout', bal: 'Balance to keep', amt: 'Amount available (min {m})', maxn: 'Payouts made', req: 'Record my request',
       n_win: ['1 more winning day of {m}+', '{k} more winning days of {m}+'], n_any: ['1 more profitable day', '{k} more profitable days'], n_td: ['1 more traded day', '{k} more traded days'],
       n_pos: '{v} more profit to be positive since the last payout', n_fmin: '{v} more profit before the first payout', n_cmin: '{v} more profit since the last payout',
       n_cons: ['Bring your best day under {p}: about {v} more profit, on at least 1 more day', 'Bring your best day under {p}: about {v} more profit, spread over at least {k} days'],
       n_bal: '{v} more above the balance to keep', n_amt: '{v} more profit to request the minimum of {m}', n_maxn: 'You made the {n} payouts this account allows', n_brk: 'This account went past its max loss: no payout', none: 'Add your firm’s payout rules to see when you can request one.', f_days: 'Winning days required', f_wmin: 'Minimum profit per day ($)', f_min: 'Minimum payout ($)', f_max: 'Maximum per payout ($)', f_pct: 'Max % of the profit', f_bal: 'Balance to keep ($)', hint: 'Filled in by the preset of your firm when there is one. Check them on your firm’s site.' },
-    fr: { t: 'Payout', rules: 'Règles de payout', ready: 'Prêt pour un payout', notyet: 'Pas encore', avail: 'Tu peux demander jusqu’à {v}', since: 'Compté depuis ta dernière demande ({d}).', first: 'Compté depuis le début du compte.', win: 'Jours gagnants de {m} et +', winAny: 'Jours profitables', tdays: 'Jours tradés', cons: 'Meilleur jour ≤ {p} du profit', pos: 'Profitable depuis le dernier payout', cmin: 'Profit depuis le dernier payout', fmin: 'Profit avant le premier payout', bal: 'Solde à garder', amt: 'Montant disponible (min {m})', maxn: 'Payouts faits', req: 'Enregistrer ma demande',
+    fr: { sumD: '{d} jours gagnants', sumM: 'min {m}', sum0: 'pas encore réglées', t: 'Payout', rules: 'Règles de payout', ready: 'Prêt pour un payout', notyet: 'Pas encore', avail: 'Tu peux demander jusqu’à {v}', since: 'Compté depuis ta dernière demande ({d}).', first: 'Compté depuis le début du compte.', win: 'Jours gagnants de {m} et +', winAny: 'Jours profitables', tdays: 'Jours tradés', cons: 'Meilleur jour ≤ {p} du profit', pos: 'Profitable depuis le dernier payout', cmin: 'Profit depuis le dernier payout', fmin: 'Profit avant le premier payout', bal: 'Solde à garder', amt: 'Montant disponible (min {m})', maxn: 'Payouts faits', req: 'Enregistrer ma demande',
       n_win: ['Encore 1 jour gagnant de {m} et +', 'Encore {k} jours gagnants de {m} et +'], n_any: ['Encore 1 jour profitable', 'Encore {k} jours profitables'], n_td: ['Encore 1 jour tradé', 'Encore {k} jours tradés'],
       n_pos: 'Encore {v} de profit pour repasser en positif depuis le dernier payout', n_fmin: 'Encore {v} de profit avant le premier payout', n_cmin: 'Encore {v} de profit depuis le dernier payout',
       n_cons: ['Baisse ton meilleur jour sous {p} : environ {v} de profit en plus, sur au moins 1 jour', 'Baisse ton meilleur jour sous {p} : environ {v} de profit en plus, réparti sur au moins {k} jours'],
       n_bal: 'Encore {v} au-dessus du solde à garder', n_amt: 'Encore {v} de profit pour demander le minimum de {m}', n_maxn: 'Tu as fait les {n} payouts que ce compte permet', n_brk: 'Ce compte a dépassé sa perte max : pas de payout', none: 'Ajoute les règles de payout de ta firme pour voir quand tu pourras en demander un.', f_days: 'Jours gagnants requis', f_wmin: 'Profit minimum par jour ($)', f_min: 'Payout minimum ($)', f_max: 'Maximum par payout ($)', f_pct: 'Max % du profit', f_bal: 'Solde à garder ($)', hint: 'Remplies par le préréglage de ta firme quand il y en a un. Vérifie-les sur le site de ta firme.' },
-    es: { t: 'Payout', rules: 'Reglas de payout', ready: 'Listo para un payout', notyet: 'Aún no', avail: 'Puedes pedir hasta {v}', since: 'Contado desde tu última solicitud ({d}).', first: 'Contado desde el inicio de la cuenta.', win: 'Días ganadores de {m} o más', winAny: 'Días rentables', tdays: 'Días operados', cons: 'Mejor día ≤ {p} del beneficio', pos: 'Rentable desde el último payout', cmin: 'Beneficio desde el último payout', fmin: 'Beneficio antes del primer payout', bal: 'Saldo a mantener', amt: 'Importe disponible (mín. {m})', maxn: 'Payouts hechos', req: 'Registrar mi solicitud',
+    es: { sumD: '{d} días ganadores', sumM: 'mín {m}', sum0: 'aún sin definir', t: 'Payout', rules: 'Reglas de payout', ready: 'Listo para un payout', notyet: 'Aún no', avail: 'Puedes pedir hasta {v}', since: 'Contado desde tu última solicitud ({d}).', first: 'Contado desde el inicio de la cuenta.', win: 'Días ganadores de {m} o más', winAny: 'Días rentables', tdays: 'Días operados', cons: 'Mejor día ≤ {p} del beneficio', pos: 'Rentable desde el último payout', cmin: 'Beneficio desde el último payout', fmin: 'Beneficio antes del primer payout', bal: 'Saldo a mantener', amt: 'Importe disponible (mín. {m})', maxn: 'Payouts hechos', req: 'Registrar mi solicitud',
       n_win: ['Falta 1 día ganador de {m} o más', 'Faltan {k} días ganadores de {m} o más'], n_any: ['Falta 1 día rentable', 'Faltan {k} días rentables'], n_td: ['Falta 1 día operado', 'Faltan {k} días operados'],
       n_pos: 'Faltan {v} de beneficio para volver a positivo desde el último payout', n_fmin: 'Faltan {v} de beneficio antes del primer payout', n_cmin: 'Faltan {v} de beneficio desde el último payout',
       n_cons: ['Baja tu mejor día bajo el {p}: unos {v} más de beneficio, en al menos 1 día más', 'Baja tu mejor día bajo el {p}: unos {v} más de beneficio, repartidos en al menos {k} días'],
@@ -3205,12 +3164,14 @@ window.SweepMO = window.SweepMO || class {
     // (27 Oct., brief « nouveau trader » N4) an evaluation: the payout rules folded (they serve once funded), still one tap away
     const funded = ['funded', 'live'].includes(a.phase) || ['funded', 'live'].includes(a.money_type);
     const val = (k) => (r[k] == null ? '' : k.endsWith('_c') ? (r[k] / 100) : r[k]);
+    // (10 Nov., brief « produit final » step 4) the rules stay folded, their summary on the line: opened with a tap
+    const poSum = (x) => { const p = []; if (x.payout_win_days) p.push(t('sumD').replace('{d}', x.payout_win_days)); if (x.payout_min_c) p.push(t('sumM').replace('{m}', $u(x.payout_min_c))); return p.join(' · ') || t('sum0'); };
     const fld = (k, lab, ph) => `<label class="f"><span>${lab}</span><input inputmode="decimal" data-po="${k}" value="${esc2(val(k))}" placeholder="${ph || ''}"></label>`;
     const head = s ? `<div class="nav-po-h ${s.ready ? 'ok' : ''}"><b>${s.ready ? '✓ ' + t('ready') : t('notyet')}</b>${s.ready ? `<span>${t('avail').replace('{v}', $u(s.avail))}</span><button type="button" class="btn primary sm nav-po-req" data-po-req="${esc2(id)}">${t('req')}</button>` : ''}${!s.ready && s.todo.length ? `<ul class="nav-po-todo">${s.todo.map((x) => `<li data-k="${x.k}">${esc2(x.text)}</li>`).join('')}</ul>` : ''}</div>
       <ul class="nav-po-c">${s.conds.map((c) => `<li class="${c.ok ? 'ok' : ''}"><i>${c.ok ? '✓' : ''}</i><span>${esc2(c.label)}</span><b>${esc2(c.have)}</b><s style="--w:${Math.round(c.frac * 100)}%"></s></li>`).join('')}</ul>
       <small class="muted">${s.last ? t('since').replace('{d}', s.last) : t('first')}</small>` : `<p class="muted nav-po-none">${t('none')}</p>`;
     const html = `<h3>${t('t')}</h3>${head}
-      <details class="nav-po-rules" ${s || !funded ? '' : 'open'}><summary>${t('rules')}</summary><div class="fgrid">${fld('payout_win_days', t('f_days'), '5')}${fld('payout_win_min_c', t('f_wmin'), '150')}${fld('payout_min_c', t('f_min'), '500')}${fld('payout_max_c', t('f_max'))}${fld('payout_max_pct', t('f_pct'), '50')}${fld('payout_min_bal_c', t('f_bal'))}</div><small class="muted">${t('hint')}</small></details>`;
+      <details class="nav-po-rules"><summary>${t('rules')}<small>${esc2(poSum(r))}</small></summary><div class="fgrid">${fld('payout_win_days', t('f_days'), '5')}${fld('payout_win_min_c', t('f_wmin'), '150')}${fld('payout_min_c', t('f_min'), '500')}${fld('payout_max_c', t('f_max'))}${fld('payout_max_pct', t('f_pct'), '50')}${fld('payout_min_bal_c', t('f_bal'))}</div><small class="muted">${t('hint')}</small></details>`;
     let box = main.querySelector('.nav-po');
     if (!box) {
       const recal = main.querySelector('.nav-recal');
@@ -3351,7 +3312,11 @@ window.SweepMO = window.SweepMO || class {
     const ok = passed(a);
     let st = null; try { st = acctState(a); } catch (e) { st = null; }
     // « Move to funded » only once the evaluation is really passed; target reached but something missing → say what
-    const html = ok ? `<div class="nav-pass-row ok" data-noi18n><span>🏁 <b>${t('badge')}</b> · ${a.pass_asked ? t('wait') : t('btnS')}</span><button type="button" class="btn sm primary" data-pass-btn="${esc2(id)}">${t('btn')}</button></div>`
+    // (10 Nov., brief « produit final » step 4) « Move to funded » is in the page's « ⋯ » menu (its window still opens once, by itself)
+    const pop = main.querySelector('details.menu > .menu-pop'); let mi = pop && pop.querySelector('.nav-pass-m');
+    if (ok && pop && !mi) pop.insertAdjacentHTML('afterbegin', `<button type="button" class="nav-pass-m" data-noi18n data-pass-btn="${esc2(id)}">🏁 ${t('btn')}</button>`);
+    else if (!ok && mi) mi.remove();
+    const html = ok ? ''
       : st && st.reached && !st.breached && st.missing && st.missing.length ? `<div class="nav-pass-row nav-pass-miss" data-noi18n><span>${esc2(evalMissLabel(st.missing))}</span></div>` : '';
     if (!html) { if (el) el.remove(); return; }
     if (!el) { const back = main.querySelector(':scope > .row'); if (!back) return; back.insertAdjacentHTML('afterend', html); }
@@ -3372,7 +3337,8 @@ window.SweepMO = window.SweepMO || class {
 (function () {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
-  const T = { en: { s: 'Promoted to a live account?', b: 'Move to live', done: 'Live account created' }, fr: { s: 'Promu en compte live ?', b: 'Passer en live', done: 'Compte live créé' }, es: { s: '¿Ascendido a cuenta live?', b: 'Pasar a live', done: 'Cuenta live creada' } }[L] || { s: 'Promoted to a live account?', b: 'Move to live', done: 'Live account created' };
+  const T0 = { s: 'Promoted to a live account?', sub: 'Sweep creates the live account with your firm’s live rules and archives this one, its trades and payouts kept.', b: 'Move to live', done: 'Live account created' };
+  const T = { en: T0, fr: { s: 'Promu en compte live ?', sub: 'Sweep crée le compte live avec les règles live de ta firme et archive celui-ci, avec ses trades et ses payouts.', b: 'Passer en live', done: 'Compte live créé' }, es: { s: '¿Ascendido a cuenta live?', sub: 'Sweep crea la cuenta live con las reglas live de tu firma y archiva esta, con sus operaciones y pagos.', b: 'Pasar a live', done: 'Cuenta live creada' } }[L] || T0;
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const BADGE = '<span class="nav-live" aria-label="Live">LIVE</span>';
   function badges() {
@@ -3386,10 +3352,21 @@ window.SweepMO = window.SweepMO || class {
     const id = decodeURIComponent(m[1]), a = getDoc('accounts', id), main = document.getElementById('main'); if (!a || !main) return;
     const name = main.querySelector('.nav-accname span'); if (name && a.phase === 'live' && !name.parentElement.querySelector('.nav-live')) name.insertAdjacentHTML('afterend', BADGE);
     // a funded account: « moved to live? »
-    let row = main.querySelector('.nav-live-row');
+    // (10 Nov., brief « produit final » step 4) « Move to live » is in the page's « ⋯ » menu, and asked once in a window when the
+    // moment comes: the funded account's first payout paid (firms promote to live after payouts)
     const show = a.phase === 'funded' && a.status !== 'archived';
-    if (!show) { if (row) row.remove(); return; }
-    if (!row) { const back = main.querySelector(':scope > .row'); if (!back) return; back.insertAdjacentHTML('afterend', `<div class="nav-pass-row nav-live-row" data-noi18n><span>${BADGE} ${T.s}</span><button type="button" class="btn sm" data-live-go="${esc2(id)}">${T.b}</button></div>`); }
+    const pop = main.querySelector('details.menu > .menu-pop'); let mi = pop && pop.querySelector('.nav-live-m');
+    if (!show) { if (mi) mi.remove(); return; }
+    if (pop && !mi) pop.insertAdjacentHTML('afterbegin', `<button type="button" class="nav-live-m" data-noi18n data-live-go="${esc2(id)}">${T.b}</button>`);
+    offer(a);
+  }
+  function offer(a) {
+    let seen = []; try { seen = JSON.parse(localStorage.getItem('sw.liveAsk') || '[]'); } catch (e) { seen = []; }
+    if (seen.includes(a.id) || a.demo || !window.SweepAsk) return;
+    if (!(S.payouts || []).some((p) => p.account_id === a.id && p.status === 'paid')) return;
+    if (document.querySelector('.nav-pass, .nav-ask, #gSheet.open, #tkSlide.open, .evp.open, .g-sweep, #gOb') || (window.SweepQuiet && SweepQuiet())) return;
+    seen.push(a.id); try { localStorage.setItem('sw.liveAsk', JSON.stringify(seen.slice(-50))); } catch (e) { /* private mode */ }
+    SweepAsk(T.s, T.sub, T.b, false).then((go) => { if (go) toLive(a.id); });
   }
   document.addEventListener('click', (e) => {
     const b = e.target.closest && e.target.closest('[data-live-go]'); if (!b) return;
@@ -3881,12 +3858,9 @@ window.SweepMO = window.SweepMO || class {
   'use strict';
   const L = (typeof LANG !== 'undefined' && LANG) || 'en';
   const T = {
-    en: { pub: 'Public discipline profile', pubS: 'A personal link with your last 4 weeks: discipline, days swept, streak. Never an amount. Off by default.', pubCopy: 'Copy', pubSee: 'See my profile', pubCopied: 'Link copied', pubErr: 'Could not save. Try again.', pubVer: '« Verified » shows when every trade comes from a platform sync.',
-      fn: 'First name', ln: 'Last name', un: 'Username', unH: 'Your public name in leagues and shared links.', fv: 'Where did you find Sweep?', need: 'Enter your first name.', me: 'Your first name', prof: 'Profile', save: 'Save', saved: 'Profile saved', help: 'Help & support', helpS: 'A question, an idea, a bug? Write to us, we answer every message.', friend: 'A friend', google: 'Google', other: 'Other' },
-    fr: { pub: 'Profil public de discipline', pubS: 'Un lien personnel avec tes 4 dernières semaines : discipline, journées balayées, série. Jamais de montant. Désactivé par défaut.', pubCopy: 'Copier', pubSee: 'Voir mon profil', pubCopied: 'Lien copié', pubErr: 'Impossible d’enregistrer. Réessaie.', pubVer: '« Vérifié » s’affiche quand chaque trade vient d’une synchro de plateforme.',
-      fn: 'Prénom', ln: 'Nom', un: 'Nom d’utilisateur', unH: 'Ton nom public dans les ligues et les liens partagés.', fv: 'Où as-tu trouvé Sweep ?', need: 'Entre ton prénom.', me: 'Ton prénom', prof: 'Profil', save: 'Enregistrer', saved: 'Profil enregistré', help: 'Aide et support', helpS: 'Une question, une idée, un bug ? Écris-nous, on répond à chaque message.', friend: 'Un ami', google: 'Google', other: 'Autre' },
-    es: { pub: 'Perfil público de disciplina', pubS: 'Un enlace personal con tus últimas 4 semanas: disciplina, días barridos, racha. Nunca un monto. Desactivado por defecto.', pubCopy: 'Copiar', pubSee: 'Ver mi perfil', pubCopied: 'Enlace copiado', pubErr: 'No se pudo guardar. Inténtalo de nuevo.', pubVer: '«Verificado» aparece cuando cada operación viene de una sincronización de plataforma.',
-      fn: 'Nombre', ln: 'Apellido', un: 'Nombre de usuario', unH: 'Tu nombre público en ligas y enlaces compartidos.', fv: '¿Dónde encontraste Sweep?', need: 'Escribe tu nombre.', me: 'Tu nombre', prof: 'Perfil', save: 'Guardar', saved: 'Perfil guardado', help: 'Ayuda y soporte', helpS: '¿Una pregunta, una idea, un error? Escríbenos, respondemos cada mensaje.', friend: 'Un amigo', google: 'Google', other: 'Otro' } };
+    en: { fn: 'First name', ln: 'Last name', un: 'Username', unH: 'The name you sign in with.', fv: 'Where did you find Sweep?', need: 'Enter your first name.', me: 'Your first name', prof: 'Profile', save: 'Save', saved: 'Profile saved', friend: 'A friend', google: 'Google', other: 'Other' },
+    fr: { fn: 'Prénom', ln: 'Nom', un: 'Nom d’utilisateur', unH: 'Le nom avec lequel tu te connectes.', fv: 'Où as-tu trouvé Sweep ?', need: 'Entre ton prénom.', me: 'Ton prénom', prof: 'Profil', save: 'Enregistrer', saved: 'Profil enregistré', friend: 'Un ami', google: 'Google', other: 'Autre' },
+    es: { fn: 'Nombre', ln: 'Apellido', un: 'Nombre de usuario', unH: 'El nombre con el que inicias sesión.', fv: '¿Dónde encontraste Sweep?', need: 'Escribe tu nombre.', me: 'Tu nombre', prof: 'Perfil', save: 'Guardar', saved: 'Perfil guardado', friend: 'Un amigo', google: 'Google', other: 'Otro' } };
   const t = (k) => (T[L] || T.en)[k];
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const SUPPORT = 'hello@makeitsweep.com';
@@ -3970,35 +3944,13 @@ window.SweepMO = window.SweepMO || class {
     const main = document.getElementById('main'); if (!main || main.querySelector('.nav-set-prof')) return;
     const first = main.querySelector('details.nav-sgd[data-i="0"] .surface') || main.querySelector('.surface'); if (!first) return;   // in « Account », wherever its group stands
     const sec = document.createElement('section'); sec.className = 'surface nav-set-prof'; sec.setAttribute('data-noi18n', '');
-    sec.innerHTML = `<h2>${t('prof')}</h2>${fields(S.me || {}, true)}<p class="err nav-prof-err"></p><button type="button" class="btn primary" data-prof-save>${t('save')}</button><div class="nav-pub" data-pub-box>${pubHtml()}</div>`;
+    sec.innerHTML = `<h2>${t('prof')}</h2>${fields(S.me || {}, true)}<p class="err nav-prof-err"></p><button type="button" class="btn primary" data-prof-save>${t('save')}</button>`;
     first.before(sec);
-    if (!PUB) pubLoad();
-    const help = document.createElement('section'); help.className = 'surface nav-set-help'; help.setAttribute('data-noi18n', '');
+    // (10 Nov., brief « produit final » step 6) the support email, the referral and the feedback are in « About Sweep » (no Help block)
+    const about = main.querySelector('section.about .surface'), legal = about && about.querySelector('.legal');
     const RF = { en: ['Referral', 'Give feedback'], fr: ['Parrainage', 'Donner mon avis'], es: ['Referidos', 'Dar mi opinión'] }[LANG] || ['Referral', 'Give feedback'];   // (31 Oct., fluidity 14) out of the profile menu
-    help.innerHTML = `<h2>${t('help')}</h2><p class="muted">${t('helpS')}</p><a class="btn" href="mailto:${SUPPORT}">${SUPPORT}</a><div class="nav-set-rows"><a href="#referral">${RF[0]} ›</a><a href="#feedback">${RF[1]} ›</a></div>`;
-    main.append(help);
+    if (legal && !about.querySelector('.nav-set-rows')) legal.insertAdjacentHTML('afterend', `<div class="nav-set-rows nav-about-rows" data-noi18n><a href="mailto:${SUPPORT}">${SUPPORT}</a><a href="#referral">${RF[0]} ›</a><a href="#feedback">${RF[1]} ›</a></div>`);
   }
-  // brief 02 part 12: the public discipline profile, off by default (growth/public-profile.php)
-  let PUB = null;
-  function pubHtml() {
-    return `<label class="nav-pub-row"><span><b>${t('pub')}</b><small>${t('pubS')}</small></span><span class="sw"><input type="checkbox" data-pub ${PUB && PUB.on ? 'checked' : ''} ${PUB ? '' : 'disabled'} aria-label="${t('pub')}"><i></i></span></label>`
-      + (PUB && PUB.on ? `<div class="nav-shl-row nav-pub-link"><input readonly value="${esc2(location.origin + PUB.url)}" aria-label="${t('pub')}"><button type="button" class="btn sm primary" data-pub-copy>${t('pubCopy')}</button></div>
-        <p class="muted nav-pub-h"><a href="${esc2(PUB.url)}" target="_blank" rel="noopener">${t('pubSee')} ↗</a> · ${t('pubVer')}</p>` : '');
-  }
-  const pubPaint = () => { const b = document.querySelector('#main [data-pub-box]'); if (b) b.innerHTML = pubHtml(); };
-  async function pubLoad() { try { PUB = await apiJSON('api/profile/public'); } catch (e) { PUB = null; } pubPaint(); }
-  document.addEventListener('change', async (e) => {
-    const c = e.target.closest && e.target.closest('input[data-pub]'); if (!c) return;
-    c.disabled = true;
-    try { PUB = await apiJSON('api/profile/public', { method: 'POST', body: { on: c.checked } }); if (typeof haptic === 'function') haptic(6); }
-    catch (x) { if (typeof toast === 'function') toast(t('pubErr')); }
-    pubPaint();
-  });
-  document.addEventListener('click', async (e) => {
-    const b = e.target.closest && e.target.closest('[data-pub-copy]'); if (!b || !PUB || !PUB.url) return;
-    const u = location.origin + PUB.url;
-    try { await navigator.clipboard.writeText(u); if (typeof toast === 'function') toast(t('pubCopied')); } catch (x) { const i = b.parentElement.querySelector('input'); if (i) i.select(); }
-  });
   document.addEventListener('click', async (e) => { const b = e.target.closest && e.target.closest('[data-prof-save]'); if (!b) return; b.disabled = true; const ok = await save(b.closest('.nav-set-prof')); b.disabled = false; if (ok && typeof toast === 'function') toast(t('saved')); });
   // the trader has started filling in the first account: a refresh that would draw the same page (still no account, same
   // address) is skipped, otherwise it sends the guided picker back to its first question and empties the first name
@@ -4047,42 +3999,6 @@ window.SweepMO = window.SweepMO || class {
     };
     w.__who = true; window.shDraw = w;
   })(0);
-})();
-
-/* computer, Today: the level becomes a small ring in the first section (no separate « Apprentice · Lv » row,
- * which overlapped the mission line); tapping it opens Progression like the row did */
-(function () {
-  'use strict';
-  function merge() {
-    if (window.SW_MQ.matches) return;
-    const dash = document.querySelector('#main .nav-dash'); if (!dash) return;
-    const rank = dash.querySelector('.d-rank .nav-rank'), mid = dash.querySelector('.g-today .gc-mid');
-    if (!rank || !mid) return;
-    const chip = [...mid.querySelectorAll('button, span, div')].find((x) => /^Lv\s?\d+/i.test((x.textContent || '').trim()) && x.children.length <= 3 && !x.closest('.nav-lvring'));
-    document.body.classList.add('nav-lvr');
-    if (!chip || chip.dataset.lvRing) return;
-    const bar = [...chip.querySelectorAll('*')].find((x) => /width\s*:\s*[\d.]+%/.test(x.getAttribute('style') || ''));
-    const pct = bar ? Math.max(0, Math.min(100, parseFloat((bar.getAttribute('style').match(/width\s*:\s*([\d.]+)%/) || [0, 0])[1]))) : 0;
-    const lv = ((chip.textContent || '').match(/Lv\s?(\d+)/i) || [0, ''])[1];
-    const r = 9, C = 2 * Math.PI * r;
-    const ring = document.createElement('button'); ring.type = 'button'; ring.className = 'nav-lvring' + (rank.classList.contains('nav-dot') ? ' dot' : '');
-    ring.title = (rank.innerText || '').replace(/\s+/g, ' ').trim();
-    ring.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="${r}" class="bg"/><circle cx="12" cy="12" r="${r}" class="fg" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct / 100)}"/></svg><b>Lv ${lv}</b>`;
-    ring.addEventListener('click', () => {
-      rank.click();
-      // keyboard users: when Progression closes, the focus comes back to the ring (the old row is hidden)
-      const back = () => { if (document.querySelector('#gSheet')) { setTimeout(back, 120); return; } const r = document.querySelector('.nav-lvring'); if (r && (document.activeElement === document.body || !document.activeElement || document.activeElement.offsetParent === null)) r.focus(); };
-      setTimeout(back, 300);
-    });
-    ring.dataset.pct = String(Math.round(pct)); ring.dataset.lv = lv;
-    chip.dataset.lvRing = '1'; chip.replaceWith(ring);
-  }
-  const appRender = window.render;
-  if (typeof appRender === 'function' && !appRender.__lvr) {
-    const w = function () { const out = appRender.apply(this, arguments); try { merge(); } catch (e) { /* never blocks */ } return out; };
-    w.__lvr = true; window.render = w;
-  }
-  new window.SweepMO(() => { try { merge(); } catch (e) { /* never blocks */ } }).observe(document.body, { childList: true, subtree: true });
 })();
 
 /* ───────────── October 7 notes ─────────────
@@ -4581,40 +4497,40 @@ window.SweepMO = window.SweepMO || class {
     // (1 Nov.) the loading card has the card's size: the mission line kept in the browser, and steps with the real texts, hidden
     // (a 70 px line and steps 28 px taller arrived with the game's answer on a slow server: the accounts card was pushed down 100 px)
     const skStep = (a, b, c, d2, x) => `<div class="nav-rt-s sk"><div class="nav-rt-si"><span class="nav-rt-n">1</span></div><div class="nav-rt-sb"><b>${t(a)}</b><small>${t(b)}</small><span class="nav-rt-st">${t(d2)}</span></div><div class="nav-rt-sa"><button type="button" class="btn sm" tabindex="-1"><span class="l">${t(c)}</span><span class="s">${t(c + 's')}</span></button>${x ? `<span class="link nav-rt-off">${t('off')}</span>` : ''}</div></div>`;
-    // and the height the real card had last time at this width (kept in the browser: rows the loading card cannot know, as « Yesterday is not finished »)
+    // and the height the real card had last time at this width (kept in the browser: rows the loading card cannot know, as « Yesterday is not finished »;
+    // 10 Nov.: exactly that height, the one line under the title may be « Now » instead of the mission kept in the browser)
     const rtH = (() => { try { const k = JSON.parse(localStorage.getItem('sw.rtH') || 'null'); return k && k.w === innerWidth && k.h > 0 ? k.h : 0; } catch (e) { return 0; } })();
-    if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"${rtH ? ` style="min-height:${rtH}px"` : ''}><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div>${gpLine()}<div class="nav-rt-steps">${skStep('s1', 's1d', 'b1', 'todo', !(S.trades || []).some((x) => typeof todayStr === 'function' && x.date === todayStr()))}${skStep('s2', 's2d', 'b2', 'noTrade')}${skStep('s3', 's3d', 'b3', 'reviewTodo')}</div></section>`;
+    if (!d) return `<section class="surface nav-rt ph" data-noi18n aria-busy="true"${rtH ? ` style="height:${rtH}px;overflow:hidden"` : ''}><div class="nav-rt-h"><div><h2>${t('title')}</h2></div><div class="nav-rt-me"><span class="nav-rt-disc nav-rt-disc-ph" aria-hidden="true"></span><span class="nav-rt-sk w"></span><span class="nav-rt-sk"></span></div></div>${gpLine()}<div class="nav-rt-steps">${skStep('s1', 's1d', 'b1', 'todo', !(S.trades || []).some((x) => typeof todayStr === 'function' && x.date === todayStr()))}${skStep('s2', 's2d', 'b2', 'noTrade')}${skStep('s3', 's3d', 'b3', 'reviewTodo')}</div></section>`;
     const p = st.profile || {}, y = st.yesterday && st.yesterday.market && !st.yesterday.valid && (st.yesterday.trades > 0 || st.yesterday.plan_valid) ? st.yesterday : null;   // only a day that was started is « not finished »
-    const r = d.rings || {}, ring = document.querySelector('.nav-lvring');
-    // level progress: from the game's own level bar (or the ring made from it)
-    let pct = ring ? +ring.dataset.pct || 0 : 0;
-    if (!pct) { const g = document.querySelector('#main .g-today'); const chip = g && [...g.querySelectorAll('*')].find((x) => /^Lv\s?\d+/i.test((x.textContent || '').trim()) && x.children.length <= 3); const bar = chip && [...chip.querySelectorAll('*')].find((x) => /width\s*:\s*[\d.]+%/.test(x.getAttribute('style') || '')); if (bar) pct = parseFloat(bar.getAttribute('style').match(/width\s*:\s*([\d.]+)%/)[1]) || 0; }
-    const lv = (ring && ring.dataset.lv) || p.level || '';
-    const streak = (p.streak && p.streak.current) || 0;
+    const r = d.rings || {};
     // before the first trade (27 Oct. tour): no « Discipline — », no streak « 0 », no level — they mean nothing yet; they come with it
     const first = (S.trades || []).some((x) => !x.demo) || (S.trades || []).length > 0 && !(S.accounts || []).some((a) => !a.demo);
-    // (31 Oct., C5) the discipline, streak and level pills became one line under the title: « Level 2 · 0 complete days › » (My progress)
-    const SUM = { en: ['Level {l}', '{n} complete day', '{n} complete days'], fr: ['Niveau {l}', '{n} jour complet', '{n} jours complets'], es: ['Nivel {l}', '{n} día completo', '{n} días completos'] }[L] || ['Level {l}', '{n} complete day', '{n} complete days'];
-    // (2 Nov., analyse débutant C2) « Level 2 » alone until a first day is complete (« · 0 complete days » read as a counter at zero)
-    const sumLine = first ? `<button type="button" class="nav-rt-sum" data-rt="hub">${[lv ? SUM[0].replace('{l}', esc2(lv)) : '', streak || !lv ? SUM[streak === 1 || (streak === 0 && L === 'fr') ? 1 : 2].replace('{n}', streak) : ''].filter(Boolean).join(' · ')} ›</button>` : '';
-    const head = (extra, still) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market && !still ? foldBtn() : ''}${extra || ''}</div></div><div class="nav-rt-sub">${sumLine}<button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button></div>`;
+    // (10 Nov., brief « produit final » step 1) no level any more: « Level n › » became « n swept days › » (My progress), from the first trade
+    const SUM = { en: ['{n} swept day', '{n} swept days'], fr: ['{n} journée balayée', '{n} journées balayées'], es: ['{n} día barrido', '{n} días barridos'] }[L] || ['{n} swept day', '{n} swept days'];
+    const swd = +p.swept_days || 0;
+    const sumLine = first ? `<button type="button" class="nav-rt-sum" data-rt="hub">${SUM[swd === 1 || (swd === 0 && L === 'fr') ? 0 : 1].replace('{n}', swd)} ›</button>` : '';
+    // (10 Nov.) the « ? » in the title's row when there is no line under it (an empty row before the first complete day)
+    const helpB = `<button type="button" class="nav-rt-help" data-rt="help" aria-label="${t('how')}">${svg('help')}</button>`;
+    const head = (extra, still) => `<div class="nav-rt-h"><div class="nav-rt-tg"><h2>${t('title')}</h2>${d.market && !still ? foldBtn() : ''}${extra || ''}${sumLine ? '' : helpB}</div></div>${sumLine ? `<div class="nav-rt-sub">${sumLine}${helpB}</div>` : ''}`;
     // the week's recap is ready (brief 01 step 5): it takes the place of the next step, with the only primary button
     const wk = st.weekly, wkReady = !!(wk && wk.open && !wk.seen);
     const wkt = ({ en: ['Your week is ready', 'Open the weekly recap'], fr: ['Ta semaine est prête', 'Ouvrir le bilan de la semaine'], es: ['Tu semana está lista', 'Abrir el resumen semanal'] })[L]   // (SWEEP.md step 6) one name: « Bilan de la semaine » || ['Your week is ready', 'See my week'];
     const wkRow = wkReady ? `<div class="nav-rt-wk"><b>${wkt[0]}</b><button type="button" class="btn primary" data-rt="week">${wkt[1]}</button></div>` : '';
     // the intention written in last week's recap, shown all this week (SWEEP.md step 1, D5: it lived only in the game's hidden card)
     const intT = ({ en: 'Your intention this week', fr: 'Ton intention cette semaine', es: 'Tu intención esta semana' })[L] || 'Your intention this week';
-    // (1 Nov., brief avance 6) else, in the first days of a month, the mission the Month in Review's AI proposed for it
-    const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : (!wkReady && window.SweepGame && SweepGame.monthMission ? SweepGame.monthMission() : '');
-    // (1 Nov., brief avance 6) « Your October is ready »: the Month in Review, at the top of the card until seen to its end
-    const mrRow = window.SweepGame && SweepGame.monthCard ? SweepGame.monthCard() : '';
+    const intRow = !wkReady && wk && wk.intention ? `<p class="nav-rt-int"><b>${intT}</b> · ${esc2(wk.intention)}</p>` : '';
     const nowRow = nowHtml(d, r);
     const rmRow = remindRow() || qrRow();
     const gpRow = gpLine();
+    // (10 Nov., brief « produit final » step 2) « Now » first (the session's block, on every market day), then one line at most,
+    // the most useful, in the brief's order: the week's recap ready, the mission of the day, then the rest (a one-time offer: the
+    // reminder after a first plan, Sweep on the phone; the week's intention); « Yesterday » stays in the title; the recap and the
+    // mission are never hidden by « Now », they are the loop
+    const one = nowRow + (wkRow || gpRow || rmRow || intRow);
     // the « ? » of the header opens the same help on every card (market closed, day off: it threw on a missing help text, Admin › Errors, 12 Oct.)
     const helpT = `<div class="nav-rt-help-t" hidden>${t('help')}</div>`;
-    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${mrRow}${head()}${wkRow}${intRow}<p class="nav-rt-msg">${t('closed')}</p>${rmRow}${gpRow}${helpT}</section>`;
-    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${mrRow}${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow}${intRow}<p class="nav-rt-msg">${t('dayoff')}</p>${gpRow}${helpT}</section>`;
+    if (!d.market) return `<section class="surface nav-rt closed" data-noi18n>${head()}${wkRow || gpRow || rmRow || intRow}<p class="nav-rt-msg">${t('closed')}</p>${helpT}</section>`;
+    if (d.day_off) return `<section class="surface nav-rt off" data-noi18n>${head(`<span class="nav-rt-pill ok">${svg('check')}${t('dayoffT')}</span>`)}${wkRow || gpRow || intRow}<p class="nav-rt-msg">${t('dayoff')}</p>${helpT}</section>`;
     // (1 Nov., brief avance 4) the day's limit reached: « Day closed » in place of « Now » and the 3 steps, until 18:00 ET (no fold: it is the day)
     const lk = lockOf(d);
     if (lk) return `<section class="surface nav-rt nav-lockd" data-noi18n>${head(`<span class="nav-rt-pill lk">${esc2(lt('pill'))}</span>`, true)}${lockHtml(d, r, lk)}${helpT}</section>`;
@@ -4635,7 +4551,7 @@ window.SweepMO = window.SweepMO || class {
     const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t(d.trades === 1 ? 'inPlan1' : 'inPlan', { c: d.compliant || 0, n: d.trades });
     // (2 Nov., analyse débutant C4) « Yesterday: 15 h 19 left › »: « Finish yesterday › 15 h 19 » read the time left as a clock time
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${esc2(t('ydayP', { t: left(y.deadline) }))} ›</b></button>` : '';
-    return `<section class="surface nav-rt" data-noi18n>${mrRow}${head(pill + ych)}${wkRow}${nowRow}${rmRow}${gpRow}${intRow}
+    return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${one}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
         ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
@@ -4670,7 +4586,6 @@ window.SweepMO = window.SweepMO || class {
     if (k === 'plan') { if (window.SweepGame && SweepGame.openPlan) { const nx = window.SweepNextSession && SweepNextSession(); nx ? SweepGame.openPlan(nx) : SweepGame.openPlan(); } }
     else if (k === 'review' || k === 'fin') { if (window.SweepGame && SweepGame.openReview) SweepGame.openReview(); }   // « I'm done for today »: the same review, at once
     else if (k === 'week') { if (window.SweepGame && SweepGame.open) SweepGame.open('weekly'); }
-    else if (k === 'month') { if (window.SweepGame && SweepGame.open) SweepGame.open('month', b.dataset.v, b); }   // (1 Nov., brief avance 6) the story grows from the card
     else if (k === 'trade') { if (typeof openTicket === 'function') openTicket(); }
     else if (k === 'lock-grade') {   // (1 Nov., brief avance 4) the next trade of the day not graded yet, else the day's trades (Journal)
       const day = rtDay() || (typeof todayStr === 'function' ? todayStr() : ''), nx = lockTrades(day).find((x) => !graded(x));
@@ -4679,10 +4594,9 @@ window.SweepMO = window.SweepMO || class {
     else if (k === 'dayoff') { const o = g && g.querySelector('[data-g=dayoff]'); if (o) o.click(); }
     else if (k === 'yday') { const o = document.querySelector('#main [data-g=yday]'); if (o) o.click(); }
     else if (k === 'hub') {
-      const cls = b.classList.contains('nav-rt-lv') ? '.nav-rt-lv' : '.nav-rt-streak';
-      const o = document.querySelector('#main .nav-rank') || document.querySelector('.nav-lvring'); if (o) o.click(); else if (window.SweepGame) SweepGame.open('hub');
-      // keyboard users: when Progression closes, the focus comes back to the button that opened it
-      const back = () => { if (document.querySelector('#gSheet')) { setTimeout(back, 120); return; } const r = document.querySelector('#main .nav-rt ' + cls); if (r) r.focus(); };
+      if (window.SweepGame) SweepGame.open('hub');
+      // keyboard users: when My progress closes, the focus comes back to the button that opened it
+      const back = () => { if (document.querySelector('#gSheet')) { setTimeout(back, 120); return; } const r = document.querySelector('#main .nav-rt-sum'); if (r) r.focus(); };
       setTimeout(back, 300);
     }
     else if (k === 'help') { const h = b.closest('.nav-rt') && b.closest('.nav-rt').querySelector('.nav-rt-help-t'); if (h) h.hidden = !h.hidden; }
@@ -4777,17 +4691,10 @@ window.SweepMO = window.SweepMO || class {
 })();
 
 
-/* Stats: the rank opens Progression (what's done, what's next, missions); Payouts: « Share my payouts » above the numbers */
+/* Payouts: « Share my payouts » above the numbers */
 (function () {
   'use strict';
-  document.addEventListener('click', (e) => {
-    const r = e.target.closest && e.target.closest('#main #gIns .gm-ins-rank');
-    if (r && !e.target.closest('button:not(.gm-ins-rank), a')) { if (window.SweepGame && SweepGame.open) SweepGame.open('hub'); }
-  });
   function pass() {
-    const rk = document.querySelector('#main #gIns .gm-ins-rank');
-    if (rk && !rk.querySelector('.nav-rank-more')) { const m = document.createElement('span'); m.className = 'nav-rank-more'; m.setAttribute('data-noi18n', ''); m.textContent = ({ en: 'What’s next ›', fr: 'Voir la suite ›', es: 'Ver lo siguiente ›' })[(typeof LANG !== 'undefined' && LANG) || 'en'] || 'What’s next ›'; rk.append(m); }
-    if (rk && !rk.dataset.go) { rk.dataset.go = '1'; rk.setAttribute('role', 'button'); rk.tabIndex = 0; rk.classList.add('nav-rank-go'); rk.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); rk.click(); } }); }
     if (/^#payouts/.test(location.hash || '')) {
       const row = document.querySelector('#main .sh-row'), k = row && row.previousElementSibling;
       if (row && k && k.classList.contains('kpis')) { k.before(row); row.classList.add('nav-sh-top'); }
@@ -5427,7 +5334,6 @@ window.SweepMO = window.SweepMO || class {
       SH.alt = [kind, id];
       await loadSwept();
       const out = await orig.call(this, 'discipline', 'view');
-      if (kind === 'payout' && typeof confetti === 'function') confetti();   // the payout moment keeps its confetti
       return out;
     };
     w.__disc = true; window.openShare = w;
@@ -7149,8 +7055,9 @@ new window.SweepMO(() => {
     if (fg && !fg.querySelector('.tr-more')) {
       const rest = [...fg.children].filter((c, i) => i > 0 && !(c.matches && c.matches('datalist, .nav-sp, [class*=setup]')) && c.tagName === 'LABEL');
       if (rest.length) {
-        const d = document.createElement('details'); d.className = 'tr-more'; d.setAttribute('data-noi18n', '');
-        d.innerHTML = `<summary>${({ en: 'More details', fr: 'Plus de détails', es: 'Más detalles' })[L] || 'More details'}</summary><div class="fgrid one"></div>`;
+        // (10 Nov.) only its title is kept from the translation pass: the fields moved in were left in English (« Fees & commissions »)
+        const d = document.createElement('details'); d.className = 'tr-more';
+        d.innerHTML = `<summary data-noi18n>${({ en: 'More details', fr: 'Plus de détails', es: 'Más detalles' })[L] || 'More details'}</summary><div class="fgrid one"></div>`;
         const inner = d.lastElementChild; rest[0].before(d); rest.forEach((c) => inner.append(c));
         // the hint line under the platform's P&L follows its field
         [...fg.children].filter((c) => c !== d && c.previousElementSibling === d && c.tagName !== 'LABEL' && c.tagName !== 'DETAILS').forEach((c) => inner.append(c));
@@ -7318,17 +7225,10 @@ new window.SweepMO(() => {
     const w = function () { const out = appRender.apply(this, arguments); try { apply(); } catch (e) { /* never blocks */ } return out; };
     w.__disc = true; window.render = w;
   }
-  // « My progress » before mission 15: the level and the streak, and when the rest opens (badges, challenges, boss, season…)
-  const HUB = { en: ['Level {l} · {s} complete days in a row', 'Badges, weekly challenges and the rest open with mission 15: three days in a row.'],
-    fr: ['Niveau {l} · {s} jours complets de suite', 'Les badges, les défis de la semaine et le reste s’ouvrent avec la mission 15 : trois journées de suite.'],
-    es: ['Nivel {l} · {s} días completos seguidos', 'Las insignias, los retos de la semana y el resto se abren con la misión 15: tres días seguidos.'] };
-  function hub() {
-    const w = document.querySelector('#gSheet.gc-hubsheet .gc-hubwrap'); if (!w || !document.body.classList.contains('disc-no-game') || w.querySelector('.nav-disc-hub')) return;
-    const pr = (window.SweepGame && SweepGame.state && SweepGame.state().profile) || {}, h = HUB[L] || HUB.en;
-    w.insertAdjacentHTML('afterbegin', `<div class="nav-disc-hub" data-noi18n><b>${esc2(h[0].replace('{l}', pr.level || 1).replace('{s}', (pr.streak && pr.streak.current) || 0))}</b><p>${esc2(h[1])}</p></div>`);
-  }
-  if (window.SweepMO) new window.SweepMO(hub).observe(document.body, { childList: true });
-  window.SweepDisc = { line, go, apply };
+  // « My progress » before mission 15: the streak only, and when the badges open (10 Nov.: drawn by the sheet itself, game.js progressHtml)
+  const HUB = { en: 'Your badges open with mission 15: three days in a row.', fr: 'Tes badges s’ouvrent avec la mission 15 : trois journées de suite.',
+    es: 'Tus insignias se abren con la misión 15: tres días seguidos.' };
+  window.SweepDisc = { line, go, apply, hubNote: () => HUB[L] || HUB.en };
 })();
 
 /* ───────────── (31 Oct., brief « fluidité iOS 27 », lot 1) moving between pages like iOS ─────────────
@@ -7485,7 +7385,7 @@ new window.SweepMO(() => {
 
 /* ───────────── (31 Oct., fluidity 12) Stats on a phone in about two screens ─────────────
  * Stats: the 4 figures, the score and the curve, « Patterns to watch » and the calendar, then « Detailed analysis › ». The rest
- * (most active, drawdown, durations, P&L breakdown and the « Deep dive » with its 9 tabs) is one level down: #analytics/deep
+ * (drawdown, P&L breakdown and the « Deep dive » with its 10 tabs, durations among them: 10 Nov.) is one level down: #analytics/deep
  * (or a tab: #analytics/time…), a sub-page that slides in. Nothing removed: the same blocks, shown on one page or the other. */
 (function () {
   'use strict';
@@ -7497,13 +7397,13 @@ new window.SweepMO(() => {
     if (!on) { main.classList.remove('st-main', 'st-deep'); return; }
     const box = main.querySelector('.g-top') && main.querySelector('.g-top').parentElement; if (!box) return;
     const two = box.querySelector(':scope > .g-two');
-    [box.querySelector(':scope > .g-ins'), two && two.children[0], box.querySelector(':scope > .deep')].forEach((x) => { if (x && !x.classList.contains('st-detail')) x.classList.add('st-detail'); });
-    [box.querySelector(':scope > .ikpis'), box.querySelector(':scope > .g-top'), two && two.children[1], [...box.querySelectorAll(':scope > section.ic')].pop()].forEach((x) => { if (x && !x.classList.contains('st-keep')) x.classList.add('st-keep'); });
+    [box.querySelector(':scope > .g-ins'), box.querySelector(':scope > .deep')].forEach((x) => { if (x && !x.classList.contains('st-detail')) x.classList.add('st-detail'); });
+    [box.querySelector(':scope > .ikpis'), box.querySelector(':scope > .g-top'), two, [...box.querySelectorAll(':scope > section.ic')].pop()].forEach((x) => { if (x && !x.classList.contains('st-keep')) x.classList.add('st-keep'); });
     const deep = /^#analytics\/./.test(location.hash || '');
     main.classList.toggle('st-deep', deep); main.classList.toggle('st-main', !deep);
     if (!box.querySelector(':scope > .st-more')) box.insertAdjacentHTML('beforeend', `<a class="st-more" href="#analytics/deep" data-noi18n>${t()[0]}</a>`);
     // « Patterns to watch »: its first 3, the others open in place with one tap
-    const ul = two && two.children[1] && two.children[1].querySelector('ul.ins'), n = ul ? ul.children.length - 3 : 0;
+    const ul = two && two.querySelector('ul.ins'), n = ul ? ul.children.length - 3 : 0;
     if (ul && n > 0 && !ul.nextElementSibling?.classList.contains('st-ins-more') && !ul.classList.contains('st-all')) ul.insertAdjacentHTML('afterend', `<button type="button" class="link st-ins-more" data-noi18n>${t()[2].replace('{n}', n)}</button>`);
     if (!main.querySelector(':scope > .st-back')) main.insertAdjacentHTML('afterbegin', `<a class="nav-back st-back" href="#analytics" data-noi18n>${t()[1]}</a>`);
   }

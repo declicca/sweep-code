@@ -52,7 +52,7 @@ with sync_playwright() as p:
     pg.unroute('**/api/**')
     # (29 Oct.) what changed under the card that moved, for the next failure on the CI (the accounts arriving after the first paint?)
     acc = pg.evaluate("[window.__acc0 ?? null, (S.accounts || []).length, Math.round((document.querySelector('#main .d-acc') || { getBoundingClientRect: () => ({ height: 0 }) }).getBoundingClientRect().height)]")
-    ok(pg.locator('#gpLine').count() == 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan line in « Now », coming back: nothing pushed down ({pg.evaluate(CLS)} {pg.evaluate("window.__ls.filter((x) => x.v > 0.0005)")}; accounts at the first paint, at the end, the accounts card height: {acc})')   # (21 Oct.: what moved, in the failure line — the only one GitHub shows)
+    ok(pg.locator('#gpLine').count() <= 1 and pg.evaluate(CLS) < 0.005, f'3 {tag}: Today with the gameplan started (its line or « Now », one line: 10 Nov.), coming back: nothing pushed down ({pg.evaluate(CLS)} {pg.evaluate("window.__ls.filter((x) => x.v > 0.0005)")}; accounts at the first paint, at the end, the accounts card height: {acc})')   # (21 Oct.: what moved, in the failure line — the only one GitHub shows)
     pg.evaluate("fetch('api/game/gameplan/stop', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Requested-With': 'fetch'}, body: '{}'})"); pg.wait_for_timeout(600)
     c.close()
   ok(not errs, f'no page error ({errs[:2]})')

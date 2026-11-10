@@ -48,7 +48,7 @@ Events::on('feedback.status_changed', function (array $p): void {
 });
 function mb_strimwidth_safe(string $s, int $n): string { return strlen($s) <= $n ? $s : rtrim(function_exists('mb_substr') ? mb_substr($s, 0, $n) : substr($s, 0, $n)) . '…'; }
 
-// Crews & buddy (game/v3c.php)
+// Crews & buddy (retired 10 Nov. 2026: kept so their old notifications still show)
 Notify::register('buddy_invite', ['category' => 'achievements', 'icon' => 'user']);
 Notify::register('buddy_cheer', ['category' => 'achievements', 'icon' => 'star']);
 Notify::register('buddy_swept', ['category' => 'achievements', 'icon' => 'star']);

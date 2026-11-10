@@ -61,9 +61,10 @@ async def main():
     ok(b and b['phase'] == 'funded' and b['dd'] and b['dd_type'], f'Lucid funded: its catalogue drawdown ({b})')
     await pg.evaluate("location.hash='#dashboard'"); await pg.wait_for_timeout(1500)
     await pg.evaluate(f"location.hash='#account/{b['id']}'"); await pg.wait_for_timeout(1500)
-    row = await pg.evaluate("(document.querySelector('#main .nav-live-row')||{innerText:''}).innerText.replace(/\\n/g,' ')")
-    ok('Passer en live' in row, f'the funded account offers « Passer en live » ({row})')
-    await pg.locator('#main [data-live-go]').click(); await pg.wait_for_timeout(1800)
+    # (10 Nov., brief « produit final » step 4) « Passer en live » is in the page's « ⋯ » menu
+    row = await pg.evaluate("(() => { const d = document.querySelector('#main details.menu'); if (d) d.open = true; return (document.querySelector('#main details.menu [data-live-go]')||{innerText:''}).innerText.replace(/\\n/g,' ') })()")
+    ok('Passer en live' in row, f'the funded account offers « Passer en live » in « ⋯ » ({row})')
+    await pg.locator('#main details.menu [data-live-go]').click(); await pg.wait_for_timeout(1800)
     r=await pg.evaluate(f"(()=>{{const o=getDoc('accounts','{b['id']}'), n=S.accounts.find(x=>x.from_funded==='{b['id']}'); return {{old:[o.status,o.result], new:n?[n.phase,n.preset,n.rules.payout_max_c,n.rules.payout_max_pct,n.rules.payout_win_days]:null, page:location.hash, badge:!!document.querySelector('#main .nav-live')}}}})()")
     ok(r['new'] and r['new'][0] == 'live' and (r['new'][1] or '').endswith('|live|'), f'moved: the live account with its own rules ({r["new"]})')
     ok(r['old'] == ['archived', 'live'] and r['page'].startswith('#account/') and r['badge'], f'the funded account archived as « live », the new one opened with its LIVE badge ({r["old"]}, {r["page"]}, {r["badge"]})')

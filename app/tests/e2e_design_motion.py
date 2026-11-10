@@ -5,8 +5,9 @@ Uses the signed-in trader's sample data; changes nothing. Phone 390 and computer
  1  one curve: on the main pages, at least 97 % of the transitions use the site's spring (--spring: linear(…), or
     cubic-bezier(.32,.72,0,1) where the browser has no linear(); design chantier, step 5)
  2  short: no transition over 350 ms on the main pages; sheets 340 ms; the page entrance ≤ 350 ms
- 3  the decorative loops stop by themselves (the Sweep AI star: 3 rounds, not forever)
- 4  transform / opacity: Wrapped's story bar scales (no width), the skeletons breathe in opacity, the entrance has no blur
+ 3  no decorative loop (10 Nov., brief « produit final » step 7): the Sweep AI star stays still; only the loading skeletons
+    and spinners loop
+ 4  transform / opacity: the skeletons breathe in opacity, the entrance has no blur
  5  « Reduce motion »: transitions and animations are instant; a sub-page fades in 150 ms instead of sliding (31 Oct.)
  6  « Reduce transparency »: the bottom bar and the sheets are opaque, without blur
  7  « More contrast »: the secondary grey is as dark as the grey, lines stronger
@@ -48,10 +49,13 @@ with sync_playwright() as p:
     sh = pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--dur-sheet').trim()")
     ok(sh == '340ms', f'2 {w}: sheets {sh}')
     tw = pg.evaluate("(()=>{const i=document.querySelector('.ask-fab-ic i'); return i?getComputedStyle(i).animationIterationCount:null})()")
-    ok(tw == '3', f'3 {w}: the Sweep AI star twinkles {tw} rounds, then stops')
-    kf = pg.evaluate("""(()=>{const out={};const all=[];const walk=(l)=>{for(const r of l){all.push(r);if(r.cssRules&&r.type!==7)walk(r.cssRules)}};for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(e){}}for(const r of all){if(r.type===7&&['wr-fill','shimmer','nav-sk','sc-sh','sw-rise'].includes(r.name))out[r.name]=r.cssText}return out})()""")
+    ok(pg.evaluate("(()=>{const i=document.querySelector('.ask-fab-ic i'); return !i || getComputedStyle(i).animationName === 'none'})()"), f'3 {w}: the Sweep AI star stays still ({tw})')
+    loops = pg.evaluate("""(()=>{const out=new Set();const walk=(l)=>{for(const r of l){if(r.cssRules&&!r.selectorText)walk(r.cssRules);else if(r.style&&/infinite/.test(r.style.animation||r.style.animationIterationCount||''))out.add((r.style.animationName||r.style.animation).split(' ')[0])}};for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(e){}}return [...out]})()""")
+    deco = [k for k in loops if k not in ('shimmer', 'sc-sh', 'nav-rt-pulse', 'spin', 'nav-ptr-spin', 'sai-b', 'dot', 'airp')]
+    ok(not deco, f'3 {w}: only loading loops ({sorted(loops)}; decorative: {deco})')
+    kf = pg.evaluate("""(()=>{const out={};const all=[];const walk=(l)=>{for(const r of l){all.push(r);if(r.cssRules&&r.type!==7)walk(r.cssRules)}};for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(e){}}for(const r of all){if(r.type===7&&['shimmer','sc-sh','sw-rise','nav-rt-pulse'].includes(r.name))out[r.name]=r.cssText}return out})()""")
     bad = {k: v for k, v in kf.items() if re.search(r'width|background-position|filter', v)}
-    ok(len(kf) >= 4 and not bad, f'4 {w}: {sorted(kf)} move only transform / opacity ({list(bad)})')
+    ok(len(kf) >= 3 and not bad, f'4 {w}: {sorted(kf)} move only transform / opacity ({list(bad)})')
     allerr += errs; c.close()
   c, pg, errs = page(br, 390, True, reduced_motion='reduce')
   r = pg.evaluate("(()=>{const b=document.querySelector('.bottomnav'); const s=getComputedStyle(b); return [s.transitionDuration.split(', ').map(parseFloat).every(x=>x<0.02), document.getAnimations().every(a=>(a.effect.getComputedTiming().duration||0)<20)]})()")
