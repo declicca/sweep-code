@@ -202,8 +202,9 @@ def _nx_title(k, at, L):
         return _fit([f"{n['en']} Release Dates {'2026–2027' if at.year == 2026 else y} · Next: {sd}, {tm} ET", f"{n['en']} Release Dates {y} · Next: {sd}, {tm} ET",
                      f"{n.get('short', n['en'])} Release Dates {y} · Next: {sd}, {tm} ET"], 0, 60)
     nx_ = {"fr": "Prochaines" if n.get("pl") else "Prochain", "es": "Próximas" if n.get("pl") else "Próximo"}[L]
-    if L == "fr": return _fit([f"Dates {n['de']} {y} · {nx_} : {sd}, {tm} ET", f"{n['fr']} {y} · {nx_} : {sd}, {tm} ET"], 0, 60)
-    return _fit([f"Fechas {n['dl']} {y} · {nx_}: {sd}, {tm} ET", f"{n['es']} {y} · {nx_}: {sd}, {tm} ET"], 0, 60)
+    # « heure » / « hora » first: French and Spanish searches ask for the time (nfp heure, a qué hora es el CPI, Search Console, Nov. 10)
+    if L == "fr": return _fit([f"Dates et heure {n['de']} {y} · {nx_} : {sd}, {tm} ET", f"Dates {n['de']} {y} · {nx_} : {sd}, {tm} ET", f"{n['fr']} {y} · {nx_} : {sd}, {tm} ET"], 0, 60)
+    return _fit([f"Fechas y hora {n['dl']} {y} · {nx_}: {sd}, {tm} ET", f"Fechas {n['dl']} {y} · {nx_}: {sd}, {tm} ET", f"{n['es']} {y} · {nx_}: {sd}, {tm} ET"], 0, 60)
 
 def _nx_desc(k, e, at, L):
     n = NXN[k]; lg = _long(at.date(), L); h = _hm(e["time"], L); est = e["status"] == "estimated"
@@ -611,6 +612,16 @@ def hours_written(lang, t):
               f"Las mismas sesiones en {names}. Estados Unidos y Europa cambian la hora en fechas distintas: durante unas semanas en marzo y hacia principios de noviembre, la diferencia es una hora menor.")
     if lang == "es": intro = {l: intro[l] + " " + {"en": "", "fr": "", "es": "México, Colombia y Argentina no cambian la hora; Chile la cambia en sentido contrario, por el hemisferio sur."}[l] for l in LANGS}
     if lang == "fr": intro = {l: intro[l] + " " + {"en": "", "fr": "Abidjan, Dakar et Casablanca ne changent pas d’heure.", "es": ""}[l] for l in LANGS}
+    # hours by exchange (CME Group product pages; searches ask for « cbot / nymex / euro futures trading hours », Search Console, Nov. 10)
+    G24 = T("Sun 6:00 p.m. – Fri 5:00 p.m., break 5:00–6:00 p.m.", "dim. 18 h – ven. 17 h, pause de 17 h à 18 h", "dom. 18:00 – vie. 17:00, pausa de 17:00 a 18:00")
+    EXCH = [("CME", ["es", "mes", "nq", "mnq", "rty", "m2k", "6e"], G24), ("CBOT", ["ym", "mym"], G24), ("NYMEX", ["cl", "mcl"], G24), ("COMEX", ["gc", "mgc", "si"], G24),
+            (t(T("CBOT grains (corn, soybeans, wheat)", "CBOT, grains (maïs, soja, blé)", "CBOT, granos (maíz, soja, trigo)")), [],
+             T("Sun–Fri 8:00 p.m. – 8:45 a.m., then Mon–Fri 9:30 a.m. – 2:20 p.m.", "dim.–ven. 20 h – 8 h 45, puis lun.–ven. 9 h 30 – 14 h 20", "dom.–vie. 20:00 – 8:45, luego lun.–vie. 9:30 – 14:20"))]
+    fl, hl_ = _html.escape(t(T("Futures","Futures","Futuros"))), _html.escape(t(T("New York time","Heure de New York","Hora de Nueva York")))
+    erows = "".join(f'<tr><th scope="row">{x}</th><td data-label="{fl}">{", ".join(f"<a href=\"{href(lang, f"contracts/{c}-futures.html")}\">{c.upper()}</a>" for c in cs) or "—"}</td><td data-label="{hl_}">{t(h)}</td></tr>' for x, cs, h in EXCH)
+    exch = (f'<h2 id="by-exchange">{t(T("Trading hours by exchange: CME, CBOT, NYMEX, COMEX","Les heures par Bourse : CME, CBOT, NYMEX, COMEX","El horario por bolsa: CME, CBOT, NYMEX, COMEX"))}</h2>'
+            f'<p>{t(T("CME, CBOT, NYMEX and COMEX are the four exchanges of CME Group, and their futures all trade on CME Globex. Index, energy, metals and currency futures, the euro (6E) included, share the same hours. Grains are the exception, with two sessions a day.", "CME, CBOT, NYMEX et COMEX sont les quatre Bourses du CME Group, et leurs futures se négocient tous sur CME Globex. Les futures sur indices, énergie, métaux et devises, l’euro (6E) compris, ont les mêmes heures. Les grains font exception, avec deux sessions par jour.", "CME, CBOT, NYMEX y COMEX son las cuatro bolsas de CME Group, y todos sus futuros se negocian en CME Globex. Los futuros de índices, energía, metales y divisas, el euro (6E) incluido, tienen el mismo horario. Los granos son la excepción, con dos sesiones al día."))}</p>'
+            f'<div class="cmp-wrap"><table class="cmp guide"><thead><tr><th scope="col">{t(T("Exchange","Bourse","Bolsa"))}</th><th scope="col">{fl}</th><th scope="col">{hl_}</th></tr></thead><tbody>{erows}</tbody></table></div>')
     hol = _us_holidays(D.date.today())
     hl = _html.escape(t(T("Holiday","Jour férié","Festivo")))
     hrows = "".join(f'<tr><th scope="row" class="num">{_date(t, d.isoformat())}</th><td data-label="{hl}">{t(n)}</td></tr>' for d, n in hol)
@@ -618,10 +629,10 @@ def hours_written(lang, t):
             f'<p>{t(T("On these days, CME Globex has special hours: closed, or an early close for equity, energy and metals futures. CME confirms each schedule about two weeks before on its holiday calendar.", "Ces jours-là, CME Globex a des heures spéciales : fermé, ou une fermeture anticipée pour les futures sur indices, énergie et métaux. Le CME confirme chaque horaire environ deux semaines avant dans son calendrier des jours fériés.", "Esos días, CME Globex tiene un horario especial: cerrado, o un cierre anticipado para los futuros de índices, energía y metales. CME confirma cada horario unas dos semanas antes en su calendario de festivos."))}'
             f' <a href="https://www.cmegroup.com/tools-information/holiday-calendar.html" rel="noopener">cmegroup.com</a>.</p>'
             f'<div class="cmp-wrap"><table class="cmp guide"><thead><tr><th scope="col">{t(T("Date","Date","Fecha"))}</th><th scope="col">{t(T("Holiday","Jour férié","Festivo"))}</th></tr></thead><tbody>{hrows}</tbody></table></div>')
-    return (f'<h2 id="your-city">{t(T("Futures hours in your city","Les heures des futures dans ta ville","El horario de futuros en tu ciudad"))}</h2><p>{t(intro)}</p>{tables}' + holi)
+    return exch + (f'<h2 id="your-city">{t(T("Futures hours in your city","Les heures des futures dans ta ville","El horario de futuros en tu ciudad"))}</h2><p>{t(intro)}</p>{tables}' + holi)
 
 def page_hours(lang, t):
-    hero = ui.hero(t, T("Market hours","Heures de marché","Horario"), T("Futures market hours, in your time zone.","Heures des marchés futures, dans ton fuseau horaire.","Horario de los mercados de futuros, en tu zona horaria."),
+    hero = ui.hero(t, T("Market hours","Heures de marché","Horario"), T("Futures trading hours, in your time zone.","Heures des marchés futures, dans ton fuseau horaire.","Horario de los mercados de futuros, en tu zona horaria."),
         T("CME Globex sessions converted to your local time, with what’s open right now.","Les sessions CME Globex converties à ton heure locale, avec ce qui est ouvert en ce moment.","Las sesiones de CME Globex convertidas a tu hora local, con lo que está abierto ahora."))
     S = [("globex",T("Globex session","Session Globex","Sesión Globex"),"18:00","17:00"),("asia",T("Asia","Asie","Asia"),"18:00","03:00"),("london",T("London","Londres","Londres"),"03:00","08:00"),
          ("ny",T("New York (RTH)","New York (RTH)","Nueva York (RTH)"),"09:30","16:00"),("nyam",T("New York AM","New York matin (AM)","Nueva York mañana (AM)"),"09:30","12:00"),("nypm",T("New York PM","New York après-midi (PM)","Nueva York tarde (PM)"),"13:30","16:00"),("break",T("Daily break","Pause quotidienne","Pausa diaria"),"17:00","18:00")]
@@ -650,8 +661,8 @@ tick();setInterval(tick,30000);}})();</script>'''
     b = (ui.sec(f'<div class="article">{openq}</div>' + clock + f'<div style="margin-top:24px">{tbl}</div><p class="fine" style="margin-top:16px">{t(note)}</p>', "t", "hours", width="read")
          + ui.sec(f'<article class="article">{hours_written(lang, t)}</article>', "n", "city", width="read")
          + ui.sec(f'<article class="article">{localize(lang, t(HOURS_HELP))}</article>', "n", "read", width="read") + js)
-    return (t(T("Futures market hours in your time zone (CME Globex) · Sweep","Heures des futures (CME Globex) dans ton fuseau · Sweep","Horario de futuros en tu zona horaria (CME Globex) · Sweep")),
-            t(T("CME Globex futures hours converted to your local time: Asia, London and New York sessions, daily break, and whether the market is open now.","Les heures CME Globex converties à ton heure locale : sessions Asie, Londres et New York, pause quotidienne, et si le marché est ouvert maintenant.","El horario de CME Globex en tu hora local: sesiones de Asia, Londres y Nueva York, pausa diaria y si el mercado está abierto ahora.")),
+    return (t(T("Futures Trading Hours: CME Globex in Your Time Zone · Sweep","Heures des futures (CME Globex) dans ton fuseau · Sweep","Horario de futuros en tu zona horaria (CME Globex) · Sweep")),
+            t(T("CME Globex futures trading hours in your local time: sessions, daily break, holidays, and the hours of CME, CBOT, NYMEX and COMEX futures.","Les heures CME Globex converties à ton heure locale : sessions Asie, Londres et New York, pause quotidienne, et si le marché est ouvert maintenant.","El horario de CME Globex en tu hora local: sesiones de Asia, Londres y Nueva York, pausa diaria y si el mercado está abierto ahora.")),
             hero + b + ui.final(lang, t), "")
 SYSTEM_PAGES.add("futures-market-hours.html")
 

@@ -481,9 +481,18 @@ def make_rules_page(f):
                "apex": {"en": ["Apex Trader Funding Rules 2026: Drawdown & Payouts · Sweep"], "fr": ["Règles Apex Trader Funding 2026 : drawdown et payouts · Sweep",
                                                                                                   "Règles Apex Trader Funding 2026 : drawdown et payouts"]}}
         title = next(c for c in OVR.get(f["id"], {}).get(lang, []) + chain[lang] if len(c) <= 60)
-        desc = t(T(f"{name} rules from Sweep’s weekly check ({day(when, 'en')}): max loss, daily loss limit, consistency, minimum days and payout conditions, {kk(sizes_all[0])} to {kk(sizes_all[-1])}.",
-                   f"Règles {name} 2026 : drawdown, perte journalière max, règle de consistance, jours minimum et conditions de payout, vérifiées le {day(when, 'fr')}.",
-                   f"Reglas de {name} 2026: drawdown, pérdida diaria máxima, regla de consistencia, días mínimos y condiciones de payout, revisadas el {day(when, 'es')}."))
+        last = wk or when   # the latest check, as in the « verified » line: a weekly check dated weeks ago looked stale in search results (Search Console, Nov. 10)
+        fit = lambda *c: next((x for x in c if len(x) <= 158), c[-1])   # the longest that fits a search result, never cut with « … »
+        rg = f"{kk(sizes_all[0])} to {kk(sizes_all[-1])}"
+        desc = t(T(fit(f"{name} rules 2026, checked every week (last: {day(last, 'en')}): drawdown, daily loss limit, consistency, minimum days and payout rules, {rg}.",
+                       f"{name} rules 2026, checked weekly (last: {day(last, 'en')}): drawdown, daily loss limit, consistency, minimum days and payout rules.",
+                       f"{name} rules 2026, checked weekly (last: {day(last, 'en')}): drawdown, daily loss, consistency, minimum days, payouts."),
+                   fit(f"Règles {name} 2026, vérifiées chaque semaine (dernière : {day(last, 'fr')}) : drawdown, perte journalière max, consistance, jours minimum et règles de payout.",
+                       f"Règles {name} 2026, vérifiées chaque semaine (dernière : {day(last, 'fr')}) : drawdown, perte journalière, consistance, jours minimum, payouts.",
+                       f"Règles {name} 2026, vérifiées chaque semaine ({day(last, 'fr')}) : drawdown, perte journalière, consistance, payouts."),
+                   fit(f"Reglas de {name} 2026, revisadas cada semana (última: {day(last, 'es')}): drawdown, pérdida diaria máxima, consistencia, días mínimos y reglas de payout.",
+                       f"Reglas de {name} 2026, revisadas cada semana (última: {day(last, 'es')}): drawdown, pérdida diaria, consistencia, días mínimos, payouts.",
+                       f"Reglas de {name} 2026, revisadas cada semana ({day(last, 'es')}): drawdown, pérdida diaria, consistencia, payouts.")))
         ld = jsonld({"@context":"https://schema.org","@graph":[
             {"@type":"WebPage","name":title,"inLanguage":lang,"dateModified":when,"url":f"https://{DOMAIN}{href(lang, page_of(f))}","about":{"@type":"Organization","name":name,"url":(f.get("sources") or [None])[0]}},
             {"@type":"FAQPage","mainEntity":[{"@type":"Question","name":t(q),"acceptedAnswer":{"@type":"Answer","text":re.sub(r"<[^>]+>", "", t(a))}} for q, a in faqs]}]})
