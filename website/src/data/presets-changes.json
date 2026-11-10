@@ -1,5 +1,23 @@
 [
  {
+  "date": "2026-11-09",
+  "firm": "mffu",
+  "program": "mffu-builder",
+  "size": 50000,
+  "rule": "funded.payout.cycle_pos",
+  "old": null,
+  "new": true
+ },
+ {
+  "date": "2026-11-09",
+  "firm": "mffu",
+  "program": "mffu-rapid-eod",
+  "size": 25000,
+  "rule": "funded.payout.min",
+  "old": null,
+  "new": 500
+ },
+ {
   "date": "2026-11-02",
   "firm": "alpha",
   "program": "direct",
