@@ -28,7 +28,13 @@ def href(lang, page):
 UTM_JS = ("<script>(function(){try{var p=new URLSearchParams(location.search);var k=['utm_source','utm_medium','utm_campaign','utm_content'];"
           "var has=k.some(function(x){return p.get(x);});if(has&&!sessionStorage.getItem('sweep_utm_pending')){var d={};k.forEach(function(x){d[x]=(p.get(x)||'').slice(0,50);});sessionStorage.setItem('sweep_utm_pending',JSON.stringify(d));}"
           "window.sweepWriteUTM=function(){try{var v=sessionStorage.getItem('sweep_utm_pending');if(v&&document.cookie.indexOf('sweep_utm=')===-1){document.cookie='sweep_utm='+encodeURIComponent(v)+'; domain=.makeitsweep.com; path=/; max-age=2592000; SameSite=Lax; Secure';}}catch(e){}};"
-          "if(localStorage.getItem('sweep-consent')==='yes')window.sweepWriteUTM();}catch(e){}})();</script>")
+          "if(localStorage.getItem('sweep-consent')==='yes')window.sweepWriteUTM();}catch(e){}})();</script>"
+          # creator links (App note of 2 Nov.): makeitsweep.com/?ref=CODE keeps the code for the visit and adds it to every link to the
+          # app, with the UTMs; the app counts the click and ties the sign-up to the creator. Letters and digits, 3 to 16; the first wins.
+          "<script>(function(){try{var r=new URLSearchParams(location.search).get('ref');if(r&&/^[A-Za-z0-9]{3,16}$/.test(r)&&!sessionStorage.getItem('sweep_ref'))sessionStorage.setItem('sweep_ref',r);"
+          "var c=sessionStorage.getItem('sweep_ref');if(!c)return;var tag=function(a){try{var u=new URL(a.href);if(u.hostname==='app.makeitsweep.com'&&!u.searchParams.has('ref')){u.searchParams.set('ref',c);a.href=u.href;}}catch(e){}};"
+          "document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('a[href^=\"https://app.makeitsweep.com\"]').forEach(tag);});"
+          "document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(a)tag(a);},true);}catch(e){}})();</script>")
 
 MARK = ('<svg viewBox="40 8 40 102" fill="none" aria-hidden="true"><line x1="60" y1="14" x2="60" y2="30" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>'
         '<rect x="46" y="28" width="28" height="44" rx="5" fill="currentColor"/><line x1="60" y1="70" x2="60" y2="84" stroke="currentColor" stroke-width="6"/>'
