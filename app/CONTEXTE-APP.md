@@ -1812,3 +1812,10 @@ Règle : une fonction reste si elle sert la boucle (plan, trade, revue, compte, 
 ### Passation (10 nov.)
 - Tests retirés : voir `tests/RETIRED.md` (10 nov.). Ajoutés au cœur de `run-all.sh` : `e2e_trade_tap_still`, `e2e_account_lean`, `e2e_stats_lean`, `e2e_settings_lean`.
 - Adaptés : `e2e_design_motion` (plus de boucle décorative), `e2e_sync_ui` (« Modifier » par « ⋯ » au téléphone), `e2e_tour_fixes` (A3 retiré : plus de toast « n nouveautés »), `e2e_life_weeks` (B1 : la mission peut céder sa ligne à une offre ou au bilan), `e2e_page_shift`, `e2e_parcours_defauts`, `e2e_eval_to_funded`, `e2e_live_accounts`, `e2e_payout_conditions`, `e2e_disc_target`, `e2e_nav_1031`, `e2e_design_pages`, `e2e_coach`, `e2e_first_run`, `e2e_share` (le niveau, le profil public et la carte du parcours retirés ; « ⋯ » au téléphone ; tuiles de Stats dans l'analyse détaillée).
+
+## Après l'audit complet (11 nov., `docs/analyse/AUDIT-COMPLET-2026-11-11.md`)
+- **« Importer ma séance »** (Aujourd'hui, sous « Ajouter un trade » de l'étape Exécution, ordinateur seulement comme « Pas de trading aujourd'hui ») : pour un trader dont des trades viennent d'un fichier CSV (`csvTrader`, `nav.js` : une clé d'import qui n'est pas celle de la synchro) et tant que la journée n'a aucun trade. Ouvre `#import`. EN / FR / ES.
+- **Le « ? » de la routine** garde sa taille (30 px) avec une zone de 44 px sous le doigt (`nav.css`, `pointer:coarse`). Les autres petits contrôles (note A–F, puces, plein écran du graphique) avaient déjà leur zone (`nav.css`, « 44 px zone ») : le constat 3.5 de l'audit sur la page d'un trade était faux.
+- **API de TopstepX (ProjectX) : écartée.** 29 $ par mois pour le trader, une clé qui donne l'accès complet au trading (pas de lecture seule), comptes live exclus. Pas de synchro par cette voie.
+- **Règle pour la suite** : une page qu'on touche voit ses observateurs (`SweepMO`) ramenés dans le dessin de la page (ce qu'un observateur ajoute apparaît une image plus tard : source des « Trade page jump »).
+- Test ajouté au cœur de `run-all.sh` : `e2e_import_day`.

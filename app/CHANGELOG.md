@@ -2,6 +2,7 @@
 
 Une ligne par livraison, la plus récente en haut. Le détail (règles, causes, tests) : `CONTEXTE-APP.md`. Ce fichier n'est pas servi en ligne (`.htaccess` refuse tous les `.md`).
 
+- **11 nov. 2026 — Après l'audit complet.** Aujourd'hui : « Importer ma séance » sous l'étape Exécution pour un trader qui importe ses trades par CSV (ordinateur, journée sans trade) ; le « ? » de la routine a 44 px sous le doigt au téléphone. Test : `e2e_import_day`.
 - **10 nov. 2026 — Brief « produit final ».** Le jeu réduit à la routine (journées balayées, série et gels, badges, missions, plan de 90 jours, bilan de la semaine sans coffre) : saisons, ligues, crews, boss, coffre, Wrapped, Mois en revue, thèmes, son, Discord et profil public retirés. Aujourd'hui : une seule ligne sous la routine. Page d'un trade : plus de barre d'onglets ni de compteurs, l'IA et « Modifier » dans « ⋯ » au téléphone. Page d'un compte −30 % de hauteur. Stats : 10 cartes avant l'analyse détaillée. Réglages plus courts. Plus de confettis ni de boucles décoratives.
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-k.** Dès le premier vrai trade, les données d'exemple sont masquées partout (jamais supprimées) ; une ligne propose « Les retirer ».
 - **16 oct. 2026 — Brief 00, phase 1, lot 1.2-f.** Une seule consistance partout (page du compte, prêt pour un payout, serveur) : le meilleur jour en % du profit net total, sauf si le catalogue d'une firme dit autrement.

@@ -3458,3 +3458,6 @@ html body #main .about .nav-about-rows{margin-top:6px}
 html body #main .about .sc-legal{margin:8px 0 0;text-align:left}
 html body #main .about .surface > .nav-ver{margin:6px 0 0}
 @media (max-width:600px){html body .nav-rt-tg > .nav-rt-fold{width:30px!important;min-width:30px!important}html body .nav-rt-tg > .nav-rt-help{width:28px}}   /* « Your routine today » whole, with its « ? » */
+
+/* (11 Nov., audit 3.5) the routine's small « ? » keeps its size, with 44 px under the finger (the other small controls already have their zone) */
+@media (pointer:coarse){html body .nav-rt-sub .nav-rt-help,html body .nav-rt-tg > .nav-rt-help{position:relative}html body .nav-rt-sub .nav-rt-help::after,html body .nav-rt-tg > .nav-rt-help::after{content:"";position:absolute;inset:-7px}}

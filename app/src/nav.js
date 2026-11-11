@@ -4310,17 +4310,17 @@ window.SweepMO = window.SweepMO || class {
     en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day complete', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
       s1: 'Plan', s1d: 'Make your plan', s2: 'Execution', s2d: 'Trade your plan', s3: 'Review', s3d: 'Do your review',
       todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', inPlan1: '{c} of 1 trade in your plan', noPlanN: '{n} trades · no plan', noPlan1: '1 trade · no plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
-      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', ydayP: 'Yesterday: {t} left', b1s: 'Plan it', b2s: 'Add', b3s: 'Review', see: 'See',
+      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', impDay: 'Import my session', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', ydayP: 'Yesterday: {t} left', b1s: 'Plan it', b2s: 'Add', b3s: 'Review', see: 'See',
       help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day complete »: your streak goes on. Profit never counts, only the process.' },
     fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée complète', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
       s1: 'Plan', s1d: 'Fais ton plan', s2: 'Exécution', s2d: 'Respecte ton plan', s3: 'Revue', s3d: 'Fais ta revue',
       todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', inPlan1: '{c} sur 1 trade dans ton plan', noPlanN: '{n} trades · pas de plan', noPlan1: '1 trade · pas de plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
-      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', ydayP: 'Hier : encore {t}', b1s: 'Planifier', b2s: 'Ajouter', b3s: 'Réviser', see: 'Voir',
+      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', impDay: 'Importer ma séance', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', ydayP: 'Hier : encore {t}', b1s: 'Planifier', b2s: 'Ajouter', b3s: 'Réviser', see: 'Voir',
       help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée complète » : ta série continue. Le profit ne compte jamais, seulement le processus.' },
     es: { title: 'Tu rutina de hoy', how: 'Cómo funciona', of: '{n} de 3 hechas', swept: 'Día completado', closed: 'Los mercados están cerrados hoy. El descanso es parte del proceso.', dayoffT: 'Día libre', dayoff: 'Sin operar hoy: tu racha está protegida.',
       s1: 'Plan', s1d: 'Haz tu plan', s2: 'Ejecución', s2d: 'Respeta tu plan', s3: 'Revisión', s3d: 'Haz tu revisión',
       todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', inPlan1: '{c} de 1 operación en tu plan', noPlanN: '{n} operaciones · sin plan', noPlan1: '1 operación · sin plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
-      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', ydayP: 'Ayer: quedan {t}', b1s: 'Planificar', b2s: 'Añadir', b3s: 'Revisar', see: 'Ver',
+      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', impDay: 'Importar mi sesión', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', ydayP: 'Ayer: quedan {t}', b1s: 'Planificar', b2s: 'Añadir', b3s: 'Revisar', see: 'Ver',
       help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue. El beneficio nunca cuenta, solo el proceso.' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -4554,12 +4554,15 @@ window.SweepMO = window.SweepMO || class {
     return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${one}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
-        ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', '', t('b2s'))}
+        ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', !d.trades && csvTrader() ? `<button type="button" class="link nav-rt-off" data-rt="import">${t('impDay')}</button>` : '', t('b2s'))}
         ${step(3, r.review || 0, 'review', t('s3'), t('s3d'), s3, s3 === 'done' ? t('reviewDone') : t('reviewTodo'), s3 === 'done' ? t('b3v') : t('b3'), 'review', '', s3 === 'done' ? t('see') : t('b3s'))}
       </div>
       ${NOWSTOP && s3 !== 'done' ? `<p class="nav-rt-finl"><button type="button" class="link nav-rt-fin" data-rt="fin">${t('fin')} ›</button></p>` : ''}
       ${helpT}</section>`;
   }
+  /* (11 Nov., audit 3.1) a trader whose trades come from a CSV file (Tradovate, Rithmic, TopstepX, TradingView: an import key that is
+     not the sync's) gets « Import my session » under the Execution step while the day has no trade — on a computer, where the file is */
+  const csvTrader = () => { try { return (S.trades || []).some((x) => !x.demo && x.import_key && !/^sync:/.test(x.import_key)); } catch (e) { return false; } };
   window.SweepNowRefresh = () => { try { place(); } catch (e) { /* never blocks */ } };
   function place() {
     if (!/^#?(dashboard)?$/.test((location.hash || '').replace(/^#/, ''))) return;
@@ -4591,6 +4594,7 @@ window.SweepMO = window.SweepMO || class {
       const day = rtDay() || (typeof todayStr === 'function' ? todayStr() : ''), nx = lockTrades(day).find((x) => !graded(x));
       location.hash = nx ? '#trade/' + encodeURIComponent(nx.id) : '#journal/' + day;
     }
+    else if (k === 'import') location.hash = '#import';
     else if (k === 'dayoff') { const o = g && g.querySelector('[data-g=dayoff]'); if (o) o.click(); }
     else if (k === 'yday') { const o = document.querySelector('#main [data-g=yday]'); if (o) o.click(); }
     else if (k === 'hub') {
