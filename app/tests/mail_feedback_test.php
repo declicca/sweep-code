@@ -96,7 +96,7 @@ $user('w2', 'en', 9, 1);
 ma_send('w2', 'inactive3d');
 ma_feedback_run(['w2'], $now);
 $ok($pairs() === ['w2:inactive3d'], 'an absence email queued today: week one waits');
-$age(3); ma_feedback_run(['w2'], $now);
+$age(3); ma_feedback_run(['w2'], time());   // time(): ma_send queued it a second or more after $now on a slow runner (CI, 10 Nov.)
 $ok($pairs() === ['w2:inactive3d', 'w2:weekOne'], '3 days later: week one leaves');
 
 // 6. switched off again: not claimed, the traders due get it once switched on
