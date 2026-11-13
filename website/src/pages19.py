@@ -442,12 +442,16 @@ def page_payout_guide(lang, t):
                  T(f'Take your balance, subtract the balance to keep, then stay within the firm’s minimum and maximum. The free <a href="{href("en", "payout-calculator.html")}">payout calculator</a> does it for you, and Sweep counts your payout conditions on every trade.',
                    f'Prends ton solde, retire le solde à garder, puis reste entre le minimum et le maximum de la firme. Le <a href="{href("fr", "payout-calculator.html")}">calculateur de payout</a> gratuit le fait pour toi, et Sweep compte tes conditions de payout à chaque trade.',
                    f'Toma tu saldo, resta el saldo a mantener y quédate entre el mínimo y el máximo de la firma. La <a href="{href("es", "payout-calculator.html")}">calculadora de payout</a> gratuita lo hace por ti, y Sweep cuenta tus condiciones de payout en cada operación.')))
+    from pages18 import payout_page_of, has_payouts   # each firm's payout rules alone (pages23.py)
+    each = (f'<h2>{t(T("Each firm’s payout rules, by account size", "Les règles de payout de chaque firme, par taille de compte", "Las reglas de payout de cada firma, por tamaño de cuenta"))}</h2>'
+            f'<p>{t(T("The table above shows a 50K account. Each firm has its own page with every account size, the minimum and maximum payout, and an example worked out:", "Le tableau ci-dessus montre un compte de 50K. Chaque firme a sa page avec toutes les tailles de compte, le payout minimum et maximum, et un exemple chiffré :", "La tabla de arriba muestra una cuenta de 50K. Cada firma tiene su página con todos los tamaños de cuenta, el payout mínimo y máximo, y un ejemplo con cifras:"))}</p>'
+            '<ul class="list">' + "".join(f'<li><a href="{href(lang, payout_page_of(f))}">{t(T(f"{f["name"]} payout rules", f"Règles de payout {fr_de(f["name"])}", f"Reglas de payout de {f["name"]}"))}</a></li>' for f in presets.FIRMS if has_payouts(f)) + "</ul>")
     rel = [("payout-calculator.html", T("Payout calculator", "Calculateur de payout", "Calculadora de payout")), (GUIDE_CONS, T("Consistency rules compared", "Règles de consistance comparées", "Reglas de consistencia comparadas")),
            (GUIDE_DD, T("Drawdown rules compared", "Règles de drawdown comparées", "Reglas de drawdown comparadas")), ("prop-firms/index.html", T("Prop firm rules", "Règles des prop firms", "Reglas de las prop firms")), (HUB, T("All guides", "Tous les guides", "Todas las guías"))]
     return _page(lang, t, T("Guide", "Guide", "Guía"),
         T("Prop firm payout rules, compared (2026).", "Les règles de payout des prop firms, comparées (2026).", "Las reglas de payout de las prop firms, comparadas (2026)."),
         answer_payouts(),
-        intro, table, "", faqs, rel,
+        intro, table, each, faqs, rel,
         T("Prop Firm Payout Rules Compared (2026) · Sweep", "Payouts des prop firms : règles comparées (2026) · Sweep", "Payouts de las prop firms: reglas comparadas (2026) · Sweep"),
         T(f"Payout rules of {FIRMS_N} futures prop firms, side by side: winning days, balance to keep, caps per payout and profit split, from Sweep’s weekly check.",
           f"Les règles de payout de {FIRMS_N} prop firms de futures, côte à côte : jours gagnants, solde à garder, plafonds et partage des profits, vérifiés chaque semaine.",
@@ -969,12 +973,14 @@ def make_firm_vs(a_id, b_id):
         firms_chips = [(page_of(f), {l: f["name"] for l in LANGS}) for f in both]
         others = [(vs_page_of(*(next(f for f in presets.FIRMS if f["id"] == i) for i in pr)), {l: f"{SHORT[pr[0]]} vs {SHORT[pr[1]]}" for l in LANGS}) for pr in FIRM_VS if pr != (a_id, b_id)]
         from pages17 import chiprow
+        from pages18 import payout_page_of, has_payouts
         b_ = (ui.sec(summary, "t", "summary")
               + ui.sec(ui.head(t, None, T("The differences at a glance.", "Les différences en bref.", "Las diferencias de un vistazo.")) + f'<div class="read">{glance_html}</div>', "n", "glance")
               + "".join(ui.sec(ui.head(t, None, h) + body + every(g, h), "t", k) for k, h, body, g in topics)
               + ui.sec(f'<p class="fine vs-note">{_checked_note(lang, t)}</p>' + band, "n", "note")
               + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs)
                        + chiprow(lang, t, T("Firm pages", "Pages des firmes", "Páginas de las firmas"), firms_chips, 32)
+                       + chiprow(lang, t, T("Payout rules", "Règles de payout", "Reglas de payout"), [(payout_page_of(f), {l: f["name"] for l in LANGS}) for f in both if has_payouts(f)], 12)
                        + chiprow(lang, t, T("Compare too", "Compare aussi", "Compara también"), others, 12), "n", "faq", width="read")
               + ui.read_next(lang, t, ["pass-prop-firm-evaluation.html", "funded-account-playbook.html", "prop-firm-rule-changes.html"]) + ui.final(lang, t))
         ld = jsonld({"@context": "https://schema.org", "@graph": [

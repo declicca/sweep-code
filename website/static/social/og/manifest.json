@@ -83,6 +83,90 @@
    "date": "2026-10-13"
   }
  },
+ "prop-firms/lucid-payout-rules.html": {
+  "en": {
+   "alt": "Lucid Trading payout rules 2026 · Minimum, maximum and split · Checked November 9, 2026",
+   "date": "2026-11-09"
+  },
+  "fr": {
+   "alt": "Règles de payout de Lucid Trading 2026 · Minimum, maximum et partage · Vérifiées le 9 novembre 2026",
+   "date": "2026-11-09"
+  },
+  "es": {
+   "alt": "Reglas de payout de Lucid Trading 2026 · Mínimo, máximo y reparto · Revisadas el 9 de noviembre de 2026",
+   "date": "2026-11-09"
+  }
+ },
+ "prop-firms/topstep-payout-rules.html": {
+  "en": {
+   "alt": "Topstep payout rules 2026 · Minimum, maximum and split · Checked November 9, 2026",
+   "date": "2026-11-09"
+  },
+  "fr": {
+   "alt": "Règles de payout de Topstep 2026 · Minimum, maximum et partage · Vérifiées le 9 novembre 2026",
+   "date": "2026-11-09"
+  },
+  "es": {
+   "alt": "Reglas de payout de Topstep 2026 · Mínimo, máximo y reparto · Revisadas el 9 de noviembre de 2026",
+   "date": "2026-11-09"
+  }
+ },
+ "prop-firms/apex-payout-rules.html": {
+  "en": {
+   "alt": "Apex Trader Funding payout rules 2026 · Minimum, maximum and split · Checked November 9, 2026",
+   "date": "2026-11-09"
+  },
+  "fr": {
+   "alt": "Règles de payout d’Apex Trader Funding 2026 · Minimum, maximum et partage · Vérifiées le 9 novembre 2026",
+   "date": "2026-11-09"
+  },
+  "es": {
+   "alt": "Reglas de payout de Apex Trader Funding 2026 · Mínimo, máximo y reparto · Revisadas el 9 de noviembre de 2026",
+   "date": "2026-11-09"
+  }
+ },
+ "prop-firms/take-profit-trader-payout-rules.html": {
+  "en": {
+   "alt": "Take Profit Trader payout rules 2026 · Minimum, maximum and split · Checked November 9, 2026",
+   "date": "2026-11-09"
+  },
+  "fr": {
+   "alt": "Règles de payout de Take Profit Trader 2026 · Minimum, maximum et partage · Vérifiées le 9 novembre 2026",
+   "date": "2026-11-09"
+  },
+  "es": {
+   "alt": "Reglas de payout de Take Profit Trader 2026 · Mínimo, máximo y reparto · Revisadas el 9 de noviembre de 2026",
+   "date": "2026-11-09"
+  }
+ },
+ "prop-firms/myfundedfutures-payout-rules.html": {
+  "en": {
+   "alt": "MyFundedFutures payout rules 2026 · Minimum, maximum and split · Checked November 9, 2026",
+   "date": "2026-11-09"
+  },
+  "fr": {
+   "alt": "Règles de payout de MyFundedFutures 2026 · Minimum, maximum et partage · Vérifiées le 9 novembre 2026",
+   "date": "2026-11-09"
+  },
+  "es": {
+   "alt": "Reglas de payout de MyFundedFutures 2026 · Mínimo, máximo y reparto · Revisadas el 9 de noviembre de 2026",
+   "date": "2026-11-09"
+  }
+ },
+ "prop-firms/alpha-futures-payout-rules.html": {
+  "en": {
+   "alt": "Alpha Futures payout rules 2026 · Minimum, maximum and split · Checked November 9, 2026",
+   "date": "2026-11-09"
+  },
+  "fr": {
+   "alt": "Règles de payout d’Alpha Futures 2026 · Minimum, maximum et partage · Vérifiées le 9 novembre 2026",
+   "date": "2026-11-09"
+  },
+  "es": {
+   "alt": "Reglas de payout de Alpha Futures 2026 · Mínimo, máximo y reparto · Revisadas el 9 de noviembre de 2026",
+   "date": "2026-11-09"
+  }
+ },
  "prop-firms/tradeify.html": {
   "en": {
    "alt": "Tradeify rules · Enter them once. Every trade is checked.",

@@ -10,6 +10,7 @@ NB, NNB = " ", " "
 
 def slug(f): return SLUG.get(f["id"], f["id"])
 def page_of(f): return f"prop-firms/{slug(f)}.html"
+def payout_page_of(f): return f"prop-firms/{slug(f)}-payout-rules.html"   # the firm's payout rules alone (pages23.py)
 
 # ---------------------------------------------------------------- formats (same as the app: FR « 3 000 $ », ES « 3.000 $ »)
 def usd(v, lang):
@@ -35,6 +36,10 @@ def anchor(f, p):
 def rep(p):
     """The size used for examples: 50K when the program has it."""
     sizes = p["sizes"]; return next((s for s in sizes if s["size"] == 50000), sizes[0])
+def an(x):
+    """English article: « an Apex Legacy 50K », « an EOD Trail 50K », « a Topstep account »."""
+    return ("an " if x[:1] in "AEIOaeio" else "a ") + x
+def has_payouts(f): return any(((s.get("funded") or {}).get("payout")) for p in f["programs"] for s in p["sizes"])
 def fr_de(name):
     """« de Topstep », « d’Apex Trader Funding »: French elides « de » before a vowel."""
     return ("d’" if name[:1] in "AEIOUYÉ" else "de ") + name
@@ -376,8 +381,19 @@ def glance(lang, t, f):
             + t(T(f'Several accounts? The <a href="{rot}">account rotation planner</a> tells you which one to trade first today.',
                   f'Plusieurs comptes ? Le <a href="{rot}">planificateur de rotation des comptes</a> te dit lequel trader en premier aujourd’hui.',
                   f'¿Varias cuentas? El <a href="{rot}">planificador de rotación de cuentas</a> te dice cuál operar primero hoy.')))
-    if po_items: out += f'<h2 id="payouts">{t(h3)}</h2><ul class="list">{"".join(po_items)}</ul><p>{more}</p>' + go("prop-firm-payout-rules.html", T("Payout rules of every firm, compared", "Les règles de payout de chaque firme, comparées", "Las reglas de payout de cada firma, comparadas"))
+    if po_items: out += (f'<h2 id="payouts">{t(h3)}</h2><ul class="list">{"".join(po_items)}</ul><p>{more}</p>'
+                         + go(payout_page_of(f), T(f"{name} payout rules by account size, with an example", f"Les règles de payout {fr_de(name)} par taille de compte, avec un exemple", f"Las reglas de payout de {name} por tamaño de cuenta, con un ejemplo"))
+                         + go("prop-firm-payout-rules.html", T("Payout rules of every firm, compared", "Les règles de payout de chaque firme, comparées", "Las reglas de payout de cada firma, comparadas")))
     return out
+
+def verified_of(f):
+    """« Verified by hand on …, against the firm's official pages, then checked every week (last check: …) · How we verify », in the 3 languages."""
+    name, when, src = f["name"], checked_of(f), source_of(f)
+    wk = presets.CHECKED if presets.CHECKED > when else ""   # the weekly check of the whole catalogue, when it is newer than this firm's check by hand
+    verified = T(f'{"Verified by hand on " + day(when, "en") if wk else "Last verified: " + day(when, "en")}, against <a href="{src}" rel="nofollow noopener" target="_blank">{poss(name)} official pages</a>{", then checked every week (last check: " + day(wk, "en") + ")" if wk else ""} · <a href="{href("en", METHOD)}">How we verify</a>',
+                 f'{"Vérifiées à la main le " + day(when, "fr") if wk else "Dernière vérification : " + day(when, "fr")}, sur <a href="{src}" rel="nofollow noopener" target="_blank">les pages officielles {fr_de(name)}</a>{", puis chaque semaine (dernière vérification : " + day(wk, "fr") + ")" if wk else ""} · <a href="{href("fr", METHOD)}">Notre méthode</a>',
+                 f'{"Verificadas a mano el " + day(when, "es") if wk else "Última verificación: " + day(when, "es")}, en <a href="{src}" rel="nofollow noopener" target="_blank">las páginas oficiales de {name}</a>{", y luego cada semana (última revisión: " + day(wk, "es") + ")" if wk else ""} · <a href="{href("es", METHOD)}">Nuestro método</a>')
+    return verified
 
 def make_rules_page(f):
     CRUMBS[page_of(f)] = f["name"]
@@ -387,9 +403,7 @@ def make_rules_page(f):
         when, src = checked_of(f), source_of(f)
         sizes_all = sorted({s["size"] for p in progs for s in p["sizes"]})
         wk = presets.CHECKED if presets.CHECKED > when else ""   # the weekly check of the whole catalogue, when it is newer than this firm's check by hand
-        verified = T(f'{"Verified by hand on " + day(when, "en") if wk else "Last verified: " + day(when, "en")}, against <a href="{src}" rel="nofollow noopener" target="_blank">{poss(name)} official pages</a>{", then checked every week (last check: " + day(wk, "en") + ")" if wk else ""} · <a href="{href("en", METHOD)}">How we verify</a>',
-                     f'{"Vérifiées à la main le " + day(when, "fr") if wk else "Dernière vérification : " + day(when, "fr")}, sur <a href="{src}" rel="nofollow noopener" target="_blank">les pages officielles {fr_de(name)}</a>{", puis chaque semaine (dernière vérification : " + day(wk, "fr") + ")" if wk else ""} · <a href="{href("fr", METHOD)}">Notre méthode</a>',
-                     f'{"Verificadas a mano el " + day(when, "es") if wk else "Última verificación: " + day(when, "es")}, en <a href="{src}" rel="nofollow noopener" target="_blank">las páginas oficiales de {name}</a>{", y luego cada semana (última revisión: " + day(wk, "es") + ")" if wk else ""} · <a href="{href("es", METHOD)}">Nuestro método</a>')
+        verified = verified_of(f)
         names = ", ".join(p["name"] for p in progs)
         rng = f"{kk(sizes_all[0])}" + (f" – {kk(sizes_all[-1])}" if len(sizes_all) > 1 else "")
         if len(progs) == 1:
@@ -537,7 +551,7 @@ def faq_of(lang, t, f):
                     {l: {"en": "Yes: your best day can be at most a share of your profit. ", "fr": "Oui : ton meilleur jour peut représenter au plus une part de ton profit. ", "es": "Sí: tu mejor día puede ser como máximo una parte de tu beneficio. "}[l] + ". ".join(cons[l]) + "." for l in LANGS}))
     # payouts (first program, 50K when it exists)
     p = progs[0]; s = rep(p)
-    pay = payout_sentence(f, p, s, {"en": f"a {p['name']} {kk(s['size'])}", "fr": f"un {p['name']} {kk(s['size'])}", "es": f"una cuenta {p['name']} de {kk(s['size'])}"})
+    pay = payout_sentence(f, p, s, {"en": an(f"{p['name']} {kk(s['size'])}"), "fr": f"un {p['name']} {kk(s['size'])}", "es": f"una cuenta {p['name']} de {kk(s['size'])}"})
     if pay:
         out.append((T(f"When can I request a payout from {name}?", f"Quand puis-je demander un payout chez {name} ?", f"¿Cuándo puedo pedir un payout en {name}?"), pay))
     # prices

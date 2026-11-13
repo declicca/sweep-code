@@ -31,6 +31,13 @@ def entries():
                                              T(f"Drawdown, consistency and payouts · Verified {pages18.day(when, 'en')}",
                                                f"Drawdown, consistance et payouts · Vérifiées le {pages18.day(when, 'fr')}",
                                                f"Drawdown, consistencia y payouts · Revisadas el {pages18.day(when, 'es')}")[l]) for l in LANGS}, when))
+    import pages23   # each firm's payout rules
+    for f in pages23.PAYOUT_FIRMS:
+        name, when = f["name"], max(pages18.checked_of(f), presets.CHECKED)
+        out.append((pages18.payout_page_of(f), {l: (T(f"{name} payout rules 2026", f"Règles de payout {pages18.fr_de(name)} 2026", f"Reglas de payout de {name} 2026")[l],
+                                                    T(f"Minimum, maximum and split · Checked {pages18.day(when, 'en')}",
+                                                      f"Minimum, maximum et partage · Vérifiées le {pages18.day(when, 'fr')}",
+                                                      f"Mínimo, máximo y reparto · Revisadas el {pages18.day(when, 'es')}")[l]) for l in LANGS}, when))
     for slug, name in pages8.FIRMS:
         if name in presets.PRESET_FIRMS: continue
         out.append((slug, {l: (T(f"{name} rules", f"Règles {name}", f"Reglas de {name}")[l],

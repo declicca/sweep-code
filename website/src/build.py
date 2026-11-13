@@ -58,6 +58,8 @@ if pages19.COSTS_LIVE: PAGES[pages19.GUIDE_COSTS] = pages19.page_costs_guide
 for _c in pages17.VS: PAGES[_c["slug"]] = pages17.make_vs(_c)
 for _f in pages18.presets.FIRMS: PAGES[pages18.page_of(_f)] = pages18.make_rules_page(_f)
 PAGES.update(pages19.VS_PAGES)   # firm vs firm
+import pages23
+PAGES.update(pages23.PAYOUT_PAGES)   # each firm's payout rules
 for _r in pages13.REL: PAGES[_r[1]] = pages13.make_release(_r[0])
 PRIO = {"100":"0.8","tools.html":"0.8","position-size-calculator.html":"0.8","trailing-drawdown-calculator.html":"0.8","consistency-rule-calculator.html":"0.8","index.html":"1.0","features.html":"0.9","ai.html":"0.9","how-it-works.html":"0.8","economic-calendar.html":"0.8","pricing.html":"0.8","faq.html":"0.7","sweep-vs-tradezella.html":"0.8","best-trading-journal-for-prop-firms.html":"0.9","free-trading-journal.html":"0.9","prop-firm-tracker.html":"0.9","payout-tracker.html":"0.9","ninjatrader.html":"0.8","quantower.html":"0.8","how-to-start-prop-firm-trading.html":"0.9","prop-firm-gameplan-month-1.html":"0.8","prop-firm-gameplan-month-2.html":"0.8","prop-firm-gameplan-month-3.html":"0.8","pass-prop-firm-evaluation.html":"0.8","prop-firm-position-sizing.html":"0.8","funded-account-playbook.html":"0.8","liquidity-sweep.html":"0.8","mes-vs-mnq.html":"0.8"}
 if os.path.exists(DIST): shutil.rmtree(DIST)
@@ -160,6 +162,7 @@ for _p, _h in MAIN.items():
 if LM != _lm: json.dump(LM, open(LM_FILE, "w", encoding="utf-8"), indent=1, sort_keys=True); open(LM_FILE, "a").write("\n")
 LASTMOD = {p: v["date"] for p, v in LM.items()}
 for f in pages18.presets.FIRMS: LASTMOD[pages18.page_of(f)] = pages18.checked_of(f); PRIO.setdefault(pages18.page_of(f), "0.8")
+for _pp in pages23.PAYOUT_PAGES: PRIO.setdefault(_pp, "0.8")
 PRIO.setdefault("prop-firms/index.html", "0.8"); PRIO.setdefault(pages18.RULE_CHANGES, "0.8")
 for _c in pages17.VS: PRIO.setdefault(_c["slug"], "0.8")
 for _g in pages19.RULE_GUIDES: PRIO.setdefault(_g, "0.8")
@@ -352,6 +355,7 @@ for _sub in ("img", "video"):
                 _bytes += os.path.getsize(_p); os.remove(_p); _removed += 1
 print(f"pruned {_removed} unused files ({_bytes//1024//1024} MB)")
 _stale = [pg for pg, d in (list((pages18.page_of(f), pages18.checked_of(f)) for f in pages18.presets.FIRMS)
+                           + [(pages18.payout_page_of(f), max(pages18.checked_of(f), pages18.presets.CHECKED)) for f in pages23.PAYOUT_FIRMS]
                            + [(g, pages18.presets.CHECKED) for g in pages19.RULE_GUIDES])
           if (core.OG.get(pg) or {}).get("en", {}).get("date") not in (None, d)]
 if _stale: print("share images show an older verification date, run tools/og_images.py:", ", ".join(_stale))
