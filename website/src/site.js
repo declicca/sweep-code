@@ -362,7 +362,7 @@
   // Laid over the row's content edges (absolute, in its offset parent): nothing moves. None with a finger, none for a row that fits.
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)');
   var PADT = {en:['Previous','Next'], fr:['Précédent','Suivant'], es:['Anterior','Siguiente']}[(root.lang || 'en').slice(0,2)] || ['Previous','Next'];
-  var place = function(r){
+  var railPlace = function(r){
     var p = r._pads, over = r.scrollWidth - r.clientWidth > 2 && r.getClientRects().length && r.offsetParent;
     if(!over || !fine.matches){ if(p){ p.forEach(function(b){ b.remove(); }); r._pads = null; r.classList.remove('rail-on','more-l','more-r'); } return; }
     if(!p || p[0].parentElement !== r.offsetParent){
@@ -371,7 +371,7 @@
         b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (d ? 'M9 6l6 6-6 6' : 'M15 6l-6 6 6 6') + '"/></svg>';
         b.addEventListener('click', function(){ r.scrollBy({left:(d ? 1 : -1) * Math.max(120, r.clientWidth * .8), behavior: reduce ? 'auto' : 'smooth'}); });
         r.offsetParent.appendChild(b); return b; });
-      if(!r._padScroll){ r._padScroll = true; r.addEventListener('scroll', function(){ place(r); }, {passive:true}); }
+      if(!r._padScroll){ r._padScroll = true; r.addEventListener('scroll', function(){ railPlace(r); }, {passive:true}); }
       r.classList.add('rail-on');
     }
     var l = r._pads[0], rt = r._pads[1], x = r.scrollLeft, end = r.scrollWidth - r.clientWidth - x;
@@ -380,7 +380,7 @@
   };
   var railList = document.querySelectorAll('.subnav .sn,.phones-row,.cards.c5,.chiprow,.plans.three,.shares.stories');
   if(railList.length){
-    var railQ = false, railSoon = function(){ if(railQ) return; railQ = true; requestAnimationFrame(function(){ railQ = false; railList.forEach(place); }); };
+    var railQ = false, railSoon = function(){ if(railQ) return; railQ = true; requestAnimationFrame(function(){ railQ = false; railList.forEach(railPlace); }); };
     window.addEventListener('resize', railSoon); if(fine.addEventListener) fine.addEventListener('change', railSoon); window.addEventListener('load', railSoon); railSoon();
   }
 

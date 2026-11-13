@@ -32,6 +32,12 @@ async def run(B, dist):
                 await pg.keyboard.press("Escape"); await pg.wait_for_timeout(300)
                 back = await pg.evaluate("document.activeElement.classList.contains('ddbtn')")
                 check(f"{lang or '/'} menu {key} : Entrée / Tab / Échap", opened and inmenu and back and await btn.get_attribute("aria-expanded") == "false", f"open={opened} tab-in={inmenu} focus-back={back}")
+            # pricing: Monthly / Yearly changes every paid plan's price (13 Nov.: a 2nd « place » in site.js broke it from Nov. 7 on)
+            perrs = []; pg.on("pageerror", lambda e: perrs.append(str(e)))
+            PRICES = "[...document.querySelectorAll('.plan .price .num[data-m]')].map(e => [e.textContent.trim(), e.dataset.m, e.dataset.y])"
+            await pg.locator('[data-bill="m"]').click(); await pg.wait_for_timeout(800); mo = await pg.evaluate(PRICES)
+            await pg.locator('[data-bill="y"]').click(); await pg.wait_for_timeout(800); yr = await pg.evaluate(PRICES)
+            check(f"{lang or '/'} tarifs : Mensuel / Annuel changent les prix, l'annuel moins cher", len(mo) == 2 and all(x[0] == x[1] for x in mo) and all(x[0] == x[2] for x in yr) and all(m[0] != y[0] for m, y in zip(mo, yr)) and not perrs, f"mensuel={mo} annuel={yr} erreurs={perrs[:1]}")
             await ctx.close()
         # phone menu, size switch, tour, banners
         ctx = await br.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, locale="fr-CA"); pg = await ctx.new_page()
