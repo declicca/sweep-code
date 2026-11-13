@@ -119,7 +119,9 @@ def heading_levels(body):
         a = m.group(1) or ""
         a = a.replace('class="', 'class="h3 ', 1) if 'class="' in a else ' class="h3"' + a
         return f"<h2{a}>{m.group(2)}</h2>"
-    return _re.sub(r"<h3(\s[^>]*)?>(.*?)</h3>", h2, head, flags=_re.S) + tail
+    head = _re.sub(r"<h3(\s[^>]*)?>(.*?)</h3>", h2, head, flags=_re.S)
+    head = _re.sub(r"<h4>(.*?)</h4>", r'<h3 class="h4">\1</h3>', head, flags=_re.S)   # and their h4 follow, one level up, same look
+    return head + tail
 def table_names(body):
     """A table is named after the heading before it, and the row headers of key/value tables say they are."""
     out, last = [], 0

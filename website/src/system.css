@@ -482,7 +482,7 @@ table.glance tbody th a{color:var(--text);text-decoration:none}
 table.reltbl tbody th{width:auto;color:var(--text)}
 table.reltbl tr.past>*{color:var(--faint)}
 table.wk td:last-child{font-family:var(--font)}table.wk tbody th,table.wk td.num{white-space:nowrap}
-table.reltbl tr.past .st{opacity:.55}
+table.reltbl tr.past .st{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--muted)}   /* a past date: the neutral badge, still readable (no opacity) */
 .nx .nx-in{font-size:14px;color:var(--muted)}
 .nx-cities{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 20px;margin:6px 0 0;padding:14px 0 0;list-style:none;border-top:1px solid var(--line)}
 .nx-cities li{display:flex;align-items:baseline;gap:8px;font-size:14px}
@@ -611,7 +611,7 @@ table.reltbl tr.past .st{opacity:.55}
 .plat-more{margin-top:16px;font-size:14.5px}
 .plat-more a{color:var(--blue-text);text-decoration:none;font-weight:500}
 .plat-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-.plat h4{margin-top:20px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.plat h4,.plat .h4{margin-top:20px;line-height:inherit;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
 .psteps{counter-reset:s;display:grid;gap:10px;margin-top:12px}
 .psteps li{counter-increment:s;position:relative;padding-left:32px;font-size:14.5px;line-height:1.5;color:var(--muted)}
 .psteps li::before{content:counter(s);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--blue-text);font:600 12px/1 var(--mono)}
@@ -918,7 +918,7 @@ footer{content-visibility:auto;contain-intrinsic-size:auto 520px;padding:64px 0 
 .langsug.in,.consent.in{opacity:1;transform:translate(-50%,0)}
 .langsug{width:max-content}   /* from left:50%, it would only get half the screen */
 .langsug a{color:var(--blue-text);font-weight:600;white-space:nowrap}
-.langsug button{position:relative;width:30px;height:30px;border-radius:50%;color:var(--muted)}
+.langsug button{position:relative;flex:none;width:30px;height:30px;border-radius:50%;color:var(--muted)}
 .langsug button::after{content:"";position:absolute;inset:-7px}   /* a 44-px target around the small cross */
 .consent{flex-wrap:wrap;border-radius:var(--r4);padding:16px 18px;width:min(560px,calc(100% - 24px))}
 .consent p{flex:1 1 280px;color:var(--muted);font-size:13.5px}
