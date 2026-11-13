@@ -210,6 +210,7 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
     $start = ['signed_up' => count($users), 'first_name' => $step($named, false), 'account' => $step($acc1), 'plan' => $step($plan1), 'trade' => $step($first)];
     $brief = [
         'start' => $start,
+        'firms' => $has('documents') ? sweep_firm_metrics($pdo, array_fill_keys(array_column($users, 'id'), true), $now) : null,   // (13 Nov.) accounts by firm
         'filters' => ['cohort' => $fc, 'source' => $fs, 'weeks' => array_slice($weeks, 0, 16, true), 'sources' => $sources, 'traders' => count($users), 'of' => count($all)],
         'first_trade_median_min' => $ft ? (int) round($ft[intdiv(count($ft), 2)] / 60) : null, 'first_trade_of' => count($ft),
         'activation_day0' => ['pct' => $rate($d0k, $d0n), 'of' => $d0n],
@@ -311,6 +312,64 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
  * once): the share of traders with 20 trades or more and over 80 % winners (the plainest sign of losses not logged), the share
  * of losing trades, the share of trading days (a trader, a day) without a single losing trade. Net = pnl_c − fees_c.
  */
+/**
+ * (13 Nov., brief « comptes par firme ») The traders' accounts by prop firm, and how the trades of those accounts were entered.
+ * One row per firm of the presets catalogue, then « other » (a firm that is not in the catalogue) and « personal » (no firm: a
+ * personal or practice account). Accounts: active ones (not archived), sample data aside; $real = the traders counted (internal
+ * accounts are not in it). An account's firm: its preset (« firm|program|size… »), else the name of its firm matched with the
+ * catalogue's names and aliases. Its type: as src/ux.js moneyTypeOf (stored, else its phase, else its rules).
+ * Trades: those dated in the last 30 days (New York), on these accounts, read on the trade itself — no import key = entered by
+ * hand (a screenshot or the AI included), a key « sync:… » = the NinjaTrader / Quantower add-on, any other key = a CSV file.
+ * So CSV and sync are told apart for the past too (« how trades are entered » above counts an event, where they are one).
+ */
+function sweep_firm_metrics(PDO $pdo, array $real, int $now): array
+{
+    require_once dirname(__DIR__) . '/presets/presets-lib.php';
+    $norm = fn(string $x) => preg_replace('/[^a-z0-9]/', '', strtolower($x)) ?? '';
+    $rows = []; $byName = [];
+    foreach ((array) (pr_current()['firms'] ?? []) as $f) {
+        $id = (string) ($f['id'] ?? ''); if ($id === '') continue;
+        $rows[$id] = ['id' => $id, 'name' => (string) ($f['name'] ?? $id)];
+        foreach (array_merge([$id, (string) ($f['name'] ?? '')], (array) ($f['aliases'] ?? [])) as $n) if ($norm((string) $n) !== '') $byName[$norm((string) $n)] = $id;
+    }
+    $rows['other'] = ['id' => 'other', 'name' => '']; $rows['personal'] = ['id' => 'personal', 'name' => ''];
+    foreach ($rows as &$r) $r += ['accounts' => 0, 'traders' => [], 'eval' => 0, 'funded' => 0, 'live' => 0, 'trades' => 0, 'manual' => 0, 'csv' => 0, 'sync' => 0];
+    unset($r);
+    $docs = function (string $col) use ($pdo, $real) {
+        $st = $pdo->prepare('SELECT user_id, id, data FROM documents WHERE collection = ?'); $st->execute([$col]);
+        foreach ($st as $r) { if (!isset($real[$r['user_id']])) continue; $d = json_decode((string) $r['data'], true); if (is_array($d) && empty($d['demo'])) yield [$r['user_id'], (string) $r['id'], $d]; }
+    };
+    $firmName = []; foreach ($docs('firms') as [$uid, $id, $d]) $firmName[$uid . '|' . $id] = (string) ($d['name'] ?? '');
+    $of = [];   // « user|account » → its row
+    foreach ($docs('accounts') as [$uid, $id, $a]) {
+        if (($a['status'] ?? '') === 'archived') continue;
+        $fid = (string) ($a['firm_id'] ?? ''); $preset = is_string($a['preset'] ?? null) ? explode('|', $a['preset'])[0] : '';
+        $name = $fid !== '' ? ($firmName[$uid . '|' . $fid] ?? '') : '';
+        $k = isset($rows[$preset]) && !in_array($preset, ['other', 'personal'], true) ? $preset : ($byName[$norm($name)] ?? (($fid !== '' || $preset !== '') ? 'other' : 'personal'));
+        $ty = (string) ($a['money_type'] ?? ''); $ph = (string) ($a['phase'] ?? ''); $ru = (array) ($a['rules'] ?? []);
+        if (!in_array($ty, ['eval', 'funded', 'live', 'personal', 'simulation'], true)) {
+            $ty = in_array($ph, ['eval', 'funded', 'live', 'personal', 'simulation'], true) ? $ph
+                : (!empty($ru['target_c']) ? 'eval' : (array_filter(array_intersect_key($ru, array_flip(['payout_win_days', 'payout_min_c', 'payout_max_c', 'payout_min_bal_c', 'payout_trade_days']))) ? 'funded' : ''));
+        }
+        $rows[$k]['accounts']++; $rows[$k]['traders'][$uid] = true;
+        if (isset($rows[$k][$ty]) && in_array($ty, ['eval', 'funded', 'live'], true)) $rows[$k][$ty]++;
+        $of[$uid . '|' . $id] = $k;
+    }
+    $from = (new DateTimeImmutable('@' . ($now - 30 * 86400)))->setTimezone(new DateTimeZone('America/New_York'))->format('Y-m-d');
+    foreach ($docs('trades') as [$uid, $id, $t]) {
+        $k = $of[$uid . '|' . (string) ($t['account_id'] ?? '')] ?? null; $d = (string) ($t['date'] ?? '');
+        if ($k === null || $d === '' || $d < $from) continue;
+        $key = (string) ($t['import_key'] ?? '');
+        $rows[$k]['trades']++; $rows[$k][$key === '' ? 'manual' : (strncmp($key, 'sync:', 5) === 0 ? 'sync' : 'csv')]++;
+    }
+    $all = [];
+    foreach ($rows as &$r) { foreach (array_keys($r['traders']) as $u) $all[$u] = true; $r['traders'] = count($r['traders']); }
+    unset($r);
+    $sum = fn(string $c) => array_sum(array_column($rows, $c));
+    return ['rows' => array_values($rows), 'total' => ['accounts' => $sum('accounts'), 'traders' => count($all), 'eval' => $sum('eval'), 'funded' => $sum('funded'), 'live' => $sum('live'),
+        'trades' => $sum('trades'), 'manual' => $sum('manual'), 'csv' => $sum('csv'), 'sync' => $sum('sync')], 'of' => count($real)];
+}
+
 function sweep_journal_metrics(PDO $pdo, array $real, int $now, int $days): array
 {
     $from = (new DateTimeImmutable('@' . ($now - $days * 86400)))->setTimezone(new DateTimeZone('America/New_York'))->format('Y-m-d');

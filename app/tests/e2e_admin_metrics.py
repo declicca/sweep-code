@@ -109,6 +109,15 @@ async def main():
       await pg.select_option('#main [data-ux-mf=source]', ''); await pg.wait_for_timeout(1200)
       wk = await pg.evaluate("[...document.querySelectorAll('#main [data-ux-mf=cohort] option')].map(o=>o.textContent).slice(1,2)")
       ok(bool(wk) and wk[0].startswith('sem. du'), f'{tag} the sign-up weeks « sem. du … » ({wk})')
+      # (13 Nov., brief « comptes par firme ») the accounts by firm, under the start: a row per firm of the catalogue, « other », « personal », the total
+      fm = await pg.evaluate("""(() => { const t = document.querySelector('#main table.ux-firms'); if (!t) return null; const st = document.querySelector('#main table.ux-start:not(.ux-slots):not(.ux-cases):not(.ux-journal):not(.ux-first-plan)');
+        const w = t.closest('.scroll-x'), h = t.closest('.scroll-x').previousElementSibling;
+        return { h: h.textContent, heads: [...t.tHead.rows[0].cells].map((c) => c.textContent), rows: [...t.tBodies[0].rows].map((r) => r.cells[0].textContent), cells: t.tBodies[0].rows[0].cells.length,
+          after: !!st && !!(st.compareDocumentPosition(t) & 4), stacked: t.classList.contains('ux-stack'), over: Math.round(t.getBoundingClientRect().right - w.getBoundingClientRect().right), sub: (document.querySelector('#main .ux-firms-s') || {}).textContent || '',
+          total: [...t.querySelector('tr.ux-firms-t').cells].map((c) => c.textContent) }; })()""")
+      ok(bool(fm) and fm['h'] == 'Comptes par firme' and fm['heads'] == ['Firme', 'Comptes', 'Traders', 'Évaluation', 'Financé', 'Live', 'Trades (30 j)', 'À la main', 'Import CSV', 'Synchro'] and fm['after'], f'{tag} « Comptes par firme » under the start, its 10 columns ({fm and fm["heads"]})')
+      ok(bool(fm) and len(fm['rows']) >= 5 and fm['rows'][-3:] == ['Autre firme', 'Compte personnel ou simulation', 'Total'] and 'Topstep' in fm['rows'] and fm['cells'] == 10, f'{tag} a row per firm, then « Autre firme », « Compte personnel ou simulation » and the total ({fm and fm["rows"]})')
+      ok(bool(fm) and fm['over'] <= 0 and fm['stacked'] == mob and 'import CSV' in fm['sub'] and int(fm['total'][1]) >= 0, f'{tag} it fits its card ({"stacked rows" if mob else "a table"}), with what each column means under it ({fm and [fm["over"], fm["stacked"], fm["total"]]})')
       ok(await pg.evaluate("document.documentElement.scrollWidth <= innerWidth"), f'{tag} no horizontal scroll')
       ok(not errs, f'{tag} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
       await ctx.close()

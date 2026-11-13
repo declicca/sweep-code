@@ -10096,7 +10096,7 @@ async function uploadShots(e) {
         });
       }), syncTrade(t, [ "shots" ]);
     } catch (o) {
-      toast("Upload failed: " + (o.message || o.code || "unknown error"));
+      toast("Upload failed: " + tr(o.message || o.code || "unknown error"));
       return;
     }
     toast(s.length > 1 ? s.length + " screenshots added" : "Screenshot added"), refresh();

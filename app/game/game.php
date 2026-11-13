@@ -775,6 +775,7 @@ final class GameEngine
         $out = [];
         foreach (GAME_BADGES as $id => $b) {
             $got = isset($have[$id]);
+            if (!$got && in_array($id, GAME_BADGES_RETIRED, true)) continue;   // (13 Nov.) nothing unlocks it any more: not shown locked, not in the count
             $out[] = ['id' => $id, 'rarity' => $b['rarity'], 'secret' => $b['secret'] && !$got, 'xp' => $b['xp'], 'unlocked' => $got, 'unlocked_at' => $have[$id] ?? null,
                       'progress' => $b['secret'] && !$got ? null : ($prog[$id] ?? [$got ? 1 : 0, 1])];
         }

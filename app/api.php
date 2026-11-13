@@ -1167,6 +1167,19 @@ try {
             $deny = sb_guard(db(), (string) $UID, 'write_trade', ['account_id' => (string) $d['account_id'], 'account_ids' => billing_account_ids((string) $UID)]);
             if ($deny) json_out(402, $deny);
         }
+        // (13 Nov.) the other limits of the plan, as the one-document route below checks them (before: trades only, so a batch
+        // created the accounts and payouts that the plan refuses one at a time)
+        if (billing_on() && in_array($col, ['payouts', 'expenses'], true) && array_filter($puts, fn($d) => empty($d['demo']))) {
+            $deny = sb_guard(db(), (string) $UID, 'write_payouts'); if ($deny) json_out(402, $deny);
+        }
+        if (billing_on() && $col === 'accounts') {
+            $have = billing_account_ids((string) $UID);
+            foreach ($puts as $d) if (empty($d['demo']) && !in_array((string) $d['id'], $have, true)
+                && !q("SELECT 1 FROM documents WHERE user_id = ? AND collection = 'accounts' AND id = ?", [$UID, (string) $d['id']])->fetchColumn()) {
+                $deny = sb_guard(db(), (string) $UID, 'create_account', ['account_ids' => $have]); if ($deny) json_out(402, $deny);
+                $have[] = (string) $d['id'];
+            }
+        }
         if ((int) q('SELECT COUNT(*) FROM documents WHERE user_id = ?', [$UID])->fetchColumn() + count($puts) > $MAX_DOCS) json_out(507, ['error' => 'Record limit reached.']);
         $events = [];
         $pdo = db(); $pdo->beginTransaction();
@@ -1454,6 +1467,7 @@ try {
             echo $md; exit;
         }
         if ($route === 'api/admin/health' && $method === 'GET') { require_once __DIR__ . '/ops/health.php'; json_out(200, sweep_health(db(), $cfg, __DIR__)); }
+        if ($route === 'api/admin/watch' && $method === 'GET') { require_once __DIR__ . '/ops/watch.php'; json_out(200, sweep_watch(db(), $cfg, __DIR__)); }   // (13 Nov.) « To look at »
         // prop firm presets: last check, status per firm, « Check now » (one firm per request, then « finish »)
         if (strpos($route, 'api/admin/presets') === 0) {
             require_once __DIR__ . '/presets/check.php';

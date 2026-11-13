@@ -35,7 +35,9 @@ function ref_schema(PDO $pdo): void
 }
 function ref_q(PDO $pdo, string $sql, array $a = []): PDOStatement { $st = $pdo->prepare($sql); $st->execute($a); return $st; }
 function ref_salt(): string { global $cfg; return (string) ($cfg['referral_salt'] ?? ($cfg['password'] ?? 'sweep')) . '|ref'; }
-function ref_ip_hash(): string { return hash('sha256', (string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? '') . ref_salt()); }
+// (13 Nov.) the connection's address only: the app is not behind a proxy, so a CF-Connecting-IP header is whatever the caller types
+// (it let one trader look like many, past the same-address check and the daily cap)
+function ref_ip_hash(): string { return hash('sha256', (string) ($_SERVER['REMOTE_ADDR'] ?? '') . ref_salt()); }
 function ref_row(PDO $pdo, string $uid): array
 {
     ref_schema($pdo);

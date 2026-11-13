@@ -30,6 +30,8 @@ const GAME_BADGES = [
     'comeback'      => ['rarity' => 'rare',   'secret' => true,  'xp' => 100, 'target' => 1],
     'perfectionist' => ['rarity' => 'epic',   'secret' => true,  'xp' => 200, 'target' => 5],
     'zen'           => ['rarity' => 'rare',   'secret' => true,  'xp' => 100, 'target' => 1],
+    // (13 Nov.) retired with their features on 10 Nov. (GAME_BADGES_RETIRED below): bosses, the chest (« lucky »), leagues, buddies.
+    // Kept here for the traders who earned one; never shown locked, never counted
     // V3 bosses: unlocked when the boss is defeated (the boss itself pays 500 XP)
     'boss_revenge' => ['rarity' => 'epic', 'secret' => true, 'xp' => 0, 'target' => 1], 'boss_fomo_open' => ['rarity' => 'epic', 'secret' => true, 'xp' => 0, 'target' => 1],
     'boss_cursed_day' => ['rarity' => 'epic', 'secret' => true, 'xp' => 0, 'target' => 1], 'boss_oversize' => ['rarity' => 'epic', 'secret' => true, 'xp' => 0, 'target' => 1],
@@ -43,6 +45,7 @@ const GAME_BADGES = [
     'league_promoted' => ['rarity' => 'rare', 'secret' => false, 'xp' => 100, 'target' => 1],
     'buddy_10' => ['rarity' => 'rare', 'secret' => false, 'xp' => 150, 'target' => 1],
 ];
+const GAME_BADGES_RETIRED = ['boss_revenge', 'boss_fomo_open', 'boss_cursed_day', 'boss_oversize', 'boss_moving_stop', 'boss_overtrader', 'boss_offplan', 'boss_no_plan', 'boss_for_good', 'lucky', 'league_promoted', 'buddy_10'];
 
 /** (brief « pertes oubliées », step 4) from this day, a closed day counts for the streak and the review's XP only when it is
  *  complete: each account traded that day has its platform balance checked (journal.post.bal) or was synced (NinjaTrader 8,

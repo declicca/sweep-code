@@ -406,6 +406,36 @@
   const es = { 'No trades today. ': 'Ninguna operación hoy. ', 'No trades today.': 'Ninguna operación hoy.', 'No trades on this day.': 'Ninguna operación este día.' };
   if (window.I18N_FR) for (const k in fr) window.I18N_FR[k] = window.I18N_FR[k] || fr[k];
   if (window.I18N_ES) for (const k in es) window.I18N_ES[k] = window.I18N_ES[k] || es[k];
+  // (13 Nov., the hunt) toasts, errors and rare states that stayed in English in French and Spanish
+  const more = {
+    'Storage is full — delete some records to add more.': ['Stockage plein : supprime des enregistrements pour en ajouter.', 'Almacenamiento lleno: elimina registros para añadir más.'],
+    'your session expired — reload the page to sign in again': ['ta session a expiré, recharge la page pour te reconnecter', 'tu sesión expiró, recarga la página para volver a entrar'],
+    'record too large': ['enregistrement trop volumineux', 'registro demasiado grande'],
+    'record limit reached for this account': ['limite d’enregistrements atteinte pour ce compte', 'límite de registros alcanzado para esta cuenta'],
+    'unknown error': ['erreur inconnue', 'error desconocido'],
+    'use PNG, JPEG, GIF or WebP images': ['utilise des images PNG, JPEG, GIF ou WebP', 'usa imágenes PNG, JPEG, GIF o WebP'],
+    'image is too large for the server upload limit': ['image trop lourde pour le serveur', 'imagen demasiado pesada para el servidor'],
+    'your screenshot storage is full': ['ton espace de captures est plein', 'tu espacio de capturas está lleno'],
+    'Screenshot added': ['Capture ajoutée', 'Captura añadida'],
+    'Upload failed': ['Échec du téléversement', 'Error al subir'],
+    'No closed trades found in this file.': ['Aucun trade fermé dans ce fichier.', 'Ninguna operación cerrada en este archivo.'],
+    'Saving…': ['Enregistrement…', 'Guardando…'],
+    'No setup': ['Sans setup', 'Sin setup'], 'No tag': ['Sans tag', 'Sin etiqueta'],
+    'No rule violations recorded': ['Aucune règle enfreinte', 'Ninguna regla incumplida'],
+    'No rule violations recorded in this period.': ['Aucune règle enfreinte sur cette période.', 'Ninguna regla incumplida en este período.'],
+    'No ratings recorded yet.': ['Aucune note pour l’instant.', 'Ninguna nota por ahora.'],
+    'This trade no longer exists.': ['Ce trade n’existe plus.', 'Esta operación ya no existe.'], 'Back to trades': ['Retour aux trades', 'Volver a las operaciones'],
+    'Account not found.': ['Compte introuvable.', 'Cuenta no encontrada.'], 'Back to accounts': ['Retour aux comptes', 'Volver a las cuentas'],
+    'You are signed out.': ['Tu es déconnecté.', 'Has cerrado sesión.'],
+  };
+  for (const k in more) { if (window.I18N_FR && !window.I18N_FR[k]) window.I18N_FR[k] = more[k][0]; if (window.I18N_ES && !window.I18N_ES[k]) window.I18N_ES[k] = more[k][1]; }
+  if (typeof I18N_PAT !== 'undefined' && typeof T === 'function' && typeof tr === 'function') I18N_PAT.push(
+    [/^Could not save: (.*)$/, (m) => T('Enregistrement impossible : ' + tr(m[1]), 'No se pudo guardar: ' + tr(m[1]))],
+    [/^server error (\d+)$/, (m) => T('erreur du serveur ' + m[1], 'error del servidor ' + m[1])],
+    [/^(\d+) screenshots added$/, (m) => T(m[1] + ' captures ajoutées', m[1] + ' capturas añadidas')],
+    [/^Not enough data yet to compare directions reliably \(at least (\d+) trades each\)\.$/, (m) => T(`Pas encore assez de données pour comparer les sens (au moins ${m[1]} trades chacun).`, `Aún no hay suficientes datos para comparar los sentidos (al menos ${m[1]} operaciones cada uno).`)],
+    [/^Not enough data yet for firm conclusions \((\d+) trades? after a loss\)\.$/, (m) => T(`Pas encore assez de données pour conclure (${m[1]} trade${m[1] === '1' ? '' : 's'} après une perte).`, `Aún no hay suficientes datos para concluir (${m[1]} operaci${m[1] === '1' ? 'ón' : 'ones'} después de una pérdida).`)],
+    [/^This page could not be displayed: (.*)$/, (m) => T('Cette page n’a pas pu s’afficher : ' + m[1], 'Esta página no se pudo mostrar: ' + m[1])]);
 })();
 
 /* ───────────── 10. Feedback page: « what happens next » card + loop notifications text ───────────── */
@@ -917,6 +947,22 @@
     const all = s.signed_up || 0, rows = [[y.stN[0], all, null], [y.stN[1], s.first_name.n, null], [y.stN[2], s.account.n, s.account.median_min], [y.stN[3], s.plan.n, s.plan.median_min], [y.stN[4], s.trade.n, s.trade.median_min]];
     return `<h4 class="ux-start-h">${y.st}</h4><div class="scroll-x"><table class="tbl ux-start"><tbody>${rows.map(([l, n, m], i) => `<tr><td>${esc(l)}</td><td class="num"><b>${n}</b></td><td class="num">${all ? Math.round(n / all * 100) + ' %' : '—'}</td><td class="num muted">${i > 1 ? dur(m) : ''}</td></tr>`).join('')}</tbody></table></div>`;
   }
+  // (13 Nov., brief « comptes par firme ») the accounts by firm and how their trades are entered (ops/metrics.php, sweep_firm_metrics)
+  const FMT = {
+    en: { h: 'Accounts by firm', firm: 'Firm', acc: 'Accounts', tr: 'Traders', ev: 'Evaluation', fu: 'Funded', li: 'Live', td: 'Trades (30 d)', ma: 'By hand', csv: 'CSV import', sy: 'Sync', other: 'Other firm', personal: 'Personal or practice account', total: 'Total',
+      sub: 'Active accounts (archived accounts, sample data and Sweep’s own accounts aside). Trades dated in the last 30 days, read on the trade itself: by hand = typed, from a screenshot or with the AI; CSV import = a file exported from the platform; sync = the NinjaTrader 8 or Quantower add-on, with nothing to do. Valid for past trades too.' },
+    fr: { h: 'Comptes par firme', firm: 'Firme', acc: 'Comptes', tr: 'Traders', ev: 'Évaluation', fu: 'Financé', li: 'Live', td: 'Trades (30 j)', ma: 'À la main', csv: 'Import CSV', sy: 'Synchro', other: 'Autre firme', personal: 'Compte personnel ou simulation', total: 'Total',
+      sub: 'Comptes actifs (comptes archivés, données d’exemple et comptes de Sweep à part). Trades datés des 30 derniers jours, lus sur le trade lui-même : à la main = tapé, depuis une capture ou avec l’IA ; import CSV = un fichier exporté de la plateforme ; synchro = l’add-on NinjaTrader 8 ou Quantower, sans rien faire. Valable aussi pour les trades passés.' },
+    es: { h: 'Cuentas por firma', firm: 'Firma', acc: 'Cuentas', tr: 'Traders', ev: 'Evaluación', fu: 'Fondeada', li: 'Live', td: 'Operaciones (30 d)', ma: 'A mano', csv: 'Importación CSV', sy: 'Sincronización', other: 'Otra firma', personal: 'Cuenta personal o de práctica', total: 'Total',
+      sub: 'Cuentas activas (cuentas archivadas, datos de ejemplo y cuentas de Sweep aparte). Operaciones con fecha en los últimos 30 días, leídas en la propia operación: a mano = escrita, desde una captura o con la IA; importación CSV = un archivo exportado de la plataforma; sincronización = el complemento de NinjaTrader 8 o Quantower, sin hacer nada. Válido también para las operaciones pasadas.' } };
+  function firmsHtml(f) {
+    if (!f || !f.rows) return '';
+    const x = FMT[LANG] || FMT.en, sh = (r, k) => (r.trades ? Math.round(r[k] / r.trades * 100) + ' %' : '—');
+    const cols = [[x.acc, (r) => `<b>${r.accounts}</b>`], [x.tr, (r) => r.traders], [x.ev, (r) => r.eval], [x.fu, (r) => r.funded], [x.li, (r) => r.live], [x.td, (r) => r.trades], [x.ma, (r) => sh(r, 'manual')], [x.csv, (r) => sh(r, 'csv')], [x.sy, (r) => sh(r, 'sync')]];
+    const row = (r, l, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${esc(l)}</td>${cols.map(([h, v]) => `<td class="num" data-l="${esc(h)}">${v(r)}</td>`).join('')}</tr>`;
+    return `<h4 class="ux-start-h">${x.h}</h4><div class="scroll-x"><table class="tbl ux-firms"><thead><tr><th>${x.firm}</th>${cols.map(([h]) => `<th class="num">${h}</th>`).join('')}</tr></thead><tbody>${
+      f.rows.map((r) => row(r, r.id === 'other' ? x.other : r.id === 'personal' ? x.personal : r.name, r.accounts ? '' : 'muted')).join('')}${row(f.total, x.total, 'ux-firms-t')}</tbody></table></div><p class="muted ux-firms-s">${x.sub}</p>`;
+  }
   // (7 Nov., brief « premier plan », step 1) the first plan, screen by screen: per screen the traders who reached it, those who left on it
   // (their last screen, not saved) and the median time on it; by start and device (two lists, the numbers come computed for each)
   const FPT = {
@@ -995,10 +1041,10 @@
     return `<div class="ux-brief"><div class="ux-bf"><label class="f"><span>${y.week}</span><select data-ux-mf="cohort">${weeks}</select></label><label class="f"><span>${y.source}</span><select data-ux-mf="source">${srcs}</select></label>
         <small class="muted">${y.traders.replace('{a}', b.filters.traders).replace('{b}', b.filters.of)}</small></div>
       <div class="ux-mgrid">${card(y.d0, pct(b.activation_day0), sub(b.activation_day0))}${card(y.d7, pct(b.retention_d7), sub(b.retention_d7))}${card(y.d30, pct(b.retention_d30), sub(b.retention_d30))}${card(y.swept, pct(b.swept_sessions_30d), sub(b.swept_sessions_30d))}${card(y.closed, pct(b.closed_sessions_30d), sub(b.closed_sessions_30d))}${card(y.wkop, pct(b.weekly_opened_8w), sub(b.weekly_opened_8w))}${b.return_d1 ? card(SC().d1, pct(b.return_d1), sub(b.return_d1)) + card(SC().rs, pct(b.risk_seen_day0), sub(b.risk_seen_day0)) : ''}</div>${slotsHtml(b.signup_slots)}${casesHtml(b.start_cases)}${journalHtml(d.journal)}
-      ${startHtml(b.start, y)}${firstPlanHtml(b.first_plan)}
+      ${startHtml(b.start, y)}${firmsHtml(b.firms)}${firstPlanHtml(b.first_plan)}
       <div class="ux-err-h"><h4>${y.errs}</h4>${rows ? `<span class="ux-err-a"><button type="button" class="btn sm" data-ux-errclr>${y.clr}</button><a class="btn sm" href="api/admin/errors-export" download title="${esc(y.expT)}">${y.exp}</a></span>` : ''}</div>${rows ? `<div class="scroll-x"><table class="tbl ux-errs"><thead><tr><th>${y.msg}</th><th class="num">${y.tr}</th><th class="num">${y.n}</th><th>${y.last}</th><th>${y.pages}</th><th>${y.br}</th><th>${y.ver}</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="muted">${y.noErr}</p>`}</div>`;
   }
-  const load = () => { busy = true; apiJSON('api/admin/metrics' + (fc || fs ? '?' + new URLSearchParams({ cohort: fc, source: fs }) : '')).then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) b.innerHTML = html(d); }).catch(() => { busy = false; at = Date.now(); }); };
+  const load = () => { busy = true; apiJSON('api/admin/metrics' + (fc || fs ? '?' + new URLSearchParams({ cohort: fc, source: fs }) : '')).then((d) => { data = d; at = Date.now(); busy = false; const b = document.querySelector('#main .ux-metrics'); if (b) { b.innerHTML = html(d); uxStack(); } }).catch(() => { busy = false; at = Date.now(); }); };
   // « Clear »: once the errors are fixed, the list starts again from zero (the app's own window, never the browser's)
   document.addEventListener('click', async (e) => {
     const b = e.target.closest && e.target.closest('[data-ux-errclr]'); if (!b) return;
@@ -1207,8 +1253,72 @@
     if (sy) { const h = syHtml(sy); if (box._h !== h) { box.innerHTML = h; box._h = h; } }
     if (!syBusy && Date.now() - syAt > 60000) { syBusy = true; apiJSON('api/admin/sync').then((d) => { sy = d; syAt = Date.now(); syBusy = false; syPaint(); }).catch(() => { syBusy = false; syAt = Date.now(); }); }
   }
+  /* ───── Admin → « To look at » (13 Nov., brief « Admin lisible sur téléphone », 2.1): only what asks for an action (ops/watch.php) ─────
+     One sentence per line; a tap goes to its section of Admin. Nothing to do: one line, « Nothing to look at ». */
+  const WT = {
+    en: { h: 'To look at', none: 'Nothing to look at', task: ['{n} scheduled task failed or late', '{n} scheduled tasks failed or late'], error: ['{n} new error in the last 7 days', '{n} new errors in the last 7 days'],
+      rules: 'Firm rules read but not applied at the last check: {f}', stale: 'No check of the firm rules for {d} days', staleNever: 'The firm rules were never checked',
+      toLink: ['{n} trader with accounts to link', '{n} traders with accounts to link'], dl: ['{n} add-on downloaded, never seen', '{n} add-ons downloaded, never seen'],
+      signups: ['{n} sign-up started and not finished (7 days)', '{n} sign-ups started and not finished (7 days)'], backup: 'Backups have no copy outside the server', noBackup: 'No backup is set up', go: 'See', csv: 'List (CSV)' },
+    fr: { h: 'À regarder', none: 'Rien à regarder', task: ['{n} tâche planifiée en échec ou en retard', '{n} tâches planifiées en échec ou en retard'], error: ['{n} erreur nouvelle depuis 7 jours', '{n} erreurs nouvelles depuis 7 jours'],
+      rules: 'Règles de firme lues mais non appliquées à la dernière vérification : {f}', stale: 'Aucune vérification des règles de firme depuis {d} jours', staleNever: 'Les règles de firme n’ont jamais été vérifiées',
+      toLink: ['{n} trader avec des comptes à relier', '{n} traders avec des comptes à relier'], dl: ['{n} add-on téléchargé, jamais vu', '{n} add-ons téléchargés, jamais vus'],
+      signups: ['{n} inscription commencée, pas finie (7 jours)', '{n} inscriptions commencées, pas finies (7 jours)'], backup: 'Les sauvegardes n’ont pas de copie hors du serveur', noBackup: 'Aucune sauvegarde n’est réglée', go: 'Voir', csv: 'Liste (CSV)' },
+    es: { h: 'Para revisar', none: 'Nada que revisar', task: ['{n} tarea programada con error o con retraso', '{n} tareas programadas con error o con retraso'], error: ['{n} error nuevo en los últimos 7 días', '{n} errores nuevos en los últimos 7 días'],
+      rules: 'Reglas de firma leídas pero no aplicadas en la última verificación: {f}', stale: 'Ninguna verificación de las reglas de firma desde hace {d} días', staleNever: 'Las reglas de firma nunca se verificaron',
+      toLink: ['{n} trader con cuentas por vincular', '{n} traders con cuentas por vincular'], dl: ['{n} complemento descargado, nunca visto', '{n} complementos descargados, nunca vistos'],
+      signups: ['{n} registro empezado y no terminado (7 días)', '{n} registros empezados y no terminados (7 días)'], backup: 'Las copias de seguridad no tienen copia fuera del servidor', noBackup: 'No hay ninguna copia de seguridad configurada', go: 'Ver', csv: 'Lista (CSV)' } };
+  let wt = null, wtAt = 0, wtBusy = false;
+  function wtHtml(d) {
+    const x = WT[LANG] || WT.en, pl = (a, n) => a[n === 1 ? 0 : 1].replace('{n}', n), rows = [];
+    for (const i of d.items || []) {
+      if (i.k === 'task') rows.push(['task', pl(x.task, i.n), '.ux-health-admin']);
+      else if (i.k === 'error') rows.push(['error', pl(x.error, i.n), '.ux-err-h']);
+      else if (i.k === 'rules') { if (i.n) rows.push(['rules', x.rules.replace('{f}', (i.firms || []).join(', ')), '.ux-presets-admin']); if (i.stale) rows.push(['rules', i.days == null ? x.staleNever : x.stale.replace('{d}', i.days), '.ux-presets-admin']); }
+      else if (i.k === 'sync') { if (i.to_link) rows.push(['sync', pl(x.toLink, i.to_link), '.ux-sync-admin']); if (i.downloaded) rows.push(['sync', pl(x.dl, i.downloaded), '.ux-sync-admin']); }
+      else if (i.k === 'signups') rows.push(['signups', pl(x.signups, i.n), '']);
+      else if (i.k === 'backup') rows.push(['backup', i.none ? x.noBackup : x.backup, '.ux-health-admin [data-hl="' + (i.none ? 'backup' : 'offsite') + '"]']);
+    }
+    return `<div class="sec-h"><h2>${x.h}</h2></div>${rows.length ? `<ul class="ux-wt-list">${rows.map(([k, l, to]) => `<li data-wt="${k}">${to
+      ? `<button type="button" class="ux-wt-row" data-ux-go="${esc(to)}"><span>${esc(l)}</span><b>${x.go}</b></button>`
+      : `<a class="ux-wt-row" href="api/admin/leads?format=csv" download><span>${esc(l)}</span><b>${x.csv}</b></a>`}</li>`).join('')}</ul>` : `<p class="ux-wt-none" data-wt="none">${x.none}</p>`}`;
+  }
+  function wtPaint() {
+    if (route().v !== 'admin') return;
+    const main = document.getElementById('main'); if (!main) return;
+    let box = main.querySelector('.ux-watch');
+    if (!box) { box = document.createElement('section'); box.className = 'sec ux-watch'; box.setAttribute('data-noi18n', ''); }
+    // above everything Admin shows: just before « Export for Claude », else Health, else the dashboard (whichever is there yet)
+    const next = main.querySelector('.ux-rep-bar') || main.querySelector('.ux-health-admin') || main.querySelector('.ux-metrics');
+    if (next) { if (box.nextElementSibling !== next) next.before(box); } else if (!box.parentNode) main.prepend(box);
+    if (wt) { const h = wtHtml(wt); if (box._h !== h) { box.innerHTML = h; box._h = h; } }
+    if (!wtBusy && Date.now() - wtAt > 60000) { wtBusy = true; apiJSON('api/admin/watch').then((d) => { wt = d; wtAt = Date.now(); wtBusy = false; wtPaint(); }).catch(() => { wtBusy = false; wtAt = Date.now(); }); }
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-ux-go]'); if (!b) return;
+    const el = document.querySelector('#main ' + b.dataset.uxGo); if (!el) return;
+    const d = el.closest('details'); if (d) d.open = true;
+    el.scrollIntoView({ block: 'start', behavior: 'auto' });
+  });
+  /* ───── Admin tables on a phone (same brief, 2.2): a table wider than its card is drawn as stacked rows — the first cell on its
+     own line, each value under the name of its column (data-l, copied from the header). Measured, so a table that fits stays a
+     table; wider screens are untouched (the style only applies under 640 px). The traders' list has its own phone layout. */
+  function uxStack() {
+    if (route().v !== 'admin') return;
+    const narrow = innerWidth < 640;
+    document.querySelectorAll('#main table.tbl').forEach((t) => {
+      if (t.classList.contains('trd-tbl') || !t.tHead || !t.tHead.rows[0]) return;
+      const heads = [...t.tHead.rows[0].cells].map((c) => c.textContent.trim());
+      for (const r of t.tBodies[0] ? t.tBodies[0].rows : []) [...r.cells].forEach((c, i) => { if (i && !c.hasAttribute('data-l') && heads[i]) c.setAttribute('data-l', heads[i]); });
+      if (!narrow) { t.classList.remove('ux-stack'); return; }
+      if (t.classList.contains('ux-stack')) return;
+      const w = t.closest('.scroll-x') || t.parentElement;
+      if (w && t.scrollWidth > w.clientWidth + 1) t.classList.add('ux-stack');
+    });
+  }
+  window.addEventListener('resize', () => { try { document.querySelectorAll('#main table.ux-stack').forEach((t) => t.classList.remove('ux-stack')); uxStack(); } catch (e) { /* never blocks */ } });
   const appRender = render;
-  render = function () { const out = appRender.apply(this, arguments); try { paint(); prPaint(); hlPaint(); syPaint(); } catch (e) { /* never blocks */ } return out; };
+  render = function () { const out = appRender.apply(this, arguments); try { paint(); prPaint(); hlPaint(); syPaint(); wtPaint(); uxStack(); } catch (e) { /* never blocks */ } return out; };
 })();
 
 /* ───────────── 16. Text for « chart ready » and end-of-trial notifications (« trial_ending.body »: those sent before brief 02 part 13) ───────────── */

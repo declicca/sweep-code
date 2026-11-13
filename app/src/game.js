@@ -323,7 +323,7 @@
   function nextAction(d) {
     if (!d || !d.market) return null;
     const unj = d.trades - d.journaled, hm = etHM(), inSession = hm < '17:00', nextSession = hm >= '18:00';
-    const weekly = G.weekly && G.weekly.open && !(G.weekly.done && G.weekly.chest_opened) && (!G.unlocked || G.unlocked.includes('weekly'));
+    const weekly = G.weekly && G.weekly.open && !G.weekly.done && (!G.unlocked || G.unlocked.includes('weekly'));
     if (d.swept) return weekly ? { k: 'weekly', label: wt('weekly') } : { k: 'swept', label: t('cta_swept') };
     if (nextSession && unj <= 0) {
       // the session that just ended is still editable: journal its trades / review it before planning the next one

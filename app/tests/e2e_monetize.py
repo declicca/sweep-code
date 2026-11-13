@@ -173,6 +173,25 @@ try:
     shot(pg, 'monetize-resumed-fr-1300-light')
     ok(not errs, 'B 1300 light: no page error ' + '; '.join(errs[:2]))
     ctx.close()
+    # C. (13 Nov.) the plan's limits hold on the batch route too (before: trades only — a batch created the accounts and the
+    #    payouts that Free refuses one at a time). Free: 2 accounts, no payouts
+    fctx = br.new_context(); femail, fuid = register(fctx, 'free')
+    sql("UPDATE billing_grants SET ends_at = ? WHERE uid = ?", (int(time.time()) - 60, fuid))   # the trial is over: Free
+    acc = lambda i: {'id': 'mzb%d' % i, 'name': 'Apex %d' % i, 'starting_balance_c': 5000000, 'status': 'active'}
+    one = fctx.request.put(B1 + '/api/docs/accounts/mzb9', data=json.dumps(acc(9)), headers=H)   # his 2nd account: allowed
+    third = fctx.request.put(B1 + '/api/docs/accounts/mzb8', data=json.dumps(acc(8)), headers=H)
+    ok(one.status < 300 and third.status == 402, f'C Free, one at a time: the 2nd account is saved, the 3rd refused ({one.status}, {third.status})')
+    b = fctx.request.post(B1 + '/api/docs/batch', data=json.dumps({'col': 'accounts', 'put': [acc(1), acc(2)]}), headers=H)
+    n = sql("SELECT COUNT(*) FROM documents WHERE user_id = ? AND collection = 'accounts'", (fuid,))[0][0]
+    ok(b.status == 402 and n == 2, f'C Free, a batch of 2 more accounts: refused, still 2 accounts ({b.status}, {n})')
+    b = fctx.request.post(B1 + '/api/docs/batch', data=json.dumps({'col': 'accounts', 'put': [dict(acc(9), name='Apex renamed')]}), headers=H)
+    ok(b.status < 300, f'C Free, a batch that changes an account he has: saved ({b.status})')
+    b = fctx.request.post(B1 + '/api/docs/batch', data=json.dumps({'col': 'payouts', 'put': [{'id': 'mzp1', 'account_id': 'mza1', 'amount_c': 100000, 'date': '2026-11-10'}]}), headers=H)
+    n = sql("SELECT COUNT(*) FROM documents WHERE user_id = ? AND collection = 'payouts'", (fuid,))[0][0]
+    ok(b.status == 402 and n == 0, f'C Free, a payout in a batch: refused like the single write ({b.status}, {n})')
+    b = fctx.request.post(B1 + '/api/docs/batch', data=json.dumps({'col': 'trades', 'put': [{'id': 'mzt1', 'account_id': 'mza1', 'date': '2026-11-10', 'instrument': 'NQ', 'direction': 'long', 'contracts': 1, 'pnl_c': 1000}]}), headers=H)
+    ok(b.status < 300, f'C Free, a batch of trades on an active account: saved ({b.status})')
+    fctx.close()
     br.close()
 finally:
   stop(srv)

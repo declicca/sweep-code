@@ -69,6 +69,15 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
             ['Premier compte', $s['account']['n'], round($s['account']['n'] / $all * 100) . ' %', $dur($s['account']['median_min'])],
             ['Premier plan', $s['plan']['n'], round($s['plan']['n'] / $all * 100) . ' %', $dur($s['plan']['median_min'])],
             ['Premier trade', $s['trade']['n'], round($s['trade']['n'] / $all * 100) . ' %', $dur($s['trade']['median_min'])]]);
+    // (13 Nov., brief « comptes par firme ») the accounts by firm and how their trades are entered
+    if (!empty($b['firms'])) {
+        $fl = fn(array $r) => $r['id'] === 'other' ? 'Autre firme' : ($r['id'] === 'personal' ? 'Compte personnel ou simulation' : $r['name']);
+        $sh = fn(array $r, string $k) => $r['trades'] ? round($r[$k] / $r['trades'] * 100) . ' %' : '—';
+        $line = fn(array $r, string $l) => [$l, $r['accounts'], $r['traders'], $r['eval'], $r['funded'], $r['live'], $r['trades'], $sh($r, 'manual'), $sh($r, 'csv'), $sh($r, 'sync')];
+        $md .= "**Comptes par firme** (comptes actifs, données d'exemple et comptes archivés à part ; trades datés des 30 derniers jours, selon la clé d'import du trade : sans clé = à la main, capture ou IA comprises ; « sync » = add-on NinjaTrader ou Quantower ; autre clé = fichier CSV) :\n\n"
+            . $tbl(['Firme', 'Comptes', 'Traders', 'Évaluation', 'Financé', 'Live', 'Trades (30 j)', 'À la main', 'Import CSV', 'Synchro'],
+                array_merge(array_map(fn($r) => $line($r, $fl($r)), $b['firms']['rows']), [$line($b['firms']['total'], 'Total')]));
+    }
     $sk = ['before' => 'Avant l\'ouverture (18 h → 9 h 30)', 'session' => 'Séance (9 h 30 → 17 h)', 'evening' => 'Marché fermé (17 h → 18 h)', 'weekend' => 'Fin de semaine (vendredi 17 h → dimanche 18 h)'];
     $md .= "**Quand ils s'inscrivent** (heure de New York) et la part qui fait un premier plan ou un premier trade pendant cette séance :\n\n"
         . $tbl(['Moment', 'Inscrits', 'Premier plan ou trade ce jour-là'], array_map(fn($k) => [$sk[$k], $b['signup_slots'][$k]['n'], $pc(['pct' => $b['signup_slots'][$k]['day0_pct']])], array_keys($sk)))

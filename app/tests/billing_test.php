@@ -221,6 +221,10 @@ $hook('evt_4', 'customer.subscription.deleted', $SUBS['sub_ana']);
 [, $s] = $route('ana', 'api/billing/me');
 $ok($s['plan'] === 'free' && $s['subscription'] === null && $s['accounts']['active'] === ['a4', 'a3'] && $s['accounts']['frozen'] === ['a1', 'a2'], 'cancellation: Free again, the same accounts active');
 $ok($before === ['accounts' => $count('ana', 'accounts'), 'trades' => $count('ana', 'trades'), 'payouts' => $count('ana', 'payouts'), 'expenses' => $count('ana', 'expenses')], 'cancellation: still nothing deleted');
+// (13 Nov.) an older event that arrives after the cancellation (Stripe retries, and does not keep the order): still cancelled
+$hook('evt_4_late', 'customer.subscription.updated', $sub('sub_ana', 'ana', $cus, 'price_test_pro_y', 'active', $end, true));
+[, $s] = $route('ana', 'api/billing/me');
+$ok($s['plan'] === 'free' && $s['subscription'] === null, 'a late « active » event after the cancellation: still Free (before 13 Nov.: Pro again, for ever)');
 // a failed payment: the plan stays 7 days (the card can be updated), then Free
 $at('2026-12-20 20:00'); $signup('cy'); $route('cy', 'api/billing/me');
 $pdo->exec("UPDATE billing_users SET stripe_customer = 'cus_cy' WHERE uid = 'cy'");

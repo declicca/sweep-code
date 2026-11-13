@@ -184,7 +184,7 @@ function sb_verify_signature(string $payload, string $header, string $secret, in
 }
 
 /** Writes a Stripe subscription object into billing_subs. Returns the uid it belongs to (or null). */
-function sb_sync_subscription(PDO $pdo, array $sub, ?string $uidHint = null): ?string
+function sb_sync_subscription(PDO $pdo, array $sub, ?string $uidHint = null, bool $fromEvent = false): ?string
 {
     $uid = (string) ($sub['metadata']['uid'] ?? '') ?: $uidHint;
     $customer = is_array($sub['customer'] ?? null) ? ($sub['customer']['id'] ?? '') : (string) ($sub['customer'] ?? '');
@@ -204,7 +204,11 @@ function sb_sync_subscription(PDO $pdo, array $sub, ?string $uidHint = null): ?s
     $status = (string) ($sub['status'] ?? 'incomplete');
     $periodEnd = $sub['current_period_end'] ?? $item['current_period_end'] ?? null;
     $now = sb_now();
-    $prev = sb_q($pdo, 'SELECT past_due_since, founding, paused_until, paused_at FROM billing_subs WHERE id = ?', [$sub['id']])->fetch(PDO::FETCH_ASSOC);
+    $prev = sb_q($pdo, 'SELECT status, past_due_since, founding, paused_until, paused_at FROM billing_subs WHERE id = ?', [$sub['id']])->fetch(PDO::FETCH_ASSOC);
+    // (13 Nov.) a cancelled subscription never comes back at Stripe: an older event that arrives late (Stripe does not keep the
+    // order, and retries) must not make it « active » again, paid for ever with nothing charged. Only what an event carries
+    // ($fromEvent): a subscription just read from Stripe (a payment, a checkout) is the truth
+    if ($fromEvent && $prev && in_array((string) $prev['status'], ['canceled', 'incomplete_expired'], true) && !in_array($status, ['canceled', 'incomplete_expired'], true)) return $uid;
     if ($prev && (int) $prev['founding'] === 1) $founding = true;   // founding price is for life on this subscription
     $pastDueSince = $status === 'past_due' ? (int) (($prev['past_due_since'] ?? null) ?: $now) : null;
 
@@ -250,7 +254,7 @@ function sb_handle_event(PDO $pdo, array $event): string
         case 'customer.subscription.deleted':
         case 'customer.subscription.paused':
         case 'customer.subscription.resumed':
-            $uid = sb_sync_subscription($pdo, $obj);
+            $uid = sb_sync_subscription($pdo, $obj, null, true);
             $result = 'synced ' . ($obj['status'] ?? '') . ' ' . ($uid ?? '?');
             // creators: a cancelled subscription stops the commission on what this trader pays afterwards
             if ($type === 'customer.subscription.deleted' && $uid && function_exists('cr_on_cancel')) cr_on_cancel($pdo, (string) $uid);

@@ -72,6 +72,8 @@ function sl_create(PDO $pdo, array $me, array $b): array
     // a few links per minute at most
     $recent = (int) $pdo->query("SELECT COUNT(*) FROM public_shares WHERE user_id = " . $pdo->quote($me['id']) . " AND created_at > " . (time() - 60))->fetchColumn();
     if ($recent >= 6) return ['error' => 'slow_down'];
+    // (13 Nov.) and per day: a link keeps up to 10 MB on the server (image, preview, page), and nothing else bounded them
+    if ((int) $pdo->query("SELECT COUNT(*) FROM public_shares WHERE user_id = " . $pdo->quote($me['id']) . " AND created_at > " . (time() - 86400))->fetchColumn() >= 60) return ['error' => 'slow_down'];
     $id = sl_id();
     file_put_contents(sl_dir() . '/' . $id . '.png', $raw);
     if ($pv !== null) file_put_contents(sl_dir() . '/' . $id . '-og.png', $pv);
@@ -84,11 +86,19 @@ function sl_create(PDO $pdo, array $me, array $b): array
 /** the snapshot of the Stats page: markup only (no script, no handler, no outside resource); the page's CSP blocks scripts anyway */
 function sl_sanitize(string $h): string
 {
-    $h = preg_replace('#<(script|style|iframe|object|embed|link|meta|base|form|noscript|template)\b[^>]*>.*?</\1\s*>#is', '', $h) ?? '';
-    $h = preg_replace('#<(script|iframe|object|embed|link|meta|base|form|input|textarea|select)\b[^>]*/?>#is', '', $h) ?? '';
-    $h = preg_replace('#\son[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $h) ?? '';
-    $h = preg_replace('#\s(href|src|xlink:href|action|formaction|srcdoc)\s*=\s*("\s*(javascript|vbscript|data:text)[^"]*"|\'\s*(javascript|vbscript|data:text)[^\']*\')#i', '', $h) ?? '';
-    $h = preg_replace('#\shref\s*=\s*"(?!\#)[^"]*"#i', '', $h) ?? '';
+    // (13 Nov.) every pass again until nothing changes: one pass left « <me<input>ta http-equiv=refresh …> » as a live <meta> (a redirect
+    // from the app's own address). Links: any href that is not « #… », whatever its quotes (before: double quotes only).
+    // A full-screen layer (position: fixed) is laid back in the page.
+    for ($i = 0; $i < 25; $i++) {
+        $was = $h;
+        $h = preg_replace('#<(script|style|iframe|object|embed|link|meta|base|form|noscript|template)\b[^>]*>.*?</\1\s*>#is', '', $h) ?? '';
+        $h = preg_replace('#</?(script|style|iframe|object|embed|link|meta|base|form|input|textarea|select|noscript|template)\b[^>]*>?#is', '', $h) ?? '';
+        $h = preg_replace('#\son[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $h) ?? '';
+        $h = preg_replace('#\s(href|src|xlink:href|action|formaction|srcdoc)\s*=\s*("\s*(javascript|vbscript|data:text)[^"]*"|\'\s*(javascript|vbscript|data:text)[^\']*\'|(javascript|vbscript|data:text)[^\s>]*)#i', '', $h) ?? '';
+        $h = preg_replace('#\s(href|xlink:href|action|formaction|srcdoc)\s*=\s*("(?!\#)[^"]*"|\'(?!\#)[^\']*\'|(?!["\'\#])[^\s>]+)#i', '', $h) ?? '';
+        $h = preg_replace('#position\s*:\s*(fixed|sticky)#i', 'position:static', $h) ?? '';
+        if ($h === $was) break;
+    }
     return trim($h);
 }
 

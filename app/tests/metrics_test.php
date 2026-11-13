@@ -208,6 +208,90 @@ require_once $app . '/ops/report.php';
 $md = sweep_full_report($pdo, [], $app, time());
 $ok(str_contains($md, 'Le premier plan, écran par écran') && str_contains($md, '| Tous | tous appareils | 3 | 1 | 1 | 0 | 1 |') && str_contains($md, '| Marché fermé | téléphone | Plan guidé : position | 1 | 1 | 70 s |'), 'Export for Claude: the first plan, by start and device');
 
+// (13 Nov., brief « comptes par firme ») accounts by firm, on a fourth throwaway database — every number counted by hand:
+//  f1: a Topstep evaluation by its preset (a1), and an archived Topstep account (a2: left out)
+//  f2: a funded account whose firm is named « TopstepX » (b1: the catalogue's alias → Topstep), a live account at a firm that is
+//      not in the catalogue (b2: other), a personal account with no firm (b3)
+//  f3: an Apex account with a profit target and no type stored (c1: an evaluation), and a sample account (left out)
+//  fx: Mateo's own Topstep account (internal: left out)
+$p4 = new PDO('sqlite:' . $tmp . '/f.db', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+$p4->exec('CREATE TABLE users (id TEXT PRIMARY KEY, created_at TEXT, utm_source TEXT, utm_campaign TEXT, is_internal INT DEFAULT 0, disabled INT DEFAULT 0, found_via TEXT, first_name TEXT, last_login TEXT)');
+$p4->exec('CREATE TABLE documents (user_id TEXT, collection TEXT, id TEXT, data TEXT, created_at TEXT, updated_at TEXT)');
+foreach (['f1' => 0, 'f2' => 0, 'f3' => 0, 'fx' => 1] as $id => $int) $p4->prepare('INSERT INTO users (id, created_at, is_internal) VALUES (?, ?, ?)')->execute([$id, '2026-09-01 12:00:00', $int]);
+$fd = function (string $u, string $col, string $id, array $d) use ($p4) { $p4->prepare("INSERT INTO documents VALUES (?, ?, ?, ?, '', '')")->execute([$u, $col, $id, json_encode($d)]); };
+$fd('f1', 'accounts', 'a1', ['preset' => 'topstep|combine|50000', 'firm_id' => 'x1', 'money_type' => 'eval', 'status' => 'active']);
+$fd('f1', 'accounts', 'a2', ['preset' => 'topstep|combine|50000', 'firm_id' => 'x1', 'money_type' => 'eval', 'status' => 'archived']);
+$fd('f2', 'firms', 'x2', ['name' => 'TopstepX']); $fd('f2', 'firms', 'x3', ['name' => 'Bulenox']);
+$fd('f2', 'accounts', 'b1', ['firm_id' => 'x2', 'phase' => 'funded', 'status' => 'active']);
+$fd('f2', 'accounts', 'b2', ['firm_id' => 'x3', 'money_type' => 'live', 'status' => 'active']);
+$fd('f2', 'accounts', 'b3', ['money_type' => 'personal', 'status' => 'active']);
+$fd('f3', 'accounts', 'c1', ['preset' => 'apex|eod|50000', 'rules' => ['target_c' => 300000], 'status' => 'active']);
+$fd('f3', 'accounts', 'c9', ['preset' => 'apex|eod|50000', 'demo' => true, 'status' => 'active']);
+$fd('fx', 'accounts', 'z1', ['preset' => 'topstep|combine|50000', 'money_type' => 'funded', 'status' => 'active']);
+$n4 = 0; $ft = function (string $u, string $acc, int $ago, array $more = []) use ($fd, $jd, &$n4) { $fd($u, 'trades', 't' . (++$n4), array_merge(['account_id' => $acc, 'date' => $jd($ago), 'pnl_c' => 1000], $more)); };
+$ft('f1', 'a1', 1); $ft('f1', 'a1', 3); $ft('f1', 'a1', 2, ['import_key' => 'tv:1']); $ft('f1', 'a1', 2, ['import_key' => 'sync:nt8:1']);   // a1: 2 by hand, 1 CSV, 1 sync
+$ft('f1', 'a1', 1, ['demo' => true]); $ft('f1', 'a1', 40); $ft('f1', 'a2', 1);   // a sample trade, one 40 days old, one on the archived account: left out
+$ft('f2', 'b1', 5, ['import_key' => 'sync:qt:9']); $ft('f2', 'b2', 5, ['import_key' => 'tx:800001']); $ft('f2', 'b3', 5); $ft('f2', 'gone', 5);   // « gone »: an account that no longer exists
+$ft('fx', 'z1', 1); $ft('fx', 'z1', 1, ['import_key' => 'sync:nt8:2']);   // Mateo's: left out
+$fm = sweep_metrics($p4, $app)['brief']['firms']; $fr = array_column($fm['rows'], null, 'id');
+$pick = fn(array $r) => [$r['accounts'], $r['traders'], $r['eval'], $r['funded'], $r['live'], $r['trades'], $r['manual'], $r['csv'], $r['sync']];
+$ok(array_keys($fr) === ['lucid', 'topstep', 'apex', 'tpt', 'mffu', 'tradeify', 'alpha', 'other', 'personal'], 'firms: one row per firm of the catalogue, then « other » and « personal » (' . implode(', ', array_keys($fr)) . ')');
+$ok($pick($fr['topstep']) === [2, 2, 1, 1, 0, 5, 2, 1, 2], 'firms, Topstep: 2 accounts of 2 traders (the preset, and « TopstepX » by its alias), 1 evaluation 1 funded, 5 trades = 2 by hand + 1 CSV + 2 sync: ' . json_encode($pick($fr['topstep'])));
+$ok($pick($fr['apex']) === [1, 1, 1, 0, 0, 0, 0, 0, 0], 'firms, Apex: 1 account, an evaluation by its profit target, no trade; the sample account is left out: ' . json_encode($pick($fr['apex'])));
+$ok($pick($fr['other']) === [1, 1, 0, 0, 1, 1, 0, 1, 0] && $pick($fr['personal']) === [1, 1, 0, 0, 0, 1, 1, 0, 0], 'firms: a firm outside the catalogue → « other » (live, 1 CSV trade); no firm → « personal » (1 trade by hand)');
+$ok($pick($fm['total']) === [5, 3, 2, 1, 1, 7, 3, 2, 2] && $fm['of'] === 3 && $pick($fr['lucid']) === [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    'firms, total: 5 accounts of 3 traders (the archived, the sample and Mateo\'s accounts left out), 7 trades = 3 by hand + 2 CSV + 2 sync: ' . json_encode($pick($fm['total'])));
+$ok(sweep_metrics($pdo, $app)['brief']['firms'] !== null && sweep_metrics($pdo, $app)['brief']['firms']['total']['accounts'] >= 0, 'firms: the first database (accounts with no firm) gives the table too, no error');
+$cronSql = (string) $pdo->query("SELECT sql FROM sqlite_master WHERE name = 'cron_runs'")->fetchColumn();   // the tasks' table is made once per run (the first database has it)
+$p4->exec($cronSql);
+$md4 = sweep_full_report($p4, [], $app, time());
+$ok(str_contains($md4, '**Comptes par firme**') && str_contains($md4, '| Topstep | 2 | 2 | 1 | 1 | 0 | 5 | 40 % | 20 % | 40 % |') && str_contains($md4, '| Autre firme | 1 | 1 | 0 | 0 | 1 | 1 | 0 % | 100 % | 0 % |')
+    && str_contains($md4, '| Compte personnel ou simulation | 1 | 1 | 0 | 0 | 0 | 1 | 100 % | 0 % | 0 % |') && str_contains($md4, '| Total | 5 | 3 | 2 | 1 | 1 | 7 | 43 % | 29 % | 29 % |'), 'firms: the table is in « Export for Claude », with the shares');
+
+// (13 Nov., brief « Admin lisible sur téléphone », 2.1) « To look at »: only what asks for an action
+require $app . '/ops/watch.php';
+$p5 = new PDO('sqlite:' . $tmp . '/w.db', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+$wapp = $tmp . '/wapp'; mkdir($wapp);   // an app folder of its own: its error_log
+$T0 = time(); $kinds = fn(array $w) => array_column($w['items'], null, 'k');
+$p5->exec($cronSql);
+$green = function () use ($p5, $T0) { $p5->exec('DELETE FROM cron_runs'); foreach (array_keys(SWEEP_CRON_TASKS) as $t) $p5->prepare('INSERT INTO cron_runs (task, started_at, finished_at, duration_ms, ok, last_ok_at) VALUES (?, ?, ?, 10, 1, ?)')->execute([$t, $T0 - 30, $T0 - 20, $T0 - 20]); };
+$green();
+file_put_contents(pr_status_path(), json_encode(['last_run' => gmdate('c', $T0 - 3600), 'firms' => []]));
+$wcfg = []; file_put_contents($tmp . '/backup-cfg.php', "<?php return ['passphrase' => 'x', 's3' => ['bucket' => 'b']];"); $envB = getenv('SWEEP_BACKUP_CONFIG'); putenv('SWEEP_BACKUP_CONFIG=' . $tmp . '/backup-cfg.php');   // backups set up, with a copy outside
+$w = sweep_watch($p5, $wcfg, $app, $T0, $wapp . '/error_log');
+$ok($w['items'] === [], 'to look at: every task green, rules checked an hour ago, no error, no sync, no lead → nothing (' . json_encode(array_column($w['items'], 'k')) . ')');
+$p5->exec("UPDATE cron_runs SET ok = 0, error = 'boom' WHERE task = 'game'"); $p5->exec('UPDATE cron_runs SET last_ok_at = ' . ($T0 - 40 * 86400) . ", finished_at = " . ($T0 - 20) . " WHERE task = 'backup'");
+$k = $kinds(sweep_watch($p5, $wcfg, $app, $T0, $wapp . '/error_log'));
+$ok(($k['task']['n'] ?? 0) === 2 && $k['task']['red'] === 1 && in_array('game', $k['task']['tasks'], true), 'to look at: a failed task and a late one → one line, 2 tasks, 1 red: ' . json_encode($k['task'] ?? null));
+$green();
+$p5->exec('CREATE TABLE client_errors (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, msg TEXT, src TEXT, line INT, page TEXT, ua TEXT, ver TEXT, created_at INT NOT NULL)');
+$we = fn(string $m, int $ts) => $p5->prepare("INSERT INTO client_errors (user_id, msg, created_at) VALUES ('u', ?, ?)")->execute([$m, $ts]);
+$we('old one', $T0 - 20 * 86400); $we('old one', $T0 - 3600); $we('new one', $T0 - 2 * 86400); $we('new one', $T0 - 60); $we('newer', $T0 - 30);
+file_put_contents($wapp . '/error_log', '[' . gmdate('d-M-Y H:i:s', $T0 - 20 * 86400) . " UTC] PHP Warning:  known thing on line 12\n[" . gmdate('d-M-Y H:i:s', $T0 - 3600) . " UTC] PHP Warning:  known thing on line 48\n["
+    . gmdate('d-M-Y H:i:s', $T0 - 7200) . " UTC] PHP Fatal error:  brand new failure\n[" . gmdate('d-M-Y H:i:s', $T0 - 60) . " UTC] PHP Fatal error:  brand new failure\n");
+$k = $kinds(sweep_watch($p5, $wcfg, $app, $T0, $wapp . '/error_log'));
+$ok(($k['error']['js'] ?? 0) === 2 && $k['error']['php'] === 1 && $k['error']['n'] === 3, 'to look at: 2 JS messages first seen this week (the one known for 20 days is not new) and 1 new PHP error (the known warning is not): ' . json_encode($k['error'] ?? null));
+$p5->exec('DELETE FROM client_errors'); unlink($wapp . '/error_log');
+file_put_contents(pr_status_path(), json_encode(['last_run' => gmdate('c', $T0 - 3600), 'firms' => ['apex' => ['status' => 'review', 'errors' => ['not applied (not confirmed by a second reading, read again next week): eod 50K dd_c 2000 → 9000'], 'changes' => []], 'topstep' => ['status' => 'unchanged', 'errors' => ['page not reachable'], 'changes' => []]]]));
+$k = $kinds(sweep_watch($p5, $wcfg, $app, $T0, $wapp . '/error_log'));
+$ok(($k['rules']['n'] ?? 0) === 1 && $k['rules']['firms'] === ['Apex Trader Funding'] && $k['rules']['stale'] === false, 'to look at: rules read and not applied at one firm (another error is not one): ' . json_encode($k['rules'] ?? null));
+file_put_contents(pr_status_path(), json_encode(['last_run' => gmdate('c', $T0 - 12 * 86400), 'firms' => []]));
+$k = $kinds(sweep_watch($p5, $wcfg, $app, $T0, $wapp . '/error_log'));
+$ok(($k['rules']['stale'] ?? false) === true && $k['rules']['n'] === 0 && $k['rules']['days'] === 12, 'to look at: no check of the rules for 12 days: ' . json_encode($k['rules'] ?? null));
+file_put_contents(pr_status_path(), json_encode(['last_run' => gmdate('c', $T0 - 3600), 'firms' => []]));
+$p5->exec('CREATE TABLE signup_leads (email_lc TEXT PRIMARY KEY, created_at INT NOT NULL, updated_at INT NOT NULL, completed_at INT NULL)');
+$p5->exec("INSERT INTO signup_leads VALUES ('a@t.dev', " . ($T0 - 86400) . ", 0, NULL), ('b@t.dev', " . ($T0 - 2 * 86400) . ", 0, " . ($T0 - 86400) . "), ('c@t.dev', " . ($T0 - 9 * 86400) . ", 0, NULL)");
+$k = $kinds(sweep_watch($p5, $wcfg, $app, $T0, $wapp . '/error_log'));
+$ok(($k['signups']['n'] ?? 0) === 1, 'to look at: 1 sign-up started and not finished in 7 days (one finished, one older: not counted): ' . json_encode($k['signups'] ?? null));
+file_put_contents($tmp . '/backup-cfg.php', "<?php return ['passphrase' => 'x'];");
+$k = $kinds(sweep_watch($p5, [], $app, $T0, $wapp . '/error_log'));
+$ok(isset($k['backup']) && $k['backup']['none'] === false, 'to look at: backups with no copy outside the server → its line');
+putenv('SWEEP_BACKUP_CONFIG=' . $tmp . '/none.php');
+$k = $kinds(sweep_watch($p5, [], $app, $T0, $wapp . '/error_log'));
+$ok(isset($k['backup']) && $k['backup']['none'] === true, 'to look at: no backup set up → its line');
+putenv('SWEEP_BACKUP_CONFIG' . ($envB !== false ? '=' . $envB : ''));
+$p5 = null; @unlink($tmp . '/backup-cfg.php'); @rmdir($wapp);
+
 foreach (glob($tmp . '/*') as $x) @unlink($x); @rmdir($tmp);
 echo "\n$pass passed, $fail failed\n";
 exit($fail ? 1 : 0);
