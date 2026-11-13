@@ -744,7 +744,7 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
 .shares img{width:100%;height:auto;border-radius:var(--r3);box-shadow:var(--frame-shadow)}
 .shares.posts{grid-template-columns:repeat(2,minmax(0,1fr))}
 .shares.posts .wide{grid-column:1/-1}
-.shares.stories{grid-template-columns:repeat(3,minmax(0,1fr));max-width:880px;margin:56px 0 0}
+.shares.stories{grid-template-columns:repeat(2,minmax(0,1fr));max-width:580px;margin:56px 0 0}
 .shares.stories img{aspect-ratio:9/16;object-fit:cover}
 @media (max-width:743px){.shares.stories{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:calc(-1 * var(--gutter));padding:0 var(--gutter) 8px;scrollbar-width:none}.shares.stories>*{flex:0 0 62%;scroll-snap-align:center}}
 

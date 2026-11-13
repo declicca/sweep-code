@@ -105,7 +105,7 @@ def sec_disc(lang, t):
              L3("Private by default", "Privé par défaut", "Privado por defecto")]
     pts = [L3("Free, without AI: what was right, the one thing to fix, and your edge, the conditions where you win.","Gratuit, sans IA : ce qui était bien, la seule chose à corriger, et ton edge, les conditions où tu gagnes.","Gratis, sin IA: lo que estuvo bien, la única cosa a corregir y tu edge, las condiciones en las que ganas."),
            L3("A rough session never blocks your day. It shows up in your discipline score, not as a penalty.","Une séance difficile ne bloque jamais ta journée. Elle compte dans ton score de discipline, pas comme une punition.","Una mala sesión nunca bloquea tu día. Cuenta en tu puntuación de disciplina, no como castigo."),
-           L3("Leagues and crews are optional. Your P&L always stays private.","Ligues et crews optionnels. Ton P&L reste toujours privé.","Ligas y crews opcionales. Tu P&L siempre es privado.")]
+           L3("No leaderboard, no public profile. Your P&L always stays private.","Ni classement, ni profil public. Ton P&L reste toujours privé.","Sin clasificación ni perfil público. Tu P&L siempre es privado.")]
     points = '<ul class="points stagger">' + "".join(f"<li><b>{t(h)}</b>{t(x)}</li>" for h, x in zip(heads, pts)) + "</ul>"
     shot = frame_d("v6-22-today-swept-d.webp", t(L3("Today: plan, execution and review done, the day swept, sample data","Aujourd’hui : plan, exécution et revue faits, journée balayée, données d’exemple","Hoy: plan, ejecución y revisión hechos, día barrido, datos de ejemplo")),
                    m="v6-22-today-swept-m.webp", sizes="(max-width: 1067px) 92vw, 1200px", t=t, cls="reveal zoom")
@@ -150,16 +150,14 @@ def sec_friday(lang, t):
 
 def sec_ai(lang, t):
     L = "fr" if lang == "fr" else ("es" if lang == "es" else "en")
-    items = [card_media(t, T("Edge Reveal","Edge Reveal","Edge Reveal"), L3("The setups and hours that pay you most.","Les setups et les heures qui te rapportent le plus.","Los setups y horarios que más te pagan."),
-                        phone_img("/img/captures/ecran-edge-reveal.webp", t(L3("Edge Reveal: one truth from your trades","Edge Reveal : une vérité tirée de tes trades","Edge Reveal: una verdad de tus operaciones")), "50% 74%"), crop=True),
-             card_media(t, L3("Ask your journal","Demande à ton journal","Pregúntale a tu diario"), L3("“What’s my best time of day on NQ?”","« Quelle est ma meilleure heure sur NQ ? »","«¿Cuál es mi mejor hora en NQ?»"),
+    items = [card_media(t, L3("Ask your journal","Demande à ton journal","Pregúntale a tu diario"), L3("“What’s my best time of day on NQ?”","« Quelle est ma meilleure heure sur NQ ? »","«¿Cuál es mi mejor hora en NQ?»"),
                         phone_img(f"/img/mobile-{L}-dark-ask-sweep-786.webp", t(L3("Ask Sweep answers from your trades","Ask Sweep répond à partir de tes trades","Ask Sweep responde con tus operaciones")), "50% 4%"), crop=True),
              card_media(t, L3("Economic calendar","Calendrier économique","Calendario económico"), L3("AI notes on every major release, in full with Elite.","Des notes IA sur chaque annonce majeure, complètes avec Elite.","Notas de IA en cada dato importante, completas con Elite."),
                         phone_img(f"/img/mobile-{L}-dark-economic-calendar-786.webp", t(L3("The week’s economic releases","Les annonces économiques de la semaine","Los datos económicos de la semana")), "50% 6%"), crop=True)]
     return sec(head(t, T("Sweep AI","Sweep AI","Sweep AI"), L3("Ask your journal anything.","Pose n’importe quelle question à ton journal.","Pregúntale lo que quieras a tu diario."),
                     L3("Sweep AI reads your trades, plans and reviews, then answers in plain words.","Sweep AI lit tes trades, tes plans et tes revues, puis répond simplement.","Sweep AI lee tus operaciones, planes y revisiones, y responde con palabras simples."),
                     links=link(lang, t, "ai.html", L3("Meet Sweep AI","Découvrir Sweep AI","Conoce Sweep AI")))
-               + cards(items, 3), "n", "sweep-ai")
+               + cards(items, 2), "n", "sweep-ai")
 
 def sec_trust(lang, t):
     items = [("download", L3("Export everything in one click","Export complet en un clic","Exporta todo en un clic"), None), ("archive", L3("Nothing lost when an account closes","Rien de perdu quand un compte ferme","Nada se pierde al cerrar una cuenta"), None),

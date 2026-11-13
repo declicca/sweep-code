@@ -20,8 +20,8 @@
   "hash": "b49ca7774538911c"
  },
  "changelog.html": {
-  "date": "2026-11-07",
-  "hash": "8df071b735adfb99"
+  "date": "2026-11-13",
+  "hash": "a3a65609faf96c41"
  },
  "cl-vs-mcl.html": {
   "date": "2026-10-27",
@@ -108,8 +108,8 @@
   "hash": "24cf098ea951d314"
  },
  "faq.html": {
-  "date": "2026-10-29",
-  "hash": "18f0a423769a0378"
+  "date": "2026-11-13",
+  "hash": "ea7ede31ba0490f9"
  },
  "features.html": {
   "date": "2026-10-29",
@@ -120,8 +120,8 @@
   "hash": "ebd5d90dd46c95de"
  },
  "free-trading-journal.html": {
-  "date": "2026-10-29",
-  "hash": "cac2982e60050348"
+  "date": "2026-11-13",
+  "hash": "3a76e8502d575bbe"
  },
  "funded-account-playbook.html": {
   "date": "2026-10-27",
@@ -152,8 +152,8 @@
   "hash": "0fc9da5ffe469af7"
  },
  "how-it-works.html": {
-  "date": "2026-10-29",
-  "hash": "bb87d2f5607b70f1"
+  "date": "2026-11-13",
+  "hash": "79cc85b2be7ddf57"
  },
  "how-to-start-prop-firm-trading.html": {
   "date": "2026-10-29",
@@ -180,8 +180,8 @@
   "hash": "b222de4798501d92"
  },
  "index.html": {
-  "date": "2026-11-04",
-  "hash": "bc56251904f6d8b9"
+  "date": "2026-11-13",
+  "hash": "32857f6b5501a9db"
  },
  "install.html": {
   "date": "2026-10-27",
@@ -192,8 +192,8 @@
   "hash": "88798e380e41a8bd"
  },
  "liquidity-sweep.html": {
-  "date": "2026-10-27",
-  "hash": "5cc5062e9b95b1f9"
+  "date": "2026-11-13",
+  "hash": "7ab03b62e10b0875"
  },
  "mes-vs-mnq.html": {
   "date": "2026-10-27",
@@ -244,12 +244,12 @@
   "hash": "3992650ca3eecfef"
  },
  "pricing.html": {
-  "date": "2026-10-29",
-  "hash": "4619899300c9ebe8"
+  "date": "2026-11-13",
+  "hash": "a5807a4b100d4b20"
  },
  "privacy.html": {
-  "date": "2026-10-18",
-  "hash": "7dec40059e59ec91"
+  "date": "2026-11-13",
+  "hash": "c89d3721a4b2f33b"
  },
  "prop-firm-account-rotation.html": {
   "date": "2026-11-04",
@@ -436,12 +436,12 @@
   "hash": "8e6beff22323d621"
  },
  "risk.html": {
-  "date": "2026-10-15",
-  "hash": "4fbb0dc81b830dcb"
+  "date": "2026-11-13",
+  "hash": "5f0cffc743210d83"
  },
  "security.html": {
-  "date": "2026-10-18",
-  "hash": "0be65a81ea76364e"
+  "date": "2026-11-13",
+  "hash": "eecf2bfd70206053"
  },
  "sweep-vs-edgewonk.html": {
   "date": "2026-11-01",
@@ -460,8 +460,8 @@
   "hash": "5993d97d8c28a439"
  },
  "terms.html": {
-  "date": "2026-10-18",
-  "hash": "e4ce67e29558f4bd"
+  "date": "2026-11-13",
+  "hash": "60322b5edeb9812a"
  },
  "tools.html": {
   "date": "2026-11-01",
