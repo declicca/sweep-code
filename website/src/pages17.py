@@ -34,7 +34,7 @@ L = {"free": T("Free plan","Forfait gratuit","Plan gratis"), "trial": T("Trial o
      "charts": T("Charts of your trades","Graphiques de tes trades","Gráficos de tus operaciones"), "mentor": T("Mentoring","Mentorat","Mentoría"),
      "ai": T("AI assistant","Assistant IA","Asistente de IA"), "mobile": T("On your phone","Sur ton téléphone","En tu teléfono"),
      "psych": T("Psychology and discipline","Psychologie et discipline","Psicología y disciplina"), "markets": T("Markets","Marchés","Mercados")}
-SW = {"free": T("Yes: 2 prop accounts, no time limit, no card","Oui : 2 comptes prop, sans limite de temps, sans carte","Sí: 2 cuentas prop, sin límite de tiempo, sin tarjeta"), "trial": T("60 days of Pro","60 jours de Pro","60 días de Pro"),
+SW = {"free": T("Yes: 2 prop accounts, no time limit, no card","Oui : 2 comptes prop, sans limite de temps, sans carte","Sí: 2 cuentas prop, sin límite de tiempo, sin tarjeta"), "trial": T("30 days of Pro","30 jours de Pro","30 días de Pro"),
       "month": T("Pro $19 · Elite $39","Pro 19 $ · Elite 39 $","Pro 19 $ · Elite 39 $"),
       "year": T("Pro $159 · Elite $329","Pro 159 $ · Elite 329 $","Pro 159 $ · Elite 329 $"),
       "add": T("NinjaTrader 8 and Quantower sync, file import, screenshot read by AI, or by hand","Synchro NinjaTrader 8 et Quantower, import de fichier, capture lue par l’IA, ou à la main","Sincronización con NinjaTrader 8 y Quantower, importación de archivo, captura leída por la IA o a mano"),
@@ -104,9 +104,9 @@ def _summary(t, name):
 
 def _free_alt(name, them_en, them_fr, them_es):
     return (T(f"Is there a free alternative to {name}?", f"Existe-t-il une alternative gratuite à {name} ?", f"¿Hay una alternativa gratis a {name}?"),
-            T("Yes. Sweep has a Free plan with no time limit and no credit card, and every new account gets 60 days of Pro. " + them_en,
-              "Oui. Sweep a un forfait Free sans limite de temps et sans carte de crédit, et chaque nouveau compte reçoit 60 jours de Pro. " + them_fr,
-              "Sí. Sweep tiene un plan Free sin límite de tiempo y sin tarjeta, y cada cuenta nueva recibe 60 días de Pro. " + them_es))
+            T("Yes. Sweep has a Free plan with no time limit and no credit card, and every new account gets 30 days of Pro. " + them_en,
+              "Oui. Sweep a un forfait Free sans limite de temps et sans carte de crédit, et chaque nouveau compte reçoit 30 jours de Pro. " + them_fr,
+              "Sí. Sweep tiene un plan Free sin límite de tiempo y sin tarjeta, y cada cuenta nueva recibe 30 días de Pro. " + them_es))
 def _cheaper(them_en, them_fr, them_es, first=T("Sweep. ","Sweep. ","Sweep. ")):
     return (T("Which one is cheaper?","Lequel coûte le moins cher ?","¿Cuál es más barato?"),
             T(first["en"] + "Pro is $19 a month or $159 a year, and Elite is $39 a month or $329 a year. " + them_en + " Prices in USD, before tax.",
@@ -173,9 +173,9 @@ VS = [
              "Tradervue mise sur des rapports détaillés : statistiques MFE et MAE, analyse des sorties, rapports de liquidité et de risque, avec mentorat et partage de trades. Il couvre les actions, les options et le forex en plus des futures, se synchronise avec les courtiers sur ses forfaits payants, et a un forfait gratuit jusqu’à 30 trades par mois. Si tu trades surtout des actions ou veux des rapports poussés, c’est le meilleur choix.",
              "Tradervue se centra en informes detallados: estadísticas MFE y MAE, análisis de salidas, informes de liquidez y de riesgo, con mentoría y operaciones compartidas. Cubre acciones, opciones y forex además de futuros, se sincroniza con brókers en sus planes de pago y tiene un plan gratis de hasta 30 operaciones al mes. Si operas sobre todo acciones o quieres informes a fondo, es la mejor opción."),
   "faq": [(T("Is Tradervue free?","Tradervue est-il gratuit ?","¿Tradervue es gratis?"),
-           T("Tradervue has a free plan limited to 30 trades a month; Silver ($29.95 a month) and Gold ($49.95 a month) remove that limit. Sweep’s Free plan has no time limit and no credit card, and every new account gets 60 days of Pro.",
-             "Tradervue a un forfait gratuit limité à 30 trades par mois ; Silver (29,95 $ par mois) et Gold (49,95 $ par mois) lèvent cette limite. Le forfait Free de Sweep n’a pas de limite de temps ni de carte de crédit, et chaque nouveau compte reçoit 60 jours de Pro.",
-             "Tradervue tiene un plan gratis limitado a 30 operaciones al mes; Silver (29,95 $ al mes) y Gold (49,95 $ al mes) quitan ese límite. El plan Free de Sweep no tiene límite de tiempo ni tarjeta, y cada cuenta nueva recibe 60 días de Pro.")),
+           T("Tradervue has a free plan limited to 30 trades a month; Silver ($29.95 a month) and Gold ($49.95 a month) remove that limit. Sweep’s Free plan has no time limit and no credit card, and every new account gets 30 days of Pro.",
+             "Tradervue a un forfait gratuit limité à 30 trades par mois ; Silver (29,95 $ par mois) et Gold (49,95 $ par mois) lèvent cette limite. Le forfait Free de Sweep n’a pas de limite de temps ni de carte de crédit, et chaque nouveau compte reçoit 30 jours de Pro.",
+             "Tradervue tiene un plan gratis limitado a 30 operaciones al mes; Silver (29,95 $ al mes) y Gold (49,95 $ al mes) quitan ese límite. El plan Free de Sweep no tiene límite de tiempo ni tarjeta, y cada cuenta nueva recibe 30 días de Pro.")),
           _cheaper("Tradervue’s paid plans are $29.95 (Silver) and $49.95 (Gold) a month; its pricing page lists no yearly price.", "Les forfaits payants de Tradervue coûtent 29,95 $ (Silver) et 49,95 $ (Gold) par mois ; sa page de tarifs n’affiche pas de prix annuel.", "Los planes de pago de Tradervue cuestan 29,95 $ (Silver) y 49,95 $ (Gold) al mes; su página de precios no muestra precio anual.",
                    first=T("Among paid plans, Sweep. ","Parmi les forfaits payants, Sweep. ","Entre los planes de pago, Sweep. ")),
           (T("Does Tradervue track prop firm rules?","Tradervue suit-il les règles des prop firms ?","¿Tradervue sigue las reglas de las prop firms?"),
@@ -411,7 +411,7 @@ def page_best_journal(lang, t):
       T("Sweep is built around prop firm accounts. Pick your firm and account type and the rules are already there: drawdown, consistency and payout conditions, checked against each firm’s official pages every week. Evaluations, funded and live accounts stay apart in your P&L, and a daily routine (plan, rules, review) keeps the focus on process.",
         "Sweep est construit autour des comptes prop. Choisis ta firme et ton type de compte, et les règles sont déjà là : drawdown, consistance et conditions de payout, vérifiées chaque semaine sur les pages officielles de chaque firme. Évaluations, comptes financés et live restent séparés dans ton P&L, et une routine quotidienne (plan, règles, revue) garde l’accent sur le processus.",
         "Sweep está construido alrededor de las cuentas prop. Elige tu firma y tu tipo de cuenta y las reglas ya están ahí: drawdown, consistencia y condiciones de payout, revisadas cada semana en las páginas oficiales de cada firma. Evaluaciones, cuentas financiadas y live se mantienen separadas en tu P&L, y una rutina diaria (plan, reglas, revisión) mantiene el foco en el proceso."),
-      T("Free forever; Pro $19/mo or $159/yr; Elite $39/mo or $329/yr; 60 days of Pro for every new account.","Gratuit pour toujours ; Pro 19 $/mois ou 159 $/an ; Elite 39 $/mois ou 329 $/an ; 60 jours de Pro pour chaque nouveau compte.","Gratis para siempre; Pro 19 $/mes o 159 $/año; Elite 39 $/mes o 329 $/año; 60 días de Pro para cada cuenta nueva."),
+      T("Free forever; Pro $19/mo or $159/yr; Elite $39/mo or $329/yr; 30 days of Pro for every new account.","Gratuit pour toujours ; Pro 19 $/mois ou 159 $/an ; Elite 39 $/mois ou 329 $/an ; 30 jours de Pro pour chaque nouveau compte.","Gratis para siempre; Pro 19 $/mes o 159 $/año; Elite 39 $/mes o 329 $/año; 30 días de Pro para cada cuenta nueva."),
       T("Automatic sync from NinjaTrader 8 and Quantower only, no trade replay or backtesting, futures only. Expense and payout tracking is on Pro and Elite.","Synchro automatique depuis NinjaTrader 8 et Quantower seulement, pas de replay ni de backtesting, futures seulement. Le suivi des dépenses et des payouts est sur Pro et Elite.","Sincronización automática solo desde NinjaTrader 8 y Quantower, sin replay ni backtesting, solo futuros. El seguimiento de gastos y payouts está en Pro y Elite."),
       firms)
      + _journal(t, 2, "TradeZella", ALT_BEST["TradeZella"],

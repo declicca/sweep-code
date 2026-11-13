@@ -685,6 +685,7 @@ a.chip:hover{background:color-mix(in srgb,var(--text) 12%,transparent);color:var
 @media (min-width:861px){.plans.three .plan{display:grid;grid-row:span 6;grid-template-rows:subgrid;align-content:start}}   /* the same line for every price, list and button */
 .plan{position:relative;display:flex;flex-direction:column;padding:28px;border-radius:var(--r4);background:var(--glass);box-shadow:var(--shadow-2)}
 .plan.main{box-shadow:0 0 0 1px color-mix(in srgb,var(--blue) 60%,transparent) inset,var(--shadow-2);background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 10%,transparent),transparent 40%),var(--glass)}
+.plan .btn{white-space:normal;text-wrap:balance;text-align:center;min-width:0}   /* a long label (« Commencer mes 30 jours de Pro ») wraps instead of widening the card (1024 px) */
 .plan .badge{position:absolute;top:-12px;left:24px;padding:4px 12px;border-radius:var(--r-pill);background:var(--blue-deep);color:#fff;font-size:12px;font-weight:600}
 .plan h2{font-size:24px}
 .plan .tagline{margin-top:8px;color:var(--muted);font-size:15px;min-height:4.65em}

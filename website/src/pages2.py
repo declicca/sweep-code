@@ -5,15 +5,15 @@ import re
 FAQ = [
  (T("Free and plans","Gratuit et forfaits","Gratis y planes"), [
   (T("Is Sweep really free?","Sweep est-il vraiment gratuit ?","¿Sweep es realmente gratis?"),
-   T("Yes. The <a href=\"/free-trading-journal\">Free plan</a> is free forever. You also get Pro for your first 60 days to try everything, no credit card needed.",
-     "Oui. Le <a href=\"/fr/free-trading-journal\">forfait Free</a> est gratuit pour toujours. Tu as aussi accès à Pro pendant tes 60 premiers jours pour tout essayer, sans carte de crédit.",
-     "Sí. El <a href=\"/es/free-trading-journal\">plan Free</a> es gratis para siempre. También tienes Pro durante tus primeros 60 días para probarlo todo, sin tarjeta.")),
-  (T("What happens after the 60 days of Pro?","Que se passe-t-il après les 60 jours de Pro ?","¿Qué pasa después de los 60 días de Pro?"),
+   T("Yes. The <a href=\"/free-trading-journal\">Free plan</a> is free forever. You also get Pro for your first 30 days to try everything, no credit card needed.",
+     "Oui. Le <a href=\"/fr/free-trading-journal\">forfait Free</a> est gratuit pour toujours. Tu as aussi accès à Pro pendant tes 30 premiers jours pour tout essayer, sans carte de crédit.",
+     "Sí. El <a href=\"/es/free-trading-journal\">plan Free</a> es gratis para siempre. También tienes Pro durante tus primeros 30 días para probarlo todo, sin tarjeta.")),
+  (T("What happens after the 30 days of Pro?","Que se passe-t-il après les 30 jours de Pro ?","¿Qué pasa después de los 30 días de Pro?"),
    T("You move to the Free plan automatically. Nothing is charged and nothing is lost. Upgrade only if you want to.",
      "Tu passes automatiquement au forfait Free. Rien n’est facturé et rien n’est perdu. Tu passes à un forfait payant seulement si tu le veux.",
      "Pasas automáticamente al plan Free. No se cobra nada y no se pierde nada. Mejora solo si quieres.")),
   (T("Do you offer refunds?","Est-ce que Sweep rembourse ?","¿Ofrecen reembolsos?"),
-   T("All sales are final — that’s why every account gets 60 days of Pro first. You can cancel anytime and keep using Sweep on the Free plan, without losing your data.","Toutes les ventes sont finales : c’est pour ça que chaque compte reçoit d’abord 60 jours de Pro. Tu peux annuler à tout moment et continuer sur le forfait Free, sans perdre tes données.","Todas las ventas son finales: por eso cada cuenta recibe primero 60 días de Pro. Puedes cancelar cuando quieras y seguir en el plan Free sin perder tus datos.")),
+   T("All sales are final — that’s why every account gets 30 days of Pro first. You can cancel anytime and keep using Sweep on the Free plan, without losing your data.","Toutes les ventes sont finales : c’est pour ça que chaque compte reçoit d’abord 30 jours de Pro. Tu peux annuler à tout moment et continuer sur le forfait Free, sans perdre tes données.","Todas las ventas son finales: por eso cada cuenta recibe primero 30 días de Pro. Puedes cancelar cuando quieras y seguir en el plan Free sin perder tus datos.")),
   (T("Does Sweep know my firm’s payout rules?","Sweep connaît-il les règles de payout de ma firme ?","¿Sweep conoce las reglas de payout de mi firma?"),
    T(f"Yes, for {FIRMS_TXT['en']}: minimum <a href=\"/prop-firm-benchmark-days\">winning days</a>, cushion, minimum and maximum per payout, the share of profit you can request, the profit needed before each payout and the maximum number of payouts. They’re checked every week, prefilled for guidance and editable by hand.",
      f"Oui, pour {FIRMS_TXT['fr']} : <a href=\"/fr/prop-firm-benchmark-days\">jours gagnants</a> minimum, coussin, minimum et maximum par payout, la part du profit que tu peux demander, le profit à faire avant chaque payout et le nombre maximum de payouts. Elles sont vérifiées chaque semaine, préremplies à titre indicatif et modifiables à la main.",
@@ -93,7 +93,7 @@ def page_faq(lang, t):
         cta=ui.btn(t(CREATE_FREE), SIGNUP, lg=True, attrs='data-track="signup_faq_hero"'))
     body += ui.subnav(t, T("Categories","Catégories","Categorías"), [(k, c) for k, (c, _) in zip(FAQ_IDS, FAQ)]) + ui.sec(groups, "t", "questions", width="read")
     return (t(T("FAQ · Sweep trading journal","FAQ · Journal de trading Sweep","Preguntas frecuentes · Diario de trading Sweep")),
-            t(T("Answers about Sweep: free plan and 60 days of Pro, real CME charts, instruments, prop firms, privacy, refunds and your data.","Réponses sur Sweep : forfait gratuit et 60 jours de Pro, vrais graphiques CME, instruments, prop firms, confidentialité, remboursements et tes données.","Respuestas sobre Sweep: plan gratuito y 60 días de Pro, gráficos reales de CME, instrumentos, prop firms, privacidad, reembolsos y tus datos.")),
+            t(T("Answers about Sweep: free plan and 30 days of Pro, real CME charts, instruments, prop firms, privacy, refunds and your data.","Réponses sur Sweep : forfait gratuit et 30 jours de Pro, vrais graphiques CME, instruments, prop firms, confidentialité, remboursements et tes données.","Respuestas sobre Sweep: plan gratuito y 30 días de Pro, gráficos reales de CME, instrumentos, prop firms, privacidad, reembolsos y tus datos.")),
             body + ui.final(lang, t), ld)
 SYSTEM_PAGES.add("faq.html")
 
@@ -159,8 +159,8 @@ def page_install(lang, t):
                "Non. Sweep a besoin d’une connexion pour s’ouvrir et enregistrer tes trades : ton journal est donc le même sur ton téléphone et ton ordinateur.",
                "No. Sweep necesita conexión para abrirse y guardar tus operaciones, así tu diario es el mismo en tu teléfono y tu ordenador.")),
             (T("Is the app free?", "L’app est-elle gratuite ?", "¿La app es gratis?"),
-             T("Yes. Sweep is free forever, with Pro included for your first 60 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 60 premiers jours. Sans carte de crédit.",
-               "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 60 días. Sin tarjeta."))]
+             T("Yes. Sweep is free forever, with Pro included for your first 30 days. No credit card.", "Oui. Sweep est gratuit pour toujours, avec Pro offert pendant tes 30 premiers jours. Sans carte de crédit.",
+               "Sí. Sweep es gratis para siempre, con Pro incluido tus primeros 30 días. Sin tarjeta."))]
     b = (ui.sec(f'<div class="split phone-media">{copy}<div>{duo}</div></div>', "t", "steps")
          + ui.sec(f'<article class="article">{t(INSTALL_HELP)}</article>', "n", "help", width="read")
          + ui.sec(ui.head(t, None, T("Questions", "Questions", "Preguntas")) + ui.qa(t, faqs), "n", "faq", width="read") + ui.final(lang, t))

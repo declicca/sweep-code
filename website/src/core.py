@@ -192,9 +192,9 @@ DISC = T("Sweep does not offer financial advice. Trading futures involves a subs
 ADD_TRADES = T("On NinjaTrader 8 or Quantower, Sweep’s free add-on sends your trades on its own. Otherwise: a screenshot (a history screenshot adds all its trades), your own words, or your platform’s export (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). Automatic sync for Rithmic and Tradovate is planned for later.",
                "Sur NinjaTrader 8 ou Quantower, le module gratuit de Sweep envoie tes trades tout seul. Sinon : une capture d’écran (une capture d’historique ajoute tous ses trades), tes propres mots, ou l’export de ta plateforme (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La synchro automatique Rithmic et Tradovate est prévue plus tard.",
                "En NinjaTrader 8 o Quantower, el complemento gratuito de Sweep envía tus operaciones solo. Si no: una captura (una captura del historial añade todas sus operaciones), tus propias palabras o la exportación de tu plataforma (Tradovate, Rithmic, TopstepX/ProjectX, TradingView). La sincronización automática con Rithmic y Tradovate está prevista para más adelante.")
-MONEY_PLAN = T("Payouts and expenses are part of Pro and Elite, included for your first 60 days.",
-               "Les payouts et les dépenses font partie de Pro et d’Elite, offerts tes 60 premiers jours.",
-               "Los payouts y los gastos forman parte de Pro y Elite, incluidos tus primeros 60 días.")
+MONEY_PLAN = T("Payouts and expenses are part of Pro and Elite, included for your first 30 days.",
+               "Les payouts et les dépenses font partie de Pro et d’Elite, offerts tes 30 premiers jours.",
+               "Los payouts y los gastos forman parte de Pro y Elite, incluidos tus primeros 30 días.")
 CHART_MENTION = T("CME market data. Charts powered by TradingView Lightweight Charts™.","Données de marché CME. Graphiques propulsés par TradingView Lightweight Charts™.","Datos de mercado de CME. Gráficos impulsados por TradingView Lightweight Charts™.")
 CURP = ' aria-current="page"'; CURL = ' aria-current="true"'
 
@@ -284,7 +284,7 @@ def _title(tl):
 
 META_SEO = {
  "pricing.html": (T("Pricing — Free Trading Journal, Pro from $19 | Sweep","Tarifs — Journal de trading gratuit, Pro dès 19 $ | Sweep","Precios — Diario de trading gratis, Pro desde 19 $ | Sweep"),
-                  T("Start free forever and get 60 days of Pro to test everything. Pro $19/mo or $159/yr, Elite $39/mo or $329/yr. Prices before tax.","Commence gratuitement pour toujours avec 60 jours de Pro pour tout tester. Pro 19 $/mois ou 159 $/an, Elite 39 $/mois ou 329 $/an. Prix avant taxes.","Empieza gratis para siempre con 60 días de Pro para probarlo todo. Pro 19 $/mes o 159 $/año, Elite 39 $/mes o 329 $/año. Precios antes de impuestos.")),
+                  T("Start free forever and get 30 days of Pro to test everything. Pro $19/mo or $159/yr, Elite $39/mo or $329/yr. Prices before tax.","Commence gratuitement pour toujours avec 30 jours de Pro pour tout tester. Pro 19 $/mois ou 159 $/an, Elite 39 $/mois ou 329 $/an. Prix avant taxes.","Empieza gratis para siempre con 30 días de Pro para probarlo todo. Pro 19 $/mes o 159 $/año, Elite 39 $/mes o 329 $/año. Precios antes de impuestos.")),
  "about.html": (T("About Sweep — Trading Journal Made in Québec | Sweep","À propos — Journal de trading conçu au Québec | Sweep","Acerca de Sweep — Diario de trading hecho en Quebec | Sweep"),
                 T("Sweep Inc. builds the trading journal for futures and prop firm traders, from Laval, Québec. Our story and what we stand for.","Sweep Inc. conçoit le journal de trading des traders de futures et de prop firms, à Laval, au Québec. Notre histoire et nos valeurs.","Sweep Inc. crea el diario de trading para traders de futuros y de prop firms, desde Laval, Quebec. Nuestra historia y nuestros valores.")),
  "security.html": (T("Security & Data — Never Lose Your Trading History | Sweep","Sécurité et données — Ne perds jamais ton historique | Sweep","Seguridad y datos — Nunca pierdas tu historial | Sweep"),
@@ -470,9 +470,9 @@ def final_cta(lang, t, title=None, sub=None, own=False):
     if not own:
         return (f'<section class="final rule"><div class="wrap" style="text-align:center"><h2>{t(T("Your edge, finally in one place.","Ton edge, enfin au même endroit.","Tu edge, por fin en un solo lugar."))}</h2>'
                 f'<div class="cta-row" style="justify-content:center;margin-top:26px"><a class="btn btn-primary btn-lg" href="{SIGNUP}">{t(CREATE_FREE)}</a></div>'
-                f'<p class="fine" style="margin-top:14px">{t(T("Free forever · 60 days of Pro · No card","Gratuit pour toujours · 60 jours de Pro · Sans carte","Gratis para siempre · 60 días de Pro · Sin tarjeta"))}</p></div></section>')
+                f'<p class="fine" style="margin-top:14px">{t(T("Free forever · 30 days of Pro · No card","Gratuit pour toujours · 30 jours de Pro · Sans carte","Gratis para siempre · 30 días de Pro · Sin tarjeta"))}</p></div></section>')
     title = title or T("Start your record today.","Commence ton historique aujourd’hui.","Empieza tu historial hoy.")
-    sub = sub or T("Free forever. Pro included for 60 days.","Gratuit pour toujours. Pro offert pendant 60 jours.","Gratis para siempre. Pro incluido durante 60 días.")
+    sub = sub or T("Free forever. Pro included for 30 days.","Gratuit pour toujours. Pro offert pendant 30 jours.","Gratis para siempre. Pro incluido durante 30 días.")
     return f'''<section class="final rule"><div class="wrap">
 <span class="mark" aria-hidden="true">{ANIM_MARK}</span>
 <h2>{t(title)}</h2>

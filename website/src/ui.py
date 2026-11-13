@@ -160,7 +160,7 @@ def final(lang, t, title=None, note=None, label=None):
             f'<span class="mark" aria-hidden="true">{ANIM_MARK}</span>'
             f'<h2 aria-label="{_label(t(title or FINAL_T))}">{words(t(title or FINAL_T))}</h2>'
             f'<div class="cta-row">{btn(label or t(CREATE_FREE), SIGNUP, lg=True)}</div>'
-            f'<p class="reassure">{t(note or T("Free forever · 60 days of Pro · No card","Gratuit pour toujours · 60 jours de Pro · Sans carte","Gratis para siempre · 60 días de Pro · Sin tarjeta"))}</p>'
+            f'<p class="reassure">{t(note or T("Free forever · 30 days of Pro · No card","Gratuit pour toujours · 30 jours de Pro · Sans carte","Gratis para siempre · 30 días de Pro · Sin tarjeta"))}</p>'
             f'</div></div></section>')
 
 def read_next(lang, t, items):
