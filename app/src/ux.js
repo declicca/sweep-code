@@ -949,19 +949,22 @@
   }
   // (13 Nov., brief « comptes par firme ») the accounts by firm and how their trades are entered (ops/metrics.php, sweep_firm_metrics)
   const FMT = {
-    en: { h: 'Accounts by firm', firm: 'Firm', acc: 'Accounts', tr: 'Traders', ev: 'Evaluation', fu: 'Funded', li: 'Live', td: 'Trades (30 d)', ma: 'By hand', csv: 'CSV import', sy: 'Sync', other: 'Other firm', personal: 'Personal or practice account', total: 'Total',
+    en: { h: 'Accounts by firm', firm: 'Firm', acc: 'Accounts', tr: 'Traders', ev: 'Evaluation', fu: 'Funded', li: 'Live', td: 'Trades (30 d)', ma: 'By hand', csv: 'CSV import', sy: 'Sync', other: 'Other firm', personal: 'Personal or practice account', total: 'Total', rest: 'others ({n} names typed by one trader only, or no name)',
       sub: 'Active accounts (archived accounts, sample data and Sweep’s own accounts aside). Trades dated in the last 30 days, read on the trade itself: by hand = typed, from a screenshot or with the AI; CSV import = a file exported from the platform; sync = the NinjaTrader 8 or Quantower add-on, with nothing to do. Valid for past trades too.' },
-    fr: { h: 'Comptes par firme', firm: 'Firme', acc: 'Comptes', tr: 'Traders', ev: 'Évaluation', fu: 'Financé', li: 'Live', td: 'Trades (30 j)', ma: 'À la main', csv: 'Import CSV', sy: 'Synchro', other: 'Autre firme', personal: 'Compte personnel ou simulation', total: 'Total',
+    fr: { h: 'Comptes par firme', firm: 'Firme', acc: 'Comptes', tr: 'Traders', ev: 'Évaluation', fu: 'Financé', li: 'Live', td: 'Trades (30 j)', ma: 'À la main', csv: 'Import CSV', sy: 'Synchro', other: 'Autre firme', personal: 'Compte personnel ou simulation', total: 'Total', rest: 'autres ({n} noms tapés par un seul trader, ou sans nom)',
       sub: 'Comptes actifs (comptes archivés, données d’exemple et comptes de Sweep à part). Trades datés des 30 derniers jours, lus sur le trade lui-même : à la main = tapé, depuis une capture ou avec l’IA ; import CSV = un fichier exporté de la plateforme ; synchro = l’add-on NinjaTrader 8 ou Quantower, sans rien faire. Valable aussi pour les trades passés.' },
-    es: { h: 'Cuentas por firma', firm: 'Firma', acc: 'Cuentas', tr: 'Traders', ev: 'Evaluación', fu: 'Fondeada', li: 'Live', td: 'Operaciones (30 d)', ma: 'A mano', csv: 'Importación CSV', sy: 'Sincronización', other: 'Otra firma', personal: 'Cuenta personal o de práctica', total: 'Total',
+    es: { h: 'Cuentas por firma', firm: 'Firma', acc: 'Cuentas', tr: 'Traders', ev: 'Evaluación', fu: 'Fondeada', li: 'Live', td: 'Operaciones (30 d)', ma: 'A mano', csv: 'Importación CSV', sy: 'Sincronización', other: 'Otra firma', personal: 'Cuenta personal o de práctica', total: 'Total', rest: 'otras ({n} nombres escritos por un solo trader, o sin nombre)',
       sub: 'Cuentas activas (cuentas archivadas, datos de ejemplo y cuentas de Sweep aparte). Operaciones con fecha en los últimos 30 días, leídas en la propia operación: a mano = escrita, desde una captura o con la IA; importación CSV = un archivo exportado de la plataforma; sincronización = el complemento de NinjaTrader 8 o Quantower, sin hacer nada. Válido también para las operaciones pasadas.' } };
   function firmsHtml(f) {
     if (!f || !f.rows) return '';
     const x = FMT[LANG] || FMT.en, sh = (r, k) => (r.trades ? Math.round(r[k] / r.trades * 100) + ' %' : '—');
     const cols = [[x.acc, (r) => `<b>${r.accounts}</b>`], [x.tr, (r) => r.traders], [x.ev, (r) => r.eval], [x.fu, (r) => r.funded], [x.li, (r) => r.live], [x.td, (r) => r.trades], [x.ma, (r) => sh(r, 'manual')], [x.csv, (r) => sh(r, 'csv')], [x.sy, (r) => sh(r, 'sync')]];
     const row = (r, l, cls) => `<tr${cls ? ` class="${cls}"` : ''}><td>${esc(l)}</td>${cols.map(([h, v]) => `<td class="num" data-l="${esc(h)}">${v(r)}</td>`).join('')}</tr>`;
+    // (13 Nov., step 2) under « Other firm »: the 10 firm names typed the most (two traders or more each), then the rest together
+    const sub = (l, r) => `<tr class="ux-firms-sub"><td>${esc(l)}</td>${cols.map(([h], i) => `<td class="num"${i < 2 ? ` data-l="${esc(h)}"` : ''}>${i === 0 ? r.accounts : i === 1 ? r.traders : ''}</td>`).join('')}</tr>`;
+    const rest = f.other_rest || {}, under = (f.other_names || []).map((r) => sub(r.name, r)).join('') + (rest.accounts ? sub(x.rest.replace('{n}', rest.names), rest) : '');
     return `<h4 class="ux-start-h">${x.h}</h4><div class="scroll-x"><table class="tbl ux-firms"><thead><tr><th>${x.firm}</th>${cols.map(([h]) => `<th class="num">${h}</th>`).join('')}</tr></thead><tbody>${
-      f.rows.map((r) => row(r, r.id === 'other' ? x.other : r.id === 'personal' ? x.personal : r.name, r.accounts ? '' : 'muted')).join('')}${row(f.total, x.total, 'ux-firms-t')}</tbody></table></div><p class="muted ux-firms-s">${x.sub}</p>`;
+      f.rows.map((r) => row(r, r.id === 'other' ? x.other : r.id === 'personal' ? x.personal : r.name, r.accounts ? '' : 'muted') + (r.id === 'other' ? under : '')).join('')}${row(f.total, x.total, 'ux-firms-t')}</tbody></table></div><p class="muted ux-firms-s">${x.sub}</p>`;
   }
   // (7 Nov., brief « premier plan », step 1) the first plan, screen by screen: per screen the traders who reached it, those who left on it
   // (their last screen, not saved) and the median time on it; by start and device (two lists, the numbers come computed for each)
@@ -1004,15 +1007,15 @@
   const SC = () => SCT[LANG] || SCT.en;
   // brief « pertes oubliées », step 1: a complete journal, measured before changing anything (7 and 30 days, real traders)
   const JRT = {
-    en: { h: 'Complete journal', sub: 'Losses not logged make the journal too pretty. Real traders lose on 40 to 55 % of their trades.', d7: '7 days', d30: '30 days', hi: 'Traders with 20+ trades and over 80 % winners', loss: 'Losing trades', nol: 'Trading days without a loss', gd: 'Days closed with a gap to the platform', gt: 'Total of the gaps', gdet: 'Share of the gaps detailed in trades' },
-    fr: { h: 'Journal complet', sub: 'Des pertes non notées rendent le journal trop beau. Chez de vrais traders, 40 à 55 % des trades sont perdants.', d7: '7 jours', d30: '30 jours', hi: 'Traders de 20 trades et plus avec plus de 80 % de gagnants', loss: 'Trades perdants', nol: 'Jours de trading sans perte', gd: 'Journées fermées avec un écart à la plateforme', gt: 'Montant total des écarts', gdet: 'Part des écarts détaillée en trades' },
-    es: { h: 'Diario completo', sub: 'Las pérdidas no anotadas hacen el diario demasiado bonito. En traders reales, del 40 al 55 % de las operaciones son perdedoras.', d7: '7 días', d30: '30 días', hi: 'Traders con 20+ operaciones y más del 80 % ganadoras', loss: 'Operaciones perdedoras', nol: 'Días de trading sin pérdida', gd: 'Días cerrados con una diferencia con la plataforma', gt: 'Total de las diferencias', gdet: 'Parte de las diferencias detallada en operaciones' } };
+    en: { h: 'Complete journal', sub: 'Losses not logged make the journal too pretty. Real traders lose on 40 to 55 % of their trades.', d7: '7 days', d30: '30 days', hi: 'Traders with 20+ trades and over 80 % winners', loss: 'Losing trades', nol: 'Trading days without a loss', gd: 'Days closed with a gap to the platform', gt: 'Total of the gaps', gc: 'Balances to check (a gap larger than the account’s maximum loss, not in the total)', gdet: 'Share of the gaps detailed in trades' },
+    fr: { h: 'Journal complet', sub: 'Des pertes non notées rendent le journal trop beau. Chez de vrais traders, 40 à 55 % des trades sont perdants.', d7: '7 jours', d30: '30 jours', hi: 'Traders de 20 trades et plus avec plus de 80 % de gagnants', loss: 'Trades perdants', nol: 'Jours de trading sans perte', gd: 'Journées fermées avec un écart à la plateforme', gt: 'Montant total des écarts', gc: 'Soldes à vérifier (écart plus grand que la perte maximale du compte, hors du total)', gdet: 'Part des écarts détaillée en trades' },
+    es: { h: 'Diario completo', sub: 'Las pérdidas no anotadas hacen el diario demasiado bonito. En traders reales, del 40 al 55 % de las operaciones son perdedoras.', d7: '7 días', d30: '30 días', hi: 'Traders con 20+ operaciones y más del 80 % ganadoras', loss: 'Operaciones perdedoras', nol: 'Días de trading sin pérdida', gd: 'Días cerrados con una diferencia con la plataforma', gt: 'Total de las diferencias', gc: 'Saldos por revisar (diferencia mayor que la pérdida máxima de la cuenta, fuera del total)', gdet: 'Parte de las diferencias detallada en operaciones' } };
   const mUSD = (c) => (typeof money === 'function' ? money(c || 0, { sign: false, dec: 0 }) : '$' + Math.round((c || 0) / 100));
   function journalHtml(j) {
     if (!j) return '';
     const x = JRT[LANG] || JRT.en, y = bt(), sub = (o) => (o && o.of != null ? y.of.replace('{n}', o.of) : '');
     const row = (k, l) => `<tr data-jr="${k}"><td>${esc(l)}</td><td class="num"><b>${pct(j.d7[k])}</b> <small class="muted">${esc(sub(j.d7[k]))}</small></td><td class="num"><b>${pct(j.d30[k])}</b> <small class="muted">${esc(sub(j.d30[k]))}</small></td></tr>`;
-    return `<h4 class="ux-start-h">${x.h}</h4><p class="muted ux-jr-sub">${esc(x.sub)}</p><div class="scroll-x"><table class="tbl ux-start ux-journal"><thead><tr><th></th><th class="num">${x.d7}</th><th class="num">${x.d30}</th></tr></thead><tbody>${row('high_win_20', x.hi)}${row('losing_trades', x.loss)}${row('days_without_loss', x.nol)}${j.d7.gap_days ? row('gap_days', x.gd) + `<tr data-jr="gap_total_c"><td>${esc(x.gt)}</td><td class="num"><b>${mUSD(j.d7.gap_total_c)}</b></td><td class="num"><b>${mUSD(j.d30.gap_total_c)}</b></td></tr>` + row('gap_detailed', x.gdet) : ''}</tbody></table></div>`;
+    return `<h4 class="ux-start-h">${x.h}</h4><p class="muted ux-jr-sub">${esc(x.sub)}</p><div class="scroll-x"><table class="tbl ux-start ux-journal"><thead><tr><th></th><th class="num">${x.d7}</th><th class="num">${x.d30}</th></tr></thead><tbody>${row('high_win_20', x.hi)}${row('losing_trades', x.loss)}${row('days_without_loss', x.nol)}${j.d7.gap_days ? row('gap_days', x.gd) + `<tr data-jr="gap_total_c"><td>${esc(x.gt)}</td><td class="num"><b>${mUSD(j.d7.gap_total_c)}</b></td><td class="num"><b>${mUSD(j.d30.gap_total_c)}</b></td></tr>` + (j.d7.gap_check ? `<tr data-jr="gap_check"><td>${esc(x.gc)}</td><td class="num"><b>${j.d7.gap_check.n}</b> <small class="muted">${mUSD(j.d7.gap_check.c)}</small></td><td class="num"><b>${j.d30.gap_check.n}</b> <small class="muted">${mUSD(j.d30.gap_check.c)}</small></td></tr>` : '') + row('gap_detailed', x.gdet) : ''}</tbody></table></div>`;
   }
   // (28 Oct., activation D) the three endings of the first visit, each sign-up in one, and who saw his risk allowed that session
   const CST = { en: { h: 'The three starts', open: 'Market open (first trade)', closed: 'Market closed (tomorrow’s plan)', active: 'Active trader (history)' },
@@ -1208,21 +1211,21 @@
       dl: 'downloaded {t}',
       why: { key_only: 'A key to paste, the add-on never sent anything: installed? key pasted?', downloaded: 'Add-on downloaded with its key, never heard from: imported in NinjaTrader (Tools › Import › NinjaScript Add-On)?', no_accounts: 'The add-on runs but sees no account: is the platform connected to the broker?', to_link: 'Accounts found, none linked yet: the trader has to link them (Settings › Connections).' },
       err: { plan: 'frozen on the Free plan', limit: 'record limit reached', account_gone: 'linked Sweep account deleted' },
-      seen: 'seen {t}', acc: '{l} linked · {n} to link · {i} ignored', tr: '{n} trades ({w} in 7 d)', team: 'team', none: 'No trader has created a key yet.',
+      seen: 'seen {t}', acc: '{n} to link · {l} linked · {s} simulation', ign: '{i} ignored by the trader', tr: '{n} trades ({w} in 7 d)', team: 'team', none: 'No trader has created a key yet.',
       ctr: 'Contracts (30 d): {l}', unk: 'Not recognized: {l}', alert: 'Contracts Sweep does not recognize: {l}. Their trades keep the right P&L, not the right instrument.' },
     fr: { h: 'Synchro', sub: 'Les traders qui ont créé une clé, les plus récemment vus en premier. Lecture seule.', card: 'Traders sur {p}', cardSub: '{a} vu(s) en 24 h · {b} compte(s) relié(s) · {c} trade(s) en 7 j',
       st: { ok: 'Synchronise', to_link: 'Comptes à relier', no_accounts: 'Aucun compte trouvé', key_only: 'Clé créée, pas téléchargé', downloaded: 'Téléchargé, jamais vu', error: 'Erreur' },
       dl: 'téléchargé {t}',
       why: { key_only: 'Une clé à coller, l’add-on n’a jamais rien envoyé : installé ? clé collée ?', downloaded: 'Add-on téléchargé avec sa clé, jamais vu : importé dans NinjaTrader (Tools › Import › NinjaScript Add-On) ?', no_accounts: 'L’add-on tourne mais ne voit aucun compte : la plateforme est-elle connectée au courtier ?', to_link: 'Comptes trouvés, aucun relié : le trader doit les relier (Réglages › Connexions).' },
       err: { plan: 'compte gelé (forfait Free)', limit: 'limite d’enregistrements atteinte', account_gone: 'compte Sweep relié supprimé' },
-      seen: 'vu {t}', acc: '{l} relié(s) · {n} à relier · {i} ignoré(s)', tr: '{n} trade(s) ({w} en 7 j)', team: 'équipe', none: 'Aucun trader n’a encore créé de clé.',
+      seen: 'vu {t}', acc: '{n} à relier · {l} relié(s) · {s} simulation', ign: '{i} ignoré(s) par le trader', tr: '{n} trade(s) ({w} en 7 j)', team: 'équipe', none: 'Aucun trader n’a encore créé de clé.',
       ctr: 'Contrats (30 j) : {l}', unk: 'Non reconnu(s) : {l}', alert: 'Contrats que Sweep ne reconnaît pas : {l}. Leurs trades gardent le bon P&L, pas le bon instrument.' },
     es: { h: 'Sincronización', sub: 'Los traders que crearon una clave, los vistos más recientemente primero. Solo lectura.', card: 'Traders en {p}', cardSub: '{a} vistos en 24 h · {b} cuentas vinculadas · {c} operaciones en 7 d',
       st: { ok: 'Sincroniza', to_link: 'Cuentas por vincular', no_accounts: 'Ninguna cuenta encontrada', key_only: 'Clave creada, sin descargar', downloaded: 'Descargado, nunca visto', error: 'Error' },
       dl: 'descargado {t}',
       why: { key_only: 'Una clave para pegar, el add-on nunca envió nada: ¿instalado? ¿clave pegada?', downloaded: 'Add-on descargado con su clave, nunca visto: ¿importado en NinjaTrader (Tools › Import › NinjaScript Add-On)?', no_accounts: 'El add-on funciona pero no ve ninguna cuenta: ¿la plataforma está conectada al bróker?', to_link: 'Cuentas encontradas, ninguna vinculada: el trader debe vincularlas (Ajustes › Conexiones).' },
       err: { plan: 'cuenta congelada (plan Free)', limit: 'límite de registros alcanzado', account_gone: 'cuenta de Sweep vinculada eliminada' },
-      seen: 'visto {t}', acc: '{l} vinculada(s) · {n} por vincular · {i} ignorada(s)', tr: '{n} operación(es) ({w} en 7 d)', team: 'equipo', none: 'Ningún trader ha creado una clave todavía.',
+      seen: 'visto {t}', acc: '{n} por vincular · {l} vinculada(s) · {s} simulación', ign: '{i} ignorada(s) por el trader', tr: '{n} operación(es) ({w} en 7 d)', team: 'equipo', none: 'Ningún trader ha creado una clave todavía.',
       ctr: 'Contratos (30 d): {l}', unk: 'No reconocido(s): {l}', alert: 'Contratos que Sweep no reconoce: {l}. Sus operaciones mantienen el P&L correcto, no el instrumento correcto.' },
   };
   const PLATS = { ninjatrader: 'NinjaTrader 8', quantower: 'Quantower' };
@@ -1232,7 +1235,8 @@
     const cards = Object.entries(d.platforms || {}).map(([p, v]) => card(x.card.replace('{p}', PLATS[p] || p), v.traders, x.cardSub.replace('{a}', v.seen_24h).replace('{b}', v.linked).replace('{c}', v.trades_7d))).join('');
     const rows = (d.rows || []).map((r) => {
       const info = [r.email !== r.name ? r.email : '', r.client || '', r.last_seen_at ? x.seen.replace('{t}', ago(r.last_seen_at, d.now)) : r.downloaded_at ? x.dl.replace('{t}', ago(r.downloaded_at, d.now)) : '', r.team ? x.team : ''].filter(Boolean).map(esc).join(' · ');
-      const acc = x.acc.replace('{l}', r.accounts.linked).replace('{n}', r.accounts.new).replace('{i}', r.accounts.ignored) + ' · ' + x.tr.replace('{n}', r.trades).replace('{w}', r.trades_7d);
+      const sim = r.accounts.sim || 0, ign = (r.accounts.ignored || 0) - sim;   // (13 Nov.) the platform's simulation accounts apart from the ones a trader ignored
+      const acc = x.acc.replace('{l}', r.accounts.linked).replace('{n}', r.accounts.new).replace('{s}', sim) + (ign > 0 ? ' · ' + x.ign.replace('{i}', ign) : '') + ' · ' + x.tr.replace('{n}', r.trades).replace('{w}', r.trades_7d);
       const why = r.state === 'error' ? `<small class="neg">${esc(r.errors.map((e) => x.err[e] || e).join(' · '))}</small>` : x.why[r.state] ? `<small>${esc(x.why[r.state])}</small>` : '';
       // the contracts received and the instrument Sweep reads in each; one it does not recognize, in red
       const cs = r.contracts || [], ok2 = cs.filter((c) => c.known), bad = cs.filter((c) => !c.known);
@@ -2763,6 +2767,7 @@
       phone: 'Open app.makeitsweep.com on the computer where NinjaTrader runs: Settings › Connections.', late: 'Still nothing? In NinjaTrader: Control Center › New › Sweep Sync. Its window says why.',
       neverDl: 'Sweep has not heard from the add-on yet. In NinjaTrader: Tools › Import › NinjaScript Add-On with the downloaded file, then Control Center › New › Sweep Sync: its window says why.',
       allNoteE: 'Each account found is filled in already: your free Sweep account of the same firm and phase, or a new account named as in {p}. Change a line if needed.', newAs: 'New account: {d}', todo: 'To complete',
+      tLink: '{p} found the account {n}. Link it to {a}?', tNew: '{p} found the account {n}. Its trades arrive on their own once it is in Sweep.', tPick: '{p} found the account {n}. Which Sweep account is it?', tCreate: 'Create this account', tChoose: 'Choose the account', tNot: 'Not a trading account',
       tipImport: 'On NinjaTrader 8 or Quantower? Connect it once: your trades arrive on their own, no more imports.', tipAcct: 'Trading on NinjaTrader 8 or Quantower? Connect it: your accounts are found and your trades arrive on their own.' },
     fr: { conn: 'Connexions', pitch: 'Tes trades arrivent seuls depuis {p}, sur tous tes comptes.', connect: 'Connecter', manage: 'Gérer', waiting: 'En attente de l’add-on',
       seen: 'Add-on vu {t}', now: 'à l’instant', min: 'il y a {n} min', hr: 'il y a {n} h', day: 'il y a {n} j', found1: '1 compte trouvé', foundN: '{n} comptes trouvés', linkMine: 'Relier mes comptes',
@@ -2786,6 +2791,7 @@
       phone: 'Ouvre app.makeitsweep.com sur l’ordinateur où tourne NinjaTrader : Réglages › Connexions.', late: 'Toujours rien ? Dans NinjaTrader : Control Center › New › Sweep Sync. Sa fenêtre dit pourquoi.',
       neverDl: 'Sweep n’a encore rien reçu de l’add-on. Dans NinjaTrader : Tools › Import › NinjaScript Add-On avec le fichier téléchargé, puis Control Center › New › Sweep Sync : sa fenêtre dit pourquoi.',
       allNoteE: 'Chaque compte trouvé est déjà rempli : ton compte Sweep libre de la même firme et de la même phase, ou un nouveau compte nommé comme dans {p}. Change une ligne au besoin.', newAs: 'Nouveau compte : {d}', todo: 'À compléter',
+      tLink: '{p} a trouvé le compte {n}. Relier à {a} ?', tNew: '{p} a trouvé le compte {n}. Ses trades arrivent seuls dès qu’il est dans Sweep.', tPick: '{p} a trouvé le compte {n}. C’est quel compte Sweep ?', tCreate: 'Créer ce compte', tChoose: 'Choisir le compte', tNot: 'Ce n’est pas un compte de trading',
       tipImport: 'Sur NinjaTrader 8 ou Quantower ? Connecte-le une fois : tes trades arrivent seuls, plus besoin d’importer.', tipAcct: 'Tu trades sur NinjaTrader 8 ou Quantower ? Connecte-le : tes comptes sont trouvés et tes trades arrivent seuls.' },
     es: { conn: 'Conexiones', pitch: 'Tus operaciones llegan solas desde {p}, en todas tus cuentas.', connect: 'Conectar', manage: 'Gestionar', waiting: 'Esperando el add-on',
       seen: 'Add-on visto {t}', now: 'justo ahora', min: 'hace {n} min', hr: 'hace {n} h', day: 'hace {n} d', found1: '1 cuenta encontrada', foundN: '{n} cuentas encontradas', linkMine: 'Vincular mis cuentas',
@@ -2809,6 +2815,7 @@
       phone: 'Abre app.makeitsweep.com en el ordenador donde corre NinjaTrader: Ajustes › Conexiones.', late: '¿Sigue sin nada? En NinjaTrader: Control Center › New › Sweep Sync. Su ventana dice por qué.',
       neverDl: 'Sweep aún no ha recibido nada del add-on. En NinjaTrader: Tools › Import › NinjaScript Add-On con el archivo descargado, luego Control Center › New › Sweep Sync: su ventana dice por qué.',
       allNoteE: 'Cada cuenta encontrada ya está rellenada: tu cuenta de Sweep libre de la misma firma y fase, o una cuenta nueva con el nombre de {p}. Cambia una línea si hace falta.', newAs: 'Cuenta nueva: {d}', todo: 'Por completar',
+      tLink: '{p} encontró la cuenta {n}. ¿Vincularla a {a}?', tNew: '{p} encontró la cuenta {n}. Sus operaciones llegan solas en cuanto esté en Sweep.', tPick: '{p} encontró la cuenta {n}. ¿Qué cuenta de Sweep es?', tCreate: 'Crear esta cuenta', tChoose: 'Elegir la cuenta', tNot: 'No es una cuenta de trading',
       tipImport: '¿En NinjaTrader 8 o Quantower? Conéctalo una vez: tus operaciones llegan solas, sin importar más.', tipAcct: '¿Operas en NinjaTrader 8 o Quantower? Conéctalo: tus cuentas se encuentran y tus operaciones llegan solas.' },
   };
   const t = (k) => { const x = (T[L] || T.en)[k]; return x == null ? T.en[k] : x; };
@@ -2852,7 +2859,8 @@
   const beta = () => { if (S.me && S.me.is_admin) return true; try { return localStorage.getItem('sw.syncBeta') === '1'; } catch (e) { return false; } };
   const shown = () => Object.keys(NAME).filter((p) => ((SY.st.addons || {})[p] && (!BETA.includes(p) || beta())) || conn(p) || accts(p).length);   // an add-on to download, or already in use
   const nameOf = (id) => { const a = typeof acct === 'function' ? acct(id) : null; return a ? (typeof acctLabel === 'function' ? acctLabel(id) : a.name) : '—'; };
-  const guessOf = (a) => { const g = a.guess || {}; if (g.sim) return t('sim'); if (g.firm) return (FIRMS[g.firm] || g.firm) + (g.phase ? ' · ' + t(g.phase) : ''); return ''; };
+  const firmLabel = (f) => FIRMS[f] || ((SY.st && SY.st.firms) || {})[f] || f;   // (13 Nov.) the catalogue's name for the firms the server reads in a name (Lucid…)
+  const guessOf = (a) => { const g = a.guess || {}; if (g.sim) return t('sim'); if (g.firm) return firmLabel(g.firm) + (g.phase ? ' · ' + t(g.phase) : ''); return ''; };
 
   /** the trader's sync, asked again at most every 20 s (and right after each action) */
   function load(force) {
@@ -3080,17 +3088,12 @@
   function openAll(p) {
     const v = { k: 'all', p, picks: {}, pv: {}, err: {}, busy: false }, own = freeOwn();
     const used = () => new Set(Object.values(v.picks));
-    const firmIs = (x, f) => { const fm = typeof firm === 'function' ? firm(x.firm_id) : null; return !!(fm && new RegExp(FIRMS[f] || f, 'i').test(fm.name)); };
-    const list = accts(p).filter((x) => x.state === 'new');
-    list.forEach((a) => {
-      const same = own.find((x) => String(x.name || '').trim().toLowerCase() === String(a.name).trim().toLowerCase() && !used().has(x.id));
-      if (same) v.picks[a.id] = same.id;
-    });
-    list.forEach((a) => {
-      if (v.picks[a.id]) return;
-      const g = a.guess || {};
-      const twin = g.firm && g.phase ? own.find((x) => !used().has(x.id) && firmIs(x, g.firm) && x.phase === g.phase) : null;
-      v.picks[a.id] = twin ? twin.id : 'new';
+    // (13 Nov.) the server's proposal (sync_suggest: same name or number, firm and size, the only account of the firm);
+    // no account stands out: « New account », as before
+    accts(p).filter((x) => x.state === 'new').forEach((a) => {
+      const sg = a.suggest || {};
+      if (sg.account_id && own.some((x) => x.id === sg.account_id) && !used().has(sg.account_id)) v.picks[a.id] = sg.account_id;
+      else v.picks[a.id] = 'new';   // (the line can be changed here: his other accounts are in the list)
     });
     open(v); Object.keys(v.picks).forEach((sid) => preview(v, sid));
   }
@@ -3103,15 +3106,16 @@
   }
   function newDesc(a) {
     const g = a.guess || {}, sz = sizeOf(a);
-    return [g.firm ? (FIRMS[g.firm] || g.firm) + (g.phase ? ' · ' + t(g.phase) : '') : t('todo'), sz ? (typeof moneyU === 'function' ? moneyU(sz * 100) : '$' + sz) : ''].filter(Boolean).join(' · ');
+    return [g.firm ? firmLabel(g.firm) + (g.phase ? ' · ' + t(g.phase) : '') : t('todo'), sz ? (typeof moneyU === 'function' ? moneyU(sz * 100) : '$' + sz) : ''].filter(Boolean).join(' · ');
   }
   /** creates the Sweep account of a platform account and waits until the server has it (null: refused, e.g. the plan's limit) */
   async function createAcc(a) {
     const g = a.guess || {}, sz = sizeOf(a);
     let fid = null;
     if (g.firm) {
-      const fm = (S.firms || []).find((f) => new RegExp(FIRMS[g.firm] || g.firm, 'i').test(f.name || ''));
-      fid = fm ? fm.id : put('firms', { id: uid(), name: FIRM_NAME[g.firm] || FIRMS[g.firm] || g.firm }, { silent: true }).id;
+      const flat = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, ''), full = FIRM_NAME[g.firm] || firmLabel(g.firm), short = flat(FIRMS[g.firm] || full);
+      const fm = (S.firms || []).find((f) => flat(f.name) === flat(full) || (short.length >= 4 && flat(f.name).includes(short)));
+      fid = fm ? fm.id : put('firms', { id: uid(), name: full }, { silent: true }).id;
     }
     const d = { id: uid(), firm_id: fid, name: String(a.name).slice(0, 120), starting_balance_c: sz ? sz * 100 : 0, status: 'active', created_on: typeof todayStr === 'function' ? todayStr() : new Date().toISOString().slice(0, 10) };
     if (g.phase) { d.phase = g.phase; d.money_type = g.phase; }
@@ -3134,6 +3138,7 @@
   /* ───── what the trader does ───── */
   async function act(b) {
     const k = b.dataset.sy, v = SY.view || {};
+    if (/^t-/.test(k)) return actToday(k, b.dataset.id);
     if (k === 'close') return close();
     if (k === 'manage') return open({ k: 'manage', p: b.dataset.p });
     if (k === 'acct') return open({ k: 'acct', id: b.dataset.id, pick: null });
@@ -3303,7 +3308,46 @@
       else if (!todo && has) has.remove();
     });
   }
-  function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); paintTips(); paintTodo(); }
+  /* ───── Today: an account found stays in sight until it is linked (13 Nov., brief « relier les comptes trouvés ») ─────
+     One line, the first account still « to link »: the Sweep account the server proposes and « Link » (one tap), or « Create
+     this account » when the trader has none it could be, or « Choose the account » when none stands out; and « Not a trading
+     account » (ignored). Handled, the next one shows; none left, the line goes. */
+  function paintToday() {
+    const main = document.getElementById('main'); if (!main) return;
+    let el = main.querySelector('.sy-today');
+    if ((location.hash || '#dashboard') !== '#dashboard' || main.querySelector('.onb')) { if (el) el.remove(); return; }
+    load();
+    const fresh = accts().filter((x) => x.state === 'new' && SY.stopping !== x.platform), a = fresh.find((x) => x.suggest && x.suggest.account_id) || fresh[0];   // the one Sweep has an account for first
+    if (!a) { if (el) el.remove(); return; }
+    const sg = a.suggest || {}, own = freeOwn(), acc = sg.account_id && own.find((x) => x.id === sg.account_id), mode = acc ? 'link' : (sg.choose || own.length) ? 'choose' : 'create';
+    const txt = t(mode === 'link' ? 'tLink' : mode === 'choose' ? 'tPick' : 'tNew').replace('{p}', PLAT[a.platform] || a.platform).replace('{n}', a.name).replace('{a}', acc ? nameOf(acc.id) : '');
+    const desc = mode === 'create' && ((a.guess || {}).firm || sizeOf(a)) ? t('newAs').replace('{d}', newDesc(a)) : '';
+    const dis = SY.tBusy ? ' disabled' : '';
+    const html = `<span class="sy-ic">${IC}</span><span class="sy-txt"><span>${h(txt)}</span>${desc ? `<small>${h(desc)}</small>` : ''}</span><span class="sy-tip-b"><button type="button" class="btn sm primary" data-sy="t-${mode}" data-id="${h(a.id)}"${dis}>${t(mode === 'link' ? 'link' : mode === 'choose' ? 'tChoose' : 'tCreate')}</button><button type="button" class="link sy-not" data-sy="t-ignore" data-id="${h(a.id)}"${dis}>${t('tNot')}</button></span>`;
+    if (!el) { el = document.createElement('div'); el.className = 'sy-tip sy-today'; el.setAttribute('data-noi18n', ''); }
+    const dash = main.querySelector(':scope > .nav-dash'), at = dash || main.querySelector(':scope > :not(.nav-demo-hid):not(.sy-today)');
+    if (at ? at.previousElementSibling !== el : el.parentNode !== main) { if (at) at.before(el); else main.prepend(el); }
+    if (el._h !== html) { el.innerHTML = html; el._h = html; }
+  }
+  async function actToday(k, id) {
+    const a = accts().find((x) => x.id === id && x.state === 'new'); if (!a || SY.tBusy) return;
+    if (k === 't-choose') return open({ k: 'acct', id: a.id, pick: null });
+    SY.tBusy = true; paintToday();
+    try {
+      if (k === 't-ignore') { await apiJSON(`api/sync/accounts/${encodeURIComponent(a.id)}`, { method: 'POST', body: { action: 'ignore' } }); if (typeof toast === 'function') toast(t('ignoredT')); }
+      else {
+        const pick = k === 't-create' ? await createAcc(a) : (a.suggest || {}).account_id;
+        if (!pick) throw new Error('account');
+        const r = await apiJSON(`api/sync/accounts/${encodeURIComponent(a.id)}`, { method: 'POST', body: { action: 'link', account_id: pick } });
+        const n = (r.created || 0) + (r.merged || 0);
+        if (typeof toast === 'function') toast(r.error ? t('err_' + r.error) : n ? t('linkedT').replace('{n}', n) : t('linked0'));
+        if (typeof syncNow === 'function') syncNow({ manual: true });
+      }
+    } catch (e) { if (typeof toast === 'function') toast(e && e.status === 409 && e.data && e.data.error === 'taken' ? t('err_taken') : t('err')); }
+    SY.tBusy = false;
+    await load(true); if (typeof render === 'function') render();
+  }
+  function paint() { if (!server()) return; paintSettings(); paintAccount(); paintTrade(); paintTips(); paintTodo(); paintToday(); }
   const appRender = render;
   render = function () {
     try { importKeys(); } catch (e) { /* never blocks */ }

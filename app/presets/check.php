@@ -238,11 +238,19 @@ function pr_set_leaf(array &$a, string $path, $v): void
  *  - a new account type or size is added only when both readings have it, with the same rules;
  *  - an account type whose rules come out impossible keeps its previous version.
  * Returns the firm to save and what was not applied.
+ *
+ * (13 Nov.) $prev: the reading kept from the last check, when that check left something not applied. It confirms like the
+ * second reading does — a week apart instead of a minute —, so what two readings of the same run never give in exactly the
+ * same words is no longer held for ever (Tradeify: 6 account types found on 9 Nov., none applied, 0 in the catalogue):
+ *  - a rule, a price, a new size: applied when this week's reading and last week's give the same value;
+ *  - a new account type: added with the sizes two readings agree on (at least one), the other sizes wait;
+ *  - account types found in none of the three readings become Legacy even when they are more than half of the firm's types
+ *    (Lucid: « 3 of 5 account types not found », week after week).
  */
-function pr_settle(array $old, array $a, array $b): array
+function pr_settle(array $old, array $a, array $b, ?array $prev = null): array
 {
     $idx = function (array $f) { $o = []; foreach ((array) $f['programs'] as $p) if (empty($p['legacy'])) $o[$p['id']] = ['p' => $p, 's' => array_column((array) $p['sizes'], null, 'size')]; return $o; };
-    $A = $idx($a); $B = $idx($b); $O = $idx($old);
+    $A = $idx($a); $B = $idx($b); $O = $idx($old); $P = $prev ? $idx($prev) : [];
     $same = fn($x, $y) => $x !== null && $y !== null && pr_leaves($x) == pr_leaves($y);
     $out = $old; $held = []; $gone = [];
     foreach ($out['programs'] as $pi => &$p) {
@@ -252,15 +260,16 @@ function pr_settle(array $old, array $a, array $b): array
         foreach ($p['sizes'] as &$s) {
             $sa = $pa['s'][$s['size']] ?? null; if (!$sa) continue;
             $lo = pr_leaves($s); $lb = isset($pb['s'][$s['size']]) ? pr_leaves($pb['s'][$s['size']]) : [];
+            $lp = isset($P[$p['id']]['s'][$s['size']]) ? pr_leaves($P[$p['id']]['s'][$s['size']]) : [];
             foreach (pr_leaves($sa) as $k => $v) {
                 if (array_key_exists($k, $lo) && $lo[$k] == $v) continue;
-                if (array_key_exists($k, $lb) && $lb[$k] == $v) { pr_set_leaf($s, $k, $v); if (strpos($k, 'price.') === 0) $s['price']['checked'] = gmdate('Y-m-d'); }
+                if ((array_key_exists($k, $lb) && $lb[$k] == $v) || (array_key_exists($k, $lp) && $lp[$k] == $v)) { pr_set_leaf($s, $k, $v); if (strpos($k, 'price.') === 0) $s['price']['checked'] = gmdate('Y-m-d'); }
                 else $held[] = $p['id'] . ' ' . ((int) $s['size'] / 1000) . "K $k " . var_export($lo[$k] ?? null, true) . ' → ' . var_export($v, true);
             }
         }
         unset($s);
         foreach ($pa['s'] as $size => $sa) if (!isset($O[$p['id']]['s'][$size])) {
-            if ($same($sa, $pb['s'][$size] ?? null)) $p['sizes'][] = $sa; else $held[] = $p['id'] . ' ' . ((int) $size / 1000) . 'K new size';
+            if ($same($sa, $pb['s'][$size] ?? null) || $same($sa, $P[$p['id']]['s'][$size] ?? null)) $p['sizes'][] = $sa; else $held[] = $p['id'] . ' ' . ((int) $size / 1000) . 'K new size';
         }
         usort($p['sizes'], fn($x, $y) => $x['size'] <=> $y['size']);
     }
@@ -268,10 +277,18 @@ function pr_settle(array $old, array $a, array $b): array
     foreach ($A as $id => $x) if (!isset($O[$id])) {
         $y = $B[$id] ?? null; $ok = $y && count($x['s']) === count($y['s']);
         foreach ($x['s'] as $size => $sa) $ok = $ok && $same($sa, $y['s'][$size] ?? null);
+        if (!$ok && isset($P[$id])) {   // confirmed a week apart: the sizes this reading and last week's (or the second one) agree on
+            $keep = array_filter($x['s'], fn($sa, $size) => $same($sa, $P[$id]['s'][$size] ?? null) || $same($sa, $y['s'][$size] ?? null), ARRAY_FILTER_USE_BOTH);
+            if ($keep) {
+                foreach (array_diff(array_keys($x['s']), array_keys($keep)) as $size) $held[] = $id . ' ' . ((int) $size / 1000) . 'K new size';
+                $x['p']['sizes'] = array_values($keep); usort($x['p']['sizes'], fn($m, $n) => $m['size'] <=> $n['size']); $ok = true;
+            }
+        }
         if ($ok) array_splice($out['programs'], count(array_filter($out['programs'], fn($q) => empty($q['legacy']))), 0, [$x['p']]); else $held[] = "$id new account type";
     }
     $sold = count($O);
-    if ($gone && count($gone) * 2 <= $sold) foreach ($gone as $pi) {
+    $again = $prev !== null && $gone && !array_filter($gone, fn($pi) => isset($P[$out['programs'][$pi]['id']]));   // not found last week either
+    if ($gone && (count($gone) * 2 <= $sold || $again)) foreach ($gone as $pi) {
         $n = $out['programs'][$pi]['name'];
         $out['programs'][$pi]['legacy'] = true;
         $out['programs'][$pi]['label'] = ['fr' => "$n (plus vendu)", 'en' => "$n (no longer sold)", 'es' => "$n (ya no se vende)"];
@@ -309,7 +326,11 @@ function pr_check_firm(PDO $pdo, array $firm): array
         $doubts = array_merge($doubts, pr_doubtful($firm, $new));
         if ($doubts) {
             [$second] = $read();   // a second, independent reading settles the doubts
-            [$new, $held] = pr_settle($firm, $new, $second ?: ['programs' => []]);
+            // (13 Nov.) and the reading the last check kept (3 weeks at most), when it left something not applied
+            $kept = pr_status()['pending'][$firm['id']] ?? null; $first = $new;
+            $prev = is_array($kept) && (int) ($kept['at'] ?? 0) > time() - 21 * 86400 && is_array($kept['programs'] ?? null) ? ['programs' => $kept['programs']] + $firm : null;
+            [$new, $held] = pr_settle($firm, $new, $second ?: ['programs' => []], $prev);
+            if ($held) $st['pending'] = ['at' => time(), 'programs' => $first['programs']];   // read again next week, against this one (pr_apply keeps it)
             if ($held) $st['errors'] = array_slice(array_map(fn($h) => "not applied (not confirmed by a second reading, read again next week): $h", $held), 0, 12);
             $st['doubts'] = array_slice($doubts, 0, 12);
         }
@@ -367,7 +388,12 @@ function pr_apply(PDO $pdo, string $firmId, array $st, ?array $new, bool $dry = 
         try { $st['notified'] = pr_notify_changes($pdo, $old, pr_current(), $firmId); }
         catch (Throwable $e) { $st['notified'] = 0; $st['errors'][] = 'notifications not sent: ' . $e->getMessage(); error_log('Sweep presets notify: ' . $e->getMessage()); }
     }
-    if (!$dry) { $status['firms'][$firmId] = $st; pr_save_status($status); }
+    // (13 Nov.) the reading whose doubts were not settled waits for next week's (pr_check_firm); settled or unchanged: forgotten
+    $pending = $st['pending'] ?? null; unset($st['pending']);
+    if (!$dry) {
+        if ($pending) $status['pending'][$firmId] = $pending; else unset($status['pending'][$firmId]);
+        $status['firms'][$firmId] = $st; pr_save_status($status);
+    }
     return $st;
 }
 

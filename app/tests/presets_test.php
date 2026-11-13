@@ -228,6 +228,34 @@ $st = $run1('alpha', function (array &$a) { foreach ($a['programs'] as &$p) if (
 ok($st['status'] === 'updated' && pr_rules_of(pr_current(), 'alpha|advanced|50000|funded|')['rules']['consistency_pct'] === 40 && ($st['notified'] ?? null) !== null, 'the same funded consistency given by both readings: applied, traders notified (' . $st['status'] . ')');
 ok(!in_array('review', array_column(pr_admin_summary()['firms'], 'status'), true), 'no firm is ever « to review »');
 
+echo "— A reading not confirmed waits for next week's reading (13 Nov.: Tradeify stayed empty, Lucid « 3 of 5 not found »)\n";
+$tf = function (bool $second) {   // Tradeify as read on the pages: two account types and a third with an impossible drawdown (the doubt)
+    $src = answer_of('mffu')['programs']; $a = $src[0]; $a['id'] = 'tf-growth'; $a['name'] = 'Growth'; $b = $src[1]; $b['id'] = 'tf-select'; $b['name'] = 'Select';
+    $c = $src[0]; $c['id'] = 'tf-odd'; $c['name'] = 'Odd'; foreach ($c['sizes'] as &$z) $z['eval']['dd'] = $z['size'] * 2; unset($z);
+    if ($second) { $a['sizes'][0]['eval']['target'] = (int) $a['sizes'][0]['eval']['target'] + 500; return ['programs' => [$a]]; }   // the second reading of a run never says it the same way
+    return ['programs' => [$a, $b, $c]];
+};
+$wk = 0; $week = function (string $id, array $readings) use ($pdo, $firmOf, &$wk) { mock([$id => $readings, '_week' => ++$wk]);   // (a new file each week: the simulated readings start again at the first one)
+    [$st, $new] = pr_check_firm($pdo, $firmOf($id)); return pr_apply($pdo, $id, $st, $new); };
+$st = $week('tradeify', [$tf(false), $tf(true)]);
+ok(count($firmOf('tradeify')['programs']) === 0 && $st['errors'] && isset(pr_status()['pending']['tradeify']['programs']) && !isset(pr_status()['firms']['tradeify']['pending']),
+    'Tradeify, week 1: the account types found are not confirmed by the second reading: none applied, the reading is kept for next week (' . count($st['errors']) . ' not applied)');
+$st = $week('tradeify', [$tf(false), $tf(true)]);
+$ids = array_column($firmOf('tradeify')['programs'], 'id');
+ok($st['status'] === 'updated' && in_array('tf-growth', $ids, true) && in_array('tf-select', $ids, true) && !in_array('tf-odd', $ids, true) && count($firmOf('tradeify')['programs'][0]['sizes']) === count(answer_of('mffu')['programs'][0]['sizes']),
+    'Tradeify, week 2: the same reading a week apart confirms them: its account types are in the catalogue, with their sizes; the one with impossible rules still is not (' . implode(', ', $ids) . ')');
+$status = pr_status(); $status['pending']['tradeify']['at'] = time() - 30 * 86400; pr_save_status($status);
+$half = function (array &$a) { $a['programs'] = array_slice($a['programs'], 0, 2); };
+$nLu = count(array_filter($firmOf('lucid')['programs'], fn($p) => empty($p['legacy'])));
+$st = $week('lucid', [answer_of('lucid', $half)]);
+ok($nLu === 5 && count(array_filter($firmOf('lucid')['programs'], fn($p) => empty($p['legacy']))) === 5 && isset(pr_status()['pending']['lucid']), 'Lucid, week 1: 3 of its 5 account types not found: more than half, nothing removed, the reading is kept');
+$st = $week('lucid', [answer_of('lucid', $half)]);
+$leg = array_filter($firmOf('lucid')['programs'], fn($p) => !empty($p['legacy']));
+ok(count($leg) === 3 && count($firmOf('lucid')['programs']) === 5 && !isset(pr_status()['pending']['lucid']), 'Lucid, week 2: not found again, a week apart: the 3 become « no longer sold » (kept for the accounts that have them, no longer offered); nothing waits any more');
+$old = pr_status(); $old['pending']['mffu'] = ['at' => time() - 30 * 86400, 'programs' => []]; pr_save_status($old);
+$st = $week('mffu', [answer_of('mffu', function (array &$a) { $a['programs'] = array_slice($a['programs'], 0, 1); })]);
+ok(count(array_filter($firmOf('mffu')['programs'], fn($p) => empty($p['legacy']))) === 4, 'a reading kept more than 3 weeks ago confirms nothing: MFFU keeps its 4 account types');
+
 exec('rm -rf ' . escapeshellarg($DATA));
 echo "\n" . ($n - $fails) . "/$n passed\n";
 exit($fails ? 1 : 0);

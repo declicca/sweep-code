@@ -1,7 +1,7 @@
 """
 Sweep — a trade's page, an answer tapped never moves the page (10 Nov., the « tapped set » jump of 9 Nov., an iPhone 393 x 695):
   python3 tests/e2e_trade_tap_still.py http://127.0.0.1:8095 /tmp/show_state.json
-Phone 393 x 695 (touch, light then dark), Safari-like (no scroll anchoring), the server a little slow (0.2 s per save):
+Phone 393 x 695 (touch, light on a real trade taken without a stop, then dark on a sample trade), Safari-like (no scroll anchoring), the server a little slow (0.2 s per save):
 each « set » control of the page (the grade A–F, the coach's Yes / No, the full review's checklist, opened) is tapped; for
 0.7 s, image by image, the tapped control stays where it was on the screen (a move of 6 px or more, even one image, is a
 jump), and the page sends no « Trade page jump » report. Also: the AI in the « ⋯ » menu, no sticky Chart · Details · Review · Setup bar, no
@@ -41,7 +41,13 @@ with sync_playwright() as p:
       route.continue_()
     pg.route('**/api/**', slow)
     pg.goto(B + '/#trades'); pg.wait_for_function("() => typeof S !== 'undefined' && (S.trades || []).length > 0", timeout=20000); pg.wait_for_timeout(800)
-    tid = pg.evaluate("(S.trades.find((t) => !t.demo) || S.trades[0]).id")
+    # (13 Nov.) a real trade too, taken without a stop: the coach asks « stop respected? » in « Answer your coach », and the
+    # answer replaces the question by the next one (the detector took the full review's button of that question, 600 px lower,
+    # for the tapped one and reported a jump of 628 px)
+    pg.evaluate("""() => { put('accounts', { id: 'jt-a', name: 'Jump test', starting_balance_c: 5000000, status: 'active', created_on: todayStr() });
+      [['09:35', 30000, 20090], ['09:50', -15000, null]].forEach(([tm, pnl, stop], k) => put('trades', { id: 'jt' + k, account_id: 'jt-a', instrument: 'NQ', direction: 'long', contracts: 1, entry: 20100, exit: 20100 + pnl / 2000, stop, pnl_c: pnl, pnl_manual: true, date: todayStr(), entry_time: tm, exit_time: tm.slice(0, 3) + '58' }));
+      render(); }"""); pg.wait_for_timeout(1200)
+    tid = 'jt1' if cs == 'light' else pg.evaluate("(S.trades.find((t) => t.demo) || S.trades[0]).id")
     pg.evaluate(f"location.hash = '#trade/{tid}'"); pg.wait_for_selector('#main .th-head', timeout=15000); pg.wait_for_timeout(1500)
     page = pg.evaluate("""(() => { const m = document.getElementById('main'), g = m.querySelector('.th-head > div:has(> .seg[role=group])'), d = m.querySelector('.th-head .nav-tdisc');
       const fab = document.getElementById('askFab');
@@ -76,6 +82,7 @@ with sync_playwright() as p:
     jumps = [r for r in reps if 'Trade page jump' in r]
     ok(not jumps, f'{cs} no « Trade page jump » report ({jumps[:1]})')
     ok(not errs, f'{cs} no page error' + ('' if not errs else ': ' + ' | '.join(errs[:2])))
+    for d in ('trades/jt0', 'trades/jt1', 'accounts/jt-a'): ctx.request.delete(B + '/api/docs/' + d, headers={'X-Requested-With': 'fetch'})   # the other tests find the data as it was
     ctx.close()
   br.close()
 print('all passed' if not fails else f'{fails} failed'); sys.exit(1 if fails else 0)

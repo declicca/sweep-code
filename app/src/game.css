@@ -846,6 +846,8 @@ html body #gSheet.g-pm .pm-insts.bad .chip,html body #gSheet.g-pm input[aria-inv
 .g-bal-r input{flex:1;min-width:0;font-variant-numeric:tabular-nums}
 .g-bal-r .chip{flex:none}
 .g-bal-gap p{margin:8px 0 6px;font-size:14px;line-height:1.4}
+.g-bal-gap p.g-bal-sure{font-weight:500;color:var(--text)}
+.g-bal-gap .g-bal-sure+.g-chips-row{margin-bottom:10px}
 .g-bal-shot{display:block;margin:-4px 0 10px;font-size:13px}
 @media (max-width:860px){.g-bal-r input{font-size:16px}}
 

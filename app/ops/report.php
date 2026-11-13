@@ -77,6 +77,10 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
         $md .= "**Comptes par firme** (comptes actifs, données d'exemple et comptes archivés à part ; trades datés des 30 derniers jours, selon la clé d'import du trade : sans clé = à la main, capture ou IA comprises ; « sync » = add-on NinjaTrader ou Quantower ; autre clé = fichier CSV) :\n\n"
             . $tbl(['Firme', 'Comptes', 'Traders', 'Évaluation', 'Financé', 'Live', 'Trades (30 j)', 'À la main', 'Import CSV', 'Synchro'],
                 array_merge(array_map(fn($r) => $line($r, $fl($r)), $b['firms']['rows']), [$line($b['firms']['total'], 'Total')]));
+        // (13 Nov.) what is behind « Autre firme »: the names as typed, to decide which firms to add to the catalogue
+        $on = $b['firms']['other_names'] ?? []; $or = $b['firms']['other_rest'] ?? ['names' => 0, 'accounts' => 0, 'traders' => 0];
+        if ($on || $or['accounts']) $md .= "**Dans « Autre firme »** (les 10 noms de firme les plus tapés, ramenés à une seule écriture : casse, espaces, « LLC » ; un nom tapé par un seul trader n'est pas affiché, il est compté dans « autres ») :\n\n"
+            . $tbl(['Nom tapé', 'Comptes', 'Traders'], array_merge(array_map(fn($r) => [$r['name'], $r['accounts'], $r['traders']], $on), $or['accounts'] ? [['autres (' . $or['names'] . ' noms tapés par un seul trader, ou sans nom)', $or['accounts'], $or['traders']]] : []));
     }
     $sk = ['before' => 'Avant l\'ouverture (18 h → 9 h 30)', 'session' => 'Séance (9 h 30 → 17 h)', 'evening' => 'Marché fermé (17 h → 18 h)', 'weekend' => 'Fin de semaine (vendredi 17 h → dimanche 18 h)'];
     $md .= "**Quand ils s'inscrivent** (heure de New York) et la part qui fait un premier plan ou un premier trade pendant cette séance :\n\n"
@@ -102,7 +106,7 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
         $j = $m['journal']; $jr = fn(string $k, string $l) => [$l, $pc($j['d7'][$k]), $pc($j['d30'][$k])];
         $md .= "**Journal complet** (des pertes non notées rendent le journal trop beau ; chez de vrais traders, 40 à 55 % des trades sont perdants) :\n\n"
             . $tbl(['Indicateur', '7 jours', '30 jours'], array_merge([$jr('high_win_20', 'Traders de 20 trades et plus avec plus de 80 % de gagnants'), $jr('losing_trades', 'Trades perdants'), $jr('days_without_loss', 'Jours de trading sans perte')],
-                isset($j['d7']['gap_days']) ? [$jr('gap_days', 'Journées fermées avec un écart à la plateforme'), ['Montant total des écarts', round($j['d7']['gap_total_c'] / 100) . ' $', round($j['d30']['gap_total_c'] / 100) . ' $'], $jr('gap_detailed', 'Part des écarts détaillée en trades')] : []));
+                isset($j['d7']['gap_days']) ? [$jr('gap_days', 'Journées fermées avec un écart à la plateforme'), ['Montant total des écarts', round($j['d7']['gap_total_c'] / 100) . ' $', round($j['d30']['gap_total_c'] / 100) . ' $'], ['Soldes à vérifier (écart plus grand que la perte maximale du compte, hors du total)', ($j['d7']['gap_check']['n'] ?? 0) . ' · ' . round(($j['d7']['gap_check']['c'] ?? 0) / 100) . ' $', ($j['d30']['gap_check']['n'] ?? 0) . ' · ' . round(($j['d30']['gap_check']['c'] ?? 0) / 100) . ' $'], $jr('gap_detailed', 'Part des écarts détaillée en trades')] : []));
     }
 
     $md .= "## 3. D'où viennent les traders\n\n**Inscriptions par semaine** (lundi, New York) :\n\n" . $tbl(['Semaine', 'Inscrits'], array_map(null, array_keys($b['filters']['weeks']), array_values($b['filters']['weeks'])))
@@ -137,9 +141,12 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
         if (!$has('sync_connections')) return null;
         $o = [];
         foreach ($q('SELECT user_id, platform, status, last_push_at FROM sync_connections WHERE revoked_at IS NULL') as $r) { if (!isset($real[$r['user_id']])) continue; $x = &$o[$r['platform']]; $x ??= ['t' => [], 'p7' => []]; $x['t'][$r['user_id']] = 1; if ((int) $r['last_push_at'] > time() - 7 * 86400) $x['p7'][$r['user_id']] = 1; unset($x); }
-        $acc = []; foreach ($q('SELECT user_id, platform, state FROM sync_accounts') as $r) if (isset($real[$r['user_id']])) $acc[$r['platform']][$r['state']] = ($acc[$r['platform']][$r['state']] ?? 0) + 1;
+        require_once dirname(__DIR__) . '/sync/sync-store.php';
+        // the platform's own simulation accounts (Sim101, Playback) apart from the accounts a trader chose to ignore
+        $acc = []; foreach ($q('SELECT user_id, platform, ext_id, state FROM sync_accounts') as $r) if (isset($real[$r['user_id']])) { $k = $r['state'] === 'ignored' && !empty(sync_guess((string) $r['ext_id'], (string) $r['platform'])['sim']) ? 'sim' : (string) $r['state']; $acc[$r['platform']][$k] = ($acc[$r['platform']][$k] ?? 0) + 1; }
+        $found = fn(array $a) => implode(' · ', array_filter([(int) ($a['new'] ?? 0) . ' à relier', (int) ($a['linked'] ?? 0) . ' reliés', (int) ($a['sim'] ?? 0) . ' simulation', !empty($a['ignored']) ? $a['ignored'] . ' ignorés par le trader' : '']));
         $tr = []; foreach ($q('SELECT t.user_id, a.platform, t.created_at FROM sync_trades t JOIN sync_accounts a ON a.id = t.sync_account_id') as $r) if (isset($real[$r['user_id']])) { $tr[$r['platform']][0] = ($tr[$r['platform']][0] ?? 0) + 1; if ((int) $r['created_at'] > time() - 7 * 86400) $tr[$r['platform']][1] = ($tr[$r['platform']][1] ?? 0) + 1; }
-        $rows = []; foreach (array_unique(array_merge(array_keys($o), array_keys($acc))) as $p) $rows[] = [$p, count($o[$p]['t'] ?? []), count($o[$p]['p7'] ?? []), json_encode($acc[$p] ?? []), (int) ($tr[$p][0] ?? 0) . ' / ' . (int) ($tr[$p][1] ?? 0)];
+        $rows = []; foreach (array_unique(array_merge(array_keys($o), array_keys($acc))) as $p) $rows[] = [$p, count($o[$p]['t'] ?? []), count($o[$p]['p7'] ?? []), $found($acc[$p] ?? []), (int) ($tr[$p][0] ?? 0) . ' / ' . (int) ($tr[$p][1] ?? 0)];
         return $rows;
     });
     if ($sy !== null) $md .= "## 8. Synchronisation automatique\n\n" . $tbl(['Plateforme', 'Traders connectés', 'Envoi en 7 j', 'Comptes trouvés', 'Trades écrits (total / 7 j)'], $sy);
@@ -158,9 +165,18 @@ function sweep_full_report(PDO $pdo, array $cfg, string $app, int $now): string
     if ($pr) $md .= "## 11. Préréglages des prop firms\n\nCatalogue v" . $pr['version'] . ', dernière vérification complète : ' . ($pr['last_run'] ? $at($pr['last_run']) . ' (il y a ' . $pr['days_since'] . ' j)' : 'jamais') . ($pr['stale'] ? ' — **en retard**' : '') . ".\n\n"
         . $tbl(['Firme', 'Programmes', 'État', 'Vérifiée', 'Changements trouvés', 'Erreurs'], array_map(fn($f) => [$f['name'], $f['programs'], $f['status'], $at($f['checked_at']), implode(' ; ', $f['changes']), implode(' ; ', $f['errors'])], $pr['firms']));
 
-    $fb = $try(fn() => $q('SELECT user_id, type, rating, message, page, status, created_at FROM feedback ORDER BY created_at DESC LIMIT 40')->fetchAll(PDO::FETCH_ASSOC), []);
+    // (13 Nov.) an answer given in one tap from an email has no text of its own: its question and the answer chosen are the text
+    // (the two « answer » of 6 and 9 Nov. showed an empty text); the comment the trader added, if any, follows
+    $fb = $try(fn() => $q('SELECT user_id, type, rating, message, page, status, created_at, question, answer FROM feedback ORDER BY created_at DESC LIMIT 40')->fetchAll(PDO::FETCH_ASSOC), null)
+        ?? $try(fn() => $q('SELECT user_id, type, rating, message, page, status, created_at FROM feedback ORDER BY created_at DESC LIMIT 40')->fetchAll(PDO::FETCH_ASSOC), []);
+    $fbText = function (array $r): string {
+        $m = trim((string) $r['message']); $a = trim((string) ($r['answer'] ?? ''));
+        if ($a === '') return $m;
+        $qn = trim((string) ($r['question'] ?? ''));
+        return ($qn !== '' ? '« ' . $qn . ' » → ' : 'Réponse : ') . $a . ($m !== '' ? ' — ' . $m : '');
+    };
     $fb = array_values(array_filter($fb, fn($r) => isset($real[$r['user_id']])));
-    $md .= "## 12. Avis des traders (40 derniers)\n\nCourriels, liens et numéros retirés des textes.\n\n" . $tbl(['Date', 'Type', 'Note', 'Page', 'État', 'Texte'], array_map(fn($r) => [$at($r['created_at']), $r['type'], $r['rating'] ?? '—', $r['page'] ?: '—', $r['status'], mb_substr(sweep_report_redact((string) $r['message']), 0, 600)], $fb));
+    $md .= "## 12. Avis des traders (40 derniers)\n\nCourriels, liens et numéros retirés des textes.\n\n" . $tbl(['Date', 'Type', 'Note', 'Page', 'État', 'Texte'], array_map(fn($r) => [$at($r['created_at']), $r['type'], $r['rating'] ?? '—', $r['page'] ?: '—', $r['status'], mb_substr(sweep_report_redact($fbText($r)), 0, 600)], $fb));
 
     sweep_errors_schema($pdo);
     $eg = sweep_err_groups($pdo, $now);

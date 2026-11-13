@@ -129,11 +129,11 @@ def case_mario(p):
   linked = {x['name']: x['account_id'] for x in st['accounts'] if x['state'] == 'linked'}
   ok(len(acc) == 17 and sorted(by) == sorted(EVALS + FUNDED + OTHERS) and len(linked) == 17 and all(linked[n] == by[n]['id'] for n in linked), f'1 17 Sweep accounts named as in NinjaTrader, each linked to its own ({len(acc)}, {len(linked)})')
   ok(all(by[n]['firm'] == 'Apex Trader Funding' and by[n]['phase'] == 'eval' and by[n]['start'] == 5000000 for n in EVALS) and all(by[n]['firm'] == 'Apex Trader Funding' and by[n]['phase'] == 'funded' and by[n]['start'] == 10000000 for n in FUNDED), '1 the Apex accounts: Apex Trader Funding, evaluation or funded, 50K / 100K from their balance')
-  ok(all(by[n]['firm'] is None and by[n]['phase'] is None for n in OTHERS) and len([f for f in pg.evaluate("S.firms.map(f => f.name)") if 'Apex' in f]) == 1, '1 the others: no firm guessed; one Apex firm for all')
+  ok(all(by[n]['phase'] is None for n in OTHERS) and [by[n]['firm'] for n in OTHERS] == [None, 'Take Profit Trader', 'MyFundedFutures', None] and len([f for f in pg.evaluate("S.firms.map(f => f.name)") if 'Apex' in f]) == 1, f'1 the others: a firm only when the name starts with it (13 Nov.: TPT-…, MFFU-…), none invented for LFE… or BX-…; one Apex firm for all ({[by[n]["firm"] for n in OTHERS]})')
   ok(sorted(x['name'] for x in st['accounts'] if x['state'] == 'ignored') == ['Playback101', 'Sim101'], '1 Sim101 and Playback101 still ignored')
   pg.goto(B + '/#accounts'); pg.wait_for_selector('#main table.acct-tbl', timeout=15000); pg.wait_for_timeout(800)
   todo = pg.evaluate("[...document.querySelectorAll('#main table.acct-tbl tr[data-href]')].filter(tr => tr.querySelector('.sy-todo')).map(tr => tr.children[0].textContent.trim())")
-  ok(len(todo) == 4 and all(any(t.startswith(o) for o in OTHERS) for t in todo) and pg.inner_text('#main .sy-todo') == 'À compléter', f'1 Accounts: the 4 accounts without a firm say « À compléter » ({todo})')
+  ok(len(todo) == 2 and all(any(t.startswith(o) for o in ('LFE0507712', 'BX-200417')) for t in todo) and pg.inner_text('#main .sy-todo') == 'À compléter', f'1 Accounts: the 2 accounts without a firm say « À compléter » ({todo})')
   pg.screenshot(path=f'{SHOTS}/nt-mario-accounts-1300.png')
   # the executions sent next become trades in the right account
   fills = [{'id': 'm1', 'account': 'PA-APEX-41275-03', 'contract': 'MNQ 12-26', 'side': 'buy', 'qty': 1, 'price': 21000.25, 'ts': ms(DAY + ' 09:31:05'), 'point_value': 2},
@@ -169,7 +169,7 @@ def case_layout(p, lang, phone, dark):
   push(ctx, key, ACCTS)
   settings(pg); tap(pg, '#main .sy-sec .sy-found [data-sy="linkall"]'); pg.wait_for_selector('#sySheet.open .sy-all select', timeout=8000); pg.wait_for_timeout(700)
   txt = pg.inner_text('#sySheet'); x = T[lang]
-  left = [w for w in EN_WORDS if lang != 'en' and w in txt]
+  left = [w for w in EN_WORDS if lang != 'en' and w in txt.replace('MyFundedFutures', '')]   # (a firm's own name is not a text to translate)
   ok(x['note'] in txt and pg.inner_text('#sySheet [data-sy="doall"]') == x['do'] and x['new'] in txt and not left, f'{tag}: the sheet in {lang} ({left})')
   er = pg.eval_on_selector_all('#sySheet .sy-err', 'l => l.map(x => x.textContent)')
   ok(not er, f'{tag}: no error under a line before linking ({er[:2]})')

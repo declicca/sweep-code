@@ -1066,6 +1066,7 @@ window.SweepMO = window.SweepMO || class {
    * a block that opens), the page jumped under the finger. For 0.7 s after a tap, if the control moved on the screen, the
    * page scrolls by as much — unless the trader scrolls himself. */
   let userMoved = 0;
+  const jumpZone = (x) => { const z = x.closest('section, .surface'); return z ? z.className.split(' ').filter((c) => !/^(open|on|is-|has-)/.test(c)).sort().join(' ') : ''; };   // the card a control lives in
   ['touchmove', 'wheel', 'keydown'].forEach((k) => addEventListener(k, () => { userMoved = performance.now(); }, { passive: true, capture: true }));
   addEventListener('click', (e) => {
     if (route().v !== 'trade' || !window.SW_MQ.matches) return;
@@ -1076,7 +1077,7 @@ window.SweepMO = window.SweepMO || class {
     const y0 = key.getBoundingClientRect().top;
     // (1 Nov.) the same control in the same card only: an answer given in « Answer your coach » moves the coach to its next
     // question, and the checklist's button of that question further down is another control (the page jumped 171 px to it)
-    const zone = (x) => { const z = x.closest('section, .surface'); return z ? z.className.split(' ').filter((c) => !/^(open|on|is-|has-)/.test(c)).sort().join(' ') : ''; }, z0 = zone(key);
+    const zone = jumpZone, z0 = zone(key);
     const find = () => (document.contains(key) ? key : sel ? [...main.querySelectorAll(sel)].filter((c) => zone(c) === z0).sort((a, b) => Math.abs(a.getBoundingClientRect().top - y0) - Math.abs(b.getBoundingClientRect().top - y0))[0] : null);
     const fix = () => {
       if (location.hash !== h0 || userMoved > t0) return;
@@ -1100,13 +1101,18 @@ window.SweepMO = window.SweepMO || class {
     if (jumpReports >= 5 || route().v !== 'trade' || !window.SW_MQ.matches) return;
     const main = document.getElementById('main'); if (!main || !main.contains(e.target)) return;
     if (e.target.closest('[data-sc="full"]')) return;   // (8 Nov.) entering or leaving the chart's full screen is not a jump
+    // (13 Nov., the report of 12 Nov. 10:48: « +surface +756px at 25ms ») a whole card « appeared »: the tap came while the page
+    // was still being drawn (the address already said #trade, the trade's page was not in yet). Not a jump inside a page.
+    if (document.documentElement.dataset.vt || !main.querySelector(':scope > section.surface > .th-head')) return;
     const blocks = () => [...main.children].map((c, i) => { const r = c.getBoundingClientRect(); return { k: (c.className || c.tagName).toString().split(' ').slice(0, 2).join('.') || ('#' + i), h: Math.round(r.height), top: Math.round(r.top) }; });
     const base = blocks(), t0 = performance.now(), seen = {}, key = (e.target.closest('[data-v],[data-act],[data-path]') || e.target);
     const at = (x) => x.getBoundingClientRect().top, h0 = location.hash;   // (on the screen: what the trader sees, after the anchoring above)
-    const y0 = at(key); let worst = 0, worstAt = 0;
+    const y0 = at(key), z0 = jumpZone(key); let worst = 0, worstAt = 0;
     const find = () => { if (document.contains(key)) return key; const k = ['data-act', 'data-path', 'data-v', 'data-id'].filter((a) => key.hasAttribute && key.hasAttribute(a)).map((a) => `[${a}="${CSS.escape(key.getAttribute(a))}"]`).join(''); if (!k) return null;
       // the same control redrawn: the copy nearest to where it was (« Answer your coach » repeats some of the review's buttons)
-      return [...main.querySelectorAll(k)].sort((a, b) => Math.abs(at(a) - y0) - Math.abs(at(b) - y0))[0] || null; };
+      // (13 Nov.) in the same card only, as the anchoring above: an answer given in « Answer your coach » replaces its question by
+      // the next one, and the full review's button of that question, 600 px lower, was reported as a jump of 628 px
+      return [...main.querySelectorAll(k)].filter((c) => jumpZone(c) === z0).sort((a, b) => Math.abs(at(a) - y0) - Math.abs(at(b) - y0))[0] || null; };
     const tick = () => {
       if (location.hash !== h0 || userMoved > t0) return;   // the tap opened another page, or the trader scrolled: not a jump
       const ms = Math.round(performance.now() - t0), el = find();

@@ -158,14 +158,101 @@ function sync_guard(PDO $pdo, string $uid, string $accountId): ?array
 /* ---------------- accounts found ---------------- */
 
 function sync_name($v): string { return mb_substr(trim(preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $v)), 0, 120); }
-/** what the account's name says, when a firm documents it (Apex: « APEX-… » evaluation, « PA-APEX… » funded); NinjaTrader's own simulation accounts */
+/** the catalogue's firms (presets), each with the names it goes by, letters and digits only, upper case: [id => [name, [alias…]]] */
+function sync_firms(): array
+{
+    static $firms = null; if ($firms !== null) return $firms;
+    $firms = [];
+    try {
+        require_once dirname(__DIR__) . '/presets/presets-lib.php';
+        foreach ((array) (pr_current()['firms'] ?? []) as $f) {
+            $id = (string) ($f['id'] ?? ''); if ($id === '') continue;
+            $al = [];
+            foreach (array_merge([$id, (string) ($f['name'] ?? '')], (array) ($f['aliases'] ?? [])) as $n) { $n = preg_replace('/[^A-Z0-9]/', '', strtoupper((string) $n)) ?? ''; if ($n !== '' && !in_array($n, $al, true)) $al[] = $n; }
+            usort($al, fn($x, $y) => strlen($y) <=> strlen($x));
+            $firms[$id] = [(string) ($f['name'] ?? $id), $al];
+        }
+    } catch (Throwable $e) { /* no catalogue: Apex's documented names still work */ }
+    return $firms;
+}
+/**
+ * What the account's name says. Apex documents its names (« APEX-… » evaluation, « PA-APEX… » funded). For the other firms of
+ * the catalogue nothing is invented: the firm is read only when the name starts with the firm's own name or one of its
+ * catalogue aliases (« LUCID… », « MFFU… »; a short alias such as « TPT » must be followed by something other than a letter).
+ * NinjaTrader's own simulation accounts are told apart.
+ */
 function sync_guess(string $name, string $platform = 'ninjatrader'): array
 {
     $u = strtoupper($name);
     if (str_starts_with($u, 'PA-APEX')) return ['firm' => 'apex', 'phase' => 'funded'];
     if (str_starts_with($u, 'APEX-')) return ['firm' => 'apex', 'phase' => 'eval'];
     if ($platform === 'ninjatrader' && preg_match('/^(SIM\d*|PLAYBACK\d*|BACKTEST)$/', $u)) return ['sim' => true];
+    $flat = preg_replace('/[^A-Z0-9]/', '', $u) ?? '';
+    foreach (sync_firms() as $id => [, $aliases]) foreach ($aliases as $a) {
+        if (!str_starts_with($flat, $a)) continue;
+        if (strlen($a) >= 4 || !preg_match('/^[A-Z]/', substr($flat, strlen($a)))) return ['firm' => $id];
+    }
     return [];
+}
+/** the account size a platform balance says: the firm size within 12 % (the gains or losses since are trades), else the balance itself */
+function sync_size(?array $info): ?int
+{
+    $cash = is_array($info) && is_numeric($info['cash'] ?? null) ? (float) $info['cash'] : null; if ($cash === null || $cash <= 0) return null;
+    $best = 25000; foreach ([25000, 50000, 75000, 100000, 150000, 200000, 250000, 300000] as $x) if (abs($x - $cash) < abs($best - $cash)) $best = $x;
+    return abs($best - $cash) <= $best * 0.12 ? $best : (int) round($cash);
+}
+/** the trader's Sweep accounts a platform account can be linked to (not sample data, not archived, not linked to another platform account), each with its catalogue firm */
+function sync_free_accounts(PDO $pdo, string $uid, string $exceptSid = ''): array
+{
+    $taken = []; foreach (sync_q($pdo, 'SELECT account_id FROM sync_accounts WHERE user_id = ? AND account_id IS NOT NULL AND id <> ?', [$uid, $exceptSid]) as $r) $taken[(string) $r['account_id']] = true;
+    $flat = fn(string $x) => preg_replace('/[^A-Z0-9]/', '', strtoupper($x)) ?? '';
+    $firmName = [];
+    foreach (sync_q($pdo, "SELECT id, data FROM documents WHERE user_id = ? AND collection = 'firms'", [$uid]) as $r) { $d = json_decode((string) $r['data'], true); if (is_array($d)) $firmName[(string) $r['id']] = (string) ($d['name'] ?? ''); }
+    $byAlias = []; foreach (sync_firms() as $id => [, $aliases]) foreach ($aliases as $a) $byAlias[$a] = $id;
+    $out = [];
+    foreach (sync_q($pdo, "SELECT id, data FROM documents WHERE user_id = ? AND collection = 'accounts' ORDER BY id", [$uid]) as $r) {
+        $d = json_decode((string) $r['data'], true); $id = (string) $r['id'];
+        if (!is_array($d) || !empty($d['demo']) || isset($taken[$id]) || in_array((string) ($d['status'] ?? ''), ['archived', 'closed'], true)) continue;
+        $preset = is_string($d['preset'] ?? null) ? explode('|', $d['preset'])[0] : '';
+        $firm = isset(sync_firms()[$preset]) ? $preset : ($byAlias[$flat($firmName[(string) ($d['firm_id'] ?? '')] ?? '')] ?? '');
+        $ph = (string) ($d['money_type'] ?? ''); if (!in_array($ph, ['eval', 'funded', 'live'], true)) $ph = (string) ($d['phase'] ?? '');
+        $out[] = ['id' => $id, 'name' => (string) ($d['name'] ?? ''), 'flat' => $flat((string) ($d['name'] ?? '')), 'firm' => $firm, 'phase' => $ph, 'size' => (int) round(((float) ($d['starting_balance_c'] ?? 0)) / 100)];
+    }
+    return $out;
+}
+/**
+ * The Sweep account proposed for a platform account found, chosen in this order: 1 the same name or number (the platform name
+ * is the Sweep account's name, or is written in it); 2 the firm its name says and the size its balance says (the phase too
+ * when the name says it), else the first free account of that firm and phase; 3 the only account of that firm; 4 no firm in the name: the only account of that size. One answer
+ * or none, never a guess between two: ['account_id', 'why'] · ['create' => firm, firm_name, size, phase] when the trader has
+ * no account it could be · ['choose' => true] when he has accounts and none stands out.
+ */
+function sync_suggest(array $sa, array $free): array
+{
+    $flat = preg_replace('/[^A-Z0-9]/', '', strtoupper((string) $sa['ext_id'])) ?? '';
+    $info = json_decode((string) ($sa['info'] ?? ''), true) ?: null;
+    $g = sync_guess((string) $sa['ext_id'], (string) $sa['platform']); $size = sync_size($info);
+    $one = fn(array $l) => count($l) === 1 ? array_values($l)[0] : null;
+    if ($flat !== '') {
+        $m = $one(array_filter($free, fn($a) => $a['flat'] === $flat)) ?? (strlen($flat) >= 5 ? $one(array_filter($free, fn($a) => str_contains($a['flat'], $flat))) : null);
+        if ($m) return ['account_id' => $m['id'], 'why' => 'name'];
+    }
+    $firm = (string) ($g['firm'] ?? ''); $ph = (string) ($g['phase'] ?? '');
+    if ($firm !== '') {
+        $of = array_filter($free, fn($a) => $a['firm'] === $firm);
+        $fits = fn($a) => (!$size || !$a['size'] || $a['size'] === $size) && ($ph === '' || $a['phase'] === '' || $a['phase'] === $ph);   // nothing known says otherwise
+        if ($size) {
+            $l = array_filter($of, fn($a) => $a['size'] === $size && $fits($a));   // (never a funded account for an evaluation's name)
+            if (count($l) > 1 && $ph !== '') $l = array_filter($l, fn($a) => $a['phase'] === $ph);
+            if ($m = $one($l)) return ['account_id' => $m['id'], 'why' => 'firm_size'];
+        }
+        // the name says the phase (Apex: evaluation, funded): the first free account of that firm and phase, as since 3 Nov.
+        if ($ph !== '' && ($l = array_values(array_filter($of, fn($a) => $a['phase'] === $ph && $fits($a))))) return ['account_id' => $l[0]['id'], 'why' => 'firm_phase'];
+        // the only account of the firm, unless a size or a phase known on both sides differs (a 100K found is not the trader's 50K)
+        if (($m = $one($of)) && $fits($m)) return ['account_id' => $m['id'], 'why' => 'firm'];
+    } elseif ($size && ($m = $one(array_filter($free, fn($a) => $a['size'] === $size)))) return ['account_id' => $m['id'], 'why' => 'size'];
+    if ($free) return ['choose' => true];
+    return ['create' => ['firm' => $firm ?: null, 'firm_name' => $firm !== '' ? (sync_firms()[$firm][0] ?? null) : null, 'size' => $size, 'phase' => $g['phase'] ?? null]];
 }
 /** the platform an add-on says it is (its « client »), or null when it does not say */
 function sync_client_platform(string $client): ?string
@@ -674,9 +761,24 @@ function sync_status(PDO $pdo, string $uid): array
     $accts = [];
     foreach (sync_q($pdo, 'SELECT * FROM sync_accounts WHERE user_id = ? ORDER BY created_at, ext_id', [$uid]) as $a)
         $accts[] = ['id' => $a['id'], 'platform' => $a['platform'], 'name' => $a['ext_id'], 'info' => json_decode((string) $a['info'], true) ?: null, 'guess' => sync_guess((string) $a['ext_id'], (string) $a['platform']) ?: null,
-            'state' => $a['state'], 'account_id' => $a['account_id'], 'trades' => $n[$a['id']] ?? 0, 'last_fill_at' => $a['last_fill_at'] === null ? null : (int) $a['last_fill_at'], 'error' => $a['last_error']];
+            'state' => $a['state'], 'account_id' => $a['account_id'], 'trades' => $n[$a['id']] ?? 0, 'last_fill_at' => $a['last_fill_at'] === null ? null : (int) $a['last_fill_at'], 'error' => $a['last_error']]
+            + ($a['state'] === 'new' ? ['suggest' => sync_suggest($a, $free ??= sync_free_accounts($pdo, $uid)), '_row' => $a] : []);
+    // one Sweep account is proposed to one account found only: the strongest reason keeps it, the others are asked again without it
+    $rank = ['name' => 0, 'firm_size' => 1, 'firm_phase' => 2, 'firm' => 3, 'size' => 4]; $rest = $free ?? [];
+    for ($pass = 0; $pass < 20; $pass++) {
+        $by = []; foreach ($accts as $i => $x) if (isset($x['suggest']['account_id'])) $by[$x['suggest']['account_id']][] = $i;
+        $dup = array_filter($by, fn($l) => count($l) > 1); if (!$dup) break;
+        foreach ($dup as $aid => $l) {
+            usort($l, fn($x, $y) => [$rank[$accts[$x]['suggest']['why']], $x] <=> [$rank[$accts[$y]['suggest']['why']], $y]);
+            $rest = array_values(array_filter($rest, fn($f) => (string) $f['id'] !== (string) $aid));
+            foreach (array_slice($l, 1) as $i) { $sg = sync_suggest($accts[$i]['_row'], $rest); $accts[$i]['suggest'] = isset($sg['create']) ? ['choose' => true] : $sg; }   // he has accounts: never « create » here
+        }
+    }
+    foreach ($accts as &$x) unset($x['_row']);
+    unset($x);
     $addons = []; foreach (SYNC_ADDONS as $pl => $f) $addons[$pl] = is_file($f) ? ['url' => 'api/sync/addon?platform=' . $pl, 'size' => filesize($f), 'embed' => sync_can_embed($pl)] : null;
-    return ['connections' => $conns, 'accounts' => $accts, 'addons' => $addons];
+    $firms = []; foreach (sync_firms() as $id => [$name]) $firms[$id] = $name;   // the catalogue's names, for what a guess says
+    return ['connections' => $conns, 'accounts' => $accts, 'addons' => $addons, 'firms' => $firms];
 }
 /**
  * Admin › Sync: per platform (traders with a key, add-on seen within 24 h, accounts linked, trades written in 7 days), then one
@@ -691,9 +793,10 @@ function sync_admin(PDO $pdo, int $now = 0): array
 {
     sync_schema($pdo); $now = $now ?: time();
     $acc = [];
-    foreach (sync_q($pdo, 'SELECT user_id, platform, state, last_error FROM sync_accounts') as $r) {
-        $a = &$acc[$r['user_id'] . '|' . $r['platform']]; $a ??= ['new' => 0, 'linked' => 0, 'ignored' => 0, 'errors' => []];
+    foreach (sync_q($pdo, 'SELECT user_id, platform, ext_id, state, last_error FROM sync_accounts') as $r) {
+        $a = &$acc[$r['user_id'] . '|' . $r['platform']]; $a ??= ['new' => 0, 'linked' => 0, 'ignored' => 0, 'sim' => 0, 'errors' => []];
         if (isset($a[$r['state']])) $a[$r['state']]++;
+        if ($r['state'] === 'ignored' && !empty(sync_guess((string) $r['ext_id'], (string) $r['platform'])['sim'])) $a['sim']++;   // the platform's own simulation accounts, among the ignored
         if ($r['last_error'] !== null && $r['last_error'] !== '' && !in_array($r['last_error'], $a['errors'], true)) $a['errors'][] = (string) $r['last_error'];
         unset($a);
     }
@@ -730,7 +833,7 @@ function sync_admin(PDO $pdo, int $now = 0): array
     $rows = [];
     foreach ($conns as $c) {
         $k = $c['user_id'] . '|' . $c['platform'];
-        $a = $acc[$k] ?? ['new' => 0, 'linked' => 0, 'ignored' => 0, 'errors' => []]; $t = $tr[$k] ?? ['n' => 0, 'n7' => 0];
+        $a = $acc[$k] ?? ['new' => 0, 'linked' => 0, 'ignored' => 0, 'sim' => 0, 'errors' => []]; $t = $tr[$k] ?? ['n' => 0, 'n7' => 0];
         $seen = $c['last_seen_at'] === null ? null : (int) $c['last_seen_at'];
         $dl = $c['downloaded_at'] === null ? null : (int) $c['downloaded_at'];
         $state = $seen === null ? ($dl !== null ? 'downloaded' : 'key_only') : ($a['errors'] ? 'error' : (!($a['new'] + $a['linked'] + $a['ignored']) ? 'no_accounts' : (!$a['linked'] ? 'to_link' : 'ok')));
@@ -739,7 +842,7 @@ function sync_admin(PDO $pdo, int $now = 0): array
         $rows[] = ['user_id' => (string) $c['user_id'], 'name' => $name !== '' ? $name : (string) ($u['username'] ?? $c['user_id']), 'email' => (string) ($u['email'] ?? ''),
             'team' => !empty($u['is_admin']) || !empty($u['is_internal']), 'platform' => (string) $c['platform'], 'client' => $c['client'],
             'created_at' => (int) $c['created_at'], 'downloaded_at' => $dl, 'last_seen_at' => $seen, 'last_push_at' => $c['last_push_at'] === null ? null : (int) $c['last_push_at'],
-            'accounts' => ['new' => $a['new'], 'linked' => $a['linked'], 'ignored' => $a['ignored']], 'errors' => $a['errors'],
+            'accounts' => ['new' => $a['new'], 'linked' => $a['linked'], 'ignored' => $a['ignored'], 'sim' => $a['sim']], 'errors' => $a['errors'],
             'trades' => $t['n'], 'trades_7d' => $t['n7'], 'contracts' => $ctr[$k] ?? [], 'state' => $state];
         if (isset($plat[$c['platform']])) {
             $x = &$plat[$c['platform']]; $x['traders']++; if ($seen !== null && $now - $seen < 86400) $x['seen_24h']++; $x['linked'] += $a['linked']; $x['trades_7d'] += $t['n7']; unset($x);

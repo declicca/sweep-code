@@ -238,21 +238,16 @@ function sweep_metrics(PDO $pdo, string $app, array $f = []): array
         foreach ($q('SELECT DISTINCT user_id, event FROM game_analytics WHERE created_at > ?', [$now - 30 * $day]) as $r) if (isset($act30[$r['user_id']])) $ev[$r['event']][$r['user_id']] = true;
         $rows = function (string $sql) use ($q, $has, $act30): array { try { $o = []; foreach ($q($sql)->fetchAll(PDO::FETCH_COLUMN) as $u) if (isset($act30[$u])) $o[$u] = true; return $o; } catch (Throwable $e) { return []; } };
         $any = function (array $events, array ...$more) use ($ev): array { $o = []; foreach ($events as $e) $o += $ev[$e] ?? []; foreach ($more as $m) $o += $m; return $o; };
+        // (13 Nov.) only what still exists since the 10 Nov. cleanup: seasons, leagues, crews, buddy, Discord, the chest, Edge Reveal,
+        // Wrapped, ring themes, the special missions, the levels, the mission swap and the comeback quest are gone from the app
         $used = [
             'share' => $any(['share_card_created', 'share_card_shared']),
-            'weekly_recap' => $any(['weekly_opened']), 'weekly_review' => $any(['weekly_review_done']), 'chest' => $any(['chest_opened']), 'edge_reveal' => $any(['edge_reveal_viewed']),
-            'wrapped' => $any(['wrapped_viewed']), 'season' => $any(['season_tier_claimed']),
-            'league' => $any(['league_joined'], $has('social_profile') ? $rows('SELECT user_id FROM social_profile WHERE league_opt_in = 1') : []),
-            'crew' => $any(['crew_created', 'crew_joined'], $has('crew_members') ? $rows('SELECT user_id FROM crew_members') : []),
-            'buddy' => $any(['buddy_linked', 'buddy_encourage']),
-            'discord' => $any(['discord_linked'], $has('social_profile') ? $rows("SELECT user_id FROM social_profile WHERE discord_user_id IS NOT NULL AND discord_user_id <> ''") : []),
-            'theme' => $any(['cosmetic_equipped'], $has('user_cosmetics') ? $rows('SELECT user_id FROM user_cosmetics WHERE equipped = 1') : []),
-            'mission_reroll' => $any(['mission_rerolled']), 'locked_tap' => $any(['locked_feature_tapped']),
+            'weekly_recap' => $any(['weekly_opened']), 'weekly_review' => $any(['weekly_review_done']),
         ];
         $reached = [
-            'mission' => $any(['mission_completed']), 'badge' => $any(['badge_unlocked']), 'level' => $any(['level_up']), 'swept' => $any(['day_swept']),
+            'mission' => $any(['mission_completed']), 'badge' => $any(['badge_unlocked']), 'swept' => $any(['day_swept']),
             'streak3' => $has('user_game_profile') ? $rows('SELECT user_id FROM user_game_profile WHERE streak_current >= 3') : [], 'freeze' => $any(['freeze_used']),
-            'map' => $any(['map_node_completed']), 'boss' => $any(['boss_defeated']), 'comeback' => $any(['comeback_started']), 'wow' => $any(['wow_moment']),
+            'map' => $any(['map_node_completed']), 'wow' => $any(['wow_moment']),
         ];
         $n = count($act30); $pc = fn(array $x) => ['n' => count($x), 'pct' => $n ? (int) round(count($x) / $n * 100) : 0];
         $game = ['active_30d' => $n, 'used' => array_map($pc, $used), 'reached' => array_map($pc, $reached)];
@@ -341,6 +336,14 @@ function sweep_firm_metrics(PDO $pdo, array $real, int $now): array
     };
     $firmName = []; foreach ($docs('firms') as [$uid, $id, $d]) $firmName[$uid . '|' . $id] = (string) ($d['name'] ?? '');
     $of = [];   // « user|account » → its row
+    // (13 Nov., brief « relier les comptes trouvés », step 2) what is behind « other »: the firm names as typed, brought to one
+    // spelling (case, spaces, punctuation, « LLC » and the like); a name typed by one trader only is never shown (« rest »)
+    $key = function (string $n): string {
+        $n = preg_replace('/[^a-z0-9 ]+/', ' ', strtolower($n)) ?? '';
+        $n = preg_replace('/\b(llc|l l c|inc|ltd|limited|corp|co|llp)\b/', ' ', $n) ?? '';
+        return trim(preg_replace('/\s+/', ' ', $n) ?? '');
+    };
+    $typed = [];
     foreach ($docs('accounts') as [$uid, $id, $a]) {
         if (($a['status'] ?? '') === 'archived') continue;
         $fid = (string) ($a['firm_id'] ?? ''); $preset = is_string($a['preset'] ?? null) ? explode('|', $a['preset'])[0] : '';
@@ -352,6 +355,7 @@ function sweep_firm_metrics(PDO $pdo, array $real, int $now): array
                 : (!empty($ru['target_c']) ? 'eval' : (array_filter(array_intersect_key($ru, array_flip(['payout_win_days', 'payout_min_c', 'payout_max_c', 'payout_min_bal_c', 'payout_trade_days']))) ? 'funded' : ''));
         }
         $rows[$k]['accounts']++; $rows[$k]['traders'][$uid] = true;
+        if ($k === 'other') { $t = &$typed[$key($name)]; $t ??= ['as' => [], 'accounts' => 0, 'traders' => []]; $t['accounts']++; $t['traders'][$uid] = true; $sp = trim(preg_replace('/\s+/', ' ', $name) ?? ''); if ($sp !== '') $t['as'][$sp] = ($t['as'][$sp] ?? 0) + 1; unset($t); }
         if (isset($rows[$k][$ty]) && in_array($ty, ['eval', 'funded', 'live'], true)) $rows[$k][$ty]++;
         $of[$uid . '|' . $id] = $k;
     }
@@ -366,7 +370,14 @@ function sweep_firm_metrics(PDO $pdo, array $real, int $now): array
     foreach ($rows as &$r) { foreach (array_keys($r['traders']) as $u) $all[$u] = true; $r['traders'] = count($r['traders']); }
     unset($r);
     $sum = fn(string $c) => array_sum(array_column($rows, $c));
-    return ['rows' => array_values($rows), 'total' => ['accounts' => $sum('accounts'), 'traders' => count($all), 'eval' => $sum('eval'), 'funded' => $sum('funded'), 'live' => $sum('live'),
+    $names = []; $rest = ['names' => 0, 'accounts' => 0, 'traders' => []];
+    uksort($typed, fn($x, $y) => [$typed[$y]['accounts'], count($typed[$y]['traders']), $x] <=> [$typed[$x]['accounts'], count($typed[$x]['traders']), $y]);
+    foreach ($typed as $k => $t) {
+        if ($k !== '' && count($t['traders']) >= 2 && count($names) < 10) { arsort($t['as']); $names[] = ['name' => (string) array_key_first($t['as']), 'accounts' => $t['accounts'], 'traders' => count($t['traders'])]; continue; }
+        $rest['names']++; $rest['accounts'] += $t['accounts']; $rest['traders'] += $t['traders'];
+    }
+    $rest['traders'] = count($rest['traders']);
+    return ['other_names' => $names, 'other_rest' => $rest, 'rows' => array_values($rows), 'total' => ['accounts' => $sum('accounts'), 'traders' => count($all), 'eval' => $sum('eval'), 'funded' => $sum('funded'), 'live' => $sum('live'),
         'trades' => $sum('trades'), 'manual' => $sum('manual'), 'csv' => $sum('csv'), 'sync' => $sum('sync')], 'of' => count($real)];
 }
 
@@ -389,13 +400,25 @@ function sweep_journal_metrics(PDO $pdo, array $real, int $now, int $days): arra
     }
     // (step 2) the days closed on the platform's balance: with a gap, the gaps' total, the share detailed in trades since
     $st = $pdo->prepare("SELECT user_id, id, data FROM documents WHERE collection = 'journals'"); $st->execute();
-    $closed = $withGap = $gapSum = 0;
+    $closed = $withGap = $gapSum = $chkN = $chkSum = 0;
+    // (13 Nov., step 3.1) a gap larger than the account's maximum loss (its drawdown rule, else 10 % of its size) is a balance to
+    // check — the account's size typed for the balance, for instance —, counted apart and never added to the total
+    $limit = [];
+    $sa = $pdo->prepare("SELECT user_id, id, data FROM documents WHERE collection = 'accounts'"); $sa->execute();
+    foreach ($sa->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        if (!isset($real[$r['user_id']])) continue; $a = json_decode((string) $r['data'], true); if (!is_array($a)) continue;
+        $dd = (int) (($a['rules']['dd_c'] ?? 0)); $sb = (int) ($a['starting_balance_c'] ?? 0);
+        $limit[$r['user_id'] . '|' . $r['id']] = $dd > 0 ? $dd : ($sb > 0 ? (int) round($sb * 0.1) : 0);
+    }
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
         if (!isset($real[$r['user_id']]) || (string) $r['id'] < $from) continue;
         $j = json_decode((string) $r['data'], true); $bal = is_array($j) && empty($j['demo']) ? ($j['post']['bal'] ?? null) : null;
         if (!is_array($bal) || !$bal) continue;
         $closed++; $g = 0;
-        foreach ($bal as $b) $g += abs((int) ($b['gap_c'] ?? 0));
+        foreach ($bal as $b) {
+            $x = abs((int) ($b['gap_c'] ?? 0)); $m = $limit[$r['user_id'] . '|' . (string) ($b['acc'] ?? '')] ?? 0;
+            if ($m && $x > $m) { $chkN++; $chkSum += $x; } else $g += $x;
+        }
         if ($g) { $withGap++; $gapSum += $g; }
     }
     $rate = fn(int $a, int $b) => $b ? (int) round($a / $b * 100) : null;
@@ -407,7 +430,7 @@ function sweep_journal_metrics(PDO $pdo, array $real, int $now, int $days): arra
     }
     return ['days' => $days, 'traders' => count($per), 'high_win_20' => ['pct' => $rate($hi, $t20), 'of' => $t20], 'losing_trades' => ['pct' => $rate($l, $n), 'of' => $n],
         'days_without_loss' => ['pct' => $rate($dk, $dn), 'of' => $dn],
-        'gap_days' => ['pct' => $rate($withGap, $closed), 'of' => $closed], 'gap_total_c' => $gapSum, 'gap_detailed' => ['pct' => $gapAbs ? (int) round($detAbs / $gapAbs * 100) : null, 'of' => $lines]];
+        'gap_days' => ['pct' => $rate($withGap, $closed), 'of' => $closed], 'gap_total_c' => $gapSum, 'gap_check' => ['n' => $chkN, 'c' => $chkSum], 'gap_detailed' => ['pct' => $gapAbs ? (int) round($detAbs / $gapAbs * 100) : null, 'of' => $lines]];
 }
 
 /** « Safari iOS 18 », « Chrome Android », « Firefox macOS »: enough to group errors, nothing personal */

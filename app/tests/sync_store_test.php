@@ -181,7 +181,7 @@ $pdo->exec("UPDATE users SET username = 'max@t.dev', email = 'max@t.dev', is_int
 $k3 = sync_new_key($pdo, 'u2', 'quantower');
 $ad = sync_admin($pdo); $row = function (string $uid, string $pl) use ($ad) { foreach ($ad['rows'] as $r) if ($r['user_id'] === $uid && $r['platform'] === $pl) return $r; return null; };
 $q1 = $row('u1', 'quantower'); $n1 = $row('u1', 'ninjatrader'); $q2 = $row('u2', 'quantower');
-ok($q1 && $q1['state'] === 'ok' && $q1['name'] === 'Lea Test' && $q1['email'] === 'lea@t.dev' && $q1['client'] === 'Sweep Quantower test' && $q1['accounts'] === ['new' => 1, 'linked' => 1, 'ignored' => 0] && $q1['trades'] === 1 && $q1['trades_7d'] === 1 && $q1['last_seen_at'] > 0, 'Admin › Sync: Quantower, linked and writing trades → « ok » (1 linked, 1 to link, 1 trade)');
+ok($q1 && $q1['state'] === 'ok' && $q1['name'] === 'Lea Test' && $q1['email'] === 'lea@t.dev' && $q1['client'] === 'Sweep Quantower test' && $q1['accounts'] === ['new' => 1, 'linked' => 1, 'ignored' => 0, 'sim' => 0] && $q1['trades'] === 1 && $q1['trades_7d'] === 1 && $q1['last_seen_at'] > 0, 'Admin › Sync: Quantower, linked and writing trades → « ok » (1 linked, 1 to link, 1 trade)');
 ok($n1 && $n1['state'] === 'error' && in_array('limit', $n1['errors'], true), 'Admin › Sync: NinjaTrader 8 with an account over the record limit → « error » (limit)');
 ok($q2 && $q2['state'] === 'key_only' && $q2['downloaded_at'] === null && $q2['last_seen_at'] === null && $q2['team'] === true && $q2['name'] === 'max@t.dev', 'Admin › Sync: a key to paste never used by the add-on → « key_only »; an internal trader is marked team');
 ok(array_search($q2, $ad['rows'], true) > array_search($q1, $ad['rows'], true) && $ad['platforms']['quantower'] === ['traders' => 2, 'seen_24h' => 1, 'linked' => 1, 'trades_7d' => 1] && $ad['platforms']['ninjatrader']['traders'] === 1, 'Admin › Sync: most recently seen first; per platform: traders, seen within 24 h, accounts linked, trades in 7 days');
@@ -226,6 +226,52 @@ $k5 = sync_new_key($pdo, 'u3', 'ninjatrader'); $zf3 = sync_addon_zip($pdo, 'u3',
 ok(sync_auth($pdo, $k5['key']) === null && sync_auth($pdo, $k6['key']) !== null && (int) $pdo->query("SELECT COUNT(*) FROM sync_connections WHERE user_id = 'u3' AND status = 'active'")->fetchColumn() === 1, '« New key » (to paste): the earlier keys, downloaded ones too, stop at once');
 define('SYNC_NO_EMBED', true);
 ok(sync_addon_zip($pdo, 'u3', 'ninjatrader') === null && sync_status($pdo, 'u3')['addons']['ninjatrader']['embed'] === false && (int) $pdo->query("SELECT COUNT(*) FROM sync_connections WHERE user_id = 'u3' AND status = 'active'")->fetchColumn() === 1, 'without ZipArchive: no zip made, no key made, the key to paste as before');
+
+// 14f. (13 Nov., brief « relier les comptes trouvés ») the firm a name says, and the Sweep account proposed for an account found
+ok(sync_guess('LUCID-EVAL-50K-778') === ['firm' => 'lucid'] && sync_guess('lucidtrading 100k 22') === ['firm' => 'lucid'] && sync_guess('MFFU-Core-50K') === ['firm' => 'mffu'] && sync_guess('TPT-1234') === ['firm' => 'tpt'],
+    'the firm is read when the name starts with the firm\'s name or a catalogue alias (Lucid, MFFU, TPT)');
+ok(sync_guess('TPTX99') === [] && sync_guess('LT12345') === [] && sync_guess('1234567') === [] && sync_guess('APEX-9') === ['firm' => 'apex', 'phase' => 'eval'] && sync_guess('Sim101') === ['sim' => true],
+    'nothing is invented: a short alias followed by a letter, an unknown prefix or a number say no firm; Apex and the simulation accounts as before');
+$pdo->exec("INSERT INTO users (id) VALUES ('u5')");
+$put('u5', 'firms', ['id' => 'fl', 'name' => 'lucid trading']); $put('u5', 'firms', ['id' => 'fa', 'name' => 'Apex']);
+$put('u5', 'accounts', ['id' => 'L50', 'name' => 'Lucid 50K', 'firm_id' => 'fl', 'starting_balance_c' => 5000000, 'status' => 'active']);
+$put('u5', 'accounts', ['id' => 'L100', 'name' => 'Lucid 100K LTF99887', 'firm_id' => 'fl', 'starting_balance_c' => 10000000, 'status' => 'active']);
+$put('u5', 'accounts', ['id' => 'A150', 'name' => 'My Apex', 'firm_id' => 'fa', 'starting_balance_c' => 15000000, 'status' => 'active']);
+$put('u5', 'accounts', ['id' => 'P75', 'name' => 'Perso', 'starting_balance_c' => 7500000, 'status' => 'active']);
+$put('u5', 'accounts', ['id' => 'old', 'name' => 'LUCID50K-778', 'firm_id' => 'fl', 'starting_balance_c' => 5000000, 'status' => 'archived']);
+$put('u5', 'accounts', ['id' => 'demo', 'name' => 'Sample', 'demo' => true, 'starting_balance_c' => 5000000]);
+$put('u5', 'trades', ['id' => 'typed', 'account_id' => 'L50', 'instrument' => 'NQ', 'date' => '2026-11-10', 'session_date' => true, 'entry_time' => '10:01', 'direction' => 'long', 'contracts' => 1, 'entry' => 21000, 'exit' => 21010, 'pnl_c' => 20000, 'notes' => 'Typed by hand']);
+$k5 = sync_new_key($pdo, 'u5', 'ninjatrader'); $c5 = sync_auth($pdo, $k5['key']);
+sync_receive($pdo, $c5, ['client' => 'Sweep NT8 1.3.0', 'accounts' => [['name' => 'LUCID50K-778', 'cash' => 50420], ['name' => 'LTF99887', 'cash' => 99000], ['name' => 'APEX-55-01'], ['name' => 'XYZ-1', 'cash' => 75100], ['name' => 'QQ-2', 'cash' => 7000], ['name' => 'LUCID-100K-5', 'cash' => 100300], ['name' => 'Lucid-300', 'cash' => 301000]],
+    'fills' => [$fill('l1', 'LUCID50K-778', 'buy', 1, 21000, '2026-11-10 10:00:00'), $fill('l2', 'LUCID50K-778', 'sell', 1, 21010, '2026-11-10 10:05:00'), $fill('l3', 'LUCID50K-778', 'buy', 1, 21050, '2026-11-10 11:00:00'), $fill('l4', 'LUCID50K-778', 'sell', 1, 21060, '2026-11-10 11:10:00')]]);
+$st5 = sync_status($pdo, 'u5'); $sg = []; foreach ($st5['accounts'] as $x) $sg[$x['name']] = $x['suggest'] ?? null;
+ok($sg['LUCID50K-778'] === ['account_id' => 'L50', 'why' => 'firm_size'] && $st5['firms']['lucid'] === 'Lucid Trading', 'a Lucid account found, $50,420 on the platform: the trader\'s Lucid 50K is proposed (firm read in the name, size in the balance; the archived account of the same name is not)');
+ok($sg['LTF99887'] === ['account_id' => 'L100', 'why' => 'name'], 'the platform\'s number written in a Sweep account\'s name: that account, before anything else');
+ok($sg['APEX-55-01'] === ['account_id' => 'A150', 'why' => 'firm'], 'no balance sent: the only account of the firm');
+ok($sg['XYZ-1'] === ['account_id' => 'P75', 'why' => 'size'], 'no firm in the name: the only account of the size the balance says');
+ok($sg['LUCID-100K-5'] === ['choose' => true] && $sg['Lucid-300'] === ['choose' => true], 'one Sweep account is proposed once (the strongest reason keeps Lucid 50K); a Lucid 100K found does not take the Lucid 100K already proposed by its number, nor his 50K; a size he does not have: he chooses');
+ok($sg['QQ-2'] === ['choose' => true], 'accounts, none that stands out: the trader chooses (no guess between several, no new account made next to his own)');
+$tr0 = count($trades('u5'));
+$r5 = sync_link($pdo, 'u5', $sa('u5', 'LUCID50K-778')['id'], 'L50'); $t5 = $trades('u5');
+ok($r5['ok'] && $r5['created'] === 1 && $r5['merged'] === 1 && $tr0 === 1 && count($t5) === 2 && $t5['typed']['notes'] === 'Typed by hand' && $t5['typed']['source'] === 'ninjatrader',
+    '« Link »: the executions already received write their trades at once; the trade typed by hand the same minute is completed, not doubled (2 trades, its note kept)');
+$sg2 = []; foreach (sync_status($pdo, 'u5')['accounts'] as $x) $sg2[$x['name']] = $x['suggest'] ?? null;
+ok($sg2['LUCID50K-778'] === null && !in_array('L50', array_column(array_filter($sg2), 'account_id'), true), 'once linked: no proposal for it any more, and its Sweep account is proposed to no other');
+$pdo->exec("INSERT INTO users (id) VALUES ('u6')"); $k6 = sync_new_key($pdo, 'u6', 'ninjatrader');
+sync_receive($pdo, sync_auth($pdo, $k6['key']), ['accounts' => [['name' => 'Lucid-Flex-9', 'cash' => 50000], ['name' => 'PA-APEX-7-01', 'cash' => 101200]], 'fills' => []]);
+$sg6 = []; foreach (sync_status($pdo, 'u6')['accounts'] as $x) $sg6[$x['name']] = $x['suggest'];
+ok($sg6['Lucid-Flex-9'] === ['create' => ['firm' => 'lucid', 'firm_name' => 'Lucid Trading', 'size' => 50000, 'phase' => null]] && $sg6['PA-APEX-7-01'] === ['create' => ['firm' => 'apex', 'firm_name' => 'Apex Trader Funding', 'size' => 100000, 'phase' => 'funded']],
+    'a trader without a Sweep account: « Create this account », the firm, the size and the phase already filled in when the name says them');
+$pdo->exec("INSERT INTO users (id) VALUES ('u7')"); $k7 = sync_new_key($pdo, 'u7', 'ninjatrader');
+$put('u7', 'firms', ['id' => 'fa', 'name' => 'Apex Trader Funding']);
+$put('u7', 'accounts', ['id' => 'o0', 'name' => 'Eval', 'firm_id' => 'fa', 'starting_balance_c' => 5000000, 'status' => 'active', 'phase' => 'eval']);
+$put('u7', 'accounts', ['id' => 'o1', 'name' => 'PA', 'firm_id' => 'fa', 'starting_balance_c' => 5000000, 'status' => 'active', 'money_type' => 'funded']);
+sync_receive($pdo, sync_auth($pdo, $k7['key']), ['accounts' => [['name' => 'APEX-7-01', 'cash' => 50100], ['name' => 'APEX-7-02', 'cash' => 49800], ['name' => 'PA-APEX-7-01', 'cash' => 50900]], 'fills' => []]);
+$sg7 = []; foreach (sync_status($pdo, 'u7')['accounts'] as $x) $sg7[$x['name']] = $x['suggest'];
+ok($sg7 === ['APEX-7-01' => ['account_id' => 'o0', 'why' => 'firm_size'], 'APEX-7-02' => ['choose' => true], 'PA-APEX-7-01' => ['account_id' => 'o1', 'why' => 'firm_size']],
+    'two Apex 50K, an evaluation and a funded one: each goes to the name that says its phase; the second evaluation found gets neither (never the funded account, never the same account twice)');
+$ad6 = null; foreach (sync_admin($pdo)['rows'] as $x) if ($x['user_id'] === 'u5') $ad6 = $x;
+ok($ad6 && $ad6['accounts'] === ['new' => 6, 'linked' => 1, 'ignored' => 0, 'sim' => 0], 'Admin › Sync counts: 6 to link, 1 linked, simulation apart from the ignored');
 
 // 15. a trader deletes their Sweep account: everything of the sync goes
 sync_delete_user($pdo, 'u1');

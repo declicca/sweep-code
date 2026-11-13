@@ -1672,9 +1672,9 @@
    * Quantower add-on), and once a week an account not traded for 3 trading days. « It matches »: one tap. Another balance: the gap
    * is said without judging, then one tap says what it was (SweepGap, nav.js). Answered once per day: journal.post.bal. */
   const BV = {
-    en: { q: 'Your balance on {f}?', same: 'It matches', shot: 'Import a screenshot of your trades', need: 'Confirm your balance on {f}.', needK: 'Say what the gap was, in one tap.' },
-    fr: { q: 'Ton solde sur {f} ?', same: 'C’est le même', shot: 'Importer une capture de tes trades', need: 'Confirme ton solde sur {f}.', needK: 'Dis ce qu’était l’écart, en un toucher.' },
-    es: { q: '¿Tu saldo en {f}?', same: 'Es el mismo', shot: 'Importar una captura de tus operaciones', need: 'Confirma tu saldo en {f}.', needK: 'Di qué fue la diferencia, en un toque.' } };
+    en: { q: 'Your balance on {f}?', same: 'It matches', shot: 'Import a screenshot of your trades', need: 'Confirm your balance on {f}.', needK: 'Say what the gap was, in one tap.', sure: 'Is that really the balance your platform shows? The gap ({g}) is more than this account’s maximum loss ({m}).', sureY: 'Yes, that is my balance', needSure: 'Check this balance, or confirm it.' },
+    fr: { q: 'Ton solde sur {f} ?', same: 'C’est le même', shot: 'Importer une capture de tes trades', need: 'Confirme ton solde sur {f}.', needK: 'Dis ce qu’était l’écart, en un toucher.', sure: 'C’est bien le solde affiché par la plateforme ? L’écart ({g}) dépasse la perte maximale de ce compte ({m}).', sureY: 'Oui, c’est bien mon solde', needSure: 'Vérifie ce solde, ou confirme-le.' },
+    es: { q: '¿Tu saldo en {f}?', same: 'Es el mismo', shot: 'Importar una captura de tus operaciones', need: 'Confirma tu saldo en {f}.', needK: 'Di qué fue la diferencia, en un toque.', sure: '¿Es de verdad el saldo que muestra la plataforma? La diferencia ({g}) supera la pérdida máxima de esta cuenta ({m}).', sureY: 'Sí, es mi saldo', needSure: 'Revisa este saldo, o confírmalo.' } };
   const bv = (k) => (BV[L()] || BV.en)[k];
   const SYNCED = ['ninjatrader', 'quantower'];
   const balWhere = (a) => { const f = typeof firm === 'function' && a.firm_id ? firm(a.firm_id) : null; return (f && f.name) || a.name || ''; };
@@ -1711,31 +1711,39 @@
     const last = (S.journals || []).filter((j) => j.id < day && !j.demo && j.post && Array.isArray(j.post.bal) && j.post.bal.some((b) => b.acc === a.id)).sort((x, y) => y.id.localeCompare(x.id))[0];
     return typed || !!(last && last.post.bal.some((b) => b.acc === a.id && b.gap_c));
   }
+  /* (13 Nov., brief « relier les comptes trouvés », step 3.1) a gap larger than the account's maximum loss (its drawdown rule; an
+     account without one: 10 % of its size) is almost surely a balance typed wrong, the account's size for instance ($235,000
+     of gaps in 7 days in Admin): « Is that really the balance your platform shows? » is asked before it is kept. */
+  const balLimit = (a) => (a && a.rules && +a.rules.dd_c > 0 ? +a.rules.dd_c : a && +a.starting_balance_c > 0 ? Math.round(+a.starting_balance_c * 0.1) : 0);
+  const balOver = (a, gap) => { const m = balLimit(a); return !!(m && Math.abs(gap) > m); };
+  const balUsd = (c) => (typeof money === 'function' ? money(Math.abs(c), { sign: false, dec: 0 }) : '$' + Math.round(Math.abs(c) / 100));
+  const balSure = (a, b, gap) => (balOver(a, gap) ? `<p class="g-bal-sure">${esc(bv('sure').replace('{g}', balUsd(gap)).replace('{m}', balUsd(balLimit(a))))}</p><div class="g-chips-row wrap"><button type="button" class="chip ${b.sure ? 'on' : ''}" data-bal-sure="${esc(a.id)}">${bv('sureY')}</button></div>` : '');
   function balRow(a) {
     const b = RV.bal[a.id], gap = b.plat == null ? 0 : b.plat - b.sweep, G2 = window.SweepGap;
     return `<div class="g-f g-bal" data-bal="${esc(a.id)}"><span>${esc(bv('q').replace('{f}', balWhere(a)))}</span>
       ${balWhere(a) !== a.name ? `<small class="g-bal-a">${esc(a.name || '')}</small>` : ''}
       <div class="g-bal-r"><input inputmode="decimal" data-bal-in="${esc(a.id)}" value="${balIn(b.plat == null ? b.sweep : b.plat)}" aria-label="${esc(bv('q').replace('{f}', balWhere(a)))}"><button type="button" class="chip ${b.same ? 'on' : ''}" data-bal-same="${esc(a.id)}">${bv('same')}</button></div>
-      <div class="g-bal-gap" ${gap && G2 ? '' : 'hidden'}>${gap && G2 ? `<p>${esc(G2.msg(gap))}</p><div class="g-chips-row wrap">${G2.chips(gap, b.kind, 'data-bal-k')}</div>` : ''}</div></div>`;
+      <div class="g-bal-gap" ${gap && G2 ? '' : 'hidden'}>${gap && G2 ? `${balSure(a, b, gap)}<p>${esc(G2.msg(gap))}</p><div class="g-chips-row wrap">${G2.chips(gap, b.kind, 'data-bal-k')}</div>` : ''}</div></div>`;
   }
   function balPaint(id) {
     const el = document.querySelector(`#gSheet .g-bal[data-bal="${CSS.escape(id)}"]`), a = getDoc('accounts', id); if (!el || !a) return;
     const b = RV.bal[id], gap = b.plat == null ? 0 : b.plat - b.sweep, box = el.querySelector('.g-bal-gap'), G2 = window.SweepGap;
     el.querySelector('[data-bal-same]').classList.toggle('on', b.same);
-    if (gap && G2) { box.innerHTML = `<p>${esc(G2.msg(gap))}</p><div class="g-chips-row wrap">${G2.chips(gap, b.kind, 'data-bal-k')}</div>`; box.hidden = false; } else { box.innerHTML = ''; box.hidden = true; }
+    if (gap && G2) { box.innerHTML = `${balSure(a, b, gap)}<p>${esc(G2.msg(gap))}</p><div class="g-chips-row wrap">${G2.chips(gap, b.kind, 'data-bal-k')}</div>`; box.hidden = false; } else { box.innerHTML = ''; box.hidden = true; }
   }
   document.addEventListener('click', (e) => {
-    const el = e.target.closest && e.target.closest('#gSheet .g-bal [data-bal-same], #gSheet .g-bal [data-bal-k], #gSheet [data-bal-shot]'); if (!el) return;
+    const el = e.target.closest && e.target.closest('#gSheet .g-bal [data-bal-same], #gSheet .g-bal [data-bal-k], #gSheet .g-bal [data-bal-sure], #gSheet [data-bal-shot]'); if (!el) return;
     if (el.hasAttribute('data-bal-shot')) { closeSheet(); setTimeout(() => { if (typeof openTicket === 'function') openTicket(null, { date: RV.day }); }, 350); return; }
     const id = el.closest('.g-bal').dataset.bal, b = RV.bal[id]; if (!b) return;
-    if (el.hasAttribute('data-bal-same')) { b.same = true; b.plat = null; b.kind = null; const i = el.parentElement.querySelector('input'); if (i) i.value = balIn(b.sweep); }
+    if (el.hasAttribute('data-bal-sure')) { b.sure = !b.sure; }
+    else if (el.hasAttribute('data-bal-same')) { b.same = true; b.plat = null; b.kind = null; b.sure = false; const i = el.parentElement.querySelector('input'); if (i) i.value = balIn(b.sweep); }
     else { b.kind = el.getAttribute('data-bal-k'); }
     buzz(6); balPaint(id); const er = document.getElementById('gErr'); if (er) er.textContent = '';
   });
   document.addEventListener('input', (e) => {
     const i = e.target.closest && e.target.closest('#gSheet [data-bal-in]'); if (!i) return;
     const b = RV.bal[i.dataset.balIn]; if (!b) return;
-    const v = balC(i.value); b.plat = v; b.same = v != null && v === b.sweep; if (b.same) b.plat = null; b.kind = null;
+    const v = balC(i.value); b.plat = v; b.same = v != null && v === b.sweep; if (b.same) b.plat = null; b.kind = null; b.sure = false;
     balPaint(i.dataset.balIn);
   });
   function rvGuess(day) {
@@ -1757,6 +1765,7 @@
     for (const a of RV.balAcc || []) {   // each balance said: the same, or the gap and what it was
       const x = RV.bal[a.id], gap = x.plat == null ? 0 : x.plat - x.sweep;
       if ((!x.same && x.plat == null) || (gap && !x.kind)) { const e = document.getElementById('gErr'); if (e) e.textContent = gap ? bv('needK') : bv('need').replace('{f}', balWhere(a)); buzz(20); return; }
+      if (gap && balOver(a, gap) && !x.sure) { const e = document.getElementById('gErr'); if (e) e.textContent = bv('needSure'); buzz(20); return; }   // (13 Nov.) more than the account can lose: asked before it is kept
     }
     const tom = el.querySelector('[data-gr=tomorrow]').value.trim();
     const j = structuredClone(journalOf(RV.day));

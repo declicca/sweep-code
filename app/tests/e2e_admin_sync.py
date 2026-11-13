@@ -75,7 +75,7 @@ with sync_playwright() as p:
     row = lambda email: pg.evaluate("(e)=>{const l=[...document.querySelectorAll('#main .ux-sy-list li')].find(x=>x.innerText.includes(e)); return l && {c:l.className, b:l.querySelector('b').textContent, chip:l.querySelector('.ux-pr-chip').textContent, t:l.innerText.replace(/\\s+/g,' ')}}", email)
     ra, rb = row(ea), row(eb)
     ok(ra and ra['c'] == 'ux-hl-ok' and ra['b'] == 'Alma Sync' and ra['chip'] == 'Synchronise' and 'Quantower' in ra['t'] and 'Sweep Quantower test' in ra['t'] and ('vu à l’instant' in ra['t'] or 'vu il y a' in ra['t']), f'{tag} trader A: blue « Synchronise », Quantower, add-on version, seen just now ({ra and ra["t"][:140]})')
-    ok(ra and '1 relié(s) · 0 à relier · 0 ignoré(s) · 1 trade(s) (1 en 7 j)' in ra['t'], f'{tag} trader A: accounts and trades')
+    ok(ra and '0 à relier · 1 relié(s) · 0 simulation · 1 trade(s) (1 en 7 j)' in ra['t'], f'{tag} trader A: accounts and trades')
     unk = pg.evaluate("(e)=>{const l=[...document.querySelectorAll('#main .ux-sy-list li')].find(x=>x.innerText.includes(e)); return l && [(l.querySelector('[data-sy-ctr]')||{}).textContent, (l.querySelector('[data-sy-unk]')||{}).textContent, getComputedStyle(l.querySelector('[data-sy-unk]')).color]}", ea)
     alert = pg.inner_text('#main .ux-sync-admin [data-sy-alert]') if pg.locator('#main .ux-sync-admin [data-sy-alert]').count() else ''
     ok(unk and unk[0] == 'Contrats (30 j) : MNQZ6 → MNQ' and unk[1] == 'Non reconnu(s) : CON.F.US.ZZZ.Z25' and unk[2] == 'rgb(200, 30, 30)', f'{tag} trader A: contracts received (MNQZ6 → MNQ) and the one Sweep does not recognize, in red ({unk})')

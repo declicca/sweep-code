@@ -111,8 +111,9 @@ $ev('ga', 'share_card_shared', $at(2)); $ev('ga', 'share_card_created', $at(2));
 $ev('gb', 'chest_opened', $at(40)); $ev('gc', 'mission_completed', $at(5)); $ev('ga', 'mission_completed', $at(6));
 $g = sweep_metrics($pdo, $app)['game'];
 $n = $g['active_30d'];
-$ok($n >= 3 && $g['used']['share']['n'] === 1 && $g['used']['share']['pct'] === (int) round(100 / $n) && $g['used']['chest']['n'] === 0 && $g['reached']['mission']['n'] === 2,
-    "the game's use: of the $n active traders, 1 shared a card (Mateo's account and an inactive trader aside, twice counted once), no chest within 30 days, 2 missions: " . json_encode([$g['used']['share'], $g['used']['chest'], $g['reached']['mission']]));
+$ok($n >= 3 && $g['used']['share']['n'] === 1 && $g['used']['share']['pct'] === (int) round(100 / $n) && $g['reached']['mission']['n'] === 2
+    && array_keys($g['used']) === ['share', 'weekly_recap', 'weekly_review'] && array_keys($g['reached']) === ['mission', 'badge', 'swept', 'streak3', 'freeze', 'map', 'wow'],
+    "the game's use: of the $n active traders, 1 shared a card (Mateo's account and an inactive trader aside, twice counted once), 2 missions; nothing of what was removed on 10 Nov. (chest, season, league, crew, Wrapped, theme, Discord, boss, level…) is listed: " . json_encode([$g['used']['share'], array_keys($g['used']), array_keys($g['reached'])]));
 
 // brief activation of 27 Oct., step C, on a second throwaway database: when they sign up, the return on the next trading day,
 // the risk allowed seen on the session of the sign-up. Tuesday 1 Sept. 2026, New York time.
@@ -168,6 +169,15 @@ $ok($jm['d30']['losing_trades'] === ['pct' => (int) round(($l7 + 1) / 52 * 100),
 
 $ok($jm['d7']['gap_days'] === ['pct' => 67, 'of' => 3] && $jm['d7']['gap_total_c'] === 49000, '7 days: 2 of 3 days closed with a gap (j1 day 2, j2 day 3), $490 in all (|−100| + |+50| for j2), Mateo\'s left out: ' . json_encode([$jm['d7']['gap_days'], $jm['d7']['gap_total_c']]));
 $ok($jm['d30']['gap_days'] === ['pct' => 75, 'of' => 4] && $jm['d30']['gap_total_c'] === 51000, '30 days: j3\'s old gap too (3 of 4, $510): ' . json_encode([$jm['d30']['gap_days'], $jm['d30']['gap_total_c']]));
+// (13 Nov., step 3.1) a gap larger than the account's maximum loss: a balance to check, apart from the total
+$p3->prepare("INSERT INTO documents VALUES ('j1', 'accounts', 'big', ?, '', '')")->execute([json_encode(['starting_balance_c' => 5000000, 'rules' => ['dd_c' => 200000]])]);
+$p3->prepare("INSERT INTO documents VALUES ('j2', 'accounts', 'plain', ?, '', '')")->execute([json_encode(['starting_balance_c' => 5000000])]);
+$p3->prepare("INSERT INTO documents VALUES ('j1', 'journals', ?, ?, '', '')")->execute([$jd(4), json_encode(['post' => ['bal' => [['acc' => 'big', 'gap_c' => 5000000], ['acc' => 'big', 'gap_c' => -150000]]]])]);
+$p3->prepare("INSERT INTO documents VALUES ('j2', 'journals', ?, ?, '', '')")->execute([$jd(5), json_encode(['post' => ['bal' => [['acc' => 'plain', 'gap_c' => -500100]]]])]);
+$jc = sweep_metrics($p3, $app)['journal']['d7'];
+$ok($jc['gap_check'] === ['n' => 2, 'c' => 5500100] && $jc['gap_total_c'] === 49000 + 150000 && $jc['gap_days'] === ['pct' => 60, 'of' => 5],
+    'balances to check: a $50,000 gap on an account that can lose $2,000, and $5,001 on a 50K without a rule (10 % of its size) are counted apart (2, $55,001), not in the total ($490 + the $1,500 gap under the limit): ' . json_encode([$jc['gap_check'], $jc['gap_total_c'], $jc['gap_days']]));
+$p3->exec("DELETE FROM documents WHERE id IN ('big', 'plain') OR (collection = 'journals' AND id IN ('" . $jd(4) . "', '" . $jd(5) . "'))");
 $ok($jm['d7']['gap_detailed'] === ['pct' => 50, 'of' => 1], 'the « Trades not detailed » line: half of its $340 detailed in trades since: ' . json_encode($jm['d7']['gap_detailed']));
 
 // (5 Nov., brief monétisation, étape 1) « 5 trades in 7 days » by week of sign-up: copies once, sample data and later trades aside
@@ -247,6 +257,26 @@ $p4->exec($cronSql);
 $md4 = sweep_full_report($p4, [], $app, time());
 $ok(str_contains($md4, '**Comptes par firme**') && str_contains($md4, '| Topstep | 2 | 2 | 1 | 1 | 0 | 5 | 40 % | 20 % | 40 % |') && str_contains($md4, '| Autre firme | 1 | 1 | 0 | 0 | 1 | 1 | 0 % | 100 % | 0 % |')
     && str_contains($md4, '| Compte personnel ou simulation | 1 | 1 | 0 | 0 | 0 | 1 | 100 % | 0 % | 0 % |') && str_contains($md4, '| Total | 5 | 3 | 2 | 1 | 1 | 7 | 43 % | 29 % | 29 % |'), 'firms: the table is in « Export for Claude », with the shares');
+// (13 Nov., step 2) behind « other »: the names typed, one spelling each; a name typed by one trader only is not shown
+$ok($fm['other_names'] === [] && $fm['other_rest'] === ['names' => 1, 'accounts' => 1, 'traders' => 1], 'other firms: « Bulenox », typed by one trader, is not shown: counted in the rest (' . json_encode($fm['other_rest']) . ')');
+foreach (['g1', 'g2', 'g3', 'g4'] as $id) $p4->prepare('INSERT INTO users (id, created_at, is_internal) VALUES (?, ?, 0)')->execute([$id, '2026-09-01 12:00:00']);
+$fd('g1', 'firms', 'y1', ['name' => 'Bulenox']); $fd('g1', 'accounts', 'd1', ['firm_id' => 'y1', 'status' => 'active']); $fd('g1', 'accounts', 'd2', ['firm_id' => 'y1', 'status' => 'active']);
+$fd('g2', 'firms', 'y2', ['name' => '  bulenox  LLC ']); $fd('g2', 'accounts', 'd3', ['firm_id' => 'y2', 'status' => 'active']);
+$fd('g3', 'firms', 'y3', ['name' => 'Blue Guardian, Inc.']); $fd('g3', 'accounts', 'd4', ['firm_id' => 'y3', 'status' => 'active']);
+$fd('g4', 'firms', 'y4', ['name' => 'BLUE  GUARDIAN']); $fd('g4', 'accounts', 'd5', ['firm_id' => 'y4', 'status' => 'active']);
+$fd('g4', 'firms', 'y5', ['name' => 'Chez Jean Tremblay']); $fd('g4', 'accounts', 'd6', ['firm_id' => 'y5', 'status' => 'active']);
+$fd('g4', 'accounts', 'd7', ['firm_id' => 'gone', 'status' => 'active']);   // a firm that no longer exists: « other », with no name
+$fm2 = sweep_metrics($p4, $app)['brief']['firms'];
+$ok($fm2['other_names'] === [['name' => 'Bulenox', 'accounts' => 4, 'traders' => 3], ['name' => 'BLUE  GUARDIAN', 'accounts' => 2, 'traders' => 2]] || $fm2['other_names'] === [['name' => 'Bulenox', 'accounts' => 4, 'traders' => 3], ['name' => 'BLUE GUARDIAN', 'accounts' => 2, 'traders' => 2]] || $fm2['other_names'] === [['name' => 'Bulenox', 'accounts' => 4, 'traders' => 3], ['name' => 'Blue Guardian, Inc.', 'accounts' => 2, 'traders' => 2]],
+    'other firms: « Bulenox », « bulenox LLC » → one name, 4 accounts of 3 traders; « Blue Guardian, Inc. » and « BLUE GUARDIAN » → one name, 2 of 2; the most accounts first: ' . json_encode($fm2['other_names']));
+$ok($fm2['other_rest'] === ['names' => 2, 'accounts' => 2, 'traders' => 1] && !str_contains(json_encode($fm2), 'Tremblay'), 'other firms: a name typed by one trader only and an account with no firm name → « rest » (2 accounts of 1 trader), never shown: ' . json_encode($fm2['other_rest']));
+$p4->exec('CREATE TABLE feedback (id INTEGER PRIMARY KEY, user_id TEXT, type TEXT, rating INT, message TEXT, page TEXT, status TEXT, created_at INT, question TEXT, answer TEXT)');
+$p4->exec("INSERT INTO feedback (user_id, type, rating, message, page, status, created_at, question, answer) VALUES ('f1', 'answer', NULL, '', 'email', 'new', " . time() . ", 'What stopped you?', 'Too long to fill in'), ('f2', 'answer', NULL, 'Too many taps', 'email', 'new', " . time() . ", 'What stopped you?', 'Other'), ('f1', 'idea', NULL, 'A dark chart', 'stats', 'new', " . time() . ", NULL, NULL)");
+$md5 = sweep_full_report($p4, [], $app, time());
+$ok(str_contains($md5, '**Dans « Autre firme »**') && str_contains($md5, '| Bulenox | 4 | 3 |') && str_contains($md5, '| autres (2 noms tapés par un seul trader, ou sans nom) | 2 | 1 |') && !str_contains($md5, 'Tremblay'), 'other firms: the same table in « Export for Claude », nothing personal in it');
+$ok(str_contains($md5, '| answer | — | email | new | « What stopped you? » → Too long to fill in |') && str_contains($md5, '« What stopped you? » → Other — Too many taps |') && str_contains($md5, '| idea | — | stats | new | A dark chart |'),
+    'feedback in the export: an answer given in one tap from an email shows its question and the answer chosen (its text was empty), a comment follows; a written feedback as before');
+foreach (['g1', 'g2', 'g3', 'g4'] as $id) { $p4->exec("DELETE FROM users WHERE id = '$id'"); $p4->exec("DELETE FROM documents WHERE user_id = '$id'"); }
 
 // (13 Nov., brief « Admin lisible sur téléphone », 2.1) « To look at »: only what asks for an action
 require $app . '/ops/watch.php';
