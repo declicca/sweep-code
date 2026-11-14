@@ -10,7 +10,9 @@ A trader of its own. Phone 390 (fr) and computer 1300 (en):
     Settings, which says why); every feature shown is seen once, on every device: after a reload, no window;
  4  one automatic window per session: none when another one already opened;
  5  (step 3) the bell keeps them (« What's new », already read when seen in the window): a tap opens that one; the avatar
-    menu › « What's new » opens the last 60 days' features, seen ones too.
+    menu › « What's new » opens the last 60 days' features, seen ones too;
+ 6  (14 Nov.) the NinjaTrader / Quantower features (who: 'sync') only for a trader with a sync connection; an entry not live yet
+    (live: false) never; « Prepare my zones » opens the plan's « Plan on the chart » sheet.
 No page error, nothing wider than the window.
 """
 import json, random, sys
@@ -27,17 +29,20 @@ X = {'fr': {'h': 'Quoi de neuf', 'acc': 'Voir mes comptes', 'push': 'Des rappels
 # who signed up 90 days ago sees those of the last 60 days
 NEW3 = "() => { S.me.created_at = Math.floor(Date.now() / 1000) - 3 * 86400; sessionStorage.removeItem('sw.modal'); }"
 OLD = "() => { S.me.created_at = Math.floor(Date.now() / 1000) - 90 * 86400; sessionStorage.removeItem('sw.modal'); }"
+# the features a trader of 3 days is told about: those after the sign-up, live, for every trader (this one has no sync), in order
+AFTER = """() => { const sd = new Date((S.me.created_at) * 1000).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }), now = todayStr(), L = JSON.parse(localStorage.getItem('tj.lang') || '"en"');
+  return SweepNews.list.filter((n) => n.live !== false && !n.who && n.d > sd && n.d <= now && n.act !== 'push').map((n) => n.t[L] || n.t.en); }"""
 SHOWN = "() => { const s = document.querySelector('#gSheet.g-wnsheet'); return s ? { h: s.querySelector('h2').textContent, items: [...s.querySelectorAll('.g-wn-it b')].map((b) => b.textContent), btns: [...s.querySelectorAll('.g-wn-go')].map((b) => b.textContent) } : null }"
 with sync_playwright() as p:
   br = p.chromium.launch(); allerr = []
   for lang, w, phone in (('fr', 390, True), ('en', 1300, False)):
     tag = f'{w}-{lang}'; x = X[lang]
-    ctx = br.new_context(viewport={'width': w, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, locale='fr-CA' if lang == 'fr' else 'en-US')
+    ctx = br.new_context(viewport={'width': w, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, locale='fr-CA' if lang == 'fr' else 'en-US', color_scheme='dark' if phone else 'light')   # (14 Nov.) the phone in dark, the computer in light
     ctx.add_init_script("try { localStorage.setItem('tj.lang', JSON.stringify('%s')); localStorage.setItem('sw.installShown', '1') } catch (e) {}" % lang)
     r = ctx.request.post(B + '/api/auth/register', data=json.dumps({'password': 'Testpass123!', 'email': 'nw%06d@t.dev' % random.randint(0, 999999), 'consent': True, 'elapsed': 6000}), headers=H)
     ctx.request.post(B + '/api/me/profile', data=json.dumps({'first_name': 'Noa', 'experience': 'gt1'}), headers=H)
     pg = ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
-    pg.goto(B + '/#dashboard'); pg.wait_for_timeout(2500)
+    pg.goto(B + '/#dashboard'); pg.wait_for_function("() => !!(window.put && window.SweepNews)", timeout=20000); pg.wait_for_timeout(1500)
     pg.evaluate("put('accounts', { id: 'nw-a', name: 'Apex 50K', status: 'active', phase: 'eval', starting_balance_c: 5000000, rules: { dd_c: 250000 } })"); pg.wait_for_timeout(800)
     # 1. the day of sign-up
     pg.evaluate("sessionStorage.removeItem('sw.modal'); SweepNews.show()"); pg.wait_for_timeout(900)
@@ -47,7 +52,10 @@ with sync_playwright() as p:
     ok(pg.evaluate(SHOWN) is None, f'{tag} one automatic window per session: none after another one')
     # 2. the next days: nothing from before the sign-up (B2), then a trader of 90 days
     pg.evaluate(NEW3); pg.evaluate("SweepNews.show()"); pg.wait_for_timeout(1200)
-    ok(pg.evaluate(SHOWN) is None, f'{tag} 3 days after the sign-up: no « {x["h"]} » for features older than the sign-up (B2)')
+    s = pg.evaluate(SHOWN); exp = pg.evaluate(AFTER)
+    ok((s['items'] if s else []) == exp, f'{tag} 3 days after the sign-up: only the features that came out after it (B2): {exp}')
+    pg.evaluate("(document.querySelector('#gSheet [data-g=wn-ok]')||{click(){}}).click()"); pg.wait_for_timeout(500)
+    pg.evaluate("editDoc('settings', 'settings', (r) => { r.news_seen = [] })"); pg.wait_for_timeout(300)
     pg.evaluate(OLD); pg.evaluate("SweepNews.show()"); pg.wait_for_timeout(1200)
     s = pg.evaluate(SHOWN)
     ok(s and s['h'] == x['h'] and len(s['items']) >= 2 and x['acc'] in s['btns'], f'{tag} from the next day: « {x["h"]} », each feature with its button ({s})')
@@ -89,6 +97,28 @@ with sync_playwright() as p:
     pg.evaluate(OLD); pg.evaluate("SweepNews.show()"); pg.wait_for_timeout(1200)
     s = pg.evaluate(SHOWN)
     ok(s and x['push'] not in s['items'], f'{tag} the reminders already on: not offered ({s and s["items"]})')
+    # 6 (14 Nov.) who: 'sync': only for a trader whose trades come from NinjaTrader or Quantower; live: false: never shown
+    # (a feature dated after the pinned test day, tools/game-now.py, is moved to that day: it is checked like the others)
+    pg.evaluate("SweepNews.list.forEach((n) => { if (n.d > todayStr()) n.d = todayStr(); })")
+    sync = pg.evaluate("SweepNews.list.filter((n) => n.who === 'sync' && n.live !== false).map((n) => n.t[%r] || n.t.en)" % lang)
+    off = pg.evaluate("SweepNews.list.filter((n) => n.live === false).map((n) => n.t[%r] || n.t.en)" % lang)
+    pg.evaluate("() => { S.settings.news_seen = []; }"); pg.evaluate(OLD); pg.evaluate("SweepNews.open()"); pg.wait_for_timeout(1200)
+    s = pg.evaluate(SHOWN) or {'items': []}
+    ok(sync and not any(i in s['items'] for i in sync + off), f'{tag} no sync: none of the NinjaTrader / Quantower features ({len(sync)}) nor the ones not live yet ({off})')
+    pg.evaluate("(document.querySelector('#gSheet [data-g=wn-ok]')||{click(){}}).click()"); pg.wait_for_timeout(500)
+    pg.evaluate("() => { S.settings.news_seen = []; const st = SweepSync.state() || {}; SweepSync.state = () => Object.assign({}, st, { connections: [{ platform: 'quantower', hint: 'abcd' }] }); SweepSync.load = () => Promise.resolve(SweepSync.state()); }")
+    pg.evaluate(OLD); pg.evaluate("SweepNews.open()"); pg.wait_for_timeout(1200)
+    s = pg.evaluate(SHOWN) or {'items': [], 'btns': []}
+    ok(all(i in s['items'] for i in sync) and not any(i in s['items'] for i in off), f'{tag} a Quantower trader: the sync features too, still not the ones not live ({s["items"]})')
+    ok(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} the longer window: nothing wider than the screen')
+    if phone: pg.screenshot(path='/tmp/news_sync_390.png')
+    else: pg.screenshot(path='/tmp/news_sync_1300.png')
+    zb = pg.evaluate("(SweepNews.list.find((n) => n.act === 'chart' && n.live !== false) || {b: {}}).b[%r]" % lang)
+    if zb and zb in s['btns']:
+      pg.locator('#gSheet .g-wn-go', has_text=zb).click(); pg.wait_for_timeout(1500)
+      ok(pg.locator('#pcSheet.open').count() == 1, f'{tag} « {zb} »: the « Plan on the chart » sheet opens')
+      pg.evaluate("(document.querySelector('#pcScrim')||{click(){}}).click()"); pg.wait_for_timeout(600)
+    else: ok(False, f'{tag} the zones feature has its button ({zb}, {s["btns"]})')
     allerr += errs; ctx.close()
   ok(not allerr, f'no page error ({allerr[:2]})')
   br.close()

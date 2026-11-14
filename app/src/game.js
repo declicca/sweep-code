@@ -2217,7 +2217,30 @@
   /* ───────────── « What's new »: the features worth knowing (16 Oct.), each seen once per trader on every device
      (settings.news_seen), each with the button that does it; the session's modal, never on the day of sign-up ───────────── */
   // a new feature worth a window: add it on top (id never reused; d = the day it went live, older than 60 days: not shown)
+  // (14 Nov., Mateo) every delivery that changes something for traders adds its entry here, and its CHANGELOG line names it
+  // « [news: id] » (or says « (interne) »): tests/news_changelog_test.php checks it. who: 'sync' = only the traders whose trades
+  // come from NinjaTrader or Quantower (a sync connection, an account found or a synced trade); live: false = written, not shown yet
   const NEWS = [
+    { id: 'notrade-1', d: '2026-11-14', ic: 'leaf', act: '#dashboard',   // « I took no trade » in the Execution step (14 Nov.)
+      t: { en: 'A day without a trade counts too', fr: 'Une journée sans trade compte aussi', es: 'Un día sin operar también cuenta' },
+      s: { en: 'You made your plan and nothing came? Under Execution, tap «\u00a0I took no trade\u00a0»: the step is done. Not trading can be the right decision.', fr: 'Tu as fait ton plan et rien ne s’est présenté ? Sous Exécution, touche «\u00a0Je n’ai pas pris de trade\u00a0» : l’étape est faite. Ne pas trader peut être la bonne décision.', es: '¿Hiciste tu plan y no apareció nada? En Ejecución, toca «\u00a0No tomé ninguna operación\u00a0»: el paso queda hecho. No operar puede ser la decisión correcta.' },
+      b: { en: 'See my routine', fr: 'Voir ma routine', es: 'Ver mi rutina' } },
+    { id: 'chart-plan-1', d: '2026-11-14', ic: 'target', act: 'chart', who: 'sync',   // Plan Sync steps 1 and 5 (13-14 Nov.): what works today, without the add-on
+      t: { en: 'Your zones in your plan, and in your review', fr: 'Tes zones dans ton plan, et dans ta revue', es: 'Tus zonas en tu plan, y en tu revisión' },
+      s: { en: 'In your plan, «\u00a0Plan on the chart\u00a0»: your levels and zones (a price range where you expect to act), with if-then rules, like «\u00a0if price sweeps the overnight low (runs past it and comes back), remind me to wait\u00a0». In the evening, your review says how many trades were in your zones, in the direction you planned (your bias).', fr: 'Dans ton plan, «\u00a0Plan sur le chart\u00a0» : tes niveaux et tes zones (une fourchette de prix où tu comptes agir), avec des règles si… alors, comme «\u00a0si le prix fait un sweep du plus bas de la nuit (il le dépasse puis revient), rappelle-moi d’attendre\u00a0». Le soir, ta revue te dit combien de trades étaient dans tes zones, dans le sens prévu (ton biais).', es: 'En tu plan, «\u00a0Plan en el gráfico\u00a0»: tus niveles y zonas (un rango de precio donde piensas actuar), con reglas si… entonces, como «\u00a0si el precio hace un sweep del mínimo de la noche (lo supera y vuelve), recuérdame esperar\u00a0». Por la noche, tu revisión te dice cuántas operaciones estuvieron en tus zonas, en la dirección prevista (tu sesgo).' },
+      b: { en: 'Prepare my zones', fr: 'Préparer mes zones', es: 'Preparar mis zonas' } },
+    { id: 'chart-addon-1', d: '2026-11-14', ic: 'bell', act: 'chart', who: 'sync', live: false,   // Plan Sync steps 3 and 4: switch live on (and set d) the day the add-on zips carry « Sweep Plan »
+      t: { en: 'Your plan on your NinjaTrader or Quantower chart', fr: 'Ton plan sur ton chart NinjaTrader ou Quantower', es: 'Tu plan en tu gráfico de NinjaTrader o Quantower' },
+      s: { en: 'Add the «\u00a0Sweep Plan\u00a0» indicator to your chart: your zones are drawn on it, and an alert reminds you of your plan when price comes close. Sweep never places an order.', fr: 'Ajoute l’indicateur «\u00a0Sweep Plan\u00a0» à ton chart : tes zones y sont dessinées, et une alerte te rappelle ton plan quand le prix s’en approche. Sweep ne passe jamais d’ordre.', es: 'Añade el indicador «\u00a0Sweep Plan\u00a0» a tu gráfico: tus zonas se dibujan en él y una alerta te recuerda tu plan cuando el precio se acerca. Sweep nunca envía órdenes.' },
+      b: { en: 'See my zones', fr: 'Voir mes zones', es: 'Ver mis zonas' } },
+    { id: 'sync-link-1', d: '2026-11-13', ic: 'target', act: '#settings/sync', who: 'sync',   // link the accounts found by the add-on (13 Nov.)
+      t: { en: 'NinjaTrader and Quantower: link the accounts found', fr: 'NinjaTrader et Quantower : relie les comptes trouvés', es: 'NinjaTrader y Quantower: vincula las cuentas encontradas' },
+      s: { en: 'When the add-on finds an account, Sweep proposes the matching one (Apex, Lucid, Topstep… recognized by their name). One tap on «\u00a0Link\u00a0» and its trades go to the right account.', fr: 'Quand l’add-on trouve un compte, Sweep propose le compte qui lui correspond (Apex, Lucid, Topstep… reconnus par leur nom). Un toucher sur «\u00a0Relier\u00a0» et ses trades vont au bon compte.', es: 'Cuando el add-on encuentra una cuenta, Sweep propone la que le corresponde (Apex, Lucid, Topstep… reconocidas por su nombre). Un toque en «\u00a0Vincular\u00a0» y sus operaciones van a la cuenta correcta.' },
+      b: { en: 'See my connections', fr: 'Voir mes connexions', es: 'Ver mis conexiones' } },
+    { id: 'progress-1', d: '2026-11-10', ic: 'sweep', act: 'hub',   // « produit final » (10 Nov.): My progress
+      t: { en: 'My progress: your complete days', fr: 'Ma progression : tes journées complètes', es: 'Mi progreso: tus días completos' },
+      s: { en: 'A swept day = plan, execution and review done. My progress counts them, with your streak (days in a row), your streak freezes (a missed day that does not break it) and your badges.', fr: 'Une journée balayée = plan, exécution et revue faits. Ma progression les compte, avec ta série (jours de suite), tes gels de série (un jour manqué qui ne la casse pas) et tes badges.', es: 'Un día barrido = plan, ejecución y revisión hechos. Mi progreso los cuenta, con tu racha (días seguidos), tus congeladores (un día perdido que no la rompe) y tus insignias.' },
+      b: { en: 'Open My progress', fr: 'Ouvrir Ma progression', es: 'Abrir Mi progreso' } },
     { id: 'gameplan-1', d: '2026-10-20', ic: 'flag', act: 'gameplan',   // the 90-day gameplan for traders starting out (20 Oct., Mateo)
       t: { en: 'New: a 90-day gameplan for traders starting out', fr: 'Nouveau : un parcours de 90 jours pour débuter', es: 'Nuevo: un recorrido de 90 días para empezar' },
       s: { en: 'One mission a day for 90 days: what to learn, what to practise, what to review, with a notion and a quick quiz when it helps. Sweep ticks what it can see.', fr: 'Une mission par jour pendant 90 jours : quoi apprendre, quoi pratiquer, quoi revoir, avec la notion du jour et un petit quiz quand ça aide. Sweep coche ce qu’il voit.', es: 'Una misión al día durante 90 días: qué aprender, qué practicar, qué revisar, con la noción del día y un pequeño quiz cuando ayuda. Sweep marca lo que ve.' },
@@ -2238,13 +2261,22 @@
   const WN = { en: ['What’s new', 'Got it'], fr: ['Quoi de neuf', 'Compris'], es: ['Novedades', 'Entendido'] };
   const nyDay = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   const signupDay = () => { const c = S.me && S.me.created_at; if (c == null || c === '') return ''; const ms = /^\d+$/.test(String(c)) ? +c * 1000 : Date.parse(String(c).replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(String(c)) ? '' : 'Z')); return isFinite(ms) ? nyDay(ms + 216e5) : ''; };   // the session of the sign-up (18:00 ET or later = the next day, as todayStr)
+  // (14 Nov.) a trader whose trades come from NinjaTrader or Quantower: a connection, an account found, or a synced trade
+  const syncTrader = () => {
+    const st = window.SweepSync && SweepSync.state && SweepSync.state();
+    if (st && (((st.connections || []).length) || (st.accounts || []).length)) return true;
+    return (S.trades || []).some((x) => !x.demo && /^sync:/.test(String(x.import_key || '')));
+  };
+  const syncReady = () => (NEWS.some((n) => n.who === 'sync' && n.live !== false) && window.SweepSync && SweepSync.load ? SweepSync.load().catch(() => null) : Promise.resolve(null));
   function newsRecent() {   // the last 60 days
     const now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
     const old = new Date(now + 'T12:00:00'); old.setDate(old.getDate() - 60); const from = nyDay(old.getTime());
     const sd = signupDay();   // (1 Nov., brief dans le temps B2) only what came out after the sign-up: a new trader is not told what was always there
-    return NEWS.filter((n) => n.d >= from && n.d <= now && (!sd || n.d > sd));
+    const sy = NEWS.some((n) => n.who === 'sync') ? syncTrader() : false;
+    return NEWS.filter((n) => n.live !== false && (n.who !== 'sync' || sy) && n.d >= from && n.d <= now && (!sd || n.d > sd));
   }
   async function newsDue(all) {   // all: the window opened by the trader (seen ones too)
+    await syncReady();   // who: 'sync' needs the sync's state (Today asks it anyway)
     const seen = new Set((S.settings && S.settings.news_seen) || []);
     const list = newsRecent().filter((n) => all || !seen.has(n.id));
     const pushSt = list.some((n) => n.act === 'push') && window.SweepNotify && SweepNotify.push ? await SweepNotify.push.state().catch(() => null) : null;   // { available, can, on }
@@ -2254,7 +2286,7 @@
     if (G.obOpen || G.wnOpen || document.querySelector('#gSheet') || !S.settings || !(S.trades || []).length && !(S.accounts || []).some((a) => !a.demo)) return;
     const sd = signupDay(), now = typeof todayStr === 'function' ? todayStr() : nyDay(Date.now());
     if (!sd || sd >= now) return;   // never on the day of sign-up (the first day has its own steps)
-    bell();
+    await syncReady(); bell();
     if (modalUsed() || quiet()) return;   // (C2) never between the first trade and the review
     const list = await newsDue(); if (!list.length || G.wnOpen || document.querySelector('#gSheet') || !useModal()) return;
     newsSheet(list);
@@ -2293,6 +2325,8 @@
       return;
     }
     if (n.act === 'gameplan') { if (window.SweepGPLoad) window.SweepGPLoad().then((m) => m.learn()).catch(() => { location.hash = '#settings'; }); return; }
+    if (n.act === 'chart') { setTimeout(() => chartOpen(), 380); return; }   // the plan's « Plan on the chart » sheet, for the next session
+    if (n.act === 'hub') { setTimeout(() => openHub(), 380); return; }   // My progress
     location.hash = n.act;
   }
   const newsText = (id) => { const n = NEWS.find((x) => x.id === id); return n ? { t: n.t[L()] || n.t.en, s: n.s[L()] || n.s.en } : null; };
