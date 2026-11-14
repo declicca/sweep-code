@@ -1609,7 +1609,12 @@
       a_alert: 'alert me with my message', a_plan: 'remind me of my plan', a_limit: 'remind me of my limit', tip_a_alert: 'Your message, as you write it.',
       tip_a_plan: 'Your bias, the zone’s note and your plan’s checklist.', tip_a_limit: 'Your risk allowed today and your max trades, as Sweep knows them.',
       msg: 'Message (optional)', msg_ph: 'e.g. Wait for the reclaim, long on the buy zone, stop under the wick', preview: 'In words',
-      p_alert: 'alert me', p_plan: 'remind me of my plan', p_limit: 'remind me of my limit' },
+      p_alert: 'alert me', p_plan: 'remind me of my plan', p_limit: 'remind me of my limit',
+      d_title: 'On the chart', d_n: '{a} of {n} trades in your plan’s zones', d_n1: '{a} of 1 trade in your plan’s zones', d_today: ' today',
+      d_tip: 'In your plan: entered in one of your zones (a level: within its approach distance), in the direction planned there: the zone’s bias, else the day’s (long = buy, short = sell).',
+      e_near: 'Price close to {z}', e_touch: 'Price touches {z}', e_above: '{tf} candle closed above {z}', e_below: '{tf} candle closed below {z}', e_sweep: 'Sweep of {z} ({tf})',
+      e_time: 'It is {h} in New York', e_rule: 'A rule fired', s_alert: 'alert shown', s_plan: 'plan reminder shown', s_limit: 'limit reminder shown',
+      tr: 'Trade {d} {i}', tr_in: 'in the plan', tr_out: 'off plan', d_more: 'See the {n} others', d_zone: 'a zone' },
     fr: { title: 'Plan sur le chart', row: 'Plan sur le chart', row_none: 'Tes niveaux sur Quantower ou NinjaTrader', z1: '1 zone', zn: '{n} zones', r1: '1 règle', rn: '{n} règles',
       intro: 'Tes niveaux et tes zones s’affichent sur ton chart Quantower ou NinjaTrader, avec une alerte quand le prix s’en approche. Sweep ne passe jamais d’ordre.',
       sync_on: 'Synchronisé avec {p} · {ago}', sync_off: 'Pas encore connecté', install: 'Installer l’add-on', ago_s: 'il y a {n} s', ago_m: 'il y a {n} min', ago_h: 'il y a {n} h',
@@ -1630,7 +1635,12 @@
       a_alert: 'm’avertir avec mon message', a_plan: 'me rappeler mon plan', a_limit: 'me rappeler ma limite', tip_a_alert: 'Ton message, tel que tu l’écris.',
       tip_a_plan: 'Ton biais, la note de la zone et la checklist de ton plan.', tip_a_limit: 'Ton risque permis aujourd’hui et ton nombre max de trades, tels que Sweep les connaît.',
       msg: 'Message (facultatif)', msg_ph: 'ex. Attendre le retour au-dessus, long sur la zone d’achat, stop sous la mèche', preview: 'En mots',
-      p_alert: 'avertis-moi', p_plan: 'rappelle-moi mon plan', p_limit: 'rappelle-moi ma limite' },
+      p_alert: 'avertis-moi', p_plan: 'rappelle-moi mon plan', p_limit: 'rappelle-moi ma limite',
+      d_title: 'Sur le chart', d_n: '{a} trades sur {n} dans les zones de ton plan', d_n1: '{a} trade sur {n} dans les zones de ton plan', d_today: ' aujourd’hui',
+      d_tip: 'Dans le plan : entrée dans une de tes zones (un niveau : à sa distance d’approche), dans le sens prévu là : le biais de la zone, sinon celui du jour (long = achat, short = vente).',
+      e_near: 'Prix proche de {z}', e_touch: 'Le prix touche {z}', e_above: 'Bougie {tf} fermée au-dessus de {z}', e_below: 'Bougie {tf} fermée au-dessous de {z}', e_sweep: '{z} sweepé ({tf})',
+      e_time: 'Il est {h} à New York', e_rule: 'Une règle s’est déclenchée', s_alert: 'alerte affichée', s_plan: 'rappel du plan affiché', s_limit: 'rappel de ta limite affiché',
+      tr: 'Trade {d} {i}', tr_in: 'dans le plan', tr_out: 'hors plan', d_more: 'Voir les {n} autres', d_zone: 'une zone' },
     es: { title: 'Plan en el gráfico', row: 'Plan en el gráfico', row_none: 'Tus niveles en Quantower o NinjaTrader', z1: '1 zona', zn: '{n} zonas', r1: '1 regla', rn: '{n} reglas',
       intro: 'Tus niveles y zonas aparecen en tu gráfico de Quantower o NinjaTrader, con una alerta cuando el precio se acerca. Sweep nunca envía órdenes.',
       sync_on: 'Sincronizado con {p} · {ago}', sync_off: 'Aún no conectado', install: 'Instalar el add-on', ago_s: 'hace {n} s', ago_m: 'hace {n} min', ago_h: 'hace {n} h',
@@ -1651,7 +1661,12 @@
       a_alert: 'avisarme con mi mensaje', a_plan: 'recordarme mi plan', a_limit: 'recordarme mi límite', tip_a_alert: 'Tu mensaje, tal como lo escribes.',
       tip_a_plan: 'Tu sesgo, la nota de la zona y el checklist de tu plan.', tip_a_limit: 'Tu riesgo permitido hoy y tu máximo de trades, tal como Sweep los conoce.',
       msg: 'Mensaje (opcional)', msg_ph: 'p. ej. Esperar el regreso por encima, long en la zona de compra, stop bajo la mecha', preview: 'En palabras',
-      p_alert: 'avísame', p_plan: 'recuérdame mi plan', p_limit: 'recuérdame mi límite' },
+      p_alert: 'avísame', p_plan: 'recuérdame mi plan', p_limit: 'recuérdame mi límite',
+      d_title: 'En el gráfico', d_n: '{a} de {n} operaciones en las zonas de tu plan', d_n1: '{a} de 1 operación en las zonas de tu plan', d_today: ' hoy',
+      d_tip: 'En el plan: entrada en una de tus zonas (un nivel: dentro de su distancia de aproximación), en la dirección prevista allí: el sesgo de la zona, si no el del día (long = compra, short = venta).',
+      e_near: 'Precio cerca de {z}', e_touch: 'El precio toca {z}', e_above: 'Vela {tf} cerrada por encima de {z}', e_below: 'Vela {tf} cerrada por debajo de {z}', e_sweep: 'Sweep de {z} ({tf})',
+      e_time: 'Son las {h} en Nueva York', e_rule: 'Se activó una regla', s_alert: 'alerta mostrada', s_plan: 'recordatorio del plan mostrado', s_limit: 'recordatorio de tu límite mostrado',
+      tr: 'Operación {d} {i}', tr_in: 'en el plan', tr_out: 'fuera del plan', d_more: 'Ver las {n} restantes', d_zone: 'una zona' },
   };
   const ct = (k, p) => { let s = (PCT[L()] || PCT.en)[k]; if (s == null) s = PCT.en[k] != null ? PCT.en[k] : k; return p ? s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)) : s; };
   /** the one table of Plan Sync: each root, its micro (same prices) and its default approach distance in ticks (NQ 40 = 10 points,
@@ -1890,7 +1905,55 @@
     const i = e.target.closest && e.target.closest('#pcSheet select[data-pcf]'); if (!i || !PCV.d || PCV.d[i.dataset.pcf] === i.value) return;
     PCV.d[i.dataset.pcf] = i.value; pcRender(true);
   });
-  window.SweepPlanChart = { open: chartOpen, close: chartClose, of: chartOf, root: pcRoot, sentence: pcSentence, tick: pcTick, prox: pcProx, ROOTS: PC_ROOTS };
+  /* ── Plan Sync, step 5: was the plan followed? (the day's journal and the end-of-day review, no new screen) ──
+   * What the add-ons saw on the chart, and the day's trades against the plan's zones (the server: api/sync/plan-day,
+   * ChartPlan::follow), in one time line: « 9:42 — Sweep of Asia low (5m), plan reminder shown ». Said without judging. */
+  const PCD = {};
+  const pcClock = (sec) => new Intl.DateTimeFormat(L() === 'fr' ? 'fr-CA' : L() === 'es' ? 'es-ES' : 'en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }).format(new Date(sec * 1000));
+  const pcHm = (hm) => { const m = /^(\d{1,2}):(\d{2})/.exec(String(hm || '')); if (!m) return ''; const h = +m[1]; return L() === 'fr' ? `${h} h ${m[2]}` : L() === 'es' ? `${h}:${m[2]}` : `${h % 12 || 12}:${m[2]} ${h < 12 ? 'AM' : 'PM'}`; };
+  function pcEventText(e, c) {
+    const r = e.rule ? c.rules.find((x) => x.id === e.rule) : null, zid = (r && r.zone) || e.zone, z = zid ? c.zones.find((x) => x.id === zid) : null;
+    const zn = z ? (z.label || pcWhere(z)) : ct('d_zone');
+    if (e.type === 'zone_approached') return { txt: ct('e_near', { z: zn }) + ', ' + ct('s_alert') };
+    if (e.type === 'zone_entered') return { txt: ct('e_touch', { z: zn }) + ', ' + ct('s_alert') };
+    if (!r) return { txt: ct('e_rule') };
+    const tf = r.tf || '5m';
+    const what = r.trigger === 'approach' ? ct('e_near', { z: zn }) : r.trigger === 'enter' ? ct('e_touch', { z: zn }) : r.trigger === 'close_above' ? ct('e_above', { tf, z: zn })
+      : r.trigger === 'close_below' ? ct('e_below', { tf, z: zn }) : r.trigger === 'sweep' ? ct('e_sweep', { tf, z: zn }) : ct('e_time', { h: pcHm(r.time) });
+    return { txt: what + ', ' + ct('s_' + (r.action || 'alert')), sweep: r.trigger === 'sweep' };
+  }
+  /** the block's HTML, '' when there is nothing to say (no event, no trade to compare) */
+  function pcDayBody(day, d) {
+    if (!d) return '';
+    const c = chartOf(day), f = d.follow && d.follow.n ? d.follow : null, ev = Array.isArray(d.events) ? d.events : [];
+    if (!f && !ev.length) return '';
+    const rows = ev.map((e) => Object.assign({ at: +e.at, k: 'e' }, pcEventText(e, c)));
+    if (f) (S.trades || []).filter((x) => !x.demo && f.trades[x.id]).forEach((x) => {
+      const st = f.trades[x.id], z = st.in && c.zones.find((y) => y.id === st.zone), tm = String(x.entry_time || '').slice(0, 5);
+      rows.push({ k: 't', tm, inP: st.in, txt: ct('tr', { d: x.direction === 'short' ? 'short' : 'long', i: x.instrument || 'NQ' }) + ' · ' + (st.in ? ct('tr_in') + (z ? ` (${z.label || pcWhere(z)})` : '') : ct('tr_out')) });
+    });
+    // the events carry their moment (UTC); a trade its New York time: both put on New York clock minutes to sort
+    const nyMin = (r) => { if (r.k === 't') { const m = /^(\d{2}):(\d{2})$/.exec(r.tm || ''); return m ? ((+m[1] + 6) % 24) * 60 + +m[2] : 1e4; } const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(r.at * 1000)).split(':'); return ((+p[0] + 6) % 24) * 60 + +p[1]; };
+    rows.sort((a, b) => nyMin(a) - nyMin(b));
+    const li = (r) => `<li class="${r.k === 't' ? 'pc-tl-t' + (r.inP ? ' in' : '') : ''}"><time>${esc(r.k === 't' ? pcHm(r.tm) || '—' : pcClock(r.at))}</time><span>${esc(r.txt)}</span></li>`;
+    const head = rows.slice(0, 6).map(li).join(''), rest = rows.slice(6);
+    const today = typeof todayStr === 'function' && day === todayStr();
+    const line = f ? ct((L() === 'fr' ? f.in <= 1 : f.n === 1) ? 'd_n1' : 'd_n', { a: f.in, n: f.n }) + (today ? ct('d_today') : '') + '.' : '';
+    return `${line ? `<p class="pc-follow"><b>${esc(line)}</b></p>` : ''}
+      <ul class="pc-tl">${head}</ul>${rest.length ? `<details class="pc-tl-more"><summary>${esc(ct('d_more', { n: rest.length }))}</summary><ul class="pc-tl">${rest.map(li).join('')}</ul></details>` : ''}
+      <p class="g-hint g-hint-sm pc-tl-tip">${esc(f ? ct('d_tip') : '')}${rows.some((r) => r.sweep) ? `${f ? ' ' : ''}${esc(ct('tip_sweep'))}` : ''}</p>`;
+  }
+  /** the day's block, from what was read last (k: read again when it changes); cb when a new read arrives */
+  function pcDayHtml(day, k, cb) {
+    const c = PCD[day];
+    if ((!c || c.k !== k) && typeof apiJSON === 'function' && !(c && c.wait === k)) {
+      PCD[day] = Object.assign(c || {}, { wait: k });
+      apiJSON('api/sync/plan-day?day=' + encodeURIComponent(day)).then((d) => { PCD[day] = { k, d, wait: null }; if (cb) cb(); }).catch(() => { PCD[day] = Object.assign(PCD[day] || {}, { wait: null, k }); });
+    }
+    const body = pcDayBody(day, PCD[day] && PCD[day].d);
+    return body ? `<div class="pc-day" data-noi18n><h4>${esc(ct('d_title'))}</h4>${body}</div>` : '';
+  }
+  window.SweepPlanChart = { open: chartOpen, close: chartClose, of: chartOf, root: pcRoot, sentence: pcSentence, tick: pcTick, prox: pcProx, ROOTS: PC_ROOTS, dayHtml: pcDayHtml };
 
   /* ───────────── Quick journal (carousel) ───────────── */
   const EMOS = ['Calm', 'Confident', 'Patient', 'Focused', 'FOMO', 'Fearful', 'Frustrated', 'Greedy', 'Hesitant', 'Impulsive'];
@@ -1964,7 +2027,10 @@
     // screenshot (typed by hand) or when the account's last check found a gap (the computed balance may be off)
     // (3 Nov., the account guardian) a balance typed today in « Update » is the platform's balance proposed
     RV.balAcc.forEach((a) => { const sw = acctState(a).bal, lv = typedBal(a.id, RV.day); RV.bal[a.id] = { sweep: sw, plat: lv != null && lv !== sw ? lv : null, same: lv != null ? lv === sw : !balAsk(a, RV.day), kind: null }; });
+    // (14 Nov., Plan Sync step 5) what the chart add-on saw today and the trades against the plan's zones, above « Did you follow your plan? »
+    const pcK = 'rv' + Date.now(), pcFill = () => { const el = document.querySelector('#gSheet.g-rv [data-pc-day-slot]'); if (el && document.getElementById('gSheet').dataset.day === RV.day) el.innerHTML = pcDayHtml(RV.day, pcK); };
     openSheet(`${head(t('review_title'), fdate(RV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}
+      <div data-pc-day-slot>${pcDayHtml(RV.day, pcK, pcFill)}</div>
       <div class="g-f"><span>${RV.fiche ? pt('followed_sheet') : t('followed')}</span><div class="g-seg3">${[['yes', 'yes'], ['partly', 'partial'], ['no', 'no']].map(([v, k]) => `<button type="button" class="${RV.followed === v ? 'on' : ''} r-${k}" data-g="r-followed" data-v="${v}">${t(k)}</button>`).join('')}</div></div>
       ${RV.fiche ? `<div class="g-f rv-rules" ${RV.followed === 'partly' || RV.followed === 'no' ? '' : 'hidden'}><span>${pt('rules_q')}</span><div class="g-chips-row wrap">${FICHE.RULES.map((r) => `<button type="button" class="chip ${RV.rules.has(r) ? 'on' : ''}" data-rv-rule="${r}">${pt('r_' + r)}</button>`).join('')}</div></div>` : ''}
       ${'' /* (29 Oct., tour T2) the plan followed and the balance are asked; the discipline and the grade, filled in from the day, wait under « + Details » */}<details class="g-rv-more"><summary>${({ en: '+ Details', fr: '+ Détails', es: '+ Detalles' })[L()] || '+ Details'}</summary>

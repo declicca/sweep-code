@@ -9,6 +9,7 @@ if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''))
  *   DELETE api/sync/key?platform=…          stop the sync (the trades already written stay)
  *   GET    api/sync/accounts/ID/preview?account_id=…   what linking would do: trades to add, typed by hand to complete
  *   POST   api/sync/accounts/ID {action: link, account_id} | {action: ignore} | {action: unlink}
+ *   GET    api/sync/plan-day?day=YYYY-MM-DD  Plan Sync step 5: the day's chart events and its trades in / out of the plan's zones
  *   GET    api/sync/addon?platform=…        a platform's add-on (zip; NinjaTrader 8 by default), for a signed-in trader. NinjaTrader 8:
  *                                            a new key of the trader written in it (nothing to paste; the earlier keys keep working)
  */
@@ -37,6 +38,8 @@ function sync_route(string $route, string $method, string $uid): void
 {
     $pdo = db(); sync_schema($pdo);
     if ($route === 'api/sync' && $method === 'GET') json_out(200, sync_status($pdo, $uid));
+    // Plan Sync, step 5: the day's chart events and its trades against the plan's zones (the journal and the end-of-day review)
+    if ($route === 'api/sync/plan-day' && $method === 'GET') { require_once __DIR__ . '/plan-sync.php'; json_out(200, ps_day($pdo, $uid, (string) ($_GET['day'] ?? ''))); }
     if ($route === 'api/sync/addon' && $method === 'GET') {
         $f = SYNC_ADDONS[(string) ($_GET['platform'] ?? 'ninjatrader')] ?? null;
         if ($f === null) json_out(400, ['error' => 'Unknown platform.']);

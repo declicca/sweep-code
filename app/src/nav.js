@@ -1698,11 +1698,15 @@ window.SweepMO = window.SweepMO || class {
     const lesson = (post.lesson || post.tomorrow || post.well || '').trim();
     const gd = trades.length ? gameDay(day, trades.length) : null;
     const inPlan = !trades.length ? t('none') : gd ? `${gd.c} / ${gd.n || trades.length}` : '…';
+    // (14 Nov., Plan Sync step 5) what the chart add-on saw that day, and the trades against the plan's zones (game.js);
+    // read again when the day's trades or zones change, or every 5 minutes
+    const PSC = window.SweepPlanChart, pcK = [trades.length, (j.chart || {}).updated_at || 0, Math.floor(Date.now() / 300000)].join('|');
+    const pcDay = PSC && PSC.dayHtml ? PSC.dayHtml(day, pcK, () => { try { journalRecap(); } catch (x) { /* never blocks */ } }) : '';
     const html = `<div class="nav-recap" data-noi18n><h3>${t('recap')}</h3><div class="nav-recap-g">
       <div><span>${t('plan')}</span><b>${esc2(biasTxt)}</b></div>
       <div><span>${t('exec')}</span><b>${inPlan}</b></div>
       <div><span>${t('review')}</span><b class="${reviewed ? 'pos' : ''}">${reviewed ? '✓ ' + t('done') : t('todo')}</b></div>
-      <div class="w"><span>${t('lesson')}</span><b>${lesson ? esc2(lesson.length > 140 ? lesson.slice(0, 140) + '…' : lesson) : t('none')}</b></div></div></div>`;
+      <div class="w"><span>${t('lesson')}</span><b>${lesson ? esc2(lesson.length > 140 ? lesson.slice(0, 140) + '…' : lesson) : t('none')}</b></div></div>${pcDay}</div>`;
     let rc = main.querySelector('.nav-recap');
     if (!rc) { stat.insertAdjacentHTML('afterend', html); }
     else if (rc.outerHTML.replace(/\s+/g, '') !== html.replace(/\s+/g, '')) rc.outerHTML = html;

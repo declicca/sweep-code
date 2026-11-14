@@ -23,6 +23,11 @@ final class ChartPlan
     /** a micro contract reads the levels of its mini (same price) */
     public const MICRO = ['MNQ' => 'NQ', 'MES' => 'ES', 'MYM' => 'YM', 'M2K' => 'RTY', 'MCL' => 'CL', 'MGC' => 'GC', 'SIL' => 'SI', 'M6E' => '6E'];
 
+    /** the tick of each root (the app's INSTR, src/app.js) and its default approach distance in ticks (PC_ROOTS, src/game.js) */
+    public const TICKS = ['NQ' => 0.25, 'ES' => 0.25, 'YM' => 1, 'RTY' => 0.1, 'CL' => 0.01, 'GC' => 0.1, 'SI' => 0.005, '6E' => 0.0001, 'NG' => 0.001,
+        'HG' => 0.0005, 'ZN' => 0.015625, 'ZB' => 0.03125, 'MBT' => 5, 'MET' => 0.5];
+    public const PROX = ['NQ' => 40, 'ES' => 8, 'YM' => 20, 'RTY' => 20, 'CL' => 10, 'GC' => 20, 'SI' => 10, '6E' => 20, 'NG' => 10, 'HG' => 20, 'ZN' => 8, 'ZB' => 8, 'MBT' => 20, 'MET' => 20];
+
     /** the instrument's root: NQZ6 → NQ, MNQ → NQ, mnq h27 → NQ */
     public static function root(string $s): string
     {
@@ -98,6 +103,42 @@ final class ChartPlan
         }
         $u = $c['updated_at'] ?? null;
         return ['zones' => $zones, 'rules' => $rules, 'updated_at' => is_int($u) && $u > 0 ? $u : time()];
+    }
+
+    /**
+     * Step 5: was the plan followed? Each trade of the day (copies once, already chosen by the caller) is « in » when its entry
+     * price is in a zone of the plan on its instrument (MNQ reads NQ) — a zone between its low and high, a level within its
+     * approach distance (its ticks × the instrument's tick) — and in the direction the plan gives there: the zone's own bias,
+     * else the day's bias (bullish → long, bearish → short), else either way. Any other trade is « out ». A trade without an
+     * entry price or a direction is not counted. null: the day has no zone, nothing to compare with.
+     * Returns { n, in, trades: { id: { in, zone } } } (zone: the id of the zone it was in, or null).
+     */
+    public static function follow($chart, array $pre, array $trades): ?array
+    {
+        $c = self::normalize($chart);
+        if (!$c || !$c['zones']) return null;
+        $dayDir = ['bullish' => 'long', 'bearish' => 'short'][$pre['bias'] ?? ''] ?? null;
+        $n = 0; $in = 0; $out = [];
+        foreach ($trades as $t) {
+            if (!is_array($t) || !empty($t['untracked'])) continue;
+            $dir = strtolower((string) ($t['direction'] ?? '')); $px = self::num($t['entry'] ?? null);
+            if (!in_array($dir, ['long', 'short'], true) || $px === null) continue;
+            $root = self::root((string) (($t['instrument'] ?? '') ?: 'NQ'));
+            $hit = null;
+            foreach ($c['zones'] as $z) {
+                if ($z['instrument'] !== $root) continue;
+                $tk = self::TICKS[$root] ?? 0.25;
+                $inZone = $z['type'] === 'zone'
+                    ? $px >= $z['low'] - 1e-9 && $px <= $z['high'] + 1e-9
+                    : abs($px - $z['price']) <= ($z['proximity_ticks'] ?? self::PROX[$root] ?? 20) * $tk + 1e-9;
+                if (!$inZone) continue;
+                $want = $z['bias'] ?? $dayDir;
+                if ($want === null || $want === $dir) { $hit = $z['id']; break; }
+            }
+            $n++; if ($hit !== null) $in++;
+            $out[(string) ($t['id'] ?? $n)] = ['in' => $hit !== null, 'zone' => $hit];
+        }
+        return ['n' => $n, 'in' => $in, 'trades' => $out];
     }
 
     /**

@@ -175,6 +175,29 @@ function ps_day_events(PDO $pdo, string $uid, string $day): array
     return sync_q($pdo, 'SELECT id, type, at, platform, instrument, price, zone_id, rule_id FROM plan_sync_events WHERE user_id = ? AND day = ? ORDER BY at, id', [$uid, $day])->fetchAll();
 }
 
+/**
+ * Step 5, for the app (signed-in trader, GET api/sync/plan-day?day=…): what the add-ons saw that day (the time line of the
+ * day's journal and of the end-of-day review) and the day's trades against the plan's zones (ChartPlan::follow). Read only.
+ */
+function ps_day(PDO $pdo, string $uid, string $day): array
+{
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $day)) return ['day' => null, 'events' => [], 'follow' => null];
+    $j = ps_doc($pdo, $uid, 'journals', $day);
+    $trades = [];
+    foreach (sync_q($pdo, 'SELECT id, data FROM documents WHERE user_id = ? AND collection = ?', [$uid, 'trades']) as $r) {
+        $t = json_decode((string) $r['data'], true);
+        if (!is_array($t) || !empty($t['demo'])) continue;
+        $t['id'] = $r['id'];
+        $d = class_exists('GameEngine', false) ? GameEngine::tradeDay($t) : (string) ($t['date'] ?? '');
+        if ($d === $day) $trades[] = $t;
+    }
+    if (class_exists('GameEngine', false)) $trades = GameEngine::onePerCopyGroup($trades);
+    usort($trades, fn($a, $b) => strcmp((string) ($a['date'] ?? '') . (string) ($a['entry_time'] ?? ''), (string) ($b['date'] ?? '') . (string) ($b['entry_time'] ?? '')));
+    $ev = array_map(fn($e) => ['at' => (int) $e['at'], 'type' => (string) $e['type'], 'platform' => (string) $e['platform'], 'instrument' => $e['instrument'],
+        'price' => $e['price'] === null ? null : (float) $e['price'], 'zone' => $e['zone_id'], 'rule' => $e['rule_id']], ps_day_events($pdo, $uid, $day));
+    return ['day' => $day, 'events' => $ev, 'follow' => class_exists('ChartPlan') ? ChartPlan::follow($j['chart'] ?? null, is_array($j['pre'] ?? null) ? $j['pre'] : [], $trades) : null];
+}
+
 function ps_delete_user(PDO $pdo, string $uid): void
 {
     try { sync_q($pdo, 'DELETE FROM plan_sync_events WHERE user_id = ?', [$uid]); sync_q($pdo, 'DELETE FROM plan_sync_rate WHERE k IN (?, ?)', ['get:' . $uid, 'events:' . $uid]); }
