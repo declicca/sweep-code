@@ -568,6 +568,17 @@
     put('journals', j);
     buzz(10); soon(400);
   }
+  /* (14 Nov., Mateo) « I took no trade » in the Execution step: a plan made and no trade taken is a decision that keeps to the
+     plan (the server already closes the execution ring for a day with a valid plan and no trade: game.php, $ringExec); the
+     trader says it, the step shows done; a trade saved later takes over, and it can be undone */
+  function noTrade(on) {
+    const day = G.today && G.today.day; if (!day) return;
+    const j = structuredClone(journalOf(day)); j.id = day;
+    j.post = Object.assign({}, j.post || {});
+    if (on) j.post.no_trade_at = new Date().toISOString(); else delete j.post.no_trade_at;
+    put('journals', j);
+    buzz(10); soon(300);
+  }
 
   /* ───────────── Pre-market sheet (« fiche », brief « Plan pre-market adaptatif », step 1) ─────────────
      One per trading day and trader, in that day's journal (journals/{day}.fiche); the server keeps the same model
@@ -2784,7 +2795,7 @@
     };
   }
   paint();
-  window.SweepGame = { refresh: () => load(true), openPlan, openReview, weekBrief, suggestedSetups: SUGGESTED_SETUPS,
+  window.SweepGame = { refresh: () => load(true), openPlan, openReview, weekBrief, suggestedSetups: SUGGESTED_SETUPS, noTrade,
     // the plan first (once a day) before a new trade — used by the screenshot way of adding a trade too
     state: () => ({ today: G.today || null, yesterday: G.yesterday || null, profile: G.profile || null, weekly: G.weekly || null, discovery: G.discovery || null }),   // for the « Your routine » card on Today (weekly: the week's recap, brief 01 step 5)
     planFirst: (then) => { if (!document.getElementById('gSheet') && planGateNeeded()) { openPlan(G.today.day, { then }); return true; } return false; }, openJournal: () => openJournal(), openGoal: () => openGoalQuestions(), t,

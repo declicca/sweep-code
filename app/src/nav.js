@@ -4320,17 +4320,17 @@ window.SweepMO = window.SweepMO || class {
     en: { title: 'Your routine today', how: 'How it works', of: '{n} of 3 done', swept: 'Day complete', closed: 'Markets are closed today. Rest is part of the process.', dayoffT: 'Day off', dayoff: 'No trading today: your streak is safe.',
       s1: 'Plan', s1d: 'Make your plan', s2: 'Execution', s2d: 'Trade your plan', s3: 'Review', s3d: 'Do your review',
       todo: 'To do', done: 'Done', late: 'Done after your first trade', noTrade: 'No trade yet', inPlan: '{c} of {n} trades in your plan', inPlan1: '{c} of 1 trade in your plan', noPlanN: '{n} trades · no plan', noPlan1: '1 trade · no plan', reviewTodo: 'To do after your session', reviewDone: 'Done',
-      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', impDay: 'Import my session', b2: 'Add a trade', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', ydayP: 'Yesterday: {t} left', b1s: 'Plan it', b2s: 'Add', b3s: 'Review', see: 'See',
+      b1: 'Make my plan', b1v: 'See my plan', off: 'Not trading today', impDay: 'Import my session', b2: 'Add a trade', nt: 'I took no trade', ntS: 'No trade', ntDone: 'No trade: that keeps to your plan', ntUndo: 'Undo', fin: 'I’m done for today', b3: 'Do my review', b3v: 'See my review', streak: 'day streak', streak1: 'day streak', level: 'Level', yday: 'Yesterday is not finished: {t} left', ydayB: 'Finish yesterday', ydayP: 'Yesterday: {t} left', b1s: 'Plan it', b2s: 'Add', b3s: 'Review', see: 'See',
       help: 'Each day, three steps: plan before you trade, trade what you planned, review your day. All three = « day complete »: your streak goes on. Profit never counts, only the process.' },
     fr: { title: 'Ta routine du jour', how: 'Comment ça marche', of: '{n} sur 3 faites', swept: 'Journée complète', closed: 'Les marchés sont fermés aujourd’hui. Le repos fait partie du processus.', dayoffT: 'Journée off', dayoff: 'Pas de trading aujourd’hui : ta série est protégée.',
       s1: 'Plan', s1d: 'Fais ton plan', s2: 'Exécution', s2d: 'Respecte ton plan', s3: 'Revue', s3d: 'Fais ta revue',
       todo: 'À faire', done: 'Fait', late: 'Fait après ton premier trade', noTrade: 'Aucun trade pour l’instant', inPlan: '{c} sur {n} trades dans ton plan', inPlan1: '{c} sur 1 trade dans ton plan', noPlanN: '{n} trades · pas de plan', noPlan1: '1 trade · pas de plan', reviewTodo: 'À faire après ta séance', reviewDone: 'Faite',
-      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', impDay: 'Importer ma séance', b2: 'Ajouter un trade', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', ydayP: 'Hier : encore {t}', b1s: 'Planifier', b2s: 'Ajouter', b3s: 'Réviser', see: 'Voir',
+      b1: 'Faire mon plan', b1v: 'Voir mon plan', off: 'Pas de trading aujourd’hui', impDay: 'Importer ma séance', b2: 'Ajouter un trade', nt: 'Je n’ai pas pris de trade', ntS: 'Aucun trade', ntDone: 'Aucun trade : ça respecte ton plan', ntUndo: 'Annuler', fin: 'J’ai fini pour aujourd’hui', b3: 'Faire ma revue', b3v: 'Voir ma revue', streak: 'jours de suite', streak1: 'jour de suite', level: 'Niveau', yday: 'Hier n’est pas terminé : encore {t}', ydayB: 'Terminer hier', ydayP: 'Hier : encore {t}', b1s: 'Planifier', b2s: 'Ajouter', b3s: 'Réviser', see: 'Voir',
       help: 'Chaque jour, trois étapes : planifie avant de trader, trade ce que tu as prévu, fais ta revue. Les trois = « journée complète » : ta série continue. Le profit ne compte jamais, seulement le processus.' },
     es: { title: 'Tu rutina de hoy', how: 'Cómo funciona', of: '{n} de 3 hechas', swept: 'Día completado', closed: 'Los mercados están cerrados hoy. El descanso es parte del proceso.', dayoffT: 'Día libre', dayoff: 'Sin operar hoy: tu racha está protegida.',
       s1: 'Plan', s1d: 'Haz tu plan', s2: 'Ejecución', s2d: 'Respeta tu plan', s3: 'Revisión', s3d: 'Haz tu revisión',
       todo: 'Pendiente', done: 'Hecho', late: 'Hecho después de tu primera operación', noTrade: 'Aún sin operaciones', inPlan: '{c} de {n} operaciones en tu plan', inPlan1: '{c} de 1 operación en tu plan', noPlanN: '{n} operaciones · sin plan', noPlan1: '1 operación · sin plan', reviewTodo: 'Pendiente tras tu sesión', reviewDone: 'Hecha',
-      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', impDay: 'Importar mi sesión', b2: 'Añadir una operación', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', ydayP: 'Ayer: quedan {t}', b1s: 'Planificar', b2s: 'Añadir', b3s: 'Revisar', see: 'Ver',
+      b1: 'Hacer mi plan', b1v: 'Ver mi plan', off: 'Hoy no opero', impDay: 'Importar mi sesión', b2: 'Añadir una operación', nt: 'No tomé ninguna operación', ntS: 'Sin operar', ntDone: 'Sin operar: respeta tu plan', ntUndo: 'Deshacer', fin: 'He terminado por hoy', b3: 'Hacer mi revisión', b3v: 'Ver mi revisión', streak: 'días seguidos', streak1: 'día seguido', level: 'Nivel', yday: 'Ayer no está terminado: quedan {t}', ydayB: 'Terminar ayer', ydayP: 'Ayer: quedan {t}', b1s: 'Planificar', b2s: 'Añadir', b3s: 'Revisar', see: 'Ver',
       help: 'Cada día, tres pasos: planifica antes de operar, opera lo que planeaste, revisa tu día. Los tres = « día completado »: tu racha sigue. El beneficio nunca cuenta, solo el proceso.' } };
   const t = (k, v) => String((T[L] || T.en)[k]).replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
   const esc2 = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -4545,10 +4545,14 @@ window.SweepMO = window.SweepMO || class {
     const lk = lockOf(d);
     if (lk) return `<section class="surface nav-rt nav-lockd" data-noi18n>${head(`<span class="nav-rt-pill lk">${esc2(lt('pill'))}</span>`, true)}${lockHtml(d, r, lk)}${helpT}</section>`;
     const s1 = r.plan >= 100 ? 'done' : r.plan > 0 ? 'late' : 'todo';
-    const s2 = !d.trades ? 'wait' : r.execution >= 100 ? 'done' : 'part';
+    // (14 Nov., Mateo) « I took no trade »: with a plan made and no trade, the trader may say so; the step is done (the server already
+    // closes the ring for that day: game.php $ringExec); a trade saved later takes over, « Undo » takes it back
+    const ntJ = typeof getDoc === 'function' ? getDoc('journals', d.day) : null;
+    const nt = !d.trades && !!d.plan_valid && !!(ntJ && ntJ.post && ntJ.post.no_trade_at);
+    const s2 = !d.trades ? (nt ? 'done' : 'wait') : r.execution >= 100 ? 'done' : 'part';
     const s3 = r.review >= 100 ? 'done' : 'todo';
     const n = [s1 !== 'todo', s2 === 'done', s3 === 'done'].filter(Boolean).length;
-    const nextI = wkReady || NOWEND ? 0 : s1 === 'todo' ? 1 : s3 === 'done' ? 0 : reviewTime(d) ? 3 : 2;   // (« Now » with « Close my day »: the only blue button)   // only the next step is highlighted (none when the week's recap is ready)
+    const nextI = wkReady || NOWEND ? 0 : s1 === 'todo' ? 1 : s3 === 'done' ? 0 : reviewTime(d) || nt ? 3 : 2;   // (« Now » with « Close my day »: the only blue button)   // only the next step is highlighted (none when the week's recap is ready)
     const pill = d.swept ? `<span class="nav-rt-pill ok">${svg('check')}${t('swept')}</span>` : `<span class="nav-rt-pill">${t('of', { n })}</span>`;
     const step = (i, key, ic, title, sub, state, stateTxt, btn, act, extra, short) => `<div class="nav-rt-s ${state}${i === nextI ? ' next' : ''}"${i === nextI ? ' aria-current="step"' : ''}>
         <div class="nav-rt-si"><span class="nav-rt-n">${state === 'done' ? svg('check') : i}</span><span class="nav-rt-ic">${svg(ic)}</span></div>
@@ -4558,13 +4562,13 @@ window.SweepMO = window.SweepMO || class {
     const execPct = d.trades && d.plan_valid ? Math.round((d.compliant || 0) / d.trades * 100) : 0;
     // without a valid plan no trade is « in your plan » (audit of 16 Oct.; the server counts 0 too: game.php compliant_count)
     // (27 Oct., brief « daily loop » step 3) under the steps from the first trade: « I'm done for today » opens the review at once
-    const execLine = !d.trades ? t('noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t(d.trades === 1 ? 'inPlan1' : 'inPlan', { c: d.compliant || 0, n: d.trades });
+    const execLine = !d.trades ? t(nt ? 'ntDone' : 'noTrade') : !d.plan_valid ? (d.trades === 1 ? t('noPlan1') : t('noPlanN', { n: d.trades })) : t(d.trades === 1 ? 'inPlan1' : 'inPlan', { c: d.compliant || 0, n: d.trades });
     // (2 Nov., analyse débutant C4) « Yesterday: 15 h 19 left › »: « Finish yesterday › 15 h 19 » read the time left as a clock time
     const ych = y ? `<button type="button" class="nav-rt-y" data-rt="yday" title="${esc2(t('yday', { t: left(y.deadline) }))}"><b>${esc2(t('ydayP', { t: left(y.deadline) }))} ›</b></button>` : '';
     return `<section class="surface nav-rt" data-noi18n>${head(pill + ych)}${one}
       <div class="nav-rt-steps" data-next="${nextI}">
         ${step(1, r.plan || 0, 'plan', t('s1'), t('s1d'), s1, s1 === 'done' ? t('done') : s1 === 'late' ? t('late') : t('todo'), s1 === 'todo' ? t('b1') : t('b1v'), 'plan', s1 === 'todo' && !d.trades ? `<button type="button" class="link nav-rt-off" data-rt="dayoff">${t('off')}</button>` : '', s1 === 'todo' ? t('b1s') : t('see'))}
-        ${step(2, d.trades ? execPct : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', !d.trades && csvTrader() ? `<button type="button" class="link nav-rt-off" data-rt="import">${t('impDay')}</button>` : '', t('b2s'))}
+        ${step(2, d.trades ? execPct : nt ? 100 : 0, 'trade', t('s2'), t('s2d'), s2, execLine, t('b2'), 'trade', (!d.trades && csvTrader() && !nt ? `<button type="button" class="link nav-rt-off" data-rt="import">${t('impDay')}</button>` : '') + (!d.trades && d.plan_valid ? `<button type="button" class="link nav-rt-nt" data-rt="${nt ? 'nt-undo' : 'nt'}"><span class="l">${t(nt ? 'ntUndo' : 'nt')}</span><span class="s">${t(nt ? 'ntUndo' : 'ntS')}</span></button>` : ''), t('b2s'))}
         ${step(3, r.review || 0, 'review', t('s3'), t('s3d'), s3, s3 === 'done' ? t('reviewDone') : t('reviewTodo'), s3 === 'done' ? t('b3v') : t('b3'), 'review', '', s3 === 'done' ? t('see') : t('b3s'))}
       </div>
       ${NOWSTOP && s3 !== 'done' ? `<p class="nav-rt-finl"><button type="button" class="link nav-rt-fin" data-rt="fin">${t('fin')} ›</button></p>` : ''}
@@ -4605,6 +4609,7 @@ window.SweepMO = window.SweepMO || class {
       location.hash = nx ? '#trade/' + encodeURIComponent(nx.id) : '#journal/' + day;
     }
     else if (k === 'import') location.hash = '#import';
+    else if (k === 'nt' || k === 'nt-undo') { if (window.SweepGame && SweepGame.noTrade) SweepGame.noTrade(k === 'nt'); }
     else if (k === 'dayoff') { const o = g && g.querySelector('[data-g=dayoff]'); if (o) o.click(); }
     else if (k === 'yday') { const o = document.querySelector('#main [data-g=yday]'); if (o) o.click(); }
     else if (k === 'hub') {

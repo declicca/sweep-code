@@ -81,6 +81,7 @@
  "e2e_no_english_in_fr_es": 200,
  "e2e_no_jumps": 92,
  "e2e_no_zoom": 12,
+ "e2e_no_trade_exec": 60,
  "e2e_noindex": 0,
  "e2e_page_shift": 110,
  "e2e_parcours_defauts": 20,

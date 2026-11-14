@@ -1083,6 +1083,9 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
 .nav-rt-sa{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:auto}
 
 .nav-rt-off{font-size:13px;color:var(--muted);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+/* (14 Nov.) « I took no trade » / « Undo » under Execution: on the phone too (short words), min 24 px tall for the finger */
+.nav-rt-nt{font-size:13px;color:var(--muted);background:none;border:0;padding:2px 0;min-height:24px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-align:left}
+.nav-rt-nt .s{display:none}
 .nav-rt-bar{position:absolute;}
 .nav-rt-bar > i{display:block;height:100%;background:var(--pos);border-radius:0 10px 10px 0;transition:width .7s var(--ease-ios)}
 .nav-rt-s.late .nav-rt-bar > i,.nav-rt-s.part .nav-rt-bar > i{background:#F2A541}
@@ -1101,6 +1104,7 @@ body.nav-rt-on .nav-dash .d-rank{display:none!important}
   .nav-rt-sb small{display:none}
   .nav-rt-st{margin-top:2px;font-size:12px;line-height:1.35}
   .nav-rt-off{display:none}
+  .nav-rt-nt{font-size:12px}.nav-rt-nt .l{display:none}.nav-rt-nt .s{display:inline}
 }
 
 /* phone: the routine card shows at the top of Today (the old block stays hidden) */
