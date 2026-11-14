@@ -33,7 +33,7 @@ if not any(l.split('.')[0].isdigit() and int(l.split('.')[0]) >= 10 for l in sdk
 def build(proj, out):
   """dotnet build, one at a time on this machine: the copies of tools/par.py run at once, and their first restores of the same
   NuGet packages (a fresh CI machine) collide in the shared cache"""
-  with open(os.path.join(tempfile.gettempdir(), 'sweep-dotnet-build.lock'), 'w') as lk:
+  with open('/tmp/sweep-dotnet-build.lock', 'w') as lk:   # /tmp itself: each copy has its own TMPDIR
     fcntl.flock(lk, fcntl.LOCK_EX)
     r = subprocess.run([DN, 'build', proj, '-c', 'Release', '-nologo', '-v', 'q', '-o', out], env=ENV, capture_output=True, text=True)
   if r.returncode:
