@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <!-- drawing on the chart (GDI+), as Quantower's own examples; compile only: Quantower brings it, it is not shipped -->
-    <PackageReference Include="System.Drawing.Common" Version="8.0.8" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0" ExcludeAssets="runtime" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
