@@ -105,4 +105,14 @@ preg_match_all('/\{ "([0-9A-Z]+)", (\d+) \}/', (string) (preg_match('/Prox = new
 ok(count($js[1]) >= 10 && array_combine($js[1], $js[2]) == array_combine($cs2[1], $cs2[2]), 'Plan Sync: the default approach distances are the app\'s (' . count($js[1]) . ' roots)');
 ok(str_contains($pc, 'public static string NoPlan(string l) { return Pick(l, "No plan') && preg_match_all('/Pick\((?:lang|l), "/', $pc) >= 20, 'Plan Sync: the add-on\'s texts in English, French and Spanish');
 
+// Plan Sync (step 4): NinjaTrader 8's Sweep Plan indicator, the same shared logic, Sweep Sync's key, never an order
+$ni = (string) file_get_contents($app . '/sync/addon/ninjatrader-plan/SweepPlan.cs');
+$zt = (string) file_get_contents($app . '/tools/addon-zip.py');
+ok(str_contains($ni, 'public class SweepPlan : Indicator') && str_contains($ni, 'using SP = SweepPlanSync;') && str_contains($zt, "('AddOns/SweepPlanCore.cs', os.path.join('plan', 'PlanCore.cs'))") && str_contains($zt, "('Indicators/SweepPlan.cs', os.path.join('ninjatrader-plan', 'SweepPlan.cs'))"), 'Plan Sync NT8: an indicator, with the shared logic (plan/PlanCore.cs), both in the import zip (tools/addon-zip.py --plan)');
+ok(preg_match('/\b(Submit\w*|CreateOrder|Enter(Long|Short)\w*|Exit(Long|Short)\w*|Flatten|CancelAllOrders|Change(Order)?)\s*\(|\.Cancel\s*\(|AccountItem/', $ni) === 0, 'Plan Sync NT8: never an order call, never an account read');
+ok(str_contains($ni, 'k = SweepSyncEngine.Key ?? ""') && str_contains($ni, '"Sweep NT8 Plan " + Version') && str_contains($store, "'Sweep NT8' => 'ninjatrader'") && str_contains($ni, 'req.Headers["X-Sweep-Key"] = k') && str_contains($ni, 'req.Headers["If-None-Match"]'), 'Plan Sync NT8: Sweep Sync\'s key, named « Sweep NT8 … » (a NinjaTrader 8 key only), the plan\'s ETag');
+ok(preg_match('/public static string Key = "";/', $cs) === 1 && preg_match('/public static string Url = DefaultUrl;/', $cs) === 1, 'Plan Sync NT8: Sweep Sync\'s key and server are public (the indicator reads them, same NinjaScript assembly)');
+ok(str_contains($ni, '"https://app.makeitsweep.com"') && str_contains($ni, '"/api/plan-sync/today?instrument="') && str_contains($ni, '"/api/plan-sync/events"') && str_contains($ni, 'NinjaTrader.NinjaScript.Alert.AlertCallback(') && str_contains($ni, 'SetZOrder(-1)'), 'Plan Sync NT8: app.makeitsweep.com, the two routes, NinjaTrader\'s Alerts window, drawn behind the bars');
+ok(!str_contains($ni, '$"') && !str_contains($ni, '?.') && !preg_match('/\bout var\b|\bnameof\(|=>\s*[^{(]*;\s*$/m', preg_replace('/\([^()]*=>[^;]*\)/', '', $ni)), 'Plan Sync NT8: plain C# 5 (no $"…", ?., out var, nameof), what NinjaTrader 8 compiles');
+
 echo "\n" . ($f ? "$f failed" : "$n/$n passed") . "\n"; exit($f ? 1 : 0);

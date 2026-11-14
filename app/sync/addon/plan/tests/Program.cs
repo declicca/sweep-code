@@ -197,6 +197,13 @@ static class Program
             Ok(Texts.Title("en", "close_below", Plan.Parse(PlanJson(Pdh, "")).Zones[0], 5, "") == "5m candle closed below PDH" && Texts.NoPlan("en") == "No plan for today in Sweep." && Texts.NoPlan("fr") == "Pas de plan pour aujourd’hui dans Sweep." && Texts.NoPlan("es") == "No hay plan para hoy en Sweep.", "English texts, and « no plan today » in the 3 languages");
             Plan none = Plan.Parse("{\"day\":\"" + Day + "\",\"lang\":\"en\",\"empty\":true,\"zones\":[],\"rules\":[],\"plan\":null,\"limits\":null,\"version\":\"v\"}");
             Ok(none.Empty && none.Limits == null && Texts.Body(none, new Rule { Action = "limit" }, null) == "No limit set in Sweep for today.", "no plan, no limits: the limit reminder says so");
+            // (step 4) NinjaTrader 8: no key yet → where to paste it, in the 3 languages
+            Ok(new[] { "en", "fr", "es" }.All(l => Texts.NoKeyNinja(l).Contains("Control Center › New › Sweep Sync") && Texts.NoKeyNinja(l).Contains("NinjaTrader 8")) && Texts.NoKeyNinja("fr").StartsWith("Sweep Plan : dans NinjaTrader") && Texts.NoKeyNinja("es").StartsWith("Sweep Plan: en NinjaTrader") && Texts.NoKeyNinja("de") == Texts.NoKeyNinja("en"), "NinjaTrader 8, no key: « Control Center › New › Sweep Sync » in EN, FR and ES");
+        }
+
+        // ---------- (step 4) NinjaTrader 8's names: « NQ 12-26 » and its MasterInstrument « NQ »; MNQ reads NQ ----------
+        {
+            Ok(Roots.Root("NQ 12-26", "NQ") == "NQ" && Roots.Root("MNQ 12-26", "MNQ") == "NQ" && Roots.Root("ES 03-27", "ES") == "ES" && Roots.Root("MES 03-27", "MES") == "ES" && Roots.Root("GC 02-27", "GC") == "GC" && Roots.Root("MGC 02-27", "MGC") == "GC", "NinjaTrader 8 names (« NQ 12-26 », « MNQ 12-26 »…) → NQ, NQ, ES, ES, GC, GC");
         }
 
         // ---------- the events Sweep receives (api/plan-sync/events) ----------

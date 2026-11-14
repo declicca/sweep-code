@@ -569,6 +569,7 @@ namespace SweepPlanSync
         // the add-on's own lines (the chart's banner)
         public static string NoPlan(string l) { return Pick(l, "No plan for today in Sweep.", "Pas de plan pour aujourd’hui dans Sweep.", "No hay plan para hoy en Sweep."); }
         public static string NoKey(string l) { return Pick(l, "Sweep Plan: open the Sweep Sync panel and paste your Quantower key.", "Sweep Plan : ouvre le panneau Sweep Sync et colle ta clé Quantower.", "Sweep Plan: abre el panel Sweep Sync y pega tu clave de Quantower."); }
+        public static string NoKeyNinja(string l) { return Pick(l, "Sweep Plan: in NinjaTrader, open Control Center › New › Sweep Sync and paste your NinjaTrader 8 key.", "Sweep Plan : dans NinjaTrader, ouvre Control Center › New › Sweep Sync et colle ta clé NinjaTrader 8.", "Sweep Plan: en NinjaTrader, abre Control Center › New › Sweep Sync y pega tu clave de NinjaTrader 8."); }
         public static string Offline(string l) { return Pick(l, "Sweep unreachable: your last plan stays on the chart and its alerts still work.", "Sweep injoignable : ton dernier plan reste sur le chart et ses alertes fonctionnent.", "Sweep no responde: tu último plan sigue en el gráfico y sus alertas funcionan."); }
         public static string Rearm(string l) { return Pick(l, "Re-arm", "Réarmer", "Rearmar"); }
     }

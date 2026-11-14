@@ -46,6 +46,7 @@ php tests/sync_store_test.php > "$out" 2>&1; check sync_store_test.php $? "$out"
 php tests/sync_addon_test.php > "$out" 2>&1; check sync_addon_test.php $? "$out"
 php tests/plan_sync_test.php > "$out" 2>&1; check plan_sync_test.php $? "$out"
 python3 tests/plan_core_test.py > "$out" 2>&1; check plan_core_test.py $? "$out"   # Plan Sync: the add-ons' shared logic (skipped without .NET)
+python3 tests/ninjatrader_plan_test.py "$BASE" > "$out" 2>&1; check ninjatrader_plan_test.py $? "$out"   # Plan Sync: the NinjaTrader 8 indicator, compiled and run against this server (skipped without .NET)
 php tests/mail_auto_test.php > "$out" 2>&1; check mail_auto_test.php $? "$out"
 php tests/mail_answer_test.php > "$out" 2>&1; check mail_answer_test.php $? "$out"
 php tests/mail_usage_test.php > "$out" 2>&1; check mail_usage_test.php $? "$out"

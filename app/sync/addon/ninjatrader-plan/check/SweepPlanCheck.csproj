@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Plan Sync on NinjaTrader 8: a compile check of the indicator (../SweepPlan.cs) and the shared logic (../../plan/PlanCore.cs)
+       in C# 5, the language NinjaTrader 8 compiles, against stubs of NinjaTrader's API (NinjaTraderStubs.cs), WPF and SharpDX.
+       NinjaTrader compiles the real thing itself, from the source in SweepSync.zip; nothing here is shipped. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <OutputType>Library</OutputType>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>5</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>CS0649;CS0169;CS0414;SYSLIB0014</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\SweepPlan.cs" Link="SweepPlan.cs" />
+    <Compile Include="..\..\plan\PlanCore.cs" Link="PlanCore.cs" />
+    <Compile Include="NinjaTraderStubs.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- NinjaTrader 8 ships SharpDX 2.6.3 (math types in SharpDX.dll); 4.2.0 has the same API, its math types in SharpDX.Mathematics -->
+    <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
+    <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+  </ItemGroup>
+
+</Project>
