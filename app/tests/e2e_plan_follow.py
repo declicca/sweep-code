@@ -7,7 +7,8 @@
     « 1 of 2 trades in your plan's zones » and the time line (approach, touch, the trade in the plan, the sweep with its
     plan reminder, the trade off plan) in New York order, the words explained (sweep, long / short); in the review, above
     « Did you follow your plan? »; nothing cut or overlapping, the page never wider than the screen, no page error
-Screenshots: /tmp/sweep-plan-follow-<w>-<lang>-<review|journal>.png"""
+4  (14 Nov.) a trader on his sign-up session, no plan: the journal's recap says « No plan » and the coach never « all in your plan »
+Screenshots: /tmp/sweep-plan-follow-<w>-<lang>-<review|journal|noplan>.png"""
 import json, sys, time, uuid, urllib.parse, urllib.request, urllib.error, http.cookiejar
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -74,13 +75,13 @@ ok(call(bare, 'GET', 'api/sync/plan-day?day=' + day, None, {'X-Sweep-Key': AK['X
 # 3. the journal day and the end-of-day review, in the browser
 X = {'fr': {'line': '1 trade sur 2 dans les zones de ton plan', 'sweep': 'PDH sweepé (5m), rappel du plan affiché', 'near': 'Prix proche de Buy zone, alerte affichée',
             'touch': 'Le prix touche Buy zone, alerte affichée', 'tin': 'Trade long MNQ · dans le plan (Buy zone)', 'tout': 'Trade long NQ · hors plan', 'tip': 'long = achat', 'stip': 'Sweep :',
-            'q': 'suivi', 'locale': 'fr-CA', 'title': 'Sur le chart'},
+            'q': 'suivi', 'np': 'Pas de plan', 'all': 'tous dans ton plan', 'locale': 'fr-CA', 'title': 'Sur le chart'},
      'en': {'line': '1 of 2 trades in your plan’s zones', 'sweep': 'Sweep of PDH (5m), plan reminder shown', 'near': 'Price close to Buy zone, alert shown',
             'touch': 'Price touches Buy zone, alert shown', 'tin': 'Trade long MNQ · in the plan (Buy zone)', 'tout': 'Trade long NQ · off plan', 'tip': 'long = buy', 'stip': 'Sweep:',
-            'q': 'follow', 'locale': 'en-US', 'title': 'On the chart'},
+            'q': 'follow', 'np': 'No plan', 'all': 'all in your plan', 'locale': 'en-US', 'title': 'On the chart'},
      'es': {'line': '1 de 2 operaciones en las zonas de tu plan', 'sweep': 'Sweep de PDH (5m), recordatorio del plan mostrado', 'near': 'Precio cerca de Buy zone, alerta mostrada',
             'touch': 'El precio toca Buy zone, alerta mostrada', 'tin': 'Operación long MNQ · en el plan (Buy zone)', 'tout': 'Operación long NQ · fuera del plan', 'tip': 'long = compra', 'stip': 'Sweep:',
-            'q': 'segui', 'locale': 'es-ES', 'title': 'En el gráfico'}}
+            'q': 'segui', 'np': 'Sin plan', 'all': 'todas dentro de tu plan', 'locale': 'es-ES', 'title': 'En el gráfico'}}
 ORDER = ['near', 'touch', 'tin', 'sweep', 'tout']
 RUNS = [(390, True, 'fr', 'dark'), (1300, False, 'fr', 'light'), (390, True, 'en', 'light'), (1300, False, 'en', 'dark'), (390, True, 'es', 'light'), (1300, False, 'es', 'dark')]
 FIT = """(sel) => { const box = document.querySelector(sel); if (!box) return 'missing'; const r = box.getBoundingClientRect(), bad = [];
@@ -127,6 +128,32 @@ with sync_playwright() as pw:
         ok(len(dots) == 2 and dots[0] != dots[1], f'{tag} review: the trade in the plan marked in blue, the other in neutral grey ({dots})')
         bad = pg.evaluate(FIT, '#gSheet.g-rv .pc-day'); ok(bad == '', f'{tag} review: nothing cut, overlapping or wider than the screen ({bad})')
         pg.screenshot(path=f'/tmp/sweep-plan-follow-{w}-{lang}-review.png')
+        cx.close()
+    # 4. (14 Nov.) the journal's recap and the coach say the same: a trader on his sign-up session, no plan, 2 trades without a
+    # mistake — the recap says « No plan » (as Today: « 2 trades · no plan »), never « 0 / 2 », and the coach's lesson never
+    # « all in your plan » (no reproach either, R2). The server's own day (its game clock), so the day is in game_days
+    jar2 = http.cookiejar.CookieJar(); web2 = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar2))
+    s, _ = call(web2, 'POST', 'api/auth/register', {'password': 'Testpass123!', 'email': 'pfnp' + uuid.uuid4().hex[:8] + '@t.dev', 'consent': True, 'elapsed': 6000, 'lang': 'fr'}, H)
+    sday = call(web2, 'GET', 'api/game/history?from=2026-01-01&to=2026-01-01', None, H)[1].get('today') or day
+    for tid, hh in (('np_t1', '09:40'), ('np_t2', '10:10')):
+        call(web2, 'PUT', 'api/docs/trades/' + tid, {'date': sday, 'entry_time': hh, 'exit_time': hh, 'direction': 'long', 'entry': 21000, 'exit': 21005, 'stop': 20990,
+                                                     'instrument': 'NQ', 'contracts': 1, 'pnl': 100, 'net': 100}, H)
+    cookies2 = [{'name': c.name, 'value': c.value, 'domain': host, 'path': c.path or '/'} for c in jar2]
+    for w, phone, lang, scheme in RUNS:
+        x = X[lang]; tag = f'{w}-{lang}-{scheme} no plan'
+        cx = br.new_context(viewport={'width': w, 'height': 844 if phone else 850}, is_mobile=phone, has_touch=phone, locale=x['locale'], color_scheme=scheme)
+        cx.add_cookies(cookies2); cx.add_init_script("sessionStorage.setItem('sw.modal','1'); localStorage.setItem('tj.lang', JSON.stringify('%s'))" % lang)
+        pg = cx.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)[:160]))
+        pg.goto(B + '/#journal/' + sday)
+        ex = ''
+        for _ in range(120):
+            ex = pg.evaluate("(() => { const b = [...document.querySelectorAll('.nav-recap .nav-recap-g > div')][1]; const t = b ? b.querySelector('b').textContent.trim() : ''; return t === '…' ? '' : t; })()")
+            if ex and pg.evaluate("!!window.SweepCoach"): break
+            pg.wait_for_timeout(150)
+        ls = pg.evaluate("(() => { const l = window.SweepCoach && SweepCoach.lesson('%s'); return l ? l.text : ''; })()" % sday)
+        ok(ex == x['np'] and ls != '' and x['all'] not in ls, f'{tag}: the recap says « {ex} », the coach agrees ({ls[:70]!r})')
+        bad = pg.evaluate(FIT, '.nav-recap'); ok(bad == '', f'{tag}: the recap, nothing cut or overlapping ({bad})')
+        pg.screenshot(path=f'/tmp/sweep-plan-follow-{w}-{lang}-noplan.png')
         cx.close()
     br.close()
 ok(not errs, 'no page error (%s)' % errs[:2])

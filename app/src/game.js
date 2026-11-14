@@ -1600,8 +1600,8 @@
      at the session, the zones stay editable all day. Opened from one row of the plan (express, the guided plan's sheet, the
      session view), as a sheet over the plan, so the plan being filled keeps its answers. Sweep reminds, it never trades. */
   const PCT = {
-    en: { title: 'Plan on the chart', row: 'Plan on the chart', row_none: 'Your levels on Quantower or NinjaTrader', z1: '1 zone', zn: '{n} zones', r1: '1 rule', rn: '{n} rules',
-      intro: 'Your levels and zones show on your Quantower or NinjaTrader chart, with an alert when price gets close. Sweep never places an order.',
+    en: { title: 'Plan on the chart', row: 'Plan on the chart', row_none: 'Your zones and rules for the day', z1: '1 zone', zn: '{n} zones', r1: '1 rule', rn: '{n} rules',
+      intro: 'Prepare your zones and rules: Sweep compares them with your trades in your review. The add-on that draws them on your chart is coming soon. Sweep never places an order.',
       sync_on: 'Synced with {p} · {ago}', sync_off: 'Not connected yet', install: 'Install the add-on', ago_s: '{n} s ago', ago_m: '{n} min ago', ago_h: '{n} h ago',
       zones: 'Levels and zones', add_zone: 'Add a level or a zone', resume_y: 'Use yesterday’s zones', resume_d: 'Use the zones of {d}', resumed: '{n} zones of {d} copied: check them.',
       rules: 'If… then', rules_hint: 'Without a rule, each zone already alerts you when price gets close and when it touches it.', add_rule: 'Add a rule', once: 'Each rule fires once per session.', need_zone: 'Add a zone first, or a rule at a time of day.',
@@ -1626,8 +1626,8 @@
       e_near: 'Price close to {z}', e_touch: 'Price touches {z}', e_above: '{tf} candle closed above {z}', e_below: '{tf} candle closed below {z}', e_sweep: 'Sweep of {z} ({tf})',
       e_time: 'It is {h} in New York', e_rule: 'A rule fired', s_alert: 'alert shown', s_plan: 'plan reminder shown', s_limit: 'limit reminder shown',
       tr: 'Trade {d} {i}', tr_in: 'in the plan', tr_out: 'off plan', d_more: 'See the {n} others', d_zone: 'a zone' },
-    fr: { title: 'Plan sur le chart', row: 'Plan sur le chart', row_none: 'Tes niveaux sur Quantower ou NinjaTrader', z1: '1 zone', zn: '{n} zones', r1: '1 règle', rn: '{n} règles',
-      intro: 'Tes niveaux et tes zones s’affichent sur ton chart Quantower ou NinjaTrader, avec une alerte quand le prix s’en approche. Sweep ne passe jamais d’ordre.',
+    fr: { title: 'Plan sur le chart', row: 'Plan sur le chart', row_none: 'Tes zones et tes règles du jour', z1: '1 zone', zn: '{n} zones', r1: '1 règle', rn: '{n} règles',
+      intro: 'Prépare tes zones et tes règles : Sweep les compare à tes trades dans ta revue. L’add-on qui les dessinera sur ton chart arrive bientôt. Sweep ne passe jamais d’ordre.',
       sync_on: 'Synchronisé avec {p} · {ago}', sync_off: 'Pas encore connecté', install: 'Installer l’add-on', ago_s: 'il y a {n} s', ago_m: 'il y a {n} min', ago_h: 'il y a {n} h',
       zones: 'Niveaux et zones', add_zone: 'Ajouter un niveau ou une zone', resume_y: 'Reprendre les zones d’hier', resume_d: 'Reprendre les zones du {d}', resumed: '{n} zones du {d} reprises : vérifie-les.',
       rules: 'Si… alors', rules_hint: 'Sans règle, chaque zone t’avertit déjà quand le prix s’approche et quand il la touche.', add_rule: 'Ajouter une règle', once: 'Chaque règle se déclenche une fois par séance.', need_zone: 'Ajoute d’abord une zone, ou une règle à une heure de la journée.',
@@ -1652,8 +1652,8 @@
       e_near: 'Prix proche de {z}', e_touch: 'Le prix touche {z}', e_above: 'Bougie {tf} fermée au-dessus de {z}', e_below: 'Bougie {tf} fermée au-dessous de {z}', e_sweep: '{z} sweepé ({tf})',
       e_time: 'Il est {h} à New York', e_rule: 'Une règle s’est déclenchée', s_alert: 'alerte affichée', s_plan: 'rappel du plan affiché', s_limit: 'rappel de ta limite affiché',
       tr: 'Trade {d} {i}', tr_in: 'dans le plan', tr_out: 'hors plan', d_more: 'Voir les {n} autres', d_zone: 'une zone' },
-    es: { title: 'Plan en el gráfico', row: 'Plan en el gráfico', row_none: 'Tus niveles en Quantower o NinjaTrader', z1: '1 zona', zn: '{n} zonas', r1: '1 regla', rn: '{n} reglas',
-      intro: 'Tus niveles y zonas aparecen en tu gráfico de Quantower o NinjaTrader, con una alerta cuando el precio se acerca. Sweep nunca envía órdenes.',
+    es: { title: 'Plan en el gráfico', row: 'Plan en el gráfico', row_none: 'Tus zonas y reglas del día', z1: '1 zona', zn: '{n} zonas', r1: '1 regla', rn: '{n} reglas',
+      intro: 'Prepara tus zonas y reglas: Sweep las compara con tus operaciones en tu revisión. El add-on que las dibujará en tu gráfico llega pronto. Sweep nunca envía órdenes.',
       sync_on: 'Sincronizado con {p} · {ago}', sync_off: 'Aún no conectado', install: 'Instalar el add-on', ago_s: 'hace {n} s', ago_m: 'hace {n} min', ago_h: 'hace {n} h',
       zones: 'Niveles y zonas', add_zone: 'Añadir un nivel o una zona', resume_y: 'Retomar las zonas de ayer', resume_d: 'Retomar las zonas del {d}', resumed: '{n} zonas del {d} retomadas: revísalas.',
       rules: 'Si… entonces', rules_hint: 'Sin regla, cada zona ya te avisa cuando el precio se acerca y cuando la toca.', add_rule: 'Añadir una regla', once: 'Cada regla se activa una vez por sesión.', need_zone: 'Añade primero una zona, o una regla a una hora del día.',
