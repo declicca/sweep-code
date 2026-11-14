@@ -143,10 +143,10 @@ def page_how(lang, t):
                              for i, (_, _, h, p) in enumerate(st)], 5, cls="stagger steps5"), "t", "start")
     # a new trader's first weeks: one discovery mission per trading day (app, 29 Oct.)
     discover = ui.split(t, T("Your first weeks","Tes premières semaines","Tus primeras semanas"), T("One discovery mission a day.","Une mission de découverte par jour.","Una misión de descubrimiento al día."),
-        T("New traders get 15 short missions, one per trading day, each ticked by what you do, with a “Do it now” button. My money, the guided plan, Sweep AI and your badges show up at their mission; “Show everything” opens them all at once.",
-          "Un nouveau trader reçoit 15 courtes missions, une par jour de trading, cochées par ce que tu fais, avec un bouton « Faire maintenant ». Mon argent, le plan guidé, Sweep AI et tes badges arrivent à leur mission ; « Tout montrer » les ouvre tous d’un coup.",
-          "Un trader nuevo recibe 15 misiones cortas, una por día de trading, marcadas por lo que haces, con un botón «Hacerlo ahora». Mi dinero, el plan guiado, Sweep AI y tus insignias aparecen en su misión; «Mostrar todo» los abre todos a la vez."),
-        [], ui.frame_p("ecran-missions-decouverte.webp", t(T("The day’s discovery mission with “Do it now”, sample data","La mission de découverte du jour avec « Faire maintenant », données d’exemple","La misión de descubrimiento del día con «Hacerlo ahora», datos de ejemplo")), t=t),
+        T("New traders get 15 short missions, one per trading day, each ticked by what you do, with a “Do it now” button. My money, the guided plan, Sweep AI and your badges show up at their mission; “Show everything” opens them all at once. With the 90-day gameplan (Pro), its mission of the day takes that line.",
+          "Un nouveau trader reçoit 15 courtes missions, une par jour de trading, cochées par ce que tu fais, avec un bouton « Faire maintenant ». Mon argent, le plan guidé, Sweep AI et tes badges arrivent à leur mission ; « Tout montrer » les ouvre tous d’un coup. Avec le parcours de 90 jours (Pro), c’est sa mission du jour qui prend cette ligne.",
+          "Un trader nuevo recibe 15 misiones cortas, una por día de trading, marcadas por lo que haces, con un botón «Hacerlo ahora». Mi dinero, el plan guiado, Sweep AI y tus insignias aparecen en su misión; «Mostrar todo» los abre todos a la vez. Con el recorrido de 90 días (Pro), es su misión del día la que ocupa esa línea."),
+        [], ui.frame_p("ecran-missions-decouverte.webp", t(T("Today: the day’s mission, one line under “Now”, sample data","Aujourd’hui : la mission du jour, une ligne sous « Maintenant », données d’exemple","Hoy: la misión del día, una línea bajo «Ahora», datos de ejemplo")), t=t),
         flip=True, id_="discovery", phone=True)
     G = {g[1]: g for g in GAME}
     POS = {"progression": "50% 30%", "weekly": "50% 14%"}
