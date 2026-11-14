@@ -7,7 +7,7 @@
 Without a .NET 10 SDK (the CI), it says so and passes: like plan_core_test.py, it runs where .NET exists (Mateo's Mac).
 Its files go to a temporary folder (SWEEP_PLAN_TEST_DIR), never to Documents.
    python3 tests/ninjatrader_plan_test.py [BASE]"""
-import json, os, shutil, sqlite3, subprocess, sys, tempfile, urllib.request, urllib.error, http.cookiejar, uuid
+import fcntl, json, os, shutil, sqlite3, subprocess, sys, tempfile, urllib.request, urllib.error, http.cookiejar, uuid
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ADDON = os.path.join(APP, 'sync', 'addon')
 B = (sys.argv[1] if len(sys.argv) > 1 else '').rstrip('/')
@@ -30,6 +30,17 @@ sdks = subprocess.run([DN, '--list-sdks'], env=ENV, capture_output=True, text=Tr
 if not any(l.split('.')[0].isdigit() and int(l.split('.')[0]) >= 10 for l in sdks.splitlines()):
   print('--   no .NET 10 SDK here: the NinjaTrader 8 Plan Sync checks are skipped'); sys.exit(0)
 
+def build(proj, out):
+  """dotnet build, one at a time on this machine: the copies of tools/par.py run at once, and their first restores of the same
+  NuGet packages (a fresh CI machine) collide in the shared cache"""
+  with open(os.path.join(tempfile.gettempdir(), 'sweep-dotnet-build.lock'), 'w') as lk:
+    fcntl.flock(lk, fcntl.LOCK_EX)
+    r = subprocess.run([DN, 'build', proj, '-c', 'Release', '-nologo', '-v', 'q', '-o', out], env=ENV, capture_output=True, text=True)
+  if r.returncode:
+    errs = [l.strip() for l in (r.stdout + r.stderr).splitlines() if ' error ' in l or 'error NU' in l or 'error NETSDK' in l or 'error MSB' in l]
+    print('\n'.join(sorted(set(errs))[:20]) or (r.stdout[-3000:] + r.stderr[-1500:]))
+  return r.returncode
+
 tmp = tempfile.mkdtemp(prefix='sweep-ntplan-')
 try:
   # a copy without bin/ or obj/ (nothing lands in the repository)
@@ -46,9 +57,7 @@ try:
   ok('AddOns/SweepPlanCore.cs' in open(os.path.join(APP, 'tools', 'addon-zip.py'), encoding='utf-8').read(), 'the shared logic travels in the zip as AddOns/SweepPlanCore.cs')
 
   # 1. compiles in C# 5 against WPF, SharpDX and NinjaTrader's stubs
-  b = subprocess.run([DN, 'build', os.path.join(work, 'ninjatrader-plan', 'check', 'SweepPlanCheck.csproj'), '-c', 'Release', '-nologo', '-v', 'q', '-o', os.path.join(tmp, 'check')], env=ENV, capture_output=True, text=True)
-  if b.returncode: print(b.stdout[-4000:], b.stderr[-2000:])
-  ok(b.returncode == 0, 'the indicator and the shared logic compile in C# 5 (NinjaTrader 8\'s language), 0 warning')
+  ok(build(os.path.join(work, 'ninjatrader-plan', 'check', 'SweepPlanCheck.csproj'), os.path.join(tmp, 'check')) == 0, 'the indicator and the shared logic compile in C# 5 (NinjaTrader 8\'s language), 0 warning')
 
   # 2. live, against a test trader
   if B:
@@ -73,10 +82,9 @@ try:
     zid = 'nt' + uuid.uuid4().hex[:8]
     s, _ = call('PUT', 'api/docs/journals/' + day, {'chart': {'zones': [{'id': zid, 'instrument': 'NQ', 'type': 'level', 'price': 21300, 'label': 'PDH', 'role': 'resistance', 'proximity_ticks': 40}], 'rules': []}})
     ok(s == 200 and len(day) == 10, 'the day\'s plan saved in the app: PDH 21300 on NQ (' + day + ')')
-    r = subprocess.run([DN, 'build', os.path.join(work, 'ninjatrader-plan', 'check', 'run', 'SweepPlanRun.csproj'), '-c', 'Release', '-nologo', '-v', 'q', '-o', os.path.join(tmp, 'run')], env=ENV, capture_output=True, text=True)
-    if r.returncode: print(r.stdout[-4000:], r.stderr[-2000:])
-    ok(r.returncode == 0, 'the live run builds')
-    if r.returncode == 0:
+    rc = build(os.path.join(work, 'ninjatrader-plan', 'check', 'run', 'SweepPlanRun.csproj'), os.path.join(tmp, 'run'))
+    ok(rc == 0, 'the live run builds')
+    if rc == 0:
       home = os.path.join(tmp, 'files')
       x = subprocess.run([DN, os.path.join(tmp, 'run', 'SweepPlanRun.dll'), B, nt, qt], env=dict(ENV, SWEEP_PLAN_TEST_DIR=home), capture_output=True, text=True, timeout=120)
       out = x.stdout
