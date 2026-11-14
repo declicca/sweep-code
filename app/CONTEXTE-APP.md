@@ -1831,6 +1831,11 @@ Règle : une fonction reste si elle sert la boucle (plan, trade, revue, compte, 
 - **Tableaux d'Admin à 390 px** (`uxStack`, `src/ux.js` ; style `table.ux-stack`, `src/ux.css`, sous 640 px seulement) : un tableau plus large que sa carte passe en lignes empilées (la première cellule sur sa ligne, chaque valeur sous le nom de sa colonne, copié de l'en-tête dans `data-l`). Mesuré : un tableau qui tient reste un tableau. Appelé après chaque dessin d'Admin et à l'arrivée des métriques (pas d'observateur). La liste des traders garde sa propre mise en page. Rien ne change à 1300.
 - Tests : `metrics_test.php` (firmes : 7 cas comptés à la main et l'export ; « À regarder » : 9 cas), `e2e_admin_metrics` (le tableau à 390 et 1440), `e2e_admin_phone` (nouveau : le bloc, une tâche rouge simulée, « Rien à regarder », tous les tableaux à 390 et 1300, FR / EN / ES, clair et foncé).
 
+## Captures du site (13 nov., brief `briefs/brief-captures-site-2026-11-13.md`)
+
+- **« Journées balayées » sur les cartes de partage** (Discipline et « Journée complète », `nav.js`, `shData`) : le total du profil (`profile.swept_days`), le même chiffre qu'Aujourd'hui (« n journées balayées › ») et « Ma progression ». La carte comptait les journées du mois (11 contre 28 sur Aujourd'hui pour le trader démo). Test : `e2e_share` (un total de 37 posé dans le profil se retrouve sur la carte).
+- **Outil des captures** (`tools/site-shots/`, hors déploiement) : boss, saison, ligue, crew, Wrapped, parcours, Edge Reveal et les cartes « payout » et Wrapped du jeu retirés ; `ecran-badges` = « Ma progression » depuis le haut ; `carte-journee-balayee` = la carte « Journée complète » de la fenêtre de partage ; les 3 comptes de l'add-on démo reliés (un compte « à relier » passe maintenant en tête d'Aujourd'hui) ; vidéos `hero-loop` et `tour` avec « Ma progression » au lieu de la ligue et du crew ; l'affiche de `v6-video-today-phone` est sa première image. `social.php` n'existe plus : son appel est retiré.
+
 ## Relier les comptes trouvés (13 nov., brief `briefs/brief-app-synchro-relier-2026-11-13.md`, étapes 1 à 3)
 
 Décision du brief : l'effort va à relier ce que la synchro trouve déjà (17 comptes « à relier » chez 8 traders), pas à une nouvelle plateforme.

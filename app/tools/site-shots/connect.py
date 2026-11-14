@@ -1,7 +1,7 @@
 """
 Sweep — the site's captures: Alex's platforms connected (Settings › Data › Connections), through the app's own API on the
 capture server: NinjaTrader 8 and Quantower each with its key, their add-ons' first push (3 accounts found, no fills),
-2 of them linked to their Sweep account, the third still to link.
+all 3 linked to their Sweep account (13 Nov.: an account still « to link » now heads Today, not what the site shows).
   python3 tools/site-shots/connect.py <base_url> <state_file>
 """
 import json, sys
@@ -10,7 +10,7 @@ B, STATE = sys.argv[1], sys.argv[2]
 H = {'X-Requested-With': 'fetch', 'Content-Type': 'application/json'}
 PUSH = {'ninjatrader': ('Sweep NT8 1.4', [{'name': 'PA-APEX-224455-03', 'connection': 'Apex', 'provider': 'Rithmic'}, {'name': 'LFE-50K-118204', 'connection': 'Lucid', 'provider': 'Rithmic'}]),
         'quantower': ('Sweep Quantower 1.2', [{'name': 'XFA-50K-771204', 'connection': 'Topstep', 'provider': 'ProjectX'}])}
-LINK = {'PA-APEX-224455-03': 'a4', 'XFA-50K-771204': 'a2'}   # the Lucid one stays « to link »
+LINK = {'PA-APEX-224455-03': 'a4', 'XFA-50K-771204': 'a2', 'LFE-50K-118204': 'a3'}
 with sync_playwright() as p:
   br = p.chromium.launch(); ctx = br.new_context(storage_state=STATE); rq = ctx.request
   for plat, (client, accs) in PUSH.items():

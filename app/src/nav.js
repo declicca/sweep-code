@@ -5312,7 +5312,7 @@ window.SweepMO = window.SweepMO || class {
       const st = window.SweepGame && SweepGame.state && SweepGame.state(); const p = (st && st.profile) || {};
       const s = (p.streak && p.streak.current) || 0, v = discScore(), nm = window.SweepName && SweepName.shown() && SweepName.first();
       return { label: t('dCard'), eyebrow: new Date().toLocaleDateString(L === 'en' ? 'en-US' : L === 'es' ? 'es-ES' : 'fr-CA', { month: 'long', year: 'numeric' }), big: v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%'), tone: 'pos', sub: null,
-        stats: [[t('streak'), String(s)], [t('score'), v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%')], [t('swept'), swept == null ? '—' : String(swept)]], demo: false, chart: null, bars: null, mark: true, who: nm || null, whoAt: 'eyebrow', cap: t('capD')(s, v == null ? 0 : v) };
+        stats: [[t('streak'), String(s)], [t('score'), v == null ? '—' : v + (L === 'en' ? '%' : '\u202f%')], [t('swept'), p.swept_days != null ? String(+p.swept_days || 0) : swept == null ? '—' : String(swept)]], demo: false, chart: null, bars: null, mark: true, who: nm || null, whoAt: 'eyebrow', cap: t('capD')(s, v == null ? 0 : v) };
     };
     w.__disc = true; w.__congrats = true; w.__name = true; w.__stats = true; w.__po = true; window.shData = w;
   })(0);
@@ -5553,7 +5553,7 @@ document.addEventListener('click', (e) => {
       const st = window.SweepGame && SweepGame.state && SweepGame.state(); const p = (st && st.profile) || {};
       const s = (p.streak && p.streak.current) || 0, nm = window.SweepName && SweepName.shown() && SweepName.first();
       return { label: t('label'), eyebrow: t('eb'), big: '3/3 ✓', tone: 'pos', sub: t('sub'),
-        stats: [[t('streak'), String(s)], [t('disc'), disc || '—'], [t('swept'), swept == null ? '—' : String(swept)]],
+        stats: [[t('streak'), String(s)], [t('disc'), disc || '—'], [t('swept'), p.swept_days != null ? String(+p.swept_days || 0) : swept == null ? '—' : String(swept)]],
         demo: false, chart: null, bars: null, mark: true, who: nm || null, whoAt: 'eyebrow', cap: t('cap')(s) };
     };
     w.__swept = true; w.__disc = true; w.__congrats = true; w.__name = true; w.__stats = true; w.__po = true; window.shData = w;

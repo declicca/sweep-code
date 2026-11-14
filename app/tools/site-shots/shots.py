@@ -165,19 +165,8 @@ def plan_sheet(pg, lang):   # the express plan, being filled: his bias, his leve
   pg.wait_for_timeout(800)
   pg.evaluate("() => { const e = document.activeElement; if (e) e.blur(); }"); pg.wait_for_timeout(500)
 
-def boss(pg, lang):
-  row = pg.evaluate("fetch('api/game/boss?lang=%s', { headers: { 'X-Requested-With': 'fetch' } }).then((r) => r.json()).then((d) => (d.active && d.active[0] && d.active[0].row) || null)" % lang)
-  pg.evaluate("SweepGame.refresh()"); pg.wait_for_timeout(1500); g(pg, 'boss', str(row), 2200)
-
-def badges(pg, lang):   # the collection's badge grid (its section title is not shown in the sheet)
+def badges(pg, lang):   # « My progress » as it opens (13 Nov. brief): swept days, streak and freezes, then the badges
   g(pg, 'hub', None, 3500)
-  pg.evaluate("() => { const sc = document.querySelector('#gSheet .evp-in'), gr = sc && sc.querySelector('.g-badges'); if (gr) sc.scrollTop += gr.getBoundingClientRect().top - sc.getBoundingClientRect().top - 16; }"); pg.wait_for_timeout(900)
-
-def wrapped(n):
-  def f(pg, lang):
-    g(pg, 'wrapped', None, 2500)
-    for i in range(n - 1): pg.mouse.click(300, 420); pg.wait_for_timeout(1600)
-  return f
 
 def connections(pg, lang):
   import sqlite3   # « add-on seen 2 min ago », from the capture's clock (4 Nov.: the page counts from the browser's fixed clock)
@@ -187,7 +176,7 @@ def connections(pg, lang):
   scroll_text(pg, r'^(Connections|Connexions|Conexiones)$', '#main h2, #main h3, #main h4, #main b', 90 if phone(pg) else 30)
 
 SYNC_LINK = """(act) => fetch('api/sync', { headers: { 'X-Requested-With': 'fetch' } }).then((r) => r.json()).then((st) => Promise.all((st.accounts || []).map((a) => {
-  const to = { 'PA-APEX-224455-03': 'a4', 'XFA-50K-771204': 'a2' }[a.name || (a.info && a.info.name) || a.ext_id]; if (!to) return null;
+  const to = { 'PA-APEX-224455-03': 'a4', 'XFA-50K-771204': 'a2', 'LFE-50K-118204': 'a3' }[a.name || (a.info && a.info.name) || a.ext_id]; if (!to) return null;
   return fetch('api/sync/accounts/' + a.id, { method: 'POST', headers: { 'X-Requested-With': 'fetch', 'Content-Type': 'application/json' }, body: JSON.stringify(act === 'link' ? { action: 'link', account_id: to } : { action: 'unlink' }) }); })))"""
 def connections_link(pg, lang):   # computer: « Link my accounts » open, the 3 accounts found at once (linked again afterwards)
   pg.evaluate(SYNC_LINK, 'unlink'); pg.wait_for_timeout(800)
@@ -205,13 +194,6 @@ def news_report(pg, lang):   # the recap of Thursday's retail sales, from the ec
   rid = json.load(open(DEST + '-econ.json'))['retail']
   go(pg, '#news', 2500)
   pg.evaluate("(id) => { const e = document.querySelector('#main [data-act=ev-open][data-id=\"' + id + '\"]'); if (e) e.click(); }", rid); pg.wait_for_timeout(3000)
-
-def edge_reveal(pg, lang):   # the week's recap, its Edge Reveal card turned over
-  g(pg, 'weekly', None, 2500)
-  for i in range(3):
-    if pg.locator('#gSheet [data-g=wk-flip]').count(): break
-    g(pg, 'wk-next', None, 1500)
-  pg.evaluate("() => { const b = document.querySelector('#gSheet [data-g=wk-flip]'); if (b) b.click(); }"); pg.wait_for_timeout(2500)
 
 def econ_week(pg, lang):
   go(pg, '#news', 2500); click_text(pg, r'^(This week|Cette semaine|Esta semana)$', '#main', 2000)
@@ -285,16 +267,8 @@ SHOTS = {
   'v6-20-signup-m': ('m', L3, 'captures', signup),
   'v6-23-discipline-checklist-m': ('m', L3, 'captures', checklist),
   'v6-24-new-trade-filled-m': ('m', L3, 'captures', new_trade_filled),
-  'ecran-parcours': ('m', L3, 'captures', lambda pg, l: g(pg, 'hub', None, 3500)),   # « My progress » (29 Oct.)
-  'ecran-boss-revenge': ('m', L3, 'captures', boss),
-  'ecran-saison': ('m', L3, 'captures', lambda pg, l: g(pg, 'season', None, 2200)),
   'ecran-badges': ('m', L3, 'captures', badges),
-  'ecran-ligue': ('m', L3, 'captures', lambda pg, l: g(pg, 'league', None, 2500)),
-  'ecran-crew': ('m', L3, 'captures', lambda pg, l: g(pg, 'social', None, 2500)),
   'ecran-plan-du-jour': ('m', L3, 'captures', plan_sheet),
-  'ecran-wrapped-1': ('m', L3, 'captures', wrapped(1)),
-  'ecran-wrapped-2': ('m', L3, 'captures', wrapped(2)),
-  'ecran-wrapped-3': ('m', L3, 'captures', wrapped(3)),
   'ecran-connexions': ('m', L3, 'captures', connections),
   'ecran-fermer-journee': ('m', L3, 'captures', close_day),
   'ecran-explication-i': ('m', L3, 'captures', term_i),
@@ -315,7 +289,6 @@ SHOTS = {
   'v6-26-connections-d': ('d', L3, 'captures', connections_link),
   # img/ (en, fr, es)
   'ecran-revue-semaine': ('m', L3, 'captures', lambda pg, l: g(pg, 'weekly', None, 2500)),
-  'ecran-edge-reveal': ('m', L3, 'captures', edge_reveal),
   'mobile-{lang}-dark-ask-sweep-786': ('m786', ('en', 'fr', 'es'), 'img', ask_sweep),
   'mobile-{lang}-dark-calendar-786': ('m786', ('en', 'fr', 'es'), 'img', page('#calendar')),
   'mobile-{lang}-dark-economic-calendar-786': ('m786', ('en', 'fr', 'es'), 'img', econ_week),
@@ -329,8 +302,8 @@ SHOTS = {
   'v6-22-today-swept-d': ('d', L3, 'captures', swept),
 }
 SIGNED_OUT = {'v6-20-signup-m'}
-# Friday after the close (SHOTS_NOW="2026-10-16 17:30", a second server: serve.sh with DEST=/tmp/gs2 PORT=8997): the week's recap
-FRIDAY = {'ecran-revue-semaine', 'ecran-edge-reveal'}
+# Friday after the close (SHOTS_NOW="2026-10-16 17:30", a second server: serve.sh with DEST=/tmp/gs2 PORT=8997): the week's recap (no chest since 10 Nov.)
+FRIDAY = {'ecran-revue-semaine'}
 EVENING = NOW.weekday() == 4 and NOW.hour >= 17
 CLEAN = {'v6-06-trade-review-m': tmp_clean, 'v6-26-connections-d': relink, 'ecran-missions-decouverte': discovery_back}
 
@@ -354,19 +327,15 @@ def payout_card(pg, lang):
 def trade_card(pg, lang):
   go(pg, '#trade/' + TODAY_TRADE, 2500); pg.evaluate("() => document.querySelector('#main [data-act=share]').click()"); pg.wait_for_timeout(1800); second_tab(pg); tap(pg, '[data-sh-fmt="wide"]', 1500)
   return lambda: click_text(pg, SAVE, 'body', 300, last=True)
-def game_card(kind, v=None, before=None):
-  def f(pg, lang):
-    if before: g(pg, before, None, 2500)
-    return lambda: pg.evaluate("([k, v]) => { const b = document.createElement('button'); b.dataset.g = 'share'; b.dataset.k = k; if (v) b.dataset.v = v; b.hidden = true; document.body.appendChild(b); b.click(); b.remove(); }", [kind, v])
-  return f
+def swept_card(pg, lang):   # (13 Nov.) the « Day swept » card of the share window, story format
+  pg.evaluate("SweepSweptShare()"); pg.wait_for_timeout(2200); tap(pg, '[data-sh-fmt="story"]', 1500)
+  return lambda: click_text(pg, SAVE, 'body', 300, last=True)
 CARDS = {   # name → (folder, langs, size, steps returning the click that saves)
   'share-payout-1080': ('img', ('en',), (1080, 1350), payout_card),
   'share-net-1080': ('img', ('en',), (1080, 1920), stats_card('net', 'story')),
   'share-trade-1080': ('img', ('en',), (1080, 608), trade_card),
   'share-weekly-hidden-1080': ('img', ('en',), (1080, 1350), stats_card('week', 'post')),
-  'carte-journee-balayee': ('captures', ('en', 'fr'), (900, 1600), game_card('sweep')),
-  'carte-payout': ('captures', ('en', 'fr'), (900, 1600), game_card('payout')),
-  'carte-wrapped': ('captures', ('en', 'fr'), (900, 1600), game_card('wrapped', '2026-09', 'wrapped')),
+  'carte-journee-balayee': ('captures', ('en', 'fr'), (900, 1600), swept_card),
 }
 def cards():
   from PIL import Image
@@ -412,9 +381,7 @@ def seed(langs):
   for lang, uid in json.load(open(STATE + '-uids.json')).items():
     r = subprocess.run(['php', os.path.join(DEST, 'tools', 'site-shots', 'history.php'), uid, GAME_FROM, NOW.strftime('%Y-%m-%d'), NOW.strftime('%H:%M')], capture_output=True, text=True)
     print('history', lang, r.stdout.strip(), r.stderr.strip()[-300:])
-  uids = json.load(open(STATE + '-uids.json')); H = {'en': 'AlexM', 'fr': 'Alex.M', 'es': 'Alex_M'}
-  r = subprocess.run(['php', os.path.join(DEST, 'tools', 'site-shots', 'social.php'), NOW.strftime('%Y-%m-%d'), *[x for l in ('en', 'fr', 'es') if l in uids for x in (uids[l], H[l])]], capture_output=True, text=True)   # social.php gives the languages in this order (4 Nov.: the FR and ES crews were swapped)
-  print('social', r.stdout.strip(), r.stderr.strip()[-300:])
+  uids = json.load(open(STATE + '-uids.json'))
   for lang in uids: subprocess.run([sys.executable, os.path.join(HERE, 'connect.py'), B, f'{STATE}-{lang}.json'], check=True, capture_output=True)
   # Alex has used Sweep for weeks: he sees everything, like every account from before the discovery missions (29 Oct.)
   import sqlite3

@@ -76,6 +76,10 @@ def run(p, lang, phone):
   seg = pg.evaluate(TXT, '#shPanel .nav-dk button'); on = pg.evaluate(TXT, '#shPanel .nav-dk button.on')
   ok(pg.evaluate("SH.kind") == 'discipline' and seg == [x['disc'], x['net']] and on == [x['disc']], f"{tag} from Mon argent: the Discipline card first, « {x['net']} » next to it ({seg})")
   ok(x['card'] in t and x['streak'] in t and x['swept'] in t and 'Noa' in t and 'Tremblay' not in t and '$' not in t, f"{tag} the card: « {x['card']} », streak, « {x['swept']} », the first name only, no dollar ({t[:180]})")
+  # (13 Nov.) « days swept » on the card is the count Today and My progress show (the profile's total), not this month's
+  sw = pg.evaluate("(() => { const st = SweepGame.state && SweepGame.state(); if (!st || !st.profile) return null; st.profile.swept_days = 37; return 37; })()")   # a total unlike this month's count
+  dd = pg.evaluate("shData('discipline').stats.map((r) => r[1])")
+  ok(sw == 37 and dd[2] == '37', f"{tag} the card's « {x['swept']} » = the profile's total, as Today ({dd[2]} = {sw})")
   ok(pg.evaluate("SH.amounts") is False and not pg.evaluate("!!document.querySelector('#shPanel [data-sh]')"), f"{tag} amounts off by default; no amount or firm switch on the Discipline card (nothing to hide)")
   if SHOTS: pg.locator('#shPanel').screenshot(path=os.path.join(SHOTS, f'p12-disc-{tag}.png'))
   ok(pg.evaluate(WIDE) <= 1, f'{tag} nothing wider than the window')

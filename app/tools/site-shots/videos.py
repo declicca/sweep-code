@@ -87,7 +87,7 @@ def hero(br, lang='en'):
   pg.evaluate("() => { const b = [...document.querySelectorAll('#main button')].find((e) => e.textContent.trim() === '1m'); const x = b && (b.closest('.tr-chart') || b.parentElement); if (x) scrollTo({ top: x.getBoundingClientRect().top + scrollY - 24, behavior: 'smooth' }); }"); pg.wait_for_timeout(1200)
   hash_go(pg, '#account/a4', 600)                                                 # payout ready
   pg.evaluate("() => { const h = [...document.querySelectorAll('#main h2, #main h3')].find((e) => /^(Payout|Pago|Retiro)$/i.test(e.textContent.trim())); if (h) scrollTo({ top: h.getBoundingClientRect().top + scrollY - 30, behavior: 'smooth' }); }"); pg.wait_for_timeout(1300)
-  hash_go(pg, '#dashboard', 400); g(pg, 'league', None, 1300)                     # your progress
+  hash_go(pg, '#dashboard', 400); g(pg, 'hub', None, 1300)                        # your progress (« My progress », 13 Nov.: no league)
   close_sheet(pg, 500); pg.wait_for_timeout(600)
   r.stop(os.path.join(OUT, 'video', 'hero-loop.mp4'), length=float(os.environ.get('HERO_LEN', '14.4')) or None); c.close()
 
@@ -110,8 +110,9 @@ def tour(br, lang='en'):
   hash_go(pg, '#journal/2026-10-14', 3500)                                                                    # journal
   hash_go(pg, '#news', 3000)                                                                                  # economic calendar
   hash_go(pg, '#dashboard', 1200); g(pg, 'map', None, 3000); close_sheet(pg, 700)                             # the journey
-  g(pg, 'league', None, 3000); close_sheet(pg, 700)                                                           # the league
-  g(pg, 'social', None, 3000); close_sheet(pg, 900)                                                           # the crew
+  g(pg, 'hub', None, 3000)                                                                                    # « My progress »: swept days, streak, badges (13 Nov.: no league, no crew)
+  pg.evaluate("() => { const sc = document.querySelector('#gSheet .evp-in'), gr = sc && sc.querySelector('.g-badges'); if (sc && gr) sc.scrollTo({ top: sc.scrollTop + gr.getBoundingClientRect().top - sc.getBoundingClientRect().top - 16, behavior: 'smooth' }); }"); pg.wait_for_timeout(2600)
+  close_sheet(pg, 900)
   pg.wait_for_timeout(2500)
   r.stop(os.path.join(OUT, 'video', 'tour.mp4'), length=60.0); c.close()
 
@@ -124,7 +125,10 @@ def today_phone(br, lang):
     smooth(pg, y, 1700); pg.wait_for_timeout(2200)
   smooth(pg, 0, 1800); pg.wait_for_timeout(1300)
   g(pg, 'detail', None, 3000); close_sheet(pg, 900); pg.wait_for_timeout(1500)
-  r.stop(os.path.join(OUT, 'captures', lang, 'v6-video-today-phone.mp4'), length=24.0); c.close()
+  mp4 = os.path.join(OUT, 'captures', lang, 'v6-video-today-phone.mp4'); r.stop(mp4, length=24.0); c.close()
+  png = mp4.replace('v6-video-', 'v6-poster-').replace('.mp4', '.png')   # (13 Nov.) its poster: the first frame, same size
+  subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', mp4, '-frames:v', '1', png], check=True)
+  subprocess.run(['cwebp', '-quiet', '-q', '82', '-m', '6', png, '-o', png.replace('.png', '.webp')], check=True)
 
 VIDEOS = {'hero-loop': lambda br: hero(br), 'tour': lambda br: tour(br),
           'v6-video-today-phone': lambda br: [today_phone(br, l) for l in ('en', 'fr', 'es')]}

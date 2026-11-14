@@ -117,10 +117,9 @@ SHOTS = {
   'v7-23-trade-recap': (MD, False, trade),
   'v7-24-signup': (MD, False, signup),
   'v7-05-review-tomorrow': (M, False, tomorrow),   # last: it closes today
-  'v7-06-edge-reveal': (MD, False, shots.edge_reveal),
   'v7-07-weekly-recap': (MD, False, weekly),
 }
-FRI = {'v7-06-edge-reveal', 'v7-07-weekly-recap'}
+FRI = {'v7-07-weekly-recap'}   # (13 Nov.) Edge Reveal left with the game
 SIGNED_OUT = {'v7-15-onboarding', 'v7-24-signup'}
 CLEAN = {'v7-09-ninjatrader-sync': shots.relink}
 
