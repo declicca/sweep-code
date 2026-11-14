@@ -334,13 +334,13 @@ function wp_notify(PDO $pdo, string $uid, string $kind, string $url, array $para
     try {
         $cfg = wp_config();
         if (!$cfg || !isset(WP_KINDS[$kind]) || !isset(WP_TEXT['en'][$kind]) || empty(wp_prefs($pdo, $uid)[$kind]['on'])) return 0;
-        $n = 0; $now = time();
+        $n = 0; $now = class_exists('GameEngine', false) ? GameEngine::ts() : time();   // (13 Nov.) the game's clock, as the reminders that call this (time() live; the tests' clock otherwise)
         foreach (wp_q($pdo, 'SELECT * FROM push_subscriptions WHERE user_id = ?', [$uid])->fetchAll(PDO::FETCH_ASSOC) as $s) {
             if (!in_array($kind, WP_QUIET_FREE, true) && wp_quiet($s['tz'] ?? null, $now)) continue;   // (5 Nov.) never at night on that phone
             $fill = fn(string $x) => strtr($x, array_combine(array_map(fn($k) => '{' . $k . '}', array_keys($params)), array_map('strval', $params)) ?: []);
             [$title, $body] = array_map($fill, (WP_TEXT[$s['lang']] ?? WP_TEXT['en'])[$kind]);
             if ($kind === 'plan') {   // (5 Nov.) the plan reminder says the day's big release, when there is one (the game's clock: its New York date)
-                $d = (new DateTimeImmutable('@' . (class_exists('GameEngine', false) ? GameEngine::ts() : $now)))->setTimezone(new DateTimeZone('America/New_York'))->format('Y-m-d');
+                $d = (new DateTimeImmutable('@' . $now))->setTimezone(new DateTimeZone('America/New_York'))->format('Y-m-d');
                 $body = wp_econ_line(in_array($s['lang'], ['en', 'fr', 'es'], true) ? $s['lang'] : 'en', $d) ?? $body;
             }
             if (wp_deliver($pdo, $s, ['title' => $title, 'body' => $body, 'url' => $url, 'tag' => 'sweep-' . $kind], $kind, $cfg)) $n++;
