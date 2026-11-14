@@ -778,7 +778,9 @@ function sync_status(PDO $pdo, string $uid): array
     unset($x);
     $addons = []; foreach (SYNC_ADDONS as $pl => $f) $addons[$pl] = is_file($f) ? ['url' => 'api/sync/addon?platform=' . $pl, 'size' => filesize($f), 'embed' => sync_can_embed($pl)] : null;
     $firms = []; foreach (sync_firms() as $id => [$name]) $firms[$id] = $name;   // the catalogue's names, for what a guess says
-    return ['connections' => $conns, 'accounts' => $accts, 'addons' => $addons, 'firms' => $firms];
+    // Plan Sync (sync/plan-sync.php): when an add-on last read the day's plan, and which one (the editor's « Synced with … »)
+    $pr = null; try { $pr = sync_q($pdo, "SELECT platform, plan_read_at FROM sync_connections WHERE user_id = ? AND status = 'active' AND plan_read_at IS NOT NULL ORDER BY plan_read_at DESC LIMIT 1", [$uid])->fetch() ?: null; } catch (Throwable $e) { /* column added by the first read */ }
+    return ['connections' => $conns, 'accounts' => $accts, 'addons' => $addons, 'firms' => $firms, 'plan_read_at' => $pr ? (int) $pr['plan_read_at'] : null, 'plan_read_by' => $pr ? (string) $pr['platform'] : null];
 }
 /**
  * Admin › Sync: per platform (traders with a key, add-on seen within 24 h, accounts linked, trades written in 7 days), then one

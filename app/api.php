@@ -680,6 +680,7 @@ function delete_user_everything(string $uid): void {
     // our own emails (3 Nov.): a campaign's numbers stay, without the address, the name or the link to the account; the set-aside line goes
     try { $em0 = strtolower(trim((string) q('SELECT email FROM users WHERE id = ?', [$uid])->fetchColumn())); q("UPDATE mail_queue SET user_id = NULL, email = 'deleted', first_name = NULL, subject = NULL, text_body = NULL, html_body = NULL WHERE user_id = ?", [$uid]); if ($em0 !== '') q('DELETE FROM mail_suppress WHERE email_lc = ?', [$em0]); } catch (Throwable $e) { /* mail tables not created yet */ }
     foreach (['sync_fills', 'sync_trades', 'sync_accounts', 'sync_connections'] as $t) { try { q("DELETE FROM $t WHERE user_id = ?", [$uid]); } catch (Throwable $e) { /* sync tables not created yet */ } }   // sync/: keys, executions, accounts found
+    require_once __DIR__ . '/sync/plan-sync.php'; ps_delete_user(db(), $uid);   // Plan Sync: the add-ons' events
     if (billing_on()) {
         try {
             require_once __DIR__ . '/billing/billing-stripe.php';
@@ -813,6 +814,8 @@ try {
     }
     // sync add-ons (sync/: NinjaTrader 8, Quantower): executions sent with the trader's personal key (X-Sweep-Key), no session, no CSRF header
     if ($route === 'api/sync/push') { require_once __DIR__ . '/sync/sync-routes.php'; sync_push_route($method); }
+    // Plan Sync (sync/plan-sync.php): the day's plan read by the chart add-ons, their events — the same key, no session, no CSRF header
+    if (strpos($route, 'api/plan-sync/') === 0) { require_once __DIR__ . '/sync/plan-sync.php'; ps_route($route, $method); }
     // « Your week » email: the link at its bottom stops (or starts again) the email, without signing in: the link carries the trader's own token
     // (no CSRF header: mail apps post the one-click « Unsubscribe » themselves, List-Unsubscribe-Post)
     if ($route === 'api/email/weekly' && class_exists('GameWeeklyMail')) GameWeeklyMail::page($method, (string) ($_GET['t'] ?? ''));
