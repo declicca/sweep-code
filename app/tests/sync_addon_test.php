@@ -74,7 +74,35 @@ $qz = $app . '/sync/addon/SweepSync-Quantower.zip';
 if (is_file($qz)) {
     $names = []; if (class_exists('ZipArchive')) { $z = new ZipArchive(); if ($z->open($qz) === true) { for ($i = 0; $i < $z->numFiles; $i++) $names[] = $z->getNameIndex($i); $z->close(); } }
     else $names = array_filter(array_map('trim', explode("\n", (string) shell_exec('unzip -Z1 ' . escapeshellarg($qz) . ' 2>/dev/null'))));
-    ok(array_values($names) === ['SweepSync/SweepSync.dll'], 'Quantower: the zip holds the compiled add-on only (SweepSync/SweepSync.dll)');
+    // until it is built again with Plan Sync (tools/addon-quantower.py): the panel alone, unzipped into « plug-ins »; once built: the
+    // panel and the indicator in Quantower's folders, unzipped into « Scripts » — the « Connect Quantower » sheet must say so
+    $ux = (string) file_get_contents($app . '/src/ux.js');
+    $plan = ['Indicators/SweepPlan/SweepPlan.dll', 'plug-ins/SweepSync/SweepSync.dll'];
+    $sorted = array_values($names); sort($sorted);
+    ok(array_values($names) === ['SweepSync/SweepSync.dll'] ? str_contains($ux, 'Settings › Scripts › plug-ins') : ($sorted === $plan && !str_contains($ux, 'Settings › Scripts › plug-ins')),
+        'Quantower: the zip holds the compiled add-on only (' . implode(', ', $names) . '), and the « Connect Quantower » sheet says where to unzip it');
 } else echo "--   Quantower: no zip yet (built at step 3 with tools/addon-quantower.py)\n";
+
+// Plan Sync (step 3): the Sweep Plan indicator, its shared logic, the same key and server, never an order, no market data out
+$pi = (string) file_get_contents($app . '/sync/addon/quantower-plan/SweepPlan.cs');
+$pp = (string) file_get_contents($app . '/sync/addon/quantower-plan/SweepPlan.csproj');
+$pc = (string) file_get_contents($app . '/sync/addon/plan/PlanCore.cs');
+$ps = (string) file_get_contents($app . '/sync/plan-sync.php');
+$tool = (string) file_get_contents($app . '/tools/addon-quantower.py');
+ok(str_contains($pi, 'class SweepPlanIndicator : Indicator') && str_contains($pp, '<Compile Include="..\\plan\\PlanCore.cs"') && str_contains($pp, '<Private>false</Private>') && str_contains($pp, 'ExcludeAssets="runtime"'), 'Plan Sync: an indicator, with the shared logic (plan/PlanCore.cs), Quantower\'s library referenced, never shipped');
+ok(str_contains($tool, "'Indicators/SweepPlan/SweepPlan.dll'") && str_contains($tool, "'plug-ins/SweepSync/SweepSync.dll'"), 'Plan Sync: the add-on tool builds the panel and the indicator into one zip');
+ok(preg_match('/\b(PlaceOrder|CancelOrder|ModifyOrder|ClosePosition|SendCustomRequest|Core\.Instance\.(Orders|Positions))\b|\.(Close|Cancel)\s*\(/', $pi . $pc) === 0, 'Plan Sync: never an order call (no PlaceOrder, CancelOrder, ModifyOrder, Close)');
+ok(str_contains($pi, '"/api/plan-sync/today?instrument="') && str_contains($pi, '"/api/plan-sync/events"') && str_contains($pi, 'TryAddWithoutValidation("X-Sweep-Key", k)') && str_contains($pi, '"If-None-Match"'), 'Plan Sync: the plan read with the sync key and its ETag, the events sent to their route');
+ok(str_contains($pi, '"Sweep Quantower Plan " + Version') && str_contains($store, "'Sweep Quantower' => 'quantower'") && str_contains($pi, '"https://app.makeitsweep.com"') && str_contains($pi, '"config.txt"'), 'Plan Sync: it names itself « Sweep Quantower … » (a Quantower key only), app.makeitsweep.com, the panel\'s key (config.txt)');
+preg_match_all("/'([a-z_]+)'/", (string) (preg_match('/PS_EVENT_TYPES = \[([^\]]*)\]/', $ps, $m) ? $m[1] : ''), $types);
+ok(str_contains($pc, '"zone_approached"') && str_contains($pc, '"zone_entered"') && str_contains($pc, '"rule_triggered"') && !array_diff(['zone_approached', 'zone_entered', 'rule_triggered'], $types[1] ?? []), 'Plan Sync: the event types are the server\'s');
+preg_match_all('/"(approach|enter|close_above|close_below|sweep|time)"/', (string) (preg_match('/Triggers = \{([^}]*)\}/', $pc, $m2) ? $m2[1] : ''), $tr);
+ok(($tr[1] ?? []) === ['approach', 'enter', 'close_above', 'close_below', 'sweep', 'time'] && str_contains((string) file_get_contents($app . '/game/chart-plan.php'), "TRIGGERS = ['approach', 'enter', 'close_above', 'close_below', 'sweep', 'time']"), 'Plan Sync: the V1 triggers, the same as the app\'s');
+// the app's default approach distances (src/game.js PC_ROOTS) = the add-on's
+$gjs = (string) file_get_contents($app . '/src/game.js');
+preg_match_all('/\b\'?([0-9A-Z]{1,4})\'?: \{ (?:m: \'[0-9A-Z]+\', )?prox: (\d+) \}/', (string) (preg_match('/const PC_ROOTS = \{(.*?)\};/s', $gjs, $m3) ? $m3[1] : ''), $js);
+preg_match_all('/\{ "([0-9A-Z]+)", (\d+) \}/', (string) (preg_match('/Prox = new Dictionary<string, int>\s*\{(.*?)\};/s', $pc, $m4) ? $m4[1] : ''), $cs2);
+ok(count($js[1]) >= 10 && array_combine($js[1], $js[2]) == array_combine($cs2[1], $cs2[2]), 'Plan Sync: the default approach distances are the app\'s (' . count($js[1]) . ' roots)');
+ok(str_contains($pc, 'public static string NoPlan(string l) { return Pick(l, "No plan') && preg_match_all('/Pick\((?:lang|l), "/', $pc) >= 20, 'Plan Sync: the add-on\'s texts in English, French and Spanish');
 
 echo "\n" . ($f ? "$f failed" : "$n/$n passed") . "\n"; exit($f ? 1 : 0);

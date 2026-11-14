@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Sweep Plan for Quantower (Plan Sync, an indicator), shipped in the same zip as the Sweep Sync panel. Built by
+       tools/addon-quantower.py with Quantower's library (QuantowerBin = <Quantower>\TradingPlatform\v1.x\bin), referenced only.
+       The logic shared with NinjaTrader 8 is ../plan/PlanCore.cs. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>SweepPlan</AssemblyName>
+    <RootNamespace>SweepPlan</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>true</Deterministic>
+    <DebugType>none</DebugType>
+    <PathMap>$(MSBuildProjectDirectory)=/SweepPlan</PathMap>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\plan\PlanCore.cs" Link="PlanCore.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- drawing on the chart (GDI+), as Quantower's own examples; compile only: Quantower brings it, it is not shipped -->
+    <PackageReference Include="System.Drawing.Common" Version="8.0.8" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="TradingPlatform.BusinessLayer">
+      <HintPath>$(QuantowerBin)\TradingPlatform.BusinessLayer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
