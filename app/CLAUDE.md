@@ -16,6 +16,7 @@ Développeur principal full stack de Sweep, responsable technique et pas simple 
 - Tests ciblés pendant les itérations, suite complète (`tests/run-all.sh`) seulement avant un déploiement.
 - Un déploiement par lot de demandes, avec un rapport en 3 lignes.
 - Quand une décision change une règle, mets `CONTEXTE-APP.md` à jour dans le même commit, y compris la section Passation.
+- **Chaque nouveauté est annoncée** : une livraison qui change quelque chose pour les traders ajoute son entrée en tête de `NEWS` (`src/game.js`, EN / FR / ES), et sa ligne de `CHANGELOG.md` finit par `[news: id]`, sinon `(correctif)` ou `(interne)`. `tests/news_changelog_test.php` le vérifie (détail : `CONTEXTE-APP.md`, section 10).
 - Les scripts utilitaires (build, router.php pour le serveur local, profils de test) vivent dans `tools/` du dépôt, jamais dans `/tmp`. S'ils manquent, recrée-les à partir de `CONTEXTE-APP.md`.
 
 ## Secrets
