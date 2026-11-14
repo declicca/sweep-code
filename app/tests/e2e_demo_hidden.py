@@ -73,7 +73,12 @@ with sync_playwright() as p:
       if srv == {'trades': 0, 'accounts': 0, 'payouts': 0}: break
       pg.wait_for_timeout(500)
     ok(srv == {'trades': 0, 'accounts': 0, 'payouts': 0}, f'{tag} Remove: gone from the server ({srv})')
-    ok(pg.evaluate("!!getDoc('trades','dh-t1') && !!getDoc('accounts','dh-a') && !document.querySelector('#main .nav-demo-hid')"), f'{tag} his own trade and account untouched, the line gone')
+    # (14 Nov.) the page redraws after the queue empties: on GitHub's slower machine the line can stay a moment longer
+    gone = "!!getDoc('trades','dh-t1') && !!getDoc('accounts','dh-a') && !document.querySelector('#main .nav-demo-hid')"
+    for _ in range(20):
+      if pg.evaluate(gone): break
+      pg.wait_for_timeout(500)
+    ok(pg.evaluate(gone), f'{tag} his own trade and account untouched, the line gone')
     ok(not errs and pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 0, f'{tag} no page error, nothing wider than the window ({errs[:1]})')
     c.close()
   br.close()
