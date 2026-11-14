@@ -226,7 +226,7 @@ $ok((pa_news_send(['en' => ['Again', 'Again']])['error'] ?? '') === 'too_soon', 
 $ok((pa_save('payoutReady', ['on' => true, 'text' => ['en' => ['', '']]])['error'] ?? '') === 'text', 'never switched on without an English title and line');
 
 // 7. the streak reminder on the phone: its number, and never at night on that phone
-$now = time();
+$now = class_exists('GameEngine', false) ? GameEngine::ts() : time();   // the clock wp_notify reads (the game's, as the reminders)
 $user('s'); $epS = $device('s', 'fr', 'America/New_York'); $epS2 = $device('s', 'en', 'Asia/Tokyo');
 $quietTokyo = wp_quiet('Asia/Tokyo', $now); $quietNy = wp_quiet('America/New_York', $now);
 wp_notify($pdo, 's', 'streak', '#dashboard', ['n' => 4]);
