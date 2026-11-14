@@ -36,6 +36,7 @@ $MARKET_KEY      = trim((string)(getenv('MARKET_DATA_API_KEY') ?: ($cfg['market_
 $MARKET_SYMBOL   = trim((string)($cfg['market_symbol'] ?? 'NQ.v.0'));
 require_once __DIR__ . '/econ.php';
 require_once __DIR__ . '/game/fiche.php';   // the pre-market sheet of a trading day (journals/{day}.fiche)
+require_once __DIR__ . '/game/chart-plan.php';   // Plan Sync: the day's zones and rules for the chart (journals/{day}.chart)
 /** the trader's lock time for the pre-market sheet (Settings), else 09:25 New York */
 function fiche_lock_hm(string $uid): ?string
 {
@@ -1188,7 +1189,8 @@ try {
                 $d['user_id'] = $UID; $id = (string) $d['id'];
                 if ($col === 'journals') {   // the sheet of the day: normalized, locked as it was
                     $pv = q('SELECT data FROM documents WHERE user_id = ? AND collection = ? AND id = ?', [$UID, $col, $id])->fetchColumn();
-                    $d = Fiche::apply($d, $id, $pv !== false ? (json_decode((string) $pv, true) ?: []) : null, null, fiche_lock_hm((string) $UID));
+                    $pvd = $pv !== false ? (json_decode((string) $pv, true) ?: []) : null;
+                    $d = ChartPlan::apply(Fiche::apply($d, $id, $pvd, null, fiche_lock_hm((string) $UID)), $id, $pvd);
                 }
                 $json = json_encode($d, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 $prev = q('SELECT data FROM documents WHERE user_id = ? AND collection = ? AND id = ?', [$UID, $col, $id])->fetchColumn();
@@ -1234,8 +1236,10 @@ try {
             $obj = json_decode((string) file_get_contents('php://input'));
             if ($obj instanceof stdClass && $col === 'journals') {   // the sheet as the server keeps it (normalized; locked as it was; never dropped by omission)
                 $pv = q('SELECT data FROM documents WHERE user_id = ? AND collection = ? AND id = ?', [$UID, $col, $id])->fetchColumn();
-                $doc = Fiche::apply($doc, $id, $pv !== false ? (json_decode((string) $pv, true) ?: []) : null, null, fiche_lock_hm((string) $UID));
+                $pvd = $pv !== false ? (json_decode((string) $pv, true) ?: []) : null;
+                $doc = ChartPlan::apply(Fiche::apply($doc, $id, $pvd, null, fiche_lock_hm((string) $UID)), $id, $pvd);
                 if (array_key_exists('fiche', $doc)) $obj->fiche = $doc['fiche']; else unset($obj->fiche);
+                if (array_key_exists('chart', $doc)) $obj->chart = json_decode(json_encode($doc['chart'])); else unset($obj->chart);
             }
             if ($obj instanceof stdClass) { $obj->id = $id; $obj->user_id = $UID; $json = json_encode($obj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); }
             else $json = json_encode($doc, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

@@ -1172,6 +1172,7 @@
         <div class="g-f"><span>${pt('x_levels')}${pmI('levels')}</span>${pmTipP('levels')}${pmIn('X_levels', a.X_levels, pt('x_levels_ph'), 'text')}</div>
         <div class="g-f"><span>${pt('x_plan')}${pmI('plan')}</span>${pmTipP('plan')}${ta('X_plan', pt('x_plan_ph'))}</div>
         <div class="g-f"><span>${pt('x_alt')}${pmI('alt')}</span>${pmTipP('alt')}${ta('X_alt', pt('x_alt_ph'))}</div>
+        ${chartRow(PM.day)}
         <div class="g-f"><span>${pt('dml')}${pmI('maxloss')}</span>${pmTipP('maxloss')}${pmIn('max_loss', a.max_loss, '$')}${pmLimHint()}${PM.small ? `<small class="g-hint-sm g-small">${t('start_small')}</small>` : ''}</div>
         ${PM.late ? `<button type="button" class="link pm-off-day" data-pm="later">${pt('x_later')}</button>` : `<button type="button" class="link pm-off-day" data-pm="mode" data-v="full"${PM.offerKeep ? ' data-keep="1"' : ''}>${pt(PM.offerKeep ? 'x_keep' : 'x_guided')}</button>`}
         <button type="button" class="link pm-off-day" data-pm="dayoff">${t('no_trade')}</button>`;
@@ -1188,7 +1189,7 @@
       <div class="pm-sep" role="separator"></div><h3 class="pm-q">${pt('c4')}${pmI('stopday')}</h3>${pmTipP('stopday')}<div class="g-chips-row wrap">${FICHE.NO_TRADE.map((c) => `<button type="button" class="chip ${nt.includes(c) ? 'on' : ''}" aria-pressed="${nt.includes(c)}" data-pm="nt" data-v="${c}">${esc(c === 'time_limit' && f.limits.time_limit ? pt('nt_time', { t: f.limits.time_limit }) : pt(c))}</button>`).join('')}</div>
       ${nt.includes('other') ? `<label class="g-f"><span>${pt('other')}</span><input type="text" maxlength="120" data-pmf="no_trade_other" value="${esc(f.no_trade_other || '')}" placeholder="${esc(pt('other_ph'))}"></label>` : ''}`;
     }
-    if (name === 'sheet') return `<h3 class="pm-q">${pt('sheet')}</h3>${pmSheetHtml(pmFinal(), true)}<p class="g-err" id="gErr"></p>`;
+    if (name === 'sheet') return `<h3 class="pm-q">${pt('sheet')}</h3>${pmSheetHtml(pmFinal(), true)}${chartRow(PM.day)}<p class="g-err" id="gErr"></p>`;
     return '';
   }
   function pmHtml() {
@@ -1482,7 +1483,7 @@
       ${over ? `<p class="pm-banner pm-over" role="status">${st('over')}</p>` : ''}
       <p class="pm-count" data-noi18n>${esc(st('trades', { n: trades, m: f.limits.max_trades }))}</p>
       <div class="pm-sheet pm-sheet-s">${pmExpressLines(f)}${nt.length ? `<p class="pm-l"><b>${pt('notrade')}</b> · ${esc(nt.join(pt('or')))}</p>` : ''}<p class="pm-l"><b>${pt('lim')}</b> · ${esc([pt('risk_l', { p: pmFmt(f.limits.risk_pct) })].concat(f.news_windows.map((w) => pt('window', { a: w.start, b: w.end }))).join(' · '))}</p></div>
-      <div class="pm-body pm-ss-body">${scen}</div>`;
+      <div class="pm-body pm-ss-body">${scen}</div>${chartRow(f.trading_day)}`;
   }
   function ssRender(day) { const el = document.querySelector('#gSheet.g-pm-locked .g-in'), f = ficheGet(day); if (el && f) el.innerHTML = pmLockedHtml(f); }
   /** a box of the checklist: the next one, or undo the last one; all checked → confirmed */
@@ -1581,6 +1582,315 @@
   });
   Object.assign(window.SweepFiche, { maybeExpress: ficheMaybeExpress, markTrade: ficheMarkTrade, link: ficheLink, over: (day) => { const f = ficheGet(day); return f ? ssOver(f) : ''; } });
   Object.assign(window.SweepFiche, { open: openPremarket, scenarios: pmScenarios, target: pmTarget, compute: pmCompute, viable: pmViable, line: pmScenarioLine, sheetHtml: pmSheetHtml });
+
+  /* ───────────── Plan Sync, step 1 (BRIEF_PLAN_SYNC, 13 Nov. 2026): the plan on the chart ─────────────
+     The day's levels and zones, and simple « If… then » rules, made readable by the add-ons (Quantower, NinjaTrader; step 2+).
+     Kept in the day's journal next to the sheet but outside it (journals/{day}.chart, game/chart-plan.php): the sheet locks
+     at the session, the zones stay editable all day. Opened from one row of the plan (express, the guided plan's sheet, the
+     session view), as a sheet over the plan, so the plan being filled keeps its answers. Sweep reminds, it never trades. */
+  const PCT = {
+    en: { title: 'Plan on the chart', row: 'Plan on the chart', row_none: 'Your levels on Quantower or NinjaTrader', z1: '1 zone', zn: '{n} zones', r1: '1 rule', rn: '{n} rules',
+      intro: 'Your levels and zones show on your Quantower or NinjaTrader chart, with an alert when price gets close. Sweep never places an order.',
+      sync_on: 'Synced with {p} · {ago}', sync_off: 'Not connected yet', install: 'Install the add-on', ago_s: '{n} s ago', ago_m: '{n} min ago', ago_h: '{n} h ago',
+      zones: 'Levels and zones', add_zone: 'Add a level or a zone', resume_y: 'Use yesterday’s zones', resume_d: 'Use the zones of {d}', resumed: '{n} zones of {d} copied: check them.',
+      rules: 'If… then', rules_hint: 'Without a rule, each zone already alerts you when price gets close and when it touches it.', add_rule: 'Add a rule', once: 'Each rule fires once per session.', need_zone: 'Add a zone first, or a rule at a time of day.',
+      z_new: 'New level or zone', z_edit: 'Edit the zone', r_new: 'New rule', r_edit: 'Edit the rule', inst: 'Instrument', inst_h: 'A level on {r} also shows on {m}.', other: 'Other', other_ph: 'Symbol, e.g. 6E',
+      level: 'Level', zone: 'Zone', level_h: 'One price.', zone_h: 'Between two prices.', price: 'Price', high: 'High', low: 'Low', label: 'Name', label_ph: 'e.g. PDH, Asia low, Buy zone',
+      label_tip: 'PDH / PDL: the previous day’s high and low. Asia / London high and low: the high and low of those sessions (New York time: Asia 18:00–3:00, London 3:00–8:00).',
+      role: 'Role', support: 'Support', resistance: 'Resistance', target: 'Target', invalidation: 'Invalidation', neutral: 'Neutral',
+      tip_support: 'A price where you expect buyers.', tip_resistance: 'A price where you expect sellers.', tip_target: 'Where you plan to take your profit.', tip_invalidation: 'Past this price, your idea is wrong.', tip_neutral: 'Just a level to watch.',
+      bias: 'Bias', long: 'Long', short: 'Short', none: 'None', bias_tip: 'The direction you favour at this zone: long = buy, short = sell.',
+      note: 'Note (optional)', note_ph: 'e.g. I want a sweep and a close back above', prox: 'Approach alert, in ticks', prox_h: '{n} ticks = {p} points. A tick is the smallest price step of {r} ({t}).',
+      save: 'Save', del: 'Delete', back: 'Back', e_price: 'Enter a price.', e_tick: '{r} moves by {t}: {v} is not a possible price. Try {a}.', e_zone: 'The high must be above the low.',
+      e_label: 'Give it a name.', e_inst: 'Pick the instrument.', e_prox: 'The approach alert is a whole number of ticks.', e_zone_need: 'Pick a zone.', e_time: 'Pick a time.',
+      if: 'If…', then: '…then', t_approach: 'price gets close to', t_enter: 'price touches', t_close_above: 'a candle closes above', t_close_below: 'a candle closes below', t_sweep: 'price sweeps', t_time: 'it is',
+      tip_approach: 'Within the zone’s approach distance.', tip_enter: 'Price touches the level or enters the zone.', tip_close: 'Counted when the candle of the chosen time frame closes, not while it moves.',
+      tip_sweep: 'Sweep: price goes past the level by at least 1 tick, then a candle closes back on the other side.', tip_time: 'New York time.', tf: 'Candle (m = minutes)', time: 'Time (New York)', which: 'Which zone',
+      a_alert: 'alert me with my message', a_plan: 'remind me of my plan', a_limit: 'remind me of my limit', tip_a_alert: 'Your message, as you write it.',
+      tip_a_plan: 'Your bias, the zone’s note and your plan’s checklist.', tip_a_limit: 'Your risk allowed today and your max trades, as Sweep knows them.',
+      msg: 'Message (optional)', msg_ph: 'e.g. Wait for the reclaim, long on the buy zone, stop under the wick', preview: 'In words',
+      p_alert: 'alert me', p_plan: 'remind me of my plan', p_limit: 'remind me of my limit' },
+    fr: { title: 'Plan sur le chart', row: 'Plan sur le chart', row_none: 'Tes niveaux sur Quantower ou NinjaTrader', z1: '1 zone', zn: '{n} zones', r1: '1 règle', rn: '{n} règles',
+      intro: 'Tes niveaux et tes zones s’affichent sur ton chart Quantower ou NinjaTrader, avec une alerte quand le prix s’en approche. Sweep ne passe jamais d’ordre.',
+      sync_on: 'Synchronisé avec {p} · {ago}', sync_off: 'Pas encore connecté', install: 'Installer l’add-on', ago_s: 'il y a {n} s', ago_m: 'il y a {n} min', ago_h: 'il y a {n} h',
+      zones: 'Niveaux et zones', add_zone: 'Ajouter un niveau ou une zone', resume_y: 'Reprendre les zones d’hier', resume_d: 'Reprendre les zones du {d}', resumed: '{n} zones du {d} reprises : vérifie-les.',
+      rules: 'Si… alors', rules_hint: 'Sans règle, chaque zone t’avertit déjà quand le prix s’approche et quand il la touche.', add_rule: 'Ajouter une règle', once: 'Chaque règle se déclenche une fois par séance.', need_zone: 'Ajoute d’abord une zone, ou une règle à une heure de la journée.',
+      z_new: 'Nouveau niveau ou zone', z_edit: 'Modifier la zone', r_new: 'Nouvelle règle', r_edit: 'Modifier la règle', inst: 'Instrument', inst_h: 'Un niveau sur le {r} s’affiche aussi sur le {m}.', other: 'Autre', other_ph: 'Symbole, ex. 6E',
+      level: 'Niveau', zone: 'Zone', level_h: 'Un prix.', zone_h: 'Entre deux prix.', price: 'Prix', high: 'Haut', low: 'Bas', label: 'Nom', label_ph: 'ex. PDH, Asia low, Zone d’achat',
+      label_tip: 'PDH / PDL : le plus haut et le plus bas de la veille. Asia / London high et low : le plus haut et le plus bas de ces séances (heure de New York : Asie 18 h–3 h, Londres 3 h–8 h).',
+      role: 'Rôle', support: 'Support', resistance: 'Résistance', target: 'Objectif', invalidation: 'Invalidation', neutral: 'Neutre',
+      tip_support: 'Un prix où tu attends des acheteurs.', tip_resistance: 'Un prix où tu attends des vendeurs.', tip_target: 'Là où tu prévois de prendre ton gain.', tip_invalidation: 'Au-delà de ce prix, ton idée est fausse.', tip_neutral: 'Juste un niveau à surveiller.',
+      bias: 'Biais', long: 'Long', short: 'Short', none: 'Aucun', bias_tip: 'La direction que tu privilégies sur cette zone : long = acheter, short = vendre.',
+      note: 'Note (facultative)', note_ph: 'ex. Je veux voir un sweep et un retour au-dessus', prox: 'Alerte d’approche (ticks)', prox_h: '{n} ticks = {p} points. Un tick est le plus petit pas de prix du {r} ({t}).',
+      save: 'Enregistrer', del: 'Supprimer', back: 'Retour', e_price: 'Entre un prix.', e_tick: 'Le {r} avance par {t} : {v} n’est pas un prix possible. Essaie {a}.', e_zone: 'Le haut doit être au-dessus du bas.',
+      e_label: 'Donne-lui un nom.', e_inst: 'Choisis l’instrument.', e_prox: 'L’alerte d’approche est un nombre entier de ticks.', e_zone_need: 'Choisis une zone.', e_time: 'Choisis une heure.',
+      if: 'Si…', then: '…alors', t_approach: 'le prix s’approche de', t_enter: 'le prix touche', t_close_above: 'une bougie ferme au-dessus de', t_close_below: 'une bougie ferme au-dessous de', t_sweep: 'le prix sweep', t_time: 'il est',
+      tip_approach: 'À la distance d’approche de la zone.', tip_enter: 'Le prix touche le niveau ou entre dans la zone.', tip_close: 'Compté quand la bougie de l’unité choisie ferme, pas pendant qu’elle bouge.',
+      tip_sweep: 'Sweep : le prix dépasse le niveau d’au moins 1 tick, puis une bougie ferme de retour de l’autre côté.', tip_time: 'Heure de New York.', tf: 'Bougie (m = minutes)', time: 'Heure (New York)', which: 'Quelle zone',
+      a_alert: 'm’avertir avec mon message', a_plan: 'me rappeler mon plan', a_limit: 'me rappeler ma limite', tip_a_alert: 'Ton message, tel que tu l’écris.',
+      tip_a_plan: 'Ton biais, la note de la zone et la checklist de ton plan.', tip_a_limit: 'Ton risque permis aujourd’hui et ton nombre max de trades, tels que Sweep les connaît.',
+      msg: 'Message (facultatif)', msg_ph: 'ex. Attendre le retour au-dessus, long sur la zone d’achat, stop sous la mèche', preview: 'En mots',
+      p_alert: 'avertis-moi', p_plan: 'rappelle-moi mon plan', p_limit: 'rappelle-moi ma limite' },
+    es: { title: 'Plan en el gráfico', row: 'Plan en el gráfico', row_none: 'Tus niveles en Quantower o NinjaTrader', z1: '1 zona', zn: '{n} zonas', r1: '1 regla', rn: '{n} reglas',
+      intro: 'Tus niveles y zonas aparecen en tu gráfico de Quantower o NinjaTrader, con una alerta cuando el precio se acerca. Sweep nunca envía órdenes.',
+      sync_on: 'Sincronizado con {p} · {ago}', sync_off: 'Aún no conectado', install: 'Instalar el add-on', ago_s: 'hace {n} s', ago_m: 'hace {n} min', ago_h: 'hace {n} h',
+      zones: 'Niveles y zonas', add_zone: 'Añadir un nivel o una zona', resume_y: 'Retomar las zonas de ayer', resume_d: 'Retomar las zonas del {d}', resumed: '{n} zonas del {d} retomadas: revísalas.',
+      rules: 'Si… entonces', rules_hint: 'Sin regla, cada zona ya te avisa cuando el precio se acerca y cuando la toca.', add_rule: 'Añadir una regla', once: 'Cada regla se activa una vez por sesión.', need_zone: 'Añade primero una zona, o una regla a una hora del día.',
+      z_new: 'Nuevo nivel o zona', z_edit: 'Editar la zona', r_new: 'Nueva regla', r_edit: 'Editar la regla', inst: 'Instrumento', inst_h: 'Un nivel en el {r} también aparece en el {m}.', other: 'Otro', other_ph: 'Símbolo, p. ej. 6E',
+      level: 'Nivel', zone: 'Zona', level_h: 'Un precio.', zone_h: 'Entre dos precios.', price: 'Precio', high: 'Alto', low: 'Bajo', label: 'Nombre', label_ph: 'p. ej. PDH, Asia low, Zona de compra',
+      label_tip: 'PDH / PDL: el máximo y el mínimo del día anterior. Asia / London high y low: el máximo y el mínimo de esas sesiones (hora de Nueva York: Asia 18:00–3:00, Londres 3:00–8:00).',
+      role: 'Rol', support: 'Soporte', resistance: 'Resistencia', target: 'Objetivo', invalidation: 'Invalidación', neutral: 'Neutral',
+      tip_support: 'Un precio donde esperas compradores.', tip_resistance: 'Un precio donde esperas vendedores.', tip_target: 'Donde piensas tomar tu ganancia.', tip_invalidation: 'Más allá de este precio, tu idea es incorrecta.', tip_neutral: 'Solo un nivel a vigilar.',
+      bias: 'Sesgo', long: 'Long', short: 'Short', none: 'Ninguno', bias_tip: 'La dirección que prefieres en esta zona: long = comprar, short = vender.',
+      note: 'Nota (opcional)', note_ph: 'p. ej. Quiero ver un sweep y un regreso por encima', prox: 'Alerta de aproximación (ticks)', prox_h: '{n} ticks = {p} puntos. Un tick es el paso de precio más pequeño del {r} ({t}).',
+      save: 'Guardar', del: 'Eliminar', back: 'Atrás', e_price: 'Introduce un precio.', e_tick: 'El {r} avanza de {t} en {t}: {v} no es un precio posible. Prueba {a}.', e_zone: 'El alto debe estar por encima del bajo.',
+      e_label: 'Dale un nombre.', e_inst: 'Elige el instrumento.', e_prox: 'La alerta de aproximación es un número entero de ticks.', e_zone_need: 'Elige una zona.', e_time: 'Elige una hora.',
+      if: 'Si…', then: '…entonces', t_approach: 'el precio se acerca a', t_enter: 'el precio toca', t_close_above: 'una vela cierra por encima de', t_close_below: 'una vela cierra por debajo de', t_sweep: 'el precio hace sweep de', t_time: 'son las',
+      tip_approach: 'A la distancia de aproximación de la zona.', tip_enter: 'El precio toca el nivel o entra en la zona.', tip_close: 'Cuenta cuando la vela de la temporalidad elegida cierra, no mientras se mueve.',
+      tip_sweep: 'Sweep: el precio supera el nivel por al menos 1 tick y luego una vela cierra de vuelta del otro lado.', tip_time: 'Hora de Nueva York.', tf: 'Vela (m = minutos)', time: 'Hora (Nueva York)', which: 'Qué zona',
+      a_alert: 'avisarme con mi mensaje', a_plan: 'recordarme mi plan', a_limit: 'recordarme mi límite', tip_a_alert: 'Tu mensaje, tal como lo escribes.',
+      tip_a_plan: 'Tu sesgo, la nota de la zona y el checklist de tu plan.', tip_a_limit: 'Tu riesgo permitido hoy y tu máximo de trades, tal como Sweep los conoce.',
+      msg: 'Mensaje (opcional)', msg_ph: 'p. ej. Esperar el regreso por encima, long en la zona de compra, stop bajo la mecha', preview: 'En palabras',
+      p_alert: 'avísame', p_plan: 'recuérdame mi plan', p_limit: 'recuérdame mi límite' },
+  };
+  const ct = (k, p) => { let s = (PCT[L()] || PCT.en)[k]; if (s == null) s = PCT.en[k] != null ? PCT.en[k] : k; return p ? s.replace(/\{(\w+)\}/g, (m, x) => (p[x] != null ? p[x] : m)) : s; };
+  /** the one table of Plan Sync: each root, its micro (same prices) and its default approach distance in ticks (NQ 40 = 10 points,
+      ES 8 = 2 points); the tick sizes are the app's own (app.js INSTR) */
+  const PC_ROOTS = { NQ: { m: 'MNQ', prox: 40 }, ES: { m: 'MES', prox: 8 }, YM: { m: 'MYM', prox: 20 }, RTY: { m: 'M2K', prox: 20 }, CL: { m: 'MCL', prox: 10 }, GC: { m: 'MGC', prox: 20 },
+    SI: { m: 'SIL', prox: 10 }, '6E': { m: 'M6E', prox: 20 }, NG: { prox: 10 }, HG: { prox: 20 }, ZN: { prox: 8 }, ZB: { prox: 8 }, MBT: { prox: 20 }, MET: { prox: 20 } };
+  const PC_MICRO = Object.fromEntries(Object.entries(PC_ROOTS).filter(([, v]) => v.m).map(([k, v]) => [v.m, k]));
+  const PC_PICK = ['NQ', 'ES', 'GC', 'CL', 'YM', 'RTY'];
+  const PC_LABELS = ['PDH', 'PDL', 'Asia high', 'Asia low', 'London high', 'London low'];
+  /** NQZ6 → NQ, MNQ → NQ (as game/chart-plan.php) */
+  function pcRoot(s) {
+    s = String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (s.length > 3) s = s.replace(/[FGHJKMNQUVXZ]\d{1,2}$/, '');
+    s = s.slice(0, 8);
+    return PC_MICRO[s] || s;
+  }
+  const pcTick = (r) => { const I = typeof INSTR !== 'undefined' ? INSTR : {}, x = I[r] || (PC_ROOTS[r] && I[PC_ROOTS[r].m]); return x && x.tick > 0 ? x.tick : pmTick(r); };
+  const pcProx = (r) => (PC_ROOTS[r] ? PC_ROOTS[r].prox : 20);
+  /** a typed price: « 21 290,25 », « 21,290.25 », « 21290.25 » */
+  function pcNum(v) {
+    let s = String(v == null ? '' : v).replace(/[\s  $]/g, '');
+    if (!s) return null;
+    const c = s.lastIndexOf(','), d = s.lastIndexOf('.');
+    if (c >= 0 && d >= 0) s = c > d ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+    else if (c >= 0) s = /^\d{1,3}(,\d{3})+$/.test(s) && L() === 'en' ? s.replace(/,/g, '') : s.replace(',', '.');
+    return /^\d+(\.\d+)?$/.test(s) && +s > 0 ? +s : null;
+  }
+  const pcOnTick = (v, tk) => Math.abs(v / tk - Math.round(v / tk)) < 1e-6;
+  const pcSnap = (v, tk) => Math.round(Math.round(v / tk) * tk * 1e6) / 1e6;
+  function chartOf(day) {
+    const c = journalOf(day).chart || {};
+    return { zones: Array.isArray(c.zones) ? c.zones.map((z) => Object.assign({}, z)) : [], rules: Array.isArray(c.rules) ? c.rules.map((r) => Object.assign({}, r)) : [] };
+  }
+  function chartSave(day, c) {
+    const j = structuredClone(journalOf(day)); j.id = day;
+    c.rules = c.rules.filter((r) => r.trigger === 'time' || c.zones.some((z) => z.id === r.zone));   // a zone deleted: its rules go with it
+    j.chart = { zones: c.zones, rules: c.rules, updated_at: Math.floor(Date.now() / 1000) };
+    put('journals', j); buzz(8);
+  }
+  const pcId = (p) => p + Date.now().toString(36).slice(-5) + Math.random().toString(36).slice(2, 5);
+  const pcPx = (v) => pmFmt(v);
+  const pcWhere = (z) => (z.type === 'zone' ? `${pcPx(z.low)} – ${pcPx(z.high)}` : pcPx(z.price));
+  const pcCount = (c) => [c.zones.length ? (c.zones.length === 1 ? ct('z1') : ct('zn', { n: c.zones.length })) : '', c.rules.length ? (c.rules.length === 1 ? ct('r1') : ct('rn', { n: c.rules.length })) : ''].filter(Boolean).join(' · ');
+  /** the row in the plan (express, the guided plan's sheet, the session view) */
+  function chartRow(day) {
+    const c = chartOf(day), n = pcCount(c);
+    return `<button type="button" class="pc-row" data-pc="open" data-day="${day}"><span><b>${ct('row')}</b><small data-pc-count>${esc(n || ct('row_none'))}</small></span><i aria-hidden="true">›</i></button>`;
+  }
+  /** a rule in words */
+  function pcSentence(r, c) {
+    const z = c.zones.find((x) => x.id === r.zone), act = ct('p_' + (r.action || 'alert')), m = String(r.message || '').trim();
+    const q = (s) => (L() === 'en' ? `“${s}”` : L() === 'es' ? `«${s}»` : `« ${s} »`);
+    const tail = m ? (L() === 'fr' ? ` : ${q(m)}` : `: ${q(m)}`) : '';
+    if (r.trigger === 'time') {
+      const h = r.time || '--:--';
+      return L() === 'fr' ? `À ${h} (heure de New York), ${act}${tail}.` : L() === 'es' ? `A las ${h} (hora de Nueva York), ${act}${tail}.` : `At ${h} (New York time), ${act}${tail}.`;
+    }
+    const zn = z ? (z.label || pcWhere(z)) : '…', tf = /^(close_|sweep)/.test(r.trigger) && r.tf ? (L() === 'en' ? ` on the ${r.tf}` : ` en ${r.tf}`) : '';
+    const tr = ct('t_' + r.trigger);
+    return L() === 'fr' ? `Si ${tr} ${q(zn)}${tf}, alors ${act}${tail}.` : L() === 'es' ? `Si ${tr} ${q(zn)}${tf}, entonces ${act}${tail}.` : `If ${tr} ${q(zn)}${tf}, then ${act}${tail}.`;
+  }
+  const PCV = { day: '', view: 'list', id: null, d: null, err: '', bad: [], sync: null, resumed: '' };
+  function pcInst(day) {
+    const f = PM.day === day && PM.f ? PM.f : ficheGet(day);
+    const lt = (S.trades || []).filter((x) => !x.demo && x.instrument).sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+    return pcRoot((f && f.instrument) || (lt && lt.instrument) || 'NQ') || 'NQ';
+  }
+  /** the last earlier day with zones (« Use yesterday's zones ») */
+  function pcPrev(day) {
+    return (S.journals || []).filter((j) => /^\d{4}-\d{2}-\d{2}$/.test(j.id) && j.id < day && j.chart && Array.isArray(j.chart.zones) && j.chart.zones.length).sort((a, b) => b.id.localeCompare(a.id))[0] || null;
+  }
+  function pcSyncLine() {
+    const s = PCV.sync, at = s && +s.plan_read_at;
+    if (at > 0) {
+      const sec = Math.max(0, Math.round(Date.now() / 1000 - at)), ago = sec < 60 ? ct('ago_s', { n: sec }) : sec < 3600 ? ct('ago_m', { n: Math.round(sec / 60) }) : ct('ago_h', { n: Math.round(sec / 3600) });
+      const p = s.plan_read_by === 'quantower' ? 'Quantower' : s.plan_read_by === 'ninjatrader' ? 'NinjaTrader' : 'Quantower / NinjaTrader';
+      return `<p class="pc-sync on" data-noi18n><i aria-hidden="true"></i>${esc(ct('sync_on', { p, ago }))}</p>`;
+    }
+    return `<p class="pc-sync" data-noi18n><i aria-hidden="true"></i>${esc(ct('sync_off'))} · <a href="#settings/sync" data-pc="install">${esc(ct('install'))} ›</a></p>`;
+  }
+  function pcHead(title, back) {
+    return `<div class="g-head pc-head">${back ? `<button type="button" class="link pc-back" data-pc="list">‹ ${esc(ct('back'))}</button>` : ''}<div><h2>${esc(title)}</h2><span class="muted">${esc(fdate(PCV.day, { weekday: 'long', month: 'long', day: 'numeric' }))}</span></div><button type="button" class="g-x" data-pc="close" aria-label="Close">${svg('x')}</button></div>`;
+  }
+  function pcList() {
+    const c = chartOf(PCV.day), prev = !c.zones.length && pcPrev(PCV.day);
+    const zr = c.zones.map((z) => `<button type="button" class="pc-item" data-pc="zone" data-id="${esc(z.id)}"><span class="pc-dot pc-${esc(z.role || 'neutral')}" aria-hidden="true"></span><span class="pc-txt"><b>${esc(z.label || '')}</b><small>${esc(z.instrument)} · ${esc(pcWhere(z))} · ${esc(ct(z.role || 'neutral'))}${z.bias ? ' · ' + esc(ct(z.bias)) : ''}</small></span><i aria-hidden="true">›</i></button>`).join('');
+    const rr = c.rules.map((r) => `<button type="button" class="pc-item" data-pc="rule" data-id="${esc(r.id)}"><span class="pc-txt"><span class="pc-say">${esc(pcSentence(r, c))}</span></span><i aria-hidden="true">›</i></button>`).join('');
+    return `${pcHead(ct('title'))}${pcSyncLine()}<p class="g-hint g-hint-sm pc-intro">${esc(ct('intro'))}</p>
+      ${PCV.resumed ? `<p class="g-hint g-hint-sm pm-resumed">${esc(PCV.resumed)}</p>` : ''}
+      <h3 class="pc-h">${esc(ct('zones'))}</h3>
+      <div class="pc-list surface">${zr}<button type="button" class="add-row pc-add" data-pc="new-zone"><span class="add-ic">+</span>${esc(ct('add_zone'))}</button></div>
+      ${prev ? `<button type="button" class="btn pc-resume" data-pc="resume" data-from="${esc(prev.id)}">${esc(prev.id === pmPrevDay(PCV.day) ? ct('resume_y') : ct('resume_d', { d: fdate(prev.id, { day: 'numeric', month: 'long' }) }))}</button>` : ''}
+      <h3 class="pc-h">${esc(ct('rules'))}</h3><p class="g-hint g-hint-sm">${esc(ct('rules_hint'))}</p>
+      <div class="pc-list surface">${rr}<button type="button" class="add-row pc-add" data-pc="new-rule"><span class="add-ic">+</span>${esc(ct('add_rule'))}</button></div>
+      <p class="g-hint g-hint-sm pc-once">${esc(ct('once'))}</p>`;
+  }
+  const pcSeg = (k, opts, cur, lab) => `<div class="g-seg${opts.length === 3 ? '3' : '4'} pc-seg${PCV.bad.includes(k) ? ' bad' : ''}" role="group">${opts.map((o) => `<button type="button" class="${cur === o ? 'on' : ''}" aria-pressed="${cur === o}" data-pc="set" data-k="${k}" data-v="${esc(o)}">${esc(lab ? lab(o) : ct(o))}</button>`).join('')}</div>`;
+  const pcIn = (k, v, ph, mode) => `<input type="text" inputmode="${mode || 'decimal'}" data-pcf="${k}" value="${v == null ? '' : esc(String(v))}" placeholder="${esc(ph || '')}" autocomplete="off" spellcheck="false"${PCV.bad.includes(k) ? ' aria-invalid="true"' : ''}>`;
+  function pcZoneForm() {
+    const d = PCV.d, r = d.instrument, tk = pcTick(r), other = !PC_PICK.includes(r), prox = parseInt(d.proximity_ticks, 10);
+    return `${pcHead(ct(PCV.id ? 'z_edit' : 'z_new'), true)}
+      <div class="g-f"><span>${esc(ct('inst'))}</span><div class="g-chips-row wrap pc-insts${PCV.bad.includes('instrument') ? ' bad' : ''}">${PC_PICK.map((x) => `<button type="button" class="chip${x === r ? ' on' : ''}" aria-pressed="${x === r}" data-pc="set" data-k="instrument" data-v="${x}">${x}</button>`).join('')}<button type="button" class="chip${other ? ' on' : ''}" aria-pressed="${other}" data-pc="inst-other">${esc(ct('other'))}</button></div>
+        ${other ? pcIn('instrument', r, ct('other_ph'), 'text') : ''}${PC_ROOTS[r] && PC_ROOTS[r].m ? `<small class="g-hint-sm">${esc(ct('inst_h', { r, m: PC_ROOTS[r].m }))}</small>` : ''}</div>
+      <div class="g-f"><span>${esc(d.type === 'zone' ? ct('zone_h') : ct('level_h'))}</span>${pcSeg('type', ['level', 'zone'], d.type)}</div>
+      ${d.type === 'zone' ? `<div class="g-row2"><label class="g-f"><span>${esc(ct('high'))}</span>${pcIn('high', d.high)}</label><label class="g-f"><span>${esc(ct('low'))}</span>${pcIn('low', d.low)}</label></div>`
+        : `<label class="g-f"><span>${esc(ct('price'))}</span>${pcIn('price', d.price)}</label>`}
+      <div class="g-f"><span>${esc(ct('label'))}</span>${pcIn('label', d.label, ct('label_ph'), 'text')}<div class="g-chips-row pc-labels">${PC_LABELS.map((x) => `<button type="button" class="chip${d.label === x ? ' on' : ''}" data-pc="set" data-k="label" data-v="${x}">${x}</button>`).join('')}</div><small class="g-hint-sm">${esc(ct('label_tip'))}</small></div>
+      <div class="g-f"><span>${esc(ct('role'))}</span><div class="g-chips-row wrap">${['support', 'resistance', 'target', 'invalidation', 'neutral'].map((o) => `<button type="button" class="chip${d.role === o ? ' on' : ''}" aria-pressed="${d.role === o}" data-pc="set" data-k="role" data-v="${o}">${esc(ct(o))}</button>`).join('')}</div><small class="g-hint-sm">${esc(ct('tip_' + (d.role || 'neutral')))}</small></div>
+      <div class="g-f"><span>${esc(ct('bias'))}</span>${pcSeg('bias', ['long', 'short', 'none'], d.bias || 'none')}<small class="g-hint-sm">${esc(ct('bias_tip'))}</small></div>
+      <label class="g-f"><span>${esc(ct('note'))}</span><textarea rows="2" maxlength="200" data-pcf="note" placeholder="${esc(ct('note_ph'))}">${esc(d.note || '')}</textarea></label>
+      <label class="g-f"><span>${esc(ct('prox'))}</span>${pcIn('proximity_ticks', d.proximity_ticks, String(pcProx(r)), 'numeric')}<small class="g-hint-sm" data-pc-prox>${esc(prox > 0 ? ct('prox_h', { n: prox, p: pcPx(Math.round(prox * tk * 1e4) / 1e4), r, t: pcPx(tk) }) : '')}</small></label>
+      ${PCV.err ? `<p class="g-err pc-err" role="alert">${esc(PCV.err)}</p>` : ''}
+      <div class="pc-nav">${PCV.id ? `<button type="button" class="btn pc-del" data-pc="del">${esc(ct('del'))}</button>` : ''}<button type="button" class="btn primary g-big pc-save" data-pc="save-zone">${esc(ct('save'))}</button></div>`;
+  }
+  function pcRuleForm() {
+    const d = PCV.d, c = chartOf(PCV.day), trg = ['approach', 'enter', 'close_above', 'close_below', 'sweep', 'time'];
+    const tipT = d.trigger === 'sweep' ? 'tip_sweep' : /^close_/.test(d.trigger) ? 'tip_close' : 'tip_' + d.trigger;
+    const prev = Object.assign({}, d, { message: d.message });
+    return `${pcHead(ct(PCV.id ? 'r_edit' : 'r_new'), true)}
+      <div class="g-f"><span class="pc-if">${esc(ct('if'))}</span><select data-pcf="trigger" class="pc-sel">${trg.map((x) => `<option value="${x}"${d.trigger === x ? ' selected' : ''}>${esc(ct('t_' + x))}</option>`).join('')}</select><small class="g-hint-sm">${esc(ct(tipT))}</small></div>
+      ${d.trigger === 'time' ? `<label class="g-f"><span>${esc(ct('time'))}</span><input type="time" data-pcf="time" value="${esc(d.time || '')}"${PCV.bad.includes('time') ? ' aria-invalid="true"' : ''}></label>`
+        : `<div class="g-f"><span>${esc(ct('which'))}</span><select data-pcf="zone" class="pc-sel"${PCV.bad.includes('zone') ? ' aria-invalid="true"' : ''}>${c.zones.map((z) => `<option value="${esc(z.id)}"${d.zone === z.id ? ' selected' : ''}>${esc((z.label ? z.label + ' · ' : '') + pcWhere(z))}</option>`).join('')}</select></div>
+        ${/^(close_|sweep)/.test(d.trigger) ? `<div class="g-f"><span>${esc(ct('tf'))}</span>${pcSeg('tf', ['1m', '5m', '15m'], d.tf || '5m', (o) => o)}</div>` : ''}`}
+      <div class="g-f"><span class="pc-if">${esc(ct('then'))}</span><select data-pcf="action" class="pc-sel">${['alert', 'plan', 'limit'].map((x) => `<option value="${x}"${d.action === x ? ' selected' : ''}>${esc(ct('a_' + x))}</option>`).join('')}</select><small class="g-hint-sm">${esc(ct('tip_a_' + d.action))}</small></div>
+      <label class="g-f"><span>${esc(ct('msg'))}</span><textarea rows="2" maxlength="200" data-pcf="message" placeholder="${esc(ct('msg_ph'))}">${esc(d.message || '')}</textarea></label>
+      <div class="pc-preview"><small>${esc(ct('preview'))}</small><p data-pc-say>${esc(pcSentence(prev, c))}</p></div>
+      ${PCV.err ? `<p class="g-err pc-err" role="alert">${esc(PCV.err)}</p>` : ''}
+      <div class="pc-nav">${PCV.id ? `<button type="button" class="btn pc-del" data-pc="del">${esc(ct('del'))}</button>` : ''}<button type="button" class="btn primary g-big pc-save" data-pc="save-rule">${esc(ct('save'))}</button></div>`;
+  }
+  function pcRender(keepScroll) {
+    const el = document.getElementById('pcSheet'); if (!el) return;
+    const sc = el.querySelector('.g-in'), y = keepScroll ? sc.scrollTop : 0;
+    sc.innerHTML = PCV.view === 'zone' ? pcZoneForm() : PCV.view === 'rule' ? pcRuleForm() : pcList();
+    sc.scrollTop = y;
+  }
+  function chartOpen(day) {
+    PCV.day = day || (window.SweepFiche ? SweepFiche.dayOf() : todayStr()); PCV.view = 'list'; PCV.id = null; PCV.err = ''; PCV.bad = []; PCV.resumed = '';
+    chartClose(true);
+    const el = document.createElement('aside');
+    el.className = 'evp g-sheet pc-sheet'; el.id = 'pcSheet'; el.setAttribute('data-noi18n', ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+    el.innerHTML = '<div class="evp-in g-in"></div>';
+    const sc = document.createElement('div'); sc.className = 'evp-scrim pc-scrim'; sc.id = 'pcScrim'; sc.addEventListener('click', () => chartClose());
+    document.body.append(sc, el);
+    if (typeof swipeDismiss === 'function') swipeDismiss(el, { scroller: () => el.querySelector('.g-in'), onClose: () => chartClose(), ignore: '.g-chips-row,textarea,input,select' });
+    pcRender();
+    requestAnimationFrame(() => { el.classList.add('open'); sc.classList.add('open'); document.body.classList.add('evp-lock'); });
+    PCV.sync = null;
+    if (typeof apiJSON === 'function') apiJSON('api/sync').then((s) => { PCV.sync = s || null; const p = document.querySelector('#pcSheet .pc-sync'); if (p && PCV.view === 'list') p.outerHTML = pcSyncLine(); }).catch(() => {});
+  }
+  function chartClose(instant) {
+    const el = document.getElementById('pcSheet'), sc = document.getElementById('pcScrim'); if (!el) return;
+    el.id = ''; if (sc) sc.id = '';
+    el.classList.remove('open'); if (sc) sc.classList.remove('open');
+    if (!document.querySelector('.evp.open:not(.pc-sheet)')) document.body.classList.remove('evp-lock');
+    setTimeout(() => { el.remove(); if (sc) sc.remove(); }, instant ? 0 : 350);
+    const n = pcCount(chartOf(PCV.day));   // the plan's row says what is there now
+    document.querySelectorAll(`.pc-row[data-day="${PCV.day}"] [data-pc-count]`).forEach((s) => { s.textContent = n || ct('row_none'); });
+  }
+  function pcZoneSave() {
+    const d = PCV.d, r = pcRoot(d.instrument), tk = pcTick(r); PCV.bad = []; PCV.err = '';
+    const fail = (k, msg) => { PCV.bad = [].concat(k); PCV.err = msg; buzz(20); pcRender(true); return false; };
+    if (!r) return fail('instrument', ct('e_inst'));
+    const nums = d.type === 'zone' ? ['high', 'low'] : ['price'], v = {};
+    for (const k of nums) {
+      v[k] = pcNum(d[k]); if (v[k] == null) return fail(k, ct('e_price'));
+      if (!pcOnTick(v[k], tk)) return fail(k, ct('e_tick', { r, t: pcPx(tk), v: pcPx(v[k]), a: pcPx(pcSnap(v[k], tk)) }));
+    }
+    if (d.type === 'zone' && !(v.high > v.low)) return fail(['high', 'low'], ct('e_zone'));
+    const label = String(d.label || '').trim().slice(0, 40); if (!label) return fail('label', ct('e_label'));
+    const px = String(d.proximity_ticks == null ? '' : d.proximity_ticks).trim(), prox = px === '' ? pcProx(r) : /^\d+$/.test(px) && +px >= 1 ? Math.min(5000, +px) : null;
+    if (prox == null) return fail('proximity_ticks', ct('e_prox'));
+    const z = { id: PCV.id || pcId('z'), instrument: r, type: d.type === 'zone' ? 'zone' : 'level', label, role: d.role || 'neutral', bias: d.bias === 'long' || d.bias === 'short' ? d.bias : null, note: String(d.note || '').trim().slice(0, 200), proximity_ticks: prox };
+    if (z.type === 'zone') { z.high = v.high; z.low = v.low; } else z.price = v.price;
+    const c = chartOf(PCV.day), i = c.zones.findIndex((x) => x.id === z.id);
+    if (i >= 0) c.zones[i] = z; else c.zones.push(z);
+    chartSave(PCV.day, c); PCV.view = 'list'; PCV.id = null; PCV.resumed = ''; pcRender();
+    return true;
+  }
+  function pcRuleSave() {
+    const d = PCV.d, c = chartOf(PCV.day); PCV.bad = []; PCV.err = '';
+    const fail = (k, msg) => { PCV.bad = [k]; PCV.err = msg; buzz(20); pcRender(true); return false; };
+    const r = { id: PCV.id || pcId('r'), trigger: d.trigger, action: ['alert', 'plan', 'limit'].includes(d.action) ? d.action : 'alert', message: String(d.message || '').trim().slice(0, 200) };
+    if (r.trigger === 'time') { if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time || '')) return fail('time', ct('e_time')); r.time = d.time; }
+    else {
+      if (!c.zones.some((z) => z.id === d.zone)) return fail('zone', ct('e_zone_need'));
+      r.zone = d.zone; if (/^(close_|sweep)/.test(r.trigger)) r.tf = ['1m', '5m', '15m'].includes(d.tf) ? d.tf : '5m';
+    }
+    const i = c.rules.findIndex((x) => x.id === r.id);
+    if (i >= 0) c.rules[i] = r; else c.rules.push(r);
+    chartSave(PCV.day, c); PCV.view = 'list'; PCV.id = null; pcRender();
+    return true;
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-pc]'); if (!b) return;
+    const k = b.dataset.pc;
+    if (k === 'open') { e.preventDefault(); chartOpen(b.dataset.day || (document.getElementById('gSheet') || {}).dataset?.day); return; }
+    if (!b.closest('#pcSheet')) return;
+    if (k === 'close') chartClose();
+    else if (k === 'install') { chartClose(true); closeSheet(true); }   // the link opens Settings › Sync, where the add-on is installed
+    else if (k === 'list') { PCV.view = 'list'; PCV.id = null; PCV.err = ''; PCV.bad = []; pcRender(); }
+    else if (k === 'new-zone') { PCV.view = 'zone'; PCV.id = null; PCV.err = ''; PCV.bad = []; const r = pcInst(PCV.day); PCV.d = { instrument: r, type: 'level', price: '', high: '', low: '', label: '', role: 'neutral', bias: null, note: '', proximity_ticks: pcProx(r) }; pcRender(); }
+    else if (k === 'zone') { const z = chartOf(PCV.day).zones.find((x) => x.id === b.dataset.id); if (!z) return; PCV.view = 'zone'; PCV.id = z.id; PCV.err = ''; PCV.bad = []; PCV.d = Object.assign({ price: '', high: '', low: '' }, z, { price: z.price != null ? pcPx(z.price) : '', high: z.high != null ? pcPx(z.high) : '', low: z.low != null ? pcPx(z.low) : '' }); pcRender(); }
+    else if (k === 'new-rule') { const c = chartOf(PCV.day); PCV.view = 'rule'; PCV.id = null; PCV.err = ''; PCV.bad = []; PCV.d = { trigger: c.zones.length ? 'approach' : 'time', zone: (c.zones[0] || {}).id || '', tf: '5m', time: '09:30', action: 'alert', message: '' }; pcRender(); }
+    else if (k === 'rule') { const r = chartOf(PCV.day).rules.find((x) => x.id === b.dataset.id); if (!r) return; PCV.view = 'rule'; PCV.id = r.id; PCV.err = ''; PCV.bad = []; PCV.d = Object.assign({ tf: '5m', time: '09:30', zone: '' }, r); pcRender(); }
+    else if (k === 'set') {
+      const f = b.dataset.k; let v = b.dataset.v;
+      if (f === 'bias' && v === 'none') v = null;
+      if (f === 'instrument' && v !== PCV.d.instrument) { const was = pcProx(PCV.d.instrument); if (String(PCV.d.proximity_ticks) === String(was)) PCV.d.proximity_ticks = pcProx(v); }   // its own default, unless the trader typed one
+      PCV.d[f] = v; PCV.bad = PCV.bad.filter((x) => x !== f); pcRender(true);
+    }
+    else if (k === 'inst-other') { PCV.d.instrument = ''; pcRender(true); const i = document.querySelector('#pcSheet [data-pcf=instrument]'); if (i) i.focus(); }
+    else if (k === 'save-zone') pcZoneSave();
+    else if (k === 'save-rule') pcRuleSave();
+    else if (k === 'del') {
+      const c = chartOf(PCV.day);
+      if (PCV.view === 'zone') c.zones = c.zones.filter((z) => z.id !== PCV.id); else c.rules = c.rules.filter((r) => r.id !== PCV.id);
+      chartSave(PCV.day, c); PCV.view = 'list'; PCV.id = null; pcRender();
+    }
+    else if (k === 'resume') {
+      const from = b.dataset.from, p = (S.journals || []).find((j) => j.id === from); if (!p || !p.chart) return;
+      const c = { zones: (p.chart.zones || []).map((z) => Object.assign({}, z)), rules: (p.chart.rules || []).map((r) => Object.assign({}, r)) };
+      chartSave(PCV.day, c); PCV.resumed = ct('resumed', { n: c.zones.length, d: fdate(from, { day: 'numeric', month: 'long' }) }); pcRender();
+    }
+  });
+  document.addEventListener('input', (e) => {
+    const i = e.target.closest && e.target.closest('#pcSheet [data-pcf]'); if (!i || !PCV.d) return;
+    const k = i.dataset.pcf; PCV.d[k] = i.value;
+    if (k === 'instrument') PCV.d.instrument = pcRoot(i.value);
+    if (k === 'proximity_ticks') { const s = document.querySelector('#pcSheet [data-pc-prox]'), n = parseInt(i.value, 10), r = pcRoot(PCV.d.instrument), tk = pcTick(r); if (s) s.textContent = n > 0 ? ct('prox_h', { n, p: pcPx(Math.round(n * tk * 1e4) / 1e4), r, t: pcPx(tk) }) : ''; }
+    if (PCV.view === 'rule') {
+      if (i.tagName === 'SELECT' && (k === 'trigger' || k === 'action')) { if (k === 'trigger' && PCV.d.trigger !== 'time' && !PCV.d.zone) PCV.d.zone = (chartOf(PCV.day).zones[0] || {}).id || ''; pcRender(true); return; }
+      const s = document.querySelector('#pcSheet [data-pc-say]'); if (s) s.textContent = pcSentence(PCV.d, chartOf(PCV.day));
+    }
+  });
+  document.addEventListener('change', (e) => {   // a select changed (some browsers send change without input)
+    const i = e.target.closest && e.target.closest('#pcSheet select[data-pcf]'); if (!i || !PCV.d || PCV.d[i.dataset.pcf] === i.value) return;
+    PCV.d[i.dataset.pcf] = i.value; pcRender(true);
+  });
+  window.SweepPlanChart = { open: chartOpen, close: chartClose, of: chartOf, root: pcRoot, sentence: pcSentence, tick: pcTick, prox: pcProx, ROOTS: PC_ROOTS };
 
   /* ───────────── Quick journal (carousel) ───────────── */
   const EMOS = ['Calm', 'Confident', 'Patient', 'Focused', 'FOMO', 'Fearful', 'Frustrated', 'Greedy', 'Hesitant', 'Impulsive'];
@@ -2388,7 +2698,11 @@
     const s = e.target.closest && e.target.closest('#gSheet [data-g-setup]');
     if (s) { const id = JN.ids[JN.i]; editDoc('trades', id, (d) => { d.setup = s.value.trim(); }, { delay: 600 }); }
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.getElementById('gSheet')) { e.stopPropagation(); closeSheet(); } }, true);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('pcSheet')) { e.stopPropagation(); chartClose(); return; }   // the plan on the chart, over the plan: closed first
+    if (document.getElementById('gSheet')) { e.stopPropagation(); closeSheet(); }
+  }, true);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(); });
   // the old Progress page now lives in Insights and Settings
   const legacy = () => { if (/^#progress/.test(location.hash)) location.replace('#analytics'); };
